@@ -1,4 +1,4 @@
-/* 
+/*
     Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
@@ -72,7 +72,7 @@ class LIBPBD_API EnumWriter {
 	    bool bitwise;
 
 	    EnumRegistration() {}
-	    EnumRegistration (std::vector<int>& v, std::vector<std::string>& s, bool b) 
+	    EnumRegistration (std::vector<int>& v, std::vector<std::string>& s, bool b)
 		    : values (v), names (s), bitwise (b) {}
 	};
 

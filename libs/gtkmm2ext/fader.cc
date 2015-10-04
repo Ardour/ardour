@@ -46,23 +46,23 @@ static void get_closest_point_on_line(double xa, double ya, double xb, double yb
 	// Storing vector A->B
 	double a_to_b_x = xb - xa;
 	double a_to_b_y = yb - ya;
-    
+
 	// Storing vector A->P
 	double a_to_p_x = xp - xa;
 	double a_to_p_y = yp - ya;
-    
+
 
 	// Basically finding the squared magnitude
 	// of a_to_b
 	double atb2 = a_to_b_x * a_to_b_x + a_to_b_y * a_to_b_y;
- 
+
 	// The dot product of a_to_p and a_to_b
 	double atp_dot_atb = a_to_p_x * a_to_b_x + a_to_p_y * a_to_b_y;
-    
+
 	// The normalized "distance" from a to
 	// your closest point
 	double t = atp_dot_atb / atb2;
-    
+
 	// Add the distance to A, moving
 	// towards B
 	double x = xa + a_to_b_x * t;
@@ -116,7 +116,7 @@ Fader::Fader (Gtk::Adjustment& adj,
               const Glib::RefPtr<Gdk::Pixbuf>& underlay_pixbuf,
               const Glib::RefPtr<Gdk::Pixbuf>& handle_pixbuf,
               const Glib::RefPtr<Gdk::Pixbuf>& active_handle_pixbuf,
-              int min_pos_x, 
+              int min_pos_x,
               int min_pos_y,
               int max_pos_x,
               int max_pos_y,
@@ -208,8 +208,8 @@ Fader::render (cairo_t* cr, cairo_rectangle_t*)
 	}
 
 	gdk_cairo_set_source_pixbuf (cr,
-	                             ((get_state () == Gtk::STATE_ACTIVE) && (_active_face_pixbuf != 0)) ? 
-	                             _active_face_pixbuf->gobj() : 
+	                             ((get_state () == Gtk::STATE_ACTIVE) && (_active_face_pixbuf != 0)) ?
+	                             _active_face_pixbuf->gobj() :
 	                             _face_pixbuf->gobj(),
 	                             0,
 	                             0);
@@ -241,11 +241,11 @@ bool
 Fader::on_button_press_event (GdkEventButton* ev)
 {
 	focus_handler();
-    
+
 	if (_read_only) {
 		return false;
 	}
-    
+
 	if (ev->type != GDK_BUTTON_PRESS) {
 		return false;
 	}
@@ -273,12 +273,12 @@ Fader::on_button_press_event (GdkEventButton* ev)
 	if ((ev->x < (_grab_start_handle_x - hw/2)) || (ev->x > (_grab_start_handle_x + hw/2)) || (ev->y < (_grab_start_handle_y - hh/2)) || (ev->y > (_grab_start_handle_y + hh/2))) {
 		return false;
 	}
-    
+
 	double ev_pos_x;
 	double ev_pos_y;
 		
 	get_closest_point_on_line(_min_pos_x, _min_pos_y,
-	                          _max_pos_x, _max_pos_y, 
+	                          _max_pos_x, _max_pos_y,
 	                          ev->x, ev->y,
 	                          ev_pos_x, ev_pos_y );
 	add_modal_grab ();
@@ -375,7 +375,7 @@ Fader::on_motion_notify_event (GdkEventMotion* ev)
 		}
 
 		get_closest_point_on_line(_min_pos_x, _min_pos_y,
-		                          _max_pos_x, _max_pos_y, 
+		                          _max_pos_x, _max_pos_y,
 		                          _grab_start_handle_x + (ev->x - _grab_start_mouse_x), _grab_start_handle_y + (ev->y - _grab_start_mouse_y),
 		                          ev_pos_x, ev_pos_y );
 		

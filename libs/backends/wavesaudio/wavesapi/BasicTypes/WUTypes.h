@@ -36,16 +36,16 @@
     Atoms
 *********************************************************************************/
 
-#define WTSInt64    "WTSInt64 is obsolete, please use int64_t instead"; 
-#define WTUInt64    "WTUInt64 is obsolete, please use uint64_t instead"; 
-#define WTSInt32    "WTSInt32 is obsolete, please use int32_t instead"; 
-#define WTUInt32    "WTUInt32 is obsolete, please use uint32_t instead"; 
-#define WTSInt16    "WTSInt16 is obsolete, please use int16_t instead"; 
-#define WTUInt16    "WTUInt16 is obsolete, please use uint16_t instead"; 
-#define WTSInt8     "WTSInt8 is obsolete, please use int8_t instead"; 
-#define WTUInt8     "WTUInt8 is obsolete, please use uint8_t instead"; 
-#define WTFloat32   "WTFloat32 is obsolete, please use float instead"; 
-#define WTByte      "WTByte is obsolete, please use uint8_t instead"; 
+#define WTSInt64    "WTSInt64 is obsolete, please use int64_t instead";
+#define WTUInt64    "WTUInt64 is obsolete, please use uint64_t instead";
+#define WTSInt32    "WTSInt32 is obsolete, please use int32_t instead";
+#define WTUInt32    "WTUInt32 is obsolete, please use uint32_t instead";
+#define WTSInt16    "WTSInt16 is obsolete, please use int16_t instead";
+#define WTUInt16    "WTUInt16 is obsolete, please use uint16_t instead";
+#define WTSInt8     "WTSInt8 is obsolete, please use int8_t instead";
+#define WTUInt8     "WTUInt8 is obsolete, please use uint8_t instead";
+#define WTFloat32   "WTFloat32 is obsolete, please use float instead";
+#define WTByte      "WTByte is obsolete, please use uint8_t instead";
 
 /********************************************************************************
     Consts
@@ -122,7 +122,7 @@ enum WESystemFolders{
 	eCurrentFolder,
 	eRootFolder,
 	eLibrariesFolder,
-	eAudioComponentsFolder, // MacOS only 
+	eAudioComponentsFolder, // MacOS only
 	eCacheFolder,
 	eWavesCacheFolder,
 	eAppDataFolder,
@@ -184,7 +184,7 @@ enum WEManagerInitOptions
 //********************************************************************************
 //    Files
 
-const uint32_t kMaxPathLength = 1023;      // maximum length of a path 
+const uint32_t kMaxPathLength = 1023;      // maximum length of a path
 const uint32_t kMaxFileNameLength = 255;    // maximum length of a file name including extension
 typedef WCFixedString<kMaxPathLength> WTPathString;
 typedef WCFixedString<kMaxFileNameLength> WTFileNameString;
@@ -242,7 +242,7 @@ const WCOGLTextureRef kIllegalOGLTextureRef = 0;
 const WCPluginViewRef kIllegalPluginViewRef = 0;
 const WCMenuRef kIllegalWCMenuRef = 0;
 
-const intptr_t kIllegalTexturesMaster = -1;        
+const intptr_t kIllegalTexturesMaster = -1;
 
 
 typedef unsigned int WTTextureRef;

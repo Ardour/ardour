@@ -1,7 +1,7 @@
 /* pmwin.c -- PortMidi os-dependent code */
 
 /* This file only needs to implement:
-       pm_init(), which calls various routines to register the 
+       pm_init(), which calls various routines to register the
            available midi devices,
        Pm_GetDefaultInputDeviceID(), and
        Pm_GetDefaultOutputDeviceID().
@@ -75,7 +75,7 @@ static PmDeviceID pm_get_default_device_id(int is_input, char *key) {
         }
     }
     /* Look in registry for a default device name pattern. */
-    if (RegOpenKeyEx(HKEY_CURRENT_USER, "Software", 0, KEY_READ, &hkey) != 
+    if (RegOpenKeyEx(HKEY_CURRENT_USER, "Software", 0, KEY_READ, &hkey) !=
         ERROR_SUCCESS) {
         return id;
     }
@@ -91,7 +91,7 @@ static PmDeviceID pm_get_default_device_id(int is_input, char *key) {
         ERROR_SUCCESS) {
         return id;
     }
-    if (RegQueryValueEx(hkey, key, NULL, &dwType, (LPBYTE)pattern, (LPDWORD)&pattern_max) != 
+    if (RegQueryValueEx(hkey, key, NULL, &dwType, (LPBYTE)pattern, (LPDWORD)&pattern_max) !=
 	ERROR_SUCCESS) {
         return id;
     }
@@ -118,7 +118,7 @@ static PmDeviceID pm_get_default_device_id(int is_input, char *key) {
 
 
 PmDeviceID Pm_GetDefaultInputDeviceID() {
-    return pm_get_default_device_id(TRUE, 
+    return pm_get_default_device_id(TRUE,
            "/P/M_/R/E/C/O/M/M/E/N/D/E/D_/I/N/P/U/T_/D/E/V/I/C/E");
 }
 
@@ -129,14 +129,14 @@ PmDeviceID Pm_GetDefaultOutputDeviceID() {
 }
 
 
-#include "stdio.h" 
+#include "stdio.h"
 
 void *pm_alloc(size_t s) {
-    return malloc(s); 
+    return malloc(s);
 }
 
 
-void pm_free(void *ptr) { 
-    free(ptr); 
+void pm_free(void *ptr) {
+    free(ptr);
 }
 

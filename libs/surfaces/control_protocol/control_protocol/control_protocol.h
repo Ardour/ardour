@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it
     and/or modify it under the terms of the GNU Lesser
@@ -84,7 +84,7 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	static PBD::Signal1<void,uint32_t> RemoveRouteFromSelection;
 	static PBD::Signal0<void>          ClearRouteSelection;
 
-	/* signals that one UI (e.g. the GUI) can emit to get all other UI's to 
+	/* signals that one UI (e.g. the GUI) can emit to get all other UI's to
 	   respond. Typically this will always be GUI->"others" - the GUI pays
 	   no attention to these signals.
 	*/
@@ -96,7 +96,7 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	   we imagine most control surfaces being able to control
 	   from 1 to N tracks at a time, with a session that may
 	   contain 1 to M tracks, where M may be smaller, larger or
-	   equal to N. 
+	   equal to N.
 
 	   the control surface has a fixed set of physical controllers
 	   which can potentially be mapped onto different tracks/busses
@@ -136,7 +136,7 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 
         XMLNode& get_state ();
         int set_state (XMLNode const &, int version);
-        
+
         static const std::string state_node_name;
 
   protected:
@@ -163,7 +163,7 @@ extern "C" {
 	    bool             (*probe)(ControlProtocolDescriptor*);
 	    ControlProtocol* (*initialize)(ControlProtocolDescriptor*,Session*);
 	    void             (*destroy)(ControlProtocolDescriptor*,ControlProtocol*);
-	    
+	
 	};
 }
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,6 @@
 
 namespace PBD {
 	LIBPBD_API Glib::ustring basename_nosuffix (Glib::ustring);
-} 
+}
 
 #endif  /* __libpbd_basename_h__ */

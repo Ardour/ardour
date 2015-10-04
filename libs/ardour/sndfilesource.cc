@@ -78,7 +78,7 @@ SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 }
 
 /** Constructor for existing external-to-session files.
-    Files created this way are never writable or removable 
+    Files created this way are never writable or removable
 */
 SndFileSource::SndFileSource (Session& s, const string& path, int chn, Flag flags)
 	: Source(s, DataType::AUDIO, path, flags)
@@ -103,8 +103,8 @@ SndFileSource::SndFileSource (Session& s, const string& path, int chn, Flag flag
 	}
 }
 
-/** This constructor is used to construct new internal-to-session files, 
-    not open existing ones. 
+/** This constructor is used to construct new internal-to-session files,
+    not open existing ones.
 */
 SndFileSource::SndFileSource (Session& s, const string& path, const string& origin,
                               SampleFormat sfmt, HeaderFormat hf, framecnt_t rate, Flag flags)
@@ -168,7 +168,7 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 		fmt = SF_FORMAT_RF64;
 		_flags = Flag (_flags & ~Broadcast);
 		break;
-		               
+		
 	default:
 		fatal << string_compose (_("programming error: %1"), X_("unsupported audio header format requested")) << endmsg;
 		abort(); /*NOTREACHED*/
@@ -348,7 +348,7 @@ SndFileSource::open ()
 		delete _broadcast_info;
 		_broadcast_info = 0;
 		_flags = Flag (_flags & ~Broadcast);
-	} 
+	}
 
 	/* Set the broadcast flag if the BWF info is already there. We need
 	 * this when recovering or using existing files.

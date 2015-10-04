@@ -65,7 +65,7 @@ struct LIBCANVAS_API Duple
 		: x (x_)
 		, y (y_)
 	{}
-		     
+		
 	Coord x;
 	Coord y;
 

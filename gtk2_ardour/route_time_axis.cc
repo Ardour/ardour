@@ -306,7 +306,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		/* pick up the correct freeze state */
 		map_frozen ();
 
-	} 
+	}
 
 	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_pixel));
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::color_handler));
@@ -505,7 +505,7 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 				   sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::hide_all_automation), for_selection)));
 
 	/* Attach the plugin submenu. It may have previously been used elsewhere,
-	   so it was detached above 
+	   so it was detached above
 	*/
 	
 	if (!subplugin_menu.items().empty()) {
@@ -519,7 +519,7 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 	if (gain_track) {
 		items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &RouteTimeAxisView::update_gain_track_visibility)));
 		gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		gain_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) && 
+		gain_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
 		                                  (gain_track && string_is_affirmative (gain_track->gui_property ("visible"))));
 
 		_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
@@ -537,7 +537,7 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 	if (mute_track) {
 		items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &RouteTimeAxisView::update_mute_track_visibility)));
 		mute_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		mute_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) && 
+		mute_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
 		                                  (mute_track && string_is_affirmative (mute_track->gui_property ("visible"))));
 
 		_main_automation_menu_map[Evoral::Parameter(MuteAutomation)] = mute_automation_item;
@@ -2212,7 +2212,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 	
 	pan->view = boost::shared_ptr<AutomationTimeAxisView>(
 		new AutomationTimeAxisView (_session, _route, processor, control, control->parameter (),
-					    _editor, *this, false, parent_canvas, 
+					    _editor, *this, false, parent_canvas,
 					    processor->describe_parameter (what), processor->name()));
 
 	pan->view->Hiding.connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::processor_automation_track_hidden), pan, processor));
@@ -2276,7 +2276,7 @@ RouteTimeAxisView::add_automation_child (Evoral::Parameter param, boost::shared_
 
 	/* existing state overrides "show" argument */
 	string s = track->gui_property ("visible");
-	if (!s.empty()) { 
+	if (!s.empty()) {
 		show = string_is_affirmative (s);
 	}
 

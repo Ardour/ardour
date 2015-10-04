@@ -315,8 +315,8 @@ JACKAudioBackend::get_ports (const string& port_name_pattern, DataType type, Por
 
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack,0);
 
-	const char** ports =  jack_get_ports (_priv_jack, port_name_pattern.c_str(), 
-					      ardour_data_type_to_jack_port_type (type), 
+	const char** ports =  jack_get_ports (_priv_jack, port_name_pattern.c_str(),
+					      ardour_data_type_to_jack_port_type (type),
 					      ardour_port_flags_to_jack_flags (flags));
 
 	if (ports == 0) {
@@ -419,7 +419,7 @@ PortEngine::PortHandle
 JACKAudioBackend::register_port (const std::string& shortname, ARDOUR::DataType type, ARDOUR::PortFlags flags)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
-	return jack_port_register (_priv_jack, shortname.c_str(), 
+	return jack_port_register (_priv_jack, shortname.c_str(),
 				   ardour_data_type_to_jack_port_type (type),
 				   ardour_port_flags_to_jack_flags (flags),
 				   0);

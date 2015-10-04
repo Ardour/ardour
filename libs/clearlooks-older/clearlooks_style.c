@@ -220,7 +220,7 @@ clearlooks_draw_arrow (GtkStyle      *style,
 		height = 7;
 	}
 	
-	/* Compensate arrow position for "sunken" look */ 
+	/* Compensate arrow position for "sunken" look */
 	if (DETAIL ("spinbutton") && arrow_type == GTK_ARROW_DOWN &&
 	    style->xthickness > 2 && style->ythickness > 2)
 			y -= 1;
@@ -260,7 +260,7 @@ draw_flat_box (DRAW_ARGS)
 	sanitize_size (window, &width, &height);
 
 	if (detail && 	
-	    clearlooks_style->listviewitemstyle == 1 && 
+	    clearlooks_style->listviewitemstyle == 1 &&
 	    state_type == GTK_STATE_SELECTED && (
 	    !strncmp ("cell_even", detail, strlen ("cell_even")) ||
 	    !strncmp ("cell_odd", detail, strlen ("cell_odd"))))
@@ -352,7 +352,7 @@ draw_shadow (DRAW_ARGS)
 	{
 		gtk_style_apply_default_background (style, window,widget && !GTK_WIDGET_NO_WINDOW (widget),
 		                                    state_type, area, x, y, width, height);
-      
+
 		if (area)
 		{
 			gdk_gc_set_clip_rectangle (clearlooks_style->shade_gc[3], area);
@@ -456,7 +456,7 @@ draw_shadow (DRAW_ARGS)
                                         rect.height = d;
 
 
-static void 
+static void
 draw_box_gap (DRAW_ARGS,
 	      GtkPositionType gap_side,
 	      gint            gap_x,
@@ -561,7 +561,7 @@ draw_box_gap (DRAW_ARGS,
 
 	cl_draw_rectangle (window, widget, style, x, y, width, height, &r);
 
-	cl_draw_shadow (window, widget, style, x, y, width, height, &r); 
+	cl_draw_shadow (window, widget, style, x, y, width, height, &r);
 
 	gdk_gc_set_clip_region (r.bordergc,    NULL);
 	gdk_gc_set_clip_region (r.topleft,     NULL);
@@ -734,11 +734,11 @@ draw_extension (DRAW_ARGS, GtkPositionType gap_side)
 		                              gap_side);
 	}
 }
-    
+
 
 /**************************************************************************/
 
-static void 
+static void
 draw_handle (DRAW_ARGS, GtkOrientation orientation)
 {
 	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
@@ -795,7 +795,7 @@ draw_handle (DRAW_ARGS, GtkOrientation orientation)
 			gdk_gc_set_clip_rectangle (light_gc, area);
 			gdk_gc_set_clip_rectangle (dark_gc, area);
 		}
-     
+
 		if (area)
 		{
 			gdk_gc_set_clip_rectangle (light_gc, NULL);
@@ -807,7 +807,7 @@ draw_handle (DRAW_ARGS, GtkOrientation orientation)
 			gdk_gc_set_clip_rectangle (clearlooks_style->shade_gc[0], area);
 			gdk_gc_set_clip_rectangle (clearlooks_style->shade_gc[3], area);
 		}
-      
+
 		gdk_draw_line (window, clearlooks_style->shade_gc[0], x, y, x + width, y);
 		gdk_draw_line (window, clearlooks_style->shade_gc[3], x, y + height - 1, x + width, y + height - 1);
 			
@@ -1006,8 +1006,8 @@ draw_box (DRAW_ARGS)
 		
 		GtkOrientation orientation = GTK_RANGE (widget)->orientation;
 		
-		gint fill_size = (orientation ? height : width) * 
-		                 (1 / ((adjustment->upper - adjustment->lower) / 
+		gint fill_size = (orientation ? height : width) *
+		                 (1 / ((adjustment->upper - adjustment->lower) /
 		                      (adjustment->value - adjustment->lower)));
 
 		if (orientation == GTK_ORIENTATION_HORIZONTAL)
@@ -1028,7 +1028,7 @@ draw_box (DRAW_ARGS)
 			shadow = clearlooks_style->shade_gc[3];
 		}
 		
-		cl_rectangle_init (&r, inner, outer, CL_CORNER_NONE, CL_CORNER_NONE, 
+		cl_rectangle_init (&r, inner, outer, CL_CORNER_NONE, CL_CORNER_NONE,
 		                                     CL_CORNER_NONE, CL_CORNER_NONE );
 		
 		r.topleft = shadow;
@@ -1071,7 +1071,7 @@ draw_box (DRAW_ARGS)
 		GdkGC *inner  = clearlooks_style->shade_gc[3],
 		      *outer  = clearlooks_style->shade_gc[5];	
 		
-		cl_rectangle_init (&r, inner, outer, CL_CORNER_NONE, CL_CORNER_NONE, 
+		cl_rectangle_init (&r, inner, outer, CL_CORNER_NONE, CL_CORNER_NONE,
 		                                     CL_CORNER_NONE, CL_CORNER_NONE );
 		
 		if (GTK_RANGE (widget)->orientation == GTK_ORIENTATION_VERTICAL)
@@ -1334,7 +1334,7 @@ draw_box (DRAW_ARGS)
 				state_type, area, x, y, width, height);
 		
 		/* we only want the borders on horizontal toolbars */
-		if ( DETAIL ("menubar") || height < 2*width ) { 
+		if ( DETAIL ("menubar") || height < 2*width ) {
 			if (!DETAIL ("menubar"))
 				gdk_draw_line (window, clearlooks_style->shade_gc[0],
 				               x, y, x + width, y); /* top */
@@ -1411,7 +1411,7 @@ ensure_check_pixmaps (GtkStyle     *style,
 	gdk_pixbuf_composite (base, composite,
 	                      0, 0, RADIO_SIZE, RADIO_SIZE, 0, 0,
 	                      1.0, 1.0, GDK_INTERP_NEAREST, 255);
- 
+
 	gdk_pixbuf_composite (inconsistent, composite,
 	                      0, 0, RADIO_SIZE, RADIO_SIZE, 0, 0,
 	                      1.0, 1.0, GDK_INTERP_NEAREST, 255);
@@ -1609,7 +1609,7 @@ ensure_radio_pixmaps (GtkStyle     *style,
 	gdk_pixbuf_composite (outline, composite,
 	                      0, 0, RADIO_SIZE, RADIO_SIZE, 0, 0,
 	                      1.0, 1.0, GDK_INTERP_NEAREST, 255);
-						  
+						
 	gdk_pixbuf_composite (circle, composite,
 	                      0, 0, RADIO_SIZE, RADIO_SIZE, 0, 0,
 	                      1.0, 1.0, GDK_INTERP_NEAREST, 255);
@@ -1696,7 +1696,7 @@ draw_option (DRAW_ARGS)
 
 /**************************************************************************/
 
-static void 
+static void
 draw_shadow_gap (DRAW_ARGS,
                  GtkPositionType gap_side,
                  gint            gap_x,
@@ -1705,7 +1705,7 @@ draw_shadow_gap (DRAW_ARGS,
 	/* I need to improve this function. */
 	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
 	CLRectangle r;
-	GdkRegion *area_region = NULL, 
+	GdkRegion *area_region = NULL,
 	          *gap_region  = NULL;
 
 #if DEBUG
@@ -2036,7 +2036,7 @@ draw_resize_grip (GtkStyle       *style,
   ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
   g_return_if_fail (GTK_IS_STYLE (style));
   g_return_if_fail (window != NULL);
-  
+
   if (area)
     {
       gdk_gc_set_clip_rectangle (style->light_gc[state_type], area);
@@ -2129,7 +2129,7 @@ draw_resize_grip (GtkStyle       *style,
   /* Clear background */
   gtk_style_apply_default_background (style, window, FALSE,
 				      state_type, area,
-				      x, y, width, height);   
+				      x, y, width, height);
 
   switch (edge)
     {
@@ -2205,7 +2205,7 @@ draw_resize_grip (GtkStyle       *style,
 
 	    xi -= 3;
 	    yi -= 3;
-	    
+	
 	  }
       }
       break;
@@ -2221,11 +2221,11 @@ draw_resize_grip (GtkStyle       *style,
             gdk_draw_line (window,
                            style->light_gc[state_type],
                            xi, y,
-                           x + width, yi);                           
+                           x + width, yi);
 
             ++xi;
             --yi;
-            
+
             gdk_draw_line (window,
                            clearlooks_style->shade_gc[4],
                            xi, y,
@@ -2260,11 +2260,11 @@ draw_resize_grip (GtkStyle       *style,
 
 	    xi -= 3;
 	    yi += 3;
-	    
+	
 	  }
       }
       break;
-      
+
     case GDK_WINDOW_EDGE_SOUTH_EAST:
       {
         gint xi, yi;
@@ -2277,16 +2277,16 @@ draw_resize_grip (GtkStyle       *style,
             gdk_draw_line (window,
                            style->light_gc[state_type],
                            xi, y + height,
-                           x + width, yi);                           
+                           x + width, yi);
 
             ++xi;
             ++yi;
-            
+
             gdk_draw_line (window,
                            clearlooks_style->shade_gc[4],
                            xi, y + height,
-                           x + width, yi);                           
-            
+                           x + width, yi);
+
             xi += 3;
             yi += 3;
           }
@@ -2296,7 +2296,7 @@ draw_resize_grip (GtkStyle       *style,
       g_assert_not_reached ();
       break;
     }
-  
+
   if (area)
     {
       gdk_gc_set_clip_rectangle (style->light_gc[state_type], NULL);
@@ -2490,7 +2490,7 @@ set_transparency (const GdkPixbuf *pixbuf, gdouble alpha_percent)
 		for (x = 0; x < width; x++) {
 			/* The "4" is the number of chars per pixel, in this case, RGBA,
 			   the 3 means "skip to the alpha" */
-			current = data + (y * rowstride) + (x * 4) + 3; 
+			current = data + (y * rowstride) + (x * 4) + 3;
 			*(current) = (guchar) (*(current) * alpha_percent);
 		}
 	}
@@ -2551,7 +2551,7 @@ render_icon (GtkStyle            *style,
 			  g_warning ("Using the default screen for gtk_default_render_icon()"));
 	}
 	
-  
+
 	if (size != (GtkIconSize) -1 && !gtk_icon_size_lookup_for_settings (settings, size, &width, &height)) {
 		g_warning (G_STRLOC ": invalid icon size '%d'", size);
 		return NULL;
@@ -2584,7 +2584,7 @@ render_icon (GtkStyle            *style,
 			
 			g_object_unref (scaled);
 		} else if (state == GTK_STATE_PRELIGHT) {
-			stated = gdk_pixbuf_copy (scaled);      
+			stated = gdk_pixbuf_copy (scaled);
 			
 			gdk_pixbuf_saturate_and_pixelate (scaled, stated,
 							  1.2, FALSE);
@@ -2596,7 +2596,7 @@ render_icon (GtkStyle            *style,
 	}
 	else
 		stated = scaled;
-  
+
   return stated;
 }
 

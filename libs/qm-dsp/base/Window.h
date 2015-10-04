@@ -46,7 +46,7 @@ public:
 	return *this;
     }
     virtual ~Window() { delete[] m_cache; }
-    
+
     void cut(T *src) const { cut(src, src); }
     void cut(const T *src, T *dst) const {
 	for (size_t i = 0; i < m_size; ++i) dst[i] = src[i] * m_cache[i];
@@ -59,7 +59,7 @@ protected:
     WindowType m_type;
     size_t m_size;
     T *m_cache;
-    
+
     void encache();
 };
 
@@ -78,40 +78,40 @@ void Window<T>::encache()
 	    mult[i] = mult[i] * 0.5;
 	}
 	break;
-	    
+	
     case BartlettWindow:
 	for (i = 0; i < n/2; ++i) {
 	    mult[i] = mult[i] * (i / T(n/2));
 	    mult[i + n/2] = mult[i + n/2] * (1.0 - (i / T(n/2)));
 	}
 	break;
-	    
+	
     case HammingWindow:
 	for (i = 0; i < n; ++i) {
 	    mult[i] = mult[i] * (0.54 - 0.46 * cos(2 * M_PI * i / n));
 	}
 	break;
-	    
+	
     case HanningWindow:
 	for (i = 0; i < n; ++i) {
 	    mult[i] = mult[i] * (0.50 - 0.50 * cos(2 * M_PI * i / n));
 	}
 	break;
-	    
+	
     case BlackmanWindow:
 	for (i = 0; i < n; ++i) {
 	    mult[i] = mult[i] * (0.42 - 0.50 * cos(2 * M_PI * i / n)
 				 + 0.08 * cos(4 * M_PI * i / n));
 	}
 	break;
-	    
+	
     case GaussianWindow:
 	for (i = 0; i < n; ++i) {
 	    mult[i] = mult[i] * exp((-1.0 / (n*n)) * ((T(2*i) - n) *
 						      (T(2*i) - n)));
 	}
 	break;
-	    
+	
     case ParzenWindow:
 	for (i = 0; i < n; ++i) {
 	    mult[i] = mult[i] * (1.0 - fabs((T(2*i) - n) / T(n + 1)));

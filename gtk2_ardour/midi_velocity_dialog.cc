@@ -45,7 +45,7 @@ MidiVelocityDialog::MidiVelocityDialog (uint8_t current_velocity)
 	spinner.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &MidiVelocityDialog::response), Gtk::RESPONSE_OK));
 }
 
-uint8_t 
+uint8_t
 MidiVelocityDialog::velocity () const
 {
 	return (uint8_t) adjustment.get_value();

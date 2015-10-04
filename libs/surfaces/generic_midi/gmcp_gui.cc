@@ -35,7 +35,7 @@
 
 #include "i18n.h"
 
-class GMCPGUI : public Gtk::VBox 
+class GMCPGUI : public Gtk::VBox
 {
 public:
 	GMCPGUI (GenericMidiControlProtocol&);
@@ -158,7 +158,7 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 
 	threshold_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &GMCPGUI::threshold_changed));
 
-	Gtkmm2ext::UI::instance()->set_tip (threshold_spinner, 
+	Gtkmm2ext::UI::instance()->set_tip (threshold_spinner,
 					    string_compose (_("Controls how %1 behaves if the MIDI controller sends discontinuous values"), PROGRAM_NAME));
 
 	label = manage (new Label (_("Smoothing:")));

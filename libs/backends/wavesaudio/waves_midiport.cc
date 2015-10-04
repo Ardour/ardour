@@ -26,7 +26,7 @@ WavesMidiPort::WavesMidiPort (const std::string& port_name, PortFlags flags)
     : WavesDataPort (port_name, flags)
     , _midi_device (NULL)
     , _waves_midi_buffer (port_name)
-{       
+{
 }
 
 struct MidiEventSorter {
@@ -35,7 +35,7 @@ struct MidiEventSorter {
 	}
 };
 
-void* 
+void*
 WavesMidiPort::get_buffer (pframes_t nframes)
 {
     if (is_input ()) {

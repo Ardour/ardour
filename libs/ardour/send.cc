@@ -48,7 +48,7 @@ string
 Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_bitslot)
 {
 	if (ignore_bitslot) {
-		/* this happens during initial construction of sends from XML, 
+		/* this happens during initial construction of sends from XML,
 		   before they get ::set_state() called. lets not worry about
 		   it.
 		*/

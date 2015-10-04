@@ -1470,7 +1470,7 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			error << string_compose(_("AudioDiskstream %1: cannot write to disk"), id()) << endmsg;
 			return -1;
 		}
-                
+
 		(*chan)->capture_buf->increment_read_ptr (to_write);
 		(*chan)->curr_capture_cnt += to_write;
 
@@ -1817,7 +1817,7 @@ AudioDiskstream::set_record_safe (bool yn)
 		return;
 	}
 	
-	/* can't rec-safe in destructive mode if transport is before start ???? 
+	/* can't rec-safe in destructive mode if transport is before start ????
 	 REQUIRES REVIEW */
 	
 	if (destructive() && yn && _session.transport_frame() < _session.current_start_frame()) {
@@ -1834,7 +1834,7 @@ AudioDiskstream::set_record_safe (bool yn)
 		} else {
 			disengage_record_safe ();
 		}
-	    
+	
 		RecordSafeChanged (); /* EMIT SIGNAL */
 	}
 }
@@ -2575,7 +2575,7 @@ AudioDiskstream::ChannelInfo::~ChannelInfo ()
 			   continue to exist. If we do not do this, then the
 			   Session retains a reference to it, it is not
 			   deleted, and later attempts to create a new source
-			   file will use wierd naming because it already 
+			   file will use wierd naming because it already
 			   exists.
 
 			   XXX longer term TO-DO: do not add to session source

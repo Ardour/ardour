@@ -23,9 +23,9 @@
 namespace ArdourSurface  {
 namespace Mackie {
 
-enum surface_type_t { 
-	mcu, 
-	ext, 
+enum surface_type_t {
+	mcu,
+	ext,
 };
 
 /**

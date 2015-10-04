@@ -79,7 +79,7 @@ SessionEvent::operator new (size_t)
 	SessionEvent* ev = static_cast<SessionEvent*> (p->alloc ());
 	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 Allocating SessionEvent from %2 ev @ %3 pool size %4 free %5 used %6\n", pthread_name(), p->name(), ev,
 	                                                   p->total(), p->available(), p->used()));
-	                                                   
+	
 	ev->own_pool = p;
 	return ev;
 }

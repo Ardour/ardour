@@ -1289,7 +1289,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_change (XMLNode* n)
 	assert (prop);
 	Evoral::event_id_t const id = atoi (prop->value().c_str());
 
-	/* we need to load via an int intermediate for all properties that are 
+	/* we need to load via an int intermediate for all properties that are
 	   actually uint8_t (char/byte).
 	*/
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Barton-Davis 
+    Copyright (C) 1999 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,11 +56,11 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API int pixel_width (const std::string& str, Pango::FontDescription& font);
 	LIBGTKMM2EXT_API void pixel_size (const std::string& str, Pango::FontDescription& font, int& width, int& height);
 
-	LIBGTKMM2EXT_API void get_ink_pixel_size (Glib::RefPtr<Pango::Layout>, 
+	LIBGTKMM2EXT_API void get_ink_pixel_size (Glib::RefPtr<Pango::Layout>,
 						  int& width, int& height);
 	
 
-	LIBGTKMM2EXT_API void get_pixel_size (Glib::RefPtr<Pango::Layout>, 
+	LIBGTKMM2EXT_API void get_pixel_size (Glib::RefPtr<Pango::Layout>,
 					      int& width, int& height);
 	
 	LIBGTKMM2EXT_API void set_size_request_to_display_given_text (Gtk::Widget &w,
@@ -89,13 +89,13 @@ namespace Gtkmm2ext {
 								      gint vpadding);
 
 
-	LIBGTKMM2EXT_API Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_string (const std::string& name, 
-								       const Pango::FontDescription& font, 
-								       int clip_width, 
-								       int clip_height, 
+	LIBGTKMM2EXT_API Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_string (const std::string& name,
+								       const Pango::FontDescription& font,
+								       int clip_width,
+								       int clip_height,
 								       Gdk::Color fg);
 
-	LIBGTKMM2EXT_API void set_popdown_strings (Gtk::ComboBoxText&, 
+	LIBGTKMM2EXT_API void set_popdown_strings (Gtk::ComboBoxText&,
 	                          const std::vector<std::string>&);
 
 	LIBGTKMM2EXT_API void get_popdown_strings (Gtk::ComboBoxText&,

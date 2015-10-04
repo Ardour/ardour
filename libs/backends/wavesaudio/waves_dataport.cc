@@ -26,9 +26,9 @@ WavesDataPort::WavesDataPort (const std::string& inport_name, PortFlags inflags)
     : _name (inport_name)
     , _flags (inflags)
 {
-    _capture_latency_range.min = 
-    _capture_latency_range.max = 
-    _playback_latency_range.min = 
+    _capture_latency_range.min =
+    _capture_latency_range.max =
+    _playback_latency_range.min =
     _playback_latency_range.max = 0;
 }
 
@@ -63,7 +63,7 @@ int WavesDataPort::connect (WavesDataPort *port)
 
     if (this == port) {
         std::cerr << "WavesDataPort::connect (): attempt to connect port to itself!" << std::endl;
-        return -1; 
+        return -1;
     }
 
     if (is_connected (port)) {
@@ -106,7 +106,7 @@ int WavesDataPort::disconnect (WavesDataPort *port)
 void WavesDataPort::_disconnect (WavesDataPort *port, bool api_call)
 {
     std::vector<WavesDataPort*>::iterator it = std::find (_connections.begin (), _connections.end (), port);
-    
+
     if (it != _connections.end ()) { // actually, it's supposed to be always true.
         _connections.erase (it);
     }
@@ -124,7 +124,7 @@ void WavesDataPort::_disconnect (WavesDataPort *port, bool api_call)
 void WavesDataPort::disconnect_all ()
 {
     _disconnect_all ();
-    
+
 	if (is_input())	{
 		_wipe_buffer();
 	}

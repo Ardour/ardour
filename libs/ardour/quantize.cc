@@ -69,7 +69,7 @@ swing_position (double pos, double grid, double swing, double offset)
 	 * if the start grid is 1.0, the beat at 0 isn't swung,
 	 * but the beat at 1.0 is. the beat at 2.0 isn't swung,
 	 * but the beat at 3.0 is. and so on.
-	 * 
+	 *
 	 * so the criterion for a position being swung is
 	 * whether or not ((possible_grid_position / grid) % 2) != 0
 	 */
@@ -131,7 +131,7 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 
 			/* compute new start + end points WITHOUT the offset
 			 * caused by the start of the model (see above).
-			 * 
+			 *
 			 * these versions of new_start and new_end are
 			 * guaranteed to precisely align with the quantize grid(s).
 			 */

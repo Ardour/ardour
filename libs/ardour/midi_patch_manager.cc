@@ -135,7 +135,7 @@ MidiPatchManager::refresh()
 				        << endmsg;
 				continue;
 			}
-				                      
+				
 			_documents[device->first]               = document;
 			_master_devices_by_model[device->first] = device->second;
 

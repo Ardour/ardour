@@ -59,7 +59,7 @@ JackConnection::JackConnection (const std::string& arg1, const std::string& arg2
 	, _probed_buffer_size (0)
 	, _probed_sample_rate (0)
 {
-	/* See if the server is already up 
+	/* See if the server is already up
 	 */
 
         EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();

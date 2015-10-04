@@ -24,7 +24,7 @@
 using namespace ARDOUR;
 
 WavesAudioPort::WavesAudioPort (const std::string& port_name, PortFlags flags)
-    : WavesDataPort (port_name, flags)    
+    : WavesDataPort (port_name, flags)
 {
 	aligned_malloc ((void**)&_buffer, MAX_BUFFER_SIZE_BYTES, 32 /*32 byte alignment*/);
     memset (_buffer, 0, MAX_BUFFER_SIZE_BYTES);
@@ -39,9 +39,9 @@ WavesAudioPort::~WavesAudioPort ()
 void* WavesAudioPort::get_buffer (pframes_t nframes)
 {
     if (is_input ()) {
-        
+
         std::vector<WavesDataPort*>::const_iterator it = get_connections ().begin ();
-        
+
         if (it != get_connections ().end ()) {
             /* In fact, the static casting to (const WavesAudioPort*) is not that safe.
              * However, mixing the buffers is assumed in the time critical conditions.
@@ -53,7 +53,7 @@ void* WavesAudioPort::get_buffer (pframes_t nframes)
              // use optimized function to fill the buffer intialy
              ARDOUR::copy_vector (_buffer, ((const WavesAudioPort*)*it)->const_buffer (), nframes);
              ++it;
-            
+
              // mix the rest
              for (; it != get_connections ().end (); ++it) {
                  Sample* tgt = buffer ();

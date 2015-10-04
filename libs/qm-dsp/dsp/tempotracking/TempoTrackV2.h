@@ -26,7 +26,7 @@ using std::vector;
 // 44100, but surely the fixed window sizes and comb filtering will
 // make it prefer double or half time when run at e.g. 96000?
 
-class TempoTrackV2  
+class TempoTrackV2
 {
 public:
     /**

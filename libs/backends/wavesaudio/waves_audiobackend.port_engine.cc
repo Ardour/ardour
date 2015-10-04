@@ -34,7 +34,7 @@ int
 WavesAudioBackend::set_port_name (PortHandle port_handle, const std::string& port_name)
 {
     // COMMENTED DBG LOGS */ std::cout  << "WavesAudioBackend::set_port_name (): [" << std::hex << port_handle << std::dec << "], [" << port_name << "]" << std::endl;
-    
+
     if (!_registered (port_handle)) {
         std::cerr << "WavesAudioBackend::set_port_name (): Failed to find port [" << std::hex << port_handle << std::dec << "]!" << std::endl;
         return -1;
@@ -72,7 +72,7 @@ WavesAudioBackend::get_port_by_name (const std::string& port_name) const
 }
 
 
-WavesDataPort* 
+WavesDataPort*
 WavesAudioBackend::_find_port (const std::string& port_name) const
 {
     for (std::vector<WavesDataPort*>::const_iterator it = _ports.begin (); it != _ports.end (); ++it) {
@@ -88,14 +88,14 @@ WavesAudioBackend::_find_port (const std::string& port_name) const
 int
 WavesAudioBackend::get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>& port_names) const
 {
-  
+
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::get_ports (): \n\tPattern: [" << port_name_pattern << "]\n\tType: " << type << "\n\tFlags: " << flags << endl;
-    
+
     unsigned found_ports =0;
-    
+
     for (size_t i = 0; i < _ports.size (); ++i) {
         WavesDataPort* port = _ports[i];
-        
+
         if ((port->type () == type) && flags == (port->flags () & flags)) {
             port_names.push_back (port->name ());
             found_ports++;
@@ -114,9 +114,9 @@ WavesAudioBackend::port_data_type (PortHandle port_handle) const
         std::cerr << "WavesAudioBackend::port_data_type (): Failed to find port [" << std::hex << port_handle << std::dec << "]!" << std::endl;
         return DataType::NIL;
     }
-    
+
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::port_data_type: " << endl;
-    
+
     return ((WavesAudioPort*)port_handle)->type ();
 }
 
@@ -190,7 +190,7 @@ WavesAudioBackend::_register_port (const std::string& port_name, ARDOUR::DataTyp
             std::cerr << "WavesAudioBackend::register_port () : Invalid data type (" << (uint32_t)type << ") applied to port [" << port_name << "]!" << std::endl;
         return NULL;
     }
-    
+
     _ports.push_back (port);
 
     return port;
@@ -283,7 +283,7 @@ WavesAudioBackend::connect (const std::string& src_port_name, const std::string&
         std::cerr << "WavesAudioBackend::connect: Failed to find source port " << src_port_name << " !" << std::endl;
         return -1;
     }
-    
+
     WavesDataPort* dst_port = _find_port (dst_port_name);
     if (dst_port == NULL) {
         std::cerr << "WavesAudioBackend::connect: Failed to find destination port " << dst_port_name << " !" << std::endl;
@@ -325,7 +325,7 @@ WavesAudioBackend::disconnect (PortHandle src_port_handle, const std::string& ds
         std::cerr << "WavesAudioBackend::disconnect (): Failed to find source port [" << std::hex << src_port_handle << std::dec << "]!" << std::endl;
         return -1;
     }
-    
+
     // COMMENTED DBG LOGS */ std::cout  << "\t[" << std::hex << src_port_handle << std::dec << "]" << std::endl;
     // COMMENTED DBG LOGS */ std::cout  << "\t[" << dst_port_name << "]" << std::endl;
 
@@ -364,7 +364,7 @@ WavesAudioBackend::disconnect (const std::string& src_port_name, const std::stri
         std::cerr << "WavesAudioBackend::disconnect : Failed to find source port!\n";
         return -1;
     }
-    
+
     WavesDataPort* dst_port = _find_port (dst_port_name);
     if (dst_port == NULL) {
         std::cerr << "WavesAudioBackend::disconnect : Failed to find destination port!\n";
@@ -383,7 +383,7 @@ WavesAudioBackend::connected (PortHandle port_handle, bool process_callback_safe
         std::cerr << "WavesAudioBackend::connected (): Failed to find port [" << std::hex << port_handle << std::dec << "]!" << std::endl;
         return false;
     }
-    
+
     return ((WavesDataPort*)port_handle)->is_connected ();
 }
 
@@ -426,7 +426,7 @@ int
 WavesAudioBackend::get_connections (PortHandle port_handle, std::vector<std::string>& names, bool process_callback_safe)
 {
    // COMMENTED DBG LOGS */ std::cout  << "WavesAudioBackend::get_connections ()" << std::endl;
-    
+
     if (!_registered (port_handle)) {
         std::cerr << "WavesAudioBackend::get_connections (): Failed to find port [" << std::hex << port_handle << std::dec << "]!" << std::endl;
         return -1;
@@ -436,7 +436,7 @@ WavesAudioBackend::get_connections (PortHandle port_handle, std::vector<std::str
         std::cerr << "WavesAudioBackend::get_connections () : Parameter 'names' is not empty!\n";
         return -1;
     }
- 
+
     const std::vector<WavesDataPort*>& connected_ports = ((WavesDataPort*)port_handle)->get_connections ();
 
     for (std::vector<WavesDataPort*>::const_iterator it = connected_ports.begin (); it != connected_ports.end (); ++it) {
@@ -474,12 +474,12 @@ WavesAudioBackend::monitoring_input (PortHandle)
 bool
 WavesAudioBackend::port_is_physical (PortHandle port_handle) const
 {
-    
+
     if (!_registered (port_handle)) {
         std::cerr << "WavesAudioBackend::port_is_physical (): Failed to find port [" << std::hex << port_handle << std::dec << "]!" << std::endl;
         return -1;
     }
-    
+
     return (((WavesAudioPort*)port_handle)->flags () & IsPhysical) != 0;
 }
 
@@ -488,7 +488,7 @@ void
 WavesAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>& names)
 {
     names.clear();
-    
+
     // COMMENTED DBG LOGS */ std::cout  << "WavesAudioBackend::get_physical_outputs ():" << std::endl << "\tdatatype = " << type << std::endl;
 
     switch (type) {
@@ -514,7 +514,7 @@ void
 WavesAudioBackend::get_physical_inputs (DataType type, std::vector<std::string>& names)
 {
      names.clear();
-    
+
     // COMMENTED DBG LOGS */ std::cout  << "WavesAudioBackend::get_physical_inputs ():" << std::endl << "\tdatatype = " << type << std::endl;
     switch (type) {
         case ARDOUR::DataType::AUDIO: {
@@ -571,8 +571,8 @@ WavesAudioBackend::get_buffer (PortHandle port_handle, pframes_t nframes)
     if (port_handle == NULL) {
         std::cerr << "WavesAudioBackend::get_buffer : Invalid port handler <NULL>!" << std::endl;
         return NULL;
-    }  
-    
+    }
+
     return ((WavesAudioPort*)port_handle)->get_buffer (nframes);
 }
 
@@ -584,10 +584,10 @@ WavesAudioBackend::_register_system_audio_ports ()
         std::cerr << "WavesAudioBackend::_register_system_audio_ports (): No device is set!" << std::endl;
         return -1;
     }
-    
+
     std::vector<std::string> input_channels = _device->InputChannels ();
     _max_input_channels = input_channels.size ();
-    
+
     uint32_t channels = (_input_channels ? _input_channels : input_channels.size ());
     uint32_t port_number = 0;
 
@@ -595,44 +595,44 @@ WavesAudioBackend::_register_system_audio_ports ()
 
     // Get latency for capture
     lr.min = lr.max = _device->GetLatency (false) + _device->CurrentBufferSize () + _systemic_input_latency;
-    for (std::vector<std::string>::iterator it = input_channels.begin (); 
+    for (std::vector<std::string>::iterator it = input_channels.begin ();
          (port_number < channels) && (it != input_channels.end ());
         ++it) {
-        
+
         std::ostringstream port_name(*it);
         WavesDataPort* port = _register_port ("system:capture:" + port_name.str (), DataType::AUDIO ,
                                               static_cast<PortFlags> (IsOutput | IsPhysical | IsTerminal));
-        
+
         if (port == NULL) {
             std::cerr << "WavesAudioBackend::_create_system_audio_ports (): Failed registering port [" << port_name << "] for [" << _device->DeviceName () << "]" << std::endl;
             return-1;
         }
         set_latency_range (port, false, lr);
     }
-    
+
     std::vector<std::string> output_channels = _device->OutputChannels ();
     _max_output_channels = output_channels.size ();
     channels = (_output_channels ? _output_channels : _max_output_channels);
     port_number = 0;
-    
+
     // Get latency for playback
     lr.min = lr.max = _device->GetLatency (true) + _device->CurrentBufferSize () + _systemic_output_latency;
 
     for (std::vector<std::string>::iterator it = output_channels.begin ();
          (port_number < channels) && (it != output_channels.end ());
         ++it) {
-        
+
         std::ostringstream port_name(*it);
         WavesDataPort* port = _register_port ("system:playback:" + port_name.str (), DataType::AUDIO ,
                                               static_cast<PortFlags> (IsInput| IsPhysical | IsTerminal));
-        
+
         if (port == NULL) {
             std::cerr << "WavesAudioBackend::_create_system_audio_ports (): Failed registering port ]" << port_name << "] for [" << _device->DeviceName () << "]" << std::endl;
             return-1;
         }
         set_latency_range (port, true, lr);
     }
-    
+
     return 0;
 }
 
@@ -642,7 +642,7 @@ WavesAudioBackend::_unregister_system_audio_ports ()
 {
     std::vector<WavesAudioPort*> physical_audio_ports = _physical_audio_inputs;
     physical_audio_ports.insert (physical_audio_ports.begin (), _physical_audio_outputs.begin (), _physical_audio_outputs.end ());
-        
+
     for (std::vector<WavesAudioPort*>::const_iterator it = physical_audio_ports.begin (); it != physical_audio_ports.end (); ++it) {
         std::vector<WavesDataPort*>::iterator port_iterator = std::find (_ports.begin (), _ports.end (), *it);
         if (port_iterator == _ports.end ()) {

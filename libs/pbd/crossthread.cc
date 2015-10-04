@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2009 Paul Davis 
+  Copyright (C) 2009 Paul Davis
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ using namespace Glib;
 #include "crossthread.win.cc"
 #endif
 
-gboolean 
+gboolean
 cross_thread_channel_call_receive_slot (GIOChannel*, GIOCondition condition, void *data)
 {
         CrossThreadChannel* ctc = static_cast<CrossThreadChannel*>(data);

@@ -32,11 +32,11 @@ namespace PBD {
 class LIBPBD_API UUID : public boost::uuids::uuid {
 
   public:
-    UUID () 
+    UUID ()
             : boost::uuids::uuid (boost::uuids::random_generator()()) {}
     UUID (std::string const & str)
             : boost::uuids::uuid (boost::uuids::string_generator()(str)) {}
-    
+
     explicit UUID (boost::uuids::uuid const& u)
             : boost::uuids::uuid(u)
     {}
@@ -44,14 +44,14 @@ class LIBPBD_API UUID : public boost::uuids::uuid {
     operator boost::uuids::uuid() {
             return static_cast<boost::uuids::uuid&>(*this);
     }
-    
+
     operator boost::uuids::uuid() const {
             return static_cast<boost::uuids::uuid const&>(*this);
     }
 
     UUID& operator= (std::string const & str);
     std::string to_s () const;
-    
+
     operator bool() const { return !is_nil(); }
 };
 

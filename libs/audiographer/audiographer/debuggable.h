@@ -24,7 +24,7 @@ enum LIBAUDIOGRAPHER_API DebugLevel
 };
 
 /** Class that allows optimizing out debugging code during compile time.
-  * Usage: to take all advantage of this class you should wrap all 
+  * Usage: to take all advantage of this class you should wrap all
   * debugging statemets like this:
   * \code
   * if (debug_level (SomeDebugLevel) && other_optional_conditionals) {

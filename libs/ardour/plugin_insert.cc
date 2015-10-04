@@ -272,11 +272,11 @@ PluginInsert::parameter_changed (uint32_t which, float val)
 
 	if (ac) {
 		ac->set_value (val);
-                
+
                 Plugins::iterator i = _plugins.begin();
-                
+
                 /* don't set the first plugin, just all the slaves */
-                
+
                 if (i != _plugins.end()) {
                         ++i;
                         for (; i != _plugins.end(); ++i) {
@@ -1427,7 +1427,7 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 	plugin->set_insert_id (this->id());
 	
 	if (_plugins.empty()) {
-                /* first (and probably only) plugin instance - connect to relevant signals 
+                /* first (and probably only) plugin instance - connect to relevant signals
                  */
 
 		plugin->ParameterChanged.connect_same_thread (*this, boost::bind (&PluginInsert::parameter_changed, this, _1, _2));

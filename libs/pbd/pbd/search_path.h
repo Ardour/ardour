@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Tim Mayberry 
+    Copyright (C) 2007 Tim Mayberry
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ namespace PBD {
  * @class Searchpath
  *
  * The Searchpath class is a helper class for getting a
- * vector of paths contained in a search path string where a 
- * "search path string" contains absolute directory paths 
+ * vector of paths contained in a search path string where a
+ * "search path string" contains absolute directory paths
  * separated by a colon(:) or a semi-colon(;) on windows.
  *
  * The Searchpath class does not test whether the paths exist
@@ -48,13 +48,13 @@ public:
 
 	/**
 	 * Initialize Searchpath from a string where the string contains
-	 * one or more absolute paths to directories which are delimited 
-	 * by a path separation character. The path delimeter is a 
+	 * one or more absolute paths to directories which are delimited
+	 * by a path separation character. The path delimeter is a
 	 * colon(:) on unix and a semi-colon(;) on windows.
 	 *
 	 * Each path contained in the search path may or may not resolve to
 	 * an existing directory in the filesystem.
-	 * 
+	 *
 	 * @param search_path A path string.
 	 */
 	LIBPBD_TEMPLATE_MEMBER_API Searchpath (const std::string& search_path);
@@ -109,7 +109,7 @@ public:
 
 	/**
 	 * Add a sub-directory to each path in the search path.
-	 * @param subdir The directory name, it should not contain 
+	 * @param subdir The directory name, it should not contain
 	 * any path separating tokens.
 	 */
 	LIBPBD_TEMPLATE_MEMBER_API Searchpath& add_subdirectory_to_paths (const std::string& subdir);

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,17 +15,17 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  *   */
 
 /* The most common header files that the tranzport uses */
 
 #ifndef ardour_tranzport_common
-#define ardour_tranzport_common 
+#define ardour_tranzport_common
 #include <iostream>
-#include <algorithm>    
-#include <cmath>        
-  
+#include <algorithm>
+#include <cmath>
+
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <float.h>

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2006 Paul Davis 
+  Copyright (C) 2006 Paul Davis
   Copyright (C) 2007 Mike Taht
 
   This program is free software; you can redistribute it and/or modify
@@ -59,7 +59,7 @@ private:
 	const static int STATUS_OFFLINE  = 0xff;
 	const static int STATUS_ONLINE = 0x01;
 	const static int STATUS_OK = 0x00;
-  
+
         const static int LIGHTS = 7;
         const static int ROWS = 2;
         const static int COLUMNS = 20;
@@ -97,7 +97,7 @@ private:
 		ButtonPlay = 0x00100000,
 		ButtonRecord = 0x00000100,
 		ButtonShift = 0x08000000,
-		ButtonFootswitch = 0x00001000 
+		ButtonFootswitch = 0x00001000
 	};
 
 	enum WheelShiftMode {
@@ -124,7 +124,7 @@ private:
 		WheelIncrSecond,
 		WheelIncrMinute
 	};
-	  
+	
 	enum DisplayMode {
 		DisplayNormal,
 		DisplayRecording,
@@ -183,7 +183,7 @@ private:
         std::bitset<LIGHTS> lights_flash;
 
 	int32_t       last_notify;
-	char           last_notify_msg[COLUMNS+1]; 
+	char           last_notify_msg[COLUMNS+1];
 	uint32_t       last_bars;
 	uint32_t       last_beats;
 	uint32_t       last_ticks;
@@ -241,10 +241,10 @@ private:
 	void screen_invalidate();
 	int  screen_flush();
 	void screen_clear();
-	// bool screen_isuptodate(); // think on this - 
+	// bool screen_isuptodate(); // think on this -
 	int  screen_show_bling();
 
-	// Commands to write to the lcd 
+	// Commands to write to the lcd
 
 	int  lcd_init();
         bool lcd_damage();
@@ -293,7 +293,7 @@ private:
 	void enter_bling_mode();
 
 	void next_marker (); // basicui doesn't give me enough info
-	void prev_marker (); 
+	void prev_marker ();
 
 	void next_display_mode ();
 	void normal_update ();

@@ -82,7 +82,7 @@ public:
 	bool locked() const { return _controls_locked; }
 
 	void gui_selection_changed (const ARDOUR::StrongRouteNotificationList&);
-  
+
 	void notify_metering_state_changed();
 
 private:

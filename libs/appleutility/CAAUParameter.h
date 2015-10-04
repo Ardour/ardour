@@ -63,15 +63,15 @@ public:
 								~CAAUParameter();
 		
 	/*! @method operator <@ */
-	bool						operator < (const CAAUParameter &a) const 
-								{ 
-									return memcmp(this, &a, sizeof(AudioUnitParameter)) < 0; 
+	bool						operator < (const CAAUParameter &a) const
+								{
+									return memcmp(this, &a, sizeof(AudioUnitParameter)) < 0;
 								}
 
 	/*! @method operator ==@ */
-	bool						operator == (const CAAUParameter &a) const 
-								{ 
-									return !memcmp(this, &a, sizeof(AudioUnitParameter)); 
+	bool						operator == (const CAAUParameter &a) const
+								{
+									return !memcmp(this, &a, sizeof(AudioUnitParameter));
 								}
 	
 	/*! @method operator =@ */
@@ -80,12 +80,12 @@ public:
 	/*! @method GetValue */
 	Float32						GetValue() const;
 	/*! @method SetValue */
-	void						SetValue(	AUParameterListenerRef			inListener, 
+	void						SetValue(	AUParameterListenerRef			inListener,
 											void *							inObject,
 											Float32							inValue) const;
 	
 	/*! @method GetName */
-	CFStringRef					GetName() const { return mParamName; }  
+	CFStringRef					GetName() const { return mParamName; }
 										// borrowed reference!
 
 	/*! @method GetStringFromValueCopy */
@@ -94,9 +94,9 @@ public:
 										// or null if there is no name associated
 										// caller must release
 	/*! @method ValuesHaveStrings */
-	bool						ValuesHaveStrings () const 
-								{ 
-									return (mParamInfo.flags & kAudioUnitParameterFlag_ValuesHaveStrings) != 0; 
+	bool						ValuesHaveStrings () const
+								{
+									return (mParamInfo.flags & kAudioUnitParameterFlag_ValuesHaveStrings) != 0;
 								}
 	
 	/*! @method GetValueFromString */
@@ -109,16 +109,16 @@ public:
 
 	/*! @method GetParamTag */
 	CFStringRef					GetParamTag() const	{ return mParamTag; }
-									// this may return null! - 
+									// this may return null! -
 									// in which case there is no descriptive tag for the parameter
 
 	/*! @method GetParamName */
 	CFStringRef					GetParamName (int inIndex) const
 									// this can return null if there is no name for the parameter
-								{ 
-									return (mNamedParams && inIndex < mNumIndexedParams) 
+								{
+									return (mNamedParams && inIndex < mNumIndexedParams)
 												? (CFStringRef) CFArrayGetValueAtIndex(mNamedParams, inIndex)
-												: 0; 
+												: 0;
 								}
 	
 	/*! @method GetNumIndexedParams */
@@ -131,8 +131,8 @@ public:
 	bool						HasNamedParams () const { return IsIndexedParam() && mNamedParams; }
 	
 	/*! @method GetClumpID */
-	bool						GetClumpID (UInt32 &outClumpID) const 
-								{ 
+	bool						GetClumpID (UInt32 &outClumpID) const
+								{
 									if (mParamInfo.flags & kAudioUnitParameterFlag_HasClump) {
 										outClumpID = mParamInfo.clumpID;
 										return true;
@@ -141,15 +141,15 @@ public:
 								}
 								
 	/*! @method HasDisplayTransformation */
-	bool						HasDisplayTransformation () const 
-								{ 
-									return GetAudioUnitParameterDisplayType (mParamInfo.flags); 
+	bool						HasDisplayTransformation () const
+								{
+									return GetAudioUnitParameterDisplayType (mParamInfo.flags);
 								}
 
 	/*! @method IsExpert */
-	bool						IsExpert () const 
-								{ 
-									return mParamInfo.flags & kAudioUnitParameterFlag_ExpertMode; 
+	bool						IsExpert () const
+								{
+									return mParamInfo.flags & kAudioUnitParameterFlag_ExpertMode;
 								}
 #if DEBUG
 	void						Print () const;

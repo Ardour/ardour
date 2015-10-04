@@ -262,7 +262,7 @@ XMLNode::clear_lists ()
 	_proplist.clear ();
 }
 
-XMLNode& 
+XMLNode&
 XMLNode::operator= (const XMLNode& from)
 {
 	if (&from != this) {

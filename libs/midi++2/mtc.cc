@@ -95,13 +95,13 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 {
 	int which_quarter_frame = (msg[1] & 0xf0) >> 4;
 
-	/* Is it an expected frame?  
-	   Remember, the first can be frame 7 or frame 0, 
+	/* Is it an expected frame?
+	   Remember, the first can be frame 7 or frame 0,
 	   depending on the direction of the MTC generator ...
 	*/
 
 #ifdef DEBUG_MTC
-	 cerr << "MTC: (state = " << _mtc_running << ") " 
+	 cerr << "MTC: (state = " << _mtc_running << ") "
 	      << which_quarter_frame << " vs. " << expected_mtc_quarter_frame_code
 	      << " consecutive ? " << consecutive_qtr_frame_cnt
 	      << endl;
@@ -141,7 +141,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 			cerr << "Send MTC status as " << _mtc_running << endl;
 #endif
 			mtc_status (_mtc_running);
-		} 
+		}
 
 		switch (_mtc_running) {
 		case MTC_Forward:
@@ -177,7 +177,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 			consecutive_qtr_frame_cnt = 0;
 
 #ifdef DEBUG_MTC
-			cerr << "MTC: (state = " << _mtc_running << ") " 
+			cerr << "MTC: (state = " << _mtc_running << ") "
 			     << which_quarter_frame << " vs. " << expected_mtc_quarter_frame_code << endl;
 #endif
 
@@ -272,11 +272,11 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 		_qtr_mtc_time[3] |= msg[1] & 0xf;
 		break;
 
-	case 7: 
+	case 7:
 		
 		/* last quarter frame msg has the MS bit of
 		   the hour in bit 0, and the SMPTE FPS type
-		   in bits 5 and 6 
+		   in bits 5 and 6
 		*/
 		
 		_qtr_mtc_time[3] |= ((msg[1] & 0x1) << 4);
@@ -288,7 +288,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 		abort(); /*NOTREACHED*/
 		break;
 
-	} 
+	}
 	
 #ifdef DEBUG_MTC
 	cerr << "Emit MTC Qtr\n";

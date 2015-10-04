@@ -91,10 +91,10 @@ calculate_arrow_geometry (GtkArrowType  arrow_type,
                           gint         *y,
                           gint         *width,
                           gint         *height);
-						  
+						
 GtkWidget *special_get_ancestor(GtkWidget * widget,
 				       GType widget_type);
-					   
+					
 void blend (GdkColormap *colormap,
             GdkColor *a, GdkColor *b, GdkColor *c, int alpha);
 			

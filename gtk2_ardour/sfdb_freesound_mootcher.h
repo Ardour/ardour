@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ public:
 	std::string	searchText(std::string query, int page, std::string filter, enum sortMethod sort);
 	std::string	searchSimilar(std::string id);
 	void *		threadFunc();
-	SoundFileBrowser *sfb; 
+	SoundFileBrowser *sfb;
 	std::string	audioFileName;
 	std::string	ID;
 
@@ -113,7 +113,7 @@ private:
 	Gtk::Button cancel_download_btn;
 
 	bool cancel_download;
-	void cancelDownload() { 
+	void cancelDownload() {
 		cancel_download = true;
 		progress_hbox.hide();
 	}

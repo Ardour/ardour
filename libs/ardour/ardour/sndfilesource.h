@@ -45,7 +45,7 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	SndFileSource (Session&, const std::string& path, int chn);
 
 	/** Constructor to be called for existing in-session files during
-	 * session loading 
+	 * session loading
 	 */
 	SndFileSource (Session&, const XMLNode&);
 

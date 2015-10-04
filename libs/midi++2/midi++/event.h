@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 
 /** If this is not defined, all methods of MidiEvent are RT safe
  * but MidiEvent will never deep copy and (depending on the scenario)
- * may not be usable in STL containers, signals, etc. 
+ * may not be usable in STL containers, signals, etc.
  */
 #define EVORAL_EVENT_ALLOC 1
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-99 Paul Barton-Davis 
+    Copyright (C) 1998-99 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include "pbd/libpbd_visibility.h"
 #include "receiver.h"
 
-class LIBPBD_API TextReceiver : public Receiver 
+class LIBPBD_API TextReceiver : public Receiver
 {
   public:
 	TextReceiver (const std::string &n);

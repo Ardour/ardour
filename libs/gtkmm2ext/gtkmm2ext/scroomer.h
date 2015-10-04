@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 */
 
-#ifndef __gtkmm2ext_scroomer_h__ 
+#ifndef __gtkmm2ext_scroomer_h__
 #define __gtkmm2ext_scroomer_h__
 
 #include <gtkmm/drawingarea.h>

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 */
 
-#ifndef __gtkmm2ext_pixscroller_h__ 
+#ifndef __gtkmm2ext_pixscroller_h__
 #define __gtkmm2ext_pixscroller_h__
 
 #include <gtkmm/drawingarea.h>
@@ -31,7 +31,7 @@ namespace Gtkmm2ext {
 class LIBGTKMM2EXT_API PixScroller : public Gtk::DrawingArea
 {
   public:
-	PixScroller(Gtk::Adjustment& adjustment, 
+	PixScroller(Gtk::Adjustment& adjustment,
 		    Glib::RefPtr<Gdk::Pixbuf> slider,
 		    Glib::RefPtr<Gdk::Pixbuf> rail);
 

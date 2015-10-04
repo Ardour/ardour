@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2009 Paul Davis 
+    Copyright (C) 2000-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 */
 
-#ifndef __gtkmm2ext_cell_renderer_pixbuf_multi_h__ 
+#ifndef __gtkmm2ext_cell_renderer_pixbuf_multi_h__
 #define __gtkmm2ext_cell_renderer_pixbuf_multi_h__
 
 #include <map>
@@ -39,7 +39,7 @@ class LIBGTKMM2EXT_API CellRendererPixbufMulti : public Gtk::CellRenderer
 {
   public:
 
-	CellRendererPixbufMulti();  
+	CellRendererPixbufMulti();
 	virtual ~CellRendererPixbufMulti(){};
 
 	virtual void render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window, Gtk::Widget& widget, const Gdk::Rectangle& background_area, const Gdk::Rectangle& cell_area, const Gdk::Rectangle& expose_area, Gtk::CellRendererState flags);
@@ -59,9 +59,9 @@ class LIBGTKMM2EXT_API CellRendererPixbufMulti : public Gtk::CellRenderer
 	SignalChanged& signal_changed();
 
   protected:
-  
+
   private:
-	Glib::Property<uint32_t> property_state_; 
+	Glib::Property<uint32_t> property_state_;
 
 	std::map<uint32_t,Glib::RefPtr<Gdk::Pixbuf> > _pixbufs;
 

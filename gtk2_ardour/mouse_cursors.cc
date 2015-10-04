@@ -147,8 +147,8 @@ MouseCursors::set_cursor_set (const std::string& name)
 	}
 
 	/* these will throw exceptions if their images cannot be found.
-	   
-	   the default hotspot coordinates will be overridden by any 
+	
+	   the default hotspot coordinates will be overridden by any
 	   data found by Gtkmm2ext::Cursors::load_cursor_info(). the values
 	   here from the set of cursors used by Ardour; new cursor/icon
 	   sets should come with a hotspot info file.

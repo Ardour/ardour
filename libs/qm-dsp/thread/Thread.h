@@ -127,7 +127,7 @@ public:
     void wait(int us = 0);
 
     void signal();
-    
+
 private:
 
 #ifdef _WIN32

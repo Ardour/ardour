@@ -54,7 +54,7 @@ depth-first search to free nodes, you will free nodes twice. I decided
 to allocate memory from blocks of 1024 bytes and keep the blocks in a
 list associated with but private to this module. So the user should
 access this module by calling:
-    bplist_read_file() or bplist_read_user_pref() or 
+    bplist_read_file() or bplist_read_user_pref() or
     bplist_read_system_pref()
 which returns a value. When you are done with the value, call
     bplist_free_data()
@@ -89,14 +89,14 @@ memory requested or calls longjmp, so callers don't have to check.
 /* there are 2 levels of error logging/printing:
  *   BPLIST_LOG and BPLIST_LOG_VERBOSE
  * either or both can be set to non-zero to turn on
- * If BPLIST_LOG_VERBOSE is true, then BPLIST_LOG 
+ * If BPLIST_LOG_VERBOSE is true, then BPLIST_LOG
  * is also true.
- * 
+ *
  * In the code, logging is done by calling either
  * bplist_log() or bplist_log_verbose(), which take
  * parameters like printf but might be a no-op.
  */
- 
+
 /* #define BPLIST_LOG_VERBOSE 1 */
 
 #if BPLIST_LOG_VERBOSE
@@ -439,7 +439,7 @@ value_ptr bplist_read_pldata(pldata_ptr data)
         bplist_log("Bad binary plist: too short or invalid header.\n");
         return NULL;
     }
-        
+
     // read trailer
     ptr = (uint8_t *) (data->data + data->len - kTRAILER_SIZE);
     bplist.offset_int_size = ptr[6];
@@ -447,29 +447,29 @@ value_ptr bplist_read_pldata(pldata_ptr data)
     bplist.object_count = convert_uint64(ptr + 8);
     top_level_object = convert_uint64(ptr + 16);
     bplist.offset_table_offset = convert_uint64(ptr + 24);
-        
+
     // Basic sanity checks
     if (bplist.offset_int_size < 1 || bplist.offset_int_size > 8 ||
         bplist.object_ref_size < 1 || bplist.object_ref_size > 8 ||
         bplist.offset_table_offset < kHEADER_SIZE) {
         bplist_log("Bad binary plist: trailer declared insane.\n");
-        return NULL;                
+        return NULL;
     }
-        
+
     // Ensure offset table is inside file
     uint64_t offsetTableSize = bplist.offset_int_size * bplist.object_count;
-    if (offsetTableSize + bplist.offset_table_offset + kTRAILER_SIZE > 
+    if (offsetTableSize + bplist.offset_table_offset + kTRAILER_SIZE >
         data->len) {
         bplist_log("Bad binary plist: offset table overlaps end of container.\n");
         return NULL;
     }
-        
+
     bplist.data_bytes = data->data;
     bplist.length = data->len;
     bplist.cache = NULL; /* dictionary is empty */
 
-    bplist_log_verbose("Got a sane bplist with %llu items, offset_int_size: %u, object_ref_size: %u\n", 
-                      bplist.object_count, bplist.offset_int_size, 
+    bplist_log_verbose("Got a sane bplist with %llu items, offset_int_size: %u, object_ref_size: %u\n",
+                      bplist.object_count, bplist.offset_int_size,
                       bplist.object_ref_size);
     /* at this point, we are ready to do some parsing which allocates
         memory for the result data structure. If memory allocation (using
@@ -494,17 +494,17 @@ static value_ptr extract_object(bplist_info_ptr bplist, uint64_t objectRef)
     uint64_t offset;
     value_ptr result = NULL;
     uint8_t objectTag;
-    
+
     if (objectRef >= bplist->object_count) {
         // Out-of-range object reference.
         bplist_log("Bad binary plist: object index is out of range.\n");
         return NULL;
     }
-        
+
     // Use cached object if it exists
     result = cache_lookup(bplist->cache, objectRef);
     if (result != NULL)  return result;
-        
+
     // Otherwise, find object in file.
     offset = read_offset(bplist, objectRef);
     if (offset > bplist->length) {
@@ -517,71 +517,71 @@ static value_ptr extract_object(bplist_info_ptr bplist, uint64_t objectRef)
     case kTAG_SIMPLE:
         result = extract_simple(bplist, offset);
         break;
-                
+
     case kTAG_INT:
         result = extract_int(bplist, offset);
         break;
-                        
+
     case kTAG_REAL:
         result = extract_real(bplist, offset);
         break;
-                        
+
     case kTAG_DATE:
         result = extract_date(bplist, offset);
         break;
-                        
+
     case kTAG_DATA:
         result = extract_data(bplist, offset);
         break;
-                        
+
     case kTAG_ASCIISTRING:
         result = extract_ascii_string(bplist, offset);
         break;
-                        
+
     case kTAG_UNICODESTRING:
         result = extract_unicode_string(bplist, offset);
         break;
-        
+
     case kTAG_UID:
         result = extract_uid(bplist, offset);
         break;
-        
+
     case kTAG_ARRAY:
         result = extract_array(bplist, offset);
         break;
-        
+
     case kTAG_DICTIONARY:
         result = extract_dictionary(bplist, offset);
         break;
-        
+
     default:
         // Unknown tag.
-        bplist_log("Bad binary plist: unknown tag 0x%X.\n", 
+        bplist_log("Bad binary plist: unknown tag 0x%X.\n",
                    (objectTag & 0x0F) >> 4);
         result = NULL;
     }
-    
+
     // Cache and return result.
-    if (result != NULL)  
+    if (result != NULL)
         cache_insert(&bplist->cache, objectRef, result);
     return result;
 }
 
 
-static uint64_t read_sized_int(bplist_info_ptr bplist, uint64_t offset, 
+static uint64_t read_sized_int(bplist_info_ptr bplist, uint64_t offset,
                                uint8_t size)
 {
-    assert(bplist->data_bytes != NULL && size >= 1 && size <= 8 && 
+    assert(bplist->data_bytes != NULL && size >= 1 && size <= 8 &&
            offset + size <= bplist->length);
-        
+
     uint64_t result = 0;
     const uint8_t *byte = bplist->data_bytes + offset;
-        
+
     do {
         // note that ints seem to be high-order first
         result = (result << 8) | *byte++;
     } while (--size);
-        
+
     return result;
 }
 
@@ -589,35 +589,35 @@ static uint64_t read_sized_int(bplist_info_ptr bplist, uint64_t offset,
 static uint64_t read_offset(bplist_info_ptr bplist, uint64_t index)
 {
     assert(index < bplist->object_count);
-        
-    return read_sized_int(bplist, 
-            bplist->offset_table_offset + bplist->offset_int_size * index, 
+
+    return read_sized_int(bplist,
+            bplist->offset_table_offset + bplist->offset_int_size * index,
             bplist->offset_int_size);
 }
 
 
-static BOOL read_self_sized_int(bplist_info_ptr bplist, uint64_t offset, 
+static BOOL read_self_sized_int(bplist_info_ptr bplist, uint64_t offset,
                              uint64_t *outValue, size_t *outSize)
 {
     uint32_t size;
     int64_t value;
-        
+
     assert(bplist->data_bytes != NULL && offset < bplist->length);
-        
+
     size = 1 << (bplist->data_bytes[offset] & 0x0F);
     if (size > 8) {
         // Maximum allowable size in this implementation is 1<<3 = 8 bytes.
         // This also happens to be the biggest we can handle.
         return NO;
     }
-        
+
     if (offset + 1 + size > bplist->length) {
         // Out of range.
         return NO;
     }
-        
+
     value = read_sized_int(bplist, offset + 1, size);
-    
+
     if (outValue != NULL) *outValue = value;
     if (outSize != NULL) *outSize = size + 1; // +1 for tag byte.
     return YES;
@@ -628,21 +628,21 @@ static value_ptr extract_simple(bplist_info_ptr bplist, uint64_t offset)
 {
     assert(bplist->data_bytes != NULL && offset < bplist->length);
     value_ptr value = value_create();
-        
+
     switch (bplist->data_bytes[offset]) {
     case kVALUE_NULL:
         value->tag = kVALUE_NULL;
         return value;
-        
+
     case kVALUE_TRUE:
         value->tag = kVALUE_TRUE;
         return value;
-                        
+
     case kVALUE_FALSE:
         value->tag = kVALUE_FALSE;
         return value;
     }
-        
+
     // Note: kVALUE_FILLER is treated as invalid, because it, er, is.
     bplist_log("Bad binary plist: invalid atom.\n");
     free(value);
@@ -658,7 +658,7 @@ static value_ptr extract_int(bplist_info_ptr bplist, uint64_t offset)
     if (!read_self_sized_int(bplist, offset, &value->uinteger, NULL)) {
         bplist_log("Bad binary plist: invalid integer object.\n");
     }
-        
+
     /* NOTE: originally, I sign-extended here. This was the wrong thing; it
        turns out that negative ints are always stored as 64-bit, and smaller
        ints are unsigned.
@@ -671,25 +671,25 @@ static value_ptr extract_real(bplist_info_ptr bplist, uint64_t offset)
 {
     value_ptr value = value_create();
     uint32_t size;
-        
+
     assert(bplist->data_bytes != NULL && offset < bplist->length);
-    
+
     size = 1 << (bplist->data_bytes[offset] & 0x0F);
-        
+
     // FIXME: what to do if faced with other sizes for float/double?
-    assert (sizeof (float) == sizeof (uint32_t) && 
+    assert (sizeof (float) == sizeof (uint32_t) &&
             sizeof (double) == sizeof (uint64_t));
-        
+
     if (offset + 1 + size > bplist->length) {
-        bplist_log("Bad binary plist: %s object overlaps end of container.\n", 
+        bplist_log("Bad binary plist: %s object overlaps end of container.\n",
                   "floating-point number");
         free(value);
         return NULL;
     }
-        
+
     if (size == sizeof (float)) {
         // cast is ok because we know size is 4 bytes
-        uint32_t i = (uint32_t) read_sized_int(bplist, offset + 1, size); 
+        uint32_t i = (uint32_t) read_sized_int(bplist, offset + 1, size);
         // Note that this handles byte swapping.
         value_set_real(value, *(float *)&i);
         return value;
@@ -711,22 +711,22 @@ static value_ptr extract_date(bplist_info_ptr bplist, uint64_t offset)
 {
     value_ptr value;
     assert(bplist->data_bytes != NULL && offset < bplist->length);
-        
+
     // Data has size code like int and real, but only 3 (meaning 8 bytes) is valid.
     if (bplist->data_bytes[offset] != kVALUE_FULLDATETAG) {
         bplist_log("Bad binary plist: invalid size for date object.\n");
         return NULL;
     }
-        
+
     if (offset + 1 + sizeof (double) > bplist->length) {
-        bplist_log("Bad binary plist: %s object overlaps end of container.\n", 
+        bplist_log("Bad binary plist: %s object overlaps end of container.\n",
                   "date");
         return NULL;
     }
-        
+
     // FIXME: what to do if faced with other sizes for double?
     assert (sizeof (double) == sizeof (uint64_t));
-        
+
     uint64_t date = read_sized_int(bplist, offset + 1, sizeof(double));
     // Note that this handles byte swapping.
     value = value_create();
@@ -735,13 +735,13 @@ static value_ptr extract_date(bplist_info_ptr bplist, uint64_t offset)
 }
 
 
-uint64_t bplist_get_a_size(bplist_info_ptr bplist, 
+uint64_t bplist_get_a_size(bplist_info_ptr bplist,
                            uint64_t *offset_ptr, char *msg)
 {
     uint64_t size = bplist->data_bytes[*offset_ptr] & 0x0F;
     (*offset_ptr)++;
     if (size == 0x0F) {
-        // 0x0F means separate int size follows. 
+        // 0x0F means separate int size follows.
         // Smaller values are used for short data.
         size_t extra; // the length of the data size we are about to read
         if ((bplist->data_bytes[*offset_ptr] & 0xF0) != kTAG_INT) {
@@ -750,10 +750,10 @@ uint64_t bplist_get_a_size(bplist_info_ptr bplist,
                        msg);
             return UINT64_MAX; // error
         }
-                
+
         // read integer data as size, extra tells how many bytes to skip
         if (!read_self_sized_int(bplist, *offset_ptr, &size, &extra)) {
-            bplist_log("Bad binary plist: invalid %s object size tag.\n", 
+            bplist_log("Bad binary plist: invalid %s object size tag.\n",
                       "data");
             return UINT64_MAX; // error
         }
@@ -761,7 +761,7 @@ uint64_t bplist_get_a_size(bplist_info_ptr bplist,
     }
 
     if (*offset_ptr + size > bplist->length) {
-        bplist_log("Bad binary plist: %s object overlaps end of container.\n", 
+        bplist_log("Bad binary plist: %s object overlaps end of container.\n",
                   "data");
         return UINT64_MAX; // error
     }
@@ -773,12 +773,12 @@ static value_ptr extract_data(bplist_info_ptr bplist, uint64_t offset)
 {
     uint64_t size;
     value_ptr value;
-        
+
     assert(bplist->data_bytes != NULL && offset < bplist->length);
-        
-    if ((size = bplist_get_a_size(bplist, &offset, "data")) == UINT64_MAX) 
+
+    if ((size = bplist_get_a_size(bplist, &offset, "data")) == UINT64_MAX)
         return NULL;
-        
+
     value = value_create();
     // cast is ok because we only allow files up to 100MB:
     value_set_data(value, bplist->data_bytes + (size_t) offset, (size_t) size);
@@ -790,16 +790,16 @@ static value_ptr extract_ascii_string(bplist_info_ptr bplist, uint64_t offset)
 {
     uint64_t size;
     value_ptr value; // return value
-        
+
     assert(bplist->data_bytes != NULL && offset < bplist->length);
-        
+
     if ((size = bplist_get_a_size(bplist, &offset, "ascii string")) ==
-        UINT64_MAX) 
+        UINT64_MAX)
         return NULL;
 
     value = value_create();
     // cast is ok because we only allow 100MB files
-    value_set_ascii_string(value, bplist->data_bytes + (size_t) offset, 
+    value_set_ascii_string(value, bplist->data_bytes + (size_t) offset,
                            (size_t) size);
     return value;
 }
@@ -809,16 +809,16 @@ static value_ptr extract_unicode_string(bplist_info_ptr bplist, uint64_t offset)
 {
     uint64_t size;
     value_ptr value;
-        
+
     assert(bplist->data_bytes != NULL && offset < bplist->length);
-        
-    if ((size = bplist_get_a_size(bplist, &offset, "unicode string")) == 
+
+    if ((size = bplist_get_a_size(bplist, &offset, "unicode string")) ==
         UINT64_MAX)
         return NULL;
-        
+
     value = value_create();
     // cast is ok because we only allow 100MB files
-    value_set_unicode_string(value, bplist->data_bytes + (size_t) offset, 
+    value_set_unicode_string(value, bplist->data_bytes + (size_t) offset,
                              (size_t) size);
     return value;
 }
@@ -835,19 +835,19 @@ static value_ptr extract_uid(bplist_info_ptr bplist, uint64_t offset)
        introspectable CF objects. In fact, it even seems to convert the CF$UID
        dictionaries from XML plists on the fly.
     */
-        
+
     value_ptr value;
     uint64_t uid;
-        
+
     if (!read_self_sized_int(bplist, offset, &uid, NULL)) {
         bplist_log("Bad binary plist: invalid UID object.\n");
         return NULL;
     }
-        
+
     // assert(NO); // original code suggests using a string for a key
     // but our dictionaries all use big ints for keys, so I don't know
     // what to do here
-    
+
     // In practice, I believe this code is never executed by PortMidi.
     // I changed it to do something and not raise compiler warnings, but
     // not sure what the code should do.
@@ -855,7 +855,7 @@ static value_ptr extract_uid(bplist_info_ptr bplist, uint64_t offset)
     value = value_create();
     value_set_uid(value, uid);
     // return [NSDictionary dictionaryWithObject:
-    //         [NSNumber numberWithUnsignedLongLong:value] 
+    //         [NSNumber numberWithUnsignedLongLong:value]
     //         forKey:"CF$UID"];
     return value;
 }
@@ -870,26 +870,26 @@ static value_ptr extract_array(bplist_info_ptr bplist, uint64_t offset)
     value_ptr *array = NULL;
     value_ptr value = NULL;
     BOOL ok = YES;
-        
+
     assert(bplist->data_bytes != NULL && offset < bplist->length);
-        
+
     if ((count = bplist_get_a_size(bplist, &offset, "array")) == UINT64_MAX)
         return NULL;
-        
+
     if (count > UINT64_MAX / bplist->object_ref_size - offset) {
         // Offset overflow.
-        bplist_log("Bad binary plist: %s object overlaps end of container.\n", 
+        bplist_log("Bad binary plist: %s object overlaps end of container.\n",
                    "array");
         return NULL;
     }
-        
+
     size = bplist->object_ref_size * count;
     if (size + offset > bplist->length) {
-        bplist_log("Bad binary plist: %s object overlaps end of container.\n", 
+        bplist_log("Bad binary plist: %s object overlaps end of container.\n",
                    "array");
         return NULL;
     }
-        
+
     // got count, the number of array elements
 
     value = value_create();
@@ -900,12 +900,12 @@ static value_ptr extract_array(bplist_info_ptr bplist, uint64_t offset)
         value_set_array(value, array, (size_t) count);
         return value;
     }
-        
+
     array = allocate(sizeof(value_ptr) * (size_t) count);
-        
+
     for (i = 0; i != count; ++i) {
         bplist_log_verbose("[%u]\n", i);
-        elementID = read_sized_int(bplist, offset + i * bplist->object_ref_size, 
+        elementID = read_sized_int(bplist, offset + i * bplist->object_ref_size,
                                  bplist->object_ref_size);
         element = extract_object(bplist, elementID);
         if (element != NULL) {
@@ -931,27 +931,27 @@ static value_ptr extract_dictionary(bplist_info_ptr bplist, uint64_t offset)
     value_ptr value = NULL;
     dict_ptr dict = NULL;
     BOOL ok = YES;
-        
+
     assert(bplist->data_bytes != NULL && offset < bplist->length);
-        
-        
+
+
     if ((count = bplist_get_a_size(bplist, &offset, "array")) == UINT64_MAX)
         return NULL;
 
     if (count > UINT64_MAX / (bplist->object_ref_size * 2) - offset) {
         // Offset overflow.
-        bplist_log("Bad binary plist: %s object overlaps end of container.\n", 
+        bplist_log("Bad binary plist: %s object overlaps end of container.\n",
                    "dictionary");
         return NULL;
     }
-    
+
     size = bplist->object_ref_size * count * 2;
     if (size + offset > bplist->length) {
-        bplist_log("Bad binary plist: %s object overlaps end of container.\n", 
+        bplist_log("Bad binary plist: %s object overlaps end of container.\n",
                    "dictionary");
         return NULL;
     }
-    
+
     value = value_create();
     if (count == 0) {
         value_set_dict(value, NULL);
@@ -961,7 +961,7 @@ static value_ptr extract_dictionary(bplist_info_ptr bplist, uint64_t offset)
     for (i = 0; i != count; ++i) {
         value_ptr key;
         value_ptr val;
-        elementID = read_sized_int(bplist, offset + i * bplist->object_ref_size, 
+        elementID = read_sized_int(bplist, offset + i * bplist->object_ref_size,
                                  bplist->object_ref_size);
         key = extract_object(bplist, elementID);
         if (key != NULL) {
@@ -970,9 +970,9 @@ static value_ptr extract_dictionary(bplist_info_ptr bplist, uint64_t offset)
             ok = NO;
             break;
         }
-                    
-        elementID = read_sized_int(bplist, 
-                            offset + (i + count) * bplist->object_ref_size, 
+
+        elementID = read_sized_int(bplist,
+                            offset + (i + count) * bplist->object_ref_size,
                             bplist->object_ref_size);
         val = extract_object(bplist, elementID);
         if (val != NULL) {
@@ -985,7 +985,7 @@ static value_ptr extract_dictionary(bplist_info_ptr bplist, uint64_t offset)
     if (ok) {
         value_set_dict(value, dict);
     }
-    
+
     return value;
 }
 
@@ -1039,7 +1039,7 @@ value_ptr value_dict_lookup_using_path(value_ptr v, char *path)
     }
     return v;
 }
-                
+
 
 /*************** functions for debugging ***************/
 
@@ -1055,9 +1055,9 @@ void plist_print(value_ptr v)
     switch (v->tag & 0xF0) {
     case kTAG_SIMPLE:
         switch (v->tag) {
-        case kVALUE_NULL: 
+        case kVALUE_NULL:
             printf("NULL@%p", v); break;
-        case kVALUE_FALSE: 
+        case kVALUE_FALSE:
             printf("FALSE@%p", v); break;
         case kVALUE_TRUE:
             printf("TRUE@%p", v); break;
@@ -1112,4 +1112,4 @@ void plist_print(value_ptr v)
     }
 }
 
-            
+

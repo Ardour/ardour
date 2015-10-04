@@ -70,7 +70,7 @@ FloatingTextEntry::entry_focus_out (GdkEventFocus* ev)
 	if (entry_changed) {
 		use_text (entry.get_text ());
 	}
-        
+
 	delete_when_idle ( this);
 	return false;
 }
@@ -91,7 +91,7 @@ FloatingTextEntry::button_press (GdkEventButton* ev)
 	if (entry_changed) {
 		use_text (entry.get_text ());
 	}
-        
+
 	delete_when_idle ( this);
 
 	return false;
@@ -123,8 +123,8 @@ FloatingTextEntry::on_hide ()
 {
 	entry.remove_modal_grab ();
 
-	/* No hide button is shown (no decoration on the window), 
-	   so being hidden is equivalent to the Escape key or any other 
+	/* No hide button is shown (no decoration on the window),
+	   so being hidden is equivalent to the Escape key or any other
 	   method of cancelling the edit.
 	*/
 

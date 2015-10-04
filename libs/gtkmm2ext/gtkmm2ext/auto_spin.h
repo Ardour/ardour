@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Barton-Davis 
+    Copyright (C) 2000 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 
 namespace Gtkmm2ext {
 
-class LIBGTKMM2EXT_API AutoSpin 
+class LIBGTKMM2EXT_API AutoSpin
 
 {
   public:

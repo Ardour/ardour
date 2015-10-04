@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  *   */
 
 #include <tranzport_control_protocol.h>
@@ -51,29 +51,29 @@ TranzportControlProtocol::light_off (LightID light)
 void TranzportControlProtocol::lights_init()
 {
 	lights_invalid.set();
-	lights_flash = lights_pending = lights_current.reset(); 
+	lights_flash = lights_pending = lights_current.reset();
 }
 
 
-// Now that all this is bitsets, I don't see much 
+// Now that all this is bitsets, I don't see much
 // need for these 4 to remain in the API
 
-void TranzportControlProtocol::light_validate (LightID light) 
+void TranzportControlProtocol::light_validate (LightID light)
 {
 	lights_invalid.reset(light);
 }
 
-void TranzportControlProtocol::light_invalidate (LightID light) 
+void TranzportControlProtocol::light_invalidate (LightID light)
 {
 	lights_invalid.set(light);
 }
 
-void TranzportControlProtocol::lights_validate () 
+void TranzportControlProtocol::lights_validate ()
 {
 	lights_invalid.reset();
 }
 
-void TranzportControlProtocol::lights_invalidate () 
+void TranzportControlProtocol::lights_invalidate ()
 {
 	lights_invalid.set();
 }

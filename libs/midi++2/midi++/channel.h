@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-99 Paul Barton-Davis 
+    Copyright (C) 1998-99 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,24 +46,24 @@ class LIBMIDIPP_API Channel : public PBD::ScopedConnectionList {
 	byte pressure ()                { return _chanpress; }
 	byte poly_pressure (byte n)     { return _polypress[n]; }
 
-	byte last_note_on () { 
+	byte last_note_on () {
 		return _last_note_on;
 	}
-	byte last_on_velocity () { 
+	byte last_on_velocity () {
 		return _last_on_velocity;
 	}
-	byte last_note_off () { 
+	byte last_note_off () {
 		return _last_note_off;
 	}
-	byte last_off_velocity () { 
+	byte last_off_velocity () {
 		return _last_off_velocity;
 	}
 
-	pitchbend_t pitchbend () { 
+	pitchbend_t pitchbend () {
 		return _pitch_bend;
 	}
 
-	controller_value_t controller_value (byte n) { 
+	controller_value_t controller_value (byte n) {
 		return _controller_val[n%128];
 	}
 

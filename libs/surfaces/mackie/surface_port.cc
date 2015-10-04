@@ -151,7 +151,7 @@ string fetch_errmsg (int error_number)
 	return msg;
 }
 	
-int 
+int
 SurfacePort::write (const MidiByteArray & mba)
 {
 	if (mba.empty()) {
@@ -190,7 +190,7 @@ SurfacePort::write (const MidiByteArray & mba)
 	return 0;
 }
 
-ostream & 
+ostream &
 Mackie::operator <<  (ostream & os, const SurfacePort & port)
 {
 	os << "{ ";

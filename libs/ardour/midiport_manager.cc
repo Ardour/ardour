@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-99 Paul Barton-Davis 
+    Copyright (C) 1998-99 Paul Barton-Davis
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -73,7 +73,7 @@ MidiPortManager::create_ports ()
 	if (_midi_in) {
 		return;
 	}
-	      
+	
 	_midi_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("MIDI control in"), true);
 	_midi_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MIDI control out"), true);
 
@@ -86,9 +86,9 @@ MidiPortManager::create_ports ()
 	/* XXX nasty type conversion needed because of the mixed inheritance
 	 * required to integrate MIDI::IPMidiPort and ARDOUR::AsyncMIDIPort.
 	 *
-	 * At some point, we'll move IPMidiPort into Ardour and make it 
+	 * At some point, we'll move IPMidiPort into Ardour and make it
 	 * inherit from ARDOUR::MidiPort not MIDI::Port, and then this
-	 * mess can go away 
+	 * mess can go away
 	 */
 
 	_midi_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_midi_in).get();

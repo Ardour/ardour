@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ struct ThreadStartWithName {
     void* (*thread_work)(void*);
     void* arg;
     std::string name;
-    
+
     ThreadStartWithName (void* (*f)(void*), void* a, const std::string& s)
 	    : thread_work (f), arg (a), name (s) {}
 };
@@ -110,7 +110,7 @@ fake_thread_start (void* arg)
 	return ret;
 }
 
-int  
+int
 pthread_create_and_store (string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg)
 {
 	pthread_attr_t default_attr;
@@ -148,12 +148,12 @@ pthread_name ()
 
 	if (str) {
 		return str;
-	} 
+	}
 	return "unknown";
 }
 
 void
-pthread_kill_all (int signum) 
+pthread_kill_all (int signum)
 {	
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
@@ -166,7 +166,7 @@ pthread_kill_all (int signum)
 }
 
 void
-pthread_cancel_all () 
+pthread_cancel_all ()
 {	
 	pthread_mutex_lock (&thread_map_lock);
 
@@ -186,7 +186,7 @@ pthread_cancel_all ()
 }
 
 void
-pthread_cancel_one (pthread_t thread) 
+pthread_cancel_one (pthread_t thread)
 {	
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {

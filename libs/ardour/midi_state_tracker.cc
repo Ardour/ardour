@@ -79,7 +79,7 @@ MidiStateTracker::remove (uint8_t note, uint8_t chn)
 
 	}
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 OFF %2/%3 current voices = %5 total on %4\n",
-							       this, (int) note, (int) chn, _on, 
+							       this, (int) note, (int) chn, _on,
 							       (int) _active_notes[note+128 * chn]));
 }
 
@@ -129,7 +129,7 @@ MidiStateTracker::resolve_notes (MidiBuffer &dst, framepos_t time)
 				*/
 				dst.push_back (noteoff);
 				_active_notes[note + 128 * channel]--;
-				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-resolved note %2/%3 at %4\n", 
+				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-resolved note %2/%3 at %4\n",
 										       this, (int) note, (int) channel, time));
 			}
 		}
@@ -159,7 +159,7 @@ MidiStateTracker::resolve_notes (Evoral::EventSink<framepos_t> &dst, framepos_t 
 				*/
 				dst.write (time, midi_parameter_type (buf[0]), 3, buf);
 				_active_notes[note + 128 * channel]--;
-				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: EVS-resolved note %2/%3 at %4\n", 
+				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: EVS-resolved note %2/%3 at %4\n",
 										       this, (int) note, (int) channel, time));
 			}
 		}
@@ -187,7 +187,7 @@ MidiStateTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, 
 				ev.set_note (note);
 				ev.set_velocity (0);
 				src.append_event_beats (lock, ev);
-				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MS-resolved note %2/%3 at %4\n", 
+				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MS-resolved note %2/%3 at %4\n",
 										       this, (int) note, (int) channel, time));
 				_active_notes[note + 128 * channel]--;
 				/* don't stack events up at the same time */

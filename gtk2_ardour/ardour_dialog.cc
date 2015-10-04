@@ -55,7 +55,7 @@ ArdourDialog::~ArdourDialog ()
 {
         if (_splash_pushed) {
                 Splash* spl = Splash::instance();
-                
+
                 if (spl) {
                         spl->pop_front();
                 }

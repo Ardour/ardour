@@ -15,7 +15,7 @@
 #ifndef DECIMATOR_H
 #define DECIMATOR_H
 
-class Decimator  
+class Decimator
 {
 public:
     void process( const double* src, double* dst );
@@ -59,4 +59,4 @@ private:
     double* decBuffer;
 };
 
-#endif // 
+#endif //

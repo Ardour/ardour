@@ -55,10 +55,10 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 				double default_val,
 				double step_increment,
 				double page_increment,
-				const char *widget_name, 
-				bool with_numeric_display, 
-                                int subw, 
-                                int subh) 
+				const char *widget_name,
+				bool with_numeric_display,
+                                int subw,
+                                int subh)
 	: _controllable (c)
         , value (0)
 	, default_value (default_val)
@@ -149,8 +149,8 @@ MotionFeedback::~MotionFeedback()
 }
 
 bool
-MotionFeedback::pixwin_button_press_event (GdkEventButton *ev) 
-{ 
+MotionFeedback::pixwin_button_press_event (GdkEventButton *ev)
+{
         if (binding_proxy.button_press_handler (ev)) {
                 return true;
 	}
@@ -175,8 +175,8 @@ MotionFeedback::pixwin_button_press_event (GdkEventButton *ev)
 }
 
 bool
-MotionFeedback::pixwin_button_release_event (GdkEventButton *ev) 
-{ 
+MotionFeedback::pixwin_button_release_event (GdkEventButton *ev)
+{
 	if (!_controllable) {
 		return false;
 	}
@@ -209,12 +209,12 @@ MotionFeedback::pixwin_button_release_event (GdkEventButton *ev)
 		break;
 	}
 
-	return VBox::on_button_release_event (ev); 
+	return VBox::on_button_release_event (ev);
 }
 
 bool
-MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev) 
-{ 
+MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
+{
 	if (!_controllable) {
 		return false;
 	}
@@ -224,7 +224,7 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
 	gfloat y_delta;
 
 	if (!pixwin.has_grab()) {
-		return VBox::on_motion_notify_event (ev); 
+		return VBox::on_motion_notify_event (ev);
 	}
 
 	multiplier = ((ev->state & Keyboard::TertiaryModifier) ? 100 : 1) *
@@ -237,17 +237,17 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
 
                 y_delta = grabbed_y - ev->y_root;
                 grabbed_y = ev->y_root;
-                
+
                 x_delta = ev->x_root - grabbed_x;
-                
+
                 if (y_delta == 0) return TRUE;
-                
+
                 y_delta *= 1 + (x_delta/100);
                 y_delta *= multiplier;
                 y_delta /= 10;
-                
+
                 _controllable->set_value (adjust ((grab_is_fine ? step_inc : page_inc) * y_delta));
-                
+
         } else if (ev->state & Gdk::BUTTON2_MASK) {
 
 		/* rotary control */
@@ -255,11 +255,11 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
                 double x = ev->x - subwidth/2;
                 double y = - ev->y + subwidth/2;
                 double angle = std::atan2 (y, x) / M_PI;
-                
+
                 if (angle < -0.5) {
                         angle += 2.0;
                 }
-                
+
                 angle = -(2.0/3.0) * (angle - 1.25);
                 angle *= multiplier;
 
@@ -271,21 +271,21 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
 }
 
 bool
-MotionFeedback::pixwin_enter_notify_event (GdkEventCrossing*) 
+MotionFeedback::pixwin_enter_notify_event (GdkEventCrossing*)
 {
 	pixwin.grab_focus();
 	return false;
 }
 
 bool
-MotionFeedback::pixwin_leave_notify_event (GdkEventCrossing*) 
+MotionFeedback::pixwin_leave_notify_event (GdkEventCrossing*)
 {
 	pixwin.unset_flags (HAS_FOCUS);
 	return false;
 }
 
 bool
-MotionFeedback::pixwin_key_press_event (GdkEventKey *ev) 
+MotionFeedback::pixwin_key_press_event (GdkEventKey *ev)
 {
 	if (!_controllable) {
 		return false;
@@ -295,7 +295,7 @@ MotionFeedback::pixwin_key_press_event (GdkEventKey *ev)
 	double multiplier;
 
 	multiplier = ((ev->state & Keyboard::TertiaryModifier) ? 100.0 : 1.0) *
-                ((ev->state & Keyboard::SecondaryModifier) ? 10.0 : 1.0) * 
+                ((ev->state & Keyboard::SecondaryModifier) ? 10.0 : 1.0) *
                 ((ev->state & Keyboard::PrimaryModifier) ? 2.0 : 1.0);
 
 	switch (ev->keyval) {
@@ -373,11 +373,11 @@ MotionFeedback::pixwin_expose_event (GdkEventExpose*)
         phase = std::min (phase, (int32_t) 63);
 
         GtkWidget* widget = GTK_WIDGET(pixwin.gobj());
-        gdk_draw_pixbuf (GDK_DRAWABLE(window), widget->style->fg_gc[0], 
-                         pixbuf->gobj(), 
-                         phase * subwidth, type * subheight, 
+        gdk_draw_pixbuf (GDK_DRAWABLE(window), widget->style->fg_gc[0],
+                         pixbuf->gobj(),
+                         phase * subwidth, type * subheight,
 			 /* center image in allocated area */
-                         (get_width() - subwidth)/2, 
+                         (get_width() - subwidth)/2,
 			 0,
 			 subwidth, subheight, GDK_RGB_DITHER_NORMAL, 0, 0);
 
@@ -457,11 +457,11 @@ MotionFeedback::set_controllable (boost::shared_ptr<PBD::Controllable> c)
 }
 
 boost::shared_ptr<PBD::Controllable>
-MotionFeedback::controllable () const 
+MotionFeedback::controllable () const
 {
         return _controllable;
 }
-       
+
 void
 MotionFeedback::default_printer (char buf[32], const boost::shared_ptr<PBD::Controllable>& c, void *)
 {
@@ -532,7 +532,7 @@ MotionFeedback::render_pixbuf (int size)
 	g_free (path);
 	
 	return pixbuf;
-} 
+}
 
 void
 MotionFeedback::core_draw (cairo_t* cr, int phase, double size, double progress_width, double xorigin, double yorigin,
@@ -555,7 +555,7 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double size, double progress_
 	double progress_radius_outer;
 
 	g_return_if_fail (cr != NULL);
-        
+
 	progress_radius = 40.0;
 	progress_radius_inner = progress_radius - (progress_width / 2.0);
 	progress_radius_outer = progress_radius + (progress_width / 2.0);

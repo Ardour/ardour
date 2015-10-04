@@ -51,7 +51,7 @@
 /** SMF chunk header, used only by smf_load.c and smf_save.c. */
 struct chunk_header_struct {
 	char		id[4];
-	uint32_t	length; 
+	uint32_t	length;
 } ATTRIBUTE_PACKED;
 
 /** SMF chunk, used only by smf_load.c and smf_save.c. */

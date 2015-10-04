@@ -120,7 +120,7 @@ Text::_redraw () const
 	}
 
 	layout->set_alignment (_alignment);
-    
+
 	int w;
 	int h;
 
@@ -158,7 +158,7 @@ Text::_redraw () const
 	}
 
 	/* text has now been rendered in _image and is ready for blit in
-	 * ::render 
+	 * ::render
 	 */
 
 	_need_redraw = false;
@@ -291,6 +291,6 @@ Text::text_width() const
     if (_need_redraw) {
         redraw ();
     }
-    
+
     return _width;
 }

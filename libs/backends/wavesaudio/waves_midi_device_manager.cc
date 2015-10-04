@@ -114,7 +114,7 @@ WavesMidiDeviceManager::stop ()
     if ( _active == false ) {
         return 0;
 	}
-    
+
     stream (false);
 
     _delete_devices ();
@@ -128,16 +128,16 @@ WavesMidiDeviceManager::stop ()
     return 0;
 }
 
-void 
+void
 WavesMidiDeviceManager::__portmidi_callback (PtTimestamp timestamp, void * userData)
 {
     // COMMENTED FREQUENT DBG LOGS */ std::cout << "WavesMidiDeviceManager::__portmidi_callback ():" << std::endl;
     WavesMidiDeviceManager *dm = (WavesMidiDeviceManager *)userData;
-    
+
     if (dm == NULL) {
         return;
     }
-    
+
     dm->_portmidi_callback (timestamp);
 }
 
@@ -174,7 +174,7 @@ void WavesMidiDeviceManager::do_write ()
 
 PmTimestamp
 WavesMidiDeviceManager::__get_time_ms (void *time_info)
-{ 
+{
     return ((WavesAudioBackend*)time_info)->sample_time ();
 }
 

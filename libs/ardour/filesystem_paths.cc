@@ -50,7 +50,7 @@ user_config_directory_name (int version = -1)
 	}
 
 	/* ARDOUR::Profile may not be available when this is
-	   called, so rely on build-time detection of the 
+	   called, so rely on build-time detection of the
 	   product name etc.
 	*/
 	

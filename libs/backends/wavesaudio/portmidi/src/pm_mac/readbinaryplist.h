@@ -25,13 +25,13 @@ enum
     kTAG_UID = 0x80,
     kTAG_ARRAY = 0xA0,
     kTAG_DICTIONARY = 0xD0,
-    
+
     // "simple" object values
     kVALUE_NULL = 0x00,
     kVALUE_FALSE = 0x08,
     kVALUE_TRUE = 0x09,
     kVALUE_FILLER = 0x0F,
-    
+
     kVALUE_FULLDATETAG = 0x33        // Dates are tagged with a whole byte.
 };
 

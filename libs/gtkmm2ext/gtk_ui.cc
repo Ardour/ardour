@@ -71,7 +71,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (namestr)
 	, _receiver (*this)
 	, errors (0)
-	  
+	
 {
 	theMain = new Main (argc, argv);
 
@@ -142,7 +142,7 @@ UI::load_rcfile (string path, bool themechange)
 	/* Yes, pointers to Glib::RefPtr.  If these are not kept around,
 	 * a segfault somewhere deep in the wonderfully robust glib will result.
 	 * This does not occur if wiget.get_style is used instead of rc.get_style below,
-	 * except that doesn't actually work... 
+	 * except that doesn't actually work...
 	 */
 	
 	static Glib::RefPtr<Style>* fatal_style   = 0;

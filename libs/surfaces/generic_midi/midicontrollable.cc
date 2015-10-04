@@ -136,7 +136,7 @@ MIDIControllable::set_controllable (Controllable* c)
 
 	if (controllable) {
 		controllable->Destroyed.connect (controllable_death_connection, MISSING_INVALIDATOR,
-						 boost::bind (&MIDIControllable::drop_controllable, this), 
+						 boost::bind (&MIDIControllable::drop_controllable, this),
 						 MidiControlUI::instance());
 	}
 }
@@ -264,7 +264,7 @@ MIDIControllable::drop_controllable ()
 void
 MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 {
-	if (!controllable) { 
+	if (!controllable) {
 		if (lookup_controllable()) {
 			return;
 		}
@@ -289,7 +289,7 @@ MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 void
 MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 {
-	if (!controllable) { 
+	if (!controllable) {
 		if (lookup_controllable ()) {
 			return;
 		}
@@ -382,7 +382,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 void
 MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 {
-	if (!controllable) { 
+	if (!controllable) {
 		if (lookup_controllable ()) {
 			return;
 		}
@@ -405,7 +405,7 @@ MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 void
 MIDIControllable::midi_sense_pitchbend (Parser &, pitchbend_t pb)
 {
-	if (!controllable) { 
+	if (!controllable) {
 		if (lookup_controllable ()) {
 			return;
 		}
@@ -466,7 +466,7 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 
 		if (_momentary) {
 			_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
-		} 
+		}
 
 		_control_description = "MIDI control: NoteOff";
 		break;

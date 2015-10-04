@@ -31,12 +31,12 @@ class ClusterMeltSegmenterParams
 // defaults are sensible for 11025Hz with 0.2 second hopsize
 {
 public:
-    ClusterMeltSegmenterParams() : 
+    ClusterMeltSegmenterParams() :
         featureType(FEATURE_TYPE_CONSTQ),
         hopSize(0.2),
         windowSize(0.6),
         fmin(62),
-        fmax(16000), 
+        fmax(16000),
         nbins(8),
         ncomponents(20),
  	nHMMStates(40),
@@ -78,28 +78,28 @@ protected:
 
     Window<double> *window;
     FFTReal *fft;
-    ConstantQ* constq; 
+    ConstantQ* constq;
     MFCC* mfcc;
     model_t* model;				// the HMM
     int* q;					// the decoded HMM state sequence
     vector<vector<double> > histograms;	
-    
+
     feature_types featureType;	
     double hopSize;		// in seconds
     double windowSize;	// in seconds
-    
+
     // constant-Q parameters
     int fmin;
     int fmax;
     int nbins;
     int ncoeff;
-    
+
     // PCA parameters
     int ncomponents;
-    
+
     // HMM parameters
     int nHMMStates;
-    
+
     // clustering parameters
     int nclusters;
     int histogramLength;

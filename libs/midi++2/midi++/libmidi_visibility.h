@@ -38,7 +38,7 @@
      #define LIBMIDIPP_API LIBMIDIPP_DLL_EXPORT
   #else
      #define LIBMIDIPP_API LIBMIDIPP_DLL_IMPORT
-  #endif 
+  #endif
   #define    LIBMIDIPP_LOCAL LIBMIDIPP_DLL_LOCAL
 #endif
 

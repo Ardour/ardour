@@ -83,7 +83,7 @@ private:
 
 class PatchBank;
 	
-class LIBMIDIPP_API Patch 
+class LIBMIDIPP_API Patch
 {
 public:
 
@@ -114,7 +114,7 @@ private:
 
 typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
 
-class LIBMIDIPP_API PatchBank 
+class LIBMIDIPP_API PatchBank
 {
 public:
 	PatchBank (uint16_t n = 0, std::string a_name = std::string()) : _name(a_name), _number (n) {};
@@ -157,8 +157,8 @@ public:
 	
 	const PatchBanks& patch_banks() const    { return _patch_banks; }
 
-	bool available_for_channel(uint8_t channel) const { 
-		return _available_for_channels.find(channel) != _available_for_channels.end(); 
+	bool available_for_channel(uint8_t channel) const {
+		return _available_for_channels.find(channel) != _available_for_channels.end();
 	}
 	
 	boost::shared_ptr<Patch> find_patch(const PatchPrimaryKey& key) {
@@ -173,7 +173,7 @@ public:
 				if (i != _patch_list.begin()) {
 					--i;
 					return  _patch_map[*i];
-				} 
+				}
 			}
 		}
 			
@@ -240,7 +240,7 @@ private:
 	std::string _name;
 };
 
-class LIBMIDIPP_API NoteNameList 
+class LIBMIDIPP_API NoteNameList
 {
 public:
 	typedef std::vector< boost::shared_ptr<Note> > Notes;
@@ -345,7 +345,7 @@ private:
 	boost::shared_ptr<ValueNameList> _value_name_list;       ///< Local, ValueNameList
 };
 
-class LIBMIDIPP_API ControlNameList 
+class LIBMIDIPP_API ControlNameList
 {
 public:
 	typedef std::map<uint16_t, boost::shared_ptr<Control> > Controls;
@@ -385,12 +385,12 @@ public:
 	/// Note: channel here is 0-based while in the MIDNAM-file it's 1-based
 	const std::string& channel_name_set_name_by_channel(uint8_t channel) {
 		assert(channel <= 15);
-		return _channel_name_set_assignments[channel]; 
+		return _channel_name_set_assignments[channel];
 	}
 	
 private:
 	/// array index = channel number
-	/// string contents = name of channel name set 
+	/// string contents = name of channel name set
 	std::string _name;
 	std::string _channel_name_set_assignments[16];
 };

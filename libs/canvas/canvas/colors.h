@@ -25,7 +25,7 @@
 #include "canvas/visibility.h"
 #include "canvas/types.h"
 
-namespace ArdourCanvas 
+namespace ArdourCanvas
 {
 
 struct LIBCANVAS_API HSV;

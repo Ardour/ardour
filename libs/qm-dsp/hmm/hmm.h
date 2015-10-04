@@ -19,9 +19,9 @@ extern "C" {
  *
  */
 
-#ifndef PI    
+#ifndef PI
 #define PI 3.14159265358979323846264338327950288
-#endif 
+#endif
 
 typedef struct _model_t {
 	int N;			/* number of states */
@@ -33,7 +33,7 @@ typedef struct _model_t {
 } model_t;
 
 void hmm_train(double** x, int T, model_t* model);							/* with scaling */
-void forward_backwards(double*** xi, double** gamma, double* loglik, double* loglik1, double* loglik2, int iter, 
+void forward_backwards(double*** xi, double** gamma, double* loglik, double* loglik1, double* loglik2, int iter,
 					   int N, int T, double* p0, double** a, double** b);
 void baum_welch(double* p0, double** a, double** mu, double** cov, int N, int T, int L, double** x, double*** xi, double** gamma);
 void viterbi_decode(double** x, int T, model_t* model, int* q);				/* using logs */

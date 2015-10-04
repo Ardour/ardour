@@ -19,7 +19,7 @@ enum /*LIBAUDIOGRAPHER_API*/ DitherType
 };
 	
 /** Sample format converter that does dithering.
-  * This class can only convert floats to either \a float, \a int32_t, \a int16_t, or \a uint8_t 
+  * This class can only convert floats to either \a float, \a int32_t, \a int16_t, or \a uint8_t
   */
 template <typename TOut>
 class LIBAUDIOGRAPHER_API SampleFormatConverter

@@ -160,7 +160,7 @@ void cluster_melt(double *h, int m, int n, double *Bsched, int t, int k, int l, 
 				 for (j = 0; j < k; j++)
 					 mexPrintf("%d ", nc[i][j]);
 				 mexPrintf("\n");
-			} 
+			}
 			*/
 			
 			

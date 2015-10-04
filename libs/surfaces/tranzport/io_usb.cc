@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  *   */
 
 #include <iostream>
@@ -40,7 +40,7 @@ using namespace PBD;
 
 #include <pbd/abstract_ui.cc>
 
-// I note that these usb specific open, close, probe, read routines are basically 
+// I note that these usb specific open, close, probe, read routines are basically
 // pure boilerplate and could easily be abstracted elsewhere
 
 bool
@@ -57,7 +57,7 @@ TranzportControlProtocol::probe ()
 
 		for(dev = bus->devices; dev; dev = dev->next) {
 			if (dev->descriptor.idVendor == VENDORID && dev->descriptor.idProduct == PRODUCTID) {
-				return true; 
+				return true;
 			}
 		}
 	}
@@ -97,7 +97,7 @@ TranzportControlProtocol::open_core (struct usb_device* dev)
 		cerr << _("Tranzport: cannot open USB transport") << endmsg;
 		return -1;
 	}
-	 
+	
 	if (usb_claim_interface (udev, 0) < 0) {
 		cerr << _("Tranzport: cannot claim USB interface") << endmsg;
 		usb_close (udev);
@@ -135,20 +135,20 @@ TranzportControlProtocol::close ()
 	return ret;
 }
 
-int TranzportControlProtocol::read(uint8_t *buf, uint32_t timeout_override) 
+int TranzportControlProtocol::read(uint8_t *buf, uint32_t timeout_override)
 {
 	last_read_error = usb_interrupt_read (udev, READ_ENDPOINT, (char *) buf, 8, timeout_override);
 	switch(last_read_error) {
 	case -ENOENT:
 	case -ENXIO:
 	case -ECONNRESET:
-	case -ESHUTDOWN: 
-	case -ENODEV: 
+	case -ESHUTDOWN:
+	case -ENODEV:
 		cerr << "Tranzport disconnected, errno: " << last_read_error;
 		set_active(false);
 	case -ETIMEDOUT: // This is normal
 		break;
-	default: 
+	default:
 #if DEBUG_TRANZPORT
 		cerr << "Got an unknown error on read:" << last_read_error "\n";
 #endif
@@ -156,7 +156,7 @@ int TranzportControlProtocol::read(uint8_t *buf, uint32_t timeout_override)
 	}
 
 	return last_read_error;
-} 
+}
 
 	
 int
@@ -175,13 +175,13 @@ TranzportControlProtocol::write_noretry (uint8_t* cmd, uint32_t timeout_override
 		case -ENOENT:
 		case -ENXIO:
 		case -ECONNRESET:
-		case -ESHUTDOWN: 
-		case -ENODEV: 
+		case -ESHUTDOWN:
+		case -ENODEV:
 			cerr << "Tranzport disconnected, errno: " << last_write_error;
 			set_active(false);
 		case -ETIMEDOUT: // This is normal
 			break;
-		default: 
+		default:
 #if DEBUG_TRANZPORT
 			cerr << "Got an unknown error on read:" << last_write_error "\n";
 #endif

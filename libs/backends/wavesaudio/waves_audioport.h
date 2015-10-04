@@ -22,7 +22,7 @@
 
 #include "memory.h"
 #include "waves_dataport.h"
-        
+
 namespace ARDOUR {
 
 class WavesAudioPort : public WavesDataPort {
@@ -55,4 +55,4 @@ private:
 } // namespace
 
 #endif /* __libardour_waves_audioport_h__ */
-    
+

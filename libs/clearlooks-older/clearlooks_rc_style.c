@@ -82,7 +82,7 @@ clearlooks_rc_style_register_type (GTypeModule *module)
     (GInstanceInitFunc) clearlooks_rc_style_init,
     NULL
   };
-  
+
   clearlooks_type_rc_style = g_type_module_register_type (module,
 						     GTK_TYPE_RC_STYLE,
 						     "ClearlooksRcStyle",
@@ -149,7 +149,7 @@ theme_parse_contrast(GtkSettings  *settings,
     return G_TOKEN_FLOAT;
 
   *contrast = scanner->value.v_float;
-  
+
   return G_TOKEN_NONE;
 }
 
@@ -172,7 +172,7 @@ theme_parse_sunkenmenubar(GtkSettings  *settings,
     return G_TOKEN_INT;
 
   *sunken = scanner->value.v_int;
-  
+
   return G_TOKEN_NONE;
 }
 
@@ -195,7 +195,7 @@ theme_parse_progressbarstyle(GtkSettings  *settings,
     return G_TOKEN_INT;
 
   *progressbarstyle = scanner->value.v_int;
-  
+
   return G_TOKEN_NONE;
 }
 
@@ -218,7 +218,7 @@ theme_parse_menubarstyle(GtkSettings  *settings,
     return G_TOKEN_INT;
 
   *menubarstyle = scanner->value.v_int;
-  
+
   return G_TOKEN_NONE;
 }
 
@@ -241,7 +241,7 @@ theme_parse_menuitemstyle(GtkSettings  *settings,
     return G_TOKEN_INT;
 
   *menuitemstyle = scanner->value.v_int;
-  
+
   return G_TOKEN_NONE;
 }
 
@@ -249,30 +249,30 @@ static guint
 theme_parse_listviewitemstyle(GtkSettings  *settings,
                           GScanner     *scanner,
                           guint8       *listviewitemstyle)
-{         
+{
   guint token;
-	            
+	
   token = g_scanner_get_next_token(scanner);
-	              
+	
   token = g_scanner_get_next_token(scanner);
 
   if (token != G_TOKEN_EQUAL_SIGN)
      return G_TOKEN_EQUAL_SIGN;
-		          
+		
   token = g_scanner_get_next_token(scanner);
   if (token != G_TOKEN_INT)
     return G_TOKEN_INT;
-		            
+		
   *listviewitemstyle = scanner->value.v_int;
-	                
+	
   return G_TOKEN_NONE;
-}         
+}
 
 static guint
 clearlooks_rc_style_parse (GtkRcStyle *rc_style,
 			   GtkSettings  *settings,
 			   GScanner   *scanner)
-		     
+		
 {
   static GQuark scope_id = 0;
   ClearlooksRcStyle *clearlooks_style = CLEARLOOKS_RC_STYLE (rc_style);
@@ -280,7 +280,7 @@ clearlooks_rc_style_parse (GtkRcStyle *rc_style,
   guint old_scope;
   guint token;
   guint i;
-  
+
   /* Set up a new scope in this scanner. */
 
   if (!scope_id)

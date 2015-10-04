@@ -857,8 +857,8 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 
 	const framecnt_t total = g_atomic_int_get(const_cast<gint*> (&_frames_pending_write));
 
-	if (total == 0 || 
-	    _capture_buf->read_space() == 0 || 
+	if (total == 0 ||
+	    _capture_buf->read_space() == 0 ||
 	    (!force_flush && (total < disk_write_chunk_frames) && was_recording)) {
 		goto out;
 	}
@@ -890,7 +890,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 		if (_write_source->midi_write (lm, *_capture_buf, get_capture_start_frame (0), to_write) != to_write) {
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
 			return -1;
-		} 
+		}
 		g_atomic_int_add(const_cast<gint*> (&_frames_pending_write), -to_write);
 	}
 
@@ -1385,7 +1385,7 @@ float
 MidiDiskstream::playback_buffer_load () const
 {
 	/* For MIDI it's not trivial to differentiate the following two cases:
-	   
+	
 	   1.  The playback buffer is empty because the system has run out of time to fill it.
 	   2.  The playback buffer is empty because there is no more data on the playlist.
 
@@ -1430,7 +1430,7 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 
 	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
 		             "%1 MDS pre-read read %8 @ %4..%5 from %2 write to %3, LOOPED ? %6-%7\n", _name,
-		             _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr(), playback_sample, playback_sample + nframes, 
+		             _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr(), playback_sample, playback_sample + nframes,
 			     (loc ? loc->start() : -1), (loc ? loc->end() : -1), nframes));
 
         // cerr << "================\n";
@@ -1477,14 +1477,14 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #1, from %1 for %2\n",
 										      effective_start, first));
 				events_read = _playback_buf->read (dst, effective_start, first);
-			} 
+			}
 
 			if (second) {
 				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #2, from %1 for %2\n",
 										      loc->start(), second));
 				events_read += _playback_buf->read (dst, loc->start(), second);
 			}
-								    
+								
 		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
 									      effective_start, nframes));

@@ -29,7 +29,7 @@
 #include "BasicTypes/WUDefines.h"
 #include "BasicTypes/WUTypes.h"
 
-namespace wvNS { 
+namespace wvNS {
 // a wraper for Microseconds function from Timer.h
 class DllExport UMicroseconds
 {
@@ -62,7 +62,7 @@ public:
 	UMicroseconds& operator+=(const TimeKeeper in_timeToAdd)  {theTime += in_timeToAdd;  return *this;}
 
 	UMicroseconds& ReadTime();
-  
+
 	TimeKeeper GetNativeTime() const {return theTime;}
 	operator uint64_t () {return static_cast<uint64_t>(theTime);}
 	operator double () const {return static_cast<const double>(theTime);}
@@ -120,5 +120,5 @@ inline void MicrosecondDelay(double amt)
 	}	while ((now.MicroSeconds() - than.MicroSeconds()) < amt);
 }
 	
-} // namespace wvNS { 
+} // namespace wvNS {
 #endif //#ifndef __UMicroseconds_h__

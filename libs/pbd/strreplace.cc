@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 int
 replace_all (std::string& str,
 	     std::string const& target,
-	     std::string const& replacement) 
+	     std::string const& replacement)
 {
 	std::string::size_type start = str.find (target, 0);
 	int cnt = 0;

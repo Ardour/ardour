@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -144,7 +144,7 @@ Controllable::set_state (const XMLNode& node, int /*version*/)
 
 		if (sscanf (prop->value().c_str(), "%f", &val) == 1) {
 			set_value (val);
-		} 
+		}
         }
 
         return 0;

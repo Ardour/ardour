@@ -28,7 +28,7 @@ PBD::spherical_to_cartesian (double azi, double ele, double len, double& x, doub
 	/* convert from cylindrical coordinates in degrees to cartesian */
 
 	static const double atorad = 2.0 * M_PI / 360.0 ;
-        
+
         if (len == 0.0) {
                 len = 1.0;
         }
@@ -38,7 +38,7 @@ PBD::spherical_to_cartesian (double azi, double ele, double len, double& x, doub
 	z = len * sin (ele * atorad);
 }
 
-void 
+void
 PBD::cartesian_to_spherical (double x, double y, double z, double& azimuth, double& elevation, double& length)
 {
 	/* converts cartesian coordinates to cylindrical in degrees*/
@@ -64,7 +64,7 @@ PBD::cartesian_to_spherical (double x, double y, double z, double& azimuth, doub
         } else {
                 elevation = 180.0 * (phi /  M_PI);
         }
-        
+
         length = rho;
 }
 

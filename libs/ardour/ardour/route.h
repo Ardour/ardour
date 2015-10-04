@@ -442,7 +442,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	void protect_automation ();
 
-	enum { 
+	enum {
 		/* These numbers are taken from MIDI Machine Control,
 		   which can only control up to 317 tracks without
 		   doing sysex segmentation.

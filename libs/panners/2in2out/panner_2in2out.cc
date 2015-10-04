@@ -86,17 +86,17 @@ Panner2in2out::Panner2in2out (boost::shared_ptr<Pannable> p)
                 set_width(w > 0 ? wrange : -wrange);
         }
 
-        
+
         update ();
-        
+
         /* LEFT SIGNAL */
         left_interp[0] = left[0] = desired_left[0];
-        right_interp[0] = right[0] = desired_right[0]; 
-        
+        right_interp[0] = right[0] = desired_right[0];
+
         /* RIGHT SIGNAL */
         left_interp[1] = left[1] = desired_left[1];
         right_interp[1] = right[1] = desired_right[1];
-        
+
         _pannable->pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&Panner2in2out::update, this));
         _pannable->pan_width_control->Changed.connect_same_thread (*this, boost::bind (&Panner2in2out::update, this));
 }
@@ -105,13 +105,13 @@ Panner2in2out::~Panner2in2out ()
 {
 }
 
-double 
+double
 Panner2in2out::position () const
 {
         return _pannable->pan_azimuth_control->get_value();
 }
 
-double 
+double
 Panner2in2out::width () const
 {
         return _pannable->pan_width_control->get_value();
@@ -151,16 +151,16 @@ Panner2in2out::update ()
 
         /* it would be very nice to split this out into a virtual function
            that can be accessed from BaseStereoPanner and used in do_distribute_automated().
-           
+
            but the place where its used in do_distribute_automated() is a tight inner loop,
            and making "nframes" virtual function calls to compute values is an absurd
            overhead.
         */
-        
+
         /* x == 0 => hard left = 180.0 degrees
            x == 1 => hard right = 0.0 degrees
         */
-        
+
         float pos[2];
         double width = this->width ();
         const double direction_as_lr_fract = position ();
@@ -178,23 +178,23 @@ Panner2in2out::update ()
                 pos[1] = direction_as_lr_fract + (width/2.0); // right signal lr_fract
                 pos[0] = direction_as_lr_fract - (width/2.0); // left signal lr_fract
         }
-        
+
         /* compute target gain coefficients for both input signals */
-        
+
         float const pan_law_attenuation = -3.0f;
         float const scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
         float panR;
         float panL;
-        
+
         /* left signal */
-        
+
         panR = pos[0];
         panL = 1 - panR;
         desired_left[0] = panL * (scale * panL + 1.0f - scale);
         desired_right[0] = panR * (scale * panR + 1.0f - scale);
-        
+
         /* right signal */
-        
+
         panR = pos[1];
         panL = 1 - panR;
         desired_left[1] = panL * (scale * panL + 1.0f - scale);
@@ -245,20 +245,20 @@ Panner2in2out::clamp_stereo_pan (double& direction_as_lr_fract, double& width)
         }
 
         /* if the new left position is less than or equal to zero (hard left) and the left panner
-           is already there, we're not moving the left signal. 
+           is already there, we're not moving the left signal.
         */
-        
+
         if (l_pos < 0.0) {
                 return false;
         }
 
         /* if the new right position is less than or equal to 1.0 (hard right) and the right panner
-           is already there, we're not moving the right signal. 
+           is already there, we're not moving the right signal.
         */
-        
+
         if (r_pos > 1.0) {
                 return false;
-                
+
         }
 
         return true;
@@ -274,7 +274,7 @@ Panner2in2out::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 	pan_t pan;
 
 	Sample* const src = srcbuf.data();
-        
+
 	/* LEFT OUTPUT */
 
 	dst = obufs.get_audio(0).data();
@@ -326,7 +326,7 @@ Panner2in2out::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 			/* pan is 1 so we can just copy the input samples straight in */
 
 			mix_buffers_no_gain(dst,src,nframes);
-                        
+
 			/* XXX it would be nice to mark that we wrote into the buffer */
 		}
 	}
@@ -425,7 +425,7 @@ Panner2in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 
                 float panR;
 
-                if (which == 0) { 
+                if (which == 0) {
                         // panning left signal
                         panR = position[n] - (width[n]/2.0f); // center - width/2
                 } else {
@@ -440,10 +440,10 @@ Panner2in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
                 /* note that are overwriting buffers, but its OK
                    because we're finished with their old contents
                    (position/width automation data) and are
-                   replacing it with panning/gain coefficients 
+                   replacing it with panning/gain coefficients
                    that we need to actually process the data.
                 */
-                
+
                 buffers[0][n] = panL * (scale * panL + 1.0f - scale);
                 buffers[1][n] = panR * (scale * panR + 1.0f - scale);
         }
@@ -487,7 +487,7 @@ Panner2in2out::get_state ()
 	return root;
 }
 
-std::set<Evoral::Parameter> 
+std::set<Evoral::Parameter>
 Panner2in2out::what_can_be_automated() const
 {
         set<Evoral::Parameter> s;
@@ -509,7 +509,7 @@ Panner2in2out::describe_parameter (Evoral::Parameter p)
         }
 }
 
-string 
+string
 Panner2in2out::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 {
         /* DO NOT USE LocaleGuard HERE */
@@ -518,23 +518,23 @@ Panner2in2out::value_as_string (boost::shared_ptr<AutomationControl> ac) const
         switch (ac->parameter().type()) {
         case PanAzimuthAutomation:
                 /* We show the position of the center of the image relative to the left & right.
-                   This is expressed as a pair of percentage values that ranges from (100,0) 
+                   This is expressed as a pair of percentage values that ranges from (100,0)
                    (hard left) through (50,50) (hard center) to (0,100) (hard right).
-                   
+
                    This is pretty wierd, but its the way audio engineers expect it. Just remember that
                    the center of the USA isn't Kansas, its (50LA, 50NY) and it will all make sense.
-                
+
 		   This is designed to be as narrow as possible. Dedicated
 		   panner GUIs can do their own version of this if they need
 		   something less compact.
                 */
-                
+
                 return string_compose (_("L%1R%2"), (int) rint (100.0 * (1.0 - val)),
                                        (int) rint (100.0 * val));
 
         case PanWidthAutomation:
                 return string_compose (_("Width: %1%%"), (int) floor (100.0 * val));
-                
+
         default:
                 return _("unused");
         }

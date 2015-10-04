@@ -604,7 +604,7 @@ FastMeter::vertical_expose (cairo_t* cr, cairo_rectangle_t* area)
 	// MEMO: Normaly MATURE OS clips so called invalidated rects itself making APP free of
 	//       heavy operations which OS does with graphic HW
 
-        // NOTE FROM PAUL: GTK does clip already. The invalidated rect isn't the only area 
+        // NOTE FROM PAUL: GTK does clip already. The invalidated rect isn't the only area
         // we want to clip to however, which is why this object/class is called FastMeter.
         // I have left stuff commented out as I found it when I merged from Ardour in August 2014,
         // but this commenting and the previous MEMO comment represent a misunderstanding

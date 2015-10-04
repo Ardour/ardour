@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  */
 
 #include <tranzport_common.h>
@@ -41,26 +41,26 @@ TranzportControlProtocol::~TranzportControlProtocol ()
 	set_active (false);
 }
 
-int TranzportControlProtocol::rtpriority_set(int priority) 
+int TranzportControlProtocol::rtpriority_set(int priority)
 {
 	struct sched_param rtparam;
 	int err;
 	char *a = (char*) alloca(4096*2); a[0] = 'a'; a[4096] = 'b';
 	memset (&rtparam, 0, sizeof (rtparam));
 	rtparam.sched_priority = priority; /* XXX should be relative to audio (JACK) thread */
-	// Note - try SCHED_RR with a low limit 
+	// Note - try SCHED_RR with a low limit
 	// - we don't care if we can't write everything this ms
 	// and it will help if we lose the device
 	if ((err = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
 		PBD::info << string_compose (_("%1: thread not running with realtime scheduling (%2)"), name(), strerror (errno)) << endmsg;
 		return 1;
-	} 
+	}
 	return 0;
 }
 
 // Running with realtime privs is bad when you have problems
 
-int TranzportControlProtocol::rtpriority_unset(int priority) 
+int TranzportControlProtocol::rtpriority_unset(int priority)
 {
 	struct sched_param rtparam;
 	int err;
@@ -69,7 +69,7 @@ int TranzportControlProtocol::rtpriority_unset(int priority)
 	if ((err = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
 		PBD::info << string_compose (_("%1: can't stop realtime scheduling (%2)"), name(), strerror (errno)) << endmsg;
 		return 1;
-	} 
+	}
 	PBD::info << string_compose (_("%1: realtime scheduling stopped (%2)"), name(), strerror (errno)) << endmsg;
 	return 0;
 }
@@ -191,13 +191,13 @@ TranzportControlProtocol::monitor_work ()
 		/* bInterval for this beastie is 10ms */
 
 		if (_device_status == STATUS_OFFLINE) {
-			first_time = true; offline++; 
+			first_time = true; offline++;
 #if TRANZPORT_DEBUG > 3
-			if(offline == 1) { 
+			if(offline == 1) {
 				cerr << "Transport has gone offline\n";
 			}
 #endif
-		} else { 
+		} else {
 			offline = 0; // hate writing this
 		}
 		unsigned int s = (last_write_error == 0) | ((last_read_error == 0) << 1);
@@ -218,8 +218,8 @@ TranzportControlProtocol::monitor_work ()
 #if DEBUG_TRANZPORT_BITS > 99
 		if (val != 8) {
 			printf("val = %d errno = %d\n",val,errno);
-			buf[0] = buf[1] = buf[2] = buf[3] = 
-				buf[4] = buf[5] = buf[6] = buf[7] = 
+			buf[0] = buf[1] = buf[2] = buf[3] =
+				buf[4] = buf[5] = buf[6] = buf[7] =
 				buf[8] = 0;
 		}
 #endif
@@ -246,44 +246,44 @@ TranzportControlProtocol::monitor_work ()
 #if DEBUG_TRANZPORT_BITS > 10
 			// Perhaps an online message indicates something
 
-			if(_device_status != buf[1]) { 
-				printf("WTF- val: %d, device status != buf! %d != %d \n",val,_device_status,buf[1]); _device_status = buf[1]; 
+			if(_device_status != buf[1]) {
+				printf("WTF- val: %d, device status != buf! %d != %d \n",val,_device_status,buf[1]); _device_status = buf[1];
 			}
 #endif
-    
+
 		}
-    
+
 #if DEBUG_TRANZPORT_BITS > 10
 
 		if(val == 8) {
 
 			if(_device_status == STATUS_ONLINE) {
-				printf("ONLINE   : %02x %02x %02x %02x %02x %02x %02x %02x\n", 
-				       buf[0],buf[1],buf[2], buf[3], buf[4], buf[5],buf[6],buf[7]); 
+				printf("ONLINE   : %02x %02x %02x %02x %02x %02x %02x %02x\n",
+				       buf[0],buf[1],buf[2], buf[3], buf[4], buf[5],buf[6],buf[7]);
 			}
 			if(_device_status == STATUS_OFFLINE) {
-				printf("OFFLINE  : %02x %02x %02x %02x %02x %02x %02x %02x\n", 
-				       buf[0],buf[1],buf[2], buf[3], buf[4], buf[5],buf[6],buf[7]); 
+				printf("OFFLINE  : %02x %02x %02x %02x %02x %02x %02x %02x\n",
+				       buf[0],buf[1],buf[2], buf[3], buf[4], buf[5],buf[6],buf[7]);
 			}
  	
 			if(_device_status == STATUS_OK) {
-				printf("OK       : %02x %02x %02x %02x %02x %02x %02x %02x\n", 
-				       buf[0],buf[1],buf[2], buf[3], buf[4], buf[5],buf[6],buf[7]); 
+				printf("OK       : %02x %02x %02x %02x %02x %02x %02x %02x\n",
+				       buf[0],buf[1],buf[2], buf[3], buf[4], buf[5],buf[6],buf[7]);
 			}
-      
+
 		}
-    
+
 #endif
-    
+
 		/* update whatever needs updating */
-		if(last_write_error == 0 && (_device_status == STATUS_ONLINE || _device_status == STATUS_OK)) { 
+		if(last_write_error == 0 && (_device_status == STATUS_ONLINE || _device_status == STATUS_OK)) {
 			update_state ();
-      
+
 			/* still struggling with a good means of exerting flow control without having to create threads */
 			// pending = flush();
-      
+
 			if(pending == 0) {
-				pending = flush(); 
+				pending = flush();
 			} else {
 				if(inflight > 0) {
 					pending = --inflight; // we just did a whole bunch of writes so wait
@@ -293,7 +293,7 @@ TranzportControlProtocol::monitor_work ()
 			}
 		}
 		// pending = 0;
-	} 
+	}
 	return (void*) 0;
 }
 

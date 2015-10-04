@@ -83,7 +83,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		this->increment_read_ptr (prefix_size);
 
 		uint8_t status;
-		bool r = this->peek (&status, sizeof(uint8_t)); 
+		bool r = this->peek (&status, sizeof(uint8_t));
 		assert (r); // If this failed, buffer is corrupt, all hope is lost
 
 		/* lets see if we are going to be able to write this event into dst.

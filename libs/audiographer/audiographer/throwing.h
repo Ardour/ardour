@@ -26,7 +26,7 @@ enum /*LIBAUDIOGRAPHER_API*/ ThrowLevel
 };
 
 /** Class that allows optimizing out error checking during compile time.
-  * Usage: to take all advantage of this class you should wrap all 
+  * Usage: to take all advantage of this class you should wrap all
   * throwing statemets like this:
   * \code
   * if (throw_level (SomeThrowLevel) && other_optional_conditionals) {

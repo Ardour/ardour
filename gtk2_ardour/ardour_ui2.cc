@@ -343,7 +343,7 @@ ARDOUR_UI::setup_transport ()
 	alert_box.pack_start (feedback_alert_button, true, true);
 
 	/* all transport buttons should be the same size vertically and
-	 * horizontally 
+	 * horizontally
 	 */
 
 	Glib::RefPtr<SizeGroup> transport_button_size_group = SizeGroup::create (SIZE_GROUP_BOTH);

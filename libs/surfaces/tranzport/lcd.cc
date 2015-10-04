@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,14 +15,14 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  *   */
 
 #include <tranzport_control_protocol.h>
 
 // doing these functions made me realize that screen_invalid should be lcd_isdamaged FIXME soon
 
-bool TranzportControlProtocol::lcd_damage() 
+bool TranzportControlProtocol::lcd_damage()
 {
 	screen_invalidate();
 	return true;
@@ -41,7 +41,7 @@ bool TranzportControlProtocol::lcd_damage (int row, int col, int length)
 // Still working on the layering, arguably screen_invalid should be lcd_invalid
 // or vice versa
 
-bool TranzportControlProtocol::lcd_isdamaged () 
+bool TranzportControlProtocol::lcd_isdamaged ()
 {
 	if(screen_invalid.any()) {
 #if DEBUG_TRANZPORT > 5	
@@ -65,7 +65,7 @@ bool TranzportControlProtocol::lcd_isdamaged (int row, int col, int length)
 #endif
 		return true;
 	}
-	return false; 
+	return false;
 }
 
 // lcd_clear would be a separate function for a smart display
@@ -84,32 +84,32 @@ TranzportControlProtocol::lcd_clear ()
 int
 TranzportControlProtocol::lcd_flush ()
 {
-	return 0; 
+	return 0;
 }
 
-int 
+int
 TranzportControlProtocol::lcd_write(uint8_t* cmd, uint32_t timeout_override)
 {
 	int result;
 #if (DEBUG_TRANZPORT_SCREEN > 0)
-	printf("VALID  : %s\n", (screen_invalid.to_string()).c_str()); 
+	printf("VALID  : %s\n", (screen_invalid.to_string()).c_str());
 #endif
 	if ((result = write(cmd,timeout_override))) {
 #if DEBUG_TRANZPORT > 4
-		printf("usb screen update failed for some reason... why? \nresult, cmd and data were %d %02x %02x %02x %02x %02x %02x %02x %02x\n", 
-		       result, cmd[0],cmd[1],cmd[2], cmd[3], cmd[4], cmd[5],cmd[6],cmd[7]); 
+		printf("usb screen update failed for some reason... why? \nresult, cmd and data were %d %02x %02x %02x %02x %02x %02x %02x %02x\n",
+		       result, cmd[0],cmd[1],cmd[2], cmd[3], cmd[4], cmd[5],cmd[6],cmd[7]);
 #endif
 	}
 	return result;
 }
 
-void 
-TranzportControlProtocol::lcd_fill (uint8_t fill_char) 
+void
+TranzportControlProtocol::lcd_fill (uint8_t fill_char)
 {
 }
 
-void 
-TranzportControlProtocol::lcd_print (int row, int col, const char* text) 
+void
+TranzportControlProtocol::lcd_print (int row, int col, const char* text)
 {
 	print(row,col,text);
 }

@@ -57,7 +57,7 @@ MidiTracer::MidiTracer ()
 	, collect_button (_("Enabled"))
 	, delta_time_button (_("Delta times"))
 {
-	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect 
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect
 		(_manager_connection, invalidator (*this), boost::bind (&MidiTracer::ports_changed, this), gui_context());
 
 	_last_receipt.tv_sec = 0;

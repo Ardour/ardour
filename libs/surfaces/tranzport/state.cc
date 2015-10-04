@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  */
 
 #include <iostream>
@@ -48,7 +48,7 @@ using namespace PBD;
 // FIXME: How to handle multiple tranzports in a system?
 
 XMLNode&
-TranzportControlProtocol::get_state () 
+TranzportControlProtocol::get_state ()
 {
 	return ControlProtocol::get_state();
 }
@@ -108,7 +108,7 @@ TranzportControlProtocol::set_state (const XMLNode& node)
 			return -1;
 		}
 	}
-#endif 
+#endif
 
 	return retval;
 
@@ -118,28 +118,28 @@ TranzportControlProtocol::set_state (const XMLNode& node)
 // And perhaps we could load up sessions this way, too
 
 int
-TranzportControlProtocol::save (char *name) 
+TranzportControlProtocol::save (char *name)
 {
 	// Presently unimplemented
 	return 0;
 }
 
 int
-TranzportControlProtocol::load (char *name) 
+TranzportControlProtocol::load (char *name)
 {
 	// Presently unimplemented
 	return 0;
 }
 
 int
-TranzportControlProtocol::save_config (char *name) 
+TranzportControlProtocol::save_config (char *name)
 {
 	// Presently unimplemented
 	return 0;
 }
 
 int
-TranzportControlProtocol::load_config (char *name) 
+TranzportControlProtocol::load_config (char *name)
 {
 	// Presently unimplemented
 	return 0;

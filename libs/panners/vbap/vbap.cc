@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ void
 VBAPanner::Signal::resize_gains (uint32_t n)
 {
         gains.assign (n, 0.0);
-}        
+}
 
 VBAPanner::VBAPanner (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speakers> s)
 	: Panner (p)
@@ -112,7 +112,7 @@ VBAPanner::configure_io (ChanCount in, ChanCount /* ignored - we use Speakers */
         for (uint32_t i = 0; i < n; ++i) {
                 Signal* s = new Signal (_pannable->session(), *this, i, _speakers->n_speakers());
                 _signals.push_back (s);
-                
+
         }
 
         update ();
@@ -129,7 +129,7 @@ VBAPanner::update ()
                 double signal_direction = 1.0 - (_pannable->pan_azimuth_control->get_value() + (w/2));
                 double grd_step_per_signal = w / (_signals.size() - 1);
                 for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
-                
+
                         Signal* signal = *s;
 
                         int over = signal_direction;
@@ -153,8 +153,8 @@ VBAPanner::update ()
         SignalPositionChanged(); /* emit */
 }
 
-void 
-VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele) 
+void
+VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 {
 	/* calculates gain factors using loudspeaker setup and given direction */
 	double cartdir[3];
@@ -165,7 +165,7 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 	const int dimension = _speakers->dimension();
 	assert(dimension == 2 || dimension == 3);
 
-	spherical_to_cartesian (azi, ele, 1.0, cartdir[0], cartdir[1], cartdir[2]);  
+	spherical_to_cartesian (azi, ele, 1.0, cartdir[0], cartdir[1], cartdir[2]);
 	big_sm_g = -100000.0;
 
 	gains[0] = gains[1] = gains[2] = 0;
@@ -192,8 +192,8 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 
 			big_sm_g = small_g;
 
-			gains[0] = gtmp[0]; 
-			gains[1] = gtmp[1]; 
+			gains[0] = gtmp[0];
+			gains[1] = gtmp[1];
 
 			speaker_ids[0] = _speakers->speaker_for_tuple (i, 0);
 			speaker_ids[1] = _speakers->speaker_for_tuple (i, 1);
@@ -207,11 +207,11 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 			}
 		}
 	}
-        
+
 	power = sqrt (gains[0]*gains[0] + gains[1]*gains[1] + gains[2]*gains[2]);
 
 	if (power > 0) {
-		gains[0] /= power; 
+		gains[0] /= power;
 		gains[1] /= power;
 		gains[2] /= power;
 	}
@@ -264,7 +264,7 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
         assert (sz == obufs.count().n_audio());
 
         int8_t *outputs = (int8_t*)alloca(sz); // on the stack, no malloc
-        
+
         /* set initial state of each output "record"
          */
 
@@ -282,12 +282,12 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
                 if (signal->outputs[o] != -1) {
                         /* used last time */
                         outputs[signal->outputs[o]] |= 1;
-                } 
+                }
 
                 if (signal->desired_outputs[o] != -1) {
                         /* used this time */
                         outputs[signal->desired_outputs[o]] |= 1<<1;
-                } 
+                }
         }
 
         /* at this point, we can test a speaker's status:
@@ -296,7 +296,7 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
            (*outputs[o] & 2)      <= in use this time
            (*outputs[o] & 3) == 3 <= in use both times
             *outputs[o] == 0      <= not in use either time
-           
+
         */
 
 	for (int o = 0; o < 3; ++o) {
@@ -310,14 +310,14 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
                 pan = gain_coefficient * signal->desired_gains[o];
 
                 if (pan == 0.0 && signal->gains[output] == 0.0) {
-                        
+
                         /* nothing deing delivered to this output */
 
                         signal->gains[output] = 0.0;
-                        
+
                 } else if (fabs (pan - signal->gains[output]) > 0.00001) {
-                        
-                        /* signal to this output but the gain coefficient has changed, so 
+
+                        /* signal to this output but the gain coefficient has changed, so
                            interpolate between them.
                         */
 
@@ -326,10 +326,10 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
                         signal->gains[output] = pan;
 
                 } else {
-                        
+
                         /* signal to this output, same gain as before so just copy with gain
                          */
-                           
+
                         mix_buffers_with_gain (obufs.get_audio (output).data(),src,nframes,pan);
                         signal->gains[output] = pan;
                 }
@@ -354,9 +354,9 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
         */
 }
 
-void 
+void
 VBAPanner::distribute_one_automated (AudioBuffer& /*src*/, BufferSet& /*obufs*/,
-                                     framepos_t /*start*/, framepos_t /*end*/, 
+                                     framepos_t /*start*/, framepos_t /*end*/,
 				     pframes_t /*nframes*/, pan_t** /*buffers*/, uint32_t /*which*/)
 {
 	/* XXX to be implemented */
@@ -390,7 +390,7 @@ VBAPanner::out() const
         return ChanCount (DataType::AUDIO, _speakers->n_speakers());
 }
 
-std::set<Evoral::Parameter> 
+std::set<Evoral::Parameter>
 VBAPanner::what_can_be_automated() const
 {
         set<Evoral::Parameter> s;
@@ -403,7 +403,7 @@ VBAPanner::what_can_be_automated() const
         }
         return s;
 }
-        
+
 string
 VBAPanner::describe_parameter (Evoral::Parameter p)
 {
@@ -419,7 +419,7 @@ VBAPanner::describe_parameter (Evoral::Parameter p)
         }
 }
 
-string 
+string
 VBAPanner::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 {
         /* DO NOT USE LocaleGuard HERE */
@@ -428,13 +428,13 @@ VBAPanner::value_as_string (boost::shared_ptr<AutomationControl> ac) const
         switch (ac->parameter().type()) {
         case PanAzimuthAutomation: /* direction */
                 return string_compose (_("%1\u00B0"), (int (rint (val * 360.0))+180)%360);
-                
+
         case PanWidthAutomation: /* diffusion */
                 return string_compose (_("%1%%"), (int) floor (100.0 * fabs(val)));
 
         case PanElevationAutomation: /* elevation */
                 return string_compose (_("%1\u00B0"), (int) floor (90.0 * fabs(val)));
-                
+
         default:
                 return _("unused");
         }
@@ -451,7 +451,7 @@ VBAPanner::signal_position (uint32_t n) const
 }
 
 boost::shared_ptr<Speakers>
-VBAPanner::get_speakers () const 
+VBAPanner::get_speakers () const
 {
         return _speakers->parent();
 }

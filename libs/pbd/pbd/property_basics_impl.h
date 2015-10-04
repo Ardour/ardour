@@ -23,29 +23,29 @@
 namespace PBD {
 
 template<typename T>
-PropertyChange::PropertyChange(PropertyDescriptor<T> p) 
-{ 
-        insert (p.property_id); 
+PropertyChange::PropertyChange(PropertyDescriptor<T> p)
+{
+        insert (p.property_id);
 }
 
-template<typename T> PropertyChange 
-PropertyChange::operator=(PropertyDescriptor<T> p) 
+template<typename T> PropertyChange
+PropertyChange::operator=(PropertyDescriptor<T> p)
 {
         clear ();
         insert (p.property_id);
         return *this;
 }
 
-template<typename T> bool 
-PropertyChange::contains (PropertyDescriptor<T> p) const 
-{ 
-        return find (p.property_id) != end (); 
+template<typename T> bool
+PropertyChange::contains (PropertyDescriptor<T> p) const
+{
+        return find (p.property_id) != end ();
 }
 
-template<typename T> void 
-PropertyChange::add (PropertyDescriptor<T> p) 
-{ 
-        insert (p.property_id); 
+template<typename T> void
+PropertyChange::add (PropertyDescriptor<T> p)
+{
+        insert (p.property_id);
 }
 
 }

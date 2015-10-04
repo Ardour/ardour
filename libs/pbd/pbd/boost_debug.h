@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
     From an idea by Carl Hetherington.
 
     This program is free software; you can redistribute it and/or modify

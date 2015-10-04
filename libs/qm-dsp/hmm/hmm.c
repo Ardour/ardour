@@ -134,7 +134,7 @@ void hmm_close(model_t* model)
 	free(model->mu);
 	for (i = 0; i < model->L; i++)
 		free(model->cov[i]);
-	free(model->cov);	  
+	free(model->cov);	
 	free(model);	
 }
 
@@ -343,9 +343,9 @@ void baum_welch(double* p0, double** a, double** mu, double** cov, int N, int T,
 			 for (t = 0; t < T; t++)
 				 for (j = 0; j < N; j++)
 					 cov[d][e] += gamma[t][j] * (x[t][d] - mu[j][d]) * (x[t][e] - mu[j][e]);
-			 
+			
 			 cov[d][e] /= sum_sum_gamma;
-			 
+			
 			 if (ISNAN(cov[d][e]))
 			 {
 				 printf("cov[%d][%d] was nan\n", d, e);
@@ -693,7 +693,7 @@ void invert(double** cov, int L, double** icov, double* detcov)
 	double* a = (double*) malloc(L*L*sizeof(double));
 	int i, j;
 	for(j=0; j < L; j++)
-		for (i=0; i < L; i++) 
+		for (i=0; i < L; i++)
 			a[j*L+i] = cov[i][j];
 	
 	int M = (int) L;	
@@ -737,7 +737,7 @@ void invert(double** cov, int L, double** icov, double* detcov)
 	dgetri_(&M, a, &M, ipiv, work, &lwork, &ret);
 
 	for(j=0; j < L; j++)
-		for (i=0; i < L; i++) 
+		for (i=0; i < L; i++)
 			icov[i][j] = a[j*L+i];	
 	
 #ifndef HAVE_ATLAS	

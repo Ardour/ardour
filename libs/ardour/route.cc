@@ -258,7 +258,7 @@ Route::set_remote_control_id (uint32_t id, bool notify_class_listeners)
 void
 Route::set_remote_control_id_internal (uint32_t id, bool notify_class_listeners)
 {
-	/* force IDs for master/monitor busses and prevent 
+	/* force IDs for master/monitor busses and prevent
 	   any other route from accidentally getting these IDs
 	   (i.e. legacy sessions)
 	*/
@@ -277,7 +277,7 @@ Route::set_remote_control_id_internal (uint32_t id, bool notify_class_listeners)
 
 	/* don't allow it to collide */
 
-	if (!is_master () && !is_monitor() && 
+	if (!is_master () && !is_monitor() &&
 	    (id == MasterBusRemoteControlID || id == MonitorBusRemoteControlID)) {
 		id += MonitorBusRemoteControlID;
 	}
@@ -297,7 +297,7 @@ Route::remote_control_id() const
 {
 	if (is_master()) {
 		return MasterBusRemoteControlID;
-	} 
+	}
 
 	if (is_monitor()) {
 		return MonitorBusRemoteControlID;
@@ -501,7 +501,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   on a transition between monitoring states we get a de-clicking gain
 	   change in the _main_outs delivery, if config.get_use_monitor_fades()
 	   is true.
-	   
+	
 	   We override this in the case where we have an internal generator.
 	*/
 	bool silence = _have_internal_generator ? false : (monitoring_state () == MonitoringSilence);
@@ -833,7 +833,7 @@ Route::set_solo (bool yn, void *src)
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: set solo => %2, src: %3 grp ? %4 currently self-soloed ? %5\n", 
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: set solo => %2, src: %3 grp ? %4 currently self-soloed ? %5\n",
 						  name(), yn, src, (src == _route_group), self_soloed()));
 
 	if (self_soloed() != yn) {
@@ -867,7 +867,7 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod solo-by-upstream by %2, current up = %3 down = %4\n", 
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod solo-by-upstream by %2, current up = %3 down = %4\n",
 						  name(), delta, _soloed_by_others_upstream, _soloed_by_others_downstream));
 
 	uint32_t old_sbu = _soloed_by_others_upstream;
@@ -927,7 +927,7 @@ Route::mod_solo_by_others_downstream (int32_t delta)
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod solo-by-downstream by %2, current up = %3 down = %4\n", 
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod solo-by-downstream by %2, current up = %3 down = %4\n",
 						  name(), delta, _soloed_by_others_upstream, _soloed_by_others_downstream));
 
 	if (delta < 0) {
@@ -1702,7 +1702,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 		if (!removed) {
 			/* what? */
 			return 1;
-		} 
+		}
 
 		if (configure_processors_unlocked (err)) {
 			pstate.restore ();
@@ -1972,7 +1972,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	}
 
 	/* make sure we have sufficient scratch buffers to cope with the new processor
-	   configuration 
+	   configuration
 	*/
 	_session.ensure_buffers (n_process_buffers ());
 
@@ -2259,7 +2259,7 @@ Route::state(bool full_state)
 
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
 		if (!full_state) {
-			/* template save: do not include internal sends functioning as 
+			/* template save: do not include internal sends functioning as
 			   aux sends because the chance of the target ID
 			   in the session where this template is used
 			   is not very likely.
@@ -3257,8 +3257,8 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 	bool need_to_queue_solo_change = true;
 
 	if ((change.type & IOChange::ConfigurationChanged)) {
-		/* This is called with the process lock held if change 
-		   contains ConfigurationChanged 
+		/* This is called with the process lock held if change
+		   contains ConfigurationChanged
 		*/
 		need_to_queue_solo_change = false;
 		configure_processors (0);
@@ -3284,8 +3284,8 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 	}
 
 	if ((change.type & IOChange::ConfigurationChanged)) {
-		/* This is called with the process lock held if change 
-		   contains ConfigurationChanged 
+		/* This is called with the process lock held if change
+		   contains ConfigurationChanged
 		*/
 		need_to_queue_solo_change = false;
 		configure_processors (0);
@@ -4389,7 +4389,7 @@ Route::setup_invisible_processors ()
 
 	/* we'll build this new list here and then use it
 	 *
-	 * TODO put the ProcessorList is on the stack for RT-safety. 
+	 * TODO put the ProcessorList is on the stack for RT-safety.
 	 */
 
 	ProcessorList new_processors;
@@ -4648,7 +4648,7 @@ Route::has_external_redirects () const
 		/* ignore inactive processors and obviously ignore the main
 		 * outs since everything has them and we don't care.
 		 */
-		 
+		
 		if ((*i)->active() && (*i) != _main_outs && (*i)->does_routing()) {
 			return true;;
 		}
@@ -4708,8 +4708,8 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 	size_t n_buffers;
 	size_t i;
 	
-	/* MIDI 
-	 *  
+	/* MIDI
+	 *
 	 * We don't currently mix MIDI input together, so we don't need the
 	 * complex logic of the audio case.
 	 */
@@ -4764,7 +4764,7 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 		} else {
 			
 			/* on subsequent times around, merge data from
-			 * the port with what is already there 
+			 * the port with what is already there
 			 */
 
 			if (scaling != 1.0f) {

@@ -121,8 +121,8 @@ generate_db_fade (boost::shared_ptr<Evoral::ControlList> dst, double len, int nu
 }
 
 static void
-merge_curves (boost::shared_ptr<Evoral::ControlList> dst, 
-	      boost::shared_ptr<const Evoral::ControlList> curve1, 
+merge_curves (boost::shared_ptr<Evoral::ControlList> dst,
+	      boost::shared_ptr<const Evoral::ControlList> curve1,
 	      boost::shared_ptr<const Evoral::ControlList> curve2)
 {
 	Evoral::ControlList::EventList::size_type size = curve1->size();
@@ -422,7 +422,7 @@ AudioRegion::set_envelope_active (bool yn)
  *  @param chan_n Channel.
  *  @param frames_per_pixel Number of samples to use to generate one peak value.
  */
- 
+
 ARDOUR::framecnt_t
 AudioRegion::read_peaks (PeakData *buf, framecnt_t npeaks, framecnt_t offset, framecnt_t cnt, uint32_t chan_n, double frames_per_pixel) const
 {
@@ -432,7 +432,7 @@ AudioRegion::read_peaks (PeakData *buf, framecnt_t npeaks, framecnt_t offset, fr
 
 	if (audio_source(chan_n)->read_peaks (buf, npeaks, offset, cnt, frames_per_pixel)) {
 		return 0;
-	} 
+	}
 
 	if (_scale_amplitude != 1.0f) {
 		for (framecnt_t n = 0; n < npeaks; ++n) {
@@ -603,7 +603,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 	/* APPLY FADES TO THE DATA IN mixdown_buffer AND MIX THE RESULTS INTO
 	 * buf. The key things to realize here: (1) the fade being applied is
-	 * (as of April 26th 2012) just the inverse of the fade in curve (2) 
+	 * (as of April 26th 2012) just the inverse of the fade in curve (2)
 	 * "buf" contains data from lower regions already. So this operation
 	 * fades out the existing material.
 	 */
@@ -1120,12 +1120,12 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 		
-	case FadeFast: 
+	case FadeFast:
 		generate_db_fade (_fade_out.val(), len, num_steps, -60);
 		generate_inverse_power_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 		
-	case FadeSlow: 
+	case FadeSlow:
 		generate_db_fade (c1, len, num_steps, -1);  //start off with a slow fade
 		generate_db_fade (c2, len, num_steps, -80);  //end with a fast fade
 		merge_curves (_fade_out.val(), c1, c2);
@@ -1573,10 +1573,10 @@ AudioRegion::get_related_audio_file_channel_count () const
 {
     uint32_t chan_count = 0;
     for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-        
+
         boost::shared_ptr<SndFileSource> sndf = boost::dynamic_pointer_cast<SndFileSource>(*i);
         if (sndf ) {
-            
+
             if (sndf->channel_count() > chan_count) {
                 chan_count = sndf->channel_count();
             }
@@ -1592,7 +1592,7 @@ AudioRegion::get_related_audio_file_channel_count () const
         }
 #endif // HAVE_COREAUDIO
     }
-    
+
     return chan_count;
 }
 

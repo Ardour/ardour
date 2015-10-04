@@ -331,7 +331,7 @@ gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
 	 item_class->draw = gnome_canvas_waveview_draw;
 }
 
-void 
+void
 gnome_canvas_waveview_set_gradient_waveforms (int yn)
 {
 	_gradient_rendering = yn;

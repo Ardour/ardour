@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-2010 Paul Barton-Davis 
+    Copyright (C) 1998-2010 Paul Barton-Davis
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -51,9 +51,9 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 
 	void cycle_start (pframes_t nframes);
 	void cycle_end (pframes_t nframes);
-    
+
         /* called from non-RT context */
-    
+
 	void parse (framecnt_t timestamp);
 	int write (const MIDI::byte *msg, size_t msglen, MIDI::timestamp_t timestamp);
         int read (MIDI::byte *buf, size_t bufsize);

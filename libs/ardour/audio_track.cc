@@ -491,7 +491,7 @@ AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endp
 			return false;
 		}
 
-		/* we're including the endpoint - if we just hit it, 
+		/* we're including the endpoint - if we just hit it,
 		   then stop.
 		*/
 
@@ -499,7 +499,7 @@ AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endp
 			return true;
 		}
 
-		/* save outputs of this processor to test against inputs 
+		/* save outputs of this processor to test against inputs
 		   of the next one.
 		*/
 

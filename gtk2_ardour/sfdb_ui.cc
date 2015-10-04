@@ -1023,7 +1023,7 @@ SoundFileBrowser::refresh_display(std::string ID, std::string file)
 		// there's a single item selected in the freesound list
 		//XXX make a function to be used to construct the actual file name both here and in the mootcher
 		Gtk::TreeIter row = freesound_list->get_iter(*rows.begin());
-		std::string selected_ID = (*row)[freesound_list_columns.id]; 
+		std::string selected_ID = (*row)[freesound_list_columns.id];
 		if (ID == selected_ID) {
 			// the selected item in the freesound list is the item that has just finished downloading
 			chooser.set_filename(file);
@@ -1089,7 +1089,7 @@ SoundFileBrowser::freesound_search()
 	gdk_flush();
 
 	std::string theString = mootcher.searchText(
-			search_string, 
+			search_string,
 			freesound_page,
 #ifdef GTKOSX
 			"", // OSX eats anything incl mp3
@@ -1655,9 +1655,9 @@ SoundFileChooser::get_filename ()
 	return paths.front();
 }
 
-SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s, 
-				uint32_t selected_audio_tracks, 
-				uint32_t selected_midi_tracks, 
+SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
+				uint32_t selected_audio_tracks,
+				uint32_t selected_midi_tracks,
 				bool persistent,
 				Editing::ImportMode mode_hint)
 	: SoundFileBrowser (title, s, persistent)

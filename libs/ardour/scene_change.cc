@@ -46,7 +46,7 @@ SceneChange::SceneChange ()
 }
 
 void
-SceneChange::set_color (uint32_t c) 
+SceneChange::set_color (uint32_t c)
 {
         _color = c;
         ColorChanged (); /* EMIT SIGNAL */

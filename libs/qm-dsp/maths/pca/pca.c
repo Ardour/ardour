@@ -15,8 +15,8 @@
    Earn/Bitnet:  fionn@dgaeso51,  fim@dgaipp1s,  murtagh@stsci
    Span:         esomc1::fionn
    Internet:     murtagh@scivax.stsci.edu
-   
-   F. Murtagh, Munich, 6 June 1989                                   */   
+
+   F. Murtagh, Munich, 6 June 1989                                   */
 /*********************************************************************/
 
 #include <stdio.h>
@@ -269,7 +269,7 @@ void pca_project(double** data, int n, int m, int ncomponents)
     /* Allocate storage for dummy and new vectors. */
     evals = (double*) malloc(m*sizeof(double));     /* Storage alloc. for vector of eigenvalues */
     interm = (double*) malloc(m*sizeof(double));    /* Storage alloc. for 'intermediate' vector */
-    //MALLOC_ARRAY(symmat2,m,m,double);    
+    //MALLOC_ARRAY(symmat2,m,m,double);
 	//for (i = 0; i < m; i++) {
 	//	for (j = 0; j < m; j++) {
 	//		symmat2[i][j] = symmat[i][j]; /* Needed below for col. projections */

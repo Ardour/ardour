@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2006 Paul Davis 
+  Copyright (C) 2006 Paul Davis
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -37,13 +37,13 @@ namespace Gtkmm2ext {
 class LIBGTKMM2EXT_API Fader : public CairoWidget
 {
   public:
-	Fader (Gtk::Adjustment& adjustment, 
+	Fader (Gtk::Adjustment& adjustment,
 	       const Glib::RefPtr<Gdk::Pixbuf>& face_pixbuf,
 	       const Glib::RefPtr<Gdk::Pixbuf>& active_face_pixbuf,
 	       const Glib::RefPtr<Gdk::Pixbuf>& underlay_pixbuf,
 	       const Glib::RefPtr<Gdk::Pixbuf>& handle_pixbuf,
 	       const Glib::RefPtr<Gdk::Pixbuf>& active_handle_pixbuf,
-	       int min_pos_x, 
+	       int min_pos_x,
 	       int min_pos_y,
 	       int max_pos_x,
 	       int max_pos_y,

@@ -467,7 +467,7 @@ public:
 	MainMenuDisabler () {
 		/* The global menu bar continues to be accessible to applications
 		   with modal dialogs on mac, which means that we need to desensitize
-		   all items in the menu bar. 
+		   all items in the menu bar.
 		*/
 		ActionManager::disable_active_actions ();
 	}

@@ -60,8 +60,8 @@ public:
 	
 	void	retain() { IncrementAtomic(&mRefCount); }
 	
-	void	release() 
-			{ 
+	void	release()
+			{
 					// this returns the ORIGINAL value, not the new one.
 				SInt32 rc = DecrementAtomic(&mRefCount);
 				if (rc == 1) {

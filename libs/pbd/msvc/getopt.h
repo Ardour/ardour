@@ -106,5 +106,5 @@ GETOPT_API int getopt __P((int, char * const *, const char *));
 
 __END_DECLS
 #endif
- 
+
 #endif /* !_GETOPT_H_ */

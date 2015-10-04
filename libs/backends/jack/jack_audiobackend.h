@@ -42,7 +42,7 @@ class JACKAudioBackend : public AudioBackend {
   public:
     JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, boost::shared_ptr<JackConnection>);
     ~JACKAudioBackend ();
-    
+
     /* AUDIOBACKEND API */
 
     std::string name() const;
@@ -120,7 +120,7 @@ class JACKAudioBackend : public AudioBackend {
     void update_latencies ();
 
     static bool already_configured();
-    
+
     /* PORTENGINE API */
 
     const std::string& my_name() const;
@@ -148,7 +148,7 @@ class JACKAudioBackend : public AudioBackend {
     int   disconnect_all (PortHandle);
     int   connect (const std::string& src, const std::string& dst);
     int   disconnect (const std::string& src, const std::string& dst);
-    
+
     /* MIDI */
 
     std::vector<std::string> enumerate_midi_options () const;
@@ -182,7 +182,7 @@ class JACKAudioBackend : public AudioBackend {
 
     /* Latency management
      */
-    
+
     void          set_latency_range (PortHandle, bool for_playback, LatencyRange);
     LatencyRange  get_latency_range (PortHandle, bool for_playback);
 
@@ -220,7 +220,7 @@ class JACKAudioBackend : public AudioBackend {
     static void _freewheel_callback (int , void *arg);
     static void _latency_callback (jack_latency_callback_mode_t, void*);
     static void _session_callback (jack_session_event_t *event, void *arg);
-    
+
     void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
     int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
     int  jack_bufsize_callback (pframes_t);
@@ -232,7 +232,7 @@ class JACKAudioBackend : public AudioBackend {
 
     void set_jack_callbacks ();
     int reconnect_to_jack ();
-    
+
     struct ThreadData {
 	JACKAudioBackend* engine;
 	boost::function<void()> f;
@@ -241,7 +241,7 @@ class JACKAudioBackend : public AudioBackend {
 	ThreadData (JACKAudioBackend* e, boost::function<void()> fp, size_t stacksz)
 		: engine (e) , f (fp) , stacksize (stacksz) {}
     };
-    
+
     void*  process_thread ();
     static void* _start_process_thread (void*);
 
@@ -265,7 +265,7 @@ class JACKAudioBackend : public AudioBackend {
 
     typedef std::set<std::string> DeviceList;
     typedef std::map<std::string,DeviceList> DriverDeviceMap;
-    
+
     mutable DriverDeviceMap all_devices;
 
     PBD::ScopedConnection disconnect_connection;
@@ -284,7 +284,7 @@ class JACKAudioBackend : public AudioBackend {
     void when_connected_to_jack ();
     PBD::ScopedConnection jack_connection_connection;
 
-    /* Object to manage interactions with Session in a way that 
+    /* Object to manage interactions with Session in a way that
        keeps JACK out of libardour directly
     */
 
@@ -297,4 +297,4 @@ class JACKAudioBackend : public AudioBackend {
 } // namespace
 
 #endif /* __ardour_audiobackend_h__ */
-    
+

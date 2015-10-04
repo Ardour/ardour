@@ -565,7 +565,7 @@ ExportHandler::write_cue_header (CDMarkerStatus & status)
 		MOTOROLA = "header-less" audio (44.1 kHz, 16 Bit, big endian),
 		and MP3
 		
-		We try to use these file types whenever appropriate and 
+		We try to use these file types whenever appropriate and
 		default to our own names otherwise.
 	*/
 	status.out << "FILE \"" << Glib::path_get_basename(status.filename) << "\" ";
@@ -860,7 +860,7 @@ ExportHandler::cue_escape_cdtext (const std::string& txt)
 	}
 	
 	// does not do much mor than UTF-8 to Latin1 translation yet, but
-	// that may have to change if cue parsers in burning programs change 
+	// that may have to change if cue parsers in burning programs change
 	out = '"' + latin1_txt + '"';
 
 	return out;

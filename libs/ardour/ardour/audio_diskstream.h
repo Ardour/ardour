@@ -244,7 +244,7 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 
         bool prep_record_enable ();
 	bool prep_record_disable ();
-    
+
 	// Working buffers for do_refill (butler thread)
 	static void allocate_working_buffers();
 	static void free_working_buffers();

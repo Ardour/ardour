@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,10 +15,10 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  *   */
 
-/* The Bling class theoretically knows nothing about the device it's blinging 
+/* The Bling class theoretically knows nothing about the device it's blinging
    and depends on the overlying implementation to tell it about the format of the
    device. Maybe this will become a template or people will inherit from it */
 
@@ -75,8 +75,8 @@ protected:
 // make absolutely sure we have the pointer to the interface
 // something like this
 
-#define BLING_INTFA(a) (intf)? 0:intf->a  
-#define BLING_INTF(a) { if (intf) { intf->a; } else { return 0; } }  
+#define BLING_INTFA(a) (intf)? 0:intf->a
+#define BLING_INTF(a) { if (intf) { intf->a; } else { return 0; } }
 
 // Should any of these bother to return a status code?
 

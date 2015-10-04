@@ -34,7 +34,7 @@
     #define LIBCONTROLCP_API LIBCONTROLCP_DLL_EXPORT
 #else
     #define LIBCONTROLCP_API LIBCONTROLCP_DLL_IMPORT
-#endif 
+#endif
 #define LIBCONTROLCP_LOCAL LIBCONTROLCP_DLL_LOCAL
 
 /* These should be used by surfaces/control interfaces. They use (probably)
@@ -48,7 +48,7 @@
     #define ARDOURSURFACE_API LIBCONTROLCP_DLL_EXPORT
 #else
     #define ARDOURSURFACE_API LIBCONTROLCP_DLL_IMPORT
-#endif 
+#endif
 #define ARDOURSURFACE_LOCAL LIBCONTROLCP_DLL_LOCAL
 
 

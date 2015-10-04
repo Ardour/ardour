@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
     From an idea by Carl Hetherington.
 
     This program is free software; you can redistribute it and/or modify
@@ -48,8 +48,8 @@ private:
 std::ostream& operator<< (std::ostream& str, const Backtrace& bt) { return bt.print (str); }
 
 
-Backtrace::Backtrace() 
-{ 
+Backtrace::Backtrace()
+{
 #ifdef HAVE_EXECINFO
 	size = ::backtrace (trace, 200);
 #endif
@@ -76,7 +76,7 @@ Backtrace::print (std::ostream& str) const
 	return str;
 }
 
-struct BTPair { 
+struct BTPair {
 
     Backtrace* ref;
     Backtrace* rel;
@@ -94,10 +94,10 @@ std::ostream& operator<<(std::ostream& str, const BTPair& btp) {
 	return str;
 }
 
-struct SPDebug { 
+struct SPDebug {
     Backtrace* constructor;
     Backtrace* destructor;
-    
+
     SPDebug (Backtrace* c) : constructor (c), destructor (0) {}
     ~SPDebug () {
 	    delete constructor;
@@ -121,7 +121,7 @@ typedef std::map<void const*,const char*> IPointerMap;
 using namespace std;
 
 static PointerMap* _sptrs;
-PointerMap& sptrs() { 
+PointerMap& sptrs() {
         if (_sptrs == 0) {
                 _sptrs = new PointerMap;
         }
@@ -129,7 +129,7 @@ PointerMap& sptrs() {
 }
 
 static IPointerMap* _interesting_pointers;
-IPointerMap& interesting_pointers() { 
+IPointerMap& interesting_pointers() {
         if (_interesting_pointers == 0) {
                 _interesting_pointers = new IPointerMap;
         }
@@ -193,7 +193,7 @@ boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int
 
 	if (is_interesting_object (old_obj)) {
 		if (debug_out) {
-			cerr << "\tlost old sp @ " << sp << " for " << old_obj << " UC = " << old_use_count << " now for " << obj << " UC = " << new_use_count 
+			cerr << "\tlost old sp @ " << sp << " for " << old_obj << " UC = " << old_use_count << " now for " << obj << " UC = " << new_use_count
 			     << " (total sp's = " << sptrs().size() << ')' << endl;			
 		}
 		PointerMap::iterator x = sptrs().find (sp);
@@ -216,12 +216,12 @@ boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int
 		sptrs().insert (newpair);
 		
 		if (debug_out) {
-			cerr << "assignment created sp for " << obj << " @ " << sp << " used to point to " << old_obj << " UC = " << old_use_count 
-			     << " UC = " << new_use_count 
+			cerr << "assignment created sp for " << obj << " @ " << sp << " used to point to " << old_obj << " UC = " << old_use_count
+			     << " UC = " << new_use_count
 			     << " (total sp's = " << sptrs().size() << ')' << endl;			
 			cerr << *newpair.second << endl;
 		}
-	} 
+	}
 }
 
 void
@@ -241,7 +241,7 @@ boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_c
 
 	if (is_interesting_object (old_obj)) {
 		if (debug_out) {
-			cerr << "\tlost old sp @ " << sp << " for " << old_obj << " UC = " << old_use_count << " now for " << obj << " UC = " << new_use_count 
+			cerr << "\tlost old sp @ " << sp << " for " << old_obj << " UC = " << old_use_count << " now for " << obj << " UC = " << new_use_count
 			     << " (total sp's = " << sptrs().size() << ')' << endl;			
 		}
 		PointerMap::iterator x = sptrs().find (sp);
@@ -264,12 +264,12 @@ boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_c
 		sptrs().insert (newpair);
 		
 		if (debug_out) {
-			cerr << "reset created sp for " << obj << " @ " << sp << " used to point to " << old_obj << " UC = " << old_use_count 
-			     << " UC = " << new_use_count 
+			cerr << "reset created sp for " << obj << " @ " << sp << " used to point to " << old_obj << " UC = " << old_use_count
+			     << " UC = " << new_use_count
 			     << " (total sp's = " << sptrs().size() << ')' << endl;			
 			cerr << *newpair.second << endl;
 		}
-	} 
+	}
 }
 
 void
@@ -341,7 +341,7 @@ void sp_counter_ref_hook (void* /*pn*/, long /* use count */)
 {
 }
 
-void sp_counter_release_hook (void* /*pn*/, long /*use_count*/) 
+void sp_counter_release_hook (void* /*pn*/, long /*use_count*/)
 {
 }
 

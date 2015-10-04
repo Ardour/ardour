@@ -772,7 +772,7 @@ PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
 	 * This plugin may have unconnected output-ports (currently only in Mixbus,
 	 * e.g channelstrip-EQ at the top of a MIDI-channel before the synth).
 	 *
-	 * The *next* processor below this one will only see the 
+	 * The *next* processor below this one will only see the
 	 * actual available streams (it cannot know the real outputs
 	 * of this plugin).
 	 *
@@ -952,7 +952,7 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 		cairo_stroke (cr);
 #ifndef NDEBUG
 	} else if (midi_sources != 0 && midi_sinks != 0) {
-		PBD::warning << string_compose("Programming error: midi routing display: A %1 -> %2 | M %3 -> %4 | T %5 -> %6", 
+		PBD::warning << string_compose("Programming error: midi routing display: A %1 -> %2 | M %3 -> %4 | T %5 -> %6",
 				audio_sources, audio_sinks, midi_sources, midi_sinks, sources, sinks) << endmsg;
 #endif
 	}
@@ -999,7 +999,7 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 		cairo_stroke (cr);
 #ifndef NDEBUG
 	} else if (audio_sources != 0 && audio_sinks != 0) {
-		PBD::warning << string_compose("Programming error: audio routing display: A %1 -> %2 | M %3 -> %4 | T %5 -> %6", 
+		PBD::warning << string_compose("Programming error: audio routing display: A %1 -> %2 | M %3 -> %4 | T %5 -> %6",
 				audio_sources, audio_sinks, midi_sources, midi_sinks, sources, sinks) << endmsg;
 #endif
 	}
@@ -1322,7 +1322,7 @@ ProcessorBox::leave_notify (GdkEventCrossing*)
 }
 
 bool
-ProcessorBox::processor_operation (ProcessorOperation op) 
+ProcessorBox::processor_operation (ProcessorOperation op)
 {
 	ProcSelection targets;
 
@@ -1402,7 +1402,7 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 	return true;
 }
 
-ProcessorWindowProxy* 
+ProcessorWindowProxy*
 ProcessorBox::find_window_proxy (boost::shared_ptr<Processor> processor) const
 {
 	return  processor->window_proxy();
@@ -1733,7 +1733,7 @@ ProcessorBox::redisplay_processors ()
 	_visible_prefader_processors = 0;
 	fader_seen = false;
 
-	_route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &ProcessorBox::help_count_visible_prefader_processors), 
+	_route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &ProcessorBox::help_count_visible_prefader_processors),
 					       &_visible_prefader_processors, &fader_seen));
 
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::add_processor_to_display));
@@ -2447,7 +2447,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 	 * will be forced back into a model where the fader controls the main gain.
 	 * If the processor is a send, then we map the send controls onto the
 	 * strip.
-	 * 
+	 *
 	 * Plugins and others will return a window for control.
 	 */
 
@@ -3065,7 +3065,7 @@ ProcessorWindowProxy::processor_going_away ()
 }
 
 ARDOUR::SessionHandlePtr*
-ProcessorWindowProxy::session_handle() 
+ProcessorWindowProxy::session_handle()
 {
 	/* we don't care */
 	return 0;

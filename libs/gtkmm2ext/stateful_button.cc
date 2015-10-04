@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace std;
 
-StateButton::StateButton () 
+StateButton::StateButton ()
         : visual_state (0)
         , _self_managed (false)
         , _is_realized (false)
@@ -87,9 +87,9 @@ StateButton::avoid_prelight_on_style_changed (const Glib::RefPtr<Gtk::Style>& /*
         if (style_changing) {
                 return;
         }
-        
+
         if (gtk_widget_get_state (widget) == GTK_STATE_PRELIGHT) {
-                
+
                 /* avoid PRELIGHT: make sure that the prelight colors in this new style match
                    the colors of the new style in whatever state we were in
                    before we switched to prelight.
@@ -101,7 +101,7 @@ StateButton::avoid_prelight_on_style_changed (const Glib::RefPtr<Gtk::Style>& /*
                 rcstyle->fg[GTK_STATE_PRELIGHT] = style->fg[state_before_prelight];
                 rcstyle->bg[GTK_STATE_PRELIGHT] = style->bg[state_before_prelight];
                 rcstyle->color_flags[GTK_STATE_PRELIGHT] = (GtkRcFlags) (GTK_RC_FG|GTK_RC_BG);
-                
+
                 style_changing = true;
                 g_object_ref (rcstyle);
                 gtk_widget_modify_style (widget, rcstyle);
@@ -125,20 +125,20 @@ StateButton::avoid_prelight_on_state_changed (Gtk::StateType old_state, GtkWidge
         if (state == GTK_STATE_PRELIGHT) {
 
                 state_before_prelight = old_state;
-                
-                
-                /* avoid PRELIGHT when currently ACTIVE: 
-                   if we just went into PRELIGHT, make sure that the colors 
-                   match those of whatever state we were in before. 
+
+
+                /* avoid PRELIGHT when currently ACTIVE:
+                   if we just went into PRELIGHT, make sure that the colors
+                   match those of whatever state we were in before.
                 */
-                
+
                 GtkRcStyle* rcstyle = gtk_widget_get_modifier_style (widget);
                 GtkStyle* style = gtk_widget_get_style (widget);
-                
+
                 rcstyle->fg[GTK_STATE_PRELIGHT] = style->fg[old_state];
                 rcstyle->bg[GTK_STATE_PRELIGHT] = style->bg[old_state];
                 rcstyle->color_flags[GTK_STATE_PRELIGHT] = (GtkRcFlags) (GTK_RC_FG|GTK_RC_BG);
-                
+
                 g_object_ref (rcstyle);
                 gtk_widget_modify_style (widget, rcstyle);
 
@@ -204,14 +204,14 @@ StatefulToggleButton::on_style_changed (const Glib::RefPtr<Gtk::Style>& style)
 {
         avoid_prelight_on_style_changed (style, GTK_WIDGET(gobj()));
         Button::on_style_changed (style);
-}       
+}
 
 void
 StatefulToggleButton::on_state_changed (Gtk::StateType old_state)
 {
         avoid_prelight_on_state_changed (old_state, GTK_WIDGET(gobj()));
         Button::on_state_changed (old_state);
-}       
+}
 
 Widget*
 StatefulToggleButton::get_child_widget ()
@@ -222,12 +222,12 @@ StatefulToggleButton::get_child_widget ()
 void
 StatefulToggleButton::set_widget_name (const std::string& name)
 {
-	set_name (name); 
+	set_name (name);
 	Widget* w = get_child();
 
 	if (w) {
-		w->set_name (name); 
-	} 
+		w->set_name (name);
+	}
 }
 
 /*--------------------------------------------- */
@@ -246,14 +246,14 @@ StatefulButton::on_style_changed (const Glib::RefPtr<Gtk::Style>& style)
 {
         avoid_prelight_on_style_changed (style, GTK_WIDGET(gobj()));
         Button::on_style_changed (style);
-}       
+}
 
 void
 StatefulButton::on_state_changed (Gtk::StateType old_state)
 {
         avoid_prelight_on_state_changed (old_state, GTK_WIDGET(gobj()));
         Button::on_state_changed (old_state);
-}       
+}
 
 Widget*
 StatefulButton::get_child_widget ()
@@ -264,10 +264,10 @@ StatefulButton::get_child_widget ()
 void
 StatefulButton::set_widget_name (const std::string& name)
 {
-	set_name (name); 
+	set_name (name);
 	Widget* w = get_child();
 
 	if (w) {
-		w->set_name (name); 
-	} 
+		w->set_name (name);
+	}
 }

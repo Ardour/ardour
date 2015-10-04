@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2001 Paul Davis 
+    Copyright (C) 2000-2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ Stateful::~Stateful ()
 {
 	delete _properties;
 
-	// Do not delete _extra_xml.  The use of add_child_nocopy() 
+	// Do not delete _extra_xml.  The use of add_child_nocopy()
 	// means it needs to live on indefinately.
 
 	delete _instant_xml;
@@ -85,7 +85,7 @@ Stateful::extra_xml (const string& str, bool add_if_missing)
 	if (!node && add_if_missing) {
 		node = new XMLNode (str);
 		add_extra_xml (*node);
-	} 
+	}
 
 	return node;
 }
@@ -93,7 +93,7 @@ Stateful::extra_xml (const string& str, bool add_if_missing)
 void
 Stateful::save_extra_xml (const XMLNode& node)
 {
-	/* Looks for the child node called "Extra" and makes _extra_xml 
+	/* Looks for the child node called "Extra" and makes _extra_xml
 	   point to a copy of it. Will delete any existing node pointed
 	   to by _extra_xml if a new Extra node is found, but not
 	   otherwise.
@@ -131,11 +131,11 @@ Stateful::add_instant_xml (XMLNode& node, const std::string& directory_path)
 
 	/* Important: the destructor for an XMLTree deletes
 	   all of its nodes, starting at _root. We therefore
-	   cannot simply hand it our persistent _instant_xml 
+	   cannot simply hand it our persistent _instant_xml
 	   node as its _root, because we will lose it whenever
 	   the Tree goes out of scope.
 
-	   So instead, copy the _instant_xml node (which does 
+	   So instead, copy the _instant_xml node (which does
 	   a deep copy), and hand that to the tree.
 	*/
 
@@ -322,7 +322,7 @@ Stateful::resume_property_changes ()
 }
 
 bool
-Stateful::changed() const  
+Stateful::changed() const
 {
 	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
 		if (i->second->changed()) {
@@ -376,16 +376,16 @@ Stateful::clear_owned_changes ()
 		i->second->clear_owned_changes ();
 	}
 }
-  
+
 bool
-Stateful::set_id (const XMLNode& node) 
+Stateful::set_id (const XMLNode& node)
 {
 	const XMLProperty* prop;
 
 	if ((prop = node.property ("id")) != 0) {
 		_id = prop->value ();
 		return true;
-	} 
+	}
 
 	return false;
 }

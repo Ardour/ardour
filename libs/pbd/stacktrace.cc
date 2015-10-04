@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ PBD::trace_twb ()
 #include <execinfo.h>
 #include <cxxabi.h>
 
-static std::string 
+static std::string
 symbol_demangle (const std::string& l)
 {
 	int status;
@@ -63,7 +63,7 @@ symbol_demangle (const std::string& l)
 	return l;
 }
 
-std::string 
+std::string
 PBD::demangle (std::string const & l)
 {
 	std::string::size_type const b = l.find_first_of ("(");
@@ -93,12 +93,12 @@ PBD::stacktrace (std::ostream& out, int levels)
 	size_t size;
 	char **strings;
 	size_t i;
-     
+
 	size = backtrace (array, 200);
 
 	if (size) {
 		strings = backtrace_symbols (array, size);
-     
+
 		if (strings) {
 			
 			for (i = 0; i < size && (levels == 0 || i < size_t(levels)); i++) {
@@ -127,7 +127,7 @@ extern "C" {
 }
 #endif
 
-std::string 
+std::string
 PBD::demangle (std::string const & l) /* JE - !!!! 'PBD' namespace might possibly get removed (except it's still used in 'libs/canvas/item.cc') */
 {
 	return std::string();
@@ -177,7 +177,7 @@ c_stacktrace ()
 
 #else
 
-std::string 
+std::string
 PBD::demangle (std::string const & l) /* JE - !!!! 'PBD' namespace might possibly get removed (except it's still used in 'libs/canvas/item.cc') */
 {
 	return std::string();

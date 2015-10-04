@@ -2,25 +2,25 @@
     but based on ...
  */
 
-/*  REAPER OMF plug-in 
+/*  REAPER OMF plug-in
     Copyright (C) 2009 Hannes Breul
 
     Provides OMF import.
-    
+
     Based on the m3u example included in the Reaper SDK,
     Copyright (C) 2005-2008 Cockos Incorporated
-    
+
     Original source available at:
     http://www.reaper.fm/sdk/plugin/plugin.php#ext_dl
-    
+
     This software is provided 'as-is', without any express or implied
     warranty.  In no event will the authors be held liable for any damages
     arising from the use of this software.
-    
+
     Permission is granted to anyone to use this software for any purpose,
     including commercial applications, and to alter it and redistribute it
     freely, subject to the following restrictions:
-    
+
     1. The origin of this software must not be misrepresented; you must not
     claim that you wrote the original software. If you use this software
     in a product, an acknowledgment in the product documentation would be
@@ -56,7 +56,7 @@ using namespace std;
 using namespace PBD;
 
 //#define DEBUG(fmt,...) fprintf (stderr, fmt, ## __VA_ARGS__)
-#define DEBUG(fmt,...) 
+#define DEBUG(fmt,...)
 #define INFO(fmt,...) fprintf (stdout, fmt, ## __VA_ARGS__)
 
 #define MB_OK 0
@@ -66,8 +66,8 @@ MessageBox (FILE* /*ignored*/, const char* msg, const char* title, int status)
 	fprintf (stderr, msg);
 }
 
-void 
-OMF::name_types () 
+void
+OMF::name_types ()
 {
 	/* Add built-in types */
 	sqlite3_exec(db, "INSERT INTO lookup VALUES (1, 'TOC property 1')", 0, 0, 0);
@@ -118,9 +118,9 @@ OMF::name_types ()
 	sqlite3_exec(db, "DROP TABLE lookup", 0, 0, 0);
 }
 
-int 
+int
 OMF::load (const string& path)
-{ 
+{
 	if ((file = fopen(path.c_str(), "rb")) == 0) {
 		MessageBox(NULL, "Cannot open file","OMF Error", MB_OK);
 		return -1;
@@ -142,7 +142,7 @@ OMF::load (const string& path)
 	sqlite3_exec(db, "BEGIN", 0, 0, 0);
 	sqlite3_exec(db, "CREATE TABLE data (object, property, type, value, offset, length)", 0, 0, 0);
 	sqlite3_exec(db, "CREATE TABLE lookup (key, name)", 0, 0, 0);
-  
+
 	uint8_t magic[8];
 	fseek(file, -24, SEEK_END);
 	fread(magic, 8, 1, file);
@@ -169,7 +169,7 @@ OMF::load (const string& path)
 	fseek(file, -14, SEEK_END);
 	fread(&bSize, 2, 1, file);
 	bSize = e16(bSize);
-  
+
 	fseek(file, -8, SEEK_END);
 	fread(&tocStart, 4, 1, file);
 	tocStart = e32(tocStart);
@@ -178,8 +178,8 @@ OMF::load (const string& path)
 	fread(&tocSize, 4, 1, file);
 	tocSize = e32(tocSize);
 	DEBUG ("block size: %d\n toc start: %d\n  toc size: %d\n", bSize, tocStart, tocSize);
-  
-    
+
+
 	/* Calculate number of TOC blocks */
 	uint32_t tocBlocks = tocSize / (bSize * 1024) + 1;
 	DEBUG ("toc blocks: %d\n", tocBlocks);
@@ -205,7 +205,7 @@ OMF::load (const string& path)
 			char cByte; // TOC control byte
 			fseek(file, currentPos, SEEK_SET);
 			fread(&cByte, 1, 1, file);
-      
+
 			/* New object */
 			if (cByte == 1) {
 				fseek(file, currentPos + 1, SEEK_SET);
@@ -225,8 +225,8 @@ OMF::load (const string& path)
 				currentPos += 12; // Skip the bytes that were just read
 			}
 			/* ---------- */
-      
-      
+
+
 			/* New property */
 			else if (cByte == 2) {
 				fseek(file, currentPos + 1, SEEK_SET);
@@ -241,8 +241,8 @@ OMF::load (const string& path)
 				currentPos += 8;
 			}
 			/* ------------ */
-      
-      
+
+
 			/* New type */
 			else if (cByte == 3) {
 				fseek(file, currentPos + 1, SEEK_SET);
@@ -253,15 +253,15 @@ OMF::load (const string& path)
 				currentPos += 4;
 			}
 			/* -------- */
-      
-      
+
+
 			/* (unused) */
 			else if (cByte == 4) {
 				currentPos += 4;
 			}
 			/* -------- */
-      
-      
+
+
 			/* Reference to a value - 4/8 byte offset, 4/8 byte size */
 			else if ((cByte == 5) | (cByte == 6) | (cByte == 7) | (cByte == 8)) {
 				if (!skip) {
@@ -286,7 +286,7 @@ OMF::load (const string& path)
 					}
 					DEBUG("   offset: %d\n", dataOffset);
 					DEBUG("   length: %d\n", dataLength);
-    		  
+    		
 					if (currentType == 21) {
 						char* string = (char*) malloc((uint32_t) dataLength);
 						fseek(file, dataOffset, SEEK_SET);
@@ -325,8 +325,8 @@ OMF::load (const string& path)
 				}
 			}
 			/* ----------------------------------------------------- */
-      
-      
+
+
 			/* Zero byte value */
 			else if (cByte == 9) {
 				if (!skip) {
@@ -350,13 +350,13 @@ OMF::load (const string& path)
 					sqlite3_exec(db, query, 0, 0, 0);
 					sqlite3_free(query);
 					DEBUG("    value: %d\n", data);
-          
+
 				}
 				currentPos += 4;
 			}
 			/* --------------- */
-      
-      
+
+
 			/* Reference list */
 			else if (cByte == 15) {
 				uint32_t data = 0;
@@ -374,14 +374,14 @@ OMF::load (const string& path)
 			else {
 				break;
 			}
-      
+
 		}
 	}
 	/* --------------------- */
 	time(&endtime);
 	INFO("done. (%ld seconds)\n", endtime - starttime);
 	starttime = endtime;
-  
+
 	INFO("Assigning type and property names... ");
 	name_types ();
 	time(&endtime);
@@ -397,7 +397,7 @@ OMF::load (const string& path)
 	INFO("Resolving ObjRefArrays ");
 	sqlite3_get_table(db, "SELECT * FROM data WHERE type LIKE 'omfi:ObjRefArray' AND value = ''", &arrays, &arrayCount, 0, 0);
 	INFO("(%d to be processed)... ", arrayCount);
-	sqlite3_exec(db,"DELETE FROM data WHERE type LIKE 'omfi:ObjRefArray' AND value = ''",0,0,0); 
+	sqlite3_exec(db,"DELETE FROM data WHERE type LIKE 'omfi:ObjRefArray' AND value = ''",0,0,0);
 	for (l = 6; l <= arrayCount * 6; l+=6) {
 		uint16_t counter;
 		uint32_t arrOffs = atoi(arrays[l+4]);
@@ -451,7 +451,7 @@ OMF::load (const string& path)
 	  }
 	  sqlite3_free_table(refs);
 	  printf("temporary table deleted\n"); */
-  
+
 	if (!isAvid) {
 		INFO("Resolving ObjRefs ");
 		sqlite3_exec(db,"CREATE TABLE reference (object1, property1, value1)",0,0,0);
@@ -463,7 +463,7 @@ OMF::load (const string& path)
 		char **refs;
 		int refCount;
 		int currentRef;
-  
+
 		sqlite3_get_table(db,"SELECT * FROM reference", &refs, &refCount, 0, 0);
 		INFO ("(%d to be processed)... ", refCount);
 		for (currentRef = 3; currentRef <= refCount * 3; currentRef += 3) {
@@ -474,7 +474,7 @@ OMF::load (const string& path)
 		sqlite3_free_table(refs);
 	}
 	DEBUG("temporary table deleted\n");
-  
+
 	/*sqlite3_get_table(db,"SELECT object, property, value FROM data WHERE type LIKE 'omfi:ObjRef'", &refs, &refCount, 0, 0);
 	  printf("%d\n", refCount);
 	  for (currentRef = 3; currentRef <= refCount * 3; currentRef += 3) {
@@ -525,9 +525,9 @@ OMF::load (const string& path)
 	time(&endtime);
 	INFO("done. (%ld seconds)\n", endtime - starttime);
 	starttime = endtime;
-  
+
 	//return -1;
-  
+
 	/* extract media data */
 	printf("Extracting media data...\n");
 	char **objects;
@@ -623,7 +623,7 @@ OMF::load (const string& path)
 		strncpy(clsString, (char *) &clsID, 4);
 		clsString[4] = 0;
 		DEBUG("%d -> %s\n", clsID, clsString);
-    
+
 		sqlite3_exec(db,sqlite3_mprintf("INSERT INTO data VALUES (%s, '%s', 'omfi:ClassID', '%s', -1, -1)", classID[currentClsID], classID[currentClsID + 1], clsString),0,0,0);
 	}
 	sqlite3_free_table(classID);
@@ -638,7 +638,7 @@ OMF::load (const string& path)
 	/*time(&endtime);
 	  printf("Took %ld seconds\n", endtime - starttime);
 	  starttime = endtime;*/
-  
+
 
 	time(&endtime);
 	INFO("done. (%ld seconds)\n", endtime - starttime);

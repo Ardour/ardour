@@ -110,7 +110,7 @@ Editor::external_audio_dialog ()
 		if (atv) {
 			if (atv->is_audio_track()) {
 				audio_track_cnt++;
-			} 
+			}
 
 		} else {
 			MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(*x);
@@ -628,7 +628,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 
 					source = boost::dynamic_pointer_cast<AudioFileSource> (
 						SourceFactory::createExternal (DataType::AUDIO, *_session,
-									       path, n, 
+									       path, n,
 									       (mode == ImportAsTapeTrack
 										? Source::Destructive
 										: Source::Flag (0)),

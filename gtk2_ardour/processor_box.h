@@ -75,14 +75,14 @@ namespace ARDOUR {
 
 class ProcessorBox;
 
-class ProcessorWindowProxy : public WM::ProxyBase 
+class ProcessorWindowProxy : public WM::ProxyBase
 {
   public:
     ProcessorWindowProxy (std::string const &, ProcessorBox *, boost::weak_ptr<ARDOUR::Processor>);
     ~ProcessorWindowProxy();
 
     Gtk::Window* get (bool create = false);
-    
+
     boost::weak_ptr<ARDOUR::Processor> processor () const {
 	    return _processor;
     }

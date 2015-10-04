@@ -53,7 +53,7 @@ struct LIBCANVAS_API WaveViewThreadRequest
 	        Cancel,
 	        Draw
         };
-        
+
 	WaveViewThreadRequest  () : stop (0) {}
 	
 	bool should_stop () const { return (bool) g_atomic_int_get (const_cast<gint*>(&stop)); }
@@ -113,7 +113,7 @@ class LIBCANVAS_API WaveViewCache
 		uint64_t timestamp;
 		
 		Entry (int chan, Coord hght, float amp, Color fcl, double spp, framepos_t strt, framepos_t ed,
-		       Cairo::RefPtr<Cairo::ImageSurface> img) 
+		       Cairo::RefPtr<Cairo::ImageSurface> img)
 			: channel (chan)
 			, height (hght)
 			, amplitude (amp)
@@ -165,14 +165,14 @@ class LIBCANVAS_API WaveViewCache
          */
         typedef std::pair<boost::shared_ptr<ARDOUR::AudioSource>,boost::shared_ptr<Entry> > ListEntry;
         typedef std::vector<ListEntry> CacheList;
- 
+
         struct SortByTimestamp {
 	        bool operator() (const WaveViewCache::ListEntry& a, const WaveViewCache::ListEntry& b) {
 		        return a.second->timestamp < b.second->timestamp;
 	        }
         };
         friend struct SortByTimestamp;
-        
+
         uint64_t image_cache_size;
         uint64_t _image_cache_threshold;
 
@@ -185,7 +185,7 @@ class LIBCANVAS_API WaveView : public Item, public sigc::trackable
 {
 public:
 
-        enum Shape { 
+        enum Shape {
 		Normal,
 		Rectified
         };
@@ -201,13 +201,13 @@ public:
 
 	   x = 0 in the waveview corresponds to the first waveform datum taken
 	   from region->start() samples into the source data.
-	   
-	   x = N in the waveview corresponds to the (N * spp)'th sample 
+	
+	   x = N in the waveview corresponds to the (N * spp)'th sample
 	   measured from region->start() into the source data.
-	   
+	
 	   when drawing, we will map the zeroth-pixel of the waveview
-	   into a window. 
-	   
+	   into a window.
+	
 	   The waveview itself contains a set of pre-rendered Cairo::ImageSurfaces
 	   that cache sections of the display. This is filled on-demand and
 	   never cleared until something explicitly marks the cache invalid
@@ -221,7 +221,7 @@ public:
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
-    
+
 	void set_samples_per_pixel (double);
 	void set_height (Distance);
 	void set_channel (int);
@@ -252,7 +252,7 @@ public:
         void set_shape (Shape);
 
         void set_always_get_image_in_thread (bool yn);
-        
+
         /* currently missing because we don't need them (yet):
 	   set_shape_independent();
 	   set_logscaled_independent()
@@ -262,7 +262,7 @@ public:
         static void set_global_logscaled (bool);
         static void set_global_shape (Shape);
         static void set_global_show_waveform_clipping (bool);
-    
+
         static double  global_gradient_depth()  { return _global_gradient_depth; }
         static bool    global_logscaled()  { return _global_logscaled; }
         static Shape   global_shape()  { return _global_shape; }
@@ -336,7 +336,7 @@ public:
 	mutable bool get_image_in_thread;
 
 	/** If true, calls to get_image() will render a missing wave image
-	   in the calling thread. Set true for waveviews we expect to 
+	   in the calling thread. Set true for waveviews we expect to
 	   keep updating (e.g. while recording)
 	*/
 	bool always_get_image_in_thread;
@@ -371,7 +371,7 @@ public:
 	        double spread;
 	        bool clip_max;
 	        bool clip_min;
-	        
+	
 	        LineTips() : top (0.0), bot (0.0), clip_max (false), clip_min (false) {}
         };
 
@@ -388,11 +388,11 @@ public:
         void queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, framepos_t start, framepos_t end) const;
         void generate_image (boost::shared_ptr<WaveViewThreadRequest>, bool in_render_thread) const;
         boost::shared_ptr<WaveViewCache::Entry> cache_request_result (boost::shared_ptr<WaveViewThreadRequest> req) const;
-        
+
         void image_ready ();
-        
+
         mutable boost::shared_ptr<WaveViewCache::Entry> _current_image;
-        
+
 	mutable boost::shared_ptr<WaveViewThreadRequest> current_request;
 	
 	static WaveViewCache* images;

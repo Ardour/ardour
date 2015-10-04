@@ -5,7 +5,7 @@
 
 #include "gtkmm2ext/visibility.h"
 
-class LIBGTKMM2EXT_API CairoPacker 
+class LIBGTKMM2EXT_API CairoPacker
 {
   public:
 	CairoPacker () {}

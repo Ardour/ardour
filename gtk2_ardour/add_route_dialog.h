@@ -49,14 +49,14 @@ class AddRouteDialog : public ArdourDialog
 	AddRouteDialog ();
 	~AddRouteDialog ();
 
-        enum TypeWanted { 
+        enum TypeWanted {
 		AudioTrack,
 		MidiTrack,
 		MixedTrack,
 		AudioBus
 	};
         TypeWanted type_wanted() const;
-       
+
         ARDOUR::ChanCount channels ();
 	int count ();
 

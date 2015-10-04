@@ -42,7 +42,7 @@ public:
     mutable float* multiple;
     mutable float* constant;
     mutable Points::size_type cached_size;
-    
+
     void cache_shape_computation () const;
 };
 	

@@ -6,7 +6,7 @@
 namespace Gtkmm2ext {
 
 	/* widget states: unlike GTK, visual states like "Selected" or "Prelight"
-	   are orthogonal to active states. 
+	   are orthogonal to active states.
 	*/
 
 	enum LIBGTKMM2EXT_API ActiveState {

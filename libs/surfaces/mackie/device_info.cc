@@ -100,8 +100,8 @@ DeviceInfo::mackie_control_buttons ()
 	_global_buttons[Button::UserA] = GlobalButtonInfo ("Rear Panel User Switch 1", "user", 0x66);
 	_global_buttons[Button::UserB] = GlobalButtonInfo ("Rear Panel User Switch 2", "user", 0x67);
 
-	//TODO Implement "rear panel external control": a connection for a resistive 
-	//TODO element expression pedal . Message: 0xb0 0x2e 0xVV where 0xVV = external 
+	//TODO Implement "rear panel external control": a connection for a resistive
+	//TODO element expression pedal . Message: 0xb0 0x2e 0xVV where 0xVV = external
 	//TODO controller position value (0x00 to 0x7f)
 
 	_strip_buttons[Button::RecEnable] = StripButtonInfo (0x0, "Rec");
@@ -547,7 +547,7 @@ DeviceInfo::reload_device_info ()
 
 std::ostream& operator<< (std::ostream& os, const Mackie::DeviceInfo& di)
 {
-	os << di.name() << ' ' 
+	os << di.name() << ' '
 	   << di.strip_cnt() << ' '
 	   << di.extenders() << ' '
 	   << di.master_position() << ' '

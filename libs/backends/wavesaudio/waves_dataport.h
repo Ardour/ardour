@@ -22,7 +22,7 @@
 
 #include "ardour/types.h"
 #include "memory.h"
-        
+
 namespace ARDOUR {
 
 class WavesDataPort {
@@ -34,7 +34,7 @@ public:
     {
         return _name;
     }
-    
+
     int set_name (const std::string &name)
     {
         _name = name;
@@ -72,9 +72,9 @@ public:
     }
 
     int connect (WavesDataPort *port);
-    
+
     int disconnect (WavesDataPort *port);
-    
+
     void disconnect_all ();
 
     bool inline is_connected (const WavesDataPort *port) const
@@ -113,4 +113,4 @@ private:
 } // namespace
 
 #endif /* __libardour_waves_dataport_h__ */
-    
+

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,20 +25,20 @@ using namespace std;
 
 static void do_not_delete_the_loop_pointer (void*) { }
 
-Glib::Threads::Private<EventLoop> EventLoop::thread_event_loop (do_not_delete_the_loop_pointer); 
+Glib::Threads::Private<EventLoop> EventLoop::thread_event_loop (do_not_delete_the_loop_pointer);
 
-EventLoop* 
+EventLoop*
 EventLoop::get_event_loop_for_thread() {
 	return thread_event_loop.get ();
 }
 
-void 
-EventLoop::set_event_loop_for_thread (EventLoop* loop) 
+void
+EventLoop::set_event_loop_for_thread (EventLoop* loop)
 {
 	thread_event_loop.set (loop);
 }
 
-void* 
+void*
 EventLoop::invalidate_request (void* data)
 {
         InvalidationRecord* ir = (InvalidationRecord*) data;
@@ -46,7 +46,7 @@ EventLoop::invalidate_request (void* data)
 	/* Some of the requests queued with an EventLoop may involve functors
 	 * that make method calls to objects whose lifetime is shorter
 	 * than the EventLoop's. We do not want to make those calls if the
-	 * object involve has been destroyed. To prevent this, we 
+	 * object involve has been destroyed. To prevent this, we
 	 * provide a way to invalidate those requests when the object is
 	 * destroyed.
 	 *
@@ -57,7 +57,7 @@ EventLoop::invalidate_request (void* data)
 	 *
 	 * The object is currently being destroyed and so we want to
 	 * mark all requests involving this object that are queued with
-	 * any EventLoop as invalid. 
+	 * any EventLoop as invalid.
 	 *
 	 * As of April 2012, we are usign sigc::trackable as the base object
 	 * used to queue calls to ::invalidate_request() to be made upon
@@ -74,7 +74,7 @@ EventLoop::invalidate_request (void* data)
 			(*i)->invalidation = 0;
 		}
 		delete ir;
-        } 
+        }
 
         return 0;
 }

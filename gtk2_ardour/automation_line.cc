@@ -201,7 +201,7 @@ void
 AutomationLine::hide ()
 {
 	/* leave control points setting unchanged, we are just hiding the
-	   overall line 
+	   overall line
 	*/
 	
 	set_visibility (AutomationLine::VisibleAspects (_visible & ~Line));
@@ -521,13 +521,13 @@ struct ControlPointSorter
 	bool operator() (ControlPoint const * a, ControlPoint const * b) const {
 		if (floateq (a->get_x(), b->get_x(), 1)) {
 			return a->view_index() < b->view_index();
-		} 
+		}
 		return a->get_x() < b->get_x();
 	}
 };
 
 AutomationLine::ContiguousControlPoints::ContiguousControlPoints (AutomationLine& al)
-	: line (al), before_x (0), after_x (DBL_MAX) 
+	: line (al), before_x (0), after_x (DBL_MAX)
 {
 }
 
@@ -539,7 +539,7 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 	if (sz > 0 && sz < line.npoints()) {
 		const TempoMap& map (e.session()->tempo_map());
 
-		/* determine the limits on x-axis motion for this 
+		/* determine the limits on x-axis motion for this
 		   contiguous range of control points
 		*/
 
@@ -573,8 +573,8 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 	}
 }
 
-double 
-AutomationLine::ContiguousControlPoints::clamp_dx (double dx) 
+double
+AutomationLine::ContiguousControlPoints::clamp_dx (double dx)
 {
 	if (empty()) {
 		return dx;
@@ -594,14 +594,14 @@ AutomationLine::ContiguousControlPoints::clamp_dx (double dx)
 		cp = front();
 	}
 
-	tx = cp->get_x() + dx; // new possible position if we just add the motion 
+	tx = cp->get_x() + dx; // new possible position if we just add the motion
 	tx = max (tx, before_x); // can't move later than following point
 	tx = min (tx, after_x);  // can't move earlier than preceeding point
-	return  tx - cp->get_x (); 
+	return  tx - cp->get_x ();
 }
 
-void 
-AutomationLine::ContiguousControlPoints::move (double dx, double dy) 
+void
+AutomationLine::ContiguousControlPoints::move (double dx, double dy)
 {
 	for (std::list<ControlPoint*>::iterator i = begin(); i != end(); ++i) {
 		(*i)->move_to ((*i)->get_x() + dx, (*i)->get_y() - line.height() * dy, ControlPoint::Full);
@@ -645,7 +645,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 
 	if (!_drag_had_movement) {
 
-		/* "first move" ... do some stuff that we don't want to do if 
+		/* "first move" ... do some stuff that we don't want to do if
 		   no motion ever took place, but need to do before we handle
 		   motion.
 		*/
@@ -680,8 +680,8 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 	/* OK, now on to the stuff related to *this* motion event. First, for
 	 * each contiguous range, figure out the maximum x-axis motion we are
 	 * allowed (because of neighbouring points that are not moving.
-	 * 
-	 * if we are moving forwards with push, we don't need to do this, 
+	 *
+	 * if we are moving forwards with push, we don't need to do this,
 	 * since all later points will move too.
 	 */
 
@@ -1260,7 +1260,7 @@ AutomationLine::interpolation_changed (AutomationList::InterpolationStyle style)
 }
 
 void
-AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, double tx, double ty, 
+AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, double tx, double ty,
                                            AutomationList::iterator model, uint32_t npoints)
 {
 	ControlPoint::ShapeType shape;

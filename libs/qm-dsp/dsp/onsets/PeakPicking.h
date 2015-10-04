@@ -51,7 +51,7 @@ struct PPickParams
     QFitThresh QuadThresh;
 };
 
-class PeakPicking  
+class PeakPicking
 {
 public:
     PeakPicking( PPickParams Config );

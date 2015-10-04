@@ -89,7 +89,7 @@ protected:
 	PaError testStateValidness(int sampleRate, int bufferSize);
 	///////////////////////////////////////////////////////////
 	
-	static int TheCallback (const void *pInputBuffer, void *pOutputBuffer, unsigned long framesPerBuffer, 
+	static int TheCallback (const void *pInputBuffer, void *pOutputBuffer, unsigned long framesPerBuffer,
 							const PaStreamCallbackTimeInfo* /*pTimeInfo*/, PaStreamCallbackFlags /*statusFlags*/, void *pUserData );
 
 	unsigned int m_DeviceID; ///< The PA device id

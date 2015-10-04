@@ -58,7 +58,7 @@ template<class T> inline T WUMinMax(const T &Smallest, const T &Biggest, const T
 	#include <math.h>
 
 #ifndef __GNUC__
-#define __abs(x)	abs(x) 
+#define __abs(x)	abs(x)
 #define __labs(x)	labs(x)
 #define __fabs(x)	fabs(x)
 #endif
@@ -87,8 +87,8 @@ template<class T> inline T WUMinMax(const T &Smallest, const T &Biggest, const T
 // log2: on Windows there's no proper definition for log2, whereas on other platform there is.
 	#ifndef WUlog2
     #if defined(PLATFORM_WINDOWS)
-        #define WUlog2(x)  (kdOneOverLog2 * log10((x))) 
-    #else    
+        #define WUlog2(x)  (kdOneOverLog2 * log10((x)))
+    #else
         #define WUlog2(x) log2(x)
     #endif
     #endif

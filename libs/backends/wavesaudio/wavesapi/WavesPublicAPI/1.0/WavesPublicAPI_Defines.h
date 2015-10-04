@@ -30,9 +30,9 @@
         #define WPAPI_DllExport __attribute__ ((visibility("default")))
         #define __WPAPI_CDECL
         #define __WPAPI_STDCALL
-    
+
     #else
-    
+
         #define WPAPI_DllExport __declspec(export)
         #define __WPAPI_CDECL
         #define __WPAPI_STDCALL
@@ -46,7 +46,7 @@
     #define WPAPI_DllExport __declspec(dllexport)
 	#define __WPAPI_CDECL __cdecl
 	#define __WPAPI_STDCALL __stdcall
-#endif 
+#endif
 
 #ifdef __linux__
 

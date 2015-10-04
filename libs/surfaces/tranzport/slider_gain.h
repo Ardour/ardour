@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,13 +15,13 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  *   */
 
 #ifndef ardour_slider_gain
 #define ardour_slider_gain
 
-static inline double 
+static inline double
 gain_to_slider_position (ARDOUR::gain_t g)
 {
 	if (g == 0) return 0;
@@ -29,7 +29,7 @@ gain_to_slider_position (ARDOUR::gain_t g)
 
 }
 
-static inline ARDOUR::gain_t 
+static inline ARDOUR::gain_t
 slider_position_to_gain (double pos)
 {
 	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */

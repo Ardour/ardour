@@ -197,7 +197,7 @@ ArdourButton::set_alignment (const float xa, const float ya)
 /* TODO make this a dedicated function elsewhere.
  *
  * Option 1:
- * virtual ArdourButton::render_vector_icon() 
+ * virtual ArdourButton::render_vector_icon()
  * ArdourIconButton::render_vector_icon
  *
  * Option 2:

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010 Paul Davis 
+    Copyright (C) 2010 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,14 +31,14 @@ class LIBPBD_API EnvironmentalProtectionAgency {
   public:
         EnvironmentalProtectionAgency (bool arm = true, const std::string& envname = std::string());
         ~EnvironmentalProtectionAgency ();
-        
+
         void arm ();
         void save ();
         void restore () const;
-        
+
         static EnvironmentalProtectionAgency* get_global_epa () { return _global_epa; }
         static void set_global_epa (EnvironmentalProtectionAgency* epa) { _global_epa = epa; }
-        
+
   private:
         void clear () const;
 		

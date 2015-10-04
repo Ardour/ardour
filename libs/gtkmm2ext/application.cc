@@ -1,4 +1,4 @@
-/* GTK+ Integration with platform-specific application-wide features 
+/* GTK+ Integration with platform-specific application-wide features
  * such as the OS X menubar and application delegate concepts.
  *
  * Copyright (C) 2007 Pioneer Research Center USA, Inc.

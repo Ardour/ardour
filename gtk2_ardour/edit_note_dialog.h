@@ -30,7 +30,7 @@ public:
 	EditNoteDialog (MidiRegionView* rv, std::set<NoteBase*> n);
 
 	void done (int);
-    
+
   private:
 	MidiRegionView* _region_view;
 	std::set<NoteBase*> _events;

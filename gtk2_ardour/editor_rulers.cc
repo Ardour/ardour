@@ -742,7 +742,7 @@ Editor::set_timecode_ruler_scale (framepos_t lower, framepos_t upper)
 		return;
 	}
 
-	fr = _session->frame_rate();        
+	fr = _session->frame_rate();
 
 	if (lower > (spacer = (framepos_t) (128 * Editor::get_current_zoom ()))) {
 		lower = lower - spacer;
@@ -816,7 +816,7 @@ Editor::set_timecode_ruler_scale (framepos_t lower, framepos_t upper)
 	} else if (range <= 8 * 60 * 60 * fr) { /* 4 - 8 hrs*/
 		timecode_ruler_scale = timecode_show_hours;
 		timecode_mark_modulo = 1;
-		timecode_nmarks = 2 + 8; 
+		timecode_nmarks = 2 + 8;
 	} else if (range <= 16 * 60 * 60 * fr) { /* 16-24 hrs*/
 		timecode_ruler_scale = timecode_show_hours;
 		timecode_mark_modulo = 1;
@@ -832,7 +832,7 @@ Editor::set_timecode_ruler_scale (framepos_t lower, framepos_t upper)
 
                    But in this case, where the range defined by lower and uppper can vary
                    substantially (basically anything from 24hrs+ to several billion years)
-                   trying to decide which tick marks to show does require us to know 
+                   trying to decide which tick marks to show does require us to know
                    about the available width.
                 */
 
@@ -1002,7 +1002,7 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
                                 mark.position = pos;
                                 marks.push_back (mark);
                                 ++n;
-                        } 
+                        }
                         /* can't use Timecode::increment_hours() here because we may be traversing thousands of hours
                            and doing it 1 hour at a time is just stupid (and slow).
                         */
@@ -1147,7 +1147,7 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
 	}
 }
 
-static void 
+static void
 edit_last_mark_label (std::vector<ArdourCanvas::Ruler::Mark>& marks, const std::string& newlabel)
 {
 	ArdourCanvas::Ruler::Mark copy = marks.back();
@@ -1798,7 +1798,7 @@ Editor::set_minsec_ruler_scale (framepos_t lower, framepos_t upper)
 
                    But in this case, where the range defined by lower and uppper can vary
                    substantially (anything from 24hrs+ to several billion years)
-                   trying to decide which tick marks to show does require us to know 
+                   trying to decide which tick marks to show does require us to know
                    about the available width.
                 */
 
@@ -1853,7 +1853,7 @@ Editor::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdoubl
 			marks.push_back (mark);
 		}
                 break;
-                
+
 	case minsec_show_seconds:
 		for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
                 	sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
@@ -1909,7 +1909,7 @@ Editor::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdoubl
 			marks.push_back (mark);
                  }
                  break;
-                 
+
         case minsec_show_many_hours:
                 for (n = 0; n < minsec_nmarks; ) {
                         sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);

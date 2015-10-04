@@ -1,20 +1,20 @@
 /*
   Copyright (C) 2014 Waves Audio Ltd.
- 
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2 of the License, or
   (at your option) any later version.
- 
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
- 
+
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- 
+
 */
 
 #ifndef __gtk2_ardour__engine_state_controller__
@@ -29,7 +29,7 @@
 namespace ARDOUR {
 
 class AudioBackendInfo;
-    
+
 /**
  * @class EngineStateController
  * @brief EngineStateController class.
@@ -40,33 +40,33 @@ class AudioBackendInfo;
 class EngineStateController
 {
                                         public:
-    
+
 	// public data types:
-    
-	/** 
+
+	/**
 	 * @struct PortState
 	 * Structure which represents AudioPort state
 	 */
 	struct PortState {
 		std::string name; ///< Audio Port name
 		bool active;      ///< Audio Port state
-        
+
 		PortState ()
 			: name("")
 			, active(false)
 		{
 		}
-        
+
 		PortState (const std::string& name)
 			: name(name)
 			, active(false)
 		{
 		}
-        
+
 		bool operator==(const PortState& rhs) {return rhs.name == name; }
-        
+
 	};
-    
+
 	/// @typedef Type for the list of all available audio ports
 	typedef std::list<PortState> PortStateList;
 
@@ -81,7 +81,7 @@ class EngineStateController
 		bool available;       ///< Midi Port availability - if it is physicaly available or not
 		bool scene_connected; ///< Is midi port used for scene MIDI marker in/out
 		bool mtc_in;          ///< Is midi port used as MTC in
-        
+
 		MidiPortState(const std::string& name)
 			: name(name)
 			, active(false)
@@ -89,89 +89,89 @@ class EngineStateController
 			, scene_connected(false)
 			, mtc_in(false)
 		{}
-        
+
 		bool operator==(const MidiPortState& rhs)
 		{
 			return name == rhs.name;
 		}
 	};
-    
+
 	/// @typedef Type for the list of MidiPorts ever registered in the system
 	typedef std::list<MidiPortState> MidiPortStateList;
-    
+
 
 	//Interfaces
-    
+
 	/** Get an instance of EngineStateController singleton.
 	 * @return EngineStateController instance pointer
 	 */
 	static EngineStateController* instance ();
-    
+
 	/** Associate session with EngineStateController instance.
 	 */
 	void set_session (Session* session);
-    
+
 	/** Remove link to the associated session.
 	 */
 	void remove_session ();
-    
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// General backend/device information methods
-    
+
 	/** Provides names of all available backends.
 	 *
 	 * @param[out] available_backends - vector of available backends
 	 */
 	void available_backends (std::vector<const AudioBackendInfo*>& available_backends);
-    
+
 	/** Provides the name of currently used backend.
 	 *
 	 * @return the name of currently used backend
 	 */
 	const std::string& get_current_backend_name() const;
-    
+
 	/** Provides the name of currently used device.
 	 *
 	 * @return the name of currently used device
 	 */
 	const std::string& get_current_device_name () const;
-    
+
 	/** Provides names for all available devices.
 	 *
 	 * @param[out] device_vector - vector of available devices
 	 */
 	void enumerate_devices (std::vector<ARDOUR::AudioBackend::DeviceStatus>& device_vector) const;
-    
+
 	/** Get sample rate used by current device.
 	 *
 	 * @return current sample rate
 	 */
 	ARDOUR::framecnt_t get_current_sample_rate () const;
-    
+
 	/** Get default sample rate for current backend.
 	 *
 	 * @return default sample rate for current backend
 	 */
 	ARDOUR::framecnt_t get_default_sample_rate () const;
-    
+
 	/** Get sample rates which are supported by current device and current backend.
 	 *
 	 * @param[out] sample_rates - vector of supported sample rates
 	 */
 	void available_sample_rates_for_current_device (std::vector<float>& sample_rates) const;
-    
+
 	/** Get buffer size used by current device.
 	 *
 	 * @return current buffer size
 	 */
 	ARDOUR::pframes_t get_current_buffer_size () const;
-    
+
 	/** Get default buffer size for current backend.
 	 *
 	 * @return default buffer size for current backend
 	 */
 	ARDOUR::pframes_t get_default_buffer_size () const;
-    
+
 	/** Get buffer sizes which are supported by current device and current backend.
 	 *
 	 * @param[out] buffer_sizes - vector of supported buffer_sizes
@@ -180,7 +180,7 @@ class EngineStateController
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// device state control methods
-    
+
 	/** Get the number of all enabled Audio inputs.
 	 *
 	 * @return number of all enabled Audio inputs
@@ -191,7 +191,7 @@ class EngineStateController
 	 * @return number of all enabled Audio outputs
 	 */
 	uint32_t            get_available_outputs_count () const;
-    
+
 	/** Get vector of all enabled physical Audio input port names.
 	 *
 	 * @param[out] port_names - vector of all enabled Audio input names
@@ -202,7 +202,7 @@ class EngineStateController
 	 * @param[out] port_names - vector of all enabled Audio input names
 	 */
 	void                get_physical_audio_outputs (std::vector<std::string>& port_names);
-    
+
 	/** Get vector of all enabled physical MIDI input port names.
 	 *
 	 * @param[out] port_names - vector of all enabled MIDI input names
@@ -213,7 +213,7 @@ class EngineStateController
 	 * @param[out] port_names - vector of all enabled MIDI output names
 	 */
 	void                get_physical_midi_outputs (std::vector<std::string>& port_names);
-    
+
 	/** Sets new state to all Audio inputs.
 	 *
 	 * @param[in] state - new state
@@ -224,7 +224,7 @@ class EngineStateController
 	 * @param[in] state - new state
 	 */
 	void                set_state_to_all_outputs(bool state);
-    
+
 	/** Get vector of states for all physical Audio input ports.
 	 *
 	 * @param[out] channel_states - vector of input port states
@@ -235,7 +235,7 @@ class EngineStateController
 	 * @param[out] channel_states - vector of output port states
 	 */
 	void                get_physical_audio_output_states(std::vector<PortState>& channel_states);
-    
+
 	/** Set state of the specified Audio input port.
 	 *
 	 * @param[in] port_name - input name
@@ -248,7 +248,7 @@ class EngineStateController
 	 * @param[in] state - new state
 	 */
 	void                set_physical_audio_output_state(const std::string& port_name, bool state);
-    
+
 	/** Get state of the specified Audio input port.
 	 *
 	 * @param[in] port_name - input name
@@ -261,7 +261,7 @@ class EngineStateController
 	 * @return output state
 	 */
 	bool                get_physical_audio_output_state(const std::string& port_name);
-    
+
 
 	/** Get vector of all enabled MIDI input port names.
 	 *
@@ -290,7 +290,7 @@ class EngineStateController
 	 * return name of ltc source port
 	 */
 	std::string          get_ltc_source_port ();
-    
+
 	/** Set ltc output port
 	 *
 	 * @param[in] port - name of ltc output port
@@ -301,7 +301,7 @@ class EngineStateController
 	 * return name of ltc output port
 	 */
 	std::string         get_ltc_output_port ();
-    
+
 	/** Set state of the specified MIDI input port.
 	 *
 	 * @param[in] port_name - input name
@@ -328,7 +328,7 @@ class EngineStateController
 	 * @return output state
 	 */
 	bool                get_physical_midi_output_state(const std::string& port_name, bool& scene_connected);
-    
+
 	/** Set state of Scene In connection for the specified MIDI input port.
 	 *
 	 * @param[in] port_name - input name
@@ -341,30 +341,30 @@ class EngineStateController
 	 * @param[in] state - new state
 	 */
 	void                set_physical_midi_scenen_out_connection_state(const std::string&, bool);
-    
+
 	/** Disocnnect all MIDI input ports from Scene In.
 	 */
 	void                set_all_midi_scene_inputs_disconnected();
 	/** Disocnnect all MIDI output ports from Scene Out.
 	 */
 	void                set_all_midi_scene_outputs_disconnected();
-    
+
 	/** Set MIDI TimeCode input port
 	 * @note There is a sense to choose MIDI TimeCode input only because
 	 * our MIDI TimeCode is propagated to all midi output ports.
 	 */
 	void                set_mtc_source_port (const std::string&);
-    
+
 	/** Check if AudioEngine setup is required
 	 * @return true if setup is required, otherwise - false
 	 */
 	bool                is_setup_required() const {return ARDOUR::AudioEngine::instance()->setup_required (); }
-    
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Methods set parameters inside the controller
 	// the state of engine won't change untill we make a "push" of this state to the backend
 	// NOTE: Use push_state_to_backend() method to update backend with the most recent controller state
-    
+
 	/** Set new sample rate for current device in EngineStateController database
 	 * @note Use push_state_to_backend() method to update backend/device state with the most recent controller state
 	 * @param sample_rate - new sample rate
@@ -375,7 +375,7 @@ class EngineStateController
 	 * @param buffer_size - new buffer size
 	 */
 	bool        set_new_buffer_size_in_controller(pframes_t buffer_size);
-    
+
 	/** @brief push current controller state to backend.
 	 * Propagate and set all current EngineStateController parameters to the backend
 	 * @note Engine will be restarted if it's running when this method is called.
@@ -397,7 +397,7 @@ class EngineStateController
 	 */
 	bool        set_new_device_as_current(const std::string& device_name);
 
-    
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Methods to save/serialize setting states
 
@@ -408,7 +408,7 @@ class EngineStateController
 	/** Save Audio/Midi settings (entire EngineStateController database) to config persistently
 	 */
 	void        save_audio_midi_settings();
-    
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	//UPDATE SIGNALS
 	/** This signal is emitted if the sample rate changes */
@@ -428,7 +428,7 @@ class EngineStateController
 	PBD::Signal0<void> EngineStopped;
 	/** This signal is emitted if Engine processing is terminated */
 	PBD::Signal0<void> EngineHalted;
-    
+
 	/** This signal is emitted if the AUDIO input channel configuration changes */
 	PBD::Signal0<void> InputConfigChanged;
 	/** This signal is emitted if the AUDIO output channel configuration changes */
@@ -437,7 +437,7 @@ class EngineStateController
 	 * @note By output connection mode "Stereo Out" or "Multi Out" is meant
 	 */
 	PBD::Signal0<void> OutputConnectionModeChanged;
-    
+
 	/** This signals is emitted if the MIDI input channel configuration changes */
 	PBD::Signal0<void> MIDIInputConfigChanged;
 	/** This signals is emitted if the MIDI output channel configuration changes */
@@ -446,23 +446,23 @@ class EngineStateController
 	PBD::Signal2<void, const std::vector<std::string>&, bool> MIDISceneInputConnectionChanged;
 	/** This signals is emitted if the MIDI Scene Out connection changes */
 	PBD::Signal2<void, const std::vector<std::string>&, bool> MIDISceneOutputConnectionChanged;
-    
+
 	/** This signal is emitted if the MTC Input channel is changed */
 	PBD::Signal1<void, const std::string&> MTCInputChanged;
-    
+
 	/** This signal is emitted if new Audio/MIDI ports are registered or unregistered */
 	PBD::Signal0<void> PortRegistrationChanged;
-    
+
                                         private:
 
 	EngineStateController(); /// singleton
 	~EngineStateController(); /// singleton
 	EngineStateController(const EngineStateController& ); /// prohibited
 	EngineStateController& operator=(const EngineStateController&); /// prohibited
-    
+
 	////////////////////////////////////////////////////////////////////////////////////////////
 	// private data structures
-    
+
 	/** @struct Engine state
 	 * @brief State structure.
 	 * Contains information about single device/backend state
@@ -477,7 +477,7 @@ class EngineStateController
 		PortStateList multi_out_channel_states; ///< states of device Audio inputs in Multi Out mode
 		PortStateList stereo_out_channel_states; ///< states of device Audio inputs in Stereo Out mode
 		bool active; ///< was this state the most recent active one
-        
+
 		State()
 			: sample_rate(0)
 			, buffer_size(0)
@@ -487,19 +487,19 @@ class EngineStateController
 			, active (false)
 		{
 		}
-        
+
 		bool operator==(const State& rhs)
 		{
 			return (backend_name == rhs.backend_name) && (device_name == rhs.device_name);
 		}
-        
+
 		/** Forms string name for the state
 		 * @return name string
 		 */
 		std::string form_state_name() {
 			return std::string("State:" + backend_name + ":" + device_name);
 		}
-        
+
 		/** @struct StatepPredicate
 		 * This predicate is used to identify a state during search in the list of states
 		 */
@@ -509,26 +509,26 @@ class EngineStateController
 				: _backend_name (backend_name)
 				, _device_name (device_name)
 			{}
-            
+
 			bool operator()(boost::shared_ptr<ARDOUR::EngineStateController::State> rhs)
 			{
 				return (_backend_name == rhs->backend_name) && (_device_name == rhs->device_name);
 			}
-            
+
 		                                        private:
 			std::string _backend_name;
 			std::string _device_name;
 		};
 	};
-    
+
 	/// @typedef Type for the state pointer
 	typedef boost::shared_ptr<State> StatePtr;
 	/// @typedef Type for the list of states
 	typedef std::list<StatePtr> StateList;
-    
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// methods to manage setting states
-    
+
 	/** Deserializes and loads Engine and Audio port states from the config to EngineStateController
 	 */
 	void _deserialize_and_load_engine_states();
@@ -543,13 +543,13 @@ class EngineStateController
 	 * @param[in,out] audio_midi_settings_node - node to serialize the satets to
 	 */
 	void _serialize_midi_port_states(XMLNode* audio_midi_settings_node);
-    
+
 	/** Provides initial state configuration.
 	 * It loades the last active state if there is one and it is aplicable.
 	 * Otherwise default state (None device with default sample rate and buffer size) is loaded.
 	 */
 	void _do_initial_engine_setup();
-    
+
 	/** Loades provided state.
 	 * @note It's possible that provided state can't be loaded
 	 * (device disconnected or reqested parameters are not supported anymore).
@@ -557,15 +557,15 @@ class EngineStateController
 	 * @return true on success, otherwise - false
 	 */
 	bool _apply_state(const StatePtr& state);
-    
+
 	/** Gets available device channels from engine and updates internal controller state
 	 */
 	void _update_device_channels_state();
-    
+
 	/** Check "Stereo Out" mode channels state configuration and make it correspond Stereo Out mode requirements
 	 */
 	void _refresh_stereo_out_channel_states();
-    
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// internal helper functions
 	/** make sure that current device parameters are supported and fit session requirements
@@ -579,7 +579,7 @@ class EngineStateController
 	/** change ltc source port in case of the output ports list change
 	 */
 	void _update_ltc_output_port ();
-    
+
 	/** check that port is still existed in the list of input ports
 	    @param[in] port - port name
 	    @return true if current port is existed, otherwise - false
@@ -626,18 +626,18 @@ class EngineStateController
 	 */
 	void _on_session_loaded();
 	////////////////////////////////////////
-        
+
 	////////////////////////////////////////
 	// attributes
 	StatePtr _current_state; ///< current state pointer
 	// list of system states
 	StateList _states; ///< list of all available states
-    
+
 	MidiPortStateList _midi_inputs; ///< midi input states
 	MidiPortStateList _midi_outputs; ///< midi output states
-    
+
 	std::string _last_used_real_device; ///< last active non-default (real) device
-    
+
 	Session* _session; ///< current session
 
 	// Engine connections stuff
@@ -649,5 +649,5 @@ class EngineStateController
 };
 
 } // namespace ARDOUR
-    
+
 #endif /* defined(__gtk2_ardour__engine_state_controller__) */

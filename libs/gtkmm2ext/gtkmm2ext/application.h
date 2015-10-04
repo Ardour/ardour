@@ -1,4 +1,4 @@
-/* GTK+ Integration with platform-specific application-wide features 
+/* GTK+ Integration with platform-specific application-wide features
  * such as the OS X menubar and application delegate concepts.
  *
  * Copyright (C) 2009 Paul Davis
@@ -38,7 +38,7 @@ namespace Glib {
 
 namespace Gtkmm2ext {
 
-class LIBGTKMM2EXT_API Application 
+class LIBGTKMM2EXT_API Application
 {
 public:
     static Application* instance();

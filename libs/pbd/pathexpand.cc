@@ -52,7 +52,7 @@ using std::vector;
  *    On Failure: 0 (NULL)
  */
 
-static char* 
+static char*
 realpath (const char *original_path, char resolved_path[_MAX_PATH+1])
 {
 	char *rpath = 0;
@@ -135,7 +135,7 @@ PBD::path_expand (string path)
                 return path;
         }
 
-	while (true) { 
+	while (true) {
 
 		if (regexec (&compiled_pattern, path.c_str(), nmatches, matches, 0)) {
 			break;
@@ -161,7 +161,7 @@ PBD::path_expand (string path)
                 }
 
 		/* go back and do it again with whatever remains after the
-		 * substitution 
+		 * substitution
 		 */
 	}
 

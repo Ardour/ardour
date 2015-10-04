@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
     Author: Sakari Bergen
 
     This program is free software; you can redistribute it and/or modify

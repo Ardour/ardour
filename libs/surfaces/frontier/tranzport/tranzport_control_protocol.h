@@ -94,7 +94,7 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 	       WheelIncrSecond,
 	       WheelIncrMinute
 	};
-	  
+	
 	enum DisplayMode {
 		DisplayNormal,
 		DisplayRecording,
@@ -190,9 +190,9 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 	void screen_invalidate();
 	int  screen_flush();
 	void screen_clear();
-	// bool screen_isuptodate(); // think on this - 
+	// bool screen_isuptodate(); // think on this -
 
-	// Commands to write to the lcd 
+	// Commands to write to the lcd
 
 	int  lcd_init();
         bool lcd_damage();

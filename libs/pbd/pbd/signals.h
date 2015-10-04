@@ -1,6 +1,6 @@
 /*
-    Copyright (C) 2009-2012 Paul Davis 
-    
+    Copyright (C) 2009-2012 Paul Davis
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -166,9 +166,9 @@ class LIBPBD_API ScopedConnectionList  : public boost::noncopyable
 	   scoped connections needs to be protected in 2 cases:
 
 	   (1) (unlikely) we make a connection involving a callback on the
-	       same object from 2 threads. (wouldn't that just be appalling 
+	       same object from 2 threads. (wouldn't that just be appalling
 	       programming style?)
-	     
+	
 	   (2) where we are dropping connections in one thread and adding
 	       one from another.
 	 */

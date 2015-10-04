@@ -168,8 +168,8 @@ Location::operator= (const Location& other)
 
 void
 Location::set_name (const std::string& str)
-{ 
-	_name = str; 
+{
+	_name = str;
 
 	name_changed (this); /* EMIT SIGNAL */
 	NameChanged  (); /* EMIT SIGNAL */
@@ -358,7 +358,7 @@ Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 		if (e - s < Config->get_range_location_minimum()) {
 			return -1;
 		}
-                
+
 		if (s != _start) {
 
 			framepos_t const old = _start;
@@ -369,23 +369,23 @@ Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 			}
 
 			start_change = true;
-                        
+
 			if (is_session_range ()) {
 				Session::StartTimeChanged (old); /* EMIT SIGNAL */
 				AudioFileSource::set_header_position_offset (s);
 			}
 		}
-                        
-                 
+
+
 		if (e != _end) {
-                        
+
 			framepos_t const old = _end;
 			_end = e;
 
 			if (allow_bbt_recompute) {
 				recompute_bbt_from_frames ();
 			}
-                        
+
 			end_change = true;
 
 			if (is_session_range()) {
@@ -763,7 +763,7 @@ Location::set_scene_change (boost::shared_ptr<SceneChange>  sc)
         if (_scene_change != sc) {
                 _scene_change = sc;
                 _session.set_dirty ();
-                
+
                 scene_changed (); /* EMIT SIGNAL */
                 SceneChangeChanged (); /* EMIT SIGNAL */
         }
@@ -819,7 +819,7 @@ Locations::next_available_name(string& result,string base)
 	l = base.length();
 
 	if (!base.empty()) {
-                
+
 		/* find all existing names that match "base", and store
 		   the numeric part of them (if any) in the map "taken"
 		*/
@@ -827,7 +827,7 @@ Locations::next_available_name(string& result,string base)
 		for (i = locations.begin(); i != locations.end(); ++i) {
 
 			const string& temp ((*i)->name());
-                        
+
 			if (!temp.find (base,0)) {
 				/* grab what comes after the "base" as if it was
 				   a number, and assuming that works OK,
@@ -846,12 +846,12 @@ Locations::next_available_name(string& result,string base)
 	   was deleted.
 
 	   This must start at 1, both for human-numbering reasons
-	   and also because the call to atoi() above would return 
+	   and also because the call to atoi() above would return
 	   zero if there is no recognizable numeric suffix, causing
 	   "base 0" not to be inserted into the "taken" map.
 	*/
 
-	n = 1; 
+	n = 1;
 
 	while (n < UINT32_MAX) {
 		if (taken.find (n) == taken.end()) {
@@ -861,7 +861,7 @@ Locations::next_available_name(string& result,string base)
 		}
 		++n;
 	}
-                
+
 	return 0;
 }
 
@@ -922,7 +922,7 @@ Locations::clear_markers ()
 			i = tmp;
 		}
 	}
-        
+
 	changed (); /* EMIT SIGNAL */
 }
 
@@ -1022,7 +1022,7 @@ Locations::remove (Location *loc)
 	if (was_removed) {
 
 		removed (loc); /* EMIT SIGNAL */
-                
+
 		if (was_current) {
 			current_changed (0); /* EMIT SIGNAL */
 		}
@@ -1085,7 +1085,7 @@ Locations::set_state (const XMLNode& node, int version)
 				if (i != locations.end()) {
 					/* we can re-use an old Location object */
 					loc = *i;
-                    
+
 					// changed locations will be updated by Locations::changed signal
 					loc->set_state (**niter, version);
 				} else {
@@ -1234,7 +1234,7 @@ Locations::mark_at (framepos_t pos, framecnt_t slop) const
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 
 		if ((*i)->is_mark()) {
-			if (pos > (*i)->start()) { 
+			if (pos > (*i)->start()) {
 				delta = pos - (*i)->start();
 			} else {
 				delta = (*i)->start() - pos;

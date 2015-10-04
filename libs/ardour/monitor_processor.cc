@@ -53,13 +53,13 @@ MonitorProcessor::MonitorProcessor (Session& s)
         , _dim_all_ptr (new MPControl<bool> (false, _("monitor dim"), Controllable::Toggle))
         , _cut_all_ptr (new MPControl<bool> (false, _("monitor cut"), Controllable::Toggle))
         , _mono_ptr (new MPControl<bool> (false, _("monitor mono"), Controllable::Toggle))
-        , _dim_level_ptr (new MPControl<volatile gain_t> 
+        , _dim_level_ptr (new MPControl<volatile gain_t>
 			  /* default is -12dB, range is -20dB to 0dB */
-                          (dB_to_coefficient(-12.0), _("monitor dim level"), Controllable::Flag (0), 
+                          (dB_to_coefficient(-12.0), _("monitor dim level"), Controllable::Flag (0),
 			   dB_to_coefficient(-20.0), dB_to_coefficient (0.0)))
-        , _solo_boost_level_ptr (new MPControl<volatile gain_t> 
+        , _solo_boost_level_ptr (new MPControl<volatile gain_t>
 				 /* default is 0dB, range is 0dB to +20dB */
-                                 (dB_to_coefficient(0.0), _("monitor solo boost level"), Controllable::Flag (0), 
+                                 (dB_to_coefficient(0.0), _("monitor solo boost level"), Controllable::Flag (0),
 				  dB_to_coefficient(0.0), dB_to_coefficient(10.0)))
         , _dim_all_control (_dim_all_ptr)
         , _cut_all_control (_cut_all_ptr)

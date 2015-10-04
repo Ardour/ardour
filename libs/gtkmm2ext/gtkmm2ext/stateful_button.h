@@ -28,7 +28,7 @@
 
 namespace Gtkmm2ext {
 
-class LIBGTKMM2EXT_API StateButton 
+class LIBGTKMM2EXT_API StateButton
 {
    public:
 	StateButton();
@@ -80,12 +80,12 @@ class LIBGTKMM2EXT_API StatefulButton : public StateButton, public Gtk::Button
 	explicit StatefulButton(const std::string &label);
 	virtual ~StatefulButton() {}
 	void set_widget_name (const std::string& name);
-        
+
   protected:
 	void on_realize ();
         void on_style_changed (const Glib::RefPtr<Gtk::Style>& style);
         void on_state_changed (Gtk::StateType old_state);
-        
+
         Gtk::Widget* get_child_widget ();
 	std::string get_widget_name() const { return get_name(); }
 };

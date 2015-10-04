@@ -133,7 +133,7 @@ pixbuf_to_pixmap (GtkStyle  *style,
 	                         gdk_pixbuf_get_width (pixbuf),
 	                         gdk_pixbuf_get_height (pixbuf),
 	                         style->depth);
-							 
+							
 	gdk_drawable_set_colormap (pixmap, style->colormap);
 	
 	tmp_gc = gdk_gc_new (pixmap);
@@ -642,10 +642,10 @@ internal_image_buffer_new (gint width, gint height)
 					internel_image_buffer_free_pixels, NULL);
 }
 
-static void 
-internal_color_get_as_uchars(GdkColor *color, 
-				guchar *red, 
-				guchar *green, 
+static void
+internal_color_get_as_uchars(GdkColor *color,
+				guchar *red,
+				guchar *green,
 				guchar *blue)
 {
 	*red = (guchar) (color->red / 256.0);
@@ -657,7 +657,7 @@ static GdkPixbuf*
 internal_create_horizontal_gradient_image_buffer (gint width, gint height,
 							GdkColor *from,
 							GdkColor *to)
-{    
+{
 	int i;
 	long r, g, b, dr, dg, db;
 	GdkPixbuf* buffer;
@@ -671,18 +671,18 @@ internal_create_horizontal_gradient_image_buffer (gint width, gint height,
 
 	if (buffer == NULL)
 		return NULL;
-    
+
 	pixels = gdk_pixbuf_get_pixels (buffer);
 	ptr = pixels;
 	rowstride = gdk_pixbuf_get_rowstride (buffer);
-  
+
 	internal_color_get_as_uchars(from, &r0, &g0, &b0);
 	internal_color_get_as_uchars(to, &rf, &gf, &bf);
-  
+
 	r = r0 << 16;
 	g = g0 << 16;
 	b = b0 << 16;
-    
+
 	dr = ((rf-r0)<<16)/width;
 	dg = ((gf-g0)<<16)/width;
 	db = ((bf-b0)<<16)/width;
@@ -704,7 +704,7 @@ internal_create_horizontal_gradient_image_buffer (gint width, gint height,
 	{
 		memcpy (&(pixels[i*rowstride]), pixels, rowstride);
 	}
-    
+
 	return buffer;
 }
 
@@ -725,15 +725,15 @@ internal_create_vertical_gradient_image_buffer (gint width, gint height,
 
 	gint rowstride;
 	guchar *pixels;
-  
+
 	buffer = internal_image_buffer_new (width, height);
 
 	if (buffer == NULL)
 		return NULL;
-    
+
 	pixels = gdk_pixbuf_get_pixels (buffer);
 	rowstride = gdk_pixbuf_get_rowstride (buffer);
-  
+
 	internal_color_get_as_uchars(from, &r0, &g0, &b0);
 	internal_color_get_as_uchars(to, &rf, &gf, &bf);
 
@@ -750,7 +750,7 @@ internal_create_vertical_gradient_image_buffer (gint width, gint height,
 	for (i=0; i < height; i++)
 	{
 		ptr = pixels + i * rowstride;
-      
+
 		ptr[0] = r>>16;
 		ptr[1] = g>>16;
 		ptr[2] = b>>16;

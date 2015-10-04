@@ -95,7 +95,7 @@ AxisView::set_marked_for_display (bool yn)
 }
 
 GUIObjectState&
-AxisView::gui_object_state() 
+AxisView::gui_object_state()
 {
 	return *ARDOUR_UI::instance()->gui_object_state;
 }

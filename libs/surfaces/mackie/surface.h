@@ -154,7 +154,7 @@ public:
 
 	void next_jog_mode ();
 	void set_jog_mode (Mackie::JogWheel::Mode);
-  
+
         void notify_metering_state_changed();
 	void turn_it_on ();
 

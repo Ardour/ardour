@@ -935,7 +935,7 @@ PortMatrix::visible_ports (int d) const
 	   the TOP_TO_RIGHT arrangement we reverse the order of the vertical
 	   tabs in setup_notebooks ().
 	*/
-	   
+	
 	int n = 0;
 	if (d == _row_index) {
 		if (_arrangement == LEFT_TO_BOTTOM) {

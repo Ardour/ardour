@@ -64,7 +64,7 @@ const WTThreadSafetyType kpthreadsmutexThreadSafety = 1;
 namespace wvThread
 {
     //#include "BasicTypes/WavesAPISetAligment.h"
-    //Packing affects the layout of classes, and commonly, if packing changes across header files, there can be problems. 
+    //Packing affects the layout of classes, and commonly, if packing changes across header files, there can be problems.
 #ifdef PLATFORM_WINDOWS
 #pragma pack(push)
 #pragma pack(8)
@@ -136,7 +136,7 @@ namespace wvThread
 	public:
 		static const ThreadHandle Invalid;
 	protected:
-		ThreadHandle(uintptr_t n) : m_oshandle(n) {} 
+		ThreadHandle(uintptr_t n) : m_oshandle(n) {}
 	public:
 		ThreadHandle() : m_oshandle(Invalid.m_oshandle) {}
 		bool is_invalid() const { return !m_oshandle || m_oshandle==Invalid.m_oshandle; }
@@ -160,7 +160,7 @@ namespace wvThread
 
 
 
-    
+
 	//--------------------------------------------------------
     class DllExport noncopyableobject
 	{
@@ -219,7 +219,7 @@ namespace wvThread
 	//--------------------------------------------------------
 
 	// Thread Mutex class that is automatically initialized
-	class ThreadMutex : public ThreadMutexInited 
+	class ThreadMutex : public ThreadMutexInited
 	{
 	public:
 		ThreadMutex() {init();}
@@ -351,7 +351,7 @@ namespace wvThread
 
 	protected:
 		uintptr_t m_osThreadRef;
-		WCThreadRef(uintptr_t n) : m_osThreadRef(n) {} 
+		WCThreadRef(uintptr_t n) : m_osThreadRef(n) {}
 
 		friend DllExport bool operator==(const WCThreadRef& first, const WCThreadRef& second);
 		friend DllExport bool operator!=(const WCThreadRef& first, const WCThreadRef& second);
@@ -366,7 +366,7 @@ namespace wvThread
 
     class DllExport WCAtomicLock
     {
-    public:    
+    public:
         WCAtomicLock() : m_the_lock(0) {}
 		bool obtain(const uint32_t in_num_trys = 1);
 		void release();
@@ -388,12 +388,12 @@ namespace wvThread
 class WCStThreadMutexLocker
 {
 public:
-    WCStThreadMutexLocker(wvNS::wvThread::ThreadMutexInited& in_mutex) : 
+    WCStThreadMutexLocker(wvNS::wvThread::ThreadMutexInited& in_mutex) :
     m_mutex(in_mutex)
     {
         m_mutex.obtain();
     }
-    
+
     ~WCStThreadMutexLocker()
     {
         m_mutex.release();
@@ -403,7 +403,7 @@ protected:
     WCStThreadMutexLocker(const WCStThreadMutexLocker&);
     WCStThreadMutexLocker& operator=(const WCStThreadMutexLocker&);
 };
-    
+
 } // namespace wvThread
 
 

@@ -26,7 +26,7 @@
 
 #include "gtkmm2ext/visibility.h"
 
-namespace Gtkmm2ext 
+namespace Gtkmm2ext
 {
 
 class LIBGTKMM2EXT_API EmScale
@@ -51,6 +51,6 @@ class LIBGTKMM2EXT_API EmScale
 	static std::map<std::string,EmScale> _emscales;
 };
 
-} // namespace 
+} // namespace
 
 #endif /* __libgtkmm2ext_emscale_h__ */

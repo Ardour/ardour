@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ static ControlProtocolDescriptor tranzport_descriptor = {
 	
 
 extern "C" {
-ControlProtocolDescriptor* 
+ControlProtocolDescriptor*
 protocol_descriptor () {
 	return &tranzport_descriptor;
 }

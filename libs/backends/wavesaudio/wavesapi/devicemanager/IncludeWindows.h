@@ -45,6 +45,6 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <objbase.h>
-#endif // #if PLATFORM_WINDOWS 
+#endif // #if PLATFORM_WINDOWS
 #endif // #ifndef __IncludeWindows_h__
 

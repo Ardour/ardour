@@ -1,5 +1,5 @@
-/** 
- * @file colorspace.h 
+/**
+ * @file colorspace.h
  * @author Pascal Getreuer 2005-2010 <getreuer@gmail.com>
  */
 

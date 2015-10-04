@@ -35,7 +35,7 @@ class LIBPBD_API PropertyList : public std::map<PropertyID, PropertyBase*>
 public:
 	PropertyList ();
 	PropertyList (PropertyList const &);
-        
+
 	virtual ~PropertyList();
 
         void get_changes_as_xml (XMLNode *);

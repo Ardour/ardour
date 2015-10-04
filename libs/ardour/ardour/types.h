@@ -457,7 +457,7 @@ namespace ARDOUR {
 		AutoConnectPhysical = 0x1,
 		AutoConnectMaster = 0x2
 	};
-        
+
     enum TracksAutoNamingRule {
         UseDefaultNames = 0x1,
         NameAfterDriver = 0x2
@@ -610,8 +610,8 @@ namespace ARDOUR {
 		   this equality cannot be assumed.
 		*/
 		TransportStopped = 0,
-		TransportRolling = 1, 
-		TransportLooping = 2, 
+		TransportRolling = 1,
+		TransportLooping = 2,
 		TransportStarting = 3,
 	};
 
@@ -619,7 +619,7 @@ namespace ARDOUR {
 		/* these values happen to match the constants used by JACK but
 		   this equality cannot be assumed.
 		*/
-		IsInput = 0x1, 
+		IsInput = 0x1,
 		IsOutput = 0x2,
 		IsPhysical = 0x4,
 		CanMonitor = 0x8,
@@ -730,7 +730,7 @@ session_frame_to_track_frame (ARDOUR::framepos_t session_frame, double speed)
 static inline ARDOUR::framepos_t
 track_frame_to_session_frame (ARDOUR::framepos_t track_frame, double speed)
 {
-	/* NB - do we need a check for speed == 0 ??? */ 
+	/* NB - do we need a check for speed == 0 ??? */
 	long double result = (long double) track_frame / (long double) speed;
 
 	if (result >= (long double) ARDOUR::max_framepos) {

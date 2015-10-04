@@ -78,9 +78,9 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	framepos_t current_time (framepos_t position = 0) const;
 	framepos_t current_duration (framepos_t position = 0) const;
 	void set_session (ARDOUR::Session *s);
-        void set_negative_allowed (bool yn); 
+        void set_negative_allowed (bool yn);
 
-	/** Alter cairo scaling during rendering. 
+	/** Alter cairo scaling during rendering.
 	 *
 	 * Used by clocks that resize themselves
 	 * to fit any given space. Can lead
@@ -175,7 +175,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	/* this maps the number of input characters/digits when editing
 	   to a cursor position. insert_map[N] = index of character/digit
-	   where the cursor should be after N chars/digits. it is 
+	   where the cursor should be after N chars/digits. it is
 	   mode specific and so it is filled during set_mode().
 	*/
 

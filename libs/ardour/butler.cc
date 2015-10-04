@@ -111,7 +111,7 @@ Butler::start_thread()
 	const float rate = (float)_session.frame_rate();
 	audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * rate);
 	audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * rate);
-    
+
 	/* size is in bytes
 	 * XXX: AudioEngine needs to tell us the MIDI buffer size
 	 * (i.e. how many MIDI bytes we might see in a cycle)
@@ -129,7 +129,7 @@ Butler::start_thread()
 
 	//pthread_detach (thread);
 	have_thread = true;
-    
+
 	// we are ready to request buffer adjustments
 	_session.adjust_capture_buffering ();
 	_session.adjust_playback_buffering ();

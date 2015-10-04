@@ -51,7 +51,7 @@ public:
 
 	/** The render() method is likely to be identical in all containers
 	 *  (just call Item::render_children()). It can be overridden as necessary.
-	 */ 
+	 */
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 };
 

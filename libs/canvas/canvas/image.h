@@ -36,7 +36,7 @@ class LIBCANVAS_API Image : public Item
 public:
     Image (Canvas *, Cairo::Format, int width, int height);
     Image (Item*, Cairo::Format, int width, int height);
-    
+
     struct Data {
 	Data (uint8_t *d, int w, int h, int s, Cairo::Format fmt)
 		: data (d)
@@ -65,12 +65,12 @@ public:
 	void* destroy_arg;
     };
 
-    /** 
-     * Returns a shared_ptr to a Data object that can be used to 
+    /**
+     * Returns a shared_ptr to a Data object that can be used to
      * write image data to. The Data object will contain a pointer
      * to the buffer, along with image properties that may be
      * useful during the data writing.
-     * 
+     *
      * Can be called from any thread BUT ..
      *
      * ... to avoid collisions with Image deletion, some synchronization method

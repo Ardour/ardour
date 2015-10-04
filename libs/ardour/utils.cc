@@ -133,7 +133,7 @@ ARDOUR::legalize_for_uri (const string& str)
  * version.
  */
 
-string 
+string
 ARDOUR::legalize_for_path_2X (const string& str)
 {
 	string::size_type pos;

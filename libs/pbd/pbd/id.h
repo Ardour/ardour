@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ class LIBPBD_API ID {
 	void reset ();
 
 	bool operator== (const ID& other) const {
-		return _id == other._id; 
+		return _id == other._id;
 	}
 
 	bool operator!= (const ID& other) const {
@@ -47,8 +47,8 @@ class LIBPBD_API ID {
 
 	bool operator== (const std::string&) const;
 
-	ID& operator= (std::string); 
-	ID& operator= (const ID&); 
+	ID& operator= (std::string);
+	ID& operator= (const ID&);
 
 	bool operator< (const ID& other) const {
 		return _id < other._id;

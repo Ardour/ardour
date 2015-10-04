@@ -62,7 +62,7 @@ LXVSTPlugin::~LXVSTPlugin ()
 	vstfx_close (_state);
 }
 
-PluginPtr 
+PluginPtr
 LXVSTPluginInfo::load (Session& session)
 {
 	try {

@@ -4,16 +4,16 @@
 
 /***********************************************
  * ge_hsb_from_color -
- *  
+ *
  *   Get HSB values from RGB values.
  *
  *   Modified from Smooth but originated in GTK+
  ***********************************************/
 void
-ge_hsb_from_color (const CairoColor *color, 
-                        gdouble *hue, 
+ge_hsb_from_color (const CairoColor *color,
+                        gdouble *hue,
                         gdouble *saturation,
-                        gdouble *brightness) 
+                        gdouble *brightness)
 {
 	gdouble min, max, delta;
 	gdouble red, green, blue;
@@ -21,7 +21,7 @@ ge_hsb_from_color (const CairoColor *color,
 	red = color->r;
 	green = color->g;
 	blue = color->b;
-  
+
 	if (red > green)
 	{
 		max = MAX(red, blue);
@@ -32,7 +32,7 @@ ge_hsb_from_color (const CairoColor *color,
 		max = MAX(green, blue);
 		min = MIN(red, blue);
 	}
-  
+
 	*brightness = (max + min) / 2;
  	
 	if (fabs(max - min) < 0.0001)
@@ -46,34 +46,34 @@ ge_hsb_from_color (const CairoColor *color,
 			*saturation = (max - min) / (max + min);
 		else
 			*saturation = (max - min) / (2 - max - min);
-       
+
 		delta = max -min;
- 
+
 		if (red == max)
 			*hue = (green - blue) / delta;
 		else if (green == max)
 			*hue = 2 + (blue - red) / delta;
 		else if (blue == max)
 			*hue = 4 + (red - green) / delta;
- 
+
 		*hue *= 60;
 		if (*hue < 0.0)
 			*hue += 360;
 	}
 }
- 
+
 /***********************************************
  * ge_color_from_hsb -
- *  
+ *
  *   Get RGB values from HSB values.
  *
  *   Modified from Smooth but originated in GTK+
  ***********************************************/
 #define MODULA(number, divisor) (((gint)number % divisor) + (number - (gint)number))
 void
-ge_color_from_hsb (gdouble hue, 
+ge_color_from_hsb (gdouble hue,
                         gdouble saturation,
-                        gdouble brightness, 
+                        gdouble brightness,
                         CairoColor *color)
 {
 	gint i;
@@ -81,31 +81,31 @@ ge_color_from_hsb (gdouble hue,
 	gdouble m1, m2, m3;
 
 	if (!color) return;
-  	  
+  	
 	if (brightness <= 0.5)
 		m2 = brightness * (1 + saturation);
 	else
 		m2 = brightness + saturation - brightness * saturation;
- 
+
 	m1 = 2 * brightness - m2;
- 
+
 	hue_shift[0] = hue + 120;
 	hue_shift[1] = hue;
 	hue_shift[2] = hue - 120;
- 
+
 	color_shift[0] = color_shift[1] = color_shift[2] = brightness;	
- 
+
 	i = (saturation == 0)?3:0;
- 
+
 	for (; i < 3; i++)
 	{
 		m3 = hue_shift[i];
- 
+
 		if (m3 > 360)
 			m3 = MODULA(m3, 360);
 		else if (m3 < 0)
 			m3 = 360 - MODULA(ABS(m3), 360);
- 
+
 		if (m3 < 60)
 			color_shift[i] = m1 + (m2 - m1) * m3 / 60;
 		else if (m3 < 180)
@@ -115,7 +115,7 @@ ge_color_from_hsb (gdouble hue,
 		else
 			color_shift[i] = m1;
 	}	
- 
+
 	color->r = color_shift[0];
 	color->g = color_shift[1];
 	color->b = color_shift[2];	
@@ -155,7 +155,7 @@ ge_cairo_color_to_gtk (const CairoColor *cc, GdkColor *c)
 	c->blue = b;
 }
 
-void 
+void
 ge_gtk_style_to_cairo_color_cube (GtkStyle * style, CairoColorCube *cube)
 {
 	int i;
@@ -163,7 +163,7 @@ ge_gtk_style_to_cairo_color_cube (GtkStyle * style, CairoColorCube *cube)
 	g_return_if_fail (style && cube);
 
 	for (i = 0; i < 5; i++)
-	{ 
+	{
 		ge_gdk_color_to_cairo (&style->bg[i], &cube->bg[i]);
 		ge_gdk_color_to_cairo (&style->fg[i], &cube->fg[i]);
 
@@ -189,17 +189,17 @@ ge_shade_color(const CairoColor *base, gdouble shade_ratio, CairoColor *composit
 	gdouble hue = 0;
 	gdouble saturation = 0;
 	gdouble brightness = 0;
- 
+
 	g_return_if_fail (base && composite);
 
 	ge_hsb_from_color (base, &hue, &saturation, &brightness);
- 
+
 	brightness = MIN(brightness*shade_ratio, 1.0);
 	brightness = MAX(brightness, 0.0);
-  
+
 	saturation = MIN(saturation*shade_ratio, 1.0);
 	saturation = MAX(saturation, 0.0);
-  
+
 	ge_color_from_hsb (hue, saturation, brightness, composite);
 	composite->a = base->a;	
 }
@@ -210,7 +210,7 @@ ge_saturate_color (const CairoColor *base, gdouble saturate_level, CairoColor *c
 	gdouble hue = 0;
 	gdouble saturation = 0;
 	gdouble brightness = 0;
- 
+
 	g_return_if_fail (base && composite);
 
 	ge_hsb_from_color (base, &hue, &saturation, &brightness);
@@ -223,7 +223,7 @@ ge_saturate_color (const CairoColor *base, gdouble saturate_level, CairoColor *c
 }
 
 void
-ge_mix_color (const CairoColor *color1, const CairoColor *color2, 
+ge_mix_color (const CairoColor *color1, const CairoColor *color2,
               gdouble mix_factor, CairoColor *composite)
 {
 	g_return_if_fail (color1 && color2 && composite);
@@ -234,7 +234,7 @@ ge_mix_color (const CairoColor *color1, const CairoColor *color2,
 	composite->a = 1.0;
 }
 
-cairo_t * 
+cairo_t *
 ge_gdk_drawable_to_cairo (GdkDrawable  *window, GdkRectangle *area)
 {
 	cairo_t *cr;
@@ -246,7 +246,7 @@ ge_gdk_drawable_to_cairo (GdkDrawable  *window, GdkRectangle *area)
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_SQUARE);
 	cairo_set_line_join (cr, CAIRO_LINE_JOIN_MITER);
 
-	if (area) 
+	if (area)
 	{
 		cairo_rectangle (cr, area->x, area->y, area->width, area->height);
 		cairo_clip_preserve (cr);
@@ -256,7 +256,7 @@ ge_gdk_drawable_to_cairo (GdkDrawable  *window, GdkRectangle *area)
 	return cr;
 }
 
-void 
+void
 ge_cairo_set_color (cairo_t *cr, const CairoColor *color)
 {
 	g_return_if_fail (cr && color);
@@ -275,9 +275,9 @@ ge_cairo_set_gdk_color_with_alpha (cairo_t *cr, const GdkColor *color, gdouble a
 	                           alpha);
 }
 
-void 
-ge_cairo_pattern_add_color_stop_color (cairo_pattern_t *pattern, 
-						gfloat offset, 
+void
+ge_cairo_pattern_add_color_stop_color (cairo_pattern_t *pattern,
+						gfloat offset,
 						const CairoColor *color)
 {
 	g_return_if_fail (pattern && color);
@@ -286,9 +286,9 @@ ge_cairo_pattern_add_color_stop_color (cairo_pattern_t *pattern,
 }
 
 void
-ge_cairo_pattern_add_color_stop_shade(cairo_pattern_t *pattern, 
-						gdouble offset, 
-						const CairoColor *color, 
+ge_cairo_pattern_add_color_stop_shade(cairo_pattern_t *pattern,
+						gdouble offset,
+						const CairoColor *color,
 						gdouble shade)
 {
 	CairoColor shaded;
@@ -408,16 +408,16 @@ ge_cairo_stroke_rectangle (cairo_t *cr, double x, double y, double w, double h)
 
 /***********************************************
  * ge_cairo_simple_border -
- *  
+ *
  *   A simple routine to draw thin squared
  *   borders with a topleft and bottomright color.
- *    
+ *
  *   It originated in Smooth-Engine.
  ***********************************************/
 void
 ge_cairo_simple_border (cairo_t *cr,
 				const CairoColor * tl, const CairoColor * br,
-				gint x,	gint y, gint width, gint height, 
+				gint x,	gint y, gint width, gint height,
 				gboolean topleft_overlap)
 {
 	gboolean solid_color;
@@ -445,7 +445,7 @@ ge_cairo_simple_border (cairo_t *cr,
 		
 		cairo_stroke (cr);
 	}
- 
+
 	ge_cairo_set_color(cr, tl);	
 
 	cairo_move_to(cr, x + 0.5, y + height - 0.5);
@@ -485,7 +485,7 @@ void ge_cairo_polygon (cairo_t *cr,
 	for (i = 1; i < npoints; i++)
 	{
 		if (!((points[i].x == points[i + 1].x) &&
-		    (points[i].y == points[i + 1].y))) 
+		    (points[i].y == points[i + 1].y)))
 		{
 			cairo_line_to(cr, points[i].x, points[i].y);
 		}
@@ -508,7 +508,7 @@ void ge_cairo_line (cairo_t *cr,
 			gint y1,
 			gint x2,
 			gint y2)
-{ 
+{
 	cairo_save(cr);
 
 	ge_cairo_set_color(cr, color);	
@@ -578,11 +578,11 @@ ge_cairo_exchange_axis (cairo_t  *cr,
 
 /***********************************************
  * ge_cairo_pattern_fill -
- *  
+ *
  *   Fill an area with some pattern
  *   Scaling or tiling if needed
  ***********************************************/
-void 
+void
 ge_cairo_pattern_fill(cairo_t *canvas,
 			CairoPattern *pattern,
 			gint x,
@@ -653,7 +653,7 @@ ge_cairo_pattern_fill(cairo_t *canvas,
 
 /***********************************************
  * ge_cairo_color_pattern -
- *  
+ *
  *   Create A Solid Color Pattern
  ***********************************************/
 CairoPattern*
@@ -668,9 +668,9 @@ ge_cairo_color_pattern(CairoColor *base)
 	result->scale = GE_DIRECTION_NONE;
 	result->translate = GE_DIRECTION_NONE;
 
-	result->handle = cairo_pattern_create_rgba(base->r, 
-							base->g, 
-							base->b, 
+	result->handle = cairo_pattern_create_rgba(base->r,
+							base->g,
+							base->b,
 							base->a);
 
 	result->operator = CAIRO_OPERATOR_SOURCE;
@@ -680,7 +680,7 @@ ge_cairo_color_pattern(CairoColor *base)
 
 /***********************************************
  * ge_cairo_pixbuf_pattern -
- *  
+ *
  *   Create A Tiled Pixbuf Pattern
  ***********************************************/
 CairoPattern*
@@ -723,7 +723,7 @@ ge_cairo_pixbuf_pattern(GdkPixbuf *pixbuf)
 
 /***********************************************
  * ge_cairo_pixmap_pattern -
- *  
+ *
  *   Create A Tiled Pixmap Pattern
  ***********************************************/
 CairoPattern*
@@ -736,8 +736,8 @@ ge_cairo_pixmap_pattern(GdkPixmap *pixmap)
 
 	gdk_drawable_get_size (GDK_DRAWABLE (pixmap), &width, &height);
 
-	pixbuf = gdk_pixbuf_get_from_drawable(NULL, GDK_DRAWABLE (pixmap), 
-				gdk_drawable_get_colormap(GDK_DRAWABLE (pixmap)), 
+	pixbuf = gdk_pixbuf_get_from_drawable(NULL, GDK_DRAWABLE (pixmap),
+				gdk_drawable_get_colormap(GDK_DRAWABLE (pixmap)),
 				0, 0, 0, 0, width, height);
 
 	result = ge_cairo_pixbuf_pattern(pixbuf);
@@ -748,17 +748,17 @@ ge_cairo_pixmap_pattern(GdkPixmap *pixmap)
 }
 
 /***********************************************
- * ge_cairo_linear_shade_gradient_pattern - 
- *  
+ * ge_cairo_linear_shade_gradient_pattern -
+ *
  *   Create A Linear Shade Gradient Pattern
  *   Aka Smooth Shade Gradient, from/to gradient
  *   With End points defined as shades of the
  *   base color
  ***********************************************/
 CairoPattern *
-ge_cairo_linear_shade_gradient_pattern(CairoColor *base, 
-						gdouble shade1, 
-						gdouble shade2, 
+ge_cairo_linear_shade_gradient_pattern(CairoColor *base,
+						gdouble shade1,
+						gdouble shade2,
 						gboolean vertical)
 {
 	CairoPattern * result = g_new0(CairoPattern, 1);

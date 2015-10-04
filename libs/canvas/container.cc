@@ -21,18 +21,18 @@
 
 using namespace ArdourCanvas;
 
-Container::Container (Canvas* canvas) 
+Container::Container (Canvas* canvas)
 	: Item (canvas)
 {
 }
 
-Container::Container (Item* parent) 
+Container::Container (Item* parent)
 	: Item (parent)
 {
 }
 
 
-Container::Container (Item* parent, Duple const & p) 
+Container::Container (Item* parent, Duple const & p)
 	: Item (parent, p)
 {
 }

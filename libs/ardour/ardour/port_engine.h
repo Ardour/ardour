@@ -34,14 +34,14 @@ namespace ARDOUR {
 class PortManager;
 
 /** PortEngine is an abstract base class that defines the functionality
- * required by Ardour. 
- * 
+ * required by Ardour.
+ *
  * A Port is basically an endpoint for a datastream (which can either be
  * continuous, like audio, or event-based, like MIDI). Ports have buffers
  * associated with them into which data can be written (if they are output
  * ports) and from which data can be read (if they input ports). Ports can be
  * connected together so that data written to an output port can be read from
- * an input port. These connections can be 1:1, 1:N OR N:1. 
+ * an input port. These connections can be 1:1, 1:N OR N:1.
  *
  * Ports may be associated with software only, or with hardware.  Hardware
  * related ports are often referred to as physical, and correspond to some
@@ -66,7 +66,7 @@ class PortManager;
  *                  come from the "outside world" if the terminal port is also
  *                  physical, or will have been synthesized by the entity that
  *                  owns the terminal port.
- *                  
+ *
  * <b>playback latency</b>: how long until the data written to the buffer of
  *                   port will reach a terminal port.
  *
@@ -79,34 +79,34 @@ class LIBARDOUR_API PortEngine {
   public:
     PortEngine (PortManager& pm) : manager (pm) {}
     virtual ~PortEngine() {}
-    
+
     /** Return a private, type-free pointer to any data
      * that might be useful to a concrete implementation
      */
     virtual void* private_handle() const = 0;
 
     /* We use void* here so that the API can be defined for any implementation.
-     * 
+     *
      * We could theoretically use a template (PortEngine<T>) and define
      * PortHandle as T, but this complicates the desired inheritance
      * pattern in which FooPortEngine handles things for the Foo API,
      * rather than being a derivative of PortEngine<Foo>.
     */
-       
+
     typedef void* PortHandle;
 
     /** Return the name of this process as used by the port manager
      * when naming ports.
      */
     virtual const std::string& my_name() const = 0;
- 
+
     /** Return true if the underlying mechanism/API is still available
      * for us to utilize. return false if some or all of the AudioBackend
      * API can no longer be effectively used.
      */
     virtual bool available() const = 0;
 
-    /** Return the maximum size of a port name 
+    /** Return the maximum size of a port name
      */
     virtual uint32_t port_name_size() const = 0;
 
@@ -149,9 +149,9 @@ class LIBARDOUR_API PortEngine {
      *
      * To avoid selecting by name, pass an empty string for @param
      * port_name_pattern.
-     * 
+     *
      * To avoid selecting by type, pass DataType::NIL as @param type.
-     * 
+     *
      * To avoid selecting by flags, pass PortFlags (0) as @param flags.
      */
     virtual int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>& ports) const = 0;
@@ -173,7 +173,7 @@ class LIBARDOUR_API PortEngine {
      * is connected to.
      */
     virtual void       unregister_port (PortHandle) = 0;
-    
+
     /* Connection management */
 
     /** Ensure that data written to the port named by @param src will be
@@ -182,20 +182,20 @@ class LIBARDOUR_API PortEngine {
     */
     virtual int   connect (const std::string& src, const std::string& dst) = 0;
 
-    /** Remove any existing connection between the ports named by @param src and 
+    /** Remove any existing connection between the ports named by @param src and
      * @param dst. Return zero on success, non-zero otherwise.
      */
     virtual int   disconnect (const std::string& src, const std::string& dst) = 0;
-    
-    
+
+
     /** Ensure that data written to the port referenced by @param portwill be
      * readable from the port named by @param dst. Return zero on success,
      * non-zero otherwise.
     */
     virtual int   connect (PortHandle src, const std::string& dst) = 0;
-    /** Remove any existing connection between the port referenced by @param src and 
+    /** Remove any existing connection between the port referenced by @param src and
      * the port named @param dst. Return zero on success, non-zero otherwise.
-     */ 
+     */
     virtual int   disconnect (PortHandle src, const std::string& dst) = 0;
 
     /** Remove all connections between the port referred to by @param port and
@@ -227,10 +227,10 @@ class LIBARDOUR_API PortEngine {
     /** Retrieve a MIDI event from the data at @param port_buffer. The event
     number to be retrieved is given by @param event_index (a value of zero
     indicates that the first event in the port_buffer should be retrieved).
-    * 
+    *
     * The data associated with the event will be copied into the buffer at
     * @param buf and the number of bytes written will be stored in @param
-    * size. The timestamp of the event (which is always relative to the start 
+    * size. The timestamp of the event (which is always relative to the start
     * of the current process cycle, in samples) will be stored in @param
     * timestamp
     */
@@ -241,7 +241,7 @@ class LIBARDOUR_API PortEngine {
      * port_buffer. The MIDI event will be marked with a time given by @param
      * timestamp. Return zero on success, non-zero otherwise.
      *
-     * Events  must be added monotonically to a port buffer. An attempt to 
+     * Events  must be added monotonically to a port buffer. An attempt to
      * add a non-monotonic event (e.g. out-of-order) will cause this method
      * to return a failure status.
      */
@@ -270,13 +270,13 @@ class LIBARDOUR_API PortEngine {
      * APIs can offer it.
      */
     virtual bool  can_monitor_input() const = 0;
-    /** Increment or decrement the number of requests to monitor the input 
+    /** Increment or decrement the number of requests to monitor the input
      * of the hardware channel represented by the port referred to by @param
      * port.
      *
      * If the number of requests rises above zero, input monitoring will
      * be enabled (if can_monitor_input() returns true for the implementation).
-     * 
+     *
      * If the number of requests falls to zero, input monitoring will be
      * disabled (if can_monitor_input() returns true for the implementation)
      */
@@ -296,7 +296,7 @@ class LIBARDOUR_API PortEngine {
 
     /* Latency management
      */
-    
+
     /** Set the latency range for the port referred to by @param port to @param
      * r. The playback range will be set if @param for_playback is true,
      * otherwise the capture range will be set.
@@ -349,11 +349,11 @@ class LIBARDOUR_API PortEngine {
      * schedule MIDI events within their buffers. It is a bit odd that we
      * expose this here, because it is also exposed by AudioBackend, but they
      * only have access to a PortEngine object, not an AudioBackend.
-     * 
-     * Return the time according to the sample clock in use when the current 
-     * buffer process cycle began. 
      *
-     * XXX to be removed after some more design cleanup. 
+     * Return the time according to the sample clock in use when the current
+     * buffer process cycle began.
+     *
+     * XXX to be removed after some more design cleanup.
      */
     virtual framepos_t sample_time_at_cycle_start () = 0;
 

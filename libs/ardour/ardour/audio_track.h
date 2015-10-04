@@ -55,7 +55,7 @@ class LIBARDOUR_API AudioTrack : public Track
 
 	bool bounceable (boost::shared_ptr<Processor>, bool include_endpoint) const;
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, 
+	boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&,
 						boost::shared_ptr<Processor> endpoint, bool include_endpoint);
 	int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t nframes,
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze);

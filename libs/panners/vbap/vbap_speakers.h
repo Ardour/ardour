@@ -51,7 +51,7 @@ public:
 
 private:
 	static const double MIN_VOL_P_SIDE_LGTH;
-	int   _dimension;  
+	int   _dimension;
         boost::shared_ptr<Speakers> _parent;
 	std::vector<Speaker> _speakers;
 	PBD::ScopedConnection speaker_connection;
@@ -69,7 +69,7 @@ private:
 	struct threeDmatrix : public dvector {
 	threeDmatrix() : dvector (9, 0.0) {}
 	};
-        
+
 	struct tmatrix : public dvector {
 	tmatrix() : dvector (3, 0.0) {}
 	};
@@ -99,7 +99,7 @@ private:
 	void choose_speaker_pairs ();
 	void sort_2D_lss (int* sorted_lss);
 	int  calc_2D_inv_tmatrix (double azi1,double azi2, double* inv_mat);
-        
+
 };
 
 } /* namespace */

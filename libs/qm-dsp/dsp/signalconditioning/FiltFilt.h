@@ -24,7 +24,7 @@ struct FiltFiltConfig{
     double* BCoeffs;
 };
 
-class FiltFilt  
+class FiltFilt
 {
 public:
     FiltFilt( FiltFiltConfig Config );

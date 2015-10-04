@@ -39,16 +39,16 @@
  * Tracks contain zero or more events.  Libsmf doesn't care about actual MIDI data, as long
  * as it is valid from the MIDI specification point of view - it may be realtime message,
  * SysEx, whatever.
- * 
+ *
  * The only field in smf_t, smf_track_t, smf_event_t and smf_tempo_t structures your
  * code may modify is event->midi_buffer and event->midi_buffer_length.  Do not modify
  * other fields, _ever_.  You may read them, though.  Do not declare static instances
  * of these types, i.e. never do something like this:  "smf_t smf;".  Always use
  * "smf_t *smf = smf_new();".  The same applies to smf_track_t and smf_event_t.
- * 
+ *
  * Say you want to load a Standard MIDI File (.mid) file and play it back somehow.
  * This is (roughly) how you do this:
- * 
+ *
  * \code
  * 	smf_t *smf;
  * 	smf_event_t *event;
@@ -58,11 +58,11 @@
  * 		Whoops, something went wrong.
  * 		return;
  * 	}
- * 
+ *
  * 	while ((event = smf_get_next_event(smf)) != NULL) {
  *		if (smf_event_is_metadata(event))
  *			continue;
- * 
+ *
  * 		wait until event->time_seconds.
  * 		feed_to_midi_output(event->midi_buffer, event->midi_buffer_length);
  * 	}
@@ -70,9 +70,9 @@
  *	smf_delete(smf);
  *
  * \endcode
- * 
+ *
  * Saving works like this:
- * 
+ *
  * \code
  *
  * 	smf_t *smf;
@@ -84,27 +84,27 @@
  * 		Whoops.
  * 		return;
  * 	}
- * 
+ *
  * 	for (int i = 1; i <= number of tracks; i++) {
  * 		track = smf_track_new();
  * 		if (track == NULL) {
  * 			Whoops.
  * 			return;
  * 		}
- * 
+ *
  * 		smf_add_track(smf, track);
- * 
+ *
  * 		for (int j = 1; j <= number of events you want to put into this track; j++) {
  * 			event = smf_event_new_from_pointer(your MIDI message, message length);
  * 			if (event == NULL) {
  * 				Whoops.
  * 				return;
  * 			}
- * 
+ *
  * 			smf_track_add_event_seconds(track, event, seconds since start of the song);
  * 		}
  * 	}
- * 
+ *
  * 	ret = smf_save(smf, file_name);
  * 	if (ret) {
  * 		Whoops, saving failed for some reason.
@@ -386,7 +386,7 @@ int   smf_event_is_textual(const smf_event_t *event) WARN_UNUSED_RESULT;
 char *smf_event_decode(const smf_event_t *event) WARN_UNUSED_RESULT;
 char *smf_event_extract_text(const smf_event_t *event) WARN_UNUSED_RESULT;
 
-/* Routines for dealing with Variable Length Quantities (VLQ's). 
+/* Routines for dealing with Variable Length Quantities (VLQ's).
    Slightly odd names reflect original static names within libsmf
  */
 int smf_format_vlq (unsigned char *buf, int length, unsigned long value);

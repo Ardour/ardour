@@ -65,9 +65,9 @@ clearlooks_draw_glossy_gradient (cairo_t         *cr,
 }
 
 static void
-clearlooks_set_mixed_color (cairo_t          *cr, 
-                            const CairoColor *color1, 
-                            const CairoColor *color2, 
+clearlooks_set_mixed_color (cairo_t          *cr,
+                            const CairoColor *color1,
+                            const CairoColor *color2,
                             gdouble mix_factor)
 {
 	CairoColor composite;
@@ -77,7 +77,7 @@ clearlooks_set_mixed_color (cairo_t          *cr,
 }
 
 static void
-clearlooks_glossy_draw_inset (cairo_t          *cr, 
+clearlooks_glossy_draw_inset (cairo_t          *cr,
                               const CairoColor *bg_color,
                               double x, double y, double w, double h,
                               double radius, uint8 corners)
@@ -133,9 +133,9 @@ clearlooks_glossy_draw_inset (cairo_t          *cr,
 }
 
 static void
-clearlooks_glossy_draw_light_inset (cairo_t          *cr, 
-                                    const CairoColor *bg_color, 
-                                    double x, double y, double w, double h, 
+clearlooks_glossy_draw_light_inset (cairo_t          *cr,
+                                    const CairoColor *bg_color,
+                                    double x, double y, double w, double h,
                                     double radius, uint8 corners)
 {
 	CairoColor shadow;
@@ -189,7 +189,7 @@ clearlooks_glossy_draw_light_inset (cairo_t          *cr,
 }
 
 static void
-clearlooks_glossy_draw_highlight_and_shade (cairo_t          *cr, 
+clearlooks_glossy_draw_highlight_and_shade (cairo_t          *cr,
                                             const CairoColor *bg_color,
                                             const ShadowParameters *params,
                                             int width, int height, gdouble radius)
@@ -305,8 +305,8 @@ clearlooks_glossy_draw_button (cairo_t *cr,
 		cairo_translate (cr, -0.5, -0.5);
 	}
 
-	clearlooks_draw_glossy_gradient (cr, xoffset+1, yoffset+1, 
-	                              width-(xoffset*2)-2, height-(yoffset*2)-2, 
+	clearlooks_draw_glossy_gradient (cr, xoffset+1, yoffset+1,
+	                              width-(xoffset*2)-2, height-(yoffset*2)-2,
 	                              &fill, params->disabled, radius, params->corners);
 	
 	/* Pressed button shadow */
@@ -714,7 +714,7 @@ clearlooks_glossy_draw_tab (cairo_t *cr,
 	{
 		width += 3.0;
 		
-		if (tab->gap_side == CL_GAP_LEFT) 
+		if (tab->gap_side == CL_GAP_LEFT)
 			cairo_translate (cr, -3.0, 0.0); /* gap at the other side */
 	}
 	
@@ -1001,7 +1001,7 @@ clearlooks_glossy_draw_scrollbar_slider (cairo_t *cr,
 	cairo_fill (cr);
 	cairo_pattern_destroy (pattern);
 	
-	if (scrollbar->has_color) 
+	if (scrollbar->has_color)
 	{
 		cairo_set_source_rgba (cr, hilight.r, hilight.g, hilight.b, 0.5);
 		ge_cairo_stroke_rectangle (cr, 1.5, 1.5, width-3, height-3);
@@ -1081,7 +1081,7 @@ clearlooks_glossy_draw_list_view_header (cairo_t *cr,
 	}
 }
 
-static void 
+static void
 clearlooks_glossy_draw_toolbar (cairo_t *cr,
                          const ClearlooksColors          *colors,
                          const WidgetParameters          *widget,
@@ -1104,7 +1104,7 @@ clearlooks_glossy_draw_toolbar (cairo_t *cr,
 	cairo_translate (cr, x, y);
 	
 	if (toolbar->style == 1) /* Enable Extra features */
-	{ 
+	{
 		cairo_pattern_t *pattern;
 		CairoColor shade1, shade2, shade3;
 		
@@ -1126,11 +1126,11 @@ clearlooks_glossy_draw_toolbar (cairo_t *cr,
 		cairo_pattern_destroy (pattern);
 	}
 	else /* Flat */
-	{ 
+	{
 		ge_cairo_set_color (cr, fill);
 		cairo_paint (cr);
 
-		if (!toolbar->topmost) 
+		if (!toolbar->topmost)
 		{
 			/* Draw highlight */
 			cairo_move_to       (cr, 0, 0.5);
@@ -1330,7 +1330,7 @@ clearlooks_glossy_draw_checkbox (cairo_t *cr,
                           int x, int y, int width, int height)
 {
 	const CairoColor *border;
-	const CairoColor *dot; 
+	const CairoColor *dot;
 	gboolean inconsistent = FALSE;
 	gboolean draw_bullet = (checkbox->shadow_type == GTK_SHADOW_IN);
 
@@ -1356,17 +1356,17 @@ clearlooks_glossy_draw_checkbox (cairo_t *cr,
 	
 	if (widget->xthickness > 2 && widget->ythickness > 2)
 	{
-		widget->style_functions->draw_inset (cr, &widget->parentbg, 0.5, 0.5, 
+		widget->style_functions->draw_inset (cr, &widget->parentbg, 0.5, 0.5,
                                            width-1, height-1, (widget->radius > 0)? 1 : 0, CR_CORNER_ALL);
 		
 		/* Draw the rectangle for the checkbox itself */
-		ge_cairo_rounded_rectangle (cr, 1.5, 1.5, 
+		ge_cairo_rounded_rectangle (cr, 1.5, 1.5,
                                   width-3, height-3, (widget->radius > 0)? 1 : 0, CR_CORNER_ALL);
 	}
 	else
 	{
 		/* Draw the rectangle for the checkbox itself */
-		ge_cairo_rounded_rectangle (cr, 0.5, 0.5, 
+		ge_cairo_rounded_rectangle (cr, 0.5, 0.5,
                                   width-1, height-1, (widget->radius > 0)? 1 : 0, CR_CORNER_ALL);
 	}
 	

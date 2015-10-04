@@ -1225,11 +1225,11 @@ Playlist::flush_notifications (bool from_undo)
 			 while (itimes--) {
 				 for (RegionList::iterator i = other->regions.begin(); i != other->regions.end(); ++i) {
 					 boost::shared_ptr<Region> copy_of_region = RegionFactory::create (*i, true);
-					 
+					
 					 /* put these new regions on top of all existing ones, but preserve
 					    the ordering they had in the original playlist.
 					 */
-					 
+					
 					 add_region_internal (copy_of_region, (*i)->position() + pos);
 					 set_layer (copy_of_region, copy_of_region->layer() + top);
 				 }
@@ -1423,7 +1423,7 @@ Playlist::flush_notifications (bool from_undo)
 
 	 if (_edit_mode == Splice) {
 		 splice_locked (at, distance, exclude);
-	 } 
+	 }
  }
 
  void
@@ -1522,7 +1522,7 @@ Playlist::core_ripple (framepos_t at, framecnt_t distance, RegionList *exclude)
 				new_pos = 0;
 			} else if (new_pos >= limit ) {
 				new_pos = limit;
-			} 
+			}
 				
 			(*i)->set_position (new_pos);
 		}
@@ -1650,7 +1650,7 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
 	 }
 
 	 mark_session_dirty ();
-     
+
 	 return save;
  }
 

@@ -34,7 +34,7 @@
     #define LIBTIMECODE_API LIBTIMECODE_DLL_EXPORT
 #else
     #define LIBTIMECODE_API LIBTIMECODE_DLL_IMPORT
-#endif 
+#endif
 #define LIBTIMECODE_LOCAL LIBTIMECODE_DLL_LOCAL
 
 #endif /* __libtimecode_visibility_h__ */

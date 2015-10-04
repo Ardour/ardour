@@ -226,7 +226,7 @@ AutomationList::stop_touch (bool mark, double)
                 if (mark) {
 			
 			/* XXX need to mark the last added point with the
-			 * current time 
+			 * current time
 			 */
                 }
         }

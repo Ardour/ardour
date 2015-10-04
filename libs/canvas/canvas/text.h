@@ -65,7 +65,7 @@ private:
         mutable bool           _need_redraw;
         mutable double         _width_correction;
         double                 _clamped_width;
-        
+
         void _redraw () const;
 };
 

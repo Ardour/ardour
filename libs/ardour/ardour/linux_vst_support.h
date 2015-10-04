@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 /******************************************************************************************/
 /*VSTFX - an engine to manage native linux VST plugins - derived from FST for Windows VSTs*/
 /******************************************************************************************/
- 
+
 LIBARDOUR_API extern void (*vstfx_error_callback)(const char *msg);
 
 LIBARDOUR_API void vstfx_set_error_function (void (*func)(const char *));

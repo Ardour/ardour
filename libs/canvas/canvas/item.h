@@ -78,7 +78,7 @@ public:
 	/** Adds one or more items to the vector @param items based on their
 	 * covering @param point which is in **window** coordinates
 	 *
-	 * Note that Item::add_items_at_window_point() is only intended to be 
+	 * Note that Item::add_items_at_window_point() is only intended to be
 	 * called on items already looked up in a LookupTable (i.e. by a
 	 * parent) and thus known to cover @param point already.
 	 *
@@ -87,8 +87,8 @@ public:
 	virtual void add_items_at_point (Duple /*point*/, std::vector<Item const *>& items) const;
 
         /** Return true if the item covers @param point, false otherwise.
-         * 
-         * The point is in window coordinates 
+         *
+         * The point is in window coordinates
          */
         virtual bool covers (Duple const &) const;
 
@@ -105,19 +105,19 @@ public:
 	Item* parent () const {
 		return _parent;
 	}
-    
+
         uint32_t depth() const;
         const Item* closest_ancestor_with (const Item& other) const;
         bool common_ancestor_within (uint32_t, const Item& other) const;
 
         /** returns true if this item is an ancestor of @param candidate,
-	 * and false otherwise. 
+	 * and false otherwise.
 	 */
         bool is_ancestor_of (const Item& candidate) const {
 		return candidate.is_descendant_of (*this);
 	}
         /** returns true if this Item is a descendant of @param candidate,
-	 * and false otherwise. 
+	 * and false otherwise.
 	 */
         bool is_descendant_of (const Item& candidate) const;
 
@@ -160,7 +160,7 @@ public:
         Duple window_to_item (Duple const&) const;
         Rect item_to_window (Rect const&, bool rounded = true) const;
         Rect window_to_item (Rect const&) const;
-        
+
 	void raise_to_top ();
 	void raise (int);
 	void lower_to_bottom ();

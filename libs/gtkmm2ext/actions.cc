@@ -303,9 +303,9 @@ ActionManager::save_action_states ()
 	GList* acts;
 
 	for (node = list; node; node = g_list_next (node)) {
-        
+
 		GtkActionGroup* group = (GtkActionGroup*) node->data;
-        
+
 		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
 			GtkAction* action = (GtkAction*) acts->data;
 			action_states_to_restore.push_back (ActionState (action, gtk_action_get_sensitive (action)));
@@ -531,7 +531,7 @@ ActionManager::get_key_representation (const string& accel_path, AccelKey& key)
 		uint32_t k = possibly_translate_legal_accelerator_to_real_key (key.get_key());
 		key = AccelKey (k, Gdk::ModifierType (key.get_mod()));
 		return ui_manager->get_accel_group()->get_label (key.get_key(), Gdk::ModifierType (key.get_mod()));
-	} 
+	}
 	
 	return unbound_string;
 }

@@ -76,7 +76,7 @@ class CAAudioChannelLayout
 public:
 	static AudioChannelLayout*	Create(UInt32 inNumberChannelDescriptions);
 	static void					Destroy(AudioChannelLayout* inChannelLayout);
-	static UInt32				CalculateByteSize(UInt32 inNumberChannelDescriptions) { 
+	static UInt32				CalculateByteSize(UInt32 inNumberChannelDescriptions) {
 									return offsetof(AudioChannelLayout, mChannelDescriptions) + inNumberChannelDescriptions * sizeof(AudioChannelDescription);
 								}
 	static void					SetAllToUnknown(AudioChannelLayout& outChannelLayout, UInt32 inNumberChannelDescriptions);
@@ -90,7 +90,7 @@ public:
 								CAAudioChannelLayout (UInt32 inNumberChannels, bool inChooseSurround);
 									// if inChooseSurround is false, then symmetrical speaker arrangements
 									// are chosen in place of surround layouts if there is a choice
-									// This call chooses layouts based on the expected defaults in 
+									// This call chooses layouts based on the expected defaults in
 									// AudioUnit usage
 								CAAudioChannelLayout (AudioChannelLayoutTag inTag);
 								CAAudioChannelLayout (const CAAudioChannelLayout &c);
@@ -121,8 +121,8 @@ public:
 private:
 	class ACLRefCounter : public CAReferenceCounted {
 	public:
-				ACLRefCounter (UInt32 inDataSize) 
-				{ 
+				ACLRefCounter (UInt32 inDataSize)
+				{
 					if (inDataSize < offsetof(AudioChannelLayout, mChannelDescriptions))
 						inDataSize = offsetof(AudioChannelLayout, mChannelDescriptions);
 						

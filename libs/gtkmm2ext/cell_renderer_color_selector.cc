@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2011 Paul Davis
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -54,13 +54,13 @@ CellRendererColorSelector::~CellRendererColorSelector ()
 {
 }
 
-Glib::PropertyProxy<Gdk::Color> 
+Glib::PropertyProxy<Gdk::Color>
 CellRendererColorSelector::property_color()
 {
 	return _property_color.get_proxy();
-} 
+}
 
-void 
+void
 CellRendererColorSelector::render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window, Gtk::Widget& /*widget*/, const Gdk::Rectangle& /*background_area*/, const Gdk::Rectangle& cell_area, const Gdk::Rectangle& expose_area, Gtk::CellRendererState /*flags*/)
 {
 	Gdk::Color c = _property_color.get_value();

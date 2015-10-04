@@ -113,7 +113,7 @@ ASIOBackend::ASIOBackend (AudioEngine& e, AudioBackendInfo& info)
 
 ASIOBackend::~ASIOBackend ()
 {
-#if 0 
+#if 0
 	delete _pcmio; _pcmio = 0; // TODO
 	delete _midiio; _midiio = 0; // TODO
 #endif

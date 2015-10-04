@@ -69,7 +69,7 @@ Gtkmm2ext::treeview_select_previous (TreeView& view, RefPtr<TreeModel> model, Tr
                 prev = model->get_path (iter);
 
         } else {
-                
+
                 prev.prev();
         }
 
@@ -107,14 +107,14 @@ Gtkmm2ext::treeview_select_previous (TreeView& view, RefPtr<TreeModel> model, Tr
 
                         iter = model->get_iter (prev);
                 }
-                
+
                 if (iter) {
                         treeview_select_one (selection, model, view, iter, prev, col);
                 } else {
 
                         /* we could not forward, so wrap around to the first row */
 
-                        /* grr: no nice way to get an iter for the 
+                        /* grr: no nice way to get an iter for the
                            last row, because there is no operator--
                            for TreeIter
                         */
@@ -216,7 +216,7 @@ Gtkmm2ext::treeview_select_next (TreeView& view, RefPtr<TreeModel> model, TreeVi
 
                         iter = model->get_iter (next);
                 }
-                
+
                 if (iter) {
                         treeview_select_one (selection, model, view, iter, next, col);
                 } else {

@@ -91,7 +91,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 
                 XMLNode* child = new XMLNode (PBD::capitalize (property_name()));
                 history_node->add_child_nocopy (*child);
-                
+
 		/* record the change described in our change member */
 
 		if (!_changes.added.empty()) {
@@ -126,7 +126,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 	void get_value (XMLNode & node) const {
                 for (typename Container::const_iterator i = _val.begin(); i != _val.end(); ++i) {
                         node.add_child_nocopy ((*i)->get_state ());
-                } 
+                }
 	}
 
 	bool changed () const {
@@ -144,7 +144,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 	}
 
 	/** Given a record of changes to this property, pass it to a callback that will
-	 *  update the property in some appropriate way. 
+	 *  update the property in some appropriate way.
 	 *
 	 *  This exists because simply using std::sequence methods to add/remove items
 	 *  from the property is far too simplistic - the semantics of add/remove may
@@ -170,7 +170,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 			   it. the Destructible is likely to be the Command being built
 			   with this diff().
 			*/
-                        
+
 			for (typename ChangeContainer::const_iterator i = a->changes().added.begin(); i != a->changes().added.end(); ++i) {
 				(*i)->DropReferences.connect_same_thread (*cmd, boost::bind (&Destructible::drop_references, cmd));
 			}
@@ -302,11 +302,11 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 		_val.clear ();
 	}
 	
-	typename Container::size_type size() const { 
+	typename Container::size_type size() const {
 		return _val.size();
 	}
 
-	bool empty() const { 
+	bool empty() const {
 		return _val.empty();
 	}
 
@@ -320,30 +320,30 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 		return _val = other;
 	}
 
-	typename Container::reference front() { 
+	typename Container::reference front() {
 		return _val.front ();
 	}
 
-	typename Container::const_reference front() const { 
+	typename Container::const_reference front() const {
 		return _val.front ();
 	}
 
-	typename Container::reference back() { 
+	typename Container::reference back() {
 		return _val.back ();
 	}
 
-	typename Container::const_reference back() const { 
+	typename Container::const_reference back() const {
 		return _val.back ();
 	}
 
-	void sort() { 
+	void sort() {
 		_val.sort ();
 	}
 
 	template<class BinaryPredicate> void sort(BinaryPredicate comp) {
 		_val.sort (comp);
 	}
-        
+
         const ChangeRecord& changes () const { return _changes; }
 
 protected:

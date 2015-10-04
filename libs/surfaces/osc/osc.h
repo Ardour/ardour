@@ -1,20 +1,20 @@
 /*
  * Copyright (C) 2006-2009 Paul Davis
- *  
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *  
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *  
+ *
  */
 
 #ifndef ardour_osc_h
@@ -207,7 +207,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
                  name (argv[0]->arg1type, argv[1]->arg2type,argv[2]->arg3type,argv[3]->arg4type); \
                 }                                                      \
                return 0;                                               \
-       } 
+       }
 
         PATH_CALLBACK2(locate,i,i);
         PATH_CALLBACK2(loop_location,i,i);
@@ -223,7 +223,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
         PATH_CALLBACK3(route_set_send_gain_abs,i,i,f);
         PATH_CALLBACK3(route_set_send_gain_dB,i,i,f);
         PATH_CALLBACK4(route_plugin_parameter,i,i,i,f);
-        PATH_CALLBACK3(route_plugin_parameter_print,i,i,i); 
+        PATH_CALLBACK3(route_plugin_parameter_print,i,i,i);
 
 	int route_mute (int rid, int yn);
 	int route_solo (int rid, int yn);

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-99 Paul Barton-Davis 
+    Copyright (C) 1998-99 Paul Barton-Davis
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -47,7 +47,7 @@ class LIBGTKMM2EXT_API MotionFeedback : public Gtk::VBox
 		Endless
 	};
 
-	MotionFeedback (Glib::RefPtr<Gdk::Pixbuf>, 
+	MotionFeedback (Glib::RefPtr<Gdk::Pixbuf>,
 			Type type,
 			boost::shared_ptr<PBD::Controllable>,
 			double default_value,
@@ -65,7 +65,7 @@ class LIBGTKMM2EXT_API MotionFeedback : public Gtk::VBox
 	virtual void set_controllable (boost::shared_ptr<PBD::Controllable> c);
 
         static void set_lamp_color (const std::string&);
-        
+
         static Glib::RefPtr<Gdk::Pixbuf> render_pixbuf (int size);
 
 	void set_print_func(void (*pf)(char buf[32], const boost::shared_ptr<PBD::Controllable>&, void *),

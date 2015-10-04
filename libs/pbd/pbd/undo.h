@@ -1,4 +1,4 @@
-/* 
+/*
     Copyright (C) 2002 Brett Viren & Paul Davis
 
     This program is free software; you can redistribute it and/or modify
@@ -99,7 +99,7 @@ class LIBPBD_API UndoHistory : public PBD::ScopedConnectionList
 	   If depth==0 it returns just the top
 	   node. If depth<0, it returns everything.
 	   If depth>0, it returns state for that
-	   many elements of the history, or 
+	   many elements of the history, or
 	   the full history, whichever is smaller.
 	*/
 

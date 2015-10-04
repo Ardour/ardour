@@ -87,12 +87,12 @@ ArdourCanvas::distance_to_segment_squared (Duple const & p, Duple const & p1, Du
 		at = p1;
 		t = 0.0;
 		return ((dp1x * dp1x) + (dp1y * dp1y));
-	} 
+	}
 
 
 	// Project a line from p to the segment [p1,p2].  By considering the line
 	// extending the segment, parameterized as p1 + (t * (p2 - p1)),
-	// we find projection of point p onto the line. 
+	// we find projection of point p onto the line.
 	// It falls where t = [(p - p1) . (p2 - p1)] / |p2 - p1|^2
 		
 	t = ((dp1x * dx) + (dp1y * dy)) / segLenSquared;

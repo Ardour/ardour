@@ -34,7 +34,7 @@ SysEx::SysEx (
 {
 	_flag = new ArdourCanvas::Flag (
 		parent,
-		height, 
+		height,
 		UIConfiguration::instance().color ("midi sysex outline"),
 		UIConfiguration::instance().color_mod ("midi sysex fill", "midi sysex fill"),
 		ArdourCanvas::Duple (x, y)

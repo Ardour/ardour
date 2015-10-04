@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Barton-Davis 
+    Copyright (C) 1999 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -123,7 +123,7 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, std::string c
 }
 
 void
-Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, 
+Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w,
 						   const std::vector<std::string>& strings,
 						   gint hpadding, gint vpadding)
 {
@@ -232,10 +232,10 @@ Gtkmm2ext::convert_bgra_to_rgba (guint8 const* src,
                                                          src_pixel[3]); // R [0] <= [ 2 ]
                         dst_pixel[1] = demultiply_alpha (src_pixel[1],
                                                          src_pixel[3]); // G [1] <= [ 1 ]
-                        dst_pixel[2] = demultiply_alpha (src_pixel[0],  
+                        dst_pixel[2] = demultiply_alpha (src_pixel[0],
                                                          src_pixel[3]); // B [2] <= [ 0 ]
                         dst_pixel[3] = src_pixel[3]; // alpha
-                        
+
 #elif G_BYTE_ORDER == G_BIG_ENDIAN
                         /* Cairo [ B G R A ] is actually  [ A R G B ] in memory SOURCE
                                                             0 1 2 3
@@ -248,11 +248,11 @@ Gtkmm2ext::convert_bgra_to_rgba (guint8 const* src,
                         dst_pixel[2] = demultiply_alpha (src_pixel[3],
                                                          src_pixel[0]); // B [2] <= [ 3 ]
                         dst_pixel[3] = src_pixel[0]; // alpha
-                        
+
 #else
 #error ardour does not currently support PDP-endianess
 #endif			
-                        
+
                         dst_pixel += 4;
                         src_pixel += 4;
                 }
@@ -506,7 +506,7 @@ int
 Gtkmm2ext::physical_screen_width (Glib::RefPtr<Gdk::Window> win)
 {
         GdkScreen* scr = gdk_screen_get_default();
-        
+
         if (win) {
                 GdkRectangle r;
                 gint monitor = gdk_screen_get_monitor_at_window (scr, win->gobj());
@@ -764,7 +764,7 @@ Gtkmm2ext::fit_to_pixels (const string& str, int pixel_width, Pango::FontDescrip
 	line = layout->get_line (0);
 
 	/* XXX: might need special care to get the ellipsis character, not sure
-           how that works 
+           how that works
 	*/	
 
 	string s = string (layout->get_text ().substr(line->get_start_index(), line->get_length()));
@@ -864,7 +864,7 @@ Gtkmm2ext::event_inside_widget_window (Gtk::Widget& widget, GdkEvent* ev)
         if (!gdk_event_get_root_coords (ev, &evx, &evy)) {
                 return false;
         }
-        
+
         gint wx;
         gint wy;
         gint width, height, depth;
@@ -874,11 +874,11 @@ Gtkmm2ext::event_inside_widget_window (Gtk::Widget& widget, GdkEvent* ev)
 
         widget_window->get_geometry (x, y, width, height, depth);
         widget_window->get_root_origin (wx, wy);
-        
-        if ((evx >= wx && evx < wx + width) && 
+
+        if ((evx >= wx && evx < wx + width) &&
             (evy >= wy && evy < wy + height)) {
                 return true;
-        } 
+        }
 
         return false;
 }

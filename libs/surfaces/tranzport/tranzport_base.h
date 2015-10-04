@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,26 +15,26 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  *   */
 
 /* This header file is basically where all the tranzport debuggable options go.
    Try to only check it in with minimal debugging enabled so production
    systems don't have to fiddle with it. */
 
-/* Design notes: The tranzport is a unique device, basically a 
-   20x2 character lcd gui with (almost) 22 shift keys and 8 blinking lights. 
+/* Design notes: The tranzport is a unique device, basically a
+   20x2 character lcd gui with (almost) 22 shift keys and 8 blinking lights.
 
    As such it has several unique constraints. In the libusb driver,
    the device exerts flow control
    by having a usb write fail. It is pointless to retry madly at that point,
-   the device is busy, and it's not going to become unbusy very quickly. 
+   the device is busy, and it's not going to become unbusy very quickly.
 
-   So writes need to be either "mandatory" or "unreliable", and therein 
+   So writes need to be either "mandatory" or "unreliable", and therein
    lies the rub, as the kernel can also drop writes, and missing an
-   interrupt in userspace is also generally bad. 
+   interrupt in userspace is also generally bad.
 
-   However, the kernel driver retries writes for you and also buffers and 
+   However, the kernel driver retries writes for you and also buffers and
    compresses incoming wheel events - it will rarely, if ever, drop data.
 
    A more complex surface might have hundreds of lights and several displays.
@@ -61,7 +61,7 @@
 // for now, this is what the device is called
 #define TRANZPORT_DEVICE "/dev/tranzport0"
 
-#if DEBUG_TRANZPORT > 0 
+#if DEBUG_TRANZPORT > 0
 #define DEBUG_TRANZPORT_SCREEN 10
 #define DEBUG_TRANZPORT_BITS 10
 #define DEBUG_TRANZPORT_LIGHTS 10

@@ -26,7 +26,7 @@ struct FilterConfig{
     double* BCoeffs;
 };
 
-class Filter  
+class Filter
 {
 public:
     Filter( FilterConfig Config );

@@ -7,7 +7,7 @@
 #include <deque>
 #include <queue>
 
-namespace ArdourSurface { 
+namespace ArdourSurface {
 
 class MackieControlProtocol;
 

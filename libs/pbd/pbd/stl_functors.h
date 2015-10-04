@@ -1,6 +1,6 @@
 /*
     Copyright (C) 1998-99 Paul Barton-Davis
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -85,7 +85,7 @@ struct LIBPBD_API equal_to<std::string *>
 #ifndef LESS_CONST_STRING_R
 struct LIBPBD_API less<const std::string &> {
     bool operator() (const std::string &s1, const std::string &s2) {
-	    return s1 < s2; 
+	    return s1 < s2;
     }
 };
 #define LESS_CONST_STRING_R

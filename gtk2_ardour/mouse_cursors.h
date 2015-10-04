@@ -73,7 +73,7 @@ public:
 	Gdk::Cursor* expand_left_right;
 	Gdk::Cursor* expand_up_down;
 
-	/* This cursor is not intended to be used directly, it just 
+	/* This cursor is not intended to be used directly, it just
 	   serves as an out-of-bounds value when we need to indicate
 	   "no cursor". NULL/0 doesn't work for this, because it
 	   is actually a valid value for a Gdk::Cursor - it indicates

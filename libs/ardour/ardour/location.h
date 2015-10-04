@@ -61,7 +61,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	Location (const Location& other);
 	Location (Session &, const XMLNode&);
 	Location* operator= (const Location& other);
-    
+
 	bool operator==(const Location& other);
 
 	bool locked() const { return _locked; }
@@ -120,18 +120,18 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	static PBD::Signal1<void,Location*> changed;
 
 	/* these are member signals for objects that care only about
-	   changes to this object 
+	   changes to this object
 	*/
 
 	PBD::Signal0<void> Changed;
-    
+
 	PBD::Signal0<void> NameChanged;
 	PBD::Signal0<void> EndChanged;
 	PBD::Signal0<void> StartChanged;
 	PBD::Signal0<void> FlagsChanged;
 	PBD::Signal0<void> LockChanged;
 	PBD::Signal0<void> PositionLockStyleChanged;
-        
+
 	/* CD Track / CD-Text info */
 
 	std::map<std::string, std::string> cd_info;
@@ -146,7 +146,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 
 	static PBD::Signal0<void> scene_changed; /* for use by backend scene change management, class level */
         PBD::Signal0<void> SceneChangeChanged;   /* for use by objects interested in this object */
-        
+
   private:
 	std::string        _name;
 	framepos_t         _start;
@@ -157,7 +157,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	bool               _locked;
 	PositionLockStyle  _position_lock_style;
 	boost::shared_ptr<SceneChange> _scene_change;
-    
+
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
 	void recompute_bbt_from_frames ();
@@ -201,7 +201,7 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 	void marks_either_side (framepos_t const, framepos_t &, framepos_t &) const;
 
 	void find_all_between (framepos_t start, framepos_t, LocationList&, Location::Flags);
-    
+
 	PBD::Signal1<void,Location*> current_changed;
 
 	/* Objects that care about individual addition and removal of Locations should connect to added/removed.

@@ -158,7 +158,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	   the tempo section is located in. A value of 0.0 indicates that
 	   it occurs on the first beat of the bar, a value of 0.5 indicates
 	   that it occurs halfway through the bar and so on.
-	   
+	
 	   this enables us to keep the tempo change at the same relative
 	   position within the bar if/when the meter changes.
 	*/
@@ -224,7 +224,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 		const TempoSection* tempo;
 		uint32_t            bar;
 		uint32_t            beat;
-            
+
 		BBTPoint (const MeterSection& m, const TempoSection& t, framepos_t f,
 		          uint32_t b, uint32_t e)
 			: frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
@@ -242,22 +242,22 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 		(obj.*method)(metrics);
 	}
 
-	void get_grid (BBTPointList::const_iterator&, BBTPointList::const_iterator&, 
+	void get_grid (BBTPointList::const_iterator&, BBTPointList::const_iterator&,
 	               framepos_t start, framepos_t end);
 	
-	/* TEMPO- AND METER-SENSITIVE FUNCTIONS 
+	/* TEMPO- AND METER-SENSITIVE FUNCTIONS
 
 	   bbt_time(), bbt_time_rt(), frame_time() and bbt_duration_at()
 	   are all sensitive to tempo and meter, and will give answers
 	   that align with the grid formed by tempo and meter sections.
-	   
-	   They SHOULD NOT be used to determine the position of events 
+	
+	   They SHOULD NOT be used to determine the position of events
 	   whose location is canonically defined in beats.
 	*/
 
 	void bbt_time (framepos_t when, Timecode::BBT_Time&);
 
-	/* realtime safe variant of ::bbt_time(), will throw 
+	/* realtime safe variant of ::bbt_time(), will throw
 	   std::logic_error if the map is not large enough
 	   to provide an answer.
 	*/
@@ -266,12 +266,12 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
 
 	/* TEMPO-SENSITIVE FUNCTIONS
-	   
+	
 	   These next 4 functions will all take tempo in account and should be
 	   used to determine position (and in the last case, distance in beats)
 	   when tempo matters but meter does not.
 
-	   They SHOULD be used to determine the position of events 
+	   They SHOULD be used to determine the position of events
 	   whose location is canonically defined in beats.
 	*/
 
@@ -348,7 +348,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void extend_map (framepos_t end);
 	void require_map_to (framepos_t pos);
 	void require_map_to (const Timecode::BBT_Time&);
-	void _extend_map (TempoSection* tempo, MeterSection* meter, 
+	void _extend_map (TempoSection* tempo, MeterSection* meter,
 	                  Metrics::iterator next_metric,
 	                  Timecode::BBT_Time current, framepos_t current_frame, framepos_t end);
 

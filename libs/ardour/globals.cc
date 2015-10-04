@@ -62,7 +62,7 @@
 
 #ifdef check
 #undef check /* stupid Apple and their un-namespaced, generic Carbon macros */
-#endif 
+#endif
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
@@ -502,7 +502,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	   how many more per-thread buffer sets we need above
 	   the h/w concurrency, but its definitely > 1 more.
 	*/
-        BufferManager::init (hardware_concurrency() + 4); 
+        BufferManager::init (hardware_concurrency() + 4);
 
         PannerManager::instance().discover_panners();
 
@@ -511,7 +511,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	/* it is unfortunate that we need to include reserved names here that
 	   refer to control surfaces. But there's no way to ensure a complete
 	   lack of collisions without doing this, since the control surface
-	   support may not even be active. Without adding an API to control 
+	   support may not even be active. Without adding an API to control
 	   surface support that would list their port names, we do have to
 	   list them here.
 	*/
@@ -550,7 +550,7 @@ ARDOUR::init_post_engine ()
 }
 
 void
-ARDOUR::cleanup () 
+ARDOUR::cleanup ()
 {
 	if (!libardour_initialized) {
 		return;
@@ -752,7 +752,7 @@ ARDOUR::get_available_sync_options ()
 #include <mach/mach_time.h>
 #define CLOCK_REALTIME 0
 #define CLOCK_MONOTONIC 0
-int 
+int
 clock_gettime (int /*clk_id*/, struct timespec *t)
 {
         static bool initialized = false;
@@ -770,7 +770,7 @@ clock_gettime (int /*clk_id*/, struct timespec *t)
         return 0;
 }
 #endif
- 
+
 microseconds_t
 ARDOUR::get_microseconds ()
 {

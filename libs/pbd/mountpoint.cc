@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ mountpoint (string path)
 		n = 0;
 		matchlen = 0;
 
-		/* note: strcmp's semantics are not 
+		/* note: strcmp's semantics are not
 		   strict enough to use for this.
 		*/
 
@@ -123,9 +123,9 @@ mountpoint (string path)
 	const char *cpath = path.c_str();
 	char best[PATH_MAX+1];
 	
-	/* From the manpage, under "BUGS" : "The memory allocated by getmntinfo() cannot be free(3)'d by the 
+	/* From the manpage, under "BUGS" : "The memory allocated by getmntinfo() cannot be free(3)'d by the
 	   application."
-	   
+	
 	   Thus: we do NOT try to free memory allocated by getmntinfo()
 	*/
 
@@ -139,7 +139,7 @@ mountpoint (string path)
 		unsigned int n = 0;
 		matchlen = 0;
 
-		/* note: strcmp's semantics are not 
+		/* note: strcmp's semantics are not
 		   strict enough to use for this.
 		*/
 

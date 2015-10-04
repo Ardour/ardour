@@ -35,12 +35,12 @@ CrossThreadChannel::~CrossThreadChannel ()
 	if (fds[0] >= 0) {
 		close (fds[0]);
 		fds[0] = -1;
-	} 
+	}
 
 	if (fds[1] >= 0) {
 		close (fds[1]);
 		fds[1] = -1;
-	} 
+	}
 }
 
 void
@@ -87,7 +87,7 @@ CrossThreadChannel::poll_for_request()
 	return false;
 }
 
-int 
+int
 CrossThreadChannel::receive (char& msg, bool wait)
 {
 	if (wait) {

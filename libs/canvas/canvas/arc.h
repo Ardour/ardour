@@ -42,7 +42,7 @@ public:
 	void set_arc (double degrees);
 	void set_start (double degrees);
 
-        Duple center() const { 
+        Duple center() const {
 		return _center;
 	}
 	Coord radius () const {

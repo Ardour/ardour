@@ -20,17 +20,17 @@
 #include "FiltFilt.h"
 
 struct DFProcConfig{
-    unsigned int length; 
-    unsigned int LPOrd; 
-    double *LPACoeffs; 
-    double *LPBCoeffs; 
+    unsigned int length;
+    unsigned int LPOrd;
+    double *LPACoeffs;
+    double *LPBCoeffs;
     unsigned int winPre;
-    unsigned int winPost; 
+    unsigned int winPost;
     double AlphaNormParam;
     bool isMedianPositive;
 };
 
-class DFProcess  
+class DFProcess
 {
 public:
     DFProcess( DFProcConfig Config );

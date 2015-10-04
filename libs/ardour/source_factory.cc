@@ -308,7 +308,7 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createWritable (DataType type, Session& s, const std::string& path, 
+SourceFactory::createWritable (DataType type, Session& s, const std::string& path,
 			       bool destructive, framecnt_t rate, bool announce, bool defer_peaks)
 {
 	/* this might throw failed_constructor(), which is OK */

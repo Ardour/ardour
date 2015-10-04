@@ -584,7 +584,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void transport_record (bool roll);
 	void transport_roll ();
 	void transport_play_selection();
-	void transport_play_preroll(); 
+	void transport_play_preroll();
 	void transport_forward (int option);
 	void transport_rewind (int option);
 	void transport_loop ();
@@ -640,7 +640,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         SessionOptionEditor*    create_session_option_editor ();
         BundleManager*          create_bundle_manager ();
         AddVideoDialog*         create_add_video_dialog ();
-        BigClockWindow*         create_big_clock_window(); 
+        BigClockWindow*         create_big_clock_window();
         GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 
 	ARDOUR::SystemExec *video_server_process;
@@ -733,7 +733,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void loading_message (const std::string& msg);
 
 	PBD::ScopedConnectionList forever_connections;
-        PBD::ScopedConnection halt_connection; 
+        PBD::ScopedConnection halt_connection;
 
         void step_edit_status_change (bool);
 

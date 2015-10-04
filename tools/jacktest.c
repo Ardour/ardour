@@ -73,7 +73,7 @@ process (jack_nframes_t nframes, void *arg)
 		exit (0);
 	}
 
-	return 0;      
+	return 0;
 }
 
 /**

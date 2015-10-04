@@ -36,7 +36,7 @@ const std::vector<std::string> WavesAudioBackend::__available_midi_options = boo
 #endif
 
 
-std::vector<std::string> 
+std::vector<std::string>
 WavesAudioBackend::enumerate_midi_options () const
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::enumerate_midi_options ()" << std::endl;
@@ -44,7 +44,7 @@ WavesAudioBackend::enumerate_midi_options () const
 }
 
 
-int 
+int
 WavesAudioBackend::set_midi_option (const std::string& option)
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::set_midi_option ( " << option << " )" << std::endl;
@@ -137,7 +137,7 @@ uint32_t
 WavesAudioBackend::get_midi_event_count (void* port_buffer)
 {
     // COMMENTED FREQUENT DBG LOGS */ std::cout << "WavesAudioBackend::get_midi_event_count (): " << std::endl;
-    
+
     if (port_buffer == NULL) {
         std::cerr << "WavesAudioBackend::get_midi_event_count () : NULL in the 'port_buffer' argument!\n";
         return -1;
@@ -182,7 +182,7 @@ WavesAudioBackend::_changed_midi_devices ()
         std::cerr << "WavesAudioBackend::_changed_midi_devices (): _register_system_midi_ports () failed!" << std::endl;
         return;
     }
-    
+
     manager.registration_callback ();
 
     if (_midi_device_manager.stream (true)) {
@@ -245,9 +245,9 @@ WavesAudioBackend::_register_system_midi_ports ()
             std::string port_name = "system_midi:" + (*it)->name () + " capture";
             WavesDataPort* port = _find_port (port_name);
             WavesMidiPort* midi_port = dynamic_cast<WavesMidiPort*> (port);
-            if (midi_port && (midi_port->type () != DataType::MIDI || 
-                midi_port->midi_device () != *it || 
-                !midi_port->is_output () || 
+            if (midi_port && (midi_port->type () != DataType::MIDI ||
+                midi_port->midi_device () != *it ||
+                !midi_port->is_output () ||
                 !midi_port->is_physical () ||
                 !midi_port->is_terminal ())) {
                 std::cerr << "WavesAudioBackend::_register_system_midi_ports (): the port [" << midi_port->name () << "] is inconsystently constructed!" << std::endl;
@@ -263,16 +263,16 @@ WavesAudioBackend::_register_system_midi_ports ()
                 }
                 ((WavesMidiPort*)port)->set_midi_device (*it);
             }
-            port->set_latency_range (lr, false); 
+            port->set_latency_range (lr, false);
         }
 
         if ((*it)->is_output ()) {
             std::string port_name = "system_midi:" + (*it)->name () + " playback";
             WavesDataPort* port = _find_port (port_name);
             WavesMidiPort* midi_port = dynamic_cast<WavesMidiPort*> (port);
-            if (midi_port && (midi_port->type () != DataType::MIDI || 
-                midi_port->midi_device () != *it || 
-                !midi_port->is_input () || 
+            if (midi_port && (midi_port->type () != DataType::MIDI ||
+                midi_port->midi_device () != *it ||
+                !midi_port->is_input () ||
                 !midi_port->is_physical () ||
                 !midi_port->is_terminal ())) {
                 std::cerr << "WavesAudioBackend::_register_system_midi_ports (): the port [" << midi_port->name () << "] is inconsystently constructed!" << std::endl;
@@ -293,7 +293,7 @@ WavesAudioBackend::_register_system_midi_ports ()
             port->set_latency_range (lr, true);
         }
     }
-    
+
     return 0;
 }
 
@@ -304,18 +304,18 @@ WavesAudioBackend::_read_midi_data_from_devices ()
     // COMMENTED FREQUENT DBG LOGS */ std::cout  << "WavesAudioBackend::_read_midi_data_from_devices ():" << std::endl;
     if (!_midi_device_manager.is_streaming ())
         return 0;
-    
+
     _midi_device_manager.do_read ();
 
     for (std::vector<WavesMidiPort*>::iterator it = _physical_midi_inputs.begin (); it != _physical_midi_inputs.end (); ++it) {
         WavesMidiDevice* midi_device = (*it)->midi_device ();
-        
+
         WavesMidiBuffer& waves_midi_buffer = (*it)->buffer ();
         waves_midi_buffer.clear ();
-        
+
         while (WavesMidiEvent *waves_midi_event = midi_device->dequeue_input_waves_midi_event ()) {
             int32_t timestamp_st = _buffer_size - (_sample_time_at_cycle_start - waves_midi_event->timestamp ());
-            
+
             if (timestamp_st < 0) {
                 timestamp_st = 0;
             } else if (timestamp_st >= (int32_t)_buffer_size) {
@@ -334,16 +334,16 @@ WavesAudioBackend::_write_midi_data_to_devices (pframes_t nframes)
 {
     if (!_midi_device_manager.is_streaming ())
         return 0;
-    
+
     for (std::vector<WavesMidiPort*>::iterator it = _physical_midi_outputs.begin (); it != _physical_midi_outputs.end (); ++it) {
-        WavesMidiDevice* midi_device = (*it)->midi_device (); 
+        WavesMidiDevice* midi_device = (*it)->midi_device ();
         WavesMidiBuffer &waves_midi_buffer = * (WavesMidiBuffer*) (*it)->get_buffer (nframes);
 
         for (WavesMidiBufferIterator it = waves_midi_buffer.begin (); it != waves_midi_buffer.end ();) {
              WavesMidiEvent* waves_midi_event = *it;
-            
+
             waves_midi_buffer.erase (it);
-            
+
             waves_midi_event->set_timestamp (_sample_time_at_cycle_start + waves_midi_event->timestamp () + nframes);
             midi_device->enqueue_output_waves_midi_event (waves_midi_event);
        }

@@ -42,7 +42,7 @@ SessionDirectory::SessionDirectory (const std::string& session_path)
 
 }
 
-SessionDirectory& 
+SessionDirectory&
 SessionDirectory::operator= (const std::string& newpath)
 {
 	m_root_path = newpath;

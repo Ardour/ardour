@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2005 Paul Davis
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -30,7 +30,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-PixScroller::PixScroller (Adjustment& a, 
+PixScroller::PixScroller (Adjustment& a,
 			  Glib::RefPtr<Gdk::Pixbuf> s,
 			  Glib::RefPtr<Gdk::Pixbuf> r)
 	: adj (a),
@@ -66,7 +66,7 @@ PixScroller::PixScroller (Adjustment& a,
         rail_surface = Cairo::ImageSurface::create  (format, rail->get_width(), rail->get_height());
         rail_context = Cairo::Context::create (rail_surface);
         Gdk::Cairo::set_source_pixbuf (rail_context, rail, 0.0, 0.0);
-        rail_context->paint();        
+        rail_context->paint();
 
         if (slider->get_has_alpha()) {
                 format = Cairo::FORMAT_ARGB32;
@@ -76,7 +76,7 @@ PixScroller::PixScroller (Adjustment& a,
         slider_surface = Cairo::ImageSurface::create  (format, slider->get_width(), slider->get_height());
         slider_context = Cairo::Context::create (slider_surface);
         Gdk::Cairo::set_source_pixbuf (slider_context, slider, 0.0, 0.0);
-        slider_context->paint();        
+        slider_context->paint();
 }
 
 void
@@ -92,7 +92,7 @@ PixScroller::on_expose_event (GdkEventExpose* ev)
 	GdkRectangle intersect;
 	Glib::RefPtr<Gdk::Window> win (get_window());
         Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
-        
+
 	if (gdk_rectangle_intersect (railrect.gobj(), &ev->area, &intersect)) {
 
                 context->save();
@@ -135,8 +135,8 @@ PixScroller::on_button_press_event (GdkEventButton* ev)
 		break;
 	default:
 		break;
-	} 
-			       
+	}
+			
 
 	return false;
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,14 +17,14 @@
 
 */
 
-/* Design notes: The tranzport is a unique device, basically a 
-   20 lcd gui with 22 shift keys and 8 blinking lights. 
+/* Design notes: The tranzport is a unique device, basically a
+   20 lcd gui with 22 shift keys and 8 blinking lights.
 
    As such it has several unique constraints. The device exerts flow control
    by having a usb write fail. It is pointless to retry madly at that point,
-   the device is busy, and it's not going to become unbusy very quickly. 
+   the device is busy, and it's not going to become unbusy very quickly.
 
-   So writes need to be either "mandatory" or "unreliable", and therein 
+   So writes need to be either "mandatory" or "unreliable", and therein
    lies the rub, as the kernel can also drop writes, and missing an
    interrupt in userspace is also generally bad.
 
@@ -81,7 +81,7 @@ static const uint8_t cmd_light_on[] =  { 0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00
 static const uint8_t cmd_light_off[] = { 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 };
 static const uint8_t cmd_write_screen[] =  { 0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00 };
 
-static inline double 
+static inline double
 gain_to_slider_position (ARDOUR::gain_t g)
 {
 	if (g == 0) return 0;
@@ -89,7 +89,7 @@ gain_to_slider_position (ARDOUR::gain_t g)
 
 }
 
-static inline ARDOUR::gain_t 
+static inline ARDOUR::gain_t
 slider_position_to_gain (double pos)
 {
 	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */
@@ -127,30 +127,30 @@ TranzportControlProtocol::TranzportControlProtocol (Session& s)
 	print(1,0,"!Peace through Music!");
 }
 
-void TranzportControlProtocol::light_validate (LightID light) 
+void TranzportControlProtocol::light_validate (LightID light)
 {
 	lights_invalid[light] = 0;
 }
 
-void TranzportControlProtocol::light_invalidate (LightID light) 
+void TranzportControlProtocol::light_invalidate (LightID light)
 {
 	lights_invalid[light] = 1;
 }
 
-void TranzportControlProtocol::lights_validate () 
+void TranzportControlProtocol::lights_validate ()
 {
-	memset (lights_invalid, 0, sizeof (lights_invalid)); 
+	memset (lights_invalid, 0, sizeof (lights_invalid));
 }
 
-void TranzportControlProtocol::lights_invalidate () 
+void TranzportControlProtocol::lights_invalidate ()
 {
-	memset (lights_invalid, 1, sizeof (lights_invalid)); 
+	memset (lights_invalid, 1, sizeof (lights_invalid));
 }
 
 void TranzportControlProtocol::lights_init()
 {
 	for (uint32_t i = 0; i < sizeof(lights_current)/sizeof(lights_current[0]); i++) {
-		lights_invalid[i] = lights_current[i] = 
+		lights_invalid[i] = lights_current[i] =
 			lights_pending[i] = lights_flash[i] = false;
 	}
 }
@@ -165,9 +165,9 @@ TranzportControlProtocol::lights_flush ()
 	//  Figure out iterators one day soon
 	//  for (LightID i = i.start(), i = i.end(); i++) {
 	//  if (lights_pending[i] != lights_current[i] || lights_invalid[i]) {
-	//    if (light_set(i, lights_pending[i])) { 
+	//    if (light_set(i, lights_pending[i])) {
 	//       return i-1;
-	//    } 
+	//    }
 	//  }
 	//}
 	if ((lights_pending[LightRecord] != lights_current[LightRecord]) || lights_invalid[LightRecord]) {
@@ -217,7 +217,7 @@ void
 TranzportControlProtocol::screen_clear ()
 {
 	const char *blank = "                    ";
-	print(0,0,blank); 
+	print(0,0,blank);
 	print(1,0,blank);
 }
 
@@ -252,35 +252,35 @@ TranzportControlProtocol::screen_flush ()
 
 	for (row = 0; row < 2 && pending == 0; row++) {
 		for (col_base = 0, col = 0; col < 20 && pending == 0; ) {
-			if ((screen_pending[row][col] != screen_current[row][col]) 
+			if ((screen_pending[row][col] != screen_current[row][col])
 					|| screen_invalid[row][col]) {
 
 				/* something in this cell is different, so dump the cell to the device. */
 
-				uint8_t cmd[8]; 
-				cmd[0] = 0x00; 
-				cmd[1] = 0x01; 
-				cmd[2] = cell; 
-				cmd[3] = screen_pending[row][col_base]; 
+				uint8_t cmd[8];
+				cmd[0] = 0x00;
+				cmd[1] = 0x01;
+				cmd[2] = cell;
+				cmd[3] = screen_pending[row][col_base];
 				cmd[4] = screen_pending[row][col_base+1];
-				cmd[5] = screen_pending[row][col_base+2]; 
+				cmd[5] = screen_pending[row][col_base+2];
 				cmd[6] = screen_pending[row][col_base+3];
 				cmd[7] = 0x00;
 
 				if(write(cmd) != 0) {
 					/* try to update this cell on the next go-round */
 #if DEBUG_TRANZPORT > 4
-					printf("usb screen update failed for some reason... why? \ncmd and data were %02x %02x %02x %02x %02x %02x %02x %02x\n", 
-							cmd[0],cmd[1],cmd[2], cmd[3], cmd[4], cmd[5],cmd[6],cmd[7]); 
+					printf("usb screen update failed for some reason... why? \ncmd and data were %02x %02x %02x %02x %02x %02x %02x %02x\n",
+							cmd[0],cmd[1],cmd[2], cmd[3], cmd[4], cmd[5],cmd[6],cmd[7]);
 #endif
 					pending += 1;	
 					// Shouldn't need to do this
-					// screen_invalid[row][col_base] = screen_invalid[row][col_base+1] = 
+					// screen_invalid[row][col_base] = screen_invalid[row][col_base+1] =
 					// screen_invalid[row][col_base+2] = screen_invalid[row][col_base+3] = true;
 
 				} else {
 					/* successful write: copy to current cached display */
-					screen_invalid[row][col_base] = screen_invalid[row][col_base+1] = 
+					screen_invalid[row][col_base] = screen_invalid[row][col_base+1] =
 						screen_invalid[row][col_base+2] = screen_invalid[row][col_base+3] = false;
 					memcpy (&screen_current[row][col_base], &screen_pending[row][col_base], 4);
 				}
@@ -308,7 +308,7 @@ TranzportControlProtocol::screen_flush ()
 
 //  Tranzport specific
 
-void TranzportControlProtocol::invalidate() 
+void TranzportControlProtocol::invalidate()
 {
 	lcd_damage(); lights_invalidate(); screen_invalidate(); // one of these days lcds can be fine but screens not
 }
@@ -347,7 +347,7 @@ TranzportControlProtocol::set_active (bool yn)
 			close ();
 			_active = false;
 			cerr << "End tranzport shutdown\n";
-		} 
+		}
 	}
 
 	return 0;
@@ -359,13 +359,13 @@ TranzportControlProtocol::show_track_gain ()
 	if (route_table[0]) {
 		gain_t g = route_get_gain (0);
 		if ((g != last_track_gain) || lcd_isdamaged(0,9,8)) {
-			char buf[16]; 
+			char buf[16];
 			snprintf (buf, sizeof (buf), "%6.1fdB", coefficient_to_dB (route_get_effective_gain (0)));
-			print (0, 9, buf); 
+			print (0, 9, buf);
 			last_track_gain = g;
 		}
 	} else {
-		print (0, 9, "        "); 
+		print (0, 9, "        ");
 	}
 }
 
@@ -399,7 +399,7 @@ TranzportControlProtocol::next_display_mode ()
 			enter_big_meter_mode();
 			break;
 
-		case DisplayConfig: 
+		case DisplayConfig:
 		case DisplayBling:
 		case DisplayBlingMeter:
 			enter_normal_display_mode();
@@ -480,7 +480,7 @@ log_meter (float db)
 		def = (db + 20.0f) * 2.5f + 50.0f;
 	}
 
-	/* 115 is the deflection %age that would be 
+	/* 115 is the deflection %age that would be
 	   when db=6.0. this is an arbitrary
 	   endpoint for our scaling.
 	   */
@@ -495,7 +495,7 @@ TranzportControlProtocol::show_meter ()
 	if (route_table[0] == 0) {
 		// Principle of least surprise
 		print (0, 0, "No audio to meter!!!");
-		print (1, 0, "Select another track"); 
+		print (1, 0, "Select another track");
 		return;
 	}
 
@@ -531,7 +531,7 @@ TranzportControlProtocol::show_meter ()
 
 	for (i = 0; i < fill; ++i) {
 		buf[i] = 0x07; /* tranzport special code for 4 quadrant LCD block */
-	} 
+	}
 
 	/* add a possible half-step */
 
@@ -556,7 +556,7 @@ TranzportControlProtocol::show_meter ()
 
 void
 TranzportControlProtocol::show_bbt (framepos_t where)
-{ 
+{
 	if ((where != last_where) || lcd_isdamaged(1,9,8)) {
 		char buf[16];
 		Timecode::BBT_Time bbt;
@@ -618,7 +618,7 @@ TranzportControlProtocol::show_smpte (framepos_t where)
 		print (1, 15, buf);
 
 		sprintf (buf, "%02" PRIu32, smpte.frames);
-		print_noretry (1, 18, buf); 
+		print_noretry (1, 18, buf);
 
 		last_where = where;
 	}
@@ -630,7 +630,7 @@ TranzportControlProtocol::_monitor_work (void* arg)
 	return static_cast<TranzportControlProtocol*>(arg)->monitor_work ();
 }
 
-// I note that these usb specific open, close, probe, read routines are basically 
+// I note that these usb specific open, close, probe, read routines are basically
 // pure boilerplate and could easily be abstracted elsewhere
 
 #if !HAVE_TRANZPORT_KERNEL_DRIVER
@@ -649,7 +649,7 @@ TranzportControlProtocol::probe ()
 
 		for(dev = bus->devices; dev; dev = dev->next) {
 			if (dev->descriptor.idVendor == VENDORID && dev->descriptor.idProduct == PRODUCTID) {
-				return true; 
+				return true;
 			}
 		}
 	}
@@ -689,7 +689,7 @@ TranzportControlProtocol::open_core (struct usb_device* dev)
 		error << _("Tranzport: cannot open USB transport") << endmsg;
 		return -1;
 	}
-	 
+	
 	if (usb_claim_interface (udev, 0) < 0) {
 		error << _("Tranzport: cannot claim USB interface") << endmsg;
 		usb_close (udev);
@@ -727,7 +727,7 @@ TranzportControlProtocol::close ()
 	return ret;
 }
 
-int TranzportControlProtocol::read(uint8_t *buf, uint32_t timeout_override) 
+int TranzportControlProtocol::read(uint8_t *buf, uint32_t timeout_override)
 {
 	int val;
 	// Get smarter about handling usb errors soon. Like disconnect
@@ -735,7 +735,7 @@ int TranzportControlProtocol::read(uint8_t *buf, uint32_t timeout_override)
 	val = usb_interrupt_read (udev, READ_ENDPOINT, (char *) buf, 8, 10);
 	//  pthread_testcancel();
 	return val;
-} 
+}
 
 	
 int
@@ -803,18 +803,18 @@ TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
 
 // We have a state "Unknown" - STOP USING SPACES FOR IT - switching to arrow character
 // We have another state - no_retry. Misleading, as we still retry on the next pass
-// I think it's pointless to keep no_retry and instead we should throttle writes 
+// I think it's pointless to keep no_retry and instead we should throttle writes
 // We have an "displayed" screen
 // We always draw into the pending screen, which could be any of several screens
 // We have an active screen
-// Print arg - we have 
+// Print arg - we have
 // setactive
 // so someday I think we need a screen object.
 
 /*
 screen_flash.clear();
 screen_flash.print(0,0,"Undone:"); // Someday pull the undo stack from somewhere
-screen_flash.print(1,0,"Nextup:"); 
+screen_flash.print(1,0,"Nextup:");
 
 if(flash_messages && lcd.getactive() != screen_flash) lcd.setactive(screen_flash,2000);
 
@@ -828,14 +828,14 @@ TranzportControlProtocol::flush ()
 {
 	int pending = 0;
 	if(!(pending = lights_flush())) {
-		pending = screen_flush(); 
-	} 
+		pending = screen_flush();
+	}
 	return pending;
 }
 
 // doing these functions made me realize that screen_invalid should be lcd_isdamaged FIXME soon
 
-bool TranzportControlProtocol::lcd_damage() 
+bool TranzportControlProtocol::lcd_damage()
 {
 	screen_invalidate();
 	return true;
@@ -845,7 +845,7 @@ bool TranzportControlProtocol::lcd_damage (int row, int col, int length)
 {
 	bool result = false;
 	int endcol = col+length-1;
-	if((endcol > 19)) { endcol = 19; } 
+	if((endcol > 19)) { endcol = 19; }
 	if((row >= 0 && row < 2) && (col >=0 && col < 20)) {
 		for(int c = col; c < endcol; c++) {
 			screen_invalid[row][c] = true;
@@ -858,7 +858,7 @@ bool TranzportControlProtocol::lcd_damage (int row, int col, int length)
 // Gotta switch to bitfields, this is collossally dumb
 // Still working on the layering, arguably screen_invalid should be lcd_invalid
 
-bool TranzportControlProtocol::lcd_isdamaged () 
+bool TranzportControlProtocol::lcd_isdamaged ()
 {
 	for(int r = 0; r < 2; r++) {
 		for(int c = 0; c < 20; c++) {
@@ -877,7 +877,7 @@ bool TranzportControlProtocol::lcd_isdamaged (int row, int col, int length)
 {
 	bool result = 0;
 	int endcol = col+length;
-	if((endcol > 19)) { endcol = 19; } 
+	if((endcol > 19)) { endcol = 19; }
 	if((row >= 0 && row < 2) && (col >=0 && col < 20)) {
 		for(int c = col; c < endcol; c++) {
 			if(screen_invalid[row][c]) {
@@ -907,22 +907,22 @@ TranzportControlProtocol::lcd_clear ()
 int
 TranzportControlProtocol::lcd_flush ()
 {
-	return 0; 
+	return 0;
 }
 
-int 
+int
 TranzportControlProtocol::lcd_write(uint8_t* cmd, uint32_t timeout_override)
 {
 	return write(cmd,timeout_override);
 }
 
-void 
-TranzportControlProtocol::lcd_fill (uint8_t fill_char) 
+void
+TranzportControlProtocol::lcd_fill (uint8_t fill_char)
 {
 }
 
-void 
-TranzportControlProtocol::lcd_print (int row, int col, const char* text) 
+void
+TranzportControlProtocol::lcd_print (int row, int col, const char* text)
 {
 	print(row,col,text);
 }
@@ -937,18 +937,18 @@ void TranzportControlProtocol::lcd_print_noretry (int row, int col, const char* 
 void
 TranzportControlProtocol::lights_on ()
 {
-	lights_pending[LightRecord] = lights_pending[LightTrackrec] = 
-		lights_pending[LightTrackmute] =  lights_pending[LightTracksolo] = 
-		lights_pending[LightAnysolo] =   lights_pending[LightLoop] = 
+	lights_pending[LightRecord] = lights_pending[LightTrackrec] =
+		lights_pending[LightTrackmute] =  lights_pending[LightTracksolo] =
+		lights_pending[LightAnysolo] =   lights_pending[LightLoop] =
 		lights_pending[LightPunch] = true;
 }
 
 void
 TranzportControlProtocol::lights_off ()
 {
-	lights_pending[LightRecord] = lights_pending[LightTrackrec] = 
-		lights_pending[LightTrackmute] =  lights_pending[LightTracksolo] = 
-		lights_pending[LightAnysolo] =   lights_pending[LightLoop] = 
+	lights_pending[LightRecord] = lights_pending[LightTrackrec] =
+		lights_pending[LightTrackmute] =  lights_pending[LightTracksolo] =
+		lights_pending[LightAnysolo] =   lights_pending[LightLoop] =
 		lights_pending[LightPunch] = false;
 }
 
@@ -982,7 +982,7 @@ TranzportControlProtocol::light_set (LightID light, bool offon)
 	}
 }
 
-int TranzportControlProtocol::rtpriority_set(int priority) 
+int TranzportControlProtocol::rtpriority_set(int priority)
 {
 	struct sched_param rtparam;
 	int err;
@@ -990,19 +990,19 @@ int TranzportControlProtocol::rtpriority_set(int priority)
 	char *a = (char*) alloca(4096*2); a[0] = 'a'; a[4096] = 'b';
 	memset (&rtparam, 0, sizeof (rtparam));
 	rtparam.sched_priority = priority; /* XXX should be relative to audio (JACK) thread */
-	// Note - try SCHED_RR with a low limit 
+	// Note - try SCHED_RR with a low limit
 	// - we don't care if we can't write everything this ms
 	// and it will help if we lose the device
 	if ((err = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
 		PBD::info << string_compose (_("%1: thread not running with realtime scheduling (%2)"), name(), strerror (errno)) << endmsg;
 		return 1;
-	} 
+	}
 	return 0;
 }
 
 // Running with realtime privs is bad when you have problems
 
-int TranzportControlProtocol::rtpriority_unset(int priority) 
+int TranzportControlProtocol::rtpriority_unset(int priority)
 {
 	struct sched_param rtparam;
 	int err;
@@ -1011,7 +1011,7 @@ int TranzportControlProtocol::rtpriority_unset(int priority)
 	if ((err = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
 		PBD::info << string_compose (_("%1: can't stop realtime scheduling (%2)"), name(), strerror (errno)) << endmsg;
 		return 1;
-	} 
+	}
 	PBD::info << string_compose (_("%1: realtime scheduling stopped (%2)"), name(), strerror (errno)) << endmsg;
 	return 0;
 }
@@ -1041,10 +1041,10 @@ TranzportControlProtocol::monitor_work ()
 
 		if (_device_status == STATUS_OFFLINE) {
 			first_time = true;
-			if(offline++ == 1) { 
+			if(offline++ == 1) {
 				cerr << "Transport has gone offline\n";
 			}
-		} else { 
+		} else {
 			offline = 0; // hate writing this
 		}
 
@@ -1075,7 +1075,7 @@ TranzportControlProtocol::monitor_work ()
 			// pending = flush();
 
 			if(pending == 0) {
-				pending = flush(); 
+				pending = flush();
 			} else {
 				if(inflight > 0) {
 					pending = --inflight; // we just did a whole bunch of writes so wait
@@ -1084,13 +1084,13 @@ TranzportControlProtocol::monitor_work ()
 				}
 			}
 			// pending = 0;
-		} 
+		}
 	}
 
 	return (void*) 0;
 }
 
-int TranzportControlProtocol::lights_show_recording() 
+int TranzportControlProtocol::lights_show_recording()
 {
 	//   FIXME, flash recording light when recording and transport is moving
 	return     lights_show_normal();
@@ -1098,7 +1098,7 @@ int TranzportControlProtocol::lights_show_recording()
 
 // gotta do bling next!
 
-int TranzportControlProtocol::lights_show_bling() 
+int TranzportControlProtocol::lights_show_bling()
 {
 	switch (bling_mode) {
 		case BlingOff: break;
@@ -1111,14 +1111,14 @@ int TranzportControlProtocol::lights_show_bling()
 	return 0;
 }
 
-int TranzportControlProtocol::lights_show_normal() 
+int TranzportControlProtocol::lights_show_normal()
 {
 	/* Track only */
 
 	if (route_table[0]) {
 		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack> (route_table[0]);
 		lights_pending[LightTrackrec]  = at && at->record_enabled();
-		lights_pending[LightTrackmute] = route_get_muted(0); 
+		lights_pending[LightTrackmute] = route_get_muted(0);
 		lights_pending[LightTracksolo] = route_get_soloed(0);
 	} else {
 		lights_pending[LightTrackrec]  = false;
@@ -1128,7 +1128,7 @@ int TranzportControlProtocol::lights_show_normal()
 
 	/* Global settings */
 
-	lights_pending[LightLoop]        = session->get_play_loop(); 
+	lights_pending[LightLoop]        = session->get_play_loop();
 	lights_pending[LightPunch]       = Config->get_punch_in() || Config->get_punch_out();
 	lights_pending[LightRecord]      = session->get_record_enabled();
 	lights_pending[LightAnysolo]     = session->soloing();
@@ -1136,9 +1136,9 @@ int TranzportControlProtocol::lights_show_normal()
 	return 0;
 }
 
-int TranzportControlProtocol::lights_show_tempo() 
+int TranzportControlProtocol::lights_show_tempo()
 {
-	// someday soon fiddle with the lights based on the tempo 
+	// someday soon fiddle with the lights based on the tempo
 	return     lights_show_normal();
 }
 
@@ -1163,12 +1163,12 @@ TranzportControlProtocol::update_state ()
 
 		case DisplayRecording:
 			lights_show_recording();
-			normal_update(); 
+			normal_update();
 			break;
 
 		case DisplayRecordingMeter:
 			lights_show_recording();
-			show_meter(); 
+			show_meter();
 			break;
 
 		case DisplayBling:
@@ -1215,7 +1215,7 @@ TranzportControlProtocol::process (uint8_t* buf)
 
 	// SHIFT + STOP + PLAY for bling mode?
 	// if (button_changes & ButtonPlay & ButtonStop) {
-	// bling_mode_toggle();  
+	// bling_mode_toggle();
 	// } or something like that
 
 	TRANZPORT_BUTTON_HANDLER(button_event_battery,ButtonBattery);
@@ -1289,7 +1289,7 @@ TranzportControlProtocol::button_event_backlight_release (bool shifted)
 		lcd_clear();
 		last_where += 1; /* force time redisplay */
 		last_track_gain = FLT_MAX;
-		normal_update(); //  redraw_screen();  
+		normal_update(); //  redraw_screen();
 	}
 }
 
@@ -1919,7 +1919,7 @@ TranzportControlProtocol::print_noretry (int row, int col, const char *text)
 }	
 
 XMLNode&
-TranzportControlProtocol::get_state () 
+TranzportControlProtocol::get_state ()
 {
 	return ControlProtocol::get_state();
 }
@@ -1931,14 +1931,14 @@ TranzportControlProtocol::set_state (const XMLNode& node)
 }
 
 int
-TranzportControlProtocol::save (char *name) 
+TranzportControlProtocol::save (char *name)
 {
 	// Presently unimplemented
 	return 0;
 }
 
 int
-TranzportControlProtocol::load (char *name) 
+TranzportControlProtocol::load (char *name)
 {
 	// Presently unimplemented
 	return 0;

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-2010 Paul Barton-Davis 
+    Copyright (C) 1998-2010 Paul Barton-Davis
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -72,7 +72,7 @@ class LIBMIDIPP_API Port {
 	/** block until the output FIFO used by non-process threads
 	 * is empty, checking every @a check_interval_usecs usecs
 	 * for current status. Not to be called by a thread that
-	 * executes any part of a JACK process callback (will 
+	 * executes any part of a JACK process callback (will
 	 * simply return immediately in that situation).
 	 */
 	virtual void drain (int /* check_interval_usecs */) {}
@@ -83,7 +83,7 @@ class LIBMIDIPP_API Port {
 	 */
 	int midimsg (byte *msg, size_t len, timestamp_t timestamp) {
 		return !(write (msg, len, timestamp) == (int) len);
-	} 
+	}
 
 	virtual void parse (framecnt_t timestamp) = 0;
 
@@ -92,11 +92,11 @@ class LIBMIDIPP_API Port {
 	/* select(2)/poll(2)-based I/O */
 
 	/** Get the file descriptor for port.
-	 * @return File descriptor, or -1 if not selectable. 
+	 * @return File descriptor, or -1 if not selectable.
 	 */
 	virtual int selectable () const = 0;
 
-	Channel *channel (channel_t chn) { 
+	Channel *channel (channel_t chn) {
 		return _channel[chn&0x7F];
 	}
 	
@@ -141,7 +141,7 @@ class LIBMIDIPP_API Port {
 
 struct LIBMIDIPP_API PortSet {
     PortSet (std::string str) : owner (str) { }
-    
+
     std::string owner;
     std::list<XMLNode> ports;
 };

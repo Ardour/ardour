@@ -180,7 +180,7 @@ protected:
 			}
 
 			_current  = v;
-		} 
+		}
 	}
 
 	virtual std::string to_string (T const& v) const             = 0;
@@ -197,7 +197,7 @@ private:
 	PropertyTemplate (PropertyTemplate<T> const &);
 };
 
-template<class T> /*LIBPBD_API*/ 
+template<class T> /*LIBPBD_API*/
 std::ostream & operator<<(std::ostream& os, PropertyTemplate<T> const& s)
 {
 	return os << s.val ();

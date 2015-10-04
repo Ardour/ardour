@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,14 +35,14 @@
 
 /** A simple abstraction of a mechanism of signalling one thread from another.
  * The signaller calls ::wakeup() to tell the signalled thread to check for
- * work to be done. 
+ * work to be done.
  *
  * This implementation provides both ::selectable() for use in direct
  * poll/select-based event loops, and a Glib::IOSource via ::ios() for use
- * in Glib main loop based situations. 
+ * in Glib main loop based situations.
  */
 
-class LIBPBD_API CrossThreadChannel { 
+class LIBPBD_API CrossThreadChannel {
 public:
 	/** if @a non_blocking is true, the channel will not cause blocking
 	 * when used in an event loop based on poll/select or the glib main
@@ -74,7 +74,7 @@ public:
 	int receive (char& msg, bool wait = false);
 
 	/** empty the channel of all requests.
-	 * Typically this is done as soon as input 
+	 * Typically this is done as soon as input
 	 * is noticed on the channel, because the
 	 * handler will look at a separately managed work
 	 * queue. The actual number of queued "wakeups"

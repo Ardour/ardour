@@ -46,7 +46,7 @@ namespace PBD {
 	namespace DEBUG {
 
 		/* this namespace is so that we can write DEBUG::bit_name */
-                
+
 		LIBPBD_API extern DebugBits Stateful;
 		LIBPBD_API extern DebugBits Properties;
 		LIBPBD_API extern DebugBits FileManager;

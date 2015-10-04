@@ -567,7 +567,7 @@ AUPlugin::init ()
 	unit->GetElementCount (kAudioUnitScope_Output, output_elements);
 
 	if (input_elements > 0) {
-		/* setup render callback: the plugin calls this to get input data 
+		/* setup render callback: the plugin calls this to get input data
 		 */
 		
 		AURenderCallbackStruct renderCallbackInfo;
@@ -1129,7 +1129,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 
 	vector<pair<int,int> >& io_configs = pinfo->cache.io_configs;
 
-	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 has %2 IO configurations, looking for %3 in, %4 out\n", 
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 has %2 IO configurations, looking for %3 in, %4 out\n",
 							name(), io_configs.size(), in, out));
 
 	//Ardour expects the plugin to tell it the output
@@ -1175,7 +1175,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 		int32_t possible_out = i->second;
 
 		if ((possible_in == audio_in) && (possible_out == audio_out)) {
-			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: %1 in %2 out to match in %3 out %4\n", 
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: %1 in %2 out to match in %3 out %4\n",
 									possible_in, possible_out,
 									in, out));
 
@@ -1213,8 +1213,8 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 				audio_out = 2;
 				found = true;
 			} else if (possible_out == -2) {
-				/* plugins shouldn't really use (0,-2) but might. 
-				   any configuration possible, provide stereo output 
+				/* plugins shouldn't really use (0,-2) but might.
+				   any configuration possible, provide stereo output
 				*/
 				audio_out = 2;
 				found = true;
@@ -1263,7 +1263,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 				audio_out = audio_in;
 				found = true;
 			} else if (possible_out == -2) {
-				/* plugins shouldn't really use (-2,-2) but might. 
+				/* plugins shouldn't really use (-2,-2) but might.
 				   interpret as (-1,-1).
 				*/
 				audio_out = audio_in;
@@ -1293,8 +1293,8 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 				audio_out = 2;
 				found = true;
 			} else if (possible_out == -2) {
-				/* plugins shouldn't really use (<-2,-2) but might. 
-				   interpret as (<-2,-1): any configuration possible, provide stereo output 
+				/* plugins shouldn't really use (<-2,-2) but might.
+				   interpret as (<-2,-1): any configuration possible, provide stereo output
 				*/
 				audio_out = 2;
 				found = true;
@@ -1322,8 +1322,8 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 				audio_out = 2;
 				found = true;
 			} else if (possible_out == -2) {
-				/* plugins shouldn't really use (>0,-2) but might. 
-				   interpret as (>0,-1): 
+				/* plugins shouldn't really use (>0,-2) but might.
+				   interpret as (>0,-1):
 				   any output configuration possible, provide stereo output
 				*/
 				audio_out = 2;
@@ -1482,8 +1482,8 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		buffers->mBuffers[i].mDataByteSize = nframes * sizeof (Sample);
 		/* setting this to 0 indicates to the AU that it can provide buffers here
 		   if necessary. if it can process in-place, it will use the buffers provided
-		   as input by ::render_callback() above. 
-                   
+		   as input by ::render_callback() above.
+
                    a non-null values tells the plugin to render into the buffer pointed
                    at by the value.
 		*/
@@ -1514,7 +1514,7 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		}
 	}
 
-	/* does this really mean anything ? 
+	/* does this really mean anything ?
 	 */
 
 	ts.mSampleTime = frames_processed;
@@ -1623,7 +1623,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 			/* on the beat */
 			*outDeltaSampleOffsetToNextBeat = 0;
 		} else {
-			*outDeltaSampleOffsetToNextBeat = (UInt32) 
+			*outDeltaSampleOffsetToNextBeat = (UInt32)
 				floor (((Timecode::BBT_Time::ticks_per_beat - bbt.ticks)/Timecode::BBT_Time::ticks_per_beat) * // fraction of a beat to next beat
 				       metric.tempo().frames_per_beat (_session.frame_rate())); // frames per beat
 		}
@@ -1957,7 +1957,7 @@ AUPlugin::load_preset (PresetRecord r)
 }
 
 void
-AUPlugin::do_remove_preset (std::string) 
+AUPlugin::do_remove_preset (std::string)
 {
 }
 
@@ -2309,7 +2309,7 @@ AUPluginInfo::discover (bool scan_only)
 	/* AU require a CAComponentDescription pointer provided by the OS.
 	 * Ardour only caches port and i/o config. It can't just 'scan' without
 	 * 'discovering' (like we do for VST).
-	 * 
+	 *
 	 * "Scan Only" means
 	 * "Iterate over all plugins. skip the ones where there's no io-cache".
 	 */
@@ -2927,7 +2927,7 @@ int
 AUPlugin::create_parameter_listener (AUEventListenerProc cb, void* arg, float interval_secs)
 {
 #ifdef WITH_CARBON
-	CFRunLoopRef run_loop = (CFRunLoopRef) GetCFRunLoopFromEventLoop(GetCurrentEventLoop()); 
+	CFRunLoopRef run_loop = (CFRunLoopRef) GetCFRunLoopFromEventLoop(GetCurrentEventLoop());
 #else
 	CFRunLoopRef run_loop = CFRunLoopGetCurrent();
 #endif
@@ -2959,7 +2959,7 @@ AUPlugin::listen_to_parameter (uint32_t param_id)
 
 	if (AUEventListenerAddEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
 		return -1;
-	} 
+	}
 
 	event.mEventType = kAudioUnitEvent_BeginParameterChangeGesture;
 	event.mArgument.mParameter.mAudioUnit = unit->AU();
@@ -2969,7 +2969,7 @@ AUPlugin::listen_to_parameter (uint32_t param_id)
 
 	if (AUEventListenerAddEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
 		return -1;
-	} 
+	}
 
 	event.mEventType = kAudioUnitEvent_EndParameterChangeGesture;
 	event.mArgument.mParameter.mAudioUnit = unit->AU();
@@ -2979,7 +2979,7 @@ AUPlugin::listen_to_parameter (uint32_t param_id)
 
 	if (AUEventListenerAddEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
 		return -1;
-	} 
+	}
 
 	return 0;
 }
@@ -3001,7 +3001,7 @@ AUPlugin::end_listen_to_parameter (uint32_t param_id)
 
 	if (AUEventListenerRemoveEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
 		return -1;
-	} 
+	}
 
 	event.mEventType = kAudioUnitEvent_BeginParameterChangeGesture;
 	event.mArgument.mParameter.mAudioUnit = unit->AU();
@@ -3011,7 +3011,7 @@ AUPlugin::end_listen_to_parameter (uint32_t param_id)
 
 	if (AUEventListenerRemoveEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
 		return -1;
-	} 
+	}
 
 	event.mEventType = kAudioUnitEvent_EndParameterChangeGesture;
 	event.mArgument.mParameter.mAudioUnit = unit->AU();
@@ -3021,7 +3021,7 @@ AUPlugin::end_listen_to_parameter (uint32_t param_id)
 
 	if (AUEventListenerRemoveEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
 		return -1;
-	} 
+	}
 
 	return 0;
 }
@@ -3040,7 +3040,7 @@ AUPlugin::parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUn
         if ((i = parameter_map.find (event->mArgument.mParameter.mParameterID)) == parameter_map.end()) {
                 return;
         }
-        
+
         switch (event->mEventType) {
         case kAudioUnitEvent_BeginParameterChangeGesture:
                 StartTouch (i->second);

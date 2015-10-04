@@ -34,13 +34,13 @@ struct LIBARDOUR_API _VSTKey
 
 typedef struct _VSTKey VSTKey;
 
-struct LIBARDOUR_API _VSTInfo 
+struct LIBARDOUR_API _VSTInfo
 {
 	char  *name;
 	char  *creator;
 	int    UniqueID;
 	char  *Category;
-    
+
 	int    numInputs;
 	int    numOutputs;
 	int    numParams;

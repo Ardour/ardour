@@ -45,7 +45,7 @@ namespace ArdourCanvas {
  * This is not actually a canvas item itself to avoid the dreaded diamond
  * inheritance pattern, since various types of canvas items (Note (rect), Hit
  * (diamond), etc) need to share this functionality but can't share an
- * ancestor. 
+ * ancestor.
  *
  * Note: Because of this, derived classes need to manually bounce events to
  * on_event, it won't happen automatically.
@@ -147,7 +147,7 @@ protected:
 	bool                              _valid;
         float                             _mouse_x_fraction;
         float                             _mouse_y_fraction;
-        
+
         void set_mouse_fractions (GdkEvent*);
 
 private:

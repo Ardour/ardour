@@ -197,7 +197,7 @@ int tranzport_read(tranzport_t *z, uint8_t *status, uint32_t *buttons, uint8_t *
 	if (val < 0) {
 		printf("errno: %d\n",errno);
 		switch(errno) {
-			case ENOENT: ; 
+			case ENOENT: ;
                         case ECONNRESET: ;
                     	case ESHUTDOWN: printf("dying\n"); exit(1);  break;
 		}

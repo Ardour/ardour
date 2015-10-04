@@ -709,7 +709,7 @@ PixFader::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
 		_text = "";
 		set_text (txt, _centered_text, false);
 	}
-	/* patterns are cached and re-created as needed 
+	/* patterns are cached and re-created as needed
 	 * during 'expose' in the GUI thread */
 	_pattern = 0;
 	queue_draw ();

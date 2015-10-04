@@ -114,11 +114,11 @@ PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 
 		c = item_to_window (Duple (p->x, p->y));
 		
-		context->curve_to (c1.x + pixel_adjust, 
-				   c1.y + pixel_adjust, 
-				   c2.x + pixel_adjust, 
-				   c2.y + pixel_adjust, 
-				   c.x + pixel_adjust, 
+		context->curve_to (c1.x + pixel_adjust,
+				   c1.y + pixel_adjust,
+				   c2.x + pixel_adjust,
+				   c2.y + pixel_adjust,
+				   c.x + pixel_adjust,
 				   c.y + pixel_adjust);
 		
 		++cp1;

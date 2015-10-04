@@ -26,7 +26,7 @@
 #include "pbd/libpbd_visibility.h"
 
 template<class T>
-class /*LIBPBD_API*/ RingBuffer 
+class /*LIBPBD_API*/ RingBuffer
 {
   public:
 	RingBuffer (guint sz) {
@@ -69,15 +69,15 @@ class /*LIBPBD_API*/ RingBuffer
 	
 	void decrement_read_idx (guint cnt) {
 		g_atomic_int_set (&read_idx, (g_atomic_int_get(&read_idx) - cnt) & size_mask);
-	}                
+	}
 
 	void increment_read_idx (guint cnt) {
 		g_atomic_int_set (&read_idx, (g_atomic_int_get(&read_idx) + cnt) & size_mask);
-	}                
+	}
 
 	void increment_write_idx (guint cnt) {
 		g_atomic_int_set (&write_idx,  (g_atomic_int_get(&write_idx) + cnt) & size_mask);
-	}                
+	}
 
 	guint write_space () const {
 		guint w, r;
@@ -120,7 +120,7 @@ class /*LIBPBD_API*/ RingBuffer
 	guint size_mask;
 };
 
-template<class T> /*LIBPBD_API*/ guint 
+template<class T> /*LIBPBD_API*/ guint
 RingBuffer<T>::read (T *dest, guint cnt)
 {
         guint free_cnt;
@@ -136,7 +136,7 @@ RingBuffer<T>::read (T *dest, guint cnt)
         }
 
         to_read = cnt > free_cnt ? free_cnt : cnt;
-        
+
         cnt2 = priv_read_idx + to_read;
 
         if (cnt2 > size) {
@@ -146,7 +146,7 @@ RingBuffer<T>::read (T *dest, guint cnt)
                 n1 = to_read;
                 n2 = 0;
         }
-        
+
         memcpy (dest, &buf[priv_read_idx], n1 * sizeof (T));
         priv_read_idx = (priv_read_idx + n1) & size_mask;
 
@@ -176,7 +176,7 @@ RingBuffer<T>::write (T const *src, guint cnt)
         }
 
         to_write = cnt > free_cnt ? free_cnt : cnt;
-        
+
         cnt2 = priv_write_idx + to_write;
 
         if (cnt2 > size) {
@@ -220,7 +220,7 @@ RingBuffer<T>::get_read_vector (typename RingBuffer<T>::rw_vector *vec)
 
 	if (cnt2 > size) {
 		/* Two part vector: the rest of the buffer after the
-		   current write ptr, plus some from the start of 
+		   current write ptr, plus some from the start of
 		   the buffer.
 		*/
 
@@ -264,7 +264,7 @@ RingBuffer<T>::get_write_vector (typename RingBuffer<T>::rw_vector *vec)
 	if (cnt2 > size) {
 		
 		/* Two part vector: the rest of the buffer after the
-		   current write ptr, plus some from the start of 
+		   current write ptr, plus some from the start of
 		   the buffer.
 		*/
 

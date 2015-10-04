@@ -64,7 +64,7 @@ struct DeviceInfo
     DeviceInfo():
     m_DeviceId(-1), m_DeviceName("Unknown"), m_MaxInputChannels(0), m_MaxOutputChannels(0)
 	{};
-    
+
 	DeviceInfo(unsigned int deviceID, const std::string & deviceName):
 		m_DeviceId(deviceID), m_DeviceName(deviceName), m_MaxInputChannels(0), m_MaxOutputChannels(0)
 	{};
@@ -186,11 +186,11 @@ public:
 	
 	virtual WTErr ShowConfigPanel (void *pParam);///< Show Control Panel - in case of ASIO this will work only with Active device!
 	virtual WTErr SendCustomCommand (int customCommand, void *pCommandParam); ///< Send a custom command to the audiodevice...
-    
+
     virtual uint32_t GetLatency (bool isInput); ///Get latency.
 
 	virtual WTErr UpdateDeviceInfo () = 0;
-    
+
 protected:
 	WCMRAudioDeviceManager *m_pMyManager; ///< The manager who's managing this device, can be used for sending notifications!
 	
@@ -230,7 +230,7 @@ typedef enum eAudioDeviceFilter
 class WCMRAudioDeviceManager : public WCRefManager
 {
 public://< Public functions for the class.
-  
+
 	WCMRAudioDeviceManager(WCMRAudioDeviceManagerClient *pTheClient, eAudioDeviceFilter eCurAudioDeviceFilter); ///< constructor
 	virtual ~WCMRAudioDeviceManager(void); ///< Destructor
 
@@ -248,7 +248,7 @@ public://< Public functions for the class.
 	void					NotifyClient (WCMRAudioDeviceManagerClient::NotificationReason forReason, void *pParam = NULL);
 
 protected:
-    
+
     mutable wvNS::wvThread::ThreadMutex         m_AudioDeviceInfoVecMutex; // mutex to lock device info list
 	DeviceInfoVec                               m_DeviceInfoVec;
 	
@@ -264,7 +264,7 @@ private:
 	virtual WTErr				getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& bufferSizes) const = 0;
     virtual WTErr				generateDeviceListImpl() = 0;
     virtual WTErr				updateDeviceListImpl() = 0;
-    
+
 	WCMRAudioDeviceManagerClient	*m_pTheClient; ///< The device manager's client, used to send notifications.
 };
 

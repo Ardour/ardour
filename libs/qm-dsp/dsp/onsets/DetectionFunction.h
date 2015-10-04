@@ -37,7 +37,7 @@ struct DFConfig{
     double whiteningFloor; // if < 0, a sensible default will be used
 };
 
-class DetectionFunction  
+class DetectionFunction
 {
 public:
     double* getSpectrumMagnitude();
@@ -82,4 +82,4 @@ private:
     PhaseVocoder* m_phaseVoc;	// Phase Vocoder
 };
 
-#endif 
+#endif

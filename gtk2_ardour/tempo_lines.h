@@ -29,7 +29,7 @@ public:
 
 	void tempo_map_changed();
 
-	void draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin, 
+	void draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	           const ARDOUR::TempoMap::BBTPointList::const_iterator& end,
 	           unsigned                                              divisions,
 	           ARDOUR::framecnt_t                                    leftmost_frame,

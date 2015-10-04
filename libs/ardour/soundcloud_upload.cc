@@ -72,7 +72,7 @@ SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 	struct curl_httppost *formpost=NULL;
 	struct curl_httppost *lastptr=NULL;
 
-	/* Fill in the filename field */ 
+	/* Fill in the filename field */
 	curl_formadd(&formpost,
 			&lastptr,
 			CURLFORM_COPYNAME, "client_id",
@@ -108,7 +108,7 @@ SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 	headerlist = curl_slist_append(headerlist, "Accept: application/xml");
 	curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headerlist);
 
-	/* what URL that receives this POST */ 
+	/* what URL that receives this POST */
 	std::string url = "https://api.soundcloud.com/oauth2/token";
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost);
@@ -170,14 +170,14 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 	struct curl_httppost *lastptr=NULL;
 
 	/* Fill in the file upload field. This makes libcurl load data from
-	   the given file name when curl_easy_perform() is called. */ 
+	   the given file name when curl_easy_perform() is called. */
 	curl_formadd(&formpost,
 			&lastptr,
 			CURLFORM_COPYNAME, "track[asset_data]",
 			CURLFORM_FILE, file_path.c_str(),
 			CURLFORM_END);
 
-	/* Fill in the filename field */ 
+	/* Fill in the filename field */
 	curl_formadd(&formpost,
 			&lastptr,
 			CURLFORM_COPYNAME, "oauth_token",
@@ -205,7 +205,7 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 
 
 	/* initalize custom header list (stating that Expect: 100-continue is not
-	   wanted */ 
+	   wanted */
 	struct curl_slist *headerlist=NULL;
 	static const char buf[] = "Expect:";
 	headerlist = curl_slist_append(headerlist, buf);
@@ -213,7 +213,7 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 
 	if (curl_handle && multi_handle) {
 
-		/* what URL that receives this POST */ 
+		/* what URL that receives this POST */
 		std::string url = "https://api.soundcloud.com/tracks";
 		curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
 		// curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
@@ -235,7 +235,7 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 
 		while(still_running) {
 			struct timeval timeout;
-			int rc; /* select() return code */ 
+			int rc; /* select() return code */
 
 			fd_set fdread;
 			fd_set fdwrite;
@@ -248,7 +248,7 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 			FD_ZERO(&fdwrite);
 			FD_ZERO(&fdexcep);
 
-			/* set a suitable timeout to play around with */ 
+			/* set a suitable timeout to play around with */
 			timeout.tv_sec = 1;
 			timeout.tv_usec = 0;
 
@@ -261,33 +261,33 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 					timeout.tv_usec = (curl_timeo % 1000) * 1000;
 			}
 
-			/* get file descriptors from the transfers */ 
+			/* get file descriptors from the transfers */
 			curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 
 			/* In a real-world program you OF COURSE check the return code of the
 			   function calls.  On success, the value of maxfd is guaranteed to be
 			   greater or equal than -1.  We call select(maxfd + 1, ...), specially in
 			   case of (maxfd == -1), we call select(0, ...), which is basically equal
-			   to sleep. */ 
+			   to sleep. */
 
 			rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
 
 			switch(rc) {
 				case -1:
-					/* select error */ 
+					/* select error */
 					break;
 				case 0:
 				default:
-					/* timeout or readable/writable sockets */ 
+					/* timeout or readable/writable sockets */
 					curl_multi_perform(multi_handle, &still_running);
 					break;
 			}
-		} 
+		}
 
-		/* then cleanup the formpost chain */ 
+		/* then cleanup the formpost chain */
 		curl_formfree(formpost);
 
-		/* free slist */ 
+		/* free slist */
 		curl_slist_free_all (headerlist);
 	}
 

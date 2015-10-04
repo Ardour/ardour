@@ -83,9 +83,9 @@ TimeAxisViewItem::set_constant_heights ()
 
         NAME_HEIGHT = height;
 
-	/* Config->get_show_name_highlight) == true: 
+	/* Config->get_show_name_highlight) == true:
 	        Y_OFFSET is measured from bottom of the time axis view item.
-	   Config->get_show_name_highlight) == false: 
+	   Config->get_show_name_highlight) == false:
 	        Y_OFFSET is measured from the top of the time axis view item.
 	*/
 
@@ -154,8 +154,8 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 }
 
 void
-TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_color, 
-			framepos_t start, framepos_t duration, Visibility vis, 
+TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_color,
+			framepos_t start, framepos_t duration, Visibility vis,
 			bool wide, bool high)
 {
 	group = new ArdourCanvas::Container (parent);
@@ -185,9 +185,9 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	}
 
 	if (visibility & ShowFrame) {
-		frame = new ArdourCanvas::Rectangle (group, 
-						     ArdourCanvas::Rect (0.0, 0.0, 
-									 trackview.editor().sample_to_pixel(duration), 
+		frame = new ArdourCanvas::Rectangle (group,
+						     ArdourCanvas::Rect (0.0, 0.0,
+									 trackview.editor().sample_to_pixel(duration),
 									 trackview.current_height()));
 		
 		frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
@@ -550,9 +550,9 @@ TimeAxisViewItem::set_height (double height)
 
 	if (visibility & ShowNameText) {
 		if (UIConfiguration::instance().get_show_name_highlight()) {
-			name_text->set_y_position (height - NAME_Y_OFFSET); 
+			name_text->set_y_position (height - NAME_Y_OFFSET);
 		} else {
-			name_text->set_y_position (NAME_Y_OFFSET); 
+			name_text->set_y_position (NAME_Y_OFFSET);
 		}
 	}
 
@@ -865,7 +865,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 		if (frame_handle_start) {
 			if (pixel_width < (3 * TimeAxisViewItem::GRAB_HANDLE_WIDTH)) {
 				/*
-				 * there's less than GRAB_HANDLE_WIDTH of the region between 
+				 * there's less than GRAB_HANDLE_WIDTH of the region between
 				 * the right-hand end of frame_handle_start and the left-hand
 				 * end of frame_handle_end, so disable the handles
 				 */

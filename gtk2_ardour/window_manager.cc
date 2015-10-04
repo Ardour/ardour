@@ -68,7 +68,7 @@ Manager::register_window (ProxyBase* info)
 			ActionManager::add_action_group (window_actions);
 		}
 
-		info->set_action (ActionManager::register_action (window_actions, info->action_name().c_str(), info->menu_name().c_str(), 
+		info->set_action (ActionManager::register_action (window_actions, info->action_name().c_str(), info->menu_name().c_str(),
 								  sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info)));
 	}
 }
@@ -142,7 +142,7 @@ Manager::set_transient_for (Gtk::Window* parent)
 	/* OS X has a richer concept of window layering than X does (or
 	 * certainly, than any accepted conventions on X), and so the use of
 	 * Manager::set_transient_for() is not necessary on that platform.
-	 * 
+	 *
 	 * On OS X this is mostly taken care of by using the window type rather
 	 * than explicit 1:1 transient-for relationships.
 	 */
@@ -178,7 +178,7 @@ ProxyBase::ProxyBase (const string& name, const std::string& menu_name)
 	, _x_off (-1)
 	, _y_off (-1)
 	, _width (-1)
-	, _height (-1) 
+	, _height (-1)
 	, vistracker (0)
 {
 }
@@ -191,7 +191,7 @@ ProxyBase::ProxyBase (const string& name, const std::string& menu_name, const XM
 	, _x_off (-1)
 	, _y_off (-1)
 	, _width (-1)
-	, _height (-1) 
+	, _height (-1)
 	, vistracker (0)
 {
 	set_state (node);
@@ -255,13 +255,13 @@ ProxyBase::set_action (Glib::RefPtr<Gtk::Action> act)
 }
 
 std::string
-ProxyBase::action_name() const 
+ProxyBase::action_name() const
 {
 	return string_compose (X_("toggle-%1"), _name);
 }
 
 void
-ProxyBase::toggle() 
+ProxyBase::toggle()
 {
 	if (!_window) {
 		(void) get (true);

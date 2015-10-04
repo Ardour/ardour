@@ -65,7 +65,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	: ArdourDialog (_("Plugin Manager"), true, false)
 	, filter_button (Stock::CLEAR)
 	, manager (mgr)
-	  
+	
 {
 	set_name ("PluginSelectorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);

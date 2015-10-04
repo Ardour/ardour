@@ -114,7 +114,7 @@ fixup_bundle_environment (int, char* [], string & localedir)
 	g_setenv ("FONTCONFIG_FILE", Glib::build_filename (bundle_dir, "Resources/fonts.conf").c_str(), 1);
 }
 
-void load_custom_fonts() 
+void load_custom_fonts()
 {
 	/* this code will only compile on OS X 10.6 and above, and we currently do not
 	 * need it for earlier versions since we fall back on a non-monospace,

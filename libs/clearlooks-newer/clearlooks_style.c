@@ -237,7 +237,7 @@ clearlooks_style_draw_shadow (DRAW_ARGS)
 	cairo_destroy (cr);
 }
 
-static void 
+static void
 clearlooks_style_draw_box_gap (DRAW_ARGS,
 	          GtkPositionType gap_side,
 	          gint            gap_x,
@@ -379,7 +379,7 @@ clearlooks_style_draw_extension (DRAW_ARGS, GtkPositionType gap_side)
 	cairo_destroy (cr);
 }
 
-static void 
+static void
 clearlooks_style_draw_handle (DRAW_ARGS, GtkOrientation orientation)
 {
 	ClearlooksStyle  *clearlooks_style = CLEARLOOKS_STYLE (style);
@@ -643,7 +643,7 @@ clearlooks_style_draw_box (DRAW_ARGS)
 		
 		clearlooks_set_widget_parameters (widget, style, state_type, &params);		
 		
-		STYLE_FUNCTION(draw_progressbar_trough) (cr, colors, &params, 
+		STYLE_FUNCTION(draw_progressbar_trough) (cr, colors, &params,
 		                                    x, y, width, height);
 	}
 	else if (DETAIL ("trough") && widget && (GE_IS_VSCROLLBAR (widget) || GE_IS_HSCROLLBAR (widget)))
@@ -1082,7 +1082,7 @@ clearlooks_style_draw_hline (GtkStyle               *style,
 	cairo_destroy (cr);
 }
 
-static void 
+static void
 clearlooks_style_draw_shadow_gap (DRAW_ARGS,
                  GtkPositionType gap_side,
                  gint            gap_x,
@@ -1170,7 +1170,7 @@ clearlooks_style_draw_tab (DRAW_ARGS)
 {
 	ClearlooksColors *colors;
 	WidgetParameters params;
-	ArrowParameters  arrow; 	 
+	ArrowParameters  arrow; 	
 	cairo_t *cr;
 	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
 
@@ -1185,7 +1185,7 @@ clearlooks_style_draw_tab (DRAW_ARGS)
 
 	clearlooks_set_widget_parameters (widget, style, state_type, &params);
 	arrow.type      = CL_ARROW_COMBO;
-	arrow.direction = CL_DIRECTION_DOWN; 	 
+	arrow.direction = CL_DIRECTION_DOWN; 	
 
 	STYLE_FUNCTION(draw_arrow) (cr, colors, &params, &arrow, x, y, width, height);
 
@@ -1451,7 +1451,7 @@ set_transparency (const GdkPixbuf *pixbuf, gdouble alpha_percent)
 		for (x = 0; x < width; x++) {
 			/* The "4" is the number of chars per pixel, in this case, RGBA,
 			   the 3 means "skip to the alpha" */
-			current = data + (y * rowstride) + (x * 4) + 3; 
+			current = data + (y * rowstride) + (x * 4) + 3;
 			*(current) = (guchar) (*(current) * alpha_percent);
 		}
 	}
@@ -1567,7 +1567,7 @@ clearlooks_style_draw_render_icon (GtkStyle            *style,
 			  g_warning ("Using the default screen for gtk_default_render_icon()"));
 	}
 	
-  
+
 	if (size != (GtkIconSize) -1 && !gtk_icon_size_lookup_for_settings (settings, size, &width, &height)) {
 		g_warning (G_STRLOC ": invalid icon size '%d'", size);
 		return NULL;
@@ -1590,7 +1590,7 @@ clearlooks_style_draw_render_icon (GtkStyle            *style,
 			
 			g_object_unref (scaled);
 		} else if (state == GTK_STATE_PRELIGHT) {
-			stated = gdk_pixbuf_copy (scaled);      
+			stated = gdk_pixbuf_copy (scaled);
 			
 			gdk_pixbuf_saturate_and_pixelate (scaled, stated,
 							  1.2, FALSE);
@@ -1602,7 +1602,7 @@ clearlooks_style_draw_render_icon (GtkStyle            *style,
 	}
 	else
 		stated = scaled;
-  
+
   return stated;
 }
 

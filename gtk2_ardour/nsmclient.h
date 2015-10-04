@@ -77,7 +77,7 @@ namespace NSM
         int init ( const char *nsm_url );
         /* init with threading */
         int init_thread ( const char *nsm_url );
-        
+
         /* call this periodically to check for new messages */
         void check ( int timeout = 0 );
 

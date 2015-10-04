@@ -33,7 +33,7 @@ using std::min;
 using std::string;
 using namespace ARDOUR_UI_UTILS;
 
-BigClockWindow::BigClockWindow (AudioClock& c) 
+BigClockWindow::BigClockWindow (AudioClock& c)
 	: ArdourWindow (_("Big Clock"))
 	, clock (c)
 {

@@ -78,7 +78,7 @@ Editor::initialize_canvas ()
 	*/
 	no_scroll_group = new ArdourCanvas::Container (_track_canvas->root());
 
-	ArdourCanvas::ScrollGroup* hsg; 
+	ArdourCanvas::ScrollGroup* hsg;
 	ArdourCanvas::ScrollGroup* hg;
 	ArdourCanvas::ScrollGroup* cg;
 
@@ -86,7 +86,7 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (h_scroll_group, "canvas h scroll");
 	_track_canvas->add_scroller (*hg);
 
-	hv_scroll_group = hsg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), 
+	hv_scroll_group = hsg = new ArdourCanvas::ScrollGroup (_track_canvas->root(),
 							       ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
 													     ArdourCanvas::ScrollGroup::ScrollsHorizontally));
 	CANVAS_DEBUG_NAME (hv_scroll_group, "canvas hv scroll");
@@ -136,7 +136,7 @@ Editor::initialize_canvas ()
 	/* a group to hold stuff while it gets dragged around. Must be the
 	 * uppermost (last) group with hv_scroll_group as a parent
 	 */
-	_drag_motion_group = new ArdourCanvas::Container (hv_scroll_group);                                                                                                                                     
+	_drag_motion_group = new ArdourCanvas::Container (hv_scroll_group);
         CANVAS_DEBUG_NAME (_drag_motion_group, "Canvas Drag Motion");
 
 	/* TIME BAR CANVAS */
@@ -539,16 +539,16 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 
 		/* the effective width of the autoscroll boundary so
 		   that we start scrolling before we hit the edge.
-		   
+		
 		   this helps when the window is slammed up against the
 		   right edge of the screen, making it hard to scroll
 		   effectively.
 		*/
 		
-		if (alloc.get_width() > 20) { 
+		if (alloc.get_width() > 20) {
 			alloc.set_width (alloc.get_width() - 20);
 			alloc.set_x (alloc.get_x() + 10);
-		} 
+		}
 
 	}
 	
@@ -633,7 +633,7 @@ Editor::autoscroll_canvas ()
 		// const double vertical_pos = vertical_adjustment.get_value();
 		const int speed_factor = 10;
 
-		/* vertical */ 
+		/* vertical */
 		
 		if (y < autoscroll_boundary.y0) {
 
@@ -675,7 +675,7 @@ Editor::autoscroll_canvas ()
 		/* the motion handler expects events in canvas coordinate space */
 
 		/* we asked for the mouse position above (::get_pointer()) via
-		 * our own top level window (we being the Editor). Convert into 
+		 * our own top level window (we being the Editor). Convert into
 		 * coordinates within the canvas window.
 		 */
 
@@ -704,7 +704,7 @@ Editor::autoscroll_canvas ()
 	} else if (no_stop) {
 
 		/* not changing visual state but pointer is outside the scrolling boundary
-		 * so we still need to deliver a fake motion event 
+		 * so we still need to deliver a fake motion event
 		 */
 
 		GdkEventMotion ev;
@@ -828,7 +828,7 @@ Editor::ensure_time_axis_view_is_visible (TimeAxisView const & track, bool at_to
 	double const track_min_y = track.y_position ();
 	double const track_max_y = track.y_position () + track.effective_height ();
 
-	if (!at_top && 
+	if (!at_top &&
 	    (track_min_y >= current_view_min_y &&
 	     track_max_y < current_view_max_y)) {
 		/* already visible, and caller did not ask to place it at the
@@ -948,7 +948,7 @@ Editor::color_handler()
 	/* redraw the whole thing */
 	_track_canvas->set_background_color (UIConfiguration::instance().color ("arrange base"));
 	_track_canvas->queue_draw ();
-        
+
 /*
 	redisplay_tempo (true);
 
@@ -1147,7 +1147,7 @@ Editor::which_mode_cursor () const
 			
 			hv_scroll_group->add_items_at_point (ArdourCanvas::Duple (x,y), items);
 			
-			// first item will be the upper most 
+			// first item will be the upper most
 			
 			if (!items.empty()) {
 				const ArdourCanvas::Item* i = items.front();

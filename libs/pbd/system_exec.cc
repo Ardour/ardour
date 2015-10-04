@@ -256,7 +256,7 @@ SystemExec::make_argp_escaped(std::string command, const std::map<char, std::str
 				switch (c) {
 					case ' ' :
 					case '"' : arg += c; break; // "\\", "\" at end-of-string => "\"
-					case '\0': 
+					case '\0':
 					case '\\': arg += '\\'; break;
 					default  : arg += '\\'; arg += c; break;
 				}

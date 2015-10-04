@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
     Based on code by Paul Davis, Torben Hohn as part of FST
 
     This program is free software; you can redistribute it and/or modify
@@ -146,13 +146,13 @@ long getXWindowProperty(Window window, Atom atom)
 	
 	XErrorHandler olderrorhandler = XSetErrorHandler(TempErrorHandler);
  	
-	XGetWindowProperty(	LXVST_XDisplay, 
-						window, 
+	XGetWindowProperty(	LXVST_XDisplay,
+						window,
 						atom,
 						0,
 						2,
 						false,
-						AnyPropertyType, 
+						AnyPropertyType,
 	 					&userType,
 						&userSize,
 						&userCount,
@@ -195,7 +195,7 @@ dispatch_x_events (XEvent* event, VSTState* vstfx)
 			when opening a preset manager (you might think that should be spawned as a new window...) */
 			
 			/*if the size has changed, we flag this so that in lxvst_pluginui.cc we can make the
-			change to the GTK parent window in ardour, from its UI thread*/ 
+			change to the GTK parent window in ardour, from its UI thread*/
 			
 			if (window == (Window) (vstfx->linux_window)) {
 				if (width != vstfx->width || height!=vstfx->height) {
@@ -317,7 +317,7 @@ maybe_set_program (VSTState* vstfx)
 			vstfx->plugin->dispatcher (vstfx->plugin, 68 /* effEndSetProgram */, 0, 0, NULL, 0);
 		}
 		
-		vstfx->want_program = -1; 
+		vstfx->want_program = -1;
 	}
 
 	if (vstfx->want_chunk == 1) {
@@ -342,7 +342,7 @@ void* gui_event_loop (void* ptr)
 	
 	while (!gui_quit)
 	{
-		/* handle window creation requests, destroy requests, 
+		/* handle window creation requests, destroy requests,
 		   and run idle callbacks */
 
 		/*Look at the XEvent queue - if there are any XEvents we need to handle them,
@@ -395,7 +395,7 @@ void* gui_event_loop (void* ptr)
 		{
 			//printf("elapsed %d ms ^= %.2f Hz\n", elapsed_time_ms, 1000.0/(double)elapsed_time_ms); // DEBUG
 			pthread_mutex_lock (&plugin_mutex);
-		    
+		
 again:
 			/*Parse through the linked list of plugins*/
 			
@@ -421,7 +421,7 @@ again:
 					pthread_mutex_unlock (&vstfx->lock);
 					
 					goto again;
-				} 
+				}
 				
 				/*Window does not yet exist - scheduled for creation*/
 
@@ -446,7 +446,7 @@ again:
 				
 				if (vstfx->dispatcher_wantcall) {
 					vstfx->dispatcher_retval = vstfx->plugin->dispatcher (
-						vstfx->plugin, 
+						vstfx->plugin,
 						vstfx->dispatcher_opcode,
 						vstfx->dispatcher_index,
 						vstfx->dispatcher_val,
@@ -497,7 +497,7 @@ int vstfx_init (void* ptr)
 	
 	pthread_attr_init(&thread_attributes);
 	
-	/*Make sure the thread is joinable - this should be the default anyway - 
+	/*Make sure the thread is joinable - this should be the default anyway -
 	so we can join to it on vstfx_exit*/
 	
 	pthread_attr_setdetachstate(&thread_attributes, PTHREAD_CREATE_JOINABLE);
@@ -632,7 +632,7 @@ int vstfx_create_editor (VSTState* vstfx)
 	/*Select the events we are interested in receiving - we need Substructure notify so that
 	if the plugin resizes its window - e.g. Loomer Manifold then we get a message*/
 	
-	XSelectInput(LXVST_XDisplay, 
+	XSelectInput(LXVST_XDisplay,
 				parent_window,
 				SubstructureNotifyMask | ButtonPressMask | ButtonReleaseMask | ButtonMotionMask | ExposureMask);
 										

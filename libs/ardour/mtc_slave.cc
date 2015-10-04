@@ -596,7 +596,7 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	read_current (&last);
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("speed&pos: timestamp %1 speed %2 initstate %3 dir %4 tpos %5 now %6 last-in %7\n",
-						 last.timestamp, 
+						 last.timestamp,
 						 last.speed,
 						 engine_dll_initstate,
 						 transport_direction,
@@ -605,8 +605,8 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 						 last_inbound_frame));
 
 	/* re-init engine DLL here when state changed (direction, first_mtc_timestamp) */
-	if (last.timestamp == 0) { 
-		engine_dll_initstate = 0; 
+	if (last.timestamp == 0) {
+		engine_dll_initstate = 0;
 	} else if (engine_dll_initstate != transport_direction && last.speed != 0) {
 		engine_dll_initstate = transport_direction;
 		init_engine_dll(last.position, session.engine().samples_per_cycle());

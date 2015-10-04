@@ -323,7 +323,7 @@ CURLcode res;
 		if (res != CURLE_ABORTED_BY_CALLBACK) {
 			error <<  string_compose (_("curl error %1 (%2)"), res, curl_easy_strerror(res)) << endmsg;
 		}
-		remove ( (audioFileName+".part").c_str() );  
+		remove ( (audioFileName+".part").c_str() );
 	} else {
 		rename ( (audioFileName+".part").c_str(), audioFileName.c_str() );
 		// now download the tags &c.
@@ -332,20 +332,20 @@ CURLcode res;
 
 	return (void *) res;
 }
- 
+
 void
 Mootcher::doneWithMootcher()
 {
 
-	// update the sound info pane if the selection in the list box is still us 
+	// update the sound info pane if the selection in the list box is still us
 	sfb->refresh_display(ID, audioFileName);
 
 	delete this; // this should be OK to do as long as Progress and Finished signals are always received in the order in which they are emitted
 }
 
 static void *
-freesound_download_thread_func(void *arg) 
-{ 
+freesound_download_thread_func(void *arg)
+{
 	Mootcher *thisMootcher = (Mootcher *) arg;
 	void *res;
 
@@ -367,16 +367,16 @@ bool Mootcher::checkAudioFile(std::string originalFileName, std::string theID)
 
 	// check to see if audio file already exists
 	FILE *testFile = g_fopen(audioFileName.c_str(), "r");
-	if (testFile) {  
+	if (testFile) {
 		fseek (testFile , 0 , SEEK_END);
 		if (ftell (testFile) > 256) {
 			fclose (testFile);
 			return true;
 		}
 		
-		// else file was small, probably an error, delete it 
+		// else file was small, probably an error, delete it
 		fclose(testFile);
-		remove( audioFileName.c_str() );  
+		remove( audioFileName.c_str() );
 	}
 	return false;
 }
@@ -430,8 +430,8 @@ bool Mootcher::fetchAudioFile(std::string originalFileName, std::string theID, s
 
 //---------
 
-void 
-Mootcher::updateProgress(double dlnow, double dltotal) 
+void
+Mootcher::updateProgress(double dlnow, double dltotal)
 {
 	if (dltotal > 0) {
 		double fraction = dlnow / dltotal;
@@ -445,7 +445,7 @@ Mootcher::updateProgress(double dlnow, double dltotal)
 	}
 }
 
-int 
+int
 Mootcher::progress_callback(void *caller, double dltotal, double dlnow, double /*ultotal*/, double /*ulnow*/)
 {
 	// It may seem curious to pass a pointer to an instance of an object to a static

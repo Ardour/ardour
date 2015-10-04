@@ -331,7 +331,7 @@ smf_get_last_tempo(const smf_t *smf)
 }
 
 /**
- * \internal 
+ * \internal
  *
  * Remove all smf_tempo_t structures from SMF.
  */

@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2004 Greg Kroah-Hartman (greg@kroah.com)
  * Copyright (C) 2005 Michael Hund <mhund@ld-didactic.de>
- * 
+ *
  * The ldusb driver was, in turn, derived from Lego USB Tower driver
  * Copyright (C) 2003 David Glance <advidgsf@sourceforge.net>
  *		 2001-2004 Juergen Stuber <starblue@users.sourceforge.net>
@@ -25,10 +25,10 @@
  */
 
 /* Note: this currently uses a dumb ringbuffer for reads and writes.
- * A more optimal driver would cache and kill off outstanding urbs that are 
+ * A more optimal driver would cache and kill off outstanding urbs that are
  * now invalid, and ignore ones that already were in the queue but valid
  * as we only have 17 commands for the tranzport. In particular this is
- * key for getting lights to flash in time as otherwise many commands 
+ * key for getting lights to flash in time as otherwise many commands
  * can be buffered up before the light change makes it to the interface.
 */
 
@@ -171,7 +171,7 @@ static int write_buffer_size = WRITE_BUFFER_SIZE;
 module_param(write_buffer_size, int,  S_IRUGO);
 MODULE_PARM_DESC(write_buffer_size, "Write buffer size");
 
-/* 
+/*
  * Increase the interval for debugging purposes.
  * or set to 1 to use the standard interval from the endpoint descriptors.
  */
@@ -221,7 +221,7 @@ struct usb_tranzport {
 
     int event; /* alternate interface to events */
     int wheel; /* - for negative, 0 for none, + for positive */
-    int lights; 
+    int lights;
     unsigned char dump_state; /* 0 if disabled 1 if enabled */
     unsigned char enable; /* 0 if disabled 1 if enabled */
     unsigned char offline; /* if the device is out of range or asleep */
@@ -391,10 +391,10 @@ static void usb_tranzport_interrupt_in_callback(struct urb *urb)
 			goto resubmit; /* maybe we can recover */
 		}
 	}
-    
+
 	if (urb->actual_length != 8) {
 		dev_warn(&dev->intf->dev,
-			 "Urb length was %d bytes!! Do something intelligent \n", urb->actual_length); 
+			 "Urb length was %d bytes!! Do something intelligent \n", urb->actual_length);
 	} else {
 		dbg_info(&dev->intf->dev, "%s: received: %02x%02x%02x%02x%02x%02x%02x%02x\n",
 			 __FUNCTION__, dev->interrupt_in_buffer[0],dev->interrupt_in_buffer[1],dev->interrupt_in_buffer[2],dev->interrupt_in_buffer[3],dev->interrupt_in_buffer[4],dev->interrupt_in_buffer[5],dev->interrupt_in_buffer[6],dev->interrupt_in_buffer[7]);
@@ -406,7 +406,7 @@ static void usb_tranzport_interrupt_in_callback(struct urb *urb)
 		if(dev->offline > 0 && dev->interrupt_in_buffer[1] != 0xff) { dev->offline = 0; }
 		if(dev->offline == 0 && dev->interrupt_in_buffer[1] == 0xff) { dev->offline = 1; }
 			
-#endif 
+#endif
 		dbg_info(&dev->intf->dev, "%s: head, tail are %x, %x\n", __FUNCTION__,dev->ring_head,dev->ring_tail);
 
 		next_ring_head = (dev->ring_head+1) % ring_buffer_size;
@@ -422,17 +422,17 @@ static void usb_tranzport_interrupt_in_callback(struct urb *urb)
 				 urb->actual_length);
 			memset(dev->interrupt_in_buffer, 0, urb->actual_length);
 		}
-	} 
+	}
 
 resubmit:
 	/* resubmit if we're still running */
 	if (dev->interrupt_in_running && dev->intf) {
-		retval = usb_submit_urb(dev->interrupt_in_urb, GFP_ATOMIC); 
+		retval = usb_submit_urb(dev->interrupt_in_urb, GFP_ATOMIC);
 		if (retval)
 			dev_err(&dev->intf->dev,
 				"usb_submit_urb failed (%d)\n", retval);
 	}
-    
+
 exit:
 	dev->interrupt_in_done = 1;
 	wake_up_interruptible(&dev->read_wait);
@@ -662,7 +662,7 @@ static ssize_t usb_tranzport_read(struct file *file, char __user *buffer, size_t
 		retval = wait_event_interruptible(dev->read_wait, dev->interrupt_in_done);
 		if (retval < 0) {
 			goto unlock_exit;
-		} 
+		}
 	}
 
 	dbg_info(&dev->intf->dev, "%s: copying to userspace: %02x%02x%02x%02x%02x%02x%02x%02x\n",
@@ -673,10 +673,10 @@ static ssize_t usb_tranzport_read(struct file *file, char __user *buffer, size_t
 	   while((c < count) && (dev->ring_tail != dev->ring_head)) {
 
 /* This started off in the lower level service routine, and I moved it here. Then my brain died. Not done yet. */
-#if COMPRESS_WHEEL_EVENTS 
+#if COMPRESS_WHEEL_EVENTS
 		next_tail = (dev->ring_tail+1) % ring_buffer_size;
 		if(dev->compress_wheel) cancompress = 1;
-		while(dev->ring_head != next_tail && cancompress == 1 ) { 
+		while(dev->ring_head != next_tail && cancompress == 1 ) {
 			newwheel = (*dev->ring_buffer)[next_tail].cmd[6];
 			oldwheel = (*dev->ring_buffer)[dev->ring_tail].cmd[6];
 			// if both are wheel events, and no buttons have changes (FIXME, do I have to check?),
@@ -688,9 +688,9 @@ static ssize_t usb_tranzport_read(struct file *file, char __user *buffer, size_t
 			 __FUNCTION__, (*dev->ring_buffer)[dev->ring_tail].cmd[0],(*dev->ring_buffer)[dev->ring_tail].cmd[1],(*dev->ring_buffer)[dev->ring_tail].cmd[2],(*dev->ring_buffer)[dev->ring_tail].cmd[3],(*dev->ring_buffer)[dev->ring_tail].cmd[4],(*dev->ring_buffer)[dev->ring_tail].cmd[5],(*dev->ring_buffer)[dev->ring_tail].cmd[6],(*dev->ring_buffer)[dev->ring_tail].cmd[7]);
 
 			
-			if(((*dev->ring_buffer)[dev->ring_tail].cmd[6] != 0 && 
-			    (*dev->ring_buffer)[next_tail].cmd[6] != 0 ) && 
-				((newwheel > 0 && oldwheel > 0) || 
+			if(((*dev->ring_buffer)[dev->ring_tail].cmd[6] != 0 &&
+			    (*dev->ring_buffer)[next_tail].cmd[6] != 0 ) &&
+				((newwheel > 0 && oldwheel > 0) ||
 				(newwheel < 0 && oldwheel < 0)) &&
 				((*dev->ring_buffer)[dev->ring_tail].cmd[2] == (*dev->ring_buffer)[next_tail].cmd[2]) &&
 				((*dev->ring_buffer)[dev->ring_tail].cmd[3] == (*dev->ring_buffer)[next_tail].cmd[3]) &&
@@ -702,15 +702,15 @@ static ssize_t usb_tranzport_read(struct file *file, char __user *buffer, size_t
 
 				newwheel += oldwheel;
 				if(oldwheel > 0 && !(newwheel > 0)) {
-					newwheel = 0x7f; 
+					newwheel = 0x7f;
 					cancompress = 0;
 				}
 				if(oldwheel < 0 && !(newwheel < 0)) {
-					newwheel = 0x80; 
+					newwheel = 0x80;
 					cancompress = 0;
 				}
 
-				(*dev->ring_buffer)[next_tail].cmd[6] = newwheel; 
+				(*dev->ring_buffer)[next_tail].cmd[6] = newwheel;
 				dev->ring_tail = next_tail;
 				next_tail = (dev->ring_tail+1) % ring_buffer_size;
 			} else {
@@ -729,7 +729,7 @@ static ssize_t usb_tranzport_read(struct file *file, char __user *buffer, size_t
 		dbg_info(&dev->intf->dev, "%s: head, tail are %x, %x\n", __FUNCTION__,dev->ring_head,dev->ring_tail);
 	   }
 	   retval = c;
-	   
+	
 #else
 	if (copy_to_user(buffer, &(*dev->ring_buffer)[dev->ring_tail], 8)) {
 		retval = -EFAULT;
@@ -916,13 +916,13 @@ static int usb_tranzport_probe(struct usb_interface *intf, const struct usb_devi
 	true_size = min(ring_buffer_size,RING_BUFFER_SIZE);
 	/* FIXME - there are more usb_alloc routines for dma correctness. Needed? */
 
-	dev->ring_buffer = kmalloc((true_size*sizeof(struct tranzport_cmd))+8, GFP_KERNEL); 
+	dev->ring_buffer = kmalloc((true_size*sizeof(struct tranzport_cmd))+8, GFP_KERNEL);
 
 	if (!dev->ring_buffer) {
 		dev_err(&intf->dev, "Couldn't allocate ring_buffer of size %d\n",true_size);
 		goto error;
 	}
-	dev->interrupt_in_buffer = kmalloc(dev->interrupt_in_endpoint_size, GFP_KERNEL); 
+	dev->interrupt_in_buffer = kmalloc(dev->interrupt_in_endpoint_size, GFP_KERNEL);
 	if (!dev->interrupt_in_buffer) {
 		dev_err(&intf->dev, "Couldn't allocate interrupt_in_buffer\n");
 		goto error;

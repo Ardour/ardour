@@ -81,7 +81,7 @@ public:
 		default:    return "unknown"; // reeeally shouldn't ever happen
 		}
 	}
-    
+
 	const char* to_i18n_string () const;
 
 	inline operator uint32_t() const { return (uint32_t)_symbol; }

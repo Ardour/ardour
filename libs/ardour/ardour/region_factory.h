@@ -117,7 +117,7 @@ public:
 	 * announce=false but they still need to be in the map soon after
 	 * creation.
 	 */
-	 
+	
 	static void map_add (boost::shared_ptr<Region>);
 
   private:

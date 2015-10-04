@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2009 Paul Davis 
+  Copyright (C) 2009 Paul Davis
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 */
 
 CrossThreadChannel::CrossThreadChannel (bool non_blocking)
-	: receive_channel (0) 
+	: receive_channel (0)
 	, receive_source (0)
 	, receive_slot ()
 	, send_socket()
@@ -32,7 +32,7 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	send_address.sin_family = AF_INET;
 	send_address.sin_addr.s_addr = inet_addr("127.0.0.1");
 	send_address.sin_port = htons(0);
-	int status = bind(send_socket, (SOCKADDR*)&send_address,   
+	int status = bind(send_socket, (SOCKADDR*)&send_address,
 			  sizeof(send_address));
 
 	if (status != 0) {
@@ -54,9 +54,9 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	recv_address.sin_family = AF_INET;
 	recv_address.sin_addr.s_addr = inet_addr("127.0.0.1");
 	recv_address.sin_port = htons(0);
-	status = bind(receive_socket, (SOCKADDR*)&recv_address, 
+	status = bind(receive_socket, (SOCKADDR*)&recv_address,
 		      sizeof(recv_address));
-    
+
 	if (status != 0) {
 		std::cerr << "CrossThreadChannel::CrossThreadChannel() Receive socket binding failed with error: " << WSAGetLastError() << std::endl;
 		return;
@@ -67,7 +67,7 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	// get assigned port number for Receive Socket
 	int recv_addr_len = sizeof(recv_address);
 	status = getsockname(receive_socket, (SOCKADDR*)&recv_address, &recv_addr_len);
-    
+
 	if (status != 0) {
 		std::cerr << "CrossThreadChannel::CrossThreadChannel() Setting receive socket address to local failed with error: " << WSAGetLastError() << std::endl;
 		return;
@@ -173,7 +173,7 @@ CrossThreadChannel::poll_for_request()
 	return false;
 }
 
-int 
+int
 CrossThreadChannel::receive (char& msg, bool wait)
 {
 	gsize read = 0;

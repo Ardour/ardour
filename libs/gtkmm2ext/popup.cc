@@ -1,6 +1,6 @@
 /*
     Copyright (C) 1998-99 Paul Barton-Davis
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -103,8 +103,8 @@ PopUp::touch ()
 		show_all ();
 		
 		if (popdown_time != 0) {
-			timeout = g_timeout_add (popdown_time, 
-						   remove_prompt_timeout, 
+			timeout = g_timeout_add (popdown_time,
+						   remove_prompt_timeout,
 						   this);
 		}
 	}

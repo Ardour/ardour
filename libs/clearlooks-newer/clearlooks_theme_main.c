@@ -19,5 +19,5 @@ theme_exit (void)
 GE_EXPORT GtkRcStyle *
 theme_create_rc_style (void)
 {
-  return GTK_RC_STYLE (g_object_new (CLEARLOOKS_TYPE_RC_STYLE, NULL));  
+  return GTK_RC_STYLE (g_object_new (CLEARLOOKS_TYPE_RC_STYLE, NULL));
 }

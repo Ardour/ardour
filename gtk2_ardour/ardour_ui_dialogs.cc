@@ -204,8 +204,8 @@ ARDOUR_UI::set_session (Session *s)
 		transport_tearoff_hbox.remove (editor_meter_peak_display);
 	}
 
-	if (_session && 
-	    _session->master_out() && 
+	if (_session &&
+	    _session->master_out() &&
 	    _session->master_out()->n_outputs().n(DataType::AUDIO) > 0) {
 
 		if (!ARDOUR::Profile->get_trx()) {

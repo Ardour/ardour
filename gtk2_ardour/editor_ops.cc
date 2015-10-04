@@ -657,8 +657,8 @@ Editor::sequence_regions ()
 		if (in_command) {
 			commit_reversible_command ();
 		}
-	} 
-} 
+	}
+}
 
 
 /* DISPLAY MOTION */
@@ -1508,7 +1508,7 @@ Editor::scroll_up_one_track (bool skip_child_views)
 			continue;
 		}
 
-		/* find the trackview at the top of the trackview group 
+		/* find the trackview at the top of the trackview group
 		 *
 		 * Note that covers_y_position() is recursive and includes child views
 		 */
@@ -1521,7 +1521,7 @@ Editor::scroll_up_one_track (bool skip_child_views)
 			/* automation lane (one level, non-recursive)
 			 *
 			 * - if no automation lane exists -> move to prev tack
-			 * - if no y-axis match is found -> the current track is at the top -> move to prev track 
+			 * - if no y-axis match is found -> the current track is at the top -> move to prev track
 			 *     (actually last automation lane of previous track, see below)
 			 * - if first (top-most) lane is at the top -> move to this track
 			 * - else move up one lane
@@ -1678,7 +1678,7 @@ Editor::temporal_zoom (framecnt_t fpp)
 		return;
 	}
 
-	// Imposing an arbitrary limit to zoom out as too much zoom out produces 
+	// Imposing an arbitrary limit to zoom out as too much zoom out produces
 	// segfaults for lack of memory. If somebody decides this is not high enough I
 	// believe it can be raisen to higher values but some limit must be in place.
 	//
@@ -1891,7 +1891,7 @@ Editor::get_selection_extents ( framepos_t &start, framepos_t &end )
 	} else if (!selection->time.empty()) {
 		start = selection->time.start();
 		end = selection->time.end_frame();
-	} else 
+	} else
 		ret = false;  //no selection found
 
 	//range check
@@ -2543,12 +2543,12 @@ Editor::maybe_locate_with_edit_preroll ( framepos_t location )
 	location -= get_preroll();
 	
 	//don't try to locate before the beginning of time
-	if ( location < 0 ) 
+	if ( location < 0 )
 		location = 0;
 		
 	//if follow_playhead is on, keep the playhead on the screen
 	if ( _follow_playhead )
-		if ( location < leftmost_frame ) 
+		if ( location < leftmost_frame )
 			location = leftmost_frame;
 
 	_session->request_locate( location );
@@ -4622,7 +4622,7 @@ Editor::cut_copy_ranges (CutCopyOp op)
 			return;
 		}
 		ts.push_back (entered_track);
-	} 
+	}
 
 	for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
 		(*i)->cut_copy_clear (*selection, op);
@@ -7408,7 +7408,7 @@ Editor::do_remove_time ()
 }
 
 void
-Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt, 
+Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 		     bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too)
 {
 	if (Config->get_edit_mode() == Lock) {
@@ -7596,9 +7596,9 @@ Editor::fit_tracks (TrackViewList & tracks)
 
 	/* compute the per-track height from:
 
-	   total canvas visible height - 
+	   total canvas visible height -
                  height that will be taken by visible children of selected
-                 tracks - height of the ruler/hscroll area 
+                 tracks - height of the ruler/hscroll area
 	*/
 	uint32_t h = (uint32_t) floor ((trackviews_height() - child_heights) / visible_tracks);
 	double first_y_pos = DBL_MAX;

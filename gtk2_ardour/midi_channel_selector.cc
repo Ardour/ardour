@@ -396,17 +396,17 @@ MidiChannelSelectorWindow::build ()
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to enable recording all channels"));
 	capture_controls->pack_start (*b);
 	capture_mask_controls.push_back (b);
-	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::fill_capture_mask)); 
+	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::fill_capture_mask));
         b = manage (new Button (_("None")));
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to disable recording all channels"));
 	capture_controls->pack_start (*b);
 	capture_mask_controls.push_back (b);
-	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::zero_capture_mask)); 
+	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::zero_capture_mask));
         b = manage (new Button (_("Invert")));
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to invert currently selected recording channels"));
 	capture_controls->pack_start (*b);
 	capture_mask_controls.push_back (b);
-	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::invert_capture_mask)); 
+	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::invert_capture_mask));
 
         vpacker->pack_start (*capture_controls);
 
@@ -432,12 +432,12 @@ MidiChannelSelectorWindow::build ()
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to enable playback of all channels"));
 	playback_controls->pack_start (*b);
 	playback_mask_controls.push_back (b);
-	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::fill_playback_mask)); 
+	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::fill_playback_mask));
         b = manage (new Button (_("None")));
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to disable playback of all channels"));
 	playback_controls->pack_start (*b);
 	playback_mask_controls.push_back (b);
-	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::zero_playback_mask)); 
+	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::zero_playback_mask));
 	b = manage (new Button (_("Invert")));
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to invert current selected playback channels"));
 	playback_controls->pack_start (*b);
@@ -739,7 +739,7 @@ MidiChannelSelectorWindow::capture_mode_changed ()
 		
 		if (mode != ForceChannel) {
 			set_capture_selected_channels (track->get_capture_channel_mask());
-		} 
+		}
 	}
 
 	if (mode == AllChannels) {

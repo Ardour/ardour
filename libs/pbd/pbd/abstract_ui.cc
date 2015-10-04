@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ DECLARE_DEFAULT_COMPARISONS(ptw32_handle_t)
 
 using namespace std;
 
-template<typename RequestBuffer> void 
+template<typename RequestBuffer> void
 cleanup_request_buffer (void* ptr)
 {
         RequestBuffer* rb = (RequestBuffer*) ptr;
@@ -48,13 +48,13 @@ cleanup_request_buffer (void* ptr)
 	 * allocated dies. That could be before or after the end of the UI
 	 * event loop for which this request buffer provides communication.
 	 *
-	 * We are not modifying the UI's thread/buffer map, just marking it 
+	 * We are not modifying the UI's thread/buffer map, just marking it
 	 * dead. If the UI is currently processing the buffers and misses
 	 * this "dead" signal, it will find it the next time it receives
 	 * a request. If the UI has finished processing requests, then
 	 * we will leak this buffer object.
 	 */
-	 
+	
 	rb->dead = true;
 }
 
@@ -67,7 +67,7 @@ AbstractUI<RequestObject>::AbstractUI (const string& name)
 {
 	void (AbstractUI<RequestObject>::*pmf)(string,pthread_t,string,uint32_t) = &AbstractUI<RequestObject>::register_thread;
 
-	/* better to make this connect a handler that runs in the UI event loop but the syntax seems hard, and 
+	/* better to make this connect a handler that runs in the UI event loop but the syntax seems hard, and
 	   register_thread() is thread safe anyway.
 	*/
 
@@ -112,14 +112,14 @@ AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_
 		/* add the new request queue (ringbuffer) to our map
 		   so that we can iterate over it when the time is right.
 		   This step is not RT-safe, but is assumed to be called
-		   only at thread initialization time, not repeatedly, 
+		   only at thread initialization time, not repeatedly,
 		   and so this is of little consequence.
 		*/
 		Glib::Threads::Mutex::Lock lm (request_buffer_map_lock);
 		request_buffers[thread_id] = b;
 	}
 
-	/* set this thread's per_thread_request_buffer to this new 
+	/* set this thread's per_thread_request_buffer to this new
 	   queue/ringbuffer. remember that only this thread will
 	   get this queue when it calls per_thread_request_buffer.get()
 
@@ -188,7 +188,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 	for (i = request_buffers.begin(); i != request_buffers.end(); ++i) {
 
                 while (true) {
-                        
+
                         /* we must process requests 1 by 1 because
                            the request may run a recursive main
                            event loop that will itself call
@@ -198,9 +198,9 @@ AbstractUI<RequestObject>::handle_ui_requests ()
                            is even remotely consistent with
                            the condition before we called it.
                         */
-                        
+
                         i->second->get_read_vector (&vec);
-                        
+
                         if (vec.len[0] == 0) {
                                 break;
                         } else {
@@ -214,7 +214,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
                                         delete vec.buf[0];
                                         i->second->increment_read_ptr (1);
                                 }
-                        } 
+                        }
                 }
         }
 
@@ -246,7 +246,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
                 /* We need to use this lock, because its the one
                    returned by slot_invalidation_mutex() and protects
-                   against request invalidation. 
+                   against request invalidation.
                 */
 
                 request_buffer_map_lock.lock ();
@@ -276,7 +276,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		/* at this point, an object involved in a functor could be
 		 * deleted before we actually execute the functor. so there is
 		 * a race condition that makes the invalidation architecture
-		 * somewhat pointless. 
+		 * somewhat pointless.
 		 *
 		 * really, we should only allow functors containing shared_ptr
 		 * references to objects to enter into the request queue.
@@ -285,7 +285,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
                 request_buffer_map_lock.unlock ();
 		
 		/* unlock the request lock while we execute the request, so
-		 * that we don't needlessly block other threads (note: not RT 
+		 * that we don't needlessly block other threads (note: not RT
 		 * threads since they have their own queue) from making requests.
 		 */
 
@@ -386,7 +386,7 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 	req->the_slot = f;
 	
 	/* the invalidation record is an object which will carry out
-	 * invalidation of any requests associated with it when it is 
+	 * invalidation of any requests associated with it when it is
 	 * destroyed. it can be null. if its not null, associate this
 	 * request with the invalidation record. this allows us to
 	 * "cancel" requests submitted to the UI because they involved

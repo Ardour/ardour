@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ DnDTreeViewBase::add_object_drag (int column, string type_name)
 	enable_model_drag_dest (draggable);
 }
 
-bool 
+bool
 DnDTreeViewBase::on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time)
 {
 	suggested_action = Gdk::DragAction (0);

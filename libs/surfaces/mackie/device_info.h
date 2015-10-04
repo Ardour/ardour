@@ -37,22 +37,22 @@ struct GlobalButtonInfo {
 	std::string label; // visible to user
 	std::string group; // in case we want to present in a GUI
 	int32_t id;       // value sent by device
-    
+
 	GlobalButtonInfo () : id (-1) {}
 	GlobalButtonInfo (const std::string& l, const std::string& g, uint32_t i)
 		: label (l), group (g), id (i) {}
 };
-        
+
 struct StripButtonInfo {
 	int32_t base_id;
 	std::string name;
-    
+
 	StripButtonInfo () : base_id (-1) {}
 	StripButtonInfo (uint32_t i, const std::string& n)
 		: base_id (i), name (n) {}
 };
 
-class DeviceInfo 
+class DeviceInfo
 {
                                         public:
 	enum DeviceType {
@@ -72,7 +72,7 @@ class DeviceInfo
 	uint32_t strip_cnt () const;
 	uint32_t extenders() const;
 	uint32_t master_position() const;
-	bool has_two_character_display() const; 
+	bool has_two_character_display() const;
 	bool has_master_fader () const;
 	bool has_timecode_display() const;
 	bool has_global_controls() const;

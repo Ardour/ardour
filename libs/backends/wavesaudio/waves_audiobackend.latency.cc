@@ -23,7 +23,7 @@
 using namespace ARDOUR;
 
 
-int 
+int
 WavesAudioBackend::set_systemic_input_latency (uint32_t systemic_input_latency)
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::set_systemic_input_latency (): " << systemic_input_latency << std::endl;
@@ -33,7 +33,7 @@ WavesAudioBackend::set_systemic_input_latency (uint32_t systemic_input_latency)
 }
 
 
-int 
+int
 WavesAudioBackend::set_systemic_output_latency (uint32_t systemic_output_latency)
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::set_systemic_output_latency (): " << systemic_output_latency << std::endl;
@@ -42,7 +42,7 @@ WavesAudioBackend::set_systemic_output_latency (uint32_t systemic_output_latency
     return 0;
 }
 
-uint32_t     
+uint32_t
 WavesAudioBackend::systemic_input_latency () const
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::systemic_input_latency ()" << std::endl;
@@ -51,7 +51,7 @@ WavesAudioBackend::systemic_input_latency () const
 }
 
 
-uint32_t     
+uint32_t
 WavesAudioBackend::systemic_output_latency () const
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::systemic_output_latency ()" << std::endl;
@@ -85,6 +85,6 @@ WavesAudioBackend::get_latency_range (PortHandle port_handle, bool for_playback)
         std::cerr << "WavesAudioBackend::get_latency_range (): Failed to find port [" << std::hex << port_handle << std::dec << "]!" << std::endl;
         LatencyRange lr = {0,0};
         return lr;
-    }   
+    }
     return ((WavesDataPort*)port_handle)->latency_range (for_playback);
 }

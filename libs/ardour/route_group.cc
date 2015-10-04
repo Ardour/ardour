@@ -376,7 +376,7 @@ RouteGroup::set_color (bool yn)
 }
 
 void
-RouteGroup::set_monitoring (bool yn) 
+RouteGroup::set_monitoring (bool yn)
 {
 	if (is_monitoring() == yn) {
 		return;

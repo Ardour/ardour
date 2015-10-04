@@ -653,13 +653,13 @@ MasterDeviceNames::value_name_list_by_control(const std::string& mode, uint8_t c
 	}
 }
 
-boost::shared_ptr<CustomDeviceMode> 
+boost::shared_ptr<CustomDeviceMode>
 MasterDeviceNames::custom_device_mode_by_name(const std::string& mode_name)
 {
 	return _custom_device_modes[mode_name];
 }
 
-boost::shared_ptr<ChannelNameSet> 
+boost::shared_ptr<ChannelNameSet>
 MasterDeviceNames::channel_name_set_by_channel(const std::string& mode, uint8_t channel)
 {
 	boost::shared_ptr<CustomDeviceMode> cdm = custom_device_mode_by_name(mode);
@@ -667,8 +667,8 @@ MasterDeviceNames::channel_name_set_by_channel(const std::string& mode, uint8_t 
 	return cns;
 }
 
-boost::shared_ptr<Patch> 
-MasterDeviceNames::find_patch(const std::string& mode, uint8_t channel, const PatchPrimaryKey& key) 
+boost::shared_ptr<Patch>
+MasterDeviceNames::find_patch(const std::string& mode, uint8_t channel, const PatchPrimaryKey& key)
 {
 	boost::shared_ptr<ChannelNameSet> cns = channel_name_set_by_channel(mode, channel);
 	if (!cns) return boost::shared_ptr<Patch>();

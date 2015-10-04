@@ -73,7 +73,7 @@ public:
 
     class Position;
     boost::scoped_ptr<Position> _pos;
-    
+
     double one_ppqn_in_frames (framepos_t transport_position);
 
     void send_midi_clock_event (pframes_t offset, pframes_t nframes);
@@ -83,6 +83,6 @@ public:
     void send_position_event (uint32_t midi_clocks, pframes_t offset, pframes_t nframes);
 };
 }
- // namespace 
+ // namespace
 
 #endif /* __libardour_ticker_h__ */

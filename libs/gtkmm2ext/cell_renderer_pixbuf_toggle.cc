@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2009 Paul Davis
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -30,7 +30,7 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 
 
-CellRendererPixbufToggle::CellRendererPixbufToggle() : 
+CellRendererPixbufToggle::CellRendererPixbufToggle() :
 	Glib::ObjectBase( typeid(CellRendererPixbufToggle) ),
 	Gtk::CellRenderer(),
 	property_pixbuf_(*this, "pixbuf"),
@@ -42,26 +42,26 @@ CellRendererPixbufToggle::CellRendererPixbufToggle() :
 	property_sensitive() = false;
 }
 
-Glib::PropertyProxy< Glib::RefPtr<Gdk::Pixbuf> > 
+Glib::PropertyProxy< Glib::RefPtr<Gdk::Pixbuf> >
 CellRendererPixbufToggle::property_pixbuf()
 {
 	return property_pixbuf_.get_proxy();
-} 
+}
 
-Glib::PropertyProxy<bool> 
+Glib::PropertyProxy<bool>
 CellRendererPixbufToggle::property_active()
 {
 	return property_active_.get_proxy();
-} 
+}
 
-// Overridden methods of the parent CellRenderer  
-Glib::PropertyProxy_Base 
+// Overridden methods of the parent CellRenderer
+Glib::PropertyProxy_Base
 CellRendererPixbufToggle::_property_renderable()
 {
 	return property_pixbuf();
-}  
+}
 
-bool 
+bool
 CellRendererPixbufToggle::activate_vfunc(GdkEvent*, Gtk::Widget&, const Glib::ustring& path, const Gdk::Rectangle&, const Gdk::Rectangle&, Gtk::CellRendererState)
 {
 	signal_toggled_(path);
@@ -70,7 +70,7 @@ CellRendererPixbufToggle::activate_vfunc(GdkEvent*, Gtk::Widget&, const Glib::us
 
 
 
-void 
+void
 CellRendererPixbufToggle::render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window, Gtk::Widget& /*widget*/, const Gdk::Rectangle& /*background_area*/, const Gdk::Rectangle& cell_area, const Gdk::Rectangle& /*expose_area*/, Gtk::CellRendererState /*flags*/)
 {
 	int offset_width = 0;
@@ -91,7 +91,7 @@ CellRendererPixbufToggle::render_vfunc (const Glib::RefPtr<Gdk::Drawable>& windo
 	}
 }
 
-void 
+void
 CellRendererPixbufToggle::get_size_vfunc (Gtk::Widget& /*widget*/, const Gdk::Rectangle* /*cell_area*/, int* /*x_offset*/, int* /*y_offset*/, int* /*width*/, int* /*height*/) const
 {
 //cerr << "cell_renderer_pixbuf_toggle get_size" << endl;
@@ -108,7 +108,7 @@ CellRendererPixbufToggle::set_inactive_pixbuf(Glib::RefPtr<Gdk::Pixbuf> pixbuf){
 	inactive_pixbuf = pixbuf;
 }
 
-CellRendererPixbufToggle::SignalToggled& 
+CellRendererPixbufToggle::SignalToggled&
 CellRendererPixbufToggle::signal_toggled()
 {
   return signal_toggled_;

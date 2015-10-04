@@ -45,14 +45,14 @@ FrameposPlusBeatsTest::doubleTempoTest ()
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
-	  
+	
 	  120bpm = 24e3 samples per beat
 	  240bpm = 12e3 samples per beat
 	*/
 	
 
 	/*
-	  
+	
 	  120bpm                                                240bpm
 	  0 beats                                               12 beats
 	  0 frames                                              288e3 frames
@@ -85,7 +85,7 @@ FrameposPlusBeatsTest::doubleTempoTest ()
    tempo change (which shouldn't affect anything, since we are just dealing with
    beats)
 */
-   
+
 void
 FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 {
@@ -97,14 +97,14 @@ FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
-	  
+	
 	  120bpm = 24e3 samples per beat
 	  240bpm = 12e3 samples per beat
 	*/
 	
 
 	/*
-	  
+	
 	  120bpm                                                240bpm
 	  0 beats                                               12 beats
 	  0 frames                                              288e3 frames

@@ -85,7 +85,7 @@ bool
 Editor::mouse_frame (framepos_t& where, bool& in_track_canvas) const
 {
         /* gdk_window_get_pointer() has X11's XQueryPointer semantics in that it only
-           pays attentions to subwindows. this means that menu windows are ignored, and 
+           pays attentions to subwindows. this means that menu windows are ignored, and
            if the pointer is in a menu, the return window from the call will be the
            the regular subwindow *under* the menu.
 
@@ -349,7 +349,7 @@ Editor::update_time_selection_display ()
 		break;
 	case MouseContent:
 		/* This handles internal edit.
-		   Clear everything except points and notes. 
+		   Clear everything except points and notes.
 		*/
 		selection->clear_regions();
 		selection->clear_lines();
@@ -665,7 +665,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	Editing::MouseMode eff = effective_mouse_mode ();
 
 	/* special case: allow drag of region fade in/out in object mode with join object/range enabled */
-	if (get_smart_mode()) { 
+	if (get_smart_mode()) {
 		switch (item_type) {
 		  case FadeInHandleItem:
 		  case FadeInTrimHandleItem:
@@ -823,7 +823,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case StartCrossFadeItem:
 			case EndCrossFadeItem:
-				/* we might allow user to grab inside the fade to trim a region with preserve_fade_anchor.  for not this is not fully implemented */ 
+				/* we might allow user to grab inside the fade to trim a region with preserve_fade_anchor.  for not this is not fully implemented */
 //				if (!clicked_regionview->region()->locked()) {
 //					_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer(), true), event);
 //					return true;
@@ -1106,7 +1106,7 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	return false;
 }
-   
+
 bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
@@ -1204,14 +1204,14 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	if (!Keyboard::is_context_menu_event (&event->button)) {
 
                 /* see if we're finishing a drag */
-                
+
                 if (_drags->active ()) {
                         bool const r = _drags->end_grab (event);
                         if (r) {
                                 /* grab dragged, so do nothing else */
                                 return true;
                         }
-                        
+
                         were_dragging = true;
                 }
 
@@ -1580,7 +1580,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
         bool ret = true;
 
 	/* by the time we reach here, entered_regionview and entered trackview
-	 * will have already been set as appropriate. Things are done this 
+	 * will have already been set as appropriate. Things are done this
 	 * way because this method isn't passed a pointer to a variable type of
 	 * thing that is entered (which may or may not be canvas item).
 	 * (e.g. the actual entered regionview)
@@ -1720,7 +1720,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 
 	switch (item_type) {
 	case ControlPointItem:
-		_verbose_cursor->hide (); 
+		_verbose_cursor->hide ();
 		break;
 
 	case GainLineItem:

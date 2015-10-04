@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ struct /*LIBGTKMM2EXT_API*/ SerializedObjectPointers {
     DataType data[0];
 };
 
-class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView 
+class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 {
   private:
   public:
@@ -92,7 +92,7 @@ template<class DataType>
 class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 {
   public:
-	DnDTreeView() {} 
+	DnDTreeView() {}
 	~DnDTreeView() {}
 
 	sigc::signal<void,const std::list<DataType>&,Gtk::TreeView*,int,int,Glib::RefPtr<Gdk::DragContext>&> signal_drop;
@@ -171,5 +171,5 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 };
 
 } // namespace
- 
+
 #endif /* __gtkmm2ext_dndtreeview_h__ */

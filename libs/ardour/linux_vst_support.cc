@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ void* vstfx_load_vst_library(const char* path)
 	size_t len1;
 	size_t len2;
 
-	/*Try and load the shared library pointed to by the path - 
+	/*Try and load the shared library pointed to by the path -
 	NOTE: You have to give RTLD_LAZY or RTLD_NOW to dlopen or
 	you get some occasional failures to load - dlerror reports
 	invalid arguments*/
@@ -311,7 +311,7 @@ vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 		return 0;
 	}
 
-	if ((vstfx->plugin = fhandle->main_entry (amc)) == 0) 
+	if ((vstfx->plugin = fhandle->main_entry (amc)) == 0)
 	{
 		vstfx_error ("** ERROR ** VSTFX : %s could not be instantiated :(\n", fhandle->name);
 		free (vstfx);
@@ -362,7 +362,7 @@ void vstfx_close (VSTState* vstfx)
 	if (vstfx->handle->plugincnt)
 			vstfx->handle->plugincnt--;
 		
-	/*vstfx_unload will unload the dll if the instance count allows - 
+	/*vstfx_unload will unload the dll if the instance count allows -
 	we need to do this because some plugins keep their own instance count
 	and (JUCE) manages the plugin UI in its own thread.  When the plugins
 	internal instance count reaches zero, JUCE stops the UI thread and won't
@@ -388,7 +388,7 @@ void vstfx_close (VSTState* vstfx)
 }
 
 
-bool 
+bool
 vstfx_save_state (VSTState* vstfx, char * filename)
 {
 	FILE* f = g_fopen (filename, "wb");
@@ -476,7 +476,7 @@ vstfx_save_state (VSTState* vstfx, char * filename)
 					//g_free( encoded );
 				}
 			}
-		} 
+		}
 
 		fprintf( f, "</plugin_state>\n" );
 		fclose( f );
@@ -491,7 +491,7 @@ vstfx_save_state (VSTState* vstfx, char * filename)
 
 /*Set up a call to the plugins 'dispatcher' function*/
 
-int vstfx_call_dispatcher (VSTState* vstfx, int opcode, int index, int val, void *ptr, float opt) 
+int vstfx_call_dispatcher (VSTState* vstfx, int opcode, int index, int val, void *ptr, float opt)
 {
 	pthread_mutex_lock (&vstfx->lock);
 	

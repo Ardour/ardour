@@ -1,4 +1,4 @@
-/* 
+/*
     Copyright (C) 2001 Brett Viren & Paul Davis
 
     This program is free software; you can redistribute it and/or modify
@@ -51,7 +51,7 @@ UndoTransaction::~UndoTransaction ()
 	clear ();
 }
 
-void 
+void
 command_death (UndoTransaction* ut, Command* c)
 {
 	if (ut->clearing()) {
@@ -65,7 +65,7 @@ command_death (UndoTransaction* ut, Command* c)
 	}
 }
 
-UndoTransaction& 
+UndoTransaction&
 UndoTransaction::operator= (const UndoTransaction& rhs)
 {
 	if (this == &rhs) return *this;
@@ -152,12 +152,12 @@ XMLNode &UndoTransaction::get_state()
 
 class UndoRedoSignaller {
 public:
-    UndoRedoSignaller (UndoHistory& uh) 
-	    : _history (uh) { 
-	    _history.BeginUndoRedo(); 
+    UndoRedoSignaller (UndoHistory& uh)
+	    : _history (uh) {
+	    _history.BeginUndoRedo();
     }
-    ~UndoRedoSignaller() { 
-	    _history.EndUndoRedo(); 
+    ~UndoRedoSignaller() {
+	    _history.EndUndoRedo();
     }
 
 private:
@@ -333,7 +333,7 @@ UndoHistory::clear ()
 	Changed (); /* EMIT SIGNAL */
 }
 
-XMLNode& 
+XMLNode&
 UndoHistory::get_state (int32_t depth)
 {
     XMLNode *node = new XMLNode ("UndoHistory");

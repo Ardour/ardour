@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
     Inspired by code from Ben Loftis @ Harrison Consoles
 
     This program is free software; you can redistribute it and/or modify

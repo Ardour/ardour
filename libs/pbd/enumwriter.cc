@@ -1,4 +1,4 @@
-/* 
+/*
     Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
@@ -36,16 +36,16 @@ using namespace PBD;
 EnumWriter* EnumWriter::_instance = 0;
 map<string,string> EnumWriter::hack_table;
 
-static int 
-nocase_cmp(const string & s1, const string& s2) 
+static int
+nocase_cmp(const string & s1, const string& s2)
 {
 	string::const_iterator it1 = s1.begin();
 	string::const_iterator it2 = s2.begin();
 	
-	while ((it1 != s1.end()) && (it2 != s2.end())) { 
+	while ((it1 != s1.end()) && (it2 != s2.end())) {
 		if(::toupper(*it1) != ::toupper(*it2))  {//letters differ?
 			// return -1 to indicate 'smaller than', 1 otherwise
-			return (::toupper(*it1) < ::toupper(*it2)) ? -1 : 1; 
+			return (::toupper(*it1) < ::toupper(*it2)) ? -1 : 1;
 		}
 
 		++it1;
@@ -65,11 +65,11 @@ nocase_cmp(const string & s1, const string& s2)
 }
 
 EnumWriter&
-EnumWriter::instance() 
+EnumWriter::instance()
 {
 	if (_instance == 0) {
 		_instance = new EnumWriter;
-	} 
+	}
 
 	return *_instance;
 }
@@ -166,7 +166,7 @@ EnumWriter::write_bits (EnumRegistration& er, int value)
 		if (value & (*i)) {
 			if (!result.empty()) {
 				result += ',';
-			} 
+			}
 			result += (*s);
 		}
 	}
@@ -204,22 +204,22 @@ EnumWriter::validate (EnumRegistration& er, int val) const
 
         vector<int>::iterator i;
         string enum_name = _("unknown enumeration");
-        
+
         for (Registry::const_iterator x = registry.begin(); x != registry.end(); ++x) {
                 if (&er == &(*x).second) {
                         enum_name = (*x).first;
                 }
         }
-        
+
 
         for (i = er.values.begin(); i != er.values.end(); ++i) {
                 if (*i == val) {
                         return val;
                 }
         }
-        
+
         warning << string_compose (_("Illegal value loaded for %1 (%2) - %3 used instead"),
-                                   enum_name, val, er.names.front()) 
+                                   enum_name, val, er.names.front())
                 << endmsg;
         return er.values.front();
 }

@@ -298,7 +298,7 @@ setup_enum_writer ()
 	REGISTER (_RemoteModel);
 	/*
 	 * EditorOrdered has been deprecated
-	 * since the removal of independent 
+	 * since the removal of independent
 	 * editor / mixer ordering.
 	*/
 	enum_writer.add_to_hack_table ("EditorOrdered", "MixerOrdered");
@@ -326,7 +326,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (UseDefaultNames);
 	REGISTER_ENUM (NameAfterDriver);
 	REGISTER_BITS (_TracksAutoNamingRule);
-    
+
 	REGISTER_ENUM (FormatFloat);
 	REGISTER_ENUM (FormatInt24);
 	REGISTER_ENUM (FormatInt16);

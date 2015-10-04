@@ -2,7 +2,7 @@
     Copyright (C) 2012 Paul Davis
 
     Using code from Rui Nuno Capela's qmidinet as inspiration.
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -82,8 +82,8 @@ IPMIDIPort::~IPMIDIPort ()
 
 int
 IPMIDIPort::selectable () const
-{ 
-	return sockin; 
+{
+	return sockin;
 }
 
 XMLNode&
@@ -112,7 +112,7 @@ IPMIDIPort::close_sockets ()
 	}
 }
 
-static bool 
+static bool
 get_address (int sock, struct in_addr *inaddr, const string& ifname )
 {
 	// Get interface address from supplied name.

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Barton-Davis 
+    Copyright (C) 1999 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,13 +69,13 @@ extern BaseUI::RequestType AddIdle;
 extern BaseUI::RequestType AddTimeout;
 
 struct LIBGTKMM2EXT_API UIRequest : public BaseUI::BaseRequestObject {
-     
+
      /* this once used anonymous unions to merge elements
 	that are never part of the same request. that makes
 	the creation of a legal copy constructor difficult
 	because of the semantics of the slot member.
      */
-     
+
     Touchable *display;
     const char *msg;
     Gtk::StateType new_state;
@@ -88,8 +88,8 @@ struct LIBGTKMM2EXT_API UIRequest : public BaseUI::BaseRequestObject {
     UIRequest () {
             type = NullMessage;
     }
-    
-    ~UIRequest () { 
+
+    ~UIRequest () {
 	    if (type == ErrorMessage && msg) {
 		    /* msg was strdup()'ed */
 		    free (const_cast<char *>(msg));

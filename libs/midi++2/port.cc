@@ -1,6 +1,6 @@
 /*
     Copyright (C) 1998 Paul Barton-Davis
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -139,7 +139,7 @@ Port::Descriptor::Descriptor (const XMLNode& node)
 	}
 }
 
-XMLNode& 
+XMLNode&
 Port::get_state () const
 {
 	XMLNode* root = new XMLNode (state_node_name);

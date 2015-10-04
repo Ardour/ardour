@@ -79,7 +79,7 @@ AudioPort::get_audio_buffer (pframes_t nframes)
 	return *_buffer;
 }
 
-Sample* 
+Sample*
 AudioPort::engine_get_whole_audio_buffer ()
 {
 	/* caller must hold process lock */

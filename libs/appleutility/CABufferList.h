@@ -248,7 +248,7 @@ public:
 	void		DeallocateBuffers();
 	
 	void		UseExternalBuffer(Byte *ptr, UInt32 nBytes);
-    
+
 	void		AdvanceBufferPointers(UInt32 nBytes)
 					// this is for bufferlists that function simply as
 					// an array of pointers into another bufferlist, being advanced,

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ namespace PBD {
 	LIBPBD_API std::string demangle (const std::string&);
 
 template<typename T>
-class /*LIBPBD_API*/ thing_with_backtrace 
+class /*LIBPBD_API*/ thing_with_backtrace
 {
   public:
     thing_with_backtrace () {
@@ -52,7 +52,7 @@ class /*LIBPBD_API*/ thing_with_backtrace
 #ifdef HAVE_EXECINFO
 	    allocation_backtrace = new void*[50];
 	    allocation_backtrace_size = backtrace (allocation_backtrace, 50);
-#else 
+#else
 	    allocation_backtrace_size = 0;
 #endif
 	    Glib::Threads::Mutex::Lock lm (all_mutex);
@@ -64,14 +64,14 @@ class /*LIBPBD_API*/ thing_with_backtrace
 #ifdef HAVE_EXECINFO
 	    allocation_backtrace = new void*[50];
 	    allocation_backtrace_size = backtrace (allocation_backtrace, 50);
-#else 
+#else
 	    allocation_backtrace_size = 0;
 #endif
 	    Glib::Threads::Mutex::Lock lm (all_mutex);
 	    all.push_back (this);
     }
 
-    ~thing_with_backtrace() { 
+    ~thing_with_backtrace() {
 	    if (allocation_backtrace_size) {
 		    delete [] allocation_backtrace;
 	    }
@@ -90,9 +90,9 @@ class /*LIBPBD_API*/ thing_with_backtrace
 	    for (x = all.begin(); x != all.end(); ++x) {
 		    char **strings;
 		    size_t i;
-		    
+		
 		    strings = backtrace_symbols ((*x)->allocation_backtrace, (*x)->allocation_backtrace_size);
-		    
+		
 		    if (strings) {
 			    stream << "--- ALLOCATED SHARED_PTR @ " << (*x) << std::endl;
 			    for (i = 0; i < (*x)->allocation_backtrace_size && i < 50U; i++) {

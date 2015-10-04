@@ -344,7 +344,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_midnam_custom_device_mode_selector.show ();
 
 		_midi_controls_box.pack_start (_midnam_custom_device_mode_selector, false, false, 2);
-	} 
+	}
 
 	model_changed(gui_property(X_("midnam-model-name")));
 	custom_device_mode_changed(gui_property(X_("midnam-custom-device-mode")));
@@ -522,7 +522,7 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 
 	range_items.push_back (
 		MenuElem (_("Show Full Range"),
-		          sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range), 
+		          sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
 		                      MidiStreamView::FullRange, true)));
 
 	range_items.push_back (

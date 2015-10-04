@@ -124,7 +124,7 @@ PatchChangeDialog::PatchChangeDialog (
 	set_active_bank_combo ();
 	bank_combo_changed ();
 
-	_info.Changed.connect (_info_changed_connection, invalidator (*this), 
+	_info.Changed.connect (_info_changed_connection, invalidator (*this),
 			       boost::bind (&PatchChangeDialog::instrument_info_changed, this), gui_context());
 
 	show_all ();

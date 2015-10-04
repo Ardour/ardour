@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
     Inspired by code from Ben Loftis @ Harrison Consoles
 
     This program is free software; you can redistribute it and/or modify
@@ -113,10 +113,10 @@ _pingback (void *arg)
 	curl_global_init (CURL_GLOBAL_NOTHING);
 	c = curl_easy_init ();
 	
-	curl_easy_setopt (c, CURLOPT_WRITEFUNCTION, curl_write_data); 
-	curl_easy_setopt (c, CURLOPT_WRITEDATA, &return_str); 
+	curl_easy_setopt (c, CURLOPT_WRITEFUNCTION, curl_write_data);
+	curl_easy_setopt (c, CURLOPT_WRITEDATA, &return_str);
 	char errbuf[CURL_ERROR_SIZE];
-	curl_easy_setopt (c, CURLOPT_ERRORBUFFER, errbuf); 
+	curl_easy_setopt (c, CURLOPT_ERRORBUFFER, errbuf);
 
 	string url;
 
@@ -206,7 +206,7 @@ _pingback (void *arg)
 	return_str = "";
 
 	if (curl_easy_perform (c) == 0) {
-		long http_status; 
+		long http_status;
 
 		curl_easy_getinfo (c, CURLINFO_RESPONSE_CODE, &http_status);
 
@@ -241,7 +241,7 @@ _pingback (void *arg)
 
 namespace ARDOUR {
 
-void pingback (const string& version, const string& announce_path) 
+void pingback (const string& version, const string& announce_path)
 {
 	ping_call* cm = new ping_call (version, announce_path);
 	pthread_t thread;

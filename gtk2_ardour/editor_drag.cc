@@ -404,7 +404,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 					_initially_vertical = false;
 				}
 				/** check constraints for this drag.
-				 *  Note that the current convention is to use "contains" for 
+				 *  Note that the current convention is to use "contains" for
 				 *  key modifiers during motion and "equals" when initiating a drag.
 				 *  In this case we haven't moved yet, so "equals" applies here.
 				 */
@@ -882,7 +882,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 	}
 	/* for automation lanes, there is a TimeAxisView but no ->view()
-	 * if (!tv) -> dropzone 
+	 * if (!tv) -> dropzone
 	 */
 	else if (!tv && cur_y >= 0 && _last_pointer_time_axis_view >= 0) {
 		/* Moving into the drop-zone.. */
@@ -1181,7 +1181,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 				 * We do not use negative _last_pointer_time_axis_view because
 				 * the dropzone is "packed" (the actual track offset is ignored)
 				 *
-				 * As opposed to the actual number 
+				 * As opposed to the actual number
 				 * of elements in the dropzone (_ndropzone)
 				 * _pdropzone is not constrained. This is necessary
 				 * to allow moving multiple regions with y-distance

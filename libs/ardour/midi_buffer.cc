@@ -178,7 +178,7 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 #endif
 
 	if (_size + stamp_size + size >= _capacity) {
-		cerr << "MidiBuffer::push_back2 failed (buffer is full; _size = " << _size << " capacity " 
+		cerr << "MidiBuffer::push_back2 failed (buffer is full; _size = " << _size << " capacity "
 		     << _capacity << " stamp " << stamp_size << " size = " << size << ")" << endl;
 		PBD::stacktrace (cerr, 20);
 		return false;
@@ -304,9 +304,9 @@ MidiBuffer::second_simultaneous_midi_byte_is_first (uint8_t a, uint8_t b)
 
 	/* two events at identical times. we need to determine
 	   the order in which they should occur.
-	   
+	
 	   the rule is:
-	   
+	
 	   Controller messages
 	   Program Change
 	   Note Off
@@ -474,7 +474,7 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 		 * if "sz" is non-zero, there is data to be merged from "other"
 		 * into this buffer before we do anything else, corresponding
 		 * to the events from "other" that we skipped while advancing
-		 * "them". 
+		 * "them".
 		 */
 
 		if (bytes_to_merge) {
@@ -488,7 +488,7 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 			memcpy  (_data + us.offset, other._data + merge_offset, bytes_to_merge);
 			/* update iterator to our own events. this is a miserable hack */
 			us.offset += bytes_to_merge;
-		} 
+		}
 
 		/* if we're at the end of the other buffer, we're done */
 
@@ -502,7 +502,7 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 
 		if ((*us).time() == (*them).time()) {
 
-			DEBUG_TRACE (DEBUG::MidiIO, 
+			DEBUG_TRACE (DEBUG::MidiIO,
 				     string_compose ("simultaneous MIDI events discovered during merge, times %1/%2 status %3/%4\n",
 						     (*us).time(), (*them).time(),
 						     (int) *(_data + us.offset + sizeof (TimeType)),
@@ -539,7 +539,7 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 			if (them_first) {
 				/* need to skip the event pointed to by 'us'
 				   since its at the same time as 'them'
-				   (still), and we'll enter 
+				   (still), and we'll enter
 				*/
 
 				if (us != end()) {
@@ -576,7 +576,7 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 			_size += other._size - them.offset;
 			assert(_size <= _capacity);
 			break;
-		} 
+		}
 	}
 
 	return true;

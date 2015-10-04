@@ -38,7 +38,7 @@ class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
 	void set_tip (std::string);
 	void set_font (Pango::FontDescription font);
 	void set_center_alignment (bool align_to_center);
-   
+
 	virtual bool dragging () const;
 
   private:
@@ -56,7 +56,7 @@ class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
 	Gtk::Window* _window;
 	/** Our label */
 	Gtk::Label* _label;
-    
+
 	/** allow to drag
 	 */
 	bool _draggable;

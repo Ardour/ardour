@@ -1,4 +1,4 @@
-/* 
+/*
    Copyright (C) 2007 Paul Davis
 
 	This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@
 #include "pbd/command.h"
 #include "pbd/failed_constructor.h"
 
-/** This command class is initialized 
+/** This command class is initialized
  */
 
 namespace PBD {
@@ -45,11 +45,11 @@ class /*LIBPBD_API*/ FunctorCommand : public Command
 	typedef typename FunctorMap::iterator FunctorMapIterator;
 
 	public:
-	FunctorCommand(std::string functor, obj_type& object, arg_type b, arg_type a) 
+	FunctorCommand(std::string functor, obj_type& object, arg_type b, arg_type a)
 		: functor_name(functor)
 		, object(object)
 		, before(b)
-		, after(a) 
+		, after(a)
 	{
 		method = find_functor(functor);
 
@@ -65,7 +65,7 @@ class /*LIBPBD_API*/ FunctorCommand : public Command
 		(object.*method) (after);
 	}
 
-	void undo() { 
+	void undo() {
 		(object.*method) (before);
 	}
 
@@ -108,7 +108,7 @@ class /*LIBPBD_API*/ FunctorCommand : public Command
 	static FunctorMap functor_map;
 };
 
-// static initialization of functor_map... 
+// static initialization of functor_map...
 template <class obj_type, class arg_type>
 typename FunctorCommand<obj_type, arg_type>::FunctorMap
 FunctorCommand<obj_type, arg_type>::functor_map;

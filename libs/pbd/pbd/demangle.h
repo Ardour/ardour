@@ -32,7 +32,7 @@
 
 namespace PBD
 {
-	template<typename T> /*LIBPBD_API*/ 
+	template<typename T> /*LIBPBD_API*/
 	std::string demangled_name (T const & obj)
 	{
 #ifdef __GNUC__
@@ -49,7 +49,7 @@ namespace PBD
                    See http://msdn.microsoft.com/en-us/library/ms681400%28VS.85%29.aspx
                    See also: http://msdn.microsoft.com/en-us/library/ms680344%28VS.85%29.aspx
                 */
-                
+
 		return typeid(obj).name();
 	}
 } // namespace

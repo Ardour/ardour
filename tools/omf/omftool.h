@@ -84,7 +84,7 @@ private:
 	uint32_t e32(uint32_t x)
 	{
 		if (bigEndian)
-			return (x>>24) | 
+			return (x>>24) |
 				((x<<8) & 0x00FF0000) |
 				((x>>8) & 0x0000FF00) |
 				(x<<24);
@@ -95,7 +95,7 @@ private:
 	uint64_t e64(uint64_t x)
 	{
 		if (bigEndian)
-			return (x>>56) | 
+			return (x>>56) |
 				((x<<40) & 0x00FF000000000000) |
 				((x<<24) & 0x0000FF0000000000) |
 				((x<<8)  & 0x000000FF00000000) |

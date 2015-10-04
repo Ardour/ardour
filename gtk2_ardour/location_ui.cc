@@ -345,7 +345,7 @@ LocationEditRow::set_location (Location *loc)
         location->StartChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::start_changed, this), gui_context());
         location->EndChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::end_changed, this), gui_context());
         location->Changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::location_changed, this), gui_context());
-        location->FlagsChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::flags_changed, this), gui_context()); 
+        location->FlagsChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::flags_changed, this), gui_context());
         location->LockChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::lock_changed, this), gui_context());
         location->PositionLockStyleChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::position_lock_style_changed, this), gui_context());
 }
@@ -1132,7 +1132,7 @@ LocationUI::clock_mode_from_session_instant_xml () const
 	if (!p) {
 		return ARDOUR_UI::instance()->secondary_clock->mode();
 	}
-	      
+	
 	return (AudioClock::Mode) string_2_enum (p->value (), AudioClock::Mode);
 }
 

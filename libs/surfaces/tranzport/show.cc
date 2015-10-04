@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  *   */
 
 #include <iostream>
@@ -70,7 +70,7 @@ log_meter (float db)
 		def = (db + 20.0f) * 2.5f + 50.0f;
 	}
 
-	/* 115 is the deflection %age that would be 
+	/* 115 is the deflection %age that would be
 	   when db=6.0. this is an arbitrary
 	   endpoint for our scaling.
 	*/
@@ -79,43 +79,43 @@ log_meter (float db)
 }
 
 #define TRANZ_U  0x1 /* upper */
-#define TRANZ_BL 0x2 /* lower left */ 
+#define TRANZ_BL 0x2 /* lower left */
 #define TRANZ_Q2 0x3 /* 2 quadrant block */
-#define TRANZ_ULB 0x4 /* Upper + lower left */ 
-#define TRANZ_L 0x5  /* lower  */ 
-#define TRANZ_UBL 0x6 /* upper left + bottom all */ 
-#define TRANZ_Q4 0x7 /* 4 quadrant block */ 
+#define TRANZ_ULB 0x4 /* Upper + lower left */
+#define TRANZ_L 0x5  /* lower  */
+#define TRANZ_UBL 0x6 /* upper left + bottom all */
+#define TRANZ_Q4 0x7 /* 4 quadrant block */
 #define TRANZ_UL 0x08 /* upper left */
 
 // Shift Space - switches your "view"
 // Currently defined views are:
 // BigMeter
-// 
+//
 // Shift Record - SAVE SNAPSHOT
 // Somewhere I was rewriting this
 // Other meters
 // Inverted - show meters "inside out" For example 4 meters covering 2 cells each, and the
-// 
+//
 // each 4 character cell could be an 8 bar meter = 10 meters!
 // Dual Meter mode - master and current track
 // We have 16 rows of pixels so we COULD do a vertical meter
-// BEAT BLOCKS - For each beat, flash a 8 block (could use the center for vertical meters) 
+// BEAT BLOCKS - For each beat, flash a 8 block (could use the center for vertical meters)
 // Could have something generic that could handle up to /20 time
 // Odd times could flash the whole top bar for the first beat
 
 
-// Vertical Meter _ .colon - + ucolon A P R I H FULLBLACK 
+// Vertical Meter _ .colon - + ucolon A P R I H FULLBLACK
 // MV@$%&*()-
 
 // 3 char block  rotating beat `\'/
 // 1 char rotating beat {/\}
 // 4 char in block rotating beat {/\}
 //                               {\/)
- 
+
 void TranzportControlProtocol::show_mini_meter()
 {
 	// FIXME - show the current marker in passing
-	const int meter_buf_size = 41; 
+	const int meter_buf_size = 41;
 	static uint32_t last_meter_fill_l = 0;
 	static uint32_t last_meter_fill_r = 0;
 	uint32_t meter_size;
@@ -123,25 +123,25 @@ void TranzportControlProtocol::show_mini_meter()
 	float speed = fabsf(session->transport_speed());
 	char buf[meter_buf_size];
 
-	if (speed == 1.0)  { 
-		meter_size = 32; 
+	if (speed == 1.0)  {
+		meter_size = 32;
 	}
-  
-	if (speed == 0.0) { 
+
+	if (speed == 0.0) {
 		meter_size = 20;  // not actually reached
 	}
-  
-	if (speed > 0.0 && (speed < 1.0)) { 
+
+	if (speed > 0.0 && (speed < 1.0)) {
 		meter_size = 20; // may shrink more one day
 	}
 
-	if (speed > 1.0 && (speed < 2.0)) { 
+	if (speed > 1.0 && (speed < 2.0)) {
 		meter_size = 20;
 	}
-  
+
 	if (speed >= 2.0) {
-		meter_size = 24; 
-	} 
+		meter_size = 24;
+	}
 
 
 	// you only seem to get a route_table[0] == 0 on moving forward - bug in next_track?
@@ -180,19 +180,19 @@ void TranzportControlProtocol::show_mini_meter()
 		light_on (LightTrackrec);
 	}
 	
-	const uint8_t char_map[16] = { ' ', TRANZ_UL, 
+	const uint8_t char_map[16] = { ' ', TRANZ_UL,
 				       TRANZ_U, TRANZ_U,
-				       TRANZ_BL, TRANZ_Q2, 
+				       TRANZ_BL, TRANZ_Q2,
 				       TRANZ_Q2, TRANZ_ULB,
-				       TRANZ_L, TRANZ_UBL, 
+				       TRANZ_L, TRANZ_UBL,
 				       ' ',' ',
 				       TRANZ_L, TRANZ_UBL,
 				       TRANZ_Q4,TRANZ_Q4
-	};  
+	};
 	unsigned int val,j,i;
 
 	for(j = 1, i = 0; i < meter_size/2; i++, j+=2) {
-		val = (fill_left >= j) | ((fill_left >= j+1) << 1) | 
+		val = (fill_left >= j) | ((fill_left >= j+1) << 1) |
 			((fill_right >=j) << 2) | ((fill_right >= j+1) << 3);
 		buf[i] = char_map[val];
 	}
@@ -207,7 +207,7 @@ void TranzportControlProtocol::show_mini_meter()
 		
 	//		char peak[2]; peak[0] = ' '; peak[1] = '\0';
 	//		if(fraction_l == 1.0 || fraction_r == 1.0) peak[0] = 'P';
-	//		print (1,8,peak); // Put a peak meter - P in if we peaked. 
+	//		print (1,8,peak); // Put a peak meter - P in if we peaked.
 		
 }
 
@@ -218,7 +218,7 @@ TranzportControlProtocol::show_meter ()
 	if (route_table[0] == 0) {
 		// Principle of least surprise
 		print (0, 0, "No audio to meter!!!");
-		print (1, 0, "Select another track"); 
+		print (1, 0, "Select another track");
 		return;
 	}
 
@@ -260,7 +260,7 @@ TranzportControlProtocol::show_meter ()
 
 	for (i = 0; i < fill; ++i) {
 		buf[i] = 0x07; /* tranzport special code for 4 quadrant LCD block */
-	} 
+	}
 	
 	/* add a possible half-step */
 
@@ -285,7 +285,7 @@ TranzportControlProtocol::show_meter ()
 
 void
 TranzportControlProtocol::show_bbt (framepos_t where)
-{ 
+{
 	if (where != last_where) {
 		char buf[16];
 		Timecode::BBT_Time bbt;
@@ -303,33 +303,33 @@ TranzportControlProtocol::show_bbt (framepos_t where)
 
 		float speed = fabsf(session->transport_speed());
 
-		if (speed == 1.0)  { 
+		if (speed == 1.0)  {
 			sprintf (buf, "%03" PRIu32 "%1" PRIu32, bbt.bars,bbt.beats); // switch to hex one day
-			print (1, 16, buf); 
+			print (1, 16, buf);
 		}
 
-		if (speed == 0.0) { 
+		if (speed == 0.0) {
 			sprintf (buf, "%03" PRIu32 "|%1" PRIu32 "|%04" PRIu32, bbt.bars,bbt.beats,bbt.ticks);
-			print (1, 10, buf); 
+			print (1, 10, buf);
 		}
 
-		if (speed > 0.0 && (speed < 1.0)) { 
+		if (speed > 0.0 && (speed < 1.0)) {
 			sprintf (buf, "%03" PRIu32 "|%1" PRIu32 "|%04" PRIu32, bbt.bars,bbt.beats,bbt.ticks);
-			print (1, 10, buf); 
+			print (1, 10, buf);
 		}
 
-		if (speed > 1.0 && (speed < 2.0)) { 
+		if (speed > 1.0 && (speed < 2.0)) {
 			sprintf (buf, "%03" PRIu32 "|%1" PRIu32 "|%04" PRIu32, bbt.bars,bbt.beats,bbt.ticks);
-			print (1, 10, buf); 
+			print (1, 10, buf);
 		}
 
 		if (speed >= 2.0) {
-			sprintf (buf, "%03" PRIu32 "|%1" PRIu32 "|%02" PRIu32, bbt.bars,bbt.beats,bbt.ticks); 
-			print (1, 12, buf); 
-		} 
+			sprintf (buf, "%03" PRIu32 "|%1" PRIu32 "|%02" PRIu32, bbt.bars,bbt.beats,bbt.ticks);
+			print (1, 12, buf);
+		}
 
 		TempoMap::Metric m (session->tempo_map().metric_at (where));
-    
+
 		// the lights stop working well at above 100 bpm so don't bother
 		if(m.tempo().beats_per_minute() < 101.0 && (speed > 0.0)) {
 
@@ -375,7 +375,7 @@ TranzportControlProtocol::show_timecode (framepos_t where)
 		print (1, 15, buf);
 
 		sprintf (buf, "%02" PRIu32, timecode.frames);
-		print_noretry (1, 18, buf); 
+		print_noretry (1, 18, buf);
 
 		last_where = where;
 	}
@@ -388,12 +388,12 @@ TranzportControlProtocol::show_track_gain ()
 	if (route_table[0]) {
 		gain_t g = route_get_gain (0);
 		if ((g != last_track_gain) || lcd_isdamaged(0,12,8)) {
-			char buf[16]; 
+			char buf[16];
 			snprintf (buf, sizeof (buf), "%6.1fdB", coefficient_to_dB (route_get_effective_gain (0)));
-			print (0, 12, buf); 
+			print (0, 12, buf);
 			last_track_gain = g;
 		}
 	} else {
-		print (0, 9, "        "); 
+		print (0, 9, "        ");
 	}
 }

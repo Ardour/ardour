@@ -41,18 +41,18 @@ public:
 
     Position() : speed(0.0f), frame(0), midi_beats(0) { }
     ~Position() { }
-    
+
     /** Sync timing information taken from the given Session
-     * @return True if timings differed 
+     * @return True if timings differed
      */
 
     bool sync (Session* s) {
 
 	    bool changed = false;
-	    
+	
 	    double     sp = s->transport_speed();
 	    framecnt_t fr = s->transport_frame();
-	    
+	
 	    if (speed != sp) {
 		    speed = sp;
 		    changed = true;
@@ -75,7 +75,7 @@ public:
 	    double mb;
 
 	    /** Midi Beats in terms of Song Position Pointer is equivalent to total
-	     * sixteenth notes at 'time' 
+	     * sixteenth notes at 'time'
 	     */
 
 	    mb  = (((bars - 1) * divisions) + beats - 1);
@@ -95,7 +95,7 @@ public:
     framecnt_t  frame;
     double      midi_beats;
     double      midi_clocks;
-    
+
     void print (std::ostream& s) {
 	    s << "frames: " << frame << " midi beats: " << midi_beats << " speed: " << speed;
     }

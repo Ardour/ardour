@@ -188,11 +188,11 @@ ThemeManager::ThemeManager()
 	transients_follow_front.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_transients_follow_front_toggled));
 	icon_set_dropdown.signal_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_icon_set_changed));
 
-	Gtkmm2ext::UI::instance()->set_tip (all_dialogs, 
+	Gtkmm2ext::UI::instance()->set_tip (all_dialogs,
 					    string_compose (_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\n"
 							      "This may help with some window managers. This requires a restart of %1 to take effect"),
 							    PROGRAM_NAME));
-	Gtkmm2ext::UI::instance()->set_tip (transients_follow_front, 
+	Gtkmm2ext::UI::instance()->set_tip (transients_follow_front,
 					    string_compose (_("Make transient windows follow the front window when toggling between the editor and mixer.\n"
 							      "This requires a restart of %1 to take effect"), PROGRAM_NAME));
 
@@ -367,7 +367,7 @@ ThemeManager::set_ui_to_state()
 	}
 
 	/* there is no need to block signal handlers, here,
-	 * all elements check if the value has changed and ignore NOOPs 
+	 * all elements check if the value has changed and ignore NOOPs
 	 */
 	all_dialogs.set_active (UIConfiguration::instance().get_all_floating_windows_are_dialogs());
 	transients_follow_front.set_active (UIConfiguration::instance().get_transients_follow_front());
@@ -665,7 +665,7 @@ ThemeManager::setup_aliases ()
 		if ((colon = i->first.find (':')) != string::npos) {
 
 			/* this is supposed to be a child node, so find the
-			 * parent 
+			 * parent
 			 */
 
 			string parent = i->first.substr (0, colon);

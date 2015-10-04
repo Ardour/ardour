@@ -5,12 +5,12 @@
   under the terms of the GNU Lesser General Public License as published by
   the Free Software Foundation; either version 2 of the License, or (at your
   option) any later version.
-  
+
   This program is distributed in the hope that it will be useful, but WITHOUT
   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
   License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public License
   along with this program; if not, write to the Free Software Foundation,
   Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -46,7 +46,7 @@ increment (Time& timecode, uint32_t subframes_per_frame)
 			timecode.negative = false;
 			return SECONDS;
 		}
-    
+
 		timecode.negative = false;
 		wrap = decrement (timecode, subframes_per_frame);
 		if (!Timecode_IS_ZERO (timecode)) {
@@ -94,7 +94,7 @@ increment (Time& timecode, uint32_t subframes_per_frame)
 		}
 		break;
 	}
-  
+
 	if (wrap == SECONDS) {
 		if (timecode.seconds == 59) {
 			timecode.seconds = 0;
@@ -112,7 +112,7 @@ increment (Time& timecode, uint32_t subframes_per_frame)
 	} else {
 		timecode.frames++;
 	}
-  
+
 	return wrap;
 }
 
@@ -124,7 +124,7 @@ Wrap
 decrement (Time& timecode, uint32_t subframes_per_frame)
 {
 	Wrap wrap = NONE;
-  
+
 	if (timecode.negative || Timecode_IS_ZERO (timecode)) {
 		timecode.negative = false;
 		wrap = increment (timecode, subframes_per_frame);
@@ -136,7 +136,7 @@ decrement (Time& timecode, uint32_t subframes_per_frame)
 		timecode.negative = true;
 		return SECONDS;
 	}
-  
+
 	switch ((int)ceil (timecode.rate)) {
 	case 24:
 		if (timecode.frames == 0) {
@@ -176,7 +176,7 @@ decrement (Time& timecode, uint32_t subframes_per_frame)
 		}
 		break;
 	}
-  
+
 	if (wrap == SECONDS) {
 		if (timecode.seconds == 0) {
 			timecode.seconds = 59;
@@ -195,11 +195,11 @@ decrement (Time& timecode, uint32_t subframes_per_frame)
 	} else {
 		timecode.frames--;
 	}
-  
+
 	if (Timecode_IS_ZERO (timecode)) {
 		timecode.negative = false;
 	}
-  
+
 	return wrap;
 }
 
@@ -220,7 +220,7 @@ Wrap
 increment_subframes (Time& timecode, uint32_t subframes_per_frame)
 {
 	Wrap wrap = NONE;
-  
+
 	if (timecode.negative) {
 		timecode.negative = false;
 		wrap = decrement_subframes (timecode, subframes_per_frame);
@@ -229,7 +229,7 @@ increment_subframes (Time& timecode, uint32_t subframes_per_frame)
 		}
 		return wrap;
 	}
-  
+
 	timecode.subframes++;
 	if (timecode.subframes >= subframes_per_frame) {
 		timecode.subframes = 0;
@@ -245,14 +245,14 @@ Wrap
 decrement_subframes (Time& timecode, uint32_t subframes_per_frame)
 {
 	Wrap wrap = NONE;
-  
+
 	if (timecode.negative) {
 		timecode.negative = false;
 		wrap = increment_subframes (timecode, subframes_per_frame);
 		timecode.negative = true;
 		return wrap;
 	}
-  
+
 	if (timecode.subframes <= 0) {
 		timecode.subframes = 0;
 		if (Timecode_IS_ZERO (timecode)) {
@@ -279,10 +279,10 @@ Wrap
 increment_seconds (Time& timecode, uint32_t subframes_per_frame)
 {
 	Wrap wrap = NONE;
-  
+
 	// Clear subframes
 	frames_floor (timecode);
-  
+
 	if (timecode.negative) {
 		// Wrap second if on second boundary
 		wrap = increment (timecode, subframes_per_frame);
@@ -307,11 +307,11 @@ increment_seconds (Time& timecode, uint32_t subframes_per_frame)
 			timecode.frames = 59;
 			break;
 		}
-    
+
 		// Increment by one frame
 		wrap = increment (timecode, subframes_per_frame);
 	}
-  
+
 	return wrap;
 }
 
@@ -323,7 +323,7 @@ seconds_floor (Time& timecode)
 {
 	// Clear subframes
 	frames_floor (timecode);
-  
+
 	// Go to lowest possible frame in this second
 	switch ((int)ceil (timecode.rate)) {
 	case 24:
@@ -341,7 +341,7 @@ seconds_floor (Time& timecode)
 		}
 		break;
 	}
-  
+
 	if (Timecode_IS_ZERO (timecode)) {
 		timecode.negative = false;
 	}
@@ -353,10 +353,10 @@ Wrap
 increment_minutes (Time& timecode, uint32_t subframes_per_frame)
 {
 	Wrap wrap = NONE;
-  
+
 	// Clear subframes
 	frames_floor (timecode);
-  
+
 	if (timecode.negative) {
 		// Wrap if on minute boundary
 		wrap = increment_seconds (timecode, subframes_per_frame);
@@ -368,7 +368,7 @@ increment_minutes (Time& timecode, uint32_t subframes_per_frame)
 		// Wrap minute by incrementing second
 		wrap = increment_seconds (timecode, subframes_per_frame);
 	}
-  
+
 	return wrap;
 }
 
@@ -393,10 +393,10 @@ Wrap
 increment_hours (Time& timecode, uint32_t subframes_per_frame)
 {
 	Wrap wrap = NONE;
-  
+
 	// Clear subframes
 	frames_floor (timecode);
-  
+
 	if (timecode.negative) {
 		// Wrap if on hour boundary
 		wrap = increment_minutes (timecode, subframes_per_frame);
@@ -406,7 +406,7 @@ increment_hours (Time& timecode, uint32_t subframes_per_frame)
 		timecode.minutes = 59;
 		wrap = increment_minutes (timecode, subframes_per_frame);
 	}
-  
+
 	return wrap;
 }
 
@@ -419,7 +419,7 @@ hours_floor(Time& timecode)
 	timecode.seconds   = 0;
 	timecode.frames    = 0;
 	timecode.subframes = 0;
-  
+
 	if (Timecode_IS_ZERO (timecode)) {
 		timecode.negative = false;
 	}
@@ -846,8 +846,8 @@ sample_to_timecode (
 
 } // namespace Timecode
 
-std::ostream& 
-operator<<(std::ostream& ostr, const Timecode::Time& t) 
+std::ostream&
+operator<<(std::ostream& ostr, const Timecode::Time& t)
 {
 	return t.print (ostr);
 }

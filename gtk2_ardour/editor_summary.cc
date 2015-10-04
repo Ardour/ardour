@@ -241,7 +241,7 @@ EditorSummary::render (cairo_t* cr, cairo_rectangle_t*)
 
 	int32_t width = _view_rectangle_x.second - _view_rectangle_x.first;
 	int32_t height = _view_rectangle_y.second - _view_rectangle_y.first;
-	cairo_rectangle (cr, _view_rectangle_x.first, _view_rectangle_y.first, width, height); 
+	cairo_rectangle (cr, _view_rectangle_x.first, _view_rectangle_y.first, width, height);
 	cairo_set_source_rgba (cr, 1, 1, 1, 0.1);
 	cairo_fill_preserve (cr);
 	cairo_set_line_width (cr, 1);
@@ -352,7 +352,7 @@ EditorSummary::centre_on_click (GdkEventButton* ev)
 	set_editor (ex, ey);
 }
 
-bool 
+bool
 EditorSummary::on_enter_notify_event (GdkEventCrossing*)
 {
 	grab_focus ();
@@ -360,7 +360,7 @@ EditorSummary::on_enter_notify_event (GdkEventCrossing*)
 	return false;
 }
 
-bool 
+bool
 EditorSummary::on_leave_notify_event (GdkEventCrossing*)
 {
 	/* there are no inferior/child windows, so any leave event means that
@@ -489,7 +489,7 @@ EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) con
 		/* We are dragging, and configured not to update the editor window during drags,
 		   so just return where the editor will be when the drag finishes.
 		*/
-		   
+		
 		*x = _pending_editor_x;
 		*y = _pending_editor_y;
 

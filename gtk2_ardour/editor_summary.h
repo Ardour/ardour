@@ -61,7 +61,7 @@ private:
 		TO_LEFT_OR_RIGHT,
 		OTHERWISE_OUTSIDE
 	};
-      
+
 	void on_size_request (Gtk::Requisition *);
 	bool on_button_press_event (GdkEventButton *);
 	bool on_button_release_event (GdkEventButton *);
@@ -69,8 +69,8 @@ private:
 	bool on_scroll_event (GdkEventScroll *);
         bool on_key_press_event (GdkEventKey*);
         bool on_key_release_event (GdkEventKey*);
-        bool on_enter_notify_event (GdkEventCrossing*); 
-        bool on_leave_notify_event (GdkEventCrossing*); 
+        bool on_enter_notify_event (GdkEventCrossing*);
+        bool on_leave_notify_event (GdkEventCrossing*);
 
 	void centre_on_click (GdkEventButton *);
 	void render (cairo_t *, cairo_rectangle_t*);

@@ -1,16 +1,16 @@
 /*
     Copyright (C) 2006,2007 John Anderson
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -87,7 +87,7 @@ public:
 	~MackieControlUIRequest () {}
 };
 
-class MackieControlProtocol 
+class MackieControlProtocol
 	: public ARDOUR::ControlProtocol
 	, public AbstractUI<MackieControlUIRequest>
 {
@@ -194,7 +194,7 @@ class MackieControlProtocol
 	
 	/// this is called to generate the midi to send in response to a button press.
 	void update_led(Mackie::Surface&, Mackie::Button & button, Mackie::LedState);
-  
+
 	void update_global_button (int id, Mackie::LedState);
 	void update_global_led (int id, Mackie::LedState);
 
@@ -225,7 +225,7 @@ class MackieControlProtocol
   protected:
 	// shut down the surface
 	void close();
-  
+
 	// This sets up the notifications and sets the
 	// controls to the correct values
 	void update_surfaces();
@@ -243,12 +243,12 @@ class MackieControlProtocol
 	*/
 	typedef std::vector<boost::shared_ptr<ARDOUR::Route> > Sorted;
 	Sorted get_sorted_routes();
-  
+
 	// bank switching
 	void switch_banks (uint32_t first_remote_id, bool force = false);
 	void prev_track ();
 	void next_track ();
-  
+
 	// also called from poll_automation to update timecode display
 	void update_timecode_display();
 
@@ -267,9 +267,9 @@ class MackieControlProtocol
 	struct ButtonHandlers {
 	    Mackie::LedState (MackieControlProtocol::*press) (Mackie::Button&);
 	    Mackie::LedState (MackieControlProtocol::*release) (Mackie::Button&);
-	    
+	
 	    ButtonHandlers (Mackie::LedState (MackieControlProtocol::*p) (Mackie::Button&),
-			    Mackie::LedState (MackieControlProtocol::*r) (Mackie::Button&)) 
+			    Mackie::LedState (MackieControlProtocol::*r) (Mackie::Button&))
 	    : press (p)
 	    , release (r) {}
 	};
@@ -343,7 +343,7 @@ class MackieControlProtocol
 	typedef std::set<uint32_t> DownButtonList;
 	typedef std::map<ARDOUR::AutomationType,DownButtonList> DownButtonMap;
 	DownButtonMap  _down_buttons;
-	DownButtonList _down_select_buttons; 
+	DownButtonList _down_select_buttons;
 
 	void pull_route_range (DownButtonList&, ARDOUR::RouteList&);
 
@@ -488,6 +488,6 @@ class MackieControlProtocol
 	Mackie::LedState view_release (Mackie::Button&);
 };
 
-} // namespace 
+} // namespace
 
 #endif // ardour_mackie_control_protocol_h

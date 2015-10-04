@@ -932,9 +932,9 @@ Track::adjust_capture_buffering ()
 
 #ifdef USE_TRACKS_CODE_FEATURES
 
-/* This is the Tracks version of Track::monitoring_state(). 
+/* This is the Tracks version of Track::monitoring_state().
  *
- * Ardour developers: try to flag or fix issues if parts of the libardour API 
+ * Ardour developers: try to flag or fix issues if parts of the libardour API
  * change in ways that invalidate this
  */
 
@@ -984,7 +984,7 @@ Track::monitoring_state () const
 
 #else
 
-/* This is the Ardour/Mixbus version of Track::monitoring_state(). 
+/* This is the Ardour/Mixbus version of Track::monitoring_state().
  *
  * Tracks developers: do NOT modify this method under any circumstances.
  */
@@ -1111,7 +1111,7 @@ Track::check_initial_delay (framecnt_t nframes, framepos_t& transport_frame)
 
 	}
 
-	return nframes; 
+	return nframes;
 }
 
 void

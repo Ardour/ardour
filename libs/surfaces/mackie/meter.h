@@ -41,7 +41,7 @@ public:
 	MidiByteArray zero();
 
 	static Control* factory (Surface&, int id, const char*, Group&);
-  
+
 	void notify_metering_state_changed(Surface& surface, bool transport_is_rolling, bool metering_active);
 
   private:

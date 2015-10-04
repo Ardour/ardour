@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2008-2012 Paul Davis 
+  Copyright (C) 2008-2012 Paul Davis
   Author: Sakari Bergen
 
   This program is free software; you can redistribute it and/or modify
@@ -116,13 +116,13 @@ void
 ExportGraphBuilder::cleanup (bool remove_out_files/*=false*/)
 {
 	ChannelConfigList::iterator iter = channel_configs.begin();
-    
+
 	while (iter != channel_configs.end() ) {
 		iter->remove_children(remove_out_files);
 		iter = channel_configs.erase(iter);
 	}
 }
-    
+
 void
 ExportGraphBuilder::set_current_timespan (boost::shared_ptr<ExportTimespan> span)
 {
@@ -186,7 +186,7 @@ ExportGraphBuilder::add_split_config (FileSpec const & config)
 	// No duplicate channel config found, create new one
 	channel_configs.push_back (new ChannelConfig (*this, config, channels));
 }
- 
+
 /* Encoder */
 
 template <>
@@ -221,20 +221,20 @@ ExportGraphBuilder::Encoder::add_child (FileSpec const & new_config)
 {
 	filenames.push_back (new_config.filename);
 }
-    
+
 void
 ExportGraphBuilder::Encoder::destroy_writer (bool delete_out_file)
 {
 	if (delete_out_file ) {
-        
+
 		if (float_writer) {
 			float_writer->close ();
 		}
-    
+
 		if (int_writer) {
 			int_writer->close ();
 		}
-        
+
 		if (short_writer) {
 			short_writer->close ();
 		}
@@ -243,7 +243,7 @@ ExportGraphBuilder::Encoder::destroy_writer (bool delete_out_file)
 			std::cout << "Encoder::destroy_writer () : Error removing file: " << strerror(errno) << std::endl;
 		}
 	}
-    
+
 	float_writer.reset ();
 	int_writer.reset ();
 	short_writer.reset ();
@@ -348,16 +348,16 @@ void
 ExportGraphBuilder::SFC::remove_children (bool remove_out_files)
 {
 	boost::ptr_list<Encoder>::iterator iter = children.begin ();
-    
+
 	while (iter != children.end() ) {
-        
+
 		if (remove_out_files) {
 			iter->destroy_writer(remove_out_files);
 		}
 		iter = children.erase (iter);
 	}
 }
-    
+
 bool
 ExportGraphBuilder::SFC::operator== (FileSpec const & other_config) const
 {
@@ -421,13 +421,13 @@ void
 ExportGraphBuilder::Normalizer::remove_children (bool remove_out_files)
 {
 	boost::ptr_list<SFC>::iterator iter = children.begin ();
-    
+
 	while (iter != children.end() ) {
 		iter->remove_children (remove_out_files);
 		iter = children.erase (iter);
 	}
 }
-    
+
 bool
 ExportGraphBuilder::Normalizer::operator== (FileSpec const & other_config) const
 {
@@ -487,20 +487,20 @@ ExportGraphBuilder::SRC::add_child (FileSpec const & new_config)
 		add_child_to_list (new_config, children);
 	}
 }
-    
+
 void
 ExportGraphBuilder::SRC::remove_children (bool remove_out_files)
 {
 	boost::ptr_list<SFC>::iterator sfc_iter = children.begin();
-    
+
 	while (sfc_iter != children.end() ) {
 		converter->remove_output (sfc_iter->sink() );
 		sfc_iter->remove_children (remove_out_files);
 		sfc_iter = children.erase (sfc_iter);
 	}
-    
+
 	boost::ptr_list<Normalizer>::iterator norm_iter = normalized_children.begin();
-    
+
 	while (norm_iter != normalized_children.end() ) {
 		converter->remove_output (norm_iter->sink() );
 		norm_iter->remove_children (remove_out_files);
@@ -570,12 +570,12 @@ ExportGraphBuilder::SilenceHandler::add_child (FileSpec const & new_config)
 	children.push_back (new SRC (parent, new_config, max_frames_in));
 	silence_trimmer->add_output (children.back().sink());
 }
-    
+
 void
 ExportGraphBuilder::SilenceHandler::remove_children (bool remove_out_files)
 {
 	boost::ptr_list<SRC>::iterator iter = children.begin();
-    
+
 	while (iter != children.end() ) {
 		silence_trimmer->remove_output (iter->sink() );
 		iter->remove_children (remove_out_files);
@@ -647,14 +647,14 @@ ExportGraphBuilder::ChannelConfig::add_child (FileSpec const & new_config)
 	children.push_back (new SilenceHandler (parent, new_config, max_frames_out));
 	chunker->add_output (children.back().sink ());
 }
-    
+
 void
 ExportGraphBuilder::ChannelConfig::remove_children (bool remove_out_files)
 {
 	boost::ptr_list<SilenceHandler>::iterator iter = children.begin();
-    
+
 	while(iter != children.end() ) {
-        
+
 		chunker->remove_output (iter->sink ());
 		iter->remove_children (remove_out_files);
 		iter = children.erase(iter);

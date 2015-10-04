@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it
     and/or modify it under the terms of the GNU Lesser
@@ -57,7 +57,7 @@ BasicUI::register_thread (std::string name)
 }
 
 void
-BasicUI::access_action ( std::string action_path ) 
+BasicUI::access_action ( std::string action_path )
 {
 	int split_at = action_path.find( "/" );
 	std::string group = action_path.substr( 0, split_at );
@@ -67,7 +67,7 @@ BasicUI::access_action ( std::string action_path )
 }
 
 void
-BasicUI::loop_toggle () 
+BasicUI::loop_toggle ()
 {
 	if (session->get_play_loop()) {
 		session->request_play_loop (false);
@@ -105,7 +105,7 @@ BasicUI::goto_end ()
 	session->goto_end ();
 }
 
-void       
+void
 BasicUI::add_marker (const std::string& markername)
 {
 	framepos_t where = session->audible_frame();
@@ -143,7 +143,7 @@ BasicUI::transport_play (bool from_last_start)
 
 	if (session->get_play_loop()) {
 		session->request_play_loop (false);
-	} 
+	}
 
 	if (session->get_play_range ()) {
 		session->request_play_range (0);
@@ -304,13 +304,13 @@ BasicUI::timecode_time (framepos_t where, Timecode::Time& timecode)
 	session->timecode_time (where, *((Timecode::Time *) &timecode));
 }
 
-void 
+void
 BasicUI::timecode_to_sample (Timecode::Time& timecode, framepos_t & sample, bool use_offset, bool use_subframes) const
 {
 	session->timecode_to_sample (*((Timecode::Time*)&timecode), sample, use_offset, use_subframes);
 }
 
-void 
+void
 BasicUI::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const
 {
 	session->sample_to_timecode (sample, *((Timecode::Time*)&timecode), use_offset, use_subframes);

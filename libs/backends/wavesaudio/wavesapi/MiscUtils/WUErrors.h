@@ -44,11 +44,11 @@ const WTErr eNotJustANumber					= -13; //!< expected a number and found one but 
 const WTErr eNegativeNumber					= -14; //!< expected a positive number and found a negative
 const WTErr eTimeOut                        = -15; //!< something timed out
 const WTErr eCoreAudioFailed				= -16; //!< Error in a core audio call
-const WTErr eSomeThingInitailzedTwice		= -17; 
-const WTErr eGenerateHelpInfo				= -18; 
-const WTErr eOutOfRangeNumber				= -19; 
-const WTErr eMacOnlyCode    				= -20; 
-const WTErr eWinOnlyCode				    = -21; 
+const WTErr eSomeThingInitailzedTwice		= -17;
+const WTErr eGenerateHelpInfo				= -18;
+const WTErr eOutOfRangeNumber				= -19;
+const WTErr eMacOnlyCode    				= -20;
+const WTErr eWinOnlyCode				    = -21;
 const WTErr eAppLaunchFailed     		    = -22; //!< failed to launch an application
 const WTErr eAppTerminateFailed    		    = -23; //!< failed to terminate an application
 const WTErr eAppReturnedError               = -24; //!< Non zero exit code from application
@@ -57,7 +57,7 @@ const WTErr eNotEmpty		                = -26; //!< Something was expected to be 
 const WTErr eAsioFailed						= -27;
 
 // File Manager errors
-const WTErr eFMNoSuchVolume					= -1001; 
+const WTErr eFMNoSuchVolume					= -1001;
 const WTErr eFMFileNotFound					= -1002;
 const WTErr eFMFileAllreadyExists			= -1003;
 const WTErr eFMAllreadyOpenWithWritePerm	= -1004;
@@ -71,8 +71,8 @@ const WTErr eFMReadFailed					= -1011;
 const WTErr eFMIllegalPathRef				= -1012;
 const WTErr eFMFileNotOpened				= -1013;
 const WTErr eFMFileSizeTooBig				= -1014;
-const WTErr eFMNoSuchDomain					= -1015; 
-const WTErr eFMNoSuchSystemFolder			= -1016; 
+const WTErr eFMNoSuchDomain					= -1015;
+const WTErr eFMNoSuchSystemFolder			= -1016;
 const WTErr eFMWrongParameters				= -1017;
 const WTErr eFMIsNotAFolder					= -1018;
 const WTErr eFMIsAFolder					= -1019;
@@ -113,7 +113,7 @@ const WTErr eNotAValidApplication           = -2012;
 
 // Resource Manager errors
 const WTErr eRMResNotFound   	  	= -3000;
-const WTErr eRMResExists     		= -3001; //!< a resource exist even though it's not expected to 
+const WTErr eRMResExists     		= -3001; //!< a resource exist even though it's not expected to
 const WTErr eRMContainerNotFound   	= -3002; //!< The container was not found in the list of containers
 const WTErr eRMResRefNotFound    	= -3003; //!< The resRef was not found in container's resource list
 const WTErr eRMInvalidResRef			= -3004;
@@ -155,8 +155,8 @@ const WTErr eMemObjNotInitialized   = -4004;
 const WTErr eMemBuffTooShort        = -4005; //!< the buffer in question did not have enough space for the operation
 const WTErr eInstanciationFailed    = -4006;
 const WTErr eMemAddressSpaceError   = -4007; //!< memory falls outside the legal address space
-const WTErr eMemBadPointer          = -4008; 
-const WTErr eMemOutOfMemory         = -4009; 
+const WTErr eMemBadPointer          = -4008;
+const WTErr eMemOutOfMemory         = -4009;
 
 // XML Errors
 const WTErr eXMLParserFailed        = -6001;
@@ -168,24 +168,24 @@ const WTErr eXMLElementIncomplete  = -6006;		//!< XML parser did not complete bu
 const WTErr eXMLAttribMissing      = -6007;
 
 // Preset errors
-const WTErr ePresetFileProblem          	= -7860; 
-const WTErr eInvalidFileFormatProblem   	= -7861; 
-const WTErr ePresetLockedProblem        	= -7862; 
-const WTErr ePresetInfoNotFound         	= -7863; 
-const WTErr eDuplicatePluginSpecificTag     = -7959; 
-const WTErr ePluginSpecifcNotExisting       = -7960; 
-const WTErr eBuffSizeToSmall                = -7961; 
-const WTErr eCreatingPopupWhereAnItemExists = -7962; 
-const WTErr eDeletePluginSpecifcFailed      = -7963; 
-const WTErr eFactoryPresetNumOutOfRange     = -7964; 
-const WTErr eNoFactoryPresets               = -7965; 
-const WTErr eLoadPresetToPlugin_vec_empty   = -7966; 
-const WTErr eFactoryPresetNotFound          = -7967; 
-const WTErr eCantCreateUserPrefFile         = -7968; 
-const WTErr eDataFormatNotSupported         = -7969; 
-const WTErr eCantLoadProcessFunction        = -7970; 
-const WTErr eIllegalChunkIndex				= -7971; 
-const WTErr eIllegalChunkID					= -7972; 
+const WTErr ePresetFileProblem          	= -7860;
+const WTErr eInvalidFileFormatProblem   	= -7861;
+const WTErr ePresetLockedProblem        	= -7862;
+const WTErr ePresetInfoNotFound         	= -7863;
+const WTErr eDuplicatePluginSpecificTag     = -7959;
+const WTErr ePluginSpecifcNotExisting       = -7960;
+const WTErr eBuffSizeToSmall                = -7961;
+const WTErr eCreatingPopupWhereAnItemExists = -7962;
+const WTErr eDeletePluginSpecifcFailed      = -7963;
+const WTErr eFactoryPresetNumOutOfRange     = -7964;
+const WTErr eNoFactoryPresets               = -7965;
+const WTErr eLoadPresetToPlugin_vec_empty   = -7966;
+const WTErr eFactoryPresetNotFound          = -7967;
+const WTErr eCantCreateUserPrefFile         = -7968;
+const WTErr eDataFormatNotSupported         = -7969;
+const WTErr eCantLoadProcessFunction        = -7970;
+const WTErr eIllegalChunkIndex				= -7971;
+const WTErr eIllegalChunkID					= -7972;
 const WTErr	eIllegalChunkVersion            = -7973;
 
 

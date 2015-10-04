@@ -177,7 +177,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	void initial_track_display ();
 	void show_track_list_menu ();
-      
+
 	void set_all_strips_visibility (bool yn);
 	void set_all_audio_midi_visibility (int, bool);
         void track_visibility_changed (std::string const & path);

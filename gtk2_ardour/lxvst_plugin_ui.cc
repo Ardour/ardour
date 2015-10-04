@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -133,7 +133,7 @@ LXVSTPluginUI::get_XID ()
 	pthread_mutex_lock (&(_vst->state()->lock));
 	
 	/* The Window may be scheduled for creation
-	   but not actually created by the gui_event_loop yet - 
+	   but not actually created by the gui_event_loop yet -
 	   spin here until it has been activated.  Possible
 	   deadlock if the window never gets activated but
 	   should not be called here if the window doesn't
@@ -148,7 +148,7 @@ LXVSTPluginUI::get_XID ()
 	
 	pthread_mutex_unlock (&(_vst->state()->lock));
 	
-	/* Finally it might be safe to return the ID - 
+	/* Finally it might be safe to return the ID -
 	   problems will arise if we return either a zero ID
 	   and GTK tries to socket it or if we return an ID
 	   which hasn't yet become real to the server
@@ -162,7 +162,7 @@ static Display *the_gtk_display;
 static error_handler_t vstfx_error_handler;
 static error_handler_t gtk_error_handler;
 
-static int 
+static int
 gtk_xerror_handler (Display*, XErrorEvent*)
 {
 	std::cerr << "** ERROR ** LXVSTPluginUI : Trapped an X Window System Error" << std::endl;

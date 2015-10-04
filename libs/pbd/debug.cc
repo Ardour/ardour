@@ -125,7 +125,7 @@ void
 PBD::list_debug_options ()
 {
 	cout << _("The following debug options are available. Separate multiple options with commas.\nNames are case-insensitive and can be abbreviated.") << endl << endl;
-	cout << '\t' << X_("all") << endl; 
+	cout << '\t' << X_("all") << endl;
 
 	vector<string> options;
 

@@ -98,7 +98,7 @@ public:
 		if (in_index < m_MaxFixedStringLength)
 			return m_begin[in_index];
 		else
-			return m_begin[m_MaxFixedStringLength]; // in_index was too big 
+			return m_begin[m_MaxFixedStringLength]; // in_index was too big
 	}
 
 	char& operator[](const pos_t in_index)
@@ -106,7 +106,7 @@ public:
 		if (in_index < m_MaxFixedStringLength)
 			return m_begin[in_index];
 		else
-			return m_begin[m_MaxFixedStringLength]; // in_index was too big 
+			return m_begin[m_MaxFixedStringLength]; // in_index was too big
 	}
 
 	inline size_t resize(const size_t in_newSize)
@@ -236,7 +236,7 @@ public:
 			*m_end++ = *curr_char++;
 
 #if kEnableDebug == 1
-		if (curr_char < in_chars_end)   // if there wasn't enough room for some appended chars  
+		if (curr_char < in_chars_end)   // if there wasn't enough room for some appended chars
 		{
 			m_begin[0] = '@';           // mark the string as overflowed
 		}
@@ -244,20 +244,20 @@ public:
 		*m_end = '\0';
 	}
 
-	// append from a char* in_count chars, (no \0 is required to terminate the input string) 
+	// append from a char* in_count chars, (no \0 is required to terminate the input string)
 	inline void append(const char* in_chars_begin, const size_t in_count)
 	{
 		append(in_chars_begin, in_chars_begin + in_count);
 	}
 
-	// assign from a char* in_count chars, (no \0 is required to terminate the input string) 
+	// assign from a char* in_count chars, (no \0 is required to terminate the input string)
 	inline void assign(const char* in_chars_begin, const size_t in_count)
 	{
 		clear();
 		append(in_chars_begin, in_chars_begin + in_count);
 	}
 
-	// assign from a char* , (a \0 is required to terminate the input string) 
+	// assign from a char* , (a \0 is required to terminate the input string)
 	inline void assign(const char* in_chars_ptr)
 	{
 		clear();
@@ -349,7 +349,7 @@ public:
 				*m_end++ = *pSource++;
 
 #if kEnableDebug == 1
-			if (*pSource != '\0')   // if there wasn't enough room for some appended chars  
+			if (*pSource != '\0')   // if there wasn't enough room for some appended chars
 			{
 				m_begin[0] = '@';  // mark the string as overflowed
 			}
@@ -379,7 +379,7 @@ public:
 	WCFixedStringBase& operator<<(const size_t in_uint) {
 		return operator<<(static_cast<unsigned long long>(in_uint));
 	}
-#endif   
+#endif
 //	WCFixedStringBase& operator<<(const unsigned char in_uint) {
 //		return operator<<(static_cast<const unsigned long long>(in_uint));
 //		}
@@ -392,13 +392,13 @@ public:
 	WCFixedStringBase& operator<<(const unsigned int in_uint) {
 		return operator<<(static_cast<uint64_t>(in_uint));
 	}
-#endif   
+#endif
 //		
 #if defined(PLATFORM_WINDOWS) || defined(__linux__) // both 32 & 64 bit
 	WCFixedStringBase& operator<<(const unsigned long in_uint) {
 		return operator<<(static_cast<uint64_t>(in_uint));
 	}
-#endif   
+#endif
 
 	WCFixedStringBase& operator<<(const long long in_int)
 	{
@@ -514,7 +514,7 @@ public:
         pos_t retVal = npos;
         const char* pCurrChar = m_end;
 
-        while (pCurrChar != m_begin) 
+        while (pCurrChar != m_begin)
         {
             --pCurrChar;
             if (*pCurrChar == in_char_to_find)
@@ -523,15 +523,15 @@ public:
                 break;
             }
         }
-        
+
         return retVal;
     }
-    
+
 	pos_t find(const char* in_chars_to_find, const pos_t in_start_from = 0) const
 	{
 		pos_t retVal = npos;
 		size_t to_find_size = ::strlen(in_chars_to_find);
-        
+
 		if (to_find_size > 0 && to_find_size <= size() && in_start_from < size())
 		{
 			const char* pCurrChar = m_begin + in_start_from;
@@ -543,19 +543,19 @@ public:
 					retVal = (pCurrChar - m_begin);
 					break;
 				}
-                
+
 				++pCurrChar;
 			}
 		}
-        
+
 		return retVal;
 	}
-    
+
 	pos_t rfind(const char* in_chars_to_find) const
 	{
 		pos_t retVal = npos;
 		size_t to_find_size = ::strlen(in_chars_to_find);
-        
+
 		if (to_find_size > 0 && to_find_size <= size())
 		{
 			const char* pCurrChar = m_end - to_find_size;
@@ -567,19 +567,19 @@ public:
 					retVal = (pCurrChar - m_begin);
 					break;
 				}
-                
+
 				--pCurrChar;
 			}
 		}
-        
+
 		return retVal;
 	}
-    
+
 	pos_t find_case_insensitive(const char* in_chars_to_find, const pos_t in_start_from = 0) const
 	{
 		pos_t retVal = npos;
 		size_t to_find_size = ::strlen(in_chars_to_find);
-        
+
 		if (to_find_size > 0 && to_find_size <= size() && in_start_from < size())
 		{
 			const char* pCurrChar = m_begin + in_start_from;
@@ -591,20 +591,20 @@ public:
                 	if (tolower(*(pCurrChar+i)) != tolower(in_chars_to_find[i]))
                     	break;
                 }
-                
+
 				if (i == to_find_size)
 				{
 					retVal = (pCurrChar - m_begin);
 					break;
 				}
-                
+
 				++pCurrChar;
 			}
 		}
-        
+
 		return retVal;
 	}
-    
+
 	pos_t find_first_of(const char* in_possibe_chars_to_find, const pos_t in_start_from = 0) const
 	{
 		pos_t retVal = npos;
@@ -698,7 +698,7 @@ public:
         bool retVal = ((size() - strlen(in_end_text)) == where) || (0 == ::strlen(in_end_text));
         return retVal;
     }
-    
+
 	size_t replace(const char in_look_for, const char in_replace_with)
 	{
 		size_t retVal = 0;
@@ -770,11 +770,11 @@ public:
             const char* end_buffer = out_buffer + (WUMin<size_t>(in_buffer_size - 1, m_end - m_begin));
             while (cur_buffer < end_buffer)
                 *cur_buffer++ = *cur_fixed++;
-            
+
             *cur_buffer = '\0';
         }
     }
-    
+
 protected:	
 	~WCFixedStringBase() {}
 
@@ -799,7 +799,7 @@ template<size_t kMaxFixedStringLength> class DllExport WCFixedString : public WC
 {
 public:
 
-	inline WCFixedString() : 
+	inline WCFixedString() :
 		WCFixedStringBase(m_fixedString, kMaxFixedStringLength)
 	{
 	}
@@ -889,7 +889,7 @@ typedef WCFixedString<511>	WCFixedString511;
 typedef WCFixedString<1023>	WCFixedString1023;
 typedef WCFixedString<2047>	WCFixedString2047;
 
-template<size_t kSizeOfFirst, size_t kSizeOfSecond> 
+template<size_t kSizeOfFirst, size_t kSizeOfSecond>
 	class WCFixedStringPair : public std::pair< WCFixedString<kSizeOfFirst>, WCFixedString<kSizeOfSecond> >
 {
 public:

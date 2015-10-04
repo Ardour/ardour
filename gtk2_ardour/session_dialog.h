@@ -47,7 +47,7 @@ class EngineControl;
 
 class SessionDialog : public ArdourDialog {
   public:
-        SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path, 
+        SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path,
 		       const std::string& template_name, bool cancel_not_quit);
         SessionDialog ();
 	~SessionDialog ();
@@ -56,7 +56,7 @@ class SessionDialog : public ArdourDialog {
 
 	std::string session_name (bool& should_be_new);
 	std::string session_folder ();
-    
+
 	bool use_session_template();
 	std::string session_template_name();
 

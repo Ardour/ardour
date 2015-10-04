@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 #include <cmath>
 #include <algorithm>
-#include <string> 
+#include <string>
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -172,8 +172,8 @@ internationalize (const char *package_name, const char **array)
 	return v;
 }
 
-static int32_t 
-int_from_hex (char hic, char loc) 
+static int32_t
+int_from_hex (char hic, char loc)
 {
 	int hi;		/* hi byte */
 	int lo;		/* low byte */
@@ -260,7 +260,7 @@ length2string (const int64_t frames, const double sample_rate)
 	return duration_str;
 }
 
-static bool 
+static bool
 chars_equal_ignore_case(char x, char y)
 {
 	/* app should have called setlocale() if its wants this comparison to be
@@ -269,7 +269,7 @@ chars_equal_ignore_case(char x, char y)
 	return toupper (x) == toupper (y);
 }
 
-bool 
+bool
 strings_equal_ignore_case (const string& a, const string& b)
 {
 	if (a.length() == b.length()) {

@@ -67,7 +67,7 @@ class LIBARDOUR_API PluginInfo {
 	std::string unique_id;
 
 	virtual PluginPtr load (Session& session) = 0;
-	virtual bool is_instrument() const; 
+	virtual bool is_instrument() const;
 
 	/* NOTE: this block of virtual methods looks like the interface
 	   to a Processor, but Plugin does not inherit from Processor.
@@ -144,11 +144,11 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	struct PresetRecord {
 	    PresetRecord () : number (-1), user (true) {}
 	    PresetRecord (const std::string& u, const std::string& l, int n = -1, bool s = true) : uri (u), label (l), number (n), user (s)  {}
-	    
+	
 	    bool operator!= (PresetRecord const & a) const {
 		    return number != a.number || uri != a.uri || label != a.label;
 	    }
-	    
+	
 	    std::string uri;
 	    std::string label;
 	    int number; // if <0, invalid

@@ -27,7 +27,7 @@
 
 namespace Gtkmm2ext {
 
-class LIBGTKMM2EXT_API CursorInfo 
+class LIBGTKMM2EXT_API CursorInfo
 {
     public:
         static CursorInfo* lookup_cursor_info (const std::string& image_name);
@@ -40,7 +40,7 @@ class LIBGTKMM2EXT_API CursorInfo
 
     private:
         CursorInfo (const std::string& image_name, int hotspot_x, int hotspot_y);
-        
+
         typedef std::map<std::string,CursorInfo*> Infos;
         static Infos infos;
 };

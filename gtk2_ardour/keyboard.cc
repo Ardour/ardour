@@ -242,7 +242,7 @@ ArdourKeyboard::set_state (const XMLNode& node, int version)
 	return Keyboard::set_state (node, version);
 }
 
-/* Snap and snap delta modifiers may contain each other, so we use the 
+/* Snap and snap delta modifiers may contain each other, so we use the
  * following two methods to sort that out:
  */
 bool

@@ -58,7 +58,7 @@ class LIBPBD_API MD5
 	void Transform (uint32_t state[4], uint8_t const * block);
 	void Encode (uint8_t *output, uint32_t const *input, size_t len);
 	void Decode (uint32_t *output, uint8_t const * input, size_t len);
-	void Update (uint8_t const *input, size_t inputLen); 
+	void Update (uint8_t const *input, size_t inputLen);
 	void Final ();
 	
 };

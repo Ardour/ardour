@@ -40,7 +40,7 @@ Led::factory (Surface& surface, int id, const char* name, Group& group)
 	return l;
 }
 
-MidiByteArray 
+MidiByteArray
 Led::set_state (LedState new_state)
 {
 	state = new_state;
@@ -49,13 +49,13 @@ Led::set_state (LedState new_state)
 
 	switch  (state.state()) {
 	case LedState::on:			
-		msg = 0x7f; 
+		msg = 0x7f;
 		break;
 	case LedState::off:			
-		msg = 0x00; 
+		msg = 0x00;
 		break;
 	case LedState::flashing:	
-		msg = 0x01; 
+		msg = 0x01;
 		break;
 	case LedState::none:			
 		return MidiByteArray ();

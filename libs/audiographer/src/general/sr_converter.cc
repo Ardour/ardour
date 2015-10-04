@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
     Author: Sakari Bergen
 
     This program is free software; you can redistribute it and/or modify
@@ -59,7 +59,7 @@ SampleRateConverter::init (framecnt_t in_rate, framecnt_t out_rate, int quality)
 	int err;
 	src_state = src_new (quality, channels, &err);
 	if (throw_level (ThrowObject) && !src_state) {
-		throw Exception (*this, str (format 
+		throw Exception (*this, str (format
 			("Cannot initialize sample rate converter: %1%")
 			% src_strerror (err)));
 	}
@@ -161,7 +161,7 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 		
 		err = src_process (src_state, &src_data);
 		if (throw_level (ThrowProcess) && err) {
-			throw Exception (*this, str (format 
+			throw Exception (*this, str (format
 			("An error occured during sample rate conversion: %1%")
 			% src_strerror (err)));
 		}
@@ -189,7 +189,7 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 		}
 
 		if (throw_level (ThrowProcess) && src_data.output_frames_gen == 0 && leftover_frames) {
-			throw Exception (*this, boost::str (boost::format 
+			throw Exception (*this, boost::str (boost::format
 				("No output frames genereated with %1% leftover frames")
 				% leftover_frames));
 		}

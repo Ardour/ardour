@@ -162,7 +162,7 @@ AudioEngine::sample_rate_change (pframes_t nframes)
 	return 0;
 }
 
-int 
+int
 AudioEngine::buffer_size_change (pframes_t bufsiz)
 {
 	if (_session) {
@@ -207,7 +207,7 @@ AudioEngine::process_callback (pframes_t nframes)
 		}
 		/* really only JACK requires this
 		 * (other backends clear the output buffers
-		 * before the process_callback. it may even be 
+		 * before the process_callback. it may even be
 		 * jack/alsa only). but better safe than sorry.
 		 */
 		PortManager::silence_outputs (nframes);
@@ -219,7 +219,7 @@ AudioEngine::process_callback (pframes_t nframes)
 	if (_measuring_latency == MeasureAudio && _mtdm) {
 		/* run a normal cycle from the perspective of the PortManager
 		   so that we get silence on all registered ports.
-		   
+		
 		   we overwrite the silence on the two ports used for latency
 		   measurement.
 		*/
@@ -294,12 +294,12 @@ AudioEngine::process_callback (pframes_t nframes)
 		} else if (session_removal_countdown > 0) {
 
 			/* we'll be fading audio out.
-			   
-			   if this is the last time we do this as part 
+			
+			   if this is the last time we do this as part
 			   of session removal, do a MIDI panic now
 			   to get MIDI stopped. This relies on the fact
 			   that "immediate data" (aka "out of band data") from
-			   MIDI tracks is *appended* after any other data, 
+			   MIDI tracks is *appended* after any other data,
 			   so that it emerges after any outbound note ons, etc.
 			*/
 
@@ -456,21 +456,21 @@ void
 AudioEngine::do_reset_backend()
 {
 	SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 1024);
-    
+
 	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
-    
+
 	while (!_stop_hw_reset_processing) {
-        
+
 		if (g_atomic_int_get (&_hw_reset_request_count) != 0 && _backend) {
-	        
+	
 			_reset_request_lock.unlock();
-	        
+	
 			Glib::Threads::RecMutex::Lock pl (_state_lock);
 			g_atomic_int_dec_and_test (&_hw_reset_request_count);
-	        
+	
             std::cout << "AudioEngine::RESET::Reset request processing. Requests left: " << _hw_reset_request_count << std::endl;
                         DeviceResetStarted(); // notify about device reset to be started
-            
+
                         // backup the device name
                         std::string name = _backend->device_name ();
 
@@ -484,9 +484,9 @@ AudioEngine::do_reset_backend()
 				// inform about possible changes
 				BufferSizeChanged (_backend->buffer_size() );
                 DeviceResetFinished(); // notify about device reset finish
-            
+
             } else {
-            
+
                 DeviceResetFinished(); // notify about device reset finish
 				// we've got an error
                 DeviceError();
@@ -495,11 +495,11 @@ AudioEngine::do_reset_backend()
 			std::cout << "AudioEngine::RESET::Done." << std::endl;
 
 			_reset_request_lock.lock();
-            
+
 		} else {
-            
+
 			_hw_reset_condition.wait (_reset_request_lock);
-            
+
 		}
 	}
 }
@@ -516,22 +516,22 @@ void
 AudioEngine::do_devicelist_update()
 {
     SessionEvent::create_per_thread_pool (X_("Device list update processing thread"), 512);
-    
+
     Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
-    
+
     while (!_stop_hw_devicelist_processing) {
-        
+
         if (_hw_devicelist_update_count) {
 
             _devicelist_update_lock.unlock();
-            
+
             Glib::Threads::RecMutex::Lock pl (_state_lock);
-            
+
             g_atomic_int_dec_and_test (&_hw_devicelist_update_count);
             DeviceListChanged (); /* EMIT SIGNAL */
-        
+
             _devicelist_update_lock.lock();
-            
+
         } else {
             _hw_devicelist_update_condition.wait (_devicelist_update_lock);
         }
@@ -541,13 +541,13 @@ AudioEngine::do_devicelist_update()
 
 void
 AudioEngine::start_hw_event_processing()
-{   
+{
     if (_hw_reset_event_thread == 0) {
         g_atomic_int_set(&_hw_reset_request_count, 0);
         g_atomic_int_set(&_stop_hw_reset_processing, 0);
         _hw_reset_event_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
     }
-    
+
     if (_hw_devicelist_update_thread == 0) {
         g_atomic_int_set(&_hw_devicelist_update_count, 0);
         g_atomic_int_set(&_stop_hw_devicelist_processing, 0);
@@ -566,7 +566,7 @@ AudioEngine::stop_hw_event_processing()
         _hw_reset_event_thread->join ();
         _hw_reset_event_thread = 0;
     }
-    
+
     if (_hw_devicelist_update_thread) {
         g_atomic_int_set(&_stop_hw_devicelist_processing, 1);
         g_atomic_int_set(&_hw_devicelist_update_count, 0);
@@ -768,7 +768,7 @@ AudioEngine::current_backend_name() const
 {
 	if (_backend) {
 		return _backend->name();
-	} 
+	}
 	return string();
 }
 
@@ -921,7 +921,7 @@ AudioEngine::freewheel (bool start_stop)
 }
 
 float
-AudioEngine::get_dsp_load() const 
+AudioEngine::get_dsp_load() const
 {
 	if (!_backend) {
 		return 0.0;
@@ -930,7 +930,7 @@ AudioEngine::get_dsp_load() const
 }
 
 bool
-AudioEngine::is_realtime() const 
+AudioEngine::is_realtime() const
 {
 	if (!_backend) {
 		return false;
@@ -940,7 +940,7 @@ AudioEngine::is_realtime() const
 }
 
 bool
-AudioEngine::connected() const 
+AudioEngine::connected() const
 {
 	if (!_backend) {
 		return false;

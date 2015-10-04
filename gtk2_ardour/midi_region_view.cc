@@ -686,7 +686,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
 	}
 
-	/* we may be dragging some non-note object (eg. patch-change, sysex) 
+	/* we may be dragging some non-note object (eg. patch-change, sysex)
 	 */
 
 	return editor.drags()->motion_handler ((GdkEvent *) ev, false);
@@ -1301,7 +1301,7 @@ MidiRegionView::display_sysexes()
 	if (!UIConfiguration::instance().get_never_display_periodic_midi()) {
 
 		for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
-			const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::Beats> > mev = 
+			const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::Beats> > mev =
 				boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::Beats> > (*i);
 			
 			if (mev) {
@@ -1326,7 +1326,7 @@ MidiRegionView::display_sysexes()
 			
 			if (zoom > (video_frame*4)) {
 				display_periodic_messages = false;
-			} 
+			}
 		}
 	} else {
 		display_periodic_messages = false;
@@ -1334,7 +1334,7 @@ MidiRegionView::display_sysexes()
 
 	for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
 
-		const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::Beats> > mev = 
+		const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::Beats> > mev =
 			boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::Beats> > (*i);
 
 		Evoral::Beats time = (*i)->time();
@@ -1956,7 +1956,7 @@ patch_applies (const ARDOUR::MidiModel::constPatchChangePtr pc, Evoral::Beats ti
 	return pc->time() <= time && pc->channel() == channel;
 }
 	
-void 
+void
 MidiRegionView::get_patch_key_at (Evoral::Beats time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const
 {
 	// The earliest event not before time
@@ -2714,7 +2714,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 			resize_data->note = note;
 
 			// create a new SimpleRect from the note which will be the resize preview
-			ArdourCanvas::Rectangle *resize_rect = new ArdourCanvas::Rectangle (_note_group, 
+			ArdourCanvas::Rectangle *resize_rect = new ArdourCanvas::Rectangle (_note_group,
 											    ArdourCanvas::Rect (note->x0(), note->y0(), note->x0(), note->y1()));
 
 			// calculate the colors: get the color settings
@@ -3344,8 +3344,8 @@ MidiRegionView::patch_entered (PatchChange* p)
 {
 	ostringstream s;
 	/* XXX should get patch name if we can */
-	s << _("Bank ") << (p->patch()->bank() + MIDI_BP_ZERO) << '\n' 
-	  << _("Program ") << ((int) p->patch()->program()) + MIDI_BP_ZERO << '\n' 
+	s << _("Bank ") << (p->patch()->bank() + MIDI_BP_ZERO) << '\n'
+	  << _("Program ") << ((int) p->patch()->program()) + MIDI_BP_ZERO << '\n'
 	  << _("Channel ") << ((int) p->patch()->channel() + 1);
 	show_verbose_cursor (s.str(), 10, 20);
 	p->item().grab_focus();

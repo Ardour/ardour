@@ -113,7 +113,7 @@ PortExportChannel::set_state (XMLNode * node, Session & session)
 	}
 }
 
-RegionExportChannelFactory::RegionExportChannelFactory (Session * session, AudioRegion const & region, AudioTrack & track, Type type) 
+RegionExportChannelFactory::RegionExportChannelFactory (Session * session, AudioRegion const & region, AudioTrack & track, Type type)
 	: region (region)
 	, track (track)
 	, type (type)

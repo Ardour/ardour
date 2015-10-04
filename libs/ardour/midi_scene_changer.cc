@@ -41,7 +41,7 @@ MIDISceneChanger::MIDISceneChanger (Session& s)
 	, last_program_message_time (-1)
 	, last_delivered_program (-1)
 	, last_delivered_bank (-1)
-	  
+	
 {
 	/* catch any add/remove/clear etc. for all Locations */
 	_session.locations()->changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
@@ -63,7 +63,7 @@ MIDISceneChanger::locations_changed ()
 }
 
 /** Use the session's list of locations to collect all patch changes.
- * 
+ *
  * This is called whenever the locations change in anyway.
  */
 void
@@ -137,7 +137,7 @@ MIDISceneChanger::non_rt_deliver (boost::shared_ptr<MIDISceneChange> msc)
 	   non-RT/process context. Using zero means "deliver them as early as
 	   possible" (practically speaking, in the next process callback).
 	*/
-        
+
 	MIDIOutputActivity (); /* EMIT SIGNAL */
 
 	if ((cnt = msc->get_bank_msb_message (buf, sizeof (buf))) > 0) {
@@ -259,7 +259,7 @@ MIDISceneChanger::set_recording (bool yn)
 }
 
 bool
-MIDISceneChanger::recording() const 
+MIDISceneChanger::recording() const
 {
 	return _session.transport_rolling() && _session.get_record_enabled();
 }
@@ -283,12 +283,12 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 	if (!recording()) {
 
 		MIDIInputActivity (); /* EMIT SIGNAL */
-        
+
 		int bank = -1;
 		if (have_seen_bank_changes) {
 			bank = input_port->channel (channel)->bank();
 		}
-        
+
 		jump_to (bank, program);
 		return;
 	}

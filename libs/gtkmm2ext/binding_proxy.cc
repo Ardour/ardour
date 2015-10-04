@@ -37,12 +37,12 @@ guint BindingProxy::bind_statemask = Gdk::CONTROL_MASK;
 BindingProxy::BindingProxy (boost::shared_ptr<Controllable> c)
 	: prompter (0),
 	  controllable (c)
-{			  
+{			
 }
 
 BindingProxy::BindingProxy ()
 	: prompter (0)
-{			  
+{			
 }
 
 BindingProxy::~BindingProxy ()
@@ -76,7 +76,7 @@ BindingProxy::is_bind_action (GdkEventButton *ev)
 bool
 BindingProxy::button_press_handler (GdkEventButton *ev)
 {
-	if ( controllable && is_bind_action(ev) ) { 
+	if ( controllable && is_bind_action(ev) ) {
 		if (Controllable::StartLearning (controllable.get())) {
 			string prompt = _("operate controller now");
 			if (prompter == 0) {

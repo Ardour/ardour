@@ -42,9 +42,9 @@ typedef void (*menubar_draw_proto) (cairo_t *cr,
                                     int x, int y, int width, int height);
 
 static void
-clearlooks_draw_inset (cairo_t          *cr, 
-                       const CairoColor *bg_color, 
-                       double x, double y, double w, double h, 
+clearlooks_draw_inset (cairo_t          *cr,
+                       const CairoColor *bg_color,
+                       double x, double y, double w, double h,
                        double radius, uint8 corners)
 {
 	CairoColor shadow;
@@ -100,7 +100,7 @@ clearlooks_draw_inset (cairo_t          *cr,
 static void
 clearlooks_draw_shadow (cairo_t *cr, const ClearlooksColors *colors, gfloat radius, int width, int height)
 {
-	CairoColor shadow; 
+	CairoColor shadow;
 	ge_shade_color (&colors->shade[6], 0.92, &shadow);
 
 	cairo_set_line_width (cr, 1.0);
@@ -119,7 +119,7 @@ clearlooks_draw_top_left_highlight (cairo_t *cr, const CairoColor *color,
                                     const WidgetParameters *params,
                                     int width, int height, gdouble radius)
 {
-	CairoColor hilight; 
+	CairoColor hilight;
 
 	double light_top = params->ythickness-1,
 	       light_bottom = height - params->ythickness - 1,
@@ -223,12 +223,12 @@ clearlooks_draw_gripdots (cairo_t *cr, const ClearlooksColors *colors, int x, in
 
 	ge_shade_color (dark, 1.5, &hilight);
 
-	for ( i = 0; i < xr; i++ ) 
+	for ( i = 0; i < xr; i++ )
 	{
 		for ( j = 0; j < yr; j++ )
 		{
 			xoff = x -(xr * 3 / 2) + 3 * i;
-			yoff = y -(yr * 3 / 2) + 3 * j; 
+			yoff = y -(yr * 3 / 2) + 3 * j;
 			
 			cairo_rectangle (cr, width/2+0.5+xoff, height/2+0.5+yoff, 2, 2);
 			cairo_set_source_rgba (cr, hilight.r, hilight.g, hilight.b, 0.8+contrast);
@@ -353,7 +353,7 @@ clearlooks_draw_button (cairo_t *cr,
 		ge_cairo_set_color (cr, border_disabled);
 	else
 		if (!params->active)
-			clearlooks_set_border_gradient (cr, border_normal, 1.32, 0, height); 
+			clearlooks_set_border_gradient (cr, border_normal, 1.32, 0, height);
 		else
 			ge_cairo_set_color (cr, border_normal);
 	
@@ -412,7 +412,7 @@ clearlooks_draw_entry (cairo_t *cr,
 	}
 	else
 	{
-		CairoColor shadow; 
+		CairoColor shadow;
 		ge_shade_color (&border, 0.925, &shadow);
 
 		cairo_set_source_rgba (cr, shadow.r, shadow.g, shadow.b, params->disabled ? 0.05 : 0.1);
@@ -430,7 +430,7 @@ clearlooks_draw_entry (cairo_t *cr,
 	if (params->focus || params->disabled)
 		ge_cairo_set_color (cr, &border);
 	else
-		clearlooks_set_border_gradient (cr, &border, 1.32, 0, height); 
+		clearlooks_set_border_gradient (cr, &border, 1.32, 0, height);
 	cairo_stroke (cr);
 }
 
@@ -441,7 +441,7 @@ clearlooks_draw_spinbutton (cairo_t *cr,
                             int x, int y, int width, int height)
 {
 	const CairoColor *border = &colors->shade[!params->disabled ? 5 : 3];
-	CairoColor hilight; 
+	CairoColor hilight;
 
 	params->style_functions->draw_button (cr, colors, params, x, y, width, height);
 
@@ -468,7 +468,7 @@ clearlooks_draw_spinbutton_down (cairo_t *cr,
 {
 	cairo_pattern_t *pattern;
 	double radius = MIN (params->radius, MIN ((width - 4.0) / 2.0, (height - 4.0) / 2.0));
-	CairoColor shadow; 
+	CairoColor shadow;
 	ge_shade_color (&colors->bg[GTK_STATE_NORMAL], 0.8, &shadow);
 
 	cairo_translate (cr, x+1, y+1);
@@ -624,9 +624,9 @@ clearlooks_draw_slider (cairo_t *cr,
 		cairo_pattern_add_color_stop_rgb (pattern, 1.0, spot->r, spot->g, spot->b);
 		cairo_set_source (cr, pattern);
 	}
-	else 
+	else
 	{
-		CairoColor hilight; 
+		CairoColor hilight;
 		ge_shade_color (fill, 1.5, &hilight);
 		cairo_set_source_rgba (cr, hilight.r, hilight.g, hilight.b, 0.5);
 	}
@@ -642,7 +642,7 @@ clearlooks_draw_slider (cairo_t *cr,
 	if (params->prelight || params->disabled)
 		ge_cairo_set_color (cr, border);
 	else
-		clearlooks_set_border_gradient (cr, border, 1.2, 0, height); 
+		clearlooks_set_border_gradient (cr, border, 1.2, 0, height);
 	cairo_stroke (cr);
 
 	/* Draw handle lines */
@@ -1021,10 +1021,10 @@ clearlooks_draw_menubar1 (cairo_t *cr,
 
 
 static menubar_draw_proto clearlooks_menubar_draw[3] =
-{ 
-	clearlooks_draw_menubar0, 
+{
+	clearlooks_draw_menubar0,
 	clearlooks_draw_menubar1,
-	clearlooks_draw_menubar2 
+	clearlooks_draw_menubar2
 };
 
 static void
@@ -1042,7 +1042,7 @@ clearlooks_draw_menubar (cairo_t *cr,
 }
 
 static void
-clearlooks_get_frame_gap_clip (int x, int y, int width, int height, 
+clearlooks_get_frame_gap_clip (int x, int y, int width, int height,
                                const FrameParameters     *frame,
                                ClearlooksRectangle *bevel,
                                ClearlooksRectangle *border)
@@ -1219,7 +1219,7 @@ clearlooks_draw_tab (cairo_t *cr,
 		width += 3.0;
 	 	strip_size = 2.0/width;
 		
-		if (tab->gap_side == CL_GAP_LEFT) 
+		if (tab->gap_side == CL_GAP_LEFT)
 			cairo_translate (cr, -3.0, 0.0); /* gap at the other side */
 	}
 	
@@ -1263,8 +1263,8 @@ clearlooks_draw_tab (cairo_t *cr,
 		
 		ge_shade_color (fill, 0.92, &shadow);
 
-		cairo_pattern_add_color_stop_rgba  (pattern, 0.0,  				hilight.r, hilight.g, hilight.b, 0.4);     
-		cairo_pattern_add_color_stop_rgba  (pattern, 1.0/height,  hilight.r, hilight.g, hilight.b, 0.4); 
+		cairo_pattern_add_color_stop_rgba  (pattern, 0.0,  				hilight.r, hilight.g, hilight.b, 0.4);
+		cairo_pattern_add_color_stop_rgba  (pattern, 1.0/height,  hilight.r, hilight.g, hilight.b, 0.4);
 		cairo_pattern_add_color_stop_rgb	(pattern, 1.0/height, 	fill->r,fill->g,fill->b);
 		cairo_pattern_add_color_stop_rgb 	(pattern, 1.0, 					shadow.r,shadow.g,shadow.b);
 		cairo_set_source (cr, pattern);
@@ -1374,7 +1374,7 @@ clearlooks_draw_list_view_header (cairo_t *cr,
 {
 	const CairoColor *border = &colors->shade[5];
 	cairo_pattern_t *pattern;
-	CairoColor hilight; 
+	CairoColor hilight;
 	CairoColor shadow;
 
  	ge_shade_color (border, 1.5, &hilight);	
@@ -1452,7 +1452,7 @@ clearlooks_draw_toolbar (cairo_t *cr,
 	ge_cairo_set_color (cr, fill);
 	cairo_paint (cr);
 
-	if (!toolbar->topmost) 
+	if (!toolbar->topmost)
 	{
 		/* Draw highlight */
 		cairo_move_to       (cr, 0, 0.5);
@@ -1661,8 +1661,8 @@ clearlooks_draw_scrollbar_stepper (cairo_t *cr,
 				
 	s2 = colors->bg[widget->state_type];
 	ge_shade_color(&s2, 1.06, &s1);
-	ge_shade_color(&s2, 0.98, &s3); 
-	ge_shade_color(&s2, 0.94, &s4); 
+	ge_shade_color(&s2, 0.98, &s3);
+	ge_shade_color(&s2, 0.94, &s4);
 	
 	cairo_pattern_add_color_stop_rgb(pattern, 0,    s1.r, s1.g, s1.b);
 	cairo_pattern_add_color_stop_rgb(pattern, 0.5,	s2.r, s2.g, s2.b);
@@ -1677,7 +1677,7 @@ clearlooks_draw_scrollbar_stepper (cairo_t *cr,
 	cairo_translate (cr, -0.5, -0.5);
 	
 	ge_cairo_rounded_rectangle (cr, 0.5, 0.5, width-1, height-1, radius, corners);
-	clearlooks_set_border_gradient (cr, &border, 1.2, (scrollbar->horizontal ? 0 : width), (scrollbar->horizontal ? height: 0)); 
+	clearlooks_set_border_gradient (cr, &border, 1.2, (scrollbar->horizontal ? 0 : width), (scrollbar->horizontal ? height: 0));
 	cairo_stroke (cr);
 	
 	cairo_translate (cr, 0.5, 0.5);
@@ -1763,8 +1763,8 @@ clearlooks_draw_scrollbar_slider (cairo_t *cr,
 		
 		s2 = colors->bg[widget->state_type];
 		ge_shade_color(&s2, 1.06, &s1);
-		ge_shade_color(&s2, 0.98, &s3); 
-		ge_shade_color(&s2, 0.94, &s4); 
+		ge_shade_color(&s2, 0.98, &s3);
+		ge_shade_color(&s2, 0.94, &s4);
 	
 		pattern = cairo_pattern_create_linear(1, 1, 1, height-1);
 		cairo_pattern_add_color_stop_rgb(pattern, 0,   s1.r, s1.g, s1.b);
@@ -1777,7 +1777,7 @@ clearlooks_draw_scrollbar_slider (cairo_t *cr,
 		cairo_fill(cr);
 		cairo_pattern_destroy(pattern);
 		
-		clearlooks_set_border_gradient (cr, &border, 1.2, 0, height); 
+		clearlooks_set_border_gradient (cr, &border, 1.2, 0, height);
 		ge_cairo_stroke_rectangle (cr, 0.5, 0.5, width-1, height-1);
 		
 		cairo_move_to (cr, 1.5, height-1.5);

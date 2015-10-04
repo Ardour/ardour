@@ -28,7 +28,7 @@
 
 // When changing wvNS value also do the same change in Objective_C_MangledNames.h
 // because CWSAUCocoaViewFactoryAsString is hard coded there
-#define wvNS wvWavesV9_3 
+#define wvNS wvWavesV9_3
 #ifdef __APPLE__
     #define ObjCNameSpace(__className__) wvWavesV9_3_ ## __className__
 #endif
@@ -36,7 +36,7 @@
 #ifdef INSIDE_NETSHELL
     #define DllExport
 #else
-    #define DllExport   WPAPI_DllExport 
+    #define DllExport   WPAPI_DllExport
 #endif
 
 #define __CDECL     __WPAPI_CDECL
@@ -62,32 +62,32 @@
 
     #define WIN_ONLY(__Something_only_for_windows__)
     #define MAC_ONLY(__Something_only_for_mac__) __Something_only_for_mac__
-    
+
     #if defined(i386) || defined(__i386) || defined(__i386__)
         #define kNumArchBits 32
     #endif
     #if defined(__x86_64) || defined(__x86_64__)
         #define kNumArchBits 64
-    #endif 
+    #endif
 
     #if (__i386 || __x86_64) && !defined(__LITTLE_ENDIAN__)
-        #define __LITTLE_ENDIAN__ 
+        #define __LITTLE_ENDIAN__
     #endif
     #if !(__i386 || __x86_64) && !defined(__BIG_ENDIAN__)
         #define __BIG_ENDIAN__
     #endif
     #ifdef __GNUC__
         #define STD_EXCEPT_WIN std
-        #define FAR 
-        #define PASCAL 
+        #define FAR
+        #define PASCAL
         // #define HINSTANCE void*
         #define WINAPI
-    
+
     #else
-    
+
         #define DllExport_WinOnly
         #define STD_EXCEPT_WIN std
-        #define FAR 
+        #define FAR
         #define PASCAL          // windows' pascal
         #define HINSTANCE void*
         #define WINAPI
@@ -125,7 +125,7 @@
     #define WUNUSED_PARAM_ON_MAC(__SOME_UNUSED_PARAM__)
     #define WUNUSED_PARAM_ON_WIN(__SOME_UNUSED_PARAM__) WUNUSED_PARAM(__SOME_UNUSED_PARAM__)
 
-#endif 
+#endif
 
 #ifdef __linux__
     const char* const  OS_NAME = "Linux";
@@ -135,18 +135,18 @@
 
     #define DllExport_WinOnly
     #define STD_EXCEPT_WIN std
-    #define FAR 
-    #define PASCAL 
+    #define FAR
+    #define PASCAL
     // #define HINSTANCE void*
     #define WINAPI
     #if __i386 && !defined(__LITTLE_ENDIAN__)
-        #define __LITTLE_ENDIAN__ 
+        #define __LITTLE_ENDIAN__
     #endif
     #if !__i386 && !defined(__BIG_ENDIAN__)
         #define __BIG_ENDIAN__
     #endif
     #define THROW_SPEC(THROW_OBJ) throw (THROW_OBJ)
-    
+
     #if defined(__x86_64) || defined(__LP64__)
         #error "64 bit not suported yet on linux"
     #else
@@ -155,11 +155,11 @@
 #endif
 
 #ifndef _WU_DECL
-    #define _WU_DECL __CDECL // the default is calling model is cdecl, but you can also set this macro from the outside to something different 
+    #define _WU_DECL __CDECL // the default is calling model is cdecl, but you can also set this macro from the outside to something different
 #endif
 
 #ifndef _XML_DECL
-    #define _XML_DECL __CDECL // the default is calling model is cdecl, but you can also set this macro from the outside to something different 
+    #define _XML_DECL __CDECL // the default is calling model is cdecl, but you can also set this macro from the outside to something different
 #endif
 
 #ifndef kNumArchBits

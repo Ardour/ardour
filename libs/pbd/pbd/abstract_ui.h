@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-2009 Paul Davis 
+    Copyright (C) 1998-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 
 /* We have a special case in libpbd of a template class that gets instantiated
  * as the base class of several classes in other libraries. It is not possible
- * to use LIBFOO_API to mark this visible, because the FOO in each case is 
+ * to use LIBFOO_API to mark this visible, because the FOO in each case is
  * different. So we define this generic visible/export/hidden/import pair
  * of macros to try to deal with this special case. These should NEVER be
  * used anywhere except AbstractUI<T> (or similar cases if they arise.
@@ -46,7 +46,7 @@
 #define ABSTRACT_UI_API LIBPBD_DLL_EXPORT
 #else
 #define ABSTRACT_UI_API LIBPBD_DLL_IMPORT
-#endif 
+#endif
 
 
 class Touchable;
@@ -68,9 +68,9 @@ class ABSTRACT_UI_API AbstractUI : public BaseUI
 	struct RequestBuffer : public PBD::RingBufferNPT<RequestObject> {
                 bool dead;
                 AbstractUI<RequestObject>& ui;
-                RequestBuffer (uint32_t size, AbstractUI<RequestObject>& uir) 
+                RequestBuffer (uint32_t size, AbstractUI<RequestObject>& uir)
                         : PBD::RingBufferNPT<RequestObject> (size)
-                        , dead (false) 
+                        , dead (false)
                         , ui (uir) {}
         };
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;

@@ -12,11 +12,11 @@ static void cl_draw_borders (GdkWindow *window, GtkWidget *widget, GtkStyle *sty
 static void cl_draw_line (GdkWindow *window, GtkWidget *widget, GtkStyle *style,
                    int x1, int y1, int x2, int y2, CLBorderType border,
                    CLRectangle *r);
-				   
+				
 static void cl_draw_corner (GdkWindow *window, GtkWidget *widget, GtkStyle *style,
                      int x, int y, int width, int height,
                      CLRectangle *r, CLCornerSide corner);
-					 
+					
 static void cl_draw_fill (GdkWindow *window, GtkWidget *widget, GtkStyle *style,
                    int x, int y, int width, int height, CLRectangle *r);
 
@@ -471,7 +471,7 @@ void cl_rectangle_reset (CLRectangle *r, GtkStyle *style)
 	                   CL_CORNER_ROUND, CL_CORNER_ROUND);
 }
 
-static void cl_progressbar_points_transform (GdkPoint *points, int npoints, 
+static void cl_progressbar_points_transform (GdkPoint *points, int npoints,
                                              int offset, gboolean is_horizontal)
 {
 	int i;
@@ -514,8 +514,8 @@ GdkPixmap* cl_progressbar_tile_new (GdkDrawable *drawable, GtkWidget *widget,
 	else
 		draw_vgradient (tmp, style->black_gc, style, 0, 0, width, height,
 	    	            &tmp_color, &clearlooks_style->spot2); /* TODO: swap for RTL */
-	                
-	if (orientation == GTK_PROGRESS_RIGHT_TO_LEFT || 
+	
+	if (orientation == GTK_PROGRESS_RIGHT_TO_LEFT ||
 	    orientation == GTK_PROGRESS_BOTTOM_TO_TOP)
 	{
 		offset = -offset;
@@ -539,7 +539,7 @@ GdkPixmap* cl_progressbar_tile_new (GdkDrawable *drawable, GtkWidget *widget,
 		points[2] = (GdkPoint){0, xdir*(stripe_width - topright_div_2)};        /* bottomright */
 		points[3] = (GdkPoint){0, xdir*(-topright_div_2)};                      /* bottomleft */
 	}
-						 
+						
 	
 	shift = (stripe_width*2)/(double)10;
 	cl_progressbar_points_transform (points, 4, (offset*shift), is_horizontal);
@@ -654,7 +654,7 @@ void cl_progressbar_fill (GdkDrawable *drawable, GtkWidget *widget,
 	g_object_unref (tile);
 }
 
-GdkColor cl_gc_set_fg_color_shade (GdkGC *gc, GdkColormap *colormap, 
+GdkColor cl_gc_set_fg_color_shade (GdkGC *gc, GdkColormap *colormap,
                                    GdkColor *from, gfloat s)
 {
 	GdkColor tmp_color;
@@ -732,11 +732,11 @@ void cl_draw_inset (GtkStyle *style, GdkWindow *window, GtkWidget *widget,
 		                           &clwindowstyle->inset_light[windowstate]);
 	}
 	cl_rectangle_set_clip_rectangle (&r, area);
-	cl_draw_rectangle (window, widget, style, x, y, width, height, &r); 
+	cl_draw_rectangle (window, widget, style, x, y, width, height, &r);
 	cl_rectangle_reset_clip_rectangle (&r);
 }
 
-/* Draw a normal (toggle)button. Not spinbuttons.*/ 
+/* Draw a normal (toggle)button. Not spinbuttons.*/
 void cl_draw_button(GtkStyle *style, GdkWindow *window,
                     GtkStateType state_type, GtkShadowType shadow_type,
                     GdkRectangle *area,
@@ -801,7 +801,7 @@ void cl_draw_button(GtkStyle *style, GdkWindow *window,
 	cl_draw_rectangle (window, widget, style, x, y, width, height, &r);
 	
 	
-	if (!is_active) 
+	if (!is_active)
 	{
 		int tmp_height = (float)height*0.25;
 	
@@ -948,7 +948,7 @@ void cl_draw_combobox_entry (GtkStyle *style, GdkWindow *window,
 	cl_rectangle_set_clip_rectangle (&r, area);
 
 	cl_draw_rectangle (window, widget, style, x, y, width, height, &r);
-	cl_draw_shadow (window, widget, style, x, y, width, height, &r); 
+	cl_draw_shadow (window, widget, style, x, y, width, height, &r);
 	
 	cl_rectangle_reset_clip_rectangle (&r);
 }
@@ -1086,7 +1086,7 @@ void cl_draw_entry (GtkStyle *style, GdkWindow *window,
 	
 	cl_rectangle_set_clip_rectangle (&r, area);
 	cl_draw_rectangle (window, widget, style, x, y, width, height, &r);
-	cl_draw_shadow (window, widget, style, x, y, width, height, &r); 
+	cl_draw_shadow (window, widget, style, x, y, width, height, &r);
 	cl_rectangle_reset_clip_rectangle (&r);
 }
 
@@ -1121,7 +1121,7 @@ void cl_draw_optionmenu(GtkStyle *style, GdkWindow *window,
 
 
 void cl_draw_menuitem_button (GdkDrawable *window, GtkWidget *widget, GtkStyle *style,
-                              GdkRectangle *area, GtkStateType state_type, 
+                              GdkRectangle *area, GtkStateType state_type,
                               int x, int y, int width, int height, CLRectangle *r)
 {
 	ClearlooksStyle *clearlooks_style = (ClearlooksStyle*)style;
@@ -1159,7 +1159,7 @@ void cl_draw_menuitem_button (GdkDrawable *window, GtkWidget *widget, GtkStyle *
 }
 
 void cl_draw_menuitem_flat (GdkDrawable *window, GtkWidget *widget, GtkStyle *style,
-                              GdkRectangle *area, GtkStateType state_type, 
+                              GdkRectangle *area, GtkStateType state_type,
                               int x, int y, int width, int height, CLRectangle *r)
 {
 	ClearlooksStyle *clearlooks_style = (ClearlooksStyle*)style;
@@ -1185,7 +1185,7 @@ void cl_draw_menuitem_flat (GdkDrawable *window, GtkWidget *widget, GtkStyle *st
 }
 
 void cl_draw_menuitem_gradient (GdkDrawable *window, GtkWidget *widget, GtkStyle *style,
-                                GdkRectangle *area, GtkStateType state_type, 
+                                GdkRectangle *area, GtkStateType state_type,
                                 int x, int y, int width, int height, CLRectangle *r)
 {
 	ClearlooksStyle *clearlooks_style = (ClearlooksStyle*)style;
@@ -1197,7 +1197,7 @@ void cl_draw_menuitem_gradient (GdkDrawable *window, GtkWidget *widget, GtkStyle
 	
 	cl_rectangle_set_corners (r, CL_CORNER_NARROW, CL_CORNER_NARROW,
 	                             CL_CORNER_NARROW, CL_CORNER_NARROW);
-	                             
+	
 	cl_rectangle_set_gradient (&r->fill_gradient,
 	                           &style->base[GTK_STATE_SELECTED], &lower_color);
 
@@ -1265,8 +1265,8 @@ void cl_draw_treeview_header (GtkStyle *style, GdkWindow *window,
 
 	if (resizable || (column_index != columns-1))
 	{
-		gdk_draw_line (window, clearlooks_style->shade_gc[4], x+width-2, y+4, x+width-2, y+height-5); 
-		gdk_draw_line (window, clearlooks_style->shade_gc[0], x+width-1, y+4, x+width-1, y+height-5); 
+		gdk_draw_line (window, clearlooks_style->shade_gc[4], x+width-2, y+4, x+width-2, y+height-5);
+		gdk_draw_line (window, clearlooks_style->shade_gc[0], x+width-1, y+4, x+width-1, y+height-5);
 	}
 	
 	/* left light line */

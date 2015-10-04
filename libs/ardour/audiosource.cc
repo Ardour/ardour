@@ -380,7 +380,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		 *
 		 * XXX this may not work for destructive recording, but we
 		 * might decided to get rid of that anyway.
-		 * 
+		 *
 		 */
 		
 		const off_t expected_file_size = (_length / (double) samples_per_file_peak) * sizeof (PeakData);
@@ -404,7 +404,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		error << string_compose (_("Cannot open peakfile @ %1 for reading (%2)"), _peakpath, strerror (errno)) << endmsg;
 		return -1;
 	}
-				  
+				
 	scale = npeaks/expected_peaks;
 
 

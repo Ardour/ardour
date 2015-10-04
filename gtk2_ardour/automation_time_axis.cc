@@ -909,8 +909,8 @@ AutomationTimeAxisView::state_id() const
 	if (_automatable != _route && _control) {
 		return string_compose ("automation %1", _control->id().to_s());
 	} else if (_parameter) {
-		return string_compose ("automation %1 %2/%3/%4", 
-				       _route->id(), 
+		return string_compose ("automation %1 %2/%3/%4",
+				       _route->id(),
 				       _parameter.type(),
 				       _parameter.id(),
 				       (int) _parameter.channel());

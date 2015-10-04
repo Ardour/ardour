@@ -41,7 +41,7 @@ VolumeController::VolumeController (Glib::RefPtr<Gdk::Pixbuf> p,
 				    double step,
 				    double page,
 				    bool with_numeric,
-                                    int subw, 
+                                    int subw,
 				    int subh,
 				    bool linear)
 
@@ -60,7 +60,7 @@ VolumeController::_dB_printer (char buf[32], const boost::shared_ptr<PBD::Contro
 }
 
 void
-VolumeController::dB_printer (char buf[32], const boost::shared_ptr<PBD::Controllable>& c) 
+VolumeController::dB_printer (char buf[32], const boost::shared_ptr<PBD::Controllable>& c)
 {
 	if (c) {
 		
@@ -255,7 +255,7 @@ VolumeController::adjust (double control_delta)
 				v = 0.0;
 			} else {
 
-				/* non-linear scaling as the dB level gets low 
+				/* non-linear scaling as the dB level gets low
 				   so that we can hit -inf and get back out of
 				   it appropriately.
 				*/

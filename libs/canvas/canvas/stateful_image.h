@@ -44,7 +44,7 @@ class StatefulImage : public Item
       public:
 	ImageHandle image;
     };
-    
+
     typedef std::vector<State> States;
 
   public:
@@ -71,7 +71,7 @@ class StatefulImage : public Item
     double                  _text_y;
 
     int load_states (const XMLNode&);
-    
+
     typedef std::map<std::string,Cairo::RefPtr<Cairo::ImageSurface> > ImageCache;
     static ImageCache _image_cache;
     static PBD::Searchpath _image_search_path;

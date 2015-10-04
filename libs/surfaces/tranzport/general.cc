@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  *   */
 
 #include <tranzport_common.h>
@@ -33,7 +33,7 @@ using namespace PBD;
 #include <slider_gain.h>
 
 //   FIXME, flash recording light when recording and transport is moving
-int TranzportControlProtocol::lights_show_recording() 
+int TranzportControlProtocol::lights_show_recording()
 {
 	return     lights_show_normal();
 }
@@ -67,7 +67,7 @@ void TranzportControlProtocol::show_notify() {
 
 // Need more bling!
 
-int TranzportControlProtocol::lights_show_bling() 
+int TranzportControlProtocol::lights_show_bling()
 {
 	switch (bling_mode) {
 	case BlingOff: break;
@@ -77,14 +77,14 @@ int TranzportControlProtocol::lights_show_bling()
 	case BlingRows: break; // light each row in sequence
 	case BlingFlashAll: break; // Flash everything randomly
 	case BlingEnter: lights_on(); // Show intro 	
-	case BlingExit: 
+	case BlingExit:
 		lights_off();
 		break;
 	}
 	return 0;
 }
 
-int TranzportControlProtocol::screen_show_bling() 
+int TranzportControlProtocol::screen_show_bling()
 {
 	switch (bling_mode) {
 	case BlingOff: break;
@@ -97,20 +97,20 @@ int TranzportControlProtocol::screen_show_bling()
 		print(0,0,"!!Welcome to Ardour!");
 		print(1,0,"Peace through Music!");
 		break;
-	case BlingExit: 
+	case BlingExit:
 		break;
 	}
 	return 0;
 }
 
-int TranzportControlProtocol::lights_show_normal() 
+int TranzportControlProtocol::lights_show_normal()
 {
 	/* Track only */
 
 	if (route_table[0]) {
 		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack> (route_table[0]);
 		lights_pending[LightTrackrec]  = at && at->record_enabled();
-		lights_pending[LightTrackmute] = route_get_muted(0); 
+		lights_pending[LightTrackmute] = route_get_muted(0);
 		lights_pending[LightTracksolo] = route_get_soloed(0);
 	} else {
 		lights_pending[LightTrackrec]  = false;
@@ -120,7 +120,7 @@ int TranzportControlProtocol::lights_show_normal()
 
 	/* Global settings */
 
-	lights_pending[LightLoop]        = session->get_play_loop(); 
+	lights_pending[LightLoop]        = session->get_play_loop();
 	lights_pending[LightPunch]       = session->config.get_punch_in() || session->config.get_punch_out();
 	lights_pending[LightRecord]      = session->get_record_enabled();
 	lights_pending[LightAnysolo]     = session->soloing();
@@ -128,9 +128,9 @@ int TranzportControlProtocol::lights_show_normal()
 	return 0;
 }
 
-int TranzportControlProtocol::lights_show_tempo() 
+int TranzportControlProtocol::lights_show_tempo()
 {
-	// someday soon fiddle with the lights more sanely based on the tempo 
+	// someday soon fiddle with the lights more sanely based on the tempo
 	return     lights_show_normal();
 }
 
@@ -160,7 +160,7 @@ TranzportControlProtocol::update_state ()
 
 	case DisplayRecordingMeter:
 		lights_show_recording();
-		show_meter(); 
+		show_meter();
 		break;
 
 	case DisplayBling:
@@ -190,7 +190,7 @@ TranzportControlProtocol::prev_marker ()
 		session->goto_start ();
 		notify("START");
 	}
-     
+
 }
 
 void
@@ -327,7 +327,7 @@ TranzportControlProtocol::print_noretry (int row, int col, const char *text)
 	screen_invalid = mask;
 }
 
-void TranzportControlProtocol::invalidate() 
+void TranzportControlProtocol::invalidate()
 {
 	lcd_damage(); lights_invalidate(); screen_invalidate(); // one of these days lcds can be fine but screens not
 }

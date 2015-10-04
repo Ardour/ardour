@@ -34,7 +34,7 @@ class LIBGTKMM2EXT_API VisibilityTracker : public virtual sigc::trackable {
   public:
     VisibilityTracker (Gtk::Window&);
     virtual ~VisibilityTracker() {}
-    
+
     void cycle_visibility ();
 
     bool fully_visible() const;
@@ -51,4 +51,4 @@ class LIBGTKMM2EXT_API VisibilityTracker : public virtual sigc::trackable {
 
 }
 
-#endif /* __libgtkmm2ext_visibility_tracker__ */ 
+#endif /* __libgtkmm2ext_visibility_tracker__ */

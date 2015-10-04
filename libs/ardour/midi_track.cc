@@ -430,7 +430,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 		diskstream->flush_playback (start_frame, end_frame);
 
-	} 
+	}
 
 	
 	/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
@@ -965,7 +965,7 @@ MidiTrack::monitoring_state () const
 	MonitorState ms = Track::monitoring_state();
 	if (ms == MonitoringSilence) {
 		return MonitoringInput;
-	} 
+	}
 	return ms;
 }
 

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  */
 
 #include <iostream>
@@ -100,7 +100,7 @@ TranzportControlProtocol::show_wheel_mode ()
 	//    if ? greater. dont
 
 	if(session->transport_speed() != 0) {
-		show_mini_meter(); 
+		show_mini_meter();
 	} else {
 		
 		switch (wheel_mode) {
@@ -134,5 +134,5 @@ TranzportControlProtocol::show_wheel_mode ()
 		}
 		
 		print (1, 0, text.c_str());
-	} 
+	}
 }

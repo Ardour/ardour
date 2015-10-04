@@ -501,7 +501,7 @@ toggle_file_existence (string const & path)
 {
 	if (Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
 		return g_unlink (path.c_str());
-	} 
+	}
 
 	PBD::ScopedFileDescriptor fd = g_open (path.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666);
 	return !((int) fd >= 0);

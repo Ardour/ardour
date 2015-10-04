@@ -536,7 +536,7 @@ ARDOUR::get_jack_server_dir_paths (vector<std::string>& server_dir_paths)
 #ifdef PLATFORM_WINDOWS
 // N.B. The #define (immediately below) can be safely removed once we know that this code builds okay with mingw
 #ifdef COMPILER_MSVC
-	IShellLinkA  *pISL = NULL;    
+	IShellLinkA  *pISL = NULL;
 	IPersistFile *ppf  = NULL;
 
 	// Mixbus creates a Windows shortcut giving the location of its
@@ -940,7 +940,7 @@ ARDOUR::write_jack_config_file (const std::string& config_file_path, const strin
 }
 
 vector<string>
-ARDOUR::enumerate_midi_options () 
+ARDOUR::enumerate_midi_options ()
 {
 	if (midi_options.empty()) {
 #ifdef HAVE_ALSA

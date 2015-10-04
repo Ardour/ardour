@@ -82,7 +82,7 @@ InterpolationTest::linearInterpolationTest ()
 	}
 	/*
 	   for (int i=0; i < NUM_SAMPLES; ++i) {
-	   cout  << i << " " << output[i] << endl; 
+	   cout  << i << " " << output[i] << endl;
 	   }
 	   */
 }

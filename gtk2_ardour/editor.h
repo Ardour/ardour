@@ -809,7 +809,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::VBox                 time_bars_vbox;
 
 	ArdourCanvas::Pixbuf     *logo_item;
-#if 0    
+#if 0
     /* these will be needed when we have canvas rulers */
 	ArdourCanvas::Container      *minsec_group;
 	ArdourCanvas::Container      *bbt_group;
@@ -1703,7 +1703,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
-	void compute_current_bbt_points (framepos_t left, framepos_t right, 
+	void compute_current_bbt_points (framepos_t left, framepos_t right,
 					 ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 					 ARDOUR::TempoMap::BBTPointList::const_iterator& end);
 

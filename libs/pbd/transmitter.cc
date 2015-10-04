@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-99 Paul Barton-Davis 
+    Copyright (C) 1998-99 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ Transmitter::deliver ()
 
 	/* NOTE: this is just a default action for a Transmitter or a
 	   derived class. Any class can override this to produce some
-	   other action when deliver() is called. 
+	   other action when deliver() is called.
 	*/
 
 	*this << '\0';
@@ -98,7 +98,7 @@ Transmitter::deliver ()
  * provides some time for the user to see the message.
  */
 #endif
-	} 
+	}
 }
 
 bool
@@ -115,7 +115,7 @@ Transmitter::does_not_return ()
 
 extern "C" {
   void pbd_c_error (const char *str)
- 
+
   {
 	PBD::error << str << endmsg;
   }

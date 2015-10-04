@@ -29,7 +29,7 @@ struct ChromaConfig{
     MathUtilities::NormaliseType normalise;
 };
 
-class Chromagram 
+class Chromagram
 {
 
 public:	

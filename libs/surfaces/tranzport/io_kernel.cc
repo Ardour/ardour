@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  *   */
 
 #if HAVE_TRANZPORT_KERNEL_DRIVER
@@ -33,8 +33,8 @@ TranzportControlProtocol::probe ()
 {
 	if((udev = ::open(TRANZPORT_DEVICE,O_RDWR))> 0) {
 		::close(udev);
-		return true; 
-	} 
+		return true;
+	}
 	error << _("Tranzport: Can't open device for Read/Write: ") << endmsg;
 	return false;
 }
@@ -44,7 +44,7 @@ TranzportControlProtocol::open ()
 {
 	if((udev=::open(TRANZPORT_DEVICE,O_RDWR))> 0) {
 		return(udev);
-	} 
+	}
 	error << _("Tranzport: no device detected") << endmsg;
 	return udev;
 }
@@ -67,22 +67,22 @@ TranzportControlProtocol::close ()
 
 // someday do buffered reads, presently this does blocking reads, which is bad...
 
-int TranzportControlProtocol::read(uint8_t *buf, uint32_t timeout_override) 
+int TranzportControlProtocol::read(uint8_t *buf, uint32_t timeout_override)
 {
 	last_read_error = ::read (udev, (char *) buf, 8);
 	switch(errno) {
 	case -ENOENT:
 	case -ENXIO:
 	case -ECONNRESET:
-	case -ESHUTDOWN: 
-	case -ENODEV: 
+	case -ESHUTDOWN:
+	case -ENODEV:
 		cerr << "Tranzport disconnected, errno: " << last_read_error;
 		set_active(false);
 		break;
 	case -ETIMEDOUT: // This is not normal, but lets see what happened
 		cerr << "Tranzport read timed out, errno: " << last_read_error;
 		break;
-	default: 
+	default:
 #if DEBUG_TRANZPORT
 		cerr << "Got an unknown error on read:" << last_read_error "\n";
 #endif
@@ -90,7 +90,7 @@ int TranzportControlProtocol::read(uint8_t *buf, uint32_t timeout_override)
 	}
 
 	return last_read_error;
-} 
+}
 
 	
 int
@@ -109,15 +109,15 @@ TranzportControlProtocol::write_noretry (uint8_t* cmd, uint32_t timeout_override
 		case -ENOENT:
 		case -ENXIO:
 		case -ECONNRESET:
-		case -ESHUTDOWN: 
-		case -ENODEV: 
+		case -ESHUTDOWN:
+		case -ENODEV:
 			cerr << "Tranzport disconnected, errno: " << last_write_error;
 			set_active(false);
 			break;
 		case -ETIMEDOUT: // This is not normal but
 			cerr << "Tranzport disconnected, errno: " << last_write_error;
 			break;
-		default: 
+		default:
 #if DEBUG_TRANZPORT
 			cerr << "Got an unknown error on read:" << last_write_error "\n";
 #endif

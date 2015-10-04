@@ -75,7 +75,7 @@ class LIBARDOUR_API ExportGraphBuilder
   private:
 
 	void add_split_config (FileSpec const & config);
-    
+
 	class Encoder {
             public:
 		template <typename T> boost::shared_ptr<AudioGrapher::Sink<T> > init (FileSpec const & new_config);
@@ -99,7 +99,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		PBD::ScopedConnection  copy_files_connection;
 
 		std::string writer_filename;
-        
+
 		// Only one of these should be available at a time
 		FloatWriterPtr float_writer;
 		IntWriterPtr   int_writer;
@@ -175,7 +175,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		void remove_children (bool remove_out_files);
-        
+
 		bool operator== (FileSpec const & other_config) const;
 
 	                                        private:

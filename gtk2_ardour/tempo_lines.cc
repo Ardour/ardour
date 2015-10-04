@@ -99,7 +99,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 
 	i = end;
 	i--;
-	bars = (*i).bar - (*begin).bar; 
+	bars = (*i).bar - (*begin).bar;
 	beats = distance (begin, end) - bars;
 
 	beat_density = (beats * 10.0f) / lines.canvas()->width();

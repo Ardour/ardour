@@ -66,7 +66,7 @@ public:
 
         /** return @param y as a floating point fraction of the overall
          *  height of the rectangle. @param y is in canvas coordinate space.
-         * 
+         *
          *  A value of zero indicates that y is at the bottom of the
          *  rectangle; a value of 1 indicates that y is at the top.
          *

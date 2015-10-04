@@ -68,4 +68,4 @@ private:
 } // namespace
 
 #endif /* __libardour_waves_midi_device_h__ */
-    
+

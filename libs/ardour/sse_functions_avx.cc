@@ -48,9 +48,9 @@ x86_sse_avx_find_peaks(const float* buf, uint32_t nframes, float *min, float *ma
         // use 64 byte prefetch for quadruple quads:
 		// load each 64 bytes into cash before processing
         while (nframes >= 16) {
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)                                   
+#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 				_mm_prefetch(((char*)buf+64), _mm_hint(0) );
-#else    
+#else
                 __builtin_prefetch(buf+64,0,0);
 #endif
                 work = _mm256_load_ps(buf);

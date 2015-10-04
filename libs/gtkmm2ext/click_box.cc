@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Barton-Davis 
+    Copyright (C) 1999 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -115,7 +115,7 @@ ClickBox::set_label ()
 void
 ClickBox::style_changed (const Glib::RefPtr<Gtk::Style>&)
 {
-	layout->context_changed (); 
+	layout->context_changed ();
 	layout->get_pixel_size (twidth, theight);
 }
 

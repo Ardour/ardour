@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ public:
 		return _selection;
 	}
 
-	/** Set the `active' child; this is simply a child which is set to have the 
+	/** Set the `active' child; this is simply a child which is set to have the
 	 *  visual state "active" for whatever purposes the client may have.
 	 *  @param c Child, or 0 for none.
 	 */

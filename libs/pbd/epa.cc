@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010 Paul Davis 
+    Copyright (C) 2010 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ EnvironmentalProtectionAgency::save ()
         e.clear ();
 
         if (!_envname.empty()) {
-                
+
                 /* fetch environment from named environment variable, rather than "environ"
                  */
 
@@ -73,8 +73,8 @@ EnvironmentalProtectionAgency::save ()
                 if (!estr) {
                         return;
                 }
-                
-                /* parse line by line, and save into "e" 
+
+                /* parse line by line, and save into "e"
                  */
 
                 vector<string> lines;
@@ -84,40 +84,40 @@ EnvironmentalProtectionAgency::save ()
 
                         string estring = *i;
                         string::size_type equal = estring.find_first_of ('=');
-                        
+
                         if (equal == string::npos) {
                                 /* say what? an environ value without = ? */
                                 continue;
                         }
-                        
+
                         string before = estring.substr (0, equal);
                         string after = estring.substr (equal+1);
-                        
+
                         e.insert (pair<string,string>(before,after));
                 }
-                
+
         } else {
 
                 /* fetch environment from "environ"
                  */
 
                 for (size_t i = 0; environ[i]; ++i) {
-                        
+
                         string estring = environ[i];
                         string::size_type equal = estring.find_first_of ('=');
-                        
+
                         if (equal == string::npos) {
                                 /* say what? an environ value without = ? */
                                 continue;
                         }
-                        
+
                         string before = estring.substr (0, equal);
                         string after = estring.substr (equal+1);
-                        
+
                         e.insert (pair<string,string>(before,after));
                 }
         }
-}                         
+}
 void
 EnvironmentalProtectionAgency::restore () const
 {
@@ -126,7 +126,7 @@ EnvironmentalProtectionAgency::restore () const
         for (map<string,string>::const_iterator i = e.begin(); i != e.end(); ++i) {
                 g_setenv (i->first.c_str(), i->second.c_str(), 1);
         }
-} 
+}
 
 void
 EnvironmentalProtectionAgency::clear () const

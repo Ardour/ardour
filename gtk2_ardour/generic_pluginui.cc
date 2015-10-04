@@ -193,7 +193,7 @@ std::size_t length, n = 0;
 		if (!match_or_digit(s1[n], s2[n]))
 			break;
 		n++;
-	} 
+	}
 	return n;
 }
 
@@ -206,7 +206,7 @@ std::size_t s1pos, s2pos, n = 0;
 		if (!match_or_digit(s1[s1pos], s2[s2pos])	)
 			break;
 		n++;
-	} 
+	}
 	return n;
 }
 
@@ -389,12 +389,12 @@ GenericPluginUI::build ()
 		if (i > 0) {
 			// A hand-wavy calculation of how similar this control's
 			// label is to the previous.
-			similarity_scores[i] = 
-				(float) ( 
-					( matching_chars_at_head(label, previous_label) + 
+			similarity_scores[i] =
+				(float) (
+					( matching_chars_at_head(label, previous_label) +
 					  matching_chars_at_tail(label, previous_label) +
-					  1 
-					) 
+					  1
+					)
 				) / (label.length() + previous_label.length());
 			if (numbers_in_labels[i] >= 0) {
 				similarity_scores[i] += (numbers_in_labels[i] == numbers_in_labels[i-1]);
@@ -406,7 +406,7 @@ GenericPluginUI::build ()
 		}
 
 		// cerr << "label: " << label << " sim: " << fixed << setprecision(3) << similarity_scores[i] << " num: " << numbers_in_labels[i] << endl;
-		previous_label = label;		                       
+		previous_label = label;		
 	}
 
 	
@@ -420,7 +420,7 @@ GenericPluginUI::build ()
 	}
 	
 	// Now iterate over the list of controls to display them, placing an
-	// HSeparator between controls of less than a certain similarity, and 
+	// HSeparator between controls of less than a certain similarity, and
 	// starting a new column when necessary.
 	
 	i = 0;
@@ -829,7 +829,7 @@ GenericPluginUI::astate_clicked (ControlUI* cui)
 	automation_menu->popup (1, gtk_get_current_event_time());
 }
 
-void 
+void
 GenericPluginUI::set_all_automation (AutoState as)
 {
 	for (vector<ControlUI*>::iterator i = input_controls_with_automation.begin(); i != input_controls_with_automation.end(); ++i) {

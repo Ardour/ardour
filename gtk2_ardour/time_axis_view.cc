@@ -357,7 +357,7 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 			}
 			e.stepping_axis_view()->step_height (false);
 			return true;
-		} 
+		}
 		break;
 
 	case GDK_SCROLL_DOWN:
@@ -369,7 +369,7 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 			}
 			e.stepping_axis_view()->step_height (true);
 			return true;
-		} 
+		}
 		break;
 
 	default:
@@ -700,7 +700,7 @@ TimeAxisView::end_name_edit (int response)
 	}
 
 	if (ending_name_edit) {
-		/* already doing this, and focus out or other event has caused 
+		/* already doing this, and focus out or other event has caused
 		   us to re-enter this code.
 		*/
 		return;
@@ -767,7 +767,7 @@ TimeAxisView::end_name_edit (int response)
 		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
 			_editor.ensure_time_axis_view_is_visible (**i, false);
 			(*i)->begin_name_edit ();
-		} 
+		}
 
 	} else if (edit_prev) {
 
@@ -798,7 +798,7 @@ TimeAxisView::end_name_edit (int response)
 		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
 			_editor.ensure_time_axis_view_is_visible (**i, false);
 			(*i)->begin_name_edit ();
-		} 
+		}
 	}
 }
 

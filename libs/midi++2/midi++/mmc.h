@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Barton-Davis 
+    Copyright (C) 2000 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ class Parser;
 class MachineControlCommand;
 
 /** Class to handle incoming and outgoing MIDI machine control messages */
-class LIBMIDIPP_API MachineControl 
+class LIBMIDIPP_API MachineControl
 {
   public:
 	typedef PBD::Signal1<void,MachineControl&> MMCSignal;
@@ -95,7 +95,7 @@ class LIBMIDIPP_API MachineControl
 	};
 	
         MachineControl ();
-    
+
         void set_ports (MIDI::Port* input, MIDI::Port* output);
 
 	Port* input_port() { return _input_port; }
@@ -166,14 +166,14 @@ class LIBMIDIPP_API MachineControl
 	   status.
 	*/
 
-	PBD::Signal3<void,MachineControl &,size_t,bool> 
+	PBD::Signal3<void,MachineControl &,size_t,bool>
 		                             TrackRecordStatusChange;
 	
 	/* The second argument specifies the desired track record enabled
 	   status.
 	*/
 
-	PBD::Signal3<void,MachineControl &,size_t,bool> 
+	PBD::Signal3<void,MachineControl &,size_t,bool>
 		                             TrackMuteChange;
 	
 	/* The second argument points to a byte array containing

@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CAComponent.h
- 
+
 =============================================================================*/
 
 #ifndef __CAComponent_h__
@@ -52,7 +52,7 @@
 
 #include "CAComponentDescription.h"
 
-class CAComponent 
+class CAComponent
 {
 public:
 	CAComponent ()
@@ -61,7 +61,7 @@ public:
 		// if next is specifed that is used to find the next component after that one
 	CAComponent (const ComponentDescription& inDesc, CAComponent* next = 0);
 	
-	CAComponent (const CAComponent& y) 
+	CAComponent (const CAComponent& y)
 		: mComp (0), mDesc(), mManuName(0), mAUName(0), mCompName(0), mCompInfo (0) { *this = y; }
 
 	CAComponent (const Component& comp);
@@ -91,7 +91,7 @@ public:
 	
 	const CAComponentDescription&	Desc () const { return mDesc; }
 			
-	OSStatus		Open (ComponentInstance& outInst) const 
+	OSStatus		Open (ComponentInstance& outInst) const
 	{
 		return OpenAComponent (Comp(), &outInst);
   	}

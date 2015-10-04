@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CACFDictionary.h
- 
+
 =============================================================================*/
 #if !defined(__CACFDictionary_h__)
 #define __CACFDictionary_h__
@@ -57,7 +57,7 @@
 //	CACFDictionary
 //=============================================================================
 
-class CACFDictionary 
+class CACFDictionary
 {
 
 //	Construction/Destruction
@@ -66,7 +66,7 @@ public:
 							CACFDictionary(const CFDictionaryRef inCFDictionary, bool inRelease) : mCFDictionary(const_cast<CFMutableDictionaryRef>(inCFDictionary)), mRelease(inRelease), mMutable(true) {}
 							CACFDictionary(const CFMutableDictionaryRef inCFDictionary, bool inRelease) : mCFDictionary(inCFDictionary), mRelease(inRelease), mMutable(true) {}
 							CACFDictionary(const CACFDictionary& inDictionary) : mCFDictionary(inDictionary.mCFDictionary), mRelease(inDictionary.mRelease), mMutable(inDictionary.mMutable) { if(mRelease && (mCFDictionary != NULL)) { CFRetain(mCFDictionary); } }
-	CACFDictionary&			operator=(const CACFDictionary& inDictionary) { mCFDictionary = inDictionary.mCFDictionary; mRelease = inDictionary.mRelease; mMutable = inDictionary.mMutable; if(mRelease && (mCFDictionary != NULL)) { CFRetain(mCFDictionary); } return *this; } 
+	CACFDictionary&			operator=(const CACFDictionary& inDictionary) { mCFDictionary = inDictionary.mCFDictionary; mRelease = inDictionary.mRelease; mMutable = inDictionary.mMutable; if(mRelease && (mCFDictionary != NULL)) { CFRetain(mCFDictionary); } return *this; }
 							~CACFDictionary() { if(mRelease && (mCFDictionary != NULL)) { CFRelease(mCFDictionary); } }
 		
 //	Attributes

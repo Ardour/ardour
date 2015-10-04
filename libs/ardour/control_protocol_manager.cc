@@ -286,7 +286,7 @@ ControlProtocolManager::discover_control_protocols ()
 	find_files_matching_pattern (cp_modules, control_protocol_search_path (),
 	                             dylib_extension_pattern);
 
-	DEBUG_TRACE (DEBUG::ControlProtocols, 
+	DEBUG_TRACE (DEBUG::ControlProtocols,
 		     string_compose (_("looking for control protocols in %1\n"), control_protocol_search_path().to_string()));
 	
 	for (vector<std::string>::iterator i = cp_modules.begin(); i != cp_modules.end(); ++i) {
@@ -328,7 +328,7 @@ ControlProtocolManager::control_protocol_discover (string path)
 
 			control_protocol_info.push_back (cpi);
 
-			DEBUG_TRACE (DEBUG::ControlProtocols, 
+			DEBUG_TRACE (DEBUG::ControlProtocols,
 				     string_compose(_("Control surface protocol discovered: \"%1\"\n"), cpi->name));
 		}
 

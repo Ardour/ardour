@@ -90,10 +90,10 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
                     std::cerr << "WavesMidiDevice::open (): _input_queue = Pm_QueueCreate () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
                     return -1;
 				}
-			} 
+			}
 			// create stream
 			// COMMENTED DBG LOGS */ std::cout << "    going to Pm_OpenInput : " << std::endl;
-            if (pmNoError != Pm_OpenInput (&_input_pm_stream, 
+            if (pmNoError != Pm_OpenInput (&_input_pm_stream,
                                             _pm_input_id,
                                             NULL,
                                             1024,
@@ -108,9 +108,9 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
                     return -1;
             }
 			// COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
-		} 
-	} 
-        
+		}
+	}
+
 	if (is_output () ) {
 		// COMMENTED DBG LOGS */ std::cout << "WavesMidiDevice::open (): OUTPUT" << _pm_output_id << "-[" << name () <<  "]" << std::endl;
 
@@ -127,8 +127,8 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 			}
 			// create stream
 			// COMMENTED DBG LOGS */ std::cout << "    going to Pm_OpenOutput : " << std::endl;
-			if (pmNoError != Pm_OpenOutput (&_output_pm_stream, 
-			                                _pm_output_id, 
+			if (pmNoError != Pm_OpenOutput (&_output_pm_stream,
+			                                _pm_output_id,
 			                                NULL,
 			                                1024,
 			                                time_proc,
@@ -217,7 +217,7 @@ WavesMidiDevice::read_midi ()
         if (NULL == _input_pm_stream) {
                 return;
         }
-        
+
         while (Pm_Poll (_input_pm_stream) > 0) {
 
                 PmEvent pm_event; // just one message at a time
@@ -234,14 +234,14 @@ WavesMidiDevice::read_midi ()
                         DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1] new incomplete_waves_midi_event\n", name()));
                         _incomplete_waves_midi_event = new WavesMidiEvent (pm_event.timestamp);
                 }
-                
+
                 WavesMidiEvent *nested_pm_event = _incomplete_waves_midi_event->append_data (pm_event);
 
                 if (nested_pm_event) {
                         Pm_Enqueue (_input_queue, &nested_pm_event);
                         DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1] : Pm_Enqueue (_input_queue, nested_pm_event)\n", name()));
                 }
-                
+
                 switch ( _incomplete_waves_midi_event->state ()) {
                 case WavesMidiEvent::BROKEN:
                         delete _incomplete_waves_midi_event;
@@ -275,7 +275,7 @@ WavesMidiDevice::write_midi ()
 
         PmError err;
         WavesMidiEvent *waves_midi_event;
-        
+
         while (1 == Pm_Dequeue (_output_queue, &waves_midi_event)) {
                 if (waves_midi_event->sysex ()) {
                         // LATENCY compensation
@@ -297,28 +297,28 @@ WavesMidiDevice::write_midi ()
 
         return;
 }
-                 
+
 int
 WavesMidiDevice::enqueue_output_waves_midi_event (const WavesMidiEvent* waves_midi_event)
 {
         DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::enqueue_output_waves_midi_event () [%1]\n", name()));
-        
+
         if (waves_midi_event == NULL) {
                 error << "WavesMidiDevice::put_event_to_callback (): 'waves_midi_event' is NULL!" << endmsg;
                 return -1;
         }
-        
+
         PmError err = Pm_Enqueue (_output_queue, &waves_midi_event);
-        
+
         if (0 > err) {
                 error << "WavesMidiDevice::put_event_to_callback (): Pm_Enqueue () failed (" << err << ")!" << endmsg;
                 return -1;
         };
-        
+
         return 0;
 }
 
-WavesMidiEvent* 
+WavesMidiEvent*
 WavesMidiDevice::dequeue_input_waves_midi_event ()
 {
         WavesMidiEvent* waves_midi_event;

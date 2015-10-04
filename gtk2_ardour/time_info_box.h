@@ -55,7 +55,7 @@ class TimeInfoBox : public CairoHPacker, public ARDOUR::SessionHandlePtr
     AudioClock* selection_start;
     AudioClock* selection_end;
     AudioClock* selection_length;
-    
+
     AudioClock* punch_start;
     AudioClock* punch_end;
 

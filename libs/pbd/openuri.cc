@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ PBD::open_uri (const char* uri)
 }
 
 bool
-PBD::open_uri (const std::string& uri) 
+PBD::open_uri (const std::string& uri)
 {
 	return open_uri (uri.c_str());
 }

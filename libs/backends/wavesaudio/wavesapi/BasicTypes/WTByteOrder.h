@@ -51,7 +51,7 @@
 #define _BYTEORDER_BIG_ENDIAN 0
 #endif // big/little switch
 #else // if the compiler proparly has NOT set either __BIG_ENDIAN__ or __LITTLE_ENDIAN__
-// http://msdn.microsoft.com/en-us/library/b0084kay.aspx for all preprocessor defs. _M_X64: 64 bit. _M_IA64: Itanium 64bit 
+// http://msdn.microsoft.com/en-us/library/b0084kay.aspx for all preprocessor defs. _M_X64: 64 bit. _M_IA64: Itanium 64bit
 #if defined(__i386__) || defined(__i386) || defined(_M_IX86) || defined(__INTEL__) || defined(__x86_64__) || defined(_M_X64) || defined(_M_IA64)
 #define _BYTEORDER_BIG_ENDIAN 0
 #elif defined(_M_PPC) || defined(__POWERPC__ ) || defined(__ppc__)
@@ -86,7 +86,7 @@ namespace wvBO // namespace Waves::ByteOrder
     // We try to use this static const rather than preprocessor symbols in our code wherever possible.
 #if _BYTEORDER_BIG_ENDIAN == 1
     static const	byte_order_type compiler_byte_order = byte_order_big_endian;
-#else 
+#else
     static const	byte_order_type compiler_byte_order = byte_order_little_endian;
 #endif
 
@@ -113,8 +113,8 @@ namespace wvBO // namespace Waves::ByteOrder
         return x;
     }
     inline uint64_t swap64(uint64_t x)  // TODO: To be replaced
-    {   
-        return 
+    {
+        return
             ((x>>7*8)&0xFF)<<0*8 | ((x>>6*8)&0xFF)<<1*8 | ((x>>5*8)&0xFF)<<2*8 | ((x>>4*8)&0xFF)<<3*8 |
             ((x>>3*8)&0xFF)<<4*8 | ((x>>2*8)&0xFF)<<5*8 | ((x>>1*8)&0xFF)<<6*8 | ((x>>0*8)&0xFF)<<7*8 ;
     }
@@ -144,12 +144,12 @@ namespace wvBO // namespace Waves::ByteOrder
     // TODO
 #endif // _BYTEORDER_ASM_GNUC_PPC
 
-#if _BYTEORDER_ASM_NONE 
+#if _BYTEORDER_ASM_NONE
     inline uint16_t swap16(uint16_t x) { return (x>>8) | ((x&0xFF)<<8); }
     inline uint32_t swap32(uint32_t x) { return (x&0xFF)<<24 | (x&0xFF00)<<8 | (x&0xFF0000)>>8 | (x&0xFF000000)>>24; }
     inline uint64_t swap64(uint64_t x)
-    {   
-        return 
+    {
+        return
             ((x>>7*8)&0xFF)<<0*8 | ((x>>6*8)&0xFF)<<1*8 | ((x>>5*8)&0xFF)<<2*8 | ((x>>4*8)&0xFF)<<3*8 |
             ((x>>3*8)&0xFF)<<4*8 | ((x>>2*8)&0xFF)<<5*8 | ((x>>1*8)&0xFF)<<6*8 | ((x>>0*8)&0xFF)<<7*8 ;
     }
@@ -161,7 +161,7 @@ namespace wvBO // namespace Waves::ByteOrder
     //---------------------------------------------------------------------------------
 
     // order conversion functions
-    //    may want to overload for float and double as well. 
+    //    may want to overload for float and double as well.
     //    overload for signed ints is ambiguous and should be done only if no other choice exists.
     // - - - - - - - - - - - - - - - - - - - -
     inline uint16_t compiler_to_big_16(uint16_t x)

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Barton-Davis 
+    Copyright (C) 1999 Paul Barton-Davis
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -49,7 +49,7 @@ class LIBGTKMM2EXT_API Selector : public Gtk::VBox
 	friend class Gtkmm2ext::TreeView_Selector;
 
 public:
-	Selector (SelectorRefillFunction, void *arg, 
+	Selector (SelectorRefillFunction, void *arg,
 		  std::vector<std::string> titles);
 
 	virtual ~Selector ();

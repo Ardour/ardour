@@ -80,7 +80,7 @@ void mpeg7_constq(double** features, int nframes, int ncoeff)
 		features[i][ncoeff] = env;
 		if (env > maxenv)
 			maxenv = env;
-	} 
+	}
 	/* normalise the envelopes */
 	for (i = 0; i < nframes; i++)
 		features[i][ncoeff] /= maxenv;	
@@ -94,7 +94,7 @@ void create_histograms(int* x, int nx, int m, int hlen, double* h)
 	int i, j, t;
 	double norm;
 
-	for (i = 0; i < nx*m; i++) 
+	for (i = 0; i < nx*m; i++)
 	        h[i] = 0;
 
 	for (i = hlen/2; i < nx-hlen/2; i++)
@@ -120,7 +120,7 @@ void create_histograms(int* x, int nx, int m, int hlen, double* h)
 }
 
 /* segment using HMM and then histogram clustering */
-void cluster_segment(int* q, double** features, int frames_read, int feature_length, int nHMM_states, 
+void cluster_segment(int* q, double** features, int frames_read, int feature_length, int nHMM_states,
 					 int histogram_length, int nclusters, int neighbour_limit)
 {
 	int i, j;
@@ -137,7 +137,7 @@ void cluster_segment(int* q, double** features, int frames_read, int feature_len
 		maxval = 0;
 		for (j = 0; j < feature_length; j++)
 		{
-			if (features[i][j] > maxval) 
+			if (features[i][j] > maxval)
 			{
 				maxval = features[i][j];
 				maxbin = j;
@@ -172,14 +172,14 @@ void cluster_segment(int* q, double** features, int frames_read, int feature_len
 	hmm_print(model);
 */	
 	/* decode the hidden state sequence */
-	viterbi_decode(features, frames_read, model, q);  
+	viterbi_decode(features, frames_read, model, q);
 	hmm_close(model);
 	
 	/*****************************/
 	}
 	/*****************************/
 	
-    
+
 /*
 	fprintf(stderr, "HMM state sequence:\n");
 	for (i = 0; i < frames_read; i++)
@@ -203,12 +203,12 @@ void cluster_segment(int* q, double** features, int frames_read, int feature_len
 	
 	/* now q holds a sequence of cluster assignments */
 	
-	free(h);  
+	free(h);
 	free(bsched);
 }
 
 /* segment constant-Q or chroma features */
-void constq_segment(int* q, double** features, int frames_read, int bins, int ncoeff, int feature_type, 
+void constq_segment(int* q, double** features, int frames_read, int bins, int ncoeff, int feature_type,
 			 int nHMM_states, int histogram_length, int nclusters, int neighbour_limit)
 {
 	int feature_length;

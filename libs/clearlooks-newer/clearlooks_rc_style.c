@@ -80,7 +80,7 @@ clearlooks_gtk2_rc_symbols[] =
 	{ "contrast",           TOKEN_CONTRAST  },
 	{ "sunkenmenubar",      TOKEN_SUNKENMENU },
 	{ "progressbarstyle",   TOKEN_PROGRESSBARSTYLE },
-	{ "menubarstyle",       TOKEN_MENUBARSTYLE }, 
+	{ "menubarstyle",       TOKEN_MENUBARSTYLE },
 	{ "toolbarstyle",       TOKEN_TOOLBARSTYLE },
 	{ "menuitemstyle",      TOKEN_MENUITEMSTYLE },
 	{ "listviewitemstyle",  TOKEN_LISTVIEWITEMSTYLE },
@@ -281,7 +281,7 @@ clearlooks_gtk2_rc_parse_style (GtkSettings      *settings,
 	   return G_TOKEN_EQUAL_SIGN;
 
 	token = g_scanner_get_next_token (scanner);
-  
+
 	switch (token)
 	{
 		case TOKEN_CLASSIC:
@@ -333,7 +333,7 @@ static guint
 clearlooks_rc_style_parse (GtkRcStyle *rc_style,
 			   GtkSettings  *settings,
 			   GScanner   *scanner)
-		     
+		
 {
 	static GQuark scope_id = 0;
 	ClearlooksRcStyle *clearlooks_style = CLEARLOOKS_RC_STYLE (rc_style);

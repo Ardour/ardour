@@ -45,11 +45,11 @@
 #include "CAAUParameter.h"
 
 /*
-	The ParameterMap returned by the Map() method is a map where 
+	The ParameterMap returned by the Map() method is a map where
 		- the key is the clumpID
 		- the value is a ParameterList (vector<CAAUParameter>)
 		
-	If you have parameters on multiple scopes (or elements within a scope), then you should create one of these 
+	If you have parameters on multiple scopes (or elements within a scope), then you should create one of these
 	for each scope-element pair
 */
 
@@ -61,9 +61,9 @@ public:
 
 
 
-							AUParamInfo (AudioUnit		inAU, 
-									bool				inIncludeExpert, 
-									bool				inIncludeReadOnly, 
+							AUParamInfo (AudioUnit		inAU,
+									bool				inIncludeExpert,
+									bool				inIncludeReadOnly,
 									AudioUnitScope		inScope = kAudioUnitScope_Global,
 									AudioUnitElement	inElement = 0);
 									
@@ -74,12 +74,12 @@ public:
 	// some convenience methods
 	UInt32					NumParams () const { return mNumParams; }
 	
-	AudioUnitParameterID	ParamID (UInt32 inIndex) const 
-							{ 
-								if (inIndex < mNumParams) return mParamListID[inIndex]; 
-								return 0xFFFFFFFF; 
+	AudioUnitParameterID	ParamID (UInt32 inIndex) const
+							{
+								if (inIndex < mNumParams) return mParamListID[inIndex];
+								return 0xFFFFFFFF;
 							}
-							 
+							
 	UInt32					NumClumps () const { return mParams.size(); }
 
 	UInt32					NumParamsForClump (UInt32 inClump) const;

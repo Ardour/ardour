@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ __cpuid(int regs[4], int cpuid_leaf)
 	         "%ebx",
 #endif
 	         "%ecx", "%edx");
-        
+
         regs[0] = eax;
         regs[1] = ebx;
         regs[2] = ecx;
@@ -106,7 +106,7 @@ _xgetbv (uint32_t xcr)
 	// N.B.  The following would probably work for a pre-VC10 build,
 	// although it might suffer from optimization issues.  We'd need
 	// to place this function into its own (unoptimized) source file.
-	__asm {   
+	__asm {
 			 mov ecx, [xcr]
 			 __asm _emit 0x0f __asm _emit 0x01 __asm _emit 0xd0   /*xgetbv*/
 		  }
@@ -255,7 +255,7 @@ FPU::FPU ()
 		
 			if (mxcsr_mask & (1<<6)) {
 				_flags = Flags (_flags | HasDenormalsAreZero);
-			} 
+			}
 		
 #if !defined HAVE_POSIX_MEMALIGN && defined PLATFORM_WINDOWS
 			_aligned_free (*fxbuf);
@@ -284,7 +284,7 @@ FPU::FPU ()
 			}
 			cpu_brand.assign(cpu_string, cpu_string_ptr - cpu_string);
 			info << string_compose (_("CPU brand: %1"), cpu_brand) << endmsg;
-		} 
+		}
 	}
 #endif /* !ARCH_X86 */
 }			

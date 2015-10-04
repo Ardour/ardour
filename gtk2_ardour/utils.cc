@@ -205,15 +205,15 @@ ARDOUR_UI_UTILS::xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 	return (savergb);
 }
 
-/** Returns a Pango::FontDescription given a string describing the font. 
+/** Returns a Pango::FontDescription given a string describing the font.
  *
  * If the returned FontDescription does not specify a family, then
  * the family is set to "Sans". This mirrors GTK's behaviour in
- * gtkstyle.c. 
+ * gtkstyle.c.
  *
  * Some environments will force Pango to specify the family
  * even if it was not specified in the string describing the font.
- * Such environments should be left unaffected by this function, 
+ * Such environments should be left unaffected by this function,
  * since the font family will be left alone.
  *
  * There may be other similar font specification enforcement
@@ -427,7 +427,7 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
            appear to be. if it ever is necessar, figure out if it should apply
            to all platforms.
         */
-#if 0 
+#if 0
 	if (Keyboard::some_magic_widget_has_focus ()) {
                 allow_activating = false;
 	}
@@ -487,7 +487,7 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
 		 * automatically sent through the accel groups activation
 		 * pathway, which prevents individual widgets & canvas items
 		 * from ever seeing it if is used by a key binding.
-		 * 
+		 *
 		 * specifically, this hid Ctrl-down-arrow from MIDI region
 		 * views because it is also bound to an action.
 		 *
@@ -714,7 +714,7 @@ ARDOUR_UI_UTILS::longest (vector<string>& strings)
 bool
 ARDOUR_UI_UTILS::key_is_legal_for_numeric_entry (guint keyval)
 {
-	/* we assume that this does not change over the life of the process 
+	/* we assume that this does not change over the life of the process
 	 */
 
 	static int comma_decimal = -1;
@@ -879,7 +879,7 @@ ARDOUR_UI_UTILS::unique_random_color (list<Gdk::Color>& used_colors)
 	}
 }
 
-string 
+string
 ARDOUR_UI_UTILS::rate_as_string (float r)
 {
 	char buf[32];

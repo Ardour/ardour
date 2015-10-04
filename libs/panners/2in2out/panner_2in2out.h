@@ -82,7 +82,7 @@ class Panner2in2out : public Panner
 
   private:
         bool clamp_stereo_pan (double& direction_as_lr_fract, double& width);
-        
+
         void distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which);
         void distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
                                        framepos_t start, framepos_t end, pframes_t nframes,

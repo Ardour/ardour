@@ -66,7 +66,7 @@ instantiate (const std::string& arg1, const std::string& arg2)
 	return 0;
 }
 
-static int 
+static int
 deinstantiate ()
 {
 	backend.reset ();

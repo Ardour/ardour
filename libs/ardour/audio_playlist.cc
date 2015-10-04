@@ -502,7 +502,7 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 
 			if (!in) {
 				warning << string_compose (_("Legacy crossfade involved an incoming region not present in playlist \"%1\" - crossfade discarded"),
-							   name()) 
+							   name())
 					<< endmsg;
 				continue;
 			}
@@ -518,7 +518,7 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 
 			if (!out) {
 				warning << string_compose (_("Legacy crossfade involved an outgoing region not present in playlist \"%1\" - crossfade discarded"),
-							   name()) 
+							   name())
 					<< endmsg;
 				continue;
 			}
@@ -533,7 +533,7 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 			if (in->layer() <= out->layer()) {
 
 				/* incoming region is below the outgoing one,
-				 * so apply a fade out to the outgoing one 
+				 * so apply a fade out to the outgoing one
 				 */
 
 				const XMLNodeList c = (*i)->children ();

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Barton-Davis 
+    Copyright (C) 1999 Paul Barton-Davis
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -40,7 +40,7 @@ template<class T>
 class /*LIBPBD_API*/ DynamicTouchable : public Touchable
 {
   public:
-	DynamicTouchable (T& t, void (T::*m)(void)) 
+	DynamicTouchable (T& t, void (T::*m)(void))
 		: object (t), method (m) { set_delete_after_touch (true); }
 
 	void touch () {
@@ -56,7 +56,7 @@ template<class T1, class T2>
 class /*LIBPBD_API*/ DynamicTouchable1 : public Touchable
 {
   public:
-	DynamicTouchable1 (T1& t, void (T1::*m)(T2), T2 a) 
+	DynamicTouchable1 (T1& t, void (T1::*m)(T2), T2 a)
 		: object (t), method (m), arg (a) { set_delete_after_touch (true); }
 
 	void touch () {
@@ -73,7 +73,7 @@ template<class T1, class T2, class T3>
 class /*LIBPBD_API*/ DynamicTouchable2 : public Touchable
 {
   public:
-	DynamicTouchable2 (T1& t, void (T1::*m)(T2, T3), T2 a1, T3 a2) 
+	DynamicTouchable2 (T1& t, void (T1::*m)(T2, T3), T2 a1, T3 a2)
 		: object (t), method (m), arg1 (a1), arg2 (a2) { set_delete_after_touch (true); }
 
 	void touch () {

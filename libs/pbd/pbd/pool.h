@@ -1,6 +1,6 @@
 /*
     Copyright (C) 1998-99 Paul Barton-Davis
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -31,7 +31,7 @@
 /** A pool of data items that can be allocated, read from and written to
  *  without system memory allocation or locking.
  */
-class LIBPBD_API Pool 
+class LIBPBD_API Pool
 {
   public:
 	Pool (std::string name, unsigned long item_size, unsigned long nitems);
@@ -87,15 +87,15 @@ class LIBPBD_API PerThreadPool;
 
 /** Management of a per-thread pool of data that is allocated by one thread and
  *  freed by one other thread. Not safe for use when there is more than 1
- *  reader and 1 writer. 
+ *  reader and 1 writer.
  *
- *  This is basically a wrapper around a thread-local storage instance of a 
+ *  This is basically a wrapper around a thread-local storage instance of a
  *  ringbuffer, made safe for use in the case where multiple threads allocate
  *  from the ringbuffer and a single thread "frees" the allocations.
- * 
+ *
  *  Rather than using locks, each thread has its own ringbuffer (and associated
  *  data), and so it calls alloc(), passes a pointer to the result of the alloc
- *  to another thread, which later calls push() to "free" it. 
+ *  to another thread, which later calls push() to "free" it.
  */
 class LIBPBD_API CrossThreadPool : public Pool
 {

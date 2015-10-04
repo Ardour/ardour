@@ -44,7 +44,7 @@ namespace ARDOUR {
 class ExportTimespanSelector;
 class ExportChannelSelector;
 
-class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList 
+class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 {
 
   public:

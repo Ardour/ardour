@@ -21,7 +21,7 @@
 #define __libardour_waves_audiobackend_h__
 
 #include <string>
-#include <vector>    
+#include <vector>
 #include <list>
 
 #include <stdint.h>
@@ -76,17 +76,17 @@ class WavesMidiPort;
     /* AUDIOBACKEND API */
 
     virtual std::string name () const;
-    
+
     virtual bool is_realtime () const;
-    
+
     virtual bool requires_driver_selection () const;
-    
+
     virtual std::vector<std::string> enumerate_drivers () const;
-    
+
     virtual int set_driver (const std::string& /*drivername*/);
-    
+
     virtual std::vector<DeviceStatus> enumerate_devices () const;
-    
+
     virtual std::vector<float> available_sample_rates (const std::string& device) const;
 
     virtual float default_sample_rate () const;
@@ -112,9 +112,9 @@ class WavesMidiPort;
     virtual int set_sample_format (SampleFormat);
 
     virtual int set_interleaved (bool yn);
-    
+
     virtual int set_input_channels (uint32_t);
-    
+
     virtual int set_output_channels (uint32_t);
 
     virtual int set_systemic_input_latency (uint32_t);
@@ -127,21 +127,21 @@ class WavesMidiPort;
     virtual int reset_device ();
 
     virtual std::string device_name () const;
-    
+
     virtual float sample_rate () const;
-    
+
     virtual uint32_t buffer_size () const;
-    
+
     virtual SampleFormat sample_format () const;
-    
+
     virtual bool interleaved () const;
-    
+
     virtual uint32_t input_channels () const;
-    
+
     virtual uint32_t output_channels () const;
-    
+
     virtual uint32_t systemic_input_latency () const;
-    
+
     virtual uint32_t systemic_output_latency () const;
 
     uint32_t systemic_midi_input_latency (std::string const) const { return 0; }
@@ -194,7 +194,7 @@ class WavesMidiPort;
     virtual int usecs_per_cycle () const;
 
     virtual size_t raw_buffer_size (DataType data_type);
-    
+
     virtual framepos_t sample_time ();
 
     virtual framepos_t sample_time_at_cycle_start ();
@@ -222,9 +222,9 @@ class WavesMidiPort;
     /* PORTENGINE API */
 
     virtual void* private_handle () const;
- 
+
     virtual const std::string& my_name () const;
-    
+
     virtual bool available () const;
 
     virtual uint32_t port_name_size () const;
@@ -246,7 +246,7 @@ class WavesMidiPort;
     virtual int connect (const std::string& src, const std::string& dst);
 
     virtual int disconnect (const std::string& src, const std::string& dst);
-    
+
     virtual int connect (PortHandle port_handle, const std::string& port_name);
 
     virtual int disconnect (PortHandle port_handle, const std::string& port_name);
@@ -262,23 +262,23 @@ class WavesMidiPort;
     virtual int get_connections (PortHandle port_handle, std::vector<std::string>&, bool process_callback_safe);
 
     virtual int midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index);
-    
+
     virtual int midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
-    
+
     virtual uint32_t get_midi_event_count (void* port_buffer);
-    
+
     virtual void midi_clear (void* port_buffer);
 
     virtual bool can_monitor_input () const;
-    
+
     virtual int request_input_monitoring (PortHandle port_handle, bool);
-    
+
     virtual int ensure_input_monitoring (PortHandle port_handle, bool);
-    
+
     virtual bool monitoring_input (PortHandle port_handle);
 
     virtual void set_latency_range (PortHandle port_handle, bool for_playback, LatencyRange);
-    
+
     virtual LatencyRange get_latency_range (PortHandle port_handle, bool for_playback);
 
     virtual bool port_is_physical (PortHandle port_handle) const;
@@ -326,7 +326,7 @@ class WavesMidiPort;
         WavesAudioBackend* engine;
         boost::function<void ()> f;
         size_t stacksize;
-    
+
         ThreadData (WavesAudioBackend* e, boost::function<void ()> fp, size_t stacksz)
             : engine (e) , f (fp) , stacksize (stacksz) {}
     };
@@ -339,11 +339,11 @@ class WavesMidiPort;
 
     static void* __start_process_thread (void*);
     static uint64_t __get_time_nanos ();
-    
+
     static size_t __thread_stack_size ();
 
-    void _audio_device_callback (const float* input_audio_buffer, 
-                                 float* output_buffer, 
+    void _audio_device_callback (const float* input_audio_buffer,
+                                 float* output_buffer,
                                  unsigned long nframes,
                                  framepos_t sample_time,
                                  uint64_t cycle_start_time_nanos);
@@ -353,7 +353,7 @@ class WavesMidiPort;
 	// DO change sample rate and buffer size
 	int _buffer_size_change(uint32_t new_buffer_size);
 	int _sample_rate_change(float new_sample_rate);
-    
+
     int _register_system_audio_ports ();
     int _register_system_midi_ports ();
 
@@ -374,7 +374,7 @@ class WavesMidiPort;
     {
         return std::find (_ports.begin (), _ports.end (), (WavesDataPort*)port_handle) != _ports.end ();
     }
-    
+
     WavesDataPort* _find_port (const std::string& port_name) const;
     void _freewheel_thread ();
 
@@ -395,7 +395,7 @@ class WavesMidiPort;
     bool _freewheel_thread_active;
 
     friend class WavesMidiDeviceManager;
-    
+
     std::list<uint64_t> _dsp_load_history;
     size_t _dsp_load_history_length;
     uint64_t _dsp_load_accumulator;
@@ -406,4 +406,4 @@ class WavesMidiPort;
 } // namespace
 
 #endif /* __libardour_waves_audiobackend_h__ */
-    
+

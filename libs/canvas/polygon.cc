@@ -72,7 +72,7 @@ Polygon::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	}
 }
 
-void 
+void
 Polygon::cache_shape_computation () const
 {
 	Points::size_type npoints = _points.size();
@@ -95,17 +95,17 @@ Polygon::cache_shape_computation () const
 	for (i = 0; i < npoints; i++) {
 		if (_points[j].y == _points[i].y) {
 			constant[i] = _points[i].x;
-			multiple[i] = 0; 
+			multiple[i] = 0;
 		} else {
 			constant[i] = _points[i].x-(_points[i].y*_points[j].x)/(_points[j].y-_points[i].y)+(_points[i].y*_points[i].x)/(_points[j].y-_points[i].y);
-			multiple[i] = (_points[j].x-_points[i].x)/(_points[j].y-_points[i].y); 
+			multiple[i] = (_points[j].x-_points[i].x)/(_points[j].y-_points[i].y);
 		}
 
-		j = i; 
+		j = i;
 	}
 }
 
-bool 
+bool
 Polygon::covers (Duple const & point) const
 {
 	Duple p = window_to_item (point);
@@ -126,13 +126,13 @@ Polygon::covers (Duple const & point) const
 	
 	for (i = 0; i < npoints; i++) {
 		if (((_points[i].y < p.y && _points[j].y >= p.y) || (_points[j].y < p.y && _points[i].y >= p.y))) {
-			oddNodes ^= (p.y * multiple[i] + constant[i] < p.x); 
+			oddNodes ^= (p.y * multiple[i] + constant[i] < p.x);
 		}
-		j = i; 
+		j = i;
 	}
 
-	return oddNodes; 
-} 
+	return oddNodes;
+}
 
 void
 Polygon::compute_bounding_box () const

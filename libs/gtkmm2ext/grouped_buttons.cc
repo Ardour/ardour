@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ GroupedButtons::GroupedButtons (uint32_t nbuttons, uint32_t first_active)
 		
 		if (n == current_active) {
 			button->set_active (true);
-		} 
+		}
 
 		button->signal_clicked().connect (sigc::bind (mem_fun (*this, &GroupedButtons::one_clicked), n));
 		buttons.push_back (button);

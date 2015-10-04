@@ -101,7 +101,7 @@ MD5::Init ()
  * context.
  */
 
-void 
+void
 MD5::Update(uint8_t const *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
@@ -139,7 +139,7 @@ MD5::Update(uint8_t const *input, size_t inputLen)
 // the message digest and zeroizing the context.
 // Writes to digestRaw
 
-void 
+void
 MD5::Final()
 {
 	uint8_t bits[8];
@@ -165,8 +165,8 @@ MD5::Final()
 	writeToString();
 }
 
-/// Buffer must be 32+1 (nul) = 33 chars long at least 
-void 
+/// Buffer must be 32+1 (nul) = 33 chars long at least
+void
 MD5::writeToString()
 {
 	int pos;
@@ -178,7 +178,7 @@ MD5::writeToString()
 
 /// Load a file from disk and digest it
 // Digests a file and returns the result.
-char* 
+char*
 MD5::digestFile (char *filename)
 {
 	Init();
@@ -201,18 +201,18 @@ MD5::digestFile (char *filename)
 }
 
 /// Digests a byte-array already in memory
-char* 
+char*
 MD5::digestMemory (uint8_t const * memchunk, size_t len)
 {
 	Init ();
 	Update (memchunk, len);
 	Final ();
-    
+
 	return digestChars;
 }
 
 // Digests a string and prints the result.
-char* 
+char*
 MD5::digestString (char const * string)
 {
 	Init ();
@@ -222,7 +222,7 @@ MD5::digestString (char const * string)
 	return digestChars;
 }
 
-void 
+void
 MD5::Transform (uint32_t state[4], uint8_t const * block)
 {
 	uint32_t a = state[0], b = state[1], c = state[2], d = state[3], x[16];
@@ -313,7 +313,7 @@ MD5::Transform (uint32_t state[4], uint8_t const * block)
 /* Encodes input (uint32_t) into output (unsigned char). Assumes len is
  * a multiple of 4.
  */
-void 
+void
 MD5::Encode (uint8_t *output, uint32_t const * input, size_t len)
 {
 	size_t i, j;
@@ -330,7 +330,7 @@ MD5::Encode (uint8_t *output, uint32_t const * input, size_t len)
  * a multiple of 4.
  */
 
-void 
+void
 MD5::Decode (uint32_t *output, uint8_t const * input, size_t len)
 {
 	size_t i, j;

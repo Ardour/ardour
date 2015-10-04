@@ -481,10 +481,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 *
 	 * Argument is the snapshot name to use when saving.
 	 */
-	PBD::Signal1<void,std::string> SaveSessionRequested; 
+	PBD::Signal1<void,std::string> SaveSessionRequested;
 
 	/* emitted during a session save to allow other entities to add state, via
-	 * extra XML, to the session state 
+	 * extra XML, to the session state
 	 */
 	PBD::Signal0<void> SessionSaveUnderway;
 
@@ -568,7 +568,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
 		const ChanCount& input, const ChanCount& output,
 		boost::shared_ptr<PluginInfo> instrument = boost::shared_ptr<PluginInfo>(),
-		TrackMode mode = Normal, 
+		TrackMode mode = Normal,
 		RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = ""
 		);
 
@@ -1030,7 +1030,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<MidiPort> midi_clock_input_port () const;
 	boost::shared_ptr<MidiPort> mtc_output_port () const;
 	boost::shared_ptr<MidiPort> mtc_input_port () const;
-    
+
 	MIDI::MachineControl& mmc() { return *_mmc; }
 
 	void reconnect_midi_scene_ports (bool);
@@ -1301,7 +1301,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void consolidate_skips (Location*);
 	void sync_locations_to_skips ();
 	void _sync_locations_to_skips ();
-    
+
 	PBD::ScopedConnectionList skip_update_connections;
 	bool _ignore_skips_updates;
 

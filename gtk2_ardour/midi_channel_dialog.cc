@@ -34,7 +34,7 @@ MidiChannelDialog::MidiChannelDialog (uint8_t active_channel)
 	add_button (Stock::OK, RESPONSE_OK);
 }
 
-uint8_t 
+uint8_t
 MidiChannelDialog::active_channel () const
 {
 	return selector.get_active_channel();

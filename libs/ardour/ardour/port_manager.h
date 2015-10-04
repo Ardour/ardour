@@ -40,12 +40,12 @@ namespace ARDOUR {
 class PortEngine;
 class AudioBackend;
 
-class LIBARDOUR_API PortManager 
+class LIBARDOUR_API PortManager
 {
   public:
 	typedef std::map<std::string,boost::shared_ptr<Port> > Ports;
 	typedef std::list<boost::shared_ptr<Port> > PortList;
-    
+
 	PortManager ();
 	virtual ~PortManager() {}
 
@@ -55,13 +55,13 @@ class LIBARDOUR_API PortManager
 	std::string my_name() const;
 
 	/* Port registration */
-    
+
 	boost::shared_ptr<Port> register_input_port (DataType, const std::string& portname, bool async = false);
 	boost::shared_ptr<Port> register_output_port (DataType, const std::string& portname, bool async = false);
 	int unregister_port (boost::shared_ptr<Port>);
-    
+
 	/* Port connectivity */
-    
+
 	int  connect (const std::string& source, const std::string& destination);
 	int  disconnect (const std::string& source, const std::string& destination);
 	int  disconnect (boost::shared_ptr<Port>);
@@ -82,9 +82,9 @@ class LIBARDOUR_API PortManager
 	std::string             get_pretty_name_by_name (const std::string& portname) const;
 	bool                    port_is_mine (const std::string& fullname) const;
 	bool                    port_name_prefix_is_unique (const std::string& first_part_of_port_name) const;
-    
+
 	/* other Port management */
-    
+
 	bool      port_is_physical (const std::string&) const;
 	void      get_physical_outputs (DataType type, std::vector<std::string>&);
 	void      get_physical_inputs (DataType type, std::vector<std::string>&);
@@ -95,13 +95,13 @@ class LIBARDOUR_API PortManager
 	int get_ports (DataType, PortList&);
 
 	void remove_all_ports ();
-    
+
 	/* per-Port monitoring */
-    
+
 	bool can_request_input_monitoring () const;
 	void request_input_monitoring (const std::string&, bool) const;
 	void ensure_input_monitoring (const std::string&, bool) const;
-    
+
 	class PortRegistrationFailure : public std::exception {
 	                                        public:
 		PortRegistrationFailure (std::string const & why = "")
@@ -116,7 +116,7 @@ class LIBARDOUR_API PortManager
 	};
 
 	/* the port engine will invoke these callbacks when the time is right */
-    
+
 	void registration_callback ();
 	int graph_order_callback ();
 	void connect_callback (const std::string&, const std::string&, bool connection);
@@ -128,7 +128,7 @@ class LIBARDOUR_API PortManager
 
 	/** Emitted if a Port is registered or unregistered */
 	PBD::Signal0<void> PortRegisteredOrUnregistered;
-    
+
 	/** Emitted if a Port is connected or disconnected.
 	 *  The Port parameters are the ports being connected / disconnected, or 0 if they are not known to Ardour.
 	 *  The std::string parameters are the (long) port names.

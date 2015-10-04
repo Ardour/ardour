@@ -79,7 +79,7 @@ BufferSet::clear()
 	_count.reset();
 	_available.reset();
 
-#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT 
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
 	for (VSTBuffers::iterator i = _vst_buffers.begin(); i != _vst_buffers.end(); ++i) {
 		delete *i;
 	}

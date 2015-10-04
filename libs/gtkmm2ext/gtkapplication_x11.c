@@ -1,4 +1,4 @@
-/* GTK+ Integration with platform-specific application-wide features 
+/* GTK+ Integration with platform-specific application-wide features
  * such as the OS X menubar and application delegate concepts (for X11)
  *
  * Copyright (C) 2007 Pioneer Research Center USA, Inc.
@@ -23,7 +23,7 @@
 
 #include <gtkmm2ext/gtkapplication.h>
 
-int  
+int
 gtk_application_init (void)
 {
 	return 0;
@@ -33,13 +33,13 @@ void gtk_application_cleanup (void)
 {
 }
 
-void                      
+void
 gtk_application_set_menu_bar (GtkMenuShell* menushell)
 {
 	(void) menushell;
 }
 
-void                      
+void
 gtk_application_add_app_menu_item (GtkApplicationMenuGroup* group, GtkMenuItem* item)
 {
 	(void) group;

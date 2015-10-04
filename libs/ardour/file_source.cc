@@ -319,7 +319,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 			
 			keeppath = de_duped_hits[0];
 		}
-						   
+						
        } else {
                 keeppath = path;
         }
@@ -590,7 +590,7 @@ FileSource::rename (const string& newpath)
 		return -1;
 	}
 
-	if (Glib::file_test (oldpath.c_str(), Glib::FILE_TEST_EXISTS)) { 
+	if (Glib::file_test (oldpath.c_str(), Glib::FILE_TEST_EXISTS)) {
 		/* rename only needed if file exists on disk */
 		if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
 			error << string_compose (_("cannot rename file %1 to %2 (%3)"), oldpath, newpath, strerror(errno)) << endmsg;

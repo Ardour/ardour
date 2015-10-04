@@ -24,7 +24,7 @@ using namespace PBD;
 using namespace std;
 
 void
-setup_libpbd_enums () 
+setup_libpbd_enums ()
 {
 	EnumWriter& enum_writer (EnumWriter::instance());
 	vector<int> i;

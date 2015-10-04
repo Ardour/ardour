@@ -490,7 +490,7 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 }
 
 
-void load_custom_fonts() 
+void load_custom_fonts()
 {
 	std::string ardour_mono_file;
 

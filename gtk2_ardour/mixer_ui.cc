@@ -76,11 +76,11 @@ using PBD::Unwinder;
 Mixer_UI* Mixer_UI::_instance = 0;
 
 Mixer_UI*
-Mixer_UI::instance () 
+Mixer_UI::instance ()
 {
 	if (!_instance) {
 		_instance  = new Mixer_UI;
-	} 
+	}
 
 	return _instance;
 }
@@ -357,7 +357,7 @@ Mixer_UI::add_strips (RouteList& routes)
 					if (mnode) {
 						_monitor_section->tearoff().set_state (*mnode);
 					}
-				} 
+				}
 				
 				out_packer.pack_end (_monitor_section->tearoff(), false, false);
 				_monitor_section->set_session (_session);
@@ -701,7 +701,7 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 
 					for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
 						if ((*i) == strip) {
-							/* hit clicked strip, start accumulating till we hit the first 
+							/* hit clicked strip, start accumulating till we hit the first
 							   selected strip
 							*/
 							if (accumulate) {
@@ -1059,7 +1059,7 @@ Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 {
 	/* this happens as the second step of a DnD within the treeview as well
 	   as when a row/route is actually deleted.
-           
+
            if it was a deletion then we have to force a redisplay because
            order keys may not have changed.
 	*/

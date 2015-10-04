@@ -99,7 +99,7 @@ private:
 	 */
 	int pre_gui_init ();
 
-	/** called after the GUI toolkit has been initialized. 
+	/** called after the GUI toolkit has been initialized.
 	 */
 	UIConfiguration* post_gui_init ();
 	

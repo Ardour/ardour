@@ -20,7 +20,7 @@ class /*LIBAUDIOGRAPHER_API*/ Interleaver
   : public ListedSource<T>
   , public Throwing<>
 {
-  public: 
+  public:
 	
 	/// Constructs an interleaver \n RT safe
 	Interleaver()
@@ -57,8 +57,8 @@ class /*LIBAUDIOGRAPHER_API*/ Interleaver
 		return boost::static_pointer_cast<Sink<T> > (inputs[channel]);
 	}
 	
-  private: 
- 
+  private:
+
 	class Input : public Sink<T>
 	{
 	  public:

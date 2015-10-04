@@ -50,12 +50,12 @@ class Surface;
 	Make a relationship between a midi port and a Mackie device.
 */
 
-class SurfacePort 
+class SurfacePort
 {
 public:
     SurfacePort (Mackie::Surface&);
     virtual ~SurfacePort();
-    
+
     /// an easier way to output bytes via midi
     int write (const MidiByteArray&);
 	

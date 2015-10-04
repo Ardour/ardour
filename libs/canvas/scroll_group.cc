@@ -94,7 +94,7 @@ ScrollGroup::covers_canvas (Duple const& d) const
            to consider the position of the bounding box
            within the canvas.
         */
-        
+
 	return r->translate (position()).contains (d);
 }
 
@@ -109,8 +109,8 @@ ScrollGroup::covers_window (Duple const& d) const
 
         /* Bounding box is in item coordinates, but we need
            to consider the position of the bounding box
-           within the canvas. 
+           within the canvas.
         */
-        
+
 	return r->translate (position()).contains (d);
 }

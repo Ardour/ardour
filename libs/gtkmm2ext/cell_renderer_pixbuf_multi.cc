@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2009 Paul Davis
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -30,7 +30,7 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 
 
-CellRendererPixbufMulti::CellRendererPixbufMulti() : 
+CellRendererPixbufMulti::CellRendererPixbufMulti() :
 	Glib::ObjectBase( typeid(CellRendererPixbufMulti) ),
 	Gtk::CellRenderer(),
 	property_state_(*this, "active", 0)
@@ -41,27 +41,27 @@ CellRendererPixbufMulti::CellRendererPixbufMulti() :
 	property_sensitive() = false;
 }
 
-Glib::PropertyProxy<uint32_t> 
+Glib::PropertyProxy<uint32_t>
 CellRendererPixbufMulti::property_state()
 {
 	return property_state_.get_proxy();
-} 
+}
 
-// Overridden methods of the parent CellRenderer  
-Glib::PropertyProxy_Base 
+// Overridden methods of the parent CellRenderer
+Glib::PropertyProxy_Base
 CellRendererPixbufMulti::_property_renderable()
 {
 	return property_state();
-}  
+}
 
-bool 
+bool
 CellRendererPixbufMulti::activate_vfunc(GdkEvent*, Gtk::Widget&, const Glib::ustring& path, const Gdk::Rectangle&, const Gdk::Rectangle&, Gtk::CellRendererState)
 {
 	signal_changed_(path);
 	return true;
 }
 
-void 
+void
 CellRendererPixbufMulti::render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window, Gtk::Widget& /*widget*/, const Gdk::Rectangle& /*background_area*/, const Gdk::Rectangle& cell_area, const Gdk::Rectangle& /*expose_area*/, Gtk::CellRendererState /*flags*/)
 {
 	int offset_width = 0;
@@ -74,7 +74,7 @@ CellRendererPixbufMulti::render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window
 	window->draw_pixbuf (RefPtr<GC>(), pb, 0, 0, offset_width, offset_height, -1, -1, Gdk::RGB_DITHER_NORMAL, 0, 0);
 }
 
-void 
+void
 CellRendererPixbufMulti::get_size_vfunc (Gtk::Widget& /*widget*/, const Gdk::Rectangle* /*cell_area*/, int* /*x_offset*/, int* /*y_offset*/, int* /*width*/, int* /*height*/) const
 {
 }
@@ -84,7 +84,7 @@ CellRendererPixbufMulti::set_pixbuf(uint32_t which, Glib::RefPtr<Gdk::Pixbuf> pi
 	_pixbufs[which] = pixbuf;
 }
 
-CellRendererPixbufMulti::SignalChanged& 
+CellRendererPixbufMulti::SignalChanged&
 CellRendererPixbufMulti::signal_changed()
 {
   return signal_changed_;

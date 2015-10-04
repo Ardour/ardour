@@ -168,7 +168,7 @@ PortManager::get_physical_outputs (DataType type, std::vector<std::string>& s)
 	}
 	_backend->get_physical_outputs (type, s);
 }
- 
+
 void
 PortManager::get_physical_inputs (DataType type, std::vector<std::string>& s)
 {
@@ -178,7 +178,7 @@ PortManager::get_physical_inputs (DataType type, std::vector<std::string>& s)
 
 	_backend->get_physical_inputs (type, s);
 }
- 
+
 ChanCount
 PortManager::n_physical_outputs () const
 {
@@ -188,7 +188,7 @@ PortManager::n_physical_outputs () const
 
 	return _backend->n_physical_outputs ();
 }
- 
+
 ChanCount
 PortManager::n_physical_inputs () const
 {
@@ -210,7 +210,7 @@ PortManager::port_name_prefix_is_unique (const string& first_part_of_port_name) 
 	
 	for (Ports::const_iterator x = pr->begin(); x != pr->end(); ++x) {
 
-		string prefix = x->first.substr (0, len); 
+		string prefix = x->first.substr (0, len);
 
 		if (strings_equal_ignore_case (prefix, first_part_of_port_name)) {
 			return false;
@@ -568,7 +568,7 @@ PortManager::can_request_input_monitoring () const
 
 	return _backend->can_monitor_input ();
 }
- 
+
 void
 PortManager::request_input_monitoring (const string& name, bool yn) const
 {
@@ -582,7 +582,7 @@ PortManager::request_input_monitoring (const string& name, bool yn) const
 		_backend->request_input_monitoring (ph, yn);
 	}
 }
- 
+
 void
 PortManager::ensure_input_monitoring (const string& name, bool yn) const
 {

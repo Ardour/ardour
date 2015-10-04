@@ -329,7 +329,7 @@ Editor::canvas_wave_view_event (GdkEvent *event, ArdourCanvas::Item* item, Regio
 	}
 
 	return ret;
-}	 
+}	
 
 
 bool
@@ -1233,8 +1233,8 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 			    (boost::dynamic_pointer_cast<MidiRegion> (region) != 0 &&
 			     dynamic_cast<MidiTimeAxisView*> (tv.first) != 0)) {
 				
-				/* audio to audio 
-				   OR 
+				/* audio to audio
+				   OR
 				   midi to midi
 				*/
 				

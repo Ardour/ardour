@@ -244,7 +244,7 @@ private:
 	CairoCell* find_cell (uint32_t x, uint32_t y);
 	void queue_draw_cell (CairoCell* target);
         void position_cells_and_get_bbox (GdkRectangle&);
-        void set_cell_sizes (); 
+        void set_cell_sizes ();
 };
 
 #endif /* __libgtmm2ext_cairocell_h__ */

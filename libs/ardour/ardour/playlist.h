@@ -250,7 +250,7 @@ public:
 
     class RegionWriteLock : public Glib::Threads::RWLock::WriterLock {
     public:
-	    RegionWriteLock (Playlist *pl, bool do_block_notify = true) 
+	    RegionWriteLock (Playlist *pl, bool do_block_notify = true)
                     : Glib::Threads::RWLock::WriterLock (pl->region_lock)
                     , playlist (pl)
                     , block_notify (do_block_notify) {

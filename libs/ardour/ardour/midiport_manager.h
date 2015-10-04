@@ -1,6 +1,6 @@
 /*
     Copyright (C) 1998 Paul Barton-Davis
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -45,12 +45,12 @@ class LIBARDOUR_API MidiPortManager {
 	
     /* Ports used for control. These are read/written to outside of the
      * process callback (asynchronously with respect to when data
-     * actually arrives). 
+     * actually arrives).
      *
      * More detail: we do actually read/write data for these ports
      * inside the process callback, but incoming data is only parsed
      * and outgoing data is only generated *outside* the process
-     * callback. 
+     * callback.
      */
 
     MIDI::Port* midi_input_port () const { return _midi_input_port; }
@@ -59,7 +59,7 @@ class LIBARDOUR_API MidiPortManager {
     MIDI::Port* mmc_output_port () const { return _mmc_output_port; }
     MIDI::Port* scene_input_port () const { return _scene_input_port; }
     MIDI::Port* scene_output_port () const { return _scene_output_port; }
-    
+
     boost::shared_ptr<MidiPort> mmc_in() const { return boost::dynamic_pointer_cast<MidiPort>(_mmc_in); }
     boost::shared_ptr<MidiPort> mmc_out() const { return boost::dynamic_pointer_cast<MidiPort>(_mmc_out); }
 
@@ -74,7 +74,7 @@ class LIBARDOUR_API MidiPortManager {
     boost::shared_ptr<MidiPort> mtc_output_port() const { return _mtc_output_port; }
     boost::shared_ptr<MidiPort> midi_clock_input_port() const { return _midi_clock_input_port; }
     boost::shared_ptr<MidiPort> midi_clock_output_port() const { return _midi_clock_output_port; }
-    
+
     void set_midi_port_states (const XMLNodeList&);
     std::list<XMLNode*> get_midi_port_states () const;
 

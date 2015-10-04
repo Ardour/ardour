@@ -28,7 +28,7 @@ namespace PBD {
 
 LIBPBD_API void spherical_to_cartesian (double azi, double ele, double len, double& x, double& y, double& z);
 LIBPBD_API void cartesian_to_spherical (double x, double y, double z, double& azi, double& ele, double& len);
-        
+
 struct AngularVector;
 
 struct LIBPBD_API CartesianVector {

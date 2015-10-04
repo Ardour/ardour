@@ -1,6 +1,6 @@
 /*
     Copyright (C) 1998-99 Paul Barton-Davis
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -43,7 +43,7 @@ Pool::Pool (string n, unsigned long item_size, unsigned long nitems)
 
 	/* since some overloaded ::operator new() might use this,
 	   its important that we use a "lower level" allocator to
-	   get more space.  
+	   get more space.
 	*/
 
 	block = malloc (nitems * item_size);
@@ -99,7 +99,7 @@ Pool::release (void *ptr)
 
 /*---------------------------------------------*/
 
-MultiAllocSingleReleasePool::MultiAllocSingleReleasePool (string n, unsigned long isize, unsigned long nitems) 
+MultiAllocSingleReleasePool::MultiAllocSingleReleasePool (string n, unsigned long isize, unsigned long nitems)
 	: Pool (n, isize, nitems)
 {
 }
@@ -108,7 +108,7 @@ MultiAllocSingleReleasePool::~MultiAllocSingleReleasePool ()
 {
 }
 
-SingleAllocMultiReleasePool::SingleAllocMultiReleasePool (string n, unsigned long isize, unsigned long nitems) 
+SingleAllocMultiReleasePool::SingleAllocMultiReleasePool (string n, unsigned long isize, unsigned long nitems)
 	: Pool (n, isize, nitems)
 {
 }
@@ -147,7 +147,7 @@ SingleAllocMultiReleasePool::release (void* ptr)
 
 /*-------------------------------------------------------*/
 
-static void 
+static void
 free_per_thread_pool (void* ptr)
 {
 	/* Rather than deleting the CrossThreadPool now, we add it to our trash buffer.
@@ -170,7 +170,7 @@ free_per_thread_pool (void* ptr)
 		cp->parent()->add_to_trash (cp);
 	}
 }
- 
+
 PerThreadPool::PerThreadPool ()
 	: _key (free_per_thread_pool)
 	, _trash (0)
@@ -264,7 +264,7 @@ CrossThreadPool::flush_pending ()
 	
 	DEBUG_TRACE (DEBUG::Pool, string_compose ("%1 %2 has %3 pending free entries waiting, status size %4 free %5 used %6\n", pthread_name(), name(), pending.read_space(),
 	                                          total(), available(), used()));
-	                                          
+	
 	while (pending.read (&ptr, 1) == 1) {
 		DEBUG_TRACE (DEBUG::Pool, string_compose ("%1 %2 pushes back a pending free list entry before allocating\n", pthread_name(), name()));
 		free_list.write (&ptr, 1);
@@ -277,7 +277,7 @@ CrossThreadPool::flush_pending ()
 }
 
 void*
-CrossThreadPool::alloc () 
+CrossThreadPool::alloc ()
 {
 	/* process anything waiting to be deleted (i.e. moved back to the free list)  */
 	flush_pending ();
@@ -286,7 +286,7 @@ CrossThreadPool::alloc ()
 }
 
 void
-CrossThreadPool::push (void* t) 
+CrossThreadPool::push (void* t)
 {
 	pending.write (&t, 1);
 }

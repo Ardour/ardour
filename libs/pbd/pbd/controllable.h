@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -134,12 +134,12 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
    a Controllable
 */
 
-class LIBPBD_API IgnorableControllable : public Controllable 
+class LIBPBD_API IgnorableControllable : public Controllable
 {
-  public: 
+  public:
 	IgnorableControllable () : PBD::Controllable ("ignoreMe") {}
 	~IgnorableControllable () {}
-    
+
 	void set_value (double /*v*/) {}
 	double get_value () const { return 0.0; }
 };

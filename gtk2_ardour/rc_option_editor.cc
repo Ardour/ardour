@@ -27,7 +27,7 @@
 
 #include <cairo/cairo.h>
 
-#include <boost/algorithm/string.hpp>    
+#include <boost/algorithm/string.hpp>
 
 #include <gtkmm/liststore.h>
 #include <gtkmm/stock.h>
@@ -1019,7 +1019,7 @@ private:
 class ClipLevelOptions : public OptionEditorBox
 {
 public:
-	ClipLevelOptions () 
+	ClipLevelOptions ()
 		: _clip_level_adjustment (-.5, -50.0, 0.0, 0.1, 1.0) /* units of dB */
 		, _clip_level_slider (_clip_level_adjustment)
 	{
@@ -1927,7 +1927,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_loop_is_mode),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_loop_is_mode)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
 					    (_("<b>When enabled</b> the loop button does not start playback but forces playback to always play the loop\n\n"
 					       "<b>When disabled</b> the loop button starts playing the loop, but stop then cancels loop playback")));
 	add_option (_("Transport"), tsf);
@@ -1938,7 +1938,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
 					    string_compose (_("<b>When enabled</b> %1 will stop recording if an over- or underrun is detected by the audio engine"),
 							    PROGRAM_NAME));
 	add_option (_("Transport"), tsf);
@@ -1958,7 +1958,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_at_session_end),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_at_session_end)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
 					    string_compose (_("<b>When enabled</b> if %1 is <b>not recording</b>, it will stop the transport "
 							      "when it reaches the current session end marker\n\n"
 							      "<b>When disabled</b> %1 will continue to roll past the session end marker at all times"),
@@ -1971,7 +1971,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_seamless_loop),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_seamless_loop)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
 					    string_compose (_("<b>When enabled</b> this will loop by reading ahead and wrapping around at the loop point, "
 							      "preventing any need to do a transport locate at the end of the loop\n\n"
 							      "<b>When disabled</b> looping is done by locating back to the start of the loop when %1 reaches the end "
@@ -2014,7 +2014,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_sync_frame_rate),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_sync_frame_rate)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip 
+	Gtkmm2ext::UI::instance()->set_tip
 		(_sync_framerate->tip_widget(),
 		 string_compose (_("This option controls the value of the video frame rate <i>while chasing</i> an external timecode source.\n\n"
 				   "<b>When enabled</b> the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
@@ -2030,7 +2030,7 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
 		);
-	Gtkmm2ext::UI::instance()->set_tip 
+	Gtkmm2ext::UI::instance()->set_tip
 		(_sync_genlock->tip_widget(),
 		 string_compose (_("<b>When enabled</b> %1 will never varispeed when slaved to external timecode. "
 				   "Sync Lock indicates that the selected external timecode source shares clock-sync "
@@ -2732,7 +2732,7 @@ RCOptionEditor::RCOptionEditor ()
 #endif
 	   )
 	{
-		add_option (_("User interaction"), 
+		add_option (_("User interaction"),
 			    new BoolOption (
 				    "enable-translation",
 				    string_compose (_("Use translations of %1 messages\n"

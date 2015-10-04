@@ -38,7 +38,7 @@
      #define LIBPTFORMAT_API LIBPTFORMAT_DLL_EXPORT
   #else
      #define LIBPTFORMAT_API LIBPTFORMAT_DLL_IMPORT
-  #endif 
+  #endif
   #define    LIBPTFORMAT_LOCAL LIBPTFORMAT_DLL_LOCAL
 #endif
 

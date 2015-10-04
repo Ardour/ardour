@@ -33,7 +33,7 @@ class JACKSession : public ARDOUR::SessionHandlePtr
   public:
     JACKSession (ARDOUR::Session* s);
     ~JACKSession ();
-    
+
     void session_event (jack_session_event_t* event);
     void timebase_callback (jack_transport_state_t /*state*/,
 			    ARDOUR::pframes_t /*nframes*/,

@@ -41,6 +41,6 @@ class JackConnection {
     uint32_t _probed_sample_rate; // when not in control
 };
 
-} // namespace 
+} // namespace
 
 #endif /* __libardour_jack_connection_h__ */

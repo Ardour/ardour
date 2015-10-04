@@ -1,4 +1,4 @@
-/* 
+/*
     Copyright (C) 2006 Paul Davis
     Author: Hans Fugal
 
@@ -95,7 +95,7 @@ private:
 	PBD::ScopedConnection _object_death_connection;
 };
 
-/** This command class is initialized with before and after mementos 
+/** This command class is initialized with before and after mementos
  * (from Stateful::get_state()), so undo becomes restoring the before
  * memento, and redo is restoring the after memento.
  */
@@ -103,14 +103,14 @@ template <class obj_T>
 class LIBPBD_TEMPLATE_API MementoCommand : public Command
 {
 public:
-	MementoCommand (obj_T& a_object, XMLNode* a_before, XMLNode* a_after) 
+	MementoCommand (obj_T& a_object, XMLNode* a_before, XMLNode* a_after)
 		: _binder (new SimpleMementoCommandBinder<obj_T> (a_object)), before (a_before), after (a_after)
 	{
 		/* The binder's object died, so we must die */
 		_binder->DropReferences.connect_same_thread (_binder_death_connection, boost::bind (&MementoCommand::binder_dying, this));
 	}
 
-	MementoCommand (MementoCommandBinder<obj_T>* b, XMLNode* a_before, XMLNode* a_after) 
+	MementoCommand (MementoCommandBinder<obj_T>* b, XMLNode* a_before, XMLNode* a_after)
 		: _binder (b), before (a_before), after (a_after)
 	{
 		/* The binder's object died, so we must die */
@@ -130,13 +130,13 @@ public:
 
 	void operator() () {
 		if (after) {
-			_binder->get()->set_state(*after, Stateful::current_state_version); 
+			_binder->get()->set_state(*after, Stateful::current_state_version);
 		}
 	}
 
-	void undo() { 
+	void undo() {
 		if (before) {
-			_binder->get()->set_state(*before, Stateful::current_state_version); 
+			_binder->get()->set_state(*before, Stateful::current_state_version);
 		}
 	}
 

@@ -126,9 +126,9 @@ Item::canvas_origin () const
 }
 
 Duple
-Item::window_origin () const 
+Item::window_origin () const
 {
-	/* This is slightly subtle. Our _position is in the coordinate space of 
+	/* This is slightly subtle. Our _position is in the coordinate space of
 	   our parent. So to find out where that is in window coordinates, we
 	   have to ask our parent.
 	*/
@@ -150,7 +150,7 @@ Item::scroll_offset () const
 {
 	if (_scroll_parent) {
 		return _scroll_parent->scroll_offset();
-	} 
+	}
 	return Duple (0,0);
 }
 
@@ -583,7 +583,7 @@ Item::bounding_box () const
 }
 
 Coord
-Item::height () const 
+Item::height () const
 {
 	boost::optional<ArdourCanvas::Rect> bb  = bounding_box();
 
@@ -594,7 +594,7 @@ Item::height () const
 }
 
 Coord
-Item::width () const 
+Item::width () const
 {
 	boost::optional<ArdourCanvas::Rect> bb = bounding_box();
 
@@ -688,7 +688,7 @@ Item::set_ignore_events (bool ignore)
 }
 
 std::string
-Item::whatami () const 
+Item::whatami () const
 {
 	std::string type = demangle (typeid (*this).name());
 	return type.substr (type.find_last_of (':') + 1);
@@ -738,7 +738,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 #ifdef CANVAS_DEBUG
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-		cerr << string_compose ("%1%7 %2 @ %7 render %5 @ %6 %3 items out of %4\n", 
+		cerr << string_compose ("%1%7 %2 @ %7 render %5 @ %6 %3 items out of %4\n",
 					_canvas->render_indent(), (name.empty() ? string ("[unnamed]") : name), items.size(), _items.size(), area, _position, this,
 					whatami());
 	}
@@ -778,7 +778,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 				if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 					if (dynamic_cast<Container*>(*i) == 0) {
 						cerr << _canvas->render_indent() << "render "
-						     << ' ' 
+						     << ' '
 						     << (*i)
 						     << ' '
 						     << (*i)->whatami()
@@ -786,11 +786,11 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 						     << (*i)->name
 						     << " item "
 						     << item_bbox.get()
-						     << " window = " 
+						     << " window = "
 						     << item
 						     << " intersect = "
 						     << draw
-						     << " @ " 
+						     << " @ "
 						     << _position
 						     << endl;
 					}

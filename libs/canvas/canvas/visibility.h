@@ -38,7 +38,7 @@
     #define LIBCANVAS_API LIBCANVAS_DLL_EXPORT
   #else
     #define LIBCANVAS_API LIBCANVAS_DLL_IMPORT
-  #endif 
+  #endif
   #define LIBCANVAS_LOCAL LIBCANVAS_DLL_LOCAL
 #endif
 

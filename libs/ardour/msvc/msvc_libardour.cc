@@ -83,7 +83,7 @@ namespace ARDOUR {
 LIBARDOUR_API int LIBARDOUR_APICALLTYPE
 symlink(const char *dest, const char *shortcut, const char *working_directory /*= NULL */)
 {
-IShellLinkA  *pISL = NULL;    
+IShellLinkA  *pISL = NULL;
 IPersistFile *ppf  = NULL;
 int           ret  = (-1);
 
@@ -202,7 +202,7 @@ int           ret  = (-1);
 LIBARDOUR_API int LIBARDOUR_APICALLTYPE
 readlink(const char *__restrict shortcut, char *__restrict buf, size_t bufsize)
 {
-IShellLinkA  *pISL = NULL;    
+IShellLinkA  *pISL = NULL;
 IPersistFile *ppf  = NULL;
 int           ret  = (-1);
 
@@ -237,7 +237,7 @@ int           ret  = (-1);
 						// Read the target information from the shortcut object
 						if (S_OK == (pISL->GetPath (target_path, _MAX_PATH, NULL, SLGP_UNCPRIORITY)))
 						{
-							strncpy(buf, target_path, bufsize); 
+							strncpy(buf, target_path, bufsize);
 							ret = ((ret = strlen(buf)) > bufsize) ? bufsize : ret;
 							// _set_errno(0);
 						}

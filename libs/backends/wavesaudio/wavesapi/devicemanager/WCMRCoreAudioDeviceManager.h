@@ -37,7 +37,7 @@
 
 #include <mach/mach.h>
 
-#include <CoreAudio/CoreAudio.h> 
+#include <CoreAudio/CoreAudio.h>
 
 //forward decl.
 class WCMRCoreAudioDeviceManager;
@@ -47,9 +47,9 @@ class WCMRCoreAudioDeviceManager;
 // This enum is for choosing filter for audio devices scan
 typedef enum eCABS_Method
 {
-	eCABS_Simple = 0,       
+	eCABS_Simple = 0,
 	eCABS_DestructiveCache,
-	eCABS_CacheOnDeviceSet,    
+	eCABS_CacheOnDeviceSet,
 	eCABS_MethodNum // Must be last
 }	eCABS_Method;
 
@@ -65,8 +65,8 @@ public:
 	virtual const std::string& DeviceName() const;///<Name?
 	virtual const std::vector<std::string>& InputChannels();///<Current Input Channel List? - note that this may change with change in sampling rate.
 	virtual const std::vector<std::string>& OutputChannels();///<Current Output Channel List? - note that this may change with change in sampling rate.
-    
-    
+
+
 	virtual const std::vector<int>& SamplingRates();///<Supported Sampling Rate List?
 	virtual int CurrentSamplingRate(); ///<Current Sampling rate.?
 	virtual WTErr SetCurrentSamplingRate(int newRate);///<Change Current Sampling Rate : This is a requset, might not be successful at run time!
@@ -90,11 +90,11 @@ public:
 	virtual int AudioCallback (float *pOutputBuffer, unsigned long framesPerBuffer, int64_t inSampleTime, uint64_t inCycleStartTime);
 	
 	AudioDeviceID DeviceID () {return m_DeviceID;}
-    
+
     virtual uint32_t GetLatency (bool isInput); ///< Get latency.
     virtual OSStatus GetStreamLatency(AudioDeviceID deviceID, bool isInput, std::vector<int>& latencies);
 
-    
+
 protected:
 
 	AudioDeviceID m_DeviceID; ///< The CoreAudio device id
@@ -186,23 +186,23 @@ public:
 
 protected:
     static OSStatus HardwarePropertyChangeCallback (AudioHardwarePropertyID inPropertyID, void* inClientData);
-    
+
     virtual WCMRAudioDevice*	initNewCurrentDeviceImpl(const std::string & deviceName);
 	virtual void				destroyCurrentDeviceImpl();
 	virtual WTErr				generateDeviceListImpl();
     virtual WTErr				updateDeviceListImpl();
     virtual WTErr               getDeviceSampleRatesImpl(const std::string & deviceName, std::vector<int>& sampleRates) const;
 	virtual WTErr				getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& bufferSizes) const;
-    
+
 	bool m_UseMultithreading; ///< Flag indicates whether to use multi-threading for audio processing.
     bool m_bNoCopyAudioBuffer;
-	    
+	
 private:
     // helper functions for this class only
     WTErr getDeviceAvailableSampleRates(DeviceID deviceId, std::vector<int>& sampleRates);
     WTErr getDeviceMaxInputChannels(DeviceID deviceId, unsigned int& inputChannels);
     WTErr getDeviceMaxOutputChannels(DeviceID deviceId, unsigned int& outputChannels);
-    
+
     WCMRAudioDevice*			m_NoneDevice;
 };
 

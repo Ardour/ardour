@@ -133,7 +133,7 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 					     << _global_port_buffer_offset << " limit="
 					     << (_global_port_buffer_offset + _port_buffer_offset + nframes) << "\n";
 				}
-			} 
+			}
 
 		} else {
 			_buffer->silence (nframes);
@@ -198,7 +198,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 			/* resolve all notes at the start of the buffer */
 			resolve_notes (port_buffer, 0);
 			_resolve_required = false;
-		} 
+		}
 		
 		if (_buffer->empty()) {
 			return;
@@ -263,7 +263,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 			}
 		}
 
-		/* done.. the data has moved to the port buffer, mark it so 
+		/* done.. the data has moved to the port buffer, mark it so
 		 */
 
 		_buffer->clear ();

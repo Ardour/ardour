@@ -135,7 +135,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	peak_display.set_alignment(0.5);
 	
 	/* stuff related to the fact that the peak display is not, in
-	   fact, supposed to be a text entry. 
+	   fact, supposed to be a text entry.
 	*/
 	peak_display.set_events (peak_display.get_events() & ~(Gdk::EventMask (Gdk::LEAVE_NOTIFY_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::POINTER_MOTION_MASK)));
 	peak_display.signal_map().connect (sigc::bind (sigc::ptr_fun (reset_cursor_to_default), &peak_display));

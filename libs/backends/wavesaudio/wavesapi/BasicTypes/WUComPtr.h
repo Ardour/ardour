@@ -26,7 +26,7 @@
 
 #include "WavesPublicAPI/wstdint.h"
 
-typedef int32_t wvComPtr[2]; 
+typedef int32_t wvComPtr[2];
 
 // ConvertDPtr has the exact format of a vfp callback function, but it is a local function, native only.
 // It converts a pointer in either 32 bits or 64 bits to a place-holder of 64 bits in coefs/states/external memory.
@@ -102,7 +102,7 @@ inline uint32_t  ComPtr_to_DSP( const intptr_t PtrToConvert, char* pDataStruct )
 //////////////////////////////////////////////////////////////////////////
 inline uint32_t  DSP_to_ComPtr( const char* pDataStruct, intptr_t *ThePtr)
 // pDataStruct is pointing to wvComPtr in the Coefs/States
-// the function reconstruct the pointer into ThePtr 
+// the function reconstruct the pointer into ThePtr
 {
 
 	*ThePtr = UnpackComPtr(*(reinterpret_cast<const wvComPtr *>(pDataStruct)));

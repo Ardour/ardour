@@ -648,7 +648,7 @@ Keyboard::reset_bindings ()
 		if (::g_rename (user_keybindings_path.c_str(), new_path.c_str())) {
 			error << string_compose (_("Cannot rename your own keybinding file (%1)"), strerror (errno)) << endmsg;
 			return -1;
-		} 
+		}
 	}
 
 	{

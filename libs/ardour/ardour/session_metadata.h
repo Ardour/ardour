@@ -136,7 +136,7 @@ class LIBARDOUR_API SessionMetadata : public PBD::StatefulDestructible
 
   private:
 
-	static SessionMetadata *_metadata;  //singleton instance 
+	static SessionMetadata *_metadata;  //singleton instance
 
 	typedef std::pair<std::string, std::string> Property;
 	typedef std::map<std::string, std::string> PropertyMap;

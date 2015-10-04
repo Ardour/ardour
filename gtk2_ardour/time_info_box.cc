@@ -158,7 +158,7 @@ TimeInfoBox::~TimeInfoBox ()
         delete selection_length;
         delete selection_end;
         delete selection_start;
-        
+
         delete punch_start;
         delete punch_end;
 }
@@ -258,7 +258,7 @@ TimeInfoBox::set_session (Session* s)
 		
 		punch_changed (punch);
 
-		_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR, 
+		_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR,
 							       boost::bind (&TimeInfoBox::punch_location_changed, this, _1), gui_context());
 	}
 }
@@ -367,7 +367,7 @@ TimeInfoBox::punch_location_changed (Location* loc)
 {
 	if (loc) {
 		watch_punch (loc);
-	} 
+	}
 }
 
 void

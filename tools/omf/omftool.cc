@@ -2,25 +2,25 @@
     but based on ...
  */
 
-/*  REAPER OMF plug-in 
+/*  REAPER OMF plug-in
     Copyright (C) 2009 Hannes Breul
 
     Provides OMF import.
-    
+
     Based on the m3u example included in the Reaper SDK,
     Copyright (C) 2005-2008 Cockos Incorporated
-    
+
     Original source available at:
     http://www.reaper.fm/sdk/plugin/plugin.php#ext_dl
-    
+
     This software is provided 'as-is', without any express or implied
     warranty.  In no event will the authors be held liable for any damages
     arising from the use of this software.
-    
+
     Permission is granted to anyone to use this software for any purpose,
     including commercial applications, and to alter it and redistribute it
     freely, subject to the following restrictions:
-    
+
     1. The origin of this software must not be misrepresented; you must not
     claim that you wrote the original software. If you use this software
     in a product, an acknowledgment in the product documentation would be
@@ -53,7 +53,7 @@
 #include "omftool.h"
 
 //#define DEBUG(fmt,...) fprintf (stderr, fmt, ## __VA_ARGS__)
-#define DEBUG(fmt,...) 
+#define DEBUG(fmt,...)
 #define INFO(fmt,...) fprintf (stdout, fmt, ## __VA_ARGS__)
 
 using namespace std;
@@ -223,7 +223,7 @@ OMF::get_audio_info (const std::string& path)
 
 	XMLNode* source = new_source_node();
 
-	known_sources.insert (pair<string,SourceInfo*> 
+	known_sources.insert (pair<string,SourceInfo*>
 			      (Glib::path_get_basename (path),
 			       new SourceInfo (sf_info.channels,
 					       sf_info.samplerate,
@@ -466,7 +466,7 @@ OMF::new_route_node ()
 	route->add_child_nocopy (*extra);
 	XMLNode* gui = new XMLNode ("GUI");
 	extra->add_child_nocopy (*gui);
-	snprintf (sbuf, sizeof (sbuf), "%d:%d:%d", 
+	snprintf (sbuf, sizeof (sbuf), "%d:%d:%d",
 		  random() % 65536,
 		  random() % 65536,
 		  random() % 65536);
@@ -533,7 +533,7 @@ OMF::get_known_source (const char* name)
 	KnownSources::iterator i = known_sources.find (s);
 	if (i != known_sources.end()) {
 		return i->second;
-	} 
+	}
 	return 0;
 }
 
@@ -826,7 +826,7 @@ OMF::create_xml ()
 
 					sqlite3_free_table(fallbackFile);
 				}
-              
+
 					
 				if (sinfo) {
 					
@@ -864,14 +864,14 @@ OMF::create_xml ()
 				sqlite3_get_table(db, sqlite3_mprintf("SELECT value FROM data WHERE object = %s AND property = 'OMFI:SCLP:StartTime' LIMIT 1", items[j]), &startTime, &startTimeCount, 0, 0);
 				if (startTimeCount > 0) {
 					start = atoi(startTime[1]);
-				} 
+				}
 				sqlite3_free_table(startTime);
 
 				char **sourceFile;
 				int sourceFileCount;
 				//sqlite3_get_table(db, sqlite3_mprintf("SELECT d10.offset, d10.length FROM data d3, data d4, data d5, data d6, data d7, data d8, data d9, data d10 WHERE d3.object LIKE '%s' AND d3.property LIKE 'OMFI:SCLP:SourceID' AND d4.value LIKE d3.value AND d4.property LIKE 'OMFI:MOBJ:MobID' AND d5.object LIKE d4.object AND d5.property LIKE 'OMFI:MOBJ:Slots' AND d6.object LIKE d5.value AND d7.object LIKE d6.value AND d7.property LIKE 'OMFI:MSLT:Segment' AND d8.object LIKE d7.value AND d8.property LIKE 'OMFI:SCLP:SourceID' AND d9.value LIKE d8.value AND d9.property LIKE 'OMFI:MOBJ:MobID' AND d10.object LIKE d9.object AND d10.property LIKE 'OMFI:MOBJ:Name' LIMIT 1", items[j]), &sourceFile, &sourceFileCount, 0, 0);
 				sqlite3_get_table(db, sqlite3_mprintf("SELECT offset, length FROM data WHERE object IN (SELECT object FROM data WHERE value IN (SELECT value FROM data WHERE object IN (SELECT value FROM data WHERE object IN (SELECT value FROM data WHERE object IN (SELECT value FROM data WHERE object IN (SELECT object FROM data WHERE value IN (SELECT value FROM data WHERE object = %s AND property = 'OMFI:SCLP:SourceID' LIMIT 1) AND property = 'OMFI:MOBJ:MobID' LIMIT 1) AND property = 'OMFI:MOBJ:Slots' LIMIT 1) LIMIT 1) AND property = 'OMFI:MSLT:Segment' LIMIT 1) AND property = 'OMFI:SCLP:SourceID' LIMIT 1) AND property = 'OMFI:MOBJ:MobID' LIMIT 1) AND property LIKE 'OMFI:MOBJ:Name' LIMIT 1", items[j]), &sourceFile, &sourceFileCount, 0, 0);
-              
+
 				if (sourceFileCount > 0) {
 					uint32_t sfOffs;
 					uint32_t sfLen;
@@ -903,7 +903,7 @@ OMF::create_xml ()
 					}
 					sqlite3_free_table(fallbackFile);
 				}
-              
+
 				if (sinfo) {
 
 					region = new_region_node ();
@@ -959,10 +959,10 @@ OMF::create_xml ()
 }
 
 
-static void 
+static void
 print_help (const char* execname)
 {
-	cout << execname 
+	cout << execname
 	     << " [ -r sample-rate ]"
 	     << " [ -n session-name ]"
 	     << " [ -v ardour-session-version ]"

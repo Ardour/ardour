@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-99 Paul Barton-Davis 
+    Copyright (C) 1998-99 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 using namespace MIDI;
 
-Channel::Channel (MIDI::byte channelnum, Port &p) 
+Channel::Channel (MIDI::byte channelnum, Port &p)
 	: _port (p)
 {
 	_channel_number = channelnum;
@@ -66,7 +66,7 @@ Channel::reset (timestamp_t timestamp, framecnt_t /*nframes*/, bool notes_off)
 	memset (_polypress, 0, sizeof (_polypress));
 	memset (_controller_msb, 0, sizeof (_controller_msb));
 	memset (_controller_lsb, 0, sizeof (_controller_lsb));
-       
+
 	/* zero all controllers XXX not necessarily the right thing */
 
 	memset (_controller_val, 0, sizeof (_controller_val));
@@ -87,7 +87,7 @@ Channel::reset (timestamp_t timestamp, framecnt_t /*nframes*/, bool notes_off)
 }
 
 void
-Channel::process_note_off (Parser & /*parser*/, EventTwoBytes *tb) 
+Channel::process_note_off (Parser & /*parser*/, EventTwoBytes *tb)
 {
 	_last_note_off = tb->note_number;
 	_last_off_velocity = tb->velocity;
@@ -98,7 +98,7 @@ Channel::process_note_off (Parser & /*parser*/, EventTwoBytes *tb)
 }
 
 void
-Channel::process_note_on (Parser & /*parser*/, EventTwoBytes *tb) 
+Channel::process_note_on (Parser & /*parser*/, EventTwoBytes *tb)
 {
 	_last_note_on = tb->note_number;
 	_last_on_velocity = tb->velocity;
@@ -106,7 +106,7 @@ Channel::process_note_on (Parser & /*parser*/, EventTwoBytes *tb)
 }
 
 void
-Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb) 
+Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 {
 	unsigned short cv;
 
@@ -118,7 +118,7 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 	if (tb->controller_number < 32) { /* unsigned: no test for >= 0 */
 
 		/* if this controller is already known to use 14 bits,
-		   then treat this value as the MSB, and combine it 
+		   then treat this value as the MSB, and combine it
 		   with the existing LSB.
 
 		   otherwise, just treat it as a 7 bit value, and set
@@ -135,25 +135,25 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 
 		_controller_val[tb->controller_number] = (controller_value_t)cv;
 
-	} else if ((tb->controller_number >= 32 && 
+	} else if ((tb->controller_number >= 32 &&
 		    tb->controller_number <= 63)) {
-		   
+		
 		int cn = tb->controller_number - 32;
 
 		cv = (unsigned short) _controller_val[cn];
 
-		/* LSB for CC 0-31 arrived. 
+		/* LSB for CC 0-31 arrived.
 
 		   If this is the first time (i.e. its currently
 		   flagged as a 7 bit controller), mark the
 		   controller as 14 bit, adjust the existing value
-		   to be the MSB, and OR-in the new LSB value. 
+		   to be the MSB, and OR-in the new LSB value.
 
 		   otherwise, OR-in the new low 7bits with the old
 		   high 7.
 		*/
 
-		   
+		
 		if (_controller_14bit[cn] == false) {
 			_controller_14bit[cn] = true;
 			cv = (cv << 7) | (tb->value & 0x7f);
@@ -173,7 +173,7 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 
 		/* controller can only take 7 bit values */
 		
-		_controller_val[tb->controller_number] = 
+		_controller_val[tb->controller_number] =
 			(controller_value_t) tb->value;
 	}
 
@@ -188,31 +188,31 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 }
 
 void
-Channel::process_program_change (Parser & /*parser*/, MIDI::byte val) 
+Channel::process_program_change (Parser & /*parser*/, MIDI::byte val)
 {
 	_program_number = val;
 }
 
 void
-Channel::process_chanpress (Parser & /*parser*/, MIDI::byte val) 
+Channel::process_chanpress (Parser & /*parser*/, MIDI::byte val)
 {
 	_chanpress = val;
 }
 
 void
-Channel::process_polypress (Parser & /*parser*/, EventTwoBytes *tb) 
+Channel::process_polypress (Parser & /*parser*/, EventTwoBytes *tb)
 {
 	_polypress[tb->note_number] = tb->value;
 }
 
 void
-Channel::process_pitchbend (Parser & /*parser*/, pitchbend_t val) 
+Channel::process_pitchbend (Parser & /*parser*/, pitchbend_t val)
 {
 	_pitch_bend = val;
 }
 
 void
-Channel::process_reset (Parser & /*parser*/) 
+Channel::process_reset (Parser & /*parser*/)
 {
 	reset (0, 1);
 }

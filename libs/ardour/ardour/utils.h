@@ -110,9 +110,9 @@ slider_position_to_gain (double pos)
 #ifndef OLD_GAIN_MATH
 	/* 5th order polynomial function fit to data from a TC Spectra console
 	   fader (image of fader gradations).
-	 
+	
 	   y = a + bx1 + cx2 + dx3 + fx4 + gx5
-	   
+	
 	   a = -1.1945480381045521E-02
 	   b =  1.5809476525537265E+00
 	   c = -1.5850710838966151E+01

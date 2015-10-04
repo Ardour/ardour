@@ -148,8 +148,8 @@ class SoundFileBrowser : public ArdourWindow
 		Gtk::TreeModelColumn<bool>        started;
 
 		FreesoundColumns() {
-			add(id); 
-			add(filename); 
+			add(id);
+			add(filename);
 			add(uri);
 			add(duration);
 			add(filesize);
@@ -272,7 +272,7 @@ class SoundFileOmega : public SoundFileBrowser
 {
 
   public:
-	SoundFileOmega (std::string title, ARDOUR::Session* _s, 
+	SoundFileOmega (std::string title, ARDOUR::Session* _s,
 			uint32_t selected_audio_tracks, uint32_t selected_midi_tracks,
 			bool persistent,
 			Editing::ImportMode mode_hint = Editing::ImportAsTrack);

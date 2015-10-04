@@ -35,8 +35,8 @@
 /* IO connection */
 
 CONFIG_VARIABLE (bool, auto_connect_standard_busses, "auto-connect-standard-busses", true)
-/* this variable is used to indicate output mode in Waves Tracks: 
-   "Multi Out" == AutoConnectPhysical and "Stereo Out" == AutoConnectMaster 
+/* this variable is used to indicate output mode in Waves Tracks:
+   "Multi Out" == AutoConnectPhysical and "Stereo Out" == AutoConnectMaster
 */
 CONFIG_VARIABLE (AutoConnectOption, output_auto_connect, "output-auto-connect", AutoConnectMaster)
 CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", AutoConnectPhysical)

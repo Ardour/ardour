@@ -4,7 +4,7 @@
 #include "pbd/transmitter.h"
 #include "pbd/receiver.h"
 
-class TestReceiver : public Receiver 
+class TestReceiver : public Receiver
 {
   protected:
     void receive (Transmitter::Channel chn, const char * str);

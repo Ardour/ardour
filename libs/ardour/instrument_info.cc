@@ -90,7 +90,7 @@ InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel)
 	MIDI::Name::PatchPrimaryKey patch_key (program, bank);
 	
 	boost::shared_ptr<MIDI::Name::Patch> patch =
-		MIDI::Name::MidiPatchManager::instance().find_patch (external_instrument_model, 
+		MIDI::Name::MidiPatchManager::instance().find_patch (external_instrument_model,
 								     external_instrument_mode, channel, patch_key);
 
 	if (patch) {
@@ -209,7 +209,7 @@ InstrumentInfo::general_midi_patches()
 {
 	if (_gm_patches.empty()) {
 		for (int n = 0; n < 128; n++) {
-			_gm_patches.push_back (boost::shared_ptr<Patch> (new Patch (general_midi_program_names[n], n))); 
+			_gm_patches.push_back (boost::shared_ptr<Patch> (new Patch (general_midi_program_names[n], n)));
 		}
 	}
 

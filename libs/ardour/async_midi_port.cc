@@ -1,6 +1,6 @@
 /*
     Copyright (C) 1998 Paul Barton-Davis
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -107,7 +107,7 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 
 	if (ARDOUR::Port::sends_output()) {
 		flush_output_fifo (nframes);
-	} 
+	}
 	
 	/* copy incoming data from the port buffer into the input FIFO
 	   and if necessary wakeup the reader
@@ -252,7 +252,7 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 			
 			if (timestamp == 0) {
 				timestamp = _last_write_timestamp;
-			} 
+			}
 			
 			if (mb.push_back (timestamp, msglen, msg)) {
 				ret = msglen;

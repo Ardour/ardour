@@ -80,7 +80,7 @@ public:
 
 	/* set_focus_handler() will cause all button-press events on any
 	   CairoWidget to invoke this slot/functor/function/method/callback.
-	   
+	
 	   We do this because in general, CairoWidgets do not grab
 	   keyboard focus, but a button press on them should
 	   clear focus from any active text entry.
@@ -89,7 +89,7 @@ public:
 
 	   However, derived types can override the behaviour by defining their
 	   own on_button_press_event() handler which returns true under all
-	   conditions (which will block this handler from being called). If 
+	   conditions (which will block this handler from being called). If
 	   they wish to invoke any existing focus handler from their own
 	   button press handler, they can just use: focus_handler();
 	*/

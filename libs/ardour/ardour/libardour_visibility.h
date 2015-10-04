@@ -38,7 +38,7 @@
     #define LIBARDOUR_API LIBARDOUR_DLL_EXPORT
   #else
     #define LIBARDOUR_API LIBARDOUR_DLL_IMPORT
-  #endif 
+  #endif
   #define LIBARDOUR_LOCAL LIBARDOUR_DLL_LOCAL
 #endif
 

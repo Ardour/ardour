@@ -4,7 +4,7 @@
  *
  * == Summary ==
  * This file implements routines for color transformations between the spaces
- * sRGB, Y'UV, Y'CbCr, Y'PbPr, Y'DbDr, Y'IQ, HSV, HSL, HSI, CIEXYZ, CIELAB, 
+ * sRGB, Y'UV, Y'CbCr, Y'PbPr, Y'DbDr, Y'IQ, HSV, HSL, HSI, CIEXYZ, CIELAB,
  * CIELUV, CIELCH, and CIECAT02 LMS.
  *
  * == Usage ==
@@ -15,13 +15,13 @@
        double S[3] = {173, 0.8, 0.5};
        double D[3];
        colortransform Trans;
-       
+
        if(!(GetColorTransform(&Trans, "HSI -> Lab")))
        {
            printf("Invalid syntax or unknown color space\n");
            return;
-       }   
-       
+       }
+
        ApplyColorTransform(Trans, &D[0], &D[1], &D[2], S[0], S[1], S[2]);
 @endcode
  * "num" is a typedef defined at the beginning of colorspace.h that may be set
@@ -36,15 +36,15 @@
      Lab2Rgb(&R, &G, &B, L, a, b);
 @endcode
  * Generally, the calling syntax is
-@code 
+@code
      Foo2Bar(&B0, &B1, &B2, F0, F1, F2);
-@endcode 
+@endcode
  * where (F0,F1,F2) are the coordinates of a color in space "Foo" and
- * (B0,B1,B2) are the transformed coordinates in space "Bar."  For any 
+ * (B0,B1,B2) are the transformed coordinates in space "Bar."  For any
  * transformation routine, its inverse has the sytax
-@code 
+@code
      Bar2Foo(&F0, &F1, &F2, B0, B1, B2);
-@endcode  
+@endcode
  *
  * The conversion routines are consistently named with the first letter of a
  * color space capitalized with following letters in lower case and omitting
@@ -52,7 +52,7 @@
  * any transformation routine Foo2Bar, its inverse is Bar2Foo.
  *
  * All transformations assume a two degree observer angle and a D65 illuminant.
- * The white point can be changed by modifying the WHITEPOINT_X, WHITEPOINT_Y,  
+ * The white point can be changed by modifying the WHITEPOINT_X, WHITEPOINT_Y,
  * WHITEPOINT_Z definitions at the beginning of colorspace.h.
  *
  * == List of transformation routines ==
@@ -69,22 +69,22 @@
  *   - Xyz2Lab(double *L, double *a, double *b, double X, double Y, double Z)
  *   - Xyz2Luv(double *L, double *u, double *v, double X, double Y, double Z)
  *   - Xyz2Lch(double *L, double *C, double *h, double X, double Y, double Z)
- *   - Xyz2Cat02lms(double *L, double *M, double *S, double X, double Y, double Z) 
+ *   - Xyz2Cat02lms(double *L, double *M, double *S, double X, double Y, double Z)
  *   - Rgb2Lab(double *L, double *a, double *b, double R, double G, double B)
  *   - Rgb2Luv(double *L, double *u, double *v, double R, double G, double B)
  *   - Rgb2Lch(double *L, double *C, double *h, double R, double G, double B)
- *   - Rgb2Cat02lms(double *L, double *M, double *S, double R, double G, double B) 
+ *   - Rgb2Cat02lms(double *L, double *M, double *S, double R, double G, double B)
  * (Similarly for the inverse transformations.)
  *
  * It is possible to transform between two arbitrary color spaces by first
  * transforming from the source space to sRGB and then transforming from
  * sRGB to the desired destination space.  For transformations between CIE
  * color spaces, it is convenient to use XYZ as the intermediate space.  This
- * is the strategy used by GetColorTransform and ApplyColorTransform. 
+ * is the strategy used by GetColorTransform and ApplyColorTransform.
  *
  * == References ==
  * The definitions of these spaces and the many of the transformation formulas
- * can be found in 
+ * can be found in
  *
  *    Poynton, "Frequently Asked Questions About Gamma"
  *    http://www.poynton.com/notes/colour_and_gamma/GammaFAQ.html
@@ -108,25 +108,25 @@
  * == License (BSD) ==
  * Copyright (c) 2005-2010, Pascal Getreuer
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without 
+ *
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
- * - Redistributions of source code must retain the above copyright 
+ *
+ * - Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
- * - Redistributions in binary form must reproduce the above copyright 
- *   notice, this list of conditions and the following disclaimer in 
+ * - Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the distribution.
- *       
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
@@ -154,7 +154,7 @@
 #define M_PI	3.14159265358979323846264338327950288
 #endif
 
-/** 
+/**
  * @brief sRGB gamma correction, transforms R to R'
  * http://en.wikipedia.org/wiki/SRGB
  */
@@ -162,14 +162,14 @@
 	(((t) <= 0.0031306684425005883) ? \
 	(12.92*(t)) : (1.055*pow((t), 0.416666666666666667) - 0.055))
 
-/** 
- * @brief Inverse sRGB gamma correction, transforms R' to R 
+/**
+ * @brief Inverse sRGB gamma correction, transforms R' to R
  */
 #define INVGAMMACORRECTION(t)	\
 	(((t) <= 0.0404482362771076) ? \
 	((t)/12.92) : pow(((t) + 0.055)/1.055, 2.4))
 
-/** 
+/**
  * @brief CIE L*a*b* f function (used to convert XYZ to L*a*b*)
  * http://en.wikipedia.org/wiki/Lab_color_space
  */
@@ -177,8 +177,8 @@
 	((t >= 8.85645167903563082e-3) ? \
 	pow(t,0.333333333333333) : (841.0/108.0)*(t) + (4.0/29.0))
 
-/** 
- * @brief CIE L*a*b* inverse f function 
+/**
+ * @brief CIE L*a*b* inverse f function
  * http://en.wikipedia.org/wiki/Lab_color_space
  */
 #define LABINVF(t)	\
@@ -215,7 +215,7 @@
 
 /*
  * == Linear color transformations ==
- * 
+ *
  * The following routines implement transformations between sRGB and
  * the linearly-related color spaces Y'UV, Y'PbPr, Y'DbDr, and Y'IQ.
  */
@@ -346,15 +346,15 @@ void Yiq2Rgb(double *R, double *G, double *B, double Y, double I, double Q)
 
 /*
  * == Hue Saturation Value/Lightness/Intensity color transformations ==
- * 
+ *
  * The following routines implement transformations between sRGB and
  * color spaces HSV, HSL, and HSI.
  */
 
 
-/** 
+/**
  * @brief Convert an sRGB color to Hue-Saturation-Value (HSV)
- * 
+ *
  * @param H, S, V pointers to hold the result
  * @param R, G, B the input sRGB values scaled in [0,1]
  *
@@ -399,16 +399,16 @@ void Rgb2Hsv(double *H, double *S, double *V, double R, double G, double B)
 }
 
 
-/** 
+/**
  * @brief Convert a Hue-Saturation-Value (HSV) color to sRGB
- * 
+ *
  * @param R, G, B pointers to hold the result
  * @param H, S, V the input HSV values
  *
- * The input values are assumed to be scaled as 
+ * The input values are assumed to be scaled as
  *    0 <= H < 360,
  *    0 <= S <= 1,
- *    0 <= V <= 1. 
+ *    0 <= V <= 1.
  * The output sRGB values are scaled between 0 and 1.  This is the inverse
  * transformation of Rgb2Hsv.
  *
@@ -463,9 +463,9 @@ void Hsv2Rgb(double *R, double *G, double *B, double H, double S, double V)
 }
 
 
-/** 
+/**
  * @brief Convert an sRGB color to Hue-Saturation-Lightness (HSL)
- * 
+ *
  * @param H, S, L pointers to hold the result
  * @param R, G, B the input sRGB values scaled in [0,1]
  *
@@ -511,16 +511,16 @@ void Rgb2Hsl(double *H, double *S, double *L, double R, double G, double B)
 }
 
 
-/** 
+/**
  * @brief Convert a Hue-Saturation-Lightness (HSL) color to sRGB
- * 
+ *
  * @param R, G, B pointers to hold the result
  * @param H, S, L the input HSL values
  *
- * The input values are assumed to be scaled as 
+ * The input values are assumed to be scaled as
  *    0 <= H < 360,
  *    0 <= S <= 1,
- *    0 <= L <= 1. 
+ *    0 <= L <= 1.
  * The output sRGB values are scaled between 0 and 1.  This is the inverse
  * transformation of Rgb2Hsl.
  *
@@ -575,9 +575,9 @@ void Hsl2Rgb(double *R, double *G, double *B, double H, double S, double L)
 }
 
 
-/** 
+/**
  * @brief Convert an sRGB color to Hue-Saturation-Intensity (HSI)
- * 
+ *
  * @param H, S, I pointers to hold the result
  * @param R, G, B the input sRGB values scaled in [0,1]
  *
@@ -611,16 +611,16 @@ void Rgb2Hsi(double *H, double *S, double *I, double R, double G, double B)
 }
 
 
-/** 
+/**
  * @brief Convert a Hue-Saturation-Intesity (HSI) color to sRGB
- * 
+ *
  * @param R, G, B pointers to hold the result
  * @param H, S, I the input HSI values
  *
- * The input values are assumed to be scaled as 
+ * The input values are assumed to be scaled as
  *    0 <= H < 360,
  *    0 <= S <= 1,
- *    0 <= I <= 1. 
+ *    0 <= I <= 1.
  * The output sRGB values are scaled between 0 and 1.  This is the inverse
  * transformation of Rgb2Hsi.
  *
@@ -655,9 +655,9 @@ void Hsi2Rgb(double *R, double *G, double *B, double H, double S, double I)
 
 /*
  * == CIE color transformations ==
- * 
+ *
  * The following routines implement transformations between sRGB and
- * the CIE color spaces XYZ, L*a*b, L*u*v*, and L*C*H*.  These 
+ * the CIE color spaces XYZ, L*a*b, L*u*v*, and L*C*H*.  These
  * transforms assume a 2 degree observer angle and a D65 illuminant.
  */
 
@@ -668,7 +668,7 @@ void Hsi2Rgb(double *R, double *G, double *B, double H, double S, double I)
  * @param X, Y, Z pointers to hold the result
  * @param R, G, B the input sRGB values
  *
- * Poynton, "Frequently Asked Questions About Color," page 10 
+ * Poynton, "Frequently Asked Questions About Color," page 10
  * Wikipedia: http://en.wikipedia.org/wiki/SRGB
  * Wikipedia: http://en.wikipedia.org/wiki/CIE_1931_color_space
  */
@@ -748,7 +748,7 @@ void Xyz2Lab(double *L, double *a, double *b, double X, double Y, double Z)
  * @param X, Y, Z pointers to hold the result
  * @param L, a, b the input L*a*b* values
  *
- * Wikipedia: http://en.wikipedia.org/wiki/Lab_color_space 
+ * Wikipedia: http://en.wikipedia.org/wiki/Lab_color_space
  */
 void Lab2Xyz(double *X, double *Y, double *Z, double L, double a, double b)
 {
@@ -873,7 +873,7 @@ void Cat02lms2Xyz(double *X, double *Y, double *Z, double L, double M, double S)
 }
 
 
-/* 
+/*
  * == Glue functions for multi-stage transforms ==
  */
 

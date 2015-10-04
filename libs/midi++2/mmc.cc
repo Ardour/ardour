@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Barton-Davis 
+    Copyright (C) 2000 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -307,7 +307,7 @@ MachineControl::process_mmc_message (Parser &, MIDI::byte *msg, size_t len)
 		}
 
 #if 0
-		cerr << "+++ MMC type " 
+		cerr << "+++ MMC type "
 		     << hex
 		     << ((int) *mmc_msg)
 		     << dec
@@ -447,7 +447,7 @@ MachineControl::process_mmc_message (Parser &, MIDI::byte *msg, size_t len)
 			break;
 		}
 
-		/* increase skiplen to cover the command byte and 
+		/* increase skiplen to cover the command byte and
 		   count byte (if it existed).
 		*/
 
@@ -508,15 +508,15 @@ MachineControl::write_track_status (MIDI::byte *msg, size_t /*len*/, MIDI::byte 
 	   bit 4: aux track b
 
 	   the format of the message (its an MMC Masked Write) is:
-	   
+	
 	   0x41      Command Code
 	   <count>   byte count of following data
 	   <name>    byte value of the field being written
-	   <byte #>  byte number of target byte in the 
+	   <byte #>  byte number of target byte in the
 	   bitmap being written to
 	   <mask>    ones in the mask indicate which bits will be changed
 	   <data>    new data for the byte being written
-	   
+	
 	   by the time this code is executing, msg[0] is the
 	   byte number of the target byte. if its zero, we
 	   are writing to a special byte in the standard
@@ -524,8 +524,8 @@ MachineControl::write_track_status (MIDI::byte *msg, size_t /*len*/, MIDI::byte 
 	   special. hence the bits for tracks 1 + 2 are bits
 	   5 and 6 of the first byte of the track
 	   bitmap. so:
-	   
-	   change track 1:  msg[0] = 0;       << first byte of track bitmap 
+	
+	   change track 1:  msg[0] = 0;       << first byte of track bitmap
 	                    msg[1] = 0100000; << binary: bit 5 set
 	
 	   change track 2:  msg[0] = 0;       << first byte of track bitmap
@@ -577,7 +577,7 @@ MachineControl::write_track_status (MIDI::byte *msg, size_t /*len*/, MIDI::byte 
 				TrackMuteChange (*this, base_track+n, val);
 				break;
 			}
-		} 
+		}
 
 	}
 }
@@ -633,7 +633,7 @@ MachineControl::do_shuttle (MIDI::byte *msg, size_t /*msglen*/)
 	integral = ((sh & 0x7) << left_shift) | (sm >> (7 - left_shift));
 	fractional = ((sm << left_shift) << 7) | sl;
 
-	shuttle_speed = integral + 
+	shuttle_speed = integral +
 		((float)fractional / (1 << (14 - left_shift)));
 
 	Shuttle (*this, shuttle_speed, forward);
@@ -697,7 +697,7 @@ MachineControlCommand::MachineControlCommand (Timecode::Time t)
 
 }
 
-MIDI::byte * 
+MIDI::byte *
 MachineControlCommand::fill_buffer (MachineControl* mmc, MIDI::byte* b) const
 {
 	*b++ = 0xf0; // SysEx

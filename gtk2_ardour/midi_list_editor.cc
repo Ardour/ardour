@@ -5,12 +5,12 @@
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -50,7 +50,7 @@ using Timecode::BBT_Time;
 
 static map<int,std::string> note_length_map;
 
-static void 
+static void
 fill_note_length_map ()
 {
 	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat, _("Whole")));
@@ -146,7 +146,7 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r, boo
 
 	redisplay_model ();
 
-	region->midi_source(0)->model()->ContentsChanged.connect (content_connection, invalidator (*this), 
+	region->midi_source(0)->model()->ContentsChanged.connect (content_connection, invalidator (*this),
 								  boost::bind (&MidiListEditor::redisplay_model, this), gui_context());
 
 	buttons.attach (sound_notes_button, 0, 1, 0, 1);

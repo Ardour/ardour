@@ -72,7 +72,7 @@ Canvas::scroll_to (Coord x, Coord y)
 		(*i)->scroll_to (Duple (x, y));
 	}
 
-	pick_current_item (0); // no current mouse position 
+	pick_current_item (0); // no current mouse position
 }
 
 void
@@ -144,7 +144,7 @@ operator<< (ostream& o, Canvas& c)
 
 std::string
 Canvas::indent() const
-{ 
+{
 	string s;
 
 	for (int n = 0; n < ArdourCanvas::dump_depth; ++n) {
@@ -156,7 +156,7 @@ Canvas::indent() const
 
 std::string
 Canvas::render_indent() const
-{ 
+{
 	string s;
 
 	for (int n = 0; n < ArdourCanvas::render_depth; ++n) {
@@ -258,12 +258,12 @@ Canvas::window_to_canvas (Duple const & d) const
 			/* XXX January 22nd 2015: leaving this in place for now
 			 * but I think it fixes a bug that really should be
 			 * fixed in a different way (and will be) by my next
-			 * commit. But it may still be relevant. 
+			 * commit. But it may still be relevant.
 			 */
 
 			/* If scroll groups overlap, choose the one with the highest sensitivity,
 			   that is, choose an HV scroll group over an H or V
-			   only group. 
+			   only group.
 			*/
 			if (!best_group || sg->sensitivity() > best_group->sensitivity()) {
 				best_group = sg;
@@ -406,7 +406,7 @@ GtkCanvas::pick_current_item (int state)
 	 * added or removed, so we have no coordinates to work from as is the
 	 * case with a motion event. Find out where the mouse is and use that.
 	 */
-	     
+	
 	Glib::RefPtr<const Gdk::Window> pointer_window = Gdk::Display::get_default()->get_window_at_pointer (x, y);
 
 	if (pointer_window != get_window()) {
@@ -559,7 +559,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 		enter_detail = GDK_NOTIFY_UNKNOWN;
 
 		/* no current item, so also send virtual enter events to the
-		 * entire heirarchy for the new item 
+		 * entire heirarchy for the new item
 		 */
 
 		for (i = _new_current_item->parent(); i ; i = i->parent()) {
@@ -569,7 +569,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	} else if (_current_item->is_descendant_of (*_new_current_item)) {
 
 		/* move from descendant to ancestor (X: "_current_item is an
-		 * inferior ("child") of _new_current_item") 
+		 * inferior ("child") of _new_current_item")
 		 *
 		 * Deliver "virtual" leave notifications to all items in the
 		 * heirarchy between current and new_current.
@@ -690,7 +690,7 @@ GtkCanvas::deliver_event (GdkEvent* event)
 
 		Item* parent = item->parent ();
 
-		if (!item->ignore_events () && 
+		if (!item->ignore_events () &&
 		    item->Event (event)) {
 			/* this item has just handled the event */
 			DEBUG_TRACE (
@@ -746,7 +746,7 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 	}
 
 	if (_current_item == item) {
-		/* no need to send a leave event to this item, since it is going away 
+		/* no need to send a leave event to this item, since it is going away
 		 */
 		_current_item = 0;
 		pick_current_item (0); // no mouse state
@@ -797,17 +797,17 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	}
         Cairo::RefPtr<Cairo::Context> draw_context = Cairo::Context::create (canvas_image);
 	Cairo::RefPtr<Cairo::Context> window_context = get_window()->create_cairo_context ();
-#else 
+#else
 	Cairo::RefPtr<Cairo::Context> draw_context = get_window()->create_cairo_context ();
 #endif
 
         /* draw background color */
-        
+
         draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
         draw_context->clip_preserve ();
         set_source_rgba (draw_context, _bg_color);
         draw_context->fill ();
-        
+
         /* render canvas */
 		if ( _single_exposure ) {
 	
@@ -984,7 +984,7 @@ GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 	copy.motion.x = where.x;
 	copy.motion.y = where.y;
 
-	/* Coordinates in "copy" will be canvas coordinates, 
+	/* Coordinates in "copy" will be canvas coordinates,
 	*/
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas motion @ %1, %2 canvas @ %3, %4\n", ev->x, ev->y, copy.motion.x, copy.motion.y));
@@ -1277,7 +1277,7 @@ void
 GtkCanvasViewport::on_size_request (Gtk::Requisition* req)
 {
 	/* force the canvas to size itself */
-	// _canvas.root()->bounding_box(); 
+	// _canvas.root()->bounding_box();
 
 	req->width = 16;
 	req->height = 16;

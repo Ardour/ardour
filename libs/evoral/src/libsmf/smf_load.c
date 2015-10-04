@@ -612,7 +612,7 @@ error:
 /**
  * Takes "len" characters starting in "buf", making sure it does not access past the length of the buffer,
  * and makes ordinary, zero-terminated string from it.  May return NULL if there was any problem.
- */ 
+ */
 static char *
 make_string(const unsigned char *buf, const size_t buffer_length, uint32_t len)
 {

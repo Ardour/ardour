@@ -900,7 +900,7 @@ SessionMetadataImporter::run ()
 		return;
 	}
 
-	//create a temporary 
+	//create a temporary
 	ARDOUR::SessionMetadata data;
 	data.set_state (*node, version);
 	init_data ( true );  //skip user data here

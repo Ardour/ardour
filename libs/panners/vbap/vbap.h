@@ -34,8 +34,8 @@ namespace ARDOUR {
 class Speakers;
 class Pannable;
 
-class VBAPanner : public Panner 
-{ 
+class VBAPanner : public Panner
+{
 public:
 	VBAPanner (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
 	~VBAPanner ();
@@ -81,14 +81,14 @@ private:
 
         std::vector<Signal*> _signals;
         boost::shared_ptr<VBAPSpeakers>  _speakers;
-        
+
 	void compute_gains (double g[3], int ls[3], int azi, int ele);
         void update ();
         void clear_signals ();
 
 	void distribute_one (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which);
 	void distribute_one_automated (AudioBuffer& src, BufferSet& obufs,
-                                          framepos_t start, framepos_t end, pframes_t nframes, 
+                                          framepos_t start, framepos_t end, pframes_t nframes,
                                           pan_t** buffers, uint32_t which);
 };
 

@@ -1,6 +1,6 @@
 /*
-    Copyright (C) 2011 Tim Mayberry 
-    Copyright (C) 2013 Paul Davis 
+    Copyright (C) 2011 Tim Mayberry
+    Copyright (C) 2013 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -168,9 +168,9 @@ route_template_search_path ()
 const char*
 vst_search_path ()
 {
-	DWORD dwType = REG_SZ;  
+	DWORD dwType = REG_SZ;
 	HKEY hKey;
-	DWORD dwSize = PATH_MAX;  
+	DWORD dwSize = PATH_MAX;
 	char* p = 0;
 	char* user_home = 0;
 	char tmp[PATH_MAX+1];
@@ -255,7 +255,7 @@ vst_search_path ()
 	return p;
 }
 
-#else 
+#else
 
 /* Unix-like. Probably require some OS X specific breakdown if we ever add VST
  * support on that platform.

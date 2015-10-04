@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Tim Mayberry 
+    Copyright (C) 2007 Tim Mayberry
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -155,7 +155,7 @@ Searchpath&
 Searchpath::add_subdirectory_to_paths (const string& subdir)
 {
 	for (vector<std::string>::iterator i = begin(); i != end(); ++i) {
-		// should these new paths just be added to the end of 
+		// should these new paths just be added to the end of
 		// the search path rather than replace?
 		*i = Glib::build_filename (*i, subdir);
 	}
@@ -167,7 +167,7 @@ Searchpath::add_subdirectory_to_paths (const string& subdir)
  * whole idea, and we put it here for convenience.
  */
 
-void 
+void
 export_search_path (const string& base_dir, const char* varname, const char* dir)
 {
 	string path;

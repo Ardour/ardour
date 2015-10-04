@@ -149,7 +149,7 @@ NoteBase::set_selected(bool selected)
 
 	_selected = selected;
 	set_fill_color (base_color());
-        
+
 	set_outline_color(calculate_outline(base_color(), _selected));
 }
 
@@ -169,13 +169,13 @@ NoteBase::base_color()
 	case TrackColor:
 	{
 		uint32_t color = _region.midi_stream_view()->get_region_color();
-		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (color, opacity), 
-		                         UIConfiguration::instance().color ("midi note selected"), 
+		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (color, opacity),
+		                         UIConfiguration::instance().color ("midi note selected"),
 					 0.5);
 	}
 
 	case ChannelColors:
-		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::midi_channel_colors[_note->channel()], opacity), 
+		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::midi_channel_colors[_note->channel()], opacity),
 		                         UIConfiguration::instance().color ("midi note selected"), 0.5);
 
 	default:

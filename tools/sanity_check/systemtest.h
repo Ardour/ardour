@@ -5,9 +5,9 @@
  * GPL, yabbadabba
  *
  * Set of functions to gather system information for the jack setup wizard.
- * 
+ *
  * @author Florian Faber, faber@faberman.de
- * 
+ *
  * @version 0.1 (2009-01-15) [FF]
  *              - initial version
  *
@@ -15,7 +15,7 @@
 
 
 /**
- * This function checks for the existence of known frequency scaling mechanisms 
+ * This function checks for the existence of known frequency scaling mechanisms
  * in this system.
  *
  * @returns 0 if the system has no frequency scaling capabilities non-0 otherwise.
@@ -24,8 +24,8 @@ int system_has_frequencyscaling();
 
 
 /**
- * This function determines wether the CPU has a variable clock speed if frequency 
- * scaling is available. 
+ * This function determines wether the CPU has a variable clock speed if frequency
+ * scaling is available.
  *
  * @returns 0 if system doesn't use frequency scaling at the moment, non-0 otherwise
  **/

@@ -119,7 +119,7 @@ Port::connected () const
 {
 	if (_port_handle) {
 		return (port_engine.connected (_port_handle) != 0);
-	} 
+	}
 	return false;
 }
 
@@ -131,7 +131,7 @@ Port::disconnect_all ()
 		port_engine.disconnect_all (_port_handle);
 		_connections.clear ();
 		
-		/* a cheaper, less hacky way to do boost::shared_from_this() ... 
+		/* a cheaper, less hacky way to do boost::shared_from_this() ...
 		 */
 		boost::shared_ptr<Port> pself = port_manager->get_port_by_name (name());
 		PostDisconnect (pself, boost::shared_ptr<Port>()); // emit signal
@@ -147,7 +147,7 @@ bool
 Port::connected_to (std::string const & o) const
 {
 	if (!_port_handle) {
-		return false; 
+		return false;
 	}
 
 	if (!port_engine.available()) {
@@ -217,7 +217,7 @@ Port::disconnect (std::string const & other)
 		_connections.erase (other);
 	}
 
-	/* a cheaper, less hacky way to do boost::shared_from_this() ... 
+	/* a cheaper, less hacky way to do boost::shared_from_this() ...
 	 */
 	boost::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
 	boost::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (other);
@@ -227,7 +227,7 @@ Port::disconnect (std::string const & other)
 		   a check on whether this may affect anything that we
 		   need to know about.
 		*/
-		PostDisconnect (pself, pother); // emit signal 
+		PostDisconnect (pself, pother); // emit signal
 	}
 
 	return r;

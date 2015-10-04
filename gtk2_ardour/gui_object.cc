@@ -88,7 +88,7 @@ GUIObjectState::remove_node (const std::string& id)
  *  @return value of property `prop_name', or empty.
  */
 
-string 
+string
 GUIObjectState::get_string (const string& id, const string& prop_name, bool* empty)
 {
 	XMLNode* child = get_node (&_state, id);

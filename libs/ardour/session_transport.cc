@@ -336,12 +336,12 @@ Session::butler_transport_work ()
 			DEBUG_TRACE (DEBUG::Butler, "flush loop recording fragment to disk\n");
 			
 			/* this locate might be happening while we are
-			 * loop recording. 
+			 * loop recording.
 			 *
 			 * Non-seamless looping will require a locate (below) that
 			 * will reset capture buffers and throw away data.
 			 *
-			 * Rather than first find all tracks and see if they 
+			 * Rather than first find all tracks and see if they
 			 * have outstanding data, just do a flush anyway. It
 			 * may be cheaper this way anyway, and is certainly
 			 * more accurate.
@@ -597,7 +597,7 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 					/* need to get track buffers reloaded */
 					set_track_loop (true);
 				}
-			} 
+			}
 		}
 	}
 	
@@ -605,7 +605,7 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 		if (!_object_selection.empty()) {
 			jump_to = _object_selection.from;
 		}
-	} 
+	}
 
 	if (jump_to < 0 && (autoreturn & LastLocate)) {
 		jump_to = _last_roll_location;
@@ -811,7 +811,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			/* This (::non_realtime_stop()) gets called by main
 			   process thread, which will lead to confusion
 			   when calling AsyncMIDIPort::write().
-			   
+			
 			   Something must be done. XXX
 			*/
 			send_mmc_locate (_transport_frame);
@@ -967,8 +967,8 @@ Session::set_play_loop (bool yn, double speed)
 					/* set all tracks to use internal looping */
 					set_track_loop (true);
 				} else {
-					/* we will do this in the locate to the start OR when we hit the end 
-					 * of the loop for the first time 
+					/* we will do this in the locate to the start OR when we hit the end
+					 * of the loop for the first time
 					 */
 				}
 			} else {
@@ -1100,7 +1100,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	 * already have the correct data in them, and thus there is no need to
 	 * actually tell the tracks to locate. What does need to be done,
 	 * though, is all the housekeeping that is associated with non-linear
-	 * changes in the value of _transport_frame. 
+	 * changes in the value of _transport_frame.
 	 */
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1, roll %2 flush %3 loop-enabled %4 force %5 mmc %6\n",
@@ -1285,7 +1285,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 void
 Session::set_transport_speed (double speed, framepos_t destination_frame, bool abort, bool clear_state, bool as_default)
 {
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4 as_default %6\n", 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4 as_default %6\n",
 						       speed, abort, clear_state, _transport_speed, _transport_frame, as_default));
 
 	if (_transport_speed == speed) {
@@ -1297,7 +1297,7 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 
 	if (actively_recording() && speed != 1.0 && speed != 0.0) {
 		/* no varispeed during recording */
-		DEBUG_TRACE (DEBUG::Transport, string_compose ("No varispeed during recording cur_speed %1, frame %2\n", 
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("No varispeed during recording cur_speed %1, frame %2\n",
 						       _transport_speed, _transport_frame));
 		return;
 	}
@@ -1434,13 +1434,13 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 
 		DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_speed));
 
-		/* throttle signal emissions. 
+		/* throttle signal emissions.
 		 * when slaved [_last]_transport_speed
 		 * usually changes every cycle (tiny amounts due to DLL).
 		 * Emitting a signal every cycle is overkill and unwarranted.
 		 *
 		 * Using _last_transport_speed is not acceptable,
-		 * since it allows for large changes over a long period 
+		 * since it allows for large changes over a long period
 		 * of time. Hence we introduce a dedicated variable to keep track
 		 *
 		 * The 0.2% dead-zone is somewhat arbitrary. Main use-case
@@ -1510,7 +1510,7 @@ Session::stop_transport (bool abort, bool clear_state)
 			merge_event (ev);
 
 			/* request a declick at the start of the next process cycle() so that playback ceases.
-			   It will remain silent until we actually stop (at the StopOnce event somewhere in 
+			   It will remain silent until we actually stop (at the StopOnce event somewhere in
 			   the future). The extra flag (StopPendingCapture) is set to ensure that check_declick_out()
 			   does not stop the transport too early.
 			 */
@@ -1535,7 +1535,7 @@ Session::stop_transport (bool abort, bool clear_state)
 		DEBUG_TRACE (DEBUG::Transport, "time to actually stop\n");
 		
 		/* declick was scheduled, but we've been called again, which means it is really time to stop
-		   
+		
 		   XXX: we should probably split this off into its own method and call it explicitly.
 		*/
 

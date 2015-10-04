@@ -31,7 +31,7 @@ public:
     WavesMidiDeviceManager (WavesAudioBackend& audiobackend);
     ~WavesMidiDeviceManager ();
 
-    inline const std::vector<WavesMidiDevice *>& devices () const 
+    inline const std::vector<WavesMidiDevice *>& devices () const
     {
         return _devices;
     }
@@ -51,10 +51,10 @@ private:
     void _portmidi_callback (PtTimestamp timestamp);
     /** __get_time_ms is given to Pm_Open functions (see WavesMidiDevice.cc)
      *  to provide the time in milliseconds using the time of audio
-     *  transport. 
+     *  transport.
      *  time_info is a pointer on the backend instance, which agregates the
      *  audio and miditransports. It's not checked for correctness to consume
-     *  no time. 
+     *  no time.
      */
     static PmTimestamp __get_time_ms (void *time_info);
 
@@ -72,4 +72,4 @@ private:
 } // namespace
 
 #endif /* __libardour_waves_midi_device_manager_h__ */
-    
+

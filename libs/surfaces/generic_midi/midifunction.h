@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2009 Paul Davis
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -41,7 +41,7 @@ class GenericMidiControlProtocol;
 class MIDIFunction : public MIDIInvokable
 {
   public:
-	enum Function { 
+	enum Function {
 		NextBank,
 		PrevBank,
 		TransportRoll,
@@ -56,7 +56,7 @@ class MIDIFunction : public MIDIInvokable
 		Select,
 		SetBank,
 		/* 2 argument functions: RID, value */
-		TrackSetSolo, 
+		TrackSetSolo,
 		TrackSetMute,
 		TrackSetGain,
 		TrackSetRecordEnable,

@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2009 Paul Davis
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -74,7 +74,7 @@ OSCControllable::send_change_message ()
 
 /*------------------------------------------------------------*/	
 
-OSCRouteControllable::OSCRouteControllable (lo_address a, const std::string& p, 
+OSCRouteControllable::OSCRouteControllable (lo_address a, const std::string& p,
 					    boost::shared_ptr<Controllable> c, boost::shared_ptr<Route> r)
 	: OSCControllable (a, p, c)
 	, _route (r)

@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2003 Paul Barton-Davis
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -43,7 +43,7 @@ TearOff::TearOff (Widget& c, bool allow_resize)
         , _visible (true)
         , _torn (false)
         , _can_be_torn_off (true)
-         
+
 {
         own_window_width = 0;
         own_window_height = 0;
@@ -55,7 +55,7 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	tearoff_event_box.signal_button_release_event().connect (mem_fun (*this, &TearOff::tearoff_click));
 
 	tearoff_event_box.set_tooltip_text (_("Click to tear this into its own window"));
-        
+
 	close_event_box.add (close_arrow);
 	close_event_box.set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 	close_event_box.signal_button_release_event().connect (mem_fun (*this, &TearOff::close_click));
@@ -145,7 +145,7 @@ TearOff::tear_it_off ()
 	if (!_can_be_torn_off) {
                 return;
         }
-                
+
         if (torn_off()) {
                 return;
         }
@@ -164,7 +164,7 @@ TearOff::tear_it_off ()
         _torn = true;
 
         Detach ();
-}        
+}
 
 gint
 TearOff::close_click (GdkEventButton* /*ev*/)
@@ -280,7 +280,7 @@ TearOff::add_state (XMLNode& node) const
                 snprintf (buf, sizeof (buf), "%d", own_window_ypos);
                 node.add_property ("ypos", buf);
         }
-}        
+}
 
 void
 TearOff::set_state (const XMLNode& node)
@@ -316,7 +316,7 @@ TearOff::set_state (const XMLNode& node)
                 own_window.move (own_window_xpos, own_window_ypos);
         }
         /* otherwise do it once the window is realized, see below */
-}        
+}
 
 void
 TearOff::own_window_realized ()
@@ -335,7 +335,7 @@ TearOff::own_window_configured (GdkEventConfigure*)
         Glib::RefPtr<const Gdk::Window> win;
 
         win = own_window.get_window ();
-        
+
         if (win) {
                 win->get_size (own_window_width, own_window_height);
                 win->get_position (own_window_xpos, own_window_ypos);

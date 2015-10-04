@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Barton-Davis 
+    Copyright (C) 1999 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ Prompter::init ()
 	
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 
-	/* 
+	/*
 	   Alas a generic 'affirmative' button seems a bit useless sometimes.
 	   You will have to add your own.
 	   After adding, use :
@@ -122,10 +122,10 @@ Prompter::entry_activated ()
 void
 Prompter::on_entry_changed ()
 {
-	/* 
-	   This is set up so that entering text in the entry 
-	   field makes the RESPONSE_ACCEPT button active. 
-	   Of course if you haven't added a RESPONSE_ACCEPT 
+	/*
+	   This is set up so that entering text in the entry
+	   field makes the RESPONSE_ACCEPT button active.
+	   Of course if you haven't added a RESPONSE_ACCEPT
 	   button, nothing will happen at all.
 	*/
 

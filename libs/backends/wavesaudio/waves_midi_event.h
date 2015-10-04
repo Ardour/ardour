@@ -39,7 +39,7 @@ public:
     WavesMidiEvent (PmTimestamp timestamp, const uint8_t* data, size_t datalen);
     WavesMidiEvent (const WavesMidiEvent& source);
     ~WavesMidiEvent ();
-    
+
     WavesMidiEvent *append_data (const PmEvent &midi_event);
 
     inline State state () const { return _state; };

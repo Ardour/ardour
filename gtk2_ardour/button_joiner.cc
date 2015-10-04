@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -132,7 +132,7 @@ ButtonJoiner::render (cairo_t* cr, cairo_rectangle_t*)
 			Gtkmm2ext::rounded_top_rectangle (cr, 0, 0, (get_width() - 20.0)/2.0 , h, 8);
 			cairo_fill_preserve (cr);
 			
-			Gtkmm2ext::rounded_top_rectangle (cr, (get_width() - 20.)/2.0 + 20.0, 0.0, 
+			Gtkmm2ext::rounded_top_rectangle (cr, (get_width() - 20.)/2.0 + 20.0, 0.0,
 							  (get_width() - 20.0)/2.0 , h, 8);
 			cairo_fill_preserve (cr);
 
@@ -187,7 +187,7 @@ ButtonJoiner::set_related_action (Glib::RefPtr<Action> act)
 		if (tact) {
 			action_toggled ();
 			tact->signal_toggled().connect (sigc::mem_fun (*this, &ButtonJoiner::action_toggled));
-		} 
+		}
 
 		_action->connect_property_changed ("sensitive", sigc::mem_fun (*this, &ButtonJoiner::action_sensitivity_changed));
 		_action->connect_property_changed ("visible", sigc::mem_fun (*this, &ButtonJoiner::action_visibility_changed));

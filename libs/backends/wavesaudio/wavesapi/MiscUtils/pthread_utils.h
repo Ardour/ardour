@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014 John Emmas 
+    Copyright (C) 2014 John Emmas
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

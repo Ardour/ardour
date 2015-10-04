@@ -29,7 +29,7 @@ namespace Gtk {
 	class ActionGroup;
 }
 
-class MixerActor : virtual public sigc::trackable 
+class MixerActor : virtual public sigc::trackable
 {
   public:
 	MixerActor ();

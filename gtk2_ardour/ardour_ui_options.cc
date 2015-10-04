@@ -412,7 +412,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 				transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
 				meter_box.show();
 				editor_meter_peak_display.show();
-			} 
+			}
 		}
 	} else if (p == "waveform-scale") {
 		ArdourCanvas::WaveView::set_global_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);

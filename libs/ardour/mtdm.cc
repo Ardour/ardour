@@ -20,7 +20,7 @@
 
 #include "ardour/mtdm.h"
 
-MTDM::MTDM (int fsamp) 
+MTDM::MTDM (int fsamp)
   : _cnt (0)
   , _inv (0)
 {
@@ -32,7 +32,7 @@ MTDM::MTDM (int fsamp)
     _freq [2].f  = 3072;
     _freq [3].f  = 2560;
     _freq [4].f  = 2304;
-    _freq [5].f  = 2176; 
+    _freq [5].f  = 2176;
     _freq [6].f  = 1088;
     _freq [7].f  = 1312;
     _freq [8].f  = 1552;
@@ -63,14 +63,14 @@ int MTDM::process (size_t len, float *ip, float *op)
 	vip = *ip++;
 	for (i = 0, F = _freq; i < 13; i++, F++)
 	{
-	    a = 2 * (float) M_PI * (F->p & 65535) / 65536.0; 
+	    a = 2 * (float) M_PI * (F->p & 65535) / 65536.0;
 	    F->p += F->f;
-	    c =  cosf (a); 
-	    s = -sinf (a); 
+	    c =  cosf (a);
+	    s = -sinf (a);
 	    vop += (i ? 0.01f : 0.20f) * s;
 	    F->xa += s * vip;
 	    F->ya += c * vip;
-	} 
+	}
 	*op++ = vop;
 	if (++_cnt == 16)
 	{
@@ -113,10 +113,10 @@ int MTDM::resolve (void)
 	k = (int)(floor (p + 0.5));
 	e = fabs (p - k);
         if (e > _err) _err = e;
-        if (e > 0.4) return 1; 
+        if (e > 0.4) return 1;
 	d += m * (k & 1);
 	m *= 2;
-    }  
+    }
     _del = 16 * d;
 
     return 0;

@@ -191,7 +191,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 	}
 
         if (_divide_height >= 0.0) {
-                
+
                 cr->set_line_width (1.0);
 
                 set_source_rgba (cr, _divider_color_top);

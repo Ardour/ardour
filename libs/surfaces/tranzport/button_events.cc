@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  *   */
 
 #include <tranzport_common.h>
@@ -66,7 +66,7 @@ TranzportControlProtocol::button_event_trackleft_press (bool shifted)
 {
 	prev_track ();
 	// not really the right layer for this
-	if(display_mode == DisplayBigMeter) { 
+	if(display_mode == DisplayBigMeter) {
 		if (route_table[0] != 0) {
 			notify(route_get_name (0).substr (0, 15).c_str());
 		}
@@ -81,9 +81,9 @@ TranzportControlProtocol::button_event_trackleft_release (bool shifted)
 void
 TranzportControlProtocol::button_event_trackright_press (bool shifted)
 {
-	next_track (); 
+	next_track ();
 	// not really the right layer for this
-	if(display_mode == DisplayBigMeter) { 
+	if(display_mode == DisplayBigMeter) {
 		if (route_table[0] != 0) {
 			notify(route_get_name (0).substr (0, 15).c_str());
 		}
@@ -372,9 +372,9 @@ TranzportControlProtocol::button_event_footswitch_release (bool shifted)
 void button_event_mute (bool pressed, bool shifted)
 {
 	static int was_pressed = 0;
-	if((!pressed && !was_pressed) || pressed) { 
+	if((!pressed && !was_pressed) || pressed) {
 		was_pressed = 1;
-	} 
+	}
 
 	was_pressed = 0;
 }

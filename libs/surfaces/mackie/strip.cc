@@ -108,7 +108,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	for (map<Button::ID,StripButtonInfo>::const_iterator b = strip_buttons.begin(); b != strip_buttons.end(); ++b) {
 		Button* bb = dynamic_cast<Button*> (Button::factory (*_surface, b->first, b->second.base_id + index, b->second.name, *this));
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface %1 strip %2 new button BID %3 id %4 from base %5\n",
-								   _surface->number(), index, Button::id_to_name (bb->bid()), 
+								   _surface->number(), index, Button::id_to_name (bb->bid()),
 								   bb->id(), b->second.base_id));
 	}
 }	
@@ -118,7 +118,7 @@ Strip::~Strip ()
 	/* surface is responsible for deleting all controls */
 }
 
-void 
+void
 Strip::add (Control & control)
 {
 	Button* button;
@@ -244,7 +244,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	}
 }
 
-void 
+void
 Strip::notify_all()
 {
 	if (!_route) {
@@ -261,7 +261,7 @@ Strip::notify_all()
 	notify_record_enable_changed ();
 }
 
-void 
+void
 Strip::notify_solo_changed ()
 {
 	if (_route && _solo) {
@@ -269,7 +269,7 @@ Strip::notify_solo_changed ()
 	}
 }
 
-void 
+void
 Strip::notify_mute_changed ()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Strip %1 mute changed\n", _index));
@@ -281,7 +281,7 @@ Strip::notify_mute_changed ()
 	}
 }
 
-void 
+void
 Strip::notify_record_enable_changed ()
 {
 	if (_route && _recenable)  {
@@ -289,19 +289,19 @@ Strip::notify_record_enable_changed ()
 	}
 }
 
-void 
+void
 Strip::notify_active_changed ()
 {
 	_surface->mcp().refresh_current_bank();
 }
 
-void 
+void
 Strip::notify_route_deleted ()
 {
 	_surface->mcp().refresh_current_bank();
 }
 
-void 
+void
 Strip::notify_gain_changed (bool force_update)
 {
 	if (_route) {
@@ -340,7 +340,7 @@ Strip::notify_gain_changed (bool force_update)
 	}
 }
 
-void 
+void
 Strip::notify_property_changed (const PropertyChange& what_changed)
 {
 	if (!what_changed.contains (ARDOUR::Properties::name)) {
@@ -361,7 +361,7 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 	}
 }
 
-void 
+void
 Strip::notify_panner_azi_changed (bool force_update)
 {
 	if (_route) {
@@ -400,7 +400,7 @@ Strip::notify_panner_azi_changed (bool force_update)
 	}
 }
 
-void 
+void
 Strip::notify_panner_width_changed (bool force_update)
 {
 	if (_route) {
@@ -731,7 +731,7 @@ Strip::redisplay ()
 	}
 }
 
-void 
+void
 Strip::update_automation ()
 {
 	ARDOUR::AutoState gain_state = _route->gain_control()->automation_state();
@@ -926,7 +926,7 @@ Strip::reset_display ()
 		
 	clear_display_reset ();
 }
-			 
+			
 struct RouteCompareByName {
 	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 		return a->name().compare (b->name()) < 0;
@@ -1135,7 +1135,7 @@ Strip::reset_saved_values ()
 
 }
 
-void 
+void
 Strip::notify_metering_state_changed()
 {
 	if (!_route || !_meter) {

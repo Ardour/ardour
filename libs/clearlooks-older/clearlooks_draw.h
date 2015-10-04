@@ -4,7 +4,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
-typedef struct 
+typedef struct
 {
 	GdkColor *from;
 	GdkColor *to;
@@ -104,8 +104,8 @@ void cl_progressbar_fill (GdkDrawable *drawable, GtkWidget *widget,
                           GtkStyle *style, GdkGC *gc,
                           gint x, gint y, gint width, gint height,
 						  guint8 offset, GdkRectangle *area);
-						  
-GdkColor cl_gc_set_fg_color_shade (GdkGC *gc, GdkColormap *colormap, 
+						
+GdkColor cl_gc_set_fg_color_shade (GdkGC *gc, GdkColormap *colormap,
                                    GdkColor *from, gfloat s);
 
 void cl_draw_spinbutton(GtkStyle *style, GdkWindow *window,
@@ -137,23 +137,23 @@ void cl_draw_combobox_button (GtkStyle *style, GdkWindow *window,
                              GdkRectangle *area,
                              GtkWidget *widget, const gchar *detail,
                              gint x, gint y, gint width, gint height);
-							 
+							
 void cl_draw_menuitem_button (GdkDrawable *window, GtkWidget *widget, GtkStyle *style,
-                              GdkRectangle *area, GtkStateType state_type, 
+                              GdkRectangle *area, GtkStateType state_type,
                               int x, int y, int wiidth, int height, CLRectangle *r);
 
 void cl_draw_menuitem_flat (GdkDrawable *window, GtkWidget *widget, GtkStyle *style,
-                            GdkRectangle *area, GtkStateType state_type, 
+                            GdkRectangle *area, GtkStateType state_type,
                             int x, int y, int wiidth, int height, CLRectangle *r);
-                            
+
 void cl_draw_menuitem_gradient (GdkDrawable *window, GtkWidget *widget, GtkStyle *style,
-                                GdkRectangle *area, GtkStateType state_type, 
+                                GdkRectangle *area, GtkStateType state_type,
                                 int x, int y, int wiidth, int height, CLRectangle *r);
-							  
+							
 void cl_draw_treeview_header (GtkStyle *style, GdkWindow *window,
                               GtkStateType state_type, GtkShadowType shadow_type,
                               GdkRectangle *area,
                               GtkWidget *widget, const gchar *detail,
                               gint x, gint y, gint width, gint height);
-							  
+							
 #endif /* CLEARLOOKS_DRAW_H */

@@ -275,7 +275,7 @@ void
 MackieControlProtocolGUI::build_available_action_menu ()
 {
 	/* build a model of all available actions (needs to be tree structured
-	 * more) 
+	 * more)
 	 */
 
 	available_action_model = TreeStore::create (available_action_columns);
@@ -555,7 +555,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 	function_key_editor.set_model (function_key_model);
 }
 
-void 
+void
 MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib::ustring &text, TreeModelColumnBase col)
 {
 	// Remove Binding is not in the action map but still valid

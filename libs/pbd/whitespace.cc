@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,11 +25,11 @@ namespace PBD {
 	
 void
 strip_whitespace_edges (string& str)
-{   
-    string::size_type i; 
-    string::size_type len;    
+{
+    string::size_type i;
+    string::size_type len;
     string::size_type s = 0;
-			            
+			
     len = str.length();
 
     if (len == 1) {
@@ -37,7 +37,7 @@ strip_whitespace_edges (string& str)
     }
 
     /* strip front */
-				        
+				
     for (i = 0; i < len; ++i) {
         if (!isspace (str[i])) {
             break;
@@ -51,16 +51,16 @@ strip_whitespace_edges (string& str)
     }
 
     /* strip back */
-    
+
     if (len > 1) {
-    
+
 	    s = i;
 	    i = len - 1;
 
 	    if (s == i) {
 		    return;
 	    }
-	    
+	
 	    do {
 		    if (!isspace (str[i]) || i == 0) {
 			    break;
@@ -68,8 +68,8 @@ strip_whitespace_edges (string& str)
 
 		    --i;
 
-	    } while (true); 
-	    
+	    } while (true);
+	
 	    str = str.substr (s, (i - s) + 1);
 
     } else {

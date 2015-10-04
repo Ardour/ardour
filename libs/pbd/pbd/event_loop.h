@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ namespace PBD
  * when something like this is needed (it inherits from EventLoop).
  */
 
-class LIBPBD_API EventLoop 
+class LIBPBD_API EventLoop
 {
   public:
 	EventLoop() {}
@@ -49,7 +49,7 @@ class LIBPBD_API EventLoop
 	};
 
         struct BaseRequestObject;
-    
+
         struct InvalidationRecord {
 	    std::list<BaseRequestObject*> requests;
 	    PBD::EventLoop* event_loop;
@@ -66,7 +66,7 @@ class LIBPBD_API EventLoop
             bool                    valid;
             InvalidationRecord*     invalidation;
 	    boost::function<void()> the_slot;
-            
+
             BaseRequestObject() : valid (true), invalidation (0) {}
 	};
 

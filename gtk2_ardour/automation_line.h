@@ -169,7 +169,7 @@ protected:
 	bool _our_time_converter;
 
 	VisibleAspects _visible;
- 
+
 	bool    _uses_gain_mapping;
 	bool    terminal_points_can_slide;
 	bool    update_pending;

@@ -82,7 +82,7 @@ CairoFontDescription::CairoFontDescription (Pango::FontDescription& fd)
 	}
 
 	face = fd.get_family();
-}       
+}
 
 CairoCell::CairoCell (int32_t id)
 	: _id (id)
@@ -147,7 +147,7 @@ CairoTextCell::set_size (Cairo::RefPtr<Cairo::Context>& context)
 	for (int digit = 0; digit < 10; digit++) {
 
 		for (n = 0; n < lim; ++n) {
-			buf[n] = '0' + digit; 
+			buf[n] = '0' + digit;
 		}
 		
 		context->get_text_extents (&buf[0], ext);

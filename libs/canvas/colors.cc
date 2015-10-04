@@ -76,7 +76,7 @@ ArdourCanvas::color_to_hsva (Color color, double& h, double& s, double& v, doubl
 
 	if (cmax == 0) {
 		// r = g = b == 0 ... v is undefined, s = 0
-		s = 0.0;  
+		s = 0.0;
 		h = 0.0;
 		return;
 	}
@@ -135,7 +135,7 @@ ArdourCanvas::hsva_to_color (double h, double s, double v, double a)
 		return rgba_to_color (x + m, m, c + m, a);
         } else if (h >= 300.0 && h < 360.0) {
 		return rgba_to_color (c + m, m, x + m, a);
-        } 
+        }
 	return rgba_to_color (m, m, m, a);
 }
 
@@ -172,8 +172,8 @@ ArdourCanvas::rgba_to_color (double r, double g, double b, double a)
 }
 
 // Inverse of sRGB "gamma" function.
-static inline double 
-inv_gam_sRGB (double c) 
+static inline double
+inv_gam_sRGB (double c)
 {
         if (c <= 0.04045) {
                 return c/12.92;
@@ -183,8 +183,8 @@ inv_gam_sRGB (double c)
 }
 
 // sRGB "gamma" function
-static inline int 
-gam_sRGB(double v) 
+static inline int
+gam_sRGB(double v)
 {
         if (v <= 0.0031308) {
                 v *= 12.92;
@@ -194,7 +194,7 @@ gam_sRGB(double v)
         return int (v*255+.5);
 }
 
-static double 
+static double
 luminance (uint32_t c)
 {
         // sRGB luminance(Y) values
@@ -205,9 +205,9 @@ luminance (uint32_t c)
         double r, g, b, a;
 
         ArdourCanvas::color_to_rgba (c, r, g, b, a);
-        
+
         return (gam_sRGB (rY*inv_gam_sRGB(r) + gY*inv_gam_sRGB(g) + bY*inv_gam_sRGB(b))) / 255.0;
-}    
+}
 
 uint32_t
 ArdourCanvas::contrasting_text_color (uint32_t c)
@@ -226,7 +226,7 @@ HSV::HSV ()
 	: h (0.0)
 	, s (1.0)
 	, v (1.0)
-	, a (1.0) 
+	, a (1.0)
 {
 }
 
@@ -234,7 +234,7 @@ HSV::HSV (double hh, double ss, double vv, double aa)
 	: h (hh)
 	, s (ss)
 	, v (vv)
-	, a (aa) 
+	, a (aa)
 {
 	if (h < 0.0) {
 		/* normalize negative hue values into positive range */
@@ -345,8 +345,8 @@ HSV::shade (double factor) const
 	/* algorithm derived from a google palette website
 	   and analysis of their color palettes.
 
-	   basic rule: to make a color darker, increase its saturation 
-	   until it reaches 88%, but then additionally reduce value/lightness 
+	   basic rule: to make a color darker, increase its saturation
+	   until it reaches 88%, but then additionally reduce value/lightness
 	   by a larger amount.
 
 	   invert rule to make a color lighter.
@@ -355,12 +355,12 @@ HSV::shade (double factor) const
 	if (factor > 1.0) {
 		if (s < 88) {
 			hsv.v += (hsv.v * (factor * 10.0));
-		} 
+		}
 		hsv.s *= factor;
 	} else {
 		if (s < 88) {
 			hsv.v -= (hsv.v * (factor * 10.0));
-		} 
+		}
 		hsv.s *= factor;
 	}
 
@@ -420,13 +420,13 @@ HSV::distance (const HSV& other) const
 	if (is_gray() && other.is_gray()) {
 		/* human color perception of achromatics generates about 450
 		   distinct colors. By contrast, CIE94 could give a maximal
-		   perceptual distance of sqrt ((360^2) + 1 + 1) = 360. The 450 
+		   perceptual distance of sqrt ((360^2) + 1 + 1) = 360. The 450
 		   are not evenly spread (Webers Law), so lets use 360 as an
 		   approximation of the number of distinct achromatics.
-		   
+		
 		   So, scale up the achromatic difference to give about
 		   a maximal distance between v = 1.0 and v = 0.0 of 360.
-		   
+		
 		   A difference of about 0.0055 will generate a return value of
 		   2, which is roughly the limit of human perceptual
 		   discrimination for chromatics.
@@ -444,7 +444,7 @@ HSV::distance (const HSV& other) const
 	double sL, sA, sB;
 	double oL, oA, oB;
 	double r, g, b, alpha;  // Careful, "a" is a field of this
-	Color c; 
+	Color c;
 
 	c = hsva_to_color (h, s, v, a);
 	color_to_rgba (c, r, g, b, alpha);
@@ -458,7 +458,7 @@ HSV::distance (const HSV& other) const
 
 	const double whtL = 1.0;
 	const double whtC = 1.0;
-	const double whtH = 1.0;  
+	const double whtH = 1.0;
 
 	const double xC1 = sqrt ((sA * sA) + (sB * oB));
 	const double xC2 = sqrt ((oA * oA) + (oB * oB));

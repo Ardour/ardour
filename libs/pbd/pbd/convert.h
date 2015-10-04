@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ LIBPBD_API std::string length2string (const int64_t frames, const double sample_
 LIBPBD_API std::vector<std::string> internationalize (const char *, const char **);
 LIBPBD_API bool strings_equal_ignore_case (const std::string& a, const std::string& b);
 
-template <class T> std::string /*LIBPBD_API*/ 
+template <class T> std::string /*LIBPBD_API*/
 to_string (T t, std::ios_base & (*f)(std::ios_base&))
 {
 	std::ostringstream oss;

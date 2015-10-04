@@ -54,7 +54,7 @@ class LIBARDOUR_API AudioPort : public Port
 
   private:
 	AudioBuffer* _buffer;
-        bool         _buf_valid; 
+        bool         _buf_valid;
 };
 
 } // namespace ARDOUR

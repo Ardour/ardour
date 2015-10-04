@@ -52,7 +52,7 @@ typedef uint32_t WTFourCharCode;
 class WCFourCC
 {
 private:
-	template<class _iter> 
+	template<class _iter>
 	static WTFourCharCode stored_from_iter(_iter& i)
 	{
 		return s_stored_byte_order==wvNS::wvBO::byte_order_big_endian ? FOURCC_BIG(i[0], i[1], i[2], i[3]) : FOURCC_LITTLE(i[0], i[1], i[2], i[3]);
@@ -67,7 +67,7 @@ public:
 	// change this line will change the byte order in which WCFourCC keeps the four char code
 	static const wvNS::wvBO::byte_order_type s_stored_byte_order = wvNS::wvBO::compiler_byte_order;
 
-	WCFourCC(const char a, const char b, const char c, const char d) : 
+	WCFourCC(const char a, const char b, const char c, const char d) :
 		m_stored_value(s_stored_byte_order==wvNS::wvBO::compiler_byte_order ? FOURCC_BIG(a,b,c,d) : FOURCC_LITTLE(a,b,c,d))
 	{
 #if kEnableWCFourCCDebug == 1
@@ -141,7 +141,7 @@ public:
 	{
 		return reinterpret_cast<char*>(&m_stored_value)[s_stored_byte_order==wvNS::wvBO::byte_order_little_endian ? 3-in_character_index : in_character_index];
 	}
-    
+
     static size_t size()
     {
         return sizeof(WTFourCharCode);
@@ -151,12 +151,12 @@ public:
 	{
 		return size();
 	}
-    
+
 	static size_t capacity()
 	{
 		return size();
 	}
-    
+
 	WCFixedString4 GetString() const
 	{
 		WCFixedString4 retVal;

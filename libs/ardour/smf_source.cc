@@ -71,7 +71,7 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	if (init (_path, false)) {
 		throw failed_constructor ();
 	}
- 
+
         assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 	existence_check ();
 
@@ -107,7 +107,7 @@ SMFSource::SMFSource (Session& s, const string& path)
 	if (init (_path, true)) {
 		throw failed_constructor ();
 	}
- 
+
         assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 	existence_check ();
 
@@ -784,7 +784,7 @@ SMFSource::prevent_deletion ()
 	/* Unlike the audio case, the MIDI file remains mutable (because we can
 	   edit MIDI data)
 	*/
-  
+
 	_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
 }
 		

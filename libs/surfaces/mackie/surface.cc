@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -180,7 +180,7 @@ Surface::set_state (const XMLNode& node, int version)
 	return 0;
 }
 
-const MidiByteArray& 
+const MidiByteArray&
 Surface::sysex_hdr() const
 {
 	switch  (_stype) {
@@ -201,7 +201,7 @@ static GlobalControlDefinition mackie_global_controls[] = {
 	{ "", 0, Led::factory, "" }
 };
 
-void 
+void
 Surface::init_controls()
 {
 	Group* group;
@@ -243,7 +243,7 @@ Surface::init_controls()
 	}
 }
 
-void 
+void
 Surface::init_strips (uint32_t n)
 {
 	const map<Button::ID,StripButtonInfo>& strip_buttons (_mcp.device_info().strip_buttons());
@@ -268,7 +268,7 @@ Surface::setup_master ()
 	
 	if ((m = _mcp.get_session().monitor_out()) == 0) {
 		m = _mcp.get_session().master_out();
-	} 
+	}
 	
 	if (!m) {
 		return;
@@ -318,7 +318,7 @@ Surface::master_gain_changed ()
 	_last_master_gain_written = normalized_position;
 }
 
-float 
+float
 Surface::scaled_delta (float delta, float current_speed)
 {
 	/* XXX needs work before use */
@@ -327,7 +327,7 @@ Surface::scaled_delta (float delta, float current_speed)
 	return ((sign * std::pow (delta + 1.0, 2.0)) + current_speed) / 100.0;
 }
 
-void 
+void
 Surface::display_bank_start (uint32_t current_bank)
 {
 	if  (current_bank == 0) {
@@ -339,7 +339,7 @@ Surface::display_bank_start (uint32_t current_bank)
 	}
 }
 
-void 
+void
 Surface::blank_jog_ring ()
 {
 	Control* control = controls_by_device_independent_id[Jog::ID];
@@ -358,13 +358,13 @@ Surface::scrub_scaling_factor () const
 	return 100.0;
 }
 
-void 
+void
 Surface::connect_to_signals ()
 {
 	if (!_connected) {
 
 
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 connecting to signals on port %2\n", 
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 connecting to signals on port %2\n",
 								   number(), _port->input_port().name()));
 
 		MIDI::Parser* p = _port->input_port().parser();
@@ -396,7 +396,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 	 * from the MIDI::Parser conveys the fader ID, which was given by the
 	 * channel ID in the status byte.
 	 *
-	 * Instead, we have used bind() to supply the fader-within-strip ID 
+	 * Instead, we have used bind() to supply the fader-within-strip ID
 	 * when we connected to the per-channel pitchbend events.
 	 */
 
@@ -433,21 +433,21 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 	}
 }
 
-void 
+void
 Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface::handle_midi_note_on_message %1 = %2\n", (int) ev->note_number, (int) ev->velocity));
 	
 	if (_mcp.device_info().no_handshake()) {
 		turn_it_on ();
-	} 
+	}
 
 	if (_mcp.device_info().device_type() == DeviceInfo::HUI && ev->note_number == 0 && ev->velocity == 127) {
 		turn_it_on ();
 	}
 	
 	/* fader touch sense is given by "buttons" 0xe..0xe7 and 0xe8 for the
-	 * master. 
+	 * master.
 	 */
 
 	if (ev->note_number >= 0xE0 && ev->note_number <= 0xE8) {
@@ -487,7 +487,7 @@ Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 	}
 }
 
-void 
+void
 Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::handle_midi_controller %1 = %2\n", (int) ev->controller_number, (int) ev->value));
@@ -499,7 +499,7 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 	Pot* pot = pots[ev->controller_number];
 
 	// bit 6 gives the sign
-	float sign = (ev->value & 0x40) == 0 ? 1.0 : -1.0; 
+	float sign = (ev->value & 0x40) == 0 ? 1.0 : -1.0;
 	// bits 0..5 give the velocity. we interpret this as "ticks
 	// moved before this message was sent"
 	float ticks = (ev->value & 0x3f);
@@ -532,10 +532,10 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 	Strip* strip = dynamic_cast<Strip*> (&pot->group());
 	if (strip) {
 		strip->handle_pot (*pot, delta);
-	} 
+	}
 }
 
-void 
+void
 Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count)
 {
 	MidiByteArray bytes (count, raw_bytes);
@@ -547,7 +547,7 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 	}
 
 	/* always save the device type ID so that our outgoing sysex messages
-	 * are correct 
+	 * are correct
 	 */
 
 	if (_stype == mcu) {
@@ -558,8 +558,8 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 
 	switch (bytes[5]) {
 	case 0x01:
-		/* MCP: Device Ready 
-		   LCP: Connection Challenge 
+		/* MCP: Device Ready
+		   LCP: Connection Challenge
 		*/
 		if (bytes[4] == 0x10 || bytes[4] == 0x11) {
 			DEBUG_TRACE (DEBUG::MackieControl, "Logic Control Device connection challenge\n");
@@ -589,7 +589,7 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 	}
 }
 
-static MidiByteArray 
+static MidiByteArray
 calculate_challenge_response (MidiByteArray::iterator begin, MidiByteArray::iterator end)
 {
 	MidiByteArray l;
@@ -609,7 +609,7 @@ calculate_challenge_response (MidiByteArray::iterator begin, MidiByteArray::iter
 }
 
 // not used right now
-MidiByteArray 
+MidiByteArray
 Surface::host_connection_query (MidiByteArray & bytes)
 {
 	MidiByteArray response;
@@ -635,7 +635,7 @@ Surface::host_connection_query (MidiByteArray & bytes)
 }
 
 // not used right now
-MidiByteArray 
+MidiByteArray
 Surface::host_connection_confirmation (const MidiByteArray & bytes)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("host_connection_confirmation: %1\n", bytes));
@@ -673,7 +673,7 @@ Surface::turn_it_on ()
 	}
 }
 
-void 
+void
 Surface::write_sysex (const MidiByteArray & mba)
 {
 	if (mba.empty()) {
@@ -685,7 +685,7 @@ Surface::write_sysex (const MidiByteArray & mba)
 	_port->write (buf);
 }
 
-void 
+void
 Surface::write_sysex (MIDI::byte msg)
 {
 	MidiByteArray buf;
@@ -698,7 +698,7 @@ Surface::n_strips (bool with_locked_strips) const
 {
 	if (with_locked_strips) {
 		return strips.size();
-	} 
+	}
 
 	uint32_t n = 0;
 
@@ -782,7 +782,7 @@ Surface::redisplay ()
 }
 
 void
-Surface::write (const MidiByteArray& data) 
+Surface::write (const MidiByteArray& data)
 {
 	if (_active) {
 		_port->write (data);
@@ -819,7 +819,7 @@ Surface::map_routes (const vector<boost::shared_ptr<Route> >& routes)
 
 }
 
-static char 
+static char
 translate_seven_segment (char achar)
 {
 	achar = toupper (achar);
@@ -876,7 +876,7 @@ Surface::display_timecode (const std::string & timecode, const std::string & las
 	}
 
 	// pad to 10 characters
-	while  (local_timecode.length() < 10) { 
+	while  (local_timecode.length() < 10) {
 		local_timecode += " ";
 	}
 	
@@ -1012,7 +1012,7 @@ Surface::route_is_locked_to_strip (boost::shared_ptr<Route> r) const
 	return false;
 }
 
-void 
+void
 Surface::notify_metering_state_changed()
 {
 	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
@@ -1026,7 +1026,7 @@ Surface::reset ()
 	if (_port) {
 		/* reset msg for Mackie Control */
 		MidiByteArray msg (8, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x08, 0x00, MIDI::eox);
-		_port->write (msg); 
+		_port->write (msg);
 		msg[4] = 0x15; /* reset Mackie XT */
 		_port->write (msg);
 		msg[4] = 0x10; /* reset Logic Control */
@@ -1042,7 +1042,7 @@ Surface::toggle_backlight ()
 	if (_port) {
 		int onoff = random() %2;
 		MidiByteArray msg (8, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x0a, onoff, MIDI::eox);
-		_port->write (msg); 
+		_port->write (msg);
 		msg[4] = 0x15; /* reset Mackie XT */
 		_port->write (msg);
 		msg[4] = 0x10; /* reset Logic Control */
@@ -1057,7 +1057,7 @@ Surface::recalibrate_faders ()
 {
 	if (_port) {
 		MidiByteArray msg (8, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x09, 0x00, MIDI::eox);
-		_port->write (msg); 
+		_port->write (msg);
 		msg[4] = 0x15; /* reset Mackie XT */
 		_port->write (msg);
 		msg[4] = 0x10; /* reset Logic Control */
@@ -1080,7 +1080,7 @@ Surface::set_touch_sensitivity (int sensitivity)
 		for (int fader = 0; fader < 9; ++fader) {
 			msg[6] = fader;
 
-			_port->write (msg); 
+			_port->write (msg);
 			msg[4] = 0x15; /* reset Mackie XT */
 			_port->write (msg);
 			msg[4] = 0x10; /* reset Logic Control */

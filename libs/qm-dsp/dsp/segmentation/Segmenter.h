@@ -52,7 +52,7 @@ public:
 	virtual void segment() = 0;						// call once all the features have been extracted
 	virtual void segment(int m) = 0;				// specify desired number of segment-types
 	virtual void clear() { features.clear(); }
-	const Segmentation& getSegmentation() const { return segmentation; } 
+	const Segmentation& getSegmentation() const { return segmentation; }
 protected:
 	vector<vector<double> > features;
 	Segmentation segmentation;

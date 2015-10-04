@@ -89,7 +89,7 @@ JACKSession::session_event (jack_session_event_t* event)
                 }
         }
 
-	/* this won't be called if the port engine in use is not JACK, so we do 
+	/* this won't be called if the port engine in use is not JACK, so we do
 	   not have to worry about the type of PortEngine::private_handle()
 	*/
 

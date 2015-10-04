@@ -1040,8 +1040,8 @@ AudioRegionView::set_colors ()
 	RegionView::set_colors();
 
 	if (gain_line) {
-		gain_line->set_line_color (audio_region()->envelope_active() ? 
-					   UIConfiguration::instance().color ("gain line") : 
+		gain_line->set_line_color (audio_region()->envelope_active() ?
+					   UIConfiguration::instance().color ("gain line") :
 					   UIConfiguration::instance().color_mod ("gain line inactive", "gain line inactive"));
 	}
 
@@ -1216,7 +1216,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	}
 
 	/* first waveview starts at 1.0, not 0.0 since that will overlap the
-	 * frame 
+	 * frame
 	 */
 	
 	gdouble yoff = which * ht;
@@ -1471,8 +1471,8 @@ void
 AudioRegionView::envelope_active_changed ()
 {
 	if (gain_line) {
-		gain_line->set_line_color (audio_region()->envelope_active() ? 
-					   UIConfiguration::instance().color ("gain line") : 
+		gain_line->set_line_color (audio_region()->envelope_active() ?
+					   UIConfiguration::instance().color ("gain line") :
 					   UIConfiguration::instance().color_mod ("gain line inactive", "gain line inactive"));
 		update_envelope_visibility ();
 	}

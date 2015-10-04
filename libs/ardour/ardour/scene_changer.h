@@ -34,7 +34,7 @@ class Parser;
 class Port;
 }
 
-namespace ARDOUR 
+namespace ARDOUR
 {
 
 class Session;

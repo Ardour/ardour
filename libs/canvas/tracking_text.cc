@@ -112,7 +112,7 @@ TrackingText::show_and_track (bool tx, bool ty)
 
 	if (!was_visible) {
 		/* move to current pointer location. do this after show() so that
-		 * _visible is true, and thus ::pointer_motion() will do 
+		 * _visible is true, and thus ::pointer_motion() will do
 		 * something.
 		 */
 		Duple winpos;

@@ -33,7 +33,7 @@ class /*LIBAUDIOGRAPHER_API*/ TypeUtils : private TypeUtilsBase
 {
 	BOOST_STATIC_ASSERT (boost::has_trivial_destructor<T>::value);
 	
-	typedef boost::integral_constant<bool, 
+	typedef boost::integral_constant<bool,
 			boost::is_floating_point<T>::value ||
 			boost::is_signed<T>::value> zero_fillable;
   public:

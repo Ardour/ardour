@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006 Paul Davis 
+ *   Copyright (C) 2006 Paul Davis
  *   Copyright (C) 2007 Michael Taht
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *  
+ *
  *   */
 
 #include "tranzport_control_protocol.h"
@@ -33,15 +33,15 @@ TranzportControlProtocol::process (uint8_t* buf)
 
 	_device_status = buf[1];
 
-#if DEBUG_TRANZPORT > 10 
+#if DEBUG_TRANZPORT > 10
 	// Perhaps the device can go offline due to flow control, print command bits to see if we have anything interesting
 	if(_device_status == STATUS_ONLINE) {
-		printf("ONLINE   : %02x %02x %02x %02x %02x %02x %02x %02x\n", 
-		       buf[0],buf[1],buf[2], buf[3], buf[4], buf[5],buf[6],buf[7]); 
+		printf("ONLINE   : %02x %02x %02x %02x %02x %02x %02x %02x\n",
+		       buf[0],buf[1],buf[2], buf[3], buf[4], buf[5],buf[6],buf[7]);
 	}
 	if(_device_status == STATUS_OFFLINE) {
-		printf("OFFLINE  : %02x %02x %02x %02x %02x %02x %02x %02x\n", 
-		       buf[0],buf[1],buf[2], buf[3], buf[4], buf[5],buf[6],buf[7]); 
+		printf("OFFLINE  : %02x %02x %02x %02x %02x %02x %02x %02x\n",
+		       buf[0],buf[1],buf[2], buf[3], buf[4], buf[5],buf[6],buf[7]);
 	}
 
 	if(_device_status != STATUS_OK) { return 1; }
@@ -84,7 +84,7 @@ TranzportControlProtocol::process (uint8_t* buf)
 
 	// SHIFT + STOP + PLAY for bling mode?
 	// if (button_changes & ButtonPlay & ButtonStop) {
-	// bling_mode_toggle();  
+	// bling_mode_toggle();
 	// } or something like that
 
 	TRANZPORT_BUTTON_HANDLER(button_event_battery,ButtonBattery);

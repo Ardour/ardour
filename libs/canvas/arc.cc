@@ -136,7 +136,7 @@ Arc::covers (Duple const & point) const
 	double angle_degs = atan (p.y/p.x) * 2.0 * M_PI;
 	double radius = sqrt (p.x * p.x + p.y * p.y);
 	
-	return (angle_degs >= _start_degrees) && 
-		(angle_degs <= (_start_degrees + _arc_degrees)) && 
+	return (angle_degs >= _start_degrees) &&
+		(angle_degs <= (_start_degrees + _arc_degrees)) &&
 		(radius < _radius);
 }

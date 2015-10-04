@@ -63,7 +63,7 @@ namespace NSM
     {
         if ( _st )
             stop();
-        
+
         if ( _st )
             lo_server_thread_free( _st );
         else
@@ -130,7 +130,7 @@ namespace NSM
         }
     }
 
-    
+
     void
     Client::broadcast ( lo_message msg )
     {
@@ -191,10 +191,10 @@ namespace NSM
         lo_address addr = lo_address_new_from_url( nsm_url );
         int proto = lo_address_get_protocol( addr );
         lo_address_free( addr );
-        
+
         _st = lo_server_thread_new_with_proto( NULL, proto, NULL );
         _server = lo_server_thread_get_server( _st );
-        
+
         if ( ! _server || ! _st )
             return -1;
 
@@ -204,7 +204,7 @@ namespace NSM
         lo_server_thread_add_method( _st, "/nsm/client/save", "", &Client::osc_save, this );
         lo_server_thread_add_method( _st, "/nsm/client/session_is_loaded", "", &Client::osc_session_is_loaded, this );
         lo_server_thread_add_method( _st, NULL, NULL, &Client::osc_broadcast, this );
-        
+
         return 0;
     }
 
@@ -222,7 +222,7 @@ namespace NSM
     Client::osc_save ( const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data )
     {
         char *out_msg = NULL;
-        
+
         int r = ((NSM::Client*)user_data)->command_save(&out_msg);
 
         if ( r )
@@ -242,12 +242,12 @@ namespace NSM
         char *out_msg = NULL;
 
         NSM::Client *nsm = (NSM::Client*)user_data;
-        
+
         nsm->_nsm_client_id = strdup( &argv[2]->s );
         nsm->_nsm_client_path = strdup( &argv[0]->s );
 
         int r = ((NSM::Client*)user_data)->command_open( &argv[0]->s, &argv[1]->s, &argv[2]->s, &out_msg);
-        
+
         if ( r )
             OSC_REPLY_ERR( r, ( out_msg ? out_msg : "") );
         else
@@ -274,12 +274,12 @@ namespace NSM
     {
         if ( strcmp( &argv[0]->s, "/nsm/server/announce" ) )
             return -1;
-        
+
         NSM::Client *nsm = (NSM::Client*)user_data;
 
 
         nsm->nsm_is_active = false;
-        
+
         nsm->command_active( nsm->nsm_is_active );
 
         return 0;
@@ -290,13 +290,13 @@ namespace NSM
     {
         if ( strcmp( &argv[0]->s, "/nsm/server/announce" ) )
             return -1;
-       
+
         NSM::Client *nsm = (NSM::Client*)user_data;
 
         nsm->nsm_is_active = true;
         nsm->_session_manager_name = strdup( &argv[2]->s );
-        nsm->nsm_addr = lo_address_new_from_url( lo_address_get_url( lo_message_get_source( msg ) ));   
-    
+        nsm->nsm_addr = lo_address_new_from_url( lo_address_get_url( lo_message_get_source( msg ) ));
+
         nsm->command_active( nsm->nsm_is_active );
 
         return 0;

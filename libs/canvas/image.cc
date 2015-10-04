@@ -42,7 +42,7 @@ Image::Image (Item* parent, Cairo::Format fmt, int width, int height)
 	DataReady.connect (data_connections, MISSING_INVALIDATOR, boost::bind (&Image::accept_data, this), gui_context());
 }
 
-void 
+void
 Image::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	if (_need_render && _pending) {
@@ -96,12 +96,12 @@ Image::put_image (boost::shared_ptr<Data> d)
 }
 
 void
-Image::accept_data () 
+Image::accept_data ()
 {
 	/* must be executed in gui thread */
 
 	begin_change ();
 	_need_render = true;
 	end_change (); // notify canvas that we need redrawing
-}	     
+}	
 

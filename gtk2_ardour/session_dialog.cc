@@ -224,7 +224,7 @@ SessionDialog::session_template_name ()
 		TreeModel::Row row = (*iter);
 		string s = row[session_template_columns.path];
 		return s;
-	} 
+	}
 
 	return string();
 }
@@ -784,7 +784,7 @@ SessionDialog::redisplay_recent_sessions ()
 		row[recent_session_columns.time_formatted] = gdt.format ("%F %H:%M");
 	}
 
-	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip 
+	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip
 	recent_session_display.set_model (recent_session_model);
 
 	// custom sort

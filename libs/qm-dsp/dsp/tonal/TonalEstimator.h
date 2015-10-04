@@ -54,7 +54,7 @@ public:
     {
         for (size_t i = 0; i < 12; ++i) (*this)[i] = 0.0;
     }
-        
+
 	
 };
 

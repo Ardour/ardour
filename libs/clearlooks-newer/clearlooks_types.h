@@ -108,7 +108,7 @@ typedef enum
 	CL_WINDOW_EDGE_EAST,
 	CL_WINDOW_EDGE_SOUTH_WEST,
 	CL_WINDOW_EDGE_SOUTH,
-	CL_WINDOW_EDGE_SOUTH_EAST  
+	CL_WINDOW_EDGE_SOUTH_EAST
 } ClearlooksWindowEdge;
 
 typedef struct
@@ -214,7 +214,7 @@ typedef struct
 typedef struct
 {
 	ClearlooksHandleType type;
-	boolean              horizontal; 
+	boolean              horizontal;
 } HandleParameters;
 
 typedef struct
@@ -301,7 +301,7 @@ struct _ClearlooksStyleFunctions
 	                               const WidgetParameters		*widget,
 	                               const OptionMenuParameters *optionmenu,
 	                               int x, int y, int width, int height);
-					   
+					
 	void (*draw_inset)            (cairo_t				*cr,
 	                                const CairoColor		*bg_color,
 	                                double x, double y, double w, double h,
@@ -415,7 +415,7 @@ struct _ClearlooksStyleFunctions
 	                               const WidgetParameters		*widget,
 	                               const ArrowParameters		*arrow,
 	                               int x, int y, int width, int height);
-	                               
+	
 	void (*draw_checkbox)         (cairo_t				*cr,
 	                               const ClearlooksColors		*colors,
 	                               const WidgetParameters		*widget,

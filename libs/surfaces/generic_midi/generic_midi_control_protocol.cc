@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2006 Paul Davis
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -239,7 +239,7 @@ GenericMidiControlProtocol::set_feedback_interval (microseconds_t ms)
 	_feedback_interval = ms;
 }
 
-void 
+void
 GenericMidiControlProtocol::send_feedback ()
 {
 	/* This is executed in RT "process" context", so no blocking calls
@@ -262,7 +262,7 @@ GenericMidiControlProtocol::send_feedback ()
 	last_feedback_time = now;
 }
 
-void 
+void
 GenericMidiControlProtocol::_send_feedback ()
 {
 	/* This is executed in RT "process" context", so no blocking calls
@@ -523,7 +523,7 @@ GenericMidiControlProtocol::check_used_event (int pos, int control_number)
 }
 
 XMLNode&
-GenericMidiControlProtocol::get_state () 
+GenericMidiControlProtocol::get_state ()
 {
 	XMLNode& node (ControlProtocol::get_state());
 	char buf[32];
@@ -1070,7 +1070,7 @@ GenericMidiControlProtocol::create_action (const XMLNode& node)
 	prop = node.property (X_("action"));
 	
 	MIDIAction* ma = new MIDIAction (*_input_port->parser());
-        
+
 	if (ma->init (*this, prop->value(), data, data_size)) {
 		delete ma;
 		return 0;

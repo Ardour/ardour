@@ -107,7 +107,7 @@ class ThemeManager : public Gtk::VBox
 	
 	/* these methods create and manage a canvas for use in either the
 	   palette tab or in a separate dialog. Different behaviour is
-	   accomplished by changing the event handler passed into the 
+	   accomplished by changing the event handler passed into the
 	   allocation handler. We do it there because we have to rebuild
 	   the canvas on allocation events, and during the rebuild, connect
 	   each rectangle to the event handler.

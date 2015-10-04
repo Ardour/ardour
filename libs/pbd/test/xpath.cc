@@ -32,7 +32,7 @@ XPathTest::testMisc ()
 		assert((*i)->property("name"));
 //		cout << "Found bank number " << counter++ << " with name: " << (*i)->property("name")->value() << endl;
 		for(XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
-//			cout << "\t found program " << (*j)->property("id")->value() << 
+//			cout << "\t found program " << (*j)->property("id")->value() <<
 //			        " with name: " << (*j)->property("name")->value() << endl;
 		}
 	}
@@ -43,7 +43,7 @@ XPathTest::testMisc ()
 	assert(result->size() == 5);
 	
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
-//		cout << "\t found program " << (*i)->property("id")->value() << 
+//		cout << "\t found program " << (*i)->property("id")->value() <<
 //		        " with name: " << (*i)->property("name")->value() << endl;
 	}
 
@@ -58,7 +58,7 @@ XPathTest::testMisc ()
 	assert(result->size() == 16);
 	
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
-//		cout << "\t found source '" << (*i)->property("name")->value() << 
+//		cout << "\t found source '" << (*i)->property("name")->value() <<
 //		        "' with id: " << (*i)->property("id")->value() << endl;
 	}
 	
@@ -69,8 +69,8 @@ XPathTest::testMisc ()
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
 		assert((*i)->property("id"));
 		assert((*i)->property("name"));
-//		cout << "\t found element '" << (*i)->name() << 
-//		        "' with id: "  << (*i)->property("id")->value() << 
+//		cout << "\t found element '" << (*i)->name() <<
+//		        "' with id: "  << (*i)->property("id")->value() <<
 //		      		"' and name: " << (*i)->property("name")->value() << endl;
 	}
 	
@@ -88,7 +88,7 @@ XPathTest::testMisc ()
 //		cout << "\t found Patchbank " << (*i)->property("Name")->value() << endl;
 		boost::shared_ptr<XMLSharedNodeList> patches = doc3.find ("//Patch[@Name]", i->get());
 		for(XMLSharedNodeList::const_iterator p = patches->begin(); p != patches->end(); ++p) {
-//			cout << "\t\t found patch number " << (*p)->property("Number")->value() 
+//			cout << "\t\t found patch number " << (*p)->property("Number")->value()
 //			     << " with name: " << (*p)->property("Name")->value()  << endl;
 		}
 	}
@@ -98,7 +98,7 @@ XPathTest::testMisc ()
 	
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
 		boost::shared_ptr<XMLNode> node = (*i);
-//		cout << "\t found attribute node: " << node->name()  
+//		cout << "\t found attribute node: " << node->name()
 //		     << " value: " << node->attribute_value() << endl;
 	}	
 	
@@ -109,7 +109,7 @@ XPathTest::testMisc ()
 	assert(result->size() == 15);
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
 		boost::shared_ptr<XMLNode> node = (*i);
-//		cout << "\t found available Channel: " << node->name()  
+//		cout << "\t found available Channel: " << node->name()
 //		     << " value: " << node->attribute_value() << endl;
 	}	
 	

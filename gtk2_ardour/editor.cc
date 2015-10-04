@@ -235,7 +235,7 @@ pane_size_watcher (Paned* pane)
 
 	      X: hard to access
 	      Quartz: impossible to access
-	      
+	
 	   so stop that by preventing it from ever getting too narrow. 35
 	   pixels is basically a rough guess at the tab width.
 
@@ -1014,12 +1014,12 @@ Editor::control_unselect ()
 }
 
 void
-Editor::control_select (uint32_t rid, Selection::Operation op) 
+Editor::control_select (uint32_t rid, Selection::Operation op)
 {
 	/* handles the (static) signal from the ControlProtocol class that
 	 * requests setting the selected track to a given RID
 	 */
-	 
+	
 	if (!_session) {
 		return;
 	}
@@ -1190,7 +1190,7 @@ Editor::generic_event_handler (GdkEvent* ev)
 		case GDK_NOTIFY_UNKNOWN:
 		case GDK_NOTIFY_INFERIOR:
 		case GDK_NOTIFY_ANCESTOR:
-			break; 
+			break;
 		case GDK_NOTIFY_VIRTUAL:
 		case GDK_NOTIFY_NONLINEAR:
 		case GDK_NOTIFY_NONLINEAR_VIRTUAL:
@@ -3068,7 +3068,7 @@ Editor::setup_toolbar ()
 							   &_zoom_tearoff->tearoff_window()));
 		_zoom_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
 							    &_zoom_tearoff->tearoff_window(), 0));
-	} 
+	}
 
 	if (Profile->get_sae() || Profile->get_mixbus() ) {
 		_zoom_tearoff->set_can_be_torn_off (false);
@@ -3600,7 +3600,7 @@ Editor::duplicate_range (bool with_dialog)
 	} else if (get_smart_mode()) {
 		if (selection->time.length()) {
 			duplicate_selection (times);
-		} else 
+		} else
 			duplicate_some_regions (rs, times);
 	} else {
 		duplicate_some_regions (rs, times);
@@ -3803,7 +3803,7 @@ Editor::set_visible_track_count (int32_t n)
 		h = trackviews_height() / n;
 		str = _("All");
 	} else {
-		/* negative value means that the visible track count has 
+		/* negative value means that the visible track count has
 		   been overridden by explicit track height changes.
 		*/
 		visible_tracks_selector.set_text (X_("*"));
@@ -3967,8 +3967,8 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 void
 Editor::detach_tearoff (Box* /*b*/, Window* /*w*/)
 {
-	if ((_tools_tearoff->torn_off() || !_tools_tearoff->visible()) && 
-	    (_mouse_mode_tearoff->torn_off() || !_mouse_mode_tearoff->visible()) && 
+	if ((_tools_tearoff->torn_off() || !_tools_tearoff->visible()) &&
+	    (_mouse_mode_tearoff->torn_off() || !_mouse_mode_tearoff->visible()) &&
 	    (_zoom_tearoff && (_zoom_tearoff->torn_off() || !_zoom_tearoff->visible()))) {
 		top_hbox.remove (toolbar_frame);
 	}
@@ -3998,7 +3998,7 @@ Editor::set_show_measures (bool yn)
 			
 			compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(), begin, end);
 			draw_measures (begin, end);
-		} 
+		}
 
 		instant_save ();
 	}
@@ -4911,7 +4911,7 @@ Editor::get_regions_from_selection_and_edit_point ()
 		if (!tracks.empty()) {
 			/* no region selected or entered, but some selected tracks:
 			 * act on all regions on the selected tracks at the edit point
-			 */ 
+			 */
 			framepos_t const where = get_preferred_edit_position ();
 			get_regions_at(regions, where, tracks);
 		}
@@ -4948,7 +4948,7 @@ Editor::get_regions_from_selection_and_mouse (framepos_t pos)
 		if (!tracks.empty()) {
 			/* no region selected or entered, but some selected tracks:
 			 * act on all regions on the selected tracks at the edit point
-			 */ 
+			 */
 			get_regions_at(regions, pos, tracks);
 		}
 	}

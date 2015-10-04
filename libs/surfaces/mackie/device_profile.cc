@@ -135,7 +135,7 @@ DeviceProfile::set_state (const XMLNode& node, int /* version */)
 	}
 
 	/* name is mandatory */
- 
+
 	if ((child = node.child ("Name")) == 0 || (prop = child->property ("value")) == 0) {
 		return -1;
 	} else {

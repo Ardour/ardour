@@ -114,7 +114,7 @@ public:
 
         void scroll_to (Coord x, Coord y);
 	void add_scroller (ScrollGroup& i);
-        
+
         virtual Rect  visible_area () const = 0;
         virtual Coord width () const = 0;
         virtual Coord height () const = 0;
@@ -137,7 +137,7 @@ public:
 	Duple clamp_to_window (Duple const& winpos, Duple border = Duple());
 
         void zoomed();
-    
+
         std::string indent() const;
         std::string render_indent() const;
         void dump (std::ostream&) const;
@@ -210,7 +210,7 @@ protected:
 	bool motion_notify_handler (GdkEventMotion *);
         bool deliver_event (GdkEvent *);
         void deliver_enter_leave (Duple const & point, int state);
-    
+
         void pick_current_item (int state);
         void pick_current_item (Duple const &, int state);
 
@@ -241,7 +241,7 @@ private:
 };
 
 /** A GTK::Alignment with a GtkCanvas inside it plus some Gtk::Adjustments for
- *   scrolling. 
+ *   scrolling.
  *
  * This provides a GtkCanvas that can be scrolled. It does NOT implement the
  * Gtk::Scrollable interface.

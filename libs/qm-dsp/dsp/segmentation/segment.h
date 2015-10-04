@@ -34,10 +34,10 @@ typedef struct segmentation_t
 	segment_t* segments;
 } segmentation_t;
 
-typedef enum 
-{ 
-	FEATURE_TYPE_UNKNOWN = 0, 
-	FEATURE_TYPE_CONSTQ = 1, 
+typedef enum
+{
+	FEATURE_TYPE_UNKNOWN = 0,
+	FEATURE_TYPE_CONSTQ = 1,
 	FEATURE_TYPE_CHROMA = 2,
 	FEATURE_TYPE_MFCC = 3
 } feature_types;

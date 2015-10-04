@@ -101,7 +101,7 @@ Delivery::~Delivery()
 
 	/* this object should vanish from any signal callback lists
 	   that it is on before we get any further. The full qualification
-	   of the method name is not necessary, but is here to make it 
+	   of the method name is not necessary, but is here to make it
 	   clear that this call is about signals, not data flow connections.
 	*/
 
@@ -394,7 +394,7 @@ Delivery::pan_outs () const
 {
 	if (_output) {
 		return _output->n_ports().n_audio();
-	} 
+	}
 
 	return _configured_output.n_audio();
 }

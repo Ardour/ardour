@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010 Paul Davis 
+    Copyright (C) 2010 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ StatefulDiffCommand::get_state ()
         XMLNode* changes = new XMLNode (X_("Changes"));
 
         _changes->get_changes_as_xml (changes);
-        
+
         node->add_child_nocopy (*changes);
 
 	return *node;

@@ -9,7 +9,7 @@
 
 #ifdef WIN32
 #ifndef INT32_DEFINED
-// rather than having users install a special .h file for windows, 
+// rather than having users install a special .h file for windows,
 // just put the required definitions inline here. portmidi.h uses
 // these too, so the definitions are (unfortunately) duplicated there
 typedef int int32_t;
@@ -28,7 +28,7 @@ extern "C" {
 #ifdef _WINDLL
 #define PMEXPORT __declspec(dllexport)
 #else
-#define PMEXPORT 
+#define PMEXPORT
 #endif
 #endif
 
@@ -73,7 +73,7 @@ PMEXPORT PtError Pt_Stop();
 */
 PMEXPORT int Pt_Started();
 
-/* 
+/*
     Pt_Time() returns the current time in ms.
 */
 PMEXPORT PtTimestamp Pt_Time();
@@ -81,7 +81,7 @@ PMEXPORT PtTimestamp Pt_Time();
 /*
     Pt_Sleep() pauses, allowing other threads to run.
 
-    duration is the length of the pause in ms. The true duration 
+    duration is the length of the pause in ms. The true duration
     of the pause may be rounded to the nearest or next clock tick
     as determined by resolution in Pt_Start().
 */

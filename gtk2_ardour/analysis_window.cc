@@ -310,7 +310,7 @@ AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 				newrow[tlcols.visible]     = true;
 				newrow[tlcols.color]       = rui->color();
 				newrow[tlcols.graph]       = res;
-			} 
+			}
 		} else if (source_selection_regions_rb.get_active()) {
 			RegionSelection ars = s.regions;
 			// std::cerr << "Analyzing selected regions" << std::endl;

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ public:
 	    PluginParameter
     };
 
-    ControllableDescriptor () 
+    ControllableDescriptor ()
 	    : _top_level_type (RemoteControlID)
 	    , _subtype (Gain)
 	    , _rid (0)

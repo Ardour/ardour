@@ -165,7 +165,7 @@ ControlPoint::move_to (double x, double y, ShapeType shape)
 }
 
 ArdourCanvas::Item&
-ControlPoint::item() const 
+ControlPoint::item() const
 {
 	return *_item;
 }

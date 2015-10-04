@@ -249,9 +249,9 @@ Session::rt_set_record_safe (boost::shared_ptr<RouteList> rl, bool yn, bool grou
 		if ((*i)->is_auditioner ()) { // REQUIRES REVIEW Can audiotioner be in Record Safe mode?
 			continue;
 		}
-	    
+	
 		boost::shared_ptr<Track> t;
-	    
+	
 		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
 			t->set_record_safe (yn, (group_override ? (void*) t->route_group () : (void *) this));
 		}

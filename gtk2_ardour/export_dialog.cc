@@ -280,7 +280,7 @@ ExportDialog::do_export ()
 		handler->soundcloud_downloadable = soundcloud_selector->downloadable ();
 
 		handler->SoundcloudProgress.connect_same_thread(
-				*this, 
+				*this,
 				boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3)
 				);
 #if 0

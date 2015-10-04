@@ -21,12 +21,12 @@ class LIBGTKMM2EXT_API KeyboardKey
         KeyboardKey () {
                 _val = GDK_VoidSymbol;
         }
-        
+
         KeyboardKey (uint32_t state, uint32_t keycode);
-        
+
         uint32_t state() const { return _val >> 32; }
         uint32_t key() const { return _val & 0xffff; }
-        
+
         bool operator<(const KeyboardKey& other) const {
                 return _val < other._val;
         }
@@ -75,7 +75,7 @@ class LIBGTKMM2EXT_API ActionMap {
 	Glib::RefPtr<Gtk::Action> register_action (const char* path,
 						   const char* name, const char* label, sigc::slot<void> sl);
 	Glib::RefPtr<Gtk::Action> register_radio_action (const char* path, Gtk::RadioAction::Group&,
-							 const char* name, const char* label, 
+							 const char* name, const char* label,
                                                          sigc::slot<void,GtkAction*> sl,
                                                          int value);
 	Glib::RefPtr<Gtk::Action> register_toggle_action (const char*path,
@@ -86,15 +86,15 @@ class LIBGTKMM2EXT_API ActionMap {
   private:
         typedef std::map<std::string, Glib::RefPtr<Gtk::Action> > _ActionMap;
         _ActionMap actions;
-};        
+};
 
 class LIBGTKMM2EXT_API Bindings {
   public:
-        enum Operation { 
+        enum Operation {
                 Press,
                 Release
         };
-        
+
         Bindings();
         ~Bindings ();
 
@@ -110,7 +110,7 @@ class LIBGTKMM2EXT_API Bindings {
         void load (const XMLNode& node);
         bool save (const std::string& path);
         void save (XMLNode& root);
-        
+
         void set_action_map (ActionMap&);
 
         static void set_ignored_state (int mask) {

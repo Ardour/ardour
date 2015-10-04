@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010 Paul Davis 
+    Copyright (C) 2010 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public:
 
 	void operator() ();
 	void undo ();
-        
+
 	XMLNode& get_state ();
 
 	bool empty () const;

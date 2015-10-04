@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2009 Paul Davis 
+    Copyright (C) 2000-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
  * events/requests and dispatch/process them as they arrive.
  *
  * This implementation starts up a thread that runs a Glib main loop
- * to wait on events/requests etc. 
+ * to wait on events/requests etc.
  */
 
 
@@ -62,7 +62,7 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	static RequestType CallSlot;
 	static RequestType Quit;
 
-	/** start up a thread to run the main loop 
+	/** start up a thread to run the main loop
 	 */
 	void run ();
 
@@ -72,7 +72,7 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	void quit ();
 
   protected:
-	bool _ok; 
+	bool _ok;
 
 	Glib::RefPtr<Glib::MainLoop> _main_loop;
 	Glib::RefPtr<Glib::MainContext> m_context;
@@ -81,7 +81,7 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	Glib::Threads::Cond         _running;
 
 	/* this signals _running from within the event loop,
-	   from an idle callback 
+	   from an idle callback
 	*/
 
 	bool signal_running ();
@@ -107,7 +107,7 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	virtual void handle_ui_requests () = 0;
 
   private:
-	std::string _name; 
+	std::string _name;
 	BaseUI* base_ui_instance;
 
 	CrossThreadChannel request_channel;

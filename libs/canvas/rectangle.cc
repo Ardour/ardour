@@ -88,7 +88,7 @@ Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 
 		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
 		context->fill ();
-	} 
+	}
 	
 	if (_outline) {
 
@@ -103,7 +103,7 @@ Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 		 * to be colored are actually "at" 0.5 and 10.5 (midway
 		 * between the integer coordinates).
 		 *
-		 * See the Cairo FAQ on single pixel lines for more 
+		 * See the Cairo FAQ on single pixel lines for more
 		 * detail.
 		 */
 
@@ -163,7 +163,7 @@ Rectangle::compute_bounding_box () const
 		   bounding box is 1.0 pixels outside the stated
 		   corners of the rectangle (so that the middle
 		   of the 2 pixel wide border passes through
-		   the corners, alternatively described as 1 row 
+		   the corners, alternatively described as 1 row
 		   of pixels outside of the corners, and 1 row
 		   inside).
 

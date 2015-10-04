@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ using namespace MIDI;
 Port *port;
 PortRequest midi_device;
 
-int 
+int
 setup_midi ()
 
 {
@@ -49,12 +49,12 @@ setup_midi ()
 	if ((port = MIDI::Manager::instance()->add_port (midi_device)) == 0) {
 		info << "MIDI port is not valid" << endmsg;
 		return -1;
-	} 
+	}
 
 	return 0;
 }
 
-main (int argc, char *argv[]) 
+main (int argc, char *argv[])
 
 {
 	byte buf[1];
@@ -75,7 +75,7 @@ main (int argc, char *argv[])
 			error << "cannot read byte"
 			      << endmsg;
 			break;
-		} 
+		}
 	}
 }
 

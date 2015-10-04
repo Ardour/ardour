@@ -630,32 +630,32 @@ Session::start_midi_thread ()
 	return 0;
 }
 
-MIDI::Port* 
+MIDI::Port*
 Session::midi_input_port () const
 {
 	return _midi_ports->midi_input_port ();
 }
-MIDI::Port* 
+MIDI::Port*
 Session::midi_output_port () const
 {
 	return _midi_ports->midi_output_port ();
 }
-boost::shared_ptr<MidiPort> 
+boost::shared_ptr<MidiPort>
 Session::midi_clock_output_port () const
 {
 	return _midi_ports->midi_clock_output_port ();
 }
-boost::shared_ptr<MidiPort> 
+boost::shared_ptr<MidiPort>
 Session::midi_clock_input_port () const
 {
 	return _midi_ports->midi_clock_input_port ();
 }
-boost::shared_ptr<MidiPort> 
+boost::shared_ptr<MidiPort>
 Session::mtc_output_port () const
 {
 	return _midi_ports->mtc_output_port ();
 }
-boost::shared_ptr<MidiPort> 
+boost::shared_ptr<MidiPort>
 Session::mtc_input_port () const
 {
 	return _midi_ports->mtc_input_port ();

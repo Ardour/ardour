@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2010 Paul Davis 
+    Copyright (C) 2000-2010 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ class LIBPBD_API Stateful {
 	virtual void resume_property_changes ();
 
         bool property_changes_suspended() const { return g_atomic_int_get (const_cast<gint*>(&_stateful_frozen)) > 0; }
-        
+
   protected:
 
 	void add_instant_xml (XMLNode&, const std::string& directory_path);
@@ -103,7 +103,7 @@ class LIBPBD_API Stateful {
 	PropertyChange set_values (XMLNode const &);
 	
 	/* derived classes can implement this to do cross-checking
-	   of property values after either a PropertyList or XML 
+	   of property values after either a PropertyList or XML
 	   driven property change.
 	*/
 	virtual void post_set (const PropertyChange&) { };

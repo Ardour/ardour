@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,18 +42,18 @@ union /*LIBPBD_API*/ Float_t
     bool    negative() const { return (i >> 31) != 0; }
     int32_t raw_mantissa() const { return i & ((1 << 23) - 1); }
     int32_t raw_exponent() const { return (i >> 23) & 0xFF; }
- 
+
     int32_t i;
     float f;
 };
- 
+
 /* Note: ULPS = Units in the Last Place */
 
 static inline bool floateq (float a, float b, int max_ulps_diff)
 {
     Float_t ua (a);
     Float_t ub (b);
- 
+
     if (a == b) {
             return true;
     }
@@ -69,7 +69,7 @@ static inline bool floateq (float a, float b, int max_ulps_diff)
     if (ulps_diff <= max_ulps_diff) {
         return true;
     }
- 
+
     return false;
 }
 

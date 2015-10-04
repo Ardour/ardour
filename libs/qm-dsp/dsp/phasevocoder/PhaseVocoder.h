@@ -18,7 +18,7 @@
 
 class FFTReal;
 
-class PhaseVocoder  
+class PhaseVocoder
 {
 public:
     PhaseVocoder( unsigned int size );

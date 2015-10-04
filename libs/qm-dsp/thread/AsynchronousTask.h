@@ -77,7 +77,7 @@ protected:
     }
 
     virtual void performTask() = 0;
-    
+
 private:
     virtual void run() {
         m_todo.lock();

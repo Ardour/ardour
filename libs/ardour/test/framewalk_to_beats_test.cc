@@ -51,14 +51,14 @@ FramewalkToBeatsTest::doubleTempoTest ()
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
-	  
+	
 	  120bpm = 24e3 samples per beat
 	  240bpm = 12e3 samples per beat
 	*/
 	
 
 	/*
-	  
+	
 	  120bpm                                          240bpm
 	  0 beats                                         12 beats
 	  0 frames                                        288e3 frames
@@ -107,7 +107,7 @@ FramewalkToBeatsTest::tripleTempoTest ()
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 2, 160bpm at bar 3
-	  
+	
 	  120bpm = 24e3 samples per beat
 	  160bpm = 18e3 samples per beat
 	  240bpm = 12e3 samples per beat
@@ -115,7 +115,7 @@ FramewalkToBeatsTest::tripleTempoTest ()
 	
 
 	/*
-	  
+	
 	  120bpm            240bpm            160bpm
 	  0 beats           4 beats           8 beats
 	  0 frames          96e3 frames       144e3 frames

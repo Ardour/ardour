@@ -75,7 +75,7 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 
 	ProcessThread* main_thread() const { return _main_thread; }
 
-	/* START BACKEND PROXY API 
+	/* START BACKEND PROXY API
 	 *
 	 * See audio_backend.h for full documentation and semantics. These wrappers
 	 * just forward to a backend implementation.
@@ -139,7 +139,7 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	}
 
 	framecnt_t processed_frames() const { return _processed_frames; }
-    
+
 	void set_session (Session *);
 	void remove_session (); // not a replacement for SessionHandle::session_going_away()
 	Session* session() const { return _session; }
@@ -150,19 +150,19 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	    public:
 		virtual const char *what() const throw() { return "could not connect to engine backend"; }
 	};
-    
+
 	void split_cycle (pframes_t offset);
-    
+
 	int  reset_timebase ();
-    
+
 	void update_latencies ();
-    
+
 	/* this signal is sent for every process() cycle while freewheeling.
 	   (the regular process() call to session->process() is not made)
 	*/
-    
+
 	PBD::Signal1<int, pframes_t> Freewheel;
-    
+
 	PBD::Signal0<void> Xrun;
 
 	/** this signal is emitted if the sample rate changes */
@@ -175,30 +175,30 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	PBD::Signal0<void> DeviceError;
 
 	/* this signal is emitted if the device list changed */
-    
+
 	PBD::Signal0<void> DeviceListChanged;
-    
+
 	/* this signal is sent if the backend ever disconnects us */
-    
+
 	PBD::Signal1<void,const char*> Halted;
-    
+
 	/* these two are emitted when the engine itself is
 	   started and stopped
 	*/
-    
+
 	PBD::Signal0<void> Running;
 	PBD::Signal0<void> Stopped;
 
 	/* these two are emitted when a device reset is initiated/finished
 	 */
-    
+
 	PBD::Signal0<void> DeviceResetStarted;
 	PBD::Signal0<void> DeviceResetFinished;
 
 	static AudioEngine* instance() { return _instance; }
 	static void destroy();
 	void died ();
-    
+
 	/* The backend will cause these at the appropriate time(s)
 	 */
 	int  process_callback (pframes_t nframes);

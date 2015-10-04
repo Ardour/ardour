@@ -104,7 +104,7 @@ Splash::pop_back_for (Gtk::Window& win)
         /* April 2013: window layering on OS X is a bit different to X Window. at present,
            the "restack()" functionality in GDK will only operate on windows in the same
            "level" (e.g. two normal top level windows, or two utility windows) and will not
-           work across them. The splashscreen is on its own "StatusWindowLevel" so restacking 
+           work across them. The splashscreen is on its own "StatusWindowLevel" so restacking
            is not going to work.
 
            So for OS X, we just hide ourselves.
@@ -144,11 +144,11 @@ bool
 Splash::on_button_release_event (GdkEventButton* ev)
 {
 	RefPtr<Gdk::Window> window = get_window();
-        
+
         if (!window || ev->window != window->gobj()) {
                 return false;
         }
-        
+
 	hide ();
 	return true;
 }
@@ -174,9 +174,9 @@ Splash::expose (GdkEventExpose* ev)
 
 	window->draw_layout (white, 10, pixbuf->get_height() - 30, layout);
 
-	/* this must execute AFTER the GDK idle update mechanism 
+	/* this must execute AFTER the GDK idle update mechanism
 	 */
-       
+
 	if (expose_is_the_one) {
 		Glib::signal_idle().connect (sigc::mem_fun (this, &Splash::idle_after_expose),
 					     GDK_PRIORITY_REDRAW+2);
@@ -206,7 +206,7 @@ Splash::display ()
 	if (!was_mapped) {
 		expose_done = false;
 		expose_is_the_one = false;
-	} 
+	}
 
 	pop_front ();
 	present ();

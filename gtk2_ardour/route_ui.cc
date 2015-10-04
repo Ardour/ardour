@@ -94,7 +94,7 @@ RouteUI::~RouteUI()
 
 	_route.reset (); /* drop reference to route, so that it can be cleaned up */
 	route_connections.drop_connections ();
-    
+
 	delete solo_menu;
 	delete mute_menu;
 	delete sends_menu;
@@ -279,7 +279,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
                                                                     boost::bind (&RouteUI::step_edit_changed, this, _1), gui_context());
                 }
 
-	} 
+	}
 
 	/* this will work for busses and tracks, and needs to be called to
 	   set up the name entry/name label display.
@@ -401,7 +401,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 				boost::shared_ptr<RouteList> rl;
 
-				if (ev->button == 1) { 
+				if (ev->button == 1) {
 
 					if (_route->route_group()) {
 							
@@ -595,7 +595,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 				boost::shared_ptr<RouteList> rl;
 
-				if (ev->button == 1) { 
+				if (ev->button == 1) {
 
 					if (_route->route_group()) {
 							
@@ -824,7 +824,7 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 	MonitorChoice mc;
 	boost::shared_ptr<RouteList> rl;
 	
-	/* XXX for now, monitoring choices are orthogonal. cue monitoring 
+	/* XXX for now, monitoring choices are orthogonal. cue monitoring
 	   will follow in 3.X but requires mixing the input and playback (disk)
 	   signal together, which requires yet more buffers.
 	*/

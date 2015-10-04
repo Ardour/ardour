@@ -36,4 +36,4 @@
 # undef GE_INTERNAL
 # define GE_EXPORT      __global
 # define GE_INTERNAL    __hidden
-#endif 
+#endif

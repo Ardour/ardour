@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2012 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ uint32_t Bindings::_ignored_state = 0;
 MouseButton::MouseButton (uint32_t state, uint32_t keycode)
 {
         uint32_t ignore = Bindings::ignored_state();
-        
+
         if (gdk_keyval_is_upper (keycode) && gdk_keyval_is_lower (keycode)) {
                 /* key is not subject to case, so ignore SHIFT
                  */
@@ -75,7 +75,7 @@ MouseButton::make_button (const string& str, MouseButton& b)
 
         string::size_type lastmod = str.find_last_of ('-');
         uint32_t button_number;
-        
+
         if (lastmod == string::npos) {
                 button_number = PBD::atoi (str);
         } else {
@@ -90,12 +90,12 @@ string
 MouseButton::name () const
 {
         int s = state();
-        
+
         string str;
 
         if (s & Keyboard::PrimaryModifier) {
                 str += "Primary";
-        } 
+        }
         if (s & Keyboard::SecondaryModifier) {
                 if (!str.empty()) {
                         str += '-';
@@ -107,14 +107,14 @@ MouseButton::name () const
                         str += '-';
                 }
                 str += "Tertiary";
-        } 
+        }
         if (s & Keyboard::Level4Modifier) {
                 if (!str.empty()) {
                         str += '-';
                 }
                 str += "Level4";
         }
-        
+
         if (!str.empty()) {
                 str += '-';
         }
@@ -129,7 +129,7 @@ MouseButton::name () const
 KeyboardKey::KeyboardKey (uint32_t state, uint32_t keycode)
 {
         uint32_t ignore = Bindings::ignored_state();
-        
+
         if (gdk_keyval_is_upper (keycode) && gdk_keyval_is_lower (keycode)) {
                 /* key is not subject to case, so ignore SHIFT
                  */
@@ -146,12 +146,12 @@ string
 KeyboardKey::name () const
 {
         int s = state();
-        
+
         string str;
 
         if (s & Keyboard::PrimaryModifier) {
                 str += "Primary";
-        } 
+        }
         if (s & Keyboard::SecondaryModifier) {
                 if (!str.empty()) {
                         str += '-';
@@ -163,14 +163,14 @@ KeyboardKey::name () const
                         str += '-';
                 }
                 str += "Tertiary";
-        } 
+        }
         if (s & Keyboard::Level4Modifier) {
                 if (!str.empty()) {
                         str += '-';
                 }
                 str += "Level4";
         }
-        
+
         if (!str.empty()) {
                 str += '-';
         }
@@ -323,7 +323,7 @@ Bindings::activate (MouseButton bb, Operation op)
         }
 
         MouseButtonBindingMap::iterator b = bbm->find (bb);
-        
+
         if (b == bbm->end()) {
                 /* no entry for this key in the state map */
                 return false;
@@ -373,7 +373,7 @@ Bindings::remove (MouseButton bb, Operation op)
                 bbm = &button_release_bindings;
                 break;
         }
-        
+
         MouseButtonBindingMap::iterator b = bbm->find (bb);
 
         if (b != bbm->end()) {
@@ -387,7 +387,7 @@ Bindings::save (const string& path)
         XMLTree tree;
         XMLNode* root = new XMLNode (X_("Bindings"));
         tree.set_root (root);
-        
+
         save (*root);
 
         if (!tree.write (path)) {
@@ -457,7 +457,7 @@ Bindings::load (const string& path)
         if (!tree.read (path)) {
                 return false;
         }
-        
+
         press_bindings.clear ();
         release_bindings.clear ();
 
@@ -475,27 +475,27 @@ void
 Bindings::load (const XMLNode& node)
 {
         if (node.name() == X_("Press") || node.name() == X_("Release")) {
-                
+
                 Operation op;
-                
+
                 if (node.name() == X_("Press")) {
                         op = Press;
                 } else {
                         op = Release;
                 }
-                
+
                 const XMLNodeList& children (node.children());
-                
+
                 for (XMLNodeList::const_iterator p = children.begin(); p != children.end(); ++p) {
-                        
+
                         XMLProperty* ap;
                         XMLProperty* kp;
                         XMLProperty* bp;
-                        
+
                         ap = (*p)->property ("action");
                         kp = (*p)->property ("key");
                         bp = (*p)->property ("button");
-                        
+
                         if (!ap || (!kp && !bp)) {
                                 continue;
                         }
@@ -504,7 +504,7 @@ Bindings::load (const XMLNode& node)
 
                         if (action_map) {
                                 act = action_map->find_action (ap->value());
-                        } 
+                        }
 
                         if (!act) {
                                 string::size_type slash = ap->value().find ('/');
@@ -514,11 +514,11 @@ Bindings::load (const XMLNode& node)
                                         act = ActionManager::get_action (group.c_str(), action.c_str());
                                 }
                         }
-                        
+
                         if (!act) {
                                 continue;
                         }
-                        
+
                         if (kp) {
                                 KeyboardKey k;
                                 if (!KeyboardKey::make_key (kp->value(), k)) {
@@ -534,7 +534,7 @@ Bindings::load (const XMLNode& node)
                         }
                 }
         }
-}        
+}
 
 RefPtr<Action>
 ActionMap::find_action (const string& name)
@@ -548,7 +548,7 @@ ActionMap::find_action (const string& name)
         return RefPtr<Action>();
 }
 
-RefPtr<Action> 
+RefPtr<Action>
 ActionMap::register_action (const char* path,
                             const char* name, const char* label, sigc::slot<void> sl)
 {
@@ -566,9 +566,9 @@ ActionMap::register_action (const char* path,
         return act;
 }
 
-RefPtr<Action> 
+RefPtr<Action>
 ActionMap::register_radio_action (const char* path, Gtk::RadioAction::Group& rgroup,
-                                  const char* name, const char* label, 
+                                  const char* name, const char* label,
                                   sigc::slot<void,GtkAction*> sl,
                                   int value)
 {
@@ -588,7 +588,7 @@ ActionMap::register_radio_action (const char* path, Gtk::RadioAction::Group& rgr
         return act;
 }
 
-RefPtr<Action> 
+RefPtr<Action>
 ActionMap::register_toggle_action (const char* path,
                                    const char* name, const char* label, sigc::slot<void> sl)
 {

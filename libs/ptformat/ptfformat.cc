@@ -73,7 +73,7 @@ static uint64_t gen_secret (int i) {
 
 	if (idx & 0x20) {
 		lo ^= 0xaaaaaaab;
-		xk ^= 0x10000000; 
+		xk ^= 0x10000000;
 	}
 	uint32_t hi = swapbytes32 (lo) ^ xk;
 	return  ((uint64_t)hi << 32) | (lo ^ xor_lo);
@@ -559,7 +559,7 @@ PTFFormat::parserest5(void) {
 			//printf("name=`%s` start=%04x length=%04x offset=%04x findex=%d\n", name,start,length,sampleoffset,findex);
 
 			std::string filename = string(name) + extension;
-			wav_t f = { 
+			wav_t f = {
 				filename,
 				findex,
 				(int64_t)(start*ratefactor),
@@ -903,7 +903,7 @@ PTFFormat::parserest89(void) {
 			j+=somethingbytes;
 			*/
 			std::string filename = string(name) + extension;
-			wav_t f = { 
+			wav_t f = {
 				filename,
 				0,
 				(int64_t)(start*ratefactor),
@@ -1171,7 +1171,7 @@ PTFFormat::parserest10(void) {
 			j+=somethingbytes;
 			*/
 			std::string filename = string(name) + extension;
-			wav_t f = { 
+			wav_t f = {
 				filename,
 				0,
 				(int64_t)(start*ratefactor),

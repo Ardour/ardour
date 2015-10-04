@@ -287,7 +287,7 @@ XFadeCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 	if (IS_START || show_background_fade) {
 		set_source_rgba (context, IS_START ? _outline_color : outline_shaded);
 		context->set_line_width (IS_START ? 1.0 : .5);
-        
+
 		context->begin_new_path ();
 		context->append_path (*path_in);
 		context->stroke();

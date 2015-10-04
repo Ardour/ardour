@@ -135,7 +135,7 @@ EditorRegions::EditorRegions (Editor* e)
 		if (ci[i].index > 6) {
 			col->set_expand (false);
 			col->set_alignment (ALIGN_CENTER);
-		} 
+		}
 	}
 
 	_display.set_headers_visible (true);

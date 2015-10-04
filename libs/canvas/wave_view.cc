@@ -273,8 +273,8 @@ WaveView::compute_tips (PeakData const & peak, WaveView::LineTips& tips) const
 {
 	const double effective_height  = _height;
 
-	/* remember: canvas (and cairo) coordinate space puts the origin at the upper left. 
-	   
+	/* remember: canvas (and cairo) coordinate space puts the origin at the upper left.
+	
 	   So, a sample value of 1.0 (0dbFS) will be computed as:
 
 	         (1.0 - 1.0) * 0.5 * effective_height
@@ -606,7 +606,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				}
 			}
 
-			/* zero line, show only if there is enough spread 
+			/* zero line, show only if there is enough spread
 			or the waveform line does not cross zero line */
 
 			if (show_zero_line() && ((tips[i].spread >= 5.0) || (tips[i].top > height_zero ) || (tips[i].bot < height_zero)) ) {
@@ -790,8 +790,8 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 		 * while we're here.
 		 */
 
-                DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 CR %2 stop? %3 image %4\n", this, current_request, 
-                                                              (current_request ? current_request->should_stop() : false), 
+                DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 CR %2 stop? %3 image %4\n", this, current_request,
+                                                              (current_request ? current_request->should_stop() : false),
                                                               (current_request ? current_request->image : 0)));
 		
 		if (current_request && !current_request->should_stop() && current_request->image) {
@@ -836,7 +836,7 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 	if (!ret || !full_image) {
 
 		if ((rendered && get_image_in_thread) || always_get_image_in_thread) {
-                        
+
 			DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: generating image in caller thread\n", name));
 			
 			boost::shared_ptr<WaveViewThreadRequest> req (new WaveViewThreadRequest);
@@ -894,19 +894,19 @@ WaveView::get_image_from_cache (framepos_t start, framepos_t end, bool& full) co
 framecnt_t
 WaveView::desired_image_width () const
 {
-        /* compute how wide the image should be, in samples. 
+        /* compute how wide the image should be, in samples.
          *
-         * We want at least 1 canvas width's worth, but if that 
+         * We want at least 1 canvas width's worth, but if that
          * represents less than 1/10th of a second, use 1/10th of
          * a second instead.
          */
-        
+
         framecnt_t canvas_width_samples = _canvas->visible_area().width() * _samples_per_pixel;
         const framecnt_t one_tenth_of_second = _region->session().frame_rate() / 10;
 
         if (canvas_width_samples > one_tenth_of_second) {
                 return  canvas_width_samples;
-        } 
+        }
 
         return one_tenth_of_second;
 }
@@ -959,7 +959,7 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 	if (!req->should_stop()) {
 
 		/* sample position is canonical here, and we want to generate
-		 * an image that spans about 3x the canvas width. We get to that 
+		 * an image that spans about 3x the canvas width. We get to that
                  * width by using an image sample count of the screen width added
                  * on each side of the desired image center.
 		 */
@@ -980,7 +980,7 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		   offset into the Region's **SOURCE**, rather than an offset into
 		   the Region itself.
 		*/
-	                             
+	
 		framecnt_t peaks_read = _region->read_peaks (peaks.get(), n_peaks,
 		                                             sample_start, sample_end - sample_start,
 		                                             req->channel,
@@ -1104,12 +1104,12 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	
 	// cerr << "Image/WV space: " << image_start << " .. " << image_end << endl;
 	
-	/* sample coordinates - note, these are not subject to rounding error 
+	/* sample coordinates - note, these are not subject to rounding error
 	 *
 	 * "sample_start = N" means "the first sample we need to represent is N
 	 * samples after the first sample of the region"
 	 */
-	 
+	
 	framepos_t sample_start = _region_start + (image_start * _samples_per_pixel);
 	framepos_t sample_end   = _region_start + (image_end * _samples_per_pixel);
 	
@@ -1167,13 +1167,13 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	}
 
 	/* compute the first pixel of the image that should be used when we
-	 * render the specified range. 
+	 * render the specified range.
 	 */
 
 	image_origin_in_self_coordinates = (image_to_draw->start - _region_start) / _samples_per_pixel;
 	
 	if (_start_shift && (sample_start == _region_start) && (self.x0 == draw.x0)) {
-		/* we are going to draw the first pixel for this region, but 
+		/* we are going to draw the first pixel for this region, but
 		   we may not want this to overlap a border around the
 		   waveform. If so, _start_shift will be set.
 		*/
@@ -1843,7 +1843,7 @@ WaveViewCache::cache_flush ()
 			}
 			DEBUG_TRACE (DEBUG::WaveView, string_compose ("cache shrunk to %1\n", image_cache_size));
 		}
-      
+
 		/* Remove from the linear list, even if we didn't find it in
 		 * the actual cache_mao
 		 */

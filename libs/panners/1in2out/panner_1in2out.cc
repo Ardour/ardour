@@ -66,7 +66,7 @@ static PanPluginDescriptor _descriptor = {
         "Mono to Stereo Panner",
         "http://ardour.org/plugin/panner_1in2out",
         "http://ardour.org/plugin/panner_1in2out#ui",
-        1, 2, 
+        1, 2,
         10000,
         Panner1in2out::factory
 };
@@ -81,7 +81,7 @@ Panner1in2out::Panner1in2out (boost::shared_ptr<Pannable> p)
                 _pannable->pan_azimuth_control->set_value (0.5);
             }
         }
-        
+
         update ();
 
         left = desired_left;
@@ -133,7 +133,7 @@ Panner1in2out::position_range () const
 	return make_pair (0, 1);
 }
 
-double 
+double
 Panner1in2out::position () const
 {
         return _pannable->pan_azimuth_control->get_value ();
@@ -149,7 +149,7 @@ Panner1in2out::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 	pan_t pan;
 
 	Sample* const src = srcbuf.data();
-        
+
 	/* LEFT OUTPUT */
 
 	dst = obufs.get_audio(0).data();
@@ -200,7 +200,7 @@ Panner1in2out::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 			/* pan is 1 so we can just copy the input samples straight in */
 
 			mix_buffers_no_gain(dst,src,nframes);
-                        
+
 			/* XXX it would be nice to mark that we wrote into the buffer */
 		}
 	}
@@ -296,10 +296,10 @@ Panner1in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
                 /* note that are overwriting buffers, but its OK
                    because we're finished with their old contents
                    (position automation data) and are
-                   replacing it with panning/gain coefficients 
+                   replacing it with panning/gain coefficients
                    that we need to actually process the data.
                 */
-                
+
                 buffers[0][n] = panL * (scale * panL + 1.0f - scale);
                 buffers[1][n] = panR * (scale * panR + 1.0f - scale);
         }
@@ -345,7 +345,7 @@ Panner1in2out::get_state ()
 }
 
 
-std::set<Evoral::Parameter> 
+std::set<Evoral::Parameter>
 Panner1in2out::what_can_be_automated() const
 {
         set<Evoral::Parameter> s;
@@ -364,7 +364,7 @@ Panner1in2out::describe_parameter (Evoral::Parameter p)
         }
 }
 
-string 
+string
 Panner1in2out::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 {
         /* DO NOT USE LocaleGuard HERE */
@@ -373,9 +373,9 @@ Panner1in2out::value_as_string (boost::shared_ptr<AutomationControl> ac) const
         switch (ac->parameter().type()) {
         case PanAzimuthAutomation:
                 /* We show the position of the center of the image relative to the left & right.
-                   This is expressed as a pair of percentage values that ranges from (100,0) 
+                   This is expressed as a pair of percentage values that ranges from (100,0)
                    (hard left) through (50,50) (hard center) to (0,100) (hard right).
-                   
+
                    This is pretty wierd, but its the way audio engineers expect it. Just remember that
                    the center of the USA isn't Kansas, its (50LA, 50NY) and it will all make sense.
 
@@ -383,10 +383,10 @@ Panner1in2out::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 		   panner GUIs can do their own version of this if they need
 		   something less compact.
                 */
-                
+
                 return string_compose (_("L%1R%2"), (int) rint (100.0 * (1.0 - val)),
                                        (int) rint (100.0 * val));
-                
+
         default:
                 return _("unused");
         }

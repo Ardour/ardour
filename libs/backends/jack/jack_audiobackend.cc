@@ -72,7 +72,7 @@ JACKAudioBackend::~JACKAudioBackend()
 }
 
 string
-JACKAudioBackend::name() const 
+JACKAudioBackend::name() const
 {
 	return X_("JACK");
 }
@@ -127,7 +127,7 @@ JACKAudioBackend::enumerate_devices () const
 		all_devices.insert (make_pair (_target_driver, std::set<string>()));
 	}
 	
-	/* store every device we've found, by driver name. 
+	/* store every device we've found, by driver name.
 	 *
 	 * This is so we do not confuse ALSA, FFADO, netjack etc. devices
 	 * with each other.
@@ -160,7 +160,7 @@ JACKAudioBackend::available_sample_rates (const string& device) const
 		return f;
 	}
 
-	/* if JACK is not already running, just list a bunch of reasonable 
+	/* if JACK is not already running, just list a bunch of reasonable
 	   values and let the future sort it all out.
 	*/
 
@@ -339,7 +339,7 @@ JACKAudioBackend::device_name () const
 	if (!_jack_connection->in_control()) {
 		return "???"; // JACK has no way (as of fall 2013) to return
 			      // the device name
-	} 
+	}
 
 	return _target_device;
 }
@@ -441,7 +441,7 @@ JACKAudioBackend::systemic_output_latency () const
 	return _target_systemic_output_latency;
 }
 
-size_t 
+size_t
 JACKAudioBackend::raw_buffer_size(DataType t)
 {
 	std::map<DataType,size_t>::const_iterator s = _raw_buffer_sizes.find(t);
@@ -504,7 +504,7 @@ JACKAudioBackend::_start (bool for_latency_measurement)
 	if (!available()) {
 
 		if (_jack_connection->in_control()) {
-			/* we will be starting JACK, so set up the 
+			/* we will be starting JACK, so set up the
 			   command that JACK will use when it (auto-)starts
 			*/
 			setup_jack_startup_command (for_latency_measurement);
@@ -522,7 +522,7 @@ JACKAudioBackend::_start (bool for_latency_measurement)
 	jack_sample_rate_callback (jack_get_sample_rate (_priv_jack));
 	jack_bufsize_callback (jack_get_buffer_size (_priv_jack));
 	
-	/* Now that we have buffer size and sample rate established, the engine 
+	/* Now that we have buffer size and sample rate established, the engine
 	   can go ahead and do its stuff
 	*/
 
@@ -606,8 +606,8 @@ JACKAudioBackend::transport_locate (framepos_t where)
 	jack_transport_locate (_priv_jack, where);
 }
 
-framepos_t 
-JACKAudioBackend::transport_frame () const 
+framepos_t
+JACKAudioBackend::transport_frame () const
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
 	return jack_get_current_transport_frame (_priv_jack);
@@ -1018,8 +1018,8 @@ JACKAudioBackend::disconnected (const char* why)
         }
 }
 
-float 
-JACKAudioBackend::dsp_load() const 
+float
+JACKAudioBackend::dsp_load() const
 {
 	GET_PRIVATE_JACK_POINTER_RET(_priv_jack,0);
 	return jack_cpu_load (_priv_jack);
@@ -1137,7 +1137,7 @@ JACKAudioBackend::speed_and_position (double& speed, framepos_t& position)
 	jack_transport_state_t state;
 	bool starting;
 
-	/* this won't be called if the port engine in use is not JACK, so we do 
+	/* this won't be called if the port engine in use is not JACK, so we do
 	   not have to worry about the type of PortEngine::private_handle()
 	*/
 

@@ -170,7 +170,7 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 
 	bool prep_record_enable ();
 	bool prep_record_disable ();
-    
+
 	MidiRingBuffer<framepos_t>*  _playback_buf;
 	MidiRingBuffer<framepos_t>*  _capture_buf;
 	boost::weak_ptr<MidiPort>    _source_port;

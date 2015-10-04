@@ -244,12 +244,12 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 
 	if (iter) {
 		group = (*iter)[_columns.routegroup];
-	} 
+	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
 		_editor->_group_tabs->get_menu(group)->popup (1, ev->time);
 		return true;
-	} 
+	}
 
 	if (!p) {
 		/* cancel selection */
@@ -262,7 +262,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 	group = (*iter)[_columns.routegroup];
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
-	case 0: 
+	case 0:
 		c =  (*iter)[_columns.gdkcolor];
 		color_dialog.get_colorsel()->set_previous_color (c);
 		color_dialog.get_colorsel()->set_current_color (c);

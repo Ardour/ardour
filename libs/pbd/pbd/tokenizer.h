@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ namespace PBD {
 */
 template<typename StringType, typename Iter>
 /*LIBPBD_API*/ unsigned int
-tokenize(const StringType& str,        
+tokenize(const StringType& str,
         const StringType& delims,
         Iter it,
 		bool strip_whitespace=false)

@@ -9,7 +9,7 @@
 #ifndef FFT_H
 #define FFT_H
 
-class FFT  
+class FFT
 {
 public:
     FFT(unsigned int nsamples);
@@ -18,7 +18,7 @@ public:
     void process(bool inverse,
                  const double *realIn, const double *imagIn,
                  double *realOut, double *imagOut);
-    
+
 private:
     unsigned int m_n;
     void *m_private;
@@ -37,6 +37,6 @@ public:
 private:
     unsigned int m_n;
     void *m_private_real;
-};    
+};
 
 #endif

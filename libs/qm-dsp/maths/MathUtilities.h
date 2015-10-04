@@ -20,7 +20,7 @@
 
 #include "nan-inf.h"
 
-class MathUtilities  
+class MathUtilities
 {
 public:	
     static double round( double x );

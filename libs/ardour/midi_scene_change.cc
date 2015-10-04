@@ -174,5 +174,5 @@ MIDISceneChange::set_bank (int bank)
 {
         _bank = bank;
 }
-      
+
 

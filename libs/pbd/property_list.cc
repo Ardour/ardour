@@ -24,8 +24,8 @@
 
 using namespace PBD;
 
-PropertyList::PropertyList() 
-        : _property_owner (true) 
+PropertyList::PropertyList()
+        : _property_owner (true)
 {
 	
 }
@@ -57,7 +57,7 @@ PropertyList::get_changes_as_xml (XMLNode* history_node)
 {
         for (const_iterator i = begin(); i != end(); ++i) {
                 DEBUG_TRACE (DEBUG::Properties, string_compose ("Add changes to %1 for %2\n",
-                                                                history_node->name(), 
+                                                                history_node->name(),
                                                                 i->second->property_name()));
                 i->second->get_changes_as_xml (history_node);
         }

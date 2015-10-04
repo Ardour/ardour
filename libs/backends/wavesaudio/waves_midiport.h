@@ -61,4 +61,4 @@ private:
 } // namespace
 
 #endif /* __libardour_waves_midiport_h__ */
-    
+

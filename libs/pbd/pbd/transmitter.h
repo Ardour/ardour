@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-99 Paul Barton-Davis 
+    Copyright (C) 1998-99 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class LIBPBD_API Transmitter : public std::stringstream
 
 	Transmitter (Channel);
 
-	sigc::signal<void,Channel, const char *> &sender() { 
+	sigc::signal<void,Channel, const char *> &sender() {
 		return *send;
 	}
 
@@ -62,7 +62,7 @@ class LIBPBD_API Transmitter : public std::stringstream
 };
 
 /* for EGCS 2.91.66, if this function is not compiled within the same
-   compilation unit as the one where a ThrownError is thrown, then 
+   compilation unit as the one where a ThrownError is thrown, then
    nothing will catch the error. This is a pretty small function, so
    inlining it here seems like a reasonable workaround.
 */

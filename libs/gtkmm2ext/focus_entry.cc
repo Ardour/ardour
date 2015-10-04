@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ FocusEntry::FocusEntry ()
 	next_release_selects = false;
 }
 
-bool 
+bool
 FocusEntry::on_button_press_event (GdkEventButton* ev)
 {
 	if (!has_focus()) {
@@ -35,7 +35,7 @@ FocusEntry::on_button_press_event (GdkEventButton* ev)
 	return Entry::on_button_press_event (ev);
 }
 
-bool 
+bool
 FocusEntry::on_button_release_event (GdkEventButton* ev)
 {
 	if (next_release_selects) {
@@ -43,7 +43,7 @@ FocusEntry::on_button_release_event (GdkEventButton* ev)
 		select_region (0, -1);
 		next_release_selects = false;
 		return ret;
-	} 
+	}
 
 	return Entry::on_button_release_event (ev);
 }

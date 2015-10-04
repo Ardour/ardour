@@ -110,7 +110,7 @@ namespace StringPrivate
     case '8':
     case '9':
       return true;
-    
+
     default:
       return false;
     }
@@ -124,21 +124,21 @@ namespace StringPrivate
     os << obj;
 
     std::string rep = os.str();
-  
+
     if (!rep.empty()) {		// manipulators don't produce output
       for (specification_map::const_iterator i = specs.lower_bound(arg_no),
 	     end = specs.upper_bound(arg_no); i != end; ++i) {
 	output_list::iterator pos = i->second;
 	++pos;
-      
+
 	output.insert(pos, rep);
       }
-    
+
       os.str(std::string());
       //os.clear();
       ++arg_no;
     }
-  
+
     return *this;
   }
 
@@ -174,7 +174,7 @@ namespace StringPrivate
 	  }
 
 	  ++arg_no;
-	  
+	
 	  return *this;
   }
 
@@ -182,7 +182,7 @@ namespace StringPrivate
     : arg_no(1)
   {
     std::string::size_type b = 0, i = 0;
-  
+
     // fill in output with the strings between the %1 %2 %3 etc. and
     // fill in specs with the positions
     while (i < fmt.length()) {
@@ -220,7 +220,7 @@ namespace StringPrivate
       else
 	++i;
     }
-  
+
     if (i - b > 0)		// add the rest of the string
       output.push_back(fmt.substr(b, i - b));
   }
@@ -229,11 +229,11 @@ namespace StringPrivate
   {
     // assemble string
     std::string str;
-  
+
     for (output_list::const_iterator i = output.begin(), end = output.end();
 	 i != end; ++i)
       str += *i;
-  
+
     return str;
   }
 }
@@ -244,7 +244,7 @@ namespace StringPrivate
   // a series of functions which accept a format string on the form "text %1
   // more %2 less %3" and a number of templated parameters and spits out the
   // composited string
-  template <typename T1> 
+  template <typename T1>
   inline std::string string_compose(const std::string &fmt, const T1 &o1)
   {
     StringPrivate::Composition c(fmt);
@@ -252,7 +252,7 @@ namespace StringPrivate
     return c.str();
   }
 
-  template <typename T1, typename T2> 
+  template <typename T1, typename T2>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2)
   {
@@ -261,7 +261,7 @@ namespace StringPrivate
     return c.str();
   }
 
-  template <typename T1, typename T2, typename T3> 
+  template <typename T1, typename T2, typename T3>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3)
   {
@@ -270,7 +270,7 @@ namespace StringPrivate
     return c.str();
   }
 
-  template <typename T1, typename T2, typename T3, typename T4> 
+  template <typename T1, typename T2, typename T3, typename T4>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4)
@@ -280,7 +280,7 @@ namespace StringPrivate
     return c.str();
   }
 
-  template <typename T1, typename T2, typename T3, typename T4, typename T5> 
+  template <typename T1, typename T2, typename T3, typename T4, typename T5>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5)
@@ -291,7 +291,7 @@ namespace StringPrivate
   }
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
-	    typename T6> 
+	    typename T6>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6)
@@ -302,7 +302,7 @@ namespace StringPrivate
   }
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
-	    typename T6, typename T7> 
+	    typename T6, typename T7>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -314,7 +314,7 @@ namespace StringPrivate
   }
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
-	    typename T6, typename T7, typename T8> 
+	    typename T6, typename T7, typename T8>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -326,7 +326,7 @@ namespace StringPrivate
   }
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
-	    typename T6, typename T7, typename T8, typename T9> 
+	    typename T6, typename T7, typename T8, typename T9>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -338,7 +338,7 @@ namespace StringPrivate
   }
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
-	    typename T6, typename T7, typename T8, typename T9, typename T10> 
+	    typename T6, typename T7, typename T8, typename T9, typename T10>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -350,10 +350,10 @@ namespace StringPrivate
       .arg(o10);
     return c.str();
   }
-  
+
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
-	    typename T11> 
+	    typename T11>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -368,7 +368,7 @@ namespace StringPrivate
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
-	    typename T11, typename T12> 
+	    typename T11, typename T12>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -383,7 +383,7 @@ namespace StringPrivate
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
-	    typename T11, typename T12, typename T13> 
+	    typename T11, typename T12, typename T13>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -399,7 +399,7 @@ namespace StringPrivate
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
-	    typename T11, typename T12, typename T13, typename T14> 
+	    typename T11, typename T12, typename T13, typename T14>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -416,7 +416,7 @@ namespace StringPrivate
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
 	    typename T11, typename T12, typename T13, typename T14,
-	    typename T15> 
+	    typename T15>
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,

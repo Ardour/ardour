@@ -178,9 +178,9 @@ PluginUIWindow::on_show ()
 
 	if (_pluginui) {
 #if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
-                if (pre_deactivate_x >= 0) {                                                                             
+                if (pre_deactivate_x >= 0) {
                         move (pre_deactivate_x, pre_deactivate_y);
-                }                                                      
+                }
 #endif
 
 		if (_pluginui->on_window_show (_title)) {
@@ -193,7 +193,7 @@ void
 PluginUIWindow::on_hide ()
 {
 #if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
-        get_position (pre_deactivate_x, pre_deactivate_y);                                                               
+        get_position (pre_deactivate_x, pre_deactivate_y);
 #endif
 
 	Window::on_hide ();
@@ -607,7 +607,7 @@ PlugUIBase::add_plugin_setting ()
 		}
 		break;
 	}
-#else 
+#else
 	if (!seen_saving_message) {
 		seen_saving_message = true;
 		show_no_plugin_message();
@@ -625,7 +625,7 @@ PlugUIBase::save_plugin_setting ()
 	if (!r.uri.empty ()) {
 		plugin->load_preset (r);
 	}
-#else 
+#else
 	if (!seen_saving_message) {
 		seen_saving_message = true;
 		show_no_plugin_message();

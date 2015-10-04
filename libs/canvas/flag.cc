@@ -43,7 +43,7 @@ Flag::Flag (Item* parent, Distance height, Color outline_color, Color fill_color
 	setup (height, position);
 }
 
-void 
+void
 Flag::setup (Distance height, Duple position)
 {
 	_text = new Text (this);
@@ -108,7 +108,7 @@ Flag::covers (Duple const & point) const
 {
 	if (_rectangle) {
 		return _rectangle->covers (point);
-	} 
+	}
 
 	return false;
 }
