@@ -3502,10 +3502,12 @@ Session::route_listen_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 	if (route->listening_via_monitor ()) {
 
 		if (Config->get_exclusive_solo()) {
-			/* new listen: disable all other listen */
+			/* new listen: disable all other listen, except solo-grouped channels */
+			RouteGroup* rg = route->route_group ();
+			bool leave_group_alone = (rg && rg->is_active() && rg->is_solo());
 			boost::shared_ptr<RouteList> r = routes.reader ();
 			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-				if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+				if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() || (leave_group_alone && ((*i)->route_group() == rg))) {
 					continue;
 				}
 				(*i)->set_listen (false, this);
