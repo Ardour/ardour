@@ -4112,10 +4112,12 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 {
 	double dx = _drags->current_pointer_x() - last_pointer_x();
 	double dy = current_pointer_y() - last_pointer_y();
+	bool need_snap = true;
 
 	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::fine_adjust_modifier ())) {
 		dx *= 0.1;
 		dy *= 0.1;
+		need_snap = false;
 	}
 
 	/* coordinate in pixels relative to the start of the region (for region-based automation)
@@ -4148,7 +4150,7 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 
 	framepos_t cx_frames = _editor->pixel_to_sample (cx) + snap_delta (event->button.state);
 
-	if (!_x_constrained) {
+	if (!_x_constrained && need_snap) {
 		_editor->snap_to_with_modifier (cx_frames, event);
 	}
 
