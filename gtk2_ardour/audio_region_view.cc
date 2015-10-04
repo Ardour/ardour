@@ -1319,9 +1319,10 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 	y = ev->button.y;
 
 	item->canvas_to_item (x, y);
-
-	framepos_t fx = trackview.editor().pixel_to_sample (x);
+	framepos_t rpos = region ()->position ();
+	framepos_t fx = trackview.editor().pixel_to_sample (x) + rpos;
 	trackview.editor ().snap_to_with_modifier (fx, ev);
+	fx -= rpos;
 
 	if (fx > _region->length()) {
 		return;
