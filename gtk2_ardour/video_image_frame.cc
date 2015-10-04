@@ -193,7 +193,7 @@ VideoImageFrame::cut_rightend ()
 	}
 }
 
-void *
+static void *
 http_get_thread (void *arg) {
 	VideoImageFrame *vif = static_cast<VideoImageFrame *>(arg);
 	char url[2048];
