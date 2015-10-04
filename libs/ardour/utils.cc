@@ -33,7 +33,6 @@
 #include <cerrno>
 #include <iostream>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/time.h>
 #include <fcntl.h>
 #ifndef COMPILER_MSVC
@@ -41,6 +40,8 @@
 #endif
 #include <errno.h>
 #include <regex.h>
+
+#include <pbd/gstdio_compat.h>
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -662,11 +663,11 @@ ARDOUR::native_header_format_extension (HeaderFormat hf, const DataType& type)
 bool
 ARDOUR::matching_unsuffixed_filename_exists_in (const string& dir, const string& path)
 {
-        string bws = basename_nosuffix (path);
+	string bws = basename_nosuffix (path);
 	struct dirent* dentry;
-	struct stat statbuf;
+	GStatBuf statbuf;
 	DIR* dead;
-        bool ret = false;
+	bool ret = false;
 
         if ((dead = ::opendir (dir.c_str())) == 0) {
                 error << string_compose (_("cannot open directory %1 (%2)"), dir, strerror (errno)) << endl;
@@ -684,7 +685,7 @@ ARDOUR::matching_unsuffixed_filename_exists_in (const string& dir, const string&
 
                 string fullpath = Glib::build_filename (dir, dentry->d_name);
 
-                if (::stat (fullpath.c_str(), &statbuf)) {
+                if (g_stat (fullpath.c_str(), &statbuf)) {
                         continue;
                 }
 

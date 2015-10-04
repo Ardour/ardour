@@ -27,7 +27,6 @@
 #include <cassert>
 
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -419,11 +418,11 @@ vstfx_infofile_for_read (const char* dllpath)
 	string const path = vstfx_infofile_path (dllpath);
 
 	if (Glib::file_test (path, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR))) {
-		struct stat dllstat;
-		struct stat fsistat;
+		GStatBuf dllstat;
+		GStatBuf fsistat;
 
-		if (stat (dllpath, &dllstat) == 0) {
-			if (stat (path.c_str (), &fsistat) == 0) {
+		if (g_stat (dllpath, &dllstat) == 0) {
+			if (g_stat (path.c_str (), &fsistat) == 0) {
 				if (dllstat.st_mtime <= fsistat.st_mtime) {
 					/* plugin is older than info file */
 					return g_fopen (path.c_str (), "rb");

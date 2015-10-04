@@ -18,11 +18,12 @@
 */
 
 #include <unistd.h>
-#include <sys/stat.h>
 
 #include <cstring>
 #include <climits>
 #include <cerrno>
+
+#include <pbd/gstdio_compat.h>
 
 #include <glibmm/miscutils.h>
 
@@ -44,7 +45,7 @@ namespace ARDOUR {
 int
 find_session (string str, string& path, string& snapshot, bool& isnew)
 {
-	struct stat statbuf;
+	GStatBuf statbuf;
 
 	isnew = false;
 
@@ -52,7 +53,7 @@ find_session (string str, string& path, string& snapshot, bool& isnew)
 
 	/* check to see if it exists, and what it is */
 
-	if (stat (str.c_str(), &statbuf)) {
+	if (g_stat (str.c_str(), &statbuf)) {
 		if (errno == ENOENT) {
 			isnew = true;
 		} else {
@@ -81,7 +82,7 @@ find_session (string str, string& path, string& snapshot, bool& isnew)
 
 				/* is it there ? */
 
-				if (stat (tmp.c_str(), &statbuf)) {
+				if (g_stat (tmp.c_str(), &statbuf)) {
 					error << string_compose (_("cannot check statefile %1 (%2)"), tmp, strerror (errno))
 					      << endmsg;
 					return -1;

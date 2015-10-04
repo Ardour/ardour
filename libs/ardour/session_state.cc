@@ -31,7 +31,6 @@
 #include <cstdio> /* snprintf(3) ... grrr */
 #include <cmath>
 #include <unistd.h>
-#include <sys/stat.h>
 #include <climits>
 #include <signal.h>
 #include <sys/time.h>
@@ -3065,7 +3064,7 @@ Session::cleanup_sources (CleanupReport& rep)
 	/* now try to move all unused files into the "dead" directory(ies) */
 
 	for (vector<string>::iterator x = unused.begin(); x != unused.end(); ++x) {
-		struct stat statbuf;
+		GStatBuf statbuf;
 
 		string newpath;
 
@@ -3130,7 +3129,7 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		}
 
-		stat ((*x).c_str(), &statbuf);
+		g_stat ((*x).c_str(), &statbuf);
 
 		if (::rename ((*x).c_str(), newpath.c_str()) != 0) {
 			error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"),
@@ -3161,8 +3160,8 @@ Session::cleanup_sources (CleanupReport& rep)
 		}
 
 		rep.paths.push_back (*x);
-                rep.space += statbuf.st_size;
-        }
+		rep.space += statbuf.st_size;
+	}
 
 	/* dump the history list */
 

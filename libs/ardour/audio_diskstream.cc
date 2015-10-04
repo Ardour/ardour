@@ -28,6 +28,7 @@
 #include <cstdlib>
 #include <ctime>
 
+#include <pbd/gstdio_compat.h>
 #include "pbd/error.h"
 #include "pbd/xml++.h"
 #include "pbd/memento_command.h"
@@ -2284,8 +2285,8 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 			}
 
 			// This protects sessions from errant CapturingSources in stored sessions
-			struct stat sbuf;
-			if (stat (prop->value().c_str(), &sbuf)) {
+			GStatBuf sbuf;
+			if (g_stat (prop->value().c_str(), &sbuf)) {
 				continue;
 			}
 
