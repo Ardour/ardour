@@ -1246,7 +1246,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void region_fill_track ();
 	void audition_playlist_region_standalone (boost::shared_ptr<ARDOUR::Region>);
-	void audition_playlist_region_via_route (boost::shared_ptr<ARDOUR::Region>, ARDOUR::Route&);
 	void split_multichannel_region();
 	void reverse_region ();
 	void strip_region_silence ();

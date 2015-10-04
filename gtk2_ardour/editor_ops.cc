@@ -2767,25 +2767,6 @@ Editor::rename_region ()
 	}
 }
 
-void
-Editor::audition_playlist_region_via_route (boost::shared_ptr<Region> region, Route& route)
-{
-	if (_session->is_auditioning()) {
-		_session->cancel_audition ();
-	}
-
-	// note: some potential for creativity here, because region doesn't
-	// have to belong to the playlist that Route is handling
-
-	// bool was_soloed = route.soloed();
-
-	route.set_solo (true, this);
-
-	_session->request_bounded_roll (region->position(), region->position() + region->length());
-
-	/* XXX how to unset the solo state ? */
-}
-
 /** Start an audition of the first selected region */
 void
 Editor::play_edit_range ()
