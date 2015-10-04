@@ -4539,7 +4539,7 @@ Route::setup_invisible_processors ()
 	_processors = new_processors;
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if (!(*i)->display_to_user () && !(*i)->active ()) {
+		if (!(*i)->display_to_user () && !(*i)->active () && (*i) != _monitor_send) {
 			(*i)->activate ();
 		}
 	}
