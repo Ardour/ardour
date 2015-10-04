@@ -125,7 +125,7 @@ static void vstfx_read_blacklist (std::string &bl) {
 		char buf[1024];
 		size_t s = fread (buf, sizeof(char), 1024, blacklist_fd);
 		if (ferror (blacklist_fd)) {
-			error << string_compose (_("error reading VST Blacklist file %1 (%2)"), fn, strerror (errno)) << endmsg;
+			PBD::error << string_compose (_("error reading VST Blacklist file %1 (%2)"), fn, strerror (errno)) << endmsg;
 			bl = "";
 			break;
 		}
