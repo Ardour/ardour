@@ -3529,7 +3529,7 @@ Session::route_solo_isolated_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 
 	if (!route) {
 		/* should not happen */
-		error << string_compose (_("programming error: %1"), X_("invalid route weak ptr passed to route_solo_changed")) << endmsg;
+		error << string_compose (_("programming error: %1"), X_("invalid route weak ptr passed to route_solo_isolated_changed")) << endmsg;
 		return;
 	}
 
