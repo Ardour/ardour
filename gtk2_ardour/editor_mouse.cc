@@ -619,7 +619,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		break;
 
 	case AutomationTrackItem:
-		if (eff_mouse_mode != MouseDraw) {
+		if (eff_mouse_mode != MouseDraw && op == Selection::Set) {
 			set_selected_track_as_side_effect (op);
 		}
 		break;
