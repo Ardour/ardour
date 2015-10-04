@@ -587,7 +587,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 				if (_desc.toggled) {
 					const double opp_val = ((value < 0.5) ? 1.0 : 0.0);
 					_events.insert (_events.end(), new ControlEvent (0, opp_val));
-					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added bool value %2 at zero\n", this, opp_val));
+					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added toggled value %2 at zero\n", this, opp_val));
 
 				} else {
 					_events.insert (_events.end(), new ControlEvent (0, value));
