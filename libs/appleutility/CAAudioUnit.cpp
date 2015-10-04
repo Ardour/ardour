@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CAAudioUnit.cpp
- 
+
 =============================================================================*/
 
 #include "CAAudioUnit.h"
@@ -65,15 +65,15 @@ class CAAudioUnit::AUState : public CAReferenceCounted  {
 public:
 	AUState (Component inComp)
 						: mUnit(0), mNode (0)
-						{ 
-							OSStatus result = ::OpenAComponent (inComp, &mUnit); 
+						{
+							OSStatus result = ::OpenAComponent (inComp, &mUnit);
 							if (result)
 								throw result;
 							Init();
 						}
 
 	AUState (const AUNode &inNode, const AudioUnit& inUnit)
-						: mUnit (inUnit), mNode (inNode) 
+						: mUnit (inUnit), mNode (inNode)
 						{
 							Init();
 						}
@@ -87,7 +87,7 @@ public:
 											Float32 &outValue) const
 	{
 			if (mGetParamProc != NULL) {
-				return reinterpret_cast<AudioUnitGetParameterProc>(mGetParamProc) (mConnInstanceStorage, 
+				return reinterpret_cast<AudioUnitGetParameterProc>(mGetParamProc) (mConnInstanceStorage,
 										inID, scope, element, &outValue);
 			}							
 		return AudioUnitGetParameter(mUnit, inID, scope, element, &outValue);
@@ -97,7 +97,7 @@ public:
 											Float32 value, UInt32 bufferOffsetFrames)
 	{
 			if (mSetParamProc != NULL) {
-				return reinterpret_cast<AudioUnitSetParameterProc>(mSetParamProc) (mConnInstanceStorage, 
+				return reinterpret_cast<AudioUnitSetParameterProc>(mSetParamProc) (mConnInstanceStorage,
 										inID, scope, element, value, bufferOffsetFrames);
 			}							
 			return AudioUnitSetParameter(mUnit, inID, scope, element, value, bufferOffsetFrames);
@@ -110,7 +110,7 @@ public:
 								AudioBufferList *             ioData)
 	{
 		if (mRenderProc != NULL) {
-			return reinterpret_cast<AudioUnitRenderProc>(mRenderProc) (mConnInstanceStorage, 
+			return reinterpret_cast<AudioUnitRenderProc>(mRenderProc) (mConnInstanceStorage,
 									ioActionFlags, inTimeStamp, inOutputBusNumber, inNumberFrames, ioData);
 		}							
 		return AudioUnitRender(mUnit, ioActionFlags, inTimeStamp, inOutputBusNumber, inNumberFrames, ioData);
@@ -123,7 +123,7 @@ public:
 	{
 #if !TARGET_OS_WIN32
 		if (mMIDIEventProc != NULL) {
-			return reinterpret_cast<MusicDeviceMIDIEventProc>(mMIDIEventProc) (mConnInstanceStorage, 
+			return reinterpret_cast<MusicDeviceMIDIEventProc>(mMIDIEventProc) (mConnInstanceStorage,
 									inStatus, inData1, inData2, inOffsetSampleFrame);
 		}
 		return MusicDeviceMIDIEvent (mUnit, inStatus, inData1, inData2, inOffsetSampleFrame);
@@ -157,7 +157,7 @@ public:
 
 private:
 	// get the fast dispatch pointers
-	void Init() 
+	void Init()
 	{
 		UInt32 size = sizeof(AudioUnitRenderProc);
 		if (AudioUnitGetProperty(mUnit, kAudioUnitProperty_FastDispatch,
@@ -192,7 +192,7 @@ private:
 		// get the compiler to tell us when we do a bad thing!!!
 	AUState () {}
         AUState (const AUState& other) : CAReferenceCounted (other) {}
-	AUState& operator= (const AUState&) { return *this; } 
+	AUState& operator= (const AUState&) { return *this; }
 };						
 						
 						
@@ -208,7 +208,7 @@ CAAudioUnit::AUState::~AUState ()
 OSStatus		CAAudioUnit::Open (const CAComponent& inComp, CAAudioUnit &outUnit)
 {
 	try {
-		outUnit = inComp; 
+		outUnit = inComp;
 		return noErr;
 	} catch (OSStatus res) {
 		return res;
@@ -229,7 +229,7 @@ CAAudioUnit::CAAudioUnit (const CAComponent& inComp)
 }
 
 CAAudioUnit::CAAudioUnit (const AUNode &inNode, const AudioUnit& inUnit)
-	: mComp (inUnit), mDataPtr(new AUState (inNode, inUnit)) 
+	: mComp (inUnit), mDataPtr(new AUState (inNode, inUnit))
 {
 }
 
@@ -272,24 +272,24 @@ bool			CAAudioUnit::operator== (const AudioUnit& y) const
 
 #pragma mark __State Management	
 
-bool			CAAudioUnit::IsValid () const 
-{ 
-	return mDataPtr ? mDataPtr->mUnit != 0 : false; 
+bool			CAAudioUnit::IsValid () const
+{
+	return mDataPtr ? mDataPtr->mUnit != 0 : false;
 }
 	
-AudioUnit		CAAudioUnit::AU() const 
-{ 
-	return mDataPtr ? mDataPtr->mUnit : 0; 
+AudioUnit		CAAudioUnit::AU() const
+{
+	return mDataPtr ? mDataPtr->mUnit : 0;
 }
 
 AUNode			CAAudioUnit::GetAUNode () const
 {
-	return mDataPtr ? mDataPtr->mNode : 0; 
+	return mDataPtr ? mDataPtr->mNode : 0;
 }
 
 #pragma mark __Format Handling
 	
-bool		CAAudioUnit::CanDo (	int 				inChannelsIn, 
+bool		CAAudioUnit::CanDo (	int 				inChannelsIn,
 									int 				inChannelsOut) const
 {		
 	// this is the default assumption of an audio effect unit
@@ -303,14 +303,14 @@ bool		CAAudioUnit::CanDo (	int 				inChannelsIn,
 		
 		// if this property is NOT implemented an FX unit
 		// is expected to deal with same channel valance in and out
-	if (result) 
+	if (result)
 	{
 		if ((Comp().Desc().IsEffect() && (inChannelsIn == inChannelsOut))
 			|| (Comp().Desc().IsOffline() && (inChannelsIn == inChannelsOut)))
 		{
 			return true;
 		}
-		else 
+		else
 		{
 			// the au should either really tell us about this
 			// or we will assume the worst
@@ -342,9 +342,9 @@ int    CAAudioUnit::GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt)
 	// if this property is NOT implemented an FX unit
 	// is expected to deal with same channel valance in and out
 	
-	if (result) 
+	if (result)
 	{
-		if (Comp().Desc().IsEffect()) 
+		if (Comp().Desc().IsEffect())
 		{
 			return 1;
 		}
@@ -383,7 +383,7 @@ int    CAAudioUnit::GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt)
 			}
 			return 0;
 		}
-		else 
+		else
 		{
 			// the au should either really tell us about this
 			// or we will assume the worst
@@ -403,7 +403,7 @@ int    CAAudioUnit::GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt)
 }
 
 
-bool	CAAudioUnit::ValidateChannelPair (int 				inChannelsIn, 
+bool	CAAudioUnit::ValidateChannelPair (int 				inChannelsIn,
 										int 				inChannelsOut,
 										const AUChannelInfo * info,
 										UInt32				numChanInfo) const
@@ -415,8 +415,8 @@ bool	CAAudioUnit::ValidateChannelPair (int 				inChannelsIn,
 -1		wild card:
 -1,-1	any num channels as long as same channels on in and out
 -1,-2	any num channels channels on in and out - special meaning
--2+ 	indicates total num channs AU can handle 
-			- elements configurable to any num channels, 
+-2+ 	indicates total num channs AU can handle
+			- elements configurable to any num channels,
 			- element count in scope must be writable
 */
 
@@ -433,7 +433,7 @@ bool	CAAudioUnit::ValidateChannelPair (int 				inChannelsIn,
 				}
 			}
 			else if ((info[i].inChannels == -1 && info[i].outChannels == -2)
-					|| (info[i].inChannels == -2 && info[i].outChannels == -1)) 
+					|| (info[i].inChannels == -2 && info[i].outChannels == -1))
 			{
 				return true;
 			}
@@ -445,7 +445,7 @@ bool	CAAudioUnit::ValidateChannelPair (int 				inChannelsIn,
 				IsElementCountWritable (kAudioUnitScope_Input, inWrite);
 				if (inWrite && outWrite) {
 					if ((inChannelsOut <= abs(info[i].outChannels))
-						&& (inChannelsIn <= abs(info[i].inChannels))) 
+						&& (inChannelsIn <= abs(info[i].inChannels)))
 					{
 						return true;
 					}
@@ -455,12 +455,12 @@ bool	CAAudioUnit::ValidateChannelPair (int 				inChannelsIn,
 			
 			// special meaning on input, specific num on output
 		else if (info[i].inChannels < 0) {
-			if (info[i].outChannels == inChannelsOut) 
+			if (info[i].outChannels == inChannelsOut)
 			{
 					// can do any in channels
 				if (info[i].inChannels == -1) {
 					return true;
-				} 
+				}
 					// total chans on input
 				else {
 					bool inWrite = false;
@@ -474,12 +474,12 @@ bool	CAAudioUnit::ValidateChannelPair (int 				inChannelsIn,
 		
 			// special meaning on output, specific num on input
 		else if (info[i].outChannels < 0) {
-			if (info[i].inChannels == inChannelsIn) 
+			if (info[i].inChannels == inChannelsIn)
 			{
 					// can do any out channels
 				if (info[i].outChannels == -1) {
 					return true;
-				} 
+				}
 					// total chans on output
 				else {
 					bool outWrite = false;
@@ -494,9 +494,9 @@ bool	CAAudioUnit::ValidateChannelPair (int 				inChannelsIn,
 			// both chans in struct >= 0 - thus has to explicitly match
 		else if ((info[i].inChannels == inChannelsIn) && (info[i].outChannels == inChannelsOut)) {
 			return true;
-		} 
+		}
 		
-			// now check to see if a wild card on the args (inChannelsIn or inChannelsOut chans is zero) is found 
+			// now check to see if a wild card on the args (inChannelsIn or inChannelsOut chans is zero) is found
 			// tells us to match just one side of the scopes
 		else if (inChannelsIn == 0) {
 			if (info[i].outChannels == inChannelsOut) {
@@ -521,9 +521,9 @@ bool CheckDynCount (SInt32 inTotalChans, const CAAUChanHelper &inHelper)
 	return (totalChans <= inTotalChans);
 }
 
-bool	CAAudioUnit::CheckOneSide (const CAAUChanHelper		&inHelper, 
-									bool					checkOutput, 
-									const AUChannelInfo		*info, 
+bool	CAAudioUnit::CheckOneSide (const CAAUChanHelper		&inHelper,
+									bool					checkOutput,
+									const AUChannelInfo		*info,
 									UInt32					numInfo) const
 {
 		// now we can use the wildcard option (see above impl) to see if this matches
@@ -546,7 +546,7 @@ bool	CAAudioUnit::CheckOneSide (const CAAUChanHelper		&inHelper,
 	return true;
 }
 
-bool		CAAudioUnit::CanDo (const CAAUChanHelper		&inputs,  
+bool		CAAudioUnit::CanDo (const CAAUChanHelper		&inputs,
 								const CAAUChanHelper		&outputs) const
 
 {
@@ -564,7 +564,7 @@ bool		CAAudioUnit::CanDo (const CAAUChanHelper		&inputs,
 // (1) special cases (effects and sources (generators and instruments) only)
 	UInt32	dataSize = 0;
 	if (GetPropertyInfo (kAudioUnitProperty_SupportedNumChannels,
-									kAudioUnitScope_Global, 0, &dataSize, NULL) != noErr) 
+									kAudioUnitScope_Global, 0, &dataSize, NULL) != noErr)
 	{
 		if (Comp().Desc().IsEffect() || Comp().Desc().IsOffline()) {
 			UInt32 numChan = outputs.mNumEls > 0 ? outputs.mChans[0] : inputs.mChans[0];
@@ -599,8 +599,8 @@ bool		CAAudioUnit::CanDo (const CAAUChanHelper		&inputs,
 	if (GetProperty (kAudioUnitProperty_SupportedNumChannels,
 							kAudioUnitScope_Global, 0,
 							info.mChanInfo, &dataSize) != noErr)
-	{ 
-		return false; 
+	{
+		return false;
 	}
 	
 	int numInfo = dataSize / sizeof(AUChannelInfo);
@@ -628,7 +628,7 @@ bool		CAAudioUnit::CanDo (const CAAUChanHelper		&inputs,
 	}
 
 // (4) - not a dynamic AU, has ins and outs, and has channel constraints so we test every possible pairing
-	for (unsigned int in = 0; in < inputs.mNumEls; ++in) 
+	for (unsigned int in = 0; in < inputs.mNumEls; ++in)
 	{
 		bool testInAlready = false;
 		for (unsigned int i = 0; i < in; ++i) {
@@ -683,7 +683,7 @@ bool		CAAudioUnit::GetChannelLayouts (AudioUnitScope 			inScope,
 										AudioUnitElement 			inEl,
 										ChannelTagVector			&outChannelVector) const
 {
-	if (HasChannelLayouts (inScope, inEl) == false) return false; 
+	if (HasChannelLayouts (inScope, inEl) == false) return false;
 
 	UInt32 dataSize;
 	OSStatus result = AudioUnitGetPropertyInfo (AU(),
@@ -721,7 +721,7 @@ home:
 	return canDo;
 }
 
-bool		CAAudioUnit::HasChannelLayouts (AudioUnitScope 		inScope, 
+bool		CAAudioUnit::HasChannelLayouts (AudioUnitScope 		inScope,
 										AudioUnitElement 		inEl) const
 {
 	OSStatus result = AudioUnitGetPropertyInfo (AU(),
@@ -763,7 +763,7 @@ OSStatus	CAAudioUnit::SetChannelLayout (AudioUnitScope 		inScope,
 	return result;
 }
 
-OSStatus	CAAudioUnit::SetChannelLayout (AudioUnitScope 			inScope, 
+OSStatus	CAAudioUnit::SetChannelLayout (AudioUnitScope 			inScope,
 											AudioUnitElement 		inEl,
 											AudioChannelLayout		&inLayout,
 											UInt32					inSize)
@@ -789,7 +789,7 @@ OSStatus	CAAudioUnit::GetFormat (AudioUnitScope				inScope,
 {
 	UInt32 dataSize = sizeof (AudioStreamBasicDescription);
 	return AudioUnitGetProperty (AU(), kAudioUnitProperty_StreamFormat,
-								inScope, inEl, 
+								inScope, inEl,
 								&outFormat, &dataSize);
 }
 
@@ -799,7 +799,7 @@ OSStatus	CAAudioUnit::SetFormat (AudioUnitScope						inScope,
 {
 	return AudioUnitSetProperty (AU(), kAudioUnitProperty_StreamFormat,
 								inScope, inEl,
-								const_cast<AudioStreamBasicDescription*>(&inFormat), 
+								const_cast<AudioStreamBasicDescription*>(&inFormat),
 								sizeof (AudioStreamBasicDescription));
 }
 
@@ -809,7 +809,7 @@ OSStatus	CAAudioUnit::GetSampleRate (AudioUnitScope		inScope,
 {
 	UInt32 dataSize = sizeof (Float64);
 	return AudioUnitGetProperty (AU(), kAudioUnitProperty_SampleRate,
-								inScope, inEl, 
+								inScope, inEl,
 								&outRate, &dataSize);
 }
 
@@ -924,9 +924,9 @@ bool			CAAudioUnit::HasDynamicScope (AudioUnitScope inScope, SInt32 &outTotalNum
 
 -N 	(where N is less than -2), signifies the total channel count on the scope side (in or out)
 */
-bool	CAAudioUnit::ValidateDynamicScope (AudioUnitScope		inScope, 
-											SInt32				&outTotalNumChannels, 
-											const AUChannelInfo *info, 
+bool	CAAudioUnit::ValidateDynamicScope (AudioUnitScope		inScope,
+											SInt32				&outTotalNumChannels,
+											const AUChannelInfo *info,
 											UInt32				numInfo) const
 {
 	bool writable = false;
@@ -956,7 +956,7 @@ bool	CAAudioUnit::ValidateDynamicScope (AudioUnitScope		inScope,
 				outTotalNumChannels = abs (info[i].inChannels);
 				return true;
 			}
-		} 
+		}
 		
 		else if (inScope == kAudioUnitScope_Output) {
 				// isn't dynamic on this side at least
@@ -967,7 +967,7 @@ bool	CAAudioUnit::ValidateDynamicScope (AudioUnitScope		inScope,
 				outTotalNumChannels = abs (info[i].outChannels);
 				return true;
 			}
-		} 
+		}
 		
 		else {
 			break; // wrong scope was specified
@@ -977,9 +977,9 @@ bool	CAAudioUnit::ValidateDynamicScope (AudioUnitScope		inScope,
 	return false;	
 }
 
-OSStatus	CAAudioUnit::ConfigureDynamicScope (AudioUnitScope 		inScope, 
-											UInt32 					inNumElements, 
-											UInt32 					*inChannelsPerElement, 
+OSStatus	CAAudioUnit::ConfigureDynamicScope (AudioUnitScope 		inScope,
+											UInt32 					inNumElements,
+											UInt32 					*inChannelsPerElement,
 											Float64 				inSampleRate)
 {
 	SInt32 numChannels = 0;
@@ -1142,7 +1142,7 @@ OSStatus	CAAudioUnit::StartNote (MusicDeviceInstrumentID		inInstrument,
 									UInt32						inOffsetSampleFrame,
 									const MusicDeviceNoteParams * inParams)
 {
-	return mDataPtr ? (OSStatus) mDataPtr->StartNote (inInstrument, inGroupID, outNoteInstanceID, inOffsetSampleFrame, inParams) 
+	return mDataPtr ? (OSStatus) mDataPtr->StartNote (inInstrument, inGroupID, outNoteInstanceID, inOffsetSampleFrame, inParams)
 		: paramErr;
 }
 
@@ -1165,11 +1165,11 @@ OSStatus		CAAudioUnit::Render (AudioUnitRenderActionFlags 			* ioActionFlags,
 }
 
 static AURenderCallbackStruct sRenderCallback;
-static OSStatus PrerollRenderProc (	void 						* /*inRefCon*/, 
+static OSStatus PrerollRenderProc (	void 						* /*inRefCon*/,
 								AudioUnitRenderActionFlags		* /*inActionFlags*/,
-								const AudioTimeStamp 			* /*inTimeStamp*/, 
+								const AudioTimeStamp 			* /*inTimeStamp*/,
 								UInt32 							/*inBusNumber*/,
-								UInt32							/*inNumFrames*/, 
+								UInt32							/*inNumFrames*/,
 								AudioBufferList 				*ioData)
 {
 	AudioBuffer *buf = ioData->mBuffers;
@@ -1185,12 +1185,12 @@ OSStatus 	CAAudioUnit::Preroll (UInt32 inFrameSize)
 	OSStatus result = GetFormat (kAudioUnitScope_Input, 0, desc);
 	bool hasInput = false;
 			//we have input	
-	if (result == noErr) 
+	if (result == noErr)
 	{
 		sRenderCallback.inputProc = PrerollRenderProc;
 		sRenderCallback.inputProcRefCon = 0;
 		
-		result = SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 
+		result = SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
 								0, &sRenderCallback, sizeof(sRenderCallback));
 		if (result) return result;
 		hasInput = true;
@@ -1217,7 +1217,7 @@ home:
 		sRenderCallback.inputProc = 0;
 		sRenderCallback.inputProcRefCon = 0;
 		
-		SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 
+		SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
 								0, &sRenderCallback, sizeof(sRenderCallback));
 	}
 	return result;
@@ -1251,8 +1251,8 @@ CAAUChanHelper::~CAAUChanHelper()
 	if (mDidAllocate) delete [] mChans;
 }
 
-CAAUChanHelper&		CAAUChanHelper::operator= (const CAAUChanHelper &c) 
-{ 
+CAAUChanHelper&		CAAUChanHelper::operator= (const CAAUChanHelper &c)
+{
 	if (mDidAllocate) delete [] mChans;
 	if (c.mDidAllocate) {
 		mChans = new UInt32[c.mNumEls];
@@ -1263,7 +1263,7 @@ CAAUChanHelper&		CAAUChanHelper::operator= (const CAAUChanHelper &c)
 	}
 	memcpy (mChans, c.mChans, c.mNumEls * sizeof(int));
 	
-	return *this; 
+	return *this;
 }
 
 #pragma mark __Print Utilities
@@ -1271,7 +1271,7 @@ CAAUChanHelper&		CAAUChanHelper::operator= (const CAAUChanHelper &c)
 void		CAAudioUnit::Print (FILE* file) const
 {
 	fprintf (file, "AudioUnit:%p\n", AU());
-	if (IsValid()) { 
+	if (IsValid()) {
 		fprintf (file, "\tnode=%ld\t", (long)GetAUNode()); Comp().Print (file);
 	}
 }

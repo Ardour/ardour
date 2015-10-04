@@ -25,7 +25,7 @@ using namespace wvNS;
 #define PROPERTY_CHANGE_TIMEOUT_SECONDS 2
 #define PROPERTY_CHANGE_RETRIES 3
 
-///< Supported Sample rates                                                                                                  
+///< Supported Sample rates
 static const double gAllSampleRates[] =
 	{
 		44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0, -1 /* negative terminated  list */
@@ -64,7 +64,7 @@ DWORD WINAPI WCMRPortAudioDevice::__DoIdle__(LPVOID lpThreadParameter)
 }
 
 //**********************************************************************************************
-// WCMRPortAudioDevice::WCMRPortAudioDevice 
+// WCMRPortAudioDevice::WCMRPortAudioDevice
 //
 //! Constructor for the audio device. Opens the PA device
 //! and gets information about the device.
@@ -74,9 +74,9 @@ DWORD WINAPI WCMRPortAudioDevice::__DoIdle__(LPVOID lpThreadParameter)
 //! \param *pManager	: The audio device manager that's managing this device.
 //! \param deviceID		: The port audio device ID.
 //! \param useMultithreading : Whether to use multi-threading for audio processing. Default is true.
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 WCMRPortAudioDevice::WCMRPortAudioDevice (WCMRPortAudioDeviceManager *pManager, unsigned int deviceID, bool useMultithreading, bool bNoCopy) :
 	WCMRNativeAudioDevice (pManager, useMultithreading, bNoCopy)
@@ -230,16 +230,16 @@ void WCMRPortAudioDevice::terminateDevice()
 
 
 //**********************************************************************************************
-// WCMRPortAudioDevice::~WCMRPortAudioDevice 
+// WCMRPortAudioDevice::~WCMRPortAudioDevice
 //
 //! Destructor for the audio device. The base release all the connections that were created, if
 //!		they have not been already destroyed! Here we simply stop streaming, and close device
 //!		handles if necessary.
 //!
 //! \param none
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 WCMRPortAudioDevice::~WCMRPortAudioDevice ()
 {
@@ -293,13 +293,13 @@ WTErr WCMRPortAudioDevice::UpdateDeviceInfo ()
 
 
 //**********************************************************************************************
-// WCMRPortAudioDevice::updateDeviceInfo 
+// WCMRPortAudioDevice::updateDeviceInfo
 //
 //! Must be called be device processing thread
 //! Updates Device Information about channels, sampling rates, buffer sizes.
 //!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 {
@@ -353,7 +353,7 @@ void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 	m_BufferSizes.clear();
 	bool useDefaultBuffers = true;
 
-	// In ASIO Windows, the buffer size is set from the sound device manufacturer's control panel 
+	// In ASIO Windows, the buffer size is set from the sound device manufacturer's control panel
 	long minSize, maxSize, preferredSize, granularity;
 	PaError err = PaAsio_GetAvailableBufferSizes(m_DeviceID, &minSize, &maxSize, &preferredSize, &granularity);
 	
@@ -486,15 +486,15 @@ PaError WCMRPortAudioDevice::testStateValidness(int sampleRate, int bufferSize)
 
 
 //**********************************************************************************************
-// WCMRPortAudioDevice::CurrentSamplingRate 
+// WCMRPortAudioDevice::CurrentSamplingRate
 //
-//! The device's current sampling rate. This may be overridden, if the device needs to 
+//! The device's current sampling rate. This may be overridden, if the device needs to
 //!		query the driver for the current rate.
 //!
 //! \param none
-//! 
+//!
 //! \return The device's current sampling rate. -1 on error.
-//! 
+//!
 //**********************************************************************************************
 int WCMRPortAudioDevice::CurrentSamplingRate ()
 {
@@ -561,14 +561,14 @@ WTErr WCMRPortAudioDevice::ResetDevice()
 
 
 //**********************************************************************************************
-// WCMRPortAudioDevice::SetCurrentSamplingRate 
+// WCMRPortAudioDevice::SetCurrentSamplingRate
 //
-//! Change the sampling rate to be used by the device. 
+//! Change the sampling rate to be used by the device.
 //!
 //! \param newRate : The rate to use (samples per sec).
-//! 
+//!
 //! \return eNoErr always. The derived classes may return error codes.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRPortAudioDevice::SetCurrentSamplingRate (int newRate)
 {
@@ -622,13 +622,13 @@ WTErr WCMRPortAudioDevice::SetCurrentSamplingRate (int newRate)
 //**********************************************************************************************
 // WCMRPortAudioDevice::CurrentBufferSize
 //
-//! The device's current buffer size in use. This may be overridden, if the device needs to 
+//! The device's current buffer size in use. This may be overridden, if the device needs to
 //!		query the driver for the current size.
 //!
 //! \param none
-//! 
+//!
 //! \return The device's current buffer size. 0 on error.
-//! 
+//!
 //**********************************************************************************************
 int WCMRPortAudioDevice::CurrentBufferSize ()
 {
@@ -639,13 +639,13 @@ int WCMRPortAudioDevice::CurrentBufferSize ()
 //**********************************************************************************************
 // WCMRPortAudioDevice::SetCurrentBufferSize
 //
-//! Change the buffer size to be used by the device. This will most likely be overridden, 
+//! Change the buffer size to be used by the device. This will most likely be overridden,
 //!		the base class simply updates the member variable.
 //!
 //! \param newSize : The buffer size to use (in sample-frames)
-//! 
+//!
 //! \return eNoErr always. The derived classes may return error codes.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRPortAudioDevice::SetCurrentBufferSize (int newSize)
 {
@@ -678,15 +678,15 @@ WTErr WCMRPortAudioDevice::SetCurrentBufferSize (int newSize)
 
 
 //**********************************************************************************************
-// WCMRPortAudioDevice::ConnectionStatus 
+// WCMRPortAudioDevice::ConnectionStatus
 //
 //! Retrieves the device's current connection status. This will most likely be overridden,
 //!		in case some driver communication is required to query the status.
 //!
 //! \param none
-//! 
+//!
 //! \return A ConnectionStates value.
-//! 
+//!
 //**********************************************************************************************
 WCMRPortAudioDevice::ConnectionStates WCMRPortAudioDevice::ConnectionStatus ()
 {
@@ -701,7 +701,7 @@ WCMRPortAudioDevice::ConnectionStates WCMRPortAudioDevice::ConnectionStatus ()
 // WCMRPortAudioDevice::activateDevice
 //
 //!	IS CALLED BY PROCESS THREAD
-//! Sets the device into "active" state. Essentially, opens the PA device. 
+//! Sets the device into "active" state. Essentially, opens the PA device.
 //!		If it's an ASIO device it may result in buffer size change in some cases.
 //!
 //**********************************************************************************************
@@ -740,7 +740,7 @@ void WCMRPortAudioDevice::activateDevice (bool callerIsWaiting/*=false*/)
 
 		std::cout << "API::Device " << m_DeviceName << " Opening device stream " << std::endl;
 		std::cout << "Sample rate: " << m_CurrentSamplingRate << " buffer size: " << m_CurrentBufferSize << std::endl;
-		paErr = Pa_OpenStream(&m_PortAudioStream, 
+		paErr = Pa_OpenStream(&m_PortAudioStream,
 								pInS,
 								pOutS,
 								m_CurrentSamplingRate,
@@ -817,7 +817,7 @@ void WCMRPortAudioDevice::activateDevice (bool callerIsWaiting/*=false*/)
 // WCMRPortAudioDevice::deactivateDevice
 //
 //!	IS CALLED BY PROCESS THREAD
-//! Sets the device into "inactive" state. Essentially, closes the PA device. 
+//! Sets the device into "inactive" state. Essentially, closes the PA device.
 //!
 //**********************************************************************************************
 void WCMRPortAudioDevice::deactivateDevice (bool callerIsWaiting/*=false*/)
@@ -878,7 +878,7 @@ void WCMRPortAudioDevice::deactivateDevice (bool callerIsWaiting/*=false*/)
 //
 //! Sets the devices into "streaming" state. Calls PA's Start stream routines.
 //! This roughly corresponds to calling Start on the lower level interface.
-//! 
+//!
 //**********************************************************************************************
 void WCMRPortAudioDevice::startStreaming (bool callerIsWaiting/*=false*/)
 {
@@ -928,7 +928,7 @@ void WCMRPortAudioDevice::startStreaming (bool callerIsWaiting/*=false*/)
 //
 //! Sets the devices into "not streaming" state. Calls PA's Stop stream routines.
 //! This roughly corresponds to calling Stop on the lower level interface.
-//! 
+//!
 //**********************************************************************************************
 void WCMRPortAudioDevice::stopStreaming (bool callerIsWaiting/*=false*/)
 {
@@ -963,15 +963,15 @@ void WCMRPortAudioDevice::stopStreaming (bool callerIsWaiting/*=false*/)
 
 
 //**********************************************************************************************
-// WCMRPortAudioDevice::resetDevice 
+// WCMRPortAudioDevice::resetDevice
 //
 //! Resets the device, updates device info. Importnat: does PA reinitialization calling
 //! Pa_terminate/Pa_initialize functions.
 //!
 //! \param none
-//! 
+//!
 //! \return nothing
-//! 
+//!
 //**********************************************************************************************
 void WCMRPortAudioDevice::resetDevice (bool callerIsWaiting /*=false*/ )
 {
@@ -1007,7 +1007,7 @@ void WCMRPortAudioDevice::resetDevice (bool callerIsWaiting /*=false*/ )
 		if (paErr != paNoError)
 		{
 			continue;
-		} 
+		}
 		m_CurrentBufferSize = preferredSize;
 
 		paErr = testStateValidness(m_CurrentSamplingRate, m_CurrentBufferSize);
@@ -1115,22 +1115,22 @@ long WCMRPortAudioDevice::ASIOMessageHook (long selector, long WCUNUSEDPARAM(val
 
 
 //**********************************************************************************************
-// WCMRPortAudioDevice::DoIdle 
+// WCMRPortAudioDevice::DoIdle
 //
 //! A place for doing idle time processing. The other derived classes will probably do something
 //!		meaningful.
 //!
 //! \param none
-//! 
+//!
 //! \return eNoErr always.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRPortAudioDevice::DoIdle ()
 {
 	WTErr retVal = eNoErr;
 
 	std::cout << "WCMRPortAudioDevice::DoIdle ()" << std::endl;
-	HANDLE hEvents[] = 
+	HANDLE hEvents[] =
 	{
 		m_hUpdateDeviceInfoRequestedEvent,
 		m_hActivateRequestedEvent,
@@ -1218,15 +1218,15 @@ WTErr WCMRPortAudioDevice::DoIdle ()
 
 
 //**********************************************************************************************
-// WCMRPortAudioDevice::SetMonitorChannels 
+// WCMRPortAudioDevice::SetMonitorChannels
 //
 //! Used to set the channels to be used for monitoring.
 //!
 //! \param leftChannel : Left monitor channel index.
 //! \param rightChannel : Right monitor channel index.
-//! 
+//!
 //! \return eNoErr always, the derived classes may return appropriate errors.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRPortAudioDevice::SetMonitorChannels (int leftChannel, int rightChannel)
 {
@@ -1241,14 +1241,14 @@ WTErr WCMRPortAudioDevice::SetMonitorChannels (int leftChannel, int rightChannel
 
 
 //**********************************************************************************************
-// WCMRPortAudioDevice::SetMonitorGain 
+// WCMRPortAudioDevice::SetMonitorGain
 //
 //! Used to set monitor gain (or atten).
 //!
-//! \param newGain : The new gain or atten. value to use. Specified as a linear multiplier (not dB) 
-//! 
+//! \param newGain : The new gain or atten. value to use. Specified as a linear multiplier (not dB)
+//!
 //! \return eNoErr always, the derived classes may return appropriate errors.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRPortAudioDevice::SetMonitorGain (float newGain)
 {
@@ -1264,15 +1264,15 @@ WTErr WCMRPortAudioDevice::SetMonitorGain (float newGain)
 
 
 //**********************************************************************************************
-// WCMRPortAudioDevice::ShowConfigPanel 
+// WCMRPortAudioDevice::ShowConfigPanel
 //
 //! Used to show device specific config/control panel. Some interfaces may not support it.
 //!		Some interfaces may require the device to be active before it can display a panel.
 //!
 //! \param pParam : A device/interface specific parameter, should be the app window handle for ASIO.
-//! 
+//!
 //! \return eNoErr always, the derived classes may return errors.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRPortAudioDevice::ShowConfigPanel (void *pParam)
 {
@@ -1315,7 +1315,7 @@ WTErr WCMRPortAudioDevice::ShowConfigPanel (void *pParam)
 //*****************************************************************************************************
 // WCMRPortAudioDevice::TheCallback
 //
-//! The (static) Port Audio Callback function. This is a static member. It calls on the AudioCallback in the 
+//! The (static) Port Audio Callback function. This is a static member. It calls on the AudioCallback in the
 //!		WCMRPortAudioDevice to do the real work.
 //!
 //! \param pInputBuffer: pointer to input buffer.
@@ -1324,10 +1324,10 @@ WTErr WCMRPortAudioDevice::ShowConfigPanel (void *pParam)
 //! \param pTimeInfo: time info for PaStream callback.
 //! \param statusFlags:
 //! \param pUserData: pointer to user data, in our case the WCMRPortAudioDevice object.
-//! 
+//!
 //! \return true to stop streaming else returns false.
 //******************************************************************************************************
-int WCMRPortAudioDevice::TheCallback (const void *pInputBuffer, void *pOutputBuffer, unsigned long framesPerBuffer, 
+int WCMRPortAudioDevice::TheCallback (const void *pInputBuffer, void *pOutputBuffer, unsigned long framesPerBuffer,
 	const PaStreamCallbackTimeInfo* /*pTimeInfo*/, PaStreamCallbackFlags statusFlags, void *pUserData )
 {
 	WCMRPortAudioDevice *pMyDevice = (WCMRPortAudioDevice *)pUserData;
@@ -1342,10 +1342,10 @@ int WCMRPortAudioDevice::TheCallback (const void *pInputBuffer, void *pOutputBuf
 
 
 //**********************************************************************************************
-// WCMRPortAudioDevice::AudoiCallback 
+// WCMRPortAudioDevice::AudoiCallback
 //
-//! Here's where the actual audio processing happens. We call upon all the active connections' 
-//!		sinks to provide data to us which can be put/mixed in the output buffer! Also, we make the 
+//! Here's where the actual audio processing happens. We call upon all the active connections'
+//!		sinks to provide data to us which can be put/mixed in the output buffer! Also, we make the
 //!		input data available to any sources	that may call upon us during this time!
 //!
 //! \param *pInputBuffer : Points to a buffer with recorded data.
@@ -1354,9 +1354,9 @@ int WCMRPortAudioDevice::TheCallback (const void *pInputBuffer, void *pOutputBuf
 //!		which are interleaved, is fixed at Device Open (Active) time. In this implementation,
 //!		the number of channels are fixed to use the maximum available.
 //!	\param dropsDetected : True if dropouts were detected in input or output. Can be used to signal the GUI.
-//! 
+//!
 //! \return true
-//! 
+//!
 //**********************************************************************************************
 int WCMRPortAudioDevice::AudioCallback( const float *pInputBuffer, float *pOutputBuffer, unsigned long framesPerBuffer, bool dropsDetected )
 {
@@ -1382,7 +1382,7 @@ int WCMRPortAudioDevice::AudioCallback( const float *pInputBuffer, float *pOutpu
 		m_SampleCounter,
 		theStartTime.MicroSeconds()*1000
     };
-    
+
     m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::AudioCallback, (void *)&audioCallbackData );
 
 	//Don't try to 	access after this call returns!
@@ -1404,11 +1404,11 @@ int WCMRPortAudioDevice::AudioCallback( const float *pInputBuffer, float *pOutpu
 //! \param *pTheClient : The manager's client object (which receives notifications).
 //! \param interfaceType : The PortAudio interface type to use for this manager - acts as a filter.
 //! \param useMultithreading : Whether to use multi-threading for audio processing. Default is true.
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
-WCMRPortAudioDeviceManager::WCMRPortAudioDeviceManager (WCMRAudioDeviceManagerClient *pTheClient, 
+WCMRPortAudioDeviceManager::WCMRPortAudioDeviceManager (WCMRAudioDeviceManagerClient *pTheClient,
 														eAudioDeviceFilter eCurAudioDeviceFilter, bool useMultithreading, bool bNocopy)
 	: WCMRAudioDeviceManager (pTheClient, eCurAudioDeviceFilter)
 	, m_NoneDevice(0)
@@ -1436,9 +1436,9 @@ WCMRPortAudioDeviceManager::WCMRPortAudioDeviceManager (WCMRAudioDeviceManagerCl
 //! It clears the device list, releasing each of the device.
 //!
 //! \param none
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 WCMRPortAudioDeviceManager::~WCMRPortAudioDeviceManager()
 {
@@ -1463,7 +1463,7 @@ WCMRPortAudioDeviceManager::~WCMRPortAudioDeviceManager()
 WCMRAudioDevice* WCMRPortAudioDeviceManager::initNewCurrentDeviceImpl(const std::string & deviceName)
 {
     destroyCurrentDeviceImpl();
-    
+
 	std::cout << "API::PortAudioDeviceManager::initNewCurrentDevice " << deviceName << std::endl;
 	if (deviceName == m_NoneDevice->DeviceName() )
 	{
@@ -1687,7 +1687,7 @@ WTErr WCMRPortAudioDeviceManager::generateDeviceListImpl()
 							m_DeviceInfoVec.push_back(pDevInfo);
 							break;
 					}
-                
+
 					if(bRejectDevice)
 					{
 						TRACE_MSG ("API::PortAudioDeviceManager::Device " << pDevInfo->m_DeviceName << "Rejected. \
@@ -1721,9 +1721,9 @@ WTErr WCMRPortAudioDeviceManager::generateDeviceListImpl()
 WTErr WCMRPortAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & deviceName, std::vector<int>& sampleRates) const
 {
     sampleRates.clear ();
-    
+
     WTErr retVal = eNoErr;
-    
+
 	if (m_CurrentDevice && deviceName == m_CurrentDevice->DeviceName() )
 	{
 		sampleRates=m_CurrentDevice->SamplingRates();
@@ -1732,7 +1732,7 @@ WTErr WCMRPortAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & d
 
     DeviceInfo devInfo;
 	retVal = GetDeviceInfoByName(deviceName, devInfo);
-    
+
 	if (eNoErr == retVal)
 	{
 		sampleRates=devInfo.m_AvailableSampleRates;
@@ -1765,7 +1765,7 @@ WTErr WCMRPortAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & d
 		return retVal;
 	}
 
-	DeviceInfo devInfo; 
+	DeviceInfo devInfo;
 	retVal = GetDeviceInfoByName(deviceName, devInfo);
 
 	if (eNoErr == retVal)

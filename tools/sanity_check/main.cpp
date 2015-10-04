@@ -1,12 +1,12 @@
 /*
- * 
- *   program:  sanityCheck 
+ *
+ *   program:  sanityCheck
  *   file:     main.c
  *   author:   Todd Naugle
  *   date:     11/17/2010
- * 
+ *
  *   Desc:  Command line version of the sanity check functions found in jack
-*/ 
+*/
 
 #include <algorithm>
 #include <stdio.h>
@@ -262,7 +262,7 @@ ParseSwitches(
 	}
 
 	if (OK) {
-		// All switches are at least valid, now check to make sure they are all valid to 
+		// All switches are at least valid, now check to make sure they are all valid to
 		// be used together.
 		
 		if (gSwitchesReceived.size() > 1) {
@@ -291,7 +291,7 @@ ParseSwitches(
 	}
 	else {
 		fprintf(stderr, "\n");
-		fprintf(stderr, "ERROR - Invalid Option: %s\n", (const char *) argv[--i]); 
+		fprintf(stderr, "ERROR - Invalid Option: %s\n", (const char *) argv[--i]);
 		fprintf(stderr, "Check syntax\n");
 		PrintUsage();
 		return false;

@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CAStreamBasicDescription.cpp
- 
+
 =============================================================================*/
 
 #include "CAConditionalMacros.h"
@@ -82,9 +82,9 @@ void CAStreamBasicDescription::PrintFormat(FILE *f, const char *indent, const ch
 	if (mFormatID == kAudioFormatLinearPCM) {
 		bool isInt = !(mFormatFlags & kLinearPCMFormatFlagIsFloat);
 		int wordSize = SampleWordSize();
-		const char *endian = (wordSize > 1) ? 
+		const char *endian = (wordSize > 1) ?
 			((mFormatFlags & kLinearPCMFormatFlagIsBigEndian) ? " big-endian" : " little-endian" ) : "";
-		const char *sign = isInt ? 
+		const char *sign = isInt ?
 			((mFormatFlags & kLinearPCMFormatFlagIsSignedInteger) ? " signed" : " unsigned") : "";
 		const char *floatInt = isInt ? "integer" : "float";
 		char packed[32];
@@ -101,7 +101,7 @@ void CAStreamBasicDescription::PrintFormat(FILE *f, const char *indent, const ch
 		const char *commaSpace = (packed[0]!='\0') || (align[0]!='\0') ? ", " : "";
 		
 		fprintf(f, "%ld-bit%s%s %s%s%s%s%s\n",
-			mBitsPerChannel, endian, sign, floatInt, 
+			mBitsPerChannel, endian, sign, floatInt,
 			commaSpace, packed, align, deinter);
 	} else if (mFormatID == 'alac') {	//	kAudioFormatAppleLossless
 		int sourceBits = 0;
@@ -128,7 +128,7 @@ void CAStreamBasicDescription::PrintFormat(FILE *f, const char *indent, const ch
 		fprintf(f, "%ld frames/packet\n", mFramesPerPacket);
 	}
 	else
-		fprintf(f, "%ld bits/channel, %ld bytes/packet, %ld frames/packet, %ld bytes/frame\n", 
+		fprintf(f, "%ld bits/channel, %ld bytes/packet, %ld frames/packet, %ld bytes/frame\n",
 			mBitsPerChannel, mBytesPerPacket, mFramesPerPacket, mBytesPerFrame);
 }
 
@@ -440,7 +440,7 @@ static bool MatchFormatFlags(const AudioStreamBasicDescription& x, const AudioSt
 	UInt32 yFlags = y.mFormatFlags;
 	
 	// match wildcards
-	if (x.mFormatID == 0 || y.mFormatID == 0 || xFlags == 0 || yFlags == 0) 
+	if (x.mFormatID == 0 || y.mFormatID == 0 || xFlags == 0 || yFlags == 0)
 		return true;
 	
 	if (x.mFormatID == kAudioFormatLinearPCM)
@@ -488,7 +488,7 @@ bool	operator==(const AudioStreamBasicDescription& x, const AudioStreamBasicDesc
 	
 #define MATCH(name) ((x.name) == 0 || (y.name) == 0 || (x.name) == (y.name))
 	
-	return 
+	return
 			//	check the sample rate
 		(fiszero(x.mSampleRate) || fiszero(y.mSampleRate) || fequal(x.mSampleRate, y.mSampleRate))
 		
@@ -496,19 +496,19 @@ bool	operator==(const AudioStreamBasicDescription& x, const AudioStreamBasicDesc
 		&& MATCH(mFormatID)
 		
 			//	check the format flags
-		&& MatchFormatFlags(x, y)  
+		&& MatchFormatFlags(x, y)
 			
 			//	check the bytes per packet
-		&& MATCH(mBytesPerPacket) 
+		&& MATCH(mBytesPerPacket)
 		
 			//	check the frames per packet
-		&& MATCH(mFramesPerPacket) 
+		&& MATCH(mFramesPerPacket)
 		
 			//	check the bytes per frame
-		&& MATCH(mBytesPerFrame) 
+		&& MATCH(mBytesPerFrame)
 		
 			//	check the channels per frame
-		&& MATCH(mChannelsPerFrame) 
+		&& MATCH(mChannelsPerFrame)
 		
 			//	check the channels per frame
 		&& MATCH(mBitsPerChannel) ;

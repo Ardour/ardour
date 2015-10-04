@@ -7,7 +7,7 @@
 
     Centre for Digital Music, Queen Mary, University of London.
     Copyright 2006 Chris Cannam.
-  
+
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
     files (the "Software"), to deal in the Software without
@@ -165,7 +165,7 @@ ZeroCrossing::process(const float *const *inputBuffers,
 	}
 
 	if (crossing) {
-	    ++count; 
+	    ++count;
 	    Feature feature;
 	    feature.hasTimestamp = true;
 	    feature.timestamp = timestamp +

@@ -18,22 +18,22 @@ namespace Akupara
 
     // Integer log2 functions
     //------------------------------------------------------------------------
-    template<unsigned int n> 
+    template<unsigned int n>
     struct compiletime_bit_count_to_represent { static const unsigned int value = 1+compiletime_bit_count_to_represent<(n>>1)>::value; };
 
-    template<> 
+    template<>
     struct compiletime_bit_count_to_represent<0> { static const unsigned int value = 0; };
     //------------------------------------------------------------------------
-    template<unsigned int n> 
+    template<unsigned int n>
     struct compiletime_log2_ceiling  { static const unsigned int value=compiletime_bit_count_to_represent<n-1>::value; };
 
-    template<> 
+    template<>
     struct compiletime_log2_ceiling<0> {}; // no value for 0 argument
     //------------------------------------------------------------------------
-    template<unsigned int n> 
+    template<unsigned int n>
     struct compiletime_log2_floor { static const unsigned int value=compiletime_bit_count_to_represent<n>::value-1; };
 
-    template<> 
+    template<>
     struct compiletime_log2_floor<0> {}; // no value for 0 argument
     //------------------------------------------------------------------------
 
@@ -41,13 +41,13 @@ namespace Akupara
 
     // Assertion - accessing 'value' will generate a compile-time error if the argument evaluates to false
     //------------------------------------------------------------------------
-    template<bool> 
+    template<bool>
     struct compiletime_assert;
 
     template<>
     struct compiletime_assert<true> { static const bool value=true; };
 
-    template<> 
+    template<>
     struct compiletime_assert<false> {}; // no value member for false assertion -> compile time error
     //------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ namespace Akupara
     template<typename _true_type, typename _false_type>
     struct compiletime_select_type<true,  _true_type, _false_type> { typedef _true_type  type; };
 
-    template<typename _true_type, typename _false_type> 
+    template<typename _true_type, typename _false_type>
     struct compiletime_select_type<false, _true_type, _false_type> { typedef _false_type type; };
     //------------------------------------------------------------------------
 
@@ -72,7 +72,7 @@ namespace Akupara
     //------------------------------------------------------------------------
     namespace detail
     {
-        template<unsigned int _size, bool _signed> 
+        template<unsigned int _size, bool _signed>
         struct integer_with_byte_count_base;
 
         template<>
@@ -149,15 +149,15 @@ namespace Akupara
             AKUPARA_SIGNED_UNSIGNED_INTEGER_PAIR(3, int      )
 			
 			//AKUPARA_SIGNED_UNSIGNED_INTEGER_PAIR(4, int32_t     )// 64BitConversion
-			template<> 
-			struct 
-			signed_unsigned_pair<4> 
-			{ 
-				typedef int32_t signed_type; 
-				typedef uint32_t  unsigned_type; 
+			template<>
+			struct
+			signed_unsigned_pair<4>
+			{
+				typedef int32_t signed_type;
+				typedef uint32_t  unsigned_type;
 			};
-            
-            
+
+
 			AKUPARA_SIGNED_UNSIGNED_INTEGER_PAIR(5, long long)
             AKUPARA_SIGNED_UNSIGNED_FLOAT_PAIR  (6, float      )
             AKUPARA_SIGNED_UNSIGNED_FLOAT_PAIR  (7, double     )

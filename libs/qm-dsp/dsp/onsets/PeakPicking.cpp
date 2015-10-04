@@ -42,12 +42,12 @@ void PeakPicking::initialise( PPickParams Config )
     Qfiltb = Config.QuadThresh.b ;
     Qfiltc = Config.QuadThresh.c ;
 	
-    m_DFProcessingParams.length = m_DFLength; 
-    m_DFProcessingParams.LPOrd = Config.LPOrd; 
-    m_DFProcessingParams.LPACoeffs = Config.LPACoeffs; 
-    m_DFProcessingParams.LPBCoeffs = Config.LPBCoeffs; 
+    m_DFProcessingParams.length = m_DFLength;
+    m_DFProcessingParams.LPOrd = Config.LPOrd;
+    m_DFProcessingParams.LPACoeffs = Config.LPACoeffs;
+    m_DFProcessingParams.LPBCoeffs = Config.LPBCoeffs;
     m_DFProcessingParams.winPre  = Config.WinT.pre;
-    m_DFProcessingParams.winPost = Config.WinT.post; 
+    m_DFProcessingParams.winPost = Config.WinT.post;
     m_DFProcessingParams.AlphaNormParam = Config.alpha;
     m_DFProcessingParams.isMedianPositive = false;
 	
@@ -70,7 +70,7 @@ void PeakPicking::process( double* src, unsigned int len, vector<int> &onsets )
 
     vector <double> m_maxima;	
 
-    // Signal conditioning 
+    // Signal conditioning
     m_DFSmoothing->process( src, m_workBuffer );
 	
     for( unsigned int u = 0; u < len; u++)

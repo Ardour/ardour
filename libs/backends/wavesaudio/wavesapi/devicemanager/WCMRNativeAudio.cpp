@@ -30,8 +30,8 @@
 //!		the applications.
 //!
 //! \param pManager : The managing device manager - simply passed on to the base class.
-//! 
-//! 
+//!
+//!
 //**********************************************************************************************
 WCMRNativeAudioNoneDevice::WCMRNativeAudioNoneDevice (WCMRAudioDeviceManager *pManager)
 	: WCMRNativeAudioDevice (pManager, false /*useMultiThreading*/)
@@ -155,7 +155,7 @@ WTErr WCMRNativeAudioNoneDevice::SetStreaming (bool newState)
 			std::cerr << "WCMRNativeAudioNoneDevice::SetStreaming (): pthread_attr_init () failed!" << std::endl;
 			return eGenericErr;
 		}
-   
+
 		if (pthread_attr_setstacksize (&attributes, stack_size)) {
 			std::cerr << "WCMRNativeAudioNoneDevice::SetStreaming (): pthread_attr_setstacksize () failed!" << std::endl;
 			return eGenericErr;
@@ -203,13 +203,13 @@ void WCMRNativeAudioNoneDevice::_SilenceThread()
 		(const float*)theInpBuffers,
 		_m_outputBuffer,
 		buffer_size,
-		0, 
+		0,
 		0
 	};
 
 	audioCallbackData.acdCycleStartTimeNanos =__get_time_nanos();
 
-    // VERY ROUGH IMPLEMENTATION: 
+    // VERY ROUGH IMPLEMENTATION:
     while(Streaming()) {
 	
         uint64_t cycleEndTimeNanos = audioCallbackData.acdCycleStartTimeNanos + cyclePeriodNanos;
@@ -236,13 +236,13 @@ void* WCMRNativeAudioNoneDevice::__SilenceThread(void *This)
 
 #if defined(PLATFORM_WINDOWS)
 void WCMRNativeAudioNoneDevice::_usleep(uint64_t duration_usec)
-{ 
-    LARGE_INTEGER ft; 
+{
+    LARGE_INTEGER ft;
 
     ft.QuadPart = -(10*duration_usec); // Convert to 100 nanosecond interval, negative value indicates relative time
 
     SetWaitableTimer(_waitableTimerForUsleep, &ft, 0, NULL, NULL, 0);
-    WaitForSingleObject(_waitableTimerForUsleep, INFINITE); 
+    WaitForSingleObject(_waitableTimerForUsleep, INFINITE);
 }
 #endif
 
@@ -254,9 +254,9 @@ WCMRNativeAudioNoneDevice::__get_time_nanos ()
     // the API should be a part of WCMRCoreAudioDeviceManager to give a chance of being tied to the
     // audio device transport timeß.
     return AudioConvertHostTimeToNanos (AudioGetCurrentHostTime ());
-    
+
 #elif PLATFORM_WINDOWS
-    
+
     LARGE_INTEGER Frequency, Count ;
 
     QueryPerformanceFrequency (&Frequency) ;

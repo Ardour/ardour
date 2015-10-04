@@ -55,7 +55,7 @@ struct AudioBuffer
 };
 */
 
-AUOutputBL::AUOutputBL (const CAStreamBasicDescription &inDesc, UInt32 inDefaultNumFrames) 
+AUOutputBL::AUOutputBL (const CAStreamBasicDescription &inDesc, UInt32 inDefaultNumFrames)
 		: mFormat (inDesc),
 		  mBufferMemory(NULL),
 		  mBufferList (NULL),
@@ -76,7 +76,7 @@ AUOutputBL::~AUOutputBL()
 		delete [] mBufferList;
 }
 
-void 	AUOutputBL::Prepare (UInt32 inNumFrames, bool inWantNullBufferIfAllocated) 
+void 	AUOutputBL::Prepare (UInt32 inNumFrames, bool inWantNullBufferIfAllocated)
 {
 	UInt32 channelsPerBuffer = mFormat.IsInterleaved() ? mFormat.NumberChannels() : 1;
 	
@@ -111,11 +111,11 @@ void 	AUOutputBL::Prepare (UInt32 inNumFrames, bool inWantNullBufferIfAllocated)
 
 void	AUOutputBL::Allocate (UInt32 inNumFrames)
 {
-	if (inNumFrames) 
+	if (inNumFrames)
 	{
 		UInt32 nBytes = mFormat.FramesToBytes (inNumFrames);
 		
-		if (nBytes <= AllocatedBytes()) 
+		if (nBytes <= AllocatedBytes())
 			return;
 		
 			// align successive buffers for Altivec and to take alternating
@@ -134,8 +134,8 @@ void	AUOutputBL::Allocate (UInt32 inNumFrames)
 		delete[] oldMemory;
 		
 		mFrames = inNumFrames;
-	} 
-	else 
+	}
+	else
 	{
 		if (mBufferMemory) {
 			delete [] mBufferMemory;

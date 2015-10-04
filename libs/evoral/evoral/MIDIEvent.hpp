@@ -101,7 +101,7 @@ public:
 	inline bool     is_spp()                  const { return this->_buf[0] == 0xF2 && this->size() == 1; }
 	inline bool     is_mtc_quarter()          const { return this->_buf[0] == 0xF1 && this->size() == 1; }
 	inline bool     is_mtc_full()             const {
-		return this->size() == 10    && this->_buf[0] == 0xf0 && this->_buf[1] == 0x7f && 
+		return this->size() == 10    && this->_buf[0] == 0xf0 && this->_buf[1] == 0x7f &&
 		       this->_buf[3] == 0x01 && this->_buf[4] == 0x01;
 	}
 

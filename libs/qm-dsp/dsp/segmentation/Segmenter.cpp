@@ -23,7 +23,7 @@ ostream& operator<<(ostream& os, const Segmentation& s)
 	for (int i = 0; i < s.segments.size(); i++)
 	{
 		Segment seg = s.segments[i];
-		os << std::fixed << seg.type << ':' << '\t' << std::setprecision(6) << seg.start / static_cast<double>(s.samplerate) 
+		os << std::fixed << seg.type << ':' << '\t' << std::setprecision(6) << seg.start / static_cast<double>(s.samplerate)
 			<< '\t' << std::setprecision(6) << seg.end / static_cast<double>(s.samplerate) << "\n";
 	}
 	

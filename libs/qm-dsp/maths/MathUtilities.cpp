@@ -76,7 +76,7 @@ double MathUtilities::getAlphaNorm( const std::vector <double> &data, unsigned i
 double MathUtilities::round(double x)
 {
     double val = (double)floor(x + 0.5);
-  
+
     return val;
 }
 
@@ -86,7 +86,7 @@ double MathUtilities::median(const double *src, unsigned int len)
     double tmp = 0.0;
     double tempMedian;
     double medianVal;
- 
+
     double* scratch = new double[ len ];//Vector < double > sortedX = Vector < double > ( size );
 
     for ( i = 0; i < len; i++ )

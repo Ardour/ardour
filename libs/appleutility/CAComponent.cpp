@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CAComponent.cpp
- 
+
 =============================================================================*/
 
 #include "CAComponent.h"
@@ -55,23 +55,23 @@ CAComponent::CAComponent (const ComponentDescription& inDesc, CAComponent* next)
 		memcpy (&mDesc, &inDesc, sizeof(ComponentDescription));
 }
 
-CAComponent::CAComponent (const Component& comp) 
+CAComponent::CAComponent (const Component& comp)
 	: mComp (comp),
-	  mManuName(0), 
-	  mAUName(0), 
-	  mCompName(0), 
-	  mCompInfo (0) 
+	  mManuName(0),
+	  mAUName(0),
+	  mCompName(0),
+	  mCompInfo (0)
 {
 	GetComponentInfo (Comp(), &mDesc, NULL, NULL, NULL);
 }
 
-CAComponent::CAComponent (const ComponentInstance& compInst) 
-	: mComp (Component(compInst)), 
-	  mManuName(0), 
-	  mAUName(0), 
-	  mCompName(0), 
-	  mCompInfo (0) 
-{ 
+CAComponent::CAComponent (const ComponentInstance& compInst)
+	: mComp (Component(compInst)),
+	  mManuName(0),
+	  mAUName(0),
+	  mCompName(0),
+	  mCompInfo (0)
+{
 	GetComponentInfo (Comp(), &mDesc, NULL, NULL, NULL);
 }
 
@@ -107,7 +107,7 @@ OSStatus		CAComponent::GetResourceVersion (UInt32 &outVersion) const
 			// only go on if we successfully found at least 1 thng resource
 	require_noerr (thngResourceCount <= 0 ? -1 : 0, home);
 
-	// loop through all of the Component thng resources trying to 
+	// loop through all of the Component thng resources trying to
 	// find one that matches this Component description
 	for (short i = 0; i < thngResourceCount && (!versionFound); i++)
 	{
@@ -121,8 +121,8 @@ OSStatus		CAComponent::GetResourceVersion (UInt32 &outVersion) const
 
 				// check to see if this is the thng resource for the particular Component that we are looking at
 				// (there often is more than one Component described in the resource)
-				if ((componentThng->cd.componentType == mDesc.Type()) 
-						&& (componentThng->cd.componentSubType == mDesc.SubType()) 
+				if ((componentThng->cd.componentType == mDesc.Type())
+						&& (componentThng->cd.componentSubType == mDesc.SubType())
 						&& (componentThng->cd.componentManufacturer == mDesc.Manu()))
 				{
 					outVersion = componentThng->componentVersion;
@@ -162,7 +162,7 @@ CAComponent&	CAComponent::operator= (const CAComponent& y)
 
 	if (y.mManuName) { mManuName = y.mManuName; CFRetain (mManuName); }
 	if (y.mAUName) { mAUName = y.mAUName; CFRetain (mAUName); }
-	if (y.mCompName) { mCompName = y.mCompName; CFRetain (mCompName); } 
+	if (y.mCompName) { mCompName = y.mCompName; CFRetain (mCompName); }
 	if (y.mCompInfo) { mCompInfo = y.mCompInfo; CFRetain (mCompInfo); }
 
 	return *this;
@@ -208,7 +208,7 @@ void 		CAComponent::SetCompNames () const
 			displayStr[j] = 0;
 
 			const_cast<CAComponent*>(this)->mAUName = CFStringCreateWithCString(NULL, displayStr, kCFStringEncodingMacRoman);
-		} 
+		}
 		
 		DisposeHandle (h1);
 	}
@@ -252,6 +252,6 @@ void	CAComponent::Print(FILE* file) const
 		fprintf (file, ", Manu:"); _ShowCF (file, mManuName);
 		if (mAUName) fprintf (file, ", Name:"); _ShowCF (file, mAUName);
 	}
-	fprintf (file, ", "); 
+	fprintf (file, ", ");
 	Desc ().Print(file);
 }

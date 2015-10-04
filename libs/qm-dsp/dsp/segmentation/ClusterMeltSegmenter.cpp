@@ -51,7 +51,7 @@ void ClusterMeltSegmenter::initialise(int fs)
 
     if (featureType == FEATURE_TYPE_CONSTQ ||
         featureType == FEATURE_TYPE_CHROMA) {
-        
+
         // run internal processing at 11025 or thereabouts
         int internalRate = 11025;
         int decimationFactor = samplerate / internalRate;
@@ -77,11 +77,11 @@ void ClusterMeltSegmenter::initialise(int fs)
 
         constq = new ConstantQ(config);
         constq->sparsekernel();
-        
+
         ncoeff = constq->getK();
 
         fft = new FFTReal(constq->getfftlength());
-        
+
     } else if (featureType == FEATURE_TYPE_MFCC) {
 
         // run internal processing at 22050 or thereabouts
@@ -110,7 +110,7 @@ void ClusterMeltSegmenter::initialise(int fs)
     }
 }
 
-ClusterMeltSegmenter::~ClusterMeltSegmenter() 
+ClusterMeltSegmenter::~ClusterMeltSegmenter()
 {
     delete window;
     delete constq;
@@ -164,7 +164,7 @@ void ClusterMeltSegmenter::extractFeaturesConstQ(const double* samples, int nsam
     vector<double> cq(ncoeff);
 
     for (int i = 0; i < ncoeff; ++i) cq[i] = 0.0;
-    
+
     const double *psource = samples;
     int pcount = nsamples;
 
@@ -174,9 +174,9 @@ void ClusterMeltSegmenter::extractFeaturesConstQ(const double* samples, int nsam
         decimator->process(samples, decout);
         psource = decout;
     }
-    
+
     int origin = 0;
-    
+
 //    std::cerr << "nsamples = " << nsamples << ", pcount = " << pcount << std::endl;
 
     int frames = 0;
@@ -208,9 +208,9 @@ void ClusterMeltSegmenter::extractFeaturesConstQ(const double* samples, int nsam
         }
 
         window->cut(frame);
-        
+
         fft->process(false, frame, real, imag);
-        
+
         constq->process(real, imag, cqre, cqim);
 	
         for (int i = 0; i < ncoeff; ++i) {
@@ -255,7 +255,7 @@ void ClusterMeltSegmenter::extractFeaturesMFCC(const double* samples, int nsampl
     vector<double> cc(ncoeff);
 
     for (int i = 0; i < ncoeff; ++i) cc[i] = 0.0;
-    
+
     const double *psource = samples;
     int pcount = nsamples;
 
@@ -330,7 +330,7 @@ void ClusterMeltSegmenter::segment()
     decimator = 0;
 
     if (features.size() < histogramLength) return;
-/*    
+/*
     std::cerr << "ClusterMeltSegmenter::segment: have " << features.size()
               << " features with " << features[0].size() << " coefficients (ncoeff = " << ncoeff << ", ncomponents = " << ncomponents << ")" << std::endl;
 */
@@ -353,10 +353,10 @@ void ClusterMeltSegmenter::segment()
 	
     if (featureType == FEATURE_TYPE_UNKNOWN ||
         featureType == FEATURE_TYPE_MFCC)
-        cluster_segment(q, arrFeatures, features.size(), features[0].size(), nHMMStates, histogramLength, 
+        cluster_segment(q, arrFeatures, features.size(), features[0].size(), nHMMStates, histogramLength,
                         nclusters, neighbourhoodLimit);
     else
-        constq_segment(q, arrFeatures, features.size(), nbins, ncoeff, featureType, 
+        constq_segment(q, arrFeatures, features.size(), nbins, ncoeff, featureType,
                        nHMMStates, histogramLength, nclusters, neighbourhoodLimit);
 	
     // convert the cluster assignment sequence to a segmentation

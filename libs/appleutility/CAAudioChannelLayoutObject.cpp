@@ -37,7 +37,7 @@
 */
 /*=============================================================================
     CAAudioChannelLayoutObject.cpp
- 
+
 =============================================================================*/
 
 #include "CAAudioChannelLayout.h"
@@ -69,7 +69,7 @@ CAAudioChannelLayout::CAAudioChannelLayout (UInt32 inNumberChannels, bool inChoo
 
 	layout->mNumberChannelDescriptions = inNumberChannels;
 	
-	switch (inNumberChannels) 
+	switch (inNumberChannels)
 	{
 		case 1:
 			layout->mChannelLayoutTag = kAudioChannelLayoutTag_Mono;

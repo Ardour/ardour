@@ -123,7 +123,7 @@ void		CABufferList::DeallocateBuffers()
 		delete[] mBufferMemory;
 		mBufferMemory = NULL;
 	}
-    
+
 }
 
 extern "C" void CAShowAudioBufferList(const AudioBufferList *abl, int framesToPrint, int wordSize)
@@ -131,7 +131,7 @@ extern "C" void CAShowAudioBufferList(const AudioBufferList *abl, int framesToPr
 	printf("AudioBufferList @ %p:\n", abl);
 	const AudioBuffer *buf = abl->mBuffers;
 	for (UInt32 i = 0; i < abl->mNumberBuffers; ++i, ++buf) {
-		printf("  [%2ld]: %2ldch, %5ld bytes @ %8p", 
+		printf("  [%2ld]: %2ldch, %5ld bytes @ %8p",
 			i, buf->mNumberChannels, buf->mDataByteSize, buf->mData);
 		if (framesToPrint) {
 			printf(":");

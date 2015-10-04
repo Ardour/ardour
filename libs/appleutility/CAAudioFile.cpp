@@ -243,7 +243,7 @@ void	CAAudioFile::CreateNew(const FSRef &parentDir, CFStringRef filename, AudioF
 
 // _______________________________________________________________________________________
 //
-// called to create the file -- or update its format/channel layout/properties based on an encoder 
+// called to create the file -- or update its format/channel layout/properties based on an encoder
 // setting change
 void	CAAudioFile::FileFormatChanged(const FSRef *parentDir, CFStringRef filename, AudioFileTypeID filetype)
 {
@@ -356,7 +356,7 @@ void	CAAudioFile::FileFormatChanged(const FSRef *parentDir, CFStringRef filename
 #if VERBOSE_CHANNELMAP
 			printf("writing file's channel layout: %s\n", CAChannelLayouts::ConstantToString(mFileChannelLayout.Tag()));
 #endif
-			err = AudioFileSetProperty(mAudioFile, kAudioFilePropertyChannelLayout, 
+			err = AudioFileSetProperty(mAudioFile, kAudioFilePropertyChannelLayout,
 				mFileChannelLayout.Size(), &mFileChannelLayout.Layout());
 			if (err)
 				CAXException::Warning("could not set the file's channel layout", err);
@@ -378,7 +378,7 @@ void	CAAudioFile::InitFileMaxPacketSize()
 {
 	LOG_FUNCTION("CAAudioFile::InitFileMaxPacketSize", "%p", this);
 	UInt32 propertySize = sizeof(UInt32);
-	OSStatus err = AudioFileGetProperty(mAudioFile, kAudioFilePropertyMaximumPacketSize, 
+	OSStatus err = AudioFileGetProperty(mAudioFile, kAudioFilePropertyMaximumPacketSize,
 		&propertySize, &mFileMaxPacketSize);
 	if (err) {
 		// workaround for 3361377: not all file formats' maximum packet sizes are supported
@@ -657,7 +657,7 @@ void	CAAudioFile::UpdateClientMaxPacketSize()
 	LOG_FUNCTION("CAAudioFile::UpdateClientMaxPacketSize", "%p", this);
 	mFrame0Offset = 0;
 	if (mConverter != NULL) {
-		AudioConverterPropertyID property = (mMode == kReading) ? 
+		AudioConverterPropertyID property = (mMode == kReading) ?
 			kAudioConverterPropertyMaximumOutputPacketSize :
 			kAudioConverterPropertyMaximumInputPacketSize;
 			
@@ -1078,14 +1078,14 @@ void	CAAudioFile::Write(UInt32 numPackets, const AudioBufferList *data)
 		WritePacketsFromCallback(WriteInputProc, this);
 	} else {
 		StartTiming(this, write);
-		XThrowIfError(AudioFileWritePackets(mAudioFile, mUseCache, data->mBuffers[0].mDataByteSize, 
+		XThrowIfError(AudioFileWritePackets(mAudioFile, mUseCache, data->mBuffers[0].mDataByteSize,
 						NULL, mPacketMark, &numPackets, data->mBuffers[0].mData),
 						"write audio file");
 		ElapsedTime(this, write, mTicksInIO);
 #if VERBOSE_IO
 		printf("CAAudioFile::WritePackets: wrote %ld packets at %qd, %ld bytes\n", numPackets, mPacketMark, data->mBuffers[0].mDataByteSize);
 #endif
-		//mNumberPackets = 
+		//mNumberPackets =
 		mPacketMark += numPackets;
 		if (mFileDataFormat.mFramesPerPacket > 0)
 			mFrameMark += numPackets * mFileDataFormat.mFramesPerPacket;
@@ -1201,7 +1201,7 @@ void	CAAudioFile::WritePacketsFromCallback(
 		mInConverter = true;
 #endif
 		StartTiming(this, fill);
-		OSStatus err = AudioConverterFillComplexBuffer(mConverter, inInputDataProc, inInputDataProcUserData, 
+		OSStatus err = AudioConverterFillComplexBuffer(mConverter, inInputDataProc, inInputDataProcUserData,
 					&numEncodedPackets, &mIOBufferList, mPacketDescs);
 		ElapsedTime(this, fill, mTicksInConverter);
 #if CAAUDIOFILE_PROFILE

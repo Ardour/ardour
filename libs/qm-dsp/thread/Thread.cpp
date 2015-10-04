@@ -58,9 +58,9 @@ Thread::start()
 #endif
         m_extant = true;
     }
-}    
+}
 
-void 
+void
 Thread::wait()
 {
     if (m_extant) {
@@ -233,7 +233,7 @@ Condition::unlock()
     ReleaseMutex(m_mutex);
 }
 
-void 
+void
 Condition::wait(int us)
 {
     if (us == 0) {
@@ -248,7 +248,7 @@ Condition::wait(int us)
 
         DWORD ms = us / 1000;
         if (us > 0 && ms == 0) ms = 1;
-    
+
 #ifdef DEBUG_CONDITION
         cerr << "CONDITION DEBUG: " << (void *)GetCurrentThreadId() << ": Timed waiting on " << &m_condition << " \"" << m_name << "\"" << endl;
 #endif
@@ -310,9 +310,9 @@ Thread::start()
 #endif
         m_extant = true;
     }
-}    
+}
 
-void 
+void
 Thread::wait()
 {
     if (m_extant) {
@@ -490,7 +490,7 @@ Condition::unlock()
     pthread_mutex_unlock(&m_mutex);
 }
 
-void 
+void
 Condition::wait(int us)
 {
     if (us == 0) {
@@ -514,7 +514,7 @@ Condition::wait(int us)
         struct timespec timeout;
         timeout.tv_sec = now.tv_sec;
         timeout.tv_nsec = now.tv_usec * 1000;
-    
+
 #ifdef DEBUG_CONDITION
         cerr << "CONDITION DEBUG: " << (void *)pthread_self() << ": Timed waiting on " << &m_condition << " \"" << m_name << "\"" << endl;
 #endif
@@ -551,9 +551,9 @@ void
 Thread::start()
 {
     abort();
-}    
+}
 
-void 
+void
 Thread::wait()
 {
     abort();
@@ -611,7 +611,7 @@ Condition::lock()
     abort();
 }
 
-void 
+void
 Condition::wait(int us)
 {
     abort();

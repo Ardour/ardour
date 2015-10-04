@@ -41,7 +41,7 @@ TempoTrackV2::filter_df(d_vec_t &df)
     b[0] = 0.2066;
     b[1] = 0.4131;
     b[2] = 0.2066;
-    
+
     double inp1 = 0.;
     double inp2 = 0.;
     double out1 = 0.;
@@ -67,7 +67,7 @@ TempoTrackV2::filter_df(d_vec_t &df)
 
     for (unsigned int i = 0;i < df.size();i++)
     {
-        lp_df[i] = 0.;    
+        lp_df[i] = 0.;
     }
 
     inp1 = 0.; inp2 = 0.;
@@ -130,9 +130,9 @@ TempoTrackV2::calculateBeatPeriod(const vector<double> &df,
             dfframe[k] = df[i+k];
         }
         // get rcf vector for current frame
-        d_vec_t rcf(wv_len);    
+        d_vec_t rcf(wv_len);
         get_rcf(dfframe,wv,rcf);
-  
+
         rcfmat.push_back( d_vec_t() ); // adds a new column
         col_counter++;
         for (unsigned int j=0; j<rcf.size(); j++)
@@ -140,7 +140,7 @@ TempoTrackV2::calculateBeatPeriod(const vector<double> &df,
             rcfmat[col_counter].push_back( rcf[j] );
         }
     }
-  
+
     // now call viterbi decoding function
     viterbi_decode(rcfmat,wv,beat_period,tempi);
 }
@@ -161,7 +161,7 @@ TempoTrackV2::get_rcf(const d_vec_t &dfframe_in, const d_vec_t &wv, d_vec_t &rcf
 
     d_vec_t acf(dfframe.size());
 
-    
+
     for (unsigned int lag=0; lag<dfframe.size(); lag++)
     {
         double sum = 0.;
@@ -169,7 +169,7 @@ TempoTrackV2::get_rcf(const d_vec_t &dfframe_in, const d_vec_t &wv, d_vec_t &rcf
 
         for (unsigned int n=0; n<(dfframe.size()-lag); n++)
         {
-            tmp = dfframe[n] * dfframe[n+lag];    
+            tmp = dfframe[n] * dfframe[n+lag];
             sum += tmp;
         }
         acf[lag] = static_cast<double> (sum/ (dfframe.size()-lag));
@@ -188,10 +188,10 @@ TempoTrackV2::get_rcf(const d_vec_t &dfframe_in, const d_vec_t &wv, d_vec_t &rcf
             }
         }
     }
-  
+
     // apply adaptive threshold to rcf
     MathUtilities::adaptiveThreshold(rcf);
-  
+
     double rcfsum =0.;
     for (unsigned int i=0; i<rcf.size(); i++)
     {
@@ -222,7 +222,7 @@ TempoTrackV2::viterbi_decode(const d_mat_t &rcfmat, const d_vec_t &wv, d_vec_t &
             tmat[i].push_back(0.); // fill with zeros initially
         }
     }
-    
+
     // variance of Gaussians in transition matrix
     // formed of Gaussians on diagonal - implies slow tempo change
     double sigma = 8.;
@@ -265,16 +265,16 @@ TempoTrackV2::viterbi_decode(const d_mat_t &rcfmat, const d_vec_t &wv, d_vec_t &
         delta[0][j] = wv[j] * rcfmat[0][j];
         psi[0][j] = 0;
     }
-    
+
     double deltasum = 0.;
     for (unsigned int i=0; i<Q; i++)
     {
         deltasum += delta[0][i];
-    }      
+    }
     for (unsigned int i=0; i<Q; i++)
     {
         delta[0][i] /= (deltasum + EPS);
-    }      
+    }
 
 
     for (unsigned int t=1; t<T; t++)
@@ -286,12 +286,12 @@ TempoTrackV2::viterbi_decode(const d_mat_t &rcfmat, const d_vec_t &wv, d_vec_t &
             for (unsigned int i=0; i<Q; i++)
             {
                 tmp_vec[i] = delta[t-1][i] * tmat[j][i];
-            }      
-   
-            delta[t][j] = get_max_val(tmp_vec);    
+            }
+
+            delta[t][j] = get_max_val(tmp_vec);
 
             psi[t][j] = get_max_ind(tmp_vec);
- 
+
             delta[t][j] *= rcfmat[t][j];
         }
 
@@ -300,23 +300,23 @@ TempoTrackV2::viterbi_decode(const d_mat_t &rcfmat, const d_vec_t &wv, d_vec_t &
         for (unsigned int i=0; i<Q; i++)
         {
             deltasum += delta[t][i];
-        }      
+        }
         for (unsigned int i=0; i<Q; i++)
         {
             delta[t][i] /= (deltasum + EPS);
-        }      
+        }
     }
 
     i_vec_t bestpath(T);
     d_vec_t tmp_vec(Q);
     for (unsigned int i=0; i<Q; i++)
-    {  
+    {
         tmp_vec[i] = delta[T-1][i];
     }
 
     // find starting point - best beat period for "last" frame
     bestpath[T-1] = get_max_ind(tmp_vec);
- 
+
     // backtrace through index of maximum values in psi
     for (unsigned int t=T-2; t>0 ;t--)
     {
@@ -328,7 +328,7 @@ TempoTrackV2::viterbi_decode(const d_mat_t &rcfmat, const d_vec_t &wv, d_vec_t &
 
     unsigned int lastind = 0;
     for (unsigned int i=0; i<T; i++)
-    {  
+    {
         unsigned int step = 128;
         for (unsigned int j=0; j<step; j++)
         {
@@ -361,7 +361,7 @@ TempoTrackV2::get_max_val(const d_vec_t &df)
             maxval = df[i];
         }
     }
-    
+
     return maxval;
 }
 
@@ -378,7 +378,7 @@ TempoTrackV2::get_max_ind(const d_vec_t &df)
             ind = i;
         }
     }
-    
+
     return ind;
 }
 
@@ -390,7 +390,7 @@ TempoTrackV2::normalise_vec(d_vec_t &df)
     {
         sum += df[i];
     }
-    
+
     for (unsigned int i=0; i<df.size(); i++)
     {
         df[i]/= (sum + EPS);
@@ -436,7 +436,7 @@ TempoTrackV2::calculateBeats(const vector<double> &df,
             // ELSE LEAVE AT DEFAULT VALUE FROM INITIALISATION:  D_VEC_T SCORECANDS (TXWT.SIZE());
 
             int cscore_ind = i+prange_min+j;
-            if (cscore_ind >= 0)   
+            if (cscore_ind >= 0)
             {
                 scorecands[j] = txwt[j] * cumscore[cscore_ind];
             }
@@ -457,7 +457,7 @@ TempoTrackV2::calculateBeats(const vector<double> &df,
     for (unsigned int i=cumscore.size() - beat_period[beat_period.size()-1] ; i<cumscore.size(); i++)
     {
         tmp_vec.push_back(cumscore[i]);
-    }  
+    }
 
     int startpoint = get_max_ind(tmp_vec) + cumscore.size() - beat_period[beat_period.size()-1] ;
 
@@ -476,10 +476,10 @@ TempoTrackV2::calculateBeats(const vector<double> &df,
         if (backlink[b] == b) break; // shouldn't happen... haha
         ibeats.push_back(backlink[b]);
     }
-  
+
     // REVERSE SEQUENCE OF IBEATS AND STORE AS BEATS
     for (unsigned int i=0; i<ibeats.size(); i++)
-    { 
+    {
         beats.push_back( static_cast<double>(ibeats[ibeats.size()-i-1]) );
     }
 }

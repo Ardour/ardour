@@ -14,7 +14,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * Set of functions to gather system information for the jack setup wizard.
- * 
+ *
  * TODO: Test for rt prio availability
  *
  * @author Florian Faber, faber@faberman.de
@@ -43,7 +43,7 @@
 #include "systemtest.h"
 
 /**
- * This function checks for the existence of known frequency scaling mechanisms 
+ * This function checks for the existence of known frequency scaling mechanisms
  * in this system by testing for the availability of scaling governors/
  *
  * @returns 0 if the system has no frequency scaling capabilities non-0 otherwise.
@@ -73,13 +73,13 @@ static int read_string(char* filename, char* buf, size_t buflen) {
   if (-1<fd) {
     r = read (fd, buf, buflen-1);
     (void) close(fd);
-    
+
     if (-1==r) {
       fprintf(stderr, "Error while reading \"%s\": %s\n", filename, strerror(errno));
       exit(EXIT_FAILURE);
     }
   }
-  
+
   return (int) r;
 }
 
@@ -96,7 +96,7 @@ static int read_int(char* filename, int* value) {
 
 
 /**
- * This function determines wether any CPU core uses a variable clock speed if frequency 
+ * This function determines wether any CPU core uses a variable clock speed if frequency
  * scaling is available. If the governor for all cores is either "powersave" or
  * "performance", the CPU frequency can be assumed to be static. This is also the case
  * if scaling_min_freq and scaling_max_freq are set to the same value.
@@ -110,7 +110,7 @@ int system_uses_frequencyscaling() {
   while (!done) {
           (void) snprintf(filename, 256, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor", cpu);
           if (0<read_string(filename, buf, 256)) {
-                  if ((0!=strncmp("performance", buf, 11)) && 
+                  if ((0!=strncmp("performance", buf, 11)) &&
                       (0!=strncmp("powersafe", buf, 9))) {
                           // So it's neither the "performance" nor the "powersafe" governor
                           (void) snprintf(filename, 256, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq", cpu);
@@ -121,7 +121,7 @@ int system_uses_frequencyscaling() {
                                                   // wrong governor AND different frequency limits -> scaling
                                                   return 1;
                                           }
-                                  } 
+                                  }
                           }
                   }
           } else {
@@ -130,7 +130,7 @@ int system_uses_frequencyscaling() {
           }
           cpu++;
   }
-  
+
   // couldn't find anything that points to scaling
   return 0;
 }
@@ -172,18 +172,18 @@ int system_user_in_group(const char *name) {
     free(list);
     return 0;
   }
-  
+
   num_groups = getgroups(MAX_GROUPS, list);
-  
+
   while (i<num_groups) {
     if (list[i]==gid) {
       found = 1;
       i = num_groups;
     }
-    
+
     i++;
   }
-  
+
   free(list);
 
   return found;
@@ -254,7 +254,7 @@ int system_user_can_rtprio() {
     perror("sched_get_priority");
     exit(EXIT_FAILURE);
   }
-  schparam.sched_priority = min_prio;  
+  schparam.sched_priority = min_prio;
 
   if (0 == sched_setscheduler(0, SCHED_FIFO, &schparam)) {
     // TODO: restore previous state
@@ -264,7 +264,7 @@ int system_user_can_rtprio() {
       exit(EXIT_FAILURE);
     }
     return 1;
-  }  
+  }
 
   return 0;
 }
@@ -300,7 +300,7 @@ long long unsigned int system_available_physical_mem() {
 		if (strncmp (buf, "MemTotal:", 9) == 0) {
 			if (sscanf (buf, "%*s %llu", &res) != 1) {
 				perror ("parse error in /proc/meminfo");
-			} 
+			}
 		}
 	} else {
 		perror("read from /proc/meminfo");

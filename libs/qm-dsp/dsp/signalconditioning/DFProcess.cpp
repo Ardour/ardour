@@ -115,7 +115,7 @@ void DFProcess::medianFilter(double *src, double *dst)
     {
         if (index >= m_length) break;
 
-			 
+			
 	l = 0;
 	for(  j  = i; j < ( i + m_winPost + m_winPre + 1); j++)
 	{
@@ -140,7 +140,7 @@ void DFProcess::medianFilter(double *src, double *dst)
 	    l++;
 	}
 		
-	scratch[ index++ ] = MathUtilities::median( y, l); 
+	scratch[ index++ ] = MathUtilities::median( y, l);
     }
 
 
@@ -182,6 +182,6 @@ void DFProcess::removeDCNormalize( double *src, double*dst )
 
     for(int i = 0; i< m_length; i++)
     {
-	dst[ i ] = ( src[ i ] - DFMin ) / DFAlphaNorm; 
+	dst[ i ] = ( src[ i ] - DFMin ) / DFAlphaNorm;
     }
 }

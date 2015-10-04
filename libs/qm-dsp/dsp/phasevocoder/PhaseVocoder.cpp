@@ -70,7 +70,7 @@ void PhaseVocoder::getPhase(unsigned int size, double *theta, double *real, doub
 {
     unsigned int k;
 
-    // Phase Angle "matlab" style 
+    // Phase Angle "matlab" style
     //Watch out for quadrant mapping  !!!
     for( k = 0; k < size; k++)
     {

@@ -66,7 +66,7 @@ namespace wvThread
         //--------------------- begin measurement code
         // poll to align to a tick of gettimeofday
         ::gettimeofday(&tvtmp,0);
-        do { 
+        do {
             ::gettimeofday(&tvstart,0);
             __asm__ __volatile__ (".byte 0x0f, 0x31" : "=A" (Tstart));  // RDTSC
         } while (tvtmp.tv_usec!=tvstart.tv_usec);
@@ -74,7 +74,7 @@ namespace wvThread
         ::usleep(sktd_TSC_MeasurementPeriod);
         //
         ::gettimeofday(&tvtmp,0);
-        do { 
+        do {
             ::gettimeofday(&tvend,0);
             __asm__ __volatile__ (".byte 0x0f, 0x31" : "=A" (Tend));    // RDTSC
         } while (tvtmp.tv_usec!=tvend.tv_usec);
@@ -86,10 +86,10 @@ namespace wvThread
 #endif
         return nTicksPerMicrosecond;
     }
-    
+
 #if defined(__APPLE__) //&& !defined(__MACH__)
 
-    
+
     bool FindNetInterfaceByIPAddress(const char *sIP, char *sInterface) // sIP and sInterface are both char[16]
     {
         FILE *fProcess , *pSubcall;
@@ -106,7 +106,7 @@ namespace wvThread
             while (pToken)
             {
                 sprintf(sCommand, "ifconfig %s | grep \"inet %s \"", pToken, sIP);
-                
+
                 pSubcall = popen(sCommand, "r");
                 if (pSubcall)
                 {
@@ -121,12 +121,12 @@ namespace wvThread
                     }
                 }
                 pclose(pSubcall);
-                pToken = strtok(NULL, " ");    
+                pToken = strtok(NULL, " ");
             }
-            
+
         }
         pclose(fProcess);
-        
+
         return res;
     }
 #endif // MACOS
@@ -198,7 +198,7 @@ namespace wvThread
 #elif XPLATFORMTHREADS_POSIX
     void yield()   {  ::sched_yield();  }
 #endif
- 
+
 
 
 
@@ -214,14 +214,14 @@ namespace wvThread
         inline void obtain()       { EnsureThreadingInitialized(); ::EnterCriticalSection     (&m_critsec); }
         inline void release()      { EnsureThreadingInitialized(); ::LeaveCriticalSection     (&m_critsec); }
         inline bool tryobtain()    { EnsureThreadingInitialized(); return TryEnterCriticalSection(&m_critsec)!=FALSE; }
-        
+
 #elif defined (XPLATFORMTHREADS_POSIX)
     protected:
         pthread_mutex_t  m_ptmutex;
     public:
-        inline OSDependentMutex()  
-        { 
-            EnsureThreadingInitialized(); 
+        inline OSDependentMutex()
+        {
+            EnsureThreadingInitialized();
             pthread_mutexattr_t attr;
             pthread_mutexattr_init(&attr);
             pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
@@ -237,7 +237,7 @@ namespace wvThread
 
     ThreadMutexInited::ThreadMutexInited() :
                         m_osdmutex(0) {}
-    
+
     void ThreadMutexInited::init()
     {
         if (! is_init())
@@ -245,7 +245,7 @@ namespace wvThread
             m_osdmutex = new OSDependentMutex;
         }
     }
-    
+
     void ThreadMutexInited::uninit()
     {
         if (is_init())
@@ -254,38 +254,38 @@ namespace wvThread
             m_osdmutex = 0;
         }
     }
-    
+
     ThreadMutexInited::~ThreadMutexInited()
     {
         uninit();
-    }    
-    
+    }
+
     void ThreadMutexInited::obtain()
     {
         if (is_init())
         {
-            m_osdmutex->obtain(); 
+            m_osdmutex->obtain();
         }
-    }    
+    }
 
     void ThreadMutexInited::release()
     {
         if (is_init())
         {
-            m_osdmutex->release(); 
+            m_osdmutex->release();
         }
-    }    
-    
+    }
+
     bool ThreadMutexInited::tryobtain()
     {
         bool retVal = true;
         if (is_init())
         {
-            retVal = m_osdmutex->tryobtain(); 
+            retVal = m_osdmutex->tryobtain();
         }
         return retVal;
-    }    
-    
+    }
+
     class ThreadConditionSignal::OSDependentObject : public noncopyableobject
     {
 #if defined (XPLATFORMTHREADS_POSIX)
@@ -294,17 +294,17 @@ namespace wvThread
         pthread_cond_t  m_ptcond;
         pthread_mutex_t m_ptmutex;
     public:
-        inline OSDependentObject()      
+        inline OSDependentObject()
         {
-            EnsureThreadingInitialized(); 
+            EnsureThreadingInitialized();
             ::pthread_mutex_init(&m_ptmutex,0);
-            ::pthread_cond_init(&m_ptcond, 0); 
+            ::pthread_cond_init(&m_ptcond, 0);
         }
         inline ~OSDependentObject()     { ::pthread_cond_destroy(&m_ptcond), ::pthread_mutex_destroy(&m_ptmutex); }
         inline void signal_unicast()    { ::pthread_cond_signal(&m_ptcond);    }
         inline void signal_broadcast()  { ::pthread_cond_broadcast(&m_ptcond); }
         inline void await_signal()      { ::pthread_cond_wait(&m_ptcond, &m_ptmutex); }
-        inline bool await_signal(timediff td) 
+        inline bool await_signal(timediff td)
         {
             timespec tspecDeadline;
             timeval  tvNow;
@@ -423,14 +423,14 @@ namespace wvThread
 #endif // OS switch
     };
 
-    void ThreadConditionSignal::obtain_mutex()    
-    { 
-        m_osdepobj.obtain_mutex();    
+    void ThreadConditionSignal::obtain_mutex()
+    {
+        m_osdepobj.obtain_mutex();
     }
     bool ThreadConditionSignal::tryobtain_mutex() { return m_osdepobj.tryobtain_mutex(); }
-    void ThreadConditionSignal::release_mutex()   
-    { 
-        m_osdepobj.release_mutex();   
+    void ThreadConditionSignal::release_mutex()
+    {
+        m_osdepobj.release_mutex();
     }
 
     void ThreadConditionSignal::await_condition()                   { m_osdepobj.await_signal();  }
@@ -587,7 +587,7 @@ namespace wvThread
                 0                  // where to store thread ID
             );
 
-        if (h) 
+        if (h)
         {
             th.m_oshandle = h;
             if (pri!=ThreadPriority::Normal)
@@ -620,8 +620,8 @@ namespace wvThread
                 ThunkedThreadWrapper,
                 ptwdata
             );
-            
-        if (anyerr) 
+
+        if (anyerr)
             th=Invalid;
         else
             th.m_oshandle = OSDependent::from_oshandle(pt);
@@ -676,7 +676,7 @@ namespace wvThread
     class WCThreadRef::OSDependent
     {
     public:
-        static void GetCurrentThreadRef(WCThreadRef& tid); 
+        static void GetCurrentThreadRef(WCThreadRef& tid);
 #if XPLATFORMTHREADS_WINDOWS
         static inline uintptr_t from_os(DWORD thread_id) { return (uintptr_t)(thread_id); }
         static inline DWORD to_os(uintptr_t thread_id)   { return (DWORD)(thread_id); }
@@ -735,7 +735,7 @@ namespace wvThread
 
     WCThreadRef GetCurrentThreadRef()
     {
-        EnsureThreadingInitialized(); // Is it necessary?  
+        EnsureThreadingInitialized(); // Is it necessary?
         WCThreadRef tRefToReturn;
         WCThreadRef::OSDependent::GetCurrentThreadRef(tRefToReturn);
         return tRefToReturn;
@@ -794,7 +794,7 @@ namespace wvThread
     bool WCAtomicLock::obtain(const uint32_t in_num_trys)
     {
         bool retVal = false;
-        
+
         uint32_t timeOut = in_num_trys;
         while (true)
         {
@@ -812,7 +812,7 @@ namespace wvThread
                 sleep_milliseconds(1000);
             }
         }
-        
+
         return retVal;
     }
 

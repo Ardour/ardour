@@ -12,7 +12,7 @@
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::WCMRAudioDevice 
+// WCMRAudioDevice::WCMRAudioDevice
 //
 //! Constructor for the audio device. The derived classes will need to do more actual work, such
 //!		as determining supported sampling rates, buffer sizes, and channel counts. Connection
@@ -20,7 +20,7 @@
 //!
 //! \param *pManager : The audio device manager that's managing this device.
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 WCMRAudioDevice::WCMRAudioDevice (WCMRAudioDeviceManager *pManager) :
 	m_pMyManager (pManager)
@@ -39,19 +39,19 @@ WCMRAudioDevice::WCMRAudioDevice (WCMRAudioDeviceManager *pManager) :
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::~WCMRAudioDevice 
+// WCMRAudioDevice::~WCMRAudioDevice
 //
 //! Destructor for the audio device. It release all the connections that were created.
 //!
 //! \param none
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 WCMRAudioDevice::~WCMRAudioDevice ()
 {
     AUTO_FUNC_DEBUG;
-	try 
+	try
 	{
 	}
 	catch (...)
@@ -65,14 +65,14 @@ WCMRAudioDevice::~WCMRAudioDevice ()
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::DeviceName 
+// WCMRAudioDevice::DeviceName
 //
 //! Retrieves Device's name.
 //!
 //! \param none
-//! 
+//!
 //! \return The device name.
-//! 
+//!
 //**********************************************************************************************
 const std::string& WCMRAudioDevice::DeviceName () const
 {
@@ -83,14 +83,14 @@ const std::string& WCMRAudioDevice::DeviceName () const
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::InputChannels 
+// WCMRAudioDevice::InputChannels
 //
 //! Retrieves Input Channel information. Note that the list may be changed at run-time.
 //!
 //! \param none
-//! 
+//!
 //! \return A vector with Input Channel Names.
-//! 
+//!
 //**********************************************************************************************
 const std::vector<std::string>& WCMRAudioDevice::InputChannels ()
 {
@@ -101,14 +101,14 @@ const std::vector<std::string>& WCMRAudioDevice::InputChannels ()
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::OutputChannels 
+// WCMRAudioDevice::OutputChannels
 //
 //! Retrieves Output Channel Information. Note that the list may be changed at run-time.
 //!
 //! \param none
-//! 
+//!
 //! \return A vector with Output Channel Names.
-//! 
+//!
 //**********************************************************************************************
 const std::vector<std::string>& WCMRAudioDevice::OutputChannels ()
 {
@@ -119,14 +119,14 @@ const std::vector<std::string>& WCMRAudioDevice::OutputChannels ()
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::SamplingRates 
+// WCMRAudioDevice::SamplingRates
 //
 //! Retrieves supported sampling rate information.
 //!
 //! \param none
-//! 
+//!
 //! \return A vector with supported sampling rates.
-//! 
+//!
 //**********************************************************************************************
 const std::vector<int>& WCMRAudioDevice::SamplingRates ()
 {
@@ -136,15 +136,15 @@ const std::vector<int>& WCMRAudioDevice::SamplingRates ()
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::CurrentSamplingRate 
+// WCMRAudioDevice::CurrentSamplingRate
 //
-//! The device's current sampling rate. This may be overridden, if the device needs to 
+//! The device's current sampling rate. This may be overridden, if the device needs to
 //!		query the driver for the current rate.
 //!
 //! \param none
-//! 
+//!
 //! \return The device's current sampling rate. -1 on error.
-//! 
+//!
 //**********************************************************************************************
 int WCMRAudioDevice::CurrentSamplingRate ()
 {
@@ -155,15 +155,15 @@ int WCMRAudioDevice::CurrentSamplingRate ()
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::SetCurrentSamplingRate 
+// WCMRAudioDevice::SetCurrentSamplingRate
 //
-//! Change the sampling rate to be used by the device. This will most likely be overridden, 
+//! Change the sampling rate to be used by the device. This will most likely be overridden,
 //!		the base class simply updates the member variable.
 //!
 //! \param newRate : The rate to use (samples per sec).
-//! 
+//!
 //! \return eNoErr always. The derived classes may return error codes.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRAudioDevice::SetCurrentSamplingRate (int newRate)
 {
@@ -176,14 +176,14 @@ WTErr WCMRAudioDevice::SetCurrentSamplingRate (int newRate)
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::BufferSizes 
+// WCMRAudioDevice::BufferSizes
 //
 //! Retrieves supported buffer size information.
 //!
 //! \param none
-//! 
+//!
 //! \return A vector with supported buffer sizes.
-//! 
+//!
 //**********************************************************************************************
 const std::vector<int>& WCMRAudioDevice::BufferSizes ()
 {
@@ -195,13 +195,13 @@ const std::vector<int>& WCMRAudioDevice::BufferSizes ()
 //**********************************************************************************************
 // WCMRAudioDevice::CurrentBufferSize
 //
-//! The device's current buffer size in use. This may be overridden, if the device needs to 
+//! The device's current buffer size in use. This may be overridden, if the device needs to
 //!		query the driver for the current size.
 //!
 //! \param none
-//! 
+//!
 //! \return The device's current buffer size. 0 on error.
-//! 
+//!
 //**********************************************************************************************
 int WCMRAudioDevice::CurrentBufferSize ()
 {
@@ -216,9 +216,9 @@ int WCMRAudioDevice::CurrentBufferSize ()
 //!   data other then the audio buffers, like frames info in SG, so it can be overridden
 //!
 //! \param none
-//! 
+//!
 //! \return The device's current block size. 0 on error.
-//! 
+//!
 //**********************************************************************************************
 int WCMRAudioDevice::CurrentBlockSize()
 {
@@ -230,13 +230,13 @@ int WCMRAudioDevice::CurrentBlockSize()
 //**********************************************************************************************
 // WCMRAudioDevice::SetCurrentBufferSize
 //
-//! Change the buffer size to be used by the device. This will most likely be overridden, 
+//! Change the buffer size to be used by the device. This will most likely be overridden,
 //!		the base class simply updates the member variable.
 //!
 //! \param newSize : The buffer size to use (in sample-frames)
-//! 
+//!
 //! \return eNoErr always. The derived classes may return error codes.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRAudioDevice::SetCurrentBufferSize (int newSize)
 {
@@ -250,15 +250,15 @@ WTErr WCMRAudioDevice::SetCurrentBufferSize (int newSize)
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::ConnectionStatus 
+// WCMRAudioDevice::ConnectionStatus
 //
 //! Retrieves the device's current connection status. This will most likely be overridden,
 //!		in case some driver communication is required to query the status.
 //!
 //! \param none
-//! 
+//!
 //! \return A ConnectionStates value.
-//! 
+//!
 //**********************************************************************************************
 WCMRAudioDevice::ConnectionStates WCMRAudioDevice::ConnectionStatus ()
 {
@@ -270,14 +270,14 @@ WCMRAudioDevice::ConnectionStates WCMRAudioDevice::ConnectionStatus ()
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::Active 
+// WCMRAudioDevice::Active
 //
 //! Retrieves Device activation status.
 //!
 //! \param none
-//! 
+//!
 //! \return true if device is active, false otherwise.
-//! 
+//!
 //**********************************************************************************************
 bool WCMRAudioDevice::Active ()
 {
@@ -288,15 +288,15 @@ bool WCMRAudioDevice::Active ()
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::SetActive 
+// WCMRAudioDevice::SetActive
 //
 //! Sets the device's activation status.
 //!
 //! \param newState : Should be true to activate, false to deactivate. This roughly corresponds
 //!		to opening and closing the device handle/stream/audio unit.
-//! 
+//!
 //! \return eNoErr always, the derived classes may return appropriate error code.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRAudioDevice::SetActive (bool newState)
 {
@@ -310,14 +310,14 @@ WTErr WCMRAudioDevice::SetActive (bool newState)
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::Streaming 
+// WCMRAudioDevice::Streaming
 //
 //! Retrieves Device streaming status.
 //!
 //! \param none
-//! 
+//!
 //! \return true if device is streaming, false otherwise.
-//! 
+//!
 //**********************************************************************************************
 bool WCMRAudioDevice::Streaming ()
 {
@@ -333,9 +333,9 @@ bool WCMRAudioDevice::Streaming ()
 //!
 //! \param newState : Should be true to start streaming, false to stop streaming. This roughly
 //!		corresponds to calling Start/Stop on the lower level interface.
-//! 
+//!
 //! \return eNoErr always, the derived classes may return appropriate error code.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRAudioDevice::SetStreaming (bool newState)
 {
@@ -387,15 +387,15 @@ bool WCMRAudioDevice::IsProcessActive()
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::DoIdle 
+// WCMRAudioDevice::DoIdle
 //
 //! A place for doing idle time processing. The derived classes will probably do something
 //!		meaningful.
 //!
 //! \param none
-//! 
+//!
 //! \return eNoErr always.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRAudioDevice::DoIdle ()
 {
@@ -408,14 +408,14 @@ WTErr WCMRAudioDevice::DoIdle ()
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::InputLevels 
+// WCMRAudioDevice::InputLevels
 //
 //! Retrieve current input levels.
 //!
 //! \param none
-//! 
+//!
 //! \return A vector (the same size as input channels list) that contains current input levels.
-//! 
+//!
 //**********************************************************************************************
 const std::vector<float>& WCMRAudioDevice::InputLevels ()
 {
@@ -427,14 +427,14 @@ const std::vector<float>& WCMRAudioDevice::InputLevels ()
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::OutputLevels 
+// WCMRAudioDevice::OutputLevels
 //
 //! Retrieve current output levels.
 //!
 //! \param none
-//! 
+//!
 //! \return A vector (the same size as output channels list) that contains current output levels.
-//! 
+//!
 //**********************************************************************************************
 const std::vector<float>& WCMRAudioDevice::OutputLevels ()
 {
@@ -446,16 +446,16 @@ const std::vector<float>& WCMRAudioDevice::OutputLevels ()
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::GetMonitorInfo 
+// WCMRAudioDevice::GetMonitorInfo
 //
 //! Retrieves current monitoring information.
 //!
 //! \param *pLeftChannel : Pointer to receive left monitor channel index.
 //! \param *pRightChannel : Pointer to receive right monitor channel index.
 //! \param *pGain : Pointer to receive the gain (linear) to be applied.
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 void WCMRAudioDevice::GetMonitorInfo (int *pLeftChannel, int *pRightChannel, float *pGain)
 {
@@ -471,15 +471,15 @@ void WCMRAudioDevice::GetMonitorInfo (int *pLeftChannel, int *pRightChannel, flo
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::SetMonitorChannels 
+// WCMRAudioDevice::SetMonitorChannels
 //
 //! Used to set the channels to be used for monitoring.
 //!
 //! \param leftChannel : Left monitor channel index.
 //! \param rightChannel : Right monitor channel index.
-//! 
+//!
 //! \return eNoErr always, the derived classes may return appropriate errors.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRAudioDevice::SetMonitorChannels (int leftChannel, int rightChannel)
 {
@@ -493,14 +493,14 @@ WTErr WCMRAudioDevice::SetMonitorChannels (int leftChannel, int rightChannel)
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::SetMonitorGain 
+// WCMRAudioDevice::SetMonitorGain
 //
 //! Used to set monitor gain (or atten).
 //!
-//! \param newGain : The new gain or atten. value to use. Specified as a linear multiplier (not dB) 
-//! 
+//! \param newGain : The new gain or atten. value to use. Specified as a linear multiplier (not dB)
+//!
 //! \return eNoErr always, the derived classes may return appropriate errors.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRAudioDevice::SetMonitorGain (float newGain)
 {
@@ -514,15 +514,15 @@ WTErr WCMRAudioDevice::SetMonitorGain (float newGain)
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::ShowConfigPanel 
+// WCMRAudioDevice::ShowConfigPanel
 //
 //! Used to show device specific config/control panel. Some interfaces may not support it.
 //!		Some interfaces may require the device to be active before it can display a panel.
 //!
 //! \param pParam : A device/interface specific parameter - optional.
-//! 
+//!
 //! \return eNoErr always, the derived classes may return errors.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRAudioDevice::ShowConfigPanel (void *WCUNUSEDPARAM(pParam))
 {
@@ -532,16 +532,16 @@ WTErr WCMRAudioDevice::ShowConfigPanel (void *WCUNUSEDPARAM(pParam))
 
 
 //**********************************************************************************************
-// WCMRAudioDevice::SendCustomCommand 
+// WCMRAudioDevice::SendCustomCommand
 //
-//! Used to Send a custom command to the audiodevice. Some interfaces may require the device 
+//! Used to Send a custom command to the audiodevice. Some interfaces may require the device
 //!		to be active before it can do anything in this.
 //!
 //! \param customCommand : A device/interface specific command.
 //! \param pCommandParam : A device/interface/command specific parameter - optional.
-//! 
+//!
 //! \return eNoErr always, the derived classes may return errors.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRAudioDevice::SendCustomCommand (int WCUNUSEDPARAM(customCommand), void *WCUNUSEDPARAM(pCommandParam))
 {
@@ -573,10 +573,10 @@ uint32_t WCMRAudioDevice::GetLatency (bool isInput)
 //
 //! The constructuor, most of the work will be done in the derived class' constructor.
 //!
-//! \param *pTheClient : 
-//! 
+//! \param *pTheClient :
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 WCMRAudioDeviceManager::WCMRAudioDeviceManager(WCMRAudioDeviceManagerClient *pTheClient, eAudioDeviceFilter eCurAudioDeviceFilter)
     : m_eAudioDeviceFilter(eCurAudioDeviceFilter)
@@ -592,9 +592,9 @@ WCMRAudioDeviceManager::WCMRAudioDeviceManager(WCMRAudioDeviceManagerClient *pTh
 //! It clears the device list, releasing each of the device.
 //!
 //! \param none
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 WCMRAudioDeviceManager::~WCMRAudioDeviceManager()
 {
@@ -674,15 +674,15 @@ WTErr WCMRAudioDeviceManager::GetDeviceBufferSizes(const std::string & nameToMat
 
 
 //**********************************************************************************************
-// WCMRAudioDeviceManager::NotifyClient 
+// WCMRAudioDeviceManager::NotifyClient
 //
 //! A helper routine used to call the client for notification.
 //!
 //! \param forReason : The reason for notification.
 //! \param *pParam : A parameter (if required) for notification.
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 void WCMRAudioDeviceManager::NotifyClient (WCMRAudioDeviceManagerClient::NotificationReason forReason, void *pParam)
 {

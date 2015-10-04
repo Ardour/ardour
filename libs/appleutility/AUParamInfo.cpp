@@ -42,8 +42,8 @@
 #include "AUParamInfo.h"
 #include "CAXException.h"
 
-AUParamInfo::AUParamInfo (AudioUnit				inAU, 
-							bool				inIncludeExpert, 
+AUParamInfo::AUParamInfo (AudioUnit				inAU,
+							bool				inIncludeExpert,
 							bool				inIncludeReadOnly,
 							AudioUnitScope		inScope,
 							AudioUnitElement	inElement)
@@ -73,13 +73,13 @@ AUParamInfo::AUParamInfo (AudioUnit				inAU,
 	}
 	
 	ParameterMap params;
-	for (int i = 0; i < nparams; ++i) 
+	for (int i = 0; i < nparams; ++i)
 	{
 		CAAUParameter auvp (mAU, paramList[i], mScope, mElement); // took out only using global scope in CAAUParameter creation
 		const AudioUnitParameterInfo &paramInfo = auvp.ParamInfo();
 			
 		//	don't include if parameter can't be read or written
-		if (!(paramInfo.flags & kAudioUnitParameterFlag_IsWritable) 
+		if (!(paramInfo.flags & kAudioUnitParameterFlag_IsWritable)
 			&& !(paramInfo.flags & kAudioUnitParameterFlag_IsReadable))
 			continue;
 
@@ -88,7 +88,7 @@ AUParamInfo::AUParamInfo (AudioUnit				inAU,
 			continue;
 		
 		// only include if read only params are wanted
-		if (!(paramInfo.flags & kAudioUnitParameterFlag_IsWritable) 
+		if (!(paramInfo.flags & kAudioUnitParameterFlag_IsWritable)
 			&& (paramInfo.flags & kAudioUnitParameterFlag_IsReadable))
 		{	
 			if (!inIncludeReadOnly)
@@ -113,9 +113,9 @@ AUParamInfo::~AUParamInfo()
 }
 
 UInt32			AUParamInfo::NumParamsForClump (UInt32 inClump) const
-{ 
+{
 	ParameterMap::const_iterator it = mParams.find(inClump);
-	if (it != mParams.end()) 
+	if (it != mParams.end())
 		return (*it).second.size();
 	return 0;
 }

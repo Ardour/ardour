@@ -49,7 +49,7 @@ public:
     vector<double> dfOutput;
     Vamp::RealTime origin;
 };
-    
+
 
 OnsetDetector::OnsetDetector(float inputSampleRate) :
     Vamp::Plugin(inputSampleRate),
@@ -162,7 +162,7 @@ OnsetDetector::getParameter(std::string name) const
     } else if (name == "sensitivity") {
         return m_sensitivity;
     } else if (name == "whiten") {
-        return m_whiten ? 1.0 : 0.0; 
+        return m_whiten ? 1.0 : 0.0;
     }
     return 0.0;
 }
@@ -265,7 +265,7 @@ OnsetDetector::initialise(size_t channels, size_t stepSize, size_t blockSize)
     dfConfig.adaptiveWhitening = m_whiten;
     dfConfig.whiteningRelaxCoeff = -1;
     dfConfig.whiteningFloor = -1;
-    
+
     m_d = new OnsetDetectorData(dfConfig);
     return true;
 }
@@ -480,7 +480,7 @@ OnsetDetector::getRemainingFeatures()
     }
 
     for (unsigned int i = 0; i < ppParams.length; ++i) {
-        
+
         Feature feature;
 //        feature.hasTimestamp = false;
         feature.hasTimestamp = true;

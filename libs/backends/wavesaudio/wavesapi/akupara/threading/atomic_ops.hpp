@@ -1,6 +1,6 @@
 /*
 *  Akupara/threading/atomic_ops.hpp
-*  
+*
 *
 *  Created by Udi Barzilai on 06/06.
 *  Copyright 2006 __MyCompanyName__. All rights reserved.
@@ -91,16 +91,16 @@ namespace Akupara
             //----------------------------------------------------------------------------------------
             namespace detail
             {
-                template<unsigned int _byte_count> 
-                struct largest_atomic_byte_count_upto 
-                { 
-                    static const unsigned int value = 
-                        machine::implements_load<_byte_count>::value && machine::implements_store<_byte_count>::value ? 
-_byte_count : 
-                    largest_atomic_byte_count_upto<_byte_count/2>::value; 
+                template<unsigned int _byte_count>
+                struct largest_atomic_byte_count_upto
+                {
+                    static const unsigned int value =
+                        machine::implements_load<_byte_count>::value && machine::implements_store<_byte_count>::value ?
+_byte_count :
+                    largest_atomic_byte_count_upto<_byte_count/2>::value;
                 };
 
-                template<> 
+                template<>
                 struct largest_atomic_byte_count_upto<0> { static const unsigned int value = 0; };
 
                 const unsigned int k_byte_count_best_atomic = largest_atomic_byte_count_upto<sizeof(int)>::value;
@@ -129,7 +129,7 @@ _byte_count :
             namespace detail
             {
                 template<
-                    typename _integer_type, 
+                    typename _integer_type,
                     bool _implements_CAS   = machine::implements_CAS  <sizeof(_integer_type)>::value,
                     bool _implements_LL_SC = machine::implements_LL_SC<sizeof(_integer_type)>::value>
                 struct implementation_CAS
@@ -138,7 +138,7 @@ _byte_count :
                 };
                 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 // specialization for native CAS support
-                template<typename _integer_type, bool _implements_LL_SC> 
+                template<typename _integer_type, bool _implements_LL_SC>
                 struct implementation_CAS<_integer_type, true, _implements_LL_SC>
                 {
                     static const bool s_exists = true;
@@ -164,7 +164,7 @@ _byte_count :
                 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             } // namespace detail
             // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-            template<typename _integer_type> 
+            template<typename _integer_type>
             inline bool compare_and_store(volatile _integer_type * operand_address, const _integer_type & expected_value, const _integer_type & value_to_store)
             {
                 // if your compiler can't find the function to call here then there is no implementation available for your machine
@@ -181,7 +181,7 @@ _byte_count :
             namespace detail
             {
                 template<
-                    typename _integer_type, 
+                    typename _integer_type,
                     bool _0 = machine::implements_fetch_and_add<sizeof(_integer_type)>::value,
                     bool _1 = machine::implements_add_and_fetch<sizeof(_integer_type)>::value,
                     bool _2 = machine::implements_LL_SC        <sizeof(_integer_type)>::value,
@@ -244,7 +244,7 @@ _byte_count :
                 };
                 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             } // namespace detail
-            template<typename _integer_type> 
+            template<typename _integer_type>
             inline _integer_type fetch_and_add(volatile _integer_type * operand_address, const _integer_type & addend)
             {
                 // if your compiler can't find the function to call here then there is no implementation available for your machine
@@ -260,7 +260,7 @@ _byte_count :
             namespace detail
             {
                 template<
-                    typename _integer_type, 
+                    typename _integer_type,
                     bool _0 = machine::implements_add_and_fetch<sizeof(_integer_type)>::value,
                     bool _1 = machine::implements_fetch_and_add<sizeof(_integer_type)>::value,
                     bool _2 = machine::implements_LL_SC        <sizeof(_integer_type)>::value,
@@ -323,7 +323,7 @@ _byte_count :
                 };
                 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             } // namespace detail
-            template<typename _integer_type> 
+            template<typename _integer_type>
             inline _integer_type add_and_fetch(volatile _integer_type * operand_address, const _integer_type & addend)
             {
                 // if your compiler can't find the function to call here then there is no implementation available for your machine
@@ -335,7 +335,7 @@ _byte_count :
 
             //----------------------------------------------------------------------------------------
             // add
-            template<typename _integer_type> 
+            template<typename _integer_type>
             inline void add(volatile _integer_type * operand_address, const _integer_type & addend)
             {
                 if (machine::implements_add<sizeof(_integer_type)>::value)

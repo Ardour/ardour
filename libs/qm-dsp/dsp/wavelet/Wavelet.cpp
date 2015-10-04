@@ -85,7 +85,7 @@ Wavelet::createDecompositionFilters(Type wavelet,
 	
     switch (wavelet) {
 
-    case Haar: 
+    case Haar:
         lpd.push_back(0.70710678118655);
         lpd.push_back(0.70710678118655);
         hpd.push_back(-0.70710678118655);

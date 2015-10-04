@@ -1,6 +1,6 @@
 /*
  *  Akupara/threading/atomic_ops_gcc_x86.hpp
- *  
+ *
  *
  *  Created by Udi Barzilai on 06/06.
  *  Copyright 2006 __MyCompanyName__. All rights reserved.

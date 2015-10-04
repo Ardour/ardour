@@ -26,13 +26,13 @@ static event_id_t _event_id_counter = 0;
 event_id_t
 event_id_counter()
 {
-	return g_atomic_int_get (&_event_id_counter); 
+	return g_atomic_int_get (&_event_id_counter);
 }
 
-void 
-init_event_id_counter(event_id_t n) 
-{ 
-	g_atomic_int_set (&_event_id_counter, n); 
+void
+init_event_id_counter(event_id_t n)
+{
+	g_atomic_int_set (&_event_id_counter, n);
 }
 
 event_id_t

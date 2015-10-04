@@ -18,7 +18,7 @@
 #define ENABLE_DEVICE_CHANGE_LISTNER 1
 
 #define PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS 10
-#define PROPERTY_CHANGE_TIMEOUT_SECONDS 5 
+#define PROPERTY_CHANGE_TIMEOUT_SECONDS 5
 #define USE_IOCYCLE_TIMES 1 ///< Set this to 0 to use individual thread cpu measurement
 
 using namespace wvNS;
@@ -34,7 +34,7 @@ static const int gAllBufferSizes[] =
 {
     32, 64, 96, 128, 192, 256, 512, 1024, 2048, -1 /* negative terminated  list */
 };
-    
+
 
 ///< The default SR.
 static const int DEFAULT_SR = 44100;
@@ -47,29 +47,29 @@ static const int NONE_DEVICE_ID = -1;
 static const int NUM_STALLS_FOR_NOTIFICATION = 2 * 50; // 2*50 corresponds to 2 * 50 x 42 ms idle timer - about 4 seconds.
 static const int CHANGE_CHECK_COUNTER_PERIOD = 100; // 120 corresponds to 120 x 42 ms idle timer - about 4 seconds.
 
-#define AUHAL_OUTPUT_ELEMENT 0  
+#define AUHAL_OUTPUT_ELEMENT 0
 #define AUHAL_INPUT_ELEMENT 1
 
 #include <sys/sysctl.h>
 
-static int getProcessorCount() 
+static int getProcessorCount()
 {
     int     count = 1;
     size_t size = sizeof(count);
 
-    if (sysctlbyname("hw.ncpu", &count, &size, NULL, 0)) 
+    if (sysctlbyname("hw.ncpu", &count, &size, NULL, 0))
         return 1;
 
     //if something did not work, let's revert to a safe value...
     if (count == 0)
         count = 1;
-        
-    return count; 
+
+    return count;
 }
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::WCMRCoreAudioDevice 
+// WCMRCoreAudioDevice::WCMRCoreAudioDevice
 //
 //! Constructor for the audio device. Opens the PA device and gets information about the device.
 //!     such as determining supported sampling rates, buffer sizes, and channel counts.
@@ -77,11 +77,11 @@ static int getProcessorCount()
 //! \param *pManager : The audio device manager that's managing this device.
 //! \param deviceID : The port audio device ID.
 //! \param useMultithreading : Whether to use multi-threading for audio processing. Default is true.
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
-WCMRCoreAudioDevice::WCMRCoreAudioDevice (WCMRCoreAudioDeviceManager *pManager, AudioDeviceID deviceID, bool useMultithreading, bool bNocopy) 
+WCMRCoreAudioDevice::WCMRCoreAudioDevice (WCMRCoreAudioDeviceManager *pManager, AudioDeviceID deviceID, bool useMultithreading, bool bNocopy)
   : WCMRNativeAudioDevice (pManager, useMultithreading, bNocopy)
   , m_SampleCountAtLastIdle (0)
   , m_StalledSampleCounter(0)
@@ -112,16 +112,16 @@ WCMRCoreAudioDevice::WCMRCoreAudioDevice (WCMRCoreAudioDeviceManager *pManager, 
 
     //Update device info...
     m_DeviceID = deviceID;
-    
+
     m_CurrentSamplingRate = DEFAULT_SR;
     m_CurrentBufferSize = DEFAULT_BUFFERSIZE;
     m_StopRequested = true;
     m_pInputData = NULL;
-    
+
     m_CPUCount = getProcessorCount();
     m_LastCPULog = wvThread::now() - 10 * wvThread::ktdOneSecond;
-    
-    
+
+
 
     /*
       @constant       kAudioDevicePropertyNominalSampleRate
@@ -132,10 +132,10 @@ WCMRCoreAudioDevice::WCMRCoreAudioDevice (WCMRCoreAudioDeviceManager *pManager, 
     err = kAudioHardwareNoError;
     if (AudioDeviceGetProperty(m_DeviceID, 0, 0, kAudioDevicePropertyNominalSampleRate, &propSize, &currentNominalRate) != kAudioHardwareNoError)
         err = AudioDeviceGetProperty(m_DeviceID, 0, 1, kAudioDevicePropertyNominalSampleRate, &propSize, &currentNominalRate);
-        
+
     if (err == kAudioHardwareNoError)
         m_CurrentSamplingRate = (int)currentNominalRate;
-        
+
     /*
       @constant       kAudioDevicePropertyBufferFrameSize
       A UInt32 whose value indicates the number of frames in the IO buffers.
@@ -146,11 +146,11 @@ WCMRCoreAudioDevice::WCMRCoreAudioDevice (WCMRCoreAudioDeviceManager *pManager, 
     err = kAudioHardwareNoError;
     if (AudioDeviceGetProperty(m_DeviceID, 0, 0, kAudioDevicePropertyBufferFrameSize, &propSize, &bufferSize) != kAudioHardwareNoError)
         err = AudioDeviceGetProperty(m_DeviceID, 0, 1, kAudioDevicePropertyBufferFrameSize, &propSize, &bufferSize);
-        
+
     if (err == kAudioHardwareNoError)
         m_CurrentBufferSize = (int)bufferSize;
-    
-    
+
+
     UpdateDeviceInfo();
 
     //should use a valid current SR...
@@ -164,7 +164,7 @@ WCMRCoreAudioDevice::WCMRCoreAudioDevice (WCMRCoreAudioDeviceManager *pManager, 
             m_CurrentSamplingRate = m_SamplingRates[0];
         }
     }
-    
+
     //should use a valid current buffer size
     if (m_BufferSizes.size())
     {
@@ -176,7 +176,7 @@ WCMRCoreAudioDevice::WCMRCoreAudioDevice (WCMRCoreAudioDeviceManager *pManager, 
             m_CurrentBufferSize = m_BufferSizes[0];
         }
     }
-    
+
     //build our input/output level lists
     for (unsigned int currentChannel = 0; currentChannel < m_InputChannels.size(); currentChannel++)
     {
@@ -188,22 +188,22 @@ WCMRCoreAudioDevice::WCMRCoreAudioDevice (WCMRCoreAudioDeviceManager *pManager, 
     {
         m_OutputLevels.push_back (0.0);
     }
-    
+
 }
 
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::~WCMRCoreAudioDevice 
+// WCMRCoreAudioDevice::~WCMRCoreAudioDevice
 //
 //! Destructor for the audio device. The base release all the connections that were created, if
 //!     they have not been already destroyed! Here we simply stop streaming, and close device
 //!     handles if necessary.
 //!
 //! \param none
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 WCMRCoreAudioDevice::~WCMRCoreAudioDevice ()
 {
@@ -216,13 +216,13 @@ WCMRCoreAudioDevice::~WCMRCoreAudioDevice ()
         {
             SetStreaming (false);
         }
-        
+
         //If device is active (meaning stream is open) we need to close it.
         if (Active())
         {
             SetActive (false);
         }
-        
+
     }
     catch (...)
     {
@@ -234,29 +234,29 @@ WCMRCoreAudioDevice::~WCMRCoreAudioDevice ()
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::UpdateDeviceInfo 
+// WCMRCoreAudioDevice::UpdateDeviceInfo
 //
 //! Updates Device Information about channels, sampling rates, buffer sizes.
-//! 
+//!
 //! \return WTErr.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::UpdateDeviceInfo ()
 {
     AUTO_FUNC_DEBUG;
-    
-    WTErr retVal = eNoErr;  
-    
+
+    WTErr retVal = eNoErr;
+
     // Some devices change the ID during restart
     WTErr errId = UpdateDeviceId();
-    
+
     // Update all devices parts regardless of errors
     WTErr errName = UpdateDeviceName();
     WTErr errIn =   UpdateDeviceInputs();
     WTErr errOut =  UpdateDeviceOutputs();
-    WTErr errSR =   eNoErr; 
-    WTErr errBS =   eNoErr; 
-    
+    WTErr errSR =   eNoErr;
+    WTErr errBS =   eNoErr;
+
     errSR = UpdateDeviceSampleRates();
     errBS = UpdateDeviceBufferSizes();
 
@@ -264,8 +264,8 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInfo ()
     {
         retVal = eCoreAudioFailed;
     }
-    
-    return retVal;  
+
+    return retVal;
 }
 
 
@@ -278,22 +278,22 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceId()
     ASSERT_ERROR(osErr, "AudioHardwareGetProperty 1");
     if (WUIsError(osErr))
         throw osErr;
-    
+
     size_t numDevices = propSize / sizeof (AudioDeviceID);
     AudioDeviceID* deviceIDs = new AudioDeviceID[numDevices];
-    
+
     //retrieve the device IDs
     propSize = numDevices * sizeof (AudioDeviceID);
     osErr = AudioHardwareGetProperty (kAudioHardwarePropertyDevices, &propSize, deviceIDs);
     ASSERT_ERROR(osErr, "Error while getting audio devices: AudioHardwareGetProperty 2");
     if (WUIsError(osErr))
         throw osErr;
-    
+
     //now add the ones that are not there...
     for (size_t deviceIndex = 0; deviceIndex < numDevices; deviceIndex++)
     {
         DeviceInfo* pDevInfo = 0;
-        
+
         //Get device name and create new DeviceInfo entry
         //Get property name size.
         osErr = AudioDeviceGetPropertyInfo(deviceIDs[deviceIndex], 0, 0, kAudioDevicePropertyDeviceName, &propSize, NULL);
@@ -306,9 +306,9 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceId()
             {
                 if ( (m_DeviceName == deviceName) &&
                      (m_DeviceID != deviceIDs[deviceIndex]) ) {
-                    
+
                     m_DeviceID = deviceIDs[deviceIndex];
-                    
+
                     m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Current device has changed it's id.");
                 }
             }
@@ -317,7 +317,7 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceId()
                 retVal = eCoreAudioFailed;
                 DEBUG_MSG("Failed to get device name. Device ID: " << m_DeviceID);
             }
-            
+
             delete [] deviceName;
         }
         else
@@ -326,14 +326,14 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceId()
             DEBUG_MSG("Failed to get device name prop Info. Device ID: " << m_DeviceID);
         }
     }
-    
+
     delete [] deviceIDs;
 	return retVal;
 }
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::UpdateDeviceName 
+// WCMRCoreAudioDevice::UpdateDeviceName
 //
 //! Updates Device name.
 //!
@@ -341,20 +341,20 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceId()
 //!
 //! 1. Get property name size.
 //! 2. Get property: name.
-//! 
+//!
 //! \return WTErr.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::UpdateDeviceName()
 {
     AUTO_FUNC_DEBUG;
-    WTErr retVal = eNoErr;  
+    WTErr retVal = eNoErr;
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
-    
+
     // Initiate name to unknown.
     m_DeviceName = "Unknown";
-    
+
     //! 1. Get property name size.
     err = AudioDeviceGetPropertyInfo(m_DeviceID, 0, 0, kAudioDevicePropertyDeviceName, &propSize, NULL);
     if (err == kAudioHardwareNoError)
@@ -371,7 +371,7 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceName()
             retVal = eCoreAudioFailed;
             DEBUG_MSG("Failed to get device name. Device ID: " << m_DeviceID);
         }
-        
+
         delete [] deviceName;
     }
     else
@@ -379,12 +379,12 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceName()
         retVal = eCoreAudioFailed;
         DEBUG_MSG("Failed to get device name property size. Device ID: " << m_DeviceID);
     }
-    
+
     return retVal;
 }
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::UpdateDeviceInputs 
+// WCMRCoreAudioDevice::UpdateDeviceInputs
 //
 //! Updates Device Inputs.
 //!
@@ -397,18 +397,18 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceName()
 //! 1. Get property cannels input size.
 //! 2. Get property: cannels input.
 //! 3. Update input channels
-//! 
+//!
 //! \return WTErr.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
 {
     AUTO_FUNC_DEBUG;
-    WTErr retVal = eNoErr;  
+    WTErr retVal = eNoErr;
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
     int maxInputChannels = 0;
-    
+
     // 1. Get property cannels input size.
     err = AudioDeviceGetPropertyInfo (m_DeviceID, 0, 1/* Input */, kAudioDevicePropertyStreamConfiguration, &propSize, NULL);
     if (err == kAudioHardwareNoError)
@@ -417,11 +417,11 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
 
         // Allocate size according to the property size. Note that this is a variable sized struct...
         AudioBufferList *pStreamBuffers = (AudioBufferList *)malloc(propSize);
-        
+
         if (pStreamBuffers)
         {
             memset (pStreamBuffers, 0, propSize);
-        
+
             // Get the Input channels
             err = AudioDeviceGetProperty (m_DeviceID, 0, true/* Input */, kAudioDevicePropertyStreamConfiguration, &propSize, pStreamBuffers);
             if (err == kAudioHardwareNoError)
@@ -437,7 +437,7 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
                 retVal = eCoreAudioFailed;
                 DEBUG_MSG("Failed to get device Input channels. Device Name: " << m_DeviceName.c_str());
             }
-            
+
             free (pStreamBuffers);
         }
         else
@@ -451,24 +451,24 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
         retVal = eCoreAudioFailed;
         DEBUG_MSG("Failed to get device Input channels property size. Device Name: " << m_DeviceName.c_str());
     }
-    
+
     // Update input channels
     m_InputChannels.clear();
-    
+
     for (int channel = 0; channel < maxInputChannels; channel++)
     {
         CFStringRef cfName;
         std::stringstream chNameStream;
         UInt32 nameSize = 0;
         OSStatus error = kAudioHardwareNoError;
-        
+
         error = AudioDeviceGetPropertyInfo (m_DeviceID,
                                             channel + 1,
                                             true /* Input */,
                                             kAudioDevicePropertyChannelNameCFString,
                                             &nameSize,
                                             NULL);
-        
+
         if (error == kAudioHardwareNoError)
         {
             error = AudioDeviceGetProperty (m_DeviceID,
@@ -478,7 +478,7 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
                                             &nameSize,
                                             &cfName);
         }
-  
+
         bool decoded = false;
         char* cstr_name = 0;
         if (error == kAudioHardwareNoError)
@@ -488,9 +488,9 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
             cstr_name = new char[maxSize];
             decoded = CFStringGetCString(cfName, cstr_name, maxSize, kCFStringEncodingUTF8);
         }
-        
+
         chNameStream << (channel+1) << " - ";
-        
+
         if (cstr_name && decoded && (0 != std::strlen(cstr_name) ) ) {
             chNameStream << cstr_name;
         }
@@ -500,15 +500,15 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
         }
 
         m_InputChannels.push_back (chNameStream.str());
-        
+
         delete [] cstr_name;
     }
-    
+
     return retVal;
 }
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::UpdateDeviceOutputs 
+// WCMRCoreAudioDevice::UpdateDeviceOutputs
 //
 //! Updates Device Outputs.
 //!
@@ -521,31 +521,31 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
 //! 1. Get property cannels output size.
 //! 2. Get property: cannels output.
 //! 3. Update output channels
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::UpdateDeviceOutputs()
 {
     AUTO_FUNC_DEBUG;
-    
-    WTErr retVal = eNoErr;  
+
+    WTErr retVal = eNoErr;
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
     int maxOutputChannels = 0;
-    
+
     //! 1. Get property cannels output size.
     err = AudioDeviceGetPropertyInfo (m_DeviceID, 0, 0/* Output */, kAudioDevicePropertyStreamConfiguration, &propSize, NULL);
     if (err == kAudioHardwareNoError)
     {
         //! 2. Get property: cannels output.
-        
+
         // Allocate size according to the property size. Note that this is a variable sized struct...
         AudioBufferList *pStreamBuffers = (AudioBufferList *)malloc(propSize);
         if (pStreamBuffers)
         {
             memset (pStreamBuffers, 0, propSize);
-        
+
             // Get the Output channels
             err = AudioDeviceGetProperty (m_DeviceID, 0, 0/* Output */, kAudioDevicePropertyStreamConfiguration, &propSize, pStreamBuffers);
             if (err == kAudioHardwareNoError)
@@ -574,7 +574,7 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceOutputs()
         retVal = eCoreAudioFailed;
         DEBUG_MSG("Failed to get device Output channels property size. Device Name: " << m_DeviceName.c_str());
     }
-    
+
     // Update output channels
     m_OutputChannels.clear();
     for (int channel = 0; channel < maxOutputChannels; channel++)
@@ -583,14 +583,14 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceOutputs()
         std::stringstream chNameStream;
         UInt32 nameSize = 0;
         OSStatus error = kAudioHardwareNoError;
-        
+
         error = AudioDeviceGetPropertyInfo (m_DeviceID,
                                             channel + 1,
                                             false /* Output */,
                                             kAudioDevicePropertyChannelNameCFString,
                                             &nameSize,
                                             NULL);
-        
+
         if (error == kAudioHardwareNoError)
         {
             error = AudioDeviceGetProperty (m_DeviceID,
@@ -600,7 +600,7 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceOutputs()
                                                 &nameSize,
                                                 &cfName);
         }
-        
+
         bool decoded = false;
         char* cstr_name = 0;
         if (error == kAudioHardwareNoError )
@@ -610,9 +610,9 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceOutputs()
             cstr_name = new char[maxSize];
             decoded = CFStringGetCString(cfName, cstr_name, maxSize, kCFStringEncodingUTF8);
         }
-        
+
         chNameStream << (channel+1) << " - ";
-        
+
         if (cstr_name && decoded && (0 != std::strlen(cstr_name) ) ) {
             chNameStream << cstr_name;
         }
@@ -620,17 +620,17 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceOutputs()
         {
             chNameStream << "Output " << (channel+1);
         }
-        
+
         m_OutputChannels.push_back (chNameStream.str());
-        
+
         delete [] cstr_name;
     }
-    
+
     return retVal;
 }
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::UpdateDeviceSampleRates 
+// WCMRCoreAudioDevice::UpdateDeviceSampleRates
 //
 //! Updates Device Sample rates.
 //!
@@ -639,43 +639,43 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceOutputs()
 //! 1. Get sample rate property size.
 //! 2. Get property: sample rates.
 //! 3. Update sample rates
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::UpdateDeviceSampleRates()
 {
     AUTO_FUNC_DEBUG;
-    
-    WTErr retVal = eNoErr;  
+
+    WTErr retVal = eNoErr;
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
-    
+
     m_SamplingRates.clear();
-    
+
     //! 1. Get sample rate property size.
     err = AudioDeviceGetPropertyInfo(m_DeviceID, 0, 0, kAudioDevicePropertyAvailableNominalSampleRates, &propSize, NULL);
     if (err == kAudioHardwareNoError)
     {
         //! 2. Get property: cannels output.
-        
+
         // Allocate size accrding to the number of audio values
         int numRates = propSize / sizeof(AudioValueRange);
         AudioValueRange* supportedRates = new AudioValueRange[numRates];
-        
+
         // Get sampling rates from Audio device
         err = AudioDeviceGetProperty(m_DeviceID, 0, 0, kAudioDevicePropertyAvailableNominalSampleRates, &propSize, supportedRates);
         if (err == kAudioHardwareNoError)
         {
             //! 3. Update sample rates
-            
+
             // now iterate through our standard SRs
             for(int ourSR=0; gAllSampleRates[ourSR] > 0; ourSR++)
             {
                 //check to see if our SR is in the supported rates...
                 for (int deviceSR = 0; deviceSR < numRates; deviceSR++)
                 {
-                    if ((supportedRates[deviceSR].mMinimum <= gAllSampleRates[ourSR]) && 
+                    if ((supportedRates[deviceSR].mMinimum <= gAllSampleRates[ourSR]) &&
                         (supportedRates[deviceSR].mMaximum >= gAllSampleRates[ourSR]))
                     {
                         m_SamplingRates.push_back ((int)gAllSampleRates[ourSR]);
@@ -689,7 +689,7 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceSampleRates()
             retVal = eCoreAudioFailed;
             DEBUG_MSG("Failed to get device Sample rates. Device Name: " << m_DeviceName.c_str());
         }
-        
+
         delete [] supportedRates;
     }
     else
@@ -697,13 +697,13 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceSampleRates()
         retVal = eCoreAudioFailed;
         DEBUG_MSG("Failed to get device Sample rates property size. Device Name: " << m_DeviceName.c_str());
     }
-    
+
     return retVal;
 }
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::UpdateDeviceBufferSizes_Simple 
+// WCMRCoreAudioDevice::UpdateDeviceBufferSizes_Simple
 //
 // Use kAudioDevicePropertyBufferFrameSizeRange
 //
@@ -712,21 +712,21 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceSampleRates()
 //
 // 1. Get buffer size range
 // 2. Run on all ranges and add them to the list
-// 
+//
 // \return error code
-// 
+//
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::UpdateDeviceBufferSizes ()
 {
     AUTO_FUNC_DEBUG;
-    
+
     WTErr retVal = eNoErr;
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
-    
+
     // Clear buffer sizes
     m_BufferSizes.clear();
-    
+
     // 1. Get buffer size range
     AudioValueRange bufferSizesRange;
     propSize = sizeof (AudioValueRange);
@@ -741,7 +741,7 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceBufferSizes ()
                 m_BufferSizes.push_back (gAllBufferSizes[bsize]);
             }
         }
-        
+
         //if we didn't get a single hit, let's simply add the min. and the max...
         if (m_BufferSizes.empty())
         {
@@ -754,21 +754,21 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceBufferSizes ()
         retVal = eCoreAudioFailed;
         DEBUG_MSG("Failed to get device buffer sizes range. Device Name: " << m_DeviceName.c_str());
     }
-    
+
     return retVal;
 }
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::DeviceName 
+// WCMRCoreAudioDevice::DeviceName
 //
 //! in case of 'eMatchedDuplexDevices' and a matching device exists return common device name
 //! in all other cases retur base class function implementation
 //!
 //! \param none
-//! 
+//!
 //! \return current device name
-//! 
+//!
 //**********************************************************************************************
 const std::string& WCMRCoreAudioDevice::DeviceName() const
 {
@@ -776,14 +776,14 @@ const std::string& WCMRCoreAudioDevice::DeviceName() const
 }
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::InputChannels 
+// WCMRCoreAudioDevice::InputChannels
 //
 //! return base class function implementation
 //!
 //! \param none
-//! 
+//!
 //! \return base class function implementation
-//! 
+//!
 //**********************************************************************************************
 const std::vector<std::string>& WCMRCoreAudioDevice::InputChannels()
 {
@@ -791,15 +791,15 @@ const std::vector<std::string>& WCMRCoreAudioDevice::InputChannels()
 }
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::OutputChannels 
+// WCMRCoreAudioDevice::OutputChannels
 //
 //! in case of 'eMatchedDuplexDevices' return matching device output channel if there is one
 //! in all other cases retur base class function implementation
 //!
 //! \param none
-//! 
+//!
 //! \return list of output channels of current device
-//! 
+//!
 //**********************************************************************************************
 const std::vector<std::string>& WCMRCoreAudioDevice::OutputChannels()
 {
@@ -808,15 +808,15 @@ const std::vector<std::string>& WCMRCoreAudioDevice::OutputChannels()
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::SamplingRates 
+// WCMRCoreAudioDevice::SamplingRates
 //
 //! in case of 'eMatchedDuplexDevices' and a matching device exists return common sample rate
 //! in all other cases retur base class function implementation
 //!
 //! \param none
-//! 
+//!
 //! \return current sample rate
-//! 
+//!
 //**********************************************************************************************
 const std::vector<int>& WCMRCoreAudioDevice::SamplingRates()
 {
@@ -824,15 +824,15 @@ const std::vector<int>& WCMRCoreAudioDevice::SamplingRates()
 }
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::CurrentSamplingRate 
+// WCMRCoreAudioDevice::CurrentSamplingRate
 //
-//! The device's current sampling rate. This may be overridden, if the device needs to 
+//! The device's current sampling rate. This may be overridden, if the device needs to
 //!     query the driver for the current rate.
 //!
 //! \param none
-//! 
+//!
 //! \return The device's current sampling rate. -1 on error.
-//! 
+//!
 //**********************************************************************************************
 int WCMRCoreAudioDevice::CurrentSamplingRate ()
 {
@@ -846,7 +846,7 @@ int WCMRCoreAudioDevice::CurrentSamplingRate ()
     err = kAudioHardwareNoError;
     if (AudioDeviceGetProperty(m_DeviceID, 0, 0, kAudioDevicePropertyNominalSampleRate, &propSize, &currentNominalRate) != kAudioHardwareNoError)
         err = AudioDeviceGetProperty(m_DeviceID, 0, 1, kAudioDevicePropertyNominalSampleRate, &propSize, &currentNominalRate);
-        
+
     if (err == kAudioHardwareNoError)
         m_CurrentSamplingRate = (int)currentNominalRate;
     else
@@ -861,14 +861,14 @@ int WCMRCoreAudioDevice::CurrentSamplingRate ()
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::SetCurrentSamplingRate 
+// WCMRCoreAudioDevice::SetCurrentSamplingRate
 //
-//! Change the sampling rate to be used by the device. 
+//! Change the sampling rate to be used by the device.
 //!
 //! \param newRate : The rate to use (samples per sec).
-//! 
+//!
 //! \return eNoErr always. The derived classes may return error codes.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::SetCurrentSamplingRate (int newRate)
 {
@@ -879,7 +879,7 @@ WTErr WCMRCoreAudioDevice::SetCurrentSamplingRate (int newRate)
     //changes the status.
     int oldRate = CurrentSamplingRate();
     bool oldActive = Active();
-    
+
     //no change, nothing to do
     if (oldRate == newRate)
         goto Exit;
@@ -892,7 +892,7 @@ WTErr WCMRCoreAudioDevice::SetCurrentSamplingRate (int newRate)
         retVal = eCommandLineParameter;
         goto Exit;
     }
-    
+
     if (Streaming())
     {
         //Can't change, perhaps use an "in use" type of error
@@ -905,34 +905,34 @@ WTErr WCMRCoreAudioDevice::SetCurrentSamplingRate (int newRate)
         //Deactivate it for the change...
         SetActive (false);
     }
-    
+
     retVal = SetAndCheckCurrentSamplingRate (newRate);
     if(retVal == eNoErr)
     {
         retVal = UpdateDeviceInfo ();
     }
 
-    //reactivate it.    
+    //reactivate it.
     if (oldActive)
     {
         retVal = SetActive (true);
     }
-    
+
 Exit:
 
     return (retVal);
-        
+
 }
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate 
+// WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate
 //
-//! Change the sampling rate to be used by the device. 
+//! Change the sampling rate to be used by the device.
 //!
 //! \param newRate : The rate to use (samples per sec).
-//! 
+//!
 //! \return eNoErr always. The derived classes may return error codes.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate (int newRate)
 {
@@ -941,12 +941,12 @@ WTErr WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate (int newRate)
     WTErr retVal = eNoErr;
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
-    
+
     // 1. Set new sampling rate
     Float64 newNominalRate = newRate;
     propSize = sizeof (Float64);
     err = AudioDeviceSetProperty(m_DeviceID, NULL, 0, 0, kAudioDevicePropertyNominalSampleRate, propSize, &newNominalRate);
-    
+
     if (err != kAudioHardwareNoError)
     {
         retVal = eCoreAudioFailed;
@@ -955,12 +955,12 @@ WTErr WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate (int newRate)
     else
     {
         // 2. wait for the SR to actually change...
-        
+
         // Set total time out time
         int tryAgain = ((PROPERTY_CHANGE_TIMEOUT_SECONDS * 1000) / PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS) ;
         int actualWait = 0;
         Float64 actualSamplingRate = 0.0;
-        
+
         // Run as ling as time out is not finished
         while (tryAgain)
         {
@@ -980,21 +980,21 @@ WTErr WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate (int newRate)
                 m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Could not read Sampling Rate for verification.");
                 DEBUG_MSG ("Unable to get SR. Device name: " << m_DeviceName.c_str());
             }
-            
+
             // oh well...there's always another millisecond...
             wvThread::sleep_milliseconds (PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS);
             tryAgain--;
             actualWait++;
         }
-        
+
         // If sample rate actually changed
         if (tryAgain != 0)
         {
             m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Changed the Sampling Rate.");
-            
+
             // Update member with new rate
             m_CurrentSamplingRate = newRate;
-            
+
             char debugMsg[128];
             snprintf (debugMsg, sizeof(debugMsg), "Actual Wait for SR Change was %d milliseconds", actualWait * PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS);
             m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)debugMsg);
@@ -1010,15 +1010,15 @@ WTErr WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate (int newRate)
                     found = true;
                 }
             }
-            
+
             if (found) {
                 // Update member with last read value
                 m_CurrentSamplingRate = static_cast<int>(actualSamplingRate);
-                
+
                 char debugMsg[128];
                 snprintf (debugMsg, sizeof(debugMsg), "Unable to change SR, even after waiting for %d milliseconds", actualWait * PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS);
                 m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)debugMsg);
-                
+
                 float sample_rate_update = actualSamplingRate;
                 m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::SamplingRateChanged, (void *)&sample_rate_update);
             } else {
@@ -1026,21 +1026,21 @@ WTErr WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate (int newRate)
             }
         }
     }
-    
+
     return (retVal);
 }
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::BufferSizes 
+// WCMRCoreAudioDevice::BufferSizes
 //
 //! in case of 'eMatchedDuplexDevices' and a matching device exists return common buffer sizes
 //! in all other cases retur base class function implementation
 //!
 //! \param none
-//! 
+//!
 //! \return current sample rate
-//! 
+//!
 //**********************************************************************************************
 const std::vector<int>& WCMRCoreAudioDevice::BufferSizes()
 {
@@ -1051,13 +1051,13 @@ const std::vector<int>& WCMRCoreAudioDevice::BufferSizes()
 //**********************************************************************************************
 // WCMRCoreAudioDevice::CurrentBufferSize
 //
-//! The device's current buffer size in use. This may be overridden, if the device needs to 
+//! The device's current buffer size in use. This may be overridden, if the device needs to
 //!     query the driver for the current size.
 //!
 //! \param none
-//! 
+//!
 //! \return The device's current buffer size. 0 on error.
-//! 
+//!
 //**********************************************************************************************
 int WCMRCoreAudioDevice::CurrentBufferSize ()
 {
@@ -1071,13 +1071,13 @@ int WCMRCoreAudioDevice::CurrentBufferSize ()
 //**********************************************************************************************
 // WCMRCoreAudioDevice::SetCurrentBufferSize
 //
-//! Change the buffer size to be used by the device. This will most likely be overridden, 
+//! Change the buffer size to be used by the device. This will most likely be overridden,
 //!     the base class simply updates the member variable.
 //!
 //! \param newSize : The buffer size to use (in sample-frames)
-//! 
+//!
 //! \return eNoErr always. The derived classes may return error codes.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::SetCurrentBufferSize (int newSize)
 {
@@ -1092,20 +1092,20 @@ WTErr WCMRCoreAudioDevice::SetCurrentBufferSize (int newSize)
     //same size, nothing to do.
     if (oldSize == newSize)
         goto Exit;
-    
+
     if (Streaming())
     {
         //Can't change, perhaps use an "in use" type of error
         retVal = eGenericErr;
         goto Exit;
     }
-    
+
     if (oldActive)
     {
         //Deactivate it for the change...
         SetActive (false);
     }
-    
+
     // when audio device is inactive it is safe to set a working buffer size according to new buffer size
     // if 'newSize' is not a valid buffer size, another valid buffer size will be set
     retVal = SetWorkingBufferSize(newSize);
@@ -1115,7 +1115,7 @@ WTErr WCMRCoreAudioDevice::SetCurrentBufferSize (int newSize)
         goto Exit;
     }
 
-    //reactivate it.    
+    //reactivate it.
     if (oldActive)
     {
         retVal = SetActive (true);
@@ -1125,9 +1125,9 @@ WTErr WCMRCoreAudioDevice::SetCurrentBufferSize (int newSize)
             goto Exit;
         }
     }
-    
+
 Exit:
-    
+
     return (retVal);
 }
 
@@ -1136,10 +1136,10 @@ WTErr WCMRCoreAudioDevice::SetWorkingBufferSize(int newSize)
     AUTO_FUNC_DEBUG;
     WTErr retVal = eNoErr;
     OSStatus err = kAudioHardwareNoError;
-    
+
     // 1. Set new buffer size
     err = SetBufferSizesByIO(newSize);
-    
+
     // If there's no error it means this buffer size is supported
     if(err == kAudioHardwareNoError)
     {
@@ -1151,18 +1151,18 @@ WTErr WCMRCoreAudioDevice::SetWorkingBufferSize(int newSize)
         // In case the new buffer size could not be set, set another working buffer size
 
         // Run on all buffer sizes:
-        
+
         // Try setting buffer sizes that are bigger then selected buffer size first,
-        // Since bigger buffer sizes usually work safer 
+        // Since bigger buffer sizes usually work safer
         for(std::vector<int>::const_iterator iter = m_BufferSizes.begin();iter != m_BufferSizes.end();++iter)
         {
             int nCurBS = *iter;
-            
+
             if(nCurBS > newSize)
             {
                 // Try setting current buffer size
                 err = SetBufferSizesByIO(nCurBS);
-                
+
                 // in case buffer size is valid
                 if(err == kAudioHardwareNoError)
                 {
@@ -1172,19 +1172,19 @@ WTErr WCMRCoreAudioDevice::SetWorkingBufferSize(int newSize)
                 }
             }
         }
-        
+
         // If bigger buffer sizes failed, go to smaller buffer sizes
         if(err != kAudioHardwareNoError)
         {
             for(std::vector<int>::const_iterator iter = m_BufferSizes.begin();iter != m_BufferSizes.end();++iter)
             {
                 int nCurBS = *iter;
-                
+
                 if(nCurBS < newSize)
                 {
                     // Try setting current buffer size
                     err = SetBufferSizesByIO(*iter);
-                    
+
                     // in case buffer size is valid
                     if(err == kAudioHardwareNoError)
                     {
@@ -1195,7 +1195,7 @@ WTErr WCMRCoreAudioDevice::SetWorkingBufferSize(int newSize)
                 }
             }
         }
-        
+
         // Check if a valid buffer size was found
         if(err == kAudioHardwareNoError)
         {
@@ -1212,18 +1212,18 @@ WTErr WCMRCoreAudioDevice::SetWorkingBufferSize(int newSize)
             DEBUG_MSG("Unable to set any buffer size. Device Name: " << m_DeviceName.c_str());
         }
     }
-    
+
     return retVal;
 }
 
 OSStatus WCMRCoreAudioDevice::SetBufferSizesByIO(int newSize)
 {
     OSStatus err = kAudioHardwareNoError;
-    
+
     // 1. Set new buffer size
     UInt32 bufferSize = (UInt32)newSize;
     UInt32 propSize = sizeof (UInt32);
-    
+
     // Set new buffer size to input
     if (!m_InputChannels.empty())
     {
@@ -1233,27 +1233,27 @@ OSStatus WCMRCoreAudioDevice::SetBufferSizesByIO(int newSize)
     {
         err = AudioDeviceSetProperty(m_DeviceID, NULL, 0, 0, kAudioDevicePropertyBufferFrameSize, propSize, &bufferSize);
     }
-    
+
     return err;
 }
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::ConnectionStatus 
+// WCMRCoreAudioDevice::ConnectionStatus
 //
 //! Retrieves the device's current connection status. This will most likely be overridden,
 //!     in case some driver communication is required to query the status.
 //!
 //! \param none
-//! 
+//!
 //! \return A ConnectionStates value.
-//! 
+//!
 //**********************************************************************************************
 WCMRCoreAudioDevice::ConnectionStates WCMRCoreAudioDevice::ConnectionStatus ()
 {
     AUTO_FUNC_DEBUG;
     //ToDo: May want to do something more to extract the actual status!
     return (m_ConnectionStatus);
-    
+
 }
 
 
@@ -1263,25 +1263,25 @@ WCMRCoreAudioDevice::ConnectionStates WCMRCoreAudioDevice::ConnectionStatus ()
 //! Sets up the AUHAL for IO, allowing changes to the devices to be used by the AudioUnit.
 //!
 //! \param none
-//! 
+//!
 //! \return eNoErr on success, an error code on failure.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::EnableAudioUnitIO()
 {
     AUTO_FUNC_DEBUG;
     WTErr retVal = eNoErr;
     OSStatus err = kAudioHardwareNoError;
-    
+
     UInt32 enableIO = 1;
     if (!m_InputChannels.empty())
     {
         ///////////////
         //ENABLE IO (INPUT)
-        //You must enable the Audio Unit (AUHAL) for input 
-        
+        //You must enable the Audio Unit (AUHAL) for input
+
         //Enable input on the AUHAL
-        err =  AudioUnitSetProperty(m_AUHALAudioUnit, 
+        err =  AudioUnitSetProperty(m_AUHALAudioUnit,
                                     kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input,
                                     AUHAL_INPUT_ELEMENT,
                                     &enableIO, sizeof(enableIO));
@@ -1293,18 +1293,18 @@ WTErr WCMRCoreAudioDevice::EnableAudioUnitIO()
             goto Exit;
         }
     }
-    
+
     //disable Output on the AUHAL if there's no output
     if (m_OutputChannels.empty())
         enableIO = 0;
     else
         enableIO = 1;
-        
+
     err = AudioUnitSetProperty(m_AUHALAudioUnit,
                                kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Output,
                                AUHAL_OUTPUT_ELEMENT,
                                &enableIO, sizeof(enableIO));
-        
+
     if (err)
     {
         DEBUG_MSG("Couldn't Enable/Disable IO on output scope of output element, error = " << err);
@@ -1323,9 +1323,9 @@ Exit:
 //! Sets up listeners to listen for Audio Device property changes, so that app can be notified.
 //!
 //! \param none
-//! 
+//!
 //! \return eNoErr on success, an error code on failure.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::EnableListeners()
 {
@@ -1336,7 +1336,7 @@ WTErr WCMRCoreAudioDevice::EnableListeners()
     //listner for SR change...
     err = AudioDeviceAddPropertyListener(m_DeviceID, 0, 0, kAudioDevicePropertyNominalSampleRate,
                                          StaticPropertyChangeProc, this);
-    
+
     if (err)
     {
         DEBUG_MSG("Couldn't Setup SR Property Listner, error = " << err);
@@ -1347,14 +1347,14 @@ WTErr WCMRCoreAudioDevice::EnableListeners()
 #if ENABLE_DEVICE_CHANGE_LISTNER
     {
         //listner for device change...
-        
+
         err = AudioDeviceAddPropertyListener (m_DeviceID,
                                               kAudioPropertyWildcardChannel,
                                               true,
                                               kAudioDevicePropertyDeviceHasChanged,
                                               StaticPropertyChangeProc,
                                               this);
-                
+
         if (err)
         {
             DEBUG_MSG("Couldn't Setup device change Property Listner, error = " << err);
@@ -1362,21 +1362,21 @@ WTErr WCMRCoreAudioDevice::EnableListeners()
             goto Exit;
         }
     }
-#endif //ENABLE_DEVICE_CHANGE_LISTNER   
-    
+#endif //ENABLE_DEVICE_CHANGE_LISTNER
+
     //listner for dropouts...
     err = AudioDeviceAddPropertyListener(m_DeviceID, 0, 0, kAudioDeviceProcessorOverload,
                                          StaticPropertyChangeProc, this);
-        
+
     if (err)
     {
         DEBUG_MSG("Couldn't Setup Processor Overload Property Listner, error = " << err);
         retVal = eGenericErr;
         goto Exit;
     }
-    
 
-Exit:   
+
+Exit:
     return retVal;
 }
 
@@ -1388,9 +1388,9 @@ Exit:
 //! Undoes the work done by EnableListeners
 //!
 //! \param none
-//! 
+//!
 //! \return eNoErr on success, an error code on failure.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::DisableListeners()
 {
@@ -1401,39 +1401,39 @@ WTErr WCMRCoreAudioDevice::DisableListeners()
     //listner for SR change...
     err = AudioDeviceRemovePropertyListener(m_DeviceID, 0, 0, kAudioDevicePropertyNominalSampleRate,
                                             StaticPropertyChangeProc);
-        
+
     if (err)
     {
         DEBUG_MSG("Couldn't Cleanup SR Property Listner, error = " << err);
         //not sure if we need to report this...
     }
 
-#if ENABLE_DEVICE_CHANGE_LISTNER    
+#if ENABLE_DEVICE_CHANGE_LISTNER
     {
         err = AudioDeviceRemovePropertyListener (m_DeviceID,
                                                  kAudioPropertyWildcardChannel,
                                                  true/* Input */,
                                                  kAudioDevicePropertyDeviceHasChanged,
                                                  StaticPropertyChangeProc);
-        
+
         if (err)
         {
             DEBUG_MSG("Couldn't Cleanup device input stream change Property Listner, error = " << err);
             //not sure if we need to report this...
         }
-        
+
     }
-#endif //ENABLE_DEVICE_CHANGE_LISTNER   
+#endif //ENABLE_DEVICE_CHANGE_LISTNER
 
     err = AudioDeviceRemovePropertyListener(m_DeviceID, 0, 0, kAudioDeviceProcessorOverload,
                                             StaticPropertyChangeProc);
-        
+
     if (err)
     {
         DEBUG_MSG("Couldn't Cleanup device change Property Listner, error = " << err);
         //not sure if we need to report this...
     }
-    
+
 
     return retVal;
 }
@@ -1450,9 +1450,9 @@ WTErr WCMRCoreAudioDevice::DisableListeners()
 //! \param isInput : If the change is for Input.
 //! \param inPropertyID : The property that has changed.
 //! \param inClientData: What was passed when listener was enabled, in our case teh WCMRCoreAudioDevice object.
-//! 
+//!
 //! \return 0 always.
-//! 
+//!
 //**********************************************************************************************
 OSStatus WCMRCoreAudioDevice::StaticPropertyChangeProc (AudioDeviceID /*inDevice*/, UInt32 /*inChannel*/, Boolean /*isInput*/,
                                                         AudioDevicePropertyID inPropertyID, void *inClientData)
@@ -1462,7 +1462,7 @@ OSStatus WCMRCoreAudioDevice::StaticPropertyChangeProc (AudioDeviceID /*inDevice
         WCMRCoreAudioDevice* pCoreDevice = (WCMRCoreAudioDevice *)inClientData;
         pCoreDevice->PropertyChangeProc (inPropertyID);
     }
-        
+
     return 0;
 }
 
@@ -1475,9 +1475,9 @@ OSStatus WCMRCoreAudioDevice::StaticPropertyChangeProc (AudioDeviceID /*inDevice
 //!     on an arbitrary thread, we simply update the request counters and return.
 //!
 //! \param none
-//! 
+//!
 //! \return nothing.
-//! 
+//!
 //**********************************************************************************************
 void WCMRCoreAudioDevice::PropertyChangeProc (AudioDevicePropertyID inPropertyID)
 {
@@ -1486,14 +1486,14 @@ void WCMRCoreAudioDevice::PropertyChangeProc (AudioDevicePropertyID inPropertyID
     case kAudioDevicePropertyNominalSampleRate:
         m_SRChangeRequested++;
         break;
-#if ENABLE_DEVICE_CHANGE_LISTNER    
+#if ENABLE_DEVICE_CHANGE_LISTNER
     case kAudioDevicePropertyDeviceHasChanged:
         {
             m_ResetRequested++;
             m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
         }
         break;
-#endif //ENABLE_DEVICE_CHANGE_LISTNER   
+#endif //ENABLE_DEVICE_CHANGE_LISTNER
     case kAudioDeviceProcessorOverload:
         {
         if (m_IgnoreThisDrop)
@@ -1515,9 +1515,9 @@ void WCMRCoreAudioDevice::PropertyChangeProc (AudioDevicePropertyID inPropertyID
 //! Sets up the AUHAL AudioUnit for device IO.
 //!
 //! \param none
-//! 
+//!
 //! \return eNoErr on success, an error code on failure.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::SetupAUHAL()
 {
@@ -1533,17 +1533,17 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
     //Some audio units serve as Outputs, Mixers, or DSP
     //units. See AUComponent.h for listing
     desc.componentType = kAudioUnitType_Output;
-    
+
     //Every Component has a subType, which will give a clearer picture
     //of what this components function will be.
     desc.componentSubType = kAudioUnitSubType_HALOutput;
-    
-    //all Audio Units in AUComponent.h must use 
+
+    //all Audio Units in AUComponent.h must use
     //"kAudioUnitManufacturer_Apple" as the Manufacturer
     desc.componentManufacturer = kAudioUnitManufacturer_Apple;
     desc.componentFlags = 0;
     desc.componentFlagsMask = 0;
-    
+
     //Finds a component that meets the desc spec's
     comp = FindNextComponent(NULL, &desc);
     if (comp == NULL)
@@ -1552,17 +1552,17 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
         retVal = eGenericErr;
         goto Exit;
     }
-    
-    //gains access to the services provided by the component
-    OpenAComponent(comp, &m_AUHALAudioUnit);  
 
-    
+    //gains access to the services provided by the component
+    OpenAComponent(comp, &m_AUHALAudioUnit);
+
+
     retVal = EnableAudioUnitIO();
     if (retVal != eNoErr)
         goto Exit;
 
     //Now setup the device to use by the audio unit...
-    
+
     //input
     if (!m_InputChannels.empty())
     {
@@ -1592,7 +1592,7 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
             goto Exit;
         }
     }
-    
+
     //also set Sample Rate...
     {
         retVal = SetAndCheckCurrentSamplingRate(m_CurrentSamplingRate);
@@ -1612,10 +1612,10 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
             //we don't really quit here..., just keep going even if this does not work,
             //the AUHAL is supposed to take care of this by way of slicing...
             m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Could not set buffer size.");
-            
+
         }
     }
-    
+
     //convertor quality
     {
         UInt32 quality = kAudioConverterQuality_Max;
@@ -1624,7 +1624,7 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
                                    kAudioUnitProperty_RenderQuality, kAudioUnitScope_Global,
                                    AUHAL_OUTPUT_ELEMENT,
                                    &quality, sizeof (quality));
-            
+
         if (err != kAudioHardwareNoError)
         {
             DEBUG_MSG ("Unable to set Convertor Quality, error = " << err);
@@ -1632,7 +1632,7 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
             goto Exit;
         }
     }
-    
+
     memset (&auhalStreamFormat, 0, sizeof (auhalStreamFormat));
     propSize = sizeof (auhalStreamFormat);
     err = AudioUnitGetProperty(m_AUHALAudioUnit,
@@ -1645,12 +1645,12 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
         retVal = eGenericErr;
         goto Exit;
     }
-    
+
     if (auhalStreamFormat.mSampleRate != (Float64)m_CurrentSamplingRate)
     {
         TRACE_MSG ("AUHAL's Input SR differs from expected SR, expected = " << m_CurrentSamplingRate << ", AUHAL's = " << (UInt32)auhalStreamFormat.mSampleRate);
     }
-    
+
     //format, and slice size...
     memset (&streamFormatToUse, 0, sizeof (streamFormatToUse));
     streamFormatToUse.mFormatID = kAudioFormatLinearPCM;
@@ -1676,7 +1676,7 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
             retVal = eGenericErr;
             goto Exit;
         }
-        
+
         UInt32 bufferSize = m_CurrentBufferSize;
         err = AudioUnitSetProperty(m_AUHALAudioUnit,
                                    kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Output,
@@ -1689,7 +1689,7 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
             retVal = eGenericErr;
             goto Exit;
         }
-        
+
     }
 
     if (!m_OutputChannels.empty())
@@ -1704,13 +1704,13 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
             retVal = eGenericErr;
             goto Exit;
         }
-        
+
         if (auhalStreamFormat.mSampleRate != (Float64)m_CurrentSamplingRate)
         {
             TRACE_MSG ("AUHAL's Output SR differs from expected SR, expected = " << m_CurrentSamplingRate << ", AUHAL's = " << (UInt32)auhalStreamFormat.mSampleRate);
         }
-        
-        
+
+
         streamFormatToUse.mChannelsPerFrame = m_OutputChannels.size();
         streamFormatToUse.mBytesPerFrame = sizeof (float)*streamFormatToUse.mChannelsPerFrame;
         streamFormatToUse.mBytesPerPacket = streamFormatToUse.mBytesPerFrame;
@@ -1742,7 +1742,7 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
         }
 
     }
-    
+
     //setup callback (IOProc)
     {
         AURenderCallbackStruct renderCallback;
@@ -1750,13 +1750,13 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
         propSize = sizeof (renderCallback);
         renderCallback.inputProc = StaticAudioIOProc;
         renderCallback.inputProcRefCon = this;
-        
+
         err = AudioUnitSetProperty(m_AUHALAudioUnit,
                                    (m_OutputChannels.empty() ? (AudioUnitPropertyID)kAudioOutputUnitProperty_SetInputCallback : (AudioUnitPropertyID)kAudioUnitProperty_SetRenderCallback),
                                    kAudioUnitScope_Output,
                                    m_OutputChannels.empty() ? AUHAL_INPUT_ELEMENT : AUHAL_OUTPUT_ELEMENT,
                                    &renderCallback, sizeof (renderCallback));
-            
+
         if (err != kAudioHardwareNoError)
         {
             DEBUG_MSG ("Unable to set callback, error = " << err);
@@ -1768,7 +1768,7 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
     retVal = EnableListeners();
     if (retVal != eNoErr)
         goto Exit;
-    
+
     //initialize the audio-unit now!
     err = AudioUnitInitialize(m_AUHALAudioUnit);
     if (err != kAudioHardwareNoError)
@@ -1777,11 +1777,11 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
         retVal = eGenericErr;
         goto Exit;
     }
-    
+
 Exit:
     if (retVal != eNoErr)
         TearDownAUHAL();
-        
+
     return retVal;
 }
 
@@ -1793,9 +1793,9 @@ Exit:
 //! Undoes the work done by SetupAUHAL
 //!
 //! \param none
-//! 
+//!
 //! \return eNoErr on success, an error code on failure.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::TearDownAUHAL()
 {
@@ -1814,23 +1814,23 @@ WTErr WCMRCoreAudioDevice::TearDownAUHAL()
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::SetActive 
+// WCMRCoreAudioDevice::SetActive
 //
-//! Sets the device's activation status. Essentially, opens or closes the PA device. 
+//! Sets the device's activation status. Essentially, opens or closes the PA device.
 //!     If it's an ASIO device it may result in buffer size change in some cases.
 //!
 //! \param newState : Should be true to activate, false to deactivate. This roughly corresponds
 //!     to opening and closing the device handle/stream/audio unit.
-//! 
+//!
 //! \return eNoErr on success, an error code otherwise.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::SetActive (bool newState)
 {
     AUTO_FUNC_DEBUG;
 
     WTErr retVal = eNoErr;
-    
+
     if (Active() == newState)
         goto Exit;
 
@@ -1881,10 +1881,10 @@ WTErr WCMRCoreAudioDevice::SetActive (bool newState)
 
         UpdateDeviceInfo();
     }
-    
+
     m_IsActive = newState;
-    
-Exit:   
+
+Exit:
     return (retVal);
 }
 
@@ -1919,10 +1919,10 @@ void WCMRCoreAudioDevice::SetupToneGenerator ()
         fscanf(toneGenHandle, "%d", &toneFreq);
         if ((toneFreq <= 0) || (toneFreq > (m_CurrentSamplingRate/2)))
         {
-            toneFreq = 1000;    
+            toneFreq = 1000;
         }
-        
-        
+
+
         m_ToneDataSamples = m_CurrentSamplingRate / toneFreq;
         int toneDataSamplesFrac = m_CurrentSamplingRate % m_ToneDataSamples;
         int powerOfTen = 1;
@@ -1932,10 +1932,10 @@ void WCMRCoreAudioDevice::SetupToneGenerator ()
             toneDataSamplesFrac = m_CurrentSamplingRate % m_ToneDataSamples;
             powerOfTen++;
         }
-        
+
         //allocate
         m_pToneData = new float_t[m_ToneDataSamples];
-        
+
         //fill with a -6dB Sine Tone
         uint32_t numSamplesLeft = m_ToneDataSamples;
         float_t *pNextSample = m_pToneData;
@@ -1948,9 +1948,9 @@ void WCMRCoreAudioDevice::SetupToneGenerator ()
             pNextSample++;
             numSamplesLeft--;
         }
-        
+
         m_NextSampleToUse = 0;
-        
+
         fclose(toneGenHandle);
     }
 }
@@ -1964,9 +1964,9 @@ void WCMRCoreAudioDevice::SetupToneGenerator ()
 //!
 //! \param newState : Should be true to start streaming, false to stop streaming. This roughly
 //!     corresponds to calling Start/Stop on the lower level interface.
-//! 
+//!
 //! \return eNoErr always, the derived classes may return appropriate error code.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::SetStreaming (bool newState)
 {
@@ -1988,7 +1988,7 @@ WTErr WCMRCoreAudioDevice::SetStreaming (bool newState)
         m_SampleCounter = 0;
         m_IOProcThreadPort = 0;
         m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Starting AUHAL.");
-        
+
 		// Prepare for streaming - tell Engine to do the initialization for process callback
 		m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
 
@@ -1999,11 +1999,11 @@ WTErr WCMRCoreAudioDevice::SetStreaming (bool newState)
             unsigned int computationUS = (unsigned int)(0.8 * periodAndConstraintUS); //assuming we may want to use up to 80% CPU
             //ErrandManager().SetRealTimeConstraintsForAllThreads (periodAndConstraintUS, computationUS, periodAndConstraintUS);
         }
-        
+
         err = AudioOutputUnitStart (m_AUHALAudioUnit);
-        
+
         m_StopRequested = false;
-        
+
         if(err)
         {
             DEBUG_MSG( "Failed to start AudioUnit, err " << err );
@@ -2028,7 +2028,7 @@ WTErr WCMRCoreAudioDevice::SetStreaming (bool newState)
                 err = AudioUnitReset (m_AUHALAudioUnit, kAudioUnitScope_Global, AUHAL_OUTPUT_ELEMENT);
             }
         }
-        
+
         if(err)
         {
             DEBUG_MSG( "Failed to stop AudioUnit " << err );
@@ -2041,24 +2041,24 @@ WTErr WCMRCoreAudioDevice::SetStreaming (bool newState)
     // After units restart, reset request for reset and SR change
     m_SRChangeReported = m_SRChangeRequested;
     m_ResetReported = m_ResetRequested;
-    
+
     m_IsStreaming = newState;
 
-Exit:   
+Exit:
     return (retVal);
 }
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::DoIdle 
+// WCMRCoreAudioDevice::DoIdle
 //
 //! A place for doing idle time processing. The other derived classes will probably do something
 //!     meaningful.
 //!
 //! \param none
-//! 
+//!
 //! \return eNoErr always.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::DoIdle ()
 {
@@ -2081,7 +2081,7 @@ WTErr WCMRCoreAudioDevice::DoIdle ()
         m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestResync);
         m_ResyncReported = m_ResyncRequested;
     }
-    
+
     if (m_SRChangeReported != m_SRChangeRequested)
     {
         m_SRChangeReported = m_SRChangeRequested;
@@ -2095,7 +2095,7 @@ WTErr WCMRCoreAudioDevice::DoIdle ()
         m_DropsReported = m_DropsDetected;
     }
 
-    
+
     //Perhaps add checks to make sure a stream counter is incrementing if
     //stream is supposed to be streaming!
     if (Streaming())
@@ -2117,7 +2117,7 @@ WTErr WCMRCoreAudioDevice::DoIdle ()
         }
     }*/
 
-    
+
     return (eNoErr);
 }
 
@@ -2126,15 +2126,15 @@ WTErr WCMRCoreAudioDevice::DoIdle ()
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::SetMonitorChannels 
+// WCMRCoreAudioDevice::SetMonitorChannels
 //
 //! Used to set the channels to be used for monitoring.
 //!
 //! \param leftChannel : Left monitor channel index.
 //! \param rightChannel : Right monitor channel index.
-//! 
+//!
 //! \return eNoErr always, the derived classes may return appropriate errors.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::SetMonitorChannels (int leftChannel, int rightChannel)
 {
@@ -2149,22 +2149,22 @@ WTErr WCMRCoreAudioDevice::SetMonitorChannels (int leftChannel, int rightChannel
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::SetMonitorGain 
+// WCMRCoreAudioDevice::SetMonitorGain
 //
 //! Used to set monitor gain (or atten).
 //!
-//! \param newGain : The new gain or atten. value to use. Specified as a linear multiplier (not dB) 
-//! 
+//! \param newGain : The new gain or atten. value to use. Specified as a linear multiplier (not dB)
+//!
 //! \return eNoErr always, the derived classes may return appropriate errors.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::SetMonitorGain (float newGain)
 {
     AUTO_FUNC_DEBUG;
     //This will most likely be overridden, the base class simply
     //changes the member.
-    
-    
+
+
     m_MonitorGain = newGain;
     return (eNoErr);
 }
@@ -2173,21 +2173,21 @@ WTErr WCMRCoreAudioDevice::SetMonitorGain (float newGain)
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::ShowConfigPanel 
+// WCMRCoreAudioDevice::ShowConfigPanel
 //
 //! Used to show device specific config/control panel. Some interfaces may not support it.
 //!     Some interfaces may require the device to be active before it can display a panel.
 //!
 //! \param pParam : A device/interface specific parameter, should be the app window handle for ASIO.
-//! 
+//!
 //! \return eNoErr always, the derived classes may return errors.
-//! 
+//!
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::ShowConfigPanel (void */*pParam*/)
 {
     AUTO_FUNC_DEBUG;
     WTErr retVal = eNoErr;
-    
+
     CFStringRef configAP;
     UInt32 propSize = sizeof (configAP);
     /*
@@ -2197,7 +2197,7 @@ WTErr WCMRCoreAudioDevice::ShowConfigPanel (void */*pParam*/)
       is the bundle ID for Audio MIDI Setup. The caller is responsible for
       releasing the returned CFObject.
     */
-    
+
     if (AudioDeviceGetProperty(m_DeviceID, 0, 0, kAudioDevicePropertyConfigurationApplication, &propSize, &configAP) == kAudioHardwareNoError)
     {
         //  get the FSRef of the config app
@@ -2212,16 +2212,16 @@ WTErr WCMRCoreAudioDevice::ShowConfigPanel (void */*pParam*/)
             // open default AudioMIDISetup if device app is not found
             CFStringRef audiMidiSetupApp = CFStringCreateWithCString(kCFAllocatorDefault, "com.apple.audio.AudioMIDISetup", kCFStringEncodingMacRoman);
             theError = LSFindApplicationForInfo(kLSUnknownCreator, audiMidiSetupApp, NULL, &theAppFSRef, NULL);
-            
+
             if (!theError)
             {
                 LSOpenFSRef(&theAppFSRef, NULL);
             }
         }
-        
+
         CFRelease (configAP);
     }
-    
+
     return (retVal);
 }
 
@@ -2238,9 +2238,9 @@ WTErr WCMRCoreAudioDevice::ShowConfigPanel (void */*pParam*/)
 //! \param inBusNumber : The AU element.
 //! \param inNumberFrames: Number af Audio frames that are requested.
 //! \param ioData : Where the playback data is to be placed.
-//! 
+//!
 //! \return 0 always
-//! 
+//!
 //**********************************************************************************************
 OSStatus WCMRCoreAudioDevice::StaticAudioIOProc(void *inRefCon, AudioUnitRenderActionFlags *    ioActionFlags,
                                                 const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumberFrames,
@@ -2267,9 +2267,9 @@ OSStatus WCMRCoreAudioDevice::StaticAudioIOProc(void *inRefCon, AudioUnitRenderA
 //! \param inBusNumber : The AU element.
 //! \param inNumberFrames: Number af Audio frames that are requested.
 //! \param ioData : Where the playback data is to be placed.
-//! 
+//!
 //! \return 0 always
-//! 
+//!
 //**********************************************************************************************
 OSStatus WCMRCoreAudioDevice::AudioIOProc(AudioUnitRenderActionFlags *  ioActionFlags,
                                           const AudioTimeStamp *inTimeStamp, UInt32 /*inBusNumber*/, UInt32 inNumberFrames,
@@ -2278,17 +2278,17 @@ OSStatus WCMRCoreAudioDevice::AudioIOProc(AudioUnitRenderActionFlags *  ioAction
     UInt64 theStartTime = AudioGetCurrentHostTime();
 
     OSStatus retVal = 0;
-    
+
     if (m_StopRequested)
         return retVal;
 
     if (m_IOProcThreadPort == 0)
         m_IOProcThreadPort = mach_thread_self ();
-    
+
     //cannot really deal with it unless the number of frames are the same as our buffer size!
     if (inNumberFrames != (UInt32)m_CurrentBufferSize)
         return retVal;
-    
+
     //Retrieve the input data...
     if (!m_InputChannels.empty())
     {
@@ -2298,9 +2298,9 @@ OSStatus WCMRCoreAudioDevice::AudioIOProc(AudioUnitRenderActionFlags *  ioAction
         inputAudioBufferList.mBuffers[0].mNumberChannels = m_InputChannels.size();
         inputAudioBufferList.mBuffers[0].mDataByteSize = expectedDataSize;
         inputAudioBufferList.mBuffers[0].mData = NULL;//new float[expectedDataSize]; // we are going to get buffer from CoreAudio
-        
+
         retVal = AudioUnitRender(m_AUHALAudioUnit, ioActionFlags, inTimeStamp, AUHAL_INPUT_ELEMENT, inNumberFrames, &inputAudioBufferList);
-        
+
         if (retVal == kAudioHardwareNoError &&
             inputAudioBufferList.mBuffers[0].mNumberChannels == m_InputChannels.size() &&
             inputAudioBufferList.mBuffers[0].mDataByteSize == expectedDataSize )
@@ -2313,31 +2313,31 @@ OSStatus WCMRCoreAudioDevice::AudioIOProc(AudioUnitRenderActionFlags *  ioAction
             return retVal;
         }
     }
-    
+
     //is this an input only device?
     if (m_OutputChannels.empty())
         AudioCallback (NULL, inNumberFrames, (int64_t)inTimeStamp->mSampleTime, theStartTime);
     else if ((!m_OutputChannels.empty()) && (ioData->mBuffers[0].mNumberChannels == m_OutputChannels.size()))
         AudioCallback ((float *)ioData->mBuffers[0].mData, inNumberFrames, (int64_t)inTimeStamp->mSampleTime, theStartTime);
-    
+
     return retVal;
 }
 
 
 //**********************************************************************************************
-// WCMRCoreAudioDevice::AudioCallback 
+// WCMRCoreAudioDevice::AudioCallback
 //
-//! Here's where the actual audio processing happens. We call upon all the active connections' 
-//!     sinks to provide data to us which can be put/mixed in the output buffer! Also, we make the 
+//! Here's where the actual audio processing happens. We call upon all the active connections'
+//!     sinks to provide data to us which can be put/mixed in the output buffer! Also, we make the
 //!     input data available to any sources that may call upon us during this time!
 //!
 //! \param *pOutputBuffer : Points to a buffer to receive playback data. For Input only devices, this will be NULL
 //! \param framesPerBuffer : Number of sample frames in input and output buffers. Number of channels,
 //!     which are interleaved, is fixed at Device Open (Active) time. In this implementation,
 //!     the number of channels are fixed to use the maximum available.
-//! 
+//!
 //! \return true
-//! 
+//!
 //**********************************************************************************************
 int WCMRCoreAudioDevice::AudioCallback (float *pOutputBuffer, unsigned long framesPerBuffer, int64_t inSampleTime, uint64_t inCycleStartTime)
 {
@@ -2349,9 +2349,9 @@ int WCMRCoreAudioDevice::AudioCallback (float *pOutputBuffer, unsigned long fram
         inSampleTime,
         AudioConvertHostTimeToNanos(inCycleStartTime)
     };
-    
+
     m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::AudioCallback, (void *)&audioCallbackData);
-    
+
     m_SampleCounter += framesPerBuffer;
     return m_StopRequested;
 }
@@ -2377,11 +2377,11 @@ uint32_t WCMRCoreAudioDevice::GetLatency(bool isInput)
     UInt32 propSize = sizeof(UInt32);
     UInt32 value1 = 0;
     UInt32 value2 = 0;
-    
+
     UInt32 latency = 0;
     std::vector<int> streamLatencies;
-    
-    
+
+
     err = AudioDeviceGetProperty(m_DeviceID, 0, isInput, kAudioDevicePropertyLatency, &propSize, &value1);
     if (err != kAudioHardwareNoError)
     {
@@ -2403,7 +2403,7 @@ uint32_t WCMRCoreAudioDevice::GetLatency(bool isInput)
             latency += streamLatencies[i];
         }
     }
-    
+
     return latency;
 }
 
@@ -2422,7 +2422,7 @@ OSStatus WCMRCoreAudioDevice::GetStreamLatency(AudioDeviceID device, bool isInpu
     OSStatus err = kAudioHardwareNoError;
     UInt32 outSize1, outSize2, outSize3;
     Boolean	outWritable;
-    
+
     err = AudioDeviceGetPropertyInfo(device, 0, isInput, kAudioDevicePropertyStreams, &outSize1, &outWritable);
     if (err == noErr) {
         int stream_count = outSize1 / sizeof(UInt32);
@@ -2430,19 +2430,19 @@ OSStatus WCMRCoreAudioDevice::GetStreamLatency(AudioDeviceID device, bool isInpu
         AudioBufferList bufferList[stream_count];
         UInt32 streamLatency;
         outSize2 = sizeof(UInt32);
-        
+
         err = AudioDeviceGetProperty(device, 0, isInput, kAudioDevicePropertyStreams, &outSize1, streamIDs);
         if (err != noErr) {
             DEBUG_MSG("GetStreamLatencies kAudioDevicePropertyStreams err = " << err);
             return err;
         }
-        
+
         err = AudioDeviceGetPropertyInfo(device, 0, isInput, kAudioDevicePropertyStreamConfiguration, &outSize3, &outWritable);
         if (err != noErr) {
             DEBUG_MSG("GetStreamLatencies kAudioDevicePropertyStreamConfiguration err = " << err);
             return err;
         }
-        
+
         for (int i = 0; i < stream_count; i++) {
             err = AudioStreamGetProperty(streamIDs[i], 0, kAudioStreamPropertyLatency, &outSize2, &streamLatency);
             if (err != noErr) {
@@ -2468,9 +2468,9 @@ OSStatus WCMRCoreAudioDevice::GetStreamLatency(AudioDeviceID device, bool isInpu
 //!
 //! \param *pTheClient : The manager's client object (which receives notifications).
 //! \param useMultithreading : Whether to use multi-threading for audio processing. Default is true.
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 WCMRCoreAudioDeviceManager::WCMRCoreAudioDeviceManager(WCMRAudioDeviceManagerClient *pTheClient,
                             eAudioDeviceFilter eCurAudioDeviceFilter, bool useMultithreading, bool bNocopy)
@@ -2488,7 +2488,7 @@ WCMRCoreAudioDeviceManager::WCMRCoreAudioDeviceManager(WCMRAudioDeviceManagerCli
     // http://lists.apple.com/archives/coreaudio-api/2009/Oct/msg00214.html
     //
     // As per Jeff's suggestion, opened an Apple Bug on this - ID# 7364011
-    
+
     CFRunLoopRef nullRunLoop = 0;
     OSStatus err = AudioHardwareSetProperty (kAudioHardwarePropertyRunLoop, sizeof(CFRunLoopRef), &nullRunLoop);
 
@@ -2499,7 +2499,7 @@ WCMRCoreAudioDeviceManager::WCMRCoreAudioDeviceManager(WCMRAudioDeviceManagerCli
 
     //add a listener to find out when devices change...
     AudioHardwareAddPropertyListener (kAudioHardwarePropertyDevices, HardwarePropertyChangeCallback, this);
-    
+
     //Always add the None device first...
     m_NoneDevice = new WCMRNativeAudioNoneDevice(this);
 
@@ -2517,9 +2517,9 @@ WCMRCoreAudioDeviceManager::WCMRCoreAudioDeviceManager(WCMRAudioDeviceManagerCli
 //! It clears the device list, releasing each of the device.
 //!
 //! \param none
-//! 
+//!
 //! \return Nothing.
-//! 
+//!
 //**********************************************************************************************
 WCMRCoreAudioDeviceManager::~WCMRCoreAudioDeviceManager()
 {
@@ -2541,24 +2541,24 @@ WCMRCoreAudioDeviceManager::~WCMRCoreAudioDeviceManager()
 WCMRAudioDevice* WCMRCoreAudioDeviceManager::initNewCurrentDeviceImpl(const std::string & deviceName)
 {
     destroyCurrentDeviceImpl();
-    
+
     std::cout << "API::PortAudioDeviceManager::initNewCurrentDevice " << deviceName << std::endl;
 	if (deviceName == m_NoneDevice->DeviceName() )
 	{
 		m_CurrentDevice = m_NoneDevice;
 		return m_CurrentDevice;
 	}
-    
+
 	DeviceInfo devInfo;
     WTErr err = GetDeviceInfoByName(deviceName, devInfo);
-    
+
 	if (eNoErr == err)
 	{
 		try
 		{
 			std::cout << "API::PortAudioDeviceManager::Creating PA device: " << devInfo.m_DeviceId << ", Device Name: " << devInfo.m_DeviceName << std::endl;
 			TRACE_MSG ("API::PortAudioDeviceManager::Creating PA device: " << devInfo.m_DeviceId << ", Device Name: " << devInfo.m_DeviceName);
-            
+
             m_CurrentDevice = new WCMRCoreAudioDevice (this, devInfo.m_DeviceId, m_UseMultithreading, m_bNoCopyAudioBuffer);
 		}
 		catch (...)
@@ -2567,7 +2567,7 @@ WCMRAudioDevice* WCMRCoreAudioDeviceManager::initNewCurrentDeviceImpl(const std:
 			DEBUG_MSG ("Unabled to create PA Device: " << devInfo.m_DeviceId);
 		}
 	}
-    
+
 	return m_CurrentDevice;
 }
 
@@ -2576,37 +2576,37 @@ void WCMRCoreAudioDeviceManager::destroyCurrentDeviceImpl()
 {
     if (m_CurrentDevice != m_NoneDevice)
         delete m_CurrentDevice;
-    
+
     m_CurrentDevice = 0;
 }
-    
-    
+
+
 WTErr WCMRCoreAudioDeviceManager::getDeviceAvailableSampleRates(DeviceID deviceId, std::vector<int>& sampleRates)
 {
     AUTO_FUNC_DEBUG;
-    
+
     WTErr retVal = eNoErr;
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
-    
+
     sampleRates.clear();
-    
+
     //! 1. Get sample rate property size.
     err = AudioDeviceGetPropertyInfo(deviceId, 0, 0, kAudioDevicePropertyAvailableNominalSampleRates, &propSize, NULL);
     if (err == kAudioHardwareNoError)
     {
         //! 2. Get property: cannels output.
-        
+
         // Allocate size according to the number of audio values
         int numRates = propSize / sizeof(AudioValueRange);
         AudioValueRange* supportedRates = new AudioValueRange[numRates];
-        
+
         // Get sampling rates from Audio device
         err = AudioDeviceGetProperty(deviceId, 0, 0, kAudioDevicePropertyAvailableNominalSampleRates, &propSize, supportedRates);
         if (err == kAudioHardwareNoError)
         {
             //! 3. Update sample rates
-            
+
             // now iterate through our standard SRs
             for(int ourSR=0; gAllSampleRates[ourSR] > 0; ourSR++)
             {
@@ -2627,7 +2627,7 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceAvailableSampleRates(DeviceID deviceI
             retVal = eCoreAudioFailed;
             DEBUG_MSG("Failed to get device Sample rates. Device Name: " << m_DeviceName.c_str());
         }
-        
+
         delete [] supportedRates;
     }
     else
@@ -2635,11 +2635,11 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceAvailableSampleRates(DeviceID deviceI
         retVal = eCoreAudioFailed;
         DEBUG_MSG("Failed to get device Sample rates property size. Device Name: " << m_DeviceName.c_str());
     }
-    
+
     return retVal;
 }
 
-    
+
 WTErr WCMRCoreAudioDeviceManager::getDeviceMaxInputChannels(DeviceID deviceId, unsigned int& inputChannels)
 {
     AUTO_FUNC_DEBUG;
@@ -2653,14 +2653,14 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceMaxInputChannels(DeviceID deviceId, u
     if (err == kAudioHardwareNoError)
     {
         //! 2. Get property: cannels input.
-        
+
         // Allocate size according to the property size. Note that this is a variable sized struct...
         AudioBufferList *pStreamBuffers = (AudioBufferList *)malloc(propSize);
-        
+
         if (pStreamBuffers)
         {
             memset (pStreamBuffers, 0, propSize);
-            
+
             // Get the Input channels
             err = AudioDeviceGetProperty (deviceId, 0, 1/* Input */, kAudioDevicePropertyStreamConfiguration, &propSize, pStreamBuffers);
             if (err == kAudioHardwareNoError)
@@ -2676,7 +2676,7 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceMaxInputChannels(DeviceID deviceId, u
                 retVal = eCoreAudioFailed;
                 DEBUG_MSG("Failed to get device Input channels. Device Name: " << m_DeviceName.c_str());
             }
-            
+
             free (pStreamBuffers);
         }
         else
@@ -2690,15 +2690,15 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceMaxInputChannels(DeviceID deviceId, u
         retVal = eCoreAudioFailed;
         DEBUG_MSG("Failed to get device Input channels property size. Device Name: " << m_DeviceName.c_str());
     }
-    
+
     return retVal;
 }
-    
+
 
 WTErr WCMRCoreAudioDeviceManager::getDeviceMaxOutputChannels(DeviceID deviceId, unsigned int& outputChannels)
 {
     AUTO_FUNC_DEBUG;
-    
+
     WTErr retVal = eNoErr;
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
@@ -2709,13 +2709,13 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceMaxOutputChannels(DeviceID deviceId, 
     if (err == kAudioHardwareNoError)
     {
         //! 2. Get property: cannels output.
-        
+
         // Allocate size according to the property size. Note that this is a variable sized struct...
         AudioBufferList *pStreamBuffers = (AudioBufferList *)malloc(propSize);
         if (pStreamBuffers)
         {
             memset (pStreamBuffers, 0, propSize);
-            
+
             // Get the Output channels
             err = AudioDeviceGetProperty (deviceId, 0, 0/* Output */, kAudioDevicePropertyStreamConfiguration, &propSize, pStreamBuffers);
             if (err == kAudioHardwareNoError)
@@ -2744,19 +2744,19 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceMaxOutputChannels(DeviceID deviceId, 
         retVal = eCoreAudioFailed;
         DEBUG_MSG("Failed to get device Output channels property size. Device Name: " << m_DeviceName.c_str());
     }
- 
+
     return retVal;
 }
-    
-    
+
+
 WTErr WCMRCoreAudioDeviceManager::generateDeviceListImpl()
 {
     AUTO_FUNC_DEBUG;
-    
+
     // lock the list first
     wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceInfoVecMutex);
     m_DeviceInfoVec.clear();
-    
+
     //First, get info from None device which is always present
     if (m_NoneDevice)
     {
@@ -2764,13 +2764,13 @@ WTErr WCMRCoreAudioDeviceManager::generateDeviceListImpl()
         pDevInfo->m_AvailableSampleRates = m_NoneDevice->SamplingRates();
         m_DeviceInfoVec.push_back(pDevInfo);
     }
-    
+
     WTErr retVal = eNoErr;
     OSStatus osErr = noErr;
     AudioDeviceID* deviceIDs = 0;
-    
+
     openlog("WCMRCoreAudioDeviceManager", LOG_PID | LOG_CONS, LOG_USER);
-    
+
     try
     {
         //Get device count...
@@ -2779,22 +2779,22 @@ WTErr WCMRCoreAudioDeviceManager::generateDeviceListImpl()
         ASSERT_ERROR(osErr, "AudioHardwareGetProperty 1");
         if (WUIsError(osErr))
             throw osErr;
-        
+
         size_t numDevices = propSize / sizeof (AudioDeviceID);
         deviceIDs = new AudioDeviceID[numDevices];
-        
+
         //retrieve the device IDs
         propSize = numDevices * sizeof (AudioDeviceID);
         osErr = AudioHardwareGetProperty (kAudioHardwarePropertyDevices, &propSize, deviceIDs);
         ASSERT_ERROR(osErr, "Error while getting audio devices: AudioHardwareGetProperty 2");
         if (WUIsError(osErr))
             throw osErr;
-        
+
         //now add the ones that are not there...
         for (size_t deviceIndex = 0; deviceIndex < numDevices; deviceIndex++)
         {
             DeviceInfo* pDevInfo = 0;
-            
+
             //Get device name and create new DeviceInfo entry
             //Get property name size.
             osErr = AudioDeviceGetPropertyInfo(deviceIDs[deviceIndex], 0, 0, kAudioDevicePropertyDeviceName, &propSize, NULL);
@@ -2812,7 +2812,7 @@ WTErr WCMRCoreAudioDeviceManager::generateDeviceListImpl()
                     retVal = eCoreAudioFailed;
                     DEBUG_MSG("Failed to get device name. Device ID: " << m_DeviceID);
                 }
-                
+
                 delete [] deviceName;
             }
             else
@@ -2820,51 +2820,51 @@ WTErr WCMRCoreAudioDeviceManager::generateDeviceListImpl()
                 retVal = eCoreAudioFailed;
                 DEBUG_MSG("Failed to get device name property size. Device ID: " << m_DeviceID);
             }
-            
+
             if (pDevInfo)
             {
                 //Retrieve all the information we need for the device
                 WTErr wErr = eNoErr;
-                
+
                 //Get available sample rates for the device
                 std::vector<int> availableSampleRates;
                 wErr = getDeviceAvailableSampleRates(pDevInfo->m_DeviceId, availableSampleRates);
-                
+
                 if (wErr != eNoErr)
                 {
                     DEBUG_MSG ("Failed to get device available sample rates. Device ID: " << m_DeviceID);
                     delete pDevInfo;
                     continue; //proceed to the next device
                 }
-                
+
                 pDevInfo->m_AvailableSampleRates = availableSampleRates;
-                
+
                 //Get max input channels
                 uint32_t maxInputChannels;
                 wErr = getDeviceMaxInputChannels(pDevInfo->m_DeviceId, maxInputChannels);
-                
+
                 if (wErr != eNoErr)
                 {
                     DEBUG_MSG ("Failed to get device max input channels count. Device ID: " << m_DeviceID);
                     delete pDevInfo;
                     continue; //proceed to the next device
                 }
-                
+
                 pDevInfo->m_MaxInputChannels = maxInputChannels;
-                
+
                 //Get max output channels
                 uint32_t maxOutputChannels;
                 wErr = getDeviceMaxOutputChannels(pDevInfo->m_DeviceId, maxOutputChannels);
-                
+
                 if (wErr != eNoErr)
                 {
                     DEBUG_MSG ("Failed to get device max output channels count. Device ID: " << m_DeviceID);
                     delete pDevInfo;
                     continue; //proceed to the next device
                 }
-                
+
                 pDevInfo->m_MaxOutputChannels = maxOutputChannels;
-                
+
                 //Now check if this device is acceptable according to current input/output settings
                 bool bRejectDevice = false;
                 switch(m_eAudioDeviceFilter)
@@ -2907,7 +2907,7 @@ WTErr WCMRCoreAudioDeviceManager::generateDeviceListImpl()
                         m_DeviceInfoVec.push_back(pDevInfo);
                         break;
                 }
-                
+
                 if(bRejectDevice)
                 {
                     syslog (LOG_NOTICE, "%s rejected, In Channels = %d, Out Channels = %d\n",
@@ -2917,23 +2917,23 @@ WTErr WCMRCoreAudioDeviceManager::generateDeviceListImpl()
                 }
             }
         }
-        
-        
+
+
         //If no devices were found, that's not a good thing!
         if (m_DeviceInfoVec.empty())
         {
             DEBUG_MSG ("No matching CoreAudio devices were found\n");
-        }        
+        }
     }
     catch (...)
     {
         if (WUNoError(retVal))
             retVal = eCoreAudioFailed;
     }
-    
+
     delete[] deviceIDs;
     closelog();
-    
+
     return retVal;
 }
 
@@ -2942,26 +2942,26 @@ WTErr WCMRCoreAudioDeviceManager::updateDeviceListImpl()
 {
     wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceInfoVecMutex);
     WTErr err = generateDeviceListImpl();
-    
+
     if (eNoErr != err)
     {
         std::cout << "API::PortAudioDeviceManager::updateDeviceListImpl: Device list update error: "<< err << std::endl;
     }
-    
+
     if (m_CurrentDevice)
     {
         // if we have device initialized we should find out if this device is still connected
         DeviceInfo devInfo;
         WTErr deviceLookUpErr = GetDeviceInfoByName(m_CurrentDevice->DeviceName(), devInfo );
-    
+
         if (eNoErr != deviceLookUpErr)
         {
             NotifyClient (WCMRAudioDeviceManagerClient::IODeviceDisconnected);
             return err;
         }
-        
+
         WCMRCoreAudioDevice* current_device = dynamic_cast<WCMRCoreAudioDevice*>(m_CurrentDevice);
-        
+
         if ( current_device &&
             (current_device->DeviceID() != devInfo.m_DeviceId ) )
         {
@@ -2969,9 +2969,9 @@ WTErr WCMRCoreAudioDeviceManager::updateDeviceListImpl()
             return err;
         }
     }
-    
+
     NotifyClient (WCMRAudioDeviceManagerClient::DeviceListChanged);
-    
+
     return err;
 }
 
@@ -2979,13 +2979,13 @@ WTErr WCMRCoreAudioDeviceManager::updateDeviceListImpl()
 WTErr WCMRCoreAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & deviceName, std::vector<int>& sampleRates) const
 {
     AUTO_FUNC_DEBUG;
-    
+
     WTErr retVal = eNoErr;
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
-    
+
     sampleRates.clear();
-    
+
     //first check if the request has been made for None device
 	if (deviceName == m_NoneDevice->DeviceName() )
 	{
@@ -2997,28 +2997,28 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & d
         sampleRates.assign(m_CurrentDevice->SamplingRates().begin(), m_CurrentDevice->SamplingRates().end() );
         return retVal;
     }
-    
+
     DeviceInfo devInfo;
     retVal = GetDeviceInfoByName(deviceName, devInfo);
-    
+
     //! 1. Get sample rate property size.
     err = AudioDeviceGetPropertyInfo(devInfo.m_DeviceId, 0, 0, kAudioDevicePropertyAvailableNominalSampleRates, &propSize, NULL);
-    
+
     if (err == kAudioHardwareNoError)
     {
         //! 2. Get property: cannels output.
-        
+
         // Allocate size accrding to the number of audio values
         int numRates = propSize / sizeof(AudioValueRange);
         AudioValueRange* supportedRates = new AudioValueRange[numRates];
-        
+
         // Get sampling rates from Audio device
         err = AudioDeviceGetProperty(devInfo.m_DeviceId, 0, 0, kAudioDevicePropertyAvailableNominalSampleRates, &propSize, supportedRates);
-        
+
         if (err == kAudioHardwareNoError)
         {
             //! 3. Update sample rates
-            
+
             // now iterate through our standard SRs
             for(int ourSR=0; gAllSampleRates[ourSR] > 0; ourSR++)
             {
@@ -3039,7 +3039,7 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & d
             retVal = eCoreAudioFailed;
             DEBUG_MSG("Failed to get device Sample rates. Device Name: " << m_DeviceName.c_str());
         }
-        
+
         delete [] supportedRates;
     }
     else
@@ -3049,7 +3049,7 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & d
     }
 
     devInfo.m_AvailableSampleRates.assign(sampleRates.begin(), sampleRates.end() );
-    
+
     return retVal;
 }
 
@@ -3057,28 +3057,28 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & d
 WTErr WCMRCoreAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& bufferSizes) const
 {
     AUTO_FUNC_DEBUG;
-    
+
     WTErr retVal = eNoErr;
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
-    
+
     bufferSizes.clear();
-    
+
     //first check if the request has been made for None device
 	if (deviceName == m_NoneDevice->DeviceName() )
 	{
 		bufferSizes = m_NoneDevice->BufferSizes();
 		return retVal;
 	}
-    
+
     if (m_CurrentDevice && m_CurrentDevice->DeviceName () == deviceName) {
         bufferSizes.assign(m_CurrentDevice->BufferSizes().begin(), m_CurrentDevice->BufferSizes().end() );
         return retVal;
     }
-    
+
     DeviceInfo devInfo;
     retVal = GetDeviceInfoByName(deviceName, devInfo);
-    
+
     if (eNoErr == retVal)
     {
         // 1. Get buffer size range
@@ -3095,7 +3095,7 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & d
                     bufferSizes.push_back (gAllBufferSizes[bsize]);
                 }
             }
-            
+
             //if we didn't get a single hit, let's simply add the min. and the max...
             if (bufferSizes.empty())
             {
@@ -3115,7 +3115,7 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & d
 		std::cout << "API::PortAudioDeviceManager::GetBufferSizes: Device not found: "<< deviceName << std::endl;
 	}
 
-    
+
     return retVal;
 }
 
@@ -3131,10 +3131,10 @@ OSStatus WCMRCoreAudioDeviceManager::HardwarePropertyChangeCallback (AudioHardwa
                     pManager->updateDeviceListImpl();
             }
             break;
-            
+
         default:
             break;
     }
-    
+
     return 0;
 }

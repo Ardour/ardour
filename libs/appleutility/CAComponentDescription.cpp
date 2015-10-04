@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CAComponentDescription.cpp
- 
+
 =============================================================================*/
 
 #include "CAComponentDescription.h"
@@ -87,8 +87,8 @@ CAComponentDescription::CAComponentDescription (OSType inType, OSType inSubtype,
 	componentFlagsMask = 0;
 }
 
-bool	CAComponentDescription::IsAU () const 
-{ 
+bool	CAComponentDescription::IsAU () const
+{
 	bool flag = IsEffect() || IsMusicDevice() || IsOffline();
 	if (flag) return true;
 	
@@ -103,7 +103,7 @@ bool	CAComponentDescription::IsAU () const
 
 inline bool _MatchTest (const OSType &inTypeA, const OSType &inTypeB)
 {
-	return ((inTypeA == inTypeB) || (!inTypeA && !inTypeB) || (inTypeA && !inTypeB) || (!inTypeA && inTypeB)); 
+	return ((inTypeA == inTypeB) || (!inTypeA && !inTypeB) || (inTypeA && !inTypeB) || (!inTypeA && inTypeB));
 }
 
 bool	CAComponentDescription::Matches (const ComponentDescription &desc) const

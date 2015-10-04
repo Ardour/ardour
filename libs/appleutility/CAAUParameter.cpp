@@ -42,7 +42,7 @@
 
 #include "CAAUParameter.h"
 
-CAAUParameter::CAAUParameter() 
+CAAUParameter::CAAUParameter()
 {
 	memset(this, 0, sizeof(CAAUParameter));
 }
@@ -59,7 +59,7 @@ CAAUParameter::CAAUParameter (AudioUnitParameter &inParam)
 	Init (inParam.mAudioUnit, inParam.mParameterID, inParam.mScope, inParam.mElement);
 }
 
-CAAUParameter::CAAUParameter(const CAAUParameter &a) 
+CAAUParameter::CAAUParameter(const CAAUParameter &a)
 {
 	memset(this, 0, sizeof(CAAUParameter));
 	*this = a;
@@ -101,7 +101,7 @@ void		CAAUParameter::Init (AudioUnit au, AudioUnitParameterID param, AudioUnitSc
 		memset(&mParamInfo, 0, sizeof(mParamInfo));
 	if (mParamInfo.flags & kAudioUnitParameterFlag_HasCFNameString) {
 		mParamName = mParamInfo.cfNameString;
-		if (!(mParamInfo.flags & kAudioUnitParameterFlag_CFNameRelease)) 
+		if (!(mParamInfo.flags & kAudioUnitParameterFlag_CFNameRelease))
 			CFRetain (mParamName);
 	} else
 		mParamName = CFStringCreateWithCString(NULL, mParamInfo.name, kCFStringEncodingUTF8);
@@ -173,11 +173,11 @@ void		CAAUParameter::Init (AudioUnit au, AudioUnitParameterID param, AudioUnitSc
 		case kAudioUnitParameterUnit_Indexed:
 			{
 				propertySize = sizeof(mNamedParams);
-				err = AudioUnitGetProperty (au, 
+				err = AudioUnitGetProperty (au,
 									kAudioUnitProperty_ParameterValueStrings,
-									scope, 
-									param, 
-									&mNamedParams, 
+									scope,
+									param,
+									&mNamedParams,
 									&propertySize);
 				if (!err && mNamedParams) {
 					mNumIndexedParams = CFArrayGetCount(mNamedParams);
@@ -215,7 +215,7 @@ void		CAAUParameter::Init (AudioUnit au, AudioUnitParameterID param, AudioUnitSc
 Float32		CAAUParameter::GetValue() const
 {
 	Float32 value = 0.;
-	//OSStatus err = 
+	//OSStatus err =
 	AudioUnitGetParameter(mAudioUnit, mParameterID, mScope, mElement, &value);
 	return value;
 }
@@ -232,7 +232,7 @@ CFStringRef CAAUParameter::GetStringFromValueCopy(const Float32 *value) const
 			return str;
 		}
 	}
-	else if (ValuesHaveStrings()) 
+	else if (ValuesHaveStrings())
 	{
 		AudioUnitParameterStringFromValue stringValue;
 		stringValue.inParamID = mParameterID;
@@ -240,11 +240,11 @@ CFStringRef CAAUParameter::GetStringFromValueCopy(const Float32 *value) const
 		stringValue.outString = NULL;
 		UInt32 propertySize = sizeof(stringValue);
 		
-		OSStatus err = AudioUnitGetProperty (mAudioUnit, 
+		OSStatus err = AudioUnitGetProperty (mAudioUnit,
 											kAudioUnitProperty_ParameterStringFromValue,
-											mScope, 
-											mParameterID, 
-											&stringValue, 
+											mScope,
+											mParameterID,
+											&stringValue,
 											&propertySize);
 		
 		if (err == noErr && stringValue.outString != NULL)
@@ -259,18 +259,18 @@ CFStringRef CAAUParameter::GetStringFromValueCopy(const Float32 *value) const
 
 Float32 CAAUParameter::GetValueFromString(CFStringRef str) const
 {
-	if (ValuesHaveStrings()) 
+	if (ValuesHaveStrings())
 	{
 		AudioUnitParameterValueFromString valueString;
 		valueString.inParamID = mParameterID;
 		valueString.inString = str;
 		UInt32 propertySize = sizeof(valueString);
 		
-		OSStatus err = AudioUnitGetProperty (mAudioUnit, 
+		OSStatus err = AudioUnitGetProperty (mAudioUnit,
 										kAudioUnitProperty_ParameterValueFromString,
-										mScope, 
-										mParameterID, 
-										&valueString, 
+										mScope,
+										mParameterID,
+										&valueString,
 										&propertySize);
 										
 		if (err == noErr) {
@@ -285,7 +285,7 @@ Float32 CAAUParameter::GetValueFromString(CFStringRef str) const
 	return paramValue;
 }
 
-void		CAAUParameter::SetValue(	AUParameterListenerRef		inListener, 
+void		CAAUParameter::SetValue(	AUParameterListenerRef		inListener,
 									void *							inObject,
 									Float32							inValue) const
 {
@@ -295,7 +295,7 @@ void		CAAUParameter::SetValue(	AUParameterListenerRef		inListener,
         valueToSet = mParamInfo.maxValue;
     if (valueToSet < mParamInfo.minValue)
         valueToSet = mParamInfo.minValue;
-    
+
 	AUParameterSet(inListener, inObject, this, valueToSet, 0);
 }
 

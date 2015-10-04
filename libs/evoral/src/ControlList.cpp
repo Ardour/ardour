@@ -288,8 +288,8 @@ ControlList::thin (double thinning_factor)
 				/* compute the area of the triangle formed by 3 points
 				 */
 				
-				double area = fabs ((prevprev->when * (prev->value - cur->value)) + 
-						    (prev->when * (cur->value - prevprev->value)) + 
+				double area = fabs ((prevprev->when * (prev->value - cur->value)) +
+						    (prev->when * (cur->value - prevprev->value)) +
 						    (cur->when * (prevprev->value - prev->value)));
 				
 				if (area < thinning_factor) {
@@ -413,11 +413,11 @@ ControlList::add_guard_point (double when)
 		/* most_recent_insert_iterator points to a control event
 		   already at the insert position, so there is
 		   nothing to do.
-		   
-		   ... except ... 
+		
+		   ... except ...
 
 		   advance most_recent_insert_iterator so that the "real"
-		   insert occurs in the right place, since it 
+		   insert occurs in the right place, since it
 		   points to the control event just inserted.
 		*/
 
@@ -427,13 +427,13 @@ ControlList::add_guard_point (double when)
 		/* insert a new control event at the right spot
 		 */
 		
-		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert eval-value %2 just before iterator @ %3\n", 
+		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert eval-value %2 just before iterator @ %3\n",
 								 this, eval_value, (*most_recent_insert_iterator)->when));
 		
 		most_recent_insert_iterator = _events.insert (most_recent_insert_iterator, new ControlEvent (when, eval_value));
 
 		/* advance most_recent_insert_iterator so that the "real"
-		 * insert occurs in the right place, since it 
+		 * insert occurs in the right place, since it
 		 * points to the control event just inserted.
 		 */
 		

@@ -172,7 +172,7 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
     }
 }
 
-void 
+void
 MidnamTest::load_all_midnams_test ()
 {
     vector<std::string> result;

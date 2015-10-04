@@ -124,7 +124,7 @@ void Chromagram::unityNormalise(double *src)
 double* Chromagram::process( const double *data )
 {
     if (!m_skGenerated) {
-        // Generate CQ Kernel 
+        // Generate CQ Kernel
         m_ConstantQ->sparsekernel();
         m_skGenerated = true;
     }
@@ -148,7 +148,7 @@ double* Chromagram::process( const double *data )
 double* Chromagram::process( const double *real, const double *imag )
 {
     if (!m_skGenerated) {
-        // Generate CQ Kernel 
+        // Generate CQ Kernel
         m_ConstantQ->sparsekernel();
         m_skGenerated = true;
     }
@@ -164,10 +164,10 @@ double* Chromagram::process( const double *real, const double *imag )
 	
     // add each octave of cq data into Chromagram
     const unsigned octaves = (int)floor(double( m_uK/m_BPO))-1;
-    for (unsigned octave = 0; octave <= octaves; octave++) 
+    for (unsigned octave = 0; octave <= octaves; octave++)
     {
 	unsigned firstBin = octave*m_BPO;
-	for (unsigned i = 0; i < m_BPO; i++) 
+	for (unsigned i = 0; i < m_BPO; i++)
 	{
 	    m_chromadata[i] += kabs( m_CQRe[ firstBin + i ], m_CQIm[ firstBin + i ]);
 	}

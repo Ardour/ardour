@@ -250,7 +250,7 @@ double DetectionFunction::complexSD(unsigned int length, double *srcMagnitude, d
     double tmpPhase = 0;
     double tmpReal = 0;
     double tmpImag = 0;
-   
+
     double dev = 0;
     ComplexData meas = ComplexData( 0, 0 );
     ComplexData j = ComplexData( 0, 1 );
@@ -287,7 +287,7 @@ double DetectionFunction::broadband(unsigned int length, double *src)
         m_magHistory[i] = sqrmag;
     }
     return val;
-}        
+}
 
 double* DetectionFunction::getSpectrumMagnitude()
 {

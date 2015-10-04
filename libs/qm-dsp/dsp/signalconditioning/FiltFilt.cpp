@@ -63,7 +63,7 @@ void FiltFilt::process(double *src, double *dst, unsigned int length)
     m_filtScratchOut = new double[ nExt ];
 
 	
-    for( i = 0; i< nExt; i++ ) 
+    for( i = 0; i< nExt; i++ )
     {
 	m_filtScratchIn[ i ] = 0.0;
 	m_filtScratchOut[ i ] = 0.0;
@@ -94,16 +94,16 @@ void FiltFilt::process(double *src, double *dst, unsigned int length)
     // Do  0Ph filtering
     m_filter->process( m_filtScratchIn, m_filtScratchOut, nExt);
 	
-    // reverse the series for FILTFILT 
+    // reverse the series for FILTFILT
     for ( i = 0; i < nExt; i++)
-    { 
+    {
 	m_filtScratchIn[ i ] = m_filtScratchOut[ nExt - i - 1];
     }
 
-    // do FILTER again 
+    // do FILTER again
     m_filter->process( m_filtScratchIn, m_filtScratchOut, nExt);
 	
-    // reverse the series back 
+    // reverse the series back
     for ( i = 0; i < nExt; i++)
     {
 	m_filtScratchIn[ i ] = m_filtScratchOut[ nExt - i - 1 ];

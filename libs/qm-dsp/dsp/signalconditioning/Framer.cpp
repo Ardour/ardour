@@ -64,7 +64,7 @@ void Framer::getFrame(double *dst)
     {
 	for( unsigned int u = 0; u < m_frameLength; u++)
 	{
-	    dst[ u ] = m_srcBuffer[ m_ulSrcIndex++ ]; 
+	    dst[ u ] = m_srcBuffer[ m_ulSrcIndex++ ];
 	}	
 	m_ulSrcIndex -= ( m_frameLength - m_stepSize );
     }

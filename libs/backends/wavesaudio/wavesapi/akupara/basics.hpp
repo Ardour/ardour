@@ -15,7 +15,7 @@ namespace Akupara
 {
 	// The ultimate nothingness
 	// This is useful for writing constructors that nullify their object, and for testing nullness
-	struct null_type 
+	struct null_type
 	{
 		null_type() {}
 		null_type(const null_type *) {} // this allows 0 to be implicitly converted to null_type

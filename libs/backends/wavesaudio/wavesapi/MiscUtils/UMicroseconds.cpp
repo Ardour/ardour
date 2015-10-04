@@ -7,7 +7,7 @@
 
 #include "UMicroseconds.h"
 
-namespace wvNS { 
+namespace wvNS {
 UMicroseconds& UMicroseconds::ReadTime()
 {
 	// Note: g_get_monotonic_time() may be a viable alternative
@@ -39,7 +39,7 @@ UMicroseconds& UMicroseconds::ReadTime()
 	return *this;
 }
 /*
- Removed in favor of the posix implementation. 
+ Removed in favor of the posix implementation.
 #ifdef __APPLE__
 	uint32_t UMicroseconds::hi() {return reinterpret_cast<UnsignedWide*>(&theTime)->hi;}
 	uint32_t UMicroseconds::lo() {return reinterpret_cast<UnsignedWide*>(&theTime)->lo;}
@@ -74,4 +74,4 @@ UMicrosecondsAccumulator& UMicrosecondsAccumulator::operator+=(const UMicrosecon
 	return *this;
 }
 	
-} // namespace wvNS { 
+} // namespace wvNS {

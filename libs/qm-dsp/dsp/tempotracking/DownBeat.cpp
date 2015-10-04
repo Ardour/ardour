@@ -122,7 +122,7 @@ DownBeat::pushAudioBlock(const float *audio)
 //    std::cerr << "pushAudioBlock: rms in " << sqrt(rmsin) << ", out " << sqrt(rmsout) << std::endl;
     m_buffill += m_increment / m_factor;
 }
-    
+
 const float *
 DownBeat::getBufferedAudio(size_t &length) const
 {
@@ -192,9 +192,9 @@ DownBeat::findDownBeats(const float *audio,
         }
 
         // Now FFT beat frame
-        
+
         m_fft->process(false, m_beatframe, m_fftRealOut, m_fftImagOut);
-        
+
         // Calculate magnitudes
 
         for (size_t j = 0; j < m_beatframesize/2; ++j) {
@@ -257,7 +257,7 @@ DownBeat::measureSpecDiff(d_vec_t oldspec, d_vec_t newspec)
 {
     // JENSEN-SHANNON DIVERGENCE BETWEEN SPECTRAL FRAMES
 
-    unsigned int SPECSIZE = 512;   // ONLY LOOK AT FIRST 512 SAMPLES OF SPECTRUM. 
+    unsigned int SPECSIZE = 512;   // ONLY LOOK AT FIRST 512 SAMPLES OF SPECTRUM.
     if (SPECSIZE > oldspec.size()/4) {
         SPECSIZE = oldspec.size()/4;
     }
@@ -266,37 +266,37 @@ DownBeat::measureSpecDiff(d_vec_t oldspec, d_vec_t newspec)
 
     double sumnew = 0.;
     double sumold = 0.;
-  
+
     for (unsigned int i = 0;i < SPECSIZE;i++)
     {
         newspec[i] +=EPS;
         oldspec[i] +=EPS;
-        
+
         sumnew+=newspec[i];
         sumold+=oldspec[i];
-    } 
-    
+    }
+
     for (unsigned int i = 0;i < SPECSIZE;i++)
     {
         newspec[i] /= (sumnew);
         oldspec[i] /= (sumold);
-        
+
         // IF ANY SPECTRAL VALUES ARE 0 (SHOULDN'T BE ANY!) SET THEM TO 1
         if (newspec[i] == 0)
         {
             newspec[i] = 1.;
         }
-        
+
         if (oldspec[i] == 0)
         {
             oldspec[i] = 1.;
         }
-        
+
         // JENSEN-SHANNON CALCULATION
         sd1 = 0.5*oldspec[i] + 0.5*newspec[i];	
         SD = SD + (-sd1*log(sd1)) + (0.5*(oldspec[i]*log(oldspec[i]))) + (0.5*(newspec[i]*log(newspec[i])));
     }
-    
+
     return SD;
 }
 

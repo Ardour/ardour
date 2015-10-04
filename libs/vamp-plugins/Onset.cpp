@@ -5,7 +5,7 @@
 
     Centre for Digital Music, Queen Mary, University of London.
     This file copyright 2006 Chris Cannam.
-    
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -136,7 +136,7 @@ Onset::initialise(size_t channels, size_t stepSize, size_t blockSize)
     m_peakpick = new_aubio_peakpicker(m_threshold);
 
     m_onsetdet = new_aubio_onsetdetection(m_onsettype, blockSize, channels);
-    
+
     m_delay = Vamp::RealTime::frame2RealTime(4 * stepSize,
                                              lrintf(m_inputSampleRate));
 
@@ -157,7 +157,7 @@ Onset::reset()
          m_blockSize,
          m_stepSize,
          lrintf(m_inputSampleRate));
-    
+
     aubio_onset_set_threshold(m_onsetdet, m_threshold);
     aubio_onset_set_silence(m_onsetdet, m_silence);
     aubio_onset_set_minioi(m_onsetdet, m_minioi);
@@ -185,7 +185,7 @@ Onset::ParameterList
 Onset::getParameterDescriptors() const
 {
     ParameterList list;
-    
+
     ParameterDescriptor desc;
     desc.identifier = "onsettype";
     desc.name = "Onset Detection Function Type";

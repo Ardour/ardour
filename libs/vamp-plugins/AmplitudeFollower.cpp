@@ -7,7 +7,7 @@
 
     Centre for Digital Music, Queen Mary, University of London.
     This file copyright 2006 Dan Stowell.
-  
+
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
     files (the "Software"), to deal in the Software without
@@ -109,7 +109,7 @@ AmplitudeFollower::initialise(size_t channels, size_t stepSize, size_t blockSize
 
     m_stepSize = std::min(stepSize, blockSize);
 	
-    // Translate the coefficients 
+    // Translate the coefficients
     // from their "convenient" 60dB convergence-time values
     // to real coefficients
     m_clampcoef = m_clampcoef==0.0 ? 0.0 : exp(log(0.1)/(m_clampcoef * m_inputSampleRate));
@@ -158,9 +158,9 @@ AmplitudeFollower::getParameterDescriptors() const
     att.maxValue = 1.f;
     att.defaultValue = 0.01f;
     att.isQuantized = false;
-    
+
     list.push_back(att);
-    
+
     ParameterDescriptor dec;
     dec.identifier = "release";
     dec.name = "Release time";
@@ -170,9 +170,9 @@ AmplitudeFollower::getParameterDescriptors() const
     dec.maxValue = 1.f;
     dec.defaultValue = 0.01f;
     dec.isQuantized = false;
-    
+
     list.push_back(dec);
-    
+
     return list;
 }
 
