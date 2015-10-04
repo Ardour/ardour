@@ -882,6 +882,7 @@ AutomationLine::remove_point (ControlPoint& cp)
 	trackview.editor().begin_reversible_command (_("remove control point"));
 	XMLNode &before = alist->get_state();
 
+	trackview.editor ().get_selection ().clear_points ();
 	alist->erase (cp.model());
 
 	trackview.editor().session()->add_command(

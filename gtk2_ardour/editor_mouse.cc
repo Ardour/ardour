@@ -458,7 +458,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 			/* almost no selection action on modified button-2 or button-3 events */
 
-			if (item_type != RegionItem && event->button.button != 2) {
+			if ((item_type != RegionItem && event->button.button != 2) && !(item_type == ControlPointItem && event->button.button == 3)) {
 				return;
 			}
 		}
@@ -519,7 +519,11 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		/* for object/track exclusivity, we don't call set_selected_track_as_side_effect (op); */
 
 		if (eff_mouse_mode != MouseRange) {
-			_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
+			if (event->button.button != 3) {
+				_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
+			} else {
+				_mouse_changed_selection |= set_selected_control_point_from_click (press, Selection::Set);
+			}
 		}
 		break;
 

@@ -81,6 +81,7 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 		trackview.session()->add_command(new StatefulDiffCommand (rv.audio_region()));
 	}
 
+	trackview.editor ().get_selection ().clear_points ();
 	alist->erase (cp.model());
 
 	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
