@@ -151,7 +151,7 @@ Session::pre_engine_init (string fullpath)
 
 		string full_session_name = Glib::build_filename( fullpath, _name );
 		full_session_name += statefile_suffix;
-		
+
 		_is_new = !Glib::file_test (full_session_name, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
 	} else {
 		_is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
@@ -179,7 +179,7 @@ Session::pre_engine_init (string fullpath)
 	last_rr_session_dir = session_dirs.begin();
 
 	set_history_depth (Config->get_history_depth());
-	
+
         /* default: assume simple stereo speaker configuration */
 
         _speakers->setup_default_speakers (2);
@@ -214,7 +214,7 @@ Session::post_engine_init ()
 	BootMessage (_("Using configuration"));
 
 	_midi_ports = new MidiPortManager;
-	
+
 	MIDISceneChanger* msc;
 
 	_scene_changer = msc = new MIDISceneChanger (*this);
@@ -225,15 +225,15 @@ Session::post_engine_init ()
 	boost::dynamic_pointer_cast<AsyncMIDIPort>(scene_in())->set_timer (timer_func);
 
 	setup_midi_machine_control ();
-	
+
 	if (_butler->start_thread()) {
 		return -1;
 	}
-	
+
 	if (start_midi_thread ()) {
 		return -1;
 	}
-	
+
 	setup_click_sounds (0);
 	setup_midi_control ();
 
@@ -246,7 +246,7 @@ Session::post_engine_init ()
 		delete _tempo_map;
 		_tempo_map = new TempoMap (_current_frame_rate);
 		_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
-		
+
 		/* MidiClock requires a tempo map */
 
 		midi_clock = new MidiClockTicker ();
@@ -256,14 +256,14 @@ Session::post_engine_init ()
 
 		SndFileSource::setup_standard_crossfades (*this, frame_rate());
 		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
-		
+
 		AudioDiskstream::allocate_working_buffers();
 		refresh_disk_space ();
-		
+
 		/* we're finally ready to call set_state() ... all objects have
 		 * been created, the engine is running.
 		 */
-		
+
 		if (state_tree) {
 			if (set_state (*state_tree->root(), Stateful::loading_state_version)) {
 				return -1;
@@ -278,56 +278,56 @@ Session::post_engine_init ()
 
 		boost::function<void (std::string)> ff (boost::bind (&Session::config_changed, this, _1, false));
 		boost::function<void (std::string)> ft (boost::bind (&Session::config_changed, this, _1, true));
-		
+
 		Config->map_parameters (ff);
 		config.map_parameters (ft);
                 _butler->map_parameters ();
 
 		/* Reset all panners */
-		
+
 		Delivery::reset_panners ();
-		
+
 		/* this will cause the CPM to instantiate any protocols that are in use
 		 * (or mandatory), which will pass it this Session, and then call
 		 * set_state() on each instantiated protocol to match stored state.
 		 */
-		
+
 		ControlProtocolManager::instance().set_session (this);
-		
+
 		/* This must be done after the ControlProtocolManager set_session above,
 		   as it will set states for ports which the ControlProtocolManager creates.
 		*/
-		
+
 		// XXX set state of MIDI::Port's
 		// MidiPortManager::instance()->set_port_states (Config->midi_port_states ());
-		
+
 		/* And this must be done after the MIDI::Manager::set_port_states as
 		 * it will try to make connections whose details are loaded by set_port_states.
 		 */
-		
+
 		hookup_io ();
-		
+
 		/* Let control protocols know that we are now all connected, so they
 		 * could start talking to surfaces if they want to.
 		 */
-		
+
 		ControlProtocolManager::instance().midi_connectivity_established ();
-		
+
 		if (_is_new && !no_auto_connect()) {
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock());
 			auto_connect_master_bus ();
 		}
-		
+
 		_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
-		
+
 		/* update latencies */
-		
+
 		initialize_latencies ();
-		
+
 		_locations->added.connect_same_thread (*this, boost::bind (&Session::location_added, this, _1));
 		_locations->removed.connect_same_thread (*this, boost::bind (&Session::location_removed, this, _1));
 		_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
-		
+
 	} catch (AudioEngine::PortRegistrationFailure& err) {
 		/* handle this one in a different way than all others, so that its clear what happened */
 		error << err.what() << endmsg;
@@ -364,9 +364,9 @@ Session::post_engine_init ()
 	}
 
 	/* Now, finally, we can fill the playback buffers */
-    
+
 	BootMessage (_("Filling playback buffers"));
-    
+
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
 		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (*r);
@@ -382,11 +382,11 @@ void
 Session::session_loaded ()
 {
 	SessionLoaded();
-	
+
 	_state_of_the_state = Clean;
-	
+
 	DirtyChanged (); /* EMIT SIGNAL */
-	
+
 	if (_is_new) {
 		save_state ("");
 	} else if (state_was_pending) {
@@ -394,9 +394,9 @@ Session::session_loaded ()
 		remove_pending_capture_state ();
 		state_was_pending = false;
 	}
-	
+
 	/* Now, finally, we can fill the playback buffers */
-	
+
 	BootMessage (_("Filling playback buffers"));
 	force_locate (_transport_frame, false);
 }
@@ -555,7 +555,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 				while (!feof (in)) {
 					size_t charsRead = fread (buf, sizeof(char), 1024, in);
-	
+
 					if (ferror (in)) {
 						error << string_compose (_("Error reading session template file %1 (%2)"), in_path, strerror (errno)) << endmsg;
 						fclose (in);
@@ -585,7 +585,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 					std::string template_plugins = Glib::build_filename (session_template, X_("plugins"));
 					copy_recurse (template_plugins, plugins_dir ());
 				}
-                                
+
 				return 0;
 
 			} else {
@@ -604,16 +604,16 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 	}
 
 	if (Profile->get_trx()) {
-	
+
 		/* set initial start + end point : ARDOUR::Session::session_end_shift long.
 		   Remember that this is a brand new session. Sessions
 		   loaded from saved state will get this range from the saved state.
 		*/
-		
+
 		set_session_range_location (0, 0);
-		
+
 		/* Initial loop location, from absolute zero, length 10 seconds  */
-		
+
 		Location* loc = new Location (*this, 0, 10.0 * _engine.sample_rate(), _("Loop"),  Location::IsAutoLoop);
 		_locations->add (loc, true);
 		set_auto_loop_location (loc);
@@ -656,15 +656,15 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 		// Waves Tracks: Skip this. Always use autoconnection for Tracks
 		if (!ARDOUR::Profile->get_trx()) {
-			
+
 			/* this allows the user to override settings with an environment variable.
 			 */
-			
+
 			if (no_auto_connect()) {
 				bus_profile->input_ac = AutoConnectOption (0);
 				bus_profile->output_ac = AutoConnectOption (0);
 			}
-			
+
 			Config->set_input_auto_connect (bus_profile->input_ac);
 			Config->set_output_auto_connect (bus_profile->output_ac);
 		}
@@ -827,7 +827,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	tmp_path = Glib::build_filename (tmp_path, legalize_for_path (snapshot_name) + temp_suffix);
 
 	cerr << "actually writing state to " << tmp_path << endl;
-	
+
 	if (!tree.write (tmp_path)) {
 		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
 		if (g_remove (tmp_path.c_str()) != 0) {
@@ -839,7 +839,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	} else {
 
 		cerr << "renaming state to " << xml_path << endl;
-		
+
 		if (::g_rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
 			error << string_compose (_("could not rename temporary session file %1 to %2 (%3)"),
 					tmp_path, xml_path, g_strerror(errno)) << endmsg;
@@ -963,9 +963,9 @@ Session::load_state (string snapshot_name)
 		// only create a backup for a given statefile version once
 
 		if (!Glib::file_test (backup_path, Glib::FILE_TEST_EXISTS)) {
-			
+
 			VersionMismatch (xmlpath, backup_path);
-			
+
 			if (!copy_file (xmlpath, backup_path)) {;
 				return -1;
 			}
@@ -1141,13 +1141,13 @@ Session::state (bool full_state)
 			}
 		}
 	}
-	
-	
+
+
 
 	if (full_state) {
-		
+
 		if (_locations) {
-			node->add_child_nocopy (_locations->get_state());	
+			node->add_child_nocopy (_locations->get_state());
 		}
 	} else {
 		Locations loc (*this);
@@ -1157,7 +1157,7 @@ Session::state (bool full_state)
 		range->set (max_framepos, 0);
 		loc.add (range);
 		XMLNode& locations_state = loc.get_state();
-		
+
 		if (ARDOUR::Profile->get_trx() && _locations) {
 			// For tracks we need stored the Auto Loop Range and all MIDI markers.
 			for (Locations::LocationList::const_iterator i = _locations->list ().begin (); i != _locations->list ().end (); ++i) {
@@ -1187,9 +1187,9 @@ Session::state (bool full_state)
 		RoutePublicOrderSorter cmp;
 		RouteList public_order (*r);
 		public_order.sort (cmp);
-		
+
 		/* the sort should have put control outs first */
-		
+
 		if (_monitor_out) {
 			assert (_monitor_out == public_order.front());
 		}
@@ -1718,7 +1718,7 @@ Session::load_nested_sources (const XMLNode& node)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == "Source") {
 
-			/* it may already exist, so don't recreate it unnecessarily 
+			/* it may already exist, so don't recreate it unnecessarily
 			 */
 
 			XMLProperty* prop = (*niter)->property (X_("id"));
@@ -2123,7 +2123,7 @@ Session::save_template (string template_name)
 									  template_dir_path) << endmsg;
 			return -1;
 		}
-		
+
 		if (g_mkdir_with_parents (template_dir_path.c_str(), 0755) != 0) {
 			error << string_compose(_("Could not create directory for Session template\"%1\" (%2)"),
 									template_dir_path, g_strerror (errno)) << endmsg;
@@ -2133,7 +2133,7 @@ Session::save_template (string template_name)
 
 	/* file to write */
 	std::string template_file_path;
-	
+
 	if (ARDOUR::Profile->get_trx()) {
 		template_file_path = template_name;
 	} else {
@@ -2145,7 +2145,7 @@ Session::save_template (string template_name)
 	}
 
 	SessionSaveUnderway (); /* EMIT SIGNAL */
-	
+
 	XMLTree tree;
 
 	tree.set_root (&get_template());
@@ -2176,7 +2176,7 @@ void
 Session::refresh_disk_space ()
 {
 #if __APPLE__ || (HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H)
-	
+
 	Glib::Threads::Mutex::Lock lm (space_lock);
 
 	/* get freespace on every FS that is part of the session path */
@@ -3013,17 +3013,17 @@ Session::cleanup_sources (CleanupReport& rep)
 				if (playlists->source_use_count (fs) != 0) {
 					all_sources.insert (fs->path());
 				} else {
-					
+
 					/* we might not remove this source from disk, because it may be used
 					   by other snapshots, but its not being used in this version
 					   so lets get rid of it now, along with any representative regions
 					   in the region list.
 					*/
-					
+
 					RegionFactory::remove_regions_using_source (i->second);
-					
+
 					// also remove source from all_sources
-					
+
 					for (set<string>::iterator j = all_sources.begin(); j != all_sources.end(); ++j) {
 						spath = Glib::path_get_basename (*j);
 						if (spath == i->second->name()) {
@@ -3408,7 +3408,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		if (p) {
 			boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
 			boost::shared_ptr<Amp> a = s->amp();
-			
+
 			if (a) {
 				c = s->amp()->gain_control();
 			}
@@ -3451,7 +3451,7 @@ Session::save_history (string snapshot_name)
 	        return 0;
 	}
 
-	if (!Config->get_save_history() || Config->get_saved_history_depth() < 0 || 
+	if (!Config->get_save_history() || Config->get_saved_history_depth() < 0 ||
 	    (_history.undo_depth() == 0 && _history.redo_depth() == 0)) {
 		return 0;
 	}
@@ -3713,7 +3713,7 @@ Session::config_changed (std::string p, bool ours)
 		}
 
 	} else if (p == "click-gain") {
-		
+
 		if (_click_gain) {
 			_click_gain->set_gain (Config->get_click_gain(), this);
 		}
@@ -3908,7 +3908,7 @@ Session::rename (const std::string& new_name)
 	 * interchange subdirectory
 	 * session file
 	 * session history
-	 
+
 	 * Backup files are left unchanged and not renamed.
 	 */
 
@@ -3925,30 +3925,30 @@ Session::rename (const std::string& new_name)
 			fs->close ();
 		}
 	}
-	
+
 	/* pass one: not 100% safe check that the new directory names don't
 	 * already exist ...
 	 */
 
 	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		
+
 		oldstr = (*i).path;
-		
+
 		/* this is a stupid hack because Glib::path_get_dirname() is
 		 * lexical-only, and so passing it /a/b/c/ gives a different
 		 * result than passing it /a/b/c ...
 		 */
-		
+
 		if (oldstr[oldstr.length()-1] == G_DIR_SEPARATOR) {
 			oldstr = oldstr.substr (0, oldstr.length() - 1);
 		}
-		
+
 		string base = Glib::path_get_dirname (oldstr);
-		
+
 		newstr = Glib::build_filename (base, legal_name);
-		
+
 		cerr << "Looking for " << newstr << endl;
-		
+
 		if (Glib::file_test (newstr, Glib::FILE_TEST_EXISTS)) {
 			cerr << " exists\n";
 			return -1;
@@ -3958,18 +3958,18 @@ Session::rename (const std::string& new_name)
 	/* Session dirs */
 
 	first = true;
-	
+
 	for (vector<space_and_path>::iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 
 		vector<string> v;
 
 		oldstr = (*i).path;
-		
+
 		/* this is a stupid hack because Glib::path_get_dirname() is
 		 * lexical-only, and so passing it /a/b/c/ gives a different
 		 * result than passing it /a/b/c ...
 		 */
-		
+
 		if (oldstr[oldstr.length()-1] == G_DIR_SEPARATOR) {
 			oldstr = oldstr.substr (0, oldstr.length() - 1);
 		}
@@ -3978,8 +3978,8 @@ Session::rename (const std::string& new_name)
 		newstr = Glib::build_filename (base, legal_name);
 
 		cerr << "for " << oldstr << " new dir = " << newstr << endl;
-		
-		cerr << "Rename " << oldstr << " => " << newstr << endl;		
+
+		cerr << "Rename " << oldstr << " => " << newstr << endl;
 		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
 			cerr << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endl;
 			error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
@@ -3987,12 +3987,12 @@ Session::rename (const std::string& new_name)
 		}
 
 		/* Reset path in "session dirs" */
-		
+
 		(*i).path = newstr;
 		(*i).blocks = 0;
-		
+
 		/* reset primary SessionDirectory object */
-		
+
 		if (first) {
 			(*_session_dir) = newstr;
 			new_path = newstr;
@@ -4005,10 +4005,10 @@ Session::rename (const std::string& new_name)
 		string new_interchange_dir;
 
 		/* use newstr here because we renamed the path
-		 * (folder/directory) that used to be oldstr to newstr above 
-		 */	
-		
-		v.push_back (newstr); 
+		 * (folder/directory) that used to be oldstr to newstr above
+		 */
+
+		v.push_back (newstr);
 		v.push_back (interchange_dir_name);
 		v.push_back (Glib::path_get_basename (oldstr));
 
@@ -4018,11 +4018,11 @@ Session::rename (const std::string& new_name)
 		v.push_back (newstr);
 		v.push_back (interchange_dir_name);
 		v.push_back (legal_name);
-		
+
 		new_interchange_dir = Glib::build_filename (v);
-		
+
 		cerr << "Rename " << old_interchange_dir << " => " << new_interchange_dir << endl;
-		
+
 		if (::g_rename (old_interchange_dir.c_str(), new_interchange_dir.c_str()) != 0) {
 			cerr << string_compose (_("renaming %s as %2 failed (%3)"),
 			                         old_interchange_dir, new_interchange_dir,
@@ -4037,11 +4037,11 @@ Session::rename (const std::string& new_name)
 	}
 
 	/* state file */
-	
+
 	oldstr = Glib::build_filename (new_path, _current_snapshot_name + statefile_suffix);
 	newstr= Glib::build_filename (new_path, legal_name + statefile_suffix);
-	
-	cerr << "Rename " << oldstr << " => " << newstr << endl;		
+
+	cerr << "Rename " << oldstr << " => " << newstr << endl;
 
 	if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
 		cerr << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endl;
@@ -4050,14 +4050,14 @@ Session::rename (const std::string& new_name)
 	}
 
 	/* history file */
-	
+
 	oldstr = Glib::build_filename (new_path, _current_snapshot_name) + history_suffix;
 
 	if (Glib::file_test (oldstr, Glib::FILE_TEST_EXISTS))  {
 		newstr = Glib::build_filename (new_path, legal_name) + history_suffix;
-		
-		cerr << "Rename " << oldstr << " => " << newstr << endl;		
-		
+
+		cerr << "Rename " << oldstr << " => " << newstr << endl;
+
 		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
 			cerr << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endl;
 			error << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
@@ -4068,9 +4068,9 @@ Session::rename (const std::string& new_name)
 	/* remove old name from recent sessions */
 	remove_recent_sessions (_path);
 	_path = new_path;
-	
+
 	/* update file source paths */
-	
+
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
 		if (fs) {
@@ -4083,7 +4083,7 @@ Session::rename (const std::string& new_name)
 
 	_current_snapshot_name = new_name;
 	_name = new_name;
-	
+
 	set_dirty ();
 
 	/* save state again to get everything just right */
@@ -4125,7 +4125,7 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 	/* sample rate */
 
 	const XMLProperty* prop;
-	if ((prop = tree.root()->property (X_("sample-rate"))) != 0) {		
+	if ((prop = tree.root()->property (X_("sample-rate"))) != 0) {
 		sample_rate = atoi (prop->value());
 		found_sr = true;
 	}
@@ -4178,20 +4178,20 @@ Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,
 	{
 
 		Glib::Threads::Mutex::Lock lm (source_lock);
-		
+
 		cerr << " total sources = " << sources.size();
-		
+
 		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
-			
+
 			if (!fs) {
 				continue;
 			}
-			
+
 			if (fs->within_session()) {
 				continue;
 			}
-			
+
 			if (source_path_map.find (fs->path()) != source_path_map.end()) {
 				source_path_map[fs->path()].push_back (fs);
 			} else {
@@ -4199,45 +4199,45 @@ Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,
 				v.push_back (fs);
 				source_path_map.insert (make_pair (fs->path(), v));
 			}
-			
+
 			total++;
 		}
-		
+
 		cerr << " fsources = " << total << endl;
-		
+
 		for (SourcePathMap::iterator i = source_path_map.begin(); i != source_path_map.end(); ++i) {
-			
+
 			/* tell caller where we are */
-			
+
 			string old_path = i->first;
-			
+
 			callback (n, total, old_path);
-			
+
 			cerr << old_path << endl;
-			
+
 			new_path.clear ();
-			
+
 			switch (i->second.front()->type()) {
 			case DataType::AUDIO:
 				new_path = new_audio_source_path_for_embedded (old_path);
 				break;
-				
+
 			case DataType::MIDI:
 				/* XXX not implemented yet */
 				break;
 			}
-			
+
 			if (new_path.empty()) {
 				continue;
 			}
-			
+
 			cerr << "Move " << old_path << " => " << new_path << endl;
-			
+
 			if (!copy_file (old_path, new_path)) {
 				cerr << "failed !\n";
 				ret = -1;
 			}
-			
+
 			/* make sure we stop looking in the external
 			   dir/folder. Remember, this is an all-or-nothing
 			   operations, it doesn't merge just some files.
@@ -4280,7 +4280,7 @@ make_new_media_path (string old_path, string new_session_folder, string new_sess
 	v.push_back (new_session_path);   /* just one directory/folder */
 	v.push_back (typedir);
 	v.push_back (Glib::path_get_basename (old_path));
-	
+
 	return Glib::build_filename (v);
 }
 
@@ -4307,15 +4307,15 @@ Session::save_as (SaveAs& saveas)
 	/* get total size */
 
 	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
-		
+
 		/* need to clear this because
 		 * find_files_matching_filter() is cumulative
 		 */
-		
+
 		files.clear ();
-		
+
 		find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
-		
+
 		all += files.size();
 
 		for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
@@ -4326,7 +4326,7 @@ Session::save_as (SaveAs& saveas)
 	}
 
 	/* save old values so we can switch back if we are not switching to the new session */
-	
+
 	string old_path = _path;
 	string old_name = _name;
 	string old_snapshot = _current_snapshot_name;
@@ -4336,15 +4336,15 @@ Session::save_as (SaveAs& saveas)
 
 	old_search_path[DataType::AUDIO] = source_search_path (DataType::AUDIO);
 	old_search_path[DataType::MIDI] = source_search_path (DataType::MIDI);
-	old_config_search_path[DataType::AUDIO]  = config.get_audio_search_path ();	
-	old_config_search_path[DataType::MIDI]  = config.get_midi_search_path ();	
+	old_config_search_path[DataType::AUDIO]  = config.get_audio_search_path ();
+	old_config_search_path[DataType::MIDI]  = config.get_midi_search_path ();
 
 	/* switch session directory */
-	
+
 	(*_session_dir) = to_dir;
 
 	/* create new tree */
-	
+
 	if (!_session_dir->create()) {
 		saveas.failure_message = string_compose (_("Cannot create new session folder %1"), to_dir);
 		return -1;
@@ -4354,21 +4354,21 @@ Session::save_as (SaveAs& saveas)
 		/* copy all relevant files. Find each location in session_dirs,
 		 * and copy files from there to target.
 		 */
-		
+
 		for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
-			
+
 			/* need to clear this because
 			 * find_files_matching_filter() is cumulative
 			 */
-			
+
 			files.clear ();
-			
+
 			const size_t prefix_len = (*sd).path.size();
-			
+
 			/* Work just on the files within this session dir */
-			
+
 			find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
-			
+
 			/* add dir separator to protect against collisions with
 			 * track names (e.g. track named "audiofiles" or
 			 * "analysis".
@@ -4383,7 +4383,7 @@ Session::save_as (SaveAs& saveas)
 			   folder. That really was a bad idea, but I'm not fixing it as part of
 			   implementing ::save_as().
 			*/
-			
+
 			for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
 
 				std::string from = *i;
@@ -4395,25 +4395,25 @@ Session::save_as (SaveAs& saveas)
 					continue;
 				}
 #endif
-				
+
 				if (from.find (audiofile_dir_string) != string::npos) {
-					
+
 					/* audio file: only copy if asked */
 
 					if (saveas.include_media && saveas.copy_media) {
-						
+
 						string to = make_new_media_path (*i, to_dir, new_folder);
 
 						info << "media file copying from " << from << " to " << to << endmsg;
-						
+
 						if (!copy_file (from, to)) {
 							throw Glib::FileError (Glib::FileError::IO_ERROR,
 												   string_compose(_("\ncopying \"%1\" failed !"), from));
 						}
 					}
-					
+
 					/* we found media files inside the session folder */
-					
+
 					internal_file_cnt++;
 
 				} else if (from.find (midifile_dir_string) != string::npos) {
@@ -4423,44 +4423,44 @@ Session::save_as (SaveAs& saveas)
 					 */
 
 					if (saveas.include_media) {
-					
+
 						string to = make_new_media_path (*i, to_dir, new_folder);
-						
+
 						info << "media file copying from " << from << " to " << to << endmsg;
-						
+
 						if (!copy_file (from, to)) {
 							throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
 						}
 					}
 
 					/* we found media files inside the session folder */
-						
+
 					internal_file_cnt++;
-					
+
 				} else if (from.find (analysis_dir_string) != string::npos) {
 
 					/*  make sure analysis dir exists in
 					 *  new session folder, but we're not
 					 *  copying analysis files here, see
-					 *  below 
+					 *  below
 					 */
-					
+
 					(void) g_mkdir_with_parents (analysis_dir().c_str(), 775);
 					continue;
-					
+
 				} else {
-					
+
 					/* normal non-media file. Don't copy state, history, etc.
 					 */
-					
+
 					bool do_copy = true;
-					
+
 					for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
 						if ((from.length() > (*v).length()) && (from.find (*v) == from.length() - (*v).length())) {
 							/* end of filename matches extension, do not copy file */
 							do_copy = false;
 							break;
-						} 
+						}
 					}
 
 					if (!saveas.copy_media && from.find (peakfile_suffix) != string::npos) {
@@ -4469,10 +4469,10 @@ Session::save_as (SaveAs& saveas)
 						 */
 						do_copy = false;
 					}
-					
+
 					if (do_copy) {
 						string to = Glib::build_filename (to_dir, from.substr (prefix_len));
-						
+
 						info << "attempting to make directory/folder " << to << endmsg;
 
 						if (g_mkdir_with_parents (Glib::path_get_dirname (to).c_str(), 0755)) {
@@ -4480,26 +4480,26 @@ Session::save_as (SaveAs& saveas)
 						}
 
 						info << "attempting to copy " << from << " to " << to << endmsg;
-						
+
 						if (!copy_file (from, to)) {
 							throw Glib::FileError (Glib::FileError::IO_ERROR,
 												   string_compose(_("\ncopying \"%1\" failed !"), from));
 						}
 					}
 				}
-				
+
 				/* measure file size even if we're not going to copy so that our Progress
 				   signals are correct, since we included these do-not-copy files
 				   in the computation of the total size and file count.
 				*/
-				
+
 				GStatBuf gsb;
 				g_stat (from.c_str(), &gsb);
 				copied += gsb.st_size;
 				cnt++;
-				
+
 				double fraction = (double) copied / total_bytes;
-				
+
 				bool keep_going = true;
 
 				if (saveas.copy_media) {
@@ -4508,11 +4508,11 @@ Session::save_as (SaveAs& saveas)
 					 * media is not being copied, because
 					 * it will be fast(ish).
 					 */
-					
+
 					/* tell someone "X percent, file M of N"; M is one-based */
-					
+
 					boost::optional<bool> res = saveas.Progress (fraction, cnt, all);
-					
+
 					if (res) {
 						keep_going = *res;
 					}
@@ -4546,7 +4546,7 @@ Session::save_as (SaveAs& saveas)
 		}
 
 		if (saveas.include_media) {
-		
+
 			if (saveas.copy_media) {
 #ifndef PLATFORM_WINDOWS
 				/* There are problems with analysis files on
@@ -4556,7 +4556,7 @@ Session::save_as (SaveAs& saveas)
 				 *
 				 * This is a tricky problem to solve so for
 				 * just don't copy these files. They will be
-				 * regenerated as-needed anyway, subject to the 
+				 * regenerated as-needed anyway, subject to the
 				 * existing issue that the filenames will be
 				 * rejected by Windows, which is a separate
 				 * problem (though related).
@@ -4565,17 +4565,17 @@ Session::save_as (SaveAs& saveas)
 				/* only needed if we are copying media, since the
 				 * analysis data refers to media data
 				 */
-				
+
 				old = analysis_dir ();
 				if (Glib::file_test (old, Glib::FILE_TEST_EXISTS)) {
 					string newdir = Glib::build_filename (to_dir, "analysis");
 					copy_files (old, newdir);
 				}
-#endif /* PLATFORM_WINDOWS */				
+#endif /* PLATFORM_WINDOWS */
 			}
 		}
-			
-		
+
+
 		_path = to_dir;
 		_current_snapshot_name = saveas.new_name;
 		_name = saveas.new_name;
@@ -4598,12 +4598,12 @@ Session::save_as (SaveAs& saveas)
 				*/
 			}
 		}
-		
+
 		bool was_dirty = dirty ();
 
 		save_state ("", false, false, !saveas.include_media);
 		save_default_options ();
-		
+
 		if (saveas.copy_media && saveas.copy_external) {
 			if (bring_all_sources_into_session (boost::bind (&Session::save_as_bring_callback, this, _1, _2, _3))) {
 				throw Glib::FileError (Glib::FileError::NO_SPACE_LEFT, "consolidate failed");
@@ -4613,7 +4613,7 @@ Session::save_as (SaveAs& saveas)
 		saveas.final_session_folder_name = _path;
 
 		store_recent_sessions (_name, _path);
-		
+
 		if (!saveas.switch_to) {
 
 			/* switch back to the way things were */
@@ -4633,7 +4633,7 @@ Session::save_as (SaveAs& saveas)
 				config.set_audio_search_path (old_config_search_path[DataType::AUDIO]);
 				config.set_midi_search_path (old_config_search_path[DataType::MIDI]);
 			}
-			
+
 		} else {
 
 			/* prune session dirs, and update disk space statistics
@@ -4645,7 +4645,7 @@ Session::save_as (SaveAs& saveas)
 			session_dirs.push_back (sp);
 			refresh_disk_space ();
 
-			/* ensure that all existing tracks reset their current capture source paths 
+			/* ensure that all existing tracks reset their current capture source paths
 			 */
 			reset_write_sources (true, true);
 
@@ -4670,27 +4670,27 @@ Session::save_as (SaveAs& saveas)
 	} catch (Glib::FileError& e) {
 
 		saveas.failure_message = e.what();
-		
+
 		/* recursively remove all the directories */
-		
+
 		remove_directory (to_dir);
-		
+
 		/* return error */
-		
+
 		return -1;
 
 	} catch (...) {
 
 		saveas.failure_message = _("unknown reason");
-		
+
 		/* recursively remove all the directories */
-		
+
 		remove_directory (to_dir);
-		
+
 		/* return error */
-		
+
 		return -1;
 	}
-	
+
 	return 0;
 }
