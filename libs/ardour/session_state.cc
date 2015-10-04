@@ -2935,6 +2935,17 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state | InCleanup);
 
+	/* this is mostly for windows which doesn't allow file
+	 * renaming if the file is in use. But we don't special
+	 * case it because we need to know if this causes
+	 * problems, and the easiest way to notice that is to
+	 * keep it in place for all platforms.
+	 */
+
+	request_stop (false);
+	_butler->summon ();
+	_butler->wait_until_finished ();
+
 	/* consider deleting all unused playlists */
 
 	if (playlists->maybe_delete_unused (boost::bind (Session::ask_about_playlist_deletion, _1))) {
@@ -3007,6 +3018,15 @@ Session::cleanup_sources (CleanupReport& rep)
                 ++tmp;
 
 		if ((fs = boost::dynamic_pointer_cast<FileSource> (i->second)) != 0) {
+
+			/* this is mostly for windows which doesn't allow file
+			 * renaming if the file is in use. But we don't special
+			 * case it because we need to know if this causes
+			 * problems, and the easiest way to notice that is to
+			 * keep it in place for all platforms.
+			 */
+
+			fs->close ();
 
 			if (!fs->is_stub()) {
 
