@@ -310,6 +310,9 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
 
 	static void register_actions();
+#ifndef NDEBUG
+	static bool show_all_processors;
+#endif
 
   private:
 

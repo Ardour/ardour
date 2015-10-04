@@ -82,6 +82,10 @@
 class AUPluginUI;
 #endif
 
+#ifndef NDEBUG
+bool ProcessorBox::show_all_processors = false;
+#endif
+
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
@@ -1794,7 +1798,12 @@ ProcessorBox::help_count_visible_prefader_processors (boost::weak_ptr<Processor>
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
 
-	if (processor && processor->display_to_user()) {
+	if (processor && ( processor->display_to_user()
+#ifndef NDEBUG
+	                    || show_all_processors
+#endif
+	                 )
+	   ) {
 
 		if (boost::dynamic_pointer_cast<Amp>(processor) && boost::dynamic_pointer_cast<Amp>(processor)->type() == X_("amp")) {
 			*amp_seen = true;
@@ -1811,7 +1820,12 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
 
-	if (!processor || !processor->display_to_user()) {
+	if (!processor || ( !processor->display_to_user()
+#ifndef NDEBUG
+	                    && !show_all_processors
+#endif
+	                  )
+	   ) {
 		return;
 	}
 

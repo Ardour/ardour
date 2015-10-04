@@ -25,6 +25,10 @@
 #include "ardour/debug.h"
 #include "ardour/session.h"
 
+#ifndef NDEBUG // "-H"
+#include "processor_box.h"
+#endif
+
 #include "opts.h"
 
 #include "i18n.h"
@@ -84,7 +88,7 @@ print_help (const char *execname)
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
-	const char *optstring = "abBc:C:dD:hk:E:m:N:nOp:PST:U:vV";
+	const char *optstring = "abBc:C:dD:hHk:E:m:N:nOp:PST:U:vV";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (getenv ("ARDOUR_SAE")) {
@@ -142,6 +146,11 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		case 'h':
 			print_help (execname);
 			exit (0);
+			break;
+		case 'H':
+#ifndef NDEBUG
+			ProcessorBox::show_all_processors = true;
+#endif
 			break;
 		case 'a':
 			check_announcements = false;
