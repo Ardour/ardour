@@ -107,6 +107,36 @@ vstfx_infofile_path (const char* dllpath)
 
 /* *** VST Blacklist *** */
 
+static void vstfx_read_blacklist (std::string &bl) {
+	FILE * blacklist_fd = NULL;
+	bl = "";
+
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST_BLACKLIST);
+
+	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		return;
+	}
+
+	if (! (blacklist_fd = g_fopen (fn.c_str (), "rb"))) {
+		return;
+	}
+
+	while (!feof (blacklist_fd)) {
+		char buf[1024];
+		size_t s = fread (buf, sizeof(char), 1024, blacklist_fd);
+		if (ferror (blacklist_fd)) {
+			error << string_compose (_("error reading VST Blacklist file %1 (%2)"), fn, strerror (errno)) << endmsg;
+			bl = "";
+			break;
+		}
+		if (s == 0) {
+			break;
+		}
+		bl.append (buf, s);
+	}
+	::fclose (blacklist_fd);
+}
+
 /** mark plugin as blacklisted */
 static void vstfx_blacklist (const char *id)
 {
@@ -132,10 +162,7 @@ static void vstfx_un_blacklist (const char *idcs)
 	}
 
 	std::string bl;
-	{
-		std::ifstream ifs (fn.c_str ());
-		bl.assign ((std::istreambuf_iterator<char> (ifs)), (std::istreambuf_iterator<char> ()));
-	}
+	vstfx_read_blacklist (bl);
 
 	::g_unlink (fn.c_str ());
 
@@ -169,9 +196,9 @@ static bool vst_is_blacklisted (const char *idcs)
 	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 		return false;
 	}
+
 	std::string bl;
-	std::ifstream ifs (fn.c_str ());
-	bl.assign ((std::istreambuf_iterator<char> (ifs)), (std::istreambuf_iterator<char> ()));
+	vstfx_read_blacklist (bl);
 
 	assert (id.find ("\n") == string::npos);
 
