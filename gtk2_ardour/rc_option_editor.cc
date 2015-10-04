@@ -348,6 +348,7 @@ static const struct {
 	{ "Shift-Alt", GDK_SHIFT_MASK|GDK_MOD1_MASK },
 	{ "Control-Shift-Alt", GDK_CONTROL_MASK|GDK_SHIFT_MASK|GDK_MOD1_MASK },
 	{ "Alt-Windows", GDK_MOD1_MASK|GDK_MOD4_MASK },
+	{ "Alt-Shift-Windows", GDK_MOD1_MASK|GDK_SHIFT_MASK|GDK_MOD4_MASK },
 	{ "Mod2", GDK_MOD2_MASK },
 	{ "Mod3", GDK_MOD3_MASK },
 	{ "Windows", GDK_MOD4_MASK },
