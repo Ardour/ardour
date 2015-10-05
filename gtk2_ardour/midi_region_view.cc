@@ -2357,7 +2357,7 @@ MidiRegionView::note_selected (NoteBase* ev, bool add, bool extend)
 	} else {
 		/* find end of latest note selected, select all between that and the start of "ev" */
 
-		Evoral::Beats earliest = Evoral::MaxBeats;
+		Evoral::Beats earliest = std::numeric_limits<Evoral::Beats>::max();
 		Evoral::Beats latest   = Evoral::Beats();
 
 		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
@@ -2516,7 +2516,7 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 {
 	typedef vector<boost::shared_ptr<NoteType> > PossibleChord;
 	PossibleChord to_play;
-	Evoral::Beats earliest = Evoral::MaxBeats;
+	Evoral::Beats earliest = std::numeric_limits<Evoral::Beats>::max();
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		if ((*i)->note()->time() < earliest) {
