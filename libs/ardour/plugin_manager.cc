@@ -28,6 +28,9 @@
 #include <cstdlib>
 #include <fstream>
 
+#include <glib.h>
+#include <pbd/gstdio_compat.h>
+
 #ifdef HAVE_LRDF
 #include <lrdf.h>
 #endif
@@ -266,10 +269,11 @@ PluginManager::refresh (bool cache_only)
 		if (!cache_only) {
 			string fn = Glib::build_filename (ARDOUR::user_cache_directory(), VST_BLACKLIST);
 			if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-				std::string bl;
-				std::ifstream ifs (fn.c_str ());
-				bl.assign ((std::istreambuf_iterator<char> (ifs)), (std::istreambuf_iterator<char> ()));
-				PBD::info << _("VST Blacklist:") << "\n" << bl << "-----" << endmsg;
+				gchar *bl = NULL;
+				if (g_file_get_contents(fn.c_str (), contents, NULL, NULL)) {
+					PBD::info << _("VST Blacklist:") << "\n" << bl << "-----" << endmsg;
+					g_free (bl);
+				}
 			}
 		}
 #endif
@@ -1005,14 +1009,8 @@ PluginManager::get_status (const PluginInfoPtr& pi)
 void
 PluginManager::save_statuses ()
 {
-	ofstream ofs;
 	std::string path = Glib::build_filename (user_config_directory(), "plugin_statuses");
-
-	ofs.open (path.c_str(), ios_base::openmode (ios::out|ios::trunc));
-
-	if (!ofs) {
-		return;
-	}
+	stringstream ofs;
 
 	for (PluginStatusList::iterator i = statuses.begin(); i != statuses.end(); ++i) {
 		switch ((*i).type) {
@@ -1051,19 +1049,19 @@ PluginManager::save_statuses ()
 		ofs << (*i).unique_id;;
 		ofs << endl;
 	}
-
-	ofs.close ();
+	g_file_set_contents (path.c_str(), ofs.str().c_str(), -1, NULL);
 }
 
 void
 PluginManager::load_statuses ()
 {
 	std::string path = Glib::build_filename (user_config_directory(), "plugin_statuses");
-	ifstream ifs (path.c_str());
-
-	if (!ifs) {
+	gchar *fbuf = NULL;
+	if (!g_file_get_contents (path.c_str(), &fbuf, NULL, NULL))  {
 		return;
 	}
+	stringstream ifs (fbuf);
+	g_free (fbuf);
 
 	std::string stype;
 	std::string sstatus;
@@ -1126,8 +1124,6 @@ PluginManager::load_statuses ()
 		strip_whitespace_edges (id);
 		set_status (type, id, status);
 	}
-
-	ifs.close ();
 }
 
 void
