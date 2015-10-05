@@ -444,7 +444,6 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 			continue;
 		}
 
-#if ENABLE_SYSEX
 		MIDIHDR header;
 		header.dwBufferLength = h.size;
 		header.dwFlags = 0;
@@ -477,7 +476,6 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 			                            get_error_string (result)));
 			break;
 		}
-#endif
 	}
 
 #ifdef USE_MMCSS_THREAD_PRIORITIES

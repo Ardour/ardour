@@ -247,7 +247,6 @@ void
 WinMMEMidiInputDevice::handle_sysex_msg (MIDIHDR* const midi_header,
                                          uint32_t timestamp)
 {
-#ifdef ENABLE_SYSEX
 	LPMIDIHDR header = (LPMIDIHDR)midi_header;
 	size_t byte_count = header->dwBytesRecorded;
 
@@ -269,7 +268,6 @@ WinMMEMidiInputDevice::handle_sysex_msg (MIDIHDR* const midi_header,
 	if (result != MMSYSERR_NOERROR) {
 		DEBUG_MIDI (get_error_string (result));
 	}
-#endif
 }
 
 // fix param order
