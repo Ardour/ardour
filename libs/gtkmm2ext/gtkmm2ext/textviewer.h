@@ -46,7 +46,6 @@ class LIBGTKMM2EXT_API TextViewer : public Gtk::Window, public Transmitter
 	Gtk::TextView& text()         { return etext; }
 	Gtk::Button& dismiss_button() { return dismiss; }
 
-	void insert_file (const std::string &);
 	void scroll_to_bottom ();
 
 	void deliver ();
