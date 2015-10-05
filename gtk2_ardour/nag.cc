@@ -21,7 +21,7 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include <fstream>
+#include "pbd/gstdio_compat.h"
 #include <gtkmm/stock.h>
 
 #include "pbd/openuri.h"
@@ -136,7 +136,7 @@ NagScreen::mark_never_again ()
 
 	path = Glib::build_filename (user_config_directory(), ".nevernag");
 
-	ofstream nagfile (path.c_str());
+	g_file_set_contents (path.c_str(), "", -1, NULL);
 }
 
 void
@@ -146,7 +146,7 @@ NagScreen::mark_subscriber ()
 
 	path = Glib::build_filename (user_config_directory(), ".askedaboutsub");
 
-	ofstream subsfile (path.c_str());
+	g_file_set_contents (path.c_str(), "", -1, NULL);
 }
 
 void
@@ -156,7 +156,7 @@ NagScreen::mark_affirmed_subscriber ()
 
 	path = Glib::build_filename (user_config_directory(), ".isubscribe");
 
-	ofstream subsfile (path.c_str());
+	g_file_set_contents (path.c_str(), "", -1, NULL);
 }
 
 bool
