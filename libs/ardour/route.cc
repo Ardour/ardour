@@ -779,11 +779,12 @@ Route::set_listen (bool yn, void* src)
 		if (yn != _monitor_send->active()) {
 			if (yn) {
 				_monitor_send->activate ();
-				_mute_master->set_soloed (true);
+				_mute_master->set_soloed_by_self (true);
 			} else {
 				_monitor_send->deactivate ();
-				_mute_master->set_soloed (false);
+				_mute_master->set_soloed_by_self (false);
 			}
+			_mute_master->set_soloed_by_others (false);
 
 			listen_changed (src); /* EMIT SIGNAL */
 		}
@@ -949,7 +950,8 @@ Route::mod_solo_by_others_downstream (int32_t delta)
 void
 Route::set_mute_master_solo ()
 {
-	_mute_master->set_soloed (self_soloed() || soloed_by_others_downstream() || soloed_by_others_upstream());
+	_mute_master->set_soloed_by_self (self_soloed());
+	_mute_master->set_soloed_by_others (soloed_by_others_downstream() || soloed_by_others_upstream());
 }
 
 void

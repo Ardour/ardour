@@ -38,7 +38,8 @@ MuteMaster::MuteMaster (Session& s, const std::string&)
 	: SessionHandleRef (s)
 	, _mute_point (MutePoint (0))
         , _muted_by_self (false)
-        , _soloed (false)
+        , _soloed_by_self (false)
+        , _soloed_by_others (false)
         , _solo_ignore (false)
 {
 
@@ -77,24 +78,18 @@ MuteMaster::unmute_at (MutePoint mp)
 	}
 }
 
-void
-MuteMaster::set_soloed (bool yn)
-{
-        _soloed = yn;
-}
-
 gain_t
 MuteMaster::mute_gain_at (MutePoint mp) const
 {
         gain_t gain;
 
         if (Config->get_solo_mute_override()) {
-                if (_soloed) {
+                if (_soloed_by_self) {
                         gain = GAIN_COEFF_UNITY;
                 } else if (muted_by_self_at (mp)) {
                         gain = GAIN_COEFF_ZERO;
                 } else {
-                        if (muted_by_others_at (mp)) {
+                        if (muted_by_others_at (mp) && !_soloed_by_others) {
                                 gain = Config->get_solo_mute_gain ();
                         } else {
                                 gain = GAIN_COEFF_UNITY;
@@ -103,7 +98,7 @@ MuteMaster::mute_gain_at (MutePoint mp) const
         } else {
                 if (muted_by_self_at (mp)) {
                         gain = GAIN_COEFF_ZERO;
-                } else if (_soloed) {
+                } else if (_soloed_by_self || _soloed_by_others) {
                         gain = GAIN_COEFF_UNITY;
                 } else {
                         if (muted_by_others_at (mp)) {

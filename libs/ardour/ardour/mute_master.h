@@ -62,7 +62,8 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 	void set_mute_points (MutePoint);
 	MutePoint mute_points() const { return _mute_point; }
 
-	void set_soloed (bool);
+	void set_soloed_by_self (bool yn) { _soloed_by_self = yn; }
+	void set_soloed_by_others (bool yn) { _soloed_by_others = yn; }
 	void set_solo_ignore (bool yn) { _solo_ignore = yn; }
 
 	PBD::Signal0<void> MutePointChanged;
@@ -73,7 +74,8 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
   private:
 	volatile MutePoint _mute_point;
 	volatile bool      _muted_by_self;
-	volatile bool      _soloed;
+	volatile bool      _soloed_by_self;
+	volatile bool      _soloed_by_others;
 	volatile bool      _solo_ignore;
 };
 
