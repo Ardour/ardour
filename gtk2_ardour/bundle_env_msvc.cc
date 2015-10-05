@@ -29,7 +29,7 @@
 #include <fstream>
 
 #include <glibmm.h>
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #include <fontconfig/fontconfig.h>
 

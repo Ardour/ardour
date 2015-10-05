@@ -28,7 +28,7 @@
 #include <cstdlib>
 
 #include <glib.h>
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #ifdef HAVE_LRDF
 #include <lrdf.h>
@@ -48,7 +48,6 @@
 #include <cstring>
 #endif //LXVST_SUPPORT
 
-#include <pbd/gstdio_compat.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/pattern.h>
 #include <glibmm/fileutils.h>

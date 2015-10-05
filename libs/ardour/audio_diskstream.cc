@@ -27,7 +27,7 @@
 #include <cstdlib>
 #include <ctime>
 
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 #include "pbd/error.h"
 #include "pbd/xml++.h"
 #include "pbd/memento_command.h"

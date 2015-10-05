@@ -20,7 +20,7 @@
 #include <sys/stat.h>
 
 #include <glib.h>
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #include <assert.h>
 #include <string.h>

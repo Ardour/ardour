@@ -41,7 +41,7 @@
 #include <errno.h>
 #include <regex.h>
 
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>

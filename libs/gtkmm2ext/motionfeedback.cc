@@ -25,7 +25,7 @@
 #include <unistd.h>
 #include <stdio.h> /* for snprintf, grrr */
 
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #include <gdk/gdkkeysyms.h>
 #include <gtkmm.h>

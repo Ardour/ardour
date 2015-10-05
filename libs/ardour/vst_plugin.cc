@@ -18,7 +18,7 @@
 */
 
 #include <glib.h>
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>

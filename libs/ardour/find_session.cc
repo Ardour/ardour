@@ -23,7 +23,7 @@
 #include <climits>
 #include <cerrno>
 
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #include <glibmm/miscutils.h>
 

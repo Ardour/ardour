@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <fcntl.h>
 
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #include <gtkmm/main.h>
 #include <gtkmm/filechooser.h>

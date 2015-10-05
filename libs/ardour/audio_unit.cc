@@ -25,6 +25,7 @@
 #include <math.h>
 #include <ctype.h>
 
+#include "pbd/gstdio_compat.h"
 #include "pbd/transmitter.h"
 #include "pbd/xml++.h"
 #include "pbd/convert.h"
@@ -35,7 +36,6 @@
 #include <glibmm/threads.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
-#include <pbd/gstdio_compat.h>
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"

@@ -33,7 +33,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
 
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 #include <glibmm/fileutils.h>
 
 #include "pbd/convert.h"

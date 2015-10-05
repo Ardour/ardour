@@ -1,7 +1,7 @@
 #include "filesystem_test.h"
 
 #include <glib.h>
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #include <unistd.h>
 #include <stdlib.h>

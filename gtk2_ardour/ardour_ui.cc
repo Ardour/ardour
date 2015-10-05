@@ -40,7 +40,7 @@
 #include <time.h>
 
 #include <glib.h>
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/accelmap.h>

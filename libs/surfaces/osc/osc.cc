@@ -25,7 +25,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 #include <glibmm/miscutils.h>
 
 #include <pbd/convert.h>

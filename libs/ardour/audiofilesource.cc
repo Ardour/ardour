@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include "pbd/gstdio_compat.h"
 #include "pbd/convert.h"
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
@@ -42,7 +43,6 @@
 
 #include <sndfile.h>
 
-#include <pbd/gstdio_compat.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/threads.h>

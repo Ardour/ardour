@@ -23,7 +23,7 @@
 #include <cerrno>
 #include <ctype.h>
 
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #include <gtkmm/widget.h>
 #include <gtkmm/window.h>

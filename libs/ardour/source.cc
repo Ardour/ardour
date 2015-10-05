@@ -26,7 +26,7 @@
 #include <iomanip>
 #include <algorithm>
 
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 #include <glibmm/threads.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>

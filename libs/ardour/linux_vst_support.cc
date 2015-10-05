@@ -29,7 +29,7 @@
 #include <pthread.h>
 
 #include <glib.h>
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 

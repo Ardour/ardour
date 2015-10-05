@@ -20,7 +20,7 @@
 
 #include "ardour/export_handler.h"
 
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 #include <glibmm/convert.h>
 

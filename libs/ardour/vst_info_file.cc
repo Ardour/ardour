@@ -35,7 +35,7 @@
 #include <string.h>
 
 #include <glib.h>
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 
 #include "pbd/error.h"

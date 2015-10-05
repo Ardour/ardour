@@ -48,7 +48,7 @@
 #endif
 
 #include <glib.h>
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #include <glibmm.h>
 #include <glibmm/threads.h>

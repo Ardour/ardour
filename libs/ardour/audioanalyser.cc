@@ -21,9 +21,9 @@
 
 #include <vamp-hostsdk/PluginLoader.h>
 
+#include "pbd/gstdio_compat.h"
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
-#include <pbd/gstdio_compat.h>
 
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"

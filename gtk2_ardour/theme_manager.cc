@@ -22,7 +22,7 @@
 
 #include "fix_carbon.h"
 
-#include <pbd/gstdio_compat.h>
+#include "pbd/gstdio_compat.h"
 
 #include <gtkmm/stock.h>
 #include <gtkmm/settings.h>
