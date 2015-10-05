@@ -128,13 +128,21 @@ Port::disconnect_all ()
 {
 	if (_port_handle) {
 
+		std::vector<std::string> connections;
+		get_connections (connections);
+
 		port_engine.disconnect_all (_port_handle);
 		_connections.clear ();
 
 		/* a cheaper, less hacky way to do boost::shared_from_this() ...
 		 */
 		boost::shared_ptr<Port> pself = port_manager->get_port_by_name (name());
-		PostDisconnect (pself, boost::shared_ptr<Port>()); // emit signal
+		for (vector<string>::const_iterator c = connections.begin(); c != connections.end() && pself; ++c) {
+			boost::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (*c);
+			if (pother) {
+				PostDisconnect (pself, pother); // emit signal
+			}
+		}
 	}
 
 	return 0;
