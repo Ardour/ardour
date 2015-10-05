@@ -118,12 +118,12 @@ class MackieControlProtocol
 		Swap,   /* fader controls secondary, vpot controls primary */
 		Zero,   /* fader controls primary, but doesn't move, vpot controls secondary */
 	};
-	
+
 	MackieControlProtocol(ARDOUR::Session &);
 	virtual ~MackieControlProtocol();
 
 	static MackieControlProtocol* instance() { return _instance; }
-	
+
 	const Mackie::DeviceInfo& device_info() const { return _device_info; }
 	Mackie::DeviceProfile& device_profile() { return _device_profile; }
 
@@ -148,9 +148,9 @@ class MackieControlProtocol
 	   we do not implement get/set_feedback() since this aspect of
 	   support for the protocol is not optional.
 	*/
-	
+
 	static bool probe();
-	
+
         Glib::Threads::Mutex surfaces_lock;
 	typedef std::list<boost::shared_ptr<Mackie::Surface> > Surfaces;
 	Surfaces surfaces;
@@ -159,9 +159,9 @@ class MackieControlProtocol
 
 	void set_master_on_surface_strip (uint32_t surface, uint32_t strip);
 	void set_monitor_on_surface_strip (uint32_t surface, uint32_t strip);
-	
+
 	uint32_t n_strips (bool with_locked_strips = true) const;
-	
+
 	bool has_editor () const { return true; }
 	void* get_gui () const;
 	void tear_down_gui ();
@@ -174,7 +174,7 @@ class MackieControlProtocol
 	void recalibrate_faders ();
 	void toggle_backlight ();
 	void set_touch_sensitivity (int);
-	
+
 	/// rebuild the current bank. Called on route added/removed and
 	/// remote id changed.
 	void refresh_current_bank();
@@ -191,7 +191,7 @@ class MackieControlProtocol
 	/// Turn timecode on and beats off, or vice versa, depending
 	/// on state of _timecode_type
 	void update_timecode_beats_led();
-	
+
 	/// this is called to generate the midi to send in response to a button press.
 	void update_led(Mackie::Surface&, Mackie::Button & button, Mackie::LedState);
 
@@ -209,7 +209,7 @@ class MackieControlProtocol
 	void add_down_button (ARDOUR::AutomationType, int surface, int strip);
 	void remove_down_button (ARDOUR::AutomationType, int surface, int strip);
 	ControlList down_controls (ARDOUR::AutomationType);
-	
+
 	void add_down_select_button (int surface, int strip);
 	void remove_down_select_button (int surface, int strip);
 	void select_range ();
@@ -221,7 +221,7 @@ class MackieControlProtocol
 	void not_session_load () { _session_load = false; }
 
 	void midi_connectivity_established ();
-	
+
   protected:
 	// shut down the surface
 	void close();
@@ -229,14 +229,14 @@ class MackieControlProtocol
 	// This sets up the notifications and sets the
 	// controls to the correct values
 	void update_surfaces();
-	
+
 	// connects global (not strip) signals from the Session to here
 	// so the surface can be notified of changes from the other UIs.
 	void connect_session_signals();
-	
+
 	// set all controls to their zero position
 	void zero_all();
-	
+
 	/**
 	   Fetch the set of routes to be considered for control by the
 	   surface. Excluding master, hidden and control routes, and inactive routes
@@ -254,7 +254,7 @@ class MackieControlProtocol
 
 	std::string format_bbt_timecode (ARDOUR::framepos_t now_frame);
 	std::string format_timecode_timecode (ARDOUR::framepos_t now_frame);
-	
+
 	void do_request (MackieControlUIRequest*);
 	int stop ();
 
@@ -267,7 +267,7 @@ class MackieControlProtocol
 	struct ButtonHandlers {
 	    Mackie::LedState (MackieControlProtocol::*press) (Mackie::Button&);
 	    Mackie::LedState (MackieControlProtocol::*release) (Mackie::Button&);
-	
+
 	    ButtonHandlers (Mackie::LedState (MackieControlProtocol::*p) (Mackie::Button&),
 			    Mackie::LedState (MackieControlProtocol::*r) (Mackie::Button&))
 	    : press (p)
@@ -277,7 +277,7 @@ class MackieControlProtocol
 	typedef std::map<Mackie::Button::ID,ButtonHandlers> ButtonMap;
 
 	static MackieControlProtocol* _instance;
-	
+
 	Mackie::DeviceInfo       _device_info;
 	Mackie::DeviceProfile    _device_profile;
 	sigc::connection          periodic_connection;

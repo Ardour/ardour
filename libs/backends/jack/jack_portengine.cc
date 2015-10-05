@@ -41,7 +41,7 @@ static uint32_t
 ardour_port_flags_to_jack_flags (PortFlags flags)
 {
 	uint32_t jack_flags = 0;
-	
+
 	if (flags & IsInput) {
 		jack_flags |= JackPortIsInput;
 	}
@@ -242,7 +242,7 @@ JACKAudioBackend::physically_connected (PortHandle p, bool process_callback_safe
 	jack_port_t* port = (jack_port_t*) p;
 
 	const char** ports;
-	
+
 	if (process_callback_safe) {
 		ports = jack_port_get_connections ((jack_port_t*)port);
 	} else {
@@ -328,7 +328,7 @@ JACKAudioBackend::get_ports (const string& port_name_pattern, DataType type, Por
 	}
 
 	jack_free (ports);
-	
+
 	return s.size();
 }
 
@@ -442,7 +442,7 @@ int
 JACKAudioBackend::connect (const std::string& src, const std::string& dst)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
-	
+
 	int r = jack_connect (_priv_jack, src.c_str(), dst.c_str());
 	return r;
 }
@@ -505,7 +505,7 @@ void
 JACKAudioBackend::set_latency_range (PortHandle port, bool for_playback, LatencyRange r)
 {
 	jack_latency_range_t range;
-	
+
 	range.min = r.min;
 	range.max = r.max;
 
@@ -517,7 +517,7 @@ JACKAudioBackend::get_latency_range (PortHandle port, bool for_playback)
 {
 	jack_latency_range_t range;
 	LatencyRange ret;
-	
+
 	jack_port_get_latency_range ((jack_port_t*) port, for_playback ? JackPlaybackLatency : JackCaptureLatency, &range);
 
 	ret.min = range.min;

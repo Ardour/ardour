@@ -48,14 +48,14 @@ class Control {
 public:
 	Control (int id, std::string name, Group& group);
 	virtual ~Control() {}
-	
+
 	int id() const { return _id; }
 	const std::string & name() const  { return _name; }
 	Group & group() const { return _group; }
 
 	bool in_use () const;
 	void set_in_use (bool);
-	
+
 	// Keep track of the timeout so it can be updated with more incoming events
 	sigc::connection in_use_connection;
 
@@ -71,7 +71,7 @@ public:
 
 	float get_value ();
 	void set_value (float val);
-	
+
 	virtual void start_touch (double when);
 	virtual void stop_touch (bool mark, double when);
 

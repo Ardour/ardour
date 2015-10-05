@@ -154,7 +154,7 @@ MixerStrip::init ()
 	if (_mixer_owned) {
 		t += string_compose (_("\n%1-%2-click to toggle the width of all strips."), Keyboard::primary_modifier_name(), Keyboard::tertiary_modifier_name ());
 	}
-	
+
 	width_button.set_icon (ArdourIcon::StripWidth);
 	set_tooltip (width_button, t);
 
@@ -162,7 +162,7 @@ MixerStrip::init ()
 	set_tooltip (&hide_button, _("Hide this mixer strip"));
 
 	input_button_box.set_spacing(2);
-	
+
 	input_button.set_text (_("Input"));
 	input_button.set_name ("mixer strip button");
 	input_button_box.pack_start (input_button, true, true);
@@ -177,7 +177,7 @@ MixerStrip::init ()
 
 	meter_point_button.signal_button_press_event().connect (sigc::mem_fun (gpm, &GainMeter::meter_press), false);
 	meter_point_button.signal_button_release_event().connect (sigc::mem_fun (gpm, &GainMeter::meter_release), false);
-	
+
 	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
 	solo_isolated_led = manage (new ArdourButton (ArdourButton::led_default_elements));
@@ -238,7 +238,7 @@ MixerStrip::init ()
 			button_size_group->add_widget (*monitor_input_button);
 		}
 	}
-	
+
 	mute_solo_table.set_homogeneous (true);
 	mute_solo_table.set_spacings (2);
 
@@ -408,7 +408,7 @@ bool
 MixerStrip::mixer_strip_enter_event (GdkEventCrossing* /*ev*/)
 {
 	_entered_mixer_strip = this;
-	
+
 	//although we are triggering on the "enter", to the user it will appear that it is happenin on the "leave"
 	//because the mixerstrip control is a parent that encompasses the strip
 	deselect_all_processors();
@@ -431,7 +431,7 @@ MixerStrip::mixer_strip_leave_event (GdkEventCrossing *ev)
 		//if we leave this mixer strip we need to clear out any selections
 		//processor_box.processor_display.select_none();  //but this doesn't work, because it gets triggered when (for example) you open the menu or start a drag
 	}
-	
+
 	return false;
 }
 
@@ -456,7 +456,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (group_button.get_parent()) {
 		bottom_button_table.remove (group_button);
 	}
-	
+
 	RouteUI::set_route (rt);
 
 	/* ProcessorBox needs access to _route so that it can read
@@ -469,7 +469,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	/* unpack these from the parent and stuff them into our own
 	   table
 	*/
-	
+
 	if (gpm.peak_display.get_parent()) {
 		gpm.peak_display.get_parent()->remove (gpm.peak_display);
 	}
@@ -478,7 +478,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	gpm.set_type (rt->meter_type());
-	
+
 	mute_solo_table.attach (gpm.gain_display,0,1,1,2, EXPAND|FILL, EXPAND);
 	mute_solo_table.attach (gpm.peak_display,1,2,1,2, EXPAND|FILL, EXPAND);
 
@@ -798,7 +798,7 @@ MixerStrip::output_release (GdkEventButton *ev)
 		edit_output_configuration ();
 		break;
 	}
-	
+
 	return false;
 }
 
@@ -869,7 +869,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 					)
 				);
 		}
-		
+
 		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_output_configuration)));
 
@@ -929,7 +929,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 
 		citems.push_back (SeparatorElem());
 		uint32_t const n_with_separator = citems.size ();
-		
+
 		input_menu_bundles.clear ();
 
 		ARDOUR::BundleList current = _route->input()->bundles_connected ();
@@ -1195,7 +1195,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 
 	ostringstream tooltip;
 	char * tooltip_cstr;
-	
+
 	//to avoid confusion, the button caption should only show connections that match the datatype of the track
 	DataType dt = DataType::AUDIO;
 	if ( boost::dynamic_pointer_cast<MidiTrack>(route) != 0 ) {
@@ -1220,7 +1220,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 		} else {
 			port = route->output()->nth (io_index);
 		}
-		
+
 		port_connections.clear ();
 		port->get_connections(port_connections);
 
@@ -1598,7 +1598,7 @@ MixerStrip::build_route_ops_menu ()
 			if (!selection.selected (rtav)) {
 				selection.set (rtav);
 			}
-			
+
 			items.push_front (SeparatorElem());
 			items.push_front (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 		}
@@ -1644,7 +1644,7 @@ MixerStrip::number_button_button_press (GdkEventButton* ev)
 		/* do not allow rename if the track is record-enabled */
 		rename_menu_item->set_sensitive (!_route->record_enabled());
 		route_ops_menu->popup (1, ev->time);
-		
+
 		return true;
 	}
 
@@ -1670,7 +1670,7 @@ MixerStrip::set_selected (bool yn)
 		global_frame.set_name ("MixerStripFrame");
 	}
 	global_frame.queue_draw ();
-	
+
 //	if (!yn)
 //		processor_box.deselect_all_processors();
 }
@@ -1735,7 +1735,7 @@ MixerStrip::width_button_pressed (GdkEventButton* ev)
 	if (ev->button != 1) {
 		return false;
 	}
-	
+
 	if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier)) && _mixer_owned) {
 		switch (_width) {
 		case Wide:
@@ -1880,19 +1880,19 @@ MixerStrip::meter_point_string (MeterPoint mp)
 		case MeterInput:
 			return _("In");
 			break;
-			
+
 		case MeterPreFader:
 			return _("Pre");
 			break;
-			
+
 		case MeterPostFader:
 			return _("Post");
 			break;
-			
+
 		case MeterOutput:
 			return _("Out");
 			break;
-			
+
 		case MeterCustom:
 		default:
 			return _("Custom");
@@ -1904,19 +1904,19 @@ MixerStrip::meter_point_string (MeterPoint mp)
 		case MeterInput:
 			return S_("Meter|In");
 			break;
-			
+
 		case MeterPreFader:
 			return S_("Meter|Pr");
 			break;
-			
+
 		case MeterPostFader:
 			return S_("Meter|Po");
 			break;
-			
+
 		case MeterOutput:
 			return S_("Meter|O");
 			break;
-			
+
 		case MeterCustom:
 		default:
 			return S_("Meter|C");
@@ -2204,7 +2204,7 @@ MixerStrip::override_solo_visibility () const
 	if (_route && _route->is_master ()) {
 		return boost::optional<bool> (false);
 	}
-	
+
 	return boost::optional<bool> ();
 }
 
@@ -2362,7 +2362,7 @@ MixerStrip::add_level_meter_item_point (Menu_Helpers::MenuList& items,
 		RadioMenuItem::Group& group, string const & name, MeterPoint point)
 {
 	using namespace Menu_Helpers;
-	
+
 	items.push_back (RadioMenuElem (group, name, sigc::bind (sigc::mem_fun (*this, &MixerStrip::set_meter_point), point)));
 	RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&items.back ());
 	i->set_active (_route->meter_point() == point);
@@ -2380,7 +2380,7 @@ MixerStrip::add_level_meter_item_type (Menu_Helpers::MenuList& items,
 		RadioMenuItem::Group& group, string const & name, MeterType type)
 {
 	using namespace Menu_Helpers;
-	
+
 	items.push_back (RadioMenuElem (group, name, sigc::bind (sigc::mem_fun (*this, &MixerStrip::set_meter_type), type)));
 	RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&items.back ());
 	i->set_active (_route->meter_type() == type);

@@ -98,7 +98,7 @@ Stateful::save_extra_xml (const XMLNode& node)
 	   to by _extra_xml if a new Extra node is found, but not
 	   otherwise.
 	*/
-	
+
 	const XMLNode* xtra = node.child ("Extra");
 
 	if (xtra) {
@@ -125,7 +125,7 @@ Stateful::add_instant_xml (XMLNode& node, const std::string& directory_path)
 	_instant_xml->add_child_copy (node);
 
 	std::string instant_xml_path = Glib::build_filename (directory_path, "instant.xml");
-	
+
 	XMLTree tree;
 	tree.set_filename(instant_xml_path);
 
@@ -192,7 +192,7 @@ PropertyList *
 Stateful::get_changes_as_properties (Command* cmd) const
 {
 	PropertyList* pl = new PropertyList;
-	
+
 	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
 		i->second->get_changes_as_properties (*pl, cmd);
 	}
@@ -209,7 +209,7 @@ PropertyChange
 Stateful::set_values (XMLNode const & node)
 {
 	PropertyChange c;
-	
+
 	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
 		if (i->second->set_value (node)) {
 			c.add (i->first);
@@ -232,7 +232,7 @@ Stateful::apply_changes (const PropertyList& property_list)
 	for (PropertyList::const_iterator pp = property_list.begin(); pp != property_list.end(); ++pp) {
 		DEBUG_TRACE (DEBUG::Stateful, string_compose ("in plist: %1\n", pp->second->property_name()));
 	}
-	
+
 	for (PropertyList::const_iterator i = property_list.begin(); i != property_list.end(); ++i) {
 		if ((p = _properties->find (i->first)) != _properties->end()) {
 
@@ -240,7 +240,7 @@ Stateful::apply_changes (const PropertyList& property_list)
 				DEBUG::Stateful,
 				string_compose ("actually setting property %1 using %2\n", p->second->property_name(), i->second->property_name())
 				);
-			
+
 			if (apply_changes (*i->second)) {
 				c.add (i->first);
 			}
@@ -249,7 +249,7 @@ Stateful::apply_changes (const PropertyList& property_list)
 			                                              i->second->property_name()));
 		}
 	}
-	
+
 	post_set (c);
 
 	send_change (c);

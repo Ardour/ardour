@@ -49,7 +49,7 @@ void PhaseVocoder::FFTShift(unsigned int size, double *src)
 void PhaseVocoder::process(double *src, double *mag, double *theta)
 {
     FFTShift( m_n, src);
-	
+
     m_fft->process(0, src, m_realOut, m_imagOut);
 
     getMagnitude( m_n/2, mag, m_realOut, m_imagOut);
@@ -57,7 +57,7 @@ void PhaseVocoder::process(double *src, double *mag, double *theta)
 }
 
 void PhaseVocoder::getMagnitude(unsigned int size, double *mag, double *real, double *imag)
-{	
+{
     unsigned int j;
 
     for( j = 0; j < size; j++)
@@ -75,5 +75,5 @@ void PhaseVocoder::getPhase(unsigned int size, double *theta, double *real, doub
     for( k = 0; k < size; k++)
     {
 	theta[ k ] = atan2( -imag[ k ], real[ k ]);
-    }	
+    }
 }

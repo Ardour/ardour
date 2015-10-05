@@ -71,7 +71,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	, _momentary (m)
 {
 	set_controllable (&c);
-	
+
 	_learned = true; /* from controllable */
 	_encoder = No_enc;
 	setting = false;
@@ -123,7 +123,7 @@ MIDIControllable::set_controllable (Controllable* c)
 	if (c == controllable) {
 		return;
 	}
-	
+
 	controllable_death_connection.disconnect ();
 
 	controllable = c;
@@ -478,7 +478,7 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 		}
 		_control_description = "MIDI control: NoteOn";
 		break;
-		
+
 	case MIDI::controller:
 		_parser.channel_controller[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_controller, this, _1, _2));
 		snprintf (buf, sizeof (buf), "MIDI control: Controller %d", control_additional);
@@ -507,7 +507,7 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
 	if (!controllable || control_type == none || !feedback || bufsize <= 2) {
 		return buf;
 	}
-	
+
 	int const gm = control_to_midi (controllable->get_value());
 
 	if (gm == last_value) {
@@ -611,7 +611,7 @@ int
 MIDIControllable::max_value_for_type () const
 {
 	/* XXX: this is not complete */
-	
+
 	if (control_type == MIDI::pitchbend) {
 		return 16383;
 	}

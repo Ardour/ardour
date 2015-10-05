@@ -60,7 +60,7 @@ class LIBCANVAS_API Line : public Item
 private:
 	Duple _points[2];
 };
-	
+
 }
 
 #endif

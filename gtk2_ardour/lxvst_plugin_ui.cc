@@ -38,8 +38,8 @@ LXVSTPluginUI::LXVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_
 
 LXVSTPluginUI::~LXVSTPluginUI ()
 {
-	_screen_update_connection.disconnect();	
-	
+	_screen_update_connection.disconnect();
+
 	// plugin destructor destroys the custom GUI, via the vstfx engine,
 	// and then our PluginUIWindow does the rest
 }
@@ -67,35 +67,35 @@ LXVSTPluginUI::resize_callback ()
 	/* We could maybe use this to resize the plugin GTK parent window
 	   if required
 	*/
-	
+
 	if (!_vst->state()->want_resize) {
 		return;
 	}
 
 	int new_height = _vst->state()->height;
 	int new_width = _vst->state()->width;
-	
+
 	void* gtk_parent_window = _vst->state()->extra_data;
-	
+
 	if (gtk_parent_window) {
 		((Gtk::Window*) gtk_parent_window)->resize (new_width, new_height + LXVST_H_FIDDLE);
 	}
-	
+
 	_vst->state()->want_resize = 0;
 }
 
 int
 LXVSTPluginUI::get_preferred_height ()
-{	
+{
 	/* XXX: FIXME */
-	
+
 	/* We have to return the required height of the plugin UI window +  a fiddle factor
 	   because we can't know how big the preset menu bar is until the window is realised
 	   and we can't realise it until we have told it how big we would like it to be
 	   which we can't do until it is realised etc
 	*/
 
-	// May not be 40 for all screen res etc	
+	// May not be 40 for all screen res etc
 	return VSTPluginUI::get_preferred_height () + LXVST_H_FIDDLE;
 }
 
@@ -103,9 +103,9 @@ int
 LXVSTPluginUI::package (Gtk::Window& win)
 {
 	VSTPluginUI::package (win);
-	
+
 	/* Map the UI start and stop updating events to 'Map' events on the Window */
-	
+
 	win.signal_map_event().connect (mem_fun (*this, &LXVSTPluginUI::start_updating));
 	win.signal_unmap_event().connect (mem_fun (*this, &LXVSTPluginUI::stop_updating));
 
@@ -129,9 +129,9 @@ LXVSTPluginUI::get_XID ()
 	   created and we get bad Window errors when trying
 	   to embed it in the GTK UI
 	*/
-	
+
 	pthread_mutex_lock (&(_vst->state()->lock));
-	
+
 	/* The Window may be scheduled for creation
 	   but not actually created by the gui_event_loop yet -
 	   spin here until it has been activated.  Possible
@@ -139,21 +139,21 @@ LXVSTPluginUI::get_XID ()
 	   should not be called here if the window doesn't
 	   exist or will never exist
 	*/
-	
+
 	while (!(_vst->state()->been_activated)) {
 		Glib::usleep (1000);
 	}
-	
+
 	int const id = _vst->state()->xid;
-	
+
 	pthread_mutex_unlock (&(_vst->state()->lock));
-	
+
 	/* Finally it might be safe to return the ID -
 	   problems will arise if we return either a zero ID
 	   and GTK tries to socket it or if we return an ID
 	   which hasn't yet become real to the server
 	*/
-	
+
 	return id;
 }
 
@@ -166,7 +166,7 @@ static int
 gtk_xerror_handler (Display*, XErrorEvent*)
 {
 	std::cerr << "** ERROR ** LXVSTPluginUI : Trapped an X Window System Error" << std::endl;
-	
+
 	return 0;
 }
 

@@ -31,7 +31,7 @@ ffs (int x)
 	return __builtin_ffs(x);
 #elif defined (COMPILER_MSVC)
 	unsigned long index;
-#ifdef WIN64	
+#ifdef WIN64
 	if (0 != _BitScanForward64(&index, (__int64)x))
 #else
 	if (0 != _BitScanForward(&index, (unsigned long)x))

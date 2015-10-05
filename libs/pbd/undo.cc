@@ -282,7 +282,7 @@ UndoHistory::redo (unsigned int n)
 
 	{
 		UndoRedoSignaller exception_safe_signaller (*this);
-		
+
 		while (n--) {
 			if (RedoList.size() == 0) {
 				return;

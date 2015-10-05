@@ -488,7 +488,7 @@ Session::import_files (ImportStatus& status)
 				return;
 			}
 		}
-		
+
 		if (channels == 0) {
 			error << _("Import: file contains no channels.") << endmsg;
 			continue;
@@ -553,7 +553,7 @@ Session::import_files (ImportStatus& status)
 					Analyser::queue_source_for_analysis (boost::static_pointer_cast<Source>(*x), false);
 				}
 			}
-			
+
 			/* imported, copied files cannot be written or removed
 			 */
 
@@ -591,7 +591,7 @@ Session::import_files (ImportStatus& status)
 		} catch (...) {
 			error << _("Failed to remove some files after failed/cancelled import operation") << endmsg;
 		}
-				
+
 	}
 
 	status.done = true;

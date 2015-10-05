@@ -221,7 +221,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 	min_x = _list.events().front()->when;
 
 	if (x0 > max_x) {
-		/* totally past the end - just fill the entire array with the final value */	
+		/* totally past the end - just fill the entire array with the final value */
 		for (int32_t i = 0; i < veclen; ++i) {
 			vec[i] = _list.events().back()->value;
 		}

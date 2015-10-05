@@ -202,7 +202,7 @@ public:
 	bool initially_vertical() const {
 		return _initially_vertical;
 	}
-	
+
 	/** Set up the _pointer_frame_offset */
 	virtual void setup_pointer_frame_offset () {
 		_pointer_frame_offset = 0;
@@ -582,7 +582,7 @@ public:
 private:
 	double y_to_region (double) const;
 	ARDOUR::framecnt_t grid_frames (framepos_t) const;
-	
+
 	MidiRegionView* _region_view;
 	ArdourCanvas::Rectangle* _drag_rect;
 	framepos_t _note[2];
@@ -675,7 +675,7 @@ public:
 private:
 
 	Operation _operation;
-	
+
 	bool _preserve_fade_anchor;
 	bool _jump_position_when_done;
 };
@@ -932,7 +932,7 @@ public:
 	 *  @param drag_in_progress true if the drag is currently happening.
 	 */
 	virtual void select_things (int button_state, framepos_t x1, framepos_t x2, double y1, double y2, bool drag_in_progress) = 0;
-	
+
 	virtual void deselect_things () = 0;
 
   protected:
@@ -1042,7 +1042,7 @@ public:
 
 	RangeMarkerBarDrag (Editor *, ArdourCanvas::Item *, Operation);
 	~RangeMarkerBarDrag ();
-	
+
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
@@ -1134,7 +1134,7 @@ class CrossfadeEdgeDrag : public Drag
 	void motion (GdkEvent*, bool);
 	void finished (GdkEvent*, bool);
 	void aborted (bool);
-	
+
 	bool y_movement_matters () const {
 		return false;
 	}

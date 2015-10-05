@@ -35,14 +35,14 @@ ControllableDescriptor::set (const std::string& str)
 	string front = str.substr (0, first_space);
 	string back = str.substr (first_space);
 
-	vector<string> path;	
+	vector<string> path;
 	split (front, path, '/');
 
 	if (path.size() < 2) {
 		return -1;
 	}
 
-	vector<string> rest;	
+	vector<string> rest;
 	split (back, rest, ' ');
 
 	if (rest.size() < 1) {
@@ -106,7 +106,7 @@ ControllableDescriptor::set (const std::string& str)
 			return -1;
 		}
 	} else if (path[1] == "send") {
-		
+
 		if (path.size() == 3 && rest.size() == 2) {
 			if (path[2] == "gain") {
 				_subtype = SendGain;
@@ -118,7 +118,7 @@ ControllableDescriptor::set (const std::string& str)
 			return -1;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -127,7 +127,7 @@ ControllableDescriptor::rid() const
 {
 	if (banked()) {
 		return _rid + _bank_offset;
-	} 		
+	}
 
 	return _rid;
 }
@@ -138,6 +138,6 @@ ControllableDescriptor::target (uint32_t n) const
 	if (n < _target.size()) {
 		return _target[n];
 	}
-	
+
 	return 0;
 }

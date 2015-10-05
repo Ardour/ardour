@@ -48,15 +48,15 @@ class DeInterleaverTest : public CppUnit::TestFixture
 	void testInvalidInputSize()
 	{
 		deinterleaver->init (channels, frames_per_channel);
-		
+
 		ProcessContext<float> c (random_data, 2 * total_frames, channels);
-		
+
 		// Too many, frames % channels == 0
 		CPPUNIT_ASSERT_THROW (deinterleaver->process (c.beginning (total_frames + channels)), Exception);
-		
+
 		// Too many, frames % channels != 0
 		CPPUNIT_ASSERT_THROW (deinterleaver->process (c.beginning (total_frames + 1)), Exception);
-		
+
 		// Too few, frames % channels != 0
 		CPPUNIT_ASSERT_THROW (deinterleaver->process (c.beginning (total_frames - 1)), Exception);
 	}
@@ -64,13 +64,13 @@ class DeInterleaverTest : public CppUnit::TestFixture
 	void assert_outputs (framecnt_t expected_frames)
 	{
 		framecnt_t generated_frames = 0;
-		
+
 		generated_frames = sink_a->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (expected_frames, generated_frames);
-		
+
 		generated_frames = sink_b->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (expected_frames, generated_frames);
-		
+
 		generated_frames = sink_c->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (expected_frames, generated_frames);
 	}
@@ -78,34 +78,34 @@ class DeInterleaverTest : public CppUnit::TestFixture
 	void testOutputSize()
 	{
 		deinterleaver->init (channels, frames_per_channel);
-		
+
 		deinterleaver->output (0)->add_output (sink_a);
 		deinterleaver->output (1)->add_output (sink_b);
 		deinterleaver->output (2)->add_output (sink_c);
-		
+
 		// Test maximum frame input
 		ProcessContext<float> c (random_data, total_frames, channels);
 		deinterleaver->process (c);
 		assert_outputs (frames_per_channel);
-		
+
 		// Now with less frames
 		framecnt_t const less_frames = frames_per_channel / 4;
 		deinterleaver->process (c.beginning (less_frames * channels));
 		assert_outputs (less_frames);
 	}
-	
+
 	void testZeroInput()
 	{
 		deinterleaver->init (channels, frames_per_channel);
-		
+
 		deinterleaver->output (0)->add_output (sink_a);
 		deinterleaver->output (1)->add_output (sink_b);
 		deinterleaver->output (2)->add_output (sink_c);
-		
+
 		// Input zero frames
 		ProcessContext<float> c (random_data, total_frames, channels);
 		deinterleaver->process (c.beginning (0));
-		
+
 		// ...and now test regular input
 		deinterleaver->process (c);
 		assert_outputs (frames_per_channel);

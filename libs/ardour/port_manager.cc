@@ -207,7 +207,7 @@ PortManager::port_name_prefix_is_unique (const string& first_part_of_port_name) 
 
 	boost::shared_ptr<const Ports> pr = ports.reader();
 	const string::size_type len = first_part_of_port_name.length();
-	
+
 	for (Ports::const_iterator x = pr->begin(); x != pr->end(); ++x) {
 
 		string prefix = x->first.substr (0, len);
@@ -262,7 +262,7 @@ PortManager::port_renamed (const std::string& old_relative_name, const std::stri
 	RCUWriter<Ports> writer (ports);
 	boost::shared_ptr<Ports> p = writer.get_copy();
 	Ports::iterator x = p->find (old_relative_name);
-	
+
 	if (x != p->end()) {
 		boost::shared_ptr<Port> port = x->second;
 		p->erase (x);
@@ -515,9 +515,9 @@ PortManager::reconnect_ports ()
 
 	if (!Profile->get_trx()) {
 		/* re-establish connections */
-		
+
 		DEBUG_TRACE (DEBUG::Ports, string_compose ("reconnect %1 ports\n", p->size()));
-		
+
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 			i->second->reconnect ();
 		}
@@ -549,7 +549,7 @@ PortManager::connect_callback (const string& a, const string& b, bool conn)
 		port_b, b,
 		conn
 		); /* EMIT SIGNAL */
-}	
+}
 
 void
 PortManager::registration_callback ()
@@ -603,7 +603,7 @@ PortManager::port_name_size() const
 	if (!_backend) {
 		return 0;
 	}
-	
+
 	return _backend->port_name_size ();
 }
 
@@ -613,7 +613,7 @@ PortManager::my_name() const
 	if (!_backend) {
 		return string();
 	}
-	
+
 	return _backend->my_name();
 }
 
@@ -709,9 +709,9 @@ void
 PortManager::check_monitoring ()
 {
 	for (Ports::iterator i = _cycle_ports->begin(); i != _cycle_ports->end(); ++i) {
-		
+
 		bool x;
-		
+
 		if (i->second->last_monitor() != (x = i->second->monitoring_input ())) {
 			i->second->set_last_monitor (x);
 			/* XXX I think this is dangerous, due to
@@ -726,14 +726,14 @@ void
 PortManager::fade_out (gain_t base_gain, gain_t gain_step, pframes_t nframes)
 {
 	for (Ports::iterator i = _cycle_ports->begin(); i != _cycle_ports->end(); ++i) {
-		
+
 		if (i->second->sends_output()) {
-			
+
 			boost::shared_ptr<AudioPort> ap = boost::dynamic_pointer_cast<AudioPort> (i->second);
 			if (ap) {
 				Sample* s = ap->engine_get_whole_audio_buffer ();
 				gain_t g = base_gain;
-				
+
 				for (pframes_t n = 0; n < nframes; ++n) {
 					*s++ *= g;
 					g -= gain_step;

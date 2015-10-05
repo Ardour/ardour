@@ -4969,7 +4969,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 				s->clear_range_selection ();
 			}
 		}
-		
+
 	} else {
 		/* just a click, no pointer movement.
 		 */

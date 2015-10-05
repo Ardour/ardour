@@ -159,14 +159,14 @@ RegionView::init (bool wfd)
 		name_highlight->set_data ("regionview", this);
 		name_highlight->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
 	}
-	
+
 	if (frame_handle_start) {
 		frame_handle_start->set_data ("regionview", this);
 		frame_handle_start->set_data ("isleft", (void*) 1);
 		frame_handle_start->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_start, this));
 		frame_handle_start->raise_to_top();
 	}
-	
+
 	if (frame_handle_end) {
 		frame_handle_end->set_data ("regionview", this);
 		frame_handle_end->set_data ("isleft", (void*) 0);
@@ -531,7 +531,7 @@ RegionView::get_fill_color () const
 {
 	ArdourCanvas::Color f = TimeAxisViewItem::get_fill_color();
 	char const *modname;
-	
+
 	if (_region->opaque()) {
 		modname = "opaque region base";
 	} else {
@@ -684,7 +684,7 @@ RegionView::move (double x_delta, double y_delta)
 	 */
 
 	ArdourCanvas::Item *item = get_canvas_group ();
-	
+
 	if (item->position().x + x_delta < 0) {
 		x_delta = -item->position().x; /* move it to zero */
 	}

@@ -104,9 +104,9 @@ Button::name_to_id (const std::string& name)
 	if (!g_ascii_strcasecmp (name.c_str(), "Scrub")) { return Scrub; }
 	if (!g_ascii_strcasecmp (name.c_str(), "User A")) { return UserA; }
 	if (!g_ascii_strcasecmp (name.c_str(), "User B")) { return UserB; }
-		
+
 		/* Strip buttons */
-		
+
 	if (!g_ascii_strcasecmp (name.c_str(), "Record Enable")) { return RecEnable; }
 	if (!g_ascii_strcasecmp (name.c_str(), "Solo")) { return Solo; }
 	if (!g_ascii_strcasecmp (name.c_str(), "Mute")) { return Mute; }

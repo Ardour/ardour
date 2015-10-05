@@ -138,7 +138,7 @@ ArdourDropdown::AddMenuElem (Menu_Helpers::Element e)
 	using namespace Menu_Helpers;
 
 	MenuList& items = _menu.items ();
-	
+
 	items.push_back (e);
 }
 

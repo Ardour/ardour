@@ -74,7 +74,7 @@ public:
 private:
 	void			Retain() { if(mWillRelease && (mCFString != NULL)) { CFRetain(mCFString); } }
 	void			Release() { if(mWillRelease && (mCFString != NULL)) { CFRelease(mCFString); } }
-	
+
 	CFStringRef		mCFString;
 	bool			mWillRelease;
 
@@ -98,7 +98,7 @@ public:
 	static UInt32	GetStringByteLength(CFStringRef inCFString, CFStringEncoding inEncoding = kCFStringEncodingUTF8);
 	static void		GetCString(CFStringRef inCFString, char* outString, UInt32& ioStringSize, CFStringEncoding inEncoding = kCFStringEncodingUTF8);
 	static void		GetUnicodeString(CFStringRef inCFString, UInt16* outString, UInt32& ioStringSize);
-	
+
 };
 
 inline bool	operator<(const CACFString& x, const CACFString& y) { return CFStringCompare(x.GetCFString(), y.GetCFString(), 0) == kCFCompareLessThan; }
@@ -129,7 +129,7 @@ public:
 private:
 	void				Retain() { if(mWillRelease && (mCFMutableString != NULL)) { CFRetain(mCFMutableString); } }
 	void				Release() { if(mWillRelease && (mCFMutableString != NULL)) { CFRelease(mCFMutableString); } }
-	
+
 	CFMutableStringRef	mCFMutableString;
 	bool				mWillRelease;
 

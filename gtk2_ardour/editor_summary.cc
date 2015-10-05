@@ -223,7 +223,7 @@ EditorSummary::render (cairo_t* cr, cairo_rectangle_t*)
 	}
 
 	cairo_push_group (cr);
-	
+
 	/* Fill with the background image */
 
 	cairo_rectangle (cr, 0, 0, get_width(), get_height());
@@ -408,7 +408,7 @@ bool
 EditorSummary::on_button_press_event (GdkEventButton* ev)
 {
 	_old_follow_playhead = _editor->follow_playhead ();
-	
+
 	if (ev->button == 1) {
 
 		pair<double, double> xr;
@@ -436,7 +436,7 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 				get_editor (&_pending_editor_x, &_pending_editor_y);
 				_pending_editor_changed = false;
 			}
-			
+
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 
 			/* secondary-modifier-click: locate playhead */
@@ -489,7 +489,7 @@ EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) con
 		/* We are dragging, and configured not to update the editor window during drags,
 		   so just return where the editor will be when the drag finishes.
 		*/
-		
+
 		*x = _pending_editor_x;
 		*y = _pending_editor_y;
 
@@ -499,7 +499,7 @@ EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) con
 
 		x->first = (_editor->leftmost_sample () - _start) * _x_scale;
 		x->second = x->first + _editor->current_page_samples() * _x_scale;
-		
+
 		y->first = editor_y_to_summary (_editor->vertical_adjustment.get_value ());
 		y->second = editor_y_to_summary (_editor->vertical_adjustment.get_value () + _editor->visible_canvas_height() - _editor->get_trackview_group()->canvas_origin().y);
 	}
@@ -668,7 +668,7 @@ bool
 EditorSummary::on_button_release_event (GdkEventButton*)
 {
 	bool const was_suspended = suspending_editor_updates ();
-	
+
 	_move_dragging = false;
 	_zoom_dragging = false;
 	_editor->_dragging_playhead = false;
@@ -677,7 +677,7 @@ EditorSummary::on_button_release_event (GdkEventButton*)
 	if (was_suspended && _pending_editor_changed) {
 		set_editor (_pending_editor_x, _pending_editor_y);
 	}
-		
+
 	return true;
 }
 
@@ -767,7 +767,7 @@ EditorSummary::set_editor (double const x, double const y)
 		   as it also means that we won't change these variables if an idle handler
 		   is merely pending but not executing.  But c'est la vie.
 		*/
-		
+
 		return;
 	}
 
@@ -854,12 +854,12 @@ EditorSummary::set_editor_x (pair<double, double> x)
 		set_dirty ();
 	} else {
 		_editor->reset_x_origin (x.first / _x_scale + _start);
-		
+
 		double const nx = (
 			((x.second - x.first) / _x_scale) /
 			_editor->sample_to_pixel (_editor->current_page_samples())
 			);
-		
+
 		if (nx != _editor->get_current_zoom ()) {
 			_editor->reset_zoom (nx);
 		}

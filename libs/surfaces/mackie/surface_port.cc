@@ -57,7 +57,7 @@ SurfacePort::SurfacePort (Surface& s)
 		_output_port = _input_port;
 
 	} else {
-		
+
 		_async_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, string_compose (_("%1 in"),  _surface->name()), true);
 		_async_out = AudioEngine::instance()->register_output_port (DataType::MIDI, string_compose (_("%1 out"),  _surface->name()), true);
 
@@ -81,7 +81,7 @@ SurfacePort::~SurfacePort()
 			AudioEngine::instance()->unregister_port (_async_in);
 			_async_in.reset ((ARDOUR::Port*) 0);
 		}
-		
+
 		if (_async_out) {
 			_output_port->drain (10000);
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("unregistering output port %1\n", _async_out->name()));
@@ -106,7 +106,7 @@ SurfacePort::get_state ()
 	child = new XMLNode (X_("Input"));
 	child->add_child_nocopy (_async_in->get_state());
 	node->add_child_nocopy (*child);
-	
+
 
 	child = new XMLNode (X_("Output"));
 	child->add_child_nocopy (_async_out->get_state());
@@ -150,7 +150,7 @@ string fetch_errmsg (int error_number)
 	char * msg = strerror (error_number);
 	return msg;
 }
-	
+
 int
 SurfacePort::write (const MidiByteArray & mba)
 {
@@ -164,7 +164,7 @@ SurfacePort::write (const MidiByteArray & mba)
 	if (mba[0] != 0xf0 && mba.size() > 3) {
 		std::cerr << "TOO LONG WRITE: " << mba << std::endl;
 	}
-		
+
 	/* this call relies on std::vector<T> using contiguous storage. not
 	 * actually guaranteed by the standard, but way, way beyond likely.
 	 */

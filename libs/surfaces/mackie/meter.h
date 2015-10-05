@@ -35,7 +35,7 @@ public:
 	Meter (int id, std::string name, Group & group)
 		: Control  (id, name, group)
 		, overload_on (false) {}
-	
+
 	void send_update (Surface&, float dB);
 
 	MidiByteArray zero();

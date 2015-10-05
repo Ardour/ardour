@@ -76,7 +76,7 @@ int TranzportControlProtocol::lights_show_bling()
 	case BlingPairs: break; // Show pairs of lights
 	case BlingRows: break; // light each row in sequence
 	case BlingFlashAll: break; // Flash everything randomly
-	case BlingEnter: lights_on(); // Show intro 	
+	case BlingEnter: lights_on(); // Show intro
 	case BlingExit:
 		lights_off();
 		break;
@@ -93,7 +93,7 @@ int TranzportControlProtocol::screen_show_bling()
 	case BlingPairs: break; // Show pairs of lights
 	case BlingRows: break; // light each row in sequence
 	case BlingFlashAll: break; // Flash everything randomly
-	case BlingEnter: // Show intro 	
+	case BlingEnter: // Show intro
 		print(0,0,"!!Welcome to Ardour!");
 		print(1,0,"Peace through Music!");
 		break;
@@ -182,7 +182,7 @@ void
 TranzportControlProtocol::prev_marker ()
 {
 	Location *location = session->locations()->first_location_before (session->transport_frame());
-	
+
 	if (location) {
 		session->request_locate (location->start(), session->transport_rolling());
 		notify(location->name().c_str());
@@ -242,7 +242,7 @@ TranzportControlProtocol::step_gain (float increment)
 	if (fabsf(gain_fraction) > 2.0) {
 		gain_fraction = 2.0*sign(gain_fraction);
 	}
-	
+
 	route_set_gain (0, slider_position_to_gain (gain_fraction));
 }
 #endif
@@ -259,7 +259,7 @@ TranzportControlProtocol::step_gain_up ()
 	if (gain_fraction > 2.0) {
 		gain_fraction = 2.0;
 	}
-	
+
 	route_set_gain (0, slider_position_to_gain (gain_fraction));
 }
 
@@ -275,7 +275,7 @@ TranzportControlProtocol::step_gain_down ()
 	if (gain_fraction < 0.0) {
 		gain_fraction = 0.0;
 	}
-	
+
 	route_set_gain (0, slider_position_to_gain (gain_fraction));
 }
 

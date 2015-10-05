@@ -471,7 +471,7 @@ AUPlugin::~AUPlugin ()
 		AUListenerDispose (_parameter_listener);
 		_parameter_listener = 0;
 	}
-	
+
 	if (unit) {
 		DEBUG_TRACE (DEBUG::AudioUnits, "about to call uninitialize in plugin destructor\n");
 		unit->Uninitialize ();
@@ -569,12 +569,12 @@ AUPlugin::init ()
 	if (input_elements > 0) {
 		/* setup render callback: the plugin calls this to get input data
 		 */
-		
+
 		AURenderCallbackStruct renderCallbackInfo;
-		
+
 		renderCallbackInfo.inputProc = _render_callback;
 		renderCallbackInfo.inputProcRefCon = this;
-		
+
 		DEBUG_TRACE (DEBUG::AudioUnits, "set render callback in input scope\n");
 		if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
 					      0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
@@ -1062,7 +1062,7 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 	}
 
 	/* reset plugin info to show currently configured state */
-	
+
 	_info->n_inputs = in;
 	_info->n_outputs = out;
 
@@ -1495,14 +1495,14 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		uint32_t nmidi = bufs.count().n_midi();
 
 		for (uint32_t i = 0; i < nmidi; ++i) {
-			
+
 			/* one MIDI port/buffer only */
-			
+
 			MidiBuffer& m = bufs.get_midi (i);
-			
+
 			for (MidiBuffer::iterator i = m.begin(); i != m.end(); ++i) {
 				Evoral::MIDIEvent<framepos_t> ev (*i);
-				
+
 				if (ev.is_channel_event()) {
 					const uint8_t* b = ev.buffer();
 					DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: MIDI event %2\n", name(), ev));
@@ -2550,7 +2550,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 			int32_t possible_in = info->cache.io_configs.front().first;
 			int32_t possible_out = info->cache.io_configs.front().second;
-			
+
 			if (possible_in > 0) {
 				info->n_inputs.set (DataType::AUDIO, possible_in);
 			} else {
@@ -2917,7 +2917,7 @@ void
 AUPlugin::set_info (PluginInfoPtr info)
 {
 	Plugin::set_info (info);
-	
+
 	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
 	_has_midi_input = pinfo->needs_midi_input ();
 	_has_midi_output = false;

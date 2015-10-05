@@ -271,7 +271,7 @@ MidiRegionView::init (bool wfd)
 	NoteBase::NoteBaseDeleted.connect (note_delete_connection, MISSING_INVALIDATOR,
 					   boost::bind (&MidiRegionView::maybe_remove_deleted_note_from_selection, this, _1),
 					   gui_context());
-	
+
 	if (wfd) {
 		Glib::Threads::Mutex::Lock lm(midi_region()->midi_source(0)->mutex());
 		midi_region()->midi_source(0)->load_model(lm);
@@ -502,10 +502,10 @@ MidiRegionView::button_press (GdkEventButton* ev)
 	}
 
 	if (_mouse_state != SelectTouchDragging) {
-		
+
 		_pressed_button = ev->button;
 		_mouse_state = Pressed;
-		
+
 		return true;
 	}
 
@@ -578,7 +578,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 				   grid snap without it overlapping this one.
 				*/
 				beats -= Evoral::Beats::tick();
-				
+
 				create_note_at (editor.pixel_to_sample (event_x), event_y, beats, true);
 
 				break;
@@ -646,9 +646,9 @@ MidiRegionView::motion (GdkEventMotion* ev)
 	case Pressed:
 
 		if (_pressed_button == 1) {
-			
+
 			MouseMode m = editor.current_mouse_mode();
-			
+
 			if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
 				editor.drags()->set (new NoteCreateDrag (dynamic_cast<Editor *> (&editor), group, this), (GdkEvent *) ev);
 				_mouse_state = AddDragging;
@@ -677,7 +677,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 	case AddDragging:
 		editor.drags()->motion_handler ((GdkEvent *) ev, false);
 		break;
-		
+
 	case SelectTouchDragging:
 		return false;
 
@@ -733,7 +733,7 @@ MidiRegionView::key_press (GdkEventKey* ev)
 	*/
 
 	bool unmodified = Keyboard::no_modifier_keys_pressed (ev);
-	
+
 	if (unmodified && (ev->keyval == GDK_Alt_L || ev->keyval == GDK_Alt_R)) {
 		_mouse_state = SelectTouchDragging;
 		return true;
@@ -878,7 +878,7 @@ MidiRegionView::velocity_edit ()
 	if (_selection.empty()) {
 		return;
 	}
-	
+
 	/* pick a note somewhat at random (since Selection is a set<>) to
 	 * provide the "current" velocity for the dialog.
 	 */
@@ -1191,7 +1191,7 @@ MidiRegionView::redisplay_model()
 		bool visible;
 
 		if (note_in_region_range (note, visible)) {
-			
+
 			if (!empty_when_starting && (cne = find_canvas_note (note)) != 0) {
 
 				cne->validate ();
@@ -1216,7 +1216,7 @@ MidiRegionView::redisplay_model()
 			}
 
 		} else {
-			
+
 			if (!empty_when_starting && (cne = find_canvas_note (note)) != 0) {
 				cne->validate ();
 				cne->hide ();
@@ -1229,17 +1229,17 @@ MidiRegionView::redisplay_model()
 	if (!empty_when_starting) {
 		for (Events::iterator i = _events.begin(); i != _events.end(); ) {
 			if (!(*i)->valid ()) {
-				
+
 				for (vector<GhostRegion*>::iterator j = ghosts.begin(); j != ghosts.end(); ++j) {
 					MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*j);
 					if (gr) {
 						gr->remove_note (*i);
 					}
 				}
-				
+
 				delete *i;
 				i = _events.erase (i);
-				
+
 			} else {
 				++i;
 			}
@@ -1303,7 +1303,7 @@ MidiRegionView::display_sysexes()
 		for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
 			const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::Beats> > mev =
 				boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::Beats> > (*i);
-			
+
 			if (mev) {
 				if (mev->is_spp() || mev->is_mtc_quarter() || mev->is_mtc_full()) {
 					have_periodic_system_messages = true;
@@ -1311,19 +1311,19 @@ MidiRegionView::display_sysexes()
 				}
 			}
 		}
-		
+
 		if (have_periodic_system_messages) {
 			double zoom = trackview.editor().get_current_zoom (); // frames per pixel
-			
+
 			/* get an approximate value for the number of samples per video frame */
-			
+
 			double video_frame = trackview.session()->frame_rate() * (1.0/30);
-			
+
 			/* if we are zoomed out beyond than the cutoff (i.e. more
 			 * frames per pixel than frames per 4 video frames), don't
 			 * show periodic sysex messages.
 			 */
-			
+
 			if (zoom > (video_frame*4)) {
 				display_periodic_messages = false;
 			}
@@ -1955,7 +1955,7 @@ patch_applies (const ARDOUR::MidiModel::constPatchChangePtr pc, Evoral::Beats ti
 {
 	return pc->time() <= time && pc->channel() == channel;
 }
-	
+
 void
 MidiRegionView::get_patch_key_at (Evoral::Beats time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const
 {
@@ -2255,13 +2255,13 @@ MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, b
 	uint8_t high_note = 0;
 	MidiModel::Notes& notes (_model->notes());
 	_optimization_iterator = _events.begin();
-	
+
 	if (extend && !have_selection) {
 		extend = false;
 	}
 
 	/* scan existing selection to get note range */
-	
+
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		if ((*i)->note()->note() < low_note) {
 			low_note = (*i)->note()->note();
@@ -2270,7 +2270,7 @@ MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, b
 			high_note = (*i)->note()->note();
 		}
 	}
-	
+
 	if (!add) {
 		clear_selection ();
 
@@ -2593,7 +2593,7 @@ MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote)
 	start_note_diff_command (_("move notes"));
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
-		
+
 		framepos_t new_frames = source_beats_to_absolute_frames ((*i)->note()->time()) + dt;
 		Evoral::Beats new_time = absolute_frames_to_source_beats (new_frames);
 
@@ -2857,7 +2857,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		/* Get the new x position for this resize, which is in pixels relative
 		 * to the region position.
 		 */
-		
+
 		double current_x;
 
 		if (at_front) {
@@ -3711,7 +3711,7 @@ MidiRegionView::update_ghost_note (double x, double y)
 	_note_group->canvas_to_item (x, y);
 
 	PublicEditor& editor = trackview.editor ();
-	
+
 	framepos_t const unsnapped_frame = editor.pixel_to_sample (x);
 	framecnt_t grid_frames;
 	framepos_t const f = snap_frame_to_grid_underneath (unsnapped_frame, grid_frames);
@@ -4084,7 +4084,7 @@ framepos_t
 MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, framecnt_t& grid_frames) const
 {
 	PublicEditor& editor = trackview.editor ();
-	
+
 	const Evoral::Beats grid_beats = get_grid_beats(p);
 
 	grid_frames = region_beats_to_region_frames (grid_beats);

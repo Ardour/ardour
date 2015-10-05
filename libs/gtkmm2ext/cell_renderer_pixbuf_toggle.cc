@@ -75,7 +75,7 @@ CellRendererPixbufToggle::render_vfunc (const Glib::RefPtr<Gdk::Drawable>& windo
 {
 	int offset_width = 0;
 	int offset_height = 0;
-	
+
 	if(property_active() == true){
 
 		offset_width = cell_area.get_x() +  (int)(cell_area.get_width() - inactive_pixbuf->get_width())/2;

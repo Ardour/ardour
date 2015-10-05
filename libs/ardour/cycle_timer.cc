@@ -85,7 +85,7 @@ StoringTimer::StoringTimer (int N)
 	_max_points = N;
 	_points = 0;
 }
-	
+
 
 void
 StoringTimer::dump (string const & file)
@@ -114,11 +114,11 @@ StoringTimer::check (int p)
 	} else if (_points > _max_points) {
 		return;
 	}
-	
+
 	_point[_points] = p;
 	_value[_points] = get_cycles ();
 	_ref[_points] = _current_ref;
-	
+
 	++_points;
 }
 

@@ -80,13 +80,13 @@ void
 ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 {
 	cairo_pattern_t* shade_pattern;
-	
+
 	float width = get_width();
 	float height = get_height();
-	
+
 	const float scale = min(width, height);
 	const float pointer_thickness = 3.0 * (scale/80);  //(if the knob is 80 pixels wide, we want a 3-pix line on it)
-	
+
 	const float start_angle = ((180 - 65) * G_PI) / 180;
 	const float end_angle = ((360 + 65) * G_PI) / 180;
 
@@ -97,13 +97,13 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 
 	const float value_angle = start_angle + (_val * (end_angle - start_angle));
 	const float zero_angle = start_angle + (zero * (end_angle - start_angle));
-	
+
 	float value_x = cos (value_angle);
 	float value_y = sin (value_angle);
 
 	float xc =  0.5 + width/ 2.0;
 	float yc = 0.5 + height/ 2.0;
-	
+
 	cairo_translate (cr, xc, yc);  //after this, everything is based on the center of the knob
 
 	//get the knob color from the theme
@@ -111,11 +111,11 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 
 	float center_radius = 0.48*scale;
 	float border_width = 0.8;
-	
+
 	bool arc = (_elements & Arc)==Arc;
 	bool bevel = (_elements & Bevel)==Bevel;
 	bool flat = _flat_buttons;
-	
+
 	if ( arc ) {
 		center_radius = scale*0.33;
 
@@ -123,7 +123,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 		float outer_progress_radius = scale*0.48;
 		float progress_width = (outer_progress_radius-inner_progress_radius);
 		float progress_radius = inner_progress_radius + progress_width/2.0;
-		
+
 		//dark arc background
 		cairo_set_source_rgb (cr, 0.3, 0.3, 0.3 );
 		cairo_set_line_width (cr, progress_width);
@@ -185,7 +185,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_stroke (cr);
 #endif
 	}
-	
+
 	if (!flat) {
 		//knob shadow
 		cairo_save(cr);
@@ -199,8 +199,8 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 		ArdourCanvas::set_source_rgba(cr, knob_color);
 		cairo_arc (cr, 0, 0, center_radius, 0, 2.0*G_PI);
 		cairo_fill (cr);
-		
-		//gradient	
+
+		//gradient
 		if (bevel) {
 			//knob gradient
 			shade_pattern = cairo_pattern_create_linear (0.0, -yc, 0.0,  yc);  //note we have to offset the gradient from our centerpoint
@@ -217,7 +217,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 			ArdourCanvas::set_source_rgb_a (cr, knob_color, 0.5 );
 			cairo_arc (cr, 0, 0, center_radius-pointer_thickness, 0, 2.0*G_PI);
 			cairo_fill (cr);
-		} else {	
+		} else {
 			//radial gradient
 			shade_pattern = cairo_pattern_create_radial ( -center_radius, -center_radius, 1, -center_radius, -center_radius, center_radius*2.5  );  //note we have to offset the gradient from our centerpoint
 			cairo_pattern_add_color_stop_rgba (shade_pattern, 0.0, 1,1,1, 0.2);
@@ -227,21 +227,21 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 			cairo_fill (cr);
 			cairo_pattern_destroy (shade_pattern);
 		}
-		
+
 	} else {
 		//inner circle
 		ArdourCanvas::set_source_rgba(cr, knob_color);
 		cairo_arc (cr, 0, 0, center_radius, 0, 2.0*G_PI);
 		cairo_fill (cr);
 	}
-	
+
 
 	//black knob border
 	cairo_set_line_width (cr, border_width);
 	cairo_set_source_rgba (cr, 0,0,0, 1 );
 	cairo_arc (cr, 0, 0, center_radius, 0, 2.0*G_PI);
 	cairo_stroke (cr);
-			
+
 	//line shadow
 	if (!flat) {
 		cairo_save(cr);
@@ -254,7 +254,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_stroke (cr);
 		cairo_restore(cr);
 	}
-	
+
 	//line
 	cairo_set_source_rgba (cr, 1,1,1, 1 );
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
@@ -269,8 +269,8 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_arc (cr, 0, 0, center_radius, 0, 2.0*G_PI);
 		cairo_fill (cr);
 	}
-	
-	cairo_identity_matrix(cr);	
+
+	cairo_identity_matrix(cr);
 }
 
 void
@@ -305,11 +305,11 @@ ArdourKnob::on_scroll_event (GdkEventScroll* ev)
 	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 	if (c) {
 		float val = c->get_interface();
-	
+
 		if ( ev->direction == GDK_SCROLL_UP )
 			val += scale;
 		else
-			val -= scale;			
+			val -= scale;
 
 		c->set_interface(val);
 	}
@@ -408,7 +408,7 @@ ArdourKnob::on_button_press_event (GdkEventButton *ev)
 	if (ev->button != 1 && ev->button != 2) {
 		return false;
 	}
-	
+
 	set_active_state (Gtkmm2ext::ExplicitActive);
 	_tooltip.start_drag();
 	add_modal_grab();
@@ -506,14 +506,14 @@ ArdourKnob::set_active_state (Gtkmm2ext::ActiveState s)
 	if (_active_state != s)
 		CairoWidget::set_active_state (s);
 }
-	
+
 void
 ArdourKnob::set_visual_state (Gtkmm2ext::VisualState s)
 {
 	if (_visual_state != s)
 		CairoWidget::set_visual_state (s);
 }
-	
+
 
 bool
 ArdourKnob::on_focus_in_event (GdkEventFocus* ev)

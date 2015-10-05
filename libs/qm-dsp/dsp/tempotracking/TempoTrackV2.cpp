@@ -177,7 +177,7 @@ TempoTrackV2::get_rcf(const d_vec_t &dfframe_in, const d_vec_t &wv, d_vec_t &rcf
 
     // now apply comb filtering
     int numelem = 4;
-	
+
     for (unsigned int i = 2;i < rcf.size();i++) // max beat period
     {
         for (int a = 1;a <= numelem;a++) // number of comb elements
@@ -218,7 +218,7 @@ TempoTrackV2::viterbi_decode(const d_mat_t &rcfmat, const d_vec_t &wv, d_vec_t &
     {
         tmat.push_back ( d_vec_t() ); // adds a new column
         for (unsigned int j=0; j<wv.size(); j++)
-        {	
+        {
             tmat[i].push_back(0.); // fill with zeros initially
         }
     }
@@ -230,7 +230,7 @@ TempoTrackV2::viterbi_decode(const d_mat_t &rcfmat, const d_vec_t &wv, d_vec_t &
     for (unsigned int i=20;i <wv.size()-20; i++)
     {
         for (unsigned int j=20; j<wv.size()-20; j++)
-        {	
+        {
             double mu = static_cast<double>(i);
             tmat[i][j] = exp( (-1.*pow((j-mu),2.)) / (2.*pow(sigma,2.)) );
         }
@@ -246,7 +246,7 @@ TempoTrackV2::viterbi_decode(const d_mat_t &rcfmat, const d_vec_t &wv, d_vec_t &
         delta.push_back( d_vec_t());
         psi.push_back( i_vec_t());
         for (unsigned int j=0; j<rcfmat[i].size(); j++)
-        {	
+        {
             delta[i].push_back(0.); // fill with zeros initially
             psi[i].push_back(0); // fill with zeros initially
         }

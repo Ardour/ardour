@@ -18,7 +18,7 @@ class SndfileBase : public virtual AudioGrapher::SndfileHandle
 		Write = SFM_WRITE,
 		ReadWrite = SFM_RDWR
 	};
-	
+
   protected:
 	SndfileBase () {}
 };

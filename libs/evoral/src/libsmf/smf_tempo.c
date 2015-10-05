@@ -241,7 +241,7 @@ smf_create_tempo_map_and_compute_seconds(smf_t *smf)
 
 	for (;;) {
 		event = smf_get_next_event(smf);
-		
+
 		if (event == NULL)
 			return;
 
@@ -275,7 +275,7 @@ smf_get_tempo_by_pulses(const smf_t *smf, size_t pulses)
 		return (smf_get_tempo_by_number(smf, 0));
 
 	assert(smf->tempo_array != NULL);
-	
+
 	for (i = smf->tempo_array->len; i > 0; i--) {
 		tempo = smf_get_tempo_by_number(smf, i - 1);
 
@@ -302,7 +302,7 @@ smf_get_tempo_by_seconds(const smf_t *smf, double seconds)
 		return (smf_get_tempo_by_number(smf, 0));
 
 	assert(smf->tempo_array != NULL);
-	
+
 	for (i = smf->tempo_array->len; i > 0; i--) {
 		tempo = smf_get_tempo_by_number(smf, i - 1);
 

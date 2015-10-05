@@ -235,7 +235,7 @@ TimeInfoBox::sync_punch_mode (AudioClock* src)
 		syncing_punch = false;
 	}
 }
-	
+
 
 void
 TimeInfoBox::set_session (Session* s)
@@ -251,11 +251,11 @@ TimeInfoBox::set_session (Session* s)
 
 	if (s) {
 		Location* punch = s->locations()->auto_punch_location ();
-		
+
 		if (punch) {
 			watch_punch (punch);
 		}
-		
+
 		punch_changed (punch);
 
 		_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR,
@@ -329,7 +329,7 @@ TimeInfoBox::selection_changed ()
 			Glib::RefPtr<Action> act = ActionManager::get_action ("MouseMode", "set-mouse-mode-object-range");
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 
-			if (tact && tact->get_active() &&  !selection.regions.empty()) {	
+			if (tact && tact->get_active() &&  !selection.regions.empty()) {
 				/* show selected regions */
 				s = selection.regions.start();
 				e = selection.regions.end_frame();
@@ -357,7 +357,7 @@ TimeInfoBox::selection_changed ()
 	default:
 		selection_start->set_off (true);
 		selection_end->set_off (true);
-		selection_length->set_off (true);	
+		selection_length->set_off (true);
 		break;
 	}
 }
@@ -395,5 +395,5 @@ TimeInfoBox::punch_changed (Location* loc)
 
 	punch_start->set (loc->start());
 	punch_end->set (loc->end());
-}	
+}
 

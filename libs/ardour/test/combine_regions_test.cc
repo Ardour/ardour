@@ -55,12 +55,12 @@ CombineRegionsTest::check_crossfade1 ()
 
 	_ar[1]->fade_in()->curve().get_vector (0, 128, fade_in, 128);
 	_ar[1]->inverse_fade_in()->curve().get_vector (0, 128, fade_out, 128);
-	
+
 	/* Crossfading _r[0] to _r[1] using _r[1]'s fade in and inverse fade in.
 	   _r[0] also has a standard region fade out to add to the fun.
 	*/
 	for (int i = 128; i < 256; ++i) {
-		
+
 		float region_fade_out = 1;
 		if (i >= 192) {
 			/* Ardour fades out from 1 to VERY_SMALL_SIGNAL, which is 0.0000001,
@@ -74,7 +74,7 @@ CombineRegionsTest::check_crossfade1 ()
 		*/
 		float r0 = i * region_fade_out;
 		r0 *= fade_out[i - 128];
-		
+
 		float const r1 = (i - 128) * fade_in[i - 128];
 		CPPUNIT_ASSERT_DOUBLES_EQUAL (r0 + r1, buf[i], 1e-16);
 	}
@@ -102,7 +102,7 @@ CombineRegionsTest::crossfadeTest1 ()
 	_ar[0]->set_default_fade_in ();
 	_ar[0]->set_default_fade_out ();
 	_ar[1]->set_default_fade_out ();
-	
+
 	_playlist->add_region (_r[0], 0);
 	_r[0]->set_length (256);
 
@@ -165,7 +165,7 @@ CombineRegionsTest::check_crossfade2 ()
 
 	_ar[0]->inverse_fade_out()->curve().get_vector (0, 128, fade_in, 128);
 	_ar[0]->fade_out()->curve().get_vector (0, 128, fade_out, 128);
-	
+
 	/* Crossfading _r[0] to _r[1] using _r[0]'s fade out and inverse fade out.
 	   _r[1] also has a standard region fade in to add to the fun.
 	*/
@@ -179,7 +179,7 @@ CombineRegionsTest::check_crossfade2 ()
 		float r0 = i * fade_out[i - 128];
 		float r1 = (i - 128) * region_fade_in;
 		r1 *= fade_in[i - 128];
-		
+
 		CPPUNIT_ASSERT_DOUBLES_EQUAL (r0 + r1, buf[i], 1e-16);
 	}
 
@@ -206,7 +206,7 @@ CombineRegionsTest::crossfadeTest2 ()
 	_ar[0]->set_default_fade_in ();
 	_ar[0]->set_default_fade_out ();
 	_ar[1]->set_default_fade_out ();
-	
+
 	_playlist->add_region (_r[0], 0);
 	_r[0]->set_length (256);
 

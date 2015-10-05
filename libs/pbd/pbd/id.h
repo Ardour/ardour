@@ -56,7 +56,7 @@ class LIBPBD_API ID {
 
 	void print (char* buf, uint32_t bufsize) const;
         std::string to_s() const;
-	
+
 	static uint64_t counter() { return _counter; }
 	static void init_counter (uint64_t val) { _counter = val; }
 	static void init ();

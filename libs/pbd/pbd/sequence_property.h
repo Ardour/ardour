@@ -132,7 +132,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 	bool changed () const {
 		return !_changes.added.empty() || !_changes.removed.empty();
 	}
-	
+
 	void clear_changes () {
 		_changes.added.clear ();
 		_changes.removed.clear ();
@@ -158,12 +158,12 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 		if (!changed ()) {
 			return;
 		}
-		
+
 		/* Create a property with just the changes and not the actual values */
 		SequenceProperty<Container>* a = create ();
 		a->_changes = _changes;
 		changes.add (a);
-		
+
 		if (cmd) {
 			/* whenever one of the items emits DropReferences, make sure
 			   that the Destructible we've been told to notify hears about
@@ -182,7 +182,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 		XMLNodeList const children = node.children ();
 
 		/* find the node for this property name */
-		
+
 		std::string const c = capitalize (property_name ());
 		XMLNodeList::const_iterator i = children.begin();
 		while (i != children.end() && (*i)->name() != c) {
@@ -194,7 +194,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 		}
 
 		/* create a property with the changes */
-		
+
 		SequenceProperty<Container>* p = create ();
 
 		XMLNodeList const & grandchildren = (*i)->children ();
@@ -301,7 +301,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 		}
 		_val.clear ();
 	}
-	
+
 	typename Container::size_type size() const {
 		return _val.size();
 	}
@@ -355,12 +355,12 @@ protected:
 		, _changes (p._changes)
 		, _update_callback (p._update_callback)
 	{}
-	
+
 	Container _val; ///< our actual container of things
 	ChangeRecord _changes; ///< changes to the container (adds/removes) that have happened since clear_changes() was last called
 	boost::function<void(const ChangeRecord&)> _update_callback;
 
-private:	
+private:
 	virtual SequenceProperty<Container>* create () const = 0;
 };
 

@@ -40,7 +40,7 @@ class LIBPBD_API unknown_enumeration : public std::exception {
 	}
 
 	~unknown_enumeration () throw() {}
-	
+
 	virtual const char *what() const throw() {
 		return _message.c_str();
 	}

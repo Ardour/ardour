@@ -956,13 +956,13 @@ LadspaPlugin::do_save_preset (string name)
 LADSPA_PortDescriptor
 LadspaPlugin::port_descriptor (uint32_t i) const
 {
-	if (i < _descriptor->PortCount) {		
+	if (i < _descriptor->PortCount) {
 		return _descriptor->PortDescriptors[i];
 	}
-	
+
 	warning << "LADSPA plugin port index " << i << " out of range." << endmsg;
 	return 0;
 }
 
-		
-	
+
+

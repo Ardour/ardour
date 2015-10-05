@@ -66,7 +66,7 @@ Automatable::~Automatable ()
 {
 	{
 		Glib::Threads::Mutex::Lock lm (_control_lock);
-		
+
 		for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
 			boost::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
 		}
@@ -288,7 +288,7 @@ Automatable::get_parameter_automation_state (Evoral::Parameter param)
 	AutoState result = Off;
 
 	boost::shared_ptr<AutomationControl> c = automation_control(param);
-	
+
 	if (c) {
 		result = c->automation_state();
 	}

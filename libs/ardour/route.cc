@@ -501,11 +501,11 @@ Route::process_output_buffers (BufferSet& bufs,
 	   on a transition between monitoring states we get a de-clicking gain
 	   change in the _main_outs delivery, if config.get_use_monitor_fades()
 	   is true.
-	
+
 	   We override this in the case where we have an internal generator.
 	*/
 	bool silence = _have_internal_generator ? false : (monitoring_state () == MonitoringSilence);
-	
+
 	_main_outs->no_outs_cuz_we_no_monitor (silence);
 
 	/* -------------------------------------------------------------------------------------------
@@ -1004,28 +1004,28 @@ Route::set_solo_isolated (bool yn, void *src)
 		}
 	}
 
-	
+
 	if (!changed) {
 		return;
 	}
-	
+
 	/* forward propagate solo-isolate status to everything fed by this route, but not those via sends only */
 
 	boost::shared_ptr<RouteList> routes = _session.get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		
+
 		if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
 			continue;
 		}
-		
+
 		bool sends_only;
 		bool does_feed = feeds (*i, &sends_only);
-		
+
 		if (does_feed && !sends_only) {
 			(*i)->mod_solo_isolated_by_upstream (yn, src);
 		}
 	}
-	
+
 	/* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
 
 	solo_isolated_changed (src);
@@ -1081,7 +1081,7 @@ Route::muted_by_others () const
 	//master is never muted by others
 	if (is_master())
 		return false;
-		
+
 	//now check to see if something is soloed (and I am not)
 	return (_session.soloing() && !self_soloed() && !solo_isolated());
 }
@@ -1108,7 +1108,7 @@ Route::before_processor_for_placement (Placement p)
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 	ProcessorList::iterator loc;
-	
+
 	if (p == PreFader) {
 		/* generic pre-fader: insert immediately before the amp */
 		loc = find (_processors.begin(), _processors.end(), _amp);
@@ -1131,14 +1131,14 @@ Route::before_processor_for_index (int index)
 	}
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-	
+
 	ProcessorList::iterator i = _processors.begin ();
 	int j = 0;
 	while (i != _processors.end() && j < index) {
 		if ((*i)->display_to_user()) {
 			++j;
 		}
-		
+
 		++i;
 	}
 
@@ -1321,7 +1321,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 		if (processor->set_state (node, version)) {
 			return false;
 		}
-		
+
 		//A2 uses the "active" flag in the toplevel redirect node, not in the child plugin/IO
 		if (i != children.end()) {
 			if ((prop = (*i)->property (X_("active"))) != 0) {
@@ -1995,12 +1995,12 @@ Route::all_visible_processors_active (bool state)
 	if (_processors.empty()) {
 		return;
 	}
-	
+
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if (!(*i)->display_to_user() || boost::dynamic_pointer_cast<Amp> (*i)) {
 			continue;
 		}
-		
+
 		if (state) {
 			(*i)->activate ();
 		} else {
@@ -3105,9 +3105,9 @@ Route::remove_aux_or_listen (boost::shared_ptr<Route> route)
 
 	  again:
 		for (ProcessorList::iterator x = _processors.begin(); x != _processors.end(); ++x) {
-			
+
 			boost::shared_ptr<InternalSend> d = boost::dynamic_pointer_cast<InternalSend>(*x);
-			
+
 			if (d && d->target_route() == route) {
 				rl.release ();
 				if (remove_processor (*x, &err, false) > 0) {
@@ -3571,9 +3571,9 @@ Route::set_meter_point_unlocked ()
 	/* Set up the meter for its new position */
 
 	ProcessorList::iterator loc = find (_processors.begin(), _processors.end(), _meter);
-	
+
 	ChanCount m_in;
-	
+
 	if (loc == _processors.begin()) {
 		m_in = _input->n_ports();
 	} else {
@@ -3976,7 +3976,7 @@ Route::set_name_in_state (XMLNode& node, string const & name)
 
 	XMLNodeList children = node.children();
 	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
-		
+
 		if ((*i)->name() == X_("IO")) {
 
 			IO::set_name_in_state (**i, name);
@@ -3987,12 +3987,12 @@ Route::set_name_in_state (XMLNode& node, string const & name)
 			if (role && role->value() == X_("Main")) {
 				(*i)->add_property (X_("name"), name);
 			}
-			
+
 		} else if ((*i)->name() == X_("Diskstream")) {
 
 			(*i)->add_property (X_("playlist"), string_compose ("%1.1", name).c_str());
 			(*i)->add_property (X_("name"), name);
-			
+
 		}
 	}
 }
@@ -4278,17 +4278,17 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, framecn
 	} else {
 		all_connections.min = ~((pframes_t) 0);
 		all_connections.max = 0;
-		
+
 		/* iterate over all "from" ports and determine the latency range for all of their
 		   connections to the "outside" (outside of this Route).
 		*/
-		
+
 		for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
-			
+
 			LatencyRange range;
-			
+
 			p->get_connected_latency_range (range, playback);
-			
+
 			all_connections.min = min (all_connections.min, range.min);
 			all_connections.max = max (all_connections.max, range.max);
 		}
@@ -4581,7 +4581,7 @@ Route::maybe_note_meter_position ()
 	if (_meter_point != MeterCustom) {
 		return;
 	}
-	
+
 	_custom_meter_position_noted = true;
 	/* custom meter points range from after trim to before panner/main_outs
 	 * this is a limitation by the current processor UI
@@ -4650,7 +4650,7 @@ Route::has_external_redirects () const
 		/* ignore inactive processors and obviously ignore the main
 		 * outs since everything has them and we don't care.
 		 */
-		
+
 		if ((*i)->active() && (*i) != _main_outs && (*i)->does_routing()) {
 			return true;;
 		}
@@ -4696,7 +4696,7 @@ Route::non_realtime_locate (framepos_t pos)
 	{
 		//Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-		
+
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			(*i)->transport_located (pos);
 		}
@@ -4709,7 +4709,7 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 {
 	size_t n_buffers;
 	size_t i;
-	
+
 	/* MIDI
 	 *
 	 * We don't currently mix MIDI input together, so we don't need the
@@ -4722,7 +4722,7 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 
 		boost::shared_ptr<MidiPort> source_port = io->midi (i);
 		MidiBuffer& buf (bufs.get_midi (i));
-		
+
 		if (source_port) {
 			buf.copy (source_port->get_midi_buffer(nframes));
 		} else {
@@ -4740,19 +4740,19 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 	if (n_ports > n_buffers) {
 		scaling = ((float) n_buffers) / n_ports;
 	}
-	
+
 	for (i = 0; i < n_ports; ++i) {
-		
+
 		/* if there are more ports than buffers, map them onto buffers
 		 * in a round-robin fashion
 		 */
 
 		boost::shared_ptr<AudioPort> source_port = io->audio (i);
 		AudioBuffer& buf (bufs.get_audio (i%n_buffers));
-			
+
 
 		if (i < n_buffers) {
-			
+
 			/* first time through just copy a channel into
 			   the output buffer.
 			*/
@@ -4762,9 +4762,9 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 			if (scaling != 1.0f) {
 				buf.apply_gain (scaling, nframes);
 			}
-			
+
 		} else {
-			
+
 			/* on subsequent times around, merge data from
 			 * the port with what is already there
 			 */

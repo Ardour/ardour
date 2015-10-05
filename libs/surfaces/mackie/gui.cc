@@ -89,7 +89,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	Gtk::Label* l;
 	Gtk::Alignment* align;
 	int row = 0;
-	
+
 	set_border_width (12);
 
 	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 12));
@@ -102,9 +102,9 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (_surface_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	row++;
-		
+
 	vector<string> surfaces;
-	
+
 	for (std::map<std::string,DeviceInfo>::iterator i = DeviceInfo::device_info.begin(); i != DeviceInfo::device_info.end(); ++i) {
 		surfaces.push_back (i->first);
 	}
@@ -127,7 +127,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 		send_string = _("Surface sends via:");
 		receive_string = _("Surface receives via:");
 	}
-	
+
 	l = manage (new Gtk::Label (send_string));
 	l->set_alignment (1.0, 0.5);
 	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
@@ -149,10 +149,10 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	table->attach (ipmidi_base_port_spinner, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	row++;
-	
+
 	ipmidi_base_port_spinner.set_sensitive (_cp.device_info().uses_ipmidi());
 	ipmidi_base_port_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::ipmidi_spinner_changed));
-	
+
 	/* leave an extra blank row */
 	row++;
 
@@ -164,7 +164,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 
 	touch_sensitivity_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::touch_sensitive_change));
 	touch_sensitivity_scale.set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
-	
+
 	l = manage (new Gtk::Label (_("Button click")));
 	l->set_alignment (1.0, 0.5);
 	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
@@ -173,7 +173,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	align->add (relay_click_button);
 	table->attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	row++;
-	
+
 	l = manage (new Gtk::Label (_("Backlight")));
 	l->set_alignment (1.0, 0.5);
 	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
@@ -182,7 +182,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	align->add (backlight_button);
 	table->attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	row++;
-		
+
 	l = manage (new Gtk::Label (_("Send Fader Position Only When Touched")));
 	l->set_alignment (1.0, 0.5);
 	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
@@ -191,7 +191,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	align->add (absolute_touch_mode_button);
 	table->attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	row++;
-	
+
 	l = manage (new Gtk::Label (_("Send Fader Position When Moved")));
 	l->set_alignment (1.0, 0.5);
 	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
@@ -200,7 +200,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	align->add (touch_move_mode_button);
 	table->attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	row++;
-	
+
 	l = manage (new Gtk::Label (_("Fader Touch Sense Sensitivity")));
 	l->set_alignment (1.0, 0.5);
 	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
@@ -209,14 +209,14 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table->attach (touch_sensitivity_scale, 1, 2, 5, 6, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	table->attach (recalibrate_fader_button, row, row+1, 6, 7, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	row++;
-	
+
 
 	table->attach (discover_button, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	discover_button.signal_clicked().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::discover_clicked));
 	row++;
-	
+
 	vector<string> profiles;
-	
+
 	profiles.push_back ("default");
 
 	for (std::map<std::string,DeviceProfile>::iterator i = DeviceProfile::device_profiles.begin(); i != DeviceProfile::device_profiles.end(); ++i) {
@@ -234,13 +234,13 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	VBox* fkey_packer = manage (new VBox);
 	HBox* profile_packer = manage (new HBox);
 	HBox* observation_packer = manage (new HBox);
-	
+
 	l = manage (new Gtk::Label (_("Profile/Settings:")));
 	profile_packer->pack_start (*l, false, false);
 	profile_packer->pack_start (_profile_combo, true, true);
 	profile_packer->set_spacing (12);
 	profile_packer->set_border_width (12);
-	
+
 	l = manage (new Gtk::Label (_("* Button available at the original Mackie MCU PRO or current device if enabled (NOT implemented yet). Device specific name presented.")));
 	observation_packer->pack_start (*l, false, false);
 
@@ -322,7 +322,7 @@ MackieControlProtocolGUI::build_available_action_menu ()
 	parent = *(rowp);
 	parent[available_action_columns.name] = _("CmdAlt");
 
-	
+
 	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
 
 		TreeModel::Row row;
@@ -395,7 +395,7 @@ MackieControlProtocolGUI::build_function_key_editor ()
 	col = manage (new TreeViewColumn (_("Plain"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.plain);
 	function_key_editor.append_column (*col);
-	
+
 	renderer = make_action_renderer (available_action_model, function_key_columns.shift);
 	col = manage (new TreeViewColumn (_("Shift"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.shift);
@@ -461,7 +461,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 				/* Probably a key alias */
 				row[function_key_columns.plain] = action;
 			} else {
-				
+
 				act = ActionManager::get_action (action.c_str());
 				if (act) {
 					row[function_key_columns.plain] = act->get_label();
@@ -569,7 +569,7 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 	if (row) {
 
 		std::map<std::string,std::string>::iterator i = action_map.find (text);
-		
+
 		if (i == action_map.end()) {
 			if (!remove) {
 				return;

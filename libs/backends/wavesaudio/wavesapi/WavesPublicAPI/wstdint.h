@@ -33,7 +33,7 @@
 	#if ! defined(__STDC_LIMIT_MACROS)
 		#define __STDC_LIMIT_MACROS
 	#endif
-	
+
 	#include <stddef.h>
 	#include </usr/include/stdint.h>
 #endif

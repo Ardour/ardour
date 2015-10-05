@@ -99,7 +99,7 @@ public:
 
 
 	/* MANAGEMENT OF Stateful State */
-	
+
 	bool set_value (XMLNode const & node) {
 
 		XMLProperty const* p = node.property (property_name());
@@ -120,9 +120,9 @@ public:
                 node.add_property (property_name(), to_string (_current));
 	}
 
-	
+
 	/* MANAGEMENT OF HISTORY */
-	
+
 	void clear_changes () {
 		_have_old = false;
 	}
@@ -137,7 +137,7 @@ public:
 
 
 	/* TRANSFERRING HISTORY TO / FROM A StatefulDiffCommand */
-	
+
 	void get_changes_as_xml (XMLNode* history_node) const {
 		XMLNode* node = history_node->add_child (property_name());
                 node->add_property ("from", to_string (_old));
@@ -225,7 +225,7 @@ public:
 	Property<T>* clone () const {
 		return new Property<T> (this->property_id(), this->_old, this->_current);
 	}
-	
+
 	Property<T>* clone_from_xml (const XMLNode& node) const {
 		XMLNodeList const & children = node.children ();
 		XMLNodeList::const_iterator i = children.begin();
@@ -238,11 +238,11 @@ public:
 		}
 		XMLProperty* from = (*i)->property ("from");
 		XMLProperty* to = (*i)->property ("to");
-				
+
 		if (!from || !to) {
 			return 0;
 		}
-			
+
 		return new Property<T> (this->property_id(), from_string (from->value()), from_string (to->value ()));
 	}
 
@@ -295,7 +295,7 @@ public:
 	Property (PropertyDescriptor<std::string> d, std::string const & o, std::string const & c)
 		: PropertyTemplate<std::string> (d, o, c)
 	{}
-	
+
 	Property<std::string>* clone () const {
 		return new Property<std::string> (this->property_id(), _old, _current);
 	}
@@ -356,12 +356,12 @@ class /*LIBPBD_API*/ SharedStatefulProperty : public PropertyBase
 {
 public:
 	typedef boost::shared_ptr<T> Ptr;
-	
+
 	SharedStatefulProperty (PropertyID d, Ptr p)
 		: PropertyBase (d)
 		, _current (p)
 	{
-		
+
 	}
 
 	SharedStatefulProperty (PropertyID d, Ptr o, Ptr c)
@@ -369,7 +369,7 @@ public:
 		, _old (o)
 		, _current (c)
 	{
-		
+
 	}
 
 	bool set_value (XMLNode const & node) {

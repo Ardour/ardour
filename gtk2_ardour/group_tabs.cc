@@ -69,7 +69,7 @@ GroupTabs::set_session (Session* s)
 		_session->RouteRemovedFromRouteGroup.connect (
 			_session_connections, invalidator (*this), boost::bind (&GroupTabs::route_removed_from_route_group, this, _1, _2), gui_context()
 			);
-		
+
 		_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&GroupTabs::set_dirty, this), gui_context());
 	}
 }
@@ -138,7 +138,7 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 	} else if (ev->button == 3) {
 
 		RouteGroup* g = t ? t->group : 0;
-		
+
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) && g) {
 			/* edit */
 			RouteGroupDialog d (g, false);
@@ -191,18 +191,18 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 	if (_dragging == 0) {
 		return false;
 	}
-	
+
 	if (!_drag_moved) {
-		
+
 		if (_dragging->group) {
 			/* toggle active state */
 			_dragging->group->set_active (!_dragging->group->is_active (), this);
 		}
-		
+
 	} else {
 		/* finish drag */
 		RouteList routes = routes_for_tab (_dragging);
-		
+
 		if (!routes.empty()) {
 			if (_dragging_new_tab) {
 				RouteGroup* g = create_and_add_group ();
@@ -214,13 +214,13 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 			} else {
 				boost::shared_ptr<RouteList> r = _session->get_routes ();
 				for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-					
+
 					bool const was_in_tab = find (
 						_initial_dragging_routes.begin(), _initial_dragging_routes.end(), *i
 						) != _initial_dragging_routes.end ();
-					
+
 					bool const now_in_tab = find (routes.begin(), routes.end(), *i) != routes.end();
-					
+
 					if (was_in_tab && !now_in_tab) {
 						_dragging->group->remove (*i);
 					} else if (!was_in_tab && now_in_tab) {
@@ -229,11 +229,11 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 				}
 			}
 		}
-		
+
 		set_dirty ();
 		queue_draw ();
 	}
-	
+
 	_dragging = 0;
 	_initial_dragging_routes.clear ();
 
@@ -254,7 +254,7 @@ GroupTabs::render (cairo_t* cr, cairo_rectangle_t*)
 	cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	cairo_rectangle (cr, 0, 0, get_width(), get_height());
 	cairo_fill (cr);
-	
+
 	/* tabs */
 
 	for (list<Tab>::const_iterator i = _tabs.begin(); i != _tabs.end(); ++i) {
@@ -551,20 +551,20 @@ GroupTabs::set_group_color (RouteGroup* group, uint32_t color)
 		g = 25;
 		b = 25;
 	}
-	
+
 	GUIObjectState& gui_state = *ARDOUR_UI::instance()->gui_object_state;
 
 	char buf[64];
-	
+
 	/* for historical reasons the colors must be stored as 16 bit color
 	 * values. Ugh.
 	 */
 
 	snprintf (buf, sizeof (buf), "%d:%d:%d", (r<<8), (g<<8), (b<<8));
 	gui_state.set_property (group_gui_id (group), "color", buf);
-	
+
 	/* the group color change notification */
-	
+
 	PBD::PropertyChange change;
 	change.add (Properties::color);
 	group->PropertyChanged (change);
@@ -594,7 +594,7 @@ uint32_t
 GroupTabs::group_color (RouteGroup* group)
 {
 	assert (group);
-	
+
 	GUIObjectState& gui_state = *ARDOUR_UI::instance()->gui_object_state;
 	string const gui_id = group_gui_id (group);
 	bool empty;
@@ -630,7 +630,7 @@ GroupTabs::route_group_property_changed (RouteGroup* rg)
 	*/
 
 	emit_gui_changed_for_members (rg);
-	
+
 	set_dirty ();
 }
 

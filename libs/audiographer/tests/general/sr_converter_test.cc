@@ -33,19 +33,19 @@ class SampleRateConverterTest : public CppUnit::TestFixture
 		assert (frames % 2 == 0);
 		framecnt_t const half_frames = frames / 2;
 		framecnt_t frames_output = 0;
-		
+
 		converter->init (44100, 44100);
 		converter->add_output (sink);
-		
+
 		ProcessContext<float> c (random_data, half_frames, 1);
 		converter->process (c);
 		ProcessContext<float> c2 (&random_data[half_frames], half_frames, 1);
 		c2.set_flag (ProcessContext<float>::EndOfInput);
 		converter->process (c2);
-		
+
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames, frames_output);
-		
+
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, sink->get_array(), frames));
 	}
 
@@ -54,11 +54,11 @@ class SampleRateConverterTest : public CppUnit::TestFixture
 		assert (frames % 2 == 0);
 		framecnt_t const half_frames = frames / 2;
 		framecnt_t frames_output = 0;
-		
+
 		converter->init (44100, 88200);
 		converter->allocate_buffers (half_frames);
 		converter->add_output (sink);
-		
+
 		ProcessContext<float> c (random_data, half_frames, 1);
 		converter->process (c);
 		ProcessContext<float> c2 (&random_data[half_frames], half_frames, 1);
@@ -75,37 +75,37 @@ class SampleRateConverterTest : public CppUnit::TestFixture
 		assert (frames % 2 == 0);
 		framecnt_t const half_frames = frames / 2;
 		framecnt_t frames_output = 0;
-		
+
 		converter->init (88200, 44100);
 		converter->allocate_buffers (half_frames);
 		converter->add_output (sink);
-		
+
 		ProcessContext<float> c (random_data, half_frames, 1);
 		converter->process (c);
 		ProcessContext<float> c2 (&random_data[half_frames], half_frames, 1);
 		c2.set_flag (ProcessContext<float>::EndOfInput);
 		converter->process (c2);
-		
+
 		frames_output = sink->get_data().size();
 		framecnt_t tolerance = 3;
 		CPPUNIT_ASSERT (half_frames - tolerance < frames_output && frames_output < half_frames + tolerance);
 	}
-	
+
 	void testRespectsEndOfInput()
 	{
 		assert (frames % 2 == 0);
 		framecnt_t const half_frames = frames / 2;
-		
+
 		converter->init (44100, 48000);
 		converter->allocate_buffers (half_frames);
 		converter->add_output (grabber);
-		
+
 		ProcessContext<float> c (random_data, half_frames, 1);
 		converter->process (c);
 		ProcessContext<float> c2 (&random_data[half_frames], half_frames / 2, 1);
 		c2.set_flag (ProcessContext<float>::EndOfInput);
 		converter->process (c2);
-		
+
 		for (std::list<ProcessContext<float> >::iterator it = grabber->contexts.begin(); it != grabber->contexts.end(); ++it) {
 			std::list<ProcessContext<float> >::iterator next = it; ++next;
 			if (next == grabber->contexts.end()) {
@@ -115,7 +115,7 @@ class SampleRateConverterTest : public CppUnit::TestFixture
 			}
 		}
 	}
-	
+
 
   private:
 	boost::shared_ptr<SampleRateConverter > converter;

@@ -53,7 +53,7 @@ Image::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 							_pending->stride);
 		_current = _pending;
 	}
-	
+
 	Rect self = item_to_window (Rect (0, 0, _width, _height));
 	boost::optional<Rect> draw = self.intersection (area);
 
@@ -103,5 +103,5 @@ Image::accept_data ()
 	begin_change ();
 	_need_render = true;
 	end_change (); // notify canvas that we need redrawing
-}	
+}
 

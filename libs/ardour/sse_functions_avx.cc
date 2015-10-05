@@ -34,7 +34,7 @@ x86_sse_avx_find_peaks(const float* buf, uint32_t nframes, float *min, float *ma
 
 	// Work input until "buf" reaches 16 byte alignment
 	while ( ((intptr_t)buf) % 32 != 0 && nframes > 0) {
-		
+
 		// Load the next float into the work buffer
 		work = _mm256_set1_ps(*buf);
 

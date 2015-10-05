@@ -340,7 +340,7 @@ carbon_menu_item_update_accelerator (CarbonMenuItem *carbon_item,
 		  default:
 			  break;
 		  }
-	
+
 		  if (realkey != -1) {
 			  SetMenuItemCommandKey (carbon_item->menu, carbon_item->index,
 						 false, realkey);
@@ -381,7 +381,7 @@ carbon_menu_item_update_accelerator (CarbonMenuItem *carbon_item,
 		  }
 
 		  /* gdk/quartz maps Command to Meta */
-		
+
 		  if (key->accel_mods & GDK_META_MASK) {
 			  use_command = 1;
 		  }

@@ -83,7 +83,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 	if (ret) {
 		ret->set_name (new_region_name(ret->name()));
 		ret->set_position (region->position());
-		
+
 		if (ret->session().config.get_glue_new_regions_to_bars_and_beats ()) {
 			ret->set_position_lock_style (MusicTime);
 		}
@@ -129,7 +129,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 		if (ret->session().config.get_glue_new_regions_to_bars_and_beats ()) {
 			ret->set_position_lock_style (MusicTime);
 		}
-		
+
 		if (announce) {
 			map_add (ret);
 			CheckNewRegion (ret);
@@ -255,7 +255,7 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 		if (ret->session().config.get_glue_new_regions_to_bars_and_beats ()) {
 			ret->set_position_lock_style (MusicTime);
 		}
-		
+
 		if (announce) {
 			map_add (ret);
 			CheckNewRegion (ret);
@@ -302,7 +302,7 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 			/* Don't fiddle with position_lock_style here as the region
 			   description is coming from XML.
 			*/
-			
+
 			CheckNewRegion (ret);
 		}
 	}
@@ -342,7 +342,7 @@ RegionFactory::map_remove (boost::weak_ptr<Region> w)
 	if (!r) {
 		return;
 	}
-	
+
 	Glib::Threads::Mutex::Lock lm (region_map_lock);
 	RegionMap::iterator i = region_map.find (r->id());
 
@@ -449,7 +449,7 @@ RegionFactory::rename_in_region_name_maps (boost::shared_ptr<Region> region)
 	update_region_name_number_map (region);
 
 	Glib::Threads::Mutex::Lock lm (region_name_maps_mutex);
-	
+
 	map<string, PBD::ID>::iterator i = region_name_map.begin();
 	while (i != region_name_map.end() && i->second != region->id ()) {
 		++i;
@@ -652,7 +652,7 @@ RegionFactory::remove_regions_using_source (boost::shared_ptr<Source> src)
 
 		RegionMap::iterator j = i;
 		++j;
-		
+
 		if (i->second->uses_source (src)) {
 			remove_from_region_name_map (i->second->name ());
 			region_map.erase (i);

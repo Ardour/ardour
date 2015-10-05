@@ -66,7 +66,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_g
 	, last_rec_data_frame(0)
 {
 	CANVAS_DEBUG_NAME (_canvas_group, string_compose ("SV canvas group %1", _trackview.name()));
-	
+
 	/* set_position() will position the group */
 
 	canvas_rect = new ArdourCanvas::Rectangle (_canvas_group);
@@ -583,7 +583,7 @@ StreamView::get_selectables (framepos_t start, framepos_t end, double top, doubl
 			layer_t const l = (*i)->region()->layer ();
 			layer_ok = (min_layer <= l && l <= max_layer);
 		}
-		
+
 		if (within) {
 			if ((*i)->region()->coverage (start, end) == Evoral::OverlapExternal && layer_ok) {
 				results.push_back (*i);
@@ -593,7 +593,7 @@ StreamView::get_selectables (framepos_t start, framepos_t end, double top, doubl
 				results.push_back (*i);
 			}
 		}
-		
+
 	}
 }
 
@@ -619,7 +619,7 @@ StreamView::child_height () const
 	case Expanded:
 		return height / (_layers * 2 + 1);
 	}
-	
+
 	abort(); /* NOTREACHED */
 	return height;
 }
@@ -670,7 +670,7 @@ StreamView::set_layer_display (LayerDisplay d)
 	if (_layer_display == Overlaid) {
 		layer_regions ();
 	}
-	
+
 	update_contents_height ();
 	update_coverage_frames ();
 }

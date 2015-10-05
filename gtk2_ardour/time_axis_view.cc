@@ -138,7 +138,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	CANVAS_DEBUG_NAME (selection_group, "selection for TAV");
 	selection_group->set_data (X_("timeselection"), (void *) 1);
 	selection_group->hide();
-	
+
 	_ghost_group = new ArdourCanvas::Container (_canvas_display);
 	CANVAS_DEBUG_NAME (_ghost_group, "ghost for TAV");
 	_ghost_group->lower_to_bottom();
@@ -319,7 +319,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 
 	_canvas_display->raise_to_top ();
 	_canvas_display->show ();
-	
+
 	_hidden = false;
 
 	_effective_height = current_height ();
@@ -407,7 +407,7 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 	}
 
 	_ebox_release_can_act = true;
-			
+
 	if (maybe_set_cursor (event->y) > 0) {
 		_resize_drag_start = event->y_root;
 	}
@@ -668,7 +668,7 @@ TimeAxisView::begin_name_edit ()
 	if (can_edit_name()) {
 
 		name_entry = manage (new Gtkmm2ext::FocusEntry);
-		
+
 		name_entry->set_width_chars(8); // min width, entry expands
 
 		name_entry->set_name ("EditorTrackNameDisplay");
@@ -681,7 +681,7 @@ TimeAxisView::begin_name_edit ()
 		if (name_label.is_ancestor (name_hbox)) {
 			name_hbox.remove (name_label);
 		}
-		
+
 		name_hbox.pack_end (*name_entry, true, true);
 		name_entry->show ();
 
@@ -705,9 +705,9 @@ TimeAxisView::end_name_edit (int response)
 		*/
 		return;
 	}
-	
+
 	PBD::Unwinder<bool> uw (ending_name_edit, true);
-	
+
 	bool edit_next = false;
 	bool edit_prev = false;
 
@@ -743,24 +743,24 @@ TimeAxisView::end_name_edit (int response)
 
 		TrackViewList const & allviews = _editor.get_track_views ();
 		TrackViewList::const_iterator i = find (allviews.begin(), allviews.end(), this);
-		
+
 		if (i != allviews.end()) {
-			
+
 			do {
 				if (++i == allviews.end()) {
 					return;
 				}
-				
+
 				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
-			
+
 				if (rtav && rtav->route()->record_enabled()) {
 					continue;
 				}
-				
+
 				if (!(*i)->hidden()) {
 					break;
 				}
-				
+
 			} while (true);
 		}
 
@@ -773,28 +773,28 @@ TimeAxisView::end_name_edit (int response)
 
 		TrackViewList const & allviews = _editor.get_track_views ();
 		TrackViewList::const_iterator i = find (allviews.begin(), allviews.end(), this);
-		
+
 		if (i != allviews.begin()) {
 			do {
 				if (i == allviews.begin()) {
 					return;
 				}
-				
+
 				--i;
-				
+
 				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
-				
+
 				if (rtav && rtav->route()->record_enabled()) {
 					continue;
 				}
-				
+
 				if (!(*i)->hidden()) {
 					break;
 				}
-				
+
 			} while (true);
 		}
-		
+
 		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
 			_editor.ensure_time_axis_view_is_visible (**i, false);
 			(*i)->begin_name_edit ();
@@ -1226,19 +1226,19 @@ TimeAxisView::color_handler ()
 
 		(*i)->start_trim->set_fill_color (UIConfiguration::instance().color ("selection"));
 		(*i)->start_trim->set_outline_color (UIConfiguration::instance().color ("selection"));
-		
+
 		(*i)->end_trim->set_fill_color (UIConfiguration::instance().color ("selection"));
 		(*i)->end_trim->set_outline_color (UIConfiguration::instance().color ("selection"));
 	}
-	
+
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
-		
+
 		(*i)->rect->set_fill_color (UIConfiguration::instance().color_mod ("selection rect", "selection rect"));
 		(*i)->rect->set_outline_color (UIConfiguration::instance().color ("selection"));
-		
+
 		(*i)->start_trim->set_fill_color (UIConfiguration::instance().color ("selection"));
 		(*i)->start_trim->set_outline_color (UIConfiguration::instance().color ("selection"));
-		
+
 		(*i)->end_trim->set_fill_color (UIConfiguration::instance().color ("selection"));
 		(*i)->end_trim->set_outline_color (UIConfiguration::instance().color ("selection"));
 	}
@@ -1314,7 +1314,7 @@ TimeAxisView::covered_by_y_range (double y0, double y1) const
 	/* if either the top or bottom of the axisview is in the vertical
 	 * range, we cover it.
 	 */
-	
+
 	if ((y0 < _y_position && y1 < _y_position) ||
 	    (y0 >= _y_position + height && y1 >= _y_position + height)) {
 		return false;
@@ -1392,7 +1392,7 @@ TimeAxisView::reset_visual_state ()
 	/* this method is not required to trigger a global redraw */
 
 	string str = gui_property ("height");
-	
+
 	if (!str.empty()) {
 		set_height (atoi (str));
 	} else {

@@ -64,11 +64,11 @@ OptionEditorComponent::add_widgets_to_page (OptionEditorPage* p, Gtk::Widget* wa
 	if (!_note.empty ()) {
 		++m;
 	}
-	
+
 	p->table.resize (m, 3);
 	p->table.attach (*wa, 1, 2, n, n + 1, FILL);
 	p->table.attach (*wb, 2, 3, n, n + 1, FILL | EXPAND);
-	
+
 	maybe_add_note (p, n + 1);
 }
 
@@ -236,7 +236,7 @@ BoolComboOption::BoolComboOption (
 	_combo->append_text (f);
 	/* and option 1 is the true */
 	_combo->append_text (t);
-	
+
 	_combo->signal_changed().connect (sigc::mem_fun (*this, &BoolComboOption::changed));
 }
 
@@ -263,9 +263,9 @@ BoolComboOption::set_sensitive (bool yn)
 {
 	_combo->set_sensitive (yn);
 }
-	
 
-	
+
+
 FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t> g, sigc::slot<bool, gain_t> s)
 	: Option (i, n)
 	, _db_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)

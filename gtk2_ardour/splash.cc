@@ -45,7 +45,7 @@ Splash* Splash::the_splash = 0;
 Splash::Splash ()
 {
 	assert (the_splash == 0);
-	
+
 	std::string splash_file;
 
 	if (!find_file (ardour_data_search_path(), "splash.png", splash_file)) {
@@ -202,7 +202,7 @@ void
 Splash::display ()
 {
 	bool was_mapped = is_mapped ();
-	
+
 	if (!was_mapped) {
 		expose_done = false;
 		expose_is_the_one = false;
@@ -210,7 +210,7 @@ Splash::display ()
 
 	pop_front ();
 	present ();
-	
+
 	if (!was_mapped) {
 		while (!expose_done) {
 			gtk_main_iteration ();
@@ -230,7 +230,7 @@ Splash::message (const string& msg)
 
 	layout->set_markup (str);
 	Glib::RefPtr<Gdk::Window> win = darea.get_window();
-	
+
 	if (win) {
                 expose_done = false;
 

@@ -105,7 +105,7 @@ IPMIDIPort::close_sockets ()
 		::closesocket (sockin);
 		sockin = -1;
 	}
-	
+
 	if (sockout >= 0) {
 		::closesocket (sockout);
 		sockout = -1;
@@ -171,12 +171,12 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	addrin.sin_family = AF_INET;
 	addrin.sin_addr.s_addr = htonl(INADDR_ANY);
 	addrin.sin_port = htons(base_port);
-	
+
 	if (::bind(sockin, (struct sockaddr *) (&addrin), sizeof(addrin)) < 0) {
 		::perror("bind");
 		return false;
 	}
-	
+
 	// Will Hall, 2007
 	// INADDR_ANY will bind to default interface,
 	// specify alternate interface nameon which to bind...
@@ -194,7 +194,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	} else {
 		if_addr_in.s_addr = htonl (INADDR_ANY);
 	}
-	
+
 	struct ip_mreq mreq;
 	mreq.imr_multiaddr.s_addr = ::inet_addr("225.0.0.37");
 	mreq.imr_interface.s_addr = if_addr_in.s_addr;
@@ -212,7 +212,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 		::perror("socket(out)");
 		return false;
 	}
-	
+
 	// Will Hall, Oct 2007
 	if (!ifname.empty()) {
 		struct in_addr if_addr_out;
@@ -225,12 +225,12 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 			return false;
 		}
 	}
-	
+
 	::memset(&addrout, 0, sizeof(struct sockaddr_in));
 	addrout.sin_family = AF_INET;
 	addrout.sin_addr.s_addr = ::inet_addr("225.0.0.37");
 	addrout.sin_port = htons (base_port);
-	
+
 	// Turn off loopback...
 	int loop = 0;
 	if (::setsockopt(sockout, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, sizeof (loop)) < 0) {
@@ -247,7 +247,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 		error << "cannot set non-blocking mode for IP MIDI output socket (" << ::strerror (errno) << ')' << endmsg;
 		return false;
 	}
-	
+
 	return true;
 #else
 	return false;
@@ -282,7 +282,7 @@ IPMIDIPort::parse (framecnt_t timestamp)
 	 * parser. This will emit appropriate signals that will be handled
 	 * by anyone who cares.
 	 */
-	
+
 	unsigned char buf[1024];
 	struct sockaddr_in sender;
 	socklen_t slen = sizeof(sender);
@@ -291,7 +291,7 @@ IPMIDIPort::parse (framecnt_t timestamp)
 	if (r >= 0) {
 
 		_parser->set_timestamp (timestamp);
-		
+
 		for (int i = 0; i < r; ++i) {
 			_parser->scanner (buf[i]);
 		}

@@ -93,7 +93,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	bool parameter_is_control (uint32_t) const;
 	bool parameter_is_input (uint32_t) const;
 	bool parameter_is_output (uint32_t) const;
-	
+
 	void set_info (PluginInfoPtr);
 
 	int set_state(const XMLNode& node, int);

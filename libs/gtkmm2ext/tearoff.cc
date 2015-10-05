@@ -65,7 +65,7 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	VBox* box1;
 	box1 = manage (new VBox);
 	box1->pack_start (close_event_box, false, false, 2);
-	
+
 	window_box.pack_end (*box1, false, false, 2);
 
 	own_window.add_events (KEY_PRESS_MASK|KEY_RELEASE_MASK|BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK|POINTER_MOTION_MASK|POINTER_MOTION_HINT_MASK);
@@ -73,7 +73,7 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	own_window.set_type_hint (WINDOW_TYPE_HINT_UTILITY);
 
 	own_window.add (window_box);
-	
+
 	own_window.signal_button_press_event().connect (mem_fun (*this, &TearOff::window_button_press));
 	own_window.signal_button_release_event().connect (mem_fun (*this, &TearOff::window_button_release));
 	own_window.signal_motion_notify_event().connect (mem_fun (*this, &TearOff::window_motion));
@@ -171,7 +171,7 @@ TearOff::close_click (GdkEventButton* /*ev*/)
 {
         put_it_back ();
 	return true;
-}		
+}
 
 void
 TearOff::put_it_back ()
@@ -232,7 +232,7 @@ TearOff::window_motion (GdkEventMotion* ev)
 	double x_delta;
 	double y_delta;
 	RefPtr<Gdk::Window> win (own_window.get_window());
-	
+
 	own_window.get_pointer (mx, my);
 
 	if (!dragging) {
@@ -250,10 +250,10 @@ TearOff::window_motion (GdkEventMotion* ev)
 
 	win->get_root_origin (x, y);
 	win->move ((gint) floor (x + x_delta), (gint) floor (y + y_delta));
-	
+
 	drag_x = ev->x_root;
 	drag_y = ev->y_root;
-	
+
 	return true;
 }
 

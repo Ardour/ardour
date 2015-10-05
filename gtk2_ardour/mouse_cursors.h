@@ -79,7 +79,7 @@ public:
 	   is actually a valid value for a Gdk::Cursor - it indicates
 	   "use the parent window's cursor"
 	*/
-	
+
 	static bool is_invalid (Gdk::Cursor* c) { if (!_invalid) { create_invalid(); } return c == _invalid; }
 	static Gdk::Cursor* invalid_cursor() { if (!_invalid) { create_invalid(); } return _invalid; }
 

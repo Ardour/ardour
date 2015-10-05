@@ -568,7 +568,7 @@ Bundle::type_channel_to_overall (DataType t, uint32_t c) const
 	if (t == DataType::NIL) {
 		return c;
 	}
-	
+
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 
 	vector<Channel>::const_iterator i = _channel.begin ();
@@ -602,11 +602,11 @@ Bundle::overall_channel_to_type (DataType t, uint32_t c) const
 	if (t == DataType::NIL) {
 		return c;
 	}
-	
+
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 
 	uint32_t s = 0;
-	
+
 	vector<Channel>::const_iterator i = _channel.begin ();
 	for (uint32_t j = 0; j < c; ++j) {
 		if (i->type == t) {

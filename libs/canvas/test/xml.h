@@ -12,6 +12,6 @@ public:
 	void get ();
 	void set ();
 
-private:	
+private:
 	void check (std::string const &);
 };

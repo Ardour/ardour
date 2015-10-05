@@ -370,7 +370,7 @@ SMFSource::write_unlocked (const Lock&                 lock,
 			break;
 		}
 		time -= position;
-			
+
 		ev.set(buf, size, time);
 		ev.set_event_type(midi_parameter_type(ev.buffer()[0]));
 		ev.set_id(Evoral::next_event_id());
@@ -577,7 +577,7 @@ SMFSource::safe_midi_file_extension (const string& file)
 	static bool compile = true;
 	const int nmatches = 2;
 	regmatch_t matches[nmatches];
-	
+
 	if (Glib::file_test (file, Glib::FILE_TEST_EXISTS)) {
 		if (!Glib::file_test (file, Glib::FILE_TEST_IS_REGULAR)) {
 			/* exists but is not a regular file */
@@ -590,7 +590,7 @@ SMFSource::safe_midi_file_extension (const string& file)
 	} else {
 		compile = false;
 	}
-	
+
 	if (regexec (&compiled_pattern, file.c_str(), nmatches, matches, 0)) {
 		return false;
 	}
@@ -787,5 +787,5 @@ SMFSource::prevent_deletion ()
 
 	_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
 }
-		
-	
+
+

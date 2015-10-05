@@ -64,7 +64,7 @@ class AddRouteDialog : public ArdourDialog
         bool name_template_is_default () const;
 	std::string track_template ();
 	ARDOUR::PluginInfoPtr requested_instrument ();
-	
+
 	ARDOUR::TrackMode mode();
 	ARDOUR::RouteGroup* route_group ();
 	enum InsertAt {

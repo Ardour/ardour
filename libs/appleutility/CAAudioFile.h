@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CAAudioFile.h
-	
+
 =============================================================================*/
 
 #ifndef __CAAudioFile_h__
@@ -122,7 +122,7 @@ public:
 				// open an existing file
 		XThrowIfError(ExtAudioFileOpen(&fsref, &mExtAF), "ExtAudioFileOpen failed");
 	}
-	
+
 	void	CreateNew(const FSRef &inParentDir, CFStringRef inFileName,	AudioFileTypeID inFileType, const AudioStreamBasicDescription &inStreamDesc, const AudioChannelLayout *inChannelLayout=NULL) {
 		XThrowIfError(ExtAudioFileCreateNew(&inParentDir, inFileName, inFileType, &inStreamDesc, inChannelLayout, &mExtAF), "ExtAudioFileCreateNew failed");
 	}
@@ -131,7 +131,7 @@ public:
 				// use this to wrap an AudioFileID opened externally
 		XThrowIfError(ExtAudioFileWrapAudioFileID(fileID, forWriting, &mExtAF), "ExtAudioFileWrapAudioFileID failed");
 	}
-	
+
 	void	Close() {
 		std::cerr << "\tdisposeo of ext audio file @ " << mExtAF << std::endl;
 		XThrowIfError(ExtAudioFileDispose(mExtAF), "ExtAudioFileClose failed");
@@ -143,11 +143,11 @@ public:
 		XThrowIfError(ExtAudioFileGetProperty(mExtAF, kExtAudioFileProperty_FileDataFormat, &size, &mFileDataFormat), "Couldn't get file's data format");
 		return mFileDataFormat;
 	}
-	
+
 	const CAAudioChannelLayout &	GetFileChannelLayout() {
 		return FetchChannelLayout(mFileChannelLayout, kExtAudioFileProperty_FileChannelLayout);
 	}
-	
+
 	void	SetFileChannelLayout(const CAAudioChannelLayout &layout) {
 		XThrowIfError(ExtAudioFileSetProperty(mExtAF, kExtAudioFileProperty_FileChannelLayout, layout.Size(), &layout.Layout()), "Couldn't set file's channel layout");
 		mFileChannelLayout = layout;
@@ -158,21 +158,21 @@ public:
 		XThrowIfError(ExtAudioFileGetProperty(mExtAF, kExtAudioFileProperty_ClientDataFormat, &size, &mClientDataFormat), "Couldn't get client data format");
 		return mClientDataFormat;
 	}
-	
+
 	const CAAudioChannelLayout &	GetClientChannelLayout() {
 		return FetchChannelLayout(mClientChannelLayout, kExtAudioFileProperty_ClientChannelLayout);
 	}
-	
+
 	void	SetClientFormat(const CAStreamBasicDescription &dataFormat, const CAAudioChannelLayout *layout=NULL) {
 		XThrowIfError(ExtAudioFileSetProperty(mExtAF, kExtAudioFileProperty_ClientDataFormat, sizeof(dataFormat), &dataFormat), "Couldn't set client format");
 		if (layout)
 			SetClientChannelLayout(*layout);
 	}
-	
+
 	void	SetClientChannelLayout(const CAAudioChannelLayout &layout) {
 		XThrowIfError(ExtAudioFileSetProperty(mExtAF, kExtAudioFileProperty_ClientChannelLayout, layout.Size(), &layout.Layout()), "Couldn't set client channel layout");
 	}
-	
+
 	AudioConverterRef				GetConverter() const {
 		UInt32 size = sizeof(AudioConverterRef);
 		AudioConverterRef converter;
@@ -192,28 +192,28 @@ public:
 		}
 		return err;
 	}
-	
+
 	SInt64		GetNumberFrames() {
 		SInt64 length;
 		UInt32 size = sizeof(SInt64);
 		XThrowIfError(ExtAudioFileGetProperty(mExtAF, kExtAudioFileProperty_FileLengthFrames, &size, &length), "Couldn't get file's length");
 		return length;
 	}
-	
+
 	void		SetNumberFrames(SInt64 length) {
 		XThrowIfError(ExtAudioFileSetProperty(mExtAF, kExtAudioFileProperty_FileLengthFrames, sizeof(SInt64), &length), "Couldn't set file's length");
 	}
-	
+
 	void		Seek(SInt64 pos) {
 		XThrowIfError(ExtAudioFileSeek(mExtAF, pos), "Couldn't seek in audio file");
 	}
-	
+
 	SInt64		Tell() {
 		SInt64 pos;
 		XThrowIfError(ExtAudioFileTell(mExtAF, &pos), "Couldn't get file's mark");
 		return pos;
 	}
-	
+
 	void		Read(UInt32 &ioFrames, AudioBufferList *ioData) {
 		XThrowIfError(ExtAudioFileRead(mExtAF, &ioFrames, ioData), "Couldn't read audio file");
 	}
@@ -261,12 +261,12 @@ private:
 	//		- Open
 	//		- PrepareNew followed by Create
 	//		- Wrap
-	
+
 	void	Open(const FSRef &fsref);
 				// open an existing file
 
 	void	CreateNew(const FSRef &inParentDir, CFStringRef inFileName,	AudioFileTypeID inFileType, const AudioStreamBasicDescription &inStreamDesc, const AudioChannelLayout *inChannelLayout=NULL);
-	
+
 	void	Wrap(AudioFileID fileID, bool forWriting);
 				// use this to wrap an AudioFileID opened externally
 
@@ -274,7 +274,7 @@ private:
 
 	void	Close();
 				// In case you want to close the file before the destructor executes
-	
+
 	// --- Data formats ---
 
 	// Allow specifying the file's channel layout. Must be called before SetClientFormat.
@@ -282,14 +282,14 @@ private:
 	// the channel layout). When reading, the specified layout overrides the one read from the file,
 	// if any.
 	void	SetFileChannelLayout(const CAAudioChannelLayout &layout);
-	
+
 	// This specifies the data format which the client will use for reading/writing the file,
 	// which may be different from the file's format. An AudioConverter is created if necessary.
 	// The client format must be linear PCM.
 	void	SetClientFormat(const CAStreamBasicDescription &dataFormat, const CAAudioChannelLayout *layout=NULL);
 	void	SetClientDataFormat(const CAStreamBasicDescription &dataFormat) { SetClientFormat(dataFormat, NULL); }
 	void	SetClientChannelLayout(const CAAudioChannelLayout &layout) { SetClientFormat(mClientDataFormat, &layout); }
-	
+
 	// Wrapping the underlying converter, if there is one
 	OSStatus	SetConverterProperty(AudioConverterPropertyID	inPropertyID,
 									UInt32						inPropertyDataSize,
@@ -298,7 +298,7 @@ private:
 	void		SetConverterConfig(CFArrayRef config) {
 					SetConverterProperty(kAudioConverterPropertySettings, sizeof(config), &config); }
 	CFArrayRef  GetConverterConfig();
-	
+
 	// --- I/O ---
 	// All I/O is sequential, but you can seek to an arbitrary position when reading.
 	// SeekToPacket and TellPacket's packet numbers are in the file's data format, not the client's.
@@ -310,7 +310,7 @@ private:
 	// These can fail for files without a constant mFramesPerPacket
 	void	Seek(SInt64 frameNumber);
 	SInt64  Tell() const;	// frameNumber
-	
+
 	// --- Accessors ---
 	// note: client parameters only valid if SetClientFormat has been called
 	AudioFileID						GetAudioFileID() const { return mAudioFile; }
@@ -331,27 +331,27 @@ private:
 	SInt64  GetNumberFrames() const;
 				// will be 0 if the file's frames/packet is 0 (variable)
 	void	SetNumberFrames(SInt64 length);	// should only be set on a PCM file
-	
+
 	// --- Tunable performance parameters ---
 	void	SetUseCache(bool b) { mUseCache = b; }
 	void	SetIOBufferSizeBytes(UInt32 bufferSizeBytes) { mIOBufferSizeBytes = bufferSizeBytes; }
 	UInt32  GetIOBufferSizeBytes() { return mIOBufferSizeBytes; }
 	void *  GetIOBuffer() { return mIOBufferList.mBuffers[0].mData; }
 	void	SetIOBuffer(void *buf);
-	
+
 	// -- Profiling ---
 #if CAAUDIOFILE_PROFILE
 	void	EnableProfiling(bool b) { mProfiling = b; }
 	UInt64	TicksInConverter() const { return (mTicksInConverter > 0) ? (mTicksInConverter - mTicksInReadInConverter) : 0; }
 	UInt64	TicksInIO() const { return mTicksInIO; }
 #endif
-	
+
 // _______________________________________________________________________________________
 private:
 	SInt64  FileDataOffset();
 	void	SeekToPacket(SInt64 packetNumber);
 	SInt64	TellPacket() const { return mPacketMark; }  // will be imprecise if SeekToFrame was called
-	
+
 	void	SetConverterChannelLayout(bool output, const CAAudioChannelLayout &layout);
 	void	WritePacketsFromCallback(
 									AudioConverterComplexInputDataProc	inInputDataProc,
@@ -372,13 +372,13 @@ private:
 										UInt32*							ioNumberDataPackets,
 										AudioBufferList*				ioData,
 										AudioStreamPacketDescription**	outDataPacketDescription,
-										void*							inUserData);	
+										void*							inUserData);
 
 	static OSStatus WriteInputProc(		AudioConverterRef				inAudioConverter,
 										UInt32*							ioNumberDataPackets,
 										AudioBufferList*				ioData,
 										AudioStreamPacketDescription**	outDataPacketDescription,
-										void*							inUserData);	
+										void*							inUserData);
 // _______________________________________________________________________________________
 private:
 
@@ -389,7 +389,7 @@ private:
 	bool						mUseCache;
 	bool						mFinishingEncoding;
 	enum { kClosed, kReading, kPreparingToCreate, kPreparingToWrite, kWriting } mMode;
-	
+
 //	SInt64						mNumberPackets;		// in file's format
 	SInt64						mFileDataOffset;
 	SInt64						mPacketMark;		// in file's format
@@ -398,7 +398,7 @@ private:
 													// lie at frame 2112 of a decoded AAC file
 	SInt32						mFrame0Offset;
 	UInt32						mFramesToSkipFollowingSeek;
-	
+
 	// buffers
 	UInt32						mIOBufferSizeBytes;
 	UInt32						mIOBufferSizePackets;
@@ -406,7 +406,7 @@ private:
 	bool						mClientOwnsIOBuffer;
 	AudioStreamPacketDescription *mPacketDescs;
 	UInt32						mNumPacketDescs;
-	
+
 	// formats/conversion
 	AudioConverterRef			mConverter;
 	CAStreamBasicDescription	mFileDataFormat;
@@ -415,18 +415,18 @@ private:
 	CAAudioChannelLayout		mClientChannelLayout;
 	UInt32						mFileMaxPacketSize;
 	UInt32						mClientMaxPacketSize;
-	
+
 	// cookie
 	Byte *						mMagicCookie;
 	UInt32						mMagicCookieSize;
-	
+
 	// for ReadPackets
 	UInt32						mMaxPacketsToRead;
-	
+
 	// for WritePackets
 	UInt32						mWritePackets;
 	CABufferList *				mWriteBufferList;
-	
+
 #if CAAUDIOFILE_PROFILE
 	// performance
 	bool						mProfiling;

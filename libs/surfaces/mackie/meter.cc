@@ -43,24 +43,24 @@ Meter::factory (Surface& surface, int id, const char* name, Group& group)
 
 void
 Meter::notify_metering_state_changed(Surface& surface, bool transport_is_rolling, bool metering_active)
-{	
+{
 	MidiByteArray msg;
-		
+
 	// sysex header
 	msg << surface.sysex_hdr();
-		
+
 	// code for Channel Meter Enable Message
 	msg << 0x20;
-		
+
 	// Channel identification
 	msg << id();
-		
+
 	// Enable (0x07) / Disable (0x00) level meter on LCD, peak hold display on horizontal meter and signal LED
 	msg << ((transport_is_rolling && metering_active) ? 0x07 : 0x00);
-		
+
 	// sysex trailer
 	msg << MIDI::eox;
-		
+
 	surface.write (msg);
 }
 
@@ -70,7 +70,7 @@ Meter::send_update (Surface& surface, float dB)
 	float def = 0.0f; /* Meter deflection %age */
 
 	// DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 dB %2\n", id(), dB));
-	
+
 	if (dB < -70.0f) {
 		def = 0.0f;
 	} else if (dB < -60.0f) {
@@ -88,19 +88,19 @@ Meter::send_update (Surface& surface, float dB)
 	} else {
 		def = 115.0f;
 	}
-	
+
 	/* 115 is the deflection %age that would be
 	   when dB=6.0. this is an arbitrary
 	   endpoint for our scaling.
 	*/
 
 	MidiByteArray msg;
-	
+
 	if (def > 100.0f) {
 		if (!overload_on) {
 			overload_on = true;
 			surface.write (MidiByteArray (2, 0xd0, (id() << 4) | 0xe));
-			
+
 		}
 	} else {
 		if (overload_on) {
@@ -108,11 +108,11 @@ Meter::send_update (Surface& surface, float dB)
 			surface.write (MidiByteArray (2, 0xd0, (id() << 4) | 0xf));
 		}
 	}
-	
+
 	/* we can use up to 13 segments */
 
 	int segment = lrintf ((def/115.0) * 13.0);
-	
+
 	surface.write (MidiByteArray (2, 0xd0, (id()<<4) | segment));
 }
 

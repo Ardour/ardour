@@ -49,10 +49,10 @@ DnDTreeViewBase::add_drop_targets (list<TargetEntry>& targets)
 	for (list<TargetEntry>::iterator i = targets.begin(); i != targets.end(); ++i) {
 		draggable.push_back (*i);
 	}
-	
+
 	enable_model_drag_source (draggable);
 	enable_model_drag_dest (draggable);
-}	
+}
 
 void
 DnDTreeViewBase::add_object_drag (int column, string type_name)

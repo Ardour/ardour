@@ -120,7 +120,7 @@ void
 UIConfiguration::parameter_changed (string param)
 {
 	_dirty = true;
-	
+
 	if (param == "ui-rc-file") {
 		load_rc_file (true);
 	} else if (param == "color-file") {
@@ -136,9 +136,9 @@ UIConfiguration::reset_gtk_theme ()
 	stringstream ss;
 
 	ss << "gtk_color_scheme = \"" << hex;
-	
+
 	for (ColorAliases::iterator g = color_aliases.begin(); g != color_aliases.end(); ++g) {
-		
+
 		if (g->first.find ("gtk_") == 0) {
 			const string gtk_name = g->first.substr (4);
 			ss << gtk_name << ":#" << std::setw (6) << setfill ('0') << (color (g->second) >> 8) << ';';
@@ -223,7 +223,7 @@ UIConfiguration::load_defaults ()
 {
         std::string rcfile;
 	int ret = -1;
-	
+
 	if (find_file (ardour_config_search_path(), default_ui_config_file_name, rcfile) ) {
 		XMLTree tree;
 
@@ -274,7 +274,7 @@ UIConfiguration::load_color_theme (bool allow_own)
 	if (!found) {
 		basename = color_file.get();
 		basename += ".colors";
-	
+
 		if (find_file (ardour_config_search_path(), basename, cfile)) {
 			found = true;
 		}
@@ -283,7 +283,7 @@ UIConfiguration::load_color_theme (bool allow_own)
 	if (found) {
 
 		XMLTree tree;
-		
+
 		info << string_compose (_("Loading color file %1"), cfile) << endmsg;
 
 		if (!tree.read (cfile.c_str())) {
@@ -322,7 +322,7 @@ UIConfiguration::store_color_theme ()
 		parent->add_child_nocopy (*node);
 	}
 	root->add_child_nocopy (*parent);
-	
+
 	parent = new XMLNode (X_("ColorAliases"));
 	for (ColorAliases::const_iterator i = color_aliases.begin(); i != color_aliases.end(); ++i) {
 		XMLNode* node = new XMLNode (X_("ColorAlias"));
@@ -343,7 +343,7 @@ UIConfiguration::store_color_theme ()
 
 	XMLTree tree;
 	std::string colorfile = Glib::build_filename (user_config_directory(), (string ("my-") + color_file.get() + ".colors"));
-	
+
 	tree.set_root (root);
 
 	if (!tree.write (colorfile.c_str())){
@@ -410,7 +410,7 @@ UIConfiguration::save_state()
 
 	if (_dirty) {
 		std::string rcfile = Glib::build_filename (user_config_directory(), ui_config_file_name);
-		
+
 		XMLTree tree;
 
 		tree.set_root (&get_state());
@@ -434,7 +434,7 @@ UIConfiguration::save_state()
 		colors_modified = false;
 		modifiers_modified = false;
 	}
-	
+
 
 	return 0;
 }
@@ -530,7 +530,7 @@ UIConfiguration::load_color_aliases (XMLNode const & node)
 	XMLNodeConstIterator niter;
 	XMLProperty const *name;
 	XMLProperty const *alias;
-	
+
 	color_aliases.clear ();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
@@ -553,7 +553,7 @@ UIConfiguration::load_colors (XMLNode const & node)
 	XMLNodeConstIterator niter;
 	XMLProperty const *name;
 	XMLProperty const *color;
-	
+
 	colors.clear ();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
@@ -579,9 +579,9 @@ UIConfiguration::load_modifiers (XMLNode const & node)
 	XMLNodeConstIterator niter;
 	XMLProperty const *name;
 	XMLProperty const *mod;
-	
+
 	modifiers.clear ();
-	
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() != X_("Modifier")) {
 			continue;
@@ -639,7 +639,7 @@ UIConfiguration::color (const std::string& name, bool* failed) const
 	if (failed) {
 		*failed = false;
 	}
-	
+
 	if (e != color_aliases.end ()) {
 		Colors::const_iterator rc = colors.find (e->second);
 		if (rc != colors.end()) {
@@ -652,7 +652,7 @@ UIConfiguration::color (const std::string& name, bool* failed) const
 			return rc->second;
 		}
 	}
-	
+
 	if (!failed) {
 		/* only show this message if the caller wasn't interested in
 		   the fail status.
@@ -663,7 +663,7 @@ UIConfiguration::color (const std::string& name, bool* failed) const
 	if (failed) {
 		*failed = true;
 	}
-	
+
 	return rgba_to_color ((g_random_int()%256)/255.0,
 			      (g_random_int()%256)/255.0,
 			      (g_random_int()%256)/255.0,

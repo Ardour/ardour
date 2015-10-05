@@ -152,7 +152,7 @@ struct ReadSorter {
 /** A segment of region that needs to be read */
 struct Segment {
 	Segment (boost::shared_ptr<AudioRegion> r, Evoral::Range<framepos_t> a) : region (r), range (a) {}
-	
+
 	boost::shared_ptr<AudioRegion> region; ///< the region
 	Evoral::Range<framepos_t> range;       ///< range of the region to read, in session frames
 };
@@ -493,7 +493,7 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 			if (!string_is_affirmative (p->value())) {
 				continue;
 			}
-			
+
 			if ((p = (*i)->property (X_("in"))) == 0) {
 				continue;
 			}
@@ -537,7 +537,7 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 				 */
 
 				const XMLNodeList c = (*i)->children ();
-				
+
 				for (XMLNodeConstIterator j = c.begin(); j != c.end(); ++j) {
 					if ((*j)->name() == X_("FadeOut")) {
 						out_a->fade_out()->set_state (**j, version);
@@ -545,7 +545,7 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 						out_a->inverse_fade_out()->set_state (**j, version);
 					}
 				}
-				
+
 				out_a->set_fade_out_active (true);
 
 			} else {
@@ -555,7 +555,7 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 				 */
 
 				const XMLNodeList c = (*i)->children ();
-				
+
 				for (XMLNodeConstIterator j = c.begin(); j != c.end(); ++j) {
 					if ((*j)->name() == X_("FadeIn")) {
 						in_a->fade_in()->set_state (**j, version);
@@ -563,7 +563,7 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 						in_a->inverse_fade_in()->set_state (**j, version);
 					}
 				}
-				
+
 				in_a->set_fade_in_active (true);
 			}
 		}

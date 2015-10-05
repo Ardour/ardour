@@ -123,7 +123,7 @@ clearlooks_gummy_draw_highlight_and_shade (cairo_t                *cr,
 		cairo_set_source_rgba (cr, highlight.r, highlight.g, highlight.b, 0.5);
 	else
 		cairo_set_source_rgba (cr, shadow.r, shadow.g, shadow.b, 0.5);
-		
+
 	cairo_stroke (cr);
 
 	/* Bottom/Right highlight -- this includes the corners */
@@ -465,7 +465,7 @@ clearlooks_gummy_draw_progressbar_fill (cairo_t                     *cr,
 		cairo_line_to (cr, stroke_width-x_step,   0);
 		cairo_line_to (cr, stroke_width/2-x_step, height);
 		cairo_line_to (cr, -x_step, height);
-		
+
 		cairo_translate (cr, stroke_width, 0);
 		tile_pos += stroke_width;
 	}
@@ -846,7 +846,7 @@ clearlooks_gummy_draw_slider (cairo_t                *cr,
 	int bar_x, i;
 	int shift_x;
 
-	cairo_set_line_width (cr, 1.0);	
+	cairo_set_line_width (cr, 1.0);
 	cairo_translate      (cr, x, y);
 
 	cairo_translate (cr, -0.5, -0.5);
@@ -1445,7 +1445,7 @@ clearlooks_gummy_draw_checkbox (cairo_t                  *cr,
 	{
 		if (widget->prelight)
 			border = &colors->spot[2];
-		else		
+		else
 			border = &colors->shade[6];
 		dot    = &colors->text[GTK_STATE_NORMAL];
 	}
@@ -1457,7 +1457,7 @@ clearlooks_gummy_draw_checkbox (cairo_t                  *cr,
 	{
 		widget->style_functions->draw_inset (cr, &widget->parentbg, 0.5, 0.5,
                                   width-1, height-1, (widget->radius > 0)? 1 : 0, CR_CORNER_ALL);
-		
+
 		/* Draw the rectangle for the checkbox itself */
 		ge_cairo_rounded_rectangle (cr, 1.5, 1.5,
                                   width-3, height-3, (widget->radius > 0)? 1 : 0, CR_CORNER_ALL);
@@ -1468,12 +1468,12 @@ clearlooks_gummy_draw_checkbox (cairo_t                  *cr,
 		ge_cairo_rounded_rectangle (cr, 0.5, 0.5,
                                   width-1, height-1, (widget->radius > 0)? 1 : 0, CR_CORNER_ALL);
 	}
-	
+
 	if (!widget->disabled)
-	{		
+	{
 		if (widget->prelight)
 			clearlooks_set_mixed_color (cr, &colors->base[0], &colors->spot[1], 0.5);
-		else		
+		else
 			ge_cairo_set_color (cr, &colors->base[0]);
 		cairo_fill_preserve (cr);
 	}

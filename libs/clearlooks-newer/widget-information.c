@@ -156,7 +156,7 @@ ge_is_bonobo_dock_item (GtkWidget * widget)
 	          result = TRUE;
 	          child = NULL;
 	        }
-            }	
+            }
 
           if (children)
   	    g_list_free(children);
@@ -278,7 +278,7 @@ ge_button_get_default_border (GtkWidget *widget,
 {
 	GtkBorder default_border = {1, 1, 1, 1};
 	GtkBorder *tmp_border = NULL;
-	
+
 	if (widget && GE_IS_BUTTON (widget))
 		gtk_widget_style_get (widget, "default-border", &tmp_border, NULL);
 
@@ -298,7 +298,7 @@ gboolean
 ge_widget_is_ltr (GtkWidget *widget)
 {
 	GtkTextDirection dir = GTK_TEXT_DIR_NONE;
-	
+
 	if (GE_IS_WIDGET (widget))
 		dir = gtk_widget_get_direction (widget);
 

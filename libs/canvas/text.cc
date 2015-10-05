@@ -71,7 +71,7 @@ void
 Text::set (string const & text)
 {
 	begin_change ();
-	
+
 	_text = text;
 
 	_need_redraw = true;
@@ -134,7 +134,7 @@ Text::_redraw () const
 #else
 	_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width, _height);
 #endif
-	
+
 	Cairo::RefPtr<Cairo::Context> img_context = Cairo::Context::create (_image);
 
 #ifdef __APPLE__
@@ -142,7 +142,7 @@ Text::_redraw () const
 	 */
 	img_context->scale (2, 2);
 #endif
-	
+
 	/* and draw, in the appropriate color of course */
 
 	if (_outline) {
@@ -173,7 +173,7 @@ Text::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 
 	Rect self = item_to_window (Rect (0, 0, min (_clamped_width, (double)_image->get_width ()), _image->get_height ()));
 	boost::optional<Rect> i = self.intersection (area);
-	
+
 	if (!i) {
 		return;
 	}
@@ -181,7 +181,7 @@ Text::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	if (_need_redraw) {
 		_redraw ();
 	}
-	
+
 	Rect intersection (i.get());
 
 	context->rectangle (intersection.x0, intersection.y0, intersection.width(), intersection.height());
@@ -238,7 +238,7 @@ void
 Text::set_alignment (Pango::Alignment alignment)
 {
 	begin_change ();
-	
+
 	_alignment = alignment;
 	_need_redraw = true;
 	_bounding_box_dirty = true;
@@ -249,7 +249,7 @@ void
 Text::set_font_description (Pango::FontDescription font_description)
 {
 	begin_change ();
-	
+
 	_font_description = new Pango::FontDescription (font_description);
 	_need_redraw = true;
         _width_correction = -1.0;
@@ -272,7 +272,7 @@ Text::set_color (Color color)
 	end_change ();
 }
 
-		
+
 void
 Text::dump (ostream& o) const
 {

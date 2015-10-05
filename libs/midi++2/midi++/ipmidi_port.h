@@ -69,7 +69,7 @@ class LIBMIDIPP_API IPMIDIPort : public Port {
 
     static const int lowest_ipmidi_port_default = 21928;
 
-private:	
+private:
     int sockin;
     int sockout;
     struct sockaddr_in addrout;

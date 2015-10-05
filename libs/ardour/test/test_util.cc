@@ -68,7 +68,7 @@ check_nodes (XMLNode const * p, XMLNode const * q, list<string> const & ignore_p
 	CPPUNIT_ASSERT_EQUAL (qc.size(), pc.size());
 	XMLNodeList::const_iterator k = pc.begin ();
 	XMLNodeList::const_iterator l = qc.begin ();
-	
+
 	while (k != pc.end ()) {
 		check_nodes (*k, *l, ignore_properties);
 		++k;

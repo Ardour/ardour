@@ -28,9 +28,9 @@ class TmpFileTest : public CppUnit::TestFixture
 		AllocatingProcessContext<float> c (random_data, frames, channels);
 		c.set_flag (ProcessContext<float>::EndOfInput);
 		file->process (c);
-		
+
 		TypeUtils<float>::zero_fill (c.data (), c.frames());
-		
+
 		file->seek (0, SEEK_SET);
 		file->read (c);
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, c.data(), c.frames()));

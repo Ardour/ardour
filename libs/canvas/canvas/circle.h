@@ -31,7 +31,7 @@ class LIBCANVAS_API Circle : public Arc
 	Circle (Canvas*);
 	Circle (Item*);
 };
-	
+
 }
 
 #endif

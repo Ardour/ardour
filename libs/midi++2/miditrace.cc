@@ -58,7 +58,7 @@ main (int argc, char *argv[])
 
 {
 	byte buf[1];
-	
+
 	text_receiver.listen_to (error);
 	text_receiver.listen_to (info);
 	text_receiver.listen_to (fatal);

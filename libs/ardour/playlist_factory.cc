@@ -46,9 +46,9 @@ PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden, bool unus
 		} else if (type->value() == "midi") {
 			pl = boost::shared_ptr<Playlist> (new MidiPlaylist (s, node, hidden));
 		}
-		
+
 		pl->set_region_ownership ();
-		
+
 		if (pl && !hidden) {
 			PlaylistCreated (pl, unused);
 		}
@@ -69,11 +69,11 @@ PlaylistFactory::create (DataType type, Session& s, string name, bool hidden)
 			pl = boost::shared_ptr<Playlist> (new AudioPlaylist (s, name, hidden));
 		else if (type == DataType::MIDI)
 			pl = boost::shared_ptr<Playlist> (new MidiPlaylist (s, name, hidden));
-		
+
 		if (pl && !hidden) {
 			PlaylistCreated (pl, false);
 		}
-		
+
 		return pl;
 	} catch (...) {
 		return boost::shared_ptr<Playlist> ();
@@ -86,7 +86,7 @@ PlaylistFactory::create (boost::shared_ptr<const Playlist> old, string name, boo
 	boost::shared_ptr<Playlist> pl;
 	boost::shared_ptr<const AudioPlaylist> apl;
 	boost::shared_ptr<const MidiPlaylist> mpl;
-	
+
 	try {
 
 		if ((apl = boost::dynamic_pointer_cast<const AudioPlaylist> (old)) != 0) {
@@ -100,12 +100,12 @@ PlaylistFactory::create (boost::shared_ptr<const Playlist> old, string name, boo
 		if (pl && !hidden) {
 			PlaylistCreated (pl, false);
 		}
-		
+
 		return pl;
 	} catch (...) {
 		return boost::shared_ptr<Playlist> ();
 	}
-		
+
 }
 
 boost::shared_ptr<Playlist>
@@ -123,9 +123,9 @@ PlaylistFactory::create (boost::shared_ptr<const Playlist> old, framepos_t start
 			pl = boost::shared_ptr<Playlist> (new MidiPlaylist (mpl, start, cnt, name, hidden));
 			pl->set_region_ownership ();
 		}
-		
+
 		/* this factory method does NOT notify others */
-		
+
 		return pl;
 	} catch (...) {
 		return boost::shared_ptr<Playlist> ();

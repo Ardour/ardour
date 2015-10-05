@@ -55,7 +55,7 @@ private:
     double phaseDev(unsigned int length, double *srcPhase);
     double complexSD(unsigned int length, double *srcMagnitude, double *srcPhase);
     double broadband(unsigned int length, double *srcMagnitude);
-	
+
 private:
     void initialise( DFConfig Config );
     void deInitialise();

@@ -57,7 +57,7 @@ class LIBARDOUR_API MidiPort : public Port {
 
 	void set_always_parse (bool yn);
 	void set_trace_on (bool yn);
-	
+
 	MIDI::Parser& self_parser() { return _self_parser; }
 
   protected:
@@ -72,7 +72,7 @@ class LIBARDOUR_API MidiPort : public Port {
 	bool        _input_active;
 	bool        _always_parse;
 	bool        _trace_on;
-	
+
     /* Naming this is tricky. AsyncMIDIPort inherits (for now, aug 2013) from
      * both MIDI::Port, which has _parser, and this (ARDOUR::MidiPort). We
      * need parsing support in this object, independently of what the

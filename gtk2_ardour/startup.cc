@@ -79,14 +79,14 @@ ArdourStartup::ArdourStartup ()
 {
 	set_position (WIN_POS_CENTER);
 	set_border_width (12);
-	
+
 	if ((icon_pixbuf = ::get_icon ("ardour_icon_48px")) == 0) {
 		throw failed_constructor();
 	}
-	
+
 	list<Glib::RefPtr<Gdk::Pixbuf> > window_icons;
 	Glib::RefPtr<Gdk::Pixbuf> icon;
-	
+
 	if ((icon = ::get_icon ("ardour_icon_16px")) != 0) {
 		window_icons.push_back (icon);
 	}
@@ -102,7 +102,7 @@ ArdourStartup::ArdourStartup ()
 	if (!window_icons.empty ()) {
 		set_default_icon_list (window_icons);
 	}
-	
+
 	setup_new_user_page ();
 	setup_first_time_config_page ();
 	setup_monitoring_choice_page ();
@@ -124,7 +124,7 @@ ArdourStartup::required ()
 	 */
 
 	const int current_version = atoi (PROGRAM_VERSION);
-	
+
 	for (int v = current_version; v != 0; --v) {
 		if (Glib::file_test (ARDOUR::been_here_before_path (v), Glib::FILE_TEST_EXISTS)) {
 			if (v != current_version) {
@@ -179,7 +179,7 @@ ArdourStartup::default_dir_changed ()
 {
 	Config->set_default_session_parent_dir (default_dir_chooser->get_filename());
 	// make new session folder chooser point to the new default
-	new_folder_chooser.set_current_folder (Config->get_default_session_parent_dir());	
+	new_folder_chooser.set_current_folder (Config->get_default_session_parent_dir());
 	config_changed ();
 }
 
@@ -424,7 +424,7 @@ ArdourStartup::on_apply ()
 		PBD::ScopedFileDescriptor fout (g_open (been_here_before_path ().c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
 
 	}
-		
+
 	_response = RESPONSE_OK;
 	gtk_main_quit ();
 }

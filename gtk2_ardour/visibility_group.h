@@ -36,7 +36,7 @@ class VisibilityGroup
 {
 public:
 	VisibilityGroup (std::string const &);
-	
+
 	void add (
 		Gtk::Widget *,
 		std::string const &,
@@ -44,7 +44,7 @@ public:
 		bool visible = false,
 		boost::function<boost::optional<bool> ()> = 0
 		);
-	
+
 	Gtk::Menu* menu ();
 	Gtk::Widget* list_view ();
 	bool button_press_event (GdkEventButton *);
@@ -55,7 +55,7 @@ public:
 	std::string get_state_value () const;
 
 	PBD::Signal0<void> VisibilityChanged;
-	
+
 private:
 
 	struct Member {

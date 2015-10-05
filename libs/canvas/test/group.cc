@@ -87,7 +87,7 @@ GroupTest::layers ()
 	CPPUNIT_ASSERT (*i++ == &d);
 
 	/* Check raise by a number of levels */
-	
+
 	a.raise (2);
 
 	i = canvas.root()->items().begin();
@@ -173,7 +173,7 @@ GroupTest::grandchildren_changing ()
 	/* Change the grandchild and check its parent and grandparent */
 	a.set (Rect (0, 0, 48, 48));
 
-	bbox = canvas.root()->bounding_box ();	
+	bbox = canvas.root()->bounding_box ();
 	CPPUNIT_ASSERT (bbox.is_initialized ());
 	CPPUNIT_ASSERT (bbox.get().x0 == 0);
 	CPPUNIT_ASSERT (bbox.get().y0 == 0);
@@ -193,7 +193,7 @@ void
 GroupTest::add_items_at_point ()
 {
 	ImageCanvas canvas;
-	
+
 	Group gA (canvas.root());
 	gA.set_position (Duple (128, 64));
 
@@ -274,7 +274,7 @@ GroupTest::torture_add_items_at_point ()
 		if (canvas.root()->bounding_box() && canvas.root()->bounding_box().get().contains (test)) {
 			items_B.push_back (canvas.root());
 		}
-		
+
 		for (list<Item*>::iterator j = rectangles.begin(); j != rectangles.end(); ++j) {
 			boost::optional<Rect> bbox = (*j)->bounding_box ();
 			assert (bbox);
@@ -293,4 +293,4 @@ GroupTest::torture_add_items_at_point ()
 		}
 	}
 }
-	
+

@@ -114,7 +114,7 @@ public:
   private:
 	bool        _no_outs_cuz_we_no_monitor;
 	boost::shared_ptr<MuteMaster> _mute_master;
-	
+
 	static bool panners_legal;
 	static PBD::Signal0<void> PannersLegal;
 

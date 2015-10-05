@@ -55,7 +55,7 @@ private:
 
     double a[ 9 ];
     double b[ 9 ];
-	
+
     double* decBuffer;
 };
 

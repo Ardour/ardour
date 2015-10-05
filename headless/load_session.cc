@@ -178,7 +178,7 @@ int main (int argc, char* argv[])
 	}
 
 	Session* s = 0;
-	
+
 	try {
 		s = load_session (argv[optind], argv[optind+1]);
 	} catch (failed_constructor& e) {
@@ -196,7 +196,7 @@ int main (int argc, char* argv[])
 	}
 
 	s->request_transport_speed (1.0);
-	
+
 	sleep (-1);
 
 	AudioEngine::instance()->remove_session ();

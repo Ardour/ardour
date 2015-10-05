@@ -33,7 +33,7 @@ new_tranzport_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 	}
 
 	return tcp;
-	
+
 }
 
 void
@@ -59,7 +59,7 @@ static ControlProtocolDescriptor tranzport_descriptor = {
 	initialize : new_tranzport_protocol,
 	destroy : delete_tranzport_protocol
 };
-	
+
 
 extern "C" {
 ControlProtocolDescriptor*

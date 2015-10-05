@@ -113,7 +113,7 @@ ControlProtocolManager::activate (ControlProtocolInfo& cpi)
 	cp->set_active (true);
 
 	return 0;
-}	
+}
 
 int
 ControlProtocolManager::deactivate (ControlProtocolInfo& cpi)
@@ -137,15 +137,15 @@ ControlProtocolManager::drop_protocols ()
 	/* called explicitly by Session::destroy() so that we can clean up
 	 * before the process cycle stops and ports vanish.
 	 */
-	
+
 	Glib::Threads::Mutex::Lock lm (protocols_lock);
-	
+
 	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
 		delete *p;
 	}
-	
+
 	control_protocols.clear ();
-	
+
 	for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
 		// mark existing protocols as requested
 		// otherwise the ControlProtocol instances are not recreated in set_session
@@ -154,7 +154,7 @@ ControlProtocolManager::drop_protocols ()
 			(*p)->protocol = 0;
 		}
 	}
-}	
+}
 
 ControlProtocol*
 ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
@@ -202,7 +202,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 	if (cpi.mandatory) {
 		return 0;
 	}
-	
+
 	/* save current state */
 
 	delete cpi.state;
@@ -288,7 +288,7 @@ ControlProtocolManager::discover_control_protocols ()
 
 	DEBUG_TRACE (DEBUG::ControlProtocols,
 		     string_compose (_("looking for control protocols in %1\n"), control_protocol_search_path().to_string()));
-	
+
 	for (vector<std::string>::iterator i = cp_modules.begin(); i != cp_modules.end(); ++i) {
 		control_protocol_discover (*i);
 	}
@@ -409,16 +409,16 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 			}
 
 			bool active = string_is_affirmative (prop->value());
-			
+
 			if ((prop = (*citer)->property (X_("name"))) == 0) {
 				continue;
 			}
 
 			ControlProtocolInfo* cpi = cpi_by_name (prop->value());
-			
+
 			if (cpi) {
 				cpi->state = new XMLNode (**citer);
-				
+
 				if (active) {
 					if (_session) {
 						instantiate (*cpi);

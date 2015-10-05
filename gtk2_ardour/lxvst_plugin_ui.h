@@ -37,7 +37,7 @@ class LXVSTPluginUI : public VSTPluginUI
 	~LXVSTPluginUI ();
 
 	int get_preferred_height ();
-	
+
 	bool start_updating (GdkEventAny *);
 	bool stop_updating (GdkEventAny *);
 

@@ -71,12 +71,12 @@ UI::UI (string namestr, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (namestr)
 	, _receiver (*this)
 	, errors (0)
-	
+
 {
 	theMain = new Main (argc, argv);
 
 	pthread_set_name ("gui");
-	
+
 	_active = false;
 
 	if (!theGtkUI) {
@@ -91,7 +91,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 	*/
 
 	run_loop_thread = Threads::Thread::self();
-	
+
 	/* store "this" as the UI-for-thread of this thread, same argument
 	   as for previous line.
 	*/
@@ -144,7 +144,7 @@ UI::load_rcfile (string path, bool themechange)
 	 * This does not occur if wiget.get_style is used instead of rc.get_style below,
 	 * except that doesn't actually work...
 	 */
-	
+
 	static Glib::RefPtr<Style>* fatal_style   = 0;
 	static Glib::RefPtr<Style>* error_style   = 0;
 	static Glib::RefPtr<Style>* warning_style = 0;
@@ -641,7 +641,7 @@ UI::toggle_errors ()
 	}
 
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	
+
 	if (tact->get_active()) {
 		errors->set_position (WIN_POS_MOUSE);
 		errors->show ();

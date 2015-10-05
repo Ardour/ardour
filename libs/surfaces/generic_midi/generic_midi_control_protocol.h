@@ -30,7 +30,7 @@
 namespace PBD {
 	class Controllable;
 	class ControllableDescriptor;
-}	
+}
 
 namespace ARDOUR {
 	class Session;
@@ -73,7 +73,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	void drop_bindings ();
 
 	void check_used_event (int, int);
-	
+
 	std::string current_binding() const { return _current_binding; }
 
 	struct MapInfo {
@@ -89,7 +89,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	void prev_bank ();
 
 	void set_motorised (bool);
-	
+
 	bool motorised () const {
 		return _motorised;
 	}

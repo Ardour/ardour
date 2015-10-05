@@ -36,11 +36,11 @@ process (jack_nframes_t nframes, void *arg)
 	out = jack_port_get_buffer (output_port, nframes);
 
 	memcpy (out, in, sizeof (jack_default_audio_sample_t) * nframes);
-	
+
 	for (i = 0; i < loopsize; ++i) {
 		fooey (nframes);
 	}
-	
+
 	last_load = jack_cpu_load (client);
 
 	if ((at_loop += nframes) >= at_loop_size) {
@@ -182,7 +182,7 @@ main (int argc, char *argv[])
 	}
 
 	free (ports);
-	
+
 	ports = jack_get_ports (client, NULL, NULL,
 				JackPortIsPhysical|JackPortIsInput);
 	if (ports == NULL) {

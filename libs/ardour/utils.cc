@@ -139,7 +139,7 @@ ARDOUR::legalize_for_path_2X (const string& str)
 	string::size_type pos;
 	string legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=: ";
         Glib::ustring legal;
-	
+
 	/* this is the one place in Ardour where we need to iterate across
 	 * potential multibyte characters, and thus we need Glib::ustring
 	 */

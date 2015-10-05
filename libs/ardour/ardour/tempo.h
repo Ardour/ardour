@@ -158,7 +158,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	   the tempo section is located in. A value of 0.0 indicates that
 	   it occurs on the first beat of the bar, a value of 0.5 indicates
 	   that it occurs halfway through the bar and so on.
-	
+
 	   this enables us to keep the tempo change at the same relative
 	   position within the bar if/when the meter changes.
 	*/
@@ -228,7 +228,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 		BBTPoint (const MeterSection& m, const TempoSection& t, framepos_t f,
 		          uint32_t b, uint32_t e)
 			: frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
-		
+
 		Timecode::BBT_Time bbt() const { return Timecode::BBT_Time (bar, beat, 0); }
 		operator Timecode::BBT_Time() const { return bbt(); }
 		operator framepos_t() const { return frame; }
@@ -244,13 +244,13 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	void get_grid (BBTPointList::const_iterator&, BBTPointList::const_iterator&,
 	               framepos_t start, framepos_t end);
-	
+
 	/* TEMPO- AND METER-SENSITIVE FUNCTIONS
 
 	   bbt_time(), bbt_time_rt(), frame_time() and bbt_duration_at()
 	   are all sensitive to tempo and meter, and will give answers
 	   that align with the grid formed by tempo and meter sections.
-	
+
 	   They SHOULD NOT be used to determine the position of events
 	   whose location is canonically defined in beats.
 	*/
@@ -266,7 +266,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
 
 	/* TEMPO-SENSITIVE FUNCTIONS
-	
+
 	   These next 4 functions will all take tempo in account and should be
 	   used to determine position (and in the last case, distance in beats)
 	   when tempo matters but meter does not.
@@ -324,7 +324,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	void insert_time (framepos_t, framecnt_t);
 	bool remove_time (framepos_t where, framecnt_t amount);  //returns true if anything was moved
-	
+
 	int n_tempos () const;
 	int n_meters () const;
 
@@ -335,7 +335,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;
 	friend class ::TempoTest;
-	
+
 	static Tempo    _default_tempo;
 	static Meter    _default_meter;
 
@@ -355,16 +355,16 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	BBTPointList::const_iterator bbt_before_or_at (framepos_t);
 	BBTPointList::const_iterator bbt_before_or_at (const Timecode::BBT_Time&);
 	BBTPointList::const_iterator bbt_after_or_at (framepos_t);
-	
+
 	framepos_t round_to_type (framepos_t fr, RoundMode dir, BBTPointType);
 	void bbt_time (framepos_t, Timecode::BBT_Time&, const BBTPointList::const_iterator&);
 	framecnt_t bbt_duration_at_unlocked (const Timecode::BBT_Time& when, const Timecode::BBT_Time& bbt, int dir);
-	
+
 	const MeterSection& first_meter() const;
 	MeterSection&       first_meter();
 	const TempoSection& first_tempo() const;
 	TempoSection&       first_tempo();
-	
+
 	void do_insert (MetricSection* section);
 
 	void add_tempo_locked (const Tempo&, Timecode::BBT_Time where, bool recompute);

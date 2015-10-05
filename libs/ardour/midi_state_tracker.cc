@@ -65,7 +65,7 @@ MidiStateTracker::add (uint8_t note, uint8_t chn)
 
 void
 MidiStateTracker::remove (uint8_t note, uint8_t chn)
-{	
+{
 	switch (_active_notes[note + 128 * chn]) {
 	case 0:
 		break;

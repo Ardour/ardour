@@ -378,7 +378,7 @@ _byte_count :
             public:
                 pad_to_cache_line() {}
                 template<typename _arg_type> pad_to_cache_line(_arg_type arg) : base_type(arg) {}
-            };	
+            };
             //---------------------------------------------------------------------
 
         } // namespace atomic

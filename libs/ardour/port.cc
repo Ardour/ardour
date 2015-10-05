@@ -73,7 +73,7 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 		cerr << "Failed to register port \"" << _name << "\", reason is unknown from here\n";
 		throw failed_constructor ();
 	}
-	
+
 	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::drop, this));
 }
 
@@ -127,10 +127,10 @@ int
 Port::disconnect_all ()
 {
 	if (_port_handle) {
-		
+
 		port_engine.disconnect_all (_port_handle);
 		_connections.clear ();
-		
+
 		/* a cheaper, less hacky way to do boost::shared_from_this() ...
 		 */
 		boost::shared_ptr<Port> pself = port_manager->get_port_by_name (name());
@@ -365,7 +365,7 @@ Port::public_latency_range (bool /*playback*/) const
 
 	if (_port_handle) {
 		r = port_engine.get_latency_range (_port_handle, sends_output() ? true : false);
-		
+
 		DEBUG_TRACE (DEBUG::Latency, string_compose (
 				     "GET PORT %1: %4 PUBLIC latency range %2 .. %3\n",
 				     name(), r.min, r.max,
@@ -520,7 +520,7 @@ Port::get_state () const
 	}
 
 	vector<string> c;
-	
+
 	get_connections (c);
 
 	for (vector<string>::const_iterator i = c.begin(); i != c.end(); ++i) {
@@ -554,7 +554,7 @@ Port::set_state (const XMLNode& node, int)
 		if ((*c)->name() != X_("Connection")) {
 			continue;
 		}
-		
+
 		if ((prop = (*c)->property (X_("other"))) == 0) {
 			continue;
 		}

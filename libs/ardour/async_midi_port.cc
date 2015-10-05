@@ -73,15 +73,15 @@ AsyncMIDIPort::flush_output_fifo (MIDI::pframes_t nframes)
 	output_fifo.get_read_vector (&vec);
 
 	MidiBuffer& mb (get_midi_buffer (nframes));
-			
+
 	if (vec.len[0]) {
 		Evoral::Event<double>* evp = vec.buf[0];
-		
+
 		for (size_t n = 0; n < vec.len[0]; ++n, ++evp) {
 			mb.push_back (evp->time(), evp->size(), evp->buffer());
 		}
 	}
-	
+
 	if (vec.len[1]) {
 		Evoral::Event<double>* evp = vec.buf[1];
 
@@ -89,7 +89,7 @@ AsyncMIDIPort::flush_output_fifo (MIDI::pframes_t nframes)
 			mb.push_back (evp->time(), evp->size(), evp->buffer());
 		}
 	}
-	
+
 	if ((written = vec.len[0] + vec.len[1]) != 0) {
 		output_fifo.increment_read_idx (written);
 	}
@@ -108,7 +108,7 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 	if (ARDOUR::Port::sends_output()) {
 		flush_output_fifo (nframes);
 	}
-	
+
 	/* copy incoming data from the port buffer into the input FIFO
 	   and if necessary wakeup the reader
 	*/
@@ -116,7 +116,7 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 	if (ARDOUR::Port::receives_input()) {
 		MidiBuffer& mb (get_midi_buffer (nframes));
 		framecnt_t when;
-		
+
 		if (have_timer) {
 			when = timer ();
 		} else {
@@ -194,7 +194,7 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 		/* this is the best estimate of "when" this MIDI data is being
 		 * delivered
 		 */
-		
+
 		_parser->set_timestamp (AudioEngine::instance()->sample_time() + timestamp);
 		for (size_t n = 0; n < msglen; ++n) {
 			_parser->scanner (msg[n]);
@@ -202,7 +202,7 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 
 		Glib::Threads::Mutex::Lock lm (output_fifo_lock);
 		RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0} };
-		
+
 		output_fifo.get_write_vector (&vec);
 
 		if (vec.len[0] + vec.len[1] < 1) {
@@ -223,7 +223,7 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 		}
 
 		output_fifo.increment_write_idx (1);
-		
+
 		ret = msglen;
 
 	} else {
@@ -249,11 +249,11 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 		if (_currently_in_cycle) {
 
 			MidiBuffer& mb (get_midi_buffer (_cycle_nframes));
-			
+
 			if (timestamp == 0) {
 				timestamp = _last_write_timestamp;
 			}
-			
+
 			if (mb.push_back (timestamp, msglen, msg)) {
 				ret = msglen;
 				_last_write_timestamp = timestamp;
@@ -279,7 +279,7 @@ AsyncMIDIPort::read (MIDI::byte *, size_t)
 	if (!ARDOUR::Port::receives_input()) {
 		return 0;
 	}
-	
+
 	timestamp_t time;
 	Evoral::EventType type;
 	uint32_t size;

@@ -24,15 +24,15 @@
 
 namespace Gtkmm2ext {
 
-/** Parent class for children of a DnDVBox */	
+/** Parent class for children of a DnDVBox */
 class /*LIBGTKMM2EXT_API*/ DnDVBoxChild
 {
 public:
 	virtual ~DnDVBoxChild () {}
-	
+
 	/** @return The widget that is to be put into the DnDVBox */
 	virtual Gtk::Widget& widget () = 0;
-	
+
 	/** @return An EventBox containing the widget that should be used for selection, dragging etc. */
 	virtual Gtk::EventBox& action_widget () = 0;
 
@@ -68,15 +68,15 @@ public:
 		signal_drag_leave().connect (mem_fun (*this, &DnDVBox::drag_leave));
 
 		_internal_vbox.show ();
-		
+
 		drag_dest_set (_targets);
 		signal_drag_data_received().connect (mem_fun (*this, &DnDVBox::drag_data_received));
 	}
-	
+
 	virtual ~DnDVBox ()
 	{
 		clear ();
-		
+
 		delete _drag_icon;
 	}
 
@@ -89,9 +89,9 @@ public:
 		child->action_widget().signal_drag_end().connect (sigc::bind (mem_fun (*this, &DnDVBox::drag_end), child));
 		child->action_widget().signal_button_press_event().connect (sigc::bind (mem_fun (*this, &DnDVBox::button_press), child));
 		child->action_widget().signal_button_release_event().connect (sigc::bind (mem_fun (*this, &DnDVBox::button_release), child));
-		
+
 		_internal_vbox.pack_start (child->widget(), false, false);
-		
+
 		_children.push_back (child);
 		child->widget().show ();
 	}
@@ -180,7 +180,7 @@ public:
 		T* after;
 
 		std::pair<T*, double> r;
-		
+
 		r.second = get_children_around_position (y, &before, &r.first, &after);
 
 		return r;
@@ -206,7 +206,7 @@ public:
 	{
 		return create_or_update_placeholder (get_child_at_position (y).second);
 	}
-	
+
 	/** Children have been reordered by a drag */
 	sigc::signal<void> Reordered;
 
@@ -241,7 +241,7 @@ private:
 
 		return bottom;
 	}
-	
+
 	/** Look at a y coordinate and find the children below y, and the ones either side.
 	 *  @param y y position.
 	 *  @param before Filled in with the child before, or 0.
@@ -270,7 +270,7 @@ private:
 		while (y >= bottom && j != _children.end()) {
 
 			top = bottom;
-			
+
 			*before = *j;
 			++i;
 			++j;
@@ -297,13 +297,13 @@ private:
 	void drag_begin (Glib::RefPtr<Gdk::DragContext> const & context, T* child)
 	{
 		_drag_child = child;
-		
+
 		/* make up an icon for the drag */
 		_drag_icon = new Gtk::Window (Gtk::WINDOW_POPUP);
-		
+
 		Gtk::Allocation a = child->action_widget().get_allocation ();
 		_drag_icon->set_size_request (a.get_width(), a.get_height());
-		
+
 		_drag_icon->signal_expose_event().connect (sigc::mem_fun (*this, &DnDVBox::icon_expose));
 		_drag_icon->set_name (get_name ());
 
@@ -317,7 +317,7 @@ private:
 		int w, h;
 		_drag_icon->get_size (w, h);
 		_drag_icon->drag_set_as_icon (context, w / 2, h / 2);
-		
+
 		_drag_source = this;
 	}
 
@@ -336,22 +336,22 @@ private:
 		cairo_rectangle (cr, 0, 0, w, h);
 		cairo_fill (cr);
 		cairo_destroy (cr);
-		
+
 		return false;
 	}
-	
+
 	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const &, Gtk::SelectionData & selection_data, guint, guint, T* child)
 	{
 		selection_data.set (selection_data.get_target(), 8, (const guchar *) &child, sizeof (&child));
 	}
-	
+
 	void drag_data_received (
 		Glib::RefPtr<Gdk::DragContext> const & context, int /*x*/, int y, Gtk::SelectionData const & selection_data, guint /*info*/, guint time
 		)
 	{
 		/* work out where it was dropped */
 		std::pair<T*, double> const drop = get_child_at_position (y);
-		
+
 		if (_drag_source == this) {
 
 			/* dropped from ourselves onto ourselves */
@@ -364,7 +364,7 @@ private:
 
 				/* where in the list this child should be dropped */
 				int target = drop.second + 0.5;
-				
+
 				/* find out whether the child was `picked up' from before the drop position */
 				int n = 0;
 				typename std::list<T*>::const_iterator i = _children.begin ();
@@ -372,31 +372,31 @@ private:
 					++i;
 					++n;
 				}
-				
+
 				/* if so, adjust the drop position to account for this */
 				if (n < target) {
 					--target;
 				}
-				
+
 				_internal_vbox.reorder_child (child->widget(), target);
 			}
-			
+
 		} else {
-			
+
 			/* drag started in another DnDVBox; raise a signal to say what happened */
-			
+
 			std::list<T*> dropped = _drag_source->selection ();
 			DropFromAnotherBox (_drag_source, drop.first, context);
 		}
-		
+
 		context->drag_finish (false, false, time);
 	}
-	
+
 	void drag_end (Glib::RefPtr<Gdk::DragContext> const &, T *)
 	{
 		delete _drag_icon;
 		_drag_icon = 0;
-		
+
 		_drag_child = 0;
 		remove_placeholder ();
 
@@ -474,7 +474,7 @@ private:
 		if (child) {
 			_expecting_unwanted_button_event = true;
 		}
-			
+
 		if (ev->button == 1 || ev->button == 3) {
 
 			if (!selected (child)) {
@@ -492,7 +492,7 @@ private:
 						if (selecting && !was_selected) {
 							add_to_selection (*i);
 						}
-						
+
 						if (!selecting && !done) {
 							if (selected (*i)) {
 								selecting = true;
@@ -509,19 +509,19 @@ private:
 					}
 
 				} else {
-						
+
 					if ((ev->state & Gdk::CONTROL_MASK) == 0) {
 						clear_selection ();
 					}
-					
+
 					if (child) {
 						add_to_selection (child);
 					}
 
 				}
-				
+
 				SelectionChanged (); /* EMIT SIGNAL */
-				
+
 			} else {
 				/* XXX THIS NEEDS GENERALIZING FOR OS X */
 				if (ev->button == 1 && (ev->state & Gdk::CONTROL_MASK)) {
@@ -535,7 +535,7 @@ private:
 
 		return ButtonPress (ev, child); /* EMIT SIGNAL */
 	}
-	
+
 	bool button_release (GdkEventButton* ev, T* child)
 	{
 		if (_expecting_unwanted_button_event == true && child == 0) {
@@ -565,7 +565,7 @@ private:
 			setup_child_state (*i);
 		}
 	}
-	
+
 	void add_to_selection (T* child)
 	{
 		if ( !child->is_selectable() )
@@ -583,21 +583,21 @@ private:
 			setup_child_state (c);
 		}
 	}
-		
+
 	T* child_from_widget (Gtk::Widget const * w) const
 	{
 		typename std::list<T*>::const_iterator i = _children.begin();
 		while (i != _children.end() && &(*i)->widget() != w) {
 			++i;
 		}
-		
+
 		if (i == _children.end()) {
 			return 0;
 		}
 
 		return *i;
 	}
-	
+
 	Gtk::VBox _internal_vbox;
 	std::list<Gtk::TargetEntry> _targets;
 	std::list<T*> _children;
@@ -611,12 +611,12 @@ private:
 	Gtk::Label* _placeholder;
 	/** Our child being dragged, or 0 */
 	T* _drag_child;
-	
+
 	static DnDVBox* _drag_source;
-	
+
 };
 
 template <class T>
 DnDVBox<T>* DnDVBox<T>::_drag_source = 0;
-	
+
 }

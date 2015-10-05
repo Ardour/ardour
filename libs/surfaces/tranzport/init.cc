@@ -65,7 +65,7 @@ int TranzportControlProtocol::rtpriority_unset(int priority)
 	struct sched_param rtparam;
 	int err;
 	memset (&rtparam, 0, sizeof (rtparam));
-	rtparam.sched_priority = priority; 	
+	rtparam.sched_priority = priority;
 	if ((err = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
 		PBD::info << string_compose (_("%1: can't stop realtime scheduling (%2)"), name(), strerror (errno)) << endmsg;
 		return 1;
@@ -208,7 +208,7 @@ TranzportControlProtocol::monitor_work ()
 		case 3: val = read(buf,DEFAULT_USB_TIMEOUT*2); break; // Hoo, boy, we're in trouble
 		default: break; // not reached
 		}
-	
+
 #if DEBUG_TRANZPORT_BITS > 9
 		if(_device_status != STATUS_OFFLINE && _device_status != STATUS_ONLINE && _device_status != STATUS_OK) {
 			printf("The device has more status bits than off or online: %d\n",_device_status);
@@ -265,7 +265,7 @@ TranzportControlProtocol::monitor_work ()
 				printf("OFFLINE  : %02x %02x %02x %02x %02x %02x %02x %02x\n",
 				       buf[0],buf[1],buf[2], buf[3], buf[4], buf[5],buf[6],buf[7]);
 			}
- 	
+
 			if(_device_status == STATUS_OK) {
 				printf("OK       : %02x %02x %02x %02x %02x %02x %02x %02x\n",
 				       buf[0],buf[1],buf[2], buf[3], buf[4], buf[5],buf[6],buf[7]);

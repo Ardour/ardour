@@ -77,7 +77,7 @@ MIDISceneChange::get_bank_lsb_message (uint8_t* buf, size_t size) const
 
 	buf[0] = 0xB0 | (_channel & 0xf);
 	buf[1] = 0x20;
-	buf[2] = _bank & 0x7f;	
+	buf[2] = _bank & 0x7f;
 
 	return 3;
 }

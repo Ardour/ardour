@@ -304,9 +304,9 @@ MidiBuffer::second_simultaneous_midi_byte_is_first (uint8_t a, uint8_t b)
 
 	/* two events at identical times. we need to determine
 	   the order in which they should occur.
-	
+
 	   the rule is:
-	
+
 	   Controller messages
 	   Program Change
 	   Note Off
@@ -315,22 +315,22 @@ MidiBuffer::second_simultaneous_midi_byte_is_first (uint8_t a, uint8_t b)
 	   Channel Pressure
 	   Pitch Bend
 	*/
-	
+
 	if ((a) >= 0xf0 || (b) >= 0xf0 || ((a & 0xf) != (b & 0xf))) {
-		
+
 		/* if either message is not a channel message, or if the channels are
 		 * different, we don't care about the type.
 		 */
-		
+
 		b_first = true;
-		
+
 	} else {
-		
+
 		switch (b & 0xf0) {
 		case MIDI_CMD_CONTROL:
 			b_first = true;
 			break;
-			
+
 		case MIDI_CMD_PGM_CHANGE:
 			switch (a & 0xf0) {
 			case MIDI_CMD_CONTROL:
@@ -344,7 +344,7 @@ MidiBuffer::second_simultaneous_midi_byte_is_first (uint8_t a, uint8_t b)
 				b_first = true;
 			}
 			break;
-			
+
 		case MIDI_CMD_NOTE_OFF:
 			switch (a & 0xf0) {
 			case MIDI_CMD_CONTROL:
@@ -358,7 +358,7 @@ MidiBuffer::second_simultaneous_midi_byte_is_first (uint8_t a, uint8_t b)
 				b_first = true;
 			}
 			break;
-			
+
 		case MIDI_CMD_NOTE_ON:
 			switch (a & 0xf0) {
 			case MIDI_CMD_CONTROL:
@@ -385,7 +385,7 @@ MidiBuffer::second_simultaneous_midi_byte_is_first (uint8_t a, uint8_t b)
 				b_first = true;
 			}
 			break;
-			
+
 		case MIDI_CMD_CHANNEL_PRESSURE:
 			switch (a & 0xf0) {
 			case MIDI_CMD_CONTROL:
@@ -414,10 +414,10 @@ MidiBuffer::second_simultaneous_midi_byte_is_first (uint8_t a, uint8_t b)
 			break;
 		}
 	}
-	
+
 	return b_first;
 }
-	
+
 /** Merge \a other into this buffer.  Realtime safe. */
 bool
 MidiBuffer::merge_in_place (const MidiBuffer &other)
@@ -507,20 +507,20 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 						     (*us).time(), (*them).time(),
 						     (int) *(_data + us.offset + sizeof (TimeType)),
 						     (int) *(other._data + them.offset + sizeof (TimeType))));
-			
+
 			uint8_t our_midi_status_byte = *(_data + us.offset + sizeof (TimeType));
 			uint8_t their_midi_status_byte = *(other._data + them.offset + sizeof (TimeType));
 			bool them_first = second_simultaneous_midi_byte_is_first (our_midi_status_byte, their_midi_status_byte);
-			
+
 			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("other message came first ? %1\n", them_first));
-			
+
 			if (!them_first) {
 				/* skip past our own event */
 				++us;
 			}
-				
+
 			bytes_to_merge = sizeof (TimeType) + (*them).size();
-			
+
 			/* move our remaining events later in the buffer by
 			 * enough to fit the one message we're going to merge
 			 */
@@ -554,11 +554,11 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 			++them;
 
 		} else {
-			
+
 			/* advance past our own events to get to the correct insertion
 			   point for the next event(s) from "other"
 			*/
-		
+
 			while (us != end() && (*us).time() <= (*them).time()) {
 				++us;
 			}
@@ -571,7 +571,7 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 		if (us == end()) {
 
 			/* just append the rest of other and we're done*/
-			
+
 			memcpy (_data + us.offset, other._data + them.offset, other._size - them.offset);
 			_size += other._size - them.offset;
 			assert(_size <= _capacity);

@@ -20,14 +20,14 @@ public:
 	{
 		_items_per_cell = items;
 	}
-	
+
 	void do_run (ImageCanvas& canvas)
 	{
 		Group::default_items_per_cell = _items_per_cell;
 		canvas.set_log_renders (false);
 
 		list<Rect> const & renders = canvas.renders ();
-		
+
 		for (list<Rect>::const_iterator i = renders.begin(); i != renders.end(); ++i) {
 			canvas.render_to_image (*i);
 		}
@@ -59,4 +59,4 @@ int main (int argc, char* argv[])
 	return 0;
 }
 
-	
+

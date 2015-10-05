@@ -35,7 +35,7 @@ static const bool show_bg_fades = false;
 #else
 static const bool show_bg_fades = true;
 #endif
-	
+
 XFadeCurve::XFadeCurve (Canvas* c)
 	: Item (c)
 	, points_per_segment (32)

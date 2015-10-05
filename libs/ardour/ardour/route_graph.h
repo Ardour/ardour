@@ -41,7 +41,7 @@ class LIBARDOUR_API GraphEdges
 {
 public:
 	typedef std::map<GraphVertex, std::set<GraphVertex> > EdgeMap;
-	
+
 	void add (GraphVertex from, GraphVertex to, bool via_sends_only);
 	bool has (GraphVertex from, GraphVertex to, bool* via_sends_only);
 	std::set<GraphVertex> from (GraphVertex r) const;
@@ -49,12 +49,12 @@ public:
 	bool has_none_to (GraphVertex to) const;
 	bool empty () const;
 	void dump () const;
-	
+
 private:
 	void insert (EdgeMap& e, GraphVertex a, GraphVertex b);
-	
+
 	typedef std::multimap<GraphVertex, std::pair<GraphVertex, bool> > EdgeMapWithSends;
-	
+
 	EdgeMapWithSends::iterator find_in_from_to_with_sends (GraphVertex, GraphVertex);
 
 	/** map of edges with from as `first' and to as `second' */

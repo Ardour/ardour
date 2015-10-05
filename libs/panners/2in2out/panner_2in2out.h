@@ -51,7 +51,7 @@ class Panner2in2out : public Panner
 
 	std::pair<double, double> position_range () const;
 	std::pair<double, double> width_range () const;
-	
+
         void set_position (double);
         void set_width (double);
 

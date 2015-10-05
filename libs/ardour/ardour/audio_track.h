@@ -71,7 +71,7 @@ class LIBARDOUR_API AudioTrack : public Track
   private:
 
 	boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &);
-	
+
 	int  deprecated_use_diskstream_connections ();
 	void set_state_part_two ();
 	void set_state_part_three ();

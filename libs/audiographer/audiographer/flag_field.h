@@ -20,10 +20,10 @@ class LIBAUDIOGRAPHER_API FlagField
   , boost::equality_comparable<FlagField>
 {
   public:
-	
+
 	typedef uint8_t  Flag;
 	typedef uint32_t storage_type;
-	
+
 	/// Bi-directional iterator for flag set. Iterates over flags that are set in this field.
 	class iterator
 	  : public std::iterator<std::bidirectional_iterator_tag, Flag>
@@ -34,10 +34,10 @@ class LIBAUDIOGRAPHER_API FlagField
 	  public:
 		iterator (FlagField const & parent, Flag position) : parent (parent), position (position) {}
 		iterator (iterator const & other) : parent (other.parent), position (other.position) {}
-		
+
 		value_type operator*() const { return position; }
 		value_type const * operator->() const { return &position; }
-		
+
 		iterator & operator++()
 		{
 			do {
@@ -46,7 +46,7 @@ class LIBAUDIOGRAPHER_API FlagField
 			return *this;
 		}
 		iterator operator++(int) { iterator copy (*this); ++(*this); return copy; }
-		
+
 		iterator & operator--()
 		{
 			do {
@@ -55,19 +55,19 @@ class LIBAUDIOGRAPHER_API FlagField
 			return *this;
 		}
 		iterator   operator--(int) { iterator copy (*this); --(*this); return copy; }
-		
+
 		bool operator< (iterator const & other) const { return position < other.position; }
-		
+
 	  private:
 		FlagField const & parent;
 		Flag              position;
 	};
-	
+
   public:
-	
+
 	FlagField() : _flags (0) {}
 	FlagField(FlagField const & other) : _flags (other._flags) {}
-	
+
 	inline bool has (Flag flag)    const { return _flags & (1 << flag); }
 	inline storage_type flags ()   const { return _flags; }
 	inline operator bool()         const { return _flags; }
@@ -77,10 +77,10 @@ class LIBAUDIOGRAPHER_API FlagField
 
 	/// Returns the flags in \a other that are not set in this field
 	inline FlagField unsupported_flags_of (FlagField const & other) const { return ~(_flags | ~other._flags); }
-	
+
 	/// Set all flags that are set in \a other
 	inline FlagField & operator+= (FlagField const & other) { _flags |= other._flags; return *this; }
-	
+
 	/** Checks whether this field has all the flags set that are set in \a other
 	  * NOTE: Can NOT be used for strict weak ordering!
 	  * \return \a true if \a other has flags set that this field does not
@@ -99,7 +99,7 @@ class LIBAUDIOGRAPHER_API FlagField
   private:
 	FlagField(storage_type flags) : _flags (flags) {}
 	static Flag max() { return CHAR_BIT * sizeof (storage_type) + 1; }
-	
+
 	storage_type _flags;
 };
 

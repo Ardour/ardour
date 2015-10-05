@@ -106,7 +106,7 @@ private:
 		WheelShiftMaster,
 		WheelShiftMarker
 	};
-		
+
 	enum WheelMode {
 		WheelTimeline,
 		WheelScrub,
@@ -124,7 +124,7 @@ private:
 		WheelIncrSecond,
 		WheelIncrMinute
 	};
-	
+
 	enum DisplayMode {
 		DisplayNormal,
 		DisplayRecording,
@@ -301,7 +301,7 @@ private:
 	void show_current_track ();
 	void show_track_gain ();
 	void show_transport_time ();
-	void show_bbt (framepos_t where);	
+	void show_bbt (framepos_t where);
 	void show_timecode (framepos_t where);
 	void show_wheel_mode ();
 	void show_gain ();

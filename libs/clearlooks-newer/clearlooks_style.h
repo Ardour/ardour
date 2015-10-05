@@ -48,7 +48,7 @@ struct _ClearlooksStyle
 	ClearlooksColors colors;
 
 	ClearlooksStyles style;
-	
+
 	guint8   menubarstyle;
 	guint8   toolbarstyle;
 	GdkColor scrollbar_color;

@@ -189,7 +189,7 @@ LedState
 MackieControlProtocol::cursor_right_press (Button& )
 {
 	if (zoom_mode()) {
-		
+
 		if (main_modifier_state() & MODIFIER_OPTION) {
 			/* reset selected tracks to default vertical zoom */
 		} else {
@@ -209,7 +209,7 @@ MackieControlProtocol::cursor_right_press (Button& )
 
 		ScrollTimeline (page_fraction);
 	}
-			
+
 	return off;
 }
 
@@ -223,7 +223,7 @@ LedState
 MackieControlProtocol::cursor_up_press (Button&)
 {
 	if (zoom_mode()) {
-		
+
 		if (main_modifier_state() & MODIFIER_CONTROL) {
 			VerticalZoomInSelected (); /* EMIT SIGNAL */
 		} else {

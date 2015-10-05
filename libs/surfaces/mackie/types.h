@@ -41,19 +41,19 @@ public:
 	LedState (state_t state): _state (state) {}
 
 	LedState& operator= (state_t s) { _state = s; return *this;  }
-		
+
 	bool operator ==  (const LedState & other) const
 	{
 		return state() == other.state();
 	}
-	
+
 	bool operator !=  (const LedState & other) const
 	{
 		return state() != other.state();
 	}
-	
+
 	state_t state() const { return _state; }
-	
+
 private:
 	state_t _state;
 };
@@ -72,27 +72,27 @@ enum ButtonState { neither = -1, release = 0, press = 1 };
 struct ControlState
 {
 	ControlState(): pos(0.0), sign(0), delta(0.0), ticks(0), led_state(off), button_state(neither) {}
-	
+
 	ControlState (LedState ls): pos(0.0), delta(0.0), led_state(ls), button_state(neither) {}
-	
+
 	// Note that this sets both pos and delta to the flt value
 	ControlState (LedState ls, float flt): pos(flt), delta(flt), ticks(0), led_state(ls), button_state(neither) {}
 	ControlState (float flt): pos(flt), delta(flt), ticks(0), led_state(none), button_state(neither) {}
 	ControlState (float flt, unsigned int tcks): pos(flt), delta(flt), ticks(tcks), led_state(none), button_state(neither) {}
 	ControlState (ButtonState bs): pos(0.0), delta(0.0), ticks(0), led_state(none), button_state(bs) {}
-	
+
 	/// For faders. Between 0 and 1.
 	float pos;
-		
+
 	/// For pots. Sign. Either -1 or 1;
 	int sign;
 
 	/// For pots. Signed value of total movement. Between 0 and 1
 	float delta;
-		
+
 	/// For pots. Unsigned number of ticks. Usually between 1 and 16.
 	unsigned int ticks;
-		
+
 	LedState led_state;
 	ButtonState button_state;
 };

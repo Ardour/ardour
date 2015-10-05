@@ -61,9 +61,9 @@ public:
     std::string getMaker() const;
     int getPluginVersion() const;
     std::string getCopyright() const;
-	
+
     OutputList getOutputDescriptors() const;
-	
+
     ParameterList getParameterDescriptors() const;
     float getParameter(std::string paramid) const;
     void setParameter(std::string paramid, float newval);

@@ -42,7 +42,7 @@ XMLTree::XMLTree(const XMLTree* from)
 	, _doc (xmlCopyDoc (from->_doc, 1))
 	, _compression(from->compression())
 {
-	
+
 }
 
 XMLTree::~XMLTree()
@@ -96,7 +96,7 @@ XMLTree::read_internal(bool validate)
 	} else {
 		_doc = xmlParseFile(_filename.c_str());
 	}
-	
+
 	/* check if parsing suceeded */
 	if (_doc == NULL) {
 		if (validate) {
@@ -117,7 +117,7 @@ XMLTree::read_internal(bool validate)
 	if (validate) {
 		xmlFreeParserCtxt(ctxt);
 	}
-	
+
 	return true;
 }
 
@@ -271,17 +271,17 @@ XMLNode::operator= (const XMLNode& from)
 		XMLPropertyIterator curprop;
 		XMLNodeList nodes;
 		XMLNodeIterator curnode;
-		
+
 		clear_lists ();
 
 		_name = from.name();
 		set_content(from.content());
-		
+
 		props = from.properties();
 		for (curprop = props.begin(); curprop != props.end(); ++curprop) {
 			add_property((*curprop)->name().c_str(), (*curprop)->value());
 		}
-		
+
 		nodes = from.children();
 		for (curnode = nodes.begin(); curnode != nodes.end(); ++curnode) {
 			add_child_copy(**curnode);
@@ -380,10 +380,10 @@ XMLTree::find(const string xpath, XMLNode* node) const
 	} else {
 		ctxt = xmlXPathNewContext(_doc);
 	}
-	
+
 	boost::shared_ptr<XMLSharedNodeList> result =
 		boost::shared_ptr<XMLSharedNodeList>(find_impl(ctxt, xpath));
-	
+
 	xmlXPathFreeContext(ctxt);
 	if (doc) {
 		xmlFreeDoc (doc);
@@ -439,7 +439,7 @@ XMLNode::add_property(const char* n, const string& v)
 {
 	string ns(n);
         map<string,XMLProperty*>::iterator iter;
-	
+
         if ((iter = _propmap.find(ns)) != _propmap.end()) {
                 iter->second->set_value (v);
                 return iter->second;
@@ -676,11 +676,11 @@ XMLNode::dump (ostream& s, string p) const
 			s << " " << (*i)->name() << "=\"" << (*i)->value() << "\"";
 		}
 		s << ">\n";
-		
+
 		for (XMLNodeList::const_iterator i = _children.begin(); i != _children.end(); ++i) {
 			(*i)->dump (s, p + "  ");
 		}
-		
+
 		s << p << "</" << _name << ">\n";
 	}
 }

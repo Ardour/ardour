@@ -103,7 +103,7 @@ class LIBGTKMM2EXT_API MotionFeedback : public Gtk::VBox
 	   to a display value (0.0 .. 1.0)
 	*/
 	virtual double to_display_value (double) = 0;
-	
+
 	virtual double adjust (double nominal_delta) = 0;
 
   private:
@@ -130,5 +130,5 @@ class LIBGTKMM2EXT_API MotionFeedback : public Gtk::VBox
 };
 
 } /* namespace */
-	
+
 #endif // __gtkmm2ext_motion_feedback_h__

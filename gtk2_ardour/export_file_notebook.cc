@@ -301,7 +301,7 @@ ExportFileNotebook::FilePage::update_example_filename()
 			example = profile_manager->get_sample_filename_for_format (
 				filename_state->filename, format_state->format);
 		}
-		
+
 		if (example != "") {
 			filename_selector.set_example_filename(Glib::path_get_basename (example));
 		} else {

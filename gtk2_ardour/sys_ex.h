@@ -44,7 +44,7 @@ public:
 
         ArdourCanvas::Item& item() const { return *_flag; }
 
-private:	
+private:
 	bool event_handler (GdkEvent* ev);
 
 	ArdourCanvas::Flag* _flag;

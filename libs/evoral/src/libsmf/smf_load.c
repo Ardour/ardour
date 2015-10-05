@@ -126,7 +126,7 @@ parse_mthd_header(smf_t *smf)
 
 	if (!chunk_signature_matches(tmp_mthd, "MThd")) {
 		g_critical("SMF error: MThd signature not found, is that a MIDI file?");
-		
+
 		return (-2);
 	}
 
@@ -199,7 +199,7 @@ parse_mthd_chunk(smf_t *smf)
 		g_critical("SMF file uses FPS timing instead of PPQN, no support for that yet.");
 		return (-4);
 	}
-	
+
 	return (0);
 }
 
@@ -372,7 +372,7 @@ expected_message_length(unsigned char status, const unsigned char *second_byte, 
 		case 0xA0: /* AfterTouch. */
 		case 0xB0: /* Control Change. */
 		case 0xE0: /* Pitch Wheel. */
-			return (3);	
+			return (3);
 
 		case 0xC0: /* Program Change. */
 		case 0xD0: /* Channel Pressure. */
@@ -388,7 +388,7 @@ static int
 extract_sysex_event(const unsigned char *buf, const size_t buffer_length, smf_event_t *event, uint32_t *len, int last_status)
 {
 	(void) last_status;
-	
+
 	int status;
 	int32_t vlq_length, message_length;
 	const unsigned char *c = buf;
@@ -433,7 +433,7 @@ static int
 extract_escaped_event(const unsigned char *buf, const size_t buffer_length, smf_event_t *event, uint32_t *len, int last_status)
 {
 	(void) last_status;
-	
+
 	int status;
 	int32_t message_length = 0;
 	int32_t vlq_length = 0;
@@ -709,7 +709,7 @@ parse_mtrk_header(smf_track_t *track)
 	if (!chunk_signature_matches(mtrk, "MTrk")) {
 		g_warning("SMF warning: Expected MTrk signature, got %c%c%c%c instead; ignoring this chunk.",
 				mtrk->id[0], mtrk->id[1], mtrk->id[2], mtrk->id[3]);
-		
+
 		return (-2);
 	}
 
@@ -741,7 +741,7 @@ smf_event_length_is_valid(const smf_event_t *event)
 {
 	assert(event);
 	assert(event->midi_buffer);
-	
+
 	int32_t expected;
 
 	if (event->midi_buffer_length < 1)
@@ -854,7 +854,7 @@ load_file_into_buffer(void **file_buffer, size_t *file_buffer_length, FILE* stre
 	*file_buffer = malloc(*file_buffer_length);
 	if (*file_buffer == NULL) {
 		g_critical("malloc(3) failed: %s", strerror(errno));
-		
+
 		return (-5);
 	}
 
@@ -864,7 +864,7 @@ load_file_into_buffer(void **file_buffer, size_t *file_buffer_length, FILE* stre
 		*file_buffer = NULL;
 		return (-6);
 	}
-	
+
 	return (0);
 }
 

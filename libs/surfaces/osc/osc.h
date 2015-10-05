@@ -44,7 +44,7 @@ namespace ARDOUR {
 class Session;
 class Route;
 }
-	
+
 /* this is mostly a placeholder because I suspect that at some
    point we will want to add more members to accomodate
    certain types of requests to the OSC UI
@@ -85,7 +85,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	GSource* local_server;
 	GSource* remote_server;
-	
+
 	bool osc_input_handler (Glib::IOCondition, lo_server);
 
   private:
@@ -102,7 +102,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void register_callbacks ();
 
 	void route_added (ARDOUR::RouteList&);
-		
+
 	// Handlers for "Application Hook" signals
 	void session_loaded (ARDOUR::Session&);
 	void session_exported (std::string, std::string);
@@ -114,9 +114,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	void send_current_value (const char* path, lo_arg** argv, int argc, lo_message msg);
 	void current_value_query (const char* path, size_t len, lo_arg **argv, int argc, lo_message msg);
-	
+
 	int current_value (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
-	
+
 	int catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data);
 	static int _catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
 
@@ -131,10 +131,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		name (data);		\
 		return 0;		\
 	}
-	
+
 	PATH_CALLBACK_MSG(routes_list);
 	PATH_CALLBACK_MSG(transport_frame);
-	
+
 #define PATH_CALLBACK(name) \
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
@@ -238,18 +238,18 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_set_send_gain_dB (int rid, int sid, float val);
 	int route_plugin_parameter (int rid, int piid,int par, float val);
 	int route_plugin_parameter_print (int rid, int piid,int par);
-	
+
 	void listen_to_route (boost::shared_ptr<ARDOUR::Route>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Route>, lo_address);
 	void drop_route (boost::weak_ptr<ARDOUR::Route>);
-	
+
 	void route_name_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route> r, lo_address addr);
-	
+
 	void update_clock ();
 
 
 	typedef std::list<OSCRouteObserver*> RouteObservers;
-	
+
 	RouteObservers route_observers;
 
 	static OSC* _instance;

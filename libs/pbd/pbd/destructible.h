@@ -29,7 +29,7 @@ class LIBPBD_API Destructible {
   public:
         Destructible() {}
 	virtual ~Destructible () { Destroyed(); }
-	
+
 	PBD::Signal0<void> Destroyed;
 	PBD::Signal0<void> DropReferences;
 

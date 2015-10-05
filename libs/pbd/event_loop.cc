@@ -66,7 +66,7 @@ EventLoop::invalidate_request (void* data)
 	 * want, and many of the objects we want to do this with already
 	 * inherit (indirectly) from sigc::trackable.
 	 */
-	
+
         if (ir->event_loop) {
 		Glib::Threads::Mutex::Lock lm (ir->event_loop->slot_invalidation_mutex());
 		for (list<BaseRequestObject*>::iterator i = ir->requests.begin(); i != ir->requests.end(); ++i) {

@@ -43,7 +43,7 @@ public:
     virtual bool has_item_at_point (Duple const & point) const = 0;
 
 protected:
-	
+
     Item const & _item;
 };
 

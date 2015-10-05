@@ -92,10 +92,10 @@ class ABSTRACT_UI_API AbstractUI : public BaseUI
 
 	RequestBufferMap request_buffers;
         static Glib::Threads::Private<RequestBuffer> per_thread_request_buffer;
-	
+
 	Glib::Threads::Mutex               request_list_lock;
 	std::list<RequestObject*> request_list;
-	
+
 	RequestObject* get_request (RequestType);
 	void handle_ui_requests ();
 	void send_request (RequestObject *);

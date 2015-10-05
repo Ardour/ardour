@@ -108,7 +108,7 @@ main (int argc, char* argv[])
 
 	int option_index = 0;
 	int c = 0;
-	
+
 	while (1) {
 		if ((c = getopt_long (argc, argv, optstring, longopts, &option_index)) == -1) {
 			break;
@@ -170,7 +170,7 @@ main (int argc, char* argv[])
 
 	format_info.samplerate = samplerate;
 	format_info.channels = channels;
-	
+
 	if (strcasecmp (header_format, "wav") == 0) {
 		format_info.format |= SF_FORMAT_WAV;
 		suffix = ".wav";
@@ -201,7 +201,7 @@ main (int argc, char* argv[])
 		usage ();
 		return 0;
 	}
-	
+
 	string tmpdirname = Glib::build_filename (dirname, "sftest");
 	if (g_mkdir_with_parents (tmpdirname.c_str(), 0755)) {
 		cerr << "Cannot create output directory\n";
@@ -216,7 +216,7 @@ main (int argc, char* argv[])
 		ss << "sf-";
 		ss << n;
 		ss << suffix;
-		
+
 		path = Glib::build_filename (tmpdirname, ss.str());
 
                 int flags = O_RDWR|O_CREAT|O_TRUNC;
@@ -254,7 +254,7 @@ main (int argc, char* argv[])
 		cout << endl;
 		cout << "Format is " << suffix << ' ' << channels << " channel" << (channels > 1 ? "s" : "") << " written in chunks of " << block_size << " frames, synced ? " << (with_sync ? "yes" : "no") << endl;
 	}
-	
+
 	data = new float[block_size*channels];
 	uint64_t written = 0;
 
@@ -284,7 +284,7 @@ main (int argc, char* argv[])
 
 		max_bandwidth = max (max_bandwidth, bandwidth);
 		min_bandwidth = min (min_bandwidth, bandwidth);
-		
+
 		if (!quiet) {
 			cout << "BW @ " << written << " frames (" << ds.str() << " minutes) = " << (bandwidth/1048576.0) <<  " MB/sec " << bandwidth / data_rate << " x faster than necessary " << endl;
 		}
@@ -300,7 +300,7 @@ main (int argc, char* argv[])
 		}
 		cout << "Done.\n";
 	}
-	
+
 	return 0;
 }
 

@@ -139,7 +139,7 @@ public:
 	static void init_event_pool ();
 
 	CrossThreadPool* event_pool() const { return own_pool; }
-	
+
 private:
 	static PerThreadPool* pool;
 	CrossThreadPool* own_pool;

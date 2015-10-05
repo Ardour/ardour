@@ -432,7 +432,7 @@ AudioStreamView::hide_xfades_with (boost::shared_ptr<AudioRegion> ar)
 {
 	list<AudioRegionView*> start_hidden;
 	list<AudioRegionView*> end_hidden;
-	
+
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {

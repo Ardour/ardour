@@ -41,11 +41,11 @@ public:
 	virtual int package (Gtk::Window &);
 
 	bool non_gtk_gui () const { return true; }
-	
+
 protected:
 
 	virtual int get_XID () = 0;
-	
+
 	boost::shared_ptr<ARDOUR::VSTPlugin> _vst;
 	Gtk::Socket _socket;
 

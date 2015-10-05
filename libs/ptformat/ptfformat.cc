@@ -667,7 +667,7 @@ PTFFormat::parseaudio5(void) {
 			break;
 		}
 	}
-	
+
 	wavnumber = 0;
 	i+=16;
 	while (i < len && numberofwavs > 0) {

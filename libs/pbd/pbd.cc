@@ -101,7 +101,7 @@ PBD::init ()
 
 	/* Initialize windows socket DLL for PBD::CrossThreadChannel
 	 */
-	
+
 	if (WSAStartup(MAKEWORD(1,1),&wsaData) != 0) {
 		fatal << X_("Windows socket initialization failed with error: ") << WSAGetLastError() << endmsg;
 		abort();
@@ -141,7 +141,7 @@ PBD::cleanup ()
 #ifdef PLATFORM_WINDOWS
 	PBD::MMCSS::deinitialize ();
 	WSACleanup();
-#endif	
+#endif
 
 	EnumWriter::destroy ();
 	FPU::destroy ();

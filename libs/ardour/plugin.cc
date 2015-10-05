@@ -396,7 +396,7 @@ Plugin::get_state ()
 	root->add_property (X_("last-preset-label"), _last_preset.label);
 	root->add_property (X_("parameter-changed-since-last-preset"), _parameter_changed_since_last_preset ? X_("yes") : X_("no"));
 
-#ifndef NO_PLUGIN_STATE	
+#ifndef NO_PLUGIN_STATE
 	add_state (root);
 #else
 	if (!seen_get_state_message) {

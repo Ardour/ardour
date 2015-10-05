@@ -75,7 +75,7 @@
 #endif
 
 namespace wvNS {
-	
+
 namespace wvBO // namespace Waves::ByteOrder
 {
     typedef int		byte_order_type;   // we use int rather than enum because some compilers cannot resolve enum constants at compile-time. There are only two options anyway :-)

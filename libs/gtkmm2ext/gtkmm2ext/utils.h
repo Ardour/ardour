@@ -58,16 +58,16 @@ namespace Gtkmm2ext {
 
 	LIBGTKMM2EXT_API void get_ink_pixel_size (Glib::RefPtr<Pango::Layout>,
 						  int& width, int& height);
-	
+
 
 	LIBGTKMM2EXT_API void get_pixel_size (Glib::RefPtr<Pango::Layout>,
 					      int& width, int& height);
-	
+
 	LIBGTKMM2EXT_API void set_size_request_to_display_given_text (Gtk::Widget &w,
 								      const gchar *text,
 								      gint hpadding,
 								      gint vpadding);
-	
+
 	LIBGTKMM2EXT_API void set_size_request_to_display_given_text_width (Gtk::Widget& w,
 	                                                                    const gchar* htext,
 	                                                                    gint         hpadding,
@@ -108,7 +108,7 @@ namespace Gtkmm2ext {
 
 	LIBGTKMM2EXT_API bool set_active_text_if_present (Gtk::ComboBoxText&,
 	                          const std::string);
-	
+
 	template<class T> /*LIBGTKMM2EXT_API*/ void deferred_delete (void *ptr) {
 		delete static_cast<T *> (ptr);
 	}
@@ -131,7 +131,7 @@ namespace Gtkmm2ext {
         LIBGTKMM2EXT_API void container_clear (Gtk::Container&);
 
 	/* C++ API for rounded rectangles */
-	
+
         LIBGTKMM2EXT_API void rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
         LIBGTKMM2EXT_API void rounded_top_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
         LIBGTKMM2EXT_API void rounded_top_left_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);

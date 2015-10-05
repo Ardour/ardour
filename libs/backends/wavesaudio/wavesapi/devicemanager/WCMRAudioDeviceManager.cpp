@@ -77,7 +77,7 @@ WCMRAudioDevice::~WCMRAudioDevice ()
 const std::string& WCMRAudioDevice::DeviceName () const
 {
 	return (m_DeviceName);
-	
+
 }
 
 
@@ -95,7 +95,7 @@ const std::string& WCMRAudioDevice::DeviceName () const
 const std::vector<std::string>& WCMRAudioDevice::InputChannels ()
 {
 	return (m_InputChannels);
-	
+
 }
 
 
@@ -263,7 +263,7 @@ WTErr WCMRAudioDevice::SetCurrentBufferSize (int newSize)
 WCMRAudioDevice::ConnectionStates WCMRAudioDevice::ConnectionStatus ()
 {
 	return (m_ConnectionStatus);
-	
+
 }
 
 
@@ -282,7 +282,7 @@ WCMRAudioDevice::ConnectionStates WCMRAudioDevice::ConnectionStatus ()
 bool WCMRAudioDevice::Active ()
 {
 	return (m_IsActive);
-	
+
 }
 
 
@@ -344,7 +344,7 @@ WTErr WCMRAudioDevice::SetStreaming (bool newState)
 	if (newState) {
 		m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
 	}
-	
+
 	//This will most likely be overridden, the base class simply
 	//changes the member.
 	m_IsStreaming = newState;
@@ -359,7 +359,7 @@ WTErr WCMRAudioDevice::ResetDevice ()
 	bool wasActive = Active();
 
 	WTErr err = SetStreaming(false);
-	
+
 	if (err == eNoErr)
 		err = SetActive(false);
 
@@ -461,11 +461,11 @@ void WCMRAudioDevice::GetMonitorInfo (int *pLeftChannel, int *pRightChannel, flo
 {
 	if (pLeftChannel)
 		*pLeftChannel = m_LeftMonitorChannel;
-	if (pRightChannel)	
+	if (pRightChannel)
 		*pRightChannel = m_RightMonitorChannel;
-	if (pGain)	
+	if (pGain)
 		*pGain = m_MonitorGain;
-	return;	
+	return;
 }
 
 
@@ -688,5 +688,5 @@ void WCMRAudioDeviceManager::NotifyClient (WCMRAudioDeviceManagerClient::Notific
 {
 	if (m_pTheClient)
 		m_pTheClient->AudioDeviceManagerNotification (forReason, pParam);
-	return;	
+	return;
 }

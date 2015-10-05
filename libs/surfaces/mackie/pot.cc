@@ -45,7 +45,7 @@ Pot::set (float val, bool onoff, Mode mode)
 
 	// center on if val is "very close" to 0.50
 	MIDI::byte msg =  (val > 0.48 && val < 0.58 ? 1 : 0) << 6;
-	
+
 	// Pot/LED mode
 	msg |=  (mode << 4);
 
@@ -57,7 +57,7 @@ Pot::set (float val, bool onoff, Mode mode)
 	if (val < 0){
 	  val = val * -1;
 	}
-	
+
 	// val, but only if off hasn't explicitly been set
 	if (onoff) {
 		if (mode == spread) {
@@ -73,4 +73,4 @@ Pot::set (float val, bool onoff, Mode mode)
 	return MidiByteArray (3, 0xb0, 0x20 + id(), msg);
 
 }
-	
+

@@ -211,7 +211,7 @@ Session::Session (AudioEngine &eng,
 	, loop_changing (false)
 	, last_loopend (0)
 	, _session_dir (new SessionDirectory (fullpath))
-	, _current_snapshot_name (snapshot_name)	
+	, _current_snapshot_name (snapshot_name)
 	, state_tree (0)
 	, state_was_pending (false)
 	, _state_of_the_state (StateOfTheState(CannotSave|InitialConnecting|Loading))
@@ -304,12 +304,12 @@ Session::Session (AudioEngine &eng,
 	pthread_cond_init (&_rt_emit_cond, 0);
 
 	pre_engine_init (fullpath);
-	
+
 	if (_is_new) {
 
 		Stateful::loading_state_version = CURRENT_SESSION_FILE_VERSION;
 
-#ifdef USE_TRACKS_CODE_FEATURES		
+#ifdef USE_TRACKS_CODE_FEATURES
 		sr = EngineStateController::instance()->get_current_sample_rate();
 #endif
 		if (ensure_engine (sr)) {
@@ -348,7 +348,7 @@ Session::Session (AudioEngine &eng,
 		if (load_state (_current_snapshot_name)) {
 			throw SessionException (_("Failed to load state"));
 		}
-	
+
 		/* try to get sample rate from XML state so that we
 		 * can influence the SR if we set up the audio
 		 * engine.
@@ -356,7 +356,7 @@ Session::Session (AudioEngine &eng,
 
 		if (state_tree) {
 			const XMLProperty* prop;
-			if ((prop = state_tree->root()->property (X_("sample-rate"))) != 0) {		
+			if ((prop = state_tree->root()->property (X_("sample-rate"))) != 0) {
 				sr = atoi (prop->value());
 			}
 		}
@@ -398,25 +398,25 @@ Session::Session (AudioEngine &eng,
 	_engine.reset_timebase ();
 
 #ifdef USE_TRACKS_CODE_FEATURES
-	
+
 	EngineStateController::instance()->set_session(this);
-	
+
 	if (_is_new ) {
 		if ( ARDOUR::Profile->get_trx () ) {
 
 			/* Waves Tracks: fill session with tracks basing on the amount of inputs.
 			 * each available input must have corresponding track when session starts.
 			 */
-			
+
 			uint32_t how_many (0);
-			
+
 			std::vector<std::string> inputs;
 			EngineStateController::instance()->get_physical_audio_inputs(inputs);
-			
+
 			how_many = inputs.size();
-			
+
 			list<boost::shared_ptr<AudioTrack> > tracks;
-			
+
 			// Track names after driver
 			if (Config->get_tracks_auto_naming() == NameAfterDriver) {
 				string track_name = "";
@@ -424,14 +424,14 @@ Session::Session (AudioEngine &eng,
 					string track_name;
 					track_name = inputs[i];
 					replace_all (track_name, "system:capture", "");
-					
+
 					list<boost::shared_ptr<AudioTrack> > single_track = new_audio_track (1, 1, Normal, 0, 1, track_name);
 					tracks.insert(tracks.begin(), single_track.front());
 				}
 			} else { // Default track names
 				tracks = new_audio_track (1, 1, Normal, 0, how_many, string());
 			}
-			
+
 			if (tracks.size() != how_many) {
 				destroy ();
 				throw failed_constructor ();
@@ -439,7 +439,7 @@ Session::Session (AudioEngine &eng,
 		}
 	}
 #endif
-	
+
 	_is_new = false;
 	session_loaded ();
 
@@ -448,9 +448,9 @@ Session::Session (AudioEngine &eng,
 
 Session::~Session ()
 {
-#ifdef PT_TIMING	
+#ifdef PT_TIMING
 	ST.dump ("ST.dump");
-#endif	
+#endif
 	destroy ();
 }
 
@@ -493,7 +493,7 @@ Session::immediately_post_engine ()
 	 * know that the engine is running, but before we either create a
 	 * session or set state for an existing one.
 	 */
-	
+
 	if (how_many_dsp_threads () > 1) {
 		/* For now, only create the graph if we are using >1 DSP threads, as
 		   it is a bit slower than the old code with 1 thread.
@@ -553,9 +553,9 @@ Session::destroy ()
 	/* shutdown control surface protocols while we still have ports
 	   and the engine to move data to any devices.
 	*/
-	
+
 	ControlProtocolManager::instance().drop_protocols ();
-	
+
 	_engine.remove_session ();
 
 #ifdef USE_TRACKS_CODE_FEATURES
@@ -586,7 +586,7 @@ Session::destroy ()
 	_butler->drop_references ();
 	delete _butler;
 	_butler = 0;
-	
+
 	delete _all_route_group;
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
@@ -675,7 +675,7 @@ Session::destroy ()
 	delete _locations; _locations = 0;
 
 	delete _tempo_map;
-	
+
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -687,10 +687,10 @@ void
 Session::setup_ltc ()
 {
 	XMLNode* child = 0;
-	
+
 	_ltc_input.reset (new IO (*this, X_("LTC In"), IO::Input));
 	_ltc_output.reset (new IO (*this, X_("LTC Out"), IO::Output));
-	
+
 	if (state_tree && (child = find_named_node (*state_tree->root(), X_("LTC In"))) != 0) {
 		_ltc_input->set_state (*(child->children().front()), Stateful::loading_state_version);
 	} else {
@@ -700,7 +700,7 @@ Session::setup_ltc ()
 		}
 		reconnect_ltc_input ();
 	}
-	
+
 	if (state_tree && (child = find_named_node (*state_tree->root(), X_("LTC Out"))) != 0) {
 		_ltc_output->set_state (*(child->children().front()), Stateful::loading_state_version);
 	} else {
@@ -710,11 +710,11 @@ Session::setup_ltc ()
 		}
 		reconnect_ltc_output ();
 	}
-	
+
 	/* fix up names of LTC ports because we don't want the normal
 	 * IO style of NAME/TYPE-{in,out}N
 	 */
-	
+
 	_ltc_input->nth (0)->set_name (X_("LTC-in"));
 	_ltc_output->nth (0)->set_name (X_("LTC-out"));
 }
@@ -735,11 +735,11 @@ Session::setup_click ()
 
 void
 Session::setup_click_state (const XMLNode* node)
-{	
+{
 	const XMLNode* child = 0;
-	
+
 	if (node && (child = find_named_node (*node, "Click")) != 0) {
-		
+
 		/* existing state for Click */
 		int c = 0;
 
@@ -755,7 +755,7 @@ Session::setup_click_state (const XMLNode* node)
 				}
 			}
 		}
-			
+
 		if (c == 0) {
 			_clicking = Config->get_clicking ();
 
@@ -929,7 +929,7 @@ Session::auto_connect_master_bus ()
 	if (!_master_out || !Config->get_auto_connect_standard_busses() || _monitor_out) {
 		return;
 	}
-	
+
 	// Waves Tracks: Do not connect master bas for Tracks if AutoConnectMaster option is not set
 	// In this case it means "Multi Out" output mode
 	if (ARDOUR::Profile->get_trx() && !(Config->get_output_auto_connect() & AutoConnectMaster) ) {
@@ -938,21 +938,21 @@ Session::auto_connect_master_bus ()
 
 	/* if requested auto-connect the outputs to the first N physical ports.
 	 */
-	
+
 	uint32_t limit = _master_out->n_outputs().n_total();
 	vector<string> outputs[DataType::num_types];
-	
+
 	for (uint32_t i = 0; i < DataType::num_types; ++i) {
 		_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
 	}
-	
+
 	for (uint32_t n = 0; n < limit; ++n) {
 		boost::shared_ptr<Port> p = _master_out->output()->nth (n);
 		string connect_to;
 		if (outputs[p->type()].size() > n) {
 			connect_to = outputs[p->type()][n];
 		}
-		
+
 		if (!connect_to.empty() && p->connected_to (connect_to) == false) {
 			if (_master_out->output()->connect (p, connect_to, this)) {
 				error << string_compose (_("cannot connect master output %1 to %2"), n, connect_to)
@@ -983,20 +983,20 @@ Session::remove_monitor_section ()
 		/* Hold process lock while doing this so that we don't hear bits and
 		 * pieces of audio as we work on each route.
 		 */
-		
+
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-		
+
 		/* Connect tracks to monitor section. Note that in an
 		   existing session, the internal sends will already exist, but we want the
 		   routes to notice that they connect to the control out specifically.
 		*/
-		
-		
+
+
 		boost::shared_ptr<RouteList> r = routes.reader ();
 		PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
-		
+
 		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
-			
+
 			if ((*x)->is_monitor()) {
 				/* relax */
 			} else if ((*x)->is_master()) {
@@ -1044,17 +1044,17 @@ Session::add_monitor_section ()
 
 	rl.push_back (r);
 	add_routes (rl, false, false, false);
-	
+
 	assert (_monitor_out);
 
 	/* AUDIO ONLY as of june 29th 2009, because listen semantics for anything else
 	   are undefined, at best.
 	*/
-	
+
 	uint32_t limit = _monitor_out->n_inputs().n_audio();
-	
+
 	if (_master_out) {
-		
+
 		/* connect the inputs to the master bus outputs. this
 		 * represents a separate data feed from the internal sends from
 		 * each route. as of jan 2011, it allows the monitor section to
@@ -1068,7 +1068,7 @@ Session::add_monitor_section ()
 		for (uint32_t n = 0; n < limit; ++n) {
 			boost::shared_ptr<AudioPort> p = _monitor_out->input()->ports().nth_audio_port (n);
 			boost::shared_ptr<AudioPort> o = _master_out->output()->ports().nth_audio_port (n);
-			
+
 			if (o) {
 				string connect_to = o->name();
 				if (_monitor_out->input()->connect (p, connect_to, this)) {
@@ -1079,16 +1079,16 @@ Session::add_monitor_section ()
 			}
 		}
 	}
-	
+
 	/* if monitor section is not connected, connect it to physical outs
 	 */
-	
+
 	if (Config->get_auto_connect_standard_busses() && !_monitor_out->output()->connected ()) {
-		
+
 		if (!Config->get_monitor_bus_preferred_bundle().empty()) {
-			
+
 			boost::shared_ptr<Bundle> b = bundle_by_name (Config->get_monitor_bus_preferred_bundle());
-			
+
 			if (b) {
 				_monitor_out->output()->connect_ports_to_bundle (b, true, this);
 			} else {
@@ -1096,9 +1096,9 @@ Session::add_monitor_section ()
 							   Config->get_monitor_bus_preferred_bundle())
 					<< endmsg;
 			}
-			
+
 		} else {
-			
+
 			/* Monitor bus is audio only */
 
 			vector<string> outputs[DataType::num_types];
@@ -1109,17 +1109,17 @@ Session::add_monitor_section ()
 
 			uint32_t mod = outputs[DataType::AUDIO].size();
 			uint32_t limit = _monitor_out->n_outputs().get (DataType::AUDIO);
-			
+
 			if (mod != 0) {
-				
+
 				for (uint32_t n = 0; n < limit; ++n) {
-					
+
 					boost::shared_ptr<Port> p = _monitor_out->output()->ports().port(DataType::AUDIO, n);
 					string connect_to;
 					if (outputs[DataType::AUDIO].size() > (n % mod)) {
 						connect_to = outputs[DataType::AUDIO][n % mod];
 					}
-					
+
 					if (!connect_to.empty()) {
 						if (_monitor_out->output()->connect (p, connect_to, this)) {
 							error << string_compose (
@@ -1137,7 +1137,7 @@ Session::add_monitor_section ()
 	/* Hold process lock while doing this so that we don't hear bits and
 	 * pieces of audio as we work on each route.
 	 */
-	
+
 	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 	/* Connect tracks to monitor section. Note that in an
@@ -1151,7 +1151,7 @@ Session::add_monitor_section ()
 	PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
 
 	for (RouteList::iterator x = rls->begin(); x != rls->end(); ++x) {
-		
+
 		if ((*x)->is_monitor()) {
 			/* relax */
 		} else if ((*x)->is_master()) {
@@ -1482,7 +1482,7 @@ Session::auto_loop_changed (Location* location)
 		}
 	}
 
-	
+
 	last_loopend = location->end();
 	set_dirty ();
 }
@@ -1532,14 +1532,14 @@ Session::set_session_extents (framepos_t start, framepos_t end)
 		//if there is no existing session, we need to make a new session location  (should never happen)
 		existing = new Location (*this, 0, 0, _("session"), Location::IsSessionRange);
 	}
-	
+
 	if (end <= start) {
 		error << _("Session: you can't use that location for session start/end)") << endmsg;
 		return;
 	}
 
 	existing->set( start, end );
-	
+
 	set_dirty();
 }
 
@@ -1613,7 +1613,7 @@ Session::update_skips (Location* loc, bool consolidate)
 	if (_ignore_skips_updates) {
 		return;
 	}
-	
+
 	Locations::LocationList skips;
 
         if (consolidate) {
@@ -1683,9 +1683,9 @@ Session::_sync_locations_to_skips ()
 	Locations::LocationList const & locs (_locations->list());
 
 	for (Locations::LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
-		
+
 		Location* location = *i;
-		
+
 		if (location->is_skip() && location->is_skipping()) {
 			SessionEvent* ev = new SessionEvent (SessionEvent::Skip, SessionEvent::Add, location->start(), location->end(), 1.0);
 			queue_event (ev);
@@ -1774,14 +1774,14 @@ Session::_locations_changed (const Locations::LocationList& locations)
            We might be re-adding a location here but it doesn't actually matter
            for all the locations that the Session takes an interest in.
         */
-	
+
 	{
 		PBD::Unwinder<bool> protect_ignore_skip_updates (_ignore_skips_updates, true);
 		for (Locations::LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 			location_added (*i);
 		}
 	}
-	
+
 	update_skips (NULL, false);
 }
 
@@ -1799,7 +1799,7 @@ Session::enable_record ()
 		if (rs == Recording) {
 			break;
 		}
-		
+
 		if (g_atomic_int_compare_and_exchange (&_record_status, rs, Recording)) {
 
 			_last_record_location = _transport_frame;
@@ -1961,7 +1961,7 @@ Session::set_frame_rate (framecnt_t frames_per_second)
 
 	clear_clicks ();
 	reset_write_sources (false);
-	
+
 	// XXX we need some equivalent to this, somehow
 	// SndFileSource::setup_standard_crossfades (frames_per_second);
 
@@ -1978,7 +1978,7 @@ Session::set_block_size (pframes_t nframes)
 	   ::process(). It is therefore fine to do things that block
 	   here.
 	*/
-	
+
 	{
 		current_block_size = nframes;
 
@@ -2101,7 +2101,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 	/* We are going to build a directed graph of our routes;
 	   this is where the edges of that graph are put.
 	*/
-	
+
 	GraphEdges edges;
 
 	/* Go through all routes doing two things:
@@ -2114,7 +2114,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 	 *    routes directly or indirectly feed them.  This information
 	 *    is used by the solo code.
 	 */
-	
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		/* Clear out the route's list of direct or indirect feeds */
@@ -2138,7 +2138,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 
 	/* Attempt a topological sort of the route graph */
 	boost::shared_ptr<RouteList> sorted_routes = topological_sort (r, edges);
-	
+
 	if (sorted_routes) {
 		/* We got a satisfactory topological sort, so there is no feedback;
 		   use this new graph.
@@ -2149,7 +2149,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 		if (_process_graph) {
 			_process_graph->rechain (sorted_routes, edges);
 		}
-		
+
 		_current_route_graph = edges;
 
 		/* Complete the building of the routes' lists of what directly
@@ -2180,7 +2180,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 		   so the solo code will think that everything is still connected
 		   as it was before.
 		*/
-		
+
 		FeedbackDetected (); /* EMIT SIGNAL */
 	}
 
@@ -2205,7 +2205,7 @@ Session::find_route_name (string const & base, uint32_t& id, string& name, bool 
 	   routes, but hidden objects like the click track. So check port names
 	   before anything else.
 	*/
-	
+
 	for (vector<string>::const_iterator reserved = reserved_io_names.begin(); reserved != reserved_io_names.end(); ++reserved) {
 		if (base == *reserved) {
 			definitely_add_number = true;
@@ -2215,7 +2215,7 @@ Session::find_route_name (string const & base, uint32_t& id, string& name, bool 
 			break;
 		}
 	}
-	
+
 	if (!definitely_add_number && route_by_name (base) == 0) {
 		/* juse use the base */
 		name = base;
@@ -2230,7 +2230,7 @@ Session::find_route_name (string const & base, uint32_t& id, string& name, bool 
 		}
 
 		++id;
-		
+
 	} while (id < (UINT_MAX-1));
 
 	return false;
@@ -2313,7 +2313,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 			{
 				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				if (track->input()->ensure_io (input, false, this)) {
-					error << "cannot configure " << input << " out configuration for new midi track" << endmsg;	
+					error << "cannot configure " << input << " out configuration for new midi track" << endmsg;
 					goto failed;
 				}
 
@@ -2369,7 +2369,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 				PluginPtr plugin = instrument->load (*this);
 				boost::shared_ptr<Processor> p (new PluginInsert (*this, plugin));
 				(*r)->add_processor (p, PreFader);
-				
+
 			}
 		}
 	}
@@ -2751,24 +2751,24 @@ Session::reconnect_mtc_ports ()
 	}
 
 	mtc_in_ptr->disconnect_all ();
-	
+
 	std::vector<EngineStateController::MidiPortState> midi_port_states;
 	EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
-	
+
 	std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
-	
+
 	for (; state_iter != midi_port_states.end(); ++state_iter) {
 		if (state_iter->available && state_iter->mtc_in) {
 			mtc_in_ptr->connect (state_iter->name);
 		}
 	}
-	
+
 	if (!_midi_ports->mtc_input_port ()->connected () &&
 	    config.get_external_sync () &&
 	    (Config->get_sync_source () == MTC) ) {
 		config.set_external_sync (false);
 	}
-	
+
 	if ( ARDOUR::Profile->get_trx () ) {
 		// Tracks need this signal to update timecode_source_dropdown
 		MtcOrLtcInputPortChanged (); //emit signal
@@ -2827,7 +2827,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 	const string name_pattern = default_track_name_pattern (DataType::AUDIO);
 	bool const use_number = (how_many != 1) || name_template.empty () || (name_template == name_pattern);
-	
+
 	while (how_many) {
 
 		if (!find_route_name (name_template.empty() ? _(name_pattern.c_str()) : name_template, ++track_id, track_name, use_number)) {
@@ -2939,7 +2939,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 	RouteList ret;
 
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Bus");
-	
+
 	while (how_many) {
 		if (!find_route_name (name_template.empty () ? _("Bus") : name_template, ++bus_id, bus_name, use_number)) {
 			error << "cannot find name for new audio bus" << endmsg;
@@ -2985,7 +2985,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 			bus->add_internal_return ();
 
 			ret.push_back (bus);
-			
+
 			RouteAddedOrRemoved (true); /* EMIT SIGNAL */
 
 			ARDOUR::GUIIdle ();
@@ -3064,7 +3064,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 			} else {
 
 				string const route_name  = node_copy.property(X_("name"))->value ();
-			
+
 				/* generate a new name by adding a number to the end of the template name */
 				if (!find_route_name (route_name.c_str(), ++number, name, true)) {
 					fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
@@ -3085,7 +3085,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 					}
 				}
 			}
-			
+
 			boost::shared_ptr<Route> route (XMLRouteFactory (node_copy, 3000));
 
 			if (route == 0) {
@@ -3158,13 +3158,13 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 
 	update_latency (true);
 	update_latency (false);
-		
+
 	set_dirty();
-	
+
 	if (save) {
 		save_state (_current_snapshot_name);
 	}
-	
+
 	reassign_track_numbers();
 
 	update_route_record_state ();
@@ -3260,8 +3260,8 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 	}
 
 	if (_monitor_out && IO::connecting_legal) {
-		Glib::Threads::Mutex::Lock lm (_engine.process_lock());		
-		
+		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
 			if ((*x)->is_monitor()) {
 				/* relax */
@@ -3579,7 +3579,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 	bool leave_group_alone = (rg && rg->is_active() && rg->is_solo());
 
 	if (delta == 1 && Config->get_exclusive_solo()) {
-		
+
 		/* new solo: disable all other solos, but not the group if its solo-enabled */
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -3609,7 +3609,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		in_signal_flow = false;
 
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed from %1\n", (*i)->name()));
-		
+
 		if ((*i)->feeds (route, &via_sends_only)) {
 			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a feed from %1\n", (*i)->name()));
 			if (!via_sends_only) {
@@ -3623,7 +3623,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		} else {
 			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tno feed from %1\n", (*i)->name()));
 		}
-		
+
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed to %1\n", (*i)->name()));
 
 		if (route->feeds (*i, &via_sends_only)) {
@@ -3747,7 +3747,7 @@ Session::io_name_is_legal (const std::string& name)
 			return false;
 		}
 	}
-	
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->name() == name) {
 			return false;
@@ -3782,19 +3782,19 @@ Session::set_exclusive_input_active (boost::shared_ptr<RouteList> rl, bool onoff
 	for (RouteList::iterator rt = rl->begin(); rt != rl->end(); ++rt) {
 
 		PortSet& ps ((*rt)->input()->ports());
-		
+
 		for (PortSet::iterator p = ps.begin(); p != ps.end(); ++p) {
 			p->get_connections (connections);
 		}
-		
+
 		for (vector<string>::iterator s = connections.begin(); s != connections.end(); ++s) {
 			routes_using_input_from (*s, rl2);
 		}
-		
+
 		/* scan all relevant routes to see if others are on or off */
-		
+
 		bool others_are_already_on = false;
-		
+
 		for (RouteList::iterator r = rl2.begin(); r != rl2.end(); ++r) {
 
 			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*r);
@@ -3812,11 +3812,11 @@ Session::set_exclusive_input_active (boost::shared_ptr<RouteList> rl, bool onoff
 				mt->set_input_active (onoff);
 			}
 		}
-		
+
 		if (flip_others) {
 
 			/* globally reverse other routes */
-			
+
 			for (RouteList::iterator r = rl2.begin(); r != rl2.end(); ++r) {
 				if ((*r) != (*rt)) {
 					boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*r);
@@ -4136,13 +4136,13 @@ Session::add_source (boost::shared_ptr<Source> source)
 		/* yay, new source */
 
 		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (source);
-		
+
 		if (fs) {
 			if (!fs->within_session()) {
 				ensure_search_path_includes (Glib::path_get_dirname (fs->path()), fs->type());
 			}
 		}
-		
+
 		set_dirty();
 
 		boost::shared_ptr<AudioFileSource> afs;
@@ -4238,7 +4238,7 @@ Session::midi_source_by_path (const std::string& path) const
 			= boost::dynamic_pointer_cast<MidiSource>(s->second);
 		boost::shared_ptr<FileSource> fs
 			= boost::dynamic_pointer_cast<FileSource>(s->second);
-		
+
 		if (ms && fs && fs->path() == path) {
 			return ms;
 		}
@@ -4286,9 +4286,9 @@ Session::construct_peak_filepath (const string& filepath, const bool in_session,
 
 		string session_path;
 		bool in_another_session = true;
-		
+
 		if (filepath.find (interchange_dir_string) != string::npos) {
-		
+
 			session_path = Glib::path_get_dirname (filepath); /* now ends in audiofiles */
 			session_path = Glib::path_get_dirname (session_path); /* now ends in session name */
 			session_path = Glib::path_get_dirname (session_path); /* now ends in interchange */
@@ -4305,7 +4305,7 @@ Session::construct_peak_filepath (const string& filepath, const bool in_session,
 		} else {
 			in_another_session = false;
 		}
-		
+
 
 		if (in_another_session) {
 			SessionDirectory sd (session_path);
@@ -4326,7 +4326,7 @@ Session::construct_peak_filepath (const string& filepath, const bool in_session,
 	if (!in_session) {
 		path = Glib::path_get_dirname (filepath);
 	}
-	
+
 	return peak_file_helper (_session_dir->peak_path(), path, Glib::path_get_basename (filepath), !old_peak_name);
 }
 
@@ -4360,7 +4360,7 @@ Session::new_audio_source_path_for_embedded (const std::string& path)
 	SessionDirectory sdir (get_best_session_directory_for_new_audio());
 	string base = Glib::path_get_basename (path);
 	string newpath = Glib::build_filename (sdir.sound_path(), base);
-	
+
 	if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
 
 		MD5 md5;
@@ -4368,14 +4368,14 @@ Session::new_audio_source_path_for_embedded (const std::string& path)
 		md5.digestString (path.c_str());
 		md5.writeToString ();
 		base = md5.digestChars;
-		
+
 		string ext = get_suffix (path);
 
 		if (!ext.empty()) {
 			base += '.';
 			base += ext;
 		}
-		
+
 		newpath = Glib::build_filename (sdir.sound_path(), base);
 
 		/* if this collides, we're screwed */
@@ -4409,7 +4409,7 @@ Session::audio_source_name_is_unique (const string& name)
 	uint32_t existing = 0;
 
 	for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
-		
+
 		/* note that we search *without* the extension so that
 		   we don't end up both "Audio 1-1.wav" and "Audio 1-1.caf"
 		   in the event that this new name is required for
@@ -4417,12 +4417,12 @@ Session::audio_source_name_is_unique (const string& name)
 		*/
 
 		const string spath = *i;
-		
+
 		if (matching_unsuffixed_filename_exists_in (spath, name)) {
 			existing++;
 			break;
 		}
-		
+
 		/* it is possible that we have the path already
 		 * assigned to a source that has not yet been written
 		 * (ie. the write source for a diskstream). we have to
@@ -4431,8 +4431,8 @@ Session::audio_source_name_is_unique (const string& name)
 		 * two Sources point to the same file with different
 		 * notions of their removability.
 		 */
-		
-		
+
+
 		string possible_path = Glib::build_filename (spath, name);
 
 		if (audio_source_by_path_and_channel (possible_path, 0)) {
@@ -4449,20 +4449,20 @@ Session::format_audio_source_name (const string& legalized_base, uint32_t nchan,
 {
 	ostringstream sstr;
 	const string ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
-	
+
 	if (Profile->get_trx() && destructive) {
 		sstr << 'T';
 		sstr << setfill ('0') << setw (4) << cnt;
 		sstr << legalized_base;
 	} else {
 		sstr << legalized_base;
-		
+
 		if (take_required || related_exists) {
 			sstr << '-';
 			sstr << cnt;
 		}
 	}
-	
+
 	if (nchan == 2) {
 		if (chan == 0) {
 			sstr << "%L";
@@ -4479,7 +4479,7 @@ Session::format_audio_source_name (const string& legalized_base, uint32_t nchan,
 			sstr << chan+1;
 		}
 	}
-	
+
 	sstr << ext;
 
 	return sstr.str();
@@ -4502,11 +4502,11 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 	for (cnt = (destructive ? ++destructive_index : 1); cnt <= limit; ++cnt) {
 
 		possible_name = format_audio_source_name (legalized, nchan, chan, destructive, take_required, cnt, some_related_source_name_exists);
-		
+
 		if (audio_source_name_is_unique (possible_name)) {
 			break;
 		}
-		
+
 		some_related_source_name_exists = true;
 
 		if (cnt > limit) {
@@ -4561,14 +4561,14 @@ Session::new_midi_source_path (const string& base)
 
 		vector<space_and_path>::iterator i;
 		uint32_t existing = 0;
-		
+
 		for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
 
 			snprintf (buf, sizeof(buf), "%s-%u.mid", legalized.c_str(), cnt);
 			possible_name = buf;
 
 			possible_path = Glib::build_filename (*i, possible_name);
-			
+
 			if (Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
 				existing++;
 			}
@@ -4618,7 +4618,7 @@ boost::shared_ptr<MidiSource>
 Session::create_midi_source_for_session (string const & basic_name)
 {
 	const string path = new_midi_source_path (basic_name);
-	
+
 	if (!path.empty()) {
 		return boost::dynamic_pointer_cast<SMFSource> (
 			SourceFactory::createWritable (
@@ -4634,23 +4634,23 @@ Session::create_midi_source_by_stealing_name (boost::shared_ptr<Track> track)
 {
 	/* the caller passes in the track the source will be used in,
 	   so that we can keep the numbering sane.
-	
+
 	   Rationale: a track with the name "Foo" that has had N
 	   captures carried out so far will ALREADY have a write source
 	   named "Foo-N+1.mid" waiting to be used for the next capture.
-	
+
 	   If we call new_midi_source_name() we will get "Foo-N+2". But
 	   there is no region corresponding to "Foo-N+1", so when
 	   "Foo-N+2" appears in the track, the gap presents the user
 	   with odd behaviour - why did it skip past Foo-N+1?
-	
+
 	   We could explain this to the user in some odd way, but
 	   instead we rename "Foo-N+1.mid" as "Foo-N+2.mid", and then
 	   use "Foo-N+1" here.
-	
+
 	   If that attempted rename fails, we get "Foo-N+2.mid" anyway.
 	*/
-	
+
 	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (track);
 	assert (mt);
 	std::string name = track->steal_write_source_name ();
@@ -4816,7 +4816,7 @@ Session::available_capture_duration ()
 	if (_total_free_4k_blocks_uncertain) {
 		return boost::optional<framecnt_t> ();
 	}
-	
+
 	float sample_bytes_on_disk = 4.0; // keep gcc happy
 
 	switch (config.get_native_file_data_format()) {
@@ -5228,7 +5228,7 @@ Session::write_one_track (Track& track, framepos_t start, framepos_t end,
 		string path = ((track.data_type() == DataType::AUDIO)
 		               ? new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, false, true)
 		               : new_midi_source_path (legal_playlist_name));
-		
+
 		if (path.empty()) {
 			goto out;
 		}
@@ -5535,7 +5535,7 @@ Session::update_route_record_state ()
 	if (record_status() == Recording && record_arm_state_changed ) {
 		RecordArmStateChanged ();
 	}
-	
+
 }
 
 void
@@ -6049,7 +6049,7 @@ Session::update_latency_compensation (bool force_whole_graph)
 	                                             (some_track_latency_changed ? "yes" : "no")));
 
 	DEBUG_TRACE(DEBUG::Latency, "---------------------------- DONE update latency compensation\n\n");
-	
+
 	if (some_track_latency_changed || force_whole_graph)  {
 		_engine.update_latencies ();
 	}
@@ -6122,7 +6122,7 @@ Session::notify_remote_id_change ()
 		 */
 		reconnect_existing_routes(true, true);
 #endif
-		
+
 }
 
 void
@@ -6233,5 +6233,5 @@ Session::clear_object_selection ()
 	_object_selection = Evoral::Range<framepos_t> (-1,-1);
 #ifdef USE_TRACKS_CODE_FEATURES
 	follow_playhead_priority ();
-#endif	
+#endif
 }

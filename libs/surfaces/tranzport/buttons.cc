@@ -55,7 +55,7 @@ TranzportControlProtocol::process (uint8_t* buf)
 	this_button_mask |= buf[4] << 8;
 	this_button_mask |= buf[5];
 	_datawheel = buf[6];
-	
+
 #if DEBUG_TRANZPORT_STATE > 1
 	// Is the state machine incomplete?
 	const unsigned int knownstates = 0x00004000|0x00008000|

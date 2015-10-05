@@ -322,7 +322,7 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 			shuttle_grabbed = false;
 			remove_modal_grab ();
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
-			
+
 			if (Config->get_shuttle_behaviour() == Sprung) {
 				if (shuttle_speed_on_grab == 0 ) {
 					_session->request_stop ();
@@ -397,7 +397,7 @@ ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 	default:
 		return false;
 	}
-	
+
 	if (semis) {
 
 		float lower_side_of_dead_zone = semitones_as_fract (-24, true);

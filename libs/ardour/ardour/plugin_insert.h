@@ -191,7 +191,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	struct Match {
 		Match () : method (Impossible), plugins (0) {}
 		Match (MatchingMethod m, int32_t p, ChanCount h = ChanCount ()) : method (m), plugins (p), hide (h) {}
-		
+
 		MatchingMethod method; ///< method to employ
 		int32_t plugins;       ///< number of copies of the plugin that we need
 		ChanCount hide;        ///< number of channels to hide

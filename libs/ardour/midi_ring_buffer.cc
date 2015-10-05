@@ -212,7 +212,7 @@ MidiRingBuffer<T>::flush (framepos_t /*start*/, framepos_t end)
 		assert (success);
 
 		ev_time = *(reinterpret_cast<T*>((uintptr_t)peekbuf));
-		
+
 		if (ev_time >= end) {
 			break;
 		}

@@ -169,7 +169,7 @@ void TranzportControlProtocol::show_mini_meter()
 	}
 
 	last_meter_fill_l = fill_left;	last_meter_fill_r = fill_right;
-	
+
 	// give some feedback when overdriving - override yellow and red lights
 
 	if (fraction_l > 0.96 || fraction_r > 0.96) {
@@ -179,7 +179,7 @@ void TranzportControlProtocol::show_mini_meter()
 	if (fraction_l == 1.0 || fraction_r == 1.0) {
 		light_on (LightTrackrec);
 	}
-	
+
 	const uint8_t char_map[16] = { ' ', TRANZ_UL,
 				       TRANZ_U, TRANZ_U,
 				       TRANZ_BL, TRANZ_Q2,
@@ -196,7 +196,7 @@ void TranzportControlProtocol::show_mini_meter()
 			((fill_right >=j) << 2) | ((fill_right >= j+1) << 3);
 		buf[i] = char_map[val];
 	}
-		
+
 	/* print() requires this */
 
 	buf[meter_size/2] = '\0';
@@ -204,11 +204,11 @@ void TranzportControlProtocol::show_mini_meter()
 	print (1, 0, buf);
 
 	/* Add a peak bar, someday do falloff */
-		
+
 	//		char peak[2]; peak[0] = ' '; peak[1] = '\0';
 	//		if(fraction_l == 1.0 || fraction_r == 1.0) peak[0] = 'P';
 	//		print (1,8,peak); // Put a peak meter - P in if we peaked.
-		
+
 }
 
 void
@@ -261,7 +261,7 @@ TranzportControlProtocol::show_meter ()
 	for (i = 0; i < fill; ++i) {
 		buf[i] = 0x07; /* tranzport special code for 4 quadrant LCD block */
 	}
-	
+
 	/* add a possible half-step */
 
 	if (i < 20 && add_single_level) {
@@ -349,7 +349,7 @@ void
 TranzportControlProtocol::show_transport_time ()
 {
 	show_bbt (session->transport_frame ());
-}	
+}
 
 void
 TranzportControlProtocol::show_timecode (framepos_t where)

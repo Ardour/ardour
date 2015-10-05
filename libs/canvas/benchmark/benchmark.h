@@ -16,7 +16,7 @@ public:
 
 	void set_iterations (int);
 	double run ();
-	
+
 	virtual void do_run (ArdourCanvas::ImageCanvas &) = 0;
 	virtual void finish (ArdourCanvas::ImageCanvas &) {}
 

@@ -177,7 +177,7 @@ cmd_ppqn(char *new_ppqn)
 
 		g_message("Pulses Per Quarter Note changed to %d.", smf->ppqn);
 	}
-	
+
 	return (0);
 }
 
@@ -208,7 +208,7 @@ cmd_format(char *new_format)
 
 		g_message("Forma changed to %d.", smf->format);
 	}
-	
+
 	return (0);
 }
 
@@ -343,7 +343,7 @@ show_event(smf_event_t *event)
 		type = "Metadata";
 	else
 		type = "Event";
-	
+
 	decoded = smf_event_decode(event);
 
 	if (decoded == NULL) {

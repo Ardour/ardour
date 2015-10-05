@@ -77,7 +77,7 @@ public:
 private:
 	void		Retain() { if(mWillRelease && (mCFNumber != NULL)) { CFRetain(mCFNumber); } }
 	void		Release() { if(mWillRelease && (mCFNumber != NULL)) { CFRelease(mCFNumber); } }
-	
+
 	CFNumberRef	mCFNumber;
 	bool		mWillRelease;
 

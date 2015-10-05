@@ -146,9 +146,9 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	/* share the other's parent, but still create a new group */
 
 	ArdourCanvas::Item* parent = other.group->parent();
-	
+
 	_selected = other._selected;
-	
+
 	init (parent, other.samples_per_pixel, other.fill_color, other.frame_position,
 	      other.item_duration, other.visibility, other.wide_enough_for_name, other.high_enough_for_name);
 }
@@ -189,7 +189,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 						     ArdourCanvas::Rect (0.0, 0.0,
 									 trackview.editor().sample_to_pixel(duration),
 									 trackview.current_height()));
-		
+
 		frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
 
 		CANVAS_DEBUG_NAME (frame, string_compose ("frame for %1", get_item_name()));
@@ -200,7 +200,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 			frame->set_outline_color (UIConfiguration::instance().color ("time axis frame"));
 		}
 	}
-	
+
 	if (UIConfiguration::instance().get_show_name_highlight() && (visibility & ShowNameHighlight)) {
 
 		/* rectangle size will be set in ::manage_name_highlight() */
@@ -488,7 +488,7 @@ TimeAxisViewItem::set_selected(bool yn)
 	if (_selected == yn) {
 		return;
 	}
-	
+
 	Selectable::set_selected (yn);
 	set_frame_color ();
 	set_name_text_color ();
@@ -557,7 +557,7 @@ TimeAxisViewItem::set_height (double height)
 	}
 
 	if (frame) {
-		
+
 		frame->set_y0 (0.0);
 		frame->set_y1 (height);
 
@@ -603,7 +603,7 @@ TimeAxisViewItem::manage_name_highlight ()
 		name_highlight->show();
 		// name_highlight->set_x_position (1.0);
 		name_highlight->set (ArdourCanvas::Rect (0.0, (double) _height - NAME_HIGHLIGHT_SIZE,  _width - 2.0, _height));
-			
+
 	} else {
 		name_highlight->hide();
 	}
@@ -658,10 +658,10 @@ TimeAxisViewItem::set_name_text_color ()
 	if (!name_text) {
 		return;
 	}
-	
+
 
 	uint32_t f;
-	
+
 	if (UIConfiguration::instance().get_show_name_highlight()) {
 		/* name text will always be on top of name highlight, which
 		   will always use our fill color.
@@ -718,7 +718,7 @@ TimeAxisViewItem::set_frame_gradient ()
 		frame->set_gradient (ArdourCanvas::Fill::StopList (), 0);
 		return;
 	}
-		
+
 	ArdourCanvas::Fill::StopList stops;
 	double r, g, b, a;
 	double h, s, v;
@@ -726,18 +726,18 @@ TimeAxisViewItem::set_frame_gradient ()
 
 	/* need to get alpha value */
 	ArdourCanvas::color_to_rgba (f, r, g, b, a);
-	
+
 	stops.push_back (std::make_pair (0.0, f));
-	
+
 	/* now a darker version */
-	
+
 	ArdourCanvas::color_to_hsv (f, h, s, v);
 
 	v = min (1.0, v * (1.0 - UIConfiguration::instance().get_timeline_item_gradient_depth()));
-	
+
 	ArdourCanvas::Color darker = ArdourCanvas::hsva_to_color (h, s, v, a);
 	stops.push_back (std::make_pair (1.0, darker));
-	
+
 	frame->set_gradient (stops, true);
 }
 
@@ -895,7 +895,7 @@ TimeAxisViewItem::manage_name_text ()
 		name_text->hide ();
 		return;
 	}
-		
+
 	if (name_text->text().empty()) {
 		name_text->hide ();
 	}

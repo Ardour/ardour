@@ -29,7 +29,7 @@ class LIBCANVAS_API TrackingText : public Text
   public:
 	TrackingText (Canvas*);
 	TrackingText (Item*);
-	
+
 	void show_and_track (bool track_x, bool track_y);
 	void set_offset (Duple const &);
 	void set_x_offset (double);

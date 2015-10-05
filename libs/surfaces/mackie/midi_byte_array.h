@@ -49,14 +49,14 @@ class MidiByteArray : public std::vector<MIDI::byte>
 {
 public:
 	MidiByteArray() : std::vector<MIDI::byte>() {}
-	
+
 	MidiByteArray( size_t count, MIDI::byte array[] );
 
 	/**
 		Accepts a preceding count, and then a list of bytes
 	*/
 	MidiByteArray( size_t count, MIDI::byte first, ... );
-	
+
 	/// copy the given number of bytes from the given array
 	void copy( size_t count, MIDI::byte arr[] );
 };

@@ -58,7 +58,7 @@ class MonoPanner : public PannerInterface
   private:
 	PannerEditor* editor ();
 	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;
-	
+
         boost::shared_ptr<PBD::Controllable> position_control;
         PBD::ScopedConnectionList panvalue_connections;
         PBD::ScopedConnectionList panshell_connections;

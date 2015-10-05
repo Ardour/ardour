@@ -85,7 +85,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	hbox->pack_start (*l, false, false);
 	hbox->pack_start (_color, false, false);
 	top_vbox->pack_start (*hbox, false, false);
-	
+
 	main_vbox->pack_start (*top_vbox, false, false);
 
 	_active.set_active (_group->is_active ());
@@ -96,7 +96,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 
 	VBox* options_box = manage (new VBox);
 	options_box->set_spacing (6);
-	
+
 	l = manage (new Label (_("<b>Sharing</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false ));
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true);
@@ -135,7 +135,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
  	_route_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_share_color.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_share_monitoring.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
-	
+
 	gain_toggled ();
 
 	Table* table = manage (new Table (11, 4, false));
@@ -229,7 +229,7 @@ RouteGroupDialog::update ()
 	plist.add (Properties::monitoring, _share_monitoring.get_active());
 
 	_group->apply_changes (plist);
-	
+
 	GroupTabs::set_group_color (_group, gdk_color_to_rgba (_color.get_color ()));
 }
 

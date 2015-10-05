@@ -55,43 +55,43 @@ typedef enum
 struct _ClearlooksStyle
 {
 	GtkStyle parent_instance;
-	
+
 	GdkColor shade[9];
-	
+
 	GdkColor spot_color;
 	GdkColor spot1;
 	GdkColor spot2;
 	GdkColor spot3;
-	
+
 	GdkColor border[CL_BORDER_COUNT];
-	
+
 	/* from light to dark */
 	GdkGC *shade_gc[9];
 	GdkGC *border_gc[CL_BORDER_COUNT];
-	
+
 	GdkGC *spot1_gc;
 	GdkGC *spot2_gc;
 	GdkGC *spot3_gc;
-	
+
 	GdkColor inset_light[5];
 	GdkColor inset_dark[5];
-	
+
 	GdkColor button_g1[5];
 	GdkColor button_g2[5];
 	GdkColor button_g3[5];
 	GdkColor button_g4[5];
-	
+
 	GdkColor listview_bg[5];
 
 	GdkPixmap *radio_pixmap_nonactive[5];
 	GdkPixmap *radio_pixmap_active[5];
 	GdkPixmap *radio_pixmap_inconsistent[5];
 	GdkBitmap *radio_pixmap_mask; /* All masks are the same */
-	
+
 	GdkPixmap *check_pixmap_nonactive[5];
 	GdkPixmap *check_pixmap_active[5];
 	GdkPixmap *check_pixmap_inconsistent[5];
-	
+
 	gboolean sunkenmenubar:1;
 
 	guint8   progressbarstyle;

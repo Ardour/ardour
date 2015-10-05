@@ -17,7 +17,7 @@ enum /*LIBAUDIOGRAPHER_API*/ DitherType
 	D_Tri    = GDitherTri,    ///< Triangular dithering
 	D_Shaped = GDitherShaped  ///< Actually noise shaping, only works for 46kHzish signals
 };
-	
+
 /** Sample format converter that does dithering.
   * This class can only convert floats to either \a float, \a int32_t, \a int16_t, or \a uint8_t
   */
@@ -33,7 +33,7 @@ class LIBAUDIOGRAPHER_API SampleFormatConverter
 	  */
 	SampleFormatConverter (ChannelCount channels);
 	~SampleFormatConverter ();
-	
+
 	/** Initialize and allocate buffers for processing.
 	  * \param max_frames maximum number of frames that is allowed to be used in calls to \a process()
 	  * \param type dither type from \a DitherType
@@ -45,10 +45,10 @@ class LIBAUDIOGRAPHER_API SampleFormatConverter
 
 	/// Set whether or not clipping to [-1.0, 1.0] should occur when TOut = float. Clipping is off by default
 	void set_clip_floats (bool yn) { clip_floats = yn; }
-	
+
 	/// Processes data without modifying it
 	void process (ProcessContext<float> const & c_in);
-	
+
 	/// This version is only different in the case when \a TOut = float, and float clipping is on.
 	void process (ProcessContext<float> & c_in);
 

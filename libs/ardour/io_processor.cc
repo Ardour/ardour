@@ -167,7 +167,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 	XMLNodeIterator niter;
 	const string instr = enum_2_string (IO::Input);
 	const string outstr = enum_2_string (IO::Output);
-	
+
 	if (_own_input) {
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			const XMLProperty* prop;
@@ -182,21 +182,21 @@ IOProcessor::set_state (const XMLNode& node, int version)
 				}
 			}
 		}
-		
+
 		if (io_node) {
 			_input->set_state(*io_node, version);
-			
+
 			// legacy sessions: use IO name
 			if ((prop = node.property ("name")) == 0) {
 				set_name (_input->name());
 			}
-			
+
 		} else {
 			/* no input, which is OK */
 		}
-		
+
 	}
-	
+
 	if (_own_output) {
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "IO") {
@@ -213,10 +213,10 @@ IOProcessor::set_state (const XMLNode& node, int version)
 				}
 			}
 		}
-		
+
 		if (io_node) {
 			_output->set_state(*io_node, version);
-			
+
 			// legacy sessions: use IO name
 			if ((prop = node.property ("name")) == 0) {
 				set_name (_output->name());

@@ -63,25 +63,25 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 	{
 		boost::shared_ptr<SampleFormatConverter<int32_t> > converter (new SampleFormatConverter<int32_t>(1));
 		boost::shared_ptr<VectorSink<int32_t> > sink (new VectorSink<int32_t>());
-		
+
 		converter->init (frames, D_Tri, 32);
 		converter->add_output (sink);
 		framecnt_t frames_output = 0;
-		
+
 		{
 		ProcessContext<float> pc(random_data, frames / 2, 1);
 		converter->process (pc);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames / 2, frames_output);
 		}
-		
+
 		{
 		ProcessContext<float> pc(random_data, frames, 1);
 		converter->process (pc);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames, frames_output);
 		}
-		
+
 		{
 		ProcessContext<float> pc(random_data, frames + 1, 1);
 		CPPUNIT_ASSERT_THROW(converter->process (pc), Exception);
@@ -93,27 +93,27 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 		boost::shared_ptr<SampleFormatConverter<float> > converter (new SampleFormatConverter<float>(1));
 		boost::shared_ptr<VectorSink<float> > sink (new VectorSink<float>());
 		framecnt_t frames_output = 0;
-		
+
 		converter->init(frames, D_Tri, 32);
 		converter->add_output (sink);
-		
+
 		converter->set_clip_floats (false);
 		ProcessContext<float> const pc(random_data, frames, 1);
 		converter->process (pc);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames, frames_output);
 		CPPUNIT_ASSERT (TestUtils::array_equals(sink->get_array(), random_data, frames));
-		
+
 		// Make sure a few samples are < -1.0 and > 1.0
 		random_data[10] = -1.5;
 		random_data[20] = 1.5;
-		
+
 		converter->set_clip_floats (true);
 		converter->process (pc);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames, frames_output);
 		CPPUNIT_ASSERT (TestUtils::array_filled(sink->get_array(), frames));
-		
+
 		for (framecnt_t i = 0; i < frames; ++i) {
 			// fp comparison needs a bit of tolerance, 1.01 << 1.5
 			CPPUNIT_ASSERT(sink->get_data()[i] < 1.01);
@@ -126,77 +126,77 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 		boost::shared_ptr<SampleFormatConverter<int32_t> > converter (new SampleFormatConverter<int32_t>(1));
 		boost::shared_ptr<VectorSink<int32_t> > sink (new VectorSink<int32_t>());
 		framecnt_t frames_output = 0;
-		
+
 		converter->init(frames, D_Tri, 32);
 		converter->add_output (sink);
-		
+
 		ProcessContext<float> pc(random_data, frames, 1);
 		converter->process (pc);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames, frames_output);
 		CPPUNIT_ASSERT (TestUtils::array_filled(sink->get_array(), frames));
 	}
-	
+
 	void testInt24()
 	{
 		boost::shared_ptr<SampleFormatConverter<int32_t> > converter (new SampleFormatConverter<int32_t>(1));
 		boost::shared_ptr<VectorSink<int32_t> > sink (new VectorSink<int32_t>());
 		framecnt_t frames_output = 0;
-		
+
 		converter->init(frames, D_Tri, 24);
 		converter->add_output (sink);
-		
+
 		ProcessContext<float> pc(random_data, frames, 1);
 		converter->process (pc);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames, frames_output);
 		CPPUNIT_ASSERT (TestUtils::array_filled(sink->get_array(), frames));
 	}
-	
+
 	void testInt16()
 	{
 		boost::shared_ptr<SampleFormatConverter<int16_t> > converter (new SampleFormatConverter<int16_t>(1));
 		boost::shared_ptr<VectorSink<int16_t> > sink (new VectorSink<int16_t>());
 		framecnt_t frames_output = 0;
-		
+
 		converter->init(frames, D_Tri, 16);
 		converter->add_output (sink);
-		
+
 		ProcessContext<float> pc(random_data, frames, 1);
 		converter->process (pc);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames, frames_output);
 		CPPUNIT_ASSERT (TestUtils::array_filled(sink->get_array(), frames));
 	}
-	
+
 	void testUint8()
 	{
 		boost::shared_ptr<SampleFormatConverter<uint8_t> > converter (new SampleFormatConverter<uint8_t>(1));
 		boost::shared_ptr<VectorSink<uint8_t> > sink (new VectorSink<uint8_t>());
 		framecnt_t frames_output = 0;
-		
+
 		converter->init(frames, D_Tri, 8);
 		converter->add_output (sink);
-		
+
 		ProcessContext<float> pc(random_data, frames, 1);
 		converter->process (pc);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames, frames_output);
 		CPPUNIT_ASSERT (TestUtils::array_filled(sink->get_array(), frames));
 	}
-	
+
 	void testChannelCount()
 	{
 		boost::shared_ptr<SampleFormatConverter<int32_t> > converter (new SampleFormatConverter<int32_t>(3));
 		boost::shared_ptr<VectorSink<int32_t> > sink (new VectorSink<int32_t>());
 		framecnt_t frames_output = 0;
-		
+
 		converter->init(frames, D_Tri, 32);
 		converter->add_output (sink);
-		
+
 		ProcessContext<float> pc(random_data, 4, 1);
 		CPPUNIT_ASSERT_THROW (converter->process (pc), Exception);
-		
+
 		framecnt_t new_frame_count = frames - (frames % 3);
 		converter->process (ProcessContext<float> (pc.data(), new_frame_count, 3));
 		frames_output = sink->get_data().size();

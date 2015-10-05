@@ -35,7 +35,7 @@ private:
 	void width_changed ();
 	void set_position_range ();
 	void set_width_range ();
-	
+
 	StereoPanner* _panner;
 	Gtk::SpinButton _position;
 	Gtk::SpinButton _width;

@@ -49,10 +49,10 @@ public:
     bool sync (Session* s) {
 
 	    bool changed = false;
-	
+
 	    double     sp = s->transport_speed();
 	    framecnt_t fr = s->transport_frame();
-	
+
 	    if (speed != sp) {
 		    speed = sp;
 		    changed = true;
@@ -120,7 +120,7 @@ void
 MidiClockTicker::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
-	
+
 	 if (_session) {
 		 _session->TransportStateChange.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::transport_state_changed, this));
 		 _session->TransportLooped.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::transport_looped, this));
@@ -230,7 +230,7 @@ MidiClockTicker::tick (const framepos_t& /* transport_frame */, pframes_t nframe
 			send_position_event (llrint (_pos->midi_beats), 0, nframes);
 		} else if (_pos->speed == 1.0f) {
 			send_stop_event (0, nframes);
-			
+
 			if (_pos->frame == 0) {
 				send_start_event (0, nframes);
 			} else {
@@ -249,21 +249,21 @@ MidiClockTicker::tick (const framepos_t& /* transport_frame */, pframes_t nframe
 		if (_pos->speed == 1.0f) {
 			if (_session->get_play_loop()) {
 				assert(_session->locations()->auto_loop_location());
-				
+
 				if (_pos->frame == _session->locations()->auto_loop_location()->start()) {
 					send_start_event (0, nframes);
 				} else {
 					send_continue_event (0, nframes);
 				}
-				
+
 			} else if (_pos->frame == 0) {
 				send_start_event (0, nframes);
 			} else {
 				send_continue_event (0, nframes);
 			}
-			
+
 			// send_midi_clock_event (0);
-			
+
 		} else if (_pos->speed == 0.0f) {
 			send_stop_event (0, nframes);
 			send_position_event (llrint (_pos->midi_beats), 0, nframes);

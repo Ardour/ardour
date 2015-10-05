@@ -135,21 +135,21 @@ ClickBox::on_expose_event (GdkEventExpose *ev)
 	Glib::RefPtr<Gdk::GC> fg_gc (style->get_fg_gc (Gtk::STATE_NORMAL));
 	Glib::RefPtr<Gdk::GC> bg_gc (style->get_bg_gc (Gtk::STATE_NORMAL));
 	Glib::RefPtr<Gdk::Window> win (get_window());
-	
+
 	GdkRectangle base_rect;
 	GdkRectangle draw_rect;
 	gint x, y, width, height, depth;
-	
+
 	win->get_geometry (x, y, width, height, depth);
-	
+
 	base_rect.width = width;
 	base_rect.height = height;
 	base_rect.x = 0;
 	base_rect.y = 0;
-	
+
 	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
 	win->draw_rectangle (bg_gc, true, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
-	
+
 	if (twidth && theight) {
 		win->draw_layout (fg_gc, (width - twidth) / 2, (height - theight) / 2, layout);
 	}

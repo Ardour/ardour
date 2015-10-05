@@ -56,7 +56,7 @@ public:
 
 	void add (Control & control);
 	int index() const { return _index; } // zero based
-	
+
 	void set_route (boost::shared_ptr<ARDOUR::Route>, bool with_messages = true);
 
 	// call all signal handlers manually
@@ -117,7 +117,7 @@ private:
 	void notify_panner_width_changed (bool force_update = true);
 	void notify_active_changed ();
 	void notify_route_deleted ();
-	
+
 	void update_automation ();
 	void update_meter ();
 
@@ -136,7 +136,7 @@ private:
 
 	void do_parameter_display (ARDOUR::AutomationType, float val);
 	void queue_parameter_display (ARDOUR::AutomationType, float val);
-	
+
 	typedef std::map<std::string,boost::shared_ptr<ARDOUR::Bundle> > BundleMap;
 	BundleMap input_bundles;
 	BundleMap output_bundles;

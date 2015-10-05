@@ -28,12 +28,12 @@ class /*LIBAUDIOGRAPHER_API*/ Chunker
 		buffer = new T[chunk_size];
 		add_supported_flag (ProcessContext<T>::EndOfInput);
 	}
-	
+
 	~Chunker()
 	{
 		delete [] buffer;
 	}
-	
+
 	/** Outputs data in \a context in chunks with the size specified in the constructor.
 	  * Note that some calls might not produce any output, while others may produce several.
 	  * \n RT safe
@@ -41,15 +41,15 @@ class /*LIBAUDIOGRAPHER_API*/ Chunker
 	void process (ProcessContext<T> const & context)
 	{
 		check_flags (*this, context);
-		
+
 		framecnt_t frames_left = context.frames();
 		framecnt_t input_position = 0;
-		
+
 		while (position + frames_left >= chunk_size) {
 			// Copy from context to buffer
 			framecnt_t const frames_to_copy = chunk_size - position;
 			TypeUtils<T>::copy (&context.data()[input_position], &buffer[position], frames_to_copy);
-			
+
 			// Update counters
 			position = 0;
 			input_position += frames_to_copy;
@@ -60,25 +60,25 @@ class /*LIBAUDIOGRAPHER_API*/ Chunker
 			if (frames_left) { c_out.remove_flag(ProcessContext<T>::EndOfInput); }
 			ListedSource<T>::output (c_out);
 		}
-		
+
 		if (frames_left) {
 			// Copy the rest of the data
 			TypeUtils<T>::copy (&context.data()[input_position], &buffer[position], frames_left);
 			position += frames_left;
 		}
-		
+
 		if (context.has_flag (ProcessContext<T>::EndOfInput) && position > 0) {
 			ProcessContext<T> c_out (context, buffer, position);
 			ListedSource<T>::output (c_out);
 		}
 	}
 	using Sink<T>::process;
-	
+
   private:
 	framecnt_t chunk_size;
 	framecnt_t position;
 	T * buffer;
-	
+
 };
 
 } // namespace

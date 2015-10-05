@@ -44,7 +44,7 @@ class Polygon;
  *  @todo Draws vertical lines only; could be generalised
  *  to draw lines at any angle.
  */
-	
+
 class LIBCANVAS_API Arrow : public Container
 {
 public:
@@ -66,7 +66,7 @@ public:
 	void set_x (Coord);
 	void set_y0 (Coord);
 	void set_y1 (Coord);
-	
+
         bool covers (Duple const &) const;
 
 private:

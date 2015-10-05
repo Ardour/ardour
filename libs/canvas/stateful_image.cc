@@ -46,7 +46,7 @@ StatefulImage::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 	Rect self = item_to_window (Rect (0, 0, image->get_width(), image->get_height()));
 
 	boost::optional<Rect> draw = self.intersection (area);
-	
+
 	if (!draw) {
 		return;
 	}
@@ -89,14 +89,14 @@ int
 StatefulImage::load_states (const XMLNode& node)
 {
 	const XMLNodeList& nodes (node.children());
-	
+
 	_states.clear ();
-	
+
 	for (XMLNodeList::const_iterator i = nodes.begin(); i != nodes.end(); ++i) {
 		State s;
 		States::size_type id;
 		const XMLProperty* prop;
-		
+
 		if ((prop = (*i)->property ("id")) == 0) {
 			error << _("no ID for state") << endmsg;
 			continue;
@@ -107,12 +107,12 @@ StatefulImage::load_states (const XMLNode& node)
 			error << _("no image for state") << endmsg;
 			continue;
 		}
-		
+
 		if ((s.image = find_image (prop->value())) == 0) {
 			error << string_compose (_("image %1 not found for state"), prop->value()) << endmsg;
 			continue;
 		}
-		
+
 		if (_states.size() < id) {
 			_states.reserve (id);
 		}
@@ -139,7 +139,7 @@ StatefulImage::find_image (const std::string& name)
 					 name) << endmsg;
 		return ImageHandle();
 	}
-	
+
 	return Cairo::ImageSurface::create_from_png (path);
 }
 

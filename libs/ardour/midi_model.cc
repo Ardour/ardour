@@ -321,7 +321,7 @@ MidiModel::NoteDiffCommand::operator() ()
 				_removed_notes.push_back (*i);
 			}
 		}
-		
+
 		if (!side_effect_removals.empty()) {
 			cerr << "SER: \n";
 			for (set<NotePtr>::iterator i = side_effect_removals.begin(); i != side_effect_removals.end(); ++i) {
@@ -364,7 +364,7 @@ MidiModel::NoteDiffCommand::undo ()
 				assert (i->note);
 			}
 		}
-				
+
 		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
 			Property prop = i->property;
 
@@ -439,7 +439,7 @@ MidiModel::NoteDiffCommand::undo ()
 			_model->add_note_unlocked (*i);
 		}
 	}
-	
+
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
@@ -1242,7 +1242,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 	int channel = 0;
 	int program = 0;
 	int bank = 0;
-	
+
 	if ((prop_id = n->property ("id")) != 0) {
 		istringstream s (prop_id->value());
 		s >> id;
@@ -2027,6 +2027,6 @@ void
 MidiModel::control_list_marked_dirty ()
 {
 	AutomatableSequence<Evoral::Beats>::control_list_marked_dirty ();
-	
+
 	ContentsChanged (); /* EMIT SIGNAL */
 }

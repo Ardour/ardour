@@ -34,7 +34,7 @@ public:
 	Rectangle (Canvas*, Rect const &);
 	Rectangle (Item*);
 	Rectangle (Item*, Rect const &);
-	
+
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
 

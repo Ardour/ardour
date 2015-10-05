@@ -52,9 +52,9 @@ public:
 	AutomationListProperty (PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > d, Ptr o, Ptr c)
 		: PBD::SharedStatefulProperty<AutomationList> (d.property_id, o, c)
 	{}
-	
+
 	PBD::PropertyBase* clone () const;
-	
+
 private:
 	/* No copy-construction nor assignment */
 	AutomationListProperty (AutomationListProperty const &);

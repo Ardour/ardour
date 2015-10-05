@@ -79,7 +79,7 @@ fixup_bundle_environment (int, char* [], string & localedir)
 		localedir = "/this/cannot/exist";
 	} else {
 		/* force localedir into the bundle */
-		
+
 		vector<string> lpath;
 		lpath.push_back (bundle_dir);
 		lpath.push_back ("Resources");
@@ -87,7 +87,7 @@ fixup_bundle_environment (int, char* [], string & localedir)
 		localedir = Glib::build_filename (lpath).c_str();
 	}
 #endif
-		
+
 	export_search_path (bundle_dir, "ARDOUR_DLL_PATH", "/lib");
 
 	/* inside an OS X .app bundle, there is no difference

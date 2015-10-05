@@ -137,7 +137,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 	cr->stroke ();
 
 	/* draw ticks + text */
-	
+
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (cr);
 	if (_font_description) {
 		layout->set_font_description (*_font_description);
@@ -155,7 +155,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 		} else {
 			cr->move_to (pos.x, pos.y);
 		}
-		
+
 		switch (m->style) {
 		case Mark::Major:
                         if (_divide_height >= 0) {
@@ -180,7 +180,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 
 			layout->set_text (m->label);
 			logical = layout->get_pixel_logical_extents ();
-			
+
                         if (_divide_height >= 0) {
                                 cr->move_to (pos.x + 2.0, self.y0 + _divide_height + logical.get_y() + 2.0); /* 2 pixel padding below divider */
                         } else {

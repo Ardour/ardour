@@ -32,7 +32,7 @@ class Command;
 namespace PBD {
 
 class LIBPBD_API PropertyList;
-class LIBPBD_API StatefulDiffCommand;	
+class LIBPBD_API StatefulDiffCommand;
 
 /** A unique identifier for a property of a Stateful object */
 typedef GQuark PropertyID;
@@ -41,7 +41,7 @@ template<typename T>
 struct LIBPBD_TEMPLATE_API PropertyDescriptor {
 	PropertyDescriptor () : property_id (0) {}
 	PropertyDescriptor (PropertyID pid) : property_id (pid) {}
-	
+
 	PropertyID property_id;
 	typedef T value_type;
 };
@@ -121,7 +121,7 @@ public:
 
 	/** Invert the changes in this property */
 	virtual void invert () = 0;
-	
+
 
 	/* TRANSFERRING HISTORY TO / FROM A StatefulDiffCommand */
 
@@ -129,7 +129,7 @@ public:
 	 *  StatefulDiffCommand node.
 	 */
 	virtual void get_changes_as_xml (XMLNode *) const = 0;
-	
+
         /** If this Property has changed, clone it and add it to a given list.
 	 *  Used for making StatefulDiffCommands.
 	 */
@@ -145,7 +145,7 @@ public:
 
 
 	/* VARIOUS */
-	
+
 	virtual PropertyBase* clone () const = 0;
 
 	/** Set this property's current state from another */
@@ -158,12 +158,12 @@ public:
 		return _property_id == pid;
 	}
 
-protected:	
+protected:
 	/* copy construction only by subclasses */
 	PropertyBase (PropertyBase const & b)
 		: _property_id (b._property_id)
 	{}
-	
+
 private:
 	PropertyID _property_id;
 

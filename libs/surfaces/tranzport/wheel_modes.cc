@@ -102,7 +102,7 @@ TranzportControlProtocol::show_wheel_mode ()
 	if(session->transport_speed() != 0) {
 		show_mini_meter();
 	} else {
-		
+
 		switch (wheel_mode) {
 		case WheelTimeline:
 			text = "Time";
@@ -114,25 +114,25 @@ TranzportControlProtocol::show_wheel_mode ()
 			text = "Shtl";
 			break;
 		}
-		
+
 		switch (wheel_shift_mode) {
 		case WheelShiftGain:
 			text += ":Gain";
 			break;
-					
+
 		case WheelShiftPan:
 			text += ":Pan ";
 			break;
-					
+
 		case WheelShiftMaster:
 			text += ":Mstr";
 			break;
-					
+
 		case WheelShiftMarker:
 			text += ":Mrkr";
 			break;
 		}
-		
+
 		print (1, 0, text.c_str());
 	}
 }

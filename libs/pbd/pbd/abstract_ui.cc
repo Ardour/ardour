@@ -43,7 +43,7 @@ template<typename RequestBuffer> void
 cleanup_request_buffer (void* ptr)
 {
         RequestBuffer* rb = (RequestBuffer*) ptr;
-	
+
 	/* this is called when the thread for which this request buffer was
 	 * allocated dies. That could be before or after the end of the UI
 	 * event loop for which this request buffer provides communication.
@@ -54,7 +54,7 @@ cleanup_request_buffer (void* ptr)
 	 * a request. If the UI has finished processing requests, then
 	 * we will leak this buffer object.
 	 */
-	
+
 	rb->dead = true;
 }
 
@@ -127,7 +127,7 @@ AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_
 	   when the thread exits, and ensures that the buffer is marked
 	   dead. it will then be deleted during a call to handle_ui_requests()
 	*/
-	
+
 	per_thread_request_buffer.set (b);
 }
 
@@ -229,7 +229,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
                      ++tmp;
                      request_buffers.erase (i);
                      i = tmp;
-             } else {		
+             } else {
                      ++i;
              }
         }
@@ -264,7 +264,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
                 if (req->invalidation) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 remove request from its invalidation list\n", name(), pthread_name()));
-			
+
 			/* after this call, if the object referenced by the
 			 * invalidation record is deleted, it will no longer
 			 * try to mark the request as invalid.
@@ -283,7 +283,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		 */
 
                 request_buffer_map_lock.unlock ();
-		
+
 		/* unlock the request lock while we execute the request, so
 		 * that we don't needlessly block other threads (note: not RT
 		 * threads since they have their own queue) from making requests.
@@ -328,7 +328,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 direct dispatch of request type %3\n", name(), pthread_name(), req->type));
 		do_request (req);
 		delete req;
-	} else {	
+	} else {
 
 		/* If called from a different thread, we first check to see if
 		 * the calling thread is registered with this UI. If so, there
@@ -374,7 +374,7 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 	}
 
 	RequestObject *req = get_request (BaseUI::CallSlot);
-	
+
 	if (req == 0) {
 		return;
 	}
@@ -384,7 +384,7 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 	/* copy semantics: copy the functor into the request object */
 
 	req->the_slot = f;
-	
+
 	/* the invalidation record is an object which will carry out
 	 * invalidation of any requests associated with it when it is
 	 * destroyed. it can be null. if its not null, associate this
@@ -401,5 +401,5 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
         }
 
 	send_request (req);
-}	
+}
 

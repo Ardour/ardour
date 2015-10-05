@@ -44,7 +44,7 @@ TypesTest::extend ()
 		CPPUNIT_ASSERT (c.y1 == 130);
 	}
 }
-		
+
 void
 TypesTest::test_safe_add ()
 {

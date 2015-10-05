@@ -62,7 +62,7 @@ PatchChange::PatchChange(MidiRegionView&                   region,
 		UIConfiguration::instance().color_mod ("midi patch change fill", "midi patch change fill"),
 		ArdourCanvas::Duple (x, y),
 		true);
-	
+
 	CANVAS_DEBUG_NAME (_flag, text);
 
 	_flag->Event.connect (sigc::mem_fun (*this, &PatchChange::event_handler));
@@ -98,12 +98,12 @@ PatchChange::initialize_popup_menus()
 		     ++bank) {
 			Glib::RefPtr<Glib::Regex> underscores = Glib::Regex::create("_");
 			std::string replacement(" ");
-			
+
 			Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
-			
+
 			const PatchNameList& patches = (*bank)->patch_name_list();
 			Gtk::Menu::MenuList& patch_menus = patch_bank_menu.items();
-		
+
 			for (PatchNameList::const_iterator patch = patches.begin();
 			     patch != patches.end();
 			     ++patch) {
@@ -131,13 +131,13 @@ PatchChange::initialize_popup_menus()
 
 		const PatchNameList& patches = patch_banks.front()->patch_name_list();
 		Gtk::Menu::MenuList& patch_menus = _popup.items();
-		
+
 		for (PatchNameList::const_iterator patch = patches.begin();
 		     patch != patches.end();
 		     ++patch) {
 			std::string name = (*patch)->name();
 			boost::replace_all (name, "_", " ");
-			
+
 			patch_menus.push_back (
 				Gtk::Menu_Helpers::MenuElem (
 					name,
@@ -158,7 +158,7 @@ PatchChange::event_handler (GdkEvent* ev)
 {
 	/* XXX: icky dcast */
 	Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
-	
+
 	if (!e->internal_editing()) {
 		return false;
 	}
@@ -176,7 +176,7 @@ PatchChange::event_handler (GdkEvent* ev)
 
 				_region.edit_patch_change (this);
 				return true;
-				
+
 			} else if (ev->button.button == 1) {
 				e->drags()->set (new PatchChangeDrag (e, this, &_region), ev);
 				return true;

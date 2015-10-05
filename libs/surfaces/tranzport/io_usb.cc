@@ -97,7 +97,7 @@ TranzportControlProtocol::open_core (struct usb_device* dev)
 		cerr << _("Tranzport: cannot open USB transport") << endmsg;
 		return -1;
 	}
-	
+
 	if (usb_claim_interface (udev, 0) < 0) {
 		cerr << _("Tranzport: cannot claim USB interface") << endmsg;
 		usb_close (udev);
@@ -158,7 +158,7 @@ int TranzportControlProtocol::read(uint8_t *buf, uint32_t timeout_override)
 	return last_read_error;
 }
 
-	
+
 int
 TranzportControlProtocol::write_noretry (uint8_t* cmd, uint32_t timeout_override)
 {
@@ -195,7 +195,7 @@ TranzportControlProtocol::write_noretry (uint8_t* cmd, uint32_t timeout_override
 
 	return 0;
 
-}	
+}
 
 int
 TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
@@ -204,7 +204,7 @@ TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
 	int val;
 	int retry = 0;
 	if(inflight > MAX_TRANZPORT_INFLIGHT) { return (-1); }
-	
+
 	while((val = usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, timeout_override ? timeout_override : timeout))!=8 && retry++ < MAX_RETRY) {
 		printf("usb_interrupt_write failed, retrying: %d\n", val);
 	}
@@ -227,6 +227,6 @@ TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
 	return (write_noretry(cmd,timeout_override));
 #endif
 
-}	
+}
 
 #endif

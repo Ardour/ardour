@@ -39,7 +39,7 @@ class /*LIBPBD_API*/ RingBuffer
 	buf = new T[size];
 	reset ();
 	}
-	
+
 	virtual ~RingBuffer() {
 		delete [] buf;
 	}
@@ -55,7 +55,7 @@ class /*LIBPBD_API*/ RingBuffer
 		g_atomic_int_set (&write_idx, w);
 		g_atomic_int_set (&read_idx, r);
 	}
-	
+
 	guint read  (T *dest, guint cnt);
 	guint write (T const * src,  guint cnt);
 
@@ -66,7 +66,7 @@ class /*LIBPBD_API*/ RingBuffer
 
 	void get_read_vector (rw_vector *);
 	void get_write_vector (rw_vector *);
-	
+
 	void decrement_read_idx (guint cnt) {
 		g_atomic_int_set (&read_idx, (g_atomic_int_get(&read_idx) - cnt) & size_mask);
 	}
@@ -81,10 +81,10 @@ class /*LIBPBD_API*/ RingBuffer
 
 	guint write_space () const {
 		guint w, r;
-		
+
 		w = g_atomic_int_get (&write_idx);
 		r = g_atomic_int_get (&read_idx);
-		
+
 		if (w > r) {
 			return ((r - w + size) & size_mask) - 1;
 		} else if (w < r) {
@@ -93,13 +93,13 @@ class /*LIBPBD_API*/ RingBuffer
 			return size - 1;
 		}
 	}
-	
+
 	guint read_space () const {
 		guint w, r;
-		
+
 		w = g_atomic_int_get (&write_idx);
 		r = g_atomic_int_get (&read_idx);
-		
+
 		if (w > r) {
 			return w - r;
 		} else {
@@ -206,10 +206,10 @@ RingBuffer<T>::get_read_vector (typename RingBuffer<T>::rw_vector *vec)
 	guint free_cnt;
 	guint cnt2;
 	guint w, r;
-	
+
 	w = g_atomic_int_get (&write_idx);
 	r = g_atomic_int_get (&read_idx);
-	
+
 	if (w > r) {
 		free_cnt = w - r;
 	} else {
@@ -230,9 +230,9 @@ RingBuffer<T>::get_read_vector (typename RingBuffer<T>::rw_vector *vec)
 		vec->len[1] = cnt2 & size_mask;
 
 	} else {
-		
+
 		/* Single part vector: just the rest of the buffer */
-		
+
 		vec->buf[0] = &buf[r];
 		vec->len[0] = free_cnt;
 		vec->buf[1] = 0;
@@ -247,10 +247,10 @@ RingBuffer<T>::get_write_vector (typename RingBuffer<T>::rw_vector *vec)
 	guint free_cnt;
 	guint cnt2;
 	guint w, r;
-	
+
 	w = g_atomic_int_get (&write_idx);
 	r = g_atomic_int_get (&read_idx);
-	
+
 	if (w > r) {
 		free_cnt = ((r - w + size) & size_mask) - 1;
 	} else if (w < r) {
@@ -258,11 +258,11 @@ RingBuffer<T>::get_write_vector (typename RingBuffer<T>::rw_vector *vec)
 	} else {
 		free_cnt = size - 1;
 	}
-	
+
 	cnt2 = w + free_cnt;
 
 	if (cnt2 > size) {
-		
+
 		/* Two part vector: the rest of the buffer after the
 		   current write ptr, plus some from the start of
 		   the buffer.

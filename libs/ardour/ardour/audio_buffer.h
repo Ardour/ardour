@@ -103,7 +103,7 @@ public:
 		const Sample* const src_raw = src + src_offset;
 
 		mix_buffers_no_gain(dst_raw, src_raw, len);
-		
+
 		_silent = false;
 		_written = true;
 	}

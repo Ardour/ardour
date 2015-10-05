@@ -648,7 +648,7 @@ SystemExec::terminate ()
 	/* if pid is non-zero, the child task is still executing (i.e. it did
 	 * not exit in response to stdin being closed). try to kill it.
 	 */
-	
+
 	if (pid) {
 		::kill(pid, SIGTERM);
 		::usleep(250000);

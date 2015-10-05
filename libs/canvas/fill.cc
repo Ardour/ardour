@@ -84,19 +84,19 @@ void
 Fill::setup_gradient_context (Cairo::RefPtr<Cairo::Context> context, Rect const & self, Duple const & draw_origin) const
 {
 	Cairo::RefPtr<Cairo::LinearGradient> _gradient;
-	
+
 	if (_vertical_gradient) {
 		_gradient = Cairo::LinearGradient::create (draw_origin.x, self.y0, draw_origin.x, self.y1);
 	} else {
 		_gradient = Cairo::LinearGradient::create (self.x0, draw_origin.y, self.x1, draw_origin.y);
 	}
-	
+
 	for (StopList::const_iterator s = _stops.begin(); s != _stops.end(); ++s) {
 		double r, g, b, a;
 		color_to_rgba (s->second, r, g, b, a);
 		_gradient->add_color_stop_rgba (s->first, r, g, b, a);
 	}
-	
+
 	context->set_source (_gradient);
 }
 

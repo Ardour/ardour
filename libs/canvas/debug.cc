@@ -55,7 +55,7 @@ ArdourCanvas::checkpoint (string group, string message)
 		now.tv_usec += 1e6;
 		--now.tv_sec;
 	}
-		
+
 	map<string, struct timeval>::iterator last = last_time.find (group);
 
 	if (last != last_time.end ()) {

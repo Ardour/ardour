@@ -14,7 +14,7 @@ namespace Gtkmm2ext {
 		ExplicitActive,
 		ImplicitActive,
 	};
-	
+
 	enum LIBGTKMM2EXT_API VisualState {
 		/* these can be OR-ed together */
 		NoVisualState = 0x0,

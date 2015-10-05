@@ -40,7 +40,7 @@ class /*LIBPBD_API*/ RingBufferNPT
 		buf = new T[size];
 		reset ();
 	}
-	
+
 	virtual ~RingBufferNPT () {
 		delete [] buf;
 	}
@@ -56,7 +56,7 @@ class /*LIBPBD_API*/ RingBufferNPT
 		g_atomic_int_set (&write_ptr, w);
 		g_atomic_int_set (&read_ptr, r);
 	}
-	
+
 	size_t  read  (T *dest, size_t cnt);
 	size_t  write (const T *src, size_t cnt);
 
@@ -67,7 +67,7 @@ class /*LIBPBD_API*/ RingBufferNPT
 
 	void get_read_vector (rw_vector *);
 	void get_write_vector (rw_vector *);
-	
+
 	void decrement_read_ptr (size_t cnt) {
 		g_atomic_int_set (&read_ptr, (g_atomic_int_get(&read_ptr) - cnt) % size);
 	}
@@ -82,10 +82,10 @@ class /*LIBPBD_API*/ RingBufferNPT
 
 	size_t write_space () {
 		size_t w, r;
-		
+
 		w = g_atomic_int_get (&write_ptr);
 		r = g_atomic_int_get (&read_ptr);
-		
+
 		if (w > r) {
 			return ((r - w + size) % size) - 1;
 		} else if (w < r) {
@@ -94,13 +94,13 @@ class /*LIBPBD_API*/ RingBufferNPT
 			return size - 1;
 		}
 	}
-	
+
 	size_t read_space () {
 		size_t w, r;
-		
+
 		w = g_atomic_int_get (&write_ptr);
 		r = g_atomic_int_get (&read_ptr);
-		
+
 		if (w > r) {
 			return w - r;
 		} else {
@@ -204,10 +204,10 @@ RingBufferNPT<T>::get_read_vector (typename RingBufferNPT<T>::rw_vector *vec)
 	size_t free_cnt;
 	size_t cnt2;
 	size_t w, r;
-	
+
 	w = g_atomic_int_get (&write_ptr);
 	r = g_atomic_int_get (&read_ptr);
-	
+
 	if (w > r) {
 		free_cnt = w - r;
 	} else {
@@ -228,9 +228,9 @@ RingBufferNPT<T>::get_read_vector (typename RingBufferNPT<T>::rw_vector *vec)
 		vec->len[1] = cnt2 % size;
 
 	} else {
-		
+
 		/* Single part vector: just the rest of the buffer */
-		
+
 		vec->buf[0] = &buf[r];
 		vec->len[0] = free_cnt;
 		vec->buf[1] = 0;
@@ -244,10 +244,10 @@ RingBufferNPT<T>::get_write_vector (typename RingBufferNPT<T>::rw_vector *vec)
 	size_t free_cnt;
 	size_t cnt2;
 	size_t w, r;
-	
+
 	w = g_atomic_int_get (&write_ptr);
 	r = g_atomic_int_get (&read_ptr);
-	
+
 	if (w > r) {
 		free_cnt = ((r - w + size) % size) - 1;
 	} else if (w < r) {
@@ -255,11 +255,11 @@ RingBufferNPT<T>::get_write_vector (typename RingBufferNPT<T>::rw_vector *vec)
 	} else {
 		free_cnt = size - 1;
 	}
-	
+
 	cnt2 = w + free_cnt;
 
 	if (cnt2 > size) {
-		
+
 		/* Two part vector: the rest of the buffer after the
 		   current write ptr, plus some from the start of
 		   the buffer.

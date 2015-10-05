@@ -159,7 +159,7 @@ Searchpath::add_subdirectory_to_paths (const string& subdir)
 		// the search path rather than replace?
 		*i = Glib::build_filename (*i, subdir);
 	}
-	
+
 	return *this;
 }
 

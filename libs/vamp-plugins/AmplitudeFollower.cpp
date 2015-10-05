@@ -108,7 +108,7 @@ AmplitudeFollower::initialise(size_t channels, size_t stepSize, size_t blockSize
 	channels > getMaxChannelCount()) return false;
 
     m_stepSize = std::min(stepSize, blockSize);
-	
+
     // Translate the coefficients
     // from their "convenient" 60dB convergence-time values
     // to real coefficients
@@ -148,7 +148,7 @@ AmplitudeFollower::ParameterList
 AmplitudeFollower::getParameterDescriptors() const
 {
     ParameterList list;
-	
+
     ParameterDescriptor att;
     att.identifier = "attack";
     att.name = "Attack time";
@@ -210,14 +210,14 @@ AmplitudeFollower::process(const float *const *inputBuffers,
     float previn = m_previn;
 
     FeatureSet returnFeatures;
-	
+
     float val;
     float peak = 0.0f;
 
     for (size_t i = 0; i < m_stepSize; ++i) {
 
         val = fabs(inputBuffers[0][i]);
-		
+
         if (val < previn) {
             val = val + (previn - val) * m_relaxcoef;
         } else {

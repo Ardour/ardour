@@ -34,12 +34,12 @@ ge_hsb_from_color (const CairoColor *color,
 	}
 
 	*brightness = (max + min) / 2;
- 	
+
 	if (fabs(max - min) < 0.0001)
 	{
 		*hue = 0;
 		*saturation = 0;
-	}	
+	}
 	else
 	{
 		if (*brightness <= 0.5)
@@ -81,7 +81,7 @@ ge_color_from_hsb (gdouble hue,
 	gdouble m1, m2, m3;
 
 	if (!color) return;
-  	
+
 	if (brightness <= 0.5)
 		m2 = brightness * (1 + saturation);
 	else
@@ -93,7 +93,7 @@ ge_color_from_hsb (gdouble hue,
 	hue_shift[1] = hue;
 	hue_shift[2] = hue - 120;
 
-	color_shift[0] = color_shift[1] = color_shift[2] = brightness;	
+	color_shift[0] = color_shift[1] = color_shift[2] = brightness;
 
 	i = (saturation == 0)?3:0;
 
@@ -114,12 +114,12 @@ ge_color_from_hsb (gdouble hue,
 			color_shift[i] = m1 + (m2 - m1) * (240 - m3) / 60;
 		else
 			color_shift[i] = m1;
-	}	
+	}
 
 	color->r = color_shift[0];
 	color->g = color_shift[1];
-	color->b = color_shift[2];	
-	color->a = 1.0;	
+	color->b = color_shift[2];
+	color->a = 1.0;
 }
 
 void
@@ -201,7 +201,7 @@ ge_shade_color(const CairoColor *base, gdouble shade_ratio, CairoColor *composit
 	saturation = MAX(saturation, 0.0);
 
 	ge_color_from_hsb (hue, saturation, brightness, composite);
-	composite->a = base->a;	
+	composite->a = base->a;
 }
 
 void
@@ -219,7 +219,7 @@ ge_saturate_color (const CairoColor *base, gdouble saturate_level, CairoColor *c
 	saturation = MAX(saturation, 0.0);
 
 	ge_color_from_hsb (hue, saturation, brightness, composite);
-	composite->a = base->a;	
+	composite->a = base->a;
 }
 
 void
@@ -261,7 +261,7 @@ ge_cairo_set_color (cairo_t *cr, const CairoColor *color)
 {
 	g_return_if_fail (cr && color);
 
-	cairo_set_source_rgba (cr, color->r, color->g, color->b, color->a);	
+	cairo_set_source_rgba (cr, color->r, color->g, color->b, color->a);
 }
 
 void
@@ -282,7 +282,7 @@ ge_cairo_pattern_add_color_stop_color (cairo_pattern_t *pattern,
 {
 	g_return_if_fail (pattern && color);
 
-	cairo_pattern_add_color_stop_rgba (pattern, offset, color->r, color->g, color->b, color->a);	
+	cairo_pattern_add_color_stop_rgba (pattern, offset, color->r, color->g, color->b, color->a);
 }
 
 void
@@ -302,7 +302,7 @@ ge_cairo_pattern_add_color_stop_shade(cairo_pattern_t *pattern,
 		ge_shade_color(color, shade, &shaded);
 	}
 
-	ge_cairo_pattern_add_color_stop_color(pattern, offset, &shaded);	
+	ge_cairo_pattern_add_color_stop_color(pattern, offset, &shaded);
 }
 
 /* This function will draw a rounded corner at position x,y. If the radius
@@ -370,22 +370,22 @@ ge_cairo_rounded_rectangle (cairo_t *cr,
 		cairo_move_to (cr, x+radius, y);
 	else
 		cairo_move_to (cr, x, y);
-	
+
 	if (corners & CR_CORNER_TOPRIGHT)
 		cairo_arc (cr, x+w-radius, y+radius, radius, G_PI * 1.5, G_PI * 2);
 	else
 		cairo_line_to (cr, x+w, y);
-	
+
 	if (corners & CR_CORNER_BOTTOMRIGHT)
 		cairo_arc (cr, x+w-radius, y+h-radius, radius, 0, G_PI * 0.5);
 	else
 		cairo_line_to (cr, x+w, y+h);
-	
+
 	if (corners & CR_CORNER_BOTTOMLEFT)
 		cairo_arc (cr, x+radius,   y+h-radius, radius, G_PI * 0.5, G_PI);
 	else
 		cairo_line_to (cr, x, y+h);
-	
+
 	if (corners & CR_CORNER_TOPLEFT)
 		cairo_arc (cr, x+radius,   y+radius,   radius, G_PI, G_PI * 1.5);
 	else
@@ -425,7 +425,7 @@ ge_cairo_simple_border (cairo_t *cr,
 	g_return_if_fail (cr != NULL);
 	g_return_if_fail (tl != NULL);
 	g_return_if_fail (br != NULL);
-	
+
 
 	solid_color = (tl == br) || ((tl->r == br->r) && (tl->g == br->g) && (tl->b == br->b) && (tl->a == br->a));
 
@@ -437,16 +437,16 @@ ge_cairo_simple_border (cairo_t *cr,
 
 	if (topleft_overlap)
 	{
-		ge_cairo_set_color(cr, br);	
+		ge_cairo_set_color(cr, br);
 
 		cairo_move_to(cr, x + 0.5, y + height - 0.5);
 		cairo_line_to(cr, x + width - 0.5, y + height - 0.5);
 		cairo_line_to(cr, x + width - 0.5, y + 0.5);
-		
+
 		cairo_stroke (cr);
 	}
 
-	ge_cairo_set_color(cr, tl);	
+	ge_cairo_set_color(cr, tl);
 
 	cairo_move_to(cr, x + 0.5, y + height - 0.5);
 	cairo_line_to(cr, x + 0.5, y + 0.5);
@@ -457,7 +457,7 @@ ge_cairo_simple_border (cairo_t *cr,
 		if (!solid_color)
 		{
 			cairo_stroke(cr);
-			ge_cairo_set_color(cr, br);	
+			ge_cairo_set_color(cr, br);
 		}
 
 		cairo_move_to(cr, x + 0.5, y + height - 0.5);
@@ -479,7 +479,7 @@ void ge_cairo_polygon (cairo_t *cr,
 
 	cairo_save(cr);
 
-	ge_cairo_set_color(cr, color);	
+	ge_cairo_set_color(cr, color);
 	cairo_move_to(cr, points[0].x, points[0].y);
 
 	for (i = 1; i < npoints; i++)
@@ -490,7 +490,7 @@ void ge_cairo_polygon (cairo_t *cr,
 			cairo_line_to(cr, points[i].x, points[i].y);
 		}
 	}
-	
+
 	if ((points[npoints-1].x != points[0].x) ||
 		(points[npoints-1].y != points[0].y))
 	{
@@ -511,7 +511,7 @@ void ge_cairo_line (cairo_t *cr,
 {
 	cairo_save(cr);
 
-	ge_cairo_set_color(cr, color);	
+	ge_cairo_set_color(cr, color);
 	cairo_set_line_width (cr, 1);
 
 	cairo_move_to(cr, x1 + 0.5, y1 + 0.5);
@@ -531,13 +531,13 @@ ge_cairo_mirror (cairo_t     *cr,
                  gint        *height)
 {
 	cairo_matrix_t matrix;
-	
+
 	cairo_matrix_init_identity (&matrix);
-	
+
 	cairo_translate (cr, *x, *y);
 	*x = 0;
 	*y = 0;
-	
+
 	if (mirror & CR_MIRROR_HORIZONTAL)
 	{
 		cairo_matrix_scale (&matrix, -1, 1);
@@ -566,7 +566,7 @@ ge_cairo_exchange_axis (cairo_t  *cr,
 	cairo_matrix_init (&matrix, 0, 1, 1, 0, 0, 0);
 
 	cairo_transform (cr, &matrix);
-	
+
 	/* swap width/height */
 	tmp = *width;
 	*x = 0;
@@ -658,7 +658,7 @@ ge_cairo_pattern_fill(cairo_t *canvas,
  ***********************************************/
 CairoPattern*
 ge_cairo_color_pattern(CairoColor *base)
-{	
+{
 	CairoPattern * result = g_new0(CairoPattern, 1);
 
 	#if  ((CAIRO_VERSION_MAJOR < 1) || ((CAIRO_VERSION_MAJOR == 1) && (CAIRO_VERSION_MINOR < 2)))
@@ -674,7 +674,7 @@ ge_cairo_color_pattern(CairoColor *base)
 							base->a);
 
 	result->operator = CAIRO_OPERATOR_SOURCE;
-	
+
 	return result;
 }
 
@@ -685,7 +685,7 @@ ge_cairo_color_pattern(CairoColor *base)
  ***********************************************/
 CairoPattern*
 ge_cairo_pixbuf_pattern(GdkPixbuf *pixbuf)
-{	
+{
 	CairoPattern * result = g_new0(CairoPattern, 1);
 
 	cairo_t *canvas;
@@ -701,7 +701,7 @@ ge_cairo_pixbuf_pattern(GdkPixbuf *pixbuf)
 
 	width = gdk_pixbuf_get_width(pixbuf);
 	height = gdk_pixbuf_get_height(pixbuf);
-	
+
 	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
 
 	canvas = cairo_create(surface);
@@ -728,7 +728,7 @@ ge_cairo_pixbuf_pattern(GdkPixbuf *pixbuf)
  ***********************************************/
 CairoPattern*
 ge_cairo_pixmap_pattern(GdkPixmap *pixmap)
-{	
+{
 	CairoPattern * result = NULL;
 
 	GdkPixbuf * pixbuf;
@@ -741,7 +741,7 @@ ge_cairo_pixmap_pattern(GdkPixmap *pixmap)
 				0, 0, 0, 0, width, height);
 
 	result = ge_cairo_pixbuf_pattern(pixbuf);
-	
+
 	g_object_unref (pixbuf);
 
 	return result;
@@ -762,7 +762,7 @@ ge_cairo_linear_shade_gradient_pattern(CairoColor *base,
 						gboolean vertical)
 {
 	CairoPattern * result = g_new0(CairoPattern, 1);
-	
+
 	#if  ((CAIRO_VERSION_MAJOR < 1) || ((CAIRO_VERSION_MAJOR == 1) && (CAIRO_VERSION_MINOR < 2)))
 		result->type = CAIRO_PATTERN_TYPE_LINEAR;
 	#endif
@@ -796,7 +796,7 @@ ge_cairo_pattern_destroy(CairoPattern *pattern)
 	{
 		if (pattern->handle)
 			cairo_pattern_destroy(pattern->handle);
-			
+
 		g_free(pattern);
 	}
 }
@@ -810,7 +810,7 @@ const gchar*
 g_module_check_init (GModule *module)
 {
 	(void) module;
-	
+
 	return gtk_check_version (GTK_MAJOR_VERSION,
 				  GTK_MINOR_VERSION,
 				  GTK_MICRO_VERSION - GTK_INTERFACE_AGE);

@@ -78,7 +78,7 @@ ButtonJoiner::ButtonJoiner (const std::string& str, Gtk::Widget& lw, Gtk::Widget
 
 	border_color = UIConfiguration::instance().color (string_compose ("%1: border end", name));
 	UINT_TO_RGBA (border_color, &r, &g, &b, &a);
-	
+
 	border_r = r/255.0;
 	border_g = g/255.0;
 	border_b = b/255.0;
@@ -104,7 +104,7 @@ void
 ButtonJoiner::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	double h = get_height();
-	
+
 	if (!get_active()) {
 		cairo_set_source (cr, inactive_fill_pattern);
 	} else {
@@ -113,25 +113,25 @@ ButtonJoiner::render (cairo_t* cr, cairo_rectangle_t*)
 
 	if (!central_link) {
 		/* outer rect */
-		
+
 		Gtkmm2ext::rounded_top_rectangle (cr, 0, 0, get_width(), h, 8);
 		cairo_fill_preserve (cr);
-		
+
 		/* outer edge */
-		
+
 		cairo_set_line_width (cr, 1.5);
 		cairo_set_source_rgb (cr, border_r, border_g, border_b);
 		cairo_stroke (cr);
-		
+
 		/* inner "edge" */
-		
+
 		Gtkmm2ext::rounded_top_rectangle (cr, 8, 8, get_width() - 16, h - 8, 6);
 		cairo_stroke (cr);
 	} else {
 		if (get_active()) {
 			Gtkmm2ext::rounded_top_rectangle (cr, 0, 0, (get_width() - 20.0)/2.0 , h, 8);
 			cairo_fill_preserve (cr);
-			
+
 			Gtkmm2ext::rounded_top_rectangle (cr, (get_width() - 20.)/2.0 + 20.0, 0.0,
 							  (get_width() - 20.0)/2.0 , h, 8);
 			cairo_fill_preserve (cr);
@@ -146,7 +146,7 @@ ButtonJoiner::render (cairo_t* cr, cairo_rectangle_t*)
 			cairo_set_line_width (cr, 1.5);
 			cairo_fill_preserve (cr);
 			cairo_set_source_rgb (cr, border_r, border_g, border_b);
-			cairo_stroke (cr);		
+			cairo_stroke (cr);
 		}
 	}
 }
@@ -203,7 +203,7 @@ ButtonJoiner::action_sensitivity_changed ()
 	} else {
 		set_visual_state (Gtkmm2ext::VisualState (visual_state() | Gtkmm2ext::Insensitive));
 	}
-	
+
 }
 
 void
@@ -231,7 +231,7 @@ ButtonJoiner::action_toggled ()
 	if (tact) {
 		set_active (tact->get_active());
 	}
-}	
+}
 
 void
 ButtonJoiner::set_active_state (Gtkmm2ext::ActiveState s)

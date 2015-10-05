@@ -84,7 +84,7 @@ public: enum Type
 //********************************************************************************
 //    Files
 
-//! file (and resource container) opening permissions			
+//! file (and resource container) opening permissions
 // Note: When opening with eFMWriteOnly on existing file, writing to the file will append, not overwrite, Shai, 9/8/2007.
 enum 	WEPermitions{ eFMReadOnly, eFMWriteOnly, eFMReadWrite};
 
@@ -133,7 +133,7 @@ enum WESystemFolders{
 
 	eWavesPreferencesFolder2, // Mac: "/Users/username/Library/Preferences/Waves Audio"
                               // Win: "C:\Users\username\AppData\Roaming\Waves Audio\Preferences"
-		
+
 	eNumberOfSystemFolders
 };
 

@@ -224,7 +224,7 @@ AutomationList::stop_touch (bool mark, double)
         if (_state == Touch) {
 
                 if (mark) {
-			
+
 			/* XXX need to mark the last added point with the
 			 * current time
 			 */
@@ -520,4 +520,4 @@ AutomationListProperty::clone () const
 		boost::shared_ptr<AutomationList> (new AutomationList (*this->_current.get()))
 		);
 }
-	
+

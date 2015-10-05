@@ -45,7 +45,7 @@ class Graph;
 
 class Route;
 class Session;
-class GraphEdges;	
+class GraphEdges;
 
 typedef boost::shared_ptr<GraphNode> node_ptr_t;
 

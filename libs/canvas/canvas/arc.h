@@ -63,7 +63,7 @@ private:
         double _arc_degrees;
         double _start_degrees;
 };
-	
+
 }
 
 #endif

@@ -599,7 +599,7 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 	   e.g. Playlist::notify_region_moved doesn't use an out-of-date last_position.
 	*/
 	_last_position = _position;
-	
+
 	if (_position != pos) {
 		_position = pos;
 
@@ -1738,4 +1738,4 @@ Region::latest_possible_frame () const
 
 	return _position + (minlen - _start) - 1;
 }
-	
+

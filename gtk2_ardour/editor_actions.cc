@@ -460,7 +460,7 @@ Editor::register_actions ()
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionGroup::create (X_("MouseMode"));
 	RadioAction::Group mouse_mode_group;
 
-	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Object Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));	
+	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Object Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
 	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
 	smart_mode_button.set_related_action (smart_mode_action);
 	smart_mode_button.set_text (_("Smart"));
@@ -471,27 +471,27 @@ Editor::register_actions ()
 	mouse_move_button.set_icon (Gtkmm2ext::ArdourIcon::ToolGrab);
 	mouse_move_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));	
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));
 	mouse_select_button.set_related_action (act);
 	mouse_select_button.set_icon (Gtkmm2ext::ArdourIcon::ToolRange);
 	mouse_select_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseDraw));	
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseDraw));
 	mouse_draw_button.set_related_action (act);
 	mouse_draw_button.set_icon (Gtkmm2ext::ArdourIcon::ToolDraw);
 	mouse_draw_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));	
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));
 	mouse_audition_button.set_related_action (act);
 	mouse_audition_button.set_icon (Gtkmm2ext::ArdourIcon::ToolAudition);
 	mouse_audition_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));	
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));
 	mouse_timefx_button.set_related_action (act);
 	mouse_timefx_button.set_icon (Gtkmm2ext::ArdourIcon::ToolStretch);
 	mouse_timefx_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Content Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseContent));	
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Content Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseContent));
 	mouse_content_button.set_related_action (act);
 	mouse_content_button.set_icon (Gtkmm2ext::ArdourIcon::ToolContent);
 	mouse_content_button.set_name ("mouse mode button");
@@ -502,7 +502,7 @@ Editor::register_actions ()
 		mouse_cut_button.set_icon (Gtkmm2ext::ArdourIcon::ToolCut);
 		mouse_cut_button.set_name ("mouse mode button");
 	}
-	
+
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), sigc::bind (sigc::mem_fun(*this, &Editor::step_mouse_mode), true));
 
 	RadioAction::Group edit_point_group;
@@ -601,7 +601,7 @@ Editor::register_actions ()
 	/* set defaults here */
 
 	no_ruler_shown_update = true;
-	
+
 	if (Profile->get_trx()) {
 		ruler_marker_action->set_active (true);
 		ruler_meter_action->set_active (false);
@@ -613,7 +613,7 @@ Editor::register_actions ()
 		ruler_cd_marker_action->set_active (false);
 		ruler_timecode_action->set_active (false);
 		ruler_minsec_action->set_active (true);
-	} else {	
+	} else {
 		ruler_marker_action->set_active (true);
 		ruler_meter_action->set_active (true);
 		ruler_tempo_action->set_active (true);
@@ -741,7 +741,7 @@ void
 Editor::load_bindings ()
 {
         /* XXX move this to a better place */
-	
+
         key_bindings.set_action_map (editor_action_map);
 
 	std::string binding_file;
@@ -1632,7 +1632,7 @@ void
 Editor::toggle_sound_midi_notes ()
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("sound-midi-notes"));
-	
+
 	if (act) {
 		bool s = UIConfiguration::instance().get_sound_midi_notes();
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);

@@ -31,7 +31,7 @@ Choice::Choice (string title, string prompt, vector<string> choices, bool center
 {
 	int n;
 	vector<string>::iterator i;
-	
+
 	if (center) {
 		set_position (Gtk::WIN_POS_CENTER);
 	} else {
@@ -49,7 +49,7 @@ Choice::Choice (string title, string prompt, vector<string> choices, bool center
 
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (*dhbox,  true, false);
-	
+
 	set_has_separator (false);
 	set_resizable (false);
 	show_all_children ();

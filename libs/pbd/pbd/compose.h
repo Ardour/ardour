@@ -174,7 +174,7 @@ namespace StringPrivate
 	  }
 
 	  ++arg_no;
-	
+
 	  return *this;
   }
 
@@ -194,7 +194,7 @@ namespace StringPrivate
 	else if (is_number(fmt[i + 1])) { // aha! a spec!
 	  // save string
 	  output.push_back(fmt.substr(b, i - b));
-	
+
 	  int n = 1;		// number of digits
 	  int spec_no = 0;
 
@@ -207,9 +207,9 @@ namespace StringPrivate
 	  spec_no /= 10;
 	  output_list::iterator pos = output.end();
 	  --pos;		// safe since we have just inserted a string>
-	
+
 	  specs.insert(specification_map::value_type(spec_no, pos));
-	
+
 	  // jump over spec string
 	  i += n;
 	  b = i;

@@ -41,7 +41,7 @@ MIDISceneChanger::MIDISceneChanger (Session& s)
 	, last_program_message_time (-1)
 	, last_delivered_program (-1)
 	, last_delivered_bank (-1)
-	
+
 {
 	/* catch any add/remove/clear etc. for all Locations */
 	_session.locations()->changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
@@ -86,7 +86,7 @@ MIDISceneChanger::gather (const Locations::LocationList& locations)
 				if (msc->bank() >= 0) {
 					have_seen_bank_changes = true;
 				}
-			
+
 				scenes.insert (std::make_pair ((*l)->start(), msc));
 			}
 		}
@@ -164,7 +164,7 @@ MIDISceneChanger::run (framepos_t start, framepos_t end)
 	}
 
 	Glib::Threads::RWLock::ReaderLock lm (scene_lock, Glib::Threads::TRY_LOCK);
-	
+
 	if (!lm.locked()) {
 		return;
 	}
@@ -179,9 +179,9 @@ MIDISceneChanger::run (framepos_t start, framepos_t end)
 		if (i->first >= end) {
 			break;
 		}
-	
+
 		rt_deliver (mbuf, i->first - start, i->second);
-		
+
 		++i;
 	}
 }
@@ -197,9 +197,9 @@ MIDISceneChanger::locate (framepos_t pos)
 		if (scenes.empty()) {
 			return;
 		}
-		
+
 		Scenes::const_iterator i = scenes.lower_bound (pos);
-		
+
 		if (i != scenes.end()) {
 
 			if (i->first != pos) {
@@ -223,7 +223,7 @@ MIDISceneChanger::locate (framepos_t pos)
 	if (msc->program() != last_delivered_program || msc->bank() != last_delivered_bank) {
 		non_rt_deliver (msc);
 	}
-}		
+}
 
 void
 MIDISceneChanger::set_input_port (MIDI::Port* mp)
@@ -231,9 +231,9 @@ MIDISceneChanger::set_input_port (MIDI::Port* mp)
 	input_port = mp;
 
 	incoming_connections.drop_connections();
-	
+
 	if (input_port) {
-		
+
 		/* midi port is asynchronous. MIDI parsing will be carried out
 		 * by the MIDI UI thread which will emit the relevant signals
 		 * and thus invoke our callbacks as necessary.
@@ -303,14 +303,14 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 
 	if (!loc) {
 		/* create a new marker at the desired position */
-		
+
 		std::string new_name;
 
 		if (!locations->next_available_name (new_name, _("Scene "))) {
 			std::cerr << "No new marker name available\n";
 			return;
 		}
-		
+
 		loc = new Location (_session, time, time, new_name, Location::IsMark);
 		new_mark = true;
 	}
@@ -336,7 +336,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 	}
 
 	loc->set_scene_change (boost::shared_ptr<MIDISceneChange> (msc));
-	
+
 	/* this will generate a "changed" signal to be emitted by locations,
 	   and we will call ::gather() to update our list of MIDI events.
 	*/

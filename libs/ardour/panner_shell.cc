@@ -187,7 +187,7 @@ PannerShell::set_state (const XMLNode& node, int version)
 	}
 
 	_panner.reset ();
-	
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		if ((*niter)->name() == X_("Panner")) {
@@ -406,7 +406,7 @@ PannerShell::set_bypassed (bool yn)
 	if (yn == _bypassed) {
 		return;
 	}
-	
+
 	_bypassed = yn;
 	_session.set_dirty ();
 	Changed (); /* EMIT SIGNAL */

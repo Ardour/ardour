@@ -305,7 +305,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	xmlSetGenericErrorFunc (this, libxml_generic_error_func);
 	xmlSetStructuredErrorFunc (this, libxml_structured_error_func);
-	
+
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	UIConfiguration::instance().map_parameters (pc);
@@ -441,7 +441,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	/* Trigger setting up the color scheme and loading the GTK RC file */
 
 	UIConfiguration::instance().load_rc_file (false);
-	
+
 	_process_thread = new ProcessThread ();
 	_process_thread->init ();
 

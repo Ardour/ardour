@@ -114,16 +114,16 @@ Editor::export_region ()
 	boost::shared_ptr<Region> r = selection->regions.front()->region();
 	boost::shared_ptr<AudioRegion> audio_region = boost::dynamic_pointer_cast<AudioRegion>(r);
 	boost::shared_ptr<MidiRegion> midi_region = boost::dynamic_pointer_cast<MidiRegion>(r);
-	
+
 	if (audio_region) {
-		
+
 		RouteTimeAxisView & rtv (dynamic_cast<RouteTimeAxisView &> (selection->regions.front()->get_time_axis_view()));
 		AudioTrack & track (dynamic_cast<AudioTrack &> (*rtv.route()));
-		
+
 		ExportRegionDialog dialog (*this, *(audio_region.get()), track);
 		dialog.set_session (_session);
 		dialog.run ();
-		
+
 	} else if (midi_region) {
 
 		MidiExportDialog dialog (*this, midi_region);
@@ -146,13 +146,13 @@ Editor::export_region ()
 					       true,
 					       Gtk::MESSAGE_WARNING,
 					       Gtk::BUTTONS_NONE);
-			
+
 			checker.set_title (_("File Exists!"));
 
 			checker.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 			checker.add_button (_("Overwrite Existing File"), RESPONSE_ACCEPT);
 			checker.set_default_response (RESPONSE_CANCEL);
-			
+
 			checker.set_wmclass (X_("midi_export_file_exists"), PROGRAM_NAME);
 			checker.set_position (Gtk::WIN_POS_MOUSE);
 
@@ -169,7 +169,7 @@ Editor::export_region ()
 			default:
 				return;
 			}
-			
+
 		}
 
 		(void) midi_region->clone (path);

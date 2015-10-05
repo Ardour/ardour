@@ -75,7 +75,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	   can be put below ghost regions from MIDI underlays
 	*/
 	_note_lines = new ArdourCanvas::LineSet (_canvas_group, ArdourCanvas::LineSet::Horizontal);
-	
+
 	_note_lines->Event.connect(
 		sigc::bind(sigc::mem_fun(_trackview.editor(),
 		                         &PublicEditor::canvas_stream_view_event),
@@ -345,7 +345,7 @@ MidiStreamView::draw_note_lines()
 
 		double h = y - prev_y;
 		double mid = y + (h/2.0);
-				
+
 		if (height > 1.0) { // XXX ? should that not be h >= 1 ?
 			_note_lines->add (mid, h, color);
 		}
@@ -647,7 +647,7 @@ void
 MidiStreamView::resume_updates ()
 {
 	_updates_suspended = false;
-	
+
 	draw_note_lines ();
 	apply_note_range_to_regions ();
 

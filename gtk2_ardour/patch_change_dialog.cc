@@ -62,7 +62,7 @@ PatchChangeDialog::PatchChangeDialog (
 	int r = 0;
 
 	if (_time_converter) {
-		
+
 		l = manage (left_aligned_label (_("Time")));
 		t->attach (*l, 0, 1, r, r + 1);
 		t->attach (_time, 1, 2, r, r + 1);
@@ -84,7 +84,7 @@ PatchChangeDialog::PatchChangeDialog (
 	t->attach (*l, 0, 1, r, r + 1);
 	t->attach (_patch_combo, 1, 2, r, r + 1);
 	++r;
-	
+
 	_patch_combo.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::patch_combo_changed));
 
 	l = manage (left_aligned_label (_("Channel")));
@@ -180,7 +180,7 @@ void
 PatchChangeDialog::set_active_bank_combo ()
 {
 	_current_patch_bank.reset ();
-	
+
 	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns = _info.get_patches (_channel.get_value_as_int() - 1);
 
 	if (!cns) {
@@ -215,7 +215,7 @@ PatchChangeDialog::bank_combo_changed ()
 	if (_ignore_signals) {
 		return;
 	}
-	
+
 	_current_patch_bank.reset ();
 
 	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns = _info.get_patches (_channel.get_value_as_int() - 1);
@@ -278,7 +278,7 @@ PatchChangeDialog::set_active_patch_combo ()
 		_ignore_signals = false;
 		return;
 	}
-	
+
 	const MIDI::Name::PatchNameList& patches = _current_patch_bank->patch_name_list ();
 	for (MIDI::Name::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
 		string n = (*j)->name ();
@@ -296,7 +296,7 @@ PatchChangeDialog::set_active_patch_combo ()
 	_ignore_signals = true;
 	_patch_combo.set_active (-1);
 	_ignore_signals = false;
-}	
+}
 
 /** Set _program from the current state of _patch_combo */
 void

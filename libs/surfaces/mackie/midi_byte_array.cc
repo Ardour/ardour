@@ -34,7 +34,7 @@ MidiByteArray::MidiByteArray (size_t size, MIDI::byte array[])
 	for  (size_t i = 0; i < size; ++i)
 	{
 		push_back (array[i]);
-	}			
+	}
 }
 
 MidiByteArray::MidiByteArray (size_t count, MIDI::byte first, ...)

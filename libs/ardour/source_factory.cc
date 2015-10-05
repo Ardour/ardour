@@ -164,7 +164,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 
 			try {
 				boost::shared_ptr<AudioPlaylistSource> ap (new AudioPlaylistSource (s, node));
-				
+
 				if (setup_peakfile (ap, true)) {
 					return boost::shared_ptr<Source>();
 				}
@@ -239,7 +239,7 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 			       int chn, Source::Flag flags, bool announce, bool defer_peaks)
 {
 	if (type == DataType::AUDIO) {
-		
+
 		if (!(flags & Destructive)) {
 
 			try {

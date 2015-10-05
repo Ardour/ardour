@@ -50,7 +50,7 @@ class EditorCursor {
 
 	PBD::Signal1<void, framepos_t> PositionChanged;
 
-  private:	
+  private:
 	Editor&               _editor;
 	ArdourCanvas::Arrow*  _track_canvas_item;
 	framepos_t            _current_frame;

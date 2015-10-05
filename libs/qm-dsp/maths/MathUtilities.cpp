@@ -41,11 +41,11 @@ void MathUtilities::getAlphaNorm(const double *data, unsigned int len, unsigned 
     unsigned int i;
     double temp = 0.0;
     double a=0.0;
-	
+
     for( i = 0; i < len; i++)
     {
 	temp = data[ i ];
-		
+
 	a  += ::pow( fabs(temp), double(alpha) );
     }
     a /= ( double )len;
@@ -60,11 +60,11 @@ double MathUtilities::getAlphaNorm( const std::vector <double> &data, unsigned i
     unsigned int len = data.size();
     double temp = 0.0;
     double a=0.0;
-	
+
     for( i = 0; i < len; i++)
     {
 	temp = data[ i ];
-		
+
 	a  += ::pow( fabs(temp), double(alpha) );
     }
     a /= ( double )len;
@@ -143,7 +143,7 @@ double MathUtilities::mean(const double *src, unsigned int len)
     double retVal =0.0;
 
     double s = sum( src, len );
-	
+
     retVal =  s  / (double)len;
 
     return retVal;
@@ -154,7 +154,7 @@ double MathUtilities::mean(const std::vector<double> &src,
                            unsigned int count)
 {
     double sum = 0.;
-	
+
     for (unsigned int i = 0; i < count; ++i)
     {
         sum += src[start + i];
@@ -172,7 +172,7 @@ void MathUtilities::getFrameMinMax(const double *data, unsigned int len, double 
         *min = *max = 0;
         return;
     }
-	
+
     *min = data[0];
     *max = data[0];
 
@@ -188,7 +188,7 @@ void MathUtilities::getFrameMinMax(const double *data, unsigned int len, double 
 	{
 	    *max =  temp ;
 	}
-		
+
     }
 }
 
@@ -197,7 +197,7 @@ int MathUtilities::getMax( double* pData, unsigned int Length, double* pMax )
 	unsigned int index = 0;
 	unsigned int i;
 	double temp = 0.0;
-	
+
 	double max = pData[0];
 
 	for( i = 0; i < Length; i++)
@@ -209,7 +209,7 @@ int MathUtilities::getMax( double* pData, unsigned int Length, double* pMax )
 			max =  temp ;
 			index = i;
 		}
-		
+
    	}
 
 	if (pMax) *pMax = max;
@@ -223,7 +223,7 @@ int MathUtilities::getMax( const std::vector<double> & data, double* pMax )
 	unsigned int index = 0;
 	unsigned int i;
 	double temp = 0.0;
-	
+
 	double max = data[0];
 
 	for( i = 0; i < data.size(); i++)
@@ -235,7 +235,7 @@ int MathUtilities::getMax( const std::vector<double> & data, double* pMax )
 			max =  temp ;
 			index = i;
 		}
-		
+
    	}
 
 	if (pMax) *pMax = max;
@@ -344,7 +344,7 @@ void MathUtilities::adaptiveThreshold(std::vector<double> &data)
     if (sz == 0) return;
 
     std::vector<double> smoothed(sz);
-	
+
     int p_pre = 8;
     int p_post = 7;
 

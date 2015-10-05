@@ -145,7 +145,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static void set_insert_note_button (guint);
 	static guint insert_note_modifier() { return insert_note_mod; }
 	static void set_insert_note_modifier(guint);
-	
+
 	static bool is_edit_event (GdkEventButton*);
 	static bool is_delete_event (GdkEventButton*);
 	static bool is_insert_note_event (GdkEventButton*);

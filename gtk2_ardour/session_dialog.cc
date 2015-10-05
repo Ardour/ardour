@@ -99,19 +99,19 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	get_vbox()->pack_start (info_frame, false, false);
 
 	setup_new_session_page ();
-	
+
 	if (!new_only) {
 		setup_initial_choice_box ();
 		get_vbox()->pack_start (ic_vbox, true, true);
 	} else {
 		get_vbox()->pack_start (session_new_vbox, true, true);
 	}
-	
+
 	if (!template_name.empty()) {
 		use_template_button.set_active (false);
 		load_template_override = template_name;
 	}
-	
+
 	get_vbox()->show_all ();
 
 	/* fill data models and show/hide accordingly */
@@ -131,7 +131,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 		if (cnt > 0) {
 			recent_scroller.show();
 			recent_label.show ();
-			
+
 			if (cnt > 4) {
 				recent_scroller.set_size_request (-1, 300);
 			}
@@ -240,7 +240,7 @@ SessionDialog::session_name (bool& should_be_new)
 	/* Try recent session selection */
 
 	TreeIter iter = recent_session_display.get_selection()->get_selected();
-	
+
 	if (iter) {
 		should_be_new = false;
 		return (*iter)[recent_session_columns.visible_name];
@@ -266,9 +266,9 @@ SessionDialog::session_folder ()
 	}
 
 	/* Try recent session selection */
-	
+
 	TreeIter iter = recent_session_display.get_selection()->get_selected();
-	
+
 	if (iter) {
 		string s = (*iter)[recent_session_columns.fullpath];
 		if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
@@ -342,10 +342,10 @@ SessionDialog::setup_initial_choice_box ()
 			hbox->pack_start (*image, false, false);
 		}
 	}
-	
+
 	vbox->pack_start (ic_new_session_button, true, true, 20);
 	hbox->pack_start (*vbox, true, true, 20);
-	
+
 	centering_vbox->pack_start (*hbox, false, false);
 
 	/* Possible update message */
@@ -380,29 +380,29 @@ SessionDialog::setup_initial_choice_box ()
 	recent_scroller.set_no_show_all (true);
 
 	recent_label.set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Recent Sessions")));
-	
+
 	centering_vbox->pack_start (recent_label, false, false, 12);
 	centering_vbox->pack_start (recent_scroller, true, true);
 
 	/* Browse button */
-	
+
 	existing_session_chooser.set_title (_("Select session file"));
 	existing_session_chooser.signal_file_set().connect (sigc::mem_fun (*this, &SessionDialog::existing_session_selected));
 	existing_session_chooser.set_current_folder(poor_mans_glob (Config->get_default_session_parent_dir()));
-	
+
 	FileFilter session_filter;
 	session_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
 	session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
 	existing_session_chooser.add_filter (session_filter);
 	existing_session_chooser.set_filter (session_filter);
-	
+
 #ifdef GTKOSX
 	existing_session_chooser.add_shortcut_folder ("/Volumes");
 #endif
-	
+
 	Label* browse_label = manage (new Label);
 	browse_label->set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Other Sessions")));
-	
+
 	centering_vbox->pack_start (*browse_label, false, false, 12);
 	centering_vbox->pack_start (existing_session_chooser, false, false);
 
@@ -544,7 +544,7 @@ SessionDialog::setup_new_session_page ()
 #endif
 
 	vbox1->pack_start (*hbox2, false, false);
-		
+
 	session_new_vbox.pack_start (*vbox1, false, false);
 
 	/* --- */
@@ -567,20 +567,20 @@ SessionDialog::setup_new_session_page ()
 
 	HBox* hbox4a = manage (new HBox);
 	use_template_button.set_label (_("Use this template"));
-		
+
 	TreeModel::Row row = *template_model->prepend ();
 	row[session_template_columns.name] = (_("no template"));
 	row[session_template_columns.path] = string();
-		
+
 	hbox4a->set_spacing (6);
 	hbox4a->pack_start (use_template_button, false, false);
 	hbox4a->pack_start (template_chooser, true, true);
-		
+
 	template_chooser.set_model (template_model);
-		
+
 	Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
 	text_renderer->property_editable() = false;
-		
+
 	template_chooser.pack_start (*text_renderer);
 	template_chooser.add_attribute (text_renderer->property_text(), session_template_columns.name);
 	template_chooser.set_active (0);
@@ -588,21 +588,21 @@ SessionDialog::setup_new_session_page ()
 	vbox3->pack_start (*hbox4a, false, false);
 
 	/* --- */
-	
+
 	HBox* hbox5 = manage (new HBox);
-	
+
 	hbox5->set_spacing (6);
 	hbox5->pack_start (more_new_session_options_button, false, false);
-	
+
 	setup_more_options_box ();
 	more_new_session_options_button.add (more_options_vbox);
-	
+
 	vbox3->pack_start (*hbox5, false, false);
 	hbox3->pack_start (*vbox3, true, true, 8);
 	vbox2->pack_start (*hbox3, false, false);
-	
+
 	/* --- */
-	
+
 	session_new_vbox.pack_start (*vbox2, false, false);
 	session_new_vbox.show_all ();
 }
@@ -647,7 +647,7 @@ SessionDialog::redisplay_recent_sessions ()
 	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
 		session_directories.push_back ((*i).second);
 	}
-	
+
 	int session_snapshot_count = 0;
 
 	for (vector<std::string>::const_iterator i = session_directories.begin(); i != session_directories.end(); ++i)
@@ -737,7 +737,7 @@ SessionDialog::redisplay_recent_sessions ()
 
 				s = Glib::build_filename (dirname, *i2 + statefile_suffix);
 				Gtk::TreeModel::Row child_row = *(recent_session_model->append (row.children()));
-				
+
 				child_row[recent_session_columns.visible_name] = *i2;
 				child_row[recent_session_columns.fullpath] = s;
 				child_row[recent_session_columns.tip] = Glib::Markup::escape_text (dirname);
@@ -750,7 +750,7 @@ SessionDialog::redisplay_recent_sessions ()
 				if (gsb.st_mtime > most_recent) {
 					most_recent = gsb.st_mtime;
 				}
-				
+
 				if (Session::get_info_from_path (s, sr, sf) == 0) {
 					child_row[recent_session_columns.sample_rate] = rate_as_string (sr);
 					switch (sf) {

@@ -139,15 +139,15 @@ Processor::set_state_2X (const XMLNode & node, int /*version*/)
 	XMLProperty const * prop;
 
 	XMLNodeList children = node.children ();
-	
+
 	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
 
 		if ((*i)->name() == X_("IO")) {
-			
+
 			if ((prop = (*i)->property ("name")) != 0) {
 				set_name (prop->value ());
 			}
-			
+
 			set_id (**i);
 
 			//note:  in A2, active state was stored in the Redirect node, not the child IO node
@@ -162,7 +162,7 @@ Processor::set_state_2X (const XMLNode & node, int /*version*/)
 					}
 				}
 			}*/
-			
+
 		}
 	}
 
@@ -188,7 +188,7 @@ Processor::set_state (const XMLNode& node, int version)
 			*/
 			Processor::set_name (prop->value());
 		}
-		
+
 		set_id (node);
 	}
 

@@ -30,7 +30,7 @@ void
 PlaylistEquivalentRegionsTest::setUp ()
 {
 	AudioRegionTest::setUp ();
-	
+
 	_playlist_b = PlaylistFactory::create (DataType::AUDIO, *_session, "testB");
 }
 

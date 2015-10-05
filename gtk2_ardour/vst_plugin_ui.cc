@@ -94,7 +94,7 @@ VSTPluginUI::package (Gtk::Window& win)
 			_vst->state()->width + _vst->state()->hoffset,
 			_vst->state()->height + _vst->state()->voffset);
 #endif
-	
+
 	return 0;
 }
 

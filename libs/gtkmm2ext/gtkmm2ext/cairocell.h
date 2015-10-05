@@ -36,7 +36,7 @@ class LIBGTKMM2EXT_API CairoCell
   public:
 	CairoCell(int32_t id);
 	virtual ~CairoCell() {}
-	
+
 	int32_t id() const { return _id; }
 
 	virtual void render (Cairo::RefPtr<Cairo::Context>&) = 0;
@@ -165,7 +165,7 @@ public:
 	void set_width_chars (CairoTextCell* cell, uint32_t);
 
 	void set_draw_background (bool yn) { _draw_bg = yn; }
-	
+
 	void set_colors (double cr, double cg, double cb, double ca) {
 		r = cr;
 		g = cg;
@@ -194,7 +194,7 @@ public:
 	void set_xpad (double x) { _xpad = x; queue_resize(); }
 	double ypad() const { return _ypad; }
 	void set_ypad (double y) { _ypad = y; queue_resize(); }
-	
+
 	double corner_radius() const { return _corner_radius; }
 	void set_corner_radius (double r) { _corner_radius = r; queue_draw (); }
 

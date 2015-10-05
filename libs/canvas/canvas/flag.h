@@ -41,7 +41,7 @@ public:
 	void set_font_description (Pango::FontDescription);
 
         bool covers (Duple const &) const;
-	
+
 private:
 	void setup (Distance height, Duple position);
 
@@ -52,5 +52,5 @@ private:
 	Rectangle* _rectangle;
 	bool _invert;
 };
-	
+
 }

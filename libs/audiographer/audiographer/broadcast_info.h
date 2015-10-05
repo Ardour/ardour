@@ -33,7 +33,7 @@
 namespace AudioGrapher
 {
 
-class SndfileHandle;	
+class SndfileHandle;
 
 class LIBAUDIOGRAPHER_API BroadcastInfo
 {

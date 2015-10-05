@@ -58,7 +58,7 @@ public:
 
     /// an easier way to output bytes via midi
     int write (const MidiByteArray&);
-	
+
     MIDI::Port& input_port() const { return *_input_port; }
     MIDI::Port& output_port() const { return *_output_port; }
 
@@ -73,7 +73,7 @@ private:
     MIDI::Port* _output_port;
     boost::shared_ptr<ARDOUR::Port> _async_in;
     boost::shared_ptr<ARDOUR::Port> _async_out;
-};	
+};
 
 std::ostream& operator <<  (std::ostream& , const SurfacePort& port);
 

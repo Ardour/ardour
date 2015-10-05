@@ -75,7 +75,7 @@ public:
 	  public:
 	    GhostEvent(::NoteBase *, ArdourCanvas::Container *);
 	    virtual ~GhostEvent ();
-	
+
 	    NoteBase* event;
 	    ArdourCanvas::Item* item;
 	};

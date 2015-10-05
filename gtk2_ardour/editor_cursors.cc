@@ -49,7 +49,7 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 	_track_canvas_item->set_y1 (ArdourCanvas::COORD_MAX);
 
 	_track_canvas_item->set_x (0);
-	
+
 	_current_frame = 1; /* force redraw at 0 */
 }
 
@@ -63,7 +63,7 @@ EditorCursor::EditorCursor (Editor& ed)
 	_track_canvas_item->set_show_head (1, false);
 	_track_canvas_item->set_y1 (ArdourCanvas::COORD_MAX);
 	_track_canvas_item->set_ignore_events (true);
-	
+
 	_track_canvas_item->set_x (0);
 
 	_current_frame = 1; /* force redraw at 0 */

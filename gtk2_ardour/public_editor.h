@@ -211,7 +211,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void set_show_measures (bool yn) = 0;
 	virtual bool show_measures () const = 0;
 	virtual void remove_tracks () = 0;
-	
+
 	virtual Editing::MouseMode effective_mouse_mode () const = 0;
 
 	/** Import existing media */
@@ -471,7 +471,7 @@ public:
 		*/
 		ActionManager::disable_active_actions ();
 	}
-	
+
 	~MainMenuDisabler () {
 		ActionManager::enable_active_actions ();
 	}

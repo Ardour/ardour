@@ -14,7 +14,7 @@ event (GdkEvent* ev)
 {
 	static bool dragging = false;
 	static Duple offset;
-	
+
 	if (ev->type == GDK_BUTTON_PRESS) {
 		GdkEventButton* b = reinterpret_cast<GdkEventButton*> (ev);
 		if (b->button == 1) {
@@ -38,7 +38,7 @@ event (GdkEvent* ev)
 			cout << "Move to " << (Duple (m->x, m->y) - offset) << "\n";
 		}
 	}
-			
+
 	return true;
 }
 
@@ -62,7 +62,7 @@ int main (int argc, char* argv[])
 	window.add (viewport);
 	canvas->show ();
 	window.show_all ();
-	
+
 	Gtk::Main::run (window);
 	return 0;
 }

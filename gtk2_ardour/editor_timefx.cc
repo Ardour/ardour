@@ -161,7 +161,7 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 		do_timefx ();
 		return 0;
 	}
-	
+
 	switch (current_timefx->run ()) {
 	case RESPONSE_ACCEPT:
 		break;

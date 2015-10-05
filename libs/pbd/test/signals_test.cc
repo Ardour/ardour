@@ -20,7 +20,7 @@ public:
 	void emit () {
 		Fred ();
 	}
-	
+
 	PBD::Signal0<void> Fred;
 };
 
@@ -86,6 +86,6 @@ SignalsTest::testScopedConnectionList ()
 	e->emit ();
 	delete r;
 	e->emit ();
-	
+
 	CPPUNIT_ASSERT_EQUAL (1, N);
 }

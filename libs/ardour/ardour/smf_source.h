@@ -86,7 +86,7 @@ public:
 	mutable framepos_t _smf_last_read_time;
 
 	int open_for_write ();
-	
+
 	void ensure_disk_file (const Lock& lock);
 
 	framecnt_t read_unlocked (const Lock&                    lock,

@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CABufferList.h
-	
+
 =============================================================================*/
 
 #ifndef __CABufferList_h__
@@ -59,7 +59,7 @@ extern "C" void CAShowAudioBufferList(const AudioBufferList *abl, int framesToPr
 
 	This class is designed for use in non-simplistic cases. For AudioUnits, AUBufferList
 	is preferred.
-	
+
 	CABufferList can be used in one of two ways:
 		- as mutable pointers into non-owned memory
 		- as an immutable array of buffers (owns its own memory).
@@ -99,22 +99,22 @@ public:
 		if (mBufferMemory)
 			delete[] mBufferMemory;
 	}
-	
+
 	const char *				Name() { return mName; }
-	
+
 	const AudioBufferList &		GetBufferList() const { return *(AudioBufferList *)&mNumberBuffers; }
-	
+
 	AudioBufferList &			GetModifiableBufferList()
 	{
 		VerifyNotTrashingOwnedBuffer();
 		return _GetBufferList();
 	}
-	
+
 	UInt32		GetNumBytes() const
 	{
 		return mBuffers[0].mDataByteSize;
 	}
-	
+
 	void		SetBytes(UInt32 nBytes, void *data)
 	{
 		VerifyNotTrashingOwnedBuffer();
@@ -122,7 +122,7 @@ public:
 		mBuffers[0].mDataByteSize = nBytes;
 		mBuffers[0].mData = data;
 	}
-	
+
 	void		CopyAllFrom(CABufferList *srcbl, CABufferList *ptrbl)
 					// copies bytes from srcbl
 					// make ptrbl reflect the length copied
@@ -144,7 +144,7 @@ public:
 		if (srcbl != ptrbl)
 			srcbl->BytesConsumed(nBytes);
 	}
-	
+
 	void		AppendFrom(CABufferList *blp, UInt32 nBytes)
 	{
 		VerifyNotTrashingOwnedBuffer();
@@ -156,7 +156,7 @@ public:
 		}
 		blp->BytesConsumed(nBytes);
 	}
-	
+
 	void		PadWithZeroes(UInt32 desiredBufferSize)
 					// for cases where an algorithm (e.g. SRC) requires some
 					// padding to create silence following end-of-file
@@ -169,7 +169,7 @@ public:
 			buf->mDataByteSize = desiredBufferSize;
 		}
 	}
-	
+
 	void		SetToZeroes(UInt32 nBytes)
 	{
 		VerifyNotTrashingOwnedBuffer();
@@ -179,23 +179,23 @@ public:
 			buf->mDataByteSize = nBytes;
 		}
 	}
-	
+
 	void		Reset()
 	{
 		DeallocateBuffers();
 	}
-	
+
 	Boolean SameDataAs(const CABufferList* anotherBufferList)
 	{
 		// check to see if two buffer lists point to the same memory.
 		if (mNumberBuffers != anotherBufferList->mNumberBuffers) return false;
-		
+
 		for (UInt32 i = 0; i < mNumberBuffers; ++i) {
 			if (mBuffers[i].mData != anotherBufferList->mBuffers[i].mData) return false;
 		}
 		return true;
 	}
-	
+
 	void		BytesConsumed(UInt32 nBytes)
 					// advance buffer pointers, decrease buffer sizes
 	{
@@ -207,18 +207,18 @@ public:
 			buf->mDataByteSize -= nBytes;
 		}
 	}
-	
+
 	void		SetFrom(const AudioBufferList *abl)
 	{
 		VerifyNotTrashingOwnedBuffer();
 		memcpy(&_GetBufferList(), abl, (char *)&abl->mBuffers[abl->mNumberBuffers] - (char *)abl);
 	}
-	
+
 	void		SetFrom(const CABufferList *blp)
 	{
 		SetFrom(&blp->GetBufferList());
 	}
-	
+
 	void		SetFrom(const AudioBufferList *abl, UInt32 nBytes)
 	{
 		VerifyNotTrashingOwnedBuffer();
@@ -230,23 +230,23 @@ public:
 			mybuf->mData = srcbuf->mData;
 		}
 	}
-	
+
 	void		SetFrom(const CABufferList *blp, UInt32 nBytes)
 	{
 		SetFrom(&blp->GetBufferList(), nBytes);
 	}
-	
+
 	AudioBufferList *	ToAudioBufferList(AudioBufferList *abl) const
 	{
 		memcpy(abl, &GetBufferList(), (char *)&abl->mBuffers[mNumberBuffers] - (char *)abl);
 		return abl;
 	}
-	
+
 	void		AllocateBuffers(UInt32 nBytes);
 	void		AllocateBuffersAndCopyFrom(UInt32 nBytes, CABufferList *inCopyFromList, CABufferList *inSetPtrList);
-	
+
 	void		DeallocateBuffers();
-	
+
 	void		UseExternalBuffer(Byte *ptr, UInt32 nBytes);
 
 	void		AdvanceBufferPointers(UInt32 nBytes)
@@ -261,7 +261,7 @@ public:
 			buf->mDataByteSize -= nBytes;
 		}
 	}
-	
+
 	void		SetNumBytes(UInt32 nBytes)
 	{
 		VerifyNotTrashingOwnedBuffer();

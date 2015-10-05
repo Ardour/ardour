@@ -148,10 +148,10 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	} else {
 		if (role() == Listen) {
 			/* We're going to the monitor bus, so discard MIDI data */
-			
+
 			uint32_t const bufs_audio = bufs.count().get (DataType::AUDIO);
 			uint32_t const mixbufs_audio = mixbufs.count().get (DataType::AUDIO);
-			
+
 			/* monitor-section has same number of channels as master-bus (on creation).
 			 *
 			 * There is no clear answer what should happen when trying to PFL or AFL
@@ -400,4 +400,4 @@ InternalSend::cycle_start (pframes_t /*nframes*/)
 	for (BufferSet::audio_iterator b = mixbufs.audio_begin(); b != mixbufs.audio_end(); ++b) {
 		b->prepare ();
 	}
-}	
+}

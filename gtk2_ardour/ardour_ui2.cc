@@ -412,7 +412,7 @@ ARDOUR_UI::setup_transport ()
 
 	shuttle_box = manage (new ShuttleControl);
 	shuttle_box->show ();
-	
+
 	VBox* transport_vbox = manage (new VBox);
 	transport_vbox->set_name ("TransportBase");
 	transport_vbox->set_border_width (0);
@@ -734,4 +734,4 @@ ARDOUR_UI::toggle_follow_edits ()
 	UIConfiguration::instance().set_follow_edits (tact->get_active ());
 }
 
-	
+

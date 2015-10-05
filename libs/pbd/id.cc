@@ -61,7 +61,7 @@ ID::reset ()
 {
 	Glib::Threads::Mutex::Lock lm (*counter_lock);
 	_id = _counter++;
-}	
+}
 
 int
 ID::string_assign (string str)

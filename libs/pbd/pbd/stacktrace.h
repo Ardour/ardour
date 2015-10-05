@@ -90,9 +90,9 @@ class /*LIBPBD_API*/ thing_with_backtrace
 	    for (x = all.begin(); x != all.end(); ++x) {
 		    char **strings;
 		    size_t i;
-		
+
 		    strings = backtrace_symbols ((*x)->allocation_backtrace, (*x)->allocation_backtrace_size);
-		
+
 		    if (strings) {
 			    stream << "--- ALLOCATED SHARED_PTR @ " << (*x) << std::endl;
 			    for (i = 0; i < (*x)->allocation_backtrace_size && i < 50U; i++) {

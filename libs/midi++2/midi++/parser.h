@@ -50,12 +50,12 @@ class LIBMIDIPP_API Parser {
 	   message the next time ::scanner() parses such a message. It should
 	   therefore be set before every byte passed into ::scanner().
 	*/
-	
+
 	framecnt_t get_timestamp() const { return _timestamp; }
 	void set_timestamp (const framecnt_t timestamp) { _timestamp = timestamp; }
 
 	/* signals that anyone can connect to */
-	
+
 	BankSignal            bank_change;
 	TwoByteSignal         note_on;
 	TwoByteSignal         note_off;
@@ -124,7 +124,7 @@ class LIBMIDIPP_API Parser {
 	MTC_Status  mtc_running() const { return _mtc_running; }
 	const byte *mtc_current() const { return _mtc_time; }
 	bool        mtc_locked() const  { return _mtc_locked; }
-	
+
 	PBD::Signal3<void, Parser &, int, framecnt_t>      mtc_qtr;
 	PBD::Signal3<void, const byte *, bool, framecnt_t> mtc_time;
 	PBD::Signal1<void, MTC_Status>                     mtc_status;
@@ -135,10 +135,10 @@ class LIBMIDIPP_API Parser {
 	}
 
 	void reset_mtc_state ();
-	
+
   private:
 	/* tracing */
-	
+
 	std::ostream *trace_stream;
 	std::string trace_prefix;
 	void trace_event (Parser &p, byte *msg, size_t len);
@@ -171,7 +171,7 @@ class LIBMIDIPP_API Parser {
 	MTC_Status _mtc_running;
 	bool       _mtc_locked;
 	byte last_qtr_frame;
-	
+
 	framecnt_t _timestamp;
 
 	ParseState pre_variable_state;

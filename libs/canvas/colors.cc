@@ -55,9 +55,9 @@ ArdourCanvas::color_to_hsva (Color color, double& h, double& s, double& v, doubl
 	double cmax;
 	double cmin;
 	double delta;
-	
+
 	color_to_rgba (color, r, g, b, a);
-	
+
 	if (r > g) {
 		cmax = max (r, b);
 	} else {
@@ -81,7 +81,7 @@ ArdourCanvas::color_to_hsva (Color color, double& h, double& s, double& v, doubl
 		return;
 	}
 
-	if (delta != 0.0) {	
+	if (delta != 0.0) {
 		if (cmax == r) {
 			h = fmod ((g - b)/delta, 6.0);
 		} else if (cmax == g) {
@@ -89,9 +89,9 @@ ArdourCanvas::color_to_hsva (Color color, double& h, double& s, double& v, doubl
 		} else {
 			h = ((r - g)/delta) + 4;
 		}
-		
+
 		h *= 60.0;
-		
+
 		if (h < 0.0) {
 			/* negative values are legal but confusing, because
 			   they alias positive values.
@@ -341,7 +341,7 @@ HSV
 HSV::shade (double factor) const
 {
 	HSV hsv (*this);
-	
+
 	/* algorithm derived from a google palette website
 	   and analysis of their color palettes.
 
@@ -423,10 +423,10 @@ HSV::distance (const HSV& other) const
 		   perceptual distance of sqrt ((360^2) + 1 + 1) = 360. The 450
 		   are not evenly spread (Webers Law), so lets use 360 as an
 		   approximation of the number of distinct achromatics.
-		
+
 		   So, scale up the achromatic difference to give about
 		   a maximal distance between v = 1.0 and v = 0.0 of 360.
-		
+
 		   A difference of about 0.0055 will generate a return value of
 		   2, which is roughly the limit of human perceptual
 		   discrimination for chromatics.
@@ -467,7 +467,7 @@ HSV::distance (const HSV& other) const
 	const double xDE = sqrt (((sL - oL) * (sL - oL))
 				 + ((sA - oA) * (sA - oA))
 				 + ((sB - oB) * (sB - oB)));
-	
+
 	double xDH;
 
 	if (sqrt (xDE) > (sqrt (abs (xDL)) + sqrt (abs (xDC)))) {
@@ -482,7 +482,7 @@ HSV::distance (const HSV& other) const
 	xDL /= whtL;
 	xDC /= whtC * xSC;
 	xDH /= whtH * xSH;
-	
+
 	return sqrt ((xDL * xDL) + (xDC * xDC) + (xDH * xDH));
 }
 
@@ -630,7 +630,7 @@ HSV
 SVAModifier::operator () (HSV& hsv)  const
 {
 	HSV r (hsv);
-	
+
 	switch (type) {
 	case Add:
 		r.s += _s;

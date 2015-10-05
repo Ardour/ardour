@@ -123,7 +123,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 					(*i)->bundle,
 					(*i)->bundle->type_channel_to_overall (_matrix->type (), j)
 					);
-				
+
 				render_channel_name (cr, background_colour (), c, 0, y, bc);
 				y += grid_spacing();
 				++M;
@@ -132,7 +132,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 			if (N == 0) {
 				y += grid_spacing ();
 			}
-			
+
 		} else {
 			y += grid_spacing();
 		}

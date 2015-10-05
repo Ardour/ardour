@@ -48,7 +48,7 @@ class LIBGTKMM2EXT_API TextViewer : public Gtk::Window, public Transmitter
 
 	void insert_file (const std::string &);
 	void scroll_to_bottom ();
-	
+
 	void deliver ();
 };
 

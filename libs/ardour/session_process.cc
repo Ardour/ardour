@@ -130,7 +130,7 @@ int
 Session::no_roll (pframes_t nframes)
 {
 	PT_TIMING_CHECK (4);
-	
+
 	framepos_t end_frame = _transport_frame + nframes; // FIXME: varispeed + no_roll ??
 	int ret = 0;
 	int declick = (config.get_use_transport_fades() ? get_transport_declick_required() : false);
@@ -179,7 +179,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
-	
+
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
 		if (_process_graph->process_routes (nframes, start_frame, end_frame, declick, need_butler) < 0) {
@@ -284,7 +284,7 @@ void
 Session::process_with_events (pframes_t nframes)
 {
 	PT_TIMING_CHECK (3);
-	
+
 	SessionEvent*  ev;
 	pframes_t      this_nframes;
 	framepos_t     end_frame;
@@ -1221,7 +1221,7 @@ Session::compute_stop_limit () const
 		return max_framepos;
 	}
 
-	
+
 	bool const punching_in = (config.get_punch_in () && _locations->auto_punch_location());
 	bool const punching_out = (config.get_punch_out () && _locations->auto_punch_location());
 

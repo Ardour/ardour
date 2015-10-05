@@ -51,7 +51,7 @@ public:
 
 	struct Line {
 		Line (Coord p, Distance width_, Color color_) : pos (p), width (width_), color (color_) {}
-		
+
 		Coord pos;
 		Distance width;
 		Color color;

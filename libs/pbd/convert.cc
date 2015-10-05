@@ -132,7 +132,7 @@ short_version (string orig, string::size_type target_length)
 	}
 
 	/* whatever the length is now, use it */
-	
+
 	return orig;
 }
 
@@ -187,9 +187,9 @@ int_from_hex (char hic, char loc)
 	} else if( ('A'<=hi) && (hi<='F') ) {
 		hi -= ('A'-10);
 	}
-	
+
 	lo = (int) loc;
-	
+
 	if( ('0'<=lo) && (lo<='9') ) {
 		lo -= '0';
 	} else if( ('a'<=lo) && (lo<='f') ) {
@@ -249,14 +249,14 @@ length2string (const int64_t frames, const double sample_rate)
 	secs -= (hrs * 3600LL);
 	int64_t mins = secs / 60LL;
 	secs -= (mins * 60LL);
-	
+
 	int64_t total_secs = (hrs * 3600LL) + (mins * 60LL) + secs;
 	int64_t frames_remaining = (int64_t) floor (frames - (total_secs * sample_rate));
 	float fractional_secs = (float) frames_remaining / sample_rate;
-	
+
 	char duration_str[64];
 	sprintf (duration_str, "%02" PRIi64 ":%02" PRIi64 ":%05.2f", hrs, mins, (float) secs + fractional_secs);
-	
+
 	return duration_str;
 }
 

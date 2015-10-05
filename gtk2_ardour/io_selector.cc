@@ -259,7 +259,7 @@ void
 IOSelectorWindow::io_name_changed (void*)
 {
 	ENSURE_GUI_THREAD (*this, &IOSelectorWindow::io_name_changed, src)
-		
+
 	std::string title;
 
 	if (!_selector.find_inputs_for_io_outputs()) {

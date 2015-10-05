@@ -103,7 +103,7 @@ RouteUI::~RouteUI()
 	delete input_selector;
 	delete output_selector;
 	delete _invert_menu;
-	
+
 	send_blink_connection.disconnect ();
 	rec_blink_connection.disconnect ();
 }
@@ -165,7 +165,7 @@ RouteUI::init ()
 	monitor_input_button->set_text (_("In"));
 	UI::instance()->set_tip (monitor_input_button, _("Monitor input"), "");
 	monitor_input_button->set_no_show_all (true);
-	
+
 	monitor_disk_button = manage (new ArdourButton (ArdourButton::default_elements));
 	monitor_disk_button->set_name ("monitor button");
 	monitor_disk_button->set_text (_("Disk"));
@@ -189,7 +189,7 @@ RouteUI::init ()
 	solo_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
 	mute_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
 	mute_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
-	
+
 	monitor_input_button->set_distinct_led_click (false);
 	monitor_disk_button->set_distinct_led_click (false);
 
@@ -270,7 +270,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
 		t->RecordEnableChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
-		
+
 		rec_enable_button->show();
  		rec_enable_button->set_controllable (t->rec_enable_control());
 
@@ -341,7 +341,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 	//if this is a binding action, let the ArdourButton handle it
 	if ( BindingProxy::is_bind_action(ev) )
 		return false;
-			
+
 	multiple_mute_change = false;
 
 	if (Keyboard::is_context_menu_event (ev)) {
@@ -351,7 +351,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 		}
 
 		mute_menu->popup(0,ev->time);
-		
+
 		return true;
 
 	} else {
@@ -373,7 +373,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 				 * elements of the list we need to work
 				 * on a copy.
 				 */
-					
+
 				boost::shared_ptr<RouteList> copy (new RouteList);
 
 				*copy = *_session->get_routes ();
@@ -404,9 +404,9 @@ RouteUI::mute_press (GdkEventButton* ev)
 				if (ev->button == 1) {
 
 					if (_route->route_group()) {
-							
+
 						rl = _route->route_group()->route_list();
-							
+
 						if (_mute_release) {
 							_mute_release->routes = rl;
 						}
@@ -425,7 +425,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 				boost::shared_ptr<RouteList> rl (new RouteList);
 				rl->push_back (_route);
-					
+
 				if (_mute_release) {
 					_mute_release->routes = rl;
 				}
@@ -510,7 +510,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 	//if this is a binding action, let the ArdourButton handle it
 	if ( BindingProxy::is_bind_action(ev) )
 		return false;
-			
+
 	multiple_solo_change = false;
 
 	if (Keyboard::is_context_menu_event (ev)) {
@@ -598,9 +598,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 				if (ev->button == 1) {
 
 					if (_route->route_group()) {
-							
+
 						rl = _route->route_group()->route_list();
-							
+
 						if (_solo_release) {
 							_solo_release->routes = rl;
 						}
@@ -674,7 +674,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	//if this is a binding action, let the ArdourButton handle it
 	if ( BindingProxy::is_bind_action(ev) )
 		return false;
-			
+
 	if (!_session->engine().connected()) {
 	        MessageDialog msg (_("Not connected to AudioEngine - cannot engage record"));
 		msg.run ();
@@ -694,7 +694,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	if (is_track() && rec_enable_button) {
 
 		if (Keyboard::is_button2_event (ev)) {
-			
+
 			//rec arm does not have a momentary mode
 			return false;
 
@@ -712,11 +712,11 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			if (ev->button == 1) {
 
 				boost::shared_ptr<RouteList> rl;
-				
+
 				if (_route->route_group()) {
-					
+
 					rl = _route->route_group()->route_list();
-					
+
 				} else {
 					rl.reset (new RouteList);
 					rl->push_back (_route);
@@ -810,7 +810,7 @@ RouteUI::monitor_disk_release (GdkEventButton* ev)
 
 bool
 RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
-{	
+{
 	if (ev->button != 1) {
 		return false;
 	}
@@ -823,7 +823,7 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 
 	MonitorChoice mc;
 	boost::shared_ptr<RouteList> rl;
-	
+
 	/* XXX for now, monitoring choices are orthogonal. cue monitoring
 	   will follow in 3.X but requires mixing the input and playback (disk)
 	   signal together, which requires yet more buffers.
@@ -837,7 +837,7 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 		mc = monitor_choice;
 	}
 
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {	
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 		rl = _session->get_routes ();
 
 	} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
@@ -853,7 +853,7 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 	}
 
 	DisplaySuspender ds;
-	_session->set_monitoring (rl, mc, Session::rt_cleanup, true);		
+	_session->set_monitoring (rl, mc, Session::rt_cleanup, true);
 
 	return false;
 }
@@ -1532,11 +1532,11 @@ RouteUI::set_color (const Gdk::Color & c)
 	char buf[64];
 	_color = c;
 	snprintf (buf, sizeof (buf), "%d:%d:%d", c.get_red(), c.get_green(), c.get_blue());
-	
+
 	/* note: we use the route state ID here so that color is the same for both
 	   the time axis view and the mixer strip
 	*/
-	
+
 	gui_object_state().set_property<string> (route_state_id(), X_("color"), buf);
 	_route->gui_changed ("color", (void *) 0); /* EMIT_SIGNAL */
 }
@@ -1575,12 +1575,12 @@ RouteUI::verify_new_route_name (const std::string& name)
 	if (name.find (':') == string::npos) {
 		return true;
 	}
-	
+
 	MessageDialog colon_msg (
 		_("The use of colons (':') is discouraged in track and bus names.\nDo you want to use this new name?"),
 		false, MESSAGE_QUESTION, BUTTONS_NONE
 		);
-	
+
 	colon_msg.add_button (_("Use the new name"), Gtk::RESPONSE_ACCEPT);
 	colon_msg.add_button (_("Re-edit the name"), Gtk::RESPONSE_CANCEL);
 
@@ -1939,7 +1939,7 @@ RouteUI::open_remote_control_id_dialog ()
 
 	if (Config->get_remote_model() == UserOrdered) {
 		uint32_t const limit = _session->ntracks() + _session->nbusses () + 4;
-		
+
 		HBox* hbox = manage (new HBox);
 		hbox->set_spacing (6);
 		hbox->pack_start (*manage (new Label (_("Remote control ID:"))));
@@ -1950,7 +1950,7 @@ RouteUI::open_remote_control_id_dialog ()
 		spin->set_value (_route->remote_control_id());
 		hbox->pack_start (*spin);
 		dialog.get_vbox()->pack_start (*hbox);
-		
+
 		dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 		dialog.add_button (Stock::APPLY, RESPONSE_ACCEPT);
 	} else {
@@ -2043,7 +2043,7 @@ RouteUI::set_invert_button_state ()
 		*/
 
 		ArdourButton* b = _invert_buttons.front ();
-		
+
 		if (_route->phase_invert().count() == _route->phase_invert().size()) {
 			b->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else if (_route->phase_invert().any()) {
@@ -2060,7 +2060,7 @@ RouteUI::set_invert_button_state ()
 		for (vector<ArdourButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i, ++j) {
 			(*i)->set_active (_route->phase_invert (j));
 		}
-		
+
 	}
 }
 
@@ -2092,7 +2092,7 @@ RouteUI::invert_press (GdkEventButton* ev)
 		*/
 		return false;
 	}
-	
+
 	delete _invert_menu;
 	_invert_menu = new Menu;
 	_invert_menu->set_name ("ArdourContextMenu");
@@ -2171,7 +2171,7 @@ Gdk::Color
 RouteUI::color () const
 {
 	RouteGroup* g = _route->route_group ();
-	
+
 	if (g && g->is_color()) {
 		Gdk::Color c;
 		set_color_from_rgba (c, GroupTabs::group_color (g));

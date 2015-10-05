@@ -168,11 +168,11 @@ GenericMidiControlProtocol::reload_maps ()
 
 		mi.name = prop->value ();
 		mi.path = fullpath;
-		
+
 		map_info.push_back (mi);
 	}
 }
-	
+
 void
 GenericMidiControlProtocol::drop_all ()
 {
@@ -258,7 +258,7 @@ GenericMidiControlProtocol::send_feedback ()
 	}
 
 	_send_feedback ();
-	
+
 	last_feedback_time = now;
 }
 
@@ -282,7 +282,7 @@ GenericMidiControlProtocol::_send_feedback ()
 	if (!lm.locked ()) {
 		return;
 	}
-	
+
 	for (MIDIControllables::iterator r = controllables.begin(); r != controllables.end(); ++r) {
 		MIDI::byte* end = (*r)->write_feedback (buf, bsize);
 		if (end != buf) {
@@ -314,7 +314,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 
 	{
 		Glib::Threads::Mutex::Lock lm (pending_lock);
-		
+
 		MIDIPendingControllables::iterator ptmp;
 		for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
 			ptmp = i;
@@ -341,7 +341,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	if (!mc) {
 		mc = new MIDIControllable (this, *_input_port->parser(), *c, false);
 	}
-	
+
 	{
 		Glib::Threads::Mutex::Lock lm (pending_lock);
 
@@ -360,7 +360,7 @@ GenericMidiControlProtocol::learning_stopped (MIDIControllable* mc)
 {
 	Glib::Threads::Mutex::Lock lm (pending_lock);
 	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
-	
+
 	MIDIPendingControllables::iterator tmp;
 
 	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
@@ -401,7 +401,7 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 			break;
 		}
 	}
-	
+
 	delete dptr;
 }
 
@@ -410,17 +410,17 @@ GenericMidiControlProtocol::delete_binding (PBD::Controllable* control)
 {
 	if (control != 0) {
 		Glib::Threads::Mutex::Lock lm2 (controllables_lock);
-		
+
 		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end();) {
 			MIDIControllable* existingBinding = (*iter);
-			
+
 			if (control == (existingBinding->get_controllable())) {
 				delete existingBinding;
 				iter = controllables.erase (iter);
 			} else {
 				++iter;
 			}
-			
+
 		}
 	}
 }
@@ -431,10 +431,10 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 {
 	if (control != NULL) {
 		Glib::Threads::Mutex::Lock lm2 (controllables_lock);
-		
+
 		MIDI::channel_t channel = (pos & 0xf);
 		MIDI::byte value = control_number;
-		
+
 		// Create a MIDIControllable
 		MIDIControllable* mc = new MIDIControllable (this, *_input_port->parser(), *control, false);
 
@@ -442,19 +442,19 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 		// Note:  can't use delete_binding() here because we don't know the specific controllable we want to remove, only the midi information
 		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end();) {
 			MIDIControllable* existingBinding = (*iter);
-			
+
 			if ((existingBinding->get_control_channel() & 0xf ) == channel &&
 			    existingBinding->get_control_additional() == value &&
 			    (existingBinding->get_control_type() & 0xf0 ) == MIDI::controller) {
-				
+
 				delete existingBinding;
 				iter = controllables.erase (iter);
 			} else {
 				++iter;
 			}
-			
+
 		}
-		
+
 		// Update the MIDI Controllable based on the the pos param
 		// Here is where a table lookup for user mappings could go; for now we'll just wing it...
 		mc->bind_midi(channel, MIDI::controller, value);
@@ -593,7 +593,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	}
 
 	boost::shared_ptr<Controllable> c;
-	
+
 	{
 		Glib::Threads::Mutex::Lock lm (pending_lock);
 		for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
@@ -625,20 +625,20 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 
 			if (!nlist.empty()) {
 				for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-					
+
 					if ((prop = (*niter)->property ("id")) != 0) {
-						
+
 						ID id = prop->value ();
 						DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Relearned binding for session: Control ID: %1\n", id.to_s()));
 						Controllable* c = Controllable::by_id (id);
-						
+
 						if (c) {
 							MIDIControllable* mc = new MIDIControllable (this, *_input_port->parser(), *c, false);
-							
+
 							if (mc->set_state (**niter, version) == 0) {
 								controllables.push_back (mc);
 							}
-							
+
 						} else {
 							warning << string_compose (
 								_("Generic MIDI control: controllable %1 not found in session (ignored)"),
@@ -697,7 +697,7 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 		sscanf (prop->value().c_str(), "%d.%d.%d", &major, &minor, &micro);
 		Stateful::loading_state_version = (major * 1000) + minor;
 	}
-	
+
 	const XMLNodeList& children (root->children());
 	XMLNodeConstIterator citer;
 	XMLNodeConstIterator gciter;
@@ -708,7 +708,7 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 
 	DEBUG_TRACE (DEBUG::GenericMidi, "Loading bindings\n");
 	for (citer = children.begin(); citer != children.end(); ++citer) {
-		
+
 		if ((*citer)->name() == "DeviceInfo") {
 			const XMLProperty* prop;
 
@@ -736,7 +736,7 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 
 			if (child->property ("uri")) {
 				/* controllable */
-				
+
 				if ((mc = create_binding (*child)) != 0) {
 					Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 					controllables.push_back (mc);
@@ -760,7 +760,7 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
                         }
 		}
 	}
-	
+
 	if ((prop = root->property ("name")) != 0) {
 		_current_binding = prop->value ();
 	}
@@ -805,17 +805,17 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	} else {
 		return 0;
 	}
-	
+
 	if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
 		return 0;
 	}
-	
+
 	detail = (MIDI::byte) intval;
 
 	if ((prop = node.property (X_("channel"))) == 0) {
 		return 0;
 	}
-	
+
 	if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
 		return 0;
 	}
@@ -830,7 +830,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	} else {
 		momentary = false;
 	}
-	
+
 	prop = node.property (X_("uri"));
 	uri = prop->value();
 
@@ -918,7 +918,7 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 			cnt = 0;
 			stringstream ss (prop->value());
 			ss << hex;
-			
+
 			while (ss >> val) {
 				cnt++;
 			}
@@ -930,12 +930,12 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 
 		data = new MIDI::byte[cnt];
 		data_size = cnt;
-		
+
 		{
 			stringstream ss (prop->value());
 			ss << hex;
 			cnt = 0;
-			
+
 			while (ss >> val) {
 				data[cnt++] = (MIDI::byte) val;
 			}
@@ -950,13 +950,13 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 		if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
 			return 0;
 		}
-		
+
 		detail = (MIDI::byte) intval;
 
 		if ((prop = node.property (X_("channel"))) == 0) {
 			return 0;
 		}
-	
+
 		if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
 			return 0;
 		}
@@ -972,9 +972,9 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 	}
 
 	prop = node.property (X_("function"));
-	
+
 	MIDIFunction* mf = new MIDIFunction (*_input_port->parser());
-	
+
 	if (mf->setup (*this, prop->value(), argument, data, data_size)) {
 		delete mf;
 		return 0;
@@ -1018,7 +1018,7 @@ GenericMidiControlProtocol::create_action (const XMLNode& node)
 			cnt = 0;
 			stringstream ss (prop->value());
 			ss << hex;
-			
+
 			while (ss >> val) {
 				cnt++;
 			}
@@ -1030,12 +1030,12 @@ GenericMidiControlProtocol::create_action (const XMLNode& node)
 
 		data = new MIDI::byte[cnt];
 		data_size = cnt;
-		
+
 		{
 			stringstream ss (prop->value());
 			ss << hex;
 			cnt = 0;
-			
+
 			while (ss >> val) {
 				data[cnt++] = (MIDI::byte) val;
 			}
@@ -1050,13 +1050,13 @@ GenericMidiControlProtocol::create_action (const XMLNode& node)
 		if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
 			return 0;
 		}
-		
+
 		detail = (MIDI::byte) intval;
 
 		if ((prop = node.property (X_("channel"))) == 0) {
 			return 0;
 		}
-	
+
 		if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
 			return 0;
 		}
@@ -1068,7 +1068,7 @@ GenericMidiControlProtocol::create_action (const XMLNode& node)
 	}
 
 	prop = node.property (X_("action"));
-	
+
 	MIDIAction* ma = new MIDIAction (*_input_port->parser());
 
 	if (ma->init (*this, prop->value(), data, data_size)) {

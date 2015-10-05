@@ -67,7 +67,7 @@ protected:
 
 private:
 	static void emit_gui_changed_for_members (ARDOUR::RouteGroup *);
-	
+
 	/** Compute all the tabs for this widget.
 	 *  @return Tabs.
 	 */

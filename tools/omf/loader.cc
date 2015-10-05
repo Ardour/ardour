@@ -112,7 +112,7 @@ OMF::name_types ()
 	sqlite3_exec(db, "INSERT INTO lookup VALUES (40, '(Type 40)')", 0, 0, 0);
 	sqlite3_exec(db, "INSERT INTO lookup VALUES (41, '(Type 41)')", 0, 0, 0);
 	sqlite3_exec(db, "INSERT INTO lookup VALUES (42, '(Type 42)')", 0, 0, 0);
-	
+
 	/* Assign type and property values to names */
 	sqlite3_exec(db, "UPDATE data SET property = (SELECT name FROM lookup WHERE property = key), type = (SELECT name FROM lookup WHERE type = key)", 0, 0, 0);
 	sqlite3_exec(db, "DROP TABLE lookup", 0, 0, 0);
@@ -286,7 +286,7 @@ OMF::load (const string& path)
 					}
 					DEBUG("   offset: %d\n", dataOffset);
 					DEBUG("   length: %d\n", dataLength);
-    		
+
 					if (currentType == 21) {
 						char* string = (char*) malloc((uint32_t) dataLength);
 						fseek(file, dataOffset, SEEK_SET);

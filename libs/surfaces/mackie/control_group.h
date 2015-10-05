@@ -19,21 +19,21 @@ public:
 		: _name (name) {}
 
 	virtual ~Group() {}
-	
+
 	virtual bool is_strip() const { return false; }
 	virtual bool is_master() const { return false; }
-	
+
 	virtual void add (Control & control);
-	
+
 	const std::string & name() const { return _name; }
 	void set_name (const std::string & rhs) { _name = rhs; }
-	
+
 	typedef std::vector<Control*> Controls;
 	const Controls & controls() const { return _controls; }
-	
+
 protected:
 	Controls _controls;
-	
+
 private:
 	std::string _name;
 };

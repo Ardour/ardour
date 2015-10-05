@@ -62,7 +62,7 @@ class DeviceInfo
 		LCXT = 0x11,
 		HUI = 0x5
 	};
-	
+
 	DeviceInfo();
 	~DeviceInfo();
 
@@ -85,7 +85,7 @@ class DeviceInfo
 
 	static std::map<std::string,DeviceInfo> device_info;
 	static void reload_device_info();
-	
+
 	std::string& get_global_button_name(Button::ID);
 	GlobalButtonInfo& get_global_button(Button::ID);
 
@@ -94,7 +94,7 @@ class DeviceInfo
 
 	const GlobalButtonsInfo& global_buttons() const { return _global_buttons; }
 	const StripButtonsInfo& strip_buttons() const { return _strip_buttons; }
-	
+
                                         private:
 	uint32_t _strip_cnt;
 	uint32_t _extenders;

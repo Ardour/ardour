@@ -31,7 +31,7 @@ void
 AudioRegionReadTest::readTest ()
 {
 	int const N = 1024;
-	
+
 	Sample buf[N];
 	Sample mbuf[N];
 	float gbuf[N];
@@ -70,7 +70,7 @@ AudioRegionReadTest::readTest ()
 	for (int i = 64; i < P; ++i) {
 		CPPUNIT_ASSERT_EQUAL (i, int (buf[i]));
 	}
-	
+
 	/* Offset read: 256 frames from 128 frames into the region, with fades
 	   (though the fade should not affect it, as it is finished before the read starts)
 	*/
@@ -78,7 +78,7 @@ AudioRegionReadTest::readTest ()
 	for (int i = 0; i < N; ++i) {
 		buf[i] = 0;
 	}
-	
+
 	_ar[0]->read_at (buf, mbuf, gbuf, P + 128, 256, 0);
 	check_staircase (buf, 128, 256);
 }

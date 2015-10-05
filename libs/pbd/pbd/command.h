@@ -34,13 +34,13 @@ public:
 	virtual ~Command() { /* NOTE: derived classes must call drop_references() */ }
 
 	virtual void operator() () = 0;
-	
+
 	void set_name (const std::string& str) { _name = str; }
 	const std::string& name() const { return _name; }
 
 	virtual void undo() = 0;
 	virtual void redo() { (*this)(); }
-	
+
 	virtual XMLNode &get_state();
 	virtual int set_state(const XMLNode&, int /*version*/) { /* noop */ return 0; }
 

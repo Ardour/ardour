@@ -94,15 +94,15 @@ OSStatus		CAComponent::GetResourceVersion (UInt32 &outVersion) const
 	ResFileRefNum componentResFileID = kResFileNotOpened;
 	OSStatus result;
 	short thngResourceCount;
-	
+
 	short curRes = CurResFile();
 	require_noerr (result = OpenAComponentResFile( mComp, &componentResFileID), home);
 	require_noerr (result = componentResFileID <= 0, home);
-	
+
 	UseResFile(componentResFileID);
 
 	thngResourceCount = Count1Resources(kComponentResourceType);
-	
+
 	require_noerr (result = ResError(), home);
 			// only go on if we successfully found at least 1 thng resource
 	require_noerr (thngResourceCount <= 0 ? -1 : 0, home);
@@ -135,12 +135,12 @@ OSStatus		CAComponent::GetResourceVersion (UInt32 &outVersion) const
 
 	if (!versionFound)
 		result = resNotFound;
-		
+
 	UseResFile(curRes);	// revert
-	
+
 	if ( componentResFileID != kResFileNotOpened )
 		CloseComponentResFile(componentResFileID);
-		
+
 home:
 	return result;
 }
@@ -174,9 +174,9 @@ void 		CAComponent::SetCompNames () const
 		Handle h1 = NewHandle(4);
 		CAComponentDescription desc;
 		OSStatus err = GetComponentInfo (Comp(), &desc, h1, 0, 0);
-		
+
 		if (err) { DisposeHandle(h1); return; }
-		
+
 		HLock(h1);
 		char* ptr1 = *h1;
 		// Get the manufacturer's name... look for the ':' character convention
@@ -184,7 +184,7 @@ void 		CAComponent::SetCompNames () const
 		char* displayStr = 0;
 
 		const_cast<CAComponent*>(this)->mCompName = CFStringCreateWithPascalString(NULL, (const unsigned char*)*h1, kCFStringEncodingMacRoman);
-				
+
 		for (int i = 0; i < len; ++i) {
 			if (ptr1[i] == ':') { // found the name
 				ptr1[i] = 0;
@@ -192,11 +192,11 @@ void 		CAComponent::SetCompNames () const
 				break;
 			}
 		}
-		
+
 		if (displayStr)
 		{
 			const_cast<CAComponent*>(this)->mManuName = CFStringCreateWithCString(NULL, displayStr, kCFStringEncodingMacRoman);
-										
+
 			//move displayStr ptr past the manu, to the name
 			// we move the characters down a index, because the handle doesn't have any room
 			// at the end for the \0
@@ -209,7 +209,7 @@ void 		CAComponent::SetCompNames () const
 
 			const_cast<CAComponent*>(this)->mAUName = CFStringCreateWithCString(NULL, displayStr, kCFStringEncodingMacRoman);
 		}
-		
+
 		DisposeHandle (h1);
 	}
 }

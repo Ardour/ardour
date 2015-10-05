@@ -62,7 +62,7 @@ public:
 	std::map<int,Led*> leds;
 	std::map<int,Meter*> meters;
 	std::map<int,Control*> controls_by_device_independent_id;
-	
+
 	Mackie::JogWheel* jog_wheel() const { return _jog_wheel; }
 	Fader* master_fader() const { return _master_fader; }
 
@@ -88,7 +88,7 @@ public:
 	void periodic (uint64_t now_usecs);
 	void redisplay ();
 	void hui_heartbeat ();
-	
+
 	void handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t, uint32_t channel_id);
 	void handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes*);
 	void handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes*);
@@ -105,7 +105,7 @@ public:
 
 	/// display an indicator of the first switched-in Route. Do nothing by default.
 	void display_bank_start (uint32_t /*current_bank*/);
-		
+
 	/// called from MackieControlProtocol::zero_all to turn things off
 	void zero_all ();
 	void zero_controls ();
@@ -122,7 +122,7 @@ public:
 	void recalibrate_faders ();
 	void toggle_backlight ();
 	void set_touch_sensitivity (int);
-	
+
 	/**
 		This is used to calculate the clicks per second that define
 		a transport speed of 1.0 for the jog wheel. 100.0 is 10 clicks
@@ -144,7 +144,7 @@ public:
 	// be two characters
 	void show_two_char_display (const std::string & msg, const std::string & dots = "  ");
 	void show_two_char_display (unsigned int value, const std::string & dots = "  ");
-	
+
 	void update_view_mode_display ();
 	void update_flip_mode_display ();
 
@@ -162,7 +162,7 @@ public:
 	int set_state (const XMLNode&, int version);
 
   protected:
-	
+
   private:
 	MackieControlProtocol& _mcp;
 	SurfacePort*           _port;

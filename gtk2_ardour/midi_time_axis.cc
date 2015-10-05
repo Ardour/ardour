@@ -132,7 +132,7 @@ void
 MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
 	_route = rt;
-	
+
 	_view = new MidiStreamView (*this);
 
 	if (is_track ()) {
@@ -319,11 +319,11 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	_channel_status_box.set_homogeneous (false);
 	_channel_status_box.set_spacing (4);
-	
+
 	ArdourButton *channel_selector_button = manage (new ArdourButton(_("Chns")));
 	channel_selector_button->set_name ("route button");
 	set_tooltip (channel_selector_button, _("Click to edit channel settings"));
-	
+
 	// Insert expanding space labels to get full width justification
 	_channel_status_box.pack_start (_playback_channel_status, false, false, 2);
 	_channel_status_box.pack_start (*Gtk::manage(new Gtk::Label(" ")), true, true);
@@ -333,7 +333,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_channel_status_box.show_all ();
 
 	channel_selector_button->signal_clicked.connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_channel_selector));
-	
+
 	_midi_controls_box.pack_start (_channel_status_box, false, false, 10);
 
 	if (!patch_manager.all_models().empty()) {
@@ -483,7 +483,7 @@ MidiTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	} else {
 		_midi_controls_box.hide();
 	}
-	
+
 	if (h >= KEYBOARD_MIN_HEIGHT) {
 		if (is_track() && _range_scroomer) {
 			_range_scroomer->show();
@@ -539,7 +539,7 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	if (color_mode_menu) {
 		items.push_back (MenuElem (_("Color Mode"), *color_mode_menu));
 	}
-	
+
 	items.push_back (SeparatorElem ());
 }
 
@@ -921,7 +921,7 @@ MidiTimeAxisView::build_controller_menu ()
 		     l != device_names->controls().end(); ++l) {
 			boost::shared_ptr<ControlNameList> name_list = l->second;
 			Menu*                              ctl_menu  = NULL;
-			
+
 			for (ControlNameList::Controls::const_iterator c = name_list->controls().begin();
 			     c != name_list->controls().end();) {
 				const uint16_t ctl = c->second->number();
@@ -931,7 +931,7 @@ MidiTimeAxisView::build_controller_menu ()
 						/* Create a new submenu */
 						ctl_menu = manage (new Menu);
 					}
-				
+
 					MenuList& ctl_items (ctl_menu->items());
 					if (chn_cnt > 1) {
 						add_multi_channel_controller_item(ctl_items, ctl, c->second->name());
@@ -1069,7 +1069,7 @@ MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bo
 		if (_color_mode == mode && !force) {
 			return;
 		}
-		
+
 		if (_channel_selector) {
 			if (mode == ChannelColors) {
 				_channel_selector->set_channel_colors(NoteBase::midi_channel_colors);
@@ -1077,7 +1077,7 @@ MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bo
 				_channel_selector->set_default_channel_color();
 			}
 		}
-		
+
 		_color_mode = mode;
 		set_gui_property ("color-mode", enum_2_string(_color_mode));
 		if (redisplay) {

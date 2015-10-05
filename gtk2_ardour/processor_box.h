@@ -118,7 +118,7 @@ public:
 
 	bool is_selectable() const {return _selectable;}
 	void set_selectable(bool s) { _selectable = s; }
-	
+
 	enum Position {
 		PreFader,
 		Fader,
@@ -183,7 +183,7 @@ private:
 		std::string name () const {
 			return _name;
 		}
-		
+
 		Gtk::Alignment box;
 
 	private:
@@ -305,7 +305,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
         void generic_edit_processor (boost::shared_ptr<ARDOUR::Processor>);
 
 	void update_gui_object_state (ProcessorEntry *);
-	
+
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorSelected;
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
 

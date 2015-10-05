@@ -78,16 +78,16 @@ ThemeManager::ThemeManager()
 	, palette_window (0)
 {
 	/* Now the alias list */
-	
+
 	alias_list = TreeStore::create (alias_columns);
 	alias_display.set_model (alias_list);
 	alias_display.append_column (_("Object"), alias_columns.name);
-	
+
 	Gtkmm2ext::CellRendererColorSelector* color_renderer = manage (new Gtkmm2ext::CellRendererColorSelector);
 	TreeViewColumn* color_column = manage (new TreeViewColumn (_("Color"), *color_renderer));
 	color_column->add_attribute (color_renderer->property_color(), alias_columns.color);
 	alias_display.append_column (*color_column);
-	
+
 	alias_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
 	alias_display.get_column (0)->set_expand (true);
 	alias_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
@@ -101,7 +101,7 @@ ThemeManager::ThemeManager()
 	alias_scroller.add (alias_display);
 
 	/* various buttons */
-	
+
 	RadioButton::Group group = dark_button.get_group();
 	light_button.set_group(group);
 	theme_selection_hbox.set_homogeneous(false);
@@ -137,7 +137,7 @@ ThemeManager::ThemeManager()
 		pack_start (*hbox, PACK_SHRINK);
 	}
 
-	
+
 	hbox = Gtk::manage (new Gtk::HBox());
 	hbox->set_spacing (6);
 	hbox->pack_start (waveform_gradient_depth, true, true);
@@ -156,21 +156,21 @@ ThemeManager::ThemeManager()
 	palette_scroller.add (palette_viewport);
 
 	modifier_scroller.add (modifier_vbox);
-	
+
 	notebook.append_page (alias_scroller, _("Items"));
 	notebook.append_page (palette_scroller, _("Palette"));
 	notebook.append_page (modifier_scroller, _("Transparency"));
-	
+
 	pack_start (notebook);
 
 	show_all ();
 
 	waveform_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
 	timeline_item_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
-	
+
 	color_dialog.get_colorsel()->set_has_opacity_control (true);
 	color_dialog.get_colorsel()->set_has_palette (true);
-	
+
 	set_ui_to_state();
 
 	color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
@@ -200,7 +200,7 @@ ThemeManager::ThemeManager()
 	/* no need to call setup_palette() here, it will be done when its size is allocated */
 	setup_aliases ();
 	setup_modifiers ();
-	
+
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ThemeManager::colors_changed));
 }
 
@@ -216,7 +216,7 @@ ThemeManager::setup_modifiers ()
 	Gtk::HBox* mod_hbox;
 	Gtk::Label* mod_label;
 	Gtk::HScale* mod_scale;
-	
+
 	Gtkmm2ext::container_clear (modifier_vbox);
 
 	for (UIConfiguration::Modifiers::const_iterator m = modifiers.begin(); m != modifiers.end(); ++m) {
@@ -231,7 +231,7 @@ ThemeManager::setup_modifiers ()
 		mod_label = manage (new Label (m->first));
 		mod_label->set_alignment (1.0, 0.5);
 		mod_label->set_size_request (150, -1); /* 150 pixels should be enough for anyone */
-		
+
 		mod_hbox->pack_start (*mod_label, false, true, 12);
 		mod_hbox->pack_start (*mod_scale, true, true);
 
@@ -246,7 +246,7 @@ void
 ThemeManager::modifier_edited (Gtk::Range* range, string name)
 {
 	using namespace ArdourCanvas;
-	
+
 	double alpha = range->get_value();
 	SVAModifier svam (SVAModifier::Assign, -1.0, -1.0, alpha);
 	UIConfiguration::instance().set_modifier (name, svam);
@@ -256,8 +256,8 @@ void
 ThemeManager::colors_changed ()
 {
 	setup_palette ();
-	setup_aliases ();	
-	setup_modifiers ();	
+	setup_aliases ();
+	setup_modifiers ();
 }
 
 int
@@ -338,7 +338,7 @@ ThemeManager::on_dark_theme_button_toggled()
 	if (!dark_button.get_active()) return;
 
 	UIConfiguration* uic (&UIConfiguration::instance());
-	
+
         uic->set_color_file("dark");
 }
 
@@ -348,7 +348,7 @@ ThemeManager::on_light_theme_button_toggled()
 	if (!light_button.get_active()) return;
 
 	UIConfiguration* uic (&UIConfiguration::instance());
-	
+
         uic->set_color_file("light");
 }
 
@@ -409,7 +409,7 @@ ThemeManager::initialize_palette_canvas (ArdourCanvas::Canvas& canvas)
 	canvas.set_background_color (rgba_to_color (0.0, 0.0, 1.0, 0.0));
 
 	/* bi-directional scroll group */
-	
+
 	ScrollGroup* scroll_group = new ScrollGroup (canvas.root(), ScrollGroup::ScrollSensitivity (ScrollGroup::ScrollsVertically|ScrollGroup::ScrollsHorizontally));
 	canvas.add_scroller (*scroll_group);
 
@@ -459,7 +459,7 @@ ThemeManager::build_palette_canvas (ArdourCanvas::Canvas& canvas, ArdourCanvas::
 	}
 	SortByHue sorter;
 	sort (nc.begin(), nc.end(), sorter);
-	
+
 	const uint32_t color_limit = nc.size();
 	const double box_size = 20.0;
 	const double width = canvas.width();
@@ -468,9 +468,9 @@ ThemeManager::build_palette_canvas (ArdourCanvas::Canvas& canvas, ArdourCanvas::
 	uint32_t color_num = 0;
 
 	/* clear existing rects and delete them */
-	
+
 	group.clear (true);
-	
+
 	for (uint32_t y = 0; y < height - box_size && color_num < color_limit; y += box_size) {
 		for (uint32_t x = 0; x < width - box_size && color_num < color_limit; x += box_size) {
 			ArdourCanvas::Rectangle* r = new ArdourCanvas::Rectangle (&group, ArdourCanvas::Rect (x, y, x + box_size, y + box_size));
@@ -501,7 +501,7 @@ ThemeManager::palette_size_request (Gtk::Requisition* req)
 	req->height = (int) floor (c * box_size);
 
 	/* add overflow row if necessary */
-	
+
 	if (fmod (ncolors, c) != 0.0) {
 		req->height += box_size;
 	}
@@ -554,7 +554,7 @@ ThemeManager::palette_color_response (int result, std::string name)
 	using namespace ArdourCanvas;
 
 	color_dialog_connection.disconnect ();
-	
+
 	UIConfiguration* uic (&UIConfiguration::instance());
 	Gdk::Color gdkcolor;
 	double r,g, b, a;
@@ -567,10 +567,10 @@ ThemeManager::palette_color_response (int result, std::string name)
 		r = gdkcolor.get_red_p();
 		g = gdkcolor.get_green_p();
 		b = gdkcolor.get_blue_p();
-		
+
 		uic->set_color (name, rgba_to_color (r, g, b, a));
 		break;
-		
+
 	default:
 		break;
 	}
@@ -630,14 +630,14 @@ ThemeManager::choose_color_from_palette (string const & name)
 	palette_window = new ArdourDialog (_("Color Palette"));
 	palette_window->add_button (Stock::CANCEL, RESPONSE_REJECT); /* using CANCEL causes confusion if dialog is closed via CloseAllDialogs */
 	palette_window->add_button (Stock::OK, RESPONSE_OK);
-	
+
 	ArdourCanvas::GtkCanvas* canvas = new ArdourCanvas::GtkCanvas ();
 	ArdourCanvas::Container* group = initialize_palette_canvas (*canvas);
-	
+
 	canvas->signal_size_request().connect (sigc::mem_fun (*this, &ThemeManager::palette_size_request));
 	canvas->signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::palette_canvas_allocated), group, canvas,
 							    sigc::bind (sigc::mem_fun (*this, &ThemeManager::alias_palette_event), name)));
-	
+
 	palette_window->get_vbox()->pack_start (*canvas);
 	palette_window->show_all ();
 
@@ -651,7 +651,7 @@ void
 ThemeManager::setup_aliases ()
 {
 	using namespace ArdourCanvas;
-	
+
 	UIConfiguration* uic (&UIConfiguration::instance());
 	UIConfiguration::ColorAliases& aliases (uic->color_aliases);
 
@@ -683,7 +683,7 @@ ThemeManager::setup_aliases ()
 				row = *(alias_list->append());
 				row[alias_columns.name] = parent;
 				row[alias_columns.alias] = "";
-				
+
 				/* now add the child as a child of this one */
 
 				row = *(alias_list->insert (row->children().end()));

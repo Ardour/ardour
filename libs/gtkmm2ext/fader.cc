@@ -162,7 +162,7 @@ Fader::get_image_scales (double &x_scale, double &y_scale)
 	int pbheight = _face_pixbuf->get_height ();
 	int width = get_width ();
 	int height = get_height ();
-	
+
 	if ((width != pbwidth) || (height != pbheight)) {
 		x_scale = double (width) / double (pbwidth);
 		if (x_scale == 0.0) {
@@ -186,17 +186,17 @@ Fader::set_touch_cursor (const Glib::RefPtr<Gdk::Pixbuf>& touch_cursor)
 void
 Fader::render (cairo_t* cr, cairo_rectangle_t*)
 {
-	
+
 	double xscale = 1.0;
 	double yscale = 1.0;
-	
+
 	get_image_scales (xscale, yscale);
-	
+
 	cairo_matrix_t matrix;
 	cairo_get_matrix (cr, &matrix);
 	cairo_matrix_scale (&matrix, xscale, yscale);
 	cairo_set_matrix (cr, &matrix);
-	
+
 	get_handle_position (_last_drawn_x, _last_drawn_y);
 
 	if (_underlay_pixbuf != 0) {
@@ -264,9 +264,9 @@ Fader::on_button_press_event (GdkEventButton* ev)
 
 	double xscale = 1.0;
 	double yscale = 1.0;
-	
+
 	get_image_scales (xscale, yscale);
-	
+
 	double hw = _handle_pixbuf->get_width() * xscale;
 	double hh = _handle_pixbuf->get_height() * yscale;
 
@@ -276,16 +276,16 @@ Fader::on_button_press_event (GdkEventButton* ev)
 
 	double ev_pos_x;
 	double ev_pos_y;
-		
+
 	get_closest_point_on_line(_min_pos_x, _min_pos_y,
 	                          _max_pos_x, _max_pos_y,
 	                          ev->x, ev->y,
 	                          ev_pos_x, ev_pos_y );
 	add_modal_grab ();
-	
+
 	_grab_window = ev->window;
 	_dragging = true;
-	
+
 	gdk_pointer_grab(ev->window,false,
 	                 GdkEventMask (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK),
 	                 NULL,
@@ -293,7 +293,7 @@ Fader::on_button_press_event (GdkEventButton* ev)
 	                 ev->time);
 
 	queue_draw();
-	
+
 	return true;
 }
 
@@ -368,7 +368,7 @@ Fader::on_motion_notify_event (GdkEventMotion* ev)
 	if (_dragging) {
 		double ev_pos_x;
 		double ev_pos_y;
-		
+
 		if (ev->window != _grab_window) {
 			_grab_window = ev->window;
 			return true;
@@ -378,12 +378,12 @@ Fader::on_motion_notify_event (GdkEventMotion* ev)
 		                          _max_pos_x, _max_pos_y,
 		                          _grab_start_handle_x + (ev->x - _grab_start_mouse_x), _grab_start_handle_y + (ev->y - _grab_start_mouse_y),
 		                          ev_pos_x, ev_pos_y );
-		
+
 		double const fract = sqrt((ev_pos_x - _min_pos_x) * (ev_pos_x - _min_pos_x) +
 		                          (ev_pos_y - _min_pos_y) * (ev_pos_y - _min_pos_y)) /
 			sqrt((double)((_max_pos_x - _min_pos_x) * (_max_pos_x - _min_pos_x) +
 			              (_max_pos_y - _min_pos_y) * (_max_pos_y - _min_pos_y)));
-		
+
 		adjustment.set_value (adjustment.get_lower() + (adjustment.get_upper() - adjustment.get_lower()) * fract);
 	}
 	return true;

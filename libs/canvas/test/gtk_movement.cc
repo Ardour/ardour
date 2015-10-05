@@ -69,7 +69,7 @@ int main (int argc, char* argv[])
 	overall_box.pack_start (scroller);
 
 	Gtk::HBox button_box;
-	
+
 	Gtk::Button bigger ("Bigger");
 	bigger.signal_clicked().connect (sigc::ptr_fun (&bigger_clicked));
 	button_box.pack_start (bigger);
@@ -85,9 +85,9 @@ int main (int argc, char* argv[])
 	Gtk::Button right ("Right");
 	right.signal_clicked().connect (sigc::ptr_fun (&right_clicked));
 	button_box.pack_start (right);
-	
+
 	overall_box.pack_start (button_box, false, false);
-	
+
 	window.add (overall_box);
 	canvas.show ();
 	window.show_all ();

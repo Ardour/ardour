@@ -88,7 +88,7 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	   respond. Typically this will always be GUI->"others" - the GUI pays
 	   no attention to these signals.
 	*/
-	
+
 	static PBD::Signal1<void,RouteNotificationListPtr> TrackSelectionChanged;
 
 	/* the model here is as follows:
@@ -163,7 +163,7 @@ extern "C" {
 	    bool             (*probe)(ControlProtocolDescriptor*);
 	    ControlProtocol* (*initialize)(ControlProtocolDescriptor*,Session*);
 	    void             (*destroy)(ControlProtocolDescriptor*,ControlProtocol*);
-	
+
 	};
 }
 

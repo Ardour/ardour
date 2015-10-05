@@ -86,10 +86,10 @@ WindowsVSTPluginUI::forward_key_event (GdkEventKey* ev)
 		/* buffer full */
 		return;
 	}
-	
+
 	int special_windows_key = 0;
 	int character_windows_key = 0;
-	
+
 	switch (ev->keyval) {
 	case GDK_Left:
 		special_windows_key = 0x25;
@@ -111,11 +111,11 @@ WindowsVSTPluginUI::forward_key_event (GdkEventKey* ev)
 		character_windows_key = ev->keyval;
 		break;
 	}
-	
+
 	fst->pending_keys[fst->n_pending_keys].special = special_windows_key;
 	fst->pending_keys[fst->n_pending_keys].character = character_windows_key;
 	fst->n_pending_keys++;
-	
+
 	pthread_mutex_unlock (&fst->lock);
 }
 

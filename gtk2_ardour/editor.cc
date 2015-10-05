@@ -235,7 +235,7 @@ pane_size_watcher (Paned* pane)
 
 	      X: hard to access
 	      Quartz: impossible to access
-	
+
 	   so stop that by preventing it from ever getting too narrow. 35
 	   pixels is basically a rough guess at the tab width.
 
@@ -313,7 +313,7 @@ Editor::Editor ()
 	PublicEditor::_instance = this;
 
 	_have_idled = false;
-	
+
 	selection = new Selection (this);
 	cut_buffer = new Selection (this);
 	_selection_memento = new SelectionMemento ();
@@ -742,7 +742,7 @@ Editor::Editor ()
 	signal_delete_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::exit_on_main_window_close));
 
 	Gtkmm2ext::Keyboard::the_keyboard().ZoomVerticalModifierReleased.connect (sigc::mem_fun (*this, &Editor::zoom_vertical_modifier_released));
-	
+
 	/* allow external control surfaces/protocols to do various things */
 
 	ControlProtocol::ZoomToSession.connect (*this, invalidator (*this), boost::bind (&Editor::temporal_zoom_session, this), gui_context());
@@ -1019,7 +1019,7 @@ Editor::control_select (uint32_t rid, Selection::Operation op)
 	/* handles the (static) signal from the ControlProtocol class that
 	 * requests setting the selected track to a given RID
 	 */
-	
+
 	if (!_session) {
 		return;
 	}
@@ -1464,18 +1464,18 @@ Editor::fill_xfade_menu (Menu_Helpers::MenuList& items, bool start)
 			sigc::bind (sigc::mem_fun (*this, emf), FadeLinear)
 			)
 		);
-	
+
 	dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-	
+
 	items.push_back (
 		ImageMenuElem (
 			_("Constant power"),
 			*(*images)[FadeConstantPower],
 			sigc::bind (sigc::mem_fun (*this, emf), FadeConstantPower)
 			));
-	
+
 	dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-	
+
 	items.push_back (
 		ImageMenuElem (
 			_("Symmetric"),
@@ -1483,25 +1483,25 @@ Editor::fill_xfade_menu (Menu_Helpers::MenuList& items, bool start)
 			sigc::bind (sigc::mem_fun (*this, emf), FadeSymmetric)
 			)
 		);
-	
+
 	dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-	
+
 	items.push_back (
 		ImageMenuElem (
 			_("Slow"),
 			*(*images)[FadeSlow],
 			sigc::bind (sigc::mem_fun (*this, emf), FadeSlow)
 			));
-	
+
 	dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-	
+
 	items.push_back (
 		ImageMenuElem (
 			_("Fast"),
 			*(*images)[FadeFast],
 			sigc::bind (sigc::mem_fun (*this, emf), FadeFast)
 			));
-	
+
 	dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
 }
 
@@ -2101,7 +2101,7 @@ Editor::set_snap_to (SnapType st)
 	case SnapToBeatDiv2: {
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
-		
+
 		compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(),
 					    current_bbt_points_begin, current_bbt_points_end);
 		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples(),
@@ -2587,9 +2587,9 @@ Editor::trackview_by_y_position (double y, bool trackview_relative_offset) const
 	}
 
 	for (TrackViewList::const_iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
-			
+
 		std::pair<TimeAxisView*, double> const r = (*iter)->covers_y_position (y);
-			
+
 		if (r.first) {
 			return r;
 		}
@@ -2948,7 +2948,7 @@ Editor::setup_toolbar ()
 	if (!ARDOUR::Profile->get_mixbus()) {
 		mouse_mode_hbox->pack_start (mouse_cut_button, false, false);
 	}
-	
+
 	if (!ARDOUR::Profile->get_trx()) {
 		mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
@@ -3059,7 +3059,7 @@ Editor::setup_toolbar ()
 
 	if (!ARDOUR::Profile->get_trx()) {
 		_zoom_tearoff = manage (new TearOff (_zoom_box));
-		
+
 		_zoom_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
 							   &_zoom_tearoff->tearoff_window()));
 		_zoom_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
@@ -3169,7 +3169,7 @@ void
 Editor::build_edit_mode_menu ()
 {
 	using namespace Menu_Helpers;
-	
+
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_strings[(int)Slide], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Slide)));
 //	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_strings[(int)Splice], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Splice)));
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_strings[(int)Ripple], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Ripple)));
@@ -3400,11 +3400,11 @@ Editor::commit_reversible_selection_op ()
 				    The user has undone some selection ops and then made a new one,
 				    making anything earlier in the list invalid.
 				*/
-				
+
 				list<XMLNode *>::iterator it = selection_op_history.begin();
 				list<XMLNode *>::iterator e_it = it;
 				advance (e_it, selection_op_history_it);
-				
+
 				for ( ; it != e_it; ++it) {
 					delete *it;
 				}
@@ -3764,7 +3764,7 @@ Editor::set_zoom_preset (int64_t ms)
 		temporal_zoom_session();
 		return;
 	}
-	
+
 	ARDOUR::framecnt_t const sample_rate = ARDOUR::AudioEngine::instance()->sample_rate();
 	temporal_zoom( (sample_rate * ms / 1000) / _visible_canvas_width );
 }
@@ -3779,7 +3779,7 @@ Editor::set_visible_track_count (int32_t n)
 	   allocation happens, we will get called again and then we can do the
 	   real work.
 	*/
-	
+
 	if (_visible_canvas_height <= 1) {
 		return;
 	}
@@ -3787,7 +3787,7 @@ Editor::set_visible_track_count (int32_t n)
 	int h;
 	string str;
 	DisplaySuspender ds;
-	
+
 	if (_visible_track_count > 0) {
 		h = trackviews_height() / _visible_track_count;
 		std::ostringstream s;
@@ -3813,7 +3813,7 @@ Editor::set_visible_track_count (int32_t n)
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->set_height (h, TimeAxisView::HeightPerLane);
 	}
-	
+
 	if (str != visible_tracks_selector.get_text()) {
 		visible_tracks_selector.set_text (str);
 	}
@@ -3995,7 +3995,7 @@ Editor::set_show_measures (bool yn)
 
 			ARDOUR::TempoMap::BBTPointList::const_iterator begin;
 			ARDOUR::TempoMap::BBTPointList::const_iterator end;
-			
+
 			compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(), begin, end);
 			draw_measures (begin, end);
 		}
@@ -4329,7 +4329,7 @@ Editor::copy_playlists (TimeAxisView* v)
 void
 Editor::clear_playlists (TimeAxisView* v)
 {
-	begin_reversible_command (_("clear playlists"));	
+	begin_reversible_command (_("clear playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
 	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, ARDOUR::Properties::select.property_id);
@@ -4434,7 +4434,7 @@ Editor::current_visual_state (bool with_tracks)
 	vs->leftmost_frame = leftmost_frame;
 	vs->zoom_focus = zoom_focus;
 
-	if (with_tracks) {	
+	if (with_tracks) {
 		*vs->gui_state = *ARDOUR_UI::instance()->gui_object_state;
 	}
 
@@ -4498,11 +4498,11 @@ Editor::use_visual_state (VisualState& vs)
 
 	set_zoom_focus (vs.zoom_focus);
 	reposition_and_zoom (vs.leftmost_frame, vs.samples_per_pixel);
-	
+
 	if (vs.gui_state) {
 		*ARDOUR_UI::instance()->gui_object_state = *vs.gui_state;
-		
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {	
+
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			(*i)->clear_property_cache();
 			(*i)->reset_visual_state ();
 		}
@@ -4612,7 +4612,7 @@ Editor::idle_visual_changer ()
 
 	pending_visual_change.idle_handler_id = -1;
 	pending_visual_change.being_handled = true;
-	
+
 	VisualChange vc = pending_visual_change;
 
 	pending_visual_change.pending = (VisualChange::Type) 0;
@@ -4636,7 +4636,7 @@ Editor::visual_changer (const VisualChange& vc)
 
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
-		
+
 		compute_current_bbt_points (vc.time_origin, pending_visual_change.time_origin + current_page_samples(),
 					    current_bbt_points_begin, current_bbt_points_end);
 		compute_bbt_ruler_scale (vc.time_origin, pending_visual_change.time_origin + current_page_samples(),
@@ -4978,17 +4978,17 @@ Editor::get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) cons
 {
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		RouteTimeAxisView* rtav;
-		
+
 		if ((rtav = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 			boost::shared_ptr<Playlist> pl;
 			std::vector<boost::shared_ptr<Region> > results;
 			boost::shared_ptr<Track> tr;
-			
+
 			if ((tr = rtav->track()) == 0) {
 				/* bus */
 				continue;
 			}
-			
+
 			if ((pl = (tr->playlist())) != 0) {
 				boost::shared_ptr<Region> r = pl->region_by_id (id);
 				if (r) {
@@ -5014,7 +5014,7 @@ Editor::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<
 			mtav->get_per_region_note_selection (selection);
 		}
 	}
-	
+
 }
 
 void
@@ -5070,7 +5070,7 @@ void
 Editor::first_idle ()
 {
 	MessageDialog* dialog = 0;
-	
+
 	if (track_views.size() > 1) {
 		dialog = new MessageDialog (
 			*this,
@@ -5606,7 +5606,7 @@ Editor::reset_x_origin_to_follow_playhead ()
 		} else {
 
 			framepos_t l = 0;
-			
+
 			if (frame < leftmost_frame) {
 				/* moving left */
 				if (_session->transport_rolling()) {
@@ -5630,7 +5630,7 @@ Editor::reset_x_origin_to_follow_playhead ()
 			if (l < 0) {
 				l = 0;
 			}
-			
+
 			center_screen_internal (l + (current_page_samples() / 2), current_page_samples ());
 		}
 	}
@@ -5775,7 +5775,7 @@ Editor::session_going_away ()
 	clear_marker_display ();
 
 	stop_step_editing ();
-	
+
 	/* get rid of any existing editor mixer strip */
 
 	WindowTitle title(Glib::get_application_name());
@@ -5851,7 +5851,7 @@ Editor::setup_fade_images ()
 	_fade_out_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadeout-fast-cut")));
 	_fade_out_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadeout-slow-cut")));
 	_fade_out_images[FadeConstantPower] = new Gtk::Image (get_icon_path (X_("fadeout-constant-power")));
-	
+
 	_xfade_in_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("fadein-linear")));
 	_xfade_in_images[FadeSymmetric] = new Gtk::Image (get_icon_path (X_("fadein-symmetric")));
 	_xfade_in_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadein-fast-cut")));
@@ -5922,10 +5922,10 @@ void
 Editor::popup_control_point_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	using namespace Menu_Helpers;
-	
+
 	MenuList& items = _control_point_context_menu.items ();
 	items.clear ();
-	
+
 	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &Editor::edit_control_point), item)));
 	items.push_back (MenuElem (_("Delete"), sigc::bind (sigc::mem_fun (*this, &Editor::remove_control_point), item)));
 	if (!can_remove_control_point (item)) {

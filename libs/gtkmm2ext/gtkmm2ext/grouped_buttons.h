@@ -36,7 +36,7 @@ class LIBGTKMM2EXT_API GroupedButtons : public sigc::trackable
   public:
 	GroupedButtons (uint32_t nbuttons, uint32_t first_active);
 	GroupedButtons (std::vector<Gtk::ToggleButton *>&);
-	
+
 	Gtk::ToggleButton& button (uint32_t which) {
 		return *buttons[which];
 	}

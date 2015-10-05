@@ -101,7 +101,7 @@ PopUp::touch ()
 		set_size_request_to_display_given_text (label, my_text.c_str(), 25, 10);
 		label.set_text (my_text);
 		show_all ();
-		
+
 		if (popdown_time != 0) {
 			timeout = g_timeout_add (popdown_time,
 						   remove_prompt_timeout,
@@ -137,7 +137,7 @@ PopUp::on_delete_event (GdkEventAny* /*ev*/)
 
 	if (popdown_time != 0 && timeout != -1) {
 		g_source_remove (timeout);
-	}	
+	}
 
 	if (delete_on_hide) {
 		std::cerr << "deleting prompter\n" << endl;

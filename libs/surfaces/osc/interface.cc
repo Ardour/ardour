@@ -28,7 +28,7 @@ static ControlProtocol*
 new_osc_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s)
 {
 	OSC* osc = new OSC (*s, Config->get_osc_port());
-	
+
 	osc->set_active (true);
 
 	return osc;

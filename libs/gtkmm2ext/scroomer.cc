@@ -111,29 +111,29 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 		unzoomed_page += scale * fract * range;
 		unzoomed_page = min(unzoomed_page, adj.get_upper() - unzoomed_val);
 		unzoomed_page = max(unzoomed_page, min_page_size);
-		
+
 		if (pinch){
 			temp = unzoomed_val + unzoomed_page;
 			unzoomed_val -= scale * fract * range * 0.5;
 			unzoomed_val = min(unzoomed_val, temp - min_page_size);
 			unzoomed_val = max(unzoomed_val, adj.get_lower());
 		}
-		
+
 		break;
 	case Handle2:
 		temp = unzoomed_val + unzoomed_page;
 		unzoomed_val += scale * fract * range;
 		unzoomed_val = min(unzoomed_val, temp - min_page_size);
 		unzoomed_val = max(unzoomed_val, adj.get_lower());
-		
+
 		unzoomed_page = temp - unzoomed_val;
-		
+
 		if (pinch){
-			
+
 			unzoomed_page -= scale * fract * range;
 		}
-		
-		unzoomed_page = min(unzoomed_page, adj.get_upper() - unzoomed_val);		
+
+		unzoomed_page = min(unzoomed_page, adj.get_upper() - unzoomed_val);
 		unzoomed_page = max(unzoomed_page, min_page_size);
 		break;
 	default:
@@ -145,10 +145,10 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 	 * We don't start doing zoom until we are at least one scroomer width outside the scroomer's
 	 * area.
 	 */
-	
+
 	if (ev->x > (get_width() * 2)) {
 		zoom = ev->x - get_width();
-		
+
 		double higher = unzoomed_val + unzoomed_page - half_min_page - val_at_pointer;
 		double lower = val_at_pointer - (unzoomed_val + half_min_page);
 
@@ -204,7 +204,7 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 	adj.set_page_size (rint (page));
 	adj.set_value (rint (val));
 	adj.value_changed();
-	
+
 	return true;
 }
 
@@ -241,7 +241,7 @@ Scroomer::on_button_press_event (GdkEventButton* ev)
 		unzoomed_val = adj.get_value();
 		unzoomed_page = adj.get_page_size();
 		grab_window = ev->window;
-		
+
 		if (ev->button == 3){
 			pinch = true;
 		} else {
@@ -250,7 +250,7 @@ Scroomer::on_button_press_event (GdkEventButton* ev)
 
 		DragStarting (); /* EMIT SIGNAL */
 	}
-	
+
 	if (ev->type == GDK_2BUTTON_PRESS && ev->button == 1) {
 		DoubleClicked();
 	}
@@ -289,7 +289,7 @@ Scroomer::on_button_release_event (GdkEventButton* ev)
 	default:
 		break;
 	}
-	
+
 	grab_comp = None;
 
 	remove_modal_grab();

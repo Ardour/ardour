@@ -539,7 +539,7 @@ smf_validate(smf_t *smf)
 				return (-6);
 			}
 		}
-				
+
 	}
 
 	return (0);

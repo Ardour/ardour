@@ -125,7 +125,7 @@ typedef struct
 	CairoColor bg[5];
 	CairoColor base[5];
 	CairoColor text[5];
-	
+
 	CairoColor shade[9];
 	CairoColor spot[3];
 } ClearlooksColors;
@@ -141,9 +141,9 @@ typedef struct
 	boolean enable_glow;
 
 	gfloat  radius;
-	
+
 	ClearlooksStateType state_type;
-	
+
 	uint8 corners;
 	uint8 xthickness;
 	uint8 ythickness;
@@ -189,7 +189,7 @@ typedef struct
 typedef struct
 {
 	CairoCorners    corners;
-	ClearlooksShadowType shadow;	
+	ClearlooksShadowType shadow;
 } ShadowParameters;
 
 typedef struct
@@ -301,7 +301,7 @@ struct _ClearlooksStyleFunctions
 	                               const WidgetParameters		*widget,
 	                               const OptionMenuParameters *optionmenu,
 	                               int x, int y, int width, int height);
-					
+
 	void (*draw_inset)            (cairo_t				*cr,
 	                                const CairoColor		*bg_color,
 	                                double x, double y, double w, double h,
@@ -415,7 +415,7 @@ struct _ClearlooksStyleFunctions
 	                               const WidgetParameters		*widget,
 	                               const ArrowParameters		*arrow,
 	                               int x, int y, int width, int height);
-	
+
 	void (*draw_checkbox)         (cairo_t				*cr,
 	                               const ClearlooksColors		*colors,
 	                               const WidgetParameters		*widget,

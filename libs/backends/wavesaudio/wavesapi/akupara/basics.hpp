@@ -21,7 +21,7 @@ namespace Akupara
 		null_type(const null_type *) {} // this allows 0 to be implicitly converted to null_type
 	};
 	inline null_type null() { return null_type(); }
-	
+
 
 	// This is a byte, guaranteed to be unsigned regardless of your compiler's char signedness
 	typedef uint8_t byte_type;

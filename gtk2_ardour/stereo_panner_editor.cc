@@ -40,12 +40,12 @@ StereoPannerEditor::StereoPannerEditor (StereoPanner* p)
 	t->set_spacings (6);
 
 	int n = 0;
-	
+
 	t->attach (*manage (left_aligned_label (_("Position"))), 0, 1, n, n + 1);
 	t->attach (_position, 1, 2, n, n + 1);
 	t->attach (*manage (left_aligned_label (_("%"))), 2, 3, n, n + 1);
 	++n;
-	
+
 	t->attach (*manage (left_aligned_label (_("Width"))), 0, 1, n, n + 1);
 	t->attach (_width, 1, 2, n, n + 1);
 	t->attach (*manage (left_aligned_label (_("%"))), 2, 3, n, n + 1);
@@ -66,7 +66,7 @@ StereoPannerEditor::StereoPannerEditor (StereoPanner* p)
 	_panner->get_width_controllable()->Changed.connect (
 		_connections, invalidator (*this), boost::bind (&StereoPannerEditor::update_editor, this), gui_context ()
 		);
-	
+
 	_panner->DropReferences.connect (_connections, invalidator (*this), boost::bind (&StereoPannerEditor::panner_going_away, this), gui_context ());
 	_position.signal_value_changed().connect (sigc::mem_fun (*this, &StereoPannerEditor::position_changed));
 	_width.signal_value_changed().connect (sigc::mem_fun (*this, &StereoPannerEditor::width_changed));
@@ -87,7 +87,7 @@ StereoPannerEditor::update_editor ()
 	if (!_panner) {
 		return;
 	}
-	
+
 	_ignore_changes = true;
 	_position.set_value (100 * _panner->get_position_controllable()->get_value ());
 	_width.set_value (100 * _panner->get_width_controllable()->get_value ());
@@ -135,4 +135,4 @@ StereoPannerEditor::set_width_range ()
 	pair<double, double> const wr = _panner->panner()->width_range ();
 	_width.set_range (wr.first * 100, wr.second * 100);
 }
-	
+

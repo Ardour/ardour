@@ -400,7 +400,7 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 		} else {
 			session_range = session.locations()->session_range_location();
 		}
-			
+
 		if (!session_range) { return false; }
 
 		ExportTimespanPtr timespan = handler->add_timespan();
@@ -789,7 +789,7 @@ std::string
 ExportProfileManager::get_sample_filename_for_format (ExportFilenamePtr filename, ExportFormatSpecPtr format)
 {
 	assert (format);
-	
+
 	if (channel_configs.empty()) { return ""; }
 
 	std::list<string> filenames;
@@ -829,7 +829,7 @@ ExportProfileManager::get_warnings ()
 	if (!channel_configs.empty ()) {
 		channel_config_state = channel_configs.front();
 	}
-	
+
 	TimespanStatePtr timespan_state = timespans.front();
 
 	/*** Check "global" config ***/
@@ -867,7 +867,7 @@ ExportProfileManager::get_warnings ()
 			check_config (warnings, timespan_state, channel_config_state, *format_it, *filename_it);
 		}
 	}
-	
+
 	return warnings;
 }
 

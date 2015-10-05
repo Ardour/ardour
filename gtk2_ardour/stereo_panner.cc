@@ -306,7 +306,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 	if (_panner_shell->bypassed()) {
 		return true;
 	}
-	
+
 	drag_start_x = ev->x;
 	last_drag_x = ev->x;
 
@@ -447,7 +447,7 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
 	if (PannerInterface::on_button_release_event (ev)) {
 		return true;
 	}
-	
+
 	if (ev->button != 1) {
 		return false;
 	}
@@ -537,7 +537,7 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 	if (dragging_left) {
 		delta = -delta;
 	}
-	
+
 	if (dragging_left || dragging_right) {
 
 		if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
@@ -547,7 +547,7 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 			 */
 
 			_panner->freeze ();
-			
+
 			double pv = position_control->get_value();
 
 			if (dragging_left) {
@@ -573,27 +573,27 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 		} else {
 
 			/* maintain position as invariant as we change the width */
-			
+
 			/* create a detent close to the center */
-			
+
 			if (!detented && fabs (current_width) < 0.02) {
 				detented = true;
 				/* snap to zero */
 				width_control->set_value (0);
 			}
-			
+
 			if (detented) {
-				
+
 				accumulated_delta += delta;
-				
+
 				/* have we pulled far enough to escape ? */
-				
+
 				if (fabs (accumulated_delta) >= 0.025) {
 					width_control->set_value (current_width + accumulated_delta);
 					detented = false;
 					accumulated_delta = false;
 				}
-				
+
 			} else {
 				/* width needs to change by 2 * delta because both L & R move */
 				width_control->set_value (current_width + (delta * 2.0));

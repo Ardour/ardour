@@ -59,7 +59,7 @@ class ScrollGroup;
  *  of screen pixels, with an origin of (0, 0) at the top left.  x increases
  *  rightwards and y increases downwards.
  */
-	
+
 class LIBCANVAS_API Canvas
 {
 public:
@@ -153,7 +153,7 @@ public:
 	/** Set the timeout used to display tooltips, in milliseconds
 	 */
 	static void set_tooltip_timeout (uint32_t msecs);
-	
+
 protected:
 	Root  _root;
         Color _bg_color;
@@ -205,7 +205,7 @@ protected:
 	bool on_motion_notify_event (GdkEventMotion *);
         bool on_enter_notify_event (GdkEventCrossing*);
         bool on_leave_notify_event (GdkEventCrossing*);
-	
+
 	bool button_handler (GdkEventButton *);
 	bool motion_notify_handler (GdkEventMotion *);
         bool deliver_event (GdkEvent *);
@@ -228,7 +228,7 @@ private:
 	Item * _grabbed_item;
         /** the item that currently has key focus or 0 */
 	Item * _focused_item;
-	
+
 	bool _single_exposure;
 
 	sigc::connection tooltip_timeout_connection;

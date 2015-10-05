@@ -101,7 +101,7 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	 * section of the curve. For now we rely on cairo clipping to help
 	 * with this.
 	 */
-	
+
 
 	setup_outline_context (context);
 
@@ -165,7 +165,7 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		draw = draw.expand (4.0);
 
 		/* now clip it to the actual points in the curve */
-		
+
 		if (draw.x0 < w1.x) {
 			draw.x0 = w1.x;
 		}

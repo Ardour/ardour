@@ -59,16 +59,16 @@ CAAudioChannelLayout::CAAudioChannelLayout ()
 //	CAAudioChannelLayout::CAAudioChannelLayout
 //=============================================================================
 CAAudioChannelLayout::CAAudioChannelLayout (UInt32 inNumberChannels, bool inChooseSurround)
-{		
+{
 		// this chooses default layouts based on the number of channels...
 	UInt32 theSize = CalculateByteSize (inNumberChannels);
-		
+
 	mLayoutHolder = new ACLRefCounter (theSize);
-	
+
 	AudioChannelLayout* layout = mLayoutHolder->GetLayout();
 
 	layout->mNumberChannelDescriptions = inNumberChannels;
-	
+
 	switch (inNumberChannels)
 	{
 		case 1:
@@ -148,11 +148,11 @@ CAAudioChannelLayout& CAAudioChannelLayout::operator= (const CAAudioChannelLayou
 	if (mLayoutHolder != c.mLayoutHolder) {
 		if (mLayoutHolder)
 			mLayoutHolder->release();
-	
+
 		if ((mLayoutHolder = c.mLayoutHolder) != NULL)
 			mLayoutHolder->retain();
 	}
-	
+
 	return *this;
 }
 
@@ -162,9 +162,9 @@ CAAudioChannelLayout&	CAAudioChannelLayout::operator= (const AudioChannelLayout*
 		mLayoutHolder->release();
 
 	UInt32 theSize = CalculateByteSize (inChannelLayout->mNumberChannelDescriptions);
-	
+
 	mLayoutHolder = new ACLRefCounter (theSize);
-	
+
 	memcpy(mLayoutHolder->mLayout, inChannelLayout, theSize);
 	return *this;
 }
@@ -173,7 +173,7 @@ void	CAAudioChannelLayout::SetWithTag(AudioChannelLayoutTag inTag)
 {
 	if (mLayoutHolder)
 		mLayoutHolder->release();
-	
+
 	mLayoutHolder = new ACLRefCounter(offsetof(AudioChannelLayout, mChannelDescriptions[0]));
 	AudioChannelLayout* layout = mLayoutHolder->GetLayout();
 	layout->mChannelLayoutTag = inTag;

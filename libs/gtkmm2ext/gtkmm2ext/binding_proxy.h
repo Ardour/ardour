@@ -39,7 +39,7 @@ class LIBGTKMM2EXT_API BindingProxy : public sigc::trackable
 	BindingProxy (boost::shared_ptr<PBD::Controllable>);
 	BindingProxy ();
 	virtual ~BindingProxy();
-	
+
 	void set_bind_button_state (guint button, guint statemask);
 
 	static bool is_bind_action (GdkEventButton *);
@@ -51,10 +51,10 @@ class LIBGTKMM2EXT_API BindingProxy : public sigc::trackable
   protected:
 	Gtkmm2ext::PopUp*  prompter;
 	boost::shared_ptr<PBD::Controllable> controllable;
-	
+
 	static guint bind_button;
 	static guint bind_statemask;
-	
+
 	PBD::ScopedConnection learning_connection;
 	void learning_finished ();
 	bool prompter_hiding (GdkEventAny *);

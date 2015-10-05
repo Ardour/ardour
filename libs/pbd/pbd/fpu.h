@@ -39,13 +39,13 @@ class LIBPBD_API FPU {
 
 	static FPU* instance();
 	static void destroy();
-	
+
 	bool has_flush_to_zero () const { return _flags & HasFlushToZero; }
 	bool has_denormals_are_zero () const { return _flags & HasDenormalsAreZero; }
 	bool has_sse () const { return _flags & HasSSE; }
 	bool has_sse2 () const { return _flags & HasSSE2; }
 	bool has_avx () const { return _flags & HasAVX; }
-	
+
   private:
 	Flags _flags;
 

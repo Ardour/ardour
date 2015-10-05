@@ -80,7 +80,7 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool /*dummy_arg_to_force
 ControlPoint::~ControlPoint ()
 {
 	CatchDeletion (this); /* EMIT SIGNAL */
-	
+
 	delete _item;
 }
 

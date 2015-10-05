@@ -7,7 +7,7 @@ void
 TestReceiver::receive (Transmitter::Channel chn, const char * str)
 {
 	const char *prefix = "";
-	
+
 	switch (chn) {
 	case Transmitter::Error:
 		prefix = ": [ERROR]: ";
@@ -25,13 +25,13 @@ TestReceiver::receive (Transmitter::Channel chn, const char * str)
 		/* this isn't supposed to happen */
 		abort ();
 	}
-	
+
 	/* note: iostreams are already thread-safe: no external
 	   lock required.
 	*/
-	
+
 	std::cout << prefix << str << std::endl;
-	
+
 	if (chn == Transmitter::Fatal) {
 		::exit (9);
 	}

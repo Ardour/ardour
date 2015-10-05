@@ -461,7 +461,7 @@ Editor::mapover_tracks_with_unique_playlists (sigc::slot<void, RouteTimeAxisView
 			RouteTimeAxisView* v = dynamic_cast<RouteTimeAxisView*> (*i);
 
 			if (v && v->route()->route_group() == group) {
-				
+
 				boost::shared_ptr<Track> t = v->track();
 				if (t) {
 					if (playlists.insert (t->playlist()).second) {
@@ -1005,7 +1005,7 @@ Editor::track_selection_changed ()
 	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());
 
 	/* notify control protocols */
-	
+
 	ControlProtocol::TrackSelectionChanged (routes);
 
 	if (sfbrowser && _session && !_session->deletion_in_progress()) {
@@ -1341,7 +1341,7 @@ Editor::sensitize_the_right_region_actions ()
 	if (have_active_fade_out && have_inactive_fade_out) {
 		// a->set_inconsistent ();
 	}
-	
+
 	bool const have_active_fade = have_active_fade_in || have_active_fade_out;
 	bool const have_inactive_fade = have_inactive_fade_in || have_inactive_fade_out;
 
@@ -1351,7 +1351,7 @@ Editor::sensitize_the_right_region_actions ()
 	if (have_active_fade && have_inactive_fade) {
 		// a->set_inconsistent ();
 	}
-	
+
 	_ignore_region_action = false;
 
 	_all_region_actions_sensitized = false;
@@ -1610,7 +1610,7 @@ Editor::set_selection_from_region ()
 	/* find all the tracks that have selected regions */
 
 	set<TimeAxisView*> tracks;
-	
+
 	for (RegionSelection::const_iterator r = selection->regions.begin(); r != selection->regions.end(); ++r) {
 		tracks.insert (&(*r)->get_time_axis_view());
 	}
@@ -1623,9 +1623,9 @@ Editor::set_selection_from_region ()
 	selection->set (selection->regions.start(), selection->regions.end_frame());
 
 	/* and select the tracks */
-	
+
 	selection->set (tvl);
-	
+
 	if (!Profile->get_sae()) {
 		set_mouse_mode (Editing::MouseRange, false);
 	}
@@ -1946,7 +1946,7 @@ Editor::get_edit_op_range (framepos_t& start, framepos_t& end) const
 		end = 0;
 		return false;
 	}
-	
+
 //	if (!mouse_frame (m, ignored)) {
 //		/* mouse is not in a canvas, try playhead+selected marker.
 //		   this is probably most true when using menus.

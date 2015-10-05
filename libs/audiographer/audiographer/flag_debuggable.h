@@ -26,14 +26,14 @@ class /*LIBAUDIOGRAPHER_API*/ FlagDebuggable : public Debuggable<L>
 	{
 		flags.set (flag);
 	}
-	
+
 	/// Prints debug output if \a context contains flags that are not supported by this class
 	template<typename SelfType, typename ContextType>
 	void check_flags (SelfType & self, ProcessContext<ContextType> context)
 	{
 		if (!Debuggable<L>::debug_level (DebugFlags)) { return; }
 		FlagField unsupported = flags.unsupported_flags_of (context.flags());
-		
+
 		for (FlagField::iterator it = unsupported.begin(); it != unsupported.end(); ++it) {
 			Debuggable<L>::debug_stream() << boost::str (boost::format
 				("%1% does not support flag %2%")

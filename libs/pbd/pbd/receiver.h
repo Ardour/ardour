@@ -34,7 +34,7 @@ class LIBPBD_API Receiver : public sigc::trackable
   public:
 	Receiver ();
 	virtual ~Receiver ();
-	
+
 	void listen_to (Transmitter &);
 	void hangup ();
 

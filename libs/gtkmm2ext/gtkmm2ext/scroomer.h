@@ -56,7 +56,7 @@ public:
 
 	void set_min_page_size(double page_size);
 	int get_handle_size() { return handle_size; }
-	
+
 	inline int position_of(Component comp) { return position[comp]; }
 
 	sigc::signal0<void> DragStarting;

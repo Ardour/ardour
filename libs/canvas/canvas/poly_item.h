@@ -45,7 +45,7 @@ protected:
 
 	Points _points;
 };
-	
+
 }
 
 #endif

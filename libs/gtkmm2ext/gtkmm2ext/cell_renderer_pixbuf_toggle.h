@@ -62,7 +62,7 @@ class LIBGTKMM2EXT_API CellRendererPixbufToggle : public Gtk::CellRenderer
   private:
 	Glib::Property< Glib::RefPtr<Gdk::Pixbuf> > property_pixbuf_;
 	Glib::Property<bool> property_active_;
-	
+
 	Glib::RefPtr<Gdk::Pixbuf> active_pixbuf;
 	Glib::RefPtr<Gdk::Pixbuf> inactive_pixbuf;
 

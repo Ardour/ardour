@@ -32,7 +32,7 @@ class ButtonJoiner : public CairoWidget, public Gtkmm2ext::Activatable {
 	ButtonJoiner (const std::string&, Gtk::Widget&, Gtk::Widget&, bool central_link = false);
 	~ButtonJoiner ();
 
-	void set_related_action (Glib::RefPtr<Gtk::Action>);	
+	void set_related_action (Glib::RefPtr<Gtk::Action>);
 	void set_active_state (Gtkmm2ext::ActiveState);
 
   protected:

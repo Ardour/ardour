@@ -31,7 +31,7 @@ Channel::Channel (MIDI::byte channelnum, Port &p)
 	_channel_number = channelnum;
 
 	reset (0, 1, false);
-}	
+}
 
 void
 Channel::connect_signals ()
@@ -137,7 +137,7 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 
 	} else if ((tb->controller_number >= 32 &&
 		    tb->controller_number <= 63)) {
-		
+
 		int cn = tb->controller_number - 32;
 
 		cv = (unsigned short) _controller_val[cn];
@@ -153,7 +153,7 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 		   high 7.
 		*/
 
-		
+
 		if (_controller_14bit[cn] == false) {
 			_controller_14bit[cn] = true;
 			cv = (cv << 7) | (tb->value & 0x7f);
@@ -172,7 +172,7 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 	} else {
 
 		/* controller can only take 7 bit values */
-		
+
 		_controller_val[tb->controller_number] =
 			(controller_value_t) tb->value;
 	}

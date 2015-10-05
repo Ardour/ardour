@@ -723,7 +723,7 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 	 */
 
 	typename Sequence<Time>::Notes::iterator i;
-		
+
 	for (i = note_lower_bound(note->time()); i != _notes.end() && (*i)->time() == note->time(); ++i) {
 
 		if (*i == note) {
@@ -763,19 +763,19 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 		 * in this scenario, we have no choice other than to linear
 		 * search the list of notes and find the note by ID.
 		 */
-		
+
 		for (i = _notes.begin(); i != _notes.end(); ++i) {
 
 			if ((*i)->id() == note->id()) {
-				
+
 				DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\tID-based pass, erasing note #%2 %3 @ %4\n", this, (*i)->id(), (int)(*i)->note(), (*i)->time()));
 				_notes.erase (i);
-				
+
 				if (note->note() == _lowest_note || note->note() == _highest_note) {
-					
+
 					_lowest_note = 127;
 					_highest_note = 0;
-					
+
 					for (typename Sequence<Time>::Notes::iterator ii = _notes.begin(); ii != _notes.end(); ++ii) {
 						if ((*ii)->note() < _lowest_note)
 							_lowest_note = (*ii)->note();
@@ -783,18 +783,18 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 							_highest_note = (*ii)->note();
 					}
 				}
-				
+
 				erased = true;
 				id_matched = true;
 				break;
 			}
 		}
 	}
-	
+
 	if (erased) {
 
 		Pitches& p (pitches (note->channel()));
-		
+
 		typename Pitches::iterator j;
 
 		/* if we had to ID-match above, we can't expect to find it in
@@ -818,11 +818,11 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 			 * notes by channel+time. We care only about its note number
 			 * so the search_note has all other properties unset.
 			 */
-			
+
 			NotePtr search_note (new Note<Time>(0, Time(), Time(), note->note(), 0));
 
 			for (j = p.lower_bound (search_note); j != p.end() && (*j)->note() == note->note(); ++j) {
-				
+
 				if ((*j) == note) {
 					DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\terasing pitch %2 @ %3\n", this, (int)(*j)->note(), (*j)->time()));
 					p.erase (j);
@@ -836,7 +836,7 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 		}
 
 		_edited = true;
-	
+
 	} else {
 		cerr << "Unable to find note to erase matching " << *note.get() << endmsg;
 	}

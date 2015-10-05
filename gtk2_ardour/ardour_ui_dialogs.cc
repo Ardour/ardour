@@ -348,7 +348,7 @@ ARDOUR_UI::goto_mixer_window ()
 {
 	Glib::RefPtr<Gdk::Window> win;
 	Glib::RefPtr<Gdk::Screen> screen;
-	
+
 	if (editor) {
 		win = editor->get_window ();
 	}
@@ -358,7 +358,7 @@ ARDOUR_UI::goto_mixer_window ()
 	} else {
 		screen = Gdk::Screen::get_default();
 	}
-	
+
 	if (g_getenv ("ARDOUR_LOVES_STUPID_TINY_SCREENS") == 0 && screen && screen->get_height() < 700) {
 		Gtk::MessageDialog msg (_("This screen is not tall enough to display the mixer window"));
 		msg.run ();

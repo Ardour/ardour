@@ -100,9 +100,9 @@ Track::state (bool full)
 	root.add_property (X_("saved-meter-point"), enum_2_string (_saved_meter_point));
 	root.add_child_nocopy (_rec_enable_control->get_state());
 	root.add_child_nocopy (_diskstream->get_state ());
-	
+
 	return root;
-}	
+}
 
 int
 Track::set_state (const XMLNode& node, int version)
@@ -140,7 +140,7 @@ Track::set_state (const XMLNode& node, int version)
 			}
 		}
 	}
-	
+
 	const XMLProperty* prop;
 
 	if ((prop = node.property (X_("monitoring"))) != 0) {
@@ -196,7 +196,7 @@ Track::RecEnableControl::set_value (double val)
 	if (!t) {
 		return;
 	}
-	
+
 	t->set_record_enabled (val >= 0.5 ? true : false, this);
 }
 
@@ -207,7 +207,7 @@ Track::RecEnableControl::get_value () const
 	if (!t) {
 		return 0;
 	}
-	
+
 	return (t->record_enabled() ? 1.0 : 0.0);
 }
 
@@ -235,7 +235,7 @@ Track::prep_record_enabled (bool yn, void *src)
 	if (yn && record_safe ()) {
 	    return;
 	}
-	
+
 	if (!_session.writable()) {
 		return;
 	}
@@ -255,7 +255,7 @@ Track::prep_record_enabled (bool yn, void *src)
 	}
 
 	bool will_follow;
-	
+
 	if (yn) {
 		will_follow = _diskstream->prep_record_enable ();
 	} else {
@@ -279,7 +279,7 @@ Track::set_record_enabled (bool yn, void *src)
 	if (_diskstream->record_safe ()) {
 	    return;
 	}
-	
+
 	if (!_session.writable()) {
 		return;
 	}
@@ -310,16 +310,16 @@ Track::set_record_safe (bool yn, void *src)
 	if (!_session.writable()) { /* REQUIRES REVIEW */
 		return;
 	}
-	
+
 	if (_freeze_record.state == Frozen) { /* REQUIRES REVIEW */
 		return;
 	}
-	
+
 	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_recenable()) {
 		_route_group->apply (&Track::set_record_safe, yn, _route_group);
 		return;
 	}
-	
+
 	_diskstream->set_record_safe (yn);
 }
 
@@ -474,12 +474,12 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		be_silent = false;
 		break;
 	}
-	
+
 	//if we have an internal generator, let it play regardless of monitoring state
 	if (_have_internal_generator) {
 		be_silent = false;
 	}
-	
+
 	_amp->apply_gain_automation (false);
 
 	/* if have_internal_generator, or .. */
@@ -528,7 +528,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	} else {
 
 		BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
-		
+
 		fill_buffers_with_input (bufs, _input, nframes);
 
 		if (_meter_point == MeterInput) {
@@ -942,11 +942,11 @@ MonitorState
 Track::monitoring_state () const
 {
 	/* Explicit requests */
-	
+
 	if (_monitoring & MonitorInput) {
 		return MonitoringInput;
 	}
-		
+
 	if (_monitoring & MonitorDisk) {
 		return MonitoringDisk;
 	}
@@ -954,16 +954,16 @@ Track::monitoring_state () const
 	/* This is an implementation of the truth table in doc/monitor_modes.pdf;
 	   I don't think it's ever going to be too pretty too look at.
 	*/
-	
+
 	// GZ: NOT USED IN TRACKS
 	//bool const auto_input = _session.config.get_auto_input ();
 	//bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
 	//bool const tape_machine_mode = Config->get_tape_machine_mode ();
-	
+
 	bool const roll = _session.transport_rolling ();
 	bool const track_rec = _diskstream->record_enabled ();
 	bool session_rec = _session.actively_recording ();
-	
+
 	if (track_rec) {
 
 		if (!session_rec && roll) {
@@ -993,11 +993,11 @@ MonitorState
 Track::monitoring_state () const
 {
 	/* Explicit requests */
-	
+
 	if (_monitoring & MonitorInput) {
 		return MonitoringInput;
 	}
-		
+
 	if (_monitoring & MonitorDisk) {
 		return MonitoringDisk;
 	}
@@ -1046,7 +1046,7 @@ Track::monitoring_state () const
 			} else {
 				return MonitoringDisk;
 			}
-			
+
 		}
 	}
 

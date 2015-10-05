@@ -46,7 +46,7 @@ class /*LIBPBD_API*/ DynamicTouchable : public Touchable
 	void touch () {
 		(object.*method)();
 	}
-	
+
   protected:
 	T& object;
 	void (T::*method)(void);
@@ -62,7 +62,7 @@ class /*LIBPBD_API*/ DynamicTouchable1 : public Touchable
 	void touch () {
 		(object.*method)(arg);
 	}
-	
+
   protected:
 	T1& object;
 	void (T1::*method)(T2);
@@ -79,12 +79,12 @@ class /*LIBPBD_API*/ DynamicTouchable2 : public Touchable
 	void touch () {
 		(object.*method)(arg1, arg2);
 	}
-	
+
   protected:
 	T1& object;
 	void (T1::*method)(T2,T3);
 	T2 arg1;
 	T3 arg2;
 };
-	
+
 #endif // __pbd_touchable_h__

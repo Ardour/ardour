@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	AUOutputBL.h
-	
+
 =============================================================================*/
 
 #ifndef __AUOutputBL_h__
@@ -61,10 +61,10 @@
 
 class AUOutputBL {
 public:
-											
+
 											// you CANNOT use one of these - it will crash!
 //										AUOutputBL ();
-										
+
 											// this is the constructor that you use
 											// it can't be reset once you've constructed it
 										AUOutputBL (const CAStreamBasicDescription &inDesc, UInt32 inDefaultNumFrames = 512);
@@ -74,29 +74,29 @@ public:
 										{
 											Prepare (mFrames);
 										}
-									
+
 								// this version can throw if this is an allocted ABL and inNumFrames is > AllocatedFrames()
 								// you can set the bool to true if you want a NULL buffer list even if allocated
 								// inNumFrames must be a valid number (will throw if inNumFrames is 0)
 	void 								Prepare (UInt32 inNumFrames, bool inWantNullBufferIfAllocated = false);
-	
+
 	AudioBufferList*					ABL() { return mBufferList; }
-								
+
 								// You only need to call this if you want to allocate a buffer list
 								// if you want an empty buffer list, just call Prepare()
 								// if you want to dispose previously allocted memory, pass in 0
 								// then you either have an empty buffer list, or you can re-allocate
 								// Memory is kept around if an Allocation request is less than what is currently allocated
 	void								Allocate (UInt32 inNumberFrames);
-	
+
 	UInt32								AllocatedFrames() const { return mFrames; }
-	
+
 	const CAStreamBasicDescription&		GetFormat() const { return mFormat; }
 
 #if DEBUG
 	void								Print();
 #endif
-	
+
 private:
 	UInt32						AllocatedBytes () const { return (mBufferSize * mNumberBuffers); }
 

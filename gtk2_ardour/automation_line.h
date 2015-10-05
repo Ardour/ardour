@@ -60,7 +60,7 @@ public:
 		ControlPoints = 0x2,
 		SelectedControlPoints = 0x4
 	};
-	
+
 	AutomationLine (const std::string&                                 name,
 	                TimeAxisView&                                      tv,
 	                ArdourCanvas::Item&                                parent,

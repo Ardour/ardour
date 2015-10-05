@@ -53,13 +53,13 @@
 UInt32	CACFString::GetStringByteLength(CFStringRef inCFString, CFStringEncoding inEncoding)
 {
 	UInt32 theAnswer = 0;
-	
+
 	if(inCFString != NULL)
 	{
 		CFRange theRange = { 0, CFStringGetLength(inCFString) };
 		CFStringGetBytes(inCFString, theRange, inEncoding, 0, false, NULL, 0x7FFFFFFF, (CFIndex*)&theAnswer);
 	}
-	
+
 	return theAnswer;
 }
 

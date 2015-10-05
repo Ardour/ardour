@@ -18,14 +18,14 @@ TempoTest::recomputeMapTest ()
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
-	
+
 	  120bpm = 24e3 samples per beat
 	  240bpm = 12e3 samples per beat
 	*/
-	
+
 
 	/*
-	
+
 	  120bpm                                                240bpm
 	  0 beats                                               12 beats
 	  0 frames                                              288e3 frames

@@ -42,13 +42,13 @@ class OSCRouteObserver
   private:
 	boost::shared_ptr<ARDOUR::Route> _route;
 	//boost::shared_ptr<Controllable> _controllable;
-	
+
 	PBD::ScopedConnection name_changed_connection;
 	PBD::ScopedConnection rec_changed_connection;
 	PBD::ScopedConnection mute_changed_connection;
 	PBD::ScopedConnection solo_changed_connection;
 	PBD::ScopedConnection gain_changed_connection;
-	
+
 	lo_address addr;
 	std::string path;
 

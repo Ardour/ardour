@@ -293,7 +293,7 @@ DownBeat::measureSpecDiff(d_vec_t oldspec, d_vec_t newspec)
         }
 
         // JENSEN-SHANNON CALCULATION
-        sd1 = 0.5*oldspec[i] + 0.5*newspec[i];	
+        sd1 = 0.5*oldspec[i] + 0.5*newspec[i];
         SD = SD + (-sd1*log(sd1)) + (0.5*(oldspec[i]*log(oldspec[i]))) + (0.5*(newspec[i]*log(newspec[i])));
     }
 

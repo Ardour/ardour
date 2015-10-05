@@ -36,7 +36,7 @@ namespace Mackie
 class Timer
 {
 public:
-	
+
 	/**
 		start the timer running if true, or just create the
 		object if false.
@@ -46,7 +46,7 @@ public:
 		if ( shouldStart )
 			start();
 	}
-	
+
 	/**
 		Start the timer running. Return the current timestamp, in milliseconds
 	*/
@@ -81,7 +81,7 @@ public:
 			return (_stop - _start) / 1000;
 		}
 	}
-	
+
 	/**
 		Call stop and then start. Return the value from stop.
 	*/

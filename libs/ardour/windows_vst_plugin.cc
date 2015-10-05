@@ -50,7 +50,7 @@ WindowsVSTPlugin::WindowsVSTPlugin (const WindowsVSTPlugin &other)
 		throw failed_constructor();
 	}
 	Session::vst_current_loading_id = 0;
-	
+
 	_plugin = _state->plugin;
 }
 

@@ -101,13 +101,13 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 {
 	double const arc_radius = get_height();
 	double r, g, b, a;
-	
+
 	if (tab.group && tab.group->is_active()) {
 		ArdourCanvas::color_to_rgba (tab.color, r, g, b, a);
 	} else {
 		ArdourCanvas::color_to_rgba (UIConfiguration::instance().color ("inactive group tab"), r, g, b, a);
 	}
-	
+
 	a = 1.0;
 
 	cairo_set_source_rgba (cr, r, g, b, a);
@@ -122,7 +122,7 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 
 		cairo_text_extents_t ext;
 		cairo_text_extents (cr, tab.group->name().c_str(), &ext);
-		
+
 		ArdourCanvas::Color c = ArdourCanvas::contrasting_text_color (ArdourCanvas::rgba_to_color (r, g, b, a));
 		ArdourCanvas::color_to_rgba (c, r, g, b, a);
 

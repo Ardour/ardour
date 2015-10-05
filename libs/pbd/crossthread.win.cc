@@ -43,7 +43,7 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	// make the socket non-blockable if required
 	u_long mode = (u_long)non_blocking;
 	int otp_result = 0;
-	
+
 	otp_result = ioctlsocket(send_socket, FIONBIO, &mode);
 	if (otp_result != NO_ERROR) {
 		std::cerr << "CrossThreadChannel::CrossThreadChannel() Send socket cannot be set to non blocking mode with error: " << WSAGetLastError() << std::endl;
@@ -72,10 +72,10 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 		std::cerr << "CrossThreadChannel::CrossThreadChannel() Setting receive socket address to local failed with error: " << WSAGetLastError() << std::endl;
 		return;
 	}
-	
+
 	// construct IOChannel
 	receive_channel = g_io_channel_win32_new_socket((gint)receive_socket);
-	
+
 	// set binary data type
 	GIOStatus g_status = g_io_channel_set_encoding (receive_channel, NULL, NULL);
 	if (G_IO_STATUS_NORMAL != g_status ) {
@@ -104,7 +104,7 @@ CrossThreadChannel::wakeup ()
 {
 	char c = 0;
 
-	// write one byte to wake up a thread which is listening our IOS	
+	// write one byte to wake up a thread which is listening our IOS
 	sendto(send_socket, &c, sizeof(c), 0, (SOCKADDR*)&recv_address, sizeof(recv_address) );
 }
 
@@ -125,7 +125,7 @@ CrossThreadChannel::drain ()
 
 		if (G_IO_STATUS_NORMAL != g_status) {
 			std::cerr << "CrossThreadChannel::CrossThreadChannel() Cannot drain from read buffer! " << g_status << std::endl;
-			
+
 			if (g_error) {
 				std::cerr << "Error is Domain: " << g_error->domain << " Code: " << g_error->code << std::endl;
 				g_clear_error(&g_error);
@@ -184,7 +184,7 @@ CrossThreadChannel::receive (char& msg, bool wait)
 			return -1;
 		}
 	}
-	
+
 	// fetch the message from the channel.
 	GIOStatus g_status = g_io_channel_read_chars (receive_channel, &msg, sizeof(msg), &read, &g_error);
 

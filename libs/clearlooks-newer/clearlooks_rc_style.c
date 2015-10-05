@@ -333,7 +333,7 @@ static guint
 clearlooks_rc_style_parse (GtkRcStyle *rc_style,
 			   GtkSettings  *settings,
 			   GScanner   *scanner)
-		
+
 {
 	static GQuark scope_id = 0;
 	ClearlooksRcStyle *clearlooks_style = CLEARLOOKS_RC_STYLE (rc_style);
@@ -482,6 +482,6 @@ static GtkStyle *
 clearlooks_rc_style_create_style (GtkRcStyle *rc_style)
 {
 	(void) rc_style;
-	
+
 	return GTK_STYLE (g_object_new (CLEARLOOKS_TYPE_STYLE, NULL));
 }

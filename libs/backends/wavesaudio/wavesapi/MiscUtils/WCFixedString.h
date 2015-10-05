@@ -58,7 +58,7 @@ public:
     typedef intptr_t spos_t; // signed position, defined to intptr_t because Windows does not have ssize_t
 	static const pos_t npos = UINTPTR_MAX; // Same as size_max
 
-	WCFixedStringBase(char* const in_begin, const size_t in_MaxFixedStringLength) :	
+	WCFixedStringBase(char* const in_begin, const size_t in_MaxFixedStringLength) :
 		m_begin(in_begin),
 		m_MaxFixedStringLength(in_MaxFixedStringLength),
 		m_end(in_begin)
@@ -280,10 +280,10 @@ public:
 	#endif
 	#ifdef __APPLE__
 		std::snprintf(buf, tempBufSize, "%.*f", in_precision, in_double);
-	#endif		
-	#ifdef __linux__	
+	#endif
+	#ifdef __linux__
 		snprintf(buf, tempBufSize, "%.*f", in_precision, in_double);
-	#endif		
+	#endif
 
 		operator<<(buf);
 	}
@@ -383,17 +383,17 @@ public:
 //	WCFixedStringBase& operator<<(const unsigned char in_uint) {
 //		return operator<<(static_cast<const unsigned long long>(in_uint));
 //		}
-//		
+//
 //	WCFixedStringBase& operator<<(const size_t in_uint) {
 //		return operator<<(static_cast<const uint64_t>(in_uint));
 //		}
-//		
+//
 #if defined(__APPLE__) || defined(PLATFORM_WINDOWS) || defined(__linux__) // both 32 & 64 bit
 	WCFixedStringBase& operator<<(const unsigned int in_uint) {
 		return operator<<(static_cast<uint64_t>(in_uint));
 	}
 #endif
-//		
+//
 #if defined(PLATFORM_WINDOWS) || defined(__linux__) // both 32 & 64 bit
 	WCFixedStringBase& operator<<(const unsigned long in_uint) {
 		return operator<<(static_cast<uint64_t>(in_uint));
@@ -473,7 +473,7 @@ public:
 
 	ptrdiff_t compare(const WCFixedStringBase& in_to_compare) const
 	{
-		ptrdiff_t retVal = compare(in_to_compare.c_str());		
+		ptrdiff_t retVal = compare(in_to_compare.c_str());
 		return retVal;
 	}
 
@@ -496,7 +496,7 @@ public:
 
 	ptrdiff_t case_insensitive_compare(const WCFixedStringBase& in_to_compare) const
 	{
-		ptrdiff_t retVal = case_insensitive_compare(in_to_compare.c_str());		
+		ptrdiff_t retVal = case_insensitive_compare(in_to_compare.c_str());
 		return retVal;
 	}
 
@@ -690,7 +690,7 @@ public:
         bool retVal = (0 == where) || (0 == ::strlen(in_begin_text));
         return retVal;
     }
-	
+
     // return true if in_end_text is found at th end OR if in_end_text is empty
 	bool ends_with(const char* in_end_text) const
     {
@@ -775,7 +775,7 @@ public:
         }
     }
 
-protected:	
+protected:
 	~WCFixedStringBase() {}
 
 	char* const m_begin;
@@ -853,12 +853,12 @@ public:
 		return retVal;
 	}
 
-protected:	
+protected:
 
 	char m_fixedString[kMaxFixedStringLength + 1]; // the "+ 1" is so that *m_end is always valid, and we can put the '\0' there};
 };
 
-inline bool operator==(const WCFixedStringBase& in_left, const WCFixedStringBase& in_right)	
+inline bool operator==(const WCFixedStringBase& in_left, const WCFixedStringBase& in_right)
 {
 	return 0 == in_left.compare(in_right.c_str());
 }
@@ -868,7 +868,7 @@ inline bool operator==(const WCFixedStringBase& in_left, const char* const in_ri
 	return 0 == in_left.compare(in_right);
 }
 
-inline bool operator!=(const WCFixedStringBase& in_left, const WCFixedStringBase& in_right)	
+inline bool operator!=(const WCFixedStringBase& in_left, const WCFixedStringBase& in_right)
 {
 	return 0 != in_left.compare(in_right.c_str());
 }
@@ -893,11 +893,11 @@ template<size_t kSizeOfFirst, size_t kSizeOfSecond>
 	class WCFixedStringPair : public std::pair< WCFixedString<kSizeOfFirst>, WCFixedString<kSizeOfSecond> >
 {
 public:
-	WCFixedStringPair(const char* const in_firstStr = 0, const char* const in_secondStr = 0) :	
+	WCFixedStringPair(const char* const in_firstStr = 0, const char* const in_secondStr = 0) :
 	std::pair< WCFixedString<kSizeOfFirst>, WCFixedString<kSizeOfSecond> >(in_firstStr, in_secondStr) {}
-	WCFixedStringPair(const WCFixedStringBase& in_firstStr, const char* const in_secondStr = 0) :	
+	WCFixedStringPair(const WCFixedStringBase& in_firstStr, const char* const in_secondStr = 0) :
 	std::pair< WCFixedString<kSizeOfFirst>, WCFixedString<kSizeOfSecond> >(in_firstStr, in_secondStr) {}
-	WCFixedStringPair(const WCFixedStringBase& in_firstStr, const WCFixedStringBase& in_secondStr) :	
+	WCFixedStringPair(const WCFixedStringBase& in_firstStr, const WCFixedStringBase& in_secondStr) :
 	std::pair< WCFixedString<kSizeOfFirst>, WCFixedString<kSizeOfSecond> >(in_firstStr, in_secondStr) {}
 };
 

@@ -38,12 +38,12 @@ MonoPannerEditor::MonoPannerEditor (MonoPanner* p)
 	t->set_spacings (6);
 
 	int n = 0;
-	
+
 	t->attach (*manage (left_aligned_label (_("Left"))), 0, 1, n, n + 1);
 	t->attach (_left, 1, 2, n, n + 1);
 	t->attach (*manage (left_aligned_label (_("%"))), 2, 3, n, n + 1);
 	++n;
-	
+
 	t->attach (*manage (left_aligned_label (_("Right"))), 0, 1, n, n + 1);
 	t->attach (_right, 1, 2, n, n + 1);
 	t->attach (*manage (left_aligned_label (_("%"))), 2, 3, n, n + 1);
@@ -78,7 +78,7 @@ MonoPannerEditor::update_editor ()
 	if (!_panner) {
 		return;
 	}
-	
+
 	float const v = _panner->get_controllable()->get_value();
 
 	_ignore_changes = true;
@@ -110,7 +110,7 @@ MonoPannerEditor::right_changed ()
 	}
 
 	float const v = _right.get_value () / 100;
-	
+
 	_ignore_changes = true;
 	_left.set_value (100 * (1 - v));
 	_panner->get_controllable()->set_value (v);

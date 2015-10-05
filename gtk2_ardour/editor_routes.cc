@@ -525,7 +525,7 @@ EditorRoutes::redisplay_real ()
 		}
 
 		bool visible = tv->marked_for_display ();
-		
+
 		/* show or hide the TimeAxisView */
 		if (visible) {
 			position += tv->show_at (position, n, &_editor->edit_controls_vbox);
@@ -886,11 +886,11 @@ EditorRoutes::reset_remote_control_ids ()
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 
 		/* skip two special values */
-		
+
 		if (rid == Route::MasterBusRemoteControlID) {
 			rid++;
 		}
-		
+
 		if (rid == Route::MonitorBusRemoteControlID) {
 			rid++;
 		}
@@ -1414,7 +1414,7 @@ EditorRoutes::initial_display ()
 	}
 
 	RouteList r (*_session->get_routes());
-		
+
 	r.sort (EditorOrderRouteSorter ());
 	_editor->add_routes (r);
 }
@@ -1602,7 +1602,7 @@ EditorRoutes::idle_update_mute_rec_solo_etc()
 		(*i)[_columns.active] = route->active ();
 		if (boost::dynamic_pointer_cast<Track> (route)) {
 			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
-			
+
 			if (route->record_enabled()) {
 				if (_session->record_status() == Session::Recording) {
 					(*i)[_columns.rec_state] = 1;
@@ -1614,7 +1614,7 @@ EditorRoutes::idle_update_mute_rec_solo_etc()
 			} else {
 				(*i)[_columns.rec_state] = 0;
 			}
-			
+
 			(*i)[_columns.name_editable] = !route->record_enabled ();
 		}
 	}

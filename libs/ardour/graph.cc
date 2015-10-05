@@ -435,7 +435,7 @@ Graph::main_thread()
 
   again:
         _callback_start_sem.wait ();
-	
+
 	DEBUG_TRACE(DEBUG::ProcessThreads, "main thread is awake\n");
 
         if (!_threads_active) {

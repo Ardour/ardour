@@ -52,7 +52,7 @@ Transmitter::Transmitter (Channel c)
 		send = 0;
 		break;
 	}
-}		
+}
 
 void
 Transmitter::deliver ()
@@ -82,12 +82,12 @@ Transmitter::deliver ()
 	seekg (0, ios::beg);
 
 	/* do the right thing if this should not return */
-	
+
 	if (does_not_return()) {
 #ifndef PLATFORM_WINDOWS
 // TODO !!!! Commented out temporarily (for Windows)
 		sigset_t mask;
-		
+
 		sigemptyset (&mask);
 		sigsuspend (&mask);
 		/*NOTREACHED*/

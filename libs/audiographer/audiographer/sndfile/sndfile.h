@@ -14,15 +14,15 @@ template<typename T = DefaultSampleType>
 class Sndfile : public SndfileWriter<T>, public SndfileReader<T>
 {
   public:
-	
+
 	Sndfile (std::string const & filename, SndfileBase::Mode mode = SndfileBase::ReadWrite, int format = 0,
 	         ChannelCount channels = 0, framecnt_t samplerate = 0)
 	  : SndfileHandle (filename, mode, format, channels, samplerate)
 	{}
-	
+
 	Sndfile (Sndfile const & other) : SndfileHandle (other) {}
 	using SndfileHandle::operator=;
-	
+
 };
 
 } // namespace

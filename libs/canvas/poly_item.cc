@@ -40,12 +40,12 @@ PolyItem::PolyItem (Item* parent)
 void
 PolyItem::compute_bounding_box () const
 {
-	
+
 	if (!_points.empty()) {
 
 		Rect bbox;
 		Points::const_iterator i = _points.begin();
-		
+
 		bbox.x0 = bbox.x1 = i->x;
 		bbox.y0 = bbox.y1 = i->y;
 
@@ -61,11 +61,11 @@ PolyItem::compute_bounding_box () const
 
 		_bounding_box = bbox.expand (_outline_width + 0.5);
 
-		
+
 	} else {
 		_bounding_box = boost::optional<Rect> ();
 	}
-	
+
 	_bounding_box_dirty = false;
 }
 
@@ -113,14 +113,14 @@ PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 		Duple c2 = item_to_window (Duple (cp2->x, cp2->y));
 
 		c = item_to_window (Duple (p->x, p->y));
-		
+
 		context->curve_to (c1.x + pixel_adjust,
 				   c1.y + pixel_adjust,
 				   c2.x + pixel_adjust,
 				   c2.y + pixel_adjust,
 				   c.x + pixel_adjust,
 				   c.y + pixel_adjust);
-		
+
 		++cp1;
 		++cp2;
 		++p;
@@ -133,9 +133,9 @@ PolyItem::set (Points const & points)
 	if (_points != points) {
 
 		begin_change ();
-		
+
 		_points = points;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
 	}

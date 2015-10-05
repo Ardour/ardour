@@ -53,13 +53,13 @@
 Float32	CACFNumber::GetFixed32() const
 {
 	SInt32 theFixedValue = GetSInt32();
-	
+
 	//	this is a 16.16 value so convert it to a float
 	Float32 theSign = theFixedValue < 0 ? -1.0 : 1.0;
 	theFixedValue *= (SInt32)theSign;
 	Float32 theWholePart = (theFixedValue & 0x7FFF0000) >> 16;
 	Float32 theFractPart = theFixedValue & 0x0000FFFF;
 	theFractPart /= 65536.0;
-	
+
 	return theSign * (theWholePart + theFractPart);
 }

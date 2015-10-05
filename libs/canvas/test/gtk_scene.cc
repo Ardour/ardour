@@ -26,7 +26,7 @@ int main (int argc, char* argv[])
 	Gtk::VBox overall_vbox;
 	Gtk::HScrollbar h_scroll;
 	Gtk::VScrollbar v_scroll;
-	
+
 	GtkCanvasViewport viewport (*h_scroll.get_adjustment(), *v_scroll.get_adjustment());
 	GtkCanvas* canvas = viewport.canvas ();
 
@@ -60,7 +60,7 @@ int main (int argc, char* argv[])
 	window.add (overall_vbox);
 	canvas->show ();
 	window.show_all ();
-	
+
 	Gtk::Main::run (window);
 	return 0;
 }

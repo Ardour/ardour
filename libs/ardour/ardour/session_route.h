@@ -34,11 +34,11 @@ Session::foreach_route (T *obj, void (T::*func)(Route&), bool sort)
 {
 	boost::shared_ptr<RouteList> r = routes.reader();
 	RouteList public_order (*r);
-	
+
 	if (sort) {
 		public_order.sort (RoutePublicOrderSorter());
 	}
-	
+
 	for (RouteList::iterator i = public_order.begin(); i != public_order.end(); i++) {
 		(obj->*func) (**i);
 	}
@@ -64,7 +64,7 @@ Session::foreach_route (T *obj, void (T::*func)(Route&, A), A arg1, bool sort)
 {
 	boost::shared_ptr<RouteList> r = routes.reader();
 	RouteList public_order (*r);
-	
+
 	if (sort) {
 		public_order.sort (RoutePublicOrderSorter());
 	}

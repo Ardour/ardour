@@ -57,7 +57,7 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	std::string name() const { return _name; }
 
 	bool ok() const { return _ok; }
-	
+
 	static RequestType new_request_type();
 	static RequestType CallSlot;
 	static RequestType Quit;

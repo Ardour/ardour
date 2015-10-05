@@ -235,7 +235,7 @@ AudioRegionView::init (bool wfd)
 	if (!Profile->get_sae()) {
 		gain_line.reset (new AudioRegionGainLine (line_name, *this, *group, audio_region()->envelope()));
 	}
-	
+
 	update_envelope_visibility ();
 	gain_line->reset ();
 
@@ -375,7 +375,7 @@ AudioRegionView::fade_out_active_changed ()
 	if (end_xfade_rect) {
 		if (audio_region()->fade_out_active()) {
 			end_xfade_rect->set_fill (false);
-		} else {	
+		} else {
 			end_xfade_rect->set_fill_color (UIConfiguration::instance().color_mod ("inactive crossfade", "inactive crossfade"));
 			end_xfade_rect->set_fill (true);
 		}
@@ -420,7 +420,7 @@ AudioRegionView::region_resized (const PropertyChange& what_changed)
 	interesting_stuff.add (ARDOUR::Properties::length);
 
 	if (what_changed.contains (interesting_stuff)) {
-		
+
 		for (uint32_t n = 0; n < waves.size(); ++n) {
 			waves[n]->region_resized ();
 		}
@@ -531,17 +531,17 @@ AudioRegionView::set_height (gdouble height)
 	if (wcnt > 0) {
 
 		gdouble ht;
-		
+
 		if (!UIConfiguration::instance().get_show_name_highlight() || (height < NAME_HIGHLIGHT_THRESH)) {
 			ht = height / (double) wcnt;
 		} else {
 			ht = (height - NAME_HIGHLIGHT_SIZE) / (double) wcnt;
 		}
-		
+
 		for (uint32_t n = 0; n < wcnt; ++n) {
-			
+
 			gdouble yoff = floor (ht * n);
-			
+
 			waves[n]->set_height (ht);
 			waves[n]->set_y_position (yoff);
 		}
@@ -635,7 +635,7 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 		hide_start_xfade ();
 		return;
 	}
-	
+
 	double effective_height;
 
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
@@ -689,7 +689,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 
 	double const pwidth = floor(trackview.editor().sample_to_pixel (width));
-	
+
 	/* the right edge should be right on the region frame is the pixel
 	 * width is zero. Hence the additional + 1.0 at the end.
 	 */
@@ -731,7 +731,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	}
 
 	/* points *MUST* be in anti-clockwise order */
-	
+
 	Points points;
 	Points::size_type pi;
 	boost::shared_ptr<const Evoral::ControlList> list (audio_region()->fade_out());
@@ -739,7 +739,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	double length = list->length();
 
 	points.assign (list->size(), Duple());
-	
+
 	for (x = list->begin(), pi = 0; x != list->end(); ++x, ++pi) {
 		points[pi].x = _pixel_width - pwidth + (pwidth * ((*x)->when/length));
 		points[pi].y = effective_height - ((*x)->value * (effective_height - 1.));
@@ -839,7 +839,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 
 		npoints = inverse->size();
 		ipoints.assign (npoints, Duple());
-		
+
 		Evoral::ControlList::const_iterator x;
 		Points::size_type pi;
 		double length = inverse->length();
@@ -866,7 +866,7 @@ AudioRegionView::redraw_end_xfade ()
 	}
 
 	show_end_xfade();
-	
+
 	reset_fade_out_shape_width (ar, ar->fade_out()->back()->when);
 }
 
@@ -930,9 +930,9 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 
 		npoints = inverse->size();
 		ipoints.assign (npoints, Duple());
-		
+
 		const double rend = trackview.editor().sample_to_pixel (_region->length() - width);
-		
+
 		Evoral::ControlList::const_iterator x;
 		Points::size_type pi;
 		double length = inverse->length();
@@ -1218,12 +1218,12 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	/* first waveview starts at 1.0, not 0.0 since that will overlap the
 	 * frame
 	 */
-	
+
 	gdouble yoff = which * ht;
 
 	WaveView *wave = new WaveView (group, audio_region ());
 	CANVAS_DEBUG_NAME (wave, string_compose ("wave view for chn %1 of %2", which, get_item_name()));
-	
+
 	wave->set_channel (which);
 	wave->set_y_position (yoff);
 	wave->set_height (ht);
@@ -1231,9 +1231,9 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->set_show_zero_line (true);
 	wave->set_clip_level (UIConfiguration::instance().get_waveform_clip_level ());
 	wave->set_start_shift (1.0);
-	
+
 	wave->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_wave_view_event), wave, this));
-	
+
 	switch (UIConfiguration::instance().get_waveform_shape()) {
 	case Rectified:
 		wave->set_shape (WaveView::Rectified);
@@ -1241,7 +1241,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	default:
 		wave->set_shape (WaveView::Normal);
 	}
-		
+
 	wave->set_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
 
 	vector<ArdourCanvas::WaveView*> v;
@@ -1523,7 +1523,7 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& wave
 		} else {
 			if (_region->muted()) {
 				/* hide outline with zero alpha */
-				outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 0);	
+				outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 0);
 				fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), MUTED_ALPHA);
 			} else {
 				outline = UIConfiguration::instance().color ("waveform outline");

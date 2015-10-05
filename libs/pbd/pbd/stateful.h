@@ -52,7 +52,7 @@ class LIBPBD_API Stateful {
 
 	virtual bool apply_changes (PropertyBase const &);
 	PropertyChange apply_changes (PropertyList const &);
-	
+
         const OwnedPropertyList& properties() const { return *_properties; }
 
 	void add_property (PropertyBase& s);
@@ -101,7 +101,7 @@ class LIBPBD_API Stateful {
 	void add_properties (XMLNode &);
 
 	PropertyChange set_values (XMLNode const &);
-	
+
 	/* derived classes can implement this to do cross-checking
 	   of property values after either a PropertyList or XML
 	   driven property change.

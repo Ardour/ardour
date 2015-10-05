@@ -180,7 +180,7 @@ smf_add_track(smf_t *smf, smf_track_t *track)
 #else
 		smf_set_format(smf, 1);
 #endif
-		
+
 	}
 }
 

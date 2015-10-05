@@ -373,16 +373,16 @@ void Rgb2Hsv(double *H, double *S, double *V, double R, double G, double B)
 	double Max = MAX3(R, G, B);
 	double Min = MIN3(R, G, B);
 	double C = Max - Min;
-	
-	
+
+
 	*V = Max;
-	
+
 	if(C > 0)
 	{
 		if(Max == R)
 		{
 			*H = (G - B) / C;
-			
+
 			if(G < B)
 				*H += 6;
 		}
@@ -390,7 +390,7 @@ void Rgb2Hsv(double *H, double *S, double *V, double R, double G, double B)
 			*H = 2 + (B - R) / C;
 		else
 			*H = 4 + (R - G) / C;
-		
+
 		*H *= 60;
 		*S = C / Max;
 	}
@@ -419,12 +419,12 @@ void Hsv2Rgb(double *R, double *G, double *B, double H, double S, double V)
 	double C = S * V;
 	double Min = V - C;
 	double X;
-	
-	
+
+
 	H -= 360*floor(H/360);
 	H /= 60;
 	X = C*(1 - fabs(H - 2*floor(H/2) - 1));
-	
+
 	switch((int)H)
 	{
 	case 0:
@@ -485,16 +485,16 @@ void Rgb2Hsl(double *H, double *S, double *L, double R, double G, double B)
 	double Max = MAX3(R, G, B);
 	double Min = MIN3(R, G, B);
 	double C = Max - Min;
-	
-	
+
+
 	*L = (Max + Min)/2;
-	
+
 	if(C > 0)
 	{
 		if(Max == R)
 		{
 			*H = (G - B) / C;
-			
+
 			if(G < B)
 				*H += 6;
 		}
@@ -502,7 +502,7 @@ void Rgb2Hsl(double *H, double *S, double *L, double R, double G, double B)
 			*H = 2 + (B - R) / C;
 		else
 			*H = 4 + (R - G) / C;
-		
+
 		*H *= 60;
 		*S = (*L <= 0.5) ? (C/(2*(*L))) : (C/(2 - 2*(*L)));
 	}
@@ -531,12 +531,12 @@ void Hsl2Rgb(double *R, double *G, double *B, double H, double S, double L)
 	double C = (L <= 0.5) ? (2*L*S) : ((2 - 2*L)*S);
 	double Min = L - 0.5*C;
 	double X;
-	
-	
+
+
 	H -= 360*floor(H/360);
 	H /= 60;
 	X = C*(1 - fabs(H - 2*floor(H/2) - 1));
-	
+
 	switch((int)H)
 	{
 	case 0:
@@ -594,15 +594,15 @@ void Rgb2Hsi(double *H, double *S, double *I, double R, double G, double B)
 {
 	double alpha = 0.5*(2*R - G - B);
 	double beta = 0.866025403784439*(G - B);
-	
-	
+
+
 	*I = (R + G + B)/3;
-	
+
 	if(*I > 0)
 	{
 		*S = 1 - MIN3(R,G,B) / *I;
 		*H = atan2(beta, alpha)*(180/M_PI);
-		
+
 		if(*H < 0)
 			*H += 360;
 	}
@@ -629,7 +629,7 @@ void Rgb2Hsi(double *H, double *S, double *I, double R, double G, double B)
 void Hsi2Rgb(double *R, double *G, double *B, double H, double S, double I)
 {
 	H -= 360*floor(H/360);
-	
+
 	if(H < 120)
 	{
 		*B = I*(1 - S);
@@ -695,16 +695,16 @@ void Rgb2Xyz(double *X, double *Y, double *Z, double R, double G, double B)
  * Wikipedia: http://en.wikipedia.org/wiki/CIE_1931_color_space
  */
 void Xyz2Rgb(double *R, double *G, double *B, double X, double Y, double Z)
-{	
+{
 	double R1, B1, G1, Min;
-	
-	
+
+
 	R1 = (double)( 3.2406*X - 1.5372*Y - 0.4986*Z);
 	G1 = (double)(-0.9689*X + 1.8758*Y + 0.0415*Z);
 	B1 = (double)( 0.0557*X - 0.2040*Y + 1.0570*Z);
-	
+
 	Min = MIN3(R1, G1, B1);
-	
+
 	/* Force nonnegative values so that gamma correction is well-defined. */
 	if(Min < 0)
 	{
@@ -770,9 +770,9 @@ void Lab2Xyz(double *X, double *Y, double *Z, double L, double a, double b)
  * Wikipedia: http://en.wikipedia.org/wiki/CIELUV_color_space
  */
 void Xyz2Luv(double *L, double *u, double *v, double X, double Y, double Z)
-{	
+{
 	double u1, v1, Denom;
-	
+
 
 	if((Denom = X + 15*Y + 3*Z) > 0)
 	{
@@ -802,13 +802,13 @@ void Luv2Xyz(double *X, double *Y, double *Z, double L, double u, double v)
 {
 	*Y = (L + 16)/116;
 	*Y = WHITEPOINT_Y*LABINVF(*Y);
-	
+
 	if(L != 0)
 	{
 		u /= L;
 		v /= L;
 	}
-	
+
 	u = u/13 + WHITEPOINT_U;
 	v = v/13 + WHITEPOINT_V;
 	*X = (*Y) * ((9*u)/(4*v));
@@ -829,12 +829,12 @@ void Luv2Xyz(double *X, double *Y, double *Z, double L, double u, double v)
 void Xyz2Lch(double *L, double *C, double *H, double X, double Y, double Z)
 {
 	double a, b;
-	
-	
+
+
 	Xyz2Lab(L, &a, &b, X, Y, Z);
 	*C = sqrt(a*a + b*b);
 	*H = atan2(b, a)*180.0/M_PI;
-	
+
 	if(*H < 0)
 		*H += 360;
 }
@@ -849,8 +849,8 @@ void Lch2Xyz(double *X, double *Y, double *Z, double L, double C, double H)
 {
 	double a = C * cos(H*(M_PI/180.0));
 	double b = C * sin(H*(M_PI/180.0));
-	
-	
+
+
 	Lab2Xyz(X, Y, Z, L, a, b);
 }
 

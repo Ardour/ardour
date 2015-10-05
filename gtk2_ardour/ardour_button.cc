@@ -627,7 +627,7 @@ ArdourButton::set_colors ()
 	/* The inactive color for the LED is just a fairly dark version of the
 	 * active color.
 	 */
-	
+
 	ArdourCanvas::HSV inactive (led_active_color);
 	inactive.v = 0.35;
 

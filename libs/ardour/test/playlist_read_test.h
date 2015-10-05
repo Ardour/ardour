@@ -32,7 +32,7 @@ class PlaylistReadTest : public AudioRegionTest
 public:
 	void setUp ();
 	void tearDown ();
-	
+
 	void singleReadTest ();
 	void overlappingReadTest ();
 	void transparentReadTest ();
@@ -44,6 +44,6 @@ private:
 	ARDOUR::Sample* _buf;
 	ARDOUR::Sample* _mbuf;
 	float* _gbuf;
-	
+
 	void check_staircase (ARDOUR::Sample *, int, int);
 };

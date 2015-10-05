@@ -48,7 +48,7 @@ Polygon::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	if (_outline || _fill) {
 		render_path (area, context);
-		
+
 		if (!_points.empty ()) {
 			/* close path */
 			Duple p = item_to_window (Duple (_points.front().x, _points.front().y));
@@ -119,11 +119,11 @@ Polygon::covers (Duple const & point) const
 	Points::size_type i;
 	Points::size_type j = npoints -1;
 	bool oddNodes = false;
-	
+
 	if (_bounding_box_dirty) {
 		compute_bounding_box ();
 	}
-	
+
 	for (i = 0; i < npoints; i++) {
 		if (((_points[i].y < p.y && _points[j].y >= p.y) || (_points[j].y < p.y && _points[i].y >= p.y))) {
 			oddNodes ^= (p.y * multiple[i] + constant[i] < p.x);

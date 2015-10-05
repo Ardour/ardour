@@ -46,9 +46,9 @@ GroupedButtons::GroupedButtons (uint32_t nbuttons, uint32_t first_active)
 	for (uint32_t n = 0; n < nbuttons; ++n) {
 
 		Gtk::ToggleButton *button;
-		
+
 		button = manage (new (Gtk::ToggleButton));
-		
+
 		if (n == current_active) {
 			button->set_active (true);
 		}

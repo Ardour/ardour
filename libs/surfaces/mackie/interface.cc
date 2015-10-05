@@ -35,7 +35,7 @@ static ControlProtocol*
 new_mackie_protocol (ControlProtocolDescriptor*, Session* s)
 {
 	MackieControlProtocol* mcp = 0;
-	
+
 	try {
 		mcp = new MackieControlProtocol (*s);
 		/* do not set active here - wait for set_state() */
@@ -45,7 +45,7 @@ new_mackie_protocol (ControlProtocolDescriptor*, Session* s)
 		delete mcp;
 		mcp = 0;
 	}
-	
+
 	return mcp;
 }
 
@@ -90,6 +90,6 @@ static ControlProtocolDescriptor mackie_descriptor = {
 	/*initialize :        */   new_mackie_protocol,
 	/*destroy :           */   delete_mackie_protocol
 };
-	
+
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &mackie_descriptor; }

@@ -66,7 +66,7 @@ class LIBPBD_API Selectable : public sigc::trackable
 		fromPath,
 		fromFILE
 	};
-		
+
 	bool _ok;
 	int _type;
 	std::string path;
@@ -89,7 +89,7 @@ class LIBPBD_API Selector {
 	void multithreaded (bool yn) {
 		use_list_lock = yn;
 	}
-	
+
 	void add (int condition, Selectable *s);
 	void remove (Selectable *);
 	int select (unsigned long usecs);

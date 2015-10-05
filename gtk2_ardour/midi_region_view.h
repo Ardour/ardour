@@ -309,7 +309,7 @@ public:
 	Selection selection () const {
 		return _selection;
 	}
-	
+
 	void selection_as_notelist (Notes& selected, bool allow_all_if_none_selected = false);
 
 	void enable_display (bool);
@@ -331,7 +331,7 @@ public:
 	void clear_selection (bool signal = true) { clear_selection_except (0, signal); }
 
         ARDOUR::InstrumentInfo& instrument_info() const;
-	
+
 protected:
 	void region_resized (const PBD::PropertyChange&);
 
@@ -401,7 +401,7 @@ private:
 
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
-	
+
 	typedef std::list<NoteBase*>                          Events;
 	typedef std::vector< boost::shared_ptr<PatchChange> > PatchChanges;
 	typedef std::vector< boost::shared_ptr<SysEx> >       SysExes;
@@ -514,7 +514,7 @@ private:
 	bool _mouse_changed_selection;
 
 	framepos_t snap_frame_to_grid_underneath (framepos_t p, framecnt_t &) const;
-	
+
 	PBD::ScopedConnection _mouse_mode_connection;
 
 	boost::shared_ptr<CursorContext> _press_cursor_ctx;

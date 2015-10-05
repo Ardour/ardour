@@ -133,7 +133,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	max_peak = minus_infinity();
 	peak_display.set_text (_("-inf"));
 	peak_display.set_alignment(0.5);
-	
+
 	/* stuff related to the fact that the peak display is not, in
 	   fact, supposed to be a text entry.
 	*/
@@ -282,7 +282,7 @@ GainMeterBase::setup_gain_adjustment ()
 	ignore_toggle = false;
 
 	effective_gain_display ();
-	
+
 	_previous_amp_output_streams = _amp->output_streams ();
 }
 
@@ -529,7 +529,7 @@ GainMeterBase::gain_adjusted ()
 	} else {
 		value = gain_adjustment.get_value();
 	}
-	
+
 	if (!ignore_toggle) {
 		if (_route && _route->amp() == _amp) {
 			_route->set_gain (value, this);

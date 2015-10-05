@@ -72,7 +72,7 @@ void
 Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context, Rect self) const
 {
 	boost::optional<Rect> r = self.intersection (area);
-	
+
 	if (!r) {
 		return;
 	}
@@ -89,11 +89,11 @@ Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
 		context->fill ();
 	}
-	
+
 	if (_outline) {
 
 		setup_outline_context (context);
-		
+
 		/* the goal here is that if the border is 1 pixel
 		 * thick, it will precisely align with the corner
 		 * coordinates of the rectangle. So if the rectangle
@@ -111,9 +111,9 @@ Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 			const double shift = _outline_width * 0.5;
 			self = self.translate (Duple (shift, shift));
 		}
-		
+
 		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
-			
+
 			context->rectangle (self.x0, self.y0, self.width(), self.height());
 
 		} else {
@@ -122,7 +122,7 @@ Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 				context->move_to (self.x0, self.y0);
 				context->line_to (self.x0, self.y1);
 			}
-			
+
 			if (_outline_what & TOP) {
 				context->move_to (self.x0, self.y0);
 				context->line_to (self.x1, self.y0);
@@ -132,13 +132,13 @@ Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 				context->move_to (self.x0, self.y1);
 				context->line_to (self.x1, self.y1);
 			}
-			
+
 			if (_outline_what & RIGHT) {
 				context->move_to (self.x1, self.y0);
 				context->line_to (self.x1, self.y1);
 			}
 		}
-		
+
 		context->stroke ();
 	}
 }
@@ -195,11 +195,11 @@ Rectangle::set (Rect const & r)
 	*/
 
 	if (r != _rect) {
-		
+
 		begin_change ();
-		
+
 		_rect = r;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
 	}
@@ -210,9 +210,9 @@ Rectangle::set_x0 (Coord x0)
 {
 	if (x0 != _rect.x0) {
 		begin_change ();
-		
+
 		_rect.x0 = x0;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
 	}
@@ -223,9 +223,9 @@ Rectangle::set_y0 (Coord y0)
 {
 	if (y0 != _rect.y0) {
 		begin_change ();
-		
+
 		_rect.y0 = y0;
-		
+
 		_bounding_box_dirty = true;
 		end_change();
 	}
@@ -236,9 +236,9 @@ Rectangle::set_x1 (Coord x1)
 {
 	if (x1 != _rect.x1) {
 		begin_change ();
-		
+
 		_rect.x1 = x1;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
 	}
@@ -249,9 +249,9 @@ Rectangle::set_y1 (Coord y1)
 {
 	if (y1 != _rect.y1) {
 		begin_change ();
-		
+
 		_rect.y1 = y1;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
 	}

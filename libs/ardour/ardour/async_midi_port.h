@@ -77,7 +77,7 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 	static pthread_t get_process_thread () { return _process_thread; }
 	static bool is_process_thread();
 
-  private:	
+  private:
 	bool                    _currently_in_cycle;
         MIDI::timestamp_t       _last_write_timestamp;
 	bool                    have_timer;
@@ -90,7 +90,7 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 	int create_port ();
 
 	/** Channel used to signal to the MidiControlUI that input has arrived */
-	
+
 	std::string _connections;
 	PBD::ScopedConnection connect_connection;
 	PBD::ScopedConnection halt_connection;

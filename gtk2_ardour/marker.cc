@@ -261,12 +261,12 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (unit_position, 0));
 #ifdef CANVAS_DEBUG
 	group->name = string_compose ("Marker::group for %1", annotation);
-#endif	
+#endif
 
 	_name_background = new ArdourCanvas::Rectangle (group);
 #ifdef CANVAS_DEBUG
 	_name_background->name = string_compose ("Marker::_name_background for %1", annotation);
-#endif	
+#endif
 
 	/* adjust to properly locate the tip */
 
@@ -286,7 +286,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 
 	layout->set_font_description (name_font);
 	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
-	
+
 	_name_item = new ArdourCanvas::Text (group);
 	CANVAS_DEBUG_NAME (_name_item, string_compose ("ArdourMarker::_name_item for %1", annotation));
 	_name_item->set_font_description (name_font);
@@ -303,7 +303,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 
 	group->set_data ("marker", this);
 	mark->set_data ("marker", this);
-	
+
 	if (handle_events) {
 		group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 	}
@@ -420,10 +420,10 @@ ArdourMarker::setup_name_display ()
 		if (label_on_left ()) {
 			_name_item->set_x_position (-name_width);
 		}
-			
+
 		_name_item->clamp_width (name_width);
 		_name_item->set (_name);
-		
+
 		if (label_on_left ()) {
 			/* adjust right edge of background to fit text */
 			_name_background->set_x0 (_name_item->position().x - padding);

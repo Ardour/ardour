@@ -137,7 +137,7 @@ PortMatrixGrid::render (cairo_t* cr)
 		cairo_line_to (cr, _width, y);
 		cairo_stroke (cr);
 	}
-	
+
 	/* ASSOCIATION INDICATORS and NON-CONNECTABLE INDICATORS */
 
 	/* we draw a grey square in a matrix box if the two ports that intersect at that box
@@ -230,7 +230,7 @@ PortMatrixGrid::render (cairo_t* cr)
 						*/
 						draw_non_connectable_indicator (cr, x, y);
 					}
-					
+
 					x += grid_spacing();
 				}
 

@@ -118,7 +118,7 @@ public:
 	void check_record_layers (boost::shared_ptr<ARDOUR::Region>, ARDOUR::framepos_t);
 
 	virtual void playlist_layered (boost::weak_ptr<ARDOUR::Track>);
-	
+
 	sigc::signal<void, RegionView*> RegionViewAdded;
 	sigc::signal<void> RegionViewRemoved;
 	/** Emitted when the height of regions has changed */

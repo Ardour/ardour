@@ -20,11 +20,11 @@ public:
 	{
 		_items_per_cell = items;
 	}
-	
+
 	void do_run (ImageCanvas& canvas)
 	{
 		Group::default_items_per_cell = _items_per_cell;
-	
+
 		for (int i = 0; i < 1e4; i += 50) {
 			canvas.render_to_image (Rect (i, 0, i + 50, 1024));
 		}
@@ -55,4 +55,4 @@ int main (int argc, char* argv[])
 	return 0;
 }
 
-	
+

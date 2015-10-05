@@ -163,7 +163,7 @@ Manager::set_transient_for (Gtk::Window* parent)
 			}
 		}
 	}
-	
+
 	current_transient_parent = parent;
 #endif
 }
@@ -300,12 +300,12 @@ XMLNode&
 ProxyBase::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Window"));
-	char buf[32];	
+	char buf[32];
 
 	node->add_property (X_("name"), _name);
 
 	if (_window && vistracker) {
-		
+
 		/* we have a window, so use current state */
 
 		_visible = vistracker->partially_visible ();
@@ -316,7 +316,7 @@ ProxyBase::get_state () const
 	}
 
 	node->add_property (X_("visible"), _visible? X_("yes") : X_("no"));
-	
+
 	snprintf (buf, sizeof (buf), "%d", _x_off);
 	node->add_property (X_("x-off"), buf);
 	snprintf (buf, sizeof (buf), "%d", _y_off);
@@ -371,7 +371,7 @@ ProxyBase::setup ()
 	}
 	set_session(_session);
 }
-	
+
 void
 ProxyBase::show ()
 {

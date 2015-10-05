@@ -67,14 +67,14 @@ PlaylistReadTest::singleReadTest ()
 	CPPUNIT_ASSERT_EQUAL (double (64), _ar[0]->_fade_out->back()->when);
 	_ar[0]->set_length (1024);
 	_audio_playlist->read (_buf, _mbuf, _gbuf, 0, 256, 0);
-	
+
 	for (int i = 0; i < 64; ++i) {
 		/* Note: this specific float casting is necessary so that the rounding
 		   is done here the same as it is done in AudioPlaylist.
 		*/
 		CPPUNIT_ASSERT_DOUBLES_EQUAL (float (i * float (i / 63.0)), _buf[i], 1e-16);
 	}
-	
+
 	for (int i = 64; i < 256; ++i) {
 		CPPUNIT_ASSERT_EQUAL (i, int (_buf[i]));
 	}
@@ -101,7 +101,7 @@ PlaylistReadTest::overlappingReadTest ()
 	CPPUNIT_ASSERT_EQUAL (false, _ar[0]->fade_in_is_xfade());
 	CPPUNIT_ASSERT_EQUAL (false, _ar[0]->fade_out_is_xfade());
 #endif
-	
+
 	_audio_playlist->add_region (_ar[1], 128);
 	_ar[1]->set_default_fade_in ();
 	_ar[1]->set_default_fade_out ();
@@ -111,10 +111,10 @@ PlaylistReadTest::overlappingReadTest ()
 	CPPUNIT_ASSERT_EQUAL (false, _ar[1]->fade_in_is_xfade());
 	CPPUNIT_ASSERT_EQUAL (false, _ar[1]->fade_out_is_xfade());
 #endif
-	
+
 	CPPUNIT_ASSERT_EQUAL (double (64), _ar[1]->_fade_in->back()->when);
 	CPPUNIT_ASSERT_EQUAL (double (64), _ar[1]->_fade_out->back()->when);
-	
+
 	_ar[1]->set_length (1024);
 	_audio_playlist->read (_buf, _mbuf, _gbuf, 0, 256, 0);
 
@@ -151,7 +151,7 @@ PlaylistReadTest::transparentReadTest ()
 	CPPUNIT_ASSERT_EQUAL (double (64), _ar[0]->_fade_in->back()->when);
 	CPPUNIT_ASSERT_EQUAL (double (64), _ar[0]->_fade_out->back()->when);
 	_ar[0]->set_length (1024);
-	
+
 	_audio_playlist->add_region (_ar[1], 0);
 	_ar[1]->set_default_fade_in ();
 	_ar[1]->set_default_fade_out ();
@@ -237,7 +237,7 @@ PlaylistReadTest::enclosedTransparentReadTest ()
 	_ar[0]->set_fade_in_length (0);
 	_ar[0]->set_fade_out_length (0);
 	_ar[0]->set_length (256);
-	
+
 	_audio_playlist->add_region (_ar[1], 0);
 	/* These calls will result in a 64-sample fade */
 	_ar[1]->set_fade_in_length (0);
@@ -266,7 +266,7 @@ PlaylistReadTest::enclosedTransparentReadTest ()
 	for (int i = (256 + 64); i < (256 + 64 + 128); ++i) {
 		CPPUNIT_ASSERT_DOUBLES_EQUAL (i + i - (256 + 64) + 64, _buf[i], 1e-16);
 	}
-	
+
 	/* Then _ar[1] + _ar[0] (faded out) for 64 samples */
 	for (int i = (256 + 64 + 128); i < 512; ++i) {
 		float const ar0_without_fade = i - 256;

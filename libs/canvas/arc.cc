@@ -55,7 +55,7 @@ Arc::compute_bounding_box () const
 	/* this could be smaller in the case of small _arc values
 	   but I can't be bothered to optimize it.
 	*/
-	
+
 	bbox.x0 = _center.x - _radius;
 	bbox.y0 = _center.y - _radius;
 	bbox.x1 = _center.x + _radius;
@@ -73,7 +73,7 @@ Arc::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
 	if (_radius <= 0.0 || _arc_degrees <= 0.0) {
 		return;
 	}
-	
+
 	Duple c = item_to_window (Duple (_center.x, _center.y));
 
 	context->arc (c.x, c.y, _radius, _start_degrees * (M_PI/180.0), _arc_degrees * (M_PI/180.0));
@@ -98,35 +98,35 @@ void
 Arc::set_radius (Coord r)
 {
 	begin_change ();
-	
+
 	_radius = r;
 
 	_bounding_box_dirty = true;
 	end_change ();
-}	
+}
 
 void
 Arc::set_arc (double deg)
 {
 	begin_change ();
-	
+
 	_arc_degrees = deg;
 
 	_bounding_box_dirty = true;
 	end_change ();
-}	
+}
 
 
 void
 Arc::set_start (double deg)
 {
 	begin_change ();
-	
+
 	_start_degrees = deg;
-	
+
 	_bounding_box_dirty = true;
 	end_change ();
-}	
+}
 
 bool
 Arc::covers (Duple const & point) const
@@ -135,7 +135,7 @@ Arc::covers (Duple const & point) const
 
 	double angle_degs = atan (p.y/p.x) * 2.0 * M_PI;
 	double radius = sqrt (p.x * p.x + p.y * p.y);
-	
+
 	return (angle_degs >= _start_degrees) &&
 		(angle_degs <= (_start_degrees + _arc_degrees)) &&
 		(radius < _radius);

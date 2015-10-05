@@ -187,7 +187,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 		for (size_t i = 0; i < num_buffers; ++i) {
 			bufs.push_back(Buffer::create(type, buffer_capacity));
 		}
-		
+
 		_available.set(type, num_buffers);
 		_count.set (type, num_buffers);
 	}

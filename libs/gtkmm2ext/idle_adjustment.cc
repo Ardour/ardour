@@ -44,14 +44,14 @@ void
 IdleAdjustment::underlying_adjustment_value_changed ()
 {
 	last_vc = g_get_monotonic_time();
-	
+
 	if (timeout_queued) {
 		return;
 	}
 
 	Glib::signal_timeout().connect(mem_fun(*this, &IdleAdjustment::timeout_handler), 250);
 	timeout_queued = true;
-}	
+}
 
 gint
 IdleAdjustment::timeout_handler ()

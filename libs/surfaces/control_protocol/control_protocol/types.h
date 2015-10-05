@@ -26,7 +26,7 @@
 
 namespace ARDOUR {
 	class Route;
-	
+
 	typedef std::vector<boost::weak_ptr<ARDOUR::Route> >    RouteNotificationList;
 	typedef boost::shared_ptr<RouteNotificationList>        RouteNotificationListPtr;
 

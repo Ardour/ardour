@@ -288,7 +288,7 @@ MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /
                 /* don't double-scale by both track dim and global dim coefficients */
 
                 gain_t dim_level = (global_dim == GAIN_COEFF_UNITY ? (_channels[chn]->dim ? dim_level_this_time : GAIN_COEFF_UNITY) : GAIN_COEFF_UNITY);
-		
+
                 if (_channels[chn]->soloed) {
                         target_gain = _channels[chn]->polarity * _channels[chn]->cut * dim_level * global_cut * global_dim * solo_boost;
                 } else {

@@ -35,52 +35,52 @@ class ChunkerTest : public CppUnit::TestFixture
 	{
 		chunker->add_output (sink);
 		framecnt_t frames_output = 0;
-		
+
 		ProcessContext<float> const context (random_data, frames, 1);
-		
+
 		chunker->process (context);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL ((framecnt_t) 0, frames_output);
-		
+
 		chunker->process (context);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (2 * frames, frames_output);
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, sink->get_array(), frames));
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, &sink->get_array()[frames], frames));
-		
+
 		sink->reset();
-		
+
 		chunker->process (context);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL ((framecnt_t) 0, frames_output);
-		
+
 		chunker->process (context);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (2 * frames, frames_output);
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, sink->get_array(), frames));
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, &sink->get_array()[frames], frames));
 	}
-	
+
 	void testAsynchronousProcess()
 	{
 		assert (frames % 2 == 0);
-		
+
 		chunker->add_output (sink);
 		framecnt_t frames_output = 0;
-		
+
 		ProcessContext<float> const half_context (random_data, frames / 2, 1);
 		ProcessContext<float> const context (random_data, frames, 1);
-		
+
 		// 0.5
 		chunker->process (half_context);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL ((framecnt_t) 0, frames_output);
-		
+
 		// 1.5
 		chunker->process (context);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL ((framecnt_t) 0, frames_output);
-		
+
 		// 2.5
 		chunker->process (context);
 		frames_output = sink->get_data().size();
@@ -88,14 +88,14 @@ class ChunkerTest : public CppUnit::TestFixture
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, sink->get_array(), frames / 2));
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, &sink->get_array()[frames / 2], frames));
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, &sink->get_array()[ 3 * frames / 2], frames / 2));
-		
+
 		sink->reset();
-		
+
 		// 3.5
 		chunker->process (context);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL ((framecnt_t) 0, frames_output);
-		
+
 		// 4.0
 		chunker->process (half_context);
 		frames_output = sink->get_data().size();
@@ -104,30 +104,30 @@ class ChunkerTest : public CppUnit::TestFixture
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, &sink->get_array()[frames / 2], frames));
 		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, &sink->get_array()[ 3 * frames / 2], frames / 2));
 	}
-	
+
 	void testChoppingProcess()
 	{
 		sink.reset (new AppendingVectorSink<float>());
-		
+
 		assert (frames % 2 == 0);
 		chunker.reset (new Chunker<float>(frames / 4));
-		
+
 		chunker->add_output (sink);
 		framecnt_t frames_output = 0;
-		
+
 		ProcessContext<float> const half_context (random_data, frames / 2, 1);
 		ProcessContext<float> const context (random_data, frames, 1);
-		
+
 		// 0.5
 		chunker->process (half_context);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL ((framecnt_t) frames / 2, frames_output);
-		
+
 		// 1.5
 		chunker->process (context);
 		frames_output = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL ((framecnt_t) frames / 2 * 3, frames_output);
-		
+
 		// 2.5
 		chunker->process (context);
 		frames_output = sink->get_data().size();
@@ -140,15 +140,15 @@ class ChunkerTest : public CppUnit::TestFixture
 	void testEndOfInputFlagHandling()
 	{
 		boost::shared_ptr<ProcessContextGrabber<float> > grabber(new ProcessContextGrabber<float>());
-		
+
 		assert (frames % 2 == 0);
 		chunker.reset (new Chunker<float>(frames));
 		chunker->add_output (grabber);
-		
+
 		ProcessContext<float> const half_context (random_data, frames / 2, 1);
 		ProcessContext<float> const context (random_data, frames, 1);
 		context.set_flag(ProcessContext<>::EndOfInput);
-		
+
 		// Process 0.5 then 1.0
 		chunker->process (half_context);
 		chunker->process (context);

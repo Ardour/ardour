@@ -235,7 +235,7 @@ struct usb_tranzport {
     unsigned char  LightPunch;
     unsigned char  last_cmd[8];
     unsigned char  screen[40]; // We'll also have cells
-	
+
 };
 
 /* prevent races between open() and disconnect() */
@@ -405,12 +405,12 @@ static void usb_tranzport_interrupt_in_callback(struct urb *urb)
 /* Always pass one offline event up the stack */
 		if(dev->offline > 0 && dev->interrupt_in_buffer[1] != 0xff) { dev->offline = 0; }
 		if(dev->offline == 0 && dev->interrupt_in_buffer[1] == 0xff) { dev->offline = 1; }
-			
+
 #endif
 		dbg_info(&dev->intf->dev, "%s: head, tail are %x, %x\n", __FUNCTION__,dev->ring_head,dev->ring_tail);
 
 		next_ring_head = (dev->ring_head+1) % ring_buffer_size;
-	
+
 		if (next_ring_head != dev->ring_tail) {
 			memcpy(&((*dev->ring_buffer)[dev->ring_head]), dev->interrupt_in_buffer, urb->actual_length);
 			dev->ring_head = next_ring_head;
@@ -687,7 +687,7 @@ static ssize_t usb_tranzport_read(struct file *file, char __user *buffer, size_t
 	dbg_info(&dev->intf->dev, "%s: trying to compress: %02x%02x%02x%02x%02x %02x %02x %02x\n",
 			 __FUNCTION__, (*dev->ring_buffer)[dev->ring_tail].cmd[0],(*dev->ring_buffer)[dev->ring_tail].cmd[1],(*dev->ring_buffer)[dev->ring_tail].cmd[2],(*dev->ring_buffer)[dev->ring_tail].cmd[3],(*dev->ring_buffer)[dev->ring_tail].cmd[4],(*dev->ring_buffer)[dev->ring_tail].cmd[5],(*dev->ring_buffer)[dev->ring_tail].cmd[6],(*dev->ring_buffer)[dev->ring_tail].cmd[7]);
 
-			
+
 			if(((*dev->ring_buffer)[dev->ring_tail].cmd[6] != 0 &&
 			    (*dev->ring_buffer)[next_tail].cmd[6] != 0 ) &&
 				((newwheel > 0 && oldwheel > 0) ||
@@ -723,13 +723,13 @@ static ssize_t usb_tranzport_read(struct file *file, char __user *buffer, size_t
 			retval = -EFAULT;
 			goto unlock_exit;
 		}
-		
+
 		dev->ring_tail = (dev->ring_tail+1) % ring_buffer_size;
 		c+=8;
 		dbg_info(&dev->intf->dev, "%s: head, tail are %x, %x\n", __FUNCTION__,dev->ring_head,dev->ring_tail);
 	   }
 	   retval = c;
-	
+
 #else
 	if (copy_to_user(buffer, &(*dev->ring_buffer)[dev->ring_tail], 8)) {
 		retval = -EFAULT;

@@ -46,7 +46,7 @@ Item::Item (Canvas* canvas)
 	, _ignore_events (false)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
-}	
+}
 
 Item::Item (Item* parent)
 	: Fill (*this)
@@ -66,7 +66,7 @@ Item::Item (Item* parent)
 	}
 
 	find_scroll_parent ();
-}	
+}
 
 Item::Item (Item* parent, Duple const& p)
 	: Fill (*this)
@@ -88,7 +88,7 @@ Item::Item (Item* parent, Duple const& p)
 
 	find_scroll_parent ();
 
-}	
+}
 
 Item::~Item ()
 {
@@ -196,7 +196,7 @@ void
 Item::item_to_canvas (Coord& x, Coord& y) const
 {
 	Duple d = item_to_canvas (Duple (x, y));
-		
+
 	x = d.x;
 	y = d.y;
 }
@@ -268,16 +268,16 @@ Item::set_position (Duple p)
 		 */
 		pre_change_parent_bounding_box = item_to_parent (bbox.get());
 	}
-	
+
 	_position = p;
 
 	/* only update canvas and parent if visible. Otherwise, this
 	   will be done when ::show() is called.
 	*/
-	
+
 	if (visible()) {
 		_canvas->item_moved (this, pre_change_parent_bounding_box);
-		
+
 
 		if (_parent) {
 			_parent->child_changed ();
@@ -347,7 +347,7 @@ Item::hide ()
 			}
 		}
 
-		
+
 		propagate_show_hide ();
 	}
 }
@@ -376,11 +376,11 @@ void
 Item::propagate_show_hide ()
 {
 	/* bounding box may have changed while we were hidden */
-	
+
 	if (_parent) {
 		_parent->child_changed ();
 	}
-	
+
 	_canvas->item_shown_or_hidden (this);
 }
 
@@ -450,7 +450,7 @@ Item::find_scroll_parent ()
 		}
 		i = i->parent();
 	}
-	
+
 	_scroll_parent = const_cast<ScrollGroup*> (last_scroll_group);
 }
 
@@ -461,7 +461,7 @@ Item::common_ancestor_within (uint32_t limit, const Item& other) const
 	uint32_t d2 = other.depth();
 	const Item* i1 = this;
 	const Item* i2 = &other;
-	
+
 	/* move towards root until we are at the same level
 	   for both items
 	*/
@@ -502,7 +502,7 @@ Item::common_ancestor_within (uint32_t limit, const Item& other) const
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -544,7 +544,7 @@ Item::closest_ancestor_with (const Item& other) const
 			i2 = i2->parent ();
 		}
 	}
-	
+
 	return i1;
 }
 
@@ -611,7 +611,7 @@ Item::redraw () const
 	if (visible() && _bounding_box && _canvas) {
 		_canvas->request_redraw (item_to_window (_bounding_box.get()));
 	}
-}	
+}
 
 void
 Item::begin_change ()
@@ -624,7 +624,7 @@ Item::end_change ()
 {
 	if (visible()) {
 		_canvas->item_changed (this, _pre_change_bounding_box);
-		
+
 		if (_parent) {
 			_parent->child_changed ();
 		}
@@ -677,7 +677,7 @@ Item::get_data (string const & key) const
 	if (i == _data.end ()) {
 		return 0;
 	}
-	
+
 	return i->second;
 }
 
@@ -745,7 +745,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 #endif
 
 	++render_depth;
-		
+
 	for (std::vector<Item*>::const_iterator i = items.begin(); i != items.end(); ++i) {
 
 		if (!(*i)->visible ()) {
@@ -756,7 +756,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 #endif
 			continue;
 		}
-		
+
 		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
 
 		if (!item_bbox) {
@@ -767,10 +767,10 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 #endif
 			continue;
 		}
-		
+
 		Rect item = (*i)->item_to_window (item_bbox.get(), false);
 		boost::optional<Rect> d = item.intersection (area);
-		
+
 		if (d) {
 			Rect draw = d.get();
 			if (draw.width() && draw.height()) {
@@ -891,7 +891,7 @@ Item::remove (Item* i)
 	_items.remove (i);
 	invalidate_lut ();
 	_bounding_box_dirty = true;
-	
+
 	end_change ();
 }
 
@@ -925,7 +925,7 @@ Item::clear_items (bool with_delete)
 
 		_items.erase (i);
 		item->unparent ();
-		
+
 		if (with_delete) {
 			delete item;
 		}
@@ -1069,7 +1069,7 @@ Item::dump (ostream& o) const
 
 	o << _canvas->indent() << whatami() << ' ' << this << " self-Visible ? " << self_visible() << " visible ? " << visible();
 	o << " @ " << position();
-	
+
 #ifdef CANVAS_DEBUG
 	if (!name.empty()) {
 		o << ' ' << name;
@@ -1093,25 +1093,25 @@ Item::dump (ostream& o) const
 		o << " Items: " << _items.size();
 		o << " Self-Visible ? " << self_visible();
 		o << " Visible ? " << visible();
-		
+
 		boost::optional<Rect> bb = bounding_box();
-		
+
 		if (bb) {
 			o << endl << _canvas->indent() << "  bbox: " << bb.get();
 			o << endl << _canvas->indent() << "  CANVAS bbox: " << item_to_canvas (bb.get());
 		} else {
 			o << "  bbox unset";
 		}
-		
+
 		o << endl;
 #endif
-		
+
 		ArdourCanvas::dump_depth++;
-		
+
 		for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
 			o << **i;
 		}
-		
+
 		ArdourCanvas::dump_depth--;
 	}
 }

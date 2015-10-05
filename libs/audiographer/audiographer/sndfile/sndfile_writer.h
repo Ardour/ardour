@@ -37,9 +37,9 @@ class SndfileWriter
 			broadcast_info->write_to_file (this);
 		}
 	}
-	
+
 	virtual ~SndfileWriter () {}
-	
+
 	SndfileWriter (SndfileWriter const & other)
 		: SndfileHandle (other)
 	{
@@ -50,18 +50,18 @@ class SndfileWriter
 
 	framecnt_t get_frames_written() const { return frames_written; }
 	void       reset_frames_written_count() { frames_written = 0; }
-	
+
 	/// Writes data to file
 	void process (ProcessContext<T> const & c)
 	{
 		check_flags (*this, c);
-		
+
 		if (throw_level (ThrowStrict) && c.channels() != channels()) {
 			throw Exception (*this, boost::str (boost::format
 				("Wrong number of channels given to process(), %1% instead of %2%")
 				% c.channels() % channels()));
 		}
-		
+
 		framecnt_t const written = write (c.data(), c.frames());
 		frames_written += written;
 
@@ -76,9 +76,9 @@ class SndfileWriter
 			FileWritten (path);
 		}
 	}
-	
+
 	using Sink<T>::process;
-	
+
 	PBD::Signal1<void, std::string> FileWritten;
 
   protected:

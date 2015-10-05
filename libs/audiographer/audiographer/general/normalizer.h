@@ -32,7 +32,7 @@ public:
 
 	/// Process a const ProcessContext \see alloc_buffer() \n RT safe
 	void process (ProcessContext<float> const & c);
-	
+
 	/// Process a non-const ProcsesContext in-place \n RT safe
 	void process (ProcessContext<float> & c);
 
@@ -40,7 +40,7 @@ private:
 	bool      enabled;
 	float     target;
 	float     gain;
-	
+
 	float *   buffer;
 	framecnt_t buffer_size;
 };

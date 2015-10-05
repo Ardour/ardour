@@ -57,7 +57,7 @@ short_path (const Glib::ustring& path, ustring::size_type target_characters)
 			return path;
 		}
 	}
-	
+
 	uint32_t so_far = (len - last_sep);
 	uint32_t space_for = target_characters - so_far;
 
@@ -71,6 +71,6 @@ short_path (const Glib::ustring& path, ustring::size_type target_characters)
 		res += path.substr (last_sep - space_for, len - last_sep + space_for - 3);
 		res += "...";
 		return res;
-		
+
 	}
 }

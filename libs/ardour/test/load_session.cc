@@ -21,7 +21,7 @@ int main (int argc, char* argv[])
 	ARDOUR::init (false, true, localedir);
 
 	Session* s = 0;
-	
+
 	try {
 		s = load_session (argv[1], argv[2]);
 	} catch (failed_constructor& e) {

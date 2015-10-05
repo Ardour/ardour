@@ -73,7 +73,7 @@ void 	CAComponentDescription::_CAShowComponentDescription(const ComponentDescrip
 		char str[24];
 		fprintf (file, "ComponentDescription: %s - ", StringForOSType(desc->componentType, str));
 		fprintf (file, "%s - ", StringForOSType(desc->componentSubType, str));
-		fprintf (file, "%s", StringForOSType(desc->componentManufacturer, str));		
+		fprintf (file, "%s", StringForOSType(desc->componentManufacturer, str));
 		fprintf (file, ", 0x%lX, 0x%lX\n", desc->componentFlags, desc->componentFlagsMask);
 	}
 }
@@ -91,7 +91,7 @@ bool	CAComponentDescription::IsAU () const
 {
 	bool flag = IsEffect() || IsMusicDevice() || IsOffline();
 	if (flag) return true;
-	
+
 	switch (componentType) {
 		case kAudioUnitType_Output:
 		case kAudioUnitType_FormatConverter:
@@ -109,15 +109,15 @@ inline bool _MatchTest (const OSType &inTypeA, const OSType &inTypeB)
 bool	CAComponentDescription::Matches (const ComponentDescription &desc) const
 {
 	bool matches = false;
-		
+
 		// see if the type matches
 	matches = _MatchTest (componentType, desc.componentType);
-	
+
 	if (matches)
 		matches = _MatchTest (componentSubType, desc.componentSubType);
-	
+
 	if (matches)
 		matches = _MatchTest (componentManufacturer, desc.componentManufacturer);
-	
+
 	return matches;
 }

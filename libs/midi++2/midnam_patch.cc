@@ -35,7 +35,7 @@ namespace MIDI
 
 namespace Name
 {
-	
+
 Patch::Patch (std::string name, uint8_t p_number, uint16_t b_number)
 	: _name (name)
 	, _id (p_number, b_number)
@@ -138,7 +138,7 @@ Patch::set_state (const XMLTree& tree, const XMLNode& node)
 			return -1;  // Failed to find a program number anywhere
 		}
 	}
-	
+
 	XMLNode* use_note_name_list = node.child("UsesNoteNameList");
 	if (use_note_name_list) {
 		_note_list_name = use_note_name_list->property ("Name")->value();
@@ -478,7 +478,7 @@ operator<< (std::ostream& os, const ChannelNameSet& cns)
 		os << (int) (*x) << ' ';
 	}
 	os << endl;
-	
+
 	for (ChannelNameSet::PatchBanks::const_iterator pbi = cns._patch_banks.begin(); pbi != cns._patch_banks.end(); ++pbi) {
 		os << "\tPatch Bank " << (*pbi)->name() << " with " << (*pbi)->patch_name_list().size() << " patches\n";
 		for (PatchNameList::const_iterator pni = (*pbi)->patch_name_list().begin(); pni != (*pbi)->patch_name_list().end(); ++pni) {
@@ -493,12 +493,12 @@ void
 ChannelNameSet::set_patch_banks (const ChannelNameSet::PatchBanks& pb)
 {
 	_patch_banks = pb;
-	
+
 	_patch_map.clear ();
 	_patch_list.clear ();
 	_patch_list_name = "";
 	_available_for_channels.clear ();
-	
+
 	for (PatchBanks::const_iterator pbi = _patch_banks.begin(); pbi != _patch_banks.end(); ++pbi) {
 		for (PatchNameList::const_iterator pni = (*pbi)->patch_name_list().begin(); pni != (*pbi)->patch_name_list().end(); ++pni) {
 			_patch_map[(*pni)->patch_primary_key()] = (*pni);
@@ -898,7 +898,7 @@ MIDINameDocument::set_state (const XMLTree& tree, const XMLNode&)
 		error << "No author information in MIDNAM file" << endmsg;
 		return -1;
 	}
-	
+
 	if (author->front()->children().size() > 0) {
 		_author = author->front()->children().front()->content();
 	}
@@ -922,7 +922,7 @@ MIDINameDocument::set_state (const XMLTree& tree, const XMLNode&)
 			_master_device_names_list.insert(
 				std::pair<std::string, boost::shared_ptr<MasterDeviceNames> >
 				(*model,      master_device_names));
-			
+
 			_all_models.insert(*model);
 		}
 	}

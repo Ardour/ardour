@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	AUParamInfo.cpp
-	
+
 =============================================================================*/
 #include "AUParamInfo.h"
 #include "CAXException.h"
@@ -56,14 +56,14 @@ AUParamInfo::AUParamInfo (AudioUnit				inAU,
 	UInt32 size;
 	OSStatus result = AudioUnitGetPropertyInfo(mAU, kAudioUnitProperty_ParameterList, inScope, mElement, &size, NULL);
 		if (size == 0 || result) return;
-	
+
 	int nparams = size / sizeof(AudioUnitPropertyID);
 	mParamListID = new AudioUnitParameterID[nparams];
 
 	memset (mParamListID, 0xFF, size);
 
 	AudioUnitParameterID *paramList = new AudioUnitParameterID[nparams];
-	
+
 	result = AudioUnitGetProperty(mAU, kAudioUnitProperty_ParameterList, mScope, mElement, paramList, &size);
 	if (result) {
 		delete [] mParamListID;
@@ -71,13 +71,13 @@ AUParamInfo::AUParamInfo (AudioUnit				inAU,
 		mParamListID = NULL;
 		return;
 	}
-	
+
 	ParameterMap params;
 	for (int i = 0; i < nparams; ++i)
 	{
 		CAAUParameter auvp (mAU, paramList[i], mScope, mElement); // took out only using global scope in CAAUParameter creation
 		const AudioUnitParameterInfo &paramInfo = auvp.ParamInfo();
-			
+
 		//	don't include if parameter can't be read or written
 		if (!(paramInfo.flags & kAudioUnitParameterFlag_IsWritable)
 			&& !(paramInfo.flags & kAudioUnitParameterFlag_IsReadable))
@@ -86,18 +86,18 @@ AUParamInfo::AUParamInfo (AudioUnit				inAU,
 		// only include if expert params wanted
 		if (!inIncludeExpert && auvp.IsExpert())
 			continue;
-		
+
 		// only include if read only params are wanted
 		if (!(paramInfo.flags & kAudioUnitParameterFlag_IsWritable)
 			&& (paramInfo.flags & kAudioUnitParameterFlag_IsReadable))
-		{	
+		{
 			if (!inIncludeReadOnly)
 				continue;
 		}
-		
+
 		mParamListID[mNumParams] = paramList[i];
 		mNumParams++;
-		
+
 		// ok - if we're here, then we have a parameter we are going to display.
 		UInt32 clump = 0;
 		auvp.GetClumpID (clump);

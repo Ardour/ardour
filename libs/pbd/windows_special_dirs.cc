@@ -30,7 +30,7 @@ PBD::get_win_special_folder_path (int csidl)
 	HRESULT hr;
 	LPITEMIDLIST pidl = 0;
 	char *utf8_folder_path = 0;
-	
+
 	if (S_OK == (hr = SHGetSpecialFolderLocation (0, csidl, &pidl))) {
 
 		if (SHGetPathFromIDListW (pidl, path)) {

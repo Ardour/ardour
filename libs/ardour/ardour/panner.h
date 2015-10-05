@@ -159,7 +159,7 @@ public:
 
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state ();
-	
+
 	boost::shared_ptr<Pannable> pannable() const { return _pannable; }
 
 	static bool equivalent (pan_t a, pan_t b) {

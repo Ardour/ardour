@@ -19,7 +19,7 @@
 
 #ifndef __WUMathConsts_h__
 	#define __WUMathConsts_h__
-	
+
 /* Copy to include:
 #include "BasicTypes/WUMathConsts.h"
 */

@@ -93,10 +93,10 @@ KeyEditor::KeyEditor ()
 		unbind_button.show ();
 
 	}
-	
+
 	reset_button.add (reset_label);
 	reset_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Reset Bindings to Defaults")));
-				
+
 	reset_box.pack_start (reset_button, true, false);
 	reset_box.show ();
 	reset_button.show ();

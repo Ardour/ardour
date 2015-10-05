@@ -18,7 +18,7 @@ class JogWheel
 {
   public:
 	enum Mode { scroll };
-	
+
 	JogWheel (MackieControlProtocol & mcp);
 
 	/// As the wheel turns...

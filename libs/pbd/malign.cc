@@ -62,7 +62,7 @@ int cache_aligned_malloc (void** memptr, size_t size)
 	}
 
 	return 0;
-#endif	
+#endif
 }
 
 void cache_aligned_free (void* memptr)
@@ -101,7 +101,7 @@ int  aligned_malloc (void** memptr, size_t size, size_t alignment)
 	}
 
 	return 0;
-#endif	
+#endif
 }
 
 void aligned_free (void* memptr)

@@ -63,7 +63,7 @@ void
 OSCControllable::send_change_message ()
 {
 	lo_message msg = lo_message_new ();
-	
+
 	lo_message_add_float (msg, (float) controllable->get_value());
 
 	/* XXX thread issues */
@@ -72,7 +72,7 @@ OSCControllable::send_change_message ()
 	lo_message_free (msg);
 }
 
-/*------------------------------------------------------------*/	
+/*------------------------------------------------------------*/
 
 OSCRouteControllable::OSCRouteControllable (lo_address a, const std::string& p,
 					    boost::shared_ptr<Controllable> c, boost::shared_ptr<Route> r)

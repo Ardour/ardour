@@ -46,7 +46,7 @@ class LIBMIDIPP_API Port {
 		IsInput = 0x1,  /* MUST MATCH JACK's JackPortIsInput */
 		IsOutput = 0x2, /* MUST MATCH JACK's JackPortIsOutput */
 	};
-	
+
 	Port (std::string const &, Flags);
 	Port (const XMLNode&);
 	virtual ~Port ();
@@ -99,11 +99,11 @@ class LIBMIDIPP_API Port {
 	Channel *channel (channel_t chn) {
 		return _channel[chn&0x7F];
 	}
-	
+
 	Parser* parser () {
 		return _parser;
 	}
-	
+
 	const char *name () const   { return _tagname.c_str(); }
 	bool   ok ()   const        { return _ok; }
 

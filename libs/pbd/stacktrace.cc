@@ -51,13 +51,13 @@ symbol_demangle (const std::string& l)
 	int status;
 
 	try {
-		
+
 		char* realname = abi::__cxa_demangle (l.c_str(), 0, 0, &status);
 		std::string d (realname);
 		free (realname);
 		return d;
 	} catch (std::exception) {
-		
+
 	}
 
 	return l;
@@ -80,7 +80,7 @@ PBD::demangle (std::string const & l)
 	if ((p - b) <= 1) {
 		return symbol_demangle (l);
 	}
-	
+
 	std::string const fn = l.substr (b + 1, p - b - 1);
 
 	return symbol_demangle (fn);
@@ -100,11 +100,11 @@ PBD::stacktrace (std::ostream& out, int levels)
 		strings = backtrace_symbols (array, size);
 
 		if (strings) {
-			
+
 			for (i = 0; i < size && (levels == 0 || i < size_t(levels)); i++) {
 				out << "  " << demangle (strings[i]) << std::endl;
 			}
-			
+
 			free (strings);
 		}
 	} else {

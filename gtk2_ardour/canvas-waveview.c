@@ -1361,7 +1361,7 @@ gnome_canvas_waveview_gradient_render (GnomeCanvasItem *item,
 					} else {
 						PAINT_VERTA_GR(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax, fill_max, wave_middle, wave_top);
 					}
-					
+
 				}
 
 				if((prev_pymin > pymin && next_pymin > pymin) ||
@@ -1559,7 +1559,7 @@ gnome_canvas_waveview_gradient_render (GnomeCanvasItem *item,
 				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a >> 1, x - 1, pymax, pymax + (clip_length - 1));
 			}
 
-			if (clip_min) {	
+			if (clip_min) {
 				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a , x, pymin - clip_length, pymin);
 				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a >> 1, x + 1, pymin - (clip_length - 1), pymin);
 				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a >> 1, x - 1, pymin - (clip_length - 1), pymin);

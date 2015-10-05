@@ -40,7 +40,7 @@ class LIBGTKMM2EXT_API BindableToggleButton : public Gtkmm2ext::StatefulToggleBu
 	BindableToggleButton () {}
 
 	virtual ~BindableToggleButton() {}
-	
+
 	bool on_button_press_event (GdkEventButton *ev) {
 		if (!binding_proxy.button_press_handler (ev)) {
 			StatefulToggleButton::on_button_press_event (ev);
@@ -49,7 +49,7 @@ class LIBGTKMM2EXT_API BindableToggleButton : public Gtkmm2ext::StatefulToggleBu
 			return true;
 		}
 	}
-	
+
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
  	void set_controllable (boost::shared_ptr<PBD::Controllable> c);
         void watch ();
@@ -67,7 +67,7 @@ class LIBGTKMM2EXT_API BindableButton : public Gtkmm2ext::StatefulButton
    public:
 	BindableButton (boost::shared_ptr<PBD::Controllable> c) : binding_proxy (c) {}
 	~BindableButton() {}
-	
+
 	bool on_button_press_event (GdkEventButton *ev) {
 		if (!binding_proxy.button_press_handler (ev)) {
 			StatefulButton::on_button_press_event (ev);

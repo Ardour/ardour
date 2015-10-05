@@ -107,7 +107,7 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
 
 RegionLayeringOrderEditor::~RegionLayeringOrderEditor ()
 {
-	
+
 }
 
 void
@@ -123,15 +123,15 @@ RegionLayeringOrderEditor::row_selected ()
 	if (!iter) {
 		return;
 	}
-	
+
 	TreeModel::Row row = *iter;
 	RegionView* rv = row[layering_order_columns.region_view];
-	
+
 	vector<RegionView*> eq;
 	editor.get_equivalent_regions (rv, eq, Properties::select.property_id);
 
 	/* XXX this should be reversible, really */
-	
+
 	for (vector<RegionView*>::iterator i = eq.begin(); i != eq.end(); ++i) {
 		boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
 		if (pl) {
@@ -150,7 +150,7 @@ void
 RegionLayeringOrderEditor::refill ()
 {
 	assert (_time_axis_view);
-	
+
 	regions_at_position = 0;
 	in_row_change = true;
 	layering_order_model->clear ();

@@ -20,20 +20,20 @@ int main (int argc, char* argv[])
 	double Ns = sqrt (N);
 	int max_x = 1024;
 	int max_y = 1024;
-	
+
 	for (int x = 0; x < Ns; ++x) {
 		for (int y = 0; y < Ns; ++y) {
 			Rectangle* r = new Rectangle (canvas.root ());
 			r->set (Rect (x * max_x / Ns, y * max_y / Ns, (x + 1) * max_x / Ns, (y + 1) * max_y / Ns));
 		}
 	}
-	
+
 	Gtk::ScrolledWindow scroller;
 	scroller.add (canvas);
 	window.add (scroller);
 	canvas.show ();
 	window.show_all ();
-	
+
 	Gtk::Main::run (window);
 	return 0;
 }

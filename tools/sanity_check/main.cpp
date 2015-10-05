@@ -34,7 +34,7 @@ typedef struct
 } testRecord;
 
 static vector<testRecord>	gTestSet;
-	
+
 static vector<string>		gValidSwitchList;
 static vector<string>		gSwitchDescriptionList;
 
@@ -52,7 +52,7 @@ ExecuteAll()
 	}
 
 	OK &= !(system_memlock_amount() == 0);
-	
+
 	return OK;
 }
 
@@ -97,15 +97,15 @@ PrintUsage()
 	printf("  Options are as follows:\n");
 	printf("\n");
 	printf("\n");
-	
+
 	vector<testRecord>::iterator		itr;
-	
+
 	for (itr = gTestSet.begin(); itr != gTestSet.end(); ++itr) {
 		printf("%20s %s :\t%s\n", (*itr).switchText.c_str(), (*itr).swOptionText.c_str(), (*itr).descriptionText.c_str());
 	}
 
 	printf("\n");
-	
+
 	return true;
 }
 
@@ -113,7 +113,7 @@ void
 DefineSwitches()
 {
 	testRecord rec;
-	
+
 	// Global switches
 	rec.switchText = "-a";
 	rec.swOptionText = "";
@@ -217,7 +217,7 @@ ParseSwitches(
 	vector<testRecord>::iterator	itr;
 	bool	OK = true;
 	int	i;
-	
+
 	if (argc == 1) {
 		gSwitchesReceived.push_back("-a");
 	}
@@ -249,7 +249,7 @@ ParseSwitches(
 					break;
 				}
 			}
-			
+
 			if (OK && itr != gTestSet.end()) {
 				// Known option switch found
 				gSwitchesReceived.push_back(tmp);
@@ -264,7 +264,7 @@ ParseSwitches(
 	if (OK) {
 		// All switches are at least valid, now check to make sure they are all valid to
 		// be used together.
-		
+
 		if (gSwitchesReceived.size() > 1) {
 			// make sure help is not mixed with other options
 			vector<string>::iterator	swItr;
@@ -304,14 +304,14 @@ Execute()
 	bool OK = true;
 	vector<string>::iterator	itr;
 	vector<testRecord>::iterator	testItr;
-	
+
 	for (itr = gSwitchesReceived.begin(); itr != gSwitchesReceived.end(); ++itr) {
 		for (testItr = gTestSet.begin(); testItr != gTestSet.end(); ++testItr) {
 			if ((*itr) == (*testItr).switchText) {
 				break;
 			}
 		}
-		
+
 		bool result;
 		if ((*testItr).hasOption) {
 			result = ((*testItr).opFunctionPtr((*testItr).optionArg) != 0);
@@ -329,7 +329,7 @@ Execute()
 
 		OK &= result;
 	}
-	
+
 	return OK;
 }
 
@@ -339,7 +339,7 @@ main(
 	char 	**argv)
 {
 	int status = 0;
-	
+
 	DefineSwitches();
 
 	if (ParseSwitches(argc, argv)) {

@@ -145,7 +145,7 @@ JackConnection::close ()
 {
 	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 
-	if (_priv_jack) {	
+	if (_priv_jack) {
 		int ret = jack_client_close (_priv_jack);
 		_jack = 0;
 

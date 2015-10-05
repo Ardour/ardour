@@ -58,7 +58,7 @@ TextReceiver::receive (Transmitter::Channel chn, const char *str)
 	/* note: iostreams are already thread-safe: no external
 	   lock required.
 	*/
-	
+
 	cout << name << prefix << str << endl;
 
 	if (chn == Transmitter::Fatal) {

@@ -46,7 +46,7 @@ public:
 	Distance outline_width () const {
 		return _outline_width;
 	}
-	
+
 	virtual void set_outline_width (Distance);
 
 	bool outline () const {

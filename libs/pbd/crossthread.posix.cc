@@ -16,7 +16,7 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 			error << "cannot set non-blocking mode for x-thread pipe (read) (" << ::strerror (errno) << ')' << endmsg;
 			return;
 		}
-		
+
 		if (fcntl (fds[1], F_SETFL, O_NONBLOCK)) {
 			error << "cannot set non-blocking mode for x-thread pipe (write) (%2)" << ::strerror (errno) << ')' << endmsg;
 			return;

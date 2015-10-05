@@ -33,7 +33,7 @@ public:
 
 	std::string new_parent_folder () const;
 	std::string new_name () const;
-	
+
 	bool switch_to () const;
 	bool include_media () const;
 	bool copy_media () const;
@@ -41,7 +41,7 @@ public:
 
 	void clear_name ();
 	void set_name (std::string);
-	
+
 private:
 	Gtk::CheckButton switch_to_button;
 	Gtk::CheckButton copy_media_button;

@@ -75,7 +75,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	TreeViewColumn* color_column = manage (new TreeViewColumn ("", *color_renderer));
 
 	color_column->add_attribute (color_renderer->property_color(), _columns.gdkcolor);
-	
+
 	_display.append_column (*color_column);
 
 	_display.append_column ("", _columns.text);
@@ -138,7 +138,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (1));
 	name_cell->property_editable() = true;
 	name_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorRouteGroups::name_edit));
-	
+
 	for (int i = 1; ci[i].index >= 0; ++i) {
 		CellRendererToggle* active_cell = dynamic_cast <CellRendererToggle*> (_display.get_column_cell_renderer (i));
 
@@ -274,10 +274,10 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 			c = color_dialog.get_colorsel()->get_current_color();
 			GroupTabs::set_group_color (group, gdk_color_to_rgba (c));
 			break;
-			
+
 		default:
 			break;
-			
+
 		}
 
 		color_dialog.hide ();
@@ -301,7 +301,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		ret = true;
 		break;
 
-		
+
 	case 3:
 		val = (*iter)[_columns.active_state];
 		group->set_active (!val, this);
@@ -423,11 +423,11 @@ EditorRouteGroups::add (RouteGroup* group)
 	row[_columns.active_shared] = group->is_route_active ();
 	row[_columns.active_state] = group->is_active ();
 	row[_columns.is_visible] = !group->is_hidden();
-	
+
 	Gdk::Color c;
 	set_color_from_rgba (c, GroupTabs::group_color (group));
 	row[_columns.gdkcolor] = c;
-	
+
 	_in_row_change = true;
 
 	row[_columns.routegroup] = group;
@@ -505,7 +505,7 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange&)
 			break;
 		}
 	}
-	
+
 	_in_row_change = false;
 
 	for (TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {

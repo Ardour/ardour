@@ -323,7 +323,7 @@ LocationEditRow::set_location (Location *loc)
 
 		set_tooltip (start_to_playhead_button, _("Set range start from playhead location"));
 		set_tooltip (end_to_playhead_button, _("Set range end from playhead location"));
-		
+
 	} else {
 
 		set_tooltip (remove_button, _("Remove this marker"));
@@ -903,7 +903,7 @@ LocationUI::location_added (Location* location)
 		loc.sort (LocationSortByStart ());
 
 		LocationEditRow* erow = manage (new LocationEditRow (_session, location));
-		
+
                 erow->set_clock_group (*_clock_group);
 		erow->remove_requested.connect (sigc::mem_fun (*this, &LocationUI::location_remove_requested));
 
@@ -1132,7 +1132,7 @@ LocationUI::clock_mode_from_session_instant_xml () const
 	if (!p) {
 		return ARDOUR_UI::instance()->secondary_clock->mode();
 	}
-	
+
 	return (AudioClock::Mode) string_2_enum (p->value (), AudioClock::Mode);
 }
 

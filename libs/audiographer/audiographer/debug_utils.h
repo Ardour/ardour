@@ -34,7 +34,7 @@ struct LIBAUDIOGRAPHER_API DebugUtils
 #endif
 		return typeid(obj).name();
 	}
-	
+
 	/// Returns name of ProcessContext::Flag
 	static std::string process_context_flag_name (FlagField::Flag flag);
 };

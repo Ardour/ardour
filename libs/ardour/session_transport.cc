@@ -257,11 +257,11 @@ Session::realtime_stop (bool abort, bool clear_state)
 	for (RouteList::iterator i = r->begin (); i != r->end(); ++i) {
 		(*i)->realtime_handle_transport_stopped ();
 	}
-	
+
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("stop complete, auto-return scheduled for return to %1\n", _requested_return_frame));
 
 	/* the duration change is not guaranteed to have happened, but is likely */
-	
+
 	todo = PostTransportWork (todo | PostTransportDuration);
 
 	if (abort) {
@@ -286,7 +286,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 	if (clear_state && !Config->get_loop_is_mode()) {
 		unset_play_loop ();
 	}
-	
+
 	reset_slave_state ();
 
 	_transport_speed = 0;
@@ -321,7 +321,7 @@ Session::butler_transport_work ()
 	PostTransportWork ptw;
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	uint64_t before;
-	
+
 	int on_entry = g_atomic_int_get (&_butler->should_do_transport_work);
 	finished = true;
 	ptw = post_transport_work();
@@ -334,7 +334,7 @@ Session::butler_transport_work ()
 		if (get_play_loop() && !Config->get_seamless_loop()) {
 
 			DEBUG_TRACE (DEBUG::Butler, "flush loop recording fragment to disk\n");
-			
+
 			/* this locate might be happening while we are
 			 * loop recording.
 			 *
@@ -517,13 +517,13 @@ Session::non_realtime_locate ()
 		} else if (loc) {
 			set_track_loop (false);
 		}
-		
+
 	} else {
 
 		/* no more looping .. should have been noticed elsewhere */
 	}
 
-	
+
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		(*i)->non_realtime_locate (_transport_frame);
@@ -555,7 +555,7 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 		// Next stop will put us where we need to be.
 		return false;
 	}
-	
+
 	/* Note that the order of checking each AutoReturnTarget flag defines
 	   the priority each flag.
 
@@ -569,7 +569,7 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
                           Region Selection
                           Last Locate
 	*/
-	
+
 	if (autoreturn & RangeSelectionStart) {
 		if (!_range_selection.empty()) {
 			jump_to = _range_selection.from;
@@ -583,13 +583,13 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 			}
 		}
 	}
-	
+
 	if (jump_to < 0 && (autoreturn & Loop) && get_play_loop()) {
 		/* don't try to handle loop play when synced to JACK */
-		
+
 		if (!synced_to_engine()) {
 			Location *location = _locations->auto_loop_location();
-			
+
 			if (location) {
 				jump_to = location->start();
 
@@ -600,7 +600,7 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 			}
 		}
 	}
-	
+
 	if (jump_to < 0 && (autoreturn & RegionSelectionStart)) {
 		if (!_object_selection.empty()) {
 			jump_to = _object_selection.from;
@@ -610,7 +610,7 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 	if (jump_to < 0 && (autoreturn & LastLocate)) {
 		jump_to = _last_roll_location;
 	}
-	
+
 	return jump_to >= 0;
 }
 #else
@@ -804,14 +804,14 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	if (_engine.connected() && !_engine.freewheeling()) {
 		// need to queue this in the next RT cycle
 		_send_timecode_update = true;
-		
+
 		if (!dynamic_cast<MTC_Slave*>(_slave)) {
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
 
 			/* This (::non_realtime_stop()) gets called by main
 			   process thread, which will lead to confusion
 			   when calling AsyncMIDIPort::write().
-			
+
 			   Something must be done. XXX
 			*/
 			send_mmc_locate (_transport_frame);
@@ -904,8 +904,8 @@ Session::unset_play_loop ()
 		clear_events (SessionEvent::AutoLoop);
 		clear_events (SessionEvent::AutoLoopDeclick);
 		set_track_loop (false);
-		
-	
+
+
 		if (Config->get_seamless_loop()) {
 			/* likely need to flush track buffers: this will locate us to wherever we are */
 			add_post_transport_work (PostTransportLocate);
@@ -957,7 +957,7 @@ Session::set_play_loop (bool yn, double speed)
 
 		play_loop = true;
 		have_looped = false;
-		
+
 		if (loc) {
 
 			unset_play_range ();
@@ -1094,7 +1094,7 @@ void
 Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool for_loop_enabled, bool force, bool with_mmc)
 {
 	bool need_butler = false;
-	
+
 	/* Locates for seamless looping are fairly different from other
 	 * locates. They assume that the diskstream buffers for each track
 	 * already have the correct data in them, and thus there is no need to
@@ -1105,7 +1105,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1, roll %2 flush %3 loop-enabled %4 force %5 mmc %6\n",
 	                                               target_frame, with_roll, with_flush, for_loop_enabled, force, with_mmc));
-	
+
 	if (!force && _transport_frame == target_frame && !loop_changing && !for_loop_enabled) {
 
 		/* already at the desired position. Not forced to locate,
@@ -1155,7 +1155,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	 */
 
 	bool transport_was_stopped = !transport_rolling();
-	
+
 	if (!transport_was_stopped && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_engine() && play_loop) &&
 	    (!Profile->get_trx() || !(config.get_external_sync() && !synced_to_engine()))) {
 		realtime_stop (false, true); // XXX paul - check if the 2nd arg is really correct
@@ -1175,7 +1175,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 		add_post_transport_work (todo);
 		need_butler = true;
-		
+
 	} else {
 
 		/* this is functionally what clear_clicks() does but with a tentative lock */
@@ -1215,7 +1215,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 				// located outside the loop: cancel looping directly, this is called from event handling context
 
 				have_looped = false;
-				
+
 				if (!Config->get_loop_is_mode()) {
 					set_play_loop (false, _transport_speed);
 				} else {
@@ -1246,10 +1246,10 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 				}
 
 				boost::shared_ptr<RouteList> rl = routes.reader();
-				
+
 				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-					
+
 					if (tr && tr->record_enabled ()) {
 						// tell it we've looped, so it can deal with the record state
 						tr->transport_looped (_transport_frame);
@@ -1321,7 +1321,7 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
 			set_track_monitor_input_status (true);
 		}
-		
+
 		if (synced_to_engine ()) {
 			if (clear_state) {
 				/* do this here because our response to the slave won't
@@ -1348,7 +1348,7 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 		if (Config->get_loop_is_mode() && play_loop) {
 
 			Location *location = _locations->auto_loop_location();
-			
+
 			if (location != 0) {
 				if (_transport_frame != location->start()) {
 
@@ -1468,7 +1468,7 @@ Session::stop_transport (bool abort, bool clear_state)
 	}
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("stop_transport, declick required? %1\n", get_transport_declick_required()));
-	
+
 	if (!get_transport_declick_required()) {
 
 		/* stop has not yet been scheduled */
@@ -1484,10 +1484,10 @@ Session::stop_transport (bool abort, bool clear_state)
 		}
 
 		SubState new_bits;
-		
+
 		if (actively_recording() &&                           /* we are recording */
 		    worst_input_latency() > current_block_size) {     /* input latency exceeds block size, so simple 1 cycle delay before stop is not enough */
-			
+
 			/* we need to capture the audio that is still somewhere in the pipeline between
 			   wherever it was generated and the process callback. This means that even though
 			   the user (or something else)  has asked us to stop, we have to roll
@@ -1497,16 +1497,16 @@ Session::stop_transport (bool abort, bool clear_state)
 			   we still need playback to "stop" now, however, which is why we schedule
 			   a declick below.
 			*/
-			
+
 			DEBUG_TRACE (DEBUG::Transport, string_compose ("stop transport requested @ %1, scheduled for + %2 = %3, abort = %4\n",
 								       _transport_frame, _worst_input_latency,
 								       _transport_frame + _worst_input_latency,
 								       abort));
-			
+
 			SessionEvent *ev = new SessionEvent (SessionEvent::StopOnce, SessionEvent::Replace,
 							     _transport_frame + _worst_input_latency,
 							     0, 0, abort);
-			
+
 			merge_event (ev);
 
 			/* request a declick at the start of the next process cycle() so that playback ceases.
@@ -1515,15 +1515,15 @@ Session::stop_transport (bool abort, bool clear_state)
 			   does not stop the transport too early.
 			 */
 			new_bits = SubState (PendingDeclickOut|StopPendingCapture);
-			
+
 		} else {
-			
+
 			/* Not recording, schedule a declick in the next process() cycle and then stop at its end */
-			
+
 			new_bits = PendingDeclickOut;
 			DEBUG_TRACE (DEBUG::Transport, string_compose ("stop scheduled for next process cycle @ %1\n", _transport_frame));
 		}
-		
+
 		/* we'll be called again after the declick */
 		transport_sub_state = SubState (transport_sub_state|new_bits);
 		pending_abort = abort;
@@ -1533,9 +1533,9 @@ Session::stop_transport (bool abort, bool clear_state)
 	} else {
 
 		DEBUG_TRACE (DEBUG::Transport, "time to actually stop\n");
-		
+
 		/* declick was scheduled, but we've been called again, which means it is really time to stop
-		
+
 		   XXX: we should probably split this off into its own method and call it explicitly.
 		*/
 
@@ -1709,7 +1709,7 @@ Session::use_sync_source (Slave* new_slave)
 	}
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("set new slave to %1\n", _slave));
-	
+
 	// need to queue this for next process() cycle
 	_send_timecode_update = true;
 

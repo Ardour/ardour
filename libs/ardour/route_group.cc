@@ -136,7 +136,7 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 	if (r->route_group()) {
 		r->route_group()->remove (r);
 	}
-	
+
 	routes->push_back (r);
 
 	r->set_route_group (this);
@@ -190,7 +190,7 @@ RouteGroup::get_min_factor (gain_t factor)
 
 		factor = 0.0000003f / g - 1.0f;
 	}
-	
+
 	return factor;
 }
 

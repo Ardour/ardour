@@ -26,17 +26,17 @@ class PeakReaderTest : public CppUnit::TestFixture
 	{
 		reader.reset (new PeakReader());
 		ProcessContext<float> c (random_data, frames, 1);
-		
+
 		float peak = 1.5;
 		random_data[10] = peak;
 		reader->process (c);
 		CPPUNIT_ASSERT_EQUAL(peak, reader->get_peak());
-		
+
 		peak = 2.0;
 		random_data[10] = peak;
 		reader->process (c);
 		CPPUNIT_ASSERT_EQUAL(peak, reader->get_peak());
-		
+
 		peak = -2.1;
 		random_data[10] = peak;
 		reader->process (c);

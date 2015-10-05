@@ -259,7 +259,7 @@ ActionManager::enable_accelerators ()
 
 		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
 			ui_string += "<accelerator action=\"";
-			
+
 			/* OK, this is pretty stupid ... there is the full
 			 * accel path returned by gtk_action_get_accel_path ()
 			 * but of course the UIManager doesn't use that, but
@@ -338,7 +338,7 @@ ActionManager::disable_active_actions ()
 	}
 	// save all action's states to action_states_to_restore
 	save_action_states ();
-	
+
 	// set all action's states disabled
 	for (ActionStates::iterator i = action_states_to_restore.begin(); i != action_states_to_restore.end(); ++i) {
 		if ((*i).sensitive) {
@@ -391,7 +391,7 @@ ActionManager::get_action (const char* path)
 	*slash = '\0';
 
 	return get_action (&copy[0], ++slash);
-	
+
 }
 
 RefPtr<Action>
@@ -493,7 +493,7 @@ void
 ActionManager::set_toggleaction_state (string n, bool s)
 {
 	char const * name = n.c_str ();
-	
+
 	const char *last_slash = strrchr (name, '/');
 
 	if (last_slash == 0) {
@@ -526,13 +526,13 @@ string
 ActionManager::get_key_representation (const string& accel_path, AccelKey& key)
 {
 	bool known = lookup_entry (accel_path, key);
-	
+
 	if (known) {
 		uint32_t k = possibly_translate_legal_accelerator_to_real_key (key.get_key());
 		key = AccelKey (k, Gdk::ModifierType (key.get_mod()));
 		return ui_manager->get_accel_group()->get_label (key.get_key(), Gdk::ModifierType (key.get_mod()));
 	}
-	
+
 	return unbound_string;
 }
 

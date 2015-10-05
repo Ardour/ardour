@@ -72,7 +72,7 @@ public:
 
 protected:
     void makeSegmentation(int* q, int len);
-	
+
     void extractFeaturesConstQ(const double *, int);
     void extractFeaturesMFCC(const double *, int);
 
@@ -82,9 +82,9 @@ protected:
     MFCC* mfcc;
     model_t* model;				// the HMM
     int* q;					// the decoded HMM state sequence
-    vector<vector<double> > histograms;	
+    vector<vector<double> > histograms;
 
-    feature_types featureType;	
+    feature_types featureType;
     double hopSize;		// in seconds
     double windowSize;	// in seconds
 

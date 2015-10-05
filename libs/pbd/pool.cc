@@ -91,7 +91,7 @@ Pool::alloc ()
 }
 
 /** Release an item's memory by writing its location to the free list */
-void		
+void
 Pool::release (void *ptr)
 {
 	free_list.write (&ptr, 1);
@@ -228,7 +228,7 @@ void
 PerThreadPool::add_to_trash (CrossThreadPool* p)
 {
 	Glib::Threads::Mutex::Lock lm (_trash_mutex);
-	
+
 	if (!_trash) {
 		warning << "Pool " << p->name() << " has no trash collector; a memory leak has therefore occurred" << endmsg;
 		return;
@@ -237,7 +237,7 @@ PerThreadPool::add_to_trash (CrossThreadPool* p)
 	/* we have a lock here so that multiple threads can safely call add_to_trash (even though there
 	   can only be one writer to the _trash RingBuffer)
 	*/
-		
+
 	_trash->write (&p, 1);
 }
 
@@ -246,7 +246,7 @@ CrossThreadPool::CrossThreadPool  (string n, unsigned long isize, unsigned long 
 	, pending (nitems)
 	, _parent (p)
 {
-	
+
 }
 
 void
@@ -261,10 +261,10 @@ CrossThreadPool::flush_pending ()
 {
 	void* ptr;
 	bool did_release = false;
-	
+
 	DEBUG_TRACE (DEBUG::Pool, string_compose ("%1 %2 has %3 pending free entries waiting, status size %4 free %5 used %6\n", pthread_name(), name(), pending.read_space(),
 	                                          total(), available(), used()));
-	
+
 	while (pending.read (&ptr, 1) == 1) {
 		DEBUG_TRACE (DEBUG::Pool, string_compose ("%1 %2 pushes back a pending free list entry before allocating\n", pthread_name(), name()));
 		free_list.write (&ptr, 1);

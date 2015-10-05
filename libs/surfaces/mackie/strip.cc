@@ -111,7 +111,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 								   _surface->number(), index, Button::id_to_name (bb->bid()),
 								   bb->id(), b->second.base_id));
 	}
-}	
+}
 
 Strip::~Strip ()
 {
@@ -161,7 +161,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	}
 
 	route_connections.drop_connections ();
-	
+
 	_solo->set_control (boost::shared_ptr<AutomationControl>());
 	_mute->set_control (boost::shared_ptr<AutomationControl>());
 	_select->set_control (boost::shared_ptr<AutomationControl>());
@@ -181,12 +181,12 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 strip %2 now mapping route %3\n",
 							   _surface->number(), _index, _route->name()));
-	
+
 	_solo->set_control (_route->solo_control());
 	_mute->set_control (_route->mute_control());
 
 	set_vpot_parameter (PanAzimuthAutomation);
-	
+
 	_route->solo_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
 	_route->listen_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
 
@@ -200,28 +200,28 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	}
 	_route->gain_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_gain_changed, this, false), ui_context());
 	_route->PropertyChanged.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
-	
+
 	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
-	
+
 	if (trk) {
 		_recenable->set_control (trk->rec_enable_control());
 		trk->rec_enable_control()->Changed .connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_record_enable_changed, this), ui_context());
 
-		
+
 	}
-	
+
 	// TODO this works when a currently-banked route is made inactive, but not
 	// when a route is activated which should be currently banked.
-	
+
 	_route->active_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_active_changed, this), ui_context());
 	_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_route_deleted, this), ui_context());
-	
+
 	/* Update */
-	
+
 	notify_all ();
 
 	/* setup legal VPot modes for this route */
-	
+
 	build_input_list (_route->input()->n_ports());
 	build_output_list (_route->output()->n_ports());
 
@@ -232,11 +232,11 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 		if (panner) {
 			set<Evoral::Parameter> automatable = panner->what_can_be_automated ();
 			set<Evoral::Parameter>::iterator a;
-			
+
 			if ((a = automatable.find (PanAzimuthAutomation)) != automatable.end()) {
 				possible_pot_parameters.push_back (PanAzimuthAutomation);
 			}
-			
+
 			if ((a = automatable.find (PanWidthAutomation)) != automatable.end()) {
 				possible_pot_parameters.push_back (PanWidthAutomation);
 			}
@@ -305,7 +305,7 @@ void
 Strip::notify_gain_changed (bool force_update)
 {
 	if (_route) {
-		
+
 		Control* control;
 
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
@@ -315,13 +315,13 @@ Strip::notify_gain_changed (bool force_update)
 		}
 
 		boost::shared_ptr<AutomationControl> ac = _route->gain_control();
-		
+
 		float gain_coefficient = ac->get_value();
 		float normalized_position = ac->internal_to_interface (gain_coefficient);
 
 
 		if (force_update || normalized_position != _last_gain_position_written) {
-			
+
 			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 				if (!control->in_use()) {
 					_surface->write (_vpot->set (normalized_position, true, Pot::wrap));
@@ -350,13 +350,13 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 	if (_route) {
 		string line1;
 		string fullname = _route->name();
-		
+
 		if (fullname.length() <= 6) {
 			line1 = fullname;
 		} else {
 			line1 = PBD::short_version (fullname, 6);
 		}
-		
+
 		_surface->write (display (0, line1));
 	}
 }
@@ -382,7 +382,7 @@ Strip::notify_panner_azi_changed (bool force_update)
 		}
 
 		double pos = pannable->pan_azimuth_control->internal_to_interface (pannable->pan_azimuth_control->get_value());
-		
+
 		if (force_update || pos != _last_pan_azi_position_written) {
 
 			if (control == _fader) {
@@ -392,7 +392,7 @@ Strip::notify_panner_azi_changed (bool force_update)
 			} else if (control == _vpot) {
 				_surface->write (_vpot->set (pos, true, Pot::dot));
 			}
-			
+
 			queue_parameter_display (PanAzimuthAutomation, pos);
 			queue_display_reset (2000);
 			_last_pan_azi_position_written = pos;
@@ -419,12 +419,12 @@ Strip::notify_panner_width_changed (bool force_update)
 
 		if (!control) {
 			return;
-		}	
-			
+		}
+
 		double pos = pannable->pan_width_control->internal_to_interface (pannable->pan_width_control->get_value());
-		
+
 		if (force_update || pos != _last_pan_azi_position_written) {
-			
+
 			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 
 				if (control == _fader) {
@@ -436,7 +436,7 @@ Strip::notify_panner_width_changed (bool force_update)
 			} else if (control == _vpot) {
 				_surface->write (_vpot->set (pos, true, Pot::spread));
 			}
-			
+
 			queue_parameter_display (PanWidthAutomation, pos);
 			queue_display_reset (2000);
 			_last_pan_azi_position_written = pos;
@@ -448,9 +448,9 @@ void
 Strip::select_event (Button&, ButtonState bs)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "select button\n");
-	
+
 	if (bs == press) {
-		
+
 		int ms = _surface->mcp().main_modifier_state();
 
 		if (ms & MackieControlProtocol::MODIFIER_CMDALT) {
@@ -459,7 +459,7 @@ Strip::select_event (Button&, ButtonState bs)
 			queue_display_reset (1000);
 			return;
 		}
-		
+
 		if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
 			/* reset to default */
 			boost::shared_ptr<AutomationControl> ac = _fader->control ();
@@ -468,14 +468,14 @@ Strip::select_event (Button&, ButtonState bs)
 			}
 			return;
 		}
-		
+
 		DEBUG_TRACE (DEBUG::MackieControl, "add select button on press\n");
-		_surface->mcp().add_down_select_button (_surface->number(), _index);			
+		_surface->mcp().add_down_select_button (_surface->number(), _index);
 		_surface->mcp().select_range ();
-		
+
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, "remove select button on release\n");
-		_surface->mcp().remove_down_select_button (_surface->number(), _index);			
+		_surface->mcp().remove_down_select_button (_surface->number(), _index);
 	}
 }
 
@@ -485,13 +485,13 @@ Strip::vselect_event (Button&, ButtonState bs)
 	if (bs == press) {
 
 		int ms = _surface->mcp().main_modifier_state();
-				
+
 		if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
 
 			boost::shared_ptr<AutomationControl> ac = _vpot->control ();
-				
+
 			if (ac) {
-				
+
 				/* reset to default/normal value */
 				ac->set_value (ac->normal());
 			}
@@ -509,7 +509,7 @@ void
 Strip::fader_touch_event (Button&, ButtonState bs)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader touch, press ? %1\n", (bs == press)));
-	
+
 	if (bs == press) {
 
 		boost::shared_ptr<AutomationControl> ac = _fader->control ();
@@ -522,20 +522,20 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 
 			_fader->set_in_use (true);
 			_fader->start_touch (_surface->mcp().transport_frame());
-			
+
 			if (ac) {
 				queue_parameter_display ((AutomationType) ac->parameter().type(), ac->internal_to_interface (ac->get_value()));
 				queue_display_reset (2000);
 			}
 		}
-			
+
 	} else {
-		
+
 		_fader->set_in_use (false);
 		_fader->stop_touch (_surface->mcp().transport_frame(), true);
-		
+
 	}
-}	
+}
 
 
 void
@@ -550,12 +550,12 @@ Strip::handle_button (Button& button, ButtonState bs)
 	}
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 handling button %2 press ? %3\n", _index, button.bid(), (bs == press)));
-	
+
 	switch (button.bid()) {
 	case Button::Select:
 		select_event (button, bs);
 		break;
-		
+
 	case Button::VSelect:
 		vselect_event (button, bs);
 		break;
@@ -569,34 +569,34 @@ Strip::handle_button (Button& button, ButtonState bs)
 			if (bs == press) {
 				DEBUG_TRACE (DEBUG::MackieControl, "add button on press\n");
 				_surface->mcp().add_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
-				
+
 				float new_value;
 				int ms = _surface->mcp().main_modifier_state();
-				
+
 				if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
 					/* reset to default/normal value */
 					new_value = control->normal();
 				} else {
 					new_value = control->get_value() ? 0.0 : 1.0;
 				}
-				
+
 				/* get all controls that either have their
 				 * button down or are within a range of
 				 * several down buttons
 				 */
-				
+
 				MackieControlProtocol::ControlList controls = _surface->mcp().down_controls ((AutomationType) control->parameter().type());
-				
-				
+
+
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("there are %1 buttons down for control type %2, new value = %3\n",
 									    controls.size(), control->parameter().type(), new_value));
 
 				/* apply change */
-				
+
 				for (MackieControlProtocol::ControlList::iterator c = controls.begin(); c != controls.end(); ++c) {
 					(*c)->set_value (new_value);
 				}
-				
+
 			} else {
 				DEBUG_TRACE (DEBUG::MackieControl, "remove button on release\n");
 				_surface->mcp().remove_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
@@ -629,7 +629,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
 			_surface->write (display (1, buf));
-		}		
+		}
 		break;
 
 	case PanAzimuthAutomation:
@@ -691,7 +691,7 @@ Strip::handle_pot (Pot& pot, float delta)
 	/* Pots only emit events when they move, not when they
 	   stop moving. So to get a stop event, we need to use a timeout.
 	*/
-	
+
 	boost::shared_ptr<AutomationControl> ac = pot.control();
 	double p = pot.get_value ();
 	p += delta;
@@ -786,12 +786,12 @@ Strip::display (uint32_t line_number, const std::string& line)
 
 	// sysex header
 	retval << _surface->sysex_hdr();
-	
+
 	// code for display
 	retval << 0x12;
 	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line)
 	retval << (_index * 7 + (line_number * 0x38));
-	
+
 	// ascii data to display. @param line is UTF-8
 	string ascii = Glib::convert_with_fallback (line, "UTF-8", "ISO-8859-1", "_");
 	string::size_type len = ascii.length();
@@ -804,7 +804,7 @@ Strip::display (uint32_t line_number, const std::string& line)
 	for (int i = len; i < 6; ++i) {
 		retval << ' ';
 	}
-	
+
 	// column spacer, unless it's the right-hand column
 	if (_index < 7) {
 		retval << ' ';
@@ -812,7 +812,7 @@ Strip::display (uint32_t line_number, const std::string& line)
 
 	// sysex trailer
 	retval << MIDI::eox;
-	
+
 	return retval;
 }
 
@@ -845,7 +845,7 @@ string
 Strip::vpot_mode_string () const
 {
 	boost::shared_ptr<AutomationControl> ac = _vpot->control();
-	
+
 	if (!ac) {
 		return string();
 	}
@@ -900,10 +900,10 @@ Strip::queue_display_reset (uint32_t msecs)
 	struct timeval delta;
 	struct timeval when;
 	gettimeofday (&now, 0);
-	
+
 	delta.tv_sec = msecs/1000;
 	delta.tv_usec = (msecs - ((msecs/1000) * 1000)) * 1000;
-	
+
 	timeradd (&now, &delta, &when);
 
 	_reset_display_at = (when.tv_sec * 1000000) + when.tv_usec;
@@ -923,10 +923,10 @@ Strip::reset_display ()
 	} else {
 		_surface->write (blank_display (1));
 	}
-		
+
 	clear_display_reset ();
 }
-			
+
 struct RouteCompareByName {
 	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 		return a->name().compare (b->name()) < 0;
@@ -951,19 +951,19 @@ Strip::build_input_list (const ChanCount& channels)
 	input_bundles.clear ();
 
 	/* give user bundles first chance at being in the menu */
-	
+
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
 			maybe_add_to_bundle_map (input_bundles, *i, true, channels);
 		}
 	}
-	
+
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
 			maybe_add_to_bundle_map (input_bundles, *i, true, channels);
 		}
 	}
-	
+
 	boost::shared_ptr<ARDOUR::RouteList> routes = _surface->mcp().get_session().get_routes ();
 	RouteList copy = *routes;
 	copy.sort (RouteCompareByName ());
@@ -982,19 +982,19 @@ Strip::build_output_list (const ChanCount& channels)
 	output_bundles.clear ();
 
 	/* give user bundles first chance at being in the menu */
-	
+
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
 			maybe_add_to_bundle_map (output_bundles, *i, false, channels);
 		}
 	}
-	
+
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
 			maybe_add_to_bundle_map (output_bundles, *i, false, channels);
 		}
 	}
-	
+
 	boost::shared_ptr<ARDOUR::RouteList> routes = _surface->mcp().get_session().get_routes ();
 	RouteList copy = *routes;
 	copy.sort (RouteCompareByName ());
@@ -1141,21 +1141,21 @@ Strip::notify_metering_state_changed()
 	if (!_route || !_meter) {
 		return;
 	}
-	
+
 	bool transport_is_rolling = (_surface->mcp().get_transport_speed () != 0.0f);
 	bool metering_active = _surface->mcp().metering_active ();
-	
+
 	if ((_transport_is_rolling == transport_is_rolling) && (_metering_active == metering_active)) {
 		return;
 	}
-	
+
 	_meter->notify_metering_state_changed (*_surface, transport_is_rolling, metering_active);
-	
+
 	if (!transport_is_rolling || !metering_active) {
 		notify_property_changed (PBD::PropertyChange (ARDOUR::Properties::name));
 		notify_panner_azi_changed (true);
 	}
-	
+
 	_transport_is_rolling = transport_is_rolling;
 	_metering_active = metering_active;
 }

@@ -92,11 +92,11 @@ bool
 Port::clock (timestamp_t timestamp)
 {
 	static byte clockmsg = 0xf8;
-	
+
 	if (sends_output()) {
 		return midimsg (&clockmsg, 1, timestamp);
 	}
-	
+
 	return false;
 }
 
@@ -150,7 +150,7 @@ Port::get_state () const
 	} else {
 		root->add_property ("mode", "output");
 	}
-	
+
 #if 0
 	byte device_inquiry[6];
 
@@ -160,7 +160,7 @@ Port::get_state () const
 	device_inquiry[0] = 0x06;
 	device_inquiry[0] = 0x02;
 	device_inquiry[0] = 0xf7;
-	
+
 	write (device_inquiry, sizeof (device_inquiry), 0);
 #endif
 

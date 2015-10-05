@@ -93,7 +93,7 @@ gain_to_slider_position (ARDOUR::gain_t g)
 	   K =  7.8990885960495589E+00
 
 	 */
-	
+
 	return 8.2857630370864188E-01 * pow(g,5.1526743785019269E-01) * exp (-g/7.8990885960495589E+00);
 #else
 	return pow((6.0*log(g)/log(2.0)+192.0)/198.0, 8.0);
@@ -110,9 +110,9 @@ slider_position_to_gain (double pos)
 #ifndef OLD_GAIN_MATH
 	/* 5th order polynomial function fit to data from a TC Spectra console
 	   fader (image of fader gradations).
-	
+
 	   y = a + bx1 + cx2 + dx3 + fx4 + gx5
-	
+
 	   a = -1.1945480381045521E-02
 	   b =  1.5809476525537265E+00
 	   c = -1.5850710838966151E+01

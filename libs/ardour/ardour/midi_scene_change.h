@@ -62,6 +62,6 @@ class MIDISceneChange : public SceneChange
 };
 
 } /* namespace */
-	
+
 
 #endif /* __libardour_scene_change_h__ */

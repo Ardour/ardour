@@ -138,7 +138,7 @@ PersistentTooltip::show ()
 			_window->set_transient_for (*tlw);
 		}
 	}
-	
+
 	set_tip (_tip);
 
 	if (!_window->is_visible ()) {
@@ -146,7 +146,7 @@ PersistentTooltip::show ()
 		int sw = gdk_screen_width ();
 
 		_target->get_window()->get_origin (rx, ry);
-		
+
 		/* the window needs to be realized first
 		 * for _window->get_width() to be correct.
 		 */

@@ -26,7 +26,7 @@ struct LIBARDOUR_API _VSTHandle;
 typedef struct _VSTHandle VSTHandle;
 
 namespace ARDOUR {
-	
+
 class AudioEngine;
 class Session;
 

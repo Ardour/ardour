@@ -44,7 +44,7 @@ bool TranzportControlProtocol::lcd_damage (int row, int col, int length)
 bool TranzportControlProtocol::lcd_isdamaged ()
 {
 	if(screen_invalid.any()) {
-#if DEBUG_TRANZPORT > 5	
+#if DEBUG_TRANZPORT > 5
 		printf("LCD is damaged somewhere, should redraw it\n");
 #endif
 		return true;
@@ -60,7 +60,7 @@ bool TranzportControlProtocol::lcd_isdamaged (int row, int col, int length)
 	std::bitset<ROWS*COLUMNS> mask(mask1 << (row*COLUMNS+col));
 	mask &= screen_invalid;
 	if(mask.any()) {
-#if DEBUG_TRANZPORT > 5	
+#if DEBUG_TRANZPORT > 5
 		printf("row: %d,col: %d is damaged, should redraw it\n", row,col);
 #endif
 		return true;

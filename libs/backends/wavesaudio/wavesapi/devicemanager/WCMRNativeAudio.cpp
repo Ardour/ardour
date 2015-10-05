@@ -106,7 +106,7 @@ WTErr WCMRNativeAudioNoneDevice::SetCurrentBufferSize (int newSize)
 	//same size, nothing to do.
 	if (oldSize == newSize)
 		return eNoErr;
-	
+
 	//see if this is one of our supported rates...
 	std::vector<int>::iterator intIter = find(m_BufferSizes.begin(), m_BufferSizes.end(), newSize);
 	if (intIter == m_BufferSizes.end())
@@ -114,14 +114,14 @@ WTErr WCMRNativeAudioNoneDevice::SetCurrentBufferSize (int newSize)
 		//Can't change, perhaps use an "invalid param" type of error
 		return eCommandLineParameter;
 	}
-	
+
 	if (Streaming())
 	{
 		//Can't change, perhaps use an "in use" type of error
 		return eGenericErr;
 	}
 
-	
+
 	return WCMRAudioDevice::SetCurrentBufferSize(newSize);
 }
 
@@ -211,15 +211,15 @@ void WCMRNativeAudioNoneDevice::_SilenceThread()
 
     // VERY ROUGH IMPLEMENTATION:
     while(Streaming()) {
-	
+
         uint64_t cycleEndTimeNanos = audioCallbackData.acdCycleStartTimeNanos + cyclePeriodNanos;
 
 		m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::AudioCallback, (void *)&audioCallbackData);
-		
+
         audioCallbackData.acdSampleTime += buffer_size;
-		
+
 		int64_t timeToSleepUsecs = ((int64_t)cycleEndTimeNanos - (int64_t)__get_time_nanos())/1000;
-		
+
         if (timeToSleepUsecs > 0) {
             _usleep (timeToSleepUsecs);
         }

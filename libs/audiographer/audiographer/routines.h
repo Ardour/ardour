@@ -15,13 +15,13 @@ class LIBAUDIOGRAPHER_API Routines
 {
   public:
 	typedef uint32_t uint_type;
-	
+
 	typedef float (*compute_peak_t)          (float const *, uint_type, float);
 	typedef void  (*apply_gain_to_buffer_t)  (float *, uint_type, float);
-	
+
 	static void override_compute_peak         (compute_peak_t func)         { _compute_peak = func; }
 	static void override_apply_gain_to_buffer (apply_gain_to_buffer_t func) { _apply_gain_to_buffer = func; }
-	
+
 	/** Computes peak in float buffer
 	  * \n RT safe
 	  * \param data buffer from which the peak is computed
@@ -61,7 +61,7 @@ class LIBAUDIOGRAPHER_API Routines
 			data[i] *= gain;
 		}
 	}
-	
+
 	static compute_peak_t          _compute_peak;
 	static apply_gain_to_buffer_t  _apply_gain_to_buffer;
 };

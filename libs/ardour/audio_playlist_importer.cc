@@ -177,7 +177,7 @@ AudioPlaylistImporter::_prepare_move ()
 		}
 		name = rename_pair.second;
 	}
-	
+
 	XMLProperty* p = xml_playlist.property ("name");
 	if (!p) {
 		error << _("badly-formed XML in imported playlist") << endmsg;

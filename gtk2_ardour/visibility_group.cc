@@ -54,7 +54,7 @@ VisibilityGroup::add (Gtk::Widget* widget, string const & id, string const & nam
 	m.name = name;
 	m.visible = visible;
 	m.override = override;
-	
+
 	_members.push_back (m);
 }
 
@@ -161,7 +161,7 @@ VisibilityGroup::set_state (string v)
 		}
 
 		v = v.substr (comma + 1);
-		
+
 	} while (1);
 
 	update ();
@@ -195,11 +195,11 @@ VisibilityGroup::update_list_view ()
 	if (!_model) {
 		return;
 	}
-	
+
 	_ignore_list_view_change = true;
 
 	_model->clear ();
-	
+
 	for (vector<Member>::iterator i = _members.begin(); i != _members.end(); ++i) {
 		Gtk::TreeModel::iterator j = _model->append ();
 		Gtk::TreeModel::Row row = *j;
@@ -235,7 +235,7 @@ VisibilityGroup::list_view_visible_changed (string const & path)
 	if (_ignore_list_view_change) {
 		return;
 	}
-	
+
 	Gtk::TreeModel::iterator i = _model->get_iter (path);
 	if (!i) {
 		return;

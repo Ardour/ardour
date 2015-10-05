@@ -42,7 +42,7 @@
 using namespace std;
 using namespace PBD;
 using namespace Glib;
-	
+
 uint64_t BaseUI::rt_bit = 1;
 BaseUI::RequestType BaseUI::CallSlot = BaseUI::new_request_type();
 BaseUI::RequestType BaseUI::Quit = BaseUI::new_request_type();
@@ -91,7 +91,7 @@ BaseUI::signal_running ()
 {
 	Glib::Threads::Mutex::Lock lm (_run_lock);
 	_running.signal ();
-	
+
 	return false; // don't call it again
 }
 
@@ -130,7 +130,7 @@ BaseUI::request_handler (Glib::IOCondition ioc)
 
 	if (ioc & IO_IN) {
 		request_channel.drain ();
-		
+
 		/* there may been an error. we'd rather handle requests first,
 		   and then get IO_HUP or IO_ERR on the next loop.
 		*/

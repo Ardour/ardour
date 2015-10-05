@@ -63,7 +63,7 @@ ArdourDisplay::~ArdourDisplay ()
 bool
 ArdourDisplay::on_button_press_event (GdkEventButton*)
 {
-	_menu.popup (1, gtk_get_current_event_time());	
+	_menu.popup (1, gtk_get_current_event_time());
 	return true;
 }
 
@@ -84,12 +84,12 @@ ArdourDisplay::on_scroll_event (GdkEventScroll* ev)
 	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 	if (c) {
 		float val = c->get_interface();
-	
+
 		if ( ev->direction == GDK_SCROLL_UP )
 			val += 0.05 * scale;  //by default, we step in 1/20ths of the knob travel
 		else
 			val -= 0.05 * scale;
-			
+
 		c->set_interface(val);
 	}
 

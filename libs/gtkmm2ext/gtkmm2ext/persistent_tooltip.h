@@ -34,7 +34,7 @@ class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
   public:
 	PersistentTooltip (Gtk::Widget *, bool draggable = false, int margin_y = 0);
 	virtual ~PersistentTooltip ();
-	
+
 	void set_tip (std::string);
 	void set_font (Pango::FontDescription font);
 	void set_center_alignment (bool align_to_center);

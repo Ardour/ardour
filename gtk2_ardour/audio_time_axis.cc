@@ -183,14 +183,14 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 	AutomationTracks::iterator existing = _automation_tracks.find (param);
 
 	if (existing != _automation_tracks.end()) {
-		
+
 		/* automation track created because we had existing data for
 		 * the processor, but visibility may need to be controlled
 		 * since it will have been set visible by default.
 		 */
 
 		existing->second->set_marked_for_display (show);
-		
+
 		if (!no_redraw) {
 			request_redraw ();
 		}
@@ -219,7 +219,7 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 	} else if (param.type() == MuteAutomation) {
 
 		create_mute_automation_child (param, show);
-		
+
 
 	} else {
 		error << "AudioTimeAxisView: unknown automation child " << EventTypeMap::instance().to_symbol(param) << endmsg;

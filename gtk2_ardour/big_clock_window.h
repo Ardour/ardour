@@ -28,11 +28,11 @@ class BigClockWindow : public ArdourWindow
 {
     public:
 	BigClockWindow (AudioClock&);
-	
+
     private:
 	AudioClock& clock;
 	Gtk::Requisition default_size;
-	
+
 	void clock_size_reallocated (Gtk::Allocation&);
 	void on_realize ();
 	void on_unmap ();

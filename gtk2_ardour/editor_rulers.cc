@@ -130,7 +130,7 @@ Editor::initialize_rulers ()
 	_bbt_metric = new BBTMetric (this);
 	_minsec_metric = new MinsecMetric (this);
 	_samples_metric = new SamplesMetric (this);
-	
+
 	timecode_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_timecode_metric,
 						  ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
 	timecode_ruler->set_font_description (font);
@@ -175,7 +175,7 @@ Editor::initialize_rulers ()
 	minsec_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), minsec_ruler, MinsecRulerItem));
 	bbt_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), bbt_ruler, BBTRulerItem));
 	samples_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), samples_ruler, SamplesRulerItem));
-	
+
 	visible_timebars = 0; /*this will be changed below */
 }
 
@@ -1141,7 +1141,7 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
 	} else {
 		bbt_ruler_scale =  bbt_show_ticks_detail;
 	}
-	
+
 	if ((bbt_ruler_scale == bbt_show_ticks_detail) && (lower_beat.beats == upper_beat.beats) && (upper_beat.ticks - lower_beat.ticks <= Timecode::BBT_Time::ticks_per_beat / 4)) {
 		bbt_ruler_scale =  bbt_show_ticks_super_detail;
 	}
@@ -1154,7 +1154,7 @@ edit_last_mark_label (std::vector<ArdourCanvas::Ruler::Mark>& marks, const std::
 	copy.label = newlabel;
 	marks.pop_back ();
 	marks.push_back (copy);
-}		
+}
 
 void
 Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble lower, gdouble upper, gint /*maxchars*/)
@@ -1234,7 +1234,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
 
 		bbt_position_of_helper = lower + (30 * Editor::get_current_zoom ());
-		
+
 		// could do marks.assign() here to preallocate
 
 		mark.label = "";

@@ -63,7 +63,7 @@ public:
 	{
 		return g_atomic_int_dec_and_test (&m_value);
 	}
-	
+
 	bool operator-- ()
 	{
 		return decrement_and_test ();

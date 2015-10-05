@@ -39,7 +39,7 @@ SysEx::SysEx (
 		UIConfiguration::instance().color_mod ("midi sysex fill", "midi sysex fill"),
 		ArdourCanvas::Duple (x, y)
 		);
-	
+
 	_flag->set_text (text);
 }
 

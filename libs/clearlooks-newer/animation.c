@@ -31,7 +31,7 @@
 
 struct _AnimationInfo {
 	GTimer *timer;
-	
+
 	gdouble start_modifier;
 	gdouble stop_time;
 	GtkWidget *widget;
@@ -107,11 +107,11 @@ static void
 destroy_animation_info_and_weak_unref (gpointer data)
 {
 	AnimationInfo *animation_info = data;
-	
+
 	/* force a last redraw. This is so that if the animation is removed,
 	 * the widget is left in a sane state. */
 	force_widget_redraw (animation_info->widget);
-	
+
 	g_object_weak_unref (G_OBJECT (animation_info->widget), on_animated_widget_destruction, data);
 	animation_info_destroy (animation_info);
 }
@@ -122,7 +122,7 @@ lookup_animation_info (const GtkWidget *widget)
 {
 	if (animated_widgets)
 		return g_hash_table_lookup (animated_widgets, widget);
-	
+
 	return NULL;
 }
 
@@ -131,26 +131,26 @@ static void
 add_animation (const GtkWidget *widget, gdouble stop_time)
 {
 	AnimationInfo *value;
-	
+
 	/* object already in the list, do not add it twice */
 	if (lookup_animation_info (widget))
 		return;
-	
+
 	if (animated_widgets == NULL)
 		animated_widgets = g_hash_table_new_full (g_direct_hash, g_direct_equal,
 		                                          NULL, destroy_animation_info_and_weak_unref);
-	
+
 	value = g_new(AnimationInfo, 1);
-	
+
 	value->widget = (GtkWidget*) widget;
-	
+
 	value->timer = g_timer_new ();
 	value->stop_time= stop_time;
 	value->start_modifier = 0.0;
 
 	g_object_weak_ref (G_OBJECT (widget), on_animated_widget_destruction, value);
 	g_hash_table_insert (animated_widgets, (GtkWidget*) widget, value);
-	
+
 	start_timer ();
 }
 
@@ -161,34 +161,34 @@ update_animation_info (gpointer key, gpointer value, gpointer user_data)
 {
 	AnimationInfo *animation_info;
 	GtkWidget *widget = key;
-	
+
 	animation_info = value;
 	(void) user_data;
-	
+
 	g_assert ((widget != NULL) && (animation_info != NULL));
-	
+
 	/* remove the widget from the hash table if it is not drawable */
 	if (!GTK_WIDGET_DRAWABLE (widget))
 	{
 		return TRUE;
 	}
-	
+
 	if (GE_IS_PROGRESS_BAR (widget))
 	{
 		gfloat fraction = gtk_progress_bar_get_fraction (GTK_PROGRESS_BAR (widget));
-		
+
 		/* stop animation for filled/not filled progress bars */
 		if (fraction <= 0.0 || fraction >= 1.0)
 			return TRUE;
 	}
-	
+
 	force_widget_redraw (widget);
-	
+
 	/* stop at stop_time */
 	if (animation_info->stop_time != 0 &&
 	    g_timer_elapsed (animation_info->timer, NULL) > animation_info->stop_time)
 		return TRUE;
-	
+
 	return FALSE;
 }
 
@@ -197,21 +197,21 @@ static gboolean
 animation_timeout_handler (gpointer data)
 {
 	(void) data;
-	
+
 	/*g_print("** TICK **\n");*/
-	
+
 	/* enter threads as update_animation_info will use gtk/gdk. */
 	gdk_threads_enter ();
 	g_hash_table_foreach_remove (animated_widgets, update_animation_info, NULL);
 	/* leave threads again */
 	gdk_threads_leave ();
-	
+
 	if(g_hash_table_size(animated_widgets)==0)
 	{
 		stop_timer ();
 		return FALSE;
 	}
-	
+
 	return TRUE;
 }
 
@@ -220,13 +220,13 @@ on_checkbox_toggle (GtkWidget *widget, gpointer data)
 {
 	AnimationInfo *animation_info;
 	(void) data;
-	
+
 	animation_info = lookup_animation_info (widget);
-	
+
 	if (animation_info != NULL)
 	{
 		gfloat elapsed = g_timer_elapsed (animation_info->timer, NULL);
-		
+
 		animation_info->start_modifier = elapsed - animation_info->start_modifier;
 	}
 	else
@@ -239,7 +239,7 @@ static void
 on_connected_widget_destruction (gpointer data, GObject *widget)
 {
 	(void) widget;
-	
+
 	connected_widgets = g_slist_remove (connected_widgets, data);
 	g_free (data);
 }
@@ -251,14 +251,14 @@ disconnect_all_signals (void)
 	while (item != NULL)
 	{
 		SignalInfo *signal_info = (SignalInfo*) item->data;
-		
+
 		g_signal_handler_disconnect (signal_info->widget, signal_info->handler_id);
 		g_object_weak_unref (G_OBJECT (signal_info->widget), on_connected_widget_destruction, signal_info);
 		g_free (signal_info);
-		
+
 		item = g_slist_next (item);
 	}
-	
+
 	g_slist_free (connected_widgets);
 	connected_widgets = NULL;
 }
@@ -281,7 +281,7 @@ void
 clearlooks_animation_progressbar_add (GtkWidget *progressbar)
 {
 	gdouble fraction = gtk_progress_bar_get_fraction (GTK_PROGRESS_BAR (progressbar));
-	
+
 	if (fraction < 1.0 && fraction > 0.0)
 		add_animation ((GtkWidget*) progressbar, 0.0);
 }
@@ -295,10 +295,10 @@ clearlooks_animation_connect_checkbox (GtkWidget *widget)
 		if (!g_slist_find_custom (connected_widgets, widget, find_signal_info))
 		{
 			SignalInfo * signal_info = g_new (SignalInfo, 1);
-			
+
 			signal_info->widget = widget;
 			signal_info->handler_id = g_signal_connect ((GObject*)widget, "toggled", G_CALLBACK (on_checkbox_toggle), NULL);
-			
+
 			connected_widgets = g_slist_append (connected_widgets, signal_info);
 			g_object_weak_ref (G_OBJECT (widget), on_connected_widget_destruction, signal_info);
 		}
@@ -317,7 +317,7 @@ gdouble
 clearlooks_animation_elapsed (gpointer data)
 {
 	AnimationInfo *animation_info = lookup_animation_info (data);
-	
+
 	if (animation_info)
 		return   g_timer_elapsed (animation_info->timer, NULL)
 		       - animation_info->start_modifier;
@@ -330,13 +330,13 @@ void
 clearlooks_animation_cleanup (void)
 {
 	disconnect_all_signals ();
-	
+
 	if (animated_widgets != NULL)
 	{
 		g_hash_table_destroy (animated_widgets);
 		animated_widgets = NULL;
 	}
-	
+
 	stop_timer ();
 }
 #else /* !HAVE_ANIMATION */

@@ -104,7 +104,7 @@ PixScroller::on_expose_event (GdkEventExpose* ev)
                 context->paint();
                 context->restore();
 	}
-	
+
 	if (gdk_rectangle_intersect (sliderrect.gobj(), &ev->area, &intersect)) {
 
                 context->save();
@@ -136,7 +136,7 @@ PixScroller::on_button_press_event (GdkEventButton* ev)
 	default:
 		break;
 	}
-			
+
 
 	return false;
 }
@@ -145,7 +145,7 @@ bool
 PixScroller::on_button_release_event (GdkEventButton* ev)
 {
 	double scale;
-	
+
 	if (ev->state & Keyboard::PrimaryModifier) {
 		if (ev->state & Keyboard::SecondaryModifier) {
 			scale = 0.05;
@@ -195,7 +195,7 @@ bool
 PixScroller::on_scroll_event (GdkEventScroll* ev)
 {
 	double scale;
-	
+
 	if (ev->state & Keyboard::PrimaryModifier) {
 		if (ev->state & Keyboard::SecondaryModifier) {
 			scale = 0.05;
@@ -235,7 +235,7 @@ PixScroller::on_motion_notify_event (GdkEventMotion* ev)
 			grab_window = ev->window;
 			return true;
 		}
-		
+
 		if (ev->state & Keyboard::PrimaryModifier) {
 			if (ev->state & Keyboard::SecondaryModifier) {
 				scale = 0.05;
@@ -253,7 +253,7 @@ PixScroller::on_motion_notify_event (GdkEventMotion* ev)
 
 		fract = min (1.0, fract);
 		fract = max (-1.0, fract);
-		
+
 		fract = -fract;
 
 		adj.set_value (adj.get_value() + scale * fract * (adj.get_upper() - adj.get_lower()));

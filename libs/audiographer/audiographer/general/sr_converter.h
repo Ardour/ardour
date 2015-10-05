@@ -27,10 +27,10 @@ class LIBAUDIOGRAPHER_API SampleRateConverter
 
 	/// Init converter \n Not RT safe
 	void init (framecnt_t in_rate, framecnt_t out_rate, int quality = 0);
-	
+
 	/// Returns max amount of frames that will be output \n RT safe
 	framecnt_t allocate_buffers (framecnt_t max_frames);
-	
+
 	/** Does sample rate conversion.
 	  * Note that outpt size may vary a lot.
 	  * May or may not output several contexts of data.
@@ -48,7 +48,7 @@ class LIBAUDIOGRAPHER_API SampleRateConverter
 	bool           active;
 	uint32_t       channels;
 	framecnt_t     max_frames_in;
-	
+
 	float *        leftover_data;
 	framecnt_t     leftover_frames;
 	framecnt_t     max_leftover_frames;

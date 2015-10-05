@@ -42,7 +42,7 @@ class LIBARDOUR_API MidiPortManager {
   public:
     MidiPortManager();
     virtual ~MidiPortManager ();
-	
+
     /* Ports used for control. These are read/written to outside of the
      * process callback (asynchronously with respect to when data
      * actually arrives).

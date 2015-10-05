@@ -64,20 +64,20 @@ class ThemeManager : public Gtk::VBox
 
   private:
 	Gtk::Notebook notebook;
-	
+
 	struct BasicColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 		BasicColorDisplayModelColumns() {
 			add (name);
 			add (gdkcolor);
 		}
-		
+
 		Gtk::TreeModelColumn<std::string>  name;
 		Gtk::TreeModelColumn<Gdk::Color>   gdkcolor;
 	};
-	
+
 	Gtk::ColorSelectionDialog color_dialog;
 	sigc::connection color_dialog_connection;
-	
+
 	Gtk::HBox theme_selection_hbox;
 	Gtk::RadioButton dark_button;
 	Gtk::RadioButton light_button;
@@ -104,7 +104,7 @@ class ThemeManager : public Gtk::VBox
 	Gtk::ScrolledWindow palette_scroller;
 	ArdourCanvas::GtkCanvasViewport palette_viewport;
 	ArdourCanvas::Container* palette_group;
-	
+
 	/* these methods create and manage a canvas for use in either the
 	   palette tab or in a separate dialog. Different behaviour is
 	   accomplished by changing the event handler passed into the
@@ -130,7 +130,7 @@ class ThemeManager : public Gtk::VBox
 	   on it inside the palette tab.
 	*/
 	void edit_palette_color (std::string);
-	
+
 	struct ColorAliasModelColumns : public Gtk::TreeModel::ColumnRecord {
 		ColorAliasModelColumns() {
 			add (name);
@@ -138,7 +138,7 @@ class ThemeManager : public Gtk::VBox
 			add (color);
 			add (key);
 		}
-		
+
 		Gtk::TreeModelColumn<std::string>  name;
 		Gtk::TreeModelColumn<std::string>  alias;
 		Gtk::TreeModelColumn<Gdk::Color>   color;
@@ -154,9 +154,9 @@ class ThemeManager : public Gtk::VBox
 
 	ArdourDialog* palette_window;
 	sigc::connection palette_response_connection;
-	
+
 	void choose_color_from_palette (std::string const &target_name);
-	
+
 	bool alias_palette_event (GdkEvent*, std::string, std::string);
 	void alias_palette_response (int, std::string, std::string);
 
@@ -165,10 +165,10 @@ class ThemeManager : public Gtk::VBox
 
 	Gtk::ScrolledWindow modifier_scroller;
 	Gtk::VBox modifier_vbox;
-	
+
 	void setup_modifiers ();
 	void modifier_edited (Gtk::Range*, std::string);
-	
+
 	void colors_changed ();
 	void set_ui_to_state ();
 };

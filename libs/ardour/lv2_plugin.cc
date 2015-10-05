@@ -2388,7 +2388,7 @@ LV2Plugin::Impl::designated_input (const char* uri, void** bufptrs[], void** buf
 static bool lv2_filter (const string& str, void* /*arg*/)
 {
 	/* Not a dotfile, has a prefix before a period, suffix is "lv2" */
-	
+
 	return str[0] != '.' && (str.length() > 3 && str.find (".lv2") == (str.length() - 4));
 }
 

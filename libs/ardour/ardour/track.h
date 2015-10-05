@@ -57,7 +57,7 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	PBD::Signal0<void> MonitoringChanged;
 
 	MeterState metering_state () const;
-	
+
 	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	                     bool state_changing);
 
@@ -221,13 +221,13 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	void maybe_declick (BufferSet&, framecnt_t, int);
 
 	boost::shared_ptr<RecEnableControl> _rec_enable_control;
-	
+
 	framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&);
 
 private:
 
 	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &) = 0;
-	
+
 	void diskstream_playlist_changed ();
 	void diskstream_record_enable_changed ();
 	void diskstream_record_safe_changed ();

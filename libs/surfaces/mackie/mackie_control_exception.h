@@ -30,14 +30,14 @@ public:
 	: _msg( msg )
 	{
 	}
-	
+
 	virtual ~MackieControlException() throw () {}
-	
+
 	const char * what() const throw ()
 	{
 		return _msg.c_str();
 	}
-	
+
 private:
 	std::string _msg;
 };

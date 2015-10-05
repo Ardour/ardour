@@ -68,7 +68,7 @@ class MIDIControllable : public PBD::Stateful
 	};
 
 	MIDI::byte* write_feedback (MIDI::byte* buf, int32_t& bufsize, bool force = false);
-	
+
 	void midi_rebind (MIDI::channel_t channel=-1);
 	void midi_forget ();
 	void learn_about_external_control ();
@@ -104,7 +104,7 @@ class MIDIControllable : public PBD::Stateful
 	MIDI::byte get_control_additional () { return control_additional; }
 
         int lookup_controllable();
-	
+
   private:
 
 	int max_value_for_type () const;

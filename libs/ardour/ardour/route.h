@@ -113,7 +113,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	virtual MonitorState monitoring_state () const;
 	virtual MeterState metering_state () const;
-	
+
 	/* these are the core of the API of a Route. see the protected sections as well */
 
 	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
@@ -152,7 +152,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	bool muted () const;
 	void set_mute (bool yn, void* src);
-	
+
 	bool muted_by_others() const;
 
 	/* controls use set_solo() to modify this route's solo state
@@ -547,7 +547,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	uint32_t       _solo_isolated_by_upstream;
 
 	void mod_solo_isolated_by_upstream (bool, void*);
-	
+
 	bool           _denormal_protection;
 
 	bool _recordable : 1;
@@ -668,7 +668,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	Route (Route const &);
 
 	void maybe_note_meter_position ();
-	
+
 	/** true if we've made a note of a custom meter position in these variables */
 	bool _custom_meter_position_noted;
 	/** the processor that came after the meter when it was last set to a custom position,

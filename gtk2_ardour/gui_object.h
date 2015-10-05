@@ -55,7 +55,7 @@ public:
 	static XMLNode* get_or_add_node (XMLNode *, const std::string &);
 
 	void remove_node (const std::string& id);
-	
+
   private:
 	XMLNode _state;
 };

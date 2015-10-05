@@ -60,7 +60,7 @@ TranzportControlProtocol::set_state (const XMLNode& node)
 	int retval = 0;
 
 // I think I want to make these strings rather than numbers
-#if 0		
+#if 0
 	// fetch current display mode
 	if ( node.property( X_("display_mode") ) != 0 )
 	{

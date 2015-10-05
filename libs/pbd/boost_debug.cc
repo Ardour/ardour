@@ -64,7 +64,7 @@ Backtrace::print (std::ostream& str) const
 	if (size) {
 #ifdef HAVE_EXECINFO
 		strings = ::backtrace_symbols (trace, size);
-#endif		
+#endif
 		if (strings) {
 			for (i = 3; i < 5+18 && i < size; i++) {
 				str << strings[i] << std::endl;
@@ -151,7 +151,7 @@ is_interesting_object (void const* ptr)
 	if (ptr == 0) {
 		return false;
 	}
-	
+
 	return interesting_pointers().find (ptr) != interesting_pointers().end();
 }
 
@@ -194,10 +194,10 @@ boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int
 	if (is_interesting_object (old_obj)) {
 		if (debug_out) {
 			cerr << "\tlost old sp @ " << sp << " for " << old_obj << " UC = " << old_use_count << " now for " << obj << " UC = " << new_use_count
-			     << " (total sp's = " << sptrs().size() << ')' << endl;			
+			     << " (total sp's = " << sptrs().size() << ')' << endl;
 		}
 		PointerMap::iterator x = sptrs().find (sp);
-		
+
 		if (x != sptrs().end()) {
 			sptrs().erase (x);
 			if (debug_out) {
@@ -214,11 +214,11 @@ boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int
 		newpair.second = new SPDebug (new Backtrace());
 
 		sptrs().insert (newpair);
-		
+
 		if (debug_out) {
 			cerr << "assignment created sp for " << obj << " @ " << sp << " used to point to " << old_obj << " UC = " << old_use_count
 			     << " UC = " << new_use_count
-			     << " (total sp's = " << sptrs().size() << ')' << endl;			
+			     << " (total sp's = " << sptrs().size() << ')' << endl;
 			cerr << *newpair.second << endl;
 		}
 	}
@@ -242,10 +242,10 @@ boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_c
 	if (is_interesting_object (old_obj)) {
 		if (debug_out) {
 			cerr << "\tlost old sp @ " << sp << " for " << old_obj << " UC = " << old_use_count << " now for " << obj << " UC = " << new_use_count
-			     << " (total sp's = " << sptrs().size() << ')' << endl;			
+			     << " (total sp's = " << sptrs().size() << ')' << endl;
 		}
 		PointerMap::iterator x = sptrs().find (sp);
-		
+
 		if (x != sptrs().end()) {
 			sptrs().erase (x);
 			if (debug_out) {
@@ -262,11 +262,11 @@ boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_c
 		newpair.second = new SPDebug (new Backtrace());
 
 		sptrs().insert (newpair);
-		
+
 		if (debug_out) {
 			cerr << "reset created sp for " << obj << " @ " << sp << " used to point to " << old_obj << " UC = " << old_use_count
 			     << " UC = " << new_use_count
-			     << " (total sp's = " << sptrs().size() << ')' << endl;			
+			     << " (total sp's = " << sptrs().size() << ')' << endl;
 			cerr << *newpair.second << endl;
 		}
 	}

@@ -50,7 +50,7 @@ class MIDIInvokable : public PBD::Stateful
 	MIDI::channel_t get_control_channel () { return control_channel; }
 	MIDI::eventType get_control_type () { return control_type; }
 	MIDI::byte get_control_additional () { return control_additional; }
-	
+
   protected:
 	GenericMidiControlProtocol* _ui;
 	std::string     _invokable_name;

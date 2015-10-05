@@ -93,7 +93,7 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 
 MonoPanner::~MonoPanner ()
 {
-	
+
 }
 
 void

@@ -63,7 +63,7 @@ clearlooks_set_border_gradient (cairo_t *cr, const CairoColor *color, double hil
 	pattern	= cairo_pattern_create_linear (0, 0, width, height);
 	cairo_pattern_add_color_stop_rgb (pattern, 0, color->r, color->g, color->b);
 	cairo_pattern_add_color_stop_rgb (pattern, 1, bottom_shade.r, bottom_shade.g, bottom_shade.b);
-	
+
 	cairo_set_source (cr, pattern);
 	cairo_pattern_destroy (pattern);
 }
@@ -76,16 +76,16 @@ clearlooks_inverted_draw_button (cairo_t *cr,
 {
 	double xoffset = 0, yoffset = 0;
 	double radius = params->radius;
-	const CairoColor *fill = &colors->bg[params->state_type];	
+	const CairoColor *fill = &colors->bg[params->state_type];
 	const CairoColor *border_disabled = &colors->shade[4];
 	CairoColor border_normal;
 	CairoColor shadow;
 
 	ge_shade_color(&colors->shade[6], 1.05, &border_normal);
 	ge_shade_color (&border_normal, 0.925, &shadow);
-	
+
 	cairo_save (cr);
-	
+
 	cairo_translate (cr, x, y);
 	cairo_set_line_width (cr, 1.0);
 
@@ -104,21 +104,21 @@ clearlooks_inverted_draw_button (cairo_t *cr,
 		cairo_translate (cr, 0.5, 0.5);
 		params->style_functions->draw_inset (cr, &params->parentbg, 0, 0, width-1, height-1, radius+1, params->corners);
 		cairo_translate (cr, -0.5, -0.5);
-	}		
-	
+	}
+
 	ge_cairo_rounded_rectangle (cr, xoffset+1, yoffset+1,
 	                                     width-(xoffset*2)-2,
 	                                     height-(yoffset*2)-2,
 	                                     radius, params->corners);
-	
+
 	if (!params->active)
 	{
 		cairo_pattern_t *pattern;
 
 		CairoColor top_shade, bottom_shade;
-		ge_shade_color (fill, 0.95, &top_shade);		
+		ge_shade_color (fill, 0.95, &top_shade);
 		ge_shade_color (fill, 1.05, &bottom_shade);
-		
+
 		pattern	= cairo_pattern_create_linear (0, 0, 0, height);
 		cairo_pattern_add_color_stop_rgb (pattern, 0.0, top_shade.r, top_shade.g, top_shade.b);
 		cairo_pattern_add_color_stop_rgb (pattern, 1.0, bottom_shade.r, bottom_shade.g, bottom_shade.b);
@@ -129,7 +129,7 @@ clearlooks_inverted_draw_button (cairo_t *cr,
 	else
 	{
 		cairo_pattern_t *pattern;
-		
+
 		ge_cairo_set_color (cr, fill);
 		cairo_fill_preserve (cr);
 
@@ -168,7 +168,7 @@ clearlooks_inverted_draw_button (cairo_t *cr,
 		ge_cairo_set_color (cr, d);
 		ge_cairo_stroke_rectangle (cr, 3.5, 3.5, width-7, height-7);
 	}
-	
+
 	if (params->disabled)
 			ge_cairo_set_color (cr, border_disabled);
 	else
@@ -176,12 +176,12 @@ clearlooks_inverted_draw_button (cairo_t *cr,
 			clearlooks_set_border_gradient (cr, &border_normal, 1.32, 0, height);
 		else
 			ge_cairo_set_color (cr, &border_normal);
-	
+
 	ge_cairo_rounded_rectangle (cr, xoffset + 0.5, yoffset + 0.5,
                                   width-(xoffset*2)-1, height-(yoffset*2)-1,
                                   radius, params->corners);
 	cairo_stroke (cr);
-	
+
 	/* Draw the "shadow" */
 	if (!params->active)
 	{
@@ -191,7 +191,7 @@ clearlooks_inverted_draw_button (cairo_t *cr,
 		cairo_line_to (cr, width-params->xthickness, height - params->ythickness - 1);
 		cairo_set_source_rgba (cr, shadow.r, shadow.g, shadow.b, 0.1);
 		cairo_stroke (cr);
-		
+
 		/* Draw topleft shadow */
 		clearlooks_draw_top_left_highlight (cr, fill, params, width, height, radius);
 	}
@@ -233,7 +233,7 @@ clearlooks_inverted_draw_progressbar_fill (cairo_t *cr,
 
 	stroke_width = height*2;
 	x_step = (((float)stroke_width/10)*offset); /* This looks weird ... */
-	
+
 	cairo_translate (cr, x, y);
 
 	cairo_save (cr);
@@ -244,7 +244,7 @@ clearlooks_inverted_draw_progressbar_fill (cairo_t *cr,
 	ge_cairo_rounded_rectangle (cr, -radius, 0, width + radius, height, radius, CR_CORNER_TOPRIGHT | CR_CORNER_BOTTOMRIGHT);
 	cairo_clip (cr);
 
-		
+
 	ge_shade_color (&colors->spot[1], 1.05, &top_shade);
 
 	/* Draw the background gradient */
@@ -264,16 +264,16 @@ clearlooks_inverted_draw_progressbar_fill (cairo_t *cr,
 		cairo_line_to (cr, stroke_width-x_step,   0);
 		cairo_line_to (cr, stroke_width/2-x_step, height);
 		cairo_line_to (cr, -x_step, height);
-		
+
 		cairo_translate (cr, stroke_width, 0);
 		tile_pos += stroke_width;
 	}
-	
+
 	cairo_set_source_rgba (cr, colors->spot[2].r,
 	                           colors->spot[2].g,
 	                           colors->spot[2].b,
 	                           0.15);
-	
+
 	cairo_fill (cr);
 	cairo_restore (cr); /* rounded clip region */
 
@@ -353,7 +353,7 @@ clearlooks_inverted_draw_progressbar_fill (cairo_t *cr,
 		ge_cairo_set_color (cr, &shadow);
 		cairo_stroke (cr);
 	}
-	
+
 	cairo_restore (cr);
 
 	cairo_restore (cr); /* rotation, mirroring */
@@ -398,10 +398,10 @@ clearlooks_inverted_draw_menubaritem (cairo_t *cr,
 	CairoColor fill_shade;
 	CairoColor border = colors->spot[2];
 	cairo_pattern_t *pattern;
-	
+
 	ge_shade_color (&border, 1.05, &border);
 	ge_shade_color (fill, 0.85, &fill_shade);
-	
+
 	cairo_set_line_width (cr, 1.0);
 	ge_cairo_rounded_rectangle (cr, x + 0.5, y + 0.5, width - 1, height, widget->radius, widget->corners);
 
@@ -433,7 +433,7 @@ clearlooks_inverted_draw_tab (cairo_t *cr,
 	CairoColor           shadow;
 
 	cairo_pattern_t     *pattern;
-	
+
 	double               radius;
 	double               strip_size;
 
@@ -444,7 +444,7 @@ clearlooks_inverted_draw_tab (cairo_t *cr,
 	cairo_clip           (cr);
 	cairo_new_path       (cr);
 
-	/* Translate and set line width */	
+	/* Translate and set line width */
 	cairo_set_line_width (cr, 1.0);
 	cairo_translate      (cr, x+0.5, y+0.5);
 
@@ -455,7 +455,7 @@ clearlooks_inverted_draw_tab (cairo_t *cr,
 	{
 		height += 3.0;
 	 	strip_size = 2.0/height; /* 2 pixel high strip */
-		
+
 		if (tab->gap_side == CL_GAP_TOP)
 			cairo_translate (cr, 0.0, -3.0); /* gap at the other side */
 	}
@@ -463,18 +463,18 @@ clearlooks_inverted_draw_tab (cairo_t *cr,
 	{
 		width += 3.0;
 	 	strip_size = 2.0/width;
-		
+
 		if (tab->gap_side == CL_GAP_LEFT)
 			cairo_translate (cr, -3.0, 0.0); /* gap at the other side */
 	}
-	
+
 	/* Set the fill color */
 	fill = &colors->bg[params->state_type];
 
 	/* Set tab shape */
 	ge_cairo_rounded_rectangle (cr, 0, 0, width-1, height-1,
 	                            radius, params->corners);
-	
+
 	/* Draw fill */
 	ge_cairo_set_color (cr, fill);
 	cairo_fill   (cr);
@@ -489,7 +489,7 @@ clearlooks_inverted_draw_tab (cairo_t *cr,
 		                                        tab->gap_side == CL_GAP_BOTTOM ? height   : 0 );
 
 		ge_cairo_rounded_rectangle (cr, 0, 0, width-1, height-1, radius, params->corners);
-		
+
 		ge_shade_color (fill, 0.92, &shadow);
 
 		cairo_pattern_add_color_stop_rgba  (pattern, 0.0,  				hilight.r, hilight.g, hilight.b, 0.4);
@@ -507,9 +507,9 @@ clearlooks_inverted_draw_tab (cairo_t *cr,
 		                                        tab->gap_side == CL_GAP_TOP    ? height-2 : 0,
 		                                        tab->gap_side == CL_GAP_RIGHT  ? width    : 0,
 		                                        tab->gap_side == CL_GAP_BOTTOM ? height   : 0 );
-	
+
 		ge_cairo_rounded_rectangle (cr, 0, 0, width-1, height-1, radius, params->corners);
-		
+
 
 		cairo_pattern_add_color_stop_rgb  (pattern, 0.0,        stripe_fill->r, stripe_fill->g, stripe_fill->b);
 		cairo_pattern_add_color_stop_rgb  (pattern, strip_size, stripe_fill->r, stripe_fill->g, stripe_fill->b);
@@ -521,10 +521,10 @@ clearlooks_inverted_draw_tab (cairo_t *cr,
 	}
 
 	ge_cairo_rounded_rectangle (cr, 0, 0, width-1, height-1, radius, params->corners);
-	
+
 	if (params->active)
 	{
-		ge_cairo_set_color (cr, border2);	
+		ge_cairo_set_color (cr, border2);
 		cairo_stroke (cr);
 	}
 	else
@@ -533,7 +533,7 @@ clearlooks_inverted_draw_tab (cairo_t *cr,
 		                                        tab->gap_side == CL_GAP_TOP    ? height-2 : 2,
 		                                        tab->gap_side == CL_GAP_RIGHT  ? width    : 2,
 		                                        tab->gap_side == CL_GAP_BOTTOM ? height   : 2 );
-		
+
 		cairo_pattern_add_color_stop_rgb (pattern, 0.0,        stripe_border->r, stripe_border->g, stripe_border->b);
 		cairo_pattern_add_color_stop_rgb (pattern, strip_size, stripe_border->r, stripe_border->g, stripe_border->b);
 		cairo_pattern_add_color_stop_rgb (pattern, strip_size, border1->r,       border1->g,       border1->b);
@@ -557,7 +557,7 @@ clearlooks_inverted_draw_slider (cairo_t *cr,
 
 	cairo_pattern_t *pattern;
 
-	cairo_set_line_width (cr, 1.0);	
+	cairo_set_line_width (cr, 1.0);
 	cairo_translate      (cr, x, y);
 
 	if (params->disabled)
@@ -634,10 +634,10 @@ clearlooks_inverted_draw_slider (cairo_t *cr,
 	{
 		cairo_move_to (cr, 6, 0.5);
 		cairo_line_to (cr, 6, height-1);
-	
+
 		cairo_move_to (cr, width-7, 0.5);
 		cairo_line_to (cr, width-7, height-1);
-	
+
 		cairo_set_line_width (cr, 1.0);
 		cairo_set_source_rgba (cr, border->r,
 		                           border->g,
@@ -656,7 +656,7 @@ clearlooks_inverted_draw_slider_button (cairo_t *cr,
 {
 	double radius = MIN (params->radius, MIN ((width - 2.0) / 2.0, (height - 2.0) / 2.0));
 	cairo_set_line_width (cr, 1.0);
-	
+
 	if (!slider->horizontal)
 		ge_cairo_exchange_axis (cr, &x, &y, &width, &height);
 	cairo_translate (cr, x+0.5, y+0.5);
@@ -683,12 +683,12 @@ clearlooks_inverted_draw_list_view_header (cairo_t *cr,
 	CairoColor shadow;
 
 	ge_shade_color (border, 1.5, &hilight);
-	ge_shade_color (fill, 1.05, &hilight_header);	
-	ge_shade_color (fill, 0.95, &shadow);	
+	ge_shade_color (fill, 1.05, &hilight_header);
+	ge_shade_color (fill, 0.95, &shadow);
 
 	cairo_translate (cr, x, y);
 	cairo_set_line_width (cr, 1.0);
-	
+
 	/* Draw highlight */
 	if (header->order == CL_ORDER_FIRST)
 	{
@@ -697,19 +697,19 @@ clearlooks_inverted_draw_list_view_header (cairo_t *cr,
 	}
 	else
 		cairo_move_to (cr, 0.0, 0.5);
-	
+
 	cairo_line_to (cr, width, 0.5);
-	
+
 	ge_cairo_set_color (cr, &hilight);
 	cairo_stroke (cr);
-	
+
 	/* Draw bottom border */
 	cairo_move_to (cr, 0.0, height-0.5);
 	cairo_line_to (cr, width, height-0.5);
 	ge_cairo_set_color (cr, border);
 	cairo_stroke (cr);
 
-	/* Draw bottom shade */	
+	/* Draw bottom shade */
 	pattern = cairo_pattern_create_linear (0.0, 0, 0.0, height-1.0);
 	cairo_pattern_add_color_stop_rgb     (pattern, 0.0, shadow.r, shadow.g, shadow.b);
 	cairo_pattern_add_color_stop_rgb     (pattern, 1.0, hilight_header.r, hilight_header.g, hilight_header.b);
@@ -718,14 +718,14 @@ clearlooks_inverted_draw_list_view_header (cairo_t *cr,
 	cairo_set_source      (cr, pattern);
 	cairo_fill            (cr);
 	cairo_pattern_destroy (pattern);
-	
+
 	/* Draw resize grip */
 	if ((params->ltr && header->order != CL_ORDER_LAST) ||
 	    (!params->ltr && header->order != CL_ORDER_FIRST) || header->resizable)
 	{
 		SeparatorParameters separator;
 		separator.horizontal = FALSE;
-		
+
 		if (params->ltr)
 			params->style_functions->draw_separator (cr, colors, params, &separator,
 			                                         width-1.5, 4.0, 2, height-8.0);
@@ -749,7 +749,7 @@ clearlooks_inverted_draw_scrollbar_stepper (cairo_t *cr,
 	CairoColor s1, s2, s3;
 	cairo_pattern_t *pattern;
 	double radius = MIN (widget->radius, MIN ((width - 2.0) / 2.0, (height - 2.0) / 2.0));
-	
+
 	ge_shade_color(&colors->shade[6], 1.05, &border);
 
 	if (scrollbar->horizontal)
@@ -766,21 +766,21 @@ clearlooks_inverted_draw_scrollbar_stepper (cairo_t *cr,
 		else if (stepper->stepper == CL_STEPPER_D)
 			corners = CR_CORNER_BOTTOMLEFT | CR_CORNER_BOTTOMRIGHT;
 	}
-	
+
 	cairo_translate (cr, x, y);
 	cairo_set_line_width (cr, 1);
-	
+
 	ge_cairo_rounded_rectangle (cr, 1, 1, width-2, height-2, radius, corners);
-	
+
 	if (scrollbar->horizontal)
 		pattern = cairo_pattern_create_linear (0, 0, 0, height);
 	else
 		pattern = cairo_pattern_create_linear (0, 0, width, 0);
-				
+
 	s1 = colors->bg[widget->state_type];
 	ge_shade_color(&s1, 0.95, &s2);
 	ge_shade_color(&s1, 1.05, &s3);
-	
+
 	cairo_pattern_add_color_stop_rgb(pattern, 0,    s2.r, s2.g, s2.b);
 	cairo_pattern_add_color_stop_rgb(pattern, 1.0,  s3.r, s3.g, s3.b);
 	cairo_set_source (cr, pattern);
@@ -789,10 +789,10 @@ clearlooks_inverted_draw_scrollbar_stepper (cairo_t *cr,
 
 	clearlooks_draw_top_left_highlight (cr, &s1, widget, width, height, radius);
 
-	ge_cairo_rounded_rectangle (cr, 0.5, 0.5, width-1, height-1, radius, corners);	
+	ge_cairo_rounded_rectangle (cr, 0.5, 0.5, width-1, height-1, radius, corners);
 	clearlooks_set_border_gradient (cr, &border, 1.2, (scrollbar->horizontal ? 0 : width), (scrollbar->horizontal ? height: 0));
 	cairo_stroke (cr);
-	
+
 	cairo_translate (cr, 0.5, 0.5);
 }
 
@@ -823,11 +823,11 @@ clearlooks_inverted_draw_scrollbar_slider (cairo_t *cr,
 		else
 			height += 1;
 	}
-	
+
 	if (!scrollbar->horizontal)
 		ge_cairo_exchange_axis (cr, &x, &y, &width, &height);
 
-	cairo_translate (cr, x, y);	
+	cairo_translate (cr, x, y);
 
 	if (scrollbar->has_color)
 	{
@@ -836,30 +836,30 @@ clearlooks_inverted_draw_scrollbar_slider (cairo_t *cr,
 		CairoColor  hilight;
 		CairoColor  shade1, shade2, shade3;
 		cairo_pattern_t *pattern;
-				
+
 		if (widget->prelight)
 			ge_shade_color (&fill, 1.1, &fill);
-			
+
 		cairo_set_line_width (cr, 1);
-		
+
 		ge_shade_color (&fill, 1.3, &hilight);
 		ge_shade_color (&fill, 1.1, &shade1);
 		ge_shade_color (&fill, 1.05, &shade2);
 		ge_shade_color (&fill, 0.98, &shade3);
-		
+
 		pattern = cairo_pattern_create_linear (1, 1, 1, height-2);
 		cairo_pattern_add_color_stop_rgb (pattern, 0,    fill.r,  fill.g,  fill.b);
 		cairo_pattern_add_color_stop_rgb (pattern, 0.5,  shade3.r, shade3.g, shade3.b);
-		cairo_pattern_add_color_stop_rgb (pattern, 0.5,  shade2.r, shade2.g, shade2.b);	
+		cairo_pattern_add_color_stop_rgb (pattern, 0.5,  shade2.r, shade2.g, shade2.b);
 		cairo_pattern_add_color_stop_rgb (pattern, 1.0,  shade1.r, shade1.g, shade1.b);
 		cairo_rectangle (cr, 1, 1, width-2, height-2);
 		cairo_set_source (cr, pattern);
 		cairo_fill (cr);
 		cairo_pattern_destroy (pattern);
-		
+
 		cairo_set_source_rgba (cr, hilight.r, hilight.g, hilight.b, 0.5);
 		ge_cairo_stroke_rectangle (cr, 1.5, 1.5, width-3, height-3);
-	
+
 		ge_cairo_set_color (cr, border);
 		ge_cairo_stroke_rectangle (cr, 0.5, 0.5, width-1, height-1);
 	}
@@ -869,9 +869,9 @@ clearlooks_inverted_draw_scrollbar_slider (cairo_t *cr,
 		CairoColor s1, s2, s3;
 		cairo_pattern_t *pattern;
 		int bar_x, i;
-		
+
 		const CairoColor *dark  = &colors->shade[4];
-		const CairoColor *light = &colors->shade[0];		
+		const CairoColor *light = &colors->shade[0];
 
 		ge_shade_color(&colors->shade[6], 1.05, &border);
 
@@ -888,15 +888,15 @@ clearlooks_inverted_draw_scrollbar_slider (cairo_t *cr,
 		cairo_set_source(cr, pattern);
 		cairo_fill(cr);
 		cairo_pattern_destroy(pattern);
-		
+
 		clearlooks_draw_top_left_highlight (cr, &s2, widget, width, height, 0);
 
 		clearlooks_set_border_gradient (cr, &border, 1.2, 0, height);
 		ge_cairo_stroke_rectangle (cr, 0.5, 0.5, width-1, height-1);
-		
+
 		/* draw handles */
 		cairo_set_line_width (cr, 1);
-		
+
 		bar_x = width/2 - 4;
 		cairo_translate(cr, 0.5, 0.5);
 		for (i=0; i<3; i++)
@@ -905,12 +905,12 @@ clearlooks_inverted_draw_scrollbar_slider (cairo_t *cr,
 			cairo_line_to (cr, bar_x, height-5);
 			ge_cairo_set_color (cr, dark);
 			cairo_stroke (cr);
-			
+
 			cairo_move_to (cr, bar_x+1, 4);
 			cairo_line_to (cr, bar_x+1, height-5);
 			ge_cairo_set_color (cr, light);
 			cairo_stroke (cr);
-			
+
 			bar_x += 3;
 		}
 	}
@@ -927,7 +927,7 @@ clearlooks_inverted_draw_selected_cell (cairo_t                  *cr,
 	CairoColor border;
 	cairo_pattern_t *pattern;
 	cairo_save (cr);
-	
+
 	cairo_translate (cr, x, y);
 
 	if (params->focus)
@@ -951,7 +951,7 @@ clearlooks_inverted_draw_selected_cell (cairo_t                  *cr,
 	cairo_fill       (cr);
 	cairo_pattern_destroy (pattern);
 
-	ge_shade_color(&upper_color, 0.8, &border);	
+	ge_shade_color(&upper_color, 0.8, &border);
 
 	cairo_move_to  (cr, 0, 0.5);
 	cairo_rel_line_to (cr, width, 0);
@@ -975,7 +975,7 @@ clearlooks_register_style_inverted (ClearlooksStyleFunctions *functions)
 	functions->draw_menubaritem       = clearlooks_inverted_draw_menubaritem;
 	functions->draw_tab               = clearlooks_inverted_draw_tab;
 	functions->draw_list_view_header  = clearlooks_inverted_draw_list_view_header;
-	functions->draw_scrollbar_stepper = clearlooks_inverted_draw_scrollbar_stepper;	
+	functions->draw_scrollbar_stepper = clearlooks_inverted_draw_scrollbar_stepper;
 	functions->draw_scrollbar_slider  = clearlooks_inverted_draw_scrollbar_slider;
 	functions->draw_selected_cell     = clearlooks_inverted_draw_selected_cell;
 }

@@ -41,7 +41,7 @@ Pixbuf::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) co
 	Gdk::Cairo::set_source_pixbuf (context, _pixbuf, 0, 0);
 	context->paint ();
 }
-	
+
 void
 Pixbuf::compute_bounding_box () const
 {
@@ -58,7 +58,7 @@ void
 Pixbuf::set (Glib::RefPtr<Gdk::Pixbuf> pixbuf)
 {
 	begin_change ();
-	
+
 	_pixbuf = pixbuf;
 	_bounding_box_dirty = true;
 

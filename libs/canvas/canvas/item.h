@@ -36,7 +36,7 @@
 
 namespace ArdourCanvas
 {
-struct Rect;	
+struct Rect;
 
 class Canvas;
 class ScrollGroup;
@@ -51,7 +51,7 @@ class ScrollGroup;
  *  Any item that is being displayed on a canvas has a pointer to that canvas,
  *  and all except the `root group' have a pointer to their parent group.
  */
-	
+
 class LIBCANVAS_API Item : public Fill, public Outline
 {
 public:
@@ -97,7 +97,7 @@ public:
 
 	void grab ();
 	void ungrab ();
-	
+
 	void unparent ();
 	void reparent (Item *);
 
@@ -176,7 +176,7 @@ public:
 	}
 
 	bool visible () const;
-	
+
 	/** @return Our canvas, or 0 if we are not attached to one */
 	Canvas* canvas () const {
 		return _canvas;
@@ -204,7 +204,7 @@ public:
 
 	static int default_items_per_cell;
 
-	
+
 	/* This is a sigc++ signal because it is solely
 	   concerned with GUI stuff and is thus single-threaded
 	*/
@@ -223,23 +223,23 @@ public:
 			return false;
 		}
 	};
-	
+
         sigc::signal1<bool, GdkEvent*, EventAccumulator<bool> > Event;
 
 #ifdef CANVAS_DEBUG
 	std::string name;
 #endif
-	
+
 #ifdef CANVAS_COMPATIBILITY
 	void grab_focus ();
-#endif	
+#endif
 
 	const std::string& tooltip () const { return _tooltip; }
 	void set_tooltip (const std::string&);
 
 	void start_tooltip_timeout ();
 	void stop_tooltip_timeout ();
-	
+
         virtual void dump (std::ostream&) const;
         std::string whatami() const;
 

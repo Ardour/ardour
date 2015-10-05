@@ -47,7 +47,7 @@ public:
 	virtual ~FileSource ();
 
 	const std::string& path() const { return _path; }
-	
+
 	virtual bool safe_file_extension (const std::string& path) const = 0;
 
 	int  move_to_trash (const std::string& trash_dir_name);
@@ -79,7 +79,7 @@ public:
 	const std::string& origin() const { return _origin; }
 
 	virtual void set_path (const std::string&);
-	
+
 	static PBD::Signal2<int,std::string,std::vector<std::string> > AmbiguousFileName;
 
 	void existence_check ();

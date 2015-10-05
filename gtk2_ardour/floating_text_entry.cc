@@ -34,7 +34,7 @@ FloatingTextEntry::FloatingTextEntry (const std::string& initial_contents)
 	set_name (X_("FloatingTextEntry"));
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_border_width (0);
-	
+
 	if (!initial_contents.empty()) {
 		entry.set_text (initial_contents);
 	}

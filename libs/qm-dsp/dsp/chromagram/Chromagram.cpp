@@ -27,14 +27,14 @@ Chromagram::Chromagram( ChromaConfig Config ) :
 }
 
 int Chromagram::initialise( ChromaConfig Config )
-{	
+{
     m_FMin = Config.min;		// min freq
     m_FMax = Config.max;		// max freq
     m_BPO  = Config.BPO;		// bins per octave
     m_normalise = Config.normalise;     // if frame normalisation is required
 
     // No. of constant Q bins
-    m_uK = ( unsigned int ) ceil( m_BPO * log(m_FMax/m_FMin)/log(2.0));	
+    m_uK = ( unsigned int ) ceil( m_BPO * log(m_FMax/m_FMin)/log(2.0));
 
     // Create array for chroma result
     m_chromadata = new double[ m_BPO ];
@@ -49,7 +49,7 @@ int Chromagram::initialise( ChromaConfig Config )
     ConstantQConfig.max = m_FMax;
     ConstantQConfig.BPO = m_BPO;
     ConstantQConfig.CQThresh = Config.CQThresh;
-	
+
     // Initialise ConstantQ operator
     m_ConstantQ = new ConstantQ( ConstantQConfig );
 
@@ -57,7 +57,7 @@ int Chromagram::initialise( ChromaConfig Config )
     m_frameSize = m_ConstantQ->getfftlength();
     m_hopSize = m_ConstantQ->gethop();
 
-    // Initialise FFT object	
+    // Initialise FFT object
     m_FFT = new FFTReal(m_frameSize);
 
     m_FFTRe = new double[ m_frameSize ];
@@ -161,7 +161,7 @@ double* Chromagram::process( const double *real, const double *imag )
 
     // Calculate ConstantQ frame
     m_ConstantQ->process( real, imag, m_CQRe, m_CQIm );
-	
+
     // add each octave of cq data into Chromagram
     const unsigned octaves = (int)floor(double( m_uK/m_BPO))-1;
     for (unsigned octave = 0; octave <= octaves; octave++)

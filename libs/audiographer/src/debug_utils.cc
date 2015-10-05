@@ -30,7 +30,7 @@ std::string
 DebugUtils::process_context_flag_name (FlagField::Flag flag)
 {
 	std::ostringstream ret;
-	
+
 	switch (flag) {
 		case ProcessContext<>::EndOfInput:
 			ret << "EndOfInput";
@@ -39,7 +39,7 @@ DebugUtils::process_context_flag_name (FlagField::Flag flag)
 			ret << flag;
 			break;
 	}
-	
+
 	return ret.str();
 }
 

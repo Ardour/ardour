@@ -28,7 +28,7 @@
 
 namespace ArdourCanvas
 {
-	
+
 class LIBCANVAS_API Ruler : public Rectangle
 {
 public:
@@ -42,7 +42,7 @@ public:
 		double position;
 		Style  style;
 	};
-	
+
 	struct Metric {
 		Metric () : units_per_pixel (0) {}
 		virtual ~Metric() {}
@@ -51,15 +51,15 @@ public:
 
 		/* lower and upper and sample positions, which are also canvas coordinates
 		 */
-		
+
 		virtual void get_marks (std::vector<Mark>&, double lower, double upper, int maxchars) const = 0;
 	};
-	
+
 	Ruler (Canvas*, const Metric& m);
 	Ruler (Canvas*, const Metric& m, Rect const&);
 	Ruler (Item*, const Metric& m);
 	Ruler (Item*, const Metric& m, Rect const&);
-	
+
 	void set_range (double lower, double upper);
 	void set_font_description (Pango::FontDescription);
 	void set_metric (const Metric&);

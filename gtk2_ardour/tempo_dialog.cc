@@ -105,7 +105,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	if (x == note_types.end()) {
 		pulse_selector.set_active_text (strings[3]); // "quarter"
 	}
-	
+
 	Table* table;
 
 	if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
@@ -249,7 +249,7 @@ double
 TempoDialog::get_note_type ()
 {
 	NoteTypes::iterator x = note_types.find (pulse_selector.get_active_text());
-	
+
 	if (x == note_types.end()) {
 		error << string_compose(_("incomprehensible pulse note type (%1)"), pulse_selector.get_active_text()) << endmsg;
 		return 0;
@@ -367,7 +367,7 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 			break;
 		}
 	}
-	
+
 	if (x == note_types.end()) {
 		note_type.set_active_text (strings[3]); // "quarter"
 	}
@@ -498,7 +498,7 @@ double
 MeterDialog::get_note_type ()
 {
 	NoteTypes::iterator x = note_types.find (note_type.get_active_text());
-	
+
 	if (x == note_types.end()) {
 		error << string_compose(_("incomprehensible meter note type (%1)"), note_type.get_active_text()) << endmsg;
 		return 0;

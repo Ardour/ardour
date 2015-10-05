@@ -122,7 +122,7 @@ PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, 
                         Sample* out = outbuf.data();
 
                         _mtdm->process (nframes, in, out);
-			
+
                         outbuf.set_written (true);
                 }
 

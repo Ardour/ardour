@@ -53,7 +53,7 @@ void UMicrosecondsAccumulator::Start()
 void UMicrosecondsAccumulator::Stop()
 {
 	UMicroseconds stop_time;
-	
+
 	m_accumulator += stop_time.GetNativeTime() - m_start_time.GetNativeTime();
 }
 
@@ -73,5 +73,5 @@ UMicrosecondsAccumulator& UMicrosecondsAccumulator::operator+=(const UMicrosecon
 	m_accumulator += inaccum_to_add.GetAccumulatedTime();
 	return *this;
 }
-	
+
 } // namespace wvNS {

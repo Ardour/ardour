@@ -29,7 +29,7 @@ class XMLNode;
 
 namespace PBD {
 
-/** A list of properties, mapped using their ID */	
+/** A list of properties, mapped using their ID */
 class LIBPBD_API PropertyList : public std::map<PropertyID, PropertyBase*>
 {
 public:

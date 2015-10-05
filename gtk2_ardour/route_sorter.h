@@ -38,7 +38,7 @@ struct RoutePlusOrderKey {
 	    , old_display_order (ok)
 	    , new_display_order (nk) {}
 };
-	
+
 typedef std::vector<RoutePlusOrderKey> OrderKeySortedRoutes;
 
 struct SortByNewDisplayOrder {

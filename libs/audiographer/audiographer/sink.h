@@ -17,13 +17,13 @@ template <typename T>
 class /*LIBAUDIOGRAPHER_API*/ Sink  {
   public:
 	virtual ~Sink () {}
-	
+
 	/** Process given data.
 	  * The data can not be modified, so in-place processing is not allowed.
 	  * At least this function must be implemented by deriving classes
 	  */
 	virtual void process (ProcessContext<T> const & context) = 0;
-	
+
 	/** Process given data
 	  * Data may be modified, so in place processing is allowed.
 	  * The default implementation calls the non-modifying version,

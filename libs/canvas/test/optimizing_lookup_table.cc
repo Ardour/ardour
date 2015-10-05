@@ -23,7 +23,7 @@ OptimizingLookupTableTest::build_1 ()
 	Rectangle d (canvas.root(), Rect (33, 33, 64, 64));
 	d.set_outline_width (0);
 	OptimizingLookupTable table (*canvas.root(), 1);
-	
+
 	CPPUNIT_ASSERT (table._items_per_cell == 1);
 	CPPUNIT_ASSERT (table._cell_size.x == 32);
 	CPPUNIT_ASSERT (table._cell_size.y == 32);
@@ -65,10 +65,10 @@ OptimizingLookupTableTest::get_small ()
 	Rectangle d (canvas.root(), Rect (33, 33, 64, 64));
 	d.set_outline_width (0);
 	OptimizingLookupTable table (*canvas.root(), 1);
-	
+
 	vector<Item*> items = table.get (Rect (16, 16, 48, 48));
 	CPPUNIT_ASSERT (items.size() == 4);
-	
+
 	items = table.get (Rect (32, 32, 33, 33));
 	CPPUNIT_ASSERT (items.size() == 1);
 }
@@ -80,7 +80,7 @@ OptimizingLookupTableTest::get_big ()
 
 	double const s = 8;
 	int const N = 1024;
-	
+
 	for (int x = 0; x < N; ++x) {
 		for (int y = 0; y < N; ++y) {
 			Rectangle* r = new Rectangle (canvas.root());

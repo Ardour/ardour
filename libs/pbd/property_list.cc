@@ -27,7 +27,7 @@ using namespace PBD;
 PropertyList::PropertyList()
         : _property_owner (true)
 {
-	
+
 }
 
 PropertyList::PropertyList (PropertyList const & other)

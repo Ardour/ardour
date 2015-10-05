@@ -256,7 +256,7 @@ MachineControl::is_mmc (MIDI::byte *sysex_buf, size_t len)
 	    sysex_buf[3] != 0x7) { /* MMC Response */
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -465,7 +465,7 @@ MachineControl::process_mmc_message (Parser &, MIDI::byte *msg, size_t len)
 		len -= skiplen;
 
 	} while (len > 1); /* skip terminating EOX byte */
-}		
+}
 
 int
 MachineControl::do_masked_write (MIDI::byte *msg, size_t len)
@@ -473,7 +473,7 @@ MachineControl::do_masked_write (MIDI::byte *msg, size_t len)
 	/* return the number of bytes "consumed" */
 
 	int retval = msg[1] + 2; /* bytes following + 2 */
-	
+
 	switch (msg[2]) {
 	case 0x4f:  /* Track Record Ready Status */
 		write_track_status (&msg[3], len - 3, msg[2]);
@@ -508,7 +508,7 @@ MachineControl::write_track_status (MIDI::byte *msg, size_t /*len*/, MIDI::byte 
 	   bit 4: aux track b
 
 	   the format of the message (its an MMC Masked Write) is:
-	
+
 	   0x41      Command Code
 	   <count>   byte count of following data
 	   <name>    byte value of the field being written
@@ -516,7 +516,7 @@ MachineControl::write_track_status (MIDI::byte *msg, size_t /*len*/, MIDI::byte 
 	   bitmap being written to
 	   <mask>    ones in the mask indicate which bits will be changed
 	   <data>    new data for the byte being written
-	
+
 	   by the time this code is executing, msg[0] is the
 	   byte number of the target byte. if its zero, we
 	   are writing to a special byte in the standard
@@ -524,20 +524,20 @@ MachineControl::write_track_status (MIDI::byte *msg, size_t /*len*/, MIDI::byte 
 	   special. hence the bits for tracks 1 + 2 are bits
 	   5 and 6 of the first byte of the track
 	   bitmap. so:
-	
+
 	   change track 1:  msg[0] = 0;       << first byte of track bitmap
 	                    msg[1] = 0100000; << binary: bit 5 set
-	
+
 	   change track 2:  msg[0] = 0;       << first byte of track bitmap
 	                    msg[1] = 1000000; << binary: bit 6 set
-	
+
 	   change track 3:  msg[0] = 1;       << second byte of track bitmap
 	                    msg[1] = 0000001; << binary: bit 0 set
-	
+
 	   the (msg[0] * 8) - 6 computation is an attempt to
 	   extract the value of the first track: ie. the one
 	   that would be indicated by bit 0 being set.
-		
+
            so, if msg[0] = 0, msg[1] = 0100000 (binary),
 	   what happens is that base_track = -5, but by the
 	   time we check the correct bit, n = 5, and so the
@@ -565,13 +565,13 @@ MachineControl::write_track_status (MIDI::byte *msg, size_t /*len*/, MIDI::byte 
 			*/
 
 			bool val = (msg[2] & (1<<n));
-			
+
 			switch (reg) {
 			case 0x4f:
 				trackRecordStatus[base_track+n] = val;
 				TrackRecordStatusChange (*this, base_track+n, val);
 				break;
-				
+
 			case 0x62:
 				trackMute[base_track+n] = val;
 				TrackMuteChange (*this, base_track+n, val);
@@ -627,7 +627,7 @@ MachineControl::do_shuttle (MIDI::byte *msg, size_t /*msglen*/)
 	} else {
 		forward = true;
 	}
-	
+
 	left_shift = (sh & 0x38);
 
 	integral = ((sh & 0x7) << left_shift) | (sm >> (7 - left_shift));

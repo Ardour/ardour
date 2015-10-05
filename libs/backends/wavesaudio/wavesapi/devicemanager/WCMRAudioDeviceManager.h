@@ -166,24 +166,24 @@ public:
 
 	virtual bool Active();///<Active status - mainly significant for ASIO, as certain ops can only be performed on active devices!
 	virtual WTErr SetActive (bool newState);///<Prepare/Activate device.
-	
+
 	virtual bool Streaming();///<Streaming Status?
 	virtual WTErr SetStreaming (bool newState);///<Start/Stop Streaming - should reconnect connections when streaming starts!
 
 	virtual WTErr ResetDevice ();
 
     virtual bool IsProcessActive();
-	
+
 	virtual WTErr DoIdle();///<Do Idle Processing
-	
+
 	virtual const std::vector<float>& InputLevels();///<Retrieve Input Levels (for VU display)?
-	
+
 	virtual const std::vector<float>& OutputLevels();///<Retrieve Output Levels (for VU display)?
 
 	void GetMonitorInfo (int *pLeftChannel = NULL, int *pRightChannel = NULL, float *pGain = NULL);///<Retrieve current monitor channel pair and gain - optional, will not be available with AG
 	virtual WTErr SetMonitorChannels (int leftChannel, int rightChannel);///<Set monitor channels. - optional, will not be available with AG
 	virtual WTErr SetMonitorGain (float newGain);///<Set monitor gain. - optional, will not be available with AG
-	
+
 	virtual WTErr ShowConfigPanel (void *pParam);///< Show Control Panel - in case of ASIO this will work only with Active device!
 	virtual WTErr SendCustomCommand (int customCommand, void *pCommandParam); ///< Send a custom command to the audiodevice...
 
@@ -193,13 +193,13 @@ public:
 
 protected:
 	WCMRAudioDeviceManager *m_pMyManager; ///< The manager who's managing this device, can be used for sending notifications!
-	
+
 	std::string m_DeviceName; ///< Name of the device.
 	std::vector<std::string> m_InputChannels; ///< List of input channel names.
 	std::vector<std::string> m_OutputChannels; ///< List of output channel names.
 	std::vector<int> m_SamplingRates; ///< List of available sampling rates.
 	std::vector<int> m_BufferSizes; ///< List of available buffer sizes.
-	
+
 	int m_CurrentSamplingRate; ///< Currently selected sampling rate.
 	int m_CurrentBufferSize; ///< Currently selected buffer size.
 
@@ -208,7 +208,7 @@ protected:
 	bool m_IsStreaming; ///< Flag for streaming status.
 	std::vector<float> m_InputLevels; ///< List of input levels.
 	std::vector<float> m_OutputLevels; ///< List of output levels.
-	
+
 	int m_LeftMonitorChannel; ///< The device channel to use for monitoring left channel data.
 	int m_RightMonitorChannel; ///< The device channel to use for monitoring right channel data.
 	float m_MonitorGain; ///< Amount of gain to apply for monitoring signal.
@@ -251,7 +251,7 @@ protected:
 
     mutable wvNS::wvThread::ThreadMutex         m_AudioDeviceInfoVecMutex; // mutex to lock device info list
 	DeviceInfoVec                               m_DeviceInfoVec;
-	
+
     eAudioDeviceFilter                          m_eAudioDeviceFilter;
 	WCMRAudioDevice*                            m_CurrentDevice;
 

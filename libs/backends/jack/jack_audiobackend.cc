@@ -126,7 +126,7 @@ JACKAudioBackend::enumerate_devices () const
 	if (all_devices.find (_target_driver) == all_devices.end()) {
 		all_devices.insert (make_pair (_target_driver, std::set<string>()));
 	}
-	
+
 	/* store every device we've found, by driver name.
 	 *
 	 * This is so we do not confuse ALSA, FFADO, netjack etc. devices
@@ -138,7 +138,7 @@ JACKAudioBackend::enumerate_devices () const
 	for (vector<string>::const_iterator d = currently_available.begin(); d != currently_available.end(); ++d) {
 		all.insert (*d);
 	}
-	
+
 	for (DeviceList::const_iterator d = all.begin(); d != all.end(); ++d) {
 		if (find (currently_available.begin(), currently_available.end(), *d) == currently_available.end()) {
 			statuses.push_back (DeviceStatus (*d, false));
@@ -146,7 +146,7 @@ JACKAudioBackend::enumerate_devices () const
 			statuses.push_back (DeviceStatus (*d, false));
 		}
 	}
-	
+
 	return statuses;
 }
 
@@ -154,7 +154,7 @@ vector<float>
 JACKAudioBackend::available_sample_rates (const string& device) const
 {
 	vector<float> f;
-	
+
 	if (device == _target_device && available()) {
 		f.push_back (sample_rate());
 		return f;
@@ -174,7 +174,7 @@ JACKAudioBackend::available_sample_rates (const string& device) const
 	f.push_back (96000.0);
 	f.push_back (192000.0);
 	f.push_back (384000.0);
-	
+
 	return f;
 }
 
@@ -182,7 +182,7 @@ vector<uint32_t>
 JACKAudioBackend::available_buffer_sizes (const string& device) const
 {
 	vector<uint32_t> s;
-		
+
 	if (device == _target_device && available()) {
 		s.push_back (buffer_size());
 		return s;
@@ -286,7 +286,7 @@ JACKAudioBackend::set_input_channels (uint32_t cnt)
 	}
 
 	_target_input_channels = cnt;
-	
+
 	return 0;
 }
 
@@ -473,7 +473,7 @@ JACKAudioBackend::setup_jack_startup_command (bool for_latency_measurement)
 	}
 	options.realtime = true;
 	options.ports_max = 2048;
-	
+
 	ARDOUR::set_midi_option (options, _target_midi_option);
 
 	/* this must always be true for any server instance we start ourselves
@@ -514,14 +514,14 @@ JACKAudioBackend::_start (bool for_latency_measurement)
 			return -1;
 		}
 	}
-	
+
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
 	/* get the buffer size and sample rates established */
 
 	jack_sample_rate_callback (jack_get_sample_rate (_priv_jack));
 	jack_bufsize_callback (jack_get_buffer_size (_priv_jack));
-	
+
 	/* Now that we have buffer size and sample rate established, the engine
 	   can go ahead and do its stuff
 	*/
@@ -534,9 +534,9 @@ JACKAudioBackend::_start (bool for_latency_measurement)
 	if (!jack_port_type_get_buffer_size) {
 		warning << _("This version of JACK is old - you should upgrade to a newer version that supports jack_port_type_get_buffer_size()") << endmsg;
 	}
-	
+
 	set_jack_callbacks ();
-	
+
 	if (jack_activate (_priv_jack) == 0) {
 		_running = true;
 	} else {
@@ -553,7 +553,7 @@ JACKAudioBackend::stop ()
 {
 	_running = false; // no 'engine halted message'.
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
-	
+
 	_jack_connection->close ();
 
 	_current_buffer_size = 0;
@@ -571,7 +571,7 @@ JACKAudioBackend::freewheel (bool onoff)
 
 	if (onoff == _freewheeling) {
 		/* already doing what has been asked for */
-		
+
 		return 0;
 	}
 
@@ -930,7 +930,7 @@ JACKAudioBackend::process_thread ()
                 GET_PRIVATE_JACK_POINTER_RET(_priv_jack,0);
 
                 pframes_t nframes = jack_cycle_wait (_priv_jack);
-		
+
                 if (engine.process_callback (nframes)) {
                         return 0;
                 }
@@ -1050,7 +1050,7 @@ JACKAudioBackend::n_physical (unsigned long flags) const
 				}
 			}
 		}
-		
+
 		jack_free (ports);
 	}
 
@@ -1084,9 +1084,9 @@ JACKAudioBackend::control_app_name () const
 		if (_target_driver.empty() || _target_device.empty()) {
 			return appname;
 		}
-		
+
 		if (_target_driver == "ALSA") {
-			
+
 			if (_target_device == "Hammerfall DSP") {
 				appname = "hdspconf";
 			} else if (_target_device == "M Audio Delta 1010") {

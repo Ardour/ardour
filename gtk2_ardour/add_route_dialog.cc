@@ -323,7 +323,7 @@ void
 AddRouteDialog::refill_track_modes ()
 {
 	vector<string> s;
-	
+
 	s.push_back (_("Normal"));
 
 	if (!ARDOUR::Profile->get_sae ()) {
@@ -392,7 +392,7 @@ AddRouteDialog::channels ()
 		ret.set (DataType::MIDI, 1);
 		break;
 	}
-		
+
 	return ret;
 }
 

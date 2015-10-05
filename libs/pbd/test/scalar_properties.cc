@@ -31,7 +31,7 @@ ScalarPropertiesTest::testBasic ()
 
 	_fred.clear_changes ();
 	CPPUNIT_ASSERT (_fred.changed() == false);
-	
+
 	_fred = 5;
 	CPPUNIT_ASSERT (_fred == 5);
 	CPPUNIT_ASSERT (_fred.changed() == true);

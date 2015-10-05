@@ -378,7 +378,7 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
 	config = new_config;
 	uint32_t const channels = config.channel_config->get_n_chans();
 	max_frames_out = 4086 - (4086 % channels); // TODO good chunk size
-	
+
 	buffer.reset (new AllocatingProcessContext<Sample> (max_frames_out, channels));
 	peak_reader.reset (new PeakReader ());
 	normalizer.reset (new AudioGrapher::Normalizer (config.format->normalize_target()));

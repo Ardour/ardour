@@ -133,12 +133,12 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	if (immediate_redraw) {
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
-		
+
 		compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(),
 					    current_bbt_points_begin, current_bbt_points_end);
 		draw_measures (current_bbt_points_begin, current_bbt_points_end);
 		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end); // redraw rulers and measures
-	
+
 	} else {
 		Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::mem_fun (*this, &Editor::redisplay_tempo), true), false));
 	}

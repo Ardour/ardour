@@ -49,7 +49,7 @@ void clearlooks_clist_get_header_index (GtkCList *clist, GtkWidget *button,
 {
 	int i;
 	*columns = clist->columns;
-	
+
 	for (i=0; i<*columns; i++)
 	{
 		if (clist->column[i].button == button)
@@ -66,22 +66,22 @@ clearlooks_get_parent_bg (const GtkWidget *widget, CairoColor *color)
 	GtkStateType state_type;
 	const GtkWidget *parent;
 	GdkColor *gcolor;
-	
+
 	if (widget == NULL)
 		return;
-	
+
 	parent = widget->parent;
-	
+
 	while (parent && GTK_WIDGET_NO_WINDOW (parent) && !((GTK_IS_NOTEBOOK (parent)) || (GTK_IS_TOOLBAR (parent))))
 		parent = parent->parent;
 
 	if (parent == NULL)
 		return;
-	
+
 	state_type = GTK_WIDGET_STATE (parent);
-	
+
 	gcolor = &parent->style->bg[state_type];
-	
+
 	ge_gdk_color_to_cairo (gcolor, color);
 }
 
@@ -101,12 +101,12 @@ clearlooks_scrollbar_get_stepper (GtkWidget    *widget,
 	check_rectangle.y      = widget->allocation.y;
 	check_rectangle.width  = stepper->width;
 	check_rectangle.height = stepper->height;
-	
+
 	orientation = GTK_RANGE (widget)->orientation;
-	
+
 	if (widget->allocation.x == -1 && widget->allocation.y == -1)
 		return CL_STEPPER_UNKNOWN;
-		
+
 	if (gdk_rectangle_intersect (stepper, &check_rectangle, &tmp))
 		value = CL_STEPPER_A;
 
@@ -116,7 +116,7 @@ clearlooks_scrollbar_get_stepper (GtkWidget    *widget,
 			check_rectangle.x = widget->allocation.x + stepper->width;
 		else
 			check_rectangle.y = widget->allocation.y + stepper->height;
-		
+
 		if (gdk_rectangle_intersect (stepper, &check_rectangle, &tmp))
 			value = CL_STEPPER_B;
 	}
@@ -127,7 +127,7 @@ clearlooks_scrollbar_get_stepper (GtkWidget    *widget,
 			check_rectangle.x = widget->allocation.x + widget->allocation.width - (stepper->width * 2);
 		else
 			check_rectangle.y = widget->allocation.y + widget->allocation.height - (stepper->height * 2);
-		
+
 		if (gdk_rectangle_intersect (stepper, &check_rectangle, &tmp))
 			value = CL_STEPPER_C;
 	}
@@ -138,11 +138,11 @@ clearlooks_scrollbar_get_stepper (GtkWidget    *widget,
 			check_rectangle.x = widget->allocation.x + widget->allocation.width - stepper->width;
 		else
 			check_rectangle.y = widget->allocation.y + widget->allocation.height - stepper->height;
-		
+
 		if (gdk_rectangle_intersect (stepper, &check_rectangle, &tmp))
 			value = CL_STEPPER_D;
 	}
-	
+
 	return value;
 }
 
@@ -150,13 +150,13 @@ ClearlooksStepper
 clearlooks_scrollbar_visible_steppers (GtkWidget *widget)
 {
 	ClearlooksStepper steppers = 0;
-	
+
 	if (!GE_IS_RANGE (widget))
 		return 0;
-	
+
 	if (GTK_RANGE (widget)->has_stepper_a)
 		steppers |= CL_STEPPER_A;
-	
+
 	if (GTK_RANGE (widget)->has_stepper_b)
 		steppers |= CL_STEPPER_B;
 
@@ -171,27 +171,27 @@ clearlooks_scrollbar_visible_steppers (GtkWidget *widget)
 
 ClearlooksJunction
 clearlooks_scrollbar_get_junction (GtkWidget    *widget)
-{	
+{
 	GtkAdjustment *adj;
 	ClearlooksJunction junction = CL_JUNCTION_NONE;
-	
+
 	if (!GE_IS_RANGE (widget))
 		return CL_JUNCTION_NONE;
 
 	adj = GTK_RANGE (widget)->adjustment;
-	
+
 	if (adj->value <= adj->lower &&
 		(GTK_RANGE (widget)->has_stepper_a || GTK_RANGE (widget)->has_stepper_b))
 	{
 		junction |= CL_JUNCTION_BEGIN;
 	}
-	
+
 	if (adj->value >= adj->upper - adj->page_size &&
 		(GTK_RANGE (widget)->has_stepper_c || GTK_RANGE (widget)->has_stepper_d))
 	{
 		junction |= CL_JUNCTION_END;
 	}
-	
+
 	return junction;
 }
 
@@ -245,7 +245,7 @@ clearlooks_get_notebook_tab_position (GtkWidget *widget,
 			GtkWidget *tab_label;
 			gboolean expand;
 			GtkPackType pack_type;
-						
+
 			tab_child = gtk_notebook_get_nth_page (notebook, i);
 
 			/* Skip invisible tabs */

@@ -71,7 +71,7 @@ class LIBPBD_API UndoTransaction : public Command
 	bool                  _clearing;
 
 	friend void command_death (UndoTransaction*, Command *);
-	
+
 	void about_to_explicitly_delete ();
 };
 
@@ -80,14 +80,14 @@ class LIBPBD_API UndoHistory : public PBD::ScopedConnectionList
   public:
 	UndoHistory();
 	~UndoHistory() {}
-	
+
 	void add (UndoTransaction* ut);
 	void undo (unsigned int n);
 	void redo (unsigned int n);
-	
+
 	unsigned long undo_depth() const { return UndoList.size(); }
 	unsigned long redo_depth() const { return RedoList.size(); }
-	
+
 	std::string next_undo() const { return (UndoList.empty() ? std::string() : UndoList.back()->name()); }
 	std::string next_redo() const { return (RedoList.empty() ? std::string() : RedoList.back()->name()); }
 
@@ -111,7 +111,7 @@ class LIBPBD_API UndoHistory : public PBD::ScopedConnectionList
 	PBD::Signal0<void> Changed;
 	PBD::Signal0<void> BeginUndoRedo;
 	PBD::Signal0<void> EndUndoRedo;
-	
+
   private:
 	bool _clearing;
 	uint32_t _depth;

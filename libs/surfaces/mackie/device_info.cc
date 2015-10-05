@@ -377,7 +377,7 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 							}
 						}
 					}
-					
+
 				}
 
 			} else if ((*i)->name() == "StripButton") {
@@ -393,9 +393,9 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 							}
 						}
 					}
-					
+
 				}
-				
+
 			}
 		}
 	}

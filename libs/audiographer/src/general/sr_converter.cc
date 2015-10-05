@@ -49,7 +49,7 @@ void
 SampleRateConverter::init (framecnt_t in_rate, framecnt_t out_rate, int quality)
 {
 	reset();
-	
+
 	if (in_rate == out_rate) {
 		src_data.src_ratio = 1;
 		return;
@@ -76,7 +76,7 @@ framecnt_t
 SampleRateConverter::allocate_buffers (framecnt_t max_frames)
 {
 	if (!active) { return max_frames; }
-	
+
 	framecnt_t max_frames_out = (framecnt_t) ceil (max_frames * src_data.src_ratio);
 	if (data_out_size < max_frames_out) {
 
@@ -93,7 +93,7 @@ SampleRateConverter::allocate_buffers (framecnt_t max_frames)
 		max_frames_in = max_frames;
 		data_out_size = max_frames_out;
 	}
-	
+
 	return max_frames_out;
 }
 
@@ -101,7 +101,7 @@ void
 SampleRateConverter::process (ProcessContext<float> const & c)
 {
 	check_flags (*this, c);
-	
+
 	if (!active) {
 		output (c);
 		return;
@@ -158,7 +158,7 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 				", data_out: " << src_data.data_out <<
 				", output_frames: " << src_data.output_frames << std::endl;
 		}
-		
+
 		err = src_process (src_state, &src_data);
 		if (throw_level (ThrowProcess) && err) {
 			throw Exception (*this, str (format
@@ -193,9 +193,9 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 				("No output frames genereated with %1% leftover frames")
 				% leftover_frames));
 		}
-		
+
 	} while (leftover_frames > frames);
-	
+
 	// src_data.end_of_input has to be checked to prevent infinite recursion
 	if (!src_data.end_of_input && c.has_flag(ProcessContext<float>::EndOfInput)) {
 		set_end_of_input (c);
@@ -205,10 +205,10 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 void SampleRateConverter::set_end_of_input (ProcessContext<float> const & c)
 {
 	src_data.end_of_input = true;
-	
+
 	float f;
 	ProcessContext<float> const dummy (c, &f, 0, channels);
-	
+
 	/* No idea why this has to be done twice for all data to be written,
 	 * but that just seems to be the way it is...
 	 */
@@ -224,17 +224,17 @@ void SampleRateConverter::reset ()
 	active = false;
 	max_frames_in = 0;
 	src_data.end_of_input = false;
-	
+
 	if (src_state) {
 		src_delete (src_state);
 	}
-	
+
 	leftover_frames = 0;
 	max_leftover_frames = 0;
 	if (leftover_data) {
 		free (leftover_data);
 	}
-	
+
 	data_out_size = 0;
 	delete [] data_out;
 	data_out = 0;

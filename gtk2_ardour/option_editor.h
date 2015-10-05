@@ -78,7 +78,7 @@ public:
 
 private:
 	void maybe_add_note (OptionEditorPage *, int);
-	
+
 	std::string _note;
 };
 
@@ -625,7 +625,7 @@ public:
 
 private:
 	void selection_changed ();
-	
+
 	sigc::slot<std::string> _get; ///< slot to get the configuration variable's value
 	sigc::slot<bool, std::string> _set;  ///< slot to set the configuration variable's value
 	Gtk::FileChooserButton _file_chooser;
@@ -654,13 +654,13 @@ public:
 
 	void add_option (std::string const &, OptionEditorComponent *);
 	void add_page (std::string const &, Gtk::Widget& page_widget);
-	
+
 	void set_current_page (std::string const &);
 
 protected:
 
 	virtual void parameter_changed (std::string const &);
-	
+
 	PBD::Configuration* _config;
 
 private:

@@ -576,19 +576,19 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	//add the file chooser
 
 	chooser.set_border_width (12);
-	
+
 	audio_and_midi_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun (*this, &SoundFileBrowser::on_audio_and_midi_filter));
 	audio_and_midi_filter.set_name (_("Audio and MIDI files"));
-	
+
 	audio_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun(*this, &SoundFileBrowser::on_audio_filter));
 	audio_filter.set_name (_("Audio files"));
-	
+
 	midi_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun(*this, &SoundFileBrowser::on_midi_filter));
 	midi_filter.set_name (_("MIDI files"));
-	
+
 	matchall_filter.add_pattern ("*.*");
 	matchall_filter.set_name (_("All files"));
-	
+
 	chooser.add_filter (audio_and_midi_filter);
 	chooser.add_filter (audio_filter);
 	chooser.add_filter (midi_filter);
@@ -601,13 +601,13 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	/* some broken redraw behaviour - this is a bandaid */
 	chooser.signal_selection_changed().connect (mem_fun (chooser, &Widget::queue_draw));
 #endif
-	
+
 	if (!persistent_folder.empty()) {
 		chooser.set_current_folder (persistent_folder);
 	}
 
 	notebook.append_page (chooser, _("Browse Files"));
-	
+
 	hpacker.set_spacing (6);
 	hpacker.pack_start (notebook, true, true);
 	hpacker.pack_start (preview, false, false);
@@ -621,52 +621,52 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 
 	VBox* vbox;
 	HBox* hbox;
-	
-	
+
+
 	hbox = manage(new HBox);
 	hbox->pack_start (found_entry);
 	hbox->pack_start (found_search_btn);
-	
+
 	Gtk::ScrolledWindow *scroll = manage(new ScrolledWindow);
 	scroll->add(found_list_view);
 	scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-	
+
 	vbox = manage(new VBox);
 	vbox->pack_start (*hbox, PACK_SHRINK);
 	vbox->pack_start (*scroll);
-	
+
 	found_list_view.append_column(_("Paths"), found_list_columns.pathname);
-	
+
 	found_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::found_list_view_selected));
-	
+
 	found_list_view.signal_row_activated().connect (sigc::mem_fun (*this, &SoundFileBrowser::found_list_view_activated));
-	
+
 	found_search_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::found_search_clicked));
 	found_entry.signal_activate().connect(sigc::mem_fun(*this, &SoundFileBrowser::found_search_clicked));
-	
+
 	notebook.append_page (*vbox, _("Search Tags"));
 
 	//add freesound search
 
 	HBox* passbox;
 	Label* label;
-	
+
 	passbox = manage(new HBox);
 	passbox->set_spacing (6);
-	
+
 	label = manage (new Label);
 	label->set_text (_("Tags:"));
 	passbox->pack_start (*label, false, false);
 	passbox->pack_start (freesound_entry, true, true);
-	
+
 	label = manage (new Label);
 	label->set_text (_("Sort:"));
 	passbox->pack_start (*label, false, false);
 	passbox->pack_start (freesound_sort, false, false);
 	freesound_sort.clear_items();
-	
+
 	// Order of the following must correspond with enum sortMethod
-	// in sfdb_freesound_mootcher.h	
+	// in sfdb_freesound_mootcher.h
 	freesound_sort.append_text(_("None"));
 	freesound_sort.append_text(_("Longest"));
 	freesound_sort.append_text(_("Shortest"));
@@ -677,7 +677,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	freesound_sort.append_text(_("Highest rated"));
 	freesound_sort.append_text(_("Lowest rated"));
 	freesound_sort.set_active(0);
-	
+
 	passbox->pack_start (freesound_search_btn, false, false);
 	passbox->pack_start (freesound_more_btn, false, false);
 	freesound_more_btn.set_label(_("More"));
@@ -686,11 +686,11 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	passbox->pack_start (freesound_similar_btn, false, false);
 	freesound_similar_btn.set_label(_("Similar"));
 	freesound_similar_btn.set_sensitive(false);
-	
+
 	scroll = manage(new ScrolledWindow);
 	scroll->add(freesound_list_view);
 	scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-	
+
 	vbox = manage(new VBox);
 	vbox->set_spacing (3);
 	vbox->pack_start (*passbox, PACK_SHRINK);
@@ -710,7 +710,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	freesound_list_view.get_column(3)->set_alignment(0.5);
 	freesound_list_view.get_column(4)->set_alignment(0.5);
 	freesound_list_view.get_column(5)->set_alignment(0.5);
-	
+
 	freesound_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_list_view_selected));
 	freesound_list_view.set_tooltip_column(1);
 
@@ -1067,9 +1067,9 @@ SoundFileBrowser::freesound_similar_clicked ()
 		prev_cursor = gdk_window_get_cursor (get_window()->gobj());
 		gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
 		gdk_flush();
-		
+
 		std::string theString = mootcher.searchSimilar(id);
-		
+
 		gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
 		handle_freesound_results(theString);
 	}
@@ -1353,28 +1353,28 @@ SoundFileOmega::reset_options ()
 		if (selected_audio_track_cnt > 0) {
 			if (channel_combo.get_active_text().length()) {
 				ImportDisposition id = get_channel_disposition();
-				
+
 				switch (id) {
 				case Editing::ImportDistinctFiles:
 					if (selected_audio_track_cnt == paths.size()) {
 						action_strings.push_back (importmode2string (ImportToTrack));
 					}
 					break;
-					
+
 				case Editing::ImportDistinctChannels:
 					/* XXX it would be nice to allow channel-per-selected track
 					   but its too hard we don't want to deal with all the
 					   different per-file + per-track channel configurations.
 					*/
 					break;
-					
+
 				default:
 					action_strings.push_back (importmode2string (ImportToTrack));
 					break;
 				}
 			}
 		}
-		
+
 	}  else {
 
 		/* MIDI ONLY */
@@ -1489,7 +1489,7 @@ SoundFileOmega::reset_options ()
 	/* We must copy MIDI files or those from Freesound
 	 * or any file if we are under nsm control */
 	bool const must_copy = _session->get_nsm_state() || have_a_midi_file || notebook.get_current_page() == 2;
-	
+
 	if (UIConfiguration::instance().get_only_copy_imported_files()) {
 
 		if (selection_can_be_embedded_with_links && !must_copy) {
@@ -1505,7 +1505,7 @@ SoundFileOmega::reset_options ()
 
 		if (must_copy) {
 			copy_files_btn.set_active (true);
-		}			
+		}
 		copy_files_btn.set_sensitive (!must_copy);
 	}
 
@@ -1952,14 +1952,14 @@ SoundFileOmega::do_something (int action)
 	}
 
 	/* lets do it */
-	
+
 	vector<string> paths = get_paths ();
 	ImportPosition pos = get_position ();
 	ImportMode mode = get_mode ();
 	ImportDisposition chns = get_channel_disposition ();
 	PluginInfoPtr instrument = instrument_combo.selected_instrument();
 	framepos_t where;
-	
+
 	switch (pos) {
 	case ImportAtEditPoint:
 		where = PublicEditor::instance().get_preferred_edit_position ();
@@ -1974,13 +1974,13 @@ SoundFileOmega::do_something (int action)
 		where = _session->current_start_frame();
 		break;
 	}
-	
+
 	SrcQuality quality = get_src_quality();
-	
+
 	if (copy_files_btn.get_active()) {
 		PublicEditor::instance().do_import (paths, chns, mode, quality, where, instrument);
 	} else {
 		PublicEditor::instance().do_embed (paths, chns, mode, where, instrument);
 	}
 }
-	
+

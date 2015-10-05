@@ -45,7 +45,7 @@ public:
 
     void cache_shape_computation () const;
 };
-	
+
 }
 
 #endif

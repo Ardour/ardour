@@ -37,7 +37,7 @@ int main (int argc, char* argv[])
 	b.set_outline_color (0x00ff00ff);
 
 	Gtk::HBox button_box;
-	
+
 	Gtk::Button left ("Left");
 	left.signal_clicked().connect (sigc::ptr_fun (&left_clicked));
 	button_box.pack_start (left);
@@ -48,18 +48,18 @@ int main (int argc, char* argv[])
 
 	hadj = new Gtk::Adjustment (0, 0, 1e3);
 	vadj = new Gtk::Adjustment (0, 0, 1e3);
-	
+
 	Gtk::Viewport viewport (*hadj, *vadj);
 	viewport.add (canvas);
 
 	Gtk::VBox overall_box;
 	overall_box.pack_start (viewport);
 	overall_box.pack_start (button_box, false, false);
-	
+
 	window.add (overall_box);
 	canvas.show ();
 	window.show_all ();
-	
+
 	Gtk::Main::run (window);
 	return 0;
 }

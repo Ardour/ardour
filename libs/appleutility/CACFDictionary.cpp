@@ -74,7 +74,7 @@ void	CACFDictionary::GetKeys (const void **keys) const
 bool	CACFDictionary::GetBool(const CFStringRef inKey, bool& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inKey, theValue))
 	{
@@ -91,14 +91,14 @@ bool	CACFDictionary::GetBool(const CFStringRef inKey, bool& outValue) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::GetSInt32(const CFStringRef inKey, SInt32& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inKey, theValue))
 	{
@@ -108,14 +108,14 @@ bool	CACFDictionary::GetSInt32(const CFStringRef inKey, SInt32& outValue) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::GetUInt32(const CFStringRef inKey, UInt32& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inKey, theValue))
 	{
@@ -125,14 +125,14 @@ bool	CACFDictionary::GetUInt32(const CFStringRef inKey, UInt32& outValue) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::GetSInt64(const CFStringRef inKey, SInt64& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inKey, theValue))
 	{
@@ -142,14 +142,14 @@ bool	CACFDictionary::GetSInt64(const CFStringRef inKey, SInt64& outValue) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::GetUInt64(const CFStringRef inKey, UInt64& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inKey, theValue))
 	{
@@ -159,14 +159,14 @@ bool	CACFDictionary::GetUInt64(const CFStringRef inKey, UInt64& outValue) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::GetFloat32(const CFStringRef inKey, Float32& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inKey, theValue))
 	{
@@ -176,14 +176,14 @@ bool	CACFDictionary::GetFloat32(const CFStringRef inKey, Float32& outValue) cons
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::GetFloat64(const CFStringRef inKey, Float64& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inKey, theValue))
 	{
@@ -193,14 +193,14 @@ bool	CACFDictionary::GetFloat64(const CFStringRef inKey, Float64& outValue) cons
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::GetString(const CFStringRef inKey, CFStringRef& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inKey, theValue))
 	{
@@ -210,14 +210,14 @@ bool	CACFDictionary::GetString(const CFStringRef inKey, CFStringRef& outValue) c
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
-	
+
 bool	CACFDictionary::GetArray(const CFStringRef inKey, CFArrayRef& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inKey, theValue))
 	{
@@ -227,14 +227,14 @@ bool	CACFDictionary::GetArray(const CFStringRef inKey, CFArrayRef& outValue) con
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
-	
+
 bool	CACFDictionary::GetDictionary(const CFStringRef inKey, CFDictionaryRef& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inKey, theValue))
 	{
@@ -244,14 +244,14 @@ bool	CACFDictionary::GetDictionary(const CFStringRef inKey, CFDictionaryRef& out
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::GetData(const CFStringRef inKey, CFDataRef& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inKey, theValue))
 	{
@@ -261,27 +261,27 @@ bool	CACFDictionary::GetData(const CFStringRef inKey, CFDataRef& outValue) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::GetCFType(const CFStringRef inKey, CFTypeRef& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	if(mCFDictionary != NULL)
 	{
 		outValue = CFDictionaryGetValue(mCFDictionary, inKey);
 		theAnswer = (outValue != NULL);
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::GetCFTypeWithCStringKey(const char* inKey, CFTypeRef& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	if(mCFDictionary != NULL)
 	{
 		CACFString theKey(inKey);
@@ -290,165 +290,165 @@ bool	CACFDictionary::GetCFTypeWithCStringKey(const char* inKey, CFTypeRef& outVa
 			theAnswer = GetCFType(theKey.GetCFString(), outValue);
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddSInt32(const CFStringRef inKey, SInt32 inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		CACFNumber theValue(inValue);
 		theAnswer = AddCFType(inKey, theValue.GetCFNumber());
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddUInt32(const CFStringRef inKey, UInt32 inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		CACFNumber theValue(inValue);
 		theAnswer = AddCFType(inKey, theValue.GetCFNumber());
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddSInt64(const CFStringRef inKey, SInt64 inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		CACFNumber theValue(inValue);
 		theAnswer = AddCFType(inKey, theValue.GetCFNumber());
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddUInt64(const CFStringRef inKey, UInt64 inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		CACFNumber theValue(inValue);
 		theAnswer = AddCFType(inKey, theValue.GetCFNumber());
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddFloat32(const CFStringRef inKey, Float32 inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		CACFNumber theValue(inValue);
 		theAnswer = AddCFType(inKey, theValue.GetCFNumber());
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddFloat64(const CFStringRef inKey, Float64 inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		CACFNumber theValue(inValue);
 		theAnswer = AddCFType(inKey, theValue.GetCFNumber());
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddNumber(const CFStringRef inKey, const CFNumberRef inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		theAnswer = AddCFType(inKey, inValue);
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddString(const CFStringRef inKey, const CFStringRef inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		theAnswer = AddCFType(inKey, inValue);
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddArray(const CFStringRef inKey, const CFArrayRef inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		theAnswer = AddCFType(inKey, inValue);
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddDictionary(const CFStringRef inKey, const CFDictionaryRef inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		theAnswer = AddCFType(inKey, inValue);
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddData(const CFStringRef inKey, const CFDataRef inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		theAnswer = AddCFType(inKey, inValue);
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddCFType(const CFStringRef inKey, const CFTypeRef inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		CFDictionarySetValue(mCFDictionary, inKey, inValue);
 		theAnswer = true;
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddCFTypeWithCStringKey(const char* inKey, const CFTypeRef inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		CACFString theKey(inKey);
@@ -457,14 +457,14 @@ bool	CACFDictionary::AddCFTypeWithCStringKey(const char* inKey, const CFTypeRef 
 			theAnswer = AddCFType(theKey.GetCFString(), inValue);
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFDictionary::AddCString(const CFStringRef inKey, const char* inValue)
 {
 	bool theAnswer = false;
-	
+
 	if(mMutable && (mCFDictionary != NULL))
 	{
 		CACFString theValue(inValue);
@@ -473,6 +473,6 @@ bool	CACFDictionary::AddCString(const CFStringRef inKey, const char* inValue)
 			theAnswer = AddCFType(inKey, theValue.GetCFString());
 		}
 	}
-	
+
 	return theAnswer;
 }

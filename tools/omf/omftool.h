@@ -52,16 +52,16 @@ private:
 	XMLNode* diskstreams;
 	XMLNode* locations;
 	XMLNode* options;
-	
+
 	XMLNode* new_region_node ();
 	XMLNode* new_source_node ();
 	XMLNode* new_route_node ();
 	XMLNode* new_playlist_node ();
 	XMLNode* new_diskstream_node ();
-	
+
 	typedef std::map<std::string,SourceInfo*> KnownSources;
 	KnownSources known_sources;
-	
+
 	SourceInfo* get_known_source (const char*);
 	char* read_name (size_t offset, size_t length);
 	bool get_offset_and_length (const char* offstr, const char* lenstr, uint32_t& offset, uint32_t& len);
@@ -80,7 +80,7 @@ private:
 		else
 			return x;
 	}
-	
+
 	uint32_t e32(uint32_t x)
 	{
 		if (bigEndian)
@@ -91,7 +91,7 @@ private:
 		else
 			return x;
 	}
-	
+
 	uint64_t e64(uint64_t x)
 	{
 		if (bigEndian)
@@ -106,7 +106,7 @@ private:
 		else
 			return x;
 	}
-	
+
 };
 
 #endif /* __ardour_omftool__ */

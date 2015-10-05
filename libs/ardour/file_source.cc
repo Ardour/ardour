@@ -274,7 +274,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 
 			vector<string>::iterator j = i;
 			++j;
-			
+
 			while (j != hits.end()) {
 				if (PBD::equivalent_paths (*i, *j)) {
 					/* *i and *j are the same file; break out of the loop early */
@@ -316,10 +316,10 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
                 } else {
 
 			/* only one match: happy days */
-			
+
 			keeppath = de_duped_hits[0];
 		}
-						
+
        } else {
                 keeppath = path;
         }
@@ -566,7 +566,7 @@ FileSource::is_stub () const
 	if (!empty()) {
 		return false;
 	}
-	
+
 	if (!removable()) {
 		return false;
 	}
@@ -577,7 +577,7 @@ FileSource::is_stub () const
 
 	return true;
 }
-		
+
 int
 FileSource::rename (const string& newpath)
 {
@@ -604,4 +604,4 @@ FileSource::rename (const string& newpath)
 	return 0;
 }
 
-	
+

@@ -39,7 +39,7 @@ InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*e
 	}
 
 	Glib::Threads::Mutex::Lock lm (_sends_mutex, Glib::Threads::TRY_LOCK);
-	
+
 	if (lm.locked ()) {
 		for (list<InternalSend*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
 			if ((*i)->active () && (!(*i)->source_route() || (*i)->source_route()->active())) {

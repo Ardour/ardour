@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CAReferenceCounted.h
-	
+
 =============================================================================*/
 
 #ifndef __CAReferenceCounted_h__
@@ -57,9 +57,9 @@
 class CAReferenceCounted {
 public:
 	CAReferenceCounted() : mRefCount(1) {}
-	
+
 	void	retain() { IncrementAtomic(&mRefCount); }
-	
+
 	void	release()
 			{
 					// this returns the ORIGINAL value, not the new one.

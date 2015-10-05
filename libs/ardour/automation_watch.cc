@@ -47,7 +47,7 @@ AutomationWatch::AutomationWatch ()
 	, _last_time (0)
 	, _run_thread (false)
 {
-	
+
 }
 
 AutomationWatch::~AutomationWatch ()
@@ -85,7 +85,7 @@ AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 	 * creates reference cycles. we don't need to make the weak_ptr<>
 	 * explicit here, but it helps to remind us what is going on.
 	 */
-	
+
 	boost::weak_ptr<AutomationControl> wac (ac);
 	ac->DropReferences.connect_same_thread (*this, boost::bind (&AutomationWatch::remove_weak_automation_watch, this, wac));
 }
@@ -139,7 +139,7 @@ AutomationWatch::timer ()
 				}
 			}
 		}
-		
+
 		_last_time = time;
 	}
 
@@ -171,7 +171,7 @@ AutomationWatch::set_session (Session* s)
 	if (_session) {
 		_run_thread = true;
 		_thread = Glib::Threads::Thread::create (boost::bind (&AutomationWatch::thread, this));
-		
+
 		_session->TransportStateChange.connect_same_thread (transport_connection, boost::bind (&AutomationWatch::transport_state_change, this));
 	}
 }
@@ -184,7 +184,7 @@ AutomationWatch::transport_state_change ()
 	}
 
 	bool rolling = _session->transport_rolling();
-	
+
 	_last_time = _session->audible_frame ();
 
 	{

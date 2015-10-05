@@ -35,7 +35,7 @@ public:
     void reset();
 
     void process( double *src, double *dst, unsigned int length );
-	
+
 
 private:
     void initialise( FilterConfig Config );

@@ -61,7 +61,7 @@ main (int argc, char* argv[])
 	int c = 0;
 	char const * name_template = 0;
 	int samplerate;
-	
+
 	while (1) {
 		if ((c = getopt_long (argc, argv, optstring, longopts, &option_index)) == -1) {
 			break;
@@ -99,7 +99,7 @@ main (int argc, char* argv[])
 		if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 			break;
 		}
-		
+
                 int flags = O_RDONLY;
                 int fd = open (path, flags, 0644);
 
@@ -126,15 +126,15 @@ main (int argc, char* argv[])
 		}
 
 		samplerate = format_info.samplerate;
-		
+
 		sndfiles.push_back (sf);
 	}
 
 	cout << "Discovered " << sndfiles.size() << " files using " << name_template << endl;
-		
+
 	data = new float[block_size];
 	uint64_t read = 0;
-	
+
 	while (true) {
 		gint64 before;
 		before = g_get_monotonic_time();
@@ -147,7 +147,7 @@ main (int argc, char* argv[])
 		read += block_size;
 		gint64 elapsed = g_get_monotonic_time() - before;
                 double bandwidth = ((sndfiles.size() * block_size * sample_size)/1048576.0) / (elapsed/1000000.0);
-		
+
                 printf ("BW @ %Lu %.3f seconds bandwidth %.4f MB/sec\n", read, elapsed/1000000.0, bandwidth);
 	}
 

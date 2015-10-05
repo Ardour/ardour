@@ -45,12 +45,12 @@ class SceneChanger : public SessionHandleRef
     public:
         SceneChanger (Session& s) : SessionHandleRef (s) {}
         virtual ~SceneChanger () {};
-	
+
 	virtual void run (framepos_t start, framepos_t end) = 0;
 	virtual void locate (framepos_t where) = 0;
 };
 
 } /* namespace */
-	
+
 
 #endif /* __libardour_scene_change_h__ */

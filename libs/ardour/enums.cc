@@ -405,7 +405,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (SessionEvent, Replace);
 	REGISTER_CLASS_ENUM (SessionEvent, Clear);
 	REGISTER (_SessionEvent_Action);
-	
+
 	REGISTER_CLASS_ENUM (Session, Stopped);
 	REGISTER_CLASS_ENUM (Session, Waiting);
 	REGISTER_CLASS_ENUM (Session, Running);

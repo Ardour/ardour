@@ -58,7 +58,7 @@ AutomationListPropertyTest::basicTest ()
 
 	/* No change since we just cleared them */
 	CPPUNIT_ASSERT_EQUAL (false, property.changed());
-	
+
 	property->add (1, 2, false, false);
 	property->add (3, 4, false, false);
 

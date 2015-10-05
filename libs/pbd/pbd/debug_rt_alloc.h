@@ -34,7 +34,7 @@ LIBPBD_API extern int (*pbd_alloc_allowed) ();
 /** Call this to suspend malloc checking until a call to resume_rt_malloc_checks */
 LIBPBD_API extern void suspend_rt_malloc_checks ();
 
-/** Resume malloc checking after a suspension */	
+/** Resume malloc checking after a suspension */
 LIBPBD_API extern void resume_rt_malloc_checks ();
 
 }

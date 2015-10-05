@@ -106,11 +106,11 @@ class LIBARDOUR_API PortManager
 	                                        public:
 		PortRegistrationFailure (std::string const & why = "")
 			: reason (why) {}
-	
+
 		~PortRegistrationFailure () throw () {}
-	
+
 		const char *what() const throw () { return reason.c_str(); }
-	
+
 	                                        private:
 		std::string reason;
 	};
@@ -157,7 +157,7 @@ class LIBARDOUR_API PortManager
 	 * Realtime safe.
 	 */
 	void cycle_start (pframes_t nframes);
-	
+
 	/** Signal the end of an audio cycle.
 	 * This signifies that the cycle began with @ref cycle_start has ended.
 	 * This MUST be called at the end of each cycle.
@@ -167,7 +167,7 @@ class LIBARDOUR_API PortManager
 };
 
 
-	
+
 } // namespace
 
 #endif /* __libardour_port_manager_h__ */

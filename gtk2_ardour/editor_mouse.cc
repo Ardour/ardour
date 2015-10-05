@@ -207,7 +207,7 @@ void
 Editor::mouse_mode_object_range_toggled()
 {
 	MouseMode m = mouse_mode;
-	
+
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-range"));
 	assert (act);
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
@@ -313,7 +313,7 @@ Editor::mouse_mode_toggled (MouseMode m)
 	}
 
 	set_gain_envelope_visibility ();
-	
+
 	update_time_selection_display ();
 
 	update_all_enter_cursors ();
@@ -1229,17 +1229,17 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case TempoMarkerItem: {
 			ArdourMarker* marker;
 			TempoMarker* tempo_marker;
-			
+
 			if ((marker = reinterpret_cast<ArdourMarker *> (item->get_data ("marker"))) == 0) {
 				fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
 				abort(); /*NOTREACHED*/
 			}
-			
+
 			if ((tempo_marker = dynamic_cast<TempoMarker*> (marker)) == 0) {
 				fatal << _("programming error: marker for tempo is not a tempo marker!") << endmsg;
 				abort(); /*NOTREACHED*/
 			}
-			
+
 			edit_tempo_marker (*tempo_marker);
 			break;
 		}
@@ -1247,12 +1247,12 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case MeterMarkerItem: {
 			ArdourMarker* marker;
 			MeterMarker* meter_marker;
-			
+
 			if ((marker = reinterpret_cast<ArdourMarker *> (item->get_data ("marker"))) == 0) {
 				fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
 				abort(); /*NOTREACHED*/
 			}
-			
+
 			if ((meter_marker = dynamic_cast<MeterMarker*> (marker)) == 0) {
 				fatal << _("programming error: marker for meter is not a meter marker!") << endmsg;
 				abort(); /*NOTREACHED*/
@@ -1320,7 +1320,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case SelectionItem:
 				popup_track_context_menu (1, event->button.time, item_type, true);
 				break;
-				
+
 			case AutomationTrackItem:
 				popup_track_context_menu (1, event->button.time, item_type, false);
 				break;
@@ -1549,7 +1549,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case MouseDraw:
 			return true;
-			
+
 		case MouseRange:
 			// x_style_paste (where, 1.0);
 			return true;
@@ -1880,14 +1880,14 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 		current_stepping_trackview = 0;
 		step_timeout.disconnect ();
 	}
-	
+
 	if (_session && _session->actively_recording()) {
 		/* Sorry. no dragging stuff around while we record */
 		return true;
 	}
-	
+
 	update_join_object_range_location (event->motion.y);
-	
+
 	if (_drags->active ()) {
 	 	return _drags->motion_handler (event, from_autoscroll);
 	}
@@ -2064,7 +2064,7 @@ Editor::cancel_time_selection ()
 	}
 	selection->time.clear ();
 	clicked_selection = 0;
-}	
+}
 
 void
 Editor::point_trim (GdkEvent* event, framepos_t new_bound)
@@ -2386,7 +2386,7 @@ Editor::update_join_object_range_location (double y)
 	} else if (entered_track) {
 
 		RouteTimeAxisView* entered_route_view = dynamic_cast<RouteTimeAxisView*> (entered_track);
-		
+
 		if (entered_route_view) {
 
 			double cx = 0;

@@ -81,7 +81,7 @@ class ControlPoint : public Selectable
 	AutomationLine&                  line()  const { return _line; }
 
 	static PBD::Signal1<void, ControlPoint *> CatchDeletion;
-	
+
   private:
 	ArdourCanvas::Rectangle*        _item;
 	AutomationLine&                  _line;

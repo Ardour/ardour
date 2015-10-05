@@ -195,7 +195,7 @@ EventTypeMap::from_symbol(const string& str) const
 	} else {
 		PBD::warning << "Unknown Parameter '" << str << "'" << endmsg;
 	}
-	
+
 	return Evoral::Parameter(p_type, p_channel, p_id);
 }
 

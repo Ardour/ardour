@@ -88,7 +88,7 @@ InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel)
 	}
 
 	MIDI::Name::PatchPrimaryKey patch_key (program, bank);
-	
+
 	boost::shared_ptr<MIDI::Name::Patch> patch =
 		MIDI::Name::MidiPatchManager::instance().find_patch (external_instrument_model,
 								     external_instrument_mode, channel, patch_key);
@@ -102,7 +102,7 @@ InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel)
 
 		return string_compose ("prg %1 bnk %2",program + MIDI_BP_ZERO , bank + MIDI_BP_ZERO);
 	}
-}	
+}
 
 string
 InstrumentInfo::get_controller_name (Evoral::Parameter param) const
@@ -118,7 +118,7 @@ InstrumentInfo::get_controller_name (Evoral::Parameter param) const
 	if (!dev_names) {
 		return "";
 	}
-	
+
 	boost::shared_ptr<ChannelNameSet> chan_names(
 		dev_names->channel_name_set_by_channel(
 			external_instrument_mode, param.channel()));
@@ -133,7 +133,7 @@ InstrumentInfo::get_controller_name (Evoral::Parameter param) const
 	}
 
 	return control_names->control(param.id())->name();
-}	
+}
 
 boost::shared_ptr<MIDI::Name::ChannelNameSet>
 InstrumentInfo::get_patches (uint8_t channel)
@@ -164,7 +164,7 @@ InstrumentInfo::plugin_programs_to_channel_name_set (boost::shared_ptr<Processor
 	}
 
 	boost::shared_ptr<Plugin> pp = insert->plugin();
-	
+
 	if (pp->current_preset_uses_general_midi()) {
 
 		patch_list = InstrumentInfo::general_midi_patches ();
@@ -174,11 +174,11 @@ InstrumentInfo::plugin_programs_to_channel_name_set (boost::shared_ptr<Processor
 		std::vector<Plugin::PresetRecord> presets = pp->get_presets ();
 		std::vector<Plugin::PresetRecord>::iterator i;
 		int n;
-		
+
 		/* XXX note the assumption that plugin presets start their numbering at
 		 * zero
 		 */
-		
+
 		for (n = 0, i = presets.begin(); i != presets.end(); ++i, ++n) {
 			if ((*i).number >= 0) {
 				patch_list.push_back (boost::shared_ptr<Patch> (new Patch ((*i).label, n)));
@@ -202,7 +202,7 @@ InstrumentInfo::plugin_programs_to_channel_name_set (boost::shared_ptr<Processor
 	cns->set_patch_banks (patch_banks);
 
 	return cns;
-}	
+}
 
 const MIDI::Name::PatchNameList&
 InstrumentInfo::general_midi_patches()
@@ -222,7 +222,7 @@ InstrumentInfo::get_plugin_patch_name (boost::shared_ptr<Processor> p, uint16_t 
 	boost::shared_ptr<PluginInsert> insert = boost::dynamic_pointer_cast<PluginInsert> (p);
 	if (insert) {
 		boost::shared_ptr<Plugin> pp = insert->plugin();
-		
+
 		if (pp->current_preset_uses_general_midi()) {
 			return MIDI::Name::general_midi_program_names[std::min((uint8_t) 127,program)];
 		}

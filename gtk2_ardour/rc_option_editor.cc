@@ -101,10 +101,10 @@ public:
 		_click_emphasis_browse_button.signal_clicked ().connect (
 		    sigc::mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
 		t->attach (_click_emphasis_browse_button, 2, 3, 2, 3, FILL);
-		
+
 		_box->pack_start (*t, false, false);
 
-		_click_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_changed));	
+		_click_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_changed));
 		_click_emphasis_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_emphasis_changed));
 
 		if (_rc_config->get_click_sound ().empty() &&
@@ -155,7 +155,7 @@ private:
 	{
 		click_chosen (_click_path_entry.get_text ());
 	}
-	
+
 	void click_emphasis_browse_clicked ()
 	{
 		SoundFileChooser sfdb (_("Choose Click Emphasis"));
@@ -1077,7 +1077,7 @@ public:
 		vector<string> presets;
 
 		/* these must match the order of the enums for BufferingPreset */
-		
+
 		presets.push_back (_("Small sessions (4-16 tracks)"));
 		presets.push_back (_("Medium sessions (16-64 tracks)"));
 		presets.push_back (_("Large sessions (64+ tracks)"));
@@ -1094,7 +1094,7 @@ public:
 		_box->pack_start (*h, false, false);
 
 		_buffering_presets_combo.signal_changed().connect (sigc::mem_fun (*this, &BufferingOptions::preset_changed));
-		
+
 		_playback_adjustment.set_value (_rc_config->get_audio_playback_buffer_seconds());
 
 		l = manage (new Label (_("Playback (seconds of buffering):")));
@@ -1192,7 +1192,7 @@ private:
 			break;
 		}
 	}
-	
+
 	void playback_changed ()
 	{
 		_rc_config->set_audio_playback_buffer_seconds ((long) _playback_adjustment.get_value());
@@ -1269,7 +1269,7 @@ private:
         void protocol_status_changed (ControlProtocolInfo* cpi) {
 		/* find the row */
 		TreeModel::Children rows = _store->children();
-		
+
 		for (TreeModel::Children::iterator x = rows.begin(); x != rows.end(); ++x) {
 			string n = ((*x)[_model.name]);
 
@@ -1785,7 +1785,7 @@ private:
 		*/
 		_set (_visibility_group->get_state_value ());
 	}
-	
+
 	OptionEditorHeading _heading;
 	VisibilityGroup* _visibility_group;
 	sigc::slot<std::string> _get;
@@ -1931,7 +1931,7 @@ RCOptionEditor::RCOptionEditor ()
 					    (_("<b>When enabled</b> the loop button does not start playback but forces playback to always play the loop\n\n"
 					       "<b>When disabled</b> the loop button starts playing the loop, but stop then cancels loop playback")));
 	add_option (_("Transport"), tsf);
-	
+
 	tsf = new BoolOption (
 		     "stop-recording-on-xrun",
 		     _("Stop recording when an xrun occurs"),
@@ -2274,7 +2274,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_name_new_markers),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_name_new_markers)
 		);
-	
+
 	add_option (_("Editor"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
 								"\n\nYou can always rename markers by right-clicking on them"));
@@ -2851,7 +2851,7 @@ RCOptionEditor::RCOptionEditor ()
 		(sics->tip_widget(),
 		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
 	add_option (S_("Preferences|GUI"), sics);
-	
+
 	/* Lock GUI timeout */
 
 	Gtk::Adjustment *lts = manage (new Gtk::Adjustment(0, 0, 1000, 1, 10));
@@ -2876,7 +2876,7 @@ RCOptionEditor::RCOptionEditor ()
 	_mixer_strip_visibility.add (0, X_("SoloIsoLock"), _("Solo Iso / Lock"));
 	_mixer_strip_visibility.add (0, X_("Output"), _("Output"));
 	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
-	
+
 	add_option (
 		S_("Preferences|GUI"),
 		new VisibilityOption (

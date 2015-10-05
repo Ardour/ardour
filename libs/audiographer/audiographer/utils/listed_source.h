@@ -19,11 +19,11 @@ class /*LIBAUDIOGRAPHER_API*/ ListedSource : public Source<T>
 	void add_output (typename Source<T>::SinkPtr output) { outputs.push_back(output); }
 	void clear_outputs () { outputs.clear(); }
 	void remove_output (typename Source<T>::SinkPtr output) { outputs.remove(output); }
-	
+
   protected:
-	
+
 	typedef std::list<typename Source<T>::SinkPtr> SinkList;
-	
+
 	/// Helper for derived classes
 	void output (ProcessContext<T> const & c)
 	{

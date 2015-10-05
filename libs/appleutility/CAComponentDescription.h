@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CAComponentDescription.h
-	
+
 =============================================================================*/
 
 #ifndef __CAComponentDescription_h__
@@ -73,53 +73,53 @@ void CAShowComponentDescription(const ComponentDescription *desc);
 class CAComponentDescription : public ComponentDescription {
 public:
 	CAComponentDescription() { memset (this, 0, sizeof (ComponentDescription)); }
-	
+
 	CAComponentDescription (OSType inType, OSType inSubtype = 0, OSType inManu = 0);
 
 	CAComponentDescription(const ComponentDescription& desc) { memcpy (this, &desc, sizeof (ComponentDescription)); }
-		
+
 	// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 	//
 	// interrogation
-	
+
 	bool	IsAU () const;
-	
+
 	bool	IsAUFX() const { return componentType == kAudioUnitType_Effect; }
 	bool	IsAUFM() const { return componentType == kAudioUnitType_MusicEffect; }
-	
+
 	bool 	IsEffect () const { return IsAUFX() || IsAUFM() || IsPanner(); }
-	
+
 	bool	IsOffline () const { return componentType == 'auol'; }
-	
+
 	bool 	IsFConv () const { return componentType == kAudioUnitType_FormatConverter; }
-	
+
 	bool	IsPanner () const { return componentType == kAudioUnitType_Panner; }
-	
+
 	bool	IsMusicDevice () const { return componentType == kAudioUnitType_MusicDevice; }
-	
+
 #ifndef MAC_OS_X_VERSION_10_4
 	bool	IsGenerator () const { return componentType =='augn'; }
 #else
 	bool	IsGenerator () const { return componentType ==kAudioUnitType_Generator; }
 #endif
-	
+
 	bool	IsOutput () const { return componentType == kAudioUnitType_Output; }
-	
+
 	bool	IsSource () const { return IsMusicDevice() || IsGenerator(); }
-	
+
 	OSType	Type () const { return componentType; }
 	OSType	SubType () const { return componentSubType; }
 	OSType 	Manu () const { return componentManufacturer; }
 
 	int		Count() const { return CountComponents(const_cast<CAComponentDescription*>(this)); }
-	
+
 		// does a semantic match where "wild card" values for type, subtype, manu will match
 	bool	Matches (const ComponentDescription &desc) const;
-	
+
 	// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 	//
 	//	other
-	
+
 	void	Print(FILE* file = stdout) const 	{ _CAShowComponentDescription (this, file); }
 
 	OSStatus			Save (CFPropertyListRef *outData) const;

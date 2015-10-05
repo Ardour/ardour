@@ -137,7 +137,7 @@ void
 pthread_set_name (const char *str)
 {
 	/* copy string and delete it when exiting */
-	
+
 	thread_name.set (strdup (str));
 }
 
@@ -154,7 +154,7 @@ pthread_name ()
 
 void
 pthread_kill_all (int signum)
-{	
+{
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
 		if (!pthread_equal ((*i), pthread_self())) {
@@ -167,7 +167,7 @@ pthread_kill_all (int signum)
 
 void
 pthread_cancel_all ()
-{	
+{
 	pthread_mutex_lock (&thread_map_lock);
 
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ) {
@@ -187,7 +187,7 @@ pthread_cancel_all ()
 
 void
 pthread_cancel_one (pthread_t thread)
-{	
+{
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
 		if (pthread_equal ((*i), thread)) {

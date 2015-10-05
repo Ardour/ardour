@@ -128,7 +128,7 @@ ExportFilename::set_state (const XMLNode & node)
 			folder = tmp;
 		}
 	}
-	
+
 	if (folder.empty()) {
 		folder = session.session_directory().export_path();
 	}

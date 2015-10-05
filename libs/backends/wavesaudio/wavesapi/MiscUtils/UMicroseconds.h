@@ -19,7 +19,7 @@
 
 #ifndef __UMicroseconds_h__
 	#define __UMicroseconds_h__
-	
+
 /* Copy to include
 #include "UMicroseconds.h"
 */
@@ -87,15 +87,15 @@ class UMicrosecondsAccumulator
 {
 public:
 	UMicrosecondsAccumulator() : m_start_time(0), m_accumulator(0) {}
-	
+
 	void Start();
 	void Stop();
 	void Clear();
-	
+
 	UMicroseconds GetAccumulatedTime() const;
-	
+
 	UMicrosecondsAccumulator& operator+=(const UMicrosecondsAccumulator&);
-	
+
 protected:
 	UMicroseconds m_start_time;
 	UMicroseconds m_accumulator;
@@ -119,6 +119,6 @@ inline void MicrosecondDelay(double amt)
 		now.ReadTime();
 	}	while ((now.MicroSeconds() - than.MicroSeconds()) < amt);
 }
-	
+
 } // namespace wvNS {
 #endif //#ifndef __UMicroseconds_h__

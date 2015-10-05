@@ -504,7 +504,7 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 		error << string_compose (_("%1: this session uses destructive tracks, which are not supported"), PROGRAM_NAME) << endmsg;
 		return -1;
 	}
-	
+
         if ((prop = node.property (X_("capture-alignment"))) != 0) {
                 set_align_choice (AlignChoice (string_2_enum (prop->value(), _alignment_choice)), true);
         } else {
@@ -526,7 +526,7 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 			non_realtime_set_speed ();
 		}
 	}
-	
+
 	if ((prop = node.property ("record-safe")) != 0) {
 	    _record_safe = PBD::string_is_affirmative (prop->value()) ? 1 : 0;
 	}
@@ -799,7 +799,7 @@ framecnt_t
 Diskstream::default_disk_read_chunk_frames()
 {
 	return 65536;
-}	
+}
 
 framecnt_t
 Diskstream::default_disk_write_chunk_frames ()
@@ -818,7 +818,7 @@ Diskstream::set_buffering_parameters (BufferingPreset bp)
 	if (!get_buffering_presets (bp, read_chunk_size, read_buffer_size, write_chunk_size, write_buffer_size)) {
 		return;
 	}
-	
+
 	disk_read_chunk_frames = read_chunk_size;
 	disk_write_chunk_frames = write_chunk_size;
 	Config->set_audio_capture_buffer_seconds (write_buffer_size);

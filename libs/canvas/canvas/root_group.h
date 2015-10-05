@@ -29,7 +29,7 @@ class LIBCANVAS_API Root : public Container
 {
 private:
 	friend class Canvas;
-	
+
 	Root (Canvas *);
 
 	void compute_bounding_box () const;

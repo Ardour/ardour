@@ -100,7 +100,7 @@ void Mootcher::ensureWorkingDir ()
 	}
 #endif
 }
-	
+
 
 //------------------------------------------------------------------------
 size_t Mootcher::WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
@@ -127,7 +127,7 @@ std::string Mootcher::sortMethodString(enum sortMethod sort)
 // sort the results in the requested way.
 
 	switch (sort) {
-		case sort_duration_desc:	return "duration_desc";	
+		case sort_duration_desc:	return "duration_desc";
 		case sort_duration_asc: 	return "duration_asc";
 		case sort_created_desc:		return "created_desc";
 		case sort_created_asc:		return "created_asc";
@@ -135,7 +135,7 @@ std::string Mootcher::sortMethodString(enum sortMethod sort)
 		case sort_downloads_asc:	return "downloads_asc";
 		case sort_rating_desc:		return "rating_desc";
 		case sort_rating_asc:		return "rating_asc";
-		default:			return "";	
+		default:			return "";
 	}
 }
 
@@ -150,7 +150,7 @@ void Mootcher::setcUrlOptions()
 	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorBuffer);
 	// Allow redirection
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
-	
+
 	// Allow connections to time out (without using signals)
 	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 30);
@@ -180,9 +180,9 @@ std::string Mootcher::doRequest(std::string uri, std::string params)
 	} else {
 		url += "api_key=" + api_key + "&format=xml";
 	}
-		
+
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str() );
-	
+
 	// perform online request
 	CURLcode res = curl_easy_perform(curl);
 	if( res != 0 ) {
@@ -194,7 +194,7 @@ std::string Mootcher::doRequest(std::string uri, std::string params)
 	if (xml_page.memory) {
 		result = xml_page.memory;
 	}
-	
+
 	free (xml_page.memory);
 	xml_page.memory = NULL;
 	xml_page.size = 0;
@@ -234,7 +234,7 @@ std::string Mootcher::searchText(std::string query, int page, std::string filter
 		params += "&f=" + std::string(ef);
 		free(ef);
 	}
-	
+
 	if (sort)
 		params += "&s=" + sortMethodString(sort);
 
@@ -317,7 +317,7 @@ CURLcode res;
 	res = curl_easy_perform (curl);
 	fclose (theFile);
 	curl_easy_setopt (curl, CURLOPT_NOPROGRESS, 1); // turn off the progress bar
-	
+
 	if (res != CURLE_OK) {
 		/* it's not an error if the user pressed the stop button */
 		if (res != CURLE_ABORTED_BY_CALLBACK) {
@@ -373,7 +373,7 @@ bool Mootcher::checkAudioFile(std::string originalFileName, std::string theID)
 			fclose (testFile);
 			return true;
 		}
-		
+
 		// else file was small, probably an error, delete it
 		fclose(testFile);
 		remove( audioFileName.c_str() );
@@ -397,7 +397,7 @@ bool Mootcher::fetchAudioFile(std::string originalFileName, std::string theID, s
 	if (!theFile) {
 		return false;
 	}
-	
+
 	// create the download url
 	audioURL += "?api_key=" + api_key;
 
@@ -453,7 +453,7 @@ Mootcher::progress_callback(void *caller, double dltotal, double dlnow, double /
 	// and we want access to some private members of Mootcher.
 
 	Mootcher *thisMootcher = (Mootcher *) caller;
-	
+
 	if (thisMootcher->cancel_download) {
 		return -1;
 	}

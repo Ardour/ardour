@@ -299,7 +299,7 @@ Mixer_UI::show_window ()
 			ms->parameter_changed (X_("mixer-element-visibility"));
 		}
 	}
-	
+
 	/* force focus into main area */
 	scroller_base.grab_focus ();
 
@@ -343,44 +343,44 @@ Mixer_UI::add_strips (RouteList& routes)
 
 		for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 			boost::shared_ptr<Route> route = (*x);
-			
+
 			if (route->is_auditioner()) {
 				continue;
 			}
-			
+
 			if (route->is_monitor()) {
-				
+
 				if (!_monitor_section) {
 					_monitor_section = new MonitorSection (_session);
-					
+
 					XMLNode* mnode = ARDOUR_UI::instance()->tearoff_settings (X_("monitor-section"));
 					if (mnode) {
 						_monitor_section->tearoff().set_state (*mnode);
 					}
 				}
-				
+
 				out_packer.pack_end (_monitor_section->tearoff(), false, false);
 				_monitor_section->set_session (_session);
 				_monitor_section->tearoff().show_all ();
-				
+
 				route->DropReferences.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::monitor_section_going_away, this), gui_context());
-				
+
 				/* no regular strip shown for control out */
-				
+
 				continue;
 			}
-			
+
 			strip = new MixerStrip (*this, _session, route);
 			strips.push_back (strip);
 
 			UIConfiguration::instance().get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
-			
+
 			if (strip->width_owner() != strip) {
 				strip->set_width_enum (_strip_width, this);
 			}
-			
+
 			show_strip (strip);
-			
+
 			TreeModel::Row row = *(track_model->insert(insert_iter));
 			row[track_columns.text] = route->name();
 			row[track_columns.visible] = strip->route()->is_master() ? true : strip->marked_for_display();
@@ -390,9 +390,9 @@ Mixer_UI::add_strips (RouteList& routes)
 			if (!from_scratch) {
 				_selection.add (strip);
 			}
-			
+
 			route->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::strip_property_changed, this, _1, strip), gui_context());
-			
+
 			strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
 			strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 		}
@@ -402,7 +402,7 @@ Mixer_UI::add_strips (RouteList& routes)
 
 	no_track_list_redisplay = false;
 	track_display.set_model (track_model);
-	
+
 	sync_order_keys_from_treeview ();
 	redisplay_track_list ();
 }
@@ -442,11 +442,11 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 	list<MixerStrip *>::iterator i;
-	
+
 	if ((i = find (strips.begin(), strips.end(), strip)) != strips.end()) {
 		strips.erase (i);
 	}
-	
+
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[track_columns.strip] == strip) {
                         PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
@@ -464,7 +464,7 @@ Mixer_UI::reset_remote_control_ids ()
 	}
 
 	TreeModel::Children rows = track_model->children();
-	
+
 	if (rows.empty()) {
 		return;
 	}
@@ -479,11 +479,11 @@ Mixer_UI::reset_remote_control_ids ()
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 
 		/* skip two special values */
-		
+
 		if (rid == Route::MasterBusRemoteControlID) {
 			rid++;
 		}
-		
+
 		if (rid == Route::MonitorBusRemoteControlID) {
 			rid++;
 		}
@@ -492,14 +492,14 @@ Mixer_UI::reset_remote_control_ids ()
 		bool visible = (*ri)[track_columns.visible];
 
 		if (!route->is_master() && !route->is_monitor()) {
-			
+
 			uint32_t new_rid = (visible ? rid : invisible_key--);
-			
+
 			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_explicit (new_rid);	
+				route->set_remote_control_id_explicit (new_rid);
 				rid_change = true;
 			}
-			
+
 			if (visible) {
 				rid++;
 			}
@@ -520,7 +520,7 @@ Mixer_UI::sync_order_keys_from_treeview ()
 	}
 
 	TreeModel::Children rows = track_model->children();
-	
+
 	if (rows.empty()) {
 		return;
 	}
@@ -550,10 +550,10 @@ Mixer_UI::sync_order_keys_from_treeview ()
 			uint32_t new_rid = (visible ? rid : invisible_key--);
 
 			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_explicit (new_rid);	
+				route->set_remote_control_id_explicit (new_rid);
 				rid_change = true;
 			}
-			
+
 			if (visible) {
 				rid++;
 			}
@@ -610,7 +610,7 @@ Mixer_UI::sync_treeview_from_order_keys ()
 	neworder.assign (sorted_routes.size(), 0);
 
 	uint32_t n = 0;
-	
+
 	for (OrderKeySortedRoutes::iterator sr = sorted_routes.begin(); sr != sorted_routes.end(); ++sr, ++n) {
 
 		neworder[n] = sr->old_display_order;
@@ -640,7 +640,7 @@ Mixer_UI::follow_editor_selection ()
 
 	_following_editor_selection = true;
 	_selection.block_routes_changed (true);
-	
+
 	TrackSelection& s (PublicEditor::instance().get_selection().tracks);
 
 	_selection.clear_routes ();
@@ -690,13 +690,13 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::RangeSelectModifier)) {
 
 				if (!_selection.selected(strip)) {
-				
+
 					/* extend selection */
-					
+
 					vector<MixerStrip*> tmp;
 					bool accumulate = false;
 					bool found_another = false;
-					
+
 					tmp.push_back (strip);
 
 					for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
@@ -845,15 +845,15 @@ Mixer_UI::update_track_visibility ()
 
 	{
 		Unwinder<bool> uw (no_track_list_redisplay, true);
-		
+
 		for (i = rows.begin(); i != rows.end(); ++i) {
 			MixerStrip *strip = (*i)[track_columns.strip];
 			(*i)[track_columns.visible] = strip->marked_for_display ();
 		}
-		
+
 		/* force route order keys catch up with visibility changes
 		 */
-		
+
 		sync_order_keys_from_treeview ();
 	}
 
@@ -926,20 +926,20 @@ Mixer_UI::set_all_strips_visibility (bool yn)
 
 	{
 		Unwinder<bool> uw (no_track_list_redisplay, true);
-		
+
 		for (i = rows.begin(); i != rows.end(); ++i) {
-			
+
 			TreeModel::Row row = (*i);
 			MixerStrip* strip = row[track_columns.strip];
-			
+
 			if (strip == 0) {
 				continue;
 			}
-			
+
 			if (strip->route()->is_master() || strip->route()->is_monitor()) {
 				continue;
 			}
-			
+
 			(*i)[track_columns.visible] = yn;
 		}
 	}
@@ -956,33 +956,33 @@ Mixer_UI::set_all_audio_midi_visibility (int tracks, bool yn)
 
 	{
 		Unwinder<bool> uw (no_track_list_redisplay, true);
-		
+
 		for (i = rows.begin(); i != rows.end(); ++i) {
 			TreeModel::Row row = (*i);
 			MixerStrip* strip = row[track_columns.strip];
-			
+
 			if (strip == 0) {
 				continue;
 			}
-			
+
 			if (strip->route()->is_master() || strip->route()->is_monitor()) {
 				continue;
 			}
-			
+
 			boost::shared_ptr<AudioTrack> at = strip->audio_track();
 			boost::shared_ptr<MidiTrack> mt = strip->midi_track();
-			
+
 			switch (tracks) {
 			case 0:
 				(*i)[track_columns.visible] = yn;
 				break;
-				
+
 			case 1:
 				if (at) { /* track */
 					(*i)[track_columns.visible] = yn;
 				}
 				break;
-				
+
 			case 2:
 				if (!at && !mt) { /* bus */
 					(*i)[track_columns.visible] = yn;
@@ -1077,7 +1077,7 @@ Mixer_UI::redisplay_track_list ()
 {
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;
-	
+
 	if (no_track_list_redisplay) {
 		return;
 	}
@@ -1176,7 +1176,7 @@ Mixer_UI::initial_track_display ()
 		track_model->clear ();
 		add_strips (copy);
 	}
-	
+
 	_session->sync_order_keys ();
 
 	redisplay_track_list ();
@@ -1792,7 +1792,7 @@ Mixer_UI::on_key_release_event (GdkEventKey* ev)
 	}
 
 	KeyboardKey k (ev->state, ev->keyval);
-	
+
 	if (bindings.activate (k, Bindings::Release)) {
 		return true;
 	}
@@ -1935,7 +1935,7 @@ Mixer_UI::update_title ()
 {
 	if (_session) {
 		string n;
-		
+
 		if (_session->snap_name() != _session->name()) {
 			n = _session->snap_name ();
 		} else {
@@ -1945,14 +1945,14 @@ Mixer_UI::update_title ()
 		if (_session->dirty ()) {
 			n = "*" + n;
 		}
-		
+
 		WindowTitle title (n);
 		title += S_("Window|Mixer");
 		title += Glib::get_application_name ();
 		set_title (title.get_string());
 
 	} else {
-		
+
 		WindowTitle title (S_("Window|Mixer"));
 		title += Glib::get_application_name ();
 		set_title (title.get_string());
@@ -2015,7 +2015,7 @@ Mixer_UI::toggle_midi_input_active (bool flip_others)
 			onoff = !mt->input_active();
 		}
 	}
-	
+
 	_session->set_exclusive_input_active (rl, onoff, flip_others);
 }
 

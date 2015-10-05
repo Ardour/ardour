@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CAXException.h
-	
+
 =============================================================================*/
 
 #ifndef __CAXException_h__
@@ -68,24 +68,24 @@ public:
 			} else
 				strcpy(mOperation, operation);
 		}
-	
+
 	char *FormatError(char *str) const
 	{
 		return FormatError(str, mError);
 	}
-	
+
 	char				mOperation[256];
 	const OSStatus		mError;
-	
+
 	// -------------------------------------------------
-	
+
 	typedef void (*WarningHandler)(const char *msg, OSStatus err);
-	
+
 	/*static void Throw(const char *operation, OSStatus err)
 	{
 		throw CAXException(operation, err);
 	}*/
-	
+
 	static char *FormatError(char *str, OSStatus error)
 	{
 		// see if it appears to be a 4-char-code
@@ -98,13 +98,13 @@ public:
 			sprintf(str, "%ld", error);
 		return str;
 	}
-	
+
 	static void Warning(const char *s, OSStatus error)
 	{
 		if (sWarningHandler)
 			(*sWarningHandler)(s, error);
 	}
-	
+
 	static void SetWarningHandler(WarningHandler f) { sWarningHandler = f; }
 private:
 	static WarningHandler	sWarningHandler;

@@ -28,7 +28,7 @@ public:
 	MainClock (const std::string& clock_name, const std::string& widget_name, bool primary);
 
 private:
-	
+
 	// Editor *_editor;
 
 	void build_ops_menu ();

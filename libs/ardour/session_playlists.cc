@@ -465,7 +465,7 @@ SessionPlaylists::playlists_for_track (boost::shared_ptr<Track> tr) const
 {
 	vector<boost::shared_ptr<Playlist> > pl;
 	get (pl);
-	
+
 	vector<boost::shared_ptr<Playlist> > pl_tr;
 
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = pl.begin(); i != pl.end(); ++i) {

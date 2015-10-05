@@ -61,7 +61,7 @@ class StereoPanner : public PannerInterface
   private:
 	PannerEditor* editor ();
 	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;
-		
+
         boost::shared_ptr<PBD::Controllable> position_control;
         boost::shared_ptr<PBD::Controllable> width_control;
         PBD::ScopedConnectionList panvalue_connections;

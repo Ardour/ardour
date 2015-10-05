@@ -131,7 +131,7 @@ MidiTracer::ports_changed ()
 {
 	string const c = _port_combo.get_active_text ();
 	_port_combo.clear ();
-	
+
 	ARDOUR::PortManager::PortList pl;
 	ARDOUR::AudioEngine::instance()->get_ports (ARDOUR::DataType::MIDI, pl);
 
@@ -182,7 +182,7 @@ MidiTracer::port_changed ()
 			mp->set_trace_on (true);
 			traced_port = mp;
 		}
-		
+
 	} else {
 		async->parser()->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3));
 	}

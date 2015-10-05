@@ -21,17 +21,17 @@ typedef struct
 {
 	CLGradient      fill_gradient;
 	CLGradient      border_gradient;
-	
+
 	CLGradientType  gradient_type;
-	
+
 	GdkGC          *bordergc;
 	GdkGC          *fillgc;
 
 	guint8          corners[4];
-	
+
 	GdkGC          *topleft;		/* top + left shadow */
 	GdkGC          *bottomright;	/* bottom + right shadow */
-	
+
 	GdkColor        tmp_color;		/* used for gradient */
 } CLRectangle;
 
@@ -79,7 +79,7 @@ void cl_rectangle_set_entry (CLRectangle *r, GtkStyle *style,
                             CLBorderType tl, CLBorderType tr,
                             CLBorderType bl, CLBorderType br,
                             gboolean has_focus);
-							
+
 void cl_draw_shadow(GdkWindow *window, GtkWidget *widget, GtkStyle *style,
                     int x, int y, int width, int height, CLRectangle *r);
 
@@ -99,12 +99,12 @@ void cl_rectangle_reset (CLRectangle *r, GtkStyle *style);
 
 GdkPixmap* cl_progressbar_tile_new (GdkDrawable *drawable, GtkWidget *widget,
                               GtkStyle *style, gint height, gint offset);
-				
+
 void cl_progressbar_fill (GdkDrawable *drawable, GtkWidget *widget,
                           GtkStyle *style, GdkGC *gc,
                           gint x, gint y, gint width, gint height,
 						  guint8 offset, GdkRectangle *area);
-						
+
 GdkColor cl_gc_set_fg_color_shade (GdkGC *gc, GdkColormap *colormap,
                                    GdkColor *from, gfloat s);
 
@@ -113,31 +113,31 @@ void cl_draw_spinbutton(GtkStyle *style, GdkWindow *window,
                         GdkRectangle *area,
                         GtkWidget *widget, const gchar *detail,
                         gint x, gint y, gint width, gint height);
-						
+
 void cl_draw_button(GtkStyle *style, GdkWindow *window,
                     GtkStateType state_type, GtkShadowType shadow_type,
                     GdkRectangle *area,
                     GtkWidget *widget, const gchar *detail,
                     gint x, gint y, gint width, gint height);
-					
+
 void cl_draw_entry (GtkStyle *style, GdkWindow *window,
                     GtkStateType state_type, GtkShadowType shadow_type,
                     GdkRectangle *area,
                     GtkWidget *widget, const gchar *detail,
                     gint x, gint y, gint width, gint height);
-					
+
 void cl_draw_combobox_entry (GtkStyle *style, GdkWindow *window,
                              GtkStateType state_type, GtkShadowType shadow_type,
                              GdkRectangle *area,
                              GtkWidget *widget, const gchar *detail,
                              gint x, gint y, gint width, gint height);
-		
+
 void cl_draw_combobox_button (GtkStyle *style, GdkWindow *window,
                              GtkStateType state_type, GtkShadowType shadow_type,
                              GdkRectangle *area,
                              GtkWidget *widget, const gchar *detail,
                              gint x, gint y, gint width, gint height);
-							
+
 void cl_draw_menuitem_button (GdkDrawable *window, GtkWidget *widget, GtkStyle *style,
                               GdkRectangle *area, GtkStateType state_type,
                               int x, int y, int wiidth, int height, CLRectangle *r);
@@ -149,11 +149,11 @@ void cl_draw_menuitem_flat (GdkDrawable *window, GtkWidget *widget, GtkStyle *st
 void cl_draw_menuitem_gradient (GdkDrawable *window, GtkWidget *widget, GtkStyle *style,
                                 GdkRectangle *area, GtkStateType state_type,
                                 int x, int y, int wiidth, int height, CLRectangle *r);
-							
+
 void cl_draw_treeview_header (GtkStyle *style, GdkWindow *window,
                               GtkStateType state_type, GtkShadowType shadow_type,
                               GdkRectangle *area,
                               GtkWidget *widget, const gchar *detail,
                               gint x, gint y, gint width, gint height);
-							
+
 #endif /* CLEARLOOKS_DRAW_H */

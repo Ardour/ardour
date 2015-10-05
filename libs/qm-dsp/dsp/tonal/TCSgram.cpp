@@ -55,7 +55,7 @@ void TCSGram::addTCSVector(const TCSVector& rTCSVector)
 	std::pair<long, TCSVector> p;
 	p.first = lMilliSeconds;
 	p.second = rTCSVector;
-	
+
 	m_VectorList.push_back(p);
 }
 
@@ -68,7 +68,7 @@ long TCSGram::getDuration() const
 void TCSGram::printDebug()
 {
 	vectorlist_t::iterator vectorIterator = m_VectorList.begin();
-	
+
 	while (vectorIterator != m_VectorList.end())
 	{
 		vectorIterator->second.printDebug();

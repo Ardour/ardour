@@ -40,10 +40,10 @@
 template<class T> inline T WUMin(const T &a, const T &b) {return (a < b) ? a : b;} // requires only < to be defined for T
 template<class T> inline T WUMax(const T &a,const T &b) {return (a < b) ? b : a;} // requires only < to be defined for T
 template<class T> inline T WUMinMax(const T &Smallest, const T &Biggest, const T &Val)  // requires only < to be defined for T
-{	
+{
 	return ((Val < Smallest) ? Smallest : ((Biggest < Val) ? Biggest : Val));
 }
-/*	
+/*
 // Min and Max
 	template<class T> inline T WUMin(T a,T b) {return (a < b) ? a : b;} // requires only < to be defined for T
 	template<class T> inline T WUMax(T a,T b) {return (a < b) ? b : a;} // requires only < to be defined for T
@@ -51,7 +51,7 @@ template<class T> inline T WUMinMax(const T &Smallest, const T &Biggest, const T
 	{
 		return ((X < SMALLEST) ? SMALLEST : ((BIGGEST < X) ? BIGGEST : X));
 	}
- */	
+ */
 // Absolute value
 
 #ifdef PLATFORM_WINDOWS

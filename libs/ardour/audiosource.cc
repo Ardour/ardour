@@ -317,7 +317,7 @@ framecnt_t
 AudioSource::read (Sample *dst, framepos_t start, framecnt_t cnt, int /*channel*/) const
 {
 	assert (cnt >= 0);
-	
+
 	Glib::Threads::Mutex::Lock lm (_lock);
 	return read_unlocked (dst, start, cnt);
 }
@@ -370,7 +370,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	}
 
 	if (!_captured_for.empty()) {
-	
+
 		/* _captured_for is only set after a capture pass is
 		 * complete. so we know that capturing is finished for this
 		 * file, and now we can check actual size of the peakfile is at
@@ -382,9 +382,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		 * might decided to get rid of that anyway.
 		 *
 		 */
-		
+
 		const off_t expected_file_size = (_length / (double) samples_per_file_peak) * sizeof (PeakData);
-		
+
 		if (statbuf.st_size < expected_file_size) {
 			warning << string_compose (_("peak file %1 is truncated from %2 to %3"), _peakpath, expected_file_size, statbuf.st_size) << endmsg;
 			const_cast<AudioSource*>(this)->build_peaks_from_scratch ();
@@ -404,7 +404,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		error << string_compose (_("Cannot open peakfile @ %1 for reading (%2)"), _peakpath, strerror (errno)) << endmsg;
 		return -1;
 	}
-				
+
 	scale = npeaks/expected_peaks;
 
 
@@ -728,7 +728,7 @@ AudioSource::build_peaks_from_scratch ()
 		/* hold lock while building peaks */
 
 		Glib::Threads::Mutex::Lock lp (_lock);
-		
+
 		if (prepare_for_peakfile_writes ()) {
 			goto out;
 		}
@@ -743,7 +743,7 @@ AudioSource::build_peaks_from_scratch ()
 
 			framecnt_t frames_to_read = min (bufsize, cnt);
 			framecnt_t frames_read;
-			
+
 			if ((frames_read = read_unlocked (buf.get(), current_frame, frames_to_read)) != frames_to_read) {
 				error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
 				done_with_peakfile_writes (false);

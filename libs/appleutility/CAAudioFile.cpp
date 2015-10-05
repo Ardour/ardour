@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CAAudioFile.cpp
-	
+
 =============================================================================*/
 
 #include "CAAudioFile.h"
@@ -88,13 +88,13 @@
 			if (sIndent == 0)
 				printf("\n");
 		}
-		
+
 		static void	Indent() {
 			for (int i = sIndent; --i >= 0; ) {
 				putchar(' '); putchar(' ');
 			}
 		}
-		
+
 		const char *mName;
 		static int sIndent;
 	};
@@ -126,7 +126,7 @@ CAAudioFile::CAAudioFile() :
 	mMode(kClosed),
 	mFileDataOffset(-1),
 	mFramesToSkipFollowingSeek(0),
-	
+
 	mClientOwnsIOBuffer(false),
 	mPacketDescs(NULL),
 	mNumPacketDescs(0),
@@ -229,7 +229,7 @@ void	CAAudioFile::CreateNew(const FSRef &parentDir, CFStringRef filename, AudioF
 {
 	LOG_FUNCTION("CAAudioFile::CreateNew", "%p", this);
 	XThrowIf(mMode != kClosed, kExtAudioFileError_InvalidOperationOrder, "file already open");
-	
+
 	mFileDataFormat = dataFormat;
 	if (layout) {
 		mFileChannelLayout = layout;
@@ -249,15 +249,15 @@ void	CAAudioFile::FileFormatChanged(const FSRef *parentDir, CFStringRef filename
 {
 	LOG_FUNCTION("CAAudioFile::FileFormatChanged", "%p", this);
 	XThrowIf(mMode != kPreparingToCreate && mMode != kPreparingToWrite, kExtAudioFileError_InvalidOperationOrder, "new file not prepared");
-	
+
 	UInt32 propertySize;
 	OSStatus err;
 	AudioStreamBasicDescription saveFileDataFormat = mFileDataFormat;
-	
+
 #if VERBOSE_CONVERTER
 	mFileDataFormat.PrintFormat(stdout, "", "Specified file data format");
 #endif
-	
+
 	// Find out the actual format the converter will produce. This is necessary in
 	// case the bitrate has forced a lower sample rate, which needs to be set correctly
 	// in the stream description passed to AudioFileCreate.
@@ -286,7 +286,7 @@ void	CAAudioFile::FileFormatChanged(const FSRef *parentDir, CFStringRef filename
 			free(layout);
 		}
 	}
-	
+
 	// create the output file
 	if (mMode == kPreparingToCreate) {
 		CAStreamBasicDescription newFileDataFormat = mFileDataFormat;
@@ -314,12 +314,12 @@ void	CAAudioFile::FileFormatChanged(const FSRef *parentDir, CFStringRef filename
 
 	if (mConverter != NULL) {
 		// encoder
-		// get the magic cookie, if any, from the converter		
+		// get the magic cookie, if any, from the converter
 		delete[] mMagicCookie;	mMagicCookie = NULL;
 		mMagicCookieSize = 0;
 
 		err = AudioConverterGetPropertyInfo(mConverter, kAudioConverterCompressionMagicCookie, &propertySize, NULL);
-		
+
 		// we can get a noErr result and also a propertySize == 0
 		// -- if the file format does support magic cookies, but this file doesn't have one.
 		if (err == noErr && propertySize > 0) {
@@ -338,7 +338,7 @@ void	CAAudioFile::FileFormatChanged(const FSRef *parentDir, CFStringRef filename
 				XThrowIfError(AudioFileSetProperty(mAudioFile, kAudioFilePropertyMagicCookieData, mMagicCookieSize, mMagicCookie), "set audio file's magic cookie");
 			}
 		}
-		
+
 		// get maximum packet size
 		propertySize = sizeof(UInt32);
 		XThrowIfError(AudioConverterGetProperty(mConverter, kAudioConverterPropertyMaximumOutputPacketSize, &propertySize, &mFileMaxPacketSize), "get audio converter's maximum output packet size");
@@ -347,7 +347,7 @@ void	CAAudioFile::FileFormatChanged(const FSRef *parentDir, CFStringRef filename
 	} else {
 		InitFileMaxPacketSize();
 	}
-	
+
 	if (mFileChannelLayout.IsValid() && mFileChannelLayout.NumberChannels() > 2) {
 		// don't bother tagging mono/stereo files
 		UInt32 isWritable;
@@ -366,7 +366,7 @@ void	CAAudioFile::FileFormatChanged(const FSRef *parentDir, CFStringRef filename
 #endif
 		}
 	}
-	
+
 	UpdateClientMaxPacketSize();	// also sets mFrame0Offset
 	mPacketMark = 0;
 	mFrameMark = 0;
@@ -429,11 +429,11 @@ void	CAAudioFile::GetExistingFileInfo()
 	LOG_FUNCTION("CAAudioFile::GetExistingFileInfo", "%p", this);
 	UInt32 propertySize;
 	OSStatus err;
-	
+
 	// get mFileDataFormat
 	propertySize = sizeof(AudioStreamBasicDescription);
 	XThrowIfError(AudioFileGetProperty(mAudioFile, kAudioFilePropertyDataFormat, &propertySize, &mFileDataFormat), "get audio file's data format");
-	
+
 	// get mFileChannelLayout
 	err = AudioFileGetPropertyInfo(mAudioFile, kAudioFilePropertyChannelLayout, &propertySize, NULL);
 	if (err == noErr && propertySize > 0) {
@@ -450,7 +450,7 @@ void	CAAudioFile::GetExistingFileInfo()
 	}
 	if (mMode != kReading)
 		return;
-	
+
 #if 0
 	// get mNumberPackets
 	propertySize = sizeof(mNumberPackets);
@@ -459,7 +459,7 @@ void	CAAudioFile::GetExistingFileInfo()
 	printf("CAAudioFile::GetExistingFileInfo: %qd packets\n", mNumberPackets);
 #endif
 #endif
-	
+
 	// get mMagicCookie
 	err = AudioFileGetPropertyInfo(mAudioFile, kAudioFilePropertyMagicCookieData, &propertySize, NULL);
 	if (err == noErr && propertySize > 0) {
@@ -470,7 +470,7 @@ void	CAAudioFile::GetExistingFileInfo()
 	InitFileMaxPacketSize();
 	mPacketMark = 0;
 	mFrameMark = 0;
-	
+
 	UpdateClientMaxPacketSize();
 }
 
@@ -495,9 +495,9 @@ void	CAAudioFile::SetClientFormat(const CAStreamBasicDescription &dataFormat, co
 {
 	LOG_FUNCTION("CAAudioFile::SetClientFormat", "%p", this);
 	XThrowIf(!dataFormat.IsPCM(), kExtAudioFileError_NonPCMClientFormat, "non-PCM client format on audio file");
-	
+
 	bool dataFormatChanging = (mClientDataFormat.mFormatID == 0 || mClientDataFormat != dataFormat);
-	
+
 	if (dataFormatChanging) {
 		CloseConverter();
 		if (mWriteBufferList) {
@@ -506,12 +506,12 @@ void	CAAudioFile::SetClientFormat(const CAStreamBasicDescription &dataFormat, co
 		}
 		mClientDataFormat = dataFormat;
 	}
-	
+
 	if (layout && layout->IsValid()) {
 		XThrowIf(layout->NumberChannels() != mClientDataFormat.NumberChannels(), kExtAudioFileError_InvalidChannelMap, "inappropriate channel map");
 		mClientChannelLayout = *layout;
 	}
-	
+
 	bool differentLayouts;
 	if (mClientChannelLayout.IsValid()) {
 		if (mFileChannelLayout.IsValid()) {
@@ -534,7 +534,7 @@ void	CAAudioFile::SetClientFormat(const CAStreamBasicDescription &dataFormat, co
 			printf("two invalid layouts\n");
 #endif
 	}
-	
+
 	if (mClientDataFormat != mFileDataFormat || differentLayouts) {
 		// We need an AudioConverter.
 		if (mMode == kReading) {
@@ -545,7 +545,7 @@ void	CAAudioFile::SetClientFormat(const CAStreamBasicDescription &dataFormat, co
 			if (mConverter == NULL)
 				XThrowIfError(AudioConverterNew(&mFileDataFormat, &mClientDataFormat, &mConverter),
 				"create audio converter");
-			
+
 #if VERBOSE_CONVERTER
 			printf("CAAudioFile %p -- created converter\n", this);
 			CAShow(mConverter);
@@ -558,7 +558,7 @@ void	CAAudioFile::SetClientFormat(const CAStreamBasicDescription &dataFormat, co
 
 			SetConverterChannelLayout(false, mFileChannelLayout);
 			SetConverterChannelLayout(true, mClientChannelLayout);
-			
+
 			// propagate leading/trailing frame counts
 			if (mFileDataFormat.mBitsPerChannel == 0) {
 				UInt32 propertySize;
@@ -592,7 +592,7 @@ void	CAAudioFile::SetClientFormat(const CAStreamBasicDescription &dataFormat, co
 
 // _______________________________________________________________________________________
 //
-OSStatus	CAAudioFile::SetConverterProperty(	
+OSStatus	CAAudioFile::SetConverterProperty(
 											AudioConverterPropertyID	inPropertyID,
 											UInt32						inPropertyDataSize,
 											const void*					inPropertyData,
@@ -620,7 +620,7 @@ void	CAAudioFile::SetConverterChannelLayout(bool output, const CAAudioChannelLay
 {
 	LOG_FUNCTION("CAAudioFile::SetConverterChannelLayout", "%p", this);
 	OSStatus err;
-	
+
 	if (layout.IsValid()) {
 #if VERBOSE_CHANNELMAP
 		printf("Setting converter's %s channel layout: %s\n", output ? "output" : "input",
@@ -660,11 +660,11 @@ void	CAAudioFile::UpdateClientMaxPacketSize()
 		AudioConverterPropertyID property = (mMode == kReading) ?
 			kAudioConverterPropertyMaximumOutputPacketSize :
 			kAudioConverterPropertyMaximumInputPacketSize;
-			
+
 		UInt32 propertySize = sizeof(UInt32);
 		XThrowIfError(AudioConverterGetProperty(mConverter, property, &propertySize, &mClientMaxPacketSize),
 			"get audio converter's maximum packet size");
-		
+
 		if (mFileDataFormat.mBitsPerChannel == 0) {
 			AudioConverterPrimeInfo primeInfo;
 			propertySize = sizeof(primeInfo);
@@ -693,7 +693,7 @@ void	CAAudioFile::AllocateBuffers(bool okToFail)
 	}
 	UInt32 bufferSizeBytes = mIOBufferSizeBytes = std::max(mIOBufferSizeBytes, mFileMaxPacketSize);
 		// must be big enough for at least one maximum size packet
-	
+
 	if (mIOBufferList.mBuffers[0].mDataByteSize != bufferSizeBytes) {
 		mIOBufferList.mNumberBuffers = 1;
 		mIOBufferList.mBuffers[0].mNumberChannels = mFileDataFormat.mChannelsPerFrame;
@@ -705,7 +705,7 @@ void	CAAudioFile::AllocateBuffers(bool okToFail)
 		mIOBufferList.mBuffers[0].mDataByteSize = bufferSizeBytes;
 		mIOBufferSizePackets = bufferSizeBytes / mFileMaxPacketSize;
 	}
-	
+
 	UInt32 propertySize = sizeof(UInt32);
 	UInt32 externallyFramed;
 	XThrowIfError(AudioFormatGetProperty(kAudioFormatProperty_FormatIsExternallyFramed,
@@ -766,7 +766,7 @@ SInt64  CAAudioFile::PacketToFrame(SInt64 packet) const
 {
 	AudioFramePacketTranslation trans;
 	UInt32 propertySize;
-	
+
 	switch (mFileDataFormat.mFramesPerPacket) {
 	case 1:
 		return packet;
@@ -784,7 +784,7 @@ SInt64	CAAudioFile::FrameToPacket(SInt64 inFrame) const
 {
 	AudioFramePacketTranslation trans;
 	UInt32 propertySize;
-	
+
 	switch (mFileDataFormat.mFramesPerPacket) {
 	case 1:
 		return inFrame;
@@ -815,7 +815,7 @@ void	CAAudioFile::SeekToPacket(SInt64 packetNumber)
 	if (mPacketMark == packetNumber)
 		return; // already there! don't reset converter
 	mPacketMark = packetNumber;
-	
+
 	mFrameMark = PacketToFrame(packetNumber) - mFrame0Offset;
 	mFramesToSkipFollowingSeek = 0;
 	if (mConverter)
@@ -825,7 +825,7 @@ void	CAAudioFile::SeekToPacket(SInt64 packetNumber)
 
 /*
 	Example: AAC, 1024 frames/packet, 2112 frame offset
-	
+
                                            2112
                                              |
     Absolute frames:  0       1024      2048 |    3072
@@ -838,7 +838,7 @@ void	CAAudioFile::SeekToPacket(SInt64 packetNumber)
 
 	*   Offset between absolute and client frames is mFrame0Offset.
 	*** mFrameMark is in client frames ***
-	
+
 	Examples:
 		clientFrame					0		960		1000	1024
 		absoluteFrame				2112	3072	3112	3136
@@ -857,7 +857,7 @@ void	CAAudioFile::Seek(SInt64 clientFrame)
 #if VERBOSE_IO
 	SInt64 prevFrameMark = mFrameMark;
 #endif
-	
+
 	SInt64 packet;
 	packet = FrameToPacket(clientFrame);
 	if (packet < 0)
@@ -866,7 +866,7 @@ void	CAAudioFile::Seek(SInt64 clientFrame)
 	// this will have backed up mFrameMark to match the beginning of the packet
 	mFramesToSkipFollowingSeek = std::max(UInt32(clientFrame - mFrameMark), UInt32(0));
 	mFrameMark = clientFrame;
-	
+
 #if VERBOSE_IO
 	printf("CAAudioFile::SeekToFrame: frame %qd (from %qd), packet %qd, skip %ld frames\n", mFrameMark, prevFrameMark, packet, mFramesToSkipFollowingSeek);
 #endif
@@ -889,12 +889,12 @@ void	CAAudioFile::Read(UInt32 &ioNumPackets, AudioBufferList *ioData)
 		AllocateBuffers();
 	}
 	UInt32 bufferSizeBytes = ioData->mBuffers[0].mDataByteSize;
-	UInt32 maxNumPackets = bufferSizeBytes / mClientMaxPacketSize;	
+	UInt32 maxNumPackets = bufferSizeBytes / mClientMaxPacketSize;
 	// older versions of AudioConverterFillComplexBuffer don't do this, so do our own sanity check
 	UInt32 nPackets = std::min(ioNumPackets, maxNumPackets);
-	
+
 	mMaxPacketsToRead = ~0UL;
-	
+
 	if (mClientDataFormat.mFramesPerPacket == 1) {  // PCM or equivalent
 		while (mFramesToSkipFollowingSeek > 0) {
 			UInt32 skipFrames = std::min(mFramesToSkipFollowingSeek, maxNumPackets);
@@ -931,7 +931,7 @@ void	CAAudioFile::Read(UInt32 &ioNumPackets, AudioBufferList *ioData)
 				ioData->mBuffers[i].mDataByteSize = bufferSizeBytes;
 		}
 	}
-	
+
 	if (mFileDataFormat.mFramesPerPacket > 0)
 		// don't read more packets than we are being asked to produce
 		mMaxPacketsToRead = nPackets / mFileDataFormat.mFramesPerPacket + 1;
@@ -950,7 +950,7 @@ void	CAAudioFile::Read(UInt32 &ioNumPackets, AudioBufferList *ioData)
 	}
 	if (mClientDataFormat.mFramesPerPacket == 1)
 		mFrameMark += nPackets;
-	
+
 	ioNumPackets = nPackets;
 }
 
@@ -977,7 +977,7 @@ OSStatus CAAudioFile::ReadInputProc(	AudioConverterRef				inAudioConverter,
 		return noErr;	// not eofErr; EOF is signified by 0 packets/0 bytes
 	}
 #endif
-	
+
 	// determine how much to read
 	AudioBufferList *readBuffer;
 	UInt32 readPackets;
@@ -1003,11 +1003,11 @@ OSStatus CAAudioFile::ReadInputProc(	AudioConverterRef				inAudioConverter,
 #endif
 		readPackets = This->mMaxPacketsToRead;
 	}
-	
+
 	// read
 	UInt32 bytesRead;
 	OSStatus err;
-	
+
 	StartTiming(This, read);
 	StartTiming(This, readinconv);
 	err = AudioFileReadPackets(This->mAudioFile, This->mUseCache, &bytesRead, This->mPacketDescs, This->mPacketMark, &readPackets, readBuffer->mBuffers[0].mData);
@@ -1020,7 +1020,7 @@ OSStatus CAAudioFile::ReadInputProc(	AudioConverterRef				inAudioConverter,
 		DebugMessageN1("Error %ld from AudioFileReadPackets!!!\n", err);
 		return err;
 	}
-	
+
 #if VERBOSE_IO
 	printf("CAAudioFile::ReadInputProc: read %ld packets (%qd-%qd), %ld bytes, err %ld\n", readPackets, This->mPacketMark, This->mPacketMark + readPackets, bytesRead, err);
 #if VERBOSE_IO >= 2
@@ -1108,7 +1108,7 @@ void	CAAudioFile::FlushEncoder()
 			OSStatus err;
 			AudioConverterPrimeInfo primeInfo;
 			propertySize = sizeof(primeInfo);
-	
+
 			err = AudioConverterGetProperty(mConverter, kAudioConverterPrimeInfo, &propertySize, &primeInfo);
 			if (err == noErr) {
 				AudioFilePacketTableInfo pti;
@@ -1165,9 +1165,9 @@ static void	hexdump(const void *addr, long len)
 {
 	const Byte *p = (Byte *)addr;
 	UInt32 offset = 0;
-	
+
 	if (len > 0x400) len = 0x400;
-	
+
 	while (len > 0) {
 		int n = len > 16 ? 16 : len;
 		printf("%08lX:  ", offset);

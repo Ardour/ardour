@@ -182,7 +182,7 @@ char*
 MD5::digestFile (char *filename)
 {
 	Init();
-		
+
 	FILE *file;
 	int len;
 	unsigned char buffer[1024];
@@ -226,9 +226,9 @@ void
 MD5::Transform (uint32_t state[4], uint8_t const * block)
 {
 	uint32_t a = state[0], b = state[1], c = state[2], d = state[3], x[16];
-		
+
 	Decode (x, block, 64);
-		
+
 	/* Round 1 */
 	FF (a, b, c, d, x[ 0], S11, 0xd76aa478); /* 1 */
 	FF (d, a, b, c, x[ 1], S12, 0xe8c7b756); /* 2 */
@@ -246,7 +246,7 @@ MD5::Transform (uint32_t state[4], uint8_t const * block)
 	FF (d, a, b, c, x[13], S12, 0xfd987193); /* 14 */
 	FF (c, d, a, b, x[14], S13, 0xa679438e); /* 15 */
 	FF (b, c, d, a, x[15], S14, 0x49b40821); /* 16 */
-		
+
 	/* Round 2 */
 	GG (a, b, c, d, x[ 1], S21, 0xf61e2562); /* 17 */
 	GG (d, a, b, c, x[ 6], S22, 0xc040b340); /* 18 */
@@ -264,7 +264,7 @@ MD5::Transform (uint32_t state[4], uint8_t const * block)
 	GG (d, a, b, c, x[ 2], S22, 0xfcefa3f8); /* 30 */
 	GG (c, d, a, b, x[ 7], S23, 0x676f02d9); /* 31 */
 	GG (b, c, d, a, x[12], S24, 0x8d2a4c8a); /* 32 */
-		
+
 	/* Round 3 */
 	HH (a, b, c, d, x[ 5], S31, 0xfffa3942); /* 33 */
 	HH (d, a, b, c, x[ 8], S32, 0x8771f681); /* 34 */
@@ -334,7 +334,7 @@ void
 MD5::Decode (uint32_t *output, uint8_t const * input, size_t len)
 {
 	size_t i, j;
-	
+
 	for (i = 0, j = 0; j < len; i++, j += 4)
 		output[i] = ((uint32_t)input[j]) | (((uint32_t)input[j+1]) << 8) |
 			(((uint32_t)input[j+2]) << 16) | (((uint32_t)input[j+3]) << 24);

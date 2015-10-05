@@ -312,7 +312,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* Timecode status signals */
 	PBD::Signal1<void, bool> MTCSyncStateChanged;
-	PBD::Signal1<void, bool> LTCSyncStateChanged;	
+	PBD::Signal1<void, bool> LTCSyncStateChanged;
 
 	/* Record status signals */
 
@@ -362,7 +362,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* Timecode state signals */
 	PBD::Signal0<void> MtcOrLtcInputPortChanged;
-	
+
 	void queue_event (SessionEvent*);
 
 	void request_roll_at_and_return (framepos_t start, framepos_t return_to);
@@ -427,7 +427,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	framecnt_t worst_input_latency ()  const { return _worst_input_latency; }
 	framecnt_t worst_track_latency ()  const { return _worst_track_latency; }
 	framecnt_t worst_playback_latency () const { return _worst_output_latency + _worst_track_latency; }
-	
+
 	struct SaveAs {
 		std::string new_parent_folder;  /* parent folder where new session folder will be created */
 		std::string new_name;           /* name of newly saved session */
@@ -437,7 +437,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		bool        copy_external; /* true if external media should be consolidated into the newly saved session; false otherwise */
 
 		std::string final_session_folder_name; /* filled in by * Session::save_as(), provides full path to newly saved session */
-		
+
 		/* emitted as we make progress. 3 arguments passed to signal
 		 * handler:
 		 *
@@ -582,7 +582,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	AudioEngine const & engine () const { return _engine; }
 
 	static std::string default_track_name_pattern (DataType);
-	
+
 	/* Time */
 
 	framepos_t transport_frame () const {return _transport_frame; }
@@ -625,7 +625,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool   synced_to_engine() const { return _slave && config.get_external_sync() && Config->get_sync_source() == Engine; }
 	bool   synced_to_mtc () const { return config.get_external_sync() && Config->get_sync_source() == MTC && g_atomic_int_get (const_cast<gint*>(&_mtc_active)); }
 	bool   synced_to_ltc () const { return config.get_external_sync() && Config->get_sync_source() == LTC && g_atomic_int_get (const_cast<gint*>(&_ltc_active)); }
-	
+
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }
 	bool   transport_rolling() const { return _transport_speed != 0.0f; }
@@ -877,7 +877,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void set_object_selection (framepos_t start, framepos_t end);
 	void clear_range_selection ();
 	void clear_object_selection ();
-	
+
 	/* buffers for gain and pan */
 
 	gain_t* gain_automation_buffer () const;
@@ -901,7 +901,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		void* ptr,
 		float opt
 		);
-			
+
 	static PBD::Signal0<void> SendFeedback;
 
 	/* Speakers */
@@ -1025,7 +1025,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	boost::shared_ptr<MidiPort> scene_in () const;
 	boost::shared_ptr<MidiPort> scene_out () const;
-	
+
 	boost::shared_ptr<MidiPort> midi_clock_output_port () const;
 	boost::shared_ptr<MidiPort> midi_clock_input_port () const;
 	boost::shared_ptr<MidiPort> mtc_output_port () const;
@@ -1039,7 +1039,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void reconnect_ltc_input ();
 	void reconnect_ltc_output ();
-	
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
@@ -1115,7 +1115,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	PBD::ScopedConnection mtc_status_connection;
 	void ltc_status_changed (bool);
 	PBD::ScopedConnection ltc_status_connection;
-	
+
 	void initialize_latencies ();
 	void set_worst_io_latencies ();
 	void set_worst_playback_latency ();
@@ -1319,7 +1319,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	int  post_engine_init ();
 	int  immediately_post_engine ();
 	void remove_empty_sounds ();
-	
+
 	void session_loaded ();
 
 	void setup_midi_control ();
@@ -1485,7 +1485,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void set_track_loop (bool);
 	bool select_playhead_priority_target (framepos_t&);
 	void follow_playhead_priority ();
-	
+
 	/* These are synchronous and so can only be called from within the process
 	 * cycle
 	 */
@@ -1712,7 +1712,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	*/
 	Evoral::Range<framepos_t> _range_selection;
 	Evoral::Range<framepos_t> _object_selection;
-	
+
 	/* main outs */
 	uint32_t main_outs;
 
@@ -1770,7 +1770,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		ev->rt_slot = boost::bind (method, this, rl, targ, group_override);
 		ev->rt_return = after;
 		ev->event_loop = PBD::EventLoop::get_event_loop_for_thread ();
-		
+
 		return ev;
 	}
 
@@ -1824,16 +1824,16 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* Scene Changing */
 	SceneChanger* _scene_changer;
-	
+
 	/* persistent, non-track related MIDI ports */
 	MidiPortManager* _midi_ports;
 	MIDI::MachineControl* _mmc;
-	
+
 	void setup_ltc ();
 	void setup_click ();
 	void setup_click_state (const XMLNode*);
 	void setup_bundles ();
-	
+
 	void save_as_bring_callback (uint32_t, uint32_t, std::string);
 
 	static int get_session_info_from_path (XMLTree& state_tree, const std::string& xmlpath);

@@ -70,7 +70,7 @@ GraphEdges::has (GraphVertex from, GraphVertex to, bool* via_sends_only)
 	if (i == _from_to_with_sends.end ()) {
 		return false;
 	}
-	
+
 	if (via_sends_only) {
 		*via_sends_only = i->second.second;
 	}
@@ -86,7 +86,7 @@ GraphEdges::from (GraphVertex r) const
 	if (i == _from_to.end ()) {
 		return set<GraphVertex> ();
 	}
-	
+
 	return i->second;
 }
 
@@ -99,7 +99,7 @@ GraphEdges::remove (GraphVertex from, GraphVertex to)
 	if (i->second.empty ()) {
 		_from_to.erase (i);
 	}
-	
+
 	EdgeMap::iterator j = _to_from.find (to);
 	assert (j != _to_from.end ());
 	j->second.erase (from);
@@ -139,7 +139,7 @@ GraphEdges::dump () const
 		}
 		cout << "\n";
 	}
-	
+
 	for (EdgeMap::const_iterator i = _to_from.begin(); i != _to_from.end(); ++i) {
 		cout << "TO: " << i->first->name() << " ";
 		for (set<GraphVertex>::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
@@ -197,7 +197,7 @@ ARDOUR::topological_sort (
 	)
 {
 	boost::shared_ptr<RouteList> sorted_routes (new RouteList);
-	
+
 	/* queue of routes to process */
 	RouteList queue;
 
@@ -217,7 +217,7 @@ ARDOUR::topological_sort (
 	/* Do the sort: algorithm is Kahn's from Wikipedia.
 	   `Topological sorting of large networks', Communications of the ACM 5(11):558-562.
 	*/
-	
+
 	while (!queue.empty ()) {
 		GraphVertex r = queue.front ();
 		queue.pop_front ();

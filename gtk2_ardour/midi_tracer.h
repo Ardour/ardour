@@ -57,7 +57,7 @@ class MidiTracer : public ArdourWindow
 	Gtk::Label line_count_label;
 	Gtk::HBox line_count_box;
 	struct timeval _last_receipt;
-	
+
 	bool autoscroll;
 	bool show_hex;
 	bool show_delta_time;

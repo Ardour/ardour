@@ -46,11 +46,11 @@ model_t* hmm_init(double** x, int T, int L, int N)
 {
 	int i, j, d, e, t;
 	double s, ss;
-	
+
 	model_t* model;
 	model = (model_t*) malloc(sizeof(model_t));
 	model->N = N;
-	model->L = L;	
+	model->L = L;
 	model->p0 = (double*) malloc(N*sizeof(double));
 	model->a = (double**) malloc(N*sizeof(double*));
 	model->mu = (double**) malloc(N*sizeof(double*));
@@ -62,10 +62,10 @@ model_t* hmm_init(double** x, int T, int L, int N)
 	model->cov = (double**) malloc(L*sizeof(double*));
 	for (i = 0; i < L; i++)
 		model->cov[i] = (double*) malloc(L*sizeof(double));
-	
+
 	srand(time(0));
 	double* global_mean = (double*) malloc(L*sizeof(double));
-	
+
 	/* find global mean */
 	for (d = 0; d < L; d++)
 	{
@@ -74,7 +74,7 @@ model_t* hmm_init(double** x, int T, int L, int N)
 			global_mean[d] += x[t][d];
 		global_mean[d] /= T;
 	}
-	
+
 	/* calculate global diagonal covariance */
 	for (d = 0; d < L; d++)
 	{
@@ -84,7 +84,7 @@ model_t* hmm_init(double** x, int T, int L, int N)
 			model->cov[d][d] += (x[t][d] - global_mean[d]) * (x[t][d] - global_mean[d]);
 		model->cov[d][d] /= T-1;
 	}
-	
+
 	/* set all means close to global mean */
 	for (i = 0; i < N; i++)
 	{
@@ -94,8 +94,8 @@ model_t* hmm_init(double** x, int T, int L, int N)
 			/* ideally the random number would be Gaussian(0,1), as a hack we make it uniform on [-0.25,0.25] */
 			model->mu[i][d] = global_mean[d] + (0.5 * rand() / (double) RAND_MAX - 0.25) * sqrt(model->cov[d][d]);
 		}
-	}	
-	
+	}
+
 	/* random intial and transition probs */
 	s = 0;
 	for (i = 0; i < N; i++)
@@ -115,16 +115,16 @@ model_t* hmm_init(double** x, int T, int L, int N)
 	}
 	for (i = 0; i < N; i++)
 		model->p0[i] /= s;
-	
+
 	free(global_mean);
-	
+
 	return model;
 }
 
 void hmm_close(model_t* model)
 {
 	int i;
-	
+
 	for (i = 0; i < model->N; i++)
 	{
 		free(model->a[i]);
@@ -134,23 +134,23 @@ void hmm_close(model_t* model)
 	free(model->mu);
 	for (i = 0; i < model->L; i++)
 		free(model->cov[i]);
-	free(model->cov);	
-	free(model);	
+	free(model->cov);
+	free(model);
 }
 
 void hmm_train(double** x, int T, model_t* model)
 {
 	int i, t;
 	double loglik;	/* overall log-likelihood at each iteration */
-	
+
 	int N = model->N;
 	int L = model->L;
 	double* p0 = model->p0;
 	double** a = model->a;
 	double** mu = model->mu;
 	double** cov = model->cov;
-	
-	/* allocate memory */	
+
+	/* allocate memory */
 	double** gamma = (double**) malloc(T*sizeof(double*));
 	double*** xi = (double***) malloc(T*sizeof(double**));
 	for (t = 0; t < T; t++)
@@ -160,45 +160,45 @@ void hmm_train(double** x, int T, model_t* model)
 		for (i = 0; i < N; i++)
 			xi[t][i] = (double*) malloc(N*sizeof(double));
 	}
-	
+
 	/* temporary memory */
 	double* gauss_y = (double*) malloc(L*sizeof(double));
-	double* gauss_z = (double*) malloc(L*sizeof(double));	
-			
+	double* gauss_z = (double*) malloc(L*sizeof(double));
+
 	/* obs probs P(j|{x}) */
 	double** b = (double**) malloc(T*sizeof(double*));
 	for (t = 0; t < T; t++)
 		b[t] = (double*) malloc(N*sizeof(double));
-	
+
 	/* inverse covariance and its determinant */
 	double** icov = (double**) malloc(L*sizeof(double*));
 	for (i = 0; i < L; i++)
 		icov[i] = (double*) malloc(L*sizeof(double));
 	double detcov;
-	
+
 	double thresh = 0.0001;
-	int niter = 50;	
+	int niter = 50;
 	int iter = 0;
 	double loglik1, loglik2;
 	int foundnan = 0;
 
-	while (iter < niter && !foundnan && !(iter > 1 && (loglik - loglik1) < thresh * (loglik1 - loglik2)))	
+	while (iter < niter && !foundnan && !(iter > 1 && (loglik - loglik1) < thresh * (loglik1 - loglik2)))
 	{
 		++iter;
-/*		
+/*
 		fprintf(stderr, "calculating obsprobs...\n");
 		fflush(stderr);
-*/		
+*/
 		/* precalculate obs probs */
 		invert(cov, L, icov, &detcov);
-		
+
 		for (t = 0; t < T; t++)
 		{
 			//int allzero = 1;
 			for (i = 0; i < N; i++)
 			{
 				b[t][i] = exp(loggauss(x[t], L, mu[i], icov, detcov, gauss_y, gauss_z));
-		
+
 				//if (b[t][i] != 0)
 				//	allzero = 0;
 			}
@@ -213,13 +213,13 @@ void hmm_train(double** x, int T, model_t* model)
 			}
 			*/
 		}
-/*		
+/*
 		fprintf(stderr, "forwards-backwards...\n");
 		fflush(stderr);
-*/		
+*/
 		forward_backwards(xi, gamma, &loglik, &loglik1, &loglik2, iter, N, T, p0, a, b);
-/*		
-		fprintf(stderr, "iteration %d: loglik = %f\n", iter, loglik);		
+/*
+		fprintf(stderr, "iteration %d: loglik = %f\n", iter, loglik);
 		fprintf(stderr, "re-estimation...\n");
 		fflush(stderr);
 */
@@ -227,9 +227,9 @@ void hmm_train(double** x, int T, model_t* model)
 		    foundnan = 1;
 		    continue;
 		}
-		
+
 		baum_welch(p0, a, mu, cov, N, T, L, x, xi, gamma);
-			
+
 		/*
 		printf("a:\n");
 		for (i = 0; i < model->N; i++)
@@ -242,7 +242,7 @@ void hmm_train(double** x, int T, model_t* model)
 		 */
 		//hmm_print(model);
 	}
-	
+
 	/* deallocate memory */
 	for (t = 0; t < T; t++)
 	{
@@ -254,12 +254,12 @@ void hmm_train(double** x, int T, model_t* model)
 	}
 	free(gamma);
 	free(xi);
-	free(b);	
-	
+	free(b);
+
 	for (i = 0; i < L; i++)
 		free(icov[i]);
 	free(icov);
-	
+
 	free(gauss_y);
 	free(gauss_z);
 }
@@ -267,27 +267,27 @@ void hmm_train(double** x, int T, model_t* model)
 void mlss_reestimate(double* p0, double** a, double** mu, double** cov, int N, int T, int L, int* q, double** x)
 {
 	/* fit a single Gaussian to observations in each state */
-	
+
 	/* calculate the mean observation in each state */
-	
+
 	/* calculate the overall covariance */
-	
+
 	/* count transitions */
-	
+
 	/* estimate initial probs from transitions (???) */
 }
 
 void baum_welch(double* p0, double** a, double** mu, double** cov, int N, int T, int L, double** x, double*** xi, double** gamma)
 {
 	int i, j, t;
-	
+
 	double* sum_gamma = (double*) malloc(N*sizeof(double));
-	
+
 	/* temporary memory */
 	double* u = (double*) malloc(L*L*sizeof(double));
 	double* yy = (double*) malloc(T*L*sizeof(double));
-	double* yy2 = (double*) malloc(T*L*sizeof(double));	
-	
+	double* yy2 = (double*) malloc(T*L*sizeof(double));
+
 	/* re-estimate transition probs */
 	for (i = 0; i < N; i++)
 	{
@@ -295,7 +295,7 @@ void baum_welch(double* p0, double** a, double** mu, double** cov, int N, int T,
 		for (t = 0; t < T-1; t++)
 			sum_gamma[i] += gamma[t][i];
 	}
-	
+
 	for (i = 0; i < N; i++)
 	{
 		if (sum_gamma[i] == 0)
@@ -310,7 +310,7 @@ void baum_welch(double* p0, double** a, double** mu, double** cov, int N, int T,
 			for (t = 0; t < T-1; t++)
 				a[i][j] += xi[t][i][j];
 			//s += a[i][j];
-			a[i][j] /= sum_gamma[i];	
+			a[i][j] /= sum_gamma[i];
 		}
 		/*
 		 for (j = 0; j < N; j++)
@@ -319,21 +319,21 @@ void baum_welch(double* p0, double** a, double** mu, double** cov, int N, int T,
 		 }
 		 */
 	}
-	
+
 	/* NB: now we need to sum gamma over all t */
 	for (i = 0; i < N; i++)
 		sum_gamma[i] += gamma[T-1][i];
-	
+
 	/* re-estimate initial probs */
 	for (i = 0; i < N; i++)
 		p0[i] = gamma[0][i];
-	
+
 	/* re-estimate covariance */
 	int d, e;
 	double sum_sum_gamma = 0;
 	for (i = 0; i < N; i++)
-		sum_sum_gamma += sum_gamma[i];		
-	
+		sum_sum_gamma += sum_gamma[i];
+
 	/*
 	 for (d = 0; d < L; d++)
 	 {
@@ -343,9 +343,9 @@ void baum_welch(double* p0, double** a, double** mu, double** cov, int N, int T,
 			 for (t = 0; t < T; t++)
 				 for (j = 0; j < N; j++)
 					 cov[d][e] += gamma[t][j] * (x[t][d] - mu[j][d]) * (x[t][e] - mu[j][e]);
-			
+
 			 cov[d][e] /= sum_sum_gamma;
-			
+
 			 if (ISNAN(cov[d][e]))
 			 {
 				 printf("cov[%d][%d] was nan\n", d, e);
@@ -365,12 +365,12 @@ void baum_welch(double* p0, double** a, double** mu, double** cov, int N, int T,
 	 for (e = 0; e < d; e++)
 	 cov[d][e] = cov[e][d];
 	 */
-	
+
 	/* using BLAS */
 	for (d = 0; d < L; d++)
 		for (e = 0; e < L; e++)
 			cov[d][e] = 0;
-	
+
 	for (j = 0; j < N; j++)
 	{
 		for (d = 0; d < L; d++)
@@ -379,20 +379,20 @@ void baum_welch(double* p0, double** a, double** mu, double** cov, int N, int T,
 				yy[d*T+t] = x[t][d] - mu[j][d];
 				yy2[d*T+t] = gamma[t][j] * (x[t][d] - mu[j][d]);
 			}
-				
+
 				cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, L, L, T, 1.0, yy, T, yy2, T, 0, u, L);
-		
+
 		for (e = 0; e < L; e++)
 			for (d = 0; d < L; d++)
 				cov[d][e] += u[e*L+d];
 	}
-	
+
 	for (d = 0; d < L; d++)
 		for (e = 0; e < L; e++)
-			cov[d][e] /= T; /* sum_sum_gamma; */			
-	
+			cov[d][e] /= T; /* sum_sum_gamma; */
+
 	//printf("sum_sum_gamma = %f\n", sum_sum_gamma); /* fine, = T IS THIS ALWAYS TRUE with pooled cov?? */
-	
+
 	/* re-estimate means */
 	for (j = 0; j < N; j++)
 	{
@@ -404,7 +404,7 @@ void baum_welch(double* p0, double** a, double** mu, double** cov, int N, int T,
 			mu[j][d] /= sum_gamma[j];
 		}
 	}
-	
+
 	/* deallocate memory */
 	free(sum_gamma);
 	free(yy);
@@ -416,7 +416,7 @@ void forward_backwards(double*** xi, double** gamma, double* loglik, double* log
 {
 	/* forwards-backwards with scaling */
 	int i, j, t;
-	
+
 	double** alpha = (double**) malloc(T*sizeof(double*));
 	double** beta = (double**) malloc(T*sizeof(double*));
 	for (t = 0; t < T; t++)
@@ -424,34 +424,34 @@ void forward_backwards(double*** xi, double** gamma, double* loglik, double* log
 		alpha[t] = (double*) malloc(N*sizeof(double));
 		beta[t] = (double*) malloc(N*sizeof(double));
 	}
-	
+
 	/* scaling coefficients */
 	double* c = (double*) malloc(T*sizeof(double));
-	
+
 	/* calculate forward probs and scale coefficients */
 	c[0] = 0;
 	for (i = 0; i < N; i++)
 	{
 		alpha[0][i] = p0[i] * b[0][i];
 		c[0] += alpha[0][i];
-		
+
 		//printf("p0[%d] = %f, b[0][%d] = %f\n", i, p0[i], i, b[0][i]);
 	}
 	c[0] = 1 / c[0];
 	for (i = 0; i < N; i++)
 	{
-		alpha[0][i] *= c[0];		
-		
+		alpha[0][i] *= c[0];
+
 		//printf("alpha[0][%d] = %f\n", i, alpha[0][i]);	/* OK agrees with Matlab */
 	}
-	
+
 	*loglik1 = *loglik;
 	*loglik = -log(c[0]);
 	if (iter == 2)
 		*loglik2 = *loglik;
-	
+
 	for (t = 1; t < T; t++)
-	{			
+	{
 		c[t] = 0;
 		for (j = 0; j < N; j++)
 		{
@@ -459,10 +459,10 @@ void forward_backwards(double*** xi, double** gamma, double* loglik, double* log
 			for (i = 0; i < N; i++)
 				alpha[t][j] += alpha[t-1][i] * a[i][j];
 			alpha[t][j] *= b[t][j];
-			
+
 			c[t] += alpha[t][j];
 		}
-		
+
 		/*
 		 if (c[t] == 0)
 		 {
@@ -477,16 +477,16 @@ void forward_backwards(double*** xi, double** gamma, double* loglik, double* log
 			 exit(-1);
 		 }
 		 */
-		
+
 		c[t] = 1 / c[t];
 		for (j = 0; j < N; j++)
 			alpha[t][j] *= c[t];
-		
+
 		//printf("c[%d] = %e\n", t, c[t]);
-		
+
 		*loglik -= log(c[t]);
 	}
-	
+
 	/* calculate backwards probs using same coefficients */
 	for (i = 0; i < N; i++)
 		beta[T-1][i] = 1;
@@ -495,20 +495,20 @@ void forward_backwards(double*** xi, double** gamma, double* loglik, double* log
 	{
 		for (i = 0; i < N; i++)
 			beta[t][i] *= c[t];
-		
+
 		if (t == 0)
 			break;
-		
+
 		for (i = 0; i < N; i++)
 		{
 			beta[t-1][i] = 0;
 			for (j = 0; j < N; j++)
 				beta[t-1][i] += a[i][j] * b[t][j] * beta[t][j];
 		}
-		
+
 		t--;
 	}
-	
+
 	/*
 	 printf("alpha:\n");
 	 for (t = 0; t < T; t++)
@@ -526,7 +526,7 @@ void forward_backwards(double*** xi, double** gamma, double* loglik, double* log
 	 }
 	 printf("\n\n");
 	 */
-	
+
 	/* calculate posterior probs */
 	double tot;
 	for (t = 0; t < T; t++)
@@ -539,12 +539,12 @@ void forward_backwards(double*** xi, double** gamma, double* loglik, double* log
 		}
 		for (i = 0; i < N; i++)
 		{
-			gamma[t][i] /= tot;				
-			
-			//printf("gamma[%d][%d] = %f\n", t, i, gamma[t][i]);				
+			gamma[t][i] /= tot;
+
+			//printf("gamma[%d][%d] = %f\n", t, i, gamma[t][i]);
 		}
-	}		
-	
+	}
+
 	for (t = 0; t < T-1; t++)
 	{
 		tot = 0;
@@ -560,7 +560,7 @@ void forward_backwards(double*** xi, double** gamma, double* loglik, double* log
 			for (j = 0; j < N; j++)
 				xi[t][i][j] /= tot;
 	}
-	
+
 	/*
 	 // CHECK - fine
 	 // gamma[t][i] = \sum_j{xi[t][i][j]}
@@ -568,8 +568,8 @@ void forward_backwards(double*** xi, double** gamma, double* loglik, double* log
 	 for (j = 0; j < N; j++)
 	 tot += xi[3][1][j];
 	 printf("gamma[3][1] = %f, sum_j(xi[3][1][j]) = %f\n", gamma[3][1], tot);
-	 */	
-	
+	 */
+
 	for (t = 0; t < T; t++)
 	{
 		free(alpha[t]);
@@ -585,20 +585,20 @@ void viterbi_decode(double** x, int T, model_t* model, int* q)
 	int i, j, t;
 	double max;
 	int havemax;
-	
+
 	int N = model->N;
 	int L = model->L;
 	double* p0 = model->p0;
 	double** a = model->a;
 	double** mu = model->mu;
 	double** cov = model->cov;
-	
+
 	/* inverse covariance and its determinant */
 	double** icov = (double**) malloc(L*sizeof(double*));
 	for (i = 0; i < L; i++)
 		icov[i] = (double*) malloc(L*sizeof(double));
 	double detcov;
-	
+
 	double** logb = (double**) malloc(T*sizeof(double*));
 	double** phi = (double**) malloc(T*sizeof(double*));
 	int** psi = (int**) malloc(T*sizeof(int*));
@@ -608,24 +608,24 @@ void viterbi_decode(double** x, int T, model_t* model, int* q)
 		phi[t] = (double*) malloc(N*sizeof(double));
 		psi[t] = (int*) malloc(N*sizeof(int));
 	}
-	
+
 	/* temporary memory */
 	double* gauss_y = (double*) malloc(L*sizeof(double));
-	double* gauss_z = (double*) malloc(L*sizeof(double));	
-	
+	double* gauss_z = (double*) malloc(L*sizeof(double));
+
 	/* calculate observation logprobs */
 	invert(cov, L, icov, &detcov);
 	for (t = 0; t < T; t++)
 		for (i = 0; i < N; i++)
 			logb[t][i] = loggauss(x[t], L, mu[i], icov, detcov, gauss_y, gauss_z);
-	
+
 	/* initialise */
 	for (i = 0; i < N; i++)
 	{
 		phi[0][i] = log(p0[i]) + logb[0][i];
 		psi[0][i] = 0;
 	}
-	
+
 	for (t = 1; t < T; t++)
 	{
 		for (j = 0; j < N; j++)
@@ -646,7 +646,7 @@ void viterbi_decode(double** x, int T, model_t* model, int* q)
 			}
 		}
 	}
-	
+
 	/* find maximising state at time T-1 */
 	max = phi[T-1][0];
 	q[T-1] = 0;
@@ -659,7 +659,7 @@ void viterbi_decode(double** x, int T, model_t* model, int* q)
 		}
 	}
 
-	
+
 	/* track back */
 	t = T - 2;
 	while (t >= 0)
@@ -667,7 +667,7 @@ void viterbi_decode(double** x, int T, model_t* model, int* q)
 		q[t] = psi[t+1][q[t+1]];
 		t--;
 	}
-	
+
 	/* de-allocate memory */
 	for (i = 0; i < L; i++)
 		free(icov[i]);
@@ -681,7 +681,7 @@ void viterbi_decode(double** x, int T, model_t* model, int* q)
 	free(logb);
 	free(phi);
 	free(psi);
-	
+
 	free(gauss_y);
 	free(gauss_z);
 }
@@ -695,11 +695,11 @@ void invert(double** cov, int L, double** icov, double* detcov)
 	for(j=0; j < L; j++)
 		for (i=0; i < L; i++)
 			a[j*L+i] = cov[i][j];
-	
-	int M = (int) L;	
+
+	int M = (int) L;
 	int* ipiv = (int *) malloc(L*L*sizeof(int));
 	int ret;
-	
+
 	/* LU decomposition */
 	ret = dgetrf_(&M, &M, a, &M, ipiv, &ret);	/* ret should be zero, negative if cov is singular */
 	if (ret < 0)
@@ -707,7 +707,7 @@ void invert(double** cov, int L, double** icov, double* detcov)
 		fprintf(stderr, "Covariance matrix was singular, couldn't invert\n");
 		exit(-1);
 	}
-	
+
 	/* find determinant */
 	double det = 1;
 	for(i = 0; i < L; i++)
@@ -723,27 +723,27 @@ void invert(double** cov, int L, double** icov, double* detcov)
 	if (det < 0)
 		det = -det;
 	*detcov = det;
-	
+
 	/* allocate required working storage */
 #ifndef HAVE_ATLAS
 	int lwork = -1;
 	double lwbest = 0.0;
 	dgetri_(&M, a, &M, ipiv, &lwbest, &lwork, &ret);
-	lwork = (int) lwbest;	
+	lwork = (int) lwbest;
 	double* work  = (double*) malloc(lwork*sizeof(double));
 #endif
-	
+
 	/* find inverse */
 	dgetri_(&M, a, &M, ipiv, work, &lwork, &ret);
 
 	for(j=0; j < L; j++)
 		for (i=0; i < L; i++)
-			icov[i][j] = a[j*L+i];	
-	
-#ifndef HAVE_ATLAS	
+			icov[i][j] = a[j*L+i];
+
+#ifndef HAVE_ATLAS
 	free(work);
 #endif
-	free(a);	
+	free(a);
 }
 
 /* probability of multivariate Gaussian given mean, inverse and determinant of covariance */
@@ -762,8 +762,8 @@ double gauss(double* x, int L, double* mu, double** icov, double detcov, double*
 	}
 	s = cblas_ddot(L, z, 1, y, 1);
 	//for (i = 0; i < L; i++)
-	//	s += z[i] * y[i];	
-	
+	//	s += z[i] * y[i];
+
 	return exp(-s/2.0) / (pow(2*PI, L/2.0) * sqrt(detcov));
 }
 
@@ -784,10 +784,10 @@ double loggauss(double* x, int L, double* mu, double** icov, double detcov, doub
 	}
 	s = cblas_ddot(L, z, 1, y, 1);
 	//for (i = 0; i < L; i++)
-	//	s += z[i] * y[i];	
-	
+	//	s += z[i] * y[i];
+
 	ret = -0.5 * (s + L * log(2*PI) + log(detcov));
-	
+
 	/*
 	// TEST
 	if (ISINF(ret) > 0)
@@ -795,9 +795,9 @@ double loggauss(double* x, int L, double* mu, double** icov, double detcov, doub
 	if (ISINF(ret) < 0)
 		printf("loggauss returning -infinity\n");
 	if (ISNAN(ret))
-		printf("loggauss returning nan\n");	
+		printf("loggauss returning nan\n");
 	*/
-	
+
 	return ret;
 }
 

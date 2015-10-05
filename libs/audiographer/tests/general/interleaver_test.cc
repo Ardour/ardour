@@ -24,7 +24,7 @@ class InterleaverTest : public CppUnit::TestFixture
 
 		interleaver.reset (new Interleaver<float>());
 		sink.reset (new VectorSink<float>());
-		
+
 		interleaver->init (channels, frames);
 	}
 
@@ -50,7 +50,7 @@ class InterleaverTest : public CppUnit::TestFixture
 	{
 		ProcessContext<float> c (random_data, frames + 1, 1);
 		CPPUNIT_ASSERT_THROW (interleaver->input (0)->process (c), Exception);
-		
+
 		interleaver->input (0)->process (c.beginning (frames));
 		interleaver->input (1)->process (c.beginning (frames));
 		CPPUNIT_ASSERT_THROW (interleaver->input (2)->process (c.beginning (frames - 1)), Exception);
@@ -92,9 +92,9 @@ class InterleaverTest : public CppUnit::TestFixture
 		interleaver->input (0)->process (c.beginning (0));
 		interleaver->input (1)->process (c.beginning (0));
 		interleaver->input (2)->process (c.beginning (0));
-		
+
 		// NOTE zero input is allowed to be a NOP
-		
+
 		// ...now test regular input
 		interleaver->input (0)->process (c);
 		interleaver->input (1)->process (c);
@@ -110,7 +110,7 @@ class InterleaverTest : public CppUnit::TestFixture
 		interleaver->add_output (sink);
 		ProcessContext<float> c (random_data, frames, 1);
 		interleaver->input (0)->process (c);
-		CPPUNIT_ASSERT_THROW (interleaver->input (0)->process (c), Exception);		
+		CPPUNIT_ASSERT_THROW (interleaver->input (0)->process (c), Exception);
 	}
 
 

@@ -158,7 +158,7 @@ ExportDialog::init_gui ()
 	export_notebook.append_page (*file_format_selector, _("File format"));
 	export_notebook.append_page (*timespan_selector, _("Time Span"));
 	export_notebook.append_page (*channel_selector, _("Channels"));
-	
+
 	get_vbox()->pack_start (export_notebook, true, true, 0);
 	get_vbox()->pack_end   (warning_widget, false, false, 0);
 	get_vbox()->pack_end   (progress_widget, false, false, 0);
@@ -325,7 +325,7 @@ ExportDialog::show_progress ()
 	if (!status->aborted()) {
 
 		NagScreen* ns = NagScreen::maybe_nag (_("export"));
-		
+
 		if (ns) {
 			ns->nag ();
 			delete ns;

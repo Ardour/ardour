@@ -13,7 +13,7 @@ public:
 	void testBasic ();
 
 	static void make_property_quarks ();
-	
+
 private:
 	PBD::Property<int> _fred;
 };

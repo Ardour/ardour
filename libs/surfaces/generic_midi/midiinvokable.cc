@@ -141,7 +141,7 @@ MIDIInvokable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	case MIDI::on:
 		_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_note_on, this, _1, _2));
 		break;
-		
+
 	case MIDI::controller:
 		_parser.channel_controller[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_controller, this, _1, _2));
 		break;

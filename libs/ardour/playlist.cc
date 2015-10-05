@@ -557,7 +557,7 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 		pending_contents_change = false;
 		RegionAdded (boost::weak_ptr<Region> (r)); /* EMIT SIGNAL */
 		ContentsChanged (); /* EMIT SIGNAL */
-		
+
 	}
 }
 
@@ -603,7 +603,7 @@ Playlist::flush_notifications (bool from_undo)
 		remove_dependents (*s);
 		RegionRemoved (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
 	}
-	
+
 	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
 		crossfade_ranges.push_back ((*s)->range ());
 		/* don't emit RegionAdded signal until relayering is done,
@@ -620,25 +620,25 @@ Playlist::flush_notifications (bool from_undo)
 		pending_layering = true;
 		ContentsChanged (); /* EMIT SIGNAL */
 	}
-	
+
 	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
 		(*s)->clear_changes ();
 		RegionAdded (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
 	}
-	
+
 	if ((regions_changed && !in_set_state) || pending_layering) {
 		relayer ();
 	}
-	
+
 	coalesce_and_check_crossfades (crossfade_ranges);
-	
+
 	if (!pending_range_moves.empty ()) {
 		/* We don't need to check crossfades for these as pending_bounds has
 		   already covered it.
 		*/
 		RangesMoved (pending_range_moves, from_undo);
 	}
-	
+
 	if (!pending_region_extensions.empty ()) {
 		RegionsExtended (pending_region_extensions);
 	}
@@ -1225,11 +1225,11 @@ Playlist::flush_notifications (bool from_undo)
 			 while (itimes--) {
 				 for (RegionList::iterator i = other->regions.begin(); i != other->regions.end(); ++i) {
 					 boost::shared_ptr<Region> copy_of_region = RegionFactory::create (*i, true);
-					
+
 					 /* put these new regions on top of all existing ones, but preserve
 					    the ordering they had in the original playlist.
 					 */
-					
+
 					 add_region_internal (copy_of_region, (*i)->position() + pos);
 					 set_layer (copy_of_region, copy_of_region->layer() + top);
 				 }
@@ -1523,7 +1523,7 @@ Playlist::core_ripple (framepos_t at, framecnt_t distance, RegionList *exclude)
 			} else if (new_pos >= limit ) {
 				new_pos = limit;
 			}
-				
+
 			(*i)->set_position (new_pos);
 		}
 	}
@@ -1783,15 +1783,15 @@ boost::shared_ptr<RegionList>
 Playlist::find_regions_at (framepos_t frame)
 {
 	/* Caller must hold lock */
-	
+
 	boost::shared_ptr<RegionList> rlist (new RegionList);
-	
+
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 		if ((*i)->covers (frame)) {
 			rlist->push_back (*i);
 		}
 	}
-	
+
 	return rlist;
 }
 
@@ -1840,13 +1840,13 @@ boost::shared_ptr<RegionList>
 Playlist::regions_touched_locked (framepos_t start, framepos_t end)
 {
 	boost::shared_ptr<RegionList> rlist (new RegionList);
-	
+
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 		if ((*i)->coverage (start, end) != Evoral::OverlapNone) {
 			rlist->push_back (*i);
 		}
 	}
-	
+
 	return rlist;
 }
 
@@ -1856,7 +1856,7 @@ Playlist::find_next_transient (framepos_t from, int dir)
 	RegionReadLock rlock (this);
 	AnalysisFeatureList points;
 	AnalysisFeatureList these_points;
-	
+
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 		if (dir > 0) {
 			if ((*i)->last_frame() < from) {
@@ -1867,30 +1867,30 @@ Playlist::find_next_transient (framepos_t from, int dir)
 				continue;
 			}
 		}
-		
+
 		(*i)->get_transients (these_points);
-		
+
 		/* add first frame, just, err, because */
-		
+
 		these_points.push_back ((*i)->first_frame());
-		
+
 		points.insert (points.end(), these_points.begin(), these_points.end());
 		these_points.clear ();
 	}
-	
+
 	if (points.empty()) {
 		return -1;
 	}
-	
+
 	TransientDetector::cleanup_transients (points, _session.frame_rate(), 3.0);
 	bool reached = false;
-	
+
 	if (dir > 0) {
 		for (AnalysisFeatureList::iterator x = points.begin(); x != points.end(); ++x) {
 			if ((*x) >= from) {
 				reached = true;
 			}
-			
+
 			if (reached && (*x) > from) {
 				return *x;
 			}
@@ -1900,13 +1900,13 @@ Playlist::find_next_transient (framepos_t from, int dir)
 			if ((*x) <= from) {
 				reached = true;
 			}
-			
+
 			if (reached && (*x) < from) {
 				return *x;
 			}
 		}
 	}
-	
+
 	return -1;
 }
 
@@ -1916,17 +1916,17 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 	RegionReadLock rlock (this);
 	boost::shared_ptr<Region> ret;
 	framepos_t closest = max_framepos;
-	
+
 	bool end_iter = false;
-	
+
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		
+
 		if(end_iter) break;
-		
+
 		frameoffset_t distance;
 		boost::shared_ptr<Region> r = (*i);
 		framepos_t pos = 0;
-		
+
 		switch (point) {
 		case Start:
 			pos = r->first_frame ();
@@ -1938,10 +1938,10 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 			pos = r->sync_position ();
 			break;
 		}
-		
+
 		switch (dir) {
 		case 1: /* forwards */
-			
+
 			if (pos > frame) {
 				if ((distance = pos - frame) < closest) {
 					closest = distance;
@@ -1949,11 +1949,11 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 					end_iter = true;
 				}
 			}
-			
+
 			break;
-			
+
 		default: /* backwards */
-			
+
 			if (pos < frame) {
 				if ((distance = frame - pos) < closest) {
 					closest = distance;
@@ -1962,11 +1962,11 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 			} else {
 				end_iter = true;
 			}
-			
+
 			break;
 		}
 	}
-	
+
 	return ret;
 }
 
@@ -2170,7 +2170,7 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 				 RegionWriteLock rlock (this);
 				 add_region_internal (region, region->position());
 			 }
-			
+
 			region->resume_property_changes ();
 
 		}
@@ -2179,7 +2179,7 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 	if (seen_region_nodes && regions.empty()) {
 		ret = -1;
 	}
-		
+
 	thaw ();
 	notify_contents_changed ();
 
@@ -2358,7 +2358,7 @@ Playlist::set_layer (boost::shared_ptr<Region> region, double new_layer)
 		}
 		++i;
 	}
-	
+
 	copy.insert (i, region);
 
 	setup_layering_indices (copy);

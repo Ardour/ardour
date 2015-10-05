@@ -19,7 +19,7 @@
 
 #ifndef __safe_delete_h__
 	#define __safe_delete_h__
-	
+
 
 /* Copy to include:
 #include "safe_delete.h"

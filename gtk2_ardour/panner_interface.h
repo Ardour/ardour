@@ -45,7 +45,7 @@ public:
 private:
 	bool _dragging;
 };
-	
+
 
 /** Parent class for some panner UI classes that contains some common code */
 class PannerInterface : public Gtk::DrawingArea, public PBD::Destructible
@@ -65,7 +65,7 @@ protected:
 	virtual void set_tooltip () = 0;
 
 	void value_change ();
-	
+
         bool on_enter_notify_event (GdkEventCrossing *);
         bool on_leave_notify_event (GdkEventCrossing *);
 	bool on_key_release_event  (GdkEventKey *);

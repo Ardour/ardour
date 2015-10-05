@@ -191,7 +191,7 @@ namespace wvThread
 		void obtain();
 		bool tryobtain();
 		void release();
-	
+
 	private:
 		ThreadMutexInited(const ThreadMutexInited&);            // cannot be copied
 		ThreadMutexInited& operator=(const ThreadMutexInited&); // cannot be copied
@@ -224,7 +224,7 @@ namespace wvThread
 	public:
 		ThreadMutex() {init();}
 	};
-	
+
 	//--------------------------------------------------------
 	class DllExport ThreadConditionSignal : public noncopyableobject
 	{

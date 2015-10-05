@@ -94,7 +94,7 @@ JACKSession::session_event (jack_session_event_t* event)
 	*/
 
 	jack_client_t* jack_client = (jack_client_t*) AudioEngine::instance()->port_engine().private_handle();
-	
+
 	if (jack_client) {
 		jack_session_reply (jack_client, event);
 	}
@@ -119,23 +119,23 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 	/* BBT info */
 
 	TempoMetric metric (tempo_map.metric_at (tf));
-	
+
 	try {
 		tempo_map.bbt_time_rt (tf, bbt);
-		
+
 		pos->bar = bbt.bars;
 		pos->beat = bbt.beats;
 		pos->tick = bbt.ticks;
-		
+
 		// XXX still need to set bar_start_tick
-		
+
 		pos->beats_per_bar = metric.meter().divisions_per_bar();
 		pos->beat_type = metric.meter().note_divisor();
 		pos->ticks_per_beat = Timecode::BBT_Time::ticks_per_beat;
 		pos->beats_per_minute = metric.tempo().beats_per_minute();
-		
+
 		pos->valid = jack_position_bits_t (pos->valid | JackPositionBBT);
-		
+
 	} catch (...) {
 		/* no message */
 	}

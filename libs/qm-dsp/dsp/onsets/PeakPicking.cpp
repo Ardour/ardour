@@ -41,7 +41,7 @@ void PeakPicking::initialise( PPickParams Config )
     Qfilta = Config.QuadThresh.a ;
     Qfiltb = Config.QuadThresh.b ;
     Qfiltc = Config.QuadThresh.c ;
-	
+
     m_DFProcessingParams.length = m_DFLength;
     m_DFProcessingParams.LPOrd = Config.LPOrd;
     m_DFProcessingParams.LPACoeffs = Config.LPACoeffs;
@@ -50,7 +50,7 @@ void PeakPicking::initialise( PPickParams Config )
     m_DFProcessingParams.winPost = Config.WinT.post;
     m_DFProcessingParams.AlphaNormParam = Config.alpha;
     m_DFProcessingParams.isMedianPositive = false;
-	
+
     m_DFSmoothing = new DFProcess( m_DFProcessingParams );
 
     m_workBuffer = new double[ m_DFLength ];
@@ -68,16 +68,16 @@ void PeakPicking::process( double* src, unsigned int len, vector<int> &onsets )
 {
     if (len < 4) return;
 
-    vector <double> m_maxima;	
+    vector <double> m_maxima;
 
     // Signal conditioning
     m_DFSmoothing->process( src, m_workBuffer );
-	
+
     for( unsigned int u = 0; u < len; u++)
     {
-	m_maxima.push_back( m_workBuffer[ u ] );		
+	m_maxima.push_back( m_workBuffer[ u ] );
     }
-	
+
     quadEval( m_maxima, onsets );
 
     for(unsigned int b = 0; b <  m_maxima.size(); b++)
@@ -92,7 +92,7 @@ int PeakPicking::quadEval( vector<double> &src, vector<int> &idx )
 
     vector <int> m_maxIndex;
     vector <int> m_onsetPosition;
-	
+
     vector <double> m_maxFit;
     vector <double> m_poly;
     vector <double> m_err;
@@ -123,7 +123,7 @@ int PeakPicking::quadEval( vector<double> &src, vector<int> &idx )
         for (int k = -2; k <= 2; ++k)
 	{
 	    selMax = src[ m_maxIndex[j] + k ] ;
-	    m_maxFit.push_back(selMax);			
+	    m_maxFit.push_back(selMax);
 	}
 
 	double f = m_poly[0];
@@ -133,7 +133,7 @@ int PeakPicking::quadEval( vector<double> &src, vector<int> &idx )
 	{
 	    idx.push_back(m_maxIndex[j]);
 	}
-		
+
 	m_maxFit.clear();
     }
 

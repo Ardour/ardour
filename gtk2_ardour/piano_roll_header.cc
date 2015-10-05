@@ -467,7 +467,7 @@ PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)
 	if (_dragging) {
 
 		if ( false /*editor().current_mouse_mode() == Editing::MouseRange*/ ) {   //ToDo:  fix this.  this mode is buggy, and of questionable utility anyway
-			
+
 			/* select note range */
 
 			if (Keyboard::no_modifiers_active (ev->state)) {
@@ -480,9 +480,9 @@ PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)
 			if (_clicked_note != NO_MIDI_NOTE && _clicked_note != note) {
 				_active_notes[_clicked_note] = false;
 				send_note_off(_clicked_note);
-				
+
 				_clicked_note = note;
-				
+
 				if (!_active_notes[note]) {
 					_active_notes[note] = true;
 					send_note_on(note);
@@ -511,12 +511,12 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 	} else if (ev->button == 1 && note >= 0 && note < 128) {
 		add_modal_grab();
 		_dragging = true;
-		
+
 		if (!_active_notes[note]) {
 			_active_notes[note] = true;
 			_clicked_note = note;
 			send_note_on(note);
-			
+
 			invalidate_note_range(note, note);
 		} else {
 			reset_clicked_note(note);
@@ -540,7 +540,7 @@ PianoRollHeader::on_button_release_event (GdkEventButton* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::RangeSelectModifier)) {
 			ExtendNoteSelection (note); // EMIT SIGNAL
 		}
-		
+
 	} else {
 
 		if (_dragging) {

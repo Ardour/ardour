@@ -380,15 +380,15 @@ MidiChannelSelectorWindow::build ()
 
 	vpacker->pack_start (capture_all_button);
 	capture_all_button.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiChannelSelectorWindow::capture_mode_toggled), AllChannels));
-	
+
 	vpacker->pack_start (capture_filter_button);
 	capture_filter_button.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiChannelSelectorWindow::capture_mode_toggled), FilterChannels));
-	
+
 	vpacker->pack_start (capture_force_button);
 	capture_force_button.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiChannelSelectorWindow::capture_mode_toggled), ForceChannel));
 
         vpacker->pack_start (capture_mask_box);
-	
+
 	capture_controls = manage (new HBox);
 	capture_controls->set_spacing (6);
 
@@ -416,10 +416,10 @@ MidiChannelSelectorWindow::build ()
 
 	vpacker->pack_start (playback_all_button);
 	playback_all_button.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiChannelSelectorWindow::playback_mode_toggled), AllChannels));
-	
+
 	vpacker->pack_start (playback_filter_button);
 	playback_filter_button.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiChannelSelectorWindow::playback_mode_toggled), FilterChannels));
-	
+
 	vpacker->pack_start (playback_force_button);
 	playback_force_button.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiChannelSelectorWindow::playback_mode_toggled), ForceChannel));
 
@@ -496,7 +496,7 @@ MidiChannelSelectorWindow::invert_capture_mask ()
 		track->set_capture_channel_mask (~track->get_capture_channel_mask());
 	}
 }
-		
+
 void
 MidiChannelSelectorWindow::set_playback_selected_channels (uint16_t mask)
 {
@@ -510,7 +510,7 @@ MidiChannelSelectorWindow::set_playback_selected_channels (uint16_t mask)
 			playback_buttons[i]->set_active ((1<<i) & mask);
 		}
 		break;
-		
+
 	case ForceChannel:
 		/* only set the lowest set channel in the mask as active */
 		for (uint16_t i = 0; i < 16; i++) {
@@ -533,7 +533,7 @@ MidiChannelSelectorWindow::set_capture_selected_channels (uint16_t mask)
 			capture_buttons[i]->set_active ((1<<i) & mask);
 		}
 		break;
-		
+
 	case ForceChannel:
 		/* only set the lowest set channel in the mask as active */
 		for (uint16_t i = 0; i < 16; i++) {
@@ -605,10 +605,10 @@ MidiChannelSelectorWindow::playback_mode_changed ()
 	if (playback_buttons.empty()) {
 
 		Gtkmm2ext::container_clear (playback_mask_box);
-		
+
 		ToggleButton* tb;
 		RadioButtonGroup group;
-		
+
 		for (uint32_t n = 0; n < 16; ++n) {
 			char buf[3];
 			snprintf (buf, sizeof (buf), "%d", n+1);
@@ -638,7 +638,7 @@ MidiChannelSelectorWindow::playback_mode_changed ()
 				tb->set_sensitive (false);
 			}
 		}
-		
+
 		if (mode != ForceChannel) {
 			set_playback_selected_channels (track->get_playback_channel_mask());
 		}
@@ -703,10 +703,10 @@ MidiChannelSelectorWindow::capture_mode_changed ()
 	if (capture_buttons.empty()) {
 
 		Gtkmm2ext::container_clear (capture_mask_box);
-		
+
 		ToggleButton* tb;
 		RadioButtonGroup group;
-		
+
 		for (uint32_t n = 0; n < 16; ++n) {
 			char buf[3];
 			snprintf (buf, sizeof (buf), "%d", n+1);
@@ -736,7 +736,7 @@ MidiChannelSelectorWindow::capture_mode_changed ()
 				tb->set_sensitive (false);
 			}
 		}
-		
+
 		if (mode != ForceChannel) {
 			set_capture_selected_channels (track->get_capture_channel_mask());
 		}
@@ -803,7 +803,7 @@ MidiChannelSelectorWindow::capture_mode_toggled (ChannelMode mode)
 	   so we take action only if the button is active (i.e it is the one
 	   just clicked on)
 	*/
-	
+
 	switch (mode) {
 	case AllChannels:
 		if (capture_all_button.get_active()) {
@@ -833,7 +833,7 @@ MidiChannelSelectorWindow::playback_mode_toggled (ChannelMode mode)
 	   so we take action only if the button is active (i.e it is the one
 	   just clicked on)
 	*/
-	
+
 	switch (mode) {
 	case AllChannels:
 		if (playback_all_button.get_active()) {
@@ -860,7 +860,7 @@ MidiChannelSelectorWindow::set_channel_colors (const uint32_t new_channel_colors
 
 		char color_normal[8];
 		char color_active[8];
-		
+
 		snprintf(color_normal, 8, "#%x", UINT_INTERPOLATE(new_channel_colors[n], 0x000000ff, 0.6));
 		snprintf(color_active, 8, "#%x", new_channel_colors[n]);
 

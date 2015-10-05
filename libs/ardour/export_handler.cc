@@ -168,7 +168,7 @@ ExportHandler::start_timespan ()
 	   this is the timespan to do this time
 	*/
 	current_timespan = config_map.begin()->first;
-	
+
 	export_status->total_frames_current_timespan = current_timespan->get_length();
 	export_status->timespan_name = current_timespan->name();
 	export_status->processed_frames_current_timespan = 0;
@@ -564,7 +564,7 @@ ExportHandler::write_cue_header (CDMarkerStatus & status)
 		BINARY   = "header-less" audio (44.1 kHz, 16 Bit, little endian),
 		MOTOROLA = "header-less" audio (44.1 kHz, 16 Bit, big endian),
 		and MP3
-		
+
 		We try to use these file types whenever appropriate and
 		default to our own names otherwise.
 	*/
@@ -688,14 +688,14 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 
 	status.out << "CD_TEXT {" << endl << "  LANGUAGE 0 {" << endl;
 	status.out << "     TITLE " << toc_escape_cdtext (status.marker->name()) << endl;
-	
+
 	status.out << "     PERFORMER ";
 	if (status.marker->cd_info.find("performer") != status.marker->cd_info.end()) {
 		status.out << toc_escape_cdtext (status.marker->cd_info["performer"]) << endl;
 	} else {
 		status.out << "\"\"" << endl;
 	}
-	
+
 	if (status.marker->cd_info.find("composer") != status.marker->cd_info.end()) {
 		status.out  << "     SONGWRITER " << toc_escape_cdtext (status.marker->cd_info["composer"]) << endl;
 	}
@@ -816,7 +816,7 @@ ExportHandler::toc_escape_cdtext (const std::string& txt)
 			out += buf;
 		}
 	}
-	
+
 	out += '"';
 
 	return out;
@@ -841,7 +841,7 @@ ExportHandler::toc_escape_filename (const std::string& txt)
 			out += *c;
 		}
 	}
-	
+
 	out += '"';
 
 	return out;
@@ -852,13 +852,13 @@ ExportHandler::cue_escape_cdtext (const std::string& txt)
 {
 	std::string latin1_txt;
 	std::string out;
-	
+
 	try {
 		latin1_txt = Glib::convert (txt, "ISO-8859-1", "UTF-8");
 	} catch (Glib::ConvertError& err) {
 		throw Glib::ConvertError (err.code(), string_compose (_("Cannot convert %1 to Latin-1 text"), txt));
 	}
-	
+
 	// does not do much mor than UTF-8 to Latin1 translation yet, but
 	// that may have to change if cue parsers in burning programs change
 	out = '"' + latin1_txt + '"';

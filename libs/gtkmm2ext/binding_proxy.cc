@@ -37,12 +37,12 @@ guint BindingProxy::bind_statemask = Gdk::CONTROL_MASK;
 BindingProxy::BindingProxy (boost::shared_ptr<Controllable> c)
 	: prompter (0),
 	  controllable (c)
-{			
+{
 }
 
 BindingProxy::BindingProxy ()
 	: prompter (0)
-{			
+{
 }
 
 BindingProxy::~BindingProxy ()
@@ -89,7 +89,7 @@ BindingProxy::button_press_handler (GdkEventButton *ev)
 		}
 		return true;
 	}
-	
+
 	return false;
 }
 

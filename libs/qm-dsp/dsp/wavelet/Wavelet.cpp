@@ -82,7 +82,7 @@ Wavelet::createDecompositionFilters(Type wavelet,
     hpd.clear();
 
     unsigned int flength = 0;
-	
+
     switch (wavelet) {
 
     case Haar:
@@ -103,7 +103,7 @@ Wavelet::createDecompositionFilters(Type wavelet,
         hpd.push_back(-0.22414386804186);
         hpd.push_back(-0.12940952255092);
         flength = 4;
-        break;		
+        break;
 
     case Daubechies_3:
         lpd.push_back(0.03522629188210);
@@ -592,7 +592,7 @@ Wavelet::createDecompositionFilters(Type wavelet,
         hpd.push_back(-0.00000000000000);
         flength = 80;
         break;
-			
+
     case Symlet_2:
         lpd.push_back(-0.12940952255092);
         lpd.push_back(0.22414386804186);
@@ -692,7 +692,7 @@ Wavelet::createDecompositionFilters(Type wavelet,
         hpd.push_back(0.01540410932703);
         flength = 12;
         break;
-			
+
     case Symlet_7:
         lpd.push_back(0.00268181456826);
         lpd.push_back(-0.00104738488868);

@@ -22,7 +22,7 @@ MTDMTest::basicTest ()
 		mtdm->process (256, in, out);
 		memcpy (in, out, 256 * sizeof (float));
 	}
-	
+
 	for (int i = 0; i < 64; ++i) {
 		mtdm->process (256, in, out);
 		memcpy (in, out, 256 * sizeof (float));

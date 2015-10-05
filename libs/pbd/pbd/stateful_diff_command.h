@@ -29,7 +29,7 @@
 namespace PBD
 {
 
-class StatefulDestructible;	
+class StatefulDestructible;
 class PropertyList;
 
 /** A Command which stores its action as the differences between the before and after

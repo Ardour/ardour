@@ -48,18 +48,18 @@ public:
 		: _bank(std::max(0, std::min(bank_num, 16383)))
 		, _program(std::max(0, std::min(program_num, 127)))
 	{}
-	
+
 	inline PatchPrimaryKey& operator=(const PatchPrimaryKey& id) {
 		_bank    = id._bank;
 		_program = id._program;
 		return *this;
 	}
-	
+
 	inline bool operator==(const PatchPrimaryKey& id) const {
 		return (_bank    == id._bank &&
 		        _program == id._program);
 	}
-	
+
 	/** Strict weak ordering. */
 	inline bool operator<(const PatchPrimaryKey& id) const {
 		if (_bank < id._bank) {
@@ -82,7 +82,7 @@ private:
 };
 
 class PatchBank;
-	
+
 class LIBMIDIPP_API Patch
 {
 public:
@@ -92,7 +92,7 @@ public:
 
 	const std::string& name() const        { return _name; }
 	void set_name(const std::string& name) { _name = name; }
-	
+
 	const std::string& note_list_name() const  { return _note_list_name; }
 
 	uint8_t program_number() const     { return _id.program(); }
@@ -154,17 +154,17 @@ public:
 
 	const std::string& name() const        { return _name; }
 	void set_name(const std::string& name) { _name = name; }
-	
+
 	const PatchBanks& patch_banks() const    { return _patch_banks; }
 
 	bool available_for_channel(uint8_t channel) const {
 		return _available_for_channels.find(channel) != _available_for_channels.end();
 	}
-	
+
 	boost::shared_ptr<Patch> find_patch(const PatchPrimaryKey& key) {
 		return _patch_map[key];
 	}
-	
+
 	boost::shared_ptr<Patch> previous_patch(const PatchPrimaryKey& key) {
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
@@ -176,10 +176,10 @@ public:
 				}
 			}
 		}
-			
+
 		return boost::shared_ptr<Patch>();
 	}
-	
+
 	boost::shared_ptr<Patch> next_patch(const PatchPrimaryKey& key) {
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
@@ -192,7 +192,7 @@ public:
 				}
 			}
 		}
-			
+
 		return boost::shared_ptr<Patch>();
 	}
 
@@ -378,16 +378,16 @@ public:
 	const std::string& name() const        { return _name; }
 	void set_name(const std::string& name) { _name = name; }
 
-	
+
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
-	
+
 	/// Note: channel here is 0-based while in the MIDNAM-file it's 1-based
 	const std::string& channel_name_set_name_by_channel(uint8_t channel) {
 		assert(channel <= 15);
 		return _channel_name_set_assignments[channel];
 	}
-	
+
 private:
 	/// array index = channel number
 	/// string contents = name of channel name set
@@ -408,13 +408,13 @@ public:
 	typedef std::map<std::string, boost::shared_ptr<ControlNameList> >  ControlNameLists;
 	typedef std::map<std::string, boost::shared_ptr<ValueNameList> >    ValueNameLists;
 	typedef std::map<std::string, PatchNameList>                        PatchNameLists;
-	
+
 	MasterDeviceNames() {};
 	virtual ~MasterDeviceNames() {};
-	
+
 	const std::string& manufacturer() const { return _manufacturer; }
 	void set_manufacturer(const std::string& manufacturer) { _manufacturer = manufacturer; }
-	
+
 	const Models& models() const { return _models; }
 	void set_models(const Models some_models) { _models = some_models; }
 
@@ -427,7 +427,7 @@ public:
 		uint8_t            number);
 
 	const CustomDeviceModeNames& custom_device_mode_names() const { return _custom_device_mode_names; }
-	
+
 	boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(const std::string& mode_name);
 	boost::shared_ptr<ChannelNameSet> channel_name_set_by_channel(const std::string& mode, uint8_t channel);
 	boost::shared_ptr<Patch> find_patch(const std::string& mode, uint8_t channel, const PatchPrimaryKey& key);
@@ -445,7 +445,7 @@ public:
 
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
-	
+
 private:
 	std::string           _manufacturer;
 	Models                _models;
@@ -463,20 +463,20 @@ class LIBMIDIPP_API MIDINameDocument
 public:
 	// Maps Model names to MasterDeviceNames
 	typedef std::map<std::string, boost::shared_ptr<MasterDeviceNames> > MasterDeviceNamesList;
-	
+
 	MIDINameDocument() {}
 	MIDINameDocument(const std::string& filename);
 	virtual ~MIDINameDocument() {};
 
 	const std::string& author() const { return _author; }
 	void set_author(const std::string& author) { _author = author; }
-	
+
 	boost::shared_ptr<MasterDeviceNames> master_device_names(const std::string& model);
 
 	const MasterDeviceNamesList& master_device_names_by_model() const { return _master_device_names_list; }
-	
+
 	const MasterDeviceNames::Models& all_models() const { return _all_models; }
-		
+
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 

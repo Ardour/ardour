@@ -59,11 +59,11 @@ class LIBCANVAS_API SVAModifier
 	double s() const { return _s; }
 	double v() const { return _v; }
 	double a() const { return _a; }
-	
+
 	HSV operator () (HSV& hsv) const;
 	std::string to_string () const;
 	void from_string (std::string const &);
-	
+
   private:
 	Type type;
 	double _s;
@@ -77,7 +77,7 @@ struct LIBCANVAS_API HSV
 	HSV (double h, double s, double v, double a = 1.0);
 	HSV (Color);
 	HSV (const std::string&);
-	
+
 	double h;
 	double s;
 	double v;
@@ -85,12 +85,12 @@ struct LIBCANVAS_API HSV
 
 	std::string to_string() const;
 	bool is_gray() const;
-	
+
 	Color color() const { return hsva_to_color (h,s, v, a); }
 	operator Color() const { return color(); }
 
 	HSV mod (SVAModifier const & svam);
-	
+
 	HSV operator+ (const HSV&) const;
 	HSV operator- (const HSV&) const;
 

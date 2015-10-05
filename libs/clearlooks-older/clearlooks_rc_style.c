@@ -251,20 +251,20 @@ theme_parse_listviewitemstyle(GtkSettings  *settings,
                           guint8       *listviewitemstyle)
 {
   guint token;
-	
+
   token = g_scanner_get_next_token(scanner);
-	
+
   token = g_scanner_get_next_token(scanner);
 
   if (token != G_TOKEN_EQUAL_SIGN)
      return G_TOKEN_EQUAL_SIGN;
-		
+
   token = g_scanner_get_next_token(scanner);
   if (token != G_TOKEN_INT)
     return G_TOKEN_INT;
-		
+
   *listviewitemstyle = scanner->value.v_int;
-	
+
   return G_TOKEN_NONE;
 }
 
@@ -272,7 +272,7 @@ static guint
 clearlooks_rc_style_parse (GtkRcStyle *rc_style,
 			   GtkSettings  *settings,
 			   GScanner   *scanner)
-		
+
 {
   static GQuark scope_id = 0;
   ClearlooksRcStyle *clearlooks_style = CLEARLOOKS_RC_STYLE (rc_style);
@@ -359,15 +359,15 @@ clearlooks_rc_style_merge (GtkRcStyle *dest,
 			   GtkRcStyle *src)
 {
 	ClearlooksRcStyle *dest_w, *src_w;
-	
+
 	parent_class->merge (dest, src);
-	
+
 	if (!CLEARLOOKS_IS_RC_STYLE (src))
 		return;
-	
+
 	src_w = CLEARLOOKS_RC_STYLE (src);
 	dest_w = CLEARLOOKS_RC_STYLE (dest);
-	
+
 	dest_w->contrast = src_w->contrast;
 	dest_w->sunkenmenubar = src_w->sunkenmenubar;
 	dest_w->progressbarstyle = src_w->progressbarstyle;

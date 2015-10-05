@@ -69,7 +69,7 @@ private:
 	void set_alias (std::string const & name, std::string const & alias);
 	void set_color (const std::string& name, ArdourCanvas::Color);
 	void set_modifier (std::string const &, ArdourCanvas::SVAModifier svam);
-	
+
 	std::string color_as_alias (ArdourCanvas::Color c);
 	ArdourCanvas::Color quantized (ArdourCanvas::Color) const;
 
@@ -85,7 +85,7 @@ private:
 	void set_pango_fontsize ();
 
 	float get_ui_scale ();
-		
+
 	sigc::signal<void>  DPIReset;
 
 	sigc::signal<void,std::string> ParameterChanged;
@@ -102,7 +102,7 @@ private:
 	/** called after the GUI toolkit has been initialized.
 	 */
 	UIConfiguration* post_gui_init ();
-	
+
 #undef UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,value) \
 	Type get_##var () const { return var.get(); } \
@@ -132,7 +132,7 @@ private:
 	bool aliases_modified;
 	bool colors_modified;
 	bool modifiers_modified;
-	
+
 	int store_color_theme ();
 	void load_color_aliases (XMLNode const &);
 	void load_colors (XMLNode const &);

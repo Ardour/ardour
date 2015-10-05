@@ -32,14 +32,14 @@ class LIBPBD_API MD5
 {
     public:
 	MD5();
-	
+
 	// an MD5 digest is a 16-byte number (32 hex digits)
 	uint8_t digestRaw[16] ;
-	
+
 	// This version of the digest is actually
 	// a "printf'd" version of the digest.
 	char digestChars[33] ;
-	
+
 	void   writeToString ();
 	char*  digestFile (char *filename);
 	char*  digestMemory (uint8_t const * memchunk, size_t len);
@@ -53,14 +53,14 @@ class LIBPBD_API MD5
 	};
 
 	context_t context;
-	
+
 	void Init ();
 	void Transform (uint32_t state[4], uint8_t const * block);
 	void Encode (uint8_t *output, uint32_t const *input, size_t len);
 	void Decode (uint32_t *output, uint8_t const * input, size_t len);
 	void Update (uint8_t const *input, size_t inputLen);
 	void Final ();
-	
+
 };
 
 #endif /* __libpbd_md5_h__ */

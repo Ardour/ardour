@@ -68,7 +68,7 @@ Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_b
 		abort(); /*NOTREACHED*/
 		return string();
 	}
-	
+
 }
 
 Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, Role r, bool ignore_bitslot)
@@ -239,7 +239,7 @@ Send::set_state (const XMLNode& node, int version)
 		/* don't try to reset bitslot if there is a node for it already: this can cause
 		   issues with the session's accounting of send ID's
 		*/
-		
+
 		if ((prop = node.property ("bitslot")) == 0) {
 			if (_role == Delivery::Aux) {
 				_bitslot = _session.next_aux_send_id ();
@@ -264,7 +264,7 @@ Send::set_state (const XMLNode& node, int version)
 			}
 		}
 	}
-	
+
 	XMLNodeList nlist = node.children();
 	for (XMLNodeIterator i = nlist.begin(); i != nlist.end(); ++i) {
 		if ((*i)->name() == X_("Processor")) {
@@ -401,4 +401,4 @@ Send::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 	return _amp->value_as_string (ac);
 }
 
-	
+

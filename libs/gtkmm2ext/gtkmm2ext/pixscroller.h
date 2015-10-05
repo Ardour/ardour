@@ -60,7 +60,7 @@ class LIBGTKMM2EXT_API PixScroller : public Gtk::DrawingArea
 	double grab_start;
 	int overall_height;
 	bool dragging;
-	
+
 	float default_value;
 
 	void adjustment_changed ();

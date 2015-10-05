@@ -110,7 +110,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	}
 	tipname += nom;
 	_name = tipname;
-	
+
 	CANVAS_DEBUG_NAME (_canvas_display, string_compose ("main for auto %2/%1", _name, r->name()));
 	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for auto %2/%1", _name, r->name()));
 	CANVAS_DEBUG_NAME (_ghost_group, string_compose ("ghosts for auto %2/%1", _name, r->name()));
@@ -178,7 +178,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	if (name_label.get_parent()) {
 		name_label.get_parent()->remove (name_label);
 	}
-	
+
 	name_label.set_text (_name);
 	name_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
 	name_label.set_name (X_("TrackParameterName"));
@@ -618,7 +618,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 	}
 
 	boost::shared_ptr<AutomationList> list = _line->the_list ();
-	
+
 	if (list->in_write_pass()) {
 		/* do not allow the GUI to add automation events during an
 		   automation write pass.
@@ -781,11 +781,11 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 {
 	if (_control && line) {
 		assert(line->the_list() == _control->list());
-		
+
 		_control->alist()->automation_state_changed.connect (
 			_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context()
 			);
-		
+
 		_control->alist()->InterpolationChanged.connect (
 			_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::interpolation_changed, this, _1), gui_context()
 			);
@@ -860,15 +860,15 @@ AutomationTimeAxisView::what_has_visible_automation (const boost::shared_ptr<Aut
 	assert (automatable);
 
 	Automatable::Controls& controls (automatable->controls());
-	
+
 	for (Automatable::Controls::iterator i = controls.begin(); i != controls.end(); ++i) {
-		
+
 		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (i->second);
 
 		if (ac && ac->alist()) {
-			
+
 			const XMLNode* gui_node = ac->extra_xml ("GUI");
-			
+
 			if (gui_node) {
 				const XMLProperty* prop = gui_node->property ("shown");
 				if (prop) {

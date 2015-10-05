@@ -40,7 +40,7 @@ class SoundcloudExportSelector : public Gtk::VBox, public ARDOUR::SessionHandleP
 	Gtk::CheckButton soundcloud_download_checkbox;
 	bool soundcloud_cancel;
 	Gtk::ProgressBar progress_bar;
-	
+
 };
 
 #endif // __soundcloud_export_selector_h__

@@ -121,7 +121,7 @@ AudioEngine::create ()
 	}
 
 	_instance = new AudioEngine ();
-	
+
 	return _instance;
 }
 
@@ -158,7 +158,7 @@ AudioEngine::sample_rate_change (pframes_t nframes)
 #ifdef SILENCE_AFTER_SECONDS
 	_silence_countdown = nframes * SILENCE_AFTER_SECONDS;
 #endif
-	
+
 	return 0;
 }
 
@@ -219,11 +219,11 @@ AudioEngine::process_callback (pframes_t nframes)
 	if (_measuring_latency == MeasureAudio && _mtdm) {
 		/* run a normal cycle from the perspective of the PortManager
 		   so that we get silence on all registered ports.
-		
+
 		   we overwrite the silence on the two ports used for latency
 		   measurement.
 		*/
-		
+
 		PortManager::cycle_start (nframes);
 		PortManager::silence (nframes);
 
@@ -262,7 +262,7 @@ AudioEngine::process_callback (pframes_t nframes)
 		return_after_remove_check = true;
 
 	} else if (_latency_flush_frames) {
-		
+
 		/* wait for the appropriate duration for the MTDM signal to
 		 * drain from the ports before we revert to normal behaviour.
 		 */
@@ -270,7 +270,7 @@ AudioEngine::process_callback (pframes_t nframes)
 		PortManager::cycle_start (nframes);
 		PortManager::silence (nframes);
 		PortManager::cycle_end (nframes);
-		
+
                 if (_latency_flush_frames > nframes) {
                         _latency_flush_frames -= nframes;
                 } else {
@@ -294,7 +294,7 @@ AudioEngine::process_callback (pframes_t nframes)
 		} else if (session_removal_countdown > 0) {
 
 			/* we'll be fading audio out.
-			
+
 			   if this is the last time we do this as part
 			   of session removal, do a MIDI panic now
 			   to get MIDI stopped. This relies on the fact
@@ -362,7 +362,7 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	if (last_monitor_check + monitor_check_interval < next_processed_frames) {
-		
+
 		PortManager::check_monitoring ();
 		last_monitor_check = next_processed_frames;
 	}
@@ -370,7 +370,7 @@ AudioEngine::process_callback (pframes_t nframes)
 #ifdef SILENCE_AFTER_SECONDS
 
 	bool was_silent = (_silence_countdown == 0);
-	
+
 	if (_silence_countdown >= nframes) {
 		_silence_countdown -= nframes;
 	} else {
@@ -385,17 +385,17 @@ AudioEngine::process_callback (pframes_t nframes)
 	if (_silence_countdown == 0 || _session->silent()) {
 		PortManager::silence (nframes);
 	}
-	
-#else	
+
+#else
 	if (_session->silent()) {
 		PortManager::silence (nframes);
 	}
 #endif
-	
+
 	if (session_remove_pending && session_removal_countdown) {
 
 		PortManager::fade_out (session_removal_gain, session_removal_gain_step, nframes);
-		
+
 		if (session_removal_countdown > nframes) {
 			session_removal_countdown -= nframes;
 		} else {
@@ -410,7 +410,7 @@ AudioEngine::process_callback (pframes_t nframes)
 	_processed_frames = next_processed_frames;
 
 	PT_TIMING_CHECK (2);
-	
+
 	return 0;
 }
 
@@ -462,12 +462,12 @@ AudioEngine::do_reset_backend()
 	while (!_stop_hw_reset_processing) {
 
 		if (g_atomic_int_get (&_hw_reset_request_count) != 0 && _backend) {
-	
+
 			_reset_request_lock.unlock();
-	
+
 			Glib::Threads::RecMutex::Lock pl (_state_lock);
 			g_atomic_int_dec_and_test (&_hw_reset_request_count);
-	
+
             std::cout << "AudioEngine::RESET::Reset request processing. Requests left: " << _hw_reset_request_count << std::endl;
                         DeviceResetStarted(); // notify about device reset to be started
 
@@ -478,9 +478,9 @@ AudioEngine::do_reset_backend()
 			if ( ( 0 == stop () ) &&
                  ( 0 == _backend->reset_device () ) &&
                  ( 0 == start () ) ) {
-				
+
 				std::cout << "AudioEngine::RESET::Engine started..." << std::endl;
-				
+
 				// inform about possible changes
 				BufferSizeChanged (_backend->buffer_size() );
                 DeviceResetFinished(); // notify about device reset finish
@@ -491,7 +491,7 @@ AudioEngine::do_reset_backend()
 				// we've got an error
                 DeviceError();
 			}
-			
+
 			std::cout << "AudioEngine::RESET::Done." << std::endl;
 
 			_reset_request_lock.lock();
@@ -574,7 +574,7 @@ AudioEngine::stop_hw_event_processing()
         _hw_devicelist_update_thread->join ();
         _hw_devicelist_update_thread = 0;
     }
-	
+
 }
 
 
@@ -633,7 +633,7 @@ AudioEngine::reconnect_session_routes (bool reconnect_inputs, bool reconnect_out
 	if (_session) {
 		_session->reconnect_existing_routes(true, true, reconnect_inputs, reconnect_outputs);
 	}
-#endif	
+#endif
 }
 
 
@@ -733,13 +733,13 @@ AudioEngine::backend_discover (const string& path)
 					Glib::Module::get_last_error()) << endmsg;
 		return 0;
 	}
-	
+
 	if (!module.get_symbol ("descriptor", func)) {
 		error << string_compose(_("AudioEngine: backend at \"%1\" has no descriptor function."), path) << endmsg;
 		error << Glib::Module::get_last_error() << endmsg;
 		return 0;
 	}
-	
+
 	dfunc = (AudioBackendInfo* (*)(void))func;
 	info = dfunc();
 	if (!info->available()) {
@@ -747,7 +747,7 @@ AudioEngine::backend_discover (const string& path)
 	}
 
 	module.make_resident ();
-	
+
 	return info;
 }
 
@@ -755,7 +755,7 @@ vector<const AudioBackendInfo*>
 AudioEngine::available_backends() const
 {
 	vector<const AudioBackendInfo*> r;
-	
+
 	for (BackendMap::const_iterator i = _backends.begin(); i != _backends.end(); ++i) {
 		r.push_back (i->second);
 	}
@@ -805,12 +805,12 @@ AudioEngine::set_backend (const std::string& name, const std::string& arg1, cons
 	}
 
 	drop_backend ();
-	
+
 	try {
 		if (b->second->instantiate (arg1, arg2)) {
 			throw failed_constructor ();
 		}
-		
+
 		_backend = b->second->factory (*this);
 
 	} catch (exception& e) {
@@ -846,20 +846,20 @@ AudioEngine::start (bool for_latency)
 	}
 
 	_running = true;
-	
+
 	if (_session) {
 		_session->set_frame_rate (_backend->sample_rate());
-		
+
 		if (_session->config.get_jack_time_master()) {
 			_backend->set_time_master (true);
 		}
 
 	}
-	
+
 	if (!for_latency) {
 		Running(); /* EMIT SIGNAL */
 	}
-	
+
 	return 0;
 }
 
@@ -898,13 +898,13 @@ AudioEngine::stop (bool for_latency)
 	_latency_output_port = 0;
 	_latency_input_port = 0;
 	_started_for_latency = false;
-	
+
 	Port::PortDrop ();
 
 	if (!for_latency) {
 		Stopped (); /* EMIT SIGNAL */
 	}
-	
+
 	return 0;
 }
 
@@ -1264,7 +1264,7 @@ AudioEngine::setup_required () const
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 

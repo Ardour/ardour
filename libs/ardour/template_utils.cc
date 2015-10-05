@@ -57,7 +57,7 @@ template_filter (const string &str, void* /*arg*/)
 	if (!Glib::file_test (str, Glib::FILE_TEST_IS_DIR)) {
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -67,7 +67,7 @@ route_template_filter (const string &str, void* /*arg*/)
 	if (str.find (template_suffix) == str.length() - strlen (template_suffix)) {
 		return true;
 	}
-	
+
 	return false;
 }
 

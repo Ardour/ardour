@@ -273,7 +273,7 @@ TranzportControlProtocol::screen_flush ()
 					printf("usb screen update failed for some reason... why? \ncmd and data were %02x %02x %02x %02x %02x %02x %02x %02x\n",
 							cmd[0],cmd[1],cmd[2], cmd[3], cmd[4], cmd[5],cmd[6],cmd[7]);
 #endif
-					pending += 1;	
+					pending += 1;
 					// Shouldn't need to do this
 					// screen_invalid[row][col_base] = screen_invalid[row][col_base+1] =
 					// screen_invalid[row][col_base+2] = screen_invalid[row][col_base+3] = true;
@@ -592,7 +592,7 @@ void
 TranzportControlProtocol::show_transport_time ()
 {
 	show_bbt (session->transport_frame ());
-}	
+}
 
 void
 TranzportControlProtocol::show_smpte (framepos_t where)
@@ -689,7 +689,7 @@ TranzportControlProtocol::open_core (struct usb_device* dev)
 		error << _("Tranzport: cannot open USB transport") << endmsg;
 		return -1;
 	}
-	
+
 	if (usb_claim_interface (udev, 0) < 0) {
 		error << _("Tranzport: cannot claim USB interface") << endmsg;
 		usb_close (udev);
@@ -737,7 +737,7 @@ int TranzportControlProtocol::read(uint8_t *buf, uint32_t timeout_override)
 	return val;
 }
 
-	
+
 int
 TranzportControlProtocol::write_noretry (uint8_t* cmd, uint32_t timeout_override)
 {
@@ -762,7 +762,7 @@ TranzportControlProtocol::write_noretry (uint8_t* cmd, uint32_t timeout_override
 
 	return 0;
 
-}	
+}
 
 int
 TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
@@ -771,7 +771,7 @@ TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
 	int val;
 	int retry = 0;
 	if(inflight > MAX_TRANZPORT_INFLIGHT) { return (-1); }
-	
+
 	while((val = usb_interrupt_write (udev, WRITE_ENDPOINT, (char*) cmd, 8, timeout_override ? timeout_override : timeout))!=8 && retry++ < MAX_RETRY) {
 		printf("usb_interrupt_write failed, retrying: %d\n", val);
 	}
@@ -794,7 +794,7 @@ TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
 	return (write_noretry(cmd,timeout_override));
 #endif
 
-}	
+}
 
 #else
 #error Kernel API not defined yet for Tranzport
@@ -863,7 +863,7 @@ bool TranzportControlProtocol::lcd_isdamaged ()
 	for(int r = 0; r < 2; r++) {
 		for(int c = 0; c < 20; c++) {
 			if(screen_invalid[r][c]) {
-#if DEBUG_TRANZPORT > 5	
+#if DEBUG_TRANZPORT > 5
 				printf("row: %d,col: %d is damaged, should redraw it\n", r,c);
 #endif
 				return true;
@@ -881,7 +881,7 @@ bool TranzportControlProtocol::lcd_isdamaged (int row, int col, int length)
 	if((row >= 0 && row < 2) && (col >=0 && col < 20)) {
 		for(int c = col; c < endcol; c++) {
 			if(screen_invalid[row][c]) {
-#if DEBUG_TRANZPORT > 5	
+#if DEBUG_TRANZPORT > 5
 				printf("row: %d,col: %d is damaged, should redraw it\n", row,c);
 #endif
 				return true;
@@ -1007,7 +1007,7 @@ int TranzportControlProtocol::rtpriority_unset(int priority)
 	struct sched_param rtparam;
 	int err;
 	memset (&rtparam, 0, sizeof (rtparam));
-	rtparam.sched_priority = priority; 	
+	rtparam.sched_priority = priority;
 	if ((err = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
 		PBD::info << string_compose (_("%1: can't stop realtime scheduling (%2)"), name(), strerror (errno)) << endmsg;
 		return 1;
@@ -1731,7 +1731,7 @@ TranzportControlProtocol::step_gain_up ()
 	if (gain_fraction > 2.0) {
 		gain_fraction = 2.0;
 	}
-	
+
 	route_set_gain (0, slider_position_to_gain (gain_fraction));
 }
 
@@ -1747,7 +1747,7 @@ TranzportControlProtocol::step_gain_down ()
 	if (gain_fraction < 0.0) {
 		gain_fraction = 0.0;
 	}
-	
+
 	route_set_gain (0, slider_position_to_gain (gain_fraction));
 }
 
@@ -1866,7 +1866,7 @@ TranzportControlProtocol::print_noretry (int row, int col, const char *text)
 	uint32_t left = strlen (text);
 	char tmp[5];
 	int base_col;
-	
+
 	if (row < 0 || row > 1) {
 		return;
 	}
@@ -1899,24 +1899,24 @@ TranzportControlProtocol::print_noretry (int row, int col, const char *text)
 		int offset = col % 4;
 
 		/* copy current cell contents into tmp */
-		
+
 		memcpy (tmp, &screen_pending[row][base_col], 4);
-		
+
 		/* overwrite with new text */
-		
+
 		uint32_t tocopy = min ((4U - offset), left);
-		
+
 		memcpy (tmp+offset, text, tocopy);
-		
+
 		/* copy it back to pending */
-		
+
 		memcpy (&screen_pending[row][base_col], tmp, 4);
-		
+
 		text += tocopy;
 		left -= tocopy;
 		col  += tocopy;
 	}
-}	
+}
 
 XMLNode&
 TranzportControlProtocol::get_state ()

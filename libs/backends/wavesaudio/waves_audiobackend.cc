@@ -752,7 +752,7 @@ WavesAudioBackend::_audio_device_callback (const float* input_buffer,
 
     if ( !engine.thread_initialised_for_audio_processing () ) {
 	    std::cerr << "\tWavesAudioBackend::_audio_device_callback (): It's an attempt to call process callback from the thread which didn't initialize it " << std::endl;
-	
+
 	    AudioEngine::thread_init_callback (this);
     }
 
@@ -803,7 +803,7 @@ WavesAudioBackend::stop ()
 	_midi_device_manager.stop ();
     _unregister_system_audio_ports ();
     _unregister_system_midi_ports ();
-	
+
     return retVal;
 }
 

@@ -34,7 +34,7 @@ ProcessSemaphore::ProcessSemaphore (const char* name, int val)
 	}
 
 	/* this semaphore does not exist for IPC */
-	
+
 	if (sem_unlink (name)) {
 		throw failed_constructor ();
 	}

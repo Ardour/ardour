@@ -94,7 +94,7 @@ AutomationLine::AutomationLine (const string&                              name,
 	} else {
 		_our_time_converter = true;
 	}
-	
+
 	_visible = Line;
 
 	update_pending = false;
@@ -203,7 +203,7 @@ AutomationLine::hide ()
 	/* leave control points setting unchanged, we are just hiding the
 	   overall line
 	*/
-	
+
 	set_visibility (AutomationLine::VisibleAspects (_visible & ~Line));
 }
 
@@ -582,10 +582,10 @@ AutomationLine::ContiguousControlPoints::clamp_dx (double dx)
 
 	/* get the maximum distance we can move any of these points along the x-axis
 	 */
-	
+
 	double tx; /* possible position a point would move to, given dx */
 	ControlPoint* cp;
-	
+
 	if (dx > 0) {
 		/* check the last point, since we're moving later in time */
 		cp = back();
@@ -649,15 +649,15 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		   no motion ever took place, but need to do before we handle
 		   motion.
 		*/
-	
+
 		/* partition the points we are dragging into (potentially several)
 		 * set(s) of contiguous points. this will not happen with a normal
 		 * drag, but if the user does a discontiguous selection, it can.
 		 */
-		
+
 		uint32_t expected_view_index = 0;
 		CCP contig;
-		
+
 		for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
 			if (i == _drag_points.begin() || (*i)->view_index() != expected_view_index) {
 				contig.reset (new ContiguousControlPoints (*this));
@@ -675,7 +675,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 			(*ccp)->compute_x_bounds (trackview.editor());
 		}
 		_drag_had_movement = true;
-	}	
+	}
 
 	/* OK, now on to the stuff related to *this* motion event. First, for
 	 * each contiguous range, figure out the maximum x-axis motion we are
@@ -695,7 +695,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 	}
 
 	/* clamp y */
-	
+
 	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
 		double const y = ((_height - (*i)->get_y()) / _height) + dy;
 		if (y < 0) {
@@ -709,7 +709,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 	if (dx || dy) {
 
 		/* and now move each section */
-		
+
 		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
 			(*ccp)->move (dx, dy);
 		}
@@ -731,7 +731,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 			line->set_steps (line_points, is_stepped());
 		}
 	}
-	
+
 	_drag_distance += dx;
 	_drag_x += dx;
 	_last_drag_fraction = fraction;
@@ -884,7 +884,7 @@ AutomationLine::remove_point (ControlPoint& cp)
 	XMLNode &before = alist->get_state();
 
 	alist->erase (cp.model());
-	
+
 	trackview.editor().session()->add_command(
 		new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state()));
 
@@ -912,7 +912,7 @@ AutomationLine::get_selectables (framepos_t start, framepos_t end, double botfra
 		/* model_when is relative to the start of the source, so we just need to add on the origin_b here
 		   (as it is the session frame position of the start of the source)
 		*/
-		
+
 		framepos_t const session_frames_when = _time_converter->to (model_when) + _time_converter->origin_b ();
 
 		if (session_frames_when >= start && session_frames_when <= end && (*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
@@ -993,7 +993,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 	np = events.size();
 
 	Evoral::ControlList& e = const_cast<Evoral::ControlList&> (events);
-	
+
 	for (AutomationList::iterator ai = e.begin(); ai != e.end(); ++ai, ++pi) {
 
 		double tx = (*ai)->when;
@@ -1008,17 +1008,17 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 			                           _name) << endmsg;
 			continue;
 		}
-		
+
 		if (tx >= max_framepos || tx < 0 || tx >= _maximum_time) {
 			continue;
 		}
-		
+
 		/* convert x-coordinate to a canvas unit coordinate (this takes
 		 * zoom and scroll into account).
 		 */
-			
+
 		tx = trackview.editor().sample_to_pixel_unrounded (tx);
-		
+
 		/* convert from canonical view height (0..1.0) to actual
 		 * height coordinates (using X11's top-left rooted system)
 		 */

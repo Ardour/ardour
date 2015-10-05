@@ -96,7 +96,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	smaller_hbox->pack_start (delete_button, false, false);
 	smaller_hbox->pack_start (reset_button, false, false, 4);
 	smaller_hbox->pack_start (bypass_button, false, true, 4);
-	
+
 	automation_manual_all_button.set_text(_("Manual"));
 	automation_manual_all_button.set_name (X_("generic button"));
 	automation_play_all_button.set_text(_("Play"));
@@ -105,7 +105,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	automation_write_all_button.set_name (X_("generic button"));
 	automation_touch_all_button.set_text(_("Touch"));
 	automation_touch_all_button.set_name (X_("generic button"));
-	
+
 	Label* l = manage (new Label (_("All Automation")));
 	l->set_alignment (1.0, 0.5);
 	automation_hbox->pack_start (*l, true, true);
@@ -183,7 +183,7 @@ int value = -1;
 
 static int match_or_digit(char c1, char c2) {
 	return c1 == c2 || (isdigit(c1) && isdigit(c2));
-}	
+}
 
 static std::size_t matching_chars_at_head(const string s1, const string s2) {
 std::size_t length, n = 0;
@@ -374,13 +374,13 @@ GenericPluginUI::build ()
 
 	// Iterate over the list of controls to find which adjacent controls
 	// are similar enough to be grouped together.
-	
+
 	string label, previous_label = "";
 	std::vector<int> numbers_in_labels(cui_controls_list.size());
-	
+
 	std::vector<float> similarity_scores(cui_controls_list.size());
 	float most_similar = 0.0, least_similar = 1.0;
-	
+
 	i = 0;
 	for (vector<ControlUI*>::iterator cuip = cui_controls_list.begin(); cuip != cui_controls_list.end(); ++cuip, ++i) {
 		label = (*cuip)->label.get_text();
@@ -406,32 +406,32 @@ GenericPluginUI::build ()
 		}
 
 		// cerr << "label: " << label << " sim: " << fixed << setprecision(3) << similarity_scores[i] << " num: " << numbers_in_labels[i] << endl;
-		previous_label = label;		
+		previous_label = label;
 	}
 
-	
+
 	// cerr << "most similar: " << most_similar << ", least similar: " << least_similar << endl;
 	float similarity_threshold;
-	
+
 	if (most_similar > 1.0) {
 		similarity_threshold = default_similarity_threshold;
 	} else {
 		similarity_threshold = most_similar - (1 - default_similarity_threshold);
 	}
-	
+
 	// Now iterate over the list of controls to display them, placing an
 	// HSeparator between controls of less than a certain similarity, and
 	// starting a new column when necessary.
-	
+
 	i = 0;
 	for (vector<ControlUI*>::iterator cuip = cui_controls_list.begin(); cuip != cui_controls_list.end(); ++cuip, ++i) {
 
 		ControlUI* cui = *cuip;
-		
+
 		if (!is_scrollable) {
 			x++;
 		}
-		
+
 		if (x > max_controls_per_column || similarity_scores[i] <= similarity_threshold) {
 			if (x > min_controls_per_column) {
 				frame = manage (new Frame);
@@ -477,7 +477,7 @@ GenericPluginUI::build ()
 
 	output_table.show_all ();
 	button_table.show_all ();
-	
+
 	automation_manual_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Off));
 	automation_play_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Play));
 	automation_write_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Write));
@@ -601,7 +601,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		int const steps = desc.integer_step ? (desc.upper - desc.lower + 1) / desc.step : 0;
 
 		if (control_ui->scale_points && ((steps && int (control_ui->scale_points->size()) == steps) || desc.enumeration)) {
-			
+
 			/* Either:
 			 *   a) There is a label for each possible value of this input, or
 			 *   b) This port is marked as being an enumeration.
@@ -612,7 +612,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 				ARDOUR::ScalePoints::const_iterator i = control_ui->scale_points->begin();
 				i != control_ui->scale_points->end();
 				++i) {
-				
+
 				labels.push_back(i->first);
 			}
 

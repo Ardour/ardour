@@ -39,11 +39,11 @@ public:
 
 	Gtkmm2ext::ActiveState active_state() const { return _active_state; }
 	Gtkmm2ext::VisualState visual_state() const { return _visual_state; }
-	
+
 	/* derived widgets can override these two to catch
 	   changes in active & visual state
 	*/
-	
+
 	virtual void set_active_state (Gtkmm2ext::ActiveState);
 	virtual void set_visual_state (Gtkmm2ext::VisualState);
 
@@ -80,7 +80,7 @@ public:
 
 	/* set_focus_handler() will cause all button-press events on any
 	   CairoWidget to invoke this slot/functor/function/method/callback.
-	
+
 	   We do this because in general, CairoWidgets do not grab
 	   keyboard focus, but a button press on them should
 	   clear focus from any active text entry.
@@ -103,7 +103,7 @@ protected:
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 	bool on_button_press_event (GdkEventButton*);
 	Gdk::Color get_parent_bg ();
-	
+
 	/* this is an additional virtual "on_..." method. Glibmm does not
 	   provide a direct signal for name changes, so this acts as a proxy.
 	*/
@@ -125,7 +125,7 @@ protected:
 	Glib::SignalProxyProperty _name_proxy;
 	sigc::connection _parent_style_change;
 	Widget * _current_parent;
-	
+
 };
 
 #endif

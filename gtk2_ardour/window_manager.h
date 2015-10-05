@@ -74,7 +74,7 @@ class Manager : public ARDOUR::SessionHandlePtr
 
     static Manager* _instance;
 };
-	
+
 class ProxyBase : public ARDOUR::SessionHandlePtr, public sigc::trackable {
   public:
     ProxyBase (const std::string& name, const std::string& menu_name);
@@ -126,7 +126,7 @@ class ProxyBase : public ARDOUR::SessionHandlePtr, public sigc::trackable {
 
     void setup ();
 };
-	
+
 class ProxyTemporary: public ProxyBase {
   public:
     ProxyTemporary (const std::string& name, Gtk::Window* win);
@@ -143,16 +143,16 @@ class ProxyTemporary: public ProxyBase {
 
     ARDOUR::SessionHandlePtr* session_handle ();
 };
-	
+
 template<typename T>
 class ProxyWithConstructor: public ProxyBase {
   public:
     ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c)
 	    : ProxyBase (name, menu_name) , creator (c) {}
-	
+
     ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c, const XMLNode* node)
 	    : ProxyBase (name, menu_name, *node) , creator (c) {}
-	
+
     Gtk::Window* get (bool create = false) {
 	    if (!_window) {
 		    if (!create) {
@@ -163,7 +163,7 @@ class ProxyWithConstructor: public ProxyBase {
 
 		    if (_window) {
 			    setup ();
-		    }	
+		    }
 	    }
 
 	    return _window;
@@ -199,7 +199,7 @@ class Proxy : public ProxyBase {
 
     Proxy (const std::string& name, const std::string& menu_name, const XMLNode* node)
 	    : ProxyBase (name, menu_name, *node)  {}
-	
+
     Gtk::Window* get (bool create = false) {
 	    if (!_window) {
 		    if (!create) {
@@ -210,7 +210,7 @@ class Proxy : public ProxyBase {
 
 		    if (_window) {
 			    setup ();
-		    }	
+		    }
 	    }
 
 	    return _window;

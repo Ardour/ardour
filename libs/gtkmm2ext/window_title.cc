@@ -24,7 +24,7 @@
 using namespace std;
 
 namespace {
-	
+
 // I don't know if this should be translated.
 const char* const title_separator = X_(" - ");
 

@@ -136,7 +136,7 @@ Session::mmc_record_strobe (MIDI::MachineControl &/*mmc*/)
 		   treat RecordStrobe like RecordPause. This violates the MMC
 		   specification.
 		*/
-		
+
 		if (Config->get_mmc_control()) {
 			maybe_enable_record();
 		}
@@ -438,7 +438,7 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 	msg[8] = timecode.frames;
 
 	// Send message at offset 0, sent time is for the start of this cycle
-	
+
 	MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer (nframes));
 	mb.push_back (Port::port_offset(), sizeof (msg), msg);
 
@@ -576,7 +576,7 @@ Session::send_immediate_mmc (MachineControlCommand c)
 	} else {
 		_mmc->send (c, 0);
 	}
-		
+
 }
 
 bool

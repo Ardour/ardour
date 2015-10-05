@@ -42,12 +42,12 @@ public:
 		, state (off)
 	{
 	}
-	
+
 	Led & led() { return *this; }
 	MidiByteArray set_state (LedState);
 
 	MidiByteArray zero() { return set_state (off); }
-	
+
 	static Control* factory (Surface&, int id, const char*, Group&);
 
   private:

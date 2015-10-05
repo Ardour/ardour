@@ -34,7 +34,7 @@ class LIBCANVAS_API ScrollGroup : public Container
 		ScrollsVertically = 0x1,
 		ScrollsHorizontally = 0x2
 	};
-	
+
 	ScrollGroup (Canvas*, ScrollSensitivity);
 	ScrollGroup (Item*, ScrollSensitivity);
 

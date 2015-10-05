@@ -53,12 +53,12 @@ public:
 	virtual ConnectionStates ConnectionStatus();///< Connection Status - device available, gone, disconnected
 
 	virtual WTErr SetActive (bool newState);///<Prepare/Activate device.
-	
+
 	virtual WTErr SetStreaming (bool newState);///<Start/Stop Streaming - should reconnect connections when streaming starts!
 
 	virtual WTErr SetMonitorChannels (int leftChannel, int rightChannel);///<Set monitor channels. - optional, will not be available with AG
 	virtual WTErr SetMonitorGain (float newGain);///<Set monitor gain. - optional, will not be available with AG
-	
+
 	virtual WTErr ShowConfigPanel (void *pParam);///< Show Control Panel - in case of ASIO this will work only with Active device!
 
 	virtual int AudioCallback (const float *pInputBuffer, float *pOutputBuffer, unsigned long framesPerBuffe, bool dropsDetectedr);
@@ -71,7 +71,7 @@ public:
 	static long StaticASIOMessageHook (void *pRefCon, long selector, long value, void* message, double* opt);
 	long ASIOMessageHook (long selector, long value, void* message, double* opt);
 #endif //PLATFORM_WINDOWS
-	
+
 protected:
 	static DWORD WINAPI __DoIdle__(LPVOID lpThreadParameter);
 
@@ -88,7 +88,7 @@ protected:
 
 	PaError testStateValidness(int sampleRate, int bufferSize);
 	///////////////////////////////////////////////////////////
-	
+
 	static int TheCallback (const void *pInputBuffer, void *pOutputBuffer, unsigned long framesPerBuffer,
 							const PaStreamCallbackTimeInfo* /*pTimeInfo*/, PaStreamCallbackFlags /*statusFlags*/, void *pUserData );
 
@@ -154,7 +154,7 @@ class WCMRPortAudioDeviceManager : public WCMRAudioDeviceManager
 public:
 	WCMRPortAudioDeviceManager(WCMRAudioDeviceManagerClient *pTheClient, eAudioDeviceFilter eCurAudioDeviceFilter,
 								bool useMultithreading = true, bool bNocopy = false); ///< constructor
-	
+
 	virtual ~WCMRPortAudioDeviceManager(void); ///< destructor
 
 protected:

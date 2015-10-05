@@ -38,7 +38,7 @@ static const int gAllBufferSizes[] =
 	{
 		32, 64, 96, 128, 192, 256, 512, 1024, 2048
 	};
-	
+
 
 ///< The default SR.
 static const int DEFAULT_SR = 44100;
@@ -50,7 +50,7 @@ static const int NONE_DEVICE_ID = -1;
 ///< Number of stalls to wait before notifying user...
 static const int NUM_STALLS_FOR_NOTIFICATION = 100; // 100 corresponds to 100 x 42 ms idle timer - about 4 seconds.
 static const int CHANGE_CHECK_COUNTER_PERIOD = 100; // 120 corresponds to 120 x 42 ms idle timer - about 4 seconds.
-	
+
 #define HUNDRED_NANO_TO_MILLI_CONSTANT 10000
 #define CONSUMPTION_CALCULATION_INTERVAL 500 // Milli Seconds
 
@@ -165,7 +165,7 @@ void WCMRPortAudioDevice::initDevice()
 		}
 		else
 			std::cout << "API::Device " << m_DeviceName << " Device does not support any sample rate of ours" << std::endl;
-	
+
 		//should use a valid current buffer size
 		if (m_BufferSizes.size())
 		{
@@ -177,7 +177,7 @@ void WCMRPortAudioDevice::initDevice()
 				m_CurrentBufferSize = m_BufferSizes[0];
 			}
 		}
-	
+
 		//build our input/output level lists
 		for (unsigned int currentChannel = 0; currentChannel < m_InputChannels.size(); currentChannel++)
 		{
@@ -215,7 +215,7 @@ void WCMRPortAudioDevice::terminateDevice()
 	{
 		stopStreaming();
 	}
-		
+
 	//If device is active (meaning stream is open) we need to close it.
 	if (Active())
 	{
@@ -285,7 +285,7 @@ WCMRPortAudioDevice::~WCMRPortAudioDevice ()
 WTErr WCMRPortAudioDevice::UpdateDeviceInfo ()
 {
 	std::cout << "API::Device (ID:)" << m_DeviceID << " Updating device info" << std::endl;
-	
+
 	SignalObjectAndWait(m_hUpdateDeviceInfoRequestedEvent, m_hUpdateDeviceInfoDone, INFINITE, false);
 
 	return eNoErr;
@@ -307,7 +307,7 @@ void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 
 	//get device info
 	const PaDeviceInfo *pDeviceInfo = Pa_GetDeviceInfo(m_DeviceID);
-	
+
 	//update name.
 	m_DeviceName = pDeviceInfo->name;
 
@@ -336,7 +336,7 @@ void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 	////////////////////////////////////////////////////////////////////////////////////
 	//update list of supported SRs...
 	m_SamplingRates.clear();
-		
+
 	// now iterate through our standard SRs and check if they are supported by device
 	// store them for this device
 	for(int sr=0; gAllSampleRates[sr] > 0; sr++)
@@ -356,11 +356,11 @@ void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 	// In ASIO Windows, the buffer size is set from the sound device manufacturer's control panel
 	long minSize, maxSize, preferredSize, granularity;
 	PaError err = PaAsio_GetAvailableBufferSizes(m_DeviceID, &minSize, &maxSize, &preferredSize, &granularity);
-	
+
 	if (err == paNoError)
 	{
 		std::cout << "API::Device " << m_DeviceName << " Buffers: " << minSize << " " << maxSize << " " << preferredSize << std::endl;
-			
+
 		m_BufferSizes.push_back (preferredSize);
 		useDefaultBuffers = false;
 	}
@@ -368,7 +368,7 @@ void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 	{
 		std::cout << "API::Device" << m_DeviceName << " Preffered buffer size is not supported" << std::endl;
 	}
-	
+
 	if (useDefaultBuffers)
 	{
 		std::cout << "API::Device" << m_DeviceName << " Using default buffer sizes " <<std::endl;
@@ -404,17 +404,17 @@ void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 
 			m_InputChannels.push_back (chNameStream.str());
 		}
-	
-	
+
+
 		//Update output channels
 		m_OutputChannels.clear();
 		for (int channel = 0; channel < maxOutputChannels; channel++)
 		{
 			const char* channelName[32]; // 32 is max leth declared by PortAudio for this operation
 			std::stringstream chNameStream;
-			
+
 			PaError error = PaAsio_GetOutputChannelName(m_DeviceID, channel, channelName);
-			
+
 			chNameStream << (channel+1) << " - ";
 
 			if (error == paNoError)
@@ -425,7 +425,7 @@ void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 			{
 				chNameStream << "Output " << (channel+1);
 			}
-			
+
 			m_OutputChannels.push_back (chNameStream.str());
 		}
 	}
@@ -467,13 +467,13 @@ PaError WCMRPortAudioDevice::testStateValidness(int sampleRate, int bufferSize)
 		pOutS = &outputParameters;
 
 	PaStream *portAudioStream = NULL;
-		
+
 	//sometimes devices change buffer size if sample rate changes
 	//it updates buffer size during stream opening
 	//we need to find out how device would behave with current sample rate
 	//try opening test stream to load device driver for current sample rate and buffer size
 	paErr = Pa_OpenStream (&portAudioStream, pInS, pOutS, sampleRate, bufferSize, paDitherOff, NULL, NULL);
-	
+
 	if (portAudioStream)
 	{
 		// close test stream
@@ -500,7 +500,7 @@ int WCMRPortAudioDevice::CurrentSamplingRate ()
 {
     AUTO_FUNC_DEBUG;
 	//ToDo: Perhaps for ASIO devices that are active, we should retrive the SR from the device...
-	
+
 	return (m_CurrentSamplingRate);
 }
 
@@ -548,7 +548,7 @@ WTErr WCMRPortAudioDevice::SetStreaming (bool newState)
 WTErr WCMRPortAudioDevice::ResetDevice()
 {
 	std::cout << "API::Device: " << m_DeviceName << " Reseting device" << std::endl;
-	
+
 	SignalObjectAndWait(m_hResetRequestedEvent, m_hResetDone, INFINITE, false);
 
 	if (ConnectionStatus() == DeviceErrors)
@@ -579,7 +579,7 @@ WTErr WCMRPortAudioDevice::SetCurrentSamplingRate (int newRate)
 	//changes the status.
 	int oldRate = CurrentSamplingRate();
 	bool oldActive = Active();
-	
+
 	//no change, nothing to do
 	if (oldRate == newRate)
 		return (retVal);
@@ -593,14 +593,14 @@ WTErr WCMRPortAudioDevice::SetCurrentSamplingRate (int newRate)
 		retVal = eCommandLineParameter;
 		return (retVal);
 	}
-	
+
 	if (Streaming())
 	{
 		//Can't change, perhaps use an "in use" type of error
 		retVal = eGenericErr;
 		return (retVal);
 	}
-	
+
 	//make the change...
 	m_CurrentSamplingRate = newRate;
 	PaError paErr = PaAsio_SetStreamSampleRate (m_PortAudioStream, m_CurrentSamplingRate);
@@ -614,7 +614,7 @@ WTErr WCMRPortAudioDevice::SetCurrentSamplingRate (int newRate)
 
 		retVal = eWrongObjectState;
 	}
-	
+
 	return (retVal);
 }
 
@@ -693,7 +693,7 @@ WCMRPortAudioDevice::ConnectionStates WCMRPortAudioDevice::ConnectionStatus ()
     AUTO_FUNC_DEBUG;
 	//ToDo: May want to do something more to extract the actual status!
 	return (m_ConnectionStatus);
-	
+
 }
 
 
@@ -710,7 +710,7 @@ void WCMRPortAudioDevice::activateDevice (bool callerIsWaiting/*=false*/)
 	AUTO_FUNC_DEBUG;
 
 	PaError paErr = paNoError;
-	
+
 	// if device is not active activate it
 	if (!Active() )
 	{
@@ -748,11 +748,11 @@ void WCMRPortAudioDevice::activateDevice (bool callerIsWaiting/*=false*/)
 								paDitherOff,
 								WCMRPortAudioDevice::TheCallback,
 								this);
-			
+
 		if(paErr != paNoError)
 		{
 			std::cout << "Cannot open streamm with buffer: "<< m_CurrentBufferSize << " Error: " << Pa_GetErrorText (paErr) << std::endl;
-			
+
 			if (paErr ==  paUnanticipatedHostError)
 				std::cout << "Error details: "<< Pa_GetLastHostErrorInfo ()->errorText << "; code: " << Pa_GetLastHostErrorInfo ()->errorCode << std::endl;
 		}
@@ -803,7 +803,7 @@ void WCMRPortAudioDevice::activateDevice (bool callerIsWaiting/*=false*/)
 			m_lastErr = eAsioFailed;
 		}
 
-	
+
 	}
 
 	std::cout << "Activation is DONE "<< std::endl;
@@ -825,14 +825,14 @@ void WCMRPortAudioDevice::deactivateDevice (bool callerIsWaiting/*=false*/)
     AUTO_FUNC_DEBUG;
 
 	PaError paErr = paNoError;
-	
+
 	if (Active() )
 	{
 		if (Streaming())
 		{
 			stopStreaming ();
 		}
-		
+
 		if (m_PortAudioStream)
 		{
 			//close the stream first
@@ -892,13 +892,13 @@ void WCMRPortAudioDevice::startStreaming (bool callerIsWaiting/*=false*/)
 		m_SampleCounter = 0;
 
 		std::cout << "API::Device" << m_DeviceName << " Starting device stream" << std::endl;
-		
+
 		//get device info
 		const PaDeviceInfo *pDeviceInfo = Pa_GetDeviceInfo(m_DeviceID);
-	
+
 		unsigned int inChannelCount = pDeviceInfo->maxInputChannels;
 		unsigned int outChannelCount = pDeviceInfo->maxOutputChannels;
-		
+
 		// Prepare for streaming - tell Engine to do the initialization for process callback
 		m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
 
@@ -917,7 +917,7 @@ void WCMRPortAudioDevice::startStreaming (bool callerIsWaiting/*=false*/)
 			m_lastErr = eGenericErr;
 		}
 	}
-		
+
 	if (callerIsWaiting)
 		SetEvent(m_hStartStreamingDone);
 }
@@ -995,7 +995,7 @@ void WCMRPortAudioDevice::resetDevice (bool callerIsWaiting /*=false*/ )
 		// Reinitialize PA
 		Pa_Terminate();
 		Pa_Initialize();
-			
+
 		std::cout << "Updating device state... " << std::endl;
 		// update device info
 		updateDeviceInfo();
@@ -1145,7 +1145,7 @@ WTErr WCMRPortAudioDevice::DoIdle ()
 	};
 
 	const size_t hEventsSize = sizeof(hEvents)/sizeof(hEvents[0]);
-	
+
 	initDevice();
 
 	for(;;)
@@ -1255,7 +1255,7 @@ WTErr WCMRPortAudioDevice::SetMonitorGain (float newGain)
     AUTO_FUNC_DEBUG;
 	//This will most likely be overridden, the base class simply
 	//changes the member.
-	
+
 	m_MonitorGain = newGain;
 	return (eNoErr);
 }
@@ -1278,7 +1278,7 @@ WTErr WCMRPortAudioDevice::ShowConfigPanel (void *pParam)
 {
     AUTO_FUNC_DEBUG;
 	WTErr retVal = eNoErr;
-	
+
 	if (Active() && !m_ResetRequested )
 	{
 #ifdef PLATFORM_WINDOWS
@@ -1291,7 +1291,7 @@ WTErr WCMRPortAudioDevice::ShowConfigPanel (void *pParam)
 			// show control panel for the device
 			if (PaAsio_ShowControlPanel (m_DeviceID, pParam) != paNoError)
 				retVal = eGenericErr;
-			
+
 			// restore previous state for the device
 			SetActive(true);
 			if (wasStreaming)
@@ -1305,9 +1305,9 @@ WTErr WCMRPortAudioDevice::ShowConfigPanel (void *pParam)
 		}
 #else
 	pParam = pParam;
-#endif //_windows		
+#endif //_windows
 	}
-	
+
 	return (retVal);
 }
 
@@ -1336,7 +1336,7 @@ int WCMRPortAudioDevice::TheCallback (const void *pInputBuffer, void *pOutputBuf
 			(statusFlags & (paInputOverflow | paOutputUnderflow)) != 0);
 	else
 		return (true);
-			
+
 }
 
 
@@ -1388,7 +1388,7 @@ int WCMRPortAudioDevice::AudioCallback( const float *pInputBuffer, float *pOutpu
 	//Don't try to 	access after this call returns!
 	m_pInputData = NULL;
 
-	m_SampleCounter += framesPerBuffer;	
+	m_SampleCounter += framesPerBuffer;
 
 	return m_StopRequested;
 }
@@ -1417,7 +1417,7 @@ WCMRPortAudioDeviceManager::WCMRPortAudioDeviceManager (WCMRAudioDeviceManagerCl
 {
     AUTO_FUNC_DEBUG;
 	std::cout << "API::PortAudioDeviceManager::PA Device manager constructor" << std::endl;
-	
+
 	//Always create the None device first...
 	m_NoneDevice = new WCMRNativeAudioNoneDevice(this);
 
@@ -1443,7 +1443,7 @@ WCMRPortAudioDeviceManager::WCMRPortAudioDeviceManager (WCMRAudioDeviceManagerCl
 WCMRPortAudioDeviceManager::~WCMRPortAudioDeviceManager()
 {
     AUTO_FUNC_DEBUG;
-	
+
 	std::cout << "API::Destroying PortAudioDeviceManager " << std::endl;
 
 	try
@@ -1480,7 +1480,7 @@ WCMRAudioDevice* WCMRPortAudioDeviceManager::initNewCurrentDeviceImpl(const std:
 		{
 			std::cout << "API::PortAudioDeviceManager::Creating PA device: " << devInfo.m_DeviceId << ", Device Name: " << devInfo.m_DeviceName << std::endl;
 			TRACE_MSG ("API::PortAudioDeviceManager::Creating PA device: " << devInfo.m_DeviceId << ", Device Name: " << devInfo.m_DeviceName);
-		
+
 			m_CurrentDevice = new WCMRPortAudioDevice (this, devInfo.m_DeviceId, m_UseMultithreading, m_bNoCopyAudioBuffer);
 		}
 		catch (...)
@@ -1548,7 +1548,7 @@ WTErr WCMRPortAudioDeviceManager::getDeviceAvailableSampleRates(DeviceID deviceI
 WTErr WCMRPortAudioDeviceManager::getDeviceAvailableBufferSizes(DeviceID deviceId, std::vector<int>& buffers)
 {
 	WTErr retVal = eNoErr;
-	
+
 	buffers.clear();
 
 	//make PA request to get actual device buffer sizes
@@ -1574,7 +1574,7 @@ WTErr WCMRPortAudioDeviceManager::getDeviceAvailableBufferSizes(DeviceID deviceI
 WTErr WCMRPortAudioDeviceManager::generateDeviceListImpl()
 {
 	std::cout << "API::PortAudioDeviceManager::Generating device list" << std::endl;
-	
+
 	WTErr retVal = eNoErr;
 
 	//Initialize PortAudio and ASIO first
@@ -1605,7 +1605,7 @@ WTErr WCMRPortAudioDeviceManager::generateDeviceListImpl()
 	{
 		//if it's of the required type...
 		const PaDeviceInfo *pPaDeviceInfo = Pa_GetDeviceInfo(thisDeviceID);
-		
+
 		if (Pa_GetHostApiInfo(pPaDeviceInfo->hostApi)->type == paASIO)
 		{
 			//build a device object...
@@ -1749,7 +1749,7 @@ WTErr WCMRPortAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & d
 WTErr WCMRPortAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& buffers) const
 {
 	WTErr retVal = eNoErr;
-	
+
 	buffers.clear();
 
 	//first check if the request has been made for None device
@@ -1758,7 +1758,7 @@ WTErr WCMRPortAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & d
 		buffers=m_NoneDevice->BufferSizes();
 		return retVal;
 	}
-	
+
 	if (m_CurrentDevice && deviceName == m_CurrentDevice->DeviceName() )
 	{
 		buffers=m_CurrentDevice->BufferSizes();

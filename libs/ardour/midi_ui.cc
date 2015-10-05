@@ -104,12 +104,12 @@ MidiControlUI::reset_ports ()
 {
 	vector<AsyncMIDIPort*> ports;
 	AsyncMIDIPort* p;
-	
+
 	if ((p = dynamic_cast<AsyncMIDIPort*> (_session.midi_input_port()))) {
 		ports.push_back (p);
 	}
-	
-	
+
+
 	if ((p = dynamic_cast<AsyncMIDIPort*> (_session.mmc_input_port()))) {
 		ports.push_back (p);
 	}
@@ -117,11 +117,11 @@ MidiControlUI::reset_ports ()
 	if ((p = dynamic_cast<AsyncMIDIPort*> (_session.scene_input_port()))) {
 		ports.push_back (p);
 	}
-	
+
 	if (ports.empty()) {
 		return;
 	}
-	
+
 	for (vector<AsyncMIDIPort*>::const_iterator pi = ports.begin(); pi != ports.end(); ++pi) {
 		(*pi)->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &MidiControlUI::midi_input_handler), *pi));
 		(*pi)->xthread().attach (_main_loop->get_context());

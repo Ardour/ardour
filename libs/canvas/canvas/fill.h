@@ -50,7 +50,7 @@ public:
 	}
 
         typedef std::vector<std::pair<double,Color> > StopList;
-	
+
         void set_gradient (StopList const & stops, bool is_vertical);
 
         void set_pattern (Cairo::RefPtr<Cairo::Pattern>);

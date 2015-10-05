@@ -87,7 +87,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	 * to font distortion.
 	 */
 	void set_scale (double x, double y);
-	
+
 	static void print_minsec (framepos_t, char* buf, size_t bufsize, float frame_rate);
 
 	sigc::signal<void> ValueChanged;
@@ -242,7 +242,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	ARDOUR::framecnt_t parse_as_minsec_distance (const std::string&);
 	ARDOUR::framecnt_t parse_as_bbt_distance (const std::string&);
 	ARDOUR::framecnt_t parse_as_frames_distance (const std::string&);
-	
+
 	void set_font (Pango::FontDescription);
 	void set_colors ();
 	void show_edit_status (int length);

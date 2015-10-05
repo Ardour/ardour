@@ -507,7 +507,7 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
 									  ev->keyval, fakekey));
 
 			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tmodified modifier was %1\n", show_gdk_event_state (modifier)));
-			
+
 			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, modifier)) {
 				DEBUG_TRACE (DEBUG::Accelerators, "\taccel group activated by fakekey\n");
 				return true;
@@ -590,7 +590,7 @@ ARDOUR_UI_UTILS::get_icon_sets ()
 	Searchpath spath(ARDOUR::ardour_data_search_path());
 	spath.add_subdirectory_to_paths ("icons");
 	vector<string> r;
-	
+
 	r.push_back (_("default"));
 
 	for (vector<string>::iterator s = spath.begin(); s != spath.end(); ++s) {
@@ -626,22 +626,22 @@ ARDOUR_UI_UTILS::get_icon_path (const char* cname, string icon_set, bool is_imag
 		/* add "icons/icon_set" but .. not allowed to add both of these at once */
 		spath.add_subdirectory_to_paths ("icons");
 		spath.add_subdirectory_to_paths (icon_set);
-		
+
 		find_file (spath, name, data_file_path);
 	} else {
 		spath.add_subdirectory_to_paths ("icons");
 		find_file (spath, name, data_file_path);
 	}
-	
+
 	if (is_image && data_file_path.empty()) {
-		
+
 		if (!icon_set.empty() && icon_set != _("default")) {
 			warning << string_compose (_("icon \"%1\" not found for icon set \"%2\", fallback to default"), cname, icon_set) << endmsg;
 		}
-		
+
 		Searchpath def (ARDOUR::ardour_data_search_path());
 		def.add_subdirectory_to_paths ("icons");
-	
+
 		if (!find_file (def, name, data_file_path)) {
 			fatal << string_compose (_("cannot find icon image for %1 using %2"), name, spath.to_string()) << endmsg;
 			abort(); /*NOTREACHED*/

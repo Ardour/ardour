@@ -372,7 +372,7 @@ int main (int argc, char *argv[])
 		error << _("Could not complete pre-GUI initialization") << endmsg;
 		exit (1);
 	}
-	
+
 	try {
 		ui = new ARDOUR_UI (&argc, &argv, localedir.c_str());
 	} catch (failed_constructor& err) {

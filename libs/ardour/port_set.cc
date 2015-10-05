@@ -92,7 +92,7 @@ PortSet::add (boost::shared_ptr<Port> port)
 
 	sort(v.begin(), v.end(), sort_ports_by_name);
 	sort(_all_ports.begin(), _all_ports.end(), sort_ports_by_type_and_name);
-	
+
 	_count.set(port->type(), _count.get(port->type()) + 1);
 	assert(_count.get(port->type()) == _ports[port->type()].size());
 }
@@ -104,7 +104,7 @@ PortSet::remove (boost::shared_ptr<Port> port)
 	if (i != _all_ports.end()) {
 		_all_ports.erase(i);
 	}
-	
+
 	for (std::vector<PortVec>::iterator l = _ports.begin(); l != _ports.end(); ++l) {
 		PortVec::iterator i = find(l->begin(), l->end(), port);
 		if (i != l->end()) {

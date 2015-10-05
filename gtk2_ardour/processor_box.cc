@@ -118,7 +118,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	, _output_icon(false)
 {
 	_vbox.show ();
-	
+
 	_button.set_distinct_led_click (true);
 	_button.set_fallthrough_to_parent(true);
 	_button.set_led_left (true);
@@ -155,7 +155,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 
 		set<Evoral::Parameter> p = _processor->what_can_be_automated ();
 		for (set<Evoral::Parameter>::iterator i = p.begin(); i != p.end(); ++i) {
-			
+
 			std::string label = _processor->describe_parameter (*i);
 
 			if (boost::dynamic_pointer_cast<Send> (_processor)) {
@@ -165,7 +165,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 			}
 
 			Control* c = new Control (_processor->automation_control (*i), label);
-			
+
 			_controls.push_back (c);
 
 			if (boost::dynamic_pointer_cast<Amp> (_processor) == 0) {
@@ -458,7 +458,7 @@ ProcessorEntry::build_controls_menu ()
 	items.push_back (
 		MenuElem (_("Show All Controls"), sigc::mem_fun (*this, &ProcessorEntry::show_all_controls))
 		);
-		
+
 	items.push_back (
 		MenuElem (_("Hide All Controls"), sigc::mem_fun (*this, &ProcessorEntry::hide_all_controls))
 		);
@@ -466,7 +466,7 @@ ProcessorEntry::build_controls_menu ()
 	if (!_controls.empty ()) {
 		items.push_back (SeparatorElem ());
 	}
-	
+
 	for (list<Control*>::iterator i = _controls.begin(); i != _controls.end(); ++i) {
 		items.push_back (CheckMenuElem ((*i)->name ()));
 		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
@@ -538,7 +538,7 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 		//c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
 
 	} else {
-		
+
 		_slider.set_name ("ProcessorControlSlider");
 		_slider.set_text (_name);
 
@@ -569,7 +569,7 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 		_adjustment.set_step_increment (smallstep);
 		_adjustment.set_page_increment (largestep);
 		_slider.set_default_value (normal);
-		
+
 		_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
 		// dup. currently timers are used :(
 		//c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
@@ -578,7 +578,7 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 	// yuck, do we really need to do this?
 	// according to c404374 this is only needed for send automation
 	timer_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Control::control_changed));
-	
+
 	control_changed ();
 	set_tooltip ();
 
@@ -617,7 +617,7 @@ ProcessorEntry::Control::slider_adjusted ()
 	if (_ignore_ui_adjustment) {
 		return;
 	}
-	
+
 	boost::shared_ptr<AutomationControl> c = _control.lock ();
 
 	if (!c) {
@@ -657,7 +657,7 @@ ProcessorEntry::Control::control_changed ()
 	if (c->toggled ()) {
 
 		_button.set_active (c->get_value() > 0.5);
-		
+
 	} else {
 		// as long as rapid timers are used, only update the tooltip
 		// if the value has changed.
@@ -667,7 +667,7 @@ ProcessorEntry::Control::control_changed ()
 			set_tooltip ();
 		}
 	}
-	
+
 	_ignore_ui_adjustment = false;
 }
 
@@ -700,7 +700,7 @@ ProcessorEntry::Control::set_visible (bool v)
 	} else {
 		box.hide ();
 	}
-	
+
 	_visible = v;
 }
 
@@ -1343,7 +1343,7 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 
 	if ( (op == ProcessorsDelete) && targets.empty() )
 		return false;  //nothing to delete.  return false so the editor-mixer, because the user was probably intending to delete something in the editor
-	
+
 	switch (op) {
 	case ProcessorsSelectAll:
 		processor_display.select_all ();
@@ -1398,7 +1398,7 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 	default:
 		break;
 	}
-	
+
 	return true;
 }
 
@@ -1441,7 +1441,7 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 	} else if (Keyboard::is_context_menu_event (ev)) {
 
 		show_processor_menu (ev->time);
-		
+
 		ret = true;
 
 	} else if (processor && ev->button == 1 && selected) {
@@ -1782,7 +1782,7 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 	if (ui_xml) {
 		wp->set_state (*ui_xml);
 	}
-	
+
         void* existing_ui = p->get_ui ();
 
         if (existing_ui) {
@@ -1830,7 +1830,7 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	}
 
 	boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (processor);
-	
+
 	ProcessorEntry* e = 0;
 	if (plugin_insert) {
 		e = new PluginInsertProcessorEntry (this, plugin_insert, _width);
@@ -1841,7 +1841,7 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
 	boost::shared_ptr<PortInsert> ext = boost::dynamic_pointer_cast<PortInsert> (processor);
 	boost::shared_ptr<UnknownProcessor> stub = boost::dynamic_pointer_cast<UnknownProcessor> (processor);
-	
+
 	//faders and meters are not deletable, copy/paste-able, so they shouldn't be selectable
 	if (!send && !plugin_insert && !ext && !stub)
 		e->set_selectable(false);
@@ -2220,11 +2220,11 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				continue;
 
 			} else if (type->value() == "intsend") {
-				
+
 				/* aux sends are OK, but those used for
 				 * other purposes, are not.
 				 */
-				
+
 				assert (role);
 
 				if (role->value() != "Aux") {
@@ -2253,7 +2253,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				Send* s = new Send (*_session, _route->pannable(), _route->mute_master());
 
 				IOProcessor::prepare_for_reset (n, s->name());
-				
+
                                 if (s->set_state (n, Stateful::loading_state_version)) {
                                         delete s;
                                         return;
@@ -2279,13 +2279,13 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 				XMLNode n (**niter);
 				PortInsert* pi = new PortInsert (*_session, _route->pannable (), _route->mute_master ());
-				
+
 				IOProcessor::prepare_for_reset (n, pi->name());
-				
+
 				if (pi->set_state (n, Stateful::loading_state_version)) {
 					return;
 				}
-				
+
 				p.reset (pi);
 
 			} else {
@@ -3004,7 +3004,7 @@ ProcessorBox::entry_gui_object_state (ProcessorEntry* entry)
 	}
 
 	GUIObjectState& st = _parent_strip->gui_object_state ();
-	
+
 	XMLNode* strip = st.get_or_add_node (_parent_strip->state_id ());
 	assert (strip);
 	return st.get_or_add_node (strip, entry->state_id());
@@ -3120,7 +3120,7 @@ ProcessorWindowProxy::get (bool create)
 		if (!create) {
 			return 0;
 		}
-		
+
 		is_custom = want_custom;
 		_window = _processor_box->get_editor_window (p, is_custom);
 

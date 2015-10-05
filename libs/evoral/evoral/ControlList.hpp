@@ -108,7 +108,7 @@ public:
 	void                       set_descriptor(const ParameterDescriptor& d) { _desc = d; }
 
 	EventList::size_type size() const { return _events.size(); }
-        double length() const { 		
+        double length() const {
 		Glib::Threads::RWLock::ReaderLock lm (_lock);
 		return _events.empty() ? 0.0 : _events.back()->when;
 	}
@@ -126,7 +126,7 @@ public:
 
 	virtual void add (double when, double value, bool with_guards=true, bool with_initial=true);
 	virtual void editor_add (double when, double value, bool with_guard);
-	
+
 	void fast_simple_add (double when, double value);
 
 	void erase_range (double start, double end);

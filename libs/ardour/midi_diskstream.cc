@@ -458,7 +458,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 				   that it can read it if it likes.
 				*/
 				_gui_feed_buffer.clear ();
-				
+
 				for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 					/* This may fail if buf is larger than _gui_feed_buffer, but it's not really
 					   the end of the world if it does.
@@ -509,7 +509,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 
 	if (need_disk_signal) {
 		/* copy the diskstream data to all output buffers */
-		
+
 		MidiBuffer& mbuf (bufs.get_midi (0));
 		get_playback (mbuf, playback_distance);
 
@@ -583,7 +583,7 @@ MidiDiskstream::commit (framecnt_t playback_distance)
 	 * but we do need to check so that the decision on whether or not we
 	 * need the butler is done correctly.
 	 */
-	
+
 	/* furthermore..
 	 *
 	 * Doing heavy GUI operations[1] can stall also the butler.
@@ -755,7 +755,7 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 					id(), this_read, start) << endmsg;
 			return -1;
 		}
-		
+
 		g_atomic_int_add (&_frames_written_to_ringbuffer, this_read);
 
 		if (reversed) {
@@ -1157,7 +1157,7 @@ MidiDiskstream::set_record_enabled (bool yn)
 		} else {
 			disengage_record_enable ();
 		}
-		
+
 		RecordEnableChanged (); /* EMIT SIGNAL */
 	}
 }
@@ -1168,18 +1168,18 @@ MidiDiskstream::set_record_safe (bool yn)
 	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_midi() == 0) { // REQUIRES REVIEW
 		return;
 	}
-	
+
 	/* yes, i know that this not proof against race conditions, but its
 	 good enough. i think.
 	 */
-	
+
 	if (record_safe () != yn) {
 		if (yn) {
 			engage_record_safe ();
 		} else {
 			disengage_record_safe ();
 		}
-		
+
 		RecordSafeChanged (); /* EMIT SIGNAL */
 	}
 }
@@ -1194,7 +1194,7 @@ MidiDiskstream::prep_record_enable ()
 	bool const rolling = _session.transport_speed() != 0.0f;
 
 	boost::shared_ptr<MidiPort> sp = _source_port.lock ();
-	
+
 	if (sp && Config->get_monitoring_model() == HardwareMonitoring) {
 		sp->request_input_monitoring (!(_session.config.get_auto_input() && rolling));
 	}
@@ -1321,14 +1321,14 @@ MidiDiskstream::steal_write_source_name ()
 
 	try {
 		string new_path = _session.new_midi_source_path (name());
-		
+
 		if (_write_source->rename (new_path)) {
 			return string();
 		}
 	} catch (...) {
 		return string ();
 	}
-	
+
 	return our_old_name;
 }
 
@@ -1360,7 +1360,7 @@ void
 MidiDiskstream::ensure_input_monitoring (bool yn)
 {
 	boost::shared_ptr<MidiPort> sp = _source_port.lock ();
-	
+
 	if (sp) {
 		sp->ensure_input_monitoring (yn);
 	}
@@ -1385,7 +1385,7 @@ float
 MidiDiskstream::playback_buffer_load () const
 {
 	/* For MIDI it's not trivial to differentiate the following two cases:
-	
+
 	   1.  The playback buffer is empty because the system has run out of time to fill it.
 	   2.  The playback buffer is empty because there is no more data on the playlist.
 
@@ -1393,7 +1393,7 @@ MidiDiskstream::playback_buffer_load () const
 	   cannot keep up when #2 happens, when in fact it can.  Since MIDI data rates
 	   are so low compared to audio, just give a pretend answer here.
 	*/
-	
+
 	return 1;
 }
 
@@ -1401,7 +1401,7 @@ float
 MidiDiskstream::capture_buffer_load () const
 {
 	/* We don't report playback buffer load, so don't report capture load either */
-	
+
 	return 1;
 }
 
@@ -1437,7 +1437,7 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
         // _playback_buf->dump (cerr);
         // cerr << "----------------\n";
 
-	size_t events_read = 0;	
+	size_t events_read = 0;
 
 	if (loc) {
 		framepos_t effective_start;
@@ -1447,7 +1447,7 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 		} else {
 			effective_start = playback_sample;
 		}
-		
+
 		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("looped, effective start adjusted to %1\n", effective_start));
 
 		if (effective_start == loc->start()) {
@@ -1484,7 +1484,7 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 										      loc->start(), second));
 				events_read += _playback_buf->read (dst, loc->start(), second);
 			}
-								
+
 		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
 									      effective_start, nframes));
@@ -1535,7 +1535,7 @@ boost::shared_ptr<MidiBuffer>
 MidiDiskstream::get_gui_feed_buffer () const
 {
 	boost::shared_ptr<MidiBuffer> b (new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI)));
-	
+
 	Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex);
 	b->copy (_gui_feed_buffer);
 	return b;

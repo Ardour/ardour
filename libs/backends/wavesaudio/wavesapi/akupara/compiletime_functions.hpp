@@ -147,7 +147,7 @@ namespace Akupara
         AKUPARA_SIGNED_UNSIGNED_INTEGER_PAIR(1, char     )
             AKUPARA_SIGNED_UNSIGNED_INTEGER_PAIR(2, short    )
             AKUPARA_SIGNED_UNSIGNED_INTEGER_PAIR(3, int      )
-			
+
 			//AKUPARA_SIGNED_UNSIGNED_INTEGER_PAIR(4, int32_t     )// 64BitConversion
 			template<>
 			struct

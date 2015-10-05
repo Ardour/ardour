@@ -92,11 +92,11 @@ DumbLookupTable::has_item_at_point (Duple const & point) const
 		if (!(*i)->visible()) {
 			continue;
 		}
-		
+
 		if ((*i)->covers (point)) {
 			// std::cerr << "\t\t" << (*i)->whatami() << '/' << (*i)->name << " covers " << point << std::endl;
 			return true;
-			
+
 		}
 	}
 
@@ -235,7 +235,7 @@ OptimizingLookupTable::items_at_point (Duple const & point) const
 	if (y >= _dimension) {
 		cout << "WARNING: y=" << y << ", dim=" << _dimension << ", py=" << point.y << " cellsize=" << _cell_size << "\n";
 	}
-	
+
 	/* XXX: hmm */
 	x = min (_dimension - 1, x);
 	y = min (_dimension - 1, y);
@@ -272,7 +272,7 @@ OptimizingLookupTable::has_item_at_point (Duple const & point) const
 	if (y >= _dimension) {
 		cout << "WARNING: y=" << y << ", dim=" << _dimension << ", py=" << point.y << " cellsize=" << _cell_size << "\n";
 	}
-	
+
 	/* XXX: hmm */
 	x = min (_dimension - 1, x);
 	y = min (_dimension - 1, y);
@@ -294,7 +294,7 @@ OptimizingLookupTable::has_item_at_point (Duple const & point) const
 
 	return false;
 }
-	
+
 /** @param area Area in our owning item's coordinates */
 vector<Item*>
 OptimizingLookupTable::get (Rect const & area)
@@ -321,7 +321,7 @@ OptimizingLookupTable::get (Rect const & area)
 
 	vector<Item*> vitems;
 	copy (items.begin (), items.end (), back_inserter (vitems));
-	
+
 	return vitems;
 }
 

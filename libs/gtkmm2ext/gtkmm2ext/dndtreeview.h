@@ -52,7 +52,7 @@ class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 		Gtk::TreeView::on_drag_begin (context);
 		start_object_drag ();
 	}
-	
+
 	void on_drag_leave(const Glib::RefPtr<Gdk::DragContext>& context, guint time) {
 		suggested_action = context->get_suggested_action();
 		TreeView::on_drag_leave (context, time);
@@ -73,12 +73,12 @@ class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 
 	struct DragData {
 	    DragData () : source (0) {}
-		
+
 	    Gtk::TreeView* source;
 	    int            data_column;
 	    std::string    object_type;
 	};
-	
+
 	static DragData drag_data;
 
 	void start_object_drag () {
@@ -112,7 +112,7 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 			selection_data.set (8, (guchar*)&c, 1);
 		}
 	}
-	
+
 	void on_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time) {
 		if (suggested_action) {
 			/* this is a drag motion callback. just update the status to
@@ -122,14 +122,14 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 			TreeView::on_drag_data_received (context, x, y, selection_data, info, time);
 			return;
 		}
-		
+
 		if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
-			
+
 			TreeView::on_drag_data_received (context, x, y, selection_data, info, time);
-			
+
 
 		} else if (selection_data.get_target() == object_type) {
-			
+
 			end_object_drag (const_cast<Glib::RefPtr<Gdk::DragContext>& > (context), x, y);
 
 		} else {
@@ -147,16 +147,16 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 		if (drag_data.source == 0) {
 			return;
 		}
-			
+
 		Glib::RefPtr<Gtk::TreeModel> model = drag_data.source->get_model();
 		DataType v;
 		Gtk::TreeSelection::ListHandle_Path selection = drag_data.source->get_selection()->get_selected_rows ();
-		
+
 		for (Gtk::TreeSelection::ListHandle_Path::iterator x = selection.begin(); x != selection.end(); ++x) {
 			model->get_iter (*x)->get_value (drag_data.data_column, v);
 			l.push_back (v);
 		}
-		
+
 		*source = drag_data.source;
 	}
 

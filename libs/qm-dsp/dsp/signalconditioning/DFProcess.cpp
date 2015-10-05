@@ -25,7 +25,7 @@
 DFProcess::DFProcess( DFProcConfig Config )
 {
     filtSrc = NULL;
-    filtDst = NULL;	
+    filtDst = NULL;
     m_filtScratchIn = NULL;
     m_filtScratchOut = NULL;
 
@@ -51,13 +51,13 @@ void DFProcess::initialise( DFProcConfig Config )
     filtSrc = new double[ m_length ];
     filtDst = new double[ m_length ];
 
-	
+
     //Low Pass Smoothing Filter Config
     m_FilterConfigParams.ord = Config.LPOrd;
     m_FilterConfigParams.ACoeffs = Config.LPACoeffs;
     m_FilterConfigParams.BCoeffs = Config.LPBCoeffs;
-	
-    m_FiltFilt = new FiltFilt( m_FilterConfigParams );	
+
+    m_FiltFilt = new FiltFilt( m_FilterConfigParams );
 }
 
 void DFProcess::deInitialise()
@@ -115,7 +115,7 @@ void DFProcess::medianFilter(double *src, double *dst)
     {
         if (index >= m_length) break;
 
-			
+
 	l = 0;
 	for(  j  = i; j < ( i + m_winPost + m_winPre + 1); j++)
 	{
@@ -139,7 +139,7 @@ void DFProcess::medianFilter(double *src, double *dst)
 
 	    l++;
 	}
-		
+
 	scratch[ index++ ] = MathUtilities::median( y, l);
     }
 
@@ -147,7 +147,7 @@ void DFProcess::medianFilter(double *src, double *dst)
     for( i = 0; i < m_length; i++ )
     {
 	val = src[ i ] - scratch[ i ];// - 0.033;
-		
+
 	if( m_isMedianPositive )
 	{
 	    if( val > 0 )
@@ -164,7 +164,7 @@ void DFProcess::medianFilter(double *src, double *dst)
 	    dst[ i ]  = val;
 	}
     }
-	
+
     delete [] y;
     delete [] scratch;
 }

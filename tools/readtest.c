@@ -61,7 +61,7 @@ main (int argc, char* argv[])
 	int n = 0;
 	int nfiles = 0;
 	int quiet = 0;
-	
+
 	while (1) {
 		if ((c = getopt_long (argc, argv, optstring, longopts, &option_index)) == -1) {
 			break;
@@ -97,7 +97,7 @@ main (int argc, char* argv[])
 			return 0;
 		}
 	}
-	
+
 	if (optind < argc) {
 		name_template = argv[optind];
 	} else {
@@ -129,7 +129,7 @@ main (int argc, char* argv[])
 	if (!quiet) {
 		printf ("# Discovered %d files using %s\n", n, name_template);
 	}
-	
+
 	nfiles = n;
 	files = (int *) malloc (sizeof (int) * nfiles);
 #ifdef HAVE_MMAP
@@ -233,7 +233,7 @@ main (int argc, char* argv[])
 		if (!quiet) {
 			printf ("# BW @ %lu %.3f seconds bandwidth %.4f MB/sec\n", (long unsigned int)_read, elapsed/1000000.0, bandwidth);
 		}
-		
+
 		total_time += elapsed;
 
 		++cnt;

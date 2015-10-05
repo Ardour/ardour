@@ -140,7 +140,7 @@ struct /*LIBEVORAL_API*/ Range {
 	bool empty() const { return from == to; }
 };
 
-template<typename T>	
+template<typename T>
 bool operator== (Range<T> a, Range<T> b) {
 	return a.from == b.from && a.to == b.to;
 }
@@ -149,7 +149,7 @@ template<typename T>
 class /*LIBEVORAL_API*/ RangeList {
 public:
 	RangeList () : _dirty (false) {}
-	
+
 	typedef std::list<Range<T> > List;
 
 	List const & get () {
@@ -171,7 +171,7 @@ public:
 			return;
 		}
 
-	restart:		
+	restart:
 		for (typename List::iterator i = _list.begin(); i != _list.end(); ++i) {
 			for (typename List::iterator j = _list.begin(); j != _list.end(); ++j) {
 
@@ -192,7 +192,7 @@ public:
 	}
 
 private:
-	
+
 	List _list;
 	bool _dirty;
 };
@@ -225,7 +225,7 @@ RangeList<T> subtract (Range<T> range, RangeList<T> sub)
 	/* The basic idea here is to keep a list of the result ranges, and subtract
 	   the bits of `sub' from them one by one.
 	*/
-	
+
 	for (typename RangeList<T>::List::const_iterator i = s.begin(); i != s.end(); ++i) {
 
 		/* Here's where we'll put the new current result after subtracting *i from it */

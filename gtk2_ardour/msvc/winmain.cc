@@ -40,7 +40,7 @@ char* argv[256];
 	// Essential!!  Make sure that any files used by Ardour
 	//              will be created or opened in BINARY mode!
 	_fmode = O_BINARY;
-	
+
 	GetModuleFileName (NULL, (LPSTR)szPathToProgram, (DWORD)sizeof(szPathToProgram));
 	argv[0] = new char[(strlen(szPathToProgram) + 1)];
 

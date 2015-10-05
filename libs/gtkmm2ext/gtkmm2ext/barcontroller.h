@@ -80,4 +80,4 @@ class LIBGTKMM2EXT_API BarController : public Gtk::Alignment
 
 }; /* namespace */
 
-#endif // __gtkmm2ext_bar_controller_h__		
+#endif // __gtkmm2ext_bar_controller_h__

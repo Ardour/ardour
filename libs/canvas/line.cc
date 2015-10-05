@@ -43,7 +43,7 @@ void
 Line::compute_bounding_box () const
 {
 	Rect bbox;
-	
+
 	bbox.x0 = min (_points[0].x, _points[1].x);
 	bbox.y0 = min (_points[0].y, _points[1].y);
 	bbox.x1 = max (_points[0].x, _points[1].x);
@@ -66,7 +66,7 @@ Line::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) cons
 	if (_outline_width <= 1.0) {
 		/* See Cairo FAQ on single pixel lines to understand why we add 0.5
 		 */
-		
+
 		const Duple half_a_pixel (0.5, 0.5);
 		p0 = p0.translate (half_a_pixel);
 		p1 = p1.translate (half_a_pixel);
@@ -82,10 +82,10 @@ Line::set (Duple a, Duple b)
 {
 	if (a != _points[0] || b != _points[1]) {
 		begin_change ();
-		
+
 		_points[0] = a;
 		_points[1] = b;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
 	}
@@ -96,23 +96,23 @@ Line::set_x (Coord x0, Coord x1)
 {
 	if (x0 != _points[0].x || x1 != _points[1].x) {
 		begin_change ();
-		
+
 		_points[0].x = x0;
 		_points[1].x = x1;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
 	}
-}	
+}
 
 void
 Line::set_x0 (Coord x0)
 {
 	if (x0 != _points[0].x) {
 		begin_change ();
-		
+
 		_points[0].x = x0;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
 	}
@@ -123,9 +123,9 @@ Line::set_y0 (Coord y0)
 {
 	if (y0 != _points[0].y) {
 		begin_change ();
-		
+
 		_points[0].y = y0;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
 	}
@@ -138,9 +138,9 @@ Line::set_x1 (Coord x1)
 {
 	if (x1 != _points[1].x) {
 		begin_change ();
-		
+
 		_points[1].x = x1;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
 	}
@@ -151,9 +151,9 @@ Line::set_y1 (Coord y1)
 {
 	if (y1 != _points[1].y) {
 		begin_change ();
-		
+
 		_points[1].y = y1;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
 	}

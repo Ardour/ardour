@@ -33,7 +33,7 @@ private:
 	void update_editor ();
 	void left_changed ();
 	void right_changed ();
-	
+
 	MonoPanner* _panner;
 	Gtk::SpinButton _left;
 	Gtk::SpinButton _right;

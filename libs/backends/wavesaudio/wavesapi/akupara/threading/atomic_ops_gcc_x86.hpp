@@ -19,7 +19,7 @@ namespace Akupara
 			namespace machine
 			{
 				const unsigned int k_bytes_per_cache_line = 64;  // this is true for P4 & K8
-	
+
 
 				// Flags for operations supported by this machine
 				//-------------------------------------
@@ -30,7 +30,7 @@ namespace Akupara
 				template<> struct implements_add          <4> : public true_type {};
 				template<> struct implements_fetch_and_add<4> : public true_type {};
 				//-------------------------------------
-		
+
 
 
 				// CAS
@@ -162,10 +162,10 @@ namespace Akupara
 					return fetch_and_add(operand_address, -subtrahend);
 				}
 				//--------------------------------------------------------------------------------
-		
 
 
-			
+
+
 				// Memory barriers
 				//--------------------------------------------------------------------------------
 				inline void memory_barrier_readwrite()

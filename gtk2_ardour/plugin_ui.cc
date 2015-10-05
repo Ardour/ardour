@@ -100,7 +100,7 @@ PluginUIWindow::PluginUIWindow (
 		case ARDOUR::Windows_VST:
 			have_gui = create_windows_vst_editor (insert);
 			break;
-			
+
 		case ARDOUR::LXVST:
 			have_gui = create_lxvst_editor (insert);
 			break;
@@ -662,7 +662,7 @@ bool
 PlugUIBase::bypass_button_release (GdkEventButton*)
 {
 	bool view_says_bypassed = (bypass_button.active_state() != 0);
-	
+
 	if (view_says_bypassed != insert->active()) {
 		if (view_says_bypassed) {
 			insert->activate ();
@@ -712,7 +712,7 @@ PlugUIBase::toggle_description()
 		description_expander.add(*label);
 		description_expander.show_all();
 	}
-	
+
 	if (!description_expander.get_expanded()) {
 		description_expander.remove();
 	}

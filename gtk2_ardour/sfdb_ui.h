@@ -198,7 +198,7 @@ class SoundFileBrowser : public ArdourWindow
 
 	void freesound_search();
 	void refresh_display(std::string ID, std::string file);
-	
+
   protected:
 	bool resetting_ourselves;
 	int matches;
@@ -239,7 +239,7 @@ class SoundFileBrowser : public ArdourWindow
 	void freesound_more_clicked ();
 	void freesound_similar_clicked ();
 	int freesound_page;
-	
+
 	void chooser_file_activated ();
 	std::string freesound_get_audio_file(Gtk::TreeIter iter);
 

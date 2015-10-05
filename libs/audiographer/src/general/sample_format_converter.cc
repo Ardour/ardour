@@ -120,11 +120,11 @@ SampleFormatConverter<TOut>::reset()
 		gdither_free (dither);
 		dither = 0;
 	}
-	
+
 	delete[] data_out;
 	data_out_size = 0;
 	data_out = 0;
-	
+
 	clip_floats = false;
 }
 
@@ -134,7 +134,7 @@ void
 SampleFormatConverter<TOut>::process (ProcessContext<float> const & c_in)
 {
 	float const * const data = c_in.data();
-	
+
 	check_frame_and_channel_count (c_in.frames (), c_in.channels ());
 
 	/* Do conversion */
@@ -164,7 +164,7 @@ SampleFormatConverter<float>::process (ProcessContext<float> & c_in)
 {
 	framecnt_t frames = c_in.frames();
 	float * data = c_in.data();
-	
+
 	if (clip_floats) {
 		for (framecnt_t x = 0; x < frames; ++x) {
 			if (data[x] > 1.0f) {
@@ -186,7 +186,7 @@ SampleFormatConverter<float>::process (ProcessContext<float> const & c_in)
 	// Make copy of data and pass it to non-const version
 	check_frame_and_channel_count (c_in.frames(), c_in.channels());
 	TypeUtils<float>::copy (c_in.data(), data_out, c_in.frames());
-	
+
 	ProcessContext<float> c (c_in, data_out);
 	process (c);
 }
@@ -200,7 +200,7 @@ SampleFormatConverter<TOut>::check_frame_and_channel_count (framecnt_t frames, C
 			("Wrong channel count given to process(), %1% instead of %2%")
 			% channels_ % channels));
 	}
-	
+
 	if (throw_level (ThrowProcess) && frames  > data_out_size) {
 		throw Exception (*this, boost::str (boost::format
 			("Too many frames given to process(), %1% instad of %2%")

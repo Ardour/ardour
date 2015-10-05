@@ -74,5 +74,5 @@ class LIBGTKMM2EXT_API AutoSpin
 };
 
 } /* namespace */
-	
+
 #endif /* __gtkmm2ext_auto_spin_h__ */

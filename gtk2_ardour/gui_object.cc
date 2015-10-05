@@ -157,4 +157,4 @@ GUIObjectState::all_ids () const
 	return ids;
 }
 
-	
+

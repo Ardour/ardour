@@ -113,7 +113,7 @@ IO::disconnect_check (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
 		 * ::disconnect()
 		 */
 		if (_ports.contains (a) || _ports.contains (b)) {
-			changed (IOChange (IOChange::ConnectionsChanged), this); /* EMIT SIGNAL */		
+			changed (IOChange (IOChange::ConnectionsChanged), this); /* EMIT SIGNAL */
 		}
 	} else {
 		/* we didn't get the lock, so assume that we're inside
@@ -299,7 +299,7 @@ IO::remove_port (boost::shared_ptr<Port> port, void* src)
 	}
 
 	_session.set_dirty ();
-	
+
 	return 0;
 }
 
@@ -321,12 +321,12 @@ IO::add_port (string destination, void* src, DataType type)
 	ChanCount before = _ports.count ();
 	ChanCount after = before;
 	after.set (type, after.get (type) + 1);
-	
+
 	bool const r = PortCountChanging (after); /* EMIT SIGNAL */
 	if (r) {
 		return -1;
 	}
-	
+
 	IOChange change;
 
 	{
@@ -339,7 +339,7 @@ IO::add_port (string destination, void* src, DataType type)
 			/* Create a new port */
 
 			string portname = build_legal_port_name (type);
-			
+
 			if (_direction == Input) {
 				if ((our_port = _session.engine().register_input_port (type, portname)) == 0) {
 					error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
@@ -355,7 +355,7 @@ IO::add_port (string destination, void* src, DataType type)
 			change.before = _ports.count ();
 			_ports.add (our_port);
 		}
-		
+
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
 		change.type = IOChange::ConfigurationChanged;
 		change.after = _ports.count ();
@@ -575,7 +575,7 @@ IO::state (bool /*full_state*/)
 
 	snprintf (buf, sizeof (buf), "%" PRId64, _user_latency);
 	node->add_property (X_("user-latency"), buf);
-	
+
 	return *node;
 }
 
@@ -983,9 +983,9 @@ IO::prepare_for_reset (XMLNode& node, const std::string& name)
 	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
 
 		if ((*i)->name() == "Port") {
-			
+
 			prop = (*i)->property (X_("name"));
-			
+
 			if (prop) {
 				string new_name;
 				string old = prop->value();
@@ -993,10 +993,10 @@ IO::prepare_for_reset (XMLNode& node, const std::string& name)
 
 				if (slash != string::npos) {
 					/* port name is of form: <IO-name>/<port-name> */
-					
+
 					new_name = name;
 					new_name += old.substr (old.find ('/'));
-					
+
 					prop->set_value (new_name);
 				}
 			}

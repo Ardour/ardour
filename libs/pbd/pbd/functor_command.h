@@ -71,7 +71,7 @@ class /*LIBPBD_API*/ FunctorCommand : public Command
 
 	virtual XMLNode &get_state() {
 		std::stringstream ss;
-		
+
 		XMLNode *node = new XMLNode("FunctorCommand");
 		node->add_property("type_name", typeid(obj_type).name());
 		node->add_property("functor", functor_name);

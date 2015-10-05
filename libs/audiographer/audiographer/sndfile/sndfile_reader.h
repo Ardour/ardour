@@ -18,13 +18,13 @@ class SndfileReader
   , public Throwing<>
 {
   public:
-	
+
 	SndfileReader (std::string const & path) : SndfileHandle (path) {}
 	virtual ~SndfileReader () {}
 
 	SndfileReader (SndfileReader const & other) : SndfileHandle (other) {}
 	using SndfileHandle::operator=;
-	
+
 	/** Read data into buffer in \a context, only the data is modified (not frame count)
 	 *  Note that the data read is output to the outputs, as well as read into the context
 	 *  \return number of frames read
@@ -36,17 +36,17 @@ class SndfileReader
 				("Wrong number of channels given to process(), %1% instead of %2%")
 				% context.channels() % channels()));
 		}
-		
+
 		framecnt_t const frames_read = SndfileHandle::read (context.data(), context.frames());
 		ProcessContext<T> c_out = context.beginning (frames_read);
-		
+
 		if (frames_read < context.frames()) {
 			c_out.set_flag (ProcessContext<T>::EndOfInput);
 		}
 		this->output (c_out);
 		return frames_read;
 	}
-	
+
   protected:
 	/// SndfileHandle has to be constructed directly by deriving classes
 	SndfileReader () {}

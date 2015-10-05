@@ -27,9 +27,9 @@ CairoPacker::draw_background (Gtk::Widget& w, GdkEventExpose*)
 	int x, y;
 	Gtk::Widget* window_parent;
 	Glib::RefPtr<Gdk::Window> win = Gtkmm2ext::window_to_draw_on (w, &window_parent);
-	
+
 	if (win) {
-		
+
 		Cairo::RefPtr<Cairo::Context> context = win->create_cairo_context();
 		w.translate_coordinates (*window_parent, 0, 0, x, y);
 

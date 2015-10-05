@@ -29,7 +29,7 @@
 template<class T> /*LIBPBD_API*/ void vector_delete (std::vector<T *> *vec)
 {
 	typename std::vector<T *>::iterator i;
-	
+
 	for (i = vec->begin(); i != vec->end(); i++) {
 		delete *i;
 	}
@@ -79,7 +79,7 @@ template<class T> /*LIBPBD_API*/ void slist_delete (std::slist<T *> *l)
 template<class T> void /*LIBPBD_API*/ set_delete (std::set<T *> *sset)
 {
 	typename std::set<T *>::iterator i;
-	
+
 	for (i = sset->begin(); i != sset->end(); i++) {
 		delete *i;
 	}

@@ -26,24 +26,24 @@ class NormalizerTest : public CppUnit::TestFixture
 	{
 		float target = 0.0;
 		random_data = TestUtils::init_random_data(frames, 0.5);
-		
+
 		normalizer.reset (new Normalizer(target));
 		peak_reader.reset (new PeakReader());
 		sink.reset (new VectorSink<float>());
-		
+
 		ProcessContext<float> const c (random_data, frames, 1);
 		peak_reader->process (c);
-		
+
 		float peak = peak_reader->get_peak();
 		normalizer->alloc_buffer (frames);
 		normalizer->set_peak (peak);
 		normalizer->add_output (sink);
 		normalizer->process (c);
-		
+
 		peak_reader->reset();
 		ConstProcessContext<float> normalized (sink->get_array(), frames, 1);
 		peak_reader->process (normalized);
-		
+
 		peak = peak_reader->get_peak();
 		CPPUNIT_ASSERT (-FLT_EPSILON <= (peak - 1.0) && (peak - 1.0) <= 0.0);
 	}

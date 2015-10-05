@@ -162,7 +162,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 					(*i)->bundle,
 					(*i)->bundle->type_channel_to_overall (_matrix->type (), j)
 					);
-				
+
 				render_channel_name (cr, background_colour (), c, x, 0, bc);
 				x += grid_spacing();
 			}
@@ -504,7 +504,7 @@ PortMatrixColumnLabels::motion (double x, double y)
 			if (!_matrix->should_show (w.bundle->channel_type (i))) {
 				continue;
 			}
-			
+
 			ARDOUR::BundleChannel const bc (w.bundle, i);
 			n.push_back (PortMatrixNode (ARDOUR::BundleChannel (), bc));
 		}

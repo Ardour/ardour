@@ -12,7 +12,7 @@ static void
 test (int items_per_cell)
 {
 	Group::default_items_per_cell = items_per_cell;
-	
+
 	int const n_rectangles = 10000;
 	int const n_tests = 1000;
 	double const rough_size = 1000;
@@ -42,7 +42,7 @@ int main ()
 	for (unsigned int i = 0; i < sizeof (tests) / sizeof (int); ++i) {
 		timeval start;
 		timeval stop;
-		
+
 		gettimeofday (&start, 0);
 		test (tests[i]);
 		gettimeofday (&stop, 0);
@@ -59,4 +59,4 @@ int main ()
 		cout << "Test " << tests[i] << ": " << seconds << "\n";
 	}
 }
-	
+

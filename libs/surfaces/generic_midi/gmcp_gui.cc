@@ -40,7 +40,7 @@ class GMCPGUI : public Gtk::VBox
 public:
 	GMCPGUI (GenericMidiControlProtocol&);
 	~GMCPGUI ();
-	
+
 private:
 	GenericMidiControlProtocol& cp;
 	Gtk::ComboBoxText map_combo;
@@ -110,7 +110,7 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	}
 
 	set_popdown_strings (map_combo, popdowns);
-	
+
 	if (cp.current_binding().empty()) {
 		map_combo.set_active_text (popdowns[0]);
 	} else {
@@ -126,7 +126,7 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	table->set_row_spacings (6);
 	table->set_col_spacings (6);
 	table->show ();
-	
+
 	int n = 0;
 
 	Label* label = manage (new Label (_("MIDI Bindings:")));
@@ -134,10 +134,10 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	table->attach (*label, 0, 1, n, n + 1);
 	table->attach (map_combo, 1, 2, n, n + 1);
 	++n;
-	
+
 	map_combo.show ();
 	label->show ();
-	
+
 	bank_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &GMCPGUI::bank_changed));
 
 	label = manage (new Label (_("Current Bank:")));
@@ -145,7 +145,7 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	table->attach (*label, 0, 1, n, n + 1);
 	table->attach (bank_spinner, 1, 2, n, n + 1);
 	++n;
-	
+
 	bank_spinner.show ();
 	label->show ();
 

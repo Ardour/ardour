@@ -65,7 +65,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	: ArdourDialog (_("Plugin Manager"), true, false)
 	, filter_button (Stock::CLEAR)
 	, manager (mgr)
-	
+
 {
 	set_name ("PluginSelectorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
@@ -340,7 +340,7 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 				newrow[plugin_columns.audio_ins] = buf;
 				snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_midi());
 				newrow[plugin_columns.midi_ins] = buf;
-				
+
 				snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_audio());
 				newrow[plugin_columns.audio_outs] = buf;
 				snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_midi());

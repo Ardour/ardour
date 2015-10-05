@@ -54,7 +54,7 @@ void
 Control::set_double (double value, double frame, bool to_list)
 {
 	_user_value = value;
-	
+
 	/* if we're in a write pass, the automation watcher will determine the
 	   values and add them to the list, so we we don't need to bother.
 	*/
@@ -69,7 +69,7 @@ void
 Control::set_list(boost::shared_ptr<ControlList> list)
 {
 	_list_marked_dirty_connection.disconnect ();
-	
+
 	_list = list;
 
 	if (_list) {

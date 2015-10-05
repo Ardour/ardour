@@ -99,7 +99,7 @@ swing_position (double pos, double grid, double swing, double offset)
 	/* now correct for start-of-model offset */
 
 	pos += offset;
-				
+
 	if (fabs (pos - swung_pos) > fabs (pos - swung_previous_grid_position)) {
 		pos = swung_previous_grid_position;
 	} else {
@@ -135,7 +135,7 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 			 * these versions of new_start and new_end are
 			 * guaranteed to precisely align with the quantize grid(s).
 			 */
-			
+
 			double new_start = round (((*i)->time().to_double() - offset) / _start_grid) * _start_grid;
 			double new_end = round (((*i)->end_time().to_double() - offset) / _end_grid) * _end_grid;
 
@@ -143,7 +143,7 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 
 				new_start = swing_position (new_start, _start_grid, _swing, offset);
 				new_end = swing_position (new_end, _end_grid, _swing, offset);
-				
+
 			} else {
 
 				/* now correct for start-of-model offset */
@@ -151,10 +151,10 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 				new_start += offset;
 				new_end += offset;
 			}
-			
+
 			double delta = new_start - (*i)->time().to_double();
 
-			
+
 			if (fabs (delta) >= _threshold) {
 				if (_snap_start) {
 					delta *= _strength;

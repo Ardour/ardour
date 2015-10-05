@@ -43,7 +43,7 @@ WaveViewTest::setUp ()
 	AudioEngine engine ("test", "");
 	MIDI::Manager::create (engine.jack ());
 	CPPUNIT_ASSERT (engine.start () == 0);
-	
+
 	Session session (engine, "tmp_session", "tmp_session");
 	engine.set_session (&session);
 
@@ -70,7 +70,7 @@ void
 WaveViewTest::make_canvas ()
 {
 	/* this leaks various things, but hey ho */
-	
+
 	_canvas = new ImageCanvas (Duple (256, 256));
 	_wave_view = new WaveView (_canvas->root(), _audio_region);
 	_wave_view->set_frames_per_pixel ((double) (44100 / 1000) / 64);
@@ -84,7 +84,7 @@ WaveViewTest::all ()
 	   gets called once; there are various singletons etc. in Ardour which don't
 	   like being recreated.
 	*/
-	
+
 	render_all_at_once ();
 	render_in_pieces ();
 	cache ();
@@ -94,7 +94,7 @@ void
 WaveViewTest::render_all_at_once ()
 {
 	make_canvas ();
-	
+
 	_canvas->render_to_image (Rect (0, 0, 256, 256));
 	_canvas->write_to_png ("waveview_1.png");
 
@@ -119,11 +119,11 @@ void
 WaveViewTest::cache ()
 {
 	make_canvas ();
-	
+
 	/* Whole of the render area needs caching from scratch */
-	
+
 	_wave_view->invalidate_whole_cache ();
-	
+
 	Rect whole (0, 0, 256, 256);
 	_canvas->render_to_image (whole);
 
@@ -132,7 +132,7 @@ WaveViewTest::cache ()
 	CPPUNIT_ASSERT (_wave_view->_cache.front()->end() == 256);
 
 	_wave_view->invalidate_whole_cache ();
-	
+
 	/* Render a bit in the middle */
 
 	Rect part1 (128, 0, 196, 256);
@@ -145,11 +145,11 @@ WaveViewTest::cache ()
 	/* Now render the whole thing and check that the cache sorts itself out */
 
 	_canvas->render_to_image (whole);
-	
+
 	CPPUNIT_ASSERT (_wave_view->_cache.size() == 3);
 
 	list<WaveView::CacheEntry*>::iterator i = _wave_view->_cache.begin ();
-	
+
 	CPPUNIT_ASSERT ((*i)->start() == 0);
 	CPPUNIT_ASSERT ((*i)->end() == 128);
 	++i;

@@ -53,7 +53,7 @@ void DetectionFunction::initialise( DFConfig Config )
 
     m_magHistory = new double[ m_halfLength ];
     memset(m_magHistory,0, m_halfLength*sizeof(double));
-		
+
     m_phaseHistory = new double[ m_halfLength ];
     memset(m_phaseHistory,0, m_halfLength*sizeof(double));
 
@@ -152,15 +152,15 @@ double DetectionFunction::runDF()
     case DF_HFC:
 	retVal = HFC( m_halfLength, m_magnitude);
 	break;
-	
+
     case DF_SPECDIFF:
 	retVal = specDiff( m_halfLength, m_magnitude);
 	break;
-	
+
     case DF_PHASEDEV:
 	retVal = phaseDev( m_halfLength, m_thetaAngle);
 	break;
-	
+
     case DF_COMPLEXSD:
 	retVal = complexSD( m_halfLength, m_magnitude, m_thetaAngle);
 	break;
@@ -169,7 +169,7 @@ double DetectionFunction::runDF()
         retVal = broadband( m_halfLength, m_magnitude);
         break;
     }
-	
+
     return retVal;
 }
 
@@ -195,7 +195,7 @@ double DetectionFunction::specDiff(unsigned int length, double *src)
     for( i = 0; i < length; i++)
     {
 	temp = fabs( (src[ i ] * src[ i ]) - (m_magHistory[ i ] * m_magHistory[ i ]) );
-		
+
 	diff= sqrt(temp);
 
         // (See note in phaseDev below.)
@@ -230,15 +230,15 @@ double DetectionFunction::phaseDev(unsigned int length, double *srcPhase)
         // does significantly damage its ability to work with quieter
         // music, so I'm removing it and counting the result always.
         // Same goes for the spectral difference measure above.
-		
+
         tmpVal  = fabs(dev);
         val += tmpVal ;
 
 	m_phaseHistoryOld[ i ] = m_phaseHistory[ i ] ;
 	m_phaseHistory[ i ] = srcPhase[ i ];
     }
-	
-	
+
+
     return val;
 }
 
@@ -259,14 +259,14 @@ double DetectionFunction::complexSD(unsigned int length, double *srcMagnitude, d
     {
 	tmpPhase = (srcPhase[ i ]- 2*m_phaseHistory[ i ]+m_phaseHistoryOld[ i ]);
 	dev= MathUtilities::princarg( tmpPhase );
-		
+
 	meas = m_magHistory[i] - ( srcMagnitude[ i ] * exp( j * dev) );
 
 	tmpReal = real( meas );
 	tmpImag = imag( meas );
 
 	val += sqrt( (tmpReal * tmpReal) + (tmpImag * tmpImag) );
-		
+
 	m_phaseHistoryOld[ i ] = m_phaseHistory[ i ] ;
 	m_phaseHistory[ i ] = srcPhase[ i ];
 	m_magHistory[ i ] = srcMagnitude[ i ];

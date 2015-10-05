@@ -151,7 +151,7 @@ AudioClock::on_realize ()
 	Gtk::Requisition req;
 
 	CairoWidget::on_realize ();
-	
+
 	set_clock_dimensions (req);
 
 	first_width = req.width;
@@ -318,7 +318,7 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 		cairo_save (cr);
 		cairo_scale (cr, xscale, yscale);
 	}
-	
+
 	pango_cairo_show_layout (cr, _layout->gobj());
 
 	if (xscale != 1.0 || yscale != 1.0) {
@@ -507,15 +507,15 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 		Glib::RefPtr<Gtk::Style> style = get_style ();
 		Pango::FontDescription font;
 		int w;
-		
+
 		tmp = Pango::Layout::create (get_pango_context());
-		
+
 		if (!is_realized()) {
 			font = get_font_for_style (get_name());
 		} else {
 			font = style->get_font();
 		}
-		
+
 		tmp->set_font_description (font);
 
 		font.set_size (INFO_FONT_SIZE);
@@ -561,17 +561,17 @@ AudioClock::start_edit (Field f)
 			edit_string.clear ();
 			_layout->set_text ("");
 		}
-		
+
 		input_string.clear ();
 		editing = true;
 		edit_is_negative = false;
-		
+
 		if (f) {
 			input_string = get_field (f);
 			show_edit_status (merge_input_and_edit_string ());
 			_layout->set_text (edit_string);
 		}
-		
+
 		queue_draw ();
 
 		Keyboard::magic_widget_grab_focus ();

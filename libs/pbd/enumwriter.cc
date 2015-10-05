@@ -41,7 +41,7 @@ nocase_cmp(const string & s1, const string& s2)
 {
 	string::const_iterator it1 = s1.begin();
 	string::const_iterator it2 = s2.begin();
-	
+
 	while ((it1 != s1.end()) && (it2 != s2.end())) {
 		if(::toupper(*it1) != ::toupper(*it2))  {//letters differ?
 			// return -1 to indicate 'smaller than', 1 otherwise
@@ -97,7 +97,7 @@ EnumWriter::register_distinct (string type, vector<int> v, vector<string> s)
 
 	newpair.first = type;
 	newpair.second = EnumRegistration (v, s, false);
-	
+
 	result = registry.insert (newpair);
 
 	if (!result.second) {
@@ -113,7 +113,7 @@ EnumWriter::register_bits (string type, vector<int> v, vector<string> s)
 
 	newpair.first = type;
 	newpair.second = EnumRegistration (v, s, true);
-	
+
 	result = registry.insert (newpair);
 
 	if (!result.second) {
@@ -153,7 +153,7 @@ EnumWriter::read (string type, string value)
 	} else {
 		return read_distinct (x->second, value);
 	}
-}	
+}
 
 string
 EnumWriter::write_bits (EnumRegistration& er, int value)
@@ -263,7 +263,7 @@ EnumWriter::read_bits (EnumRegistration& er, string str)
         }
 
 	do {
-		
+
 		comma = str.find_first_of (',');
 		string segment = str.substr (0, comma);
 

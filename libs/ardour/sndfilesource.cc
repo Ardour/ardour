@@ -168,7 +168,7 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 		fmt = SF_FORMAT_RF64;
 		_flags = Flag (_flags & ~Broadcast);
 		break;
-		
+
 	default:
 		fatal << string_compose (_("programming error: %1"), X_("unsupported audio header format requested")) << endmsg;
 		abort(); /*NOTREACHED*/
@@ -325,7 +325,7 @@ SndFileSource::open ()
 		}
 	}
 #endif
-	
+
 	if (!_broadcast_info) {
 		_broadcast_info = new BroadcastInfo;
 	}
@@ -353,7 +353,7 @@ SndFileSource::open ()
 	/* Set the broadcast flag if the BWF info is already there. We need
 	 * this when recovering or using existing files.
 	 */
-	
+
 	if (bwf_info_exists) {
 		_flags = Flag (_flags | Broadcast);
 	}
@@ -380,7 +380,7 @@ SndFileSource::open ()
                         }
                 }
         }
-	
+
 	return 0;
 }
 
@@ -401,7 +401,7 @@ framecnt_t
 SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const
 {
 	assert (cnt >= 0);
-	
+
 	framecnt_t nread;
 	float *ptr;
 	framecnt_t real_cnt;

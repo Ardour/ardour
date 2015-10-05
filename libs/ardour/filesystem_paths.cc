@@ -53,14 +53,14 @@ user_config_directory_name (int version = -1)
 	   called, so rely on build-time detection of the
 	   product name etc.
 	*/
-	
+
 #ifdef USE_TRACKS_CODE_FEATURES
 	/* Tracks does not use versioned configuration folders, which may or
 	   may not be problematic in the future.
 	*/
 	return X_(PROGRAM_NAME);
 
-#else		
+#else
 	const string config_dir_name = string_compose ("%1%2", X_(PROGRAM_NAME), version);
 
 #if defined (__APPLE__) || defined (PLATFORM_WINDOWS)
@@ -70,8 +70,8 @@ user_config_directory_name (int version = -1)
 	/* use lower case folder name on Linux */
 	return downcase (config_dir_name);
 #endif
-#endif	
-}	
+#endif
+}
 
 std::string
 user_config_directory (int version)
@@ -208,7 +208,7 @@ ardour_dll_directory ()
 	if (s.empty()) {
 		std::cerr << _("ARDOUR_DLL_PATH not set in environment - exiting\n");
 		::exit (1);
-	}	
+	}
 	return s;
 #endif
 }

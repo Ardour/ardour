@@ -30,7 +30,7 @@ class LIBGTKMM2EXT_API FocusEntry : public Gtk::Entry
 {
   public:
 	FocusEntry ();
-	
+
   protected:
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);

@@ -22,7 +22,7 @@
 
 class MathUtilities
 {
-public:	
+public:
     static double round( double x );
 
     static void	  getFrameMinMax( const double* data, unsigned int len,  double* min, double* max );

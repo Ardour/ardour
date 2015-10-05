@@ -17,12 +17,12 @@ class TypeUtilsTest : public CppUnit::TestFixture
   public:
 	void setUp()
 	{
-		
+
 	}
 
 	void tearDown()
 	{
-		
+
 	}
 
 	void testZeroFillPod()
@@ -35,7 +35,7 @@ class TypeUtilsTest : public CppUnit::TestFixture
 			CPPUNIT_ASSERT_EQUAL (zero, buf[i]);
 		}
 	}
-	
+
 	void testZeroFillNonPod()
 	{
                 /* does not compile on OS X Lion
@@ -48,26 +48,26 @@ class TypeUtilsTest : public CppUnit::TestFixture
 		}
                 */
 	}
-	
+
 	void testMoveBackward()
 	{
 		int seq[8] = { 0, 1, 2, 3,
 		               4, 5, 6, 7 };
-		
+
 		TypeUtils<int>::move (&seq[4], &seq[2], 4);
-		
+
 		for (int i = 2; i < 2 + 4; ++i) {
 			CPPUNIT_ASSERT_EQUAL (i + 2, seq[i]);
 		}
 	}
-	
+
 	void testMoveForward()
 	{
 		int seq[8] = { 0, 1, 2, 3,
 		               4, 5, 6, 7 };
-		
+
 		TypeUtils<int>::move (&seq[2], &seq[4], 4);
-		
+
 		for (int i = 4; i < 4 + 4; ++i) {
 			CPPUNIT_ASSERT_EQUAL (i - 2, seq[i]);
 		}
@@ -79,16 +79,16 @@ class TypeUtilsTest : public CppUnit::TestFixture
 		int const seq2[4] = { 5, 6, 7, 8 };
 		int seq3[8] = { 0, 0, 0, 0,
 		                  0, 0, 0, 0 };
-		
+
 		TypeUtils<int>::copy (seq1, seq3, 4);
 		for (int i = 0; i < 4; ++i) {
 			CPPUNIT_ASSERT_EQUAL (seq1[i], seq3[i]);
 		}
-		
+
 		for (int i = 4; i < 8; ++i) {
 			CPPUNIT_ASSERT_EQUAL (0, seq3[i]);
 		}
-		
+
 		TypeUtils<int>::copy (seq2, &seq3[4], 4);
 		for (int i = 0; i < 4; ++i) {
 			CPPUNIT_ASSERT_EQUAL (seq1[i], seq3[i]);
@@ -99,14 +99,14 @@ class TypeUtilsTest : public CppUnit::TestFixture
 	}
 
   private:
-	
+
 	struct NonPodType {
 		NonPodType() : data (42) {}
 		bool operator== (NonPodType const & other) const
 			{ return data == other.data; }
 		int data;
 	};
-	
+
 
 };
 

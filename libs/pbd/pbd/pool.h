@@ -39,12 +39,12 @@ class LIBPBD_API Pool
 
 	virtual void *alloc ();
 	virtual void release (void *);
-	
+
 	std::string name() const { return _name; }
 	guint available() const { return free_list.read_space(); }
 	guint used() const { return free_list.bufsize() - available(); }
 	guint total() const { return free_list.bufsize(); }
-	
+
   protected:
 	RingBuffer<void*> free_list; ///< a list of pointers to free items within block
 	std::string _name;

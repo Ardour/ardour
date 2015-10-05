@@ -148,7 +148,7 @@ Location::operator= (const Location& other)
 	_bbt_end = other._bbt_end;
 	_flags = other._flags;
 	_position_lock_style = other._position_lock_style;
-	
+
 	/* XXX need to copy scene change */
 
 	/* copy is not locked even if original was */
@@ -240,7 +240,7 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 		}
 		start_changed (this); /* EMIT SIGNAL */
 		StartChanged (); /* EMIT SIGNAL */
-				
+
 		if (is_session_range ()) {
 			Session::StartTimeChanged (old); /* EMIT SIGNAL */
 			AudioFileSource::set_header_position_offset (s);
@@ -688,7 +688,7 @@ Location::set_state (const XMLNode& node, int version)
 	}
 
 	XMLNode* scene_child = find_named_node (node, SceneChange::xml_node_name);
-	
+
 	if (scene_child) {
 		_scene_change = SceneChange::factory (*scene_child, version);
 	}
@@ -1191,7 +1191,7 @@ Locations::first_mark_before (framepos_t frame, bool include_special_ranges)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 	vector<LocationPair> locs;
-	
+
 	for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
 		locs.push_back (make_pair ((*i)->start(), (*i)));
 		if (!(*i)->is_mark()) {
@@ -1239,7 +1239,7 @@ Locations::mark_at (framepos_t pos, framecnt_t slop) const
 			} else {
 				delta = (*i)->start() - pos;
 			}
-			
+
 			if (slop == 0 && delta == 0) {
 				/* special case: no slop, and direct hit for position */
 				return *i;
@@ -1272,7 +1272,7 @@ Locations::first_mark_after (framepos_t frame, bool include_special_ranges)
 
 	LocationStartEarlierComparison cmp;
 	sort (locs.begin(), locs.end(), cmp);
-	
+
 	/* locs is sorted in reverse order */
 
 	for (vector<LocationPair>::iterator i = locs.begin(); i != locs.end(); ++i) {

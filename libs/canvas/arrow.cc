@@ -58,7 +58,7 @@ Arrow::setup ()
 		setup_polygon (i);
 		CANVAS_DEBUG_NAME (_heads[i].polygon, string_compose ("arrow head %1", i));
 	}
-	
+
 	_line = new Line (this);
 	CANVAS_DEBUG_NAME (_line, "arrow line");
 }
@@ -90,9 +90,9 @@ void
 Arrow::set_show_head (int which, bool show)
 {
 	assert (which == 0 || which == 1);
-	
+
 	begin_change ();
-	
+
 	if (!show) {
 		delete _heads[which].polygon;
 		_heads[which].polygon = 0;
@@ -114,7 +114,7 @@ void
 Arrow::set_head_outward (int which, bool outward)
 {
 	assert (which == 0 || which == 1);
-	
+
 	begin_change ();
 
 	_heads[which].outward = outward;
@@ -132,9 +132,9 @@ void
 Arrow::set_head_height (int which, Distance height)
 {
 	assert (which == 0 || which == 1);
-	
+
 	begin_change ();
-	
+
 	_heads[which].height = height;
 
 	setup_polygon (which);
@@ -150,9 +150,9 @@ void
 Arrow::set_head_width (int which, Distance width)
 {
 	assert (which == 0 || which == 1);
-	
+
 	begin_change ();
-	
+
 	_heads[which].width = width;
 
 	setup_polygon (which);
@@ -239,7 +239,7 @@ void
 Arrow::setup_polygon (int which)
 {
 	assert (which == 0 || which == 1);
-	
+
 	Points points;
 
 	if ((which == 0 && _heads[which].outward) || (which == 1 && !_heads[which].outward)) {

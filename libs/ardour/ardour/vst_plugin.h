@@ -56,7 +56,7 @@ public:
 	bool parameter_is_control (uint32_t) const { return true; }
 	bool parameter_is_input (uint32_t) const { return true; }
 	bool parameter_is_output (uint32_t) const { return false; }
-	
+
 	int connect_and_run (
 		BufferSet&, ChanMapping in, ChanMapping out,
 		pframes_t nframes, framecnt_t offset
@@ -70,7 +70,7 @@ public:
         void print_parameter (uint32_t, char*, uint32_t len) const;
 
 	bool has_editor () const;
-	
+
 	AEffect * plugin () const { return _plugin; }
 	VSTState * state () const { return _state; }
 	MidiBuffer * midi_buffer () const { return _midi_out_buf; }
@@ -78,7 +78,7 @@ public:
 	int set_state (XMLNode const &, int);
 
 	int first_user_preset_index () const;
-	
+
 protected:
 	void set_plugin (AEffect *);
 	gchar* get_chunk (bool) const;
@@ -91,7 +91,7 @@ protected:
 	XMLTree * presets_tree () const;
 	std::string presets_file () const;
 	void find_presets ();
-	
+
 	VSTHandle* _handle;
 	VSTState*  _state;
 	AEffect*   _plugin;

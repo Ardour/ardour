@@ -746,7 +746,7 @@ static void FAR PASCAL winmm_in_callback(
             MMRESULT rslt;
             lpMidiHdr->dwBytesRecorded = 0;
             lpMidiHdr->dwFlags = 0;
-			
+
             /* note: no error checking -- can this actually fail? */
             rslt = midiInPrepareHeader(hMidiIn, lpMidiHdr, sizeof(MIDIHDR));
             assert(rslt == MMSYSERR_NOERROR);

@@ -92,7 +92,7 @@ int TranzportControlProtocol::read(uint8_t *buf, uint32_t timeout_override)
 	return last_read_error;
 }
 
-	
+
 int
 TranzportControlProtocol::write_noretry (uint8_t* cmd, uint32_t timeout_override)
 {
@@ -131,13 +131,13 @@ TranzportControlProtocol::write_noretry (uint8_t* cmd, uint32_t timeout_override
 
 	return 0;
 
-}	
+}
 
 int
 TranzportControlProtocol::write (uint8_t* cmd, uint32_t timeout_override)
 {
 	return (write_noretry(cmd,timeout_override));
-}	
+}
 
 // FIXME - install poll semantics
 #endif /* HAVE_TRANZPORT_KERNEL_DRIVER */

@@ -112,7 +112,7 @@ _pingback (void *arg)
 
 	curl_global_init (CURL_GLOBAL_NOTHING);
 	c = curl_easy_init ();
-	
+
 	curl_easy_setopt (c, CURLOPT_WRITEFUNCTION, curl_write_data);
 	curl_easy_setopt (c, CURLOPT_WRITEDATA, &return_str);
 	char errbuf[CURL_ERROR_SIZE];
@@ -219,7 +219,7 @@ _pingback (void *arg)
 			std::cerr << "Announcement string is too long (probably behind a proxy)." << std::endl;
 		} else {
 			std::cerr << "Announcement is: " << return_str << std::endl;
-			
+
 			//write announcements to local file, even if the
 			//announcement is empty
 

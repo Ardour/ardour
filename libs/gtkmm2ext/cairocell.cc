@@ -149,9 +149,9 @@ CairoTextCell::set_size (Cairo::RefPtr<Cairo::Context>& context)
 		for (n = 0; n < lim; ++n) {
 			buf[n] = '0' + digit;
 		}
-		
+
 		context->get_text_extents (&buf[0], ext);
-		
+
 		max_width = max (ext.width + ext.x_bearing, max_width);
 		max_height = max (ext.height, max_height);
 		bsum += ext.x_bearing;
@@ -179,7 +179,7 @@ CairoCharCell::set_size (Cairo::RefPtr<Cairo::Context>& context)
 	Cairo::TextExtents ext;
 
 	_font->apply (context);
-	
+
 	{
 		const char* buf = "8";
 		context->get_text_extents (buf, ext);
@@ -251,7 +251,7 @@ void
 CairoEditableText::add_cell (CairoCell* cell)
 {
 	cells.push_back (cell);
-	
+
 	CairoTextCell* tc = dynamic_cast<CairoTextCell*>(cell);
 
 	if (tc) {
@@ -306,7 +306,7 @@ CairoEditableText::on_expose_event (GdkEventExpose* ev)
 	Gtk::Allocation alloc = get_allocation ();
 	double width = alloc.get_width();
 	double height = alloc.get_height ();
-		
+
 	if (_draw_bg) {
 		context->set_source_rgba (bg_r, bg_g, bg_b, bg_a);
 		if (_corner_radius) {
@@ -316,14 +316,14 @@ CairoEditableText::on_expose_event (GdkEventExpose* ev)
 		}
 		context->fill ();
 	}
-	
+
 	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
 
 		CairoCell* cell = (*i);
 
 		/* is cell inside the expose area?
 		 */
-		
+
 		if (cell->intersects (ev->area)) {
 			if (cell == editing_cell) {
 				context->set_source_rgba (edit_r, edit_b, edit_g, edit_a);
@@ -413,9 +413,9 @@ CairoEditableText::set_cell_sizes ()
 	if (!win) {
 		return;
 	}
-	
+
 	Cairo::RefPtr<Cairo::Context> context = win->create_cairo_context();
-	
+
 	if (!context) {
 		return;
 	}
@@ -432,7 +432,7 @@ CairoEditableText::on_size_request (GtkRequisition* req)
 
 	max_cell_width = 0;
 	max_cell_height = 0;
-	
+
 	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
 		max_cell_width += (*i)->width();
 		max_cell_height = std::max ((double) (*i)->height(), max_cell_height);

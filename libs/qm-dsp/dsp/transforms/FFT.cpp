@@ -54,7 +54,7 @@ FFTReal::process(bool inverse,
 }
 
 static unsigned int numberOfBitsNeeded(unsigned int p_nSamples)
-{	
+{
     int i;
 
     if( p_nSamples < 2 )

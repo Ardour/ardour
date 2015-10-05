@@ -524,7 +524,7 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 
 				Sample *buf = bufs.get_audio (n).data(rec_offset);
 				memcpy (chaninfo->current_capture_buffer, buf, sizeof (Sample) * rec_nframes);
-				
+
 			} else {
 
 				framecnt_t total = chaninfo->capture_vector.len[0] + chaninfo->capture_vector.len[1];
@@ -600,7 +600,7 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 	}
 
 	if ((_track->monitoring_state () & MonitoringDisk) || collect_playback) {
-		
+
 		/* we're doing playback */
 
 		framecnt_t necessary_samples;
@@ -656,7 +656,7 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 					memcpy ((char *) chaninfo->playback_wrap_buffer,
 							chaninfo->playback_vector.buf[0],
 							chaninfo->playback_vector.len[0] * sizeof (Sample));
-					
+
 					/* Copy buf[1] from playback_buf */
 					memcpy (chaninfo->playback_wrap_buffer + chaninfo->playback_vector.len[0],
 							chaninfo->playback_vector.buf[1],
@@ -675,13 +675,13 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 			int channel = 0;
 			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++channel) {
 				ChannelInfo* chaninfo (*chan);
-				
+
 				playback_distance = interpolation.interpolate (
 					channel, nframes, chaninfo->current_playback_buffer, chaninfo->speed_buffer);
-				
+
 				chaninfo->current_playback_buffer = chaninfo->speed_buffer;
 			}
-			
+
 		} else {
 			playback_distance = nframes;
 		}
@@ -692,20 +692,20 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 	if (need_disk_signal) {
 
 		/* copy data over to buffer set */
-		
+
 		size_t n_buffers = bufs.count().n_audio();
 		size_t n_chans = c->size();
 		gain_t scaling = 1.0f;
-		
+
 		if (n_chans > n_buffers) {
 			scaling = ((float) n_buffers)/n_chans;
 		}
 
 		for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
-			
+
 			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
 			ChannelInfo* chaninfo (*chan);
-			
+
 			if (n < n_chans) {
 				if (scaling != 1.0f) {
 					buf.read_from_with_gain (chaninfo->current_playback_buffer, nframes, scaling);
@@ -725,7 +725,7 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 		ChanCount cnt (DataType::AUDIO, n_chans);
 		cnt.set (DataType::MIDI, bufs.count().n_midi());
 		bufs.set_count (cnt);
-	
+
 		/* extra buffers will already be silent, so leave them alone */
 	}
 
@@ -1124,11 +1124,11 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 	/* do not read from disk while session is marked as Loading, to avoid
 	   useless redundant I/O.
 	*/
-	
+
 	if (_session.state_of_the_state() & Session::Loading) {
 		return 0;
 	}
-	
+
 	if (c->empty()) {
 		return 0;
 	}
@@ -1263,14 +1263,14 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 	/* now back to samples */
 
 	framecnt_t samples_to_read = byte_size_for_read / (bits_per_sample / 8);
-	
+
 	//cerr << name() << " will read " << byte_size_for_read << " out of total bytes " << total_bytes << " in buffer of "
 	// << c->front()->playback_buf->bufsize() * bits_per_sample / 8 << " bps = " << bits_per_sample << endl;
 	// cerr << name () << " read samples = " << samples_to_read << " out of total space " << total_space << " in buffer of " << c->front()->playback_buf->bufsize() << " samples\n";
 
 	// uint64_t before = g_get_monotonic_time ();
 	// uint64_t elapsed;
-	
+
 	for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 
 		ChannelInfo* chan (*i);
@@ -1352,14 +1352,14 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 
 	// elapsed = g_get_monotonic_time () - before;
 	// cerr << "\tbandwidth = " << (byte_size_for_read / 1048576.0) / (elapsed/1000000.0) << "MB/sec\n";
-		
+
 	file_frame = file_frame_tmp;
 	assert (file_frame >= 0);
 
 	ret = ((total_space - samples_to_read) > disk_read_chunk_frames);
-	
+
 	c->front()->playback_buf->get_write_vector (&vector);
-	
+
   out:
 	return ret;
 }
@@ -1630,7 +1630,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 		}
 
 		_last_capture_sources.insert (_last_capture_sources.end(), srcs.begin(), srcs.end());
-		
+
 		_playlist->clear_changes ();
 		_playlist->set_capture_insertion_in_progress (true);
 		_playlist->freeze ();
@@ -1774,7 +1774,7 @@ AudioDiskstream::finish_capture (boost::shared_ptr<ChannelList> c)
 	*/
 
 	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("Finish capture, add new CI, %1 + %2\n", ci->start, ci->frames));
-	
+
 	capture_info.push_back (ci);
 	capture_captured = 0;
 
@@ -1816,25 +1816,25 @@ AudioDiskstream::set_record_safe (bool yn)
 	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_audio() == 0) {
 		return;
 	}
-	
+
 	/* can't rec-safe in destructive mode if transport is before start ????
 	 REQUIRES REVIEW */
-	
+
 	if (destructive() && yn && _session.transport_frame() < _session.current_start_frame()) {
 		return;
 	}
-	
+
 	/* yes, i know that this not proof against race conditions, but its
 	 good enough. i think.
 	 */
-	
+
 	if (record_safe () != yn) {
 		if (yn) {
 			engage_record_safe ();
 		} else {
 			disengage_record_safe ();
 		}
-	
+
 		RecordSafeChanged (); /* EMIT SIGNAL */
 	}
 }
@@ -2334,11 +2334,11 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 
 		boost::shared_ptr<AudioRegion> wf_region;
 		boost::shared_ptr<AudioRegion> region;
-		
+
 		/* First create the whole file region */
 
 		PropertyList plist;
-		
+
 		plist.add (Properties::start, 0);
 		plist.add (Properties::length, first_fs->length (first_fs->timeline_position()));
 		plist.add (Properties::name, region_name_from_path (first_fs->name(), true));
@@ -2353,7 +2353,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 		 * the playlist */
 
 		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, plist));
-		
+
 		_playlist->add_region (region, position);
 	}
 
@@ -2414,7 +2414,7 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 	if (Profile->get_trx()) {
 		return false;
 	}
-	
+
 	if (!_playlist) {
 		requires_bounce = false;
 		return false;

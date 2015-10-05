@@ -94,7 +94,7 @@ endmsg (std::ostream &ostr)
 		/* hmm. not a Transmitter, so just put a newline on
 		   it and assume that that will be enough.
 		*/
-		
+
 		ostr << std::endl;
 	}
 

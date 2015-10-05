@@ -25,9 +25,9 @@ static inline float fast_log2 (float val)
 	x &= ~(255 << 23);
 	x += 127 << 23;
 	*exp_ptr = x;
-	
+
 	val = ((-1.0f/3) * t.f + 2) * t.f - 2.0f/3;
-	
+
 	return (val + log_2);
 }
 

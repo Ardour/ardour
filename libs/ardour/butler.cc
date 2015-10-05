@@ -106,7 +106,7 @@ Butler::start_thread()
 {
 	// set up capture and playback buffering
 	Diskstream::set_buffering_parameters (Config->get_buffering_preset());
-	
+
 	/* size is in Samples, not bytes */
 	const float rate = (float)_session.frame_rate();
 	audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * rate);
@@ -133,7 +133,7 @@ Butler::start_thread()
 	// we are ready to request buffer adjustments
 	_session.adjust_capture_buffering ();
 	_session.adjust_playback_buffering ();
-	
+
 	return 0;
 }
 
@@ -198,7 +198,7 @@ Butler::thread_work ()
 			}
 		}
 
-		
+
 	  restart:
 		DEBUG_TRACE (DEBUG::Butler, "at restart for disk work\n");
 		disk_work_outstanding = false;
@@ -244,7 +244,7 @@ Butler::thread_work ()
 			case 0:
 				DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill done %1\n", tr->name()));
 				break;
-				
+
 			case 1:
 				DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill unfinished %1\n", tr->name()));
 				disk_work_outstanding = true;
@@ -315,7 +315,7 @@ Butler::flush_tracks_to_disk_normal (boost::shared_ptr<RouteList> rl, uint32_t& 
 	for (RouteList::iterator i = rl->begin(); !transport_work_requested() && should_run && i != rl->end(); ++i) {
 
 		// cerr << "write behind for " << (*i)->name () << endl;
-		
+
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 
 		if (!tr) {
@@ -350,7 +350,7 @@ Butler::flush_tracks_to_disk_normal (boost::shared_ptr<RouteList> rl, uint32_t& 
 	}
 
 	return disk_work_outstanding;
-}	
+}
 
 bool
 Butler::flush_tracks_to_disk_after_locate (boost::shared_ptr<RouteList> rl, uint32_t& errors)
@@ -360,7 +360,7 @@ Butler::flush_tracks_to_disk_after_locate (boost::shared_ptr<RouteList> rl, uint
 	/* almost the same as the "normal" version except that we do not test
 	 * for transport_work_requested() and we force flushes.
 	 */
-	
+
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 
 		// cerr << "write behind for " << (*i)->name () << endl;
@@ -399,7 +399,7 @@ Butler::flush_tracks_to_disk_after_locate (boost::shared_ptr<RouteList> rl, uint
 	}
 
 	return disk_work_outstanding;
-}	
+}
 
 void
 Butler::schedule_transport_work ()

@@ -24,7 +24,7 @@ using namespace Glib;
 
 void
 split (string str, vector<string>& result, char splitchar)
-{	
+{
 	string::size_type pos;
 	string remaining;
 	string::size_type len = str.length();
@@ -64,7 +64,7 @@ split (string str, vector<string>& result, char splitchar)
 
 void
 split (ustring str, vector<ustring>& result, char splitchar)
-{	
+{
 	ustring::size_type pos;
 	ustring remaining;
 	ustring::size_type len = str.length();

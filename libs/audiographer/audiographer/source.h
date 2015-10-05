@@ -19,15 +19,15 @@ class /*LIBAUDIOGRAPHER_API*/ Source
 {
   public:
 	virtual ~Source () { }
-	
+
 	typedef boost::shared_ptr<Sink<T> > SinkPtr;
-	
+
 	/// Adds an output to this source. All data generated is forwarded to \a output
 	virtual void add_output (SinkPtr output) = 0;
-	
+
 	/// Removes all outputs added
 	virtual void clear_outputs () = 0;
-	
+
 	/// Removes a specific output from this source
 	virtual void remove_output (SinkPtr output) = 0;
 };

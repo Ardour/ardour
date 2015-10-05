@@ -68,7 +68,7 @@ Note<Time>::Note(const Note<Time>& copy)
 	  _off_event.buffer = _off_event_buffer;
 	  memcpy(_off_event_buffer, copy._off_event_buffer, 3);
 	*/
-	
+
 	assert(time() == copy.time());
 	assert(end_time() == copy.end_time());
 	assert(length() == copy.length());

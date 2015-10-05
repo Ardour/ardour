@@ -29,7 +29,7 @@ class /*LIBPBD_API*/ Unwinder {
   public:
     Unwinder (T& var, T new_val) : _var (var), _old_val (var) { var = new_val; }
     ~Unwinder () { _var = _old_val; }
-		
+
   private:
     T& _var;
     T  _old_val;

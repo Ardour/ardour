@@ -45,12 +45,12 @@ Parser::possible_mtc (MIDI::byte *sysex_buf, size_t msglen)
 	}
 
         /* full MTC */
-	
+
 	fake_mtc_time[0] = sysex_buf[8]; // frames
 	fake_mtc_time[1] = sysex_buf[7]; // minutes
 	fake_mtc_time[2] = sysex_buf[6]; // seconds
 	fake_mtc_time[3] = (sysex_buf[5] & 0x1f); // hours
-	
+
 	_mtc_fps = MTC_FPS ((sysex_buf[5] & 0x60) >> 5); // fps
 	fake_mtc_time[4] = (byte) _mtc_fps;
 
@@ -108,7 +108,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 #endif
 
 	if (_mtc_running == MTC_Stopped) {
-	
+
 		/* we are stopped but are seeing qtr frame messages */
 
 		if (consecutive_qtr_frame_cnt == 0) {
@@ -116,11 +116,11 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 			/* first quarter frame */
 
 			if (which_quarter_frame != 0 && which_quarter_frame != 7) {
-				
+
 				last_qtr_frame = which_quarter_frame;
 				consecutive_qtr_frame_cnt++;
 			}
-			
+
 			// cerr << "first seen qframe = " << (int) last_qtr_frame << endl;
 
 			return;
@@ -128,7 +128,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 		} else if (consecutive_qtr_frame_cnt == 1) {
 
 			/* third quarter frame */
-			
+
 #ifdef DEBUG_MTC
 			cerr << "second seen qframe = " << (int) which_quarter_frame << endl;
 #endif
@@ -155,7 +155,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 		case MTC_Backward:
 			if (which_quarter_frame == 0) {
 				expected_mtc_quarter_frame_code = 7;
-				
+
 			} else {
 				expected_mtc_quarter_frame_code = which_quarter_frame - 1;
 			}
@@ -164,9 +164,9 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 		case MTC_Stopped:
 			break;
 		}
-		
+
 	} else {
-		
+
 		/* already running */
 
 // for testing bad MIDI connections etc.
@@ -186,7 +186,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 			*/
 
 			boost::optional<bool> res = mtc_skipped ();
-			
+
 			if (res.get_value_or (false)) {
 
 				/* no error, reset next expected frame */
@@ -203,7 +203,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 				case MTC_Backward:
 					if (which_quarter_frame == 0) {
 						expected_mtc_quarter_frame_code = 7;
-						
+
 					} else {
 						expected_mtc_quarter_frame_code = which_quarter_frame - 1;
 					}
@@ -215,7 +215,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 
 #ifdef DEBUG_MTC
 				cerr << "SKIPPED, next expected = " << expected_mtc_quarter_frame_code << endl;
-#endif				
+#endif
 				return;
 			}
 
@@ -226,7 +226,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 #endif
 			reset_mtc_state ();
 			mtc_status (MTC_Stopped);
-			
+
 			return;
 
 		} else {
@@ -267,18 +267,18 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 	case 5: // minutes MS nibble
 		_qtr_mtc_time[2] |= (msg[1] & 0xf)<<4;
 		break;
-		
+
 	case 6: // hours LS nibble
 		_qtr_mtc_time[3] |= msg[1] & 0xf;
 		break;
 
 	case 7:
-		
+
 		/* last quarter frame msg has the MS bit of
 		   the hour in bit 0, and the SMPTE FPS type
 		   in bits 5 and 6
 		*/
-		
+
 		_qtr_mtc_time[3] |= ((msg[1] & 0x1) << 4);
 		_mtc_fps = MTC_FPS ((msg[1] & 0x6) >> 1);
 		_qtr_mtc_time[4] = _mtc_fps;
@@ -289,7 +289,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 		break;
 
 	}
-	
+
 #ifdef DEBUG_MTC
 	cerr << "Emit MTC Qtr\n";
 #endif
@@ -301,12 +301,12 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 	switch (_mtc_running) {
 	case MTC_Forward:
 		if (which_quarter_frame == 7) {
-			
+
 			/* we've reached the final of 8 quarter frame messages.
 			   store the time, reset the pending time holder,
 			   and signal anyone who wants to know the time.
 			*/
-			
+
 			if (consecutive_qtr_frame_cnt >= 8) {
 				memcpy (_mtc_time, _qtr_mtc_time, sizeof (_mtc_time));
 				memset (_qtr_mtc_time, 0, sizeof (_qtr_mtc_time));
@@ -317,15 +317,15 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 				mtc_time (_mtc_time, false, _timestamp);
 			}
 			expected_mtc_quarter_frame_code = 0;
-			
+
 		} else {
 			expected_mtc_quarter_frame_code = which_quarter_frame + 1;
 		}
 		break;
-		
+
 	case MTC_Backward:
 		if (which_quarter_frame == 0) {
-			
+
 			/* we've reached the final of 8 quarter frame messages.
 			   store the time, reset the pending time holder,
 			   and signal anyone who wants to know the time.

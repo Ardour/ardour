@@ -39,7 +39,7 @@ SaveAsDialog::SaveAsDialog ()
 	VBox* vbox = get_vbox();
 
 	vbox->set_spacing (6);
-	
+
 	HBox* hbox;
 	Label* label;
 
@@ -62,7 +62,7 @@ SaveAsDialog::SaveAsDialog ()
 	VBox* sub_vbox = manage (new VBox);
 	HBox* sub_hbox = manage (new HBox);
 	HBox* empty = manage (new HBox);
-	
+
 	sub_vbox->pack_start (copy_media_button, false, false);
 	sub_vbox->pack_start (copy_external_button, false, false);
 
@@ -73,17 +73,17 @@ SaveAsDialog::SaveAsDialog ()
 
 	vbox->pack_start (no_include_media_button, false, false);
 	vbox->pack_start (*sub_hbox, false, false);
-	
+
 	switch_to_button.set_active (true);
 	copy_media_button.set_active (true);
-	
+
 	vbox->show_all ();
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::OK, RESPONSE_OK);
 
 	no_include_media_button.signal_toggled ().connect (sigc::mem_fun (*this, &SaveAsDialog::no_include_toggled));
-	
+
 	new_parent_folder_selector.set_action (FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	new_parent_folder_selector.set_current_folder (Glib::get_home_dir()); // Why $HOME and not poor_mans_glob (Config->get_default_session_parent_dir ()) ??
 	new_name_entry.signal_changed().connect (sigc::mem_fun (*this, &SaveAsDialog::name_entry_changed));

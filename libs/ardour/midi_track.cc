@@ -118,7 +118,7 @@ MidiTrack::set_record_safe (bool yn, void *src)
 	if (_step_editing) { /* REQUIRES REVIEW */
 		return;
 	}
-	
+
 	Track::set_record_safe (yn, src);
 }
 
@@ -130,10 +130,10 @@ MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	*/
 	boost::shared_ptr<MidiDiskstream> mds = boost::dynamic_pointer_cast<MidiDiskstream> (ds);
 	mds->set_note_mode (_note_mode);
-	
+
 	Track::set_diskstream (ds);
 
-	mds->reset_tracker ();	
+	mds->reset_tracker ();
 
 	_diskstream->set_track (this);
 	if (Profile->get_trx()) {
@@ -432,13 +432,13 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 	}
 
-	
+
 	/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
-	
+
 	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
-	
+
 	/* final argument: don't waste time with automation if we're not recording or rolling */
-	
+
 	process_output_buffers (bufs, start_frame, end_frame, nframes,
 				declick, (!diskstream->record_enabled() && !_session.transport_stopped()));
 
@@ -450,7 +450,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 	}
 
 	need_butler = diskstream->commit (playback_distance);
-	
+
 	return 0;
 }
 
@@ -930,20 +930,20 @@ MidiTrack::act_on_mute ()
 		midi_diskstream()->resolve_tracker(_immediate_events, 0);
 	}
 }
-	
+
 void
 MidiTrack::set_monitoring (MonitorChoice mc)
 {
 	if (mc != _monitoring) {
 
 		Track::set_monitoring (mc);
-		
+
 		/* monitoring state changed, so flush out any on notes at the
 		 * port level.
 		 */
 
 		PortSet& ports (_output->ports());
-		
+
 		for (PortSet::iterator p = ports.begin(); p != ports.end(); ++p) {
 			boost::shared_ptr<MidiPort> mp = boost::dynamic_pointer_cast<MidiPort> (*p);
 			if (mp) {
@@ -952,7 +952,7 @@ MidiTrack::set_monitoring (MonitorChoice mc)
 		}
 
 		boost::shared_ptr<MidiDiskstream> md (midi_diskstream());
-		
+
 		if (md) {
 			md->reset_tracker ();
 		}

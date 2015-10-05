@@ -25,7 +25,7 @@ void cq2chroma(double** cq, int nframes, int ncoeff, int bins, double** chroma)
 	int t, b, oct, ix;
 	//double maxchroma;	/* max chroma value at each time, for normalisation */
 	//double sum;		/* for normalisation */
-	
+
 	for (t = 0; t < nframes; t++)
 	{
 		for (b = 0; b < bins; b++)
@@ -50,7 +50,7 @@ void cq2chroma(double** cq, int nframes, int ncoeff, int bins, double** chroma)
 				maxchroma = chroma[t][b];
 		if (maxchroma > 0)
 			for (b = 0; b < bins; b++)
-				chroma[t][b] /= maxchroma;	
+				chroma[t][b] /= maxchroma;
 		*/
 	}
 }
@@ -62,13 +62,13 @@ void mpeg7_constq(double** features, int nframes, int ncoeff)
 	double ss;
 	double env;
 	double maxenv = 0;
-	
+
 	/* convert const-Q features to dB scale */
 	for (i = 0; i < nframes; i++)
 		for (j = 0; j < ncoeff; j++)
 			features[i][j] = 10.0 * log10(features[i][j]+DBL_EPSILON);
-	
-	/* normalise each feature vector and add the norm as an extra feature dimension */	
+
+	/* normalise each feature vector and add the norm as an extra feature dimension */
 	for (i = 0; i < nframes; i++)
 	{
 		ss = 0;
@@ -83,7 +83,7 @@ void mpeg7_constq(double** features, int nframes, int ncoeff)
 	}
 	/* normalise the envelopes */
 	for (i = 0; i < nframes; i++)
-		features[i][ncoeff] /= maxenv;	
+		features[i][ncoeff] /= maxenv;
 }
 
 /* return histograms h[nx*m] of data x[nx] into m bins using a sliding window of length h_len (MUST BE ODD) */
@@ -109,7 +109,7 @@ void create_histograms(int* x, int nx, int m, int hlen, double* h)
 		for (j = 0; j < m; j++)
 			h[i*m+j] /= norm;
 	}
-	
+
 	/* duplicate histograms at beginning and end to create one histogram for each data value supplied */
 	for (i = 0; i < hlen/2; i++)
 		for (j = 0; j < m; j++)
@@ -124,7 +124,7 @@ void cluster_segment(int* q, double** features, int frames_read, int feature_len
 					 int histogram_length, int nclusters, int neighbour_limit)
 {
 	int i, j;
-	
+
 	/*****************************/
 	if (0) {
 	/* try just using the predominant bin number as a 'decoded state' */
@@ -141,44 +141,44 @@ void cluster_segment(int* q, double** features, int frames_read, int feature_len
 			{
 				maxval = features[i][j];
 				maxbin = j;
-			}				
+			}
 		}
 		if (maxval > chroma_thresh)
 			q[i] = maxbin;
 		else
 			q[i] = feature_length;
 	}
-	
+
 	}
 	if (1) {
 	/*****************************/
-		
-	
+
+
 	/* scale all the features to 'balance covariances' during HMM training */
 	double scale = 10;
 	for (i = 0; i < frames_read; i++)
 		for (j = 0; j < feature_length; j++)
 			features[i][j] *= scale;
-	
+
 	/* train an HMM on the features */
-	
+
 	/* create a model */
 	model_t* model = hmm_init(features, frames_read, feature_length, nHMM_states);
-	
+
 	/* train the model */
 	hmm_train(features, frames_read, model);
-/*	
+/*
 	printf("\n\nafter training:\n");
 	hmm_print(model);
-*/	
+*/
 	/* decode the hidden state sequence */
 	viterbi_decode(features, frames_read, model, q);
 	hmm_close(model);
-	
+
 	/*****************************/
 	}
 	/*****************************/
-	
+
 
 /*
 	fprintf(stderr, "HMM state sequence:\n");
@@ -186,11 +186,11 @@ void cluster_segment(int* q, double** features, int frames_read, int feature_len
 		fprintf(stderr, "%d ", q[i]);
 	fprintf(stderr, "\n\n");
 */
-	
+
 	/* create histograms of states */
 	double* h = (double*) malloc(frames_read*nHMM_states*sizeof(double));	/* vector in row major order */
 	create_histograms(q, frames_read, nHMM_states, histogram_length, h);
-	
+
 	/* cluster the histograms */
 	int nbsched = 20;	/* length of inverse temperature schedule */
 	double* bsched = (double*) malloc(nbsched*sizeof(double));	/* inverse temperature schedule */
@@ -200,9 +200,9 @@ void cluster_segment(int* q, double** features, int frames_read, int feature_len
 	for (i = 1; i < nbsched; i++)
 		bsched[i] = alpha * bsched[i-1];
 	cluster_melt(h, nHMM_states, frames_read, bsched, nbsched, nclusters, neighbour_limit, q);
-	
+
 	/* now q holds a sequence of cluster assignments */
-	
+
 	free(h);
 	free(bsched);
 }
@@ -214,25 +214,25 @@ void constq_segment(int* q, double** features, int frames_read, int bins, int nc
 	int feature_length;
 	double** chroma;
 	int i;
-	
+
 	if (feature_type == FEATURE_TYPE_CONSTQ)
 	{
 /*		fprintf(stderr, "Converting to dB and normalising...\n");
- */		
+ */
 		mpeg7_constq(features, frames_read, ncoeff);
-/*		
+/*
 		fprintf(stderr, "Running PCA...\n");
-*/		
+*/
 		/* do PCA on the features (but not the envelope) */
 		int ncomponents = 20;
 		pca_project(features, frames_read, ncoeff, ncomponents);
-		
+
 		/* copy the envelope so that it immediatly follows the chosen components */
 		for (i = 0; i < frames_read; i++)
-			features[i][ncomponents] = features[i][ncoeff];	
-		
+			features[i][ncomponents] = features[i][ncoeff];
+
 		feature_length = ncomponents + 1;
-		
+
 		/**************************************
 		//TEST
 		// feature file name
@@ -241,7 +241,7 @@ void constq_segment(int* q, double** features, int frames_read, int bins, int nc
 		strcpy(file_name, dir);
 		strcat(file_name, trackname);
 		strcat(file_name, "_features_c20r8h0.2f0.6.mat");
-		
+
 		// get the features from Matlab from mat-file
 		int frames_in_file;
 		readmatarray_size(file_name, 2, &frames_in_file, &feature_length);
@@ -254,27 +254,27 @@ void constq_segment(int* q, double** features, int frames_read, int bins, int nc
 				features[frames_read-missing_frames][i] = features[frames_read-missing_frames-1][i];
 			--missing_frames;
 		}
-		
+
 		free(file_name);
 		******************************************/
-	
+
 		cluster_segment(q, features, frames_read, feature_length, nHMM_states, histogram_length, nclusters, neighbour_limit);
 	}
-	
+
 	if (feature_type == FEATURE_TYPE_CHROMA)
 	{
 /*
 		fprintf(stderr, "Converting to chroma features...\n");
-*/		
+*/
 		/* convert constant-Q to normalised chroma features */
 		chroma = (double**) malloc(frames_read*sizeof(double*));
 		for (i = 0; i < frames_read; i++)
 			chroma[i] = (double*) malloc(bins*sizeof(double));
 		cq2chroma(features, frames_read, ncoeff, bins, chroma);
 		feature_length = bins;
-		
+
 		cluster_segment(q, chroma, frames_read, feature_length, nHMM_states, histogram_length, nclusters, neighbour_limit);
-	
+
 		for (i = 0; i < frames_read; i++)
 			free(chroma[i]);
 		free(chroma);

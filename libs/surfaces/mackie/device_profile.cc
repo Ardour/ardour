@@ -339,7 +339,7 @@ DeviceProfile::save ()
 	}
 
 	fullpath = Glib::build_filename (fullpath, legalize_for_path (_name) + ".profile");
-	
+
 	XMLTree tree;
 	tree.set_root (&get_state());
 

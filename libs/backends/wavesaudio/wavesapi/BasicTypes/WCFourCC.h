@@ -19,7 +19,7 @@
 
 #ifndef __WCFourCC_h__
 	#define __WCFourCC_h__
-	
+
 /* Copy to include
 #include "BasicTypes/WCFourCC.h"
 */
@@ -206,7 +206,7 @@ inline bool operator!=(const WCFourCC in_left, const WCFourCC in_right)
 #define kDefaultFourCC WCFourCC::kDefaultFourCC_prv()
 
 static const WCFourCC kZeroFourCC(0, wvNS::wvBO::compiler_byte_order);
-	
+
 #endif //#if !defined(__WCFourCC_h__)
 
 

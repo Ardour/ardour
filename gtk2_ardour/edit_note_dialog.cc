@@ -112,13 +112,13 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 	_velocity_all.set_sensitive (false);
 	_time_all.set_sensitive (false);
 	_length_all.set_sensitive (false);
-	
+
 	int test_channel = (*_events.begin())->note()->channel ();
 	int test_pitch = (*_events.begin())->note()->note ();
 	int test_velocity = (*_events.begin())->note()->velocity ();
 	Evoral::Beats test_time = (*_events.begin())->note()->time ();
 	Evoral::Beats test_length = (*_events.begin())->note()->length ();
-	
+
 	for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((*i)->note()->channel() != test_channel) {
 			_channel_all.set_sensitive (true);
@@ -140,7 +140,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 			_length_all.set_sensitive (true);
 		}
 	}
-	
+
 	get_vbox()->pack_start (*table);
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);

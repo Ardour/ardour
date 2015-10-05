@@ -32,7 +32,7 @@ void
 ControlSurfacesTest::instantiateAndTeardownTest ()
 {
 	_session->new_audio_track (1, 2, Normal, 0, 1, "Test");
-	
+
 	ControlProtocolManager& m = ControlProtocolManager::instance ();
 	for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
 		m.activate (**i);

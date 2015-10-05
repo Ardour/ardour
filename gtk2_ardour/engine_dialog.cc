@@ -566,7 +566,7 @@ EngineControl::build_full_control_notebook ()
 		basic_packer.attach (input_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 		++row;
 	}
-	
+
 	output_channels.set_name ("OutputChannels");
 	output_channels.set_flags (Gtk::CAN_FOCUS);
 	output_channels.set_digits (0);
@@ -579,7 +579,7 @@ EngineControl::build_full_control_notebook ()
 		basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 		++row;
 	}
-	
+
 	input_latency.set_name ("InputLatency");
 	input_latency.set_flags (Gtk::CAN_FOCUS);
 	input_latency.set_digits (0);
@@ -1023,7 +1023,7 @@ EngineControl::print_channel_count (Gtk::SpinButton* sb)
 	if (ARDOUR::Profile->get_mixbus()) {
 		return true;
 	}
-	
+
 	uint32_t cnt = (uint32_t) sb->get_value();
 	if (cnt == 0) {
 		sb->set_text (_("all available channels"));
@@ -1433,7 +1433,7 @@ EngineControl::device_changed ()
 			queue_device_changed = true;
 		}
 	}
-	
+
 	//the device name must be set FIRST so ASIO can populate buffersizes and the control panel button
 	if (backend->use_separate_input_and_output_devices()) {
 		backend->set_input_device_name (device_name_in);

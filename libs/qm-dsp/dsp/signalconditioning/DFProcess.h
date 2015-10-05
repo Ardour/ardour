@@ -38,7 +38,7 @@ public:
 
     void process( double* src, double* dst );
 
-	
+
 private:
     void initialise( DFProcConfig Config );
     void deInitialise();

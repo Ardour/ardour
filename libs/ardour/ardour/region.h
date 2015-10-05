@@ -153,7 +153,7 @@ class LIBARDOUR_API Region
 	Evoral::Range<framepos_t> last_range () const {
 		return Evoral::Range<framepos_t> (_last_position, _last_position + _last_length - 1);
 	}
-	
+
 	Evoral::Range<framepos_t> range () const {
 		return Evoral::Range<framepos_t> (first_frame(), last_frame());
 	}
@@ -354,7 +354,7 @@ class LIBARDOUR_API Region
 	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
 	virtual void set_length_internal (framecnt_t);
 	virtual void set_start_internal (framecnt_t);
-	
+
 	DataType _type;
 
 	PBD::Property<bool>        _sync_marked;
@@ -366,15 +366,15 @@ class LIBARDOUR_API Region
 	PBD::Property<framepos_t>  _position;
 	/** Sync position relative to the start of our file */
 	PBD::Property<framepos_t>  _sync_position;
-	
+
 	SourceList              _sources;
 	/** Used when timefx are applied, so we can always use the original source */
 	SourceList              _master_sources;
 
 	AnalysisFeatureList     _transients;
-	
+
 	boost::weak_ptr<ARDOUR::Playlist> _playlist;
-	
+
   private:
 	void mid_thaw (const PBD::PropertyChange&);
 

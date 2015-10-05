@@ -50,7 +50,7 @@ public:
 	B origin_b () const {
 		return _origin_b;
 	}
-	
+
 	void set_origin_b (B o) {
 		_origin_b = o;
 	}
@@ -68,7 +68,7 @@ template<typename A, typename B>
 class LIBEVORAL_TEMPLATE_API IdentityConverter : public TimeConverter<A,B> {
   public:
 	IdentityConverter() {}
-	
+
 	B to(A a)   const;
 	A from(B b) const;
 };

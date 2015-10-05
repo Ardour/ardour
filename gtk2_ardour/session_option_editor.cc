@@ -196,7 +196,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	hf->add (BWF, _("Broadcast WAVE (4GB size limit)"));
 #ifdef HAVE_RF64_RIFF
 	hf->add (MBWF, _("Broadcast RF64"));
-#endif	
+#endif
 	hf->add (WAVE, _("WAVE (4GB size limit)"));
 	hf->add (WAVE64, _("WAVE-64"));
 	hf->add (CAF, _("CAF"));

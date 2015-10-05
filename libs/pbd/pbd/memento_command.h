@@ -84,7 +84,7 @@ public:
 	void add_state (XMLNode* node) {
 		node->add_property ("obj_id", _object.id().to_s());
 	}
-	
+
 	void object_died () {
 		/* The object we are binding died, so drop references to ourselves */
 		this->drop_references ();
@@ -116,7 +116,7 @@ public:
 		/* The binder's object died, so we must die */
 		_binder->DropReferences.connect_same_thread (_binder_death_connection, boost::bind (&MementoCommand::binder_dying, this));
 	}
-	
+
 	~MementoCommand () {
 		drop_references ();
 		delete before;
@@ -152,13 +152,13 @@ public:
 
 		XMLNode* node = new XMLNode(name);
 		_binder->add_state (node);
-		
+
 		node->add_property ("type_name", _binder->type_name ());
 
 		if (before) {
 			node->add_child_copy(*before);
 		}
-		
+
 		if (after) {
 			node->add_child_copy(*after);
 		}

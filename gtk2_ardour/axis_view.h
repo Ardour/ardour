@@ -54,7 +54,7 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 	virtual std::string name() const = 0;
 
 	sigc::signal<void> Hiding;
-	
+
 	void set_old_order_key (uint32_t ok) { _old_order_key = ok; }
 	uint32_t old_order_key() const { return _old_order_key; }
 
@@ -62,7 +62,7 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 	/* for now, we always return properties in string form.
 	 */
 	std::string gui_property (const std::string& property_name) const;
-	
+
 	template<typename T> void set_gui_property (const std::string& property_name, const T& value) {
 		std::stringstream s;
 		s << value;
@@ -82,7 +82,7 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 
 	static GUIObjectState& gui_object_state();
 	void clear_property_cache() { property_hashtable.clear(); }
-	
+
   protected:
 
 	AxisView (ARDOUR::Session* sess);

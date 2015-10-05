@@ -68,7 +68,7 @@ public:
     gint delete_in_progress (GdkEventAny*);
 
 private:
-	
+
     void update_progress_gui (float);
 };
 

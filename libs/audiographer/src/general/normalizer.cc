@@ -30,7 +30,7 @@ Normalizer::Normalizer (float target_dB)
 {
 	target = pow (10.0f, target_dB * 0.05f);
 }
-	
+
 Normalizer::~Normalizer()
 {
 	delete [] buffer;
@@ -66,12 +66,12 @@ void Normalizer::process (ProcessContext<float> const & c)
 	if (throw_level (ThrowProcess) && c.frames() > buffer_size) {
 		throw Exception (*this, "Too many frames given to process()");
 	}
-	
+
 	if (enabled) {
 		memcpy (buffer, c.data(), c.frames() * sizeof(float));
 		Routines::apply_gain_to_buffer (buffer, c.frames(), gain);
 	}
-	
+
 	ProcessContext<float> c_out (c, buffer);
 	ListedSource<float>::output (c_out);
 }

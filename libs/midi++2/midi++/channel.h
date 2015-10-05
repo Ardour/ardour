@@ -79,19 +79,19 @@ class LIBMIDIPP_API Channel : public PBD::ScopedConnectionList {
 	bool all_notes_off (timestamp_t timestamp) {
 		return channel_msg (MIDI::controller, 123, 0, timestamp);
 	}
-	
+
 	bool control (byte id, byte value, timestamp_t timestamp) {
 		return channel_msg (MIDI::controller, id, value, timestamp);
 	}
-	
+
 	bool note_on (byte note, byte velocity, timestamp_t timestamp) {
 		return channel_msg (MIDI::on, note, velocity, timestamp);
 	}
-	
+
 	bool note_off (byte note, byte velocity, timestamp_t timestamp) {
 		return channel_msg (MIDI::off, note, velocity, timestamp);
 	}
-	
+
 	bool aftertouch (byte value, timestamp_t timestamp) {
 		return channel_msg (MIDI::chanpress, value, 0, timestamp);
 	}
@@ -140,7 +140,7 @@ class LIBMIDIPP_API Channel : public PBD::ScopedConnectionList {
 	size_t             _notes_on;
 
 	void reset (timestamp_t timestamp, framecnt_t nframes, bool notes_off = true);
-	
+
 	void process_note_off (Parser &, EventTwoBytes *);
 	void process_note_on (Parser &, EventTwoBytes *);
 	void process_controller (Parser &, EventTwoBytes *);

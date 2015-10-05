@@ -39,8 +39,8 @@ int main (int argc, char* argv[])
 	if (argc > 2) {
 		render_whole.set_iterations (atoi (argv[2]));
 	}
-	
+
 	cout << render_whole.run () << "\n";
-	
+
 	return 0;
 }

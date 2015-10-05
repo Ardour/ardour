@@ -68,7 +68,7 @@ Editor::add_new_location (Location *location)
 
 	/* Do a full update of the markers in this group */
 	update_marker_labels (group);
-	
+
 	if (location->is_auto_punch()) {
 		update_punch_range_view ();
 	}
@@ -965,7 +965,7 @@ Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 	if (!loop_or_punch_or_session || !session) {
 		items.push_back (SeparatorElem());
 	}
-	
+
 	items.push_back (MenuElem (_("Separate Regions in Range"), sigc::mem_fun(*this, &Editor::marker_menu_separate_regions_using_location)));
 	items.push_back (MenuElem (_("Select All in Range"), sigc::mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
 	if (!Profile->get_sae()) {
@@ -1216,7 +1216,7 @@ Editor::marker_menu_set_from_selection (bool /*force_regions*/)
 			// nothing for now
 
 		} else {
-			
+
 			if (!selection->time.empty()) {
 				l->set (selection->time.start(), selection->time.end_frame());
 			} else if (!selection->regions.empty()) {
@@ -1295,7 +1295,7 @@ Editor::marker_menu_zoom_to_range ()
 	if (a >= extra) {
 		a -= extra;
 	}
-	
+
 	framepos_t b = l->end ();
 	if (b < (max_framepos - extra)) {
 		b += extra;
@@ -1480,7 +1480,7 @@ Editor::update_loop_range_view ()
 		transport_loop_range_rect->set_x1 (x2);
 
 		transport_loop_range_rect->show();
-		
+
 	} else {
 		transport_loop_range_rect->hide();
 	}
@@ -1499,7 +1499,7 @@ Editor::update_punch_range_view ()
 
 		double pixel_start;
 		double pixel_end;
-		
+
 		if (_session->config.get_punch_in()) {
 			pixel_start = sample_to_pixel (tpl->start());
 		} else {
@@ -1510,9 +1510,9 @@ Editor::update_punch_range_view ()
 		} else {
 			pixel_end = sample_to_pixel (max_framepos);
 		}
-		
+
 		transport_punch_range_rect->set_x0 (pixel_start);
-		transport_punch_range_rect->set_x1 (pixel_end);			
+		transport_punch_range_rect->set_x1 (pixel_end);
 		transport_punch_range_rect->show();
 
 	} else {

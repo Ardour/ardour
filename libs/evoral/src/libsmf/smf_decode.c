@@ -58,7 +58,7 @@ smf_event_is_metadata(const smf_event_t *event)
 {
 	assert(event->midi_buffer);
 	assert(event->midi_buffer_length > 0);
-	
+
 	if (event->midi_buffer[0] == 0xFF)
 		return (1);
 
@@ -76,7 +76,7 @@ smf_event_is_system_realtime(const smf_event_t *event)
 
 	if (smf_event_is_metadata(event))
 		return (0);
-	
+
 	if (event->midi_buffer[0] >= 0xF8)
 		return (1);
 
@@ -105,7 +105,7 @@ smf_event_is_sysex(const smf_event_t *event)
 {
 	assert(event->midi_buffer);
 	assert(event->midi_buffer_length > 0);
-	
+
 	if (event->midi_buffer[0] == 0xF0)
 		return (1);
 

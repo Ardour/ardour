@@ -128,7 +128,7 @@ Editor::initialize_canvas ()
 
 	_trackview_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (_trackview_group, "Canvas TrackViews");
-	
+
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 	rubberband_rect->hide();
@@ -140,7 +140,7 @@ Editor::initialize_canvas ()
         CANVAS_DEBUG_NAME (_drag_motion_group, "Canvas Drag Motion");
 
 	/* TIME BAR CANVAS */
-	
+
 	_time_markers_group = new ArdourCanvas::Container (h_scroll_group);
 	CANVAS_DEBUG_NAME (_time_markers_group, "time bars");
 
@@ -187,7 +187,7 @@ Editor::initialize_canvas ()
  	cd_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
 	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_group, (timebar_height * videotl_bar_height));
-	
+
 	cd_marker_bar_drag_rect = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
 	CANVAS_DEBUG_NAME (cd_marker_bar_drag_rect, "cd marker drag");
 	cd_marker_bar_drag_rect->set_outline (false);
@@ -401,7 +401,7 @@ void
 Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, double ypos, bool copy)
 {
 	RouteTimeAxisView* tv;
-	
+
 	/* MIDI files must always be imported, because we consider them
 	 * writable. So split paths into two vectors, and follow the import
 	 * path on the MIDI part.
@@ -427,7 +427,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 		frame = 0;
 		InstrumentSelector is; // instantiation builds instrument-list and sets default.
 		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, frame, is.selected_instrument());
-		
+
 		if (Profile->get_sae() || UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
 		} else {
@@ -520,13 +520,13 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 
 	if (from_headers) {
 		alloc = controls_layout.get_allocation ();
-	} else {	
+	} else {
 		alloc = _track_canvas_viewport->get_allocation ();
 
 		/* reduce height by the height of the timebars, which happens
 		   to correspond to the position of the hv_scroll_group.
 		*/
-		
+
 		alloc.set_height (alloc.get_height() - hv_scroll_group->position().y);
 		alloc.set_y (alloc.get_y() + hv_scroll_group->position().y);
 
@@ -539,21 +539,21 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 
 		/* the effective width of the autoscroll boundary so
 		   that we start scrolling before we hit the edge.
-		
+
 		   this helps when the window is slammed up against the
 		   right edge of the screen, making it hard to scroll
 		   effectively.
 		*/
-		
+
 		if (alloc.get_width() > 20) {
 			alloc.set_width (alloc.get_width() - 20);
 			alloc.set_x (alloc.get_x() + 10);
 		}
 
 	}
-	
+
 	scrolling_boundary = ArdourCanvas::Rect (alloc.get_x(), alloc.get_y(), alloc.get_x() + alloc.get_width(), alloc.get_y() + alloc.get_height());
-	
+
 	int x, y;
 	Gdk::ModifierType mask;
 
@@ -607,7 +607,7 @@ Editor::autoscroll_canvas ()
 			no_stop = true;
 
 		} else if (x < autoscroll_boundary.x0) {
-			
+
 			dx = autoscroll_boundary.x0 - x;
 			dx += 10 + (2 * (autoscroll_cnt/2));
 
@@ -621,7 +621,7 @@ Editor::autoscroll_canvas ()
 
 			no_stop = true;
 		}
-		
+
 		if (new_frame != leftmost_frame) {
 			vc.time_origin = new_frame;
 			vc.add (VisualChange::TimeOrigin);
@@ -629,12 +629,12 @@ Editor::autoscroll_canvas ()
 	}
 
 	if (autoscroll_vertical_allowed) {
-		
+
 		// const double vertical_pos = vertical_adjustment.get_value();
 		const int speed_factor = 10;
 
 		/* vertical */
-		
+
 		if (y < autoscroll_boundary.y0) {
 
 			/* scroll to make higher tracks visible */
@@ -671,7 +671,7 @@ Editor::autoscroll_canvas ()
 
 		ev.type = GDK_MOTION_NOTIFY;
 		ev.state = Gdk::BUTTON1_MASK;
-		
+
 		/* the motion handler expects events in canvas coordinate space */
 
 		/* we asked for the mouse position above (::get_pointer()) via
@@ -700,7 +700,7 @@ Editor::autoscroll_canvas ()
 		ev.y = d.y;
 
 		motion_handler (0, (GdkEvent*) &ev, true);
-		
+
 	} else if (no_stop) {
 
 		/* not changing visual state but pointer is outside the scrolling boundary
@@ -711,7 +711,7 @@ Editor::autoscroll_canvas ()
 
 		ev.type = GDK_MOTION_NOTIFY;
 		ev.state = Gdk::BUTTON1_MASK;
-		
+
 		/* the motion handler expects events in canvas coordinate space */
 
 		/* first convert from Editor window coordinates to canvas
@@ -740,7 +740,7 @@ Editor::autoscroll_canvas ()
 		ev.y = d.y;
 
 		motion_handler (0, (GdkEvent*) &ev, true);
-		
+
 	} else {
 		stop_canvas_autoscroll ();
 		return false;
@@ -749,7 +749,7 @@ Editor::autoscroll_canvas ()
 	autoscroll_cnt++;
 
 	return true; /* call me again */
-}	
+}
 
 void
 Editor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary)
@@ -895,7 +895,7 @@ Editor::color_handler()
 	samples_ruler->set_outline_color (text);
 	bbt_ruler->set_fill_color (base);
 	bbt_ruler->set_outline_color (text);
-	
+
 	playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
 
 	meter_bar->set_fill_color (UIConfiguration::instance().color_mod ("meter bar", "marker bar"));
@@ -1082,9 +1082,9 @@ Editor::which_trim_cursor (bool left) const
 	}
 
 	Trimmable::CanTrim ct = entered_regionview->region()->can_trim ();
-		
+
 	if (left) {
-		
+
 		if (ct & Trimmable::FrontTrimEarlier) {
 			return _cursors->left_side_trim;
 		} else {
@@ -1112,7 +1112,7 @@ Editor::which_mode_cursor () const
 	case MouseCut:
 		mode_cursor = _cursors->scissors;
 		break;
-			
+
 	case MouseObject:
 	case MouseContent:
 		/* don't use mode cursor, pick a grabber cursor based on the item */
@@ -1138,20 +1138,20 @@ Editor::which_mode_cursor () const
 		get_pointer_position (x, y);
 
 		if (x >= 0 && y >= 0) {
-			
+
 			vector<ArdourCanvas::Item const *> items;
 
 			/* Note how we choose a specific scroll group to get
 			 * items from. This could be problematic.
 			 */
-			
+
 			hv_scroll_group->add_items_at_point (ArdourCanvas::Duple (x,y), items);
-			
+
 			// first item will be the upper most
-			
+
 			if (!items.empty()) {
 				const ArdourCanvas::Item* i = items.front();
-				
+
 				if (i && i->parent() && i->parent()->get_data (X_("timeselection"))) {
 					pair<TimeAxisView*, int> tvp = trackview_by_y_position (_last_motion_y);
 					if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
@@ -1200,7 +1200,7 @@ Editor::which_canvas_cursor(ItemType type) const
 			break;
 		}
 	}
-	
+
 	if ((mouse_mode == MouseObject || get_smart_mode ()) ||
 	    mouse_mode == MouseContent) {
 
@@ -1296,7 +1296,7 @@ Editor::which_canvas_cursor(ItemType type) const
 		}
 
 	} else if (mouse_mode == MouseDraw) {
-		
+
 		/* ControlPointItem is not really specific to region gain mode
 		   but it is the same cursor so don't worry about this for now.
 		   The result is that we'll see the fader cursor if we enter

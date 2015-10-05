@@ -165,7 +165,7 @@ ControlList::operator= (const ControlList& other)
 
 		_interpolation = other._interpolation;
 		_default_value = other._default_value;
-		
+
 		copy_events (other);
 	}
 
@@ -269,49 +269,49 @@ ControlList::thin (double thinning_factor)
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
-		
+
 		ControlEvent* prevprev = 0;
 		ControlEvent* cur = 0;
 		ControlEvent* prev = 0;
 		iterator pprev;
 		int counter = 0;
-		
+
 		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 thin from %2 events\n", this, _events.size()));
-		
+
 		for (iterator i = _events.begin(); i != _events.end(); ++i) {
-			
+
 			cur = *i;
 			counter++;
-			
+
 			if (counter > 2) {
-				
+
 				/* compute the area of the triangle formed by 3 points
 				 */
-				
+
 				double area = fabs ((prevprev->when * (prev->value - cur->value)) +
 						    (prev->when * (cur->value - prevprev->value)) +
 						    (cur->when * (prevprev->value - prev->value)));
-				
+
 				if (area < thinning_factor) {
 					iterator tmp = pprev;
-					
+
 					/* pprev will change to current
 					   i is incremented to the next event
 					   as we loop.
 					*/
-					
+
 					pprev = i;
 					_events.erase (tmp);
 					changed = true;
 					continue;
 				}
 			}
-			
+
 			prevprev = prev;
 			prev = cur;
 			pprev = i;
 		}
-		
+
 		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 thin => %2 events\n", this, _events.size()));
 
 		if (changed) {
@@ -358,12 +358,12 @@ ControlList::start_write_pass (double when)
 	new_write_pass = true;
 	did_write_during_pass = false;
 	insert_position = when;
-	
+
 	/* leave the insert iterator invalid, so that we will do the lookup
 	   of where it should be in a "lazy" way - deferring it until
 	   we actually add the first point (which may never happen).
 	*/
-	
+
 	unlocked_invalidate_insert_iterator ();
 }
 
@@ -382,9 +382,9 @@ ControlList::write_pass_finished (double /*when*/, double thinning_factor)
 
 void
 ControlList::set_in_write_pass (bool yn, bool add_point, double when)
-{	
+{
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("now in write pass @ %1, add point ? %2\n", when, add_point));
-	
+
 	_in_write_pass = yn;
 
 	if (yn && add_point) {
@@ -401,19 +401,19 @@ ControlList::add_guard_point (double when)
 	double eval_value = unlocked_eval (insert_position);
 
 	if (most_recent_insert_iterator == _events.end()) {
-		
+
 		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert iterator at end, adding eval-value there %2\n", this, eval_value));
 		_events.push_back (new ControlEvent (when, eval_value));
 		/* leave insert iterator at the end */
-		
+
 	} else if ((*most_recent_insert_iterator)->when == when) {
 
 		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert iterator at existing point, setting eval-value there %2\n", this, eval_value));
-		
+
 		/* most_recent_insert_iterator points to a control event
 		   already at the insert position, so there is
 		   nothing to do.
-		
+
 		   ... except ...
 
 		   advance most_recent_insert_iterator so that the "real"
@@ -426,22 +426,22 @@ ControlList::add_guard_point (double when)
 
 		/* insert a new control event at the right spot
 		 */
-		
+
 		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert eval-value %2 just before iterator @ %3\n",
 								 this, eval_value, (*most_recent_insert_iterator)->when));
-		
+
 		most_recent_insert_iterator = _events.insert (most_recent_insert_iterator, new ControlEvent (when, eval_value));
 
 		/* advance most_recent_insert_iterator so that the "real"
 		 * insert occurs in the right place, since it
 		 * points to the control event just inserted.
 		 */
-		
+
 		++most_recent_insert_iterator;
 	}
-	
+
 	/* don't do this again till the next write pass */
-	
+
 	new_write_pass = false;
 }
 
@@ -458,7 +458,7 @@ ControlList::editor_add (double when, double value, bool with_guard)
 	*/
 
 	if (_events.empty()) {
-		
+
 		/* as long as the point we're adding is not at zero,
 		 * add an "anchor" point there.
 		 */
@@ -570,7 +570,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 		iterator insertion_point;
 
 		if (_events.empty() && with_initial) {
-			
+
 			/* empty: add an "anchor" point if the point we're adding past time 0 */
 
 			if (when >= 1) {
@@ -609,7 +609,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 			}
 
 		} else if (!_in_write_pass) {
-				
+
 			/* not in a write pass: figure out the iterator we should insert in front of */
 
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("compute(b) MRI for position %1\n", when));
@@ -621,7 +621,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 
 		if (most_recent_insert_iterator == _events.end()) {
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 appending new point at end\n", this));
-			
+
 			const bool done = maybe_insert_straight_line (when, value);
 			if (!done) {
 				_events.push_back (new ControlEvent (when, value));
@@ -1032,7 +1032,7 @@ ControlList::truncate_end (double last_coordinate)
 			_events.back()->when = last_coordinate;
 			_events.back()->value = last_val;
 		}
-		
+
 		unlocked_invalidate_insert_iterator ();
 		mark_dirty();
 	}
@@ -1767,7 +1767,7 @@ ControlList::operator!= (ControlList const & other) const
 	if (i != _events.end ()) {
 		return true;
 	}
-	
+
 	return (
 		_parameter != other._parameter ||
 		_interpolation != other._interpolation ||

@@ -237,7 +237,7 @@ public:
 	void set_layer (boost::shared_ptr<Region>, double);
 
 	void set_capture_insertion_in_progress (bool yn);
-	
+
   protected:
 	friend class Session;
 

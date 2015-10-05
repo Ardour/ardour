@@ -72,7 +72,7 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r, boo
 	if (note_length_map.empty()) {
 		fill_note_length_map ();
 	}
-	
+
 	/* We do not handle nested sources/regions. Caller should have tackled this */
 
 	if (r->max_source_level() > 0) {
@@ -90,7 +90,7 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r, boo
 
 	note_length_model = ListStore::create (note_length_columns);
 	TreeModel::Row row;
-	
+
 	for (std::map<int,string>::iterator i = note_length_map.begin(); i != note_length_map.end(); ++i) {
 		row = *(note_length_model->append());
 		row[note_length_columns.ticks] = i->first;
@@ -152,7 +152,7 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r, boo
 	buttons.attach (sound_notes_button, 0, 1, 0, 1);
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action ("Editor", "sound-midi-notes");
 	if (act) {
-		gtk_activatable_set_related_action (GTK_ACTIVATABLE (sound_notes_button.gobj()), act->gobj());	
+		gtk_activatable_set_related_action (GTK_ACTIVATABLE (sound_notes_button.gobj()), act->gobj());
 	}
 
 	view.show ();
@@ -191,7 +191,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 	if (!view.get_path_at_pos (ev->x, ev->y, path, col, cellx, celly)) {
 		return false;
 	}
-	
+
 	if (view.get_selection()->count_selected_rows() == 0) {
 		was_selected = false;
 	} else if (view.get_selection()->is_selected (path)) {
@@ -199,7 +199,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 	} else {
 		was_selected = false;
 	}
-	
+
 	int colnum = GPOINTER_TO_UINT (col->get_data (X_("colnum")));
 
 	switch (colnum) {
@@ -274,19 +274,19 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 		if (was_selected) {
 
 			/* use selection */
-			
+
 			TreeView::Selection::ListHandle_Path rows = view.get_selection()->get_selected_rows ();
 			TreeModel::iterator iter;
 			boost::shared_ptr<NoteType> note;
-			
+
 			for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 
 				previous_selection.push_back (*i);
 
 				if ((iter = model->get_iter (*i))) {
-					
-					note = (*iter)[columns._note];		
-					
+
+					note = (*iter)[columns._note];
+
 					switch (prop) {
 					case MidiModel::NoteDiffCommand::StartTime:
 						if (note->time() + fdelta >= 0) {
@@ -321,7 +321,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 		} else {
 
 			/* just this row */
-			
+
 			TreeModel::iterator iter;
 			iter = model->get_iter (path);
 
@@ -329,7 +329,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 
 			if (iter) {
 				boost::shared_ptr<NoteType> note = (*iter)[columns._note];
-				
+
 				switch (prop) {
 				case MidiModel::NoteDiffCommand::StartTime:
 					if (note->time() + fdelta >= 0) {
@@ -364,7 +364,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 		m->apply_command (*_session, cmd);
 
 		/* reset selection to be as it was before we rebuilt */
-		
+
 		for (vector<TreeModel::Path>::iterator i = previous_selection.begin(); i != previous_selection.end(); ++i) {
 			view.get_selection()->select (*i);
 		}
@@ -401,7 +401,7 @@ MidiListEditor::key_press (GdkEventKey* ev)
 			ret = true;
 		}
 		break;
-		
+
 	case GDK_Up:
 	case GDK_uparrow:
 		if (edit_column > 0) {
@@ -435,7 +435,7 @@ MidiListEditor::key_press (GdkEventKey* ev)
 	case GDK_Escape:
 		stop_editing (true);
 		break;
-		
+
 	}
 
 	return ret;
@@ -486,7 +486,7 @@ MidiListEditor::key_release (GdkEventKey* ev)
 			ret = true;
 		}
 		break;
-		
+
 	case GDK_r:
 		if (_session && Gtkmm2ext::Keyboard::modifier_state_contains (ev->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
 			_session->redo (1);
@@ -626,7 +626,7 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 		if (sscanf (text.c_str(), "%lf", &fval) == 1) {
 
 			/* numeric value entered */
-			
+
 			if (text.find ('.') == string::npos && text.find (',') == string::npos) {
 				/* integral => units are ticks */
 				fval = fval / BBT_Time::ticks_per_beat;
@@ -649,13 +649,13 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 				 * displaying numeric value ... use new value
 				 * from note length map, and convert to beats.
 				 */
-				
+
 				for (x = note_length_map.begin(); x != note_length_map.end(); ++x) {
 					if (x->second == text) {
 						break;
 					}
 				}
-				
+
 				if (x != note_length_map.end()) {
 					fval = x->first / BBT_Time::ticks_per_beat;
 				}
@@ -665,7 +665,7 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 				fval = -1.0;
 
 				if (text != x->second) {
-					
+
 					/* get ticks for the newly selected
 					 * note length
 					 */
@@ -675,7 +675,7 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 							break;
 						}
 					}
-					
+
 					if (x != note_length_map.end()) {
 						/* convert to beats */
 						fval = (double) x->first / BBT_Time::ticks_per_beat;
@@ -702,12 +702,12 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 		MidiModel::NoteDiffCommand* cmd = m->new_note_diff_command (opname);
 
 		TreeView::Selection::ListHandle_Path rows = view.get_selection()->get_selected_rows ();
-		
+
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 			if ((iter = model->get_iter (*i))) {
 
-				note = (*iter)[columns._note];		
-				
+				note = (*iter)[columns._note];
+
 				switch (prop) {
 				case MidiModel::NoteDiffCommand::Velocity:
 					cmd->change (note, prop, (uint8_t) (note->velocity() + idelta));
@@ -731,7 +731,7 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 
 		/* model has been redisplayed by now */
 		/* keep selected row(s), move cursor there, don't continue editing */
-		
+
 		TreeViewColumn* col = view.get_column (edit_column);
 		view.set_cursor (edit_path, *col, 0);
 
@@ -776,7 +776,7 @@ MidiListEditor::redisplay_model ()
 			const Evoral::Beats dur = (*i)->end_time() - (*i)->time();
 			bbt.beats = dur.get_beats ();
 			bbt.ticks = dur.get_ticks ();
-			
+
 			uint64_t len_ticks = (*i)->length().to_ticks();
 			std::map<int,string>::iterator x = note_length_map.find (len_ticks);
 
@@ -811,7 +811,7 @@ MidiListEditor::selection_changed ()
 
 	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 		if ((iter = model->get_iter (*i))) {
-			note = (*iter)[columns._note];		
+			note = (*iter)[columns._note];
 			player->add (note);
 		}
 	}

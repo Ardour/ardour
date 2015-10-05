@@ -145,7 +145,7 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	ArdourButton automation_write_all_button;
 	/** a button which sets all controls' automation setting to Touch */
 	ArdourButton automation_touch_all_button;
-	
+
 	void set_latency_label ();
 
 	LatencyGUI* latency_gui;

@@ -70,7 +70,7 @@ CellRendererPixbufMulti::render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window
 
 	offset_width = cell_area.get_x() +  (int)(cell_area.get_width() - pb->get_width())/2;
 	offset_height = cell_area.get_y() + (int)(cell_area.get_height() - pb->get_height())/2;
-	
+
 	window->draw_pixbuf (RefPtr<GC>(), pb, 0, 0, offset_width, offset_height, -1, -1, Gdk::RGB_DITHER_NORMAL, 0, 0);
 }
 

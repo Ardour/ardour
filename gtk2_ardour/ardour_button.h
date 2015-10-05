@@ -89,7 +89,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_layout_ellipsize_width (int w);
 	void set_layout_font (const Pango::FontDescription&);
 	void set_text_ellipsize (Pango::EllipsizeMode);
-	
+
 	sigc::signal<void> signal_led_clicked;
 	sigc::signal<void> signal_clicked;
 

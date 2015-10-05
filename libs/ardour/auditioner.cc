@@ -165,20 +165,20 @@ Auditioner::connect ()
 			/* create (and connect) new ports */
 
 			_main_outs->defer_pan_reset ();
-			
+
 			if (left.length()) {
 				_output->add_port (left, this, DataType::AUDIO);
 			}
-			
+
 			if (right.length()) {
 				_output->add_port (right, this, DataType::AUDIO);
 			}
-			
+
 			_main_outs->allow_pan_reset ();
 			_main_outs->reset_panner ();
 
 		} else {
-			
+
 			/* reconnect existing ports */
 
 			boost::shared_ptr<Port> oleft (_output->nth (0));
@@ -190,7 +190,7 @@ Auditioner::connect ()
 				oright->connect (right);
 			}
 		}
-			
+
 	}
 
 	return 0;

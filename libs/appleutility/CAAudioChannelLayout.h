@@ -81,9 +81,9 @@ public:
 								}
 	static void					SetAllToUnknown(AudioChannelLayout& outChannelLayout, UInt32 inNumberChannelDescriptions);
 	static UInt32				NumberChannels(const AudioChannelLayout& inLayout);
-	
+
 #if !HAL_Build
-// object methods	
+// object methods
 public:
 								CAAudioChannelLayout ();
 
@@ -96,7 +96,7 @@ public:
 								CAAudioChannelLayout (const CAAudioChannelLayout &c);
 								CAAudioChannelLayout (const AudioChannelLayout* inChannelLayout);
 								~CAAudioChannelLayout();
-	
+
 	CAAudioChannelLayout&		operator= (const AudioChannelLayout* inChannelLayout);
 	CAAudioChannelLayout&		operator= (const CAAudioChannelLayout& c);
 	bool						operator== (const CAAudioChannelLayout &c) const;
@@ -105,19 +105,19 @@ public:
 
 	bool						IsValid() const { return NumberChannels() > 0; }
 	UInt32						Size() const { return mLayoutHolder ? mLayoutHolder->Size() : 0; }
-	
+
 	UInt32						NumberChannels() const { return NumberChannels(Layout()); }
-	
+
 	AudioChannelLayoutTag		Tag() const { return Layout().mChannelLayoutTag; }
 	const AudioChannelLayout&	Layout() const { return mLayoutHolder->Layout(); }
 	operator const AudioChannelLayout *() const { return &Layout(); }
-	
+
 	void						Print () const { Print (stdout); }
 	void						Print (FILE* file) const;
 
 	OSStatus					Save (CFPropertyListRef *outData) const;
 	OSStatus					Restore (CFPropertyListRef &inData);
-	
+
 private:
 	class ACLRefCounter : public CAReferenceCounted {
 	public:
@@ -125,35 +125,35 @@ private:
 				{
 					if (inDataSize < offsetof(AudioChannelLayout, mChannelDescriptions))
 						inDataSize = offsetof(AudioChannelLayout, mChannelDescriptions);
-						
+
 					mLayout = static_cast<AudioChannelLayout*>(malloc (inDataSize));
 					memset (mLayout, 0, inDataSize);
 					mByteSize = inDataSize;
 				}
-	
+
 		const AudioChannelLayout & 	Layout() const { return *mLayout; }
-		
+
 		UInt32						Size () const { return mByteSize; }
-		
+
 	private:
 		AudioChannelLayout 	*mLayout;
 		UInt32				mByteSize;
-		
+
 			// only the constructors can change the actual state of the layout
 		friend CAAudioChannelLayout::CAAudioChannelLayout (UInt32 inNumberChannels, bool inChooseSurround);
 		friend OSStatus CAAudioChannelLayout::Restore (CFPropertyListRef &inData);
 		friend CAAudioChannelLayout& CAAudioChannelLayout::operator= (const AudioChannelLayout* inChannelLayout);
 		friend void CAAudioChannelLayout::SetWithTag(AudioChannelLayoutTag inTag);
-		
+
 		AudioChannelLayout * 	GetLayout() { return mLayout; }
 		~ACLRefCounter() { if (mLayout) { free(mLayout); mLayout = NULL; } }
-	
+
 	private:
 		ACLRefCounter () : mLayout(NULL) { }
 		ACLRefCounter(const ACLRefCounter& other) : CAReferenceCounted (other), mLayout(NULL) { }
 		ACLRefCounter& operator=(const ACLRefCounter&) { return *this; }
 	};
-	
+
 	ACLRefCounter				*mLayoutHolder;
 #endif	//	HAL_Build
 

@@ -65,10 +65,10 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	void load_mandatory_protocols ();
 	void midi_connectivity_established ();
 	void drop_protocols ();
-	
+
 	int activate (ControlProtocolInfo&);
         int deactivate (ControlProtocolInfo&);
-	
+
 	std::list<ControlProtocolInfo*> control_protocol_info;
 
 	static const std::string state_node_name;

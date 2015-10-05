@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CAStreamBasicDescription.h
-	
+
 =============================================================================*/
 
 #ifndef __CAStreamBasicDescription_h__
@@ -82,12 +82,12 @@ public:
 //	Construction/Destruction
 public:
 	CAStreamBasicDescription() { memset (this, 0, sizeof(AudioStreamBasicDescription)); }
-	
+
 	CAStreamBasicDescription(const AudioStreamBasicDescription &desc)
 	{
 		SetFrom(desc);
 	}
-	
+
 	CAStreamBasicDescription(		double inSampleRate,		UInt32 inFormatID,
 									UInt32 inBytesPerPacket,	UInt32 inFramesPerPacket,
 									UInt32 inBytesPerFrame,		UInt32 inChannelsPerFrame,
@@ -100,31 +100,31 @@ public:
 	{
 		memcpy(this, &desc, sizeof(AudioStreamBasicDescription));
 	}
-	
+
 	// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 	//
 	// interrogation
-	
+
 	bool	IsPCM() const { return mFormatID == kAudioFormatLinearPCM; }
-	
+
 	bool	PackednessIsSignificant() const
 	{
 		Assert(IsPCM(), "PackednessIsSignificant only applies for PCM");
 		return (SampleWordSize() << 3) != mBitsPerChannel;
 	}
-	
+
 	bool	AlignmentIsSignificant() const
 	{
 		return PackednessIsSignificant() || (mBitsPerChannel & 7) != 0;
 	}
-	
+
 	bool	IsInterleaved() const
 	{
 		return !IsPCM() || !(mFormatFlags & kAudioFormatFlagIsNonInterleaved);
 	}
-	
+
 	// for sanity with interleaved/deinterleaved possibilities, never access mChannelsPerFrame, use these:
-	UInt32	NumberInterleavedChannels() const	{ return IsInterleaved() ? mChannelsPerFrame : 1; }	
+	UInt32	NumberInterleavedChannels() const	{ return IsInterleaved() ? mChannelsPerFrame : 1; }
 	UInt32	NumberChannelStreams() const		{ return IsInterleaved() ? 1 : mChannelsPerFrame; }
 	UInt32	NumberChannels() const				{ return mChannelsPerFrame; }
 	UInt32	SampleWordSize() const				{ return (mBytesPerFrame > 0) ? mBytesPerFrame / NumberInterleavedChannels() :  0;}
@@ -134,16 +134,16 @@ public:
 		Assert(mBytesPerFrame > 0, "bytesPerFrame must be > 0 in BytesToFrames");
 		return nbytes / mBytesPerFrame;
 	}
-	
+
 	bool	SameChannelsAndInterleaving(const CAStreamBasicDescription &a) const
 	{
 		return this->NumberChannels() == a.NumberChannels() && this->IsInterleaved() == a.IsInterleaved();
 	}
-	
+
 	// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 	//
 	//	manipulation
-	
+
 	void	SetCanonical(UInt32 nChannels, bool interleaved)
 				// note: leaves sample rate untouched
 	{
@@ -159,7 +159,7 @@ public:
 			mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
 		}
 	}
-	
+
 	void	ChangeNumberChannels(UInt32 nChannels, bool interleaved)
 				// alter an existing format
 	{
@@ -177,11 +177,11 @@ public:
 			mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
 		}
 	}
-	
+
 	// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 	//
 	//	other
-	
+
 	void	Print() const
 	{
 		Print (stdout);
@@ -189,13 +189,13 @@ public:
 
 	void	Print(FILE* file) const
 	{
-		PrintFormat (file, "", "AudioStreamBasicDescription:");	
+		PrintFormat (file, "", "AudioStreamBasicDescription:");
 	}
 
 	void PrintFormat(FILE *f, const char *indent, const char *name) const;
 
 	OSStatus			Save(CFPropertyListRef *outData) const;
-		
+
 	OSStatus			Restore(CFPropertyListRef &inData);
 
 //	Operations

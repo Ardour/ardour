@@ -42,7 +42,7 @@ namespace Gdk {
 }
 
 class WaveViewTest;
-	
+
 namespace ArdourCanvas {
 
 struct LIBCANVAS_API WaveViewThreadRequest
@@ -55,10 +55,10 @@ struct LIBCANVAS_API WaveViewThreadRequest
         };
 
 	WaveViewThreadRequest  () : stop (0) {}
-	
+
 	bool should_stop () const { return (bool) g_atomic_int_get (const_cast<gint*>(&stop)); }
 	void cancel() { g_atomic_int_set (&stop, 1); }
-	
+
 	RequestType type;
 	framepos_t start;
 	framepos_t end;
@@ -71,9 +71,9 @@ struct LIBCANVAS_API WaveViewThreadRequest
 	boost::weak_ptr<const ARDOUR::Region> region;
 
 	/* resulting image, after request has been satisfied */
-	
+
 	Cairo::RefPtr<Cairo::ImageSurface> image;
-	
+
   private:
 	gint stop; /* intended for atomic access */
 };
@@ -85,7 +85,7 @@ class LIBCANVAS_API WaveViewCache
   public:
 	WaveViewCache();
 	~WaveViewCache();
-	
+
 	struct Entry {
 
 		/* these properties define the cache entry as unique.
@@ -111,7 +111,7 @@ class LIBCANVAS_API WaveViewCache
 
 		/* last time the cache entry was used */
 		uint64_t timestamp;
-		
+
 		Entry (int chan, Coord hght, float amp, Color fcl, double spp, framepos_t strt, framepos_t ed,
 		       Cairo::RefPtr<Cairo::ImageSurface> img)
 			: channel (chan)
@@ -127,10 +127,10 @@ class LIBCANVAS_API WaveViewCache
 	uint64_t image_cache_threshold () const { return _image_cache_threshold; }
 	void set_image_cache_threshold (uint64_t);
 	void clear_cache ();
-	
+
 	void add (boost::shared_ptr<ARDOUR::AudioSource>, boost::shared_ptr<Entry>);
 	void use (boost::shared_ptr<ARDOUR::AudioSource>, boost::shared_ptr<Entry>);
-	
+
         void consolidate_image_cache (boost::shared_ptr<ARDOUR::AudioSource>,
                                       int channel,
                                       Coord height,
@@ -196,18 +196,18 @@ public:
 
 	Cairo::RefPtr<Cairo::ImageSurface> _image;
 	PBD::Signal0<void> ImageReady;
-	
+
 	/* Displays a single channel of waveform data for the given Region.
 
 	   x = 0 in the waveview corresponds to the first waveform datum taken
 	   from region->start() samples into the source data.
-	
+
 	   x = N in the waveview corresponds to the (N * spp)'th sample
 	   measured from region->start() into the source data.
-	
+
 	   when drawing, we will map the zeroth-pixel of the waveview
 	   into a window.
-	
+
 	   The waveview itself contains a set of pre-rendered Cairo::ImageSurfaces
 	   that cache sections of the display. This is filled on-demand and
 	   never cleared until something explicitly marks the cache invalid
@@ -235,10 +235,10 @@ public:
 	 * want this behaviour.
 	 */
 	void set_start_shift (double pixels);
-	
+
         void set_fill_color (Color);
         void set_outline_color (Color);
-	
+
 	void region_resized ();
         void gain_changed ();
 
@@ -277,8 +277,8 @@ public:
 	static void stop_drawing_thread ();
 
 	static void set_image_cache_size (uint64_t);
-	
-#ifdef CANVAS_COMPATIBILITY	
+
+#ifdef CANVAS_COMPATIBILITY
 	void*& property_gain_src () {
 		return _foo_void;
 	}
@@ -312,7 +312,7 @@ public:
         double _amplitude_above_axis;
 	float  _region_amplitude;
 	double _start_shift;
-	
+
 	/** The `start' value to use for the region; we can't use the region's
 	 *  value as the crossfade editor needs to alter it.
 	 */
@@ -340,14 +340,14 @@ public:
 	   keep updating (e.g. while recording)
 	*/
 	bool always_get_image_in_thread;
-	
+
 	/** Set to true by render(). Used so that we know if the wave view
 	 * has actually been displayed on screen. ::set_height() when this
 	 * is true does not use get_image_in_thread, because it implies
 	 * that the height is being set BEFORE the waveview is drawn.
 	 */
 	mutable bool rendered;
-	
+
         PBD::ScopedConnectionList invalidation_connection;
         PBD::ScopedConnection     image_ready_connection;
 
@@ -364,14 +364,14 @@ public:
 
         boost::shared_ptr<WaveViewCache::Entry> get_image (framepos_t start, framepos_t end, bool& full_image) const;
         boost::shared_ptr<WaveViewCache::Entry> get_image_from_cache (framepos_t start, framepos_t end, bool& full_image) const;
-	
+
         struct LineTips {
 	        double top;
 	        double bot;
 	        double spread;
 	        bool clip_max;
 	        bool clip_min;
-	
+
 	        LineTips() : top (0.0), bot (0.0), clip_max (false), clip_min (false) {}
         };
 
@@ -382,7 +382,7 @@ public:
 
         void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int n_peaks, boost::shared_ptr<WaveViewThreadRequest>) const;
 	void draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int) const;
-	
+
         void cancel_my_render_request () const;
 
         void queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, framepos_t start, framepos_t end) const;
@@ -394,7 +394,7 @@ public:
         mutable boost::shared_ptr<WaveViewCache::Entry> _current_image;
 
 	mutable boost::shared_ptr<WaveViewThreadRequest> current_request;
-	
+
 	static WaveViewCache* images;
 
 	static void drawing_thread ();

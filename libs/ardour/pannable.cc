@@ -50,7 +50,7 @@ Pannable::Pannable (Session& s)
 	, _responding_to_control_auto_state_change (0)
 {
 	//boost_debug_shared_ptr_mark_interesting (this, "pannable");
-	
+
 	add_control (pan_azimuth_control);
 	add_control (pan_elevation_control);
 	add_control (pan_width_control);

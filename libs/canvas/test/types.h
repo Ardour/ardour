@@ -15,4 +15,4 @@ public:
 	void test_safe_add ();
 };
 
-	
+

@@ -81,14 +81,14 @@ public:
 	virtual WTErr SetStreaming (bool newState);///<Start/Stop Streaming - should reconnect connections when streaming starts!
 
 	virtual WTErr DoIdle();///<Do Idle Processing
-	
+
 	virtual WTErr SetMonitorChannels (int leftChannel, int rightChannel);///<Set monitor channels. - optional, will not be available with AG
 	virtual WTErr SetMonitorGain (float newGain);///<Set monitor gain. - optional, will not be available with AG
-	
+
 	virtual WTErr ShowConfigPanel (void *pParam);///< Show Control Panel - in case of ASIO this will work only with Active device!
 
 	virtual int AudioCallback (float *pOutputBuffer, unsigned long framesPerBuffer, int64_t inSampleTime, uint64_t inCycleStartTime);
-	
+
 	AudioDeviceID DeviceID () {return m_DeviceID;}
 
     virtual uint32_t GetLatency (bool isInput); ///< Get latency.
@@ -110,7 +110,7 @@ protected:
 //	int m_CurrentIOCycle; ///< The location in m_IOCyclesTymesTaken array, where the next cycle's value will go.
 //	int m_CyclesToAccumulate; ///< The number of cycles to accumulate the values for - maximum for last one second.
 //	unsigned int m_CyclePeriod; ///< The number of host time units for a cycle period - determined by buffer size and sampling rate
-	
+
 
 	AudioUnit m_AUHALAudioUnit;///< The AUHAL AudioUnit
 
@@ -136,7 +136,7 @@ protected:
 	uint32_t m_ToneDataSamples;
 	uint32_t m_NextSampleToUse;
 #endif //WV_USE_TONE_GEN
-	
+
 	WTErr UpdateDeviceInfo ();
     WTErr UpdateDeviceId ();
 	WTErr UpdateDeviceName();
@@ -157,14 +157,14 @@ protected:
 #if WV_USE_TONE_GEN
 	void SetupToneGenerator ();
 #endif //WV_USE_TONE_GEN
-	
+
 	static OSStatus StaticAudioIOProc(void *inRefCon, AudioUnitRenderActionFlags *	ioActionFlags,
 		const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumberFrames,
 		AudioBufferList *ioData);
 	OSStatus AudioIOProc(AudioUnitRenderActionFlags *	ioActionFlags,
 		const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumberFrames,
 		AudioBufferList *ioData);
-		
+
 	static OSStatus StaticPropertyChangeProc (AudioDeviceID inDevice, UInt32 inChannel, Boolean isInput,
 	AudioDevicePropertyID inPropertyID, void *inClientData);
 	void PropertyChangeProc (AudioDevicePropertyID inPropertyID);
@@ -196,7 +196,7 @@ protected:
 
 	bool m_UseMultithreading; ///< Flag indicates whether to use multi-threading for audio processing.
     bool m_bNoCopyAudioBuffer;
-	
+
 private:
     // helper functions for this class only
     WTErr getDeviceAvailableSampleRates(DeviceID deviceId, std::vector<int>& sampleRates);

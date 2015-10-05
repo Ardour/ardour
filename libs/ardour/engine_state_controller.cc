@@ -583,7 +583,7 @@ EngineStateController::_validate_current_device_state ()
 	// if current is not found switch to default if is supported
 	if (bs_iter == buffer_sizes.end ()) {
 		bs_iter = std::find (buffer_sizes.begin (), buffer_sizes.end (), backend->default_buffer_size (_current_state->device_name));
-	
+
 		if (bs_iter != buffer_sizes.end ()) {
 			_current_state->buffer_size = backend->default_buffer_size (_current_state->device_name);
 		} else {
@@ -1423,7 +1423,7 @@ EngineStateController::_on_session_loaded ()
 	// This is done during session construction
 	// _session->reconnect_ltc_input ();
 	// _session->reconnect_ltc_output ();
-	
+
 	framecnt_t desired_sample_rate = _session->nominal_frame_rate ();
 	if ( desired_sample_rate > 0 && set_new_sample_rate_in_controller (desired_sample_rate))
 	{
@@ -1780,7 +1780,7 @@ bool
 EngineStateController::push_current_state_to_backend (bool start)
 {
 	boost::shared_ptr<AudioBackend> backend = AudioEngine::instance ()->current_backend ();
-	
+
 	if (!backend) {
 		return false;
 	}
@@ -1820,7 +1820,7 @@ EngineStateController::push_current_state_to_backend (bool start)
 			if (!result ) {
 				std::cout << "EngineStateController::Setting device sample rate " << _current_state->sample_rate << std::endl;
 				result = backend->set_sample_rate (_current_state->sample_rate);
-				
+
 				if (result) {
 					error << string_compose (_("Cannot set sample rate to %1"), get_current_sample_rate ()) << endmsg;
 				}

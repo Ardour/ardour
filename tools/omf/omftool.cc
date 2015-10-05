@@ -84,11 +84,11 @@ OMF::OMF ()
 	options = new XMLNode ("RouteGroups");
 
 	/* add master, default 2in/2out */
-	
+
 	XMLNode* master = new_route_node ();
 	master->add_property ("name", "master");
 	set_route_node_channels (master, 2, 2, false);
-	
+
 	XMLNode* tempo_map = new XMLNode ("TempoMap");
 	XMLNode* tempo = new XMLNode ("Tempo");
 	tempo->add_property ("start", "1|1|0");
@@ -125,7 +125,7 @@ OMF::OMF ()
 	connection = new XMLNode ("Connection");
 	connection->add_property ("other", "system:playback_2");
 	port->add_child_nocopy (*connection);
-		
+
 	session->add_child_nocopy (*options);
 	session->add_child_nocopy (*sources);
 	session->add_child_nocopy (*regions);
@@ -175,7 +175,7 @@ OMF::init ()
 	audiofile_path_vector.push_back ("interchange");
 	audiofile_path_vector.push_back (session_name);
 	audiofile_path_vector.push_back ("audiofiles");
-	
+
 	dir = Glib::build_filename (audiofile_path_vector);
 	g_mkdir_with_parents (dir.c_str(), 0775);
 
@@ -253,7 +253,7 @@ OMF::new_playlist_node ()
 	add_id (playlist);
 	playlist->add_property ("type", "audio");
 	playlist->add_property ("frozen", "no");
-	
+
 	return playlist;
 }
 
@@ -266,7 +266,7 @@ OMF::new_diskstream_node ()
 	diskstream->add_property ("flags", "Recordable");
 	diskstream->add_property ("speed", "1");
 	diskstream->add_property ("channels", "1");
-	
+
 	return diskstream;
 }
 void
@@ -302,7 +302,7 @@ OMF::set_route_node_channels (XMLNode* route, int in, int out, bool send_to_mast
 	XMLNode* output_io;
 	char sbuf[256];
 	string name = route->property ("name")->value();
-	
+
 	legalize_name (name);
 
 	output_io = new XMLNode ("IO");
@@ -311,7 +311,7 @@ OMF::set_route_node_channels (XMLNode* route, int in, int out, bool send_to_mast
 	add_id (output_io);
 	output_io->add_property ("direction", "Output");
 	output_io->add_property ("default-type", "audio");
-	
+
 	input_io = new XMLNode ("IO");
 	route->add_child_nocopy (*input_io);
 	input_io->add_property ("name", name);
@@ -323,9 +323,9 @@ OMF::set_route_node_channels (XMLNode* route, int in, int out, bool send_to_mast
 		XMLNode* port = new XMLNode ("Port");
 		output_io->add_child_nocopy (*port);
 		port->add_property ("type", "audio");
-		
+
 		snprintf (sbuf, sizeof (sbuf), "%s/audio_out %d", name.c_str(), i+1);
-		
+
 		port->add_property ("name", sbuf);
 		XMLNode* connection = new XMLNode ("Connection");
 
@@ -342,7 +342,7 @@ OMF::set_route_node_channels (XMLNode* route, int in, int out, bool send_to_mast
 				snprintf (sbuf, sizeof (sbuf), "system:playback_1");
 			}
 		}
-				
+
 		connection->add_property ("other", sbuf);
 		port->add_child_nocopy (*connection);
 	}
@@ -351,9 +351,9 @@ OMF::set_route_node_channels (XMLNode* route, int in, int out, bool send_to_mast
 		XMLNode* port = new XMLNode ("Port");
 		input_io->add_child_nocopy (*port);
 		port->add_property ("type", "audio");
-		
+
 		snprintf (sbuf, sizeof (sbuf), "%s/audio_out %d", name.c_str(), i+1);
-		
+
 		port->add_property ("name", sbuf);
 		XMLNode* connection = new XMLNode ("Connection");
 
@@ -379,12 +379,12 @@ OMF::set_route_node_channels (XMLNode* route, int in, int out, bool send_to_mast
 	outs->add_property ("output", name);
 	outs->add_property ("type", "main-outs");
 	outs->add_property ("role", "Main");
-	
+
 	/* Panner setup */
 
 	XMLNode* panner = new XMLNode ("Panner");
 	outs->add_child_nocopy (*panner);
-	
+
 	panner->add_property ("linked", "no");
 	panner->add_property ("link-direction", "SameDirection");
 	panner->add_property ("bypassed", "no");
@@ -403,7 +403,7 @@ OMF::set_route_node_channels (XMLNode* route, int in, int out, bool send_to_mast
 		spanner->add_property ("type", "Equal Power Stereo");
 		spanner->add_property ("muted", "no");
 		spanner->add_property ("mono", "no");
-		
+
 		XMLNode* spc = new XMLNode ("Controllable");
 		spanner->add_child_nocopy (*spc);
 		add_id (spc);
@@ -488,9 +488,9 @@ OMF::new_region_node ()
 
 	region_extra->add_child_nocopy (*gui_extra);
 	region->add_child_nocopy (*region_extra);
-	
+
 	/* boilerplate */
-	
+
 	region->add_property ("ancestral-start", "0");
 	region->add_property ("ancestral-start", "0");
 	region->add_property ("ancestral-length", "0");
@@ -520,9 +520,9 @@ OMF::new_source_node ()
 	add_id (source);
 	source->add_property ("type", "audio");
 	source->add_property ("flags", "CanRename");
-		
+
 	sources->add_child_nocopy (*source);
-	
+
 	return source;
 }
 
@@ -585,7 +585,7 @@ OMF::create_xml ()
 	int major;
 	int minor;
 	int micro;
-	
+
 	major = version / 1000;
 	minor = version - (major * 1000);
 	micro = version - (major * 1000) - (minor * 100);
@@ -594,7 +594,7 @@ OMF::create_xml ()
 
 	session->add_property ("version", sbuf);
 	session->add_property ("name", session_name);
-	
+
 	char **tracks;
 	int numtracks;
 	sqlite3_get_table(db, "SELECT value FROM data WHERE object IN (SELECT value FROM data WHERE object IN (SELECT object FROM data WHERE property = 'OMFI:OOBJ:ObjClass' AND value = 'CMOB' LIMIT 1) AND property = 'OMFI:MOBJ:Slots')", &tracks, &numtracks, 0, 0);
@@ -690,7 +690,7 @@ OMF::create_xml ()
 		}
 
 		sqlite3_free_table(rate);
-		
+
 		char **items;
 		int itemCount;
 		//sqlite3_get_table(db, sqlite3_mprintf("SELECT d3.value FROM data d1, data d2, data d3 WHERE d1.object LIKE '%s' AND d1.property LIKE 'OMFI:MSLT:Segment' AND d2.object LIKE d1.value AND d2.property LIKE 'OMFI:SEQU:Components' AND d3.object LIKE d2.value", tracks[i]), &items, &itemCount, 0, 0);
@@ -707,7 +707,7 @@ OMF::create_xml ()
 			int lenCount;
 			double length = 0.0;
 			int lenFrames = 0;
-			
+
 			region = 0;
 
 			sqlite3_get_table(db, sqlite3_mprintf("SELECT value FROM data WHERE object = %s AND property = 'OMFI:CPNT:Length' LIMIT 1", items[j]), &len, &lenCount, 0, 0);
@@ -730,7 +730,7 @@ OMF::create_xml ()
 
 			lenFrames = atoi(len[1]);
 			length = lenFrames * frame_rate;
-			
+
 			if (!strcmp(type[1], "TRAN")) {
 
 				position -= length;
@@ -796,15 +796,15 @@ OMF::create_xml ()
 				if (sourceFileCount > 0) {
 					uint32_t sfOffs;
 					uint32_t sfLen;
-	
+
 					if (get_offset_and_length (sourceFile[2], sourceFile[3], sfOffs, sfLen)) {
 						char *sfBuf = read_name (sfOffs, sfLen);
-									
+
 						if ((sinfo = get_known_source (sfBuf)) == 0) {
 							cerr << "Reference to unknown source [" << sfBuf << "]1" << endl;
 							return -1;
 						}
-									
+
 						free (sfBuf);
 					} else {
 						cerr << "offs/len illegal\n";
@@ -819,7 +819,7 @@ OMF::create_xml ()
 							cerr << "Reference to unknown source [" << fallbackFile[1] << "]2" << endl;
 							return -1;
 						}
-									
+
 					} else {
 						cerr << "no fallback file\n";
 					}
@@ -827,12 +827,12 @@ OMF::create_xml ()
 					sqlite3_free_table(fallbackFile);
 				}
 
-					
+
 				if (sinfo) {
-					
+
 					region = new_region_node ();
 					playlist->add_child_nocopy (*region);
-					
+
 					snprintf (sbuf, sizeof (sbuf), "%" PRId64, llrintf (position * sample_rate));
 					region->add_property ("position", sbuf);
 					snprintf (sbuf, sizeof (sbuf), "%" PRId64, llrintf (length * sample_rate));
@@ -840,7 +840,7 @@ OMF::create_xml ()
 					snprintf (sbuf, sizeof (sbuf), "%" PRId64, llrintf (start * frame_rate * sample_rate));
 					region->add_property ("start", sbuf);
 					set_region_sources (region, sinfo);
-					
+
 					route_max_channels = max (route_max_channels, sinfo->channels);
 				}
 
@@ -879,7 +879,7 @@ OMF::create_xml ()
 					if (get_offset_and_length (sourceFile[2], sourceFile[3], sfOffs, sfLen)) {
 						cerr << "get source file from " << sfOffs << " + " << sfLen << endl;
 						char *sfBuf = read_name (sfOffs, sfLen);
-									
+
 						if ((sinfo = get_known_source (sfBuf)) == 0) {
 							cerr << "Reference to unknown source [" << sfBuf << ']' << endl;
 							return -1;
@@ -908,7 +908,7 @@ OMF::create_xml ()
 
 					region = new_region_node ();
 					playlist->add_child_nocopy (*region);
-					
+
 					snprintf (sbuf, sizeof (sbuf), "%" PRId64, llrintf (position * sample_rate));
 					region->add_property ("position", sbuf);
 					snprintf (sbuf, sizeof (sbuf), "%" PRId64, llrintf (length * sample_rate));
@@ -916,7 +916,7 @@ OMF::create_xml ()
 					snprintf (sbuf, sizeof (sbuf), "%" PRId64, llrintf (start * frame_rate * sample_rate));
 					region->add_property ("start", sbuf);
 					set_region_sources (region, sinfo);
-					
+
 					route_max_channels = max (route_max_channels, sinfo->channels);
 				}
 
@@ -930,9 +930,9 @@ OMF::create_xml ()
 		}
 
 		/* finalize route information */
-		
+
 		cerr << "Set up track with " << route_max_channels << " channels" << endl;
-		set_route_node_channels (route, route_max_channels, route_max_channels, true);		
+		set_route_node_channels (route, route_max_channels, route_max_channels, true);
 		sqlite3_free_table(items);
 	}
 
@@ -986,7 +986,7 @@ main (int argc, char* argv[])
 		{ "version", 1, 0, 'v' },
 		{ "help", 0, 0, 'h' },
 		{ 0, 0, 0, 0 }
-	};	
+	};
 
 
 	int option_index = 0;
@@ -1023,7 +1023,7 @@ main (int argc, char* argv[])
 		print_help (execname);
 		/*NOTREACHED*/
 	}
-	
+
 	OMF omf;
 
 	if (version) {

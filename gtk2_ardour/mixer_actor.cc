@@ -80,7 +80,7 @@ void
 MixerActor::load_bindings ()
 {
         /* XXX move this to a better place */
-	
+
         bindings.set_action_map (myactions);
 
 	std::string binding_file;

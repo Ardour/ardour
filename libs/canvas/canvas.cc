@@ -104,7 +104,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 #endif
 
 	render_count = 0;
-	
+
 	boost::optional<Rect> root_bbox = _root.bounding_box();
 	if (!root_bbox) {
 		/* the root has no bounding box, so there's nothing to render */
@@ -113,7 +113,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 	boost::optional<Rect> draw = root_bbox->intersection (area);
 	if (draw) {
-		
+
 		/* there's a common area between the root and the requested
 		   area, so render it.
 		*/
@@ -171,7 +171,7 @@ Canvas::dump (ostream& o) const
 {
 	dump_depth = 0;
 	_root.dump (o);
-}	
+}
 
 /** Called when an item has been shown or hidden.
  *  @param item Item that has been shown or hidden.
@@ -210,7 +210,7 @@ Canvas::item_visual_property_changed (Item* item)
 void
 Canvas::item_changed (Item* item, boost::optional<Rect> pre_change_bounding_box)
 {
-	
+
 	Rect window_bbox = visible_area ();
 
 	if (pre_change_bounding_box) {
@@ -223,7 +223,7 @@ Canvas::item_changed (Item* item, boost::optional<Rect> pre_change_bounding_box)
 
 	boost::optional<Rect> post_change_bounding_box = item->bounding_box ();
 	if (post_change_bounding_box) {
-		
+
 		if (item->item_to_window (*post_change_bounding_box).intersection (window_bbox)) {
 			/* request a redraw of the item's new bounding box */
 			queue_draw_item_area (item, post_change_bounding_box.get ());
@@ -406,7 +406,7 @@ GtkCanvas::pick_current_item (int state)
 	 * added or removed, so we have no coordinates to work from as is the
 	 * case with a motion event. Find out where the mouse is and use that.
 	 */
-	
+
 	Glib::RefPtr<const Gdk::Window> pointer_window = Gdk::Display::get_default()->get_window_at_pointer (x, y);
 
 	if (pointer_window != get_window()) {
@@ -453,7 +453,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 	   top, but we're going to reverse that for within_items so that its
 	   first item is the upper-most item that can be chosen as _current_item.
 	*/
-	
+
 	vector<Item const *>::const_iterator i;
 	list<Item const *> within_items;
 
@@ -483,7 +483,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CURRENT ITEM %1/%2\n", _new_current_item->whatami(), _current_item->name));
 			return;
 		}
-	
+
 		_new_current_item = const_cast<Item*> (within_items.front());
 	}
 
@@ -525,7 +525,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	/* Events delivered to canvas items are expected to be in canvas
 	 * coordinates but @param point is in window coordinates.
 	 */
-	
+
 	Duple c = window_to_canvas (point);
 	enter_event.x = c.x;
 	enter_event.y = c.y;
@@ -574,7 +574,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 		 * Deliver "virtual" leave notifications to all items in the
 		 * heirarchy between current and new_current.
 		 */
-		
+
 		for (i = _current_item->parent(); i && i != _new_current_item; i = i->parent()) {
 			items_to_leave_virtual.push_back (i);
 		}
@@ -620,7 +620,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 		enter_detail = GDK_NOTIFY_NONLINEAR;
 		leave_detail = GDK_NOTIFY_NONLINEAR;
 	}
-	
+
 
 	if (_current_item && !_current_item->ignore_events ()) {
 		leave_event.detail = leave_detail;
@@ -685,7 +685,7 @@ GtkCanvas::deliver_event (GdkEvent* event)
 	/* run through the items from child to parent, until one claims the event */
 
 	Item* item = const_cast<Item*> (event_item);
-	
+
 	while (item) {
 
 		Item* parent = item->parent ();
@@ -697,10 +697,10 @@ GtkCanvas::deliver_event (GdkEvent* event)
 				PBD::DEBUG::CanvasEvents,
 				string_compose ("canvas event handled by %1 %2\n", item->whatami(), item->name.empty() ? "[unknown]" : item->name)
 				);
-			
+
 			return true;
 		}
-		
+
 		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas event %3 left unhandled by %1 %2\n", item->whatami(), item->name.empty() ? "[unknown]" : item->name, event_type_string (event->type)));
 
 		if ((item = parent) == 0) {
@@ -722,7 +722,7 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 	if (bounding_box) {
 		queue_draw_item_area (item, bounding_box.get ());
 	}
-	
+
 	if (_new_current_item == item) {
 		_new_current_item = 0;
 	}
@@ -751,7 +751,7 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 		_current_item = 0;
 		pick_current_item (0); // no mouse state
 	}
-	
+
 }
 
 void
@@ -810,13 +810,13 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 
         /* render canvas */
 		if ( _single_exposure ) {
-	
+
 			render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
 		} else {
 			GdkRectangle* rects;
 			gint nrects;
-			
+
 			gdk_region_get_rectangles (ev->region, &rects, &nrects);
 			for (gint n = 0; n < nrects; ++n) {
 				draw_context->set_identity_matrix();  //reset the cairo matrix, just in case someone left it transformed after drawing ( cough )
@@ -824,7 +824,7 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 			}
 			g_free (rects);
 		}
-		
+
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	if (getenv("ARDOUR_IMAGE_SURFACE")) {
 #endif
@@ -856,12 +856,12 @@ GtkCanvas::on_scroll_event (GdkEventScroll* ev)
 	GdkEvent copy = *((GdkEvent*)ev);
 	Duple winpos = Duple (ev->x, ev->y);
 	Duple where = window_to_canvas (winpos);
-	
+
 	pick_current_item (winpos, ev->state);
 
 	copy.button.x = where.x;
 	copy.button.y = where.y;
-	
+
 	/* Coordinates in the event will be canvas coordinates, correctly adjusted
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
@@ -904,12 +904,12 @@ GtkCanvas::on_button_press_event (GdkEventButton* ev)
 	GdkEvent copy = *((GdkEvent*)ev);
 	Duple winpos = Duple (ev->x, ev->y);
 	Duple where = window_to_canvas (winpos);
-	
+
 	pick_current_item (winpos, ev->state);
 
 	copy.button.x = where.x;
 	copy.button.y = where.y;
-	
+
 	/* Coordinates in the event will be canvas coordinates, correctly adjusted
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
@@ -924,13 +924,13 @@ GtkCanvas::on_button_press_event (GdkEventButton* ev)
  */
 bool
 GtkCanvas::on_button_release_event (GdkEventButton* ev)
-{	
+{
 	/* translate event coordinates from window to canvas */
 
 	GdkEvent copy = *((GdkEvent*)ev);
 	Duple winpos = Duple (ev->x, ev->y);
 	Duple where = window_to_canvas (winpos);
-	
+
 	pick_current_item (winpos, ev->state);
 
 	copy.button.x = where.x;
@@ -1200,12 +1200,12 @@ GtkCanvas::show_tooltip ()
 	(void) toplevel->get_window()->get_pointer (pointer_x, pointer_y, mask);
 
 	Duple tooltip_window_origin (pointer_x, pointer_y);
-	
+
 	/* convert to root window coordinates */
 
 	int win_x, win_y;
 	dynamic_cast<Gtk::Window*>(toplevel)->get_position (win_x, win_y);
-	
+
 	tooltip_window_origin = tooltip_window_origin.translate (Duple (win_x, win_y));
 
 	/* we don't want the pointer to be inside the window when it is
@@ -1227,7 +1227,7 @@ GtkCanvas::show_tooltip ()
 	/* ready to show */
 
 	tooltip_window->present ();
-	
+
 	/* called from a timeout handler, don't call it again */
 
 	return false;

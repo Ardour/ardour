@@ -77,7 +77,7 @@ Flag::set_text (string const & text)
 	assert (bbox);
 
 	Duple flag_size (bbox.get().width() + 10, bbox.get().height() + 4);
-	
+
 	if (_invert) {
 		const Distance h = fabs(_line->y1() - _line->y0());
 		_text->set_position (Duple (5, h - flag_size.y + 2));

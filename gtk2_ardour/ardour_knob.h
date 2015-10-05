@@ -113,7 +113,7 @@ public:
 	float _val; // current value [0..1]
 	float _normal; // default value, arc
 	float _dead_zone_delta;
-	
+
 	Flags _flags;
 
 	void action_sensitivity_changed ();

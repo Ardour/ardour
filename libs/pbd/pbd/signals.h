@@ -115,9 +115,9 @@ public:
 		return r;
 	}
 };
-	
+
 typedef boost::shared_ptr<Connection> UnscopedConnection;
-	
+
 class LIBPBD_API ScopedConnection
 {
 public:
@@ -139,7 +139,7 @@ public:
 		if (_c == o) {
 			return *this;
 		}
-		
+
 		disconnect ();
 		_c = o;
 		return *this;
@@ -148,13 +148,13 @@ public:
 private:
 	UnscopedConnection _c;
 };
-	
+
 class LIBPBD_API ScopedConnectionList  : public boost::noncopyable
 {
   public:
 	ScopedConnectionList();
 	virtual ~ScopedConnectionList ();
-	
+
 	void add_connection (const UnscopedConnection& c);
 	void drop_connections ();
 
@@ -168,7 +168,7 @@ class LIBPBD_API ScopedConnectionList  : public boost::noncopyable
 	   (1) (unlikely) we make a connection involving a callback on the
 	       same object from 2 threads. (wouldn't that just be appalling
 	       programming style?)
-	
+
 	   (2) where we are dropping connections in one thread and adding
 	       one from another.
 	 */
@@ -179,8 +179,8 @@ class LIBPBD_API ScopedConnectionList  : public boost::noncopyable
 	ConnectionList _list;
 };
 
-#include "pbd/signals_generated.h"	
-	
+#include "pbd/signals_generated.h"
+
 } /* namespace */
 
 #endif /* __pbd_signals_h__ */

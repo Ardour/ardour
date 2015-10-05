@@ -109,7 +109,7 @@ tranzport_t *open_tranzport_core()
 
 tranzport_t *open_tranzport()
 {
-return open_tranzport_core();	
+return open_tranzport_core();
 }
 
 void close_tranzport(tranzport_t *z)
@@ -190,7 +190,7 @@ int tranzport_read(tranzport_t *z, uint8_t *status, uint32_t *buttons, uint8_t *
 {
 	uint8_t buf[8];
 	int val;
-	
+
 	memset(buf, 0xff, 8);
 	val = read(z->udev, buf, 8);
 	if (val < 0) {

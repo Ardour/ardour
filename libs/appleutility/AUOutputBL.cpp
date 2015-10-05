@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	AUOutputBL.h
-	
+
 =============================================================================*/
 #include "AUOutputBL.h"
 
@@ -79,7 +79,7 @@ AUOutputBL::~AUOutputBL()
 void 	AUOutputBL::Prepare (UInt32 inNumFrames, bool inWantNullBufferIfAllocated)
 {
 	UInt32 channelsPerBuffer = mFormat.IsInterleaved() ? mFormat.NumberChannels() : 1;
-	
+
 	if (mBufferMemory == NULL || inWantNullBufferIfAllocated)
 	{
 		mBufferList->mNumberBuffers = mNumberBuffers;
@@ -95,7 +95,7 @@ void 	AUOutputBL::Prepare (UInt32 inNumFrames, bool inWantNullBufferIfAllocated)
 		UInt32 nBytes = mFormat.FramesToBytes (inNumFrames);
 		if ((nBytes * mNumberBuffers) > AllocatedBytes())
 			throw OSStatus(-10874);//(kAudioUnitErr_TooManyFramesToProcess);
-			
+
 		mBufferList->mNumberBuffers = mNumberBuffers;
 		AudioBuffer *buf = &mBufferList->mBuffers[0];
 		Byte* p = mBufferMemory;
@@ -114,25 +114,25 @@ void	AUOutputBL::Allocate (UInt32 inNumFrames)
 	if (inNumFrames)
 	{
 		UInt32 nBytes = mFormat.FramesToBytes (inNumFrames);
-		
+
 		if (nBytes <= AllocatedBytes())
 			return;
-		
+
 			// align successive buffers for Altivec and to take alternating
 			// cache line hits by spacing them by odd multiples of 16
 		if (mNumberBuffers > 1)
 			nBytes = (nBytes + (0x10 - (nBytes & 0xF))) | 0x10;
-		
+
 		mBufferSize = nBytes;
-		
+
 		UInt32 memorySize = mBufferSize * mNumberBuffers;
 		Byte *newMemory = new Byte[memorySize];
 		memset(newMemory, 0, memorySize);	// make buffer "hot"
-		
+
 		Byte *oldMemory = mBufferMemory;
 		mBufferMemory = newMemory;
 		delete[] oldMemory;
-		
+
 		mFrames = inNumFrames;
 	}
 	else

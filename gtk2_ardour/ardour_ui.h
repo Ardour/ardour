@@ -180,7 +180,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ARDOUR::Session* the_session() { return _session; }
 
 	bool get_smart_mode () const;
-	
+
 	int get_session_parameters (bool quit_on_cancel, bool should_be_new = false, std::string load_template = "");
         int  build_session_from_dialog (SessionDialog&, const std::string& session_name, const std::string& session_path);
 	bool ask_about_loading_existing_session (const std::string& session_path);
@@ -193,7 +193,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void save_state (const std::string & state_name = "", bool switch_to_it = false);
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
-	
+
 	PublicEditor&	  the_editor() { return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
 
@@ -227,7 +227,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void create_xrun_marker (framepos_t);
 
 	GUIObjectState* gui_object_state;
-	
+
 	MainClock* primary_clock;
 	MainClock* secondary_clock;
 	void focus_on_clock ();
@@ -486,13 +486,13 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void audition_blink (bool);
 	void feedback_blink (bool);
 	void error_blink (bool);
-	
+
 	void set_flat_buttons();
 
 	void soloing_changed (bool);
 	void auditioning_changed (bool);
 	void _auditioning_changed (bool);
-	
+
 	bool solo_alert_press (GdkEventButton* ev);
 	bool audition_alert_press (GdkEventButton* ev);
 	bool feedback_alert_press (GdkEventButton *);
@@ -543,7 +543,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	Gtk::Label    format_label;
 	void update_format ();
-	
+
 	void every_second ();
 	void every_point_one_seconds ();
 	void every_point_zero_something_seconds ();

@@ -77,7 +77,7 @@ protected:
 	Controls            _controls;
 
 	PBD::ScopedConnectionList _list_connections;
-	
+
 private:
 
 	PBD::ScopedConnectionList _control_connections;

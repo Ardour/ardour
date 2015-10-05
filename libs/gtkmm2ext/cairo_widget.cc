@@ -38,7 +38,7 @@ void CairoWidget::set_source_rgb_a( cairo_t* cr, Gdk::Color col, float a)  //ToD
 	float r = col.get_red_p ();
 	float g = col.get_green_p ();
 	float b = col.get_blue_p ();
-	
+
 	cairo_set_source_rgba(cr, r, g, b, a);
 }
 
@@ -139,9 +139,9 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 		cairo_context->paint ();
 	}
 #endif
-	
+
 	Gtk::Widget* child = get_child ();
-	
+
 	if (child) {
 		propagate_expose (*child, ev);
 	}
@@ -187,9 +187,9 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 
 	/* paint expose area the color of the parent window bg
 	*/
-	
+
 	Gdk::Color bg (get_parent_bg());
-	
+
 	cr->set_source_rgb (bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
 	cr->fill ();
 
@@ -219,7 +219,7 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	}
 #endif
-	
+
 	return true;
 }
 

@@ -54,23 +54,23 @@ main(int argc, char* argv[])
 	TestUI* test_ui = new TestUI();
 
 	CppUnit::TestResult testresult;
-	
+
 	CppUnit::TestResultCollector collectedresults;
 	testresult.addListener (&collectedresults);
-	
+
 	CppUnit::BriefTestProgressListener progress;
 	testresult.addListener (&progress);
-	
+
 	CppUnit::TestRunner testrunner;
 	testrunner.addTest (CppUnit::TestFactoryRegistry::getRegistry ().makeTest ());
 	testrunner.run (testresult);
-	
+
 	CppUnit::CompilerOutputter compileroutputter (&collectedresults, std::cerr);
 	compileroutputter.write ();
 
 	delete test_ui;
 
 	ARDOUR::cleanup ();
-	
+
 	return collectedresults.wasSuccessful () ? 0 : 1;
 }

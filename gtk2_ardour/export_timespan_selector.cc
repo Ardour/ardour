@@ -55,7 +55,7 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 			)
 		);
 	option_hbox.pack_start (*b, false, false, 6);
-	
+
 	b = Gtk::manage (new Gtk::Button (_("Deselect All")));
 	b->signal_clicked().connect (
 		sigc::bind (

@@ -49,7 +49,7 @@ struct TestUtils
 		unsigned int const granularity = 4096;
 		float * data = new float[frames];
 		srand (std::time (NULL));
-		
+
 		for (framecnt_t i = 0; i < frames; ++i) {
 			do {
 				int biased_int = (rand() % granularity) - (granularity / 2);
@@ -127,10 +127,10 @@ class ProcessContextGrabber : public AudioGrapher::Sink<T>
 		contexts.push_back (c);
 	}
 	using AudioGrapher::Sink<T>::process;
-	
+
 	typedef std::list<AudioGrapher::ProcessContext<T> > ContextList;
 	ContextList contexts;
-	
+
 };
 
 #endif // AUDIOGRAPHER_TESTS_UTILS_H

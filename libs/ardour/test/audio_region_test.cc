@@ -49,14 +49,14 @@ AudioRegionTest::setUp ()
 	assert (s);
 
 	int const signal_length = 4096;
-	
+
 	Sample staircase[signal_length];
 	for (int i = 0; i < signal_length; ++i) {
 		staircase[i] = i;
 	}
 
 	s->write (staircase, signal_length);
-	
+
 	PropertyList plist;
 	plist.add (Properties::start, 0);
 	plist.add (Properties::length, 100);
@@ -81,4 +81,4 @@ AudioRegionTest::tearDown ()
 	TestNeedingSession::tearDown ();
 }
 
-	
+

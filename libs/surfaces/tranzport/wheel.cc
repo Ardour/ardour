@@ -55,7 +55,7 @@ TranzportControlProtocol::datawheel ()
 	if ((buttonmask & ButtonTrackRight) || (buttonmask & ButtonTrackLeft)) {
 
 		/* track scrolling */
-		
+
 		if (_datawheel < WheelDirectionThreshold) {
 			next_track ();
 		} else {
@@ -63,7 +63,7 @@ TranzportControlProtocol::datawheel ()
 		}
 
 		last_wheel_motion = 0;
-		
+
 	} else if ((buttonmask & ButtonPrev) || (buttonmask & ButtonNext)) {
 
 		if (_datawheel < WheelDirectionThreshold) {
@@ -71,13 +71,13 @@ TranzportControlProtocol::datawheel ()
 		} else {
 			prev_marker ();
 		}
-		
+
 		last_wheel_motion = 0;
-		
+
 	} else if (buttonmask & ButtonShift) {
-		
+
 		/* parameter control */
-		
+
 		if (route_table[0]) {
 			switch (wheel_shift_mode) {
 			case WheelShiftGain:
@@ -94,29 +94,29 @@ TranzportControlProtocol::datawheel ()
 					step_pan_left ();
 				}
 				break;
-				
+
 			case WheelShiftMarker:
 				break;
-				
+
 			case WheelShiftMaster:
 				break;
-				
+
 			}
 		}
-		
+
 		last_wheel_motion = 0;
-		
+
 	} else {
-		
+
 		switch (wheel_mode) {
 		case WheelTimeline:
 			scroll ();
 			break;
-			
+
 		case WheelScrub:
 			scrub ();
 			break;
-			
+
 		case WheelShuttle:
 			shuttle ();
 			break;
@@ -151,35 +151,35 @@ TranzportControlProtocol::scrub ()
 	float speed;
 	uint64_t now;
 	int dir;
-	
+
 	now = g_get_monotonic_time();
-	
+
 	if (_datawheel < WheelDirectionThreshold) {
 		dir = 1;
 	} else {
 		dir = -1;
 	}
-	
+
 	if (dir != last_wheel_dir) {
 		/* changed direction, start over */
 		speed = 0.1f;
 	} else {
 		if (last_wheel_motion != 0) {
 			/* 10 clicks per second => speed == 1.0 */
-			
+
 			speed = 100000.0f / (float) (now - last_wheel_motion)
-			
+
 		} else {
-			
+
 			/* start at half-speed and see where we go from there */
-			
+
 			speed = 0.5f;
 		}
 	}
-	
+
 	last_wheel_motion = now;
 	last_wheel_dir = dir;
-	
+
 	set_transport_speed (speed * dir);
 }
 

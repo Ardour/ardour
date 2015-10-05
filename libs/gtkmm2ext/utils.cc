@@ -53,7 +53,7 @@ Gtkmm2ext::get_ink_pixel_size (Glib::RefPtr<Pango::Layout> layout,
 			       int& height)
 {
 	Pango::Rectangle ink_rect = layout->get_ink_extents ();
-	
+
 	width = PANGO_PIXELS(ink_rect.get_width());
 	height = PANGO_PIXELS(ink_rect.get_height());
 }
@@ -72,7 +72,7 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *
 {
 	int width, height;
 	w.ensure_style ();
-	
+
 	get_pixel_size (w.create_pango_layout (text), width, height);
 	w.set_size_request(width + hpadding, height + vpadding);
 }
@@ -117,7 +117,7 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, std::string c
 {
 	int width, height;
 	w.ensure_style ();
-	
+
 	get_pixel_size (w.create_pango_layout (text), width, height);
 	w.set_size_request(width + hpadding, height + vpadding);
 }
@@ -141,7 +141,7 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w,
                         break;
                 }
         }
-	
+
         if (i == strings.end()) {
                 /* make a copy of the strings then add one that has a descender */
                 copy = strings;
@@ -150,7 +150,7 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w,
         } else {
                 to_use = &strings;
         }
-	
+
 	for (vector<string>::const_iterator i = to_use->begin(); i != to_use->end(); ++i) {
 		get_pixel_size (w.create_pango_layout (*i), width, height);
 		width_max = max(width_max,width);
@@ -211,7 +211,7 @@ Gtkmm2ext::convert_bgra_to_rgba (guint8 const* src,
 {
 	guint8 const* src_pixel = src;
 	guint8*       dst_pixel = dst;
-	
+
         /* cairo pixel data is endian-dependent ARGB with A in the most significant 8 bits,
            with premultipled alpha values (see preceding function)
 
@@ -251,7 +251,7 @@ Gtkmm2ext::convert_bgra_to_rgba (guint8 const* src,
 
 #else
 #error ardour does not currently support PDP-endianess
-#endif			
+#endif
 
                         dst_pixel += 4;
                         src_pixel += 4;
@@ -277,16 +277,16 @@ Gtkmm2ext::pixbuf_from_string(const string& name, const Pango::FontDescription& 
 	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, clip_width, clip_height);
 	cairo_t* cr = cairo_create (surface);
 	cairo_text_extents_t te;
-	
+
 	cairo_set_source_rgba (cr, fg.get_red_p(), fg.get_green_p(), fg.get_blue_p(), 1.0);
 	cairo_select_font_face (cr, font.get_family().c_str(),
 				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 	cairo_set_font_size (cr,  font.get_size() / Pango::SCALE);
 	cairo_text_extents (cr, name.c_str(), &te);
-	
+
 	cairo_move_to (cr, 0.5, int (0.5 - te.height / 2 - te.y_bearing + clip_height / 2));
 	cairo_show_text (cr, name.c_str());
-	
+
 	convert_bgra_to_rgba(cairo_image_surface_get_data (surface), buf->get_pixels(), clip_width, clip_height);
 
 	cairo_destroy(cr);
@@ -765,10 +765,10 @@ Gtkmm2ext::fit_to_pixels (const string& str, int pixel_width, Pango::FontDescrip
 
 	/* XXX: might need special care to get the ellipsis character, not sure
            how that works
-	*/	
+	*/
 
 	string s = string (layout->get_text ().substr(line->get_start_index(), line->get_length()));
-	
+
 	cerr << "fit to pixels of " << str << " returns " << s << endl;
 
 	return s;

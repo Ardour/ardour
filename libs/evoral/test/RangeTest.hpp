@@ -23,4 +23,4 @@ public:
 	void coverageTest ();
 };
 
-	
+

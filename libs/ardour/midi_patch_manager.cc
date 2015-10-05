@@ -60,7 +60,7 @@ MidiPatchManager::add_session_patches ()
 	if (!_session) {
 		return;
 	}
-	
+
 	std::string path_to_patches = _session->session_directory().midi_patch_path();
 
 	if (!Glib::file_test (path_to_patches, Glib::FILE_TEST_EXISTS)) {
@@ -135,7 +135,7 @@ MidiPatchManager::refresh()
 				        << endmsg;
 				continue;
 			}
-				
+
 			_documents[device->first]               = document;
 			_master_devices_by_model[device->first] = device->second;
 

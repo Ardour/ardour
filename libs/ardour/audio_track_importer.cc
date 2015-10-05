@@ -247,7 +247,7 @@ AudioTrackImporter::_prepare_move ()
 		}
 		name = rename_pair.second;
 	}
-	
+
 	XMLNode* c = xml_track.child ("IO");
 	if (!c) {
 		error << _("badly-formed XML in imported track") << endmsg;
@@ -259,9 +259,9 @@ AudioTrackImporter::_prepare_move ()
 		error << _("badly-formed XML in imported track") << endmsg;
 		return false;
 	}
-	
+
 	p->set_value (name);
-	
+
 	track_handler.add_name (name);
 
 	return true;

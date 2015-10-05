@@ -263,7 +263,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
 
 	void remove_tracks ();
-	
+
 	/* tempo */
 
 	void set_show_measures (bool yn);
@@ -366,7 +366,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
-	
+
 	bool scroll_up_one_track (bool skip_child_views = false);
 	bool scroll_down_one_track (bool skip_child_views = false);
 
@@ -503,7 +503,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	TimeAxisView* stepping_axis_view () {
 		return _stepping_axis_view;
 	}
-	
+
 	void set_stepping_axis_view (TimeAxisView* v) {
 		_stepping_axis_view = v;
 	}
@@ -530,7 +530,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void split_regions_at (framepos_t, RegionSelection&);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	RegionSelection get_regions_from_selection_and_mouse (framepos_t);
-	
+
 	void mouse_add_new_tempo_event (framepos_t where);
 	void mouse_add_new_meter_event (framepos_t where);
 	void edit_tempo_section (ARDOUR::TempoSection*);
@@ -719,7 +719,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
-	
+
 	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
 	bool button_release_can_deselect;
 	bool _mouse_changed_selection;
@@ -2258,7 +2258,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	QuantizeDialog* quantize_dialog;
 	MainMenuDisabler* _main_menu_disabler;
-	
+
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;

@@ -48,18 +48,18 @@ Led::set_state (LedState new_state)
 	MIDI::byte msg = 0;
 
 	switch  (state.state()) {
-	case LedState::on:			
+	case LedState::on:
 		msg = 0x7f;
 		break;
-	case LedState::off:			
+	case LedState::off:
 		msg = 0x00;
 		break;
-	case LedState::flashing:	
+	case LedState::flashing:
 		msg = 0x01;
 		break;
-	case LedState::none:			
+	case LedState::none:
 		return MidiByteArray ();
 	}
-	
+
 	return MidiByteArray  (3, 0x90, id(), msg);
 }

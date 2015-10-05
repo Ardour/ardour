@@ -44,12 +44,12 @@ struct LIBARDOUR_API _VSTInfo
 	int    numInputs;
 	int    numOutputs;
 	int    numParams;
-	
+
 	int    wantMidi;
 	int    wantEvents;
 	int    hasEditor;
 	int    canProcessReplacing;
-	
+
 	char** ParamNames;
 	char** ParamLabels;
 };
@@ -63,7 +63,7 @@ struct LIBARDOUR_API _VSTHandle
 	void*        dll;
 	char*        name;
 	char*        path;
-	
+
 	main_entry_t main_entry;
 
 	int          plugincnt;
@@ -83,13 +83,13 @@ struct LIBARDOUR_API _VSTState
 	void*       windows_window;
 
 	int         xid;               ///< X11 XWindow
-	
+
 	int         want_resize;       ///< Set to signal the plugin resized its UI
 	void*       extra_data;        ///< Pointer to any extra data
-	
+
 	void * event_callback_thisptr;
 	void  (* eventProc) (void * event);
-	
+
 	VSTHandle*  handle;
 
 	int width;
@@ -102,9 +102,9 @@ struct LIBARDOUR_API _VSTState
 	int destroy;
 	int vst_version;
 	int has_editor;
-	
+
 	int	    program_set_without_editor;
-	
+
 	int	    want_program;
 	int 	    want_chunk;
 	int	    n_pending_keys;
@@ -112,7 +112,7 @@ struct LIBARDOUR_API _VSTState
 	int 	    wanted_chunk_size;
 	float *     want_params;
 	float *     set_params;
-	
+
 	VSTKey	    pending_keys[16];
 
 	int	    dispatcher_wantcall;

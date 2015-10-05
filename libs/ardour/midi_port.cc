@@ -67,14 +67,14 @@ MidiPort::cycle_start (pframes_t nframes)
 		MidiBuffer& mb (get_midi_buffer (nframes));
 
 		/* dump incoming MIDI to parser */
-		
+
 		for (MidiBuffer::iterator b = mb.begin(); b != mb.end(); ++b) {
 			uint8_t* buf = (*b).buffer();
-			
+
 			_self_parser.set_timestamp (now + (*b).time());
-			
+
 			uint32_t limit = (*b).size();
-			
+
 			for (size_t n = 0; n < limit; ++n) {
 				_self_parser.scanner (buf[n]);
 			}
@@ -107,13 +107,13 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 			*/
 
 			for (pframes_t i = 0; i < event_count; ++i) {
-				
+
 				pframes_t timestamp;
 				size_t size;
 				uint8_t* buf;
-				
+
 				port_engine.midi_event_get (timestamp, size, &buf, buffer, i);
-				
+
 				if (buf[0] == 0xfe) {
 					/* throw away active sensing */
 					continue;
@@ -122,9 +122,9 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 					buf[0] = 0x80 | (buf[0] & 0x0F);  /* note off */
 					buf[2] = 0x40;  /* default velocity */
 				}
-				
+
 				/* check that the event is in the acceptable time range */
-				
+
 				if ((timestamp >= (_global_port_buffer_offset + _port_buffer_offset)) &&
 				    (timestamp < (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
 					_buffer->push_back (timestamp, size, buf);
@@ -192,14 +192,14 @@ MidiPort::flush_buffers (pframes_t nframes)
 	if (sends_output ()) {
 
 		void* port_buffer = 0;
-		
+
 		if (_resolve_required) {
 			port_buffer = port_engine.get_buffer (_port_handle, nframes);
 			/* resolve all notes at the start of the buffer */
 			resolve_notes (port_buffer, 0);
 			_resolve_required = false;
 		}
-		
+
 		if (_buffer->empty()) {
 			return;
 		}
@@ -216,12 +216,12 @@ MidiPort::flush_buffers (pframes_t nframes)
 
 			if (sends_output() && _trace_on) {
 				uint8_t const * const buf = ev.buffer();
-				const framepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();				
+				const framepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
 
 				_self_parser.set_timestamp (now + ev.time());
-				
+
 				uint32_t limit = ev.size();
-				
+
 				for (size_t n = 0; n < limit; ++n) {
 					_self_parser.scanner (buf[n]);
 				}

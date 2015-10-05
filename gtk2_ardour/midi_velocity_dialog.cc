@@ -41,7 +41,7 @@ MidiVelocityDialog::MidiVelocityDialog (uint8_t current_velocity)
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::OK, RESPONSE_OK);
-	
+
 	spinner.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &MidiVelocityDialog::response), Gtk::RESPONSE_OK));
 }
 

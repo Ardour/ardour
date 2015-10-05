@@ -119,9 +119,9 @@ Session::click (framepos_t start, framecnt_t nframes)
 		}
 
 		copy = min (clk->duration - clk->offset, nframes - internal_offset);
-		
+
 		memcpy (buf + internal_offset, &clk->data[clk->offset], copy * sizeof (Sample));
-		
+
 		clk->offset += copy;
 
 		if (clk->offset >= clk->duration) {

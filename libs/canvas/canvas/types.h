@@ -60,12 +60,12 @@ struct LIBCANVAS_API Duple
 		: x (0)
 		, y (0)
 	{}
-	
+
 	Duple (Coord x_, Coord y_)
 		: x (x_)
 		, y (y_)
 	{}
-		
+
 	Coord x;
 	Coord y;
 
@@ -104,14 +104,14 @@ struct LIBCANVAS_API Rect
 		, x1 (0)
 		, y1 (0)
 	{}
-	
+
 	Rect (Coord x0_, Coord y0_, Coord x1_, Coord y1_)
 		: x0 (x0_)
 		, y0 (y0_)
 		, x1 (x1_)
 		, y1 (y1_)
 	{}
-		
+
 	Coord x0;
 	Coord y0;
 	Coord x1;
@@ -120,14 +120,14 @@ struct LIBCANVAS_API Rect
 	boost::optional<Rect> intersection (Rect const & o) const throw () {
 		Rect i (std::max (x0, o.x0), std::max (y0, o.y0),
 			std::min (x1, o.x1), std::min (y1, o.y1));
-		
+
 		if (i.x0 > i.x1 || i.y0 > i.y1) {
 			return boost::optional<Rect> ();
 		}
-		
+
 		return boost::optional<Rect> (i);
 	}
-		
+
 	Rect extend (Rect const & o) const throw () {
 		return Rect (std::min (x0, o.x0), std::min (y0, o.y0),
 			     std::max (x1, o.x1), std::max (y1, o.y1));
@@ -150,7 +150,7 @@ struct LIBCANVAS_API Rect
 		return Rect (canvas_safe_add (x0, amount), canvas_safe_add (y0, amount),
 			     x1 - amount, y1 - amount);
 	}
-		
+
 	bool contains (Duple const & point) const throw () {
 		return point.x >= x0 && point.x < x1 && point.y >= y0 && point.y < y1;
 	}
@@ -158,7 +158,7 @@ struct LIBCANVAS_API Rect
 		return Rect (std::min (x0, x1), std::min (y0, y1),
 			     std::max (x0, x1), std::max (y0, y1));
 	}
-		
+
 	bool empty() const throw () { return (x0 == x1 && y0 == y1); }
 
 	Distance width () const  throw () {
@@ -181,5 +181,5 @@ extern LIBCANVAS_API std::ostream & operator<< (std::ostream &, Rect const &);
 typedef std::vector<Duple> Points;
 
 }
-	
+
 #endif

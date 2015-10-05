@@ -115,9 +115,9 @@ PBD::parse_debug_options (const char* str)
                         }
                 }
 	}
-	
+
 	debug_bits = bits;
-	
+
 	return 0;
 }
 

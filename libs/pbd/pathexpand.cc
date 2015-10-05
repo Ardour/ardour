@@ -69,7 +69,7 @@ realpath (const char *original_path, char resolved_path[_MAX_PATH+1])
 		// possibly need to add that functionality here at a later date.
 	} else {
 		char temp[(_MAX_PATH+1)*6]; // Allow for maximum length of a path in wchar characters
-		
+
 		// POSIX 'realpath()' requires that the buffer size is at
 		// least PATH_MAX+1, so assume that the user knew this !!
 
@@ -78,9 +78,9 @@ realpath (const char *original_path, char resolved_path[_MAX_PATH+1])
 		if (0 != rpath) {
 			snprintf (resolved_path, _MAX_PATH+1, "%s", Glib::locale_to_utf8 (temp).c_str());
 		}
-			
+
 	}
-	
+
 	return (rpath);
 }
 
@@ -129,7 +129,7 @@ PBD::path_expand (string path)
 	regex_t compiled_pattern;
 	const int nmatches = 100;
 	regmatch_t matches[nmatches];
-	
+
 	if (regcomp (&compiled_pattern, "\\$([a-zA-Z_][a-zA-Z0-9_]*|\\{[a-zA-Z_][a-zA-Z0-9_]*\\})", REG_EXTENDED)) {
 		std::cerr << "bad regcomp\n";
                 return path;
@@ -140,11 +140,11 @@ PBD::path_expand (string path)
 		if (regexec (&compiled_pattern, path.c_str(), nmatches, matches, 0)) {
 			break;
 		}
-		
+
 		/* matches[0] gives the entire match */
-		
+
 		string match = path.substr (matches[0].rm_so, matches[0].rm_eo - matches[0].rm_so);
-		
+
 		/* try to get match from the environment */
 
                 if (match[1] == '{') {

@@ -140,7 +140,7 @@ class LIBARDOUR_API AudioRegion : public Region
 	void set_default_fade_out ();
 
 	framecnt_t verify_xfade_bounds (framecnt_t, bool start);
-	
+
 	void set_envelope_active (bool yn);
 	void set_default_envelope ();
 
@@ -187,7 +187,7 @@ class LIBARDOUR_API AudioRegion : public Region
   private:
 	friend class ::AudioRegionReadTest;
 	friend class ::PlaylistReadTest;
-	
+
 	PBD::Property<bool>     _envelope_active;
 	PBD::Property<bool>     _default_fade_in;
 	PBD::Property<bool>     _default_fade_out;

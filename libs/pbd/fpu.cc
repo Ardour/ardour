@@ -172,9 +172,9 @@ FPU::FPU ()
 	info << string_compose (_("CPU vendor: %1"), cpu_vendor) << endmsg;
 
 	if (num_ids > 0) {
-	
+
 		/* Now get CPU/FPU flags */
-	
+
 		__cpuid (cpu_info, 1);
 
 		if ((cpu_info[2] & (1<<27)) /* OSXSAVE */ &&
@@ -193,11 +193,11 @@ FPU::FPU ()
 		}
 
 		/* Figure out CPU/FPU denormal handling capabilities */
-	
+
 		if (cpu_info[3] & (1 << 24)) {
-		
+
 			char** fxbuf = 0;
-		
+
 			/* DAZ wasn't available in the first version of SSE. Since
 			   setting a reserved bit in MXCSR causes a general protection
 			   fault, we need to be able to check the availability of this
@@ -226,10 +226,10 @@ FPU::FPU ()
 			assert (fxbuf);
 			(void) posix_memalign ((void **) fxbuf, 16, 512);
 			assert (*fxbuf);
-#endif			
-		
+#endif
+
 			memset (*fxbuf, 0, 512);
-		
+
 #ifdef COMPILER_MSVC
 			char *buf = *fxbuf;
 			__asm {
@@ -244,19 +244,19 @@ FPU::FPU ()
 				: "memory"
 				);
 #endif
-		
+
 			uint32_t mxcsr_mask = *((uint32_t*) &((*fxbuf)[28]));
-		
+
 			/* if the mask is zero, set its default value (from intel specs) */
-		
+
 			if (mxcsr_mask == 0) {
 				mxcsr_mask = 0xffbf;
 			}
-		
+
 			if (mxcsr_mask & (1<<6)) {
 				_flags = Flags (_flags | HasDenormalsAreZero);
 			}
-		
+
 #if !defined HAVE_POSIX_MEMALIGN && defined PLATFORM_WINDOWS
 			_aligned_free (*fxbuf);
 			_aligned_free (fxbuf);
@@ -272,10 +272,10 @@ FPU::FPU ()
 
 		const int parameter_end = 0x80000004;
 		string cpu_brand;
-	
+
 		if (cpu_info[0] >= parameter_end) {
 			char* cpu_string_ptr = cpu_string;
-		
+
 			for (int parameter = 0x80000002; parameter <= parameter_end &&
 				     cpu_string_ptr < &cpu_string[sizeof(cpu_string)]; parameter++) {
 				__cpuid(cpu_info, parameter);
@@ -287,7 +287,7 @@ FPU::FPU ()
 		}
 	}
 #endif /* !ARCH_X86 */
-}			
+}
 
 FPU::~FPU ()
 {

@@ -109,7 +109,7 @@ bling::scrollmsg() {
 
 // Based on the current bling mode, do whatever it is you are going to do
 bling::run() {
-	
+
 }
 
 // etc

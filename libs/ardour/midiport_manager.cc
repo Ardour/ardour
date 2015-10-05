@@ -73,7 +73,7 @@ MidiPortManager::create_ports ()
 	if (_midi_in) {
 		return;
 	}
-	
+
 	_midi_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("MIDI control in"), true);
 	_midi_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MIDI control out"), true);
 
@@ -143,7 +143,7 @@ MidiPortManager::set_midi_port_states (const XMLNodeList&nodes)
 	ports.insert (make_pair (_mmc_output_port->name(), _mmc_out));
 	ports.insert (make_pair (_scene_output_port->name(), _scene_out));
 	ports.insert (make_pair (_scene_input_port->name(), _scene_in));
-	
+
 	for (XMLNodeList::const_iterator n = nodes.begin(); n != nodes.end(); ++n) {
 		if ((prop = (*n)->property (X_("name"))) == 0) {
 			continue;
@@ -153,7 +153,7 @@ MidiPortManager::set_midi_port_states (const XMLNodeList&nodes)
 		if (p == ports.end()) {
 			continue;
 		}
-		
+
 		p->second->set_state (**n, version);
 	}
 }

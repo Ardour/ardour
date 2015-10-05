@@ -29,7 +29,7 @@ XMLTest::get ()
 	g.set_position (Duple (64, 72));
 	Line l (&g);
 	l.set (Duple (41, 43), Duple (44, 46));
-	
+
 	XMLTree* tree = canvas.get_state ();
 	tree->write ("test.xml");
 

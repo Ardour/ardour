@@ -96,7 +96,7 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 		value = new Label;
 		value->set_justify (Gtk::JUSTIFY_RIGHT);
 		value->show ();
-		
+
                 value_packer->add (*value);
 
 		hpacker = manage (new HBox);
@@ -198,7 +198,7 @@ MotionFeedback::pixwin_button_release_event (GdkEventButton *ev)
 			_controllable->set_value (_controllable->lower ());
 		}
 		break;
-		
+
 	case 3:
 		if (pixwin.has_grab()) {
 			if (grab_is_fine) {
@@ -329,7 +329,7 @@ MotionFeedback::pixwin_key_press_event (GdkEventKey *ev)
 		_controllable->set_value (_controllable->upper());
 		break;
 	}
-	
+
 	return retval;
 }
 
@@ -343,7 +343,7 @@ MotionFeedback::pixwin_expose_event (GdkEventExpose*)
 	GdkWindow *window = pixwin.get_window()->gobj();
 	double display_val = to_display_value (_controllable->get_value());
 	int32_t phase = lrint (display_val * 64.0);
-	
+
 	// skip middle phase except for true middle value
 
 	if (type == Rotary && phase == 32) {
@@ -496,30 +496,30 @@ MotionFeedback::render_pixbuf (int size)
 	GdkColor dark;
 	GdkColor bright;
 	ProlooksHSV* hsv;
-		
+
 	hsv = prolooks_hsv_new_for_gdk_color (base_color->gobj());
 	bright = (prolooks_hsv_to_gdk_color (hsv, &col2), col2);
 	prolooks_hsv_set_saturation (hsv, 0.66);
 	prolooks_hsv_set_value (hsv, 0.67);
 	dark = (prolooks_hsv_to_gdk_color (hsv, &col3), col3);
-		
+
 	cairo_surface_t *surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, size * 64, size);
 	cairo_t* cr = cairo_create (surface);
-		
+
 	for (int i = 0; i < 64; ++i) {
 		cairo_save (cr);
 		core_draw (cr, i, size, 20, size*i, 0, &bright, &dark);
 		cairo_restore (cr);
 	}
-		
+
 	if (cairo_surface_write_to_png (surface, path) != CAIRO_STATUS_SUCCESS) {
 		error << string_compose (_("motionfeedback: could not save image set to %1"), path) << endmsg;
 		return pixbuf;
 	}
-		
+
 	cairo_destroy (cr);
 	cairo_surface_destroy (surface);
-		
+
 	try {
 		pixbuf = Gdk::Pixbuf::create_from_file (path);
 	} catch (const Gdk::PixbufError &e) {
@@ -530,7 +530,7 @@ MotionFeedback::render_pixbuf (int size)
 
 	g_unlink (path);
 	g_free (path);
-	
+
 	return pixbuf;
 }
 
@@ -593,7 +593,7 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double size, double progress_
 	cairo_arc (cr, xc, yc, progress_radius, start_angle, end_angle);
 	cairo_stroke (cr);
 
-	
+
 	float r = (value) * (((float)bright->red)/G_MAXUINT16) + (1.0-value)*(((float)dark->red)/G_MAXUINT16);
 	float g = (value) * (((float)bright->green)/G_MAXUINT16) + (1.0-value)*(((float)dark->green)/G_MAXUINT16);
 	float b = (value) * (((float)bright->blue)/G_MAXUINT16) + (1.0-value)*(((float)dark->blue)/G_MAXUINT16);
@@ -612,7 +612,7 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double size, double progress_
 	cairo_arc (cr, xc, yc, progress_radius_outer-1, 0, 2.0*G_PI);
 	cairo_fill (cr);
 	cairo_pattern_destroy (shade_pattern);
-		
+
 	//black border
 	cairo_set_source_rgb (cr, 0, 0, 0 );
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
@@ -640,7 +640,7 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double size, double progress_
 	cairo_set_source_rgba (cr, 0.3, 0.3, 0.3, 1 );
 	cairo_arc (cr, xc, yc, progress_radius_inner-1, 0, 2.0*G_PI);
 	cairo_fill (cr);
-		
+
 	//knob shade
 	shade_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, progress_radius_outer);
 	cairo_pattern_add_color_stop_rgba (shade_pattern, 0, 1,1,1, 0.5);
@@ -649,7 +649,7 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double size, double progress_
 	cairo_arc (cr, xc, yc, progress_radius_inner-1, 0, 2.0*G_PI);
 	cairo_fill (cr);
 	cairo_pattern_destroy (shade_pattern);
-		
+
 	//inner circle
 	cairo_set_source_rgba (cr, 0.3, 0.3, 0.3, 0.5 );
 	cairo_arc (cr, xc, yc, progress_radius_inner-5, 0, 2.0*G_PI);

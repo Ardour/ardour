@@ -355,7 +355,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 	int dret;
 	framecnt_t playback_distance;
-	
+
 	if ((nframes = check_initial_delay (nframes, transport_frame)) == 0) {
 
 		/* need to do this so that the diskstream sets its
@@ -386,7 +386,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 	BufferSet& bufs = _session.get_route_buffers (n_process_buffers ());
 
 	fill_buffers_with_input (bufs, _input, nframes);
-	
+
 	if (_meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled())) {
 		_meter->run (bufs, start_frame, end_frame, nframes, true);
 	}
@@ -486,7 +486,7 @@ AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endp
 		/* does the output from the last considered processor match the
 		 * input to this one?
 		 */
-		
+
 		if (naudio != (*r)->input_streams().n_audio()) {
 			return false;
 		}
@@ -591,7 +591,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 					(*r)->deactivate ();
 				}
 			}
-			
+
 			_session.set_dirty ();
 		}
 	}

@@ -54,6 +54,6 @@ class SceneChange : public PBD::Stateful
 };
 
 } /* namespace */
-	
+
 
 #endif /* __libardour_scene_change_h__ */

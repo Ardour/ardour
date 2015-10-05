@@ -86,7 +86,7 @@ std::string ret;
 	if (0 == pExeRoot) {
 		pExeRoot = g_build_filename("C:\\", "Program Files", PROGRAM_NAME, 0);
 	}
-	
+
 	if (pExeRoot) {
 		gchar  tmp[PATH_MAX+1];
 		gchar* p;
@@ -232,7 +232,7 @@ string fonts_conf_file;
 
 #ifdef DEBUG
 	fonts_conf_file = get_module_folder();
-	
+
 	if (!fonts_conf_file.empty()) {
 		fonts_conf_file += "\\";
 		fonts_conf_file += PROGRAM_NAME;
@@ -257,7 +257,7 @@ string pango_modules_file;
 #if defined(DEBUG) || defined(RDC_BUILD)
 	// Make sure we pick up the debuggable DLLs !!!
 	pango_modules_file = get_module_folder();
-	
+
 	if (!pango_modules_file.empty()) {
 		pango_modules_file += "\\";
 		pango_modules_file += PROGRAM_NAME;
@@ -295,7 +295,7 @@ string gdk_pixbuf_loaders_file;
 #if defined(DEBUG) || defined(RDC_BUILD)
 	// Make sure we pick up the debuggable DLLs !!!
 	gdk_pixbuf_loaders_file = get_module_folder();
-	
+
 	if (!gdk_pixbuf_loaders_file.empty()) {
 		gdk_pixbuf_loaders_file += "\\";
 		gdk_pixbuf_loaders_file += PROGRAM_NAME;
@@ -321,7 +321,7 @@ string clearlooks_la_file;
 #if defined(DEBUG) || defined(RDC_BUILD)
 	// Make sure we pick up the debuggable DLLs !!!
 	clearlooks_la_file = get_module_folder();
-	
+
 	if (!clearlooks_la_file.empty()) {
 		clearlooks_la_file += "\\";
 		clearlooks_la_file += PROGRAM_NAME;

@@ -86,12 +86,12 @@ public:
 	 * Add another directory path to the search path.
 	 */
 	LIBPBD_TEMPLATE_MEMBER_API Searchpath& operator+= (const std::string& directory_path);
-	
+
 	/**
 	 * Concatenate another Searchpath onto this.
 	 */
 	LIBPBD_TEMPLATE_MEMBER_API const Searchpath operator+ (const Searchpath& other);
-	
+
 	/**
 	 * Add another path to the search path.
 	 */

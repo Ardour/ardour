@@ -60,10 +60,10 @@ class LIBMIDIPP_API MachineControl
 		cmdChase = 0xB,
 		cmdCommandErrorReset = 0xC,
 		cmdMmcReset = 0xD,
-		
+
 		cmdIllegalMackieJogStart = 0x20,
 		cmdIllegalMackieJogStop = 0x21,
-		
+
 		cmdWrite = 0x40,
 		cmdMaskedWrite = 0x41,
 		cmdRead = 0x42,
@@ -93,14 +93,14 @@ class LIBMIDIPP_API MachineControl
 		cmdWait = 0x7C,
 		cmdResume = 0x7F
 	};
-	
+
         MachineControl ();
 
         void set_ports (MIDI::Port* input, MIDI::Port* output);
 
 	Port* input_port() { return _input_port; }
 	Port* output_port() { return _output_port; }
-	
+
 	void set_receive_device_id (byte id);
 	void set_send_device_id (byte id);
 	byte receive_device_id () const { return _receive_device_id; }
@@ -114,7 +114,7 @@ class LIBMIDIPP_API MachineControl
 	/* Signals to connect to if you want to run "callbacks"
 	   when certain MMC commands are received.
 	*/
-			
+
 	MMCSignal Stop;
 	MMCSignal Play;
 	MMCSignal DeferredPlay;
@@ -159,7 +159,7 @@ class LIBMIDIPP_API MachineControl
 	/* The second argument is the shuttle speed, the third is
 	   true if the direction is "forwards", false for "reverse"
 	*/
-	
+
 	PBD::Signal3<void,MachineControl&,float,bool> Shuttle;
 
 	/* The second argument specifies the desired track record enabled
@@ -168,14 +168,14 @@ class LIBMIDIPP_API MachineControl
 
 	PBD::Signal3<void,MachineControl &,size_t,bool>
 		                             TrackRecordStatusChange;
-	
+
 	/* The second argument specifies the desired track record enabled
 	   status.
 	*/
 
 	PBD::Signal3<void,MachineControl &,size_t,bool>
 		                             TrackMuteChange;
-	
+
 	/* The second argument points to a byte array containing
 	   the locate target value in MMC Standard Time Code
 	   format (5 bytes, roughly: hrs/mins/secs/frames/subframes)
@@ -184,13 +184,13 @@ class LIBMIDIPP_API MachineControl
 	PBD::Signal2<void,MachineControl &, const byte *> Locate;
 
 	/* The second argument is the number of steps to jump */
-	
+
 	PBD::Signal2<void,MachineControl &, int> Step;
 
 #define MMC_NTRACKS 48
 
 	/* note: these are not currently in use */
-	
+
 	byte updateRate;
 	byte responseError;
 	byte commandError;
@@ -261,7 +261,7 @@ class LIBMIDIPP_API MachineControl
 	byte responseSegment;
 	byte wait;
 	byte resume;
-	
+
   private:
 	byte _receive_device_id;
 	byte _send_device_id;
@@ -276,7 +276,7 @@ class LIBMIDIPP_API MachineControl
 	int  do_locate (byte *, size_t len);
 	int  do_step (byte *, size_t len);
 	int  do_shuttle (byte *, size_t len);
-	
+
 	void write_track_status (byte *, size_t len, byte reg);
 	void spp_start ();
 	void spp_continue ();
@@ -293,7 +293,7 @@ public:
 	MachineControlCommand () : _command (MachineControl::Command (0)) {}
 	MachineControlCommand (MachineControl::Command);
 	MachineControlCommand (Timecode::Time);
-	
+
 	MIDI::byte* fill_buffer (MachineControl *mmc, MIDI::byte *) const;
 
 private:

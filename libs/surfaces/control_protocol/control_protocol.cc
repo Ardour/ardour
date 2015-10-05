@@ -166,7 +166,7 @@ ControlProtocol::set_route_table (uint32_t table_index, boost::shared_ptr<ARDOUR
 	if (table_index >= route_table.size()) {
 		return;
 	}
-	
+
 	route_table[table_index] = r;
 
 	// XXX SHAREDPTR need to handle r->GoingAway
@@ -245,7 +245,7 @@ ControlProtocol::route_set_gain (uint32_t table_index, float gain)
 	}
 
 	boost::shared_ptr<Route> r = route_table[table_index];
-	
+
 	if (r != 0) {
 		r->set_gain (gain, this);
 	}

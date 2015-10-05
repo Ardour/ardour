@@ -126,7 +126,7 @@ ArdourWindow::init ()
 	if (parent) {
 		set_transient_for (*parent);
 	}
-	
+
 	ARDOUR_UI::CloseAllDialogs.connect (sigc::mem_fun (*this, &ArdourWindow::hide));
 
 	proxy = new WM::ProxyTemporary (get_title(), this);

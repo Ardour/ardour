@@ -28,13 +28,13 @@ static ControlProtocol*
 new_generic_midi_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s)
 {
 	GenericMidiControlProtocol* gmcp;
-		
+
 	try {
 		gmcp =  new GenericMidiControlProtocol (*s);
 	} catch (failed_constructor& err) {
 		return 0;
 	}
-	
+
 	if (gmcp->set_active (true)) {
 		delete gmcp;
 		return 0;
@@ -67,6 +67,6 @@ static ControlProtocolDescriptor generic_midi_descriptor = {
 	/*initialize :        */   new_generic_midi_protocol,
 	/*destroy :           */   delete_generic_midi_protocol
 };
-	
+
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &generic_midi_descriptor; }
 

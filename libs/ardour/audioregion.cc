@@ -131,13 +131,13 @@ merge_curves (boost::shared_ptr<Evoral::ControlList> dst,
 	if (size != curve2->size()) {
 		return;
 	}
-	
+
 	Evoral::ControlList::const_iterator c1 = curve1->begin();
 	int count = 0;
 	for (Evoral::ControlList::const_iterator c2 = curve2->begin(); c2!=curve2->end(); c2++ ) {
 		float v1 = accurate_coefficient_to_dB((*c1)->value);
 		float v2 = accurate_coefficient_to_dB((*c2)->value);
-		
+
 		double interp = v1 * ( 1.0-( (double)count / (double)size) );
 		interp += v2 * ( (double)count / (double)size );
 
@@ -491,7 +491,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	*/
 
 	assert (cnt >= 0);
-	
+
 	if (n_channels() == 0) {
 		return 0;
 	}
@@ -521,29 +521,29 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	   of any fade out that we are dealing with
 	*/
 	frameoffset_t fade_out_offset = 0;
-	
+
 	/* Amount (length) of fade out that we are dealing with in this read */
 	framecnt_t fade_out_limit = 0;
 
 	framecnt_t fade_interval_start = 0;
 
 	/* Fade in */
-	
+
 	if (_fade_in_active && _session.config.get_use_region_fades()) {
-		
+
 		framecnt_t fade_in_length = (framecnt_t) _fade_in->back()->when;
 
 		/* see if this read is within the fade in */
-		
+
 		if (internal_offset < fade_in_length) {
 			fade_in_limit = min (to_read, fade_in_length - internal_offset);
 		}
 	}
-	
+
 	/* Fade out */
-	
+
 	if (_fade_out_active && _session.config.get_use_region_fades()) {
-		
+
 		/* see if some part of this read is within the fade out */
 
 		/* .................        >|            REGION
@@ -565,7 +565,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 		fade_interval_start = max (internal_offset, _length - framecnt_t (_fade_out->back()->when));
 		framecnt_t fade_interval_end = min(internal_offset + to_read, _length.val());
-		
+
 		if (fade_interval_end > fade_interval_start) {
 			/* (part of the) the fade out is in this buffer */
 			fade_out_limit = fade_interval_end - fade_interval_start;
@@ -616,26 +616,26 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 				/* explicit inverse fade in curve (e.g. for constant
 				 * power), so we have to fetch it.
 				 */
-				
+
 				_inverse_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
-				
+
 				/* Fade the data from lower layers out */
 				for (framecnt_t n = 0; n < fade_in_limit; ++n) {
 					buf[n] *= gain_buffer[n];
 				}
-				
+
 				/* refill gain buffer with the fade in */
-				
+
 				_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
-				
+
 			} else {
-				
+
 				/* no explicit inverse fade in, so just use (1 - fade
 				 * in) for the fade out of lower layers
 				 */
-				
+
 				_fade_in->curve().get_vector (internal_offset, internal_offset + fade_in_limit, gain_buffer, fade_in_limit);
-				
+
 				for (framecnt_t n = 0; n < fade_in_limit; ++n) {
 					buf[n] *= 1 - gain_buffer[n];
 				}
@@ -656,27 +656,27 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 		if (opaque()) {
 			if (_inverse_fade_out) {
-				
+
 				_inverse_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
-				
+
 				/* Fade the data from lower levels in */
 				for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
 					buf[m] *= gain_buffer[n];
 				}
-				
+
 				/* fetch the actual fade out */
 
 				_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
-				
+
 			} else {
 
 				/* no explicit inverse fade out (which is
 				 * actually a fade in), so just use (1 - fade
 				 * out) for the fade in of lower layers
 				 */
-				
+
 				_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
-				
+
 				for (framecnt_t n = 0, m = fade_out_offset; n < fade_out_limit; ++n, ++m) {
 					buf[m] *= 1 - gain_buffer[n];
 				}
@@ -692,7 +692,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 			buf[m] += mixdown_buffer[m] * gain_buffer[n];
 		}
 	}
-	
+
 	/* MIX OR COPY THE REGION BODY FROM mixdown_buffer INTO buf */
 
 	framecnt_t const N = to_read - fade_in_limit - fade_out_limit;
@@ -733,7 +733,7 @@ AudioRegion::read_from_sources (SourceList const & srcs, framecnt_t limit, Sampl
 	if (to_read == 0) {
 		return 0;
 	}
-	
+
 	if (chan_n < n_channels()) {
 
 		boost::shared_ptr<AudioSource> src = boost::dynamic_pointer_cast<AudioSource> (srcs[chan_n]);
@@ -759,7 +759,7 @@ AudioRegion::read_from_sources (SourceList const & srcs, framecnt_t limit, Sampl
 			}
 
 		} else {
-			
+
 			/* use silence */
 			memset (buf, 0, sizeof (Sample) * to_read);
 		}
@@ -921,7 +921,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 					_fade_out->set_state (*grandchild, version);
 				}
 			}
-			
+
 			if ((prop = child->property ("active")) != 0) {
 				if (string_is_affirmative (prop->value())) {
 					set_fade_out_active (true);
@@ -929,7 +929,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 					set_fade_out_active (false);
 				}
 			}
-	
+
 		} else if ( (child->name() == "InverseFadeIn") || (child->name() == "InvFadeIn")  ) {
 			XMLNode* grandchild = child->child ("AutomationList");
 			if (grandchild) {
@@ -1063,7 +1063,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add (len, GAIN_COEFF_UNITY);
 		reverse_curve (_inverse_fade_in.val(), _fade_in.val());
 		break;
-		
+
 	case FadeSymmetric:
 		//start with a nearly linear cuve
 		_fade_in->fast_simple_add (0, 1);
@@ -1119,12 +1119,12 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		_fade_out->fast_simple_add (len, GAIN_COEFF_SMALL);
 		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
-		
+
 	case FadeFast:
 		generate_db_fade (_fade_out.val(), len, num_steps, -60);
 		generate_inverse_power_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
-		
+
 	case FadeSlow:
 		generate_db_fade (c1, len, num_steps, -1);  //start off with a slow fade
 		generate_db_fade (c2, len, num_steps, -80);  //end with a fast fade
@@ -1143,7 +1143,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		_fade_out->fast_simple_add (len, GAIN_COEFF_SMALL);
 		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
-		
+
 	case FadeSymmetric:
 		//start with a nearly linear cuve
 		_fade_out->fast_simple_add (0, 1);
@@ -1173,7 +1173,7 @@ AudioRegion::set_fade_in_length (framecnt_t len)
 	if (len > _length) {
 		len = _length - 1;
 	}
-	
+
 	if (len < 64) {
 		len = 64;
 	}
@@ -1204,7 +1204,7 @@ AudioRegion::set_fade_out_length (framecnt_t len)
 	bool changed =	_fade_out->extend_to (len);
 
 	if (changed) {
-		
+
 		if (_inverse_fade_out) {
 			_inverse_fade_out->extend_to (len);
 		}
@@ -1893,7 +1893,7 @@ AudioRegion::get_single_other_xfade_region (bool start) const
 	} else {
 		rl = pl->regions_at (last_frame());
 	}
-	
+
 	RegionList::iterator i;
 	boost::shared_ptr<Region> other;
 	uint32_t n = 0;
@@ -1946,6 +1946,6 @@ AudioRegion::verify_xfade_bounds (framecnt_t len, bool start)
 	}
 
 	return min (length(), min (maxlen, len));
-		
+
 }
 

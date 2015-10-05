@@ -17,7 +17,7 @@ BBTTest::addTest ()
 	Meter    meter(4.0, 4.0);
 
 	map.add_meter (meter, BBT_Time(1, 1, 0));
-	
+
 	/* add some good stuff here */
 }
 

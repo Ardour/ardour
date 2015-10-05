@@ -67,5 +67,5 @@ std::string
 MidiExportDialog::get_path () const
 {
 	return file_chooser.get_filename ();
-	
+
 }

@@ -328,10 +328,10 @@ ExportFilenameSelector::open_browse_dialog ()
 
 	while (true) {
 		int result = dialog.run();
-		
+
 		if (result == Gtk::RESPONSE_OK) {
 			std::string filename = dialog.get_filename();
-			
+
 			if (!Glib::file_test (filename, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
 				Gtk::MessageDialog msg (string_compose (_("%1: this is only the directory/folder name, not the filename.\n\
 The filename will be chosen from the information just above the folder selector."), filename));

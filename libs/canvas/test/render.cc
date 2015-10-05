@@ -78,7 +78,7 @@ RenderTest::basics ()
 	text_group.set_position (Duple (128, 64));
 	Text text (&text_group);
 	text.set ("Hello world!");
-	
+
 	canvas.render_to_image (Rect (0, 0, 256, 256));
 	canvas.write_to_png ("render_basics.png");
 

@@ -167,7 +167,7 @@ Event<Timestamp>::set_original_time (Timestamp t)
 {
 	_original_time = t;
 }
-	
+
 #endif // EVORAL_EVENT_ALLOC
 
 template class Event<Evoral::Beats>;

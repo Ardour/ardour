@@ -472,7 +472,7 @@ class EngineStateController
 		std::string device_name; ///< state device name
 		ARDOUR::framecnt_t sample_rate; ///< sample rate used by the device in this state
 		ARDOUR::pframes_t buffer_size; ///< buffer size used by the device in this state
-		
+
 		PortStateList input_channel_states; ///< states of device Audio inputs
 		PortStateList multi_out_channel_states; ///< states of device Audio inputs in Multi Out mode
 		PortStateList stereo_out_channel_states; ///< states of device Audio inputs in Stereo Out mode

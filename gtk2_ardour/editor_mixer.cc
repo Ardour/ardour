@@ -80,7 +80,7 @@ Editor::show_editor_mixer (bool yn)
 	if (yn) {
 		Glib::RefPtr<Gdk::Window> win = get_window ();
 		Glib::RefPtr<Gdk::Screen> screen;
-		
+
 		if (win) {
 			 screen = win->get_screen();
 		} else {
@@ -184,7 +184,7 @@ Editor::create_editor_mixer ()
 	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
 #endif
 	current_mixer_strip->set_embedded (true);
-	
+
 }
 
 void

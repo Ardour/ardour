@@ -28,7 +28,7 @@ Root::Root (Canvas* canvas)
 {
 #ifdef CANVAS_DEBUG
 	name = "ROOT";
-#endif	
+#endif
 }
 
 void

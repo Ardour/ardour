@@ -70,7 +70,7 @@ TrackingText::pointer_motion (Duple const & winpos)
 	pos = pos.translate (offset);
 
 	/* keep inside the window */
-	
+
 	Rect r (0, 0, _canvas->width(), _canvas->height());
 
 	/* border of 200 pixels on the right, and 50 on all other sides */
@@ -83,7 +83,7 @@ TrackingText::pointer_motion (Duple const & winpos)
 	r.y1 = std::max (r.y0, (r.y1 - border));
 
 	/* clamp */
-	
+
 	if (pos.x < r.x0) {
 		pos.x = r.x0;
 	} else if (pos.x > r.x1) {

@@ -68,16 +68,16 @@ public:
 							CACFDictionary(const CACFDictionary& inDictionary) : mCFDictionary(inDictionary.mCFDictionary), mRelease(inDictionary.mRelease), mMutable(inDictionary.mMutable) { if(mRelease && (mCFDictionary != NULL)) { CFRetain(mCFDictionary); } }
 	CACFDictionary&			operator=(const CACFDictionary& inDictionary) { mCFDictionary = inDictionary.mCFDictionary; mRelease = inDictionary.mRelease; mMutable = inDictionary.mMutable; if(mRelease && (mCFDictionary != NULL)) { CFRetain(mCFDictionary); } return *this; }
 							~CACFDictionary() { if(mRelease && (mCFDictionary != NULL)) { CFRelease(mCFDictionary); } }
-		
+
 //	Attributes
 public:
 	bool					IsValid() const { return mCFDictionary != NULL; }
 	bool					IsMutable() const { return mMutable;}
 	bool					CanModify() const { return mMutable && (mCFDictionary != NULL); }
-	
+
 	bool					WillRelease() const { return mRelease; }
 	void					ShouldRelease(bool inRelease) { mRelease = inRelease; }
-	
+
 	CFDictionaryRef			GetDict() const { return mCFDictionary; }
 	CFDictionaryRef			GetCFDictionary() const { return mCFDictionary; }
 	CFDictionaryRef			CopyCFDictionary() const { if(mCFDictionary != NULL) { CFRetain(mCFDictionary); } return mCFDictionary; }
@@ -95,7 +95,7 @@ public:
 	bool					HasKey(const CFStringRef inKey) const;
 	UInt32					Size() const;
 	void					GetKeys(const void** keys) const;
-	
+
 	bool					GetBool(const CFStringRef inKey, bool& outValue) const;
 	bool					GetSInt32(const CFStringRef inKey, SInt32& outValue) const;
 	bool					GetUInt32(const CFStringRef inKey, UInt32& outValue) const;
@@ -103,12 +103,12 @@ public:
 	bool					GetUInt64(const CFStringRef inKey, UInt64& outValue) const;
 	bool					GetFloat32(const CFStringRef inKey, Float32& outValue) const;
 	bool					GetFloat64(const CFStringRef inKey, Float64& outValue) const;
-	bool					GetString(const CFStringRef inKey, CFStringRef& outValue) const;	
-	bool					GetArray(const CFStringRef inKey, CFArrayRef& outValue) const;	
-	bool					GetDictionary(const CFStringRef inKey, CFDictionaryRef& outValue) const;	
+	bool					GetString(const CFStringRef inKey, CFStringRef& outValue) const;
+	bool					GetArray(const CFStringRef inKey, CFArrayRef& outValue) const;
+	bool					GetDictionary(const CFStringRef inKey, CFDictionaryRef& outValue) const;
 	bool					GetData(const CFStringRef inKey, CFDataRef& outValue) const;
 	bool					GetCFType(const CFStringRef inKey, CFTypeRef& outValue) const;
-	
+
 	bool					GetCFTypeWithCStringKey(const char* inKey, CFTypeRef& outValue) const;
 
 	bool					AddSInt32(const CFStringRef inKey, SInt32 inValue);
@@ -123,14 +123,14 @@ public:
 	bool					AddDictionary(const CFStringRef inKey, const CFDictionaryRef inValue);
 	bool					AddData(const CFStringRef inKey, const CFDataRef inValue);
 	bool					AddCFType(const CFStringRef inKey, const CFTypeRef inValue);
-	
+
 	bool					AddCFTypeWithCStringKey(const char* inKey, const CFTypeRef inValue);
 	bool					AddCString(const CFStringRef inKey, const char* inValue);
 
 	void					Clear() { if(CanModify()) { CFDictionaryRemoveAllValues(mCFDictionary); } }
-	
+
 	void					Show() { CFShow(mCFDictionary); }
-	
+
 //	Implementation
 private:
 	CFMutableDictionaryRef 	mCFDictionary;

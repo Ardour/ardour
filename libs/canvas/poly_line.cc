@@ -77,7 +77,7 @@ PolyLine::covers (Duple const & point) const
 	Duple p = window_to_item (point);
 
 	const Points::size_type npoints = _points.size();
-	
+
 	if (npoints < 2) {
 		return false;
 	}
@@ -95,30 +95,30 @@ PolyLine::covers (Duple const & point) const
 		double t;
 		Duple a (_points[j]);
 		Duple b (_points[i]);
-		
+
 		/*
 		  Clamp the line endpoints to the visible area of the canvas. If we do
 		  not do this, we may have a line segment extending to COORD_MAX and our
 		  math goes wrong.
 		*/
-		
+
 		a.x = std::min (a.x, visible.x1);
 		a.y = std::min (a.y, visible.y1);
 		b.x = std::min (b.x, visible.x1);
 		b.y = std::min (b.y, visible.y1);
-		
+
 		double d = distance_to_segment_squared (p, a, b, t, at);
-		
+
 		if (t < 0.0 || t > 1.0) {
 			continue;
 		}
-		
+
 		if (d < _threshold + _outline_width) {
 			return true;
 		}
-		
+
 	}
-	
+
 	return false;
 }
 

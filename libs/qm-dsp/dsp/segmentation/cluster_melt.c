@@ -25,7 +25,7 @@ double kldist(double* a, double* b, int n) {
 	because a, b represent probability distributions */
 	double q, d;
 	int i;
-	
+
 	d = 0;
 	for (i = 0; i < n; i++)
 	{
@@ -38,8 +38,8 @@ double kldist(double* a, double* b, int n) {
 				d += b[i] * log(b[i] / q);
 		}
 	}
-	return d;		
-}	
+	return d;
+}
 
 void cluster_melt(double *h, int m, int n, double *Bsched, int t, int k, int l, int *c) {
 	double lambda, sum, beta, logsumexp, maxlp;
@@ -48,9 +48,9 @@ void cluster_melt(double *h, int m, int n, double *Bsched, int t, int k, int l, 
 	int** nc;	/* neighbour counts for each histogram */
 	double** lp;	/* soft assignment probs for each histogram */
 	int* oldc;	/* previous hard assignments (to check convergence) */
-	
+
 	/* NB h is passed as a 1d row major array */
-	
+
 	/* parameter values */
 	lambda = DEFAULT_LAMBDA;
 	if (l > 0)
@@ -60,22 +60,22 @@ void cluster_melt(double *h, int m, int n, double *Bsched, int t, int k, int l, 
 	B = 2 * limit + 1;
 	maxiter0 = 20;	/* number of iterations at initial temperature */
 	maxiter1 = 5;	/* number of iterations at subsequent temperatures */
-	
-	/* allocate memory */	
+
+	/* allocate memory */
 	cl = (double**) malloc(k*sizeof(double*));
 	for (i= 0; i < k; i++)
 		cl[i] = (double*) malloc(m*sizeof(double));
-	
+
 	nc = (int**) malloc(n*sizeof(int*));
 	for (i= 0; i < n; i++)
 		nc[i] = (int*) malloc(k*sizeof(int));
-	
+
 	lp = (double**) malloc(n*sizeof(double*));
 	for (i= 0; i < n; i++)
 		lp[i] = (double*) malloc(k*sizeof(double));
-	
+
 	oldc = (int*) malloc(n * sizeof(int));
-	
+
 	/* initialise */
 	for (i = 0; i < k; i++)
 	{
@@ -90,40 +90,40 @@ void cluster_melt(double *h, int m, int n, double *Bsched, int t, int k, int l, 
 		{
 			cl[i][j] /= sum;	/* normalise */
 		}
-	}	
+	}
 	//print_array(cl, k, m);
-	
+
 	for (i = 0; i < n; i++)
 		c[i] = 1;	/* initially assign all histograms to cluster 1 */
-	
+
 	for (a = 0; a < t; a++)
 	{
 		beta = Bsched[a];
-		
+
 		if (a == 0)
 			maxiter = maxiter0;
 		else
 			maxiter = maxiter1;
-		
+
 		for (it = 0; it < maxiter; it++)
 		{
 			//if (it == maxiter - 1)
 			//	mexPrintf("hasn't converged after %d iterations\n", maxiter);
-			
+
 			for (i = 0; i < n; i++)
 			{
 				/* save current hard assignments */
 				oldc[i] = c[i];
-				
+
 				/* calculate soft assignment logprobs for each cluster */
 				sum = 0;
 				for (j = 0; j < k; j++)
 				{
 					lp[i][ j] = -beta * kldist(cl[j], &h[i*m], m);
-					
+
 					/* update matching neighbour counts for this histogram, based on current hard assignments */
 					/* old version:
-					nc[i][j] = 0;	
+					nc[i][j] = 0;
 					if (i >= limit && i <= n - 1 - limit)
 					{
 							for (b = i - limit; b <= i + limit; b++)
@@ -144,14 +144,14 @@ void cluster_melt(double *h, int m, int n, double *Bsched, int t, int k, int l, 
 					for (b = b0; b <= b1; b++)
 						if (c[b] == j+1)
 							nc[i][j]--;
-					
+
 					sum += exp(lp[i][j]);
 				}
-				
+
 				/* normalise responsibilities and add duration logprior */
 				logsumexp = log(sum);
 				for (j = 0; j < k; j++)
-					lp[i][j] -= logsumexp + lambda * nc[i][j];				
+					lp[i][j] -= logsumexp + lambda * nc[i][j];
 			}
 			//print_array(lp, n, k);
 			/*
@@ -162,8 +162,8 @@ void cluster_melt(double *h, int m, int n, double *Bsched, int t, int k, int l, 
 				 mexPrintf("\n");
 			}
 			*/
-			
-			
+
+
 			/* update the assignments now that we know the duration priors
 			based on the current assignments */
 			for (i = 0; i < n; i++)
@@ -177,14 +177,14 @@ void cluster_melt(double *h, int m, int n, double *Bsched, int t, int k, int l, 
 						c[i] = j+1;
 					}
 			}
-				
+
 			/* break if assignments haven't changed */
 			i = 0;
 			while (i < n && oldc[i] == c[i])
 				i++;
 			if (i == n)
 				break;
-			
+
 			/* update reference histograms now we know new responsibilities */
 			for (j = 0; j < k; j++)
 			{
@@ -194,21 +194,21 @@ void cluster_melt(double *h, int m, int n, double *Bsched, int t, int k, int l, 
 					for (i = 0; i < n; i++)
 					{
 						cl[j][b] += exp(lp[i][j]) * h[i*m+b];
-					}	
+					}
 				}
-				
-				sum = 0;				
+
+				sum = 0;
 				for (i = 0; i < n; i++)
 					sum += exp(lp[i][j]);
 				for (b = 0; b < m; b++)
 					cl[j][b] /= sum;	/* normalise */
-			}	
-			
+			}
+
 			//print_array(cl, k, m);
 			//mexPrintf("\n\n");
 		}
 	}
-		
+
 	/* free memory */
 	for (i = 0; i < k; i++)
 		free(cl[i]);
@@ -219,7 +219,7 @@ void cluster_melt(double *h, int m, int n, double *Bsched, int t, int k, int l, 
 	for (i = 0; i < n; i++)
 		free(lp[i]);
 	free(lp);
-	free(oldc);	
+	free(oldc);
 }
 
 

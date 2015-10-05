@@ -34,7 +34,7 @@ new_tranzport_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 	}
 
 	return tcp;
-	
+
 }
 
 static void
@@ -60,7 +60,7 @@ static ControlProtocolDescriptor tranzport_descriptor = {
 	initialize : new_tranzport_protocol,
 	destroy : delete_tranzport_protocol
 };
-	
+
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &tranzport_descriptor; }
 

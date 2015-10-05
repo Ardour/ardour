@@ -243,10 +243,10 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	 * countdown, whose duration will be reduced to half of its previous
 	 * value.
 	 */
-	
+
 	PBD::Signal0<void> BecameSilent;
 	void reset_silence_countdown ();
-	
+
   private:
 	AudioEngine ();
 
@@ -308,10 +308,10 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 #ifdef SILENCE_AFTER
 	framecnt_t _silence_countdown;
 	uint32_t   _silence_hit_cnt;
-#endif	
+#endif
 
 };
-	
+
 } // namespace ARDOUR
 
 #endif /* __ardour_audioengine_h__ */

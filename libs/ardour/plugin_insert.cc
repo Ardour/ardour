@@ -167,7 +167,7 @@ PluginInsert::input_streams() const
 	}
 
 	DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, input streams = %1, match using %2\n", in, _match.method));
-	
+
 	if (_match.method == Split) {
 
 		/* we are splitting 1 processor input to multiple plugin inputs,
@@ -188,7 +188,7 @@ PluginInsert::input_streams() const
 		return in;
 
 	} else {
-		
+
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			in.set (*t, in.get (*t) * _plugins.size ());
 		}
@@ -842,7 +842,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	   We allow replication only for plugins with either zero or 1 inputs and outputs
 	   for every valid data type.
 	*/
-	
+
 	uint32_t f             = 0;
 	bool     can_replicate = true;
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
@@ -910,7 +910,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	bool could_hide = false;
 	bool cannot_hide = false;
 	ChanCount hide_channels;
-	
+
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		if (inputs.get(*t) > in.get(*t)) {
 			/* there is potential to hide, since the plugin has more inputs of type t than the insert */
@@ -1425,7 +1425,7 @@ void
 PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 {
 	plugin->set_insert_id (this->id());
-	
+
 	if (_plugins.empty()) {
                 /* first (and probably only) plugin instance - connect to relevant signals
                  */

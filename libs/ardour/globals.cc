@@ -168,15 +168,15 @@ setup_hardware_optimization (bool try_optimization)
 
 #ifdef PLATFORM_WINDOWS
 		/* We have AVX-optimized code for Windows */
-		
+
 		if (fpu->has_avx()) {
-#else			
+#else
 		/* AVX code doesn't compile on Linux yet */
-		
+
 		if (false) {
-#endif			
+#endif
 			info << "Using AVX optimized routines" << endmsg;
-			
+
 			// AVX SET
 			compute_peak          = x86_sse_avx_compute_peak;
 			find_peaks            = x86_sse_avx_find_peaks;
@@ -287,9 +287,9 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 	if (g_mkdir_with_parents (new_dir.c_str(), 0755)) {
 		return -1;
 	}
-	
+
 	if (old_version == 3) {
-	
+
 		old_name = Glib::build_filename (old_dir, X_("recent"));
 		new_name = Glib::build_filename (new_dir, X_("recent"));
 
@@ -307,7 +307,7 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 		 * $CONFIG/ardour.rc. Pick up the newer "old" config file,
 		 * to avoid confusion.
 		 */
-		
+
 		string old_name = Glib::build_filename (old_dir, X_("config"));
 
 		if (!Glib::file_test (old_name, Glib::FILE_TEST_EXISTS)) {
@@ -334,7 +334,7 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 
 		old_name = Glib::build_filename (old_dir, X_("presets"));
 		new_name = Glib::build_filename (new_dir, X_("presets"));
-		
+
 		copy_recurse (old_name, new_name);
 
 		/* presets */
@@ -343,12 +343,12 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 		new_name = Glib::build_filename (new_dir, X_("plugin_statuses"));
 
 		copy_file (old_name, new_name);
-		
+
 		/* export formats */
 
 		old_name = Glib::build_filename (old_dir, export_formats_dir_name);
 		new_name = Glib::build_filename (new_dir, export_formats_dir_name);
-		
+
 		vector<string> export_formats;
 		g_mkdir_with_parents (Glib::build_filename (new_dir, export_formats_dir_name).c_str(), 0755);
 		find_files_matching_pattern (export_formats, old_name, X_("*.format"));
@@ -366,7 +366,7 @@ void
 ARDOUR::check_for_old_configuration_files ()
 {
 	int current_version = atoi (X_(PROGRAM_VERSION));
-	
+
 	if (current_version <= 1) {
 		return;
 	}
@@ -515,7 +515,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	   surface support that would list their port names, we do have to
 	   list them here.
 	*/
-	
+
 	char const * const reserved[] = {
 		_("Monitor"),
 		_("Master"),
@@ -528,7 +528,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	for (int n = 0; reserved[n]; ++n) {
 		reserved_io_names.push_back (reserved[n]);
 	}
-	
+
 	libardour_initialized = true;
 
 	return true;
@@ -612,7 +612,7 @@ void
 ARDOUR::setup_fpu ()
 {
 	FPU* fpu = FPU::instance ();
-	
+
 	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
 		// valgrind doesn't understand this assembler stuff
 		// September 10th, 2007
@@ -632,7 +632,7 @@ ARDOUR::setup_fpu ()
 #ifdef DEBUG_DENORMAL_EXCEPTION
 	/* This will raise a FP exception if a denormal is detected */
 	MXCSR &= ~_MM_MASK_DENORM;
-#endif	
+#endif
 
 	switch (Config->get_denormal_model()) {
 	case DenormalNone:
@@ -709,15 +709,15 @@ ARDOUR::set_translations_enabled (bool yn)
 	if (fd < 0) {
 		return false;
 	}
-	
+
 	char c;
-	
+
 	if (yn) {
 		c = '1';
 	} else {
 		c = '0';
 	}
-	
+
 	(void) ::write (fd, &c, 1);
 	(void) ::close (fd);
 

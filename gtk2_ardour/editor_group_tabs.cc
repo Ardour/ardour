@@ -91,7 +91,7 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 {
 	double const arc_radius = get_width();
 	double r, g, b, a;
-	
+
 	if (tab.group && tab.group->is_active()) {
 		ArdourCanvas::color_to_rgba (tab.color, r, g, b, a);
 	} else {

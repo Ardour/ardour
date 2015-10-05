@@ -50,55 +50,55 @@ Parser::midi_event_type_name (eventType t)
 
 	case MIDI::any:
 		return "any midi message";
-	
+
 	case off:
 		return "note off";
-	
+
 	case on:
 		return "note on";
-	
+
 	case polypress:
 		return "aftertouch";
-	
+
 	case MIDI::controller:
 		return "controller";
-	
+
 	case program:
 		return "program change";
-	
+
 	case chanpress:
 		return "channel pressure";
-	
+
 	case MIDI::pitchbend:
 		return "pitch bend";
-	
+
 	case MIDI::sysex:
 		return "system exclusive";
-	
+
 	case MIDI::song:
 		return "song position";
-	
+
 	case MIDI::tune:
 		return "tune";
-	
+
 	case MIDI::eox:
 		return "end of sysex";
-	
+
 	case MIDI::timing:
 		return "timing";
-	
+
 	case MIDI::start:
 		return "start";
-	
+
 	case MIDI::stop:
 		return "continue";
-	
+
 	case MIDI::contineu:
 		return "stop";
-	
+
 	case active:
 		return "active sense";
-	
+
 	default:
 		return "unknow MIDI event type";
 	}
@@ -144,7 +144,7 @@ Parser::trace_event (Parser &, MIDI::byte *msg, size_t len)
 	if ((o = trace_stream) == NULL) { /* can be asynchronously removed */
 		return;
 	}
-	
+
 	type = (eventType) (msg[0]&0xF0);
 
 	switch (type) {
@@ -158,7 +158,7 @@ Parser::trace_event (Parser &, MIDI::byte *msg, size_t len)
 		   << (int) msg[2]
 		   << endmsg;
 		break;
-		
+
 	case on:
 		*o << trace_prefix
 		   << "Channel "
@@ -169,7 +169,7 @@ Parser::trace_event (Parser &, MIDI::byte *msg, size_t len)
 		   << (int) msg[2]
 		   << endmsg;
 		break;
-	
+
 	case polypress:
 		*o << trace_prefix
 		   << "Channel "
@@ -178,7 +178,7 @@ Parser::trace_event (Parser &, MIDI::byte *msg, size_t len)
 		   << (int) msg[1]
 		   << endmsg;
 		break;
-	
+
 	case MIDI::controller:
 		*o << trace_prefix
 		   << "Channel "
@@ -189,7 +189,7 @@ Parser::trace_event (Parser &, MIDI::byte *msg, size_t len)
 		   << (int) msg[2]
 		   << endmsg;
 		break;
-		
+
 	case program:
 		*o << trace_prefix
 		   << "Channel "
@@ -198,7 +198,7 @@ Parser::trace_event (Parser &, MIDI::byte *msg, size_t len)
 		   << (int) msg[1]
 		   << endmsg;
 		break;
-		
+
 	case chanpress:
 		*o << trace_prefix
 		   << "Channel "
@@ -207,7 +207,7 @@ Parser::trace_event (Parser &, MIDI::byte *msg, size_t len)
 		   << (int) msg[1]
 		   << endmsg;
 		break;
-	
+
 	case MIDI::pitchbend:
 		*o << trace_prefix
 		   << "Channel "
@@ -216,7 +216,7 @@ Parser::trace_event (Parser &, MIDI::byte *msg, size_t len)
 		   << ((msg[2]<<7)|msg[1])
 		   << endmsg;
 		break;
-	
+
 	case MIDI::sysex:
 		if (len == 1) {
 			switch (msg[0]) {
@@ -253,7 +253,7 @@ Parser::trace_event (Parser &, MIDI::byte *msg, size_t len)
 			default:
 				*o << trace_prefix
 				   << "System Exclusive (1 byte : " << hex << (int) *msg << dec << ')'
-				   << endmsg;		
+				   << endmsg;
 				break;
 			}
 		} else {
@@ -263,42 +263,42 @@ Parser::trace_event (Parser &, MIDI::byte *msg, size_t len)
 				*o << (int) msgbuf[i] << ' ';
 			}
 			*o << dec << ']' << endmsg;
-			
+
 		}
 		break;
-	
+
 	case MIDI::song:
 		*o << trace_prefix << "Song" << endmsg;
 		break;
-	
+
 	case MIDI::tune:
 		*o << trace_prefix << "Tune" << endmsg;
 		break;
-	
+
 	case MIDI::eox:
 		*o << trace_prefix << "End-of-System Exclusive" << endmsg;
 		break;
-	
+
 	case MIDI::timing:
 		*o << trace_prefix << "Timing" << endmsg;
 		break;
-	
+
 	case MIDI::start:
 		*o << trace_prefix << "Start" << endmsg;
 		break;
-	
+
 	case MIDI::stop:
 		*o << trace_prefix << "Stop" << endmsg;
 		break;
-	
+
 	case MIDI::contineu:
 		*o << trace_prefix << "Continue" << endmsg;
 		break;
-	
+
 	case active:
 		*o << trace_prefix << "Active Sense" << endmsg;
 		break;
-	
+
 	default:
 		*o << trace_prefix << "Unrecognized MIDI message" << endmsg;
 		break;
@@ -327,9 +327,9 @@ Parser::scanner (unsigned char inbyte)
         boost::optional<int> edit_result;
 
 	// cerr << "parse: " << hex << (int) inbyte << dec << " state = " << state << " msgindex = " << msgindex << " runnable = " << runnable << endl;
-	
+
 	/* Check active sensing early, so it doesn't interrupt sysex.
-	
+
 	   NOTE: active sense messages are not considered to fit under
 	   "any" for the purposes of callbacks. If a caller wants
 	   active sense messages handled, which is unlikely, then
@@ -337,7 +337,7 @@ Parser::scanner (unsigned char inbyte)
 	   every other MIDI message in terms of semantics that its
 	   counter-productive to treat them similarly.
 	*/
-	
+
 	if (inbyte == 0xfe) {
 	        message_counter[inbyte]++;
 		if (!_offline) {
@@ -345,21 +345,21 @@ Parser::scanner (unsigned char inbyte)
 		}
 		return;
 	}
-	
+
 	/* If necessary, allocate larger message buffer. */
-	
+
 	if (msgindex >= msglen) {
 		msglen *= 2;
 		msgbuf = (unsigned char *) realloc (msgbuf, msglen);
 	}
-	
+
 	/*
 	  Real time messages can occur ANYPLACE,
 	  but do not interrupt running status.
 	*/
 
 	bool rtmsg = false;
-	
+
 	switch (inbyte) {
 	case 0xf8:
 		rtmsg = true;
@@ -386,11 +386,11 @@ Parser::scanner (unsigned char inbyte)
 
 	if (rtmsg) {
 		boost::optional<int> res = edit (&inbyte, 1);
-		
+
 		if (res.get_value_or (1) >= 0 && !_offline) {
 			realtime_msg (inbyte);
 		}
-		
+
 		return;
 	}
 
@@ -438,11 +438,11 @@ Parser::scanner (unsigned char inbyte)
 			}
 		}
 	}
-	
+
 	/*
 	 * Status bytes always start a new message, except EOX
 	 */
-	
+
 	if (statusbit) {
 
 		msgindex = 0;
@@ -469,11 +469,11 @@ Parser::scanner (unsigned char inbyte)
 
 		return;
 	}
-	
+
 	/*
 	 * We've got a Data byte.
 	 */
-	
+
 	msgbuf[msgindex++] = inbyte;
 
 	switch (state) {
@@ -487,29 +487,29 @@ Parser::scanner (unsigned char inbyte)
 		 * messages, so just handle it silently.
 		 */
 		break;
-		
+
 	case NEEDTWOBYTES:
 		/* wait for the second byte */
 		if (msgindex < 3)
 			return;
 		/*FALLTHRU*/
-		
+
 	case NEEDONEBYTE:
 		/* We've completed a 1 or 2 byte message. */
 
                 edit_result = edit (msgbuf, msgindex);
 
 		if (edit_result.get_value_or (1)) {
-			
+
 			/* message not cancelled by an editor */
-			
+
 		        message_counter[msgbuf[0] & 0xF0]++;
 
 			if (!_offline) {
 				signal (msgbuf, msgindex);
 			}
 		}
-		
+
 		if (runnable) {
 			/* In Runnable mode, we reset the message
 			   index, but keep the callbacks_pending and state the
@@ -522,7 +522,7 @@ Parser::scanner (unsigned char inbyte)
 			state = NEEDSTATUS;
 		}
 		break;
-		
+
 	case VARIABLELENGTH:
 		/* nothing to do */
 		break;
@@ -666,7 +666,7 @@ Parser::signal (MIDI::byte *msg, size_t len)
 	switch (msgtype) {
 	case none:
 		break;
-		
+
 	case off:
 		channel_active_preparse[chan_i] (*this);
 		note_off (*this, (EventTwoBytes *) &msg[1]);
@@ -674,7 +674,7 @@ Parser::signal (MIDI::byte *msg, size_t len)
 			(*this, (EventTwoBytes *) &msg[1]);
 		channel_active_postparse[chan_i] (*this);
 		break;
-		
+
 	case on:
 		channel_active_preparse[chan_i] (*this);
 
@@ -694,7 +694,7 @@ Parser::signal (MIDI::byte *msg, size_t len)
 
 		channel_active_postparse[chan_i] (*this);
 		break;
-		
+
 	case MIDI::controller:
 		channel_active_preparse[chan_i] (*this);
 		controller (*this, (EventTwoBytes *) &msg[1]);
@@ -702,21 +702,21 @@ Parser::signal (MIDI::byte *msg, size_t len)
 			(*this, (EventTwoBytes *) &msg[1]);
 		channel_active_postparse[chan_i] (*this);
 		break;
-		
+
 	case program:
 		channel_active_preparse[chan_i] (*this);
 		program_change (*this, msg[1]);
 		channel_program_change[chan_i] (*this, msg[1]);
 		channel_active_postparse[chan_i] (*this);
 		break;
-		
+
 	case chanpress:
 		channel_active_preparse[chan_i] (*this);
 		pressure (*this, msg[1]);
 		channel_pressure[chan_i] (*this, msg[1]);
 		channel_active_postparse[chan_i] (*this);
 		break;
-		
+
 	case polypress:
 		channel_active_preparse[chan_i] (*this);
 		poly_pressure (*this, (EventTwoBytes *) &msg[1]);
@@ -724,14 +724,14 @@ Parser::signal (MIDI::byte *msg, size_t len)
 			(*this, (EventTwoBytes *) &msg[1]);
 		channel_active_postparse[chan_i] (*this);
 		break;
-		
+
 	case MIDI::pitchbend:
 		channel_active_preparse[chan_i] (*this);
 		pitchbend (*this, (msg[2]<<7)|msg[1]);
 		channel_pitchbend[chan_i] (*this, (msg[2]<<7)|msg[1]);
 		channel_active_postparse[chan_i] (*this);
 		break;
-		
+
 	case MIDI::sysex:
 		sysex (*this, msg, len);
 		break;
@@ -740,23 +740,23 @@ Parser::signal (MIDI::byte *msg, size_t len)
 		process_mtc_quarter_frame (msg);
 		mtc_quarter_frame (*this, *msg);
 		break;
-		
+
 	case MIDI::position:
 		position (*this, msg, len);
 		break;
-		
+
 	case MIDI::song:
 		song (*this, msg, len);
 		break;
-	
+
 	case MIDI::tune:
 		tune (*this);
-	
+
 	default:
 		/* XXX some kind of warning ? */
 		break;
 	}
-	
+
 	any (*this, msg, len);
 }
 
@@ -788,7 +788,7 @@ Parser::set_offline (bool yn)
 		/* this hack deals with the possibility of our first MIDI
 		   bytes being running status messages.
 		*/
-		
+
 		channel_msg (0x90);
 		state = NEEDSTATUS;
 	}

@@ -157,7 +157,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	}
 
 	set_default_response (Gtk::RESPONSE_ACCEPT);
-	
+
 	VBox* progress_box = manage (new VBox);
 	progress_box->set_spacing (6);
 

@@ -52,7 +52,7 @@ Prompter::init ()
 	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("Prompter");
-	
+
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 
 	/*
@@ -62,7 +62,7 @@ Prompter::init ()
 	   set_response_sensitive (Gtk::RESPONSE_ACCEPT, false)
 	   to prevent the RESPONSE_ACCEPT button from permitting blank strings.
 	*/
-	
+
 	entryLabel.set_line_wrap (true);
 	entryLabel.set_name ("PrompterLabel");
 
@@ -74,7 +74,7 @@ Prompter::init ()
 
 	get_vbox()->pack_start (entryBox);
 	show_all_children();
-}	
+}
 
 void
 Prompter::on_show ()
@@ -117,7 +117,7 @@ Prompter::entry_activated ()
 	} else {
 		response (Gtk::RESPONSE_CANCEL);
 	}
-}		
+}
 
 void
 Prompter::on_entry_changed ()

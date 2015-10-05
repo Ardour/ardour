@@ -50,11 +50,11 @@ public:
 	 */
 	CrossThreadChannel(bool non_blocking);
 	~CrossThreadChannel();
-	
+
 	/** Tell the listening thread that is has work to do.
 	 */
 	void wakeup();
-	
+
 	/* if the listening thread cares about the precise message
 	 * it is being sent, then ::deliver() can be used to send
 	 * a single byte message rather than a simple wakeup. These

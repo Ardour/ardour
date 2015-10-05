@@ -35,7 +35,7 @@ class Segmentation
 public:
 	int nsegtypes;		// number of segment types, so possible types are {0,1,...,nsegtypes-1}
 	int samplerate;
-	vector<Segment> segments;	
+	vector<Segment> segments;
 };
 
 ostream& operator<<(ostream& os, const Segmentation& s);

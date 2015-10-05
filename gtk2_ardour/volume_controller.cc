@@ -63,7 +63,7 @@ void
 VolumeController::dB_printer (char buf[32], const boost::shared_ptr<PBD::Controllable>& c)
 {
 	if (c) {
-		
+
 		if (_linear) {
 
 			double val = accurate_coefficient_to_dB (c->get_value());
@@ -83,7 +83,7 @@ VolumeController::dB_printer (char buf[32], const boost::shared_ptr<PBD::Control
 			}
 
 		} else {
-			
+
 			double dB = accurate_coefficient_to_dB (c->get_value());
 
 			if (step_inc < 1.0) {

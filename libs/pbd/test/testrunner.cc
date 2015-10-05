@@ -24,19 +24,19 @@ main ()
 	text_receiver.listen_to (PBD::warning);
 
 	ScalarPropertiesTest::make_property_quarks ();
-	
+
 	CppUnit::TestResult testresult;
 
 	CppUnit::TestResultCollector collectedresults;
 	testresult.addListener (&collectedresults);
-	
+
 	CppUnit::BriefTestProgressListener progress;
 	testresult.addListener (&progress);
-	
+
 	CppUnit::TestRunner testrunner;
 	testrunner.addTest (CppUnit::TestFactoryRegistry::getRegistry ().makeTest ());
 	testrunner.run (testresult);
-	
+
 	CppUnit::CompilerOutputter compileroutputter (&collectedresults, std::cerr);
 	compileroutputter.write ();
 

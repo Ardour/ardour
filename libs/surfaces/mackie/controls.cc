@@ -101,7 +101,7 @@ Control::start_touch (double when)
 		return normal_ac->start_touch (when);
 	}
 }
-	
+
 void
 Control::stop_touch (bool mark, double when)
 {
@@ -109,7 +109,7 @@ Control::stop_touch (bool mark, double when)
 		return normal_ac->stop_touch (mark, when);
 	}
 }
-	
+
 ostream & operator <<  (ostream & os, const ArdourSurface::Mackie::Control & control)
 {
 	os << typeid (control).name();
@@ -120,7 +120,7 @@ ostream & operator <<  (ostream & os, const ArdourSurface::Mackie::Control & con
 	os << ", ";
 	os << "group: " << control.group().name();
 	os << " }";
-	
+
 	return os;
 }
 

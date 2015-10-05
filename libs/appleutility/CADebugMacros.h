@@ -56,10 +56,10 @@
 #pragma mark	Basic Definitions
 
 #if	DEBUG || CoreAudio_Debug
-	
+
 	// can be used to break into debugger immediately, also see CADebugger
 	#define BusError()		(*(long *)0 = 0)
-	
+
 	//	basic debugging print routines
 	#if	TARGET_OS_MAC && !TARGET_API_MAC_CARBON
 		extern pascal void DebugStr(const unsigned char* debuggerMsg);
@@ -69,13 +69,13 @@
 		#define DebugMessageN3(msg, N1, N2, N3)
 	#else
 		#include "CADebugPrintf.h"
-		
+
 		#if	(CoreAudio_FlushDebugMessages && !CoreAudio_UseSysLog) || defined(CoreAudio_UseSideFile)
 			#define	FlushRtn	;fflush(DebugPrintfFile)
 		#else
 			#define	FlushRtn
 		#endif
-		
+
 		#if		CoreAudio_ThreadStampMessages
 			#include <pthread.h>
 			#include "CAHostTimeBase.h"
@@ -121,7 +121,7 @@
 	#else
 		#define vprint(msg)
 	#endif
-	
+
 	#if	CoreAudio_StopOnFailure
 		#include "CADebugger.h"
 		#define STOP	CADebuggerStop()

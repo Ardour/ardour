@@ -31,11 +31,11 @@ class LIBCANVAS_API PolyLine : public PolyItem
   public:
 	PolyLine (Canvas*);
 	PolyLine (Item*);
-	
+
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 
 	virtual void set_steps (Points const &, bool stepped);
-	
+
         bool covers (Duple const &) const;
 	/**
 	 * Set the distance at which a point will be considered to be covered
@@ -47,7 +47,7 @@ class LIBCANVAS_API PolyLine : public PolyItem
   private:
 	double _threshold;
 };
-	
+
 }
 
 #endif

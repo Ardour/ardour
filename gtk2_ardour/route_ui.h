@@ -304,7 +304,7 @@ class RouteUI : public virtual AxisView
 
 	static void set_showing_sends_to (boost::shared_ptr<ARDOUR::Route>);
 	static boost::weak_ptr<ARDOUR::Route> _showing_sends_to;
-	
+
 	static uint32_t _max_invert_buttons;
 };
 

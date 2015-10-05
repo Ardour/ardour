@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CAAUParameter.h
-	
+
 =============================================================================*/
 
 #ifndef __CAAUParameter_h__
@@ -61,7 +61,7 @@ public:
 								CAAUParameter(const CAAUParameter &a);
 								/*! @dtor ~CAAUParameter */
 								~CAAUParameter();
-		
+
 	/*! @method operator <@ */
 	bool						operator < (const CAAUParameter &a) const
 								{
@@ -73,23 +73,23 @@ public:
 								{
 									return !memcmp(this, &a, sizeof(AudioUnitParameter));
 								}
-	
+
 	/*! @method operator =@ */
 	CAAUParameter &				operator = (const CAAUParameter &a);
-	
+
 	/*! @method GetValue */
 	Float32						GetValue() const;
 	/*! @method SetValue */
 	void						SetValue(	AUParameterListenerRef			inListener,
 											void *							inObject,
 											Float32							inValue) const;
-	
+
 	/*! @method GetName */
 	CFStringRef					GetName() const { return mParamName; }
 										// borrowed reference!
 
 	/*! @method GetStringFromValueCopy */
-	CFStringRef					GetStringFromValueCopy(const Float32 *value = NULL) const;	
+	CFStringRef					GetStringFromValueCopy(const Float32 *value = NULL) const;
 										// returns a copy of the name of the current parameter value
 										// or null if there is no name associated
 										// caller must release
@@ -98,13 +98,13 @@ public:
 								{
 									return (mParamInfo.flags & kAudioUnitParameterFlag_ValuesHaveStrings) != 0;
 								}
-	
+
 	/*! @method GetValueFromString */
-	Float32						GetValueFromString (CFStringRef str) const;					
+	Float32						GetValueFromString (CFStringRef str) const;
 									// caller must release
 
 	/*! @method ParamInfo */
-	const AudioUnitParameterInfo &		
+	const AudioUnitParameterInfo &
 								ParamInfo()	const { return mParamInfo; }
 
 	/*! @method GetParamTag */
@@ -120,16 +120,16 @@ public:
 												? (CFStringRef) CFArrayGetValueAtIndex(mNamedParams, inIndex)
 												: 0;
 								}
-	
+
 	/*! @method GetNumIndexedParams */
 	int							GetNumIndexedParams () const { return mNumIndexedParams; }
-	
+
 	/*! @method IsIndexedParam */
 	bool						IsIndexedParam () const { return mNumIndexedParams != 0; }
-	
+
 	/*! @method HasNamedParams */
 	bool						HasNamedParams () const { return IsIndexedParam() && mNamedParams; }
-	
+
 	/*! @method GetClumpID */
 	bool						GetClumpID (UInt32 &outClumpID) const
 								{
@@ -139,7 +139,7 @@ public:
 									}
 									return false;
 								}
-								
+
 	/*! @method HasDisplayTransformation */
 	bool						HasDisplayTransformation () const
 								{
@@ -154,14 +154,14 @@ public:
 #if DEBUG
 	void						Print () const;
 #endif
-	
+
 		// these methods are defined in CAPersistence.cpp
 		// they will persist and restore only the scope, element and param ID's of the AudioUnitParameter
 		// however, this is sufficient to be able to save/restore a CAAUParameter object
 	void						Save (CFPropertyListRef &outData) const;
-	
+
 	static void					Save (const AudioUnitParameter &inParam, CFPropertyListRef &outData);
-	
+
 	static OSStatus				Restore	(const CFPropertyListRef inData, AudioUnitParameter &outParam);
 
 protected:
@@ -176,7 +176,7 @@ protected:
 	short						mNumIndexedParams;
 	/*! @var mNamedParams */
 	CFArrayRef					mNamedParams;
-	
+
 private:
 	void						Init (AudioUnit au, AudioUnitParameterID param, AudioUnitScope scope, AudioUnitElement element);
 

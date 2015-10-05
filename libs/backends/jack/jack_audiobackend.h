@@ -237,7 +237,7 @@ class JACKAudioBackend : public AudioBackend {
 	JACKAudioBackend* engine;
 	boost::function<void()> f;
 	size_t stacksize;
-	
+
 	ThreadData (JACKAudioBackend* e, boost::function<void()> fp, size_t stacksz)
 		: engine (e) , f (fp) , stacksize (stacksz) {}
     };

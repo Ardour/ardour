@@ -81,4 +81,4 @@ class LIBGTKMM2EXT_API HSliderController : public SliderController
 
 }; /* namespace */
 
-#endif // __gtkmm2ext_slider_controller_h__		
+#endif // __gtkmm2ext_slider_controller_h__

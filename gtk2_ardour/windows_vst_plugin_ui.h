@@ -33,7 +33,7 @@ public:
 	void forward_key_event (GdkEventKey *);
 
 private:
-	
+
 	int get_XID ();
-	
+
 };

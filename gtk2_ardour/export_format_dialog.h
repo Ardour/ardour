@@ -180,7 +180,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	AudioClock       silence_end_clock;
 
 	/* Post-export hook */
-	
+
 	Gtk::Label       command_label;
 	Gtk::Entry       command_entry;
 

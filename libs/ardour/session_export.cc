@@ -89,7 +89,7 @@ Session::pre_export ()
 	_exporting = true;
 	export_status->running = true;
 	export_status->Finished.connect_same_thread (*this, boost::bind (&Session::finalize_audio_export, this));
-	
+
 	/* disable MMC output early */
 
 	_pre_export_mmc_enabled = _mmc->send_enabled ();
@@ -111,7 +111,7 @@ Session::start_audio_export (framepos_t position)
 	   up otherwise it could be doing do_refill in its thread while we are doing
 	   it here.
 	*/
-	
+
 	_butler->wait_until_finished ();
 
 	/* get everyone to the right position */
@@ -198,7 +198,7 @@ Session::process_export_fw (pframes_t nframes)
 		post_transport ();
 		return 0;
 	}
-	
+
         _engine.main_thread()->get_buffers ();
 	process_export (nframes);
         _engine.main_thread()->drop_buffers ();
@@ -235,7 +235,7 @@ Session::finalize_audio_export ()
 	_engine.freewheel (false);
 
 	export_freewheel_connection.disconnect();
-	
+
 	_mmc->enable_send (_pre_export_mmc_enabled);
 
 	/* maybe write CUE/TOC */

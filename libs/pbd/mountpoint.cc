@@ -50,7 +50,7 @@ mountpoint (string path)
 	unsigned int matchlen;
 	const char *cpath = path.c_str();
 	char best[PATH_MAX+1];
-	
+
 	if ((mntf = setmntent ("/etc/mtab", "r")) == 0) {
 		return "";
 	}
@@ -122,10 +122,10 @@ mountpoint (string path)
 	unsigned int matchlen;
 	const char *cpath = path.c_str();
 	char best[PATH_MAX+1];
-	
+
 	/* From the manpage, under "BUGS" : "The memory allocated by getmntinfo() cannot be free(3)'d by the
 	   application."
-	
+
 	   Thus: we do NOT try to free memory allocated by getmntinfo()
 	*/
 
@@ -163,13 +163,13 @@ mountpoint (string path)
 			}
 		}
 	}
-	
+
 	return best;
 }
 #endif // HAVE_GETMNTENT
 
 #ifdef TEST_MOUNTPOINT
-		
+
 main (int argc, char *argv[])
 {
 	printf ("mp of %s = %s\n", argv[1], mountpoint (argv[1]).c_str());

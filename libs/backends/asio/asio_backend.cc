@@ -1344,7 +1344,7 @@ ASIOBackend::freewheel_thread ()
 		pthread_mutex_lock (&_process_callback_mutex);
 
 		/* Freewheelin' */
-		
+
 		// clear input buffers
 		for (std::vector<ASIOBackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 			memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));

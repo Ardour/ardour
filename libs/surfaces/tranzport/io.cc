@@ -67,10 +67,10 @@ TranzportControlProtocol::lights_flush ()
 	printf("LPEND   : %s\n", lights_pending.to_string().c_str());
 	printf("LCURR   : %s\n", lights_current.to_string().c_str());
 #endif
-		
+
 	// if ever we thread reads/writes STATUS_OK will have to move into the loop
 	int i;
-		
+
 	if ( _device_status == STATUS_OK || _device_status == STATUS_ONLINE) {
 		for (i = 0; i<LIGHTS; i++) {
 			if(light_state[i]) {
@@ -90,6 +90,6 @@ TranzportControlProtocol::lights_flush ()
 #if DEBUG_TRANZPORT_LIGHTS > 2
 	printf("Did %d light writes, left: %d\n",i, light_state.count());
 #endif
-		
+
 	return light_state.count();
 }

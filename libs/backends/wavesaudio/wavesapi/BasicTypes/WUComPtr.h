@@ -19,7 +19,7 @@
 
 #ifndef __WUComPtr_h__
 #define __WUComPtr_h__
-	
+
 /* Copy to include
 #include "BasicTypes/WUComPtr.h"
 */
@@ -36,7 +36,7 @@ typedef int32_t wvComPtr[2];
 //================================================================================
 inline uint32_t vfpConvertDPtr(const void* InPointer, void* pData)
 //================================================================================
-{	
+{
     uint64_t *pL = (uint64_t *)pData;
     *pL = (uint64_t)InPointer;
     return (uint32_t)sizeof(uint64_t);
@@ -64,7 +64,7 @@ inline wvComPtr PackToComPtr(const intptr_t in_PtrToPack)
 	// #ifdef for x32 - intptr_t is 32 bit
 //	retVal.LSW = int32_t(in_PtrToPack);
 //	retVal.MSW = 0;
-	
+
 	return retVal;
 }
 
@@ -73,7 +73,7 @@ inline intptr_t UnpackComPtr( const wvComPtr in_ComPtrToUnpack)
 // and unpack it to intptr_t type
 {
 	intptr_t retVal;
-	
+
 	// This unpacking is xPlatform coding for x32 and x64
 	// #ifdef for x64 - intptr_t is 64 bit so use intptr_t instead of int64_t
 	int64_t PtrAt64 = static_cast<int64_t>(in_ComPtrToUnpack.MSW);

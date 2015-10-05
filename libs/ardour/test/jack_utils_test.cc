@@ -273,7 +273,7 @@ JackUtilsTest::test_config ()
 	std::string command_line;
 
 	CPPUNIT_ASSERT (get_default_jack_command_line (command_line));
-	
+
 	CPPUNIT_ASSERT (write_jack_config_file (config_path, command_line));
 }
 

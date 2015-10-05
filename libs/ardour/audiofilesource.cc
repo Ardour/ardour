@@ -343,4 +343,4 @@ AudioFileSource::get_interleave_buffer (framecnt_t size)
 
 	return ssb->buf;
 }
-	
+

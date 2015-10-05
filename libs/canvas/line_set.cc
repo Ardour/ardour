@@ -54,7 +54,7 @@ LineSet::compute_bounding_box () const
 	} else {
 
 		if (_orientation == Horizontal) {
-			
+
 			_bounding_box = Rect (0, /* x0 */
 					      _lines.front().pos - (_lines.front().width/2.0), /* y0 */
 					      _extent, /* x1 */
@@ -62,7 +62,7 @@ LineSet::compute_bounding_box () const
 				);
 
 		} else {
-			
+
 			_bounding_box = Rect (_lines.front().pos - _lines.front().width/2.0, /* x0 */
 					      0, /* y0 */
 					      _lines.back().pos + _lines.back().width/2.0, /* x1 */
@@ -101,9 +101,9 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		}
 
 		boost::optional<Rect> isect = self.intersection (area);
-			
+
 		if (!isect) {
-			continue;	
+			continue;
 		}
 
 		Rect intersection (isect.get());
@@ -134,7 +134,7 @@ void
 LineSet::add (Coord y, Distance width, Color color)
 {
 	begin_change ();
-	
+
 	_lines.push_back (Line (y, width, color));
 	sort (_lines.begin(), _lines.end(), LineSorter());
 

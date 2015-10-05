@@ -83,16 +83,16 @@ VSTState *
 vstfx_new ()
 {
 	VSTState* vstfx = (VSTState *) calloc (1, sizeof (VSTState));
-	
+
 	/*Mutexes*/
-	
+
 	pthread_mutex_init (&vstfx->lock, 0);
 	pthread_cond_init (&vstfx->window_status_change, 0);
 	pthread_cond_init (&vstfx->plugin_dispatcher_called, 0);
 	pthread_cond_init (&vstfx->window_created, 0);
 
 	/*Safe values*/
-	
+
 	vstfx->want_program = -1;
 	vstfx->want_chunk = 0;
 	vstfx->n_pending_keys = 0;
@@ -103,7 +103,7 @@ vstfx_new ()
 	vstfx->eventProc = 0;
 	vstfx->extra_data = 0;
 	vstfx->want_resize = 0;
-	
+
 	return vstfx;
 }
 
@@ -131,35 +131,35 @@ void* vstfx_load_vst_library(const char* path)
 		PBD::error << string_compose (_("Could not open existing LXVST plugin: %1"), dlerror()) << endmsg;
 		return 0;
 	}
-		
+
 	/*We didn't find the library so try and get the path specified in the
 	env variable LXVST_PATH*/
 
 	envdup = getenv ("LXVST_PATH");
-	
+
 	/*Path not specified - not much more we can do*/
-	
+
 	if (envdup == 0)
 		return 0;
-	
+
 	/*Copy the path into envdup*/
-		
+
 	envdup = strdup (envdup);
-	
+
 	if (envdup == 0)
 		return 0;
-		
+
 	len2 = strlen(path);
 
 	/*Try all the possibilities in the path - deliminated by : */
 	char *saveptr;
 	lxvst_path = strtok_r (envdup, ":", &saveptr);
-	
+
 	while (lxvst_path != 0)
 	{
 		vstfx_error ("\"%s\"", lxvst_path);
 		len1 = strlen(lxvst_path);
-		
+
 		if (full_path) free(full_path);
 		full_path = (char*)malloc(len1 + 1 + len2 + 1);
 		memcpy(full_path, lxvst_path, len1);
@@ -174,7 +174,7 @@ void* vstfx_load_vst_library(const char* path)
 			/*Succeeded */
 			break;
 		}
-	
+
 		/*Try again*/
 
 		lxvst_path = strtok_r (0, ":", &saveptr);
@@ -195,18 +195,18 @@ vstfx_load (const char *path)
 {
 	char* buf = 0;
 	VSTHandle* fhandle;
-	
+
 	/*Create a new handle we can use to reference the plugin*/
 
 	fhandle = vstfx_handle_new();
-	
+
 	/*See if we have .so appended to the path - if not we need to make sure it is added*/
 
 	if (strstr (path, ".so") == 0)
 	{
 
 		/*Append the .so to the path - Make sure the path has enough space*/
-		
+
 		buf = (char *)malloc(strlen(path) + 4); //The .so and a terminating zero
 
 		sprintf (buf, "%s.so", path);
@@ -215,7 +215,7 @@ vstfx_load (const char *path)
 	else
 	{
 		/*We already have .so appened to the filename*/
-		
+
 		buf = strdup(path);
 	}
 
@@ -223,7 +223,7 @@ vstfx_load (const char *path)
 	   we don't know anything about its name until we load and instantiate the plugin
 	   which we don't want to do at this point
 	*/
-	
+
 	fhandle->name = strdup (PBD::basename_nosuffix (path).c_str());
 
 	/*call load_vstfx_library to actually load the .so into memory*/
@@ -231,9 +231,9 @@ vstfx_load (const char *path)
 	if ((fhandle->dll = vstfx_load_vst_library (buf)) == 0)
 	{
 		vstfx_unload (fhandle);
-		
+
 		free(buf);
-		
+
 		return 0;
 	}
 
@@ -250,11 +250,11 @@ vstfx_load (const char *path)
 	if (fhandle->main_entry == 0)
 	{
 		/*If it can't be found, unload the plugin and return a 0 handle*/
-		
+
 		vstfx_unload (fhandle);
-		
+
 		free(buf);
-		
+
 		return 0;
 	}
 
@@ -274,7 +274,7 @@ vstfx_unload (VSTHandle* fhandle)
 	{
 		/*Still have plugin instances - can't unload the library
 		- actually dlclose keeps an instance count anyway*/
-		
+
 		return -1;
 	}
 
@@ -290,9 +290,9 @@ vstfx_unload (VSTHandle* fhandle)
 	{
 		free (fhandle->name);
 	}
-	
+
 	/*Don't need the plugin handle any more*/
-	
+
 	free (fhandle);
 	return 0;
 }
@@ -317,29 +317,29 @@ vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 		free (vstfx);
 		return 0;
 	}
-	
+
 	vstfx->handle = fhandle;
 	vstfx->plugin->user = userptr;
-		
+
 	if (vstfx->plugin->magic != kEffectMagic)
 	{
 		vstfx_error ("** ERROR ** VSTFX : %s is not a VST plugin\n", fhandle->name);
 		free (vstfx);
 		return 0;
 	}
-	
+
 	vstfx->plugin->dispatcher (vstfx->plugin, effOpen, 0, 0, 0, 0);
-	
+
 	/*May or May not need to 'switch the plugin on' here - unlikely
 	since FST doesn't and most plugins start up 'On' by default - I think this is the least of our worries*/
-	
+
 	//vstfx->plugin->dispatcher (vstfx->plugin, effMainsChanged, 0, 1, 0, 0);
-	
+
 	vstfx->vst_version = vstfx->plugin->dispatcher (vstfx->plugin, effGetVstVersion, 0, 0, 0, 0);
-	
+
 	vstfx->handle->plugincnt++;
 	vstfx->wantIdle = 0;
-	
+
 	return vstfx;
 }
 
@@ -348,33 +348,33 @@ vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 void vstfx_close (VSTState* vstfx)
 {
 	vstfx_destroy_editor(vstfx);
-	
+
 	if(vstfx->plugin)
 	{
 		vstfx->plugin->dispatcher (vstfx->plugin, effMainsChanged, 0, 0, 0, 0);
-		
+
 		/*Calling dispatcher with effClose will cause the plugin's destructor to
 		be called, which will also remove the editor if it exists*/
-		
+
 		vstfx->plugin->dispatcher (vstfx->plugin, effClose, 0, 0, 0, 0);
 	}
 
 	if (vstfx->handle->plugincnt)
 			vstfx->handle->plugincnt--;
-		
+
 	/*vstfx_unload will unload the dll if the instance count allows -
 	we need to do this because some plugins keep their own instance count
 	and (JUCE) manages the plugin UI in its own thread.  When the plugins
 	internal instance count reaches zero, JUCE stops the UI thread and won't
 	restart it until the next time the library is loaded.  If we don't unload
 	the lib JUCE will never restart*/
-	
-	
+
+
 	if (vstfx->handle->plugincnt)
 	{
 		return;
 	}
-	
+
 	/*Valid plugin loaded - so we can unload it and 0 the pointer
 	to it.  We can't free the handle here because we don't know what else
 	might need it.  It should be / is freed when the plugin is deleted*/
@@ -403,11 +403,11 @@ vstfx_save_state (VSTState* vstfx, char * filename)
 		int success;
 
 		/* write header */
-		
+
 		fprintf(f, "<plugin_state>\n");
 
 		success = vstfx_call_dispatcher(vstfx, effGetProductString, 0, 0, productString, 0);
-		
+
 		if(success == 1)
 		{
 			fprintf (f, "  <check field=\"productString\" value=\"%s\"/>\n", productString);
@@ -418,7 +418,7 @@ vstfx_save_state (VSTState* vstfx, char * filename)
 		}
 
 		success = vstfx_call_dispatcher(vstfx, effGetEffectName, 0, 0, effectName, 0);
-		
+
 		if(success == 1)
 		{
 			fprintf (f, "  <check field=\"effectName\" value=\"%s\"/>\n", effectName);
@@ -430,7 +430,7 @@ vstfx_save_state (VSTState* vstfx, char * filename)
 		}
 
 		success = vstfx_call_dispatcher(vstfx, effGetVendorString, 0, 0, vendorString, 0);
-		
+
 		if( success == 1 )
 		{
 			fprintf (f, "  <check field=\"vendorString\" value=\"%s\"/>\n", vendorString);
@@ -450,7 +450,7 @@ vstfx_save_state (VSTState* vstfx, char * filename)
 		for(i=0; i < numParams; i++)
 		{
 			float val;
-			
+
 			pthread_mutex_lock( &vstfx->lock );
 			val = vstfx->plugin->getParameter(vstfx->plugin, i );
 			pthread_mutex_unlock( &vstfx->lock );
@@ -494,17 +494,17 @@ vstfx_save_state (VSTState* vstfx, char * filename)
 int vstfx_call_dispatcher (VSTState* vstfx, int opcode, int index, int val, void *ptr, float opt)
 {
 	pthread_mutex_lock (&vstfx->lock);
-	
+
 	/*Set up the opcode and parameters*/
-	
+
 	vstfx->dispatcher_opcode = opcode;
 	vstfx->dispatcher_index = index;
 	vstfx->dispatcher_val = val;
 	vstfx->dispatcher_ptr = ptr;
 	vstfx->dispatcher_opt = opt;
-	
+
 	/*Signal that we want the call to happen*/
-	
+
 	vstfx->dispatcher_wantcall = 1;
 
 	/*Wait for the call to happen*/
@@ -513,6 +513,6 @@ int vstfx_call_dispatcher (VSTState* vstfx, int opcode, int index, int val, void
 	pthread_mutex_unlock (&vstfx->lock);
 
 	/*Return the result*/
-	
+
 	return vstfx->dispatcher_retval;
 }

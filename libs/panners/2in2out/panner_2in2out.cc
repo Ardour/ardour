@@ -311,7 +311,7 @@ Panner2in2out::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 			if (pan != 0.0f) {
 
 				/* pan is 1 but also not 0, so we must do it "properly" */
-				
+
 				//obufs.get_audio(1).read_from (srcbuf, nframes);
 				mix_buffers_with_gain(dst,src,nframes,pan);
 
@@ -369,17 +369,17 @@ Panner2in2out::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 			if (pan != 0.0f) {
 
 				/* pan is not 1 but also not 0, so we must do it "properly" */
-				
+
 				mix_buffers_with_gain(dst,src,nframes,pan);
 				// obufs.get_audio(1).read_from (srcbuf, nframes);
-				
+
 				/* XXX it would be nice to mark the buffer as written to */
 			}
 
 		} else {
 
 			/* pan is 1 so we can just copy the input samples straight in */
-			
+
 			mix_buffers_no_gain(dst,src,nframes);
 
 			/* XXX it would be nice to mark the buffer as written to */

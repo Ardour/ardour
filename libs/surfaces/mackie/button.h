@@ -39,7 +39,7 @@ public:
 
 	enum ID {
 		/* Global Buttons */
-		
+
 		Track,
 		Send,
 		Pan,
@@ -111,7 +111,7 @@ public:
 		CmdAlt,
 
 		/* Strip buttons */
-		
+
 		RecEnable,
 		Solo,
 		Mute,
@@ -129,12 +129,12 @@ public:
 		: Control (did, name, group)
 		, _bid (bid)
 		, _led  (did, name + "_led", group) {}
-	
+
 	MidiByteArray zero() { return _led.zero (); }
 	MidiByteArray set_state (LedState ls) { return _led.set_state (ls); }
-	
+
 	ID bid() const { return _bid; }
-	
+
 	static Control* factory (Surface& surface, Button::ID bid, int id, const std::string&, Group& group);
 	static int name_to_id (const std::string& name);
 	static std::string id_to_name (Button::ID);

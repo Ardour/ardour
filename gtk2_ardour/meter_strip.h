@@ -142,7 +142,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void update_button_box ();
 	void update_name_box ();
 	void name_changed ();
-	
+
 	void route_color_changed ();
 
 	bool _suspend_menu_callbacks;

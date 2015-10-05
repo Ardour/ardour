@@ -67,7 +67,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	if (Keyboard::some_magic_widget_has_focus()) {
 		return false;
 	}
-	
+
 	framepos_t xdelta;
 	int direction = ev->direction;
 
@@ -329,7 +329,7 @@ Editor::canvas_wave_view_event (GdkEvent *event, ArdourCanvas::Item* item, Regio
 	}
 
 	return ret;
-}	
+}
 
 
 bool
@@ -1036,7 +1036,7 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 	bool handled = false;
 
 	if (event->type == GDK_SCROLL) {
-		
+
 		/* scroll events in the rulers are handled a little differently from
 		   scrolling elsewhere in the canvas.
 		*/
@@ -1055,7 +1055,7 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 			}
 			handled = true;
 			break;
-			
+
 		case GDK_SCROLL_DOWN:
 			if (Profile->get_mixbus()) {
 				//for mouse-wheel zoom, force zoom-focus to mouse
@@ -1068,7 +1068,7 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 			}
 			handled = true;
 			break;
-			
+
 		case GDK_SCROLL_LEFT:
 			xdelta = (current_page_samples() / 2);
 			if (leftmost_frame > xdelta) {
@@ -1078,7 +1078,7 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 			}
 			handled = true;
 			break;
-			
+
 		case GDK_SCROLL_RIGHT:
 			xdelta = (current_page_samples() / 2);
 			if (max_framepos - xdelta > leftmost_frame) {
@@ -1088,7 +1088,7 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 			}
 			handled = true;
 			break;
-			
+
 		default:
 			/* what? */
 			break;
@@ -1130,9 +1130,9 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 bool
 Editor::canvas_drop_zone_event (GdkEvent* event)
 {
-	GdkEventScroll scroll;	
+	GdkEventScroll scroll;
 	ArdourCanvas::Duple winpos;
-	
+
 	switch (event->type) {
 	case GDK_BUTTON_RELEASE:
 		if (event->button.button == 1) {
@@ -1193,18 +1193,18 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py, false);
 	bool can_drop = false;
-	
+
 	if (tv.first != 0) {
 
 		/* over a time axis view of some kind */
 
 		rtav = dynamic_cast<RouteTimeAxisView*> (tv.first);
-		
+
 		if (rtav != 0 && rtav->is_track ()) {
 			/* over a track, not a bus */
 			can_drop = true;
 		}
-			
+
 
 	} else {
 		/* not over a time axis view, so drop is possible */
@@ -1213,7 +1213,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 
 	if (can_drop) {
 		region = _regions->get_dragged_region ();
-		
+
 		if (region) {
 
 			if (tv.first == 0
@@ -1227,17 +1227,17 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 				context->drag_status (context->get_suggested_action(), time);
 				return true;
 			}
-			
+
 			if ((boost::dynamic_pointer_cast<AudioRegion> (region) != 0 &&
 			     dynamic_cast<AudioTimeAxisView*> (tv.first) != 0) ||
 			    (boost::dynamic_pointer_cast<MidiRegion> (region) != 0 &&
 			     dynamic_cast<MidiTimeAxisView*> (tv.first) != 0)) {
-				
+
 				/* audio to audio
 				   OR
 				   midi to midi
 				*/
-				
+
 				context->drag_status (context->get_suggested_action(), time);
 				return true;
 			}

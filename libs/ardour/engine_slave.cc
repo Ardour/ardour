@@ -62,6 +62,6 @@ Engine_Slave::speed_and_position (double& sp, framepos_t& position)
 	} else {
 		_starting = false;
 	}
-	
+
 	return true;
 }

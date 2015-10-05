@@ -22,14 +22,14 @@
 using namespace std;
 
 namespace PBD {
-	
+
 void
 strip_whitespace_edges (string& str)
 {
     string::size_type i;
     string::size_type len;
     string::size_type s = 0;
-			
+
     len = str.length();
 
     if (len == 1) {
@@ -37,7 +37,7 @@ strip_whitespace_edges (string& str)
     }
 
     /* strip front */
-				
+
     for (i = 0; i < len; ++i) {
         if (!isspace (str[i])) {
             break;
@@ -60,7 +60,7 @@ strip_whitespace_edges (string& str)
 	    if (s == i) {
 		    return;
 	    }
-	
+
 	    do {
 		    if (!isspace (str[i]) || i == 0) {
 			    break;
@@ -69,7 +69,7 @@ strip_whitespace_edges (string& str)
 		    --i;
 
 	    } while (true);
-	
+
 	    str = str.substr (s, (i - s) + 1);
 
     } else {

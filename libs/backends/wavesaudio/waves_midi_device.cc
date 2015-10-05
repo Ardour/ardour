@@ -47,11 +47,11 @@ WavesMidiDevice::WavesMidiDevice (const std::string& device_name)
 {
 	_pm_input_id = _pm_output_id = pmNoDevice;
 	int count = Pm_CountDevices ();
-	
+
 	for (int i = 0; i < count; i++) {
-		
+
 		const PmDeviceInfo* pm_device_info = Pm_GetDeviceInfo (i);
-		
+
 		if (pm_device_info == NULL) {
 			continue;
 		}
@@ -79,7 +79,7 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 
     if (is_input () ) {
 		// COMMENTED DBG LOGS */ std::cout << "WavesMidiDevice::open (): INPUT" << _pm_input_id << "-[" << name () <<  "]" << std::endl;
-			
+
 		if (!_input_pm_stream) {
 			// create queue
 			if (!_input_queue) {
@@ -181,7 +181,7 @@ WavesMidiDevice::close ()
 		_input_queue = NULL;
 	}
 
-        // output	
+        // output
 	if ( output_pm_stream ) {
 		// close stream
 		PmError err = Pm_Close (output_pm_stream);

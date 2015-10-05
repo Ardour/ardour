@@ -97,7 +97,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 
 Delivery::~Delivery()
 {
-	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delivery %1 destructor\n", _name));	
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delivery %1 destructor\n", _name));
 
 	/* this object should vanish from any signal callback lists
 	   that it is on before we get any further. The full qualification
@@ -462,7 +462,7 @@ Delivery::flush_buffers (framecnt_t nframes)
 	if (!_output) {
 		return;
 	}
-	
+
 	PortSet& ports (_output->ports());
 
 	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {

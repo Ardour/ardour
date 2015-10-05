@@ -41,7 +41,7 @@ class LIBPBD_API EnvironmentalProtectionAgency {
 
   private:
         void clear () const;
-		
+
         bool _armed;
         std::string _envname;
         std::map<std::string,std::string> e;

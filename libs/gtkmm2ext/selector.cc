@@ -157,7 +157,7 @@ Selector::chosen ()
 {
 	Glib::RefPtr<Gtk::TreeSelection> tree_sel = tview.get_selection();
 	Gtk::TreeModel::iterator iter = tree_sel->get_selected();
-	
+
 	if (iter) {
 		choice_made (new Result (tview, tree_sel));
 	} else {

@@ -37,7 +37,7 @@
 */
 /*=============================================================================
 	CABufferList.cpp
-	
+
 =============================================================================*/
 
 #include "CABufferList.h"
@@ -50,7 +50,7 @@
 void		CABufferList::AllocateBuffers(UInt32 nBytes)
 {
 	if (nBytes <= GetNumBytes()) return;
-	
+
 	if (mNumberBuffers > 1)
 		// align successive buffers for Altivec and to take alternating
 		// cache line hits by spacing them by odd multiples of 16
@@ -58,7 +58,7 @@ void		CABufferList::AllocateBuffers(UInt32 nBytes)
 	UInt32 memorySize = nBytes * mNumberBuffers;
 	Byte *newMemory = new Byte[memorySize], *p = newMemory;
 	memset(newMemory, 0, memorySize);	// get page faults now, not later
-	
+
 	AudioBuffer *buf = mBuffers;
 	for (UInt32 i = mNumberBuffers; i--; ++buf) {
 		if (buf->mData != NULL && buf->mDataByteSize > 0)
@@ -83,7 +83,7 @@ void		CABufferList::AllocateBuffersAndCopyFrom(UInt32 nBytes, CABufferList *inSr
 	}
 	inSetPtrList->VerifyNotTrashingOwnedBuffer();
 	UInt32 fromByteSize = inSrcList->GetNumBytes();
-	
+
 	if (mNumberBuffers > 1)
 		// align successive buffers for Altivec and to take alternating
 		// cache line hits by spacing them by odd multiples of 16
@@ -91,7 +91,7 @@ void		CABufferList::AllocateBuffersAndCopyFrom(UInt32 nBytes, CABufferList *inSr
 	UInt32 memorySize = nBytes * mNumberBuffers;
 	Byte *newMemory = new Byte[memorySize], *p = newMemory;
 	memset(newMemory, 0, memorySize);	// make buffer "hot"
-	
+
 	AudioBuffer *buf = mBuffers;
 	AudioBuffer *ptrBuf = inSetPtrList->mBuffers;
 	AudioBuffer *srcBuf = inSrcList->mBuffers;

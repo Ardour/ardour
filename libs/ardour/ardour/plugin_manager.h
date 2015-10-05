@@ -135,7 +135,7 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 
 	int windows_vst_discover_from_path (std::string path, bool cache_only = false);
 	int windows_vst_discover (std::string path, bool cache_only = false);
-	
+
 	int lxvst_discover_from_path (std::string path, bool cache_only = false);
 	int lxvst_discover (std::string path, bool cache_only = false);
 

@@ -108,7 +108,7 @@ TextViewer::scroll_to_bottom ()
  	adj = scrollwin.get_vadjustment();
  	adj->set_value (MAX(0,(adj->get_upper() - adj->get_page_size())));
 }
-	
+
 void
 TextViewer::deliver ()
 
