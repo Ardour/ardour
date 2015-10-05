@@ -25,8 +25,8 @@
 #include <cmath>
 #include <iomanip>
 #include <algorithm>
-#include <fstream>
 
+#include <pbd/gstdio_compat.h>
 #include <glibmm/threads.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -187,27 +187,23 @@ Source::set_been_analysed (bool yn)
 int
 Source::load_transients (const string& path)
 {
-	ifstream file (path.c_str());
-
-	if (!file) {
+	FILE *tf;
+	if (! (tf = g_fopen (path.c_str (), "rb"))) {
 		return -1;
 	}
 
 	transients.clear ();
-
-	stringstream strstr;
-	double val;
-
-	while (file.good()) {
-		file >> val;
-
-		if (!file.fail()) {
-			framepos_t frame = (framepos_t) floor (val * _session.frame_rate());
-			transients.push_back (frame);
+	while (!feof (tf) && !ferror(tf)) {
+		double val;
+		if (1 != fscanf (tf, "%lf", &val)) {
+			break;
 		}
+
+		framepos_t frame = (framepos_t) floor (val * _session.frame_rate());
+		transients.push_back (frame);
 	}
 
-	return 0;
+	::fclose (tf);
 }
 
 string

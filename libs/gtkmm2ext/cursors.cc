@@ -18,8 +18,8 @@
 */
 
 #include <sstream>
-#include <fstream>
 
+#include "pbd/gstdio_compat.h"
 #include "pbd/error.h"
 #include "pbd/compose.h"
 
@@ -41,13 +41,13 @@ CursorInfo::CursorInfo (const std::string& n, int hotspot_x, int hotspot_y)
 int
 CursorInfo::load_cursor_info (const std::string& path)
 {
-        std::ifstream infofile (path.c_str());
+	gchar *buf = NULL;
+	if (!g_file_get_contents (path.c_str(), &buf, NULL, NULL))  {
+		return -1;
+	}
+	std::stringstream infofile (buf);
+	g_free (buf);
 
-        if (!infofile) {
-                return -1;
-        }
-
-        std::stringstream s;
         std::string name;
         int x;
         int y;

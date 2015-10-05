@@ -38,10 +38,9 @@
 #include <portaudio.h>
 #endif
 
-#include <fstream>
-
 #include <boost/scoped_ptr.hpp>
 
+#include "pbd/gstdio_compat.h"
 #include <glibmm/miscutils.h>
 
 #include "pbd/epa.h"
@@ -927,15 +926,10 @@ ARDOUR::get_jack_server_user_config_file_path ()
 bool
 ARDOUR::write_jack_config_file (const std::string& config_file_path, const string& command_line)
 {
-	ofstream jackdrc (config_file_path.c_str());
-
-	if (!jackdrc) {
+	if (!g_file_set_contents (config_file_path.c_str(), command_line.c_str(), -1, NULL)) {
 		error << string_compose (_("cannot open JACK rc file %1 to store parameters"), config_file_path) << endmsg;
 		return false;
 	}
-
-	jackdrc << command_line << endl;
-	jackdrc.close ();
 	return true;
 }
 

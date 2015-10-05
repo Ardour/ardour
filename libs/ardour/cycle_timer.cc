@@ -86,7 +86,7 @@ StoringTimer::StoringTimer (int N)
 	_points = 0;
 }
 
-
+#ifndef NDEBUG
 void
 StoringTimer::dump (string const & file)
 {
@@ -98,6 +98,7 @@ StoringTimer::dump (string const & file)
 		f << _point[i] << " " << _ref[i] << " " << _value[i] << "\n";
 	}
 }
+#endif
 
 void
 StoringTimer::ref ()

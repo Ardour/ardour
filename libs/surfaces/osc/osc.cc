@@ -17,8 +17,6 @@
  *
  */
 
-#include <iostream>
-#include <fstream>
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
@@ -208,15 +206,8 @@ OSC::start ()
 	std::string url_file;
 
 	if (find_file (ardour_config_search_path(), "osc_url", url_file)) {
-
 		_osc_url_file = url_file;
-		ofstream urlfile;
-		urlfile.open(_osc_url_file.c_str(), ios::trunc);
-
-		if (urlfile) {
-			urlfile << get_server_url () << endl;
-			urlfile.close();
-		} else {
+		if (g_file_set_contents (_osc_url_file.c_str(), get_server_url().c_str(), -1, NULL)) {
 			cerr << "Couldn't write '" <<  _osc_url_file << "'" <<endl;
 		}
 	}

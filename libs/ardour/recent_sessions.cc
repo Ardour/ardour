@@ -19,8 +19,6 @@
 
 #include <cstring>
 #include <cerrno>
-#include <fstream>
-#include <iostream>
 #include <sstream>
 #include <algorithm>
 
@@ -163,12 +161,6 @@ ARDOUR::write_recent_sessions (RecentSessions& rs)
 
 	{
 		stringstream recent;
-		//ofstream recent (fout);
-
-		// if (!recent) {
-		// 	fclose (fout);
-		// 	return -1;
-		// }
 
 		for (RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
 			recent << (*i).first << '\n' << (*i).second << endl;

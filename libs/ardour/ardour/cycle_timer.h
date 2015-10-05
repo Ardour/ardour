@@ -70,7 +70,9 @@ public:
 	StoringTimer (int);
 	void ref ();
 	void check (int);
+#ifndef NDEBUG
 	void dump (std::string const &);
+#endif
 
 private:
 	cycles_t _current_ref;

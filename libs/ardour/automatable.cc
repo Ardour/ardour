@@ -17,10 +17,10 @@
 
 */
 
-#include <fstream>
 #include <cstdio>
 #include <errno.h>
 
+#include <pbd/gstdio_compat.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
@@ -98,7 +98,8 @@ Automatable::load_automation (const string& path)
 		fullpath = _a_session.automation_dir();
 		fullpath += path;
 	}
-	ifstream in (fullpath.c_str());
+
+	FILE * in = g_fopen (fullpath.c_str (), "rb");
 
 	if (!in) {
 		warning << string_compose(_("cannot open %2 to load automation data (%3)")
@@ -110,14 +111,17 @@ Automatable::load_automation (const string& path)
 	set<Evoral::Parameter> tosave;
 	controls().clear ();
 
-	while (in) {
+	while (!feof(in)) {
 		double when;
 		double value;
 		uint32_t port;
 
-		in >> port;  if (!in) break;
-		in >> when;  if (!in) goto bad;
-		in >> value; if (!in) goto bad;
+		if (3 != fscanf (in, "%d %lf %lf", &port, &when, &value)) {
+			if (feof(in)) {
+				break;
+			}
+			goto bad;
+		}
 
 		Evoral::Parameter param(PluginAutomation, 0, port);
 		/* FIXME: this is legacy and only used for plugin inserts?  I think? */
@@ -125,12 +129,14 @@ Automatable::load_automation (const string& path)
 		c->list()->add (when, value);
 		tosave.insert (param);
 	}
+	::fclose (in);
 
 	return 0;
 
   bad:
 	error << string_compose(_("cannot load automation data from %2"), fullpath) << endmsg;
 	controls().clear ();
+	::fclose (in);
 	return -1;
 }
 

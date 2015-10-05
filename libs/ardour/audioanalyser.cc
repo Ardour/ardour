@@ -102,7 +102,7 @@ AudioAnalyser::reset ()
 int
 AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 {
-	ofstream ofile;
+	stringstream outss;
 	Plugin::FeatureSet features;
 	int ret = -1;
 	bool done = false;
@@ -110,20 +110,6 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 	framecnt_t len = src->readable_length();
 	framepos_t pos = 0;
 	float* bufs[1] = { 0 };
-	string tmp_path;
-
-	if (!path.empty()) {
-
-		/* store data in tmp file, not the real one */
-
-		tmp_path = path;
-		tmp_path += ".tmp";
-
-		ofile.open (tmp_path.c_str());
-		if (!ofile) {
-			goto out;
-		}
-	}
 
 	data = new Sample[bufsize];
 	bufs[0] = data;
@@ -148,7 +134,7 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 
 		features = plugin->process (bufs, RealTime::fromSeconds ((double) pos / sample_rate));
 
-		if (use_features (features, (path.empty() ? 0 : &ofile))) {
+		if (use_features (features, (path.empty() ? 0 : &outss))) {
 			goto out;
 		}
 
@@ -163,21 +149,15 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 
 	features = plugin->getRemainingFeatures ();
 
-	if (use_features (features, (path.empty() ? &ofile : 0))) {
+	if (use_features (features, (path.empty() ? 0 : &outss))) {
 		goto out;
 	}
 
 	ret = 0;
 
   out:
-	/* works even if it has not been opened */
-	ofile.close ();
-
-	if (ret) {
-		g_remove (tmp_path.c_str());
-	} else if (!path.empty()) {
-		/* move the data file to the requested path */
-		g_rename (tmp_path.c_str(), path.c_str());
+	if (!ret) {
+		g_file_set_contents (path.c_str(), outss.str().c_str(), -1, NULL);
 	}
 
 	delete [] data;
