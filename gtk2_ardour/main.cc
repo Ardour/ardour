@@ -20,7 +20,6 @@
 #include <cstdlib>
 #include <signal.h>
 #include <cerrno>
-#include <fstream>
 #include <vector>
 
 #include <sigc++/bind.h>

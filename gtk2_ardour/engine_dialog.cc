@@ -20,7 +20,6 @@
 #include <exception>
 #include <vector>
 #include <cmath>
-#include <fstream>
 #include <map>
 
 #include <boost/scoped_ptr.hpp>

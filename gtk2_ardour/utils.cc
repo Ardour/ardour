@@ -26,7 +26,6 @@
 #include <cstring>
 #include <cctype>
 #include <cmath>
-#include <fstream>
 #include <list>
 #include <sys/stat.h>
 #include <gtkmm/rc.h>

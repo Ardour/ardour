@@ -26,7 +26,6 @@
 #include <sys/types.h>
 #include <cstdio>
 #include <cstdlib>
-#include <fstream>
 
 #include <glib.h>
 #include <pbd/gstdio_compat.h>

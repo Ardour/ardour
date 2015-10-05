@@ -22,14 +22,12 @@
 
 #include <cmath>
 #include <cerrno>
-#include <fstream>
 #include <cstdlib>
 #include <string>
 #include <cstdio>
 #include <locale.h>
 #include <unistd.h>
 #include <float.h>
-#include <iomanip>
 
 #include <glibmm.h>
 

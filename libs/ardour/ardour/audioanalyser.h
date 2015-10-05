@@ -22,8 +22,6 @@
 
 #include <vector>
 #include <string>
-#include <ostream>
-#include <fstream>
 #include <boost/utility.hpp>
 #include "vamp-sdk/Plugin.h"
 #include "ardour/libardour_visibility.h"

@@ -8,8 +8,6 @@
 #define __ardour_soundcloud_upload_h__
 
 #include <string>
-#include <fstream>
-#include <iostream>
 #include <stdio.h>
 #include <cstring>
 #include <string>

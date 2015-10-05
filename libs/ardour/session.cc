@@ -23,7 +23,6 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <fstream>
 #include <cstdio> /* sprintf(3) ... grrr */
 #include <cmath>
 #include <cerrno>

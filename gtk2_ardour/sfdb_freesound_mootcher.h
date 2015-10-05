@@ -32,8 +32,6 @@
 *****************************************************************************/
 
 #include <string>
-#include <fstream>
-#include <iostream>
 #include <stdio.h>
 #include <cstring>
 #include <string>

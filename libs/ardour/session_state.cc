@@ -25,7 +25,6 @@
 #include <stdint.h>
 
 #include <algorithm>
-#include <fstream>
 #include <string>
 #include <cerrno>
 #include <cstdio> /* snprintf(3) ... grrr */

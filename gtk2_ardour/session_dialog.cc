@@ -21,7 +21,6 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include <fstream>
 #include <algorithm>
 
 #include <glib.h>

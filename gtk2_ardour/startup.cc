@@ -22,7 +22,6 @@
 #include "gtk2ardour-version.h"
 #endif
 
-#include <fstream>
 #include <algorithm>
 #include <fcntl.h>
 

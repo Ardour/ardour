@@ -30,7 +30,6 @@
 
 #include <climits>
 #include <vector>
-#include <fstream>
 
 #include "boost/shared_ptr.hpp"
 

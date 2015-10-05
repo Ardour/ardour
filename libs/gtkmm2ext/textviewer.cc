@@ -18,8 +18,6 @@
 */
 
 #include <string>
-#include <fstream>
-
 #include <gtkmm2ext/textviewer.h>
 
 #include "i18n.h"

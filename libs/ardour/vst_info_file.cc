@@ -22,8 +22,6 @@
  *  e.g. its name, creator etc.
  */
 
-#include <iostream>
-#include <fstream>
 #include <cassert>
 
 #include <sys/types.h>

@@ -19,8 +19,6 @@
 */
 
 #include <string>
-#include <iostream>
-#include <fstream>
 #include <cstring>
 
 #ifdef PLATFORM_WINDOWS

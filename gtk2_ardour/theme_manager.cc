@@ -18,8 +18,6 @@
 */
 
 #include <cmath>
-#include <iostream>
-#include <fstream>
 #include <errno.h>
 
 #include "fix_carbon.h"
