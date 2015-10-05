@@ -235,7 +235,7 @@ esac
 
 if %REPLACE_GCC5%; then
 	# Ardour was compiled with gcc5, warn on gcc4 systems
-	if ! ${NORM_USER} "./.gcc-glibmm-abi-check --gcc5 > /dev/null"; then
+	if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc5 > /dev/null"; then
 		echo ""
 		echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
 		echo ""
@@ -250,7 +250,7 @@ if %REPLACE_GCC5%; then
 	fi
 else
 	# Ardour was compiled with gcc4, warn on gcc5 systems
-	if ! ${NORM_USER} "./.gcc-glibmm-abi-check --gcc4 > /dev/null"; then
+	if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc4 > /dev/null"; then
 		echo ""
 		echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
 		echo ""
