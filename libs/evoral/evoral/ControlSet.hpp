@@ -27,7 +27,6 @@
 #include "pbd/signals.h"
 
 #include "evoral/visibility.h"
-#include "evoral/types.hpp"
 #include "evoral/Parameter.hpp"
 #include "evoral/ControlList.hpp"
 

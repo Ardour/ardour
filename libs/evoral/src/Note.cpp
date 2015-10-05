@@ -23,6 +23,8 @@
 #include "evoral/Note.hpp"
 #endif
 
+#include "evoral/Beats.hpp"
+
 namespace Evoral {
 
 template<typename Time>

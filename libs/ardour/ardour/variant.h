@@ -27,7 +27,7 @@
 #include <stdexcept>
 
 #include "ardour/libardour_visibility.h"
-#include "evoral/types.hpp"
+#include "evoral/Beats.hpp"
 #include "pbd/compose.h"
 
 namespace ARDOUR {

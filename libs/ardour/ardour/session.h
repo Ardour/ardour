@@ -49,7 +49,7 @@
 
 #include "lua/luastate.h"
 
-#include "evoral/types.hpp"
+#include "evoral/Range.hpp"
 
 #include "midi++/types.h"
 #include "midi++/mmc.h"

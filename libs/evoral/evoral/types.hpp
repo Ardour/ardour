@@ -27,11 +27,7 @@
 #include <limits>
 #include <list>
 
-#include "pbd/debug.h"
-
-#include "evoral/Beats.hpp"
 #include "evoral/visibility.h"
-
 #include "pbd/debug.h"
 
 namespace Evoral {
@@ -43,6 +39,8 @@ typedef int32_t event_id_t;
 
 /** Type of an event (opaque, mapped by application) */
 typedef uint32_t EventType;
+
+class Beats;
 
 } // namespace Evoral
 

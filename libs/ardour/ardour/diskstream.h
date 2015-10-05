@@ -29,7 +29,7 @@
 
 #include <boost/utility.hpp>
 
-#include "evoral/types.hpp"
+#include "evoral/Range.hpp"
 
 #include "ardour/ardour.h"
 #include "ardour/chan_count.h"

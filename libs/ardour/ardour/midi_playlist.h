@@ -30,12 +30,12 @@
 #include "ardour/midi_state_tracker.h"
 #include "ardour/note_fixer.h"
 #include "ardour/playlist.h"
-#include "evoral/Beats.hpp"
 #include "evoral/Note.hpp"
 #include "evoral/Parameter.hpp"
 
 namespace Evoral {
 template<typename Time> class EventSink;
+class                         Beats;
 }
 
 namespace ARDOUR

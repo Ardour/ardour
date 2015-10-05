@@ -28,7 +28,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
-#include "evoral/types.hpp"
+#include "evoral/Beats.hpp"
 
 #include "pbd/xml++.h"
 #include "pbd/basename.h"

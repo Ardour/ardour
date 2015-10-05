@@ -17,7 +17,9 @@
  */
 
 #include <glib.h>
+
 #include "evoral/Event.hpp"
+#include "evoral/Beats.hpp"
 
 namespace Evoral {
 

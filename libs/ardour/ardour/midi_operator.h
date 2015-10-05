@@ -23,7 +23,7 @@
 #include <vector>
 #include <string>
 
-#include "evoral/types.hpp"
+#include "evoral/Beats.hpp"
 #include "evoral/Sequence.hpp"
 
 class Command;

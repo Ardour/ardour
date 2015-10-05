@@ -25,14 +25,13 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
 
-#include "evoral/types.hpp"
-
 #include "ardour/session_handle.h"
 
 #include "ardour_window.h"
 
 namespace Evoral {
 	template<typename Time> class Note;
+	class                         Beats;
 };
 
 namespace ARDOUR {

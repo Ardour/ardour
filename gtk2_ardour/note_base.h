@@ -23,7 +23,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "canvas/types.h"
-#include "evoral/types.hpp"
 
 #include "rgb_macros.h"
 #include "ui_config.h"
@@ -33,6 +32,7 @@ class MidiRegionView;
 
 namespace Evoral {
 	template<typename T> class Note;
+	class Beats;
 }
 
 namespace ArdourCanvas {

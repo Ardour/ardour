@@ -28,7 +28,6 @@
 #include <glibmm/threads.h>
 
 #include "evoral/visibility.h"
-#include "evoral/types.hpp"
 #include "evoral/Note.hpp"
 #include "evoral/ControlSet.hpp"
 #include "evoral/ControlList.hpp"

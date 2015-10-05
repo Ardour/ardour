@@ -19,8 +19,8 @@
     $Id: midiregion.h 733 2006-08-01 17:19:38Z drobilla $
 */
 
+#include "evoral/Beats.hpp"
 #include "evoral/TimeConverter.hpp"
-#include "evoral/types.hpp"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"

@@ -23,7 +23,7 @@
 
 #include <vector>
 
-#include "evoral/types.hpp"
+#include "evoral/Beats.hpp"
 
 #include "ardour/ardour.h"
 #include "ardour/region.h"

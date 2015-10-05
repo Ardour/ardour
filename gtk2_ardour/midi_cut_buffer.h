@@ -19,7 +19,7 @@
 #ifndef __gtk_ardour_midi_cut_buffer_h__
 #define __gtk_ardour_midi_cut_buffer_h__
 
-#include "evoral/types.hpp"
+#include "evoral/Beats.hpp"
 
 #include "ardour/automatable_sequence.h"
 

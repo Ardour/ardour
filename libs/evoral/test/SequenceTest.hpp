@@ -2,6 +2,7 @@
 #include <sigc++/sigc++.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include "evoral/Beats.hpp"
 #include "evoral/Sequence.hpp"
 #include "evoral/TypeMap.hpp"
 #include "evoral/EventSink.hpp"

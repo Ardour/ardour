@@ -27,7 +27,6 @@
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/spinbutton.h>
 
-#include "evoral/types.hpp"
 #include "ardour/types.h"
 
 #include "ardour_dialog.h"

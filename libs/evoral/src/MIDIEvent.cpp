@@ -17,6 +17,7 @@
  */
 
 #include <string>
+#include "evoral/Beats.hpp"
 #include "evoral/MIDIEvent.hpp"
 #ifdef EVORAL_MIDI_XML
 	#include "pbd/xml++.h"

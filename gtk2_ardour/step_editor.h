@@ -25,7 +25,7 @@
 #include <sigc++/trackable.h>
 
 #include "pbd/signals.h"
-#include "evoral/types.hpp"
+#include "evoral/Beats.hpp"
 
 namespace ARDOUR {
 class MidiTrack;

@@ -25,7 +25,7 @@
 
 #include <glibmm/threads.h>
 #include "pbd/xml++.h"
-#include "evoral/types.hpp"
+#include "evoral/Beats.hpp"
 #include "ardour/debug.h"
 #include "ardour/lmath.h"
 #include "ardour/tempo.h"

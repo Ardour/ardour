@@ -38,7 +38,7 @@
 #include "pbd/sequence_property.h"
 #include "pbd/stacktrace.h"
 
-#include "evoral/types.hpp"
+#include "evoral/Range.hpp"
 
 #include "ardour/ardour.h"
 #include "ardour/region.h"

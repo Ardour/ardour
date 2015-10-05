@@ -18,6 +18,7 @@
 
 #include <limits.h>
 
+#include "evoral/Beats.hpp"
 #include "evoral/types.hpp"
 
 namespace Evoral {

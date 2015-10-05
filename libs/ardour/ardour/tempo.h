@@ -30,7 +30,7 @@
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 
-#include "evoral/types.hpp"
+#include "evoral/Beats.hpp"
 
 #include "ardour/ardour.h"
 

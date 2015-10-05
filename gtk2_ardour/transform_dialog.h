@@ -31,7 +31,6 @@
 #include "ardour/midi_model.h"
 #include "ardour/transform.h"
 #include "ardour/types.h"
-#include "evoral/types.hpp"
 
 #include "ardour_dialog.h"
 

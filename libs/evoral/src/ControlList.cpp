@@ -36,6 +36,7 @@
 #include "evoral/Curve.hpp"
 #include "evoral/ParameterDescriptor.hpp"
 #include "evoral/TypeMap.hpp"
+#include "evoral/types.hpp"
 
 #include "pbd/compose.h"
 #include "pbd/debug.h"

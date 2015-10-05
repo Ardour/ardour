@@ -20,10 +20,9 @@
 
 #include <list>
 
-#include "evoral/visibility.h"
-#include "evoral/EventSink.hpp"
-#include "evoral/types.hpp"
 #include "evoral/Event.hpp"
+#include "evoral/EventSink.hpp"
+#include "evoral/visibility.h"
 
 namespace Evoral {
 

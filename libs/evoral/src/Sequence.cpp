@@ -31,6 +31,7 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 
+#include "evoral/Beats.hpp"
 #include "evoral/Control.hpp"
 #include "evoral/ControlList.hpp"
 #include "evoral/ControlSet.hpp"
