@@ -34,6 +34,7 @@ VENDOR=Ardour ;
 EXENAME=ardour
 GCC5ABI=false
 BUILDTYPE=""
+NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libevoral"
 
 
 if [ $# -eq 0 ] ; then
@@ -243,7 +244,7 @@ rm $ENVIRONMENT && chmod 775 $APPBIN/${EXENAME}${major_version}
 echo "Copying ardour executable ...."
 cp -v $BUILD_ROOT/gtk2_ardour/ardour-${release_version} $APPBIN/${EXENAME}-${release_version}
 if test x$STRIP = xall ; then
-	strip $APPBIN/${EXENAME}-${release_version}
+	strip -s $APPBIN/${EXENAME}-${release_version}
 fi
 
 # copy locale files
@@ -403,16 +404,25 @@ fi
 #  neither binary nor script exists)
 if test -d $BUILD_ROOT/libs/fst ; then
     cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $APPLIB || true
+    if test x$STRIP = xall ; then
+        strip -s $APPLIB/ardour-vst-scanner*
+    fi
 fi
 
 # vfork wrapper
 if test -f $BUILD_ROOT/libs/vfork/ardour-exec-wrapper ; then
     cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $APPLIB
+    if test x$STRIP = xall ; then
+        strip -s $APPLIB/ardour-exec-wrapper
+    fi
 fi
 
 # ALSA device reservation tool (if available)
 if test -f $BUILD_ROOT/libs/ardouralsautil/ardour-request-device; then
     cp $BUILD_ROOT/libs/ardouralsautil/ardour-request-device $APPLIB/ || true
+    if test x$STRIP = xall ; then
+        strip -s $APPLIB/ardour-request-device
+    fi
 fi
 
 OURLIBDIR=$BUILD_ROOT/libs
@@ -521,6 +531,9 @@ if test x$STRIP = xall ; then
 elif test x$STRIP = xsome ; then
     echo Stripping dependent libraries
     for l in $deplibs ; do
+        if echo "$l" | grep -qE "$NOSTRIP"; then
+            continue
+        fi
         chmod u+w $APPLIB/$l
         strip -s $APPLIB/$l
     done
