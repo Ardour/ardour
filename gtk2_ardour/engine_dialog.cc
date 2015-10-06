@@ -1016,6 +1016,11 @@ EngineControl::backend_changed ()
 	 */
 	engine_stopped (); // set "active/inactive"
 
+	if (!_have_control) {
+		// set settings from backend that we do have control over
+		set_active_text_if_present (buffer_size_combo, bufsize_as_string (backend->buffer_size()));
+	}
+
 	if (!ignore_changes) {
 		maybe_display_saved_state ();
 	}
@@ -2014,6 +2019,13 @@ EngineControl::set_current_state (const State& state)
 	// now reflect the change in the backend in the GUI so backend_changed will
 	// do the right thing
 	backend_combo.set_active_text (state->backend);
+
+	if (!ARDOUR::AudioEngine::instance()->setup_required ()) {
+		backend_changed ();
+		// we don't have control don't restore state
+		return true;
+	}
+
 
 	if (!state->driver.empty ()) {
 		if (!backend->requires_driver_selection ()) {
