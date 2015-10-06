@@ -816,6 +816,42 @@ Route::solo_safe() const
 }
 
 void
+Route::clear_all_solo_state ()
+{
+	// ideally this function will never do anything, it only exists to forestall Murphy
+	bool emit_changed = false;
+	bool old_safe = _solo_safe;
+
+#ifndef NDEBUG
+	// these are really debug messages, but of possible interest.
+	if (_self_solo) {
+		PBD::info << string_compose (_("Cleared Explicit solo: %1\n"), name());
+	}
+	if (_soloed_by_others_upstream || _soloed_by_others_downstream) {
+		PBD::info << string_compose (_("Cleared Implicit solo: %1 up:%2 down:%3\n"),
+				name(), _soloed_by_others_upstream, _soloed_by_others_downstream);
+	}
+#endif
+
+	if (!_self_solo && (_soloed_by_others_upstream || _soloed_by_others_downstream)) {
+		// if self-soled, set_solo() will do signal emission
+		emit_changed = true;
+	}
+
+	_soloed_by_others_upstream = 0;
+	_soloed_by_others_downstream = 0;
+
+	_solo_safe = false; // allow set_solo() to do its job;
+	set_solo (false, this);
+	_solo_safe = old_safe;
+
+	if (emit_changed) {
+		set_mute_master_solo ();
+		solo_changed (false, this); /* EMIT SIGNAL */
+	}
+}
+
+void
 Route::set_solo (bool yn, void *src)
 {
 	if (_solo_safe) {
@@ -916,7 +952,7 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 	}
 
 	set_mute_master_solo ();
-	solo_changed (false, this);
+	solo_changed (false, this); /* EMIT SIGNAL */
 }
 
 void
@@ -938,7 +974,7 @@ Route::mod_solo_by_others_downstream (int32_t delta)
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 SbD delta %2 = %3\n", name(), delta, _soloed_by_others_downstream));
 
 	set_mute_master_solo ();
-	solo_changed (false, this);
+	solo_changed (false, this); /* EMIT SIGNAL */
 }
 
 void
@@ -968,7 +1004,7 @@ Route::mod_solo_isolated_by_upstream (bool yn, void* src)
 	if (solo_isolated() != old) {
 		/* solo isolated status changed */
 		_mute_master->set_solo_ignore (solo_isolated());
-		solo_isolated_changed (src);
+		solo_isolated_changed (src); /* EMIT SIGNAL */
 	}
 }
 
@@ -1024,7 +1060,7 @@ Route::set_solo_isolated (bool yn, void *src)
 
 	/* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
 
-	solo_isolated_changed (src);
+	solo_isolated_changed (src); /* EMIT SIGNAL */
 }
 
 bool

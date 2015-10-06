@@ -736,6 +736,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	static const SessionEvent::RTeventCallback rt_cleanup;
 
 	void set_solo (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
+	void clear_all_solo_state (boost::shared_ptr<RouteList>);
 	void set_just_one_solo (boost::shared_ptr<Route>, bool, SessionEvent::RTeventCallback after = rt_cleanup);
 	void set_mute (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_listen (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
@@ -1774,6 +1775,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	}
 
 	void rt_set_solo (boost::shared_ptr<RouteList>, bool yn, bool group_override);
+	void rt_clear_all_solo_state (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_just_one_solo (boost::shared_ptr<RouteList>, bool yn, bool /* ignored*/ );
 	void rt_set_mute (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_listen (boost::shared_ptr<RouteList>, bool yn, bool group_override);

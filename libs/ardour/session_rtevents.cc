@@ -54,10 +54,29 @@ Session::rt_set_monitoring (boost::shared_ptr<RouteList> rl, MonitorChoice mc, b
 }
 
 void
+Session::clear_all_solo_state (boost::shared_ptr<RouteList> rl)
+{
+	queue_event (get_rt_event (rl, false, rt_cleanup, false, &Session::rt_clear_all_solo_state));
+}
+
+void
+Session::rt_clear_all_solo_state (boost::shared_ptr<RouteList> rl, bool /* yn */, bool /* group_override */)
+{
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		if ((*i)->is_auditioner()) {
+			continue;
+		}
+		(*i)->clear_all_solo_state();
+	}
+	set_dirty();
+}
+
+void
 Session::set_solo (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
 {
 	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_solo));
 }
+
 
 void
 Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, bool /* group_override */)
