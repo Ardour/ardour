@@ -862,11 +862,6 @@ Route::set_self_solo (bool yn)
 void
 Route::mod_solo_by_others_upstream (int32_t delta)
 {
-	if (_solo_safe) {
-		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 ignore solo-by-upstream due to solo-safe\n", name()));
-		return;
-	}
-
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod solo-by-upstream by %2, current up = %3 down = %4\n",
 						  name(), delta, _soloed_by_others_upstream, _soloed_by_others_downstream));
 
@@ -922,11 +917,6 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 void
 Route::mod_solo_by_others_downstream (int32_t delta)
 {
-	if (_solo_safe) {
-		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 ignore solo-by-downstream due to solo safe\n", name()));
-		return;
-	}
-
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod solo-by-downstream by %2, current up = %3 down = %4\n",
 						  name(), delta, _soloed_by_others_upstream, _soloed_by_others_downstream));
 
