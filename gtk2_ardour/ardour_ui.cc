@@ -4933,5 +4933,7 @@ ARDOUR_UI::cancel_solo ()
 		} else if (_session->listening()) {
 			_session->set_listen (_session->get_routes(), false);
 		}
+
+		_session->clear_all_solo_state (_session->get_routes()); // safeguard, ideally this won't do anything, check the log-window
 	}
 }
