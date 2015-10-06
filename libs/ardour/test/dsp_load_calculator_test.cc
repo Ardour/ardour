@@ -6,6 +6,22 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION (DSPLoadCalculatorTest);
 
+
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+/* cppunit-1.13.2  uses assertion_traits<double>
+ *    sprintf( , "%.*g", precision, x)
+ * to format a double. The actual comparison is performed on a string.
+ * This is problematic with mingw/windows|wine, "%.*g" formatting fails.
+ *
+ * This quick hack compares float, however float compatisons are at most Y.MMMM+eXX,
+ * the max precision needs to be limited. to the last mantissa digit.
+ *
+ * Anyway, actual maths is verified with Linux and OSX unit-tests,
+ * and this needs to go to https://sourceforge.net/p/cppunit/bugs/
+ */
+#define CPPUNIT_ASSERT_DOUBLES_EQUAL(A,B,P) CPPUNIT_ASSERT_EQUAL((float)rint ((A) / (P)),(float)rint ((B) / (P)))
+#endif
+
 using namespace std;
 using namespace ARDOUR;
 
