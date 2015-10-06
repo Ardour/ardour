@@ -3582,7 +3582,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		/* new solo: disable all other solos, but not the group if its solo-enabled */
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() ||
+			if ((*i) == route || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() ||
 			    (leave_group_alone && ((*i)->route_group() == rg))) {
 				continue;
 			}
@@ -3600,7 +3600,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		bool via_sends_only;
 		bool in_signal_flow;
 
-		if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() ||
+		if ((*i) == route || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() ||
 		    (leave_group_alone && ((*i)->route_group() == rg))) {
 			continue;
 		}
