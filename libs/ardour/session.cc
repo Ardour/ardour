@@ -3614,6 +3614,8 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 			if (!via_sends_only) {
 				if (!route->soloed_by_others_upstream()) {
 					(*i)->mod_solo_by_others_downstream (delta);
+				} else {
+					DEBUG_TRACE (DEBUG::Solo, "\talready soloed by others upstream\n");
 				}
 			} else {
 				DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a send-only feed from %1\n", (*i)->name()));
@@ -3638,12 +3640,9 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 								  route->soloed_by_others_downstream(),
 								  route->soloed_by_others_upstream()));
 			if (!via_sends_only) {
-				if (!route->soloed_by_others_downstream()) {
-					DEBUG_TRACE (DEBUG::Solo, string_compose ("\tmod %1 by %2\n", (*i)->name(), delta));
-					(*i)->mod_solo_by_others_upstream (delta);
-				} else {
-					DEBUG_TRACE (DEBUG::Solo, "\talready soloed by others downstream\n");
-				}
+				//NB. Triggers Invert Push, which handles soloed by downstream
+				DEBUG_TRACE (DEBUG::Solo, string_compose ("\tmod %1 by %2\n", (*i)->name(), delta));
+				(*i)->mod_solo_by_others_upstream (delta);
 			} else {
 				DEBUG_TRACE (DEBUG::Solo, string_compose ("\tfeed to %1 ignored, sends-only\n", (*i)->name()));
 			}
