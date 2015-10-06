@@ -70,8 +70,8 @@ WinMMEMidiOutputDevice::~WinMMEMidiOutputDevice ()
 
 bool
 WinMMEMidiOutputDevice::enqueue_midi_event (uint64_t timestamp,
-                                            const uint8_t* data,
-                                            size_t size)
+					    const uint8_t* data,
+					    size_t size)
 {
 	const uint32_t total_bytes = sizeof(MidiEventHeader) + size;
 	if (m_midi_buffer->write_space () < total_bytes) {
@@ -91,10 +91,10 @@ bool
 WinMMEMidiOutputDevice::open (UINT index, std::string& error_msg)
 {
 	MMRESULT result = midiOutOpen (&m_handle,
-	                               index,
-	                               (DWORD_PTR)winmm_output_callback,
-	                               (DWORD_PTR) this,
-	                               CALLBACK_FUNCTION);
+				       index,
+				       (DWORD_PTR)winmm_output_callback,
+				       (DWORD_PTR) this,
+				       CALLBACK_FUNCTION);
 	if (result != MMSYSERR_NOERROR) {
 		error_msg = get_error_string (result);
 		return false;
@@ -246,7 +246,7 @@ WinMMEMidiOutputDevice::start_midi_output_thread ()
 	while (!m_thread_running && --timeout > 0) { Glib::usleep (1000); }
 	if (timeout == 0 || !m_thread_running) {
 		DEBUG_MIDI (string_compose ("Unable to start midi output device thread: %1\n",
-		                            m_name));
+					    m_name));
 		return false;
 	}
 	return true;
@@ -262,14 +262,14 @@ WinMMEMidiOutputDevice::stop_midi_output_thread ()
 	while (m_thread_running && --timeout > 0) { Glib::usleep (1000); }
 	if (timeout == 0 || m_thread_running) {
 		DEBUG_MIDI (string_compose ("Unable to stop midi output device thread: %1\n",
-		                             m_name));
+					     m_name));
 		return false;
 	}
 
 	void *status;
 	if (pthread_join (m_output_thread_handle, &status)) {
 		DEBUG_MIDI (string_compose ("Unable to join midi output device thread: %1\n",
-		                            m_name));
+					    m_name));
 		return false;
 	}
 	return true;
@@ -303,10 +303,10 @@ WinMMEMidiOutputDevice::wait (HANDLE semaphore)
 
 void CALLBACK
 WinMMEMidiOutputDevice::winmm_output_callback (HMIDIOUT handle,
-                                               UINT msg,
-                                               DWORD_PTR instance,
-                                               DWORD_PTR midi_data,
-                                               DWORD_PTR timestamp)
+					       UINT msg,
+					       DWORD_PTR instance,
+					       DWORD_PTR midi_data,
+					       DWORD_PTR timestamp)
 {
 	((WinMMEMidiOutputDevice*)instance)
 	    ->midi_output_callback (msg, midi_data, timestamp);
@@ -314,8 +314,8 @@ WinMMEMidiOutputDevice::winmm_output_callback (HMIDIOUT handle,
 
 void
 WinMMEMidiOutputDevice::midi_output_callback (UINT message,
-                                              DWORD_PTR midi_data,
-                                              DWORD_PTR timestamp)
+					      DWORD_PTR midi_data,
+					      DWORD_PTR timestamp)
 {
 	switch (message) {
 	case MOM_CLOSE:
@@ -330,9 +330,9 @@ WinMMEMidiOutputDevice::midi_output_callback (UINT message,
 	case MOM_POSITIONCB:
 		LPMIDIHDR header = (LPMIDIHDR)midi_data;
 		DEBUG_MIDI (string_compose ("WinMMEMidiOut - %1 bytes out of %2 bytes of "
-		                            "the current sysex message have been sent.\n",
-		                            header->dwOffset,
-		                            header->dwBytesRecorded));
+					    "the current sysex message have been sent.\n",
+					    header->dwOffset,
+					    header->dwBytesRecorded));
 	}
 }
 
@@ -360,13 +360,18 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 
 	while (!m_thread_quit) {
 		if (!wait (m_queue_semaphore)) {
+			DEBUG_MIDI ("WinMMEMidiOut: output thread waiting for semaphore failed\n");
 			break;
 		}
+
+		DEBUG_MIDI ("WinMMEMidiOut: output thread woken by semaphore\n");
 
 		MidiEventHeader h (0, 0);
 		uint8_t data[MAX_MIDI_MSG_SIZE];
 
 		const uint32_t read_space = m_midi_buffer->read_space ();
+
+		DEBUG_MIDI (string_compose ("WinMMEMidiOut: total readable MIDI data %1\n", read_space));
 
 		if (read_space > sizeof(MidiEventHeader)) {
 			if (m_midi_buffer->read ((uint8_t*)&h, sizeof(MidiEventHeader)) !=
@@ -398,9 +403,9 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 		if (h.time > current_time) {
 
 			DEBUG_TIMING (string_compose ("WinMMEMidiOut: waiting at %1 for %2 "
-			                              "milliseconds before sending message\n",
-			                              ((double)current_time) / 1000.0,
-			                              ((double)(h.time - current_time)) / 1000.0));
+						      "milliseconds before sending message\n",
+						      ((double)current_time) / 1000.0,
+						      ((double)(h.time - current_time)) / 1000.0));
 
 			if (!wait_for_microseconds (h.time - current_time))
 			{
@@ -410,13 +415,13 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 
 			uint64_t wakeup_time = PBD::get_microseconds ();
 			DEBUG_TIMING (string_compose ("WinMMEMidiOut: woke up at %1(ms)\n",
-			                              ((double)wakeup_time) / 1000.0));
+						      ((double)wakeup_time) / 1000.0));
 			if (wakeup_time > h.time) {
 				DEBUG_TIMING (string_compose ("WinMMEMidiOut: overslept by %1(ms)\n",
-				                              ((double)(wakeup_time - h.time)) / 1000.0));
+							      ((double)(wakeup_time - h.time)) / 1000.0));
 			} else if (wakeup_time < h.time) {
 				DEBUG_TIMING (string_compose ("WinMMEMidiOut: woke up %1(ms) too early\n",
-				                              ((double)(h.time - wakeup_time)) / 1000.0));
+							      ((double)(h.time - wakeup_time)) / 1000.0));
 			}
 
 		} else if (h.time < current_time) {
@@ -424,6 +429,8 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 			    "WinMMEMidiOut: MIDI event at sent to driver %1(ms) late\n",
 			    ((double)(current_time - h.time)) / 1000.0));
 		}
+
+		DEBUG_MIDI (string_compose ("WinMMEMidiOut: MIDI event size: %1 time %2 now %3\n", h.size, h.time, current_time));
 
 		DWORD message = 0;
 		MMRESULT result;
@@ -452,28 +459,32 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 		result = midiOutPrepareHeader (m_handle, &header, sizeof(MIDIHDR));
 		if (result != MMSYSERR_NOERROR) {
 			DEBUG_MIDI (string_compose ("WinMMEMidiOutput: midiOutPrepareHeader %1\n",
-			                            get_error_string (result)));
+						    get_error_string (result)));
 			continue;
 		}
 
 		result = midiOutLongMsg (m_handle, &header, sizeof(MIDIHDR));
 		if (result != MMSYSERR_NOERROR) {
 			DEBUG_MIDI (string_compose ("WinMMEMidiOutput: midiOutLongMsg %1\n",
-			                            get_error_string (result)));
+						    get_error_string (result)));
 			continue;
 		}
 
 		// Sysex messages may be sent synchronously or asynchronously.  The
 		// choice is up to the WinMME driver.  So, we wait until the message is
 		// sent, regardless of the driver's choice.
+
+		DEBUG_MIDI ("WinMMEMidiOut: wait for sysex semaphore\n");
+
 		if (!wait (m_sysex_semaphore)) {
+			DEBUG_MIDI ("WinMMEMidiOut: wait for sysex semaphore - failed!\n");
 			break;
 		}
 
 		result = midiOutUnprepareHeader (m_handle, &header, sizeof(MIDIHDR));
 		if (result != MMSYSERR_NOERROR) {
 			DEBUG_MIDI (string_compose ("WinMMEMidiOutput: midiOutUnprepareHeader %1\n",
-			                            get_error_string (result)));
+						    get_error_string (result)));
 			break;
 		}
 	}
