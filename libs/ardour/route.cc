@@ -843,6 +843,8 @@ Route::set_solo (bool yn, void *src)
 		_solo_control->Changed (); /* EMIT SIGNAL */
 	}
 
+	assert (Config->get_solo_control_is_listen_control() || !_monitor_send || !_monitor_send->active());
+
 	/* XXX TRACKS DEVELOPERS: THIS LOGIC SUGGESTS THAT YOU ARE NOT AWARE OF
 	   Config->get_solo_mute_overrride().
 	*/
@@ -3682,6 +3684,7 @@ Route::listen_position_changed ()
 		ProcessorState pstate (this);
 
 		if (configure_processors_unlocked (0)) {
+			DEBUG_TRACE (DEBUG::Processors, "---- CONFIGURATION FAILED.\n");
 			pstate.restore ();
 			configure_processors_unlocked (0); // it worked before we tried to add it ...
 			return;
@@ -4548,34 +4551,29 @@ Route::setup_invisible_processors ()
 
 	if (_monitor_send && !is_monitor ()) {
 		assert (!_monitor_send->display_to_user ());
-		if (Config->get_solo_control_is_listen_control()) {
-			switch (Config->get_listen_position ()) {
-			case PreFaderListen:
-				switch (Config->get_pfl_position ()) {
-				case PFLFromBeforeProcessors:
-					new_processors.push_front (_monitor_send);
-					break;
-				case PFLFromAfterProcessors:
-					new_processors.insert (amp, _monitor_send);
-					break;
-				}
-				_monitor_send->set_can_pan (false);
+		switch (Config->get_listen_position ()) {
+		case PreFaderListen:
+			switch (Config->get_pfl_position ()) {
+			case PFLFromBeforeProcessors:
+				new_processors.push_front (_monitor_send);
 				break;
-			case AfterFaderListen:
-				switch (Config->get_afl_position ()) {
-				case AFLFromBeforeProcessors:
-					new_processors.insert (after_amp, _monitor_send);
-					break;
-				case AFLFromAfterProcessors:
-					new_processors.insert (new_processors.end(), _monitor_send);
-					break;
-				}
-				_monitor_send->set_can_pan (true);
+			case PFLFromAfterProcessors:
+				new_processors.insert (amp, _monitor_send);
 				break;
 			}
-		}  else {
-			new_processors.insert (new_processors.end(), _monitor_send);
 			_monitor_send->set_can_pan (false);
+			break;
+		case AfterFaderListen:
+			switch (Config->get_afl_position ()) {
+			case AFLFromBeforeProcessors:
+				new_processors.insert (after_amp, _monitor_send);
+				break;
+			case AFLFromAfterProcessors:
+				new_processors.insert (new_processors.end(), _monitor_send);
+				break;
+			}
+			_monitor_send->set_can_pan (true);
+			break;
 		}
 	}
 
