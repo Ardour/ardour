@@ -37,6 +37,7 @@ namespace ARDOUR {
 WinMMEMidiInputDevice::WinMMEMidiInputDevice (int index)
 	: m_handle(0)
 	, m_started(false)
+	, m_in_reset(false)
 	, m_midi_buffer(new RingBuffer<uint8_t>(MIDI_BUFFER_SIZE))
 	, m_sysex_buffer(new uint8_t[SYSEX_BUFFER_SIZE])
 {
@@ -92,12 +93,14 @@ WinMMEMidiInputDevice::close (std::string& error_msg)
 	// return error message for first error encountered?
 	bool success = true;
 
+	m_in_reset = true;
 	MMRESULT result = midiInReset (m_handle);
 	if (result != MMSYSERR_NOERROR) {
 		error_msg = get_error_string (result);
 		DEBUG_MIDI (error_msg);
 		success = false;
 	}
+	m_in_reset = false;
 	result = midiInUnprepareHeader (m_handle, &m_sysex_header, sizeof(MIDIHDR));
 	if (result != MMSYSERR_NOERROR) {
 		error_msg = get_error_string (result);
@@ -258,11 +261,18 @@ WinMMEMidiInputDevice::handle_sysex_msg (MIDIHDR* const midi_header,
 
 	uint8_t* data = (uint8_t*)header->lpData;
 
-	if ((data[0] != 0xf0) || (data[byte_count - 1] != 0xf7)) {
-		DEBUG_MIDI (string_compose ("Discarding %1 byte sysex chunk\n", byte_count));
+	DEBUG_MIDI(string_compose("WinMME sysex flags: %1\n", header->dwFlags));
+
+	if (m_in_reset) {
+		DEBUG_MIDI(string_compose("Midi device %1 being reset ignoring sysex msg\n",
+		                          name()));
+		return;
+	} else if ((data[0] != 0xf0) || (data[byte_count - 1] != 0xf7)) {
+		DEBUG_MIDI(string_compose("Discarding %1 byte sysex chunk\n", byte_count));
 	} else {
 		enqueue_midi_msg (data, byte_count, timestamp);
 	}
+
 
 	MMRESULT result = midiInAddBuffer (m_handle, &m_sysex_header, sizeof(MIDIHDR));
 	if (result != MMSYSERR_NOERROR) {
