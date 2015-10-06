@@ -1067,12 +1067,16 @@ Route::muted () const
 bool
 Route::muted_by_others () const
 {
+	// This method is only used by route_ui for display state.
+	// The real thing is MuteMaster::muted_by_others_at()
+
 	//master is never muted by others
 	if (is_master())
 		return false;
 
 	//now check to see if something is soloed (and I am not)
-	return (_session.soloing() && !self_soloed() && !solo_isolated());
+	//see also MuteMaster::mute_gain_at()
+	return (_session.soloing() && !soloed() && !solo_isolated());
 }
 
 #if 0
