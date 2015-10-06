@@ -3396,19 +3396,6 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 	}
 }
 
-void
-Route::cancel_solo_after_disconnect (bool upstream)
-{
-	assert (0); // no longer used -- TODO remove cruft
-	if (upstream) {
-		_soloed_by_others_upstream = 0;
-	} else {
-		_soloed_by_others_downstream = 0;
-	}
-	set_mute_master_solo ();
-	solo_changed (false, this);
-}
-
 uint32_t
 Route::pans_required () const
 {
