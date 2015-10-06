@@ -3273,6 +3273,31 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 		} else {
 			cancel_solo_after_disconnect (true);
 		}
+#if 1
+	} else if (_soloed_by_others_upstream) {
+		bool cancel_solo = true;
+		boost::shared_ptr<RouteList> routes = _session.get_routes ();
+		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+			if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+				continue;
+			}
+			bool sends_only;
+			bool does_feed = (*i)->direct_feeds_according_to_reality (shared_from_this(), &sends_only);
+			if (does_feed && !sends_only) {
+				if ((*i)->soloed()) {
+					cancel_solo = false;
+					break;
+				}
+			}
+		}
+		if (cancel_solo) {
+			cancel_solo_after_disconnect (true);
+		}
+#else
+	} else if (self_soloed()) {
+#endif
+		// TODO propagate upstream
+		// see commment in output_change_handler() below
 	}
 }
 
@@ -3304,6 +3329,37 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 		} else {
 			cancel_solo_after_disconnect (false);
 		}
+#if 1
+	} else if (_soloed_by_others_downstream) {
+		bool cancel_solo = true;
+		/* checking all all downstream routes for
+		 * explicit of implict solo is a rather drastic measure,
+		 * ideally the input_change_handler() of the other route
+		 * would propagate the change to us.
+		 */
+		boost::shared_ptr<RouteList> routes = _session.get_routes ();
+		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+			if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+				continue;
+			}
+			bool sends_only;
+			bool does_feed = direct_feeds_according_to_reality (*i, &sends_only);
+			if (does_feed && !sends_only) {
+				if ((*i)->soloed()) {
+					cancel_solo = false;
+					break;
+				}
+			}
+		}
+		if (cancel_solo) {
+			cancel_solo_after_disconnect (false);
+		}
+#else
+	} else if (self_soloed()) {
+		// TODO propagate change downstream to the disconnected routes
+		// Q: how to get the routes that were just disconnected. ?
+		// A: /maybe/ by diff feeds() aka fed_by() vs direct_feeds_according_to_reality() ?!?
+#endif
 	}
 }
 
