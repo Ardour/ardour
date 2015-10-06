@@ -950,6 +950,8 @@ void
 Route::mod_solo_isolated_by_upstream (bool yn, void* src)
 {
 	bool old = solo_isolated ();
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod_solo_isolated_by_upstream cur: %2 d: %3\n",
+				name(), _solo_isolated_by_upstream, yn ? "+1" : "-1"));
 
 	if (!yn) {
 		if (_solo_isolated_by_upstream >= 1) {
@@ -963,7 +965,7 @@ Route::mod_solo_isolated_by_upstream (bool yn, void* src)
 
 	if (solo_isolated() != old) {
 		/* solo isolated status changed */
-		_mute_master->set_solo_ignore (yn);
+		_mute_master->set_solo_ignore (solo_isolated());
 		solo_isolated_changed (src);
 	}
 }
@@ -991,7 +993,7 @@ Route::set_solo_isolated (bool yn, void *src)
 	} else {
 		if (_solo_isolated == true) {
 			_solo_isolated = false;
-            _mute_master->set_solo_ignore (false);
+			_mute_master->set_solo_ignore (false);
 			changed = true;
 		}
 	}
@@ -3252,56 +3254,87 @@ Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool /*did_
 void
 Route::input_change_handler (IOChange change, void * /*src*/)
 {
-	bool need_to_queue_solo_change = true;
-
 	if ((change.type & IOChange::ConfigurationChanged)) {
 		/* This is called with the process lock held if change
 		   contains ConfigurationChanged
 		*/
-		need_to_queue_solo_change = false;
 		configure_processors (0);
 		_phase_invert.resize (_input->n_ports().n_audio ());
 		io_changed (); /* EMIT SIGNAL */
 	}
 
-	if (!_input->connected() && _soloed_by_others_upstream) {
-		if (need_to_queue_solo_change) {
-			_session.cancel_solo_after_disconnect (shared_from_this(), true);
-		} else {
-			cancel_solo_after_disconnect (true);
-		}
-#if 1
-	} else if (_soloed_by_others_upstream) {
-		bool cancel_solo = true;
+	if (_soloed_by_others_upstream || _solo_isolated_by_upstream) {
+		int sbou = 0;
+		int ibou = 0;
 		boost::shared_ptr<RouteList> routes = _session.get_routes ();
+		if (_input->connected()) {
+			for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+				if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+					continue;
+				}
+				bool sends_only;
+				bool does_feed = (*i)->direct_feeds_according_to_reality (shared_from_this(), &sends_only);
+				if (does_feed && !sends_only) {
+					if ((*i)->soloed()) {
+						++sbou;
+					}
+					if ((*i)->solo_isolated()) {
+						++ibou;
+					}
+				}
+			}
+		}
+
+		int delta  = sbou - _soloed_by_others_upstream;
+		int idelta = ibou - _solo_isolated_by_upstream;
+
+		if (idelta < -1) {
+			PBD::warning << string_compose (
+			                _("Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"),
+			                _name, ibou, _solo_isolated_by_upstream, idelta)
+			             << endmsg;
+
+		}
+
+		if (_soloed_by_others_upstream) {
+			// ignore new connections (they're not propagated)
+			if (delta <= 0) {
+				mod_solo_by_others_upstream (delta);
+			}
+		}
+
+		if (_solo_isolated_by_upstream) {
+			// solo-isolate currently only propagates downstream
+			if (idelta < 0) {
+				mod_solo_isolated_by_upstream (false, this);
+			}
+			// TODO think: mod_solo_isolated_by_upstream() does not take delta arg,
+			// but idelta can't be smaller than -1, can it?
+			//_solo_isolated_by_upstream = ibou;
+		}
+
+		// Session::route_solo_changed  does not propagate indirect solo-changes
+		// propagate downstream to tracks
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 			if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
 				continue;
 			}
 			bool sends_only;
-			bool does_feed = (*i)->direct_feeds_according_to_reality (shared_from_this(), &sends_only);
-			if (does_feed && !sends_only) {
-				if ((*i)->soloed()) {
-					cancel_solo = false;
-					break;
-				}
+			bool does_feed = feeds (*i, &sends_only);
+			if (delta <= 0 && does_feed && !sends_only) {
+				(*i)->mod_solo_by_others_upstream (delta);
+			}
+
+			if (idelta < 0 && does_feed && !sends_only) {
+				(*i)->mod_solo_isolated_by_upstream (false, this);
 			}
 		}
-		if (cancel_solo) {
-			cancel_solo_after_disconnect (true);
-		}
-#else
-	} else if (self_soloed()) {
-#endif
-		// TODO propagate upstream
-		// see commment in output_change_handler() below
 	}
 }
 
 void
 Route::output_change_handler (IOChange change, void * /*src*/)
 {
-	bool need_to_queue_solo_change = true;
 	if (_initial_io_setup) {
 		return;
 	}
@@ -3310,7 +3343,6 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 		/* This is called with the process lock held if change
 		   contains ConfigurationChanged
 		*/
-		need_to_queue_solo_change = false;
 		configure_processors (0);
 
 		if (is_master()) {
@@ -3320,49 +3352,54 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 		io_changed (); /* EMIT SIGNAL */
 	}
 
-	if (!_output->connected() && _soloed_by_others_downstream) {
-		if (need_to_queue_solo_change) {
-			_session.cancel_solo_after_disconnect (shared_from_this(), false);
-		} else {
-			cancel_solo_after_disconnect (false);
-		}
-#if 1
-	} else if (_soloed_by_others_downstream) {
-		bool cancel_solo = true;
+	if (_soloed_by_others_downstream) {
+		int sbod = 0;
 		/* checking all all downstream routes for
 		 * explicit of implict solo is a rather drastic measure,
 		 * ideally the input_change_handler() of the other route
 		 * would propagate the change to us.
 		 */
 		boost::shared_ptr<RouteList> routes = _session.get_routes ();
-		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-			if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
-				continue;
-			}
-			bool sends_only;
-			bool does_feed = direct_feeds_according_to_reality (*i, &sends_only);
-			if (does_feed && !sends_only) {
-				if ((*i)->soloed()) {
-					cancel_solo = false;
-					break;
+		if (_output->connected()) {
+			for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+				if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+					continue;
+				}
+				bool sends_only;
+				bool does_feed = direct_feeds_according_to_reality (*i, &sends_only);
+				if (does_feed && !sends_only) {
+					if ((*i)->soloed()) {
+						++sbod;
+						break;
+					}
 				}
 			}
 		}
-		if (cancel_solo) {
-			cancel_solo_after_disconnect (false);
+		int delta = sbod - _soloed_by_others_downstream;
+		if (delta <= 0) {
+			// do not allow new connections to change implicit solo (no propagation)
+			mod_solo_by_others_downstream (delta);
+			// Session::route_solo_changed() does not propagate indirect solo-changes
+			// propagate upstream to tracks
+			for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+				if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+					continue;
+				}
+				bool sends_only;
+				bool does_feed = (*i)->feeds (shared_from_this(), &sends_only);
+				if (delta != 0 && does_feed && !sends_only) {
+					(*i)->mod_solo_by_others_downstream (delta);
+				}
+			}
+
 		}
-#else
-	} else if (self_soloed()) {
-		// TODO propagate change downstream to the disconnected routes
-		// Q: how to get the routes that were just disconnected. ?
-		// A: /maybe/ by diff feeds() aka fed_by() vs direct_feeds_according_to_reality() ?!?
-#endif
 	}
 }
 
 void
 Route::cancel_solo_after_disconnect (bool upstream)
 {
+	assert (0); // no longer used -- TODO remove cruft
 	if (upstream) {
 		_soloed_by_others_upstream = 0;
 	} else {
