@@ -39,6 +39,13 @@
 #include "fst.h"
 #include "pbd/basename.h"
 #include <cstring>
+
+// dll-info
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdint.h>
+
 #endif // WINDOWS_VST_SUPPORT
 
 #ifdef LXVST_SUPPORT
@@ -781,13 +788,72 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 	return ret;
 }
 
+static std::string dll_info (std::string path) {
+	std::string rv;
+	uint8_t buf[68];
+	uint16_t type = 0;
+	off_t pe_hdr_off = 0;
+
+	int fd = open(path.c_str(), O_RDONLY, 0444);
+
+	if (fd < 0) {
+		return _("- cannot open dll"); // TODO strerror()
+	}
+
+	if (68 != read (fd, buf, 68)) {
+		rv = _("- invalid dll, file too small");
+		goto errorout;
+	}
+	if (buf[0] != 'M' && buf[1] != 'Z') {
+		rv = _("- not a dll");
+		goto errorout;
+	}
+
+	pe_hdr_off = *((int32_t*) &buf[60]);
+	if (pe_hdr_off !=lseek (fd, pe_hdr_off, SEEK_SET)) {
+		rv = _("- cannot determine dll type");
+		goto errorout;
+	}
+	if (6 != read (fd, buf, 6)) {
+		rv = _("- cannot read dll PE header");
+		goto errorout
+	}
+
+	if (buf[0] != 'P' && buf[1] != 'E') {
+		rv = _("- invalid dll PE header");
+		goto errorout;
+	}
+
+	type = *((uint16_t*) &buf[4]);
+	switch (type) {
+		case 0x014c:
+			rv = _("- i386 (32bit)");
+			break;
+		case  0x0200:
+			rv = _("- Itanium");
+			break;
+		case 0x8664:
+			rv = _("- x64 (64bit)");
+			break;
+		case 0:
+			rv = _("- Native Architecture");
+			break;
+		default:
+			rv = _("- Unknown Architecture");
+			break;
+	}
+errorout:
+	close (fd);
+	return rv;
+}
+
 int
 PluginManager::windows_vst_discover (string path, bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("windows_vst_discover '%1'\n", path));
 
 	if (Config->get_verbose_plugin_scan()) {
-		info << string_compose (_(" *  %1 %2"), path, (cache_only ? _(" (cache only)") : "")) << endmsg;
+		info << string_compose (_(" *  %1 %2 %3"), path, (cache_only ? _(" (cache only)") : "", dll_info (path))) << endmsg;
 	}
 
 	_cancel_timeout = false;
