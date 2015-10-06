@@ -209,18 +209,22 @@ WinMMEMidiInputDevice::winmm_input_callback(HMIDIIN handle,
 	switch (msg) {
 	case MIM_OPEN:
 	case MIM_CLOSE:
+		DEBUG_MIDI("WinMME: devices changed callback\n");
 		// devices_changed_callback
 		break;
 	case MIM_MOREDATA:
+		DEBUG_MIDI("WinMME: more data ..\n");
 		// passing MIDI_IO_STATUS to midiInOpen means that MIM_MOREDATA
 		// will be sent when the callback isn't processing MIM_DATA messages
 		// fast enough to keep up with messages arriving at input device
 		// driver. I'm not sure what could be done differently if that occurs
 		// so just handle MIM_DATA as per normal
 	case MIM_DATA:
+		DEBUG_MIDI(string_compose ("WinMME: short msg @ %1\n", (uint32_t) timestamp));
 		midi_input->handle_short_msg ((const uint8_t*)&midi_msg, (uint32_t)timestamp);
 		break;
 	case MIM_LONGDATA:
+		DEBUG_MIDI(string_compose ("WinMME: long msg @ %1\n", (uint32_t) timestamp));
 		midi_input->handle_sysex_msg ((MIDIHDR*)&midi_msg, (uint32_t)timestamp);
 		break;
 	case MIM_ERROR:
@@ -228,6 +232,9 @@ WinMMEMidiInputDevice::winmm_input_callback(HMIDIIN handle,
 		break;
 	case MIM_LONGERROR:
 		DEBUG_MIDI ("WinMME: Driver sent an invalid or incomplete SYSEX message\n");
+		break;
+	default:
+		DEBUG_MIDI ("WinMME: Driver sent an unknown message\n");
 		break;
 	}
 }
