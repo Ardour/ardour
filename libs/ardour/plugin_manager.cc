@@ -816,7 +816,7 @@ static std::string dll_info (std::string path) {
 	}
 	if (6 != read (fd, buf, 6)) {
 		rv = _("- cannot read dll PE header");
-		goto errorout
+		goto errorout;
 	}
 
 	if (buf[0] != 'P' && buf[1] != 'E') {
