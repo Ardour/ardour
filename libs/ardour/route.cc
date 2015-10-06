@@ -34,6 +34,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
 #include "pbd/boost_debug.h"
+#include "pbd/unwind.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
@@ -820,7 +821,6 @@ Route::clear_all_solo_state ()
 {
 	// ideally this function will never do anything, it only exists to forestall Murphy
 	bool emit_changed = false;
-	bool old_safe = _solo_safe;
 
 #ifndef NDEBUG
 	// these are really debug messages, but of possible interest.
@@ -841,9 +841,10 @@ Route::clear_all_solo_state ()
 	_soloed_by_others_upstream = 0;
 	_soloed_by_others_downstream = 0;
 
-	_solo_safe = false; // allow set_solo() to do its job;
-	set_solo (false, this);
-	_solo_safe = old_safe;
+	{
+		PBD::Unwinder<bool> uw (_solo_safe, false);
+		set_solo (false, this);
+	}
 
 	if (emit_changed) {
 		set_mute_master_solo ();
