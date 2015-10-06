@@ -19,6 +19,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION (DSPLoadCalculatorTest);
  * Anyway, actual maths is verified with Linux and OSX unit-tests,
  * and this needs to go to https://sourceforge.net/p/cppunit/bugs/
  */
+#include <math.h>
 #define CPPUNIT_ASSERT_DOUBLES_EQUAL(A,B,P) CPPUNIT_ASSERT_EQUAL((float)rint ((A) / (P)),(float)rint ((B) / (P)))
 #endif
 
