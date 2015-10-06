@@ -764,14 +764,19 @@ Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t
 }
 
 void
-Route::set_listen (bool yn, void* src)
+Route::set_listen (bool yn, void* src, bool group_override)
 {
 	if (_solo_safe) {
 		return;
 	}
 
-	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_solo()) {
-		_route_group->foreach_route (boost::bind (&Route::set_listen, _1, yn, _route_group));
+	bool group_active = _route_group && _route_group->is_active() && _route_group->is_solo();
+	if (group_override && _route_group) {
+		group_active = !group_active;
+	}
+
+	if (_route_group && src != _route_group && group_active) {
+		_route_group->foreach_route (boost::bind (&Route::set_listen, _1, yn, _route_group, group_override));
 		return;
 	}
 
@@ -786,7 +791,7 @@ Route::set_listen (bool yn, void* src)
 			}
 			_mute_master->set_soloed_by_others (false);
 
-			listen_changed (src); /* EMIT SIGNAL */
+			listen_changed (src, group_active); /* EMIT SIGNAL */
 		}
 	}
 }
@@ -848,12 +853,12 @@ Route::clear_all_solo_state ()
 
 	if (emit_changed) {
 		set_mute_master_solo ();
-		solo_changed (false, this); /* EMIT SIGNAL */
+		solo_changed (false, this, false); /* EMIT SIGNAL */
 	}
 }
 
 void
-Route::set_solo (bool yn, void *src)
+Route::set_solo (bool yn, void *src, bool group_override)
 {
 	if (_solo_safe) {
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 ignore solo change due to solo-safe\n", name()));
@@ -865,8 +870,13 @@ Route::set_solo (bool yn, void *src)
 		return;
 	}
 
-	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_solo()) {
-		_route_group->foreach_route (boost::bind (&Route::set_solo, _1, yn, _route_group));
+	// explicit XOR
+	bool group_active = _route_group && _route_group->is_active() && _route_group->is_solo();
+	if (group_override && _route_group) {
+		group_active = !group_active;
+	}
+	if (_route_group && src != _route_group && group_active) {
+		_route_group->foreach_route (boost::bind (&Route::set_solo, _1, yn, _route_group, group_override));
 		return;
 	}
 
@@ -876,7 +886,7 @@ Route::set_solo (bool yn, void *src)
 	if (self_soloed() != yn) {
 		set_self_solo (yn);
 		set_mute_master_solo ();
-		solo_changed (true, src); /* EMIT SIGNAL */
+		solo_changed (true, src, group_active); /* EMIT SIGNAL */
 		_solo_control->Changed (); /* EMIT SIGNAL */
 	}
 
@@ -953,7 +963,7 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 	}
 
 	set_mute_master_solo ();
-	solo_changed (false, this); /* EMIT SIGNAL */
+	solo_changed (false, this, false); /* EMIT SIGNAL */
 }
 
 void
@@ -975,7 +985,7 @@ Route::mod_solo_by_others_downstream (int32_t delta)
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 SbD delta %2 = %3\n", name(), delta, _soloed_by_others_downstream));
 
 	set_mute_master_solo ();
-	solo_changed (false, this); /* EMIT SIGNAL */
+	solo_changed (false, this, false); /* EMIT SIGNAL */
 }
 
 void

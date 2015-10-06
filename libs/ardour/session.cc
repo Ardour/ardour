@@ -3206,8 +3206,8 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		boost::weak_ptr<Route> wpr (*x);
 		boost::shared_ptr<Route> r (*x);
 
-		r->listen_changed.connect_same_thread (*this, boost::bind (&Session::route_listen_changed, this, _1, wpr));
-		r->solo_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, _2, wpr));
+		r->listen_changed.connect_same_thread (*this, boost::bind (&Session::route_listen_changed, this, _2, wpr));
+		r->solo_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, _3, wpr));
 		r->solo_isolated_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_isolated_changed, this, _1, wpr));
 		r->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this, _1));
 		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
@@ -3490,11 +3490,11 @@ Session::route_mute_changed (void* /*src*/)
 }
 
 void
-Session::route_listen_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
+Session::route_listen_changed (bool leave_group_alone, boost::weak_ptr<Route> wpr)
 {
 	boost::shared_ptr<Route> route = wpr.lock();
 	if (!route) {
-		error << string_compose (_("programming error: %1"), X_("invalid route weak ptr passed to route_solo_changed")) << endmsg;
+		error << string_compose (_("programming error: %1"), X_("invalid route weak ptr passed to route_listen_changed")) << endmsg;
 		return;
 	}
 
@@ -3503,7 +3503,6 @@ Session::route_listen_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 		if (Config->get_exclusive_solo()) {
 			/* new listen: disable all other listen, except solo-grouped channels */
 			RouteGroup* rg = route->route_group ();
-			bool leave_group_alone = (rg && rg->is_active() && rg->is_solo());
 			boost::shared_ptr<RouteList> r = routes.reader ();
 			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 				if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() || (leave_group_alone && ((*i)->route_group() == rg))) {
@@ -3553,7 +3552,7 @@ Session::route_solo_isolated_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 }
 
 void
-Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_ptr<Route> wpr)
+Session::route_solo_changed (bool self_solo_change, bool leave_group_alone,  boost::weak_ptr<Route> wpr)
 {
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("route solo change, self = %1\n", self_solo_change));
 
@@ -3575,8 +3574,6 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 	}
 
 	RouteGroup* rg = route->route_group ();
-	bool leave_group_alone = (rg && rg->is_active() && rg->is_solo());
-
 	if (delta == 1 && Config->get_exclusive_solo()) {
 
 		/* new solo: disable all other solos, but not the group if its solo-enabled */

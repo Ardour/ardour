@@ -77,13 +77,12 @@ Session::set_solo (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeve
 	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_solo));
 }
 
-
 void
-Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, bool /* group_override */)
+Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_auditioner()) {
-			(*i)->set_solo (yn, this);
+			(*i)->set_solo (yn, this, group_override);
 		}
 	}
 
@@ -132,11 +131,11 @@ Session::set_listen (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTe
 }
 
 void
-Session::rt_set_listen (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_override*/ )
+Session::rt_set_listen (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_auditioner()) {
-			(*i)->set_listen (yn, this);
+			(*i)->set_listen (yn, this, group_override);
 		}
 	}
 

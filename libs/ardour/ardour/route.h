@@ -158,7 +158,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	/* controls use set_solo() to modify this route's solo state
 	 */
 
-	void set_solo (bool yn, void *src);
+	void set_solo (bool yn, void *src, bool group_override = false);
 	bool soloed () const { return self_soloed () || soloed_by_others (); }
 	void clear_all_solo_state ();
 
@@ -173,7 +173,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	void set_solo_safe (bool yn, void *src);
 	bool solo_safe() const;
 
-	void set_listen (bool yn, void* src);
+	void set_listen (bool yn, void* src, bool group_override = false);
 	bool listening_via_monitor () const;
 	void enable_monitor_send ();
 
@@ -286,8 +286,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	PBD::Signal0<void>       active_changed;
 	PBD::Signal0<void>       phase_invert_changed;
 	PBD::Signal0<void>       denormal_protection_changed;
-	PBD::Signal1<void,void*> listen_changed;
-	PBD::Signal2<void,bool,void*> solo_changed;
+	PBD::Signal2<void,void*,bool> listen_changed;
+	PBD::Signal3<void,bool,void*,bool> solo_changed;
 	PBD::Signal1<void,void*> solo_safe_changed;
 	PBD::Signal1<void,void*> solo_isolated_changed;
 	PBD::Signal1<void,void*> comment_changed;
