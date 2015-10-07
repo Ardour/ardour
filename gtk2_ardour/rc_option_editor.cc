@@ -200,13 +200,11 @@ private:
 			_click_emphasis_path_entry.set_sensitive (false);
 			_click_browse_button.set_sensitive (false);
 			_click_emphasis_browse_button.set_sensitive (false);
-			_use_emphasis_on_click_check_button.set_sensitive (true);
 		} else {
 			_click_path_entry.set_sensitive (true);
 			_click_emphasis_path_entry.set_sensitive (true);
 			_click_browse_button.set_sensitive (true);
 			_click_emphasis_browse_button.set_sensitive (true);
-			_use_emphasis_on_click_check_button.set_sensitive (false);
 		}
 	}
 
