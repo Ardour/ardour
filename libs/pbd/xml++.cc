@@ -82,26 +82,23 @@ XMLTree::read_internal(bool validate)
 		_doc = 0;
 	}
 
-	xmlParserCtxtPtr ctxt = NULL; /* the parser context */
+	/* create a parser context */
+	xmlParserCtxtPtr ctxt = xmlNewParserCtxt();
+	if (ctxt == NULL) {
+		return false;
+	}
 
 	xmlKeepBlanksDefault(0);
 	/* parse the file, activating the DTD validation option */
 	if (validate) {
-		/* create a parser context */
-		ctxt = xmlNewParserCtxt();
-		if (ctxt == NULL) {
-			return false;
-		}
 		_doc = xmlCtxtReadFile(ctxt, _filename.c_str(), NULL, XML_PARSE_DTDVALID);
 	} else {
-		_doc = xmlParseFile(_filename.c_str());
+		_doc = xmlCtxtReadFile(ctxt, _filename.c_str(), NULL, XML_PARSE_HUGE);
 	}
 
 	/* check if parsing suceeded */
 	if (_doc == NULL) {
-		if (validate) {
-			xmlFreeParserCtxt(ctxt);
-		}
+		xmlFreeParserCtxt(ctxt);
 		return false;
 	} else {
 		/* check if validation suceeded */
@@ -114,9 +111,7 @@ XMLTree::read_internal(bool validate)
 	_root = readnode(xmlDocGetRootElement(_doc));
 
 	/* free up the parser context */
-	if (validate) {
-		xmlFreeParserCtxt(ctxt);
-	}
+	xmlFreeParserCtxt(ctxt);
 
 	return true;
 }
