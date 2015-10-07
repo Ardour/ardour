@@ -81,13 +81,15 @@ Session::click (framepos_t start, framecnt_t nframes)
 	for (TempoMap::BBTPointList::const_iterator i = points_begin; i != points_end; ++i) {
 		switch ((*i).beat) {
 		case 1:
-			if (click_emphasis_data) {
+			if (click_emphasis_data && Config->get_use_click_emphasis () == true) {
 				clicks.push_back (new Click ((*i).frame, click_emphasis_length, click_emphasis_data));
+			} else if (click_data && Config->get_use_click_emphasis () == false) {
+				clicks.push_back (new Click ((*i).frame, click_length, click_data));
 			}
 			break;
 
 		default:
-			if (click_emphasis_data == 0 || (click_emphasis_data && (*i).beat != 1)) {
+			if (click_emphasis_data == 0 || (Config->get_use_click_emphasis () == false) || (click_emphasis_data && (*i).beat != 1)) {
 				clicks.push_back (new Click ((*i).frame, click_length, click_data));
 			}
 			break;
