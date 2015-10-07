@@ -7870,6 +7870,7 @@ Editor::unlock ()
 	lock_dialog->hide ();
 
 	delete _main_menu_disabler;
+	_main_menu_disabler = 0;
 
 	if (UIConfiguration::instance().get_lock_gui_after_seconds()) {
 		start_lock_event_timing ();
