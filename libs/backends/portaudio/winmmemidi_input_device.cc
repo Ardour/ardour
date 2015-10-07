@@ -37,7 +37,6 @@ namespace ARDOUR {
 WinMMEMidiInputDevice::WinMMEMidiInputDevice (int index)
 	: m_handle(0)
 	, m_started(false)
-	, m_in_reset(false)
 	, m_midi_buffer(new RingBuffer<uint8_t>(MIDI_BUFFER_SIZE))
 	, m_sysex_buffer(new uint8_t[SYSEX_BUFFER_SIZE])
 {
@@ -93,14 +92,12 @@ WinMMEMidiInputDevice::close (std::string& error_msg)
 	// return error message for first error encountered?
 	bool success = true;
 
-	m_in_reset = true;
 	MMRESULT result = midiInReset (m_handle);
 	if (result != MMSYSERR_NOERROR) {
 		error_msg = get_error_string (result);
 		DEBUG_MIDI (error_msg);
 		success = false;
 	}
-	m_in_reset = false;
 	result = midiInUnprepareHeader (m_handle, &m_sysex_header, sizeof(MIDIHDR));
 	if (result != MMSYSERR_NOERROR) {
 		error_msg = get_error_string (result);
@@ -127,6 +124,7 @@ WinMMEMidiInputDevice::add_sysex_buffer (std::string& error_msg)
 {
 	m_sysex_header.dwBufferLength = SYSEX_BUFFER_SIZE;
 	m_sysex_header.dwFlags = 0;
+	m_sysex_header.dwBytesRecorded = 0;
 	m_sysex_header.lpData = (LPSTR)m_sysex_buffer.get ();
 
 	MMRESULT result = midiInPrepareHeader (m_handle, &m_sysex_header, sizeof(MIDIHDR));
@@ -141,6 +139,8 @@ WinMMEMidiInputDevice::add_sysex_buffer (std::string& error_msg)
 		error_msg = get_error_string (result);
 		DEBUG_MIDI (error_msg);
 		return false;
+	} else {
+		DEBUG_MIDI ("Added Initial WinMME sysex buffer\n");
 	}
 	return true;
 }
@@ -225,7 +225,7 @@ WinMMEMidiInputDevice::winmm_input_callback(HMIDIIN handle,
 		break;
 	case MIM_LONGDATA:
 		DEBUG_MIDI(string_compose ("WinMME: long msg @ %1\n", (uint32_t) timestamp));
-		midi_input->handle_sysex_msg ((MIDIHDR*)&midi_msg, (uint32_t)timestamp);
+		midi_input->handle_sysex_msg ((MIDIHDR*)midi_msg, (uint32_t)timestamp);
 		break;
 	case MIM_ERROR:
 		DEBUG_MIDI ("WinMME: Driver sent an invalid MIDI message\n");
@@ -257,33 +257,46 @@ void
 WinMMEMidiInputDevice::handle_sysex_msg (MIDIHDR* const midi_header,
                                          uint32_t timestamp)
 {
-	LPMIDIHDR header = (LPMIDIHDR)midi_header;
-	size_t byte_count = header->dwBytesRecorded;
+	size_t byte_count = midi_header->dwBytesRecorded;
 
-	if (!byte_count) {
-		DEBUG_MIDI (
-		    "ERROR: WinMME driver has returned sysex header to us with no bytes\n");
+	if (byte_count == 0) {
+		if ((midi_header->dwFlags & WHDR_DONE) != 0) {
+			DEBUG_MIDI("WinMME: In midi reset\n");
+			// unprepare handled by close
+		} else {
+			DEBUG_MIDI(
+			    "ERROR: WinMME driver has returned sysex header to us with no bytes\n");
+		}
 		return;
 	}
 
-	uint8_t* data = (uint8_t*)header->lpData;
+	uint8_t* data = (uint8_t*)midi_header->lpData;
 
-	DEBUG_MIDI(string_compose("WinMME sysex flags: %1\n", header->dwFlags));
+	DEBUG_MIDI(string_compose("WinMME sysex flags: %1\n", midi_header->dwFlags));
 
-	if (m_in_reset) {
-		DEBUG_MIDI(string_compose("Midi device %1 being reset ignoring sysex msg\n",
-		                          name()));
-		return;
-	} else if ((data[0] != 0xf0) || (data[byte_count - 1] != 0xf7)) {
+	if ((data[0] != 0xf0) || (data[byte_count - 1] != 0xf7)) {
 		DEBUG_MIDI(string_compose("Discarding %1 byte sysex chunk\n", byte_count));
 	} else {
 		enqueue_midi_msg (data, byte_count, timestamp);
 	}
 
+	DEBUG_MIDI("Adding sysex buffer back to WinMME buffer pool\n");
 
-	MMRESULT result = midiInAddBuffer (m_handle, &m_sysex_header, sizeof(MIDIHDR));
+	midi_header->dwFlags = 0;
+	midi_header->dwBytesRecorded = 0;
+
+	MMRESULT result = midiInPrepareHeader(m_handle, midi_header, sizeof(MIDIHDR));
+
 	if (result != MMSYSERR_NOERROR) {
-		DEBUG_MIDI (get_error_string (result));
+		DEBUG_MIDI(string_compose("Unable to prepare header: %1\n",
+		                          get_error_string(result)));
+		return;
+	}
+
+	result = midiInAddBuffer(m_handle, midi_header, sizeof(MIDIHDR));
+	if (result != MMSYSERR_NOERROR) {
+		DEBUG_MIDI(string_compose("Unable to add sysex buffer to buffer pool : %1\n",
+		                          get_error_string(result)));
 	}
 }
 

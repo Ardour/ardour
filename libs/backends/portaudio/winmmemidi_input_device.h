@@ -91,7 +91,6 @@ private: // data
 	MIDIHDR m_sysex_header;
 
 	bool m_started;
-	bool m_in_reset;
 
 	std::string m_name;
 
