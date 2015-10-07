@@ -5418,6 +5418,8 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 				if (add) {
 					_region->note_deselected (_primary);
 					changed = true;
+				} else {
+					_region->unique_select (_primary);
 				}
 			} else {
 				bool extend = Keyboard::modifier_state_equals (ev->button.state, Keyboard::TertiaryModifier);
