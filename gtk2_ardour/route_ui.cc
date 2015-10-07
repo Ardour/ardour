@@ -596,8 +596,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				boost::shared_ptr<RouteList> rl;
 
 				if (ev->button == 1) {
-
-					if (_route->route_group()) {
+					if (ARDOUR::Profile->get_mixbus()) && _route->route_group() {
 
 						rl = _route->route_group()->route_list();
 
