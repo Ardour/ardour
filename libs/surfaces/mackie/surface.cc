@@ -532,6 +532,11 @@ Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 	Button* button = buttons[ev->note_number];
 
 	if (button) {
+
+		if (ev->velocity > 64) {
+			button->pressed ();
+		}
+
 		Strip* strip = dynamic_cast<Strip*> (&button->group());
 
 		if (strip) {
@@ -543,9 +548,16 @@ Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("global button %1\n", button->id()));
 			_mcp.handle_button_event (*this, *button, ev->velocity > 64 ? press : release);
 		}
+
+		if (ev->velocity <= 64) {
+			button->released ();
+		}
+
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("no button found for %1\n", (int) ev->note_number));
 	}
+
+	/* button release should reset timer AFTER handler(s) have run */
 }
 
 void

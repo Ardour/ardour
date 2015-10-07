@@ -19,6 +19,8 @@
 
 #include <glib.h>
 
+#include "ardour/ardour.h"
+
 #include "button.h"
 #include "surface.h"
 #include "control_group.h"
@@ -29,7 +31,7 @@ using namespace Mackie;
 Control*
 Button::factory (Surface& surface, Button::ID bid, int id, const std::string& name, Group& group)
 {
-	Button* b = new Button (bid, id, name, group);
+	Button* b = new Button (surface, bid, id, name, group);
 	/* store button with the device-specific ID */
 	surface.buttons[id] = b;
 	surface.controls.push_back (b);
@@ -37,6 +39,35 @@ Button::factory (Surface& surface, Button::ID bid, int id, const std::string& na
 	return b;
 }
 
+void
+Button::pressed ()
+{
+	press_time = ARDOUR::get_microseconds ();
+}
+
+void
+Button::released ()
+{
+	press_time = 0;
+}
+
+int32_t
+Button::long_press_count ()
+{
+	if (press_time == 0) {
+		return -1; /* button is not pressed */
+	}
+
+	const ARDOUR::microseconds_t delta = ARDOUR::get_microseconds () - press_time;
+
+	if (delta < 500000) {
+		return 0;
+	} else if (delta < 1000000) {
+		return 1;
+	}
+
+	return 2;
+}
 int
 Button::name_to_id (const std::string& name)
 {

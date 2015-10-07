@@ -559,14 +559,28 @@ MackieControlProtocol::enter_release (Button &)
 }
 
 LedState
-MackieControlProtocol::F1_press (Button &)
+MackieControlProtocol::bank_release (Button& b, uint32_t basic_bank_num)
+{
+	uint32_t bank_num = basic_bank_num;
+
+	if (b.long_press_count() > 0) {
+		bank_num = 8 + basic_bank_num;
+	}
+
+	switch_banks (n_strips() * bank_num);
+
+	return on;
+}
+
+LedState
+MackieControlProtocol::F1_press (Button &b)
 {
 	return off;
 }
 LedState
-MackieControlProtocol::F1_release (Button &)
+MackieControlProtocol::F1_release (Button &b)
 {
-	return off;
+	return bank_release (b, 0);
 }
 LedState
 MackieControlProtocol::F2_press (Button &)
@@ -574,9 +588,9 @@ MackieControlProtocol::F2_press (Button &)
 	return off;
 }
 LedState
-MackieControlProtocol::F2_release (Button &)
+MackieControlProtocol::F2_release (Button &b)
 {
-	return off;
+	return bank_release (b, 1);
 }
 LedState
 MackieControlProtocol::F3_press (Button &)
@@ -584,9 +598,9 @@ MackieControlProtocol::F3_press (Button &)
 	return off;
 }
 LedState
-MackieControlProtocol::F3_release (Button &)
+MackieControlProtocol::F3_release (Button &b)
 {
-	return off;
+	return bank_release (b, 2);
 }
 LedState
 MackieControlProtocol::F4_press (Button &)
@@ -594,9 +608,9 @@ MackieControlProtocol::F4_press (Button &)
 	return off;
 }
 LedState
-MackieControlProtocol::F4_release (Button &)
+MackieControlProtocol::F4_release (Button &b)
 {
-	return off;
+	return bank_release (b, 3);
 }
 LedState
 MackieControlProtocol::F5_press (Button &)

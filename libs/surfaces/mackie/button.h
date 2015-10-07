@@ -20,6 +20,8 @@
 #ifndef __ardour_mackie_control_protocol_button_h__
 #define __ardour_mackie_control_protocol_button_h__
 
+#include "ardour/types.h"
+
 #include "controls.h"
 #include "led.h"
 
@@ -125,10 +127,12 @@ public:
 	};
 
 
-	Button (ID bid, int did, std::string name, Group & group)
+	Button (Surface& s, ID bid, int did, std::string name, Group & group)
 		: Control (did, name, group)
+		, _surface (s)
 		, _bid (bid)
-		, _led  (did, name + "_led", group) {}
+		, _led  (did, name + "_led", group)
+		, press_time (0) {}
 
 	MidiByteArray zero() { return _led.zero (); }
 	MidiByteArray set_state (LedState ls) { return _led.set_state (ls); }
@@ -139,9 +143,18 @@ public:
 	static int name_to_id (const std::string& name);
 	static std::string id_to_name (Button::ID);
 
+	Surface& surface() const { return _surface; }
+
+	void pressed ();
+	void released ();
+
+	int32_t long_press_count ();
+
 private:
+	Surface& _surface;
 	ID  _bid; /* device independent button ID */
 	Led _led;
+	ARDOUR::microseconds_t press_time;
 };
 
 } // Mackie namespace

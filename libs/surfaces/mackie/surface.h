@@ -7,6 +7,8 @@
 #include "pbd/xml++.h"
 #include "midi++/types.h"
 
+#include "ardour/types.h"
+
 #include "control_protocol/types.h"
 
 #include "controls.h"
@@ -177,7 +179,7 @@ public:
 	Fader*                 _master_fader;
 	float                  _last_master_gain_written;
 	PBD::ScopedConnection   port_connection;
-	
+
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 	MidiByteArray host_connection_query (MidiByteArray& bytes);
 	MidiByteArray host_connection_confirmation (const MidiByteArray& bytes);
@@ -195,6 +197,12 @@ public:
 	};
 
 	int connection_state;
+
+	/* this times the duration between press+release events for all
+	   possible 127 buttons on THIS surface (not all surfaces).
+	*/
+
+	ARDOUR::microseconds_t button_timer[127];
 };
 
 }
