@@ -1035,7 +1035,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void    selected_marker_to_selection_end   ();
 
 	void    select_all_selectables_using_cursor (EditorCursor *, bool);
-	void    select_all_selectables_using_edit (bool);
+	void    select_all_selectables_using_edit (bool, bool);
 	void    select_all_selectables_between (bool within);
 	void    select_range_between ();
 
