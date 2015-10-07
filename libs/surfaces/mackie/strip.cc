@@ -760,11 +760,13 @@ Strip::periodic (uint64_t usecs)
 		return;
 	}
 
-	update_automation ();
-	update_meter ();
-
-	if (_reset_display_at && _reset_display_at < usecs) {
-		reset_display ();
+	if (_reset_display_at >= usecs) {
+		return;
+	} else if (_reset_display_at) {
+		return_to_vpot_mode_display ();
+	} else {
+		update_automation ();
+		update_meter ();
 	}
 }
 
@@ -1010,21 +1012,19 @@ Strip::queue_display_reset (uint32_t msecs)
 }
 
 void
-Strip::clear_display_reset ()
+Strip::return_to_vpot_mode_display ()
 {
-	_reset_display_at = 0;
-}
+	/* returns the second line of the two-line per-strip display
+	   back the mode where it shows what the VPot controls.
+	*/
 
-void
-Strip::reset_display ()
-{
 	if (_route) {
 		_surface->write (display (1, vpot_mode_string()));
 	} else {
 		_surface->write (blank_display (1));
 	}
 
-	clear_display_reset ();
+	_reset_display_at = 0;
 }
 
 struct RouteCompareByName {

@@ -129,8 +129,7 @@ private:
 	std::string vpot_mode_string () const;
 
 	void queue_display_reset (uint32_t msecs);
-	void clear_display_reset ();
-	void reset_display ();
+	void return_to_vpot_mode_display ();
 
 	struct RedisplayRequest {
 		ARDOUR::AutomationType type;
