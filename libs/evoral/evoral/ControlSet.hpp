@@ -60,7 +60,7 @@ public:
 
 	virtual void add_control(boost::shared_ptr<Control>);
 
-	bool find_next_event(double start, double end, ControlEvent& ev) const;
+	virtual bool find_next_event(double start, double end, ControlEvent& ev, bool only_active = true) const = 0;
 
 	virtual bool controls_empty() const { return _controls.size() == 0; }
 	virtual void clear_controls();

@@ -87,38 +87,6 @@ ControlSet::control (const Parameter& parameter, bool create_if_missing)
 	}
 }
 
-bool
-ControlSet::find_next_event (double now, double end, ControlEvent& next_event) const
-{
-	Controls::const_iterator li;
-
-	next_event.when = std::numeric_limits<double>::max();
-
-	for (li = _controls.begin(); li != _controls.end(); ++li) {
-		ControlList::const_iterator i;
-		boost::shared_ptr<const ControlList> alist (li->second->list());
-		ControlEvent cp (now, 0.0f);
-		if (!alist) {
-			continue;
-		}
-
-		for (i = lower_bound (alist->begin(), alist->end(), &cp, ControlList::time_comparator);
-		     i != alist->end() && (*i)->when < end; ++i) {
-			if ((*i)->when > now) {
-				break;
-			}
-		}
-
-		if (i != alist->end() && (*i)->when < end) {
-			if ((*i)->when < next_event.when) {
-				next_event.when = (*i)->when;
-			}
-		}
-	}
-
-	return next_event.when != std::numeric_limits<double>::max();
-}
-
 void
 ControlSet::clear_controls ()
 {

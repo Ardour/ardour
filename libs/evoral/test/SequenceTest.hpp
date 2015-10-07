@@ -51,6 +51,8 @@ class MySequence : public Sequence<Time> {
 public:
 	MySequence(DummyTypeMap&map) : Sequence<Time>(map) {}
 
+	virtual bool find_next_event(double start, double end, ControlEvent& ev, bool only_active) const { return false; }
+
 	boost::shared_ptr<Control> control_factory(const Parameter& param) {
 		const Evoral::ParameterDescriptor desc;
 		boost::shared_ptr<ControlList>    list(new ControlList(param, desc));

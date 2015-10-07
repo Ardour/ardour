@@ -501,3 +501,42 @@ Automatable::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 {
 	return ARDOUR::value_as_string(ac->desc(), ac->get_value());
 }
+
+bool
+Automatable::find_next_event (double now, double end, Evoral::ControlEvent& next_event, bool only_active) const
+{
+	Controls::const_iterator li;
+
+	next_event.when = std::numeric_limits<double>::max();
+
+	for (li = _controls.begin(); li != _controls.end(); ++li) {
+		boost::shared_ptr<AutomationControl> c
+			= boost::dynamic_pointer_cast<AutomationControl>(li->second);
+
+		if (only_active && (!c || !c->automation_playback())) {
+			continue;
+		}
+
+		Evoral::ControlList::const_iterator i;
+		boost::shared_ptr<const Evoral::ControlList> alist (li->second->list());
+		Evoral::ControlEvent cp (now, 0.0f);
+		if (!alist) {
+			continue;
+		}
+
+		for (i = lower_bound (alist->begin(), alist->end(), &cp, Evoral::ControlList::time_comparator);
+		     i != alist->end() && (*i)->when < end; ++i) {
+			if ((*i)->when > now) {
+				break;
+			}
+		}
+
+		if (i != alist->end() && (*i)->when < end) {
+			if ((*i)->when < next_event.when) {
+				next_event.when = (*i)->when;
+			}
+		}
+	}
+
+	return next_event.when != std::numeric_limits<double>::max();
+}

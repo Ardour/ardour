@@ -57,6 +57,7 @@ public:
 	automation_control (const Evoral::Parameter& id) const;
 
 	virtual void add_control(boost::shared_ptr<Evoral::Control>);
+	virtual bool find_next_event(double start, double end, Evoral::ControlEvent& ev, bool only_active = true) const;
 	void clear_controls ();
 
         virtual void transport_located (framepos_t now);
