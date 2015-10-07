@@ -791,7 +791,7 @@ Route::set_listen (bool yn, void* src, bool group_override)
 			}
 			_mute_master->set_soloed_by_others (false);
 
-			listen_changed (src, group_active); /* EMIT SIGNAL */
+			listen_changed (src, group_override); /* EMIT SIGNAL */
 		}
 	}
 }
@@ -870,7 +870,6 @@ Route::set_solo (bool yn, void *src, bool group_override)
 		return;
 	}
 
-	// explicit XOR
 	bool group_active = _route_group && _route_group->is_active() && _route_group->is_solo();
 	if (group_override && _route_group) {
 		group_active = !group_active;
@@ -886,7 +885,7 @@ Route::set_solo (bool yn, void *src, bool group_override)
 	if (self_soloed() != yn) {
 		set_self_solo (yn);
 		set_mute_master_solo ();
-		solo_changed (true, src, group_active); /* EMIT SIGNAL */
+		solo_changed (true, src, group_override); /* EMIT SIGNAL */
 		_solo_control->Changed (); /* EMIT SIGNAL */
 	}
 

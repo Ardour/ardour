@@ -1536,9 +1536,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* mixer stuff */
 
-	void route_listen_changed (bool leave_group_alone, boost::weak_ptr<Route>);
+	void route_listen_changed (bool group_override, boost::weak_ptr<Route>);
 	void route_mute_changed (void *src);
-	void route_solo_changed (bool self_solo_change, bool leave_group_alone, boost::weak_ptr<Route>);
+	void route_solo_changed (bool self_solo_change, bool group_override, boost::weak_ptr<Route>);
 	void route_solo_isolated_changed (void *src, boost::weak_ptr<Route>);
 	void update_route_solo_state (boost::shared_ptr<RouteList> r = boost::shared_ptr<RouteList>());
 

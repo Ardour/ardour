@@ -3490,7 +3490,7 @@ Session::route_mute_changed (void* /*src*/)
 }
 
 void
-Session::route_listen_changed (bool leave_group_alone, boost::weak_ptr<Route> wpr)
+Session::route_listen_changed (bool group_override, boost::weak_ptr<Route> wpr)
 {
 	boost::shared_ptr<Route> route = wpr.lock();
 	if (!route) {
@@ -3503,12 +3503,16 @@ Session::route_listen_changed (bool leave_group_alone, boost::weak_ptr<Route> wp
 		if (Config->get_exclusive_solo()) {
 			/* new listen: disable all other listen, except solo-grouped channels */
 			RouteGroup* rg = route->route_group ();
+			bool leave_group_alone = (rg && rg->is_active() && rg->is_solo());
+			if (group_override && rg) {
+				leave_group_alone = !leave_group_alone;
+			}
 			boost::shared_ptr<RouteList> r = routes.reader ();
 			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 				if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() || (leave_group_alone && ((*i)->route_group() == rg))) {
 					continue;
 				}
-				(*i)->set_listen (false, this);
+				(*i)->set_listen (false, this, group_override);
 			}
 		}
 
@@ -3552,7 +3556,7 @@ Session::route_solo_isolated_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 }
 
 void
-Session::route_solo_changed (bool self_solo_change, bool leave_group_alone,  boost::weak_ptr<Route> wpr)
+Session::route_solo_changed (bool self_solo_change, bool group_override,  boost::weak_ptr<Route> wpr)
 {
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("route solo change, self = %1\n", self_solo_change));
 
@@ -3574,6 +3578,10 @@ Session::route_solo_changed (bool self_solo_change, bool leave_group_alone,  boo
 	}
 
 	RouteGroup* rg = route->route_group ();
+	bool leave_group_alone = (rg && rg->is_active() && rg->is_solo());
+	if (group_override && rg) {
+		leave_group_alone = !leave_group_alone;
+	}
 	if (delta == 1 && Config->get_exclusive_solo()) {
 
 		/* new solo: disable all other solos, but not the group if its solo-enabled */
@@ -3583,7 +3591,7 @@ Session::route_solo_changed (bool self_solo_change, bool leave_group_alone,  boo
 			    (leave_group_alone && ((*i)->route_group() == rg))) {
 				continue;
 			}
-			(*i)->set_solo (false, this);
+			(*i)->set_solo (false, this, group_override);
 		}
 	}
 
