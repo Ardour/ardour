@@ -79,7 +79,7 @@ public:
 		, _click_browse_button (_("Browse..."))
 		, _click_emphasis_browse_button (_("Browse..."))
 	{
-		Table* t = manage (new Table (3, 3));
+		Table* t = manage (new Table (4, 3));
 		t->set_spacings (4);
 
 		Label* l = manage (left_aligned_label (_("Use default Click:")));
@@ -88,19 +88,25 @@ public:
 		_use_default_click_check_button.signal_toggled().connect (
 		    sigc::mem_fun (*this, &ClickOptions::use_default_click_toggled));
 
-		l = manage (left_aligned_label (_("Click audio file:")));
+		l = manage (left_aligned_label (_("Emphasis on first beat:")));
 		t->attach (*l, 0, 1, 1, 2, FILL);
-		t->attach (_click_path_entry, 1, 2, 1, 2, FILL);
+		t->attach (_use_emphasis_on_click_check_button, 1, 2, 1, 2, FILL);
+		_use_emphasis_on_click_check_button.signal_toggled().connect (
+		    sigc::mem_fun (*this, &ClickOptions::use_emphasis_on_click_toggled));
+
+		l = manage (left_aligned_label (_("Click audio file:")));
+		t->attach (*l, 0, 1, 2, 3, FILL);
+		t->attach (_click_path_entry, 1, 2, 2, 3, FILL);
 		_click_browse_button.signal_clicked ().connect (
 		    sigc::mem_fun (*this, &ClickOptions::click_browse_clicked));
-		t->attach (_click_browse_button, 2, 3, 1, 2, FILL);
+		t->attach (_click_browse_button, 2, 3, 2, 3, FILL);
 
 		l = manage (left_aligned_label (_("Click emphasis audio file:")));
-		t->attach (*l, 0, 1, 2, 3, FILL);
-		t->attach (_click_emphasis_path_entry, 1, 2, 2, 3, FILL);
+		t->attach (*l, 0, 1, 3, 4, FILL);
+		t->attach (_click_emphasis_path_entry, 1, 2, 3, 4, FILL);
 		_click_emphasis_browse_button.signal_clicked ().connect (
 		    sigc::mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
-		t->attach (_click_emphasis_browse_button, 2, 3, 2, 3, FILL);
+		t->attach (_click_emphasis_browse_button, 2, 3, 3, 4, FILL);
 
 		_box->pack_start (*t, false, false);
 
@@ -110,9 +116,11 @@ public:
 		if (_rc_config->get_click_sound ().empty() &&
 		    _rc_config->get_click_emphasis_sound().empty()) {
 			_use_default_click_check_button.set_active (true);
+			_use_emphasis_on_click_check_button.set_active (true);
 
 		} else {
 			_use_default_click_check_button.set_active (false);
+			_use_emphasis_on_click_check_button.set_active (false);
 		}
 	}
 
@@ -122,6 +130,9 @@ public:
 			_click_path_entry.set_text (_rc_config->get_click_sound());
 		} else if (p == "click-emphasis-sound") {
 			_click_emphasis_path_entry.set_text (_rc_config->get_click_emphasis_sound());
+		} else if (p == "use-click-emphasis") {
+			bool x = _rc_config->get_use_click_emphasis ();
+			_use_emphasis_on_click_check_button.set_active (x);
 		}
 	}
 
@@ -129,6 +140,7 @@ public:
 	{
 		parameter_changed ("click-sound");
 		parameter_changed ("click-emphasis-sound");
+		parameter_changed ("use-click-emphasis");
 	}
 
 private:
@@ -188,16 +200,28 @@ private:
 			_click_emphasis_path_entry.set_sensitive (false);
 			_click_browse_button.set_sensitive (false);
 			_click_emphasis_browse_button.set_sensitive (false);
+			_use_emphasis_on_click_check_button.set_sensitive (true);
 		} else {
 			_click_path_entry.set_sensitive (true);
 			_click_emphasis_path_entry.set_sensitive (true);
 			_click_browse_button.set_sensitive (true);
 			_click_emphasis_browse_button.set_sensitive (true);
+			_use_emphasis_on_click_check_button.set_sensitive (false);
+		}
+	}
+
+	void use_emphasis_on_click_toggled ()
+	{
+		if (_use_emphasis_on_click_check_button.get_active ()) {
+			_rc_config->set_use_click_emphasis(true);
+		} else {
+			_rc_config->set_use_click_emphasis(false);
 		}
 	}
 
 	RCConfiguration* _rc_config;
 	CheckButton _use_default_click_check_button;
+	CheckButton _use_emphasis_on_click_check_button;
 	Entry _click_path_entry;
 	Entry _click_emphasis_path_entry;
 	Button _click_browse_button;
