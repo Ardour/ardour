@@ -54,6 +54,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/midi_track.h"
 #include "ardour/internal_send.h"
+#include "ardour/profile.h"
 #include "ardour/send.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -596,7 +597,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				boost::shared_ptr<RouteList> rl;
 
 				if (ev->button == 1) {
-					if (ARDOUR::Profile->get_mixbus()) && _route->route_group() {
+					if (ARDOUR::Profile->get_mixbus() && _route->route_group()) {
 
 						rl = _route->route_group()->route_list();
 
