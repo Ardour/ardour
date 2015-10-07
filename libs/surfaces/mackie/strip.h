@@ -86,6 +86,8 @@ public:
 
 	void notify_metering_state_changed();
 
+	static void block_all_strip_redisplay_for (uint32_t msecs);
+
 private:
 	Button*  _solo;
 	Button*  _recenable;
@@ -101,7 +103,7 @@ private:
 	bool     _controls_locked;
 	bool     _transport_is_rolling;
 	bool     _metering_active;
-	uint64_t _reset_display_at;
+	uint64_t _block_redisplay_until;
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;
 
@@ -128,7 +130,7 @@ private:
 
 	std::string vpot_mode_string () const;
 
-	void queue_display_reset (uint32_t msecs);
+	void block_display_for (uint32_t msecs);
 	void return_to_vpot_mode_display ();
 
 	struct RedisplayRequest {
@@ -160,6 +162,8 @@ private:
 	void reset_saved_values ();
 
 	std::map<Evoral::Parameter,Control*> control_by_parameter;
+
+	static uint64_t _global_block_redisplay_until;
 };
 
 }

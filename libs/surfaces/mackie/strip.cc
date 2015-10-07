@@ -61,6 +61,8 @@ using namespace PBD;
 using namespace ArdourSurface;
 using namespace Mackie;
 
+uint64_t Strip::_global_block_redisplay_until = 0;
+
 #ifndef timeradd /// only avail with __USE_BSD
 #define timeradd(a,b,result)                         \
   do {                                               \
@@ -92,7 +94,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _controls_locked (false)
 	, _transport_is_rolling (false)
 	, _metering_active (true)
-	, _reset_display_at (0)
+	, _block_redisplay_until (0)
 	, _pan_mode (PanAzimuthAutomation)
 	, _last_gain_position_written (-1.0)
 	, _last_pan_azi_position_written (-1.0)
@@ -343,7 +345,7 @@ Strip::notify_gain_changed (bool force_update)
 				queue_parameter_display (GainAutomation, gain_coefficient);
 			}
 
-			queue_display_reset (2000);
+			block_display_for (2000);
 			_last_gain_position_written = normalized_position;
 		}
 	}
@@ -437,7 +439,7 @@ Strip::notify_panner_azi_changed (bool force_update)
 				queue_parameter_display (PanAzimuthAutomation, pos);
 			}
 
-			queue_display_reset (2000);
+			queue_parameter_display (PanAzimuthAutomation, pos);
 			_last_pan_azi_position_written = pos;
 		}
 	}
@@ -482,7 +484,7 @@ Strip::notify_panner_width_changed (bool force_update)
 				queue_parameter_display (PanWidthAutomation, pos);
 			}
 
-			queue_display_reset (2000);
+			queue_parameter_display (PanWidthAutomation, pos);
 			_last_pan_azi_position_written = pos;
 		}
 	}
@@ -500,7 +502,7 @@ Strip::select_event (Button&, ButtonState bs)
 		if (ms & MackieControlProtocol::MODIFIER_CMDALT) {
 			_controls_locked = !_controls_locked;
 			_surface->write (display (1,_controls_locked ?  "Locked" : "Unlock"));
-			queue_display_reset (1000);
+			block_display_for (1000);
 			return;
 		}
 
@@ -569,7 +571,7 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 
 			if (ac) {
 				queue_parameter_display ((AutomationType) ac->parameter().type(), ac->internal_to_interface (ac->get_value()));
-				queue_display_reset (2000);
+				block_display_for (2000);
 			}
 		}
 
@@ -759,10 +761,16 @@ Strip::periodic (uint64_t usecs)
 	if (!_route) {
 		return;
 	}
-
-	if (_reset_display_at >= usecs) {
+	if (_global_block_redisplay_until >= usecs) {
 		return;
-	} else if (_reset_display_at) {
+	} else {
+		/* reset since timer has expired */
+		_global_block_redisplay_until = 0;
+	}
+
+	if (_block_redisplay_until >= usecs) {
+		return;
+	} else if (_block_redisplay_until) {
 		return_to_vpot_mode_display ();
 	} else {
 		update_automation ();
@@ -996,7 +1004,7 @@ Strip::flip_mode_changed (bool notify)
 }
 
 void
-Strip::queue_display_reset (uint32_t msecs)
+Strip::block_display_for (uint32_t msecs)
 {
 	struct timeval now;
 	struct timeval delta;
@@ -1008,7 +1016,23 @@ Strip::queue_display_reset (uint32_t msecs)
 
 	timeradd (&now, &delta, &when);
 
-	_reset_display_at = (when.tv_sec * 1000000) + when.tv_usec;
+	_block_redisplay_until = (when.tv_sec * 1000000) + when.tv_usec;
+}
+
+void
+Strip::block_all_strip_redisplay_for (uint32_t msecs)
+{
+	struct timeval now;
+	struct timeval delta;
+	struct timeval when;
+	gettimeofday (&now, 0);
+
+	delta.tv_sec = msecs/1000;
+	delta.tv_usec = (msecs - ((msecs/1000) * 1000)) * 1000;
+
+	timeradd (&now, &delta, &when);
+
+	_global_block_redisplay_until = (when.tv_sec * 1000000) + when.tv_usec;
 }
 
 void
@@ -1024,7 +1048,7 @@ Strip::return_to_vpot_mode_display ()
 		_surface->write (blank_display (1));
 	}
 
-	_reset_display_at = 0;
+	_block_redisplay_until = 0;
 }
 
 struct RouteCompareByName {
@@ -1113,7 +1137,7 @@ Strip::next_pot_mode ()
 		/* do not change vpot mode while in flipped mode */
 		DEBUG_TRACE (DEBUG::MackieControl, "not stepping pot mode - in flip mode\n");
 		_surface->write (display (1, "Flip"));
-		queue_display_reset (1000);
+		block_display_for (1000);
 		return;
 	}
 
