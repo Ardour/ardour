@@ -1819,17 +1819,17 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 }
 
 void
-Editor::select_all_selectables_using_edit (bool after)
+Editor::select_all_selectables_using_edit (bool after, bool from_context_menu)
 {
 	framepos_t start;
 	framepos_t end;
 	list<Selectable *> touched;
 
 	if (after) {
-		start = get_preferred_edit_position(EDIT_IGNORE_NONE, true);
+		start = get_preferred_edit_position(EDIT_IGNORE_NONE, from_context_menu);
 		end = _session->current_end_frame();
 	} else {
-		if ((end = get_preferred_edit_position(EDIT_IGNORE_NONE, true)) > 1) {
+		if ((end = get_preferred_edit_position(EDIT_IGNORE_NONE, from_context_menu)) > 1) {
 			start = 0;
 			end -= 1;
 		} else {
