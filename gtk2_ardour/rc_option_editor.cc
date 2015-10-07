@@ -652,12 +652,12 @@ public:
 		set_popdown_strings (_snap_modifier_combo, dumb);
 		_snap_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_modifier_chosen));
 #ifdef GTKOSX
-		Glib::ustring desc_buf = string compose (_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
+		Glib::ustring mod_str = string compose (_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
 #else
-		Glib::ustring desc_buf = Keyboard::secondary_modifier_name();
+		Glib::ustring mod_str = Keyboard::secondary_modifier_name();
 #endif
 		Gtkmm2ext::UI::instance()->set_tip (_snap_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), desc_buf, restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) Keyboard::snap_modifier ()) {
 				_snap_modifier_combo.set_active_text (S_(modifiers[x].name));
@@ -678,12 +678,12 @@ public:
 		set_popdown_strings (_snap_delta_combo, dumb);
 		_snap_delta_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_delta_modifier_chosen));
 #ifdef GTKOSX
-		desc_buf = Keyboard::level4_modifier_name ();
+		mod_str = Keyboard::level4_modifier_name ();
 #else
-		desc_buf = string_compose (_("%1-%2"), Keyboard::secondary_modifier_name (), Keyboard::level4_modifier_name ());
+		mod_str = string_compose (_("%1-%2"), Keyboard::secondary_modifier_name (), Keyboard::level4_modifier_name ());
 #endif
 		Gtkmm2ext::UI::instance()->set_tip (_snap_delta_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), desc_buf, restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) Keyboard::snap_delta_modifier ()) {
 				_snap_delta_combo.set_active_text (S_(modifiers[x].name));
@@ -738,9 +738,9 @@ public:
 		set_popdown_strings (_fine_adjust_combo, dumb);
 		_fine_adjust_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::fine_adjust_modifier_chosen));
 
-		desc_buf = string_compose (_("%1-%2"), Keyboard::secondary_modifier_name (), Keyboard::tertiary_modifier_name ());
+		mod_str = string_compose (_("%1-%2"), Keyboard::secondary_modifier_name (), Keyboard::tertiary_modifier_name ());
 		Gtkmm2ext::UI::instance()->set_tip (_fine_adjust_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), desc_buf, restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) ArdourKeyboard::fine_adjust_modifier ()) {
 				_fine_adjust_combo.set_active_text (S_(modifiers[x].name));
