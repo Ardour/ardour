@@ -276,7 +276,11 @@ PluginManager::refresh (bool cache_only)
 			if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 				gchar *bl = NULL;
 				if (g_file_get_contents(fn.c_str (), &bl, NULL, NULL)) {
-					PBD::info << _("VST Blacklist:") << "\n" << bl << "-----" << endmsg;
+					if (Config->get_verbose_plugin_scan()) {
+						PBD::info << _("VST Blacklist: ") << fn << "\n" << bl << "-----" << endmsg;
+					} else {
+						PBD::info << _("VST Blacklist:") << "\n" << bl << "-----" << endmsg;
+					}
 					g_free (bl);
 				}
 			}
