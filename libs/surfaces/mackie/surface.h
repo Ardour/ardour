@@ -198,12 +198,6 @@ public:
 	};
 
 	int connection_state;
-
-	/* this times the duration between press+release events for all
-	   possible 127 buttons on THIS surface (not all surfaces).
-	*/
-
-	ARDOUR::microseconds_t button_timer[127];
 };
 
 }
