@@ -148,6 +148,7 @@ CONFIG_VARIABLE (bool, clicking, "clicking", false)
 CONFIG_VARIABLE (std::string, click_sound, "click-sound", "")
 CONFIG_VARIABLE (std::string, click_emphasis_sound, "click-emphasis-sound", "")
 CONFIG_VARIABLE (gain_t, click_gain, "click-gain", 1.0)
+CONFIG_VARIABLE (bool, use_click_emphasis, "use-click-emphasis", true)
 
 /* transport control and related */
 
