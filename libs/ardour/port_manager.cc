@@ -75,20 +75,14 @@ PortManager::make_port_name_relative (const string& portname) const
 		return portname;
 	}
 
-	string::size_type len;
-	string::size_type n;
-	string self = _backend->my_name();
+	string::size_type colon = portname.find (':');
 
-	len = portname.length();
-
-	for (n = 0; n < len; ++n) {
-		if (portname[n] == ':') {
-			break;
-		}
+	if (colon == string::npos) {
+		return portname;
 	}
 
-	if ((n != len) && (portname.substr (0, n) == self)) {
-		return portname.substr (n+1);
+	if (portname.substr (0, colon) == _backend->my_name()) {
+		return portname.substr (colon+1);
 	}
 
 	return portname;
