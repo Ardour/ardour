@@ -617,6 +617,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 					}
 				}
 
+				delete _solo_release;
+				_solo_release = 0;
+
 			} else {
 
 				/* click: solo this route */
