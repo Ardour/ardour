@@ -545,9 +545,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 				DisplaySuspender ds;
 				if (Config->get_solo_control_is_listen_control()) {
-					_session->set_listen (_session->get_routes(), !_route->listening_via_monitor(),  Session::rt_cleanup, true);
+					_session->set_listen (_session->get_routes(), !_route->listening_via_monitor(),  Session::rt_cleanup, false);
 				} else {
-					_session->set_solo (_session->get_routes(), !_route->self_soloed(),  Session::rt_cleanup, true);
+					_session->set_solo (_session->get_routes(), !_route->self_soloed(),  Session::rt_cleanup, false);
 				}
 
 			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
@@ -613,7 +613,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					if (Config->get_solo_control_is_listen_control()) {
 						_session->set_listen (rl, !_route->listening_via_monitor(),  Session::rt_cleanup, true);
 					} else {
-						_session->set_solo (rl, !_route->self_soloed(),  Session::rt_cleanup, true);
+						_session->set_solo (rl, !_route->self_soloed(),  Session::rt_cleanup, false);
 					}
 				}
 
@@ -654,9 +654,9 @@ RouteUI::solo_release (GdkEventButton* /*ev*/)
 		} else {
 			DisplaySuspender ds;
 			if (Config->get_solo_control_is_listen_control()) {
-				_session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
+				_session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, false);
 			} else {
-				_session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
+				_session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, false);
 			}
 		}
 
