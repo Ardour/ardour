@@ -89,7 +89,7 @@ guint Keyboard::button2_modifiers = 0; /* not used */
 const char* Keyboard::primary_modifier_name() { return _("Control"); }
 const char* Keyboard::secondary_modifier_name() { return _("Alt"); }
 const char* Keyboard::tertiary_modifier_name() { return S_("Key|Shift"); }
-const char* Keyboard::level4_modifier_name() { return _("Meta"); }
+const char* Keyboard::level4_modifier_name() { return _("Windows"); }
 const char* Keyboard::copy_modifier_name() { return _("Control"); }
 const char* Keyboard::rangeselect_modifier_name() { return S_("Key|Shift"); }
 
