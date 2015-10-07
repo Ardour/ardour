@@ -220,7 +220,7 @@ class MackieControlProtocol
 	bool session_load () { return _session_load; }
 	void not_session_load () { _session_load = false; }
 
-	void midi_connectivity_established ();
+	void ping_devices ();
 
   protected:
 	// shut down the surface

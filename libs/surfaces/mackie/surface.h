@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#include "pbd/signals.h"
 #include "pbd/xml++.h"
 #include "midi++/types.h"
 
@@ -18,6 +19,7 @@ namespace MIDI {
 
 namespace ARDOUR {
 	class Route;
+	class Port;
 }
 
 class MidiByteArray;
@@ -49,7 +51,7 @@ public:
 	uint32_t number() const { return _number; }
 	const std::string& name() { return _name; }
 
-	void say_hello ();
+	void connected ();
 
 	bool active() const { return _active; }
 
@@ -174,15 +176,25 @@ public:
 	Mackie::JogWheel*      _jog_wheel;
 	Fader*                 _master_fader;
 	float                  _last_master_gain_written;
-
+	PBD::ScopedConnection   port_connection;
+	
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 	MidiByteArray host_connection_query (MidiByteArray& bytes);
 	MidiByteArray host_connection_confirmation (const MidiByteArray& bytes);
 
+	void say_hello ();
 	void init_controls ();
 	void init_strips (uint32_t n);
 	void setup_master ();
 	void master_gain_changed ();
+	void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool);
+
+	enum ConnectionState {
+		InputConnected = 0x1,
+		OutputConnected = 0x2
+	};
+
+	int connection_state;
 };
 
 }

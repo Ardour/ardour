@@ -25,6 +25,7 @@
 
 #include "midi++/port.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/automation_control.h"
 #include "ardour/debug.h"
 #include "ardour/route.h"
@@ -88,6 +89,7 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	, _jog_wheel (0)
 	, _master_fader (0)
 	, _last_master_gain_written (-0.0f)
+	, connection_state (0)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface init\n");
 
@@ -120,6 +122,11 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 		DEBUG_TRACE (DEBUG::MackieControl, "init_strips done\n");
 	}
 
+	/*
+	 */
+
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&Surface::connection_handler, this, _1, _2, _3, _4, _5), &_mcp);
+
 	connect_to_signals ();
 
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface done\n");
@@ -145,6 +152,60 @@ Surface::~Surface ()
 	delete _port;
 
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::~Surface done\n");
+}
+
+void
+Surface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
+{
+	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (_port->input_name());
+	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (_port->output_name());
+
+	if (ni == name1 || ni == name2) {
+		if (yn) {
+			connection_state |= InputConnected;
+		} else {
+			connection_state &= ~InputConnected;
+		}
+	} else if (no == name1 || no == name2) {
+		if (yn) {
+			connection_state |= OutputConnected;
+		} else {
+			connection_state &= ~OutputConnected;
+		}
+	}
+
+	if ((connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
+
+		/* this will send a device query message, which should
+		   result in a response that will kick off device type
+		   discovery and activation of the surface(s).
+
+		   The intended order of events is:
+
+		   - each surface sends a device query message
+		   - devices respond with either MCP or LCP response (sysex in both
+		   cases)
+		   - sysex message causes Surface::turn_it_on() which tells the
+		   MCP object that the surface is ready, and sets up strip
+		   displays and binds faders and buttons for that surface
+
+		   In the case of LCP, where this is a handshake process that could
+		   fail, the response process to the initial sysex after a device query
+		   will mark the surface inactive, which won't shut anything down
+		   but will stop any writes to the device.
+
+		   Note: there are no known cases of the handshake process failing.
+
+		   We actually can't initiate this in this callback, so we have
+		   to queue it with the MCP event loop.
+		*/
+
+		connected ();
+
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 disconnected (input or output or both)\n", _name));
+		_active = false;
+	}
 }
 
 XMLNode&
@@ -401,7 +462,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 	 */
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface::handle_midi_pitchbend_message on port %3, fader = %1 value = %2 (%4)\n",
-	                                                   fader_id, pb, _number, pb/16384.0));
+							   fader_id, pb, _number, pb/16384.0));
 
 	if (_mcp.device_info().no_handshake()) {
 		turn_it_on ();
@@ -608,7 +669,6 @@ calculate_challenge_response (MidiByteArray::iterator begin, MidiByteArray::iter
 	return retval;
 }
 
-// not used right now
 MidiByteArray
 Surface::host_connection_query (MidiByteArray & bytes)
 {
@@ -634,7 +694,6 @@ Surface::host_connection_query (MidiByteArray & bytes)
 	return response;
 }
 
-// not used right now
 MidiByteArray
 Surface::host_connection_confirmation (const MidiByteArray & bytes)
 {
@@ -1101,4 +1160,16 @@ Surface::hui_heartbeat ()
 
 	MidiByteArray msg (3, MIDI::on, 0x0, 0x0);
 	_port->write (msg);
+}
+
+void
+Surface::connected ()
+{
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 now connected, trying to ping device...\n", _name));
+
+	say_hello ();
+
+	if (_mcp.device_info().no_handshake()) {
+		turn_it_on ();
+	}
 }

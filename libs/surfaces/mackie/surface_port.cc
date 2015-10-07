@@ -144,6 +144,18 @@ SurfacePort::set_state (const XMLNode& node, int version)
 	return 0;
 }
 
+std::string
+SurfacePort::input_name () const
+{
+	return _async_in->name();
+}
+
+std::string
+SurfacePort::output_name () const
+{
+	return _async_out->name();
+}
+
 // wrapper for one day when strerror_r is working properly
 string fetch_errmsg (int error_number)
 {

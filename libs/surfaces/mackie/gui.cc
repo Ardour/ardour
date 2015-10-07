@@ -664,7 +664,7 @@ void
 MackieControlProtocolGUI::discover_clicked ()
 {
 	/* this should help to get things started */
-	_cp.midi_connectivity_established ();
+	_cp.ping_devices ();
 }
 
 void

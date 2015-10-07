@@ -87,9 +87,9 @@ const int MackieControlProtocol::MODIFIER_CMDALT = 0x8;
 const int MackieControlProtocol::MODIFIER_ZOOM = 0x10;
 const int MackieControlProtocol::MODIFIER_SCRUB = 0x20;
 const int MackieControlProtocol::MAIN_MODIFIER_MASK = (MackieControlProtocol::MODIFIER_OPTION|
-                                                       MackieControlProtocol::MODIFIER_CONTROL|
-                                                       MackieControlProtocol::MODIFIER_SHIFT|
-                                                       MackieControlProtocol::MODIFIER_CMDALT);
+						       MackieControlProtocol::MODIFIER_CONTROL|
+						       MackieControlProtocol::MODIFIER_SHIFT|
+						       MackieControlProtocol::MODIFIER_CMDALT);
 
 MackieControlProtocol* MackieControlProtocol::_instance = 0;
 
@@ -184,16 +184,14 @@ MackieControlProtocol::thread_init ()
 }
 
 void
-MackieControlProtocol::midi_connectivity_established ()
+MackieControlProtocol::ping_devices ()
 {
-	for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-		(*si)->say_hello ();
-	}
+	/* should not be called if surfaces are not connected, but will not
+	 * malfunction if it is.
+	 */
 
-	if (_device_info.no_handshake()) {
-		for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-			(*si)->turn_it_on ();
-		}
+	for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+		(*si)->connected ();
 	}
 }
 
@@ -725,7 +723,7 @@ gboolean
 ArdourSurface::ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data)
 {
 	ArdourSurface::MackieControlProtocol::ipMIDIHandler* ipm = static_cast<ArdourSurface::MackieControlProtocol::ipMIDIHandler*>(data);
-        return ipm->mcp->midi_input_handler (Glib::IOCondition (condition), ipm->port);
+	return ipm->mcp->midi_input_handler (Glib::IOCondition (condition), ipm->port);
 }
 
 int
@@ -822,24 +820,24 @@ MackieControlProtocol::create_surfaces ()
 
 			if ((fd = input_port.selectable ()) >= 0) {
 
-                                GIOChannel* ioc = g_io_channel_unix_new (fd);
-                                GSource* gsrc = g_io_create_watch (ioc, GIOCondition (G_IO_IN|G_IO_HUP|G_IO_ERR));
+				GIOChannel* ioc = g_io_channel_unix_new (fd);
+				GSource* gsrc = g_io_create_watch (ioc, GIOCondition (G_IO_IN|G_IO_HUP|G_IO_ERR));
 
-                                /* hack up an object so that in the callback from the event loop
-                                   we have both the MackieControlProtocol and the input port.
+				/* hack up an object so that in the callback from the event loop
+				   we have both the MackieControlProtocol and the input port.
 
-                                   If we were using C++ for this stuff we wouldn't need this
-                                   but a nasty, not-fixable bug in the binding between C
-                                   and C++ makes it necessary to avoid C++ for the IO
-                                   callback setup.
-                                */
+				   If we were using C++ for this stuff we wouldn't need this
+				   but a nasty, not-fixable bug in the binding between C
+				   and C++ makes it necessary to avoid C++ for the IO
+				   callback setup.
+				*/
 
-                                ipMIDIHandler* ipm = new ipMIDIHandler (); /* we will leak this sizeof(pointer)*2 sized object */
-                                ipm->mcp = this;
-                                ipm->port = &input_port;
+				ipMIDIHandler* ipm = new ipMIDIHandler (); /* we will leak this sizeof(pointer)*2 sized object */
+				ipm->mcp = this;
+				ipm->port = &input_port;
 
-                                g_source_set_callback (gsrc, (GSourceFunc) ipmidi_input_handler, ipm, NULL);
-                                g_source_attach (gsrc, main_loop()->get_context()->gobj());
+				g_source_set_callback (gsrc, (GSourceFunc) ipmidi_input_handler, ipm, NULL);
+				g_source_attach (gsrc, main_loop()->get_context()->gobj());
 			}
 		}
 	}
@@ -1027,10 +1025,10 @@ MackieControlProtocol::update_timecode_display()
 void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 {
 	if (p == "punch-in") {
-	        // no such button right now
+		// no such button right now
 		// update_global_button (Button::PunchIn, session->config.get_punch_in());
 	} else if (p == "punch-out") {
-	        // no such button right now
+		// no such button right now
 		// update_global_button (Button::PunchOut, session->config.get_punch_out());
 	} else if (p == "clicking") {
 		update_global_button (Button::Click, Config->get_clicking());
@@ -1314,7 +1312,7 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		if (action.find ('/') != string::npos) { /* good chance that this is really an action */
 
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Looked up action for button %1 with modifier %2, got [%3]\n",
-			                                                   button.bid(), _modifier_state, action));
+									   button.bid(), _modifier_state, action));
 
 			/* if there is a bound action for this button, and this is a press event,
 			   carry out the action. If its a release event, do nothing since we
