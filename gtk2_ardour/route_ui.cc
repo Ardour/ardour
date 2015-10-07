@@ -613,7 +613,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					if (Config->get_solo_control_is_listen_control()) {
 						_session->set_listen (rl, !_route->listening_via_monitor(),  Session::rt_cleanup, true);
 					} else {
-						_session->set_solo (rl, !_route->self_soloed(),  Session::rt_cleanup, false);
+						_session->set_solo (rl, !_route->self_soloed(),  Session::rt_cleanup, true);
 					}
 				}
 
