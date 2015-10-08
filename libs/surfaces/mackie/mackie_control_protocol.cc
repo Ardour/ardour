@@ -461,11 +461,17 @@ MackieControlProtocol::periodic ()
 		initialize();
 	}
 
-	struct timeval now;
-	uint64_t now_usecs;
-	gettimeofday (&now, 0);
+	ARDOUR::microseconds_t now_usecs = ARDOUR::get_microseconds ();
 
-	now_usecs = (now.tv_sec * 1000000) + now.tv_usec;
+	static int cnt = 0;
+
+	cnt++;
+	if ((cnt != 1) && (cnt % 25 == 0)) {
+		if (_master_surface) {
+			cerr << string_compose ("Cnt now %1 ", cnt) << endl;
+			_master_surface->display_message_for (string_compose ("Cnt now %1\n12Hey Paul", cnt), 1000);
+		}
+	}
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -496,11 +502,13 @@ MackieControlProtocol::redisplay ()
 		initialize();
 	}
 
+	ARDOUR::microseconds_t now = ARDOUR::get_microseconds ();
+
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
 		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-			(*s)->redisplay ();
+			(*s)->redisplay (now);
 		}
 	}
 

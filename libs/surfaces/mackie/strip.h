@@ -67,8 +67,8 @@ public:
 	void handle_fader_touch (Fader&, bool touch_on);
 	void handle_pot (Pot&, float delta);
 
-	void periodic (uint64_t now_usecs);
-	void redisplay ();
+	void periodic (ARDOUR::microseconds_t now_usecs);
+	void redisplay (ARDOUR::microseconds_t now_usecs);
 
 	MidiByteArray display (uint32_t line_number, const std::string&);
 	MidiByteArray blank_display (uint32_t line_number);
@@ -86,7 +86,8 @@ public:
 
 	void notify_metering_state_changed();
 
-	static void block_all_strip_redisplay_for (uint32_t msecs);
+	void block_screen_display_for (uint32_t msecs);
+	void block_vpot_mode_display_for (uint32_t msecs);
 
 private:
 	Button*  _solo;
@@ -103,7 +104,8 @@ private:
 	bool     _controls_locked;
 	bool     _transport_is_rolling;
 	bool     _metering_active;
-	uint64_t _block_redisplay_until;
+	uint64_t _block_vpot_mode_redisplay_until;
+	uint64_t _block_screen_redisplay_until;
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;
 
@@ -130,7 +132,6 @@ private:
 
 	std::string vpot_mode_string () const;
 
-	void block_display_for (uint32_t msecs);
 	void return_to_vpot_mode_display ();
 
 	struct RedisplayRequest {
@@ -162,8 +163,6 @@ private:
 	void reset_saved_values ();
 
 	std::map<Evoral::Parameter,Control*> control_by_parameter;
-
-	static uint64_t _global_block_redisplay_until;
 };
 
 }

@@ -88,8 +88,9 @@ ostream & operator <<  (ostream & os, const MidiByteArray & mba)
 
 MidiByteArray & operator <<  (MidiByteArray & mba, const std::string & st)
 {
-	for  (string::const_iterator it = st.begin(); it != st.end(); ++it) {
-		mba << *it;
-	}
+	/* note that this assumes that "st" is ASCII encoded
+	 */
+
+	mba.insert (mba.end(), st.begin(), st.end());
 	return mba;
 }

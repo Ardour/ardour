@@ -89,8 +89,8 @@ public:
 
 	const MidiByteArray& sysex_hdr() const;
 
-	void periodic (uint64_t now_usecs);
-	void redisplay ();
+	void periodic (ARDOUR::microseconds_t now_usecs);
+	void redisplay (ARDOUR::microseconds_t now_usecs);
 	void hui_heartbeat ();
 
 	void handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t, uint32_t channel_id);
@@ -163,6 +163,8 @@ public:
         void notify_metering_state_changed();
 	void turn_it_on ();
 
+	void display_message_for (std::string const& msg, uint64_t msecs);
+
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
@@ -198,6 +200,8 @@ public:
 	};
 
 	int connection_state;
+
+	MidiByteArray display_line (std::string const& msg, int line_num);
 };
 
 }

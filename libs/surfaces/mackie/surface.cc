@@ -23,6 +23,8 @@
 #include <cstdio>
 #include <cmath>
 
+#include <glibmm/convert.h>
+
 #include "midi++/port.h"
 
 #include "ardour/audioengine.h"
@@ -845,10 +847,10 @@ Surface::periodic (uint64_t now_usecs)
 }
 
 void
-Surface::redisplay ()
+Surface::redisplay (ARDOUR::microseconds_t now)
 {
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->redisplay ();
+		(*s)->redisplay (now);
 	}
 }
 
@@ -1088,13 +1090,11 @@ Surface::reset ()
 {
 	if (_port) {
 		/* reset msg for Mackie Control */
-		MidiByteArray msg (8, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x08, 0x00, MIDI::eox);
-		_port->write (msg);
-		msg[4] = 0x15; /* reset Mackie XT */
-		_port->write (msg);
-		msg[4] = 0x10; /* reset Logic Control */
-		_port->write (msg);
-		msg[4] = 0x11; /* reset Logic Control XT */
+		MidiByteArray msg;
+		msg << sysex_hdr();
+		msg << 0x08;
+		msg << 0x00;
+		msg << MIDI::eox;
 		_port->write (msg);
 	}
 }
@@ -1104,13 +1104,11 @@ Surface::toggle_backlight ()
 {
 	if (_port) {
 		int onoff = random() %2;
-		MidiByteArray msg (8, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x0a, onoff, MIDI::eox);
-		_port->write (msg);
-		msg[4] = 0x15; /* reset Mackie XT */
-		_port->write (msg);
-		msg[4] = 0x10; /* reset Logic Control */
-		_port->write (msg);
-		msg[4] = 0x11; /* reset Logic Control XT */
+		MidiByteArray msg;
+		msg << sysex_hdr ();
+		msg << 0xa;
+		msg << (onoff ? 0x1 : 0x0);
+		msg << MIDI::eox;
 		_port->write (msg);
 	}
 }
@@ -1119,13 +1117,11 @@ void
 Surface::recalibrate_faders ()
 {
 	if (_port) {
-		MidiByteArray msg (8, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x09, 0x00, MIDI::eox);
-		_port->write (msg);
-		msg[4] = 0x15; /* reset Mackie XT */
-		_port->write (msg);
-		msg[4] = 0x10; /* reset Logic Control */
-		_port->write (msg);
-		msg[4] = 0x11; /* reset Logic Control XT */
+		MidiByteArray msg;
+		msg << sysex_hdr ();
+		msg << 0x09;
+		msg << 0x00;
+		msg << MIDI::eox;
 		_port->write (msg);
 	}
 }
@@ -1138,19 +1134,17 @@ Surface::set_touch_sensitivity (int sensitivity)
 	/* sensitivity already clamped by caller */
 
 	if (_port) {
-		MidiByteArray msg (9, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x0e, 0xff, sensitivity, MIDI::eox);
+		MidiByteArray msg;
+
+		msg << sysex_hdr ();
+		msg << 0x0e;
+		msg << 0xff; /* overwritten for each fader below */
+		msg << (sensitivity & 0x7f);
+		msg << MIDI::eox;
 
 		for (int fader = 0; fader < 9; ++fader) {
 			msg[6] = fader;
-
 			_port->write (msg);
-			msg[4] = 0x15; /* reset Mackie XT */
-			_port->write (msg);
-			msg[4] = 0x10; /* reset Logic Control */
-			_port->write (msg);
-			msg[4] = 0x11; /* reset Logic Control XT */
-
-			g_usleep (1000); /* milliseconds */
 		}
 	}
 }
@@ -1175,5 +1169,77 @@ Surface::connected ()
 
 	if (_mcp.device_info().no_handshake()) {
 		turn_it_on ();
+	}
+}
+
+MidiByteArray
+Surface::display_line (string const& msg, int line_num)
+{
+	MidiByteArray midi_msg;
+	midi_msg << sysex_hdr ();
+	midi_msg << 0x12;
+	midi_msg << (line_num ? 0x38 : 0x0); /* offsets into char array
+	                                      * on device that
+	                                      * correspond to line
+	                                      * starts
+	                                      */
+	if (msg.empty()) {
+
+		midi_msg.insert (midi_msg.end(), 55, ' ');
+
+	} else {
+
+		/* ascii data to display. @param msg is UTF-8 which is not legal. */
+		string ascii = Glib::convert_with_fallback (msg, "UTF-8", "ISO-8859-1", "_");
+		string::size_type len = ascii.length();
+
+		if (len > 55) {
+			midi_msg << ascii.substr (0, 55);
+		} else {
+			midi_msg << ascii;
+
+			for (string::size_type i = len; i < 55; ++i) {
+				midi_msg << ' ';
+			}
+		}
+	}
+
+	midi_msg << MIDI::eox;
+
+	return midi_msg;
+}
+
+/** display @param msg on the 55x2 screen for @param msecs milliseconds
+ *
+ *  @param msg is assumed to be UTF-8 encoded, and will be converted
+ *  to ASCII with an underscore as fallback character before being
+ *  sent to the device.
+ */
+void
+Surface::display_message_for (string const& msg, uint64_t msecs)
+{
+	string::size_type newline;
+
+	if ((newline = msg.find ('\n')) == string::npos) {
+
+		_port->write (display_line (msg, 0));
+		_port->write (display_line (string(), 1));
+
+	} else if (newline == 0) {
+
+		_port->write (display_line (string(), 0));
+		_port->write (display_line (msg.substr (1), 1));
+
+	} else {
+
+		string first_line = msg.substr (0, newline-1);
+		string second_line = msg.substr (newline+1);
+
+		_port->write (display_line (first_line, 0));
+		_port->write (display_line (second_line.substr (0, second_line.find_first_of ('\n')), 1));
+	}
+
+	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->block_screen_display_for (msecs);
 	}
 }
