@@ -124,10 +124,20 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 		DEBUG_TRACE (DEBUG::MackieControl, "init_strips done\n");
 	}
 
-	/*
-	 */
+	if (!_mcp.device_info().uses_ipmidi()) {
+		ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&Surface::connection_handler, this, _1, _2, _3, _4, _5), &_mcp);
+	} else {
+		/* ipMIDI port already exists, we can just assume that we're
+		 * connected.
+		 *
+		 * If the user still hasn't connected the ipMIDI surface and/or
+		 * turned it on, then they have to press "Discover Mackie
+		 * Devices" in the GUI at the right time.
+		 */
 
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&Surface::connection_handler, this, _1, _2, _3, _4, _5), &_mcp);
+		connection_state |= (InputConnected|OutputConnected);
+		connected ();
+	}
 
 	connect_to_signals ();
 
