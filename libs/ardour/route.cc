@@ -4237,6 +4237,12 @@ Route::gain_control() const
 }
 
 boost::shared_ptr<AutomationControl>
+Route::trim_control() const
+{
+	return _trim->gain_control();
+}
+
+boost::shared_ptr<AutomationControl>
 Route::get_control (const Evoral::Parameter& param)
 {
 	/* either we own the control or .... */

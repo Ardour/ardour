@@ -76,6 +76,7 @@ public:
 	void zero ();
 
 	void flip_mode_changed (bool notify=false);
+	void potmode_changed (bool notify=false);
 
 	void lock_controls ();
 	void unlock_controls ();
@@ -104,9 +105,12 @@ private:
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;
 
+	int      _pan_mode;
+
 	float _last_gain_position_written;
 	float _last_pan_azi_position_written;
 	float _last_pan_width_position_written;
+	float _last_trim_position_written;
 
 	void notify_solo_changed ();
 	void notify_mute_changed ();
@@ -117,6 +121,7 @@ private:
 	void notify_panner_width_changed (bool force_update = true);
 	void notify_active_changed ();
 	void notify_route_deleted ();
+	void notify_trim_changed (bool force_update = true);
 
 	void update_automation ();
 	void update_meter ();

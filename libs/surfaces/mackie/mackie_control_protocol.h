@@ -102,15 +102,20 @@ class MackieControlProtocol
 
 	enum ViewMode {
 		Mixer,
-		Dynamics,
-		EQ,
 		Loop,
 		AudioTracks,
 		MidiTracks,
 		Busses,
-		Sends,
-		Plugins,
 	};
+
+	enum PotMode {
+		Tracks,
+		Send,
+		Pan,
+		PlugIn,
+		EQ,
+		Instrument,
+ 	};
 
 	enum FlipMode {
 		Normal, /* fader controls primary, vpot controls secondary */
@@ -135,11 +140,13 @@ class MackieControlProtocol
 
 	FlipMode flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
+	PotMode pot_mode () const { return _pot_mode; }
 	bool zoom_mode () const { return modifier_state() & MODIFIER_ZOOM; }
 	bool     metering_active () const { return _metering_active; }
 
 	void set_view_mode (ViewMode);
 	void set_flip_mode (FlipMode);
+	void set_pot_mode (PotMode);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -302,6 +309,7 @@ class MackieControlProtocol
 	bool                     _scrub_mode;
 	FlipMode                 _flip_mode;
 	ViewMode                 _view_mode;
+	PotMode                  _pot_mode;
 	int                      _current_selected_track;
 	int                      _modifier_state;
 	ButtonMap                 button_map;

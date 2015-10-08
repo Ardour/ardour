@@ -659,7 +659,14 @@ MackieControlProtocol::F8_release (Button &)
 LedState
 MackieControlProtocol::pan_press (Button &)
 {
-	return off;
+	set_pot_mode (Pan);
+	update_global_button (Button::Track, off);
+	update_global_button (Button::Send, off);
+	update_global_button (Button::Plugin, off);
+	update_global_button (Button::Eq, off);
+	update_global_button (Button::Dyn, off);
+	return on;
+
 }
 LedState
 MackieControlProtocol::pan_release (Button &)
@@ -830,8 +837,14 @@ MackieControlProtocol::clearsolo_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::track_press (Mackie::Button&)
 {
+	set_pot_mode (Tracks);
+	update_global_button (Button::Pan, off);
+	update_global_button (Button::Send, off);
+	update_global_button (Button::Plugin, off);
+	update_global_button (Button::Eq, off);
+	update_global_button (Button::Dyn, off);
+	return on;
 
-	return off;
 }
 Mackie::LedState
 MackieControlProtocol::track_release (Mackie::Button&)
@@ -841,13 +854,15 @@ MackieControlProtocol::track_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::send_press (Mackie::Button&)
 {
-// code moved here from "sends_press"
-	//set_view_mode (Sends);
-	// Led state for vpot assignment should be radio button-ish
-	// Pressing any one should turn the rest off.
-	// but this is not implemented yet so leave off
-	//return on;
 	return off;
+	// remove above line when sends implemented
+	set_pot_mode (Send);
+	update_global_button (Button::Track, off);
+	update_global_button (Button::Pan, off);
+	update_global_button (Button::Plugin, off);
+	update_global_button (Button::Eq, off);
+	update_global_button (Button::Dyn, off);
+	return on;
 }
 Mackie::LedState
 MackieControlProtocol::send_release (Mackie::Button&)

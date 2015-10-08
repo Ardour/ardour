@@ -107,6 +107,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _scrub_mode (false)
 	, _flip_mode (Normal)
 	, _view_mode (Mixer)
+	, _pot_mode (Pan)
 	, _current_selected_track (-1)
 	, _modifier_state (0)
 	, _ipmidi_base (MIDI::IPMIDIPort::lowest_ipmidi_port_default)
@@ -292,15 +293,7 @@ MackieControlProtocol::get_sorted_routes()
 			break;
 		case MidiTracks:
 			break;
-		case Dynamics:
-			break;
-		case EQ:
-			break;
 		case Loop:
-			break;
-		case Sends:
-			break;
-		case Plugins:
 			break;
 		}
 
@@ -1439,6 +1432,20 @@ MackieControlProtocol::set_flip_mode (FlipMode fm)
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->update_flip_mode_display ();
 	}
+}
+
+void
+MackieControlProtocol::set_pot_mode (PotMode m)
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+	_pot_mode = m;
+
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->update_potmode ();
+
+	}
+
 }
 
 void

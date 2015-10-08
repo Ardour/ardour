@@ -974,6 +974,14 @@ Surface::update_flip_mode_display ()
 	}
 }
 
+ void
+Surface::update_potmode ()
+{
+	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->potmode_changed (false);
+	}
+}
+
 void
 Surface::update_view_mode_display ()
 {
@@ -987,15 +995,7 @@ Surface::update_view_mode_display ()
 	switch (_mcp.view_mode()) {
 	case MackieControlProtocol::Mixer:
 		show_two_char_display ("Mx");
-		id = Button::Pan;
-		break;
-	case MackieControlProtocol::Dynamics:
-		show_two_char_display ("Dy");
-		id = Button::Dyn;
-		break;
-	case MackieControlProtocol::EQ:
-		show_two_char_display ("EQ");
-		id = Button::Eq;
+		//id = Button::Pan;
 		break;
 	case MackieControlProtocol::Loop:
 		show_two_char_display ("LP");
@@ -1006,14 +1006,6 @@ Surface::update_view_mode_display ()
 		break;
 	case MackieControlProtocol::MidiTracks:
 		show_two_char_display ("MT");
-		break;
-	case MackieControlProtocol::Sends:
-		show_two_char_display ("Sn");
-		id = Button::Send;
-		break;
-	case MackieControlProtocol::Plugins:
-		show_two_char_display ("Pl");
-		id = Button::Plugin;
 		break;
 	default:
 		break;

@@ -151,6 +151,7 @@ public:
 
 	void update_view_mode_display ();
 	void update_flip_mode_display ();
+	void update_potmode ();
 
 	void gui_selection_changed (const ARDOUR::StrongRouteNotificationList&);
 
