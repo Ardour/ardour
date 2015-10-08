@@ -801,52 +801,53 @@ static std::string dll_info (std::string path) {
 	int fd = g_open(path.c_str(), O_RDONLY, 0444);
 
 	if (fd < 0) {
-		return _("- cannot open dll"); // TODO strerror()
+		return _("cannot open dll"); // TODO strerror()
 	}
 
 	if (68 != read (fd, buf, 68)) {
-		rv = _("- invalid dll, file too small");
+		rv = _("invalid dll, file too small");
 		goto errorout;
 	}
 	if (buf[0] != 'M' && buf[1] != 'Z') {
-		rv = _("- not a dll");
+		rv = _("not a dll");
 		goto errorout;
 	}
 
 	pe_hdr_off = *((int32_t*) &buf[60]);
 	if (pe_hdr_off !=lseek (fd, pe_hdr_off, SEEK_SET)) {
-		rv = _("- cannot determine dll type");
+		rv = _("cannot determine dll type");
 		goto errorout;
 	}
 	if (6 != read (fd, buf, 6)) {
-		rv = _("- cannot read dll PE header");
+		rv = _("cannot read dll PE header");
 		goto errorout;
 	}
 
 	if (buf[0] != 'P' && buf[1] != 'E') {
-		rv = _("- invalid dll PE header");
+		rv = _("invalid dll PE header");
 		goto errorout;
 	}
 
 	type = *((uint16_t*) &buf[4]);
 	switch (type) {
 		case 0x014c:
-			rv = _("- i386 (32bit)");
+			rv = _("i386 (32bit)");
 			break;
 		case  0x0200:
-			rv = _("- Itanium");
+			rv = _("Itanium");
 			break;
 		case 0x8664:
-			rv = _("- x64 (64bit)");
+			rv = _("x64 (64bit)");
 			break;
 		case 0:
-			rv = _("- Native Architecture");
+			rv = _("Native Architecture");
 			break;
 		default:
-			rv = _("- Unknown Architecture");
+			rv = _("Unknown Architecture");
 			break;
 	}
 errorout:
+	assert (rv.length() > 0);
 	close (fd);
 	return rv;
 }
@@ -860,7 +861,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 		if (cache_only) {
 			info << string_compose (_(" *  %1 (cache only)"), path) << endmsg;
 		} else {
-			info << string_compose (_(" *  %1 %2"), path, dll_info (path)) << endmsg;
+			info << string_compose (_(" *  %1 - %2"), path, dll_info (path)) << endmsg;
 		}
 	}
 
