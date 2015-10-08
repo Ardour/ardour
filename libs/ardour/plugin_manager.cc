@@ -798,7 +798,7 @@ static std::string dll_info (std::string path) {
 	uint16_t type = 0;
 	off_t pe_hdr_off = 0;
 
-	int fd = open(path.c_str(), O_RDONLY, 0444);
+	int fd = g_open(path.c_str(), O_RDONLY, 0444);
 
 	if (fd < 0) {
 		return _("- cannot open dll"); // TODO strerror()
