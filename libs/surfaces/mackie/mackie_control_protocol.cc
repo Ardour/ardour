@@ -463,16 +463,6 @@ MackieControlProtocol::periodic ()
 
 	ARDOUR::microseconds_t now_usecs = ARDOUR::get_microseconds ();
 
-	static int cnt = 0;
-
-	cnt++;
-	if ((cnt != 1) && (cnt % 25 == 0)) {
-		if (_master_surface) {
-			cerr << string_compose ("Cnt now %1 ", cnt) << endl;
-			_master_surface->display_message_for (string_compose ("Cnt now %1\n12Hey Paul", cnt), 1000);
-		}
-	}
-
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
