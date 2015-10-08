@@ -376,8 +376,6 @@ Strip::notify_trim_changed (bool force_update)
 				queue_parameter_display (TrimAutomation, gain_coefficient);
 			}
 			_last_trim_position_written = normalized_position;
-
-			queue_display_reset (2000);
 		}
 	}
 }
@@ -980,7 +978,7 @@ Strip::potmode_changed (bool notify)
 		/* do not change vpot mode while in flipped mode */
 		DEBUG_TRACE (DEBUG::MackieControl, "not stepping pot mode - in flip mode\n");
 		_surface->write (display (1, "Flip"));
-		queue_display_reset (1000);
+		block_vpot_mode_display_for (1000);
 		return;
 	}
 	// WIP
