@@ -69,7 +69,6 @@ class LIBARDOUR_API PortManager
 	int  reconnect_ports ();
 
 	bool  connected (const std::string&);
-	bool  connected_to (const std::string&, const std::string&);
 	bool  physically_connected (const std::string&);
 	int   get_connections (const std::string&, std::vector<std::string>&);
 
