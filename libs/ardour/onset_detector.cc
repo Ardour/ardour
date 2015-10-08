@@ -28,19 +28,12 @@ using namespace std;
 
 /* need a static initializer function for this */
 
-string OnsetDetector::_op_id = X_("libardourvampplugins:aubioonset:2");
+string OnsetDetector::_op_id = X_("aubio-onset");
 
 OnsetDetector::OnsetDetector (float sr)
 	: AudioAnalyser (sr, X_("libardourvampplugins:aubioonset"))
 	, current_results (0)
 {
-	/* update the op_id */
-
-	_op_id = X_("libardourvampplugins:aubioonset");
-
-	// XXX this should load the above-named plugin and get the current version
-
-	_op_id += ":2";
 }
 
 OnsetDetector::~OnsetDetector()

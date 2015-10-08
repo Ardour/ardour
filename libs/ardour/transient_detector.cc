@@ -30,19 +30,11 @@ using namespace std;
 
 /* need a static initializer function for this */
 
-string TransientDetector::_op_id = X_("libardourvampplugins:qm-onsetdetector:2");
+string TransientDetector::_op_id = X_("qm-onset");
 
 TransientDetector::TransientDetector (float sr)
 	: AudioAnalyser (sr, X_("libardourvampplugins:qm-onsetdetector"))
 {
-	/* update the op_id */
-
-	_op_id = X_("libardourvampplugins:qm-onsetdetector");
-
-	// XXX this should load the above-named plugin and get the current version
-
-	_op_id += ":2";
-
 	threshold = 0.00;
 }
 
