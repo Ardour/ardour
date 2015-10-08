@@ -366,7 +366,7 @@ OnsetDetector::process(const float *const *inputBuffers,
 
 //    std::cerr << "OnsetDetector::process(" << timestamp << "): "
 //              << "dftype " << m_dfType << ", sens " << m_sensitivity
-//              << ", len " << len << ", mean " << mean << std::endl;
+//              << ", len " << len << std::endl;
 
     double *magnitudes = new double[len];
     double *phases = new double[len];

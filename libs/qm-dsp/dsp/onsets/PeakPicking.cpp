@@ -126,6 +126,8 @@ int PeakPicking::quadEval( vector<double> &src, vector<int> &idx )
 	    m_maxFit.push_back(selMax);
 	}
 
+	TPolyFit::PolyFit2(m_err, m_maxFit, m_poly);
+
 	double f = m_poly[0];
 	double h = m_poly[2];
 
