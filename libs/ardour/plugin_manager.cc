@@ -857,7 +857,11 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("windows_vst_discover '%1'\n", path));
 
 	if (Config->get_verbose_plugin_scan()) {
-		info << string_compose (_(" *  %1 %2 %3"), path, (cache_only ? _(" (cache only)") : "", dll_info (path))) << endmsg;
+		if (cache_only) {
+			info << string_compose (_(" *  %1 (cache only)"), path) << endmsg;
+		} else {
+			info << string_compose (_(" *  %1 %2"), path, dll_info (path)) << endmsg;
+		}
 	}
 
 	_cancel_timeout = false;
