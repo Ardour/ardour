@@ -187,6 +187,7 @@ Source::set_been_analysed (bool yn)
 int
 Source::load_transients (const string& path)
 {
+	int rv = 0;
 	FILE *tf;
 	if (! (tf = g_fopen (path.c_str (), "rb"))) {
 		return -1;
@@ -196,6 +197,7 @@ Source::load_transients (const string& path)
 	while (!feof (tf) && !ferror(tf)) {
 		double val;
 		if (1 != fscanf (tf, "%lf", &val)) {
+			rv = -1;
 			break;
 		}
 
@@ -204,6 +206,7 @@ Source::load_transients (const string& path)
 	}
 
 	::fclose (tf);
+	return rv;
 }
 
 string
