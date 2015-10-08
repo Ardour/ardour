@@ -150,6 +150,8 @@ Surface::~Surface ()
 		delete *it;
 	}
 
+	port_connection.disconnect ();
+
 	delete _jog_wheel;
 	delete _port;
 
@@ -159,6 +161,10 @@ Surface::~Surface ()
 void
 Surface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
+	if (!_port) {
+		return;
+	}
+
 	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (_port->input_name());
 	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (_port->output_name());
 
