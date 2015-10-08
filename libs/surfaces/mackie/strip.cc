@@ -387,18 +387,25 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 		return;
 	}
 
-	if (_route) {
-		string line1;
-		string fullname = _route->name();
+	show_route_name ();
+}
 
-		if (fullname.length() <= 6) {
-			line1 = fullname;
-		} else {
-			line1 = PBD::short_version (fullname, 6);
-		}
-
-		_surface->write (display (0, line1));
+void
+Strip::show_route_name ()
+{
+	if (!_route) {
+		return;
 	}
+	string line1;
+	string fullname = _route->name();
+
+	if (fullname.length() <= 6) {
+		line1 = fullname;
+	} else {
+		line1 = PBD::short_version (fullname, 6);
+	}
+
+	_surface->write (display (0, line1));
 }
 
 void
@@ -763,6 +770,7 @@ void
 Strip::periodic (ARDOUR::microseconds_t now)
 {
 	bool reshow_vpot_mode = false;
+	bool reshow_name = false;
 
 	if (!_route) {
 		return;
@@ -779,6 +787,7 @@ Strip::periodic (ARDOUR::microseconds_t now)
 
 		_block_screen_redisplay_until = 0;
 		reshow_vpot_mode = true;
+		reshow_name = true;
 	}
 
 	if (_block_vpot_mode_redisplay_until >= now) {
@@ -789,6 +798,10 @@ Strip::periodic (ARDOUR::microseconds_t now)
 
 		_block_vpot_mode_redisplay_until = 0;
 		reshow_vpot_mode = true;
+	}
+
+	if (reshow_name) {
+		show_route_name ();
 	}
 
 	if (reshow_vpot_mode) {

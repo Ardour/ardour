@@ -159,6 +159,7 @@ private:
 	std::vector<Evoral::Parameter> possible_pot_parameters;
 	void next_pot_mode ();
 	void set_vpot_parameter (Evoral::Parameter);
+	void show_route_name ();
 
 	void reset_saved_values ();
 
