@@ -1284,6 +1284,10 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 		}
 	}
 
+	// saved property is invalid, region-transients are not saved
+	if (_transients.size() == 0){
+		_valid_transients = false;
+	}
 
 	return 0;
 }

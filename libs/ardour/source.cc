@@ -173,15 +173,16 @@ Source::has_been_analysed() const
 void
 Source::set_been_analysed (bool yn)
 {
-	{
+	if (yn) {
+		if (0 == load_transients (get_transients_path())) {
+			yn = false;
+		}
+	}
+	if (yn != _analysed); {
 		Glib::Threads::Mutex::Lock lm (_analysis_lock);
 		_analysed = yn;
 	}
-
-	if (yn) {
-		load_transients (get_transients_path());
-		AnalysisChanged(); // EMIT SIGNAL
-	}
+	AnalysisChanged(); // EMIT SIGNAL
 }
 
 int
