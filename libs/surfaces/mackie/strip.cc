@@ -240,9 +240,6 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	/* setup legal VPot modes for this route */
 
-	build_input_list (_route->input()->n_ports());
-	build_output_list (_route->output()->n_ports());
-
 	possible_pot_parameters.clear();
 
 	if (pannable) {
@@ -1076,83 +1073,6 @@ Strip::return_to_vpot_mode_display ()
 		_surface->write (display (1, vpot_mode_string()));
 	} else {
 		_surface->write (blank_display (1));
-	}
-}
-
-struct RouteCompareByName {
-	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		return a->name().compare (b->name()) < 0;
-	}
-};
-
-void
-Strip::maybe_add_to_bundle_map (BundleMap& bm, boost::shared_ptr<Bundle> b, bool for_input, const ChanCount& channels)
-{
-	if (b->ports_are_outputs() == !for_input  || b->nchannels() != channels) {
-		return;
-	}
-
-	bm[b->name()] = b;
-}
-
-void
-Strip::build_input_list (const ChanCount& channels)
-{
-	boost::shared_ptr<ARDOUR::BundleList> b = _surface->mcp().get_session().bundles ();
-
-	input_bundles.clear ();
-
-	/* give user bundles first chance at being in the menu */
-
-	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
-			maybe_add_to_bundle_map (input_bundles, *i, true, channels);
-		}
-	}
-
-	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
-			maybe_add_to_bundle_map (input_bundles, *i, true, channels);
-		}
-	}
-
-	boost::shared_ptr<ARDOUR::RouteList> routes = _surface->mcp().get_session().get_routes ();
-	RouteList copy = *routes;
-	copy.sort (RouteCompareByName ());
-
-	for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
-		maybe_add_to_bundle_map (input_bundles, (*i)->output()->bundle(), true, channels);
-	}
-
-}
-
-void
-Strip::build_output_list (const ChanCount& channels)
-{
-	boost::shared_ptr<ARDOUR::BundleList> b = _surface->mcp().get_session().bundles ();
-
-	output_bundles.clear ();
-
-	/* give user bundles first chance at being in the menu */
-
-	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
-			maybe_add_to_bundle_map (output_bundles, *i, false, channels);
-		}
-	}
-
-	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
-			maybe_add_to_bundle_map (output_bundles, *i, false, channels);
-		}
-	}
-
-	boost::shared_ptr<ARDOUR::RouteList> routes = _surface->mcp().get_session().get_routes ();
-	RouteList copy = *routes;
-	copy.sort (RouteCompareByName ());
-
-	for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
-		maybe_add_to_bundle_map (output_bundles, (*i)->input()->bundle(), false, channels);
 	}
 }
 

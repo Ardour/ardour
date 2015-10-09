@@ -144,14 +144,6 @@ private:
 	void do_parameter_display (ARDOUR::AutomationType, float val);
 	void queue_parameter_display (ARDOUR::AutomationType, float val);
 
-	typedef std::map<std::string,boost::shared_ptr<ARDOUR::Bundle> > BundleMap;
-	BundleMap input_bundles;
-	BundleMap output_bundles;
-
-	void build_input_list (const ARDOUR::ChanCount&);
-	void build_output_list (const ARDOUR::ChanCount&);
-	void maybe_add_to_bundle_map (BundleMap& bm, boost::shared_ptr<ARDOUR::Bundle>, bool for_input, const ARDOUR::ChanCount&);
-
 	void select_event (Button&, ButtonState);
 	void vselect_event (Button&, ButtonState);
 	void fader_touch_event (Button&, ButtonState);
