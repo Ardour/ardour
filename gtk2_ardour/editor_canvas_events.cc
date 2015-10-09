@@ -64,10 +64,6 @@ using Gtkmm2ext::Keyboard;
 bool
 Editor::track_canvas_scroll (GdkEventScroll* ev)
 {
-	if (Keyboard::some_magic_widget_has_focus()) {
-		return false;
-	}
-
 	framepos_t xdelta;
 	int direction = ev->direction;
 
