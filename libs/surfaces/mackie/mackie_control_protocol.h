@@ -115,7 +115,7 @@ class MackieControlProtocol
 		PlugIn,
 		EQ,
 		Instrument,
- 	};
+	};
 
 	enum FlipMode {
 		Normal, /* fader controls primary, vpot controls secondary */
@@ -131,6 +131,8 @@ class MackieControlProtocol
 
 	const Mackie::DeviceInfo& device_info() const { return _device_info; }
 	Mackie::DeviceProfile& device_profile() { return _device_profile; }
+
+	PBD::Signal0<void> DeviceChanged;
 
         void device_ready ();
 
@@ -158,9 +160,11 @@ class MackieControlProtocol
 
 	static bool probe();
 
-        Glib::Threads::Mutex surfaces_lock;
+	mutable Glib::Threads::Mutex surfaces_lock;
 	typedef std::list<boost::shared_ptr<Mackie::Surface> > Surfaces;
 	Surfaces surfaces;
+
+	boost::shared_ptr<Mackie::Surface> nth_surface (uint32_t) const;
 
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
 
