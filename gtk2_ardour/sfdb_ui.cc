@@ -1687,7 +1687,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	where_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::where_combo_changed));
 
 	Label* l = manage (new Label);
-	l->set_markup (_("<b>Add files as ...</b>"));
+	l->set_markup (_("<b>Add files ...</b>"));
 
 	vbox = manage (new VBox);
 	vbox->set_border_width (12);

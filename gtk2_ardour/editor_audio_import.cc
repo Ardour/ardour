@@ -80,7 +80,7 @@ Editor::add_external_audio_action (ImportMode mode_hint)
 	}
 
 	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (_("Add Existing Media"), _session, 0, true, mode_hint);
+		sfbrowser = new SoundFileOmega (_("Add Existing Media"), _session, 0, 0, true, mode_hint);
 	} else {
 		sfbrowser->set_mode (mode_hint);
 	}
