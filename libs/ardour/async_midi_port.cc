@@ -47,7 +47,7 @@ AsyncMIDIPort::AsyncMIDIPort (string const & name, PortFlags flags)
 	, _currently_in_cycle (false)
 	, _last_write_timestamp (0)
 	, have_timer (false)
-	, output_fifo (512)
+	, output_fifo (2048)
 	, input_fifo (1024)
 	, _xthread (true)
 {
@@ -68,7 +68,7 @@ void
 AsyncMIDIPort::flush_output_fifo (MIDI::pframes_t nframes)
 {
 	RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0 } };
-	size_t written;
+	size_t written = 0;
 
 	output_fifo.get_read_vector (&vec);
 
@@ -77,22 +77,34 @@ AsyncMIDIPort::flush_output_fifo (MIDI::pframes_t nframes)
 	if (vec.len[0]) {
 		Evoral::Event<double>* evp = vec.buf[0];
 
+		assert (evp->size());
+		assert (evp->buffer());
+
 		for (size_t n = 0; n < vec.len[0]; ++n, ++evp) {
-			mb.push_back (evp->time(), evp->size(), evp->buffer());
+			if (mb.push_back (evp->time(), evp->size(), evp->buffer())) {
+				written++;
+			}
 		}
 	}
 
 	if (vec.len[1]) {
 		Evoral::Event<double>* evp = vec.buf[1];
 
+		assert (evp->size());
+		assert (evp->buffer());
+
 		for (size_t n = 0; n < vec.len[1]; ++n, ++evp) {
-			mb.push_back (evp->time(), evp->size(), evp->buffer());
+			if (mb.push_back (evp->time(), evp->size(), evp->buffer())) {
+				written++;
+			}
 		}
 	}
 
-	if ((written = vec.len[0] + vec.len[1]) != 0) {
-		output_fifo.increment_read_idx (written);
-	}
+	/* do this "atomically" after we're done pushing events into the
+	 * MidiBuffer
+	 */
+
+	output_fifo.increment_read_idx (written);
 }
 
 void
@@ -211,12 +223,21 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 		}
 
 		if (vec.len[0]) {
-                        if (!vec.buf[0]->owns_buffer()) {
+			/* force each event inside the ringbuffer to own its
+			   own buffer, but let that be null and of zero size
+			   initially. When ::set() is called, the buffer will
+			   be allocated to hold a *copy* of the data we're
+			   storing, and then that buffer will be used over and
+			   over, occasionally being upwardly resized as
+			   necessary.
+			*/
+			if (!vec.buf[0]->owns_buffer()) {
                                 vec.buf[0]->set_buffer (0, 0, true);
                         }
 			vec.buf[0]->set (msg, msglen, timestamp);
 		} else {
-                        if (!vec.buf[1]->owns_buffer()) {
+			/* see comment in previous branch of if() statement */
+			if (!vec.buf[1]->owns_buffer()) {
                                 vec.buf[1]->set_buffer (0, 0, true);
                         }
 			vec.buf[1]->set (msg, msglen, timestamp);
