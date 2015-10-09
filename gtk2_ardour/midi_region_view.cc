@@ -700,9 +700,10 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		/* XXX: bit of a hack; allow PrimaryModifier scroll through so that
-		   it still works for zoom.
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) ||
+	    Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+		/* XXX: bit of a hack; allow PrimaryModifier and TertiaryModifier scroll
+		 * through so that it still works for navigation.
 		*/
 		return false;
 	}
@@ -710,7 +711,8 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 	hide_verbose_cursor ();
 
 	bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
-	bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
+	Keyboard::ModifierMask mask_together(Keyboard::PrimaryModifier|Keyboard::TertiaryModifier);
+	bool together = Keyboard::modifier_state_contains (ev->state, mask_together);
 
 	if (ev->direction == GDK_SCROLL_UP) {
 		change_velocities (true, fine, false, together);
