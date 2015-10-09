@@ -135,26 +135,15 @@ MidiBuffer::merge_from (const Buffer& src, framecnt_t /*nframes*/, framecnt_t /*
 bool
 MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 {
-	const size_t stamp_size = sizeof(TimeType);
-
-	if (_size + stamp_size + ev.size() >= _capacity) {
-		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
-		PBD::stacktrace (cerr, 20);
-		return false;
-	}
-
-	if (!Evoral::midi_event_is_valid(ev.buffer(), ev.size())) {
-		cerr << "WARNING: MidiBuffer ignoring illegal MIDI event" << endl;
-		return false;
-	}
-
-	push_back(ev.time(), ev.size(), ev.buffer());
-
-	return true;
+	return push_back (ev.time(), ev.size(), ev.buffer());
 }
 
 
-/** Push an event into the buffer.
+/** Push MIDI data into the buffer.
+ *
+ * Note that the raw MIDI pointed to by @param data will be COPIED and unmodified.
+ * That is, the caller still owns it, if it needs freeing it's Not My Problem(TM).
+ * Realtime safe.
  * @return false if operation failed (not enough room)
  */
 bool
@@ -178,14 +167,10 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 #endif
 
 	if (_size + stamp_size + size >= _capacity) {
-		cerr << "MidiBuffer::push_back2 failed (buffer is full; _size = " << _size << " capacity "
-		     << _capacity << " stamp " << stamp_size << " size = " << size << ")" << endl;
-		PBD::stacktrace (cerr, 20);
 		return false;
 	}
 
 	if (!Evoral::midi_event_is_valid(data, size)) {
-		cerr << "WARNING: MidiBuffer ignoring illegal MIDI event" << endl;
 		return false;
 	}
 
