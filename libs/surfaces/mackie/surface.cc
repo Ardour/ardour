@@ -149,23 +149,21 @@ Surface::~Surface ()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::~Surface init\n");
 
-	// zero_all ();
-
-	// delete groups
-	for (Groups::iterator it = groups.begin(); it != groups.end(); ++it) {
-		delete it->second;
-	}
-
-	// delete controls
-	for (Controls::iterator it = controls.begin(); it != controls.end(); ++it) {
-		delete *it;
-	}
-
 	port_connection.disconnect ();
 
 	if (input_source) {
 		g_source_destroy (input_source);
 		input_source = 0;
+	}
+
+	// delete groups (strips)
+	for (Groups::iterator it = groups.begin(); it != groups.end(); ++it) {
+		delete it->second;
+	}
+
+	// delete controls (global buttons, master fader etc)
+	for (Controls::iterator it = controls.begin(); it != controls.end(); ++it) {
+		delete *it;
 	}
 
 	delete _jog_wheel;
