@@ -202,6 +202,12 @@ public:
 	int connection_state;
 
 	MidiByteArray display_line (std::string const& msg, int line_num);
+
+  public:
+	/* IP MIDI devices need to keep a handle on these */
+
+	GIOChannel* input_channel;
+	GSource*    input_source;
 };
 
 }

@@ -688,11 +688,17 @@ MackieControlProtocol::set_device_info (const string& device_name)
 int
 MackieControlProtocol::set_device (const string& device_name)
 {
+	if (device_name == device_info().name()) {
+		/* already using that device, nothing to do */
+		return 0;
+	}
+
 	if (set_device_info (device_name)) {
 		return -1;
 	}
 
 	clear_surfaces ();
+
 	hui_connection.disconnect ();
 
 	if (_device_info.device_type() == DeviceInfo::HUI) {
@@ -706,6 +712,8 @@ MackieControlProtocol::set_device (const string& device_name)
 	}
 
 	switch_banks (0, true);
+
+	// DeviceChanged ();
 
 	return 0;
 }
@@ -811,8 +819,8 @@ MackieControlProtocol::create_surfaces ()
 
 			if ((fd = input_port.selectable ()) >= 0) {
 
-				GIOChannel* ioc = g_io_channel_unix_new (fd);
-				GSource* gsrc = g_io_create_watch (ioc, GIOCondition (G_IO_IN|G_IO_HUP|G_IO_ERR));
+				surface->input_channel = g_io_channel_unix_new (fd);
+				surface->input_source = g_io_create_watch (surface->input_channel, GIOCondition (G_IO_IN|G_IO_HUP|G_IO_ERR));
 
 				/* hack up an object so that in the callback from the event loop
 				   we have both the MackieControlProtocol and the input port.
@@ -827,8 +835,8 @@ MackieControlProtocol::create_surfaces ()
 				ipm->mcp = this;
 				ipm->port = &input_port;
 
-				g_source_set_callback (gsrc, (GSourceFunc) ipmidi_input_handler, ipm, NULL);
-				g_source_attach (gsrc, main_loop()->get_context()->gobj());
+				g_source_set_callback (surface->input_source, (GSourceFunc) ipmidi_input_handler, ipm, NULL);
+				g_source_attach (surface->input_source, main_loop()->get_context()->gobj());
 			}
 		}
 	}
@@ -1367,13 +1375,14 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 bool
 MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("something happend on  %1\n", port->name()));
-
 	if (ioc & ~IO_IN) {
+		DEBUG_TRACE (DEBUG::MackieControl, "MIDI port closed\n");
 		return false;
 	}
 
 	if (ioc & IO_IN) {
+
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("something happend on  %1\n", port->name()));
 
 		/* Devices using regular JACK MIDI ports will need to have
 		   the x-thread FIFO drained to avoid burning endless CPU.
@@ -1789,4 +1798,18 @@ MackieControlProtocol::toggle_backlight ()
 	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->toggle_backlight ();
 	}
+}
+
+boost::shared_ptr<Surface>
+MackieControlProtocol::nth_surface (uint32_t n) const
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s, --n) {
+		if (n == 0) {
+			return *s;
+		}
+	}
+
+	return boost::shared_ptr<Surface> ();
 }
