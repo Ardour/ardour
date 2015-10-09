@@ -195,10 +195,6 @@ PortManager::n_physical_inputs () const
 bool
 PortManager::port_name_prefix_is_unique (const string& first_part_of_port_name) const
 {
-	if (!_backend) {
-		return boost::shared_ptr<Port>();
-	}
-
 	boost::shared_ptr<const Ports> pr = ports.reader();
 	const string::size_type len = first_part_of_port_name.length();
 
