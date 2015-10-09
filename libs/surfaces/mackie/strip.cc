@@ -257,6 +257,10 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 			}
 		}
 	}
+
+	if (_route->trim()) {
+		possible_pot_parameters.push_back (TrimAutomation);
+	}
 }
 
 void
