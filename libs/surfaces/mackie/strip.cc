@@ -1210,14 +1210,14 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 				/* gain to vpot, trim to fader */
 				_vpot->set_control (_route->gain_control());
 				control_by_parameter[GainAutomation] = _vpot;
-					_fader->set_control (_route->trim_control());
-					control_by_parameter[TrimAutomation] = _fader;
+				_fader->set_control (_route->trim_control());
+				control_by_parameter[TrimAutomation] = _fader;
 			} else {
 				/* gain to fader, trim to vpot */
 				_fader->set_control (_route->gain_control());
 				control_by_parameter[GainAutomation] = _fader;
-					_vpot->set_control (_route->trim_control());
-					control_by_parameter[TrimAutomation] = _vpot;
+				_vpot->set_control (_route->trim_control());
+				control_by_parameter[TrimAutomation] = _vpot;
 			}
 		} else {
 			_vpot->set_control (boost::shared_ptr<AutomationControl>());
