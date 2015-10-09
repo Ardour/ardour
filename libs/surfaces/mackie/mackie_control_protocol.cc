@@ -713,7 +713,7 @@ MackieControlProtocol::set_device (const string& device_name)
 
 	switch_banks (0, true);
 
-	// DeviceChanged ();
+	DeviceChanged ();
 
 	return 0;
 }
@@ -819,8 +819,13 @@ MackieControlProtocol::create_surfaces ()
 
 			if ((fd = input_port.selectable ()) >= 0) {
 
-				surface->input_channel = g_io_channel_unix_new (fd);
-				surface->input_source = g_io_create_watch (surface->input_channel, GIOCondition (G_IO_IN|G_IO_HUP|G_IO_ERR));
+				GIOChannel* ioc = g_io_channel_unix_new (fd);
+				surface->input_source = g_io_create_watch (ioc, GIOCondition (G_IO_IN|G_IO_HUP|G_IO_ERR));
+
+				/* make surface's input source now hold the
+				 * only reference on the IO channel
+				 */
+				g_io_channel_unref (ioc);
 
 				/* hack up an object so that in the callback from the event loop
 				   we have both the MackieControlProtocol and the input port.

@@ -92,7 +92,6 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	, _master_fader (0)
 	, _last_master_gain_written (-0.0f)
 	, connection_state (0)
-	, input_channel (0)
 	, input_source (0)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface init\n");
@@ -167,11 +166,6 @@ Surface::~Surface ()
 	if (input_source) {
 		g_source_destroy (input_source);
 		input_source = 0;
-	}
-
-	if (input_channel) {
-		g_io_channel_unref (input_channel);
-		input_channel = 0;
 	}
 
 	delete _jog_wheel;
