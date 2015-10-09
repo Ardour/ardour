@@ -16,6 +16,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <vector>
+
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/box.h>
 #include <gtkmm/spinbutton.h>
@@ -26,7 +28,7 @@
 #include <gtkmm/scrolledwindow.h>
 
 namespace Gtk {
-class CellRendererCombo;
+	class CellRendererCombo;
 }
 
 #include "button.h"
@@ -44,10 +46,12 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 
    private:
 	MackieControlProtocol& _cp;
+	Gtk::Table         table;
 	Gtk::ComboBoxText _surface_combo;
 	Gtk::ComboBoxText _profile_combo;
-	Gtk::ComboBoxText _input_port_combo;
-	Gtk::ComboBoxText _output_port_combo;
+
+	typedef std::vector<Gtk::ComboBoxText*> PortCombos;
+	PortCombos port_combos;
 
 	struct AvailableActionColumns : public Gtk::TreeModel::ColumnRecord {
 		AvailableActionColumns() {
@@ -107,13 +111,19 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 	Gtk::HScale      touch_sensitivity_scale;
 	Gtk::Button      recalibrate_fader_button;
 	Gtk::Adjustment  ipmidi_base_port_adjustment;
-	Gtk::SpinButton  ipmidi_base_port_spinner;
 	Gtk::Button      discover_button;
 
 	void discover_clicked ();
 	void recalibrate_faders ();
 	void toggle_backlight ();
 	void touch_sensitive_change ();
+
+	Gtk::Widget* device_dependent_widget ();
+	Gtk::Widget* _device_dependent_widget;
+	int device_dependent_row;
+
+	PBD::ScopedConnection device_change_connection;
+	void device_changed ();
 };
 
 }
