@@ -44,6 +44,7 @@
 
 namespace ARDOUR {
 	class AutomationControl;
+	class Port;
 }
 
 namespace MIDI {
@@ -133,11 +134,12 @@ class MackieControlProtocol
 	Mackie::DeviceProfile& device_profile() { return _device_profile; }
 
 	PBD::Signal0<void> DeviceChanged;
+	PBD::Signal1<void,boost::shared_ptr<Mackie::Surface> > ConnectionChange;
 
         void device_ready ();
 
 	int set_active (bool yn);
-	int  set_device (const std::string&);
+	int  set_device (const std::string&, bool force);
         void set_profile (const std::string&);
 
 	FlipMode flip_mode () const { return _flip_mode; }
@@ -349,6 +351,11 @@ class MackieControlProtocol
 	int ipmidi_restart ();
         void initialize ();
         int set_device_info (const std::string& device_name);
+
+	/* MIDI port connection management */
+
+	PBD::ScopedConnection port_connection;
+	void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool);
 
 	/* BUTTON HANDLING */
 

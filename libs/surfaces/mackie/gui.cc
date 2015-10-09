@@ -239,6 +239,67 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	fkey_packer->show_all();
 }
 
+void
+MackieControlProtocolGUI::update_port_combos (vector<string> const& midi_inputs, vector<string> const& midi_outputs,
+                                              Gtk::ComboBoxText* input_combo,
+                                              Gtk::ComboBoxText* output_combo,
+                                              boost::shared_ptr<Surface> surface)
+{
+	vector<string> short_midi_inputs;
+	vector<string> short_midi_outputs;
+
+	/* Prepend "Disconnected" */
+
+	short_midi_inputs.push_back (_("Disconnected"));
+	short_midi_outputs.push_back (_("Disconnected"));
+
+	/* generate short versions of all the port names */
+
+	for (vector<string>::const_iterator s = midi_inputs.begin(); s != midi_inputs.end(); ++s) {
+		short_midi_inputs.push_back ((*s).substr ((*s).find (':') + 1));
+	}
+	for (vector<string>::const_iterator s = midi_outputs.begin(); s != midi_outputs.end(); ++s) {
+		short_midi_outputs.push_back ((*s).substr ((*s).find (':') + 1));
+	}
+
+	bool input_found = false;
+	bool output_found = true;
+
+	Gtkmm2ext::set_popdown_strings (*input_combo, short_midi_inputs);
+
+	vector<string>::iterator shrt = short_midi_inputs.begin();
+	shrt++; /* skip "Disconnected" */
+
+	for (vector<string>::const_iterator s = midi_inputs.begin(); s != midi_inputs.end(); ++s, ++shrt) {
+		if (surface->port().input().connected_to (*s)) {
+			input_combo->set_active_text (*shrt);
+			input_found = true;
+			break;
+		}
+	}
+
+	if (!input_found) {
+		input_combo->set_active_text (_("Disconnected"));
+	}
+
+	Gtkmm2ext::set_popdown_strings (*output_combo, short_midi_outputs);
+
+	shrt = short_midi_outputs.begin();
+	shrt++; /* skip "Disconnected" */
+
+	for (vector<string>::const_iterator s = midi_outputs.begin(); s != midi_outputs.end(); ++s, ++shrt) {
+		if (surface->port().output().connected_to (*s)) {
+			output_combo->set_active_text (*shrt);
+			output_found = true;
+			break;
+		}
+	}
+
+	if (!output_found) {
+		output_combo->set_active_text (_("Disconnected"));
+	}
+}
+
 Gtk::Widget*
 MackieControlProtocolGUI::device_dependent_widget ()
 {
@@ -267,21 +328,12 @@ MackieControlProtocolGUI::device_dependent_widget ()
 	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput|ARDOUR::IsPhysical), midi_inputs);
 	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsPhysical), midi_outputs);
 
-
-	port_combos.clear ();
+	input_combos.clear ();
+	output_combos.clear ();
 
 	if (!_cp.device_info().uses_ipmidi()) {
+
 		for (uint32_t n = 0; n < n_surfaces; ++n) {
-
-
-			Gtk::ComboBoxText* input_combo = manage (new Gtk::ComboBoxText);
-			Gtk::ComboBoxText* output_combo = manage (new Gtk::ComboBoxText);
-
-			port_combos.push_back (input_combo);
-			port_combos.push_back (output_combo);
-
-			Gtkmm2ext::set_popdown_strings (*output_combo, midi_outputs);
-			Gtkmm2ext::set_popdown_strings (*input_combo, midi_inputs);
 
 			boost::shared_ptr<Surface> surface = _cp.nth_surface (n);
 
@@ -290,20 +342,16 @@ MackieControlProtocolGUI::device_dependent_widget ()
 				/*NOTREACHED*/
 			}
 
-			for (vector<string>::iterator s = midi_inputs.begin(); s != midi_inputs.end(); ++s) {
+			Gtk::ComboBoxText* input_combo = manage (new Gtk::ComboBoxText);
+			Gtk::ComboBoxText* output_combo = manage (new Gtk::ComboBoxText);
 
-				if (surface->port().input().connected_to (*s)) {
-					input_combo->set_active_text (*s);
-					break;
-				}
-			}
+			input_combo->set_data ("surface", surface.get());
+			output_combo->set_data ("surface", surface.get());
 
-			for (vector<string>::iterator s = midi_outputs.begin(); s != midi_outputs.end(); ++s) {
-				if (surface->port().output().connected_to (*s)) {
-					output_combo->set_active_text (*s);
-					break;
-				}
-			}
+			input_combos.push_back (input_combo);
+			output_combos.push_back (output_combo);
+
+			update_port_combos (midi_inputs, midi_outputs, input_combo, output_combo, surface);
 
 			string send_string;
 			string receive_string;
@@ -721,7 +769,7 @@ void
 MackieControlProtocolGUI::surface_combo_changed ()
 {
 	_cp.not_session_load();
-	_cp.set_device (_surface_combo.get_active_text());
+	_cp.set_device (_surface_combo.get_active_text(), false);
 }
 
 void
@@ -778,4 +826,48 @@ MackieControlProtocolGUI::touch_sensitive_change ()
 {
 	int sensitivity = (int) touch_sensitivity_adjustment.get_value ();
 	_cp.set_touch_sensitivity (sensitivity);
+}
+
+void
+MackieControlProtocolGUI::surface_connectivity_change (Surface* raw_surface)
+{
+	boost::shared_ptr<Surface> surface;
+
+	for (MackieControlProtocol::Surfaces::iterator s = _cp.surfaces.begin(); s != _cp.surfaces.end(); ++s) {
+		if ((*s).get() == raw_surface) {
+			surface = *s;
+			break;
+		}
+	}
+
+	if (!surface) {
+		return;
+	}
+
+	Gtk::ComboBoxText* input_combo = 0;
+	Gtk::ComboBoxText* output_combo = 0;
+
+	for (vector<Gtk::ComboBoxText*>::iterator c = input_combos.begin(); c != input_combos.end(); ++c) {
+		if ((*c)->get_data ("surface") == raw_surface) {
+			input_combo = *c;
+		}
+	}
+
+	for (vector<Gtk::ComboBoxText*>::iterator c = output_combos.begin(); c != output_combos.end(); ++c) {
+		if ((*c)->get_data ("surface") == raw_surface) {
+			output_combo = *c;
+		}
+	}
+
+	if (!input_combo || !output_combo) {
+		return;
+	}
+
+	vector<string> midi_inputs;
+	vector<string> midi_outputs;
+
+	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput|ARDOUR::IsPhysical), midi_inputs);
+	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsPhysical), midi_outputs);
+
+	update_port_combos (midi_inputs, midi_outputs, input_combo, output_combo, surface);
 }

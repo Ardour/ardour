@@ -165,10 +165,10 @@ public:
 
 	void display_message_for (std::string const& msg, uint64_t msecs);
 
+	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool);
+
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
-
-  protected:
 
   private:
 	MackieControlProtocol& _mcp;
@@ -181,7 +181,6 @@ public:
 	Mackie::JogWheel*      _jog_wheel;
 	Fader*                 _master_fader;
 	float                  _last_master_gain_written;
-	PBD::ScopedConnection   port_connection;
 
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 	MidiByteArray host_connection_query (MidiByteArray& bytes);
@@ -192,7 +191,6 @@ public:
 	void init_strips (uint32_t n);
 	void setup_master ();
 	void master_gain_changed ();
-	void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool);
 
 	enum ConnectionState {
 		InputConnected = 0x1,

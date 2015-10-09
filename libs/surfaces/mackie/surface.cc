@@ -125,9 +125,7 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 		DEBUG_TRACE (DEBUG::MackieControl, "init_strips done\n");
 	}
 
-	if (!_mcp.device_info().uses_ipmidi()) {
-		ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&Surface::connection_handler, this, _1, _2, _3, _4, _5), &_mcp);
-	} else {
+	if (_mcp.device_info().uses_ipmidi()) {
 		/* ipMIDI port already exists, we can just assume that we're
 		 * connected.
 		 *
@@ -148,8 +146,6 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 Surface::~Surface ()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::~Surface init\n");
-
-	port_connection.disconnect ();
 
 	if (input_source) {
 		g_source_destroy (input_source);
@@ -172,11 +168,11 @@ Surface::~Surface ()
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::~Surface done\n");
 }
 
-void
+bool
 Surface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
 	if (!_port) {
-		return;
+		return false;
 	}
 
 	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (_port->input_name());
@@ -194,6 +190,9 @@ Surface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, b
 		} else {
 			connection_state &= ~OutputConnected;
 		}
+	} else {
+		/* not our ports */
+		return false;
 	}
 
 	if ((connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
@@ -228,6 +227,8 @@ Surface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, b
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 disconnected (input or output or both)\n", _name));
 		_active = false;
 	}
+
+	return true; /* connection status changed */
 }
 
 XMLNode&

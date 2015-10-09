@@ -686,19 +686,20 @@ MackieControlProtocol::set_device_info (const string& device_name)
 }
 
 int
-MackieControlProtocol::set_device (const string& device_name)
+MackieControlProtocol::set_device (const string& device_name, bool force)
 {
-	if (device_name == device_info().name()) {
+	if (device_name == device_info().name() && !force) {
 		/* already using that device, nothing to do */
 		return 0;
 	}
 
 	if (set_device_info (device_name)) {
+		cerr << "Unknown device name\n";
 		return -1;
 	}
 
 	clear_surfaces ();
-
+	port_connection.disconnect ();
 	hui_connection.disconnect ();
 
 	if (_device_info.device_type() == DeviceInfo::HUI) {
@@ -709,6 +710,10 @@ MackieControlProtocol::set_device (const string& device_name)
 
 	if (create_surfaces ()) {
 		return -1;
+	}
+
+	if (!_device_info.uses_ipmidi()) {
+		ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::connection_handler, this, _1, _2, _3, _4, _5), this);
 	}
 
 	switch_banks (0, true);
@@ -1766,10 +1771,14 @@ MackieControlProtocol::ipmidi_restart ()
 void
 MackieControlProtocol::clear_surfaces ()
 {
+	port_connection.disconnect ();
 	clear_ports ();
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
-	_master_surface.reset ();
-	surfaces.clear ();
+
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		_master_surface.reset ();
+		surfaces.clear ();
+	}
 }
 
 void
@@ -1817,4 +1826,18 @@ MackieControlProtocol::nth_surface (uint32_t n) const
 	}
 
 	return boost::shared_ptr<Surface> ();
+}
+
+void
+MackieControlProtocol::connection_handler (boost::weak_ptr<ARDOUR::Port> wp1, std::string name1, boost::weak_ptr<ARDOUR::Port> wp2, std::string name2, bool yn)
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		if ((*s)->connection_handler (wp1, name1, wp2, name2, yn)) {
+			cerr << (*s)->name() << " Connected, or disconnected\n";
+			ConnectionChange (*s);
+			break;
+		}
+	}
 }

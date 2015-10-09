@@ -39,6 +39,10 @@ namespace ArdourSurface {
 
 class MackieControlProtocol;
 
+namespace Mackie {
+	class Surface;
+}
+
 class MackieControlProtocolGUI : public Gtk::Notebook
 {
    public:
@@ -51,7 +55,8 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 	Gtk::ComboBoxText _profile_combo;
 
 	typedef std::vector<Gtk::ComboBoxText*> PortCombos;
-	PortCombos port_combos;
+	PortCombos input_combos;
+	PortCombos output_combos;
 
 	struct AvailableActionColumns : public Gtk::TreeModel::ColumnRecord {
 		AvailableActionColumns() {
@@ -124,6 +129,17 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 
 	PBD::ScopedConnection device_change_connection;
 	void device_changed ();
+
+	void update_port_combos (std::vector<std::string> const&, std::vector<std::string> const&,
+	                         Gtk::ComboBoxText* input_combo,
+	                         Gtk::ComboBoxText* output_combo,
+	                         boost::shared_ptr<Mackie::Surface> surface);
+
+	/* this takes a raw pointer to Surface, because it connects to a signal
+	   emitted by a Surface and we don't want to use
+	   boost::shared_from_this.
+	*/
+	void surface_connectivity_change (Mackie::Surface* raw_surface);
 };
 
 }
