@@ -175,6 +175,15 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	_route = r;
 
 	control_by_parameter.clear ();
+
+	control_by_parameter[PanAzimuthAutomation] = (Control*) 0;
+	control_by_parameter[PanWidthAutomation] = (Control*) 0;
+	control_by_parameter[PanElevationAutomation] = (Control*) 0;
+	control_by_parameter[PanFrontBackAutomation] = (Control*) 0;
+	control_by_parameter[PanLFEAutomation] = (Control*) 0;
+	control_by_parameter[GainAutomation] = (Control*) 0;
+	control_by_parameter[TrimAutomation] = (Control*) 0;
+
 	reset_saved_values ();
 
 	if (!r) {
