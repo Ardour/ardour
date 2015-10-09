@@ -62,6 +62,9 @@ class SurfacePort
 	MIDI::Port& input_port() const { return *_input_port; }
 	MIDI::Port& output_port() const { return *_output_port; }
 
+	ARDOUR::Port& input() const { return *_async_in; }
+	ARDOUR::Port& output() const { return *_async_out; }
+
 	std::string input_name() const;
 	std::string output_name() const;
 
