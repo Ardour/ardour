@@ -135,11 +135,8 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 	                         Gtk::ComboBoxText* output_combo,
 	                         boost::shared_ptr<Mackie::Surface> surface);
 
-	/* this takes a raw pointer to Surface, because it connects to a signal
-	   emitted by a Surface and we don't want to use
-	   boost::shared_from_this.
-	*/
-	void surface_connectivity_change (Mackie::Surface* raw_surface);
+	PBD::ScopedConnection connection_change_connection;
+	void connection_handler ();
 };
 
 }

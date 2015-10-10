@@ -200,7 +200,6 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	_pan_mode = PanAzimuthAutomation;
 	potmode_changed (true);
 
-
 	_route->solo_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
 	_route->listen_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
 
@@ -368,7 +367,14 @@ Strip::notify_trim_changed (bool force_update)
 			_surface->write (_vpot->zero());
 			return;
 		}
-		Control* control = control_by_parameter[TrimAutomation];
+		Control* control = 0;
+		ControlParameterMap::iterator i = control_by_parameter.find (TrimAutomation);
+
+		if (i == control_by_parameter.end()) {
+			return;
+		}
+
+		control = i->second;
 
 		boost::shared_ptr<AutomationControl> ac = _route->trim_control();
 
@@ -432,11 +438,14 @@ Strip::notify_panner_azi_changed (bool force_update)
 			return;
 		}
 
-		Control* control = control_by_parameter[PanAzimuthAutomation];
+		Control* control = 0;
+		ControlParameterMap::iterator i = control_by_parameter.find (PanAzimuthAutomation);
 
-		if (!control) {
+		if (i == control_by_parameter.end()) {
 			return;
 		}
+
+		control = i->second;
 
 		double pos = pannable->pan_azimuth_control->internal_to_interface (pannable->pan_azimuth_control->get_value());
 
@@ -472,12 +481,14 @@ Strip::notify_panner_width_changed (bool force_update)
 			return;
 		}
 
+		Control* control = 0;
+		ControlParameterMap::iterator i = control_by_parameter.find (PanWidthAutomation);
 
-		Control* control = control_by_parameter[PanWidthAutomation];
-
-		if (!control) {
+		if (i == control_by_parameter.end()) {
 			return;
 		}
+
+		control = i->second;
 
 		double pos = pannable->pan_width_control->internal_to_interface (pannable->pan_width_control->get_value());
 
@@ -1007,22 +1018,23 @@ Strip::potmode_changed (bool notify)
 	// WIP
 	int pm = _surface->mcp().pot_mode();
 	switch (pm) {
-		case MackieControlProtocol::Pan:
-			// This needs to set current pan mode (azimuth or width... or whatever)
-			set_vpot_parameter (_pan_mode);
-			DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Pan mode.\n");
-			break;
-		case MackieControlProtocol::Tracks: // should change the Tracks to Trim
-			DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Trim mode.\n");
+	case MackieControlProtocol::Pan:
+		// This needs to set current pan mode (azimuth or width... or whatever)
+		set_vpot_parameter (_pan_mode);
+		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Pan mode.\n");
+		break;
+	case MackieControlProtocol::Tracks: // should change the Tracks to Trim
+		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Trim mode.\n");
 			set_vpot_parameter (TrimAutomation);
 			break;
-		case MackieControlProtocol::Send:
-			DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Send mode.\n");
-			// set to current send
-			break;
-		default:
-			break;
-		}
+	case MackieControlProtocol::Send:
+		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Send mode.\n");
+		// set to current send
+		break;
+	default:
+		cerr << "Pot mode " << pm << " not yet handled\n";
+		break;
+	}
 
 	if (notify) {
 		notify_all ();
@@ -1133,9 +1145,13 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to vpot mode %1\n", p));
 
 	reset_saved_values ();
-	for (int i = 0;  i <= TrimAutomation; ++i) {
-		if (control_by_parameter[i] == _vpot) {
-			control_by_parameter[i] = 0;
+
+	/* unset any mapping between the vpot and any existing parameters */
+
+	for (ControlParameterMap::iterator i = control_by_parameter.begin(); i != control_by_parameter.end(); ++i) {
+
+		if (i != control_by_parameter.end() && i->second == _vpot) {
+			i->second = 0;
 		}
 	}
 

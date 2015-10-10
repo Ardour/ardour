@@ -37,6 +37,8 @@
 #include "ardour/session.h"
 #include "ardour/utils.h"
 
+#include <gtkmm2ext/gui_thread.h>
+
 #include "control_group.h"
 #include "surface_port.h"
 #include "surface.h"
@@ -220,6 +222,13 @@ Surface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, b
 		   We actually can't initiate this in this callback, so we have
 		   to queue it with the MCP event loop.
 		*/
+
+		/* XXX this is a horrible hack. Without a short sleep here,
+		   something prevents the device wakeup messages from being
+		   sent and/or the responses from being received.
+		*/
+
+		g_usleep (100000);
 
 		connected ();
 
@@ -662,9 +671,7 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 			write_sysex (host_connection_query (bytes));
 		} else {
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Mackie Control Device ready, current status = %1\n", _active));
-			if (!_active) {
-				turn_it_on ();
-			}
+			turn_it_on ();
 		}
 		break;
 
@@ -672,7 +679,7 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 		DEBUG_TRACE (DEBUG::MackieControl, "Logic Control Device confirms connection, ardour replies\n");
 		if (bytes[4] == 0x10 || bytes[4] == 0x11) {
 			write_sysex (host_connection_confirmation (bytes));
-			_active = true;
+			turn_it_on ();
 		}
 		break;
 

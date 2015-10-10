@@ -118,6 +118,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	_surface_combo.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::surface_combo_changed));
 
 	_cp.DeviceChanged.connect (device_change_connection, invalidator (*this), boost::bind (&MackieControlProtocolGUI::device_changed, this), gui_context());
+	_cp.ConnectionChange.connect (connection_change_connection, invalidator (*this), boost::bind (&MackieControlProtocolGUI::connection_handler, this), gui_context());
 
 	ipmidi_base_port_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::ipmidi_spinner_changed));
 
@@ -237,6 +238,29 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	build_function_key_editor ();
 	refresh_function_key_editor ();
 	fkey_packer->show_all();
+}
+
+void
+MackieControlProtocolGUI::connection_handler ()
+{
+	vector<Gtk::ComboBoxText*>::iterator ic;
+	vector<Gtk::ComboBoxText*>::iterator oc;
+
+	vector<string> midi_inputs;
+	vector<string> midi_outputs;
+
+	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput|ARDOUR::IsPhysical), midi_inputs);
+	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsPhysical), midi_outputs);
+
+
+	for (ic = input_combos.begin(), oc = output_combos.begin(); ic != input_combos.end() && oc != output_combos.end(); ++ic, ++oc) {
+
+		boost::shared_ptr<Surface> surface = _cp.get_surface_by_raw_pointer ((*ic)->get_data ("surface"));
+
+		if (surface) {
+			update_port_combos (midi_inputs, midi_outputs, *ic, *oc, surface);
+		}
+	}
 }
 
 void
@@ -826,48 +850,4 @@ MackieControlProtocolGUI::touch_sensitive_change ()
 {
 	int sensitivity = (int) touch_sensitivity_adjustment.get_value ();
 	_cp.set_touch_sensitivity (sensitivity);
-}
-
-void
-MackieControlProtocolGUI::surface_connectivity_change (Surface* raw_surface)
-{
-	boost::shared_ptr<Surface> surface;
-
-	for (MackieControlProtocol::Surfaces::iterator s = _cp.surfaces.begin(); s != _cp.surfaces.end(); ++s) {
-		if ((*s).get() == raw_surface) {
-			surface = *s;
-			break;
-		}
-	}
-
-	if (!surface) {
-		return;
-	}
-
-	Gtk::ComboBoxText* input_combo = 0;
-	Gtk::ComboBoxText* output_combo = 0;
-
-	for (vector<Gtk::ComboBoxText*>::iterator c = input_combos.begin(); c != input_combos.end(); ++c) {
-		if ((*c)->get_data ("surface") == raw_surface) {
-			input_combo = *c;
-		}
-	}
-
-	for (vector<Gtk::ComboBoxText*>::iterator c = output_combos.begin(); c != output_combos.end(); ++c) {
-		if ((*c)->get_data ("surface") == raw_surface) {
-			output_combo = *c;
-		}
-	}
-
-	if (!input_combo || !output_combo) {
-		return;
-	}
-
-	vector<string> midi_inputs;
-	vector<string> midi_outputs;
-
-	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput|ARDOUR::IsPhysical), midi_inputs);
-	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsPhysical), midi_outputs);
-
-	update_port_combos (midi_inputs, midi_outputs, input_combo, output_combo, surface);
 }

@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <sigc++/trackable.h>
+
 #include "pbd/signals.h"
 #include "pbd/xml++.h"
 #include "midi++/types.h"
@@ -43,7 +45,7 @@ class Jog;
 class Pot;
 class Led;
 
-class Surface : public PBD::ScopedConnectionList
+class Surface : public PBD::ScopedConnectionList, public sigc::trackable
 {
 public:
 	Surface (MackieControlProtocol&, const std::string& name, uint32_t number, surface_type_t stype);

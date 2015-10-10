@@ -166,6 +166,7 @@ class MackieControlProtocol
 	typedef std::list<boost::shared_ptr<Mackie::Surface> > Surfaces;
 	Surfaces surfaces;
 
+	boost::shared_ptr<Mackie::Surface> get_surface_by_raw_pointer (void*) const;
 	boost::shared_ptr<Mackie::Surface> nth_surface (uint32_t) const;
 
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();

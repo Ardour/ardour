@@ -155,7 +155,8 @@ private:
 
 	void reset_saved_values ();
 
-	std::map<Evoral::Parameter,Control*> control_by_parameter;
+	typedef std::map<Evoral::Parameter,Control*> ControlParameterMap;
+	ControlParameterMap control_by_parameter;
 };
 
 }

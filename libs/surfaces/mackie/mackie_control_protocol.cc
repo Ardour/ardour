@@ -400,11 +400,11 @@ MackieControlProtocol::set_active (bool yn)
 
 		BaseUI::run ();
 
-		if (create_surfaces ()) {
-			return -1;
-		}
 		connect_session_signals ();
-		update_surfaces ();
+
+		if (!_device_info.name().empty()) {
+			set_device (_device_info.name(), true);
+		}
 
 		/* set up periodic task for metering and automation
 		 */
@@ -534,6 +534,10 @@ MackieControlProtocol::update_global_button (int id, LedState ls)
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
+	if (surfaces.empty()) {
+		return;
+	}
+
 	if (!_device_info.has_global_controls()) {
 		return;
 	}
@@ -553,6 +557,10 @@ void
 MackieControlProtocol::update_global_led (int id, LedState ls)
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+	if (surfaces.empty()) {
+		return;
+	}
 
 	if (!_device_info.has_global_controls()) {
 		return;
@@ -688,6 +696,8 @@ MackieControlProtocol::set_device_info (const string& device_name)
 int
 MackieControlProtocol::set_device (const string& device_name, bool force)
 {
+	cerr << "Set Device\n\n\n\n\n\n";
+
 	if (device_name == device_info().name() && !force) {
 		/* already using that device, nothing to do */
 		return 0;
@@ -708,15 +718,17 @@ MackieControlProtocol::set_device (const string& device_name, bool force)
 		hui_timeout->attach (main_loop()->get_context());
 	}
 
-	if (create_surfaces ()) {
-		return -1;
-	}
-
 	if (!_device_info.uses_ipmidi()) {
+		/* notice that the handler for this will execute in our event
+		   loop, not in the thread where the
+		   PortConnectedOrDisconnected signal is emitted.
+		*/
 		ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::connection_handler, this, _1, _2, _3, _4, _5), this);
 	}
 
-	switch_banks (0, true);
+	if (create_surfaces ()) {
+		return -1;
+	}
 
 	DeviceChanged ();
 
@@ -735,17 +747,16 @@ MackieControlProtocol::create_surfaces ()
 {
 	string device_name;
 	surface_type_t stype = mcu; // type not yet determined
-	char buf[128];
 
-	if (_device_info.extenders() == 0) {
-		device_name = X_("mackie control");
-	} else {
-		device_name = X_("mackie control #1");
-	}
-
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Create %1 surfaces\n", 1 + _device_info.extenders()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Create %1 surfaces for %2\n", 1 + _device_info.extenders(), _device_info.name()));
 
 	for (uint32_t n = 0; n < 1 + _device_info.extenders(); ++n) {
+
+		if (n == 0) {
+			device_name = _device_info.name();
+		} else {
+			device_name = string_compose ("%1 #%2", _device_info.name(), n+1);
+		}
 
 		boost::shared_ptr<Surface> surface;
 
@@ -765,19 +776,13 @@ MackieControlProtocol::create_surfaces ()
 		}
 
 		if (_surfaces_state) {
+			cerr << "Resetting surface state\n";
 			surface->set_state (*_surfaces_state, _surfaces_version);
 		}
 
 		{
 			Glib::Threads::Mutex::Lock lm (surfaces_lock);
 			surfaces.push_back (surface);
-		}
-
-		if (_device_info.extenders() < 2) {
-			device_name = X_("mackie control #2");
-		} else {
-			snprintf (buf, sizeof (buf), X_("mackie control #%d"), n+2);
-			device_name = buf;
 		}
 
 		if (!_device_info.uses_ipmidi()) {
@@ -857,6 +862,7 @@ MackieControlProtocol::create_surfaces ()
 void
 MackieControlProtocol::close()
 {
+	port_connection.disconnect ();
 	session_connections.drop_connections ();
 	route_connections.drop_connections ();
 	periodic_connection.disconnect ();
@@ -1050,6 +1056,14 @@ void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 void
 MackieControlProtocol::notify_route_added (ARDOUR::RouteList & rl)
 {
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+		if (surfaces.empty()) {
+			return;
+		}
+	}
+
 	// currently assigned banks are less than the full set of
 	// strips, so activate the new strip now.
 
@@ -1072,6 +1086,11 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+		if (surfaces.empty()) {
+			return;
+		}
+
 		surface = _master_surface;
 	}
 
@@ -1087,6 +1106,14 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 void
 MackieControlProtocol::notify_remote_id_changed()
 {
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+		if (surfaces.empty()) {
+			return;
+		}
+	}
+
 	Sorted sorted = get_sorted_routes();
 	uint32_t sz = n_strips();
 
@@ -1150,6 +1177,9 @@ MackieControlProtocol::notify_record_state_changed ()
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		if (surfaces.empty()) {
+			return;
+		}
 		surface = _master_surface;
 	}
 
@@ -1771,7 +1801,6 @@ MackieControlProtocol::ipmidi_restart ()
 void
 MackieControlProtocol::clear_surfaces ()
 {
-	port_connection.disconnect ();
 	clear_ports ();
 
 	{
@@ -1815,6 +1844,20 @@ MackieControlProtocol::toggle_backlight ()
 }
 
 boost::shared_ptr<Surface>
+MackieControlProtocol::get_surface_by_raw_pointer (void* ptr) const
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		if ((*s).get() == (Surface*) ptr) {
+			return *s;
+		}
+	}
+
+	return boost::shared_ptr<Surface> ();
+}
+
+boost::shared_ptr<Surface>
 MackieControlProtocol::nth_surface (uint32_t n) const
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -1831,11 +1874,14 @@ MackieControlProtocol::nth_surface (uint32_t n) const
 void
 MackieControlProtocol::connection_handler (boost::weak_ptr<ARDOUR::Port> wp1, std::string name1, boost::weak_ptr<ARDOUR::Port> wp2, std::string name2, bool yn)
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	Surfaces scopy;
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		scopy = surfaces;
+	}
 
-	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+	for (Surfaces::const_iterator s = scopy.begin(); s != scopy.end(); ++s) {
 		if ((*s)->connection_handler (wp1, name1, wp2, name2, yn)) {
-			cerr << (*s)->name() << " Connected, or disconnected\n";
 			ConnectionChange (*s);
 			break;
 		}
