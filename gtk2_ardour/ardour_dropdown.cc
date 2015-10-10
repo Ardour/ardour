@@ -49,6 +49,7 @@ using namespace std;
 
 
 ArdourDropdown::ArdourDropdown (Element e)
+	: _scrolling_disabled(false)
 {
 //	signal_button_press_event().connect (sigc::mem_fun(*this, &ArdourDropdown::on_mouse_pressed));
 
@@ -73,6 +74,10 @@ bool
 ArdourDropdown::on_scroll_event (GdkEventScroll* ev)
 {
 	using namespace Menu_Helpers;
+
+	if (_scrolling_disabled) {
+		return false;
+	}
 
 	const MenuItem * current_active = _menu.get_active();
 	const MenuList& items = _menu.items ();
@@ -142,4 +147,8 @@ ArdourDropdown::AddMenuElem (Menu_Helpers::Element e)
 	items.push_back (e);
 }
 
-
+void
+ArdourDropdown::disable_scrolling()
+{
+	_scrolling_disabled = true;
+}
