@@ -342,7 +342,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		 */
 		return;
 	}
-
+	set_flip_mode (Normal);
 	_current_initial_bank = initial;
 	_current_selected_track = -1;
 
