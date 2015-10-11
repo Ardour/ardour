@@ -1865,7 +1865,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Misc"),
 	     new BoolOption (
 		     "periodic-safety-backups",
-		     _("Automatically save the session file at regular intervals"),
+		     _("Make periodic backups of the session file"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_periodic_safety_backups),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
 		     ));
