@@ -2841,7 +2841,7 @@ Playlist::update_after_tempo_map_change ()
 void
 Playlist::foreach_region (boost::function<void(boost::shared_ptr<Region>)> s)
 {
-	RegionWriteLock rl (this, false);
+	RegionReadLock rl (this);
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 		s (*i);
 	}
