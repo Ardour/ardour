@@ -696,15 +696,29 @@ MackieControlProtocol::set_device_info (const string& device_name)
 int
 MackieControlProtocol::set_device (const string& device_name, bool force)
 {
-	cerr << "Set Device\n\n\n\n\n\n";
-
 	if (device_name == device_info().name() && !force) {
 		/* already using that device, nothing to do */
 		return 0;
 	}
 
+	/* get state from the current setup, and make sure it is stored in
+	   the _surface_states node so that if we switch back to this device,
+	   we will have its state available.
+	*/
+
+	if (!_surfaces_state) {
+		_surfaces_state = new XMLNode (X_("Surfaces"));
+	}
+
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			update_surface_state (*s);
+		}
+	}
+
 	if (set_device_info (device_name)) {
-		cerr << "Unknown device name\n";
 		return -1;
 	}
 
@@ -750,12 +764,40 @@ MackieControlProtocol::create_surfaces ()
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Create %1 surfaces for %2\n", 1 + _device_info.extenders(), _device_info.name()));
 
-	for (uint32_t n = 0; n < 1 + _device_info.extenders(); ++n) {
+	if (!_device_info.uses_ipmidi()) {
+		_input_bundle.reset (new ARDOUR::Bundle (_("Mackie Control In"), true));
+		_output_bundle.reset (new ARDOUR::Bundle (_("Mackie Control Out"), false));
+	} else {
+		_input_bundle.reset ();
+		_output_bundle.reset ();
 
-		if (n == 0) {
-			device_name = _device_info.name();
-		} else {
-			device_name = string_compose ("%1 #%2", _device_info.name(), n+1);
+	}
+	for (uint32_t n = 0; n < 1 + _device_info.extenders(); ++n) {
+		bool is_master = false;
+
+		if (_device_info.master_position() == 0) {
+			/* unspecified master position, use first surface */
+			if (n == 0) {
+				is_master = true;
+				if (_device_info.extenders() == 0) {
+					device_name = _device_info.name();
+				} else {
+					device_name = X_("mackie control");
+				}
+			}
+		} else if ((n+1) == _device_info.master_position()) {
+			/* specified master position, uses 1-based counting for user interaction */
+			is_master = true;
+			if (_device_info.extenders() == 0) {
+				device_name = _device_info.name();
+			} else {
+				device_name = X_("mackie control");
+			}
+
+		}
+
+		if (!is_master) {
+			device_name = string_compose (X_("mackie control ext %1"), n+1);
 		}
 
 		boost::shared_ptr<Surface> surface;
@@ -771,12 +813,11 @@ MackieControlProtocol::create_surfaces ()
 			return -1;
 		}
 
-		if (n == _device_info.master_position()) {
+		if (is_master) {
 			_master_surface = surface;
 		}
 
 		if (_surfaces_state) {
-			cerr << "Resetting surface state\n";
 			surface->set_state (*_surfaces_state, _surfaces_version);
 		}
 
@@ -786,9 +827,6 @@ MackieControlProtocol::create_surfaces ()
 		}
 
 		if (!_device_info.uses_ipmidi()) {
-
-			_input_bundle.reset (new ARDOUR::Bundle (_("Mackie Control In"), true));
-			_output_bundle.reset (new ARDOUR::Bundle (_("Mackie Control Out"), false));
 
 			_input_bundle->add_channel (
 				surface->port().input_port().name(),
@@ -801,14 +839,6 @@ MackieControlProtocol::create_surfaces ()
 				ARDOUR::DataType::MIDI,
 				session->engine().make_port_name_non_relative (surface->port().output_port().name())
 				);
-
-			session->BundleAddedOrRemoved ();
-
-		} else {
-			_input_bundle.reset ((ARDOUR::Bundle*) 0);
-			_output_bundle.reset ((ARDOUR::Bundle*) 0);
-
-			session->BundleAddedOrRemoved ();
 		}
 
 		MIDI::Port& input_port (surface->port().input_port());
@@ -856,6 +886,17 @@ MackieControlProtocol::create_surfaces ()
 		}
 	}
 
+	if (!_device_info.uses_ipmidi()) {
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			(*s)->port().reconnect ();
+		}
+	}
+
+	session->BundleAddedOrRemoved ();
+
+	assert (_master_surface);
+
 	return 0;
 }
 
@@ -868,6 +909,18 @@ MackieControlProtocol::close()
 	periodic_connection.disconnect ();
 
 	clear_surfaces();
+}
+
+/** Ensure that the _surfaces_state XML node contains an up-to-date
+ *  copy of the state node for @param surface. If _surfaces_state already
+ *  contains a state node for @param surface, it will deleted and replaced.
+ */
+void
+MackieControlProtocol::update_surface_state (boost::shared_ptr<Surface> surface)
+{
+	assert (_surfaces_state);
+	_surfaces_state->remove_nodes_and_delete (X_("name"), surface->name());
+	_surfaces_state->add_child_nocopy (surface->get_state());
 }
 
 XMLNode&
@@ -889,12 +942,19 @@ MackieControlProtocol::get_state()
 	node.add_property (X_("device-profile"), _device_profile.name());
 	node.add_property (X_("device-name"), _device_info.name());
 
-	XMLNode* snode = new XMLNode (X_("Surfaces"));
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		snode->add_child_nocopy ((*s)->get_state());
+	if (!_surfaces_state) {
+		_surfaces_state = new XMLNode (X_("Surfaces"));
 	}
 
-	node.add_child_nocopy (*snode);
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			update_surface_state (*s);
+		}
+	}
+
+	/* force a copy of the _surfaces_state node, because we want to retain ownership */
+	node.add_child_copy (*_surfaces_state);
 
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::get_state done\n");
 

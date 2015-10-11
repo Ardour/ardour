@@ -229,7 +229,6 @@ Surface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, b
 		*/
 
 		g_usleep (100000);
-
 		connected ();
 
 	} else {
@@ -243,21 +242,29 @@ Surface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, b
 XMLNode&
 Surface::get_state()
 {
-	char buf[64];
-	snprintf (buf, sizeof (buf), X_("surface-%u"), _number);
-	XMLNode* node = new XMLNode (buf);
-
+	XMLNode* node = new XMLNode (X_("Surface"));
+	node->add_property (X_("name"), _name);
 	node->add_child_nocopy (_port->get_state());
-
 	return *node;
 }
 
 int
 Surface::set_state (const XMLNode& node, int version)
 {
-	char buf[64];
-	snprintf (buf, sizeof (buf), X_("surface-%u"), _number);
-	XMLNode* mynode = node.child (buf);
+	/* Look for a node named after this surface */
+
+	XMLNodeList const& children = node.children();
+	XMLNode* mynode = 0;
+
+	for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
+		XMLProperty const* prop = (*c)->property (X_("name"));
+		if (prop) {
+			if (prop->value() == _name) {
+				mynode = *c;
+				break;
+			}
+		}
+	}
 
 	if (!mynode) {
 		return 0;

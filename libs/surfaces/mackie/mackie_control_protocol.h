@@ -352,6 +352,7 @@ class MackieControlProtocol
 	int ipmidi_restart ();
         void initialize ();
         int set_device_info (const std::string& device_name);
+	void update_surface_state (boost::shared_ptr<Mackie::Surface>);
 
 	/* MIDI port connection management */
 

@@ -58,8 +58,24 @@ SurfacePort::SurfacePort (Surface& s)
 
 	} else {
 
-		_async_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, string_compose (_("%1 in"),  _surface->name()), true);
-		_async_out = AudioEngine::instance()->register_output_port (DataType::MIDI, string_compose (_("%1 out"),  _surface->name()), true);
+		string in_name;
+		string out_name;
+
+		if (_surface->mcp().device_info().extenders() > 0) {
+			if (_surface->number() + 1 == _surface->mcp().device_info().master_position()) {
+				in_name = X_("mackie control in");
+				out_name = X_("mackie control out");
+			} else {
+				in_name = string_compose (X_("mackie control in ext %1"), _surface->number());
+				out_name = string_compose (X_("mackie control out ext %1"), _surface->number());
+			}
+		} else {
+			in_name = X_("mackie control in");
+			out_name = X_("mackie control out");
+		}
+
+		_async_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, in_name, true);
+		_async_out = AudioEngine::instance()->register_output_port (DataType::MIDI, out_name, true);
 
 		if (_async_in == 0 || _async_out == 0) {
 			throw failed_constructor();
@@ -121,27 +137,31 @@ SurfacePort::set_state (const XMLNode& node, int version)
 	if (dynamic_cast<MIDI::IPMIDIPort*>(_input_port)) {
 		return 0;
 	}
-	// the rest should not be run if the device-name changes outside of a session load.
-	if ( _surface->mcp().session_load()) {
 
-		XMLNode* child;
+	XMLNode* child;
 
-		if ((child = node.child (X_("Input"))) != 0) {
-			XMLNode* portnode = child->child (Port::state_node_name.c_str());
-			if (portnode) {
-				_async_in->set_state (*portnode, version);
-			}
+	if ((child = node.child (X_("Input"))) != 0) {
+		XMLNode* portnode = child->child (Port::state_node_name.c_str());
+		if (portnode) {
+			_async_in->set_state (*portnode, version);
 		}
+	}
 
-		if ((child = node.child (X_("Output"))) != 0) {
-			XMLNode* portnode = child->child (Port::state_node_name.c_str());
-			if (portnode) {
-				_async_out->set_state (*portnode, version);
-			}
+	if ((child = node.child (X_("Output"))) != 0) {
+		XMLNode* portnode = child->child (Port::state_node_name.c_str());
+		if (portnode) {
+			_async_out->set_state (*portnode, version);
 		}
 	}
 
 	return 0;
+}
+
+void
+SurfacePort::reconnect ()
+{
+	_async_out->reconnect ();
+	_async_in->reconnect ();
 }
 
 std::string
@@ -211,4 +231,3 @@ Mackie::operator <<  (ostream & os, const SurfacePort & port)
 	os << " }";
 	return os;
 }
-

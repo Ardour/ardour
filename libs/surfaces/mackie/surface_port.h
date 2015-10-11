@@ -68,6 +68,8 @@ class SurfacePort
 	std::string input_name() const;
 	std::string output_name() const;
 
+	void reconnect ();
+
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
