@@ -461,7 +461,6 @@ Strip::notify_panner_azi_changed (bool force_update)
 				queue_parameter_display (PanAzimuthAutomation, pos);
 			}
 
-			queue_parameter_display (PanAzimuthAutomation, pos);
 			_last_pan_azi_position_written = pos;
 		}
 	}
@@ -508,7 +507,6 @@ Strip::notify_panner_width_changed (bool force_update)
 				queue_parameter_display (PanWidthAutomation, pos);
 			}
 
-			queue_parameter_display (PanWidthAutomation, pos);
 			_last_pan_azi_position_written = pos;
 		}
 	}
@@ -730,6 +728,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
 			_surface->write (display (1, buf));
+			screen_hold = true;
 		}
 		break;
 
