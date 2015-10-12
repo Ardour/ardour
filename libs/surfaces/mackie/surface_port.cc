@@ -62,12 +62,12 @@ SurfacePort::SurfacePort (Surface& s)
 		string out_name;
 
 		if (_surface->mcp().device_info().extenders() > 0) {
-			if (_surface->number() + 1 == _surface->mcp().device_info().master_position()) {
+			if (_surface->number() == _surface->mcp().device_info().master_position()) {
 				in_name = X_("mackie control in");
 				out_name = X_("mackie control out");
 			} else {
-				in_name = string_compose (X_("mackie control in ext %1"), _surface->number());
-				out_name = string_compose (X_("mackie control out ext %1"), _surface->number());
+				in_name = string_compose (X_("mackie control in ext %1"), (_surface->number() + 1));
+				out_name = string_compose (X_("mackie control out ext %1"), _surface->number() + 1);
 			}
 		} else {
 			in_name = X_("mackie control in");

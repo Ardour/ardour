@@ -775,18 +775,7 @@ MackieControlProtocol::create_surfaces ()
 	for (uint32_t n = 0; n < 1 + _device_info.extenders(); ++n) {
 		bool is_master = false;
 
-		if (_device_info.master_position() == 0) {
-			/* unspecified master position, use first surface */
-			if (n == 0) {
-				is_master = true;
-				if (_device_info.extenders() == 0) {
-					device_name = _device_info.name();
-				} else {
-					device_name = X_("mackie control");
-				}
-			}
-		} else if ((n+1) == _device_info.master_position()) {
-			/* specified master position, uses 1-based counting for user interaction */
+		if (n == _device_info.master_position()) {
 			is_master = true;
 			if (_device_info.extenders() == 0) {
 				device_name = _device_info.name();
@@ -799,10 +788,11 @@ MackieControlProtocol::create_surfaces ()
 		if (!is_master) {
 			device_name = string_compose (X_("mackie control ext %1"), n+1);
 		}
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Port Name for surface %1 is %2\n", n, device_name));
 
 		boost::shared_ptr<Surface> surface;
 
-		if (n == _device_info.master_position()) {
+		if (is_master) {
 			stype = mcu;
 		} else {
 			stype = ext;
