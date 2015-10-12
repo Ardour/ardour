@@ -18,7 +18,7 @@
 
 #include <vector>
 
-#include <gtkmm/comboboxtext.h>
+#include <gtkmm/combobox.h>
 #include <gtkmm/box.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/table.h>
@@ -54,9 +54,18 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 	Gtk::ComboBoxText _surface_combo;
 	Gtk::ComboBoxText _profile_combo;
 
-	typedef std::vector<Gtk::ComboBoxText*> PortCombos;
+	typedef std::vector<Gtk::ComboBox*> PortCombos;
 	PortCombos input_combos;
 	PortCombos output_combos;
+
+	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
+		MidiPortColumns() {
+			add (short_name);
+			add (full_name);
+		}
+		Gtk::TreeModelColumn<std::string> short_name;
+		Gtk::TreeModelColumn<std::string> full_name;
+	};
 
 	struct AvailableActionColumns : public Gtk::TreeModel::ColumnRecord {
 		AvailableActionColumns() {
@@ -90,11 +99,14 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 
 	AvailableActionColumns available_action_columns;
 	FunctionKeyColumns function_key_columns;
+	MidiPortColumns midi_port_columns;
 
 	Gtk::ScrolledWindow function_key_scroller;
 	Gtk::TreeView function_key_editor;
 	Glib::RefPtr<Gtk::ListStore> function_key_model;
 	Glib::RefPtr<Gtk::TreeStore> available_action_model;
+
+	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (bool for_input);
 
 	void build_available_action_menu ();
 	void refresh_function_key_editor ();
@@ -131,12 +143,16 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 	void device_changed ();
 
 	void update_port_combos (std::vector<std::string> const&, std::vector<std::string> const&,
-	                         Gtk::ComboBoxText* input_combo,
-	                         Gtk::ComboBoxText* output_combo,
+	                         Gtk::ComboBox* input_combo,
+	                         Gtk::ComboBox* output_combo,
 	                         boost::shared_ptr<Mackie::Surface> surface);
 
 	PBD::ScopedConnection connection_change_connection;
 	void connection_handler ();
+
+	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
+	bool ignore_active_change;
+	void active_port_changed (Gtk::ComboBox* combo, boost::weak_ptr<Mackie::Surface> ws, bool for_input);
 };
 
 }

@@ -251,7 +251,7 @@ Surface::get_state()
 int
 Surface::set_state (const XMLNode& node, int version)
 {
-	/* Look for a node named after this surface */
+	/* Look for a node named after the device we're part of */
 
 	XMLNodeList const& children = node.children();
 	XMLNode* mynode = 0;
