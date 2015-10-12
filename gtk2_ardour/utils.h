@@ -92,5 +92,7 @@ std::string rate_as_string (float r);
 
 bool windows_overlap (Gtk::Window *a, Gtk::Window *b);
 
+bool overwrite_file_dialog (std::string title, std::string text);
+
 } // namespace
 #endif /* __ardour_gtk_utils_h__ */
