@@ -592,7 +592,7 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 			_fader->start_touch (_surface->mcp().transport_frame());
 
 			if (ac) {
-				queue_parameter_display ((AutomationType) ac->parameter().type(), ac->internal_to_interface (ac->get_value()));
+				queue_parameter_display ((AutomationType) ac->parameter().type(), ac->get_value());
 			}
 		}
 
