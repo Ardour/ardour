@@ -270,10 +270,12 @@ Surface::set_state (const XMLNode& node, int version)
 		return 0;
 	}
 
-	XMLNode* portnode = mynode->child (X_("Port"));
-	if (portnode) {
-		if (_port->set_state (*portnode, version)) {
-			return -1;
+	if (_mcp.session_load ()) {
+		XMLNode* portnode = mynode->child (X_("Port"));
+		if (portnode) {
+			if (_port->set_state (*portnode, version)) {
+				return -1;
+			}
 		}
 	}
 
