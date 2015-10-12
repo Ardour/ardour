@@ -459,7 +459,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	int save_as (SaveAs&);
 	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false, bool template_only = false);
 	int restore_state (std::string snapshot_name);
-	int save_template (std::string template_name);
+	int save_template (std::string template_name, bool replace_existing = false);
 	int save_history (std::string snapshot_name = "");
 	int restore_history (std::string snapshot_name);
 	void remove_state (std::string snapshot_name);

@@ -2091,7 +2091,7 @@ Session::XMLSourceFactory (const XMLNode& node)
 }
 
 int
-Session::save_template (string template_name)
+Session::save_template (string template_name, bool replace_existing)
 {
 	if ((_state_of_the_state & CannotSave) || template_name.empty ()) {
 		return -1;
@@ -2117,10 +2117,10 @@ Session::save_template (string template_name)
 	}
 
 	if (!ARDOUR::Profile->get_trx()) {
-		if (Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
+		if (!replace_existing && Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
 			warning << string_compose(_("Template \"%1\" already exists - new version not created"),
 									  template_dir_path) << endmsg;
-			return -1;
+			return -2;
 		}
 
 		if (g_mkdir_with_parents (template_dir_path.c_str(), 0755) != 0) {
