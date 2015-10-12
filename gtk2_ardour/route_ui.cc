@@ -1863,13 +1863,20 @@ RouteUI::save_as_template ()
 		return;
 	}
 
-	p.hide ();
 	p.get_result (name, true);
 
 	safe_name = legalize_for_path (name);
 	safe_name += template_suffix;
 
 	path = Glib::build_filename (path, safe_name);
+	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		bool overwrite = overwrite_file_dialog (_("Confirm Template Overwrite"),
+							_("A template already exists with that name. Do you want to overwrite it?"));
+
+		if (!overwrite) {
+			return;
+		}
+	}
 
 	_route->save_as_template (path, name);
 }
