@@ -1522,12 +1522,20 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 void
 MackieControlProtocol::set_flip_mode (FlipMode fm)
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	if (_flip_mode != fm) {
+		if (fm == Normal) {
+			update_global_button (Button::Flip, off);
+		} else {
+			update_global_button (Button::Flip, on);
+		}
 
-	_flip_mode = fm;
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->update_flip_mode_display ();
+		_flip_mode = fm;
+
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			(*s)->update_flip_mode_display ();
+		}
 	}
 }
 
