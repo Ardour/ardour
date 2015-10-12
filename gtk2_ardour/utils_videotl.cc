@@ -28,6 +28,7 @@
 #include "ardour/session_directory.h"
 #include "video_image_frame.h"
 #include "utils_videotl.h"
+#include "utils.h"
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-version.h"
@@ -67,13 +68,12 @@ VideoUtils::confirm_video_outfn (std::string outfn, std::string docroot)
 	}
 
 	if (Glib::file_test(outfn, Glib::FILE_TEST_EXISTS)) {
-		ArdourDialog confirm (_("Confirm Overwrite"), true);
-		Label m (_("A file with the same name already exists.  Do you want to overwrite it?"));
-		confirm.get_vbox()->pack_start (m, true, true);
-		confirm.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-		confirm.add_button (_("Overwrite"), Gtk::RESPONSE_ACCEPT);
-		confirm.show_all ();
-		if (confirm.run() == RESPONSE_CANCEL) { return false; }
+		bool overwrite = ARDOUR_UI_UTILS::overwrite_file_dialog (_("Confirm Overwrite"),
+		                                                         _("A file with the same name already exists. Do you want to overwrite it?"));
+
+		if (!overwrite) {
+			return false;
+		}
 	}
 
 	std::string dir = Glib::path_get_dirname (outfn);

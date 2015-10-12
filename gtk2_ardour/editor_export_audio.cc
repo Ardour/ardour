@@ -51,6 +51,7 @@
 #include "public_editor.h"
 #include "selection.h"
 #include "time_axis_view.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -141,35 +142,18 @@ Editor::export_region ()
 		string path = dialog.get_path ();
 
 		if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+			bool overwrite = ARDOUR_UI_UTILS::overwrite_file_dialog (_("Confirm MIDI File Overwrite"),
+								                 _("A file with the same name already exists. Do you want to overwrite it?"));
 
-			MessageDialog checker (_("File Exists!"),
-					       true,
-					       Gtk::MESSAGE_WARNING,
-					       Gtk::BUTTONS_NONE);
-
-			checker.set_title (_("File Exists!"));
-
-			checker.add_button (Stock::CANCEL, RESPONSE_CANCEL);
-			checker.add_button (_("Overwrite Existing File"), RESPONSE_ACCEPT);
-			checker.set_default_response (RESPONSE_CANCEL);
-
-			checker.set_wmclass (X_("midi_export_file_exists"), PROGRAM_NAME);
-			checker.set_position (Gtk::WIN_POS_MOUSE);
-
-			ret = checker.run ();
-
-			switch (ret) {
-			case Gtk::RESPONSE_ACCEPT:
-				/* force ::g_unlink because the backend code will
-				   go wrong if it tries to open an existing
-				   file for writing.
-				*/
-				::g_unlink (path.c_str());
-				break;
-			default:
+			if (!overwrite) {
 				return;
 			}
 
+			/* force ::g_unlink because the backend code will
+			   go wrong if it tries to open an existing
+			   file for writing.
+			*/
+			::g_unlink (path.c_str());
 		}
 
 		(void) midi_region->clone (path);
