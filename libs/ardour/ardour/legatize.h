@@ -45,7 +45,7 @@ public:
 	                    Evoral::Beats                        position,
 	                    std::vector<Notes>&                  seqs);
 
-	std::string name() const { return std::string ("legatize"); }
+	std::string name () const { return (_shrink_only ? std::string ("remove overlap") : std::string ("legatize")); }
 
 private:
 	bool _shrink_only;
