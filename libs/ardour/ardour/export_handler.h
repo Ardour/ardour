@@ -22,16 +22,19 @@
 #define __ardour_export_handler_h__
 
 #include <map>
-#include <fstream>
 
 #include <boost/operators.hpp>
 #include <boost/shared_ptr.hpp>
+
+#include "pbd/gstdio_compat.h"
 
 #include "ardour/export_pointers.h"
 #include "ardour/session.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "pbd/signals.h"
+
+#include "i18n.h"
 
 namespace AudioGrapher {
 	class BroadcastInfo;
@@ -156,13 +159,31 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	struct CDMarkerStatus {
 		CDMarkerStatus (std::string out_file, ExportTimespanPtr timespan,
 		                ExportFormatSpecPtr format, std::string filename)
-		  : out (out_file.c_str()), timespan (timespan), format (format), filename (filename), marker(0)
-		  , track_number (1), track_position (0), track_duration (0), track_start_frame (0)
-		  , index_number (1), index_position (0)
+		  : path (out_file)
+		  , timespan (timespan)
+		  , format (format)
+		  , filename (filename)
+		  , marker(0)
+		  , track_number (1)
+		  , track_position (0)
+		  , track_duration (0)
+		  , track_start_frame (0)
+		  , index_number (1)
+		  , index_position (0)
 		  {}
 
+		~CDMarkerStatus () {
+			if (!g_file_set_contents (path.c_str(), out.str().c_str(), -1, NULL)) {
+				PBD::error << string_compose(_("Editor: cannot open \"%1\" as export file for CD marker file"), path) << endmsg;
+			}
+
+		}
+
+		/* I/O */
+		std::string         path;
+		std::stringstream   out;
+
 		/* General info */
-		std::ofstream  out;
 		ExportTimespanPtr   timespan;
 		ExportFormatSpecPtr format;
 		std::string         filename;

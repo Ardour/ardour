@@ -425,11 +425,6 @@ ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSp
 
 		CDMarkerStatus status (filepath, timespan, file_format, filename);
 
-		if (!status.out) {
-			error << string_compose(_("Editor: cannot open \"%1\" as export file for CD marker file"), filepath) << endmsg;
-			return;
-		}
-
 		(this->*header_func) (status);
 
 		/* Get locations and sort */
