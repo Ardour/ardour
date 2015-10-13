@@ -151,7 +151,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (FadeInAutomation);
 	REGISTER_ENUM (FadeOutAutomation);
 	REGISTER_ENUM (EnvelopeAutomation);
-	REGISTER_BITS (_AutomationType);
+	REGISTER (_AutomationType);
 
 	REGISTER_ENUM (Off);
 	REGISTER_ENUM (Write);
