@@ -504,13 +504,9 @@ MackieControlProtocol::ffwd_release (Button &)
 LedState
 MackieControlProtocol::loop_press (Button &)
 {
-	if (main_modifier_state() & MODIFIER_CONTROL) {
-		set_view_mode (Loop);
-		return on;
-	} else {
-		session->request_play_loop (!session->get_play_loop());
-		return none;
-	}
+	bool was_on = session->get_play_loop();
+	session->request_play_loop (!was_on);
+	return was_on ? off : on;
 }
 
 LedState
@@ -660,13 +656,7 @@ LedState
 MackieControlProtocol::pan_press (Button &)
 {
 	set_pot_mode (Pan);
-	update_global_button (Button::Track, off);
-	update_global_button (Button::Send, off);
-	update_global_button (Button::Plugin, off);
-	update_global_button (Button::Eq, off);
-	update_global_button (Button::Dyn, off);
-	return on;
-
+	return none;
 }
 LedState
 MackieControlProtocol::pan_release (Button &)
@@ -681,7 +671,8 @@ MackieControlProtocol::plugin_press (Button &)
 LedState
 MackieControlProtocol::plugin_release (Button &)
 {
-	return none;
+	set_view_mode (Plugins);
+	return none; /* LED state set by set_view_mode */
 }
 LedState
 MackieControlProtocol::eq_press (Button &)
@@ -837,14 +828,8 @@ MackieControlProtocol::clearsolo_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::track_press (Mackie::Button&)
 {
-	set_pot_mode (Tracks);
-	update_global_button (Button::Pan, off);
-	update_global_button (Button::Send, off);
-	update_global_button (Button::Plugin, off);
-	update_global_button (Button::Eq, off);
-	update_global_button (Button::Dyn, off);
-	return on;
-
+	set_pot_mode (Trim);
+	return none;
 }
 Mackie::LedState
 MackieControlProtocol::track_release (Mackie::Button&)
@@ -854,15 +839,10 @@ MackieControlProtocol::track_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::send_press (Mackie::Button&)
 {
-	return off;
+	return none;
 	// remove above line when sends implemented
 	set_pot_mode (Send);
-	update_global_button (Button::Track, off);
-	update_global_button (Button::Pan, off);
-	update_global_button (Button::Plugin, off);
-	update_global_button (Button::Eq, off);
-	update_global_button (Button::Dyn, off);
-	return on;
+	return none;
 }
 Mackie::LedState
 MackieControlProtocol::send_release (Mackie::Button&)
@@ -877,6 +857,7 @@ MackieControlProtocol::miditracks_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::miditracks_release (Mackie::Button&)
 {
+	set_view_mode (MidiTracks);
 	return none;
 }
 Mackie::LedState
@@ -897,6 +878,7 @@ MackieControlProtocol::audiotracks_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::audiotracks_release (Mackie::Button&)
 {
+	set_view_mode (AudioTracks);
 	return none;
 }
 Mackie::LedState
@@ -917,6 +899,7 @@ MackieControlProtocol::aux_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::aux_release (Mackie::Button&)
 {
+	set_view_mode (Auxes);
 	return none;
 }
 Mackie::LedState
@@ -927,6 +910,7 @@ MackieControlProtocol::busses_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::busses_release (Mackie::Button&)
 {
+	set_view_mode (Busses);
 	return none;
 }
 Mackie::LedState

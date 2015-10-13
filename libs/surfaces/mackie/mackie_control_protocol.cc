@@ -279,10 +279,7 @@ MackieControlProtocol::get_sorted_routes()
 		if (route_is_locked_to_strip(route)) {
 			continue;
 		}
-		/* This next section which is not used yet, looks wrong to me
-			The first four belong here but the bottom five are not a selection
-			of routes and belong elsewhere as they are v-pot modes.
-		*/
+
 		switch (_view_mode) {
 		case Mixer:
 			break;
@@ -292,7 +289,9 @@ MackieControlProtocol::get_sorted_routes()
 			break;
 		case MidiTracks:
 			break;
-		case Loop:
+		case Plugins:
+			break;
+		case Auxes:
 			break;
 		}
 
@@ -531,17 +530,21 @@ MackieControlProtocol::update_timecode_beats_led()
 void
 MackieControlProtocol::update_global_button (int id, LedState ls)
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	boost::shared_ptr<Surface> surface;
 
-	if (surfaces.empty()) {
-		return;
-	}
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-	if (!_device_info.has_global_controls()) {
-		return;
+		if (surfaces.empty()) {
+			return;
+		}
+
+		if (!_device_info.has_global_controls()) {
+			return;
+		}
+		// surface needs to be master surface
+		surface = _master_surface;
 	}
-	// surface needs to be master surface
-	boost::shared_ptr<Surface> surface = _master_surface;
 
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (id);
 	if (x != surface->controls_by_device_independent_id.end()) {
@@ -704,7 +707,12 @@ MackieControlProtocol::set_device (const string& device_name, bool force)
 	   we will have its state available.
 	*/
 
-	update_configuration_state ();
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		if (!surfaces.empty()) {
+			update_configuration_state ();
+		}
+	}
 
 	if (set_device_info (device_name)) {
 		return -1;
@@ -807,9 +815,9 @@ MackieControlProtocol::create_surfaces ()
 				}
 			}
 			if (this_device) {
-				XMLNode* surfaces = this_device->child (X_("Surfaces"));
-				if (surfaces) {
-					surface->set_state (*surfaces, state_version);
+				XMLNode* snode = this_device->child (X_("Surfaces"));
+				if (snode) {
+					surface->set_state (*snode, state_version);
 				}
 			}
 		}
@@ -911,6 +919,8 @@ MackieControlProtocol::close()
 void
 MackieControlProtocol::update_configuration_state ()
 {
+	/* CALLER MUST HOLD SURFACES LOCK */
+
 	if (!configuration_state) {
 		configuration_state = new XMLNode (X_("Configurations"));
 	}
@@ -922,14 +932,12 @@ MackieControlProtocol::update_configuration_state ()
 	configuration_state->add_child_nocopy (*devnode);
 
 	XMLNode* snode = new XMLNode (X_("Surfaces"));
-	devnode->add_child_nocopy (*snode);
 
-	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
-		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-			snode->add_child_nocopy ((*s)->get_state());
-		}
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		snode->add_child_nocopy ((*s)->get_state());
 	}
+
+	devnode->add_child_nocopy (*snode);
 }
 
 XMLNode&
@@ -951,7 +959,10 @@ MackieControlProtocol::get_state()
 	node.add_property (X_("device-profile"), _device_profile.name());
 	node.add_property (X_("device-name"), _device_info.name());
 
-	update_configuration_state ();
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		update_configuration_state ();
+	}
 
 	/* force a copy of the _surfaces_state node, because we want to retain ownership */
 	node.add_child_copy (*configuration_state);
@@ -1552,15 +1563,33 @@ MackieControlProtocol::set_flip_mode (FlipMode fm)
 void
 MackieControlProtocol::set_pot_mode (PotMode m)
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
-
 	_pot_mode = m;
 
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->update_potmode ();
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			(*s)->update_potmode ();
+
+		}
 	}
 
+	switch (_pot_mode) {
+	case Trim:
+		update_global_button (Button::Track, on);
+		update_global_button (Button::Send, off);
+		update_global_button (Button::Pan, off);
+		break;
+	case Send:
+		update_global_button (Button::Track, off);
+		update_global_button (Button::Send, on);
+		update_global_button (Button::Pan, off);
+		break;
+	case Pan:
+		update_global_button (Button::Track, off);
+		update_global_button (Button::Send, off);
+		update_global_button (Button::Pan, on);
+	};
 }
 
 void

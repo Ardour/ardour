@@ -103,19 +103,17 @@ class MackieControlProtocol
 
 	enum ViewMode {
 		Mixer,
-		Loop,
 		AudioTracks,
 		MidiTracks,
 		Busses,
+		Auxes,
+		Plugins,
 	};
 
 	enum PotMode {
-		Tracks,
+		Trim,
 		Send,
 		Pan,
-		PlugIn,
-		EQ,
-		Instrument,
 	};
 
 	enum FlipMode {

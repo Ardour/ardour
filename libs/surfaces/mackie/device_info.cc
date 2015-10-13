@@ -449,6 +449,12 @@ DeviceInfo::has_meters() const
 }
 
 bool
+DeviceInfo::has_separate_meters() const
+{
+	return _has_meters;
+}
+
+bool
 DeviceInfo::has_two_character_display() const
 {
 	return _has_two_character_display;

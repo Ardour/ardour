@@ -797,7 +797,9 @@ Strip::periodic (ARDOUR::microseconds_t now)
 	}
 
 	if (_block_screen_redisplay_until >= now) {
-
+		if (_surface->mcp().device_info().has_separate_meters()) {
+			goto meters;
+		}
 		/* no drawing here, for now */
 		return;
 
@@ -832,6 +834,7 @@ Strip::periodic (ARDOUR::microseconds_t now)
 		update_automation ();
 	}
 
+  meters:
 	update_meter ();
 }
 
@@ -1014,24 +1017,22 @@ Strip::potmode_changed (bool notify)
 		block_vpot_mode_display_for (1000);
 		return;
 	}
+
 	// WIP
 	int pm = _surface->mcp().pot_mode();
 	switch (pm) {
 	case MackieControlProtocol::Pan:
 		// This needs to set current pan mode (azimuth or width... or whatever)
 		set_vpot_parameter (_pan_mode);
-		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Pan mode.\n");
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Assign pot to Pan mode %1\n", enum_2_string (_pan_mode)));
 		break;
-	case MackieControlProtocol::Tracks: // should change the Tracks to Trim
+	case MackieControlProtocol::Trim:
 		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Trim mode.\n");
-			set_vpot_parameter (TrimAutomation);
-			break;
+		set_vpot_parameter (TrimAutomation);
+		break;
 	case MackieControlProtocol::Send:
 		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Send mode.\n");
 		// set to current send
-		break;
-	default:
-		cerr << "Pot mode " << pm << " not yet handled\n";
 		break;
 	}
 

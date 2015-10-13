@@ -1032,40 +1032,65 @@ Surface::update_view_mode_display ()
 	switch (_mcp.view_mode()) {
 	case MackieControlProtocol::Mixer:
 		show_two_char_display ("Mx");
-		//id = Button::Pan;
-		break;
-	case MackieControlProtocol::Loop:
-		show_two_char_display ("LP");
-		id = Button::Loop;
+		id = Button::Track;
+		text = _("Mixer View");
 		break;
 	case MackieControlProtocol::AudioTracks:
 		show_two_char_display ("AT");
+		id = Button::AudioTracks;
+		text = _("Audio Tracks");
 		break;
 	case MackieControlProtocol::MidiTracks:
 		show_two_char_display ("MT");
+		id = Button::MidiTracks;
+		text = _("MIDI Tracks");
+		break;
+	case MackieControlProtocol::Plugins:
+		show_two_char_display ("PL");
+		id = Button::Plugin;
+		text = _("Plugins");
+		break;
+	case MackieControlProtocol::Busses:
+		show_two_char_display ("BS");
+		id = Button::Busses;
+		text = _("Busses");
+		break;
+	case MackieControlProtocol::Auxes:
+		show_two_char_display ("AB");
+		id = Button::Aux;
+		text = _("Auxes");
 		break;
 	default:
 		break;
 	}
 
+	vector<int> view_mode_buttons;
+	view_mode_buttons.push_back (Button::Track);
+	view_mode_buttons.push_back (Button::Busses);
+	view_mode_buttons.push_back (Button::Plugin);
+	view_mode_buttons.push_back (Button::AudioTracks);
+	view_mode_buttons.push_back (Button::MidiTracks);
+	view_mode_buttons.push_back (Button::Aux);
+
 	if (id >= 0) {
 
-		/* we are attempting to turn a global button/LED on */
+		for (vector<int>::iterator i = view_mode_buttons.begin(); i != view_mode_buttons.end(); ++i) {
+			map<int,Control*>::iterator x = controls_by_device_independent_id.find (id);
 
-		map<int,Control*>::iterator x = controls_by_device_independent_id.find (id);
+			if (x != controls_by_device_independent_id.end()) {
+				Button* button = dynamic_cast<Button*> (x->second);
+				if (button) {
+					bool onoff;
+					onoff = (*i) == id;
 
-		if (x != controls_by_device_independent_id.end()) {
-			Button* button = dynamic_cast<Button*> (x->second);
-			if (button) {
-				_port->write (button->set_state (on));
+					_port->write (button->set_state (onoff));
+				}
 			}
 		}
 	}
 
 	if (!text.empty()) {
-		for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-			_port->write ((*s)->display (1, text));
-		}
+		display_message_for (text, 1000);
 	}
 }
 

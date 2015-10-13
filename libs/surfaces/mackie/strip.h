@@ -109,7 +109,7 @@ private:
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;
 
-	int      _pan_mode;
+	ARDOUR::AutomationType  _pan_mode;
 
 	float _last_gain_position_written;
 	float _last_pan_azi_position_written;
