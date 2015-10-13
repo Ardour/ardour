@@ -190,9 +190,9 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	touch_sensitivity_scale.property_digits() = 0;
 	touch_sensitivity_scale.property_draw_value() = false;
-	table.attach (touch_sensitivity_scale, row, row+1, 5, 6, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	table.attach (touch_sensitivity_scale, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	row++;
-	table.attach (recalibrate_fader_button, row, row+1, 6, 7, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	table.attach (recalibrate_fader_button, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	row++;
 
 
@@ -797,7 +797,6 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 void
 MackieControlProtocolGUI::surface_combo_changed ()
 {
-	_cp.not_session_load();
 	_cp.set_device (_surface_combo.get_active_text(), false);
 }
 
