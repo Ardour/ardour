@@ -248,21 +248,21 @@ ArdourKeyboard::set_state (const XMLNode& node, int version)
 bool
 ArdourKeyboard::indicates_snap (guint state)
 {
-	const bool contains_s = Keyboard::modifier_state_contains (state, Keyboard::snap_modifier());
-	const bool equals_s = Keyboard::modifier_state_equals (state, Keyboard::snap_modifier());
-	const bool contains_d = Keyboard::modifier_state_contains (state, Keyboard::snap_delta_modifier());
+	const bool contains_s = Keyboard::modifier_state_contains (state, Keyboard::snap_modifier ());
+	const bool contains_d = Keyboard::modifier_state_contains (state, Keyboard::snap_delta_modifier ());
+	const bool s_contains_d = Keyboard::modifier_state_contains (Keyboard::snap_modifier (), Keyboard::snap_delta_modifier ());
 
-	return  (contains_s && ((contains_d && equals_s) || !contains_d));
+	return  (contains_s && ((contains_d && s_contains_d) || !contains_d));
 }
 
 bool
 ArdourKeyboard::indicates_snap_delta (guint state)
 {
-	const bool contains_d = Keyboard::modifier_state_contains (state, Keyboard::snap_delta_modifier());
-	const bool equals_d = Keyboard::modifier_state_equals (state, Keyboard::snap_delta_modifier());
-	const bool contains_s = Keyboard::modifier_state_contains (state, Keyboard::snap_modifier());
+	const bool contains_d = Keyboard::modifier_state_contains (state, Keyboard::snap_delta_modifier ());
+	const bool contains_s = Keyboard::modifier_state_contains (state, Keyboard::snap_modifier ());
+	const bool d_contains_s = Keyboard::modifier_state_contains (Keyboard::snap_delta_modifier (), Keyboard::snap_modifier ());
 
-	return (contains_d && ((contains_s && equals_d) || !contains_s));
+	return (contains_d && ((contains_s && d_contains_s) || !contains_s));
 }
 
 void
