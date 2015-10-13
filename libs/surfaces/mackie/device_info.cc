@@ -57,6 +57,7 @@ DeviceInfo::DeviceInfo()
 	, _uses_ipmidi (false)
 	, _no_handshake (false)
 	, _has_meters (true)
+	, _has_separate_meters (false)
 	, _device_type (MCU)
 	, _name (X_("Mackie Control Universal Pro"))
 {
@@ -341,6 +342,14 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		}
 	} else {
 		_has_meters = true;
+	}
+
+	if ((child = node.child ("HasSeparateMeters")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
+			_has_meters = _has_separate_meters = string_is_affirmative (prop->value());
+		}
+	} else {
+		_has_separate_meters = false;
 	}
 
 	if ((child = node.child ("LogicControlButtons")) != 0) {

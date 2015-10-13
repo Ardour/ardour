@@ -81,6 +81,7 @@ class DeviceInfo
 	bool uses_ipmidi() const;
 	bool no_handshake() const;
 	bool has_meters() const;
+	bool has_separate_meters() const;
 	const std::string& name() const;
 
 	static std::map<std::string,DeviceInfo> device_info;
@@ -109,6 +110,7 @@ class DeviceInfo
 	bool     _uses_ipmidi;
 	bool     _no_handshake;
 	bool     _has_meters;
+	bool     _has_separate_meters;
 	DeviceType _device_type;
 	std::string _name;
 	std::string _global_button_name;

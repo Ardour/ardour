@@ -8,6 +8,7 @@
   <MasterFader value="no"/>
   <TimecodeDisplay value="no"/>
   <TwoCharacterDisplay value="yes"/>
+  <HasSeparateMeters value="yes"/>
   <GlobalControls value="yes"/>
   <JogWheel value="yes"/>
   <TouchSenseFaders value="yes"/>
