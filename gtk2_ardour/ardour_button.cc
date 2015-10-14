@@ -759,7 +759,7 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 	if (ev->button == 1 && _hovering && (_elements & Indicator) && _led_rect && _distinct_led_click) {
 		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width &&
 		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
-			signal_led_clicked(); /* EMIT SIGNAL */
+			signal_led_clicked(ev); /* EMIT SIGNAL */
 			return true;
 		}
 	}

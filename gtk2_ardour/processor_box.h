@@ -152,7 +152,7 @@ protected:
 private:
 	bool _selectable;
 	bool _unknown_processor;
-	void led_clicked();
+	void led_clicked(GdkEventButton *);
 	void processor_active_changed ();
 	void processor_property_changed (const PBD::PropertyChange&);
 	void processor_configuration_changed (const ARDOUR::ChanCount in, const ARDOUR::ChanCount out);
@@ -189,6 +189,7 @@ private:
 	private:
 		void slider_adjusted ();
 		void button_clicked ();
+		void button_clicked_event (GdkEventButton *);
 		void control_changed ();
 		std::string state_id () const;
 		void set_tooltip ();
@@ -290,6 +291,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void select_all_inserts ();
 	void select_all_sends ();
 
+	void all_visible_processors_active(bool state);
+
 	void hide_things ();
 
 	bool edit_aux_send(boost::shared_ptr<ARDOUR::Processor>);
@@ -381,7 +384,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void processors_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
 	void compute_processor_sort_keys ();
 
-	void all_visible_processors_active(bool state);
 	void ab_plugins ();
 
 	typedef std::vector<boost::shared_ptr<ARDOUR::Processor> > ProcSelection;

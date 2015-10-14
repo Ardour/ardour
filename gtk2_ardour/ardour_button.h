@@ -90,7 +90,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_layout_font (const Pango::FontDescription&);
 	void set_text_ellipsize (Pango::EllipsizeMode);
 
-	sigc::signal<void> signal_led_clicked;
+	sigc::signal<void, GdkEventButton*> signal_led_clicked;
 	sigc::signal<void> signal_clicked;
 
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
