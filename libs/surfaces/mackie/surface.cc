@@ -168,7 +168,7 @@ Surface::~Surface ()
 	delete _port;
 	// the ports take time to release and we may be rebuilding right away
 	// in the case of changing devices.
-	g_usleep (100000);
+	g_usleep (10000);
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::~Surface done\n");
 }
 
