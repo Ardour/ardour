@@ -332,6 +332,8 @@ public:
 
         ARDOUR::InstrumentInfo& instrument_info() const;
 
+	void note_deleted (NoteBase*);
+
 protected:
 	void region_resized (const PBD::PropertyChange&);
 
@@ -470,9 +472,6 @@ private:
 
 	MidiListEditor* _list_editor;
 	bool _no_sound_notes;
-
-	PBD::ScopedConnection note_delete_connection;
-	void maybe_remove_deleted_note_from_selection (NoteBase*);
 
 	void snap_changed ();
 	PBD::ScopedConnection snap_changed_connection;

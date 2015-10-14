@@ -36,8 +36,6 @@ using namespace Gtkmm2ext;
 using ARDOUR::MidiModel;
 using namespace ArdourCanvas;
 
-PBD::Signal1<void,NoteBase*> NoteBase::NoteBaseDeleted;
-
 /// dividing the hue circle in 16 parts, hand adjusted for equal look, courtesy Thorsten Wilms
 const uint32_t NoteBase::midi_channel_colors[16] = {
 	  0xd32d2dff,  0xd36b2dff,  0xd3972dff,  0xd3d12dff,
@@ -62,7 +60,7 @@ NoteBase::NoteBase(MidiRegionView& region, bool with_events, const boost::shared
 
 NoteBase::~NoteBase()
 {
-	NoteBaseDeleted (this);
+	_region.note_deleted (this);
 
 	delete _text;
 }

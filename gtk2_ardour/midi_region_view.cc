@@ -268,10 +268,6 @@ MidiRegionView::init (bool wfd)
 {
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
-	NoteBase::NoteBaseDeleted.connect (note_delete_connection, MISSING_INVALIDATOR,
-					   boost::bind (&MidiRegionView::maybe_remove_deleted_note_from_selection, this, _1),
-					   gui_context());
-
 	if (wfd) {
 		Glib::Threads::Mutex::Lock lm(midi_region()->midi_source(0)->mutex());
 		midi_region()->midi_source(0)->load_model(lm);
@@ -1384,8 +1380,6 @@ MidiRegionView::~MidiRegionView ()
 
 	hide_verbose_cursor ();
 
-	note_delete_connection.disconnect ();
-
 	delete _list_editor;
 
 	RegionViewGoingAway (this); /* EMIT_SIGNAL */
@@ -2098,7 +2092,7 @@ MidiRegionView::step_patch (PatchChange& patch, bool bank, int delta)
 }
 
 void
-MidiRegionView::maybe_remove_deleted_note_from_selection (NoteBase* cne)
+MidiRegionView::note_deleted (NoteBase* cne)
 {
 	if (_selection.empty()) {
 		return;

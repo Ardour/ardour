@@ -61,8 +61,6 @@ class NoteBase : public sigc::trackable
 	void set_item (ArdourCanvas::Item *);
         ArdourCanvas::Item* item() const { return _item; }
 
-        static PBD::Signal1<void, NoteBase*> NoteBaseDeleted;
-
 	virtual void show() = 0;
 	virtual void hide() = 0;
 
