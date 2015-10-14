@@ -275,13 +275,39 @@ ProcessorEntry::set_enum_width (Width w)
 }
 
 void
-ProcessorEntry::led_clicked()
+ProcessorEntry::led_clicked(GdkEventButton *ev)
 {
+	bool ctrl_shift_pressed = false;
+	Keyboard::ModifierMask ctrl_shift_mask = Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier);
+
+	if (Keyboard::modifier_state_equals (ev->state, ctrl_shift_mask)) {
+		ctrl_shift_pressed = true;
+	}
+
 	if (_processor) {
 		if (_button.get_active ()) {
-			_processor->deactivate ();
+			if (ctrl_shift_pressed) {
+				_parent->all_visible_processors_active(false);
+
+				if (_position == Fader) {
+					_processor->deactivate ();
+				}
+			}
+			else {
+				_processor->deactivate ();
+			}
+
 		} else {
-			_processor->activate ();
+			if (ctrl_shift_pressed) {
+				_parent->all_visible_processors_active(true);
+
+				if (_position == Fader) {
+					_processor->activate ();
+				}
+			}
+			else {
+				_processor->activate ();
+			}
 		}
 	}
 }
@@ -533,7 +559,7 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 		_button.show ();
 
 		_button.signal_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked));
-		_button.signal_led_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked));
+		_button.signal_led_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked_event));
 		// dup. currently timers are used :(
 		//c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
 
@@ -642,6 +668,14 @@ ProcessorEntry::Control::button_clicked ()
 	c->set_value (n ? 0 : 1);
 	_button.set_active (!n);
 	set_tooltip ();
+}
+
+void
+ProcessorEntry::Control::button_clicked_event (GdkEventButton *ev)
+{
+	(void) ev;
+
+	button_clicked ();
 }
 
 void
