@@ -204,7 +204,7 @@ Mixer_UI::Mixer_UI ()
 #else
 	global_hpacker.pack_start (out_packer, false, false, 12);
 #endif
-	list_hpane.pack1(list_vpacker, false, false);
+	list_hpane.pack1(list_vpacker, false, true);
 	list_hpane.pack2(global_hpacker, true, false);
 
 	rhs_pane1.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
@@ -1734,10 +1734,11 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 			return;
 		}
 
-		if (!geometry || (prop = geometry->property("mixer-list-hpane-pos")) == 0) {
-			pos = 75;
+		if (!geometry) {
+			pos = 0;
 			snprintf (buf, sizeof(buf), "%d", pos);
 		} else {
+			prop = geometry->property("mixer-list-hpane-pos");
 			pos = atoi (prop->value());
 		}
 
