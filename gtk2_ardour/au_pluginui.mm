@@ -48,7 +48,7 @@ static const gchar* _automation_mode_strings[] = {
 };
 
 static void
-dump_view_tree (NSView* view, int depth)
+dump_view_tree (NSView* view, int depth, int maxdepth)
 {
 	NSArray* subviews = [view subviews];
 	unsigned long cnt = [subviews count];
@@ -56,14 +56,17 @@ dump_view_tree (NSView* view, int depth)
 	for (int d = 0; d < depth; d++) {
 		cerr << '\t';
 	}
-        NSRect frame = [view frame];
+	NSRect frame = [view frame];
 	cerr << " view @ " <<  frame.origin.x << ", " << frame.origin.y
-             << ' ' << frame.size.width << " x " << frame.size.height
-             << endl;
-	
+		<< ' ' << frame.size.width << " x " << frame.size.height
+		<< endl;
+
+	if (depth >= maxdepth) {
+		return;
+	}
 	for (unsigned long i = 0; i < cnt; ++i) {
 		NSView* subview = [subviews objectAtIndex:i];
-		dump_view_tree (subview, depth+1);
+		dump_view_tree (subview, depth+1, maxdepth);
 	}
 }
 
@@ -74,27 +77,29 @@ dump_view_tree (NSView* view, int depth)
 	self = [ super init ];
 
 	if (self) {
-		plugin_ui = apluginui; 
+		plugin_ui = apluginui;
 		top_level_parent = tlp;
-                
-                if (cp) {
-                        cocoa_parent = cp;
-                        
-                        [[NSNotificationCenter defaultCenter] addObserver:self
-                         selector:@selector(cocoaParentActivationHandler:)
-                         name:NSWindowDidBecomeMainNotification
-                         object:NULL];
-                        
-                        [[NSNotificationCenter defaultCenter] addObserver:self
-                         selector:@selector(cocoaParentBecameKeyHandler:)
-                         name:NSWindowDidBecomeKeyNotification
-                         object:NULL];
-                }
-        }
+
+		if (cp) {
+			cocoa_parent = cp;
+
+			[[NSNotificationCenter defaultCenter]
+			     addObserver:self
+			        selector:@selector(cocoaParentActivationHandler:)
+			            name:NSWindowDidBecomeMainNotification
+			          object:NULL];
+
+			[[NSNotificationCenter defaultCenter]
+			     addObserver:self
+			        selector:@selector(cocoaParentBecameKeyHandler:)
+			            name:NSWindowDidBecomeKeyNotification
+			          object:NULL];
+		}
+	}
 
 	return self;
 }
-		
+
 - (void)cocoaParentActivationHandler:(NSNotification *)notification
 {
 	NSWindow* notification_window = (NSWindow *)[notification object];
@@ -105,7 +110,7 @@ dump_view_tree (NSView* view, int depth)
 		} else {
 			plugin_ui->deactivate();
 		}
-	} 
+	}
 }
 
 - (void)cocoaParentBecameKeyHandler:(NSNotification *)notification
@@ -118,12 +123,12 @@ dump_view_tree (NSView* view, int depth)
 		} else {
 			plugin_ui->deactivate();
 		}
-	} 
+	}
 }
 
 - (void)auViewResized:(NSNotification *)notification
 {
-        (void) notification; // stop complaints about unusued argument
+	(void) notification; // stop complaints about unusued argument
 	plugin_ui->cocoa_view_resized();
 }
 
@@ -133,12 +138,20 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	: PlugUIBase (insert)
 	, automation_mode_label (_("Automation"))
 	, preset_label (_("Presets"))
-	
+	, mapped (false)
+	, resizable (false)
+	, min_width (0)
+	, min_height (0)
+	, req_width (0)
+	, req_height (0)
+	, alo_width (0)
+	, alo_height (0)
+
 {
 	if (automation_mode_strings.empty()) {
 		automation_mode_strings = I18N (_automation_mode_strings);
 	}
-	
+
 	set_popdown_strings (automation_mode_selector, automation_mode_strings);
 	automation_mode_selector.set_active_text (automation_mode_strings.front());
 
@@ -185,7 +198,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	set_spacing (6);
 	pack_start (top_box, false, false);
-	pack_start (low_box, false, false);
+	pack_start (low_box, true, true);
 
 	preset_label.show ();
 	_preset_combo.show ();
@@ -218,22 +231,27 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 		create_cocoa_view ();
 	}
 
-	low_box.add_events(Gdk::VISIBILITY_NOTIFY_MASK);
+	low_box.add_events (Gdk::VISIBILITY_NOTIFY_MASK | Gdk::EXPOSURE_MASK);
 
 	low_box.signal_realize().connect (mem_fun (this, &AUPluginUI::lower_box_realized));
 	low_box.signal_visibility_notify_event ().connect (mem_fun (this, &AUPluginUI::lower_box_visibility_notify));
+	low_box.signal_size_request ().connect (mem_fun (this, &AUPluginUI::lower_box_size_request));
+	low_box.signal_size_allocate ().connect (mem_fun (this, &AUPluginUI::lower_box_size_allocate));
+	low_box.signal_map ().connect (mem_fun (this, &AUPluginUI::lower_box_map));
+	low_box.signal_unmap ().connect (mem_fun (this, &AUPluginUI::lower_box_unmap));
+	//low_box.signal_expose_event ().connect (mem_fun (this, &AUPluginUI::lower_box_expose));
 }
 
 AUPluginUI::~AUPluginUI ()
 {
-        if (_notify) {
-                [[NSNotificationCenter defaultCenter] removeObserver:_notify];
-        }
+	if (_notify) {
+		[[NSNotificationCenter defaultCenter] removeObserver:_notify];
+	}
 
 	if (cocoa_parent) {
 		NSWindow* win = get_nswindow();
 		[win removeChildWindow:cocoa_parent];
-	} 
+	}
 
 #ifdef WITH_CARBON
 	if (carbon_window) {
@@ -249,7 +267,7 @@ AUPluginUI::~AUPluginUI ()
 	if (au_view) {
 		/* remove whatever we packed into low_box so that GTK doesn't
 		   mess with it.
-		*/
+		 */
 
 		[au_view removeFromSuperview];
 	}
@@ -260,13 +278,13 @@ AUPluginUI::test_carbon_view_support ()
 {
 #ifdef WITH_CARBON
 	bool ret = false;
-	
+
 	carbon_descriptor.componentType = kAudioUnitCarbonViewComponentType;
 	carbon_descriptor.componentSubType = 'gnrc';
 	carbon_descriptor.componentManufacturer = 'appl';
 	carbon_descriptor.componentFlags = 0;
 	carbon_descriptor.componentFlagsMask = 0;
-	
+
 	OSStatus err;
 
 	// ask the AU for its first editor component
@@ -286,10 +304,10 @@ AUPluginUI::test_carbon_view_support ()
 
 	return ret;
 #else
-        return false;
+	return false;
 #endif
 }
-	
+
 bool
 AUPluginUI::test_cocoa_view_support ()
 {
@@ -298,7 +316,7 @@ AUPluginUI::test_cocoa_view_support ()
 	OSStatus err = AudioUnitGetPropertyInfo(*au->get_au(),
 						kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
 						0, &dataSize, &isWritable);
-	
+
 	return dataSize > 0 && err == noErr;
 }
 
@@ -327,7 +345,7 @@ AUPluginUI::create_cocoa_view ()
 
 	OSStatus result = AudioUnitGetPropertyInfo (*au->get_au(),
 						    kAudioUnitProperty_CocoaUI,
-						    kAudioUnitScope_Global, 
+						    kAudioUnitScope_Global,
 						    0,
 						    &dataSize,
 						    &isWritable );
@@ -335,7 +353,7 @@ AUPluginUI::create_cocoa_view ()
 	numberOfClasses = (dataSize - sizeof(CFURLRef)) / sizeof(CFStringRef);
 
 	// Does view have custom Cocoa UI?
-	
+
 	if ((result == noErr) && (numberOfClasses > 0) ) {
 
 		DEBUG_TRACE(DEBUG::AudioUnits,
@@ -351,13 +369,13 @@ AUPluginUI::create_cocoa_view ()
 					&dataSize) == noErr) {
 
 			CocoaViewBundlePath	= (NSURL *)cocoaViewInfo->mCocoaAUViewBundleLocation;
-				
+
 			// we only take the first view in this example.
 			factoryClassName	= (NSString *)cocoaViewInfo->mCocoaAUViewClass[0];
-			
+
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("the factory name is %1 bundle is %2\n",
 									[factoryClassName UTF8String], CocoaViewBundlePath));
-                        
+
 		} else {
 
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("No cocoaUI property cocoaViewInfo = %1\n", cocoaViewInfo));
@@ -386,7 +404,7 @@ AUPluginUI::create_cocoa_view ()
 				error << _("AUPluginUI: error getting AU view's factory class from bundle") << endmsg;
 				return -1;
 			}
-			
+
 			// make sure 'factoryClass' implements the AUCocoaUIBase protocol
 			if (!plugin_class_valid (factoryClass)) {
 				error << _("AUPluginUI: U view's factory class does not properly implement the AUCocoaUIBase protocol") << endmsg;
@@ -405,14 +423,14 @@ AUPluginUI::create_cocoa_view ()
 			au_view = [factory uiViewForAudioUnit:*au->get_au() withSize:NSZeroSize];
 
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("view created @ %1\n", au_view));
-			
+
 			// cleanup
 			[CocoaViewBundlePath release];
 			if (cocoaViewInfo) {
 				UInt32 i;
 				for (i = 0; i < numberOfClasses; i++)
 					CFRelease(cocoaViewInfo->mCocoaAUViewClass[i]);
-				
+
 				free (cocoaViewInfo);
 			}
 			wasAbleToLoadCustomView = true;
@@ -428,12 +446,13 @@ AUPluginUI::create_cocoa_view ()
 		[(AUGenericView *)au_view setShowsExpertParameters:1];
 	}
 
-	// Get the initial size of the new AU View's frame 
-	
-	NSRect rect = [au_view frame];
-        prefheight = rect.size.height;
-        prefwidth = rect.size.width;
-	low_box.set_size_request (rect.size.width, rect.size.height);
+	// Get the initial size of the new AU View's frame
+	NSRect  frame = [au_view frame];
+	min_width  = req_width  = CGRectGetWidth(NSRectToCGRect(frame));
+	min_height = req_height = CGRectGetHeight(NSRectToCGRect(frame));
+	resizable  = [au_view autoresizingMask];
+
+	low_box.queue_resize ();
 
 	return 0;
 }
@@ -441,49 +460,23 @@ AUPluginUI::create_cocoa_view ()
 void
 AUPluginUI::cocoa_view_resized ()
 {
-        NSWindow* window = get_nswindow ();
-        NSRect windowFrame= [window frame];
-        NSRect new_frame = [au_view frame];
+	if (!mapped || alo_width == 0 || alo_height == 0 || !resizable) {
+		return;
+	}
+	/* check for self-resizing plugins (e.g expand settings in AUSampler)
+	 * if the widget expands it moves its y-offset (cocoa y-axis points towards the top)
+	 */
+	NSRect new_au_frame = [au_view frame];
 
-        float dy = last_au_frame.size.height - new_frame.size.height;
-        float dx = last_au_frame.size.width - new_frame.size.width;
+	//float dx = last_au_frame.origin.x - new_au_frame.origin.x;
+	float dy = last_au_frame.origin.y - new_au_frame.origin.y;
+	//req_width += dx;
+	req_height += dy;
+	if (req_width < min_width) req_width = min_width;
+	if (req_height < min_height) req_height = min_height;
 
-        windowFrame.origin.y    += dy;
-        windowFrame.origin.x    += dx;
-        windowFrame.size.height -= dy;
-        windowFrame.size.width  -= dx;
-        
-        [[NSNotificationCenter defaultCenter] removeObserver:_notify
-         name:NSViewFrameDidChangeNotification 
-         object:au_view];
-
-        NSUInteger old_auto_resize = [au_view autoresizingMask];
-
-        [au_view setAutoresizingMask:NSViewNotSizable];
-        [window setFrame:windowFrame display:1];
-
-        /* Some stupid AU Views change the origin of the original AU View
-           when they are resized (I'm looking at you AUSampler). If the origin
-           has been moved, move it back.
-        */
-
-        if (last_au_frame.origin.x != new_frame.origin.x ||
-            last_au_frame.origin.y != new_frame.origin.y) {
-                new_frame.origin = last_au_frame.origin;
-                [au_view setFrame:new_frame];
-                /* also be sure to redraw the topbox because this can
-                   also go wrong.
-                 */
-                top_box.queue_draw ();
-        }
-
-        [au_view setAutoresizingMask:old_auto_resize];
-
-        [[NSNotificationCenter defaultCenter] addObserver:_notify
-         selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
-         object:au_view];
-
-        last_au_frame = new_frame;
+	last_au_frame = new_au_frame;
+	low_box.queue_resize ();
 }
 
 int
@@ -494,13 +487,13 @@ AUPluginUI::create_carbon_view ()
 	ControlRef root_control;
 
 	Component editComponent = FindNextComponent(NULL, &carbon_descriptor);
-	
+
 	OpenAComponent(editComponent, &editView);
 	if (!editView) {
 		error << _("AU Carbon view: cannot open AU Component") << endmsg;
 		return -1;
 	}
-	
+
 	Rect r = { 100, 100, 100, 100 };
 	WindowAttributes attr = WindowAttributes (kWindowStandardHandlerAttribute |
 						  kWindowCompositingAttribute|
@@ -512,7 +505,7 @@ AUPluginUI::create_carbon_view ()
 	        CloseComponent (editView);
 		return -1;
 	}
-	
+
 	if ((err = GetRootControl(carbon_window, &root_control)) != noErr) {
 		error << string_compose (_("AUPlugin: cannot get root control of carbon window (err: %1)"), err) << endmsg;
 		DisposeWindow (carbon_window);
@@ -538,11 +531,11 @@ AUPluginUI::create_carbon_view ()
 	size.x = bounds.right-bounds.left;
 	size.y = bounds.bottom-bounds.top;
 
-	prefwidth = (int) (size.x + 0.5);
-	prefheight = (int) (size.y + 0.5);
+	req_width = (int) (size.x + 0.5);
+	req_height = (int) (size.y + 0.5);
 
-	SizeWindow (carbon_window, prefwidth, prefheight,  true);
-	low_box.set_size_request (prefwidth, prefheight);
+	SizeWindow (carbon_window, prefwidth, req_height,  true);
+	low_box.set_size_request (prefwidth, req_height); // ??
 
 	return 0;
 #else
@@ -604,7 +597,7 @@ AUPluginUI::parent_carbon_window ()
 		error << _("AUPluginUI: no top level window!") << endmsg;
 		return -1;
 	}
-	
+
 	/* figure out where the cocoa parent window is in carbon-coordinate space, which
 	   differs from both cocoa-coordinate space and GTK-coordinate space
 	*/
@@ -623,9 +616,9 @@ AUPluginUI::parent_carbon_window ()
 	int packing_extra = 6; // this is the total vertical packing in our top level window
 
 	/* move into position, based on parent window position */
-	MoveWindow (carbon_window, 
-		    windowStructureBoundsRect.left, 
-		    windowStructureBoundsRect.top + titlebar_height + top_box.get_height() + packing_extra, 
+	MoveWindow (carbon_window,
+		    windowStructureBoundsRect.left,
+		    windowStructureBoundsRect.top + titlebar_height + top_box.get_height() + packing_extra,
 		    false);
 	ShowWindow (carbon_window);
 
@@ -634,7 +627,7 @@ AUPluginUI::parent_carbon_window ()
 
 	SetWindowActivationScope (carbon_window, kWindowActivationScopeNone);
 
-	_notify = [ [NotificationObject alloc] initWithPluginUI:this andCocoaParent:cocoa_parent andTopLevelParent:win ]; 
+	_notify = [ [NotificationObject alloc] initWithPluginUI:this andCocoaParent:cocoa_parent andTopLevelParent:win ];
 
 	[win addChildWindow:cocoa_parent ordered:NSWindowAbove];
 	[win setAutodisplay:1]; // turn of GTK stuff for this window
@@ -643,7 +636,7 @@ AUPluginUI::parent_carbon_window ()
 #else
 	return -1;
 #endif
-}	
+}
 
 int
 AUPluginUI::parent_cocoa_window ()
@@ -654,37 +647,25 @@ AUPluginUI::parent_cocoa_window ()
 		return -1;
 	}
 
-	[win setAutodisplay:1]; // turn of GTK stuff for this window
+	//[win setAutodisplay:1]; // turn off GTK stuff for this window
 
-	Gtk::Container* toplevel = get_toplevel();
+	NSView* view = gdk_quartz_window_get_nsview (low_box.get_window()->gobj());
+	[view addSubview:au_view];
 
-	if (!toplevel || !toplevel->is_toplevel()) {
-		error << _("AUPluginUI: no top level window!") << endmsg;
-		return -1;
-	}
+	gint xx, yy;
+	gtk_widget_translate_coordinates(
+			GTK_WIDGET(low_box.gobj()),
+			GTK_WIDGET(low_box.get_parent()->gobj()),
+			8, 6, &xx, &yy);
+	[au_view setFrame:NSMakeRect(xx, yy, req_width, req_height)];
 
-	NSView* view = gdk_quartz_window_get_nsview (get_toplevel()->get_window()->gobj());
-	GtkRequisition a = top_box.size_request ();
-
-	/* move the au_view down so that it doesn't overlap the top_box contents */
-
-	const int spacing = 6;  // main vbox spacing
-	const int pad     = 4;  // box pad
-
-	NSPoint origin = { spacing + pad, static_cast<CGFloat> (a.height) + (2 * spacing) + pad };
-
-	[au_view setFrameOrigin:origin];
-        [view addSubview:au_view positioned:NSWindowBelow relativeTo:NULL];
-
-        last_au_frame = [au_view frame];
-
+	last_au_frame = [au_view frame];
 	// watch for size changes of the view
-
 	_notify = [ [NotificationObject alloc] initWithPluginUI:this andCocoaParent:NULL andTopLevelParent:win ];
 
-        [[NSNotificationCenter defaultCenter] addObserver:_notify
-         selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
-         object:au_view];
+	[[NSNotificationCenter defaultCenter] addObserver:_notify
+		selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
+		object:au_view];
 
 	return 0;
 }
@@ -755,6 +736,86 @@ AUPluginUI::lower_box_visibility_notify (GdkEventVisibility* ev)
 }
 
 void
+AUPluginUI::update_view_size ()
+{
+	if (!mapped || alo_width == 0 || alo_height == 0) {
+		return;
+	}
+	gint xx, yy;
+	gtk_widget_translate_coordinates(
+			GTK_WIDGET(low_box.gobj()),
+			GTK_WIDGET(low_box.get_parent()->gobj()),
+			8, 6, &xx, &yy);
+
+	[[NSNotificationCenter defaultCenter] removeObserver:_notify
+		name:NSViewFrameDidChangeNotification
+		object:au_view];
+
+	if (!resizable) {
+		xx += (alo_width - req_width) * .5;
+		[au_view setFrame:NSMakeRect(xx, yy, req_width, req_height)];
+	} else {
+		/* this mitigates issues with plugins that resize themselves
+		 * depending on visible options (e.g AUSampler)
+		 * since the OSX y-axis points upwards, the plugin adjusts its
+		 * own y-offset if the view expands to the bottom to accomodate
+		 * subviews inside the main view.
+		 */
+		[au_view setAutoresizesSubviews:0];
+		[au_view setFrame:NSMakeRect(xx, yy, alo_width, alo_height)];
+		[au_view setAutoresizesSubviews:1];
+		[au_view setNeedsDisplay:1];
+	}
+
+	last_au_frame = [au_view frame];
+
+	[[NSNotificationCenter defaultCenter]
+	     addObserver:_notify
+	        selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
+	          object:au_view];
+}
+
+void
+AUPluginUI::lower_box_map ()
+{
+	mapped = true;
+	[au_view setHidden:0];
+	update_view_size ();
+}
+
+void
+AUPluginUI::lower_box_unmap ()
+{
+	mapped = false;
+	[au_view setHidden:1];
+}
+
+void
+AUPluginUI::lower_box_size_request (GtkRequisition* requisition)
+{
+	requisition->width  = req_width;
+	requisition->height = req_height;
+}
+
+void
+AUPluginUI::lower_box_size_allocate (Gtk::Allocation& allocation)
+{
+	alo_width  = allocation.get_width ();
+	alo_height = allocation.get_height ();
+	update_view_size ();
+}
+
+gboolean
+AUPluginUI::lower_box_expose (GdkEventExpose* event)
+{
+	[au_view drawRect:NSMakeRect(event->area.x,
+			event->area.y,
+			event->area.width,
+			event->area.height)];
+	return true;
+}
+
+void
 AUPluginUI::on_window_hide ()
 {
 #ifdef WITH_CARBON
@@ -764,12 +825,12 @@ AUPluginUI::on_window_hide ()
 	}
 #endif
 	hide_all ();
-        
+
 #if 0
-        NSArray* wins = [NSApp windows];
-        for (uint32_t i = 0; i < [wins count]; i++) {
-                id win = [wins objectAtIndex:i];
-        }
+	NSArray* wins = [NSApp windows];
+	for (uint32_t i = 0; i < [wins count]; i++) {
+		id win = [wins objectAtIndex:i];
+	}
 #endif
 }
 

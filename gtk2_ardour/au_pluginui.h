@@ -71,8 +71,8 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	AUPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>);
 	~AUPluginUI ();
 
-	gint get_preferred_height () { return prefheight; }
-	gint get_preferred_width () { return prefwidth; }
+	gint get_preferred_width () { return req_width; }
+	gint get_preferred_height () { return req_height; }
 	bool start_updating(GdkEventAny*);
 	bool stop_updating(GdkEventAny*);
 
@@ -83,6 +83,12 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 
 	void lower_box_realized ();
 	bool lower_box_visibility_notify (GdkEventVisibility*);
+
+	void lower_box_map ();
+	void lower_box_unmap ();
+	void lower_box_size_request (GtkRequisition*);
+	void lower_box_size_allocate (Gtk::Allocation&);
+	gboolean lower_box_expose (GdkEventExpose*);
 
 	void cocoa_view_resized ();
 	void on_realize ();
@@ -109,6 +115,15 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 
 	static std::vector<std::string> automation_mode_strings;
 
+	bool mapped;
+	bool resizable;
+	int  min_width;
+	int  min_height;
+	int  req_width;
+	int  req_height;
+	int  alo_width;
+	int  alo_height;
+
 	/* Cocoa */
 
 	NSWindow*           cocoa_window;
@@ -133,6 +148,8 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	int parent_carbon_window ();
 	int parent_cocoa_window ();
 	NSWindow* get_nswindow();
+
+	void update_view_size ();
 
 	bool plugin_class_valid (Class pluginClass);
 };
