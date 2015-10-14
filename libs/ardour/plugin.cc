@@ -365,6 +365,12 @@ Plugin::set_parameter (uint32_t which, float)
 	ParameterChanged (which, get_parameter (which)); /* EMIT SIGNAL */
 }
 
+void
+Plugin::set_parameter_automated (uint32_t which, float val)
+{
+	Plugin::set_parameter (which, val);
+}
+
 int
 Plugin::set_state (const XMLNode& node, int /*version*/)
 {

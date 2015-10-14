@@ -274,6 +274,7 @@ protected:
 	friend class PluginInsert;
 
 	virtual void set_parameter (uint32_t which, float val);
+	virtual void set_parameter_automated (uint32_t which, float val);
 
 	/** Do the actual saving of the current plugin settings to a preset of the provided name.
 	 *  Should return a URI on success, or an empty string on failure.
