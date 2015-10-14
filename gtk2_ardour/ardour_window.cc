@@ -39,7 +39,7 @@ ArdourWindow::ArdourWindow (string title)
 {
 	set_title (title);
 	init ();
-	set_position (Gtk::WIN_POS_CENTER);
+	set_position (Gtk::WIN_POS_MOUSE);
 }
 
 ArdourWindow::ArdourWindow (Gtk::Window& parent, string /*title*/)
