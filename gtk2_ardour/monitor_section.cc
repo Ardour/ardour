@@ -1352,7 +1352,7 @@ MonitorSection::update_output_display ()
 	char * tooltip_cstr;
 
 	io_count = _route->n_outputs().n_total();
-	tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Glib::Markup::escape_text(_route->name()));
+	tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Glib::Markup::escape_text(_route->name().c_str()));
 
 
 	for (io_index = 0; io_index < io_count; ++io_index) {
@@ -1378,12 +1378,12 @@ MonitorSection::update_output_display ()
 				}
 
 				if (io_connection_count == 0) {
-					tooltip << endl << Glib::Markup::escape_text(port->name().substr(port->name().find("/") + 1))
+					tooltip << endl << Glib::Markup::escape_text(port->name().substr(port->name().find("/") + 1)).c_str()
 						<< " -> "
-						<< Glib::Markup::escape_text( pn.empty() ? connection_name : pn );
+						<< Glib::Markup::escape_text( pn.empty() ? connection_name : pn ).c_str();
 				} else {
 					tooltip << ", "
-						<< Glib::Markup::escape_text( pn.empty() ? connection_name : pn );
+						<< Glib::Markup::escape_text( pn.empty() ? connection_name : pn ).c_str();
 				}
 
 				if (connection_name.find("ardour:") == 0) {
