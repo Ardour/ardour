@@ -1734,12 +1734,11 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 			return;
 		}
 
-		if (!geometry) {
-			pos = 0;
+		if (!geometry || (prop = geometry->property("mixer-list-hpane-pos")) == 0) {
+			pos = 75;
 			snprintf (buf, sizeof(buf), "%d", pos);
 		} else {
-			prop = geometry->property("mixer-list-hpane-pos");
-			pos = atoi (prop->value());
+			pos = max (36, atoi (prop->value ()));
 		}
 
 		if ((done[2] = GTK_WIDGET(list_hpane.gobj())->allocation.width > pos)) {
