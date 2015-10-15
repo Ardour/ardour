@@ -74,9 +74,21 @@ DebugBits PBD::debug_bits;
 DebugBits
 PBD::new_debug_bit (const char* name)
 {
-        DebugBits ret;
-        ret.set (_debug_bit++, 1);
-        _debug_bit_map().insert (make_pair (name, ret));
+	DebugBits ret;
+	DebugMap::iterator i =_debug_bit_map().find (name);
+
+	if (i != _debug_bit_map().end()) {
+		return i->second;
+	}
+
+	if (_debug_bit >= debug_bits.size()) {
+		cerr << "Too many debug bits defined, offender was " << name << endl;
+		abort ();
+		/*NOTREACHED*/
+	}
+
+	ret.set (_debug_bit++, 1);
+	_debug_bit_map().insert (make_pair (name, ret));
         return ret;
 }
 
