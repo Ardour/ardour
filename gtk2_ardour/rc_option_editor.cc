@@ -371,7 +371,7 @@ public:
 		  _insert_note_button_adjustment (3, 1, 5),
 		  _insert_note_button_spin (_insert_note_button_adjustment)
 	{
-		const Glib::ustring restart_msg = string_compose (_("\nThis setting will only take effect after your project has been saved and %1 has been restarted."), PROGRAM_NAME);
+		const Glib::ustring restart_msg = _("\nChanges to this setting will only persist after your project has been saved.");
 		/* internationalize and prepare for use with combos */
 
 		vector<string> dumb;
