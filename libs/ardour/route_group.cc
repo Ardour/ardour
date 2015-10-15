@@ -456,18 +456,26 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		if ((*i)->output()->n_ports().n_midi() != 0) {
-			PBD::info << _("You cannot subgroup MIDI tracks at this time") << endmsg;
+			PBD::warning << _("You cannot subgroup MIDI tracks at this time") << endmsg;
 			return;
 		}
 	}
 
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+		if (!aux && nin != 0 && nin != (*i)->output()->n_ports().n_audio()) {
+			PBD::warning << _("You cannot subgroup tracks with different number of outputs at this time.") << endmsg;
+			return;
+		}
 		nin = max (nin, (*i)->output()->n_ports().n_audio());
 	}
 
 	try {
-		/* use master bus etc. to determine default nouts */
-		rl = _session.new_audio_route (nin, 2, 0, 1);
+		/* use master bus etc. to determine default nouts.
+		 *
+		 * (since tracks can't have fewer outs than ins,
+		 * "nin" currently defines the number of outpus if nin > 2)
+		 */
+		rl = _session.new_audio_route (nin, 2 /*XXX*/, 0, 1);
 	} catch (...) {
 		return;
 	}
