@@ -161,6 +161,15 @@ namespace Gtkmm2ext {
 
 	LIBGTKMM2EXT_API void convert_bgra_to_rgba (guint8 const *, guint8 * dst, int, int);
 	LIBGTKMM2EXT_API const char* event_type_string (int event_type);
+
+	/* glibmm ustring workaround
+	 *
+	 * Glib::operator<<(std::ostream&, Glib::ustring const&) internally calls
+	 * g_locale_from_utf8() which uses loadlocale which is not thread-safe on OSX
+	 *
+	 * use a std::string
+	 */
+	LIBGTKMM2EXT_API std::string markup_escape_text (std::string const& s);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

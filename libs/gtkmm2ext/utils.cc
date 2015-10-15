@@ -967,3 +967,9 @@ Gtkmm2ext::event_type_string (int event_type)
 
 	return "unknown";
 }
+
+std::string
+Gtkmm2ext::markup_escape_text (std::string const& s)
+{
+	return Glib::Markup::escape_text (s);
+}
