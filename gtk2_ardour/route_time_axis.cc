@@ -1790,8 +1790,8 @@ RouteTimeAxisView::update_playlist_tip ()
 			set_tooltip (
 				playlist_button,
 				string_compose(_("Take: %1.%2"),
-					Glib::Markup::escape_text(rg->name()).c_str(),
-					Glib::Markup::escape_text(take_name).c_str())
+					Gtkmm2ext::markup_escape_text (rg->name()),
+					Gtkmm2ext::markup_escape_text (take_name))
 				);
 
 			return;
@@ -1799,7 +1799,7 @@ RouteTimeAxisView::update_playlist_tip ()
 	}
 
 	/* set the playlist button tooltip to the playlist name */
-	set_tooltip (playlist_button, _("Playlist") + std::string(": ") + Glib::Markup::escape_text(track()->playlist()->name()).c_str());
+	set_tooltip (playlist_button, _("Playlist") + std::string(": ") + Gtkmm2ext::markup_escape_text (track()->playlist()->name()));
 }
 
 

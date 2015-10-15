@@ -1207,10 +1207,10 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 
 	if (for_input) {
 		io_count = route->n_inputs().n_total();
-		tooltip << string_compose (_("<b>INPUT</b> to %1"), Glib::Markup::escape_text(route->name()).c_str());
+		tooltip << string_compose (_("<b>INPUT</b> to %1"), Gtkmm2ext::markup_escape_text (route->name()));
 	} else {
 		io_count = route->n_outputs().n_total();
-		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Glib::Markup::escape_text(route->name()).c_str());
+		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Gtkmm2ext::markup_escape_text (route->name()));
 	}
 
 
@@ -1244,12 +1244,12 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 				}
 
 				if (io_connection_count == 0) {
-					tooltip << endl << Glib::Markup::escape_text(port->name().substr(port->name().find("/") + 1)).c_str()
+					tooltip << endl << Gtkmm2ext::markup_escape_text (port->name().substr(port->name().find("/") + 1))
 						<< " -> "
-						<< Glib::Markup::escape_text( pn.empty() ? connection_name : pn ).c_str();
+						<< Gtkmm2ext::markup_escape_text ( pn.empty() ? connection_name : pn );
 				} else {
 					tooltip << ", "
-						<< Glib::Markup::escape_text( pn.empty() ? connection_name : pn ).c_str();
+						<< Gtkmm2ext::markup_escape_text ( pn.empty() ? connection_name : pn );
 				}
 
 				if (connection_name.find("ardour:") == 0) {

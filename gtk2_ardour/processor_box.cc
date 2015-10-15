@@ -606,7 +606,7 @@ ProcessorEntry::Control::set_tooltip ()
 		snprintf (tmp, sizeof(tmp), "%s: %.2f", _name.c_str(), c->internal_to_user (c->get_value ()));
 	}
 
-	string sm = Glib::Markup::escape_text (tmp);
+	string sm = Gtkmm2ext::markup_escape_text (tmp);
 	_slider_persistant_tooltip.set_tip (sm);
 	ARDOUR_UI_UTILS::set_tooltip (_button, sm);
 }

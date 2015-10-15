@@ -19,6 +19,7 @@
 
 #include <glibmm/main.h>
 #include <gtkmm/stock.h>
+#include "gtkmm2ext/utils.h"
 #include "ardour/import_status.h"
 #include "interthread_progress_window.h"
 #include "i18n.h"
@@ -87,8 +88,7 @@ bool
 ImportProgressWindow::update ()
 {
 	_cancel_button.set_sensitive (!_import_status->freeze);
-	std::string op = Glib::Markup::escape_text(_import_status->doing_what);
-	_label.set_markup ("<i>" + op + "</i>");
+	_label.set_markup ("<i>" + Gtkmm2ext::markup_escape_text (_import_status->doing_what) + "</i>");
 
 	/* use overall progress for the bar, rather than that for individual files */
 	_bar.set_fraction ((_import_status->current - 1 + _import_status->progress) / _import_status->total);

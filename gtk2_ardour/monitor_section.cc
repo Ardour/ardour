@@ -27,6 +27,7 @@
 #include "gtkmm2ext/tearoff.h"
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/motionfeedback.h"
+#include "gtkmm2ext/utils.h"
 
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
@@ -1352,7 +1353,7 @@ MonitorSection::update_output_display ()
 	char * tooltip_cstr;
 
 	io_count = _route->n_outputs().n_total();
-	tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Glib::Markup::escape_text(_route->name().c_str()));
+	tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Gtkmm2ext::markup_escape_text (_route->name()));
 
 
 	for (io_index = 0; io_index < io_count; ++io_index) {
@@ -1378,12 +1379,12 @@ MonitorSection::update_output_display ()
 				}
 
 				if (io_connection_count == 0) {
-					tooltip << endl << Glib::Markup::escape_text(port->name().substr(port->name().find("/") + 1)).c_str()
+					tooltip << endl << Gtkmm2ext::markup_escape_text (port->name().substr(port->name().find("/") + 1))
 						<< " -> "
-						<< Glib::Markup::escape_text( pn.empty() ? connection_name : pn ).c_str();
+						<< Gtkmm2ext::markup_escape_text ( pn.empty() ? connection_name : pn );
 				} else {
 					tooltip << ", "
-						<< Glib::Markup::escape_text( pn.empty() ? connection_name : pn ).c_str();
+						<< Gtkmm2ext::markup_escape_text ( pn.empty() ? connection_name : pn );
 				}
 
 				if (connection_name.find("ardour:") == 0) {

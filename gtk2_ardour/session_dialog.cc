@@ -39,6 +39,8 @@
 #include "pbd/stl_delete.h"
 #include "pbd/openuri.h"
 
+#include "gtkmm2ext/utils.h"
+
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/recent_sessions.h"
@@ -700,7 +702,7 @@ SessionDialog::redisplay_recent_sessions ()
 		g_stat (s.c_str(), &gsb);
 
 		row[recent_session_columns.fullpath] = dirname; /* just the dir, but this works too */
-		row[recent_session_columns.tip] = Glib::Markup::escape_text (dirname).c_str();
+		row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
 		row[recent_session_columns.time_modified] = gsb.st_mtime;
 
 		if (Session::get_info_from_path (s, sr, sf) == 0) {
@@ -739,7 +741,7 @@ SessionDialog::redisplay_recent_sessions ()
 
 				child_row[recent_session_columns.visible_name] = *i2;
 				child_row[recent_session_columns.fullpath] = s;
-				child_row[recent_session_columns.tip] = Glib::Markup::escape_text (dirname).c_str();
+				child_row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
 				g_stat (s.c_str(), &gsb);
 				child_row[recent_session_columns.time_modified] = gsb.st_mtime;
 

@@ -3480,7 +3480,7 @@ The following file was deleted from %2,\n\
 releasing %3 %4bytes of disk space", "\
 The following %1 files were deleted from %2,\n\
 releasing %3 %4bytes of disk space", removed),
-					removed, Glib::Markup::escape_text (dead_directory).c_str(), space_adjusted, bprefix, PROGRAM_NAME));
+					removed, Gtkmm2ext::markup_escape_text (dead_directory), space_adjusted, bprefix, PROGRAM_NAME));
 	} else {
 		txt.set_markup (string_compose (P_("\
 The following file was not in use and \n\
@@ -3493,7 +3493,7 @@ have been moved to: %2\n\n\
 After a restart of %5\n\n\
 <span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n\n\
 will release an additional %3 %4bytes of disk space.\n", removed),
-					removed, Glib::Markup::escape_text (dead_directory).c_str(), space_adjusted, bprefix, PROGRAM_NAME));
+					removed, Gtkmm2ext::markup_escape_text (dead_directory), space_adjusted, bprefix, PROGRAM_NAME));
 	}
 
 	dhbox.pack_start (*dimage, true, false, 5);

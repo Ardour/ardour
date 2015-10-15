@@ -32,6 +32,7 @@
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/audioengine.h"
+#include "gtkmm2ext/utils.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"
 #include "port_matrix_component.h"
@@ -1041,7 +1042,7 @@ PortMatrix::update_tab_highlighting ()
 				label->set_text ((*j)->name);
 			} else if (c.length() && c[0] != '<' && has_connection) {
 				/* this label is not marked up with <b> but should be */
-				label->set_markup (string_compose ("<b>%1</b>", Glib::Markup::escape_text ((*j)->name).c_str()));
+				label->set_markup (string_compose ("<b>%1</b>", Gtkmm2ext::markup_escape_text ((*j)->name)));
 			}
 
 			++p;

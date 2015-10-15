@@ -1961,7 +1961,7 @@ RouteUI::open_remote_control_id_dialog ()
 		if (_route->is_master() || _route->is_monitor()) {
 			l->set_markup (string_compose (_("The remote control ID of %1 is: %2\n\n\n"
 							 "The remote control ID of %3 cannot be changed."),
-						       Glib::Markup::escape_text (_route->name()),
+						       Gtkmm2ext::markup_escape_text (_route->name()),
 						       _route->remote_control_id(),
 						       (_route->is_master() ? _("the master bus") : _("the monitor bus"))));
 		} else {
@@ -1972,7 +1972,7 @@ RouteUI::open_remote_control_id_dialog ()
 						       _route->remote_control_id(),
 						       "<span size=\"small\" style=\"italic\">",
 						       "</span>",
-						       Glib::Markup::escape_text (_route->name()),
+						       Gtkmm2ext::markup_escape_text (_route->name()),
 						       PROGRAM_NAME));
 		}
 		dialog.get_vbox()->pack_start (*l);

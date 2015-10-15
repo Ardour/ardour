@@ -25,6 +25,8 @@
 #include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"
 
+#include "gtkmm2ext/utils.h"
+
 #ifdef check
 #undef check
 #endif
@@ -223,7 +225,7 @@ void
 Splash::message (const string& msg)
 {
 	string str ("<b>");
-	str += Glib::Markup::escape_text (msg).c_str();
+	str += Gtkmm2ext::markup_escape_text (msg);
 	str += "</b>";
 
         show ();
