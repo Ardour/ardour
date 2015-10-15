@@ -106,6 +106,9 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	update_silence_rects ();
 	update_threshold_line ();
 
+	_progress_bar.set_text (_("Analyzing"));
+	apply_button->set_sensitive (false);
+
 	/* Create a thread which runs while the dialogue is open to compute the silence regions */
 	Completed.connect (_completed_connection, invalidator(*this), boost::bind (&StripSilenceDialog::update, this), gui_context ());
 	_thread_should_finish = false;
@@ -145,6 +148,8 @@ StripSilenceDialog::drop_rects ()
 	// called by parent when starting to progess (dialog::run returned),
 	// but before the dialog is destoyed.
 
+	_interthread_info.cancel = true;
+
 	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
 		v->view->drop_silent_frames ();
 	}
@@ -180,6 +185,8 @@ StripSilenceDialog::update ()
 {
 	update_threshold_line ();
 	update_silence_rects ();
+	_progress_bar.set_text ("");
+	apply_button->set_sensitive(true);
 }
 
 void
@@ -252,6 +259,9 @@ StripSilenceDialog::restart_thread ()
 		   */
 		return;
 	}
+
+	_progress_bar.set_text (_("Analyzing"));
+	apply_button->set_sensitive (false);
 
 	/* Cancel any current run */
 	_interthread_info.cancel = true;
