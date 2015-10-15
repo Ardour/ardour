@@ -2064,6 +2064,10 @@ Session::resort_routes ()
 		return;
 	}
 
+	if (_route_deletion_in_progress) {
+		return;
+	}
+
 	{
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> r = writer.get_copy ();
@@ -3363,9 +3367,8 @@ Session::add_internal_send (boost::shared_ptr<Route> dest, boost::shared_ptr<Pro
 void
 Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 {
-	PBD::Unwinder<bool> uw_flag (_route_deletion_in_progress, true);
-
 	{ // RCU Writer scope
+		PBD::Unwinder<bool> uw_flag (_route_deletion_in_progress, true);
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> rs = writer.get_copy ();
 
