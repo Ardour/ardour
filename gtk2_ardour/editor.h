@@ -1258,6 +1258,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void legatize_regions (const RegionSelection& rs, bool shrink_only);
 	void transform_region ();
 	void transform_regions (const RegionSelection& rs);
+	void transpose_region ();
+	void transpose_regions (const RegionSelection& rs);
 	void insert_patch_change (bool from_context);
 	void fork_region ();
 
@@ -2028,8 +2030,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	int time_stretch (RegionSelection&, float fraction);
 	int pitch_shift (RegionSelection&, float cents);
 	void pitch_shift_region ();
-
-	void transpose_region ();
 
 	/* editor-mixer strip */
 
