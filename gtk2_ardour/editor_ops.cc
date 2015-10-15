@@ -5341,14 +5341,14 @@ Editor::transform_regions (const RegionSelection& rs)
 		return;
 	}
 
-	TransformDialog* td = new TransformDialog();
+	TransformDialog td;
 
-	td->present();
-	const int r = td->run();
-	td->hide();
+	td.present();
+	const int r = td.run();
+	td.hide();
 
 	if (r == Gtk::RESPONSE_OK) {
-		Transform transform(td->get());
+		Transform transform(td.get());
 		apply_midi_note_edit_op(transform, rs);
 	}
 }
