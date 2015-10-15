@@ -287,6 +287,7 @@ public:
 	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
 
 	void insert_silence_at_start (TimeType);
+	void transpose (NoteDiffCommand *, const NotePtr, int);
 	void transpose (TimeType, TimeType, int);
 
 	std::set<WeakNotePtr>& active_notes() { return _active_notes; }

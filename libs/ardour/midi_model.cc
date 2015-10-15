@@ -1983,6 +1983,20 @@ MidiModel::insert_silence_at_start (TimeType t)
 	}
 }
 
+void
+MidiModel::transpose (NoteDiffCommand* c, const NotePtr note_ptr, int semitones)
+{
+	int new_note = note_ptr->note() + semitones;
+
+	if (new_note < 0) {
+		new_note = 0;
+	} else if (new_note > 127) {
+		new_note = 127;
+	}
+
+	c->change (note_ptr, NoteDiffCommand::NoteNumber, (uint8_t) new_note);
+}
+
 /** Transpose notes in a time range by a given number of semitones.  Notes
  *  will be clamped at 0 and 127 if the transposition would make them exceed
  *  that range.
@@ -2007,16 +2021,7 @@ MidiModel::transpose (TimeType from, TimeType to, int semitones)
 
 		} else if ((*i)->time() >= from) {
 
-			int new_note = (*i)->note() + semitones;
-
-			if (new_note < 0) {
-				new_note = 0;
-			} else if (new_note > 127) {
-				new_note = 127;
-			}
-
-			c->change (*i, NoteDiffCommand::NoteNumber, (uint8_t) new_note);
-
+			transpose (c, *i, semitones);
 		}
 	}
 
