@@ -1997,37 +1997,6 @@ MidiModel::transpose (NoteDiffCommand* c, const NotePtr note_ptr, int semitones)
 	c->change (note_ptr, NoteDiffCommand::NoteNumber, (uint8_t) new_note);
 }
 
-/** Transpose notes in a time range by a given number of semitones.  Notes
- *  will be clamped at 0 and 127 if the transposition would make them exceed
- *  that range.
- *
- *  @param from Start time.
- *  @param end End time.
- *  @param semitones Number of semitones to transpose by (+ve is higher, -ve is lower).
- */
-void
-MidiModel::transpose (TimeType from, TimeType to, int semitones)
-{
-	boost::shared_ptr<const MidiSource> s = midi_source ();
-
-	NoteDiffCommand* c = new_note_diff_command (_("transpose"));
-
-	for (Notes::iterator i = notes().begin(); i != notes().end(); ++i) {
-
-		if ((*i)->time() >= to) {
-
-			/* finished */
-			break;
-
-		} else if ((*i)->time() >= from) {
-
-			transpose (c, *i, semitones);
-		}
-	}
-
-	apply_command (s->session (), c);
-}
-
 void
 MidiModel::control_list_marked_dirty ()
 {
