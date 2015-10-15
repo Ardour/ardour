@@ -478,6 +478,7 @@ ARDOUR_UI::engine_stopped ()
 void
 ARDOUR_UI::engine_running ()
 {
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_running)
 	if (first_time_engine_run) {
 		post_engine();
 		first_time_engine_run = false;
@@ -492,6 +493,8 @@ ARDOUR_UI::engine_running ()
 	update_sample_rate (AudioEngine::instance()->sample_rate());
 	update_timecode_format ();
 	update_peak_thread_work ();
+	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, true);
+	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, false);
 }
 
 void
