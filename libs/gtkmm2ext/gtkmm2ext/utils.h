@@ -28,6 +28,7 @@
 #include <pangomm/fontdescription.h>
 
 #include <gtkmm/container.h>
+#include <gtkmm/filechooser.h>
 #include <gtkmm/treeview.h>
 #include <gdkmm/window.h> /* for WMDecoration */
 #include <gdkmm/pixbuf.h>
@@ -170,6 +171,8 @@ namespace Gtkmm2ext {
 	 * use a std::string
 	 */
 	LIBGTKMM2EXT_API std::string markup_escape_text (std::string const& s);
+
+	LIBGTKMM2EXT_API void add_volume_shortcuts (Gtk::FileChooser& c);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

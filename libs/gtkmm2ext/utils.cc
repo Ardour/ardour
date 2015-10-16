@@ -973,3 +973,31 @@ Gtkmm2ext::markup_escape_text (std::string const& s)
 {
 	return Glib::Markup::escape_text (s);
 }
+
+void
+Gtkmm2ext::add_volume_shortcuts (Gtk::FileChooser& c)
+{
+#ifdef __APPLE__
+	try {
+		/* This is a first order approach, listing all mounted volumes (incl network).
+		 * One could use `diskutil` or `mount` to query local disks only, or
+		 * something even fancier if deemed appropriate.
+		 */
+		Glib::Dir dir("/Volumes");
+		for (Glib::DirIterator di = dir.begin(); di != dir.end(); di++) {
+			string fullpath = Glib::build_filename ("/Volumes", *di);
+			if (!Glib::file_test (fullpath, Glib::FILE_TEST_IS_DIR)) continue;
+
+			try { /* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
+				c.add_shortcut_folder (fullpath);
+			}
+			catch (Glib::Error& e) {
+				std::cerr << "add_shortcut_folder() threw Glib::Error: " << e.what() << std::endl;
+			}
+		}
+	}
+	catch (Glib::FileError& e) {
+		std::cerr << "listing /Volumnes failed: " << e.what() << std::endl;
+	}
+#endif
+}
