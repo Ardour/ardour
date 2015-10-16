@@ -1700,11 +1700,9 @@ ARDOUR_UI::open_session ()
 		open_session_selector.set_current_folder(Config->get_default_session_parent_dir());
 	}
 
+	Gtkmm2ext::add_volume_shortcuts (open_session_selector);
 	try {
 		/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
-#ifdef GTKOSX
-		open_session_selector.add_shortcut_folder_uri("file:///Volumes");
-#endif
 		string default_session_folder = Config->get_default_session_parent_dir();
 		open_session_selector.add_shortcut_folder (default_session_folder);
 	}

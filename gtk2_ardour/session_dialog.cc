@@ -397,9 +397,7 @@ SessionDialog::setup_initial_choice_box ()
 	existing_session_chooser.add_filter (session_filter);
 	existing_session_chooser.set_filter (session_filter);
 
-#ifdef GTKOSX
-	existing_session_chooser.add_shortcut_folder ("/Volumes");
-#endif
+	Gtkmm2ext::add_volume_shortcuts (existing_session_chooser);
 
 	Label* browse_label = manage (new Label);
 	browse_label->set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Other Sessions")));
@@ -540,9 +538,7 @@ SessionDialog::setup_new_session_page ()
 	new_folder_chooser.show ();
 	new_folder_chooser.set_title (_("Select folder for session"));
 
-#ifdef __APPLE__
-	new_folder_chooser.add_shortcut_folder ("/Volumes");
-#endif
+	Gtkmm2ext::add_volume_shortcuts (new_folder_chooser);
 
 	vbox1->pack_start (*hbox2, false, false);
 
