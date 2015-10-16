@@ -89,4 +89,9 @@ private:
 	PBD::Signal0<void> Completed; ///< emitted when a silence detection has completed
 	PBD::ScopedConnection _completed_connection;
 	ARDOUR::InterThreadInfo _interthread_info;
+
+	sigc::connection progress_idle_connection;
+	bool idle_update_progress(); ///< GUI-thread progress updates of background silence computation
+	int analysis_progress_cur;
+	int analysis_progress_max;
 };

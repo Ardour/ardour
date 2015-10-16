@@ -46,6 +46,8 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	, _minimum_length (new AudioClock (X_("silence duration"), true, "", true, false, true, false))
 	, _fade_length (new AudioClock (X_("silence duration"), true, "", true, false, true, false))
 	, _destroying (false)
+	, analysis_progress_cur (0)
+	, analysis_progress_max (0)
 {
 	set_session (s);
 
@@ -107,7 +109,9 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	update_threshold_line ();
 
 	_progress_bar.set_text (_("Analyzing"));
+	update_progress_gui (0);
 	apply_button->set_sensitive (false);
+	progress_idle_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &StripSilenceDialog::idle_update_progress));
 
 	/* Create a thread which runs while the dialogue is open to compute the silence regions */
 	Completed.connect (_completed_connection, invalidator(*this), boost::bind (&StripSilenceDialog::update, this), gui_context ());
@@ -119,10 +123,11 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 StripSilenceDialog::~StripSilenceDialog ()
 {
 	_destroying = true;
+	progress_idle_connection.disconnect();
 
 	/* Terminate our thread */
-	_lock.lock ();
 	_interthread_info.cancel = true;
+	_lock.lock ();
 	_thread_should_finish = true;
 	_lock.unlock ();
 
@@ -131,6 +136,21 @@ StripSilenceDialog::~StripSilenceDialog ()
 
 	delete _minimum_length;
 	delete _fade_length;
+}
+
+bool
+StripSilenceDialog::idle_update_progress()
+{
+	if (analysis_progress_max > 0) {
+		// AudioRegion::find_silence() has
+		// itt.progress = (end - pos) / length
+		// not sure if that's intentional, but let's use (1. - val)
+		float rp = std::min(1.f, std::max (0.f, (1.f - _interthread_info.progress)));
+		float p = analysis_progress_cur / (float) analysis_progress_max
+		        + rp / (float) analysis_progress_max;
+		update_progress_gui (p);
+	}
+	return !_destroying;
 }
 
 void
@@ -149,6 +169,10 @@ StripSilenceDialog::drop_rects ()
 	// but before the dialog is destoyed.
 
 	_interthread_info.cancel = true;
+
+	/* Block until the thread is idle */
+	_lock.lock ();
+	_lock.unlock ();
 
 	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
 		v->view->drop_silent_frames ();
@@ -186,6 +210,7 @@ StripSilenceDialog::update ()
 	update_threshold_line ();
 	update_silence_rects ();
 	_progress_bar.set_text ("");
+	update_progress_gui (0);
 	apply_button->set_sensitive(true);
 }
 
@@ -218,6 +243,8 @@ StripSilenceDialog::detection_thread_work ()
 	_lock.lock ();
 
 	while (1) {
+		analysis_progress_cur = 0;
+		analysis_progress_max = views.size();
 		for (list<ViewInterval>::iterator i = views.begin(); i != views.end(); ++i) {
 			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i).view->region());
 
@@ -228,7 +255,12 @@ StripSilenceDialog::detection_thread_work ()
 			if (_interthread_info.cancel) {
 				break;
 			}
+			++analysis_progress_cur;
+			_interthread_info.progress = 1.0;
+			ARDOUR::GUIIdle ();
 		}
+
+		analysis_progress_max = 0;
 
 		if (!_interthread_info.cancel) {
 			Completed (); /* EMIT SIGNAL */
@@ -261,6 +293,7 @@ StripSilenceDialog::restart_thread ()
 	}
 
 	_progress_bar.set_text (_("Analyzing"));
+	update_progress_gui (0);
 	apply_button->set_sensitive (false);
 
 	/* Cancel any current run */
