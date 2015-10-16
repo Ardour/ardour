@@ -2609,10 +2609,6 @@ ARDOUR_UI::save_state_canfail (string name, bool switch_to_it)
 	if (_session) {
 		int ret;
 
-		if (name.length() == 0) {
-			name = _session->snap_name();
-		}
-
 		if ((ret = _session->save_state (name, false, switch_to_it)) != 0) {
 			return ret;
 		}
