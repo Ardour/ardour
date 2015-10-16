@@ -20,3 +20,4 @@ def build(bld):
     obj.target = 'gcc-glibmm-abi-check'
     obj.name = 'gcc-glibmm-abi-check'
     obj.lib = 'dl'
+    obj.install_path = None
