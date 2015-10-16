@@ -791,7 +791,14 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	SessionSaveUnderway (); /* EMIT SIGNAL */
 
+	bool mark_as_clean = true;
+
+	if (!snapshot_name.empty() && !switch_to_snapshot) {
+		mark_as_clean = false;
+	}
+
 	if (template_only) {
+		mark_as_clean = false;
 		tree.set_root (&get_template());
 	} else {
 		tree.set_root (&get_state());
@@ -802,6 +809,8 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	} else if (switch_to_snapshot) {
                 _current_snapshot_name = snapshot_name;
         }
+
+	assert (!snapshot_name.empty());
 
 	if (!pending) {
 
@@ -854,12 +863,14 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 		save_history (snapshot_name);
 
-		bool was_dirty = dirty();
+		if (mark_as_clean) {
+			bool was_dirty = dirty();
 
-		_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
+			_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-		if (was_dirty) {
-			DirtyChanged (); /* EMIT SIGNAL */
+			if (was_dirty) {
+				DirtyChanged (); /* EMIT SIGNAL */
+			}
 		}
 
 		StateSaved (snapshot_name); /* EMIT SIGNAL */
