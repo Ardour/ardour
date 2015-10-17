@@ -288,7 +288,7 @@ int main (int argc, char *argv[])
 	}
 
 #ifdef HAVE_FFTW35F
-	ftwf_make_planner_thread_safe ();
+	fftwf_make_planner_thread_safe ();
 #endif
 
 #ifdef ENABLE_NLS
