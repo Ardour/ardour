@@ -618,7 +618,7 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 bool
 Session::select_playhead_priority_target (framepos_t& jump_to)
 {
-	if (!config.get_auto_return()) {
+	if (config.get_external_sync() || !config.get_auto_return()) {
 		return false;
 	}
 
