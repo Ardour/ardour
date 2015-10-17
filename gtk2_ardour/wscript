@@ -486,7 +486,7 @@ def build(bld):
         obj.use += [ 'SUIL' ]
 
     if bld.is_defined('HAVE_FFTW35F'):
-        obj.linkflags = ' -lfftw3_threads'
+        obj.linkflags = ' -lfftw3f_threads'
 
     if bld.is_defined('NEED_INTL'):
         obj.linkflags = ' -lintl'
