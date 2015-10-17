@@ -25,6 +25,10 @@
 #include <sigc++/bind.h>
 #include <gtkmm/settings.h>
 
+#ifdef HAVE_FFTW35F
+#include <fftw3.h>
+#endif
+
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/textreceiver.h"
@@ -282,6 +286,10 @@ int main (int argc, char *argv[])
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
 	}
+
+#ifdef HAVE_FFTW35F
+	ftwf_make_planner_thread_safe ();
+#endif
 
 #ifdef ENABLE_NLS
 	gtk_set_locale ();

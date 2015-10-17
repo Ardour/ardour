@@ -291,6 +291,8 @@ def configure(conf):
 
     autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW3F',
                       mandatory=True)
+    autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW35F',
+                      atleast_version='3.3.5', mandatory=False)
     autowaf.check_pkg(conf, 'flac', uselib_store='FLAC',
                       atleast_version='1.2.1')
     autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD',
@@ -482,6 +484,9 @@ def build(bld):
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.use += [ 'SUIL' ]
+
+    if bld.is_defined('HAVE_FFTW35F'):
+        obj.linkflags = ' -lfftw3_threads'
 
     if bld.is_defined('NEED_INTL'):
         obj.linkflags = ' -lintl'
