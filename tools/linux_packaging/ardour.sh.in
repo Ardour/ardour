@@ -2,19 +2,18 @@
 
 # This is Linux-specific startup script for a bundled version of Ardour
 
-ARGS=""
+checkdebug(){
+    for arg in "$@"
+        do
+            case "$arg" in
+                --debug )
+                    DEBUG="T"
+            esac
+        done
+}
 
-while [ $# -gt 0 ] ; do
-	case $1 in
+checkdebug "$@"
 
-	--debug)
-		DEBUG="T";
-		shift ;;
-	*)
-		ARGS=$ARGS$1" ";
-		shift; ;;
-	esac
-done
 
 # LD_LIBRARY_PATH needs to be set here so that epa can swap between the original and the bundled version
 # (the original one will be stored in PREBUNDLE_ENV)
@@ -48,8 +47,5 @@ if [ "T" = "$DEBUG" ]; then
 	export ARDOUR_INSIDE_GDB=1
 	exec gdb $INSTALL_DIR/bin/%EXENAME%-%VER%
 else
-	exec $INSTALL_DIR/bin/%EXENAME%-%VER% $ARGS
+	exec $INSTALL_DIR/bin/%EXENAME%-%VER% "$@"
 fi
-
-
-
