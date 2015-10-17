@@ -1034,7 +1034,7 @@ Surface::update_view_mode_display ()
 	switch (_mcp.view_mode()) {
 	case MackieControlProtocol::Mixer:
 		show_two_char_display ("Mx");
-		id = Button::Track;
+		id = Button::View;
 		text = _("Mixer View");
 		break;
 	case MackieControlProtocol::AudioTracks:
@@ -1067,7 +1067,7 @@ Surface::update_view_mode_display ()
 	}
 
 	vector<int> view_mode_buttons;
-	view_mode_buttons.push_back (Button::Track);
+	view_mode_buttons.push_back (Button::View);
 	view_mode_buttons.push_back (Button::Busses);
 	view_mode_buttons.push_back (Button::Plugin);
 	view_mode_buttons.push_back (Button::AudioTracks);

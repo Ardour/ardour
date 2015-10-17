@@ -996,6 +996,7 @@ MackieControlProtocol::click_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::view_press (Mackie::Button&)
 {
+	set_view_mode (Mixer);
 	return none;
 }
 Mackie::LedState
