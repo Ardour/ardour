@@ -43,7 +43,6 @@ MidiPatchManager* MidiPatchManager::_manager = 0;
 
 MidiPatchManager::MidiPatchManager ()
 {
-	refresh ();
 }
 
 void
