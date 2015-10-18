@@ -31,6 +31,11 @@
 #include "public_editor.h"
 #include "i18n.h"
 
+#ifdef COREAUDIO105
+#define ArdourCloseComponent CloseComponent
+#else
+#define ArdourCloseComponent AudioComponentInstanceDispose
+#endif
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -261,7 +266,7 @@ AUPluginUI::~AUPluginUI ()
 #endif
 
 	if (editView) {
-		CloseComponent (editView);
+		ArdourCloseComponent (editView);
 	}
 
 	if (au_view) {
@@ -502,14 +507,14 @@ AUPluginUI::create_carbon_view ()
 
 	if ((err = CreateNewWindow(kUtilityWindowClass, attr, &r, &carbon_window)) != noErr) {
 		error << string_compose (_("AUPluginUI: cannot create carbon window (err: %1)"), err) << endmsg;
-	        CloseComponent (editView);
+	        ArdourCloseComponent (editView);
 		return -1;
 	}
 
 	if ((err = GetRootControl(carbon_window, &root_control)) != noErr) {
 		error << string_compose (_("AUPlugin: cannot get root control of carbon window (err: %1)"), err) << endmsg;
 		DisposeWindow (carbon_window);
-	        CloseComponent (editView);
+	        ArdourCloseComponent (editView);
 		return -1;
 	}
 
@@ -520,7 +525,7 @@ AUPluginUI::create_carbon_view ()
 	if ((err = AudioUnitCarbonViewCreate (editView, *au->get_au(), carbon_window, root_control, &location, &size, &viewPane)) != noErr) {
 		error << string_compose (_("AUPluginUI: cannot create carbon plugin view (err: %1)"), err) << endmsg;
 		DisposeWindow (carbon_window);
-	        CloseComponent (editView);
+	        ArdourCloseComponent (editView);
 		return -1;
 	}
 
