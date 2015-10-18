@@ -26,11 +26,10 @@ def options(opt):
 
 def configure(conf):
     autowaf.configure(conf)
-    if not conf.env['build_target'] in ['panther', 'tiger', 'leopard']:
-        if not (Options.options.ppc and conf.env['build_target'] == 'snowleopard'):
-            conf.env.append_value ('CFLAGS', '-DCOREAUDIO105')
-            conf.env.append_value ('CXXFLAGS', '-DCOREAUDIO105')
-            conf.define ('COREAUDIO105', 1)
+    if conf.env['build_target'] in ['panther', 'tiger', 'leopard'] or (Options.options.ppc and conf.env['build_target'] == 'snowleopard'):
+        conf.env.append_value ('CFLAGS', '-DCOREAUDIO105')
+        conf.env.append_value ('CXXFLAGS', '-DCOREAUDIO105')
+        conf.define ('COREAUDIO105', 1)
 
 def build(bld):
     obj                = bld(features = 'cxx cxxshlib')
