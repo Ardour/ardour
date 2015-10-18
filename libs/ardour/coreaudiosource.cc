@@ -25,8 +25,12 @@
 #include "ardour/coreaudiosource.h"
 #include "ardour/utils.h"
 
-#include <appleutility/CAAudioFile.h>
-#include <appleutility/CAStreamBasicDescription.h>
+#ifdef COREAUDIO105
+#include "CAAudioFile.h"
+#else
+#include "CAExtAudioFile.h"
+#endif
+#include "CAStreamBasicDescription.h"
 
 #include <glibmm/fileutils.h>
 
@@ -241,12 +245,15 @@ CoreAudioSource::update_header (framepos_t, struct tm&, time_t)
 int
 CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string&)
 {
+#ifdef COREAUDIO105
 	FSRef ref;
+#endif
 	ExtAudioFileRef af = 0;
 	UInt32 size;
 	CFStringRef name;
 	int ret = -1;
 
+#ifdef COREAUDIO105
 	if (FSPathMakeRef ((UInt8*)path.c_str(), &ref, 0) != noErr) {
 		goto out;
 	}
@@ -254,6 +261,15 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string&)
 	if (ExtAudioFileOpen(&ref, &af) != noErr) {
 		goto out;
 	}
+#else
+	CFURLRef url = CFURLCreateFromFileSystemRepresentation (kCFAllocatorDefault, (const UInt8*)path.c_str (), strlen (path.c_str ()), false);
+	OSStatus res = ExtAudioFileOpenURL(url, &af);
+	CFRelease (url);
+
+	if (res != noErr) {
+		goto out;
+	}
+#endif
 
 	AudioStreamBasicDescription absd;
 	memset(&absd, 0, sizeof(absd));
@@ -311,66 +327,66 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string&)
 	}
 
 	switch (absd.mFormatID) {
-	case kAudioFormatLinearPCM:
-		_info.format_name += "PCM";
-		break;
+		case kAudioFormatLinearPCM:
+			_info.format_name += "PCM";
+			break;
 
-	case kAudioFormatAC3:
-		_info.format_name += "AC3";
-		break;
+		case kAudioFormatAC3:
+			_info.format_name += "AC3";
+			break;
 
-	case kAudioFormat60958AC3:
-		_info.format_name += "60958 AC3";
-		break;
+		case kAudioFormat60958AC3:
+			_info.format_name += "60958 AC3";
+			break;
 
-	case kAudioFormatMPEGLayer1:
-		_info.format_name += "MPEG-1";
-		break;
+		case kAudioFormatMPEGLayer1:
+			_info.format_name += "MPEG-1";
+			break;
 
-	case kAudioFormatMPEGLayer2:
-		_info.format_name += "MPEG-2";
-		break;
+		case kAudioFormatMPEGLayer2:
+			_info.format_name += "MPEG-2";
+			break;
 
-	case kAudioFormatMPEGLayer3:
-		_info.format_name += "MPEG-3";
-		break;
+		case kAudioFormatMPEGLayer3:
+			_info.format_name += "MPEG-3";
+			break;
 
-	case kAudioFormatAppleIMA4:
-		_info.format_name += "IMA-4";
-		break;
+		case kAudioFormatAppleIMA4:
+			_info.format_name += "IMA-4";
+			break;
 
-	case kAudioFormatMPEG4AAC:
-		_info.format_name += "AAC";
-		break;
+		case kAudioFormatMPEG4AAC:
+			_info.format_name += "AAC";
+			break;
 
-	case kAudioFormatMPEG4CELP:
-		_info.format_name += "CELP";
-		break;
+		case kAudioFormatMPEG4CELP:
+			_info.format_name += "CELP";
+			break;
 
-	case kAudioFormatMPEG4HVXC:
-		_info.format_name += "HVXC";
-		break;
+		case kAudioFormatMPEG4HVXC:
+			_info.format_name += "HVXC";
+			break;
 
-	case kAudioFormatMPEG4TwinVQ:
-		_info.format_name += "TwinVQ";
-		break;
+		case kAudioFormatMPEG4TwinVQ:
+			_info.format_name += "TwinVQ";
+			break;
 
-	/* these really shouldn't show up, but we should do something
-	   somewhere else to make sure that doesn't happen. until
-	   that is guaranteed, print something anyway.
-	*/
+			/* these really shouldn't show up, but we should do something
+			   somewhere else to make sure that doesn't happen. until
+			   that is guaranteed, print something anyway.
+			   */
 
-	case kAudioFormatTimeCode:
-		_info.format_name += "timecode";
-		break;
+		case kAudioFormatTimeCode:
+			_info.format_name += "timecode";
+			break;
 
-	case kAudioFormatMIDIStream:
-		_info.format_name += "MIDI";
-		break;
+		case kAudioFormatMIDIStream:
+			_info.format_name += "MIDI";
+			break;
 
-	case kAudioFormatParameterValueStream:
-		_info.format_name += "parameter values";
-		break;
+		case kAudioFormatParameterValueStream:
+			_info.format_name += "parameter values";
+			break;
 	}
 
 	// XXX it would be nice to find a way to get this information if it exists
@@ -378,7 +394,7 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string&)
 	_info.timecode = 0;
 	ret = 0;
 
-  out:
+out:
 	ExtAudioFileDispose (af);
 	return ret;
 

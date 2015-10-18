@@ -20,7 +20,11 @@
 #ifndef __coreaudio_source_h__
 #define __coreaudio_source_h__
 
-#include <appleutility/CAAudioFile.h>
+#ifdef COREAUDIO105
+#include "CAAudioFile.h"
+#else
+#include "CAExtAudioFile.h"
+#endif
 #include "ardour/audiofilesource.h"
 #include <string>
 
@@ -55,7 +59,11 @@ class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
 	framecnt_t write_unlocked (Sample *, framecnt_t) { return 0; }
 
   private:
+#ifdef COREAUDIO105
 	mutable CAAudioFile af;
+#else
+	mutable CAExtAudioFile af;
+#endif
 	uint16_t n_channels;
 
 	void init_cafile ();

@@ -50,8 +50,8 @@
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
 
-#include "appleutility/CAAudioUnit.h"
-#include "appleutility/CAAUParameter.h"
+#include "CAAudioUnit.h"
+#include "CAAUParameter.h"
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h>
@@ -59,6 +59,16 @@
 #include <AudioToolbox/AudioUnitUtilities.h>
 #ifdef WITH_CARBON
 #include <Carbon/Carbon.h>
+#endif
+
+#ifdef COREAUDIO105
+#define ArdourComponent Component
+#define ArdourDescription ComponentDescription
+#define ArdourFindNext FindNextComponent
+#else
+#define ArdourComponent AudioComponent
+#define ArdourDescription AudioComponentDescription
+#define ArdourFindNext AudioComponentFindNext
 #endif
 
 #include "i18n.h"
@@ -339,8 +349,8 @@ get_preset_name_in_plist (CFPropertyListRef plist)
 //--------------------------------------------------------------------------
 // general implementation for ComponentDescriptionsMatch() and ComponentDescriptionsMatch_Loosely()
 // if inIgnoreType is true, then the type code is ignored in the ComponentDescriptions
-Boolean ComponentDescriptionsMatch_General(const ComponentDescription * inComponentDescription1, const ComponentDescription * inComponentDescription2, Boolean inIgnoreType);
-Boolean ComponentDescriptionsMatch_General(const ComponentDescription * inComponentDescription1, const ComponentDescription * inComponentDescription2, Boolean inIgnoreType)
+Boolean ComponentDescriptionsMatch_General(const ArdourDescription * inComponentDescription1, const ArdourDescription * inComponentDescription2, Boolean inIgnoreType);
+Boolean ComponentDescriptionsMatch_General(const ArdourDescription * inComponentDescription1, const ArdourDescription * inComponentDescription2, Boolean inIgnoreType)
 {
 	if ( (inComponentDescription1 == NULL) || (inComponentDescription2 == NULL) )
 		return FALSE;
@@ -362,17 +372,21 @@ Boolean ComponentDescriptionsMatch_General(const ComponentDescription * inCompon
 //--------------------------------------------------------------------------
 // general implementation for ComponentAndDescriptionMatch() and ComponentAndDescriptionMatch_Loosely()
 // if inIgnoreType is true, then the type code is ignored in the ComponentDescriptions
-Boolean ComponentAndDescriptionMatch_General(Component inComponent, const ComponentDescription * inComponentDescription, Boolean inIgnoreType);
-Boolean ComponentAndDescriptionMatch_General(Component inComponent, const ComponentDescription * inComponentDescription, Boolean inIgnoreType)
+Boolean ComponentAndDescriptionMatch_General(ArdourComponent inComponent, const ArdourDescription * inComponentDescription, Boolean inIgnoreType);
+Boolean ComponentAndDescriptionMatch_General(ArdourComponent inComponent, const ArdourDescription * inComponentDescription, Boolean inIgnoreType)
 {
 	OSErr status;
-	ComponentDescription desc;
+	ArdourDescription desc;
 
 	if ( (inComponent == NULL) || (inComponentDescription == NULL) )
 		return FALSE;
 
 	// get the ComponentDescription of the input Component
+#ifdef COREAUDIO105
 	status = GetComponentInfo(inComponent, &desc, NULL, NULL, NULL);
+#else
+	status = AudioComponentGetDescription (inComponent, &desc);
+#endif
 	if (status != noErr)
 		return FALSE;
 
@@ -384,28 +398,28 @@ Boolean ComponentAndDescriptionMatch_General(Component inComponent, const Compon
 // determine if 2 ComponentDescriptions are basically equal
 // (by that, I mean that the important identifying values are compared,
 // but not the ComponentDescription flags)
-Boolean ComponentDescriptionsMatch(const ComponentDescription * inComponentDescription1, const ComponentDescription * inComponentDescription2)
+Boolean ComponentDescriptionsMatch(const ArdourDescription * inComponentDescription1, const ArdourDescription * inComponentDescription2)
 {
 	return ComponentDescriptionsMatch_General(inComponentDescription1, inComponentDescription2, FALSE);
 }
 
 //--------------------------------------------------------------------------
 // determine if 2 ComponentDescriptions have matching sub-type and manufacturer codes
-Boolean ComponentDescriptionsMatch_Loose(const ComponentDescription * inComponentDescription1, const ComponentDescription * inComponentDescription2)
+Boolean ComponentDescriptionsMatch_Loose(const ArdourDescription * inComponentDescription1, const ArdourDescription * inComponentDescription2)
 {
 	return ComponentDescriptionsMatch_General(inComponentDescription1, inComponentDescription2, TRUE);
 }
 
 //--------------------------------------------------------------------------
 // determine if a ComponentDescription basically matches that of a particular Component
-Boolean ComponentAndDescriptionMatch(Component inComponent, const ComponentDescription * inComponentDescription)
+Boolean ComponentAndDescriptionMatch(ArdourComponent inComponent, const ArdourDescription * inComponentDescription)
 {
 	return ComponentAndDescriptionMatch_General(inComponent, inComponentDescription, FALSE);
 }
 
 //--------------------------------------------------------------------------
 // determine if a ComponentDescription matches only the sub-type and manufacturer codes of a particular Component
-Boolean ComponentAndDescriptionMatch_Loosely(Component inComponent, const ComponentDescription * inComponentDescription)
+Boolean ComponentAndDescriptionMatch_Loosely(ArdourComponent inComponent, const ArdourDescription * inComponentDescription)
 {
 	return ComponentAndDescriptionMatch_General(inComponent, inComponentDescription, TRUE);
 }
@@ -533,7 +547,11 @@ AUPlugin::init ()
 	output_channels = -1;
 	{
 		CAComponentDescription temp;
+#ifdef COREAUDIO105
 		GetComponentInfo (comp.get()->Comp(), &temp, NULL, NULL, NULL);
+#else
+		AudioComponentGetDescription (comp.get()->Comp(), &temp);
+#endif
 		CFStringRef compTypeString = UTCreateStringForOSType(temp.componentType);
 		CFStringRef compSubTypeString = UTCreateStringForOSType(temp.componentSubType);
 		CFStringRef compManufacturerString = UTCreateStringForOSType(temp.componentManufacturer);
@@ -842,7 +860,7 @@ AUPlugin::maybe_fix_broken_au_id (const std::string& id)
 
 	return s.str();
 
-  err:
+err:
 	return string();
 }
 
@@ -1421,7 +1439,7 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 	/* not much to do with audio - the data is already in the buffers given to us in connect_and_run() */
 
 	// DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: render callback, frames %2 bufs %3\n",
-        // name(), inNumberFrames, ioData->mNumberBuffers));
+	// name(), inNumberFrames, ioData->mNumberBuffers));
 
 	if (input_maxbuf == 0) {
 		error << _("AUPlugin: render callback called illegally!") << endmsg;
@@ -1434,9 +1452,9 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 		ioData->mBuffers[i].mDataByteSize = sizeof (Sample) * inNumberFrames;
 
 		/* we don't use the channel mapping because audiounits are
-		   never replicated. one plugin instance uses all channels/buffers
-		   passed to PluginInsert::connect_and_run()
-		*/
+		 * never replicated. one plugin instance uses all channels/buffers
+		 * passed to PluginInsert::connect_and_run()
+		 */
 
 		ioData->mBuffers[i].mData = input_buffers->get_audio (i).data (cb_offset + input_offset);
 	}
@@ -1461,12 +1479,12 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 	}
 
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 in %2 out %3 MIDI %4 bufs %5 (available %6)\n",
-							name(), input_channels, output_channels, _has_midi_input,
-							bufs.count(), bufs.available()));
+				name(), input_channels, output_channels, _has_midi_input,
+				bufs.count(), bufs.available()));
 
 	/* the apparent number of buffers matches our input configuration, but we know that the bufferset
 	   has the capacity to handle our outputs.
-	*/
+	   */
 
 	assert (bufs.available() >= ChanCount (DataType::AUDIO, output_channels));
 
@@ -1481,12 +1499,12 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		buffers->mBuffers[i].mNumberChannels = 1;
 		buffers->mBuffers[i].mDataByteSize = nframes * sizeof (Sample);
 		/* setting this to 0 indicates to the AU that it can provide buffers here
-		   if necessary. if it can process in-place, it will use the buffers provided
-		   as input by ::render_callback() above.
-
-                   a non-null values tells the plugin to render into the buffer pointed
-                   at by the value.
-		*/
+		 * if necessary. if it can process in-place, it will use the buffers provided
+		 * as input by ::render_callback() above.
+		 *
+		 * a non-null values tells the plugin to render into the buffer pointed
+		 * at by the value.
+		 */
 		buffers->mBuffers[i].mData = 0;
 	}
 
@@ -1515,13 +1533,13 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 	}
 
 	/* does this really mean anything ?
-	 */
+	*/
 
 	ts.mSampleTime = frames_processed;
 	ts.mFlags = kAudioTimeStampSampleTimeValid;
 
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 render flags=%2 time=%3 nframes=%4 buffers=%5\n",
-                                                        name(), flags, frames_processed, nframes, buffers->mNumberBuffers));
+				name(), flags, frames_processed, nframes, buffers->mNumberBuffers));
 
 	if ((err = unit->Render (&flags, &ts, 0, nframes, buffers)) == noErr) {
 
@@ -1529,7 +1547,7 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		frames_processed += nframes;
 
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 rendered %2 buffers of %3\n",
-								name(), buffers->mNumberBuffers, output_channels));
+					name(), buffers->mNumberBuffers, output_channels));
 
 		int32_t limit = min ((int32_t) buffers->mNumberBuffers, output_channels);
 		int32_t i;
@@ -1538,14 +1556,14 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 			Sample* expected_buffer_address= bufs.get_audio (i).data (offset);
 			if (expected_buffer_address != buffers->mBuffers[i].mData) {
 				/* plugin provided its own buffer for output so copy it back to where we want it
-				 */
+				*/
 				memcpy (expected_buffer_address, buffers->mBuffers[i].mData, nframes * sizeof (Sample));
 			}
 		}
 
 		/* now silence any buffers that were passed in but the that the plugin
-		   did not fill/touch/use.
-		*/
+		 * did not fill/touch/use.
+		 */
 
 		for (;i < output_channels; ++i) {
 			memset (bufs.get_audio (i).data (offset), 0, nframes * sizeof (Sample));
@@ -2048,10 +2066,10 @@ GetDictionarySInt32Value(CFDictionaryRef inAUStateDictionary, CFStringRef inDict
 }
 
 static OSStatus
-GetAUComponentDescriptionFromStateData(CFPropertyListRef inAUStateData, ComponentDescription * outComponentDescription)
+GetAUComponentDescriptionFromStateData(CFPropertyListRef inAUStateData, ArdourDescription * outComponentDescription)
 {
 	CFDictionaryRef auStateDictionary;
-	ComponentDescription tempDesc = {0,0,0,0,0};
+	ArdourDescription tempDesc = {0,0,0,0,0};
 	SInt32 versionValue;
 	Boolean gotValue;
 
@@ -2128,12 +2146,12 @@ static bool au_preset_filter (const string& str, void* arg)
 	return ret;
 }
 
-bool
-check_and_get_preset_name (Component component, const string& pathstr, string& preset_name)
+static bool
+check_and_get_preset_name (ArdourComponent component, const string& pathstr, string& preset_name)
 {
 	OSStatus status;
 	CFPropertyListRef plist;
-	ComponentDescription presetDesc;
+	ArdourDescription presetDesc;
 	bool ret = false;
 
 	plist = load_property_list (pathstr);
@@ -2174,6 +2192,73 @@ check_and_get_preset_name (Component component, const string& pathstr, string& p
 	CFRelease (plist);
 
 	return true;
+}
+
+
+static void
+#ifdef COREAUDIO105
+get_names (CAComponentDescription& comp_desc, std::string& name, std::string& maker)
+#else
+get_names (ArdourComponent& comp, std::string& name, std::string& maker)
+#endif
+{
+	CFStringRef itemName = NULL;
+	// Marc Poirier-style item name
+#ifdef COREAUDIO105
+	CAComponent auComponent (comp_desc);
+	if (auComponent.IsValid()) {
+		CAComponentDescription dummydesc;
+		Handle nameHandle = NewHandle(sizeof(void*));
+		if (nameHandle != NULL) {
+			OSErr err = GetComponentInfo(auComponent.Comp(), &dummydesc, nameHandle, NULL, NULL);
+			if (err == noErr) {
+				ConstStr255Param nameString = (ConstStr255Param) (*nameHandle);
+				if (nameString != NULL) {
+					itemName = CFStringCreateWithPascalString(kCFAllocatorDefault, nameString, CFStringGetSystemEncoding());
+				}
+			}
+			DisposeHandle(nameHandle);
+		}
+	}
+#else
+	assert (comp);
+	AudioComponentCopyName (comp, &itemName);
+#endif
+
+	// if Marc-style fails, do the original way
+	if (itemName == NULL) {
+#ifndef COREAUDIO105
+		CAComponentDescription comp_desc;
+		AudioComponentGetDescription (comp, &comp_desc);
+#endif
+		CFStringRef compTypeString = UTCreateStringForOSType(comp_desc.componentType);
+		CFStringRef compSubTypeString = UTCreateStringForOSType(comp_desc.componentSubType);
+		CFStringRef compManufacturerString = UTCreateStringForOSType(comp_desc.componentManufacturer);
+
+		itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
+				compTypeString, compManufacturerString, compSubTypeString);
+
+		if (compTypeString != NULL)
+			CFRelease(compTypeString);
+		if (compSubTypeString != NULL)
+			CFRelease(compSubTypeString);
+		if (compManufacturerString != NULL)
+			CFRelease(compManufacturerString);
+	}
+
+	string str = CFStringRefToStdString(itemName);
+	string::size_type colon = str.find (':');
+
+	if (colon) {
+		name = str.substr (colon+1);
+		maker = str.substr (0, colon);
+		strip_whitespace_edges (maker);
+		strip_whitespace_edges (name);
+	} else {
+		name = str;
+		maker = "unknown";
+		strip_whitespace_edges (name);
+	}
 }
 
 std::string
@@ -2441,14 +2526,18 @@ AUPluginInfo::au_crashlog (std::string msg)
 void
 AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescription& desc)
 {
-	Component comp = 0;
+	ArdourComponent comp = 0;
 	au_crashlog(string_compose("Start AU discovery for Type: %1", (int)desc.componentType));
 
-	comp = FindNextComponent (NULL, &desc);
+	comp = ArdourFindNext (NULL, &desc);
 
 	while (comp != NULL) {
 		CAComponentDescription temp;
+#ifdef COREAUDIO105
 		GetComponentInfo (comp, &temp, NULL, NULL, NULL);
+#else
+		AudioComponentGetDescription (comp, &temp);
+#endif
 		CFStringRef itemName = NULL;
 
 		{
@@ -2469,7 +2558,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 		if (is_blacklisted(CFStringRefToStdString(itemName))) {
 			info << string_compose (_("Skipped blacklisted AU plugin %1 "), CFStringRefToStdString(itemName)) << endmsg;
-			comp = FindNextComponent (comp, &desc);
+			comp = ArdourFindNext (comp, &desc);
 			continue;
 		}
 
@@ -2489,7 +2578,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		case kAudioUnitType_Panner:
 		case kAudioUnitType_OfflineEffect:
 		case kAudioUnitType_FormatConverter:
-			comp = FindNextComponent (comp, &desc);
+			comp = ArdourFindNext (comp, &desc);
 			continue;
 
 		case kAudioUnitType_Output:
@@ -2516,7 +2605,11 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		}
 
 		au_blacklist(CFStringRefToStdString(itemName));
-		AUPluginInfo::get_names (temp, info->name, info->creator);
+#ifdef COREAUDIO105
+		get_names (temp, info->name, info->creator);
+#else
+		get_names (comp, info->name, info->creator);
+#endif
 		ARDOUR::PluginScanMessage(_("AU"), info->name, false);
 		au_crashlog(string_compose("Plugin: %1", info->name));
 
@@ -2528,7 +2621,12 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 		CAComponent cacomp (*info->descriptor);
 
-		if (cacomp.GetResourceVersion (info->version) != noErr) {
+#ifdef COREAUDIO105
+		if (cacomp.GetResourceVersion (info->version) != noErr)
+#else
+		if (cacomp.GetVersion (info->version) != noErr)
+#endif
+		{
 			info->version = 0;
 		}
 
@@ -2575,7 +2673,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 		au_unblacklist(CFStringRefToStdString(itemName));
 		au_crashlog("Success.");
-		comp = FindNextComponent (comp, &desc);
+		comp = ArdourFindNext (comp, &desc);
 		if (itemName != NULL) CFRelease(itemName); itemName = NULL;
 	}
 	au_crashlog(string_compose("End AU discovery for Type: %1", (int)desc.componentType));
@@ -2810,59 +2908,6 @@ AUPluginInfo::load_cached_info ()
 	return 0;
 }
 
-void
-AUPluginInfo::get_names (CAComponentDescription& comp_desc, std::string& name, std::string& maker)
-{
-	CFStringRef itemName = NULL;
-
-	// Marc Poirier-style item name
-	CAComponent auComponent (comp_desc);
-	if (auComponent.IsValid()) {
-		CAComponentDescription dummydesc;
-		Handle nameHandle = NewHandle(sizeof(void*));
-		if (nameHandle != NULL) {
-			OSErr err = GetComponentInfo(auComponent.Comp(), &dummydesc, nameHandle, NULL, NULL);
-			if (err == noErr) {
-				ConstStr255Param nameString = (ConstStr255Param) (*nameHandle);
-				if (nameString != NULL) {
-					itemName = CFStringCreateWithPascalString(kCFAllocatorDefault, nameString, CFStringGetSystemEncoding());
-				}
-			}
-			DisposeHandle(nameHandle);
-		}
-	}
-
-	// if Marc-style fails, do the original way
-	if (itemName == NULL) {
-		CFStringRef compTypeString = UTCreateStringForOSType(comp_desc.componentType);
-		CFStringRef compSubTypeString = UTCreateStringForOSType(comp_desc.componentSubType);
-		CFStringRef compManufacturerString = UTCreateStringForOSType(comp_desc.componentManufacturer);
-
-		itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
-			compTypeString, compManufacturerString, compSubTypeString);
-
-		if (compTypeString != NULL)
-			CFRelease(compTypeString);
-		if (compSubTypeString != NULL)
-			CFRelease(compSubTypeString);
-		if (compManufacturerString != NULL)
-			CFRelease(compManufacturerString);
-	}
-
-	string str = CFStringRefToStdString(itemName);
-	string::size_type colon = str.find (':');
-
-	if (colon) {
-		name = str.substr (colon+1);
-		maker = str.substr (0, colon);
-		strip_whitespace_edges (maker);
-		strip_whitespace_edges (name);
-	} else {
-		name = str;
-		maker = "unknown";
-		strip_whitespace_edges (name);
-	}
-}
 
 std::string
 AUPluginInfo::stringify_descriptor (const CAComponentDescription& desc)
