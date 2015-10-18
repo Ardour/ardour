@@ -1241,6 +1241,7 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("quantize-region")->set_sensitive (false);
 		_region_actions->get_action("legatize-region")->set_sensitive (false);
 		_region_actions->get_action("remove-overlap")->set_sensitive (false);
+		_region_actions->get_action("transform-region")->set_sensitive (false);
 		_region_actions->get_action("fork-region")->set_sensitive (false);
 		_region_actions->get_action("insert-patch-change-context")->set_sensitive (false);
 		_region_actions->get_action("insert-patch-change")->set_sensitive (false);

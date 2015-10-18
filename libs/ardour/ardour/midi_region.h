@@ -101,7 +101,6 @@ class LIBARDOUR_API MidiRegion : public Region
 	boost::shared_ptr<const MidiModel> model() const;
 
 	void fix_negative_start ();
-	void transpose (int);
 
   protected:
 

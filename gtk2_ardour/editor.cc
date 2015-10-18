@@ -5959,6 +5959,8 @@ Editor::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
 	                         sigc::mem_fun(mrv, &MidiRegionView::delete_selection)));
 	items.push_back(MenuElem(_("Edit..."),
 	                         sigc::bind(sigc::mem_fun(*this, &Editor::edit_notes), &mrv)));
+	items.push_back(MenuElem(_("Transpose..."),
+	                         sigc::bind(sigc::mem_fun(*this, &Editor::transpose_regions), rs)));
 	items.push_back(MenuElem(_("Legatize"),
 	                         sigc::bind(sigc::mem_fun(*this, &Editor::legatize_regions), rs, false)));
 	items.push_back(MenuElem(_("Quantize..."),
