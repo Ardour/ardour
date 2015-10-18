@@ -2537,7 +2537,7 @@ Editor::get_preroll ()
 void
 Editor::maybe_locate_with_edit_preroll ( framepos_t location )
 {
-	if ( _session->transport_rolling() || !UIConfiguration::instance().get_follow_edits() || _ignore_follow_edits )
+	if ( _session->transport_rolling() || !UIConfiguration::instance().get_follow_edits() || _ignore_follow_edits || _session->config.get_external_sync() )
 		return;
 
 	location -= get_preroll();
@@ -6097,7 +6097,7 @@ Editor::set_playhead_cursor ()
 		}
 	}
 
-	if (UIConfiguration::instance().get_follow_edits()) {
+	if (UIConfiguration::instance().get_follow_edits() && !_session->config.get_external_sync()) {
 		cancel_time_selection();
 	}
 }

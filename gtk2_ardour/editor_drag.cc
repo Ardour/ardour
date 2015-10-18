@@ -4954,7 +4954,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (s) {
 			if (s->get_play_range() && s->transport_rolling()) {
 				s->request_play_range (&_editor->selection->time, true);
-			} else {
+			} else if (!s->config.get_external_sync()) {
 				if (UIConfiguration::instance().get_follow_edits() && !s->transport_rolling()) {
 					if (_operation == SelectionEndTrim)
 						_editor->maybe_locate_with_edit_preroll( _editor->get_selection().time.end_frame());

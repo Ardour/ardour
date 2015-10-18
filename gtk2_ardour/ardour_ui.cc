@@ -2108,7 +2108,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 	if (affect_transport) {
 		if (rolling) {
 			_session->request_stop (with_abort, true);
-		} else {
+		} else if (!_session->config.get_external_sync()) {
 			if (UIConfiguration::instance().get_follow_edits() && ( editor->get_selection().time.front().start == _session->transport_frame() ) ) {  //if playhead is exactly at the start of a range, we can assume it was placed there by follow_edits
 				_session->request_play_range (&editor->get_selection().time, true);
 				_session->set_requested_return_frame( editor->get_selection().time.front().start );  //force an auto-return here
@@ -2286,7 +2286,7 @@ ARDOUR_UI::map_transport_state ()
 			auto_loop_button.set_active (false);
 		}
 
-		if (UIConfiguration::instance().get_follow_edits()) {
+		if (UIConfiguration::instance().get_follow_edits() && !_session->config.get_external_sync()) {
 			/* light up both roll and play-selection if they are joined */
 			roll_button.set_active (true);
 			play_selection_button.set_active (true);
