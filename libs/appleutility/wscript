@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
+from waflib import Options
 import os
 
 libappleutility_sources = [
@@ -7,7 +8,6 @@ libappleutility_sources = [
         'AUParamInfo.cpp',
         'CAAudioChannelLayout.cpp',
         'CAAudioChannelLayoutObject.cpp',
-        'CAAudioFile.cpp',
         'CAAudioUnit.cpp',
         'CAAUParameter.cpp',
         'CABufferList.cpp',
@@ -26,15 +26,29 @@ def options(opt):
 
 def configure(conf):
     autowaf.configure(conf)
+    if not conf.env['build_target'] in ['panther', 'tiger', 'leopard']:
+        if not (Options.options.ppc and conf.env['build_target'] == 'snowleopard'):
+            conf.env.append_value ('CFLAGS', '-DCOREAUDIO105')
+            conf.env.append_value ('CXXFLAGS', '-DCOREAUDIO105')
+            conf.define ('COREAUDIO105', 1)
 
 def build(bld):
     obj                = bld(features = 'cxx cxxshlib')
     obj.uselib         = 'AUDIOUNITS OSX'
-    obj.source         = libappleutility_sources
+    obj.source         = '';
+    if bld.is_defined('COREAUDIO105'):
+        obj.export_includes = ['CoreAudio105']
+        obj.source += ' CoreAudio105/CAAudioFile.cpp';
+        for src in libappleutility_sources:
+            obj.source += ' CoreAudio105/' + src;
+    else:
+        obj.export_includes = ['CoreAudio/PublicUtility']
+        for src in libappleutility_sources:
+            obj.source += ' CoreAudio/PublicUtility/' + src;
+
     # apple did not write this library with full symbol export control
     # so we need to override any visibility default.
     autowaf.ensure_visible_symbols (obj, True)
-    obj.export_includes = ['.']
     obj.includes       = ['.']
     obj.name           = 'libappleutility'
     obj.target         = 'appleutility'
