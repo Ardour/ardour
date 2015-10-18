@@ -75,7 +75,6 @@ public:
 
 	void zero ();
 
-	void flip_mode_changed (bool notify=false);
 	void potmode_changed (bool notify=false);
 
 	void lock_controls ();
@@ -154,6 +153,8 @@ private:
 	void show_route_name ();
 
 	void reset_saved_values ();
+
+	bool is_midi_track() const;
 
 	typedef std::map<Evoral::Parameter,Control*> ControlParameterMap;
 	ControlParameterMap control_by_parameter;

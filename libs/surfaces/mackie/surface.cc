@@ -1009,7 +1009,7 @@ void
 Surface::update_flip_mode_display ()
 {
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->flip_mode_changed (true);
+		(*s)->potmode_changed (true);
 	}
 }
 

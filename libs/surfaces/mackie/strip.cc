@@ -43,6 +43,7 @@
 #include "ardour/session.h"
 #include "ardour/send.h"
 #include "ardour/track.h"
+#include "ardour/midi_track.h"
 #include "ardour/user_bundle.h"
 
 #include "mackie_control_protocol.h"
@@ -205,7 +206,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	_route->mute_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_mute_changed, this), ui_context());
 
-	if (_route->trim()) {
+	if (_route->trim() && !is_midi_track()) {
 		_route->trim_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_trim_changed, this, false), ui_context());
 	}
 
@@ -257,7 +258,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 		}
 	}
 
-	if (_route->trim()) {
+	if (_route->trim() && !is_midi_track()) {
 		possible_pot_parameters.push_back (TrimAutomation);
 	}
 }
@@ -363,7 +364,7 @@ Strip::notify_trim_changed (bool force_update)
 {
 	if (_route) {
 
-		if (!_route->trim()) {
+		if (!_route->trim() || is_midi_track()) {
 			_surface->write (_vpot->zero());
 			return;
 		}
@@ -755,6 +756,10 @@ void
 Strip::handle_fader (Fader& fader, float position)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader to %1\n", position));
+	boost::shared_ptr<AutomationControl> ac = fader.control();
+	if (!ac) {
+		return;
+	}
 
 	fader.set_value (position);
 
@@ -779,6 +784,9 @@ Strip::handle_pot (Pot& pot, float delta)
 	*/
 
 	boost::shared_ptr<AutomationControl> ac = pot.control();
+	if (!ac) {
+		return;
+	}
 	double p = pot.get_value ();
 	p += delta;
 	p = max (ac->lower(), p);
@@ -874,7 +882,7 @@ Strip::update_automation ()
 			notify_panner_width_changed (false);
 		}
 	}
-	if (_route->trim()) {
+	if (_route->trim() && !is_midi_track()) {
 		ARDOUR::AutoState trim_state = _route->trim_control()->automation_state();
 		if (trim_state == Touch || trim_state == Play) {
 			notify_trim_changed (false);
@@ -1010,14 +1018,6 @@ Strip::potmode_changed (bool notify)
 		return;
 	}
 
-	if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-		/* do not change vpot mode while in flipped mode */
-		DEBUG_TRACE (DEBUG::MackieControl, "not stepping pot mode - in flip mode\n");
-		_surface->write (display (1, "Flip"));
-		block_vpot_mode_display_for (1000);
-		return;
-	}
-
 	// WIP
 	int pm = _surface->mcp().pot_mode();
 	switch (pm) {
@@ -1035,31 +1035,6 @@ Strip::potmode_changed (bool notify)
 		// set to current send
 		break;
 	}
-
-	if (notify) {
-		notify_all ();
-	}
-}
-
-void
-Strip::flip_mode_changed (bool notify)
-{
-	if (!_route) {
-		return;
-	}
-
-	reset_saved_values ();
-
-	boost::shared_ptr<AutomationControl> fader_controllable = _fader->control ();
-	boost::shared_ptr<AutomationControl> vpot_controllable = _vpot->control ();
-
-	_fader->set_control (vpot_controllable);
-	_vpot->set_control (fader_controllable);
-
-	control_by_parameter[fader_controllable->parameter()] = _vpot;
-	control_by_parameter[vpot_controllable->parameter()] = _fader;
-
-	_surface->write (display (1, vpot_mode_string ()));
 
 	if (notify) {
 		notify_all ();
@@ -1159,58 +1134,54 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 	case PanAzimuthAutomation:
 		_pan_mode = PanAzimuthAutomation;
 		pannable = _route->pannable ();
-		if (pannable) {
-			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-				/* gain to vpot, pan azi to fader */
-				_vpot->set_control (_route->gain_control());
-				control_by_parameter[GainAutomation] = _vpot;
-				if (pannable) {
-					_fader->set_control (pannable->pan_azimuth_control);
-					control_by_parameter[PanAzimuthAutomation] = _fader;
-				} else {
-					_fader->set_control (boost::shared_ptr<AutomationControl>());
-					control_by_parameter[PanAzimuthAutomation] = 0;
-				}
+		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
+			/* gain to vpot, pan azi to fader */
+			_vpot->set_control (_route->gain_control());
+			control_by_parameter[GainAutomation] = _vpot;
+			if (pannable) {
+				_fader->set_control (pannable->pan_azimuth_control);
+				control_by_parameter[PanAzimuthAutomation] = _fader;
 			} else {
-				/* gain to fader, pan azi to vpot */
-				_fader->set_control (_route->gain_control());
-				control_by_parameter[GainAutomation] = _fader;
-				if (pannable) {
-					_vpot->set_control (pannable->pan_azimuth_control);
-					control_by_parameter[PanAzimuthAutomation] = _vpot;
-				} else {
-					_vpot->set_control (boost::shared_ptr<AutomationControl>());
-					control_by_parameter[PanAzimuthAutomation] = 0;
-				}
+				_fader->set_control (boost::shared_ptr<AutomationControl>());
+				control_by_parameter[PanAzimuthAutomation] = 0;
+			}
+		} else {
+			/* gain to fader, pan azi to vpot */
+			_fader->set_control (_route->gain_control());
+			control_by_parameter[GainAutomation] = _fader;
+			if (pannable) {
+				_vpot->set_control (pannable->pan_azimuth_control);
+				control_by_parameter[PanAzimuthAutomation] = _vpot;
+			} else {
+				_vpot->set_control (boost::shared_ptr<AutomationControl>());
+				control_by_parameter[PanAzimuthAutomation] = 0;
 			}
 		}
 		break;
 	case PanWidthAutomation:
 		_pan_mode = PanWidthAutomation;
 		pannable = _route->pannable ();
-		if (pannable) {
-			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-				/* gain to vpot, pan width to fader */
-				_vpot->set_control (_route->gain_control());
-				control_by_parameter[GainAutomation] = _vpot;
-				if (pannable) {
-					_fader->set_control (pannable->pan_width_control);
-					control_by_parameter[PanWidthAutomation] = _fader;
-				} else {
-					_fader->set_control (boost::shared_ptr<AutomationControl>());
-					control_by_parameter[PanWidthAutomation] = 0;
-				}
+		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
+			/* gain to vpot, pan width to fader */
+			_vpot->set_control (_route->gain_control());
+			control_by_parameter[GainAutomation] = _vpot;
+			if (pannable) {
+				_fader->set_control (pannable->pan_width_control);
+				control_by_parameter[PanWidthAutomation] = _fader;
 			} else {
-				/* gain to fader, pan width to vpot */
-				_fader->set_control (_route->gain_control());
-				control_by_parameter[GainAutomation] = _fader;
-				if (pannable) {
-					_vpot->set_control (pannable->pan_width_control);
-					control_by_parameter[PanWidthAutomation] = _vpot;
-				} else {
-					_vpot->set_control (boost::shared_ptr<AutomationControl>());
-					control_by_parameter[PanWidthAutomation] = 0;
-				}
+				_fader->set_control (boost::shared_ptr<AutomationControl>());
+				control_by_parameter[PanWidthAutomation] = 0;
+			}
+		} else {
+			/* gain to fader, pan width to vpot */
+			_fader->set_control (_route->gain_control());
+			control_by_parameter[GainAutomation] = _fader;
+			if (pannable) {
+				_vpot->set_control (pannable->pan_width_control);
+				control_by_parameter[PanWidthAutomation] = _vpot;
+			} else {
+				_vpot->set_control (boost::shared_ptr<AutomationControl>());
+				control_by_parameter[PanWidthAutomation] = 0;
 			}
 		}
 		break;
@@ -1221,23 +1192,28 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 	case PanLFEAutomation:
 		break;
 	case TrimAutomation:
-		if (_route->trim()) {
-			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-				/* gain to vpot, trim to fader */
-				_vpot->set_control (_route->gain_control());
-				control_by_parameter[GainAutomation] = _vpot;
+		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
+			/* gain to vpot, trim to fader */
+			_vpot->set_control (_route->gain_control());
+			control_by_parameter[GainAutomation] = _vpot;
+			if (_route->trim() && !is_midi_track()) {
 				_fader->set_control (_route->trim_control());
 				control_by_parameter[TrimAutomation] = _fader;
 			} else {
-				/* gain to fader, trim to vpot */
-				_fader->set_control (_route->gain_control());
-				control_by_parameter[GainAutomation] = _fader;
-				_vpot->set_control (_route->trim_control());
-				control_by_parameter[TrimAutomation] = _vpot;
+				_fader->set_control (boost::shared_ptr<AutomationControl>());
+				control_by_parameter[TrimAutomation] = 0;
 			}
 		} else {
-			_vpot->set_control (boost::shared_ptr<AutomationControl>());
-			control_by_parameter[TrimAutomation] = 0;
+			/* gain to fader, trim to vpot */
+			_fader->set_control (_route->gain_control());
+			control_by_parameter[GainAutomation] = _fader;
+			if (_route->trim() && !is_midi_track()) {
+				_vpot->set_control (_route->trim_control());
+				control_by_parameter[TrimAutomation] = _vpot;
+			} else {
+				_vpot->set_control (boost::shared_ptr<AutomationControl>());
+				control_by_parameter[TrimAutomation] = 0;
+			}
 		}
 		break;
 	default:
@@ -1247,6 +1223,12 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 	}
 
 	_surface->write (display (1, vpot_mode_string()));
+}
+
+bool
+Strip::is_midi_track () const
+{
+	return boost::dynamic_pointer_cast<MidiTrack>(_route) != 0;
 }
 
 void
