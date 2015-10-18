@@ -480,7 +480,7 @@ def build(bld):
     obj.use += 'libptformat'
 
     if bld.env['build_target'] == 'mingw':
-        obj.linkflags += ['-mwindows']
+        obj.linkflags += ' -mwindows'
 
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
