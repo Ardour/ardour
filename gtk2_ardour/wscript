@@ -459,6 +459,7 @@ def build(bld):
         'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
         ]
     obj.install_path = bld.env['DLLDIR']
+    obj.linkflags    = ''
     obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL'
     obj.uselib       += ' GTKMM CANVAS FFTW3F'
     obj.uselib       += ' AUDIOUNITS OSX GTKOSX LO '
@@ -479,17 +480,17 @@ def build(bld):
     obj.use += 'libptformat'
 
     if bld.env['build_target'] == 'mingw':
-        obj.linkflags = ['-mwindows']
+        obj.linkflags += ['-mwindows']
 
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.use += [ 'SUIL' ]
 
     if bld.is_defined('HAVE_FFTW35F') and bld.env['build_target'] != 'mingw':
-        obj.linkflags = ' -lfftw3f_threads'
+        obj.linkflags += ' -lfftw3f_threads'
 
     if bld.is_defined('NEED_INTL'):
-        obj.linkflags = ' -lintl'
+        obj.linkflags += ' -lintl'
 
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj.source += [ 'windows_vst_plugin_ui.cc' ]
