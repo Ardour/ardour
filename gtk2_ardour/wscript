@@ -485,7 +485,7 @@ def build(bld):
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.use += [ 'SUIL' ]
 
-    if bld.is_defined('HAVE_FFTW35F'):
+    if bld.is_defined('HAVE_FFTW35F') and bld.env['build_target'] != 'mingw':
         obj.linkflags = ' -lfftw3f_threads'
 
     if bld.is_defined('NEED_INTL'):
