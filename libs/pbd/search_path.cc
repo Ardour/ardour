@@ -163,6 +163,17 @@ Searchpath::add_subdirectory_to_paths (const string& subdir)
 	return *this;
 }
 
+bool
+Searchpath::contains (const string& path) const
+{
+	std::vector<std::string>::const_iterator i = find(begin(), end(), path);
+
+	if (i == end()) {
+		return false;
+	}
+	return true;
+}
+
 /* This is not part of the Searchpath object, but is closely related to the
  * whole idea, and we put it here for convenience.
  */
