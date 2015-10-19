@@ -50,7 +50,6 @@ MidiPatchManager::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 	refresh ();
-	add_session_patches ();
 }
 
 bool
