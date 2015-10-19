@@ -134,6 +134,10 @@ public:
 	 */
 	LIBPBD_TEMPLATE_MEMBER_API void remove_directories (const std::vector<std::string>& paths);
 
+	/**
+	 * @return true if Searchpath already contains path
+	 */
+	LIBPBD_TEMPLATE_MEMBER_API bool contains (const std::string& path) const;
 };
 
 LIBPBD_API void export_search_path (const std::string& base_dir, const char* varname, const char* dir);
