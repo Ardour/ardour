@@ -53,6 +53,48 @@ MidiPatchManager::set_session (Session* s)
 	add_session_patches ();
 }
 
+bool
+MidiPatchManager::add_midi_name_document (const std::string& file_path)
+{
+	boost::shared_ptr<MIDINameDocument> document;
+	try {
+		document = boost::shared_ptr<MIDINameDocument>(new MIDINameDocument(file_path));
+	}
+	catch (...) {
+		error << "Error parsing MIDI patch file " << file_path << endmsg;
+		return false;
+	}
+	for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
+	         document->master_device_names_by_model().begin();
+	     device != document->master_device_names_by_model().end();
+	     ++device) {
+		if (_documents.find(device->first) != _documents.end()) {
+			warning << string_compose(_("Duplicate MIDI device `%1' in `%2' ignored"),
+			                          device->first,
+			                          file_path) << endmsg;
+			continue;
+		}
+
+		_documents[device->first] = document;
+		_master_devices_by_model[device->first] = device->second;
+
+		_all_models.insert(device->first);
+		const std::string& manufacturer = device->second->manufacturer();
+		if (_devices_by_manufacturer.find(manufacturer) ==
+		    _devices_by_manufacturer.end()) {
+			MIDINameDocument::MasterDeviceNamesList empty;
+			_devices_by_manufacturer.insert(std::make_pair(manufacturer, empty));
+		}
+		_devices_by_manufacturer[manufacturer].insert(
+		    std::make_pair(device->first, device->second));
+
+		// TODO: handle this gracefully.
+		assert(_documents.count(device->first) == 1);
+		assert(_master_devices_by_model.count(device->first) == 1);
+	}
+	return true;
+}
+
 void
 MidiPatchManager::add_session_patches ()
 {
@@ -75,29 +117,7 @@ MidiPatchManager::add_session_patches ()
 	info << "Loading " << result.size() << " MIDI patches from " << path_to_patches << endmsg;
 
 	for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
-		boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(*i));
-		for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
-					document->master_device_names_by_model().begin();
-				device != document->master_device_names_by_model().end();
-				++device) {
-			//cerr << "got model " << device->first << endl;
-			// have access to the documents by model name
-			_documents[device->first] = document;
-			// build a list of all master devices from all documents
-			_master_devices_by_model[device->first] = device->second;
-			_all_models.insert(device->first);
-			const std::string& manufacturer = device->second->manufacturer();
-			if (_devices_by_manufacturer.find(manufacturer) == _devices_by_manufacturer.end()) {
-				MIDINameDocument::MasterDeviceNamesList empty;
-				_devices_by_manufacturer.insert(std::make_pair(manufacturer, empty));
-			}
-			_devices_by_manufacturer[manufacturer].insert(std::make_pair(device->first, device->second));
-
-			// make sure there are no double model names
-			// TODO: handle this gracefully.
-			assert(_documents.count(device->first) == 1);
-			assert(_master_devices_by_model.count(device->first) == 1);
-		}
+		add_midi_name_document(*i);
 	}
 }
 
@@ -117,35 +137,7 @@ MidiPatchManager::refresh()
 	info << "Loading " << result.size() << " MIDI patches from " << search_path.to_string() << endmsg;
 
 	for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
-		boost::shared_ptr<MIDINameDocument> document;
-		try {
-			document = boost::shared_ptr<MIDINameDocument>(new MIDINameDocument(*i));
-		} catch (...) {
-			error << "Error parsing MIDI patch file " << *i << endmsg;
-			continue;
-		}
-		for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
-			     document->master_device_names_by_model().begin();
-		     device != document->master_device_names_by_model().end();
-		     ++device) {
-			if (_documents.find(device->first) != _documents.end()) {
-				warning << string_compose(_("Duplicate MIDI device `%1' in `%2' ignored"),
-				                          device->first, *i)
-				        << endmsg;
-				continue;
-			}
-
-			_documents[device->first]               = document;
-			_master_devices_by_model[device->first] = device->second;
-
-			_all_models.insert(device->first);
-			const std::string& manufacturer = device->second->manufacturer();
-			if (_devices_by_manufacturer.find(manufacturer) == _devices_by_manufacturer.end()) {
-				MIDINameDocument::MasterDeviceNamesList empty;
-				_devices_by_manufacturer.insert(std::make_pair(manufacturer, empty));
-			}
-			_devices_by_manufacturer[manufacturer].insert(std::make_pair(device->first, device->second));
-		}
+		add_midi_name_document (*i);
 	}
 
 	if (_session) {
