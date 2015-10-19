@@ -105,8 +105,6 @@ class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 
 	bool has_editor() const { return false; }
 
-	int require_output_streams (uint32_t);
-
 	/* LADSPA extras */
 
 	LADSPA_Properties           properties() const                { return _descriptor->Properties; }
