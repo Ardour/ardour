@@ -47,8 +47,6 @@ MidiPatchManager::MidiPatchManager ()
 void
 MidiPatchManager::add_search_path (const Searchpath& search_path)
 {
-	bool do_refresh = false;
-
 	for (Searchpath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
 
 		if (_search_path.contains(*i)) {
@@ -64,32 +62,52 @@ MidiPatchManager::add_search_path (const Searchpath& search_path)
 			continue;
 		}
 
-		_search_path.add_directory (*i);
-		do_refresh = true;
-	}
+		add_midnam_files_from_directory (*i);
 
-	if (do_refresh) {
-		refresh();
+		_search_path.add_directory (*i);
+	}
+}
+
+void
+MidiPatchManager::add_midnam_files_from_directory(const std::string& directory_path)
+{
+	vector<std::string> result;
+	find_files_matching_pattern (result, directory_path, "*.midnam");
+
+	info << "Loading " << result.size() << " MIDI patches from " << directory_path
+	     << endmsg;
+
+	for (vector<std::string>::const_iterator i = result.begin(); i != result.end(); ++i) {
+		add_midi_name_document (*i);
 	}
 }
 
 void
 MidiPatchManager::remove_search_path (const Searchpath& search_path)
 {
-	bool do_refresh = false;
-
 	for (Searchpath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
 
 		if (!_search_path.contains(*i)) {
 			continue;
 		}
 
-		_search_path.remove_directory (*i);
-		do_refresh = true;
-	}
+		remove_midnam_files_from_directory(*i);
 
-	if (do_refresh) {
-		refresh();
+		_search_path.remove_directory (*i);
+	}
+}
+
+void
+MidiPatchManager::remove_midnam_files_from_directory(const std::string& directory_path)
+{
+	vector<std::string> result;
+	find_files_matching_pattern (result, directory_path, "*.midnam");
+
+	info << "Unloading " << result.size() << " MIDI patches from "
+	     << directory_path << endmsg;
+
+	for (vector<std::string>::const_iterator i = result.begin(); i != result.end(); ++i) {
+		remove_midi_name_document (*i);
 	}
 }
 
@@ -135,22 +153,34 @@ MidiPatchManager::add_midi_name_document (const std::string& file_path)
 	return true;
 }
 
-void
-MidiPatchManager::refresh()
+bool
+MidiPatchManager::remove_midi_name_document (const std::string& file_path)
 {
-	_documents.clear();
-	_master_devices_by_model.clear();
-	_all_models.clear();
-	_devices_by_manufacturer.clear();
+	bool removed = false;
+	for (MidiNameDocuments::iterator i = _documents.begin(); i != _documents.end();) {
+		if (i->second->file_path() == file_path) {
 
-	vector<std::string> result;
+			boost::shared_ptr<MIDINameDocument> document = i->second;
 
-	find_files_matching_pattern (result, _search_path, "*.midnam");
+			_documents.erase(i++);
 
-	info << "Loading " << result.size() << " MIDI patches from "
-	     << _search_path.to_string() << endmsg;
+			for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
+			         document->master_device_names_by_model().begin();
+			     device != document->master_device_names_by_model().end();
+			     ++device) {
 
-	for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
-		add_midi_name_document (*i);
+				_master_devices_by_model.erase(device->first);
+
+				_all_models.erase(device->first);
+
+				const std::string& manufacturer = device->second->manufacturer();
+
+				_devices_by_manufacturer[manufacturer].erase(device->first);
+			}
+			removed = true;
+		} else {
+			++i;
+		}
 	}
+	return removed;
 }
