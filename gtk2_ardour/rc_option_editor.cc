@@ -652,7 +652,7 @@ public:
 		set_popdown_strings (_snap_modifier_combo, dumb);
 		_snap_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_modifier_chosen));
 #ifdef GTKOSX
-		Glib::ustring mod_str = string compose (_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
+		Glib::ustring mod_str = string_compose (_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
 #else
 		Glib::ustring mod_str = Keyboard::secondary_modifier_name();
 #endif
