@@ -142,6 +142,8 @@ private:
 	void refresh();
 	void add_session_patches();
 
+	bool add_midi_name_document(const std::string& file_path);
+
 	MidiNameDocuments                       _documents;
 	MIDINameDocument::MasterDeviceNamesList _master_devices_by_model;
 	DeviceNamesByMaker                      _devices_by_manufacturer;
