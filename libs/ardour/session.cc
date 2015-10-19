@@ -74,6 +74,7 @@
 #include "ardour/graph.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/scene_changer.h"
+#include "ardour/midi_patch_manager.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
 #include "ardour/operations.h"
@@ -554,6 +555,8 @@ Session::destroy ()
 	*/
 
 	ControlProtocolManager::instance().drop_protocols ();
+
+	MIDI::Name::MidiPatchManager::instance().remove_search_path(session_directory().midi_patch_path());
 
 	_engine.remove_session ();
 
