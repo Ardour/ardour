@@ -46,6 +46,7 @@
 #include "ardour/debug.h"
 #include "ardour/location.h"
 #include "ardour/meter.h"
+#include "ardour/midi_track.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/route.h"
@@ -282,12 +283,18 @@ MackieControlProtocol::get_sorted_routes()
 
 		switch (_view_mode) {
 		case Mixer:
+			sorted.push_back (*it);
+			remote_ids.insert (route->remote_control_id());
 			break;
 		case AudioTracks:
 			break;
 		case Busses:
 			break;
 		case MidiTracks:
+			if (is_midi_track(*it)) {
+				sorted.push_back (*it);
+				remote_ids.insert (route->remote_control_id());
+			}
 			break;
 		case Plugins:
 			break;
@@ -295,8 +302,6 @@ MackieControlProtocol::get_sorted_routes()
 			break;
 		}
 
-		sorted.push_back (*it);
-		remote_ids.insert (route->remote_control_id());
 	}
 
 	sort (sorted.begin(), sorted.end(), RouteByRemoteId());
@@ -1986,4 +1991,10 @@ MackieControlProtocol::connection_handler (boost::weak_ptr<ARDOUR::Port> wp1, st
 			break;
 		}
 	}
+}
+
+bool
+MackieControlProtocol::is_midi_track (boost::shared_ptr<Route> r) const
+{
+	return boost::dynamic_pointer_cast<MidiTrack>(r) != 0;
 }

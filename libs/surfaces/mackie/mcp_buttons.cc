@@ -858,6 +858,7 @@ Mackie::LedState
 MackieControlProtocol::miditracks_release (Mackie::Button&)
 {
 	set_view_mode (MidiTracks);
+	refresh_current_bank();
 	return none;
 }
 Mackie::LedState
@@ -879,6 +880,7 @@ Mackie::LedState
 MackieControlProtocol::audiotracks_release (Mackie::Button&)
 {
 	set_view_mode (AudioTracks);
+	refresh_current_bank();
 	return none;
 }
 Mackie::LedState
@@ -900,6 +902,7 @@ Mackie::LedState
 MackieControlProtocol::aux_release (Mackie::Button&)
 {
 	set_view_mode (Auxes);
+	refresh_current_bank();
 	return none;
 }
 Mackie::LedState
@@ -911,6 +914,7 @@ Mackie::LedState
 MackieControlProtocol::busses_release (Mackie::Button&)
 {
 	set_view_mode (Busses);
+	refresh_current_bank();
 	return none;
 }
 Mackie::LedState
@@ -997,6 +1001,7 @@ Mackie::LedState
 MackieControlProtocol::view_press (Mackie::Button&)
 {
 	set_view_mode (Mixer);
+	refresh_current_bank();
 	return none;
 }
 Mackie::LedState

@@ -60,7 +60,7 @@ public:
 	void set_route (boost::shared_ptr<ARDOUR::Route>, bool with_messages = true);
 
 	// call all signal handlers manually
-	void notify_all();
+	void notify_all ();
 
 	void handle_button (Button&, ButtonState bs);
 	void handle_fader (Fader&, float position);
@@ -154,7 +154,7 @@ private:
 
 	void reset_saved_values ();
 
-	bool is_midi_track() const;
+	bool is_midi_track () const;
 
 	typedef std::map<Evoral::Parameter,Control*> ControlParameterMap;
 	ControlParameterMap control_by_parameter;

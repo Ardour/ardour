@@ -146,6 +146,8 @@ class MackieControlProtocol
 	bool zoom_mode () const { return modifier_state() & MODIFIER_ZOOM; }
 	bool     metering_active () const { return _metering_active; }
 
+	bool is_midi_track (boost::shared_ptr<ARDOUR::Route>) const;
+
 	void set_view_mode (ViewMode);
 	void set_flip_mode (FlipMode);
 	void set_pot_mode (PotMode);
