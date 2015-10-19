@@ -74,8 +74,9 @@ MidiPatchManager::add_midnam_files_from_directory(const std::string& directory_p
 	vector<std::string> result;
 	find_files_matching_pattern (result, directory_path, "*.midnam");
 
-	info << "Loading " << result.size() << " MIDI patches from " << directory_path
-	     << endmsg;
+	info << string_compose(_("Loading %1 MIDI patches from %2"),
+	                       result.size(),
+	                       directory_path) << endmsg;
 
 	for (vector<std::string>::const_iterator i = result.begin(); i != result.end(); ++i) {
 		add_midi_name_document (*i);
@@ -103,8 +104,9 @@ MidiPatchManager::remove_midnam_files_from_directory(const std::string& director
 	vector<std::string> result;
 	find_files_matching_pattern (result, directory_path, "*.midnam");
 
-	info << "Unloading " << result.size() << " MIDI patches from "
-	     << directory_path << endmsg;
+	info << string_compose(_("Unloading %1 MIDI patches from %2"),
+	                       result.size(),
+	                       directory_path) << endmsg;
 
 	for (vector<std::string>::const_iterator i = result.begin(); i != result.end(); ++i) {
 		remove_midi_name_document (*i);
@@ -119,7 +121,8 @@ MidiPatchManager::add_midi_name_document (const std::string& file_path)
 		document = boost::shared_ptr<MIDINameDocument>(new MIDINameDocument(file_path));
 	}
 	catch (...) {
-		error << "Error parsing MIDI patch file " << file_path << endmsg;
+		error << string_compose(_("Error parsing MIDI patch file %1"), file_path)
+		      << endmsg;
 		return false;
 	}
 	for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
@@ -161,6 +164,8 @@ MidiPatchManager::remove_midi_name_document (const std::string& file_path)
 		if (i->second->file_path() == file_path) {
 
 			boost::shared_ptr<MIDINameDocument> document = i->second;
+
+			info << string_compose(_("Removing MIDI patch file %1"), file_path) << endmsg;
 
 			_documents.erase(i++);
 
