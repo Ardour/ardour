@@ -114,12 +114,26 @@ public:
 	 */
 	LIBPBD_TEMPLATE_MEMBER_API Searchpath& add_subdirectory_to_paths (const std::string& subdir);
 
-protected:
-
+	/**
+	 * Add directory_path to this Searchpath.
+	 */
 	LIBPBD_TEMPLATE_MEMBER_API void add_directory (const std::string& directory_path);
+
+	/**
+	 * Add directories in paths to this Searchpath.
+	 */
 	LIBPBD_TEMPLATE_MEMBER_API void add_directories (const std::vector<std::string>& paths);
+
+	/**
+	 * Remove directory_path from this Searchpath.
+	 */
 	LIBPBD_TEMPLATE_MEMBER_API void remove_directory (const std::string& directory_path);
+
+	/**
+	 * Remove all the directories in paths from this Searchpath.
+	 */
 	LIBPBD_TEMPLATE_MEMBER_API void remove_directories (const std::vector<std::string>& paths);
+
 };
 
 LIBPBD_API void export_search_path (const std::string& base_dir, const char* varname, const char* dir);
