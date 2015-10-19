@@ -25,8 +25,6 @@
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
 
-#include "ardour/session.h"
-#include "ardour/session_directory.h"
 #include "ardour/midi_patch_manager.h"
 
 #include "ardour/search_paths.h"
@@ -43,13 +41,56 @@ MidiPatchManager* MidiPatchManager::_manager = 0;
 
 MidiPatchManager::MidiPatchManager ()
 {
+	add_search_path(midi_patch_search_path ());
 }
 
 void
-MidiPatchManager::set_session (Session* s)
+MidiPatchManager::add_search_path (const Searchpath& search_path)
 {
-	SessionHandlePtr::set_session (s);
-	refresh ();
+	bool do_refresh = false;
+
+	for (Searchpath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
+
+		if (_search_path.contains(*i)) {
+			// already processed files from this path
+			continue;
+		}
+
+		if (!Glib::file_test (*i, Glib::FILE_TEST_EXISTS)) {
+			continue;
+		}
+
+		if (!Glib::file_test (*i, Glib::FILE_TEST_IS_DIR)) {
+			continue;
+		}
+
+		_search_path.add_directory (*i);
+		do_refresh = true;
+	}
+
+	if (do_refresh) {
+		refresh();
+	}
+}
+
+void
+MidiPatchManager::remove_search_path (const Searchpath& search_path)
+{
+	bool do_refresh = false;
+
+	for (Searchpath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
+
+		if (!_search_path.contains(*i)) {
+			continue;
+		}
+
+		_search_path.remove_directory (*i);
+		do_refresh = true;
+	}
+
+	if (do_refresh) {
+		refresh();
+	}
 }
 
 bool
@@ -95,32 +136,6 @@ MidiPatchManager::add_midi_name_document (const std::string& file_path)
 }
 
 void
-MidiPatchManager::add_session_patches ()
-{
-	if (!_session) {
-		return;
-	}
-
-	std::string path_to_patches = _session->session_directory().midi_patch_path();
-
-	if (!Glib::file_test (path_to_patches, Glib::FILE_TEST_EXISTS)) {
-		return;
-	}
-
-	assert (Glib::file_test (path_to_patches, Glib::FILE_TEST_IS_DIR));
-
-	vector<std::string> result;
-
-	find_files_matching_pattern (result, path_to_patches, "*.midnam");
-
-	info << "Loading " << result.size() << " MIDI patches from " << path_to_patches << endmsg;
-
-	for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
-		add_midi_name_document(*i);
-	}
-}
-
-void
 MidiPatchManager::refresh()
 {
 	_documents.clear();
@@ -128,28 +143,14 @@ MidiPatchManager::refresh()
 	_all_models.clear();
 	_devices_by_manufacturer.clear();
 
-	Searchpath search_path = midi_patch_search_path ();
 	vector<std::string> result;
 
-	find_files_matching_pattern (result, search_path, "*.midnam");
+	find_files_matching_pattern (result, _search_path, "*.midnam");
 
-	info << "Loading " << result.size() << " MIDI patches from " << search_path.to_string() << endmsg;
+	info << "Loading " << result.size() << " MIDI patches from "
+	     << _search_path.to_string() << endmsg;
 
 	for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
 		add_midi_name_document (*i);
 	}
-
-	if (_session) {
-		add_session_patches ();
-	}
-}
-
-void
-MidiPatchManager::session_going_away ()
-{
-	SessionHandlePtr::session_going_away ();
-	_documents.clear();
-	_master_devices_by_model.clear();
-	_all_models.clear();
-	_devices_by_manufacturer.clear();
 }
