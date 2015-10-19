@@ -139,9 +139,11 @@ public:
 	const DeviceNamesByMaker& devices_by_manufacturer() const { return _devices_by_manufacturer; }
 
 private:
-	void refresh();
-
 	bool add_midi_name_document(const std::string& file_path);
+	bool remove_midi_name_document(const std::string& file_path);
+
+	void add_midnam_files_from_directory(const std::string& directory_path);
+	void remove_midnam_files_from_directory(const std::string& directory_path);
 
 private:
 	PBD::Searchpath                         _search_path;
