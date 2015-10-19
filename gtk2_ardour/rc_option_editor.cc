@@ -333,13 +333,13 @@ static const struct {
 	{ "Command", GDK_MOD2_MASK },
 	{ "Control", GDK_CONTROL_MASK },
 	{ "Option", GDK_MOD1_MASK },
-	{ "Command-Shift", GDK_META_MASK|GDK_SHIFT_MASK },
-	{ "Command-Option", GDK_MOD1_MASK|GDK_META_MASK },
-	{ "Command-Option-Control", GDK_MOD1_MASK|GDK_META_MASK|GDK_CONTROL_MASK },
+	{ "Command-Shift", GDK_MOD2_MASK|GDK_SHIFT_MASK },
+	{ "Command-Option", GDK_MOD2_MASK|GDK_MOD1_MASK },
+	{ "Command-Option-Control", GDK_MOD2_MASK|GDK_MOD1_MASK|GDK_CONTROL_MASK },
 	{ "Option-Control", GDK_MOD1_MASK|GDK_CONTROL_MASK },
 	{ "Option-Shift", GDK_MOD1_MASK|GDK_SHIFT_MASK },
 	{ "Control-Shift", GDK_CONTROL_MASK|GDK_SHIFT_MASK },
-	{ "Shift-Command-Option", GDK_MOD5_MASK|GDK_SHIFT_MASK|GDK_META_MASK },
+	{ "Shift-Command-Option", GDK_MOD5_MASK|GDK_SHIFT_MASK|GDK_MOD2_MASK },
 
 #else
 	{ "Key|Shift", GDK_SHIFT_MASK },
