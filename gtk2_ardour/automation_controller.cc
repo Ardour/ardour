@@ -207,8 +207,8 @@ AutomationController::toggled ()
 			}
 			_controllable->list ()->set_in_write_pass (true, false, where);
 		}
-
-		_controllable->set_double (!but->get_active (), where, to_list);
+		/* set to opposite value.*/
+		_controllable->set_double (but->get_active () ? 0.0 : 1.0, where, to_list);
 
 		const bool active = _controllable->get_double (to_list, where) >= 0.5;
 		if (active && !but->get_active ()) {
