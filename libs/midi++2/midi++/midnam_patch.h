@@ -465,8 +465,10 @@ public:
 	typedef std::map<std::string, boost::shared_ptr<MasterDeviceNames> > MasterDeviceNamesList;
 
 	MIDINameDocument() {}
-	MIDINameDocument(const std::string& filename);
+	MIDINameDocument(const std::string& file_path);
 	virtual ~MIDINameDocument() {};
+
+	const std::string& file_path () const { return _file_path; }
 
 	const std::string& author() const { return _author; }
 	void set_author(const std::string& author) { _author = author; }
@@ -481,6 +483,7 @@ public:
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
+	const std::string             _file_path;
 	std::string                   _author;
 	MasterDeviceNamesList         _master_device_names_list;
 	MasterDeviceNames::Models     _all_models;
