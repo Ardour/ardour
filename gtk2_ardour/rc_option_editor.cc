@@ -330,7 +330,7 @@ static const struct {
 	   Option/Alt = Mod1
 	*/
 	{ "Key|Shift", GDK_SHIFT_MASK },
-	{ "Command", GDK_META_MASK },
+	{ "Command", GDK_MOD2_MASK },
 	{ "Control", GDK_CONTROL_MASK },
 	{ "Option", GDK_MOD1_MASK },
 	{ "Command-Shift", GDK_META_MASK|GDK_SHIFT_MASK },
