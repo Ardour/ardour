@@ -40,6 +40,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/convert.h"
 
+#include "ardour/audio_track.h"
 #include "ardour/automation_control.h"
 #include "ardour/async_midi_port.h"
 #include "ardour/dB.h"
@@ -287,8 +288,16 @@ MackieControlProtocol::get_sorted_routes()
 			remote_ids.insert (route->remote_control_id());
 			break;
 		case AudioTracks:
+			if (is_audio_track(*it)) {
+				sorted.push_back (*it);
+				remote_ids.insert (route->remote_control_id());
+			}
 			break;
 		case Busses:
+			if (!is_track(*it)) {
+				sorted.push_back (*it);
+				remote_ids.insert (route->remote_control_id());
+			}
 			break;
 		case MidiTracks:
 			if (is_midi_track(*it)) {
@@ -1991,6 +2000,18 @@ MackieControlProtocol::connection_handler (boost::weak_ptr<ARDOUR::Port> wp1, st
 			break;
 		}
 	}
+}
+
+bool
+MackieControlProtocol::is_track (boost::shared_ptr<Route> r) const
+{
+	return boost::dynamic_pointer_cast<Track>(r) != 0;
+}
+
+bool
+MackieControlProtocol::is_audio_track (boost::shared_ptr<Route> r) const
+{
+	return boost::dynamic_pointer_cast<AudioTrack>(r) != 0;
 }
 
 bool
