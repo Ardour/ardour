@@ -356,21 +356,19 @@ Plugin::clear_preset ()
 	PresetLoaded (); /* EMIT SIGNAL */
 }
 
+/** @param val `plugin' value */
 void
-Plugin::set_parameter (uint32_t /* which */, float /* value */)
+Plugin::set_parameter (uint32_t which, float)
 {
 	_parameter_changed_since_last_preset = true;
 	_session.set_dirty ();
-	PresetDirty (); /* EMIT SIGNAL */
+	ParameterChanged (which, get_parameter (which)); /* EMIT SIGNAL */
 }
 
 void
-Plugin::parameter_changed_externally (uint32_t which, float /* value */)
+Plugin::set_parameter_automated (uint32_t which, float val)
 {
-	_parameter_changed_since_last_preset = true;
-	_session.set_dirty ();
-	ParameterChangedExternally (which, get_parameter (which)); /* EMIT SIGNAL */
-	PresetDirty (); /* EMIT SIGNAL */
+	Plugin::set_parameter (which, val);
 }
 
 int

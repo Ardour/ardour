@@ -20,9 +20,7 @@
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
 #include "pbd/error.h"
-#include "pbd/stacktrace.h"
 
-#include "gui_thread.h"
 #include "lv2_plugin_ui.h"
 #include "timers.h"
 
@@ -55,9 +53,6 @@ LV2PluginUI::write_from_ui(void*       controller,
 		}
 
 		boost::shared_ptr<AutomationControl> ac = me->_controllables[port_index];
-		/* Cache our local copy of the last value received from the GUI */
-		me->_values[port_index] = *(const float*) buffer;
-		/* Now update the control itself */
 		if (ac) {
 			ac->set_value(*(const float*)buffer);
 		}
@@ -125,16 +120,24 @@ LV2PluginUI::on_external_ui_closed(void* controller)
 }
 
 void
-LV2PluginUI::control_changed (uint32_t port_index)
+LV2PluginUI::parameter_changed(uint32_t port_index, float val)
 {
-	/* Must run in GUI thread because we modify _updates with no lock */
-	if (_lv2->get_parameter (port_index) != _values[port_index]) {
-		/* current plugin parameter does not match last value received
-		   from GUI, so queue an update to push it to the GUI during
-		   our regular timeout.
-		*/
-		_updates.insert (port_index);
+	PlugUIBase::parameter_changed(port_index, val);
+
+	if (val != _values[port_index]) {
+		parameter_update(port_index, val);
 	}
+}
+
+void
+LV2PluginUI::parameter_update(uint32_t port_index, float val)
+{
+	if (!_inst) {
+		return;
+	}
+
+	suil_instance_port_event((SuilInstance*)_inst, port_index, 4, 0, &val);
+	_values[port_index] = val;
 }
 
 bool
@@ -180,14 +183,13 @@ LV2PluginUI::output_update()
 		}
 	}
 
-	if (_inst) {
-		for (Updates::iterator i = _updates.begin(); i != _updates.end(); ++i) {
-			float val = _lv2->get_parameter (*i);
-			/* push current value to the GUI */
-			suil_instance_port_event ((SuilInstance*)_inst, (*i), 4, 0, &val);
-		}
-		_updates.clear ();
+	/* FIXME only works with control output ports (which is all we support now anyway) */
+	uint32_t nports = _output_ports.size();
+	for (uint32_t i = 0; i < nports; ++i) {
+		uint32_t index = _output_ports[i];
+		parameter_changed(index, _lv2->get_parameter(index));
 	}
+
 }
 
 LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
@@ -356,14 +358,12 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		bool     ok;
 		uint32_t port = _lv2->nth_parameter(i, ok);
 		if (ok) {
+			_values[port]        = _lv2->get_parameter(port);
 			_controllables[port] = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (
 				insert->control(Evoral::Parameter(PluginAutomation, 0, port)));
 
-			/* FIXME only works with control output ports (which is all we support now anyway) */
-			if (_controllables[port] && _lv2->parameter_is_control(port) && _lv2->parameter_is_input(port)) {
-				_controllables[port]->Changed.connect (control_connections, invalidator (*this), boost::bind (&LV2PluginUI::control_changed, this, port), gui_context());
-				/* queue for first update ("push") to GUI */
-				_updates.insert (port);
+			if (_lv2->parameter_is_control(port) && _lv2->parameter_is_input(port)) {
+				parameter_update(port, _values[port]);
 			}
 		}
 	}
@@ -401,7 +401,9 @@ LV2PluginUI::lv2ui_free()
 
 LV2PluginUI::~LV2PluginUI ()
 {
-	delete [] _values;
+	if (_values) {
+		delete[] _values;
+	}
 
 	_message_update_connection.disconnect();
 	_screen_update_connection.disconnect();

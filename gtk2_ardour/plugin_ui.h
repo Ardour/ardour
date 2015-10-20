@@ -170,6 +170,7 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
 	void plugin_going_away ();
 	void automation_state_changed ();
+	virtual void parameter_changed (uint32_t, float);
 	void preset_added_or_removed ();
 	void update_preset_modified ();
 

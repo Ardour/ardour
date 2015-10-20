@@ -264,53 +264,26 @@ PluginInsert::create_automatable_parameters ()
 		}
 	}
 }
-/** Called when something outside of this host has modified a plugin
- * parameter. Responsible for propagating the change to two places:
- *
- *   1) anything listening to the Control itself
- *   2) any replicated plugins that make up this PluginInsert.
- *
- * The PluginInsert is connected to the ParameterChangedExternally signal for
- * the first (primary) plugin, and here broadcasts that change to any others.
- *
- * XXX We should probably drop this whole replication idea (Paul, October 2015)
- * since it isn't used by sensible plugin APIs (AU, LV2).
- */
+
 void
-PluginInsert::parameter_changed_externally (uint32_t which, float val)
+PluginInsert::parameter_changed (uint32_t which, float val)
 {
 	boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, which));
 
-	/* First propagation: alter the underlying value of the control,
-	 * without telling the plugin(s) that own/use it to set it.
-	 */
+	if (ac) {
+		ac->set_value (val);
 
-	if (!ac) {
-		return;
-	}
+                Plugins::iterator i = _plugins.begin();
 
-	boost::shared_ptr<PluginControl> pc = boost::dynamic_pointer_cast<PluginControl> (ac);
+                /* don't set the first plugin, just all the slaves */
 
-	if (pc) {
-		pc->catch_up_with_external_value (val);
-	}
-
-	/* Second propagation: tell all plugins except the first to
-	   update the value of this parameter. For sane plugin APIs,
-	   there are no other plugins, so this is a no-op in those
-	   cases.
-	*/
-
-	Plugins::iterator i = _plugins.begin();
-
-	/* don't set the first plugin, just all the slaves */
-
-	if (i != _plugins.end()) {
-		++i;
-		for (; i != _plugins.end(); ++i) {
-			(*i)->set_parameter (which, val);
-		}
-	}
+                if (i != _plugins.end()) {
+                        ++i;
+                        for (; i != _plugins.end(); ++i) {
+                                (*i)->set_parameter (which, val);
+                        }
+                }
+        }
 }
 
 int
@@ -531,6 +504,41 @@ PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t /*end_fra
 	 * all buffers appropriately.
 	 */
 
+}
+
+void
+PluginInsert::set_parameter (Evoral::Parameter param, float val)
+{
+	if (param.type() != PluginAutomation) {
+		return;
+	}
+
+	/* the others will be set from the event triggered by this */
+
+	_plugins[0]->set_parameter (param.id(), val);
+
+	boost::shared_ptr<AutomationControl> ac
+			= boost::dynamic_pointer_cast<AutomationControl>(control(param));
+
+	if (ac) {
+		ac->set_value(val);
+	} else {
+		warning << "set_parameter called for nonexistent parameter "
+			<< EventTypeMap::instance().to_symbol(param) << endmsg;
+	}
+
+	_session.set_dirty();
+}
+
+float
+PluginInsert::get_parameter (Evoral::Parameter param)
+{
+	if (param.type() != PluginAutomation) {
+		return 0.0;
+	} else {
+		assert (!_plugins.empty ());
+		return _plugins[0]->get_parameter (param.id());
+	}
 }
 
 void
@@ -1309,12 +1317,6 @@ PluginInsert::PluginControl::set_value (double user_val)
 	AutomationControl::set_value (user_val);
 }
 
-void
-PluginInsert::PluginControl::catch_up_with_external_value (double user_val)
-{
-	AutomationControl::set_value (user_val);
-}
-
 XMLNode&
 PluginInsert::PluginControl::get_state ()
 {
@@ -1331,13 +1333,8 @@ PluginInsert::PluginControl::get_state ()
 double
 PluginInsert::PluginControl::get_value () const
 {
-	boost::shared_ptr<Plugin> plugin = _plugin->plugin (0);
-
-	if (!plugin) {
-		return 0.0;
-	}
-
-	return plugin->get_parameter (_list->parameter().id());
+	/* FIXME: probably should be taking out some lock here.. */
+	return _plugin->get_parameter (_list->parameter());
 }
 
 PluginInsert::PluginPropertyControl::PluginPropertyControl (PluginInsert*                     p,
@@ -1433,7 +1430,7 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
                 /* first (and probably only) plugin instance - connect to relevant signals
                  */
 
-		plugin->ParameterChangedExternally.connect_same_thread (*this, boost::bind (&PluginInsert::parameter_changed_externally, this, _1, _2));
+		plugin->ParameterChanged.connect_same_thread (*this, boost::bind (&PluginInsert::parameter_changed, this, _1, _2));
                 plugin->StartTouch.connect_same_thread (*this, boost::bind (&PluginInsert::start_touch, this, _1));
                 plugin->EndTouch.connect_same_thread (*this, boost::bind (&PluginInsert::end_touch, this, _1));
 	}
