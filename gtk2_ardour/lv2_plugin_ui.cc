@@ -189,8 +189,14 @@ LV2PluginUI::output_update()
 	uint32_t nports = _output_ports.size();
 	for (uint32_t i = 0; i < nports; ++i) {
 		uint32_t index = _output_ports[i];
-		float val = _lv2->get_parameter(index);
-		suil_instance_port_event ((SuilInstance*)_inst, index, 4, 0, &val);
+		float val = _lv2->get_parameter (index);
+
+		if (val != _values[index]) {
+			/* Send to GUI */
+			suil_instance_port_event ((SuilInstance*)_inst, index, 4, 0, &val);
+			/* Cache current value */
+			_values[index] = val;
+		}
 	}
 
 	/* Input ports marked for update because the control value changed
@@ -368,10 +374,16 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 
 	_values = new float[num_ports];
 	_controllables.resize(num_ports);
+
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		bool     ok;
 		uint32_t port = _lv2->nth_parameter(i, ok);
 		if (ok) {
+			/* Cache initial value of the parameter, regardless of
+			   whether it is input or output
+			*/
+
+			_values[port]        = _lv2->get_parameter(port);
 			_controllables[port] = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (
 				insert->control(Evoral::Parameter(PluginAutomation, 0, port)));
 
@@ -379,9 +391,10 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 				if (_controllables[port]) {
 					_controllables[port]->Changed.connect (control_connections, invalidator (*this), boost::bind (&LV2PluginUI::control_changed, this, port), gui_context());
 				}
-				/* queue for first update ("push") to GUI */
-				_updates.insert (port);
 			}
+
+			/* queue for first update ("push") to GUI */
+			_updates.insert (port);
 		}
 	}
 
