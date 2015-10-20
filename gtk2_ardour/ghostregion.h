@@ -54,8 +54,6 @@ public:
 	TimeAxisView& source_trackview;
 	ArdourCanvas::Container* group;
 	ArdourCanvas::Rectangle* base_rect;
-
-	static PBD::Signal1<void,GhostRegion*> CatchDeletion;
 };
 
 class AudioGhostRegion : public GhostRegion {
