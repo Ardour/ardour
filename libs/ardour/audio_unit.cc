@@ -924,7 +924,7 @@ AUPlugin::set_parameter (uint32_t which, float val)
 	theEvent.mArgument.mParameter.mElement = d.element;
 
 	DEBUG_TRACE (DEBUG::AudioUnits, "notify about parameter change\n");
-	AUEventListenerNotify (NULL, NULL, &theEvent);
+	AUEventListenerNotify (NULL, this, &theEvent);
 
 	Plugin::set_parameter (which, val);
 }
@@ -3078,7 +3078,7 @@ AUPlugin::_parameter_change_listener (void* arg, void* src, const AudioUnitEvent
 }
 
 void
-AUPlugin::parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 /*host_time*/, Float32 new_value)
+AUPlugin::parameter_change_listener (void* /*arg*/, void* src, const AudioUnitEvent* event, UInt64 /*host_time*/, Float32 new_value)
 {
         ParameterMap::iterator i;
 
@@ -3094,7 +3094,12 @@ AUPlugin::parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUn
                 EndTouch (i->second);
                 break;
         case kAudioUnitEvent_ParameterValueChange:
-                ParameterChanged (i->second, new_value);
+	        if (src != this) {
+		        std::cerr << "something changed " << i->second << " to " << new_value << std::endl;
+		        ParameterChangedExternally (i->second, new_value);
+	        } else {
+		        std::cerr << "plugin changed " << i->second << " ignore it\n";
+	        }
                 break;
         default:
                 break;
