@@ -183,7 +183,7 @@ LV2PluginUI::output_update()
 	if (!_inst) {
 		return;
 	}
-	
+
 	/* output ports (values set by DSP) need propagating to GUI */
 
 	uint32_t nports = _output_ports.size();
@@ -192,6 +192,10 @@ LV2PluginUI::output_update()
 		float val = _lv2->get_parameter(index);
 		suil_instance_port_event ((SuilInstance*)_inst, index, 4, 0, &val);
 	}
+
+	/* Input ports marked for update because the control value changed
+	   since the last redisplay.
+	*/
 
 	for (Updates::iterator i = _updates.begin(); i != _updates.end(); ++i) {
 		float val = _lv2->get_parameter (*i);
