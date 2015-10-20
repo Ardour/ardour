@@ -450,13 +450,15 @@ remove_directory_internal (const string& dir, size_t* size, vector<string>* path
 			error << string_compose (_("cannot remove path %1 (%2)"), *i, strerror (errno))
 				<< endmsg;
 			ret = 1;
+			continue;
 		}
 
 		if (paths) {
 			paths->push_back (Glib::path_get_basename(*i));
 		}
 
-		if (size) {
+		// statbuf.st_size is off_t
+		if (size && statbuf.st_size > 0) {
 			*size += statbuf.st_size;
 		}
 
