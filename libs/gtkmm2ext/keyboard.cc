@@ -70,7 +70,6 @@ const char* Keyboard::primary_modifier_name() { return _("Command"); }
 const char* Keyboard::secondary_modifier_name() { return _("Control"); }
 const char* Keyboard::tertiary_modifier_name() { return S_("Key|Shift"); }
 const char* Keyboard::level4_modifier_name() { return _("Option"); }
-const char* Keyboard::copy_modifier_name() { return _("Control"); }
 const char* Keyboard::rangeselect_modifier_name() { return S_("Key|Shift"); }
 
 guint Keyboard::snap_mod = Keyboard::Level4Modifier|Keyboard::TertiaryModifier; // XXX this is probably completely wrong
@@ -90,7 +89,6 @@ const char* Keyboard::primary_modifier_name() { return _("Control"); }
 const char* Keyboard::secondary_modifier_name() { return _("Alt"); }
 const char* Keyboard::tertiary_modifier_name() { return S_("Key|Shift"); }
 const char* Keyboard::level4_modifier_name() { return _("Windows"); }
-const char* Keyboard::copy_modifier_name() { return _("Control"); }
 const char* Keyboard::rangeselect_modifier_name() { return S_("Key|Shift"); }
 
 guint Keyboard::snap_mod = Keyboard::SecondaryModifier;
