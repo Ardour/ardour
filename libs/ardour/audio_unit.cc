@@ -924,7 +924,8 @@ AUPlugin::set_parameter (uint32_t which, float val)
 	theEvent.mArgument.mParameter.mElement = d.element;
 
 	DEBUG_TRACE (DEBUG::AudioUnits, "notify about parameter change\n");
-	AUEventListenerNotify (NULL, this, &theEvent);
+        /* Note the 1st argument, which means "Don't notify us about a change we made ourselves" */
+        AUEventListenerNotify (_parameter_listener, NULL, &theEvent);
 
 	Plugin::set_parameter (which, val);
 }
@@ -3094,12 +3095,10 @@ AUPlugin::parameter_change_listener (void* /*arg*/, void* src, const AudioUnitEv
                 EndTouch (i->second);
                 break;
         case kAudioUnitEvent_ParameterValueChange:
-	        if (src != this) {
-		        std::cerr << "something changed " << i->second << " to " << new_value << std::endl;
-		        ParameterChangedExternally (i->second, new_value);
-	        } else {
-		        std::cerr << "plugin changed " << i->second << " ignore it\n";
-	        }
+                /* whenever we change a parameter, we request that we are NOT notified of the change, so anytime we arrive here, it
+                   means that something else (i.e. the plugin GUI) made the change.
+                */
+                ParameterChangedExternally (i->second, new_value);
                 break;
         default:
                 break;
