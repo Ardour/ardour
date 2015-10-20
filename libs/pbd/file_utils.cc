@@ -440,29 +440,29 @@ remove_directory_internal (const string& dir, size_t* size, vector<string>* path
 	get_paths (tmp_paths, dir, just_remove_files, true);
 
 	for (vector<string>::const_iterator i = tmp_paths.begin();
-	     i != tmp_paths.end(); ++i) {
+			i != tmp_paths.end(); ++i) {
 
-                if (g_stat (i->c_str(), &statbuf)) {
+		if (g_stat (i->c_str(), &statbuf)) {
 			continue;
 		}
 
-                if (::g_remove (i->c_str())) {
-                        error << string_compose (_("cannot remove path %1 (%2)"), *i, strerror (errno))
-                              << endmsg;
-                        ret = 1;
-                }
+		if (::g_remove (i->c_str())) {
+			error << string_compose (_("cannot remove path %1 (%2)"), *i, strerror (errno))
+				<< endmsg;
+			ret = 1;
+		}
 
-                if (paths) {
-                        paths->push_back (Glib::path_get_basename(*i));
-                }
+		if (paths) {
+			paths->push_back (Glib::path_get_basename(*i));
+		}
 
-                if (size) {
-                        *size += statbuf.st_size;
-                }
+		if (size) {
+			*size += statbuf.st_size;
+		}
 
 	}
 
-        return ret;
+	return ret;
 }
 
 int
