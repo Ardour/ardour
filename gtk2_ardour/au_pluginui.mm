@@ -244,7 +244,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	low_box.signal_size_allocate ().connect (mem_fun (this, &AUPluginUI::lower_box_size_allocate));
 	low_box.signal_map ().connect (mem_fun (this, &AUPluginUI::lower_box_map));
 	low_box.signal_unmap ().connect (mem_fun (this, &AUPluginUI::lower_box_unmap));
-	//low_box.signal_expose_event ().connect (mem_fun (this, &AUPluginUI::lower_box_expose));
+	low_box.signal_expose_event ().connect (mem_fun (this, &AUPluginUI::lower_box_expose));
 }
 
 AUPluginUI::~AUPluginUI ()
@@ -813,10 +813,17 @@ AUPluginUI::lower_box_size_allocate (Gtk::Allocation& allocation)
 gboolean
 AUPluginUI::lower_box_expose (GdkEventExpose* event)
 {
+#if 0 // AU view magically redraws by itself
 	[au_view drawRect:NSMakeRect(event->area.x,
 			event->area.y,
 			event->area.width,
 			event->area.height)];
+#endif
+	/* hack to keep ardour responsive
+	 * some UIs (e.g Addictive Drums) completely hog the CPU
+	 */
+	ARDOUR::GUIIdle();
+
 	return true;
 }
 
