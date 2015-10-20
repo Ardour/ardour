@@ -70,7 +70,6 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static const char* secondary_modifier_name ();
 	static const char* tertiary_modifier_name ();
 	static const char* level4_modifier_name ();
-	static const char* rangeselect_modifier_name ();
 
 	static void set_primary_modifier (uint32_t newval) {
 		set_modifier (newval, PrimaryModifier);
