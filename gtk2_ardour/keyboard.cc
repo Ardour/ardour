@@ -48,7 +48,11 @@ accel_map_changed (GtkAccelMap* /*map*/,
 	me->ui.setup_tooltips ();
 }
 
+#ifdef GTKOSX
+guint ArdourKeyboard::constraint_mod = Keyboard::PrimaryModifier;
+#else
 guint ArdourKeyboard::constraint_mod = Keyboard::SecondaryModifier;
+#endif
 guint ArdourKeyboard::trim_contents_mod = Keyboard::PrimaryModifier;
 guint ArdourKeyboard::trim_overlap_mod = Keyboard::TertiaryModifier;
 guint ArdourKeyboard::trim_anchored_mod = Keyboard::TertiaryModifier;

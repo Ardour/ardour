@@ -511,7 +511,13 @@ public:
 		set_popdown_strings (_copy_modifier_combo, dumb);
 		_copy_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::copy_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_copy_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"),
+#ifdef GTKOSX
+								     Keyboard::secondary_modifier_name (),
+#else
+								     Keyboard::primary_modifier_name (),
+#endif
+								     restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) Keyboard::CopyModifier) {
 				_copy_modifier_combo.set_active_text (S_(modifiers[x].name));
@@ -532,7 +538,13 @@ public:
 		set_popdown_strings (_constraint_modifier_combo, dumb);
 		_constraint_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::constraint_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_constraint_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::secondary_modifier_name (), restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"),
+#ifdef GTKOSX
+								     Keyboard::primary_modifier_name (),
+#else
+								     Keyboard::secondary_modifier_name (),
+#endif
+								     restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) ArdourKeyboard::constraint_modifier ()) {
 				_constraint_modifier_combo.set_active_text (S_(modifiers[x].name));
