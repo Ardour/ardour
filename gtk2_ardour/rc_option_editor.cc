@@ -382,7 +382,7 @@ public:
 		set_popdown_strings (_edit_modifier_combo, dumb);
 		_edit_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::edit_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_edit_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1 + button 3</b>%2"),  Keyboard::copy_modifier_name (), restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1 + button 3</b>%2"),  Keyboard::primary_modifier_name (), restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == Keyboard::edit_modifier ()) {
 				_edit_modifier_combo.set_active_text (S_(modifiers[x].name));
@@ -474,7 +474,7 @@ public:
 		set_popdown_strings (_insert_note_modifier_combo, dumb);
 		_insert_note_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_insert_note_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1 + button 1</b>%2"), Keyboard::copy_modifier_name (), restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1 + button 1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == Keyboard::insert_note_modifier ()) {
 				_insert_note_modifier_combo.set_active_text (S_(modifiers[x].name));
@@ -511,7 +511,7 @@ public:
 		set_popdown_strings (_copy_modifier_combo, dumb);
 		_copy_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::copy_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_copy_modifier_combo,
-						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::copy_modifier_name (), restart_msg)));
+						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) Keyboard::CopyModifier) {
 				_copy_modifier_combo.set_active_text (S_(modifiers[x].name));
