@@ -96,6 +96,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 		void set_value (double val);
 		double get_value (void) const;
+		void catch_up_with_external_value (double val);
 		XMLNode& get_state();
 
 	private:
@@ -164,10 +165,9 @@ class LIBARDOUR_API PluginInsert : public Processor
 	/* disallow copy construction */
 	PluginInsert (const PluginInsert&);
 
-	void parameter_changed (uint32_t, float);
+	void parameter_changed_externally (uint32_t, float);
 
 	void  set_parameter (Evoral::Parameter param, float val);
-	float get_parameter (Evoral::Parameter param);
 
 	float default_parameter_value (const Evoral::Parameter& param);
 

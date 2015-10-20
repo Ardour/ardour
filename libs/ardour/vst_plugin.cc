@@ -117,12 +117,6 @@ VSTPlugin::set_parameter (uint32_t which, float newval)
 	}
 }
 
-void
-VSTPlugin::set_parameter_automated (uint32_t which, float newval)
-{
-	Plugin::set_parameter_automated (which, newval);
-}
-
 uint32_t
 VSTPlugin::nth_parameter (uint32_t n, bool& ok) const
 {

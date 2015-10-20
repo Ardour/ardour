@@ -208,10 +208,17 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	/** Emitted when a preset has been loaded */
 	PBD::Signal0<void> PresetLoaded;
 
+	/** Emitted when a parameter is altered in a way that may have
+	 *  changed the settings with respect to any loaded preset.
+	 */
+	PBD::Signal0<void> PresetDirty;
+
 	virtual bool has_editor () const = 0;
 
-	/** Emitted when any parameter changes */
-	PBD::Signal2<void, uint32_t, float> ParameterChanged;
+	/** Emitted when a parameter is altered by something outside of our
+	 * control, most typically a Plugin GUI/editor
+	 */
+	PBD::Signal2<void, uint32_t, float> ParameterChangedExternally;
 
 	virtual bool configure_io (ChanCount /*in*/, ChanCount /*out*/) { return true; }
 
@@ -272,9 +279,18 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 protected:
 
 	friend class PluginInsert;
+	friend class Session;
 
+	/* Called when a parameter of the plugin is changed outside of this
+	 * host's control (typical via a plugin's own GUI/editor)
+	 */
+	void parameter_changed_externally (uint32_t which, float val);
+
+	/* should be overridden by plugin API specific derived types to
+	 * actually implement changing the parameter. The derived type should
+	 * call this after the change is made.
+	 */
 	virtual void set_parameter (uint32_t which, float val);
-	virtual void set_parameter_automated (uint32_t which, float val);
 
 	/** Do the actual saving of the current plugin settings to a preset of the provided name.
 	 *  Should return a URI on success, or an empty string on failure.

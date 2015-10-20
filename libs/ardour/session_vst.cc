@@ -86,7 +86,7 @@ intptr_t Session::vst_callback (
 		SHOW_CALLBACK ("audioMasterAutomate");
 		// index, value, returns 0
 		if (plug) {
-			plug->set_parameter_automated (index, opt);
+			plug->parameter_changed_externally (index, opt);
 		}
 		return 0;
 
