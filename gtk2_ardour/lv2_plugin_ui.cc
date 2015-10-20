@@ -55,9 +55,9 @@ LV2PluginUI::write_from_ui(void*       controller,
 		}
 
 		boost::shared_ptr<AutomationControl> ac = me->_controllables[port_index];
-		/* Cache our local copy of the last value received from the GUI */
-		me->_values[port_index] = *(const float*) buffer;
-		/* Now update the control itself */
+
+		me->_updates.insert (port_index);
+
 		if (ac) {
 			ac->set_value(*(const float*)buffer);
 		}
@@ -207,6 +207,7 @@ LV2PluginUI::output_update()
 		float val = _lv2->get_parameter (*i);
 		/* push current value to the GUI */
 		suil_instance_port_event ((SuilInstance*)_inst, (*i), 4, 0, &val);
+		_values[(*i)] = val;
 	}
 
 	_updates.clear ();
