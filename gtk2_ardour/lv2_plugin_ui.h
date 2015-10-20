@@ -26,6 +26,7 @@
 
 #include <list>
 #include <map>
+#include <set>
 #include <vector>
 
 #include <gtkmm/widget.h>
@@ -64,7 +65,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 
   private:
 
-	void parameter_changed (uint32_t, float);
+	void control_changed (uint32_t);
 
 	typedef boost::shared_ptr<ARDOUR::AutomationControl> ControllableRef;
 
@@ -85,6 +86,8 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	LV2_Feature                          _parent_feature;
 	Gtk::Window*                         _win_ptr;
 	void*                                _inst;
+	typedef std::set<uint32_t> Updates;
+	Updates                              _updates;
 
 	static void on_external_ui_closed(void* controller);
 

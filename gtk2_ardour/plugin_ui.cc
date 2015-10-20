@@ -484,7 +484,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	plugin->PresetAdded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
 	plugin->PresetRemoved.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
 	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset, this), gui_context ());
-	plugin->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::parameter_changed, this, _1, _2), gui_context ());
+	plugin->PresetDirty.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset_modified, this), gui_context ());
 
 	insert->AutomationStateChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::automation_state_changed, this), gui_context());
 
@@ -811,12 +811,6 @@ PlugUIBase::update_preset_modified ()
 	if (_preset_modified.get_text().empty() == c) {
 		_preset_modified.set_text (c ? "*" : "");
 	}
-}
-
-void
-PlugUIBase::parameter_changed (uint32_t, float)
-{
-	update_preset_modified ();
 }
 
 void
