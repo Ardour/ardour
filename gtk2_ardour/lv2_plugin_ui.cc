@@ -180,14 +180,26 @@ LV2PluginUI::output_update()
 		}
 	}
 
-	if (_inst) {
-		for (Updates::iterator i = _updates.begin(); i != _updates.end(); ++i) {
-			float val = _lv2->get_parameter (*i);
-			/* push current value to the GUI */
-			suil_instance_port_event ((SuilInstance*)_inst, (*i), 4, 0, &val);
-		}
-		_updates.clear ();
+	if (!_inst) {
+		return;
 	}
+	
+	/* output ports (values set by DSP) need propagating to GUI */
+
+	uint32_t nports = _output_ports.size();
+	for (uint32_t i = 0; i < nports; ++i) {
+		uint32_t index = _output_ports[i];
+		float val = _lv2->get_parameter(index);
+		suil_instance_port_event ((SuilInstance*)_inst, index, 4, 0, &val);
+	}
+
+	for (Updates::iterator i = _updates.begin(); i != _updates.end(); ++i) {
+		float val = _lv2->get_parameter (*i);
+		/* push current value to the GUI */
+		suil_instance_port_event ((SuilInstance*)_inst, (*i), 4, 0, &val);
+	}
+
+	_updates.clear ();
 }
 
 LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
@@ -359,9 +371,10 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			_controllables[port] = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (
 				insert->control(Evoral::Parameter(PluginAutomation, 0, port)));
 
-			/* FIXME only works with control output ports (which is all we support now anyway) */
-			if (_controllables[port] && _lv2->parameter_is_control(port) && _lv2->parameter_is_input(port)) {
-				_controllables[port]->Changed.connect (control_connections, invalidator (*this), boost::bind (&LV2PluginUI::control_changed, this, port), gui_context());
+			if (_lv2->parameter_is_control(port) && _lv2->parameter_is_input(port)) {
+				if (_controllables[port]) {
+					_controllables[port]->Changed.connect (control_connections, invalidator (*this), boost::bind (&LV2PluginUI::control_changed, this, port), gui_context());
+				}
 				/* queue for first update ("push") to GUI */
 				_updates.insert (port);
 			}
