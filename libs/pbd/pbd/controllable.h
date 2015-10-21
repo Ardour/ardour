@@ -73,9 +73,9 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 	virtual double internal_to_user (double i) const {return i;}  //by default the internal value is the same as the user value
 	virtual double user_to_internal (double i) const {return i;}  //by default the internal value is the same as the user value
 
-	/** Get and Set `interface' value  (typically, percent of knob travel) */
+	/** Get and Set `interface' value  (typically, fraction of knob travel) */
 	virtual float get_interface() const { return (internal_to_interface(get_value())); }
-	virtual void set_interface (float percent) { percent = min( max(0.0f, percent), 1.0f);  set_value(interface_to_internal(percent)); }
+	virtual void set_interface (float fraction) { fraction = min( max(0.0f, fraction), 1.0f);  set_value(interface_to_internal(fraction)); }
 
 	/** Get and Set `user' value  ( dB or milliseconds, etc.  This MIGHT be the same as the internal value, but in a few cases it is not ) */
 	virtual float get_user() const { return (internal_to_user(get_value())); }
