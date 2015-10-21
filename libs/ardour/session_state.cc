@@ -343,7 +343,7 @@ Session::post_engine_init ()
 	send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
 	send_immediate_mmc (MIDI::MachineControlCommand (Timecode::Time ()));
 
-	MIDI::Name::MidiPatchManager::instance().set_session (this);
+	MIDI::Name::MidiPatchManager::instance().add_search_path (session_directory().midi_patch_path() );
 
 	ltc_tx_initialize();
 	/* initial program change will be delivered later; see ::config_changed() */

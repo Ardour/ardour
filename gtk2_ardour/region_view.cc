@@ -84,7 +84,6 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 	, wait_for_data(false)
 	, _silence_text (0)
 {
-	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RegionView::remove_ghost, this, _1), gui_context());
 }
 
 RegionView::RegionView (const RegionView& other)
@@ -98,8 +97,6 @@ RegionView::RegionView (const RegionView& other)
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_pixel_width = other._pixel_width;
-
-	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RegionView::remove_ghost, this, _1), gui_context());
 }
 
 RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other_region)
@@ -117,8 +114,6 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_pixel_width = other._pixel_width;
-
-	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RegionView::remove_ghost, this, _1), gui_context());
 }
 
 RegionView::RegionView (ArdourCanvas::Container*          parent,
@@ -704,21 +699,6 @@ RegionView::remove_ghost_in (TimeAxisView& tv)
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		if (&(*i)->trackview == &tv) {
 			delete *i;
-			break;
-		}
-	}
-}
-
-void
-RegionView::remove_ghost (GhostRegion* ghost)
-{
-	if (in_destructor) {
-		return;
-	}
-
-	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		if (*i == ghost) {
-			ghosts.erase (i);
 			break;
 		}
 	}

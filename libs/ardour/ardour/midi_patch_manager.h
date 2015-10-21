@@ -22,12 +22,11 @@
 #define MIDI_PATCH_MANAGER_H_
 
 #include "midi++/midnam_patch.h"
-#include "pbd/signals.h"
-#include "ardour/session_handle.h"
 
-namespace ARDOUR {
-	class Session;
-}
+#include "pbd/signals.h"
+#include "pbd/search_path.h"
+
+#include "ardour/libardour_visibility.h"
 
 namespace MIDI
 {
@@ -35,7 +34,7 @@ namespace MIDI
 namespace Name
 {
 
-class LIBARDOUR_API MidiPatchManager : public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
+class LIBARDOUR_API MidiPatchManager
 {
 	/// Singleton
 private:
@@ -58,7 +57,9 @@ public:
 		return *_manager;
 	}
 
-	void set_session (ARDOUR::Session*);
+	void add_search_path (const PBD::Searchpath& search_path);
+
+	void remove_search_path (const PBD::Searchpath& search_path);
 
 	boost::shared_ptr<MIDINameDocument> document_by_model(std::string model_name)
 		{ return _documents[model_name]; }
@@ -138,9 +139,14 @@ public:
 	const DeviceNamesByMaker& devices_by_manufacturer() const { return _devices_by_manufacturer; }
 
 private:
-	void session_going_away();
-	void refresh();
-	void add_session_patches();
+	bool add_midi_name_document(const std::string& file_path);
+	bool remove_midi_name_document(const std::string& file_path);
+
+	void add_midnam_files_from_directory(const std::string& directory_path);
+	void remove_midnam_files_from_directory(const std::string& directory_path);
+
+private:
+	PBD::Searchpath                         _search_path;
 
 	MidiNameDocuments                       _documents;
 	MIDINameDocument::MasterDeviceNamesList _master_devices_by_model;

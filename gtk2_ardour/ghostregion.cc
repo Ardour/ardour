@@ -40,8 +40,6 @@ using namespace Editing;
 using namespace ArdourCanvas;
 using namespace ARDOUR;
 
-PBD::Signal1<void,GhostRegion*> GhostRegion::CatchDeletion;
-
 GhostRegion::GhostRegion (ArdourCanvas::Container* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_pos)
 	: trackview (tv)
 	, source_trackview (source_tv)
@@ -70,7 +68,7 @@ GhostRegion::GhostRegion (ArdourCanvas::Container* parent, TimeAxisView& tv, Tim
 
 GhostRegion::~GhostRegion ()
 {
-	CatchDeletion (this);
+	trackview.erase_ghost(this);
 	delete base_rect;
 	delete group;
 }

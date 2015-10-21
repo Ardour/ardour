@@ -25,8 +25,6 @@
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
 
-#include "ardour/session.h"
-#include "ardour/session_directory.h"
 #include "ardour/midi_patch_manager.h"
 
 #include "ardour/search_paths.h"
@@ -43,123 +41,151 @@ MidiPatchManager* MidiPatchManager::_manager = 0;
 
 MidiPatchManager::MidiPatchManager ()
 {
-	refresh ();
+	add_search_path(midi_patch_search_path ());
 }
 
 void
-MidiPatchManager::set_session (Session* s)
+MidiPatchManager::add_search_path (const Searchpath& search_path)
 {
-	SessionHandlePtr::set_session (s);
-	refresh ();
-	add_session_patches ();
-}
+	for (Searchpath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
 
-void
-MidiPatchManager::add_session_patches ()
-{
-	if (!_session) {
-		return;
-	}
-
-	std::string path_to_patches = _session->session_directory().midi_patch_path();
-
-	if (!Glib::file_test (path_to_patches, Glib::FILE_TEST_EXISTS)) {
-		return;
-	}
-
-	assert (Glib::file_test (path_to_patches, Glib::FILE_TEST_IS_DIR));
-
-	vector<std::string> result;
-
-	find_files_matching_pattern (result, path_to_patches, "*.midnam");
-
-	info << "Loading " << result.size() << " MIDI patches from " << path_to_patches << endmsg;
-
-	for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
-		boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(*i));
-		for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
-					document->master_device_names_by_model().begin();
-				device != document->master_device_names_by_model().end();
-				++device) {
-			//cerr << "got model " << device->first << endl;
-			// have access to the documents by model name
-			_documents[device->first] = document;
-			// build a list of all master devices from all documents
-			_master_devices_by_model[device->first] = device->second;
-			_all_models.insert(device->first);
-			const std::string& manufacturer = device->second->manufacturer();
-			if (_devices_by_manufacturer.find(manufacturer) == _devices_by_manufacturer.end()) {
-				MIDINameDocument::MasterDeviceNamesList empty;
-				_devices_by_manufacturer.insert(std::make_pair(manufacturer, empty));
-			}
-			_devices_by_manufacturer[manufacturer].insert(std::make_pair(device->first, device->second));
-
-			// make sure there are no double model names
-			// TODO: handle this gracefully.
-			assert(_documents.count(device->first) == 1);
-			assert(_master_devices_by_model.count(device->first) == 1);
-		}
-	}
-}
-
-void
-MidiPatchManager::refresh()
-{
-	_documents.clear();
-	_master_devices_by_model.clear();
-	_all_models.clear();
-	_devices_by_manufacturer.clear();
-
-	Searchpath search_path = midi_patch_search_path ();
-	vector<std::string> result;
-
-	find_files_matching_pattern (result, search_path, "*.midnam");
-
-	info << "Loading " << result.size() << " MIDI patches from " << search_path.to_string() << endmsg;
-
-	for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
-		boost::shared_ptr<MIDINameDocument> document;
-		try {
-			document = boost::shared_ptr<MIDINameDocument>(new MIDINameDocument(*i));
-		} catch (...) {
-			error << "Error parsing MIDI patch file " << *i << endmsg;
+		if (_search_path.contains(*i)) {
+			// already processed files from this path
 			continue;
 		}
-		for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
-			     document->master_device_names_by_model().begin();
-		     device != document->master_device_names_by_model().end();
-		     ++device) {
-			if (_documents.find(device->first) != _documents.end()) {
-				warning << string_compose(_("Duplicate MIDI device `%1' in `%2' ignored"),
-				                          device->first, *i)
-				        << endmsg;
-				continue;
-			}
 
-			_documents[device->first]               = document;
-			_master_devices_by_model[device->first] = device->second;
-
-			_all_models.insert(device->first);
-			const std::string& manufacturer = device->second->manufacturer();
-			if (_devices_by_manufacturer.find(manufacturer) == _devices_by_manufacturer.end()) {
-				MIDINameDocument::MasterDeviceNamesList empty;
-				_devices_by_manufacturer.insert(std::make_pair(manufacturer, empty));
-			}
-			_devices_by_manufacturer[manufacturer].insert(std::make_pair(device->first, device->second));
+		if (!Glib::file_test (*i, Glib::FILE_TEST_EXISTS)) {
+			continue;
 		}
-	}
 
-	if (_session) {
-		add_session_patches ();
+		if (!Glib::file_test (*i, Glib::FILE_TEST_IS_DIR)) {
+			continue;
+		}
+
+		add_midnam_files_from_directory (*i);
+
+		_search_path.add_directory (*i);
 	}
 }
 
 void
-MidiPatchManager::session_going_away ()
+MidiPatchManager::add_midnam_files_from_directory(const std::string& directory_path)
 {
-	SessionHandlePtr::session_going_away ();
-	_documents.clear();
-	_master_devices_by_model.clear();
-	_all_models.clear();
-	_devices_by_manufacturer.clear();
+	vector<std::string> result;
+	find_files_matching_pattern (result, directory_path, "*.midnam");
+
+	info << string_compose(_("Loading %1 MIDI patches from %2"),
+	                       result.size(),
+	                       directory_path) << endmsg;
+
+	for (vector<std::string>::const_iterator i = result.begin(); i != result.end(); ++i) {
+		add_midi_name_document (*i);
+	}
+}
+
+void
+MidiPatchManager::remove_search_path (const Searchpath& search_path)
+{
+	for (Searchpath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
+
+		if (!_search_path.contains(*i)) {
+			continue;
+		}
+
+		remove_midnam_files_from_directory(*i);
+
+		_search_path.remove_directory (*i);
+	}
+}
+
+void
+MidiPatchManager::remove_midnam_files_from_directory(const std::string& directory_path)
+{
+	vector<std::string> result;
+	find_files_matching_pattern (result, directory_path, "*.midnam");
+
+	info << string_compose(_("Unloading %1 MIDI patches from %2"),
+	                       result.size(),
+	                       directory_path) << endmsg;
+
+	for (vector<std::string>::const_iterator i = result.begin(); i != result.end(); ++i) {
+		remove_midi_name_document (*i);
+	}
+}
+
+bool
+MidiPatchManager::add_midi_name_document (const std::string& file_path)
+{
+	boost::shared_ptr<MIDINameDocument> document;
+	try {
+		document = boost::shared_ptr<MIDINameDocument>(new MIDINameDocument(file_path));
+	}
+	catch (...) {
+		error << string_compose(_("Error parsing MIDI patch file %1"), file_path)
+		      << endmsg;
+		return false;
+	}
+	for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
+	         document->master_device_names_by_model().begin();
+	     device != document->master_device_names_by_model().end();
+	     ++device) {
+		if (_documents.find(device->first) != _documents.end()) {
+			warning << string_compose(_("Duplicate MIDI device `%1' in `%2' ignored"),
+			                          device->first,
+			                          file_path) << endmsg;
+			continue;
+		}
+
+		_documents[device->first] = document;
+		_master_devices_by_model[device->first] = device->second;
+
+		_all_models.insert(device->first);
+		const std::string& manufacturer = device->second->manufacturer();
+		if (_devices_by_manufacturer.find(manufacturer) ==
+		    _devices_by_manufacturer.end()) {
+			MIDINameDocument::MasterDeviceNamesList empty;
+			_devices_by_manufacturer.insert(std::make_pair(manufacturer, empty));
+		}
+		_devices_by_manufacturer[manufacturer].insert(
+		    std::make_pair(device->first, device->second));
+
+		// TODO: handle this gracefully.
+		assert(_documents.count(device->first) == 1);
+		assert(_master_devices_by_model.count(device->first) == 1);
+	}
+	return true;
+}
+
+bool
+MidiPatchManager::remove_midi_name_document (const std::string& file_path)
+{
+	bool removed = false;
+	for (MidiNameDocuments::iterator i = _documents.begin(); i != _documents.end();) {
+		if (i->second->file_path() == file_path) {
+
+			boost::shared_ptr<MIDINameDocument> document = i->second;
+
+			info << string_compose(_("Removing MIDI patch file %1"), file_path) << endmsg;
+
+			_documents.erase(i++);
+
+			for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
+			         document->master_device_names_by_model().begin();
+			     device != document->master_device_names_by_model().end();
+			     ++device) {
+
+				_master_devices_by_model.erase(device->first);
+
+				_all_models.erase(device->first);
+
+				const std::string& manufacturer = device->second->manufacturer();
+
+				_devices_by_manufacturer[manufacturer].erase(device->first);
+			}
+			removed = true;
+		} else {
+			++i;
+		}
+	}
+	return removed;
 }

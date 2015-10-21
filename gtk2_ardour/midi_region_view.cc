@@ -1545,8 +1545,6 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_duration (_region->length() / samples_per_pixel);
 	ghosts.push_back (ghost);
 
-	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RegionView::remove_ghost, this, _1), gui_context());
-
 	return ghost;
 }
 

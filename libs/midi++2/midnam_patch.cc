@@ -877,14 +877,15 @@ MasterDeviceNames::get_state(void)
 	return nothing;
 }
 
-MIDINameDocument::MIDINameDocument (const string& filename)
+MIDINameDocument::MIDINameDocument (const string& file_path)
+	: _file_path(file_path)
 {
 	XMLTree document;
-	if (!document.read (filename)) {
+	if (!document.read (file_path)) {
 		throw failed_constructor ();
 	}
 
-	document.set_filename (filename);
+	document.set_filename (file_path);
 	set_state (document, *document.root());
 }
 
