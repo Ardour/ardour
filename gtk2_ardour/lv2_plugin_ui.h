@@ -77,7 +77,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::Widget*                         _gui_widget;
 	/** a box containing the focus, bypass, delete, save / add preset buttons etc. */
 	Gtk::HBox                            _ardour_buttons_box;
-	float*                               _values;
+	float*                               _values_last_sent_to_ui;
 	std::vector<ControllableRef>         _controllables;
 	struct lv2_external_ui_host          _external_ui_host;
 	LV2_Feature                          _external_ui_feature;

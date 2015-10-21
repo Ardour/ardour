@@ -128,7 +128,7 @@ void
 LV2PluginUI::control_changed (uint32_t port_index)
 {
 	/* Must run in GUI thread because we modify _updates with no lock */
-	if (_lv2->get_parameter (port_index) != _values[port_index]) {
+	if (_lv2->get_parameter (port_index) != _values_last_sent_to_ui[port_index]) {
 		/* current plugin parameter does not match last value received
 		   from GUI, so queue an update to push it to the GUI during
 		   our regular timeout.
@@ -191,11 +191,11 @@ LV2PluginUI::output_update()
 		uint32_t index = _output_ports[i];
 		float val = _lv2->get_parameter (index);
 
-		if (val != _values[index]) {
+		if (val != _values_last_sent_to_ui[index]) {
 			/* Send to GUI */
 			suil_instance_port_event ((SuilInstance*)_inst, index, 4, 0, &val);
 			/* Cache current value */
-			_values[index] = val;
+			_values_last_sent_to_ui[index] = val;
 		}
 	}
 
@@ -207,7 +207,7 @@ LV2PluginUI::output_update()
 		float val = _lv2->get_parameter (*i);
 		/* push current value to the GUI */
 		suil_instance_port_event ((SuilInstance*)_inst, (*i), 4, 0, &val);
-		_values[(*i)] = val;
+		_values_last_sent_to_ui[(*i)] = val;
 	}
 
 	_updates.clear ();
@@ -219,7 +219,7 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
 	, _pi(pi)
 	, _lv2(lv2p)
 	, _gui_widget(NULL)
-	, _values(NULL)
+	, _values_last_sent_to_ui(NULL)
 	, _external_ui_ptr(NULL)
 	, _inst(NULL)
 {
@@ -373,7 +373,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		_external_ui_ptr = (struct lv2_external_ui*)GET_WIDGET(_inst);
 	}
 
-	_values = new float[num_ports];
+	_values_last_sent_to_ui = new float[num_ports];
 	_controllables.resize(num_ports);
 
 	for (uint32_t i = 0; i < num_ports; ++i) {
@@ -384,7 +384,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			   whether it is input or output
 			*/
 
-			_values[port]        = _lv2->get_parameter(port);
+			_values_last_sent_to_ui[port]        = _lv2->get_parameter(port);
 			_controllables[port] = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (
 				insert->control(Evoral::Parameter(PluginAutomation, 0, port)));
 
@@ -432,7 +432,7 @@ LV2PluginUI::lv2ui_free()
 
 LV2PluginUI::~LV2PluginUI ()
 {
-	delete [] _values;
+	delete [] _values_last_sent_to_ui;
 
 	_message_update_connection.disconnect();
 	_screen_update_connection.disconnect();
