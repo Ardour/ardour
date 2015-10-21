@@ -167,7 +167,7 @@ class /*LIBPBD_API*/ ConfigVariableWithMutation : public ConfigVariable<T>
 {
   public:
 	ConfigVariableWithMutation (std::string name, T val, T (*m)(T))
-		: ConfigVariable<T> (name, val), mutator (m) {}
+		: ConfigVariable<T> (name, m (val)), unmutated_value (val), mutator (m) {}
 
 	bool set (T val) {
 		if (unmutated_value != val) {
