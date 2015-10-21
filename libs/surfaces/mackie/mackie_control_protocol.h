@@ -328,6 +328,7 @@ class MackieControlProtocol
 	ARDOUR::RouteNotificationList _last_selected_routes;
 	XMLNode*                 configuration_state;
 	int                      state_version;
+	int                      _last_mix_bank;
 
 	boost::shared_ptr<ArdourSurface::Mackie::Surface>	_master_surface;
 

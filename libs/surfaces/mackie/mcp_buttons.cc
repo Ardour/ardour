@@ -857,8 +857,11 @@ MackieControlProtocol::miditracks_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::miditracks_release (Mackie::Button&)
 {
+	if (_view_mode == Mixer) {
+		_last_mix_bank = _current_initial_bank;
+	}
 	set_view_mode (MidiTracks);
-	refresh_current_bank();
+	switch_banks(0, true);
 	return none;
 }
 Mackie::LedState
@@ -879,8 +882,11 @@ MackieControlProtocol::audiotracks_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::audiotracks_release (Mackie::Button&)
 {
+	if (_view_mode == Mixer) {
+		_last_mix_bank = _current_initial_bank;
+	}
 	set_view_mode (AudioTracks);
-	refresh_current_bank();
+	switch_banks(0, true);
 	return none;
 }
 Mackie::LedState
@@ -901,8 +907,11 @@ MackieControlProtocol::aux_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::aux_release (Mackie::Button&)
 {
+	if (_view_mode == Mixer) {
+		_last_mix_bank = _current_initial_bank;
+	}
 	set_view_mode (Auxes);
-	refresh_current_bank();
+	switch_banks(0, true);
 	return none;
 }
 Mackie::LedState
@@ -913,8 +922,11 @@ MackieControlProtocol::busses_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::busses_release (Mackie::Button&)
 {
+	if (_view_mode == Mixer) {
+		_last_mix_bank = _current_initial_bank;
+	}
 	set_view_mode (Busses);
-	refresh_current_bank();
+	switch_banks(0, true);
 	return none;
 }
 Mackie::LedState
@@ -935,8 +947,11 @@ MackieControlProtocol::user_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::user_release (Mackie::Button&)
 {
+	if (_view_mode == Mixer) {
+		_last_mix_bank = _current_initial_bank;
+	}
 	set_view_mode (Selected);
-	refresh_current_bank();
+	switch_banks(0, true);
 	return none;
 }
 Mackie::LedState
@@ -1003,7 +1018,7 @@ Mackie::LedState
 MackieControlProtocol::view_press (Mackie::Button&)
 {
 	set_view_mode (Mixer);
-	refresh_current_bank();
+	switch_banks (_last_mix_bank, true);
 	return none;
 }
 Mackie::LedState
