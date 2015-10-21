@@ -264,7 +264,7 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string&)
 #else
 	CFURLRef url = CFURLCreateFromFileSystemRepresentation (kCFAllocatorDefault, (const UInt8*)path.c_str (), strlen (path.c_str ()), false);
 	OSStatus res = ExtAudioFileOpenURL(url, &af);
-	CFRelease (url);
+	if (url) CFRelease (url);
 
 	if (res != noErr) {
 		goto out;
