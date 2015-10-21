@@ -1062,6 +1062,11 @@ Surface::update_view_mode_display ()
 		id = Button::Aux;
 		text = _("Auxes");
 		break;
+	case MackieControlProtocol::Selected:
+		show_two_char_display ("SE");
+		id = Button::User;
+		text = _("Selected Routes");
+		break;
 	default:
 		break;
 	}
@@ -1073,6 +1078,7 @@ Surface::update_view_mode_display ()
 	view_mode_buttons.push_back (Button::AudioTracks);
 	view_mode_buttons.push_back (Button::MidiTracks);
 	view_mode_buttons.push_back (Button::Aux);
+	view_mode_buttons.push_back (Button::User);
 
 	if (id >= 0) {
 

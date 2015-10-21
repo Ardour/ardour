@@ -107,6 +107,7 @@ class MackieControlProtocol
 		MidiTracks,
 		Busses,
 		Auxes,
+		Selected,
 		Plugins,
 	};
 
@@ -149,6 +150,7 @@ class MackieControlProtocol
 	bool is_track (boost::shared_ptr<ARDOUR::Route>) const;
 	bool is_audio_track (boost::shared_ptr<ARDOUR::Route>) const;
 	bool is_midi_track (boost::shared_ptr<ARDOUR::Route>) const;
+	bool selected (boost::shared_ptr<ARDOUR::Route>) const;
 
 	void set_view_mode (ViewMode);
 	void set_flip_mode (FlipMode);

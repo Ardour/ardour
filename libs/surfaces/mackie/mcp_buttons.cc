@@ -935,6 +935,8 @@ MackieControlProtocol::user_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::user_release (Mackie::Button&)
 {
+	set_view_mode (Selected);
+	refresh_current_bank();
 	return none;
 }
 Mackie::LedState

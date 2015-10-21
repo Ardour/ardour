@@ -299,7 +299,7 @@ MackieControlProtocol::get_sorted_routes()
 				remote_ids.insert (route->remote_control_id());
 			}
 			break;
-		case MidiTracks:
+		case MidiTracks: // for now aux and buss are same
 			if (is_midi_track(*it)) {
 				sorted.push_back (*it);
 				remote_ids.insert (route->remote_control_id());
@@ -307,7 +307,17 @@ MackieControlProtocol::get_sorted_routes()
 			break;
 		case Plugins:
 			break;
-		case Auxes:
+		case Auxes: // for now aux and buss are same
+			if (!is_track(*it)) {
+				sorted.push_back (*it);
+				remote_ids.insert (route->remote_control_id());
+			}
+			break;
+		case Selected: // For example: a group
+			if (selected(*it)) {
+				sorted.push_back (*it);
+				remote_ids.insert (route->remote_control_id());
+			}
 			break;
 		}
 
@@ -2018,4 +2028,18 @@ bool
 MackieControlProtocol::is_midi_track (boost::shared_ptr<Route> r) const
 {
 	return boost::dynamic_pointer_cast<MidiTrack>(r) != 0;
+}
+
+bool
+MackieControlProtocol::selected (boost::shared_ptr<Route> r) const
+{
+	const RouteNotificationList* rl = &_last_selected_routes;
+
+	for (ARDOUR::RouteNotificationList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<ARDOUR::Route> rt = (*i).lock();
+		if (rt == r) {
+			return true;
+		}
+	}
+	return false;
 }
