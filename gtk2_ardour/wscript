@@ -684,7 +684,7 @@ def build(bld):
 
         obj              = bld(features = 'subst')
         obj.source       = 'ardour-mime-info.xml'
-        obj.target       = str (bld.env['lwrcase_dirname']) + '.xml'
+        obj.target       = 'ardour.xml'
         obj.chmod        = Utils.O644
 
     # Keybindings
