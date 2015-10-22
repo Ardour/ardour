@@ -1508,7 +1508,7 @@ WaveView::start_drawing_thread ()
 void
 WaveView::stop_drawing_thread ()
 {
-	if (_drawing_thread) {
+	while (_drawing_thread) {
 		Glib::Threads::Mutex::Lock lm (request_queue_lock);
 		g_atomic_int_set (&drawing_thread_should_quit, 1);
 		request_cond.signal ();
@@ -1537,8 +1537,7 @@ WaveView::drawing_thread ()
 		}
 
 		if (request_queue.empty()) {
-			assert (g_atomic_int_get (&drawing_thread_should_quit));
-			continue; // or break;
+			continue;
 		}
 
 		/* remove the request from the queue (remember: the "request"
