@@ -192,6 +192,14 @@ Track::RecEnableControl::RecEnableControl (boost::shared_ptr<Track> t)
 void
 Track::RecEnableControl::set_value (double val)
 {
+	if (writable()) {
+		set_value_unchecked (val);
+	}
+}
+
+void
+Track::RecEnableControl::set_value_unchecked (double val)
+{
 	boost::shared_ptr<Track> t = track.lock ();
 	if (!t) {
 		return;

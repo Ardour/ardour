@@ -37,7 +37,15 @@ PanControllable::lower () const
 void
 PanControllable::set_value (double v)
 {
-        boost::shared_ptr<Panner> p = owner->panner();
+	if (writable()) {
+		set_value_unchecked (v);
+	}
+}
+
+void
+PanControllable::set_value_unchecked (double v)
+{
+	boost::shared_ptr<Panner> p = owner->panner();
 
         if (!p) {
                 /* no panner: just do it */

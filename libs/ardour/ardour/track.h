@@ -207,6 +207,7 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 		RecEnableControl (boost::shared_ptr<Track> t);
 
 		void set_value (double);
+		void set_value_unchecked (double);
 		double get_value (void) const;
 
 		boost::weak_ptr<Track> track;

@@ -389,6 +389,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	public:
 		SoloControllable (std::string name, boost::shared_ptr<Route>);
 		void set_value (double);
+		void set_value_unchecked (double);
 		double get_value () const;
 
 	private:
@@ -399,6 +400,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	public:
 		MuteControllable (std::string name, boost::shared_ptr<Route>);
 		void set_value (double);
+		void set_value_unchecked (double);
 		double get_value () const;
 
 		/* Pretend to change value, but do not affect actual route mute. */

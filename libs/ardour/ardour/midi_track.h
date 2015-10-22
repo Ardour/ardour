@@ -90,6 +90,8 @@ public:
 		{}
 
 		void set_value (double val);
+		void set_value_unchecked (double);
+		bool writable() const { return true; }
 
 		MidiTrack* _route;
 	};

@@ -405,7 +405,16 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 				const float val = c->list()->rt_safe_eval (now, valid);
 
 				if (valid) {
-					c->set_value(val);
+					/* This is the ONLY place where we are
+					 *  allowed to call
+					 *  AutomationControl::set_value_unchecked(). We
+					 *  know that the control is in
+					 *  automation playback mode, so no
+					 *  check on writable() is required
+					 *  (which must be done in AutomationControl::set_value()
+					 *
+					 */
+					c->set_value_unchecked(val);
 				}
 
 			}
@@ -1295,6 +1304,14 @@ PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
 void
 PluginInsert::PluginControl::set_value (double user_val)
 {
+	if (writable()) {
+		set_value_unchecked (user_val);
+	}
+}
+
+void
+PluginInsert::PluginControl::set_value_unchecked (double user_val)
+{
 	/* FIXME: probably should be taking out some lock here.. */
 
 	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
@@ -1359,6 +1376,14 @@ PluginInsert::PluginPropertyControl::PluginPropertyControl (PluginInsert*       
 
 void
 PluginInsert::PluginPropertyControl::set_value (double user_val)
+{
+	if (writable()) {
+		set_value_unchecked (user_val);
+	}
+}
+
+void
+PluginInsert::PluginPropertyControl::set_value_unchecked (double user_val)
 {
 	/* Old numeric set_value(), coerce to appropriate datatype if possible.
 	   This is lossy, but better than nothing until Ardour's automation system

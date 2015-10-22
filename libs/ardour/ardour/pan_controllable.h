@@ -48,6 +48,7 @@ public:
 
 	double lower () const;
 	void set_value (double);
+	void set_value_unchecked (double);
 
 private:
 	Pannable* owner;

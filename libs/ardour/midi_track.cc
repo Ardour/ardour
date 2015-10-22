@@ -717,6 +717,14 @@ MidiTrack::set_parameter_automation_state (Evoral::Parameter param, AutoState st
 void
 MidiTrack::MidiControl::set_value(double val)
 {
+	if (writable()) {
+		set_value_unchecked (val);
+	}
+}
+
+void
+MidiTrack::MidiControl::set_value_unchecked(double val)
+{
 	const Evoral::Parameter &parameter = _list ? _list->parameter() : Control::parameter();
 	const Evoral::ParameterDescriptor &desc = EventTypeMap::instance().descriptor(parameter);
 

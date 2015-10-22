@@ -25,6 +25,7 @@
 #include "ardour/session.h"
 
 #include "pbd/memento_command.h"
+#include "pbd/stacktrace.h"
 
 #include "i18n.h"
 
@@ -46,6 +47,16 @@ AutomationControl::AutomationControl(ARDOUR::Session&                          s
 
 AutomationControl::~AutomationControl ()
 {
+}
+
+bool
+AutomationControl::writable() const
+{
+	boost::shared_ptr<AutomationList> al = alist();
+	if (al) {
+		return al->automation_state() != Play;
+	}
+	return true;
 }
 
 /** Get the current effective `user' value based on automation state */

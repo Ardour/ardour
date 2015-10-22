@@ -3848,6 +3848,14 @@ Route::SoloControllable::SoloControllable (std::string name, boost::shared_ptr<R
 void
 Route::SoloControllable::set_value (double val)
 {
+	if (writable()) {
+		set_value_unchecked (val);
+	}
+}
+
+void
+Route::SoloControllable::set_value_unchecked (double val)
+{
 	const bool bval = ((val >= 0.5) ? true : false);
 
 	boost::shared_ptr<RouteList> rl (new RouteList);
@@ -3920,6 +3928,14 @@ Route::MuteControllable::set_superficial_value(bool muted)
 
 void
 Route::MuteControllable::set_value (double val)
+{
+	if (writable()) {
+		set_value_unchecked (val);
+	}
+}
+
+void
+Route::MuteControllable::set_value_unchecked (double val)
 {
 	const bool bval = ((val >= 0.5) ? true : false);
 

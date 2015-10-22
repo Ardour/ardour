@@ -91,6 +91,7 @@ public:
 		}
 
 		void set_value (double val);
+		void set_value_unchecked (double);
 
 		double internal_to_interface (double) const;
 		double interface_to_internal (double) const;

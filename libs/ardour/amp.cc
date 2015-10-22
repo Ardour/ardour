@@ -403,6 +403,14 @@ Amp::set_state (const XMLNode& node, int version)
 void
 Amp::GainControl::set_value (double val)
 {
+	if (writable()) {
+		set_value_unchecked (val);
+	}
+}
+
+void
+Amp::GainControl::set_value_unchecked (double val)
+{
 	AutomationControl::set_value (std::max (std::min (val, (double)_desc.upper), (double)_desc.lower));
 	_amp->session().set_dirty ();
 }
