@@ -983,7 +983,7 @@ LV2Plugin::add_state(XMLNode* root) const
 	assert(_insert_id != PBD::ID("0"));
 
 	XMLNode*    child;
-	char        buf[16];
+	char        buf[32];
 	LocaleGuard lg(X_("C"));
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
