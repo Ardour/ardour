@@ -668,6 +668,18 @@ def build(bld):
         obj.stdout = program + '.menus'
         bld.install_files (bld.env['CONFDIR'], program + '.menus')
 
+    # Freedesktop
+    if bld.env['FREEDESKTOP']:
+        obj              = bld(features = 'subst')
+        obj.source       = 'ardour.desktop.in'
+        obj.target       = bld.env['PROGRAM_NAME'].lower() + str (bld.env['MAJOR']) + '.desktop'
+        obj.chmod        = Utils.O644
+
+        obj              = bld(features = 'subst')
+        obj.source       = 'ardour-mime-info.xml'
+        obj.target       = bld.env['PROGRAM_NAME'].lower() + str (bld.env['MAJOR']) + '.xml'
+        obj.chmod        = Utils.O644
+
     # Keybindings
 
     # 'SAE-de-keypad', 'SAE-de-nokeypad', 'SAE-us-keypad',

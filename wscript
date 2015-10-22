@@ -643,7 +643,7 @@ def options(opt):
     opt.add_option('--no-fpu-optimization', action='store_false', dest='fpu_optimization')
     opt.add_option('--exports-hidden', action='store_true', default=False, dest='exports_hidden')
     opt.add_option('--freedesktop', action='store_true', default=False, dest='freedesktop',
-                    help='Install MIME type, icons and .desktop file as per freedesktop.org standards')
+                    help='Build MIME type and .desktop files as per freedesktop.org standards (will be placed in build/gtk2_ardour)')
     opt.add_option('--freebie', action='store_true', default=False, dest='freebie',
                     help='Build a version suitable for distribution as a zero-cost binary')
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
@@ -983,6 +983,8 @@ int main () { int x = SFC_AUTO_DOWNGRADE_RF64; return 0; }
         conf.env['PHONE_HOME'] = True
     if opts.fpu_optimization:
         conf.env['FPU_OPTIMIZATION'] = True
+    if opts.freedesktop:
+        conf.env['FREEDESKTOP'] = True
     if opts.nls:
         conf.define('ENABLE_NLS', 1)
         conf.env['ENABLE_NLS'] = True
