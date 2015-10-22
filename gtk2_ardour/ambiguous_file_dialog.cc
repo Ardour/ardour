@@ -29,8 +29,10 @@ using namespace Gtk;
 AmbiguousFileDialog::AmbiguousFileDialog (const string& file, const vector<string>& paths)
 	: ArdourDialog (_("Ambiguous File"), true, false)
 {
-	get_vbox()->set_spacing (6);
+	/* This dialog is always shown programatically. Center the window.*/
+	set_position (Gtk::WIN_POS_CENTER);
 
+	get_vbox()->set_spacing (6);
 	Label* l = manage (new Label);
 	l->set_markup (string_compose (_("%1 has found the file <i>%2</i> in the following places:\n\n"), PROGRAM_NAME, file));
 	get_vbox()->pack_start (*l);

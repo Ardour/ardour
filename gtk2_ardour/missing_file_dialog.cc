@@ -42,7 +42,10 @@ MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataT
         , all_missing_ok (choice_group, _("Skip all missing files"), false)
         , this_missing_ok (choice_group, _("Skip this file"), false)
 {
-        set_session (s);
+	/* This dialog is always shown programatically. Center the window.*/
+	set_position (Gtk::WIN_POS_CENTER);
+
+	set_session (s);
 
         add_button (_("Done"), RESPONSE_OK);
         set_default_response (RESPONSE_OK);

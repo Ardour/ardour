@@ -28,7 +28,10 @@ using namespace PBD;
 MissingPluginDialog::MissingPluginDialog (Session * s, list<string> const & plugins)
         : ArdourDialog (_("Missing Plugins"), true, false)
 {
-        set_session (s);
+	/* This dialog is always shown programatically. Center the window.*/
+	set_position (Gtk::WIN_POS_CENTER);
+
+	set_session (s);
 
         add_button (_("OK"), RESPONSE_OK);
         set_default_response (RESPONSE_OK);
