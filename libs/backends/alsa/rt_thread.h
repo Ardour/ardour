@@ -36,7 +36,7 @@ _realtime_pthread_create (
 
 	const int p_min = sched_get_priority_min (policy);
 	const int p_max = sched_get_priority_max (policy);
-	priority += p_max;
+	priority += p_min;
 	if (priority > p_max) priority = p_max;
 	if (priority < p_min) priority = p_min;
 	parm.sched_priority = priority;
