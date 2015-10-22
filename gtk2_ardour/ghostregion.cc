@@ -30,6 +30,7 @@
 #include "ghostregion.h"
 #include "midi_streamview.h"
 #include "midi_time_axis.h"
+#include "region_view.h"
 #include "rgb_macros.h"
 #include "note.h"
 #include "hit.h"
@@ -40,11 +41,14 @@ using namespace Editing;
 using namespace ArdourCanvas;
 using namespace ARDOUR;
 
-PBD::Signal1<void,GhostRegion*> GhostRegion::CatchDeletion;
-
-GhostRegion::GhostRegion (ArdourCanvas::Container* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_pos)
-	: trackview (tv)
-	, source_trackview (source_tv)
+GhostRegion::GhostRegion(RegionView& rv,
+                         ArdourCanvas::Container* parent,
+                         TimeAxisView& tv,
+                         TimeAxisView& source_tv,
+                         double initial_pos)
+    : parent_rv(rv)
+    , trackview(tv)
+    , source_trackview(source_tv)
 {
 	group = new ArdourCanvas::Container (parent);
 	CANVAS_DEBUG_NAME (group, "ghost region");
@@ -70,7 +74,8 @@ GhostRegion::GhostRegion (ArdourCanvas::Container* parent, TimeAxisView& tv, Tim
 
 GhostRegion::~GhostRegion ()
 {
-	CatchDeletion (this);
+	parent_rv.remove_ghost(this);
+	trackview.erase_ghost(this);
 	delete base_rect;
 	delete group;
 }
@@ -108,8 +113,11 @@ GhostRegion::is_automation_ghost()
 	return (dynamic_cast<AutomationTimeAxisView*>(&trackview)) != 0;
 }
 
-AudioGhostRegion::AudioGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
-	: GhostRegion(tv.ghost_group(), tv, source_tv, initial_unit_pos)
+AudioGhostRegion::AudioGhostRegion(RegionView& rv,
+                                   TimeAxisView& tv,
+                                   TimeAxisView& source_tv,
+                                   double initial_unit_pos)
+    : GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
 {
 
 }
@@ -162,12 +170,16 @@ AudioGhostRegion::set_colors ()
 /** The general constructor; called when the destination timeaxisview doesn't have
  *  a midistreamview.
  *
+ *  @param rv The parent RegionView that is being ghosted.
  *  @param tv TimeAxisView that this ghost region is on.
  *  @param source_tv TimeAxisView that we are the ghost for.
  */
-MidiGhostRegion::MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
-	: GhostRegion(tv.ghost_group(), tv, source_tv, initial_unit_pos)
-	, _optimization_iterator (events.end ())
+MidiGhostRegion::MidiGhostRegion(RegionView& rv,
+                                 TimeAxisView& tv,
+                                 TimeAxisView& source_tv,
+                                 double initial_unit_pos)
+    : GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
+    , _optimization_iterator(events.end())
 {
 	base_rect->lower_to_bottom();
 	update_range ();
@@ -176,12 +188,20 @@ MidiGhostRegion::MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, doub
 }
 
 /**
+ *  @param rv The parent RegionView being ghosted.
  *  @param msv MidiStreamView that this ghost region is on.
  *  @param source_tv TimeAxisView that we are the ghost for.
  */
-MidiGhostRegion::MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, double initial_unit_pos)
-	: GhostRegion(msv.midi_underlay_group, msv.trackview(), source_tv, initial_unit_pos)
-	, _optimization_iterator (events.end ())
+MidiGhostRegion::MidiGhostRegion(RegionView& rv,
+                                 MidiStreamView& msv,
+                                 TimeAxisView& source_tv,
+                                 double initial_unit_pos)
+    : GhostRegion(rv,
+                  msv.midi_underlay_group,
+                  msv.trackview(),
+                  source_tv,
+                  initial_unit_pos)
+    , _optimization_iterator(events.end())
 {
 	base_rect->lower_to_bottom();
 	update_range ();
