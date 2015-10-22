@@ -145,6 +145,10 @@ namespace Gtk {
 	class ProgressBar;
 }
 
+namespace Gtkmm2ext {
+	class Tabbable;
+}
+
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 {
     public:

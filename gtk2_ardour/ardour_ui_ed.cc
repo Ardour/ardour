@@ -57,6 +57,7 @@
 #include "global_port_matrix.h"
 #include "location_ui.h"
 #include "main_clock.h"
+#include "rc_option_editor.h"
 
 #include <gtkmm2ext/application.h>
 

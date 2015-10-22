@@ -506,7 +506,7 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 		return;
 	}
 	
-	if (!UIConfiguration::instance()->get_autoscroll_editor () || autoscroll_active ()) {
+	if (!UIConfiguration::instance().get_autoscroll_editor () || autoscroll_active ()) {
 		return;
 	}
 

@@ -1706,8 +1706,8 @@ ARDOUR_UI::check_audioengine (Gtk::Window& parent)
 {
 	if (!AudioEngine::instance()->connected()) {
 		MessageDialog msg (parent, string_compose (
-					   _("%1 is not connected to any audio backend.\n"
-					     "You cannot open or close sessions in this condition"),
+			                   _("%1 is not connected to any audio backend.\n"
+			                     "You cannot open or close sessions in this condition"),
 					   PROGRAM_NAME));
 		pop_back_splash (msg);
 		msg.run ();
@@ -1719,7 +1719,7 @@ ARDOUR_UI::check_audioengine (Gtk::Window& parent)
 void
 ARDOUR_UI::open_session ()
 {
-	if (!check_audioengine(*editor)) {
+	if (!check_audioengine (_main_window)) {
 		return;
 	}
 
@@ -2773,7 +2773,7 @@ ARDOUR_UI::save_template ()
 {
 	ArdourPrompter prompter (true);
 
-	if (!check_audioengine(*editor)) {
+	if (!check_audioengine (_main_window)) {
 		return;
 	}
 
@@ -3181,7 +3181,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 void
 ARDOUR_UI::close_session()
 {
-	if (!check_audioengine(*editor)) {
+	if (!check_audioengine (_main_window)) {
 		return;
 	}
 
@@ -5353,3 +5353,16 @@ ARDOUR_UI::load_bindings ()
 	}
 }
 
+void
+ARDOUR_UI::cancel_solo ()
+{
+	if (_session) {
+		if (_session->soloing()) {
+			_session->set_solo (_session->get_routes(), false);
+		} else if (_session->listening()) {
+			_session->set_listen (_session->get_routes(), false);
+		}
+
+		_session->clear_all_solo_state (_session->get_routes()); // safeguard, ideally this won't do anything, check the log-window
+	}
+}

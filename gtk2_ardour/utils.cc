@@ -54,6 +54,7 @@
 #include "gui_thread.h"
 #include "ui_config.h"
 #include "ardour_dialog.h"
+#include "ardour_ui.h"
 
 using namespace std;
 using namespace Gtk;

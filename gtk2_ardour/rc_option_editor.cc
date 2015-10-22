@@ -54,6 +54,7 @@
 
 #include "ardour_window.h"
 #include "ardour_dialog.h"
+#include "ardour_ui.h"
 #include "gui_thread.h"
 #include "meter_patterns.h"
 #include "midi_tracer.h"

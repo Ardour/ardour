@@ -58,6 +58,7 @@
 #endif
 
 #include "ardour_window.h"
+#include "ardour_ui.h"
 #include "prompter.h"
 #include "plugin_ui.h"
 #include "utils.h"
@@ -361,27 +362,26 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 			}
 		}
 		return true;
-	} else {
-		/* for us to be getting key press events, there really
-		   MUST be a _pluginui, but just to be safe, check ...
-		*/
-
-		if (_pluginui) {
-			_pluginui->grab_focus();
-			if (_pluginui->non_gtk_gui()) {
-				/* pass main window as the window for the event
-				   to be handled in, not this one, because there are
-				   no widgets in this window that we want to have
-				   key focus.
-				*/
-				return relay_key_press (event, &ARDOUR_UI::instance()->main_window());
-			} else {
-				return relay_key_press (event, this);
-			}
+	} 
+	/* for us to be getting key press events, there really
+	   MUST be a _pluginui, but just to be safe, check ...
+	*/
+	
+	if (_pluginui) {
+		_pluginui->grab_focus();
+		if (_pluginui->non_gtk_gui()) {
+			/* pass main window as the window for the event
+			   to be handled in, not this one, because there are
+			   no widgets in this window that we want to have
+			   key focus.
+			*/
+			return relay_key_press (event, &ARDOUR_UI::instance()->main_window());
 		} else {
-			return false;
+			return relay_key_press (event, this);
 		}
-	}
+	} 
+
+	return false;
 }
 
 bool

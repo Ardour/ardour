@@ -40,6 +40,7 @@
 #include "mixer_ui.h"
 #include "keyboard.h"
 #include "splash.h"
+#include "rc_option_editor.h"
 #include "route_params_ui.h"
 #include "opts.h"
 #include "utils.h"
@@ -104,7 +105,7 @@ ARDOUR_UI::we_have_dependents ()
 	boost::function<void (std::string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
 
-	ARDOUR_UI_UTILS::reset_dpi ();
+	UIConfiguration::instance().reset_dpi ();
 }
 
 void

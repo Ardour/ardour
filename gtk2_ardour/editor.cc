@@ -492,11 +492,11 @@ Editor::Editor ()
 	build_snap_type_menu();
 	build_edit_point_menu();
 
-	location_marker_color = ARDOUR_UI::config()->color ("location marker");
-	location_range_color = ARDOUR_UI::config()->color ("location range");
-	location_cd_marker_color = ARDOUR_UI::config()->color ("location cd marker");
-	location_loop_color = ARDOUR_UI::config()->color ("location loop");
-	location_punch_color = ARDOUR_UI::config()->color ("location punch");
+	location_marker_color = UIConfiguration::instance().color ("location marker");
+	location_range_color = UIConfiguration::instance().color ("location range");
+	location_cd_marker_color = UIConfiguration::instance().color ("location cd marker");
+	location_loop_color = UIConfiguration::instance().color ("location loop");
+	location_punch_color = UIConfiguration::instance().color ("location punch");
 
 	timebar_height = std::max(12., ceil (15. * ARDOUR_UI::ui_scale));
 
