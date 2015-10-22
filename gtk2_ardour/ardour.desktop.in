@@ -1,9 +1,9 @@
 [Desktop Entry]
 Name=Ardour
 Comment=Ardour Digital Audio Workstation
-Exec=ardour4
-Icon=ardour4
+Exec=@ARDOUR_EXEC@
+Icon=@ARDOUR_ICON@
 Terminal=false
-MimeType=application/x-ardour4;
+MimeType=application/x-ardour;
 Type=Application
 Categories=AudioVideo;Audio;AudioEditing;X-Recorders;X-Multitrack;X-Jack;
