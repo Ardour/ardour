@@ -409,7 +409,7 @@ Automatable::transport_stopped (framepos_t now)
 		}
 
 		if (l->automation_playback ()) {
-			c->set_value (c->list ()->eval (now));
+			c->set_value_unchecked (c->list ()->eval (now));
 		}
 	}
 }
