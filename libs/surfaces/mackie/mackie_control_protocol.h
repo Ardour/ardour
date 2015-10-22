@@ -155,6 +155,7 @@ class MackieControlProtocol
 	void set_view_mode (ViewMode);
 	void set_flip_mode (FlipMode);
 	void set_pot_mode (PotMode);
+	void display_view_mode ();
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -328,7 +329,7 @@ class MackieControlProtocol
 	ARDOUR::RouteNotificationList _last_selected_routes;
 	XMLNode*                 configuration_state;
 	int                      state_version;
-	int                      _last_mix_bank;
+	int                      _last_bank[9];
 
 	boost::shared_ptr<ArdourSurface::Mackie::Surface>	_master_surface;
 

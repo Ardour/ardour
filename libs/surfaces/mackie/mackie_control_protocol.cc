@@ -124,6 +124,12 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
 
+	for (int i = 0; i < 9; i++) {
+		_last_bank[i] = 0;
+	}
+
+	_last_bank[Mixer] = _current_selected_track;
+
 	TrackSelectionChanged.connect (gui_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::gui_track_selection_changed, this, _1, true), this);
 
 	_instance = this;
@@ -396,7 +402,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	}
 
 	/* reset this to get the right display of view mode after the switch */
-	set_view_mode (_view_mode);
+	display_view_mode ();
 
 	/* make sure selection is correct */
 
@@ -1553,9 +1559,17 @@ MackieControlProtocol::clear_ports ()
 void
 MackieControlProtocol::set_view_mode (ViewMode m)
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	_last_bank[_view_mode] = _current_initial_bank;
 
 	_view_mode = m;
+
+	switch_banks(_last_bank[_view_mode], true);
+}
+
+void
+MackieControlProtocol::display_view_mode ()
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->update_view_mode_display ();
