@@ -3162,6 +3162,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		list<string> const u = new_session->unknown_processors ();
 		if (!u.empty()) {
 			MissingPluginDialog d (_session, u);
+			d.set_position (Gtk::WIN_POS_CENTER);
 			d.run ();
 		}
 	}
@@ -4672,6 +4673,11 @@ int
 ARDOUR_UI::missing_file (Session*s, std::string str, DataType type)
 {
 	MissingFileDialog dialog (s, str, type);
+	/**
+	* This dialog may appear many times in succession, so
+	* we can't use ArdourDialog's default WIN_POS_MOUSE.
+	*/
+	dialog.set_position (Gtk::WIN_POS_CENTER);
 
 	dialog.show ();
 	dialog.present ();
@@ -4695,7 +4701,11 @@ int
 ARDOUR_UI::ambiguous_file (std::string file, std::vector<std::string> hits)
 {
 	AmbiguousFileDialog dialog (file, hits);
-
+	/**
+	* This dialog may appear many times in succession, so
+	* we can't use ArdourDialog's default WIN_POS_MOUSE.
+	*/
+	dialog.set_position (Gtk::WIN_POS_CENTER);
 	dialog.show ();
 	dialog.present ();
 
