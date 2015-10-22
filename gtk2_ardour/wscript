@@ -670,21 +670,21 @@ def build(bld):
 
     # Freedesktop
     freedesktop_subst_dict = {
-                    'ARDOUR_EXEC' : 'ardour' + str (bld.env['MAJOR']),
-                    'ARDOUR_ICON' : 'ardour' + str (bld.env['MAJOR'])
+                    'ARDOUR_EXEC' : str (bld.env['lwrcase_dirname']),
+                    'ARDOUR_ICON' : str (bld.env['lwrcase_dirname'])
     }
 
     if bld.env['FREEDESKTOP']:
         obj              = bld(features = 'subst')
         obj.source       = 'ardour.desktop.in'
-        obj.target       = bld.env['PROGRAM_NAME'].lower() + str (bld.env['MAJOR']) + '.desktop'
+        obj.target       = str (bld.env['lwrcase_dirname']) + '.desktop'
         obj.chmod        = Utils.O644
         obj.dict         = freedesktop_subst_dict
         set_subst_dict(obj, freedesktop_subst_dict)
 
         obj              = bld(features = 'subst')
         obj.source       = 'ardour-mime-info.xml'
-        obj.target       = bld.env['PROGRAM_NAME'].lower() + str (bld.env['MAJOR']) + '.xml'
+        obj.target       = str (bld.env['lwrcase_dirname']) + '.xml'
         obj.chmod        = Utils.O644
 
     # Keybindings
