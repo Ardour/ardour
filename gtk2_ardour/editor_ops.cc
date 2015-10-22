@@ -6122,7 +6122,7 @@ Editor::set_playhead_cursor ()
 		}
 	}
 
-	if (UIConfiguration::instance().get_follow_edits() && !_session->config.get_external_sync()) {
+	if (UIConfiguration::instance().get_follow_edits() && (!_session || !_session->config.get_external_sync())) {
 		cancel_time_selection();
 	}
 }
