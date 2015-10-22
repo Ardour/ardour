@@ -1532,9 +1532,9 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 		/* if ghost is inserted into midi track, use a dedicated midi ghost canvas group
 		   to allow having midi notes on top of note lines and waveforms.
 		*/
-		ghost = new MidiGhostRegion (*mtv->midi_view(), trackview, unit_position);
+		ghost = new MidiGhostRegion (*this, *mtv->midi_view(), trackview, unit_position);
 	} else {
-		ghost = new MidiGhostRegion (tv, trackview, unit_position);
+		ghost = new MidiGhostRegion (*this, tv, trackview, unit_position);
 	}
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
@@ -1544,8 +1544,6 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_height ();
 	ghost->set_duration (_region->length() / samples_per_pixel);
 	ghosts.push_back (ghost);
-
-	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RegionView::remove_ghost, this, _1), gui_context());
 
 	return ghost;
 }

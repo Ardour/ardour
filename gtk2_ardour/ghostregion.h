@@ -32,11 +32,17 @@ class Note;
 class Hit;
 class MidiStreamView;
 class TimeAxisView;
+class RegionView;
 
 class GhostRegion : public sigc::trackable
 {
 public:
-	GhostRegion(ArdourCanvas::Container* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
+	GhostRegion(RegionView& rv,
+	            ArdourCanvas::Container* parent,
+	            TimeAxisView& tv,
+	            TimeAxisView& source_tv,
+	            double initial_unit_pos);
+
 	virtual ~GhostRegion();
 
 	virtual void set_samples_per_pixel (double) = 0;
@@ -48,19 +54,21 @@ public:
 	guint source_track_color(unsigned char alpha = 0xff);
 	bool is_automation_ghost();
 
+	RegionView& parent_rv;
 	/** TimeAxisView that is the AutomationTimeAxisView that we are on */
 	TimeAxisView& trackview;
 	/** TimeAxisView that we are a ghost for */
 	TimeAxisView& source_trackview;
 	ArdourCanvas::Container* group;
 	ArdourCanvas::Rectangle* base_rect;
-
-	static PBD::Signal1<void,GhostRegion*> CatchDeletion;
 };
 
 class AudioGhostRegion : public GhostRegion {
 public:
-	AudioGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
+	AudioGhostRegion(RegionView& rv,
+	                 TimeAxisView& tv,
+	                 TimeAxisView& source_tv,
+	                 double initial_unit_pos);
 
 	void set_samples_per_pixel (double);
 	void set_height();
@@ -80,8 +88,16 @@ public:
 	    ArdourCanvas::Item* item;
 	};
 
-	MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
-	MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, double initial_unit_pos);
+	MidiGhostRegion(RegionView& rv,
+	                TimeAxisView& tv,
+	                TimeAxisView& source_tv,
+	                double initial_unit_pos);
+
+	MidiGhostRegion(RegionView& rv,
+	                MidiStreamView& msv,
+	                TimeAxisView& source_tv,
+	                double initial_unit_pos);
+
 	~MidiGhostRegion();
 
 	MidiStreamView* midi_view();

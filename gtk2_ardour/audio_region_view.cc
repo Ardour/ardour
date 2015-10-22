@@ -1384,7 +1384,7 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 	assert(rtv);
 
 	double unit_position = _region->position () / samples_per_pixel;
-	AudioGhostRegion* ghost = new AudioGhostRegion (tv, trackview, unit_position);
+	AudioGhostRegion* ghost = new AudioGhostRegion (*this, tv, trackview, unit_position);
 	uint32_t nchans;
 
 	nchans = rtv->track()->n_channels().n_audio();
