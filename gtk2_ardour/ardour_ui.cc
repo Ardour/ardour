@@ -2495,16 +2495,8 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 		vector<string> n = get_file_names_no_extension (p);
 		if (find (n.begin(), n.end(), snapname) != n.end()) {
 
-			ArdourDialog confirm (_("Confirm Snapshot Overwrite"), true);
-			Label m (_("A snapshot already exists with that name.  Do you want to overwrite it?"));
-			confirm.get_vbox()->pack_start (m, true, true);
-			confirm.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-			confirm.add_button (_("Overwrite"), Gtk::RESPONSE_ACCEPT);
-			confirm.show_all ();
-			switch (confirm.run()) {
-			case RESPONSE_CANCEL:
-				do_save = false;
-			}
+			do_save = overwrite_file_dialog (_("Confirm Snapshot Overwrite"),
+			                                 _("A snapshot already exists with that name. Do you want to overwrite it?"));
 		}
 
 		if (do_save) {
@@ -2690,7 +2682,16 @@ ARDOUR_UI::save_template ()
 		prompter.get_result (name);
 
 		if (name.length()) {
-			_session->save_template (name);
+			int failed = _session->save_template (name);
+
+			if (failed == -2) { /* file already exists. */
+				bool overwrite = overwrite_file_dialog (_("Confirm Template Overwrite"),
+							                _("A template already exists with that name. Do you want to overwrite it?"));
+
+				if (overwrite) {
+					_session->save_template (name, true);
+				}
+			}
 		}
 		break;
 

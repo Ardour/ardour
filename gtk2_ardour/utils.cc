@@ -53,6 +53,7 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "ui_config.h"
+#include "ardour_dialog.h"
 
 using namespace std;
 using namespace Gtk;
@@ -925,4 +926,25 @@ ARDOUR_UI_UTILS::windows_overlap (Gtk::Window *a, Gtk::Window *b)
 		}
 	}
 	return false;
+}
+
+bool
+ARDOUR_UI_UTILS::overwrite_file_dialog (string title, string text)
+{
+	ArdourDialog dialog (title, true);
+	Label label (text);
+
+	dialog.get_vbox()->pack_start (label, true, true);
+	dialog.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	dialog.add_button (_("Overwrite"), Gtk::RESPONSE_ACCEPT);
+	dialog.set_position (Gtk::WIN_POS_MOUSE);
+	dialog.show_all ();
+
+	switch (dialog.run()) {
+	case RESPONSE_ACCEPT:
+		return true;
+	case RESPONSE_CANCEL:
+	default:
+		return false;
+	}
 }
