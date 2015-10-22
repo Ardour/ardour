@@ -37,6 +37,18 @@ class XMLNode;
 
 namespace PBD {
 
+/* This is a pure virtual class to represent a scalar control.
+ *
+ * Note that it contains no storage/state for the controllable thing that it
+ * represents. Derived classes must provide set_value()/get_value() methods,
+ * which will involve (somehow) an actual location to store the value.
+ *
+ * In essence, this is an interface, not a class.
+ *
+ * Without overriding upper() and lower(), a derived class will function
+ * as a control whose value can range between 0 and 1.0.
+ */
+
 class LIBPBD_API Controllable : public PBD::StatefulDestructible {
   public:
 	enum Flag {
@@ -116,9 +128,7 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
         static const std::string xml_node_name;
   private:
 	std::string _name;
-
 	std::string _units;
-
 	Flag        _flags;
 	bool        _touching;
 
