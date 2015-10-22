@@ -1264,6 +1264,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\transpose.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\unknown_processor.cc"
 				>
 			</File>
@@ -2231,6 +2235,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\transient_detector.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\transpose.h"
 				>
 			</File>
 			<File
