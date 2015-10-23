@@ -239,7 +239,9 @@ log_printf(LV2_Log_Handle handle,
 struct LV2Plugin::Impl {
 	Impl() : plugin(0), ui(0), ui_type(0), name(0), author(0), instance(0)
 	       , work_iface(0)
+#ifdef HAVE_LV2_1_2_0
 	       , opts_iface(0)
+#endif
 	       , state(0)
 	       , block_length(0)
 	       , options(0)
@@ -257,7 +259,9 @@ struct LV2Plugin::Impl {
 	LilvNode*                    author;
 	LilvInstance*                instance;
 	const LV2_Worker_Interface*  work_iface;
+#ifdef HAVE_LV2_1_2_0
 	const LV2_Options_Interface* opts_iface;
+#endif
 	LilvState*                   state;
 	LV2_Atom_Forge               forge;
 	LV2_Atom_Forge               ui_forge;
@@ -441,12 +445,14 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	lilv_node_free(worker_iface_uri);
 
 
+#ifdef HAVE_LV2_1_2_0
 	LilvNode* options_iface_uri = lilv_new_uri(_world.world, LV2_OPTIONS__interface);
 	if (lilv_plugin_has_extension_data(plugin, options_iface_uri)) {
 		_impl->opts_iface = (const LV2_Options_Interface*)extension_data(
 			LV2_OPTIONS__interface);
 	}
 	lilv_node_free(options_iface_uri);
+#endif
 
 	if (lilv_plugin_has_feature(plugin, _world.lv2_inPlaceBroken)) {
 		error << string_compose(
