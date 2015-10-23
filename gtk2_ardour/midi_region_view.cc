@@ -543,7 +543,6 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		case MouseContent:
 		case MouseTimeFX:
 			{
-				clear_selection();
 				_mouse_changed_selection = true;
 
 				if (Keyboard::is_insert_note_event(ev)) {
@@ -562,6 +561,8 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					beats -= Evoral::Beats::tick();
 
 					create_note_at (editor.pixel_to_sample (event_x), event_y, beats, true);
+				} else {
+					clear_selection ();
 				}
 
 				break;

@@ -2381,9 +2381,11 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 		/* has to be relative, may make no sense otherwise */
 		relative = true;
 	}
+
 	/* select this note; if it is already selected, preserve the existing selection,
 	   otherwise make this note the only one selected.
 	*/
+	_editor->get_selection().clear_points();
 	region->note_selected (cnote, cnote->selected ());
 }
 
@@ -5298,11 +5300,9 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 			if (add) {
 				_region->note_selected (_primary, true);
 			} else {
+				_editor->get_selection().clear_points();
 				_region->unique_select (_primary);
 			}
-
-			_editor->begin_reversible_selection_op(X_("Select Note Press"));
-			_editor->commit_reversible_selection_op();
 		}
 	}
 }
@@ -5419,13 +5419,16 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 					_region->note_deselected (_primary);
 					changed = true;
 				} else {
+					_editor->get_selection().clear_points();
 					_region->unique_select (_primary);
+					changed = true;
 				}
 			} else {
 				bool extend = Keyboard::modifier_state_equals (ev->button.state, Keyboard::TertiaryModifier);
 				bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 
 				if (!extend && !add && _region->selection_size() > 1) {
+					_editor->get_selection().clear_points();
 					_region->unique_select (_primary);
 					changed = true;
 				} else if (extend) {
@@ -5433,6 +5436,8 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 					changed = true;
 				} else {
 					/* it was added during button press */
+					changed = true;
+
 				}
 			}
 
