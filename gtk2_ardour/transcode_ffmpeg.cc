@@ -96,7 +96,7 @@ TranscodeFfmpeg::probe ()
 	argp[6] = 0;
 	ffcmd = new ARDOUR::SystemExec(ffprobe_exe, argp);
 	ffcmd->ReadStdout.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffprobeparse, this, _1 ,_2));
-	ffcmd->Terminated.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffexit, this));
+	ffcmd->Terminated.connect (*this, invalidator (*this), boost::bind (&TranscodeFfmpeg::ffexit, this), gui_context());
 	if (ffcmd->start(1)) {
 		ffexit();
 		return false;
@@ -110,6 +110,7 @@ TranscodeFfmpeg::probe ()
 	int timeout = 300; // 1.5 sec
 	while (ffcmd && --timeout > 0) {
 		Glib::usleep(5000);
+		ARDOUR::GUIIdle();
 	}
 	if (timeout == 0 || ffoutput.empty()) {
 		return false;
@@ -399,7 +400,7 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 
 	ffcmd = new ARDOUR::SystemExec(ffmpeg_exe, argp);
 	ffcmd->ReadStdout.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffmpegparse_v, this, _1 ,_2));
-	ffcmd->Terminated.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffexit, this));
+	ffcmd->Terminated.connect (*this, invalidator (*this), boost::bind (&TranscodeFfmpeg::ffexit, this), gui_context());
 	if (ffcmd->start(2)) {
 		ffexit();
 		return false;
@@ -447,7 +448,7 @@ TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::framecnt_t /*sample
 
 	ffcmd = new ARDOUR::SystemExec(ffmpeg_exe, argp);
 	ffcmd->ReadStdout.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffmpegparse_a, this, _1 ,_2));
-	ffcmd->Terminated.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffexit, this));
+	ffcmd->Terminated.connect (*this, invalidator (*this), boost::bind (&TranscodeFfmpeg::ffexit, this), gui_context());
 	if (ffcmd->start(2)) {
 		ffexit();
 		return false;
@@ -506,7 +507,7 @@ TranscodeFfmpeg::transcode (std::string outfile, const int outw, const int outh,
 #endif
 	ffcmd = new ARDOUR::SystemExec(ffmpeg_exe, argp);
 	ffcmd->ReadStdout.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffmpegparse_v, this, _1 ,_2));
-	ffcmd->Terminated.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffexit, this));
+	ffcmd->Terminated.connect (*this, invalidator (*this), boost::bind (&TranscodeFfmpeg::ffexit, this), gui_context());
 	if (ffcmd->start(2)) {
 		ffexit();
 		return false;
