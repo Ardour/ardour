@@ -530,6 +530,7 @@ SystemExec::output_interposer()
 		ReadStdout(data, bytesRead);/* EMIT SIGNAL */
 	}
 	Terminated();/* EMIT SIGNAL */
+	pthread_exit(0);
 }
 
 void
@@ -896,6 +897,7 @@ SystemExec::output_interposer()
 		ReadStdout(rv, r);/* EMIT SIGNAL */
 	}
 	Terminated();/* EMIT SIGNAL */
+	pthread_exit(0);
 }
 
 void
