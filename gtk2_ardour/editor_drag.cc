@@ -82,7 +82,10 @@ double ControlPointDrag::_zero_gain_fraction = -1.0;
 DragManager::DragManager (Editor* e)
 	: _editor (e)
 	, _ending (false)
+	, _current_pointer_x (0.0)
+	, _current_pointer_y (0.0)
 	, _current_pointer_frame (0)
+	, _old_follow_playhead (false)
 {
 }
 
@@ -215,15 +218,21 @@ DragManager::have_item (ArdourCanvas::Item* i) const
 
 Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	: _editor (e)
+	, _drags (0)
 	, _item (i)
 	, _pointer_frame_offset (0)
 	, _x_constrained (false)
 	, _y_constrained (false)
+	, _was_rolling (false)
 	, _trackview_only (trackview_only)
 	, _move_threshold_passed (false)
 	, _starting_point_passed (false)
 	, _initially_vertical (false)
 	, _was_double_click (false)
+	, _grab_x (0.0)
+	, _grab_y (0.0)
+	, _last_pointer_x (0.0)
+	, _last_pointer_y (0.0)
 	, _raw_grab_frame (0)
 	, _grab_frame (0)
 	, _last_pointer_frame (0)
@@ -1829,6 +1838,7 @@ RegionMotionDrag::aborted (bool)
 RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b, bool c)
 	: RegionMotionDrag (e, i, p, v, b)
 	, _copy (c)
+	, _new_region_view (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMoveDrag\n");
 
@@ -2727,6 +2737,7 @@ VideoTimeLineDrag::aborted (bool)
 
 TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool preserve_fade_anchor)
 	: RegionDrag (e, i, p, v)
+	, _operation (StartTrim)
 	, _preserve_fade_anchor (preserve_fade_anchor)
 	, _jump_position_when_done (false)
 {
@@ -3105,6 +3116,7 @@ TrimDrag::setup_pointer_frame_offset ()
 MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	: Drag (e, i),
 	  _copy (c)
+	, before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MeterMarkerDrag\n");
 	_marker = reinterpret_cast<MeterMarker*> (_item->get_data ("marker"));
@@ -3234,8 +3246,9 @@ MeterMarkerDrag::aborted (bool moved)
 }
 
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
-	: Drag (e, i),
-	  _copy (c)
+	: Drag (e, i)
+	, _copy (c)
+	, before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoMarkerDrag\n");
 
@@ -3365,6 +3378,7 @@ CursorDrag::CursorDrag (Editor* e, EditorCursor& c, bool s)
 	: Drag (e, &c.track_canvas_item(), false)
 	, _cursor (c)
 	, _stop (s)
+	, _grab_zoom (0.0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New CursorDrag\n");
 }
@@ -3787,6 +3801,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	} else {
 		show_verbose_cursor_time (location->end());
 	}
+	setup_snap_delta (is_start ? location->start() : location->end());
 
 	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 
@@ -3884,8 +3899,9 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	bool move_both = false;
 	Location *real_location;
 	Location *copy_location = 0;
+	framecnt_t const sd = snap_delta (event->button.state);
 
-	framepos_t const newframe = adjusted_current_frame (event);
+	framecnt_t const newframe = adjusted_frame (_drags->current_pointer_frame () + sd, event, true) - sd;
 	framepos_t next = newframe;
 
 	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::push_points_modifier ())) {
@@ -3978,7 +3994,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 				} else 	if (new_start < copy_location->end()) {
 					copy_location->set_start (new_start);
 				} else if (newframe > 0) {
-					_editor->snap_to (next, RoundUpAlways, true);
+					//_editor->snap_to (next, RoundUpAlways, true);
 					copy_location->set_end (next);
 					copy_location->set_start (newframe);
 				}
@@ -3991,7 +4007,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 				} else if (new_end > copy_location->start()) {
 					copy_location->set_end (new_end);
 				} else if (newframe > 0) {
-					_editor->snap_to (next, RoundDownAlways, true);
+					//_editor->snap_to (next, RoundDownAlways, true);
 					copy_location->set_start (next);
 					copy_location->set_end (newframe);
 				}
@@ -4126,10 +4142,13 @@ MarkerDrag::update_item (Location*)
 }
 
 ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i),
-	  _cumulative_x_drag (0)
-	, _cumulative_y_drag (0)
+	: Drag (e, i)
+	, _fixed_grab_x (0.0)
+	, _fixed_grab_y (0.0)
+	, _cumulative_x_drag (0.0)
+	, _cumulative_y_drag (0.0)
 	, _pushing (false)
+	, _final_index (0)
 {
 	if (_zero_gain_fraction < 0.0) {
 		_zero_gain_fraction = gain_to_slider_position_with_max (dB_to_coefficient (0.0), Config->get_max_gain());
@@ -4265,6 +4284,8 @@ ControlPointDrag::active (Editing::MouseMode m)
 LineDrag::LineDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
 	, _line (0)
+	, _fixed_grab_x (0.0)
+	, _fixed_grab_y (0.0)
 	, _cumulative_y_drag (0)
 	, _before (0)
 	, _after (0)
@@ -4373,7 +4394,11 @@ LineDrag::aborted (bool)
 FeatureLineDrag::FeatureLineDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i),
 	  _line (0),
-	  _cumulative_x_drag (0)
+	  _arv (0),
+	  _region_view_grab_x (0.0),
+	  _cumulative_x_drag (0),
+	  _before (0.0),
+	  _max_x (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New FeatureLineDrag\n");
 }
@@ -5326,6 +5351,7 @@ NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
 	, _cumulative_dx (0)
 	, _cumulative_dy (0)
+	, _was_selected (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New NoteDrag\n");
 
