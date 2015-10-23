@@ -533,6 +533,7 @@ private:
 	MidiRegionView*     region;
 	bool                relative;
 	bool                at_front;
+	bool                _was_selected;
 	double              _snap_delta;
 };
 
@@ -556,7 +557,7 @@ class NoteDrag : public Drag
 	NoteBase* _primary;
 	double _cumulative_dx;
 	double _cumulative_dy;
-	bool _was_selected;
+	bool   _was_selected;
 	double _note_height;
 };
 

@@ -2340,6 +2340,7 @@ NoteResizeDrag::NoteResizeDrag (Editor* e, ArdourCanvas::Item* i)
 	, region (0)
 	, relative (false)
 	, at_front (true)
+	, _was_selected (false)
 	, _snap_delta (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New NoteResizeDrag\n");
@@ -2382,11 +2383,26 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 		relative = true;
 	}
 
-	/* select this note; if it is already selected, preserve the existing selection,
-	   otherwise make this note the only one selected.
-	*/
-	_editor->get_selection().clear_points();
-	region->note_selected (cnote, cnote->selected ());
+	if (!(_was_selected = cnote->selected())) {
+
+		/* tertiary-click means extend selection - we'll do that on button release,
+		   so don't add it here, because otherwise we make it hard to figure
+		   out the "extend-to" range.
+		*/
+
+		bool extend = Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier);
+
+		if (!extend) {
+			bool add = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
+
+			if (add) {
+				region->note_selected (cnote, true);
+			} else {
+				_editor->get_selection().clear_points();
+				region->unique_select (cnote);
+			}
+		}
+	}
 }
 
 void
@@ -2444,6 +2460,46 @@ void
 NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
+		/* no motion - select note */
+		NoteBase* cnote = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
+		if (_editor->current_mouse_mode() == Editing::MouseContent ||
+		    _editor->current_mouse_mode() == Editing::MouseDraw) {
+
+			bool changed = false;
+
+			if (_was_selected) {
+				bool add = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
+				if (add) {
+					region->note_deselected (cnote);
+					changed = true;
+				} else {
+					_editor->get_selection().clear_points();
+					region->unique_select (cnote);
+					changed = true;
+				}
+			} else {
+				bool extend = Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier);
+				bool add = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
+
+				if (!extend && !add && region->selection_size() > 1) {
+					_editor->get_selection().clear_points();
+					region->unique_select (cnote);
+					changed = true;
+				} else if (extend) {
+					region->note_selected (cnote, true, true);
+					changed = true;
+				} else {
+					/* it was added during button press */
+					changed = true;
+				}
+			}
+
+			if (changed) {
+				_editor->begin_reversible_selection_op(X_("Resize Select Note Release"));
+				_editor->commit_reversible_selection_op();
+			}
+		}
+
 		return;
 	}
 
