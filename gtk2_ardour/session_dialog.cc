@@ -130,12 +130,13 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	if (recent_session_model) {
 		int cnt = redisplay_recent_sessions ();
 		if (cnt > 0) {
-			recent_scroller.set_size_request (-1, 80);
 			recent_scroller.show();
 			recent_label.show ();
 
 			if (cnt > 4) {
 				recent_scroller.set_size_request (-1, 300);
+			} else {
+				recent_scroller.set_size_request (-1, 80);
 			}
 		} else {
 			recent_scroller.hide();
@@ -179,13 +180,15 @@ SessionDialog::SessionDialog ()
 	get_vbox()->pack_start (recent_scroller, true, true);
 	get_vbox()->show_all ();
 
-	recent_scroller.set_size_request (-1, 80);
 	recent_scroller.show();
 
 	int cnt = redisplay_recent_sessions ();
 	if (cnt > 4) {
 		recent_scroller.set_size_request (-1, 300);
+	} else {
+		recent_scroller.set_size_request (-1, 80);
 	}
+
 }
 
 
