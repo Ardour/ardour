@@ -3757,6 +3757,7 @@ FadeOutDrag::aborted (bool)
 
 MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
+	, _selection_changed (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MarkerDrag\n");
 
@@ -3812,6 +3813,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	case Selection::Set:
 		if (!_editor->selection->selected (_marker)) {
 			_editor->selection->set (_marker);
+			_selection_changed = true;
 		}
 		break;
 	case Selection::Extend:
@@ -3841,11 +3843,14 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		}
 		if (!to_add.empty()) {
 			_editor->selection->add (to_add);
+			_selection_changed = true;
 		}
 		break;
 	}
 	case Selection::Add:
 		_editor->selection->add (_marker);
+		_selection_changed = true;
+
 		break;
 	}
 
@@ -4051,22 +4056,29 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		*/
 
 		Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
-
 		switch (op) {
 		case Selection::Set:
 			if (_editor->selection->selected (_marker) && _editor->selection->markers.size() > 1) {
 				_editor->selection->set (_marker);
+				_selection_changed = true;
 			}
 			break;
 
 		case Selection::Toggle:
 			/* we toggle on the button release, click only */
 			_editor->selection->toggle (_marker);
+			_selection_changed = true;
+
 			break;
 
 		case Selection::Extend:
 		case Selection::Add:
 			break;
+		}
+
+		if (_selection_changed) {
+			_editor->begin_reversible_selection_op(X_("Select Marker Release"));
+			_editor->commit_reversible_selection_op();
 		}
 
 		return;

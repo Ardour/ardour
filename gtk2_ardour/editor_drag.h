@@ -825,7 +825,7 @@ private:
 	void update_item (ARDOUR::Location *);
 
 	ArdourMarker* _marker; ///< marker being dragged
-
+	bool _selection_changed;
         struct CopiedLocationMarkerInfo {
 	    ARDOUR::Location* location;
 	    std::vector<ArdourMarker*> markers;
