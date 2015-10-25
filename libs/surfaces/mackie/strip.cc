@@ -206,7 +206,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	_route->mute_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_mute_changed, this), ui_context());
 
-	if (_route->trim() && !is_midi_track()) {
+	if (_route->trim() && route()->trim()->active()) {
 		_route->trim_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_trim_changed, this, false), ui_context());
 	}
 
@@ -258,7 +258,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 		}
 	}
 
-	if (_route->trim() && !is_midi_track()) {
+	if (_route->trim() && route()->trim()->active()) {
 		possible_pot_parameters.push_back (TrimAutomation);
 	}
 }
@@ -364,7 +364,7 @@ Strip::notify_trim_changed (bool force_update)
 {
 	if (_route) {
 
-		if (!_route->trim() || is_midi_track()) {
+		if (!_route->trim() || !route()->trim()->active()) {
 			_surface->write (_vpot->zero());
 			return;
 		}
@@ -882,7 +882,7 @@ Strip::update_automation ()
 			notify_panner_width_changed (false);
 		}
 	}
-	if (_route->trim() && !is_midi_track()) {
+	if (_route->trim() && route()->trim()->active()) {
 		ARDOUR::AutoState trim_state = _route->trim_control()->automation_state();
 		if (trim_state == Touch || trim_state == Play) {
 			notify_trim_changed (false);
@@ -1196,7 +1196,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 			/* gain to vpot, trim to fader */
 			_vpot->set_control (_route->gain_control());
 			control_by_parameter[GainAutomation] = _vpot;
-			if (_route->trim() && !is_midi_track()) {
+			if (_route->trim() && route()->trim()->active()) {
 				_fader->set_control (_route->trim_control());
 				control_by_parameter[TrimAutomation] = _fader;
 			} else {
@@ -1207,7 +1207,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 			/* gain to fader, trim to vpot */
 			_fader->set_control (_route->gain_control());
 			control_by_parameter[GainAutomation] = _fader;
-			if (_route->trim() && !is_midi_track()) {
+			if (_route->trim() && route()->trim()->active()) {
 				_vpot->set_control (_route->trim_control());
 				control_by_parameter[TrimAutomation] = _vpot;
 			} else {
