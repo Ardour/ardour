@@ -266,7 +266,9 @@ struct LV2Plugin::Impl {
 	LV2_Atom_Forge               forge;
 	LV2_Atom_Forge               ui_forge;
 	int32_t                      block_length;
+#ifdef HAVE_LV2_1_2_0
 	LV2_Options_Option*          options;
+#endif
 };
 
 LV2Plugin::LV2Plugin (AudioEngine& engine,
@@ -692,7 +694,9 @@ LV2Plugin::~LV2Plugin ()
 	lilv_state_free(_impl->state);
 	lilv_node_free(_impl->name);
 	lilv_node_free(_impl->author);
+#ifdef HAVE_LV2_1_2_0
 	free(_impl->options);
+#endif
 
 	free(_features);
 	free(_make_path_feature.data);
