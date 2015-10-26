@@ -108,7 +108,7 @@ Mixer_UI::Mixer_UI ()
 	/* bindings was already set in MixerActor constructor */
 
 	_content.set_data ("ardour-bindings", bindings);
-	
+
 	scroller.set_can_default (true);
 	// set_default (scroller);
 
@@ -2085,20 +2085,16 @@ Mixer_UI::update_title ()
 			n = "*" + n;
 		}
 
-		if (own_window()) {
-			WindowTitle title (n);
-			title += S_("Window|Mixer");
-			title += Glib::get_application_name ();
-			own_window()->set_title (title.get_string());
-		}
+		WindowTitle title (n);
+		title += S_("Window|Mixer");
+		title += Glib::get_application_name ();
+		own_window()->set_title (title.get_string());
 
 	} else {
 
-		if (own_window()) {
-			WindowTitle title (S_("Window|Mixer"));
-			title += Glib::get_application_name ();
-			own_window()->set_title (title.get_string());
-		}
+		WindowTitle title (S_("Window|Mixer"));
+		title += Glib::get_application_name ();
+		own_window()->set_title (title.get_string());
 	}
 }
 
@@ -2172,11 +2168,8 @@ Mixer_UI::maximise_mixer_space ()
 		return;
 	}
 
-	Gtk::Window* win = (Gtk::Window*) get_toplevel();
-
-	if (win) {
-		win->fullscreen ();
-		_maximised = true;
+	if (_maximised) {
+		return;
 	}
 
 	_window->fullscreen ();
@@ -2190,11 +2183,8 @@ Mixer_UI::restore_mixer_space ()
 		return;
 	}
 
-	Gtk::Window* win = (Gtk::Window*) get_toplevel();
-
-	if (win) {
-		win->unfullscreen();
-		_maximised = false;
+	if (!_maximised) {
+		return;
 	}
 
 	own_window()->unfullscreen();

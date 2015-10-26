@@ -852,7 +852,7 @@ MonitorSection::register_actions ()
 	string action_name;
 	string action_descr;
 	Glib::RefPtr<Action> act;
-	
+
 	monitor_actions = myactions.create_action_group (X_("Monitor"));
 
 	myactions.register_toggle_action (monitor_actions, "monitor-mono", _("Switch monitor to mono"),

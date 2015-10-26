@@ -2,14 +2,14 @@
      File: CABufferList.cpp
  Abstract: CABufferList.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "CABufferList.h"
 #include "CAByteOrder.h"
@@ -58,7 +58,7 @@ void		CABufferList::AllocateBuffers(UInt32 nBytes)
 	UInt32 memorySize = nBytes * mABL.mNumberBuffers;
 	Byte *newMemory = new Byte[memorySize], *p = newMemory;
 	memset(newMemory, 0, memorySize);	// get page faults now, not later
-	
+
 	AudioBuffer *buf = mABL.mBuffers;
 	for (UInt32 i = mABL.mNumberBuffers; i--; ++buf) {
 		if (buf->mData != NULL && buf->mDataByteSize > 0)
@@ -84,7 +84,7 @@ void		CABufferList::AllocateBuffersAndCopyFrom(UInt32 nBytes, CABufferList *inSr
 	}
 	inSetPtrList->VerifyNotTrashingOwnedBuffer();
 	UInt32 fromByteSize = inSrcList->GetNumBytes();
-	
+
 	if (mABL.mNumberBuffers > 1)
 		// align successive buffers for Altivec and to take alternating
 		// cache line hits by spacing them by odd multiples of 16
@@ -92,7 +92,7 @@ void		CABufferList::AllocateBuffersAndCopyFrom(UInt32 nBytes, CABufferList *inSr
 	UInt32 memorySize = nBytes * mABL.mNumberBuffers;
 	Byte *newMemory = new Byte[memorySize], *p = newMemory;
 	memset(newMemory, 0, memorySize);	// make buffer "hot"
-	
+
 	AudioBuffer *buf = mABL.mBuffers;
 	AudioBuffer *ptrBuf = inSetPtrList->mABL.mBuffers;
 	AudioBuffer *srcBuf = inSrcList->mABL.mBuffers;
@@ -126,7 +126,7 @@ void		CABufferList::DeallocateBuffers()
 		mBufferMemory = NULL;
 		mBufferCapacity = 0;
 	}
-    
+
 }
 
 static void show(const AudioBufferList &abl, int framesToPrint, int wordSize, const char *label, const char *fmtstr=NULL)
@@ -193,7 +193,7 @@ void CAShowAudioBufferList(const AudioBufferList &abl, int framesToPrint, const 
 	CAStreamBasicDescription fmt(asbd);
 	int wordSize = 1;
 	char fmtstr[80] = { 0 };
-	
+
 	if (fmt.mFormatID == kAudioFormatLinearPCM) {
 		if (fmt.mFormatFlags & kLinearPCMFormatFlagIsFloat) {
 			if (fmt.mBitsPerChannel == 32) {

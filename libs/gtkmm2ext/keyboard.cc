@@ -371,7 +371,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 #if 0
 			/* August 2015: we don't have any release bindings
 			 */
-			
+
 			for (map<AccelKey,two_strings,AccelKeyLess>::iterator k = release_keys.begin(); k != release_keys.end(); ++k) {
 
 				const AccelKey& ak (k->first);
@@ -667,7 +667,7 @@ Keyboard::load_keybindings (string const & path)
 
 		/* Call to specific implementation to load bindings from path */
 		read_keybindings (path);
-		
+
 		_current_binding_name = _("Unknown");
 
 		for (map<string,string>::iterator x = binding_files.begin(); x != binding_files.end(); ++x) {
@@ -697,7 +697,7 @@ Keyboard::read_keybindings (string const & path)
 	}
 
 	/* toplevel node is "BindingSet; children are "Bindings" */
-	
+
 	XMLNodeList const& children = tree.root()->children();
 
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
@@ -707,12 +707,12 @@ Keyboard::read_keybindings (string const & path)
 			        warning << _("Keyboard binding found without a name") << endmsg;
 			        continue;
 		        }
-		        
+
 		        Bindings* b = new Bindings (name->value());
 		        b->load (**i);
 	        }
         }
-	
+
 	return 0;
 }
 
@@ -737,7 +737,7 @@ Keyboard::store_keybindings (string const & path)
 		error << string_compose (_("Cannot save key bindings to %1"), path) << endmsg;
 		ret = -1;
 	}
-	
+
 	return ret;
 }
 

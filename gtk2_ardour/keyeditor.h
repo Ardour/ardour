@@ -40,7 +40,7 @@ class KeyEditor : public ArdourWindow
 	KeyEditor ();
 
 	void add_tab (std::string const &name, Gtkmm2ext::Bindings&);
-	
+
   protected:
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
@@ -50,12 +50,12 @@ class KeyEditor : public ArdourWindow
 	{
  	   public:
 		Tab (KeyEditor&, std::string const &name, Gtkmm2ext::Bindings*);
-		
+
 		void populate ();
 		void unbind ();
 		void bind (GdkEventKey* release_event, guint pressed_key);
 		void action_selected ();
-		
+
 		struct KeyEditorColumns : public Gtk::TreeModel::ColumnRecord {
 			KeyEditorColumns () {
 				add (name);
@@ -70,12 +70,12 @@ class KeyEditor : public ArdourWindow
 			Gtk::TreeModelColumn<bool> bindable;
 			Gtk::TreeModelColumn<Glib::RefPtr<Gtk::Action> > action;
 		};
-		
+
 		Gtk::VBox vpacker;
 		/* give KeyEditor full access to these. This is just a helper
 		   class with no special semantics
 		*/
-		
+
 		KeyEditor& owner;
 		std::string name;
 		Gtkmm2ext::Bindings* bindings;
@@ -86,7 +86,7 @@ class KeyEditor : public ArdourWindow
 	};
 
 	friend class Tab;
-	
+
 	Gtk::VBox vpacker;
 	Gtk::Notebook notebook;
 	Gtk::Button unbind_button;

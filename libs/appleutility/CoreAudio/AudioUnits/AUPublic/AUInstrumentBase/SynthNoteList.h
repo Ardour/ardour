@@ -2,14 +2,14 @@
      File: SynthNoteList.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #ifndef __SynthNoteList__
 #define __SynthNoteList__
@@ -61,26 +61,26 @@
 struct SynthNoteList
 {
 	SynthNoteList() : mState(kNoteState_Unset), mHead(0), mTail(0) {}
-	
+
 	bool NotEmpty() const { return mHead != NULL; }
 	bool IsEmpty() const { return mHead == NULL; }
-	void Empty() { 
+	void Empty() {
 #if USE_SANITY_CHECK
 		SanityCheck();
 #endif
-		mHead = mTail = NULL; 
+		mHead = mTail = NULL;
 	}
-	
+
 	UInt32 Length() const {
 #if USE_SANITY_CHECK
 		SanityCheck();
 #endif
 		UInt32 length = 0;
-		for (SynthNote* note = mHead; note; note = note->mNext) 
+		for (SynthNote* note = mHead; note; note = note->mNext)
 			length++;
 		return length;
 	};
-	
+
 	void AddNote(SynthNote *inNote)
 	{
 #if DEBUG_PRINT
@@ -92,14 +92,14 @@ struct SynthNoteList
 		inNote->SetState(mState);
 		inNote->mNext = mHead;
 		inNote->mPrev = NULL;
-		
+
 		if (mHead) { mHead->mPrev = inNote; mHead = inNote; }
 		else mHead = mTail = inNote;
 #if USE_SANITY_CHECK
 		SanityCheck();
 #endif
 	}
-	
+
 	void RemoveNote(SynthNote *inNote)
 	{
 #if DEBUG_PRINT
@@ -113,7 +113,7 @@ struct SynthNoteList
 
 		if (inNote->mNext) inNote->mNext->mPrev = inNote->mPrev;
 		else mTail = inNote->mPrev;
-		
+
 		inNote->mPrev = 0;
 		inNote->mNext = 0;
 #if USE_SANITY_CHECK
@@ -131,7 +131,7 @@ struct SynthNoteList
 		inNoteList->SanityCheck();
 #endif
 		if (!inNoteList->mTail) return;
-		
+
 		if (mState == kNoteState_Released)
 		{
 			for (SynthNote* note = inNoteList->mHead; note; note = note->mNext)
@@ -150,14 +150,14 @@ struct SynthNoteList
 				note->SetState(mState);
 			}
 		}
-		
+
 		inNoteList->mTail->mNext = mHead;
-		
+
 		if (mHead) mHead->mPrev = inNoteList->mTail;
 		else mTail = inNoteList->mTail;
-		
+
 		mHead = inNoteList->mHead;
-		
+
 		inNoteList->mHead = NULL;
 		inNoteList->mTail = NULL;
 #if USE_SANITY_CHECK
@@ -165,7 +165,7 @@ struct SynthNoteList
 		inNoteList->SanityCheck();
 #endif
 	}
-	
+
 	SynthNote* FindOldestNote()
 	{
 #if DEBUG_PRINT
@@ -186,7 +186,7 @@ struct SynthNoteList
 		}
 		return oldestNote;
 	}
-	
+
 	SynthNote* FindMostQuietNote()
 	{
 #if DEBUG_PRINT
@@ -219,9 +219,9 @@ struct SynthNoteList
 #endif
 		return mostQuietNote;
 	}
-	
+
 	void SanityCheck() const;
-	
+
 	SynthNoteState	mState;
 	SynthNote *		mHead;
 	SynthNote *		mTail;

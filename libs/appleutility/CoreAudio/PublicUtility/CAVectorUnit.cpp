@@ -2,14 +2,14 @@
      File: CAVectorUnit.cpp
  Abstract: CAVectorUnit.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "CAVectorUnit.h"
 
@@ -101,17 +101,17 @@ static bool IsCpuidAvailable()
 {
 	SInt32 return_value = 0x0;
 	_asm{
-		pushfd    ;			//push original EFLAGS 
-		pop eax   ;			//get original EFLAGS 
-		mov ecx, eax   ;	//save original EFLAGS 
-		xor eax, 200000h  ; //flip ID bit in EFLAGS 
-		push eax   ;		//save new EFLAGS value on stack 
-		popfd    ;			//replace current EFLAGS value 
-		pushfd    ;			//get new EFLAGS 
-		pop eax   ;			//store new EFLAGS in EAX 
-		xor eax, ecx   ;	 
+		pushfd    ;			//push original EFLAGS
+		pop eax   ;			//get original EFLAGS
+		mov ecx, eax   ;	//save original EFLAGS
+		xor eax, 200000h  ; //flip ID bit in EFLAGS
+		push eax   ;		//save new EFLAGS value on stack
+		popfd    ;			//replace current EFLAGS value
+		pushfd    ;			//get new EFLAGS
+		pop eax   ;			//store new EFLAGS in EAX
+		xor eax, ecx   ;
 		je end_cpuid_identify  ; //can't toggle ID bit
-		mov return_value, 0x1;	
+		mov return_value, 0x1;
 end_cpuid_identify:
 		nop;
 		}
@@ -123,9 +123,9 @@ end_cpuid_identify:
 SInt32	CAVectorUnit_Examine()
 {
 	int result = kVecNone;
-	
+
 #if TARGET_OS_WIN32
-#if HAS_IPP	
+#if HAS_IPP
 	// Initialize the static IPP library! This needs to be done before
 	// any IPP function calls, otherwise we may have a performance penalty
 	int status = ippStaticInit();
@@ -156,7 +156,7 @@ SInt32	CAVectorUnit_Examine()
 	if (getenv("CA_NoVector")) {
 		fprintf(stderr, "CA_NoVector set; Vector unit optimized routines will be bypassed\n");
 		return result;
-	} 
+	}
 	else
 #endif
 	{

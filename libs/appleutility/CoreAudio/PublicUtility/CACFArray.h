@@ -2,14 +2,14 @@
      File: CACFArray.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #if !defined(__CACFArray_h__)
 #define __CACFArray_h__
@@ -92,21 +92,21 @@ public:
 private:
 	void				Retain()																	{ if(mRelease && (mCFArray != NULL)) { CFRetain(mCFArray); } }
 	void				Release()																	{ if(mRelease && (mCFArray != NULL)) { CFRelease(mCFArray); } }
-		
+
 //	Attributes
 public:
 	bool				IsValid() const																{ return mCFArray != NULL; }
 	bool				IsMutable() const															{ return mMutable; }
 	bool				CanModify() const															{ return mMutable && (mCFArray != NULL); }
-	
+
 	bool				WillRelease() const															{ return mRelease; }
 	void				ShouldRelease(bool inRelease)												{ mRelease = inRelease; }
-	
+
 	CFTypeID			GetTypeID() const															{ return CFGetTypeID(mCFArray); }
-	
+
 	CFArrayRef			GetCFArray() const															{ return mCFArray; }
 	CFArrayRef			CopyCFArray() const															{ if(mCFArray != NULL) { CFRetain(mCFArray); } return mCFArray; }
-	
+
 	CFMutableArrayRef	GetCFMutableArray() const													{ return mCFArray; }
 	CFMutableArrayRef	CopyCFMutableArray() const													{ if(mCFArray != NULL) { CFRetain(mCFArray); } return mCFArray; }
 	CFPropertyListRef   AsPropertyList() const														{ return mCFArray; }
@@ -124,7 +124,7 @@ public:
 	void				Sort(CFComparatorFunction inCompareFunction)								{ if(CanModify()) { CFRange theRange = { 0, CFArrayGetCount(mCFArray) }; CFArraySortValues(mCFArray, theRange, inCompareFunction, NULL); } }
 	void				SortNumbers()																{ Sort((CFComparatorFunction)CFNumberCompare); }
 	void				SortStrings()																{ Sort((CFComparatorFunction)CFStringCompare); }
-	
+
 	bool				GetBool(UInt32 inIndex, bool& outValue) const;
 	bool				GetSInt32(UInt32 inIndex, SInt32& outItem) const;
 	bool				GetUInt32(UInt32 inIndex, UInt32& outItem) const;
@@ -139,11 +139,11 @@ public:
 	bool				GetData(UInt32 inIndex, CFDataRef& outItem) const;
 	bool				GetUUID(UInt32 inIndex, CFUUIDRef& outItem) const;
 	bool				GetCFType(UInt32 inIndex, CFTypeRef& outItem) const;
-	
+
 	void				GetCACFString(UInt32 inIndex, CACFString& outItem) const;
 	void				GetCACFArray(UInt32 inIndex, CACFArray& outItem) const;
 	void				GetCACFDictionary(UInt32 inIndex, CACFDictionary& outItem) const;
-	
+
 	bool				AppendBool(bool inItem);
 	bool				AppendSInt32(SInt32 inItem);
 	bool				AppendUInt32(UInt32 inItem);
@@ -156,7 +156,7 @@ public:
 	bool				AppendDictionary(const CFDictionaryRef inItem);
 	bool				AppendData(const CFDataRef inItem);
 	bool				AppendCFType(const CFTypeRef inItem);
-	
+
 	bool				InsertBool(UInt32 inIndex, bool inItem);
 	bool				InsertSInt32(UInt32 inIndex, SInt32 inItem);
 	bool				InsertUInt32(UInt32 inIndex, UInt32 inItem);
@@ -169,7 +169,7 @@ public:
 	bool				InsertDictionary(UInt32 inIndex, const CFDictionaryRef inItem);
 	bool				InsertData(UInt32 inIndex, const CFDataRef inItem);
 	bool				InsertCFType(UInt32 inIndex, const CFTypeRef inItem);
-	
+
 	bool				SetBool(UInt32 inIndex, bool inItem);
 	bool				SetSInt32(UInt32 inIndex, SInt32 inItem);
 	bool				SetUInt32(UInt32 inIndex, UInt32 inItem);
@@ -188,7 +188,7 @@ private:
 	CFMutableArrayRef	mCFArray;
 	bool				mRelease;
 	bool				mMutable;
-	
+
 						CACFArray(const void*);	// prevent accidental instantiation with a pointer via bool constructor
 };
 

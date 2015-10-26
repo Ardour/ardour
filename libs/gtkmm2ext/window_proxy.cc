@@ -40,7 +40,7 @@ WindowProxy::WindowProxy (const std::string& name)
 	, _x_off (-1)
 	, _y_off (-1)
 	, _width (-1)
-	, _height (-1) 
+	, _height (-1)
 	, vistracker (0)
 {
 }
@@ -53,7 +53,7 @@ WindowProxy::WindowProxy (const std::string& name, const std::string& menu_name)
 	, _x_off (-1)
 	, _y_off (-1)
 	, _width (-1)
-	, _height (-1) 
+	, _height (-1)
 	, vistracker (0)
 {
 }
@@ -66,7 +66,7 @@ WindowProxy::WindowProxy (const std::string& name, const std::string& menu_name,
 	, _x_off (-1)
 	, _y_off (-1)
 	, _width (-1)
-	, _height (-1) 
+	, _height (-1)
 	, vistracker (0)
 {
 	set_state (node, 0);
@@ -130,13 +130,13 @@ WindowProxy::set_action (Glib::RefPtr<Gtk::Action> act)
 }
 
 std::string
-WindowProxy::action_name() const 
+WindowProxy::action_name() const
 {
 	return string_compose (X_("toggle-%1"), _name);
 }
 
 void
-WindowProxy::toggle() 
+WindowProxy::toggle()
 {
 	if (!_window) {
 		(void) get (true);
@@ -176,12 +176,12 @@ XMLNode&
 WindowProxy::get_state ()
 {
 	XMLNode* node = new XMLNode (xml_node_name());
-	char buf[32];	
+	char buf[32];
 
 	node->add_property (X_("name"), _name);
 
 	if (_window && vistracker) {
-		
+
 		/* we have a window, so use current state */
 
 		_visible = vistracker->partially_visible ();
@@ -232,7 +232,7 @@ WindowProxy::setup ()
 
 	set_pos_and_size ();
 }
-	
+
 void
 WindowProxy::show ()
 {

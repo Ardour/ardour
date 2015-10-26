@@ -2,14 +2,14 @@
      File: CACFPreferences.cpp
  Abstract: CACFPreferences.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 //==================================================================================================
 //	Includes
@@ -63,23 +63,23 @@ CFPropertyListRef	CACFPreferences::CopyValue(CFStringRef inKey, bool inCurrentUs
 {
 	//	synchronize to make sure that what's in memory matches what's on disk
 	Synchronize(inCurrentUser, inCurrentHost, false);
-	
+
 	CFPropertyListRef theAnswer = NULL;
 	CFStringRef theUser = inCurrentUser ? kCFPreferencesCurrentUser : kCFPreferencesAnyUser;
 	CFStringRef theHost = inCurrentHost ? kCFPreferencesCurrentHost : kCFPreferencesAnyHost;
-	
+
 	theAnswer = CFPreferencesCopyValue(inKey, kCFPreferencesAnyApplication, theUser, theHost);
-	
+
 	return theAnswer;
 }
 
 CFStringRef	CACFPreferences::CopyStringValue(CFStringRef inKey, bool inCurrentUser, bool inCurrentHost)
 {
 	CFStringRef theAnswer = NULL;
-	
+
 	//	get the raw value
 	CFPropertyListRef theRawValue = CopyValue(inKey, inCurrentUser, inCurrentHost);
-	
+
 	if(theRawValue != NULL)
 	{
 		//	get it's type ID and make sure it's a CFString
@@ -95,17 +95,17 @@ CFStringRef	CACFPreferences::CopyStringValue(CFStringRef inKey, bool inCurrentUs
 			DebugMessage("CACFPreferences::CopyStringValue: not a CFString");
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 CFNumberRef	CACFPreferences::CopyNumberValue(CFStringRef inKey, bool inCurrentUser, bool inCurrentHost)
 {
 	CFNumberRef theAnswer = NULL;
-	
+
 	//	get the raw value
 	CFPropertyListRef theRawValue = CopyValue(inKey, inCurrentUser, inCurrentHost);
-	
+
 	if(theRawValue != NULL)
 	{
 		//	get it's type ID and make sure it's a CFNumber
@@ -121,17 +121,17 @@ CFNumberRef	CACFPreferences::CopyNumberValue(CFStringRef inKey, bool inCurrentUs
 			DebugMessage("CACFPreferences::CopyNumberValue: not a CFNumber");
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 CFArrayRef	CACFPreferences::CopyArrayValue(CFStringRef inKey, bool inCurrentUser, bool inCurrentHost)
 {
 	CFArrayRef theAnswer = NULL;
-	
+
 	//	get the raw value
 	CFPropertyListRef theRawValue = CopyValue(inKey, inCurrentUser, inCurrentHost);
-	
+
 	if(theRawValue != NULL)
 	{
 		//	get it's type ID and make sure it's a CFArray
@@ -147,17 +147,17 @@ CFArrayRef	CACFPreferences::CopyArrayValue(CFStringRef inKey, bool inCurrentUser
 			DebugMessage("CACFPreferences::CopyArrayValue: not a CFArray");
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 CFDictionaryRef	CACFPreferences::CopyDictionaryValue(CFStringRef inKey, bool inCurrentUser, bool inCurrentHost)
 {
 	CFDictionaryRef theAnswer = NULL;
-	
+
 	//	get the raw value
 	CFPropertyListRef theRawValue = CopyValue(inKey, inCurrentUser, inCurrentHost);
-	
+
 	if(theRawValue != NULL)
 	{
 		//	get it's type ID and make sure it's a CFDictionary
@@ -173,7 +173,7 @@ CFDictionaryRef	CACFPreferences::CopyDictionaryValue(CFStringRef inKey, bool inC
 			DebugMessage("CACFPreferences::CopyDictionaryValue: not a CFDictionary");
 		}
 	}
-	
+
 	return theAnswer;
 }
 
@@ -182,7 +182,7 @@ void	CACFPreferences::SetValue(CFStringRef inKey, CFPropertyListRef inValue, boo
 	CFStringRef theUser = inCurrentUser ? kCFPreferencesCurrentUser : kCFPreferencesAnyUser;
 	CFStringRef theHost = inCurrentHost ? kCFPreferencesCurrentHost : kCFPreferencesAnyHost;
 	CFPreferencesSetValue(inKey, inValue, kCFPreferencesAnyApplication, theUser, theHost);
-	
+
 	if(inSynchronize)
 	{
 		Synchronize(inCurrentUser, inCurrentHost, true);
@@ -194,7 +194,7 @@ void	CACFPreferences::DeleteValue(CFStringRef inKey, bool inCurrentUser, bool in
 	CFStringRef theUser = inCurrentUser ? kCFPreferencesCurrentUser : kCFPreferencesAnyUser;
 	CFStringRef theHost = inCurrentHost ? kCFPreferencesCurrentHost : kCFPreferencesAnyHost;
 	CFPreferencesSetValue(inKey, NULL, kCFPreferencesAnyApplication, theUser, theHost);
-	
+
 	if(inSynchronize)
 	{
 		Synchronize(theUser, inCurrentHost, true);
@@ -260,7 +260,7 @@ void	CACFPreferences::SendNotification(CFStringRef inName)
 bool	CACFPreferences::ArePrefsOutOfDate(bool inCurrentUser, bool inCurrentHost)
 {
 	bool theAnswer = false;
-	
+
 	if(!inCurrentUser && !inCurrentHost)
 	{
 		theAnswer = sAnyUserAnyHostPrefsOutOfDate;
@@ -277,7 +277,7 @@ bool	CACFPreferences::ArePrefsOutOfDate(bool inCurrentUser, bool inCurrentHost)
 	{
 		theAnswer = sCurrentUserCurrentHostPrefsOutOfDate;
 	}
-	
+
 	return theAnswer;
 }
 

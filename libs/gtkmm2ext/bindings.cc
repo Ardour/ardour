@@ -155,7 +155,7 @@ KeyboardKey::display_label () const
 	/* This magically returns a string that will display the right thing
 	 *  on all platforms, notably the command key on OS X.
 	 */
-	
+
 	return gtk_accelerator_get_label (key(), (GdkModifierType) state());
 }
 
@@ -200,7 +200,7 @@ KeyboardKey::name () const
 	        /* fail! */
 	        return string();
         }
-	        
+
         return str;
 }
 
@@ -227,7 +227,7 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
 
         string::size_type lastmod = str.find_last_of ('-');
         guint keyval;
-        
+
         if (lastmod == string::npos) {
                 keyval = gdk_keyval_from_name (str.c_str());
         } else {
@@ -266,7 +266,7 @@ KeyboardKey
 Bindings::get_binding_for_action (RefPtr<Action> action, Operation& op)
 {
 	const string action_name = ardour_action_name (action);
-	
+
         for (KeybindingMap::iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
 
 	        /* option one: action has already been associated with the
@@ -285,11 +285,11 @@ Bindings::get_binding_for_action (RefPtr<Action> action, Operation& op)
 		        k->second.action = _action_map->find_action (action_name);
 		        return k->first;
 	        }
-	         
+
         }
 
         for (KeybindingMap::iterator k = release_bindings.begin(); k != release_bindings.end(); ++k) {
-	        
+
 	        /* option one: action has already been associated with the
 	         * binding
 	         */
@@ -306,9 +306,9 @@ Bindings::get_binding_for_action (RefPtr<Action> action, Operation& op)
 		         k->second.action = _action_map->find_action (action_name);
 		         return k->first;
 	         }
-	         
+
         }
-        
+
         return KeyboardKey::null_key();
 }
 
@@ -318,10 +318,10 @@ Bindings::set_action_map (ActionMap& actions)
 	if (_action_map) {
 		_action_map->set_bindings (0);
 	}
-	
+
 	_action_map = &actions;
 	_action_map->set_bindings (this);
-	
+
 	dissociate ();
 	associate ();
 }
@@ -357,7 +357,7 @@ Bindings::activate (KeyboardKey kb, Operation op)
                 kbm = &release_bindings;
                 break;
         }
-        
+
         KeybindingMap::iterator k = kbm->find (kb);
 
         if (k == kbm->end()) {
@@ -367,7 +367,7 @@ Bindings::activate (KeyboardKey kb, Operation op)
         }
 
         RefPtr<Action> action;
-        
+
         if (k->second.action) {
 	        action = k->second.action;
         } else {
@@ -411,7 +411,7 @@ Bindings::associate ()
 	}
 
 	MouseButtonBindingMap::iterator b;
-	
+
 	for (b = button_press_bindings.begin(); b != button_press_bindings.end(); ++b) {
 		b->second.action = _action_map->find_action (b->second.action_name);
 	}
@@ -442,14 +442,14 @@ Bindings::push_to_gtk (KeyboardKey kb, RefPtr<Action> what)
          * reimplement this functionality, so we will use it even though we no
          * longer use GTK accelerators for handling key events. To do this, we
          * need to make sure that there is a fully populated GTK AccelMap set
-         * up with all bindings/actions. 
+         * up with all bindings/actions.
          */
 
 	uint32_t gtk_legal_keyval = kb.key();
 	possibly_translate_keyval_to_make_legal_accelerator (gtk_legal_keyval);
 	KeyboardKey gtk_binding (kb.state(), gtk_legal_keyval);
 	Gtk::AccelKey gtk_key;
-	
+
 	bool entry_exists = Gtk::AccelMap::lookup_entry (what->get_accel_path(), gtk_key);
 
         if (!entry_exists) {
@@ -484,7 +484,7 @@ Bindings::replace (KeyboardKey kb, Operation op, string const & action_name, boo
 	 *   - key is not used
 	 *   - action is not bound
 	 */
-	
+
 	RefPtr<Action> action = _action_map->find_action (action_name);
 
         if (!action) {
@@ -520,7 +520,7 @@ Bindings::replace (KeyboardKey kb, Operation op, string const & action_name, boo
         add (kb, op, action_name, can_save);
 
         /* for now, this never fails */
-        
+
         return true;
 }
 
@@ -542,9 +542,9 @@ Bindings::add (KeyboardKey kb, Operation op, string const& action_name, bool can
 
         if (k != kbm->end()) {
 	        kbm->erase (k);
-        } 
+        }
         KeybindingMap::value_type new_pair (kb, ActionInfo (action_name));
-        
+
         kbm->insert (new_pair).first;
 
         if (can_save) {
@@ -631,7 +631,7 @@ Bindings::activate (MouseButton bb, Operation op)
         }
 
         RefPtr<Action> action;
-        
+
         if (b->second.action) {
 	        action = b->second.action;
         } else {
@@ -747,7 +747,7 @@ bool
 Bindings::load (XMLNode const& node)
 {
         const XMLNodeList& children (node.children());
-        
+
         press_bindings.clear ();
         release_bindings.clear ();
 
@@ -829,7 +829,7 @@ Bindings::get_all_actions (std::vector<std::string>& paths,
 
 	ActionMap::Actions all_actions;
 	_action_map->get_actions (all_actions);
-	
+
 	for (ActionMap::Actions::const_iterator act = all_actions.begin(); act != all_actions.end(); ++act) {
 
 		paths.push_back ((*act)->get_accel_path());
@@ -917,10 +917,10 @@ ActionMap::create_action_group (const string& name)
 	/* this is one of the places where our own Action management code
 	   has to touch the GTK one, because we want the GtkUIManager to
 	   be able to create widgets (particularly Menus) from our actions.
-	   
+
 	   This is a a necessary step for that to happen.
 	*/
-	
+
 	if (g) {
 		ActionManager::ui_manager->insert_action_group (g);
 	}
@@ -928,7 +928,7 @@ ActionMap::create_action_group (const string& name)
 	return g;
 }
 
-RefPtr<Action> 
+RefPtr<Action>
 ActionMap::register_action (RefPtr<ActionGroup> group, const char* name, const char* label)
 {
         string fullpath;
@@ -938,7 +938,7 @@ ActionMap::register_action (RefPtr<ActionGroup> group, const char* name, const c
         fullpath = group->get_name();
         fullpath += '/';
         fullpath += name;
-        
+
         if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
 	        group->add (act);
 	        return act;
@@ -948,7 +948,7 @@ ActionMap::register_action (RefPtr<ActionGroup> group, const char* name, const c
         return RefPtr<Action> ();
 }
 
-RefPtr<Action> 
+RefPtr<Action>
 ActionMap::register_action (RefPtr<ActionGroup> group,
                             const char* name, const char* label, sigc::slot<void> sl)
 {
@@ -969,17 +969,17 @@ ActionMap::register_action (RefPtr<ActionGroup> group,
         return RefPtr<Action>();
 }
 
-RefPtr<Action> 
+RefPtr<Action>
 ActionMap::register_radio_action (RefPtr<ActionGroup> group,
                                   Gtk::RadioAction::Group& rgroup,
-                                  const char* name, const char* label, 
+                                  const char* name, const char* label,
                                   sigc::slot<void> sl)
 {
         string fullpath;
 
         RefPtr<Action> act = RadioAction::create (rgroup, name, label);
         RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-        
+
         fullpath = group->get_name();
         fullpath += '/';
         fullpath += name;
@@ -993,10 +993,10 @@ ActionMap::register_radio_action (RefPtr<ActionGroup> group,
         return RefPtr<Action>();
 }
 
-RefPtr<Action> 
+RefPtr<Action>
 ActionMap::register_radio_action (RefPtr<ActionGroup> group,
                                   Gtk::RadioAction::Group& rgroup,
-                                  const char* name, const char* label, 
+                                  const char* name, const char* label,
                                   sigc::slot<void,GtkAction*> sl,
                                   int value)
 {
@@ -1020,7 +1020,7 @@ ActionMap::register_radio_action (RefPtr<ActionGroup> group,
         return RefPtr<Action>();
 }
 
-RefPtr<Action> 
+RefPtr<Action>
 ActionMap::register_toggle_action (RefPtr<ActionGroup> group,
                                    const char* name, const char* label, sigc::slot<void> sl)
 {
@@ -1049,7 +1049,7 @@ ActionMap::get_all_actions (std::vector<std::string>& paths,
                            std::vector<RefPtr<Action> >& actions)
 {
 	for (list<ActionMap*>::const_iterator map = action_maps.begin(); map != action_maps.end(); ++map) {
-		
+
 		ActionMap::Actions these_actions;
 		(*map)->get_actions (these_actions);
 
@@ -1059,16 +1059,16 @@ ActionMap::get_all_actions (std::vector<std::string>& paths,
 			labels.push_back ((*act)->get_label());
 			tooltips.push_back ((*act)->get_tooltip());
 			actions.push_back (*act);
-			
+
 			Bindings* bindings = (*map)->bindings();
 
 			if (bindings) {
-				
+
 				KeyboardKey key;
 				Bindings::Operation op;
-				
+
 				key = bindings->get_binding_for_action (*act, op);
-				
+
 				if (key == KeyboardKey::null_key()) {
 					keys.push_back (string());
 				} else {

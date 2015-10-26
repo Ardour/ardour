@@ -745,7 +745,7 @@ Editor::Editor ()
 	/* need to show the "contents" widget so that notebook will show if tab is switched to
 	 */
 
-	global_hpacker.show (); 
+	global_hpacker.show ();
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
@@ -1258,7 +1258,7 @@ Editor::update_title ()
 	if (!own_window()) {
 		return;
 	}
-		
+
 	if (_session) {
 		bool dirty = _session->dirty();
 
@@ -2183,7 +2183,7 @@ Editor::set_state (const XMLNode& node, int version)
 	set_id (node);
 
 	Tabbable::set_state (node, version);
-	
+
 	if (_session && (prop = node.property ("playhead"))) {
 		framepos_t pos;
 		sscanf (prop->value().c_str(), "%" PRIi64, &pos);
@@ -2414,13 +2414,13 @@ Editor::get_state ()
 	node->add_property ("id", buf);
 
 	node->add_child_nocopy (Tabbable::get_state());
-	
+
 	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&edit_pane)->gobj()));
 	node->add_property("edit-horizontal-pane-pos", string(buf));
 	node->add_property("notebook-shrunk", _notebook_shrunk ? "1" : "0");
 	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&editor_summary_pane)->gobj()));
 	node->add_property("edit-vertical-pane-pos", string(buf));
-	
+
 	maybe_add_mixer_strip_width (*node);
 
 	node->add_property ("zoom-focus", enum_2_string (zoom_focus));
@@ -2885,9 +2885,9 @@ Editor::setup_toolbar ()
 	if (!ARDOUR::Profile->get_trx()) {
 		mode_box->pack_start (edit_mode_selector, false, false);
 	}
-	
+
 	mode_box->pack_start (*mouse_mode_box, false, false);
-	
+
 	/* Zoom */
 
 	_zoom_box.set_spacing (2);
@@ -5607,12 +5607,12 @@ Editor::session_going_away ()
 	stop_step_editing ();
 
 	if (own_window()) {
-	
+
 		/* get rid of any existing editor mixer strip */
-		
+
 		WindowTitle title(Glib::get_application_name());
 		title += _("Editor");
-		
+
 		own_window()->set_title (title.get_string());
 	}
 
@@ -5851,7 +5851,7 @@ Gtk::Window*
 Editor::use_own_window (bool and_fill_it)
 {
 	bool new_window = !own_window();
-	
+
 	Gtk::Window* win = Tabbable::use_own_window (and_fill_it);
 
 	if (win && new_window) {
@@ -5862,39 +5862,39 @@ Editor::use_own_window (bool and_fill_it)
 		// win->signal_realize().connect (*this, &Editor::on_realize);
 		win->signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
 		win->set_data ("ardour-bindings", bindings);
-		
+
 		update_title ();
 	}
 
 	DisplaySuspender ds;
 	contents().show_all ();
-	
+
 	/* XXX: this is a bit unfortunate; it would probably
 	   be nicer if we could just call show () above rather
 	   than needing the show_all ()
 	*/
-	
+
 	/* re-hide stuff if necessary */
 	editor_list_button_toggled ();
 	parameter_changed ("show-summary");
 	parameter_changed ("show-group-tabs");
 	parameter_changed ("show-zoom-tools");
-	
+
 	/* now reset all audio_time_axis heights, because widgets might need
 	   to be re-hidden
 	*/
-	
+
 	TimeAxisView *tv;
-	
+
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		tv = (static_cast<TimeAxisView*>(*i));
 		tv->reset_height ();
 	}
-	
+
 	if (current_mixer_strip) {
 		current_mixer_strip->hide_things ();
 		current_mixer_strip->parameter_changed ("mixer-element-visibility");
 	}
-	
+
 	return win;
 }

@@ -2,14 +2,14 @@
      File: ComponentBase.cpp
  Abstract: ComponentBase.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "ComponentBase.h"
 #include "CAXException.h"
@@ -72,11 +72,11 @@ static OSStatus CB_GetComponentDescription (const AudioComponentInstance inInsta
 	static OSStatus CMgr_GetComponentDescription (const AudioComponentInstance inInstance, AudioComponentDescription * outDesc);
 #endif
 
-ComponentBase::ComponentBase(AudioComponentInstance inInstance) 
-	: mComponentInstance(inInstance), 
-	  mInstanceType(sNewInstanceType) 
-{ 
-	GetComponentDescription(); 
+ComponentBase::ComponentBase(AudioComponentInstance inInstance)
+	: mComponentInstance(inInstance),
+	  mInstanceType(sNewInstanceType)
+{
+	GetComponentDescription();
 }
 
 ComponentBase::~ComponentBase()
@@ -99,7 +99,7 @@ OSStatus ComponentBase::AP_Open(void *self, AudioUnit compInstance)
 	OSStatus result = noErr;
 	try {
 		ComponentInitLocker lock;
-		
+
 		ComponentBase::sNewInstanceType = ComponentBase::kAudioComponentInstance;
 		ComponentBase *cb = (ComponentBase *)(*ACPI->mConstruct)(&ACPI->mInstanceStorage, compInstance);
 		cb->PostConstructor();	// allows base class to do additional initialization
@@ -137,13 +137,13 @@ OSStatus		ComponentBase::ComponentEntryDispatch(ComponentParameters *p, Componen
 	if (This == NULL) return kAudio_ParamError;
 
 	OSStatus result = noErr;
-	
+
 	switch (p->what) {
 	case kComponentCloseSelect:
 		This->PreDestructor();
 		delete This;
 		break;
-	
+
 	case kComponentVersionSelect:
 		result = This->Version();
 		break;
@@ -158,7 +158,7 @@ OSStatus		ComponentBase::ComponentEntryDispatch(ComponentParameters *p, Componen
 		default:
 			return 0;
 		}
-		
+
 	default:
 		result = badComponentSelector;
 		break;
@@ -169,7 +169,7 @@ OSStatus		ComponentBase::ComponentEntryDispatch(ComponentParameters *p, Componen
 SInt16		ComponentBase::GetSelectorForCanDo(ComponentParameters *params)
 {
 	if (params->what != kComponentCanDoSelect) return 0;
-	
+
 	#if TARGET_CPU_X86
 		SInt16 sel = params->params[0];
 	#elif TARGET_CPU_X86_64
@@ -179,9 +179,9 @@ SInt16		ComponentBase::GetSelectorForCanDo(ComponentParameters *params)
 	#else
 		SInt16 sel = params->params[0];
 	#endif
-	
+
 	return sel;
-/*		
+/*
 		printf ("flags:%d, paramSize: %d, what: %d\n\t", params->flags, params->paramSize, params->what);
 		for (int i = 0; i < params->paramSize; ++i) {
 			printf ("[%d]:%d(0x%x), ", i, params->params[i], params->params[i]);
@@ -192,7 +192,7 @@ SInt16		ComponentBase::GetSelectorForCanDo(ComponentParameters *params)
 
 #endif
 
-#if CA_DO_NOT_USE_AUDIO_COMPONENT 
+#if CA_DO_NOT_USE_AUDIO_COMPONENT
 static OSStatus ComponentBase_GetComponentDescription (const AudioComponentInstance & inInstance, AudioComponentDescription &outDesc);
 #endif
 
@@ -200,20 +200,20 @@ AudioComponentDescription ComponentBase::GetComponentDescription() const
 {
 	AudioComponentDescription desc;
 	OSStatus result = 1;
-	
+
 	if (IsPluginObject()) {
 		ca_require_noerr(result = CB_GetComponentDescription (mComponentInstance, &desc), home);
 	}
 #if !CA_USE_AUDIO_PLUGIN_ONLY
 	else {
-		ca_require_noerr(result = CMgr_GetComponentDescription (mComponentInstance, &desc), home);	
+		ca_require_noerr(result = CMgr_GetComponentDescription (mComponentInstance, &desc), home);
 	}
 #endif
 
 home:
 	if (result)
 		memset (&desc, 0, sizeof(AudioComponentDescription));
-	
+
 	return desc;
 }
 
@@ -239,13 +239,13 @@ static OSStatus CB_GetComponentDescription (const AudioComponentInstance inInsta
 {
 	typedef AudioComponent (*AudioComponentInstanceGetComponentProc) (AudioComponentInstance);
 	static AudioComponentInstanceGetComponentProc aciGCProc = NULL;
-	
+
 	typedef OSStatus (*AudioComponentGetDescriptionProc)(AudioComponent, AudioComponentDescription *);
 	static AudioComponentGetDescriptionProc acGDProc = NULL;
-	
+
 	static int doneInit = 0;
 	if (doneInit == 0) {
-		doneInit = 1;	
+		doneInit = 1;
 		void* theImage = dlopen("/System/Library/Frameworks/AudioUnit.framework/AudioUnit", RTLD_LAZY);
 		if (theImage != NULL)
 		{
@@ -255,13 +255,13 @@ static OSStatus CB_GetComponentDescription (const AudioComponentInstance inInsta
 			}
 		}
 	}
-	
+
 	OSStatus result = kAudio_UnimplementedError;
 	if (acGDProc && aciGCProc) {
 		AudioComponent comp = (*aciGCProc)(inInstance);
 		if (comp)
 			result = (*acGDProc)(comp, outDesc);
-	} 
+	}
 #if !CA_USE_AUDIO_PLUGIN_ONLY
 	else {
 		result = CMgr_GetComponentDescription (inInstance, outDesc);
@@ -317,7 +317,7 @@ static void CSInit ()
 	dispatch_once_f(&sCSInitOnce, NULL, CSInitOnce);
 }
 
-#else 
+#else
 
 static void CSInit ()
 {

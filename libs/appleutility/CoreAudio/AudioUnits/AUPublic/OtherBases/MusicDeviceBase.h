@@ -2,14 +2,14 @@
      File: MusicDeviceBase.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #ifndef __MusicDeviceBase_h__
 #define __MusicDeviceBase_h__
@@ -57,23 +57,23 @@
 class MusicDeviceBase : public AUBase, public AUMIDIBase {
 public:
 	/*! @ctor MusicDeviceBase */
-								MusicDeviceBase(		AudioComponentInstance			inInstance, 
+								MusicDeviceBase(		AudioComponentInstance			inInstance,
 														UInt32							numInputs,
 														UInt32							numOutputs,
 														UInt32							numGroups = 0);
 
 
-	virtual OSStatus	MIDIEvent(		UInt32 						inStatus, 
-										UInt32 						inData1, 
-										UInt32 						inData2, 
+	virtual OSStatus	MIDIEvent(		UInt32 						inStatus,
+										UInt32 						inData1,
+										UInt32 						inData2,
 										UInt32 						inOffsetSampleFrame)
 	{
 		return AUMIDIBase::MIDIEvent (inStatus, inData1, inData2, inOffsetSampleFrame);
 	}
 
 	/*! @method SysEx */
-	virtual OSStatus	SysEx(			const UInt8 *				inData, 
-										UInt32 						inLength) 
+	virtual OSStatus	SysEx(			const UInt8 *				inData,
+										UInt32 						inLength)
 	{
 		return AUMIDIBase::SysEx (inData, inLength);
 	}
@@ -90,7 +90,7 @@ public:
 												AudioUnitScope 				inScope,
 												AudioUnitElement		 	inElement,
 												void *						outData);
-												
+
 	/*! @method SetProperty */
 	virtual OSStatus			SetProperty(			AudioUnitPropertyID 			inID,
 														AudioUnitScope 					inScope,
@@ -103,7 +103,7 @@ public:
 												UInt8 	inNoteNumber,
 												UInt8 	inVelocity,
 												UInt32 	inStartFrame);
-																								
+
 	/*! @method HandleNoteOff */
 	virtual OSStatus			HandleNoteOff(	UInt8 	inChannel,
 												UInt8 	inNoteNumber,

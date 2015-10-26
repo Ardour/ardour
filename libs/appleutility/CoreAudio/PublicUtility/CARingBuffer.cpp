@@ -2,14 +2,14 @@
      File: CARingBuffer.cpp
  Abstract: CARingBuffer.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "CARingBuffer.h"
 #include "CABitOperations.h"
@@ -69,9 +69,9 @@ CARingBuffer::~CARingBuffer()
 void	CARingBuffer::Allocate(int nChannels, UInt32 bytesPerFrame, UInt32 capacityFrames)
 {
 	Deallocate();
-	
+
 	capacityFrames = NextPowerOfTwo(capacityFrames);
-	
+
 	mNumberChannels = nChannels;
 	mBytesPerFrame = bytesPerFrame;
 	mCapacityFrames = capacityFrames;
@@ -88,7 +88,7 @@ void	CARingBuffer::Allocate(int nChannels, UInt32 bytesPerFrame, UInt32 capacity
 		mBuffers[i] = p;
 		p += mCapacityBytes;
 	}
-	
+
 	for (UInt32 i = 0; i<kGeneralRingTimeBoundsQueueSize; ++i)
 	{
 		mTimeBoundsQueue[i].mStartTime = 0;
@@ -157,12 +157,12 @@ CARingBufferError	CARingBuffer::Store(const AudioBufferList *abl, UInt32 framesT
 {
 	if (framesToWrite == 0)
 		return kCARingBufferError_OK;
-	
+
 	if (framesToWrite > mCapacityFrames)
 		return kCARingBufferError_TooMuch;		// too big!
 
 	SampleTime endWrite = startWrite + framesToWrite;
-	
+
 	if (startWrite < EndTime()) {
 		// going backwards, throw everything out
 		SetTimeBounds(startWrite, startWrite);
@@ -174,13 +174,13 @@ CARingBufferError	CARingBuffer::Store(const AudioBufferList *abl, UInt32 framesT
 		SampleTime newEnd = std::max(newStart, EndTime());
 		SetTimeBounds(newStart, newEnd);
 	}
-	
+
 	// write the new frames
 	Byte **buffers = mBuffers;
 	int nchannels = mNumberChannels;
 	int offset0, offset1, nbytes;
 	SampleTime curEnd = EndTime();
-	
+
 	if (startWrite > curEnd) {
 		// we are skipping some samples, so zero the range we are skipping
 		offset0 = FrameOffset(curEnd);
@@ -204,10 +204,10 @@ CARingBufferError	CARingBuffer::Store(const AudioBufferList *abl, UInt32 framesT
 		StoreABL(buffers, offset0, abl, 0, nbytes);
 		StoreABL(buffers, 0, abl, nbytes, offset1);
 	}
-	
+
 	// now update the end time
 	SetTimeBounds(StartTime(), endWrite);
-	
+
 	return kCARingBufferError_OK;	// success
 }
 
@@ -215,7 +215,7 @@ void	CARingBuffer::SetTimeBounds(SampleTime startTime, SampleTime endTime)
 {
 	UInt32 nextPtr = mTimeBoundsQueuePtr + 1;
 	UInt32 index = nextPtr & kGeneralRingTimeBoundsQueueMask;
-	
+
 	mTimeBoundsQueue[index].mStartTime = startTime;
 	mTimeBoundsQueue[index].mEndTime = endTime;
 	mTimeBoundsQueue[index].mUpdateCounter = nextPtr;
@@ -229,12 +229,12 @@ CARingBufferError	CARingBuffer::GetTimeBounds(SampleTime &startTime, SampleTime 
 		UInt32 curPtr = mTimeBoundsQueuePtr;
 		UInt32 index = curPtr & kGeneralRingTimeBoundsQueueMask;
 		CARingBuffer::TimeBounds* bounds = mTimeBoundsQueue + index;
-		
+
 		startTime = bounds->mStartTime;
 		endTime = bounds->mEndTime;
 		UInt32 newPtr = bounds->mUpdateCounter;
-		
-		if (newPtr == curPtr) 
+
+		if (newPtr == curPtr)
 			return kCARingBufferError_OK;
 	}
 	return kCARingBufferError_CPUOverload;
@@ -243,19 +243,19 @@ CARingBufferError	CARingBuffer::GetTimeBounds(SampleTime &startTime, SampleTime 
 CARingBufferError	CARingBuffer::ClipTimeBounds(SampleTime& startRead, SampleTime& endRead)
 {
 	SampleTime startTime, endTime;
-	
+
 	CARingBufferError err = GetTimeBounds(startTime, endTime);
 	if (err) return err;
-	
+
 	if (startRead > endTime || endRead < startTime) {
 		endRead = startRead;
 		return kCARingBufferError_OK;
 	}
-	
+
 	startRead = std::max(startRead, startTime);
 	endRead = std::min(endRead, endTime);
 	endRead = std::max(endRead, startRead);
-		
+
 	return kCARingBufferError_OK;	// success
 }
 
@@ -263,9 +263,9 @@ CARingBufferError	CARingBuffer::Fetch(AudioBufferList *abl, UInt32 nFrames, Samp
 {
 	if (nFrames == 0)
 		return kCARingBufferError_OK;
-		
+
 	startRead = std::max(0LL, startRead);
-	
+
 	SampleTime endRead = startRead + nFrames;
 
 	SampleTime startRead0 = startRead;
@@ -278,25 +278,25 @@ CARingBufferError	CARingBuffer::Fetch(AudioBufferList *abl, UInt32 nFrames, Samp
 		ZeroABL(abl, 0, nFrames * mBytesPerFrame);
 		return kCARingBufferError_OK;
 	}
-	
+
 	SInt32 byteSize = (SInt32)((endRead - startRead) * mBytesPerFrame);
-	
-	SInt32 destStartByteOffset = std::max((SInt32)0, (SInt32)((startRead - startRead0) * mBytesPerFrame)); 
-		
+
+	SInt32 destStartByteOffset = std::max((SInt32)0, (SInt32)((startRead - startRead0) * mBytesPerFrame));
+
 	if (destStartByteOffset > 0) {
 		ZeroABL(abl, 0, std::min((SInt32)(nFrames * mBytesPerFrame), destStartByteOffset));
 	}
 
-	SInt32 destEndSize = std::max((SInt32)0, (SInt32)(endRead0 - endRead)); 
+	SInt32 destEndSize = std::max((SInt32)0, (SInt32)(endRead0 - endRead));
 	if (destEndSize > 0) {
 		ZeroABL(abl, destStartByteOffset + byteSize, destEndSize * mBytesPerFrame);
 	}
-	
+
 	Byte **buffers = mBuffers;
 	int offset0 = FrameOffset(startRead);
 	int offset1 = FrameOffset(endRead);
 	int nbytes;
-	
+
 	if (offset0 < offset1) {
 		nbytes = offset1 - offset0;
 		FetchABL(abl, destStartByteOffset, buffers, offset0, nbytes);

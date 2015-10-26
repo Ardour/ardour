@@ -2,14 +2,14 @@
      File: CompressedPacketTable.cpp
  Abstract: CompressedPacketTable.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "CompressedPacketTable.h"
 #include "CAAutoDisposer.h"
@@ -66,7 +66,7 @@ void CompressedPacketTable::push_back(const AudioStreamPacketDescriptionExtended
 {
 	SInt64 baseIndex = mSize >> kShift;
 	UInt32 packetIndex = (UInt32)(mSize & kMask);
-	
+
 	if (packetIndex == 0) {
 		// first packet in a new sequence. create a new PacketBase.
 		PacketBase newBase;
@@ -75,16 +75,16 @@ void CompressedPacketTable::push_back(const AudioStreamPacketDescriptionExtended
 		newBase.mDescType = kExtendedPacketDescription;
 		mBases.push_back(newBase);
 	}
-	
+
 	PacketBase& base = mBases[(size_t)baseIndex];
 	AudioStreamPacketDescriptionExtended* descs = (AudioStreamPacketDescriptionExtended*)base.mDescs;
 	descs[packetIndex] = inDesc;
-	
+
 	if (packetIndex == kMask) {
 		// last packet in a sequence. compress the sequence.
 		Compress(base);
 	}
-	
+
 	mSize++;
 }
 
@@ -109,13 +109,13 @@ const AudioStreamPacketDescriptionExtended CompressedPacketTable::operator[](SIn
 
 	if ((size_t)baseIndex >= mBases.size())
 		throw -1;
-		
+
 	const PacketBase& base = mBases[(size_t)baseIndex];
-	
+
 	SInt64 packetOffset = 0;
 	UInt32 packetSize = 0;
-		
-	switch (base.mDescType) 
+
+	switch (base.mDescType)
 	{
 		ACCESS_TYPE(Tiny)
 		ACCESS_TYPE(Small)
@@ -123,7 +123,7 @@ const AudioStreamPacketDescriptionExtended CompressedPacketTable::operator[](SIn
 		case kExtendedPacketDescription :
 			return ((AudioStreamPacketDescriptionExtended*)base.mDescs)[packetIndex];
 	}
-	
+
 	AudioStreamPacketDescriptionExtended outDesc;
 	outDesc.mStartOffset = base.mBaseOffset + packetOffset;
 	outDesc.mDataByteSize = packetSize;
@@ -131,14 +131,14 @@ const AudioStreamPacketDescriptionExtended CompressedPacketTable::operator[](SIn
 	outDesc.mFrameOffset = mFramesPerPacket * inPacketIndex;
 
 	//printf("get %d %10qd   %10qd %2d   %10qd %6d %10qd\n", base.mDescType, inPacketIndex, baseIndex, packetIndex, outDesc.mStartOffset, outDesc.mDataByteSize, outDesc.mFrameOffset);
-	
+
 	return outDesc;
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 bool CompressedPacketTable::isContiguous(PacketBase& base)
-{	
+{
 	AudioStreamPacketDescriptionExtended* descs = (AudioStreamPacketDescriptionExtended*)base.mDescs;
 	SInt64 expectedOffset = descs[0].mStartOffset + descs[0].mDataByteSize;
 	for (UInt32 i = 1; i <= kMask; ++i) {
@@ -149,7 +149,7 @@ bool CompressedPacketTable::isContiguous(PacketBase& base)
 }
 
 bool CompressedPacketTable::hasVariableFrames(PacketBase& base)
-{	
+{
 	AudioStreamPacketDescriptionExtended* descs = (AudioStreamPacketDescriptionExtended*)base.mDescs;
 	for (UInt32 i = 0; i <= kMask; ++i) {
 		if (descs[i].mVariableFramesInPacket) return true;
@@ -158,7 +158,7 @@ bool CompressedPacketTable::hasVariableFrames(PacketBase& base)
 }
 
 UInt32 CompressedPacketTable::largestPacket(PacketBase& base)
-{	
+{
 	UInt32 maxPacketSize = 0;
 	AudioStreamPacketDescriptionExtended* descs = (AudioStreamPacketDescriptionExtended*)base.mDescs;
 	for (UInt32 i = 0; i <= kMask; ++i) {
@@ -193,17 +193,17 @@ UInt32 CompressedPacketTable::largestPacket(PacketBase& base)
 
 void CompressedPacketTable::Compress(PacketBase& base)
 {
-	if (hasVariableFrames(base)) 
+	if (hasVariableFrames(base))
 		return;
-	
+
 	bool contiguous = isContiguous(base);
-	
+
 	AudioStreamPacketDescriptionExtended* descs = (AudioStreamPacketDescriptionExtended*)base.mDescs;
 	SInt64 delta = descs[kMask].mStartOffset + descs[kMask].mDataByteSize - descs[0].mStartOffset;
-		
+
 	SInt64 baseOffset = descs[0].mStartOffset;
 	base.mBaseOffset = baseOffset;
-	
+
 	if (delta <= 65535LL) {
 		COMPRESS_TYPE(Tiny, UInt16)
 	} else if (delta <= 4294967295LL && largestPacket(base) <= 65535) {

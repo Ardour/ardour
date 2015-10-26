@@ -95,7 +95,7 @@ public:
 	virtual bool writable () const;
 	/* Call to ::set_value() with no test for writable() because
 	 * this is only used by automation playback. We would like
-	 * to make it pure virtual 
+	 * to make it pure virtual
 	 */
 	virtual void set_value_unchecked (double val) {}
 

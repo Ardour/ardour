@@ -2,14 +2,14 @@
      File: CAHostTimeBase.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #if !defined(__CAHostTimeBase_h__)
 #define __CAHostTimeBase_h__
@@ -101,12 +101,12 @@ public:
 	static SInt64			HostDeltaToNanos(UInt64 inStartTime, UInt64 inEndTime);
 
 	static UInt64			MultiplyByRatio(UInt64 inMuliplicand, UInt32 inNumerator, UInt32 inDenominator);
-	
+
 private:
 	static void				Initialize();
-	
+
 	static pthread_once_t	sIsInited;
-	
+
 	static Float64			sFrequency;
 	static Float64			sInverseFrequency;
 	static UInt32			sMinDelta;
@@ -128,7 +128,7 @@ inline UInt64	CAHostTimeBase::GetTheCurrentTime()
 		QueryPerformanceCounter(&theValue);
 		theTime = *((UInt64*)&theValue);
 	#endif
-	
+
 	#if	Track_Host_TimeBase
 		if(sLastTime != 0)
 		{
@@ -150,7 +150,7 @@ inline UInt64	CAHostTimeBase::GetTheCurrentTime()
 inline UInt64	CAHostTimeBase::ConvertToNanos(UInt64 inHostTime)
 {
 	pthread_once(&sIsInited, Initialize);
-	
+
 	UInt64 theAnswer = MultiplyByRatio(inHostTime, sToNanosNumerator, sToNanosDenominator);
 	#if CoreAudio_Debug
 		if(((sToNanosNumerator > sToNanosDenominator) && (theAnswer < inHostTime)) || ((sToNanosDenominator > sToNanosNumerator) && (theAnswer > inHostTime)))
@@ -158,7 +158,7 @@ inline UInt64	CAHostTimeBase::ConvertToNanos(UInt64 inHostTime)
 			DebugPrintf("CAHostTimeBase::ConvertToNanos: The conversion wrapped");
 		}
 	#endif
-	
+
 	return theAnswer;
 }
 
@@ -185,7 +185,7 @@ inline UInt64	CAHostTimeBase::GetCurrentTimeInNanos()
 inline UInt64	CAHostTimeBase::AbsoluteHostDeltaToNanos(UInt64 inStartTime, UInt64 inEndTime)
 {
 	UInt64 theAnswer;
-	
+
 	if(inStartTime <= inEndTime)
 	{
 		theAnswer = inEndTime - inStartTime;
@@ -194,7 +194,7 @@ inline UInt64	CAHostTimeBase::AbsoluteHostDeltaToNanos(UInt64 inStartTime, UInt6
 	{
 		theAnswer = inStartTime - inEndTime;
 	}
-	
+
 	return ConvertToNanos(theAnswer);
 }
 
@@ -202,7 +202,7 @@ inline SInt64	CAHostTimeBase::HostDeltaToNanos(UInt64 inStartTime, UInt64 inEndT
 {
 	SInt64 theAnswer;
 	SInt64 theSign = 1;
-	
+
 	if(inStartTime <= inEndTime)
 	{
 		theAnswer = static_cast<SInt64>(inEndTime - inStartTime);
@@ -212,7 +212,7 @@ inline SInt64	CAHostTimeBase::HostDeltaToNanos(UInt64 inStartTime, UInt64 inEndT
 		theAnswer = static_cast<SInt64>(inStartTime - inEndTime);
 		theSign = -1;
 	}
-	
+
 	return theSign * static_cast<SInt64>(ConvertToNanos(static_cast<UInt64>(theAnswer)));
 }
 

@@ -2,14 +2,14 @@
      File: CAAudioChannelLayoutObject.cpp
  Abstract: CAAudioChannelLayoutObject.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "CAAudioChannelLayout.h"
 #if !defined(__COREAUDIO_USE_FLAT_INCLUDES__)
@@ -60,11 +60,11 @@ CAAudioChannelLayout::CAAudioChannelLayout ()
 //	CAAudioChannelLayout::CAAudioChannelLayout
 //=============================================================================
 CAAudioChannelLayout::CAAudioChannelLayout (UInt32 inNumberChannels, bool inChooseSurround)
-{		
+{
 		// this chooses default layouts based on the number of channels...
 	AudioChannelLayoutTag tag;
-	
-	switch (inNumberChannels) 
+
+	switch (inNumberChannels)
 	{
 		default:
 			// here we have a "broken" layout, in the sense that we haven't any idea how to lay this out
@@ -93,7 +93,7 @@ CAAudioChannelLayout::CAAudioChannelLayout (UInt32 inNumberChannels, bool inChoo
 			tag = kAudioChannelLayoutTag_AudioUnit_8;
 			break;
 	}
-	
+
 	mLayout = RefCountedLayout::CreateWithLayoutTag(tag);
 }
 
@@ -144,11 +144,11 @@ CAAudioChannelLayout& CAAudioChannelLayout::operator= (const CAAudioChannelLayou
 	if (mLayout != c.mLayout) {
 		if (mLayout)
 			mLayout->release();
-	
+
 		if ((mLayout = c.mLayout) != NULL)
 			mLayout->retain();
 	}
-	
+
 	return *this;
 }
 
@@ -156,11 +156,11 @@ CAAudioChannelLayout&	CAAudioChannelLayout::operator= (const AudioChannelLayout*
 {
 	if (mLayout && &mLayout->Layout() == inChannelLayout)
 		return *this;
-		
+
 	if (mLayout)
 		mLayout->release();
 
-	if (inChannelLayout == NULL) 
+	if (inChannelLayout == NULL)
 	{
 		mLayout = RefCountedLayout::CreateWithNumberChannelDescriptions(0);
 	}
@@ -175,7 +175,7 @@ void	CAAudioChannelLayout::SetWithTag(AudioChannelLayoutTag inTag)
 {
 	if (mLayout)
 		mLayout->release();
-	
+
 	mLayout = RefCountedLayout::CreateWithLayoutTag(inTag);
 }
 

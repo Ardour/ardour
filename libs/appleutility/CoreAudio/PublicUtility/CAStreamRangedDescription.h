@@ -2,14 +2,14 @@
      File: CAStreamRangedDescription.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #if !defined(__CAStreamRangedDescription_h__)
 #define __CAStreamRangedDescription_h__
@@ -89,7 +89,7 @@ public:
 
 };
 
-inline bool operator<(const AudioStreamRangedDescription& x, const AudioStreamRangedDescription& y)													{	return	(x.mFormat.mFormatID == y.mFormat.mFormatID) ? 
+inline bool operator<(const AudioStreamRangedDescription& x, const AudioStreamRangedDescription& y)													{	return	(x.mFormat.mFormatID == y.mFormat.mFormatID) ?
 																																								(x.mFormat < y.mFormat) && (x.mSampleRateRange < y.mSampleRateRange) :
 																																								(x.mFormat.mFormatID == kAudioFormatLinearPCM) ? false : (x.mFormat.mFormatID < y.mFormat.mFormatID); }
 inline bool operator==(const AudioStreamRangedDescription& x, const AudioStreamRangedDescription& y)												{ return (x.mFormat == y.mFormat) && (x.mSampleRateRange == y.mSampleRateRange); }
@@ -100,10 +100,10 @@ inline bool	operator>=(const AudioStreamRangedDescription& x, const AudioStreamR
 inline bool	operator>(const AudioStreamRangedDescription& x, const AudioStreamRangedDescription& y)													{ return !((x < y) || (x == y)); }
 #endif
 
-inline bool operator<(const AudioStreamBasicDescription& x, const AudioStreamRangedDescription& y)													{	return	(x.mFormatID == y.mFormat.mFormatID) ? 
+inline bool operator<(const AudioStreamBasicDescription& x, const AudioStreamRangedDescription& y)													{	return	(x.mFormatID == y.mFormat.mFormatID) ?
 																																								(x < y.mFormat) && (x.mSampleRate < y.mSampleRateRange.mMinimum) :
 																																								(x.mFormatID == kAudioFormatLinearPCM) ? false : (x.mFormatID < y.mFormat.mFormatID); }
-inline bool operator<(const AudioStreamRangedDescription& x, const AudioStreamBasicDescription& y)													{	return	(x.mFormat.mFormatID == y.mFormatID) ? 
+inline bool operator<(const AudioStreamRangedDescription& x, const AudioStreamBasicDescription& y)													{	return	(x.mFormat.mFormatID == y.mFormatID) ?
 																																								(x.mFormat < y) && (x.mSampleRateRange.mMinimum < y.mSampleRate) :
 																																								(x.mFormat.mFormatID == kAudioFormatLinearPCM) ? false : (x.mFormat.mFormatID < y.mFormatID); }
 inline bool operator==(const AudioStreamBasicDescription& x, const AudioStreamRangedDescription& y)													{ return (x == y.mFormat) && CAAudioValueRange::ContainsValue(y.mSampleRateRange, x.mSampleRate); }
@@ -126,7 +126,7 @@ struct	CAStreamRangedDescription_EqualToASBD
 {
 			CAStreamRangedDescription_EqualToASBD(const AudioStreamBasicDescription& inFormat)	: mFormat(inFormat) {}
 	bool	operator()(const AudioStreamRangedDescription& x) const								{ return mFormat == x; }
-	
+
 	AudioStreamBasicDescription	mFormat;
 };
 

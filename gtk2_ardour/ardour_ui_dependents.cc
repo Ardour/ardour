@@ -62,13 +62,13 @@ ARDOUR_UI::we_have_dependents ()
 {
 	install_actions ();
 	load_bindings ();
-	
+
 	ProcessorBox::register_actions ();
 
 	/* Global, editor, mixer, processor box actions are defined now. Link
 	   them with any bindings, so that GTK does not get a chance to define
 	   the GTK accel map entries first when we ask the GtkUIManager to
-	   create menus/widgets. 
+	   create menus/widgets.
 
 	   If GTK adds the actions to its accel map before we do, we lose our
 	   freedom to use any keys. More precisely, we can use any keys, but
@@ -81,9 +81,9 @@ ARDOUR_UI::we_have_dependents ()
 	   importantly they don't have menus showing the bindings, so it is
 	   less of an issue.
 	*/
-	
+
 	Gtkmm2ext::Bindings::associate_all ();
-	
+
 	editor->setup_tooltips ();
 	editor->UpdateAllTransportClocks.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 
@@ -92,7 +92,7 @@ ARDOUR_UI::we_have_dependents ()
 	tabbable_state_change (*editor);
 	tabbable_state_change (*mixer);
 	tabbable_state_change (*rc_option_editor);
-	
+
 	/* all actions are defined */
 
 	ActionManager::load_menus (ARDOUR_COMMAND_LINE::menus_file);
@@ -101,7 +101,7 @@ ARDOUR_UI::we_have_dependents ()
 	mixer->track_editor_selection ();
 
 	/* catch up on parameters */
-	
+
 	boost::function<void (std::string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
 
@@ -171,7 +171,7 @@ ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
 		win->present ();
 		return nb->gobj();
 	}
-	
+
 	return 0; /* what was that? */
 }
 
@@ -207,9 +207,9 @@ ARDOUR_UI::main_window_delete_event (GdkEventAny* ev)
 	 * the window manager/desktop can think we're taking too longer to
 	 * handle the "delete" event
 	 */
-	
-	Glib::signal_idle().connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_ask_about_quit));	
-	
+
+	Glib::signal_idle().connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_ask_about_quit));
+
 	return true;
 }
 
@@ -262,7 +262,7 @@ ARDOUR_UI::setup_windows ()
 	}
 
 	/* order of addition affects order seen in initial window display */
-	
+
 	rc_option_editor->add_to_notebook (_tabs, _("Preferences"));
 	mixer->add_to_notebook (_tabs, _("Mixer"));
 	editor->add_to_notebook (_tabs, _("Editor"));
@@ -292,7 +292,7 @@ ARDOUR_UI::setup_windows ()
 	main_vpacker.pack_start (top_packer, false, false);
 
 	/* now add the transport frame to the top of main window */
-	
+
 	main_vpacker.pack_start (transport_frame, false, false);
 	main_vpacker.pack_start (_tabs, true, true);
 
@@ -305,7 +305,7 @@ ARDOUR_UI::setup_windows ()
 	setup_tooltips ();
 
 	_main_window.signal_delete_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::main_window_delete_event));
-	
+
 	/* pack the main vpacker into the main window and show everything
 	 */
 
@@ -327,12 +327,12 @@ ARDOUR_UI::setup_windows ()
 
 		if ((prop = mnode->property (X_("y"))) != 0) {
 			y = atoi (prop->value());
-		} 
+		}
 
 		if ((prop = mnode->property (X_("w"))) != 0) {
 			w = atoi (prop->value());
-		} 
-		
+		}
+
 		if ((prop = mnode->property (X_("h"))) != 0) {
 			h = atoi (prop->value());
 		}
@@ -340,17 +340,17 @@ ARDOUR_UI::setup_windows ()
 		if (x >= 0 && y >= 0 && w >= 0 && h >= 0) {
 			_main_window.set_position (Gtk::WIN_POS_NONE);
 		}
-		
+
 		if (x >= 0 && y >= 0) {
 			_main_window.move (x, y);
 		}
-		
+
 		if (w > 0 && h > 0) {
 			_main_window.set_default_size (w, h);
 		}
 
 		std::string current_tab;
-		
+
 		if ((prop = mnode->property (X_("current-tab"))) != 0) {
 			current_tab = prop->value();
 		} else {
@@ -364,10 +364,10 @@ ARDOUR_UI::setup_windows ()
 			_tabs.set_current_page (_tabs.page_num (editor->contents()));
 		}
 	}
-	
+
 	_main_window.show_all ();
 	setup_toplevel_window (_main_window, "", this);
-	
+
 	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
 	_tabs.signal_page_removed().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_removed));
 	_tabs.signal_page_added().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_added));

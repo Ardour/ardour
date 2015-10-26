@@ -196,7 +196,7 @@ ProxyBase::setup ()
 {
 	WindowProxy::setup ();
 	set_session(_session);
-}	
+}
 
 /*-----------------------*/
 

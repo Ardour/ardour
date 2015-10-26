@@ -2,14 +2,14 @@
      File: CASettingsStorage.cpp
  Abstract: CASettingsStorage.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 //==================================================================================================
 //	Includes
@@ -81,17 +81,17 @@ CASettingsStorage::CASettingsStorage(const char* inSettingsFilePath, mode_t inSe
 	size_t theLength = strlen(inSettingsFilePath);
 	mSettingsFilePath = new char[theLength + 2];
 	strlcpy(mSettingsFilePath, inSettingsFilePath, theLength + 2);
-	
+
 	mSettingsCacheTime.tv_sec = 0;
 	mSettingsCacheTime.tv_nsec = 0;
-	
+
 	mSettingsCacheForceRefresh = true;
 }
 
 CASettingsStorage::~CASettingsStorage()
 {
 	delete[] mSettingsFilePath;
-	
+
 	if(mSettingsCache != NULL)
 	{
 		CFRelease(mSettingsCache);
@@ -119,11 +119,11 @@ void	CASettingsStorage::CopyBoolValue(CFStringRef inKey, bool& outValue, bool in
 {
 	//	initialize the return value
 	outValue = inDefaultValue;
-	
+
 	//	get the raw value
 	CFTypeRef theValue = NULL;
 	CopyCFTypeValue(inKey, theValue, NULL);
-	
+
 	//	for this type, NULL is an invalid value
 	if(theValue != NULL)
 	{
@@ -138,11 +138,11 @@ void	CASettingsStorage::CopyBoolValue(CFStringRef inKey, bool& outValue, bool in
 			//	get the numeric value
 			SInt32 theNumericValue = 0;
 			CFNumberGetValue(static_cast<CFNumberRef>(theValue), kCFNumberSInt32Type, &theNumericValue);
-			
+
 			//	non-zero indicates true
 			outValue = theNumericValue != 0;
 		}
-		
+
 		//	release the value since we aren't returning it
 		CFRelease(theValue);
 	}
@@ -152,11 +152,11 @@ void	CASettingsStorage::CopySInt32Value(CFStringRef inKey, SInt32& outValue, SIn
 {
 	//	initialize the return value
 	outValue = inDefaultValue;
-	
+
 	//	get the raw value
 	CFTypeRef theValue = NULL;
 	CopyCFTypeValue(inKey, theValue, NULL);
-	
+
 	//	for this type, NULL is an invalid value
 	if(theValue != NULL)
 	{
@@ -166,7 +166,7 @@ void	CASettingsStorage::CopySInt32Value(CFStringRef inKey, SInt32& outValue, SIn
 			//	get the return value from the CF object
 			CFNumberGetValue(static_cast<CFNumberRef>(theValue), kCFNumberSInt32Type, &outValue);
 		}
-		
+
 		//	release the value since we aren't returning it
 		CFRelease(theValue);
 	}
@@ -176,11 +176,11 @@ void	CASettingsStorage::CopyUInt32Value(CFStringRef inKey, UInt32& outValue, UIn
 {
 	//	initialize the return value
 	outValue = inDefaultValue;
-	
+
 	//	get the raw value
 	CFTypeRef theValue = NULL;
 	CopyCFTypeValue(inKey, theValue, NULL);
-	
+
 	//	for this type, NULL is an invalid value
 	if(theValue != NULL)
 	{
@@ -190,7 +190,7 @@ void	CASettingsStorage::CopyUInt32Value(CFStringRef inKey, UInt32& outValue, UIn
 			//	get the return value from the CF object
 			CFNumberGetValue(static_cast<CFNumberRef>(theValue), kCFNumberSInt32Type, &outValue);
 		}
-		
+
 		//	release the value since we aren't returning it
 		CFRelease(theValue);
 	}
@@ -200,11 +200,11 @@ void	CASettingsStorage::CopySInt64Value(CFStringRef inKey, SInt64& outValue, SIn
 {
 	//	initialize the return value
 	outValue = inDefaultValue;
-	
+
 	//	get the raw value
 	CFTypeRef theValue = NULL;
 	CopyCFTypeValue(inKey, theValue, NULL);
-	
+
 	//	for this type, NULL is an invalid value
 	if(theValue != NULL)
 	{
@@ -214,7 +214,7 @@ void	CASettingsStorage::CopySInt64Value(CFStringRef inKey, SInt64& outValue, SIn
 			//	get the return value from the CF object
 			CFNumberGetValue(static_cast<CFNumberRef>(theValue), kCFNumberSInt64Type, &outValue);
 		}
-		
+
 		//	release the value since we aren't returning it
 		CFRelease(theValue);
 	}
@@ -224,11 +224,11 @@ void	CASettingsStorage::CopyUInt64Value(CFStringRef inKey, UInt64& outValue, UIn
 {
 	//	initialize the return value
 	outValue = inDefaultValue;
-	
+
 	//	get the raw value
 	CFTypeRef theValue = NULL;
 	CopyCFTypeValue(inKey, theValue, NULL);
-	
+
 	//	for this type, NULL is an invalid value
 	if(theValue != NULL)
 	{
@@ -238,7 +238,7 @@ void	CASettingsStorage::CopyUInt64Value(CFStringRef inKey, UInt64& outValue, UIn
 			//	get the return value from the CF object
 			CFNumberGetValue(static_cast<CFNumberRef>(theValue), kCFNumberSInt64Type, &outValue);
 		}
-		
+
 		//	release the value since we aren't returning it
 		CFRelease(theValue);
 	}
@@ -248,11 +248,11 @@ void	CASettingsStorage::CopyFloat32Value(CFStringRef inKey, Float32& outValue, F
 {
 	//	initialize the return value
 	outValue = inDefaultValue;
-	
+
 	//	get the raw value
 	CFTypeRef theValue = NULL;
 	CopyCFTypeValue(inKey, theValue, NULL);
-	
+
 	//	for this type, NULL is an invalid value
 	if(theValue != NULL)
 	{
@@ -262,7 +262,7 @@ void	CASettingsStorage::CopyFloat32Value(CFStringRef inKey, Float32& outValue, F
 			//	get the return value from the CF object
 			CFNumberGetValue(static_cast<CFNumberRef>(theValue), kCFNumberFloat32Type, &outValue);
 		}
-		
+
 		//	release the value since we aren't returning it
 		CFRelease(theValue);
 	}
@@ -272,11 +272,11 @@ void	CASettingsStorage::CopyFloat64Value(CFStringRef inKey, Float64& outValue, F
 {
 	//	initialize the return value
 	outValue = inDefaultValue;
-	
+
 	//	get the raw value
 	CFTypeRef theValue = NULL;
 	CopyCFTypeValue(inKey, theValue, NULL);
-	
+
 	//	for this type, NULL is an invalid value
 	if(theValue != NULL)
 	{
@@ -286,7 +286,7 @@ void	CASettingsStorage::CopyFloat64Value(CFStringRef inKey, Float64& outValue, F
 			//	get the return value from the CF object
 			CFNumberGetValue(static_cast<CFNumberRef>(theValue), kCFNumberFloat64Type, &outValue);
 		}
-		
+
 		//	release the value since we aren't returning it
 		CFRelease(theValue);
 	}
@@ -300,7 +300,7 @@ void	CASettingsStorage::CopyNumberValue(CFStringRef inKey, CFNumberRef& outValue
 	//	get the raw value
 	CFTypeRef theValue = NULL;
 	CopyCFTypeValue(inKey, theValue, inDefaultValue);
-	
+
 	//	for this type, NULL is a valid value, but requires less work
 	if(theValue != NULL)
 	{
@@ -314,16 +314,16 @@ void	CASettingsStorage::CopyNumberValue(CFStringRef inKey, CFNumberRef& outValue
 		{
 			//	release the value since we aren't returning it
 			CFRelease(theValue);
-			
+
 			//	set the return value to the default value
 			outValue = inDefaultValue;
-			
+
 			//	and retain it
 			CFRetain(outValue);
 		}
 	}
 }
-	
+
 void	CASettingsStorage::CopyStringValue(CFStringRef inKey, CFStringRef& outValue, CFStringRef inDefaultValue) const
 {
 	//	initialize the return value
@@ -332,7 +332,7 @@ void	CASettingsStorage::CopyStringValue(CFStringRef inKey, CFStringRef& outValue
 	//	get the raw value
 	CFTypeRef theValue = NULL;
 	CopyCFTypeValue(inKey, theValue, inDefaultValue);
-	
+
 	//	for this type, NULL is a valid value, but requires less work
 	if(theValue != NULL)
 	{
@@ -346,16 +346,16 @@ void	CASettingsStorage::CopyStringValue(CFStringRef inKey, CFStringRef& outValue
 		{
 			//	release the value since we aren't returning it
 			CFRelease(theValue);
-			
+
 			//	set the return value to the default value
 			outValue = inDefaultValue;
-			
+
 			//	and retain it
 			CFRetain(outValue);
 		}
 	}
 }
-	
+
 void	CASettingsStorage::CopyArrayValue(CFStringRef inKey, CFArrayRef& outValue, CFArrayRef inDefaultValue) const
 {
 	//	initialize the return value
@@ -364,7 +364,7 @@ void	CASettingsStorage::CopyArrayValue(CFStringRef inKey, CFArrayRef& outValue, 
 	//	get the raw value
 	CFTypeRef theValue = NULL;
 	CopyCFTypeValue(inKey, theValue, inDefaultValue);
-	
+
 	//	for this type, NULL is a valid value, but requires less work
 	if(theValue != NULL)
 	{
@@ -378,16 +378,16 @@ void	CASettingsStorage::CopyArrayValue(CFStringRef inKey, CFArrayRef& outValue, 
 		{
 			//	release the value since we aren't returning it
 			CFRelease(theValue);
-			
+
 			//	set the return value to the default value
 			outValue = inDefaultValue;
-			
+
 			//	and retain it
 			CFRetain(outValue);
 		}
 	}
 }
-	
+
 void	CASettingsStorage::CopyDictionaryValue(CFStringRef inKey, CFDictionaryRef& outValue, CFDictionaryRef inDefaultValue) const
 {
 	//	initialize the return value
@@ -396,7 +396,7 @@ void	CASettingsStorage::CopyDictionaryValue(CFStringRef inKey, CFDictionaryRef& 
 	//	get the raw value
 	CFTypeRef theValue = NULL;
 	CopyCFTypeValue(inKey, theValue, inDefaultValue);
-	
+
 	//	for this type, NULL is a valid value, but requires less work
 	if(theValue != NULL)
 	{
@@ -410,16 +410,16 @@ void	CASettingsStorage::CopyDictionaryValue(CFStringRef inKey, CFDictionaryRef& 
 		{
 			//	release the value since we aren't returning it
 			CFRelease(theValue);
-			
+
 			//	set the return value to the default value
 			outValue = inDefaultValue;
-			
+
 			//	and retain it
 			CFRetain(outValue);
 		}
 	}
 }
-	
+
 void	CASettingsStorage::CopyDataValue(CFStringRef inKey, CFDataRef& outValue, CFDataRef inDefaultValue) const
 {
 	//	initialize the return value
@@ -428,7 +428,7 @@ void	CASettingsStorage::CopyDataValue(CFStringRef inKey, CFDataRef& outValue, CF
 	//	get the raw value
 	CFTypeRef theValue = NULL;
 	CopyCFTypeValue(inKey, theValue, inDefaultValue);
-	
+
 	//	for this type, NULL is a valid value, but requires less work
 	if(theValue != NULL)
 	{
@@ -442,10 +442,10 @@ void	CASettingsStorage::CopyDataValue(CFStringRef inKey, CFDataRef& outValue, CF
 		{
 			//	release the value since we aren't returning it
 			CFRelease(theValue);
-			
+
 			//	set the return value to the default value
 			outValue = inDefaultValue;
-			
+
 			//	and retain it
 			CFRetain(outValue);
 		}
@@ -463,7 +463,7 @@ void	CASettingsStorage::CopyCFTypeValue(CFStringRef inKey, CFTypeRef& outValue, 
 		//	the key wasn't in the cache, so return the default value
 		outValue = inDefaultValue;
 	}
-		
+
 	//	make sure we retain the return value
 	if(outValue != NULL)
 	{
@@ -536,10 +536,10 @@ void	CASettingsStorage::SetCFTypeValue(CFStringRef inKey, CFTypeRef inValue)
 {
 	//	make sure our cache is up to date
 	RefreshSettings();
-	
+
 	//	add the new key/value to the dictionary
 	CFDictionarySetValue(mSettingsCache, inKey, inValue);
-	
+
 	//	write the settings to the file
 	SaveSettings();
 }
@@ -548,10 +548,10 @@ void	CASettingsStorage::RemoveValue(CFStringRef inKey)
 {
 	//	make sure our cache is up to date
 	RefreshSettings();
-	
+
 	//	remove the given key
 	CFDictionaryRemoveValue(mSettingsCache, inKey);
-	
+
 	//	write the settings to the file
 	SaveSettings();
 }
@@ -560,10 +560,10 @@ void	CASettingsStorage::RemoveAllValues()
 {
 	//	make sure our cache is up to date
 	RefreshSettings();
-	
+
 	//	remove the given key
 	CFDictionaryRemoveAllValues(mSettingsCache);
-	
+
 	//	write the settings to the file
 	SaveSettings();
 }
@@ -593,11 +593,11 @@ void	CASettingsStorage::RefreshSettings()
 		//	telling us if the file exisits
 		struct stat theFileInfo;
 		int theStatError = stat(mSettingsFilePath, &theFileInfo);
-		
+
 		//	we use this boolean to make error recovery easier since we need a case for when there's no file anyway
 		bool theSettingsWereCached = false;
 		bool theSettingsNeedSaving = true;
-		
+
 		if(theStatError == 0)
 		{
 			//	stat says there is something there, only have to do work if we either don't have a cache or the cache is out of date
@@ -615,44 +615,44 @@ void	CASettingsStorage::RefreshSettings()
 						fseek(theFile, 0, SEEK_END);
 						size_t theFileLength = static_cast<size_t>(ftell(theFile));
 						fseek(theFile, 0, SEEK_SET);
-						
+
 						if(theFileLength > 0)
 						{
 							//	allocate a block of memory to hold the data in the file
 							CAAutoFree<Byte> theRawFileData(theFileLength);
-							
+
 							//	read all the data in
 							fread(static_cast<Byte*>(theRawFileData), theFileLength, 1, theFile);
-							
+
 							//	release the lock
 							flock(fileno(theFile), LOCK_UN);
-							
+
 							//	put it into a CFData object
 							CACFData theRawFileDataCFData(static_cast<Byte*>(theRawFileData), static_cast<UInt32>(theFileLength));
-							
+
 							//	get rid of the existing cache
 							if(mSettingsCache != NULL)
 							{
 								CFRelease(mSettingsCache);
 								mSettingsCache = NULL;
 							}
-							
+
 							//	parse the data as a property list
 							mSettingsCache = (CFMutableDictionaryRef)CFPropertyListCreateWithData(NULL, theRawFileDataCFData.GetCFData(), kCFPropertyListMutableContainersAndLeaves, NULL, NULL);
-							
+
 							//	check to be sure we parsed a plist out of the file
 							if(mSettingsCache != NULL)
 							{
 								//	save the date of the cache
 								mSettingsCacheTime = theFileInfo.st_mtimespec;
-								
+
 								//	mark that we're done
 								theSettingsWereCached = true;
 								theSettingsNeedSaving = false;
 							}
 						}
 					}
-					
+
 					//	close the file
 					fclose(theFile);
 					mSettingsCacheForceRefresh = false;
@@ -665,8 +665,8 @@ void	CASettingsStorage::RefreshSettings()
 				theSettingsWereCached = true;
 			}
 		}
-		
-		//	if there was a failure, we need to clean up 
+
+		//	if there was a failure, we need to clean up
 		if((theStatError != 0) || theSettingsNeedSaving || !theSettingsWereCached)
 		{
 			//	we get here if either there isn't a file or something wacky happenned while parsing it
@@ -675,10 +675,10 @@ void	CASettingsStorage::RefreshSettings()
 			{
 				mSettingsCache = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 			}
-			
+
 			mSettingsCacheTime.tv_sec = 0;
 			mSettingsCacheTime.tv_nsec = 0;
-			
+
 			if((theStatError != 0) || theSettingsNeedSaving)
 			{
 				SaveSettings();
@@ -693,7 +693,7 @@ void	CASettingsStorage::SaveSettings()
 	{
 		//	make a CFData that contains the new settings
 		CACFData theNewRawPrefsCFData(CFPropertyListCreateData(NULL, mSettingsCache, mSettingsCacheFormat, 0, NULL), true);
-		
+
 		//	open the file for writing
 		FILE* theFile = fopen(mSettingsFilePath, "w+");
 		if(theFile != NULL)
@@ -707,23 +707,23 @@ void	CASettingsStorage::SaveSettings()
 				{
 					fchmod(fileno(theFile), mSettingsFileAccessMode);
 				}
-				
+
 				//	write the data
 				fwrite(theNewRawPrefsCFData.GetDataPtr(), theNewRawPrefsCFData.GetSize(), 1, theFile);
-				
+
 				//	flush the file to be sure it is all on disk
 				fflush(theFile);
-				
+
 				//	release the lock
 				flock(fileno(theFile), LOCK_UN);
-			
+
 				//	close the file
 				fclose(theFile);
-				
+
 				//	stat the file to get the mod date
 				struct stat theFileInfo;
 				stat(mSettingsFilePath, &theFileInfo);
-				
+
 				//	save the mod date
 				mSettingsCacheTime = theFileInfo.st_mtimespec;
 			}

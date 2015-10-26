@@ -477,7 +477,7 @@ Editor::register_actions ()
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = myactions.create_action_group (X_("MouseMode"));
 	RadioAction::Group mouse_mode_group;
 
-	act = myactions.register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Object Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));	
+	act = myactions.register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Object Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
 	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
 	smart_mode_button.set_related_action (smart_mode_action);
 	smart_mode_button.set_text (_("Smart"));
@@ -488,27 +488,27 @@ Editor::register_actions ()
 	mouse_move_button.set_icon (Gtkmm2ext::ArdourIcon::ToolGrab);
 	mouse_move_button.set_name ("mouse mode button");
 
-	act = myactions.register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));	
+	act = myactions.register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));
 	mouse_select_button.set_related_action (act);
 	mouse_select_button.set_icon (Gtkmm2ext::ArdourIcon::ToolRange);
 	mouse_select_button.set_name ("mouse mode button");
 
-	act = myactions.register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseDraw));	
+	act = myactions.register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseDraw));
 	mouse_draw_button.set_related_action (act);
 	mouse_draw_button.set_icon (Gtkmm2ext::ArdourIcon::ToolDraw);
 	mouse_draw_button.set_name ("mouse mode button");
 
-	act = myactions.register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));	
+	act = myactions.register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));
 	mouse_audition_button.set_related_action (act);
 	mouse_audition_button.set_icon (Gtkmm2ext::ArdourIcon::ToolAudition);
 	mouse_audition_button.set_name ("mouse mode button");
 
-	act = myactions.register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));	
+	act = myactions.register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));
 	mouse_timefx_button.set_related_action (act);
 	mouse_timefx_button.set_icon (Gtkmm2ext::ArdourIcon::ToolStretch);
 	mouse_timefx_button.set_name ("mouse mode button");
 
-	act = myactions.register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Content Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseContent));	
+	act = myactions.register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Content Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseContent));
 	mouse_content_button.set_related_action (act);
 	mouse_content_button.set_icon (Gtkmm2ext::ArdourIcon::ToolContent);
 	mouse_content_button.set_name ("mouse mode button");
@@ -742,7 +742,7 @@ Editor::register_actions ()
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 	tact->set_active (true);
 
-	myactions.register_action (editor_actions, X_("toggle-midi-input-active"), _("Toggle MIDI Input Active for Editor-Selected Tracks/Busses"), 
+	myactions.register_action (editor_actions, X_("toggle-midi-input-active"), _("Toggle MIDI Input Active for Editor-Selected Tracks/Busses"),
 				   sigc::bind (sigc::mem_fun (*this, &Editor::toggle_midi_input_active), false));
 }
 

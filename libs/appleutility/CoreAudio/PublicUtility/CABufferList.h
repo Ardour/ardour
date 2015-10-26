@@ -2,14 +2,14 @@
      File: CABufferList.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #ifndef __CABufferList_h__
 #define __CABufferList_h__
@@ -61,7 +61,7 @@ extern "C" int CrashIfClientProvidedBogusAudioBufferList(const AudioBufferList *
 
 	This class is designed for use in non-simplistic cases. For AudioUnits, AUBufferList
 	is preferred.
-	
+
 	CABufferList can be used in one of two ways:
 		- as mutable pointers into non-owned memory
 		- as an immutable array of buffers (owns its own memory).
@@ -107,20 +107,20 @@ public:
 		if (mBufferMemory)
 			delete[] mBufferMemory;
 	}
-	
+
 	const char *				Name() { return mName; }
-	
+
 	const AudioBufferList &		GetBufferList() const { return mABL; }
-	
+
 	AudioBufferList &			GetModifiableBufferList() { return _GetBufferList(); }
-	
+
 	UInt32		GetNumberBuffers() const { return mABL.mNumberBuffers; }
-	
+
 	UInt32		GetNumBytes() const
 	{
 		return mABL.mBuffers[0].mDataByteSize;
 	}
-	
+
 	void		SetBytes(UInt32 nBytes, void *data)
 	{
 		VerifyNotTrashingOwnedBuffer();
@@ -128,7 +128,7 @@ public:
 		mABL.mBuffers[0].mDataByteSize = nBytes;
 		mABL.mBuffers[0].mData = data;
 	}
-	
+
 	void		CopyAllFrom(CABufferList *srcbl, CABufferList *ptrbl)
 					// copies bytes from srcbl
 					// make ptrbl reflect the length copied
@@ -150,17 +150,17 @@ public:
 		if (srcbl != ptrbl)
 			srcbl->BytesConsumed(nBytes);
 	}
-	
+
 	// copies data from another buffer list.
 	void		CopyDataFrom(const AudioBufferList &other)
 	{
 		for (unsigned i = 0; i < other.mNumberBuffers; ++i) {
 			XAssert(mBufferCapacity == 0 || other.mBuffers[i].mDataByteSize <= mBufferCapacity);
-			memcpy(mABL.mBuffers[i].mData, other.mBuffers[i].mData, 
+			memcpy(mABL.mBuffers[i].mData, other.mBuffers[i].mData,
 				mABL.mBuffers[i].mDataByteSize = other.mBuffers[i].mDataByteSize);
 		}
 	}
-	
+
 	void		AppendFrom(CABufferList *blp, UInt32 nBytes)
 	{
 		// this may mutate a buffer that owns memory.
@@ -173,7 +173,7 @@ public:
 		}
 		blp->BytesConsumed(nBytes);
 	}
-	
+
 	void		PadWithZeroes(UInt32 desiredBufferSize)
 					// for cases where an algorithm (e.g. SRC) requires some
 					// padding to create silence following end-of-file
@@ -186,7 +186,7 @@ public:
 			buf->mDataByteSize = desiredBufferSize;
 		}
 	}
-	
+
 	void		SetToZeroes(UInt32 nBytes)
 	{
 		XAssert(mBufferCapacity == 0 || nBytes <= mBufferCapacity);
@@ -196,23 +196,23 @@ public:
 			buf->mDataByteSize = nBytes;
 		}
 	}
-	
+
 	void		Reset()
 	{
 		DeallocateBuffers();
 	}
-	
+
 	Boolean		SameDataAs(const CABufferList* anotherBufferList)
 	{
 		// check to see if two buffer lists point to the same memory.
 		if (mABL.mNumberBuffers != anotherBufferList->mABL.mNumberBuffers) return false;
-		
+
 		for (UInt32 i = 0; i < mABL.mNumberBuffers; ++i) {
 			if (mABL.mBuffers[i].mData != anotherBufferList->mABL.mBuffers[i].mData) return false;
 		}
 		return true;
 	}
-	
+
 	void		BytesConsumed(UInt32 nBytes)
 					// advance buffer pointers, decrease buffer sizes
 	{
@@ -224,18 +224,18 @@ public:
 			buf->mDataByteSize -= nBytes;
 		}
 	}
-	
+
 	void		SetFrom(const AudioBufferList *abl)
 	{
 		VerifyNotTrashingOwnedBuffer();
 		memcpy(&_GetBufferList(), abl, (char *)&abl->mBuffers[abl->mNumberBuffers] - (char *)abl);
 	}
-	
+
 	void		SetFrom(const CABufferList *blp)
 	{
 		SetFrom(&blp->GetBufferList());
 	}
-	
+
 	void		SetFrom(const AudioBufferList *abl, UInt32 nBytes)
 	{
 		VerifyNotTrashingOwnedBuffer();
@@ -247,25 +247,25 @@ public:
 			mybuf->mData = srcbuf->mData;
 		}
 	}
-	
+
 	void		SetFrom(const CABufferList *blp, UInt32 nBytes)
 	{
 		SetFrom(&blp->GetBufferList(), nBytes);
 	}
-	
+
 	AudioBufferList *	ToAudioBufferList(AudioBufferList *abl) const
 	{
 		memcpy(abl, &GetBufferList(), (char *)&abl->mBuffers[mABL.mNumberBuffers] - (char *)abl);
 		return abl;
 	}
-	
+
 	void		AllocateBuffers(UInt32 nBytes);
 	void		AllocateBuffersAndCopyFrom(UInt32 nBytes, CABufferList *inCopyFromList, CABufferList *inSetPtrList);
-	
+
 	void		DeallocateBuffers();
-	
+
 	void		UseExternalBuffer(Byte *ptr, UInt32 nBytes);
-    
+
 	void		AdvanceBufferPointers(UInt32 nBytes) // $$$ ReducingSize
 					// this is for bufferlists that function simply as
 					// an array of pointers into another bufferlist, being advanced,
@@ -278,7 +278,7 @@ public:
 			buf->mDataByteSize -= nBytes;
 		}
 	}
-	
+
 	void		SetNumBytes(UInt32 nBytes)
 	{
 		XAssert(mBufferCapacity == 0 || nBytes <= mBufferCapacity);
@@ -296,9 +296,9 @@ public:
 		if (mBufferMemory)
 			printf("  owned memory @ 0x%p:\n", mBufferMemory);
 	}
-	
+
 	UInt32		GetCapacityBytes() const { return mBufferCapacity; }
-	
+
 	template <typename T>
 	T*			GetData(UInt32 inBuffer) {
 		return static_cast<T*>(mABL.mBuffers[inBuffer].mData);

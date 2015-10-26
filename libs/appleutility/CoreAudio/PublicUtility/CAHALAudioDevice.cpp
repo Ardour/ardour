@@ -2,14 +2,14 @@
      File: CAHALAudioDevice.cpp
  Abstract: CAHALAudioDevice.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 //==================================================================================================
 //	Includes
@@ -544,7 +544,7 @@ void	CAHALAudioDevice::StartIOProcAtTime(AudioDeviceIOProcID inIOProcID, AudioTi
 	{
 		theFlags |= kAudioDeviceStartTimeDontConsultDeviceFlag;
 	}
-	
+
 	OSStatus theError = AudioDeviceStartAtTime(mObjectID, inIOProcID, &ioStartTime, theFlags);
 	ThrowIfError(theError, CAException(theError), "CAHALAudioDevice::StartIOProcAtTime: got an error starting an IOProc");
 }
@@ -561,15 +561,15 @@ void	CAHALAudioDevice::GetIOProcStreamUsage(AudioDeviceIOProcID inIOProcID, bool
 	UInt32 theNumberStreams = GetNumberStreams(inIsInput);
 	UInt32 theSize = SizeOf32(void*) + SizeOf32(UInt32) + (theNumberStreams * SizeOf32(UInt32));
 	CAAutoFree<AudioHardwareIOProcStreamUsage> theStreamUsage(theSize);
-	
+
 	//	set it up
 	theStreamUsage->mIOProc = reinterpret_cast<void*>(inIOProcID);
 	theStreamUsage->mNumberStreams = theNumberStreams;
-	
+
 	//	get the property
 	CAPropertyAddress theAddress(kAudioDevicePropertyIOProcStreamUsage, inIsInput ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput);
 	GetPropertyData(theAddress, 0, NULL, theSize, theStreamUsage);
-	
+
 	//	fill out the return value
 	for(UInt32 theIndex = 0; theIndex < theNumberStreams; ++theIndex)
 	{
@@ -583,7 +583,7 @@ void	CAHALAudioDevice::SetIOProcStreamUsage(AudioDeviceIOProcID inIOProcID, bool
 	UInt32 theNumberStreams = GetNumberStreams(inIsInput);
 	UInt32 theSize = SizeOf32(void*) + SizeOf32(UInt32) + (theNumberStreams * SizeOf32(UInt32));
 	CAAutoFree<AudioHardwareIOProcStreamUsage> theStreamUsage(theSize);
-	
+
 	//	set it up
 	theStreamUsage->mIOProc = reinterpret_cast<void*>(inIOProcID);
 	theStreamUsage->mNumberStreams = theNumberStreams;
@@ -591,7 +591,7 @@ void	CAHALAudioDevice::SetIOProcStreamUsage(AudioDeviceIOProcID inIOProcID, bool
 	{
 		theStreamUsage->mStreamIsOn[theIndex] = (inStreamUsage[theIndex] ? 1 : 0);
 	}
-	
+
 	//	set the property
 	CAPropertyAddress theAddress(kAudioDevicePropertyIOProcStreamUsage, inIsInput ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput);
 	SetPropertyData(theAddress, 0, NULL, theSize, theStreamUsage);
@@ -635,7 +635,7 @@ void	CAHALAudioDevice::GetNearestStartTime(AudioTimeStamp& ioTime, bool inIsInpu
 	{
 		theFlags |= kAudioDeviceStartTimeDontConsultDeviceFlag;
 	}
-	
+
 	OSStatus theError = AudioDeviceGetNearestStartTime(mObjectID, &ioTime, theFlags);
 	ThrowIfError(theError, CAException(theError), "CAHALAudioDevice::GetNearestStartTime: got an error getting the start time");
 }

@@ -71,37 +71,37 @@ class Manager : public ARDOUR::SessionHandlePtr
 	Windows _windows;
 	Glib::RefPtr<Gtk::ActionGroup> window_actions;
 	Gtk::Window* current_transient_parent;
-	
+
 	Manager();
 	~Manager();
 
 	static Manager* _instance;
 };
-	
+
 class ProxyBase : public ARDOUR::SessionHandlePtr, public Gtkmm2ext::WindowProxy
 {
   public:
 	ProxyBase (const std::string& name, const std::string& menu_name);
 	ProxyBase (const std::string& name, const std::string& menu_name, const XMLNode&);
-	
+
 	virtual ARDOUR::SessionHandlePtr* session_handle () = 0;
 
   protected:
 	void setup ();
 };
-	
+
 class ProxyTemporary: public ProxyBase
 {
   public:
 	ProxyTemporary (const std::string& name, Gtk::Window* win);
 	~ProxyTemporary();
-    
-	Gtk::Window* get (bool create = false) { 
+
+	Gtk::Window* get (bool create = false) {
 		(void) create;
 		return _window;
 	}
-    
-	Gtk::Window* operator->() { 
+
+	Gtk::Window* operator->() {
 		return _window;
 	}
 
@@ -114,11 +114,11 @@ class ProxyWithConstructor: public ProxyBase
   public:
 	ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c)
 		: ProxyBase (name, menu_name) , creator (c) {}
-	
+
 	ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c, const XMLNode* node)
 		: ProxyBase (name, menu_name, *node) , creator (c) {}
-	
-	Gtk::Window* get (bool create = false) { 
+
+	Gtk::Window* get (bool create = false) {
 		if (!_window) {
 			if (!create) {
 				return 0;
@@ -128,13 +128,13 @@ class ProxyWithConstructor: public ProxyBase
 
 			if (_window) {
 				setup ();
-			}	
+			}
 		}
 
 		return _window;
 	}
 
-	T* operator->() { 
+	T* operator->() {
 		return dynamic_cast<T*> (get (true));
 	}
 
@@ -165,8 +165,8 @@ class Proxy : public ProxyBase
 
 	Proxy (const std::string& name, const std::string& menu_name, const XMLNode* node)
 		: ProxyBase (name, menu_name, *node)  {}
-	
-	Gtk::Window* get (bool create = false) { 
+
+	Gtk::Window* get (bool create = false) {
 		if (!_window) {
 			if (!create) {
 				return 0;
@@ -176,13 +176,13 @@ class Proxy : public ProxyBase
 
 			if (_window) {
 				setup ();
-			}	
+			}
 		}
 
 		return _window;
 	}
 
-	T* operator->() { 
+	T* operator->() {
 		return dynamic_cast<T*> (get(true));
 	}
 
@@ -190,7 +190,7 @@ class Proxy : public ProxyBase
 		/* may return null */
 		return dynamic_cast<T*> (_window);
 	}
-	
+
 	void set_session(ARDOUR::Session *s) {
 		SessionHandlePtr::set_session (s);
 		ARDOUR::SessionHandlePtr* sp = session_handle ();
@@ -199,7 +199,7 @@ class Proxy : public ProxyBase
 			dynamic_cast<T*>(_window)->set_session(s);
 		}
 	}
-	
+
   private:
 	boost::function<T*()>	creator;
 };

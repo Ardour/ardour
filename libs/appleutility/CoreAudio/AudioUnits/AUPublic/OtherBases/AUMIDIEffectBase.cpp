@@ -2,14 +2,14 @@
      File: AUMIDIEffectBase.cpp
  Abstract: AUMIDIEffectBase.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "AUMIDIEffectBase.h"
 
@@ -61,7 +61,7 @@ static OSStatus		AUMIDIEffectBaseMIDIEvent(void *				inComponentStorage,
 						UInt32					inOffsetSampleFrame);
 
 AUMIDIEffectBase::AUMIDIEffectBase(		AudioComponentInstance				inInstance,
-						bool 						inProcessesInPlace ) 
+						bool 						inProcessesInPlace )
 	: AUEffectBase(inInstance, inProcessesInPlace),
 	  AUMIDIBase(this)
 {
@@ -74,12 +74,12 @@ OSStatus			AUMIDIEffectBase::GetPropertyInfo(AudioUnitPropertyID			inID,
 							Boolean &				outWritable)
 {
 	OSStatus result;
-	
+
 	result = AUEffectBase::GetPropertyInfo (inID, inScope, inElement, outDataSize, outWritable);
-	
+
 	if (result == kAudioUnitErr_InvalidProperty)
 		result = AUMIDIBase::DelegateGetPropertyInfo (inID, inScope, inElement, outDataSize, outWritable);
-	
+
 	return result;
 }
 
@@ -99,12 +99,12 @@ OSStatus			AUMIDIEffectBase::GetProperty(	AudioUnitPropertyID		inID,
 		return kAudioUnitErr_InvalidElement;
 	}
 #endif
-	
+
 	result = AUEffectBase::GetProperty (inID, inScope, inElement, outData);
-	
+
 	if (result == kAudioUnitErr_InvalidProperty)
 		result = AUMIDIBase::DelegateGetProperty (inID, inScope, inElement, outData);
-	
+
 	return result;
 }
 
@@ -116,10 +116,10 @@ OSStatus			AUMIDIEffectBase::SetProperty(	AudioUnitPropertyID			inID,
 {
 
 	OSStatus result = AUEffectBase::SetProperty (inID, inScope, inElement, inData, inDataSize);
-		
+
 	if (result == kAudioUnitErr_InvalidProperty)
 		result = AUMIDIBase::DelegateSetProperty (inID, inScope, inElement, inData, inDataSize);
-		
+
 	return result;
 }
 
@@ -131,7 +131,7 @@ OSStatus			AUMIDIEffectBase::ComponentEntryDispatch(ComponentParameters *			para
 	if (This == NULL) return paramErr;
 
 	OSStatus result;
-	
+
 	switch (params->what) {
 	case kMusicDeviceMIDIEventSelect:
 	case kMusicDeviceSysExSelect:
@@ -141,7 +141,7 @@ OSStatus			AUMIDIEffectBase::ComponentEntryDispatch(ComponentParameters *			para
 		result = AUEffectBase::ComponentEntryDispatch(params, This);
 		break;
 	}
-	
+
 	return result;
 }
 #endif

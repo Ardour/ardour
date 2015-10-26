@@ -186,12 +186,12 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 
 	if (_need_bg) {
 		cr->clip_preserve ();
-		
+
 		/* paint expose area the color of the parent window bg
 		 */
-		
+
 		Gdk::Color bg (get_parent_bg());
-		
+
 		cr->set_source_rgb (bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
 		cr->fill ();
 	} else {

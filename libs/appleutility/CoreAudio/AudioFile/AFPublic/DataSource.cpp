@@ -2,14 +2,14 @@
      File: DataSource.cpp
  Abstract: DataSource.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "DataSource.h"
 #if TARGET_OS_WIN32
@@ -70,7 +70,7 @@ DataSource::~DataSource()
 {
 }
 
-SInt64 DataSource::CalcOffset(	UInt16 positionMode, 
+SInt64 DataSource::CalcOffset(	UInt16 positionMode,
 								SInt64 positionOffset,
 								SInt64 currentOffset,
 								SInt64 size)
@@ -120,10 +120,10 @@ OSStatus MacFile_DataSource::SetSize(SInt64 inSize)
 
 
 OSStatus MacFile_DataSource::ReadBytes(
-					UInt16 positionMode, 
-					SInt64 positionOffset, 
-					UInt32 requestCount, 
-					void *buffer, 
+					UInt16 positionMode,
+					SInt64 positionOffset,
+					UInt32 requestCount,
+					void *buffer,
 					UInt32* actualCount)
 {
 	if (actualCount) *actualCount = 0;
@@ -135,10 +135,10 @@ OSStatus MacFile_DataSource::ReadBytes(
 }
 
 OSStatus MacFile_DataSource::WriteBytes(
-					UInt16 positionMode, 
-					SInt64 positionOffset, 
-					UInt32 requestCount, 
-					const void *buffer, 
+					UInt16 positionMode,
+					SInt64 positionOffset,
+					UInt32 requestCount,
+					const void *buffer,
 					UInt32* actualCount)
 {
 	if (!buffer) return kAudio_ParamError;
@@ -162,7 +162,7 @@ UnixFile_DataSource::~UnixFile_DataSource()
 {
 	if (mCloseOnDelete) close(mFileD);
 }
-	
+
 OSStatus	UnixFile_DataSource::GetSize(SInt64& outSize)
 {
 #if 0 // 6764274 using the cached file size causes a regression for apps that play a file while writing to it.
@@ -197,31 +197,31 @@ OSStatus	UnixFile_DataSource::GetPos(SInt64& outPos) const
 	return noErr;
 }
 
-SInt64		UnixFile_DataSource::UFCurrentOffset (UInt16	positionMode, 
+SInt64		UnixFile_DataSource::UFCurrentOffset (UInt16	positionMode,
 												SInt64		positionOffset)
 {
 	SInt64 offset = -1;
-	switch (positionMode & kPositionModeMask) 
+	switch (positionMode & kPositionModeMask)
 	{
-		/*case fsAtMark : 
+		/*case fsAtMark :
 		{
 			SInt64 pos;
 			OSStatus result = GetPos (pos);
 				if (result) return result;
-			offset = pos; 
+			offset = pos;
 			break;
 		}*/
 		case SEEK_SET :
 		{
-			offset = positionOffset; 
+			offset = positionOffset;
 			break;
 		}
-		case SEEK_END : 
+		case SEEK_END :
 		{
 			SInt64 size;
 			OSStatus result = GetSize (size);
 				if (result) return result;
-			offset = size + positionOffset; 
+			offset = size + positionOffset;
 			break;
 		}
 		case SEEK_CUR :
@@ -229,23 +229,23 @@ SInt64		UnixFile_DataSource::UFCurrentOffset (UInt16	positionMode,
 			SInt64 pos;
 			OSStatus result = GetPos (pos);
 				if (result) return result;
-			offset = positionOffset + pos; 
+			offset = positionOffset + pos;
 			break;
 		}
 	}
 	return offset;
 }
-	
+
 OSStatus	UnixFile_DataSource::ReadBytes(	UInt16 positionMode,
-								SInt64 positionOffset, 
-								UInt32 requestCount, 
-								void *buffer, 
+								SInt64 positionOffset,
+								UInt32 requestCount,
+								void *buffer,
 								UInt32* actualCount)
 {
 	if (actualCount) *actualCount = 0;
 	if (!buffer) return kAudio_ParamError;
 
-		// can't use current offset as we need to go to the disk too much		
+		// can't use current offset as we need to go to the disk too much
 	SInt64 offset = UFCurrentOffset (positionMode, positionOffset);
 		if (offset < 0) return kAudioFilePositionError;
 
@@ -260,7 +260,7 @@ OSStatus	UnixFile_DataSource::ReadBytes(	UInt16 positionMode,
 		else if (requestCount > remain) requestCount = remain;
 	} while (false);
 #endif
-	
+
 	if (requestCount <= 0) {
 		if (actualCount) *actualCount = 0;
 		return noErr;
@@ -283,20 +283,20 @@ OSStatus	UnixFile_DataSource::ReadBytes(	UInt16 positionMode,
 #endif
 	if (numBytes == -1) return kAudioFilePositionError;
 	mFilePointer = offset + numBytes;
-	
+
 	if (actualCount) *actualCount = (UInt32)numBytes;
 	return noErr;
 }
-						
-OSStatus	UnixFile_DataSource::WriteBytes(UInt16 positionMode, 
-								SInt64 positionOffset, 
-								UInt32 requestCount, 
-								const void *buffer, 
+
+OSStatus	UnixFile_DataSource::WriteBytes(UInt16 positionMode,
+								SInt64 positionOffset,
+								UInt32 requestCount,
+								const void *buffer,
 								UInt32* actualCount)
 {
 	if (!buffer) return kAudio_ParamError;
 
-		// can't use current offset as we need to go to the disk too much		
+		// can't use current offset as we need to go to the disk too much
 	SInt64 offset = UFCurrentOffset (positionMode, positionOffset);
 		if (offset < 0) return kAudioFilePositionError;
 
@@ -320,7 +320,7 @@ OSStatus	UnixFile_DataSource::WriteBytes(UInt16 positionMode,
 #endif
 	if (numBytes == -1) return kAudioFilePositionError;
 	mFilePointer = offset + numBytes;
-	
+
 	if (actualCount) *actualCount = (UInt32)numBytes;
 	return noErr;
 }
@@ -330,50 +330,50 @@ OSStatus	UnixFile_DataSource::WriteBytes(UInt16 positionMode,
 #define NO_CACHE 0
 
 OSStatus Cached_DataSource::ReadFromHeaderCache(
-					SInt64 offset, 
+					SInt64 offset,
 					UInt32 requestCount,
-					void *buffer, 
+					void *buffer,
 					UInt32* actualCount)
 {
 	if (actualCount) *actualCount = 0;
 	OSStatus err = noErr;
 	ByteCount theActualCount = 0;
 
-#if VERBOSE	
+#if VERBOSE
 	printf("read from header %lld %lu   %lld %lu\n", offset, requestCount, 0LL, mHeaderCacheSize);
 #endif
 
-	if (!mHeaderCache()) 
+	if (!mHeaderCache())
 	{
 		mHeaderCache.allocBytes(mHeaderCacheSize, true);
 		err = mDataSource->ReadBytes(SEEK_SET, 0, mHeaderCacheSize, mHeaderCache(), &mHeaderCacheSize);
 		if (err == kAudioFileEndOfFileError) err = noErr;
 		if (err) return err;
 	}
-	
+
 	ByteCount firstPart = std::min((ByteCount)requestCount, (ByteCount)(mHeaderCacheSize - offset));
 	ByteCount secondPart = requestCount - firstPart;
-	
+
 	memcpy(buffer, mHeaderCache + (ByteCount)offset, firstPart);
 	theActualCount = firstPart;
-	
+
 	if (secondPart) {
 		UInt32 secondPartActualCount = 0;
 		err = mDataSource->ReadBytes(SEEK_SET, mHeaderCacheSize, static_cast<UInt32>(secondPart), (char*)buffer + firstPart, &secondPartActualCount);
 		theActualCount += secondPartActualCount;
 	}
-	
+
 	if (actualCount) *actualCount = (UInt32)theActualCount;
 	mOffset = offset + theActualCount;
-	
+
 	return err;
 }
 
 OSStatus Cached_DataSource::ReadBytes(
-					UInt16 positionMode, 
-					SInt64 positionOffset, 
-					UInt32 requestCount, 
-					void *buffer, 
+					UInt16 positionMode,
+					SInt64 positionOffset,
+					UInt32 requestCount,
+					void *buffer,
 					UInt32* actualCount)
 {
 	if (actualCount) *actualCount = 0;
@@ -384,7 +384,7 @@ OSStatus Cached_DataSource::ReadBytes(
 	if (!buffer) return kAudio_ParamError;
 
 	if ((positionMode & kPositionModeMask) != SEEK_END) size = 0; // not used in this case
-	else 
+	else
 	{
 		err = GetSize(size);
 		if (err) return err;
@@ -392,7 +392,7 @@ OSStatus Cached_DataSource::ReadBytes(
 
 	SInt64 offset = CalcOffset(positionMode, positionOffset, mOffset, size);
 	if (offset < 0) return kAudioFilePositionError;
-	
+
 	if (offset < mHeaderCacheSize) {
 		return ReadFromHeaderCache(offset, requestCount, buffer, actualCount);
 	}
@@ -405,10 +405,10 @@ OSStatus Cached_DataSource::ReadBytes(
 	SInt64 cacheEnd = mBodyCacheOffset + mBodyCacheCurSize;
 	if (mBodyCache() && requestCount < mBodyCacheSize && offset >= mBodyCacheOffset && offset < cacheEnd)
 	{
-		if (offset + requestCount <= cacheEnd) 
+		if (offset + requestCount <= cacheEnd)
 		{
 			// request is entirely within cache
-#if VERBOSE	
+#if VERBOSE
 			printf("request is entirely within cache %lld %lu   %lld %lu\n", offset, requestCount, mBodyCacheOffset, mBodyCacheCurSize);
 #endif
 			memcpy(buffer, mBodyCache + (size_t)(offset - mBodyCacheOffset), requestCount);
@@ -417,25 +417,25 @@ OSStatus Cached_DataSource::ReadBytes(
 		else
 		{
 			// part of request is within cache. copy, read next cache block, copy.
-#if VERBOSE	
+#if VERBOSE
 			printf("part of request is within cache %lld %lu   %lld %lu\n", offset, requestCount, mBodyCacheOffset, mBodyCacheCurSize);
 #endif
-			
+
 			// copy first part.
 			ByteCount firstPart = (ByteCount)(cacheEnd - offset);
 			ByteCount secondPart = requestCount - firstPart;
-#if VERBOSE	
-			printf("memcpy   offset %lld  mBodyCacheOffset %lld  offset - mBodyCacheOffset %lld  firstPart %lu   requestCount %lu\n", 
+#if VERBOSE
+			printf("memcpy   offset %lld  mBodyCacheOffset %lld  offset - mBodyCacheOffset %lld  firstPart %lu   requestCount %lu\n",
 						offset, mBodyCacheOffset, offset - mBodyCacheOffset, firstPart, requestCount);
 #endif
 			memcpy(buffer, mBodyCache + (size_t)(offset - mBodyCacheOffset), firstPart);
-			
+
 			theActualCount = static_cast<UInt32>(firstPart);
-			
+
 			// read new block
 			SInt64 nextOffset = mBodyCacheOffset + mBodyCacheCurSize;
 			err = mDataSource->ReadBytes(SEEK_SET, nextOffset, mBodyCacheSize, mBodyCache(), &mBodyCacheCurSize);
-			
+
 			if (err == kAudioFileEndOfFileError) err = noErr;
 			if (err) goto leave;
 
@@ -447,11 +447,11 @@ OSStatus Cached_DataSource::ReadBytes(
 			theActualCount = static_cast<UInt32>(firstPart + secondPart);
 		}
 	}
-	else 
+	else
 	{
 		if (requestCount > mBodyCacheSize)
 		{
-#if VERBOSE	
+#if VERBOSE
 			printf("large request %lld %lu   %lld %lu\n", offset, requestCount, mBodyCacheOffset, mBodyCacheCurSize);
 #endif
 			// the request is larger than we normally cache, just do a read and don't cache.
@@ -461,19 +461,19 @@ OSStatus Cached_DataSource::ReadBytes(
 		else
 		{
 			// request is outside cache. read new block.
-#if VERBOSE	
+#if VERBOSE
 			printf("request is outside cache %lld %lu   %lld %lu\n", offset, requestCount, mBodyCacheOffset, mBodyCacheCurSize);
 #endif
-			if (!mBodyCache()) 
+			if (!mBodyCache())
 			{
 				mBodyCache.allocBytes(mBodyCacheSize, true);
-#if VERBOSE	
+#if VERBOSE
 				printf("alloc mBodyCache %08X\n", mBodyCache());
 #endif
 			}
 			mBodyCacheOffset = offset;
 			err = mDataSource->ReadBytes(SEEK_SET, mBodyCacheOffset, mBodyCacheSize, mBodyCache(), &mBodyCacheCurSize);
-#if VERBOSE	
+#if VERBOSE
 			printf("read %08X %d    mBodyCacheOffset %lld   %lu %lu\n", err, err, mBodyCacheOffset, mBodyCacheSize, mBodyCacheCurSize);
 #endif
 			if (err == kAudioFileEndOfFileError) err = noErr;
@@ -482,32 +482,32 @@ OSStatus Cached_DataSource::ReadBytes(
 			theActualCount = std::min(requestCount, mBodyCacheCurSize);
 			memcpy(buffer, mBodyCache(), theActualCount);
 		}
-		
+
 	}
 
 leave:
 #endif
 	if (actualCount) *actualCount = (UInt32)theActualCount;
-#if VERBOSE	
+#if VERBOSE
 	printf("<<read err %d  actualCount %lu\n", err, *actualCount);
 #endif
 	return err;
 }
 
 OSStatus Cached_DataSource::WriteBytes(
-					UInt16 positionMode, 
-					SInt64 positionOffset, 
-					UInt32 requestCount, 
-					const void *buffer, 
+					UInt16 positionMode,
+					SInt64 positionOffset,
+					UInt32 requestCount,
+					const void *buffer,
 					UInt32* actualCount)
 {
 	OSStatus err = noErr;
 	SInt64 size;
 
 	if (!buffer) return kAudio_ParamError;
-	
+
 	if ((positionMode & kPositionModeMask) != SEEK_END) size = 0; // not used in this case
-	else 
+	else
 	{
 		err = GetSize(size);
 		if (err) return err;
@@ -515,18 +515,18 @@ OSStatus Cached_DataSource::WriteBytes(
 
 	SInt64 offset = CalcOffset(positionMode, positionOffset, mOffset, size);
 	if (offset < 0) return kAudioFilePositionError;
-	
-	if (mHeaderCache() && offset < mHeaderCacheSize) 
+
+	if (mHeaderCache() && offset < mHeaderCacheSize)
 	{
 		// header cache write through
 		ByteCount firstPart = std::min((ByteCount)requestCount, (ByteCount)(mHeaderCacheSize - offset));
-#if VERBOSE	
+#if VERBOSE
 		printf("header cache write through %lu %lu\n", mHeaderCacheSize, firstPart);
 #endif
 		memcpy(mHeaderCache + (size_t)offset, buffer, firstPart);
 	}
-		
-#if VERBOSE	
+
+#if VERBOSE
 	printf("write %lld %lu    %lld %d %lld\n", offset, requestCount, mOffset, positionMode, positionOffset);
 #endif
 
@@ -535,18 +535,18 @@ OSStatus Cached_DataSource::WriteBytes(
 	{
 		// body cache write through
 		ByteCount firstPart = std::min((SInt64)requestCount, cacheEnd - offset);
-#if VERBOSE	
+#if VERBOSE
 		printf("body cache write through %lld %lu  %lld %lu\n", mBodyCacheOffset, mBodyCacheCurSize, offset, firstPart);
 #endif
 		memcpy(mBodyCache + (offset - mBodyCacheOffset), buffer, firstPart);
 	}
-	
+
 	UInt32 theActualCount;
 	err = mDataSource->WriteBytes(positionMode, positionOffset, requestCount, buffer, &theActualCount);
-	
+
 	mOffset = offset + theActualCount;
 	if (actualCount) *actualCount = (UInt32)theActualCount;
-	
+
 	return err;
 }
 
@@ -555,11 +555,11 @@ OSStatus Cached_DataSource::WriteBytes(
 //////////////////////////////////////////////////////////////////////////////////////////
 
 Seekable_DataSource::Seekable_DataSource(	void * inClientData,
-							AudioFile_ReadProc					inReadFunc, 
-							AudioFile_WriteProc					inWriteFunc, 
+							AudioFile_ReadProc					inReadFunc,
+							AudioFile_WriteProc					inWriteFunc,
 							AudioFile_GetSizeProc				inGetSizeFunc,
 							AudioFile_SetSizeProc				inSetSizeFunc)
-	: DataSource(false), mClientData(inClientData), mReadFunc(inReadFunc), mWriteFunc(inWriteFunc), 
+	: DataSource(false), mClientData(inClientData), mReadFunc(inReadFunc), mWriteFunc(inWriteFunc),
 		mSizeFunc(inGetSizeFunc), mSetSizeFunc(inSetSizeFunc)
 {
 }
@@ -585,15 +585,15 @@ OSStatus Seekable_DataSource::SetSize(SInt64 inSize)
 	return (*mSetSizeFunc)(mClientData, inSize);
 }
 
-OSStatus Seekable_DataSource::ReadBytes(	
-							UInt16 positionMode, 
-							SInt64 positionOffset, 
-							UInt32 requestCount, 
-							void *buffer, 
+OSStatus Seekable_DataSource::ReadBytes(
+							UInt16 positionMode,
+							SInt64 positionOffset,
+							UInt32 requestCount,
+							void *buffer,
 							UInt32* actualCount)
 {
 	OSStatus err;
-	
+
 	if (actualCount) *actualCount = 0;
 	if (!mReadFunc) return kAudioFileOperationNotSupportedError;
 	if (!buffer) return kAudio_ParamError;
@@ -605,16 +605,16 @@ OSStatus Seekable_DataSource::ReadBytes(
 	if (err) return err;
 
 	SInt64 offset = CalcOffset(positionMode, positionOffset, mOffset, size);
-	
+
 	// request is outside bounds of file
-	if (offset < 0) 
+	if (offset < 0)
 		return kAudioFilePositionError;
-	if (offset >= size) 
+	if (offset >= size)
 		return kAudioFileEndOfFileError;
-	
+
 	// reduce request if it exceeds the amount available
 	requestCount = static_cast<UInt32>(std::min((SInt64)requestCount, size - offset));
-	
+
 	UInt32 theActualCount = 0;
 	err = (*mReadFunc)(mClientData, offset, requestCount, buffer, &theActualCount);
 	if (actualCount) *actualCount = theActualCount;
@@ -622,23 +622,23 @@ OSStatus Seekable_DataSource::ReadBytes(
 	return err;
 }
 
-					
+
 OSStatus Seekable_DataSource::WriteBytes(
-							UInt16 positionMode, 
-							SInt64 positionOffset, 
-							UInt32 requestCount, 
-							const void *buffer, 
+							UInt16 positionMode,
+							SInt64 positionOffset,
+							UInt32 requestCount,
+							const void *buffer,
 							UInt32* actualCount)
 {
 	OSStatus err;
-	
+
 	if (!mWriteFunc) return kAudioFileOperationNotSupportedError;
 	if (!buffer) return kAudio_ParamError;
 
 	SInt64 size;
 	positionMode &= kPositionModeMask;
 	if (positionMode != SEEK_END) size = 0; // not used in this case
-	else 
+	else
 	{
 		err = GetSize(size);
 		if (err) return err;
@@ -646,7 +646,7 @@ OSStatus Seekable_DataSource::WriteBytes(
 
 	SInt64 offset = CalcOffset(positionMode, positionOffset, mOffset, size);
 	if (offset < 0) return kAudioFilePositionError;
-	
+
 	UInt32 theActualCount;
 	err = (*mWriteFunc)(mClientData, offset, requestCount, buffer, &theActualCount);
 	if (err) return err;
@@ -658,16 +658,16 @@ OSStatus Seekable_DataSource::WriteBytes(
 //////////////////////////////////////////////////////////////////////////////////////////
 
 OSStatus Buffer_DataSource::ReadBytes(
-								UInt16 positionMode, 
-								SInt64 positionOffset, 
-								UInt32 requestCount, 
-								void *buffer, 
+								UInt16 positionMode,
+								SInt64 positionOffset,
+								UInt32 requestCount,
+								void *buffer,
 								UInt32* actualCount)
 {
 	if (actualCount) *actualCount = 0;
-	SInt64 offsetWithinBuffer = CalcOffset(positionMode, positionOffset, mOffset, mDataByteSize + mStartOffset) - mStartOffset;		
+	SInt64 offsetWithinBuffer = CalcOffset(positionMode, positionOffset, mOffset, mDataByteSize + mStartOffset) - mStartOffset;
 	if (offsetWithinBuffer < 0 || offsetWithinBuffer >= mDataByteSize) return kAudioFilePositionError;
-	
+
 	SInt64 bytesAfterOffset = mDataByteSize - offsetWithinBuffer;
 	SInt64 theActualCount = std::min(bytesAfterOffset, (SInt64)requestCount);
 
@@ -677,7 +677,7 @@ OSStatus Buffer_DataSource::ReadBytes(
 	}
 
 	memcpy(buffer, mData + offsetWithinBuffer, theActualCount);
-	
+
 	if (actualCount) *actualCount = static_cast<UInt32>(theActualCount);
 	mOffset = offsetWithinBuffer + theActualCount;
 

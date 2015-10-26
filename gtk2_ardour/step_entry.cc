@@ -684,7 +684,7 @@ StepEntry::register_actions ()
 
 
         RadioAction::Group dot_group;
-                                         
+
         myactions.register_radio_action (group, dot_group, "no-dotted", _("No Dotted Notes"), sigc::mem_fun (*this, &StepEntry::dot_change), 0);
         myactions.register_radio_action (group, dot_group, "toggle-dotted", _("Toggled Dotted Notes"), sigc::mem_fun (*this, &StepEntry::dot_change), 1);
         myactions.register_radio_action (group, dot_group, "toggle-double-dotted", _("Toggled Double-Dotted Notes"), sigc::mem_fun (*this, &StepEntry::dot_change), 2);

@@ -2,14 +2,14 @@
      File: CATink.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #if !defined(__CATink_h__)
 #define __CATink_h__
@@ -74,7 +74,7 @@ class CATink
 
 public:
 	CATink(F proc) { Set(proc); }
-	
+
 	~CATink() { Set((F)0xDEADDEAD); }		// jump to an obviously bad (odd) address if accessed after destruction
 
 #if TARGET_CPU_PPC
@@ -97,7 +97,7 @@ public:
 		mCode[3] = 0x4E800420;
 		MakeDataExecutable(mCode, sizeof(mCode));
 	}
-	
+
 	operator F () { return F(mCode); }
 
 private:
@@ -107,7 +107,7 @@ private:
 	{
 		/*
 			<tink>:   push   $0x12345678
-			<tink+5>: ret    
+			<tink+5>: ret
 			<tink>:   0x34567868
 			<tink+4>: 0x00e8c312
 		*/
@@ -123,14 +123,14 @@ private:
 	UInt32		mCode[2];
 #else
 	#warning: CPU not directly supported by CATink
-	
+
 	// For other CPU's, just wrap the function pointer for now.
 	// this bypasses what we're trying to accomplish with the Tink
 	// (multiple unique "instances" of a function), but it will at
 	// least compile and run.
 
 	void Set(F proc) { mProcPtr = proc; }
-	
+
 	operator F () { return mProcPtr; }
 private:
 	F			mProcPtr;

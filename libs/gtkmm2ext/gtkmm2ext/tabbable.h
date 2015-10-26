@@ -49,37 +49,37 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	void make_invisible ();
 	void attach ();
 	void detach ();
-	
+
 	Gtk::Widget& contents() const { return _contents; }
-	
+
 	Gtk::Window* get (bool create = false);
-	Gtk::Window* own_window () { return get (false); } 
+	Gtk::Window* own_window () { return get (false); }
 	virtual Gtk::Window* use_own_window (bool and_pack_it);
 
 	bool has_own_window () const;
 
 	void set_default_tabbed (bool yn);
-	
+
 	virtual void show_window ();
 
 	bool window_visible () const;
 	bool tabbed() const;
 	bool tabbed_by_default () const;
-	
+
 	Gtk::Window* current_toplevel () const;
 
 	Gtk::Notebook* tab_root_drop ();
 
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state ();
-	
+
 	static std::string xml_node_name();
 
 	sigc::signal1<void,Tabbable&> StateChange;
-	
+
   protected:
 	bool delete_event_handler (GdkEventAny *ev);
-	
+
   private:
 	Gtk::Widget&   _contents;
 	Gtk::Notebook  _own_notebook;
@@ -89,7 +89,7 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	Gtk::Label     _tab_label;
 	CairoIcon       tab_close_image;
 	bool            tab_requested_by_state;
-	
+
 	void show_tab ();
 	void hide_tab ();
 	bool tab_close_clicked (GdkEventButton*);

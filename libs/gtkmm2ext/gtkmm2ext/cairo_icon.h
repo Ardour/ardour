@@ -41,7 +41,7 @@ public:
 	void set_fg (uint32_t fg);
 
 	bool on_expose_event (GdkEventExpose*);
-	
+
   private:
 	Cairo::RefPtr<Cairo::Surface> image_surface;
 	ArdourIcon::Icon icon_type;

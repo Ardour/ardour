@@ -430,7 +430,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	}
 
 	/* Separate windows */
-	
+
 	WM::Manager::instance().register_window (&key_editor);
 	WM::Manager::instance().register_window (&session_option_editor);
 	WM::Manager::instance().register_window (&speaker_config_window);
@@ -592,13 +592,13 @@ ARDOUR_UI::post_engine ()
 
 	if (ARDOUR_COMMAND_LINE::show_key_actions) {
 
-		
+
 		vector<string> paths;
 		vector<string> labels;
 		vector<string> tooltips;
 		vector<string> keys;
 		vector<Glib::RefPtr<Gtk::Action> > actions;
-		
+
 		Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
 
 		vector<string>::iterator k;
@@ -617,7 +617,7 @@ ARDOUR_UI::post_engine ()
 		AudioEngine::instance()->stop ();
 		exit (0);
 	}
-	
+
 	/* this being a GUI and all, we want peakfiles */
 
 	AudioFileSource::set_build_peakfiles (true);
@@ -5130,7 +5130,7 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 	if (!window_icons.empty()) {
 		window.set_default_icon_list (window_icons);
 	}
-	
+
 	Gtkmm2ext::WindowTitle title (Glib::get_application_name());
 
 	if (!name.empty()) {
@@ -5164,15 +5164,15 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 	/* until we get ardour bindings working, we are not handling key
 	 * releases yet.
 	 */
-	
+
 	if (ev->type != GDK_KEY_PRESS) {
 		return false;
 	}
-	
+
 	if (event_window == &_main_window) {
 
 		window = event_window;
-		
+
 		/* find current tab contents */
 
 		Gtk::Widget* w = _tabs.get_nth_page (_tabs.get_current_page());
@@ -5184,25 +5184,25 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 		}
 
 		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("main window key event, bindings = %1, global = %2\n", bindings, &global_bindings));
-		
+
 	} else {
 
 		window = event_window;
-		
+
 		/* see if window uses ardour binding system */
 
 		bindings = reinterpret_cast<Gtkmm2ext::Bindings*>(window->get_data ("ardour-bindings"));
-	} 
+	}
 
 	/* An empty binding set is treated as if it doesn't exist */
-	
+
 	if (bindings && bindings->empty()) {
 		bindings = 0;
 	}
-	
+
 	return key_press_focus_accelerator_handler (*window, ev, bindings);
 }
-			
+
 bool
 ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings* bindings)
 {
@@ -5217,14 +5217,14 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
         Gtkmm2ext::possibly_translate_mod_to_make_legal_accelerator(modifier);
 
         if (focus) {
-		
+
 		/* some widget has keyboard focus */
 
 		if (GTK_IS_ENTRY(focus) || Keyboard::some_magic_widget_has_focus()) {
 
 			/* A particular kind of focusable widget currently has keyboard
 			 * focus. All unmodified key events should go to that widget
-			 * first and not be used as an accelerator by default 
+			 * first and not be used as an accelerator by default
 			 */
 
 			special_handling_of_unmodified_accelerators = true;
@@ -5271,9 +5271,9 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 	   all "normal text" accelerators.
 	*/
 
-		
+
 	if (!special_handling_of_unmodified_accelerators || (ev->state & mask)) {
-		
+
 		/* no special handling or there are modifiers in effect: accelerate first */
 
                 DEBUG_TRACE (DEBUG::Accelerators, "\tactivate, then propagate\n");
@@ -5286,7 +5286,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		if (bindings) {
 
 			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing Ardour bindings %1 for this event\n", bindings));
-			
+
 			if (bindings->activate (k, Bindings::Press)) {
 				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 				return true;
@@ -5294,47 +5294,47 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		}
 
 		DEBUG_TRACE (DEBUG::Accelerators, "\tnot yet handled, try global bindings\n");
-		
+
 		if (global_bindings && global_bindings->activate (k, Bindings::Press)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 			return true;
 		}
 
                 DEBUG_TRACE (DEBUG::Accelerators, "\tnot accelerated, now propagate\n");
-                
+
                 if (gtk_window_propagate_key_event (win, ev)) {
 	                DEBUG_TRACE (DEBUG::Accelerators, "\tpropagate handled\n");
 	                return true;
                 }
 
 	} else {
-		
+
 		/* no modifiers, propagate first */
-		
+
 		DEBUG_TRACE (DEBUG::Accelerators, "\tpropagate, then activate\n");
-		
+
 		if (gtk_window_propagate_key_event (win, ev)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\thandled by propagate\n");
 			return true;
 		}
 
 		DEBUG_TRACE (DEBUG::Accelerators, "\tpropagation didn't handle, so activate\n");
-		KeyboardKey k (ev->state, ev->keyval);		
+		KeyboardKey k (ev->state, ev->keyval);
 
 		if (bindings) {
-			
+
 			DEBUG_TRACE (DEBUG::Accelerators, "\tusing Ardour bindings for this window\n");
 
-			
+
 			if (bindings->activate (k, Bindings::Press)) {
 				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 				return true;
 			}
-			
-		} 
-		
+
+		}
+
 		DEBUG_TRACE (DEBUG::Accelerators, "\tnot yet handled, try global bindings\n");
-		
+
 		if (global_bindings && global_bindings->activate (k, Bindings::Press)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 			return true;

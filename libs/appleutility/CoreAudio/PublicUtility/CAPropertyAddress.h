@@ -2,14 +2,14 @@
      File: CAPropertyAddress.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #if !defined(__CAPropertyAddress_h__)
 #define __CAPropertyAddress_h__
@@ -88,7 +88,7 @@ public:
 						CAPropertyAddress(const CAPropertyAddress& inAddress)																				: AudioObjectPropertyAddress(inAddress){}
 	CAPropertyAddress&  operator=(const AudioObjectPropertyAddress& inAddress)																				{ AudioObjectPropertyAddress::operator=(inAddress); return *this; }
 	CAPropertyAddress&  operator=(const CAPropertyAddress& inAddress)																						{ AudioObjectPropertyAddress::operator=(inAddress); return *this; }
-	
+
 //  Operations
 public:
 	static bool			IsSameAddress(const AudioObjectPropertyAddress& inAddress1, const AudioObjectPropertyAddress& inAddress2)							{ return (inAddress1.mScope == inAddress2.mScope) && (inAddress1.mSelector == inAddress2.mSelector) && (inAddress1.mElement == inAddress2.mElement); }
@@ -145,18 +145,18 @@ public:
 public:
 	void*									GetToken() const																		{ return mToken; }
 	void									SetToken(void* inToken)																	{ mToken = inToken; }
-	
+
 	uintptr_t								GetIntToken() const																		{ return reinterpret_cast<uintptr_t>(mToken); }
 	void									SetIntToken(uintptr_t inToken)															{ mToken = reinterpret_cast<void*>(inToken); }
-	
+
 	AudioObjectID							GetAudioObjectIDToken() const															{ return static_cast<AudioObjectID>(reinterpret_cast<uintptr_t>(mToken)); }
-	
+
 	bool									IsEmpty() const																			{ return mAddressList.empty(); }
 	UInt32									GetNumberItems() const																	{ return ToUInt32(mAddressList.size()); }
 	void									GetItemByIndex(UInt32 inIndex, AudioObjectPropertyAddress& outAddress) const			{ if(inIndex < mAddressList.size()) { outAddress = mAddressList.at(inIndex); } }
 	const AudioObjectPropertyAddress*		GetItems() const																		{ return &(*mAddressList.begin()); }
 	AudioObjectPropertyAddress*				GetItems()																				{ return &(*mAddressList.begin()); }
-	
+
 	bool									HasItem(const AudioObjectPropertyAddress& inAddress) const								{ AddressList::const_iterator theIterator = std::find_if(mAddressList.begin(), mAddressList.end(), std::bind1st(CAPropertyAddress::CongruentEqualTo(), inAddress)); return theIterator != mAddressList.end(); }
 	bool									HasExactItem(const AudioObjectPropertyAddress& inAddress) const							{ AddressList::const_iterator theIterator = std::find_if(mAddressList.begin(), mAddressList.end(), std::bind1st(CAPropertyAddress::EqualTo(), inAddress)); return theIterator != mAddressList.end(); }
 
@@ -174,7 +174,7 @@ private:
 
 	AddressList								mAddressList;
 	void*									mToken;
-	
+
 };
 
 //==================================================================================================
@@ -207,10 +207,10 @@ public:
 	CAPropertyAddressList*						GetItemByToken(void* inToken);
 	const CAPropertyAddressList*				GetItemByIntToken(uintptr_t inToken) const;
 	CAPropertyAddressList*						GetItemByIntToken(uintptr_t inToken);
-	
+
 	void										AppendItem(const CAPropertyAddressList& inAddressList)								{ mAddressListVector.push_back(inAddressList); }
 	void										EraseAllItems()																		{ mAddressListVector.clear(); }
-	
+
 //  Implementation
 private:
 	typedef std::vector<CAPropertyAddressList>	AddressListVector;

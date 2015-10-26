@@ -2,14 +2,14 @@
      File: AUMIDIDefs.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #ifndef __AUMIDIDefs_h__
 #define __AUMIDIDefs_h__
@@ -75,7 +75,7 @@ enum
 	kMidiController_Balance					= 8,
 	kMidiController_Pan						= 10,
 	kMidiController_Expression				= 11,
-	
+
 	// these controls have a (0-63) == off, (64-127) == on
 	kMidiController_Sustain					= 64, //hold1
 	kMidiController_Portamento				= 65,
@@ -91,7 +91,7 @@ enum
 	kMidiController_VibratoRate				= 76,
 	kMidiController_VibratoDepth			= 77,
 	kMidiController_VibratoDelay			= 78,
-	
+
 	// these controls have a 0-127 range and in MIDI they have no LSB (so fractional values are lost in MIDI)
 	kMidiController_ReverbLevel				= 91,
 	kMidiController_ChorusLevel				= 93,
@@ -109,7 +109,7 @@ enum
 };
 
 // RPN values
-enum 
+enum
 {
 	kMidiControllerValue_RPNPitchBendSensitivity	= 0,
 	kMidiControllerValue_RPNChannelFineTuning		= 1,
@@ -119,7 +119,7 @@ enum
 };
 
 // GM2 Sound Bank Constants
-enum 
+enum
 {
 	kGM2MelodicBank						= 0x7900,
 	kGM2PercussionBank					= 0x7800,
@@ -129,7 +129,7 @@ enum
 	kBankMSBMask						= 0xff00
 };
 
-enum 
+enum
 {
 	kMSBController_MidPoint			= 0x40
 };

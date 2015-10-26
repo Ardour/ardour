@@ -322,7 +322,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 
 	update_buffer_load ();
 	update_title ();
-	
+
 	return 0;
 }
 
@@ -332,7 +332,7 @@ ARDOUR_UI::show_tabbable (Tabbable* t)
 	if (!t) {
 		return;
 	}
-	
+
 	t->make_visible ();
 }
 
@@ -369,7 +369,7 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 {
 	std::vector<std::string> insensitive_action_names;
 	std::vector<std::string> sensitive_action_names;
-	Glib::RefPtr<Action> action;	
+	Glib::RefPtr<Action> action;
 	std::string downcased_name = downcase (t.name());
 
 	if (t.tabbed()) {
@@ -385,7 +385,7 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 		insensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
-		
+
 	} else if (t.window_visible()) {
 
 		insensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
@@ -398,7 +398,7 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 		/* not currently visible. allow user to retab it or just make
 		 * it visible.
 		 */
-		
+
 		insensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
 		insensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));

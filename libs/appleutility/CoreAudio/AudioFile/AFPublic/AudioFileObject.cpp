@@ -2,14 +2,14 @@
      File: AudioFileObject.cpp
  Abstract: AudioFileObject.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "AudioFileObject.h"
 #include "CADebugMacros.h"
@@ -64,7 +64,7 @@ AudioFileObject::~AudioFileObject()
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::DoCreate(		
+OSStatus AudioFileObject::DoCreate(
 									CFURLRef							inFileRef,
 									const AudioStreamBasicDescription	*inFormat,
 									UInt32								inFlags)
@@ -73,27 +73,27 @@ OSStatus AudioFileObject::DoCreate(
 	if (!IsDataFormatValid(inFormat))
 		return kAudioFileUnsupportedDataFormatError;
 
-	if (!IsDataFormatSupported(inFormat)) 
+	if (!IsDataFormatSupported(inFormat))
 		return kAudioFileUnsupportedDataFormatError;
 
 	SetPermissions(kAudioFileReadWritePermission);
-	
+
 	SetAlignDataWithFillerChunks(!(inFlags & 2 /* kAudioFileFlags_DontPageAlignAudioData */ ));
-	
+
 	// call virtual method for particular format.
 	return Create(inFileRef, inFormat);
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                                
-OSStatus AudioFileObject::Create(		
+
+OSStatus AudioFileObject::Create(
 									CFURLRef							inFileRef,
 									const AudioStreamBasicDescription	*inFormat)
 {
 	int fileD;
 	OSStatus err = CreateDataFile (inFileRef, fileD);
     FailIf (err != noErr, Bail, "CreateDataFile failed");
-	
+
 	SetURL (inFileRef);
 
 	err = OpenFile(kAudioFileReadWritePermission, fileD);
@@ -101,23 +101,23 @@ OSStatus AudioFileObject::Create(
 
 	err = SetDataFormat(inFormat);
     FailIf (err != noErr, Bail, "SetDataFormat failed");
-	
+
     mIsInitialized = false;
-	
+
 Bail:
 	return err;
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::DoOpen(	
-									CFURLRef		inFileRef, 
+OSStatus AudioFileObject::DoOpen(
+									CFURLRef		inFileRef,
 									SInt8  			inPermissions,
 									int				inFD)
-{		
+{
 	OSStatus err = noErr;
 	SetPermissions(inPermissions);
-	
+
 	err = Open(inFileRef, inPermissions, inFD);
     FailIf (err != noErr, Bail, "Open failed");
 
@@ -130,22 +130,22 @@ Bail:
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::Open(			
-									CFURLRef		inFileRef, 
+OSStatus AudioFileObject::Open(
+									CFURLRef		inFileRef,
 									SInt8  			inPermissions,
 									int				inFD)
-{		
+{
 	if (!(inPermissions & kAudioFileReadPermission))
 		return kAudioFilePermissionsError; // file must have read permissions
- 
+
 	SetURL(inFileRef);
-	
+
 	OSStatus err = OpenFile(inPermissions, inFD);
     FailIf (err != noErr, Bail, "OpenFile failed");
-		
+
 	err = OpenFromDataSource();
     FailIf (err != noErr, Bail, "OpenFromDataSource failed");
-	
+
 Bail:
 	return err;
 }
@@ -154,17 +154,17 @@ Bail:
 
 OSStatus AudioFileObject::ValidateFormatAndData()
 {
-	
+
 
 	AudioStreamBasicDescription asbd = GetDataFormat();
 
 	if (!IsDataFormatValid(&asbd))
 		return kAudioFileInvalidFileError;
 
-	if (asbd.mFormatID == kAudioFormatLinearPCM) 
+	if (asbd.mFormatID == kAudioFormatLinearPCM)
 	{
 		SInt64 maxPackets = GetNumBytes() / asbd.mBytesPerPacket;
-		if (GetNumPackets() > maxPackets) 
+		if (GetNumPackets() > maxPackets)
 			return kAudioFileInvalidFileError;
 	}
 	return noErr;
@@ -173,24 +173,24 @@ OSStatus AudioFileObject::ValidateFormatAndData()
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 OSStatus AudioFileObject::DoOpenWithCallbacks(
-				void *								inRefCon, 
-				AudioFile_ReadProc					inReadFunc, 
-				AudioFile_WriteProc					inWriteFunc, 
+				void *								inRefCon,
+				AudioFile_ReadProc					inReadFunc,
+				AudioFile_WriteProc					inWriteFunc,
 				AudioFile_GetSizeProc				inGetSizeFunc,
 				AudioFile_SetSizeProc				inSetSizeFunc)
 {
 	SInt8	perms = (inSetSizeFunc || inWriteFunc) ? kAudioFileReadWritePermission : kAudioFileReadPermission;
 	SetPermissions(perms);
-	
+
 	DataSource* dataSource = new Seekable_DataSource(inRefCon, inReadFunc, inWriteFunc, inGetSizeFunc, inSetSizeFunc);
 	SetDataSource(dataSource);
 	return OpenFromDataSource();
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-							
+
 OSStatus AudioFileObject::OpenFromDataSource(void)
-{		
+{
 	return noErr;
 }
 
@@ -198,15 +198,15 @@ OSStatus AudioFileObject::OpenFromDataSource(void)
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 OSStatus AudioFileObject::DoInitializeWithCallbacks(
-				void *								inRefCon, 
-				AudioFile_ReadProc					inReadFunc, 
-				AudioFile_WriteProc					inWriteFunc, 
+				void *								inRefCon,
+				AudioFile_ReadProc					inReadFunc,
+				AudioFile_WriteProc					inWriteFunc,
 				AudioFile_GetSizeProc				inGetSizeFunc,
 				AudioFile_SetSizeProc				inSetSizeFunc,
                 UInt32								inFileType,
 				const AudioStreamBasicDescription	*inFormat,
 				UInt32								inFlags)
-{		
+{
 	DataSource* dataSource = new Seekable_DataSource(inRefCon, inReadFunc, inWriteFunc, inGetSizeFunc, inSetSizeFunc);
 	if (!dataSource->CanWrite()) return -54/*permErr*/;
 	dataSource->SetSize(0);
@@ -217,13 +217,13 @@ OSStatus AudioFileObject::DoInitializeWithCallbacks(
 
 	OSStatus err = SetDataFormat(inFormat);
 	if (err) return err;
-	
+
 	return InitializeDataSource(inFormat, inFlags);
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-					
-OSStatus AudioFileObject::DoInitialize(	
+
+OSStatus AudioFileObject::DoInitialize(
 									CFURLRef							inFileRef,
 									const AudioStreamBasicDescription	*inFormat,
 									UInt32			inFlags)
@@ -236,15 +236,15 @@ OSStatus AudioFileObject::DoInitialize(
 	return Initialize(inFileRef, inFormat, inFlags);
 }
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-					
-OSStatus AudioFileObject::Initialize(	
+
+OSStatus AudioFileObject::Initialize(
 									CFURLRef							inFileRef,
 									const AudioStreamBasicDescription	*inFormat,
 									UInt32								inFlags)
 {
 	OSStatus err = noErr;
-		
-	UInt8 fPath[FILENAME_MAX];	
+
+	UInt8 fPath[FILENAME_MAX];
 	if (!CFURLGetFileSystemRepresentation (inFileRef, true, fPath, FILENAME_MAX))
 		return kAudio_FileNotFoundError;
 
@@ -259,10 +259,10 @@ OSStatus AudioFileObject::Initialize(
 	int fileD = open((const char*)fPath, flags, filePerms);
 	if (fileD < 0)
 		return AudioFileTranslateErrno(errno);
-	
+
 	err = OpenFile(kAudioFileReadWritePermission, fileD);
     FailIf (err != noErr, Bail, "OpenFile failed");
-	
+
 		// don't need to do this as open has an option to truncate the file
 //	GetDataSource()->SetSize(0);
 
@@ -270,15 +270,15 @@ OSStatus AudioFileObject::Initialize(
     FailIf (err != noErr, Bail, "SetDataFormat failed");
 
 	InitializeDataSource(inFormat, inFlags);
-	
-Bail:	
+
+Bail:
 	return err;
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-							
+
 OSStatus AudioFileObject::InitializeDataSource(const AudioStreamBasicDescription	*inFormat, UInt32 /*inFlags*/)
-{		
+{
 	return noErr;
 }
 
@@ -288,7 +288,7 @@ OSStatus AudioFileObject::DoClose()
 {
 	OSStatus err = UpdateSizeIfNeeded();
 	if (err) return err;
-	
+
 	return Close();
 }
 
@@ -313,7 +313,7 @@ OSStatus AudioFileObject::Close()
 OSStatus AudioFileObject::Optimize()
 {
 	// default is that nothing needs to be done. This happens to be true for Raw, SD2 and NeXT/Sun types.
-	SetIsOptimized(true); 
+	SetIsOptimized(true);
 	return noErr;
 }
 
@@ -326,7 +326,7 @@ OSStatus AudioFileObject::DoOptimize()
 
 	OSStatus err = UpdateSizeIfNeeded();
 	if (err) return err;
-	
+
 	if (IsOptimized()) return noErr;
 
 	err = Optimize();
@@ -335,12 +335,12 @@ OSStatus AudioFileObject::DoOptimize()
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::UpdateNumBytes(SInt64 inNumBytes)	
+OSStatus AudioFileObject::UpdateNumBytes(SInt64 inNumBytes)
 {
     OSStatus err = noErr;
 	if (inNumBytes != GetNumBytes()) {
 		SetNumBytes(inNumBytes);
-        
+
         // #warning " this will not work for vbr formats"
 		SetNumPackets(GetNumBytes() / mDataFormat.mBytesPerPacket);
 		SizeChanged();
@@ -350,7 +350,7 @@ OSStatus AudioFileObject::UpdateNumBytes(SInt64 inNumBytes)
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::UpdateNumPackets(SInt64 inNumPackets)	
+OSStatus AudioFileObject::UpdateNumPackets(SInt64 inNumPackets)
 {
     OSStatus err = noErr;
 	if (inNumPackets != GetNumPackets()) {
@@ -358,7 +358,7 @@ OSStatus AudioFileObject::UpdateNumPackets(SInt64 inNumPackets)
 		SetNeedsSizeUpdate(true);
 		UpdateSizeIfNeeded();
 		SetNumPackets(inNumPackets);
-        
+
         // #warning " this will not work for vbr formats"
 		SetNumBytes(GetNumPackets() * mDataFormat.mBytesPerFrame);
 		SizeChanged();
@@ -375,19 +375,19 @@ OSStatus AudioFileObject::PacketToFrame(SInt64 inPacket, SInt64& outFirstFrameIn
 	{
 		OSStatus err = ScanForPackets(inPacket+1); // the packet count must be one greater than the packet index
 		if (err) return err;
-		
+
 		SInt64 packetTableSize = GetPacketTableSize();
-		
+
 		if (mPacketTable && inPacket >= packetTableSize)
 			return kAudioFileEndOfFileError;
-		
+
 		CompressedPacketTable* packetTable = GetPacketTable();
 		if (!packetTable)
 			return kAudioFileInvalidPacketOffsetError;
-			
+
 		if (inPacket < 0 || inPacket >= packetTableSize)
 			return kAudioFileInvalidPacketOffsetError;
-			
+
 		outFirstFrameInPacket = (*packetTable)[(size_t)inPacket].mFrameOffset;
 	}
 	else
@@ -406,18 +406,18 @@ OSStatus AudioFileObject::FrameToPacket(SInt64 inFrame, SInt64& outPacket, UInt3
 		CompressedPacketTable* packetTable = GetPacketTable();
 		if (!packetTable)
 			return kAudioFileInvalidPacketOffsetError;
-			
+
 		// search packet table
 		AudioStreamPacketDescriptionExtended pext;
 		memset(&pext, 0, sizeof(pext));
 		pext.mFrameOffset = inFrame;
 		CompressedPacketTable::iterator iter = std::lower_bound(packetTable->begin(), packetTable->end(), pext);
-		
+
 		if (iter == packetTable->end())
 			return kAudioFileInvalidPacketOffsetError;
-		
+
 		if (iter > packetTable->begin()) --iter;
-		
+
 		outPacket = iter - packetTable->begin();
 		outFrameOffsetInPacket = (UInt32)(inFrame - iter->mFrameOffset);
 	}
@@ -435,21 +435,21 @@ OSStatus AudioFileObject::PacketToByte(AudioBytePacketTranslation* abpt)
 {
     if (abpt->mPacket < 0)
         return kAudioFileInvalidPacketOffsetError;
-    
+
 	if (mDataFormat.mBytesPerPacket == 0)
 	{
 		CompressedPacketTable* packetTable = GetPacketTable();
 		if (!packetTable)
 			return kAudioFileInvalidPacketOffsetError;
-			
+
 		if (abpt->mPacket < GetPacketTableSize()) {
 			abpt->mByte = (*packetTable)[(int)abpt->mPacket].mStartOffset;
 			abpt->mFlags = 0;
 		} else {
 			SInt64 numPackets = packetTable->size();
-			if (numPackets < 8) 
+			if (numPackets < 8)
 				return 'more' /*kAudioFileStreamError_DataUnavailable*/ ;
-				
+
 			const AudioStreamPacketDescriptionExtended lastPacket = (*packetTable)[numPackets - 1];
 			SInt64 bytesReadSoFar = lastPacket.mStartOffset + lastPacket.mDataByteSize;
 			double averageBytesPerPacket = (double)(bytesReadSoFar - GetDataOffset()) / (double)numPackets;
@@ -487,21 +487,21 @@ OSStatus AudioFileObject::ByteToPacket(AudioBytePacketTranslation* abpt)
 		memset(&pext, 0, sizeof(pext));
 		pext.mStartOffset = abpt->mByte;
 		CompressedPacketTable::iterator iter = std::lower_bound(packetTable->begin(), packetTable->end(), pext, byte_less_than);
-		
+
 		if (iter == packetTable->end()) {
 			SInt64 numPackets = packetTable->size();
-			if (numPackets < 8) 
+			if (numPackets < 8)
 				return 'more' /*kAudioFileStreamError_DataUnavailable*/ ;
-				
+
 			const AudioStreamPacketDescriptionExtended lastPacket = (*packetTable)[numPackets - 1];
 			SInt64 bytesReadSoFar = lastPacket.mStartOffset + lastPacket.mDataByteSize;
 			double averageBytesPerPacket = (double)(bytesReadSoFar - GetDataOffset()) / (double)numPackets;
-			
+
 			double fpacket = (double)abpt->mByte / averageBytesPerPacket;
 			abpt->mPacket = (SInt64)floor(fpacket);
 			abpt->mByteOffsetInPacket = (UInt32)floor((fpacket - (double)abpt->mPacket) * averageBytesPerPacket);
 			abpt->mFlags = kBytePacketTranslationFlag_IsEstimate;
-			
+
 		} else {
 			if (iter > packetTable->begin()) --iter;
 			abpt->mPacket = iter - packetTable->begin();
@@ -523,29 +523,29 @@ OSStatus AudioFileObject::ByteToPacket(AudioBytePacketTranslation* abpt)
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::ReadBytes(		
+OSStatus AudioFileObject::ReadBytes(
 								Boolean			inUseCache,
-								SInt64			inStartingByte, 
-								UInt32			*ioNumBytes, 
+								SInt64			inStartingByte,
+								UInt32			*ioNumBytes,
 								void			*outBuffer)
 {
     OSStatus		err = noErr;
     UInt16			mode = SEEK_SET;
 	SInt64 			fileOffset = mDataOffset + inStartingByte;
     bool			readingPastEnd = false;
-	
-    FailWithAction((ioNumBytes == NULL) || (outBuffer == NULL), err = kAudio_ParamError, 
+
+    FailWithAction((ioNumBytes == NULL) || (outBuffer == NULL), err = kAudio_ParamError,
 		Bail, "invalid num bytes parameter");
 
 	//printf("inStartingByte %lld  GetNumBytes %lld\n", inStartingByte, GetNumBytes());
 
-	if (inStartingByte >= GetNumBytes()) 
+	if (inStartingByte >= GetNumBytes())
 	{
 		*ioNumBytes = 0;
 		return kAudioFileEndOfFileError;
 	}
 
-	if ((fileOffset + *ioNumBytes) > (GetNumBytes() + mDataOffset)) 
+	if ((fileOffset + *ioNumBytes) > (GetNumBytes() + mDataOffset))
 	{
 		*ioNumBytes = (UInt32)(GetNumBytes() + mDataOffset - fileOffset);
 		readingPastEnd = true;
@@ -554,9 +554,9 @@ OSStatus AudioFileObject::ReadBytes(
 
     if (!inUseCache)
         mode |= kAudioFileNoCacheMask;
-	
+
     err = GetDataSource()->ReadBytes(mode, fileOffset, *ioNumBytes, outBuffer, ioNumBytes);
-	
+
 	if (readingPastEnd && err == noErr)
 		err = kAudioFileEndOfFileError;
 
@@ -567,10 +567,10 @@ Bail:
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::WriteBytes(	
+OSStatus AudioFileObject::WriteBytes(
 								Boolean			inUseCache,
-								SInt64			inStartingByte, 
-								UInt32			*ioNumBytes, 
+								SInt64			inStartingByte,
+								UInt32			*ioNumBytes,
 								const void		*inBuffer)
 {
     OSStatus		err = noErr;
@@ -586,57 +586,57 @@ OSStatus AudioFileObject::WriteBytes(
     // if so, see if file type supports this and bail if not
     err = IsValidFilePosition(inStartingByte + *ioNumBytes);
     FailIf(err != noErr, Bail, "invalid file position");
-    
+
     extendingTheAudioData = inStartingByte + *ioNumBytes > GetNumBytes();
-    
+
     // if file is not optimized, then do not write data that would overwrite chunks following the sound data chunk
-    FailWithAction(	extendingTheAudioData && !IsOptimized(), 
+    FailWithAction(	extendingTheAudioData && !IsOptimized(),
                     err = kAudioFileNotOptimizedError, Bail, "Can't write more data until the file is optimized");
 
     if (!inUseCache)
         mode |= kAudioFileNoCacheMask;
-    
-    err = GetDataSource()->WriteBytes(mode, mDataOffset + inStartingByte, *ioNumBytes, 
+
+    err = GetDataSource()->WriteBytes(mode, mDataOffset + inStartingByte, *ioNumBytes,
                         inBuffer, ioNumBytes);
-	
+
     FailIf(err != noErr, Bail, "couldn't write new data");
-    
+
     if (extendingTheAudioData) {
         SInt64		nuEOF;						// Get the total bytes of audio data
         SInt64		nuByteTotal;
 
 		err = GetDataSource()->GetSize(nuEOF);
 		FailIf(err != noErr, Bail, "GetSize failed");
-            
+
 		nuByteTotal = nuEOF - mDataOffset;
 		err = UpdateNumBytes(nuByteTotal);
     }
-    
+
 Bail:
     return err;
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::ReadPackets(	
+OSStatus AudioFileObject::ReadPackets(
 								Boolean							inUseCache,
 								UInt32							*outNumBytes,
 								AudioStreamPacketDescription	*outPacketDescriptions,
-								SInt64							inStartingPacket, 
-								UInt32  						*ioNumPackets, 
+								SInt64							inStartingPacket,
+								UInt32  						*ioNumPackets,
 								void							*outBuffer)
 {
 	// This only works with CBR. To suppport VBR you must override.
     OSStatus		err = noErr;
-    
+
     FailWithAction(outBuffer == NULL, err = kAudio_ParamError, Bail, "NULL buffer");
-	
+
     FailWithAction((ioNumPackets == NULL) || (*ioNumPackets < 1), err = kAudio_ParamError, Bail, "invalid num packets parameter");
-    
+
 	{
 		UInt32			byteCount = *ioNumPackets * mDataFormat.mBytesPerPacket;
 		SInt64			startingByte = inStartingPacket * mDataFormat.mBytesPerPacket;
-			
+
 		err = ReadBytes (inUseCache, startingByte, &byteCount, outBuffer);
 		if ((err == noErr) || (err == kAudioFileEndOfFileError))
 		{
@@ -648,7 +648,7 @@ OSStatus AudioFileObject::ReadPackets(
 
 			if (outNumBytes)
 				*outNumBytes = byteCount;
-			
+
 			if (err == kAudioFileEndOfFileError)
 				err = noErr;
 		}
@@ -664,12 +664,12 @@ Bail:
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::ReadPacketData(	
+OSStatus AudioFileObject::ReadPacketData(
 								Boolean							inUseCache,
 								UInt32							*ioNumBytes,
 								AudioStreamPacketDescription	*outPacketDescriptions,
-								SInt64							inStartingPacket, 
-								UInt32  						*ioNumPackets, 
+								SInt64							inStartingPacket,
+								UInt32  						*ioNumPackets,
 								void							*outBuffer)
 {
 	OSStatus		err = noErr;
@@ -703,12 +703,12 @@ Bail:
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::ReadPacketDataVBR(	
+OSStatus AudioFileObject::ReadPacketDataVBR(
 								Boolean							inUseCache,
 								UInt32							*ioNumBytes,
 								AudioStreamPacketDescription	*outPacketDescriptions,
-								SInt64							inStartingPacket, 
-								UInt32  						*ioNumPackets, 
+								SInt64							inStartingPacket,
+								UInt32  						*ioNumPackets,
 								void							*outBuffer)
 {
 	OSStatus err = ScanForPackets(inStartingPacket+1); // need to scan packets up to start
@@ -718,7 +718,7 @@ OSStatus AudioFileObject::ReadPacketDataVBR(
 	SInt64 dataOffset = GetDataOffset();
 
 	CompressedPacketTable* packetTable = GetPacketTable();
-    if (!packetTable) 
+    if (!packetTable)
 		return kAudioFileInvalidFileError;
 
 	SInt64 packetTableSize = GetPacketTableSize();
@@ -728,7 +728,7 @@ OSStatus AudioFileObject::ReadPacketDataVBR(
 		*ioNumPackets = 0;
 		return kAudioFileEndOfFileError;
 	}
-	
+
 	if (inStartingPacket + *ioNumPackets <= packetTableSize) {
 		err = ReadPacketDataVBR_InTable(inUseCache, ioNumBytes, outPacketDescriptions, inStartingPacket, ioNumPackets, outBuffer);
 	} else {
@@ -741,21 +741,21 @@ OSStatus AudioFileObject::ReadPacketDataVBR(
 		SInt64 remainingBytesInFile = fileSize - firstPacketOffset - dataOffset;
 		if (bytesRead > remainingBytesInFile)
 			bytesRead = (UInt32)remainingBytesInFile;
-		
+
 		err = ReadBytes (inUseCache, firstPacketOffset, &bytesRead, outBuffer);
 		if (err && err != kAudioFileEndOfFileError) {
 			*ioNumBytes = 0;
 			*ioNumPackets = 0;
 			return err;
 		}
-		
+
 		Buffer_DataSource bufSrc(bytesRead, outBuffer, dataOffset + firstPacketOffset);
-		
+
 		OSStatus scanErr = ScanForPackets(kScanToEnd, &bufSrc, false);
 		if (scanErr && scanErr != kAudioFileEndOfFileError)
 			return scanErr;
 		packetTableSize = packetTable->size();
-		
+
 		UInt32 numPacketsRead = 0;
 		UInt32 endOfData = 0;
 		SInt64 packetNumber = inStartingPacket;
@@ -765,10 +765,10 @@ OSStatus AudioFileObject::ReadPacketDataVBR(
 			SInt64 endOfPacket = curPacketOffset + curPacket.mDataByteSize;
 			if (endOfPacket > bytesRead) break;
 			endOfData = (UInt32)endOfPacket;
-			outPacketDescriptions[numPacketsRead] = curPacket;				
+			outPacketDescriptions[numPacketsRead] = curPacket;
 			outPacketDescriptions[numPacketsRead].mStartOffset = curPacketOffset;
 		}
-		
+
 		*ioNumBytes = endOfData;
 		*ioNumPackets = numPacketsRead;
 	}
@@ -778,14 +778,14 @@ OSStatus AudioFileObject::ReadPacketDataVBR(
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 OSStatus AudioFileObject::HowManyPacketsCanBeReadIntoBuffer(UInt32* ioNumBytes, SInt64 inStartingPacket, UInt32 *ioNumPackets)
-{		
+{
 	CompressedPacketTable*	packetTable = GetPacketTable();
 	SInt64 packetTableSize = GetPacketTableSize();
 
 	if (inStartingPacket + *ioNumPackets > (SInt64)packetTableSize) {
 		*ioNumPackets = (UInt32)(packetTableSize - inStartingPacket);
 	}
-	
+
 	AudioStreamPacketDescription firstPacket = (*packetTable)[inStartingPacket];
 
 	if (*ioNumBytes < firstPacket.mDataByteSize) {
@@ -795,28 +795,28 @@ OSStatus AudioFileObject::HowManyPacketsCanBeReadIntoBuffer(UInt32* ioNumBytes, 
 	}
 
 	SInt64 lastPacketIndex = inStartingPacket + *ioNumPackets - 1;
-	if (lastPacketIndex >= packetTableSize) 
+	if (lastPacketIndex >= packetTableSize)
 		lastPacketIndex = packetTableSize - 1;
-		
+
 	AudioStreamPacketDescription lastPacket = (*packetTable)[lastPacketIndex];
-	
+
 	SInt64 readBytes = lastPacket.mStartOffset + lastPacket.mDataByteSize - firstPacket.mStartOffset;
 	if (readBytes <= *ioNumBytes) {
 		*ioNumBytes = (UInt32)readBytes;
 		return noErr;
 	}
-	
+
 	SInt64 lowBound = inStartingPacket;
 	SInt64 highBound = lastPacketIndex + 1;
 	SInt64 okIndex = lowBound;
-	while (highBound >= lowBound) {		
+	while (highBound >= lowBound) {
 		SInt64 tryBound = (lowBound + highBound) >> 1;
-		if (tryBound > lastPacketIndex) 
+		if (tryBound > lastPacketIndex)
 			break;
 		AudioStreamPacketDescription tryPacket = (*packetTable)[tryBound];
-		
+
 		SInt64 readBytes = tryPacket.mStartOffset + tryPacket.mDataByteSize - firstPacket.mStartOffset;
-		
+
 		if (readBytes > (SInt64)*ioNumBytes) {
 			highBound = tryBound - 1;
 		} else if (readBytes < (SInt64)*ioNumBytes) {
@@ -826,14 +826,14 @@ OSStatus AudioFileObject::HowManyPacketsCanBeReadIntoBuffer(UInt32* ioNumBytes, 
 			okIndex = tryBound;
 			break;
 		}
-	}	
-	
+	}
+
 	SInt64 numPackets = okIndex - inStartingPacket + 1;
 	if (numPackets > *ioNumPackets) {
 		numPackets = *ioNumPackets;
 		okIndex = inStartingPacket + numPackets - 1;
 	}
-	
+
 	AudioStreamPacketDescription packet = (*packetTable)[okIndex];
 	*ioNumBytes = (UInt32)(packet.mStartOffset + packet.mDataByteSize - firstPacket.mStartOffset);
 	*ioNumPackets = (UInt32)numPackets;
@@ -846,25 +846,25 @@ OSStatus AudioFileObject::HowManyPacketsCanBeReadIntoBuffer(UInt32* ioNumBytes, 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::ReadPacketDataVBR_InTable(	
+OSStatus AudioFileObject::ReadPacketDataVBR_InTable(
 								Boolean							inUseCache,
 								UInt32							*ioNumBytes,
 								AudioStreamPacketDescription	*outPacketDescriptions,
-								SInt64							inStartingPacket, 
-								UInt32  						*ioNumPackets, 
+								SInt64							inStartingPacket,
+								UInt32  						*ioNumPackets,
 								void							*outBuffer)
 {
 	CompressedPacketTable* packetTable = GetPacketTable();
-    if (!packetTable) 
+    if (!packetTable)
 		return kAudioFileInvalidFileError;
-	
+
 	OSStatus err = HowManyPacketsCanBeReadIntoBuffer(ioNumBytes, inStartingPacket, ioNumPackets);
 	if (err) return err;
-			
+
 	AudioStreamPacketDescription firstPacket = (*packetTable)[inStartingPacket];
 	SInt64 firstPacketOffset = firstPacket.mStartOffset;
 	UInt32 bytesRead = *ioNumBytes;
-	
+
 	if (outBuffer) {
 		err = ReadBytes (inUseCache, firstPacketOffset, &bytesRead, outBuffer);
 		if (err && err != kAudioFileEndOfFileError) {
@@ -874,12 +874,12 @@ OSStatus AudioFileObject::ReadPacketDataVBR_InTable(
 		}
 		*ioNumBytes = bytesRead;
 	}
-	
+
 	// fill out packet descriptions
-	if (outPacketDescriptions) {						
+	if (outPacketDescriptions) {
 		for (UInt32 i = 0; i < *ioNumPackets; i++) {
 			AudioStreamPacketDescription curPacket = (*packetTable)[i + inStartingPacket];
-			outPacketDescriptions[i] = curPacket;				
+			outPacketDescriptions[i] = curPacket;
 			outPacketDescriptions[i].mStartOffset = curPacket.mStartOffset - firstPacketOffset;
 		}
 	}
@@ -890,20 +890,20 @@ OSStatus AudioFileObject::ReadPacketDataVBR_InTable(
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::WritePackets(	
+OSStatus AudioFileObject::WritePackets(
 									Boolean								inUseCache,
                                     UInt32								inNumBytes,
                                     const AudioStreamPacketDescription	*inPacketDescriptions,
-                                    SInt64								inStartingPacket, 
-                                    UInt32								*ioNumPackets, 
+                                    SInt64								inStartingPacket,
+                                    UInt32								*ioNumPackets,
                                     const void							*inBuffer)
 {
 	// This only works with CBR. To suppport VBR you must override.
     OSStatus		err = noErr;
-    
+
     FailWithAction(inStartingPacket > GetNumPackets(), err = kAudioFileInvalidPacketOffsetError, Bail, "write past end");
     FailWithAction((ioNumPackets == NULL) || (inBuffer == NULL), err = kAudioFileUnspecifiedError, Bail, "invalid parameter");
-	
+
 	{
 		UInt32 byteCount = *ioNumPackets * mDataFormat.mBytesPerPacket;
 		SInt64 startingByte = inStartingPacket * mDataFormat.mBytesPerPacket;
@@ -922,21 +922,21 @@ Bail:
 
 OSStatus AudioFileObject::GetBitRate(			UInt32					*outBitRate)
 {
-	
+
 	if (!outBitRate) return kAudioFileUnspecifiedError;
-    
+
 	UInt32 bytesPerPacket = GetDataFormat().mBytesPerPacket;
 	UInt32 framesPerPacket = GetDataFormat().mFramesPerPacket;
 	Float64 sampleRate = GetDataFormat().mSampleRate;
 	const Float64 bitsPerByte = 8.;
-	
+
 	if (bytesPerPacket && framesPerPacket) {
 		*outBitRate = (UInt32)(bitsPerByte * (Float64)bytesPerPacket * sampleRate / (Float64)framesPerPacket);
-	} else {		
+	} else {
 		SInt64 numPackets = GetNumPackets();
 		SInt64 numBytes = GetNumBytes();
 		SInt64 numFrames = 0;
-		
+
 		if (framesPerPacket) {
 			numFrames = numPackets * framesPerPacket;
 		} else {
@@ -953,12 +953,12 @@ OSStatus AudioFileObject::GetBitRate(			UInt32					*outBitRate)
 #endif
 				{
 					numFrames += (*packetTable)[i].mVariableFramesInPacket;
-				}		
+				}
 			} else {
 				return kAudioFileUnsupportedPropertyError;
 			}
 		}
-        
+
         if (numFrames == 0 || (sampleRate == 0.)) {
             *outBitRate = 0;
             return noErr;
@@ -1098,18 +1098,18 @@ OSStatus AudioFileObject::GetInfoDictionarySize(		UInt32						*outDataSize,
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-												
+
 OSStatus AudioFileObject::GetInfoDictionary(CACFDictionary  *infoDict)
-{	
+{
 	Float64 fl;
 	if (GetEstimatedDuration(&fl) == noErr)
 		return AddDurationToInfoDictionary(infoDict, fl);
-		
+
 	return kAudioFileUnsupportedPropertyError;
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-												
+
 OSStatus AudioFileObject::SetInfoDictionary(CACFDictionary *infoDict)
 {
 	return kAudioFileUnsupportedPropertyError;
@@ -1120,31 +1120,31 @@ OSStatus AudioFileObject::GetEstimatedDuration(Float64*		duration)
 {
 	// calculate duration
 	AudioStreamBasicDescription		ASBD = GetDataFormat();
-		
+
 	*duration  = (ASBD.mFramesPerPacket != 0) ? (GetNumPackets() * ASBD.mFramesPerPacket) / ASBD.mSampleRate : 0.0;
-	
+
 	/*
 		For now, assume that any ASBD that has zero in the frames per packet field has been subclassed for this
 		method. i.e. A CAF file has a frame count in one of it's chunks.
-		
-		MP3 has been subclassed because it guesstimates a duration so the entire file does not 
+
+		MP3 has been subclassed because it guesstimates a duration so the entire file does not
 		need to be parsed in order to calculate the total frames.
 	*/
-	
+
 	return noErr;
 
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OSStatus AudioFileObject::GetPropertyInfo	(	
+OSStatus AudioFileObject::GetPropertyInfo	(
                                         AudioFilePropertyID		inPropertyID,
                                         UInt32					*outDataSize,
                                         UInt32					*isWritable)
 {
     OSStatus		err = noErr;
     UInt32			writable = 0;
-        
+
     switch (inPropertyID)
     {
 		case kAudioFilePropertyDeferSizeUpdates :
@@ -1161,11 +1161,11 @@ OSStatus AudioFileObject::GetPropertyInfo	(
             if (outDataSize) *outDataSize = sizeof(AudioStreamBasicDescription);
             writable = 1;
             break;
-                        
+
 		case kAudioFilePropertyFormatList:
 			err = GetFormatListInfo(*outDataSize, writable);
             break;
-		
+
 		case kAudioFilePropertyPacketSizeUpperBound:
         case kAudioFilePropertyIsOptimized:
         case kAudioFilePropertyMaximumPacketSize:
@@ -1184,25 +1184,25 @@ OSStatus AudioFileObject::GetPropertyInfo	(
             if (outDataSize) *outDataSize = sizeof(SInt64);
             break;
 
-		case kAudioFilePropertyBitRate:            
+		case kAudioFilePropertyBitRate:
             writable = 0;
             if (outDataSize) *outDataSize = sizeof(UInt32);
 			break;
 
-		case kAudioFilePropertyMagicCookieData:            
+		case kAudioFilePropertyMagicCookieData:
             err = GetMagicCookieDataSize(outDataSize, &writable);
 			break;
 
 		case kAudioFilePropertyMarkerList :
-            err = GetMarkerListSize(outDataSize, &writable);			
+            err = GetMarkerListSize(outDataSize, &writable);
 			break;
-			
+
 		case kAudioFilePropertyRegionList :
-            err = GetRegionListSize(outDataSize, &writable);			
+            err = GetRegionListSize(outDataSize, &writable);
 			break;
-			
+
 		case kAudioFilePropertyChannelLayout :
-            err = GetChannelLayoutSize(outDataSize, &writable);			
+            err = GetChannelLayoutSize(outDataSize, &writable);
 			break;
 
 		case kAudioFilePropertyPacketToFrame :
@@ -1218,11 +1218,11 @@ OSStatus AudioFileObject::GetPropertyInfo	(
 			break;
 
         case kAudioFilePropertyInfoDictionary :
-            err = GetInfoDictionarySize(outDataSize, &writable);			
+            err = GetInfoDictionarySize(outDataSize, &writable);
             break;
 
         case kTEMPAudioFilePropertySoundCheckDictionary :
-            err = GetSoundCheckDictionarySize(outDataSize, &writable);			
+            err = GetSoundCheckDictionarySize(outDataSize, &writable);
             break;
 
 		case kTEMPAudioFilePropertyGenerateLoudnessInfo :
@@ -1253,7 +1253,7 @@ OSStatus AudioFileObject::GetPropertyInfo	(
 			if (outDataSize) *outDataSize = sizeof(SInt32);
 			if (isWritable) *isWritable = CanWrite();
 			break;
-		
+
         default:
             writable = 0;
             err = kAudioFileUnsupportedPropertyError;
@@ -1275,109 +1275,109 @@ OSStatus	AudioFileObject::GetProperty(
     OSStatus		err = noErr;
 	UInt32			neededSize;
     UInt32			writable;
-	
+
     switch (inPropertyID)
     {
         case kAudioFilePropertyFileFormat:
-            FailWithAction(*ioDataSize != sizeof(UInt32), 
+            FailWithAction(*ioDataSize != sizeof(UInt32),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
-				
+
             *(UInt32 *) ioPropertyData = GetFileType();
             break;
 
 		case kAudioFilePropertyFormatList:
 			err = GetFormatList(*ioDataSize, (AudioFormatListItem*)ioPropertyData);
             break;
-		
+
         case kAudioFilePropertyDataFormat:
-            FailWithAction(*ioDataSize != sizeof(AudioStreamBasicDescription), 
+            FailWithAction(*ioDataSize != sizeof(AudioStreamBasicDescription),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
-				
+
             memcpy(ioPropertyData, &mDataFormat, sizeof(AudioStreamBasicDescription));
             break;
 		case kAudioFilePropertyDataOffset:
-            FailWithAction(*ioDataSize != sizeof(SInt64), 
+            FailWithAction(*ioDataSize != sizeof(SInt64),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
             *(SInt64 *) ioPropertyData = mDataOffset;
 			break;
         case kAudioFilePropertyIsOptimized:
-            FailWithAction(*ioDataSize != sizeof(UInt32), 
+            FailWithAction(*ioDataSize != sizeof(UInt32),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
             *(UInt32 *) ioPropertyData = mIsOptimized;
             break;
 
         case kAudioFilePropertyAudioDataByteCount:
-            FailWithAction(*ioDataSize != sizeof(SInt64), 
+            FailWithAction(*ioDataSize != sizeof(SInt64),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
             *(SInt64 *)ioPropertyData = GetNumBytes();
             break;
 
         case kAudioFilePropertyAudioDataPacketCount:
-            FailWithAction(*ioDataSize != sizeof(SInt64), 
+            FailWithAction(*ioDataSize != sizeof(SInt64),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
             *(SInt64 *)ioPropertyData = GetNumPackets();
             break;
 
 		case kAudioFilePropertyPacketSizeUpperBound:
-            FailWithAction(*ioDataSize != sizeof(UInt32), 
+            FailWithAction(*ioDataSize != sizeof(UInt32),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
             *(UInt32 *)ioPropertyData = GetPacketSizeUpperBound();
             break;
-			
+
         case kAudioFilePropertyMaximumPacketSize:
-            FailWithAction(*ioDataSize != sizeof(UInt32), 
+            FailWithAction(*ioDataSize != sizeof(UInt32),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
             *(UInt32 *)ioPropertyData = FindMaximumPacketSize();
             break;
 
 
-         case kAudioFilePropertyBitRate:            
-            FailWithAction(*ioDataSize != sizeof(UInt32), 
+         case kAudioFilePropertyBitRate:
+            FailWithAction(*ioDataSize != sizeof(UInt32),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
 			err = GetBitRate((UInt32*)ioPropertyData);
             break;
 
-         case kAudioFilePropertyMagicCookieData:            
-            
+         case kAudioFilePropertyMagicCookieData:
+
 			err = GetMagicCookieData(ioDataSize, ioPropertyData);
             break;
 
 		case kAudioFilePropertyMarkerList :
-            err = GetMarkerList(ioDataSize, static_cast<AudioFileMarkerList*>(ioPropertyData));			
+            err = GetMarkerList(ioDataSize, static_cast<AudioFileMarkerList*>(ioPropertyData));
 			break;
-			
+
 		case kAudioFilePropertyRegionList :
 			memset(ioPropertyData, 0, *ioDataSize);
-            err = GetRegionList(ioDataSize, static_cast<AudioFileRegionList*>(ioPropertyData));			
+            err = GetRegionList(ioDataSize, static_cast<AudioFileRegionList*>(ioPropertyData));
 			break;
-			
+
 		case kAudioFilePropertyChannelLayout :
 			err = GetChannelLayoutSize(&neededSize, &writable);
             FailIf(err, Bail, "GetChannelLayoutSize failed");
             FailWithAction(*ioDataSize != neededSize, err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
-			
-            err = GetChannelLayout(ioDataSize, static_cast<AudioChannelLayout*>(ioPropertyData));			
+
+            err = GetChannelLayout(ioDataSize, static_cast<AudioChannelLayout*>(ioPropertyData));
 			break;
-						
+
 		case kAudioFilePropertyDeferSizeUpdates :
-            FailWithAction(*ioDataSize != sizeof(UInt32), 
+            FailWithAction(*ioDataSize != sizeof(UInt32),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
-				
+
             *(UInt32 *) ioPropertyData = DeferSizeUpdates();
             break;
 
-		case kAudioFilePropertyPacketToFrame : 
+		case kAudioFilePropertyPacketToFrame :
 		{
-            FailWithAction(*ioDataSize != sizeof(AudioFramePacketTranslation), 
+            FailWithAction(*ioDataSize != sizeof(AudioFramePacketTranslation),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
-			
+
 			AudioFramePacketTranslation* afpt = (AudioFramePacketTranslation*)ioPropertyData;
 			err = PacketToFrame(afpt->mPacket, afpt->mFrame);
 			break;
-		}	
+		}
 		case kAudioFilePropertyFrameToPacket :
 		{
-            FailWithAction(*ioDataSize != sizeof(AudioFramePacketTranslation), 
+            FailWithAction(*ioDataSize != sizeof(AudioFramePacketTranslation),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
 
 			AudioFramePacketTranslation* afpt = (AudioFramePacketTranslation*)ioPropertyData;
@@ -1385,18 +1385,18 @@ OSStatus	AudioFileObject::GetProperty(
 			break;
 		}
 
-		case kAudioFilePropertyPacketToByte : 
+		case kAudioFilePropertyPacketToByte :
 		{
-            FailWithAction(*ioDataSize != sizeof(AudioBytePacketTranslation), 
+            FailWithAction(*ioDataSize != sizeof(AudioBytePacketTranslation),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
-			
+
 			AudioBytePacketTranslation* abpt = (AudioBytePacketTranslation*)ioPropertyData;
 			err = PacketToByte(abpt);
 			break;
-		}	
+		}
 		case kAudioFilePropertyByteToPacket :
 		{
-            FailWithAction(*ioDataSize != sizeof(AudioBytePacketTranslation), 
+            FailWithAction(*ioDataSize != sizeof(AudioBytePacketTranslation),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
 
 			AudioBytePacketTranslation* abpt = (AudioBytePacketTranslation*)ioPropertyData;
@@ -1406,13 +1406,13 @@ OSStatus	AudioFileObject::GetProperty(
 
         case kAudioFilePropertyInfoDictionary :
 		{
-            FailWithAction(*ioDataSize != sizeof(CFDictionaryRef), 
+            FailWithAction(*ioDataSize != sizeof(CFDictionaryRef),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
 
 			CACFDictionary		afInfoDictionary(true);
 
-            err = GetInfoDictionary(&afInfoDictionary);			
-            
+            err = GetInfoDictionary(&afInfoDictionary);
+
 			if (!err)
 			{
 				*(CFMutableDictionaryRef *)ioPropertyData = afInfoDictionary.CopyCFMutableDictionary();
@@ -1422,7 +1422,7 @@ OSStatus	AudioFileObject::GetProperty(
 
         case kTEMPAudioFilePropertySoundCheckDictionary :
 		{
-            FailWithAction(*ioDataSize != sizeof(CFDictionaryRef), 
+            FailWithAction(*ioDataSize != sizeof(CFDictionaryRef),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
 
 			CACFDictionary		afInfoDictionary(true);
@@ -1432,7 +1432,7 @@ OSStatus	AudioFileObject::GetProperty(
 				OSStatus err2 = GetSoundCheckDictionaryFromLoudnessInfo(&afInfoDictionary);
 				if (err2 == noErr) err = noErr; // else report original error from GetSoundCheckDictionary.
 			}
-            
+
 			if (!err)
 			{
 				*(CFMutableDictionaryRef *)ioPropertyData = afInfoDictionary.CopyCFMutableDictionary();
@@ -1442,7 +1442,7 @@ OSStatus	AudioFileObject::GetProperty(
 
         case kTEMPAudioFilePropertyLoudnessInfo :
 		{
-            FailWithAction(*ioDataSize != sizeof(CFDictionaryRef), 
+            FailWithAction(*ioDataSize != sizeof(CFDictionaryRef),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
 
 			CACFDictionary		afInfoDictionary(true);
@@ -1452,8 +1452,8 @@ OSStatus	AudioFileObject::GetProperty(
 				OSStatus err2 = GetLoudnessInfoFromSoundCheckDictionary(&afInfoDictionary);
 				if (err2 == noErr) err = noErr; // else report original error from GetLoudnessInfo.
 			}
-			
-			if (!err) 
+
+			if (!err)
 			{
 				*(CFMutableDictionaryRef *)ioPropertyData = afInfoDictionary.CopyCFMutableDictionary();
 			}
@@ -1467,8 +1467,8 @@ OSStatus	AudioFileObject::GetProperty(
 
 			CACFDictionary		afInfoDictionary(true);
 
-            err = GenerateLoudnessInfo(&afInfoDictionary);			
-            
+            err = GenerateLoudnessInfo(&afInfoDictionary);
+
 			if (!err)
 			{
 				*(CFMutableDictionaryRef *)ioPropertyData = afInfoDictionary.CopyCFMutableDictionary();
@@ -1478,10 +1478,10 @@ OSStatus	AudioFileObject::GetProperty(
 
 		case kAudioFilePropertyEstimatedDuration :
 		{
-            FailWithAction(*ioDataSize != sizeof(Float64), 
+            FailWithAction(*ioDataSize != sizeof(Float64),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
-		
-			err = GetEstimatedDuration((Float64*)ioPropertyData); 
+
+			err = GetEstimatedDuration((Float64*)ioPropertyData);
 			break;
 		}
 
@@ -1492,21 +1492,21 @@ OSStatus	AudioFileObject::GetProperty(
 			*ioDataSize = sizeof(CFStringRef);
 			err = GetLyrics((CFStringRef*) ioPropertyData);
 			break;
-	
-		case 'eof?' : 
+
+		case 'eof?' :
 		{
             if (*ioDataSize != sizeof(UInt32))
                 return kAudioFileBadPropertySizeError;
-			
+
 			SInt64 pos;
 			err = GetDataSource()->GetPos(pos);
 			if (err) break;
-			
+
 			SInt64 endOfData = GetDataOffset() + GetNumBytes();
 			*(UInt32*)ioPropertyData = pos >= endOfData;
-			
+
 			break;
-		}	
+		}
 		case 'sbtd' /*kAudioFilePropertySourceBitDepth*/ :
 		{
             if (*ioDataSize != sizeof(SInt32))
@@ -1518,17 +1518,17 @@ OSStatus	AudioFileObject::GetProperty(
 				// if there was no stored source bit depth, and this file is LPCM, then report this file's bit depth.
 				err = noErr;
 				outValue = GetDataFormat().mBitsPerChannel;
-				if (GetDataFormat().mFormatFlags & kAudioFormatFlagIsFloat) 
+				if (GetDataFormat().mFormatFlags & kAudioFormatFlagIsFloat)
 					outValue = -outValue;
-			} else if (err) 
+			} else if (err)
 				break;
-			
+
 			*(SInt32 *) ioPropertyData = outValue;
-			
+
 			break;
-		}	
+		}
 		default:
-            err = kAudioFileUnsupportedPropertyError;			
+            err = kAudioFileUnsupportedPropertyError;
             break;
     }
 
@@ -1548,14 +1548,14 @@ OSStatus	AudioFileObject::SetProperty(
     switch (inPropertyID)
     {
         case kAudioFilePropertyDataFormat:
-            FailWithAction(inDataSize != sizeof(AudioStreamBasicDescription), 
+            FailWithAction(inDataSize != sizeof(AudioStreamBasicDescription),
 				err = kAudioFileBadPropertySizeError, Bail, "Incorrect data size");
             err = UpdateDataFormat((AudioStreamBasicDescription *) inPropertyData);
 			break;
 		case kAudioFilePropertyFormatList:
 			err = SetFormatList(inDataSize, (AudioFormatListItem*)inPropertyData);
             break;
-		
+
         case kAudioFilePropertyAudioDataByteCount: {
             FailWithAction(inDataSize != sizeof(SInt64), err = kAudioFileBadPropertySizeError, Bail, "Incorrect data size");
             SInt64 numBytes = *(SInt64 *) inPropertyData;
@@ -1577,82 +1577,82 @@ OSStatus	AudioFileObject::SetProperty(
 			}
 			err = UpdateNumPackets(numPackets);
 		} break;
-		
-		case kAudioFilePropertyMagicCookieData:            
+
+		case kAudioFilePropertyMagicCookieData:
 			err = SetMagicCookieData(inDataSize, inPropertyData);
 			break;
 
 
 		case kAudioFilePropertyMarkerList :
-            err = SetMarkerList(inDataSize, static_cast<const AudioFileMarkerList*>(inPropertyData));			
+            err = SetMarkerList(inDataSize, static_cast<const AudioFileMarkerList*>(inPropertyData));
 			break;
-			
+
 		case kAudioFilePropertyRegionList :
-            err = SetRegionList(inDataSize, static_cast<const AudioFileRegionList*>(inPropertyData));			
+            err = SetRegionList(inDataSize, static_cast<const AudioFileRegionList*>(inPropertyData));
 			break;
-			
+
 		case kAudioFilePropertyChannelLayout :
-            err = SetChannelLayout(inDataSize, static_cast<const AudioChannelLayout*>(inPropertyData));			
+            err = SetChannelLayout(inDataSize, static_cast<const AudioChannelLayout*>(inPropertyData));
 			break;
 
 		case kAudioFilePropertyDeferSizeUpdates :
-            FailWithAction(inDataSize != sizeof(UInt32), 
+            FailWithAction(inDataSize != sizeof(UInt32),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
             SetDeferSizeUpdates(*(UInt32 *) inPropertyData);
             break;
 
         case kAudioFilePropertyInfoDictionary :
 		{
-            FailWithAction(inDataSize != sizeof(CFDictionaryRef), 
+            FailWithAction(inDataSize != sizeof(CFDictionaryRef),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
 
 			// pass the SetInfoDictionary a CACFDictionary object made with the provided CFDictionaryRef
 			// Let the caller release their own CFObject so pass false for th erelease parameter
 			CACFDictionary		afInfoDictionary(*(CFDictionaryRef *)inPropertyData, false);
-            err = SetInfoDictionary(&afInfoDictionary);			
-            
+            err = SetInfoDictionary(&afInfoDictionary);
+
             break;
 		}
-			
+
         case kTEMPAudioFilePropertySoundCheckDictionary :
 		{
-            FailWithAction(inDataSize != sizeof(CFDictionaryRef), 
+            FailWithAction(inDataSize != sizeof(CFDictionaryRef),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
 
 			// pass the SetInfoDictionary a CACFDictionary object made with the provided CFDictionaryRef
 			// Let the caller release their own CFObject so pass false for the release parameter
 			CACFDictionary		afInfoDictionary(*(CFDictionaryRef *)inPropertyData, false);
-            err = SetSoundCheckDictionary(&afInfoDictionary);			
-            
+            err = SetSoundCheckDictionary(&afInfoDictionary);
+
             break;
 		}
 
         case kTEMPAudioFilePropertyLoudnessInfo :
 		{
-            FailWithAction(inDataSize != sizeof(CFDictionaryRef), 
+            FailWithAction(inDataSize != sizeof(CFDictionaryRef),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
 
 			// pass the SetInfoDictionary a CACFDictionary object made with the provided CFDictionaryRef
 			// Let the caller release their own CFObject so pass false for the release parameter
 			CACFDictionary		afInfoDictionary(*(CFDictionaryRef *)inPropertyData, false);
-            err = SetLoudnessInfo(&afInfoDictionary);			
-            
+            err = SetLoudnessInfo(&afInfoDictionary);
+
             break;
 		}
-			
+
   		case 'sbtd' /*kAudioFilePropertySourceBitDepth*/ :
 		{
-            FailWithAction(inDataSize != sizeof(SInt32), 
+            FailWithAction(inDataSize != sizeof(SInt32),
 				err = kAudioFileBadPropertySizeError, Bail, "inDataSize is wrong");
 
 			SInt32 inValue = *(SInt32 *)inPropertyData;
 			err = SetSourceBitDepth(inValue);
-			
+
 			break;
-		}	
+		}
 
       default:
-            err = kAudioFileUnsupportedPropertyError;			
+            err = kAudioFileUnsupportedPropertyError;
 		break;
     }
 
@@ -1666,17 +1666,17 @@ Bail:
 OSStatus AudioFileObject::SetDataFormat(const AudioStreamBasicDescription* inStreamFormat)
 {
 	OSStatus err = noErr;
-	
+
 	if (!IsDataFormatValid(inStreamFormat))
 		return kAudioFileUnsupportedDataFormatError;
 
-	if (!IsDataFormatSupported(inStreamFormat)) 
+	if (!IsDataFormatSupported(inStreamFormat))
 		return kAudioFileUnsupportedDataFormatError;
-	
+
 	UInt32 prevBytesPerPacket = mDataFormat.mBytesPerPacket;
-	
+
 	mDataFormat = *inStreamFormat;
-	
+
 	// if CBR and bytes per packet changes, we need to change the number of packets we think we have.
 	if (mDataFormat.mBytesPerPacket && mDataFormat.mBytesPerPacket != prevBytesPerPacket)
 	{
@@ -1687,9 +1687,9 @@ OSStatus AudioFileObject::SetDataFormat(const AudioStreamBasicDescription* inStr
 		if (!mFirstSetFormat)
 			SizeChanged();
 	}
-	
+
 	mFirstSetFormat = false;
-	
+
 	return err;
 }
 
@@ -1712,7 +1712,7 @@ OSStatus AudioFileObject::GetFormatList(	UInt32									&ioDataSize,
 	// default implementation is to just return the data format
 	if (ioDataSize < sizeof(AudioFormatListItem))
 		return kAudioFileBadPropertySizeError;
-	
+
 	AudioFormatListItem afli;
 	afli.mASBD = mDataFormat;
 	AudioChannelLayoutTag layoutTag = /*kAudioChannelLayoutTag_Unknown*/ 0xFFFF0000 | mDataFormat.mChannelsPerFrame;
@@ -1727,14 +1727,14 @@ OSStatus AudioFileObject::GetFormatList(	UInt32									&ioDataSize,
 			layoutTag = layout->mChannelLayoutTag;
 		}
 	}
-	afli.mChannelLayoutTag = layoutTag;	
-	
+	afli.mChannelLayoutTag = layoutTag;
+
 	memcpy(ioPropertyData, &afli, sizeof(AudioFormatListItem));
-	
+
 	ioDataSize = sizeof(AudioFormatListItem);
 	return noErr;
 }
-										
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 OSStatus AudioFileObject::SetFormatList(	UInt32									inDataSize,
@@ -1765,22 +1765,22 @@ Boolean AudioFileObject::IsDataFormatValid(AudioStreamBasicDescription const* in
 		return false;
 
 	if (inDesc->mFormatID == kAudioFormatLinearPCM)
-	{			
+	{
 		if (inDesc->mBitsPerChannel < 1 || inDesc->mBitsPerChannel > 64)
 			return false;
-			
+
 		if (inDesc->mFramesPerPacket != 1)
 			return false;
-			
-		if (inDesc->mBytesPerPacket == 0) 
+
+		if (inDesc->mBytesPerPacket == 0)
 			return false;
 
 		if (inDesc->mBytesPerFrame != inDesc->mBytesPerPacket)
 			return false;
-			
+
 		// [3605260] we assume here that a packet is an integer number of frames.
 		UInt32 minimumBytesPerPacket = (inDesc->mBitsPerChannel * inDesc->mChannelsPerFrame + 7) / 8;
-		if (inDesc->mBytesPerPacket < minimumBytesPerPacket) 
+		if (inDesc->mBytesPerPacket < minimumBytesPerPacket)
 			return false;
 	}
 	return true;
@@ -1788,7 +1788,7 @@ Boolean AudioFileObject::IsDataFormatValid(AudioStreamBasicDescription const* in
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void AudioFileObject::SetDataSource(DataSource* inDataSource)	
+void AudioFileObject::SetDataSource(DataSource* inDataSource)
 {
 	if (mDataSource != inDataSource) {
 		delete mDataSource;
@@ -1811,21 +1811,21 @@ OSStatus AudioFileObject::OpenFile(SInt8 inPermissions, int inFD)
 	OSStatus err = noErr;
 
 	SetDataSource(new Cached_DataSource(new UnixFile_DataSource(inFD, inPermissions, true)));
-	
+
 	mFileD = inFD;
 	SetPermissions (inPermissions);
 
 	return err;
 }
-								
+
 OSStatus AudioFileObject::CreateDataFile (CFURLRef	inFileRef, int	&outFileD)
-{	 
-	UInt8 fPath[FILENAME_MAX];	
+{
+	UInt8 fPath[FILENAME_MAX];
 	if (!CFURLGetFileSystemRepresentation (inFileRef, true, fPath, FILENAME_MAX))
 		return kAudio_FileNotFoundError;
-	
+
 	struct stat stbuf;
-	if (stat ((const char*)fPath, &stbuf) == 0) 
+	if (stat ((const char*)fPath, &stbuf) == 0)
 		return kAudioFilePermissionsError;
 
 #if TARGET_OS_WIN32
@@ -1863,7 +1863,7 @@ OSStatus AudioFileObject::AddDurationToInfoDictionary(CACFDictionary *infoDict, 
 OSStatus AudioFileObject::SizeChanged()
 {
 	OSStatus err = noErr;
-	if (mPermissions & kAudioFileWritePermission) 
+	if (mPermissions & kAudioFileWritePermission)
 	{
 		if (DeferSizeUpdates())
 			SetNeedsSizeUpdate(true);
@@ -1874,8 +1874,8 @@ OSStatus AudioFileObject::SizeChanged()
 }
 
 OSStatus AudioFileObject::UpdateSizeIfNeeded()
-{		
-	if (GetNeedsSizeUpdate()) 
+{
+	if (GetNeedsSizeUpdate())
 	{
 		OSStatus err = UpdateSize();
 		if (err) return err;
@@ -1896,7 +1896,7 @@ OSStatus AudioFileObject::GetUserDataSize(  UInt32					/*inUserDataID*/,
 {
 	return kAudioFileOperationNotSupportedError;
 }
-											
+
 OSStatus AudioFileObject::GetUserData(		UInt32					/*inUserDataID*/,
 											UInt32					/*inIndex*/,
 											UInt32*					/*ioDataSize*/,
@@ -1904,7 +1904,7 @@ OSStatus AudioFileObject::GetUserData(		UInt32					/*inUserDataID*/,
 {
 	return kAudioFileOperationNotSupportedError;
 }
-											
+
 OSStatus AudioFileObject::SetUserData(		UInt32					/*inUserDataID*/,
 											UInt32					/*inIndex*/,
 											UInt32					/*inDataSize*/,
@@ -1912,7 +1912,7 @@ OSStatus AudioFileObject::SetUserData(		UInt32					/*inUserDataID*/,
 {
 	return kAudioFileOperationNotSupportedError;
 }
-											
+
 OSStatus AudioFileObject::RemoveUserData(	UInt32					/*inUserDataID*/,
 											UInt32					/*inIndex*/)
 {
@@ -1921,7 +1921,7 @@ OSStatus AudioFileObject::RemoveUserData(	UInt32					/*inUserDataID*/,
 
 OSStatus AudioFileObject::MoveData(SInt64 fromPos, SInt64 toPos, SInt64 size)
 {
-	if (fromPos == toPos) 
+	if (fromPos == toPos)
 		return noErr;
 
 	OSStatus err = noErr;
@@ -1933,13 +1933,13 @@ OSStatus AudioFileObject::MoveData(SInt64 fromPos, SInt64 toPos, SInt64 size)
 		{
 			// read from old file
 			UInt32 byteCount;
-			SInt64 count = (bytesRemaining < kCopySoundDataBufferSize) ? bytesRemaining : kCopySoundDataBufferSize; 
+			SInt64 count = (bytesRemaining < kCopySoundDataBufferSize) ? bytesRemaining : kCopySoundDataBufferSize;
 			err = GetDataSource()->ReadBytes(SEEK_SET, fromPos+(bytesRemaining-count), (UInt32)count, audioData(), &byteCount);
 			FailIf (err != noErr, Bail, "MoveData ReadBytes failed");
 
 			err = GetDataSource()->WriteBytes(SEEK_SET, toPos+(bytesRemaining-count), (UInt32)count, audioData(), &byteCount);
 			FailIf (err != noErr, Bail, "WriteBytes failed");
-			
+
 			bytesRemaining -= count;
 		}
 	} else {
@@ -1947,17 +1947,17 @@ OSStatus AudioFileObject::MoveData(SInt64 fromPos, SInt64 toPos, SInt64 size)
 		{
 			// read from old file
 			UInt32 byteCount;
-			SInt64 count = (bytesRemaining < kCopySoundDataBufferSize) ? bytesRemaining : kCopySoundDataBufferSize; 
+			SInt64 count = (bytesRemaining < kCopySoundDataBufferSize) ? bytesRemaining : kCopySoundDataBufferSize;
 			err = GetDataSource()->ReadBytes(SEEK_SET, fromPos+(size - bytesRemaining), (UInt32)count, audioData(), &byteCount);
 			FailIf (err != noErr, Bail, "MoveData ReadBytes failed");
-			
+
 			err = GetDataSource()->WriteBytes(SEEK_SET, toPos+(size - bytesRemaining), (UInt32)count, audioData(), &byteCount);
 			FailIf (err != noErr, Bail, "WriteBytes failed");
-			
+
 			bytesRemaining -= count;
 		}
 	}
-	
+
 Bail:
 	return err;
 }

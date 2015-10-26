@@ -2,14 +2,14 @@
      File: SynthNote.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #ifndef __SynthNote__
 #define __SynthNote__
@@ -84,7 +84,7 @@ enum SynthNoteState {
         end of note             any state                                       free
 		soft voice stealing     any state                                       fast released
 		hard voice stealing     any state                                       free
-		
+
 		soft voice stealing happens when there is a note on event and NumActiveNotes > MaxActiveNotes
 		hard voice stealing happens when there is a note on event and NumActiveNotes == NumNotes (no free notes)
 		voice stealing removes the quietest note in the highest numbered state that has sounding notes.
@@ -108,20 +108,20 @@ struct SynthNote
 		mVelocity(0.0f)
 	{
 	}
-	
+
 	virtual					~SynthNote() {}
-	
+
 	virtual void			Reset();
 	//! Returns true if active note resulted from this call, otherwise false
 	virtual bool			AttackNote(
 									SynthPartElement *				inPart,
 									SynthGroupElement *				inGroup,
-									NoteInstanceID					inNoteID, 
-									UInt64							inAbsoluteSampleFrame, 
-									UInt32							inOffsetSampleFrame, 
+									NoteInstanceID					inNoteID,
+									UInt64							inAbsoluteSampleFrame,
+									UInt32							inOffsetSampleFrame,
 									const MusicDeviceNoteParams		&inParams
 							);
-								
+
 	virtual OSStatus		Render(UInt64 inAbsoluteSampleFrame, UInt32 inNumFrames, AudioBufferList** inBufferList, UInt32 inOutBusCount) = 0;
 	//! Returns true if active note resulted from this call, otherwise false
 	virtual bool			Attack(const MusicDeviceNoteParams &inParams) = 0;
@@ -134,7 +134,7 @@ struct SynthNote
 
 	SynthGroupElement*		GetGroup() const { return mGroup; }
 	SynthPartElement*		GetPart() const { return mPart; }
-	
+
 	AUInstrumentBase*		GetAudioUnit() const;
 
 	Float32					GetGlobalParameter(AudioUnitParameterID inParamID) const;
@@ -143,7 +143,7 @@ struct SynthNote
 	SynthNoteState			GetState() const { return mState; }
 	UInt8					GetMidiKey() const { return (UInt8) mPitch; }
 	UInt8					GetMidiVelocity() const { return (UInt8) mVelocity; }
-	
+
 	Boolean					IsSounding() const { return mState < kNumberOfSoundingNoteStates; }
 	Boolean					IsActive() const { return mState < kNumberOfActiveNoteStates; }
 	UInt64					GetAbsoluteStartFrame() const { return mAbsoluteStartFrame; }
@@ -155,7 +155,7 @@ struct SynthNote
 
 	float					GetPitchBend() const;
 	double					TuningA() const;
-	
+
 	Float32					GetPitch() const { return mPitch; }	// returns raw pitch from MusicDeviceNoteParams
 	virtual double			Frequency(); // returns the frequency of note + pitch bend.
 	virtual double			SampleRate();
@@ -163,7 +163,7 @@ struct SynthNote
 	// linked list pointers
 	SynthNote				*mPrev;
 	SynthNote				*mNext;
-	
+
 	friend class			SynthGroupElement;
 	friend struct			SynthNoteList;
 protected:
@@ -171,14 +171,14 @@ protected:
 private:
 	SynthPartElement*		mPart;
 	SynthGroupElement*	mGroup;
-		
+
 	NoteInstanceID			mNoteID;
 	SynthNoteState			mState;
 	UInt64					mAbsoluteStartFrame;
 	SInt32					mRelativeStartFrame;
 	SInt32					mRelativeReleaseFrame;
 	SInt32					mRelativeKillFrame;
-	
+
 	Float32					mPitch;
 	Float32					mVelocity;
 };

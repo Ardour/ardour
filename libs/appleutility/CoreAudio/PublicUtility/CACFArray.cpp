@@ -2,14 +2,14 @@
      File: CACFArray.cpp
  Abstract: CACFArray.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 //=============================================================================
 //	Includes
@@ -91,7 +91,7 @@ bool	CACFArray::GetIndexOfItem(const void* inItem, UInt32& outIndex) const
 bool	CACFArray::GetBool(UInt32 inIndex, bool& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inIndex, theValue))
 	{
@@ -108,14 +108,14 @@ bool	CACFArray::GetBool(UInt32 inIndex, bool& outValue) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::GetSInt32(UInt32 inIndex, SInt32& outItem) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theItem = NULL;
 	if(GetCFType(inIndex, theItem))
 	{
@@ -125,14 +125,14 @@ bool	CACFArray::GetSInt32(UInt32 inIndex, SInt32& outItem) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::GetUInt32(UInt32 inIndex, UInt32& outItem) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theItem = NULL;
 	if(GetCFType(inIndex, theItem))
 	{
@@ -142,14 +142,14 @@ bool	CACFArray::GetUInt32(UInt32 inIndex, UInt32& outItem) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::GetSInt64(UInt32 inIndex, SInt64& outItem) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theItem = NULL;
 	if(GetCFType(inIndex, theItem))
 	{
@@ -159,14 +159,14 @@ bool	CACFArray::GetSInt64(UInt32 inIndex, SInt64& outItem) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::GetUInt64(UInt32 inIndex, UInt64& outItem) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theItem = NULL;
 	if(GetCFType(inIndex, theItem))
 	{
@@ -176,14 +176,14 @@ bool	CACFArray::GetUInt64(UInt32 inIndex, UInt64& outItem) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::GetFloat32(UInt32 inIndex, Float32& outItem) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theItem = NULL;
 	if(GetCFType(inIndex, theItem))
 	{
@@ -193,14 +193,14 @@ bool	CACFArray::GetFloat32(UInt32 inIndex, Float32& outItem) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::GetFloat64(UInt32 inIndex, Float64& outItem) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theItem = NULL;
 	if(GetCFType(inIndex, theItem))
 	{
@@ -210,14 +210,14 @@ bool	CACFArray::GetFloat64(UInt32 inIndex, Float64& outItem) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::Get4CC(UInt32 inIndex, UInt32& outValue) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theValue = NULL;
 	if(GetCFType(inIndex, theValue))
 	{
@@ -237,14 +237,14 @@ bool	CACFArray::Get4CC(UInt32 inIndex, UInt32& outValue) const
 			}
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::GetString(UInt32 inIndex, CFStringRef& outItem) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theItem = NULL;
 	if(GetCFType(inIndex, theItem))
 	{
@@ -254,14 +254,14 @@ bool	CACFArray::GetString(UInt32 inIndex, CFStringRef& outItem) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::GetArray(UInt32 inIndex, CFArrayRef& outItem) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theItem = NULL;
 	if(GetCFType(inIndex, theItem))
 	{
@@ -271,14 +271,14 @@ bool	CACFArray::GetArray(UInt32 inIndex, CFArrayRef& outItem) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::GetDictionary(UInt32 inIndex, CFDictionaryRef& outItem) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theItem = NULL;
 	if(GetCFType(inIndex, theItem))
 	{
@@ -288,14 +288,14 @@ bool	CACFArray::GetDictionary(UInt32 inIndex, CFDictionaryRef& outItem) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::GetData(UInt32 inIndex, CFDataRef& outItem) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theItem = NULL;
 	if(GetCFType(inIndex, theItem))
 	{
@@ -305,14 +305,14 @@ bool	CACFArray::GetData(UInt32 inIndex, CFDataRef& outItem) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::GetUUID(UInt32 inIndex, CFUUIDRef& outItem) const
 {
 	bool theAnswer = false;
-	
+
 	CFTypeRef theItem = NULL;
 	if(GetCFType(inIndex, theItem))
 	{
@@ -322,20 +322,20 @@ bool	CACFArray::GetUUID(UInt32 inIndex, CFUUIDRef& outItem) const
 			theAnswer = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::GetCFType(UInt32 inIndex, CFTypeRef& outItem) const
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && (inIndex < GetNumberItems()))
 	{
 		outItem = CFArrayGetValueAtIndex(mCFArray, static_cast<CFIndex>(inIndex));
 		theAnswer = outItem != NULL;
 	}
-	
+
 	return theAnswer;
 }
 
@@ -381,7 +381,7 @@ void	CACFArray::GetCACFDictionary(UInt32 inIndex, CACFDictionary& outItem) const
 bool	CACFArray::AppendBool(bool inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFBoolean theItem(inItem);
@@ -390,14 +390,14 @@ bool	CACFArray::AppendBool(bool inItem)
 			theAnswer = AppendCFType(theItem.GetCFBoolean());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::AppendSInt32(SInt32 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFNumber theItem(inItem);
@@ -406,14 +406,14 @@ bool	CACFArray::AppendSInt32(SInt32 inItem)
 			theAnswer = AppendCFType(theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::AppendUInt32(UInt32 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFNumber theItem(inItem);
@@ -422,14 +422,14 @@ bool	CACFArray::AppendUInt32(UInt32 inItem)
 			theAnswer = AppendCFType(theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::AppendSInt64(SInt64 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFNumber theItem(inItem);
@@ -438,14 +438,14 @@ bool	CACFArray::AppendSInt64(SInt64 inItem)
 			theAnswer = AppendCFType(theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::AppendUInt64(UInt64 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFNumber theItem(inItem);
@@ -454,14 +454,14 @@ bool	CACFArray::AppendUInt64(UInt64 inItem)
 			theAnswer = AppendCFType(theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::AppendFloat32(Float32 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFNumber theItem(inItem);
@@ -470,14 +470,14 @@ bool	CACFArray::AppendFloat32(Float32 inItem)
 			theAnswer = AppendCFType(theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::AppendFloat64(Float64 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFNumber theItem(inItem);
@@ -486,7 +486,7 @@ bool	CACFArray::AppendFloat64(Float64 inItem)
 			theAnswer = AppendCFType(theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
@@ -513,20 +513,20 @@ bool	CACFArray::AppendData(const CFDataRef inItem)
 bool	CACFArray::AppendCFType(const CFTypeRef inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CFArrayAppendValue(mCFArray, inItem);
 		theAnswer = true;
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::InsertBool(UInt32 inIndex, bool inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFBoolean theItem(inItem);
@@ -535,14 +535,14 @@ bool	CACFArray::InsertBool(UInt32 inIndex, bool inItem)
 			theAnswer = InsertCFType(inIndex, theItem.GetCFBoolean());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::InsertSInt32(UInt32 inIndex, SInt32 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFNumber theItem(inItem);
@@ -551,14 +551,14 @@ bool	CACFArray::InsertSInt32(UInt32 inIndex, SInt32 inItem)
 			theAnswer = InsertCFType(inIndex, theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::InsertUInt32(UInt32 inIndex, UInt32 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFNumber theItem(inItem);
@@ -567,14 +567,14 @@ bool	CACFArray::InsertUInt32(UInt32 inIndex, UInt32 inItem)
 			theAnswer = InsertCFType(inIndex, theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::InsertSInt64(UInt32 inIndex, SInt64 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFNumber theItem(inItem);
@@ -583,14 +583,14 @@ bool	CACFArray::InsertSInt64(UInt32 inIndex, SInt64 inItem)
 			theAnswer = InsertCFType(inIndex, theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::InsertUInt64(UInt32 inIndex, UInt64 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFNumber theItem(inItem);
@@ -599,14 +599,14 @@ bool	CACFArray::InsertUInt64(UInt32 inIndex, UInt64 inItem)
 			theAnswer = InsertCFType(inIndex, theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::InsertFloat32(UInt32 inIndex, Float32 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFNumber theItem(inItem);
@@ -615,14 +615,14 @@ bool	CACFArray::InsertFloat32(UInt32 inIndex, Float32 inItem)
 			theAnswer = InsertCFType(inIndex, theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::InsertFloat64(UInt32 inIndex, Float64 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		CACFNumber theItem(inItem);
@@ -631,7 +631,7 @@ bool	CACFArray::InsertFloat64(UInt32 inIndex, Float64 inItem)
 			theAnswer = InsertCFType(inIndex, theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
@@ -658,7 +658,7 @@ bool	CACFArray::InsertData(UInt32 inIndex, const CFDataRef inItem)
 bool	CACFArray::InsertCFType(UInt32 inIndex, const CFTypeRef inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable)
 	{
 		if(inIndex < GetNumberItems())
@@ -671,14 +671,14 @@ bool	CACFArray::InsertCFType(UInt32 inIndex, const CFTypeRef inItem)
 		}
 		theAnswer = true;
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::SetBool(UInt32 inIndex, bool inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable && (inIndex <= GetNumberItems()))
 	{
 		CACFBoolean theItem(inItem);
@@ -687,14 +687,14 @@ bool	CACFArray::SetBool(UInt32 inIndex, bool inItem)
 			theAnswer = SetCFType(inIndex, theItem.GetCFBoolean());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::SetSInt32(UInt32 inIndex, SInt32 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable && (inIndex <= GetNumberItems()))
 	{
 		CACFNumber theItem(inItem);
@@ -703,14 +703,14 @@ bool	CACFArray::SetSInt32(UInt32 inIndex, SInt32 inItem)
 			theAnswer = SetCFType(inIndex, theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::SetUInt32(UInt32 inIndex, UInt32 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable && (inIndex <= GetNumberItems()))
 	{
 		CACFNumber theItem(inItem);
@@ -719,14 +719,14 @@ bool	CACFArray::SetUInt32(UInt32 inIndex, UInt32 inItem)
 			theAnswer = SetCFType(inIndex, theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::SetSInt64(UInt32 inIndex, SInt64 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable && (inIndex <= GetNumberItems()))
 	{
 		CACFNumber theItem(inItem);
@@ -735,14 +735,14 @@ bool	CACFArray::SetSInt64(UInt32 inIndex, SInt64 inItem)
 			theAnswer = SetCFType(inIndex, theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::SetUInt64(UInt32 inIndex, UInt64 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable && (inIndex <= GetNumberItems()))
 	{
 		CACFNumber theItem(inItem);
@@ -751,14 +751,14 @@ bool	CACFArray::SetUInt64(UInt32 inIndex, UInt64 inItem)
 			theAnswer = SetCFType(inIndex, theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::SetFloat32(UInt32 inIndex, Float32 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable && (inIndex <= GetNumberItems()))
 	{
 		CACFNumber theItem(inItem);
@@ -767,14 +767,14 @@ bool	CACFArray::SetFloat32(UInt32 inIndex, Float32 inItem)
 			theAnswer = SetCFType(inIndex, theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
 bool	CACFArray::SetFloat64(UInt32 inIndex, Float64 inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable && (inIndex <= GetNumberItems()))
 	{
 		CACFNumber theItem(inItem);
@@ -783,7 +783,7 @@ bool	CACFArray::SetFloat64(UInt32 inIndex, Float64 inItem)
 			theAnswer = SetCFType(inIndex, theItem.GetCFNumber());
 		}
 	}
-	
+
 	return theAnswer;
 }
 
@@ -810,12 +810,12 @@ bool	CACFArray::SetData(UInt32 inIndex, const CFDataRef inItem)
 bool	CACFArray::SetCFType(UInt32 inIndex, const CFTypeRef inItem)
 {
 	bool theAnswer = false;
-	
+
 	if((mCFArray != NULL) && mMutable && (inIndex <= GetNumberItems()))
 	{
 		CFArraySetValueAtIndex(mCFArray, static_cast<CFIndex>(inIndex), inItem);
 		theAnswer = true;
 	}
-	
+
 	return theAnswer;
 }

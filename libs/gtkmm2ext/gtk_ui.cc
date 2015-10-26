@@ -377,7 +377,7 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 		if (!bindings) {
 			bindings = global_bindings;
 		}
-		
+
 		if (bindings) {
 			Bindings::Operation op;
 			KeyboardKey kb = bindings->get_binding_for_action (action, op);

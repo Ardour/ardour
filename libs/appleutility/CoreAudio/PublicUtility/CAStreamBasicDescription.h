@@ -2,14 +2,14 @@
      File: CAStreamBasicDescription.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #ifndef __CAStreamBasicDescription_h__
 #define __CAStreamBasicDescription_h__
@@ -90,14 +90,14 @@ enum {
 //	It adds a number of convenience routines, but otherwise adds nothing
 //	to the footprint of the original struct.
 //=============================================================================
-class CAStreamBasicDescription : 
+class CAStreamBasicDescription :
 	public AudioStreamBasicDescription
 {
 
 //	Constants
 public:
 	static const AudioStreamBasicDescription	sEmpty;
-	
+
 	enum CommonPCMFormat {
 		kPCMFormatOther		= 0,
 		kPCMFormatFloat32	= 1,
@@ -105,13 +105,13 @@ public:
 		kPCMFormatFixed824	= 3,
 		kPCMFormatFloat64	= 4
 	};
-	
+
 //	Construction/Destruction
 public:
 	CAStreamBasicDescription();
-	
+
 	CAStreamBasicDescription(const AudioStreamBasicDescription &desc);
-	
+
 	CAStreamBasicDescription(		double inSampleRate,		UInt32 inFormatID,
 									UInt32 inBytesPerPacket,	UInt32 inFramesPerPacket,
 									UInt32 inBytesPerFrame,		UInt32 inChannelsPerFrame,
@@ -164,55 +164,55 @@ public:
 	{
 		memcpy(this, &desc, sizeof(AudioStreamBasicDescription));
 	}
-	
+
 	bool		FromText(const char *inTextDesc) { return FromText(inTextDesc, *this); }
 	static bool	FromText(const char *inTextDesc, AudioStreamBasicDescription &outDesc);
 					// return true if parsing was successful
-	
+
 	static const char *sTextParsingUsageString;
-	
+
 	// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 	//
 	// interrogation
-	
+
 	bool	IsPCM() const { return mFormatID == kAudioFormatLinearPCM; }
-	
+
 	bool	PackednessIsSignificant() const
 	{
 		Assert(IsPCM(), "PackednessIsSignificant only applies for PCM");
 		return (SampleWordSize() << 3) != mBitsPerChannel;
 	}
-	
+
 	bool	AlignmentIsSignificant() const
 	{
 		return PackednessIsSignificant() || (mBitsPerChannel & 7) != 0;
 	}
-	
+
 	bool	IsInterleaved() const
 	{
 		return !(mFormatFlags & kAudioFormatFlagIsNonInterleaved);
 	}
-	
+
 	bool	IsSignedInteger() const
 	{
 		return IsPCM() && (mFormatFlags & kAudioFormatFlagIsSignedInteger);
 	}
-	
+
 	bool	IsFloat() const
 	{
 		return IsPCM() && (mFormatFlags & kAudioFormatFlagIsFloat);
 	}
-	
+
 	bool	IsNativeEndian() const
 	{
 		return (mFormatFlags & kAudioFormatFlagIsBigEndian) == kAudioFormatFlagsNativeEndian;
 	}
-	
+
 	// for sanity with interleaved/deinterleaved possibilities, never access mChannelsPerFrame, use these:
-	UInt32	NumberInterleavedChannels() const	{ return IsInterleaved() ? mChannelsPerFrame : 1; }	
+	UInt32	NumberInterleavedChannels() const	{ return IsInterleaved() ? mChannelsPerFrame : 1; }
 	UInt32	NumberChannelStreams() const		{ return IsInterleaved() ? 1 : mChannelsPerFrame; }
 	UInt32	NumberChannels() const				{ return mChannelsPerFrame; }
-	UInt32	SampleWordSize() const				{ 
+	UInt32	SampleWordSize() const				{
 			return (mBytesPerFrame > 0 && NumberInterleavedChannels()) ? mBytesPerFrame / NumberInterleavedChannels() :  0;
 	}
 
@@ -221,15 +221,15 @@ public:
 		Assert(mBytesPerFrame > 0, "bytesPerFrame must be > 0 in BytesToFrames");
 		return nbytes / mBytesPerFrame;
 	}
-	
+
 	bool	SameChannelsAndInterleaving(const CAStreamBasicDescription &a) const
 	{
 		return this->NumberChannels() == a.NumberChannels() && this->IsInterleaved() == a.IsInterleaved();
 	}
-	
+
 	bool	IdentifyCommonPCMFormat(CommonPCMFormat &outFormat, bool *outIsInterleaved=NULL) const
 	{	// return true if it's a valid PCM format.
-	
+
 		outFormat = kPCMFormatOther;
 		// trap out patently invalid formats.
 		if (mFormatID != kAudioFormatLinearPCM || mFramesPerPacket != 1 || mBytesPerFrame != mBytesPerPacket || mBitsPerChannel/8 > mBytesPerFrame || mChannelsPerFrame == 0)
@@ -241,7 +241,7 @@ public:
 			if (wordsize % mChannelsPerFrame != 0) return false;
 			wordsize /= mChannelsPerFrame;
 		}
-		
+
 		if ((mFormatFlags & kAudioFormatFlagIsBigEndian) == kAudioFormatFlagsNativeEndian
 		&& wordsize * 8 == mBitsPerChannel) {
 			// packed and native endian, good
@@ -281,11 +281,11 @@ public:
 		CommonPCMFormat fmt;
 		return IdentifyCommonPCMFormat(fmt, outIsInterleaved) && fmt == kPCMFormatInt16;
 	}
-	
+
 	// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 	//
 	//	manipulation
-	
+
 	void	SetCanonical(UInt32 nChannels, bool interleaved)
 				// note: leaves sample rate untouched
 	{
@@ -302,7 +302,7 @@ public:
 			mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
 		}
 	}
-	
+
 	bool	IsCanonical() const
 	{
 		if (mFormatID != kAudioFormatLinearPCM) return false;
@@ -319,7 +319,7 @@ public:
 			&& mBytesPerFrame == reqFrameSize
 			&& mBytesPerPacket == reqFrameSize);
 	}
-	
+
 	void	SetAUCanonical(UInt32 nChannels, bool interleaved)
 	{
 		mFormatID = kAudioFormatLinearPCM;
@@ -338,7 +338,7 @@ public:
 			mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
 		}
 	}
-	
+
 	void	ChangeNumberChannels(UInt32 nChannels, bool interleaved)
 				// alter an existing format
 	{
@@ -356,28 +356,28 @@ public:
 			mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
 		}
 	}
-	
+
 	// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 	//
 	//	other
-	
+
 	bool            IsEqual(const AudioStreamBasicDescription &other, bool interpretingWildcards=true) const;
 	static bool     FlagIndependentEquivalence(const AudioStreamBasicDescription &x, const AudioStreamBasicDescription &y);
     static bool     IsFunctionallyEquivalent(const AudioStreamBasicDescription &x, const AudioStreamBasicDescription &y);
-    
+
 	void	Print() const {
 		Print (stdout);
 	}
 
 	void	Print(FILE* file) const {
-		PrintFormat (file, "", "AudioStreamBasicDescription:");	
+		PrintFormat (file, "", "AudioStreamBasicDescription:");
 	}
 
 	void	PrintFormat(FILE *f, const char *indent, const char *name) const {
 		char buf[256];
 		fprintf(f, "%s%s %s\n", indent, name, AsString(buf, sizeof(buf)));
 	}
-	
+
 	void	PrintFormat2(FILE *f, const char *indent, const char *name) const { // no trailing newline
 		char buf[256];
 		fprintf(f, "%s%s %s", indent, name, AsString(buf, sizeof(buf)));
@@ -385,14 +385,14 @@ public:
 
 	char *	AsString(char *buf, size_t bufsize, bool brief=false) const;
 
-	static void Print (const AudioStreamBasicDescription &inDesc) 
-	{ 
+	static void Print (const AudioStreamBasicDescription &inDesc)
+	{
 		CAStreamBasicDescription desc(inDesc);
 		desc.Print ();
 	}
-	
+
 	OSStatus			Save(CFPropertyListRef *outData) const;
-		
+
 	OSStatus			Restore(CFPropertyListRef &inData);
 
 //	Operations

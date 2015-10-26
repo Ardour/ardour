@@ -60,9 +60,9 @@ KeyEditor::KeyEditor ()
 	last_keyval = 0;
 
 	notebook.signal_switch_page ().connect (sigc::mem_fun (*this, &KeyEditor::page_change));
-	
+
 	vpacker.pack_start (notebook, true, true);
-	
+
 	if (!ARDOUR::Profile->get_sae()) {
 
 		Label* hint = manage (new Label (_("Select an action, then press the key(s) to (re)set its shortcut")));
@@ -126,7 +126,7 @@ KeyEditor::on_key_press_event (GdkEventKey* ev)
 	 * keys will be used by GTK to change the selection/treeview cursor
 	 * position
 	 */
-	
+
 	return true;
 }
 
@@ -211,7 +211,7 @@ KeyEditor::Tab::unbind ()
 		if (!(*i)[columns.bindable]) {
 			return;
 		}
-		
+
 		bindings->remove (action, Gtkmm2ext::Bindings::Press, true);
 		(*i)[columns.binding] = string ();
 	}
@@ -244,7 +244,7 @@ KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 
 void
 KeyEditor::Tab::populate ()
-{	
+{
 	vector<string> paths;
 	vector<string> labels;
 	vector<string> tooltips;
@@ -261,7 +261,7 @@ KeyEditor::Tab::populate ()
 	vector<string>::iterator t;
 	vector<string>::iterator l;
 	vector<Glib::RefPtr<Action> >::iterator a;
-	
+
 	model->clear ();
 
 	for (a = actions.begin(), l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l, ++a) {
@@ -273,7 +273,7 @@ KeyEditor::Tab::populate ()
 
 		string category = parts[1];
 		string action_name = parts[2];
-		
+
 		if (action_name.empty()) {
 			continue;
 		}
@@ -301,13 +301,13 @@ KeyEditor::Tab::populate ()
 			/* now set up the child row that we're about to fill
 			 * out with information
 			 */
-			
+
 			row = *(model->append (parent.children()));
 
 		} else {
 
 			/* category/group is present, so just add the child row */
-			
+
 			row = *(model->append ((*r->second)->children()));
 
 		}
@@ -315,7 +315,7 @@ KeyEditor::Tab::populate ()
 		/* add this action */
 
 		/* use the "visible label" as the action name */
-		
+
 		if (l->empty ()) {
 			/* no label, try using the tooltip instead */
 			row[columns.name] = *t;

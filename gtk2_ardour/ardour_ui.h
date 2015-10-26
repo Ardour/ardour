@@ -225,7 +225,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	XMLNode* mixer_settings () const;
 	XMLNode* keyboard_settings () const;
 	XMLNode* tearoff_settings (const char*) const;
-	
+
 	void save_ardour_state ();
 	gboolean configure_handler (GdkEventConfigure* conf);
 
@@ -325,7 +325,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::Window& main_window () { return _main_window; }
 
 	void setup_toplevel_window (Gtk::Window&, const std::string& name, void* owner);
-	
+
 	/* called from a static C function */
 
 	GtkNotebook* tab_window_root_drop (GtkNotebook* src,
@@ -373,14 +373,14 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool           first_time_engine_run;
 
 	bool tabs_button_event (GdkEventButton* ev);
-	
+
 	void show_tabbable (Gtkmm2ext::Tabbable*);
 	void hide_tabbable (Gtkmm2ext::Tabbable*);
 	void detach_tabbable (Gtkmm2ext::Tabbable*);
 	void attach_tabbable (Gtkmm2ext::Tabbable*);
 
 	void tabbable_state_change (Gtkmm2ext::Tabbable&);
-	
+
 	void toggle_meterbridge ();
 
 	int  setup_windows ();
@@ -402,7 +402,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void session_dirty_changed ();
 	void update_title ();
-	
+
 	void map_transport_state ();
 	int32_t do_engine_start ();
 
@@ -652,7 +652,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         RCOptionEditor* rc_option_editor;
 	Gtk::HBox rc_option_editor_placeholder;
-	
+
         WM::Proxy<SpeakerDialog> speaker_config_window;
         WM::Proxy<AddRouteDialog> add_route_dialog;
         WM::Proxy<About> about;
@@ -679,7 +679,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         BigClockWindow*         create_big_clock_window();
         GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 	KeyEditor*              create_key_editor ();
-	
+
 	ARDOUR::SystemExec *video_server_process;
 
 	void handle_locations_change (ARDOUR::Location*);
@@ -831,7 +831,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void tabs_page_removed (Gtk::Widget*, guint page_number);
 	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings*);
 	bool try_gtk_accel_binding (GtkWindow* win, GdkEventKey* ev, bool translate, GdkModifierType modifier);
-	
+
 	bool main_window_delete_event (GdkEventAny*);
 	bool idle_ask_about_quit ();
 

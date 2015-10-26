@@ -308,12 +308,12 @@ ARDOUR_UI_UTILS::emulate_key_event (unsigned int keyval)
 	GdkKeymap   *keymap  = gdk_keymap_get_for_display (display);
 	GdkKeymapKey *keymapkey = NULL;
 	gint n_keys;
-	
+
 	if (!gdk_keymap_get_entries_for_keyval(keymap, keyval, &keymapkey, &n_keys)) return false;
 	if (n_keys !=1) { g_free(keymapkey); return false;}
 
 	Gtk::Window& main_window (ARDOUR_UI::instance()->main_window());
-	
+
 	GdkEventKey ev;
 	ev.type = GDK_KEY_PRESS;
 	ev.window = main_window.get_window()->gobj();

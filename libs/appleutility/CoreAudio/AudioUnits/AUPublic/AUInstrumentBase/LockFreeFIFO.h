@@ -2,14 +2,14 @@
      File: LockFreeFIFO.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include <libkern/OSAtomic.h>
 
@@ -58,22 +58,22 @@ public:
 		mItems = new ITEM[inMaxSize];
 		mMask = inMaxSize - 1;
 	}
-	
+
 	~LockFreeFIFOWithFree()
 	{
 		delete [] mItems;
 	}
 
-	
-	void Reset() 
+
+	void Reset()
 	{
 		FreeItems();
 		mReadIndex = 0;
 		mWriteIndex = 0;
 		mFreeIndex = 0;
 	}
-	
-	ITEM* WriteItem() 
+
+	ITEM* WriteItem()
 	{
 		//printf("WriteItem %d %d\n", mReadIndex, mWriteIndex);
 		FreeItems(); // free items on the write thread.
@@ -81,8 +81,8 @@ public:
 		if (nextWriteIndex == mFreeIndex) return NULL;
 		return &mItems[mWriteIndex];
 	}
-	
-	ITEM* ReadItem() 
+
+	ITEM* ReadItem()
 	{
 		//printf("ReadItem %d %d\n", mReadIndex, mWriteIndex);
 		if (mReadIndex == mWriteIndex) return NULL;
@@ -91,14 +91,14 @@ public:
 	void AdvanceWritePtr() { OSAtomicCompareAndSwap32(mWriteIndex, (mWriteIndex + 1) & mMask, &mWriteIndex); }
 	void AdvanceReadPtr()  { OSAtomicCompareAndSwap32(mReadIndex,  (mReadIndex  + 1) & mMask, &mReadIndex); }
 private:
-	ITEM* FreeItem() 
+	ITEM* FreeItem()
 	{
 		if (mFreeIndex == mReadIndex) return NULL;
 		return &mItems[mFreeIndex];
 	}
 	void AdvanceFreePtr() { OSAtomicCompareAndSwap32(mFreeIndex, (mFreeIndex + 1) & mMask, &mFreeIndex); }
-	
-	void FreeItems() 
+
+	void FreeItems()
 	{
 		ITEM* item;
 		while ((item = FreeItem()) != NULL)
@@ -107,7 +107,7 @@ private:
 			AdvanceFreePtr();
 		}
 	}
-	
+
 	volatile int32_t mReadIndex, mWriteIndex, mFreeIndex;
 	int32_t mMask;
 	ITEM *mItems;
@@ -129,38 +129,38 @@ public:
 		mItems = new ITEM[inMaxSize];
 		mMask = inMaxSize - 1;
 	}
-	
+
 	~LockFreeFIFO()
 	{
 		delete [] mItems;
 	}
-	
-	void Reset() 
+
+	void Reset()
 	{
 		mReadIndex = 0;
 		mWriteIndex = 0;
 	}
-	
-	ITEM* WriteItem() 
+
+	ITEM* WriteItem()
 	{
 		int32_t nextWriteIndex = (mWriteIndex + 1) & mMask;
 		if (nextWriteIndex == mReadIndex) return NULL;
 		return &mItems[mWriteIndex];
 	}
-	
-	ITEM* ReadItem() 
+
+	ITEM* ReadItem()
 	{
 		if (mReadIndex == mWriteIndex) return NULL;
 		return &mItems[mReadIndex];
 	}
-	
+
 		// the CompareAndSwap will always succeed. We use CompareAndSwap because it calls the PowerPC sync instruction,
 		// plus any processor bug workarounds for various CPUs.
 	void AdvanceWritePtr() { OSAtomicCompareAndSwap32(mWriteIndex, (mWriteIndex + 1) & mMask, &mWriteIndex); }
 	void AdvanceReadPtr()  { OSAtomicCompareAndSwap32(mReadIndex,  (mReadIndex  + 1) & mMask, &mReadIndex); }
-	
+
 private:
-	
+
 	volatile int32_t mReadIndex, mWriteIndex;
 	int32_t mMask;
 	ITEM *mItems;

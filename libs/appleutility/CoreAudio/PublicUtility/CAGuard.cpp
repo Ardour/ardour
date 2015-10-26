@@ -2,14 +2,14 @@
      File: CAGuard.cpp
  Abstract: CAGuard.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 //==================================================================================================
 //	Includes
@@ -169,7 +169,7 @@ bool	CAGuard::WaitFor(UInt64 inNanos)
 		theTimeSpec.tv_sec = 0;
 		theTimeSpec.tv_nsec = static_cast<long>(inNanos);
 	}
-	
+
 	#if	Log_TimedWaits || Log_Latency || Log_Average_Latency
 		UInt64	theStartNanos = CAHostTimeBase::GetCurrentTimeInNanos();
 	#endif
@@ -183,19 +183,19 @@ bool	CAGuard::WaitFor(UInt64 inNanos)
 	OSStatus theError = pthread_cond_timedwait_relative_np(&mCondVar, &mMutex, &theTimeSpec);
 	ThrowIf((theError != 0) && (theError != ETIMEDOUT), CAException(theError), "CAGuard::WaitFor: Wait got an error");
 	mOwner = pthread_self();
-	
+
 	#if	Log_TimedWaits || Log_Latency || Log_Average_Latency
 		UInt64	theEndNanos = CAHostTimeBase::GetCurrentTimeInNanos();
 	#endif
-	
+
 	#if	Log_TimedWaits
 		DebugMessageN1("CAGuard::WaitFor: waited  %.0f", (Float64)(theEndNanos - theStartNanos));
 	#endif
-	
+
 	#if	Log_Latency
 		DebugMessageN1("CAGuard::WaitFor: latency  %.0f", (Float64)((theEndNanos - theStartNanos) - inNanos));
 	#endif
-	
+
 	#if	Log_Average_Latency
 		++mAverageLatencyCount;
 		mAverageLatencyAccumulator += (theEndNanos - theStartNanos) - inNanos;
@@ -231,7 +231,7 @@ bool	CAGuard::WaitFor(UInt64 inNanos)
 	#if	Log_WaitOwnership
 		DebugPrintfRtn(DebugPrintfFileComma "%lu %.4f: CAGuard::WaitFor: thread %lu is waiting on %s, owner: %lu\n", GetCurrentThreadId(), ((Float64)(CAHostTimeBase::GetCurrentTimeInNanos()) / 1000000.0), GetCurrentThreadId(), mName, mOwner);
 	#endif
-	
+
 	ReleaseMutex(mMutex);
 	HANDLE theHandles[] = { mMutex, mEvent };
 	OSStatus theError = WaitForMultipleObjects(2, theHandles, true, theWaitTime);
@@ -246,15 +246,15 @@ bool	CAGuard::WaitFor(UInt64 inNanos)
 	#if	Log_TimedWaits || Log_Latency || Log_Average_Latency
 		UInt64	theEndNanos = CAHostTimeBase::GetCurrentTimeInNanos();
 	#endif
-	
+
 	#if	Log_TimedWaits
 		DebugMessageN1("CAGuard::WaitFor: waited  %.0f", (Float64)(theEndNanos - theStartNanos));
 	#endif
-	
+
 	#if	Log_Latency
 		DebugMessageN1("CAGuard::WaitFor: latency  %.0f", (Float64)((theEndNanos - theStartNanos) - inNanos));
 	#endif
-	
+
 	#if	Log_Average_Latency
 		++mAverageLatencyCount;
 		mAverageLatencyAccumulator += (theEndNanos - theStartNanos) - inNanos;
@@ -280,11 +280,11 @@ bool	CAGuard::WaitUntil(UInt64 inNanos)
 {
 	bool	theAnswer = false;
 	UInt64	theCurrentNanos = CAHostTimeBase::GetCurrentTimeInNanos();
-	
+
 #if	Log_TimedWaits
 	DebugMessageN2("CAGuard::WaitUntil: now: %.0f, requested: %.0f", (double)theCurrentNanos, (double)inNanos);
 #endif
-	
+
 	if(inNanos > theCurrentNanos)
 	{
 #if Log_Errors
@@ -319,7 +319,7 @@ void	CAGuard::Notify()
 	#if	Log_WaitOwnership
 		DebugPrintfRtn(DebugPrintfFileComma "%lu %.4f: CAGuard::Notify: thread %lu is notifying %s, owner: %lu\n", GetCurrentThreadId(), ((Float64)(CAHostTimeBase::GetCurrentTimeInNanos()) / 1000000.0), GetCurrentThreadId(), mName, mOwner);
 	#endif
-	
+
 	SetEvent(mEvent);
 #endif
 }
@@ -337,7 +337,7 @@ void	CAGuard::NotifyAll()
 	#if	Log_WaitOwnership
 		DebugPrintfRtn(DebugPrintfFileComma "%lu %.4f: CAGuard::NotifyAll: thread %lu is notifying %s, owner: %lu\n", GetCurrentThreadId(), ((Float64)(CAHostTimeBase::GetCurrentTimeInNanos()) / 1000000.0), GetCurrentThreadId(), mName, mOwner);
 	#endif
-	
+
 	SetEvent(mEvent);
 #endif
 }

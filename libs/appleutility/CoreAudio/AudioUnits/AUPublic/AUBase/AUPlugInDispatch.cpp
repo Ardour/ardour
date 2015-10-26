@@ -2,14 +2,14 @@
      File: AUPlugInDispatch.cpp
  Abstract: AUPlugInDispatch.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "AUPlugInDispatch.h"
 #include "CAXException.h"
@@ -83,7 +83,7 @@ static OSStatus AUMethodGetPropertyInfo(void *self, AudioUnitPropertyID prop, Au
 	try {
 		UInt32 dataSize = 0;        // 13517289 GetPropetyInfo was returning an uninitialized value when there is an error. This is a problem for auval.
 		Boolean writable = false;
-		
+
 		AUI_LOCK
 		result = AUI->DispatchGetPropertyInfo(prop, scope, elem, dataSize, writable);
 		if (outDataSize != NULL)
@@ -103,7 +103,7 @@ static OSStatus AUMethodGetProperty(void *self, AudioUnitPropertyID inID, AudioU
 		Boolean writable;
 		char *tempBuffer;
 		void *destBuffer;
-		
+
 		AUI_LOCK
 		if (ioDataSize == NULL) {
 			ca_debug_string("AudioUnitGetProperty: null size pointer");
@@ -112,12 +112,12 @@ static OSStatus AUMethodGetProperty(void *self, AudioUnitPropertyID inID, AudioU
 		}
 		if (outData == NULL) {
 			UInt32 dataSize;
-			
+
 			result = AUI->DispatchGetPropertyInfo(inID, inScope, inElement, dataSize, writable);
 			*ioDataSize = dataSize;
 			goto finishGetProperty;
 		}
-		
+
 		clientBufferSize = *ioDataSize;
 		if (clientBufferSize == 0)
 		{
@@ -126,12 +126,12 @@ static OSStatus AUMethodGetProperty(void *self, AudioUnitPropertyID inID, AudioU
 			result = kAudio_ParamError;
 			goto finishGetProperty;
 		}
-		
+
 		result = AUI->DispatchGetPropertyInfo(inID, inScope, inElement, actualPropertySize, writable);
-		if (result != noErr) 
+		if (result != noErr)
 			goto finishGetProperty;
-		
-		if (clientBufferSize < actualPropertySize) 
+
+		if (clientBufferSize < actualPropertySize)
 		{
 			tempBuffer = new char[actualPropertySize];
 			destBuffer = tempBuffer;
@@ -139,9 +139,9 @@ static OSStatus AUMethodGetProperty(void *self, AudioUnitPropertyID inID, AudioU
 			tempBuffer = NULL;
 			destBuffer = outData;
 		}
-		
+
 		result = AUI->DispatchGetProperty(inID, inScope, inElement, destBuffer);
-		
+
 		if (result == noErr) {
 			if (clientBufferSize < actualPropertySize && tempBuffer != NULL)
 			{
@@ -285,7 +285,7 @@ static OSStatus AUMethodRender(void *self, AudioUnitRenderActionFlags *ioActionF
 #endif
 		// this is a processing method; no lock
 		AudioUnitRenderActionFlags tempFlags;
-		
+
 		if (inTimeStamp == NULL || ioData == NULL)
 			result = kAudio_ParamError;
 		else {
@@ -313,7 +313,7 @@ static OSStatus AUMethodComplexRender(void *self, AudioUnitRenderActionFlags *io
 #endif
 		// this is a processing method; no lock
 		AudioUnitRenderActionFlags tempFlags;
-		
+
 		if (inTimeStamp == NULL || ioData == NULL)
 			result = kAudio_ParamError;
 		else {
@@ -362,7 +362,7 @@ static OSStatus AUMethodProcess (void *self, AudioUnitRenderActionFlags *ioActio
 			if (*ioActionFlags & (1 << 9)/*kAudioUnitRenderAction_DoNotCheckRenderArgs*/)
 				doParamCheck = false;
 		}
-		
+
 		if (doParamCheck && (inTimeStamp == NULL || ioData == NULL))
 			result = kAudio_ParamError;
 		else {
@@ -380,15 +380,15 @@ static OSStatus AUMethodProcess (void *self, AudioUnitRenderActionFlags *ioActio
 static OSStatus AUMethodProcessMultiple (void *self, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inNumberFrames, UInt32 inNumberInputBufferLists, const AudioBufferList **inInputBufferLists, UInt32 inNumberOutputBufferLists, AudioBufferList **ioOutputBufferLists)
 {
 	OSStatus result = noErr;
-	
+
 #if !TARGET_OS_IPHONE
 	try {
 #endif
 		// this is a processing method; no lock
 		bool doParamCheck = true;
-		
+
 		AudioUnitRenderActionFlags tempFlags;
-		
+
 		if (ioActionFlags == NULL) {
 			tempFlags = 0;
 			ioActionFlags = &tempFlags;
@@ -402,7 +402,7 @@ static OSStatus AUMethodProcessMultiple (void *self, AudioUnitRenderActionFlags 
 		else {
 			result = AUI->DoProcessMultiple(*ioActionFlags, *inTimeStamp, inNumberFrames, inNumberInputBufferLists, inInputBufferLists, inNumberOutputBufferLists, ioOutputBufferLists);
 		}
-		
+
 #if !TARGET_OS_IPHONE
 	}
 	COMPONENT_CATCH
@@ -465,7 +465,7 @@ static OSStatus AUMethodStartNote(void *self, MusicDeviceInstrumentID inInstrume
 	OSStatus result = noErr;
 	try {
 		// this is a potential render-time method; no lock
-		if (inParams == NULL || outNoteInstanceID == NULL) 
+		if (inParams == NULL || outNoteInstanceID == NULL)
 			result = kAudio_ParamError;
 		else
 			result = AUI->StartNote(inInstrument, inGroupID, outNoteInstanceID, inOffsetSampleFrame, *inParams);
@@ -559,10 +559,10 @@ AudioComponentMethod AUComplexOutputLookup::Lookup (SInt16 selector)
 {
 	AudioComponentMethod method = AUBaseLookup::Lookup(selector);
 	if (method) return method;
-	
+
 	method = AUOutputLookup::Lookup(selector);
 	if (method) return method;
-	
+
 	if (selector == kAudioUnitComplexRenderSelect)
 		return (AudioComponentMethod)AUMethodComplexRender;
 	return NULL;
@@ -572,10 +572,10 @@ AudioComponentMethod AUBaseProcessLookup::Lookup (SInt16 selector)
 {
 	AudioComponentMethod method = AUBaseLookup::Lookup(selector);
 	if (method) return method;
-	
+
 	if (selector == kAudioUnitProcessSelect)
 		return (AudioComponentMethod)AUMethodProcess;
-	
+
 	return NULL;
 }
 
@@ -583,10 +583,10 @@ AudioComponentMethod AUBaseProcessMultipleLookup::Lookup (SInt16 selector)
 {
 	AudioComponentMethod method = AUBaseLookup::Lookup(selector);
 	if (method) return method;
-    
+
 	if (selector == kAudioUnitProcessMultipleSelect)
 		return (AudioComponentMethod)AUMethodProcessMultiple;
-	
+
 	return NULL;
 }
 
@@ -597,7 +597,7 @@ AudioComponentMethod AUBaseProcessAndMultipleLookup::Lookup (SInt16 selector)
 
 	method = AUBaseProcessMultipleLookup::Lookup(selector);
 	if (method) return method;
-    
+
 	method = AUBaseProcessLookup::Lookup(selector);
 	if (method) return method;
 
@@ -620,7 +620,7 @@ AudioComponentMethod AUMIDILookup::Lookup (SInt16 selector)
 {
 	AudioComponentMethod method = AUBaseLookup::Lookup(selector);
 	if (method) return method;
-	
+
 	return MIDI_Lookup(selector);
 }
 
@@ -628,7 +628,7 @@ AudioComponentMethod AUMIDIProcessLookup::Lookup (SInt16 selector)
 {
 	AudioComponentMethod method = AUBaseProcessLookup::Lookup(selector);
 	if (method) return method;
-	
+
 	return MIDI_Lookup(selector);
 }
 
@@ -644,7 +644,7 @@ AudioComponentMethod AUMusicLookup::Lookup (SInt16 selector)
 		case kMusicDevicePrepareInstrumentSelect:	return (AudioComponentMethod)AUMethodPrepareInstrument;
 		case kMusicDeviceReleaseInstrumentSelect:	return (AudioComponentMethod)AUMethodReleaseInstrument;
 #endif
-		default:		
+		default:
 			break;
 	}
 	return MIDI_Lookup (selector);
@@ -656,10 +656,10 @@ AudioComponentMethod AUAuxBaseLookup::Lookup (SInt16 selector)
 		case kAudioUnitGetPropertyInfoSelect:	return (AudioComponentMethod)AUMethodGetPropertyInfo;
 		case kAudioUnitGetPropertySelect:		return (AudioComponentMethod)AUMethodGetProperty;
 		case kAudioUnitSetPropertySelect:		return (AudioComponentMethod)AUMethodSetProperty;
-            
+
 		case kAudioUnitGetParameterSelect:		return (AudioComponentMethod)AUMethodGetParameter;
 		case kAudioUnitSetParameterSelect:		return (AudioComponentMethod)AUMethodSetParameter;
-            
+
 		default:
 			break;
 	}

@@ -2,14 +2,14 @@
      File: CAPThread.cpp
  Abstract: CAPThread.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 //=============================================================================
 //	Includes
@@ -170,7 +170,7 @@ void	CAPThread::SetPriority(UInt32 inPriority, bool inFixedPriority)
 	if(mPThread != 0)
 	{
 		SetPriority(mPThread, mPriority, mFixedPriority);
-    } 
+    }
 #elif TARGET_OS_WIN32
 	if(mThreadID != NULL)
 	{
@@ -185,7 +185,7 @@ void	CAPThread::SetPriority(NativeThread inThread, UInt32 inPriority, bool inFix
 	if(inThread != 0)
 	{
 		kern_return_t theError = 0;
-		
+
 		//	set whether or not this is a fixed priority thread
 		if (inFixedPriority)
 		{
@@ -193,17 +193,17 @@ void	CAPThread::SetPriority(NativeThread inThread, UInt32 inPriority, bool inFix
 			theError = thread_policy_set(pthread_mach_thread_np(inThread), THREAD_EXTENDED_POLICY, (thread_policy_t)&theFixedPolicy, THREAD_EXTENDED_POLICY_COUNT);
 			AssertNoKernelError(theError, "CAPThread::SetPriority: failed to set the fixed-priority policy");
 		}
-		
+
 		//	set the thread's absolute priority which is relative to the priority on which thread_policy_set() is called
 		UInt32 theCurrentThreadPriority = getScheduledPriority(pthread_self(), CAPTHREAD_SET_PRIORITY);
         thread_precedence_policy_data_t thePrecedencePolicy = { static_cast<integer_t>(inPriority - theCurrentThreadPriority) };
 		theError = thread_policy_set(pthread_mach_thread_np(inThread), THREAD_PRECEDENCE_POLICY, (thread_policy_t)&thePrecedencePolicy, THREAD_PRECEDENCE_POLICY_COUNT);
         AssertNoKernelError(theError, "CAPThread::SetPriority: failed to set the precedence policy");
-		
+
 		#if	Log_SetPriority
 			DebugMessageN4("CAPThread::SetPriority: requsted: %lu spawning: %lu current: %lu assigned: %d", mPriority, mSpawningThreadPriority, theCurrentThreadPriority, thePrecedencePolicy.importance);
 		#endif
-    } 
+    }
 #elif TARGET_OS_WIN32
 	if(inThread != NULL)
 	{
@@ -249,18 +249,18 @@ void	CAPThread::Start()
 	{
 		OSStatus			theResult;
 		pthread_attr_t		theThreadAttributes;
-		
+
 		theResult = pthread_attr_init(&theThreadAttributes);
 		ThrowIf(theResult != 0, CAException(theResult), "CAPThread::Start: Thread attributes could not be created.");
-		
+
 		theResult = pthread_attr_setdetachstate(&theThreadAttributes, PTHREAD_CREATE_DETACHED);
 		ThrowIf(theResult != 0, CAException(theResult), "CAPThread::Start: A thread could not be created in the detached state.");
-		
+
 		theResult = pthread_create(&mPThread, &theThreadAttributes, (ThreadRoutine)CAPThread::Entry, this);
 		ThrowIf(theResult != 0 || !mPThread, CAException(theResult), "CAPThread::Start: Could not create a thread.");
-		
+
 		pthread_attr_destroy(&theThreadAttributes);
-		
+
 	}
 #elif TARGET_OS_WIN32
 	Assert(mThreadID == 0, "CAPThread::Start: can't start because the thread is already running");
@@ -272,7 +272,7 @@ void	CAPThread::Start()
 			CloseHandle(mThreadHandle);
 			mThreadHandle = NULL;
 		}
-		
+
 		//	create a new thread
 		mThreadHandle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Entry, this, 0, &mThreadID);
 		ThrowIf(mThreadHandle == NULL, CAException(GetLastError()), "CAPThread::Start: Could not create a thread.");
@@ -291,7 +291,7 @@ void*	CAPThread::Entry(CAPThread* inCAPThread)
 #elif TARGET_OS_WIN32
 	// do we need to do something here?
 #endif
-	
+
 #if	!TARGET_OS_IPHONE && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6)
 	if(inCAPThread->mThreadName[0] != 0)
 	{
@@ -299,7 +299,7 @@ void*	CAPThread::Entry(CAPThread* inCAPThread)
 	}
 #endif
 
-	try 
+	try
 	{
 		if(inCAPThread->mTimeConstraintSet)
 		{
@@ -333,11 +333,11 @@ UInt32 CAPThread::getScheduledPriority(pthread_t inThread, int inPriorityKind)
 
 	if (inThread == NULL)
 		return 0;
-    
+
     // get basic info
     count = THREAD_BASIC_INFO_COUNT;
     thread_info (pthread_mach_thread_np (inThread), THREAD_BASIC_INFO, (thread_info_t)&threadInfo, &count);
-    
+
 	switch (threadInfo.policy) {
 		case POLICY_TIMESHARE:
 			count = POLICY_TIMESHARE_INFO_COUNT;
@@ -347,7 +347,7 @@ UInt32 CAPThread::getScheduledPriority(pthread_t inThread, int inPriorityKind)
             }
             return static_cast<UInt32>(thePolicyInfo.ts.base_priority);
             break;
-            
+
         case POLICY_FIFO:
 			count = POLICY_FIFO_INFO_COUNT;
 			thread_info(pthread_mach_thread_np (inThread), THREAD_SCHED_FIFO_INFO, (thread_info_t)&(thePolicyInfo.fifo), &count);
@@ -356,7 +356,7 @@ UInt32 CAPThread::getScheduledPriority(pthread_t inThread, int inPriorityKind)
             }
             return static_cast<UInt32>(thePolicyInfo.fifo.base_priority);
             break;
-            
+
 		case POLICY_RR:
 			count = POLICY_RR_INFO_COUNT;
 			thread_info(pthread_mach_thread_np (inThread), THREAD_SCHED_RR_INFO, (thread_info_t)&(thePolicyInfo.rr), &count);
@@ -366,7 +366,7 @@ UInt32 CAPThread::getScheduledPriority(pthread_t inThread, int inPriorityKind)
             return static_cast<UInt32>(thePolicyInfo.rr.base_priority);
             break;
 	}
-    
+
     return 0;
 }
 
@@ -376,7 +376,7 @@ UInt32 WINAPI	CAPThread::Entry(CAPThread* inCAPThread)
 {
 	UInt32 theAnswer = 0;
 
-	try 
+	try
 	{
 		if(inCAPThread->mTimeConstraintSet)
 		{
@@ -429,20 +429,20 @@ void	CAPThread::DebugPriority(const char *label)
 {
 #if !TARGET_OS_WIN32
 	if (mTimeConstraintSet)
-		printf("CAPThread::%s %p: pri=<time constraint>, spawning pri=%d, scheduled pri=%d\n", label, this, 
+		printf("CAPThread::%s %p: pri=<time constraint>, spawning pri=%d, scheduled pri=%d\n", label, this,
 		(int)mSpawningThreadPriority, (mPThread != NULL) ? (int)GetScheduledPriority() : -1);
 	else
-		printf("CAPThread::%s %p: pri=%d%s, spawning pri=%d, scheduled pri=%d\n", label, this, (int)mPriority, mFixedPriority ? " fixed" : "", 
+		printf("CAPThread::%s %p: pri=%d%s, spawning pri=%d, scheduled pri=%d\n", label, this, (int)mPriority, mFixedPriority ? " fixed" : "",
 		(int)mSpawningThreadPriority, (mPThread != NULL) ? (int)GetScheduledPriority() : -1);
 #else
 	if (mTimeConstraintSet)
 	{
-		printf("CAPThread::%s %p: pri=<time constraint>, spawning pri=%d, scheduled pri=%d\n", label, this, 
+		printf("CAPThread::%s %p: pri=<time constraint>, spawning pri=%d, scheduled pri=%d\n", label, this,
 		(int)mPriority, (mThreadHandle != NULL) ? (int)GetScheduledPriority() : -1);
 	}
 	else
 	{
-		printf("CAPThread::%s %p: pri=%d%s, spawning pri=%d, scheduled pri=%d\n", label, this, (int)mPriority, mFixedPriority ? " fixed" : "", 
+		printf("CAPThread::%s %p: pri=%d%s, spawning pri=%d, scheduled pri=%d\n", label, this, (int)mPriority, mFixedPriority ? " fixed" : "",
 		(int)mPriority, (mThreadHandle != NULL) ? (int)GetScheduledPriority() : -1);
 	}
 #endif

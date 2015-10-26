@@ -2,14 +2,14 @@
      File: AUEffectBase.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #ifndef __AUEffectBase_h__
 #define __AUEffectBase_h__
@@ -63,7 +63,7 @@ public:
 												bool						inProcessesInPlace = true );
 	/*! @dtor ~AUEffectBase */
 								~AUEffectBase();
-	
+
 	/*! @method Initialize */
 	virtual OSStatus			Initialize();
 
@@ -112,7 +112,7 @@ public:
 										UInt32							inNumberFrames);
 
 	// our virtual methods
-	
+
 	// If your unit processes N to N channels, and there are no interactions between channels,
 	// it can override NewKernel to create a mono processing object per channel.  Otherwise,
 	// don't override NewKernel, and instead, override ProcessBufferLists.
@@ -129,7 +129,7 @@ public:
 	// convenience format accessors (use output 0's format)
 	/*! @method GetSampleRate */
 	Float64						GetSampleRate();
-	
+
 	/*! @method GetNumberOfChannels */
 	UInt32						GetNumberOfChannels();
 
@@ -141,7 +141,7 @@ public:
 								{
 									Globals()->SetParameter(paramID, value);
 								}
-								
+
 	/*! @method GetParameter */
 	using AUBase::GetParameter;
 	AudioUnitParameterValue		GetParameter(			AudioUnitParameterID			paramID )
@@ -151,13 +151,13 @@ public:
 
 	/*! @method CanScheduleParameters */
 	virtual bool				CanScheduleParameters() const { return true; }
-	
+
 	/*! @method IsBypassEffect */
 	// This is used for the property value - to reflect to the UI if an effect is bypassed
 	bool						IsBypassEffect () { return mBypassEffect; }
-	
+
 protected:
-											
+
 	/*! @method MaintainKernels */
 	void						MaintainKernels();
 
@@ -165,17 +165,17 @@ protected:
 	// This is used in the render call to see if an effect is bypassed
 	// It can return a different status than IsBypassEffect (though it MUST take that into account)
 	virtual	bool				ShouldBypassEffect () { return IsBypassEffect(); }
-					
+
 public:
 	/*! @method SetBypassEffect */
 	virtual void				SetBypassEffect (bool inFlag) { mBypassEffect = inFlag; }
-	
+
 	/*! @method SetParamHasSampleRateDependency */
-	void						SetParamHasSampleRateDependency (bool inFlag) 
-								{ 
-									mParamSRDep = inFlag; 
+	void						SetParamHasSampleRateDependency (bool inFlag)
+								{
+									mParamSRDep = inFlag;
 								}
-	
+
 	/*! @method GetParamHasSampleRateDependency */
 	bool						GetParamHasSampleRateDependency () const { return mParamSRDep; }
 
@@ -194,12 +194,12 @@ public:
 
 	bool							ProcessesInPlace() const {return mProcessesInPlace;};
 	void							SetProcessesInPlace(bool inProcessesInPlace) {mProcessesInPlace = inProcessesInPlace;};
-		
-	typedef std::vector<AUKernelBase *> KernelList;
-	
-	
 
-protected:	
+	typedef std::vector<AUKernelBase *> KernelList;
+
+
+
+protected:
 	/*! @var mKernelList */
 	KernelList						mKernelList;
 
@@ -209,13 +209,13 @@ protected:
 	bool 							IsInputSilent (AudioUnitRenderActionFlags 	inActionFlags, UInt32 inFramesToProcess)
 									{
 										bool inputSilent = (inActionFlags & kAudioUnitRenderAction_OutputIsSilence) != 0;
-									
+
 										// take latency and tail time into account when propagating the silent bit
 										UInt32 silentTimeoutFrames = UInt32(GetSampleRate() * (GetLatency() + GetTailTime()));
 										mSilentTimeout.Process (inFramesToProcess, silentTimeoutFrames, inputSilent);
 										return inputSilent;
 									}
-									
+
 #if TARGET_OS_IPHONE
 	void SetOnlyOneKernel(bool inUseOnlyOneKernel) { mOnlyOneKernel = inUseOnlyOneKernel; } // set in ctor of subclass that wants it.
 #endif
@@ -228,26 +228,26 @@ protected:
 										UInt32							inFramesToProcess );
 
 	CAStreamBasicDescription::CommonPCMFormat GetCommonPCMFormat() const { return mCommonPCMFormat; }
-	
+
 
 private:
 	/*! @var mBypassEffect */
 	bool							mBypassEffect;
 	/*! @var mParamSRDep */
 	bool							mParamSRDep;
-	
+
 	/*! @var mProcessesInplace */
 	bool							mProcessesInPlace;
-	
+
 	/*! @var mSilentTimeout */
 	AUSilentTimeout					mSilentTimeout;
 
 	/*! @var mMainOutput */
 	AUOutputElement *				mMainOutput;
-	
+
 	/*! @var mMainInput */
 	AUInputElement *				mMainInput;
-	
+
 #if TARGET_OS_IPHONE
 	/*! @var mOnlyOneKernel */
 	bool							mOnlyOneKernel;
@@ -299,16 +299,16 @@ public:
 								{
 									return mAudioUnit->GetSampleRate();
 								}
-								
+
 	/*! @method GetParameter */
-	AudioUnitParameterValue		GetParameter (AudioUnitParameterID	paramID) 
+	AudioUnitParameterValue		GetParameter (AudioUnitParameterID	paramID)
 								{
 									return mAudioUnit->GetParameter(paramID);
 								}
-	
+
 	void						SetChannelNum (UInt32 inChan) { mChannelNum = inChan; }
 	UInt32						GetChannelNum () { return mChannelNum; }
-	
+
 protected:
 	/*! @var mAudioUnit */
 	AUEffectBase * 		mAudioUnit;
@@ -332,41 +332,41 @@ void	AUEffectBase::ProcessBufferListsT(
 	if (inBuffer.mNumberBuffers == 1) {
 		if (inBuffer.mBuffers[0].mNumberChannels == 0)
 			throw CAException(kAudio_ParamError);
-			
+
 		for (UInt32 channel = 0; channel < mKernelList.size(); ++channel) {
 			AUKernelBase *kernel = mKernelList[channel];
-			
+
 			if (kernel == NULL) continue;
 			ioSilence = silentInput;
-			
+
 			// process each interleaved channel individually
 			kernel->Process(
-				(const T *)inBuffer.mBuffers[0].mData + channel, 
+				(const T *)inBuffer.mBuffers[0].mData + channel,
 				(T *)outBuffer.mBuffers[0].mData + channel,
 				inFramesToProcess,
 				inBuffer.mBuffers[0].mNumberChannels,
 				ioSilence);
-				
+
 			if (!ioSilence)
 				ioActionFlags &= ~kAudioUnitRenderAction_OutputIsSilence;
 		}
 	} else {
 		for (UInt32 channel = 0; channel < mKernelList.size(); ++channel) {
 			AUKernelBase *kernel = mKernelList[channel];
-			
+
 			if (kernel == NULL) continue;
-			
+
 			ioSilence = silentInput;
 			const AudioBuffer *srcBuffer = &inBuffer.mBuffers[channel];
 			AudioBuffer *destBuffer = &outBuffer.mBuffers[channel];
-			
+
 			kernel->Process(
-				(const T *)srcBuffer->mData, 
-				(T *)destBuffer->mData, 
+				(const T *)srcBuffer->mData,
+				(T *)destBuffer->mData,
 				inFramesToProcess,
 				1,
 				ioSilence);
-				
+
 			if (!ioSilence)
 				ioActionFlags &= ~kAudioUnitRenderAction_OutputIsSilence;
 		}

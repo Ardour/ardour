@@ -2,14 +2,14 @@
      File: CAAudioValueRange.cpp
  Abstract: CAAudioValueRange.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 //==================================================================================================
 //	Includes
@@ -80,7 +80,7 @@ Float64 CAAudioValueRange::PickCommonSampleRate(const AudioValueRange& inRange)
 	//  if no common rates can be found. It assumes that inRange contains a continuous range of
 	//  sample rates.
 	Float64 theAnswer = inRange.mMaximum;
-	
+
 	if(ContainsValue(inRange, 44100.0))
 	{
 		theAnswer = 44100.0;
@@ -129,7 +129,7 @@ Float64 CAAudioValueRange::PickCommonSampleRate(const AudioValueRange& inRange)
 	{
 		theAnswer = 8000.0;
 	}
-	
+
 	return theAnswer;
 }
 
@@ -173,50 +173,50 @@ void	CAAudioValueRange_ComputeUnion(const AudioValueRange& inRange, const CAAudi
 {
 	//	this method assumes that the ranges in inRangeList are disjoint and that they are sorted from low to high and
 	outUnion.clear();
-	
+
 	//	start at the beginning of inRangeList
 	CAAudioValueRangeList::const_iterator theIterator = inRangeList.begin();
-	
+
 	//	iterate through inRangeList and add all the ranges that are strictly less than inRange
 	while((theIterator != inRangeList.end()) && CAAudioValueRange::IsStrictlyLessThan(*theIterator, inRange))
 	{
 		//	put this range in the union
 		outUnion.push_back(*theIterator);
-		
+
 		//	go to the next one
 		std::advance(theIterator, 1);
 	}
-	
+
 	if(theIterator != inRangeList.end())
 	{
 		if(!CAAudioValueRange::IsStrictlyGreaterThan(*theIterator, inRange))
 		{
 			//	inRange intersects the range that theIterator points at, but might actually intersect several contiguous ranges
-			
+
 			//	initialize the starting point, noting that we can skip the current one since we already know it's in the intersection
 			CAAudioValueRangeList::const_iterator theGreaterIterator = theIterator;
 			std::advance(theGreaterIterator, 1);
-			
+
 			//	iterate until we find a range that is strictly greater than inRange
 			while((theGreaterIterator != inRangeList.end()) && !CAAudioValueRange::IsStrictlyGreaterThan(*theGreaterIterator, inRange))
 			{
 				//	go to the next one
 				std::advance(theGreaterIterator, 1);
 			}
-			
+
 			//	theGreaterIterator now points at either one past the highest range in the intersection or the end of the vector
 			//	Either way, we have to adjust it to point at the true highest range in the intersection
 			std::advance(theGreaterIterator, -1);
-			
+
 			//	now theIterator points at the lowest range in the intersection and theGreaterIterator points at the highest
 			//	so we can compute the coagulated range
 			AudioValueRange theCoagulation;
 			theCoagulation.mMinimum = std::min(theIterator->mMinimum, inRange.mMinimum);
 			theCoagulation.mMaximum = std::max(theGreaterIterator->mMaximum, inRange.mMaximum);
-			
+
 			//	add the coagulation to the union
 			outUnion.push_back(theCoagulation);
-			
+
 			//	adjust theIterator to point at the next range for processing
 			theIterator = theGreaterIterator;
 			std::advance(theIterator, 1);
@@ -226,13 +226,13 @@ void	CAAudioValueRange_ComputeUnion(const AudioValueRange& inRange, const CAAudi
 			//	the range theIterator points at is strictly greater than inRange, so insert inRange in front of it and we're done
 			outUnion.push_back(inRange);
 		}
-			
+
 		//	we need to now copy the remaining higher ranges in inRangeList into the union
 		while(theIterator != inRangeList.end())
 		{
 			//	put this range in the union
 			outUnion.push_back(*theIterator);
-			
+
 			//	go to the next one
 			std::advance(theIterator, 1);
 		}

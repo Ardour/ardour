@@ -2,14 +2,14 @@
      File: CAStreamRangedDescription.cpp
  Abstract: CAStreamRangedDescription.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 //==================================================================================================
 //	Includes
@@ -80,9 +80,9 @@ bool	CAStreamRangedDescription::Sorter(const AudioStreamRangedDescription& x, co
 {
 	bool theAnswer = false;
 	bool isDone = false;
-	
+
 	//	note that if either side is 0, that field is skipped
-	
+
 	//	format ID is the first order sort
 	if((!isDone) && ((x.mFormat.mFormatID != 0) && (y.mFormat.mFormatID != 0)))
 	{
@@ -105,8 +105,8 @@ bool	CAStreamRangedDescription::Sorter(const AudioStreamRangedDescription& x, co
 			isDone = true;
 		}
 	}
-	
-	
+
+
 	//  mixable is always better than non-mixable for linear PCM and should be the second order sort item
 	if((!isDone) && ((x.mFormat.mFormatID == kAudioFormatLinearPCM) && (y.mFormat.mFormatID == kAudioFormatLinearPCM)))
 	{
@@ -121,7 +121,7 @@ bool	CAStreamRangedDescription::Sorter(const AudioStreamRangedDescription& x, co
 			isDone = true;
 		}
 	}
-	
+
 	//	floating point vs integer for linear PCM only
 	if((!isDone) && ((x.mFormat.mFormatID == kAudioFormatLinearPCM) && (y.mFormat.mFormatID == kAudioFormatLinearPCM)))
 	{
@@ -132,7 +132,7 @@ bool	CAStreamRangedDescription::Sorter(const AudioStreamRangedDescription& x, co
 			isDone = true;
 		}
 	}
-	
+
 	//	bit depth
 	if((!isDone) && ((x.mFormat.mBitsPerChannel != 0) && (y.mFormat.mBitsPerChannel != 0)))
 	{
@@ -143,7 +143,7 @@ bool	CAStreamRangedDescription::Sorter(const AudioStreamRangedDescription& x, co
 			isDone = true;
 		}
 	}
-	
+
 	//	sample rate range
 	if((!isDone) && fnonzero(x.mSampleRateRange.mMinimum) && fnonzero(x.mSampleRateRange.mMaximum) && fnonzero(y.mSampleRateRange.mMinimum) && fnonzero(y.mSampleRateRange.mMaximum))
 	{
@@ -154,7 +154,7 @@ bool	CAStreamRangedDescription::Sorter(const AudioStreamRangedDescription& x, co
 			isDone = true;
 		}
 	}
-	
+
 	//	sample rate
 	if((!isDone) && fnonzero(x.mFormat.mSampleRate) && fnonzero(y.mFormat.mSampleRate))
 	{
@@ -165,7 +165,7 @@ bool	CAStreamRangedDescription::Sorter(const AudioStreamRangedDescription& x, co
 			isDone = true;
 		}
 	}
-	
+
 	//	number of channels
 	if((!isDone) && ((x.mFormat.mChannelsPerFrame != 0) && (y.mFormat.mChannelsPerFrame != 0)))
 	{
@@ -177,7 +177,7 @@ bool	CAStreamRangedDescription::Sorter(const AudioStreamRangedDescription& x, co
 			//isDone = true;
 		}
 	}
-	
+
 	return theAnswer;
 }
 

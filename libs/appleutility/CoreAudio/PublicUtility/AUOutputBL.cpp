@@ -2,14 +2,14 @@
      File: AUOutputBL.cpp
  Abstract: AUOutputBL.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "AUOutputBL.h"
 #if !defined(__COREAUDIO_USE_FLAT_INCLUDES__)
@@ -64,7 +64,7 @@ struct AudioBuffer
 };
 */
 
-AUOutputBL::AUOutputBL (const CAStreamBasicDescription &inDesc, UInt32 inDefaultNumFrames) 
+AUOutputBL::AUOutputBL (const CAStreamBasicDescription &inDesc, UInt32 inDefaultNumFrames)
 		: mFormat (inDesc),
 		  mBufferMemory(NULL),
 		  mBufferList (NULL),
@@ -85,10 +85,10 @@ AUOutputBL::~AUOutputBL()
 		delete [] (Byte *)mBufferList;
 }
 
-void 	AUOutputBL::Prepare (UInt32 inNumFrames, bool inWantNullBufferIfAllocated) 
+void 	AUOutputBL::Prepare (UInt32 inNumFrames, bool inWantNullBufferIfAllocated)
 {
 	UInt32 channelsPerBuffer = mFormat.IsInterleaved() ? mFormat.NumberChannels() : 1;
-	
+
 	if (mBufferMemory == NULL || inWantNullBufferIfAllocated)
 	{
 		mBufferList->mNumberBuffers = mNumberBuffers;
@@ -104,7 +104,7 @@ void 	AUOutputBL::Prepare (UInt32 inNumFrames, bool inWantNullBufferIfAllocated)
 		UInt32 nBytes = mFormat.FramesToBytes (inNumFrames);
 		if ((nBytes * mNumberBuffers) > AllocatedBytes())
 			throw OSStatus(kAudioUnitErr_TooManyFramesToProcess);
-			
+
 		mBufferList->mNumberBuffers = mNumberBuffers;
 		AudioBuffer *buf = &mBufferList->mBuffers[0];
 		Byte* p = mBufferMemory;
@@ -120,31 +120,31 @@ void 	AUOutputBL::Prepare (UInt32 inNumFrames, bool inWantNullBufferIfAllocated)
 
 void	AUOutputBL::Allocate (UInt32 inNumFrames)
 {
-	if (inNumFrames) 
+	if (inNumFrames)
 	{
 		UInt32 nBytes = mFormat.FramesToBytes (inNumFrames);
-		
-		if (nBytes <= AllocatedBytes()) 
+
+		if (nBytes <= AllocatedBytes())
 			return;
-		
+
 			// align successive buffers for Altivec and to take alternating
 			// cache line hits by spacing them by odd multiples of 16
 		if (mNumberBuffers > 1)
 			nBytes = (nBytes + (0x10 - (nBytes & 0xF))) | 0x10;
-		
+
 		mBufferSize = nBytes;
-		
+
 		UInt32 memorySize = mBufferSize * mNumberBuffers;
 		Byte *newMemory = new Byte[memorySize];
 		memset(newMemory, 0, memorySize);	// make buffer "hot"
-		
+
 		Byte *oldMemory = mBufferMemory;
 		mBufferMemory = newMemory;
 		delete[] oldMemory;
-		
+
 		mFrames = inNumFrames;
-	} 
-	else 
+	}
+	else
 	{
 		if (mBufferMemory) {
 			delete [] mBufferMemory;

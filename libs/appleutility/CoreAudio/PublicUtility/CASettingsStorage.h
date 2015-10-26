@@ -2,14 +2,14 @@
      File: CASettingsStorage.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #if !defined(__CASettingsStorage_h__)
 #define __CASettingsStorage_h__
@@ -83,13 +83,13 @@ public:
 	void					CopyUInt64Value(const CFStringRef inKey, UInt64& outValue, UInt64 inDefaultValue = 0) const;
 	void					CopyFloat32Value(const CFStringRef inKey, Float32& outValue, Float32 inDefaultValue = 0) const;
 	void					CopyFloat64Value(const CFStringRef inKey, Float64& outValue, Float64 inDefaultValue = 0) const;
-	void					CopyNumberValue(const CFStringRef inKey, CFNumberRef& outValue, CFNumberRef inDefaultValue = NULL) const;	
-	void					CopyStringValue(const CFStringRef inKey, CFStringRef& outValue, CFStringRef inDefaultValue = NULL) const;	
-	void					CopyArrayValue(const CFStringRef inKey, CFArrayRef& outValue, CFArrayRef inDefaultValue = NULL) const;	
-	void					CopyDictionaryValue(const CFStringRef inKey, CFDictionaryRef& outValue, CFDictionaryRef inDefaultValue = NULL) const;	
+	void					CopyNumberValue(const CFStringRef inKey, CFNumberRef& outValue, CFNumberRef inDefaultValue = NULL) const;
+	void					CopyStringValue(const CFStringRef inKey, CFStringRef& outValue, CFStringRef inDefaultValue = NULL) const;
+	void					CopyArrayValue(const CFStringRef inKey, CFArrayRef& outValue, CFArrayRef inDefaultValue = NULL) const;
+	void					CopyDictionaryValue(const CFStringRef inKey, CFDictionaryRef& outValue, CFDictionaryRef inDefaultValue = NULL) const;
 	void					CopyDataValue(const CFStringRef inKey, CFDataRef& outValue, CFDataRef inDefaultValue = NULL) const;
 	void					CopyCFTypeValue(const CFStringRef inKey, CFTypeRef& outValue, CFTypeRef inDefaultValue = NULL) const;
-	
+
 	void					SetSInt32Value(const CFStringRef inKey, SInt32 inValue);
 	void					SetUInt32Value(const CFStringRef inKey, UInt32 inValue);
 	void					SetSInt64Value(const CFStringRef inKey, SInt64 inValue);
@@ -102,10 +102,10 @@ public:
 	void					SetDictionaryValue(const CFStringRef inKey, const CFDictionaryRef inValue);
 	void					SetDataValue(const CFStringRef inKey, const CFDataRef inValue);
 	void					SetCFTypeValue(const CFStringRef inKey, const CFTypeRef inValue);
-	
+
 	void					RemoveValue(const CFStringRef inKey);
 	void					RemoveAllValues();
-	
+
 	void					SendNotification(const CFStringRef inName, CFDictionaryRef inData = NULL, bool inPostToAllSessions = true) const;
 	void					ForceRefresh();
 

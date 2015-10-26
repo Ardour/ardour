@@ -505,7 +505,7 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 	if (!toplevel) {
 		return;
 	}
-	
+
 	if (!UIConfiguration::instance().get_autoscroll_editor () || autoscroll_active ()) {
 		return;
 	}
@@ -744,7 +744,7 @@ Editor::autoscroll_canvas ()
 			x = min (max ((ArdourCanvas::Coord) x, autoscroll_boundary.x0), autoscroll_boundary.x1);
 		}
 		y = min (max ((ArdourCanvas::Coord) y, autoscroll_boundary.y0), autoscroll_boundary.y1);
-		
+
 		toplevel->translate_coordinates (*_track_canvas_viewport, x, y, cx, cy);
 
 		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (cx, cy));

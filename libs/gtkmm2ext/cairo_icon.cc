@@ -110,6 +110,6 @@ CairoIcon::on_expose_event (GdkEventExpose *ev)
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	}
 #endif
-	
+
 	return true;
 }

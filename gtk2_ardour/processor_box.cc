@@ -2835,11 +2835,11 @@ ProcessorBox::register_actions ()
 	                                                     sigc::ptr_fun (ProcessorBox::rb_copy));
 	delete_action = processor_box_actions.register_action (popup_act_grp, X_("delete"), _("Delete"),
 	                                                       sigc::ptr_fun (ProcessorBox::rb_delete));
-	
+
 	ActionManager::plugin_selection_sensitive_actions.push_back (cut_action);
 	ActionManager::plugin_selection_sensitive_actions.push_back (copy_action);
 	ActionManager::plugin_selection_sensitive_actions.push_back (delete_action);
-	
+
 	paste_action = processor_box_actions.register_action (popup_act_grp, X_("paste"), _("Paste"),
 			sigc::ptr_fun (ProcessorBox::rb_paste));
 	rename_action = processor_box_actions.register_action (popup_act_grp, X_("rename"), _("Rename"),

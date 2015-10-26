@@ -2,14 +2,14 @@
      File: AUCarbonViewBase.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #ifndef __AUCarbonViewBase_h__
 #define __AUCarbonViewBase_h__
@@ -62,7 +62,7 @@ public:
 						Float32 inNotificationInterval = kDefaultNotificationInterval /* in seconds */);
 	/*! @dtor ~AUCarbonViewBase */
 	virtual ~AUCarbonViewBase();
-	
+
 	// AUViewBase overrides
 	/*! @method CreateCarbonView */
 	virtual OSStatus			CreateCarbonView (AudioUnit inAudioUnit, WindowRef inWindow, ControlRef inParentControl, const Float32Point &inLocation, const Float32Point &inSize, ControlRef &outParentControl);
@@ -73,7 +73,7 @@ public:
 
 	/*! @method HandleEvent */
 	virtual bool				HandleEvent (EventHandlerCallRef inHandlerRef, EventRef event);
-	
+
 	/*! @method GetEditAudioUnit */
 	const AudioUnit				GetEditAudioUnit () const { return mEditAudioUnit; }
 	//
@@ -84,8 +84,8 @@ public:
 
 	/*! @method AddCarbonControl */
 	void						AddCarbonControl (
-									AUCarbonViewControl::ControlType	type, 
-									const CAAUParameter &				param, 
+									AUCarbonViewControl::ControlType	type,
+									const CAAUParameter &				param,
 									ControlRef							control);
 
 	/*! @method GetCarbonWindow */
@@ -94,27 +94,27 @@ public:
 	ControlRef					GetCarbonPane () { return mCarbonPane; }
 	/*! @method EmbedControl */
 	OSStatus					EmbedControl (ControlRef ctl);
-	
+
 	/*! @method TellListener */
 	void						TellListener (const CAAUParameter &auvp, AudioUnitCarbonViewEventID event, void *evpar);
-	
+
 	// pass in true if wanting an update to the view and you're calling this from a thread
 	// that is safe to do UI in.
 	// If you don't know, pass in false!
 	/*! @method Update */
 	void						Update (bool inUIThread);
-	
+
 	/*! @method GetXOffset */
 	Float32						GetXOffset () { return mXOffset; }
 	/*! @method GetYOffset */
 	Float32						GetYOffset () { return mYOffset; }
-	
+
 	/*! @method ClearControls */
 	void						ClearControls ();
-	
+
 	/*! @method IsCompositWindow */
 	bool						IsCompositWindow () const { return mCompositWindow; }
-	
+
 protected:
 #if !__LP64__
 	/*! @method SetEventListener */
@@ -131,15 +131,15 @@ protected:
 	void						RemoveControl (AUCarbonViewControl *control);
 
 	OSStatus					CreateEventLoopTimer (Float32 inDelay, Float32 inInterval);
-	
+
 	/*! @method ParameterListener */
 	static void ParameterListener (void *						inCallbackRefCon,
 									void *						inObject,
 									const AudioUnitEvent *		inEvent,
 									UInt64						inEventHostTime,
 									Float32						inParameterValue);
-									
-	static pascal void TheTimerProc (	EventLoopTimerRef 		inTimer, 
+
+	static pascal void TheTimerProc (	EventLoopTimerRef 		inTimer,
 										void *					inUserData);
 
 	virtual void 				RespondToEventTimer (EventLoopTimerRef inTimer);

@@ -2,14 +2,14 @@
      File: MusicDeviceBase.cpp
  Abstract: MusicDeviceBase.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "MusicDeviceBase.h"
 
@@ -90,10 +90,10 @@ static OSStatus		MusicDeviceBaseStopNote(void *			inComponentStorage,
 
 #endif
 
-MusicDeviceBase::MusicDeviceBase(AudioComponentInstance			inInstance, 
+MusicDeviceBase::MusicDeviceBase(AudioComponentInstance			inInstance,
 									UInt32						numInputs,
 									UInt32						numOutputs,
-									UInt32						numGroups) 
+									UInt32						numGroups)
 	: AUBase(inInstance, numInputs, numOutputs, numGroups),
 	  AUMIDIBase(this)
 {
@@ -106,8 +106,8 @@ OSStatus			MusicDeviceBase::GetPropertyInfo(AudioUnitPropertyID	inID,
 							Boolean &				outWritable)
 {
 	OSStatus result;
-	
-	switch (inID) 
+
+	switch (inID)
 	{
 #if !TARGET_OS_IPHONE
 		case kMusicDeviceProperty_InstrumentCount:
@@ -119,7 +119,7 @@ OSStatus			MusicDeviceBase::GetPropertyInfo(AudioUnitPropertyID	inID,
 #endif
 		default:
 			result = AUBase::GetPropertyInfo (inID, inScope, inElement, outDataSize, outWritable);
-			
+
 			if (result == kAudioUnitErr_InvalidProperty)
 				result = AUMIDIBase::DelegateGetPropertyInfo (inID, inScope, inElement, outDataSize, outWritable);
 			break;
@@ -134,7 +134,7 @@ OSStatus			MusicDeviceBase::GetProperty(	AudioUnitPropertyID			inID,
 {
 	OSStatus result;
 
-	switch (inID) 
+	switch (inID)
 	{
 #if !CA_USE_AUDIO_PLUGIN_ONLY
 		case kAudioUnitProperty_FastDispatch:
@@ -146,7 +146,7 @@ OSStatus			MusicDeviceBase::GetProperty(	AudioUnitPropertyID			inID,
 			else if (inElement == kMusicDeviceStartNoteSelect) {
 				*(TEMP_MusicDeviceStartNoteProc *)outData = MusicDeviceBaseStartNote;
 				return noErr;
-			}	
+			}
 			else if (inElement == kMusicDeviceStopNoteSelect) {
 				*(TEMP_MusicDeviceStopNoteProc *)outData = MusicDeviceBaseStopNote;
 				return noErr;
@@ -161,11 +161,11 @@ OSStatus			MusicDeviceBase::GetProperty(	AudioUnitPropertyID			inID,
 #endif
 		default:
 			result = AUBase::GetProperty (inID, inScope, inElement, outData);
-			
+
 			if (result == kAudioUnitErr_InvalidProperty)
 				result = AUMIDIBase::DelegateGetProperty (inID, inScope, inElement, outData);
 	}
-	
+
 	return result;
 }
 
@@ -179,10 +179,10 @@ OSStatus			MusicDeviceBase::SetProperty(	AudioUnitPropertyID 			inID,
 {
 
 	OSStatus result = AUBase::SetProperty (inID, inScope, inElement, inData, inDataSize);
-		
+
 	if (result == kAudioUnitErr_InvalidProperty)
 		result = AUMIDIBase::DelegateSetProperty (inID, inScope, inElement, inData, inDataSize);
-		
+
 	return result;
 }
 
@@ -205,7 +205,7 @@ OSStatus	MusicDeviceBase::HandleNoteOn(	UInt8 	inChannel,
 	params.mVelocity = inVelocity;
 	return StartNote (kMusicNoteEvent_UseGroupInstrument, inChannel, NULL, inStartFrame, params);
 }
-											
+
 OSStatus	MusicDeviceBase::HandleNoteOff(	UInt8 	inChannel,
 											UInt8 	inNoteNumber,
 											UInt8 	inVelocity,
@@ -214,17 +214,17 @@ OSStatus	MusicDeviceBase::HandleNoteOff(	UInt8 	inChannel,
 	return StopNote (inChannel, inNoteNumber, inStartFrame);
 }
 
-OSStatus			
-MusicDeviceBase::HandleStartNoteMessage (MusicDeviceInstrumentID		inInstrument, 
-										MusicDeviceGroupID				inGroupID, 
-										NoteInstanceID *				outNoteInstanceID, 
-										UInt32							inOffsetSampleFrame, 
+OSStatus
+MusicDeviceBase::HandleStartNoteMessage (MusicDeviceInstrumentID		inInstrument,
+										MusicDeviceGroupID				inGroupID,
+										NoteInstanceID *				outNoteInstanceID,
+										UInt32							inOffsetSampleFrame,
 										const MusicDeviceNoteParams *	inParams)
 {
 	if (inParams == NULL || outNoteInstanceID == NULL) return kAudio_ParamError;
 
 	if (!IsInitialized()) return kAudioUnitErr_Uninitialized;
-	
+
 	return StartNote (inInstrument, inGroupID, outNoteInstanceID, inOffsetSampleFrame, *inParams);
 }
 
@@ -251,7 +251,7 @@ OSStatus			MusicDeviceBase::ComponentEntryDispatch(	ComponentParameters *		param
 	if (This == NULL) return kAudio_ParamError;
 
 	OSStatus result;
-	
+
 	switch (params->what) {
 	case kMusicDeviceMIDIEventSelect:
 	case kMusicDeviceSysExSelect:
@@ -294,7 +294,7 @@ OSStatus			MusicDeviceBase::ComponentEntryDispatch(	ComponentParameters *		param
 		result = AUBase::ComponentEntryDispatch(params, This);
 		break;
 	}
-	
+
 	return result;
 }
 #endif

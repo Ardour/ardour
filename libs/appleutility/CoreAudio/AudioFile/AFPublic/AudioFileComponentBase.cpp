@@ -2,14 +2,14 @@
      File: AudioFileComponentBase.cpp
  Abstract: AudioFileComponentBase.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #if !defined(__COREAUDIO_USE_FLAT_INCLUDES__)
 	#include <AudioToolbox/AudioFileComponent.h>
@@ -84,8 +84,8 @@ static OSStatus CreateURL(
 
 static OSStatus OpenURL(
 								void *                            self,
-								CFURLRef							inFileRef, 
-								SInt8								inPermissions, 
+								CFURLRef							inFileRef,
+								SInt8								inPermissions,
 								int									inFileDescriptor)
 {
 	return AFC->AFAPI_OpenURL(inFileRef, inPermissions, inFileDescriptor);
@@ -93,9 +93,9 @@ static OSStatus OpenURL(
 
 static OSStatus OpenWithCallbacks(
 								void *                            self,
-								void *								inRefCon, 
-								AudioFile_ReadProc					inReadFunc, 
-								AudioFile_WriteProc					inWriteFunc, 
+								void *								inRefCon,
+								AudioFile_ReadProc					inReadFunc,
+								AudioFile_WriteProc					inWriteFunc,
 								AudioFile_GetSizeProc				inGetSizeFunc,
 								AudioFile_SetSizeProc				inSetSizeFunc)
 {
@@ -104,9 +104,9 @@ static OSStatus OpenWithCallbacks(
 
 static OSStatus InitializeWithCallbacks(
 								void *                            self,
-								void *								inRefCon, 
-								AudioFile_ReadProc					inReadFunc, 
-								AudioFile_WriteProc					inWriteFunc, 
+								void *								inRefCon,
+								AudioFile_ReadProc					inReadFunc,
+								AudioFile_WriteProc					inWriteFunc,
 								AudioFile_GetSizeProc				inGetSizeFunc,
 								AudioFile_SetSizeProc				inSetSizeFunc,
 								UInt32								inFileType,
@@ -131,8 +131,8 @@ static OSStatus Optimize(
 static OSStatus ReadBytes(
 								void *                            self,
 								Boolean			inUseCache,
-								SInt64			inStartingByte, 
-								UInt32			*ioNumBytes, 
+								SInt64			inStartingByte,
+								UInt32			*ioNumBytes,
 								void			*outBuffer)
 {
 	return AFC->AFAPI_ReadBytes(inUseCache, inStartingByte, ioNumBytes, outBuffer);
@@ -142,8 +142,8 @@ static OSStatus ReadBytes(
 static OSStatus WriteBytes(
 								void *         self,
 								Boolean			inUseCache,
-								SInt64			inStartingByte, 
-								UInt32			*ioNumBytes, 
+								SInt64			inStartingByte,
+								UInt32			*ioNumBytes,
 								const void		*inBuffer)
 {
 	return AFC->AFAPI_WriteBytes(inUseCache, inStartingByte, ioNumBytes, inBuffer);
@@ -155,11 +155,11 @@ static OSStatus ReadPackets(
 								Boolean							inUseCache,
 								UInt32							*outNumBytes,
 								AudioStreamPacketDescription	*outPacketDescriptions,
-								SInt64							inStartingPacket, 
-								UInt32							*ioNumPackets, 
+								SInt64							inStartingPacket,
+								UInt32							*ioNumPackets,
 								void							*outBuffer)
 {
-	return AFC->AFAPI_ReadPackets(inUseCache, outNumBytes, outPacketDescriptions, 
+	return AFC->AFAPI_ReadPackets(inUseCache, outNumBytes, outPacketDescriptions,
 		inStartingPacket, ioNumPackets, outBuffer);
 }
 
@@ -168,11 +168,11 @@ static OSStatus ReadPacketData(
 								Boolean							inUseCache,
 								UInt32							*ioNumBytes,
 								AudioStreamPacketDescription	*outPacketDescriptions,
-								SInt64							inStartingPacket, 
-								UInt32							*ioNumPackets, 
+								SInt64							inStartingPacket,
+								UInt32							*ioNumPackets,
 								void							*outBuffer)
 {
-	return AFC->AFAPI_ReadPacketData(inUseCache, ioNumBytes, outPacketDescriptions, 
+	return AFC->AFAPI_ReadPacketData(inUseCache, ioNumBytes, outPacketDescriptions,
 		inStartingPacket, ioNumPackets, outBuffer);
 }
 
@@ -182,8 +182,8 @@ static OSStatus WritePackets(
 								Boolean								inUseCache,
 								UInt32								inNumBytes,
 								AudioStreamPacketDescription		*inPacketDescriptions,
-								SInt64								inStartingPacket, 
-								UInt32								*ioNumPackets, 
+								SInt64								inStartingPacket,
+								UInt32								*ioNumPackets,
 								const void							*inBuffer)
 #else
 static OSStatus WritePackets(
@@ -191,12 +191,12 @@ static OSStatus WritePackets(
 								Boolean								inUseCache,
 								UInt32								inNumBytes,
 								const AudioStreamPacketDescription	*inPacketDescriptions,
-								SInt64								inStartingPacket, 
-								UInt32								*ioNumPackets, 
+								SInt64								inStartingPacket,
+								UInt32								*ioNumPackets,
 								const void							*inBuffer)
 #endif
 {
-	return AFC->AFAPI_WritePackets(inUseCache, inNumBytes, 
+	return AFC->AFAPI_WritePackets(inUseCache, inNumBytes,
 		(const AudioStreamPacketDescription	*)inPacketDescriptions, // this should be const (and is in 10.5 headers)
 		inStartingPacket, ioNumPackets, inBuffer);
 }
@@ -281,7 +281,7 @@ static OSStatus ExtensionIsThisFormat(
 {
 	AudioFileFormatBase* aff = AFC->GetAudioFileFormatBase();
 	if (!aff) return kAudio_ParamError;
-	
+
 	UInt32 res = aff->ExtensionIsThisFormat(inExtension);
 	if (outResult) *outResult = res;
 	return noErr;
@@ -289,13 +289,13 @@ static OSStatus ExtensionIsThisFormat(
 
 static OSStatus FileDataIsThisFormat(
 								void *                 self,
-								UInt32					inDataByteSize, 
+								UInt32					inDataByteSize,
 								const void*				inData,
 								UInt32					*outResult)
 {
 	AudioFileFormatBase* aff = AFC->GetAudioFileFormatBase();
 	if (!aff) return kAudio_ParamError;
-	
+
 	UncertainResult res = aff->FileDataIsThisFormat(inDataByteSize, inData);
 	if (outResult) *outResult = res;
 	return noErr;
@@ -346,33 +346,33 @@ AudioFileObjectComponentBase::~AudioFileObjectComponentBase()
 }
 
 OSStatus AudioFileObjectComponentBase::AFAPI_CreateURL(
-								CFURLRef							inFileRef, 
+								CFURLRef							inFileRef,
                                 const AudioStreamBasicDescription	*inFormat,
                                 UInt32								inFlags)
 {
 	if (!mAudioFileObject) return kAudio_ParamError;
-	
+
 	OSStatus result = mAudioFileObject->DoCreate (inFileRef, inFormat, inFlags);
 	return result;
 }
 
-								
+
 OSStatus AudioFileObjectComponentBase::AFAPI_OpenURL(
-									CFURLRef		inFileRef, 
+									CFURLRef		inFileRef,
 									SInt8  			inPermissions,
 									int				inFD)
 {
 	if (!mAudioFileObject) return kAudio_ParamError;
-	
+
 	OSStatus result = mAudioFileObject->DoOpen(inFileRef, inPermissions, inFD);
  	return result;
 }
 
 
 OSStatus AudioFileObjectComponentBase::AFAPI_OpenWithCallbacks(
-				void *								inRefCon, 
-				AudioFile_ReadProc					inReadFunc, 
-				AudioFile_WriteProc					inWriteFunc, 
+				void *								inRefCon,
+				AudioFile_ReadProc					inReadFunc,
+				AudioFile_WriteProc					inWriteFunc,
 				AudioFile_GetSizeProc				inGetSizeFunc,
 				AudioFile_SetSizeProc				inSetSizeFunc)
 {
@@ -382,9 +382,9 @@ OSStatus AudioFileObjectComponentBase::AFAPI_OpenWithCallbacks(
 
 
 OSStatus AudioFileObjectComponentBase::AFAPI_InitializeWithCallbacks(
-				void *								inRefCon, 
-				AudioFile_ReadProc					inReadFunc, 
-				AudioFile_WriteProc					inWriteFunc, 
+				void *								inRefCon,
+				AudioFile_ReadProc					inReadFunc,
+				AudioFile_WriteProc					inWriteFunc,
 				AudioFile_GetSizeProc				inGetSizeFunc,
 				AudioFile_SetSizeProc				inSetSizeFunc,
 				UInt32								inFileType,
@@ -392,11 +392,11 @@ OSStatus AudioFileObjectComponentBase::AFAPI_InitializeWithCallbacks(
 				UInt32								inFlags)
 {
 	if (!mAudioFileObject) return kAudio_ParamError;
-	return mAudioFileObject->DoInitializeWithCallbacks(inRefCon, inReadFunc, inWriteFunc, inGetSizeFunc, inSetSizeFunc, 
+	return mAudioFileObject->DoInitializeWithCallbacks(inRefCon, inReadFunc, inWriteFunc, inGetSizeFunc, inSetSizeFunc,
 											inFileType, inFormat, inFlags);
 }
 
-									
+
 OSStatus AudioFileObjectComponentBase::AFAPI_Close()
 {
 	if (!mAudioFileObject) return kAudio_ParamError;
@@ -409,10 +409,10 @@ OSStatus AudioFileObjectComponentBase::AFAPI_Optimize()
 	return mAudioFileObject->DoOptimize();
 }
 
-OSStatus AudioFileObjectComponentBase::AFAPI_ReadBytes(		
+OSStatus AudioFileObjectComponentBase::AFAPI_ReadBytes(
 											Boolean			inUseCache,
-											SInt64			inStartingByte, 
-											UInt32			*ioNumBytes, 
+											SInt64			inStartingByte,
+											UInt32			*ioNumBytes,
 											void			*outBuffer)
 {
 	if (!mAudioFileObject) return kAudio_ParamError;
@@ -420,10 +420,10 @@ OSStatus AudioFileObjectComponentBase::AFAPI_ReadBytes(
 }
 
 
-OSStatus AudioFileObjectComponentBase::AFAPI_WriteBytes(		
+OSStatus AudioFileObjectComponentBase::AFAPI_WriteBytes(
 											Boolean			inUseCache,
-											SInt64			inStartingByte, 
-											UInt32			*ioNumBytes, 
+											SInt64			inStartingByte,
+											UInt32			*ioNumBytes,
 											const void		*inBuffer)
 {
 	if (!mAudioFileObject) return kAudio_ParamError;
@@ -433,12 +433,12 @@ OSStatus AudioFileObjectComponentBase::AFAPI_WriteBytes(
 
 
 
-OSStatus AudioFileObjectComponentBase::AFAPI_ReadPackets(		
+OSStatus AudioFileObjectComponentBase::AFAPI_ReadPackets(
 											Boolean							inUseCache,
 											UInt32							*outNumBytes,
 											AudioStreamPacketDescription	*outPacketDescriptions,
-											SInt64							inStartingPacket, 
-											UInt32  						*ioNumPackets, 
+											SInt64							inStartingPacket,
+											UInt32  						*ioNumPackets,
 											void							*outBuffer)
 {
 	if (!mAudioFileObject) return kAudio_ParamError;
@@ -446,12 +446,12 @@ OSStatus AudioFileObjectComponentBase::AFAPI_ReadPackets(
 												inStartingPacket, ioNumPackets, outBuffer);
 }
 
-OSStatus AudioFileObjectComponentBase::AFAPI_ReadPacketData(		
+OSStatus AudioFileObjectComponentBase::AFAPI_ReadPacketData(
 											Boolean							inUseCache,
 											UInt32							*ioNumBytes,
 											AudioStreamPacketDescription	*outPacketDescriptions,
-											SInt64							inStartingPacket, 
-											UInt32  						*ioNumPackets, 
+											SInt64							inStartingPacket,
+											UInt32  						*ioNumPackets,
 											void							*outBuffer)
 {
 	if (!mAudioFileObject) return kAudio_ParamError;
@@ -459,13 +459,13 @@ OSStatus AudioFileObjectComponentBase::AFAPI_ReadPacketData(
 												inStartingPacket, ioNumPackets, outBuffer);
 }
 
-									
-OSStatus AudioFileObjectComponentBase::AFAPI_WritePackets(	
+
+OSStatus AudioFileObjectComponentBase::AFAPI_WritePackets(
 											Boolean								inUseCache,
 											UInt32								inNumBytes,
 											const AudioStreamPacketDescription	*inPacketDescriptions,
-											SInt64								inStartingPacket, 
-											UInt32								*ioNumPackets, 
+											SInt64								inStartingPacket,
+											UInt32								*ioNumPackets,
 											const void							*inBuffer)
 {
 	if (!mAudioFileObject) return kAudio_ParamError;
@@ -474,8 +474,8 @@ OSStatus AudioFileObjectComponentBase::AFAPI_WritePackets(
 }
 
 
-									
-OSStatus AudioFileObjectComponentBase::AFAPI_GetPropertyInfo(	
+
+OSStatus AudioFileObjectComponentBase::AFAPI_GetPropertyInfo(
 											AudioFilePropertyID		inPropertyID,
 											UInt32					*outDataSize,
 											UInt32					*isWritable)
@@ -484,23 +484,23 @@ OSStatus AudioFileObjectComponentBase::AFAPI_GetPropertyInfo(
 	return mAudioFileObject->GetPropertyInfo(inPropertyID, outDataSize, isWritable);
 }
 
-										
-OSStatus AudioFileObjectComponentBase::AFAPI_GetProperty(		
+
+OSStatus AudioFileObjectComponentBase::AFAPI_GetProperty(
 											AudioFilePropertyID		inPropertyID,
 											UInt32					*ioPropertySize,
 											void					*ioPropertyData)
 {
 	OSStatus err = noErr;
-	
+
 	if (!ioPropertyData) return kAudio_ParamError;
-	
+
 	if (!mAudioFileObject) return kAudio_ParamError;
 	err = mAudioFileObject->GetProperty(inPropertyID, ioPropertySize, ioPropertyData);
 	return err;
 }
 
-									
-OSStatus AudioFileObjectComponentBase::AFAPI_SetProperty(		
+
+OSStatus AudioFileObjectComponentBase::AFAPI_SetProperty(
 											AudioFilePropertyID		inPropertyID,
 											UInt32					inPropertySize,
 											const void				*inPropertyData)
@@ -510,7 +510,7 @@ OSStatus AudioFileObjectComponentBase::AFAPI_SetProperty(
 }
 
 
-OSStatus AudioFileObjectComponentBase::AFAPI_CountUserData(		
+OSStatus AudioFileObjectComponentBase::AFAPI_CountUserData(
 											UInt32				inUserDataID,
 											UInt32				*outNumberItems)
 {
@@ -518,7 +518,7 @@ OSStatus AudioFileObjectComponentBase::AFAPI_CountUserData(
 	return mAudioFileObject->CountUserData(inUserDataID, outNumberItems);
 }
 
-OSStatus AudioFileObjectComponentBase::AFAPI_GetUserDataSize(		
+OSStatus AudioFileObjectComponentBase::AFAPI_GetUserDataSize(
 											UInt32				inUserDataID,
 											UInt32				inIndex,
 											UInt32				*outUserDataSize)
@@ -527,7 +527,7 @@ OSStatus AudioFileObjectComponentBase::AFAPI_GetUserDataSize(
 	return mAudioFileObject->GetUserDataSize(inUserDataID, inIndex, outUserDataSize);
 }
 
-OSStatus AudioFileObjectComponentBase::AFAPI_GetUserData(		
+OSStatus AudioFileObjectComponentBase::AFAPI_GetUserData(
 											UInt32				inUserDataID,
 											UInt32				inIndex,
 											UInt32				*ioUserDataSize,
@@ -537,7 +537,7 @@ OSStatus AudioFileObjectComponentBase::AFAPI_GetUserData(
 	return mAudioFileObject->GetUserData(inUserDataID, inIndex, ioUserDataSize, outUserData);
 }
 
-OSStatus AudioFileObjectComponentBase::AFAPI_SetUserData(		
+OSStatus AudioFileObjectComponentBase::AFAPI_SetUserData(
 											UInt32				inUserDataID,
 											UInt32				inIndex,
 											UInt32				inUserDataSize,
@@ -547,7 +547,7 @@ OSStatus AudioFileObjectComponentBase::AFAPI_SetUserData(
 	return mAudioFileObject->SetUserData(inUserDataID, inIndex, inUserDataSize, inUserData);
 }
 
-OSStatus AudioFileObjectComponentBase::AFAPI_RemoveUserData(		
+OSStatus AudioFileObjectComponentBase::AFAPI_RemoveUserData(
 											UInt32				inUserDataID,
 											UInt32				inIndex)
 {
@@ -556,14 +556,14 @@ OSStatus AudioFileObjectComponentBase::AFAPI_RemoveUserData(
 }
 
 
-OSStatus AudioFileComponentBase::AFAPI_GetGlobalInfoSize(		
+OSStatus AudioFileComponentBase::AFAPI_GetGlobalInfoSize(
 											AudioFilePropertyID		inPropertyID,
 											UInt32					inSpecifierSize,
 											const void*				inSpecifier,
 											UInt32					*outPropertySize)
 {
 	OSStatus err = noErr;
-		
+
 	switch (inPropertyID)
 	{
 		case kAudioFileComponent_CanRead :
@@ -578,15 +578,15 @@ OSStatus AudioFileComponentBase::AFAPI_GetGlobalInfoSize(
 		case kAudioFileComponent_ExtensionsForType :
 			*outPropertySize = sizeof(CFArrayRef);
 			break;
-			
+
 		case kAudioFileComponent_UTIsForType :
 			*outPropertySize = sizeof(CFArrayRef);
 			break;
-			
+
 		case kAudioFileComponent_MIMETypesForType :
 			*outPropertySize = sizeof(CFArrayRef);
 			break;
-			
+
 		case kAudioFileComponent_AvailableFormatIDs :
 		{
 			UInt32 size = 0xFFFFFFFF;
@@ -608,7 +608,7 @@ OSStatus AudioFileComponentBase::AFAPI_GetGlobalInfoSize(
 				err = GetAudioFileFormatBase()->GetAvailableStreamDescriptions(inFormatID, outPropertySize, NULL);
 			}
 			break;
-			
+
 		default:
 			err = kAudioFileUnsupportedPropertyError;
 	}
@@ -616,7 +616,7 @@ OSStatus AudioFileComponentBase::AFAPI_GetGlobalInfoSize(
 }
 
 
-OSStatus AudioFileComponentBase::AFAPI_GetGlobalInfo(		
+OSStatus AudioFileComponentBase::AFAPI_GetGlobalInfo(
 											AudioFilePropertyID		inPropertyID,
 											UInt32					inSpecifierSize,
 											const void*				inSpecifier,
@@ -624,9 +624,9 @@ OSStatus AudioFileComponentBase::AFAPI_GetGlobalInfo(
 											void					*ioPropertyData)
 {
 	OSStatus err = noErr;
-	
+
 	if (!ioPropertyData || !ioPropertySize) return kAudio_ParamError;
-	
+
 	switch (inPropertyID)
 	{
 		case kAudioFileComponent_CanRead :
@@ -636,7 +636,7 @@ OSStatus AudioFileComponentBase::AFAPI_GetGlobalInfo(
 				*flag = GetAudioFileFormatBase()->CanRead();
 			}
 			break;
-			
+
 		case kAudioFileComponent_CanWrite :
 			{
 				if (*ioPropertySize != sizeof(UInt32)) return kAudioFileBadPropertySizeError;
@@ -644,7 +644,7 @@ OSStatus AudioFileComponentBase::AFAPI_GetGlobalInfo(
 				*flag = GetAudioFileFormatBase()->CanWrite();
 			}
 			break;
-			
+
 		case kAudioFileComponent_FileTypeName :
 			{
 				if (*ioPropertySize != sizeof(CFStringRef)) return kAudioFileBadPropertySizeError;
@@ -682,21 +682,21 @@ OSStatus AudioFileComponentBase::AFAPI_GetGlobalInfo(
 				err = GetAudioFileFormatBase()->GetHFSCodes(ioPropertySize, ioPropertyData);
 			}
 			break;
-			
+
 		case kAudioFileComponent_AvailableFormatIDs :
 			{
 				err = GetAudioFileFormatBase()->GetAvailableFormatIDs(ioPropertySize, ioPropertyData);
 			}
 			break;
-			
+
 		case kAudioFileComponent_AvailableStreamDescriptionsForFormat :
 			{
 				if (inSpecifierSize != sizeof(UInt32)) return kAudioFileBadPropertySizeError;
-				UInt32 inFormatID = *(UInt32*)inSpecifier; 
+				UInt32 inFormatID = *(UInt32*)inSpecifier;
 				err = GetAudioFileFormatBase()->GetAvailableStreamDescriptions(inFormatID, ioPropertySize, ioPropertyData);
 			}
 			break;
-						
+
 		default:
 			err = kAudioFileUnsupportedPropertyError;
 	}
@@ -709,11 +709,11 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 {
 	OSStatus		result = noErr;
 	if (inThis == NULL) return kAudio_ParamError;
-	
+
 	try
 	{
 		switch (params->what)
-		{						
+		{
 			case kComponentCanDoSelect:
 				switch (GetSelectorForCanDo(params))
 				{
@@ -734,7 +734,7 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 					case kAudioFileFileDataIsThisFormatSelect:
 					case kAudioFileGetGlobalInfoSizeSelect:
 					case kAudioFileGetGlobalInfoSelect:
-					
+
 					case kAudioFileCountUserDataSelect:
 					case kAudioFileGetUserDataSizeSelect:
 					case kAudioFileGetUserDataSelect:
@@ -756,7 +756,7 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 						PARAM(CFURLRef, inFileRef, 0, 3);
 						PARAM(const AudioStreamBasicDescription*, inFormat, 1, 3);
 						PARAM(UInt32, inFlags, 2, 3);
-						
+
 						result = inThis->AFAPI_CreateURL(inFileRef, inFormat, inFlags);
 					}
 					break;
@@ -765,7 +765,7 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 						PARAM(CFURLRef, inFileRef, 0, 3);
 						PARAM(SInt32, inPermissions, 1, 3);
 						PARAM(int, inFileDescriptor, 2, 3);
-						
+
 						result = inThis->AFAPI_OpenURL(inFileRef, inPermissions, inFileDescriptor);
 					}
 					break;
@@ -776,8 +776,8 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 						PARAM(AudioFile_WriteProc, inWriteFunc, 2, 5);
 						PARAM(AudioFile_GetSizeProc, inGetSizeFunc, 3, 5);
 						PARAM(AudioFile_SetSizeProc, inSetSizeFunc, 4, 5);
-						
-						result = inThis->AFAPI_OpenWithCallbacks(inRefCon, inReadFunc, inWriteFunc, 
+
+						result = inThis->AFAPI_OpenWithCallbacks(inRefCon, inReadFunc, inWriteFunc,
 													inGetSizeFunc, inSetSizeFunc);
 					}
 					break;
@@ -791,8 +791,8 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 						PARAM(UInt32, inFileType, 5, 8);
 						PARAM(const AudioStreamBasicDescription*, inFormat, 6, 8);
 						PARAM(UInt32, inFlags, 7, 8);
-						
-						result = inThis->AFAPI_InitializeWithCallbacks(inRefCon, inReadFunc, inWriteFunc, 
+
+						result = inThis->AFAPI_InitializeWithCallbacks(inRefCon, inReadFunc, inWriteFunc,
 													inGetSizeFunc, inSetSizeFunc,
 													inFileType, inFormat, inFlags);
 					}
@@ -813,7 +813,7 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 						PARAM(SInt64*, inStartingByte, 1, 4);
 						PARAM(UInt32*, ioNumBytes, 2, 4);
 						PARAM(void*, outBuffer, 3, 4);
-						
+
 						result = inThis->AFAPI_ReadBytes(inUseCache, *inStartingByte, ioNumBytes,
 							outBuffer);
 					}
@@ -824,7 +824,7 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 						PARAM(SInt64*, inStartingByte, 1, 4);
 						PARAM(UInt32*, ioNumBytes, 2, 4);
 						PARAM(const void*, inBuffer, 3, 4);
-						
+
 						result = inThis->AFAPI_WriteBytes(inUseCache, *inStartingByte, ioNumBytes,
 							inBuffer);
 					}
@@ -837,8 +837,8 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 						PARAM(SInt64*, inStartingPacket, 3, 6);
 						PARAM(UInt32*, ioNumPackets, 4, 6);
 						PARAM(void*, outBuffer, 5, 6);
-						
-						result = inThis->AFAPI_ReadPackets(inUseCache, outNumBytes, outPacketDescriptions, 
+
+						result = inThis->AFAPI_ReadPackets(inUseCache, outNumBytes, outPacketDescriptions,
 							*inStartingPacket, ioNumPackets, outBuffer);
 					}
 					break;
@@ -850,28 +850,28 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 						PARAM(SInt64*, inStartingPacket, 3, 6);
 						PARAM(UInt32*, ioNumPackets, 4, 6);
 						PARAM(const void*, inBuffer, 5, 6);
-						
-						result = inThis->AFAPI_WritePackets(inUseCache, inNumBytes, inPacketDescriptions, 
+
+						result = inThis->AFAPI_WritePackets(inUseCache, inNumBytes, inPacketDescriptions,
 							*inStartingPacket, ioNumPackets, inBuffer);
 					}
 					break;
-					
+
 				case kAudioFileGetPropertyInfoSelect:
 					{
 						PARAM(AudioFileComponentPropertyID, inPropertyID, 0, 3);
 						PARAM(UInt32*, outPropertySize, 1, 3);
 						PARAM(UInt32*, outWritable, 2, 3);
-						
+
 						result = inThis->AFAPI_GetPropertyInfo(inPropertyID, outPropertySize, outWritable);
 					}
 					break;
-					
+
 				case kAudioFileGetPropertySelect:
 					{
 						PARAM(AudioFileComponentPropertyID, inPropertyID, 0, 3);
 						PARAM(UInt32*, ioPropertyDataSize, 1, 3);
 						PARAM(void*, outPropertyData, 2, 3);
-						
+
 						result = inThis->AFAPI_GetProperty(inPropertyID, ioPropertyDataSize, outPropertyData);
 					}
 					break;
@@ -880,18 +880,18 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 						PARAM(AudioFileComponentPropertyID, inPropertyID, 0, 3);
 						PARAM(UInt32, inPropertyDataSize, 1, 3);
 						PARAM(const void*, inPropertyData, 2, 3);
-						
+
 						result = inThis->AFAPI_SetProperty(inPropertyID, inPropertyDataSize, inPropertyData);
 					}
 					break;
-					
+
 				case kAudioFileGetGlobalInfoSizeSelect:
 					{
 						PARAM(AudioFileComponentPropertyID, inPropertyID, 0, 4);
 						PARAM(UInt32, inSpecifierSize, 1, 4);
 						PARAM(const void*, inSpecifier, 2, 4);
 						PARAM(UInt32*, outPropertyDataSize, 3, 4);
-						
+
 						result = inThis->AFAPI_GetGlobalInfoSize(inPropertyID, inSpecifierSize, inSpecifier,
 							outPropertyDataSize);
 					}
@@ -903,34 +903,34 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 						PARAM(const void*, inSpecifier, 2, 5);
 						PARAM(UInt32*, ioPropertyDataSize, 3, 5);
 						PARAM(void*, outPropertyData, 4, 5);
-						
+
 						result = inThis->AFAPI_GetGlobalInfo(inPropertyID, inSpecifierSize, inSpecifier,
 							ioPropertyDataSize, outPropertyData);
 					}
 					break;
-					
+
 				case kAudioFileExtensionIsThisFormatSelect:
 					{
 						PARAM(CFStringRef, inExtension, 0, 2);
 						PARAM(UInt32*, outResult, 1, 2);
-						
+
 						AudioFileFormatBase* aff = inThis->GetAudioFileFormatBase();
 						if (!aff) return kAudio_ParamError;
-						
+
 						UInt32 res = aff->ExtensionIsThisFormat(inExtension);
 						if (outResult) *outResult = res;
 					}
 					break;
-					
+
 				case kAudioFileFileDataIsThisFormatSelect:
 					{
 						PARAM(UInt32, inDataByteSize, 0, 3);
 						PARAM(const void*, inData, 1, 3);
 						PARAM(UInt32*, outResult, 2, 3);
-						
+
 						AudioFileFormatBase* aff = inThis->GetAudioFileFormatBase();
 						if (!aff) return kAudio_ParamError;
-						
+
 						UncertainResult res = aff->FileDataIsThisFormat(inDataByteSize, inData);
 						if (outResult) *outResult = res;
 					}
@@ -940,55 +940,55 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 					{
 						PARAM(UInt32, inUserDataID, 0, 2);
 						PARAM(UInt32*, outNumberItems, 1, 2);
-					
+
 						result = inThis->AFAPI_CountUserData(inUserDataID, outNumberItems);
 					}
 					break;
-					
+
 				case kAudioFileGetUserDataSizeSelect:
 					{
 						PARAM(UInt32, inUserDataID, 0, 3);
 						PARAM(UInt32, inIndex, 1, 3);
 						PARAM(UInt32*, outUserDataSize, 2, 3);
-						
+
 						result = inThis->AFAPI_GetUserDataSize(inUserDataID, inIndex, outUserDataSize);
 					}
 					break;
-					
+
 				case kAudioFileGetUserDataSelect:
 					{
 						PARAM(UInt32, inUserDataID, 0, 4);
 						PARAM(UInt32, inIndex, 1, 4);
 						PARAM(UInt32*, ioUserDataSize, 2, 4);
 						PARAM(void*, outUserData, 3, 4);
-						
-						result = inThis->AFAPI_GetUserData(inUserDataID, inIndex, 
+
+						result = inThis->AFAPI_GetUserData(inUserDataID, inIndex,
 										ioUserDataSize, outUserData);
 					}
 					break;
-					
+
 				case kAudioFileSetUserDataSelect:
 					{
 						PARAM(UInt32, inUserDataID, 0, 4);
 						PARAM(UInt32, inIndex, 1, 4);
 						PARAM(UInt32, inUserDataSize, 2, 4);
 						PARAM(const void*, inUserData, 3, 4);
-						
-						result = inThis->AFAPI_SetUserData(inUserDataID, inIndex, 
+
+						result = inThis->AFAPI_SetUserData(inUserDataID, inIndex,
 										inUserDataSize, inUserData);
 					}
 					break;
-	
+
 				case kAudioFileRemoveUserDataSelect:
 					{
 						PARAM(UInt32, inUserDataID, 0, 2);
 						PARAM(UInt32, inIndex, 1, 2);
-						
+
 						result = inThis->AFAPI_RemoveUserData(inUserDataID, inIndex);
 					}
 					break;
-	
-		
+
+
 				default:
 					result = ComponentBase::ComponentEntryDispatch(params, inThis);
 					break;
@@ -996,13 +996,13 @@ OSStatus AudioFileComponentBase::ComponentEntryDispatch(ComponentParameters* par
 	}
 	COMPONENT_CATCH
 	return result;
-} 
+}
 #endif
 
 AudioComponentMethod AudioFileComponentLookup::Lookup (SInt16 selector)
 {
 	switch (selector) {
-	
+
 #define DefCase(NAME) case kAudioFile##NAME##Select: return (AudioComponentMethod)NAME
 
 		DefCase(OpenWithCallbacks);
@@ -1016,7 +1016,7 @@ AudioComponentMethod AudioFileComponentLookup::Lookup (SInt16 selector)
 		DefCase(GetPropertyInfo);
 		DefCase(GetProperty);
 		DefCase(SetProperty);
-		
+
 		DefCase(ExtensionIsThisFormat);
 		DefCase(GetGlobalInfoSize);
 		DefCase(GetGlobalInfo);
@@ -1030,7 +1030,7 @@ AudioComponentMethod AudioFileComponentLookup::Lookup (SInt16 selector)
 		DefCase(OpenURL);
 		DefCase(FileDataIsThisFormat);
 		DefCase(ReadPacketData);
-		
+
 		// These selectors are deprecated and do not appear: Create, Open, Initialize, FileIsThisFormat, DataIsThisFormat.
 
 		default:

@@ -2,14 +2,14 @@
      File: AUEffectBase.cpp
  Abstract: AUEffectBase.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,15 +40,15 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "AUEffectBase.h"
 
-/* 
+/*
 	This class does not deal as well as it should with N-M effects...
-	
+
 	The problem areas are (if the channels don't match):
 		ProcessInPlace if the channels don't match - there will be problems if InputChan != OutputChan
 		Bypass - its just passing the buffers through when not processing them
@@ -84,7 +84,7 @@ void AUEffectBase::Cleanup()
 {
 	for (KernelList::iterator it = mKernelList.begin(); it != mKernelList.end(); ++it)
 		delete *it;
-		
+
 	mKernelList.clear();
 	mMainOutput = NULL;
 	mMainInput = NULL;
@@ -113,7 +113,7 @@ OSStatus AUEffectBase::Initialize()
             if ((configNumInputs < 0) && (configNumOutputs < 0))
             {
 					// unit accepts any number of channels on input and output
-                if (((configNumInputs == -1) && (configNumOutputs == -2)) 
+                if (((configNumInputs == -1) && (configNumOutputs == -2))
 					|| ((configNumInputs == -2) && (configNumOutputs == -1)))
                 {
 				    foundMatch = true;
@@ -129,7 +129,7 @@ OSStatus AUEffectBase::Initialize()
             }
             else
             {
-					// the -1 case on either scope is saying that the unit doesn't care about the 
+					// the -1 case on either scope is saying that the unit doesn't care about the
 					// number of channels on that scope
                 bool inputMatch = (auNumInputs == configNumInputs) || (configNumInputs == -1);
                 bool outputMatch = (auNumOutputs == configNumOutputs) || (configNumOutputs == -1);
@@ -152,14 +152,14 @@ OSStatus AUEffectBase::Initialize()
     }
 
     MaintainKernels();
-	
+
 	mMainOutput = GetOutput(0);
 	mMainInput = GetInput(0);
-	
+
 	const CAStreamBasicDescription& format = GetStreamFormat(kAudioUnitScope_Output, 0);
 	format.IdentifyCommonPCMFormat(mCommonPCMFormat, NULL);
 	mBytesPerFrame = format.mBytesPerFrame;
-	
+
     return noErr;
 }
 
@@ -171,7 +171,7 @@ OSStatus			AUEffectBase::Reset(		AudioUnitScope 		inScope,
 		if (kernel != NULL)
 			kernel->Reset();
 	}
-	
+
 	return AUBase::Reset(inScope, inElement);
 }
 
@@ -228,10 +228,10 @@ OSStatus			AUEffectBase::SetProperty(		AudioUnitPropertyID inID,
 			{
 				if (inDataSize < sizeof(UInt32))
 					return kAudioUnitErr_InvalidPropertyValue;
-					
+
 				bool tempNewSetting = *((UInt32*)inData) != 0;
 					// we're changing the state of bypass
-				if (tempNewSetting != IsBypassEffect()) 
+				if (tempNewSetting != IsBypassEffect())
 				{
 					if (!tempNewSetting && IsBypassEffect() && IsInitialized()) // turning bypass off and we're initialized
 						Reset(0, 0);
@@ -246,16 +246,16 @@ OSStatus			AUEffectBase::SetProperty(		AudioUnitPropertyID inID,
 	}
 	return AUBase::SetProperty (inID, inScope, inElement, inData, inDataSize);
 }
- 
+
 
 void	AUEffectBase::MaintainKernels()
 {
 #if TARGET_OS_IPHONE
 	UInt32 nKernels = mOnlyOneKernel ? 1 : GetNumberOfChannels();
-#else 
+#else
 	UInt32 nKernels = GetNumberOfChannels();
 #endif
-	
+
 	if (mKernelList.size() < nKernels) {
 		mKernelList.reserve(nKernels);
 		for (UInt32 i = (UInt32)mKernelList.size(); i < nKernels; ++i)
@@ -267,7 +267,7 @@ void	AUEffectBase::MaintainKernels()
 			mKernelList.pop_back();
 		}
 	}
-	
+
 	for(unsigned int i = 0; i < nKernels; i++ )
 	{
 		if(mKernelList[i]) {
@@ -289,7 +289,7 @@ OSStatus			AUEffectBase::ChangeStreamFormat(	AudioUnitScope				inScope,
 {
 	OSStatus result = AUBase::ChangeStreamFormat(inScope, inElement, inPrevFormat, inNewFormat);
 	if (result == noErr)
-	{	
+	{
 		// for the moment this only dependency we know about
 		// where a parameter's range may change is with the sample rate
 		// and effects are only publishing parameters in the global scope!
@@ -314,11 +314,11 @@ OSStatus		AUEffectBase::ProcessScheduledSlice(	void				*inUserData,
 														UInt32				inTotalBufferFrames )
 {
 	ScheduledProcessParams	&sliceParams = *((ScheduledProcessParams*)inUserData);
-	
+
 	AudioUnitRenderActionFlags 	&actionFlags = *sliceParams.actionFlags;
 	AudioBufferList 			&inputBufferList = *sliceParams.inputBufferList;
 	AudioBufferList 			&outputBufferList = *sliceParams.outputBufferList;
-	
+
 	UInt32 channelSize = inSliceFramesToProcess * mBytesPerFrame;
 		// fix the size of the buffer we're operating on before we render this slice of time
 	for(unsigned int i = 0; i < inputBufferList.mNumberBuffers; i++ ) {
@@ -333,15 +333,15 @@ OSStatus		AUEffectBase::ProcessScheduledSlice(	void				*inUserData,
 
 		// we just partially processed the buffers, so increment the data pointers to the next part of the buffer to process
 	for(unsigned int i = 0; i < inputBufferList.mNumberBuffers; i++ ) {
-		inputBufferList.mBuffers[i].mData = 
+		inputBufferList.mBuffers[i].mData =
 			(char *)inputBufferList.mBuffers[i].mData + inputBufferList.mBuffers[i].mNumberChannels * channelSize;
 	}
-	
+
 	for(unsigned int i = 0; i < outputBufferList.mNumberBuffers; i++ ) {
-		outputBufferList.mBuffers[i].mData = 
+		outputBufferList.mBuffers[i].mData =
 			(char *)outputBufferList.mBuffers[i].mData + outputBufferList.mBuffers[i].mNumberChannels * channelSize;
 	}
-	
+
 	return result;
 }
 
@@ -358,7 +358,7 @@ OSStatus 	AUEffectBase::Render(	AudioUnitRenderActionFlags &ioActionFlags,
 	OSStatus result = noErr;
 
 	result = mMainInput->PullInput(ioActionFlags, inTimeStamp, 0 /* element */, nFrames);
-	
+
 	if (result == noErr)
 	{
 		if(ProcessesInPlace() && mMainOutput->WillAllocateBuffer())
@@ -369,7 +369,7 @@ OSStatus 	AUEffectBase::Render(	AudioUnitRenderActionFlags &ioActionFlags,
 		if (ShouldBypassEffect())
 		{
 			// leave silence bit alone
-			
+
 			if(!ProcessesInPlace() )
 			{
 				mMainInput->CopyBufferContentsTo (mMainOutput->GetBufferList());
@@ -385,22 +385,22 @@ OSStatus 	AUEffectBase::Render(	AudioUnitRenderActionFlags &ioActionFlags,
 			else
 			{
 				// deal with scheduled parameters...
-				
+
 				AudioBufferList &inputBufferList = mMainInput->GetBufferList();
 				AudioBufferList &outputBufferList = mMainOutput->GetBufferList();
-				
+
 				ScheduledProcessParams processParams;
 				processParams.actionFlags = &ioActionFlags;
 				processParams.inputBufferList = &inputBufferList;
 				processParams.outputBufferList = &outputBufferList;
-	
+
 				// divide up the buffer into slices according to scheduled params then
 				// do the DSP for each slice (ProcessScheduledSlice() called for each slice)
 				result = ProcessForScheduledParams(	mParamList,
 													nFrames,
 													&processParams );
-	
-				
+
+
 				// fixup the buffer pointers to how they were before we started
 				UInt32 channelSize = nFrames * mBytesPerFrame;
 				for(unsigned int i = 0; i < inputBufferList.mNumberBuffers; i++ ) {
@@ -408,7 +408,7 @@ OSStatus 	AUEffectBase::Render(	AudioUnitRenderActionFlags &ioActionFlags,
 					inputBufferList.mBuffers[i].mData = (char *)inputBufferList.mBuffers[i].mData - size;
 					inputBufferList.mBuffers[i].mDataByteSize = size;
 				}
-				
+
 				for(unsigned int i = 0; i < outputBufferList.mNumberBuffers; i++ ) {
 					UInt32 size = outputBufferList.mBuffers[i].mNumberChannels * channelSize;
 					outputBufferList.mBuffers[i].mData = (char *)outputBufferList.mBuffers[i].mData - size;
@@ -416,13 +416,13 @@ OSStatus 	AUEffectBase::Render(	AudioUnitRenderActionFlags &ioActionFlags,
 				}
 			}
 		}
-	
+
 		if ( (ioActionFlags & kAudioUnitRenderAction_OutputIsSilence) && !ProcessesInPlace() )
 		{
 			AUBufferList::ZeroBuffer(mMainOutput->GetBufferList() );
 		}
 	}
-	
+
 	return result;
 }
 
@@ -435,7 +435,7 @@ OSStatus	AUEffectBase::ProcessBufferLists(
 {
 	if (ShouldBypassEffect())
 		return noErr;
-		
+
 	// interleaved (or mono)
 	switch (mCommonPCMFormat) {
 		case CAStreamBasicDescription::kPCMFormatFloat32 :
@@ -450,7 +450,7 @@ OSStatus	AUEffectBase::ProcessBufferLists(
 		default :
 			throw CAException(kAudio_UnimplementedError);
 	}
-	
+
 	return noErr;
 }
 

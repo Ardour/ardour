@@ -2,14 +2,14 @@
      File: AUCarbonViewControl.cpp
  Abstract: AUCarbonViewControl.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "AUCarbonViewControl.h"
 #include "AUCarbonViewBase.h"
@@ -74,11 +74,11 @@ void	AUCarbonViewControl::Bind()
 	mInControlInitialization = 1;   // true
 	AUListenerAddParameter(mListener, this, &mParam);
 		// will cause an almost-immediate callback
-	
+
 	EventTypeSpec events[] = {
 		{ kEventClassControl, kEventControlValueFieldChanged }	// N.B. OS X only
 	};
-	
+
 	WantEventTypes(GetControlEventTarget(mControl), GetEventTypeCount(events), events);
 
 	if (mType == kTypeContinuous || mType == kTypeText || mType == kTypeDiscrete) {
@@ -88,18 +88,18 @@ void	AUCarbonViewControl::Bind()
 		    { kEventClassControl, kEventControlTrack }
 		};
 		WantEventTypes(GetControlEventTarget(mControl), GetEventTypeCount(events), events);
-	} 
+	}
 
 	if (mType == kTypeText) {
 		EventTypeSpec events[] = {
 			{ kEventClassControl, kEventControlSetFocusPart }
 		};
-		WantEventTypes(GetControlEventTarget(mControl), GetEventTypeCount(events), events); 
+		WantEventTypes(GetControlEventTarget(mControl), GetEventTypeCount(events), events);
 		ControlKeyFilterUPP proc = mParam.ValuesHaveStrings() ? StdKeyFilterCallback : NumericKeyFilterCallback;
 			// this will fail for a static text field
 		SetControlData(mControl, 0, kControlEditTextKeyFilterTag, sizeof(proc), &proc);
 	}
-	
+
 	Update(true);
 	mInControlInitialization = 0;   // false
 #endif
@@ -116,7 +116,7 @@ void	AUCarbonViewControl::ParameterToControl(Float32 paramValue)
 	case kTypeDiscrete:
 		{
 			long value = long(paramValue);
-			
+
 			// special case [1] -- menu parameters
 			if (mParam.HasNamedParams()) {
 				// if we're dealing with menus they behave differently!
@@ -124,17 +124,17 @@ void	AUCarbonViewControl::ParameterToControl(Float32 paramValue)
 				// first menu item always reports a control value of 1
 				ControlKind ctrlKind;
 				if (GetControlKind(mControl, &ctrlKind) == noErr) {
-					if ((ctrlKind.kind == kControlKindPopupArrow) 
-						|| (ctrlKind.kind == kControlKindPopupButton))				
+					if ((ctrlKind.kind == kControlKindPopupArrow)
+						|| (ctrlKind.kind == kControlKindPopupButton))
 					{
 						value = value - long(mParam.ParamInfo().minValue) + 1;
 					}
 				}
 			}
-			
+
 			// special case [2] -- Write-only boolean parameters
 			AudioUnitParameterInfo AUPI = mParam.ParamInfo();
-			
+
 			bool isWriteOnlyBoolParameter = (	(AUPI.unit == kAudioUnitParameterUnit_Boolean) &&
 												(AUPI.flags & kAudioUnitParameterFlag_IsWritable) &&
 												!(AUPI.flags & kAudioUnitParameterFlag_IsReadable)	);
@@ -148,7 +148,7 @@ void	AUCarbonViewControl::ParameterToControl(Float32 paramValue)
 			CFStringRef cfstr = mParam.GetStringFromValueCopy(&paramValue);
 
 			if ( !(mParam.ParamInfo().flags & kAudioUnitParameterFlag_IsWritable)			//READ ONLY PARAMS
-					&& (mParam.ParamInfo().flags & kAudioUnitParameterFlag_IsReadable)) 
+					&& (mParam.ParamInfo().flags & kAudioUnitParameterFlag_IsReadable))
 			{
 				if (mParam.GetParamTag()) {
 					CFMutableStringRef str = CFStringCreateMutableCopy(NULL, 256, cfstr);
@@ -184,7 +184,7 @@ void	AUCarbonViewControl::ControlToParameter()
 	case kTypeDiscrete:
 		{
 			long value = GetValue();
-			
+
 			// special case [1] -- Menus
 			if (mParam.HasNamedParams()) {
 				// if we're dealing with menus they behave differently!
@@ -192,24 +192,24 @@ void	AUCarbonViewControl::ControlToParameter()
 				// first menu item always reports a control value of 1
 				ControlKind ctrlKind;
 				if (GetControlKind(mControl, &ctrlKind) == noErr) {
-					if ((ctrlKind.kind == kControlKindPopupArrow) 
-						|| (ctrlKind.kind == kControlKindPopupButton))				
+					if ((ctrlKind.kind == kControlKindPopupArrow)
+						|| (ctrlKind.kind == kControlKindPopupButton))
 					{
 						value = value + long(mParam.ParamInfo().minValue) - 1;
 					}
 				}
 			}
-			
+
 			// special case [2] -- Write-only boolean parameters
 			AudioUnitParameterInfo AUPI = mParam.ParamInfo();
-			
+
 			bool isWriteOnlyBoolParameter = (	(AUPI.unit == kAudioUnitParameterUnit_Boolean) &&
 												(AUPI.flags & kAudioUnitParameterFlag_IsWritable) &&
 												!(AUPI.flags & kAudioUnitParameterFlag_IsReadable)	);
 			if (isWriteOnlyBoolParameter) {
 				value = 1;
 			}
-			
+
 			mParam.SetValue (mListener, this, value);
 		}
 		break;
@@ -284,25 +284,25 @@ long	AUCarbonViewControl::GetValue()
 #endif
 }
 
-/* Notes on event handling 
-	
+/* Notes on event handling
+
 	Button (Click and release on button)
 		kEventControlClick received
 		kEventControlTrack received
 		kEventControlValueFieldChanged received
 		kEventControlHit received
-	
+
 	Button (Click and release outside of button bounds)
 		kEventControlClick received
 		kEventControlTrack received
-	
+
 	Slider (Click, drag, and release)
 		kEventControlClick received
 		kEventControlTrack received
 		kEventControlValueFieldChanged received
 		kEventControlValueFieldChanged received
 		kEventControlHit received
-		
+
 	Slider (Click, release without changing value)
 		kEventControlClick received
 		kEventControlTrack received
@@ -313,16 +313,16 @@ bool	AUCarbonViewControl::HandleEvent(EventHandlerCallRef inHandlerRef, EventRef
 	UInt32 ekind = GetEventKind(event);
 	ControlRef control;
 	bool		handled = true;
-	
+
 	switch (eclass) {
 		case kEventClassControl:
 		{
 			AudioUnitParameterInfo AUPI = mParam.ParamInfo();
-			
+
 			bool isWriteOnlyBoolParameter = (	(AUPI.unit == kAudioUnitParameterUnit_Boolean) &&
 												(AUPI.flags & kAudioUnitParameterFlag_IsWritable) &&
 												!(AUPI.flags & kAudioUnitParameterFlag_IsReadable)	);
-			
+
 			switch (ekind) {
 				case kEventControlSetFocusPart:	// tab
 					handled = !handled;		// fall through to next case
@@ -331,7 +331,7 @@ bool	AUCarbonViewControl::HandleEvent(EventHandlerCallRef inHandlerRef, EventRef
 					GetEventParameter(event, kEventParamDirectObject, typeControlRef, NULL, sizeof(ControlRef), NULL, &control);
 					verify(control == mControl);
 					ControlToParameter();
-					return handled;			
+					return handled;
 				case kEventControlClick:
 					if (isWriteOnlyBoolParameter) {
 						GetEventParameter(event, kEventParamDirectObject, typeControlRef, NULL, sizeof(ControlRef), NULL, &control);
@@ -341,7 +341,7 @@ bool	AUCarbonViewControl::HandleEvent(EventHandlerCallRef inHandlerRef, EventRef
 						if (mLastControl != NULL) {
 							mLastControl->Update(false);
 						}
-						mLastControl = this;	
+						mLastControl = this;
 					}
 					mOwnerView->TellListener(mParam, kAudioUnitCarbonViewEvent_MouseDownInControl, NULL);
 					break;	// don't return true, continue normal processing
@@ -349,17 +349,17 @@ bool	AUCarbonViewControl::HandleEvent(EventHandlerCallRef inHandlerRef, EventRef
 					if (mLastControl != this) {
 						if (mLastControl != NULL)
 							mLastControl->Update(false);
-						mLastControl = this;	
-					} 
+						mLastControl = this;
+					}
 					mOwnerView->TellListener(mParam, kAudioUnitCarbonViewEvent_MouseUpInControl, NULL);
 					break;	// don't return true, continue normal processing
-				case kEventControlTrack:		
+				case kEventControlTrack:
 					if (mLastControl != this) {
 						if (mLastControl != NULL)
 							mLastControl->Update(false);
-						mLastControl = this;	
+						mLastControl = this;
 					}
-					
+
 					CallNextEventHandler(inHandlerRef, event);
 					ControlToParameter();						// new code
 					mOwnerView->TellListener(mParam, kAudioUnitCarbonViewEvent_MouseUpInControl, NULL);
@@ -379,8 +379,8 @@ pascal void	AUCarbonViewControl::SliderTrackProc(ControlRef theControl, ControlP
 //	AUCarbonViewControl *This = (AUCarbonViewControl *)GetControlReference(theControl);
 }
 
-pascal ControlKeyFilterResult	AUCarbonViewControl::StdKeyFilterCallback(ControlRef theControl, 
-												SInt16 *keyCode, SInt16 *charCode, 
+pascal ControlKeyFilterResult	AUCarbonViewControl::StdKeyFilterCallback(ControlRef theControl,
+												SInt16 *keyCode, SInt16 *charCode,
 												EventModifiers *modifiers)
 {
 #if !__LP64__
@@ -397,8 +397,8 @@ pascal ControlKeyFilterResult	AUCarbonViewControl::StdKeyFilterCallback(ControlR
 	return kControlKeyFilterBlockKey;
 }
 
-pascal ControlKeyFilterResult	AUCarbonViewControl::NumericKeyFilterCallback(ControlRef theControl, 
-												SInt16 *keyCode, SInt16 *charCode, 
+pascal ControlKeyFilterResult	AUCarbonViewControl::NumericKeyFilterCallback(ControlRef theControl,
+												SInt16 *keyCode, SInt16 *charCode,
 												EventModifiers *modifiers)
 {
 #if !__LP64__
@@ -420,43 +420,43 @@ Boolean	AUCarbonViewControl::SizeControlToFit(ControlRef inControl, SInt16 *outW
 {
 #if !__LP64__
 	if (inControl == 0) return false;
-	
+
 	Boolean bValue = false;
 	// this only works on text controls -- returns an error for other controls, but doesn't do anything,
 	// so the error is irrelevant
 	SetControlData(inControl, kControlEntireControl, 'stim' /* kControlStaticTextIsMultilineTag */, sizeof(Boolean), &bValue);
-	
+
 	SInt16 baseLineOffset;
 	Rect bestRect;
-	OSErr err = GetBestControlRect(inControl, &bestRect, &baseLineOffset);  
+	OSErr err = GetBestControlRect(inControl, &bestRect, &baseLineOffset);
 	if (err != noErr) return false;
-	
+
 	int width = (bestRect.right - bestRect.left) + 1;
 	int height = (bestRect.bottom - bestRect.top) + 1;
-	
+
 	Rect boundsRect;
 	GetControlBounds (inControl, &boundsRect);
-	
+
 	Rect newRect;
 	newRect.top = boundsRect.top;
 	newRect.bottom = newRect.top + height;
 	newRect.left = boundsRect.left;
 	newRect.right = newRect.left + width;
-	
+
 	SetControlBounds (inControl, &newRect);
-	
+
 	if (outWidth)
 		*outWidth = width;
-	
+
 	if (outHeight)
 		*outHeight = height;
-#endif	
+#endif
 	return true;
 }
 
 #pragma mark ___AUPropertyControl
 bool	AUPropertyControl::HandleEvent(EventHandlerCallRef inHandlerRef, EventRef event)
-{	
+{
 	UInt32 eclass = GetEventClass(event);
 	UInt32 ekind = GetEventKind(event);
 	switch (eclass) {
@@ -477,14 +477,14 @@ void	AUPropertyControl::RegisterEvents ()
 	EventTypeSpec events[] = {
 		{ kEventClassControl, kEventControlValueFieldChanged }	// N.B. OS X only
 	};
-	
+
 	WantEventTypes(GetControlEventTarget(mControl), GetEventTypeCount(events), events);
 #endif
 }
 
-void	AUPropertyControl::EmbedControl (ControlRef theControl) 
-{ 
-	mView->EmbedControl (theControl); 
+void	AUPropertyControl::EmbedControl (ControlRef theControl)
+{
+	mView->EmbedControl (theControl);
 }
 
 WindowRef 	AUPropertyControl::GetCarbonWindow()
@@ -498,11 +498,11 @@ static CFStringRef kStringFactoryPreset = kAUViewLocalizedStringKey_FactoryPrese
 static bool sAUVPresetLocalized = false;
 #endif
 
-AUVPresets::AUVPresets (AUCarbonViewBase* 		inParentView, 
+AUVPresets::AUVPresets (AUCarbonViewBase* 		inParentView,
 						CFArrayRef& 			inPresets,
-						Point 					inLocation, 
-						int 					nameWidth, 
-						int 					controlWidth, 
+						Point 					inLocation,
+						int 					nameWidth,
+						int 					controlWidth,
 						ControlFontStyleRec & 	inFontStyle)
 	: AUPropertyControl (inParentView),
 	  mPresets (inPresets),
@@ -510,13 +510,13 @@ AUVPresets::AUVPresets (AUCarbonViewBase* 		inParentView,
 {
 #if !__LP64__
 	Rect r;
-	
+
 	// ok we now have an array of factory presets
 	// get their strings and display them
 
 	r.top = inLocation.v;		r.bottom = r.top;
 	r.left = inLocation.h;		r.right = r.left;
-	
+
     // localize as necessary
     if (!sAUVPresetLocalized) {
         CFBundleRef mainBundle = CFBundleGetBundleWithIdentifier(kLocalizedStringBundle_AUView);
@@ -527,86 +527,86 @@ AUVPresets::AUVPresets (AUCarbonViewBase* 		inParentView,
             sAUVPresetLocalized = true;
         }
     }
-    
+
     // create localized title string
     CFMutableStringRef factoryPresetsTitle = CFStringCreateMutable(NULL, 0);
     CFStringAppend(factoryPresetsTitle, kStringFactoryPreset);
     CFStringAppend(factoryPresetsTitle, kAUViewUnlocalizedString_TitleSeparator);
-    
+
 	ControlRef theControl;
     verify_noerr(CreateStaticTextControl(mView->GetCarbonWindow(), &r, factoryPresetsTitle, &inFontStyle, &theControl));
 	SInt16 width = 0;
 	AUCarbonViewControl::SizeControlToFit(theControl, &width, &mHeight);
     CFRelease(factoryPresetsTitle);
 	EmbedControl(theControl);
-	
+
 	r.top -= 2;
 	r.left += width + 10;
 	r.right = r.left;
 	r.bottom = r.top;
-	
-	verify_noerr(CreatePopupButtonControl (	mView->GetCarbonWindow(), &r, NULL, 
+
+	verify_noerr(CreatePopupButtonControl (	mView->GetCarbonWindow(), &r, NULL,
 											-12345,	// DON'T GET MENU FROM RESOURCE mMenuID,!!!
-											FALSE,	// variableWidth, 
-											0,		// titleWidth, 
-											0,		// titleJustification, 
-											0,		// titleStyle, 
+											FALSE,	// variableWidth,
+											0,		// titleWidth,
+											0,		// titleJustification,
+											0,		// titleStyle,
 											&mControl));
-	
+
 	MenuRef menuRef;
 	verify_noerr(CreateNewMenu(1, 0, &menuRef));
-	
+
 	int numPresets = CFArrayGetCount(mPresets);
-	
+
 	for (int i = 0; i < numPresets; ++i)
 	{
 		AUPreset* preset = (AUPreset*) CFArrayGetValueAtIndex (mPresets, i);
 		verify_noerr(AppendMenuItemTextWithCFString (menuRef, preset->presetName, 0, 0, 0));
 	}
-	
+
 	verify_noerr(SetControlData(mControl, 0, kControlPopupButtonMenuRefTag, sizeof(menuRef), &menuRef));
 	verify_noerr (SetControlFontStyle (mControl, &inFontStyle));
-	
+
 	SetControl32BitMaximum (mControl, numPresets);
-	
+
 	// size popup
 	SInt16 height = 0;
-	
+
 	AUCarbonViewControl::SizeControlToFit(mControl, &width, &height);
-	
+
 	if (height > mHeight) mHeight = height;
 	if (mHeight < 0) mHeight = 0;
-	
+
 	// find which menu item is the Default preset
 	UInt32 propertySize = sizeof(AUPreset);
 	AUPreset defaultPreset;
-	OSStatus result = AudioUnitGetProperty (mView->GetEditAudioUnit(), 
+	OSStatus result = AudioUnitGetProperty (mView->GetEditAudioUnit(),
 									kAudioUnitProperty_PresentPreset,
-									kAudioUnitScope_Global, 
-									0, 
-									&defaultPreset, 
+									kAudioUnitScope_Global,
+									0,
+									&defaultPreset,
 									&propertySize);
-	
+
 	mPropertyID = kAudioUnitProperty_PresentPreset;
-#endif	
+#endif
 #ifndef __LP64__
 	if (result != noErr) {	// if the PresentPreset property is not implemented, fall back to the CurrentPreset property
-		OSStatus result = AudioUnitGetProperty (mView->GetEditAudioUnit(), 
+		OSStatus result = AudioUnitGetProperty (mView->GetEditAudioUnit(),
 									kAudioUnitProperty_CurrentPreset,
-									kAudioUnitScope_Global, 
-									0, 
-									&defaultPreset, 
+									kAudioUnitScope_Global,
+									0,
+									&defaultPreset,
 									&propertySize);
 		mPropertyID = kAudioUnitProperty_CurrentPreset;
 		if (result == noErr)
 			CFRetain (defaultPreset.presetName);
-	} 
+	}
 #endif
-#if !__LP64__		
+#if !__LP64__
 	EmbedControl (mControl);
-	
+
 	HandlePropertyChange(defaultPreset);
-	
+
 	RegisterEvents();
 #endif
 }
@@ -620,7 +620,7 @@ void	AUVPresets::AddInterest (AUEventListenerRef		inListener,
 	e.mArgument.mProperty.mPropertyID = mPropertyID;
 	e.mArgument.mProperty.mScope = kAudioUnitScope_Global;
 	e.mArgument.mProperty.mElement = 0;
-	
+
 	AUEventListenerAddEventType(inListener, inObject, &e);
 }
 
@@ -644,14 +644,14 @@ void	AUVPresets::HandleControlChange ()
 	if (i > 0)
 	{
 		AUPreset* preset = (AUPreset*) CFArrayGetValueAtIndex (mPresets, i-1);
-	
-		verify_noerr(AudioUnitSetProperty (mView->GetEditAudioUnit(), 
+
+		verify_noerr(AudioUnitSetProperty (mView->GetEditAudioUnit(),
 									mPropertyID,	// either currentPreset or PresentPreset depending on which is supported
-									kAudioUnitScope_Global, 
-									0, 
-									preset, 
+									kAudioUnitScope_Global,
+									0,
+									preset,
 									sizeof(AUPreset)));
-									
+
 		// when we change a preset we can't expect the AU to update its state
 		// as it isn't meant to know that its being viewed!
 		// so we broadcast a notification to all listeners that all parameters on this AU have changed
@@ -663,12 +663,12 @@ void	AUVPresets::HandleControlChange ()
 #endif
 }
 
-void	AUVPresets::HandlePropertyChange(AUPreset &preset) 
+void	AUVPresets::HandlePropertyChange(AUPreset &preset)
 {
 #if !__LP64__
 	// check to see if the preset is in our menu
 	int numPresets = CFArrayGetCount(mPresets);
-	if (preset.presetNumber < 0) {	
+	if (preset.presetNumber < 0) {
 		SetControl32BitValue (mControl, 0); //controls are one-based
 	} else {
 		for (SInt32 i = 0; i < numPresets; ++i) {
@@ -679,7 +679,7 @@ void	AUVPresets::HandlePropertyChange(AUPreset &preset)
 			}
 		}
 	}
-	
+
 	if (preset.presetName)
 		CFRelease (preset.presetName);
 #endif
@@ -687,16 +687,16 @@ void	AUVPresets::HandlePropertyChange(AUPreset &preset)
 
 bool	AUVPresets::HandlePropertyChange (const AudioUnitProperty &inProp)
 {
-	if (inProp.mPropertyID == mPropertyID) 
+	if (inProp.mPropertyID == mPropertyID)
 	{
 		UInt32 theSize = sizeof(AUPreset);
 		AUPreset currentPreset;
-		
-		OSStatus result = AudioUnitGetProperty(inProp.mAudioUnit, 
-												inProp.mPropertyID, 
-												inProp.mScope, 
+
+		OSStatus result = AudioUnitGetProperty(inProp.mAudioUnit,
+												inProp.mPropertyID,
+												inProp.mScope,
 												inProp.mElement, &currentPreset, &theSize);
-		
+
 		if (result == noErr) {
 #ifndef __LP64__
 			if (inProp.mPropertyID == kAudioUnitProperty_CurrentPreset && currentPreset.presetName)

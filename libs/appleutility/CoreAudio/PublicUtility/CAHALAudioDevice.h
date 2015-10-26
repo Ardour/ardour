@@ -2,14 +2,14 @@
      File: CAHALAudioDevice.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #if !defined(__CAHALAudioDevice_h__)
 #define __CAHALAudioDevice_h__
@@ -108,7 +108,7 @@ public:
 	UInt32				GetTotalNumberChannels(bool inIsInput) const;
 	void				GetCurrentVirtualFormats(bool inIsInput, UInt32& ioNumberStreams, AudioStreamBasicDescription* outFormats) const;
 	void				GetCurrentPhysicalFormats(bool inIsInput, UInt32& ioNumberStreams, AudioStreamBasicDescription* outFormats) const;
-	
+
 //	IO Stuff
 public:
 	bool				IsRunning() const;
@@ -141,7 +141,7 @@ public:
 	void				SetIOProcStreamUsage(AudioDeviceIOProcID inIOProcID, bool inIsInput, const bool* inStreamUsage);
 	Float32				GetIOCycleUsage() const;
 	void				SetIOCycleUsage(Float32 inValue);
-	
+
 //	Time Operations
 public:
 	void				GetCurrentTime(AudioTimeStamp& outTime);
@@ -158,7 +158,7 @@ public:
 	void				SetVolumeControlDecibelValue(AudioObjectPropertyScope inScope, UInt32 inChannel, Float32 inValue);
 	Float32				GetVolumeControlScalarForDecibelValue(AudioObjectPropertyScope inScope, UInt32 inChannel, Float32 inValue) const;
 	Float32				GetVolumeControlDecibelForScalarValue(AudioObjectPropertyScope inScope, UInt32 inChannel, Float32 inValue) const;
-	
+
 	bool				HasSubVolumeControl(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	bool				SubVolumeControlIsSettable(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	Float32				GetSubVolumeControlScalarValue(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
@@ -167,31 +167,31 @@ public:
 	void				SetSubVolumeControlDecibelValue(AudioObjectPropertyScope inScope, UInt32 inChannel, Float32 inValue);
 	Float32				GetSubVolumeControlScalarForDecibelValue(AudioObjectPropertyScope inScope, UInt32 inChannel, Float32 inValue) const;
 	Float32				GetSubVolumeControlDecibelForScalarValue(AudioObjectPropertyScope inScope, UInt32 inChannel, Float32 inValue) const;
-	
+
 	bool				HasMuteControl(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	bool				MuteControlIsSettable(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	bool				GetMuteControlValue(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	void				SetMuteControlValue(AudioObjectPropertyScope inScope, UInt32 inChannel, bool inValue);
-	
+
 	bool				HasSoloControl(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	bool				SoloControlIsSettable(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	bool				GetSoloControlValue(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	void				SetSoloControlValue(AudioObjectPropertyScope inScope, UInt32 inChannel, bool inValue);
-	
+
 	bool				HasStereoPanControl(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	bool				StereoPanControlIsSettable(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	Float32				GetStereoPanControlValue(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	void				SetStereoPanControlValue(AudioObjectPropertyScope inScope, UInt32 inChannel, Float32 inValue);
 	void				GetStereoPanControlChannels(AudioObjectPropertyScope inScope, UInt32 inChannel, UInt32& outLeftChannel, UInt32& outRightChannel) const;
-	
+
 	bool				HasJackControl(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	bool				GetJackControlValue(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
-	
+
 	bool				HasSubMuteControl(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	bool				SubMuteControlIsSettable(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	bool				GetSubMuteControlValue(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	void				SetSubMuteControlValue(AudioObjectPropertyScope inScope, UInt32 inChannel, bool inValue);
-	
+
 	bool				HasiSubOwnerControl(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	bool				iSubOwnerControlIsSettable(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
 	bool				GetiSubOwnerControlValue(AudioObjectPropertyScope inScope, UInt32 inChannel) const;
@@ -224,7 +224,7 @@ public:
 	UInt32				GetAvailableClockSourceByIndex(UInt32 inIndex) const;
 	CFStringRef			CopyClockSourceNameForID(UInt32 inID) const;
 	UInt32				GetClockSourceKindForID(UInt32 inID) const;
-	
+
 };
 
 inline AudioDeviceIOProcID	CAHALAudioDevice::CreateIOProcIDWithBlock(dispatch_queue_t inDispatchQueue, AudioDeviceIOBlock inIOBlock)

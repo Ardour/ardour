@@ -45,32 +45,32 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
 	WindowProxy (const std::string& name, const std::string& menu_name);
 	WindowProxy (const std::string& name, const std::string& menu_name, const XMLNode&);
 	virtual ~WindowProxy();
-    
+
 	void show ();
 	void show_all ();
 	void hide ();
 	void present ();
 	void maybe_show ();
-    
+
 	bool visible() const { return _visible; }
 	bool not_visible() const { return !_visible; }
 	const std::string& name() const { return _name; }
 	const std::string& menu_name() const { return _menu_name; }
-    
+
 	std::string action_name() const;
 	void set_action (Glib::RefPtr<Gtk::Action>);
 	Glib::RefPtr<Gtk::Action> action() const { return _action; };
-    
+
 	void drop_window ();
 	void use_window (Gtk::Window&);
-    
+
 	virtual Gtk::Window* get (bool create = false) = 0;
-    
+
 	virtual int set_state (const XMLNode&, int version);
 	virtual XMLNode& get_state ();
-    
+
 	operator bool() const { return _window != 0; }
-    
+
 	static std::string xml_node_name();
 
   protected:
@@ -87,9 +87,9 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
 
 	void save_pos_and_size ();
 	void set_pos_and_size ();
-	
+
 	virtual bool delete_event_handler (GdkEventAny *ev);
-    
+
 	virtual void setup ();
 	void toggle ();
 };

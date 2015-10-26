@@ -2,14 +2,14 @@
      File: CAAudioUnit.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #ifndef __CAAudioUnit_h__
 #define __CAAudioUnit_h__
@@ -73,7 +73,7 @@ class CAAUChanHelper;
 // The destructor will NOT automatically close the AU down
 // This state should be managed by the Caller
 // once closed, the unit represented by this object is no longer valid
-// it is up to the user of this object to ensure its validity is in sync 
+// it is up to the user of this object to ensure its validity is in sync
 // if it is removed from a graph
 
 // methods that can significantly change the state of the AU (like its format) are
@@ -89,7 +89,7 @@ public:
 	typedef ChannelTagVector::iterator 			ChannelTagVectorIter;
 
 public:
-							CAAudioUnit () 
+							CAAudioUnit ()
 								: mDataPtr(0) {}
 
 							CAAudioUnit (const AudioUnit& inUnit);
@@ -105,28 +105,28 @@ public:
 
 	void					Close ();
 
-	
+
 	CAAudioUnit&			operator= (const CAAudioUnit& y);
 
 	bool					operator== (const CAAudioUnit& y) const;
 
 	bool					operator== (const AudioUnit& y) const;
 
-#pragma mark __State Management	
+#pragma mark __State Management
 	bool					IsValid () const;
-	
+
 	AudioUnit				AU() const;
 	operator AudioUnit () const { return AU(); }
 
 	const CAComponent&		Comp() const { return mComp; }
-	
+
 	const CAComponentDescription& Desc() const { return mComp.Desc(); }
-	
+
 	bool					FromAUGraph () const { return GetAUNode() != 0 && GetAUNode() != kCAAU_DoNotKnowIfAUNode; }
-	
+
 	AUNode					GetAUNode () const;
 	operator AUNode () const { return GetAUNode(); }
-	
+
 #pragma mark __API Wrapper
 	OSStatus				Initialize() const {
 								return AudioUnitInitialize(AU());
@@ -151,7 +151,7 @@ public:
 							}
 	OSStatus				SetParameter(AudioUnitParameterID inID, AudioUnitScope scope, AudioUnitElement element,
 											Float32 value, UInt32 bufferOffsetFrames=0);
-							
+
 	OSStatus				GetParameter(AudioUnitParameterID inID, AudioUnitScope scope, AudioUnitElement element,
 											Float32 &outValue) const;
 
@@ -165,7 +165,7 @@ public:
 												const AudioTimeStamp 		& inTimeStamp,
 												UInt32						inNumberFrames,
 												AudioBufferList				& ioData);
-	
+
 	OSStatus				ProcessMultiple (AudioUnitRenderActionFlags 	& ioActionFlags,
 												const AudioTimeStamp		& inTimeStamp,
 												UInt32						inNumberFrames,
@@ -174,7 +174,7 @@ public:
 												UInt32						inNumberOutputBufferLists,
 												AudioBufferList **			ioOutputBufferLists);
 
-	
+
 	OSStatus				Reset (AudioUnitScope scope, AudioUnitElement element)
 							{
 								return AudioUnitReset (AU(), scope, element);
@@ -188,7 +188,7 @@ public:
 							{
 								return AudioUnitAddRenderNotify (AU(), inProc, inProcRefCon);
 							}
-	
+
 	OSStatus				RemoveRenderNotify (AURenderCallback   inProc, void *inProcRefCon)
 							{
 								return AudioUnitRemoveRenderNotify (AU(), inProc, inProcRefCon);
@@ -200,24 +200,24 @@ public:
 							{
 								return AudioUnitAddPropertyListener (AU(), inID, inProc, inProcRefCon);
 							}
-	
+
 	OSStatus				RemovePropertyListener (AudioUnitPropertyID				inID,
 													AudioUnitPropertyListenerProc	inProc,
 													void *							inProcUserData);
-	
+
 	OSStatus				MIDIEvent (UInt32					inStatus,
 										UInt32					inData1,
 										UInt32					inData2,
 										UInt32					inOffsetSampleFrame);
-								
+
 								// uses the default VoiceForGroup value - this is the normal case
 	OSStatus				StartNote (MusicDeviceGroupID		inGroupID,
 									NoteInstanceID *			outNoteInstanceID,
 									UInt32						inOffsetSampleFrame,
 									const MusicDeviceNoteParams * inParams)
 							{
-								return StartNote (kMusicNoteEvent_UseGroupInstrument, 
-													inGroupID, outNoteInstanceID, 
+								return StartNote (kMusicNoteEvent_UseGroupInstrument,
+													inGroupID, outNoteInstanceID,
 													inOffsetSampleFrame, inParams);
 							}
 
@@ -241,45 +241,45 @@ public:
 							{
 								return CanDo (inChannelsInOut, inChannelsInOut);
 							}
-							
-	bool					CanDo (		int 				inChannelsIn, 
+
+	bool					CanDo (		int 				inChannelsIn,
 										int 				inChannelsOut) const;
-		
+
 		// This version does a more thorough test for ANY AU with ANY ins/outs
 		// you pass in the channel helper (for the current element count on that scope)
-		
+
 	bool					CanDo (		const CAAUChanHelper		&input,
 										const CAAUChanHelper		&output) const;
-	
+
 	bool					SupportsNumChannels () const;
 
-	bool					HasChannelLayouts (AudioUnitScope 		inScope, 
+	bool					HasChannelLayouts (AudioUnitScope 		inScope,
 											AudioUnitElement 		inEl) const;
-		
+
     int                                     GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt);
 	OSStatus				GetChannelLayoutTags (AudioUnitScope 	inScope,
 									AudioUnitElement 				inEl,
 									ChannelTagVector				&outChannelVector) const;
-	
-	bool					HasChannelLayout (AudioUnitScope 		inScope, 
+
+	bool					HasChannelLayout (AudioUnitScope 		inScope,
 											AudioUnitElement 		inEl) const;
-	
+
 	OSStatus				GetChannelLayout (AudioUnitScope 		inScope,
 											AudioUnitElement 		inEl,
-											CAAudioChannelLayout	&outLayout) const;	
+											CAAudioChannelLayout	&outLayout) const;
 
-	OSStatus				SetChannelLayout (AudioUnitScope 		inScope, 
+	OSStatus				SetChannelLayout (AudioUnitScope 		inScope,
 											AudioUnitElement 		inEl,
 											const CAAudioChannelLayout	&inLayout);
 
-	OSStatus				SetChannelLayout (AudioUnitScope 		inScope, 
+	OSStatus				SetChannelLayout (AudioUnitScope 		inScope,
 											AudioUnitElement 		inEl,
 											const AudioChannelLayout		&inLayout,
 											UInt32					inSize);
-											
+
 	OSStatus				ClearChannelLayout (AudioUnitScope		inScope,
 											AudioUnitElement		inEl);
-												
+
 	OSStatus				GetFormat (AudioUnitScope					inScope,
 											AudioUnitElement			inEl,
 											AudioStreamBasicDescription	&outFormat) const;
@@ -298,16 +298,16 @@ public:
 
 	// this sets the sample rate on all in/out buses of the AU
 	OSStatus				SetSampleRate (Float64				inSampleRate);
-	
+
 	OSStatus				NumberChannels (AudioUnitScope		inScope,
 											AudioUnitElement	inEl,
 											UInt32				&outChans) const;
 
 	OSStatus				GetNumberChannels (AudioUnitScope	inScope,
 											AudioUnitElement	inEl,
-											UInt32				&outChans) const 
-							{ 
-								return NumberChannels (inScope, inEl, outChans); 
+											UInt32				&outChans) const
+							{
+								return NumberChannels (inScope, inEl, outChans);
 							}
 
 	OSStatus				SetNumberChannels (AudioUnitScope	inScope,
@@ -319,28 +319,28 @@ public:
 	OSStatus				GetElementCount (AudioUnitScope 	inScope, UInt32 &outCount) const;
 
 	OSStatus				SetElementCount (AudioUnitScope		inScope, UInt32 inCount);
-		
+
 		// value of -1 for outTotalNumChannels indicates no restriction on num channels
-		// for ex. the Matrix Mixer satisfies this (its in/out element count is writable, and can be set to 
+		// for ex. the Matrix Mixer satisfies this (its in/out element count is writable, and can be set to
 		// any number of channels.
 		// outTotalNumChannels is only valid if method returns true...
 	bool					HasDynamicInputs (SInt32 &outTotalNumChannels) const
 							{
 								return HasDynamicScope (kAudioUnitScope_Input, outTotalNumChannels);
 							}
-							
+
 	bool					HasDynamicOutputs (SInt32 &outTotalNumChannels) const
 							{
 								return HasDynamicScope (kAudioUnitScope_Output, outTotalNumChannels);
 							}
-	
+
 		// here, if the in (or out) elements are dynamic, then you supply the number of elements
 		// you want on in (or out) scope, and the number of channels on each consecutive element
 	OSStatus				ConfigureDynamicInput (UInt32 inNumElements, UInt32 *inChannelsPerElement, Float64 inSampleRate)
 							{
 								return ConfigureDynamicScope (kAudioUnitScope_Input, inNumElements, inChannelsPerElement, inSampleRate);
 							}
-							
+
 	OSStatus				ConfigureDynamicOutput (UInt32 inNumElements, UInt32 *inChannelsPerElement, Float64 inSampleRate)
 							{
 								return ConfigureDynamicScope (kAudioUnitScope_Output, inNumElements, inChannelsPerElement, inSampleRate);
@@ -351,57 +351,57 @@ public:
 	bool					GetBypass 		() const;
 
 	OSStatus				SetBypass 		(bool				inBypass) const;
-	
+
 	OSStatus				GetMaxFramesPerSlice (UInt32& outMaxFrames) const;
-	
+
 	OSStatus				SetMaxFramesPerSlice (UInt32 inMaxFrames);
-	
+
 	Float64					Latency () const;
-	
+
 		// these calls just deal with the global preset state
 		// you could rescope them to deal with presets on the part scope
 	OSStatus				GetAUPreset (CFPropertyListRef &outData) const;
 
 	OSStatus				SetAUPreset (CFPropertyListRef &inData);
-	
+
 	OSStatus				SetAUPresetFromDocument (CFPropertyListRef &inData);
 
 	OSStatus				GetPresentPreset (AUPreset &outData) const;
-	
+
 	OSStatus				SetPresentPreset (AUPreset &inData);
-	
+
 	bool					HasCustomView () const;
-	
-#pragma mark __Print	
+
+#pragma mark __Print
 	void					Print () const { Print (stdout); }
 	void					Print (FILE* file) const;
-	
+
 private:
 	CAComponent				mComp;
-	
+
 	class AUState;
 	AUState*		mDataPtr;
-		
+
 		// this can throw - so wrap this up in a static that returns a result code...
 	CAAudioUnit (const CAComponent& inComp);
 
 	bool				HasDynamicScope (AudioUnitScope inScope, SInt32 &outTotalNumChannels) const;
-	OSStatus			ConfigureDynamicScope (AudioUnitScope   inScope, 
-											UInt32				inNumElements, 
-											UInt32				*inChannelsPerElement, 
+	OSStatus			ConfigureDynamicScope (AudioUnitScope   inScope,
+											UInt32				inNumElements,
+											UInt32				*inChannelsPerElement,
 											Float64				inSampleRate);
-	bool				ValidateChannelPair (int 				inChannelsIn, 
+	bool				ValidateChannelPair (int 				inChannelsIn,
 											int 				inChannelsOut,
 											const AUChannelInfo * info,
 											UInt32				numChanInfo) const;
-											
-	bool				ValidateDynamicScope (AudioUnitScope	inScope, 
-											SInt32				&outTotalNumChannels, 
-											const AUChannelInfo * info, 
+
+	bool				ValidateDynamicScope (AudioUnitScope	inScope,
+											SInt32				&outTotalNumChannels,
+											const AUChannelInfo * info,
 											UInt32 numInfo) const;
-	bool				CheckOneSide (const CAAUChanHelper		&inHelper, 
-											bool				checkOutput, 
-											const AUChannelInfo *info, 
+	bool				CheckOneSide (const CAAUChanHelper		&inHelper,
+											bool				checkOutput,
+											const AUChannelInfo *info,
 											UInt32				numInfo) const;
 	enum {
 			kCAAU_DoNotKnowIfAUNode = -1
@@ -410,24 +410,24 @@ private:
 
 class CAAUChanHelper {
 public:
-				CAAUChanHelper() 
-					: mChans(mStaticChans), mNumEls(0), mDidAllocate(false) 
+				CAAUChanHelper()
+					: mChans(mStaticChans), mNumEls(0), mDidAllocate(false)
 				{
 					memset (mChans, 0, sizeof(UInt32) * kStaticElCount);
 				}
 				CAAUChanHelper(UInt32 inMaxElems);
 				CAAUChanHelper(const CAAudioUnit &inAU, AudioUnitScope inScope);
-				CAAUChanHelper (const CAAUChanHelper &c) 
-					: mChans(mStaticChans), mNumEls(0), mDidAllocate(false) 
+				CAAUChanHelper (const CAAUChanHelper &c)
+					: mChans(mStaticChans), mNumEls(0), mDidAllocate(false)
 					{ *this = c; }
-				
+
 				~CAAUChanHelper();
 
 	CAAUChanHelper& operator= (const CAAUChanHelper &c);
 
 	UInt32		* mChans;
 	UInt32		mNumEls;
-	
+
 private:
 	enum {
 		kStaticElCount = 8

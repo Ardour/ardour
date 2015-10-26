@@ -469,7 +469,7 @@ MackieControlProtocolGUI::build_available_action_menu ()
 
 	/* Because there are button bindings built in that are not
 	   in the key binding map, there needs to be a way to undo
-	   a profile edit. 
+	   a profile edit.
 	*/
 	TreeIter rowp;
 	TreeModel::Row parent;

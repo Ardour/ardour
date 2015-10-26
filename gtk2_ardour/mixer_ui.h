@@ -361,7 +361,10 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 =======
 	void create_own_window ();
 
+<<<<<<< HEAD
 >>>>>>> the basics of tabbed
+=======
+>>>>>>> replicate the remove-all-trailing whitespace commit(s) in master
 	/// true if we are in fullscreen mode
 	bool _maximised;
 

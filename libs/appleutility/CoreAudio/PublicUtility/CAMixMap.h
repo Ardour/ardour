@@ -2,14 +2,14 @@
      File: CAMixMap.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,45 +40,45 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #ifndef __CAMixMap_h__
 #define __CAMixMap_h__
 
 	// manages the setting of mix map volumes
-	
+
 class CAMixMap {
 public:
 				CAMixMap ()
 					: mIns(0), mOuts (0), mMixMap(NULL)
 					{}
-					
-				CAMixMap (const CAMixMap &mm) 
+
+				CAMixMap (const CAMixMap &mm)
 					: mIns(0), mOuts (0), mMixMap(NULL)
 					{ *this = mm; }
-				
-				CAMixMap (UInt32 numIns, UInt32 numOuts) 
+
+				CAMixMap (UInt32 numIns, UInt32 numOuts)
 					: mIns(numIns), mOuts (numOuts), mMixMap(NULL)
-					{ 
-						mMixMap = new Float32[numIns * numOuts]; 
+					{
+						mMixMap = new Float32[numIns * numOuts];
 						memset (mMixMap, 0, ByteSize());
 					}
-								
+
 				~CAMixMap () { delete [] mMixMap; }
-	
-	CAMixMap&	operator=(const CAMixMap& mm) 
-				{ 
+
+	CAMixMap&	operator=(const CAMixMap& mm)
+				{
 					if (mMixMap) { delete [] mMixMap; mMixMap = NULL; }
 					mIns = mm.mIns; mOuts = mm.mOuts;
-					if (NumIns() && NumOuts()) { 
+					if (NumIns() && NumOuts()) {
 						mMixMap = new Float32 [ NumIns() * NumOuts() ];
 						memcpy (mMixMap, mm.mMixMap, ByteSize());
 					}
 					return *this;
 				}
-				
+
 	UInt32		NumIns () const { return mIns; }
 	UInt32		NumOuts () const { return mOuts; }
 
@@ -100,10 +100,10 @@ public:
 						mMixMap[i * NumOuts() + i] = val;
 					}
 				}
-	
+
 	void		Clear () { memset (mMixMap, 0, ByteSize()); }
-	
-	
+
+
 	Float32*	MM() { return mMixMap; }
 	const Float32*	MM() const { return mMixMap; }
 	UInt32		ByteSize () const { return NumIns() * NumOuts() * sizeof(Float32); }
@@ -116,7 +116,7 @@ public:
 					}
 					return sum;
 				}
-				
+
 	void		Normalize()
 				{
 					// ensure that no output channel will sum over unity.
@@ -129,25 +129,25 @@ public:
 						}
 						if (sum > maxsum) maxsum = sum;
 					}
-					
+
 					if (maxsum == 0.f) return;
 					Float32 scale = 1.f / maxsum;
 					for (UInt32 i = 0; i < mIns * mOuts; ++i) {
 						mixmap[i] *= scale;
 					}
 				}
-	
+
 	void		Print ()
 				{
 					printf ("Num Ins: %d, Num Outs: %d\n", (int)mIns, (int)mOuts);
 					for (unsigned int ins = 0; ins < mIns; ++ins) {
 						printf ("\t%d: ", ins);
 						for (unsigned int outs = 0; outs < mOuts; ++outs)
-							printf ("(%.3f) ", mMixMap[ins * NumOuts() + outs]); 
+							printf ("(%.3f) ", mMixMap[ins * NumOuts() + outs]);
 						printf("\n");
 					}
 				}
-				
+
 private:
 	UInt32	mIns;
 	UInt32	mOuts;

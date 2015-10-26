@@ -2,14 +2,14 @@
      File: CAAudioFileFormats.cpp
  Abstract: CAAudioFileFormats.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #include "CAAudioFileFormats.h"
 #include <algorithm>
@@ -62,26 +62,26 @@ class CompareFileFormatNames {
 public:
 	bool	operator() (const CAAudioFileFormats::FileFormatInfo &a, const CAAudioFileFormats::FileFormatInfo &b)
 	{
-		return CFStringCompare(a.mFileTypeName, b.mFileTypeName, 
+		return CFStringCompare(a.mFileTypeName, b.mFileTypeName,
 			kCFCompareCaseInsensitive | kCFCompareLocalized) == kCFCompareLessThan;
 	}
 };*/
 
 static int CompareFileFormatNames(const void *va, const void *vb)
 {
-	CAAudioFileFormats::FileFormatInfo  *a = (CAAudioFileFormats::FileFormatInfo *)va, 
+	CAAudioFileFormats::FileFormatInfo  *a = (CAAudioFileFormats::FileFormatInfo *)va,
 										*b = (CAAudioFileFormats::FileFormatInfo *)vb;
-	return CFStringCompare(a->mFileTypeName, b->mFileTypeName, 
+	return CFStringCompare(a->mFileTypeName, b->mFileTypeName,
 		kCFCompareCaseInsensitive | kCFCompareLocalized);
 }
 
-CAAudioFileFormats::CAAudioFileFormats(bool loadDataFormats) : 
+CAAudioFileFormats::CAAudioFileFormats(bool loadDataFormats) :
 	mNumFileFormats(0), mFileFormats(NULL)
 {
 	OSStatus err;
 	UInt32 size;
 	UInt32 *fileTypes = NULL;
-	
+
 	// get all file types
 	err = AudioFileGetGlobalInfoSize(kAudioFileGlobalInfo_WritableTypes, 0, NULL, &size);
 	if (err != noErr) goto bail;
@@ -90,32 +90,32 @@ CAAudioFileFormats::CAAudioFileFormats(bool loadDataFormats) :
 	fileTypes = new UInt32[mNumFileFormats];
 	err = AudioFileGetGlobalInfo(kAudioFileGlobalInfo_WritableTypes, 0, NULL, &size, fileTypes);
 	if (err != noErr) goto bail;
-	
+
 	// get info for each file type
 	for (int i = 0; i < mNumFileFormats; ++i) {
 		FileFormatInfo *ffi = &mFileFormats[i];
 		OSType filetype = fileTypes[i];
 
 		ffi->mFileTypeID = filetype;
-		
+
 		// file type name
 		ffi->mFileTypeName = NULL;
 		size = sizeof(CFStringRef);
 		err = AudioFileGetGlobalInfo(kAudioFileGlobalInfo_FileTypeName, sizeof(UInt32), &filetype, &size, &ffi->mFileTypeName);
 		if (err == noErr && ffi->mFileTypeName)
 			CFRetain(ffi->mFileTypeName);
-		
+
 		// file extensions
 		size = sizeof(CFArrayRef);
 		err = AudioFileGetGlobalInfo(kAudioFileGlobalInfo_ExtensionsForType,
 			sizeof(OSType), &filetype, &size, &ffi->mExtensions);
 		if (err)
 			ffi->mExtensions = NULL;
-		
+
 		// file data formats
 		ffi->mNumDataFormats = 0;
 		ffi->mDataFormats = NULL;
-		
+
 		if (loadDataFormats)
 			ffi->LoadDataFormats();
 	}
@@ -129,7 +129,7 @@ bail:
 void	CAAudioFileFormats::FileFormatInfo::LoadDataFormats()
 {
 	if (mDataFormats != NULL) return;
-	
+
 	UInt32 *writableFormats = NULL, *readableFormats = NULL;
 	int nWritableFormats, nReadableFormats;
 	// get all writable formats
@@ -140,7 +140,7 @@ void	CAAudioFileFormats::FileFormatInfo::LoadDataFormats()
 	writableFormats = new UInt32[nWritableFormats];
 	err = AudioFormatGetProperty(kAudioFormatProperty_EncodeFormatIDs, 0, NULL, &size, writableFormats);
 	if (err != noErr) goto bail;
-	
+
 	// get all readable formats
 	err = AudioFormatGetPropertyInfo(kAudioFormatProperty_DecodeFormatIDs, 0, NULL, &size);
 	if (err != noErr) goto bail;
@@ -148,7 +148,7 @@ void	CAAudioFileFormats::FileFormatInfo::LoadDataFormats()
 	readableFormats = new UInt32[nReadableFormats];
 	err = AudioFormatGetProperty(kAudioFormatProperty_DecodeFormatIDs, 0, NULL, &size, readableFormats);
 	if (err != noErr) goto bail;
-	
+
 	err = AudioFileGetGlobalInfoSize(kAudioFileGlobalInfo_AvailableFormatIDs, sizeof(UInt32), &mFileTypeID, &size);
 	if (err == noErr) {
 		mNumDataFormats = size / sizeof(OSType);
@@ -174,7 +174,7 @@ void	CAAudioFileFormats::FileFormatInfo::LoadDataFormats()
 						dfi->mWritable = true;
 						break;
 					}
-				
+
 				dfi->mNumVariants = 0;
 				AudioFileTypeAndFormatID tf = { mFileTypeID, dfi->mFormatID };
 				err = AudioFileGetGlobalInfoSize(kAudioFileGlobalInfo_AvailableStreamDescriptionsForFormat,
@@ -200,7 +200,7 @@ void	CAAudioFileFormats::FileFormatInfo::LoadDataFormats()
 						}
 					}
 				}
-				
+
 				dfi->mEitherEndianPCM = (anyBigEndian && anyLittleEndian);
 			}
 		}
@@ -280,7 +280,7 @@ bool	CAAudioFileFormats::InferFileFormatFromFilename(const char *filename, Audio
 	return result;
 }
 
-bool	CAAudioFileFormats::InferFileFormatFromDataFormat(const CAStreamBasicDescription &fmt, 
+bool	CAAudioFileFormats::InferFileFormatFromDataFormat(const CAStreamBasicDescription &fmt,
 			AudioFileTypeID &filetype)
 {
 	// if there's exactly one file format that supports this data format

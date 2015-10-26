@@ -87,9 +87,9 @@ ARDOUR_UI::tabs_button_event (GdkEventButton* ev)
 			 * translate before computing if event is inside the
 			 * close button.
 			 */
-			
+
 			close_button->get_toplevel()->translate_coordinates (_tabs, alloc.get_x(), alloc.get_y(), dx, dy);
-			
+
 			if (ev->x >= dx &&
 			    ev->y >= dy &&
 			    ev->x < dx + alloc.get_width() &&
@@ -100,7 +100,7 @@ ARDOUR_UI::tabs_button_event (GdkEventButton* ev)
 			}
 		}
 	}
-	
+
 	return false;
 }
 

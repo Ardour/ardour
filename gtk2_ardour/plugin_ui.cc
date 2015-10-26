@@ -362,11 +362,11 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 			}
 		}
 		return true;
-	} 
+	}
 	/* for us to be getting key press events, there really
 	   MUST be a _pluginui, but just to be safe, check ...
 	*/
-	
+
 	if (_pluginui) {
 		_pluginui->grab_focus();
 		if (_pluginui->non_gtk_gui()) {
@@ -379,7 +379,7 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 		} else {
 			return relay_key_press (event, this);
 		}
-	} 
+	}
 
 	return false;
 }

@@ -2,14 +2,14 @@
      File: CAExtAudioFile.h
  Abstract: Part of CoreAudio Utility Classes
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 #ifndef __CAExtAudioFile_h__
 #define __CAExtAudioFile_h__
@@ -74,9 +74,9 @@ public:
 	{
 		Close();
 	}
-	
+
 	bool IsValid() const { return mExtAudioFile != NULL; }
-	
+
 	void	Open(const char* filename)
 	{
 		Close();
@@ -88,7 +88,7 @@ public:
 		Check(res, "ExtAudioFileOpenURL");
 		CFRelease (url);
 	}
-	
+
 	// this group of methods maps directly to the API other than OSStatus results translating into exceptions.
 	// you must explicitly open, wrap or create a file.
 	void	OpenURL(CFURLRef url)
@@ -96,7 +96,7 @@ public:
 		Close();
 		Check(ExtAudioFileOpenURL(url, &mExtAudioFile), "ExtAudioFileOpenURL");
 	}
-		
+
 	void	WrapAudioFileID(AudioFileID inFileID, Boolean forWriting)
 	{
 		Close();
@@ -114,7 +114,7 @@ public:
 		Check(res, "ExtAudioFileCreateWithURL");
 		CFRelease(url);
 	}
-	
+
 	void	CreateWithURL(CFURLRef url, AudioFileTypeID filetype, const AudioStreamBasicDescription &streamDesc, const AudioChannelLayout *channelLayout, UInt32 flags)
 	{
 		Close();
@@ -129,12 +129,12 @@ public:
 			mExtAudioFile = NULL;
 		}
 	}
-	
+
 	void	Read(UInt32 &ioNumberFrames, AudioBufferList *ioData)
 	{
 		Check(ExtAudioFileRead(mExtAudioFile, &ioNumberFrames, ioData), "ExtAudioFileRead");
 	}
-	
+
 	OSStatus	Write(UInt32 inNumberFrames, const AudioBufferList *ioData)
 	{
 		OSStatus err = ExtAudioFileWrite(mExtAudioFile, inNumberFrames, ioData);
@@ -154,41 +154,41 @@ public:
 		}
 		return err;
 	}
-	
+
 	void	WriteAsync(UInt32 inNumberFrames, const AudioBufferList *ioData)
 	{
 		Check(ExtAudioFileWriteAsync(mExtAudioFile, inNumberFrames, ioData), "ExtAudioFileWriteAsync");
 	}
-	
+
 	void	Seek(SInt64 inFrameOffset)
 	{
 		Check(ExtAudioFileSeek(mExtAudioFile, inFrameOffset), "ExtAudioFileSeek");
 	}
-	
+
 	SInt64	Tell() const
 	{
 		SInt64 pos;
 		Check(ExtAudioFileTell(mExtAudioFile, &pos), "ExtAudioFileTell");
 		return pos;
 	}
-	
+
 	UInt32	GetPropertyInfo(ExtAudioFilePropertyID propid, Boolean *outWritable) const
 	{
 		UInt32 size;
 		CheckProperty(ExtAudioFileGetPropertyInfo(mExtAudioFile, propid, &size, outWritable), "ExtAudioFileGetPropertyInfo", propid);
 		return size;
 	}
-	
+
 	void	GetProperty(ExtAudioFilePropertyID propid, UInt32 &ioSize, void *outData) const
 	{
 		CheckProperty(ExtAudioFileGetProperty(mExtAudioFile, propid, &ioSize, outData), "ExtAudioFileGetProperty", propid);
 	}
-	
+
 	void	SetProperty(ExtAudioFilePropertyID propid, UInt32 size, const void *inData)
 	{
 		CheckProperty(ExtAudioFileSetProperty(mExtAudioFile, propid, size, inData), "ExtAudioFileSetProperty", propid);
 	}
-	
+
 	const CAAudioChannelLayout &GetFileChannelLayout()
 	{
 		return FetchChannelLayout(mFileChannelLayout, kExtAudioFileProperty_FileChannelLayout);
@@ -204,13 +204,13 @@ public:
 		GetProperty(kExtAudioFileProperty_FileDataFormat, size, &mFileDataFormat);
 		return mFileDataFormat;
 	}
-	
+
 	const CAStreamBasicDescription &GetClientDataFormat() {
 		UInt32 size = sizeof(mClientDataFormat);
 		GetProperty(kExtAudioFileProperty_ClientDataFormat, size, &mClientDataFormat);
 		return mClientDataFormat;
 	}
-	
+
 
 	void	SetClientFormat(const CAStreamBasicDescription &dataFormat, const CAAudioChannelLayout *layout=NULL, UInt32 codecManuf=0) {
 		if (codecManuf != 0)
@@ -219,11 +219,11 @@ public:
 		if (layout)
 			SetClientChannelLayout(*layout);
 	}
-	
+
 	void	SetClientChannelLayout(const CAAudioChannelLayout &layout) {
 		SetProperty(kExtAudioFileProperty_ClientChannelLayout, layout.Size(), &layout.Layout());
 	}
-	
+
 	AudioConverterRef				GetConverter() const {
 		UInt32 size = sizeof(AudioConverterRef);
 		AudioConverterRef converter = NULL;
@@ -232,7 +232,7 @@ public:
 	}
 
 	bool	HasConverter() const { return GetConverter() != NULL; }
-	
+
 	OSStatus	SetConverterProperty(AudioConverterPropertyID inPropertyID,	UInt32 inPropertyDataSize, const void *inPropertyData, bool inCanFail=false)
 	{
 		OSStatus err = AudioConverterSetProperty(GetConverter(), inPropertyID, inPropertyDataSize, inPropertyData);
@@ -245,14 +245,14 @@ public:
 		}
 		return err;
 	}
-	
+
 	SInt64		GetNumberFrames() {
 		SInt64 length;
 		UInt32 size = sizeof(SInt64);
 		GetProperty(kExtAudioFileProperty_FileLengthFrames, size, &length);
 		return length;
 	}
-	
+
 
 protected:
 	virtual void Check(OSStatus err, const char *func) const
@@ -263,7 +263,7 @@ protected:
 			throw CAXException(txt, err);
 		}
 	}
-	
+
 	virtual void CheckProperty(OSStatus err, const char *func, UInt32 propid) const
 	{
 		if (err) {
@@ -289,7 +289,7 @@ private:
 
 private:
 	ExtAudioFileRef				mExtAudioFile;
-	
+
 	// for convenience to the client, it helps if we hold onto some storage for these
 	CAStreamBasicDescription	mFileDataFormat;
 	CAAudioChannelLayout		mFileChannelLayout;

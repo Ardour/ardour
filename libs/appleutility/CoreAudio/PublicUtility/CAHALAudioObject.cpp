@@ -2,14 +2,14 @@
      File: CAHALAudioObject.cpp
  Abstract: CAHALAudioObject.h
   Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
- 
+
 */
 //==================================================================================================
 //	Includes
@@ -85,17 +85,17 @@ AudioClassID	CAHALAudioObject::GetClassID() const
 {
 	//	set up the return value
 	AudioClassID theAnswer = 0;
-	
+
 	//	set up the property address
 	CAPropertyAddress theAddress(kAudioObjectPropertyClass);
-	
+
 	//	make sure the property exists
 	if(HasProperty(theAddress))
 	{
 		UInt32 theSize = sizeof(AudioClassID);
 		GetPropertyData(theAddress, 0, NULL, theSize, &theAnswer);
 	}
-	
+
 	return theAnswer;
 }
 
@@ -103,10 +103,10 @@ AudioObjectID	CAHALAudioObject::GetOwnerObjectID() const
 {
 	//	set up the return value
 	AudioObjectID theAnswer = 0;
-	
+
 	//	set up the property address
 	CAPropertyAddress theAddress(kAudioObjectPropertyOwner);
-	
+
 	//	make sure the property exists
 	if(HasProperty(theAddress))
 	{
@@ -114,7 +114,7 @@ AudioObjectID	CAHALAudioObject::GetOwnerObjectID() const
 		UInt32 theSize = sizeof(AudioObjectID);
 		GetPropertyData(theAddress, 0, NULL, theSize, &theAnswer);
 	}
-	
+
 	return theAnswer;
 }
 
@@ -122,10 +122,10 @@ CFStringRef	CAHALAudioObject::CopyOwningPlugInBundleID() const
 {
 	//	set up the return value
 	CFStringRef theAnswer = NULL;
-	
+
 	//	set up the property address
 	CAPropertyAddress theAddress(kAudioObjectPropertyCreator);
-	
+
 	//	make sure the property exists
 	if(HasProperty(theAddress))
 	{
@@ -133,7 +133,7 @@ CFStringRef	CAHALAudioObject::CopyOwningPlugInBundleID() const
 		UInt32 theSize = sizeof(CFStringRef);
 		GetPropertyData(theAddress, 0, NULL, theSize, &theAnswer);
 	}
-	
+
 	return theAnswer;
 }
 
@@ -141,10 +141,10 @@ CFStringRef	CAHALAudioObject::CopyName() const
 {
 	//	set up the return value
 	CFStringRef theAnswer = NULL;
-	
+
 	//	set up the property address
 	CAPropertyAddress theAddress(kAudioObjectPropertyName);
-	
+
 	//	make sure the property exists
 	if(HasProperty(theAddress))
 	{
@@ -152,7 +152,7 @@ CFStringRef	CAHALAudioObject::CopyName() const
 		UInt32 theSize = sizeof(CFStringRef);
 		GetPropertyData(theAddress, 0, NULL, theSize, &theAnswer);
 	}
-	
+
 	return theAnswer;
 }
 
@@ -160,10 +160,10 @@ CFStringRef	CAHALAudioObject::CopyManufacturer() const
 {
 	//	set up the return value
 	CFStringRef theAnswer = NULL;
-	
+
 	//	set up the property address
 	CAPropertyAddress theAddress(kAudioObjectPropertyManufacturer);
-	
+
 	//	make sure the property exists
 	if(HasProperty(theAddress))
 	{
@@ -171,7 +171,7 @@ CFStringRef	CAHALAudioObject::CopyManufacturer() const
 		UInt32 theSize = sizeof(CFStringRef);
 		GetPropertyData(theAddress, 0, NULL, theSize, &theAnswer);
 	}
-	
+
 	return theAnswer;
 }
 
@@ -179,10 +179,10 @@ CFStringRef	CAHALAudioObject::CopyNameForElement(AudioObjectPropertyScope inScop
 {
 	//	set up the return value
 	CFStringRef theAnswer = NULL;
-	
+
 	//	set up the property address
 	CAPropertyAddress theAddress(kAudioObjectPropertyElementName, inScope, inElement);
-	
+
 	//	make sure the property exists
 	if(HasProperty(theAddress))
 	{
@@ -190,7 +190,7 @@ CFStringRef	CAHALAudioObject::CopyNameForElement(AudioObjectPropertyScope inScop
 		UInt32 theSize = sizeof(CFStringRef);
 		GetPropertyData(theAddress, 0, NULL, theSize, &theAnswer);
 	}
-	
+
 	return theAnswer;
 }
 
@@ -198,10 +198,10 @@ CFStringRef	CAHALAudioObject::CopyCategoryNameForElement(AudioObjectPropertyScop
 {
 	//	set up the return value
 	CFStringRef theAnswer = NULL;
-	
+
 	//	set up the property address
 	CAPropertyAddress theAddress(kAudioObjectPropertyElementCategoryName, inScope, inElement);
-	
+
 	//	make sure the property exists
 	if(HasProperty(theAddress))
 	{
@@ -209,7 +209,7 @@ CFStringRef	CAHALAudioObject::CopyCategoryNameForElement(AudioObjectPropertyScop
 		UInt32 theSize = sizeof(CFStringRef);
 		GetPropertyData(theAddress, 0, NULL, theSize, &theAnswer);
 	}
-	
+
 	return theAnswer;
 }
 
@@ -217,10 +217,10 @@ CFStringRef	CAHALAudioObject::CopyNumberNameForElement(AudioObjectPropertyScope 
 {
 	//	set up the return value
 	CFStringRef theAnswer = NULL;
-	
+
 	//	set up the property address
 	CAPropertyAddress theAddress(kAudioObjectPropertyElementNumberName, inScope, inElement);
-	
+
 	//	make sure the property exists
 	if(HasProperty(theAddress))
 	{
@@ -228,7 +228,7 @@ CFStringRef	CAHALAudioObject::CopyNumberNameForElement(AudioObjectPropertyScope 
 		UInt32 theSize = sizeof(CFStringRef);
 		GetPropertyData(theAddress, 0, NULL, theSize, &theAnswer);
 	}
-	
+
 	return theAnswer;
 }
 
@@ -243,10 +243,10 @@ UInt32	CAHALAudioObject::GetNumberOwnedObjects(AudioClassID inClass) const
 {
 	//	set up the return value
 	UInt32 theAnswer = 0;
-	
+
 	//	set up the property address
 	CAPropertyAddress theAddress(kAudioObjectPropertyOwnedObjects);
-	
+
 	//	figure out the qualifier
 	UInt32 theQualifierSize = 0;
 	void* theQualifierData = NULL;
@@ -255,13 +255,13 @@ UInt32	CAHALAudioObject::GetNumberOwnedObjects(AudioClassID inClass) const
 		theQualifierSize = sizeof(AudioObjectID);
 		theQualifierData = &inClass;
 	}
-	
+
 	//	get the property data size
 	theAnswer = GetPropertyDataSize(theAddress, theQualifierSize, theQualifierData);
-	
+
 	//	calculate the number of object IDs
 	theAnswer /= SizeOf32(AudioObjectID);
-	
+
 	return theAnswer;
 }
 
@@ -269,7 +269,7 @@ void	CAHALAudioObject::GetAllOwnedObjects(AudioClassID inClass, UInt32& ioNumber
 {
 	//	set up the property address
 	CAPropertyAddress theAddress(kAudioObjectPropertyOwnedObjects);
-	
+
 	//	figure out the qualifier
 	UInt32 theQualifierSize = 0;
 	void* theQualifierData = NULL;
@@ -278,11 +278,11 @@ void	CAHALAudioObject::GetAllOwnedObjects(AudioClassID inClass, UInt32& ioNumber
 		theQualifierSize = sizeof(AudioObjectID);
 		theQualifierData = &inClass;
 	}
-	
+
 	//	get the property data
 	UInt32 theDataSize = ioNumberObjects * SizeOf32(AudioClassID);
 	GetPropertyData(theAddress, theQualifierSize, theQualifierData, theDataSize, ioObjectIDs);
-	
+
 	//	set the number of object IDs being returned
 	ioNumberObjects = theDataSize / SizeOf32(AudioObjectID);
 }
@@ -291,7 +291,7 @@ AudioObjectID	CAHALAudioObject::GetOwnedObjectByIndex(AudioClassID inClass, UInt
 {
 	//	set up the property address
 	CAPropertyAddress theAddress(kAudioObjectPropertyOwnedObjects);
-	
+
 	//	figure out the qualifier
 	UInt32 theQualifierSize = 0;
 	void* theQualifierData = NULL;
@@ -300,27 +300,27 @@ AudioObjectID	CAHALAudioObject::GetOwnedObjectByIndex(AudioClassID inClass, UInt
 		theQualifierSize = sizeof(AudioObjectID);
 		theQualifierData = &inClass;
 	}
-	
+
 	//	figure out how much space to allocate
 	UInt32 theDataSize = GetPropertyDataSize(theAddress, theQualifierSize, theQualifierData);
 	UInt32 theNumberObjectIDs = theDataSize / SizeOf32(AudioObjectID);
-	
+
 	//	set up the return value
 	AudioObjectID theAnswer = 0;
-	
+
 	//	maker sure the index is in range
 	if(inIndex < theNumberObjectIDs)
 	{
 		//	allocate it
 		CAAutoArrayDelete<AudioObjectID> theObjectList(theDataSize / sizeof(AudioObjectID));
-		
+
 		//	get the property data
 		GetPropertyData(theAddress, theQualifierSize, theQualifierData, theDataSize, theObjectList);
-		
+
 		//	get the return value
 		theAnswer = theObjectList[inIndex];
 	}
-	
+
 	return theAnswer;
 }
 

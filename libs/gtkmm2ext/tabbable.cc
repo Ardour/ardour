@@ -116,9 +116,9 @@ Tabbable::get (bool create)
 		return 0;
 	}
 
-	/* From here on, we're creating the window 
+	/* From here on, we're creating the window
 	 */
-	
+
 	if ((_window = new Window (WINDOW_TOPLEVEL)) == 0) {
 		return 0;
 	}
@@ -129,13 +129,13 @@ Tabbable::get (bool create)
 
 	_window->signal_map().connect (sigc::mem_fun (*this, &Tabbable::window_mapped));
 	_window->signal_unmap().connect (sigc::mem_fun (*this, &Tabbable::window_unmapped));
-	
+
 	/* do other window-related setup */
 
 	setup ();
 
 	/* window should be ready for derived classes to do something with it */
-	
+
 	return _window;
 }
 
@@ -148,9 +148,9 @@ Tabbable::show_own_window (bool and_pack_it)
 	if (parent) {
 		alloc = parent->get_allocation();
 	}
-	
+
 	(void) use_own_window (and_pack_it);
-	
+
 	if (parent) {
 		_window->set_default_size (alloc.get_width(), alloc.get_height());
 	}
@@ -211,7 +211,7 @@ Tabbable::make_invisible ()
 		hide_tab ();
 	}
 }
-	
+
 void
 Tabbable::detach ()
 {
@@ -224,7 +224,7 @@ Tabbable::attach ()
 	if (!_parent_notebook) {
 		return;
 	}
-	
+
 	if (tabbed()) {
 		/* already tabbed */
 		return;
@@ -235,16 +235,16 @@ Tabbable::attach ()
 		/* unpack Tabbable from parent, put it back in the main tabbed
 		 * notebook
 		 */
-		
+
 		save_pos_and_size ();
-		
+
 		_contents.get_parent()->remove (_contents);
-	
+
 		/* leave the window around */
-		
+
 		_window->hide ();
 	}
-	
+
 	_parent_notebook->append_page (_contents, _tab_box);
 	_contents.set_data ("close-button", &tab_close_image);
 	_parent_notebook->set_tab_detachable (_contents);
@@ -282,7 +282,7 @@ Tabbable::tabbed () const
 	if (_parent_notebook && (_parent_notebook->page_num (_contents) >= 0)) {
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -331,7 +331,7 @@ Tabbable::get_state()
 	XMLNode& node (WindowProxy::get_state());
 
 	node.add_property (X_("tabbed"),  tabbed() ? X_("yes") : X_("no"));
-	
+
 	return node;
 }
 
@@ -346,11 +346,11 @@ Tabbable::set_state (const XMLNode& node, int version)
 
 	if (_visible) {
 		show_own_window (true);
-	} 
+	}
 
 	XMLNodeList children = node.children ();
 	XMLNode* window_node = node.child ("Window");
-	
+
 	if (window_node) {
 		const XMLProperty* prop = window_node->property (X_("tabbed"));
 		if (prop) {
@@ -366,7 +366,7 @@ Tabbable::set_state (const XMLNode& node, int version)
 			hide_tab ();
 		}
 	}
-	
+
 	return ret;
 }
 
