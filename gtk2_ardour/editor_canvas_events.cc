@@ -1219,7 +1219,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 			 * TODO: check if file is audio/midi, allow drops on same track-type only,
 			 * currently: if audio is dropped on a midi-track, it is only added to the region-list
 			 */
-			if (Profile->get_sae() || UIConfiguration::instance().get_only_copy_imported_files()) {
+			if (UIConfiguration::instance().get_only_copy_imported_files()) {
 				context->drag_status(Gdk::ACTION_COPY, time);
 			} else {
 				if ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY) {

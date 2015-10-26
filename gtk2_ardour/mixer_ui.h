@@ -347,7 +347,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	void monitor_section_going_away ();
 
-<<<<<<< HEAD
 	void monitor_section_attached ();
 	void monitor_section_detached ();
 
@@ -358,13 +357,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	void sync_treeview_favorite_ui_state (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&);
 	void save_favorite_ui_state (const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);
 
-=======
-	void create_own_window ();
-
-<<<<<<< HEAD
->>>>>>> the basics of tabbed
-=======
->>>>>>> replicate the remove-all-trailing whitespace commit(s) in master
 	/// true if we are in fullscreen mode
 	bool _maximised;
 

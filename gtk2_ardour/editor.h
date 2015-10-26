@@ -349,7 +349,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_summary ();
 	void set_group_tabs ();
 	void toggle_measure_visibility ();
-	void toggle_logo_visibility ();
 
 	/* fades */
 
@@ -806,8 +805,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::EventBox             time_bars_event_box;
 	Gtk::VBox                 time_bars_vbox;
-
-	ArdourCanvas::Pixbuf     *logo_item;
 
 	ArdourCanvas::Container      *tempo_group;
 	ArdourCanvas::Container      *meter_group;

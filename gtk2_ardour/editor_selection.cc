@@ -1025,10 +1025,6 @@ Editor::track_selection_changed ()
 void
 Editor::time_selection_changed ()
 {
-	if (Profile->get_sae()) {
-		return;
-	}
-
 	/* XXX this is superficially inefficient. Hide the selection in all
 	 * tracks, then show it in all selected tracks.
 	 *
@@ -1614,9 +1610,7 @@ Editor::set_selection_from_region ()
 
 	selection->set (tvl);
 
-	if (!Profile->get_sae()) {
-		set_mouse_mode (Editing::MouseRange, false);
-	}
+	set_mouse_mode (Editing::MouseRange, false);
 }
 
 void
@@ -1649,9 +1643,7 @@ Editor::set_selection_from_range (Location& loc)
 	selection->set (loc.start(), loc.end());
 	commit_reversible_selection_op ();
 
-	if (!Profile->get_sae()) {
-		set_mouse_mode (Editing::MouseRange, false);
-	}
+	set_mouse_mode (Editing::MouseRange, false);
 }
 
 void

@@ -445,11 +445,6 @@ ARDOUR_UI::setup_transport ()
 		transport_hbox.pack_start (editor_meter_peak_display, false, false);
 	}
 
-	if (Profile->get_sae()) {
-		Image* img = manage (new Image ((::get_icon (X_("sae")))));
-		transport_hbox.pack_end (*img, false, false);
-	}
-
 	/* desensitize */
 
 	set_transport_sensitivity (false);

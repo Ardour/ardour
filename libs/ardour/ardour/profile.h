@@ -31,7 +31,6 @@ class LIBARDOUR_API RuntimeProfile {
 public:
 	enum Element {
 		SmallScreen,
-		SAE,
 		SinglePackage,
 		Trx,
 		Mixbus,
@@ -43,9 +42,6 @@ public:
 
     void set_small_screen() { bits[SmallScreen] = true; }
     bool get_small_screen() const { return bits[SmallScreen]; }
-
-    void set_sae () { bits[SAE] = true; }
-    bool get_sae () const { return bits[SAE]; }
 
     bool get_trx() const { return bits[Trx]; }
     void set_trx() { bits[Trx] = true; }

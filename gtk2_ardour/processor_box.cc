@@ -1877,9 +1877,6 @@ ProcessorBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Processor>
 
 	case IOSelector::Accepted:
 		_route->add_processor_by_index (processor, _placement);
-		if (Profile->get_sae()) {
-			processor->activate ();
-		}
 		break;
 	}
 
@@ -1905,9 +1902,6 @@ ProcessorBox::return_io_finished (IOSelector::Result r, boost::weak_ptr<Processo
 
 	case IOSelector::Accepted:
 		_route->add_processor_by_index (processor, _placement);
-		if (Profile->get_sae()) {
-			processor->activate ();
-		}
 		break;
 	}
 

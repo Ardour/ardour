@@ -736,12 +736,6 @@ Editor::register_actions ()
 
 	myactions.register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measure Lines"), sigc::mem_fun (*this, &Editor::toggle_measure_visibility));
 
-	/* if there is a logo in the editor canvas, its always visible at startup */
-
-	act = myactions.register_toggle_action (editor_actions, X_("ToggleLogoVisibility"), _("Show Logo"), sigc::mem_fun (*this, &Editor::toggle_logo_visibility));
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-	tact->set_active (true);
-
 	myactions.register_action (editor_actions, X_("toggle-midi-input-active"), _("Toggle MIDI Input Active for Editor-Selected Tracks/Busses"),
 				   sigc::bind (sigc::mem_fun (*this, &Editor::toggle_midi_input_active), false));
 }
@@ -975,23 +969,6 @@ Editor::toggle_measure_visibility ()
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		set_show_measures (tact->get_active());
-	}
-}
-
-void
-Editor::toggle_logo_visibility ()
-{
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleLogoVisibility"));
-
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		if (logo_item) {
-			if (tact->get_active()) {
-				logo_item->show ();
-			} else {
-				logo_item->hide ();
-			}
-		}
 	}
 }
 

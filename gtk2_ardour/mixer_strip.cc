@@ -1596,10 +1596,8 @@ MixerStrip::build_route_ops_menu ()
 	denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	denormal_menu_item->set_active (_route->denormal_protection());
 
-	if (!Profile->get_sae()) {
-		items.push_back (SeparatorElem());
-		items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
-	}
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
 
 	if (_route) {
 		/* note that this relies on selection being shared across editor and

@@ -301,17 +301,6 @@ Region::Region (boost::shared_ptr<const Region> other)
 		_sync_position = _start;
 	}
 
-	if (Profile->get_sae()) {
-		/* reset sync point to start if its ended up
-		   outside region bounds.
-		*/
-
-		if (_sync_position < _start || _sync_position >= _start + _length) {
-			_sync_marked = false;
-			_sync_position = _start;
-		}
-	}
-
 	assert (_type == other->data_type());
 }
 
@@ -358,17 +347,6 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset)
 	} else {
 		_sync_marked = false;
 		_sync_position = _start;
-	}
-
-	if (Profile->get_sae()) {
-		/* reset sync point to start if its ended up
-		   outside region bounds.
-		*/
-
-		if (_sync_position < _start || _sync_position >= _start + _length) {
-			_sync_marked = false;
-			_sync_position = _start;
-		}
 	}
 
 	assert (_type == other->data_type());

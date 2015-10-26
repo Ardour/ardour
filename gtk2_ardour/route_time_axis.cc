@@ -588,11 +588,9 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (SeparatorElem());
 
-	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
-		items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
-		items.push_back (SeparatorElem());
-	}
+	items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
+	items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
+	items.push_back (SeparatorElem());
 
 	// Hook for derived classes to add type specific stuff
 	append_extra_display_menu_items ();
@@ -651,159 +649,154 @@ RouteTimeAxisView::build_display_menu ()
 
 		items.push_back (MenuElem (_("Layers"), *layers_menu));
 
-		if (!Profile->get_sae()) {
+		Menu* alignment_menu = manage (new Menu);
+		MenuList& alignment_items = alignment_menu->items();
+		alignment_menu->set_name ("ArdourContextMenu");
 
-			Menu* alignment_menu = manage (new Menu);
-			MenuList& alignment_items = alignment_menu->items();
-			alignment_menu->set_name ("ArdourContextMenu");
+		RadioMenuItem::Group align_group;
 
-			RadioMenuItem::Group align_group;
+		/* Same verbose hacks as for the layering options above */
 
-			/* Same verbose hacks as for the layering options above */
+		int existing = 0;
+		int capture = 0;
+		int automatic = 0;
+		int styles = 0;
+		boost::shared_ptr<Track> first_track;
 
-			int existing = 0;
-			int capture = 0;
-                        int automatic = 0;
-                        int styles = 0;
-                        boost::shared_ptr<Track> first_track;
-
-			TrackSelection const & s = _editor.get_selection().tracks;
-			for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
-				RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
-				if (!r || !r->is_track ()) {
-					continue;
-				}
-
-                                if (!first_track) {
-                                        first_track = r->track();
-                                }
-
-                                switch (r->track()->alignment_choice()) {
-                                case Automatic:
-                                        ++automatic;
-                                        styles |= 0x1;
-                                        switch (r->track()->alignment_style()) {
-                                        case ExistingMaterial:
-                                                ++existing;
-                                                break;
-                                        case CaptureTime:
-                                                ++capture;
-                                                break;
-                                        }
-                                        break;
-                                case UseExistingMaterial:
-                                        ++existing;
-                                        styles |= 0x2;
-                                        break;
-                                case UseCaptureTime:
-                                        ++capture;
-                                        styles |= 0x4;
-                                        break;
-                                }
+		for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
+			RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (!r || !r->is_track ()) {
+				continue;
 			}
 
-                        bool inconsistent;
-                        switch (styles) {
-                        case 1:
-                        case 2:
-                        case 4:
-                                inconsistent = false;
-                                break;
-                        default:
-                                inconsistent = true;
-                                break;
-                        }
-
-                        RadioMenuItem* i;
-
-                        if (!inconsistent && first_track) {
-
-                                alignment_items.push_back (RadioMenuElem (align_group, _("Automatic (based on I/O connections)")));
-                                i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
-                                i->set_active (automatic != 0 && existing == 0 && capture == 0);
-                                i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_choice), i, Automatic, true));
-
-                                switch (first_track->alignment_choice()) {
-                                case Automatic:
-                                        switch (first_track->alignment_style()) {
-                                        case ExistingMaterial:
-                                                alignment_items.push_back (MenuElem (_("(Currently: Existing Material)")));
-                                                break;
-                                        case CaptureTime:
-                                                alignment_items.push_back (MenuElem (_("(Currently: Capture Time)")));
-                                                break;
-                                        }
-                                        break;
-                                default:
-                                        break;
-                                }
-
-                                alignment_items.push_back (RadioMenuElem (align_group, _("Align with Existing Material")));
-                                i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
-                                i->set_active (existing != 0 && capture == 0 && automatic == 0);
-                                i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_choice), i, UseExistingMaterial, true));
-
-                                alignment_items.push_back (RadioMenuElem (align_group, _("Align with Capture Time")));
-                                i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
-                                i->set_active (existing == 0 && capture != 0 && automatic == 0);
-                                i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_choice), i, UseCaptureTime, true));
-
-                                items.push_back (MenuElem (_("Alignment"), *alignment_menu));
-
-                        } else {
-                                /* show nothing */
-                        }
-
-			Menu* mode_menu = manage (new Menu);
-			MenuList& mode_items = mode_menu->items ();
-			mode_menu->set_name ("ArdourContextMenu");
-
-			RadioMenuItem::Group mode_group;
-
-			int normal = 0;
-			int tape = 0;
-			int non_layered = 0;
-
-			for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
-				RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
-				if (!r || !r->is_track ()) {
-					continue;
-				}
-
-				switch (r->track()->mode()) {
-				case Normal:
-					++normal;
-					break;
-				case Destructive:
-					++tape;
-					break;
-				case NonLayered:
-					++non_layered;
-					break;
-				}
+			if (!first_track) {
+				first_track = r->track();
 			}
 
-			mode_items.push_back (RadioMenuElem (mode_group, _("Normal Mode")));
-			i = dynamic_cast<RadioMenuItem*> (&mode_items.back ());
-			i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Normal, true));
-			i->set_active (normal != 0 && tape == 0 && non_layered == 0);
-			i->set_inconsistent (normal != 0 && (tape != 0 || non_layered != 0));
-
-			mode_items.push_back (RadioMenuElem (mode_group, _("Tape Mode")));
-			i = dynamic_cast<RadioMenuItem*> (&mode_items.back ());
-			i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Destructive, true));
-			i->set_active (normal == 0 && tape != 0 && non_layered == 0);
-			i->set_inconsistent (tape != 0 && (normal != 0 || non_layered != 0));
-
- 			mode_items.push_back (RadioMenuElem (mode_group, _("Non-Layered Mode")));
-			i = dynamic_cast<RadioMenuItem*> (&mode_items.back ());
-			i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::NonLayered, true));
-			i->set_active (normal == 0 && tape == 0 && non_layered != 0);
-			i->set_inconsistent (non_layered != 0 && (normal != 0 || tape != 0));
-
-			items.push_back (MenuElem (_("Record Mode"), *mode_menu));
+			switch (r->track()->alignment_choice()) {
+			case Automatic:
+				++automatic;
+				styles |= 0x1;
+				switch (r->track()->alignment_style()) {
+				case ExistingMaterial:
+					++existing;
+					break;
+				case CaptureTime:
+					++capture;
+					break;
+				}
+				break;
+			case UseExistingMaterial:
+				++existing;
+				styles |= 0x2;
+				break;
+			case UseCaptureTime:
+				++capture;
+				styles |= 0x4;
+				break;
+			}
 		}
 
+		bool inconsistent;
+		switch (styles) {
+		case 1:
+		case 2:
+		case 4:
+			inconsistent = false;
+			break;
+		default:
+			inconsistent = true;
+			break;
+		}
+
+		RadioMenuItem* i;
+
+		if (!inconsistent && first_track) {
+
+			alignment_items.push_back (RadioMenuElem (align_group, _("Automatic (based on I/O connections)")));
+			i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
+			i->set_active (automatic != 0 && existing == 0 && capture == 0);
+			i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_choice), i, Automatic, true));
+
+			switch (first_track->alignment_choice()) {
+			case Automatic:
+				switch (first_track->alignment_style()) {
+				case ExistingMaterial:
+					alignment_items.push_back (MenuElem (_("(Currently: Existing Material)")));
+					break;
+				case CaptureTime:
+					alignment_items.push_back (MenuElem (_("(Currently: Capture Time)")));
+					break;
+				}
+				break;
+			default:
+				break;
+			}
+
+			alignment_items.push_back (RadioMenuElem (align_group, _("Align With Existing Material")));
+			i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
+			i->set_active (existing != 0 && capture == 0 && automatic == 0);
+			i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_choice), i, UseExistingMaterial, true));
+
+			alignment_items.push_back (RadioMenuElem (align_group, _("Align With Capture Time")));
+			i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
+			i->set_active (existing == 0 && capture != 0 && automatic == 0);
+			i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_choice), i, UseCaptureTime, true));
+
+			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
+
+		} else {
+			/* show nothing */
+		}
+
+		Menu* mode_menu = manage (new Menu);
+		MenuList& mode_items = mode_menu->items ();
+		mode_menu->set_name ("ArdourContextMenu");
+
+		RadioMenuItem::Group mode_group;
+
+		int normal = 0;
+		int tape = 0;
+		int non_layered = 0;
+
+		for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
+			RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (!r || !r->is_track ()) {
+				continue;
+			}
+
+			switch (r->track()->mode()) {
+			case Normal:
+				++normal;
+				break;
+			case Destructive:
+				++tape;
+				break;
+			case NonLayered:
+				++non_layered;
+				break;
+			}
+		}
+
+		mode_items.push_back (RadioMenuElem (mode_group, _("Normal Mode")));
+		i = dynamic_cast<RadioMenuItem*> (&mode_items.back ());
+		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Normal, true));
+		i->set_active (normal != 0 && tape == 0 && non_layered == 0);
+		i->set_inconsistent (normal != 0 && (tape != 0 || non_layered != 0));
+
+		mode_items.push_back (RadioMenuElem (mode_group, _("Tape Mode")));
+		i = dynamic_cast<RadioMenuItem*> (&mode_items.back ());
+		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Destructive, true));
+		i->set_active (normal == 0 && tape != 0 && non_layered == 0);
+		i->set_inconsistent (tape != 0 && (normal != 0 || non_layered != 0));
+
+		mode_items.push_back (RadioMenuElem (mode_group, _("Non-Layered Mode")));
+		i = dynamic_cast<RadioMenuItem*> (&mode_items.back ());
+		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::NonLayered, true));
+		i->set_active (normal == 0 && tape == 0 && non_layered != 0);
+		i->set_inconsistent (non_layered != 0 && (normal != 0 || tape != 0));
+
+		items.push_back (MenuElem (_("Record Mode"), *mode_menu));
 
 		items.push_back (SeparatorElem());
 

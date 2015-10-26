@@ -63,20 +63,16 @@ KeyEditor::KeyEditor ()
 
 	vpacker.pack_start (notebook, true, true);
 
-	if (!ARDOUR::Profile->get_sae()) {
+	Label* hint = manage (new Label (_("Select an action, then press the key(s) to (re)set its shortcut")));
+	hint->show ();
+	unbind_box.set_spacing (6);
+	unbind_box.pack_start (*hint, false, true);
+	unbind_box.pack_start (unbind_button, false, false);
+	unbind_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::unbind));
 
-		Label* hint = manage (new Label (_("Select an action, then press the key(s) to (re)set its shortcut")));
-		hint->show ();
-		unbind_box.set_spacing (6);
-		unbind_box.pack_start (*hint, false, true);
-		unbind_box.pack_start (unbind_button, false, false);
-		unbind_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::unbind));
-
-		vpacker.pack_start (unbind_box, false, false);
-		unbind_box.show ();
-		unbind_button.show ();
-
-	}
+	vpacker.pack_start (unbind_box, false, false);
+	unbind_box.show ();
+	unbind_button.show ();
 
 	reset_button.add (reset_label);
 	reset_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Reset Bindings to Defaults")));
@@ -133,7 +129,7 @@ KeyEditor::on_key_press_event (GdkEventKey* ev)
 bool
 KeyEditor::on_key_release_event (GdkEventKey* ev)
 {
-	if (ARDOUR::Profile->get_sae() || last_keyval == 0) {
+	if (last_keyval == 0) {
 		return false;
 	}
 

@@ -91,11 +91,6 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 	const char *optstring = "abBc:C:dD:hHk:E:m:N:nOp:PST:U:vV";
 	const char *execname = strrchr (argv[0], '/');
 
-	if (getenv ("ARDOUR_SAE")) {
-		menus_file = "ardour-sae.menus";
-		keybindings_path = "SAE";
-	}
-
 	if (execname == 0) {
 		execname = argv[0];
 	} else {

@@ -98,18 +98,6 @@ Editor::initialize_canvas ()
 
 	_verbose_cursor = new VerboseCursor (this);
 
-	/* on the bottom, an image */
-
-	if (Profile->get_sae()) {
-		Image img (::get_icon (X_("saelogo")));
-		// logo_item = new ArdourCanvas::Pixbuf (_track_canvas->root(), 0.0, 0.0, img.get_pixbuf());
-		// logo_item->property_height_in_pixels() = true;
-		// logo_item->property_width_in_pixels() = true;
-		// logo_item->property_height_set() = true;
-		// logo_item->property_width_set() = true;
-		// logo_item->show ();
-	}
-
 	/*a group to hold global rects like punch/loop indicators */
 	global_rect_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (global_rect_group, "global rect group");
@@ -226,10 +214,6 @@ Editor::initialize_canvas ()
 	transport_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
 
 	playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
-
-	if (logo_item) {
-		logo_item->lower_to_bottom ();
-	}
 
 	_canvas_drop_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 0.0));
 	/* this thing is transparent */
@@ -428,7 +412,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 		InstrumentSelector is; // instantiation builds instrument-list and sets default.
 		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, frame, is.selected_instrument());
 
-		if (Profile->get_sae() || UIConfiguration::instance().get_only_copy_imported_files() || copy) {
+		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
 		} else {
 			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
@@ -444,7 +428,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 
 			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack, SrcBest, frame);
 
-			if (Profile->get_sae() || UIConfiguration::instance().get_only_copy_imported_files() || copy) {
+			if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame);
 			} else {
 				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, frame);

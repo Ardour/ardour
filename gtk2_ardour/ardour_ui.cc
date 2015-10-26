@@ -625,13 +625,8 @@ ARDOUR_UI::post_engine ()
 
 	/* set default clock modes */
 
-	if (Profile->get_sae()) {
-		primary_clock->set_mode (AudioClock::BBT);
-		secondary_clock->set_mode (AudioClock::MinSec);
-	}  else {
-		primary_clock->set_mode (AudioClock::Timecode);
-		secondary_clock->set_mode (AudioClock::BBT);
-	}
+	primary_clock->set_mode (AudioClock::Timecode);
+	secondary_clock->set_mode (AudioClock::BBT);
 
 	/* start the time-of-day-clock */
 
@@ -2845,7 +2840,7 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 {
 	BusProfile bus_profile;
 
-	if (nsm || Profile->get_sae()) {
+	if (nsm) {
 
 		bus_profile.master_out_channels = 2;
 		bus_profile.input_ac = AutoConnectPhysical;
@@ -4833,11 +4828,6 @@ ARDOUR_UI::setup_profile ()
 {
 	if (gdk_screen_width() < 1200 || getenv ("ARDOUR_NARROW_SCREEN")) {
 		Profile->set_small_screen ();
-	}
-
-	if (g_getenv ("ARDOUR_SAE")) {
-		Profile->set_sae ();
-		Profile->set_single_package ();
 	}
 
 	if (g_getenv ("TRX")) {

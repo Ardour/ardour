@@ -540,7 +540,7 @@ Editor::update_ruler_visibility ()
 		tempo_label.hide();
 	}
 
-	if (!Profile->get_sae() && ruler_range_action->get_active()) {
+	if (ruler_range_action->get_active()) {
 		old_unit_pos = range_marker_group->position().y;
 		if (tbpos != old_unit_pos) {
 			range_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));

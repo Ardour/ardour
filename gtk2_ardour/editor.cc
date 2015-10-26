@@ -290,7 +290,6 @@ Editor::Editor ()
 	, _track_canvas_viewport (0)
 	, within_track_canvas (false)
 	, _verbose_cursor (0)
-	, logo_item (0)
 	, tempo_group (0)
 	, meter_group (0)
 	, marker_group (0)
@@ -3486,11 +3485,7 @@ Editor::cycle_edit_mode ()
 {
 	switch (Config->get_edit_mode()) {
 	case Slide:
-		if (Profile->get_sae()) {
-			Config->set_edit_mode (Lock);
-		} else {
-			Config->set_edit_mode (Ripple);
-		}
+		Config->set_edit_mode (Ripple);
 		break;
 	case Splice:
 	case Ripple:

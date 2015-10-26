@@ -56,11 +56,7 @@ ArdourKeyboard::find_bindings_files (map<string,string>& files)
 	vector<std::string> found;
 	Searchpath spath = ardour_config_search_path();
 
-	if (getenv ("ARDOUR_SAE")) {
-		find_files_matching_pattern (found, spath, string_compose ("*SAE-*.%1", Keyboard::binding_filename_suffix));
-	} else {
-		find_files_matching_pattern (found, spath, string_compose ("*.%1", Keyboard::binding_filename_suffix));
-	}
+	find_files_matching_pattern (found, spath, string_compose ("*.%1", Keyboard::binding_filename_suffix));
 
 	if (found.empty()) {
 		return;
@@ -99,8 +95,7 @@ ArdourKeyboard::setup_keybindings ()
 		binding_files.insert (newpair);
 	}
 
-	/* check to see if they gave a style name ("SAE", "ergonomic") or
-	   an actual filename (*.bindings)
+	/* check to see if they gave a style name ("ergonomic") or an actual filename (*.bindings)
 	*/
 
 	if (!keybindings_path.empty() && keybindings_path.find (binding_filename_suffix) == string::npos) {

@@ -135,16 +135,10 @@ AddRouteDialog::AddRouteDialog ()
 	table2->attach (channel_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 	++n;
 
-	if (!ARDOUR::Profile->get_sae ()) {
-
-		/* Track mode */
-
-		mode_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
-		table2->attach (mode_label, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-		table2->attach (mode_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
-		++n;
-
-	}
+	mode_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+	table2->attach (mode_label, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	table2->attach (mode_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	++n;
 
 	instrument_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
 	table2->attach (instrument_label, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
@@ -325,11 +319,8 @@ AddRouteDialog::refill_track_modes ()
 	vector<string> s;
 
 	s.push_back (_("Normal"));
-
-	if (!ARDOUR::Profile->get_sae ()) {
-		s.push_back (_("Non Layered"));
-		s.push_back (_("Tape"));
-	}
+	s.push_back (_("Non Layered"));
+	s.push_back (_("Tape"));
 
 	set_popdown_strings (mode_combo, s);
 	mode_combo.set_active_text (s.front());
@@ -338,10 +329,6 @@ AddRouteDialog::refill_track_modes ()
 ARDOUR::TrackMode
 AddRouteDialog::mode ()
 {
-	if (ARDOUR::Profile->get_sae()) {
-		return ARDOUR::Normal;
-	}
-
 	std::string str = mode_combo.get_active_text();
 	if (str == _("Normal")) {
 		return ARDOUR::Normal;
@@ -441,49 +428,47 @@ AddRouteDialog::refill_channel_setups ()
 
 	ARDOUR::find_route_templates (route_templates);
 
-	if (!ARDOUR::Profile->get_sae()) {
-		if (!route_templates.empty()) {
-			vector<string> v;
-			for (vector<TemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
-				chn.name = x->name;
-				chn.channels = 0;
-				chn.template_path = x->path;
-				channel_setups.push_back (chn);
-			}
+	if (!route_templates.empty()) {
+		vector<string> v;
+		for (vector<TemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
+			chn.name = x->name;
+			chn.channels = 0;
+			chn.template_path = x->path;
+			channel_setups.push_back (chn);
 		}
-
-		/* clear template path for the rest */
-
-		chn.template_path = "";
-
-		chn.name = _("3 Channel");
-		chn.channels = 3;
-		channel_setups.push_back (chn);
-
-		chn.name = _("4 Channel");
-		chn.channels = 4;
-		channel_setups.push_back (chn);
-
-		chn.name = _("5 Channel");
-		chn.channels = 5;
-		channel_setups.push_back (chn);
-
-		chn.name = _("6 Channel");
-		chn.channels = 6;
-		channel_setups.push_back (chn);
-
-		chn.name = _("8 Channel");
-		chn.channels = 8;
-		channel_setups.push_back (chn);
-
-		chn.name = _("12 Channel");
-		chn.channels = 12;
-		channel_setups.push_back (chn);
-
-		chn.name = _("Custom");
-		chn.channels = 0;
-		channel_setups.push_back (chn);
 	}
+
+	/* clear template path for the rest */
+
+	chn.template_path = "";
+
+	chn.name = _("3 Channel");
+	chn.channels = 3;
+	channel_setups.push_back (chn);
+
+	chn.name = _("4 Channel");
+	chn.channels = 4;
+	channel_setups.push_back (chn);
+
+	chn.name = _("5 Channel");
+	chn.channels = 5;
+	channel_setups.push_back (chn);
+
+	chn.name = _("6 Channel");
+	chn.channels = 6;
+	channel_setups.push_back (chn);
+
+	chn.name = _("8 Channel");
+	chn.channels = 8;
+	channel_setups.push_back (chn);
+
+	chn.name = _("12 Channel");
+	chn.channels = 12;
+	channel_setups.push_back (chn);
+
+	chn.name = _("Custom");
+	chn.channels = 0;
+	channel_setups.push_back (chn);
 
 	for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
 		channel_combo_strings.push_back ((*i).name);

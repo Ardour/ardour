@@ -231,10 +231,7 @@ AudioRegionView::init (bool wfd)
 	}
 
 	const string line_name = _region->name() + ":gain";
-
-	if (!Profile->get_sae()) {
-		gain_line.reset (new AudioRegionGainLine (line_name, *this, *group, audio_region()->envelope()));
-	}
+	gain_line.reset (new AudioRegionGainLine (line_name, *this, *group, audio_region()->envelope()));
 
 	update_envelope_visibility ();
 	gain_line->reset ();
