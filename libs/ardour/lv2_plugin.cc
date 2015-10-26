@@ -244,7 +244,9 @@ struct LV2Plugin::Impl {
 #endif
 	       , state(0)
 	       , block_length(0)
+#ifdef HAVE_LV2_1_2_0
 	       , options(0)
+#endif
 	{}
 
 	/** Find the LV2 input port with the given designation.
