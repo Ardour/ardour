@@ -688,6 +688,13 @@ def build(bld):
         obj.target       = 'ardour.xml'
         obj.chmod        = Utils.O644
 
+        obj              = bld(features = 'subst')
+        obj.source       = 'ardour.appdata.xml.in'
+        obj.target       = str (bld.env['lwrcase_dirname']) +  '.appdata.xml'
+        obj.chmod        = Utils.O644
+        obj.dict         = freedesktop_subst_dict
+        set_subst_dict(obj, freedesktop_subst_dict)
+
     # Keybindings
 
     # 'SAE-de-keypad', 'SAE-de-nokeypad', 'SAE-us-keypad',
