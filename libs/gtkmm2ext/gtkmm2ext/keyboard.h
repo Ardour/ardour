@@ -173,6 +173,8 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static bool load_keybindings (std::string const& path);
 	static void save_keybindings (std::string const& path);
 
+	static std::string binding_filename_suffix;
+
 	int reset_bindings ();
 
 	sigc::signal0<void> ZoomVerticalModifierReleased;

@@ -33,7 +33,7 @@ UI_CONFIG_VARIABLE (uint32_t, lock_gui_after_seconds, "lock-gui-after-seconds", 
 UI_CONFIG_VARIABLE (bool, draggable_playhead, "draggable-playhead", true)
 UI_CONFIG_VARIABLE (std::string, keyboard_layout, "keyboard-layout", "ansi")
 UI_CONFIG_VARIABLE (std::string, keyboard_layout_name, "keyboard-layout-name", "ansi")
-UI_CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
+UI_CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "us")
 UI_CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", false)
 UI_CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
 UI_CONFIG_VARIABLE (bool, name_new_markers, "name-new-markers", false)

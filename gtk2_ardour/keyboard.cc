@@ -20,6 +20,7 @@
 #include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/basename.h"
 
 #include "ardour/filesystem_paths.h"
 
@@ -27,6 +28,7 @@
 #include "public_editor.h"
 #include "keyboard.h"
 #include "opts.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -35,7 +37,7 @@ using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
 using Gtkmm2ext::Keyboard;
- 
+
 #ifdef GTKOSX
 guint ArdourKeyboard::constraint_mod = Keyboard::PrimaryModifier;
 #else
@@ -49,21 +51,46 @@ guint ArdourKeyboard::push_points_mod = Keyboard::PrimaryModifier;
 guint ArdourKeyboard::note_size_relative_mod = Keyboard::PrimaryModifier;
 
 void
+ArdourKeyboard::find_bindings_files (map<string,string>& files)
+{
+	vector<std::string> found;
+	Searchpath spath = ardour_config_search_path();
+
+	if (getenv ("ARDOUR_SAE")) {
+		find_files_matching_pattern (found, spath, string_compose ("*SAE-*.%1", Keyboard::binding_filename_suffix));
+	} else {
+		find_files_matching_pattern (found, spath, string_compose ("*.%1", Keyboard::binding_filename_suffix));
+	}
+
+	if (found.empty()) {
+		return;
+	}
+
+	for (vector<std::string>::iterator x = found.begin(); x != found.end(); ++x) {
+		std::string path(*x);
+		pair<string,string> namepath;
+		namepath.second = path;
+		namepath.first = PBD::basename_nosuffix (path);
+		files.insert (namepath);
+	}
+}
+
+void
 ArdourKeyboard::setup_keybindings ()
 {
 	using namespace ARDOUR_COMMAND_LINE;
-	string default_bindings = "us.bindings";
+	string default_bindings = string_compose ("%1%2", UIConfiguration::instance().get_default_bindings(), Keyboard::binding_filename_suffix);
 	vector<string> strs;
 
 	binding_files.clear ();
 
-	ARDOUR::find_bindings_files (binding_files);
+	find_bindings_files (binding_files);
 
 	/* set up the per-user bindings path */
 
 	string lowercase_program_name = downcase (string(PROGRAM_NAME));
 
-	user_keybindings_path = Glib::build_filename (user_config_directory(), lowercase_program_name + ".bindings");
+	user_keybindings_path = Glib::build_filename (user_config_directory(), lowercase_program_name + binding_filename_suffix);
 
 	if (Glib::file_test (user_keybindings_path, Glib::FILE_TEST_EXISTS)) {
 		std::pair<string,string> newpair;
@@ -76,7 +103,7 @@ ArdourKeyboard::setup_keybindings ()
 	   an actual filename (*.bindings)
 	*/
 
-	if (!keybindings_path.empty() && keybindings_path.find (".bindings") == string::npos) {
+	if (!keybindings_path.empty() && keybindings_path.find (binding_filename_suffix) == string::npos) {
 
 		// just a style name - allow user to
 		// specify the layout type.
@@ -97,7 +124,7 @@ ArdourKeyboard::setup_keybindings ()
 			keybindings_path += "-us";
 		}
 
-		keybindings_path += ".bindings";
+		keybindings_path += binding_filename_suffix;
 	}
 
 	if (keybindings_path.empty()) {
@@ -120,6 +147,8 @@ ArdourKeyboard::setup_keybindings ()
 		keybindings_path = default_bindings;
 	}
 
+	cerr << "KP is " << keybindings_path << endl;
+
 	while (true) {
 
 		if (!Glib::path_is_absolute (keybindings_path)) {
@@ -127,7 +156,7 @@ ArdourKeyboard::setup_keybindings ()
 			/* not absolute - look in the usual places */
 			std::string keybindings_file;
 
-			if ( ! find_file (ardour_config_search_path(), keybindings_path, keybindings_file)) {
+			if (!find_file (ardour_config_search_path(), keybindings_path, keybindings_file)) {
 
 				if (keybindings_path == default_bindings) {
 					error << string_compose (_("Default keybindings not found - %1 will be hard to use!"), PROGRAM_NAME) << endmsg;
@@ -166,8 +195,10 @@ ArdourKeyboard::setup_keybindings ()
 		}
 	}
 
+	info << string_compose (_("Loading keybindings from %1"), keybindings_path) << endmsg;
+
 	load_keybindings (keybindings_path);
-	
+
 	/* catch changes made via some GTK mechanism */
 
 	// GtkAccelMap* accelmap = gtk_accel_map_get();

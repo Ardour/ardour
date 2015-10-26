@@ -719,10 +719,10 @@ def build(bld):
     # explicitly state the use of perl here so that it works on windows too
     # 
     a_rule = 'perl ../tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap ${SRC} >${TGT}' % (sys.platform, bld.env['WINDOWS_KEY'] )
-    for b in [ 'us' ] :
+    for b in [ 'ardour' ] :
         obj = bld(
-            target = b + '.bindings',
-            source = b + '.bindings.in',
+            target = b + '.keys',
+            source = b + '.keys.in',
             rule = a_rule
             )
         obj.install_path = bld.env['CONFDIR']

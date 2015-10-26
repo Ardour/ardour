@@ -80,7 +80,6 @@
 #include "pbd/fpu.h"
 #include "pbd/file_utils.h"
 #include "pbd/enumwriter.h"
-#include "pbd/basename.h"
 
 #include "midi++/port.h"
 #include "midi++/mmc.h"
@@ -606,31 +605,6 @@ ARDOUR::cleanup ()
 	PBD::cleanup ();
 
 	return;
-}
-
-void
-ARDOUR::find_bindings_files (map<string,string>& files)
-{
-	vector<std::string> found;
-	Searchpath spath = ardour_config_search_path();
-
-	if (getenv ("ARDOUR_SAE")) {
-		find_files_matching_pattern (found, spath, "*SAE-*.bindings");
-	} else {
-		find_files_matching_pattern (found, spath, "*.bindings");
-	}
-
-	if (found.empty()) {
-		return;
-	}
-
-	for (vector<std::string>::iterator x = found.begin(); x != found.end(); ++x) {
-		std::string path(*x);
-		pair<string,string> namepath;
-		namepath.second = path;
-		namepath.first = PBD::basename_nosuffix (path);
-		files.insert (namepath);
-	}
 }
 
 bool

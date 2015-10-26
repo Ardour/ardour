@@ -72,8 +72,6 @@ namespace ARDOUR {
 
 	extern LIBARDOUR_API const char* const ardour_config_info;
 
-	LIBARDOUR_API void find_bindings_files (std::map<std::string,std::string>&);
-
 	/* these only impact bundled installations */
 	LIBARDOUR_API std::string translation_enable_path ();
 	LIBARDOUR_API bool translations_are_enabled ();

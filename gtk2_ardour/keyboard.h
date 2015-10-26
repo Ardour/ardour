@@ -20,6 +20,9 @@
 #ifndef __ardour_keyboard_h__
 #define __ardour_keyboard_h__
 
+#include <map>
+#include <string>
+
 #include "ardour/types.h"
 #include "gtkmm2ext/keyboard.h"
 
@@ -93,6 +96,8 @@ private:
 	static guint     fine_adjust_mod;
 	static guint     push_points_mod;
 	static guint     note_size_relative_mod;
+
+	void find_bindings_files (std::map<std::string,std::string>& files);
 };
 
 #endif /* __ardour_keyboard_h__ */
