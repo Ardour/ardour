@@ -40,8 +40,10 @@ compiler_flags_dictionaries= {
         'linker-debuggable' : '',
         # Flags required when building a non-debug optimized build
         'nondebuggable' : '-DNDEBUG',
-        # Flags required to enable profiling at runtime
-        'profile' : '-pg',
+        # Flags required to enable profiling at runtime with optimized builds
+        'profile' : [ '-fno-omit-frame-pointer' ],
+        # Flags required to enable gprofile profiling
+        'gprofile' : '-pg',
         # Flags required to disable warnings about unused arguments to function calls
         'silence-unused-arguments' : '',
         # Flags required to use SSE unit for general math
@@ -89,7 +91,7 @@ compiler_flags_dictionaries= {
         'debuggable' : ['/DDEBUG', '/Od', '/Zi', '/MDd', '/Gd', '/EHsc'],
         'linker-debuggable' : ['/DEBUG', '/INCREMENTAL' ],
         'nondebuggable' : ['/DNDEBUG', '/Ob1', '/MD', '/Gd', '/EHsc'],
-        'profile' : '',
+        'profile' : '/Oy-',
         'sse' : '/arch:SSE',
         'silence-unused-arguments' : '',
         'sse' : '',
@@ -332,7 +334,7 @@ int main() { return 0; }''',
         linker_flags.append('-fsanitize=address')
 
     if opt.gprofile:
-        debug_flags = [ flags_dict['profile'] ]
+        debug_flags = [ flags_dict['gprofile'] ]
 
     # OSX
     if platform == 'darwin':
@@ -545,6 +547,9 @@ int main() { return 0; }''',
     if opt.debug_symbols:
         optimization_flags += flags_dict['debuggable']
 
+    if opt.profile:
+        optimization_flags += flags_dict['profile']
+
     if opt.stl_debug:
         cxx_flags.append("-D_GLIBCXX_DEBUG")
 
@@ -646,6 +651,8 @@ def options(opt):
                     help='Build MIME type and .desktop files as per freedesktop.org standards (will be placed in build/gtk2_ardour)')
     opt.add_option('--freebie', action='store_true', default=False, dest='freebie',
                     help='Build a version suitable for distribution as a zero-cost binary')
+    opt.add_option('--profile', action='store_true', default=False, dest='profile',
+                    help='Compile for use with profiling tools requiring a frame pointer')
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
                     help='Compile for use with gprofile')
     opt.add_option('--libjack', type='string', default="auto", dest='libjack_link',
