@@ -568,15 +568,15 @@ EditorRoutes::redisplay ()
 	}
 
 	// model deprecated g_atomic_int_exchange_and_add(, 1)
-	g_atomic_int_inc(&_redisplay_active);
-	if (!g_atomic_int_compare_and_exchange (&_redisplay_active, 1, 1)) {
+	g_atomic_int_inc(const_cast<gint*>(&_redisplay_active));
+	if (!g_atomic_int_compare_and_exchange (const_cast<gint*>(&_redisplay_active), 1, 1)) {
 		return;
 	}
 
 	redisplay_real ();
 
-	while (!g_atomic_int_compare_and_exchange (&_redisplay_active, 1, 0)) {
-		g_atomic_int_set(&_redisplay_active, 1);
+	while (!g_atomic_int_compare_and_exchange (const_cast<gint*>(&_redisplay_active), 1, 0)) {
+		g_atomic_int_set(const_cast<gint*>(&_redisplay_active), 1);
 		redisplay_real ();
 	}
 }
@@ -805,7 +805,7 @@ EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost:
 void
 EditorRoutes::update_active_display ()
 {
-	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
+	if (g_atomic_int_compare_and_exchange (const_cast<gint*>(&_queue_tv_update), 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
 }
@@ -1581,7 +1581,7 @@ EditorRoutes::update_input_active_display ()
 void
 EditorRoutes::update_rec_display ()
 {
-	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
+	if (g_atomic_int_compare_and_exchange (const_cast<gint*>(&_queue_tv_update), 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
 }
@@ -1589,7 +1589,7 @@ EditorRoutes::update_rec_display ()
 bool
 EditorRoutes::idle_update_mute_rec_solo_etc()
 {
-	g_atomic_int_set (&_queue_tv_update, 0);
+	g_atomic_int_set (const_cast<gint*>(&_queue_tv_update), 0);
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 
@@ -1626,7 +1626,7 @@ EditorRoutes::idle_update_mute_rec_solo_etc()
 void
 EditorRoutes::update_mute_display ()
 {
-	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
+	if (g_atomic_int_compare_and_exchange (const_cast<gint*>(&_queue_tv_update), 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
 }
@@ -1634,7 +1634,7 @@ EditorRoutes::update_mute_display ()
 void
 EditorRoutes::update_solo_display ()
 {
-	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
+	if (g_atomic_int_compare_and_exchange (const_cast<gint*>(&_queue_tv_update), 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
 }
@@ -1642,7 +1642,7 @@ EditorRoutes::update_solo_display ()
 void
 EditorRoutes::update_solo_isolate_display ()
 {
-	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
+	if (g_atomic_int_compare_and_exchange (const_cast<gint*>(&_queue_tv_update), 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
 }
@@ -1650,7 +1650,7 @@ EditorRoutes::update_solo_isolate_display ()
 void
 EditorRoutes::update_solo_safe_display ()
 {
-	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
+	if (g_atomic_int_compare_and_exchange (const_cast<gint*>(&_queue_tv_update), 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
 }
