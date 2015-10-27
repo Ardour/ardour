@@ -9,6 +9,7 @@ BUILDTYPE=""
 SINGLE_ARCH="F"
 X86_BUNDLE_OK="F"
 X86_64_BUNDLE_OK="F"
+GCC5ABI="F"
 MAKESELF=""
 BUILD_ROOT=../../build
 
@@ -45,7 +46,7 @@ while [ $# -gt 0 ] ; do
 
 	--singlearch) SINGLE_ARCH="T" ; shift ;;
 
-	--gcc5abi) shift ;;
+	--gcc5abi) GCC5ABI="T" ; shift ;;
 
 	*)
 		#catch all for unknown arguments
@@ -138,6 +139,9 @@ else
 	fi
 fi 
 
+if [ "$GCC5ABI" = "T" ]; then
+	PACKAGE="${PACKAGE}-gcc5"
+fi
 
 echo "Cleaning up any old package files for this build"
 #Get rid of any old packages of this same name.
