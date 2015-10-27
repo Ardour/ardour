@@ -59,7 +59,7 @@ guint Keyboard::insert_note_mod = GDK_CONTROL_MASK;
 
 #ifdef GTKOSX
 
-uint Keyboard::PrimaryModifier = GDK_MOD2_MASK;   // Command
+uint Keyboard::PrimaryModifier = GDK_META_MASK|GDK_MOD2_MASK;   // Command
 guint Keyboard::SecondaryModifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
 guint Keyboard::Level4Modifier = GDK_MOD1_MASK; // Alt/Option
