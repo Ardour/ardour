@@ -35,7 +35,7 @@ Context.Context.is_tracks_build = is_tracks_build
 compiler_flags_dictionaries= {
     'gcc' : {
         # Flags required when building a debug build
-        'debuggable' : [ '-O0', '-g' ],
+        'debuggable' : [ '-g' ],
         # Flags required for the linker (if any) when building a debug build
         'linker-debuggable' : '',
         # Flags required when building a non-debug optimized build
