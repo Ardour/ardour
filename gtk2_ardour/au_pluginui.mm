@@ -813,12 +813,11 @@ AUPluginUI::lower_box_size_allocate (Gtk::Allocation& allocation)
 gboolean
 AUPluginUI::lower_box_expose (GdkEventExpose* event)
 {
-#if 0 // AU view magically redraws by itself
 	[au_view drawRect:NSMakeRect(event->area.x,
 			event->area.y,
 			event->area.width,
 			event->area.height)];
-#endif
+
 	/* hack to keep ardour responsive
 	 * some UIs (e.g Addictive Drums) completely hog the CPU
 	 */
