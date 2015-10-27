@@ -694,7 +694,6 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 	}
 
 	/* clamp y */
-
 	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
 		double const y = ((_height - (*i)->get_y()) / _height) + dy;
 		if (y < 0) {
@@ -736,7 +735,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 	_last_drag_fraction = fraction;
 	did_push = with_push;
 
-	return pair<double, float> (_drag_x + dx, _last_drag_fraction + dy);
+	return pair<double, float> (_drag_x + dx, fraction);
 }
 
 /** Should be called to indicate the end of a drag */
