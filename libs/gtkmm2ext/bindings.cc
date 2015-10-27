@@ -50,6 +50,11 @@ MouseButton::MouseButton (uint32_t state, uint32_t keycode)
 {
         uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
 
+        /* this is a slightly wierd test that relies on
+         * gdk_keyval_is_{upper,lower}() returning true for keys that have no
+         * case-sensitivity. This covers mostly non-alphanumeric keys.
+         */
+
         if (gdk_keyval_is_upper (keycode) && gdk_keyval_is_lower (keycode)) {
                 /* key is not subject to case, so ignore SHIFT
                  */
@@ -1082,4 +1087,3 @@ std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k) {
 	char const *gdk_name = gdk_keyval_name (k.key());
 	return out << "Key " << k.key() << " (" << (gdk_name ? gdk_name : "no-key") << ") state " << hex << k.state() << dec;
 }
-
