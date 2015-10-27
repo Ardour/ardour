@@ -663,8 +663,8 @@ RouteTimeAxisView::build_display_menu ()
 		int styles = 0;
 		boost::shared_ptr<Track> first_track;
 
-		for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
-			RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
+		for (TrackSelection::const_iterator t = s.begin(); t != s.end(); ++t) {
+			RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*t);
 			if (!r || !r->is_track ()) {
 				continue;
 			}
@@ -708,8 +708,6 @@ RouteTimeAxisView::build_display_menu ()
 			inconsistent = true;
 			break;
 		}
-
-		RadioMenuItem* i;
 
 		if (!inconsistent && first_track) {
 
@@ -759,8 +757,8 @@ RouteTimeAxisView::build_display_menu ()
 		int tape = 0;
 		int non_layered = 0;
 
-		for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
-			RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
+		for (TrackSelection::const_iterator t = s.begin(); t != s.end(); ++t) {
+			RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*t);
 			if (!r || !r->is_track ()) {
 				continue;
 			}
