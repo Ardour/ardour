@@ -4361,14 +4361,17 @@ LineDrag::motion (GdkEvent* event, bool first_move)
 	uint32_t ignored;
 
 	if (first_move) {
+		float const initial_fraction = 1.0 - (_fixed_grab_y / _line->height());
+
 		_editor->begin_reversible_command (_("automation range move"));
-		_line->start_drag_line (_before, _after, fraction);
+		_line->start_drag_line (_before, _after, initial_fraction);
 	}
 
 	/* we are ignoring x position for this drag, so we can just pass in anything */
-	_line->drag_motion (0, fraction, true, false, ignored);
+	pair<double, float> result;
 
-	show_verbose_cursor_text (_line->get_verbose_cursor_string (fraction));
+	result = _line->drag_motion (0, fraction, true, false, ignored);
+	show_verbose_cursor_text (_line->get_verbose_cursor_string (result.second));
 }
 
 void
