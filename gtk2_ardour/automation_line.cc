@@ -1226,7 +1226,7 @@ AutomationLine::model_to_view_coord_y (double& y) const
 	if (   alist->parameter().type() == GainAutomation
 	    || alist->parameter().type() == EnvelopeAutomation
 	    || (_desc.logarithmic && _desc.lower == 0. && _desc.upper > _desc.lower)) {
-		y = gain_to_slider_position_with_max (y, Config->get_max_gain());
+		y = gain_to_slider_position_with_max (y, _desc.upper);
 	} else if (alist->parameter().type() == TrimAutomation
 	           || (_desc.logarithmic && _desc.lower * _desc.upper > 0 && _desc.upper > _desc.lower)) {
 		const double lower_db = accurate_coefficient_to_dB (_desc.lower);
