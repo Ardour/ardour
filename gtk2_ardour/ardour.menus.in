@@ -43,12 +43,12 @@
       </menu>
       <separator/>
       <menuitem action='toggle-session-options-editor'/>
-#ifdef GTKOSX      
+#ifdef __APPLE__
       <menuitem action='toggle-about'/>
 #endif
       <separator/>
       <menuitem action='lock'/>
-#ifndef GTKOSX
+#ifndef __APPLE__
       <separator/>
       <menuitem action='Quit'/>
 #endif
@@ -550,7 +550,7 @@
       <separator/>
     </menu>
     <menu name='Help' action='Help'>
-#ifndef GTKOSX
+#ifndef __APPLE__
       <menuitem action='toggle-about'/>
 #endif
       <menuitem action='chat'/>

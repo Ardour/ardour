@@ -846,7 +846,7 @@ def configure(conf):
         conf.define ('HAVE_COREAUDIO', 1)
         conf.define ('AUDIOUNIT_SUPPORT', 1)
 
-        conf.define ('TOP_MENUBAR',1)
+        Conf.define ('TOP_MENUBAR',1)
 
         # It would be nice to be able to use this to force back-compatibility with 10.4
         # but even by the time of 11, the 10.4 SDK is no longer available in any normal

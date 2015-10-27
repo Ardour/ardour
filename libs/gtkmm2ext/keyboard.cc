@@ -57,7 +57,7 @@ guint Keyboard::delete_mod = GDK_SHIFT_MASK;
 guint Keyboard::insert_note_but = 1;
 guint Keyboard::insert_note_mod = GDK_CONTROL_MASK;
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 
 uint Keyboard::PrimaryModifier = GDK_META_MASK|GDK_MOD2_MASK;   // Command
 guint Keyboard::SecondaryModifier = GDK_CONTROL_MASK; // Control
@@ -591,7 +591,7 @@ Keyboard::is_insert_note_event (GdkEventButton *ev)
 bool
 Keyboard::is_button2_event (GdkEventButton* ev)
 {
-#ifdef GTKOSX
+#ifdef __APPLE__
 	return (ev->button == 2) ||
 		((ev->button == 1) &&
 		 ((ev->state & Keyboard::button2_modifiers) == Keyboard::button2_modifiers));

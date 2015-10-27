@@ -2,6 +2,8 @@
 from waflib.extras import autowaf as autowaf
 from waflib import Options
 import os
+import sys
+import platform as PLATFORM
 
 # Version of this package (even if built as a child)
 MAJOR = '0'
@@ -105,7 +107,7 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libgtkmm2ext'
     obj.target       = 'gtkmm2ext'
-    obj.uselib       = 'GTKMM GTK GTKOSX OSX GDK'
+    obj.uselib       = 'GTKMM GTK'
     obj.use          = [ 'libpbd', 'libardour' ]
     obj.vnum         = GTKMM2EXT_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
@@ -113,7 +115,7 @@ def build(bld):
                     'PACKAGE="' + I18N_PACKAGE + '"',
                     'LOCALEDIR="' + os.path.join(
                             os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
-    if bld.is_defined('GTKOSX'):
+    if sys.platform == 'darwin':
         obj.source += ['gtkapplication_quartz.mm']
     else:
         obj.source += ['gtkapplication_x11.c']

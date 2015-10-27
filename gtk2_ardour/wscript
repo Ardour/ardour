@@ -659,8 +659,8 @@ def build(bld):
 
     # Menus
     menus_argv = []
-    if bld.is_defined('GTKOSX'):
-        menus_argv = [ '-E', '-P', '-DGTKOSX', '-' ]
+    if sys.platform == 'darwin':
+        menus_argv = [ '-E', '-P', '-D__APPLE__', '-' ]
     else:
         menus_argv = [ '-E', '-P' ]
 
