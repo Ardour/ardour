@@ -108,7 +108,7 @@ AddVideoDialog::AddVideoDialog (Session* s)
 
 	/* file chooser */
 	chooser.set_border_width (4);
-#ifdef GTKOSX
+#ifdef __APPLE__
 	/* some broken redraw behaviour - this is a bandaid */
 	chooser.signal_selection_changed().connect (mem_fun (chooser, &Widget::queue_draw));
 #endif

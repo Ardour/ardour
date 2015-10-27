@@ -560,7 +560,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	, gm (0)
 {
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 	try {
 		/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
 		chooser.add_shortcut_folder_uri("file:///Library/GarageBand/Apple Loops");
@@ -597,7 +597,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	chooser.signal_update_preview().connect(sigc::mem_fun(*this, &SoundFileBrowser::update_preview));
 	chooser.signal_file_activated().connect (sigc::mem_fun (*this, &SoundFileBrowser::chooser_file_activated));
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 	/* some broken redraw behaviour - this is a bandaid */
 	chooser.signal_selection_changed().connect (mem_fun (chooser, &Widget::queue_draw));
 #endif
@@ -1091,7 +1091,7 @@ SoundFileBrowser::freesound_search()
 	std::string theString = mootcher.searchText(
 			search_string,
 			freesound_page,
-#ifdef GTKOSX
+#ifdef __APPLE__
 			"", // OSX eats anything incl mp3
 #else
 			"type:wav OR type:aiff OR type:flac OR type:aif OR type:ogg OR type:oga",

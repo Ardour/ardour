@@ -2015,7 +2015,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void cms_new (boost::shared_ptr<ARDOUR::Route>);
 	void current_mixer_strip_hidden ();
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 	void ensure_all_elements_drawn ();
 #endif
 	/* nudging tracks */

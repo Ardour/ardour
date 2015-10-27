@@ -547,7 +547,7 @@ ARDOUR_UI::build_menu_bar ()
 	bool disk_space = false;
 
  	if (!Profile->get_small_screen()) {
-#ifndef GTKOSX
+#ifndef __APPLE__
 		// OSX provides its own wallclock, thank you very much
 		wall_clock = true;
 #endif
@@ -571,7 +571,7 @@ ARDOUR_UI::build_menu_bar ()
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
 
-#ifndef GTKOSX
+#ifndef __APPLE__
 	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), wall_clock);
 #endif
 	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), disk_space);

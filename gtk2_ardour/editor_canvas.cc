@@ -462,7 +462,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		snap_to (frame);
 
 		bool copy = ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
-#ifdef GTKOSX
+#ifdef __APPLE__
 		/* We are not allowed to call recursive main event loops from within
 		   the main event loop with GTK/Quartz. Since import/embed wants
 		   to push up a progress dialog, defer all this till we go idle.

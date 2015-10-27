@@ -327,7 +327,7 @@ static const struct {
 
 	{ "Unmodified", 0 },
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 
 	/* Command = Meta
 	   Option/Alt = Mod1
@@ -515,7 +515,7 @@ public:
 		_copy_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::copy_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_copy_modifier_combo,
 						    (string_compose (_("<b>Recommended Setting: %1</b>%2"),
-#ifdef GTKOSX
+#ifdef __APPLE__
 								     Keyboard::secondary_modifier_name (),
 #else
 								     Keyboard::primary_modifier_name (),
@@ -542,7 +542,7 @@ public:
 		_constraint_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::constraint_modifier_chosen));
 		Gtkmm2ext::UI::instance()->set_tip (_constraint_modifier_combo,
 						    (string_compose (_("<b>Recommended Setting: %1</b>%2"),
-#ifdef GTKOSX
+#ifdef __APPLE__
 								     Keyboard::primary_modifier_name (),
 #else
 								     Keyboard::secondary_modifier_name (),
@@ -666,7 +666,7 @@ public:
 		/* ignore snap */
 		set_popdown_strings (_snap_modifier_combo, dumb);
 		_snap_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_modifier_chosen));
-#ifdef GTKOSX
+#ifdef __APPLE__
 		Glib::ustring mod_str = string_compose (X_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
 #else
 		Glib::ustring mod_str = Keyboard::secondary_modifier_name();
@@ -692,7 +692,7 @@ public:
 		/* snap delta */
 		set_popdown_strings (_snap_delta_combo, dumb);
 		_snap_delta_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_delta_modifier_chosen));
-#ifdef GTKOSX
+#ifdef __APPLE__
 		mod_str = Keyboard::level4_modifier_name ();
 #else
 		mod_str = string_compose (X_("%1-%2"), Keyboard::secondary_modifier_name (), Keyboard::level4_modifier_name ());
@@ -2902,7 +2902,12 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_name_highlight)
 		     ));
 
-	add_option (S_("GUI"),
+#ifndef __APPLE__
+	/* font scaling does nothing with GDK/Quartz */
+	add_option (S_("Preferences|GUI"), new FontScalingOptions ());
+#endif
+
+	add_option (S_("Preferences|GUI"),
 		    new BoolOption (
 			    "super-rapid-clock-update",
 			    _("Update transport clock display at FPS instead of every 100ms"),

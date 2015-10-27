@@ -161,13 +161,13 @@ Editor::show_editor_mixer (bool yn)
 		}
 	}
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 	/* XXX gtk problem here */
 	ensure_all_elements_drawn();
 #endif
 }
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 void
 Editor::ensure_all_elements_drawn ()
 {
@@ -185,7 +185,7 @@ Editor::create_editor_mixer ()
 	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
 	current_mixer_strip->WidthChanged.connect (sigc::mem_fun (*this, &Editor::mixer_strip_width_changed));
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
 #endif
 	current_mixer_strip->set_embedded (true);
@@ -273,7 +273,7 @@ Editor::maybe_add_mixer_strip_width (XMLNode& node)
 void
 Editor::mixer_strip_width_changed ()
 {
-#ifdef GTKOSX
+#ifdef __APPLE__
 	ensure_all_elements_drawn ();
 #endif
 

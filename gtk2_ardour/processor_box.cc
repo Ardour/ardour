@@ -1693,7 +1693,7 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 				boost::weak_ptr<Processor>(processor)));
 
 	} else if (processor && Keyboard::is_button2_event (ev)
-#ifndef GTKOSX
+#ifndef __APPLE__
 		   && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))
 #endif
 		) {

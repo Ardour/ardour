@@ -627,7 +627,7 @@ ARDOUR_UI::post_engine ()
 
 	/* start the time-of-day-clock */
 
-#ifndef GTKOSX
+#ifndef __APPLE__
 	/* OS X provides a nearly-always visible wallclock, so don't be stupid */
 	update_wall_clock ();
 	Glib::signal_timeout().connect_seconds (sigc::mem_fun(*this, &ARDOUR_UI::update_wall_clock), 1);

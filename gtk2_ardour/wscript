@@ -475,13 +475,10 @@ def build(bld):
         ]
     obj.install_path = bld.env['DLLDIR']
     obj.linkflags    = ''
-    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL'
-    obj.uselib       += ' GTKMM CANVAS FFTW3F'
-    obj.uselib       += ' AUDIOUNITS OSX GTKOSX LO '
-    obj.uselib       += ' TAGLIB '
+    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB '
 
     if sys.platform == 'darwin':
-        obj.uselib += ' AUDIOUNITS OSX GTKOSX'
+        obj.uselib += ' AUDIOUNITS OSX '
         obj.use    += ' libappleutility'
         obj.source += [ 'cocoacarbon.mm', 'bundle_env_cocoa.cc' ]
     elif bld.env['build_target'] == 'mingw':
@@ -578,7 +575,7 @@ def build(bld):
     base_font       = ""
 
     # Set up font sizes
-    if bld.is_defined('GTKOSX'): # OS X fonts
+    if sys.platform == 'darwin':
         basefont = ""
         font_sizes = {
                 'SMALLER' : '9',

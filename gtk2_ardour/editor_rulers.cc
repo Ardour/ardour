@@ -439,7 +439,7 @@ Editor::update_ruler_visibility ()
 	double tbgpos = 0.0;
 	double old_unit_pos;
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 	/* gtk update probs require this (damn) */
 	meter_label.hide();
 	tempo_label.hide();

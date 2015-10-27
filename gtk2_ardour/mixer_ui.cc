@@ -228,7 +228,13 @@ Mixer_UI::Mixer_UI ()
 	list_vpacker.pack_start (rhs_pane2, true, true);
 
 	global_hpacker.pack_start (scroller, true, true);
+
+#ifdef __APPLE__
+	/* current gtk-quartz has dirty updates on borders like this one */
 	global_hpacker.pack_start (out_packer, false, false, 0);
+#else
+	global_hpacker.pack_start (out_packer, false, false, 12);
+#endif
 
 	list_hpane.pack1(list_vpacker, false, true);
 	list_hpane.pack2(global_hpacker, true, false);
@@ -1240,7 +1246,7 @@ Mixer_UI::strip_width_changed ()
 {
 	_group_tabs->set_dirty ();
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;
 	long order;
@@ -1345,7 +1351,7 @@ Mixer_UI::strip_property_changed (const PropertyChange& what_changed, MixerStrip
 		}
 	}
 
-	error << _("track display list item for renamed strip not found!") << endmsg;
+x	error << _("track display list item for renamed strip not found!") << endmsg;
 }
 
 bool
@@ -1379,7 +1385,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		if (Keyboard::is_edit_event (ev)) {
 			if (group) {
 				// edit_route_group (group);
-#ifdef GTKOSX
+#ifdef __APPLE__
 				group_display.queue_draw();
 #endif
 				return true;
@@ -1391,7 +1397,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 	{
 		bool visible = (*iter)[group_columns.visible];
 		(*iter)[group_columns.visible] = !visible;
-#ifdef GTKOSX
+#ifdef __APPLE__
 		group_display.queue_draw();
 #endif
 		return true;

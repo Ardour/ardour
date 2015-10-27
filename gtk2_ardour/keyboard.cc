@@ -38,7 +38,7 @@ using namespace PBD;
 using namespace ARDOUR;
 using Gtkmm2ext::Keyboard;
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 guint ArdourKeyboard::constraint_mod = Keyboard::PrimaryModifier;
 #else
 guint ArdourKeyboard::constraint_mod = Keyboard::SecondaryModifier;

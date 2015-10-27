@@ -178,7 +178,7 @@ PluginUIWindow::on_show ()
 	}
 
 	if (_pluginui) {
-#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
+#if defined (HAVE_AUDIOUNITS) && defined(__APPLE__)
                 if (pre_deactivate_x >= 0) {
                         move (pre_deactivate_x, pre_deactivate_y);
                 }
@@ -193,7 +193,7 @@ PluginUIWindow::on_show ()
 void
 PluginUIWindow::on_hide ()
 {
-#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
+#if defined (HAVE_AUDIOUNITS) && defined(__APPLE__)
         get_position (pre_deactivate_x, pre_deactivate_y);
 #endif
 
@@ -293,7 +293,7 @@ PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert>)
 }
 
 void
-#ifdef GTKOSX
+#ifdef __APPLE__
 PluginUIWindow::app_activated (bool yn)
 #else
 PluginUIWindow::app_activated (bool)
