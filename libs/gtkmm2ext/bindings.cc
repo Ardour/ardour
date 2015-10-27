@@ -444,11 +444,7 @@ Bindings::push_to_gtk (KeyboardKey kb, RefPtr<Action> what)
          * up with all bindings/actions.
          */
 
-	uint32_t gtk_legal_keyval = kb.key();
-	possibly_translate_keyval_to_make_legal_accelerator (gtk_legal_keyval);
-	KeyboardKey gtk_binding (kb.state(), gtk_legal_keyval);
 	Gtk::AccelKey gtk_key;
-
 	bool entry_exists = Gtk::AccelMap::lookup_entry (what->get_accel_path(), gtk_key);
 
         if (!entry_exists) {
@@ -464,8 +460,8 @@ Bindings::push_to_gtk (KeyboardKey kb, RefPtr<Action> what)
 	         * happens.
 	         */
 
-	        Gtk::AccelMap::add_entry (what->get_accel_path(), gtk_binding.key(), (Gdk::ModifierType) gtk_binding.state());
-        }
+	        Gtk::AccelMap::add_entry (what->get_accel_path(), kb.key(), (Gdk::ModifierType) kb.state());
+        } 
 }
 
 bool
