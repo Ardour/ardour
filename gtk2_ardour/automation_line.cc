@@ -729,13 +729,13 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 			line->set_steps (line_points, is_stepped());
 		}
 	}
-
+	double const result_frac = _last_drag_fraction + dy;
 	_drag_distance += dx;
 	_drag_x += dx;
-	_last_drag_fraction = fraction;
+	_last_drag_fraction = result_frac;
 	did_push = with_push;
 
-	return pair<double, float> (_drag_x + dx, fraction);
+	return pair<double, float> (_drag_x + dx, result_frac);
 }
 
 /** Should be called to indicate the end of a drag */
