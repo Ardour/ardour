@@ -1,0 +1,12 @@
+#!/bin/sh
+#HELGRIND_OPTIONS="$VALGRIND_OPTIONS --free-is-write=yes"
+#HELGRIND_OPTIONS="$VALGRIND_OPTIONS --history-level=approx"
+HELGRIND_OPTIONS="$VALGRIND_OPTIONS --log-file=/tmp/ardour-%p.log"
+
+TOP=`dirname "$0"`/..
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
+export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
+exec valgrind --tool=helgrind \
+	--error-limit=no --num-callers=50 \
+	$HELGRIND_OPTIONS \
+	$TOP/$EXECUTABLE --novst "$@"
