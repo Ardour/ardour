@@ -160,7 +160,19 @@ KeyboardKey::display_label () const
 	 *  on all platforms, notably the command key on OS X.
 	 */
 
-	return gtk_accelerator_get_label (key(), (GdkModifierType) state());
+        uint32_t mod = state();
+
+#ifdef __APPLE__
+                /* We use both bits (MOD2|META) for Primary on OS X,
+                 * but we don't want MOD2 showing up in listings.
+                 */
+
+                if (mod & GDK_MOD2_MASK) {
+                        mod &= ~GDK_MOD2_MASK;
+                }
+#endif
+
+	return gtk_accelerator_get_label (key(), (GdkModifierType) mod);
 }
 
 string
