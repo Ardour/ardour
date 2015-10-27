@@ -1080,6 +1080,6 @@ ActionMap::get_all_actions (std::vector<std::string>& paths,
 
 std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k) {
 	char const *gdk_name = gdk_keyval_name (k.key());
-	return out << "Key " << k.key() << " (" << (gdk_name ? gdk_name : "no-key") << ") state " << k.state();
+	return out << "Key " << k.key() << " (" << (gdk_name ? gdk_name : "no-key") << ") state " << hex << k.state() << dec;
 }
 
