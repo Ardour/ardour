@@ -382,30 +382,6 @@ Gtkmm2ext::detach_menu (Gtk::Menu& menu)
 }
 
 bool
-Gtkmm2ext::possibly_translate_mod_to_make_legal_accelerator (GdkModifierType& mod)
-{
-#ifdef GTKOSX
-	/* GTK on OS X is currently (February 2012) setting both
-	   the Meta and Mod2 bits in the event modifier state if
-	   the Command key is down.
-
-	   gtk_accel_groups_activate() does not invoke any of the logic
-	   that gtk_window_activate_key() will that sorts out that stupid
-	   state of affairs, and as a result it fails to find a match
-	   for the key event and the current set of accelerators.
-
-	   to fix this, if the meta bit is set, remove the mod2 bit
-	   from the modifier. this assumes that our bindings use Primary
-	   which will have set the meta bit in the accelerator entry.
-	*/
-	if (mod & GDK_META_MASK) {
-		mod = GdkModifierType (mod & ~GDK_MOD2_MASK);
-	}
-#endif
-	return true;
-}
-
-bool
 Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval)
 {
 	int fakekey = GDK_VoidSymbol;

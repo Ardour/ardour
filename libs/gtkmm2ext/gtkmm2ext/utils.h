@@ -123,7 +123,6 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API Glib::RefPtr<Gdk::Window> window_to_draw_on (Gtk::Widget& w, Gtk::Widget** parent);
 
         LIBGTKMM2EXT_API bool possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval);
-        LIBGTKMM2EXT_API bool possibly_translate_mod_to_make_legal_accelerator (GdkModifierType& mod);
         LIBGTKMM2EXT_API uint32_t possibly_translate_legal_accelerator_to_real_key (uint32_t keyval);
 
         LIBGTKMM2EXT_API int physical_screen_height (Glib::RefPtr<Gdk::Window>);

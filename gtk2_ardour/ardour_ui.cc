@@ -5204,7 +5204,6 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 	GdkModifierType modifier = GdkModifierType (ev->state);
         modifier = GdkModifierType (modifier & gtk_accelerator_get_default_mod_mask());
-        Gtkmm2ext::possibly_translate_mod_to_make_legal_accelerator(modifier);
 
         if (focus) {
 
