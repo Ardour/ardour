@@ -43,13 +43,12 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 
 list<Bindings*> Bindings::bindings; /* global. Gulp */
-uint32_t Bindings::_ignored_state = 0;
 list<ActionMap*> ActionMap::action_maps; /* global. Gulp */
 PBD::Signal1<void,Bindings*> Bindings::BindingsChanged;
 
 MouseButton::MouseButton (uint32_t state, uint32_t keycode)
 {
-        uint32_t ignore = Bindings::ignored_state();
+        uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
 
         if (gdk_keyval_is_upper (keycode) && gdk_keyval_is_lower (keycode)) {
                 /* key is not subject to case, so ignore SHIFT
@@ -138,7 +137,7 @@ MouseButton::name () const
 
 KeyboardKey::KeyboardKey (uint32_t state, uint32_t keycode)
 {
-        uint32_t ignore = Bindings::ignored_state();
+        uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
 
         _val = (state & ~ignore);
         _val <<= 32;

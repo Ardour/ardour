@@ -178,16 +178,6 @@ class LIBGTKMM2EXT_API Bindings {
         void load_operation (XMLNode const& node);
         void save (XMLNode& root);
 
-        /* There are modifiers that we just don't care about
-           when it comes to defining bindings. This sets the modifiers
-           that will be ignored when comparing a key event with
-           existing bindings.
-        */
-        static void set_ignored_state (int mask) {
-                _ignored_state = mask;
-        }
-        static uint32_t ignored_state() { return _ignored_state; }
-
         /* GTK has the following position a Gtk::Action:
          *
          *  accel_path: <Actions>/GroupName/ActionName
@@ -230,8 +220,6 @@ class LIBGTKMM2EXT_API Bindings {
         typedef std::map<MouseButton,ActionInfo> MouseButtonBindingMap;
         MouseButtonBindingMap button_press_bindings;
         MouseButtonBindingMap button_release_bindings;
-
-        static uint32_t _ignored_state;
 
         void push_to_gtk (KeyboardKey, Glib::RefPtr<Gtk::Action>);
 };
