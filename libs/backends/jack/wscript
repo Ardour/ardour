@@ -101,6 +101,9 @@ def build(bld):
 
     if bld.env['libjack_link'] == 'link':
         obj.uselib   += [ 'JACK' ]
+    elif bld.env['build_target'] == 'mingw':
+        obj.defines += [ 'USE_WEAK_JACK' ]
+        obj.deps = [ 'weak_libjack.def' ]
     else:
         obj.defines += [ 'USE_WEAK_JACK', 'HAVE_JACK_PORT_RENAME' ]
         obj.deps = [ 'weak_libjack.def' ]
