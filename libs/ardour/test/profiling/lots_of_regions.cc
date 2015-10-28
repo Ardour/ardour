@@ -35,7 +35,7 @@ main (int argc, char* argv[])
 	/* Duplicate it a lot */
 	session->begin_reversible_command ("foo");
 	playlist->clear_changes ();
-	playlist->duplicate (region, region->last_frame(), 1000);
+	playlist->duplicate (region, region->last_frame() + 1, 1000);
 	session->add_command (new StatefulDiffCommand (playlist));
 	session->commit_reversible_command ();
 
@@ -45,7 +45,7 @@ main (int argc, char* argv[])
 	/* And do it again */
 	session->begin_reversible_command ("foo");
 	playlist->clear_changes ();
-	playlist->duplicate (region, region->last_frame(), 1000);
+	playlist->duplicate (region, region->last_frame() + 1, 1000);
 	session->add_command (new StatefulDiffCommand (playlist));
 	session->commit_reversible_command ();
 }
