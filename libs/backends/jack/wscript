@@ -49,7 +49,8 @@ def configure(conf):
                    uselib = 'JACK')
 
     # Check to see if jack_port_rename() is available and working
-    conf.check_cxx(fragment = "#include <jack/jack.h>\nint main(void) { jack_client_t* c; jack_port_t* p; jack_port_rename (c, p, \"foo\"); return 0; }\n",
+    if Options.options.libjack_link == 'link':
+            conf.check_cxx(fragment = "#include <jack/jack.h>\nint main(void) { jack_client_t* c; jack_port_t* p; jack_port_rename (c, p, \"foo\"); return 0; }\n",
                    mandatory = False,
                    execute = False,
                    features = ['cxx'],
@@ -101,7 +102,7 @@ def build(bld):
     if bld.env['libjack_link'] == 'link':
         obj.uselib   += [ 'JACK' ]
     else:
-        obj.defines += [ 'USE_WEAK_JACK' ]
+        obj.defines += [ 'USE_WEAK_JACK', 'HAVE_JACK_PORT_RENAME' ]
         obj.deps = [ 'weak_libjack.def' ]
 
     #
