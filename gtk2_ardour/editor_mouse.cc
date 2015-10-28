@@ -333,12 +333,12 @@ Editor::update_time_selection_display ()
 	switch (mouse_mode) {
 	case MouseRange:
 		selection->clear_objects ();
-		selection->ClearMidiNoteSelection ();  /* EMIT SIGNAL */
+		selection->clear_midi_notes ();
 		break;
 	case MouseObject:
 		selection->clear_time ();
 		selection->clear_tracks ();
-		selection->ClearMidiNoteSelection ();  /* EMIT SIGNAL */
+		selection->clear_midi_notes ();
 		break;
 	case MouseDraw:
 		/* Clear regions, but not time or tracks, since that

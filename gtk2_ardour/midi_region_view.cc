@@ -90,8 +90,6 @@ using namespace Editing;
 using namespace std;
 using Gtkmm2ext::Keyboard;
 
-PBD::Signal1<void, MidiRegionView *> MidiRegionView::SelectionCleared;
-
 #define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
@@ -134,11 +132,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
-
-	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
-
-	PublicEditor& editor (trackview.editor());
-	editor.get_selection().ClearMidiNoteSelection.connect (_clear_midi_selection_connection, invalidator (*this), boost::bind (&MidiRegionView::clear_midi_selection, this), gui_context ());
 }
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
@@ -183,11 +176,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
 	connect_to_diskstream ();
-
-	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
-
-	PublicEditor& editor (trackview.editor());
-	editor.get_selection().ClearMidiNoteSelection.connect (_clear_midi_selection_connection, invalidator (*this), boost::bind (&MidiRegionView::clear_midi_selection, this), gui_context ());
 }
 
 void
@@ -320,11 +308,6 @@ MidiRegionView::init (bool wfd)
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
-
-	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
-
-	PublicEditor& editor (trackview.editor());
-	editor.get_selection().ClearMidiNoteSelection.connect (_clear_midi_selection_connection, invalidator (*this), boost::bind (&MidiRegionView::clear_midi_selection, this), gui_context ());
 }
 
 InstrumentInfo&
@@ -554,7 +537,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		switch (editor.current_mouse_mode()) {
 		case MouseRange:
 			/* no motion occured - simple click */
-			clear_selection ();
+			clear_editor_note_selection ();
 			_mouse_changed_selection = true;
 			break;
 
@@ -574,7 +557,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					Evoral::Beats beats = get_grid_beats(editor.pixel_to_sample(event_x));
 					create_note_at (editor.pixel_to_sample (event_x), event_y, beats, true);
 				} else {
-					clear_selection ();
+					clear_editor_note_selection ();
 				}
 
 				break;
@@ -669,7 +652,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			} else if (m == MouseContent) {
 				editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-					clear_selection ();
+					clear_editor_note_selection ();
 					_mouse_changed_selection = true;
 				}
 				_mouse_state = SelectRectDragging;
@@ -752,7 +735,7 @@ MidiRegionView::key_press (GdkEventKey* ev)
 		return true;
 
 	} else if (ev->keyval == GDK_Escape && unmodified) {
-		clear_selection();
+		clear_editor_note_selection ();
 		_mouse_state = None;
 
 	} else if (ev->keyval == GDK_comma || ev->keyval == GDK_period) {
@@ -970,7 +953,7 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, bo
 
 	start_note_diff_command(_("add note"));
 
-	clear_selection ();
+	clear_editor_note_selection ();
 	note_diff_add_note (new_note, true, false);
 
 	apply_diff();
@@ -979,9 +962,10 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, bo
 }
 
 void
-MidiRegionView::clear_events (bool with_selection_signal)
+MidiRegionView::clear_events ()
 {
-	clear_selection (with_selection_signal);
+	// clear selection without signaling
+	clear_selection_internal ();
 
 	MidiGhostRegion* gr;
 	for (std::vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
@@ -1008,7 +992,7 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 	content_connection.disconnect ();
 	_model->ContentsChanged.connect (content_connection, invalidator (*this), boost::bind (&MidiRegionView::redisplay_model, this), gui_context());
 	/* Don't signal as nobody else needs to know until selection has been altered. */
-	clear_events (false);
+	clear_events ();
 
 	if (_enable_display) {
 		redisplay_model();
@@ -1110,7 +1094,7 @@ MidiRegionView::abort_command()
 {
 	delete _note_diff_command;
 	_note_diff_command = 0;
-	clear_selection();
+	clear_editor_note_selection();
 }
 
 NoteBase*
@@ -1405,10 +1389,8 @@ MidiRegionView::~MidiRegionView ()
 		end_write();
 	}
 
-	_selection_cleared_connection.disconnect ();
-
 	_selection.clear();
-	clear_events (false);
+	clear_events ();
 
 	delete _note_group;
 	delete _note_diff_command;
@@ -1898,7 +1880,7 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 
 	start_note_diff_command (_("step add"));
 
-	clear_selection ();
+	clear_editor_note_selection ();
 	note_diff_add_note (new_note, true, false);
 
 	apply_diff();
@@ -2148,65 +2130,50 @@ MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
 }
 
 void
-MidiRegionView::clear_selection_except (NoteBase* ev, bool signal)
+MidiRegionView::clear_editor_note_selection ()
 {
- 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
-		if ((*i) != ev) {
-			Selection::iterator tmp = i;
-			++tmp;
+	DEBUG_TRACE(DEBUG::Selection, "MRV::clear_editor_note_selection\n");
+	PublicEditor& editor(trackview.editor());
+	editor.get_selection().clear_midi_notes();
+}
 
-			(*i)->set_selected (false);
-			(*i)->hide_velocity ();
-			_selection.erase (i);
+void
+MidiRegionView::clear_selection ()
+{
+	clear_selection_internal();
+	PublicEditor& editor(trackview.editor());
+	editor.get_selection().remove(this);
+}
 
-			i = tmp;
-		} else {
-			++i;
-		}
+void
+MidiRegionView::clear_selection_internal ()
+{
+	DEBUG_TRACE(DEBUG::Selection, "MRV::clear_selection_internal\n");
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		(*i)->set_selected(false);
+		(*i)->hide_velocity();
 	}
+	_selection.clear();
 
-	if (!ev && _entered) {
+	if (_entered) {
 		// Clearing selection entirely, ungrab keyboard
 		Keyboard::magic_widget_drop_focus();
 		_grabbed_keyboard = false;
-	}
-
-	/* this does not change the status of this regionview w.r.t the editor
-	   selection.
-	*/
-
-	if (signal) {
-		SelectionCleared (this); /* EMIT SIGNAL */
 	}
 }
 
 void
 MidiRegionView::unique_select(NoteBase* ev)
 {
-	const bool selection_was_empty = _selection.empty();
-
-	clear_selection_except (ev);
-
-	/* don't bother with checking to see if we should remove this
-	   regionview from the editor selection, since we're about to add
-	   another note, and thus put/keep this regionview in the editor
-	   selection anyway.
-	*/
-
-	if (!ev->selected()) {
-		add_to_selection (ev);
-		if (selection_was_empty && _entered) {
-			// Grab keyboard for moving notes with arrow keys
-			Keyboard::magic_widget_grab_focus();
-			_grabbed_keyboard = true;
-		}
-	}
+	clear_editor_note_selection();
+	add_to_selection(ev);
 }
 
 void
 MidiRegionView::select_all_notes ()
 {
-	clear_selection ();
+	clear_editor_note_selection ();
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		add_to_selection (*i);
@@ -2216,7 +2183,7 @@ MidiRegionView::select_all_notes ()
 void
 MidiRegionView::select_range (framepos_t start, framepos_t end)
 {
-	clear_selection ();
+	clear_editor_note_selection ();
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		framepos_t t = source_beats_to_absolute_frames((*i)->note()->time());
@@ -2281,7 +2248,7 @@ MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, b
 	}
 
 	if (!add) {
-		clear_selection ();
+		clear_editor_note_selection ();
 
 		if (!extend && (low_note == high_note) && (high_note == notenum)) {
 			/* only note previously selected is the one we are
@@ -2356,11 +2323,8 @@ void
 MidiRegionView::note_selected (NoteBase* ev, bool add, bool extend)
 {
 	if (!add) {
-		clear_selection_except (ev);
-		if (!_selection.empty()) {
-			PublicEditor& editor (trackview.editor());
-			editor.get_selection().add (this);
-		}
+		clear_editor_note_selection();
+		add_to_selection (ev);
 	}
 
 	if (!extend) {
@@ -3574,7 +3538,7 @@ MidiRegionView::paste_internal (framepos_t pos, unsigned paste_count, float time
 	                                               duration, pos, _region->position(),
 	                                               pos_beats));
 
-	clear_selection ();
+	clear_editor_note_selection ();
 
 	for (int n = 0; n < (int) times; ++n) {
 
@@ -4121,20 +4085,6 @@ MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, framecnt_t& grid_fr
 	}
 
 	return snap_frame_to_frame (p);
-}
-
-/** Called when the selection has been cleared in any MidiRegionView.
- *  @param rv MidiRegionView that the selection was cleared in.
- */
-void
-MidiRegionView::selection_cleared (MidiRegionView* rv)
-{
-	if (rv == this) {
-		return;
-	}
-
-	/* Clear our selection in sympathy; but don't signal the fact */
-	clear_selection (false);
 }
 
 ChannelMode

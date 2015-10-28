@@ -328,9 +328,12 @@ public:
 	 */
 	void create_note_at (framepos_t t, double y, Evoral::Beats length, bool snap_t);
 
-	void clear_selection (bool signal = true) { clear_selection_except (0, signal); }
+	/** An external request to clear the note selection, remove MRV from editor
+	 * selection.
+	 */
+	void clear_selection ();
 
-        ARDOUR::InstrumentInfo& instrument_info() const;
+	ARDOUR::InstrumentInfo& instrument_info() const;
 
 	void note_deleted (NoteBase*);
 
@@ -349,19 +352,6 @@ private:
 	friend class MidiRubberbandSelectDrag;
 	friend class MidiVerticalSelectDrag;
 
-	/** Emitted when the selection has been cleared in one MidiRegionView,
-	 *  with the expectation that others will clear their selections in
-	 *  sympathy.
-	 */
-	static PBD::Signal1<void, MidiRegionView*> SelectionCleared;
-	PBD::ScopedConnection _selection_cleared_connection;
-	void selection_cleared (MidiRegionView *);
-
-	/** this handles the case when the "external" world wants us to clear our internal selections
-	 */
-	PBD::ScopedConnection _clear_midi_selection_connection;
-	void clear_midi_selection () { clear_selection(); }
-
 	friend class EditNoteDialog;
 
 	/** Play the NoteOn event of the given note immediately
@@ -371,7 +361,13 @@ private:
 	void start_playing_midi_note (boost::shared_ptr<NoteType> note);
 	void start_playing_midi_chord (std::vector<boost::shared_ptr<NoteType> > notes);
 
-	void clear_events (bool with_selection_signal = true);
+	/** Clear the note selection of just this midi region
+	 */
+	void clear_selection_internal ();
+
+	void clear_editor_note_selection ();
+
+	void clear_events ();
 
 	bool canvas_group_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
@@ -389,7 +385,6 @@ private:
 	void trim_note(NoteBase* ev, ARDOUR::MidiModel::TimeType start_delta,
 	               ARDOUR::MidiModel::TimeType end_delta);
 
-	void clear_selection_except (NoteBase* ev, bool signal = true);
 	void update_drag_selection (framepos_t start, framepos_t end, double y0, double y1, bool extend);
 	void update_vertical_drag_selection (double last_y, double y, bool extend);
 

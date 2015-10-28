@@ -27,6 +27,7 @@
 #include "ardour/rc_configuration.h"
 
 #include "audio_region_view.h"
+#include "debug.h"
 #include "gui_thread.h"
 #include "midi_cut_buffer.h"
 #include "region_gain_line.h"
@@ -177,9 +178,18 @@ Selection::clear_midi_notes ()
 		MidiNotesChanged ();
 	}
 
-	/* The note selection is actually stored in MidiRegionView, emit signal to
-	   tell them to clear their selection. */
-	ClearMidiNoteSelection();  /* EMIT SIGNAL */
+	// clear note selections for MRV's that have note selections
+	// this will cause the MRV to be removed from the list
+	for (MidiRegionSelection::iterator i = midi_regions.begin();
+	     i != midi_regions.end();) {
+		MidiRegionSelection::iterator tmp = i;
+		++tmp;
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
+		if (mrv) {
+			mrv->clear_selection();
+		}
+		i = tmp;
+	}
 }
 
 void
@@ -518,6 +528,8 @@ Selection::add (RegionView* r)
 void
 Selection::add (MidiRegionView* mrv)
 {
+	DEBUG_TRACE(DEBUG::Selection, string_compose("Selection::add MRV %1\n", mrv));
+
 	clear_time();  //enforce object/range exclusivity
 	clear_tracks();  //enforce object/track exclusivity
 
@@ -719,6 +731,8 @@ Selection::remove (RegionView* r)
 void
 Selection::remove (MidiRegionView* mrv)
 {
+	DEBUG_TRACE(DEBUG::Selection, string_compose("Selection::remove MRV %1\n", mrv));
+
 	MidiRegionSelection::iterator x;
 
 	if ((x = find (midi_regions.begin(), midi_regions.end(), mrv)) != midi_regions.end()) {
@@ -726,7 +740,6 @@ Selection::remove (MidiRegionView* mrv)
 		MidiRegionsChanged ();
 	}
 }
-
 
 void
 Selection::remove (uint32_t selection_id)
