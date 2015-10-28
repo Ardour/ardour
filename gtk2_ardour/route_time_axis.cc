@@ -2358,7 +2358,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 
 		string name = processor->describe_parameter (*i);
 
-		if (name.begin == X_("hidden")) {
+		if (name == X_("hidden")) {
 			continue;
 		}
 
