@@ -45,7 +45,6 @@ using namespace ARDOUR;
 Splash* Splash::the_splash = 0;
 
 Splash::Splash ()
-	: Gtk::Window (Gtk::WINDOW_POPUP)
 {
 	assert (the_splash == 0);
 
