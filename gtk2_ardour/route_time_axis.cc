@@ -2334,6 +2334,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 
 	if (x == processor_automation.end()) {
 		rai = new ProcessorAutomationInfo (processor);
+		processor_automation.push_back (rai);
 	} else {
 		rai = *x;
 	}
@@ -2388,10 +2389,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 		mitem->signal_toggled().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::processor_menu_item_toggled), rai, pan));
 	}
 
-	if (items.size() > 0) {
-		processor_automation.push_back (rai);
-	} else {
-		delete rai;
+	if (items.size() == 0) {
 		return;
 	}
 
