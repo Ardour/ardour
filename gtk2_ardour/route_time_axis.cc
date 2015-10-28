@@ -2333,14 +2333,9 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 	}
 
 	if (x == processor_automation.end()) {
-
 		rai = new ProcessorAutomationInfo (processor);
-		processor_automation.push_back (rai);
-
 	} else {
-
 		rai = *x;
-
 	}
 
 	/* any older menu was deleted at the top of processors_changed()
@@ -2362,6 +2357,10 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 		Gtk::CheckMenuItem* mitem;
 
 		string name = processor->describe_parameter (*i);
+
+		if (name.begin == X_("hidden")) {
+			continue;
+		}
 
 		items.push_back (CheckMenuElem (name));
 		mitem = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
@@ -2387,6 +2386,13 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 		}
 
 		mitem->signal_toggled().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::processor_menu_item_toggled), rai, pan));
+	}
+
+	if (items.size() > 0) {
+		processor_automation.push_back (rai);
+	} else {
+		delete rai;
+		return;
 	}
 
 	/* add the menu for this processor, because the subplugin
