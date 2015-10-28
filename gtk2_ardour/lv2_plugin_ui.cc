@@ -160,6 +160,19 @@ LV2PluginUI::stop_updating(GdkEventAny*)
 }
 
 void
+LV2PluginUI::queue_port_update()
+{
+	const uint32_t num_ports = _lv2->num_ports();
+	for (uint32_t i = 0; i < num_ports; ++i) {
+		bool     ok;
+		uint32_t port = _lv2->nth_parameter(i, ok);
+		if (ok) {
+			_updates.insert (port);
+		}
+	}
+}
+
+void
 LV2PluginUI::output_update()
 {
 	//cout << "output_update" << endl;
@@ -233,6 +246,8 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
 	_ardour_buttons_box.pack_end (add_button, false, false);
 	_ardour_buttons_box.pack_end (_preset_combo, false, false);
 	_ardour_buttons_box.pack_end (_preset_modified, false, false);
+
+	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&LV2PluginUI::queue_port_update, this), gui_context ());
 }
 
 void

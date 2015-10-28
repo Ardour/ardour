@@ -118,6 +118,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	bool configure_handler (GdkEventConfigure*);
 	void save_plugin_setting ();
 	void output_update();
+	void queue_port_update();
 	bool is_update_wanted(uint32_t index);
 
 	virtual bool on_window_show(const std::string& title);
