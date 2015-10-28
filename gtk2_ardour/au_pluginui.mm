@@ -240,11 +240,13 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	low_box.signal_realize().connect (mem_fun (this, &AUPluginUI::lower_box_realized));
 	low_box.signal_visibility_notify_event ().connect (mem_fun (this, &AUPluginUI::lower_box_visibility_notify));
-	low_box.signal_size_request ().connect (mem_fun (this, &AUPluginUI::lower_box_size_request));
-	low_box.signal_size_allocate ().connect (mem_fun (this, &AUPluginUI::lower_box_size_allocate));
-	low_box.signal_map ().connect (mem_fun (this, &AUPluginUI::lower_box_map));
-	low_box.signal_unmap ().connect (mem_fun (this, &AUPluginUI::lower_box_unmap));
-	low_box.signal_expose_event ().connect (mem_fun (this, &AUPluginUI::lower_box_expose));
+	if (au_view) {
+		low_box.signal_size_request ().connect (mem_fun (this, &AUPluginUI::lower_box_size_request));
+		low_box.signal_size_allocate ().connect (mem_fun (this, &AUPluginUI::lower_box_size_allocate));
+		low_box.signal_map ().connect (mem_fun (this, &AUPluginUI::lower_box_map));
+		low_box.signal_unmap ().connect (mem_fun (this, &AUPluginUI::lower_box_unmap));
+		low_box.signal_expose_event ().connect (mem_fun (this, &AUPluginUI::lower_box_expose));
+	}
 }
 
 AUPluginUI::~AUPluginUI ()
@@ -539,8 +541,8 @@ AUPluginUI::create_carbon_view ()
 	req_width = (int) (size.x + 0.5);
 	req_height = (int) (size.y + 0.5);
 
-	SizeWindow (carbon_window, prefwidth, req_height,  true);
-	low_box.set_size_request (prefwidth, req_height); // ??
+	SizeWindow (carbon_window, req_width, req_height,  true);
+	low_box.set_size_request (req_width, req_height);
 
 	return 0;
 #else
@@ -593,13 +595,6 @@ AUPluginUI::parent_carbon_window ()
 	Rect windowStructureBoundsRect;
 
 	if (!win) {
-		return -1;
-	}
-
-	Gtk::Container* toplevel = get_toplevel();
-
-	if (!toplevel || !toplevel->is_toplevel()) {
-		error << _("AUPluginUI: no top level window!") << endmsg;
 		return -1;
 	}
 
