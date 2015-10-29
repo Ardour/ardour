@@ -4334,7 +4334,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	/* store grab start in parent frame */
 	double const bx = _line->nth (_before)->get_x();
 	double const ax = _line->nth (_after)->get_x();
-	double const click_ratio = (mx - bx) / (ax - bx);
+	double const click_ratio = (ax - mx) / (ax - bx);
 
 	double const cy = ((_line->nth (_before)->get_y() * click_ratio) + (_line->nth (_after)->get_y() * (1 - click_ratio)));
 
