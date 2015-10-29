@@ -54,17 +54,17 @@ namespace PBD
 	}
 
 	/**
-	 * @param a mangled symbol/name
+	 * @param symbol a mangled symbol/name
 	 * @return a demangled symbol/name
 	 */
-	LIBPBD_API std::string symbol_demangle(const std::string&);
+	LIBPBD_API std::string demangle_symbol(const std::string& symbol);
 
 	/**
-	 * @param a string containing a mangled symbol/name
+	 * @param str a string containing a mangled symbol/name
 	 * @return a string with the mangled symbol/name replaced with a demangled
 	 * name
 	 */
-	LIBPBD_API std::string demangle(const std::string&);
+	LIBPBD_API std::string demangle(const std::string& str);
 
 } // namespace
 

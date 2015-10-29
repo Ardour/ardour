@@ -24,44 +24,44 @@
 #endif
 
 std::string
-PBD::symbol_demangle (const std::string& l)
+PBD::demangle_symbol (const std::string& mangled_symbol)
 {
 #if defined(__GLIBCXX__)
 	int status;
 
 	try {
 
-		char* realname = abi::__cxa_demangle (l.c_str(), 0, 0, &status);
-		std::string d (realname);
+		char* realname = abi::__cxa_demangle (mangled_symbol.c_str(), 0, 0, &status);
+		std::string demangled_symbol (realname);
 		free (realname);
-		return d;
+		return demangled_symbol;
 	} catch (std::exception) {
 
 	}
 #endif
 
-	return l;
+	return mangled_symbol;
 }
 
 std::string
-PBD::demangle (std::string const & l)
+PBD::demangle (std::string const& str)
 {
-	std::string::size_type const b = l.find_first_of ("(");
+	std::string::size_type const b = str.find_first_of ("(");
 
 	if (b == std::string::npos) {
-		return symbol_demangle (l);
+		return demangle_symbol (str);
 	}
 
-	std::string::size_type const p = l.find_last_of ("+");
+	std::string::size_type const p = str.find_last_of ("+");
 	if (p == std::string::npos) {
-		return symbol_demangle (l);
+		return demangle_symbol (str);
 	}
 
 	if ((p - b) <= 1) {
-		return symbol_demangle (l);
+		return demangle_symbol (str);
 	}
 
-	std::string const fn = l.substr (b + 1, p - b - 1);
+	std::string const symbol = str.substr (b + 1, p - b - 1);
 
-	return symbol_demangle (fn);
+	return demangle_symbol (symbol);
 }
