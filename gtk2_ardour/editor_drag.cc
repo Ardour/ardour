@@ -4317,12 +4317,12 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	   origin, and ditto for y.
 	*/
 
-	double cx = event->button.x;
-	double cy = event->button.y;
+	double mx = event->button.x;
+	double my = event->button.y;
 
-	_line->parent_group().canvas_to_item (cx, cy);
+	_line->parent_group().canvas_to_item (mx, my);
 
-	framecnt_t const frame_within_region = (framecnt_t) floor (cx * _editor->samples_per_pixel);
+	framecnt_t const frame_within_region = (framecnt_t) floor (mx * _editor->samples_per_pixel);
 
 	if (!_line->control_points_adjacent (frame_within_region, _before, _after)) {
 		/* no adjacent points */
@@ -4332,8 +4332,13 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	Drag::start_grab (event, _editor->cursors()->fader);
 
 	/* store grab start in parent frame */
+	double const bx = _line->nth (_before)->get_x();
+	double const ax = _line->nth (_after)->get_x();
+	double const click_ratio = (mx - bx) / (ax - bx);
 
-	_fixed_grab_x = cx;
+	double const cy = ((_line->nth (_before)->get_y() * click_ratio) + (_line->nth (_after)->get_y() * (1 - click_ratio)));
+
+	_fixed_grab_x = mx;
 	_fixed_grab_y = cy;
 
 	double fraction = 1.0 - (cy / _line->height());
