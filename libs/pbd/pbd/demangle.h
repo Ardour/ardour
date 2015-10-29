@@ -24,34 +24,10 @@
 #include <cstdlib>
 #include <typeinfo>
 
-#ifdef __GNUC__
-#include <cxxabi.h>
-#endif
-
 #include "pbd/libpbd_visibility.h"
 
 namespace PBD
 {
-	template<typename T> /*LIBPBD_API*/
-	std::string demangled_name (T const & obj)
-	{
-#ifdef __GNUC__
-		int status;
-		char * res = abi::__cxa_demangle (typeid(obj).name(), 0, 0, &status);
-		if (status == 0) {
-			std::string s(res);
-			free (res);
-			return s;
-		}
-#endif
-
-                /* Note: on win32, you can use UnDecorateSymbolName.
-                   See http://msdn.microsoft.com/en-us/library/ms681400%28VS.85%29.aspx
-                   See also: http://msdn.microsoft.com/en-us/library/ms680344%28VS.85%29.aspx
-                */
-
-		return typeid(obj).name();
-	}
 
 	/**
 	 * @param symbol a mangled symbol/name
@@ -65,6 +41,12 @@ namespace PBD
 	 * name
 	 */
 	LIBPBD_API std::string demangle(const std::string& str);
+
+	template<typename T>
+	std::string demangled_name (T const & obj)
+	{
+		return demangle_symbol(typeid(obj).name());
+	}
 
 } // namespace
 
