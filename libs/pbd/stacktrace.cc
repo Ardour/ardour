@@ -21,6 +21,7 @@
 
 #include "pbd/stacktrace.h"
 #include "pbd/debug.h"
+#include "pbd/demangle.h"
 #include "pbd/compose.h"
 #include "pbd/pthread_utils.h"
 
@@ -43,48 +44,6 @@ PBD::trace_twb ()
 #ifdef HAVE_EXECINFO
 
 #include <execinfo.h>
-#include <cxxabi.h>
-
-static std::string
-symbol_demangle (const std::string& l)
-{
-	int status;
-
-	try {
-
-		char* realname = abi::__cxa_demangle (l.c_str(), 0, 0, &status);
-		std::string d (realname);
-		free (realname);
-		return d;
-	} catch (std::exception) {
-
-	}
-
-	return l;
-}
-
-std::string
-PBD::demangle (std::string const & l)
-{
-	std::string::size_type const b = l.find_first_of ("(");
-
-	if (b == std::string::npos) {
-		return symbol_demangle (l);
-	}
-
-	std::string::size_type const p = l.find_last_of ("+");
-	if (p == std::string::npos) {
-		return symbol_demangle (l);
-	}
-
-	if ((p - b) <= 1) {
-		return symbol_demangle (l);
-	}
-
-	std::string const fn = l.substr (b + 1, p - b - 1);
-
-	return symbol_demangle (fn);
-}
 
 void
 PBD::stacktrace (std::ostream& out, int levels)
@@ -127,12 +86,6 @@ extern "C" {
 }
 #endif
 
-std::string
-PBD::demangle (std::string const & l) /* JE - !!!! 'PBD' namespace might possibly get removed (except it's still used in 'libs/canvas/item.cc') */
-{
-	return std::string();
-}
-
 void
 PBD::stacktrace( std::ostream& out, int)
 {
@@ -169,19 +122,7 @@ PBD::stacktrace( std::ostream& out, int)
 #endif
 }
 
-void
-c_stacktrace ()
-{
-	PBD::stacktrace (std::cout);
-}
-
 #else
-
-std::string
-PBD::demangle (std::string const & l) /* JE - !!!! 'PBD' namespace might possibly get removed (except it's still used in 'libs/canvas/item.cc') */
-{
-	return std::string();
-}
 
 void
 PBD::stacktrace (std::ostream& out, int /*levels*/)
@@ -189,10 +130,10 @@ PBD::stacktrace (std::ostream& out, int /*levels*/)
 	out << "stack tracing is not enabled on this platform" << std::endl;
 }
 
+#endif
+
 void
 c_stacktrace ()
 {
 	PBD::stacktrace (std::cout);
 }
-
-#endif /* HAVE_EXECINFO */

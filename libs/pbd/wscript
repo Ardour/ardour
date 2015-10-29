@@ -41,6 +41,7 @@ libpbd_sources = [
     'crossthread.cc',
     'cpus.cc',
     'debug.cc',
+    'demangle.cc',
     'enumwriter.cc',
     'event_loop.cc',
     'enums.cc',

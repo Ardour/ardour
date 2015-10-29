@@ -52,6 +52,20 @@ namespace PBD
 
 		return typeid(obj).name();
 	}
+
+	/**
+	 * @param a mangled symbol/name
+	 * @return a demangled symbol/name
+	 */
+	LIBPBD_API std::string symbol_demangle(const std::string&);
+
+	/**
+	 * @param a string containing a mangled symbol/name
+	 * @return a string with the mangled symbol/name replaced with a demangled
+	 * name
+	 */
+	LIBPBD_API std::string demangle(const std::string&);
+
 } // namespace
 
 #endif // __libpbd_demangle_h__

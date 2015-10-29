@@ -18,7 +18,7 @@
 */
 
 #include "pbd/compose.h"
-#include "pbd/stacktrace.h"
+#include "pbd/demangle.h"
 #include "pbd/convert.h"
 
 #include "ardour/utils.h"

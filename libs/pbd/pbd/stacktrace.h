@@ -41,7 +41,6 @@ namespace PBD {
 
 	LIBPBD_API void stacktrace (std::ostream& out, int levels = 0);
 	LIBPBD_API void trace_twb();
-	LIBPBD_API std::string demangle (const std::string&);
 
 template<typename T>
 class /*LIBPBD_API*/ thing_with_backtrace
