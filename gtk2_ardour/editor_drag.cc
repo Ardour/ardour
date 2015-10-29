@@ -2795,9 +2795,6 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	switch (_operation) {
 	case StartTrim:
 		show_verbose_cursor_time (region_start);
-		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
-			i->view->trim_front_starting ();
-		}
 		break;
 	case EndTrim:
 		show_verbose_cursor_duration (region_start, region_end);
@@ -2854,6 +2851,10 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			RegionView* rv = i->view;
 			rv->enable_display (false);
 			rv->region()->playlist()->clear_owned_changes ();
+
+			if (_operation == StartTrim) {
+				rv->trim_front_starting ();
+			}
 
 			AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (rv);
 
@@ -3058,14 +3059,12 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	} else {
 		/* no mouse movement */
-		_editor->point_trim (event, adjusted_current_frame (event));
+		if (adjusted_current_frame (event) != adjusted_frame (_drags->current_pointer_frame(), event, false)) {
+			_editor->point_trim (event, adjusted_current_frame (event));
+		}
 	}
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-		if (_operation == StartTrim) {
-			i->view->trim_front_ending ();
-		}
-
 		i->view->region()->resume_property_changes ();
 	}
 }
