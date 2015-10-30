@@ -87,6 +87,7 @@ public:
 		, rapid(100)
 		, super_rapid(40)
 		, fps(40)
+		, _suspend_counter(0)
 	{
 #ifndef NDEBUG
 		second.connect (sigc::mem_fun (*this, &UITimers::on_second_timer));
@@ -98,6 +99,8 @@ public:
 	StandardTimer   rapid;
 	StandardTimer   super_rapid;
 	StandardTimer   fps;
+
+	gint            _suspend_counter;
 
 #ifndef NDEBUG
 	std::vector<uint64_t> rapid_eps_count;
@@ -205,6 +208,24 @@ sigc::connection
 fps_connect(const sigc::slot<void>& slot)
 {
 	return get_timers().fps.connect (slot);
+}
+
+TimerSuspender::TimerSuspender ()
+{
+	if (g_atomic_int_add(&get_timers()._suspend_counter, 1) == 0) {
+		get_timers().rapid.suspend();
+		get_timers().super_rapid.suspend();
+		get_timers().fps.suspend();
+	}
+}
+
+TimerSuspender::~TimerSuspender ()
+{
+	if (g_atomic_int_dec_and_test (&get_timers()._suspend_counter)) {
+		get_timers().rapid.resume();
+		get_timers().super_rapid.resume();
+		get_timers().fps.resume();
+	}
 }
 
 } // namespace Timers

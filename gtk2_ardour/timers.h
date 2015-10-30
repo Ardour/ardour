@@ -37,6 +37,12 @@ void set_fps_interval(unsigned int interval);
 
 sigc::connection fps_connect(const sigc::slot<void>& slot);
 
+class TimerSuspender {
+	public:
+		TimerSuspender ();
+		~TimerSuspender ();
+};
+
 };
 
 #endif // TIMERS_H
