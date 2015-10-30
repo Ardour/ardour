@@ -5451,7 +5451,8 @@ NoteDrag::total_dx (const guint state) const
 
 	frameoffset_t ret;
 	if (snap) {
-		ret =  _region->snap_frame_to_frame (st - rp) + rp - n - snap_delta (state);
+		bool const ensure_snap = _editor->snap_mode () != SnapMagnetic;
+		ret =  _region->snap_frame_to_frame (st - rp, ensure_snap) + rp - n - snap_delta (state);
 	} else {
 		ret = st - n - snap_delta (state);
 	}

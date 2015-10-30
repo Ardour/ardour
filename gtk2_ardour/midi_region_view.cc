@@ -2748,6 +2748,7 @@ void
 MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
 {
 	bool cursor_set = false;
+	bool const ensure_snap = trackview.editor().snap_mode () != SnapMagnetic;
 
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		ArdourCanvas::Rectangle* resize_rect = (*i)->resize_rect;
@@ -2779,14 +2780,14 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 
 		if (at_front) {
 			if (with_snap) {
-				resize_rect->set_x0 (snap_to_pixel(current_x) - snap_delta);
+				resize_rect->set_x0 (snap_to_pixel (current_x, ensure_snap) - snap_delta);
 			} else {
 				resize_rect->set_x0 (current_x - snap_delta);
 			}
 			resize_rect->set_x1 (canvas_note->x1());
 		} else {
 			if (with_snap) {
-				resize_rect->set_x1 (snap_to_pixel(current_x) - snap_delta);
+				resize_rect->set_x1 (snap_to_pixel (current_x, ensure_snap) - snap_delta);
 			} else {
 				resize_rect->set_x1 (current_x - snap_delta);
 			}
@@ -2807,7 +2808,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 				sign = -1;
 			}
 
-			const double  snapped_x = (with_snap ? snap_pixel_to_sample (current_x) : trackview.editor ().pixel_to_sample (current_x));
+			const double  snapped_x = (with_snap ? snap_pixel_to_sample (current_x, ensure_snap) : trackview.editor ().pixel_to_sample (current_x));
 			Evoral::Beats beats     = region_frames_to_region_beats (snapped_x);
 			Evoral::Beats len       = Evoral::Beats();
 
@@ -2842,6 +2843,8 @@ void
 MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
 {
 	_note_diff_command = _model->new_note_diff_command (_("resize notes"));
+
+	bool const ensure_snap = trackview.editor().snap_mode () != SnapMagnetic;
 
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		Note*  canvas_note = (*i)->note;
@@ -2889,7 +2892,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		/* Convert the new x position to a frame within the source */
 		framepos_t current_fr;
 		if (with_snap) {
-			current_fr = snap_pixel_to_sample (current_x) + _region->start ();
+			current_fr = snap_pixel_to_sample (current_x, ensure_snap) + _region->start ();
 		} else {
 			current_fr = trackview.editor().pixel_to_sample (current_x) + _region->start ();
 		}
