@@ -2192,7 +2192,7 @@ Editor::point_trim (GdkEvent* event, framepos_t new_bound)
 
 		break;
 	case 2:
-		begin_reversible_command (_("End point trim"));
+		begin_reversible_command (_("end point trim"));
 
 		if (selection->selected (rv)) {
 
