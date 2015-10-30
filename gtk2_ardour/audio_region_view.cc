@@ -1309,18 +1309,32 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 		return;
 	}
 
-	double x, y;
+	uint32_t before_p, after_p;
+	double mx = ev->button.x;
+	double my = ev->button.y;
+
+	item->canvas_to_item (mx, my);
+
+	framecnt_t const frame_within_region = (framecnt_t) floor (mx * samples_per_pixel);
+
+	if (!gain_line->control_points_adjacent (frame_within_region, before_p, after_p)) {
+		/* no adjacent points */
+		return;
+	}
+
+	/*y is in item frame */
+	double const bx = gain_line->nth (before_p)->get_x();
+	double const ax = gain_line->nth (after_p)->get_x();
+	double const click_ratio = (ax - mx) / (ax - bx);
+
+	double y = ((gain_line->nth (before_p)->get_y() * click_ratio) + (gain_line->nth (after_p)->get_y() * (1 - click_ratio)));
 
 	/* don't create points that can't be seen */
 
 	update_envelope_visibility ();
 
-	x = ev->button.x;
-	y = ev->button.y;
-
-	item->canvas_to_item (x, y);
 	framepos_t rpos = region ()->position ();
-	framepos_t fx = trackview.editor().pixel_to_sample (x) + rpos;
+	framepos_t fx = trackview.editor().pixel_to_sample (mx) + rpos;
 	trackview.editor ().snap_to_with_modifier (fx, ev);
 	fx -= rpos;
 
@@ -1330,11 +1344,11 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 
 	/* compute vertical fractional position */
 
-	y = 1.0 - (y / (_height - NAME_HIGHLIGHT_SIZE));
+	y = 1.0 - (y / (gain_line->height()));
 
 	/* map using gain line */
 
-	gain_line->view_to_model_coord (x, y);
+	gain_line->view_to_model_coord (mx, y);
 
 	/* XXX STATEFUL: can't convert to stateful diff until we
 	   can represent automation data with it.

@@ -628,11 +628,11 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 
 	double x = 0;
 
-	_canvas_display->canvas_to_item (x, y);
+	_line->grab_item().canvas_to_item (x, y);
 
 	/* compute vertical fractional position */
 
-	y = 1.0 - (y / height);
+	y = 1.0 - (y / _line->height());
 
 	/* map using line */
 

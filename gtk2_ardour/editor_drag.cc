@@ -4319,7 +4319,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	double mx = event->button.x;
 	double my = event->button.y;
 
-	_line->parent_group().canvas_to_item (mx, my);
+	_line->grab_item().canvas_to_item (mx, my);
 
 	framecnt_t const frame_within_region = (framecnt_t) floor (mx * _editor->samples_per_pixel);
 
@@ -4330,7 +4330,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	Drag::start_grab (event, _editor->cursors()->fader);
 
-	/* store grab start in parent frame */
+	/* store grab start in item frame */
 	double const bx = _line->nth (_before)->get_x();
 	double const ax = _line->nth (_after)->get_x();
 	double const click_ratio = (ax - mx) / (ax - bx);
@@ -4391,14 +4391,19 @@ LineDrag::finished (GdkEvent* event, bool movement_occured)
 		AutomationTimeAxisView* atv;
 
 		if ((atv = dynamic_cast<AutomationTimeAxisView*>(_editor->clicked_axisview)) != 0) {
-			framepos_t where = _editor->canvas_event_sample (event, 0, 0);
+			framepos_t where = grab_frame ();
 
-			atv->add_automation_event (event, where, event->button.y, false);
+			double cx = 0;
+			double cy = _fixed_grab_y;
+
+			_line->grab_item().item_to_canvas (cx, cy);
+
+			atv->add_automation_event (event, where, cy, false);
 		} else if (dynamic_cast<AudioTimeAxisView*>(_editor->clicked_axisview) != 0) {
 			AudioRegionView* arv;
 
 			if ((arv = dynamic_cast<AudioRegionView*>(_editor->clicked_regionview)) != 0) {
-				arv->add_gain_point_event (arv->get_canvas_group (), event, false);
+				arv->add_gain_point_event (&arv->get_gain_line()->grab_item(), event, false);
 			}
 		}
 	}
