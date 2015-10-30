@@ -1663,6 +1663,9 @@ ControlList::paste (const ControlList& alist, double pos, float /*times*/)
 				value /= (src_desc.upper - src_desc.lower);  // normalize range
 				value *= (_desc.upper - _desc.lower);  // scale to our range
 				value += _desc.lower;  // translate to our offset
+				if (_desc.toggled) {
+					value = (value < 0.5) ? 0.0 : 1.0;
+				}
 			}
 			_events.insert (where, new ControlEvent((*i)->when + pos, value));
 			end = (*i)->when + pos;
