@@ -46,6 +46,9 @@ public:
 
 	virtual unsigned int connection_count () const = 0;
 
+	void suspend () { m_suspended = true; }
+	void resume  () { m_suspended = false; }
+
 protected:
 
 	virtual ~Timer() { }
@@ -55,6 +58,8 @@ protected:
 	void stop ();
 
 	virtual bool on_elapsed () = 0;
+
+	bool suspended  () const { return m_suspended; }
 
 private:
 
@@ -72,6 +77,8 @@ private:
 	unsigned int                           m_timeout_interval;
 
 	const Glib::RefPtr<Glib::MainContext>  m_main_context;
+
+	bool                                   m_suspended;
 
 };
 

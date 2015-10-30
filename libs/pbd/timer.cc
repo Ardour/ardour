@@ -26,6 +26,7 @@ Timer::Timer (unsigned int interval,
 	: m_timeout_source(NULL)
 	, m_timeout_interval(interval)
 	, m_main_context(main_context)
+	, m_suspended(false)
 {
 
 }
@@ -121,7 +122,9 @@ StandardTimer::on_elapsed()
 		return false;
 	}
 
-	m_signal();
+	if (!suspended ()) {
+		m_signal();
+	}
 	return true;
 }
 
@@ -149,7 +152,9 @@ BlinkTimer::on_elapsed()
 		return false;
 	}
 
-	m_blink_signal(blink_on = !blink_on);
+	if (!suspended ()) {
+		m_blink_signal(blink_on = !blink_on);
+	}
 	return true;
 }
 
