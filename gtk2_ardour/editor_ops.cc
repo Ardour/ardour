@@ -96,6 +96,7 @@
 #include "streamview.h"
 #include "strip_silence_dialog.h"
 #include "time_axis_view.h"
+#include "timers.h"
 #include "transpose_dialog.h"
 #include "transform_dialog.h"
 #include "ui_config.h"
@@ -7887,6 +7888,7 @@ Editor::bring_in_callback (Gtk::Label* label, uint32_t n, uint32_t total, string
 void
 Editor::update_bring_in_message (Gtk::Label* label, uint32_t n, uint32_t total, string name)
 {
+	Timers::TimerSuspender t;
 	label->set_text (string_compose ("Copying %1, %2 of %3", name, n, total));
 	Gtkmm2ext::UI::instance()->flush_pending ();
 }
@@ -7907,6 +7909,7 @@ Editor::bring_all_sources_into_session ()
 	 * files
 	 */
 
+	Timers::TimerSuspender t;
 	Gtkmm2ext::UI::instance()->flush_pending ();
 
 	cerr << " Do it\n";

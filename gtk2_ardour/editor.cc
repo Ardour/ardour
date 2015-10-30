@@ -5074,6 +5074,7 @@ Editor::first_idle ()
 	MessageDialog* dialog = 0;
 
 	if (track_views.size() > 1) {
+		Timers::TimerSuspender t;
 		dialog = new MessageDialog (
 			*this,
 			string_compose (_("Please wait while %1 loads visual data."), PROGRAM_NAME),

@@ -3204,7 +3204,10 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	fst_stop_threading();
 #endif
 
-	flush_pending ();
+	{
+		Timers::TimerSuspender t;
+		flush_pending ();
+	}
 
 #ifdef WINDOWS_VST_SUPPORT
 	fst_start_threading();
