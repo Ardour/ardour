@@ -458,7 +458,9 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 			/* almost no selection action on modified button-2 or button-3 events */
 
-			if ((item_type != RegionItem && event->button.button != 2) && !(item_type == ControlPointItem && event->button.button == 3)) {
+			if ((item_type != RegionItem && event->button.button != 2)
+			    /* for selection of control points prior to delete (shift-right click) */
+			    && !(item_type == ControlPointItem && event->button.button == 3 && event->type == GDK_BUTTON_PRESS)) {
 				return;
 			}
 		}
@@ -625,6 +627,20 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case AutomationTrackItem:
 		if (eff_mouse_mode != MouseDraw && op == Selection::Set) {
 			set_selected_track_as_side_effect (op);
+		}
+		break;
+
+	case NoteItem:
+		if (press && event->button.button == 3) {
+			NoteBase* cnote = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
+			assert (cnote);
+			if (cnote->region_view().selection_size() == 0 || !cnote->selected()) {
+				selection->clear_points();
+				cnote->region_view().unique_select (cnote);
+				/* we won't get the release, so store the selection change now */
+				begin_reversible_selection_op (X_("Button 3 Note Selection"));
+				commit_reversible_selection_op ();
+			}
 		}
 		break;
 
