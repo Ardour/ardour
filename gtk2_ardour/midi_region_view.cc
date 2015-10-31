@@ -2844,6 +2844,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 {
 	_note_diff_command = _model->new_note_diff_command (_("resize notes"));
 
+	/* XX why doesn't snap_pixel_to_sample() handle this properly? */
 	bool const ensure_snap = trackview.editor().snap_mode () != SnapMagnetic;
 
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
