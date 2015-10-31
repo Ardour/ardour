@@ -5964,26 +5964,29 @@ Editor::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
 					 sigc::mem_fun(mrv, &MidiRegionView::delete_selection)));
 	}
 
-	if (sel_size == 1) {
-		items.push_back(MenuElem(_("Edit..."),
-					 sigc::bind(sigc::mem_fun(*this, &Editor::edit_notes), &mrv)));
+	items.push_back(MenuElem(_("Edit..."),
+				 sigc::bind(sigc::mem_fun(*this, &Editor::edit_notes), &mrv)));
+	if (sel_size != 1) {
+		items.back().set_sensitive (false);
 	}
 
 	items.push_back(MenuElem(_("Transpose..."),
 	                         sigc::bind(sigc::mem_fun(*this, &Editor::transpose_regions), rs)));
 
-	if (sel_size > 1) {
-		items.push_back(MenuElem(_("Legatize"),
-					 sigc::bind(sigc::mem_fun(*this, &Editor::legatize_regions), rs, false)));
+
+	items.push_back(MenuElem(_("Legatize"),
+				 sigc::bind(sigc::mem_fun(*this, &Editor::legatize_regions), rs, false)));
+	if (sel_size < 2) {
+		items.back().set_sensitive (false);
 	}
 
 	items.push_back(MenuElem(_("Quantize..."),
 	                         sigc::bind(sigc::mem_fun(*this, &Editor::quantize_regions), rs)));
 
-	if (sel_size > 1) {
-		items.push_back(MenuElem(_("Remove Overlap"),
-					 sigc::bind(sigc::mem_fun(*this, &Editor::legatize_regions), rs, true)));
-
+	items.push_back(MenuElem(_("Remove Overlap"),
+				 sigc::bind(sigc::mem_fun(*this, &Editor::legatize_regions), rs, true)));
+	if (sel_size < 2) {
+		items.back().set_sensitive (false);
 	}
 
 	items.push_back(MenuElem(_("Transform..."),
