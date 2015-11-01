@@ -16,6 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "ardour/audioengine.h"
 #include "ardour/trigger_track.h"
 
 using namespace ARDOUR;
@@ -32,6 +33,17 @@ TriggerTrack::~TriggerTrack ()
 int
 TriggerTrack::init ()
 {
+	if (Track::init ()) {
+		return -1;
+	}
+
+	boost::shared_ptr<Port> p = AudioEngine::instance()->register_input_port (DataType::MIDI, name(), false);
+	if (!p) {
+		return -1;
+	}
+
+	_midi_port = boost::dynamic_pointer_cast<MidiPort> (p);
+
 	return 0;
 }
 

@@ -58,6 +58,8 @@ protected:
 	XMLNode& state (bool full);
 
 private:
+	boost::shared_ptr<MidiPort> _midi_port;
+	
 	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing);
 };
 
