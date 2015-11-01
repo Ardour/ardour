@@ -67,20 +67,20 @@ namespace Gtkmm2ext {
 }
 
 namespace ARDOUR {
-	class RouteGroup;
-	class Playlist;
 	class AudioPlaylist;
 	class AudioRegion;
-	class Region;
-	class Location;
-	class TempoSection;
-	class Session;
-	class Filter;
-	class ChanCount;
-	class MidiOperator;
-	class Track;
-	class MidiTrack;
 	class AudioTrack;
+	class ChanCount;
+	class Filter;
+	class Location;
+	class MidiOperator;
+	class MidiTrack;
+	class Playlist;
+	class Region;
+	class RouteGroup;
+	class Session;
+	class TempoSection;
+	class Track;
 }
 
 namespace LADSPA {
