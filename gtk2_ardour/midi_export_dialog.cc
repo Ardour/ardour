@@ -37,8 +37,8 @@ MidiExportDialog::MidiExportDialog (PublicEditor&, boost::shared_ptr<MidiRegion>
 {
 	set_border_width (12);
 
-	add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (file_chooser);
