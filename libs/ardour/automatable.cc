@@ -398,9 +398,7 @@ Automatable::transport_stopped (framepos_t now)
 
 		l->stop_touch (true, now);
 
-		if (list_did_write) {
-			c->commit_transaction ();
-		}
+		c->commit_transaction (list_did_write);
 
 		l->write_pass_finished (now, Config->get_automation_thinning_factor ());
 

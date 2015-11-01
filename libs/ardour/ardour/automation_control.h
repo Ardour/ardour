@@ -107,7 +107,7 @@ public:
 	const ParameterDescriptor& desc() const { return _desc; }
 
 	const ARDOUR::Session& session() const { return _session; }
-	void commit_transaction ();
+	void commit_transaction (bool did_write);
 
 protected:
 

@@ -114,6 +114,7 @@ class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Ev
 	bool operator!= (const AutomationList &) const;
 
 	XMLNode* before () { return _before; }
+	void clear_history ();
   private:
 	void create_curve_if_necessary ();
 	int deserialize_events (const XMLNode&);

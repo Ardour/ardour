@@ -191,9 +191,6 @@ AutomationList::set_automation_state (AutoState s)
 {
 	if (s != _state) {
 		_state = s;
-		if (s == Write) {
-			_before = &get_state ();
-		}
 		automation_state_changed (s); /* EMIT SIGNAL */
 	}
 }
@@ -220,6 +217,7 @@ void
 AutomationList::write_pass_finished (double when, double thinning_factor)
 {
 	ControlList::write_pass_finished (when, thinning_factor);
+	/* automation control has deleted this or it is now owned by the session undo stack */
 	_before = 0;
 }
 
@@ -254,6 +252,16 @@ AutomationList::stop_touch (bool mark, double)
 			 */
                 }
         }
+}
+
+/* _before may be owned by the undo stack,
+ * so we have to be careful about doing this.
+*/
+void
+AutomationList::clear_history ()
+{
+	delete _before;
+	_before = 0;
 }
 
 void

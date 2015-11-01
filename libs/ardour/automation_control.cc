@@ -163,11 +163,15 @@ AutomationControl::stop_touch(bool mark, double when)
 }
 
 void
-AutomationControl::commit_transaction ()
+AutomationControl::commit_transaction (bool did_write)
 {
-	if (alist ()->before ()) {
-		_session.begin_reversible_command (string_compose (_("record %1 automation"), name ()));
-		_session.commit_reversible_command (new MementoCommand<AutomationList> (*alist ().get (), alist ()->before (), &alist ()->get_state ()));
+	if (did_write) {
+		if (alist ()->before ()) {
+			_session.begin_reversible_command (string_compose (_("record %1 automation"), name ()));
+			_session.commit_reversible_command (new MementoCommand<AutomationList> (*alist ().get (), alist ()->before (), &alist ()->get_state ()));
+		}
+	} else {
+		alist ()->clear_history ();
 	}
 }
 
