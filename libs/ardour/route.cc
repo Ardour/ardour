@@ -4007,12 +4007,12 @@ Route::PhaseControllable::get_value () const
 }
 
 void
-Route::PhaseControllable::set_channel (int c)
+Route::PhaseControllable::set_channel (uint32_t c)
 {
 	_current_phase = c;
 }
 
-int
+uint32_t
 Route::PhaseControllable::channel () const
 {
 	return _current_phase;

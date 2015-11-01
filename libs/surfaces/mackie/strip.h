@@ -109,6 +109,7 @@ private:
 	PBD::ScopedConnectionList route_connections;
 
 	ARDOUR::AutomationType  _pan_mode;
+	ARDOUR::AutomationType  _trim_mode;
 
 	float _last_gain_position_written;
 	float _last_pan_azi_position_written;

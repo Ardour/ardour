@@ -96,6 +96,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _block_vpot_mode_redisplay_until (0)
 	, _block_screen_redisplay_until (0)
 	, _pan_mode (PanAzimuthAutomation)
+	, _trim_mode (TrimAutomation)
 	, _last_gain_position_written (-1.0)
 	, _last_pan_azi_position_written (-1.0)
 	, _last_pan_width_position_written (-1.0)
@@ -239,6 +240,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	/* Update */
 	_pan_mode = PanAzimuthAutomation;
+	_trim_mode = TrimAutomation;
 	potmode_changed (true);
 
 	notify_all ();
@@ -1084,11 +1086,11 @@ Strip::potmode_changed (bool notify)
 		break;
 	case MackieControlProtocol::Trim:
 		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Trim mode.\n");
-		set_vpot_parameter (TrimAutomation);
+		set_vpot_parameter (_trim_mode);
 		break;
 	case MackieControlProtocol::Send:
 		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Send mode.\n");
-		set_vpot_parameter (NullAutomation);
+		set_vpot_parameter (SendAutomation);
 		break;
 	}
 
@@ -1175,7 +1177,16 @@ Strip::next_pot_mode ()
 				break;
 			}
 		}
-		// check for phase and more than one phase control
+		if ((*i).type() == PhaseAutomation && _route->phase_invert().size() > 1) {
+			// There are more than one channel of phase
+			if ((_route->phase_control()->channel() + 1) < _route->phase_invert().size()) {
+				_route->phase_control()->set_channel(_route->phase_control()->channel() + 1);
+				set_vpot_parameter (*i);
+				return;
+			} else {
+				_route->phase_control()->set_channel(0);
+			}
+		}
 		/* move to the next mode in the list, or back to the start (which will
 		also happen if the current mode is not in the current pot mode list)
 		*/
@@ -1272,6 +1283,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 	case PanLFEAutomation:
 		break;
 	case TrimAutomation:
+		_trim_mode = TrimAutomation;
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			/* gain to vpot, trim to fader */
 			_vpot->set_control (_route->gain_control());
@@ -1297,6 +1309,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 		}
 		break;
 	case PhaseAutomation:
+		_trim_mode = PhaseAutomation;
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			/* gain to vpot, phase to fader */
 			_vpot->set_control (_route->gain_control());
@@ -1321,8 +1334,8 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 			}
 		}
 		break;
-	case NullAutomation:
-		// deal with sends, phase, hidden, etc.
+	case SendAutomation:
+		// deal with sends ... needs sends yet :)
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			// gain to vpot, trim to fader
 			_vpot->set_control (_route->gain_control());

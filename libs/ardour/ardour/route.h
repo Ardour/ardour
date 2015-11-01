@@ -414,13 +414,13 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	public:
 		PhaseControllable (std::string name, boost::shared_ptr<Route>);
 		void set_value (double);
-		void set_channel (int);
+		void set_channel (uint32_t);
 		double get_value () const;
-		int channel() const;
+		uint32_t channel() const;
 
 	private:
 		boost::weak_ptr<Route> _route;
-		int _current_phase;
+		uint32_t _current_phase;
 	};
 
 
