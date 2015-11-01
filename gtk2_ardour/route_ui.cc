@@ -1837,48 +1837,64 @@ RouteUI::adjust_latency ()
 	LatencyDialog dialog (_route->name() + _(" latency"), *(_route->output()), _session->frame_rate(), AudioEngine::instance()->samples_per_cycle());
 }
 
-void
-RouteUI::save_as_template ()
+bool
+RouteUI::process_save_template_prompter (ArdourPrompter& prompter, const std::string& dir)
 {
 	std::string path;
 	std::string safe_name;
-	string name;
+	std::string name;
 
-	path = ARDOUR::user_route_template_directory ();
-
-	if (g_mkdir_with_parents (path.c_str(), 0755)) {
-		error << string_compose (_("Cannot create route template directory %1"), path) << endmsg;
-		return;
-	}
-
-	Prompter p (true); // modal
-
-	p.set_title (_("Save As Template"));
-	p.set_prompt (_("Template name:"));
-	p.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-	switch (p.run()) {
-	case RESPONSE_ACCEPT:
-		break;
-	default:
-		return;
-	}
-
-	p.get_result (name, true);
+	prompter.get_result (name, true);
 
 	safe_name = legalize_for_path (name);
 	safe_name += template_suffix;
 
-	path = Glib::build_filename (path, safe_name);
+	path = Glib::build_filename (dir, safe_name);
+
 	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
-		bool overwrite = overwrite_file_dialog (_("Confirm Template Overwrite"),
+		bool overwrite = overwrite_file_dialog (prompter,
+		                                        _("Confirm Template Overwrite"),
 							_("A template already exists with that name. Do you want to overwrite it?"));
 
 		if (!overwrite) {
-			return;
+			return false;
 		}
 	}
 
 	_route->save_as_template (path, name);
+
+	return true;
+}
+
+void
+RouteUI::save_as_template ()
+{
+	std::string dir;
+
+	dir = ARDOUR::user_route_template_directory ();
+
+	if (g_mkdir_with_parents (dir.c_str(), 0755)) {
+		error << string_compose (_("Cannot create route template directory %1"), dir) << endmsg;
+		return;
+	}
+
+	ArdourPrompter prompter (true); // modal
+
+	prompter.set_title (_("Save As Template"));
+	prompter.set_prompt (_("Template name:"));
+	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+
+	bool finished = false;
+	while (!finished) {
+		switch (prompter.run()) {
+		case RESPONSE_ACCEPT:
+			finished = process_save_template_prompter (prompter, dir);
+			break;
+		default:
+			finished = true;
+			break;
+		}
+	}
 }
 
 void

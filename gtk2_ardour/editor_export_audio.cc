@@ -104,6 +104,32 @@ Editor::export_range ()
 	}
 }
 
+bool
+Editor::process_midi_export_dialog (MidiExportDialog& dialog, boost::shared_ptr<MidiRegion> midi_region)
+{
+	string path = dialog.get_path ();
+
+	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		bool overwrite = ARDOUR_UI_UTILS::overwrite_file_dialog (dialog,
+									 _("Confirm MIDI File Overwrite"),
+									 _("A file with the same name already exists. Do you want to overwrite it?"));
+
+		if (!overwrite) {
+			return false;
+		}
+
+		/* force ::g_unlink because the backend code will
+		   go wrong if it tries to open an existing
+		   file for writing.
+		*/
+		::g_unlink (path.c_str());
+	}
+
+	(void) midi_region->clone (path);
+
+	return true;
+}
+
 /** Export the first selected region */
 void
 Editor::export_region ()
@@ -129,34 +155,18 @@ Editor::export_region ()
 
 		MidiExportDialog dialog (*this, midi_region);
 		dialog.set_session (_session);
-		int ret = dialog.run ();
-		switch (ret) {
-		case Gtk::RESPONSE_ACCEPT:
-			break;
-		default:
-			return;
-		}
 
-		dialog.hide ();
-
-		string path = dialog.get_path ();
-
-		if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
-			bool overwrite = ARDOUR_UI_UTILS::overwrite_file_dialog (_("Confirm MIDI File Overwrite"),
-								                 _("A file with the same name already exists. Do you want to overwrite it?"));
-
-			if (!overwrite) {
+		bool finished = false;
+		while (!finished) {
+			switch (dialog.run ()) {
+			case Gtk::RESPONSE_ACCEPT:
+				finished = process_midi_export_dialog (dialog, midi_region);
+				break;
+			default:
+				finished = true;
 				return;
 			}
-
-			/* force ::g_unlink because the backend code will
-			   go wrong if it tries to open an existing
-			   file for writing.
-			*/
-			::g_unlink (path.c_str());
 		}
-
-		(void) midi_region->clone (path);
 	}
 }
 

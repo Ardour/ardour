@@ -2442,6 +2442,47 @@ ARDOUR_UI::save_session_as ()
 	}
 }
 
+bool
+ARDOUR_UI::process_snapshot_session_prompter (ArdourPrompter& prompter, bool switch_to_it)
+{
+	string snapname;
+
+	prompter.get_result (snapname);
+
+	bool do_save = (snapname.length() != 0);
+
+	if (do_save) {
+		char illegal = Session::session_name_is_legal(snapname);
+		if (illegal) {
+			MessageDialog msg (string_compose (_("To ensure compatibility with various systems\n"
+					     "snapshot names may not contain a '%1' character"), illegal));
+			msg.run ();
+			return false;
+		}
+	}
+
+	vector<std::string> p;
+	get_state_files_in_directory (_session->session_directory().root_path(), p);
+	vector<string> n = get_file_names_no_extension (p);
+
+	if (find (n.begin(), n.end(), snapname) != n.end()) {
+
+		do_save = overwrite_file_dialog (prompter,
+						 _("Confirm Snapshot Overwrite"),
+						 _("A snapshot already exists with that name. Do you want to overwrite it?"));
+	}
+
+	if (do_save) {
+		save_state (snapname, switch_to_it);
+	}
+	else {
+		return false;
+	}
+
+	return true;
+}
+
+
 /** Ask the user for the name of a new snapshot and then take it.
  */
 
@@ -2449,7 +2490,6 @@ void
 ARDOUR_UI::snapshot_session (bool switch_to_it)
 {
 	ArdourPrompter prompter (true);
-	string snapname;
 
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
@@ -2472,41 +2512,19 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 		prompter.set_initial_text (timebuf);
 	}
 
-  again:
-	switch (prompter.run()) {
-	case RESPONSE_ACCEPT:
-	{
-		prompter.get_result (snapname);
-
-		bool do_save = (snapname.length() != 0);
-
-		if (do_save) {
-			char illegal = Session::session_name_is_legal(snapname);
-			if (illegal) {
-				MessageDialog msg (string_compose (_("To ensure compatibility with various systems\n"
-				                     "snapshot names may not contain a '%1' character"), illegal));
-				msg.run ();
-				goto again;
-			}
+	bool finished = false;
+	while (!finished) {
+		switch (prompter.run()) {
+		case RESPONSE_ACCEPT:
+		{
+			finished = process_snapshot_session_prompter (prompter, switch_to_it);
+			break;
 		}
 
-		vector<std::string> p;
-		get_state_files_in_directory (_session->session_directory().root_path(), p);
-		vector<string> n = get_file_names_no_extension (p);
-		if (find (n.begin(), n.end(), snapname) != n.end()) {
-
-			do_save = overwrite_file_dialog (_("Confirm Snapshot Overwrite"),
-			                                 _("A snapshot already exists with that name. Do you want to overwrite it?"));
+		default:
+			finished = true;
+			break;
 		}
-
-		if (do_save) {
-			save_state (snapname, switch_to_it);
-		}
-		break;
-	}
-
-	default:
-		break;
 	}
 }
 
@@ -2661,11 +2679,37 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 	}
 }
 
+bool
+ARDOUR_UI::process_save_template_prompter (ArdourPrompter& prompter)
+{
+	string name;
+
+	prompter.get_result (name);
+
+	if (name.length()) {
+		int failed = _session->save_template (name);
+
+		if (failed == -2) { /* file already exists. */
+			bool overwrite = overwrite_file_dialog (prompter,
+								_("Confirm Template Overwrite"),
+								_("A template already exists with that name. Do you want to overwrite it?"));
+
+			if (overwrite) {
+				_session->save_template (name, true);
+			}
+			else {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
 void
 ARDOUR_UI::save_template ()
 {
 	ArdourPrompter prompter (true);
-	string name;
 
 	if (!check_audioengine(*editor)) {
 		return;
@@ -2677,26 +2721,17 @@ ARDOUR_UI::save_template ()
 	prompter.set_initial_text(_session->name() + _("-template"));
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 
-	switch (prompter.run()) {
-	case RESPONSE_ACCEPT:
-		prompter.get_result (name);
+	bool finished = false;
+	while (!finished) {
+		switch (prompter.run()) {
+		case RESPONSE_ACCEPT:
+			finished = process_save_template_prompter (prompter);
+			break;
 
-		if (name.length()) {
-			int failed = _session->save_template (name);
-
-			if (failed == -2) { /* file already exists. */
-				bool overwrite = overwrite_file_dialog (_("Confirm Template Overwrite"),
-							                _("A template already exists with that name. Do you want to overwrite it?"));
-
-				if (overwrite) {
-					_session->save_template (name, true);
-				}
-			}
+		default:
+			finished = true;
+			break;
 		}
-		break;
-
-	default:
-		break;
 	}
 }
 
