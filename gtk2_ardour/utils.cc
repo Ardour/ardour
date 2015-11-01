@@ -937,7 +937,6 @@ ARDOUR_UI_UTILS::overwrite_file_dialog (Gtk::Window& parent, string title, strin
 	dialog.get_vbox()->pack_start (label, true, true);
 	dialog.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	dialog.add_button (_("Overwrite"), Gtk::RESPONSE_ACCEPT);
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.show_all ();
 
 	switch (dialog.run()) {
