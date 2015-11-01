@@ -929,9 +929,9 @@ ARDOUR_UI_UTILS::windows_overlap (Gtk::Window *a, Gtk::Window *b)
 }
 
 bool
-ARDOUR_UI_UTILS::overwrite_file_dialog (string title, string text)
+ARDOUR_UI_UTILS::overwrite_file_dialog (Gtk::Window& parent, string title, string text)
 {
-	ArdourDialog dialog (title, true);
+	ArdourDialog dialog (parent, title, true);
 	Label label (text);
 
 	dialog.get_vbox()->pack_start (label, true, true);

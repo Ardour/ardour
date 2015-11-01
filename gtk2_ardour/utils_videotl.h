@@ -34,7 +34,7 @@
 
 namespace VideoUtils {
 
-bool confirm_video_outfn (std::string, std::string docroot="");
+bool confirm_video_outfn (Gtk::Window& parent, std::string, std::string docroot="");
 std::string video_dest_dir (const std::string, const std::string);
 std::string video_dest_file (const std::string, const std::string);
 std::string strip_file_extension (const std::string infile);

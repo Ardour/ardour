@@ -114,6 +114,7 @@ class ButtonJoiner;
 class ConnectionEditor;
 class MainClock;
 class Mixer_UI;
+class ArdourPrompter;
 class PublicEditor;
 class SaveAsDialog;
 class SessionDialog;
@@ -555,6 +556,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void open_session ();
 	void open_recent_session ();
+	bool process_save_template_prompter (ArdourPrompter& prompter);
 	void save_template ();
 
 	void edit_metadata ();
@@ -598,6 +600,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	guint32  last_key_press_time;
 
+	bool process_snapshot_session_prompter (ArdourPrompter& prompter, bool switch_to_it);
 	void snapshot_session (bool switch_to_it);
 
 	SaveAsDialog* save_as_dialog;
