@@ -135,12 +135,15 @@ Route::init ()
 
 	_solo_control.reset (new SoloControllable (X_("solo"), shared_from_this ()));
 	_mute_control.reset (new MuteControllable (X_("mute"), shared_from_this ()));
+	_phase_control.reset (new PhaseControllable (X_("phase"), shared_from_this ()));
 
 	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
 	_mute_control->set_flags (Controllable::Flag (_mute_control->flags() | Controllable::Toggle));
+	_phase_control->set_flags (Controllable::Flag (_phase_control->flags() | Controllable::Toggle));
 
 	add_control (_solo_control);
 	add_control (_mute_control);
+	add_control (_phase_control);
 
 	/* panning */
 
@@ -3968,6 +3971,51 @@ Route::MuteControllable::get_value () const
 	// Not playing back automation, get the actual route mute value
 	boost::shared_ptr<Route> r = _route.lock ();
 	return (r && r->muted()) ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
+}
+
+Route::PhaseControllable::PhaseControllable (std::string name, boost::shared_ptr<Route> r)
+	: AutomationControl (r->session(),
+	                     Evoral::Parameter (PhaseAutomation),
+	                     ParameterDescriptor (Evoral::Parameter (PhaseAutomation)),
+	                     boost::shared_ptr<AutomationList>(),
+	                     name)
+	, _route (r)
+{
+	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(PhaseAutomation)));
+	gl->set_interpolation(Evoral::ControlList::Discrete);
+	set_list (gl);
+}
+
+void
+Route::PhaseControllable::set_value (double v)
+{
+	boost::shared_ptr<Route> r = _route.lock ();
+	if (r->phase_invert().size()) {
+		if (v == 0 || (v < 1 && v > 0.9) ) {
+			r->set_phase_invert (_current_phase, false);
+		} else {
+			r->set_phase_invert (_current_phase, true);
+		}
+	}
+}
+
+double
+Route::PhaseControllable::get_value () const
+{
+	boost::shared_ptr<Route> r = _route.lock ();
+	return (double) r->phase_invert (_current_phase);
+}
+
+void
+Route::PhaseControllable::set_channel (int c)
+{
+	_current_phase = c;
+}
+
+int
+Route::PhaseControllable::channel () const
+{
+	return _current_phase;
 }
 
 void

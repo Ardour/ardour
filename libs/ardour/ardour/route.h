@@ -410,6 +410,20 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		boost::weak_ptr<Route> _route;
 	};
 
+	class PhaseControllable : public AutomationControl {
+	public:
+		PhaseControllable (std::string name, boost::shared_ptr<Route>);
+		void set_value (double);
+		void set_channel (int);
+		double get_value () const;
+		int channel() const;
+
+	private:
+		boost::weak_ptr<Route> _route;
+		int _current_phase;
+	};
+
+
 	boost::shared_ptr<SoloControllable> solo_control() const {
 		return _solo_control;
 	}
@@ -420,6 +434,10 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	boost::shared_ptr<MuteMaster> mute_master() const {
 		return _mute_master;
+	}
+
+	boost::shared_ptr<PhaseControllable> phase_control() const {
+		return _phase_control;
 	}
 
 	/* Route doesn't own these items, but sub-objects that it does own have them
@@ -560,6 +578,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	boost::shared_ptr<SoloControllable> _solo_control;
 	boost::shared_ptr<MuteControllable> _mute_control;
 	boost::shared_ptr<MuteMaster> _mute_master;
+	boost::shared_ptr<PhaseControllable> _phase_control;
 
 	virtual void act_on_mute () {}
 

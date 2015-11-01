@@ -184,6 +184,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	control_by_parameter[PanLFEAutomation] = (Control*) 0;
 	control_by_parameter[GainAutomation] = (Control*) 0;
 	control_by_parameter[TrimAutomation] = (Control*) 0;
+	control_by_parameter[PhaseAutomation] = (Control*) 0;
 
 	reset_saved_values ();
 
@@ -198,9 +199,6 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	_solo->set_control (_route->solo_control());
 	_mute->set_control (_route->mute_control());
 
-	_pan_mode = PanAzimuthAutomation;
-	potmode_changed (true);
-
 	_route->solo_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
 	_route->listen_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
 
@@ -208,6 +206,11 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	if (_route->trim() && route()->trim()->active()) {
 		_route->trim_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_trim_changed, this, false), ui_context());
+	}
+
+	if (_route->phase_invert().size()) {
+		_route->phase_invert_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_phase_changed, this, false), ui_context());
+		_route->phase_control()->set_channel(0);
 	}
 
 	boost::shared_ptr<Pannable> pannable = _route->pannable();
@@ -235,6 +238,8 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_route_deleted, this), ui_context());
 
 	/* Update */
+	_pan_mode = PanAzimuthAutomation;
+	potmode_changed (true);
 
 	notify_all ();
 
@@ -261,6 +266,16 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	if (_route->trim() && route()->trim()->active()) {
 		possible_pot_parameters.push_back (TrimAutomation);
 	}
+
+	possible_trim_parameters.clear();
+
+	if (_route->trim() && route()->trim()->active()) {
+		possible_trim_parameters.push_back (TrimAutomation);
+	}
+
+	if (_route->phase_invert().size()) {
+		possible_trim_parameters.push_back (PhaseAutomation);
+	}
 }
 
 void
@@ -279,6 +294,7 @@ Strip::notify_all()
 	notify_panner_width_changed ();
 	notify_record_enable_changed ();
 	notify_trim_changed ();
+	notify_phase_changed ();
 }
 
 void
@@ -393,6 +409,33 @@ Strip::notify_trim_changed (bool force_update)
 				queue_parameter_display (TrimAutomation, gain_coefficient);
 			}
 			_last_trim_position_written = normalized_position;
+		}
+	}
+}
+
+void
+Strip::notify_phase_changed (bool force_update)
+{
+	if (_route) {
+		Control* control = 0;
+		ControlParameterMap::iterator i = control_by_parameter.find (PhaseAutomation);
+
+		if (i == control_by_parameter.end()) {
+			return;
+		}
+
+		control = i->second;
+
+		float normalized_position = _route->phase_control()->get_value();
+
+		if (control == _fader) {
+			if (!_fader->in_use()) {
+				_surface->write (_fader->set_position (normalized_position));
+				queue_parameter_display (PhaseAutomation, normalized_position);
+			}
+		} else if (control == _vpot) {
+			_surface->write (_vpot->set (normalized_position, true, Pot::wrap));
+			queue_parameter_display (PhaseAutomation, normalized_position);
 		}
 	}
 }
@@ -733,6 +776,17 @@ Strip::do_parameter_display (AutomationType type, float val)
 		}
 		break;
 
+	case PhaseAutomation:
+		if (_route) {
+			if (_route->phase_control()->get_value() < 0.5) {
+				_surface->write (display (1, "Normal"));
+			} else {
+				_surface->write (display (1, "Invert"));
+			}
+			screen_hold = true;
+		}
+		break;
+
 	default:
 		break;
 	}
@@ -996,6 +1050,8 @@ Strip::vpot_mode_string () const
 		return "Fader";
 	case TrimAutomation:
 		return "Trim";
+	case PhaseAutomation:
+		return string_compose ("Phase%1", _route->phase_control()->channel() + 1);
 	case PanAzimuthAutomation:
 		return "Pan";
 	case PanWidthAutomation:
@@ -1032,7 +1088,7 @@ Strip::potmode_changed (bool notify)
 		break;
 	case MackieControlProtocol::Send:
 		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Send mode.\n");
-		// set to current send
+		set_vpot_parameter (NullAutomation);
 		break;
 	}
 
@@ -1109,7 +1165,31 @@ Strip::next_pot_mode ()
 			i = possible_pot_parameters.begin();
 		}
 		set_vpot_parameter (*i);
+	} else if (_surface->mcp().pot_mode() == MackieControlProtocol::Trim) {
+				if (possible_trim_parameters.empty() || (possible_trim_parameters.size() == 1 && possible_trim_parameters.front() == ac->parameter())) {
+			return;
+		}
+
+		for (i = possible_trim_parameters.begin(); i != possible_trim_parameters.end(); ++i) {
+			if ((*i) == ac->parameter()) {
+				break;
+			}
+		}
+		// check for phase and more than one phase control
+		/* move to the next mode in the list, or back to the start (which will
+		also happen if the current mode is not in the current pot mode list)
+		*/
+
+		if (i != possible_trim_parameters.end()) {
+			++i;
+		}
+
+		if (i == possible_trim_parameters.end()) {
+			i = possible_trim_parameters.begin();
+		}
+		set_vpot_parameter (*i);
 	}
+
 }
 
 void
@@ -1214,6 +1294,45 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 				_vpot->set_control (boost::shared_ptr<AutomationControl>());
 				control_by_parameter[TrimAutomation] = 0;
 			}
+		}
+		break;
+	case PhaseAutomation:
+		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
+			/* gain to vpot, phase to fader */
+			_vpot->set_control (_route->gain_control());
+			control_by_parameter[GainAutomation] = _vpot;
+			if (_route->phase_invert().size()) {
+				_fader->set_control (_route->phase_control());
+				control_by_parameter[PhaseAutomation] = _fader;
+			} else {
+				_fader->set_control (boost::shared_ptr<AutomationControl>());
+				control_by_parameter[PhaseAutomation] = 0;
+			}
+		} else {
+			/* gain to fader, phase to vpot */
+			_fader->set_control (_route->gain_control());
+			control_by_parameter[GainAutomation] = _fader;
+			if (_route->phase_invert().size()) {
+				_vpot->set_control (_route->phase_control());
+				control_by_parameter[PhaseAutomation] = _vpot;
+			} else {
+				_vpot->set_control (boost::shared_ptr<AutomationControl>());
+				control_by_parameter[PhaseAutomation] = 0;
+			}
+		}
+		break;
+	case NullAutomation:
+		// deal with sends, phase, hidden, etc.
+		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
+			// gain to vpot, trim to fader
+			_vpot->set_control (_route->gain_control());
+			control_by_parameter[GainAutomation] = _vpot;
+			_fader->set_control (boost::shared_ptr<AutomationControl>());
+		} else {
+			// gain to fader, trim to vpot
+			_fader->set_control (_route->gain_control());
+			control_by_parameter[GainAutomation] = _fader;
+			_vpot->set_control (boost::shared_ptr<AutomationControl>());
 		}
 		break;
 	default:

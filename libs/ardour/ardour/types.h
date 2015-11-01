@@ -140,6 +140,8 @@ namespace ARDOUR {
 		EnvelopeAutomation,
 		RecEnableAutomation,
 		TrimAutomation,
+		PhaseAutomation,
+		SendAutomation,
 	};
 
 	enum AutoState {

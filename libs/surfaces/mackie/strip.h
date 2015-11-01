@@ -125,6 +125,7 @@ private:
 	void notify_active_changed ();
 	void notify_route_deleted ();
 	void notify_trim_changed (bool force_update = true);
+	void notify_phase_changed (bool force_update = true);
 
 	void update_automation ();
 	void update_meter ();
@@ -148,6 +149,7 @@ private:
 	void fader_touch_event (Button&, ButtonState);
 
 	std::vector<Evoral::Parameter> possible_pot_parameters;
+	std::vector<Evoral::Parameter> possible_trim_parameters;
 	void next_pot_mode ();
 	void set_vpot_parameter (Evoral::Parameter);
 	void show_route_name ();
