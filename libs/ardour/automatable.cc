@@ -365,7 +365,7 @@ Automatable::transport_located (framepos_t now)
                         boost::shared_ptr<AutomationList> l
 				= boost::dynamic_pointer_cast<AutomationList>(c->list());
 
-			if (l && l->automation_state () == Write) {
+			if (l) {
 				l->start_write_pass (now);
 			}
 		}
