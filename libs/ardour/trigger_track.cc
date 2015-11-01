@@ -50,6 +50,23 @@ TriggerTrack::init ()
 int
 TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
 {
+	/* get tempo map */
+
+	/* find offset to next bar
+	 * and beat start
+	 */
+
+	/* if next beat occurs in
+	   this process cycle, see if
+	   we have any triggers
+	   waiting
+	*/
+
+
+	/* if there are any
+	   triggers, run them.
+	*/
+
 	return 0;
 }
 
