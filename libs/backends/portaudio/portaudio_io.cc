@@ -204,8 +204,17 @@ PortAudioIO::get_asio_buffer_properties (int device_id,
 	return true;
 }
 
+static
 bool
-PortAudioIO::get_asio_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_sizes)
+is_power_of_two (uint32_t v)
+{
+	return ((v != 0) && !(v & (v - 1)));
+}
+
+bool
+PortAudioIO::get_asio_buffer_sizes(int device_id,
+                                   std::vector<uint32_t>& buffer_sizes,
+                                   bool preferred_only)
 {
 	long min_size_frames = 0;
 	long max_size_frames = 0;
@@ -231,26 +240,51 @@ PortAudioIO::get_asio_buffer_sizes (int device_id, std::vector<uint32_t>& buffer
 	                             preferred_size_frames,
 	                             granularity));
 
-#ifdef USE_ASIO_MIN_MAX_BUFFER_SIZES
-	if (min_size_frames >= max_size_frames) {
-		buffer_sizes.push_back (preferred_size_frames);
+	bool driver_returns_one_size = (min_size_frames == max_size_frames) &&
+	                               (min_size_frames == preferred_size_frames);
+
+	if (preferred_only || driver_returns_one_size) {
+		buffer_sizes.push_back(preferred_size_frames);
 		return true;
 	}
 
 	long buffer_size = min_size_frames;
-	while (buffer_size <= max_size_frames) {
-		buffer_sizes.push_back (buffer_size);
 
-		if (granularity <= 0) {
-			// buffer sizes are power of 2
-			buffer_size = buffer_size * 2;
-		} else {
+	// If min size and granularity are power of two then just use values that
+	// are power of 2 even if the granularity allows for more values
+	bool use_power_of_two =
+	    is_power_of_two(min_size_frames) && is_power_of_two(granularity);
+
+	if (granularity <= 0 || use_power_of_two) {
+		// driver uses buffer sizes that are power of 2
+		while (buffer_size <= max_size_frames) {
+			buffer_sizes.push_back(buffer_size);
+			buffer_size *= 2;
+		}
+	} else {
+		if (min_size_frames == max_size_frames) {
+			// The devices I have tested either return the same values for
+			// min/max/preferred and changing buffer size is intended to only be
+			// done via the control dialog or they return a range where min != max
+			// but I guess min == max could happen if a driver only supports a single
+			// buffer size
+			buffer_sizes.push_back(min_size_frames);
+			return true;
+		}
+
+		// If min_size_frames is not power of 2 use at most 8 of the possible
+		// buffer sizes spread evenly between min and max
+		long max_values = 8;
+		while (((max_size_frames - min_size_frames) / granularity) > max_values) {
+			granularity *= 2;
+		}
+
+		while (buffer_size < max_size_frames) {
+			buffer_sizes.push_back(buffer_size);
 			buffer_size += granularity;
 		}
+		buffer_sizes.push_back(max_size_frames);
 	}
-#else
-	buffer_sizes.push_back (preferred_size_frames);
-#endif
 	return true;
 }
 #endif
@@ -272,7 +306,7 @@ PortAudioIO::available_buffer_sizes(int device_id, std::vector<uint32_t>& buffer
 {
 #ifdef WITH_ASIO
 	if (get_current_host_api_type() == paASIO) {
-		if (get_asio_buffer_sizes (device_id, buffer_sizes)) {
+		if (get_asio_buffer_sizes (device_id, buffer_sizes, false)) {
 			return 0;
 		}
 	}

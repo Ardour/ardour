@@ -63,7 +63,9 @@ public:
 	                                 long& preferred_size_frames,
 	                                 long& granularity);
 
-	bool get_asio_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_size);
+	bool get_asio_buffer_sizes(int device_id,
+	                           std::vector<uint32_t>& buffer_size,
+	                           bool preferred_only);
 #endif
 
 	std::string control_app_name (int device_id) const;
