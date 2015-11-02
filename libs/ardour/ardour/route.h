@@ -410,7 +410,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		boost::weak_ptr<Route> _route;
 	};
 
-	class PhaseControllable : public AutomationControl {
+	class LIBARDOUR_API PhaseControllable : public AutomationControl {
 	public:
 		PhaseControllable (std::string name, boost::shared_ptr<Route>);
 		void set_value (double);
