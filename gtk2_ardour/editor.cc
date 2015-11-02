@@ -822,6 +822,10 @@ Editor::~Editor()
 	delete _snapshots;
 	delete _locations;
 	delete _playlist_selector;
+
+	for (list<XMLNode *>::iterator i = selection_op_history.begin(); i != selection_op_history.end(); ++i) {
+		delete *i;
+	}
 }
 
 XMLNode*
