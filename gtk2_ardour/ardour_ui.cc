@@ -3290,13 +3290,24 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 void
 ARDOUR_UI::launch_chat ()
 {
+	MessageDialog dialog(_("<b>Just ask and wait for an answer.\nIt may take from minutes to hours.</b>"), true);
+
+	dialog.set_title (_("About the Chat"));
+	dialog.set_secondary_text (_("When you're inside the chat just ask your question and wait for an answer. The chat is occupied by real people with real lives so many of them are passively online and might not read your question before minutes or hours later.\nSo please be patient and wait for an answer.\n\nYou should just leave the chat window open and check back regularly until someone has answered your question."));
+
+	switch (dialog.run()) {
+	case RESPONSE_OK:
 #ifdef __APPLE__
-	open_uri("http://webchat.freenode.net/?channels=ardour-osx");
+		open_uri("http://webchat.freenode.net/?channels=ardour-osx");
 #elif defined PLATFORM_WINDOWS
-	open_uri("http://webchat.freenode.net/?channels=ardour-windows");
+		open_uri("http://webchat.freenode.net/?channels=ardour-windows");
 #else
-	open_uri("http://webchat.freenode.net/?channels=ardour");
+		open_uri("http://webchat.freenode.net/?channels=ardour");
 #endif
+		break;
+	default:
+		break;
+	}
 }
 
 void
