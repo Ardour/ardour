@@ -191,7 +191,7 @@ AutomationList::set_automation_state (AutoState s)
 {
 	if (s != _state) {
 		_state = s;
-		if (s == Write) {
+		if (s == Write && _desc.toggled) {
 			_before = &get_state ();
 		}
 		automation_state_changed (s); /* EMIT SIGNAL */
