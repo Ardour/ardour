@@ -19,15 +19,14 @@
 #ifndef __ardour_trigger_track_h__
 #define __ardour_trigger_track_h__
 
+#include "pbd/ringbuffer.h"
+
 #include "ardour/track.h"
 #include "ardour/data_type.h"
 
 namespace ARDOUR
 {
-
-class InterThreadInfo;
-class RouteGroup;
-class Session;
+class AudioRegion;
 
 class LIBARDOUR_API TriggerTrack : public Track
 {
@@ -54,12 +53,37 @@ public:
 
 	int set_state (const XMLNode&, int version);
 
+	class Trigger {
+	  public:
+		Trigger() {}
+		virtual ~Trigger() {}
+		virtual void bang (boost::shared_ptr<TriggerTrack>,
+		                   Evoral::Beats, framepos_t) = 0;
+		virtual Evoral::Beats duration () const = 0;
+	};
+
+	class AudioTrigger : public Trigger {
+	  public:
+		AudioTrigger (boost::shared_ptr<AudioRegion>);
+
+		void bang (boost::shared_ptr<TriggerTrack>,
+		           Evoral::Beats, framepos_t);
+		Evoral::Beats duration () const;
+
+	  private:
+		boost::shared_ptr<AudioRegion> region;
+	};
+
+	void queue_trigger (boost::shared_ptr<Trigger>);
+
 protected:
 	XMLNode& state (bool full);
 
 private:
 	boost::shared_ptr<MidiPort> _midi_port;
-	
+
+	RingBuffer<Trigger*> _triggers;
+
 	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing);
 };
 

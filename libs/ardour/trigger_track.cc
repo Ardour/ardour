@@ -23,6 +23,7 @@ using namespace ARDOUR;
 
 TriggerTrack::TriggerTrack (Session& s, std::string name, Route::Flag f, TrackMode m)
 	: Track (s, name, f, m)
+	, _triggers (1024)
 {
 }
 
