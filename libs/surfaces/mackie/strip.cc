@@ -238,13 +238,6 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	_route->active_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_active_changed, this), ui_context());
 	_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_route_deleted, this), ui_context());
 
-	/* Update */
-	_pan_mode = PanAzimuthAutomation;
-	_trim_mode = TrimAutomation;
-	potmode_changed (true);
-
-	notify_all ();
-
 	/* setup legal VPot modes for this route */
 
 	possible_pot_parameters.clear();
@@ -273,11 +266,21 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	if (_route->trim() && route()->trim()->active()) {
 		possible_trim_parameters.push_back (TrimAutomation);
+		_trim_mode = TrimAutomation;
 	}
 
 	if (_route->phase_invert().size()) {
 		possible_trim_parameters.push_back (PhaseAutomation);
+		if (_trim_mode != TrimAutomation) {
+			_trim_mode = PhaseAutomation;
+		}
 	}
+
+	/* Update */
+	_pan_mode = PanAzimuthAutomation;
+	potmode_changed (false);
+	notify_all ();
+
 }
 
 void
@@ -419,6 +422,11 @@ void
 Strip::notify_phase_changed (bool force_update)
 {
 	if (_route) {
+		if (!_route->phase_invert().size()) {
+			_surface->write (_vpot->zero());
+			return;
+		}
+
 		Control* control = 0;
 		ControlParameterMap::iterator i = control_by_parameter.find (PhaseAutomation);
 
@@ -1081,8 +1089,8 @@ Strip::potmode_changed (bool notify)
 	switch (pm) {
 	case MackieControlProtocol::Pan:
 		// This needs to set current pan mode (azimuth or width... or whatever)
-		set_vpot_parameter (_pan_mode);
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Assign pot to Pan mode %1\n", enum_2_string (_pan_mode)));
+		set_vpot_parameter (_pan_mode);
 		break;
 	case MackieControlProtocol::Trim:
 		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Trim mode.\n");
@@ -1208,7 +1216,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 {
 	boost::shared_ptr<Pannable> pannable;
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to vpot mode %1\n", p));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to vpot mode %1\n", p.type()));
 
 	reset_saved_values ();
 
