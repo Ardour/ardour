@@ -172,6 +172,7 @@ class LIBCANVAS_API GtkCanvas : public Canvas, public Gtk::EventBox
 {
 public:
 	GtkCanvas ();
+	~GtkCanvas () { _in_dtor = true ; }
 
 	void request_redraw (Rect const &);
 	void request_size (Duple);
@@ -238,6 +239,8 @@ private:
 	bool show_tooltip ();
 	void hide_tooltip ();
 	bool really_start_tooltip_timeout ();
+
+	bool _in_dtor;
 };
 
 /** A GTK::Alignment with a GtkCanvas inside it plus some Gtk::Adjustments for

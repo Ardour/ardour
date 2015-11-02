@@ -389,6 +389,7 @@ GtkCanvas::GtkCanvas ()
 	, _single_exposure (1)
 	, current_tooltip_item (0)
 	, tooltip_window (0)
+	, _in_dtor (false)
 {
 	/* these are the events we want to know about */
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK |
@@ -779,6 +780,10 @@ GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 bool
 GtkCanvas::on_expose_event (GdkEventExpose* ev)
 {
+	if (_in_dtor) {
+		return true;
+	}
+
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	Cairo::RefPtr<Cairo::Context> draw_context;
 	Cairo::RefPtr<Cairo::Context> window_context;
@@ -1039,6 +1044,10 @@ GtkCanvas::on_leave_notify_event (GdkEventCrossing* ev)
 void
 GtkCanvas::request_redraw (Rect const & request)
 {
+	if (_in_dtor) {
+		return;
+	}
+
 	Rect real_area;
 
 	Coord const w = width ();
