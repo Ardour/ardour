@@ -650,6 +650,8 @@ MidiChannelSelectorWindow::playback_mode_changed ()
 		}
 	}
 
+	playback_mask_changed(); // update buttons
+
 	last_drawn_playback_mode = mode;
 }
 
@@ -747,6 +749,8 @@ MidiChannelSelectorWindow::capture_mode_changed ()
 			(*i)->set_sensitive (false);
 		}
 	}
+
+	capture_mask_changed (); // udpate buttons
 
 	last_drawn_capture_mode = mode;
 }
