@@ -411,6 +411,17 @@ SessionDialog::setup_initial_choice_box ()
 	centering_vbox->pack_start (*browse_label, false, false, 12);
 	centering_vbox->pack_start (existing_session_chooser, false, false);
 
+	/* --disable plugins UI */
+
+	_disable_plugins.set_label (_("Safe Mode: Disable all Plugins"));
+	_disable_plugins.set_flags (Gtk::CAN_FOCUS);
+	_disable_plugins.set_relief (Gtk::RELIEF_NORMAL);
+	_disable_plugins.set_mode (true);
+	_disable_plugins.set_active (ARDOUR::Session::get_disable_all_loaded_plugins());
+	_disable_plugins.set_border_width(0);
+	_disable_plugins.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::disable_plugins_clicked));
+	centering_vbox->pack_start (_disable_plugins, false, false);
+
 	/* pack it all up */
 
 	centering_hbox->pack_start (*centering_vbox, true, true);
@@ -1132,6 +1143,12 @@ void
 SessionDialog::recent_row_activated (const Gtk::TreePath&, Gtk::TreeViewColumn*)
 {
 	response (RESPONSE_ACCEPT);
+}
+
+void
+SessionDialog::disable_plugins_clicked ()
+{
+	ARDOUR::Session::set_disable_all_loaded_plugins (_disable_plugins.get_active());
 }
 
 void

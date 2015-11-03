@@ -231,6 +231,10 @@ class SessionDialog : public ArdourDialog {
 	void master_bus_button_clicked ();
 	void setup_more_options_box ();
 
+	/* --disable plugins UI */
+	Gtk::CheckButton _disable_plugins;
+	void disable_plugins_clicked ();
+
 	/* always there */
 
 	Glib::RefPtr<Pango::Layout> layout;
