@@ -38,6 +38,8 @@ def build(bld):
     obj.source = '''
             plugins.cpp
             AmplitudeFollower.cpp
+            EBUr128.cpp
+            ebu_r128_proc.cc
             OnsetDetect.cpp
             PercussionOnsetDetector.cpp
             SpectralCentroid.cpp
