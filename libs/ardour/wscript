@@ -65,6 +65,7 @@ libardour_sources = [
         'delivery.cc',
         'directory_names.cc',
         'diskstream.cc',
+        'ebur128_analysis.cc',
         'element_import_handler.cc',
         'element_importer.cc',
         'engine_slave.cc',
