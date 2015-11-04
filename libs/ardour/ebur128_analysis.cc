@@ -18,6 +18,8 @@
 */
 
 #include <cmath>
+#include <cstring>
+
 #include "ardour/ebur128_analysis.h"
 
 #include "i18n.h"
