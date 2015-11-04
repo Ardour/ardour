@@ -1256,13 +1256,12 @@ Playlist::flush_notifications (bool from_undo)
 
 	 RegionWriteLock rl (this);
 	 int itimes = (int) floor (times);
-	 framepos_t pos = position + 1;
 
 	 while (itimes--) {
 		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
-		 add_region_internal (copy, pos);
+		 add_region_internal (copy, position);
 		 set_layer (copy, DBL_MAX);
-		 pos += gap;
+		 position += gap;
 	 }
 
 	 if (floor (times) != times) {
@@ -1278,7 +1277,7 @@ Playlist::flush_notifications (bool from_undo)
 			 plist.add (Properties::name, name);
 
 			 boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
-			 add_region_internal (sub, pos);
+			 add_region_internal (sub, position);
 			 set_layer (sub, DBL_MAX);
 		 }
 	 }
