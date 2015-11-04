@@ -544,6 +544,11 @@
       <menuitem action='Chat'/>
       <menuitem action='Manual'/>
       <menuitem action='Reference'/>
+      <menuitem action='Forums'/>
+      <menuitem action='Howto_Report'/>
+      <menuitem action='Tracker'/>
+      <menuitem action='Website'/>
+      <menuitem action='Website_Dev'/>
     </menu>
   </menubar>
 
