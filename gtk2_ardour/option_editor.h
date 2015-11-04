@@ -582,6 +582,8 @@ public:
 
 private:
 	void db_changed ();
+	void on_activate ();
+	bool on_key_press (GdkEventKey* ev);
 
 	Gtk::Adjustment _db_adjustment;
 	Gtkmm2ext::HSliderController* _db_slider;

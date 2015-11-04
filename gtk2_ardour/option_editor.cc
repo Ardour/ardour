@@ -31,9 +31,10 @@
 #include "pbd/configuration.h"
 #include "pbd/replace_all.h"
 
-#include "public_editor.h"
-#include "option_editor.h"
 #include "gui_thread.h"
+#include "option_editor.h"
+#include "public_editor.h"
+#include "utils.h"
 #include "i18n.h"
 
 using namespace std;
@@ -289,6 +290,8 @@ FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t>
 	set_size_request_to_display_given_text (_db_display, "-99.00", 12, 12);
 
 	_db_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &FaderOption::db_changed));
+	_db_display.signal_activate().connect (sigc::mem_fun (*this, &FaderOption::on_activate));
+	_db_display.signal_key_press_event().connect (sigc::mem_fun (*this, &FaderOption::on_key_press), false);
 }
 
 void
@@ -312,6 +315,26 @@ void
 FaderOption::db_changed ()
 {
 	_set (slider_position_to_gain_with_max (_db_adjustment.get_value (), Config->get_max_gain()));
+}
+
+void
+FaderOption::on_activate ()
+{
+	float db_val = atof (_db_display.get_text ().c_str ());
+	gain_t coeff_val = dB_to_coefficient (db_val);
+
+	_db_adjustment.set_value (gain_to_slider_position_with_max (coeff_val, Config->get_max_gain ()));
+}
+
+bool
+FaderOption::on_key_press (GdkEventKey* ev)
+{
+	if (ARDOUR_UI_UTILS::key_is_legal_for_numeric_entry (ev->keyval)) {
+		/* drop through to normal handling */
+		return false;
+	}
+	/* illegal key for gain entry */
+	return true;
 }
 
 void
