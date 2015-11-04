@@ -929,15 +929,14 @@ ARDOUR_UI_UTILS::windows_overlap (Gtk::Window *a, Gtk::Window *b)
 }
 
 bool
-ARDOUR_UI_UTILS::overwrite_file_dialog (string title, string text)
+ARDOUR_UI_UTILS::overwrite_file_dialog (Gtk::Window& parent, string title, string text)
 {
-	ArdourDialog dialog (title, true);
+	ArdourDialog dialog (parent, title, true);
 	Label label (text);
 
 	dialog.get_vbox()->pack_start (label, true, true);
 	dialog.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	dialog.add_button (_("Overwrite"), Gtk::RESPONSE_ACCEPT);
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.show_all ();
 
 	switch (dialog.run()) {

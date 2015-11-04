@@ -404,7 +404,7 @@ TranscodeVideoDialog::launch_transcode ()
 		return;
 	}
 	std::string outfn = path_entry.get_text();
-	if (!confirm_video_outfn(outfn, video_get_docroot(Config))) return;
+	if (!confirm_video_outfn(*this, outfn, video_get_docroot(Config))) return;
 	progress_label.set_text (_("Transcoding Video.."));
 	dialog_progress_mode();
 #if 1 /* tentative debug mode */

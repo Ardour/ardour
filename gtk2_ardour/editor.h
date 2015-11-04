@@ -67,20 +67,21 @@ namespace Gtkmm2ext {
 }
 
 namespace ARDOUR {
-	class RouteGroup;
-	class Playlist;
 	class AudioPlaylist;
 	class AudioRegion;
-	class Region;
-	class Location;
-	class TempoSection;
-	class Session;
-	class Filter;
-	class ChanCount;
-	class MidiOperator;
-	class Track;
-	class MidiTrack;
 	class AudioTrack;
+	class ChanCount;
+	class Filter;
+	class Location;
+	class MidiOperator;
+	class MidiRegion;
+	class MidiTrack;
+	class Playlist;
+	class Region;
+	class RouteGroup;
+	class Session;
+	class TempoSection;
+	class Track;
 }
 
 namespace LADSPA {
@@ -113,6 +114,7 @@ class GroupedButtons;
 class GUIObjectState;
 class ArdourMarker;
 class MidiRegionView;
+class MidiExportDialog;
 class MixerStrip;
 class MouseCursors;
 class NoteBase;
@@ -281,6 +283,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void export_selection ();
 	void export_range ();
 	void export_region ();
+
+	bool process_midi_export_dialog (MidiExportDialog& dialog, boost::shared_ptr<ARDOUR::MidiRegion> midi_region);
 
 	void add_transport_frame (Gtk::Container&);
 	void add_toplevel_menu (Gtk::Container&);

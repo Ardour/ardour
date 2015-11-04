@@ -46,7 +46,7 @@ using namespace ARDOUR;
 using namespace VideoUtils;
 
 bool
-VideoUtils::confirm_video_outfn (std::string outfn, std::string docroot)
+VideoUtils::confirm_video_outfn (Gtk::Window& parent, std::string outfn, std::string docroot)
 {
 	/* replace docroot's '/' to G_DIR_SEPARATOR for the comparison */
 	size_t look_here = 0;
@@ -68,7 +68,8 @@ VideoUtils::confirm_video_outfn (std::string outfn, std::string docroot)
 	}
 
 	if (Glib::file_test(outfn, Glib::FILE_TEST_EXISTS)) {
-		bool overwrite = ARDOUR_UI_UTILS::overwrite_file_dialog (_("Confirm Overwrite"),
+		bool overwrite = ARDOUR_UI_UTILS::overwrite_file_dialog (parent,
+		                                                         _("Confirm Overwrite"),
 		                                                         _("A file with the same name already exists. Do you want to overwrite it?"));
 
 		if (!overwrite) {

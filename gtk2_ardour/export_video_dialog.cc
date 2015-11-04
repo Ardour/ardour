@@ -619,7 +619,7 @@ ExportVideoDialog::launch_export ()
 	_session->add_extra_xml (get_state());
 
 	std::string outfn = outfn_path_entry.get_text();
-	if (!confirm_video_outfn(outfn)) { return; }
+	if (!confirm_video_outfn(*this, outfn)) { return; }
 
 	vbox->hide();
 	cancel_button->hide();
