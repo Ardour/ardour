@@ -526,23 +526,24 @@ def build(bld):
 
         create_ardour_test_program(bld, obj.includes, 'libardour-tests', 'run-tests', test_sources)
 
-        # Tester to just load a session
-        session_load_tester = bld(features = 'cxx cxxprogram')
-        session_load_tester.source = '''
+        # Utility to load and save a session
+        load_save_session = bld(features = 'cxx cxxprogram')
+        load_save_session.source = '''
                     test/test_util.cc
-                    test/load_session.cc
+                    test/test_ui.cc
+                    test/load_save_session.cc
                     test/dummy_lxvst.cc
             '''.split()
 
-        session_load_tester.includes  = obj.includes
-        session_load_tester.includes.append ('test')
-        session_load_tester.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
+        load_save_session.includes  = obj.includes
+        load_save_session.includes.append ('test')
+        load_save_session.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                              'SAMPLERATE','XML','LRDF','COREAUDIO']
-        session_load_tester.use       = ['libpbd','libmidipp','libardour']
-        session_load_tester.name      = 'libardour-session-load-tester'
-        session_load_tester.target    = 'load-session'
-        session_load_tester.install_path = ''
-        session_load_tester.defines      = [
+        load_save_session.use       = ['libpbd','libmidipp','libardour']
+        load_save_session.name      = 'libardour-load-save-session'
+        load_save_session.target    = 'load-save-session'
+        load_save_session.install_path = ''
+        load_save_session.defines      = [
             'PACKAGE="libardour' + str(bld.env['MAJOR']) + 'profile"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
