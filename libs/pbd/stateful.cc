@@ -45,11 +45,11 @@ int Stateful::current_state_version = 0;
 int Stateful::loading_state_version = 0;
 
 Stateful::Stateful ()
-	: _properties (new OwnedPropertyList)
+	: _extra_xml (0)
+	, _instant_xml (0)
+	, _properties (new OwnedPropertyList)
 	, _stateful_frozen (0)
 {
-	_extra_xml = 0;
-	_instant_xml = 0;
 }
 
 Stateful::~Stateful ()
