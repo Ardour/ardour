@@ -4,6 +4,9 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-2.0+</project_license>
   <name>Ardour</name>
+  <releases>
+    <release version="@VERSION@" />
+  </releases>
   <summary>Digital Audio Workstation</summary>
   <description>
     <p>

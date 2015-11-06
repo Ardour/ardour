@@ -674,7 +674,8 @@ def build(bld):
     # Freedesktop
     freedesktop_subst_dict = {
                     'ARDOUR_EXEC' : str (bld.env['lwrcase_dirname']),
-                    'ARDOUR_ICON' : str (bld.env['lwrcase_dirname'])
+                    'ARDOUR_ICON' : str (bld.env['lwrcase_dirname']),
+                    'VERSION': str (bld.env['VERSION']),
     }
 
     if bld.env['FREEDESKTOP']:
