@@ -9,6 +9,8 @@ import re
 import time
 from waflib.Task import Task
 from waflib.Tools import winres
+import subprocess
+import glob
 
 # Mandatory variables
 top = '.'
@@ -688,9 +690,12 @@ def build(bld):
         obj.target       = 'ardour.xml'
         obj.chmod        = Utils.O644
 
+        # build appdata with translations
+        appdata_i18n_mo(bld)
+        appdata_i18n_xmlin(bld)
         obj              = bld(features = 'subst')
         obj.source       = 'ardour.appdata.xml.in'
-        obj.target       = str (bld.env['lwrcase_dirname']) +  '.appdata.xml'
+        obj.target       = str (bld.env['lwrcase_dirname']) + '.appdata.xml'
         obj.chmod        = Utils.O644
         obj.dict         = freedesktop_subst_dict
         set_subst_dict(obj, freedesktop_subst_dict)
@@ -750,18 +755,52 @@ def i18n(bld):
         I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
         autowaf.build_i18n(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                            'Paul Davis')
+        appdata_i18n_pot(bld)
+        appdata_i18n_po(bld)
         
 def i18n_pot(bld):
         I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
         autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                                'Paul Davis')
+        appdata_i18n_pot(bld)
 
 def i18n_po(bld):
         I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
         autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                               'Paul Davis')
+        appdata_i18n_po(bld)
         
 def i18n_mo(bld):
         I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
         autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                               'Paul Davis')
+
+def appdata_i18n_pot(bld):
+    Logs.info('Generating pot file from Ardour appdata')
+    itsfile = os.path.join(bld.top_dir, 'tools', 'as-metainfo.its')
+    potfile = os.path.join(bld.top_dir, 'gtk2_ardour', 'appdata',
+            'ardour.appdata.pot')
+    adsource = os.path.join(bld.top_dir, 'gtk2_ardour',
+            'ardour.appdata.xml.in.in')
+    Logs.info('Updating ' + potfile)
+    subprocess.call(('itstool', '-i', itsfile, '-o', potfile, adsource))
+
+def appdata_i18n_po(bld):
+    autowaf.build_i18n_po(bld, bld.top_dir, os.path.join(
+        'gtk2_ardour', 'appdata'), 'ardour.appdata', 'dummy', 'dummy')
+
+def appdata_i18n_mo(bld):
+    autowaf.build_i18n_mo(bld, bld.top_dir, os.path.join(
+        'gtk2_ardour', 'appdata'), 'ardour.appdata', 'dummy', 'dummy')
+
+def appdata_i18n_xmlin(bld):
+    itsfile = os.path.join(bld.top_dir, 'tools', 'as-metainfo.its')
+    adxmlininfile = os.path.join(bld.top_dir, 'gtk2_ardour',
+            'ardour.appdata.xml.in.in')
+    adxmlinfile = os.path.join(bld.top_dir, 'gtk2_ardour',
+            'ardour.appdata.xml.in')
+    mo_glob = os.path.join(bld.top_dir, 'gtk2_ardour', 'appdata', 'po', '*.mo')
+    mo_files = glob.glob(mo_glob)
+    Logs.info('Generating ' + adxmlinfile)
+    subprocess.call(['itstool', '-i', itsfile, '-o', adxmlinfile,
+        '-j', adxmlininfile] + mo_files)
