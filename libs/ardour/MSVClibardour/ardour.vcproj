@@ -460,6 +460,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ebur128_analysis.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\element_import_handler.cc"
 				>
 			</File>
@@ -1539,6 +1543,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\dsp_load_calculator.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\ebur128_analysis.h"
 				>
 			</File>
 			<File
