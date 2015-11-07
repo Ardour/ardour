@@ -107,6 +107,7 @@ private:
 	uint64_t _block_screen_redisplay_until;
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;
+	PBD::ScopedConnectionList send_connections;
 
 	ARDOUR::AutomationType  _pan_mode;
 	ARDOUR::AutomationType  _trim_mode;
@@ -115,6 +116,7 @@ private:
 	float _last_pan_azi_position_written;
 	float _last_pan_width_position_written;
 	float _last_trim_position_written;
+	uint32_t _current_send;
 
 	void notify_solo_changed ();
 	void notify_mute_changed ();
@@ -127,11 +129,10 @@ private:
 	void notify_route_deleted ();
 	void notify_trim_changed (bool force_update = true);
 	void notify_phase_changed (bool force_update = true);
-
+	void notify_processor_changed (bool force_update = true);
 	void update_automation ();
 	void update_meter ();
-
-	std::string vpot_mode_string () const;
+	std::string vpot_mode_string ();
 
 	void return_to_vpot_mode_display ();
 

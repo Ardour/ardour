@@ -101,6 +101,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _last_pan_azi_position_written (-1.0)
 	, _last_pan_width_position_written (-1.0)
 	, _last_trim_position_written (-1.0)
+	, _current_send (0)
 	, redisplay_requests (256)
 {
 	_fader = dynamic_cast<Fader*> (Fader::factory (*_surface, index, "fader", *this));
@@ -186,6 +187,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	control_by_parameter[GainAutomation] = (Control*) 0;
 	control_by_parameter[TrimAutomation] = (Control*) 0;
 	control_by_parameter[PhaseAutomation] = (Control*) 0;
+	control_by_parameter[SendAutomation] = (Control*) 0;
 
 	reset_saved_values ();
 
@@ -271,11 +273,12 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	if (_route->phase_invert().size()) {
 		possible_trim_parameters.push_back (PhaseAutomation);
+		_route->phase_control()->set_channel(0);
 		if (_trim_mode != TrimAutomation) {
 			_trim_mode = PhaseAutomation;
 		}
 	}
-
+	_current_send = 0;
 	/* Update */
 	_pan_mode = PanAzimuthAutomation;
 	potmode_changed (false);
@@ -300,6 +303,7 @@ Strip::notify_all()
 	notify_record_enable_changed ();
 	notify_trim_changed ();
 	notify_phase_changed ();
+	notify_processor_changed ();
 }
 
 void
@@ -446,6 +450,44 @@ Strip::notify_phase_changed (bool force_update)
 		} else if (control == _vpot) {
 			_surface->write (_vpot->set (normalized_position, true, Pot::wrap));
 			queue_parameter_display (PhaseAutomation, normalized_position);
+		}
+	}
+}
+
+void
+Strip::notify_processor_changed (bool force_update)
+{
+	if (_route) {
+		boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
+		if (!p) {
+			_surface->write (_vpot->zero());
+			return;
+		}
+
+		Control* control = 0;
+		ControlParameterMap::iterator i = control_by_parameter.find (SendAutomation);
+
+		if (i == control_by_parameter.end()) {
+			return;
+		}
+
+		control = i->second;
+
+		boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
+		boost::shared_ptr<Amp> a = s->amp();
+		boost::shared_ptr<AutomationControl> ac = a->gain_control();
+
+		float gain_coefficient = ac->get_value();
+		float normalized_position = ac->internal_to_interface (gain_coefficient);
+
+		if (control == _fader) {
+			if (!_fader->in_use()) {
+				_surface->write (_fader->set_position (normalized_position));
+				queue_parameter_display (SendAutomation, normalized_position);
+			}
+		} else if (control == _vpot) {
+			_surface->write (_vpot->set (normalized_position, true, Pot::dot));
+			queue_parameter_display (SendAutomation, normalized_position);
 		}
 	}
 }
@@ -797,6 +839,18 @@ Strip::do_parameter_display (AutomationType type, float val)
 		}
 		break;
 
+	case SendAutomation:
+		if (val == 0.0) {
+			_surface->write (display (1, " -inf "));
+		} else {
+			char buf[16];
+			float dB = accurate_coefficient_to_dB (val);
+			snprintf (buf, sizeof (buf), "%6.1f", dB);
+			_surface->write (display (1, buf));
+			screen_hold = true;
+		}
+		break;
+
 	default:
 		break;
 	}
@@ -1047,30 +1101,34 @@ Strip::gui_selection_changed (const ARDOUR::StrongRouteNotificationList& rl)
 }
 
 string
-Strip::vpot_mode_string () const
+Strip::vpot_mode_string ()
 {
 	boost::shared_ptr<AutomationControl> ac = _vpot->control();
-
 	if (!ac) {
 		return string();
 	}
 
-	switch (ac->parameter().type()) {
-	case GainAutomation:
+	if (control_by_parameter.find (GainAutomation)->second == _vpot) {
 		return "Fader";
-	case TrimAutomation:
+	} else if (control_by_parameter.find (TrimAutomation)->second == _vpot) {
 		return "Trim";
-	case PhaseAutomation:
+	} else if (control_by_parameter.find (PhaseAutomation)->second == _vpot) {
 		return string_compose ("Phase%1", _route->phase_control()->channel() + 1);
-	case PanAzimuthAutomation:
+	} else if (control_by_parameter.find (SendAutomation)->second == _vpot) {
+		// should be bus name
+		boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
+		if (p) {
+			return p->name();
+		}
+	} else if (control_by_parameter.find (PanAzimuthAutomation)->second == _vpot) {
 		return "Pan";
-	case PanWidthAutomation:
+	} else if (control_by_parameter.find (PanWidthAutomation)->second == _vpot) {
 		return "Width";
-	case PanElevationAutomation:
+	} else if (control_by_parameter.find (PanElevationAutomation)->second == _vpot) {
 		return "Elev";
-	case PanFrontBackAutomation:
+	} else if (control_by_parameter.find (PanFrontBackAutomation)->second == _vpot) {
 		return "F/Rear";
-	case PanLFEAutomation:
+	} else if (control_by_parameter.find (PanLFEAutomation)->second == _vpot) {
 		return "LFE";
 	}
 
@@ -1097,6 +1155,7 @@ Strip::potmode_changed (bool notify)
 		set_vpot_parameter (_trim_mode);
 		break;
 	case MackieControlProtocol::Send:
+		// _current_send has the number of the send we will show
 		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Send mode.\n");
 		set_vpot_parameter (SendAutomation);
 		break;
@@ -1207,8 +1266,19 @@ Strip::next_pot_mode ()
 			i = possible_trim_parameters.begin();
 		}
 		set_vpot_parameter (*i);
+	} else if (_surface->mcp().pot_mode() == MackieControlProtocol::Send) {
+		boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
+		if (!p) {
+			return;
+		}
+		p = _route->nth_send (_current_send + 1);
+		if (p && p->name() != "Monitor 1") {
+			_current_send++;
+		} else {
+			_current_send = 0;
+		}
+		set_vpot_parameter (SendAutomation);
 	}
-
 }
 
 void
@@ -1343,17 +1413,41 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 		}
 		break;
 	case SendAutomation:
-		// deal with sends ... needs sends yet :)
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-			// gain to vpot, trim to fader
+			// gain to vpot, send to fader
 			_vpot->set_control (_route->gain_control());
 			control_by_parameter[GainAutomation] = _vpot;
-			_fader->set_control (boost::shared_ptr<AutomationControl>());
+			// test for send to control
+			boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
+			if (p && p->name() != "Monitor 1") {
+				boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
+				boost::shared_ptr<Amp> a = s->amp();
+				_fader->set_control (a->gain_control());
+				// connect to signal
+				send_connections.drop_connections ();
+				a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
+				control_by_parameter[SendAutomation] = _fader;
+			} else {
+				_fader->set_control (boost::shared_ptr<AutomationControl>());
+				control_by_parameter[SendAutomation] = 0;
+			}
 		} else {
-			// gain to fader, trim to vpot
+			// gain to fader, send to vpot
 			_fader->set_control (_route->gain_control());
 			control_by_parameter[GainAutomation] = _fader;
-			_vpot->set_control (boost::shared_ptr<AutomationControl>());
+			boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
+			if (p && p->name() != "Monitor 1") {
+				boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
+				boost::shared_ptr<Amp> a = s->amp();
+				_vpot->set_control (a->gain_control());
+				// connect to signal
+				send_connections.drop_connections ();
+				a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
+				control_by_parameter[SendAutomation] = _vpot;
+			} else {
+				_vpot->set_control (boost::shared_ptr<AutomationControl>());
+				control_by_parameter[SendAutomation] = 0;
+			}
 		}
 		break;
 	default:
