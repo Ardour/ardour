@@ -619,6 +619,7 @@ MackieControlProtocol::device_ready ()
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device ready init (active=%1)\n", active()));
 	update_surfaces ();
+	set_pot_mode (_pot_mode);
 }
 
 // send messages to surface to set controls to correct values
