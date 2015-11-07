@@ -69,7 +69,7 @@ Stateful::add_extra_xml (XMLNode& node)
 		_extra_xml = new XMLNode ("Extra");
 	}
 
-	_extra_xml->remove_nodes (node.name());
+	_extra_xml->remove_nodes_and_delete (node.name());
 	_extra_xml->add_child_nocopy (node);
 }
 
