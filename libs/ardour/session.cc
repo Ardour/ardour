@@ -2214,9 +2214,14 @@ Session::find_route_name (string const & base, uint32_t& id, string& name, bool 
 
 	for (vector<string>::const_iterator reserved = reserved_io_names.begin(); reserved != reserved_io_names.end(); ++reserved) {
 		if (base == *reserved) {
-			definitely_add_number = true;
-			if (id < 1) {
-				id = 1;
+			/* Check if this reserved name already exists, and if
+			   so, disallow it without a numeric suffix.
+			*/
+			if (route_by_name (*reserved)) {
+				definitely_add_number = true;
+				if (id < 1) {
+					id = 1;
+				}
 			}
 			break;
 		}
@@ -3753,7 +3758,11 @@ Session::io_name_is_legal (const std::string& name)
 
 	for (vector<string>::const_iterator reserved = reserved_io_names.begin(); reserved != reserved_io_names.end(); ++reserved) {
 		if (name == *reserved) {
-			return false;
+			if (route_by_name (*reserved)) {
+				return false;
+			} else {
+				return true;
+			}
 		}
 	}
 
