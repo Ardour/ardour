@@ -3760,8 +3760,6 @@ Session::io_name_is_legal (const std::string& name)
 		if (name == *reserved) {
 			if (route_by_name (*reserved)) {
 				return false;
-			} else {
-				return true;
 			}
 		}
 	}
