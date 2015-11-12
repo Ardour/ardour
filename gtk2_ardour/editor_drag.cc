@@ -3302,6 +3302,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		swap_grab (&_marker->the_item(), 0, GDK_CURRENT_TIME);
 
 		if (!_copy) {
+			_editor->begin_reversible_command (_("move tempo mark"));
 			TempoMap& map (_editor->session()->tempo_map());
 			/* get current state */
 			before_state = &map.get_state();
@@ -3346,7 +3347,6 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->commit_reversible_command ();
 
 	} else {
-		_editor->begin_reversible_command (_("move tempo mark"));
 		/* we removed it before, so add it back now */
 		map.add_tempo (_marker->tempo(), when);
 		XMLNode &after = map.get_state();
