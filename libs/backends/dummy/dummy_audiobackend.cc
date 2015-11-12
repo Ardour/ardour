@@ -1525,6 +1525,7 @@ void DummyPort::setup_random_number_generator ()
 	_rseed = g_get_monotonic_time() % UINT_MAX;
 	}
 	_rseed = (_rseed + (uint64_t)this) % UINT_MAX;
+	if (_rseed == 0) _rseed = 1;
 }
 
 inline uint32_t
