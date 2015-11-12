@@ -70,6 +70,17 @@ class LIBPBD_API Stateful {
 	void set_id (const std::string&);
 	void reset_id ();
 
+	/* RAII structure to manage thread-local ID regeneration.
+	 */
+	struct ForceIDRegeneration {
+		ForceIDRegeneration () {
+			set_regenerate_xml_and_string_ids_in_this_thread (true);
+		}
+		~ForceIDRegeneration () {
+			set_regenerate_xml_and_string_ids_in_this_thread (false);
+		}
+	};
+
 	/* history management */
 
 	void clear_changes ();
@@ -121,11 +132,14 @@ class LIBPBD_API Stateful {
 	virtual void mid_thaw (const PropertyChange&) { }
 
   private:
+	friend struct ForceIDRegeneration;
+	static Glib::Threads::Private<bool> regenerate_xml_or_string_ids;
 	PBD::ID  _id;
 	gint     _stateful_frozen;
+
+	static void set_regenerate_xml_and_string_ids_in_this_thread (bool yn);
 };
 
 } // namespace PBD
 
 #endif /* __pbd_stateful_h__ */
-

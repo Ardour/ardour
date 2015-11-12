@@ -44,6 +44,10 @@ namespace PBD {
 int Stateful::current_state_version = 0;
 int Stateful::loading_state_version = 0;
 
+static void do_not_delete (void*) { }
+
+Glib::Threads::Private<bool> Stateful::regenerate_xml_or_string_ids (do_not_delete);
+
 Stateful::Stateful ()
 	: _extra_xml (0)
 	, _instant_xml (0)
@@ -382,6 +386,11 @@ Stateful::set_id (const XMLNode& node)
 {
 	const XMLProperty* prop;
 
+	if (regenerate_xml_or_string_ids.get()) {
+		reset_id ();
+		return true;
+	}
+
 	if ((prop = node.property ("id")) != 0) {
 		_id = prop->value ();
 		return true;
@@ -399,7 +408,17 @@ Stateful::reset_id ()
 void
 Stateful::set_id (const string& str)
 {
-	_id = str;
+	if (regenerate_xml_or_string_ids.get()) {
+		reset_id ();
+	} else {
+		_id = str;
+	}
+}
+
+void
+Stateful::set_regenerate_xml_and_string_ids_in_this_thread (bool yn)
+{
+	regenerate_xml_or_string_ids.set (&yn);
 }
 
 } // namespace PBD
