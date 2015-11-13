@@ -591,6 +591,44 @@ Region::set_position (framepos_t pos)
 
 }
 
+/** A gui may need to create a region, then place it in an initial
+ *  position determined by the user.
+ *  When this takes place within one gui operation, we have to reset
+ *  _last_position to prevent an implied move.
+ */
+void
+Region::set_initial_position (framepos_t pos)
+{
+	if (!can_move()) {
+		return;
+	}
+
+	if (_position != pos) {
+		_position = pos;
+
+		/* check that the new _position wouldn't make the current
+		   length impossible - if so, change the length.
+
+		   XXX is this the right thing to do?
+		*/
+
+		if (max_framepos - _length < _position) {
+			_last_length = _length;
+			_length = max_framepos - _position;
+		}
+
+		recompute_position_from_lock_style ();
+		/* ensure that this move doesn't cause a range move */
+		_last_position = _position;
+	}
+
+
+	/* do this even if the position is the same. this helps out
+	   a GUI that has moved its representation already.
+	*/
+	send_change (Properties::position);
+}
+
 void
 Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 {
