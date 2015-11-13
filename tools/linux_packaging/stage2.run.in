@@ -229,42 +229,6 @@ case `uname -m` in
 		;;
 esac
 
-#############################
-# Determine C11 stdlibc++ ABI
-#############################
-
-if %REPLACE_GCC5%; then
-	# Ardour was compiled with gcc5, warn on gcc4 systems
-	if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc5 > /dev/null"; then
-		echo ""
-		echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
-		echo ""
-		echo "Ardour was compiled with gcc5, your system uses an older version of the"
-		echo "standard c++ library. Plugins on your system may not load or plugin-UIs"
-		echo "may cause crashes."
-		echo ""
-		ANSWER=$(VaildateYesNoQuestion "Continue anyway?")
-		if test "n" = $ANSWER; then
-			exit 1
-		fi
-	fi
-else
-	# Ardour was compiled with gcc4, warn on gcc5 systems
-	if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc4 > /dev/null"; then
-		echo ""
-		echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
-		echo ""
-		echo "Ardour was compiled with gcc4, your system uses a newer version of the"
-		echo "standard c++ library. Plugins on your system may not load or plugin-UIs"
-		echo "may cause crashes."
-		echo ""
-		ANSWER=$(VaildateYesNoQuestion "Continue anyway?")
-		if test "n" = $ANSWER; then
-			exit 1
-		fi
-	fi
-fi
-
 ####################
 # Check disk space
 ####################
@@ -313,12 +277,48 @@ else
 	fi
 fi
 
-FILESYSTEM_TYPE=$(df -P -T "${PKG_PATH}" | grep / | awk '{print $2}')
-echo "Bundle is on ${FILESYSTEM_TYPE} filesystem"
+#############################
+# Determine C11 stdlibc++ ABI
+#############################
+
+if %REPLACE_GCC5%; then
+	# Ardour was compiled with gcc5, warn on gcc4 systems
+	if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc5 > /dev/null"; then
+		echo ""
+		echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
+		echo ""
+		echo "Ardour was compiled with gcc5, your system uses an older version of the"
+		echo "standard c++ library. Plugins on your system may not load or plugin-UIs"
+		echo "may cause crashes."
+		echo ""
+		ANSWER=$(VaildateYesNoQuestion "Continue anyway?")
+		if test "n" = $ANSWER; then
+			exit 1
+		fi
+	fi
+else
+	# Ardour was compiled with gcc4, warn on gcc5 systems
+	if ! ${NORM_USER} "${PKG_PATH}/.gcc-glibmm-abi-check --gcc4 > /dev/null"; then
+		echo ""
+		echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
+		echo ""
+		echo "Ardour was compiled with gcc4, your system uses a newer version of the"
+		echo "standard c++ library. Plugins on your system may not load or plugin-UIs"
+		echo "may cause crashes."
+		echo ""
+		ANSWER=$(VaildateYesNoQuestion "Continue anyway?")
+		if test "n" = $ANSWER; then
+			exit 1
+		fi
+	fi
+fi
 
 #####################
 # Unpack the bundle
 #####################
+
+FILESYSTEM_TYPE=$(df -P -T "${PKG_PATH}" | grep / | awk '{print $2}')
+echo "Bundle is on ${FILESYSTEM_TYPE} filesystem"
 
 # untar the correct bundle for us to install
 echo "Unpacking bundle for $ARCH"
