@@ -336,7 +336,10 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/transport_stop", "", transport_stop);
 		REGISTER_CALLBACK (serv, "/ardour/transport_play", "", transport_play);
 		REGISTER_CALLBACK (serv, "/ardour/transport_frame", "", transport_frame);
+		REGISTER_CALLBACK (serv, "/ardour/transport_speed", "", transport_speed);
+		REGISTER_CALLBACK (serv, "/ardour/record_enabled", "", record_enabled);
 		REGISTER_CALLBACK (serv, "/ardour/set_transport_speed", "f", set_transport_speed);
+
 		REGISTER_CALLBACK (serv, "/ardour/locate", "ii", locate);
 		REGISTER_CALLBACK (serv, "/ardour/save_state", "", save_state);
 		REGISTER_CALLBACK (serv, "/ardour/prev_marker", "", prev_marker);
@@ -787,6 +790,33 @@ OSC::transport_frame (lo_message msg)
 
 	lo_message_free (reply);
 }
+
+void
+OSC::transport_speed(lo_message msg)
+{
+	double ts = session->transport_speed ();
+
+	lo_message reply = lo_message_new ();
+	lo_message_add_double (reply, ts);
+
+	lo_send_message (lo_message_get_source (msg), "/ardour/transport_speed", reply);
+
+	lo_message_free (reply);
+}
+
+void
+OSC::record_enabled(lo_message msg)
+{
+	int re = (int)session->get_record_enabled ();
+
+	lo_message reply = lo_message_new ();
+	lo_message_add_int32 (reply, re);
+
+	lo_send_message (lo_message_get_source (msg), "/ardour/record_enabled", reply);
+
+	lo_message_free (reply);
+}
+
 
 int
 OSC::route_mute (int rid, int yn)
