@@ -2176,7 +2176,7 @@ ARDOUR_UI::transport_rewind (int option)
 {
 	float current_transport_speed;
 
-       	if (_session) {
+	if (_session) {
 		current_transport_speed = _session->transport_speed();
 
 		if (current_transport_speed >= 0.0f) {
@@ -2389,7 +2389,7 @@ ARDOUR_UI::save_session_as ()
 	}
 
 
- 	Session::SaveAs sa;
+	Session::SaveAs sa;
 
 	sa.new_parent_folder = save_as_dialog->new_parent_folder ();
 	sa.new_name = save_as_dialog->new_name ();
@@ -3751,6 +3751,46 @@ ARDOUR_UI::setup_order_hint (AddRouteDialog::InsertAt place)
 }
 
 void
+ARDOUR_UI::duplicate_routes ()
+{
+	/* Copy the track selection because it will/may change as we add new ones */
+	TrackSelection tracks  (editor->get_selection().tracks);
+	int err = 0;
+
+	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
+
+		RouteUI* rui = dynamic_cast<RouteUI*> (*t);
+
+		if (!rui) {
+			/* some other type of timeaxis view, not a route */
+			continue;
+		}
+
+		XMLNode& state (rui->route()->get_state());
+		RouteList rl = _session->new_route_from_template (1, state, string(), SharePlaylist);
+
+		/* normally the state node would be added to a parent, and
+		 * ownership would transfer. Because we don't do that here,
+		 * we need to delete the node ourselves.
+		 */
+
+		delete &state;
+
+		if (rl.empty()) {
+			err++;
+			break;
+		}
+	}
+
+	if (err) {
+		MessageDialog msg (_("1 or more tracks/busses could not be duplicated"),
+		                     true, MESSAGE_ERROR, BUTTONS_OK, true);
+		msg.set_position (WIN_POS_MOUSE);
+		msg.run ();
+	}
+}
+
+void
 ARDOUR_UI::add_route (Gtk::Window* /* ignored */)
 {
 	int count;
@@ -4490,7 +4530,7 @@ what you would like to do.\n"), PROGRAM_NAME));
 int
 ARDOUR_UI::sr_mismatch_dialog (framecnt_t desired, framecnt_t actual)
 {
- 	HBox* hbox = new HBox();
+	HBox* hbox = new HBox();
 	Image* image = new Image (Stock::DIALOG_WARNING, ICON_SIZE_DIALOG);
 	ArdourDialog dialog (_("Sample Rate Mismatch"), true);
 	Label  message (string_compose (_("\
@@ -4889,14 +4929,14 @@ ARDOUR_UI::transport_numpad_event (int num)
 		_pending_locate_num = _pending_locate_num*10 + num;
 	} else {
 		switch (num) {
-			case 0:  toggle_roll(false, false); 		break;
-			case 1:  transport_rewind(1); 				break;
-			case 2:  transport_forward(1); 				break;
-			case 3:  transport_record(true); 			break;
+			case 0:  toggle_roll(false, false);		break;
+			case 1:  transport_rewind(1);				break;
+			case 2:  transport_forward(1);				break;
+			case 3:  transport_record(true);			break;
 			case 4:  toggle_session_auto_loop();		break;
-			case 5:  transport_record(false); toggle_session_auto_loop(); 	break;
-			case 6:  toggle_punch(); 					break;
-			case 7:  toggle_click(); 				break;
+			case 5:  transport_record(false); toggle_session_auto_loop();	break;
+			case 6:  toggle_punch();					break;
+			case 7:  toggle_click();				break;
 			case 8:  toggle_auto_return();			break;
 			case 9:  toggle_follow_edits();		break;
 		}

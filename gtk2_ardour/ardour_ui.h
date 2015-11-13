@@ -248,6 +248,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         void add_routes_part_two ();
         void add_routes_thread ();
 
+	void duplicate_routes ();
+
 	void add_video (Gtk::Window* float_window);
 	void remove_video ();
 	void start_video_server_menu (Gtk::Window* float_window);
@@ -788,4 +790,3 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 };
 
 #endif /* __ardour_gui_h__ */
-

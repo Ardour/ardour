@@ -374,6 +374,7 @@
 
     <menu action='TrackMenu'>
       <menuitem action='AddTrackBus'/>	
+      <menuitem action='duplicate-routes'/>	
       <separator/>
       <menuitem action='track-record-enable-toggle'/>
       <menuitem action='track-solo-toggle'/>
