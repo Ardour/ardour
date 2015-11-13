@@ -510,7 +510,7 @@ Drag::show_verbose_cursor_text (string const & text)
 }
 
 boost::shared_ptr<Region>
-Drag::add_midi_region (MidiTimeAxisView* view)
+Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 {
 	if (_editor->session()) {
 		const TempoMap& map (_editor->session()->tempo_map());
@@ -520,7 +520,7 @@ Drag::add_midi_region (MidiTimeAxisView* view)
 		   might be wrong.
 		*/
 		framecnt_t len = m.frames_per_bar (map.tempo_at (pos), _editor->session()->frame_rate());
-		return view->add_region (grab_frame(), len, true);
+		return view->add_region (grab_frame(), len, commit);
 	}
 
 	return boost::shared_ptr<Region>();
@@ -2303,13 +2303,14 @@ void
 RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
-		_region = add_midi_region (_view);
+		_editor->begin_reversible_command (_("create region"));
+		_region = add_midi_region (_view, false);
 		_view->playlist()->freeze ();
 	} else {
 		if (_region) {
 			framepos_t const f = adjusted_current_frame (event);
 			if (f < grab_frame()) {
-				_region->set_position (f);
+				_region->set_initial_position (f);
 			}
 
 			/* Don't use a zero-length region, and subtract 1 frame from the snapped length
@@ -2329,9 +2330,10 @@ void
 RegionCreateDrag::finished (GdkEvent*, bool movement_occurred)
 {
 	if (!movement_occurred) {
-		add_midi_region (_view);
+		add_midi_region (_view, true);
 	} else {
 		_view->playlist()->thaw ();
+		_editor->commit_reversible_command();
 	}
 }
 
@@ -4643,7 +4645,7 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 			/* MIDI track */
 			if (_editor->selection->empty() && _editor->mouse_mode == MouseDraw) {
 				/* nothing selected */
-				add_midi_region (mtv);
+				add_midi_region (mtv, true);
 				do_deselect = false;
 			}
 		}

@@ -246,7 +246,7 @@ protected:
 	/* sets snap delta from unsnapped pos */
 	void setup_snap_delta (framepos_t pos);
 
-	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*);
+	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*, bool commit);
 
 	void show_verbose_cursor_time (framepos_t);
 	void show_verbose_cursor_duration (framepos_t, framepos_t, double xoffset = 0);
