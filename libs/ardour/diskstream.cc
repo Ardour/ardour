@@ -864,4 +864,3 @@ Diskstream::get_buffering_presets (BufferingPreset bp,
 
 	return true;
 }
-

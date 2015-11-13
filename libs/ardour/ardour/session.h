@@ -218,7 +218,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	std::string new_audio_source_path_for_embedded (const std::string& existing_path);
 	std::string new_audio_source_path (const std::string&, uint32_t nchans, uint32_t chan, bool destructive, bool take_required);
 	std::string new_midi_source_path (const std::string&);
-	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name);
+	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name, PlaylistDisposition pd = NewPlaylist);
+	RouteList new_route_from_template (uint32_t how_many, XMLNode&, const std::string& name, PlaylistDisposition pd = NewPlaylist);
 	std::vector<std::string> get_paths_for_new_sources (bool allow_replacing, const std::string& import_file_path, uint32_t channels);
 
 	int bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,std::string)> callback);

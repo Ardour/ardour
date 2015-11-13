@@ -101,7 +101,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	void set_comment (std::string str, void *src);
 
 	bool set_name (const std::string& str);
-	static void set_name_in_state (XMLNode &, const std::string &);
+	static void set_name_in_state (XMLNode &, const std::string &, bool rename_playlist = true);
 
         uint32_t order_key () const;
         bool has_order_key () const;

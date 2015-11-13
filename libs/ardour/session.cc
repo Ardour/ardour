@@ -180,7 +180,7 @@ Session::Session (AudioEngine &eng,
 	, current_block_size (0)
 	, _worst_output_latency (0)
 	, _worst_input_latency (0)
- 	, _worst_track_latency (0)
+	, _worst_track_latency (0)
 	, _have_captured (false)
 	, _non_soloed_outs_muted (false)
 	, _listen_cnt (0)
@@ -3032,30 +3032,39 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 }
 
 RouteList
-Session::new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name_base)
+Session::new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name_base, PlaylistDisposition pd)
+{
+	XMLTree tree;
+
+	if (!tree.read (template_path.c_str())) {
+		return RouteList();
+	}
+
+	return new_route_from_template (how_many, *tree.root(), name_base, pd);
+}
+
+RouteList
+Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::string& name_base, PlaylistDisposition pd)
 {
 	RouteList ret;
 	uint32_t control_id;
-	XMLTree tree;
 	uint32_t number = 0;
 	const uint32_t being_added = how_many;
-
-	if (!tree.read (template_path.c_str())) {
-		return ret;
-	}
-
-	XMLNode* node = tree.root();
-
+	/* This will prevent the use of any existing XML-provided PBD::ID
+	   values by Stateful.
+	*/
+	Stateful::ForceIDRegeneration force_ids;
 	IO::disable_connecting ();
 
 	control_id = next_control_id ();
 
 	while (how_many) {
 
-		XMLNode node_copy (*node);
+		/* We're going to modify the node contents a bit so take a
+		 * copy. The node may be re-used when duplicating more than once.
+		 */
 
-		/* Remove IDs of everything so that new ones are used */
-		node_copy.remove_property_recursively (X_("id"));
+		XMLNode node_copy (node);
 
 		try {
 			string name;
@@ -3084,7 +3093,18 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 			}
 
 			/* set this name in the XML description that we are about to use */
-			Route::set_name_in_state (node_copy, name);
+
+			bool rename_playlist;
+			switch (pd) {
+			case NewPlaylist:
+			case CopyPlaylist:
+				rename_playlist = true;
+				break;
+			case SharePlaylist:
+				rename_playlist = false;
+			}
+
+			Route::set_name_in_state (node_copy, name, rename_playlist);
 
 			/* trim bitslots from listen sends so that new ones are used */
 			XMLNodeList children = node_copy.children ();

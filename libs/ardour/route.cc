@@ -4172,7 +4172,7 @@ Route::set_name (const string& str)
  *  @param name New name.
  */
 void
-Route::set_name_in_state (XMLNode& node, string const & name)
+Route::set_name_in_state (XMLNode& node, string const & name, bool rename_playlist)
 {
 	node.add_property (X_("name"), name);
 
@@ -4192,7 +4192,9 @@ Route::set_name_in_state (XMLNode& node, string const & name)
 
 		} else if ((*i)->name() == X_("Diskstream")) {
 
-			(*i)->add_property (X_("playlist"), string_compose ("%1.1", name).c_str());
+			if (rename_playlist) {
+				(*i)->add_property (X_("playlist"), string_compose ("%1.1", name).c_str());
+			}
 			(*i)->add_property (X_("name"), name);
 
 		}

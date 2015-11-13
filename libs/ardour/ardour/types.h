@@ -647,6 +647,12 @@ namespace ARDOUR {
 		RegionSelectionStart = 0x8,
 	};
 
+	enum PlaylistDisposition {
+		CopyPlaylist,
+		NewPlaylist,
+		SharePlaylist
+	};
+
 } // namespace ARDOUR
 
 
