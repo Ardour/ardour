@@ -50,6 +50,8 @@ class DuplicateRouteDialog : public ArdourDialog
 	Gtk::RadioButton share_playlists_button;
 	Gtk::Adjustment count_adjustment;
 	Gtk::SpinButton count_spinner;
+	Gtk::HBox count_box;
+	Gtk::Label count_label;
 };
 
 #endif /* __gtk_ardour_duplicate_route_dialog_h__ */
