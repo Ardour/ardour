@@ -362,6 +362,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/routes/send/gainabs", "iif", route_set_send_gain_abs);
 		REGISTER_CALLBACK (serv, "/ardour/routes/send/gaindB", "iif", route_set_send_gain_dB);
 
+		REGISTER_CALLBACK (serv, "/ardour/routes/gain_automation", "is", route_set_gain_automation);
+
 		/* still not-really-standardized query interface */
 		//REGISTER_CALLBACK (serv, "/ardour/*/#current_value", "", current_value);
 		//REGISTER_CALLBACK (serv, "/ardour/set", "", set);
@@ -722,6 +724,7 @@ OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv
 	return 0;
 }
 
+
 void
 OSC::routes_list (lo_message msg)
 {
@@ -854,6 +857,36 @@ OSC::route_set_gain_dB (int rid, float dB)
 
 
 int
+OSC::route_set_gain_automation(int rid, char& state)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+		switch(state) {
+		case 'p':
+			r->gain_control()->set_automation_state(Play);
+			break;
+		case 'm':
+			r->gain_control()->set_automation_state(Off);
+			break;
+		case 'w':
+			r->gain_control()->set_automation_state(Write);
+			break;
+		case 't':
+			r->gain_control()->set_automation_state(Touch);
+			break;
+		default:
+			break;
+		}
+	}
+
+	return 0;
+}
+
+
+int
 OSC::route_set_trim_abs (int rid, float level)
 {
 	if (!session) return -1;
@@ -866,6 +899,9 @@ OSC::route_set_trim_abs (int rid, float level)
 
 	return 0;
 }
+
+
+
 
 int
 OSC::route_set_trim_dB (int rid, float dB)
