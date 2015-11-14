@@ -3760,6 +3760,36 @@ ARDOUR_UI::start_duplicate_routes ()
 		duplicate_routes_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::finish_duplicate_routes));
 	}
 
+	TrackSelection& tracks  (editor->get_selection().tracks);
+	uint32_t ntracks = 0;
+	uint32_t nbusses = 0;
+
+	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
+
+		RouteUI* rui = dynamic_cast<RouteUI*> (*t);
+
+		if (!rui) {
+			/* some other type of timeaxis view, not a route */
+			continue;
+		}
+
+		boost::shared_ptr<Route> r (rui->route());
+
+		if (boost::dynamic_pointer_cast<Track> (r)) {
+			ntracks++;
+		} else {
+			if (!r->is_master() && !r->is_monitor()) {
+				nbusses++;
+			}
+		}
+	}
+
+	if (ntracks == 0 && nbusses == 0) {
+		cerr << "You can't do this\n";
+		return;
+	}
+
+	duplicate_routes_dialog->setup (ntracks, nbusses);
 	duplicate_routes_dialog->present ();
 }
 
@@ -3790,6 +3820,11 @@ ARDOUR_UI::finish_duplicate_routes (int response)
 
 		if (!rui) {
 			/* some other type of timeaxis view, not a route */
+			continue;
+		}
+
+		if (rui->route()->is_master() || rui->route()->is_monitor()) {
+			/* no option to duplicate these */
 			continue;
 		}
 

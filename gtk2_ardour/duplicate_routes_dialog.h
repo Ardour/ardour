@@ -38,6 +38,8 @@ class DuplicateRouteDialog : public ArdourDialog
 	DuplicateRouteDialog ();
 	~DuplicateRouteDialog ();
 
+	void setup (uint32_t ntracks, uint32_t nbusses);
+
 	uint32_t count() const;
 	ARDOUR::PlaylistDisposition playlist_disposition() const;
 
