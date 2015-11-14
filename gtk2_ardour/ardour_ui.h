@@ -790,8 +790,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void audioengine_became_silent ();
 
 	DuplicateRouteDialog* duplicate_routes_dialog;
-	void build_duplicate_routes_dialog ();
-	void finish_duplicate_routes (int response);
 };
 
 #endif /* __ardour_gui_h__ */
