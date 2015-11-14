@@ -56,6 +56,7 @@ gtk2_ardour_sources = [
         'cursor_context.cc',
         'curvetest.cc',
         'debug.cc',
+        'duplicate_routes_dialog.cc',
         'edit_note_dialog.cc',
         'editing.cc',
         'editor.cc',

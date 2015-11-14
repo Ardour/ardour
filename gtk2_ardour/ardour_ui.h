@@ -112,6 +112,7 @@ class ArdourKeyboard;
 class AudioClock;
 class ButtonJoiner;
 class ConnectionEditor;
+class DuplicateRouteDialog;
 class MainClock;
 class Mixer_UI;
 class ArdourPrompter;
@@ -248,7 +249,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         void add_routes_part_two ();
         void add_routes_thread ();
 
-	void duplicate_routes ();
+	void start_duplicate_routes ();
 
 	void add_video (Gtk::Window* float_window);
 	void remove_video ();
@@ -787,6 +788,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         int do_audio_midi_setup (uint32_t);
 	void audioengine_became_silent ();
+
+	DuplicateRouteDialog* duplicate_routes_dialog;
+	void build_duplicate_routes_dialog ();
+	void finish_duplicate_routes (int response);
 };
 
 #endif /* __ardour_gui_h__ */

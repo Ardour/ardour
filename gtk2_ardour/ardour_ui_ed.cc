@@ -133,7 +133,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("duplicate-routes"), _("Duplicate Tracks/Busses"),
-	                                      sigc::mem_fun(*this, &ARDOUR_UI::duplicate_routes));
+	                                      sigc::mem_fun(*this, &ARDOUR_UI::start_duplicate_routes));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);

@@ -111,6 +111,7 @@ typedef uint64_t microseconds_t;
 #include "audio_region_view.h"
 #include "big_clock_window.h"
 #include "bundle_manager.h"
+#include "duplicate_routes_dialog.h"
 #include "engine_dialog.h"
 #include "export_video_dialog.h"
 #include "export_video_infobox.h"
@@ -284,6 +285,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _status_bar_visibility (X_("status-bar"))
 	, _feedback_exists (false)
 	, _log_not_acknowledged (LogLevelNone)
+	, duplicate_routes_dialog (0)
 {
 	Gtkmm2ext::init (localedir);
 
@@ -3751,8 +3753,33 @@ ARDOUR_UI::setup_order_hint (AddRouteDialog::InsertAt place)
 }
 
 void
-ARDOUR_UI::duplicate_routes ()
+ARDOUR_UI::start_duplicate_routes ()
 {
+	if (!duplicate_routes_dialog) {
+		duplicate_routes_dialog = new DuplicateRouteDialog;
+		duplicate_routes_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::finish_duplicate_routes));
+	}
+
+	duplicate_routes_dialog->present ();
+}
+
+void
+ARDOUR_UI::finish_duplicate_routes (int response)
+{
+	if (!duplicate_routes_dialog) {
+		/* how could this happen? */
+		return;
+	}
+
+	duplicate_routes_dialog->hide ();
+
+	if (response != Gtk::RESPONSE_OK) {
+		return;
+	}
+
+	ARDOUR::PlaylistDisposition playlist_disposition = duplicate_routes_dialog->playlist_disposition ();
+	uint32_t count = duplicate_routes_dialog->count ();
+
 	/* Copy the track selection because it will/may change as we add new ones */
 	TrackSelection tracks  (editor->get_selection().tracks);
 	int err = 0;
@@ -3767,7 +3794,7 @@ ARDOUR_UI::duplicate_routes ()
 		}
 
 		XMLNode& state (rui->route()->get_state());
-		RouteList rl = _session->new_route_from_template (1, state, string(), SharePlaylist);
+		RouteList rl = _session->new_route_from_template (count, state, string(), playlist_disposition);
 
 		/* normally the state node would be added to a parent, and
 		 * ownership would transfer. Because we don't do that here,
