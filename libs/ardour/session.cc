@@ -3097,9 +3097,9 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 			bool rename_playlist;
 			switch (pd) {
 			case NewPlaylist:
-			case CopyPlaylist:
 				rename_playlist = true;
 				break;
+			case CopyPlaylist:
 			case SharePlaylist:
 				rename_playlist = false;
 			}
@@ -3141,6 +3141,21 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 
 			route->set_remote_control_id (control_id);
 			++control_id;
+
+			boost::shared_ptr<Track> track;
+
+			if ((track = boost::dynamic_pointer_cast<Track> (route))) {
+				switch (pd) {
+				case NewPlaylist:
+					track->use_new_playlist ();
+					break;
+				case CopyPlaylist:
+					track->use_copy_playlist ();
+					break;
+				case SharePlaylist:
+					break;
+				}
+			};
 
 			ret.push_back (route);
 
