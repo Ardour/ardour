@@ -36,7 +36,6 @@ class DuplicateRouteDialog : public ArdourDialog
 {
   public:
 	DuplicateRouteDialog ();
-	~DuplicateRouteDialog ();
 
 	int restart ();
 
