@@ -1305,7 +1305,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 		pannable = _route->pannable ();
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			/* gain to vpot, pan azi to fader */
-			_vpot->set_control (_route->gain_control());
+			_vpot->set_control (_route->group_gain_control());
 			control_by_parameter[GainAutomation] = _vpot;
 			if (pannable) {
 				_fader->set_control (pannable->pan_azimuth_control);
@@ -1316,7 +1316,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 			}
 		} else {
 			/* gain to fader, pan azi to vpot */
-			_fader->set_control (_route->gain_control());
+			_fader->set_control (_route->group_gain_control());
 			control_by_parameter[GainAutomation] = _fader;
 			if (pannable) {
 				_vpot->set_control (pannable->pan_azimuth_control);
@@ -1332,7 +1332,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 		pannable = _route->pannable ();
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			/* gain to vpot, pan width to fader */
-			_vpot->set_control (_route->gain_control());
+			_vpot->set_control (_route->group_gain_control());
 			control_by_parameter[GainAutomation] = _vpot;
 			if (pannable) {
 				_fader->set_control (pannable->pan_width_control);
@@ -1343,7 +1343,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 			}
 		} else {
 			/* gain to fader, pan width to vpot */
-			_fader->set_control (_route->gain_control());
+			_fader->set_control (_route->group_gain_control());
 			control_by_parameter[GainAutomation] = _fader;
 			if (pannable) {
 				_vpot->set_control (pannable->pan_width_control);
@@ -1364,7 +1364,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 		_trim_mode = TrimAutomation;
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			/* gain to vpot, trim to fader */
-			_vpot->set_control (_route->gain_control());
+			_vpot->set_control (_route->group_gain_control());
 			control_by_parameter[GainAutomation] = _vpot;
 			if (_route->trim() && route()->trim()->active()) {
 				_fader->set_control (_route->trim_control());
@@ -1375,7 +1375,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 			}
 		} else {
 			/* gain to fader, trim to vpot */
-			_fader->set_control (_route->gain_control());
+			_fader->set_control (_route->group_gain_control());
 			control_by_parameter[GainAutomation] = _fader;
 			if (_route->trim() && route()->trim()->active()) {
 				_vpot->set_control (_route->trim_control());
@@ -1390,7 +1390,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 		_trim_mode = PhaseAutomation;
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			/* gain to vpot, phase to fader */
-			_vpot->set_control (_route->gain_control());
+			_vpot->set_control (_route->group_gain_control());
 			control_by_parameter[GainAutomation] = _vpot;
 			if (_route->phase_invert().size()) {
 				_fader->set_control (_route->phase_control());
@@ -1401,7 +1401,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 			}
 		} else {
 			/* gain to fader, phase to vpot */
-			_fader->set_control (_route->gain_control());
+			_fader->set_control (_route->group_gain_control());
 			control_by_parameter[GainAutomation] = _fader;
 			if (_route->phase_invert().size()) {
 				_vpot->set_control (_route->phase_control());
@@ -1415,7 +1415,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 	case SendAutomation:
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			// gain to vpot, send to fader
-			_vpot->set_control (_route->gain_control());
+			_vpot->set_control (_route->group_gain_control());
 			control_by_parameter[GainAutomation] = _vpot;
 			// test for send to control
 			boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
@@ -1433,7 +1433,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 			}
 		} else {
 			// gain to fader, send to vpot
-			_fader->set_control (_route->gain_control());
+			_fader->set_control (_route->group_gain_control());
 			control_by_parameter[GainAutomation] = _fader;
 			boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
 			if (p && p->name() != "Monitor 1") {

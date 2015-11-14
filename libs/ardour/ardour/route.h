@@ -423,6 +423,15 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		uint32_t _current_phase;
 	};
 
+	class LIBARDOUR_API GroupGainControllable : public AutomationControl {
+	public:
+		GroupGainControllable (std::string name, boost::shared_ptr<Route>);
+		void set_value (double);
+		// We get the value from the amp where we get the changed signal from
+		//double get_value () const;
+	private:
+		boost::weak_ptr<Route> _route;
+	};
 
 	boost::shared_ptr<SoloControllable> solo_control() const {
 		return _solo_control;
@@ -438,6 +447,10 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	boost::shared_ptr<PhaseControllable> phase_control() const {
 		return _phase_control;
+	}
+
+	boost::shared_ptr<GroupGainControllable> group_gain_control() const {
+		return _group_gain_control;
 	}
 
 	/* Route doesn't own these items, but sub-objects that it does own have them
@@ -579,6 +592,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	boost::shared_ptr<MuteControllable> _mute_control;
 	boost::shared_ptr<MuteMaster> _mute_master;
 	boost::shared_ptr<PhaseControllable> _phase_control;
+	boost::shared_ptr<GroupGainControllable> _group_gain_control;
 
 	virtual void act_on_mute () {}
 
