@@ -38,10 +38,7 @@ class DuplicateRouteDialog : public ArdourDialog
 	DuplicateRouteDialog ();
 	~DuplicateRouteDialog ();
 
-	void setup (uint32_t ntracks, uint32_t nbusses);
-
-	uint32_t count() const;
-	ARDOUR::PlaylistDisposition playlist_disposition() const;
+	int restart ();
 
   private:
 	Gtk::Entry name_template_entry;
@@ -54,6 +51,11 @@ class DuplicateRouteDialog : public ArdourDialog
 	Gtk::SpinButton count_spinner;
 	Gtk::HBox count_box;
 	Gtk::Label count_label;
+
+	void on_response (int);
+
+	uint32_t count() const;
+	ARDOUR::PlaylistDisposition playlist_disposition() const;
 };
 
 #endif /* __gtk_ardour_duplicate_route_dialog_h__ */

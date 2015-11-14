@@ -19,9 +19,17 @@
 
 #include "gtkmm/stock.h"
 
+#include "ardour/route.h"
+#include "ardour/session.h"
+
+#include "editor.h"
 #include "duplicate_routes_dialog.h"
+#include "selection.h"
 
 #include "i18n.h"
+
+using namespace ARDOUR;
+using namespace Gtk;
 
 DuplicateRouteDialog::DuplicateRouteDialog ()
 	: ArdourDialog (_("Duplicate Tracks & Busses"), false, false)
@@ -43,17 +51,42 @@ DuplicateRouteDialog::DuplicateRouteDialog ()
 
 	get_vbox()->show_all ();
 
-	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button (Stock::OK, RESPONSE_OK);
 }
 
-DuplicateRouteDialog::~DuplicateRouteDialog ()
+int
+DuplicateRouteDialog::restart ()
 {
-}
+	TrackSelection& tracks  (PublicEditor::instance().get_selection().tracks);
+	uint32_t ntracks = 0;
+	uint32_t nbusses = 0;
 
-void
-DuplicateRouteDialog::setup (uint32_t ntracks, uint32_t nbusses)
-{
+	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
+
+		RouteUI* rui = dynamic_cast<RouteUI*> (*t);
+
+		if (!rui) {
+			/* some other type of timeaxis view, not a route */
+			continue;
+		}
+
+		boost::shared_ptr<Route> r (rui->route());
+
+		if (boost::dynamic_pointer_cast<Track> (r)) {
+			ntracks++;
+		} else {
+			if (!r->is_master() && !r->is_monitor()) {
+				nbusses++;
+			}
+		}
+	}
+
+	if (ntracks == 0 && nbusses == 0) {
+		std::cerr << "You can't do this\n";
+		return -1;
+	}
+
 	/* XXX grrr. Gtk Boxes do not shrink when children are removed,
 	   which is what we really want to happen here.
 	*/
@@ -63,6 +96,8 @@ DuplicateRouteDialog::setup (uint32_t ntracks, uint32_t nbusses)
 	} else {
 		get_vbox()->pack_end (playlist_button_box, false, false);
 	}
+
+	return 0;
 }
 
 uint32_t
@@ -81,4 +116,58 @@ DuplicateRouteDialog::playlist_disposition() const
 	}
 
 	return ARDOUR::SharePlaylist;
+}
+
+void
+DuplicateRouteDialog::on_response (int response)
+{
+	hide ();
+
+	if (response != RESPONSE_OK) {
+		return;
+	}
+
+	ARDOUR::PlaylistDisposition playlist_action = playlist_disposition ();
+	uint32_t cnt = count ();
+
+	/* Copy the track selection because it will/may change as we add new ones */
+	TrackSelection tracks  (PublicEditor::instance().get_selection().tracks);
+	int err = 0;
+
+	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
+
+		RouteUI* rui = dynamic_cast<RouteUI*> (*t);
+
+		if (!rui) {
+			/* some other type of timeaxis view, not a route */
+			continue;
+		}
+
+		if (rui->route()->is_master() || rui->route()->is_monitor()) {
+			/* no option to duplicate these */
+			continue;
+		}
+
+		XMLNode& state (rui->route()->get_state());
+		RouteList rl = _session->new_route_from_template (cnt, state, std::string(), playlist_action);
+
+		/* normally the state node would be added to a parent, and
+		 * ownership would transfer. Because we don't do that here,
+		 * we need to delete the node ourselves.
+		 */
+
+		delete &state;
+
+		if (rl.empty()) {
+			err++;
+			break;
+		}
+	}
+
+	if (err) {
+		MessageDialog msg (_("1 or more tracks/busses could not be duplicated"),
+		                     true, MESSAGE_ERROR, BUTTONS_OK, true);
+		msg.set_position (WIN_POS_MOUSE);
+		msg.run ();
+	}
 }

@@ -3757,98 +3757,10 @@ ARDOUR_UI::start_duplicate_routes ()
 {
 	if (!duplicate_routes_dialog) {
 		duplicate_routes_dialog = new DuplicateRouteDialog;
-		duplicate_routes_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::finish_duplicate_routes));
 	}
 
-	TrackSelection& tracks  (editor->get_selection().tracks);
-	uint32_t ntracks = 0;
-	uint32_t nbusses = 0;
-
-	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
-
-		RouteUI* rui = dynamic_cast<RouteUI*> (*t);
-
-		if (!rui) {
-			/* some other type of timeaxis view, not a route */
-			continue;
-		}
-
-		boost::shared_ptr<Route> r (rui->route());
-
-		if (boost::dynamic_pointer_cast<Track> (r)) {
-			ntracks++;
-		} else {
-			if (!r->is_master() && !r->is_monitor()) {
-				nbusses++;
-			}
-		}
-	}
-
-	if (ntracks == 0 && nbusses == 0) {
-		cerr << "You can't do this\n";
-		return;
-	}
-
-	duplicate_routes_dialog->setup (ntracks, nbusses);
-	duplicate_routes_dialog->present ();
-}
-
-void
-ARDOUR_UI::finish_duplicate_routes (int response)
-{
-	if (!duplicate_routes_dialog) {
-		/* how could this happen? */
-		return;
-	}
-
-	duplicate_routes_dialog->hide ();
-
-	if (response != Gtk::RESPONSE_OK) {
-		return;
-	}
-
-	ARDOUR::PlaylistDisposition playlist_disposition = duplicate_routes_dialog->playlist_disposition ();
-	uint32_t count = duplicate_routes_dialog->count ();
-
-	/* Copy the track selection because it will/may change as we add new ones */
-	TrackSelection tracks  (editor->get_selection().tracks);
-	int err = 0;
-
-	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
-
-		RouteUI* rui = dynamic_cast<RouteUI*> (*t);
-
-		if (!rui) {
-			/* some other type of timeaxis view, not a route */
-			continue;
-		}
-
-		if (rui->route()->is_master() || rui->route()->is_monitor()) {
-			/* no option to duplicate these */
-			continue;
-		}
-
-		XMLNode& state (rui->route()->get_state());
-		RouteList rl = _session->new_route_from_template (count, state, string(), playlist_disposition);
-
-		/* normally the state node would be added to a parent, and
-		 * ownership would transfer. Because we don't do that here,
-		 * we need to delete the node ourselves.
-		 */
-
-		delete &state;
-
-		if (rl.empty()) {
-			err++;
-			break;
-		}
-	}
-
-	if (err) {
-		MessageDialog msg (_("1 or more tracks/busses could not be duplicated"),
-		                     true, MESSAGE_ERROR, BUTTONS_OK, true);
-		msg.set_position (WIN_POS_MOUSE);
-		msg.run ();
+	if (duplicate_routes_dialog->restart ()) {
+		duplicate_routes_dialog->present ();
 	}
 }
 
