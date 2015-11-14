@@ -3759,9 +3759,11 @@ ARDOUR_UI::start_duplicate_routes ()
 		duplicate_routes_dialog = new DuplicateRouteDialog;
 	}
 
-	if (duplicate_routes_dialog->restart ()) {
-		duplicate_routes_dialog->present ();
+	if (duplicate_routes_dialog->restart (_session)) {
+		return;
 	}
+
+	duplicate_routes_dialog->present ();
 }
 
 void

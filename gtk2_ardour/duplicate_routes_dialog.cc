@@ -56,8 +56,14 @@ DuplicateRouteDialog::DuplicateRouteDialog ()
 }
 
 int
-DuplicateRouteDialog::restart ()
+DuplicateRouteDialog::restart (Session* s)
 {
+	if (!s) {
+		return -1;
+	}
+
+	set_session (s);
+
 	TrackSelection& tracks  (PublicEditor::instance().get_selection().tracks);
 	uint32_t ntracks = 0;
 	uint32_t nbusses = 0;
@@ -91,9 +97,11 @@ DuplicateRouteDialog::restart ()
 	   which is what we really want to happen here.
 	*/
 
-	if (ntracks == 0) {
+	if (playlist_button_box.get_parent()) {
 		get_vbox()->remove (playlist_button_box);
-	} else {
+	}
+
+	if (ntracks > 0) {
 		get_vbox()->pack_end (playlist_button_box, false, false);
 	}
 

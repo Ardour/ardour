@@ -30,6 +30,10 @@
 
 #include "ardour_dialog.h"
 
+namespace ARDOUR {
+class Session;
+}
+
 class Editor;
 
 class DuplicateRouteDialog : public ArdourDialog
@@ -37,7 +41,7 @@ class DuplicateRouteDialog : public ArdourDialog
   public:
 	DuplicateRouteDialog ();
 
-	int restart ();
+	int restart (ARDOUR::Session*);
 
   private:
 	Gtk::Entry name_template_entry;
