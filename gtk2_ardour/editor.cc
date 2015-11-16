@@ -1274,6 +1274,7 @@ Editor::update_title ()
 		}
 
 		WindowTitle title(session_name);
+		title += S_("Window|Editor");
 		title += Glib::get_application_name();
 		own_window()->set_title (title.get_string());
 	} else {
