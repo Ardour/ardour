@@ -253,7 +253,7 @@ Tabbable::attach ()
 
 	Gtkmm2ext::UI::instance()->set_tip (_tab_label,
 	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To put the window back, click on its \"close\" button"), _tab_title));
+	                                                      "To put the window back, use the Window > %1 > Attach menu action"), _tab_title));
 
 
 	/* have to force this on, which is semantically correct, since
