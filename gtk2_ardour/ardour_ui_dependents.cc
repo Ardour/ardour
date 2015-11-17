@@ -368,9 +368,7 @@ ARDOUR_UI::setup_windows ()
 	_main_window.show_all ();
 	setup_toplevel_window (_main_window, "", this);
 
-	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
-	_tabs.signal_page_removed().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_removed));
-	_tabs.signal_page_added().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_added));
+	_tabs.set_show_tabs (false);
 
 	/* It would be nice if Gtkmm had wrapped this rather than just
 	 * deprecating the old set_window_creation_hook() method, but oh well...

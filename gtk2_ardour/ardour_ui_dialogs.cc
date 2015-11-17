@@ -375,7 +375,7 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 	if (t.tabbed()) {
 
 		insensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
-		insensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
+		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
 
@@ -389,7 +389,7 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 	} else if (t.window_visible()) {
 
 		insensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
-		insensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
+		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
 

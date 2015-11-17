@@ -105,31 +105,6 @@ ARDOUR_UI::tabs_button_event (GdkEventButton* ev)
 }
 
 void
-ARDOUR_UI::tabs_page_removed (Gtk::Widget*, guint)
-{
-	if (_tabs.get_n_pages() == 1) {
-		_tabs.set_show_tabs (false);
-	} else {
-		_tabs.set_show_tabs (true);
-	}
-}
-
-void
-ARDOUR_UI::tabs_page_added (Gtk::Widget*, guint)
-{
-	if (_tabs.get_n_pages() == 1) {
-		_tabs.set_show_tabs (false);
-	} else {
-		_tabs.set_show_tabs (true);
-	}
-}
-
-void
-ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page_number)
-{
-}
-
-void
 ARDOUR_UI::setup_tooltips ()
 {
 	set_tip (roll_button, _("Play from playhead"));

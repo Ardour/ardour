@@ -113,7 +113,7 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_action (main_menu_actions, X_("PrefsMenu"), _("Preferences"));
 	global_actions.register_action (main_menu_actions, X_("DetachMenu"), _("Detach"));
 	global_actions.register_action (main_menu_actions, X_("Help"), _("Help"));
- 	global_actions.register_action (main_menu_actions, X_("KeyMouseActions"), _("Misc. Shortcuts"));
+	global_actions.register_action (main_menu_actions, X_("KeyMouseActions"), _("Misc. Shortcuts"));
 	global_actions.register_action (main_menu_actions, X_("AudioFileFormat"), _("Audio File Format"));
 	global_actions.register_action (main_menu_actions, X_("AudioFileFormatHeader"), _("File Type"));
 	global_actions.register_action (main_menu_actions, X_("AudioFileFormatData"), _("Sample Format"));
@@ -222,9 +222,9 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
 	global_actions.register_action (common_actions, X_("Hide"), _("Hide"), sigc::mem_fun (*this, &ARDOUR_UI::hide_application));
 
-	global_actions.register_action (common_actions, X_("show-editor"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), editor));
-	global_actions.register_action (common_actions, X_("show-mixer"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
-	global_actions.register_action (common_actions, X_("show-preferences"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
+	global_actions.register_toggle_action (common_actions, X_("show-editor"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), editor));
+	global_actions.register_toggle_action (common_actions, X_("show-mixer"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
+	global_actions.register_toggle_action (common_actions, X_("show-preferences"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
 
 	global_actions.register_action (common_actions, X_("hide-editor"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), editor));
 	global_actions.register_action (common_actions, X_("hide-mixer"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), mixer));
@@ -499,6 +499,16 @@ if (Profile->get_mixbus())
 	global_actions.register_action (midi_actions, X_("panic"), _("Panic"), sigc::mem_fun(*this, &ARDOUR_UI::midi_panic));
 }
 
+static
+bool drag_failed (const Glib::RefPtr<Gdk::DragContext>& context, DragResult result, Tabbable* tab)
+{
+	if (result == Gtk::DRAG_RESULT_NO_TARGET) {
+		tab->detach ();
+		return true;
+	}
+	return false;
+}
+
 void
 ARDOUR_UI::build_menu_bar ()
 {
@@ -538,21 +548,48 @@ ARDOUR_UI::build_menu_bar ()
 	format_label.set_use_markup ();
 
 #ifndef TOP_MENUBAR
- 	menu_hbox.pack_start (*menu_bar, false, false);
+	menu_hbox.pack_start (*menu_bar, false, false);
 #else
 	use_menubar_as_top_menubar ();
 #endif
 
+	ArdourButton* editor_button = manage (new ArdourButton (S_("Window|Editor")));
+	ArdourButton* mixer_button = manage (new ArdourButton (S_("Window|Mixer")));
+	ArdourButton* prefs_button = manage (new ArdourButton (S_("Window|Preferences")));
+	Gtk::HBox*   window_button_box = manage (new Gtk::HBox);
+
+	std::vector<TargetEntry> drag_target_entries;
+	drag_target_entries.push_back (TargetEntry ("tabbable"));
+	editor_button->drag_source_set (drag_target_entries);
+	editor_button->drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (S_("Window|Editor"),
+	                                                                    Pango::FontDescription ("Sans 12"),
+	                                                                    40, 20,
+	                                                                    Gdk::Color ("red")));
+
+	editor_button->signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), editor));
+
+	editor_button->set_related_action (ActionManager::get_action (X_("Common"), X_("show-editor")));
+	editor_button->set_name (X_("page switch button"));
+	mixer_button->set_related_action (ActionManager::get_action (X_("Common"), X_("show-mixer")));
+	mixer_button->set_name (X_("page switch button"));
+
+	window_button_box->pack_start (*editor_button, false, false);
+	window_button_box->pack_start (*mixer_button, false, false);
+	window_button_box->pack_start (*prefs_button, false, false);
+
+	menu_hbox.pack_start (*window_button_box, false, false, 20);
+
 	bool wall_clock = false;
 	bool disk_space = false;
 
- 	if (!Profile->get_small_screen()) {
+	if (!Profile->get_small_screen()) {
 #ifndef __APPLE__
 		// OSX provides its own wallclock, thank you very much
 		wall_clock = true;
 #endif
 		disk_space = true;
 	}
+
 
 	hbox->pack_end (error_alert_button, false, false, 2);
 
