@@ -48,8 +48,8 @@ ExportVideoInfobox::ExportVideoInfobox (Session* s)
 	vbox->pack_start (*l, false, true);
 	l = manage (new Label (
 				string_compose(
-				_("Video encoding is a non-trivial task with many details.\n\nPlease see the manual at %1/video-timeline/operations/#export.\n\nOpen Manual in Browser? "),
-				Config->get_reference_manual_url()
+				_("%1 does not include commercial licenses for encoding audio/video. Visit mpegla.com for information about licensing various audio/video codecs.\n\nVideo encoding is a non-trivial task with many details.\n\nPlease see the manual at %2/video-timeline/operations/#export.\n\nOpen Manual in Browser? "),
+				PROGRAM_NAME, Config->get_reference_manual_url()
 				), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_size_request(700,-1);
 	l->set_line_wrap();
