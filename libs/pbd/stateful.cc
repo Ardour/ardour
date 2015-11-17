@@ -44,9 +44,9 @@ namespace PBD {
 int Stateful::current_state_version = 0;
 int Stateful::loading_state_version = 0;
 
-static void do_not_delete (void*) { }
+static void regular_delete (void* p) { bool* bp = reinterpret_cast<bool*> (p); delete bp; std::cerr << "Deleted RSSI bool\n"; }
 
-Glib::Threads::Private<bool> Stateful::regenerate_xml_or_string_ids (do_not_delete);
+Glib::Threads::Private<bool> Stateful::regenerate_xml_or_string_ids (regular_delete);
 
 Stateful::Stateful ()
 	: _extra_xml (0)
@@ -385,8 +385,9 @@ bool
 Stateful::set_id (const XMLNode& node)
 {
 	const XMLProperty* prop;
+	bool* regen = regenerate_xml_or_string_ids.get();
 
-	if (regenerate_xml_or_string_ids.get()) {
+	if (regen && *regen) {
 		reset_id ();
 		return true;
 	}
@@ -408,7 +409,9 @@ Stateful::reset_id ()
 void
 Stateful::set_id (const string& str)
 {
-	if (regenerate_xml_or_string_ids.get()) {
+	bool* regen = regenerate_xml_or_string_ids.get();
+
+	if (regen && *regen) {
 		reset_id ();
 	} else {
 		_id = str;
