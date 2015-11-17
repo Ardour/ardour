@@ -5196,11 +5196,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 	GtkWindow* win = window.gobj();
 	GtkWidget* focus = gtk_window_get_focus (win);
 	bool special_handling_of_unmodified_accelerators = false;
-	/* consider all relevant modifiers but not LOCK or SHIFT */
 	const guint mask = (Keyboard::RelevantModifierKeyMask & ~(Gdk::SHIFT_MASK|Gdk::LOCK_MASK));
-
-	GdkModifierType modifier = GdkModifierType (ev->state);
-        modifier = GdkModifierType (modifier & gtk_accelerator_get_default_mod_mask());
 
         if (focus) {
 
@@ -5217,14 +5213,15 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		}
 	}
 
-        DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 focus = %7 (%8) Key event: code = %2  state = %3 special handling ? %4 magic widget focus ? %5 focus widget %6 named %7\n",
+        DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 focus = %7 (%8) Key event: code = %2  state = %3 special handling ? %4 magic widget focus ? %5 focus widget %6 named %7 mods ? %8\n",
                                                           win,
                                                           ev->keyval,
 							  show_gdk_event_state (ev->state),
                                                           special_handling_of_unmodified_accelerators,
                                                           Keyboard::some_magic_widget_has_focus(),
 							  focus,
-                                                          (focus ? gtk_widget_get_name (focus) : "no focus widget")));
+                                                          (focus ? gtk_widget_get_name (focus) : "no focus widget"),
+                                                          ((ev->state & mask) ? "yes" : "no")));
 
 	/* This exists to allow us to override the way GTK handles
 	   key events. The normal sequence is:
