@@ -44,9 +44,9 @@ namespace PBD {
 int Stateful::current_state_version = 0;
 int Stateful::loading_state_version = 0;
 
-static void regular_delete (void* p) { bool* bp = reinterpret_cast<bool*> (p); delete bp; std::cerr << "Deleted RSSI bool\n"; }
+static void do_not_delete (void*) {}
 
-Glib::Threads::Private<bool> Stateful::regenerate_xml_or_string_ids (regular_delete);
+Glib::Threads::Private<bool> Stateful::regenerate_xml_or_string_ids (do_not_delete);
 
 Stateful::Stateful ()
 	: _extra_xml (0)
