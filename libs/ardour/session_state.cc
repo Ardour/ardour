@@ -3339,6 +3339,10 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	case ControllableDescriptor::RemoteControlID:
 		r = route_by_remote_id (desc.rid());
 		break;
+
+	case ControllableDescriptor::SelectionCount:
+		r = route_by_selected_count (desc.selection_id());
+		break;
 	}
 
 	if (!r) {

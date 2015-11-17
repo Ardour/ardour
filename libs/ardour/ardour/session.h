@@ -279,6 +279,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<Route> route_by_name (std::string);
 	boost::shared_ptr<Route> route_by_id (PBD::ID);
 	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
+	boost::shared_ptr<Route> route_by_selected_count (uint32_t cnt);
 	boost::shared_ptr<Track> track_by_diskstream_id (PBD::ID);
 	void routes_using_input_from (const std::string& str, RouteList& rl);
 

@@ -4061,6 +4061,19 @@ Session::route_by_remote_id (uint32_t id)
 }
 
 
+boost::shared_ptr<Route>
+Session::route_by_selected_count (uint32_t id)
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		/* NOT IMPLEMENTED */
+	}
+
+	return boost::shared_ptr<Route> ((Route*) 0);
+}
+
+
 void
 Session::reassign_track_numbers ()
 {

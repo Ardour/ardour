@@ -31,7 +31,8 @@ class LIBPBD_API ControllableDescriptor {
 public:
     enum TopLevelType {
 	    RemoteControlID,
-	    NamedRoute
+	    NamedRoute,
+	    SelectionCount,
     };
 
     enum SubType {
@@ -68,6 +69,7 @@ public:
     SubType subtype() const { return _subtype; }
 
     uint32_t rid() const;
+    uint32_t selection_id() const;
     uint32_t target (uint32_t n) const;
     bool banked() const { return _banked; }
 
@@ -77,7 +79,10 @@ private:
     TopLevelType          _top_level_type;
     SubType               _subtype;
     std::string           _top_level_name;
-    uint32_t              _rid;
+    union {
+	    uint32_t  _rid;
+	    uint32_t  _selection_id;
+    };
     std::vector<uint32_t> _target;
     uint32_t              _banked;
     uint32_t              _bank_offset;

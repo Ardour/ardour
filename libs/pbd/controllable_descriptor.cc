@@ -56,6 +56,10 @@ ControllableDescriptor::set (const std::string& str)
 		if (rest[0][0] == 'B') {
 			_banked = true;
 			_rid = atoi (rest[0].substr (1));
+		} else if (rest[0][0] == 'S') {
+			_top_level_type = SelectionCount;
+			_banked = true;
+			_selection_id = atoi (rest[0].substr (1));
 		} else if (isdigit (rest[0][0])) {
 			_banked = false;
 			_rid = atoi (rest[0]);
@@ -123,13 +127,23 @@ ControllableDescriptor::set (const std::string& str)
 }
 
 uint32_t
-ControllableDescriptor::rid() const
+ControllableDescriptor::rid () const
 {
 	if (banked()) {
 		return _rid + _bank_offset;
 	}
 
 	return _rid;
+}
+
+uint32_t
+ControllableDescriptor::selection_id () const
+{
+	if (banked()) {
+		return _selection_id + _bank_offset;
+	}
+
+	return _selection_id;
 }
 
 uint32_t
