@@ -857,25 +857,25 @@ OSC::route_set_gain_dB (int rid, float dB)
 
 
 int
-OSC::route_set_gain_automation(int rid, char& state)
+OSC::route_set_gain_automation (int rid, char& state)
 {
 	if (!session) return -1;
 
 	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
 	if (r) {
-		switch(state) {
+		switch (state) {
 		case 'p':
-			r->gain_control()->set_automation_state(Play);
+			r->gain_control()->set_automation_state (Play);
 			break;
 		case 'm':
-			r->gain_control()->set_automation_state(Off);
+			r->gain_control()->set_automation_state (Off);
 			break;
 		case 'w':
-			r->gain_control()->set_automation_state(Write);
+			r->gain_control()->set_automation_state (Write);
 			break;
 		case 't':
-			r->gain_control()->set_automation_state(Touch);
+			r->gain_control()->set_automation_state (Touch);
 			break;
 		default:
 			break;
@@ -899,9 +899,6 @@ OSC::route_set_trim_abs (int rid, float level)
 
 	return 0;
 }
-
-
-
 
 int
 OSC::route_set_trim_dB (int rid, float dB)
