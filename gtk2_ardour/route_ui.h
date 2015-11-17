@@ -194,6 +194,7 @@ class RouteUI : public virtual AxisView
 
 	virtual void route_active_changed () {}
 	void set_route_active (bool, bool);
+	void duplicate_selected_routes ();
 
         Gtk::Menu* record_menu;
         void build_record_menu ();

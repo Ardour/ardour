@@ -1586,6 +1586,11 @@ MixerStrip::build_route_ops_menu ()
 		items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
 	}
 
+	if (_route && !_route->is_master()) {
+		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Duplicate..."), sigc::mem_fun (*this, &RouteUI::duplicate_selected_routes)));
+	}
+	
 	if (_route) {
 		/* note that this relies on selection being shared across editor and
 		   mixer (or global to the backend, in the future), which is the only
@@ -1599,8 +1604,8 @@ MixerStrip::build_route_ops_menu ()
 				selection.set (rtav);
 			}
 
-			items.push_front (SeparatorElem());
-			items.push_front (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
+			items.push_back (SeparatorElem());
+			items.push_back (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 		}
 	}
 }

@@ -1730,6 +1730,12 @@ RouteUI::set_route_active (bool a, bool apply_to_selection)
 }
 
 void
+RouteUI::duplicate_selected_routes ()
+{
+	ARDOUR_UI::instance()->start_duplicate_routes();
+}
+
+void
 RouteUI::toggle_denormal_protection ()
 {
 	if (denormal_menu_item) {
