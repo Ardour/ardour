@@ -23,6 +23,8 @@ while [ $# -gt 0 ] ; do
 	case $1 in
 		--mixbus)
 			MIXBUS=1
+			WITH_HARRISON_LV2=1 ;
+			WITH_X42_LV2=1 ;
 			shift ;;
 	esac
 done
@@ -226,7 +228,7 @@ fi
 
 ################################################################################
 ### Mixbus plugins, etc
-if test -n "$MIXBUS"; then # TODO use separate variable
+if test x$WITH_X42_LV2 != x ; then
 	mkdir -p $ALIBDIR/LV2
 
 	echo "Adding x42 Plugins"
@@ -250,7 +252,7 @@ if test -n "$MIXBUS"; then # TODO use separate variable
 	unzip -q -d "$ALIBDIR/LV2/" "${SRCDIR}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
 fi
 
-if test -n "$MIXBUS"; then # TODO use separate variable
+if test x$WITH_HARRISON_LV2 != x ; then
 	mkdir -p $ALIBDIR/LV2
 
 	echo "Including Harrison LV2s"
