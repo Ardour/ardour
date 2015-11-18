@@ -109,11 +109,9 @@ generate_db_fade (boost::shared_ptr<Evoral::ControlList> dst, double len, int nu
 
 	//generate a fade-out curve by successively applying a gain drop
 	float fade_speed = dB_to_coefficient(dB_drop / (float) num_steps);
+	float coeff = GAIN_COEFF_UNITY;
 	for (int i = 1; i < (num_steps-1); i++) {
-		float coeff = GAIN_COEFF_UNITY;
-		for (int j = 0; j < i; j++) {
-			coeff *= fade_speed;
-		}
+		coeff *= fade_speed;
 		dst->fast_simple_add (len*(double)i/(double)num_steps, coeff);
 	}
 
