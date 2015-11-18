@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="Presonus Faderport"/>
+  <DeviceType value="HUI"/>
+  <Strips value="1"/>
+  <MasterFader value="no"/>
+  <TimecodeDisplay value="no"/>
+  <TwoCharacterDisplay value="no"/>
+  <Extenders value="0"/>
+  <MasterPosition value="0"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="no"/>
+  <TouchSenseFaders value="yes"/>
+</MackieProtocolDevice>
