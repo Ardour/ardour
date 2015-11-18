@@ -926,7 +926,7 @@ PluginSelector::fil_hidden_button_release (GdkEventButton*)
 	_show_hidden = (fil_hidden_button.active_state() == 0);
 	fil_hidden_button.set_active (_show_hidden);
 	refill ();
-	return true;
+	return false;
 }
 
 static Gtkmm2ext::ActiveState next_state (Gtkmm2ext::ActiveState s){
@@ -967,7 +967,7 @@ PluginSelector::fil_instruments_button_release (GdkEventButton* ev)
 	}
 	fil_instruments_button.set_active_state (_show_instruments);
 	refill ();
-	return true;
+	return false;
 }
 
 bool
@@ -980,7 +980,7 @@ PluginSelector::fil_analysis_button_release (GdkEventButton* ev)
 	}
 	fil_analysis_button.set_active_state (_show_analysers);
 	refill ();
-	return true;
+	return false;
 }
 
 bool
@@ -993,7 +993,7 @@ PluginSelector::fil_utils_button_release (GdkEventButton* ev)
 	}
 	fil_utils_button.set_active_state (_show_utils);
 	refill ();
-	return true;
+	return false;
 }
 
 void
