@@ -277,6 +277,7 @@ public:
 	static PluginInfoList* discover ();
 
 	PluginPtr load (Session& session);
+	virtual bool in_category (const std::string &c) const;
 
 	char * _plugin_uri;
 };

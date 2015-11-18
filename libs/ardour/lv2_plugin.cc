@@ -2561,6 +2561,17 @@ LV2PluginInfo::load(Session& session)
 	return PluginPtr();
 }
 
+bool
+LV2PluginInfo::in_category (const std::string &c) const
+{
+	// TODO use untranslated lilv_plugin_get_class()
+	// match gtk2_ardour/plugin_selector.cc
+	if (category == c) {
+		return true;
+	}
+	return false;
+}
+
 PluginInfoList*
 LV2PluginInfo::discover()
 {

@@ -68,6 +68,7 @@ class LIBARDOUR_API PluginInfo {
 
 	virtual PluginPtr load (Session& session) = 0;
 	virtual bool is_instrument() const;
+	virtual bool in_category (const std::string &) const { return false; }
 
 	/* NOTE: this block of virtual methods looks like the interface
 	   to a Processor, but Plugin does not inherit from Processor.
