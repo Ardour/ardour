@@ -144,64 +144,67 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	btn_add->set_name("PluginSelectorButton");
 	btn_remove->set_name("PluginSelectorButton");
 
+
 	Gtk::Table* table = manage(new Gtk::Table(7, 11));
 	table->set_size_request(750, 500);
 
-	HBox* select_box = manage (new HBox);
+	Gtk::Table* filter_table = manage(new Gtk::Table(2, 5));
 
 	fil_hidden_button.set_name ("pluginlist hide button");
 	fil_hidden_button.set_text (_("Show Hidden"));
 	fil_hidden_button.set_active (_show_hidden);
-	fil_hidden_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_hidden_button_release), false);
 	set_tooltip (fil_hidden_button, _("Include hidden plugins in list."));
 
 	fil_instruments_button.set_name ("pluginlist filter button");
 	fil_instruments_button.set_text (_("Instruments"));
 	fil_instruments_button.set_active_state (_show_instruments);
-	fil_instruments_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_instruments_button_release), false);
-	set_tooltip (fil_instruments_button, _("cycle display of instrument plugins (if any)."));
+	set_tooltip (fil_instruments_button, _("Cycle display of instrument plugins (if any)."));
 
 	fil_analysis_button.set_name ("pluginlist filter button");
 	fil_analysis_button.set_text (_("Analyzers"));
 	fil_analysis_button.set_active_state (_show_analysers);
-	fil_analysis_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_analysis_button_release), false);
 	set_tooltip (fil_analysis_button, _("Cycle display of analysis plugins (if any)."));
 
 	fil_utils_button.set_name ("pluginlist filter button");
 	fil_utils_button.set_text (_("Utils"));
 	fil_utils_button.set_active_state (_show_utils);
-	fil_utils_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_utils_button_release), false);
 	set_tooltip (fil_utils_button, _("Cycle display of utility plugins (if any)."));
-
-	select_box->pack_start (fil_hidden_button, true, false);
-	select_box->pack_start (fil_instruments_button, true, false);
-	select_box->pack_start (fil_analysis_button, true, false);
-	select_box->pack_start (fil_utils_button, true, false);
-
-	select_box->show_all();
-
-	HBox* filter_box = manage (new HBox);
 
 	vector<string> filter_strings = I18N (_filter_mode_strings);
 	Gtkmm2ext::set_popdown_strings (filter_mode, filter_strings);
 	filter_mode.set_active_text (filter_strings.front());
 
-	filter_box->pack_start (filter_mode, false, false);
-	filter_box->pack_start (filter_entry, true, true);
-	filter_box->pack_start (filter_button, false, false);
+	fil_hidden_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_hidden_button_release), false);
+	fil_instruments_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_instruments_button_release), false);
+	fil_analysis_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_analysis_button_release), false);
+	fil_utils_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_utils_button_release), false);
 
 	filter_entry.signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::filter_entry_changed));
 	filter_button.signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::filter_button_clicked));
 	filter_mode.signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::filter_mode_changed));
 
-	filter_box->show ();
-	filter_mode.show ();
-	filter_entry.show ();
-	filter_button.show ();
+	filter_table->attach (filter_mode,            0, 1, 0, 1, FILL, FILL);
+	filter_table->attach (filter_entry,           1, 4, 0, 1, FILL|EXPAND, FILL);
+	filter_table->attach (filter_button,          4, 5, 0, 1, FILL, FILL);
+
+	filter_table->attach (fil_hidden_button,      1, 2, 1, 2, FILL, FILL);
+	filter_table->attach (fil_instruments_button, 2, 3, 1, 2, FILL, FILL);
+	filter_table->attach (fil_analysis_button,    3, 4, 1, 2, FILL, FILL);
+	filter_table->attach (fil_utils_button,       4, 5, 1, 2, FILL, FILL);
+
+	filter_table->set_border_width (4);
+	filter_table->set_col_spacings (2);
+	filter_table->set_row_spacings (4);
+
+	Frame* filter_frame = manage (new Frame);
+	filter_frame->set_name ("BaseFrame");
+	filter_frame->set_label (_("Filter"));
+	filter_frame->add (*filter_table);
+
+	filter_frame->show_all ();
 
 	table->attach (scroller, 0, 7, 0, 5);
-	table->attach (*select_box, 0, 7, 5, 6, FILL|EXPAND, FILL, 5, 5);
-	table->attach (*filter_box, 0, 7, 6, 7, FILL|EXPAND, FILL, 5, 5);
+	table->attach (*filter_frame, 0, 7, 6, 7, FILL|EXPAND, FILL, 5, 5);
 	table->attach(*btn_add, 1, 2, 7, 8, FILL, FILL, 5, 5);
 	table->attach(*btn_remove, 5, 6, 7, 8, FILL, FILL, 5, 5);
 
@@ -602,8 +605,18 @@ PluginSelector::filter_mode_changed ()
 
 	if (mode == _("Favorites only") || mode == _("Hidden only")) {
 		filter_entry.set_sensitive (false);
+		filter_button.set_sensitive (false);
+		fil_hidden_button.set_sensitive (false);
+		fil_instruments_button.set_sensitive (false);
+		fil_analysis_button.set_sensitive (false);
+		fil_utils_button.set_sensitive (false);
 	} else {
 		filter_entry.set_sensitive (true);
+		filter_button.set_sensitive (true);
+		fil_hidden_button.set_sensitive (true);
+		fil_instruments_button.set_sensitive (true);
+		fil_analysis_button.set_sensitive (true);
+		fil_utils_button.set_sensitive (true);
 	}
 
 	refill ();
@@ -940,6 +953,7 @@ static Gtkmm2ext::ActiveState next_state (Gtkmm2ext::ActiveState s){
 		case Gtkmm2ext::ExplicitActive:
 			return Gtkmm2ext::Off;
 			break;
+		default: assert(0); break; // not reached
 	}
 }
 
@@ -954,6 +968,7 @@ static Gtkmm2ext::ActiveState prev_state (Gtkmm2ext::ActiveState s){
 		case Gtkmm2ext::ExplicitActive:
 			return Gtkmm2ext::ImplicitActive;
 			break;
+		default: assert(0); break; // not reached
 	}
 }
 
