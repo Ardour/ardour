@@ -64,7 +64,15 @@ static const char* _filter_mode_strings[] = {
 PluginSelector::PluginSelector (PluginManager& mgr)
 	: ArdourDialog (_("Plugin Manager"), true, false)
 	, filter_button (Stock::CLEAR)
+	, fil_hidden_button (ArdourButton::led_default_elements)
+	, fil_instruments_button (ArdourButton::default_elements)
+	, fil_analysis_button (ArdourButton::default_elements)
+	, fil_utils_button (ArdourButton::default_elements)
 	, manager (mgr)
+	, _show_hidden (false)
+	, _show_instruments (Gtkmm2ext::ImplicitActive)
+	, _show_analysers (Gtkmm2ext::Off)
+	, _show_utils (Gtkmm2ext::Off)
 
 {
 	set_name ("PluginSelectorWindow");
@@ -138,7 +146,39 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	Gtk::Table* table = manage(new Gtk::Table(7, 11));
 	table->set_size_request(750, 500);
-	table->attach(scroller, 0, 7, 0, 5);
+
+	HBox* select_box = manage (new HBox);
+
+	fil_hidden_button.set_name ("pluginlist hide button");
+	fil_hidden_button.set_text (_("Show Hidden"));
+	fil_hidden_button.set_active (_show_hidden);
+	fil_hidden_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_hidden_button_release), false);
+	set_tooltip (fil_hidden_button, _("Include hidden plugins in list."));
+
+	fil_instruments_button.set_name ("pluginlist filter button");
+	fil_instruments_button.set_text (_("Instruments"));
+	fil_instruments_button.set_active_state (_show_instruments);
+	fil_instruments_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_instruments_button_release), false);
+	set_tooltip (fil_instruments_button, _("cycle display of instrument plugins (if any)."));
+
+	fil_analysis_button.set_name ("pluginlist filter button");
+	fil_analysis_button.set_text (_("Analyzers"));
+	fil_analysis_button.set_active_state (_show_analysers);
+	fil_analysis_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_analysis_button_release), false);
+	set_tooltip (fil_analysis_button, _("Cycle display of analysis plugins (if any)."));
+
+	fil_utils_button.set_name ("pluginlist filter button");
+	fil_utils_button.set_text (_("Utils"));
+	fil_utils_button.set_active_state (_show_utils);
+	fil_utils_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_utils_button_release), false);
+	set_tooltip (fil_utils_button, _("Cycle display of utility plugins (if any)."));
+
+	select_box->pack_start (fil_hidden_button, true, false);
+	select_box->pack_start (fil_instruments_button, true, false);
+	select_box->pack_start (fil_analysis_button, true, false);
+	select_box->pack_start (fil_utils_button, true, false);
+
+	select_box->show_all();
 
 	HBox* filter_box = manage (new HBox);
 
@@ -159,10 +199,11 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	filter_entry.show ();
 	filter_button.show ();
 
-	table->attach (*filter_box, 0, 7, 5, 6, FILL|EXPAND, FILL, 5, 5);
-
-	table->attach(*btn_add, 1, 2, 6, 7, FILL, FILL, 5, 5);
-	table->attach(*btn_remove, 5, 6, 6, 7, FILL, FILL, 5, 5);
+	table->attach (scroller, 0, 7, 0, 5);
+	table->attach (*select_box, 0, 7, 5, 6, FILL|EXPAND, FILL, 5, 5);
+	table->attach (*filter_box, 0, 7, 6, 7, FILL|EXPAND, FILL, 5, 5);
+	table->attach(*btn_add, 1, 2, 7, 8, FILL, FILL, 5, 5);
+	table->attach(*btn_remove, 5, 6, 7, 8, FILL, FILL, 5, 5);
 
 	table->attach(ascroller, 0, 7, 8, 10);
 
@@ -219,6 +260,40 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 
 	if (mode == _("Hidden only")) {
 		return manager.get_status (info) == PluginManager::Hidden;
+	}
+
+	if (!_show_hidden && manager.get_status (info) == PluginManager::Hidden) {
+		return false;
+	}
+
+	if (_show_instruments == Gtkmm2ext::Off && info->is_instrument()) {
+		return false;
+	}
+	if (_show_analysers == Gtkmm2ext::Off && info->category == "Analyser") {
+		return false;
+	}
+	if (_show_utils == Gtkmm2ext::Off && info->category == "Utility") {
+		return false;
+	}
+
+	/* NB once lilv_node_as_string() does honor translation AND
+	 * the lv2 onthology provides localized class name,
+	 * PluginInfo will need methods for Util & Analysis.
+	 */
+	bool exp_ok = false;
+	if (_show_instruments == Gtkmm2ext::ExplicitActive && info->is_instrument()) {
+		exp_ok = true;
+	}
+	if (_show_analysers == Gtkmm2ext::ExplicitActive && info->category == "Analyser") {
+		exp_ok = true;
+	}
+	if (_show_utils == Gtkmm2ext::ExplicitActive && info->category == "Utility") {
+		exp_ok = true;
+	}
+	if (_show_instruments == Gtkmm2ext::ExplicitActive  || _show_analysers == Gtkmm2ext::ExplicitActive || _show_utils == Gtkmm2ext::ExplicitActive) {
+		if (!exp_ok) {
+			return false;
+		}
 	}
 
 	if (!filterstr.empty()) {
@@ -843,6 +918,82 @@ PluginSelector::hidden_changed (const std::string& path)
 		build_plugin_menu ();
 	}
 	in_row_change = false;
+}
+
+bool
+PluginSelector::fil_hidden_button_release (GdkEventButton*)
+{
+	_show_hidden = (fil_hidden_button.active_state() == 0);
+	fil_hidden_button.set_active (_show_hidden);
+	refill ();
+	return true;
+}
+
+static Gtkmm2ext::ActiveState next_state (Gtkmm2ext::ActiveState s){
+	switch (s) {
+		case Gtkmm2ext::Off:
+			return Gtkmm2ext::ImplicitActive;
+			break;
+		case Gtkmm2ext::ImplicitActive:
+			return Gtkmm2ext::ExplicitActive;
+			break;
+		case Gtkmm2ext::ExplicitActive:
+			return Gtkmm2ext::Off;
+			break;
+	}
+}
+
+static Gtkmm2ext::ActiveState prev_state (Gtkmm2ext::ActiveState s){
+	switch (s) {
+		case Gtkmm2ext::Off:
+			return Gtkmm2ext::ExplicitActive;
+			break;
+		case Gtkmm2ext::ImplicitActive:
+			return Gtkmm2ext::Off;
+			break;
+		case Gtkmm2ext::ExplicitActive:
+			return Gtkmm2ext::ImplicitActive;
+			break;
+	}
+}
+
+bool
+PluginSelector::fil_instruments_button_release (GdkEventButton* ev)
+{
+	if (ev->button == 3) {
+		_show_instruments = prev_state (fil_instruments_button.active_state());
+	} else {
+		_show_instruments = next_state (fil_instruments_button.active_state());
+	}
+	fil_instruments_button.set_active_state (_show_instruments);
+	refill ();
+	return true;
+}
+
+bool
+PluginSelector::fil_analysis_button_release (GdkEventButton* ev)
+{
+	if (ev->button == 3) {
+		_show_analysers = prev_state (fil_analysis_button.active_state());
+	} else {
+		_show_analysers = next_state (fil_analysis_button.active_state());
+	}
+	fil_analysis_button.set_active_state (_show_analysers);
+	refill ();
+	return true;
+}
+
+bool
+PluginSelector::fil_utils_button_release (GdkEventButton* ev)
+{
+	if (ev->button == 3) {
+		_show_utils = prev_state (fil_utils_button.active_state());
+	} else {
+		_show_utils = next_state (fil_utils_button.active_state());
+	}
+	fil_utils_button.set_active_state (_show_utils);
+	refill ();
+	return true;
 }
 
 void
