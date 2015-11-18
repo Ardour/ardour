@@ -454,7 +454,7 @@ msgstr "Configuration :"
 
 #: add_route_dialog.cc:58
 msgid "Record Mode:"
-msgstr ""
+msgstr "Mode d'enregistrement"
 
 #: add_route_dialog.cc:59
 msgid "Instrument:"
@@ -514,7 +514,7 @@ msgstr "Groupe :"
 #: add_route_dialog.cc:162
 #, fuzzy
 msgid "Insert:"
-msgstr "&Insérer"
+msgstr "Insérer :"
 
 #: add_route_dialog.cc:223 add_route_dialog.cc:232 add_route_dialog.cc:306
 #: ardour_ui_ed.cc:539 engine_dialog.cc:237 rc_option_editor.cc:1805
