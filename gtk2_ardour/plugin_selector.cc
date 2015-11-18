@@ -272,10 +272,10 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	if (_show_instruments == Gtkmm2ext::Off && info->is_instrument()) {
 		return false;
 	}
-	if (_show_analysers == Gtkmm2ext::Off && info->category == "Analyser") {
+	if (_show_analysers == Gtkmm2ext::Off && info->in_category ("Analyser")) {
 		return false;
 	}
-	if (_show_utils == Gtkmm2ext::Off && info->category == "Utility") {
+	if (_show_utils == Gtkmm2ext::Off && info->in_category ("Utility")) {
 		return false;
 	}
 
@@ -287,10 +287,10 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	if (_show_instruments == Gtkmm2ext::ExplicitActive && info->is_instrument()) {
 		exp_ok = true;
 	}
-	if (_show_analysers == Gtkmm2ext::ExplicitActive && info->category == "Analyser") {
+	if (_show_analysers == Gtkmm2ext::ExplicitActive && info->in_category ("Analyser")) {
 		exp_ok = true;
 	}
-	if (_show_utils == Gtkmm2ext::ExplicitActive && info->category == "Utility") {
+	if (_show_utils == Gtkmm2ext::ExplicitActive && info->in_category ("Utility")) {
 		exp_ok = true;
 	}
 	if (_show_instruments == Gtkmm2ext::ExplicitActive  || _show_analysers == Gtkmm2ext::ExplicitActive || _show_utils == Gtkmm2ext::ExplicitActive) {
