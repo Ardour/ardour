@@ -149,7 +149,6 @@ SessionDirectory::sources_root () const
 			root_cache[m_root_path] = Glib::build_filename (sources_root_path, entries.front());
 		}
 		else if (entries.size() > 1) {
-			printf ("found %zu folderin interchange!\n", entries.size());
 			PBD::fatal << string_compose (_("The session's interchange dir is tainted.\nThere is more than one folder in '%1'.\nPlease remove extra subdirs to reduce possible filename ambiguties."), sources_root_path) << endmsg;
 			assert (0); // not reached
 		}
