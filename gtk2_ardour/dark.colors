@@ -326,6 +326,8 @@
     <ColorAlias name="nudge clock: cursor" alias="color 8"/>
     <ColorAlias name="nudge clock: edited text" alias="color 8"/>
     <ColorAlias name="nudge clock: text" alias="color 12"/>
+    <ColorAlias name="page switch button: fill active" alias="color 92"/>
+    <ColorAlias name="page switch button: fill" alias="color 94"/>
     <ColorAlias name="piano roll black" alias="color 76"/>
     <ColorAlias name="piano roll black outline" alias="color 33"/>
     <ColorAlias name="piano roll white" alias="color 45"/>
