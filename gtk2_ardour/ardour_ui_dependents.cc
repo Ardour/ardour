@@ -359,8 +359,8 @@ ARDOUR_UI::setup_windows ()
 		}
 	}
 
-	_main_window.show_all ();
 	setup_toplevel_window (_main_window, "", this);
+	_main_window.show_all ();
 
 	_tabs.set_show_tabs (false);
 
