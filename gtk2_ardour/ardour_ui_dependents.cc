@@ -233,15 +233,6 @@ ARDOUR_UI::setup_windows ()
 
 	keyboard->setup_keybindings ();
 
-	/* we don't use a widget with its own window for the tab close button,
-	   which makes it impossible to rely on GTK+ to generate signals for
-	   events occuring "in" this widget. Instead, we pre-connect a
-	   handler to the relevant events on the notebook and then check
-	   to see if the event coordinates tell us that it occured "in"
-	   the close button.
-	*/
-	_tabs.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_button_event), false);
-	_tabs.signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_button_event), false);
 	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
 
 	rc_option_editor = new RCOptionEditor;

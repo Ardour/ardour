@@ -85,9 +85,6 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	Gtk::Notebook  _own_notebook;
 	Gtk::Notebook* _parent_notebook;
 	std::string    _tab_title;
-	Gtk::HBox      _tab_box;
-	Gtk::Label     _tab_label;
-	CairoIcon       tab_close_image;
 	bool            tab_requested_by_state;
 
 	void show_tab ();

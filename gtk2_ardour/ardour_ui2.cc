@@ -68,42 +68,6 @@ using namespace Glib;
 using namespace ARDOUR_UI_UTILS;
 
 
-bool
-ARDOUR_UI::tabs_button_event (GdkEventButton* ev)
-{
-	std::vector<Widget*> children = _tabs.get_children();
-
-	for (std::vector<Widget*>::iterator w = children.begin(); w != children.end(); ++w) {
-
-		Gtk::Widget* close_button = reinterpret_cast<Gtk::Widget*> ((*w)->get_data ("close-button"));
-
-		if (close_button) {
-
-			Gtk::Allocation alloc (close_button->get_allocation());
-			int dx, dy;
-
-			/* Allocation origin uses toplevel window coordinates;
-			 * event origin uses _tabs-centric coordinate space, so
-			 * translate before computing if event is inside the
-			 * close button.
-			 */
-
-			close_button->get_toplevel()->translate_coordinates (_tabs, alloc.get_x(), alloc.get_y(), dx, dy);
-
-			if (ev->x >= dx &&
-			    ev->y >= dy &&
-			    ev->x < dx + alloc.get_width() &&
-			    ev->y < dy + alloc.get_height()) {
-				if (close_button->event ((GdkEvent*) ev)) {
-					return true;
-				}
-			}
-		}
-	}
-
-	return false;
-}
-
 void
 ARDOUR_UI::setup_tooltips ()
 {

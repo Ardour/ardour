@@ -587,6 +587,18 @@ ARDOUR_UI::build_menu_bar ()
 	prefs_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("show-preferences")));
 	prefs_visibility_button.set_name (X_("page switch button"));
 
+	Gtkmm2ext::UI::instance()->set_tip (editor_visibility_button,
+	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
+	                                                      "To put the window back, use the Window > %1 > Attach menu action"), editor->name()));
+
+	Gtkmm2ext::UI::instance()->set_tip (mixer_visibility_button,
+	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
+	                                                      "To put the window back, use the Window > %1 > Attach menu action"), mixer->name()));
+
+	Gtkmm2ext::UI::instance()->set_tip (prefs_visibility_button,
+	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
+	                                                      "To put the window back, use the Window > %1 > Attach menu action"), rc_option_editor->name()));
+
 	window_button_box->pack_start (editor_visibility_button, false, false);
 	window_button_box->pack_start (mixer_visibility_button, false, false);
 	window_button_box->pack_start (prefs_visibility_button, false, false);

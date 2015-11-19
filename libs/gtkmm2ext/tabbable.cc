@@ -39,18 +39,8 @@ Tabbable::Tabbable (Widget& w, const string& name)
 	: WindowProxy (name)
 	, _contents (w)
 	, _parent_notebook (0)
-	, tab_close_image (ArdourIcon::CloseCross, 0xffffffff)
 	, tab_requested_by_state (true)
 {
-	/* sizes will be scaled during rendering */
-	tab_close_image.set_size_request (15,15);
-
-	_tab_box.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	_tab_box.set_spacing (2);
-	_tab_box.pack_start (_tab_label, true, true);
-	_tab_box.pack_start (tab_close_image, false, false);
-
-	tab_close_image.signal_button_release_event().connect (sigc::mem_fun (*this, &Tabbable::tab_close_clicked));
 }
 
 Tabbable::~Tabbable ()
@@ -61,20 +51,10 @@ Tabbable::~Tabbable ()
 	}
 }
 
-bool
-Tabbable::tab_close_clicked (GdkEventButton*)
-{
-	hide_tab ();
-	return true;
-}
-
 void
 Tabbable::add_to_notebook (Notebook& notebook, const string& tab_title)
 {
 	_parent_notebook = &notebook;
-	_tab_title = tab_title;
-	_tab_label.set_text (tab_title);
-	_tab_box.show_all ();
 
 	if (tab_requested_by_state) {
 		attach ();
@@ -91,7 +71,7 @@ Tabbable::use_own_window (bool and_pack_it)
 		if (parent) {
 			parent->remove (_contents);
 		}
-		_own_notebook.append_page (_contents, _tab_box);
+		_own_notebook.append_page (_contents);
 	}
 
 	return win;
@@ -248,16 +228,10 @@ Tabbable::attach ()
 		_window->hide ();
 	}
 
-	_parent_notebook->append_page (_contents, _tab_box);
-	_contents.set_data ("close-button", &tab_close_image);
+	_parent_notebook->append_page (_contents);
 	_parent_notebook->set_tab_detachable (_contents);
 	_parent_notebook->set_tab_reorderable (_contents);
 	_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
-
-	Gtkmm2ext::UI::instance()->set_tip (_tab_label,
-	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To put the window back, use the Window > %1 > Attach menu action"), _tab_title));
-
 
 	/* have to force this on, which is semantically correct, since
 	 * the user has effectively asked for it.
