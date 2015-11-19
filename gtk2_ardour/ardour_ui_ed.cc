@@ -555,28 +555,8 @@ ARDOUR_UI::build_menu_bar ()
 
 	Gtk::HBox*   window_button_box = manage (new Gtk::HBox);
 
-	std::vector<TargetEntry> drag_target_entries;
-	drag_target_entries.push_back (TargetEntry ("tabbable"));
-
-	editor_visibility_button.drag_source_set (drag_target_entries);
-	editor_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (editor->name(),
-	                                                                              Pango::FontDescription ("Sans 24"),
-	                                                                              40, 20,
-	                                                                              Gdk::Color ("red")));
 	editor_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), editor));
-
-	mixer_visibility_button.drag_source_set (drag_target_entries);
-	mixer_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (mixer->name(),
-	                                                                             Pango::FontDescription ("Sans 24"),
-	                                                                             40, 20,
-	                                                                             Gdk::Color ("red")));
 	mixer_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), mixer));
-
-	prefs_visibility_button.drag_source_set (drag_target_entries);
-	prefs_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (rc_option_editor->name(),
-	                                                                             Pango::FontDescription ("Sans 24"),
-	                                                                             40, 20,
-	                                                                             Gdk::Color ("red")));
 	prefs_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), rc_option_editor));
 
 

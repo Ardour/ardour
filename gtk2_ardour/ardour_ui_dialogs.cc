@@ -32,7 +32,11 @@
 #include "ardour/control_protocol_manager.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
+
 #include "control_protocol/control_protocol.h"
+
+#include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/utils.h"
 
 #include "actions.h"
 #include "add_route_dialog.h"
@@ -61,8 +65,6 @@
 #include "theme_manager.h"
 #include "time_info_box.h"
 #include "timers.h"
-
-#include <gtkmm2ext/keyboard.h>
 
 #include "i18n.h"
 
@@ -362,6 +364,43 @@ ARDOUR_UI::detach_tabbable (Tabbable* t)
 		return;
 	}
 	t->detach ();
+}
+
+void
+ARDOUR_UI::tabs_page_added (Widget*,guint)
+{
+	if (_tabs.get_n_pages() > 1) {
+
+		std::vector<TargetEntry> drag_target_entries;
+		drag_target_entries.push_back (TargetEntry ("tabbable"));
+
+		editor_visibility_button.drag_source_set (drag_target_entries);
+		mixer_visibility_button.drag_source_set (drag_target_entries);
+		prefs_visibility_button.drag_source_set (drag_target_entries);
+
+		editor_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (editor->name(),
+		                                                                              Pango::FontDescription ("Sans 24"),
+		                                                                              40, 20,
+		                                                                              Gdk::Color ("red")));
+		mixer_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (mixer->name(),
+		                                                                             Pango::FontDescription ("Sans 24"),
+		                                                                             40, 20,
+		                                                                             Gdk::Color ("red")));
+		prefs_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (rc_option_editor->name(),
+		                                                                             Pango::FontDescription ("Sans 24"),
+		                                                                             40, 20,
+		                                                                             Gdk::Color ("red")));
+	}
+}
+
+void
+ARDOUR_UI::tabs_page_removed (Widget*, guint)
+{
+	if (_tabs.get_n_pages() < 2) {
+		editor_visibility_button.drag_source_unset ();
+		mixer_visibility_button.drag_source_unset ();
+		prefs_visibility_button.drag_source_unset ();
+	}
 }
 
 void
