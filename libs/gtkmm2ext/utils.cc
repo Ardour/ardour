@@ -272,6 +272,18 @@ Gtkmm2ext::pixbuf_from_string(const string& name, const Pango::FontDescription& 
 		return *empty_pixbuf;
 	}
 
+	if (clip_width <= 0 || clip_height <= 0) {
+		/* negative values mean padding around natural size */
+		int width, height;
+		pixel_size (name, font, width, height);
+		if (clip_width <= 0) {
+			clip_width = width - clip_width;
+		}
+		if (clip_height <= 0) {
+			clip_height = height - clip_height;
+		}
+	}
+
 	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
 
 	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, clip_width, clip_height);
@@ -678,7 +690,7 @@ Gtkmm2ext::window_to_draw_on (Gtk::Widget& w, Gtk::Widget** parent)
 }
 
 int
-Gtkmm2ext::pixel_width (const string& str, Pango::FontDescription& font)
+Gtkmm2ext::pixel_width (const string& str, const Pango::FontDescription& font)
 {
 	Glib::RefPtr<Pango::Context> context = Glib::wrap (gdk_pango_context_get());
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
@@ -706,7 +718,7 @@ Gtkmm2ext::pixel_width (const string& str, Pango::FontDescription& font)
 }
 
 void
-Gtkmm2ext::pixel_size (const string& str, Pango::FontDescription& font, int& width, int& height)
+Gtkmm2ext::pixel_size (const string& str, const Pango::FontDescription& font, int& width, int& height)
 {
 	Gtk::Label foo;
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
@@ -732,9 +744,9 @@ Gtkmm2ext::fit_to_pixels (const string& str, int pixel_width, Pango::FontDescrip
 	layout->set_width (pixel_width * PANGO_SCALE);
 
 	if (with_ellipses) {
-        	layout->set_ellipsize (Pango::ELLIPSIZE_END);
+		layout->set_ellipsize (Pango::ELLIPSIZE_END);
 	} else {
-        	layout->set_wrap (Pango::WRAP_CHAR);
+		layout->set_wrap (Pango::WRAP_CHAR);
 	}
 
 	line = layout->get_line (0);

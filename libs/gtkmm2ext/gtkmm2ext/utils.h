@@ -54,8 +54,8 @@ namespace Gtkmm2ext {
 
 	LIBGTKMM2EXT_API std::string fit_to_pixels (const std::string&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
 	LIBGTKMM2EXT_API std::pair<std::string, double> fit_to_pixels (cairo_t *, std::string, double);
-	LIBGTKMM2EXT_API int pixel_width (const std::string& str, Pango::FontDescription& font);
-	LIBGTKMM2EXT_API void pixel_size (const std::string& str, Pango::FontDescription& font, int& width, int& height);
+	LIBGTKMM2EXT_API int pixel_width (const std::string& str, const Pango::FontDescription& font);
+	LIBGTKMM2EXT_API void pixel_size (const std::string& str, const Pango::FontDescription& font, int& width, int& height);
 
 	LIBGTKMM2EXT_API void get_ink_pixel_size (Glib::RefPtr<Pango::Layout>,
 						  int& width, int& height);

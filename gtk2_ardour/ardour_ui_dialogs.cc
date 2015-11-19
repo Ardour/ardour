@@ -380,15 +380,15 @@ ARDOUR_UI::tabs_page_added (Widget*,guint)
 
 		editor_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (editor->name(),
 		                                                                              Pango::FontDescription ("Sans 24"),
-		                                                                              40, 20,
+		                                                                              0, 0,
 		                                                                              Gdk::Color ("red")));
 		mixer_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (mixer->name(),
 		                                                                             Pango::FontDescription ("Sans 24"),
-		                                                                             40, 20,
+		                                                                             0, 0,
 		                                                                             Gdk::Color ("red")));
 		prefs_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (rc_option_editor->name(),
 		                                                                             Pango::FontDescription ("Sans 24"),
-		                                                                             40, 20,
+		                                                                             0, 0,
 		                                                                             Gdk::Color ("red")));
 	}
 }
