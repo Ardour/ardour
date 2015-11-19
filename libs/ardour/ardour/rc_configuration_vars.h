@@ -161,6 +161,7 @@ CONFIG_VARIABLE (bool, stop_recording_on_xrun, "stop-recording-on-xrun", false)
 CONFIG_VARIABLE (bool, create_xrun_marker, "create-xrun-marker", true)
 CONFIG_VARIABLE (bool, stop_at_session_end, "stop-at-session-end", false)
 CONFIG_VARIABLE (bool, seamless_loop, "seamless-loop", false)
+CONFIG_VARIABLE (float, preroll_seconds, "preroll-seconds", 1.0f)
 #ifdef USE_TRACKS_CODE_FEATURES
 CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", true)
 #else

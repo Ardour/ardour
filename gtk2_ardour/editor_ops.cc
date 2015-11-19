@@ -2532,7 +2532,7 @@ Editor::play_selection ()
 framepos_t
 Editor::get_preroll ()
 {
-	return 1.0 /*Config->get_edit_preroll_seconds()*/ * _session->frame_rate();
+	return Config->get_preroll_seconds() * _session->frame_rate();
 }
 
 

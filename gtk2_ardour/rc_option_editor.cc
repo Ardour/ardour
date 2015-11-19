@@ -2062,6 +2062,23 @@ RCOptionEditor::RCOptionEditor ()
 						   "that occurs when fast-forwarding or rewinding through some kinds of audio"));
 	add_option (_("Transport"), tsf);
 
+	ComboOption<float>* psc = new ComboOption<float> (
+		     "preroll-seconds",
+		     _("Preroll"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_preroll_seconds),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_preroll_seconds)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
+					    (_("The amount of preroll (in seconds) to apply when Play with Preroll is initiated.\n\n"
+					       "If <b>Follow Edits</b> is enabled, the preroll is applied to the playhead position when a region is selected or trimmed.")));
+	psc->add (0.0, _("0 (no pre-roll)"));
+	psc->add (0.1, _("0.1 second"));
+	psc->add (0.25, _("0.25 second"));
+	psc->add (0.5, _("0.5 second"));
+	psc->add (1.0, _("1.0 second"));
+	psc->add (2.0, _("2.0 seconds"));
+	add_option (_("Transport"), psc);
+	
 	add_option (_("Transport"), new OptionEditorHeading (S_("Sync/Slave")));
 
 	_sync_source = new ComboOption<SyncSource> (
