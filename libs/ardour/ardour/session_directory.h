@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "ardour/libardour_visibility.h"
 
@@ -151,6 +152,9 @@ private:
 
 	/// The path to the root of the session directory.
 	std::string m_root_path;
+
+	static std::map<std::string,std::string> root_cache;
+	mutable std::string m_sources_root;
 };
 
 } // namespace ARDOUR

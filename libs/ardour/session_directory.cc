@@ -36,6 +36,10 @@ namespace ARDOUR {
 using namespace std;
 using namespace PBD::sys;
 
+
+/* keep a static cache because SessionDirectory is used in various places. */
+std::map<std::string,std::string> SessionDirectory::root_cache;
+
 SessionDirectory::SessionDirectory (const std::string& session_path)
 	: m_root_path(session_path)
 {
@@ -46,6 +50,7 @@ SessionDirectory&
 SessionDirectory::operator= (const std::string& newpath)
 {
 	m_root_path = newpath;
+	root_cache.clear ();
 	return *this;
 }
 
@@ -89,7 +94,15 @@ SessionDirectory::old_sound_path () const
 const std::string
 SessionDirectory::sources_root () const
 {
+	if (root_cache.find (m_root_path) != root_cache.end()) {
+		return root_cache[m_root_path];
+	}
+
+	root_cache.clear ();
+
 	std::string p = m_root_path;
+
+	// TODO ideally we'd use the session's name() here, and not the containing folder's name.
 	std::string filename = Glib::path_get_basename(p);
 
 	if (filename == ".") {
@@ -99,7 +112,56 @@ SessionDirectory::sources_root () const
 	const string legalized_root (legalize_for_path (Glib::path_get_basename(p)));
 
 	std::string sources_root_path = Glib::build_filename (m_root_path, interchange_dir_name);
-	return Glib::build_filename (sources_root_path, legalized_root);
+
+	/* check the interchange folder:
+	 *
+	 * 1) if a single subdir exists, use it, regardless of the name
+	 * 2) if more than one dir is in interchange: abort, blame the user
+	 * 3) if interchange does not exist or no subdir is present,
+	 *    use the session-name to create one.
+	 *
+	 *    We use the name of the containing folder, not the actual
+	 *    session name. The latter would require some API changes and
+	 *    careful libardour updates:
+	 *
+	 *    The session object is created with the "snapshot-name", only
+	 *    when loading the .ardour session file, the actual name is set.
+	 *
+	 *    SessionDirectory is created with the session itself
+	 *    and picks up the wrong inital name.
+	 *
+	 *    SessionDirectory is also used directly by the AudioRegionImporter,
+	 *    and the peak-file background thread (session.cc).
+	 *
+	 * 	  There is no actual benefit to use the session-name instead of
+	 * 	  the folder-name. Under normal circumstances they are always
+	 * 	  identical.  But it would be consistent to prefer the name.
+	 */
+	try {
+		Glib::Dir dir(sources_root_path);
+
+		std::list<std::string> entries (dir.begin(), dir.end());
+
+		if (entries.size() == 1) {
+			if (entries.front() != legalized_root) {
+				PBD::info << _("session-dir and session-name mismatch. Please use 'Menu > Session > Rename' in the future to rename sessions.") << endmsg;
+			}
+			root_cache[m_root_path] = Glib::build_filename (sources_root_path, entries.front());
+		}
+		else if (entries.size() > 1) {
+			printf ("found %zu folderin interchange!\n", entries.size());
+			PBD::fatal << string_compose (_("The session's interchange dir is tainted. There is more than one folder in '%1.'. Please remove extra subdirs to reduce possible file ambiguties."), sources_root_path) << endmsg;
+			assert (0); // not reached
+		}
+	} catch (Glib::FileError) {
+		;
+	}
+
+	if (root_cache.find (m_root_path) == root_cache.end()) {
+		root_cache[m_root_path] = Glib::build_filename (sources_root_path, legalized_root);
+	}
+
+	return root_cache[m_root_path];
 }
 
 const std::string
