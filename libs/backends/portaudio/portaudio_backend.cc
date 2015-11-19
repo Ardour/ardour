@@ -656,7 +656,9 @@ PortAudioBackend::process_callback(const float* input,
 		return true;
 	}
 
-	if (_reinit_thread_callback || m_main_thread != pthread_self()) {
+	bool in_main_thread = pthread_equal(m_main_thread, pthread_self());
+
+	if (_reinit_thread_callback || !in_main_thread) {
 		_reinit_thread_callback = false;
 		m_main_thread = pthread_self();
 		AudioEngine::thread_init_callback (this);
