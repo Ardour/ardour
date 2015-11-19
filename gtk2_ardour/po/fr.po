@@ -555,8 +555,9 @@ msgid ""
 msgstr ""
 "Les pistes Audio+MIDI doivent être utilisées <b>SEULEMENT</b> avec des "
 "greffons qui utilisent à la fois les entrées audio et MIDI.\n"
-"Si vous n'envisagez pas d'utiliser un tel plugin, utilisez plutôt une piste "
-"audio ou MIDI."
+"\n"
+"Si vous n'envisagez pas d'utiliser un tel greffon, utilisez plutôt une piste "
+"normale audio ou MIDI."
 
 #: add_route_dialog.cc:327 add_route_dialog.cc:346 editor_actions.cc:422
 #: editor_rulers.cc:251 time_axis_view.cc:1374
