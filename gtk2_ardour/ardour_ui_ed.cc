@@ -222,9 +222,9 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
 	global_actions.register_action (common_actions, X_("Hide"), _("Hide"), sigc::mem_fun (*this, &ARDOUR_UI::hide_application));
 
-	global_actions.register_toggle_action (common_actions, X_("show-editor"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), editor));
-	global_actions.register_toggle_action (common_actions, X_("show-mixer"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
-	global_actions.register_toggle_action (common_actions, X_("show-preferences"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
+	global_actions.register_action (common_actions, X_("show-editor"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), editor));
+	global_actions.register_action (common_actions, X_("show-mixer"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
+	global_actions.register_action (common_actions, X_("show-preferences"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
 
 	global_actions.register_action (common_actions, X_("hide-editor"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), editor));
 	global_actions.register_action (common_actions, X_("hide-mixer"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), mixer));
@@ -553,29 +553,43 @@ ARDOUR_UI::build_menu_bar ()
 	use_menubar_as_top_menubar ();
 #endif
 
-	ArdourButton* editor_button = manage (new ArdourButton (S_("Window|Editor")));
-	ArdourButton* mixer_button = manage (new ArdourButton (S_("Window|Mixer")));
-	ArdourButton* prefs_button = manage (new ArdourButton (S_("Window|Preferences")));
 	Gtk::HBox*   window_button_box = manage (new Gtk::HBox);
 
 	std::vector<TargetEntry> drag_target_entries;
 	drag_target_entries.push_back (TargetEntry ("tabbable"));
-	editor_button->drag_source_set (drag_target_entries);
-	editor_button->drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (S_("Window|Editor"),
-	                                                                    Pango::FontDescription ("Sans 12"),
-	                                                                    40, 20,
-	                                                                    Gdk::Color ("red")));
 
-	editor_button->signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), editor));
+	editor_visibility_button.drag_source_set (drag_target_entries);
+	editor_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (editor->name(),
+	                                                                              Pango::FontDescription ("Sans 24"),
+	                                                                              40, 20,
+	                                                                              Gdk::Color ("red")));
+	editor_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), editor));
 
-	editor_button->set_related_action (ActionManager::get_action (X_("Common"), X_("show-editor")));
-	editor_button->set_name (X_("page switch button"));
-	mixer_button->set_related_action (ActionManager::get_action (X_("Common"), X_("show-mixer")));
-	mixer_button->set_name (X_("page switch button"));
+	mixer_visibility_button.drag_source_set (drag_target_entries);
+	mixer_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (mixer->name(),
+	                                                                             Pango::FontDescription ("Sans 24"),
+	                                                                             40, 20,
+	                                                                             Gdk::Color ("red")));
+	mixer_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), mixer));
 
-	window_button_box->pack_start (*editor_button, false, false);
-	window_button_box->pack_start (*mixer_button, false, false);
-	window_button_box->pack_start (*prefs_button, false, false);
+	prefs_visibility_button.drag_source_set (drag_target_entries);
+	prefs_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (rc_option_editor->name(),
+	                                                                             Pango::FontDescription ("Sans 24"),
+	                                                                             40, 20,
+	                                                                             Gdk::Color ("red")));
+	prefs_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), rc_option_editor));
+
+
+	editor_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("show-editor")));
+	editor_visibility_button.set_name (X_("page switch button"));
+	mixer_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("show-mixer")));
+	mixer_visibility_button.set_name (X_("page switch button"));
+	prefs_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("show-preferences")));
+	prefs_visibility_button.set_name (X_("page switch button"));
+
+	window_button_box->pack_start (editor_visibility_button, false, false);
+	window_button_box->pack_start (mixer_visibility_button, false, false);
+	window_button_box->pack_start (prefs_visibility_button, false, false);
 
 	menu_hbox.pack_start (*window_button_box, false, false, 20);
 

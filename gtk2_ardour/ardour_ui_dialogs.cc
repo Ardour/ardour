@@ -365,12 +365,52 @@ ARDOUR_UI::detach_tabbable (Tabbable* t)
 }
 
 void
+ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
+{
+	if (page == _tabs.page_num (editor->contents())) {
+		editor_visibility_button.set_active_state (Gtkmm2ext::ImplicitActive);
+		if (mixer && (mixer->tabbed() || mixer->tabbed_by_default())) {
+			mixer_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+		if (rc_option_editor && (rc_option_editor->tabbed() || rc_option_editor->tabbed_by_default())) {
+			prefs_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+	} else if (page == _tabs.page_num (mixer->contents())) {
+		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
+			editor_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+		mixer_visibility_button.set_active_state (Gtkmm2ext::ImplicitActive);
+
+		if (rc_option_editor && (rc_option_editor->tabbed() || rc_option_editor->tabbed_by_default())) {
+			prefs_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+	} else {
+		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
+			editor_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+		if (mixer && (mixer->tabbed() || mixer->tabbed_by_default())) {
+			mixer_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+		prefs_visibility_button.set_active_state (Gtkmm2ext::ImplicitActive);
+	}
+
+}
+
+void
 ARDOUR_UI::tabbable_state_change (Tabbable& t)
 {
 	std::vector<std::string> insensitive_action_names;
 	std::vector<std::string> sensitive_action_names;
+	std::vector<std::string> active_action_names;
+	std::vector<std::string> inactive_action_names;
 	Glib::RefPtr<Action> action;
 	std::string downcased_name = downcase (t.name());
+	enum ViewState {
+		Tabbed,
+		Windowed,
+		Hidden
+	};
+	ViewState vs;
 
 	if (t.tabbed()) {
 
@@ -379,6 +419,8 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 		sensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
 
+		vs = Tabbed;
+
 	} else if (t.tabbed_by_default ()) {
 
 		insensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
@@ -386,12 +428,19 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
 
+		vs = Hidden;
+
 	} else if (t.window_visible()) {
 
 		insensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
+
+		active_action_names.push_back (string_compose ("show-%1", downcased_name));
+		inactive_action_names.push_back (string_compose ("hide-%1", downcased_name));
+
+		vs = Windowed;
 
 	} else {
 
@@ -403,8 +452,12 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 		insensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
-	}
 
+		active_action_names.push_back (string_compose ("hide-%1", downcased_name));
+		inactive_action_names.push_back (string_compose ("show-%1", downcased_name));
+
+		vs = Hidden;
+	}
 
 	for (std::vector<std::string>::iterator s = insensitive_action_names.begin(); s != insensitive_action_names.end(); ++s) {
 		action = ActionManager::get_action (X_("Common"), (*s).c_str());
@@ -418,6 +471,39 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 		if (action) {
 			action->set_sensitive (true);
 		}
+	}
+
+	ArdourButton* vis_button = 0;
+	std::vector<ArdourButton*> other_vis_buttons;
+
+	if (&t == editor) {
+		vis_button = &editor_visibility_button;
+		other_vis_buttons.push_back (&mixer_visibility_button);
+		other_vis_buttons.push_back (&prefs_visibility_button);
+	} else if (&t == mixer) {
+		vis_button = &mixer_visibility_button;
+		other_vis_buttons.push_back (&editor_visibility_button);
+		other_vis_buttons.push_back (&prefs_visibility_button);
+	} else {
+		vis_button = &prefs_visibility_button;
+		other_vis_buttons.push_back (&editor_visibility_button);
+		other_vis_buttons.push_back (&mixer_visibility_button);
+	}
+
+	if (!vis_button) {
+		return;
+	}
+
+	switch (vs) {
+	case Tabbed:
+		vis_button->set_active_state (Gtkmm2ext::ImplicitActive);
+		break;
+	case Windowed:
+		vis_button->set_active_state (Gtkmm2ext::ExplicitActive);
+		break;
+	case Hidden:
+		vis_button->set_active_state (Gtkmm2ext::Off);
+		break;
 	}
 }
 

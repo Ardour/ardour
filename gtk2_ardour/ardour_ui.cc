@@ -293,6 +293,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _feedback_exists (false)
 	, _log_not_acknowledged (LogLevelNone)
 	, duplicate_routes_dialog (0)
+	, editor_visibility_button (S_("Window|Editor"))
+	, mixer_visibility_button (S_("Window|Mixer"))
+	, prefs_visibility_button (S_("Window|Preferences"))
 {
 	Gtkmm2ext::init (localedir);
 

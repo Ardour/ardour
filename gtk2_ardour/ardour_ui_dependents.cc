@@ -242,6 +242,7 @@ ARDOUR_UI::setup_windows ()
 	*/
 	_tabs.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_button_event), false);
 	_tabs.signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_button_event), false);
+	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
 
 	rc_option_editor = new RCOptionEditor;
 	rc_option_editor->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));

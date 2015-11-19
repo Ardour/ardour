@@ -27,6 +27,8 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
+#include "pbd/stacktrace.h"
+
 #include "i18n.h"
 
 using namespace Gtkmm2ext;
@@ -36,6 +38,7 @@ using std::string;
 Tabbable::Tabbable (Widget& w, const string& name)
 	: WindowProxy (name)
 	, _contents (w)
+	, _parent_notebook (0)
 	, tab_close_image (ArdourIcon::CloseCross, 0xffffffff)
 	, tab_requested_by_state (true)
 {
