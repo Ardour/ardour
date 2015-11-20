@@ -329,13 +329,90 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 }
 
 void
-ARDOUR_UI::change_tabbable_visibility (Tabbable* t)
+ARDOUR_UI::toggle_editor_and_mixer ()
+{
+	if (editor->tabbed() && mixer->tabbed()) {
+		if (_tabs.get_current_page() == _tabs.page_num (editor->contents())) {
+			_tabs.set_current_page (_tabs.page_num (mixer->contents()));
+		} else if (_tabs.get_current_page() == _tabs.page_num (mixer->contents())) {
+			_tabs.set_current_page (_tabs.page_num (editor->contents()));
+		} else {
+			/* do nothing */
+		}
+		return;
+	}
+
+	if (editor->tabbed() && !mixer->tabbed()) {
+		if (!editor->fully_visible()) {
+			if (_tabs.get_current_page() == _tabs.page_num (editor->contents())) {
+				mixer->make_visible ();
+			}
+		} else {
+			_main_window.present ();
+		}
+		return;
+	}
+
+	if (mixer->tabbed () && !editor->tabbed()) {
+		if (!editor->fully_visible()) {
+			if (_tabs.get_current_page() == _tabs.page_num (mixer->contents())) {
+				editor->make_visible ();
+			}
+		} else {
+			_main_window.present ();
+		}
+		return;
+	}
+
+	if (editor->fully_visible()) {
+		mixer->make_visible ();
+	} else {
+		editor->make_visible ();
+	}
+}
+
+void
+ARDOUR_UI::key_change_tabbable_visibility (Tabbable* t)
 {
 	if (!t) {
 		return;
 	}
 
-	t->change_visibility();
+	if (t->tabbed()) {
+		_tabs.set_current_page (_tabs.page_num (t->contents()));
+	} else if (!t->fully_visible()) {
+		t->make_visible ();
+	} else {
+		_main_window.present ();
+	}
+}
+
+void
+ARDOUR_UI::button_change_tabbable_visibility (Tabbable* t)
+{
+	/* For many/most users, clicking a button in the main window will make it
+	   the main/front/key window, which will change any stacking relationship they
+	   were trying to modify by clicking on the button in the first
+	   place. This button-aware method knows that click on
+	   a button designed to show/hide a Tabbable that has its own window
+	   will have made that window be obscured (as the main window comes to
+	   the front). We therefore *hide* the Tabbable's window if it is even
+	   partially visible, believing that this is likely because the
+	   Tabbable window used to be front, the user clicked to change that,
+	   and before we even get here, the main window has become front.
+	*/
+
+	if (!t) {
+		return;
+	}
+
+	if (t->tabbed()) {
+		_tabs.set_current_page (_tabs.page_num (t->contents()));
+	} else if (t->visible()) {
+		t->hide();
+	} else {
+		t->make_visible ();
+	}
 }
 
 void
@@ -553,6 +630,10 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 	case Hidden:
 		vis_button->set_active_state (Gtkmm2ext::Off);
 		break;
+	}
+
+	for (std::vector<ArdourButton*>::iterator b = other_vis_buttons.begin(); b != other_vis_buttons.end(); ++b) {
+		(*b)->set_active_state (Gtkmm2ext::Off);
 	}
 }
 

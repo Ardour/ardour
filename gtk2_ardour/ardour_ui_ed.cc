@@ -242,9 +242,19 @@ ARDOUR_UI::install_actions ()
 	   are for the tab/window control buttons, which have somewhat odd
 	   semantics.
 	*/
-	global_actions.register_action (common_actions, X_("change-editor-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::change_tabbable_visibility), editor));
-	global_actions.register_action (common_actions, X_("change-mixer-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::change_tabbable_visibility), mixer));
-	global_actions.register_action (common_actions, X_("change-preferences-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::change_tabbable_visibility), rc_option_editor));
+	global_actions.register_action (common_actions, X_("change-editor-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::button_change_tabbable_visibility), editor));
+	global_actions.register_action (common_actions, X_("change-mixer-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::button_change_tabbable_visibility), mixer));
+	global_actions.register_action (common_actions, X_("change-preferences-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::button_change_tabbable_visibility), rc_option_editor));
+
+	/* These "change" actions are not intended to be used inside menus, but
+	   are for the tab/window control key bindings, which have somewhat odd
+	   semantics.
+	*/
+	global_actions.register_action (common_actions, X_("key-change-editor-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_change_tabbable_visibility), editor));
+	global_actions.register_action (common_actions, X_("key-change-mixer-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_change_tabbable_visibility), mixer));
+	global_actions.register_action (common_actions, X_("key-change-preferences-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_change_tabbable_visibility), rc_option_editor));
+
+	global_actions.register_action (common_actions, X_("toggle-editor-and-mixer"), _("Toggle Editor & Mixer"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_editor_and_mixer));
 
 	/* windows visibility actions */
 

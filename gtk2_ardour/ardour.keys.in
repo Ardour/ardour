@@ -228,6 +228,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @sess|Main/New|<@PRIMARY@>n|open a new session
 @wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>m|toggle global midi patchbay
+@wvis|Common/toggle-editor-and-mixer|<@SECONDARY@>m|toggle editor & mixer
 
 ;; arrow keys, navigation etc.
 

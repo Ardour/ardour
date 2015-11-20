@@ -233,6 +233,26 @@ WindowProxy::setup ()
 	set_pos_and_size ();
 }
 
+bool
+WindowProxy::visible() const
+{
+	if (vistracker) {
+		/* update with current state */
+		_visible = vistracker->partially_visible();
+	}
+	return _visible;
+}
+
+bool
+WindowProxy::fully_visible () const
+{
+	if (!vistracker) {
+		/* no vistracker .. no window .. cannot be fully visible */
+		return false;
+	}
+	return vistracker->fully_visible();
+}
+
 void
 WindowProxy::show ()
 {

@@ -52,8 +52,8 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
 	void present ();
 	void maybe_show ();
 
-	bool visible() const { return _visible; }
-	bool not_visible() const { return !_visible; }
+	bool visible() const;
+	bool fully_visible() const;
 	const std::string& name() const { return _name; }
 	const std::string& menu_name() const { return _menu_name; }
 

@@ -188,11 +188,8 @@ Tabbable::change_visibility ()
 	}
 
 	if (_window && (current_toplevel() == _window)) {
-		if (_window->is_visible ()) {
-			_window->hide ();
-		} else {
-			_window->present ();
-		}
+		/* Use WindowProxy method which will rotate then hide */
+		toggle();
 	}
 }
 

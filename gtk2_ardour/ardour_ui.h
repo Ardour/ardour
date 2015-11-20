@@ -376,8 +376,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void hide_tabbable (Gtkmm2ext::Tabbable*);
 	void detach_tabbable (Gtkmm2ext::Tabbable*);
 	void attach_tabbable (Gtkmm2ext::Tabbable*);
-	void change_tabbable_visibility (Gtkmm2ext::Tabbable*);
-
+	void button_change_tabbable_visibility (Gtkmm2ext::Tabbable*);
+	void key_change_tabbable_visibility (Gtkmm2ext::Tabbable*);
+	void toggle_editor_and_mixer ();
+	
 	void tabbable_state_change (Gtkmm2ext::Tabbable&);
 
 	void toggle_meterbridge ();
