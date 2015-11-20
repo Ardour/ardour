@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Yamaha KX25 Transport Controls">
+
+<!-- Map file created at 09-09-2013 by Gerard Aberkrom -->
+
+<!-- The KX25 uses 3 midiports. The first one are the control knobs and the keyboard itself, -->
+<!-- The second port is used by the DAW REMOTE buttons, (except for the esc,return, and cursor keys, -->
+<!-- those work the same as the ones on your typing keyboard!) and the third are the  midiconnections on the back of the KX. -->
+<!-- Ergo, make sure you connect the 2nd midiport to your Ardour Control In port -->
+
+
+
+<!-- Transport Controls. function="rec-enable" (or rec-disable, or both with the same note value)
+     didn't toggle the record state on/off, while the OSC parameter "action=" did.      -->
+  <Binding channel="1" note="85" function="loop-toggle"/>
+  <Binding channel="1" note="91" action="Transport/Rewind"/>
+  <Binding channel="1" note="92" action="Transport/Forward"/>
+  <Binding channel="1" note="93" action="Transport/Stop"/>
+  <Binding channel="1" note="94" action="Transport/Roll"/>
+  <Binding channel="1" note="95" action="Transport/Record"/>
+
+<!-- Extra keys-->
+
+<!-- keys Assign 1, Assign 2, Mute and Solo" . Since I didn't find a way to
+     get the solo and mute working while selecting a track with action="Editor/select-prev( or next)-route"
+     I assigned those keys to transport keys. A better solution for this solo/mute riddle is much appreciated! -->
+
+
+<Binding channel="1" note="56" action="Editor/playhead-to-previous-region-boundary"/>
+<Binding channel="1" note="57" action="Editor/playhead-to-next-region-boundary"/>
+ <Binding channel="1" note="58" action="Transport/TransitionToReverse"/>
+ <Binding channel="1" note="59" action="Transport/TransitionToRoll"/>
+<!-- keys VSTi Window, Add Instrument Track, Cubase Function A & B -->
+  <Binding channel="1" note="61" action="Editor/track-record-enable-toggle"/>
+  <Binding channel="1" note="60" action="Main/AddTrackBus"/>
+  <Binding channel="1" note="54" action="Editor/select-prev-route"/>
+  <Binding channel="1" note="55" action="Editor/select-next-route"/>
+
+</ArdourMIDIBindings>
