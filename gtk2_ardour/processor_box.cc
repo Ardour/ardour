@@ -354,7 +354,7 @@ ProcessorEntry::setup_tooltip ()
 			}
 			if (pi->plugin()->has_editor()) {
 				ARDOUR_UI_UTILS::set_tooltip (_button,
-						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\nAlt+double-click to show generic GUI.%2"), name (Wide), postfix));
+						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\n%2+double-click to show generic GUI.%3"), name (Wide), Keyboard::primary_modifier_name (), postfix));
 			} else {
 				ARDOUR_UI_UTILS::set_tooltip (_button,
 						string_compose (_("<b>%1</b>\nDouble-click to show generic GUI.%2"), name (Wide), postfix));
