@@ -82,17 +82,17 @@ public:
 		Table* t = manage (new Table (4, 3));
 		t->set_spacings (4);
 
-		Label* l = manage (left_aligned_label (_("Use default Click:")));
-		t->attach (*l, 0, 1, 0, 1, FILL);
-		t->attach (_use_default_click_check_button, 1, 2, 0, 1, FILL);
-		_use_default_click_check_button.signal_toggled().connect (
-		    sigc::mem_fun (*this, &ClickOptions::use_default_click_toggled));
-
-		l = manage (left_aligned_label (_("Emphasis on first beat:")));
+		Label* l = manage (left_aligned_label (_("Emphasis on first beat:")));
 		t->attach (*l, 0, 1, 1, 2, FILL);
 		t->attach (_use_emphasis_on_click_check_button, 1, 2, 1, 2, FILL);
 		_use_emphasis_on_click_check_button.signal_toggled().connect (
 		    sigc::mem_fun (*this, &ClickOptions::use_emphasis_on_click_toggled));
+
+		l = manage (left_aligned_label (_("Use default Click:")));
+		t->attach (*l, 0, 1, 0, 1, FILL);
+		t->attach (_use_default_click_check_button, 1, 2, 0, 1, FILL);
+		_use_default_click_check_button.signal_toggled().connect (
+		    sigc::mem_fun (*this, &ClickOptions::use_default_click_toggled));
 
 		l = manage (left_aligned_label (_("Click audio file:")));
 		t->attach (*l, 0, 1, 2, 3, FILL);
@@ -1905,6 +1905,8 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_verify_remove_last_capture)
 		     ));
 
+	add_option (_("Misc"), new OptionEditorHeading (_("Session Management")));
+
 	add_option (_("Misc"),
 	     new BoolOption (
 		     "periodic-safety-backups",
@@ -1912,8 +1914,6 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_periodic_safety_backups),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
 		     ));
-
-	add_option (_("Misc"), new OptionEditorHeading (_("Session Management")));
 
 	add_option (_("Misc"),
 	     new BoolOption (
@@ -2068,8 +2068,8 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_preroll_seconds),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_preroll_seconds)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(),
-					    (_("The amount of preroll (in seconds) to apply when Play with Preroll is initiated.\n\n"
+	Gtkmm2ext::UI::instance()->set_tip (psc->tip_widget(),
+					    (_("The amount of preroll (in seconds) to apply when <b>Play with Preroll</b> is initiated.\n\n"
 					       "If <b>Follow Edits</b> is enabled, the preroll is applied to the playhead position when a region is selected or trimmed.")));
 	psc->add (0.0, _("0 (no pre-roll)"));
 	psc->add (0.1, _("0.1 second"));
@@ -2195,11 +2195,26 @@ RCOptionEditor::RCOptionEditor ()
 		 _("Specify the Peak Volume of the generated LTC signal in dbFS. A good value is  0dBu ^= -18dbFS in an EBU calibrated system"));
 
 	add_option (_("Transport"), _ltc_volume_slider);
-	parameter_changed ("send-ltc");
-
-	parameter_changed ("sync-source");
 
 	/* EDITOR */
+
+	add_option (_("Editor"),
+	     new BoolOption (
+		     "rubberbanding-snaps-to-grid",
+		     _("Make rubberband selection rectangle snap to the grid"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rubberbanding_snaps_to_grid),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rubberbanding_snaps_to_grid)
+		     ));
+
+	bo = new BoolOption (
+		     "name-new-markers",
+		     _("Name new markers"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_name_new_markers),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_name_new_markers)
+		);
+	add_option (_("Editor"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
+								"\n\nYou can always rename markers by right-clicking on them"));
 
 	add_option (S_("Editor"),
 	     new BoolOption (
@@ -2207,14 +2222,6 @@ RCOptionEditor::RCOptionEditor ()
 		     _("Allow dragging of playhead"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead)
-		     ));
-
-	add_option (_("Editor"),
-	     new BoolOption (
-		     "automation-follows-regions",
-		     _("Move relevant automation when audio regions are moved"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_follows_regions),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_follows_regions)
 		     ));
 
 	add_option (_("Editor"),
@@ -2231,6 +2238,50 @@ RCOptionEditor::RCOptionEditor ()
 		     _("Display master-meter in the toolbar"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_editor_meter),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_editor_meter)
+		     ));
+
+	add_option (_("Editor"),
+		    new BoolOption (
+			    "show-zoom-tools",
+			    _("Show zoom toolbar (if torn off)"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_zoom_tools),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_zoom_tools)
+			    ));
+
+	add_option (_("Editor"),
+		    new BoolOption (
+			    "update-editor-during-summary-drag",
+			    _("Update editor window during drags of the summary"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_update_editor_during_summary_drag),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_update_editor_during_summary_drag)
+			    ));
+
+	add_option (_("Editor"),
+	    new BoolOption (
+		    "autoscroll-editor",
+		    _("Auto-scroll editor window when dragging near its edges"),
+		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_autoscroll_editor),
+		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_autoscroll_editor)
+		    ));
+
+	add_option (_("Editor"),
+	     new BoolComboOption (
+		     "show-region-gain-envelopes",
+		     _("Show gain envelopes in audio regions"),
+		     _("in all modes"),
+		     _("only in Draw and Internal Edit modes"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_gain),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_gain)
+		     ));
+
+	add_option (_("Editor"), new OptionEditorHeading (_("Editor Behavior")));
+
+	add_option (_("Editor"),
+	     new BoolOption (
+		     "automation-follows-regions",
+		     _("Move relevant automation when audio regions are moved"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_follows_regions),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_follows_regions)
 		     ));
 
 	ComboOption<FadeShape>* fadeshape = new ComboOption<FadeShape> (
@@ -2274,13 +2325,25 @@ RCOptionEditor::RCOptionEditor ()
 	lm->add (Manual, _("manual layering"));
 	add_option (_("Editor"), lm);
 
-	add_option (_("Editor"),
-	     new BoolOption (
-		     "rubberbanding-snaps-to-grid",
-		     _("Make rubberband selection rectangle snap to the grid"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rubberbanding_snaps_to_grid),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rubberbanding_snaps_to_grid)
-		     ));
+	ComboOption<RegionSelectionAfterSplit> *rsas = new ComboOption<RegionSelectionAfterSplit> (
+		    "region-selection-after-split",
+		    _("After splitting selected regions, select"),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::get_region_selection_after_split),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_region_selection_after_split));
+
+	// TODO: decide which of these modes are really useful
+	rsas->add(None, _("no regions"));
+	// rsas->add(NewlyCreatedLeft, _("newly-created regions before the split"));
+	// rsas->add(NewlyCreatedRight, _("newly-created regions after the split"));
+	rsas->add(NewlyCreatedBoth, _("newly-created regions"));
+	// rsas->add(Existing, _("unmodified regions in the existing selection"));
+	// rsas->add(ExistingNewlyCreatedLeft, _("existing selection and newly-created regions before the split"));
+	// rsas->add(ExistingNewlyCreatedRight, _("existing selection and newly-created regions after the split"));
+	rsas->add(ExistingNewlyCreatedBoth, _("existing selection and newly-created regions"));
+
+	add_option (_("Editor"), rsas);
+	
+	add_option (_("Editor"), new OptionEditorHeading (_("Waveforms")));
 
 	add_option (_("Editor"),
 	     new BoolOption (
@@ -2291,13 +2354,11 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 	add_option (_("Editor"),
-	     new BoolComboOption (
-		     "show-region-gain-envelopes",
-		     _("Show gain envelopes in audio regions"),
-		     _("in all modes"),
-		     _("only in Draw and Internal Edit modes"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_gain),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_gain)
+	     new BoolOption (
+		     "show-waveforms-while-recording",
+		     _("Show waveforms for audio while it is being recorded"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms_while_recording),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
 		     ));
 
 	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
@@ -2325,67 +2386,6 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor"), wfsh);
 
 	add_option (_("Editor"), new ClipLevelOptions ());
-
-	add_option (_("Editor"),
-	     new BoolOption (
-		     "show-waveforms-while-recording",
-		     _("Show waveforms for audio while it is being recorded"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms_while_recording),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
-		     ));
-
-	add_option (_("Editor"),
-		    new BoolOption (
-			    "show-zoom-tools",
-			    _("Show zoom toolbar"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_zoom_tools),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_zoom_tools)
-			    ));
-
-	add_option (_("Editor"),
-		    new BoolOption (
-			    "update-editor-during-summary-drag",
-			    _("Update editor window during drags of the summary"),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_update_editor_during_summary_drag),
-			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_update_editor_during_summary_drag)
-			    ));
-
-	bo = new BoolOption (
-		     "name-new-markers",
-		     _("Name new markers"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_name_new_markers),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_name_new_markers)
-		);
-
-	add_option (_("Editor"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
-								"\n\nYou can always rename markers by right-clicking on them"));
-
-	add_option (_("Editor"),
-	    new BoolOption (
-		    "autoscroll-editor",
-		    _("Auto-scroll editor window when dragging near its edges"),
-		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_autoscroll_editor),
-		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_autoscroll_editor)
-		    ));
-
-	ComboOption<RegionSelectionAfterSplit> *rsas = new ComboOption<RegionSelectionAfterSplit> (
-		    "region-selection-after-split",
-		    _("After splitting selected regions, select"),
-		    sigc::mem_fun (*_rc_config, &RCConfiguration::get_region_selection_after_split),
-		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_region_selection_after_split));
-
-	// TODO: decide which of these modes are really useful
-	rsas->add(None, _("no regions"));
-	// rsas->add(NewlyCreatedLeft, _("newly-created regions before the split"));
-	// rsas->add(NewlyCreatedRight, _("newly-created regions after the split"));
-	rsas->add(NewlyCreatedBoth, _("newly-created regions"));
-	// rsas->add(Existing, _("unmodified regions in the existing selection"));
-	// rsas->add(ExistingNewlyCreatedLeft, _("existing selection and newly-created regions before the split"));
-	// rsas->add(ExistingNewlyCreatedRight, _("existing selection and newly-created regions after the split"));
-	rsas->add(ExistingNewlyCreatedBoth, _("existing selection and newly-created regions"));
-
-	add_option (_("Editor"), rsas);
 
 
 	/* AUDIO */
@@ -2546,14 +2546,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Solo / mute"), new OptionEditorHeading (_("Solo")));
 
-	add_option (_("Solo / mute"),
-	     new FaderOption (
-		     "solo-mute-gain",
-		     _("Solo-in-place mute cut (dB)"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_gain),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_gain)
-		     ));
-
 	_solo_control_is_listen_control = new BoolOption (
 		"solo-control-is-listen-control",
 		_("Solo controls are Listen controls"),
@@ -2562,6 +2554,38 @@ RCOptionEditor::RCOptionEditor ()
 		);
 
 	add_option (_("Solo / mute"), _solo_control_is_listen_control);
+
+	add_option (_("Solo / mute"),
+	     new BoolOption (
+		     "exclusive-solo",
+		     _("Exclusive solo"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_exclusive_solo),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
+		     ));
+
+	add_option (_("Solo / mute"),
+	     new BoolOption (
+		     "show-solo-mutes",
+		     _("Show solo muting"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_solo_mutes),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
+		     ));
+
+	add_option (_("Solo / mute"),
+	     new BoolOption (
+		     "solo-mute-override",
+		     _("Soloing overrides muting"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
+		     ));
+
+	add_option (_("Solo / mute"),
+	     new FaderOption (
+		     "solo-mute-gain",
+		     _("Solo-in-place mute cut (dB)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_gain),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_gain)
+		     ));
 
 	_listen_position = new ComboOption<ListenPosition> (
 		"listen-position",
@@ -2598,32 +2622,6 @@ RCOptionEditor::RCOptionEditor ()
 	pa->add (AFLFromAfterProcessors, _("after post-fader processors (before pan)"));
 
 	add_option (_("Solo / mute"), pa);
-
-	parameter_changed ("use-monitor-bus");
-
-	add_option (_("Solo / mute"),
-	     new BoolOption (
-		     "exclusive-solo",
-		     _("Exclusive solo"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_exclusive_solo),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
-		     ));
-
-	add_option (_("Solo / mute"),
-	     new BoolOption (
-		     "show-solo-mutes",
-		     _("Show solo muting"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_solo_mutes),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
-		     ));
-
-	add_option (_("Solo / mute"),
-	     new BoolOption (
-		     "solo-mute-override",
-		     _("Soloing overrides muting"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
-		     ));
 
 	add_option (_("Solo / mute"), new OptionEditorHeading (_("Default track / bus muting options")));
 
@@ -2669,6 +2667,8 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
 		     ));
 
+	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Preferences")));
+
 	add_option (_("MIDI"),
 		    new SpinOption<float> (
 			    "midi-readahead",
@@ -2678,73 +2678,6 @@ RCOptionEditor::RCOptionEditor ()
 			    0.1, 10, 0.1, 1,
 			    "", 1.0, 1
 			    ));
-
-	add_option (_("MIDI"),
-		    new BoolOption (
-			    "send-midi-clock",
-			    _("Send MIDI Clock"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_midi_clock),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
-			    ));
-
-	add_option (_("MIDI"),
-		    new BoolOption (
-			    "send-mtc",
-			    _("Send MIDI Time Code"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mtc),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
-			    ));
-
-	add_option (_("MIDI"),
-		    new SpinOption<int> (
-			    "mtc-qf-speed-tolerance",
-			    _("Percentage either side of normal transport speed to transmit MTC"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mtc_qf_speed_tolerance),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mtc_qf_speed_tolerance),
-			    0, 20, 1, 5
-			    ));
-
-	add_option (_("MIDI"),
-		    new BoolOption (
-			    "mmc-control",
-			    _("Obey MIDI Machine Control commands"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
-			    ));
-
-	add_option (_("MIDI"),
-		    new BoolOption (
-			    "send-mmc",
-			    _("Send MIDI Machine Control commands"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mmc),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
-			    ));
-
-	add_option (_("MIDI"),
-		    new BoolOption (
-			    "midi-feedback",
-			    _("Send MIDI control feedback"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_feedback),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
-			    ));
-
-	add_option (_("MIDI"),
-	     new SpinOption<uint8_t> (
-		     "mmc-receive-device-id",
-		     _("Inbound MMC device ID"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_receive_device_id),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
-		     0, 128, 1, 10
-		     ));
-
-	add_option (_("MIDI"),
-	     new SpinOption<uint8_t> (
-		     "mmc-send-device-id",
-		     _("Outbound MMC device ID"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_send_device_id),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_send_device_id),
-		     0, 128, 1, 10
-		     ));
 
 	add_option (_("MIDI"),
 	     new SpinOption<int32_t> (
@@ -2774,9 +2707,82 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("MIDI"),
 	     new BoolOption (
 		     "sound-midi-notes",
-		     _("Sound MIDI notes as they are selected"),
+		     _("Sound MIDI notes as they are selected in the editor"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_sound_midi_notes),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_sound_midi_notes)
+		     ));
+
+	add_option (_("MIDI"),
+		    new BoolOption (
+			    "midi-feedback",
+			    _("Send MIDI control feedback"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_feedback),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
+			    ));
+
+	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Clock")));
+
+	add_option (_("MIDI"),
+		    new BoolOption (
+			    "send-midi-clock",
+			    _("Send MIDI Clock"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_midi_clock),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
+			    ));
+
+	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Time Code (MTC)")));
+
+	add_option (_("MIDI"),
+		    new BoolOption (
+			    "send-mtc",
+			    _("Send MIDI Time Code"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mtc),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
+			    ));
+
+	add_option (_("MIDI"),
+		    new SpinOption<int> (
+			    "mtc-qf-speed-tolerance",
+			    _("Percentage either side of normal transport speed to transmit MTC"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mtc_qf_speed_tolerance),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mtc_qf_speed_tolerance),
+			    0, 20, 1, 5
+			    ));
+
+	add_option (_("MIDI"), new OptionEditorHeading (_("Midi Machine Control (MMC)")));
+
+	add_option (_("MIDI"),
+		    new BoolOption (
+			    "mmc-control",
+			    _("Obey MIDI Machine Control commands"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
+			    ));
+
+	add_option (_("MIDI"),
+		    new BoolOption (
+			    "send-mmc",
+			    _("Send MIDI Machine Control commands"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mmc),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
+			    ));
+
+	add_option (_("MIDI"),
+	     new SpinOption<uint8_t> (
+		     "mmc-receive-device-id",
+		     _("Inbound MMC device ID"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_receive_device_id),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
+		     0, 128, 1, 10
+		     ));
+
+	add_option (_("MIDI"),
+	     new SpinOption<uint8_t> (
+		     "mmc-send-device-id",
+		     _("Outbound MMC device ID"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_send_device_id),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_send_device_id),
+		     0, 128, 1, 10
 		     ));
 
 	add_option (_("MIDI"), new OptionEditorHeading (_("Midi Audition")));
@@ -2905,19 +2911,19 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_name_highlight)
 		     ));
 
-#ifndef GTKOSX
-	/* font scaling does nothing with GDK/Quartz */
-	add_option (S_("Preferences|GUI"), new FontScalingOptions ());
-#endif
-
 	add_option (S_("GUI"),
 		    new BoolOption (
 			    "super-rapid-clock-update",
-			    _("update transport clock display at FPS instead of every 100ms"),
+			    _("Update transport clock display at FPS instead of every 100ms"),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_super_rapid_clock_update),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_super_rapid_clock_update)
 			    ));
 
+
+#ifndef GTKOSX
+	/* font scaling does nothing with GDK/Quartz */
+	add_option (S_("Preferences|GUI"), new FontScalingOptions ());
+#endif
 
 	/* Image cache size */
 
@@ -3130,6 +3136,11 @@ RCOptionEditor::RCOptionEditor ()
 
 	ThemeManager* tm = manage (new ThemeManager);
 	add_page (_("Theme"), *tm);
+
+	//trigger some parameter-changed messages which affect widget-visibility or -sensitivity
+	parameter_changed ("send-ltc");
+	parameter_changed ("sync-source");
+	parameter_changed ("use-monitor-bus");
 }
 
 void
