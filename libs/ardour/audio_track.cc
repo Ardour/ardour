@@ -56,6 +56,9 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 
 AudioTrack::~AudioTrack ()
 {
+	if (_freeze_record.playlist) {
+		_freeze_record.playlist->release();
+	}
 }
 
 boost::shared_ptr<Diskstream>
@@ -287,6 +290,7 @@ AudioTrack::set_state_part_two ()
 			boost::shared_ptr<Playlist> pl = _session.playlists->by_name (prop->value());
 			if (pl) {
 				_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist> (pl);
+				_freeze_record.playlist->use();
 			} else {
 				_freeze_record.playlist.reset ();
 				_freeze_record.state = NoFreeze;
@@ -620,6 +624,8 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 	diskstream->use_playlist (boost::dynamic_pointer_cast<AudioPlaylist>(new_playlist));
 	diskstream->set_record_enabled (false);
+
+	_freeze_record.playlist->use(); // prevent deletion
 
 	/* reset stuff that has already been accounted for in the freeze process */
 
