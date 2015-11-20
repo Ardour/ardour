@@ -31,6 +31,7 @@
 
 #include <gtkmm/filechooser.h>
 
+#include "pbd/basename.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
 #include "pbd/replace_all.h"
@@ -250,6 +251,10 @@ SessionDialog::session_name (bool& should_be_new)
 
 	if (iter) {
 		should_be_new = false;
+		string s = (*iter)[recent_session_columns.fullpath];
+		if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
+			return PBD::basename_nosuffix (s);
+		}
 		return (*iter)[recent_session_columns.visible_name];
 	}
 
@@ -707,14 +712,27 @@ SessionDialog::redisplay_recent_sessions ()
 
 		float sr;
 		SampleFormat sf;
-		std::string state_file_basename = state_file_names.front();
+
+		std::string state_file_basename;
+
+		if (state_file_names.size() > 1) {
+			state_file_basename = Session::get_snapshot_from_instant (dirname);
+			std::string s = Glib::build_filename (dirname, state_file_basename + statefile_suffix);
+			if (!Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
+				state_file_basename = "";
+			}
+		}
+
+		if (state_file_basename.empty()) {
+			state_file_basename = state_file_names.front();
+		}
 
 		std::string s = Glib::build_filename (dirname, state_file_basename + statefile_suffix);
 
 		GStatBuf gsb;
 		g_stat (s.c_str(), &gsb);
 
-		row[recent_session_columns.fullpath] = dirname; /* just the dir, but this works too */
+		row[recent_session_columns.fullpath] = s;
 		row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
 		row[recent_session_columns.time_modified] = gsb.st_mtime;
 
