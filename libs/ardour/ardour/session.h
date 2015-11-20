@@ -1236,6 +1236,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void graph_reordered ();
 
 	/** current snapshot name, without the .ardour suffix */
+	void set_snapshot_name (const std::string &);
+	void save_snapshot_name (const std::string &);
 	std::string _current_snapshot_name;
 
 	XMLTree*         state_tree;

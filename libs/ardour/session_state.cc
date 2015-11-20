@@ -807,8 +807,8 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	if (snapshot_name.empty()) {
 		snapshot_name = _current_snapshot_name;
 	} else if (switch_to_snapshot) {
-                _current_snapshot_name = snapshot_name;
-        }
+		set_snapshot_name (snapshot_name);
+	}
 
 	assert (!snapshot_name.empty());
 
@@ -981,6 +981,8 @@ Session::load_state (string snapshot_name)
 			}
 		}
 	}
+
+	save_snapshot_name (snapshot_name);
 
 	return 0;
 }
@@ -1459,6 +1461,7 @@ Session::set_state (const XMLNode& node, int version)
 	update_route_record_state ();
 
 	/* here beginneth the second phase ... */
+	set_snapshot_name (_current_snapshot_name);
 
 	StateReady (); /* EMIT SIGNAL */
 
@@ -3910,6 +3913,27 @@ Session::solo_cut_control() const
         return _solo_cut_control;
 }
 
+void
+Session::save_snapshot_name (const std::string & n)
+{
+	/* assure Stateful::_instant_xml is loaded
+	 * add_instant_xml() only adds to existing data and defaults
+	 * to use an empty Tree otherwise
+	 */
+	instant_xml ("LastUsedSnapshot");
+
+	XMLNode* last_used_snapshot = new XMLNode ("LastUsedSnapshot");
+	last_used_snapshot->add_property ("name", string(n));
+	add_instant_xml (*last_used_snapshot, false);
+}
+
+void
+Session::set_snapshot_name (const std::string & n)
+{
+	_current_snapshot_name = n;
+	save_snapshot_name (n);
+}
+
 int
 Session::rename (const std::string& new_name)
 {
@@ -4111,7 +4135,7 @@ Session::rename (const std::string& new_name)
 		}
 	}
 
-	_current_snapshot_name = new_name;
+	set_snapshot_name (new_name);
 	_name = new_name;
 
 	set_dirty ();
@@ -4607,7 +4631,7 @@ Session::save_as (SaveAs& saveas)
 
 
 		_path = to_dir;
-		_current_snapshot_name = saveas.new_name;
+		set_snapshot_name (saveas.new_name);
 		_name = saveas.new_name;
 
 		if (saveas.include_media && !saveas.copy_media) {
@@ -4650,7 +4674,7 @@ Session::save_as (SaveAs& saveas)
 
 			_path = old_path;
 			_name = old_name;
-			_current_snapshot_name = old_snapshot;
+			set_snapshot_name (old_snapshot);
 
 			(*_session_dir) = old_sd;
 
