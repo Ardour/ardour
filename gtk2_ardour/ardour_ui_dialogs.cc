@@ -329,6 +329,16 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 }
 
 void
+ARDOUR_UI::change_tabbable_visibility (Tabbable* t)
+{
+	if (!t) {
+		return;
+	}
+
+	t->change_visibility();
+}
+
+void
 ARDOUR_UI::show_tabbable (Tabbable* t)
 {
 	if (!t) {

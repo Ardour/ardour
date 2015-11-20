@@ -238,6 +238,14 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_action (common_actions, X_("detach-mixer"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), mixer));
 	global_actions.register_action (common_actions, X_("detach-preferences"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), rc_option_editor));
 
+	/* These "change" actions are not intended to be used inside menus, but
+	   are for the tab/window control buttons, which have somewhat odd
+	   semantics.
+	*/
+	global_actions.register_action (common_actions, X_("change-editor-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::change_tabbable_visibility), editor));
+	global_actions.register_action (common_actions, X_("change-mixer-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::change_tabbable_visibility), mixer));
+	global_actions.register_action (common_actions, X_("change-preferences-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::change_tabbable_visibility), rc_option_editor));
+
 	/* windows visibility actions */
 
 	global_actions.register_toggle_action (common_actions, X_("ToggleMaximalEditor"), _("Maximise Editor Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_editing_space));
@@ -560,11 +568,11 @@ ARDOUR_UI::build_menu_bar ()
 	prefs_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), rc_option_editor));
 
 
-	editor_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("show-editor")));
+	editor_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-editor-visibility")));
 	editor_visibility_button.set_name (X_("page switch button"));
-	mixer_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("show-mixer")));
+	mixer_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-mixer-visibility")));
 	mixer_visibility_button.set_name (X_("page switch button"));
-	prefs_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("show-preferences")));
+	prefs_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-preferences-visibility")));
 	prefs_visibility_button.set_name (X_("page switch button"));
 
 	Gtkmm2ext::UI::instance()->set_tip (editor_visibility_button,
