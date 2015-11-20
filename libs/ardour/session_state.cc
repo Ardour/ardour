@@ -4216,6 +4216,29 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 	return !(found_sr && found_data_format); // zero if they are both found
 }
 
+std::string
+Session::get_snapshot_from_instant (const std::string& session_dir)
+{
+	std::string instant_xml_path = Glib::build_filename (session_dir, "instant.xml");
+
+	if (!Glib::file_test (instant_xml_path, Glib::FILE_TEST_EXISTS)) {
+		return "";
+	}
+
+	XMLTree tree;
+	if (!tree.read (instant_xml_path)) {
+		return "";
+	}
+
+	const XMLProperty* prop;
+	XMLNode *last_used_snapshot = tree.root()->child("LastUsedSnapshot");
+	if (last_used_snapshot && (prop = last_used_snapshot->property ("name")) != 0) {
+		return prop->value();
+	}
+
+	return "";
+}
+
 typedef std::vector<boost::shared_ptr<FileSource> > SeveralFileSources;
 typedef std::map<std::string,SeveralFileSources> SourcePathMap;
 

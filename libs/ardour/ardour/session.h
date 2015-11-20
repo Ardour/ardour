@@ -173,6 +173,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	virtual ~Session ();
 
 	static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format);
+	static std::string get_snapshot_from_instant (const std::string& session_dir);
 
 	std::string path() const { return _path; }
 	std::string name() const { return _name; }
