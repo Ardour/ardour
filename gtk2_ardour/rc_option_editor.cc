@@ -42,6 +42,7 @@
 #include "pbd/cpus.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/profile.h"
 #include "ardour/dB.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/control_protocol_manager.h"
@@ -2240,6 +2241,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_editor_meter)
 		     ));
 
+if (!Profile->get_mixbus()) {
 	add_option (_("Editor"),
 		    new BoolOption (
 			    "show-zoom-tools",
@@ -2247,6 +2249,7 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_zoom_tools),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_zoom_tools)
 			    ));
+}  // !mixbus
 
 	add_option (_("Editor"),
 		    new BoolOption (
@@ -2345,6 +2348,7 @@ RCOptionEditor::RCOptionEditor ()
 	
 	add_option (_("Editor"), new OptionEditorHeading (_("Waveforms")));
 
+if (!Profile->get_mixbus()) {
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "show-waveforms",
@@ -2352,6 +2356,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms)
 		     ));
+}  // !mixbus
 
 	add_option (_("Editor"),
 	     new BoolOption (
@@ -2422,6 +2427,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_tape_machine_mode)
 		     ));
 
+if (!Profile->get_mixbus()) {
 	add_option (_("Audio"), new OptionEditorHeading (_("Connection of tracks and busses")));
 
 	add_option (_("Audio"),
@@ -2456,6 +2462,7 @@ RCOptionEditor::RCOptionEditor ()
 	oac->add (ManualConnect, _("manually"));
 
 	add_option (_("Audio"), oac);
+}  // !mixbus
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Denormals")));
 
@@ -2940,6 +2947,7 @@ RCOptionEditor::RCOptionEditor ()
 		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
 	add_option (S_("Preferences|GUI"), sics);
 
+if (!ARDOUR::Profile->get_mixbus()) {
 	/* Lock GUI timeout */
 
 	Gtk::Adjustment *lts = manage (new Gtk::Adjustment(0, 0, 1000, 1, 10));
@@ -2954,6 +2962,7 @@ RCOptionEditor::RCOptionEditor ()
 		(slts->tip_widget(),
 		 _("Lock GUI after this many idle seconds (zero to never lock)"));
 	add_option (S_("Preferences|GUI"), slts);
+} // !mixbus
 
 	/* The names of these controls must be the same as those given in MixerStrip
 	   for the actual widgets being controlled.
