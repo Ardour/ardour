@@ -180,8 +180,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	std::string raid_path () const;
 	bool path_is_within_session (const std::string&);
 
-	void set_snap_name ();
-
 	bool writable() const { return _writable; }
 	void set_dirty ();
 	void set_clean ();
