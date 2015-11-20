@@ -170,6 +170,32 @@ Tabbable::show_window ()
 	}
 }
 
+/** If this Tabbable is currently parented by a tab, ensure that the tab is the
+ * current one. If it is parented by a window, then toggle the visibility of
+ * that window.
+ */
+void
+Tabbable::change_visibility ()
+{
+	if (tabbed()) {
+		_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+		return;
+	}
+
+	if (tab_requested_by_state) {
+		/* should be tabbed, but currently isn't parented by a notebook */
+		return;
+	}
+
+	if (_window && (current_toplevel() == _window)) {
+		if (_window->is_visible ()) {
+			_window->hide ();
+		} else {
+			_window->present ();
+		}
+	}
+}
+
 void
 Tabbable::make_visible ()
 {
@@ -358,4 +384,3 @@ Tabbable::window_unmapped ()
 {
 	StateChange (*this);
 }
-

@@ -47,6 +47,7 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	void add_to_notebook (Gtk::Notebook& notebook, const std::string& tab_title);
 	void make_visible ();
 	void make_invisible ();
+	void change_visibility ();
 	void attach ();
 	void detach ();
 
