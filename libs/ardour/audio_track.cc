@@ -56,7 +56,7 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 
 AudioTrack::~AudioTrack ()
 {
-	if (_freeze_record.playlist) {
+	if (_freeze_record.playlist && !_session.deletion_in_progress()) {
 		_freeze_record.playlist->release();
 	}
 }
@@ -641,6 +641,7 @@ void
 AudioTrack::unfreeze ()
 {
 	if (_freeze_record.playlist) {
+		_freeze_record.playlist->release();
 		audio_diskstream()->use_playlist (_freeze_record.playlist);
 
 		{
