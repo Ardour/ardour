@@ -333,10 +333,16 @@ SessionPlaylists::maybe_delete_unused (boost::function<int(boost::shared_ptr<Pla
 {
 	vector<boost::shared_ptr<Playlist> > playlists_tbd;
 
-	bool delete_all = false;
+	bool delete_remaining = false;
+	bool keep_remaining = false;
 
 	for (List::iterator x = unused_playlists.begin(); x != unused_playlists.end(); ++x) {
-		if (delete_all) {
+
+		if (keep_remaining) {
+			break;
+		}
+
+		if (delete_remaining) {
 			playlists_tbd.push_back (*x);
 			continue;
 		}
@@ -348,9 +354,14 @@ SessionPlaylists::maybe_delete_unused (boost::function<int(boost::shared_ptr<Pla
 			// abort
 			return true;
 
+		case -2:
+			// keep this and all later
+			keep_remaining = true;
+			break;
+
 		case 2:
 			// delete this and all later
-			delete_all = true;
+			delete_remaining = true;
 			// no break;
 
 		case 1:
