@@ -4160,19 +4160,25 @@ Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 
 	label.show ();
 
+	dialog.add_button (_("Delete All Unused"), RESPONSE_YES);
 	dialog.add_button (_("Delete Playlist"), RESPONSE_ACCEPT);
 	dialog.add_button (_("Keep Playlist"), RESPONSE_REJECT);
 	dialog.add_button (_("Cancel"), RESPONSE_CANCEL);
 
 	switch (dialog.run ()) {
+	case RESPONSE_YES:
+		/* delete this and all others */
+		return 2;
+		break;
+
 	case RESPONSE_ACCEPT:
 		/* delete the playlist */
-		return 0;
+		return 1;
 		break;
 
 	case RESPONSE_REJECT:
 		/* keep the playlist */
-		return 1;
+		return 0;
 		break;
 
 	default:
