@@ -154,7 +154,6 @@ private:
 	std::string m_root_path;
 
 	static std::map<std::string,std::string> root_cache;
-	mutable std::string m_sources_root;
 };
 
 } // namespace ARDOUR
