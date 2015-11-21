@@ -669,6 +669,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	gpm.gain_automation_state_button.show();
 
 	parameter_changed ("mixer-element-visibility");
+	map_frozen();
 
 	show ();
 }
@@ -1805,6 +1806,8 @@ MixerStrip::map_frozen ()
 			// XXX need some way, maybe, to retoggle redirect editors
 			break;
 		}
+	} else {
+		processor_box.set_sensitive (true);
 	}
 }
 
