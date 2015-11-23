@@ -64,6 +64,15 @@ __declspec(selectany) int _forceAtlDllManifestRTM;
    implementation for commonly used integer types. */
 #include <stdint.h>
 
+/* When building Gtkmm with Atkmm support, ALL modules need
+   to agree about the status of GTKMM_ATKMM_ENABLED. Otherwise
+   we end up with all manner of imexplicable run time crashes
+   and hangs (due to Gtk::Widget having different sizes in
+   different modules). GTKMM_ATKMM_ENABLED gets #defined in
+   'gtkmmconfig.h'. So let's #include that file here, where
+   we know it'll get #included for every compilation unit. */
+#include <gtkmmconfig.h>
+
 #if defined(_MSC_VER) && !defined(__MINGW__) && !defined(__MINGW32__)
 /* Define these libraries as getting built as DLLs */
 #define LIBAUDIOGRAPHER_DLL
