@@ -1630,8 +1630,6 @@ EngineControl::State
 EngineControl::get_matching_state (const string& backend)
 {
 	for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
-		// TODO use LRU for every backend and prefer the active one
-		// uniqueness is only guaranteed for backend + driver + device(s)
 		if ((*i)->backend == backend) {
 			return (*i);
 		}
@@ -1708,6 +1706,19 @@ bool EngineControl::equivalent_states (const EngineControl::State& state1,
 	return false;
 }
 
+bool
+EngineControl::state_sort_cmp (const State &a, const State &b) {
+	if (a->active) {
+		return true;
+	}
+	else if (b->active) {
+		return false;
+	}
+	else {
+		return a->lru < b->lru;
+	}
+}
+
 EngineControl::State
 EngineControl::save_state ()
 {
@@ -1716,6 +1727,7 @@ EngineControl::save_state ()
 	if (!_have_control) {
 		state = get_matching_state (backend_combo.get_active_text(), string(), string());
 		if (state) {
+			state->lru = time (NULL) ;
 			return state;
 		}
 		state.reset(new StateStruct);
@@ -1734,6 +1746,8 @@ EngineControl::save_state ()
 	}
 
 	states.push_back (state);
+
+	states.sort (state_sort_cmp);
 
 	return state;
 }
@@ -1754,6 +1768,7 @@ EngineControl::store_state (State state)
 	state->output_channels = get_output_channels ();
 	state->midi_option = get_midi_option ();
 	state->midi_devices = _midi_devices;
+	state->lru = time (NULL) ;
 }
 
 void
@@ -1817,6 +1832,7 @@ EngineControl::get_state ()
 			node->add_property ("output-channels", (*i)->output_channels);
 			node->add_property ("active", (*i)->active ? "yes" : "no");
 			node->add_property ("midi-option", (*i)->midi_option);
+			node->add_property ("lru", (*i)->active ? time (NULL) : (*i)->lru);
 
 			XMLNode* midi_devices = new XMLNode ("MIDIDevices");
 			for (std::vector<MidiDeviceSettings>::const_iterator p = (*i)->midi_devices.begin(); p != (*i)->midi_devices.end(); ++p) {
@@ -1980,6 +1996,10 @@ EngineControl::set_state (const XMLNode& root)
 				}
 			}
 
+			if ((prop = grandchild->property ("lru"))) {
+				state->lru = atoi (prop->value ());
+			}
+
 #if 1
 			/* remove accumulated duplicates (due to bug in ealier version)
 			 * this can be removed again before release
@@ -2015,6 +2035,8 @@ EngineControl::set_state (const XMLNode& root)
 			++i;
 		}
 	}
+
+	states.sort (state_sort_cmp);
 
 	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 
@@ -2413,6 +2435,8 @@ EngineControl::post_push ()
 	} else {
 		store_state(state);
 	}
+
+	states.sort (state_sort_cmp);
 
 	/* all off */
 

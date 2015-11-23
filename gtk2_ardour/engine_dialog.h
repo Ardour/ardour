@@ -217,6 +217,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	bool active;
 	std::string midi_option;
 	std::vector<MidiDeviceSettings> midi_devices;
+	time_t lru;
 
 	StateStruct()
 		: sample_rate (48000)
@@ -225,12 +226,14 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 		, output_latency (0)
 		, input_channels (0)
 		, output_channels (0)
-		, active (false) {}
+		, active (false)
+		, lru (0) {}
 
     };
 
     typedef boost::shared_ptr<StateStruct> State;
     typedef std::list<State> StateList;
+    static bool state_sort_cmp (const State &a, const State &b);
 
     StateList states;
 
