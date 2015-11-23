@@ -99,6 +99,11 @@ class MIDIControllable : public PBD::Stateful
 	int set_state (const XMLNode&, int version);
 
 	void bind_midi (MIDI::channel_t, MIDI::eventType, MIDI::byte);
+	void bind_rpn_value (MIDI::channel_t, uint16_t rpn);
+	void bind_nrpn_value (MIDI::channel_t, uint16_t rpn);
+	void bind_rpn_change (MIDI::channel_t, uint16_t rpn);
+	void bind_nrpn_change (MIDI::channel_t, uint16_t rpn);
+
 	MIDI::channel_t get_control_channel () { return control_channel; }
 	MIDI::eventType get_control_type () { return control_type; }
 	MIDI::byte get_control_additional () { return control_additional; }
@@ -130,6 +135,8 @@ class MIDIControllable : public PBD::Stateful
 	MIDI::byte       control_additional;
 	MIDI::channel_t  control_channel;
 	std::string     _control_description;
+	int16_t          control_rpn;
+	int16_t          control_nrpn;
 	bool             feedback;
 	uint32_t        _rid;
 	std::string     _what;
@@ -144,6 +151,12 @@ class MIDIControllable : public PBD::Stateful
 	void midi_sense_controller (MIDI::Parser &, MIDI::EventTwoBytes *);
 	void midi_sense_program_change (MIDI::Parser &, MIDI::byte);
 	void midi_sense_pitchbend (MIDI::Parser &, MIDI::pitchbend_t);
+
+	void nrpn_value_change (MIDI::Parser&, uint16_t nrpn, float val);
+	void rpn_value_change (MIDI::Parser&, uint16_t nrpn, float val);
+	void rpn_change (MIDI::Parser&, uint16_t nrpn, int direction);
+	void nrpn_change (MIDI::Parser&, uint16_t nrpn, int direction);
+
 };
 
 #endif // __gm_midicontrollable_h__

@@ -781,6 +781,10 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	int intval;
 	bool momentary;
 	MIDIControllable::Encoder encoder = MIDIControllable::No_enc;
+	bool rpn_value = false;
+	bool nrpn_value = false;
+	bool rpn_change = false;
+	bool nrpn_change = false;
 
 	if ((prop = node.property (X_("ctl"))) != 0) {
 		ev = MIDI::controller;
@@ -802,6 +806,14 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	} else if ((prop = node.property (X_("enc-b"))) != 0) {
 		encoder = MIDIControllable::Enc_B;
 		ev = MIDI::controller;
+	} else if ((prop = node.property (X_("rpn"))) != 0) {
+		rpn_value = true;
+	} else if ((prop = node.property (X_("nrpn"))) != 0) {
+		nrpn_value = true;
+	} else if ((prop = node.property (X_("rpn-delta"))) != 0) {
+		rpn_change = true;
+	} else if ((prop = node.property (X_("nrpn-delta"))) != 0) {
+		nrpn_change = true;
 	} else {
 		return 0;
 	}
@@ -841,8 +853,18 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 		return 0;
 	}
 
-	mc->set_encoder (encoder);
-	mc->bind_midi (channel, ev, detail);
+	if (rpn_value) {
+		mc->bind_rpn_value (channel, detail);
+	} else if (nrpn_value) {
+		mc->bind_nrpn_value (channel, detail);
+	} else if (rpn_change) {
+		mc->bind_rpn_change (channel, detail);
+	} else if (nrpn_change) {
+		mc->bind_nrpn_change (channel, detail);
+	} else {
+		mc->set_encoder (encoder);
+		mc->bind_midi (channel, ev, detail);
+	}
 
 	return mc;
 }

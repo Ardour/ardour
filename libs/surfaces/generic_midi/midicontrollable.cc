@@ -59,6 +59,8 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	last_value = 0; // got a better idea ?
 	last_controllable_value = 0.0f;
 	control_type = none;
+	control_rpn = -1;
+	control_nrpn = -1;
 	_control_description = "MIDI Control: none";
 	control_additional = (MIDI::byte) -1;
 	feedback = true; // for now
@@ -78,6 +80,8 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	last_value = 0; // got a better idea ?
 	last_controllable_value = 0.0f;
 	control_type = none;
+	control_rpn = -1;
+	control_nrpn = -1;
 	_control_description = "MIDI Control: none";
 	control_additional = (MIDI::byte) -1;
 	feedback = true; // for now
@@ -113,6 +117,8 @@ void
 MIDIControllable::drop_external_control ()
 {
 	midi_forget ();
+	control_rpn = -1;
+	control_nrpn = -1;
 	control_type = none;
 	control_additional = (MIDI::byte) -1;
 }
@@ -445,6 +451,88 @@ MIDIControllable::midi_receiver (Parser &, MIDI::byte *msg, size_t /*len*/)
 }
 
 void
+MIDIControllable::rpn_value_change (Parser&, uint16_t rpn, float val)
+{
+	if (control_rpn == rpn) {
+		if (controllable) {
+			controllable->set_value (val);
+		}
+	}
+}
+
+void
+MIDIControllable::nrpn_value_change (Parser&, uint16_t nrpn, float val)
+{
+	if (control_nrpn == nrpn) {
+		if (controllable) {
+			controllable->set_value (val);
+		}
+	}
+}
+
+void
+MIDIControllable::rpn_change (Parser&, uint16_t rpn, int dir)
+{
+	if (control_rpn == rpn) {
+		if (controllable) {
+			/* XXX how to increment/decrement ? */
+			// controllable->set_value (val);
+		}
+	}
+}
+
+void
+MIDIControllable::nrpn_change (Parser&, uint16_t nrpn, int dir)
+{
+	if (control_nrpn == nrpn) {
+		if (controllable) {
+			/* XXX how to increment/decrement ? */
+			// controllable->set_value (val);
+		}
+	}
+}
+
+void
+MIDIControllable::bind_rpn_value (channel_t chn, uint16_t rpn)
+{
+	int chn_i = chn;
+	drop_external_control ();
+	control_rpn = rpn;
+	control_channel = chn;
+	_parser.channel_rpn[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::rpn_value_change, this, _1, _2, _3));
+}
+
+void
+MIDIControllable::bind_nrpn_value (channel_t chn, uint16_t nrpn)
+{
+	int chn_i = chn;
+	drop_external_control ();
+	control_nrpn = nrpn;
+	control_channel = chn;
+	_parser.channel_nrpn[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::rpn_value_change, this, _1, _2, _3));
+}
+
+void
+MIDIControllable::bind_nrpn_change (channel_t chn, uint16_t nrpn)
+{
+	int chn_i = chn;
+	drop_external_control ();
+	control_nrpn = nrpn;
+	control_channel = chn;
+	_parser.channel_nrpn_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::rpn_change, this, _1, _2, _3));
+}
+
+void
+MIDIControllable::bind_rpn_change (channel_t chn, uint16_t rpn)
+{
+	int chn_i = chn;
+	drop_external_control ();
+	control_rpn = rpn;
+	control_channel = chn;
+	_parser.channel_rpn_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::nrpn_change, this, _1, _2, _3));
+}
+
+void
 MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 {
 	char buf[64];
@@ -504,11 +592,76 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 MIDI::byte*
 MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*force*/)
 {
-	if (!controllable || control_type == none || !feedback || bufsize <= 2) {
+	if (!controllable || !feedback) {
 		return buf;
 	}
 
-	int const gm = control_to_midi (controllable->get_value());
+	float val = controllable->get_value ();
+
+	/* Note that when sending RPN/NPRN we do two things:
+	 *
+	 * always send MSB first, then LSB
+	 * null/reset the parameter ID after sending.
+	 *
+	 * this follows recommendations found online, eg. http://www.philrees.co.uk/nrpnq.htm
+	 */
+
+	if (control_rpn >= 0) {
+		if (bufsize < 13) {
+			return buf;
+		}
+		int rpn_val = (int) lrintf (val * 16384.0);
+		if (last_value == rpn_val) {
+			return buf;
+		}
+		*buf++ = (0xb0) | control_channel;
+		*buf++ = 0x62;
+		*buf++ = (int) ((control_rpn) >> 7);
+		*buf++ = 0x63;
+		*buf++ = (int) (control_rpn & 0x7f);
+		*buf++ = 0x06;
+		*buf++ = (int) (rpn_val >> 7);
+		*buf++ = 0x26;
+		*buf++ = (int) (rpn_val & 0x7f);
+		*buf++ = 0x62;
+		*buf++ = 0x7f;
+		*buf++ = 0x63;
+		*buf++ = 0x7f;
+		bufsize -= 13;
+		last_value = rpn_val;
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI out: RPN %1 Channel %2 Value %3\n", control_rpn, (int) control_channel, val));
+		return buf;
+	}
+
+	if (control_nrpn >= 0) {
+		int rpn_val = (int) lrintf (val * 16384.0);
+		if (last_value == rpn_val) {
+			return buf;
+		}
+		*buf++ = (0xb0) | control_channel;
+		*buf++ = 0x64;
+		*buf++ = (int) ((control_rpn) >> 7);
+		*buf++ = 0x65;
+		*buf++ = (int) (control_rpn & 0x7f);
+		*buf++ = 0x06;
+		*buf++ = (int) (rpn_val >> 7);
+		*buf++ = 0x26;
+		*buf++ = (int) (rpn_val & 0x7f);
+		*buf++ = 0x64;
+		*buf++ = 0x7f;
+		*buf++ = 0x65;
+		*buf++ = 0x7f;
+		last_value = rpn_val;
+		bufsize -= 13;
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI out: NRPN %1 Channel %2 Value %3\n", control_nrpn, (int) control_channel, val));
+		return buf;
+	}
+
+	if (control_type == none || bufsize <= 2) {
+		return buf;
+	}
+
+	int const gm = control_to_midi (val);
 
 	if (gm == last_value) {
 		return buf;
