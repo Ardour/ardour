@@ -27,9 +27,14 @@ using namespace MIDI;
 
 Channel::Channel (MIDI::byte channelnum, Port &p)
 	: _port (p)
+	, _channel_number (channelnum)
+	, _rpn_msb (0)
+	, _rpn_lsb (0)
+	, _nrpn_msb (0)
+	, _nrpn_lsb (0)
+	, _rpn_state (RPNState (0))
+	, _nrpn_state (RPNState (0))
 {
-	_channel_number = channelnum;
-
 	reset (0, 1, false);
 }
 
@@ -75,15 +80,33 @@ Channel::reset (timestamp_t timestamp, framecnt_t /*nframes*/, bool notes_off)
 		_controller_14bit[n] = false;
 	}
 
-	_rpn_msb = 0;
-	_rpn_lsb = 0;
-	_nrpn_msb = 0;
-	_nrpn_lsb = 0;
+	rpn_reset ();
+	nrpn_reset ();
 
 	_omni = true;
 	_poly = false;
 	_mono = true;
 	_notes_on = 0;
+}
+
+void
+Channel::rpn_reset ()
+{
+	_rpn_msb = 0;
+	_rpn_lsb = 0;
+	_rpn_val_msb = 0;
+	_rpn_val_lsb = 0;
+	_rpn_state = RPNState (0);
+}
+
+void
+Channel::nrpn_reset ()
+{
+	_nrpn_msb = 0;
+	_nrpn_lsb = 0;
+	_nrpn_val_msb = 0;
+	_nrpn_val_lsb = 0;
+	_nrpn_state = RPNState (0);
 }
 
 void
@@ -105,8 +128,130 @@ Channel::process_note_on (Parser & /*parser*/, EventTwoBytes *tb)
 	_notes_on++;
 }
 
+const Channel::RPNState Channel::RPN_READY_FOR_VALUE = RPNState (HaveLSB|HaveMSB);
+const Channel::RPNState Channel::RPN_VALUE_READY = RPNState (HaveLSB|HaveMSB|HaveValue);
+
+bool
+Channel::maybe_process_rpns (Parser& parser, EventTwoBytes *tb)
+{
+	switch (tb->controller_number) {
+	case 0x62:
+		_rpn_state = RPNState (_rpn_state|HaveMSB);
+		_rpn_lsb = tb->value;
+		if (_rpn_msb == 0x7f && _rpn_lsb == 0x7f) {
+			rpn_reset ();
+		}
+		return true;
+	case 0x63:
+		_rpn_state = RPNState (_rpn_state|HaveLSB);
+		_rpn_msb = tb->value;
+		if (_rpn_msb == 0x7f && _rpn_lsb == 0x7f) {
+			rpn_reset ();
+		}
+		return true;
+
+	case 0x64:
+		_nrpn_state = RPNState (_rpn_state|HaveMSB);
+		_rpn_lsb = tb->value;
+		if (_nrpn_msb == 0x7f && _nrpn_lsb == 0x7f) {
+			nrpn_reset ();
+		}
+		return true;
+	case 0x65:
+		_nrpn_state = RPNState (_rpn_state|HaveLSB);
+		_rpn_msb = tb->value;
+		if (_rpn_msb == 0x7f && _rpn_lsb == 0x7f) {
+			nrpn_reset ();
+		}
+		return true;
+	}
+
+	if ((_nrpn_state & RPN_READY_FOR_VALUE) == RPN_READY_FOR_VALUE) {
+
+		uint16_t rpn_id = (_rpn_msb << 7)|_rpn_lsb;
+
+		switch (tb->controller_number) {
+		case 0x60:
+			/* data increment */
+			_nrpn_state = RPNState (_nrpn_state|HaveValue);
+			parser.channel_nrpn_increment[_channel_number] (parser, rpn_id); /* EMIT SIGNAL */
+			return true;
+		case 0x61:
+			/* data decrement */
+			_nrpn_state = RPNState (_nrpn_state|HaveValue);
+			parser.channel_nrpn_decrement[_channel_number] (parser, rpn_id); /* EMIT SIGNAL */
+			return true;
+		case 0x06:
+			/* data entry MSB */
+			_nrpn_state = RPNState (_nrpn_state|HaveValue);
+			_nrpn_val_msb = tb->value;
+			break;
+		case 0x26:
+			/* data entry LSB */
+			_nrpn_state = RPNState (_nrpn_state|HaveValue);
+			_nrpn_val_lsb = tb->value;
+		}
+
+		if (_nrpn_state == RPN_VALUE_READY) {
+
+			float rpn_val = ((_rpn_val_msb << 7)|_rpn_val_lsb)/16384.0;
+
+			std::pair<RPNList::iterator,bool> result = nrpns.insert (std::make_pair (rpn_id, rpn_val));
+
+			if (!result.second) {
+				result.first->second = rpn_val;
+			}
+
+			parser.channel_nrpn[_channel_number] (parser, rpn_id); /* EMIT SIGNAL */
+			return true;
+		}
+
+	} else if ((_rpn_state & RPN_READY_FOR_VALUE) == RPN_READY_FOR_VALUE) {
+
+		uint16_t rpn_id = (_rpn_msb << 7)|_rpn_lsb;
+
+		switch (tb->controller_number) {
+		case 0x60:
+			/* data increment */
+			_rpn_state = RPNState (_rpn_state|HaveValue);
+			parser.channel_rpn_increment[_channel_number] (parser, rpn_id); /* EMIT SIGNAL */
+			return true;
+		case 0x61:
+			/* data decrement */
+			_rpn_state = RPNState (_rpn_state|HaveValue);
+			parser.channel_rpn_decrement[_channel_number] (parser, rpn_id); /* EMIT SIGNAL */
+			return true;
+		case 0x06:
+			/* data entry MSB */
+			_rpn_state = RPNState (_rpn_state|HaveValue);
+			_rpn_val_msb = tb->value;
+			break;
+		case 0x26:
+			/* data entry LSB */
+			_rpn_state = RPNState (_rpn_state|HaveValue);
+			_rpn_val_lsb = tb->value;
+		}
+
+		if (_rpn_state == RPN_VALUE_READY) {
+
+			float    rpn_val = ((_rpn_val_msb << 7)|_rpn_val_lsb)/16384.0;
+
+			std::pair<RPNList::iterator,bool> result = rpns.insert (std::make_pair (rpn_id, rpn_val));
+
+			if (!result.second) {
+				result.first->second = rpn_val;
+			}
+
+			parser.channel_rpn[_channel_number] (parser, rpn_id); /* EMIT SIGNAL */
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void
-Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
+Channel::process_controller (Parser & parser, EventTwoBytes *tb)
 {
 	unsigned short cv;
 
@@ -114,6 +259,16 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 	   to controller_val[...]. or rather, need to make sure that
 	   all changes *are* atomic.
 	*/
+
+	if (maybe_process_rpns (parser, tb)) {
+		return;
+	}
+
+	/* Note: if RPN data controllers (0x60, 0x61, 0x6, 0x26) are received
+	 * without a previous RPN parameter ID message, or after the RPN ID
+	 * has been reset, they will be treated like ordinary CC messages.
+	 */
+
 
 	if (tb->controller_number < 32) { /* unsigned: no test for >= 0 */
 
@@ -271,4 +426,36 @@ Channel::channel_msg (MIDI::byte id, MIDI::byte val1, MIDI::byte val2, timestamp
 	}
 
 	return _port.midimsg (msg, len, timestamp);
+}
+
+float
+Channel::rpn_value (uint16_t rpn) const
+{
+	return rpn_value_absolute (rpn) / 16384.0f;
+}
+
+float
+Channel::rpn_value_absolute (uint16_t rpn) const
+{
+	RPNList::const_iterator r = rpns.find (rpn);
+	if (r == rpns.end()) {
+		return 0.0;
+	}
+	return r->second;
+}
+
+float
+Channel::nrpn_value (uint16_t nrpn) const
+{
+	return nrpn_value_absolute (nrpn) / 16384.0f;
+}
+
+float
+Channel::nrpn_value_absolute (uint16_t nrpn) const
+{
+	RPNList::const_iterator r = nrpns.find (nrpn);
+	if (r == nrpns.end()) {
+		return 0.0;
+	}
+	return r->second;
 }

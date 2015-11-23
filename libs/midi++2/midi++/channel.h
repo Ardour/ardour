@@ -21,6 +21,7 @@
 #define __midichannel_h__
 
 #include <queue>
+#include <map>
 
 #include "pbd/signals.h"
 #include "midi++/parser.h"
@@ -75,6 +76,9 @@ class LIBMIDIPP_API Channel : public PBD::ScopedConnectionList {
 		_controller_val[n%128] = val;
 	}
 
+	controller_value_t rpn_value (uint16_t rpn_id);
+	controller_value_t nrpn_value (uint16_t rpn_id);
+
 	bool channel_msg (byte id, byte val1, byte val2, timestamp_t timestamp);
 	bool all_notes_off (timestamp_t timestamp) {
 		return channel_msg (MIDI::controller, 123, 0, timestamp);
@@ -108,6 +112,11 @@ class LIBMIDIPP_API Channel : public PBD::ScopedConnectionList {
 		return channel_msg (MIDI::pitchbend, lsb, msb, timestamp);
 	}
 
+	float rpn_value (uint16_t rpn) const;
+	float nrpn_value (uint16_t nrpn) const;
+	float rpn_value_absolute (uint16_t rpn) const;
+	float nrpn_value_absolute (uint16_t nrpn) const;
+
   protected:
 	friend class Port;
 	void connect_signals ();
@@ -115,14 +124,26 @@ class LIBMIDIPP_API Channel : public PBD::ScopedConnectionList {
   private:
 	Port& _port;
 
+	enum RPNState {
+		HaveLSB = 0x1,
+		HaveMSB = 0x2,
+		HaveValue = 0x4
+	};
+
 	/* Current channel values */
 	byte               _channel_number;
 	unsigned short     _bank_number;
 	byte               _program_number;
 	byte               _rpn_msb;
 	byte               _rpn_lsb;
+	byte               _rpn_val_msb;
+	byte               _rpn_val_lsb;
 	byte               _nrpn_msb;
 	byte               _nrpn_lsb;
+	byte               _nrpn_val_lsb;
+	byte               _nrpn_val_msb;
+	RPNState           _rpn_state;
+	RPNState           _nrpn_state;
 	byte               _chanpress;
 	byte               _polypress[128];
 	bool               _controller_14bit[128];
@@ -139,6 +160,11 @@ class LIBMIDIPP_API Channel : public PBD::ScopedConnectionList {
 	bool               _mono;
 	size_t             _notes_on;
 
+	typedef std::map<uint16_t,float> RPNList;
+
+	RPNList rpns;
+	RPNList nrpns;
+
 	void reset (timestamp_t timestamp, framecnt_t nframes, bool notes_off = true);
 
 	void process_note_off (Parser &, EventTwoBytes *);
@@ -149,6 +175,14 @@ class LIBMIDIPP_API Channel : public PBD::ScopedConnectionList {
 	void process_chanpress (Parser &, byte);
 	void process_pitchbend (Parser &, pitchbend_t);
 	void process_reset (Parser &);
+	bool maybe_process_rpns (Parser&, EventTwoBytes *);
+
+	void rpn_reset ();
+	void nrpn_reset ();
+
+	static const RPNState RPN_READY_FOR_VALUE;
+	static const RPNState RPN_VALUE_READY;
+
 };
 
 } // namespace MIDI
