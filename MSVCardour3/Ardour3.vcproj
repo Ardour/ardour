@@ -444,6 +444,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\duplicate_routes_dialog.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\edit_note_dialog.cc"
 				>
 			</File>
@@ -1439,6 +1443,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\debug.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\duplicate_routes_dialog.h"
 				>
 			</File>
 			<File
