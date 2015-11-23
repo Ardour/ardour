@@ -335,7 +335,8 @@ def build(bld):
     # micro increment <=> no interface changes
     LIBARDOUR_LIB_VERSION = "3.0.0"
 
-    sources = libardour_sources
+    # operate on copy to avoid adding sources twice
+    sources = list(libardour_sources)
     if bld.is_tracks_build():
         sources += [ 'engine_state_controller.cc' ]
     
