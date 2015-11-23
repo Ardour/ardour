@@ -77,12 +77,10 @@ class LIBMIDIPP_API Parser {
 	TwoByteSignal         channel_controller[16];
 	ZeroByteSignal        channel_active_preparse[16];
 	ZeroByteSignal        channel_active_postparse[16];
-	RPNSignal             channel_rpn[16];
-	RPNSignal             channel_nrpn[16];
-	RPNValueSignal        channel_rpn_increment[16];
-	RPNValueSignal        channel_rpn_decrement[16];
-	RPNValueSignal        channel_nrpn_increment[16];
-	RPNValueSignal        channel_nrpn_decrement[16];
+	RPNValueSignal        channel_rpn[16];
+	RPNValueSignal        channel_nrpn[16];
+	RPNSignal             channel_rpn_change[16];
+	RPNSignal             channel_nrpn_change[16];
 
 	OneByteSignal         mtc_quarter_frame; /* see below for more useful signals */
 	Signal                mtc;

@@ -174,12 +174,12 @@ Channel::maybe_process_rpns (Parser& parser, EventTwoBytes *tb)
 		case 0x60:
 			/* data increment */
 			_nrpn_state = RPNState (_nrpn_state|HaveValue);
-			parser.channel_nrpn_increment[_channel_number] (parser, rpn_id, 1); /* EMIT SIGNAL */
+			parser.channel_nrpn_change[_channel_number] (parser, rpn_id, 1); /* EMIT SIGNAL */
 			return true;
 		case 0x61:
 			/* data decrement */
 			_nrpn_state = RPNState (_nrpn_state|HaveValue);
-			parser.channel_nrpn_decrement[_channel_number] (parser, rpn_id, -1); /* EMIT SIGNAL */
+			parser.channel_nrpn_change[_channel_number] (parser, rpn_id, -1); /* EMIT SIGNAL */
 			return true;
 		case 0x06:
 			/* data entry MSB */
@@ -214,12 +214,12 @@ Channel::maybe_process_rpns (Parser& parser, EventTwoBytes *tb)
 		case 0x60:
 			/* data increment */
 			_rpn_state = RPNState (_rpn_state|HaveValue);
-			parser.channel_rpn_increment[_channel_number] (parser, rpn_id, 1); /* EMIT SIGNAL */
+			parser.channel_rpn_change[_channel_number] (parser, rpn_id, 1); /* EMIT SIGNAL */
 			return true;
 		case 0x61:
 			/* data decrement */
 			_rpn_state = RPNState (_rpn_state|HaveValue);
-			parser.channel_rpn_decrement[_channel_number] (parser, rpn_id, -1); /* EMIT SIGNAL */
+			parser.channel_rpn_change[_channel_number] (parser, rpn_id, -1); /* EMIT SIGNAL */
 			return true;
 		case 0x06:
 			/* data entry MSB */
