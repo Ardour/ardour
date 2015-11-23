@@ -777,14 +777,18 @@ def i18n_mo(bld):
                               'Paul Davis')
 
 def appdata_i18n_pot(bld):
-    Logs.info('Generating pot file from Ardour appdata')
-    itsfile = os.path.join(bld.top_dir, 'tools', 'as-metainfo.its')
     potfile = os.path.join(bld.top_dir, 'gtk2_ardour', 'appdata',
             'ardour.appdata.pot')
-    adsource = os.path.join(bld.top_dir, 'gtk2_ardour',
-            'ardour.appdata.xml.in.in')
-    Logs.info('Updating ' + potfile)
-    subprocess.call(('itstool', '-i', itsfile, '-o', potfile, adsource))
+    if bld.cmd == 'build':
+        Logs.info('Generating pot file from Ardour appdata')
+        itsfile = os.path.join(bld.top_dir, 'tools', 'as-metainfo.its')
+        adsource = os.path.join(bld.top_dir, 'gtk2_ardour',
+                'ardour.appdata.xml.in.in')
+        Logs.info('Updating ' + potfile)
+        subprocess.call(('itstool', '-i', itsfile, '-o', potfile, adsource))
+    elif bld.cmd == 'clean' and os.path.exists(potfile):
+        Logs.info('Removing Ardour appdata pot file')
+        os.remove(potfile)
 
 def appdata_i18n_po(bld):
     autowaf.build_i18n_po(bld, bld.top_dir, os.path.join(
@@ -795,13 +799,17 @@ def appdata_i18n_mo(bld):
         'gtk2_ardour', 'appdata'), 'ardour.appdata', 'dummy', 'dummy')
 
 def appdata_i18n_xmlin(bld):
-    itsfile = os.path.join(bld.top_dir, 'tools', 'as-metainfo.its')
-    adxmlininfile = os.path.join(bld.top_dir, 'gtk2_ardour',
-            'ardour.appdata.xml.in.in')
     adxmlinfile = os.path.join(bld.top_dir, 'gtk2_ardour',
             'ardour.appdata.xml.in')
-    mo_glob = os.path.join(bld.top_dir, 'gtk2_ardour', 'appdata', 'po', '*.mo')
-    mo_files = glob.glob(mo_glob)
-    Logs.info('Generating ' + adxmlinfile)
-    subprocess.call(['itstool', '-i', itsfile, '-o', adxmlinfile,
-        '-j', adxmlininfile] + mo_files)
+    if bld.cmd == 'build':
+        itsfile = os.path.join(bld.top_dir, 'tools', 'as-metainfo.its')
+        adxmlininfile = os.path.join(bld.top_dir, 'gtk2_ardour',
+                'ardour.appdata.xml.in.in')
+        mo_glob = os.path.join(bld.top_dir, 'gtk2_ardour', 'appdata', 'po', '*.mo')
+        mo_files = glob.glob(mo_glob)
+        Logs.info('Generating ' + adxmlinfile)
+        subprocess.call(['itstool', '-i', itsfile, '-o', adxmlinfile,
+            '-j', adxmlininfile] + mo_files)
+    elif bld.cmd == 'clean' and os.path.exists(adxmlinfile):
+        Logs.info('Removing ' + adxmlinfile)
+        os.remove(adxmlinfile)
