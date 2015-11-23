@@ -454,7 +454,7 @@ msgstr "Configuration :"
 
 #: add_route_dialog.cc:58
 msgid "Record Mode:"
-msgstr ""
+msgstr "Mode d'enregistrement"
 
 #: add_route_dialog.cc:59
 msgid "Instrument:"
@@ -514,7 +514,7 @@ msgstr "Groupe :"
 #: add_route_dialog.cc:162
 #, fuzzy
 msgid "Insert:"
-msgstr "&Insérer"
+msgstr "Insérer :"
 
 #: add_route_dialog.cc:223 add_route_dialog.cc:232 add_route_dialog.cc:306
 #: ardour_ui_ed.cc:539 engine_dialog.cc:237 rc_option_editor.cc:1805
@@ -555,8 +555,9 @@ msgid ""
 msgstr ""
 "Les pistes Audio+MIDI doivent être utilisées <b>SEULEMENT</b> avec des "
 "greffons qui utilisent à la fois les entrées audio et MIDI.\n"
-"Si vous n'envisagez pas d'utiliser un tel plugin, utilisez plutôt une piste "
-"audio ou MIDI."
+"\n"
+"Si vous n'envisagez pas d'utiliser un tel greffon, utilisez plutôt une piste "
+"normale audio ou MIDI."
 
 #: add_route_dialog.cc:327 add_route_dialog.cc:346 editor_actions.cc:422
 #: editor_rulers.cc:251 time_axis_view.cc:1374
@@ -12373,23 +12374,23 @@ msgid ""
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
 "Lors de l'enregistrement des instruments ou des voix, vous voudrez\n"
-"sûrement entendre le signal simultanément. C'est appelé « Monitoring ».\n"
-"Il existe différentes manières de le faire, selon matériel et "
-"configuration.\n"
-"Les deux plus courantes sont présentées ici.\n"
-"Merci d'en choisir une convenant à votre configuration.\n"
+"certainement entendre le signal simultanément à son enregistrement. Ceci\n"
+"est appelé le \"monitoring\".\n"
+"Il existe différentes manières de le faire, selon le matériel et sa"
+"configuration. Les deux manières les plus courantes sont présentées ici.\n"
+"Veuillez en choisir une convenant à votre configuration.\n"
 "\n"
-"<i>(Ce choix peut toujours être modifié, dans le menu Préférences)</i>\n"
+"<i>(Ce choix peut être modifié à tout moment, dans le dialogue des Préférences)</i>\n"
 "\n"
-"<i>Si vous ne savez que choisir, conservez l'option par défaut.</i>"
+"<i>Si vous ne savez pas quoi choisir, conservez l'option par défaut.</i>"
 
 #: startup.cc:262
 msgid "Monitoring Choices"
-msgstr "Choix du Monitoring"
+msgstr "Choix du monitoring"
 
 #: startup.cc:285
 msgid "Use a Master bus directly"
-msgstr "Utiliser directement le bus principal"
+msgstr "Utiliser directement le bus principal (le \"master\")"
 
 #: startup.cc:287
 msgid ""
@@ -12397,19 +12398,20 @@ msgid ""
 "for simple usage."
 msgstr ""
 "Connecter le bus principal directement aux sorties matérielles. Cette "
-"configuration est préférable pour un usage simplifié."
+"configuration est préférable pour une utilisation simple."
 
 #: startup.cc:296
 msgid "Use an additional Monitor bus"
-msgstr "Utiliser un Bus de Monitoring supplémentaire"
+msgstr "Utiliser un bus de monitoring supplémentaire"
 
 #: startup.cc:299
 msgid ""
 "Use a Monitor bus between Master bus and hardware outputs for \n"
 "greater control in monitoring without affecting the mix."
 msgstr ""
-"Insérer un Bus de Monitoring entre le Bus Master et les sorties\n"
-"matérielles pour mieux contrôler l'écoute sans impacter le mixage."
+"Insérer un bus de monitoring entre le bus principal (\"master\") et les\n"
+"sorties matérielles pour un plus grand contrôle de l'écoute monitoring\n"
+"sans affecter le mixage."
 
 #: startup.cc:321
 #, fuzzy
@@ -12419,8 +12421,8 @@ msgid ""
 "\n"
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
-"<i>Ceci peut être changée à tout moment dans le menu Préférences.\n"
-"Vous pouvez aussi ajouter/retirer une section de Monitoring de la session.</"
+"<i>Ceci peut être changé à tout moment dans le dialogue de Préférences.\n"
+"Vous pouvez aussi ajouter ou retirer la section d'écoute de toute session.</"
 "i>\n"
 "\n"
 "<i>Si vous ne voyez pas de quoi il s'agit, acceptez le choix par défaut.</i>"
