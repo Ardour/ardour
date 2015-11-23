@@ -1021,6 +1021,15 @@ EngineControl::backend_changed ()
 		set_active_text_if_present (buffer_size_combo, bufsize_as_string (backend->buffer_size()));
 	}
 
+	if (_have_control && !ignore_changes) {
+		// set driver & devices
+		State state = get_matching_state (backend_combo.get_active_text());
+		if (state) {
+			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+			set_current_state (state);
+		}
+	}
+
 	if (!ignore_changes) {
 		maybe_display_saved_state ();
 	}
@@ -1269,6 +1278,8 @@ EngineControl::driver_changed ()
 
 	backend->set_driver (driver_combo.get_active_text());
 	list_devices ();
+
+	// TODO load LRU device(s) for backend + driver combo
 
 	if (!ignore_changes) {
 		maybe_display_saved_state ();
@@ -1613,6 +1624,19 @@ EngineControl::midi_option_changed ()
 void
 EngineControl::parameter_changed ()
 {
+}
+
+EngineControl::State
+EngineControl::get_matching_state (const string& backend)
+{
+	for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
+		// TODO use LRU for every backend and prefer the active one
+		// uniqueness is only guaranteed for backend + driver + device(s)
+		if ((*i)->backend == backend) {
+			return (*i);
+		}
+	}
+	return State();
 }
 
 EngineControl::State
