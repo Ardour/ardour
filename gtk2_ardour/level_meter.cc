@@ -230,6 +230,7 @@ LevelMeterBase::hide_all_meters ()
 			(*i).packed = false;
 		}
 	}
+	visible_meter_count = 0;
 }
 
 void
