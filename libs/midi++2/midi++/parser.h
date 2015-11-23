@@ -39,7 +39,8 @@ typedef PBD::Signal2<void,Parser&,framecnt_t>        TimestampedSignal;
 typedef PBD::Signal2<void,Parser&, byte>             OneByteSignal;
 typedef PBD::Signal2<void,Parser &, EventTwoBytes *> TwoByteSignal;
 typedef PBD::Signal2<void,Parser &, pitchbend_t>     PitchBendSignal;
-typedef PBD::Signal2<void,Parser &, uint16_t>        RPNSignal;
+typedef PBD::Signal3<void,Parser &, uint16_t, int>   RPNSignal;
+typedef PBD::Signal3<void,Parser &, uint16_t, float> RPNValueSignal;
 typedef PBD::Signal3<void,Parser &, byte *, size_t>  Signal;
 
 class LIBMIDIPP_API Parser {
@@ -78,10 +79,10 @@ class LIBMIDIPP_API Parser {
 	ZeroByteSignal        channel_active_postparse[16];
 	RPNSignal             channel_rpn[16];
 	RPNSignal             channel_nrpn[16];
-	RPNSignal             channel_rpn_increment[16];
-	RPNSignal             channel_rpn_decrement[16];
-	RPNSignal             channel_nrpn_increment[16];
-	RPNSignal             channel_nrpn_decrement[16];
+	RPNValueSignal        channel_rpn_increment[16];
+	RPNValueSignal        channel_rpn_decrement[16];
+	RPNValueSignal        channel_nrpn_increment[16];
+	RPNValueSignal        channel_nrpn_decrement[16];
 
 	OneByteSignal         mtc_quarter_frame; /* see below for more useful signals */
 	Signal                mtc;
