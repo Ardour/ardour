@@ -422,7 +422,8 @@ def build(bld):
 
         # now the shared library containing the GTK GUI for ardour
         obj = bld (features = 'cxx c cxxshlib')
-        obj.source    = gtk2_ardour_sources
+        # operate on copy to avoid adding sources twice
+        obj.source    = list(gtk2_ardour_sources)
         obj.includes  = [ '../libs/fst', '.' ]
         obj.name      = 'libgtk2_ardour'
         obj.target    = 'gtk2_ardour'
@@ -433,7 +434,8 @@ def build(bld):
             obj = bld (features = 'cxx c cxxprogram winres')
         else:
             obj = bld (features = 'cxx c cxxprogram')
-        obj.source    = gtk2_ardour_sources
+        # operate on copy to avoid adding sources twice
+        obj.source    = list(gtk2_ardour_sources)
         obj.target = 'ardour-' + str (bld.env['VERSION'])
         obj.includes = ['.']
         obj.ldflags = ['-no-undefined']

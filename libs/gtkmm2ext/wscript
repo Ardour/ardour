@@ -84,7 +84,8 @@ def configure(conf):
 
 
 def build(bld):
-    sources = gtkmm2ext_sources
+    # operate on copy to avoid adding sources twice
+    sources = list(gtkmm2ext_sources)
     if bld.is_tracks_build():
         sources += [ 'waves_fastmeter.cc', 'fader.cc' ]
     else:
