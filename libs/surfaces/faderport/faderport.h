@@ -21,6 +21,7 @@
 #define ardour_surface_faderport_h
 
 #include <list>
+#include <map>
 #include <glibmm/threads.h>
 
 #include "ardour/types.h"
@@ -155,62 +156,14 @@ class FaderPort : public ARDOUR::ControlProtocol {
 	void encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb);
 	void fader_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb);
 
-	enum InButtonID {
-		Mute = 18,
-		Solo = 17,
-		Rec = 16,
-		Left = 19,
-		Bank = 20,
-		Right = 21,
-		Output = 22,
-		Read = 10,
-		Write = 9,
-		Touch = 8,
-		Off = 23,
-		Mix = 11,
-		Proj = 12,
-		Trns = 13,
-		Undo = 14,
-		Shift = 2,
-		Punch = 1,
-		User = 0,
-		Loop = 15,
-		Rewind = 3,
-		Ffwd = 4,
-		Stop = 5,
-		Play = 6,
-		RecEnable = 7,
-		Fader = 127,
+	struct ButtonID {
+		ButtonID (std::string const& str, int i, int o)
+			: name (str), in (i), out (o) {}
+		std::string name;
+		int in;
+		int out;
 	};
-
-	/*
-	enum OutButtonID {
-		Mute = 18,
-		Solo = 17,
-		Rec = 16,
-		Left = 19,
-		Bank = 20,
-		Right = 21,
-		Output = 22,
-		Read = 10,
-		Write = 9,
-		Touch = 8,
-		Off = 23,
-		Mix = 11,
-		Proj = 12,
-		Trns = 13,
-		Undo = 14,
-		Shift = 2,
-		Punch = 1,
-		User = 0,
-		Loop = 15,
-		Rewind = 3,
-		Ffwd = 4,
-		Stop = 5,
-		Play = 6,
-		RecEnable = 7,
-	}
-	*/
+	std::map<int,ButtonID> buttons;
 };
 
 #endif /* ardour_surface_faderport_h */

@@ -114,6 +114,31 @@ FaderPort::FaderPort (Session& s)
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::connection_handler, this, _1, _2, _3, _4, _5), midi_ui_context());
 
+	buttons.insert (std::make_pair (18, ButtonID (_("Mute"), 18, 21)));
+	buttons.insert (std::make_pair (17, ButtonID (_("Solo"), 17, 22)));
+	buttons.insert (std::make_pair (16, ButtonID (_("Rec"), 16, 23)));
+	buttons.insert (std::make_pair (19, ButtonID (_("Left"), 19, 20)));
+	buttons.insert (std::make_pair (20, ButtonID (_("Bank"), 20, 19)));
+	buttons.insert (std::make_pair (21, ButtonID (_("Right"), 21, 18)));
+	buttons.insert (std::make_pair (22, ButtonID (_("Output"), 22, 17)));
+	buttons.insert (std::make_pair (10, ButtonID (_("Read"), 10, 13)));
+	buttons.insert (std::make_pair (9, ButtonID (_("Write"), 9, 14)));
+	buttons.insert (std::make_pair (8, ButtonID (_("Touch"), 8, 15)));
+	buttons.insert (std::make_pair (23, ButtonID (_("Off"), 23, 16)));
+	buttons.insert (std::make_pair (11, ButtonID (_("Mix"), 11, 12)));
+	buttons.insert (std::make_pair (12, ButtonID (_("Proj"), 12, 11)));
+	buttons.insert (std::make_pair (13, ButtonID (_("Trns"), 13, 10)));
+	buttons.insert (std::make_pair (14, ButtonID (_("Undo"), 14, 9)));
+	buttons.insert (std::make_pair (2, ButtonID (_("Shift"), 2, 5)));
+	buttons.insert (std::make_pair (1, ButtonID (_("Punch"), 1, 6)));
+	buttons.insert (std::make_pair (0, ButtonID (_("User"), 0, 7)));
+	buttons.insert (std::make_pair (15, ButtonID (_("Loop"), 15, 8)));
+	buttons.insert (std::make_pair (3, ButtonID (_("Rewind"), 3, 4)));
+	buttons.insert (std::make_pair (4, ButtonID (_("Ffwd"), 4, 3)));
+	buttons.insert (std::make_pair (5, ButtonID (_("Stop"), 5, 2)));
+	buttons.insert (std::make_pair (6, ButtonID (_("Play"), 6, 1)));
+	buttons.insert (std::make_pair (7, ButtonID (_("RecEnable"), 7, 0)));
+	buttons.insert (std::make_pair (127, ButtonID (_("Fader (touch)"), 127, -1)));
 }
 
 FaderPort::~FaderPort ()
@@ -137,94 +162,23 @@ FaderPort::~FaderPort ()
 void
 FaderPort::switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
-	switch (tb->controller_number) {
-	case Mute:
-		cerr << "Mute\n";
-		break;
-	case Solo:
-		cerr << "Solo\n";
-		break;
-	case Rec:
-		cerr << "Rec\n";
-		break;
-	case Left:
-		cerr << "Left\n";
-		break;
-	case Bank:
-		cerr << "Bank\n";
-		break;
-	case Right:
-		cerr << "Right\n";
-		break;
-	case Output:
-		cerr << "Output\n";
-		break;
-	case Read:
-		cerr << "Read\n";
-		break;
-	case Write:
-		cerr << "Write\n";
-		break;
-	case Touch:
-		cerr << "Touch\n";
-		break;
-	case Off:
-		cerr << "Off\n";
-		break;
-	case Mix:
-		cerr << "Mix\n";
-		break;
-	case Proj:
-		cerr << "Proj\n";
-		break;
-	case Trns:
-		cerr << "Trns\n";
-		break;
-	case Undo:
-		cerr << "Undo\n";
-		break;
-	case Shift:
-		cerr << "Shift\n";
-		break;
-	case Punch:
-		cerr << "Punch\n";
-		break;
-	case User:
-		cerr << "User\n";
-		break;
-	case Loop:
-		cerr << "Loop\n";
-		break;
-	case Rewind:
-		cerr << "Rewind\n";
-		break;
-	case Ffwd:
-		cerr << "Ffwd\n";
-		break;
-	case Stop:
-		cerr << "Stop\n";
-		break;
-	case Play:
-		cerr << "Play\n";
-		break;
-	case RecEnable:
-		cerr << "RecEnable\n";
-		break;
-	case Fader:
-		cerr << "Fader touch\n";
-		break;
-	default:
-		cerr << "eh?\n";
+	map<int,ButtonID>::const_iterator b = buttons.find (tb->controller_number);
+
+	if (b != buttons.end()) {
+
+		cerr << b->second.name << endl;
+
+		if (b->second.out >= 0) {
+			/* send feedback to turn on the LED */
+
+			MIDI::byte buf[3];
+			buf[0] = 0xa0;
+			buf[1] = b->second.out;
+			buf[2] = tb->value;
+
+			_output_port->write (buf, 3, 0);
+		}
 	}
-
-	/* send feedback to turn on the LED */
-
-	MIDI::byte buf[3];
-	buf[0] = 0xa0;
-	buf[1] = tb->controller_number;
-	buf[2] = tb->value;
-
-	_output_port->write (buf, 3, 0);
 }
 
 void
