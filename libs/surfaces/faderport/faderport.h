@@ -17,8 +17,8 @@
 
 */
 
-#ifndef ardour_generic_midi_control_protocol_h
-#define ardour_generic_midi_control_protocol_h
+#ifndef ardour_surface_faderport_h
+#define ardour_surface_faderport_h
 
 #include <list>
 #include <glibmm/threads.h>
@@ -60,13 +60,20 @@ class MIDIControllable;
 class MIDIFunction;
 class MIDIAction;
 
-class FaderportMidiControlProtocol : public ARDOUR::ControlProtocol {
+class FaderPort : public ARDOUR::ControlProtocol {
   public:
-	FaderportMidiControlProtocol (ARDOUR::Session&);
-	virtual ~FaderportMidiControlProtocol();
+	FaderPort (ARDOUR::Session&);
+	virtual ~FaderPort();
 
 	int set_active (bool yn);
-	static bool probe() { return true; }  //do SysEx device check here?
+
+	/* It would be nice to send a device query message here to see if
+	 * faderport is out there. But the probe() API doesn't provide
+	 * a set of ports to be checked, so there's really no nice
+	 * way to do this. We would have to fall back on the PortManager
+	 * and get a list of all physical ports. Could be done ....
+	 */
+	static bool probe() { return true; }
 
 	void set_feedback_interval (ARDOUR::microseconds_t);
 
@@ -84,6 +91,8 @@ class FaderportMidiControlProtocol : public ARDOUR::ControlProtocol {
 	void next_bank ();
 	void prev_bank ();
 
+	void reset_controllables ();
+
 	void set_motorised (bool);
 
 	bool motorised () const {
@@ -96,11 +105,11 @@ class FaderportMidiControlProtocol : public ARDOUR::ControlProtocol {
 		return _threshold;
 	}
 
+	bool device_active() const { return _device_active; }
+
   private:
-	MIDI::Port* _input_port;
-	MIDI::Port* _output_port;
-	boost::shared_ptr<ARDOUR::Port> _async_in;
-	boost::shared_ptr<ARDOUR::Port> _async_out;
+	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
+	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
 
 	ARDOUR::microseconds_t _feedback_interval;
 	ARDOUR::microseconds_t last_feedback_time;
@@ -109,10 +118,9 @@ class FaderportMidiControlProtocol : public ARDOUR::ControlProtocol {
 	bool  do_feedback;
 	void  send_feedback ();
 
-	PBD::ScopedConnection midi_recv_connection;
-	void midi_receiver (MIDI::Parser &p, MIDI::byte *, size_t);
+	PBD::ScopedConnectionList midi_connections;
 
-	bool midi_input_handler (Glib::IOCondition ioc, ARDOUR::AsyncMIDIPort* port);
+	bool midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::AsyncMIDIPort> port);
 
 	std::string _current_binding;
 	uint32_t _bank_size;
@@ -127,6 +135,82 @@ class FaderportMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	mutable void *gui;
 	void build_gui ();
+
+	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
+	PBD::ScopedConnection port_connection;
+
+	enum ConnectionState {
+		InputConnected = 0x1,
+		OutputConnected = 0x2
+	};
+
+	int connection_state;
+	void connected ();
+	bool _device_active;
+	int fader_msb;
+	int fader_lsb;
+
+	void sysex_handler (MIDI::Parser &p, MIDI::byte *, size_t);
+	void switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb);
+	void encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb);
+	void fader_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb);
+
+	enum InButtonID {
+		Mute = 18,
+		Solo = 17,
+		Rec = 16,
+		Left = 19,
+		Bank = 20,
+		Right = 21,
+		Output = 22,
+		Read = 10,
+		Write = 9,
+		Touch = 8,
+		Off = 23,
+		Mix = 11,
+		Proj = 12,
+		Trns = 13,
+		Undo = 14,
+		Shift = 2,
+		Punch = 1,
+		User = 0,
+		Loop = 15,
+		Rewind = 3,
+		Ffwd = 4,
+		Stop = 5,
+		Play = 6,
+		RecEnable = 7,
+		Fader = 127,
+	};
+
+	/*
+	enum OutButtonID {
+		Mute = 18,
+		Solo = 17,
+		Rec = 16,
+		Left = 19,
+		Bank = 20,
+		Right = 21,
+		Output = 22,
+		Read = 10,
+		Write = 9,
+		Touch = 8,
+		Off = 23,
+		Mix = 11,
+		Proj = 12,
+		Trns = 13,
+		Undo = 14,
+		Shift = 2,
+		Punch = 1,
+		User = 0,
+		Loop = 15,
+		Rewind = 3,
+		Ffwd = 4,
+		Stop = 5,
+		Play = 6,
+		RecEnable = 7,
+	}
+	*/
 };
 
-#endif /* ardour_generic_midi_control_protocol_h */
+#endif /* ardour_surface_faderport_h */

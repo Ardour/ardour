@@ -15,7 +15,7 @@ def configure(conf):
 def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
-            faderport_midi_protocol.cc
+            faderport.cc
             fmcp_gui.cc
             faderport_interface.cc
     '''

@@ -31,18 +31,18 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 
-#include "faderport_midi_protocol.h"
+#include "faderport.h"
 
 #include "i18n.h"
 
 class GMCPGUI : public Gtk::VBox
 {
 public:
-	GMCPGUI (FaderportMidiControlProtocol&);
+	GMCPGUI (FaderPort&);
 	~GMCPGUI ();
 
 private:
-	FaderportMidiControlProtocol& cp;
+	FaderPort& cp;
 	Gtk::ComboBoxText map_combo;
 	Gtk::Adjustment bank_adjustment;
 	Gtk::SpinButton bank_spinner;
@@ -63,17 +63,17 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 void*
-FaderportMidiControlProtocol::get_gui () const
+FaderPort::get_gui () const
 {
 	if (!gui) {
-		const_cast<FaderportMidiControlProtocol*>(this)->build_gui ();
+		const_cast<FaderPort*>(this)->build_gui ();
 	}
 	static_cast<Gtk::VBox*>(gui)->show_all();
 	return gui;
 }
 
 void
-FaderportMidiControlProtocol::tear_down_gui ()
+FaderPort::tear_down_gui ()
 {
 	if (gui) {
 		Gtk::Widget *w = static_cast<Gtk::VBox*>(gui)->get_parent();
@@ -87,14 +87,14 @@ FaderportMidiControlProtocol::tear_down_gui ()
 }
 
 void
-FaderportMidiControlProtocol::build_gui ()
+FaderPort::build_gui ()
 {
 	gui = (void*) new GMCPGUI (*this);
 }
 
 /*--------------------*/
 
-GMCPGUI::GMCPGUI (FaderportMidiControlProtocol& p)
+GMCPGUI::GMCPGUI (FaderPort& p)
 	: cp (p)
 	, bank_adjustment (1, 1, 100, 1, 10)
 	, bank_spinner (bank_adjustment)

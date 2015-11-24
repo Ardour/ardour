@@ -20,27 +20,27 @@
 #include <pbd/failed_constructor.h>
 
 #include "control_protocol/control_protocol.h"
-#include "faderport_midi_protocol.h"
+#include "faderport.h"
 
 using namespace ARDOUR;
 
 static ControlProtocol*
 new_faderport_midi_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s)
 {
-	FaderportMidiControlProtocol* fmcp;
+	FaderPort* fp;
 
 	try {
-		fmcp =  new FaderportMidiControlProtocol (*s);
+		fp =  new FaderPort (*s);
 	} catch (failed_constructor& err) {
 		return 0;
 	}
 
-	if (fmcp->set_active (true)) {
-		delete fmcp;
+	if (fp->set_active (true)) {
+		delete fp;
 		return 0;
 	}
 
-	return fmcp;
+	return fp;
 }
 
 static void
@@ -52,7 +52,7 @@ delete_faderport_midi_protocol (ControlProtocolDescriptor* /*descriptor*/, Contr
 static bool
 probe_faderport_midi_protocol (ControlProtocolDescriptor* /*descriptor*/)
 {
-	return FaderportMidiControlProtocol::probe ();
+	return FaderPort::probe ();
 }
 
 static ControlProtocolDescriptor faderport_midi_descriptor = {
