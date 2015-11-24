@@ -409,8 +409,6 @@ FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1,
 	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_input_port)->name());
 	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_output_port)->name());
 
-	std::cerr << "Checking " << name1 << (yn ? " + " : " - " ) << name2 << " vs. " << ni << " & " << no << std::endl;
-
 	if (ni == name1 || ni == name2) {
 		if (yn) {
 			connection_state |= InputConnected;
