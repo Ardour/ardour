@@ -21,6 +21,7 @@ out = 'build'
 
 children = [
         'control_protocol',
+        'faderport',
         'generic_midi',
         'mackie',
 ]
@@ -67,6 +68,7 @@ def configure(conf):
 def build(bld):
     bld.recurse('control_protocol')
     bld.recurse('generic_midi')
+    bld.recurse('faderport')
     bld.recurse('mackie')
 
     if bld.is_defined ('HAVE_LO'):
