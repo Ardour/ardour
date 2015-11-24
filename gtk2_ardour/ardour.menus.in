@@ -564,7 +564,28 @@
     </menu>
   </menubar>
 
-  <popup action="RulerMenuPopup">
+  <popup action="editorTabbableButtonMenu">
+          <menuitem action='show-editor'/>
+          <menuitem action='hide-editor'/>
+          <menuitem action='attach-editor'/>
+          <menuitem action='detach-editor'/>
+  </popup>
+
+  <popup action="mixerTabbableButtonMenu">
+          <menuitem action='show-mixer'/>
+          <menuitem action='hide-mixer'/>
+          <menuitem action='attach-mixer'/>
+          <menuitem action='detach-mixer'/>
+  </popup>
+
+  <popup action="prefsTabbableButtonMenu">
+          <menuitem action='show-preferences'/>
+          <menuitem action='hide-preferences'/>
+          <menuitem action='attach-preferences'/>
+          <menuitem action='detach-preferences'/>
+  </popup>
+
+<popup action="RulerMenuPopup">
     <menuitem action="toggle-minsec-ruler"/>
     <menuitem action="toggle-timecode-ruler"/>
     <menuitem action="toggle-samples-ruler"/>

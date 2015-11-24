@@ -577,6 +577,11 @@ ARDOUR_UI::build_menu_bar ()
 	mixer_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), mixer));
 	prefs_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), rc_option_editor));
 
+	/* catch context clicks so that we can show a menu on these buttons */
+
+	editor_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("editor")), false);
+	mixer_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("mixer")), false);
+	prefs_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("preferences")), false);
 
 	editor_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-editor-visibility")));
 	editor_visibility_button.set_name (X_("page switch button"));
@@ -804,4 +809,22 @@ Gtk::Notebook&
 ARDOUR_UI::tabs()
 {
 	return _tabs;
+}
+
+bool
+ARDOUR_UI::tabbable_visibility_button_press (GdkEventButton* ev, string const& tabbable_name)
+{
+	if (ev->button != 3) {
+		return false;
+	}
+
+	/* context menu is defined in *.menus.in
+	 */
+
+	string menu_name = string ("/ui/") + tabbable_name + X_("TabbableButtonMenu");
+	Gtk::Menu* menu = dynamic_cast<Gtk::Menu*> (ActionManager::get_widget (menu_name.c_str()));
+	if (menu) {
+		menu->popup (3, ev->time);
+	}
+	return true;
 }
