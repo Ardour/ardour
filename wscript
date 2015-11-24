@@ -911,7 +911,7 @@ def configure(conf):
 
     have_rf64_riff_support = conf.check_cc(fragment = '''
 #include <sndfile.h>
-int main () { int x = SFC_AUTO_DOWNGRADE_RF64; return 0; }
+int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
 ''',
                                            features  = 'c',
                                            mandatory = False,
