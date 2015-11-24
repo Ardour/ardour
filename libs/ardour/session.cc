@@ -544,6 +544,8 @@ Session::destroy ()
 
 	remove_pending_capture_state ();
 
+	Analyser::flush ();
+
 	_state_of_the_state = StateOfTheState (CannotSave|Deletion);
 
 	/* disconnect from any and all signals that we are connected to */

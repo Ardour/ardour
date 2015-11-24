@@ -40,11 +40,13 @@ class LIBARDOUR_API Analyser {
 	static void init ();
 	static void queue_source_for_analysis (boost::shared_ptr<Source>, bool force);
 	static void work ();
+	static void flush ();
 
   private:
 	static Analyser* the_analyser;
-        static Glib::Threads::Mutex analysis_queue_lock;
-        static Glib::Threads::Cond  SourcesToAnalyse;
+	static Glib::Threads::Mutex analysis_active_lock;
+	static Glib::Threads::Mutex analysis_queue_lock;
+	static Glib::Threads::Cond  SourcesToAnalyse;
 	static std::list<boost::weak_ptr<Source> > analysis_queue;
 
 	static void analyse_audio_file_source (boost::shared_ptr<AudioFileSource>);
