@@ -652,7 +652,8 @@ ARDOUR_UI::toggle_meterbridge ()
 		obscuring = true;
 	}
 
-	if (obscuring && (editor->own_window()->property_has_toplevel_focus() || (mixer->own_window() && mixer->own_window()->property_has_toplevel_focus()))) {
+	if (obscuring && ((editor->own_window() && editor->own_window()->property_has_toplevel_focus()) ||
+	                  (mixer->own_window() && mixer->own_window()->property_has_toplevel_focus()))) {
 		show = true;
 	}
 
