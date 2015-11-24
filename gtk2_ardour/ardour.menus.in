@@ -275,7 +275,7 @@
         <menuitem action='set-tempo-from-edit-range'/>
       </menu>
       <menuitem action='set-mouse-mode-object-range'/>
-      <menuitem action='show-preferences'/>
+      <menuitem action='menu-show-preferences'/>
     </menu>         
 
     <menu name='RegionMenu' action='RegionMenu'>
