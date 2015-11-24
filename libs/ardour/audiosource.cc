@@ -238,6 +238,7 @@ AudioSource::rename_peakfile (string newpath)
 int
 AudioSource::initialize_peakfile (const string& audio_path, const bool in_session)
 {
+	Glib::Threads::Mutex::Lock lm (_initialize_peaks_lock);
 	GStatBuf statbuf;
 
 	_peakpath = construct_peak_filepath (audio_path, in_session);

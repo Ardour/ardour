@@ -156,6 +156,7 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	 *  during the handling of the signal.
 	 */
         mutable Glib::Threads::Mutex _peaks_ready_lock;
+        Glib::Threads::Mutex _initialize_peaks_lock;
 
 	int        _peakfile_fd;
 	framecnt_t peak_leftover_cnt;
