@@ -145,14 +145,14 @@ FaderPort::FaderPort (Session& s)
 FaderPort::~FaderPort ()
 {
 	if (_input_port) {
-		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("unregistering input port %1\n", boost::shared_ptr<ARDOUR::Port>(_input_port)->name()));
+		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("unregistering input port %1\n", boost::shared_ptr<ARDOUR::Port>(_input_port)->name()));
 		AudioEngine::instance()->unregister_port (_input_port);
 		_input_port.reset ();
 	}
 
 	if (_output_port) {
 //		_output_port->drain (10000);  //ToDo:  is this necessary?  It hangs the shutdown, for me
-		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("unregistering output port %1\n", boost::shared_ptr<ARDOUR::Port>(_output_port)->name()));
+		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("unregistering output port %1\n", boost::shared_ptr<ARDOUR::Port>(_output_port)->name()));
 		AudioEngine::instance()->unregister_port (_output_port);
 		_output_port.reset ();
 	}
@@ -346,7 +346,7 @@ FaderPort::sysex_handler (MIDI::Parser &p, MIDI::byte *buf, size_t sz)
 int
 FaderPort::set_active (bool yn)
 {
-	// DEBUG_TRACE (DEBUG::MackieControl, string_compose("MackieControlProtocol::set_active init with yn: '%1'\n", yn));
+	DEBUG_TRACE (DEBUG::FaderPort, string_compose("MackieControlProtocol::set_active init with yn: '%1'\n", yn));
 
 	if (yn == active()) {
 		return 0;
@@ -373,7 +373,7 @@ FaderPort::set_active (bool yn)
 
 	ControlProtocol::set_active (yn);
 
-	// DEBUG_TRACE (DEBUG::MackieControl, string_compose("MackieControlProtocol::set_active done with yn: '%1'\n", yn));
+	DEBUG_TRACE (DEBUG::FaderPort, string_compose("MackieControlProtocol::set_active done with yn: '%1'\n", yn));
 
 	return 0;
 }
@@ -393,6 +393,8 @@ FaderPort::blink ()
 void
 FaderPort::close ()
 {
+	all_lights_out ();
+
 	stop_midi_handling ();
 	session_connections.drop_connections ();
 	port_connection.disconnect ();
@@ -400,8 +402,6 @@ FaderPort::close ()
 
 #if 0
 	route_connections.drop_connections ();
-
-	clear_surfaces();
 #endif
 }
 
@@ -471,7 +471,7 @@ FaderPort::send_feedback ()
 bool
 FaderPort::midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::AsyncMIDIPort> port)
 {
-	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("something happend on  %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
+	DEBUG_TRACE (DEBUG::FaderPort, string_compose ("something happend on  %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
 
 	if (ioc & ~IO_IN) {
 		return false;
@@ -483,7 +483,7 @@ FaderPort::midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::
 			port->clear ();
 		}
 
-		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
+		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
 		framepos_t now = session->engine().sample_time();
 		port->parse (now);
 	}
@@ -631,7 +631,7 @@ FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1,
 		connected ();
 
 	} else {
-		// DEBUG_TRACE (DEBUG::FaderPort, string_compose ("Surface %1 disconnected (input or output or both)\n", _name));
+		DEBUG_TRACE (DEBUG::FaderPort, "Device disconnected (input or output or both)\n");
 		_device_active = false;
 	}
 
