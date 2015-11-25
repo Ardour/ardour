@@ -22,11 +22,79 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
+#include "ardour/types.h"
 
 #include "faderport.h"
 
 using namespace ARDOUR;
 using namespace ArdourSurface;
+
+void
+FaderPort::left ()
+{
+	access_action ("Editor/select-prev-route");
+
+	//ToDo:  bank by 8?
+	//if ( (button_state & ShiftDown) == ShiftDown )
+
+}
+
+void
+FaderPort::right ()
+{
+	access_action ("Editor/select-next-route");
+
+	//ToDo:  bank by 8?
+	//if ( (button_state & ShiftDown) == ShiftDown )
+}
+
+
+void
+FaderPort::read ()
+{
+	if (_current_route) {
+		boost::shared_ptr<AutomationControl> gain = _current_route->gain_control ();
+		if (gain) {
+			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Play );
+		}
+	}
+}
+
+void
+FaderPort::write ()
+{
+	if (_current_route) {
+		boost::shared_ptr<AutomationControl> gain = _current_route->gain_control ();
+		if (gain) {
+			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Write );
+		}
+	}
+}
+
+void
+FaderPort::touch ()
+{
+	if (_current_route) {
+		boost::shared_ptr<AutomationControl> gain = _current_route->gain_control ();
+		if (gain) {
+			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Touch );
+		}
+	}
+}
+
+void
+FaderPort::off ()
+{
+	if (_current_route) {
+		boost::shared_ptr<AutomationControl> gain = _current_route->gain_control ();
+		if (gain) {
+			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Off );
+		}
+	}
+}
+
+
+
 
 void
 FaderPort::undo ()

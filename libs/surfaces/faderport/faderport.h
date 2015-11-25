@@ -148,10 +148,10 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		Bank = 20,
 		Right = 21,
 		Output = 22,
-		Read = 10,
-		Write = 9,
-		Touch = 8,
-		Off = 23,
+		FP_Read = 10,
+		FP_Write = 9,
+		FP_Touch = 8,
+		FP_Off = 23,
 		Mix = 11,
 		Proj = 12,
 		Trns = 13,
@@ -263,6 +263,15 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void map_cut ();
 
 	/* operations (defined in operations.cc) */
+
+	void read ();
+	void write ();
+
+	void left ();
+	void right ();
+
+	void touch ();
+	void off ();
 
 	void undo ();
 	void redo ();

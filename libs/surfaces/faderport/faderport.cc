@@ -100,10 +100,10 @@ FaderPort::FaderPort (Session& s)
 	buttons.insert (std::make_pair (Bank, ButtonInfo (*this, _("Bank"), Bank, 19)));
 	buttons.insert (std::make_pair (Right, ButtonInfo (*this, _("Right"), Right, 18)));
 	buttons.insert (std::make_pair (Output, ButtonInfo (*this, _("Output"), Output, 17)));
-	buttons.insert (std::make_pair (Read, ButtonInfo (*this, _("Read"), Read, 13)));
-	buttons.insert (std::make_pair (Write, ButtonInfo (*this, _("Write"), Write, 14)));
-	buttons.insert (std::make_pair (Touch, ButtonInfo (*this, _("Touch"), Touch, 15)));
-	buttons.insert (std::make_pair (Off, ButtonInfo (*this, _("Off"), Off, 16)));
+	buttons.insert (std::make_pair (FP_Read, ButtonInfo (*this, _("Read"), FP_Read, 13)));
+	buttons.insert (std::make_pair (FP_Write, ButtonInfo (*this, _("Write"), FP_Write, 14)));
+	buttons.insert (std::make_pair (FP_Touch, ButtonInfo (*this, _("Touch"), FP_Touch, 15)));
+	buttons.insert (std::make_pair (FP_Off, ButtonInfo (*this, _("Off"), FP_Off, 16)));
 	buttons.insert (std::make_pair (Mix, ButtonInfo (*this, _("Mix"), Mix, 12)));
 	buttons.insert (std::make_pair (Proj, ButtonInfo (*this, _("Proj"), Proj, 11)));
 	buttons.insert (std::make_pair (Trns, ButtonInfo (*this, _("Trns"), Trns, 10)));
@@ -119,9 +119,21 @@ FaderPort::FaderPort (Session& s)
 	buttons.insert (std::make_pair (RecEnable, ButtonInfo (*this, _("RecEnable"), RecEnable, 0)));
 	buttons.insert (std::make_pair (FaderTouch, ButtonInfo (*this, _("Fader (touch)"), FaderTouch, -1)));
 
+	button_info (Mix).set_action ( string("Common/toggle-editor-mixer"), true);
+	button_info (Proj).set_action ( string("Common/toggle-meterbridge"), true);
+	button_info (Trns).set_action ( string("Window/toggle-locations"), true);
+
+	button_info (Left).set_action ( boost::bind (&FaderPort::left, this), true);
+	button_info (Right).set_action ( boost::bind (&FaderPort::right, this), true);
+
 	button_info (Undo).set_action (boost::bind (&FaderPort::undo, this), true);
 	button_info (Undo).set_action (boost::bind (&FaderPort::redo, this), true, ShiftDown);
 	button_info (Undo).set_flash (true);
+
+	button_info (FP_Read).set_action (boost::bind (&FaderPort::read, this), true);
+	button_info (FP_Write).set_action (boost::bind (&FaderPort::write, this), true);
+	button_info (FP_Touch).set_action (boost::bind (&FaderPort::touch, this), true);
+	button_info (FP_Off).set_action (boost::bind (&FaderPort::off, this), true);
 
 	button_info (Play).set_action (boost::bind (&BasicUI::transport_play, this, true), true);
 	button_info (RecEnable).set_action (boost::bind (&BasicUI::rec_enable_toggle, this), true);
@@ -796,6 +808,8 @@ FaderPort::set_current_route (boost::shared_ptr<Route> r)
 			mp->cut_control()->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_cut, this), this);
 		}
 	}
+	
+	//ToDo: subscribe to the fader automation modes so we can light the LEDs
 
 	map_route_state ();
 }
