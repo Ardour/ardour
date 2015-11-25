@@ -18,6 +18,7 @@
 */
 
 #include "ardour/async_midi_port.h"
+#include "ardour/monitor_processor.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
@@ -43,6 +44,12 @@ void
 FaderPort::mute ()
 {
 	if (!_current_route) {
+		return;
+	}
+
+	if (_current_route == session->monitor_out()) {
+		boost::shared_ptr<MonitorProcessor> mp = _current_route->monitor_control();
+		mp->set_cut_all (!mp->cut_all());
 		return;
 	}
 
