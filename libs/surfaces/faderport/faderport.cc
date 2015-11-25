@@ -38,6 +38,7 @@
 
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
+#include "ardour/amp.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_port.h"
@@ -71,6 +72,8 @@ FaderPort::FaderPort (Session& s)
 	, button_state (ButtonState (0))
 	, blink_state (false)
 {
+	last_encoder_time = 0;
+	
 	boost::shared_ptr<ARDOUR::Port> inp;
 	boost::shared_ptr<ARDOUR::Port> outp;
 
@@ -285,11 +288,53 @@ FaderPort::switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 void
 FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 {
+	int delta = 1;
 	if (pb < 8192) {
 		cerr << "Encoder right\n";
 	} else {
+		delta = -1;
 		cerr << "Encoder left\n";
 	}
+
+	//knob debouncing and hysteresis.  The presonus encoder often sends bursts of events, or goes the wrong direction
+	{
+		last_last_encoder_delta = last_encoder_delta;
+		last_encoder_delta = delta;
+		microseconds_t now = get_microseconds ();
+		if ((now - last_encoder_time) < 10*1000) { //require at least 10ms interval between changes, because the device sometimes sends multiple deltas
+			return;
+		}
+		if ((now - last_encoder_time) < 100*1000) { //avoid directional changes while "spinning", 100ms window
+			if ( (delta == last_encoder_delta) && (delta == last_last_encoder_delta) ) {
+				last_good_encoder_delta = delta;  //3 in a row, grudgingly accept this as the new direction
+			}
+			if (delta != last_good_encoder_delta) {  //otherwise ensure we keep going the same way
+				delta = last_good_encoder_delta;
+			}
+		} else {  //we aren't yet in a spin window, just assume this move is really what we want
+			//NOTE:  if you are worried about where these get initialized, here it is.
+			last_last_encoder_delta = delta;
+			last_encoder_delta = delta;
+		}
+		last_encoder_time = now;
+		last_good_encoder_delta = delta;
+	}
+	
+	if (_current_route) {
+
+		if ( (button_state & ShiftDown) == ShiftDown ) {    //shift+encoder = input trim
+			boost::shared_ptr<AutomationControl> gain = _current_route->trim()->gain_control ();
+			if (gain) {
+				float val = gain->get_user();  //for gain elements, the "user" value is in dB
+				val += delta;
+				gain->set_user(val);
+			}
+		} else {  //pan / balance
+			//ToDo
+		}
+		
+	}
+	
 }
 
 void
