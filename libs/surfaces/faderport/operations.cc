@@ -102,15 +102,18 @@ FaderPort::use_master ()
 		if (_current_route == r) {
 			r = pre_master_route.lock();
 			set_current_route (r);
-			if (r == session->monitor_out() || r == session->master_out()) {
+			if (r == session->monitor_out()) {
 				button_info(Output).set_led_state (_output_port, true);
+				blinkers.push_back (Output);
 			} else {
 				button_info(Output).set_led_state (_output_port, false);
+				blinkers.remove (Output);
 			}
 		} else {
 			pre_master_route = boost::weak_ptr<Route> (_current_route);
 			set_current_route (r);
 			button_info(Output).set_led_state (_output_port, true);
+			blinkers.remove (Output);
 		}
 	}
 }
@@ -119,19 +122,23 @@ void
 FaderPort::use_monitor ()
 {
 	boost::shared_ptr<Route> r = session->monitor_out();
+
 	if (r) {
 		if (_current_route == r) {
 			r = pre_monitor_route.lock();
 			set_current_route (r);
-			if (r == session->monitor_out() || r == session->master_out()) {
+			if (r == session->master_out()) {
 				button_info(Output).set_led_state (_output_port, true);
 			} else {
 				button_info(Output).set_led_state (_output_port, false);
 			}
+			blinkers.remove (Output);
 		} else {
 			pre_monitor_route = boost::weak_ptr<Route> (_current_route);
 			set_current_route (r);
 			button_info(Output).set_led_state (_output_port, true);
+			blinkers.push_back (Output);
 		}
+	} else {
 	}
 }

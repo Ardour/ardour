@@ -43,6 +43,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/monitor_processor.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -784,9 +785,32 @@ FaderPort::set_current_route (boost::shared_ptr<Route> r)
 		if (control) {
 			control->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_gain, this), this);
 		}
+
+		boost::shared_ptr<MonitorProcessor> mp = _current_route->monitor_control();
+		if (mp) {
+			mp->cut_control()->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_cut, this), this);
+		}
 	}
 
 	map_route_state ();
+}
+
+void
+FaderPort::map_cut ()
+{
+	boost::shared_ptr<MonitorProcessor> mp = _current_route->monitor_control();
+
+	if (mp) {
+		bool yn = mp->cut_all ();
+		button_info (Mute).set_led_state (_output_port, yn);
+		if (yn) {
+			blinkers.push_back (Mute);
+		} else {
+			blinkers.remove (Mute);
+		}
+	} else {
+		blinkers.remove (Mute);
+	}
 }
 
 void
@@ -875,12 +899,14 @@ FaderPort::map_route_state ()
 		button_info (Mute).set_led_state (_output_port, false);
 		button_info (Solo).set_led_state (_output_port, false);
 		button_info (Rec).set_led_state (_output_port, false);
+		blinkers.remove (Mute);
+		blinkers.remove (Solo);
 	} else {
 		/* arguments to these map_*() methods are all ignored */
 		map_mute (0);
 		map_solo (false, 0, false);
 		map_recenable ();
-
 		map_gain ();
+		map_cut ();
 	}
 }

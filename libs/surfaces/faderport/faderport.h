@@ -260,6 +260,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void map_mute (void*);
 	void map_recenable ();
 	void map_gain ();
+	void map_cut ();
 
 	/* operations (defined in operations.cc) */
 
