@@ -167,6 +167,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	bool _device_active;
 	int fader_msb;
 	int fader_lsb;
+	bool fader_is_touched;
 
 	void sysex_handler (MIDI::Parser &p, MIDI::byte *, size_t);
 	void switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb);
@@ -288,6 +289,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void map_listen (void*,bool);
 	void map_mute (void*);
 	void map_recenable ();
+	void map_gain ();
 
 	/* operations (defined in operations.cc) */
 

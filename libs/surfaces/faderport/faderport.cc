@@ -69,6 +69,7 @@ FaderPort::FaderPort (Session& s)
 	, _device_active (false)
 	, fader_msb (0)
 	, fader_lsb (0)
+	, fader_is_touched (false)
 	, button_state (ButtonState (0))
 	, blink_state (false)
 {
@@ -278,6 +279,9 @@ FaderPort::switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	case Rewind:
 		button_state = (tb->value ? ButtonState (button_state|RewindDown) : ButtonState (button_state&~RewindDown));
 		break;
+	case FaderTouch:
+		fader_is_touched = tb->value;
+		break;
 	default:
 		break;
 	}
@@ -315,7 +319,14 @@ FaderPort::fader_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	}
 
 	if (was_fader) {
-		cerr << "Fader now at " << ((fader_msb<<7)|fader_lsb) << endl;
+		if (_current_route) {
+			boost::shared_ptr<AutomationControl> gain = _current_route->gain_control ();
+			if (gain) {
+				int ival = (fader_msb << 7) | fader_lsb;
+				float val = gain->interface_to_internal (ival/16384.0);
+				_current_route->set_gain (val, this);
+			}
+		}
 	}
 }
 
@@ -787,9 +798,15 @@ FaderPort::gui_track_selection_changed (RouteNotificationListPtr routes)
 		_current_route->mute_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_mute, this, _1), this);
 		_current_route->solo_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_solo, this, _1, _2, _3), this);
 		_current_route->listen_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_listen, this, _1, _2), this);
+
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_route);
 		if (t) {
 			t->RecordEnableChanged.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_recenable, this), this);
+		}
+
+		boost::shared_ptr<AutomationControl> control = _current_route->gain_control ();
+		if (control) {
+			control->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_gain, this), this);
 		}
 	}
 
@@ -826,6 +843,56 @@ FaderPort::map_recenable ()
 }
 
 void
+FaderPort::map_gain ()
+{
+	if (fader_is_touched) {
+		/* Do not send fader moves while the user is touching the fader */
+		return;
+	}
+
+	if (!_current_route) {
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> control = _current_route->gain_control ();
+	double val;
+
+	if (!control) {
+		val = 0.0;
+	} else {
+		val = control->internal_to_interface (control->get_value ());
+	}
+
+	/* Faderport sends fader position with range 0..16384 (though some of
+	 * the least-significant bits at the top end are missing - it may only
+	 * get to 1636X or so).
+	 *
+	 * But ... position must be sent in the range 0..1023.
+	 *
+	 * Thanks, Obama.
+	 */
+
+	int ival = (int) lrintf (val * 1023.0);
+
+	/* MIDI normalization requires that we send two separate messages here,
+	 * not one single 6 byte one.
+	 */
+
+	MIDI::byte buf[3];
+
+	buf[0] = 0xb0;
+	buf[1] = 0x0;
+	buf[2] = ival >> 7;
+
+	_output_port->write (buf, 3, 0);
+
+	buf[1] = 0x20;
+	buf[2] = ival & 0x7f;
+
+	_output_port->write (buf, 3, 0);
+}
+
+void
 FaderPort::map_route_state ()
 {
 	if (!_current_route) {
@@ -837,5 +904,7 @@ FaderPort::map_route_state ()
 		map_mute (0);
 		map_solo (false, 0, false);
 		map_recenable ();
+
+		map_gain ();
 	}
 }
