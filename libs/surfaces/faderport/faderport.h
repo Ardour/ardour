@@ -79,18 +79,10 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 
 	int set_active (bool yn);
 
-	/* It would be nice to send a device query message here to see if
-	 * faderport is out there. But the probe() API doesn't provide
-	 * a set of ports to be checked, so there's really no nice
-	 * way to do this. We would have to fall back on the PortManager
-	 * and get a list of all physical ports. Could be done ....
+	/* we probe for a device when our ports are connected. Before that,
+	   there's no way to know if the device exists or not.
 	 */
 	static bool probe() { return true; }
-
-	void set_feedback_interval (ARDOUR::microseconds_t);
-
-	int set_feedback (bool yn);
-	bool get_feedback () const;
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -99,25 +91,10 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void* get_gui () const;
 	void  tear_down_gui ();
 
-	void set_current_bank (uint32_t);
-	void next_bank ();
-	void prev_bank ();
-
-	void reset_controllables ();
-
-	void set_motorised (bool);
-
-	bool motorised () const {
-		return _motorised;
-	}
-
-	void set_threshold (int);
-
-	int threshold () const {
-		return _threshold;
-	}
-
-	bool device_active() const { return _device_active; }
+	/* Note: because the FaderPort speaks an inherently duplex protocol,
+	   we do not implement get/set_feedback() since this aspect of
+	   support for the protocol is not optional.
+	*/
 
 	void do_request (FaderPortRequest*);
 	int stop ();
@@ -129,27 +106,9 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
 
-	ARDOUR::microseconds_t _feedback_interval;
-	ARDOUR::microseconds_t last_feedback_time;
-	int native_counter;
-
-	bool  do_feedback;
-	void  send_feedback ();
-
 	PBD::ScopedConnectionList midi_connections;
 
 	bool midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::AsyncMIDIPort> port);
-
-	std::string _current_binding;
-	uint32_t _bank_size;
-	uint32_t _current_bank;
-	/** true if this surface is motorised.  If it is, we assume
-	    that the surface's controls are never out of sync with
-	    Ardour's state, so we don't have to take steps to avoid
-	    values jumping around when things are not in sync.
-	*/
-	bool _motorised;
-	int _threshold;
 
 	mutable void *gui;
 	void build_gui ();

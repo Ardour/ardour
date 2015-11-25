@@ -46,16 +46,6 @@ public:
 private:
 	FaderPort& cp;
 	Gtk::ComboBoxText map_combo;
-	Gtk::Adjustment bank_adjustment;
-	Gtk::SpinButton bank_spinner;
-	Gtk::CheckButton motorised_button;
-	Gtk::Adjustment threshold_adjustment;
-	Gtk::SpinButton threshold_spinner;
-
-	void binding_changed ();
-	void bank_changed ();
-	void motorised_changed ();
-	void threshold_changed ();
 };
 
 }
@@ -101,11 +91,6 @@ FaderPort::build_gui ()
 
 GMCPGUI::GMCPGUI (FaderPort& p)
 	: cp (p)
-	, bank_adjustment (1, 1, 100, 1, 10)
-	, bank_spinner (bank_adjustment)
-	, motorised_button ("Motorised")
-	, threshold_adjustment (p.threshold(), 1, 127, 1, 10)
-	, threshold_spinner (threshold_adjustment)
 {
 }
 
@@ -113,26 +98,3 @@ GMCPGUI::~GMCPGUI ()
 {
 }
 
-void
-GMCPGUI::bank_changed ()
-{
-//	int new_bank = bank_adjustment.get_value() - 1;
-//	cp.set_current_bank (new_bank);
-}
-
-void
-GMCPGUI::binding_changed ()
-{
-}
-
-void
-GMCPGUI::motorised_changed ()
-{
-//	cp.set_motorised (motorised_button.get_active ());
-}
-
-void
-GMCPGUI::threshold_changed ()
-{
-//	cp.set_threshold (threshold_adjustment.get_value());
-}

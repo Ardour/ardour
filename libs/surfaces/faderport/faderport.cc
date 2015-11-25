@@ -62,8 +62,6 @@ using namespace std;
 FaderPort::FaderPort (Session& s)
 	: ControlProtocol (s, _("Faderport"))
 	, AbstractUI<FaderPortRequest> ("faderport")
-	, _motorised (true)
-	, _threshold (10)
 	, gui (0)
 	, connection_state (ConnectionState (0))
 	, _device_active (false)
@@ -86,18 +84,7 @@ FaderPort::FaderPort (Session& s)
 		throw failed_constructor();
 	}
 
-	do_feedback = false;
-	_feedback_interval = 10 * 1000; // microseconds
-	last_feedback_time = 0;
-	native_counter = 0;
-
-	_current_bank = 0;
-	_bank_size = 0;
-
 	TrackSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::gui_track_selection_changed, this, _1), this);
-
-	Session::SendFeedback.connect_same_thread (*this, boost::bind (&FaderPort::send_feedback, this));
-	//Session::SendFeedback.connect (*this, MISSING_INVALIDATOR, boost::bind (&FaderPort::send_feedback, this), this);;
 
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::connection_handler, this, _1, _2, _3, _4, _5), this);
@@ -471,33 +458,6 @@ FaderPort::connect_session_signals()
 	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_transport_state_changed, this), this);
 }
 
-void
-FaderPort::set_feedback_interval (microseconds_t ms)
-{
-	_feedback_interval = ms;
-}
-
-void
-FaderPort::send_feedback ()
-{
-	/* This is executed in RT "process" context", so no blocking calls
-	 */
-
-	if (!do_feedback) {
-		return;
-	}
-
-	microseconds_t now = get_microseconds ();
-
-	if (last_feedback_time != 0) {
-		if ((now - last_feedback_time) < _feedback_interval) {
-			return;
-		}
-	}
-
-	last_feedback_time = now;
-}
-
 bool
 FaderPort::midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::AsyncMIDIPort> port)
 {
@@ -567,60 +527,6 @@ FaderPort::set_state (const XMLNode& node, int version)
 	}
 
 	return 0;
-}
-
-int
-FaderPort::set_feedback (bool yn)
-{
-	do_feedback = yn;
-	last_feedback_time = 0;
-	return 0;
-}
-
-bool
-FaderPort::get_feedback () const
-{
-	return do_feedback;
-}
-
-void
-FaderPort::set_current_bank (uint32_t b)
-{
-	_current_bank = b;
-//	reset_controllables ();
-}
-
-void
-FaderPort::next_bank ()
-{
-	_current_bank++;
-//	reset_controllables ();
-}
-
-void
-FaderPort::prev_bank()
-{
-	if (_current_bank) {
-		_current_bank--;
-//		reset_controllables ();
-	}
-}
-
-void
-FaderPort::set_motorised (bool m)
-{
-	_motorised = m;
-}
-
-void
-FaderPort::set_threshold (int t)
-{
-	_threshold = t;
-}
-
-void
-FaderPort::reset_controllables ()
-{
 }
 
 bool
