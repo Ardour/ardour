@@ -17,10 +17,11 @@
 
 */
 
-#include <stdint.h>
-
+#include <cstdlib>
 #include <sstream>
 #include <algorithm>
+
+#include <stdint.h>
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
@@ -167,10 +168,34 @@ FaderPort::~FaderPort ()
 	tear_down_gui ();
 }
 
+void
+FaderPort::all_lights_out ()
+{
+	for (ButtonMap::iterator b = buttons.begin(); b != buttons.end(); ++b) {
+		b->second.set_led_state (_output_port, false);
+		g_usleep (1000);
+	}
+}
+
+void
+FaderPort::party ()
+{
+	for (int n = 0; n < 5; ++n) {
+		for (ButtonMap::iterator b = buttons.begin(); b != buttons.end(); ++b) {
+			b->second.set_led_state (_output_port, random() % 3);
+			g_usleep (1000);
+		}
+		g_usleep (250000);
+	}
+
+	all_lights_out ();
+}
+
+
 FaderPort::ButtonInfo&
 FaderPort::button_info (ButtonID id) const
 {
-	map<ButtonID,ButtonInfo>::const_iterator b = buttons.find (id);
+	ButtonMap::const_iterator b = buttons.find (id);
 	assert (b != buttons.end());
 	return const_cast<ButtonInfo&>(b->second);
 }
@@ -240,6 +265,10 @@ FaderPort::sysex_handler (MIDI::Parser &p, MIDI::byte *buf, size_t sz)
 		native[2] = 0x64;
 
 		_output_port->write (native, 3, 0);
+
+		g_usleep (10000);
+		all_lights_out ();
+		party ();
 	}
 }
 
@@ -521,6 +550,11 @@ FaderPort::ButtonInfo::set_led_state (boost::shared_ptr<MIDI::Port> port, int on
 {
 	if (led_on == (bool) onoff) {
 		/* nothing to do */
+		return;
+	}
+
+	if (out < 0) {
+		/* fader button ID - no LED */
 		return;
 	}
 

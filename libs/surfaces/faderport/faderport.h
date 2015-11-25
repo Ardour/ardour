@@ -239,8 +239,13 @@ class FaderPort : public ARDOUR::ControlProtocol {
 		} on_release;
 	};
 
-	std::map<ButtonID,ButtonInfo> buttons;
+	typedef std::map<ButtonID,ButtonInfo> ButtonMap;
+
+	ButtonMap buttons;
 	ButtonInfo& button_info (ButtonID) const;
+
+	void all_lights_out ();
+	void party ();
 };
 
 }
