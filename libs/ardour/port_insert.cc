@@ -172,10 +172,10 @@ PortInsert::state (bool full)
 	node.add_property ("type", "port");
 	snprintf (buf, sizeof (buf), "%" PRIu32, _bitslot);
 	node.add_property ("bitslot", buf);
-        snprintf (buf, sizeof (buf), "%" PRId64, _measured_latency);
-        node.add_property("latency", buf);
-        snprintf (buf, sizeof (buf), "%u", _session.get_block_size());
-        node.add_property("block_size", buf);
+	snprintf (buf, sizeof (buf), "%" PRId64, _measured_latency);
+	node.add_property("latency", buf);
+	snprintf (buf, sizeof (buf), "%u", _session.get_block_size());
+	node.add_property("block-size", buf);
 
 	return node;
 }
@@ -210,17 +210,17 @@ PortInsert::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-        uint32_t blocksize = 0;
-        if ((prop = node.property ("block_size")) != 0) {
-                sscanf (prop->value().c_str(), "%u", &blocksize);
-        }
+	uint32_t blocksize = 0;
+	if ((prop = node.property ("block-size")) != 0) {
+		sscanf (prop->value().c_str(), "%u", &blocksize);
+	}
 
-        //if the jack period is the same as when the value was saved, we can recall our latency..
-        if ( (_session.get_block_size() == blocksize) && (prop = node.property ("latency")) != 0) {
-                uint32_t latency = 0;
-                sscanf (prop->value().c_str(), "%u", &latency);
-                _measured_latency = latency;
-        }
+	//if the jack period is the same as when the value was saved, we can recall our latency..
+	if ( (_session.get_block_size() == blocksize) && (prop = node.property ("latency")) != 0) {
+		uint32_t latency = 0;
+		sscanf (prop->value().c_str(), "%u", &latency);
+		_measured_latency = latency;
+	}
 
 	if (!node.property ("ignore-bitslot")) {
 		if ((prop = node.property ("bitslot")) == 0) {
