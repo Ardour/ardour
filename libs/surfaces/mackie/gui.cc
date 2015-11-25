@@ -869,7 +869,11 @@ MackieControlProtocolGUI::build_midi_port_list (vector<string> const & ports, bo
 	for (vector<string>::const_iterator p = ports.begin(); p != ports.end(); ++p) {
 		row = *store->append ();
 		row[midi_port_columns.full_name] = *p;
-		row[midi_port_columns.short_name] = (*p).substr ((*p).find (':') + 1);
+		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*p);
+		if (pn.empty ()) {
+			pn = (*p).substr ((*p).find (':') + 1);
+		}
+		row[midi_port_columns.short_name] = pn;
 	}
 
 	return store;
