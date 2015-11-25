@@ -140,6 +140,13 @@ FaderPort::FaderPort (Session& s)
 	/* See comments about Stop above .. */
 	button_info (Rewind).set_action (boost::bind (&BasicUI::rewind, this), true, RewindDown);
 	button_info (Rewind).set_action (boost::bind (&BasicUI::goto_start, this), true, ButtonState (RewindDown|StopDown));
+
+	button_info (Loop).set_action (boost::bind (&BasicUI::loop_toggle, this), true);
+	button_info (Loop).set_action (boost::bind (&BasicUI::add_marker, this, string()), true, ShiftDown);
+
+	button_info (Punch).set_action (boost::bind (&BasicUI::prev_marker, this), true, ShiftDown);
+	button_info (User).set_action (boost::bind (&BasicUI::next_marker, this), true, ShiftDown);
+
 }
 
 FaderPort::~FaderPort ()
