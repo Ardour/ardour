@@ -115,31 +115,38 @@ FaderPort::FaderPort (Session& s)
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::connection_handler, this, _1, _2, _3, _4, _5), midi_ui_context());
 
-	buttons.insert (std::make_pair (18, ButtonID (_("Mute"), 18, 21)));
-	buttons.insert (std::make_pair (17, ButtonID (_("Solo"), 17, 22)));
-	buttons.insert (std::make_pair (16, ButtonID (_("Rec"), 16, 23)));
-	buttons.insert (std::make_pair (19, ButtonID (_("Left"), 19, 20)));
-	buttons.insert (std::make_pair (20, ButtonID (_("Bank"), 20, 19)));
-	buttons.insert (std::make_pair (21, ButtonID (_("Right"), 21, 18)));
-	buttons.insert (std::make_pair (22, ButtonID (_("Output"), 22, 17)));
-	buttons.insert (std::make_pair (10, ButtonID (_("Read"), 10, 13)));
-	buttons.insert (std::make_pair (9, ButtonID (_("Write"), 9, 14)));
-	buttons.insert (std::make_pair (8, ButtonID (_("Touch"), 8, 15)));
-	buttons.insert (std::make_pair (23, ButtonID (_("Off"), 23, 16)));
-	buttons.insert (std::make_pair (11, ButtonID (_("Mix"), 11, 12)));
-	buttons.insert (std::make_pair (12, ButtonID (_("Proj"), 12, 11)));
-	buttons.insert (std::make_pair (13, ButtonID (_("Trns"), 13, 10)));
-	buttons.insert (std::make_pair (14, ButtonID (_("Undo"), 14, 9)));
-	buttons.insert (std::make_pair (2, ButtonID (_("Shift"), 2, 5)));
-	buttons.insert (std::make_pair (1, ButtonID (_("Punch"), 1, 6)));
-	buttons.insert (std::make_pair (0, ButtonID (_("User"), 0, 7)));
-	buttons.insert (std::make_pair (15, ButtonID (_("Loop"), 15, 8)));
-	buttons.insert (std::make_pair (3, ButtonID (_("Rewind"), 3, 4)));
-	buttons.insert (std::make_pair (4, ButtonID (_("Ffwd"), 4, 3)));
-	buttons.insert (std::make_pair (5, ButtonID (_("Stop"), 5, 2)));
-	buttons.insert (std::make_pair (6, ButtonID (_("Play"), 6, 1)));
-	buttons.insert (std::make_pair (7, ButtonID (_("RecEnable"), 7, 0)));
-	buttons.insert (std::make_pair (127, ButtonID (_("Fader (touch)"), 127, -1)));
+	buttons.insert (std::make_pair (Mute, ButtonInfo (*this, _("Mute"), Mute, 21)));
+	buttons.insert (std::make_pair (Solo, ButtonInfo (*this, _("Solo"), Solo, 22)));
+	buttons.insert (std::make_pair (Rec, ButtonInfo (*this, _("Rec"), Rec, 23)));
+	buttons.insert (std::make_pair (Left, ButtonInfo (*this, _("Left"), Left, 20)));
+	buttons.insert (std::make_pair (Bank, ButtonInfo (*this, _("Bank"), Bank, 19)));
+	buttons.insert (std::make_pair (Right, ButtonInfo (*this, _("Right"), Right, 18)));
+	buttons.insert (std::make_pair (Output, ButtonInfo (*this, _("Output"), Output, 17)));
+	buttons.insert (std::make_pair (Read, ButtonInfo (*this, _("Read"), Read, 13)));
+	buttons.insert (std::make_pair (Write, ButtonInfo (*this, _("Write"), Write, 14)));
+	buttons.insert (std::make_pair (Touch, ButtonInfo (*this, _("Touch"), Touch, 15)));
+	buttons.insert (std::make_pair (Off, ButtonInfo (*this, _("Off"), Off, 16)));
+	buttons.insert (std::make_pair (Mix, ButtonInfo (*this, _("Mix"), Mix, 12)));
+	buttons.insert (std::make_pair (Proj, ButtonInfo (*this, _("Proj"), Proj, 11)));
+	buttons.insert (std::make_pair (Trns, ButtonInfo (*this, _("Trns"), Trns, 10)));
+	buttons.insert (std::make_pair (Undo, ButtonInfo (*this, _("Undo"), Undo, 9)));
+	buttons.insert (std::make_pair (Shift, ButtonInfo (*this, _("Shift"), Shift, 5)));
+	buttons.insert (std::make_pair (Punch, ButtonInfo (*this, _("Punch"), Punch, 6)));
+	buttons.insert (std::make_pair (User, ButtonInfo (*this, _("User"), User, 7)));
+	buttons.insert (std::make_pair (Loop, ButtonInfo (*this, _("Loop"), Loop, 8)));
+	buttons.insert (std::make_pair (Rewind, ButtonInfo (*this, _("Rewind"), Rewind, 4)));
+	buttons.insert (std::make_pair (Ffwd, ButtonInfo (*this, _("Ffwd"), Ffwd, 3)));
+	buttons.insert (std::make_pair (Stop, ButtonInfo (*this, _("Stop"), Stop, 2)));
+	buttons.insert (std::make_pair (Play, ButtonInfo (*this, _("Play"), Play, 1)));
+	buttons.insert (std::make_pair (RecEnable, ButtonInfo (*this, _("RecEnable"), RecEnable, 0)));
+	buttons.insert (std::make_pair (FaderTouch, ButtonInfo (*this, _("Fader (touch)"), FaderTouch, -1)));
+
+	button_info (Undo).set_action (boost::bind (&BasicUI::undo, this), true);
+	button_info (Play).set_action (boost::bind (&BasicUI::transport_play, this, false), true);
+	button_info (RecEnable).set_action (boost::bind (&BasicUI::rec_enable_toggle, this), true);
+	button_info (Stop).set_action (boost::bind (&BasicUI::transport_stop, this), true);
+	button_info (Ffwd).set_action (boost::bind (&BasicUI::ffwd, this), true);
+	button_info (Rewind).set_action (boost::bind (&BasicUI::rewind, this), true);
 }
 
 FaderPort::~FaderPort ()
@@ -160,26 +167,20 @@ FaderPort::~FaderPort ()
 	tear_down_gui ();
 }
 
+FaderPort::ButtonInfo&
+FaderPort::button_info (ButtonID id) const
+{
+	map<ButtonID,ButtonInfo>::const_iterator b = buttons.find (id);
+	assert (b != buttons.end());
+	return const_cast<ButtonInfo&>(b->second);
+}
+
 void
 FaderPort::switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
-	map<int,ButtonID>::const_iterator b = buttons.find (tb->controller_number);
-
-	if (b != buttons.end()) {
-
-		cerr << b->second.name << endl;
-
-		if (b->second.out >= 0) {
-			/* send feedback to turn on the LED */
-
-			MIDI::byte buf[3];
-			buf[0] = 0xa0;
-			buf[1] = b->second.out;
-			buf[2] = tb->value;
-
-			_output_port->write (buf, 3, 0);
-		}
-	}
+	ButtonInfo& bi (button_info ((ButtonID) tb->controller_number));
+	bi.set_led_state (_output_port, (int)tb->value);
+	bi.invoke (ButtonState (0), tb->value ? true : false);
 }
 
 void
@@ -462,4 +463,71 @@ FaderPort::connected ()
 	buf[5] = 0xf7;
 
 	_output_port->write (buf, 6, 0);
+}
+
+void
+FaderPort::ButtonInfo::invoke (FaderPort::ButtonState bs, bool press)
+{
+	switch (type) {
+	case NamedAction:
+		if (press) {
+			if (!on_press.action_name.empty()) {
+				fp.access_action (on_press.action_name);
+			}
+		} else {
+			if (!on_release.action_name.empty()) {
+				fp.access_action (on_press.action_name);
+			}
+		}
+		break;
+	case InternalFunction:
+		if (press) {
+			if (on_press.function) {
+				on_press.function ();
+			}
+		} else {
+			if (on_release.function) {
+				on_release.function ();
+			}
+		}
+		break;
+	}
+}
+
+void
+FaderPort::ButtonInfo::set_action (string const& name, bool when_pressed)
+{
+	type = NamedAction;
+	if (when_pressed) {
+		on_press.action_name = name;
+	} else {
+		on_release.action_name = name;
+	}
+}
+
+void
+FaderPort::ButtonInfo::set_action (boost::function<void()> f, bool when_pressed)
+{
+	type = InternalFunction;
+	if (when_pressed) {
+		on_press.function = f;
+	} else {
+		on_release.function = f;
+	}
+}
+
+void
+FaderPort::ButtonInfo::set_led_state (boost::shared_ptr<MIDI::Port> port, int onoff)
+{
+	if (led_on == (bool) onoff) {
+		/* nothing to do */
+		return;
+	}
+
+	MIDI::byte buf[3];
+	buf[0] = 0xa0;
+	buf[1] = out;
+	buf[2] = onoff ? 1 : 0;
+	port->write (buf, 3, 0);
+	led_on = (onoff ? true : false);
 }

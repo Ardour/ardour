@@ -158,14 +158,89 @@ class FaderPort : public ARDOUR::ControlProtocol {
 	void encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb);
 	void fader_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb);
 
-	struct ButtonID {
-		ButtonID (std::string const& str, int i, int o)
-			: name (str), in (i), out (o) {}
-		std::string name;
-		int in;
-		int out;
+	enum ButtonID {
+		Mute = 18,
+		Solo = 17,
+		Rec = 16,
+		Left = 19,
+		Bank = 20,
+		Right = 21,
+		Output = 22,
+		Read = 10,
+		Write = 9,
+		Touch = 8,
+		Off = 23,
+		Mix = 11,
+		Proj = 12,
+		Trns = 13,
+		Undo = 14,
+		Shift = 2,
+		Punch = 1,
+		User = 0,
+		Loop = 15,
+		Rewind = 3,
+		Ffwd = 4,
+		Stop = 5,
+		Play = 6,
+		RecEnable = 7,
+		FaderTouch = 127,
 	};
-	std::map<int,ButtonID> buttons;
+
+	enum ButtonState {
+		ShiftDown,
+		RewindDown,
+		StopDown,
+	};
+
+	ButtonState button_state;
+
+	friend class ButtonInfo;
+
+	class ButtonInfo {
+	  public:
+
+		enum ActionType {
+			NamedAction,
+			InternalFunction,
+		};
+
+		ButtonInfo (FaderPort& f, std::string const& str, ButtonID i, int o)
+			: fp (f)
+			, name (str)
+			, id (i)
+			, out (o)
+			, type (NamedAction)
+			, led_on (false)
+		{}
+
+		void set_action (std::string const& action_name, bool on_press);
+		void set_action (boost::function<void()> function, bool on_press);
+
+		void set_led_state (boost::shared_ptr<MIDI::Port>, int onoff);
+
+		void invoke (ButtonState bs, bool press);
+
+	  private:
+		FaderPort& fp;
+		std::string name;
+		ButtonID id;
+		int out;
+		ActionType type;
+		bool led_on;
+
+		struct {
+			std::string action_name;
+			boost::function<void()> function;
+		} on_press;
+
+		struct {
+			std::string action_name;
+			boost::function<void()> function;
+		} on_release;
+	};
+
+	std::map<ButtonID,ButtonInfo> buttons;
+	ButtonInfo& button_info (ButtonID) const;
 };
 
 }
