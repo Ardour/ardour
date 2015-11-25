@@ -35,6 +35,8 @@
 
 #include "i18n.h"
 
+namespace ArdourSurface {
+
 class GMCPGUI : public Gtk::VBox
 {
 public:
@@ -56,8 +58,11 @@ private:
 	void threshold_changed ();
 };
 
+}
+
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ArdourSurface;
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;

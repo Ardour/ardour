@@ -61,6 +61,8 @@ class MIDIControllable;
 class MIDIFunction;
 class MIDIAction;
 
+namespace ArdourSurface {
+
 class FaderPort : public ARDOUR::ControlProtocol {
   public:
 	FaderPort (ARDOUR::Session&);
@@ -165,5 +167,7 @@ class FaderPort : public ARDOUR::ControlProtocol {
 	};
 	std::map<int,ButtonID> buttons;
 };
+
+}
 
 #endif /* ardour_surface_faderport_h */

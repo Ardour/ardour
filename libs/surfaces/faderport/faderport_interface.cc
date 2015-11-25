@@ -23,6 +23,7 @@
 #include "faderport.h"
 
 using namespace ARDOUR;
+using namespace ArdourSurface;
 
 static ControlProtocol*
 new_faderport_midi_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s)

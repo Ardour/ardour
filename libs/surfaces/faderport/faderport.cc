@@ -48,6 +48,7 @@
 #include "faderport.h"
 
 using namespace ARDOUR;
+using namespace ArdourSurface;
 using namespace PBD;
 using namespace Glib;
 using namespace std;
