@@ -95,7 +95,11 @@ FaderPort::use_master ()
 		if (_current_route == r) {
 			r = pre_master_route.lock();
 			set_current_route (r);
-			button_info(Output).set_led_state (_output_port, false);
+			if (r == session->monitor_out() || r == session->master_out()) {
+				button_info(Output).set_led_state (_output_port, true);
+			} else {
+				button_info(Output).set_led_state (_output_port, false);
+			}
 		} else {
 			pre_master_route = boost::weak_ptr<Route> (_current_route);
 			set_current_route (r);
@@ -112,7 +116,11 @@ FaderPort::use_monitor ()
 		if (_current_route == r) {
 			r = pre_monitor_route.lock();
 			set_current_route (r);
-			button_info(Output).set_led_state (_output_port, false);
+			if (r == session->monitor_out() || r == session->master_out()) {
+				button_info(Output).set_led_state (_output_port, true);
+			} else {
+				button_info(Output).set_led_state (_output_port, false);
+			}
 		} else {
 			pre_monitor_route = boost::weak_ptr<Route> (_current_route);
 			set_current_route (r);
