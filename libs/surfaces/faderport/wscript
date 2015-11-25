@@ -18,6 +18,7 @@ def build(bld):
             faderport.cc
             gui.cc
             faderport_interface.cc
+    	    operations.cc
     '''
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_faderport"' ]

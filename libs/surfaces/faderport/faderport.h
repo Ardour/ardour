@@ -201,9 +201,9 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	};
 
 	enum ButtonState {
-		ShiftDown,
-		RewindDown,
-		StopDown,
+		ShiftDown = 0x1,
+		RewindDown = 0x2,
+		StopDown = 0x4,
 	};
 
 	ButtonState button_state;
@@ -228,8 +228,8 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 			, flash (false)
 		{}
 
-		void set_action (std::string const& action_name, bool on_press);
-		void set_action (boost::function<void()> function, bool on_press);
+		void set_action (std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
+		void set_action (boost::function<void()> function, bool on_press, FaderPort::ButtonState = ButtonState (0));
 		void set_led_state (boost::shared_ptr<MIDI::Port>, int onoff);
 		void invoke (ButtonState bs, bool press);
 		bool uses_flash () const { return flash; }
@@ -244,15 +244,17 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		bool led_on;
 		bool flash;
 
-		struct {
+		/* could be a union if boost::function didn't require a
+		 * constructor
+		 */
+		struct ToDo {
 			std::string action_name;
 			boost::function<void()> function;
-		} on_press;
+		};
 
-		struct {
-			std::string action_name;
-			boost::function<void()> function;
-		} on_release;
+		typedef std::map<FaderPort::ButtonState,ToDo> ToDoMap;
+		ToDoMap on_press;
+		ToDoMap on_release;
 	};
 
 	typedef std::map<ButtonID,ButtonInfo> ButtonMap;
@@ -266,6 +268,11 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void close ();
 	void start_midi_handling ();
 	void stop_midi_handling ();
+
+	/* operations (defined in operations.cc) */
+
+	void undo ();
+	void redo ();
 };
 
 }

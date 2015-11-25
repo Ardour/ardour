@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis
+    Copyright (C) 2015 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -68,6 +68,7 @@ FaderPort::FaderPort (Session& s)
 	, _device_active (false)
 	, fader_msb (0)
 	, fader_lsb (0)
+	, button_state (ButtonState (0))
 {
 	boost::shared_ptr<ARDOUR::Port> inp;
 	boost::shared_ptr<ARDOUR::Port> outp;
@@ -122,7 +123,8 @@ FaderPort::FaderPort (Session& s)
 	buttons.insert (std::make_pair (RecEnable, ButtonInfo (*this, _("RecEnable"), RecEnable, 0)));
 	buttons.insert (std::make_pair (FaderTouch, ButtonInfo (*this, _("Fader (touch)"), FaderTouch, -1)));
 
-	button_info (Undo).set_action (boost::bind (&BasicUI::undo, this), true);
+	button_info (Undo).set_action (boost::bind (&FaderPort::undo, this), true);
+	button_info (Undo).set_action (boost::bind (&FaderPort::redo, this), true, ButtonState (ShiftDown));
 	button_info (Undo).set_flash (true);
 
 	button_info (Play).set_action (boost::bind (&BasicUI::transport_play, this, false), true);
@@ -255,11 +257,29 @@ FaderPort::button_info (ButtonID id) const
 void
 FaderPort::switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
-	ButtonInfo& bi (button_info ((ButtonID) tb->controller_number));
+	ButtonID id (ButtonID (tb->controller_number));
+
+	switch (id) {
+	case Shift:
+		button_state = (tb->value ? ButtonState (button_state|ShiftDown) : ButtonState (button_state&~ShiftDown));
+		break;
+	case Stop:
+		button_state = (tb->value ? ButtonState (button_state|StopDown) : ButtonState (button_state&~StopDown));
+		break;
+	case Rewind:
+		button_state = (tb->value ? ButtonState (button_state|RewindDown) : ButtonState (button_state&~RewindDown));
+		break;
+	default:
+		break;
+	}
+
+	ButtonInfo& bi (button_info (id));
+
 	if (bi.uses_flash()) {
 		bi.set_led_state (_output_port, (int)tb->value);
 	}
-	bi.invoke (ButtonState (0), tb->value ? true : false);
+
+	bi.invoke (button_state, tb->value ? true : false);
 }
 
 void
@@ -613,23 +633,35 @@ FaderPort::ButtonInfo::invoke (FaderPort::ButtonState bs, bool press)
 	switch (type) {
 	case NamedAction:
 		if (press) {
-			if (!on_press.action_name.empty()) {
-				fp.access_action (on_press.action_name);
+			ToDoMap::iterator x = on_press.find (bs);
+			if (x != on_press.end()) {
+				if (!x->second.action_name.empty()) {
+					fp.access_action (x->second.action_name);
+				}
 			}
 		} else {
-			if (!on_release.action_name.empty()) {
-				fp.access_action (on_press.action_name);
+			ToDoMap::iterator x = on_release.find (bs);
+			if (x != on_release.end()) {
+				if (!x->second.action_name.empty()) {
+					fp.access_action (x->second.action_name);
+				}
 			}
 		}
 		break;
 	case InternalFunction:
 		if (press) {
-			if (on_press.function) {
-				on_press.function ();
+			ToDoMap::iterator x = on_press.find (bs);
+			if (x != on_press.end()) {
+				if (x->second.function) {
+					x->second.function ();
+				}
 			}
 		} else {
-			if (on_release.function) {
-				on_release.function ();
+			ToDoMap::iterator x = on_release.find (bs);
+			if (x != on_release.end()) {
+				if (x->second.function) {
+					x->second.function ();
+				}
 			}
 		}
 		break;
@@ -637,24 +669,34 @@ FaderPort::ButtonInfo::invoke (FaderPort::ButtonState bs, bool press)
 }
 
 void
-FaderPort::ButtonInfo::set_action (string const& name, bool when_pressed)
+FaderPort::ButtonInfo::set_action (string const& name, bool when_pressed, FaderPort::ButtonState bs)
 {
+	ToDo todo;
+
 	type = NamedAction;
+
 	if (when_pressed) {
-		on_press.action_name = name;
+		todo.action_name = name;
+		on_press[bs] = todo;
 	} else {
-		on_release.action_name = name;
+		todo.action_name = name;
+		on_release[bs] = todo;
 	}
+
 }
 
 void
-FaderPort::ButtonInfo::set_action (boost::function<void()> f, bool when_pressed)
+FaderPort::ButtonInfo::set_action (boost::function<void()> f, bool when_pressed, FaderPort::ButtonState bs)
 {
+	ToDo todo;
 	type = InternalFunction;
+
 	if (when_pressed) {
-		on_press.function = f;
+		todo.function = f;
+		on_press[bs] = todo;
 	} else {
-		on_release.function = f;
+		todo.function = f;
+		on_release[bs] = todo;
 	}
 }
 
