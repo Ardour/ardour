@@ -102,15 +102,12 @@ FaderPort::use_master ()
 		if (_current_route == r) {
 			r = pre_master_route.lock();
 			set_current_route (r);
-			if (r == session->monitor_out()) {
-				button_info(Output).set_led_state (_output_port, true);
-				blinkers.push_back (Output);
-			} else {
-				button_info(Output).set_led_state (_output_port, false);
-				blinkers.remove (Output);
-			}
+			button_info(Output).set_led_state (_output_port, false);
+			blinkers.remove (Output);
 		} else {
-			pre_master_route = boost::weak_ptr<Route> (_current_route);
+			if (_current_route != session->master_out() && _current_route != session->monitor_out()) {
+				pre_master_route = boost::weak_ptr<Route> (_current_route);
+			}
 			set_current_route (r);
 			button_info(Output).set_led_state (_output_port, true);
 			blinkers.remove (Output);
@@ -127,14 +124,12 @@ FaderPort::use_monitor ()
 		if (_current_route == r) {
 			r = pre_monitor_route.lock();
 			set_current_route (r);
-			if (r == session->master_out()) {
-				button_info(Output).set_led_state (_output_port, true);
-			} else {
-				button_info(Output).set_led_state (_output_port, false);
-			}
+			button_info(Output).set_led_state (_output_port, false);
 			blinkers.remove (Output);
 		} else {
-			pre_monitor_route = boost::weak_ptr<Route> (_current_route);
+			if (_current_route != session->master_out() && _current_route != session->monitor_out()) {
+				pre_monitor_route = boost::weak_ptr<Route> (_current_route);
+			}
 			set_current_route (r);
 			button_info(Output).set_led_state (_output_port, true);
 			blinkers.push_back (Output);

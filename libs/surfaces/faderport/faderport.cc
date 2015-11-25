@@ -769,6 +769,11 @@ FaderPort::set_current_route (boost::shared_ptr<Route> r)
 
 	_current_route = r;
 
+	/* turn this off. It will be turned on back on in use_master() or
+	   use_monitor() as appropriate.
+	*/
+	button_info(Output).set_led_state (_output_port, false);
+
 	if (_current_route) {
 		_current_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::drop_current_route, this), this);
 
