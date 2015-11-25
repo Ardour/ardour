@@ -128,7 +128,7 @@ FaderPort::FaderPort (Session& s)
 	button_info (Undo).set_action (boost::bind (&FaderPort::redo, this), true, ShiftDown);
 	button_info (Undo).set_flash (true);
 
-	button_info (Play).set_action (boost::bind (&BasicUI::transport_play, this, false), true);
+	button_info (Play).set_action (boost::bind (&BasicUI::transport_play, this, true), true);
 	button_info (RecEnable).set_action (boost::bind (&BasicUI::rec_enable_toggle, this), true);
 	/* Stop is a modifier, so we have to use its own button state to get
 	   the default action (since StopDown will be set when looking for the
