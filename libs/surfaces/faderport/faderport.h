@@ -103,6 +103,9 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 
   private:
 	boost::shared_ptr<ARDOUR::Route> _current_route;
+	boost::weak_ptr<ARDOUR::Route> pre_master_route;
+	boost::weak_ptr<ARDOUR::Route> pre_monitor_route;
+
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
 

@@ -17,6 +17,7 @@
 
 */
 
+#include "ardour/async_midi_port.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
@@ -91,7 +92,15 @@ FaderPort::use_master ()
 {
 	boost::shared_ptr<Route> r = session->master_out();
 	if (r) {
-		set_current_route (r);
+		if (_current_route == r) {
+			r = pre_master_route.lock();
+			set_current_route (r);
+			button_info(Output).set_led_state (_output_port, false);
+		} else {
+			pre_master_route = boost::weak_ptr<Route> (_current_route);
+			set_current_route (r);
+			button_info(Output).set_led_state (_output_port, true);
+		}
 	}
 }
 
@@ -100,6 +109,14 @@ FaderPort::use_monitor ()
 {
 	boost::shared_ptr<Route> r = session->monitor_out();
 	if (r) {
-		set_current_route (r);
+		if (_current_route == r) {
+			r = pre_monitor_route.lock();
+			set_current_route (r);
+			button_info(Output).set_led_state (_output_port, false);
+		} else {
+			pre_monitor_route = boost::weak_ptr<Route> (_current_route);
+			set_current_route (r);
+			button_info(Output).set_led_state (_output_port, true);
+		}
 	}
 }
