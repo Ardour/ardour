@@ -638,7 +638,7 @@ FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1,
 		connected ();
 
 	} else {
-		DEBUG_TRACE (DEBUG::FaderPort, "Device disconnected (input or output or both)\n");
+		DEBUG_TRACE (DEBUG::FaderPort, "Device disconnected (input or output or both) or not yet fully connected\n");
 		_device_active = false;
 	}
 
