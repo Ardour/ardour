@@ -541,9 +541,14 @@
 #ifndef GTKOSX
       <menuitem action='toggle-about'/>
 #endif
-      <menuitem action='Chat'/>
-      <menuitem action='Manual'/>
-      <menuitem action='Reference'/>
+      <menuitem action='chat'/>
+      <menuitem action='manual'/>
+      <menuitem action='reference'/>
+      <menuitem action='forums'/>
+      <menuitem action='howto-report'/>
+      <menuitem action='tracker'/>
+      <menuitem action='website'/>
+      <menuitem action='website-dev'/>
     </menu>
   </menubar>
 

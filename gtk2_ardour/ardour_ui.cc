@@ -3362,7 +3362,7 @@ ARDOUR_UI::launch_reference ()
 void
 ARDOUR_UI::launch_tracker ()
 {
-	PBD::open_uri ("http://tracker.ardour.org/bug_report_page.php");
+	PBD::open_uri ("http://tracker.ardour.org");
 }
 
 void

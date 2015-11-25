@@ -226,16 +226,16 @@ if (Profile->get_mixbus())
 
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::register_action (common_actions, X_("Chat"), _("Chat"),  sigc::mem_fun(*this, &ARDOUR_UI::launch_chat));
+	ActionManager::register_action (common_actions, X_("chat"), _("Chat"),  sigc::mem_fun(*this, &ARDOUR_UI::launch_chat));
 	/** TRANSLATORS: This is `Manual' in the sense of an instruction book that tells a user how to use Ardour */
-	ActionManager::register_action (common_actions, X_("Manual"), S_("Help|Manual"),  mem_fun(*this, &ARDOUR_UI::launch_manual));
-	ActionManager::register_action (common_actions, X_("Reference"), _("Reference"),  mem_fun(*this, &ARDOUR_UI::launch_reference));
-	ActionManager::register_action (common_actions, X_("Tracker"), _("Report A Bug"), mem_fun(*this, &ARDOUR_UI::launch_tracker));
-	ActionManager::register_action (common_actions, X_("Cheat_Sheet"), _("Cheat Sheet"), mem_fun(*this, &ARDOUR_UI::launch_cheat_sheet));
-	ActionManager::register_action (common_actions, X_("Website"), _("Ardour Website"), mem_fun(*this, &ARDOUR_UI::launch_website));
-	ActionManager::register_action (common_actions, X_("Website_Dev"), _("Ardour Development"), mem_fun(*this, &ARDOUR_UI::launch_website_dev));
-	ActionManager::register_action (common_actions, X_("Forums"), _("User Forums"), mem_fun(*this, &ARDOUR_UI::launch_forums));
-	ActionManager::register_action (common_actions, X_("Howto_Report"), _("How to report a bug"), mem_fun(*this, &ARDOUR_UI::launch_howto_report));
+	ActionManager::register_action (common_actions, X_("manual"), S_("Help|Manual"),  mem_fun(*this, &ARDOUR_UI::launch_manual));
+	ActionManager::register_action (common_actions, X_("reference"), S_("Manual|Reference"),  mem_fun(*this, &ARDOUR_UI::launch_reference));
+	ActionManager::register_action (common_actions, X_("tracker"), _("Report a Bug"), mem_fun(*this, &ARDOUR_UI::launch_tracker));
+	ActionManager::register_action (common_actions, X_("cheat-sheet"), _("Cheat Sheet"), mem_fun(*this, &ARDOUR_UI::launch_cheat_sheet));
+	ActionManager::register_action (common_actions, X_("website"), _("Ardour Website"), mem_fun(*this, &ARDOUR_UI::launch_website));
+	ActionManager::register_action (common_actions, X_("website-dev"), _("Ardour Development"), mem_fun(*this, &ARDOUR_UI::launch_website_dev));
+	ActionManager::register_action (common_actions, X_("forums"), _("User Forums"), mem_fun(*this, &ARDOUR_UI::launch_forums));
+	ActionManager::register_action (common_actions, X_("howto-report"), _("How to Report a Bug"), mem_fun(*this, &ARDOUR_UI::launch_howto_report));
 
 	act = ActionManager::register_action (common_actions, X_("Save"), _("Save"),  sigc::hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_state), string(""), false)));
 	ActionManager::session_sensitive_actions.push_back (act);
