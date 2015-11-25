@@ -100,6 +100,12 @@ BasicUI::goto_start ()
 }
 
 void
+BasicUI::goto_zero ()
+{
+	session->request_locate (0);
+}
+
+void
 BasicUI::goto_end ()
 {
 	session->goto_end ();
