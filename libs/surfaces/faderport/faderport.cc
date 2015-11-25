@@ -73,7 +73,7 @@ FaderPort::FaderPort (Session& s)
 	, blink_state (false)
 {
 	last_encoder_time = 0;
-	
+
 	boost::shared_ptr<ARDOUR::Port> inp;
 	boost::shared_ptr<ARDOUR::Port> outp;
 
@@ -148,6 +148,9 @@ FaderPort::FaderPort (Session& s)
 	button_info (Mute).set_action (boost::bind (&FaderPort::mute, this), true);
 	button_info (Solo).set_action (boost::bind (&FaderPort::solo, this), true);
 	button_info (Rec).set_action (boost::bind (&FaderPort::rec_enable, this), true);
+
+	button_info (Output).set_action (boost::bind (&FaderPort::use_master, this), true);
+	button_info (Output).set_action (boost::bind (&FaderPort::use_monitor, this), true, ShiftDown);
 }
 
 FaderPort::~FaderPort ()
@@ -319,7 +322,7 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 		last_encoder_time = now;
 		last_good_encoder_delta = delta;
 	}
-	
+
 	if (_current_route) {
 
 		if ( (button_state & ShiftDown) == ShiftDown ) {    //shift+encoder = input trim
@@ -332,9 +335,9 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 		} else {  //pan / balance
 			//ToDo
 		}
-		
+
 	}
-	
+
 }
 
 void
@@ -737,15 +740,37 @@ FaderPort::ButtonInfo::set_led_state (boost::shared_ptr<MIDI::Port> port, int on
 void
 FaderPort::gui_track_selection_changed (RouteNotificationListPtr routes)
 {
-	if (routes->empty()) {
-		_current_route.reset ();
-	} else {
-		_current_route = routes->front().lock();
+	boost::shared_ptr<Route> r;
+
+	if (!routes->empty()) {
+		r = routes->front().lock();
 	}
 
+	set_current_route (r);
+}
+
+void
+FaderPort::drop_current_route ()
+{
+	if (_current_route) {
+		if (_current_route == session->monitor_out()) {
+			set_current_route (session->master_out());
+		} else {
+			set_current_route (boost::shared_ptr<Route>());
+		}
+	}
+}
+
+void
+FaderPort::set_current_route (boost::shared_ptr<Route> r)
+{
 	route_connections.drop_connections ();
 
+	_current_route = r;
+
 	if (_current_route) {
+		_current_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::drop_current_route, this), this);
+
 		_current_route->mute_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_mute, this, _1), this);
 		_current_route->solo_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_solo, this, _1, _2, _3), this);
 		_current_route->listen_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_listen, this, _1, _2), this);

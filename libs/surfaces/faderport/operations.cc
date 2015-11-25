@@ -85,3 +85,21 @@ FaderPort::rec_enable ()
 
 	session->set_record_enabled (rl, !t->record_enabled());
 }
+
+void
+FaderPort::use_master ()
+{
+	boost::shared_ptr<Route> r = session->master_out();
+	if (r) {
+		set_current_route (r);
+	}
+}
+
+void
+FaderPort::use_monitor ()
+{
+	boost::shared_ptr<Route> r = session->monitor_out();
+	if (r) {
+		set_current_route (r);
+	}
+}

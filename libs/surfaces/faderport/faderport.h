@@ -243,6 +243,10 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	bool blink_state;
 	bool blink ();
 
+	void set_current_route (boost::shared_ptr<ARDOUR::Route>);
+	void drop_current_route ();
+	void use_master ();
+	void use_monitor ();
 	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr);
 	PBD::ScopedConnection selection_connection;
 	PBD::ScopedConnectionList route_connections;
