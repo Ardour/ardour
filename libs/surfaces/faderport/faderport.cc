@@ -36,15 +36,16 @@
 
 #include "midi++/port.h"
 
-#include "ardour/audioengine.h"
-#include "ardour/filesystem_paths.h"
-#include "ardour/session.h"
-#include "ardour/route.h"
-#include "ardour/midi_port.h"
-#include "ardour/rc_configuration.h"
-#include "ardour/midiport_manager.h"
-#include "ardour/debug.h"
 #include "ardour/async_midi_port.h"
+#include "ardour/audioengine.h"
+#include "ardour/debug.h"
+#include "ardour/filesystem_paths.h"
+#include "ardour/midi_port.h"
+#include "ardour/midiport_manager.h"
+#include "ardour/rc_configuration.h"
+#include "ardour/route.h"
+#include "ardour/session.h"
+#include "ardour/track.h"
 
 #include "faderport.h"
 
@@ -91,6 +92,8 @@ FaderPort::FaderPort (Session& s)
 
 	_current_bank = 0;
 	_bank_size = 0;
+
+	TrackSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::gui_track_selection_changed, this, _1), this);
 
 	Session::SendFeedback.connect_same_thread (*this, boost::bind (&FaderPort::send_feedback, this));
 	//Session::SendFeedback.connect (*this, MISSING_INVALIDATOR, boost::bind (&FaderPort::send_feedback, this), this);;
@@ -151,6 +154,9 @@ FaderPort::FaderPort (Session& s)
 	button_info (Punch).set_action (boost::bind (&BasicUI::prev_marker, this), true, ShiftDown);
 	button_info (User).set_action (boost::bind (&BasicUI::next_marker, this), true, ShiftDown);
 
+	button_info (Mute).set_action (boost::bind (&FaderPort::mute, this), true);
+	button_info (Solo).set_action (boost::bind (&FaderPort::solo, this), true);
+	button_info (Rec).set_action (boost::bind (&FaderPort::rec_enable, this), true);
 }
 
 FaderPort::~FaderPort ()
@@ -410,6 +416,8 @@ FaderPort::close ()
 	session_connections.drop_connections ();
 	port_connection.disconnect ();
 	blink_connection.disconnect ();
+	selection_connection.disconnect ();
+	route_connections.drop_connections ();
 
 #if 0
 	route_connections.drop_connections ();
@@ -762,4 +770,72 @@ FaderPort::ButtonInfo::set_led_state (boost::shared_ptr<MIDI::Port> port, int on
 	buf[2] = onoff ? 1 : 0;
 	port->write (buf, 3, 0);
 	led_on = (onoff ? true : false);
+}
+
+void
+FaderPort::gui_track_selection_changed (RouteNotificationListPtr routes)
+{
+	if (routes->empty()) {
+		_current_route.reset ();
+	} else {
+		_current_route = routes->front().lock();
+	}
+
+	route_connections.drop_connections ();
+
+	if (_current_route) {
+		_current_route->mute_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_mute, this, _1), this);
+		_current_route->solo_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_solo, this, _1, _2, _3), this);
+		_current_route->listen_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_listen, this, _1, _2), this);
+		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_route);
+		if (t) {
+			t->RecordEnableChanged.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_recenable, this), this);
+		}
+	}
+
+	map_route_state ();
+}
+
+void
+FaderPort::map_mute (void*)
+{
+	button_info (Mute).set_led_state (_output_port, _current_route->muted());
+}
+
+void
+FaderPort::map_solo (bool, void*, bool)
+{
+	button_info (Solo).set_led_state (_output_port, _current_route->soloed() || _current_route->listening_via_monitor());
+}
+
+void
+FaderPort::map_listen (void*, bool)
+{
+	button_info (Solo).set_led_state (_output_port, _current_route->listening_via_monitor());
+}
+
+void
+FaderPort::map_recenable ()
+{
+	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_route);
+	if (t) {
+		button_info (Rec).set_led_state (_output_port, t->record_enabled());
+	} else {
+		button_info (Rec).set_led_state (_output_port, false);
+	}
+}
+
+void
+FaderPort::map_route_state ()
+{
+	if (!_current_route) {
+		button_info (Mute).set_led_state (_output_port, false);
+		button_info (Solo).set_led_state (_output_port, false);
+		button_info (Rec).set_led_state (_output_port, false);
+	} else {
+		/* arguments to these map_*() methods are all ignored */
+		map_mute (0);
+		map_solo (false, 0, false);
+		map_recenable ();
+	}
 }

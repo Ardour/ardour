@@ -17,6 +17,10 @@
 
 */
 
+#include "ardour/rc_configuration.h"
+#include "ardour/session.h"
+#include "ardour/track.h"
+
 #include "faderport.h"
 
 using namespace ARDOUR;
@@ -32,4 +36,52 @@ void
 FaderPort::redo ()
 {
 	ControlProtocol::Redo (); /* EMIT SIGNAL */
+}
+
+void
+FaderPort::mute ()
+{
+	if (!_current_route) {
+		return;
+	}
+
+	boost::shared_ptr<RouteList> rl (new RouteList);
+	rl->push_back (_current_route);
+	session->set_mute (rl, !_current_route->muted());
+}
+
+void
+FaderPort::solo ()
+{
+	if (!_current_route) {
+		return;
+	}
+
+	boost::shared_ptr<RouteList> rl (new RouteList);
+	rl->push_back (_current_route);
+
+	if (Config->get_solo_control_is_listen_control()) {
+		session->set_listen (rl, !_current_route->listening_via_monitor());
+	} else {
+		session->set_solo (rl, !_current_route->soloed());
+	}
+}
+
+void
+FaderPort::rec_enable ()
+{
+	if (!_current_route) {
+		return;
+	}
+
+	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_current_route);
+
+	if (!t) {
+		return;
+	}
+
+	boost::shared_ptr<RouteList> rl (new RouteList);
+	rl->push_back (_current_route);
+
+	session->set_record_enabled (rl, !t->record_enabled());
 }

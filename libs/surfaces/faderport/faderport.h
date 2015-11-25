@@ -125,6 +125,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void thread_init ();
 
   private:
+	boost::shared_ptr<ARDOUR::Route> _current_route;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
 
@@ -278,10 +279,23 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	bool blink_state;
 	bool blink ();
 
+	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr);
+	PBD::ScopedConnection selection_connection;
+	PBD::ScopedConnectionList route_connections;
+
+	void map_route_state ();
+	void map_solo (bool,void*,bool);
+	void map_listen (void*,bool);
+	void map_mute (void*);
+	void map_recenable ();
+
 	/* operations (defined in operations.cc) */
 
 	void undo ();
 	void redo ();
+	void solo ();
+	void mute ();
+	void rec_enable ();
 };
 
 }
