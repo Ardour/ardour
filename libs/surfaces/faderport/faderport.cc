@@ -69,6 +69,7 @@ FaderPort::FaderPort (Session& s)
 	, fader_msb (0)
 	, fader_lsb (0)
 	, button_state (ButtonState (0))
+	, blink_state (false)
 {
 	boost::shared_ptr<ARDOUR::Port> inp;
 	boost::shared_ptr<ARDOUR::Port> outp;
@@ -124,14 +125,21 @@ FaderPort::FaderPort (Session& s)
 	buttons.insert (std::make_pair (FaderTouch, ButtonInfo (*this, _("Fader (touch)"), FaderTouch, -1)));
 
 	button_info (Undo).set_action (boost::bind (&FaderPort::undo, this), true);
-	button_info (Undo).set_action (boost::bind (&FaderPort::redo, this), true, ButtonState (ShiftDown));
+	button_info (Undo).set_action (boost::bind (&FaderPort::redo, this), true, ShiftDown);
 	button_info (Undo).set_flash (true);
 
 	button_info (Play).set_action (boost::bind (&BasicUI::transport_play, this, false), true);
 	button_info (RecEnable).set_action (boost::bind (&BasicUI::rec_enable_toggle, this), true);
-	button_info (Stop).set_action (boost::bind (&BasicUI::transport_stop, this), true);
+	/* Stop is a modifier, so we have to use its own button state to get
+	   the default action (since StopDown will be set when looking for the
+	   action to invoke.
+	*/
+	button_info (Stop).set_action (boost::bind (&BasicUI::transport_stop, this), true, StopDown);
 	button_info (Ffwd).set_action (boost::bind (&BasicUI::ffwd, this), true);
-	button_info (Rewind).set_action (boost::bind (&BasicUI::rewind, this), true);
+
+	/* See comments about Stop above .. */
+	button_info (Rewind).set_action (boost::bind (&BasicUI::rewind, this), true, RewindDown);
+	button_info (Rewind).set_action (boost::bind (&BasicUI::goto_start, this), true, ButtonState (RewindDown|StopDown));
 }
 
 FaderPort::~FaderPort ()
@@ -231,21 +239,6 @@ FaderPort::all_lights_out ()
 	}
 }
 
-void
-FaderPort::party ()
-{
-	for (int n = 0; n < 5; ++n) {
-		for (ButtonMap::iterator b = buttons.begin(); b != buttons.end(); ++b) {
-			b->second.set_led_state (_output_port, random() % 3);
-			g_usleep (1000);
-		}
-		g_usleep (250000);
-	}
-
-	all_lights_out ();
-}
-
-
 FaderPort::ButtonInfo&
 FaderPort::button_info (ButtonID id) const
 {
@@ -317,32 +310,38 @@ FaderPort::sysex_handler (MIDI::Parser &p, MIDI::byte *buf, size_t sz)
 		return;
 	}
 
-	if (buf[2] == 0x7f &&
-	    buf[3] == 0x06 &&
-	    buf[4] == 0x02 &&
-	    buf[5] == 0x0 &&
-	    buf[6] == 0x1 &&
-	    buf[7] == 0x06 &&
-	    buf[8] == 0x02 &&
-	    buf[9] == 0x0 &&
-	    buf[10] == 0x01 &&
-	    buf[11] == 0x0) {
-		_device_active = true;
-
-		cerr << "FaderPort identified\n";
-
-		/* put it into native mode */
-
-		MIDI::byte native[3];
-		native[0] = 0x91;
-		native[1] = 0x00;
-		native[2] = 0x64;
-
-		_output_port->write (native, 3, 0);
-
-		g_usleep (10000);
-		party ();
+	if (buf[2] != 0x7f ||
+	    buf[3] != 0x06 ||
+	    buf[4] != 0x02 ||
+	    buf[5] != 0x0 ||
+	    buf[6] != 0x1 ||
+	    buf[7] != 0x06 ||
+	    buf[8] != 0x02 ||
+	    buf[9] != 0x0 ||
+	    buf[10] != 0x01 ||
+	    buf[11] != 0x0) {
+		return;
 	}
+
+	_device_active = true;
+
+	cerr << "FaderPort identified\n";
+
+	/* put it into native mode */
+
+	MIDI::byte native[3];
+	native[0] = 0x91;
+	native[1] = 0x00;
+	native[2] = 0x64;
+
+	_output_port->write (native, 3, 0);
+
+	all_lights_out ();
+
+	/* catch up on state */
+
+	notify_transport_state_changed ();
+	notify_record_state_changed ();
 }
 
 int
@@ -362,6 +361,10 @@ FaderPort::set_active (bool yn)
 
 		connect_session_signals ();
 
+		Glib::RefPtr<Glib::TimeoutSource> blink_timeout = Glib::TimeoutSource::create (200); // milliseconds
+		blink_connection = blink_timeout->connect (sigc::mem_fun (*this, &FaderPort::blink));
+		blink_timeout->attach (main_loop()->get_context());
+
 	} else {
 
 		BaseUI::quit ();
@@ -376,37 +379,67 @@ FaderPort::set_active (bool yn)
 	return 0;
 }
 
+bool
+FaderPort::blink ()
+{
+	blink_state = !blink_state;
+
+	for (Blinkers::iterator b = blinkers.begin(); b != blinkers.end(); b++) {
+		button_info(*b).set_led_state (_output_port, blink_state);
+	}
+
+	return true;
+}
+
 void
 FaderPort::close ()
 {
 	stop_midi_handling ();
-#if 0
-	port_connection.disconnect ();
 	session_connections.drop_connections ();
+	port_connection.disconnect ();
+	blink_connection.disconnect ();
+
+#if 0
 	route_connections.drop_connections ();
-	periodic_connection.disconnect ();
 
 	clear_surfaces();
 #endif
 }
 
 void
+FaderPort::notify_record_state_changed ()
+{
+	switch (session->record_status()) {
+	case Session::Disabled:
+		button_info (RecEnable).set_led_state (_output_port, false);
+		blinkers.remove (RecEnable);
+		break;
+	case Session::Enabled:
+		button_info (RecEnable).set_led_state (_output_port, true);
+		blinkers.push_back (RecEnable);
+		break;
+	case Session::Recording:
+		button_info (RecEnable).set_led_state (_output_port, true);
+		blinkers.remove (RecEnable);
+		break;
+	}
+}
+
+void
+FaderPort::notify_transport_state_changed ()
+{
+	button_info (Loop).set_led_state (_output_port, session->get_play_loop());
+	button_info (Play).set_led_state (_output_port, session->transport_speed() == 1.0);
+	button_info (Stop).set_led_state (_output_port, session->transport_stopped ());
+	button_info (Rewind).set_led_state (_output_port, session->transport_speed() < 0.0);
+	button_info (Ffwd).set_led_state (_output_port, session->transport_speed() > 1.0);
+}
+
+void
 FaderPort::connect_session_signals()
 {
-#if 0
-	// receive routes added
-	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_route_added, this, _1), this);
-	// receive record state toggled
 	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_record_state_changed, this), this);
-	// receive transport state changed
 	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_transport_state_changed, this), this);
-	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_loop_state_changed, this), this);
-	// receive punch-in and punch-out
-	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_parameter_changed, this, _1), this);
-	// receive rude solo changed
-	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_solo_active_changed, this, _1), this);
-#endif
 }
 
 void

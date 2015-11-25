@@ -263,11 +263,20 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	ButtonInfo& button_info (ButtonID) const;
 
 	void all_lights_out ();
-	void party ();
-	void connect_session_signals ();
 	void close ();
 	void start_midi_handling ();
 	void stop_midi_handling ();
+
+	PBD::ScopedConnectionList session_connections;
+	void connect_session_signals ();
+	void notify_record_state_changed ();
+	void notify_transport_state_changed ();
+
+	sigc::connection blink_connection;
+	typedef std::list<ButtonID> Blinkers;
+	Blinkers blinkers;
+	bool blink_state;
+	bool blink ();
 
 	/* operations (defined in operations.cc) */
 
