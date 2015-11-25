@@ -30,8 +30,9 @@
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
-#include "pbd/xml++.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/compose.h"
+#include "pbd/xml++.h"
 
 #include "midi++/port.h"
 
@@ -39,7 +40,6 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
-#include "ardour/midi_ui.h"
 #include "ardour/midi_port.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/midiport_manager.h"
@@ -56,10 +56,11 @@ using namespace std;
 
 #include "i18n.h"
 
-#define midi_ui_context() MidiControlUI::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
+#include "pbd/abstract_ui.cc" // instantiate template
 
 FaderPort::FaderPort (Session& s)
 	: ControlProtocol (s, _("Faderport"))
+	, AbstractUI<FaderPortRequest> ("faderport")
 	, _motorised (true)
 	, _threshold (10)
 	, gui (0)
@@ -89,32 +90,11 @@ FaderPort::FaderPort (Session& s)
 	_current_bank = 0;
 	_bank_size = 0;
 
-	/* handle device inquiry response */
-	_input_port->parser()->sysex.connect_same_thread (midi_connections, boost::bind (&FaderPort::sysex_handler, this, _1, _2, _3));
-	/* handle switches */
-	_input_port->parser()->poly_pressure.connect_same_thread (midi_connections, boost::bind (&FaderPort::switch_handler, this, _1, _2));
-	/* handle encoder */
-	_input_port->parser()->pitchbend.connect_same_thread (midi_connections, boost::bind (&FaderPort::encoder_handler, this, _1, _2));
-	/* handle fader */
-	_input_port->parser()->controller.connect_same_thread (midi_connections, boost::bind (&FaderPort::fader_handler, this, _1, _2));
-
-	/* This connection means that whenever data is ready from the input
-	 * port, the relevant thread will invoke our ::midi_input_handler()
-	 * method, which will read the data, and invoke the parser.
-	 */
-
-	_input_port->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &FaderPort::midi_input_handler), _input_port));
-	_input_port->xthread().attach (midi_ui_context()->main_loop()->get_context());
-
 	Session::SendFeedback.connect_same_thread (*this, boost::bind (&FaderPort::send_feedback, this));
-	//Session::SendFeedback.connect (*this, MISSING_INVALIDATOR, boost::bind (&FaderPort::send_feedback, this), midi_ui_context());;
-
-	/* this one is cross-thread */
-
-	Route::RemoteControlIDChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&FaderPort::reset_controllables, this), midi_ui_context());
+	//Session::SendFeedback.connect (*this, MISSING_INVALIDATOR, boost::bind (&FaderPort::send_feedback, this), this);;
 
 	/* Catch port connections and disconnections */
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::connection_handler, this, _1, _2, _3, _4, _5), midi_ui_context());
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::connection_handler, this, _1, _2, _3, _4, _5), this);
 
 	buttons.insert (std::make_pair (Mute, ButtonInfo (*this, _("Mute"), Mute, 21)));
 	buttons.insert (std::make_pair (Solo, ButtonInfo (*this, _("Solo"), Solo, 22)));
@@ -143,6 +123,8 @@ FaderPort::FaderPort (Session& s)
 	buttons.insert (std::make_pair (FaderTouch, ButtonInfo (*this, _("Fader (touch)"), FaderTouch, -1)));
 
 	button_info (Undo).set_action (boost::bind (&BasicUI::undo, this), true);
+	button_info (Undo).set_flash (true);
+
 	button_info (Play).set_action (boost::bind (&BasicUI::transport_play, this, false), true);
 	button_info (RecEnable).set_action (boost::bind (&BasicUI::rec_enable_toggle, this), true);
 	button_info (Stop).set_action (boost::bind (&BasicUI::transport_stop, this), true);
@@ -166,6 +148,76 @@ FaderPort::~FaderPort ()
 	}
 
 	tear_down_gui ();
+}
+
+void
+FaderPort::start_midi_handling ()
+{
+	/* handle device inquiry response */
+	_input_port->parser()->sysex.connect_same_thread (midi_connections, boost::bind (&FaderPort::sysex_handler, this, _1, _2, _3));
+	/* handle switches */
+	_input_port->parser()->poly_pressure.connect_same_thread (midi_connections, boost::bind (&FaderPort::switch_handler, this, _1, _2));
+	/* handle encoder */
+	_input_port->parser()->pitchbend.connect_same_thread (midi_connections, boost::bind (&FaderPort::encoder_handler, this, _1, _2));
+	/* handle fader */
+	_input_port->parser()->controller.connect_same_thread (midi_connections, boost::bind (&FaderPort::fader_handler, this, _1, _2));
+
+	/* This connection means that whenever data is ready from the input
+	 * port, the relevant thread will invoke our ::midi_input_handler()
+	 * method, which will read the data, and invoke the parser.
+	 */
+
+	_input_port->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &FaderPort::midi_input_handler), _input_port));
+	_input_port->xthread().attach (main_loop()->get_context());
+}
+
+void
+FaderPort::stop_midi_handling ()
+{
+	midi_connections.drop_connections ();
+
+	/* Note: the input handler is still active at this point, but we're no
+	 * longer connected to any of the parser signals
+	 */
+}
+
+void
+FaderPort::do_request (FaderPortRequest* req)
+{
+	if (req->type == CallSlot) {
+
+		call_slot (MISSING_INVALIDATOR, req->the_slot);
+
+	} else if (req->type == Quit) {
+
+		stop ();
+	}
+}
+
+int
+FaderPort::stop ()
+{
+	BaseUI::quit ();
+
+	return 0;
+}
+
+void
+FaderPort::thread_init ()
+{
+	struct sched_param rtparam;
+
+	pthread_set_name (X_("FaderPort"));
+
+	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("FaderPort"), 2048);
+	ARDOUR::SessionEvent::create_per_thread_pool (X_("FaderPort"), 128);
+
+	memset (&rtparam, 0, sizeof (rtparam));
+	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
+
+	if (pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam) != 0) {
+		// do we care? not particularly.
+	}
 }
 
 void
@@ -204,7 +256,9 @@ void
 FaderPort::switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
 	ButtonInfo& bi (button_info ((ButtonID) tb->controller_number));
-	bi.set_led_state (_output_port, (int)tb->value);
+	if (bi.uses_flash()) {
+		bi.set_led_state (_output_port, (int)tb->value);
+	}
 	bi.invoke (ButtonState (0), tb->value ? true : false);
 }
 
@@ -267,15 +321,72 @@ FaderPort::sysex_handler (MIDI::Parser &p, MIDI::byte *buf, size_t sz)
 		_output_port->write (native, 3, 0);
 
 		g_usleep (10000);
-		all_lights_out ();
 		party ();
 	}
 }
 
 int
-FaderPort::set_active (bool /*yn*/)
+FaderPort::set_active (bool yn)
 {
+	// DEBUG_TRACE (DEBUG::MackieControl, string_compose("MackieControlProtocol::set_active init with yn: '%1'\n", yn));
+
+	if (yn == active()) {
+		return 0;
+	}
+
+	if (yn) {
+
+		/* start event loop */
+
+		BaseUI::run ();
+
+		connect_session_signals ();
+
+	} else {
+
+		BaseUI::quit ();
+		close ();
+
+	}
+
+	ControlProtocol::set_active (yn);
+
+	// DEBUG_TRACE (DEBUG::MackieControl, string_compose("MackieControlProtocol::set_active done with yn: '%1'\n", yn));
+
 	return 0;
+}
+
+void
+FaderPort::close ()
+{
+	stop_midi_handling ();
+#if 0
+	port_connection.disconnect ();
+	session_connections.drop_connections ();
+	route_connections.drop_connections ();
+	periodic_connection.disconnect ();
+
+	clear_surfaces();
+#endif
+}
+
+void
+FaderPort::connect_session_signals()
+{
+#if 0
+	// receive routes added
+	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_route_added, this, _1), this);
+	// receive record state toggled
+	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_record_state_changed, this), this);
+	// receive transport state changed
+	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_transport_state_changed, this), this);
+	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_loop_state_changed, this), this);
+	// receive punch-in and punch-out
+	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_parameter_changed, this, _1), this);
+	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_parameter_changed, this, _1), this);
+	// receive rude solo changed
+	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_solo_active_changed, this, _1), this);
+#endif
 }
 
 void
@@ -468,7 +579,7 @@ FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1,
 		connected ();
 
 	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 disconnected (input or output or both)\n", _name));
+		// DEBUG_TRACE (DEBUG::FaderPort, string_compose ("Surface %1 disconnected (input or output or both)\n", _name));
 		_device_active = false;
 	}
 
@@ -479,6 +590,8 @@ void
 FaderPort::connected ()
 {
 	std::cerr << "faderport connected\n";
+
+	start_midi_handling ();
 
 	/* send device inquiry */
 

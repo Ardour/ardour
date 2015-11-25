@@ -24,6 +24,9 @@
 #include <map>
 #include <glibmm/threads.h>
 
+#define ABSTRACT_UI_EXPORTS
+#include "pbd/abstract_ui.h"
+
 #include "ardour/types.h"
 
 #include "control_protocol/control_protocol.h"
@@ -63,7 +66,13 @@ class MIDIAction;
 
 namespace ArdourSurface {
 
-class FaderPort : public ARDOUR::ControlProtocol {
+struct FaderPortRequest : public BaseUI::BaseRequestObject {
+public:
+	FaderPortRequest () {}
+	~FaderPortRequest () {}
+};
+
+class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortRequest> {
   public:
 	FaderPort (ARDOUR::Session&);
 	virtual ~FaderPort();
@@ -109,6 +118,11 @@ class FaderPort : public ARDOUR::ControlProtocol {
 	}
 
 	bool device_active() const { return _device_active; }
+
+	void do_request (FaderPortRequest*);
+	int stop ();
+
+	void thread_init ();
 
   private:
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
@@ -211,14 +225,15 @@ class FaderPort : public ARDOUR::ControlProtocol {
 			, out (o)
 			, type (NamedAction)
 			, led_on (false)
+			, flash (false)
 		{}
 
 		void set_action (std::string const& action_name, bool on_press);
 		void set_action (boost::function<void()> function, bool on_press);
-
 		void set_led_state (boost::shared_ptr<MIDI::Port>, int onoff);
-
 		void invoke (ButtonState bs, bool press);
+		bool uses_flash () const { return flash; }
+		void set_flash (bool yn) { flash = yn; }
 
 	  private:
 		FaderPort& fp;
@@ -227,6 +242,7 @@ class FaderPort : public ARDOUR::ControlProtocol {
 		int out;
 		ActionType type;
 		bool led_on;
+		bool flash;
 
 		struct {
 			std::string action_name;
@@ -246,6 +262,10 @@ class FaderPort : public ARDOUR::ControlProtocol {
 
 	void all_lights_out ();
 	void party ();
+	void connect_session_signals ();
+	void close ();
+	void start_midi_handling ();
+	void stop_midi_handling ();
 };
 
 }
