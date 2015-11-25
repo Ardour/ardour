@@ -230,7 +230,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 
 		void set_action (std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
 		void set_action (boost::function<void()> function, bool on_press, FaderPort::ButtonState = ButtonState (0));
-		void set_led_state (boost::shared_ptr<MIDI::Port>, int onoff);
+		void set_led_state (boost::shared_ptr<MIDI::Port>, int onoff, bool force = false);
 		void invoke (ButtonState bs, bool press);
 		bool uses_flash () const { return flash; }
 		void set_flash (bool yn) { flash = yn; }

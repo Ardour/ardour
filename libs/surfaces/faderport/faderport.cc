@@ -234,8 +234,7 @@ void
 FaderPort::all_lights_out ()
 {
 	for (ButtonMap::iterator b = buttons.begin(); b != buttons.end(); ++b) {
-		b->second.set_led_state (_output_port, false);
-		g_usleep (1000);
+		b->second.set_led_state (_output_port, false, true);
 	}
 }
 
@@ -734,9 +733,9 @@ FaderPort::ButtonInfo::set_action (boost::function<void()> f, bool when_pressed,
 }
 
 void
-FaderPort::ButtonInfo::set_led_state (boost::shared_ptr<MIDI::Port> port, int onoff)
+FaderPort::ButtonInfo::set_led_state (boost::shared_ptr<MIDI::Port> port, int onoff, bool force)
 {
-	if (led_on == (bool) onoff) {
+	if (!force && (led_on == (bool) onoff)) {
 		/* nothing to do */
 		return;
 	}
