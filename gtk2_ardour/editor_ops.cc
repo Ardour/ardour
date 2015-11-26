@@ -3263,34 +3263,39 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 
-		boost::shared_ptr<Region> region;
+		/* Only the top regions at start and end have to be cropped */
+		boost::shared_ptr<Region> region_at_start = (*i)->top_region_at(start);
+		boost::shared_ptr<Region> region_at_end = (*i)->top_region_at(end);
 
-		the_start = start;
+		vector<boost::shared_ptr<Region>> regions;
 
-		if ((region = (*i)->top_region_at(the_start)) == 0) {
-			continue;
+		if (region_at_start != 0) {
+			regions.push_back (region_at_start);
+		}
+		if (region_at_end != 0) {
+			regions.push_back (region_at_end);
 		}
 
-		/* now adjust lengths to that we do the right thing
-		   if the selection extends beyond the region
-		*/
+		/* now adjust lengths */
+		for (vector<boost::shared_ptr<Region>>::iterator i = regions.begin(); i != regions.end(); ++i) {
 
-		the_start = max (the_start, (framepos_t) region->position());
-		if (max_framepos - the_start < region->length()) {
-			the_end = the_start + region->length() - 1;
-		} else {
-			the_end = max_framepos;
-		}
-		the_end = min (end, the_end);
-		cnt = the_end - the_start + 1;
+			the_start = max (start, (framepos_t) (*i)->position());
+			if (max_framepos - the_start < (*i)->length()) {
+				the_end = the_start + (*i)->length() - 1;
+			} else {
+				the_end = max_framepos;
+			}
+			the_end = min (end, the_end);
+			cnt = the_end - the_start + 1;
 
-		if(!in_command) {
-			begin_reversible_command (_("trim to selection"));
-			in_command = true;
+			if(!in_command) {
+				begin_reversible_command (_("trim to selection"));
+				in_command = true;
+			}
+			(*i)->clear_changes ();
+			(*i)->trim_to (the_start, cnt);
+			_session->add_command (new StatefulDiffCommand (*i));
 		}
-		region->clear_changes ();
-		region->trim_to (the_start, cnt);
-		_session->add_command (new StatefulDiffCommand (region));
 	}
 
 	if (in_command) {
