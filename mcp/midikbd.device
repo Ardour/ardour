@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="midikbd5"/>
+  <Strips value="5"/>
+  <MasterFader value="yes"/>
+  <TimecodeDisplay value="yes"/>
+  <TwoCharacterDisplay value="yes"/>
+  <Extenders value="0"/>
+  <MasterPosition value="0"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
+  <TouchSenseFaders value="no"/>
+  <HasSeparateMeters value="yes"/>
+  <NoHandShake value="yes"/>
+  <HasMeters value="yes"/>
+</MackieProtocolDevice>

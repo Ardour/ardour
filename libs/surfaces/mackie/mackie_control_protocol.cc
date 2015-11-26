@@ -51,6 +51,7 @@
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/route.h"
+#include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/track.h"
@@ -290,38 +291,59 @@ MackieControlProtocol::get_sorted_routes()
 
 		switch (_view_mode) {
 		case Mixer:
-			sorted.push_back (*it);
+			if (route->route_group()) {
+				route->route_group()->set_active (true, this);
+			}
+			sorted.push_back (route);
 			remote_ids.insert (route->remote_control_id());
 			break;
 		case AudioTracks:
-			if (is_audio_track(*it)) {
-				sorted.push_back (*it);
+			if (is_audio_track(route)) {
+				if (route->route_group()) {
+					route->route_group()->set_active (true, this);
+				}
+				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
 			break;
 		case Busses:
-			if (!is_track(*it)) {
-				sorted.push_back (*it);
+			if (!is_track(route)) {
+				if (route->route_group()) {
+					route->route_group()->set_active (true, this);
+				}
+				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
 			break;
-		case MidiTracks: // for now aux and buss are same
-			if (is_midi_track(*it)) {
-				sorted.push_back (*it);
+		case MidiTracks:
+			if (is_midi_track(route)) {
+				if (route->route_group()) {
+					route->route_group()->set_active (true, this);
+				}
+				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
 			break;
 		case Plugins:
 			break;
 		case Auxes: // for now aux and buss are same
-			if (!is_track(*it)) {
-				sorted.push_back (*it);
+			if (!is_track(route)) {
+				if (route->route_group()) {
+					route->route_group()->set_active (true, this);
+				}
+				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
 			break;
 		case Selected: // For example: a group
-			if (selected(*it)) {
-				sorted.push_back (*it);
+			if (selected(route)) {
+				/* Selected may be a group in which case we want to
+				 * control each track separately.
+				 */
+				if (route->route_group()) {
+					route->route_group()->set_active (false, this);
+				}
+				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
 			break;
