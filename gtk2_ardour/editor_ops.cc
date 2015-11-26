@@ -3301,56 +3301,49 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 void
 Editor::region_fill_track ()
 {
-	RegionSelection rs = get_regions_from_selection_and_entered ();
+	boost::shared_ptr<Playlist> playlist;
+	RegionSelection regions = get_regions_from_selection_and_entered ();
+	RegionSelection foo;
 
-	if (!_session || rs.empty()) {
+	framepos_t const end = _session->current_end_frame ();
+
+	if (regions.empty () || regions.end_frame () + 1 >= end) {
 		return;
 	}
 
-	framepos_t const end = _session->current_end_frame ();
-	RegionSelection foo;
-	bool in_command = false;
+	framepos_t const start_frame = regions.start ();
+	framepos_t const end_frame = regions.end_frame ();
+	framecnt_t const gap = end_frame - start_frame + 1;
 
-	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+	begin_reversible_command (Operations::region_fill);
 
-		boost::shared_ptr<Region> region ((*i)->region());
+	selection->clear_regions ();
 
-		boost::shared_ptr<Playlist> pl = region->playlist();
+	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
 
-		if (end <= region->last_frame()) {
-			continue;
-		}
+		boost::shared_ptr<Region> r ((*i)->region());
 
-		double times = (double) (end - region->last_frame()) / (double) region->length();
-
-		if (times == 0) {
-			continue;
-		}
-
-		if (!in_command) {
-			begin_reversible_command (Operations::region_fill);
-			in_command = true;
-		}
 		TimeAxisView& tv = (*i)->get_time_axis_view();
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
 		latest_regionviews.clear ();
 		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
-		pl->clear_changes ();
-		pl->add_region (RegionFactory::create (region, true), region->last_frame(), times);
-		_session->add_command (new StatefulDiffCommand (pl));
+		framepos_t const position = end_frame + (r->first_frame() - start_frame + 1);
+ 		playlist = (*i)->region()->playlist();
+		playlist->clear_changes ();
+		playlist->duplicate_until (r, position, gap, end);
+		_session->add_command(new StatefulDiffCommand (playlist));
 
 		c.disconnect ();
 
 		foo.insert (foo.end(), latest_regionviews.begin(), latest_regionviews.end());
 	}
 
-	if (in_command) {
-		if (!foo.empty()) {
-			selection->set (foo);
-		}
-		commit_reversible_command ();
+	if (!foo.empty()) {
+		selection->set (foo);
 	}
+
+	commit_reversible_command ();
 }
 
 void
