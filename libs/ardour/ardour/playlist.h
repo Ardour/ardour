@@ -141,6 +141,7 @@ public:
 	void partition (framepos_t start, framepos_t end, bool cut = false);
 	void duplicate (boost::shared_ptr<Region>, framepos_t position, float times);
 	void duplicate (boost::shared_ptr<Region>, framepos_t position, framecnt_t gap, float times);
+	void duplicate_until (boost::shared_ptr<Region>, framepos_t position, framecnt_t gap, framepos_t end);
 	void nudge_after (framepos_t start, framecnt_t distance, bool forwards);
 	boost::shared_ptr<Region> combine (const RegionList&);
 	void uncombine (boost::shared_ptr<Region>);
