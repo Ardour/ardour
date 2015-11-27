@@ -208,7 +208,7 @@ FaderPort::use_monitor ()
 }
 
 void
-FaderPort::ardour_pan (int delta)
+FaderPort::ardour_pan_azimuth (int delta)
 {
 	if (!_current_route) {
 		return;
@@ -227,6 +227,29 @@ FaderPort::ardour_pan (int delta)
 	}
 
 	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta / 64.0)));
+}
+
+
+void
+FaderPort::ardour_pan_width(int delta)
+{
+	if (!_current_route) {
+		return;
+	}
+
+	boost::shared_ptr<Pannable> pannable = _current_route->pannable ();
+
+	if (!pannable) {
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> width = pannable->pan_width_control;
+
+	if (!width) {
+		return;
+	}
+
+	width->set_value (width->interface_to_internal (width->internal_to_interface (width->get_value()) + (delta / 64.0)));
 }
 
 void

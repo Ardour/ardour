@@ -286,6 +286,9 @@ FaderPort::switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	case Rewind:
 		button_state = (tb->value ? ButtonState (button_state|RewindDown) : ButtonState (button_state&~RewindDown));
 		break;
+	case User:
+		button_state = (tb->value ? ButtonState (button_state|UserDown) : ButtonState (button_state&~UserDown));
+		break;
 	case FaderTouch:
 		fader_is_touched = tb->value;
 		if (_current_route) {
@@ -348,16 +351,30 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 
 	if (_current_route) {
 
-		if ( (button_state & ShiftDown) == ShiftDown ) {    //shift+encoder = input trim
+		ButtonState trim_modifier;
+		ButtonState width_modifier;
+
+		if (Profile->get_mixbus()) {
+			trim_modifier = ShiftDown;
+			width_modifier = ButtonState (0);
+		} else {
+			trim_modifier = UserDown;
+			width_modifier = ShiftDown;
+		}
+
+		if ((button_state & trim_modifier) == trim_modifier ) {    // mod+encoder = input trim
 			boost::shared_ptr<AutomationControl> gain = _current_route->trim()->gain_control ();
 			if (gain) {
 				float val = gain->get_user();  //for gain elements, the "user" value is in dB
 				val += delta;
 				gain->set_user(val);
 			}
-		} else {  //pan / balance
+		} else if (width_modifier && ((button_state & width_modifier) == width_modifier)) {
+			ardour_pan_width (delta);
+
+		} else {  // pan/balance
 			if (!Profile->get_mixbus()) {
-				ardour_pan (delta);
+				ardour_pan_azimuth (delta);
 			} else {
 				mixbus_pan (delta);
 			}
@@ -820,7 +837,7 @@ FaderPort::set_current_route (boost::shared_ptr<Route> r)
 			mp->cut_control()->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_cut, this), this);
 		}
 	}
-	
+
 	//ToDo: subscribe to the fader automation modes so we can light the LEDs
 
 	map_route_state ();

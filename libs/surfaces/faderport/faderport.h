@@ -172,6 +172,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		ShiftDown = 0x1,
 		RewindDown = 0x2,
 		StopDown = 0x4,
+		UserDown = 0x8,
 	};
 
 	ButtonState button_state;
@@ -279,7 +280,8 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void mute ();
 	void rec_enable ();
 
-	void ardour_pan (int);
+	void ardour_pan_azimuth (int);
+	void ardour_pan_width (int);
 	void mixbus_pan (int);
 };
 
