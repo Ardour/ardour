@@ -287,6 +287,17 @@ FaderPort::switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		break;
 	case FaderTouch:
 		fader_is_touched = tb->value;
+		if (_current_route) {
+			boost::shared_ptr<AutomationControl> gain = _current_route->gain_control ();
+			if (gain) {
+				framepos_t now = session->engine().sample_time();
+				if (tb->value) {
+					gain->start_touch (now);
+				} else {
+					gain->stop_touch (true, now);
+				}
+			}
+		}
 		break;
 	default:
 		break;
