@@ -474,15 +474,11 @@ OptionEditor::OptionEditor (PBD::Configuration* c, std::string const & t)
 {
 	using namespace Notebook_Helpers;
 
-	set_border_width (4);
-
-	pack_start (_notebook, true, true);
 
 	_notebook.set_show_tabs (true);
 	_notebook.set_show_border (true);
 	_notebook.set_name ("OptionsNotebook");
 
-	show_all ();
 
 	/* Watch out for changes to parameters */
 	_config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&OptionEditor::parameter_changed, this, _1), gui_context());
@@ -590,4 +586,23 @@ void
 DirectoryOption::selection_changed ()
 {
 	_set (poor_mans_glob(_file_chooser.get_filename ()));
+}
+
+/*--------------------------*/
+
+OptionEditorContainer::OptionEditorContainer (PBD::Configuration* c, string const& str)
+	: OptionEditor (c, str)
+{
+	set_border_width (4);
+	pack_start (notebook(), true, true);
+	show_all ();
+}
+
+OptionEditorWindow::OptionEditorWindow (PBD::Configuration* c, string const& str)
+	: OptionEditor (c, str)
+{
+	container.set_border_width (4);
+	container.pack_start (notebook(), true, true);
+	container.show_all ();
+	add (container);
 }

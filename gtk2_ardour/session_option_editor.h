@@ -27,7 +27,7 @@ namespace ARDOUR {
 	class SessionConfiguration;
 }
 
-class SessionOptionEditor : public OptionEditor
+class SessionOptionEditor : public OptionEditorWindow
 {
 public:
 	SessionOptionEditor (ARDOUR::Session* s);

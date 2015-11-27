@@ -25,7 +25,10 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/table.h>
+#include <gtkmm/window.h>
+
 #include "gtkmm2ext/slider_controller.h"
+
 #include "ardour_window.h"
 #include "audio_clock.h"
 #include "ardour/types.h"
@@ -680,7 +683,7 @@ public:
 };
 
 /** The OptionEditor dialog base class */
-class OptionEditor : public Gtk::VBox, public ARDOUR::SessionHandlePtr
+class OptionEditor : public ARDOUR::SessionHandlePtr, virtual public sigc::trackable
 {
 public:
 	OptionEditor (PBD::Configuration *, std::string const &);
@@ -692,19 +695,33 @@ public:
 	void set_current_page (std::string const &);
 
 protected:
-
 	virtual void parameter_changed (std::string const &);
 
 	PBD::Configuration* _config;
+	Gtk::Notebook& notebook() { return _notebook; }
 
 private:
-
 	PBD::ScopedConnection config_connection;
-
 	Gtk::Notebook _notebook;
 	std::map<std::string, OptionEditorPage*> _pages;
 };
 
+/** The OptionEditor dialog-as-container base class */
+class OptionEditorContainer : public OptionEditor, public Gtk::VBox
+{
+public:
+	OptionEditorContainer (PBD::Configuration *, std::string const &);
+	~OptionEditorContainer() {}
+};
+
+/** The OptionEditor dialog-as-container base class */
+class OptionEditorWindow : public OptionEditor, public Gtk::Window
+{
+public:
+	OptionEditorWindow (PBD::Configuration *, std::string const &);
+	~OptionEditorWindow() {}
+private:
+	Gtk::VBox container;
+};
+
 #endif /* __gtk_ardour_option_editor_h__ */
-
-

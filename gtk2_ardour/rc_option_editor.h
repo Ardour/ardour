@@ -34,7 +34,7 @@
  */
 
 /** Editor for options which are obtained from and written back to one of the .rc files. */
-class RCOptionEditor : public OptionEditor, public Gtkmm2ext::Tabbable
+class RCOptionEditor : public OptionEditorContainer, public Gtkmm2ext::Tabbable
 {
 public:
 	RCOptionEditor ();

@@ -29,7 +29,7 @@ using namespace ARDOUR;
 using namespace Timecode;
 
 SessionOptionEditor::SessionOptionEditor (Session* s)
-	: OptionEditor (&(s->config), _("Session Properties"))
+	: OptionEditorWindow (&(s->config), _("Session Properties"))
 	, _session_config (&(s->config))
 {
 	set_session (s);

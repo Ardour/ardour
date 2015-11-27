@@ -121,7 +121,7 @@ class ArdourPrompter;
 class PublicEditor;
 class SaveAsDialog;
 class SessionDialog;
-class SessionOptionEditor;
+class SessionOptionEditorWindow;
 class ShuttleControl;
 class Splash;
 class TimeInfoBox;
