@@ -44,6 +44,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/monitor_processor.h"
+#include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -316,11 +317,9 @@ void
 FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 {
 	int delta = 1;
-	if (pb < 8192) {
-		cerr << "Encoder right\n";
-	} else {
+
+	if (pb >= 8192) {
 		delta = -1;
-		cerr << "Encoder left\n";
 	}
 
 	//knob debouncing and hysteresis.  The presonus encoder often sends bursts of events, or goes the wrong direction
@@ -357,11 +356,13 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 				gain->set_user(val);
 			}
 		} else {  //pan / balance
-			//ToDo
+			if (!Profile->get_mixbus()) {
+				ardour_pan (delta);
+			} else {
+				mixbus_pan (delta);
+			}
 		}
-
 	}
-
 }
 
 void

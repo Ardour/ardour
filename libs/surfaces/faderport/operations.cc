@@ -19,6 +19,7 @@
 
 #include "ardour/async_midi_port.h"
 #include "ardour/monitor_processor.h"
+#include "ardour/pannable.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
@@ -204,4 +205,32 @@ FaderPort::use_monitor ()
 		}
 	} else {
 	}
+}
+
+void
+FaderPort::ardour_pan (int delta)
+{
+	if (!_current_route) {
+		return;
+	}
+
+	boost::shared_ptr<Pannable> pannable = _current_route->pannable ();
+
+	if (!pannable) {
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> azimuth = pannable->pan_azimuth_control;
+
+	if (!azimuth) {
+		return;
+	}
+
+	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta / 64.0)));
+}
+
+void
+FaderPort::mixbus_pan (int delta)
+{
+
 }
