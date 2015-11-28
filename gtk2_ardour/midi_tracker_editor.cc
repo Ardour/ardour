@@ -69,8 +69,6 @@ MidiTrackerEditor::MidiTrackerEditor (Session* s, boost::shared_ptr<MidiRegion> 
 	, region (r)
 	, track (tr)
 {
-	std::cout << "MidiTrackerEditor::MidiTrackerEditor" << std::endl;
-	
 	if (note_length_map.empty()) {
 		fill_note_length_map ();
 	}
@@ -90,47 +88,24 @@ MidiTrackerEditor::MidiTrackerEditor (Session* s, boost::shared_ptr<MidiRegion> 
 	model = ListStore::create (columns);
 	view.set_model (model);
 
-	note_length_model = ListStore::create (note_length_columns);
 	TreeModel::Row row;
-	
-	for (std::map<int,string>::iterator i = note_length_map.begin(); i != note_length_map.end(); ++i) {
-		row = *(note_length_model->append());
-		row[note_length_columns.ticks] = i->first;
-		row[note_length_columns.name] = i->second;
-	}
 
 	view.signal_key_press_event().connect (sigc::mem_fun (*this, &MidiTrackerEditor::key_press), false);
 	view.signal_key_release_event().connect (sigc::mem_fun (*this, &MidiTrackerEditor::key_release), false);
 	view.signal_scroll_event().connect (sigc::mem_fun (*this, &MidiTrackerEditor::scroll_event), false);
 
-	view.append_column (_("Start (Tracker)"), columns.start);
-	view.append_column (_("Channel (Tracker)"), columns.channel);
-	view.append_column (_("Num (Tracker)"), columns.note);
-	view.append_column (_("Name (Tracker)"), columns.note_name);
-	view.append_column (_("Vel (Tracker)"), columns.velocity);
-
-	/* use a combo renderer for length, so that we can offer a selection
-	   of pre-defined note lengths. we still allow edited values with
-	   arbitrary length (in ticks).
-	 */
-
-	Gtk::TreeViewColumn* lenCol = Gtk::manage (new Gtk::TreeViewColumn (_("Length")));
-	Gtk::CellRendererCombo* comboCell = Gtk::manage(new Gtk::CellRendererCombo);
-	lenCol->pack_start(*comboCell);
-	lenCol->add_attribute (comboCell->property_text(), columns.length);
-
-	comboCell->property_model() = note_length_model;
-	comboCell->property_text_column() = 1;
-	comboCell->property_has_entry() = false;
-
-	view.append_column (*lenCol);
+	view.append_column (_("Time"), columns.time);
+	view.append_column (_("Note"), columns.note_name);
+	view.append_column (_("Ch"), columns.channel);
+	view.append_column (_("Vel"), columns.velocity);
+	view.append_column (_("Del"), columns.delay);
 
 	view.set_headers_visible (true);
 	view.set_rules_hint (true);
 	view.get_selection()->set_mode (SELECTION_MULTIPLE);
 	view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &MidiTrackerEditor::selection_changed));
 
-	for (int i = 0; i < 6; ++i) {
+	for (int i = 0; i < TRACKER_COLNUM_COUNT; ++i) {
 		CellRendererText* renderer = dynamic_cast<CellRendererText*>(view.get_column_cell_renderer (i));
 
 		TreeViewColumn* col = view.get_column (i);
@@ -205,7 +180,7 @@ MidiTrackerEditor::scroll_event (GdkEventScroll* ev)
 	int colnum = GPOINTER_TO_UINT (col->get_data (X_("colnum")));
 
 	switch (colnum) {
-	case 0:
+	case TIME_COLNUM:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 			fdelta = 1/64.0;
 		} else {
@@ -215,10 +190,19 @@ MidiTrackerEditor::scroll_event (GdkEventScroll* ev)
 			fdelta = -fdelta;
 		}
 		prop = MidiModel::NoteDiffCommand::StartTime;
-		opname = _("edit note start");
+		opname = _("edit note time");
 		apply = true;
 		break;
-	case 1:
+	case NOTE_COLNUM:
+		idelta = 1;
+		if (ev->direction == GDK_SCROLL_DOWN || ev->direction == GDK_SCROLL_LEFT) {
+			idelta = -idelta;
+		}
+		prop = MidiModel::NoteDiffCommand::NoteNumber;
+		opname = _("edit note name");
+		apply = true;
+		break;
+	case CHANNEL_COLNUM:
 		idelta = 1;
 		if (ev->direction == GDK_SCROLL_DOWN || ev->direction == GDK_SCROLL_LEFT) {
 			idelta = -idelta;
@@ -227,18 +211,7 @@ MidiTrackerEditor::scroll_event (GdkEventScroll* ev)
 		opname = _("edit note channel");
 		apply = true;
 		break;
-	case 2:
-	case 3:
-		idelta = 1;
-		if (ev->direction == GDK_SCROLL_DOWN || ev->direction == GDK_SCROLL_LEFT) {
-			idelta = -idelta;
-		}
-		prop = MidiModel::NoteDiffCommand::NoteNumber;
-		opname = _("edit note number");
-		apply = true;
-		break;
-
-	case 4:
+	case VELOCITY_COLNUM:
 		idelta = 1;
 		if (ev->direction == GDK_SCROLL_DOWN || ev->direction == GDK_SCROLL_LEFT) {
 			idelta = -idelta;
@@ -248,17 +221,8 @@ MidiTrackerEditor::scroll_event (GdkEventScroll* ev)
 		apply = true;
 		break;
 
-	case 5:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
-			fdelta = 1/64.0;
-		} else {
-			fdelta = 1/4.0;
-		}
-		if (ev->direction == GDK_SCROLL_DOWN || ev->direction == GDK_SCROLL_LEFT) {
-			fdelta = -fdelta;
-		}
-		prop = MidiModel::NoteDiffCommand::Length;
-		opname = _("edit note length");
+	case DELAY_COLNUM:
+		opname = _("edit note delay");
 		apply = true;
 		break;
 
@@ -763,7 +727,6 @@ MidiTrackerEditor::redisplay_model ()
 			row = *(model->append());
 			row[columns.channel] = (*i)->channel() + 1;
 			row[columns.note_name] = Evoral::midi_note_name ((*i)->note());
-			row[columns.note] = (*i)->note();
 			row[columns.velocity] = (*i)->velocity();
 
 			Timecode::BBT_Time bbt;
@@ -772,7 +735,7 @@ MidiTrackerEditor::redisplay_model ()
 
 			ss.str ("");
 			ss << bbt;
-			row[columns.start] = ss.str();
+			row[columns.time] = ss.str();
 
 			bbt.bars = 0;
 			const Evoral::Beats dur = (*i)->end_time() - (*i)->time();
@@ -782,13 +745,13 @@ MidiTrackerEditor::redisplay_model ()
 			uint64_t len_ticks = (*i)->length().to_ticks();
 			std::map<int,string>::iterator x = note_length_map.find (len_ticks);
 
-			if (x != note_length_map.end()) {
-				row[columns.length] = x->second;
-			} else {
-				ss.str ("");
-				ss << len_ticks;
-				row[columns.length] = ss.str();
-			}
+			// if (x != note_length_map.end()) {
+			// 	row[columns.length] = x->second;
+			// } else {
+			// 	ss.str ("");
+			// 	ss << len_ticks;
+			// 	row[columns.length] = ss.str();
+			// }
 
 			row[columns._note] = (*i);
 		}

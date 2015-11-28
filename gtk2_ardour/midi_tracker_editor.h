@@ -52,38 +52,34 @@ class MidiTrackerEditor : public ArdourWindow
 	~MidiTrackerEditor();
 
   private:
-	struct MidiListModelColumns : public Gtk::TreeModel::ColumnRecord {
-		MidiListModelColumns() {
-			add (channel);
-			add (note);
+	struct MidiTrackerModelColumns : public Gtk::TreeModel::ColumnRecord {
+		MidiTrackerModelColumns() {
+			add (time);
 			add (note_name);
+			add (channel);
 			add (velocity);
-			add (start);
-			add (length);
-			add (_note);
+			add (delay);
+			add (_note);		// We keep that around to play the note
 		};
-		Gtk::TreeModelColumn<uint8_t>     channel;
-		Gtk::TreeModelColumn<uint8_t>     note;
+		Gtk::TreeModelColumn<std::string> time;
 		Gtk::TreeModelColumn<std::string> note_name;
+		Gtk::TreeModelColumn<uint8_t>     channel;
 		Gtk::TreeModelColumn<uint8_t>     velocity;
-		Gtk::TreeModelColumn<std::string> start;
-		Gtk::TreeModelColumn<std::string> length;
+		Gtk::TreeModelColumn<int16_t>     delay;
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note;
 	};
 
-	struct NoteLengthColumns : public Gtk::TreeModel::ColumnRecord {
-		NoteLengthColumns() {
-			add (ticks);
-			add (name);
-		}
-		Gtk::TreeModelColumn<int>         ticks;
-		Gtk::TreeModelColumn<std::string> name;
+	enum tracker_columns {
+		TIME_COLNUM,
+		NOTE_COLNUM,
+		CHANNEL_COLNUM,
+		VELOCITY_COLNUM,
+		DELAY_COLNUM,
+		TRACKER_COLNUM_COUNT
 	};
 
-	MidiListModelColumns         columns;
+	MidiTrackerModelColumns      columns;
 	Glib::RefPtr<Gtk::ListStore> model;
-	NoteLengthColumns            note_length_columns;
-	Glib::RefPtr<Gtk::ListStore> note_length_model;
 	Gtk::TreeView                view;
 	Gtk::ScrolledWindow          scroller;
 	Gtk::TreeModel::Path         edit_path;
