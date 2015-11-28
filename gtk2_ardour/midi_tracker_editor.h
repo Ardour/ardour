@@ -53,7 +53,8 @@ class MidiTrackerEditor : public ArdourWindow
 
   private:
 	struct MidiTrackerModelColumns : public Gtk::TreeModel::ColumnRecord {
-		MidiTrackerModelColumns() {
+		MidiTrackerModelColumns()
+		{
 			add (time);
 			add (note_name);
 			add (channel);
@@ -78,6 +79,8 @@ class MidiTrackerEditor : public ArdourWindow
 		TRACKER_COLNUM_COUNT
 	};
 
+	static const std::string note_off_str;
+	
 	MidiTrackerModelColumns      columns;
 	Glib::RefPtr<Gtk::ListStore> model;
 	Gtk::TreeView                view;

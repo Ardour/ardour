@@ -50,6 +50,8 @@ using Timecode::BBT_Time;
 
 static map<int,std::string> note_length_map;
 
+const std::string MidiTrackerEditor::note_off_str = "===";
+
 static void 
 fill_note_length_map ()
 {
@@ -724,35 +726,33 @@ MidiTrackerEditor::redisplay_model ()
 		stringstream ss;
 
 		for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
+			// Display note on
 			row = *(model->append());
 			row[columns.channel] = (*i)->channel() + 1;
 			row[columns.note_name] = Evoral::midi_note_name ((*i)->note());
 			row[columns.velocity] = (*i)->velocity();
 
-			Timecode::BBT_Time bbt;
-
-			_session->tempo_map().bbt_time (conv.to ((*i)->time()), bbt);
-
+			// Start time
+			Timecode::BBT_Time start_bbt;
+			_session->tempo_map().bbt_time (conv.to ((*i)->time()), start_bbt);
 			ss.str ("");
-			ss << bbt;
+			ss << start_bbt;
 			row[columns.time] = ss.str();
 
-			bbt.bars = 0;
-			const Evoral::Beats dur = (*i)->end_time() - (*i)->time();
-			bbt.beats = dur.get_beats ();
-			bbt.ticks = dur.get_ticks ();
-			
-			uint64_t len_ticks = (*i)->length().to_ticks();
-			std::map<int,string>::iterator x = note_length_map.find (len_ticks);
+			// Display not off
+			row = *(model->append());
+			row[columns.channel] = (*i)->channel() + 1;
+			row[columns.note_name] = note_off_str;
+			row[columns.velocity] = (*i)->off_velocity();
 
-			// if (x != note_length_map.end()) {
-			// 	row[columns.length] = x->second;
-			// } else {
-			// 	ss.str ("");
-			// 	ss << len_ticks;
-			// 	row[columns.length] = ss.str();
-			// }
+			// End time
+			Timecode::BBT_Time end_bbt;
+			_session->tempo_map().bbt_time (conv.to ((*i)->end_time()), end_bbt);
+			ss.str ("");
+			ss << end_bbt;
+			row[columns.time] = ss.str();
 
+			// Keep the note around for playing it
 			row[columns._note] = (*i);
 		}
 	}
