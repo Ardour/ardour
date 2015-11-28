@@ -196,7 +196,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 		if (_resolve_required) {
 			port_buffer = port_engine.get_buffer (_port_handle, nframes);
 			/* resolve all notes at the start of the buffer */
-			resolve_notes (port_buffer, 0);
+			resolve_notes (port_buffer, _global_port_buffer_offset);
 			_resolve_required = false;
 		}
 
