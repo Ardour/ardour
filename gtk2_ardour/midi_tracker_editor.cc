@@ -48,22 +48,7 @@ using namespace Glib;
 using namespace ARDOUR;
 using Timecode::BBT_Time;
 
-static map<int,std::string> note_length_map;
-
 const std::string MidiTrackerEditor::note_off_str = "===";
-
-static void 
-fill_note_length_map ()
-{
-	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat, _("Whole")));
-	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/2, _("Half")));
-	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/3, _("Triplet")));
-	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/4, _("Quarter")));
-	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/8, _("Eighth")));
-	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/16, _("Sixteenth")));
-	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/32, _("Thirty-second")));
-	note_length_map.insert (make_pair<int,string> (BBT_Time::ticks_per_beat/64, _("Sixty-fourth")));
-}
 
 MidiTrackerEditor::MidiTrackerEditor (Session* s, boost::shared_ptr<MidiRegion> r, boost::shared_ptr<MidiTrack> tr)
 	: ArdourWindow (r->name())
@@ -71,10 +56,6 @@ MidiTrackerEditor::MidiTrackerEditor (Session* s, boost::shared_ptr<MidiRegion> 
 	, region (r)
 	, track (tr)
 {
-	if (note_length_map.empty()) {
-		fill_note_length_map ();
-	}
-	
 	/* We do not handle nested sources/regions. Caller should have tackled this */
 
 	if (r->max_source_level() > 0) {
@@ -553,7 +534,6 @@ MidiTrackerEditor::edited (const std::string& path, const std::string& text)
 	boost::shared_ptr<NoteType> note = (*iter)[columns._note];
 	MidiModel::NoteDiffCommand::Property prop (MidiModel::NoteDiffCommand::NoteNumber);
 
-	double fval;
 	int    ival;
 	bool   apply = false;
 	int    idelta = 0;
@@ -589,77 +569,6 @@ MidiTrackerEditor::edited (const std::string& path, const std::string& text)
 			apply = true;
 		}
 		break;
-	case 5: // length
-
-		if (sscanf (text.c_str(), "%lf", &fval) == 1) {
-
-			/* numeric value entered */
-			
-			if (text.find ('.') == string::npos && text.find (',') == string::npos) {
-				/* integral => units are ticks */
-				fval = fval / BBT_Time::ticks_per_beat;
-			} else {
-				/* non-integral => beats, so use as-is */
-			}
-
-		} else {
-
-			/* assume its text from the combo. look for the map
-			 * entry for the actual note ticks
-			 */
-
-			uint64_t len_ticks = note->length().to_ticks();
-			std::map<int,string>::iterator x = note_length_map.find (len_ticks);
-
-			if (x == note_length_map.end()) {
-
-				/* tick length not in map - was
-				 * displaying numeric value ... use new value
-				 * from note length map, and convert to beats.
-				 */
-				
-				for (x = note_length_map.begin(); x != note_length_map.end(); ++x) {
-					if (x->second == text) {
-						break;
-					}
-				}
-				
-				if (x != note_length_map.end()) {
-					fval = x->first / BBT_Time::ticks_per_beat;
-				}
-
-			} else {
-
-				fval = -1.0;
-
-				if (text != x->second) {
-					
-					/* get ticks for the newly selected
-					 * note length
-					 */
-
-					for (x = note_length_map.begin(); x != note_length_map.end(); ++x) {
-						if (x->second == text) {
-							break;
-						}
-					}
-					
-					if (x != note_length_map.end()) {
-						/* convert to beats */
-						fval = (double) x->first / BBT_Time::ticks_per_beat;
-					}
-				}
-			}
-		}
-
-		if (fval > 0.0) {
-			fdelta = fval - note->length().to_double();
-			prop = MidiModel::NoteDiffCommand::Length;
-			opname = _("change note length");
-			apply = true;
-		}
-		break;
-
 	default:
 		break;
 	}
@@ -739,7 +648,7 @@ MidiTrackerEditor::redisplay_model ()
 			ss << start_bbt;
 			row[columns.time] = ss.str();
 
-			// Display not off
+			// Display note off
 			row = *(model->append());
 			row[columns.channel] = (*i)->channel() + 1;
 			row[columns.note_name] = note_off_str;
