@@ -66,7 +66,6 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
 
-	void get_playback (MidiBuffer& dst, framecnt_t);
 	void flush_playback (framepos_t, framepos_t);
 
 	void set_record_enabled (bool yn);
@@ -138,6 +137,7 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 	static framecnt_t midi_readahead;
 
   private:
+	void get_playback (MidiBuffer& dst, framecnt_t);
 
 	/* The two central butler operations */
 	int do_flush (RunContext context, bool force = false);
