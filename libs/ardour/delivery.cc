@@ -300,7 +300,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 		// MIDI data will not have been delivered by the panner
 
 		if (bufs.count().n_midi() > 0 && ports.count().n_midi () > 0) {
-			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, 0);
+			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, ports.port(0)->port_offset());
 		}
 
 	} else {
@@ -312,7 +312,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
                 }
 
 		if (bufs.count().n_midi() > 0 && ports.count().n_midi () > 0) {
-			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, 0);
+			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, ports.port(0)->port_offset());
 		}
 	}
 
