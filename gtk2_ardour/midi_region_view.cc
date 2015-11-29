@@ -125,6 +125,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
+	, _note_entered (false)
 	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
@@ -173,6 +174,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
+	, _note_entered (false)
 	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
@@ -226,6 +228,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
+	, _note_entered (false)
 	, _mouse_changed_selection (false)
 {
 	init (false);
@@ -258,6 +261,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
+	, _note_entered (false)
 	, _mouse_changed_selection (false)
 {
 	init (true);
@@ -604,7 +608,11 @@ MidiRegionView::motion (GdkEventMotion* ev)
 {
 	PublicEditor& editor = trackview.editor ();
 
-	if (!_ghost_note && editor.current_mouse_mode() == MouseContent &&
+	if (_note_entered) {
+
+		remove_ghost_note ();
+
+	} else if (!_ghost_note && editor.current_mouse_mode() == MouseContent &&
 	    Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()) &&
 	    _mouse_state != AddDragging) {
 
@@ -620,9 +628,14 @@ MidiRegionView::motion (GdkEventMotion* ev)
 		remove_ghost_note ();
 		hide_verbose_cursor ();
 
-	} else if (_ghost_note && editor.current_mouse_mode() == MouseDraw) {
+	} else if (editor.current_mouse_mode() == MouseDraw) {
 
-		update_ghost_note (ev->x, ev->y);
+		if (_ghost_note) {
+			update_ghost_note (ev->x, ev->y);
+		}
+		else {
+			create_ghost_note (ev->x, ev->y);
+		}
 	}
 
 	/* any motion immediately hides velocity text that may have been visible */
@@ -3309,6 +3322,8 @@ MidiRegionView::change_channel(uint8_t channel)
 void
 MidiRegionView::note_entered(NoteBase* ev)
 {
+	_note_entered = true;
+
 	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
 
 	if (_mouse_state == SelectTouchDragging) {
@@ -3323,6 +3338,8 @@ MidiRegionView::note_entered(NoteBase* ev)
 void
 MidiRegionView::note_left (NoteBase*)
 {
+	_note_entered = false;
+
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		(*i)->hide_velocity ();
 	}

@@ -509,6 +509,7 @@ private:
 	double _last_event_y;
 	bool   _grabbed_keyboard;
 	bool   _entered;
+	bool   _note_entered;
 
 	bool _mouse_changed_selection;
 
