@@ -627,6 +627,10 @@ MidiTrackerEditor::redisplay_model ()
 	view.set_model (Glib::RefPtr<Gtk::ListStore>(0));
 	model->clear ();
 
+	// TODO: replace by a user selection
+	uint32_t rows_per_beat = 4;
+	double ticks_per_row = BBT_Time::ticks_per_beat/rows_per_beat;
+
 	if (_session) {
 
 		BeatsFramesConverter conv (_session->tempo_map(), region->position());
@@ -634,6 +638,56 @@ MidiTrackerEditor::redisplay_model ()
 		TreeModel::Row row;
 		stringstream ss;
 
+		// Get the region's first and last BBT
+		Timecode::BBT_Time region_first_bbt, region_last_bbt;
+		_session->tempo_map().bbt_time (region->first_frame(), region_first_bbt);
+		_session->tempo_map().bbt_time (region->last_frame(), region_last_bbt);
+
+		// Get the frame and BBT_Time of the beat following the first frame
+		// (just in case the first row happens to be on the next beat).
+		framepos_t next_beat_frame =
+			_session->tempo_map().framepos_plus_beats (region->first_frame(), Evoral::Beats(1));
+		Timecode::BBT_Time next_beat_bbt;
+		_session->tempo_map().bbt_time (next_beat_frame, next_beat_bbt);
+		next_beat_bbt.ticks = 0;
+
+		// Find the frame and the BBT corresponding to the first row
+		Timecode::BBT_Time first_row_bbt(region_first_bbt.bars, region_first_bbt.beats, 0);
+		bool found = false;
+		for (uint32_t multiple = 0; multiple <= rows_per_beat; multiple++) {
+			if (region_first_bbt.ticks <= ticks_per_row * multiple) {
+				if (multiple < rows_per_beat) {
+					// The first row is within the first beat
+					first_row_bbt.ticks = lrint (floor (ticks_per_row * multiple));
+				} else {
+					// The first row is on the next beat
+					first_row_bbt = next_beat_bbt;
+				}
+				found = true;
+				break;
+			}
+		}
+		assert (found);
+		uint32_t first_row_frame = _session->tempo_map().frame_time (first_row_bbt);
+
+		// Find the BBT corresponding to the last row and the number of rows
+		uint32_t nrows = 10;	// TODO
+
+		// Generate each row // TODO: no note in there yet
+		for (uint32_t irow = 0; irow < nrows; irow++) {
+			row = *(model->append());
+			double row_beats = (irow*1.0) / rows_per_beat;
+			uint32_t row_frame =
+				_session->tempo_map().framepos_plus_beats (first_row_frame, Evoral::Beats(row_beats));
+			Timecode::BBT_Time row_bbt;
+			_session->tempo_map().bbt_time(row_frame, row_bbt);
+			ss.str ("");
+			ss << row_bbt;
+			row[columns.time] = ss.str();
+		}
+
+		// Generate rows of motes on and off (is kept around as it could be
+		// useful for the above loop)
 		for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
 			// Display note on
 			row = *(model->append());
