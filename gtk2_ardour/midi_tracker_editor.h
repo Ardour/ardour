@@ -80,6 +80,11 @@ class MidiTrackerEditor : public ArdourWindow
 	};
 
 	static const std::string note_off_str;
+
+	uint32_t rows_per_beat;		// number of rows per beat
+	uint32_t nrows;				// total number of rows in the region
+	double ticks_per_row;		// number of ticks per rows
+	framepos_t first_row_frame;	// frame corresponding to the first row
 	
 	MidiTrackerModelColumns      columns;
 	Glib::RefPtr<Gtk::ListStore> model;
@@ -112,6 +117,16 @@ class MidiTrackerEditor : public ArdourWindow
 
 	void delete_selected_note ();
 	void selection_changed ();
+
+	// Find the frame corresponding to the first row and initialize
+	// first_row_frame
+	void set_first_row_frame();
+
+	// Find the number of rows of the region
+	void set_nrows();
+
+	// Return the frame at the corresponding row index
+	framepos_t frame_at_row(uint32_t irow);
 };
 
 #endif /* __ardour_gtk2_midi_tracker_editor_h_ */
