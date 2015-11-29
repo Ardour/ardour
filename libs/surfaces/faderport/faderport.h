@@ -101,6 +101,48 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 
 	void thread_init ();
 
+	PBD::Signal0<void> ConnectionChange;
+
+	boost::shared_ptr<ARDOUR::Port> input_port();
+	boost::shared_ptr<ARDOUR::Port> output_port();
+
+	enum ButtonID {
+		Mute = 18,
+		Solo = 17,
+		Rec = 16,
+		Left = 19,
+		Bank = 20,
+		Right = 21,
+		Output = 22,
+		FP_Read = 10,
+		FP_Write = 9,
+		FP_Touch = 8,
+		FP_Off = 23,
+		Mix = 11,
+		Proj = 12,
+		Trns = 13,
+		Undo = 14,
+		Shift = 2,
+		Punch = 1,
+		User = 0,
+		Loop = 15,
+		Rewind = 3,
+		Ffwd = 4,
+		Stop = 5,
+		Play = 6,
+		RecEnable = 7,
+		FaderTouch = 127,
+	};
+
+	enum ButtonState {
+		ShiftDown = 0x1,
+		RewindDown = 0x2,
+		StopDown = 0x4,
+		UserDown = 0x8,
+	};
+
+	void set_action (ButtonID, std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
+
   private:
 	boost::shared_ptr<ARDOUR::Route> _current_route;
 	boost::weak_ptr<ARDOUR::Route> pre_master_route;
@@ -139,41 +181,6 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb);
 	void encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb);
 	void fader_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb);
-
-	enum ButtonID {
-		Mute = 18,
-		Solo = 17,
-		Rec = 16,
-		Left = 19,
-		Bank = 20,
-		Right = 21,
-		Output = 22,
-		FP_Read = 10,
-		FP_Write = 9,
-		FP_Touch = 8,
-		FP_Off = 23,
-		Mix = 11,
-		Proj = 12,
-		Trns = 13,
-		Undo = 14,
-		Shift = 2,
-		Punch = 1,
-		User = 0,
-		Loop = 15,
-		Rewind = 3,
-		Ffwd = 4,
-		Stop = 5,
-		Play = 6,
-		RecEnable = 7,
-		FaderTouch = 127,
-	};
-
-	enum ButtonState {
-		ShiftDown = 0x1,
-		RewindDown = 0x2,
-		StopDown = 0x4,
-		UserDown = 0x8,
-	};
 
 	ButtonState button_state;
 

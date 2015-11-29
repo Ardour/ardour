@@ -19,17 +19,32 @@
 
 #include <iostream>
 #include <list>
+#include <vector>
 #include <string>
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/label.h>
-#include <gtkmm/box.h>
 #include <gtkmm/adjustment.h>
+#include <gtkmm/alignment.h>
+#include <gtkmm/box.h>
+#include <gtkmm/combobox.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/label.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/table.h>
+#include <gtkmm/treestore.h>
 
+namespace Gtk {
+	class CellRendererCombo;
+}
+
+#include "pbd/unwind.h"
+#include "pbd/strsplit.h"
+
+#include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
+
+#include "ardour/audioengine.h"
 
 #include "faderport.h"
 
@@ -37,15 +52,59 @@
 
 namespace ArdourSurface {
 
-class GMCPGUI : public Gtk::VBox
+class FPGUI : public Gtk::VBox
 {
 public:
-	GMCPGUI (FaderPort&);
-	~GMCPGUI ();
+	FPGUI (FaderPort&);
+	~FPGUI ();
 
 private:
-	FaderPort& cp;
-	Gtk::ComboBoxText map_combo;
+	FaderPort& fp;
+	Gtk::Table table;
+	Gtk::ComboBox input_combo;
+	Gtk::ComboBox output_combo;
+	Gtk::ComboBox mix_combo;
+	Gtk::ComboBox proj_combo;
+	Gtk::ComboBox trns_combo;
+
+	void update_port_combos (std::vector<std::string> const&, std::vector<std::string> const&);
+	PBD::ScopedConnection connection_change_connection;
+	void connection_handler ();
+
+	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
+		MidiPortColumns() {
+			add (short_name);
+			add (full_name);
+		}
+		Gtk::TreeModelColumn<std::string> short_name;
+		Gtk::TreeModelColumn<std::string> full_name;
+	};
+
+	MidiPortColumns midi_port_columns;
+	bool ignore_active_change;
+
+	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
+	void active_port_changed (Gtk::ComboBox*,bool for_input);
+
+	struct ActionColumns : public Gtk::TreeModel::ColumnRecord {
+		ActionColumns() {
+			add (name);
+			add (path);
+		}
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> path;
+	};
+
+	ActionColumns action_columns;
+	Glib::RefPtr<Gtk::TreeStore> available_action_model;
+	std::map<std::string,std::string> action_map; // map from action names to paths
+
+	void build_mix_action_combo (Gtk::ComboBox&);
+	void build_proj_action_combo (Gtk::ComboBox&);
+	void build_trns_action_combo (Gtk::ComboBox&);
+
+	void build_available_action_menu ();
+	void action_changed (Gtk::ComboBox*, FaderPort::ButtonID);
 };
 
 }
@@ -77,24 +136,377 @@ FaderPort::tear_down_gui ()
 			delete w;
 		}
 	}
-	delete (GMCPGUI*) gui;
+	delete (FPGUI*) gui;
 	gui = 0;
 }
 
 void
 FaderPort::build_gui ()
 {
-	gui = (void*) new GMCPGUI (*this);
+	gui = (void*) new FPGUI (*this);
 }
 
 /*--------------------*/
 
-GMCPGUI::GMCPGUI (FaderPort& p)
-	: cp (p)
+FPGUI::FPGUI (FaderPort& p)
+	: fp (p)
+	, table (2, 5)
+	, ignore_active_change (false)
+{
+	set_border_width (12);
+
+	table.set_row_spacings (4);
+	table.set_col_spacings (6);
+	table.set_border_width (12);
+	table.set_homogeneous (false);
+
+	Gtk::Label* l;
+	Gtk::Alignment* align;
+	int row = 0;
+
+	vector<string> midi_inputs;
+	vector<string> midi_outputs;
+
+	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput|ARDOUR::IsPhysical), midi_inputs);
+	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsPhysical), midi_outputs);
+
+	update_port_combos (midi_inputs, midi_outputs);
+
+	input_combo.pack_start (midi_port_columns.short_name);
+	output_combo.pack_start (midi_port_columns.short_name);
+
+	input_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::active_port_changed), &input_combo, true));
+	output_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::active_port_changed), &output_combo, false));
+
+	l = manage (new Gtk::Label (_("Sends MIDI via:")));
+	l->set_alignment (1.0, 0.5);
+	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table.attach (input_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	row++;
+
+	l = manage (new Gtk::Label (_("Receives MIDI via:")));
+	l->set_alignment (1.0, 0.5);
+	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table.attach (output_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	row++;
+
+	build_mix_action_combo (mix_combo);
+	build_proj_action_combo (proj_combo);
+	build_trns_action_combo (trns_combo);
+
+	l = manage (new Gtk::Label (_("Mix Button")));
+	l->set_alignment (1.0, 0.5);
+	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (mix_combo);
+	table.attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	row++;
+
+	l = manage (new Gtk::Label (_("Proj Button")));
+	l->set_alignment (1.0, 0.5);
+	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (proj_combo);
+	table.attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	row++;
+
+	l = manage (new Gtk::Label (_("Trns Button")));
+	l->set_alignment (1.0, 0.5);
+	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (trns_combo);
+	table.attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	row++;
+
+	pack_start (table, false, false);
+
+	fp.ConnectionChange.connect (connection_change_connection, invalidator (*this), boost::bind (&FPGUI::connection_handler, this), gui_context());
+}
+
+FPGUI::~FPGUI ()
 {
 }
 
-GMCPGUI::~GMCPGUI ()
+void
+FPGUI::connection_handler ()
+{
+	/* ignore all changes to combobox active strings here, because we're
+	   updating them to match a new ("external") reality - we were called
+	   because port connections have changed.
+	*/
+
+	PBD::Unwinder<bool> ici (ignore_active_change, true);
+
+	vector<string> midi_inputs;
+	vector<string> midi_outputs;
+
+	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput|ARDOUR::IsTerminal), midi_inputs);
+	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsTerminal), midi_outputs);
+
+	update_port_combos (midi_inputs, midi_outputs);
+}
+
+void
+FPGUI::update_port_combos (vector<string> const& midi_inputs, vector<string> const& midi_outputs)
+{
+	Glib::RefPtr<Gtk::ListStore> input = build_midi_port_list (midi_inputs, true);
+	Glib::RefPtr<Gtk::ListStore> output = build_midi_port_list (midi_outputs, false);
+	bool input_found = false;
+	bool output_found = false;
+	int n;
+
+	input_combo.set_model (input);
+	output_combo.set_model (output);
+
+	Gtk::TreeModel::Children children = input->children();
+	Gtk::TreeModel::Children::iterator i;
+	i = children.begin();
+	++i; /* skip "Disconnected" */
+
+
+	for (n = 1;  i != children.end(); ++i, ++n) {
+		string port_name = (*i)[midi_port_columns.full_name];
+		if (fp.input_port()->connected_to (port_name)) {
+			input_combo.set_active (n);
+			input_found = true;
+			break;
+		}
+	}
+
+	if (!input_found) {
+		input_combo.set_active (0); /* disconnected */
+	}
+
+	children = output->children();
+	i = children.begin();
+	++i; /* skip "Disconnected" */
+
+	for (n = 1;  i != children.end(); ++i, ++n) {
+		string port_name = (*i)[midi_port_columns.full_name];
+		if (fp.output_port()->connected_to (port_name)) {
+			output_combo.set_active (n);
+			output_found = true;
+			break;
+		}
+	}
+
+	if (!output_found) {
+		output_combo.set_active (0); /* disconnected */
+	}
+}
+
+void
+FPGUI::build_available_action_menu ()
+{
+	/* build a model of all available actions (needs to be tree structured
+	 * more)
+	 */
+
+	available_action_model = TreeStore::create (action_columns);
+
+	vector<string> paths;
+	vector<string> labels;
+	vector<string> tooltips;
+	vector<string> keys;
+	vector<AccelKey> bindings;
+	typedef std::map<string,TreeIter> NodeMap;
+	NodeMap nodes;
+	NodeMap::iterator r;
+
+	ActionManager::get_all_actions (labels, paths, tooltips, keys, bindings);
+
+	vector<string>::iterator k;
+	vector<string>::iterator p;
+	vector<string>::iterator t;
+	vector<string>::iterator l;
+
+	available_action_model->clear ();
+
+	/* Because there are button bindings built in that are not
+	in the key binding map, there needs to be a way to undo
+	a profile edit. */
+	TreeIter rowp;
+	TreeModel::Row parent;
+	rowp = available_action_model->append();
+	parent = *(rowp);
+	parent[action_columns.name] = _("Remove Binding");
+
+	/* Key aliasing */
+
+	rowp = available_action_model->append();
+	parent = *(rowp);
+	parent[action_columns.name] = _("Shift");
+	rowp = available_action_model->append();
+	parent = *(rowp);
+	parent[action_columns.name] = _("Control");
+	rowp = available_action_model->append();
+	parent = *(rowp);
+	parent[action_columns.name] = _("Option");
+	rowp = available_action_model->append();
+	parent = *(rowp);
+	parent[action_columns.name] = _("CmdAlt");
+
+
+	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
+
+		TreeModel::Row row;
+		vector<string> parts;
+
+		parts.clear ();
+
+		split (*p, parts, '/');
+
+		if (parts.empty()) {
+			continue;
+		}
+
+		//kinda kludgy way to avoid displaying menu items as mappable
+		if ( parts[1] == _("Main_menu") )
+			continue;
+		if ( parts[1] == _("JACK") )
+			continue;
+		if ( parts[1] == _("redirectmenu") )
+			continue;
+		if ( parts[1] == _("Editor_menus") )
+			continue;
+		if ( parts[1] == _("RegionList") )
+			continue;
+		if ( parts[1] == _("ProcessorMenu") )
+			continue;
+
+		if ((r = nodes.find (parts[1])) == nodes.end()) {
+
+			/* top level is missing */
+
+			TreeIter rowp;
+			TreeModel::Row parent;
+			rowp = available_action_model->append();
+			nodes[parts[1]] = rowp;
+			parent = *(rowp);
+			parent[action_columns.name] = parts[1];
+
+			row = *(available_action_model->append (parent.children()));
+
+		} else {
+
+			row = *(available_action_model->append ((*r->second)->children()));
+
+		}
+
+		/* add this action */
+
+		if (l->empty ()) {
+			row[action_columns.name] = *t;
+			action_map[*t] = *p;
+		} else {
+			row[action_columns.name] = *l;
+			action_map[*l] = *p;
+		}
+
+		row[action_columns.path] = (*p);
+	}
+}
+
+void
+FPGUI::build_mix_action_combo (Gtk::ComboBox& cb)
+{
+	Glib::RefPtr<Gtk::ListStore> model (Gtk::ListStore::create (action_columns));
+	TreeIter rowp;
+	TreeModel::Row row;
+
+	rowp = model->append();
+	row = *(rowp);
+	row[action_columns.name] = _("Do this");
+	row[action_columns.path] = X_("do-this");
+
+	rowp = model->append();
+	row = *(rowp);
+	row[action_columns.name] = _("Do that");
+	row[action_columns.path] = X_("do-that");
+
+	cb.set_model (model);
+	cb.pack_start (action_columns.name);
+
+	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::action_changed), &cb, FaderPort::Mix));
+}
+
+void
+FPGUI::build_proj_action_combo (Gtk::ComboBox& cb)
 {
 }
 
+
+void
+FPGUI::build_trns_action_combo (Gtk::ComboBox& cb)
+{
+}
+
+Glib::RefPtr<Gtk::ListStore>
+FPGUI::build_midi_port_list (vector<string> const & ports, bool for_input)
+{
+	Glib::RefPtr<Gtk::ListStore> store = ListStore::create (midi_port_columns);
+	TreeModel::Row row;
+
+	row = *store->append ();
+	row[midi_port_columns.full_name] = string();
+	row[midi_port_columns.short_name] = _("Disconnected");
+
+	for (vector<string>::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+		row = *store->append ();
+		row[midi_port_columns.full_name] = *p;
+		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*p);
+		if (pn.empty ()) {
+			pn = (*p).substr ((*p).find (':') + 1);
+		}
+		row[midi_port_columns.short_name] = pn;
+	}
+
+	return store;
+}
+
+void
+FPGUI::active_port_changed (Gtk::ComboBox* combo, bool for_input)
+{
+	if (ignore_active_change) {
+		return;
+	}
+
+	TreeModel::iterator active = combo->get_active ();
+	string new_port = (*active)[midi_port_columns.full_name];
+
+	if (new_port.empty()) {
+		if (for_input) {
+			fp.input_port()->disconnect_all ();
+		} else {
+			fp.output_port()->disconnect_all ();
+		}
+
+		return;
+	}
+
+	if (for_input) {
+		if (!fp.input_port()->connected_to (new_port)) {
+			fp.input_port()->disconnect_all ();
+			fp.input_port()->connect (new_port);
+		}
+	} else {
+		if (!fp.output_port()->connected_to (new_port)) {
+			fp.output_port()->disconnect_all ();
+			fp.output_port()->connect (new_port);
+		}
+	}
+}
+
+void
+FPGUI::action_changed (Gtk::ComboBox* cb, FaderPort::ButtonID id)
+{
+	TreeModel::const_iterator row = cb->get_active ();
+	string action_path = (*row)[action_columns.path];
+
+	cerr << "Change " << id << " to " << action_path << endl;
+	
+	fp.set_action (id, action_path, true);
+}

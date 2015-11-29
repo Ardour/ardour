@@ -958,3 +958,21 @@ FaderPort::map_route_state ()
 		map_cut ();
 	}
 }
+
+boost::shared_ptr<Port>
+FaderPort::output_port()
+{
+	return _output_port;
+}
+
+boost::shared_ptr<Port>
+FaderPort::input_port()
+{
+	return _input_port;
+}
+
+void
+FaderPort::set_action (ButtonID id, std::string const& action_name, bool on_press, ButtonState bs)
+{
+	button_info(id).set_action (action_name, on_press, bs);
+}
