@@ -76,6 +76,11 @@ class SessionDialog : public ArdourDialog {
 	bool connect_outs_to_master() const;
 	bool connect_outs_to_physical() const;
 
+	void set_provided_session(const std::string& session_name, const std::string& session_path) {
+		_provided_session_name = session_name;
+		_provided_session_path = session_path;
+	}
+
   private:
 	bool new_only;
         std::string _provided_session_name;

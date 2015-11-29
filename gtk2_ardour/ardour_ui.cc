@@ -2833,14 +2833,49 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 void
 ARDOUR_UI::load_from_application_api (const std::string& path)
 {
+	printf("ARDOUR_UI::load_from_application_api\n");
 	ARDOUR_COMMAND_LINE::session_name = path;
+	/* Cancel SessionDialog if it's visible to make OSX delegates work.
+	 *
+	 * ARDOUR_UI::starting connects app->ShouldLoad signal and then shows a SessionDialog
+	 * race-condition:
+	 *  - ShouldLoad does not arrive in time, ARDOUR_COMMAND_LINE::session_name is empty:
+	 *    -> ARDOUR_UI::get_session_parameters starts a SessionDialog.
+	 *  - ShouldLoad signal arrives, this function is called and sets ARDOUR_COMMAND_LINE::session_name
+	 *    -> SessionDialog is not displayed
+	 */
 
+	if (_session_dialog) {
+		std::string session_name = basename_nosuffix (ARDOUR_COMMAND_LINE::session_name);
+		std::string session_path = path;
+		if (Glib::file_test (session_path, Glib::FILE_TEST_IS_REGULAR)) {
+			session_path = Glib::path_get_dirname (session_path);
+		}
+		// signal the existing dialog in ARDOUR_UI::get_session_parameters()
+		_session_dialog->set_provided_session (session_name, session_path);
+		_session_dialog->response (RESPONSE_NONE);
+		_session_dialog->hide();
+		return;
+	}
+
+	int rv;
 	if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
 		/* /path/to/foo => /path/to/foo, foo */
-		load_session (path, basename_nosuffix (path));
+		rv = load_session (path, basename_nosuffix (path));
 	} else {
 		/* /path/to/foo/foo.ardour => /path/to/foo, foo */
-		load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
+		rv =load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
+	}
+
+	// if load_session fails -> pop up SessionDialog.
+	if (rv) {
+		ARDOUR_COMMAND_LINE::session_name = "";
+
+		if (get_session_parameters (true, false)) {
+			exit (1);
+		}
+
+		goto_editor_window ();
 	}
 }
 
@@ -2896,6 +2931,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 	SessionDialog session_dialog (should_be_new, session_name, session_path, load_template, cancel_not_quit);
 
+	_session_dialog = &session_dialog;
 	while (ret != 0) {
 
 		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
@@ -2928,6 +2964,10 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 			switch (session_dialog.run()) {
 			case RESPONSE_ACCEPT:
+				break;
+			case RESPONSE_NONE:
+				/* this is used for async * app->ShouldLoad(). */
+				continue; // while loop
 				break;
 			default:
 				if (quit_on_cancel) {
@@ -3073,6 +3113,8 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			ARDOUR_COMMAND_LINE::session_name = "";
 		}
 	}
+
+	_session_dialog = NULL;
 
 	return ret;
 }

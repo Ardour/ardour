@@ -357,6 +357,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void setup_clock ();
 
 	static ARDOUR_UI *theArdourUI;
+	SessionDialog *_session_dialog;
 
         int starting ();
 
