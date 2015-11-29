@@ -263,6 +263,11 @@ gtk2_ardour_sources = [
 ]
 
 def enoify (major, minor):
+    # Code names based on
+    # https://en.wikipedia.org/wiki/Brian_Eno_discography
+    #
+    # sort Studio albums + Collaborative albums + Compilation albums by Month/Year.
+    # (no Singles, no EPs, no Video Albums, no Production)
     if major == 3:
         return "\\n\\\"E-No\\\""
     elif major == 4:
@@ -280,6 +285,10 @@ def enoify (major, minor):
             return "\\n\\\"Another Green World\\\""
         elif minor == 6:
             return "\\n\\\"Evening Star\\\""
+        elif minor == 7:
+            return "\\n\\\"Cluster and Eno\\\""
+        elif minor == 8:
+            return "\\n\\\"Before and After Science\\\""
     return "\\\"\\\""
 
 def options(opt):
