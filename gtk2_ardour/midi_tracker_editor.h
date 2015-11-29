@@ -126,7 +126,7 @@ class MidiTrackerEditor : public ArdourWindow
 	void set_nrows();
 
 	// Return the frame at the corresponding row index
-	framepos_t frame_at_row(uint32_t irow);
+	framepos_t frame_at_row(uint32_t irow, framepos_t ref_frame = first_row_frame);
 };
 
 #endif /* __ardour_gtk2_midi_tracker_editor_h_ */

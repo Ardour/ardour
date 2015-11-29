@@ -713,53 +713,36 @@ MidiTrackerEditor::selection_changed ()
 
 void MidiTrackerEditor::set_first_row_frame()
 {
-	// Get the region's first BBT
-	Timecode::BBT_Time region_first_bbt;
-	_session->tempo_map().bbt_time (region->first_frame(), region_first_bbt);
+	// Get the region's first BBT starting at a beat
+	Timecode::BBT_Time first_beat_bbt;
+	_session->tempo_map().bbt_time (region->first_frame(), first_beat_bbt);
 
-	// Get the frame and BBT_Time of the beat following the first frame
-	// (just in case the first row happens to be on the next beat).
-	framepos_t next_beat_frame =
-		_session->tempo_map().framepos_plus_beats (region->first_frame(), Evoral::Beats(1));
-	Timecode::BBT_Time next_beat_bbt;
-	_session->tempo_map().bbt_time (next_beat_frame, next_beat_bbt);
-	next_beat_bbt.ticks = 0;
+	// Set the ticks to 0 in order to start finding the first beat
+	first_beat_btt.ticks = 0;
+	framepos_t first_beat_frame = _session->tempo_map().frame_time(first_beat_bbt);
 
-	// Find the corresponding frame of the first row
-	Timecode::BBT_Time first_row_bbt(region_first_bbt.bars, region_first_bbt.beats, 0);
-	bool found = false;
-	for (uint32_t multiple = 0; multiple <= rows_per_beat; multiple++) {
-		if (region_first_bbt.ticks <= ticks_per_row * multiple) {
-			if (multiple < rows_per_beat) {
-				// The first row is within the first beat
-				first_row_bbt.ticks = lrint (floor (ticks_per_row * multiple));
-			} else {
-				// The first row is on the next beat
-				first_row_bbt = next_beat_bbt;
-			}
-			found = true;
-			break;
+	// Find the corresponding frame of the first valid row
+	for (uint32_t irow = 0; ; irow++) {
+		framepos_t row_frame = frame_at_row (irow, first_beat_frame);
+		if (region->first_frame() < row_frame) {
+			first_row_frame = row_frame;
+			return;
 		}
 	}
-	assert (found);
-	first_row_frame = _session->tempo_map().frame_time (first_row_bbt);
 }
 
 void MidiTrackerEditor::set_nrows()
 {
-	bool found = false;
-	for (uint32_t irow = 0; !found; irow++) {
-		uint32_t row_frame = frame_at_row (irow);
-		if (region->last_frame() < row_frame) {
+	for (uint32_t irow = 0; ; irow++) {
+		framepos_t row_frame = ;
+		if (region->last_frame() < frame_at_row (irow)) {
 			nrows = irow;
-			found = true;
-			break;
+			return;
 		}
 	}
-	assert (found);
 }
 
-framepos_t MidiTrackerEditor::frame_at_row(uint32_t irow)
+framepos_t MidiTrackerEditor::frame_at_row(uint32_t irow, framepos_t ref_frame)
 {
 	double row_beats = (irow*1.0) / rows_per_beat;
 	return _session->tempo_map().framepos_plus_beats (first_row_frame, Evoral::Beats(row_beats));
