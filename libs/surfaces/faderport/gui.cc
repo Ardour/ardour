@@ -419,13 +419,13 @@ FPGUI::build_mix_action_combo (Gtk::ComboBox& cb)
 
 	rowp = model->append();
 	row = *(rowp);
-	row[action_columns.name] = _("Do this");
-	row[action_columns.path] = X_("do-this");
+	row[action_columns.name] = _("Toggle Editor & Mixer Windows");
+	row[action_columns.path] = X_("Common/toggle-editor-mixer");
 
 	rowp = model->append();
 	row = *(rowp);
-	row[action_columns.name] = _("Do that");
-	row[action_columns.path] = X_("do-that");
+	row[action_columns.name] = _("Show/Hide Editor mixer strip");
+	row[action_columns.path] = X_("Editor/show-editor-mixer");
 
 	cb.set_model (model);
 	cb.pack_start (action_columns.name);
