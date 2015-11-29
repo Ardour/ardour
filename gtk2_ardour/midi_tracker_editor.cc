@@ -638,15 +638,20 @@ MidiTrackerEditor::redisplay_model ()
 		set_first_row_frame();
 		set_nrows();
 
-		// Generate each row // TODO: insert notes there
+		// Generate each row
+		MidiModel::Notes::iterator inote = notes.begin();
 		for (uint32_t irow = 0; irow < nrows; irow++) {
 			row = *(model->append());
-			uint32_t row_frame = frame_at_row(irow);
+			framepos_t row_frame = frame_at_row(irow);
+
+			// Time
 			Timecode::BBT_Time row_bbt;
 			_session->tempo_map().bbt_time(row_frame, row_bbt);
 			stringstream ss;
 			ss << row_bbt;
 			row[columns.time] = ss.str();
+
+			// TODO: find notes to insert
 		}
 
 		// Generate rows of notes on and off (is kept around as it could be
@@ -748,6 +753,5 @@ framepos_t MidiTrackerEditor::frame_at_row(framepos_t ref_frame, uint32_t irow)
 
 framepos_t MidiTrackerEditor::frame_at_row(uint32_t irow)
 {
-	double row_beats = (irow*1.0) / rows_per_beat;
-	return _session->tempo_map().framepos_plus_beats (first_row_frame, Evoral::Beats(row_beats));
+	return frame_at_row(first_row_frame, irow);
 }
