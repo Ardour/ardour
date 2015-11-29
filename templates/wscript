@@ -8,9 +8,9 @@
 # the user's hardware configuration. This makes any pre-existing
 # templates potentially wrong/useless/annoying for anyone who
 # uses a different hardware input configuration than was used
-# to create the templates. 
+# to create the templates.
 #
-# Templates should be created by the user, not by us. 
+# Templates should be created by the user, not by us.
 #
 # I modified the code below, but have not tested it. For now
 # this directory will be removed from the top level wscript's

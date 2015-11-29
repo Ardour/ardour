@@ -32,7 +32,7 @@ def build(bld):
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
     if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
         return
-    
+
     # just the normal executable version of the GTK GUI
     obj = bld (features = 'cxx c cxxprogram')
     # this program does not do the whole hidden symbols thing

@@ -9,7 +9,7 @@ out = 'build'
 
 
 def options(opt):
-    
+
     autowaf.set_options(opt)
 
 def sub_config_and_use(conf, name, has_objects = True):

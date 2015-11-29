@@ -349,7 +349,7 @@ def _doPyp(infileName, deps = False):
     inLines = fd.readlines()
     if fd != sys.stdin:
         fd.close()
-        
+
 
     for line in inLines:
         bits = re_spaces.split(line)
@@ -511,7 +511,7 @@ def build(bld):
         obj.defines += [ 'WINDOWS_VST_SUPPORT' ]
         if bld.env['build_target'] != 'mingw':
             obj.use += [ 'X11' ]
-        
+
     if bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'linux_vst_gui_support.cc', 'lxvst_plugin_ui.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
@@ -519,7 +519,7 @@ def build(bld):
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'vst_plugin_ui.cc' ]
-        
+
     if bld.is_defined('PHONE_HOME'):
         obj.defines += [ 'PHONE_HOME' ]
 
@@ -590,9 +590,9 @@ def build(bld):
                 'HUGER' : '36',
                 'MASSIVE' : '60',
         }
-        
+
         # There is no acceptable monospace font available on older versions of OS X
-        # and no API on those versions to load TTF files that will work with 
+        # and no API on those versions to load TTF files that will work with
         # GTK/fontconfig/pango.
         #
         # In addition, the ArdourMono font gets clipped for some reason on OS X
@@ -632,9 +632,9 @@ def build(bld):
             else:
                 key = "_".join (['FONT',sizename])
                 fontstyle = " ".join ([basefont,points])
-                
+
             font_subst_dict[key] = fontstyle
-            
+
     # @FONT_SIZE_XXXX@
     for sizename,points in iter(font_sizes.items()):
             key = "_".join (['FONT_SIZE',sizename])
@@ -719,7 +719,7 @@ def build(bld):
 
     #
     # explicitly state the use of perl here so that it works on windows too
-    # 
+    #
     a_rule = 'perl ../tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap <${SRC} >${TGT}' % (sys.platform, bld.env['WINDOWS_KEY'] )
     for b in [ 'mnemonic-us' ] :
         obj = bld(
@@ -769,7 +769,7 @@ def i18n(bld):
                            'Paul Davis')
         appdata_i18n_pot(bld)
         appdata_i18n_po(bld)
-        
+
 def i18n_pot(bld):
         I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
         autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
@@ -781,7 +781,7 @@ def i18n_po(bld):
         autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                               'Paul Davis')
         appdata_i18n_po(bld)
-        
+
 def i18n_mo(bld):
         I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
         autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,

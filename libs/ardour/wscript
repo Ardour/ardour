@@ -339,7 +339,7 @@ def build(bld):
     sources = list(libardour_sources)
     if bld.is_tracks_build():
         sources += [ 'engine_state_controller.cc' ]
-    
+
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=sources)
@@ -424,12 +424,12 @@ def build(bld):
         elif bld.env['build_target'] == 'mingw':
                 # usability of the 64 bit windows assembler depends on the compiler target,
                 # not the build host, which in turn can only be inferred from the name
-                # of the compiler. 
+                # of the compiler.
                 if re.search ('x86_64-w64', str(bld.env['CC'])):
                         obj.source += [ 'sse_functions_xmm.cc' ]
                         obj.source += [ 'sse_functions_64bit_win.s',  'sse_avx_functions_64bit_win.s' ]
                         avx_sources = [ 'sse_functions_avx.cc' ]
-        
+
         if avx_sources:
             # as long as we want to use AVX intrinsics in this file,
             # compile it with -mavx flag - append avx flag to the existing
@@ -442,9 +442,9 @@ def build(bld):
                 includes = [ '.' ],
                 use = [ 'libtimecode', 'libpbd', 'libevoral', ],
                 target   = 'sse_avx_functions')
-            
+
             obj.use += ['sse_avx_functions' ]
-        
+
     # i18n
     if bld.is_defined('ENABLE_NLS'):
         mo_files = bld.path.ant_glob('po/*.mo')

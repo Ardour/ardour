@@ -936,7 +936,7 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
     if have_rf64_riff_support:
             conf.env.append_value('CXXFLAGS', "-DHAVE_RF64_RIFF")
             conf.env.append_value('CFLAGS', "-DHAVE_RF64_RIFF")
-    
+
     if Options.options.dist_target == 'mingw':
         Options.options.fpu_optimization = True
         conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')

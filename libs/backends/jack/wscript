@@ -62,7 +62,7 @@ def configure(conf):
 
 def build(bld):
     obj = bld(features = 'c cxx cxxshlib')
-    obj.source = [ 
+    obj.source = [
             'jack_api.cc',
             'jack_connection.cc',
             'jack_audiobackend.cc',
@@ -74,7 +74,7 @@ def build(bld):
     obj.includes = ['.']
     obj.name     = 'jack_audiobackend'
     obj.target   = 'jack_audiobackend'
-    obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"', 
+    obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
                    'ARDOURBACKEND_DLL_EXPORTS'
                    ]
     obj.use      = 'libardour libpbd ardouralsautil'
@@ -111,7 +111,7 @@ def build(bld):
     #
     # device discovery code in the jack backend needs ALSA
     # on Linux.
-    # 
+    #
 
     if re.search ("linux", sys.platform) != None:
        obj.uselib += [ 'ALSA' ]

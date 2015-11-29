@@ -81,7 +81,7 @@ def build(bld):
         obj.cxxflags     = [ '-fPIC' ]
         obj.cflags       = [ '-fPIC' ]
         obj.defines      = [ ]
-        
+
     obj.export_includes = ['.']
     obj.includes     = ['.']
     obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST'
@@ -91,7 +91,7 @@ def build(bld):
     obj.vnum         = CANVAS_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines      += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
-    
+
     if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
 
             manual_tests              = '''
@@ -114,7 +114,7 @@ def build(bld):
                     manual_testobj.name         = 'libcanvas-manual-test-%s' % name
                     manual_testobj.target       = target
                     manual_testobj.install_path = ''
-                    
+
                     unit_testobj              = bld.new_task_gen('cxx', 'program')
                     unit_testobj.source       = '''
                         test/group.cc
@@ -139,7 +139,7 @@ def build(bld):
                     unit_testobj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
                     unit_testobj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
                     unit_testobj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
-                    
+
             benchmarks = '''
                         benchmark/items_at_point.cc
                         benchmark/render_parts.cc
