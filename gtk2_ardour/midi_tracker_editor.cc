@@ -634,7 +634,6 @@ MidiTrackerEditor::redisplay_model ()
 		BeatsFramesConverter conv (_session->tempo_map(), region->position());
 		MidiModel::Notes notes = region->midi_source(0)->model()->notes();
 		TreeModel::Row row;
-		stringstream ss;
 
 		set_first_row_frame();
 		set_nrows();
@@ -645,12 +644,12 @@ MidiTrackerEditor::redisplay_model ()
 			uint32_t row_frame = frame_at_row(irow);
 			Timecode::BBT_Time row_bbt;
 			_session->tempo_map().bbt_time(row_frame, row_bbt);
-			ss.str ("");
+			stringstream ss;
 			ss << row_bbt;
 			row[columns.time] = ss.str();
 		}
 
-		// Generate rows of motes on and off (is kept around as it could be
+		// Generate rows of notes on and off (is kept around as it could be
 		// useful for the above loop)
 		for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
 			// Display note on
@@ -662,7 +661,7 @@ MidiTrackerEditor::redisplay_model ()
 			// Start time
 			Timecode::BBT_Time start_bbt;
 			_session->tempo_map().bbt_time (conv.to ((*i)->time()), start_bbt);
-			ss.str ("");
+			stringstream ss;
 			ss << start_bbt;
 			row[columns.time] = ss.str();
 
@@ -718,7 +717,7 @@ void MidiTrackerEditor::set_first_row_frame()
 	_session->tempo_map().bbt_time (region->first_frame(), first_beat_bbt);
 
 	// Set the ticks to 0 in order to start finding the first beat
-	first_beat_btt.ticks = 0;
+	first_beat_bbt.ticks = 0;
 	framepos_t first_beat_frame = _session->tempo_map().frame_time(first_beat_bbt);
 
 	// Find the corresponding frame of the first valid row
@@ -734,7 +733,6 @@ void MidiTrackerEditor::set_first_row_frame()
 void MidiTrackerEditor::set_nrows()
 {
 	for (uint32_t irow = 0; ; irow++) {
-		framepos_t row_frame = ;
 		if (region->last_frame() < frame_at_row (irow)) {
 			nrows = irow;
 			return;
@@ -742,7 +740,13 @@ void MidiTrackerEditor::set_nrows()
 	}
 }
 
-framepos_t MidiTrackerEditor::frame_at_row(uint32_t irow, framepos_t ref_frame)
+framepos_t MidiTrackerEditor::frame_at_row(framepos_t ref_frame, uint32_t irow)
+{
+	double row_beats = (irow*1.0) / rows_per_beat;
+	return _session->tempo_map().framepos_plus_beats (ref_frame, Evoral::Beats(row_beats));
+}
+
+framepos_t MidiTrackerEditor::frame_at_row(uint32_t irow)
 {
 	double row_beats = (irow*1.0) / rows_per_beat;
 	return _session->tempo_map().framepos_plus_beats (first_row_frame, Evoral::Beats(row_beats));
