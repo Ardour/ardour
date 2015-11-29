@@ -1437,6 +1437,7 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
         // cerr << "----------------\n";
 
 	size_t events_read = 0;
+	const size_t split_cycle_offset = Port::port_offset ();
 
 	if (loc) {
 		framepos_t effective_start;
@@ -1454,10 +1455,12 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 			   beyond the loop end.
 			*/
 
-			_playback_buf->resolve_tracker (dst, 0);
+			_playback_buf->resolve_tracker (dst, split_cycle_offset);
 		}
 
 		_playback_buf->skip_to (effective_start);
+
+		/* for split-cycles we need to offset the events */
 
 		if (loc->end() >= effective_start && loc->end() < effective_start + nframes) {
 			/* end of loop is within the range we are reading, so
@@ -1475,23 +1478,23 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 			if (first) {
 				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #1, from %1 for %2\n",
 										      effective_start, first));
-				events_read = _playback_buf->read (dst, effective_start, first);
+				events_read = _playback_buf->read (dst, effective_start, first, split_cycle_offset);
 			}
 
 			if (second) {
 				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #2, from %1 for %2\n",
 										      loc->start(), second));
-				events_read += _playback_buf->read (dst, loc->start(), second);
+				events_read += _playback_buf->read (dst, loc->start(), second, split_cycle_offset);
 			}
 
 		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
 									      effective_start, nframes));
-			events_read = _playback_buf->read (dst, effective_start, effective_start + nframes);
+			events_read = _playback_buf->read (dst, effective_start, effective_start + nframes, split_cycle_offset);
 		}
 	} else {
 		_playback_buf->skip_to (playback_sample);
-		events_read = _playback_buf->read (dst, playback_sample, playback_sample + nframes);
+		events_read = _playback_buf->read (dst, playback_sample, playback_sample + nframes, split_cycle_offset);
 	}
 
 	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (

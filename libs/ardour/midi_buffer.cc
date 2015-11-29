@@ -26,6 +26,7 @@
 
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/port.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -35,6 +36,7 @@ using namespace PBD;
 MidiBuffer::MidiBuffer(size_t capacity)
 	: Buffer (DataType::MIDI)
 	, _data (0)
+	, _size (0)
 {
 	if (capacity) {
 		resize (capacity);
@@ -85,7 +87,7 @@ MidiBuffer::copy(const MidiBuffer& copy)
  * Note that offset and nframes refer to sample time, NOT buffer offsets or event counts.
  */
 void
-MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, framecnt_t dst_offset, framecnt_t src_offset)
+MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, framecnt_t dst_offset, framecnt_t /* src_offset*/)
 {
 	assert (src.type() == DataType::MIDI);
 	assert (&src != this);
@@ -99,15 +101,19 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, framecnt_t dst_off
 		assert (_size == 0);
 	}
 
-	/* XXX use dst_offset somehow */
+	framecnt_t offset = Port::port_offset();
 
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
 		const Evoral::MIDIEvent<TimeType> ev(*i, false);
-		if (ev.time() >= src_offset && ev.time() < (nframes+src_offset)) {
+		if (ev.time() >= offset && ev.time() < (nframes + offset)) {
 			push_back (ev);
 		} else {
 			cerr << "MIDI event @ " <<  ev.time() << " skipped, not within range "
-			     << src_offset << " .. " << (nframes + src_offset) << endl;
+			     << offset << " .. " << (nframes + offset) << ":";
+				for (size_t xx = 0; xx < ev.size(); ++xx) {
+					cerr << ' ' << hex << (int) ev.buffer()[xx];
+				}
+				cerr << dec << endl;
 		}
 	}
 

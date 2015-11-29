@@ -935,7 +935,7 @@ MidiTrack::act_on_mute ()
 		}
 
 		/* Resolve active notes. */
-		midi_diskstream()->resolve_tracker(_immediate_events, 0);
+		midi_diskstream()->resolve_tracker(_immediate_events, Port::port_offset());
 	}
 }
 

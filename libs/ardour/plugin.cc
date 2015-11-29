@@ -50,6 +50,7 @@
 #include "ardour/midi_state_tracker.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/port.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
 
@@ -304,7 +305,7 @@ Plugin::resolve_midi ()
 	*/
 
 	_pending_stop_events.get_midi(0).clear ();
-	_tracker.resolve_notes (_pending_stop_events.get_midi (0), 0);
+	_tracker.resolve_notes (_pending_stop_events.get_midi (0), /* split cycle offset*/ Port::port_offset());
 	_have_pending_stop_events = true;
 }
 
