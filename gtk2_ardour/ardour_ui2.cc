@@ -134,11 +134,11 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (auto_loop_button, _("Play loop range"));
 	set_tip (midi_panic_button, _("MIDI Panic\nSend note off and reset controller messages on all MIDI channels"));
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
-	set_tip (follow_edits_button, _("Playhead follows Range Selections and Edits"));
+	set_tip (follow_edits_button, _("Playhead follows range selections and edits"));
 	set_tip (auto_input_button, _("Be sensible about input monitoring"));
 	set_tip (click_button, _("Enable/Disable audio click"));
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
-	set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
+	set_tip (auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
 	set_tip (feedback_alert_button, _("When active, there is a feedback loop."));
 	set_tip (primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));

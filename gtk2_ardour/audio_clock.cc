@@ -2121,7 +2121,7 @@ AudioClock::build_ops_menu ()
 
 	if (editable && !_off && !is_duration && !_follows_playhead) {
 		ops_items.push_back (SeparatorElem());
-		ops_items.push_back (MenuElem (_("Set From Playhead"), sigc::mem_fun(*this, &AudioClock::set_from_playhead)));
+		ops_items.push_back (MenuElem (_("Set from Playhead"), sigc::mem_fun(*this, &AudioClock::set_from_playhead)));
 		ops_items.push_back (MenuElem (_("Locate to This Time"), sigc::mem_fun(*this, &AudioClock::locate)));
 	}
 	ops_items.push_back (SeparatorElem());
