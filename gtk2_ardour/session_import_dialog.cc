@@ -41,7 +41,7 @@ using namespace PBD;
 using namespace Gtk;
 
 SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
-  ArdourDialog (_("Import From Session")),
+  ArdourDialog (_("Import from Session")),
   file_browse_button (_("Browse"))
 {
 	set_session (target);

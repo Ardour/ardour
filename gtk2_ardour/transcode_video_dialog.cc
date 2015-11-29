@@ -184,7 +184,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	video_combo.set_name ("PaddedButton");
 
 	if (ffok) {
-		video_combo.append_text(_("Reference From Current Location (Previously Transcoded Files Only)"));
+		video_combo.append_text(_("Reference from Current Location (Previously Transcoded Files Only)"));
 		video_combo.append_text(_("Import/Transcode Video to Session"));
 		video_combo.set_active(1);
 		if (as.size() > 0) {

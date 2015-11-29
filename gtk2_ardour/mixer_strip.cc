@@ -1474,7 +1474,7 @@ MixerStrip::setup_comment_button ()
 	}
 
 	set_tooltip (
-		_comment_button, _route->comment().empty() ? _("Click to Add/Edit Comments") : _route->comment()
+		_comment_button, _route->comment().empty() ? _("Click to add/edit comments") : _route->comment()
 		);
 
 }

@@ -738,12 +738,12 @@ RouteTimeAxisView::build_display_menu ()
                                         break;
                                 }
 
-                                alignment_items.push_back (RadioMenuElem (align_group, _("Align With Existing Material")));
+                                alignment_items.push_back (RadioMenuElem (align_group, _("Align with Existing Material")));
                                 i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
                                 i->set_active (existing != 0 && capture == 0 && automatic == 0);
                                 i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_choice), i, UseExistingMaterial, true));
 
-                                alignment_items.push_back (RadioMenuElem (align_group, _("Align With Capture Time")));
+                                alignment_items.push_back (RadioMenuElem (align_group, _("Align with Capture Time")));
                                 i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
                                 i->set_active (existing == 0 && capture != 0 && automatic == 0);
                                 i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_choice), i, UseCaptureTime, true));
@@ -1705,7 +1705,7 @@ RouteTimeAxisView::build_playlist_menu ()
 	playlist_items.push_back (MenuElem (_("Clear Current"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::clear_playlists), this)));
 	playlist_items.push_back (SeparatorElem());
 
-	playlist_items.push_back (MenuElem(_("Select From All..."), sigc::mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
+	playlist_items.push_back (MenuElem(_("Select from All..."), sigc::mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
 }
 
 void

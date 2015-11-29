@@ -263,8 +263,8 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "nudge-playhead-forward", _("Nudge Playhead Forward"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_forward), false, true));
 	reg_sens (editor_actions, "nudge-playhead-backward", _("Nudge Playhead Backward"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), false, true));
-	reg_sens (editor_actions, "playhead-forward-to-grid", _("Playhead To Next Grid"), sigc::mem_fun(*this, &Editor::playhead_forward_to_grid));
-	reg_sens (editor_actions, "playhead-backward-to-grid", _("Playhead To Previous Grid"), sigc::mem_fun(*this, &Editor::playhead_backward_to_grid));
+	reg_sens (editor_actions, "playhead-forward-to-grid", _("Playhead to Next Grid"), sigc::mem_fun(*this, &Editor::playhead_forward_to_grid));
+	reg_sens (editor_actions, "playhead-backward-to-grid", _("Playhead to Previous Grid"), sigc::mem_fun(*this, &Editor::playhead_backward_to_grid));
 
 	reg_sens (editor_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), true));
 	reg_sens (editor_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
@@ -308,7 +308,7 @@ Editor::register_actions ()
 
 	/* this is a duplicated action so that the main menu can use a different label */
 	reg_sens (editor_actions, "main-menu-play-selected-regions", _("Play Selected Regions"), sigc::mem_fun (*this, &Editor::play_selected_region));
-	reg_sens (editor_actions, "play-from-edit-point", _("Play From Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point));
+	reg_sens (editor_actions, "play-from-edit-point", _("Play from Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point));
 	reg_sens (editor_actions, "play-from-edit-point-and-return", _("Play from Edit Point and Return"), sigc::mem_fun(*this, &Editor::play_from_edit_point_and_return));
 
 	reg_sens (editor_actions, "play-edit-range", _("Play Edit Range"), sigc::mem_fun(*this, &Editor::play_edit_range));
@@ -706,7 +706,7 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Region List..."), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import From Session"), sigc::mem_fun(*this, &Editor::session_import_dialog));
+	act = ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import from Session"), sigc::mem_fun(*this, &Editor::session_import_dialog));
 	ActionManager::write_sensitive_actions.push_back (act);
 
 
@@ -1897,7 +1897,7 @@ Editor::register_region_actions ()
 		);
 
 	/* Snap selected regions to the grid */
-	reg_sens (_region_actions, "snap-regions-to-grid", _("Snap Position To Grid"), sigc::mem_fun (*this, &Editor::snap_regions_to_grid));
+	reg_sens (_region_actions, "snap-regions-to-grid", _("Snap Position to Grid"), sigc::mem_fun (*this, &Editor::snap_regions_to_grid));
 
 	/* Close gaps in selected regions */
 	reg_sens (_region_actions, "close-region-gaps", _("Close Gaps"), sigc::mem_fun (*this, &Editor::close_region_gaps));
@@ -1998,7 +1998,7 @@ Editor::register_region_actions ()
 	reg_sens (
 		_region_actions,
 		"insert-region-from-region-list",
-		_("Insert Region From Region List"),
+		_("Insert Region from Region List"),
 		sigc::bind (sigc::mem_fun (*this, &Editor::insert_region_list_selection), 1)
 		);
 

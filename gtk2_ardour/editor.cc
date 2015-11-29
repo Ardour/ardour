@@ -1899,9 +1899,9 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Consolidate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), true, false)));
-	edit_items.push_back (MenuElem (_("Consolidate Range With Processing"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), true, true)));
+	edit_items.push_back (MenuElem (_("Consolidate Range with Processing"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), true, true)));
 	edit_items.push_back (MenuElem (_("Bounce Range to Region List"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), false, false)));
-	edit_items.push_back (MenuElem (_("Bounce Range to Region List With Processing"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), false, true)));
+	edit_items.push_back (MenuElem (_("Bounce Range to Region List with Processing"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), false, true)));
 	edit_items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_selection)));
 	if (ARDOUR_UI::instance()->video_timeline->get_duration() > 0) {
 		edit_items.push_back (MenuElem (_("Export Video Range..."), sigc::bind (sigc::mem_fun(*(ARDOUR_UI::instance()), &ARDOUR_UI::export_video), true)));
@@ -1920,8 +1920,8 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& play_items = play_menu->items();
 	play_menu->set_name ("ArdourContextMenu");
 
-	play_items.push_back (MenuElem (_("Play From Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point)));
-	play_items.push_back (MenuElem (_("Play From Start"), sigc::mem_fun(*this, &Editor::play_from_start)));
+	play_items.push_back (MenuElem (_("Play from Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point)));
+	play_items.push_back (MenuElem (_("Play from Start"), sigc::mem_fun(*this, &Editor::play_from_start)));
 	play_items.push_back (MenuElem (_("Play Region"), sigc::mem_fun(*this, &Editor::play_selected_region)));
 	play_items.push_back (SeparatorElem());
 	play_items.push_back (MenuElem (_("Loop Region"), sigc::bind (sigc::mem_fun (*this, &Editor::set_loop_from_region), true)));
@@ -2002,8 +2002,8 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& play_items = play_menu->items();
 	play_menu->set_name ("ArdourContextMenu");
 
-	play_items.push_back (MenuElem (_("Play From Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point)));
-	play_items.push_back (MenuElem (_("Play From Start"), sigc::mem_fun(*this, &Editor::play_from_start)));
+	play_items.push_back (MenuElem (_("Play from Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point)));
+	play_items.push_back (MenuElem (_("Play from Start"), sigc::mem_fun(*this, &Editor::play_from_start)));
 	edit_items.push_back (MenuElem (_("Play"), *play_menu));
 
 	/* Selection */
@@ -3237,7 +3237,7 @@ Editor::build_snap_type_menu ()
 void
 Editor::setup_tooltips ()
 {
-	set_tooltip (smart_mode_button, _("Smart Mode (add Range functions to Grab mode)"));
+	set_tooltip (smart_mode_button, _("Smart Mode (add range functions to Grab Mode)"));
 	set_tooltip (mouse_move_button, _("Grab Mode (select/move objects)"));
 	set_tooltip (mouse_cut_button, _("Cut Mode (split regions)"));
 	set_tooltip (mouse_select_button, _("Range Mode (select time ranges)"));
@@ -3252,13 +3252,13 @@ Editor::setup_tooltips ()
 	set_tooltip (zoom_out_button, _("Zoom Out"));
 	set_tooltip (zoom_preset_selector, _("Zoom to Time Scale"));
 	set_tooltip (zoom_out_full_button, _("Zoom to Session"));
-	set_tooltip (zoom_focus_selector, _("Zoom focus"));
+	set_tooltip (zoom_focus_selector, _("Zoom Focus"));
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
 	set_tooltip (snap_type_selector, _("Snap/Grid Units"));
 	set_tooltip (snap_mode_selector, _("Snap/Grid Mode"));
-	set_tooltip (edit_point_selector, _("Edit point"));
+	set_tooltip (edit_point_selector, _("Edit Point"));
 	set_tooltip (edit_mode_selector, _("Edit Mode"));
 	set_tooltip (nudge_clock, _("Nudge Clock\n(controls distance used to nudge regions and selections)"));
 }
