@@ -238,14 +238,14 @@ NoteBase::set_mouse_fractions (GdkEvent* ev)
 	_mouse_y_fraction = yf;
 
 	if (notify) {
-                if (big_enough_to_trim()) {
-                        _region.note_mouse_position (_mouse_x_fraction, _mouse_y_fraction, set_cursor);
-                } else {
-                        /* pretend the mouse is in the middle, because this is not big enough
-                           to trim right now.
-                        */
-                        _region.note_mouse_position (0.5, 0.5, set_cursor);
-                }
+		if (big_enough_to_trim()) {
+			_region.note_mouse_position (_mouse_x_fraction, _mouse_y_fraction, set_cursor);
+		} else {
+			/* pretend the mouse is in the middle, because this is not big enough
+			   to trim right now.
+			*/
+			_region.note_mouse_position (0.5, 0.5, set_cursor);
+		}
 	}
 }
 
