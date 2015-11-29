@@ -554,12 +554,6 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					group->canvas_to_item (event_x, event_y);
 
 					Evoral::Beats beats = get_grid_beats(editor.pixel_to_sample(event_x));
-
-					/* Shorten the length by 1 tick so that we can add a new note at the next
-					   grid snap without it overlapping this one.
-					*/
-					beats -= Evoral::Beats::tick();
-
 					create_note_at (editor.pixel_to_sample (event_x), event_y, beats, true);
 				} else {
 					clear_selection ();
@@ -570,14 +564,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		case MouseDraw:
 			{
 				Evoral::Beats beats = get_grid_beats(editor.pixel_to_sample(event_x));
-
-				/* Shorten the length by 1 tick so that we can add a new note at the next
-				   grid snap without it overlapping this one.
-				*/
-				beats -= Evoral::Beats::tick();
-
 				create_note_at (editor.pixel_to_sample (event_x), event_y, beats, true);
-
 				break;
 			}
 		default:
