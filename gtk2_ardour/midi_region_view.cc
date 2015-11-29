@@ -3324,6 +3324,8 @@ MidiRegionView::note_entered(NoteBase* ev)
 	} else if (editor->current_mouse_mode() == MouseDraw) {
 		show_verbose_cursor (ev->note ());
 	}
+
+	remove_ghost_note ();
 }
 
 void
@@ -3334,6 +3336,8 @@ MidiRegionView::note_left (NoteBase*)
 	}
 
 	hide_verbose_cursor ();
+
+	create_ghost_note (_last_ghost_x, _last_ghost_y);
 }
 
 void
