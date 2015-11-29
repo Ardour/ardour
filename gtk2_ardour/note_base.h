@@ -59,7 +59,7 @@ class NoteBase : public sigc::trackable
 	virtual ~NoteBase ();
 
 	void set_item (ArdourCanvas::Item *);
-        ArdourCanvas::Item* item() const { return _item; }
+	ArdourCanvas::Item* item() const { return _item; }
 
 	virtual void show() = 0;
 	virtual void hide() = 0;
@@ -94,8 +94,8 @@ class NoteBase : public sigc::trackable
 	virtual ArdourCanvas::Coord x1 () const = 0;
 	virtual ArdourCanvas::Coord y1 () const = 0;
 
-        float mouse_x_fraction() const { return _mouse_x_fraction; }
-        float mouse_y_fraction() const { return _mouse_y_fraction; }
+	float mouse_x_fraction() const { return _mouse_x_fraction; }
+	float mouse_y_fraction() const { return _mouse_y_fraction; }
 
 	const boost::shared_ptr<NoteType> note() const { return _note; }
 	MidiRegionView& region_view() const { return _region; }
@@ -128,8 +128,8 @@ class NoteBase : public sigc::trackable
 	/// hue circle divided into 16 equal-looking parts, courtesy Thorsten Wilms
 	static const uint32_t midi_channel_colors[16];
 
-        bool mouse_near_ends () const;
-        virtual bool big_enough_to_trim () const;
+	bool mouse_near_ends () const;
+	virtual bool big_enough_to_trim () const;
 
 protected:
 	enum State { None, Pressed, Dragging };
@@ -143,10 +143,10 @@ protected:
 	bool                              _own_note;
 	bool                              _selected;
 	bool                              _valid;
-        float                             _mouse_x_fraction;
-        float                             _mouse_y_fraction;
+	float                             _mouse_x_fraction;
+	float                             _mouse_y_fraction;
 
-        void set_mouse_fractions (GdkEvent*);
+	void set_mouse_fractions (GdkEvent*);
 
 private:
 	bool event_handler (GdkEvent *);
