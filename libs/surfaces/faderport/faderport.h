@@ -106,6 +106,18 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	boost::shared_ptr<ARDOUR::Port> input_port();
 	boost::shared_ptr<ARDOUR::Port> output_port();
 
+	/* In a feat of engineering brilliance, the Presonus Faderport sends
+	 * one button identifier when the button is pressed/released, but
+	 * responds to another button identifier as a command to light the LED
+	 * corresponding to the button. These ID's define what is sent
+	 * for press/release; a separate data structure contains information
+	 * on what to send to turn the LED on/off.
+	 *
+	 * One can only conclude that Presonus just didn't want to fix this
+	 * issue because it contradicts their own documentation and is more or
+	 * less the first thing you discover when programming the device.
+	 */
+
 	enum ButtonID {
 		Mute = 18,
 		Solo = 17,
