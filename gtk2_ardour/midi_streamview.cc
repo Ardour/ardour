@@ -619,7 +619,7 @@ MidiStreamView::update_rec_box ()
 uint8_t
 MidiStreamView::y_to_note (double y) const
 {
-	int const n = ((contents_height() - y - 1) / contents_height() * (double)contents_note_range())
+	int const n = ((contents_height() - y) / contents_height() * (double)contents_note_range())
 		+ lowest_note();
 
 	if (n < 0) {
@@ -628,7 +628,8 @@ MidiStreamView::y_to_note (double y) const
 		return 127;
 	}
 
-	return n;
+	/* min due to rounding and/or off-by-one errors */
+	return min ((uint8_t) n, highest_note());
 }
 
 /** Suspend updates to the regions' note ranges and our
