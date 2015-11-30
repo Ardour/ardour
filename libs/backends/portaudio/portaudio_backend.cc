@@ -1242,12 +1242,19 @@ PortAudioBackend::register_system_audio_ports()
 	const uint32_t a_ins = _n_inputs;
 	const uint32_t a_out = _n_outputs;
 
-	// XXX PA reported stream latencies don't match measurements
-	const uint32_t portaudio_reported_input_latency =  _samples_per_period ; //  _pcmio->capture_latency();
-	const uint32_t portaudio_reported_output_latency = /* _samples_per_period + */ _pcmio->playback_latency();
+	uint32_t capture_latency = 0;
+	uint32_t playback_latency = 0;
+
+	// guard against erroneous latency values
+	if (_pcmio->capture_latency() > _samples_per_period) {
+		capture_latency = _pcmio->capture_latency() - _samples_per_period;
+	}
+	if (_pcmio->playback_latency() > _samples_per_period) {
+		playback_latency = _pcmio->playback_latency() - _samples_per_period;
+	}
 
 	/* audio ports */
-	lr.min = lr.max = portaudio_reported_input_latency + (_measure_latency ? 0 : _systemic_audio_input_latency);
+	lr.min = lr.max = capture_latency + (_measure_latency ? 0 : _systemic_audio_input_latency);
 	for (uint32_t i = 0; i < a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%d", i+1);
@@ -1260,7 +1267,7 @@ PortAudioBackend::register_system_audio_ports()
 		_system_inputs.push_back (audio_port);
 	}
 
-	lr.min = lr.max = portaudio_reported_output_latency + (_measure_latency ? 0 : _systemic_audio_output_latency);
+	lr.min = lr.max = playback_latency + (_measure_latency ? 0 : _systemic_audio_output_latency);
 	for (uint32_t i = 0; i < a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i+1);
