@@ -94,77 +94,73 @@ FaderPort::FaderPort (Session& s)
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::connection_handler, this, _1, _2, _3, _4, _5), this);
 
-	buttons.insert (std::make_pair (Mute, ButtonInfo (*this, _("Mute"), Mute, 21)));
-	buttons.insert (std::make_pair (Solo, ButtonInfo (*this, _("Solo"), Solo, 22)));
-	buttons.insert (std::make_pair (Rec, ButtonInfo (*this, _("Rec"), Rec, 23)));
-	buttons.insert (std::make_pair (Left, ButtonInfo (*this, _("Left"), Left, 20)));
-	buttons.insert (std::make_pair (Bank, ButtonInfo (*this, _("Bank"), Bank, 19)));
-	buttons.insert (std::make_pair (Right, ButtonInfo (*this, _("Right"), Right, 18)));
-	buttons.insert (std::make_pair (Output, ButtonInfo (*this, _("Output"), Output, 17)));
-	buttons.insert (std::make_pair (FP_Read, ButtonInfo (*this, _("Read"), FP_Read, 13)));
-	buttons.insert (std::make_pair (FP_Write, ButtonInfo (*this, _("Write"), FP_Write, 14)));
-	buttons.insert (std::make_pair (FP_Touch, ButtonInfo (*this, _("Touch"), FP_Touch, 15)));
-	buttons.insert (std::make_pair (FP_Off, ButtonInfo (*this, _("Off"), FP_Off, 16)));
-	buttons.insert (std::make_pair (Mix, ButtonInfo (*this, _("Mix"), Mix, 12)));
-	buttons.insert (std::make_pair (Proj, ButtonInfo (*this, _("Proj"), Proj, 11)));
-	buttons.insert (std::make_pair (Trns, ButtonInfo (*this, _("Trns"), Trns, 10)));
-	buttons.insert (std::make_pair (Undo, ButtonInfo (*this, _("Undo"), Undo, 9)));
-	buttons.insert (std::make_pair (Shift, ButtonInfo (*this, _("Shift"), Shift, 5)));
-	buttons.insert (std::make_pair (Punch, ButtonInfo (*this, _("Punch"), Punch, 6)));
-	buttons.insert (std::make_pair (User, ButtonInfo (*this, _("User"), User, 7)));
-	buttons.insert (std::make_pair (Loop, ButtonInfo (*this, _("Loop"), Loop, 8)));
-	buttons.insert (std::make_pair (Rewind, ButtonInfo (*this, _("Rewind"), Rewind, 4)));
-	buttons.insert (std::make_pair (Ffwd, ButtonInfo (*this, _("Ffwd"), Ffwd, 3)));
-	buttons.insert (std::make_pair (Stop, ButtonInfo (*this, _("Stop"), Stop, 2)));
-	buttons.insert (std::make_pair (Play, ButtonInfo (*this, _("Play"), Play, 1)));
-	buttons.insert (std::make_pair (RecEnable, ButtonInfo (*this, _("RecEnable"), RecEnable, 0)));
-	buttons.insert (std::make_pair (FaderTouch, ButtonInfo (*this, _("Fader (touch)"), FaderTouch, -1)));
+	buttons.insert (std::make_pair (Mute, Button (*this, _("Mute"), Mute, 21)));
+	buttons.insert (std::make_pair (Solo, Button (*this, _("Solo"), Solo, 22)));
+	buttons.insert (std::make_pair (Rec, Button (*this, _("Rec"), Rec, 23)));
+	buttons.insert (std::make_pair (Left, Button (*this, _("Left"), Left, 20)));
+	buttons.insert (std::make_pair (Bank, Button (*this, _("Bank"), Bank, 19)));
+	buttons.insert (std::make_pair (Right, Button (*this, _("Right"), Right, 18)));
+	buttons.insert (std::make_pair (Output, Button (*this, _("Output"), Output, 17)));
+	buttons.insert (std::make_pair (FP_Read, Button (*this, _("Read"), FP_Read, 13)));
+	buttons.insert (std::make_pair (FP_Write, Button (*this, _("Write"), FP_Write, 14)));
+	buttons.insert (std::make_pair (FP_Touch, Button (*this, _("Touch"), FP_Touch, 15)));
+	buttons.insert (std::make_pair (FP_Off, Button (*this, _("Off"), FP_Off, 16)));
+	buttons.insert (std::make_pair (Mix, Button (*this, _("Mix"), Mix, 12)));
+	buttons.insert (std::make_pair (Proj, Button (*this, _("Proj"), Proj, 11)));
+	buttons.insert (std::make_pair (Trns, Button (*this, _("Trns"), Trns, 10)));
+	buttons.insert (std::make_pair (Undo, Button (*this, _("Undo"), Undo, 9)));
+	buttons.insert (std::make_pair (Shift, Button (*this, _("Shift"), Shift, 5)));
+	buttons.insert (std::make_pair (Punch, Button (*this, _("Punch"), Punch, 6)));
+	buttons.insert (std::make_pair (User, Button (*this, _("User"), User, 7)));
+	buttons.insert (std::make_pair (Loop, Button (*this, _("Loop"), Loop, 8)));
+	buttons.insert (std::make_pair (Rewind, Button (*this, _("Rewind"), Rewind, 4)));
+	buttons.insert (std::make_pair (Ffwd, Button (*this, _("Ffwd"), Ffwd, 3)));
+	buttons.insert (std::make_pair (Stop, Button (*this, _("Stop"), Stop, 2)));
+	buttons.insert (std::make_pair (Play, Button (*this, _("Play"), Play, 1)));
+	buttons.insert (std::make_pair (RecEnable, Button (*this, _("RecEnable"), RecEnable, 0)));
+	buttons.insert (std::make_pair (FaderTouch, Button (*this, _("Fader (touch)"), FaderTouch, -1)));
 
-	button_info (Mix).set_action ( string("Common/toggle-editor-mixer"), true);
-	button_info (Proj).set_action ( string("Common/toggle-meterbridge"), true);
-	button_info (Trns).set_action ( string("Window/toggle-locations"), true);
+	get_button (Left).set_action ( boost::bind (&FaderPort::left, this), true);
+	get_button (Right).set_action ( boost::bind (&FaderPort::right, this), true);
 
-	button_info (Left).set_action ( boost::bind (&FaderPort::left, this), true);
-	button_info (Right).set_action ( boost::bind (&FaderPort::right, this), true);
+	get_button (Undo).set_action (boost::bind (&FaderPort::undo, this), true);
+	get_button (Undo).set_action (boost::bind (&FaderPort::redo, this), true, ShiftDown);
+	get_button (Undo).set_flash (true);
 
-	button_info (Undo).set_action (boost::bind (&FaderPort::undo, this), true);
-	button_info (Undo).set_action (boost::bind (&FaderPort::redo, this), true, ShiftDown);
-	button_info (Undo).set_flash (true);
+	get_button (FP_Read).set_action (boost::bind (&FaderPort::read, this), true);
+	get_button (FP_Write).set_action (boost::bind (&FaderPort::write, this), true);
+	get_button (FP_Touch).set_action (boost::bind (&FaderPort::touch, this), true);
+	get_button (FP_Off).set_action (boost::bind (&FaderPort::off, this), true);
 
-	button_info (FP_Read).set_action (boost::bind (&FaderPort::read, this), true);
-	button_info (FP_Write).set_action (boost::bind (&FaderPort::write, this), true);
-	button_info (FP_Touch).set_action (boost::bind (&FaderPort::touch, this), true);
-	button_info (FP_Off).set_action (boost::bind (&FaderPort::off, this), true);
-
-	button_info (Play).set_action (boost::bind (&BasicUI::transport_play, this, true), true);
-	button_info (RecEnable).set_action (boost::bind (&BasicUI::rec_enable_toggle, this), true);
+	get_button (Play).set_action (boost::bind (&BasicUI::transport_play, this, true), true);
+	get_button (RecEnable).set_action (boost::bind (&BasicUI::rec_enable_toggle, this), true);
 	/* Stop is a modifier, so we have to use its own button state to get
 	   the default action (since StopDown will be set when looking for the
 	   action to invoke.
 	*/
-	button_info (Stop).set_action (boost::bind (&BasicUI::transport_stop, this), true, StopDown);
-	button_info (Ffwd).set_action (boost::bind (&BasicUI::ffwd, this), true);
+	get_button (Stop).set_action (boost::bind (&BasicUI::transport_stop, this), true, StopDown);
+	get_button (Ffwd).set_action (boost::bind (&BasicUI::ffwd, this), true);
 
 	/* See comments about Stop above .. */
-	button_info (Rewind).set_action (boost::bind (&BasicUI::rewind, this), true, RewindDown);
-	button_info (Rewind).set_action (boost::bind (&BasicUI::goto_zero, this), true, ButtonState (RewindDown|StopDown));
-	button_info (Rewind).set_action (boost::bind (&BasicUI::goto_start, this), true, ButtonState (RewindDown|ShiftDown));
+	get_button (Rewind).set_action (boost::bind (&BasicUI::rewind, this), true, RewindDown);
+	get_button (Rewind).set_action (boost::bind (&BasicUI::goto_zero, this), true, ButtonState (RewindDown|StopDown));
+	get_button (Rewind).set_action (boost::bind (&BasicUI::goto_start, this), true, ButtonState (RewindDown|ShiftDown));
 
-	button_info (Ffwd).set_action (boost::bind (&BasicUI::ffwd, this), true);
-	button_info (Ffwd).set_action (boost::bind (&BasicUI::goto_end, this), true, ShiftDown);
+	get_button (Ffwd).set_action (boost::bind (&BasicUI::ffwd, this), true);
+	get_button (Ffwd).set_action (boost::bind (&BasicUI::goto_end, this), true, ShiftDown);
 
-	button_info (Loop).set_action (boost::bind (&BasicUI::loop_toggle, this), true);
-	button_info (Loop).set_action (boost::bind (&BasicUI::add_marker, this, string()), true, ShiftDown);
+	get_button (Loop).set_action (boost::bind (&BasicUI::loop_toggle, this), true);
+	get_button (Loop).set_action (boost::bind (&BasicUI::add_marker, this, string()), true, ShiftDown);
 
-	button_info (Punch).set_action (boost::bind (&BasicUI::prev_marker, this), true, ShiftDown);
-	button_info (User).set_action (boost::bind (&BasicUI::next_marker, this), true, ShiftDown);
+	get_button (Punch).set_action (boost::bind (&BasicUI::prev_marker, this), true, ShiftDown);
+	get_button (User).set_action (boost::bind (&BasicUI::next_marker, this), true, ShiftDown);
 
-	button_info (Mute).set_action (boost::bind (&FaderPort::mute, this), true);
-	button_info (Solo).set_action (boost::bind (&FaderPort::solo, this), true);
-	button_info (Rec).set_action (boost::bind (&FaderPort::rec_enable, this), true);
+	get_button (Mute).set_action (boost::bind (&FaderPort::mute, this), true);
+	get_button (Solo).set_action (boost::bind (&FaderPort::solo, this), true);
+	get_button (Rec).set_action (boost::bind (&FaderPort::rec_enable, this), true);
 
-	button_info (Output).set_action (boost::bind (&FaderPort::use_master, this), true);
-	button_info (Output).set_action (boost::bind (&FaderPort::use_monitor, this), true, ShiftDown);
+	get_button (Output).set_action (boost::bind (&FaderPort::use_master, this), true);
+	get_button (Output).set_action (boost::bind (&FaderPort::use_monitor, this), true, ShiftDown);
 }
 
 FaderPort::~FaderPort ()
@@ -190,8 +186,8 @@ FaderPort::start_midi_handling ()
 {
 	/* handle device inquiry response */
 	_input_port->parser()->sysex.connect_same_thread (midi_connections, boost::bind (&FaderPort::sysex_handler, this, _1, _2, _3));
-	/* handle switches */
-	_input_port->parser()->poly_pressure.connect_same_thread (midi_connections, boost::bind (&FaderPort::switch_handler, this, _1, _2));
+	/* handle buttons */
+	_input_port->parser()->poly_pressure.connect_same_thread (midi_connections, boost::bind (&FaderPort::button_handler, this, _1, _2));
 	/* handle encoder */
 	_input_port->parser()->pitchbend.connect_same_thread (midi_connections, boost::bind (&FaderPort::encoder_handler, this, _1, _2));
 	/* handle fader */
@@ -263,18 +259,21 @@ FaderPort::all_lights_out ()
 	}
 }
 
-FaderPort::ButtonInfo&
-FaderPort::button_info (ButtonID id) const
+FaderPort::Button&
+FaderPort::get_button (ButtonID id) const
 {
 	ButtonMap::const_iterator b = buttons.find (id);
 	assert (b != buttons.end());
-	return const_cast<ButtonInfo&>(b->second);
+	return const_cast<Button&>(b->second);
 }
 
 void
-FaderPort::switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
+FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
 	ButtonID id (ButtonID (tb->controller_number));
+	Button& button (get_button (id));
+
+	button.do_timing (tb->value ? true : false);
 
 	switch (id) {
 	case Shift:
@@ -307,13 +306,11 @@ FaderPort::switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		break;
 	}
 
-	ButtonInfo& bi (button_info (id));
-
-	if (bi.uses_flash()) {
-		bi.set_led_state (_output_port, (int)tb->value);
+	if (button.uses_flash()) {
+		button.set_led_state (_output_port, (int)tb->value);
 	}
 
-	bi.invoke (button_state, tb->value ? true : false);
+	button.invoke (button_state, tb->value ? true : false);
 }
 
 void
@@ -489,7 +486,7 @@ FaderPort::blink ()
 	blink_state = !blink_state;
 
 	for (Blinkers::iterator b = blinkers.begin(); b != blinkers.end(); b++) {
-		button_info(*b).set_led_state (_output_port, blink_state);
+		get_button(*b).set_led_state (_output_port, blink_state);
 	}
 
 	return true;
@@ -517,15 +514,15 @@ FaderPort::notify_record_state_changed ()
 {
 	switch (session->record_status()) {
 	case Session::Disabled:
-		button_info (RecEnable).set_led_state (_output_port, false);
+		get_button (RecEnable).set_led_state (_output_port, false);
 		blinkers.remove (RecEnable);
 		break;
 	case Session::Enabled:
-		button_info (RecEnable).set_led_state (_output_port, true);
+		get_button (RecEnable).set_led_state (_output_port, true);
 		blinkers.push_back (RecEnable);
 		break;
 	case Session::Recording:
-		button_info (RecEnable).set_led_state (_output_port, true);
+		get_button (RecEnable).set_led_state (_output_port, true);
 		blinkers.remove (RecEnable);
 		break;
 	}
@@ -534,11 +531,11 @@ FaderPort::notify_record_state_changed ()
 void
 FaderPort::notify_transport_state_changed ()
 {
-	button_info (Loop).set_led_state (_output_port, session->get_play_loop());
-	button_info (Play).set_led_state (_output_port, session->transport_speed() == 1.0);
-	button_info (Stop).set_led_state (_output_port, session->transport_stopped ());
-	button_info (Rewind).set_led_state (_output_port, session->transport_speed() < 0.0);
-	button_info (Ffwd).set_led_state (_output_port, session->transport_speed() > 1.0);
+	get_button (Loop).set_led_state (_output_port, session->get_play_loop());
+	get_button (Play).set_led_state (_output_port, session->transport_speed() == 1.0);
+	get_button (Stop).set_led_state (_output_port, session->transport_stopped ());
+	get_button (Rewind).set_led_state (_output_port, session->transport_speed() < 0.0);
+	get_button (Ffwd).set_led_state (_output_port, session->transport_speed() > 1.0);
 }
 
 void
@@ -588,6 +585,17 @@ FaderPort::get_state ()
 	child->add_child_nocopy (boost::shared_ptr<ARDOUR::Port>(_output_port)->get_state());
 	node.add_child_nocopy (*child);
 
+	/* Save action state for Mix, Proj, Trns and User buttons, since these
+	 * are user controlled. We can only save named-action operations, since
+	 * internal functions are just pointers to functions and hard to
+	 * serialize without enumerating them all somewhere.
+	 */
+
+	node.add_child_nocopy (get_button (Mix).get_state());
+	node.add_child_nocopy (get_button (Proj).get_state());
+	node.add_child_nocopy (get_button (Trns).get_state());
+	node.add_child_nocopy (get_button (User).get_state());
+
 	return node;
 }
 
@@ -613,6 +621,21 @@ FaderPort::set_state (const XMLNode& node, int version)
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
 			boost::shared_ptr<ARDOUR::Port>(_output_port)->set_state (*portnode, version);
+		}
+	}
+
+	for (XMLNodeList::const_iterator n = node.children().begin(); n != node.children().end(); ++n) {
+		if ((*n)->name() == X_("Button")) {
+			XMLProperty const * prop = (*n)->property (X_("id"));
+			if (!prop) {
+				continue;
+			}
+			int xid = atoi (prop->value());
+			ButtonMap::iterator b = buttons.find (ButtonID (xid));
+			if (b == buttons.end()) {
+				continue;
+			}
+			b->second.set_state (**n);
 		}
 	}
 
@@ -646,6 +669,8 @@ FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1,
 		return false;
 	}
 
+	cerr << "Connection state = " << hex << connection_state << dec << endl;
+
 	if ((connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
 
 		/* XXX this is a horrible hack. Without a short sleep here,
@@ -661,13 +686,15 @@ FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1,
 		_device_active = false;
 	}
 
+	ConnectionChange (); /* emit signal for our GUI */
+
 	return true; /* connection status changed */
 }
 
 void
 FaderPort::connected ()
 {
-	std::cerr << "faderport connected\n";
+	std::cerr << "faderport connected or disconnected\n";
 
 	start_midi_handling ();
 
@@ -686,68 +713,91 @@ FaderPort::connected ()
 }
 
 void
-FaderPort::ButtonInfo::invoke (FaderPort::ButtonState bs, bool press)
+FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 {
-	switch (type) {
+	if (!press) {
+		if (long_press == 1) {
+			bs = FaderPort::ButtonState (bs | LongishPress);
+		} else if (long_press == 2) {
+			bs = FaderPort::ButtonState (bs | LongPress);
+		}
+	}
+
+	ToDoMap::iterator x;
+
+	if (press) {
+		if ((x = on_press.find (bs)) == on_press.end()) {
+			return;
+		}
+	} else {
+		if ((x = on_press.find (bs)) == on_release.end()) {
+			return;
+		}
+	}
+
+	switch (x->second.type) {
 	case NamedAction:
-		if (press) {
-			ToDoMap::iterator x = on_press.find (bs);
-			if (x != on_press.end()) {
-				if (!x->second.action_name.empty()) {
-					fp.access_action (x->second.action_name);
-				}
-			}
-		} else {
-			ToDoMap::iterator x = on_release.find (bs);
-			if (x != on_release.end()) {
-				if (!x->second.action_name.empty()) {
-					fp.access_action (x->second.action_name);
-				}
-			}
+		if (!x->second.action_name.empty()) {
+			fp.access_action (x->second.action_name);
 		}
-		break;
+				break;
 	case InternalFunction:
-		if (press) {
-			ToDoMap::iterator x = on_press.find (bs);
-			if (x != on_press.end()) {
-				if (x->second.function) {
-					x->second.function ();
-				}
-			}
-		} else {
-			ToDoMap::iterator x = on_release.find (bs);
-			if (x != on_release.end()) {
-				if (x->second.function) {
-					x->second.function ();
-				}
-			}
+		if (x->second.function) {
+			x->second.function ();
 		}
-		break;
 	}
 }
 
 void
-FaderPort::ButtonInfo::set_action (string const& name, bool when_pressed, FaderPort::ButtonState bs)
+FaderPort::Button::do_timing (bool press)
+{
+	if (press) {
+		pressed_at = get_microseconds ();
+		long_press = 0;
+	} else {
+		if (pressed_at > 0) {
+			const ARDOUR::microseconds_t delta = ARDOUR::get_microseconds () - pressed_at;
+			if (delta < 500000) {
+				long_press = 0;
+			} else if (delta < 1000000) {
+				long_press = 1;
+			} else {
+				long_press = 2;
+			}
+			pressed_at = 0;
+		}
+	}
+}
+
+void
+FaderPort::Button::set_action (string const& name, bool when_pressed, FaderPort::ButtonState bs)
 {
 	ToDo todo;
 
-	type = NamedAction;
+	todo.type = NamedAction;
 
 	if (when_pressed) {
-		todo.action_name = name;
-		on_press[bs] = todo;
+		if (name.empty()) {
+			on_press.erase (bs);
+		} else {
+			todo.action_name = name;
+			on_press[bs] = todo;
+		}
 	} else {
-		todo.action_name = name;
-		on_release[bs] = todo;
+		if (name.empty()) {
+			on_release.erase (bs);
+		} else {
+			todo.action_name = name;
+			on_release[bs] = todo;
+		}
 	}
-
 }
 
 void
-FaderPort::ButtonInfo::set_action (boost::function<void()> f, bool when_pressed, FaderPort::ButtonState bs)
+FaderPort::Button::set_action (boost::function<void()> f, bool when_pressed, FaderPort::ButtonState bs)
 {
 	ToDo todo;
-	type = InternalFunction;
+	todo.type = InternalFunction;
 
 	if (when_pressed) {
 		todo.function = f;
@@ -759,7 +809,7 @@ FaderPort::ButtonInfo::set_action (boost::function<void()> f, bool when_pressed,
 }
 
 void
-FaderPort::ButtonInfo::set_led_state (boost::shared_ptr<MIDI::Port> port, int onoff, bool force)
+FaderPort::Button::set_led_state (boost::shared_ptr<MIDI::Port> port, int onoff, bool force)
 {
 	if (!force && (led_on == (bool) onoff)) {
 		/* nothing to do */
@@ -777,6 +827,87 @@ FaderPort::ButtonInfo::set_led_state (boost::shared_ptr<MIDI::Port> port, int on
 	buf[2] = onoff ? 1 : 0;
 	port->write (buf, 3, 0);
 	led_on = (onoff ? true : false);
+}
+
+int
+FaderPort::Button::set_state (XMLNode const& node)
+{
+	const XMLProperty* prop = node.property ("id");
+	if (!prop) {
+		return -1;
+	}
+
+	int xid = atoi (prop->value());
+	if (xid != id) {
+		return -1;
+	}
+
+	typedef pair<string,FaderPort::ButtonState> state_pair_t;
+	vector<state_pair_t> state_pairs;
+
+	state_pairs.push_back (make_pair (string ("plain"), ButtonState (0)));
+	state_pairs.push_back (make_pair (string ("shift"), ShiftDown));
+	state_pairs.push_back (make_pair (string ("longish"), LongishPress));
+	state_pairs.push_back (make_pair (string ("long"), LongPress));
+
+	on_press.clear ();
+	on_release.clear ();
+
+	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
+		string propname;
+
+		propname = sp->first + X_("-press");
+		if ((prop = node.property (propname)) == 0) {
+			continue;
+		}
+		set_action (prop->value(), true, sp->second);
+
+		propname = sp->first + X_("-release");
+		if ((prop = node.property (propname)) == 0) {
+			continue;
+		}
+		set_action (prop->value(), false, sp->second);
+	}
+
+	return 0;
+}
+
+XMLNode&
+FaderPort::Button::get_state () const
+{
+	XMLNode* node = new XMLNode (X_("Button"));
+	char buf[16];
+	snprintf (buf, sizeof (buf), "%d", id);
+
+	node->add_property (X_("id"), buf);
+
+	ToDoMap::const_iterator x;
+	ToDo null;
+	null.type = NamedAction;
+
+	typedef pair<string,FaderPort::ButtonState> state_pair_t;
+	vector<state_pair_t> state_pairs;
+
+	state_pairs.push_back (make_pair (string ("plain"), ButtonState (0)));
+	state_pairs.push_back (make_pair (string ("shift"), ShiftDown));
+	state_pairs.push_back (make_pair (string ("longish"), LongishPress));
+	state_pairs.push_back (make_pair (string ("long"), LongPress));
+
+	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
+		if ((x = on_press.find (sp->second)) != on_press.end()) {
+			if (x->second.type == NamedAction) {
+				node->add_property (string (sp->first + X_("-press")).c_str(), x->second.action_name);
+			}
+		}
+
+		if ((x = on_release.find (sp->second)) != on_release.end()) {
+			if (x->second.type == NamedAction) {
+				node->add_property (string (sp->first + X_("-release")).c_str(), x->second.action_name);
+			}
+		}
+	}
+
+	return *node;
 }
 
 void
@@ -813,7 +944,7 @@ FaderPort::set_current_route (boost::shared_ptr<Route> r)
 	/* turn this off. It will be turned on back on in use_master() or
 	   use_monitor() as appropriate.
 	*/
-	button_info(Output).set_led_state (_output_port, false);
+	get_button(Output).set_led_state (_output_port, false);
 
 	if (_current_route) {
 		_current_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::drop_current_route, this), this);
@@ -850,7 +981,7 @@ FaderPort::map_cut ()
 
 	if (mp) {
 		bool yn = mp->cut_all ();
-		button_info (Mute).set_led_state (_output_port, yn);
+		get_button (Mute).set_led_state (_output_port, yn);
 		if (yn) {
 			blinkers.push_back (Mute);
 		} else {
@@ -864,19 +995,19 @@ FaderPort::map_cut ()
 void
 FaderPort::map_mute (void*)
 {
-	button_info (Mute).set_led_state (_output_port, _current_route->muted());
+	get_button (Mute).set_led_state (_output_port, _current_route->muted());
 }
 
 void
 FaderPort::map_solo (bool, void*, bool)
 {
-	button_info (Solo).set_led_state (_output_port, _current_route->soloed() || _current_route->listening_via_monitor());
+	get_button (Solo).set_led_state (_output_port, _current_route->soloed() || _current_route->listening_via_monitor());
 }
 
 void
 FaderPort::map_listen (void*, bool)
 {
-	button_info (Solo).set_led_state (_output_port, _current_route->listening_via_monitor());
+	get_button (Solo).set_led_state (_output_port, _current_route->listening_via_monitor());
 }
 
 void
@@ -884,9 +1015,9 @@ FaderPort::map_recenable ()
 {
 	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_route);
 	if (t) {
-		button_info (Rec).set_led_state (_output_port, t->record_enabled());
+		get_button (Rec).set_led_state (_output_port, t->record_enabled());
 	} else {
-		button_info (Rec).set_led_state (_output_port, false);
+		get_button (Rec).set_led_state (_output_port, false);
 	}
 }
 
@@ -944,9 +1075,9 @@ void
 FaderPort::map_route_state ()
 {
 	if (!_current_route) {
-		button_info (Mute).set_led_state (_output_port, false);
-		button_info (Solo).set_led_state (_output_port, false);
-		button_info (Rec).set_led_state (_output_port, false);
+		get_button (Mute).set_led_state (_output_port, false);
+		get_button (Solo).set_led_state (_output_port, false);
+		get_button (Rec).set_led_state (_output_port, false);
 		blinkers.remove (Mute);
 		blinkers.remove (Solo);
 	} else {
@@ -974,5 +1105,5 @@ FaderPort::input_port()
 void
 FaderPort::set_action (ButtonID id, std::string const& action_name, bool on_press, ButtonState bs)
 {
-	button_info(id).set_action (action_name, on_press, bs);
+	get_button(id).set_action (action_name, on_press, bs);
 }

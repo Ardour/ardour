@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2012 Paul Davis
+    Copyright (C) 2015 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,24 +17,9 @@
 
 */
 
-#include <iostream>
-#include <list>
-#include <vector>
-#include <string>
-
-#include <gtkmm/adjustment.h>
 #include <gtkmm/alignment.h>
-#include <gtkmm/box.h>
-#include <gtkmm/combobox.h>
-#include <gtkmm/liststore.h>
 #include <gtkmm/label.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/table.h>
-#include <gtkmm/treestore.h>
-
-namespace Gtk {
-	class CellRendererCombo;
-}
+#include <gtkmm/liststore.h>
 
 #include "pbd/unwind.h"
 #include "pbd/strsplit.h"
@@ -47,67 +32,9 @@ namespace Gtk {
 #include "ardour/audioengine.h"
 
 #include "faderport.h"
+#include "gui.h"
 
 #include "i18n.h"
-
-namespace ArdourSurface {
-
-class FPGUI : public Gtk::VBox
-{
-public:
-	FPGUI (FaderPort&);
-	~FPGUI ();
-
-private:
-	FaderPort& fp;
-	Gtk::Table table;
-	Gtk::ComboBox input_combo;
-	Gtk::ComboBox output_combo;
-	Gtk::ComboBox mix_combo;
-	Gtk::ComboBox proj_combo;
-	Gtk::ComboBox trns_combo;
-
-	void update_port_combos (std::vector<std::string> const&, std::vector<std::string> const&);
-	PBD::ScopedConnection connection_change_connection;
-	void connection_handler ();
-
-	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
-		MidiPortColumns() {
-			add (short_name);
-			add (full_name);
-		}
-		Gtk::TreeModelColumn<std::string> short_name;
-		Gtk::TreeModelColumn<std::string> full_name;
-	};
-
-	MidiPortColumns midi_port_columns;
-	bool ignore_active_change;
-
-	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
-	void active_port_changed (Gtk::ComboBox*,bool for_input);
-
-	struct ActionColumns : public Gtk::TreeModel::ColumnRecord {
-		ActionColumns() {
-			add (name);
-			add (path);
-		}
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::string> path;
-	};
-
-	ActionColumns action_columns;
-	Glib::RefPtr<Gtk::TreeStore> available_action_model;
-	std::map<std::string,std::string> action_map; // map from action names to paths
-
-	void build_mix_action_combo (Gtk::ComboBox&);
-	void build_proj_action_combo (Gtk::ComboBox&);
-	void build_trns_action_combo (Gtk::ComboBox&);
-
-	void build_available_action_menu ();
-	void action_changed (Gtk::ComboBox*, FaderPort::ButtonID);
-};
-
-}
 
 using namespace PBD;
 using namespace ARDOUR;
@@ -136,7 +63,7 @@ FaderPort::tear_down_gui ()
 			delete w;
 		}
 	}
-	delete (FPGUI*) gui;
+	delete static_cast<FPGUI*> (gui);
 	gui = 0;
 }
 
@@ -151,6 +78,7 @@ FaderPort::build_gui ()
 FPGUI::FPGUI (FaderPort& p)
 	: fp (p)
 	, table (2, 5)
+	, action_table (4, 5)
 	, ignore_active_change (false)
 {
 	set_border_width (12);
@@ -164,64 +92,137 @@ FPGUI::FPGUI (FaderPort& p)
 	Gtk::Alignment* align;
 	int row = 0;
 
-	vector<string> midi_inputs;
-	vector<string> midi_outputs;
-
-	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput|ARDOUR::IsPhysical), midi_inputs);
-	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsPhysical), midi_outputs);
-
-	update_port_combos (midi_inputs, midi_outputs);
-
 	input_combo.pack_start (midi_port_columns.short_name);
 	output_combo.pack_start (midi_port_columns.short_name);
 
 	input_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::active_port_changed), &input_combo, true));
 	output_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::active_port_changed), &output_combo, false));
 
-	l = manage (new Gtk::Label (_("Sends MIDI via:")));
+	l = manage (new Gtk::Label (_("Sends MIDI to:")));
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table.attach (input_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	row++;
 
-	l = manage (new Gtk::Label (_("Receives MIDI via:")));
+	l = manage (new Gtk::Label (_("Receives MIDI from:")));
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table.attach (output_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	row++;
 
-	build_mix_action_combo (mix_combo);
-	build_proj_action_combo (proj_combo);
-	build_trns_action_combo (trns_combo);
+	build_mix_action_combo (mix_combo[0], FaderPort::ButtonState(0));
+	build_mix_action_combo (mix_combo[1], FaderPort::ShiftDown);
+	build_mix_action_combo (mix_combo[2], FaderPort::LongishPress);
+	build_mix_action_combo (mix_combo[3], FaderPort::LongPress);
 
-	l = manage (new Gtk::Label (_("Mix Button")));
+	build_proj_action_combo (proj_combo[0], FaderPort::ButtonState(0));
+	build_proj_action_combo (proj_combo[1], FaderPort::ShiftDown);
+	build_proj_action_combo (proj_combo[2], FaderPort::LongishPress);
+	build_proj_action_combo (proj_combo[3], FaderPort::LongPress);
+
+	build_trns_action_combo (trns_combo[0], FaderPort::ButtonState(0));
+	build_trns_action_combo (trns_combo[1], FaderPort::ShiftDown);
+	build_trns_action_combo (trns_combo[2], FaderPort::LongishPress);
+	build_trns_action_combo (trns_combo[3], FaderPort::LongPress);
+
+	action_table.set_row_spacings (4);
+	action_table.set_col_spacings (6);
+	action_table.set_border_width (12);
+	action_table.set_homogeneous (false);
+
+	int action_row = 0;
+
+
+	l = manage (new Gtk::Label (_("Button")));
 	l->set_alignment (1.0, 0.5);
-	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	action_table.attach (*l, 0, 1, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	l = manage (new Gtk::Label (_("Press")));
+	l->set_alignment (1.0, 0.5);
+	action_table.attach (*l, 1, 2, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	l = manage (new Gtk::Label (_("Shift")));
+	l->set_alignment (1.0, 0.5);
+	action_table.attach (*l, 2, 3, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	l = manage (new Gtk::Label (_("Medium")));
+	l->set_alignment (1.0, 0.5);
+	action_table.attach (*l, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	l = manage (new Gtk::Label (_("Long")));
+	l->set_alignment (1.0, 0.5);
+	action_table.attach (*l, 4, 5, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	action_row++;
+
+	l = manage (new Gtk::Label (_("Mix")));
+	l->set_alignment (1.0, 0.5);
+	action_table.attach (*l, 0, 1, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	align = manage (new Alignment);
 	align->set (0.0, 0.5);
-	align->add (mix_combo);
-	table.attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	row++;
-
-	l = manage (new Gtk::Label (_("Proj Button")));
-	l->set_alignment (1.0, 0.5);
-	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align->add (mix_combo[0]);
+	action_table.attach (*align, 1, 2, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	align = manage (new Alignment);
 	align->set (0.0, 0.5);
-	align->add (proj_combo);
-	table.attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	row++;
-
-	l = manage (new Gtk::Label (_("Trns Button")));
-	l->set_alignment (1.0, 0.5);
-	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align->add (mix_combo[1]);
+	action_table.attach (*align, 2, 3, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	align = manage (new Alignment);
 	align->set (0.0, 0.5);
-	align->add (trns_combo);
-	table.attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align->add (mix_combo[2]);
+	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (mix_combo[3]);
+	action_table.attach (*align, 4, 5, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	action_row++;
+
+	l = manage (new Gtk::Label (_("Proj")));
+	l->set_alignment (1.0, 0.5);
+	action_table.attach (*l, 0, 1, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (proj_combo[0]);
+	action_table.attach (*align, 1, 2, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (proj_combo[1]);
+	action_table.attach (*align, 2, 3, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (proj_combo[2]);
+	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (proj_combo[3]);
+	action_table.attach (*align, 4, 5, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	action_row++;
+
+	l = manage (new Gtk::Label (_("Trns")));
+	l->set_alignment (1.0, 0.5);
+	action_table.attach (*l, 0, 1, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (trns_combo[0]);
+	action_table.attach (*align, 1, 2, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (trns_combo[1]);
+	action_table.attach (*align, 2, 3, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (trns_combo[2]);
+	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (trns_combo[3]);
+	action_table.attach (*align, 4, 5, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	action_row++;
+
+	table.attach (action_table, 0, 5, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	row++;
 
 	pack_start (table, false, false);
+
+	/* update the port connection combos */
+
+	update_port_combos ();
+
+	/* catch future changes to connection state */
 
 	fp.ConnectionChange.connect (connection_change_connection, invalidator (*this), boost::bind (&FPGUI::connection_handler, this), gui_context());
 }
@@ -240,18 +241,18 @@ FPGUI::connection_handler ()
 
 	PBD::Unwinder<bool> ici (ignore_active_change, true);
 
+	update_port_combos ();
+}
+
+void
+FPGUI::update_port_combos ()
+{
 	vector<string> midi_inputs;
 	vector<string> midi_outputs;
 
 	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput|ARDOUR::IsTerminal), midi_inputs);
 	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsTerminal), midi_outputs);
 
-	update_port_combos (midi_inputs, midi_outputs);
-}
-
-void
-FPGUI::update_port_combos (vector<string> const& midi_inputs, vector<string> const& midi_outputs)
-{
 	Glib::RefPtr<Gtk::ListStore> input = build_midi_port_list (midi_inputs, true);
 	Glib::RefPtr<Gtk::ListStore> output = build_midi_port_list (midi_outputs, false);
 	bool input_found = false;
@@ -411,7 +412,16 @@ FPGUI::build_available_action_menu ()
 }
 
 void
-FPGUI::build_mix_action_combo (Gtk::ComboBox& cb)
+FPGUI::action_changed (Gtk::ComboBox* cb, FaderPort::ButtonID id)
+{
+	TreeModel::const_iterator row = cb->get_active ();
+	string action_path = (*row)[action_columns.path];
+
+	fp.set_action (id, action_path, true);
+}
+
+void
+FPGUI::build_action_combo (Gtk::ComboBox& cb, vector<pair<string,string> > const & actions, FaderPort::ButtonID id, FaderPort::ButtonState bs)
 {
 	Glib::RefPtr<Gtk::ListStore> model (Gtk::ListStore::create (action_columns));
 	TreeIter rowp;
@@ -419,29 +429,51 @@ FPGUI::build_mix_action_combo (Gtk::ComboBox& cb)
 
 	rowp = model->append();
 	row = *(rowp);
-	row[action_columns.name] = _("Toggle Editor & Mixer Windows");
-	row[action_columns.path] = X_("Common/toggle-editor-mixer");
+	row[action_columns.name] = _("Disabled");
+	row[action_columns.path] = string();
 
-	rowp = model->append();
-	row = *(rowp);
-	row[action_columns.name] = _("Show/Hide Editor mixer strip");
-	row[action_columns.path] = X_("Editor/show-editor-mixer");
+	for (vector<pair<string,string> >::const_iterator i = actions.begin(); i != actions.end(); ++i) {
+		rowp = model->append();
+		row = *(rowp);
+		row[action_columns.name] = i->first;
+		row[action_columns.path] = i->second;
+	}
 
 	cb.set_model (model);
 	cb.pack_start (action_columns.name);
 
-	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::action_changed), &cb, FaderPort::Mix));
+	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::action_changed), &cb, id));
 }
 
 void
-FPGUI::build_proj_action_combo (Gtk::ComboBox& cb)
+FPGUI::build_mix_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 {
+	vector<pair<string,string> > actions;
+
+	actions.push_back (make_pair (string (_("Toggle Editor & Mixer Windows")), string (X_("Common/toggle-editor-mixer"))));
+	actions.push_back (make_pair (string (_("Show/Hide Editor mixer strip")), string (X_("Editor/show-editor-mixer"))));
+
+	build_action_combo (cb, actions, FaderPort::Mix, bs);
 }
 
+void
+FPGUI::build_proj_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
+{
+	vector<pair<string,string> > actions;
+
+	actions.push_back (make_pair (string("Toggle Meterbridge"), string(X_("Common/toggle-meterbridge"))));
+
+	build_action_combo (cb, actions, FaderPort::Proj, bs);
+}
 
 void
-FPGUI::build_trns_action_combo (Gtk::ComboBox& cb)
+FPGUI::build_trns_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 {
+	vector<pair<string,string> > actions;
+
+	actions.push_back (make_pair (string("Toggle Locations"), string(X_("Window/toggle-locations"))));
+
+	build_action_combo (cb, actions, FaderPort::Trns, bs);
 }
 
 Glib::RefPtr<Gtk::ListStore>
@@ -498,15 +530,4 @@ FPGUI::active_port_changed (Gtk::ComboBox* combo, bool for_input)
 			fp.output_port()->connect (new_port);
 		}
 	}
-}
-
-void
-FPGUI::action_changed (Gtk::ComboBox* cb, FaderPort::ButtonID id)
-{
-	TreeModel::const_iterator row = cb->get_active ();
-	string action_path = (*row)[action_columns.path];
-
-	cerr << "Change " << id << " to " << action_path << endl;
-	
-	fp.set_action (id, action_path, true);
 }

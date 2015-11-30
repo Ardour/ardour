@@ -151,6 +151,8 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		RewindDown = 0x2,
 		StopDown = 0x4,
 		UserDown = 0x8,
+		LongishPress = 0x10,
+		LongPress = 0x20
 	};
 
 	void set_action (ButtonID, std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
@@ -190,15 +192,15 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	int last_encoder_delta, last_last_encoder_delta;
 
 	void sysex_handler (MIDI::Parser &p, MIDI::byte *, size_t);
-	void switch_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb);
+	void button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb);
 	void encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb);
 	void fader_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb);
 
 	ButtonState button_state;
 
-	friend class ButtonInfo;
+	friend class Button;
 
-	class ButtonInfo {
+	class Button {
 	  public:
 
 		enum ActionType {
@@ -206,14 +208,15 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 			InternalFunction,
 		};
 
-		ButtonInfo (FaderPort& f, std::string const& str, ButtonID i, int o)
+		Button (FaderPort& f, std::string const& str, ButtonID i, int o)
 			: fp (f)
 			, name (str)
 			, id (i)
 			, out (o)
-			, type (NamedAction)
 			, led_on (false)
 			, flash (false)
+			, pressed_at (0)
+			, long_press (0)
 		{}
 
 		void set_action (std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
@@ -222,20 +225,26 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		void invoke (ButtonState bs, bool press);
 		bool uses_flash () const { return flash; }
 		void set_flash (bool yn) { flash = yn; }
+		void do_timing (bool press);
+
+		XMLNode& get_state () const;
+		int set_state (XMLNode const&);
 
 	  private:
 		FaderPort& fp;
 		std::string name;
 		ButtonID id;
 		int out;
-		ActionType type;
 		bool led_on;
 		bool flash;
+		ARDOUR::microseconds_t pressed_at;
+		int long_press;
 
-		/* could be a union if boost::function didn't require a
-		 * constructor
-		 */
 		struct ToDo {
+			ActionType type;
+			/* could be a union if boost::function didn't require a
+			 * constructor
+			 */
 			std::string action_name;
 			boost::function<void()> function;
 		};
@@ -245,10 +254,10 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		ToDoMap on_release;
 	};
 
-	typedef std::map<ButtonID,ButtonInfo> ButtonMap;
+	typedef std::map<ButtonID,Button> ButtonMap;
 
 	ButtonMap buttons;
-	ButtonInfo& button_info (ButtonID) const;
+	Button& get_button (ButtonID) const;
 
 	void all_lights_out ();
 	void close ();
