@@ -727,10 +727,12 @@ FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 
 	if (press) {
 		if ((x = on_press.find (bs)) == on_press.end()) {
+			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("no press action for button %1 state %2%3\%4\n", id, hex, bs, dec));
 			return;
 		}
 	} else {
-		if ((x = on_press.find (bs)) == on_release.end()) {
+		if ((x = on_release.find (bs)) == on_release.end()) {
+			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("no release action for button %1 state %2%3\%4\n", id, hex, bs, dec));
 			return;
 		}
 	}
@@ -780,6 +782,7 @@ FaderPort::Button::set_action (string const& name, bool when_pressed, FaderPort:
 		if (name.empty()) {
 			on_press.erase (bs);
 		} else {
+			cerr << "Set button press " << id << " to action " << name << " state " << hex << bs << dec << endl;
 			todo.action_name = name;
 			on_press[bs] = todo;
 		}
@@ -787,6 +790,7 @@ FaderPort::Button::set_action (string const& name, bool when_pressed, FaderPort:
 		if (name.empty()) {
 			on_release.erase (bs);
 		} else {
+			cerr << "Set button rel " << id << " to action " << name << " state " << hex << bs << dec << endl;
 			todo.action_name = name;
 			on_release[bs] = todo;
 		}

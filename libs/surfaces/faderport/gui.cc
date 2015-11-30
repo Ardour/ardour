@@ -412,12 +412,14 @@ FPGUI::build_available_action_menu ()
 }
 
 void
-FPGUI::action_changed (Gtk::ComboBox* cb, FaderPort::ButtonID id)
+FPGUI::action_changed (Gtk::ComboBox* cb, FaderPort::ButtonID id, FaderPort::ButtonState bs)
 {
 	TreeModel::const_iterator row = cb->get_active ();
 	string action_path = (*row)[action_columns.path];
 
-	fp.set_action (id, action_path, true);
+	/* release binding */
+	cerr << "Reset release for " << id << " to " << action_path << " bs = " << hex << bs << dec << endl;
+	fp.set_action (id, action_path, false, bs);
 }
 
 void
@@ -457,7 +459,7 @@ FPGUI::build_action_combo (Gtk::ComboBox& cb, vector<pair<string,string> > const
 		cb.set_active (active_row);
 	}
 
-	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::action_changed), &cb, id));
+	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::action_changed), &cb, id, bs));
 }
 
 void
@@ -477,6 +479,11 @@ FPGUI::build_proj_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 	vector<pair<string,string> > actions;
 
 	actions.push_back (make_pair (string("Toggle Meterbridge"), string(X_("Common/toggle-meterbridge"))));
+	actions.push_back (make_pair (string("Toggle Summary"), string(X_("Editor/ToggleSummary"))));
+	actions.push_back (make_pair (string("Toggle Editor Lists"), string(X_("Editor/show-editor-list"))));
+	actions.push_back (make_pair (string (_("Zoom to Session")), string (X_("Editor/zoom-to-session"))));
+	actions.push_back (make_pair (string (_("Zoom In")), string (X_("Editor/temporal-zoom-in"))));
+	actions.push_back (make_pair (string (_("Zoom Out")), string (X_("Editor/temporal-zoom-out"))));
 
 	build_action_combo (cb, actions, FaderPort::Proj, bs);
 }
@@ -487,6 +494,9 @@ FPGUI::build_trns_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 	vector<pair<string,string> > actions;
 
 	actions.push_back (make_pair (string("Toggle Locations"), string(X_("Window/toggle-locations"))));
+	actions.push_back (make_pair (string("Toggle Metronome"), string(X_("Transport/ToggleClick"))));
+	actions.push_back (make_pair (string("Toggle Sync"), string(X_("Transport/ToggleExternalSync"))));
+	actions.push_back (make_pair (string("Set Playhead @pointer"), string(X_("Editor/set-playhead"))));
 
 	build_action_combo (cb, actions, FaderPort::Trns, bs);
 }
