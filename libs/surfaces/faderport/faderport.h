@@ -156,6 +156,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	};
 
 	void set_action (ButtonID, std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
+	std::string get_action (ButtonID, bool on_press, FaderPort::ButtonState = ButtonState (0));
 
   private:
 	boost::shared_ptr<ARDOUR::Route> _current_route;
@@ -221,6 +222,8 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 
 		void set_action (std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
 		void set_action (boost::function<void()> function, bool on_press, FaderPort::ButtonState = ButtonState (0));
+		std::string get_action (bool press, FaderPort::ButtonState bs = ButtonState (0));
+
 		void set_led_state (boost::shared_ptr<MIDI::Port>, int onoff, bool force = false);
 		void invoke (ButtonState bs, bool press);
 		bool uses_flash () const { return flash; }

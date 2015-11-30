@@ -793,6 +793,30 @@ FaderPort::Button::set_action (string const& name, bool when_pressed, FaderPort:
 	}
 }
 
+string
+FaderPort::Button::get_action (bool press, FaderPort::ButtonState bs)
+{
+	ToDoMap::iterator x;
+
+	if (press) {
+		if ((x = on_press.find (bs)) == on_press.end()) {
+			return string();
+		}
+		if (x->second.type != NamedAction) {
+			return string ();
+		}
+		return x->second.action_name;
+	} else {
+		if ((x = on_release.find (bs)) == on_release.end()) {
+			return string();
+		}
+		if (x->second.type != NamedAction) {
+			return string ();
+		}
+		return x->second.action_name;
+	}
+}
+
 void
 FaderPort::Button::set_action (boost::function<void()> f, bool when_pressed, FaderPort::ButtonState bs)
 {
@@ -1106,4 +1130,10 @@ void
 FaderPort::set_action (ButtonID id, std::string const& action_name, bool on_press, ButtonState bs)
 {
 	get_button(id).set_action (action_name, on_press, bs);
+}
+
+string
+FaderPort::get_action (ButtonID id, bool press, ButtonState bs)
+{
+	return get_button(id).get_action (press, bs);
 }

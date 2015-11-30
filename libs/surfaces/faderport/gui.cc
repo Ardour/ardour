@@ -426,21 +426,36 @@ FPGUI::build_action_combo (Gtk::ComboBox& cb, vector<pair<string,string> > const
 	Glib::RefPtr<Gtk::ListStore> model (Gtk::ListStore::create (action_columns));
 	TreeIter rowp;
 	TreeModel::Row row;
+	string current_action = fp.get_action (id, true, bs);
+	int active_row = -1;
+	int n;
+	vector<pair<string,string> >::const_iterator i;
 
 	rowp = model->append();
 	row = *(rowp);
 	row[action_columns.name] = _("Disabled");
 	row[action_columns.path] = string();
 
-	for (vector<pair<string,string> >::const_iterator i = actions.begin(); i != actions.end(); ++i) {
+	if (current_action.empty()) {
+		active_row = 0;
+	}
+
+	for (i = actions.begin(), n = 0; i != actions.end(); ++i, ++n) {
 		rowp = model->append();
 		row = *(rowp);
 		row[action_columns.name] = i->first;
 		row[action_columns.path] = i->second;
+		if (current_action == i->second) {
+			active_row = n+1;
+		}
 	}
 
 	cb.set_model (model);
 	cb.pack_start (action_columns.name);
+
+	if (active_row >= 0) {
+		cb.set_active (active_row);
+	}
 
 	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::action_changed), &cb, id));
 }
