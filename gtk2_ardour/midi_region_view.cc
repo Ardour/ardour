@@ -574,11 +574,12 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		_mouse_state = None;
 		break;
 
-	case SelectRectDragging:
 	case AddDragging:
+		/* Only create a ghost note when we added a note, not when we were drag-selecting. */
+		create_ghost_note (ev->x, ev->y);
+	case SelectRectDragging:
 		editor.drags()->end_grab ((GdkEvent *) ev);
 		_mouse_state = None;
-		create_ghost_note (ev->x, ev->y);
 		break;
 
 
