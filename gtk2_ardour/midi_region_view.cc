@@ -447,6 +447,10 @@ MidiRegionView::enter_internal()
 		// Show ghost note under pencil
 		create_ghost_note(_last_event_x, _last_event_y);
 	}
+	else {
+		remove_ghost_note ();
+		hide_verbose_cursor ();
+	}
 
 	if (!_selection.empty()) {
 		// Grab keyboard for moving selected notes with arrow keys
