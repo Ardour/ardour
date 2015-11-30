@@ -433,7 +433,7 @@ PortAudioBackend::midi_option () const
 
 /* State Control */
 
-static void * pthread_process (void *arg)
+static void * blocking_thread_func (void *arg)
 {
 	PortAudioBackend *d = static_cast<PortAudioBackend *>(arg);
 	d->main_blocking_process_thread ();
@@ -671,9 +671,9 @@ bool
 PortAudioBackend::start_blocking_process_thread ()
 {
 	if (_realtime_pthread_create (SCHED_FIFO, -20, 100000,
-				&_main_blocking_thread, pthread_process, this))
+				&_main_blocking_thread, blocking_thread_func, this))
 	{
-		if (pthread_create (&_main_blocking_thread, NULL, pthread_process, this))
+		if (pthread_create (&_main_blocking_thread, NULL, blocking_thread_func, this))
 		{
 			DEBUG_AUDIO("Failed to create main audio thread\n");
 			_run = false;
