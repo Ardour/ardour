@@ -368,19 +368,19 @@ class PortAudioBackend : public AudioBackend {
 		bool  _reinit_thread_callback;
 		bool  _measure_latency;
 
-		ARDOUR::DSPLoadCalculator m_dsp_calc;
+		ARDOUR::DSPLoadCalculator _dsp_calc;
 
-		bool m_freewheel_thread_active;
+		bool _freewheel_thread_active;
 
-		pthread_mutex_t m_freewheel_mutex;
-		pthread_cond_t m_freewheel_signal;
+		pthread_mutex_t _freewheel_mutex;
+		pthread_cond_t _freewheel_signal;
 
-		uint64_t m_cycle_count;
-		uint64_t m_total_deviation_us;
-		uint64_t m_max_deviation_us;
+		uint64_t _cycle_count;
+		uint64_t _total_deviation_us;
+		uint64_t _max_deviation_us;
 
-		CycleTimer m_cycle_timer;
-		uint64_t m_last_cycle_start;
+		CycleTimer _cycle_timer;
+		uint64_t _last_cycle_start;
 
 		static std::vector<std::string> _midi_options;
 		static std::vector<AudioBackend::DeviceStatus> _input_audio_device_status;
@@ -413,10 +413,10 @@ class PortAudioBackend : public AudioBackend {
 		pthread_t _main_blocking_thread;
 
 		/* main thread in callback mode(or fw thread when running) */
-		pthread_t m_main_thread;
+		pthread_t _main_thread;
 
 		/* freewheel thread in callback mode */
-		pthread_t m_pthread_freewheel;
+		pthread_t _pthread_freewheel;
 
 		/* process threads */
 		static void* portaudio_process_thread (void *);

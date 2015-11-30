@@ -71,9 +71,9 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _freewheel_ack (false)
 	, _reinit_thread_callback (false)
 	, _measure_latency (false)
-	, m_cycle_count(0)
-	, m_total_deviation_us(0)
-	, m_max_deviation_us(0)
+	, _cycle_count(0)
+	, _total_deviation_us(0)
+	, _max_deviation_us(0)
 	, _input_audio_device("")
 	, _output_audio_device("")
 	, _midi_driver_option(get_standard_device_name(DeviceNone))
@@ -89,8 +89,8 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 {
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
-	pthread_mutex_init (&m_freewheel_mutex, 0);
-	pthread_cond_init (&m_freewheel_signal, 0);
+	pthread_mutex_init (&_freewheel_mutex, 0);
+	pthread_cond_init (&_freewheel_signal, 0);
 
 	_pcmio = new PortAudioIO ();
 	_midiio = new WinMMEMidiIO ();
@@ -102,8 +102,8 @@ PortAudioBackend::~PortAudioBackend ()
 	delete _midiio; _midiio = 0;
 
 	pthread_mutex_destroy (&_port_callback_mutex);
-	pthread_mutex_destroy (&m_freewheel_mutex);
-	pthread_cond_destroy (&m_freewheel_signal);
+	pthread_mutex_destroy (&_freewheel_mutex);
+	pthread_cond_destroy (&_freewheel_signal);
 }
 
 /* AUDIOBACKEND API */
@@ -545,10 +545,10 @@ PortAudioBackend::_start (bool for_latency_measurement)
 		_midiio->start(); // triggers port discovery, callback coremidi_rediscover()
 	}
 
-	m_cycle_timer.set_samplerate(_samplerate);
-	m_cycle_timer.set_samples_per_cycle(_samples_per_period);
+	_cycle_timer.set_samplerate(_samplerate);
+	_cycle_timer.set_samples_per_cycle(_samples_per_period);
 
-	m_dsp_calc.set_max_time_us (m_cycle_timer.get_length_us());
+	_dsp_calc.set_max_time_us (_cycle_timer.get_length_us());
 
 	DEBUG_MIDI ("Registering MIDI ports\n");
 
@@ -628,18 +628,18 @@ PortAudioBackend::process_callback(const float* input,
 {
 	_active = true;
 
-	m_dsp_calc.set_start_timestamp_us (PBD::get_microseconds());
+	_dsp_calc.set_start_timestamp_us (PBD::get_microseconds());
 
 	if (_run && _freewheel && !_freewheel_ack) {
 		// acknowledge freewheeling; hand-over thread ID
-		pthread_mutex_lock (&m_freewheel_mutex);
+		pthread_mutex_lock (&_freewheel_mutex);
 		if (_freewheel) {
 			DEBUG_AUDIO("Setting _freewheel_ack = true;\n");
 			_freewheel_ack = true;
 		}
 		DEBUG_AUDIO("Signalling freewheel thread\n");
-		pthread_cond_signal (&m_freewheel_signal);
-		pthread_mutex_unlock (&m_freewheel_mutex);
+		pthread_cond_signal (&_freewheel_signal);
+		pthread_mutex_unlock (&_freewheel_mutex);
 	}
 
 	if (statusFlags & paInputUnderflow ||
@@ -656,11 +656,11 @@ PortAudioBackend::process_callback(const float* input,
 		return true;
 	}
 
-	bool in_main_thread = pthread_equal(m_main_thread, pthread_self());
+	bool in_main_thread = pthread_equal(_main_thread, pthread_self());
 
 	if (_reinit_thread_callback || !in_main_thread) {
 		_reinit_thread_callback = false;
-		m_main_thread = pthread_self();
+		_main_thread = pthread_self();
 		AudioEngine::thread_init_callback (this);
 	}
 
@@ -751,15 +751,15 @@ static void* freewheel_thread(void* arg)
 bool
 PortAudioBackend::start_freewheel_process_thread ()
 {
-	if (pthread_create(&m_pthread_freewheel, NULL, freewheel_thread, this)) {
+	if (pthread_create(&_pthread_freewheel, NULL, freewheel_thread, this)) {
 		DEBUG_AUDIO("Failed to create main audio thread\n");
 		return false;
 	}
 
 	int timeout = 5000;
-	while (!m_freewheel_thread_active && --timeout > 0) { Glib::usleep (1000); }
+	while (!_freewheel_thread_active && --timeout > 0) { Glib::usleep (1000); }
 
-	if (timeout == 0 || !m_freewheel_thread_active) {
+	if (timeout == 0 || !_freewheel_thread_active) {
 		DEBUG_AUDIO("Failed to start freewheel thread\n");
 		return false;
 	}
@@ -771,17 +771,17 @@ PortAudioBackend::stop_freewheel_process_thread ()
 {
 	void *status;
 
-	if (!m_freewheel_thread_active) {
+	if (!_freewheel_thread_active) {
 		return true;
 	}
 
 	DEBUG_AUDIO("Signaling freewheel thread to stop\n");
 
-	pthread_mutex_lock (&m_freewheel_mutex);
-	pthread_cond_signal (&m_freewheel_signal);
-	pthread_mutex_unlock (&m_freewheel_mutex);
+	pthread_mutex_lock (&_freewheel_mutex);
+	pthread_cond_signal (&_freewheel_signal);
+	pthread_mutex_unlock (&_freewheel_mutex);
 
-	if (pthread_join (m_pthread_freewheel, &status) != 0) {
+	if (pthread_join (_pthread_freewheel, &status) != 0) {
 		DEBUG_AUDIO("Failed to stop freewheel thread\n");
 		return false;
 	}
@@ -792,11 +792,11 @@ PortAudioBackend::stop_freewheel_process_thread ()
 void*
 PortAudioBackend::freewheel_process_thread()
 {
-	m_freewheel_thread_active = true;
+	_freewheel_thread_active = true;
 
 	bool first_run = false;
 
-	pthread_mutex_lock (&m_freewheel_mutex);
+	pthread_mutex_lock (&_freewheel_mutex);
 
 	while(_run) {
 		// check if we should run,
@@ -822,7 +822,7 @@ PortAudioBackend::freewheel_process_thread()
 			ts.tv_sec = tv.tv_sec + 3;
 			ts.tv_nsec = 0;
 			DEBUG_AUDIO("Waiting for freewheel change\n");
-			pthread_cond_timedwait (&m_freewheel_signal, &m_freewheel_mutex, &ts);
+			pthread_cond_timedwait (&_freewheel_signal, &_freewheel_mutex, &ts);
 			continue;
 		}
 
@@ -830,7 +830,7 @@ PortAudioBackend::freewheel_process_thread()
 			// tell the engine we're ready to GO.
 			engine.freewheel_callback (_freewheeling);
 			first_run = false;
-			m_main_thread = pthread_self();
+			_main_thread = pthread_self();
 			AudioEngine::thread_init_callback (this);
 			_midiio->set_enabled(false);
 		}
@@ -840,9 +840,9 @@ PortAudioBackend::freewheel_process_thread()
 		}
 	}
 
-	pthread_mutex_unlock (&m_freewheel_mutex);
+	pthread_mutex_unlock (&_freewheel_mutex);
 
-	m_freewheel_thread_active = false;
+	_freewheel_thread_active = false;
 
 	if (_run) {
 		// engine.process_callback() returner error
@@ -859,9 +859,9 @@ PortAudioBackend::freewheel (bool onoff)
 	}
 	_freewheeling = onoff;
 
-	if (0 == pthread_mutex_trylock (&m_freewheel_mutex)) {
-		pthread_cond_signal (&m_freewheel_signal);
-		pthread_mutex_unlock (&m_freewheel_mutex);
+	if (0 == pthread_mutex_trylock (&_freewheel_mutex)) {
+		pthread_cond_signal (&_freewheel_signal);
+		pthread_mutex_unlock (&_freewheel_mutex);
 	}
 	return 0;
 }
@@ -903,11 +903,11 @@ PortAudioBackend::samples_since_cycle_start ()
 	if (!_active || !_run || _freewheeling || _freewheel) {
 		return 0;
 	}
-	if (!m_cycle_timer.valid()) {
+	if (!_cycle_timer.valid()) {
 		return 0;
 	}
 
-	return m_cycle_timer.samples_since_cycle_start (PBD::get_microseconds());
+	return _cycle_timer.samples_since_cycle_start (PBD::get_microseconds());
 }
 
 int
@@ -1037,7 +1037,7 @@ PortAudioBackend::in_process_thread ()
 		return true;
 	}
 #else
-	if (pthread_equal (m_main_thread, pthread_self()) != 0) {
+	if (pthread_equal (_main_thread, pthread_self()) != 0) {
 		return true;
 	}
 #endif
@@ -1758,7 +1758,7 @@ PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
 	int64_t min_elapsed_us = 1000000;
 	int64_t max_elapsed_us = 0;
 
-	m_dsp_calc.set_start_timestamp_us (PBD::get_microseconds());
+	_dsp_calc.set_start_timestamp_us (PBD::get_microseconds());
 
 	i = 0;
 	/* Copy input audio data into input port buffers */
@@ -1783,28 +1783,28 @@ PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
 		       _samples_per_period * sizeof(Sample));
 	}
 
-	m_last_cycle_start = m_cycle_timer.get_start();
-	m_cycle_timer.reset_start(PBD::get_microseconds());
-	m_cycle_count++;
+	_last_cycle_start = _cycle_timer.get_start();
+	_cycle_timer.reset_start(PBD::get_microseconds());
+	_cycle_count++;
 
-	uint64_t cycle_diff_us = (m_cycle_timer.get_start() - m_last_cycle_start);
-	int64_t deviation_us = (cycle_diff_us - m_cycle_timer.get_length_us());
-	m_total_deviation_us += ::llabs(deviation_us);
-	m_max_deviation_us =
-	    std::max(m_max_deviation_us, (uint64_t)::llabs(deviation_us));
+	uint64_t cycle_diff_us = (_cycle_timer.get_start() - _last_cycle_start);
+	int64_t deviation_us = (cycle_diff_us - _cycle_timer.get_length_us());
+	_total_deviation_us += ::llabs(deviation_us);
+	_max_deviation_us =
+	    std::max(_max_deviation_us, (uint64_t)::llabs(deviation_us));
 
-	if ((m_cycle_count % 1000) == 0) {
-		uint64_t mean_deviation_us = m_total_deviation_us / m_cycle_count;
+	if ((_cycle_count % 1000) == 0) {
+		uint64_t mean_deviation_us = _total_deviation_us / _cycle_count;
 		DEBUG_TIMING(string_compose("Mean avg cycle deviation: %1(ms), max %2(ms)\n",
 		                            mean_deviation_us * 1e-3,
-		                            m_max_deviation_us * 1e-3));
+		                            _max_deviation_us * 1e-3));
 	}
 
-	if (::llabs(deviation_us) > m_cycle_timer.get_length_us()) {
+	if (::llabs(deviation_us) > _cycle_timer.get_length_us()) {
 		DEBUG_TIMING(
 		    string_compose("time between process(ms): %1, Est(ms): %2, Dev(ms): %3\n",
 		                   cycle_diff_us * 1e-3,
-		                   m_cycle_timer.get_length_us() * 1e-3,
+		                   _cycle_timer.get_length_us() * 1e-3,
 		                   deviation_us * 1e-3));
 	}
 
@@ -1832,14 +1832,14 @@ PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
 	_processed_samples += _samples_per_period;
 
 	/* calculate DSP load */
-	m_dsp_calc.set_stop_timestamp_us (PBD::get_microseconds());
-	_dsp_load = m_dsp_calc.get_dsp_load();
+	_dsp_calc.set_stop_timestamp_us (PBD::get_microseconds());
+	_dsp_load = _dsp_calc.get_dsp_load();
 
 	DEBUG_TIMING(string_compose("DSP Load: %1\n", _dsp_load));
 
-	max_elapsed_us = std::max(m_dsp_calc.elapsed_time_us(), max_elapsed_us);
-	min_elapsed_us = std::min(m_dsp_calc.elapsed_time_us(), min_elapsed_us);
-	if ((m_cycle_count % 1000) == 0) {
+	max_elapsed_us = std::max(_dsp_calc.elapsed_time_us(), max_elapsed_us);
+	min_elapsed_us = std::min(_dsp_calc.elapsed_time_us(), min_elapsed_us);
+	if ((_cycle_count % 1000) == 0) {
 		DEBUG_TIMING(string_compose("Elapsed process time(usecs) max: %1, min: %2\n",
 		                            max_elapsed_us,
 		                            min_elapsed_us));
@@ -1895,12 +1895,12 @@ PortAudioBackend::process_incoming_midi ()
 		uint8_t data[256];
 		size_t size = sizeof(data);
 		while (_midiio->dequeue_input_event(i,
-		                                    m_cycle_timer.get_start(),
-		                                    m_cycle_timer.get_next_start(),
+		                                    _cycle_timer.get_start(),
+		                                    _cycle_timer.get_next_start(),
 		                                    timestamp,
 		                                    data,
 		                                    size)) {
-			sample_offset = m_cycle_timer.samples_since_cycle_start(timestamp);
+			sample_offset = _cycle_timer.samples_since_cycle_start(timestamp);
 			midi_event_put(mbuf, sample_offset, data, size);
 			DEBUG_MIDI(string_compose("Dequeuing incoming MIDI data for device: %1 "
 			                          "sample_offset: %2 timestamp: %3, size: %4\n",
@@ -1933,7 +1933,7 @@ PortAudioBackend::process_outgoing_midi ()
 		for (PortMidiBuffer::const_iterator mit = src->begin(); mit != src->end();
 		     ++mit) {
 			uint64_t timestamp =
-			    m_cycle_timer.timestamp_from_sample_offset((*mit)->timestamp());
+			    _cycle_timer.timestamp_from_sample_offset((*mit)->timestamp());
 			DEBUG_MIDI(string_compose("Queuing outgoing MIDI data for device: "
 			                          "%1 sample_offset: %2 timestamp: %3, size: %4\n",
 			                          _midiio->get_outputs()[i]->name(),
