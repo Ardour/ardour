@@ -433,13 +433,17 @@ MidiRegionView::mouse_mode_changed ()
 	// Adjust frame colour (become more transparent for internal tools)
 	set_frame_color();
 
+	// Only necessary for leave as a mouse_mode_change over a region
+	// automatically triggers an enter event.
 	if (_entered) {
-		if (trackview.editor().internal_editing()) {
-			// Switched in to internal editing mode while entered
-			enter_internal();
-		} else {
+		if (!trackview.editor().internal_editing()) {
 			// Switched out of internal editing mode while entered
 			leave_internal();
+		}
+		else if (trackview.editor().current_mouse_mode() == MouseContent) {
+			// hide cursor and ghost note after changing to internal edit mode
+			hide_verbose_cursor ();
+			remove_ghost_note ();
 		}
 	}
 }
@@ -450,10 +454,6 @@ MidiRegionView::enter_internal()
 	if (trackview.editor().current_mouse_mode() == MouseDraw && _mouse_state != AddDragging) {
 		// Show ghost note under pencil
 		create_ghost_note(_last_event_x, _last_event_y);
-	}
-	else {
-		remove_ghost_note ();
-		hide_verbose_cursor ();
 	}
 
 	if (!_selection.empty()) {
@@ -476,6 +476,7 @@ MidiRegionView::leave_internal()
 {
 	hide_verbose_cursor ();
 	remove_ghost_note ();
+	_note_entered = false;
 
 	if (_grabbed_keyboard) {
 		Keyboard::magic_widget_drop_focus();
