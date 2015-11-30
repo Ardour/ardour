@@ -318,7 +318,7 @@ class PortAudioBackend : public AudioBackend {
 
 		void* get_buffer (PortHandle, pframes_t);
 
-		void* main_blocking_process_thread ();
+		void* blocking_process_thread ();
 
 		void* freewheel_process_thread ();
 

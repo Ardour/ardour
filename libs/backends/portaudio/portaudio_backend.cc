@@ -436,7 +436,7 @@ PortAudioBackend::midi_option () const
 static void * blocking_thread_func (void *arg)
 {
 	PortAudioBackend *d = static_cast<PortAudioBackend *>(arg);
-	d->main_blocking_process_thread ();
+	d->blocking_process_thread ();
 	pthread_exit (0);
 	return 0;
 }
@@ -1678,7 +1678,7 @@ PortAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
 
 
 void *
-PortAudioBackend::main_blocking_process_thread ()
+PortAudioBackend::blocking_process_thread ()
 {
 	AudioEngine::thread_init_callback (this);
 	_active = true;
