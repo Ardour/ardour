@@ -25,6 +25,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/combobox.h>
+#include <gtkmm/image.h>
 #include <gtkmm/table.h>
 #include <gtkmm/treestore.h>
 
@@ -45,10 +46,12 @@ public:
 
 private:
 	FaderPort& fp;
+	Gtk::HBox hpacker;
 	Gtk::Table table;
 	Gtk::Table action_table;
 	Gtk::ComboBox input_combo;
 	Gtk::ComboBox output_combo;
+	Gtk::Image    image;
 
 	/* the mix, proj, trns and user buttons have no obvious semantics for
 	 * ardour, mixbus etc., so we allow the user to define their

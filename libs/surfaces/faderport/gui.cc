@@ -23,6 +23,7 @@
 
 #include "pbd/unwind.h"
 #include "pbd/strsplit.h"
+#include "pbd/file_utils.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -30,6 +31,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/filesystem_paths.h"
 
 #include "faderport.h"
 #include "gui.h"
@@ -87,6 +89,16 @@ FPGUI::FPGUI (FaderPort& p)
 	table.set_col_spacings (6);
 	table.set_border_width (12);
 	table.set_homogeneous (false);
+
+	std::string data_file_path;
+	string name = "faderport-small.png";
+	Searchpath spath(ARDOUR::ardour_data_search_path());
+	spath.add_subdirectory_to_paths ("icons");
+	find_file (spath, name, data_file_path);
+	if (!data_file_path.empty()) {
+		image.set (data_file_path);
+		hpacker.pack_start (image, false, false);
+	}
 
 	Gtk::Label* l;
 	Gtk::Alignment* align;
@@ -216,7 +228,8 @@ FPGUI::FPGUI (FaderPort& p)
 	table.attach (action_table, 0, 5, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	row++;
 
-	pack_start (table, false, false);
+	hpacker.pack_start (table, true, true);
+	pack_start (hpacker, false, false);
 
 	/* update the port connection combos */
 
