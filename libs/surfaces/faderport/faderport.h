@@ -151,8 +151,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		RewindDown = 0x2,
 		StopDown = 0x4,
 		UserDown = 0x8,
-		LongishPress = 0x10,
-		LongPress = 0x20
+		LongPress = 0x10
 	};
 
 	void set_action (ButtonID, std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
@@ -217,7 +216,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 			, led_on (false)
 			, flash (false)
 			, pressed_at (0)
-			, long_press (0)
+			, long_press (false)
 		{}
 
 		void set_action (std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
@@ -241,7 +240,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		bool led_on;
 		bool flash;
 		ARDOUR::microseconds_t pressed_at;
-		int long_press;
+		bool long_press;
 
 		struct ToDo {
 			ActionType type;

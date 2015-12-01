@@ -58,10 +58,10 @@ private:
 	 * functionality from a small, curated set of options.
 	 */
 
-	Gtk::ComboBox mix_combo[4];
-	Gtk::ComboBox proj_combo[4];
-	Gtk::ComboBox trns_combo[4];
-	Gtk::ComboBox user_combo[4];
+	Gtk::ComboBox mix_combo[3];
+	Gtk::ComboBox proj_combo[3];
+	Gtk::ComboBox trns_combo[3];
+	Gtk::ComboBox user_combo[3];
 
 	void update_port_combos ();
 	PBD::ScopedConnection connection_change_connection;

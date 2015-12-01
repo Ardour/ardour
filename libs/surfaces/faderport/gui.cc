@@ -80,7 +80,7 @@ FaderPort::build_gui ()
 FPGUI::FPGUI (FaderPort& p)
 	: fp (p)
 	, table (2, 5)
-	, action_table (4, 5)
+	, action_table (4, 4)
 	, ignore_active_change (false)
 {
 	set_border_width (12);
@@ -124,18 +124,15 @@ FPGUI::FPGUI (FaderPort& p)
 
 	build_mix_action_combo (mix_combo[0], FaderPort::ButtonState(0));
 	build_mix_action_combo (mix_combo[1], FaderPort::ShiftDown);
-	build_mix_action_combo (mix_combo[2], FaderPort::LongishPress);
-	build_mix_action_combo (mix_combo[3], FaderPort::LongPress);
+	build_mix_action_combo (mix_combo[2], FaderPort::LongPress);
 
 	build_proj_action_combo (proj_combo[0], FaderPort::ButtonState(0));
 	build_proj_action_combo (proj_combo[1], FaderPort::ShiftDown);
-	build_proj_action_combo (proj_combo[2], FaderPort::LongishPress);
-	build_proj_action_combo (proj_combo[3], FaderPort::LongPress);
+	build_proj_action_combo (proj_combo[2], FaderPort::LongPress);
 
 	build_trns_action_combo (trns_combo[0], FaderPort::ButtonState(0));
 	build_trns_action_combo (trns_combo[1], FaderPort::ShiftDown);
-	build_trns_action_combo (trns_combo[2], FaderPort::LongishPress);
-	build_trns_action_combo (trns_combo[3], FaderPort::LongPress);
+	build_trns_action_combo (trns_combo[2], FaderPort::LongPress);
 
 	action_table.set_row_spacings (4);
 	action_table.set_col_spacings (6);
@@ -148,18 +145,15 @@ FPGUI::FPGUI (FaderPort& p)
 	l = manage (new Gtk::Label (_("Button")));
 	l->set_alignment (1.0, 0.5);
 	action_table.attach (*l, 0, 1, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	l = manage (new Gtk::Label (_("Press")));
-	l->set_alignment (1.0, 0.5);
+	l = manage (new Gtk::Label (_("Normal Press/Release Action")));
+	l->set_alignment (0.5, 0.5);
 	action_table.attach (*l, 1, 2, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	l = manage (new Gtk::Label (_("Shift")));
-	l->set_alignment (1.0, 0.5);
+	l = manage (new Gtk::Label (_("Shift-Press Action")));
+	l->set_alignment (0.5, 0.5);
 	action_table.attach (*l, 2, 3, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	l = manage (new Gtk::Label (_("Medium")));
-	l->set_alignment (1.0, 0.5);
+	l = manage (new Gtk::Label (_("Long Press Action")));
+	l->set_alignment (0.5, 0.5);
 	action_table.attach (*l, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	l = manage (new Gtk::Label (_("Long")));
-	l->set_alignment (1.0, 0.5);
-	action_table.attach (*l, 4, 5, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	action_row++;
 
 	l = manage (new Gtk::Label (_("Mix")));
@@ -177,10 +171,6 @@ FPGUI::FPGUI (FaderPort& p)
 	align->set (0.0, 0.5);
 	align->add (mix_combo[2]);
 	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	align = manage (new Alignment);
-	align->set (0.0, 0.5);
-	align->add (mix_combo[3]);
-	action_table.attach (*align, 4, 5, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	action_row++;
 
 	l = manage (new Gtk::Label (_("Proj")));
@@ -198,10 +188,6 @@ FPGUI::FPGUI (FaderPort& p)
 	align->set (0.0, 0.5);
 	align->add (proj_combo[2]);
 	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	align = manage (new Alignment);
-	align->set (0.0, 0.5);
-	align->add (proj_combo[3]);
-	action_table.attach (*align, 4, 5, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	action_row++;
 
 	l = manage (new Gtk::Label (_("Trns")));
@@ -219,10 +205,6 @@ FPGUI::FPGUI (FaderPort& p)
 	align->set (0.0, 0.5);
 	align->add (trns_combo[2]);
 	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	align = manage (new Alignment);
-	align->set (0.0, 0.5);
-	align->add (trns_combo[3]);
-	action_table.attach (*align, 4, 5, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	action_row++;
 
 	table.attach (action_table, 0, 5, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));

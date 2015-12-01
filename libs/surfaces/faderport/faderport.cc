@@ -714,9 +714,7 @@ void
 FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 {
 	if (!press) {
-		if (long_press == 1) {
-			bs = FaderPort::ButtonState (bs | LongishPress);
-		} else if (long_press == 2) {
+		if (long_press) {
 			bs = FaderPort::ButtonState (bs | LongPress);
 		}
 	}
@@ -753,16 +751,14 @@ FaderPort::Button::do_timing (bool press)
 {
 	if (press) {
 		pressed_at = get_microseconds ();
-		long_press = 0;
+		long_press = false;
 	} else {
 		if (pressed_at > 0) {
 			const ARDOUR::microseconds_t delta = ARDOUR::get_microseconds () - pressed_at;
-			if (delta < 500000) {
-				long_press = 0;
-			} else if (delta < 1000000) {
-				long_press = 1;
+			if (delta < 1000000) {
+				long_press = false;
 			} else {
-				long_press = 2;
+				long_press = true;
 			}
 			pressed_at = 0;
 		}
@@ -873,7 +869,6 @@ FaderPort::Button::set_state (XMLNode const& node)
 
 	state_pairs.push_back (make_pair (string ("plain"), ButtonState (0)));
 	state_pairs.push_back (make_pair (string ("shift"), ShiftDown));
-	state_pairs.push_back (make_pair (string ("longish"), LongishPress));
 	state_pairs.push_back (make_pair (string ("long"), LongPress));
 
 	on_press.clear ();
@@ -914,7 +909,6 @@ FaderPort::Button::get_state () const
 
 	state_pairs.push_back (make_pair (string ("plain"), ButtonState (0)));
 	state_pairs.push_back (make_pair (string ("shift"), ShiftDown));
-	state_pairs.push_back (make_pair (string ("longish"), LongishPress));
 	state_pairs.push_back (make_pair (string ("long"), LongPress));
 
 	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
