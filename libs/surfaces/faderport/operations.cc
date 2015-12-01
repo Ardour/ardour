@@ -34,7 +34,7 @@ using namespace ArdourSurface;
 /* this value is chosen to given smooth motion from 0..1.0 in about 270 degrees
  * of encoder rotation.
  */
-static const double encoder_divisor = 24.0;
+static const double encoder_divider = 24.0;
 
 void
 FaderPort::left ()
