@@ -22,6 +22,7 @@
 
 #include <list>
 #include <map>
+#include <set>
 #include <glibmm/threads.h>
 
 #define ABSTRACT_UI_EXPORTS
@@ -215,8 +216,6 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 			, out (o)
 			, led_on (false)
 			, flash (false)
-			, pressed_at (0)
-			, long_press (false)
 		{}
 
 		void set_action (std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
@@ -227,10 +226,11 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		void invoke (ButtonState bs, bool press);
 		bool uses_flash () const { return flash; }
 		void set_flash (bool yn) { flash = yn; }
-		void do_timing (bool press);
 
 		XMLNode& get_state () const;
 		int set_state (XMLNode const&);
+
+		sigc::connection timeout_connection;
 
 	  private:
 		FaderPort& fp;
@@ -239,8 +239,6 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		int out;
 		bool led_on;
 		bool flash;
-		ARDOUR::microseconds_t pressed_at;
-		bool long_press;
 
 		struct ToDo {
 			ActionType type;
@@ -260,6 +258,11 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 
 	ButtonMap buttons;
 	Button& get_button (ButtonID) const;
+
+	std::set<ButtonID> buttons_down;
+
+	bool button_long_press_timeout (ButtonID id);
+	void start_press_timeout (Button&, ButtonID);
 
 	void all_lights_out ();
 	void close ();

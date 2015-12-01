@@ -120,6 +120,12 @@ FaderPort::FaderPort (Session& s)
 	buttons.insert (std::make_pair (RecEnable, Button (*this, _("RecEnable"), RecEnable, 0)));
 	buttons.insert (std::make_pair (FaderTouch, Button (*this, _("Fader (touch)"), FaderTouch, -1)));
 
+	get_button (Shift).set_flash (true);
+	get_button (Mix).set_flash (true);
+	get_button (Proj).set_flash (true);
+	get_button (Trns).set_flash (true);
+	get_button (User).set_flash (true);
+
 	get_button (Left).set_action ( boost::bind (&FaderPort::left, this), true);
 	get_button (Right).set_action ( boost::bind (&FaderPort::right, this), true);
 
@@ -269,13 +275,38 @@ FaderPort::get_button (ButtonID id) const
 	return const_cast<Button&>(b->second);
 }
 
+bool
+FaderPort::button_long_press_timeout (ButtonID id)
+{
+	if (buttons_down.find (id) != buttons_down.end()) {
+		get_button (id).invoke (ButtonState (LongPress|button_state), false);
+	} else {
+		/* release happened and somehow we were not cancelled */
+	}
+
+	return false; /* don't get called again */
+}
+
+void
+FaderPort::start_press_timeout (Button& button, ButtonID id)
+{
+	Glib::RefPtr<Glib::TimeoutSource> timeout = Glib::TimeoutSource::create (500); // milliseconds
+	button.timeout_connection = timeout->connect (sigc::bind (sigc::mem_fun (*this, &FaderPort::button_long_press_timeout), id));
+	timeout->attach (main_loop()->get_context());
+}
+
 void
 FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
 	ButtonID id (ButtonID (tb->controller_number));
 	Button& button (get_button (id));
 
-	button.do_timing (tb->value ? true : false);
+	if (tb->value) {
+		buttons_down.insert (id);
+	} else {
+		buttons_down.erase (id);
+		button.timeout_connection.disconnect ();
+	}
 
 	switch (id) {
 	case Shift:
@@ -305,6 +336,9 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		}
 		break;
 	default:
+		if (tb->value) {
+			start_press_timeout (button, id);
+		}
 		break;
 	}
 
@@ -717,12 +751,6 @@ FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 {
 	DEBUG_TRACE (DEBUG::FaderPort, string_compose ("invoke button %1 for %2 state %3%4%5\n", id, (press ? "press":"release"), hex, bs, dec));
 
-	if (!press) {
-		if (long_press) {
-			bs = FaderPort::ButtonState (bs | LongPress);
-		}
-	}
-
 	ToDoMap::iterator x;
 
 	if (press) {
@@ -746,25 +774,6 @@ FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 	case InternalFunction:
 		if (x->second.function) {
 			x->second.function ();
-		}
-	}
-}
-
-void
-FaderPort::Button::do_timing (bool press)
-{
-	if (press) {
-		pressed_at = get_microseconds ();
-		long_press = false;
-	} else {
-		if (pressed_at > 0) {
-			const ARDOUR::microseconds_t delta = ARDOUR::get_microseconds () - pressed_at;
-			if (delta < 1000000) {
-				long_press = false;
-			} else {
-				long_press = true;
-			}
-			pressed_at = 0;
 		}
 	}
 }
