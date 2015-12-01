@@ -37,6 +37,7 @@
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/paths_dialog.h>
+#include <gtkmm2ext/window_title.h>
 
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
@@ -1408,14 +1409,15 @@ private:
 			static_cast<ArdourWindow*>(box->get_parent())->present();
 			return;
 		}
-		string title = row[_model.name];
+		WindowTitle title (Glib::get_application_name());
+		title += row[_model.name];
+		title += _(": Configuration");
 		/* once created, the window is managed by the surface itself (as ->get_parent())
 		 * Surface's tear_down_gui() is called on session close, when de-activating
 		 * or re-initializing a surface.
 		 * tear_down_gui() hides an deletes the Window if it exists.
 		 */
-		ArdourWindow* win = new ArdourWindow (_parent, title);
-		win->set_title ("Control Protocol Options");
+		ArdourWindow* win = new ArdourWindow (_parent, title.get_string());
 		win->add (*box);
 		box->show ();
 		win->present ();
