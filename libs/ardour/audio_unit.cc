@@ -2289,7 +2289,6 @@ AUPlugin::find_presets ()
 
 	if (preset_files.empty()) {
 		DEBUG_TRACE (DEBUG::AudioUnits, "AU No Preset Files found for given plugin.\n");
-		return;
 	}
 
 	for (vector<string>::iterator x = preset_files.begin(); x != preset_files.end(); ++x) {
