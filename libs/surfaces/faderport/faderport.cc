@@ -780,6 +780,7 @@ FaderPort::Button::set_action (string const& name, bool when_pressed, FaderPort:
 		if (name.empty()) {
 			on_press.erase (bs);
 		} else {
+			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("set button %1 to action %2 on press + %3%4%5\n", id, name, bs));
 			todo.action_name = name;
 			on_press[bs] = todo;
 		}
@@ -787,6 +788,7 @@ FaderPort::Button::set_action (string const& name, bool when_pressed, FaderPort:
 		if (name.empty()) {
 			on_release.erase (bs);
 		} else {
+			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("set button %1 to action %2 on release + %3%4%5\n", id, name, bs));
 			todo.action_name = name;
 			on_release[bs] = todo;
 		}
@@ -881,16 +883,14 @@ FaderPort::Button::set_state (XMLNode const& node)
 		string propname;
 
 		propname = sp->first + X_("-press");
-		if ((prop = node.property (propname)) == 0) {
-			continue;
+		if ((prop = node.property (propname)) != 0) {
+			set_action (prop->value(), true, sp->second);
 		}
-		set_action (prop->value(), true, sp->second);
 
 		propname = sp->first + X_("-release");
-		if ((prop = node.property (propname)) == 0) {
-			continue;
+		if ((prop = node.property (propname)) != 0) {
+			set_action (prop->value(), false, sp->second);
 		}
-		set_action (prop->value(), false, sp->second);
 	}
 
 	return 0;
