@@ -136,6 +136,12 @@ FPGUI::FPGUI (FaderPort& p)
 	build_trns_action_combo (trns_combo[1], FaderPort::ShiftDown);
 	build_trns_action_combo (trns_combo[2], FaderPort::LongPress);
 
+	build_available_action_menu ();
+
+	build_user_action_combo (user_combo[0], FaderPort::ButtonState(0));
+	build_user_action_combo (user_combo[1], FaderPort::ShiftDown);
+	build_user_action_combo (user_combo[2], FaderPort::LongPress);
+
 	action_table.set_row_spacings (4);
 	action_table.set_col_spacings (6);
 	action_table.set_border_width (12);
@@ -208,6 +214,24 @@ FPGUI::FPGUI (FaderPort& p)
 	align = manage (new Alignment);
 	align->set (0.0, 0.5);
 	align->add (trns_combo[2]);
+	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	action_row++;
+
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("User")));
+	l->set_alignment (1.0, 0.5);
+	action_table.attach (*l, 0, 1, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (user_combo[0]);
+	action_table.attach (*align, 1, 2, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (user_combo[1]);
+	action_table.attach (*align, 2, 3, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (user_combo[2]);
 	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	action_row++;
 
@@ -406,7 +430,13 @@ FPGUI::build_available_action_menu ()
 			action_map[*l] = *p;
 		}
 
-		row[action_columns.path] = (*p);
+		string path = (*p);
+		/* ControlProtocol::access_action() is not interested in the
+		   legacy "<Actions>/" prefix part of a path.
+		*/
+		path = path.substr (strlen ("<Actions>/"));
+
+		row[action_columns.path] = path;
 	}
 }
 
@@ -497,6 +527,14 @@ FPGUI::build_trns_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 	actions.push_back (make_pair (string("Set Playhead @pointer"), string(X_("Editor/set-playhead"))));
 
 	build_action_combo (cb, actions, FaderPort::Trns, bs);
+}
+
+void
+FPGUI::build_user_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
+{
+	cb.set_model (available_action_model);
+	cb.pack_start (action_columns.name);
+	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::action_changed), &cb, FaderPort::User, bs));
 }
 
 Glib::RefPtr<Gtk::ListStore>

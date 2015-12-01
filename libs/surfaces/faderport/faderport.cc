@@ -715,6 +715,8 @@ FaderPort::connected ()
 void
 FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 {
+	DEBUG_TRACE (DEBUG::FaderPort, string_compose ("invoke button %1 for %2 state %3%4%5\n", id, (press ? "press":"release"), hex, bs, dec));
+
 	if (!press) {
 		if (long_press) {
 			bs = FaderPort::ButtonState (bs | LongPress);

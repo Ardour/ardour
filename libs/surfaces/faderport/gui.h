@@ -99,6 +99,7 @@ private:
 	void build_mix_action_combo (Gtk::ComboBox&, FaderPort::ButtonState);
 	void build_proj_action_combo (Gtk::ComboBox&, FaderPort::ButtonState);
 	void build_trns_action_combo (Gtk::ComboBox&, FaderPort::ButtonState);
+	void build_user_action_combo (Gtk::ComboBox&, FaderPort::ButtonState);
 
 	void build_available_action_menu ();
 	void action_changed (Gtk::ComboBox*, FaderPort::ButtonID, FaderPort::ButtonState);
