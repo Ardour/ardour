@@ -48,6 +48,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/session_configuration.h"
 #include "ardour/track.h"
 
 #include "faderport.h"
@@ -581,10 +582,29 @@ FaderPort::notify_transport_state_changed ()
 }
 
 void
+FaderPort::parameter_changed (string what)
+{
+	if (what == "punch-in" || what == "punch-out") {
+		bool in = session->config.get_punch_in ();
+		bool out = session->config.get_punch_out ();
+		if (in && out) {
+			get_button (Punch).set_led_state (_output_port, true);
+			blinkers.remove (Punch);
+		} else if (in || out) {
+			blinkers.push_back (Punch);
+		} else {
+			blinkers.remove (Punch);
+		}
+	}
+}
+
+void
 FaderPort::connect_session_signals()
 {
 	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_record_state_changed, this), this);
 	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_transport_state_changed, this), this);
+	/* not session, but treat it similarly */
+	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::parameter_changed, this, _1), this);
 }
 
 bool
