@@ -20,6 +20,7 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/pannable.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
@@ -260,7 +261,26 @@ FaderPort::ardour_pan_width(int delta)
 void
 FaderPort::mixbus_pan (int delta)
 {
+#ifdef MIXBUS
+	if (!_current_route) {
+		return;
+	}
 
+	const uint32_t port_channel_post_pan = 2; // gtk2_ardour/mixbus_ports.h
+	boost::shared_ptr<ARDOUR::PluginInsert> plug = _current_route->ch_post();
+
+	if (!plug) {
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> azimuth = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_channel_post_pan)));
+
+	if (!azimuth) {
+		return;
+	}
+
+	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta / encoder_divider)));
+#endif
 }
 
 void
