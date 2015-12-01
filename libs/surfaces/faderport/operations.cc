@@ -257,3 +257,9 @@ FaderPort::mixbus_pan (int delta)
 {
 
 }
+
+void
+FaderPort::punch ()
+{
+	access_action ("Transport/TogglePunch");
+}

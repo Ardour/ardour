@@ -313,6 +313,8 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void ardour_pan_azimuth (int);
 	void ardour_pan_width (int);
 	void mixbus_pan (int);
+
+	void punch ();
 };
 
 }

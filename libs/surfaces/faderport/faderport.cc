@@ -149,6 +149,8 @@ FaderPort::FaderPort (Session& s)
 	get_button (Ffwd).set_action (boost::bind (&BasicUI::ffwd, this), true);
 	get_button (Ffwd).set_action (boost::bind (&BasicUI::goto_end, this), true, ShiftDown);
 
+	get_button (Punch).set_action (boost::bind (&FaderPort::punch, this), true);
+
 	get_button (Loop).set_action (boost::bind (&BasicUI::loop_toggle, this), true);
 	get_button (Loop).set_action (boost::bind (&BasicUI::add_marker, this, string()), true, ShiftDown);
 
