@@ -42,11 +42,12 @@ ArdourWindow::ArdourWindow (string title)
 	set_position (Gtk::WIN_POS_MOUSE);
 }
 
-ArdourWindow::ArdourWindow (Gtk::Window& parent, string /*title*/)
+ArdourWindow::ArdourWindow (Gtk::Window& parent, string title)
 	: Window ()
 	, VisibilityTracker (*((Gtk::Window*)this))
 {
 	init ();
+	set_title (title);
 	set_transient_for (parent);
 	set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
 }
