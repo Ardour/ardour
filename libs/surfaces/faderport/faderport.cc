@@ -426,7 +426,7 @@ FaderPort::sysex_handler (MIDI::Parser &p, MIDI::byte *buf, size_t sz)
 
 	_device_active = true;
 
-	cerr << "FaderPort identified\n";
+	DEBUG_TRACE (DEBUG::FaderPort, "FaderPort identified via MIDI Device Inquiry response\n");
 
 	/* put it into native mode */
 
@@ -669,8 +669,6 @@ FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1,
 		return false;
 	}
 
-	cerr << "Connection state = " << hex << connection_state << dec << endl;
-
 	if ((connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
 
 		/* XXX this is a horrible hack. Without a short sleep here,
@@ -694,7 +692,7 @@ FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1,
 void
 FaderPort::connected ()
 {
-	std::cerr << "faderport connected or disconnected\n";
+	DEBUG_TRACE (DEBUG::FaderPort, "connection status changed\n");
 
 	start_midi_handling ();
 
@@ -742,7 +740,7 @@ FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 		if (!x->second.action_name.empty()) {
 			fp.access_action (x->second.action_name);
 		}
-				break;
+		break;
 	case InternalFunction:
 		if (x->second.function) {
 			x->second.function ();
@@ -782,7 +780,6 @@ FaderPort::Button::set_action (string const& name, bool when_pressed, FaderPort:
 		if (name.empty()) {
 			on_press.erase (bs);
 		} else {
-			cerr << "Set button press " << id << " to action " << name << " state " << hex << bs << dec << endl;
 			todo.action_name = name;
 			on_press[bs] = todo;
 		}
@@ -790,7 +787,6 @@ FaderPort::Button::set_action (string const& name, bool when_pressed, FaderPort:
 		if (name.empty()) {
 			on_release.erase (bs);
 		} else {
-			cerr << "Set button rel " << id << " to action " << name << " state " << hex << bs << dec << endl;
 			todo.action_name = name;
 			on_release[bs] = todo;
 		}

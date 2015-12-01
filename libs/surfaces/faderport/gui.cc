@@ -418,7 +418,6 @@ FPGUI::action_changed (Gtk::ComboBox* cb, FaderPort::ButtonID id, FaderPort::But
 	string action_path = (*row)[action_columns.path];
 
 	/* release binding */
-	cerr << "Reset release for " << id << " to " << action_path << " bs = " << hex << bs << dec << endl;
 	fp.set_action (id, action_path, false, bs);
 }
 
