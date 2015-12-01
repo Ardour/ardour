@@ -110,13 +110,15 @@ FPGUI::FPGUI (FaderPort& p)
 	input_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::active_port_changed), &input_combo, true));
 	output_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::active_port_changed), &output_combo, false));
 
-	l = manage (new Gtk::Label (_("Sends MIDI to:")));
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Incoming MIDI on:")));
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table.attach (input_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	row++;
 
-	l = manage (new Gtk::Label (_("Receives MIDI from:")));
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Outgoing MIDI on:")));
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table.attach (output_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
@@ -141,22 +143,22 @@ FPGUI::FPGUI (FaderPort& p)
 
 	int action_row = 0;
 
-
-	l = manage (new Gtk::Label (_("Button")));
-	l->set_alignment (1.0, 0.5);
-	action_table.attach (*l, 0, 1, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	l = manage (new Gtk::Label (_("Normal Press/Release Action")));
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Press Action")));
 	l->set_alignment (0.5, 0.5);
 	action_table.attach (*l, 1, 2, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	l = manage (new Gtk::Label (_("Shift-Press Action")));
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Shift-Press Action")));
 	l->set_alignment (0.5, 0.5);
 	action_table.attach (*l, 2, 3, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	l = manage (new Gtk::Label (_("Long Press Action")));
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Long Press Action")));
 	l->set_alignment (0.5, 0.5);
 	action_table.attach (*l, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	action_row++;
 
-	l = manage (new Gtk::Label (_("Mix")));
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Mix")));
 	l->set_alignment (1.0, 0.5);
 	action_table.attach (*l, 0, 1, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	align = manage (new Alignment);
@@ -173,7 +175,8 @@ FPGUI::FPGUI (FaderPort& p)
 	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	action_row++;
 
-	l = manage (new Gtk::Label (_("Proj")));
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Proj")));
 	l->set_alignment (1.0, 0.5);
 	action_table.attach (*l, 0, 1, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	align = manage (new Alignment);
@@ -190,7 +193,8 @@ FPGUI::FPGUI (FaderPort& p)
 	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	action_row++;
 
-	l = manage (new Gtk::Label (_("Trns")));
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Trns")));
 	l->set_alignment (1.0, 0.5);
 	action_table.attach (*l, 0, 1, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	align = manage (new Alignment);
@@ -422,7 +426,7 @@ FPGUI::build_action_combo (Gtk::ComboBox& cb, vector<pair<string,string> > const
 	Glib::RefPtr<Gtk::ListStore> model (Gtk::ListStore::create (action_columns));
 	TreeIter rowp;
 	TreeModel::Row row;
-	string current_action = fp.get_action (id, true, bs);
+	string current_action = fp.get_action (id, false, bs); /* lookup release action */
 	int active_row = -1;
 	int n;
 	vector<pair<string,string> >::const_iterator i;
