@@ -308,18 +308,20 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		button.timeout_connection.disconnect ();
 	}
 
+	ButtonState bs (ButtonState (0));
+
 	switch (id) {
 	case Shift:
-		button_state = (tb->value ? ButtonState (button_state|ShiftDown) : ButtonState (button_state&~ShiftDown));
+		bs = ShiftDown;
 		break;
 	case Stop:
-		button_state = (tb->value ? ButtonState (button_state|StopDown) : ButtonState (button_state&~StopDown));
+		bs = StopDown;
 		break;
 	case Rewind:
-		button_state = (tb->value ? ButtonState (button_state|RewindDown) : ButtonState (button_state&~RewindDown));
+		bs = RewindDown;
 		break;
 	case User:
-		button_state = (tb->value ? ButtonState (button_state|UserDown) : ButtonState (button_state&~UserDown));
+		bs = UserDown;
 		break;
 	case FaderTouch:
 		fader_is_touched = tb->value;
@@ -340,6 +342,10 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 			start_press_timeout (button, id);
 		}
 		break;
+	}
+
+	if (bs) {
+		button_state = (tb->value ? ButtonState (button_state|bs) : ButtonState (button_state&~bs));
 	}
 
 	if (button.uses_flash()) {

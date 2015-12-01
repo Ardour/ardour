@@ -138,9 +138,12 @@ FPGUI::FPGUI (FaderPort& p)
 
 	build_available_action_menu ();
 
+	/* No shift-press combo for User because that is labelled as "next"
+	 * (marker)
+	 */
+
 	build_user_action_combo (user_combo[0], FaderPort::ButtonState(0));
-	build_user_action_combo (user_combo[1], FaderPort::ShiftDown);
-	build_user_action_combo (user_combo[2], FaderPort::LongPress);
+	build_user_action_combo (user_combo[1], FaderPort::LongPress);
 
 	action_table.set_row_spacings (4);
 	action_table.set_col_spacings (6);
@@ -225,13 +228,10 @@ FPGUI::FPGUI (FaderPort& p)
 	align->set (0.0, 0.5);
 	align->add (user_combo[0]);
 	action_table.attach (*align, 1, 2, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	/* skip shift press combo */
 	align = manage (new Alignment);
 	align->set (0.0, 0.5);
 	align->add (user_combo[1]);
-	action_table.attach (*align, 2, 3, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	align = manage (new Alignment);
-	align->set (0.0, 0.5);
-	align->add (user_combo[2]);
 	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	action_row++;
 
