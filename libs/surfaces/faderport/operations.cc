@@ -226,7 +226,7 @@ FaderPort::ardour_pan_azimuth (int delta)
 		return;
 	}
 
-	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta / 64.0)));
+	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta / 24.0)));
 }
 
 
@@ -249,7 +249,7 @@ FaderPort::ardour_pan_width(int delta)
 		return;
 	}
 
-	width->set_value (width->interface_to_internal (width->internal_to_interface (width->get_value()) + (delta / 64.0)));
+	width->set_value (width->interface_to_internal (width->internal_to_interface (width->get_value()) + (delta / 24.0)));
 }
 
 void
