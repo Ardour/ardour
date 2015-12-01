@@ -1411,7 +1411,7 @@ private:
 		}
 		WindowTitle title (Glib::get_application_name());
 		title += row[_model.name];
-		title += _(": Configuration");
+		title += _("Configuration");
 		/* once created, the window is managed by the surface itself (as ->get_parent())
 		 * Surface's tear_down_gui() is called on session close, when de-activating
 		 * or re-initializing a surface.
