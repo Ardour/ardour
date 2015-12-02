@@ -19,9 +19,14 @@
 #ifndef __pbd_semutils_h__
 #define __pbd_semutils_h__
 
-#ifdef PLATFORM_WINDOWS
+#if (defined PLATFORM_WINDOWS && !defined USE_PTW32_SEMAPHORE)
+#define WINDOWS_SEMAPHORE 1
+#endif
+
+#ifdef WINDOWS_SEMAPHORE
 #include <windows.h>
 #else
+#include <pthread.h>
 #include <semaphore.h>
 #endif
 
@@ -31,7 +36,7 @@ namespace PBD {
 
 class LIBPBD_API ProcessSemaphore {
   private:
-#ifdef PLATFORM_WINDOWS
+#ifdef WINDOWS_SEMAPHORE
 	HANDLE _sem;
 
 #elif __APPLE__
@@ -46,7 +51,7 @@ class LIBPBD_API ProcessSemaphore {
 	ProcessSemaphore (const char* name, int val);
 	~ProcessSemaphore ();
 
-#ifdef PLATFORM_WINDOWS
+#ifdef WINDOWS_SEMAPHORE
 
 	int signal ();
 	int wait ();

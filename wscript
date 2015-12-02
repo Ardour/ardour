@@ -963,6 +963,11 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         conf.define ('WINDOWS', 1)
 
+        if os.path.isfile (user_gtk_root + 'include/semaphore.h'):
+            conf.define ('USE_PTW32_SEMAPHORE', 1)
+            conf.env.append_value('CFLAGS', '-DUSE_PTW32_SEMAPHORE')
+            conf.env.append_value('CXXFLAGS', '-DUSE_PTW32_SEMAPHORE')
+
     if Options.options.dist_target == 'msvc':
         conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
         conf.env.append_value('CFLAGS', '-DCOMPILER_MSVC')
@@ -1144,7 +1149,8 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Phone home',            conf.is_defined('PHONE_HOME'))
     write_config_text('Program name',          opts.program_name)
     write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
-    write_config_text('PT format',            conf.is_defined('PTFORMAT'))
+    write_config_text('PT format',             conf.is_defined('PTFORMAT'))
+    write_config_text('PTW32 Semaphore',       conf.is_defined('USE_PTW32_SEMAPHORE'))
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Translation',           opts.nls)
 #    write_config_text('Tranzport',             opts.tranzport)
