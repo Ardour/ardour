@@ -84,7 +84,7 @@ class AudioRegionEditor : public RegionEditor
 	PBD::Signal1<void, double> PeakAmplitudeFound;
 	PBD::ScopedConnection _peak_amplitude_connection;
 #ifdef PLATFORM_WINDOWS
-	PBD::ProcessSemaphore m_peak_sem;
+	PBD::Semaphore m_peak_sem;
 #else
 	CrossThreadChannel _peak_channel;
 #endif
