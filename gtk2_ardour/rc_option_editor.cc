@@ -1295,11 +1295,21 @@ public:
 
 		_box->pack_start (_view, false, false);
 
+		Gtk::HBox* edit_box = manage (new Gtk::HBox);
+		edit_box->set_spacing(3);
+		_box->pack_start (*edit_box, false, false);
+		edit_box->show ();
+		
 		Label* label = manage (new Label);
-		label->set_markup (string_compose (X_("<i>%1</i>"), _("Double-click on a name to edit settings for an enabled protocol")));
-
-		_box->pack_start (*label, false, false);
+		label->set_text (_("Click to edit the settings for selected protocol ( it must be ENABLED first ):"));
+		edit_box->pack_start (*label, false, false);
 		label->show ();
+
+		edit_button = manage (new Button(_("Show Protocol Settings")));
+		edit_button->signal_clicked().connect (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_btn_clicked));
+		edit_box->pack_start (*edit_button, true, true);
+		edit_button->set_sensitive (false);
+		edit_button->show ();
 
 		ControlProtocolManager& m = ControlProtocolManager::instance ();
 		m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
@@ -1307,6 +1317,7 @@ public:
 
 		_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::view_changed));
 		_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
+		_view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed));
 	}
 
 	void parameter_changed (std::string const &)
@@ -1349,6 +1360,16 @@ private:
 		}
 	}
 
+	void selection_changed ()
+	{
+		//enable the Edit button when a row is selected for editing
+		TreeModel::Row row = *(_view.get_selection()->get_selected());
+		if (row && row[_model.enabled])
+			edit_button->set_sensitive (true);
+		else
+			edit_button->set_sensitive (false);
+	}
+	
 	void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
 	{
 		TreeModel::Row r = *i;
@@ -1383,12 +1404,8 @@ private:
 		}
 	}
 
-	void edit_clicked (GdkEventButton* ev)
+	void edit_btn_clicked ()
 	{
-		if (ev->type != GDK_2BUTTON_PRESS) {
-			return;
-		}
-
 		std::string name;
 		ControlProtocolInfo* cpi;
 		TreeModel::Row row;
@@ -1423,6 +1440,15 @@ private:
 		win->present ();
 	}
 
+	void edit_clicked (GdkEventButton* ev)
+	{
+		if (ev->type != GDK_2BUTTON_PRESS) {
+			return;
+		}
+
+		edit_btn_clicked();
+	}
+
         class ControlSurfacesModelColumns : public TreeModelColumnRecord
 	{
 	public:
@@ -1447,6 +1473,7 @@ private:
         Gtk::Window& _parent;
         PBD::ScopedConnection protocol_status_connection;
         uint32_t _ignore_view_change;
+	Gtk::Button* edit_button;
 };
 
 class VideoTimelineOptions : public OptionEditorBox
