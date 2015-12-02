@@ -52,7 +52,9 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 	: RegionEditor (s, r)
 	, _audio_region (r)
 	, gain_adjustment(accurate_coefficient_to_dB(_audio_region->scale_amplitude()), -40.0, +40.0, 0.1, 1.0, 0)
-#ifndef PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
+	, m_peak_sem ("peak_semaphore", 0)
+#else
 	, _peak_channel (false)
 #endif
 {
@@ -137,7 +139,7 @@ void
 AudioRegionEditor::signal_peak_thread ()
 {
 #ifdef PLATFORM_WINDOWS
-	m_peak_sem.post ();
+	m_peak_sem.signal ();
 #else
 	_peak_channel.deliver ('c');
 #endif
