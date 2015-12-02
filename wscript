@@ -963,8 +963,20 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         conf.define ('WINDOWS', 1)
 
-        if os.path.isfile (user_gtk_root + 'include/semaphore.h'):
-            conf.define ('USE_PTW32_SEMAPHORE', 1)
+        have_ptw_semaphore = conf.check_cc(fragment = '''
+#include <pthread.h>
+#include <semaphore.h>
+int main () { return 0; }
+''',
+                                           features  = 'c',
+                                           mandatory = False,
+                                           execute   = False,
+                                           msg       = 'Checking for pthread posix semaphore',
+                                           okmsg     = 'Found',
+                                           errmsg    = 'Not found, falling back to Windows Semaphore.')
+
+        if have_ptw_semaphore:
+            conf.define('USE_PTW32_SEMAPHORE', 1)
             conf.env.append_value('CFLAGS', '-DUSE_PTW32_SEMAPHORE')
             conf.env.append_value('CXXFLAGS', '-DUSE_PTW32_SEMAPHORE')
 
