@@ -101,12 +101,12 @@ private:
 	std::vector<GraphNode *> _trigger_queue;
 	pthread_mutex_t          _trigger_mutex;
 
-	PBD::ProcessSemaphore _execution_sem;
+	PBD::Semaphore _execution_sem;
 
 	/** Signalled to start a run of the graph for a process callback */
-	PBD::ProcessSemaphore _callback_start_sem;
-	PBD::ProcessSemaphore _callback_done_sem;
-	PBD::ProcessSemaphore _cleanup_sem;
+	PBD::Semaphore _callback_start_sem;
+	PBD::Semaphore _callback_done_sem;
+	PBD::Semaphore _cleanup_sem;
 
 	/** The number of processing threads that are asleep */
 	volatile gint _execution_tokens;

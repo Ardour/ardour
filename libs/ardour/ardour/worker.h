@@ -92,7 +92,7 @@ private:
 	RingBuffer<uint8_t>*   _requests;
 	RingBuffer<uint8_t>*   _responses;
 	uint8_t*               _response;
-	PBD::ProcessSemaphore  _sem;
+	PBD::Semaphore  _sem;
 	bool                   _exit;
 	Glib::Threads::Thread* _thread;
 

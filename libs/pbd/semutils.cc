@@ -21,7 +21,7 @@
 
 using namespace PBD;
 
-ProcessSemaphore::ProcessSemaphore (const char* name, int val)
+Semaphore::Semaphore (const char* name, int val)
 {
 #ifdef WINDOWS_SEMAPHORE
 	if ((_sem = CreateSemaphore(NULL, val, 32767, name)) == NULL) {
@@ -48,7 +48,7 @@ ProcessSemaphore::ProcessSemaphore (const char* name, int val)
 #endif
 }
 
-ProcessSemaphore::~ProcessSemaphore ()
+Semaphore::~Semaphore ()
 {
 #ifdef WINDOWS_SEMAPHORE
 	CloseHandle(_sem);
@@ -60,14 +60,14 @@ ProcessSemaphore::~ProcessSemaphore ()
 #ifdef WINDOWS_SEMAPHORE
 
 int
-ProcessSemaphore::signal ()
+Semaphore::signal ()
 {
 	// non-zero on success, opposite to posix
 	return !ReleaseSemaphore(_sem, 1, NULL);
 }
 
 int
-ProcessSemaphore::wait ()
+Semaphore::wait ()
 {
 	DWORD result = 0;
 	result = WaitForSingleObject(_sem, INFINITE);

@@ -34,7 +34,7 @@
 
 namespace PBD {
 
-class LIBPBD_API ProcessSemaphore {
+class LIBPBD_API Semaphore {
   private:
 #ifdef WINDOWS_SEMAPHORE
 	HANDLE _sem;
@@ -48,8 +48,8 @@ class LIBPBD_API ProcessSemaphore {
 #endif
 
   public:
-	ProcessSemaphore (const char* name, int val);
-	~ProcessSemaphore ();
+	Semaphore (const char* name, int val);
+	~Semaphore ();
 
 #ifdef WINDOWS_SEMAPHORE
 
