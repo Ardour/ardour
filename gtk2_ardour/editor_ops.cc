@@ -3267,7 +3267,7 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 		boost::shared_ptr<Region> region_at_start = (*i)->top_region_at(start);
 		boost::shared_ptr<Region> region_at_end = (*i)->top_region_at(end);
 
-		vector<boost::shared_ptr<Region>> regions;
+		vector<boost::shared_ptr<Region> > regions;
 
 		if (region_at_start != 0) {
 			regions.push_back (region_at_start);
@@ -3277,7 +3277,7 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 		}
 
 		/* now adjust lengths */
-		for (vector<boost::shared_ptr<Region>>::iterator i = regions.begin(); i != regions.end(); ++i) {
+		for (vector<boost::shared_ptr<Region> >::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 			the_start = max (start, (framepos_t) (*i)->position());
 			if (max_framepos - the_start < (*i)->length()) {
