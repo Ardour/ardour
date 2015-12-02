@@ -1283,6 +1283,39 @@ Playlist::flush_notifications (bool from_undo)
 	 }
  }
 
+/** @param gap from the beginning of the region to the next beginning */
+/** @param end the first frame that does _not_ contain a duplicated frame */
+void
+Playlist::duplicate_until (boost::shared_ptr<Region> region, framepos_t position, framecnt_t gap, framepos_t end)
+{
+	 RegionWriteLock rl (this);
+
+	 while (position + region->length() - 1 < end) {
+		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
+		 add_region_internal (copy, position);
+		 set_layer (copy, DBL_MAX);
+		 position += gap;
+	 }
+
+	 if (position < end) {
+		 framecnt_t length = min (region->length(), end - position);
+		 string name;
+		 RegionFactory::region_name (name, region->name(), false);
+
+		 {
+			 PropertyList plist;
+
+			 plist.add (Properties::start, region->start());
+			 plist.add (Properties::length, length);
+			 plist.add (Properties::name, name);
+
+			 boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
+			 add_region_internal (sub, position);
+			 set_layer (sub, DBL_MAX);
+		 }
+	 }
+}
+
  void
  Playlist::shift (framepos_t at, frameoffset_t distance, bool move_intersected, bool ignore_music_glue)
  {
