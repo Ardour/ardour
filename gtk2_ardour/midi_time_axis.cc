@@ -121,6 +121,8 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, controller_menu (0)
 	, _step_editor (0)
 {
+	_midnam_model_selector.disable_scrolling();
+	_midnam_custom_device_mode_selector.disable_scrolling();
 }
 
 void

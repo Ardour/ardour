@@ -42,8 +42,12 @@ class ArdourDropdown : public ArdourButton
 	void clear_items ();
 	void AddMenuElem (Gtk::Menu_Helpers::Element e);
 
+	void disable_scrolling();
+
   private:
 	Gtk::Menu      _menu;
+
+	bool _scrolling_disabled;
 };
 
 #endif /* __gtk2_ardour_ardour_dropdown_h__ */
