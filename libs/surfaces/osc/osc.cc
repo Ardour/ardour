@@ -727,6 +727,9 @@ OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv
 void
 OSC::routes_list (lo_message msg)
 {
+	if (!session) {
+		return;
+	}
 	for (int n = 0; n < (int) session->nroutes(); ++n) {
 
 		boost::shared_ptr<Route> r = session->route_by_remote_id (n);
@@ -780,6 +783,9 @@ OSC::routes_list (lo_message msg)
 void
 OSC::transport_frame (lo_message msg)
 {
+	if (!session) {
+		return;
+	}
 	framepos_t pos = session->transport_frame ();
 
 	lo_message reply = lo_message_new ();
@@ -793,6 +799,9 @@ OSC::transport_frame (lo_message msg)
 void
 OSC::transport_speed (lo_message msg)
 {
+	if (!session) {
+		return;
+	}
 	double ts = session->transport_speed ();
 
 	lo_message reply = lo_message_new ();
@@ -806,6 +815,9 @@ OSC::transport_speed (lo_message msg)
 void
 OSC::record_enabled (lo_message msg)
 {
+	if (!session) {
+		return;
+	}
 	int re = (int)session->get_record_enabled ();
 
 	lo_message reply = lo_message_new ();
