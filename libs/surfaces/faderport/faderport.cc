@@ -313,7 +313,10 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 
 	switch (id) {
 	case Shift:
-		bs = ShiftDown;
+		/* set this bit on press, do NOT clear it on release */
+		if (tb->value) {
+			bs = ShiftDown;
+		}
 		break;
 	case Stop:
 		bs = StopDown;
@@ -347,6 +350,7 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 
 	if (bs) {
 		button_state = (tb->value ? ButtonState (button_state|bs) : ButtonState (button_state&~bs));
+		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("reset button state to %1%2 using %3%4\n", hex, button_state, bs, dec));
 	}
 
 	if (button.uses_flash()) {
@@ -354,6 +358,12 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	}
 
 	button.invoke (button_state, tb->value ? true : false);
+
+	if (!tb->value && (id != Shift)) {
+		/* non-shift key was released, clear shift modifier */
+		button_state = ButtonState (button_state&~ShiftDown);
+		DEBUG_TRACE (DEBUG::FaderPort, "clear shift modifier\n");
+	}
 }
 
 void
