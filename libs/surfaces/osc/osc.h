@@ -121,7 +121,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	static int _catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
 
 	void routes_list (lo_message msg);
-	void transport_frame(lo_message msg);
+	void transport_frame (lo_message msg);
+	void transport_speed (lo_message msg);
+	void record_enabled (lo_message msg);
 
 #define PATH_CALLBACK_MSG(name)					\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
@@ -134,6 +136,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	PATH_CALLBACK_MSG(routes_list);
 	PATH_CALLBACK_MSG(transport_frame);
+	PATH_CALLBACK_MSG(transport_speed);
+	PATH_CALLBACK_MSG(record_enabled);
 
 #define PATH_CALLBACK(name) \
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
