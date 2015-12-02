@@ -24,10 +24,6 @@
 
 #include <glibmm/threads.h>
 
-#ifdef PLATFORM_WINDOWS
-#include "pbd/glib_semaphore.h"
-#endif
-
 #include "pbd/crossthread.h"
 #include "pbd/ringbuffer.h"
 #include "pbd/pool.h"
