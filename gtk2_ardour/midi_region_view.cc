@@ -433,17 +433,26 @@ MidiRegionView::mouse_mode_changed ()
 	// Adjust frame colour (become more transparent for internal tools)
 	set_frame_color();
 
-	// Only necessary for leave as a mouse_mode_change over a region
-	// automatically triggers an enter event.
 	if (_entered) {
 		if (!trackview.editor().internal_editing()) {
-			// Switched out of internal editing mode while entered
+			/* Switched out of internal editing mode while entered.
+			Only necessary for leave as a mouse_mode_change over a region
+			automatically triggers an enter event. */
 			leave_internal();
 		}
 		else if (trackview.editor().current_mouse_mode() == MouseContent) {
 			// hide cursor and ghost note after changing to internal edit mode
-			hide_verbose_cursor ();
 			remove_ghost_note ();
+
+			/* XXX This is problematic as the function is executed for every region
+			and only for one region _note_entered can be true. Still it's
+			necessary as to hide the verbose cursor when we're changing from
+			draw mode to internal edit mode. These lines are the reason why
+			in some situations no verbose cursor is shown when we enter internal
+			edit mode over a note. */
+			if (!_note_entered) {
+				hide_verbose_cursor ();
+			}
 		}
 	}
 }
