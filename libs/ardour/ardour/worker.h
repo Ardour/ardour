@@ -25,7 +25,7 @@
 #include <glibmm/threads.h>
 
 #include "pbd/ringbuffer.h"
-#include "pbd/semaphore.h"
+#include "pbd/semutils.h"
 
 #include "ardour/libardour_visibility.h"
 
@@ -92,7 +92,7 @@ private:
 	RingBuffer<uint8_t>*   _requests;
 	RingBuffer<uint8_t>*   _responses;
 	uint8_t*               _response;
-	PBD::Semaphore         _sem;
+	PBD::ProcessSemaphore  _sem;
 	bool                   _exit;
 	Glib::Threads::Thread* _thread;
 

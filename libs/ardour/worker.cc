@@ -32,7 +32,7 @@ Worker::Worker(Workee* workee, uint32_t ring_size)
 	, _requests(new RingBuffer<uint8_t>(ring_size))
 	, _responses(new RingBuffer<uint8_t>(ring_size))
 	, _response((uint8_t*)malloc(ring_size))
-	, _sem(0)
+	, _sem ("worker_semaphore", 0)
 	, _exit(false)
 	, _thread (Glib::Threads::Thread::create(sigc::mem_fun(*this, &Worker::run)))
 {}
@@ -40,7 +40,7 @@ Worker::Worker(Workee* workee, uint32_t ring_size)
 Worker::~Worker()
 {
 	_exit = true;
-	_sem.post();
+	_sem.signal();
 	_thread->join();
 }
 
@@ -56,7 +56,7 @@ Worker::schedule(uint32_t size, const void* data)
 	if (_requests->write((const uint8_t*)data, size) != size) {
 		return false;
 	}
-	_sem.post();
+	_sem.signal();
 	return true;
 }
 
