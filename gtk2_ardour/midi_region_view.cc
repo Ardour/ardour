@@ -622,33 +622,32 @@ MidiRegionView::motion (GdkEventMotion* ev)
 {
 	PublicEditor& editor = trackview.editor ();
 
-	if (_note_entered) {
+	if (!_note_entered) {
 
-		remove_ghost_note ();
+		if (!_ghost_note && editor.current_mouse_mode() == MouseContent &&
+		    Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()) &&
+		    _mouse_state != AddDragging) {
 
-	} else if (!_ghost_note && editor.current_mouse_mode() == MouseContent &&
-	    Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()) &&
-	    _mouse_state != AddDragging) {
-
-		create_ghost_note (ev->x, ev->y);
-
-	} else if (_ghost_note && editor.current_mouse_mode() == MouseContent &&
-	           Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-
-		update_ghost_note (ev->x, ev->y);
-
-	} else if (_ghost_note && editor.current_mouse_mode() == MouseContent) {
-
-		remove_ghost_note ();
-		hide_verbose_cursor ();
-
-	} else if (editor.current_mouse_mode() == MouseDraw) {
-
-		if (_ghost_note) {
-			update_ghost_note (ev->x, ev->y);
-		}
-		else {
 			create_ghost_note (ev->x, ev->y);
+
+		} else if (_ghost_note && editor.current_mouse_mode() == MouseContent &&
+			   Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
+
+			update_ghost_note (ev->x, ev->y);
+
+		} else if (_ghost_note && editor.current_mouse_mode() == MouseContent) {
+
+			remove_ghost_note ();
+			hide_verbose_cursor ();
+
+		} else if (editor.current_mouse_mode() == MouseDraw) {
+
+			if (_ghost_note) {
+				update_ghost_note (ev->x, ev->y);
+			}
+			else {
+				create_ghost_note (ev->x, ev->y);
+			}
 		}
 	}
 
@@ -3339,10 +3338,17 @@ MidiRegionView::note_entered(NoteBase* ev)
 	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
 
 	if (_mouse_state == SelectTouchDragging) {
+
 		note_selected (ev, true);
+
 	} else if (editor->current_mouse_mode() == MouseContent) {
+
+		remove_ghost_note ();
 		show_verbose_cursor (ev->note ());
+
 	} else if (editor->current_mouse_mode() == MouseDraw) {
+
+		remove_ghost_note ();
 		show_verbose_cursor (ev->note ());
 	}
 }
