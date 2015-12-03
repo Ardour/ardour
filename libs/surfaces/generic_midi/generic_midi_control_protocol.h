@@ -24,6 +24,7 @@
 #include <glibmm/threads.h>
 
 #include "ardour/types.h"
+#include "ardour/port.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -53,8 +54,9 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	int set_active (bool yn);
 	static bool probe() { return true; }
 
-        MIDI::Port* input_port () const { return _input_port; }
-        MIDI::Port* output_port () const { return _output_port; }
+        ARDOUR::Port* input_port () const { return ((ARDOUR::Port*) _input_port); }
+        ARDOUR::Port* output_port () const { return ((ARDOUR::Port*) _output_port); }
+	
 	void set_feedback_interval (ARDOUR::microseconds_t);
 
 	int set_feedback (bool yn);
@@ -100,6 +102,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 		return _threshold;
 	}
 
+	PBD::Signal0<void> ConnectionChange;
   private:
         MIDI::Port* _input_port;
         MIDI::Port* _output_port;
