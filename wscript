@@ -975,10 +975,10 @@ int main () { return 0; }
                                            okmsg     = 'Found',
                                            errmsg    = 'Not found, falling back to Windows Semaphore.')
 
-        if have_ptw_semaphore:
-            conf.define('USE_PTW32_SEMAPHORE', 1)
-            conf.env.append_value('CFLAGS', '-DUSE_PTW32_SEMAPHORE')
-            conf.env.append_value('CXXFLAGS', '-DUSE_PTW32_SEMAPHORE')
+        #if have_ptw_semaphore:
+        #    conf.define('USE_PTW32_SEMAPHORE', 1)
+        #    conf.env.append_value('CFLAGS', '-DUSE_PTW32_SEMAPHORE')
+        #    conf.env.append_value('CXXFLAGS', '-DUSE_PTW32_SEMAPHORE')
 
     if Options.options.dist_target == 'msvc':
         conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
