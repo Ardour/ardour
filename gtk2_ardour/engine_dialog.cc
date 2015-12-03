@@ -263,7 +263,6 @@ EngineControl::EngineControl ()
 	output_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &output_channels));
 
 	midi_devices_button.signal_clicked.connect (mem_fun (*this, &EngineControl::configure_midi_devices));
-	midi_devices_button.set_sensitive (false);
 	midi_devices_button.set_name ("generic button");
 	midi_devices_button.set_can_focus(true);
 
@@ -650,13 +649,7 @@ EngineControl::build_full_control_notebook ()
 	label = manage (left_aligned_label (_("MIDI System:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
 	basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, SHRINK, (AttachOptions) 0);
-#if ! defined __APPLE__  && ! defined PLATFORM_WINDOWS // => linux, YAY
-	/* Currently the only backend with dedicated Midi setup is ALSA.
-	 * lot of people complain that this is greyed out
-	 * "I can't use MIDI, the setup is greyed out"
-	 */
 	basic_packer.attach (midi_devices_button, 3, 4, row, row+1, xopt, xopt);
-#endif
 	row++;
 }
 
@@ -1676,9 +1669,9 @@ EngineControl::midi_option_changed ()
 	_midi_devices = new_devices;
 
 	if (_midi_devices.empty()) {
-		midi_devices_button.set_sensitive (false);
+		midi_devices_button.hide ();
 	} else {
-		midi_devices_button.set_sensitive (true);
+		midi_devices_button.show ();
 	}
 }
 
