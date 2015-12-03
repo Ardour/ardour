@@ -533,6 +533,20 @@ FaderPort::set_active (bool yn)
 	return 0;
 }
 
+void
+FaderPort::stop_blinking (ButtonID id)
+{
+	blinkers.remove (id);
+	get_button (id).set_led_state (_output_port, false);
+}
+
+void
+FaderPort::start_blinking (ButtonID id)
+{
+	blinkers.push_back (id);
+	get_button (id).set_led_state (_output_port, true);
+}
+
 bool
 FaderPort::blink ()
 {
@@ -567,16 +581,13 @@ FaderPort::notify_record_state_changed ()
 {
 	switch (session->record_status()) {
 	case Session::Disabled:
-		get_button (RecEnable).set_led_state (_output_port, false);
-		blinkers.remove (RecEnable);
+		stop_blinking (RecEnable);
 		break;
 	case Session::Enabled:
-		get_button (RecEnable).set_led_state (_output_port, true);
-		blinkers.push_back (RecEnable);
+		start_blinking (RecEnable);
 		break;
 	case Session::Recording:
-		get_button (RecEnable).set_led_state (_output_port, true);
-		blinkers.remove (RecEnable);
+		stop_blinking (RecEnable);
 		break;
 	}
 }
@@ -601,10 +612,9 @@ FaderPort::parameter_changed (string what)
 			get_button (Punch).set_led_state (_output_port, true);
 			blinkers.remove (Punch);
 		} else if (in || out) {
-			blinkers.push_back (Punch);
+			start_blinking (Punch);
 		} else {
-			blinkers.remove (Punch);
-			get_button (Punch).set_led_state (_output_port, false);
+			stop_blinking (Punch);
 		}
 	}
 }
@@ -1086,14 +1096,13 @@ FaderPort::map_cut ()
 
 	if (mp) {
 		bool yn = mp->cut_all ();
-		get_button (Mute).set_led_state (_output_port, yn);
 		if (yn) {
-			blinkers.push_back (Mute);
+			start_blinking (Mute);
 		} else {
-			blinkers.remove (Mute);
+			stop_blinking (Mute);
 		}
 	} else {
-		blinkers.remove (Mute);
+		stop_blinking (Mute);
 	}
 }
 
@@ -1180,11 +1189,9 @@ void
 FaderPort::map_route_state ()
 {
 	if (!_current_route) {
-		get_button (Mute).set_led_state (_output_port, false);
-		get_button (Solo).set_led_state (_output_port, false);
+		stop_blinking (Mute);
+		stop_blinking (Solo);
 		get_button (Rec).set_led_state (_output_port, false);
-		blinkers.remove (Mute);
-		blinkers.remove (Solo);
 	} else {
 		/* arguments to these map_*() methods are all ignored */
 		map_mute (0);

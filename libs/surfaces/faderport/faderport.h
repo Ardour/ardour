@@ -279,6 +279,8 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	Blinkers blinkers;
 	bool blink_state;
 	bool blink ();
+	void start_blinking (ButtonID);
+	void stop_blinking (ButtonID);
 
 	void set_current_route (boost::shared_ptr<ARDOUR::Route>);
 	void drop_current_route ();
