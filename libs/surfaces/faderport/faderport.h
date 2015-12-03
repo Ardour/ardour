@@ -268,6 +268,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	Button& get_button (ButtonID) const;
 
 	std::set<ButtonID> buttons_down;
+	std::set<ButtonID> consumed;
 
 	bool button_long_press_timeout (ButtonID id);
 	void start_press_timeout (Button&, ButtonID);

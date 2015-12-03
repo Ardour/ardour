@@ -302,6 +302,11 @@ FaderPort::button_long_press_timeout (ButtonID id)
 		/* release happened and somehow we were not cancelled */
 	}
 
+	/* whichever button this was, we've used it ... don't invoke the
+	   release action.
+	*/
+	consumed.insert (id);
+
 	return false; /* don't get called again */
 }
 
@@ -374,12 +379,23 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		button.set_led_state (_output_port, (int)tb->value);
 	}
 
-	button.invoke (button_state, tb->value ? true : false);
+	set<ButtonID>::iterator c = consumed.find (id);
+
+	if (c == consumed.end()) {
+		button.invoke (button_state, tb->value ? true : false);
+	} else {
+		consumed.erase (c);
+	}
 
 	if (!tb->value && (id != Shift)) {
 		/* non-shift key was released, clear shift modifier */
 		button_state = ButtonState (button_state&~ShiftDown);
 		DEBUG_TRACE (DEBUG::FaderPort, "clear shift modifier\n");
+	}
+
+	if (!tb->value && (id != User)) {
+		consumed.insert (User);
+		DEBUG_TRACE (DEBUG::FaderPort, "clear user modifier\n");
 	}
 }
 
@@ -430,11 +446,11 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 		}
 
 		if ((button_state & trim_modifier) == trim_modifier ) {    // mod+encoder = input trim
-			boost::shared_ptr<AutomationControl> gain = _current_route->trim()->gain_control ();
-			if (gain) {
-				float val = gain->get_user();  //for gain elements, the "user" value is in dB
+			boost::shared_ptr<AutomationControl> trim = _current_route->trim()->gain_control ();
+			if (trim) {
+				float val = trim->get_user();  //for gain elements, the "user" value is in dB
 				val += delta;
-				gain->set_user(val);
+				trim->set_user(val);
 			}
 		} else if (width_modifier && ((button_state & width_modifier) == width_modifier)) {
 			ardour_pan_width (delta);
@@ -446,6 +462,14 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 				mixbus_pan (delta);
 			}
 		}
+	}
+
+	/* if the user button was pressed, mark it as consumed so that its
+	 * release action has no effect.
+	 */
+
+	if (!Profile->get_mixbus() && (button_state & UserDown)) {
+		consumed.insert (User);
 	}
 }
 
