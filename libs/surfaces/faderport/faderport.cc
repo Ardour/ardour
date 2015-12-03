@@ -39,6 +39,7 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/amp.h"
+#include "ardour/bundle.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_port.h"
@@ -89,6 +90,22 @@ FaderPort::FaderPort (Session& s)
 	if (_input_port == 0 || _output_port == 0) {
 		throw failed_constructor();
 	}
+
+	_input_bundle.reset (new ARDOUR::Bundle (_("Faderport Support (Receive)"), true));
+	_output_bundle.reset (new ARDOUR::Bundle (_("Faderport Support (Send) "), false));
+
+	_input_bundle->add_channel (
+		inp->name(),
+		ARDOUR::DataType::MIDI,
+		session->engine().make_port_name_non_relative (inp->name())
+		);
+
+	_output_bundle->add_channel (
+		outp->name(),
+		ARDOUR::DataType::MIDI,
+		session->engine().make_port_name_non_relative (outp->name())
+		);
+
 
 	TrackSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::gui_track_selection_changed, this, _1), this);
 
@@ -1085,7 +1102,7 @@ FaderPort::map_auto ()
 			get_button (FP_Off).set_led_state (_output_port, true);
 		break;
 	}
-	
+
 }
 
 
@@ -1201,6 +1218,19 @@ FaderPort::map_route_state ()
 		map_cut ();
 		map_auto ();
 	}
+}
+
+list<boost::shared_ptr<ARDOUR::Bundle> >
+FaderPort::bundles ()
+{
+	list<boost::shared_ptr<ARDOUR::Bundle> > b;
+
+	if (_input_bundle) {
+		b.push_back (_input_bundle);
+		b.push_back (_output_bundle);
+	}
+
+	return b;
 }
 
 boost::shared_ptr<Port>

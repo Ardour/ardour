@@ -55,6 +55,7 @@ namespace MIDI {
 
 namespace ARDOUR {
 	class AsyncMIDIPort;
+	class Bundle;
 	class Port;
 	class Session;
 	class MidiPort;
@@ -158,6 +159,8 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void set_action (ButtonID, std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
 	std::string get_action (ButtonID, bool on_press, FaderPort::ButtonState = ButtonState (0));
 
+	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
+	
   private:
 	boost::shared_ptr<ARDOUR::Route> _current_route;
 	boost::weak_ptr<ARDOUR::Route> pre_master_route;
@@ -165,6 +168,11 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
+
+	// Bundle to represent our input ports
+	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
+	// Bundle to represent our output ports
+	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
 
 	PBD::ScopedConnectionList midi_connections;
 
