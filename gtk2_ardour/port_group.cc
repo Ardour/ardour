@@ -492,6 +492,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	/* Now find all other ports that we haven't thought of yet */
 
 	std::vector<std::string> extra_system[DataType::num_types];
+	std::vector<std::string> extra_ardour[DataType::num_types];
 	std::vector<std::string> extra_other[DataType::num_types];
 
         string lpn (PROGRAM_NAME);
@@ -542,9 +543,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 					DataType t (AudioEngine::instance()->port_engine().port_data_type (ph));
 					if (t != DataType::NIL) {
 						if (port_has_prefix (p, N_("system:")) ||
-                                                    port_has_prefix (p, N_("alsa_pcm")) ||
-                                                    port_has_prefix (p, lpnc)) {
+						    port_has_prefix (p, N_("alsa_pcm:")) ||
+						    port_has_prefix (p, N_("alsa_midi:"))) {
 							extra_system[t].push_back (p);
+						} else if (port_has_prefix (p, lpnc)) {
+							extra_ardour[t].push_back (p);
 						} else {
 							extra_other[t].push_back (p);
 						}
@@ -560,6 +563,13 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		if (!extra_system[*i].empty()) {
 			boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_system[*i], *i, inputs);
 			system->add_bundle (b);
+		}
+	}
+
+	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+		if (!extra_ardour[*i].empty()) {
+			boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_ardour[*i], *i, inputs);
+			ardour->add_bundle (b);
 		}
 	}
 
@@ -796,4 +806,3 @@ PortGroupList::empty () const
 {
 	return _groups.empty ();
 }
-
