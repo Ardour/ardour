@@ -9,7 +9,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIBS_DIR/midi++:$LIBS_DIR/pbd:$LIBS_DIR
 export MIDIPP_TEST_PATH=$TOP/patchfiles
 
 cd $LIBS_DIR/midi++2
-if [ "$1" == "debug" ]; then 
+if [ "$1" = "debug" ]; then
 	gdb ./run-tests
 else
 	./run-tests
