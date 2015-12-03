@@ -1311,6 +1311,7 @@ public:
 
 		_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::view_changed));
 		_view.signal_button_release_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
+		_view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed));
 	}
 
 	void parameter_changed (std::string const &)
@@ -1354,6 +1355,10 @@ private:
 		}
 	}
 
+	void selection_changed ()
+	{
+	}
+
 	void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
 	{
 		TreeModel::Row r = *i;
@@ -1367,6 +1372,46 @@ private:
 			return;
 		}
 
+#if 0
+		/* XXX when we move to putting all editors into a notebook,
+		   this test will have to be more subtle.
+		*/
+		bool const was_editing = (cpi && cpi->protocol && (cpi->protocol->get_gui() != 0));
+		bool const is_editing = r[_model.edit];
+
+		if (was_editing != is_editing) {
+			if (!was_editing) {
+				if (!r[_model.enabled]) {
+					return;
+				}
+				cpi = r[_model.protocol_info];
+				if (!cpi || !cpi->protocol || !cpi->protocol->has_editor ()) {
+					return;
+				}
+				Box* box = (Box*) cpi->protocol->get_gui ();
+				if (!box) {
+					return;
+				}
+				if (box->get_parent()) {
+					static_cast<ArdourWindow*>(box->get_parent())->present();
+					return;
+				}
+				WindowTitle title (Glib::get_application_name());
+				title += r[_model.name];
+				title += _("Configuration");
+				/* once created, the window is managed by the surface itself (as ->get_parent())
+				 * Surface's tear_down_gui() is called on session close, when de-activating
+				 * or re-initializing a surface.
+				 * tear_down_gui() hides an deletes the Window if it exists.
+				 */
+				ArdourWindow* win = new ArdourWindow (_parent, title.get_string());
+				win->add (*box);
+				box->show ();
+				win->present ();
+			} else {
+			}
+		}
+#endif
 		bool const was_enabled = (cpi->protocol != 0);
 		bool const is_enabled = r[_model.enabled];
 
