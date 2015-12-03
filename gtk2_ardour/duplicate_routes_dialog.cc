@@ -38,11 +38,11 @@ DuplicateRouteDialog::DuplicateRouteDialog ()
 	, share_playlists_button (playlist_button_group, _("Share playlists"))
 	, count_adjustment (1.0, 1.0, 999, 1.0, 10.0)
 	, count_spinner (count_adjustment)
-	, count_label (_("Duplicate each track/bus this number of times"))
+	, count_label (_("Duplicate each track/bus this number of times:"))
 {
 	count_box.pack_start (count_label, false, false);
-	count_box.pack_start (count_spinner, false, false);
-	get_vbox()->pack_start (count_box, false, false, 20);
+	count_box.pack_start (count_spinner, false, false, 5);
+	get_vbox()->pack_start (count_box, false, false, 10);
 
 	playlist_button_box.pack_start (copy_playlists_button, false, false);
 	playlist_button_box.pack_start (new_playlists_button, false, false);
