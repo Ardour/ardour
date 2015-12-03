@@ -30,9 +30,10 @@
 #include "ardour/io_processor.h"
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/port.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
-#include "ardour/port.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -337,7 +338,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	boost::shared_ptr<PortGroup> bus (new PortGroup (string_compose (_("%1 Busses"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> track (new PortGroup (string_compose (_("%1 Tracks"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> system (new PortGroup (_("Hardware")));
-	boost::shared_ptr<PortGroup> ardour (new PortGroup (string_compose (_("%1 Misc"), PROGRAM_NAME)));
+	boost::shared_ptr<PortGroup> program (new PortGroup (string_compose (_("%1 Misc"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
 
 	/* Find the IOs which have bundles for routes and their processors.  We store
@@ -420,25 +421,27 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		}
 	}
 
-	/* Ardour stuff */
+	/* miscellany */
 
-	if (!inputs) {
-		ardour->add_bundle (session->the_auditioner()->output()->bundle());
-		ardour->add_bundle (session->click_io()->bundle());
-		/* Note: the LTC ports do not have the usual ":audio_out 1" postfix, so
-		 *  ardour->add_bundle (session->ltc_output_io()->bundle());
-		 *  won't work
-		 */
-		boost::shared_ptr<Bundle> ltc (new Bundle (_("LTC Out"), inputs));
-		ltc->add_channel (_("LTC Out"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_output_port()->name()));
-		ardour->add_bundle (ltc);
-	} else {
-		boost::shared_ptr<Bundle> ltc (new Bundle (_("LTC In"), inputs));
-		ltc->add_channel (_("LTC In"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_input_port()->name()));
-		ardour->add_bundle (ltc);
+	if (type == DataType::AUDIO || type == DataType::NIL) {
+		if (!inputs) {
+			program->add_bundle (session->the_auditioner()->output()->bundle());
+			program->add_bundle (session->click_io()->bundle());
+			/* Note: the LTC ports do not have the usual ":audio_out 1" postfix, so
+			 *  program->add_bundle (session->ltc_output_io()->bundle());
+			 *  won't work
+			 */
+			boost::shared_ptr<Bundle> ltc (new Bundle (_("LTC Out"), inputs));
+			ltc->add_channel (_("LTC Out"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_output_port()->name()));
+			program->add_bundle (ltc);
+		} else {
+			boost::shared_ptr<Bundle> ltc (new Bundle (_("LTC In"), inputs));
+			ltc->add_channel (_("LTC In"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_input_port()->name()));
+			program->add_bundle (ltc);
+		}
 	}
 
-	/* Ardour's control surfaces */
+	/* our control surfaces */
 
 	ControlProtocolManager& m = ControlProtocolManager::instance ();
 	for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
@@ -446,13 +449,13 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			list<boost::shared_ptr<Bundle> > b = (*i)->protocol->bundles ();
 			for (list<boost::shared_ptr<Bundle> >::iterator j = b.begin(); j != b.end(); ++j) {
 				if ((*j)->ports_are_inputs() == inputs) {
-					ardour->add_bundle (*j);
+					program->add_bundle (*j);
 				}
 			}
 		}
 	}
 
-	/* Ardour's sync ports */
+	/* our sync ports */
 
 	if ((type == DataType::MIDI || type == DataType::NIL)) {
 		boost::shared_ptr<Bundle> sync (new Bundle (_("Sync"), inputs));
@@ -486,13 +489,13 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				);
 		}
 
-		ardour->add_bundle (sync);
+		program->add_bundle (sync);
 	}
 
 	/* Now find all other ports that we haven't thought of yet */
 
 	std::vector<std::string> extra_system[DataType::num_types];
-	std::vector<std::string> extra_ardour[DataType::num_types];
+	std::vector<std::string> extra_program[DataType::num_types];
 	std::vector<std::string> extra_other[DataType::num_types];
 
         string lpn (PROGRAM_NAME);
@@ -510,7 +513,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			if (!system->has_port(p) &&
 			    !bus->has_port(p) &&
 			    !track->has_port(p) &&
-			    !ardour->has_port(p) &&
+			    !program->has_port(p) &&
 			    !other->has_port(p)) {
 
                                 /* special hack: ignore MIDI ports labelled Midi-Through. these
@@ -536,7 +539,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
                                         continue;
                                 }
 
-				/* can't use the audio engine for this as we are looking at non-Ardour ports */
+				/* can't use the audio engine for this as we
+				 * are looking at ports not owned by the
+				 * application, and the audio engine/port
+				 * manager doesn't seem them.
+				 */
 
 				PortEngine::PortHandle ph = AudioEngine::instance()->port_engine().get_port_by_name (p);
 				if (ph) {
@@ -547,7 +554,14 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 						    port_has_prefix (p, N_("alsa_midi:"))) {
 							extra_system[t].push_back (p);
 						} else if (port_has_prefix (p, lpnc)) {
-							extra_ardour[t].push_back (p);
+							/* Hide scene ports from non-Tracks Live builds */
+							if (!ARDOUR::Profile->get_trx()) {
+								if (p.find (_("Scene ")) != string::npos) {
+									++s;
+									continue;
+								}
+							}
+							extra_program[t].push_back (p);
 						} else {
 							extra_other[t].push_back (p);
 						}
@@ -567,9 +581,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	}
 
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-		if (!extra_ardour[*i].empty()) {
-			boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_ardour[*i], *i, inputs);
-			ardour->add_bundle (b);
+		if (!extra_program[*i].empty()) {
+			/* remove program name prefix from port name and use rest as bundle name */
+			std::string bundle_name = extra_program[*i].front().substr (lpnc.length());
+			boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_program[*i], *i, inputs, bundle_name);
+			program->add_bundle (b);
 		}
 	}
 
@@ -603,20 +619,24 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		add_group_if_not_empty (bus);
 	}
 	add_group_if_not_empty (track);
-	add_group_if_not_empty (ardour);
+	add_group_if_not_empty (program);
 	add_group_if_not_empty (system);
 
 	emit_changed ();
 }
 
 boost::shared_ptr<Bundle>
-PortGroupList::make_bundle_from_ports (std::vector<std::string> const & p, ARDOUR::DataType type, bool inputs) const
+PortGroupList::make_bundle_from_ports (std::vector<std::string> const & p, ARDOUR::DataType type, bool inputs, std::string const& bundle_name) const
 {
 	boost::shared_ptr<Bundle> b (new Bundle ("", inputs));
-
 	std::string const pre = common_prefix (p);
-	if (!pre.empty()) {
-		b->set_name (pre.substr (0, pre.length() - 1));
+
+	if (!bundle_name.empty()) {
+		b->set_name (bundle_name);
+	} else {
+		if (!pre.empty()) {
+			b->set_name (pre.substr (0, pre.length() - 1));
+		}
 	}
 
 	for (uint32_t j = 0; j < p.size(); ++j) {
