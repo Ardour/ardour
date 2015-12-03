@@ -604,6 +604,7 @@ FaderPort::parameter_changed (string what)
 			blinkers.push_back (Punch);
 		} else {
 			blinkers.remove (Punch);
+			get_button (Punch).set_led_state (_output_port, false);
 		}
 	}
 }
