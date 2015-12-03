@@ -1028,6 +1028,7 @@ FaderPort::set_current_route (boost::shared_ptr<Route> r)
 		boost::shared_ptr<AutomationControl> control = _current_route->gain_control ();
 		if (control) {
 			control->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_gain, this), this);
+			control->alist()->automation_state_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_auto, this), this);
 		}
 
 		boost::shared_ptr<MonitorProcessor> mp = _current_route->monitor_control();
@@ -1040,6 +1041,42 @@ FaderPort::set_current_route (boost::shared_ptr<Route> r)
 
 	map_route_state ();
 }
+
+void
+FaderPort::map_auto ()
+{
+	boost::shared_ptr<AutomationControl> control = _current_route->gain_control ();
+	const AutoState as = control->automation_state ();
+
+	switch (as) {
+		case ARDOUR::Play:
+			get_button (FP_Read).set_led_state (_output_port, true);
+			get_button (FP_Write).set_led_state (_output_port, false);
+			get_button (FP_Touch).set_led_state (_output_port, false);
+			get_button (FP_Off).set_led_state (_output_port, false);
+		break;
+		case ARDOUR::Write:
+			get_button (FP_Read).set_led_state (_output_port, false);
+			get_button (FP_Write).set_led_state (_output_port, true);
+			get_button (FP_Touch).set_led_state (_output_port, false);
+			get_button (FP_Off).set_led_state (_output_port, false);
+		break;
+		case ARDOUR::Touch:
+			get_button (FP_Read).set_led_state (_output_port, false);
+			get_button (FP_Write).set_led_state (_output_port, false);
+			get_button (FP_Touch).set_led_state (_output_port, true);
+			get_button (FP_Off).set_led_state (_output_port, false);
+		break;
+		case ARDOUR::Off:
+			get_button (FP_Read).set_led_state (_output_port, false);
+			get_button (FP_Write).set_led_state (_output_port, false);
+			get_button (FP_Touch).set_led_state (_output_port, false);
+			get_button (FP_Off).set_led_state (_output_port, true);
+		break;
+	}
+	
+}
+
 
 void
 FaderPort::map_cut ()
@@ -1154,6 +1191,7 @@ FaderPort::map_route_state ()
 		map_recenable ();
 		map_gain ();
 		map_cut ();
+		map_auto ();
 	}
 }
 
