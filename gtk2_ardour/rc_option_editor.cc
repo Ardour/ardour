@@ -1290,33 +1290,27 @@ public:
 		_view.append_column (_("Control Surface Protocol"), _model.name);
 		_view.get_column(0)->set_resizable (true);
 		_view.get_column(0)->set_expand (true);
+		_view.append_column (_("Edit"), _model.edit);
 		_view.append_column_editable (_("Enabled"), _model.enabled);
 		_view.append_column_editable (_("Feedback"), _model.feedback);
 
+		/* hacky data marker for the edit "column", since GTK offers no
+		   way to get the column number.
+		*/
+		_view.get_column (1)->set_data ("edit", (void*) 0xdeadbeef);
+		CellRendererText* crt = dynamic_cast<Gtk::CellRendererText*> (_view.get_column_cell_renderer (1));
+		if (crt) {
+			crt->property_weight() = 1000;
+		}
+
 		_box->pack_start (_view, false, false);
-
-		Gtk::HBox* edit_box = manage (new Gtk::HBox);
-		edit_box->set_spacing(3);
-		_box->pack_start (*edit_box, false, false);
-		edit_box->show ();
-		
-		Label* label = manage (new Label);
-		label->set_text (_("Click to edit the settings for selected protocol ( it must be ENABLED first ):"));
-		edit_box->pack_start (*label, false, false);
-		label->show ();
-
-		edit_button = manage (new Button(_("Show Protocol Settings")));
-		edit_button->signal_clicked().connect (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_btn_clicked));
-		edit_box->pack_start (*edit_button, true, true);
-		edit_button->set_sensitive (false);
-		edit_button->show ();
 
 		ControlProtocolManager& m = ControlProtocolManager::instance ();
 		m.ProtocolStatusChange.connect (protocol_status_connection, MISSING_INVALIDATOR,
 						boost::bind (&ControlSurfacesOptions::protocol_status_changed, this, _1), gui_context());
 
 		_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::view_changed));
-		_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
+		_view.signal_button_release_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
 		_view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::selection_changed));
 	}
 
@@ -1335,6 +1329,7 @@ public:
 			if (!(*i)->mandatory) {
 				TreeModel::Row r = *_store->append ();
 				r[_model.name] = (*i)->name;
+				r[_model.edit] = _("Edit Settings");
 				r[_model.enabled] = ((*i)->protocol || (*i)->requested);
 				r[_model.feedback] = ((*i)->protocol && (*i)->protocol->get_feedback ());
 				r[_model.protocol_info] = *i;
@@ -1362,14 +1357,8 @@ private:
 
 	void selection_changed ()
 	{
-		//enable the Edit button when a row is selected for editing
-		TreeModel::Row row = *(_view.get_selection()->get_selected());
-		if (row && row[_model.enabled])
-			edit_button->set_sensitive (true);
-		else
-			edit_button->set_sensitive (false);
 	}
-	
+
 	void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
 	{
 		TreeModel::Row r = *i;
@@ -1383,9 +1372,48 @@ private:
 			return;
 		}
 
+#if 0
+		/* XXX when we move to putting all editors into a notebook,
+		   this test will have to be more subtle.
+		*/
+		bool const was_editing = (cpi && cpi->protocol && (cpi->protocol->get_gui() != 0));
+		bool const is_editing = r[_model.edit];
+
+		if (was_editing != is_editing) {
+			if (!was_editing) {
+				if (!r[_model.enabled]) {
+					return;
+				}
+				cpi = r[_model.protocol_info];
+				if (!cpi || !cpi->protocol || !cpi->protocol->has_editor ()) {
+					return;
+				}
+				Box* box = (Box*) cpi->protocol->get_gui ();
+				if (!box) {
+					return;
+				}
+				if (box->get_parent()) {
+					static_cast<ArdourWindow*>(box->get_parent())->present();
+					return;
+				}
+				WindowTitle title (Glib::get_application_name());
+				title += r[_model.name];
+				title += _("Configuration");
+				/* once created, the window is managed by the surface itself (as ->get_parent())
+				 * Surface's tear_down_gui() is called on session close, when de-activating
+				 * or re-initializing a surface.
+				 * tear_down_gui() hides an deletes the Window if it exists.
+				 */
+				ArdourWindow* win = new ArdourWindow (_parent, title.get_string());
+				win->add (*box);
+				box->show ();
+				win->present ();
+			} else {
+			}
+		}
+#endif
 		bool const was_enabled = (cpi->protocol != 0);
 		bool const is_enabled = r[_model.enabled];
-
 
 		if (was_enabled != is_enabled) {
 
@@ -1442,11 +1470,19 @@ private:
 
 	void edit_clicked (GdkEventButton* ev)
 	{
-		if (ev->type != GDK_2BUTTON_PRESS) {
+		TreeModel::Path path;
+		TreeViewColumn* col;
+		int cell_x;
+		int cell_y;
+
+		if (!_view.get_path_at_pos (ev->x, ev->y, path, col, cell_x, cell_y)) {
+			/* no path there */
 			return;
 		}
 
-		edit_btn_clicked();
+		if (col && col->get_data (X_("edit"))) {
+			edit_btn_clicked();
+		}
 	}
 
         class ControlSurfacesModelColumns : public TreeModelColumnRecord
@@ -1456,6 +1492,7 @@ private:
 		ControlSurfacesModelColumns ()
 		{
 			add (name);
+			add (edit);
 			add (enabled);
 			add (feedback);
 			add (protocol_info);
@@ -1464,6 +1501,7 @@ private:
 		TreeModelColumn<string> name;
 		TreeModelColumn<bool> enabled;
 		TreeModelColumn<bool> feedback;
+		TreeModelColumn<string> edit;
 		TreeModelColumn<ControlProtocolInfo*> protocol_info;
 	};
 
@@ -1473,7 +1511,6 @@ private:
         Gtk::Window& _parent;
         PBD::ScopedConnection protocol_status_connection;
         uint32_t _ignore_view_change;
-	Gtk::Button* edit_button;
 };
 
 class VideoTimelineOptions : public OptionEditorBox
@@ -2108,7 +2145,7 @@ RCOptionEditor::RCOptionEditor ()
 	psc->add (1.0, _("1.0 second"));
 	psc->add (2.0, _("2.0 seconds"));
 	add_option (_("Transport"), psc);
-	
+
 	add_option (_("Transport"), new OptionEditorHeading (S_("Sync/Slave")));
 
 	_sync_source = new ComboOption<SyncSource> (
@@ -2374,7 +2411,7 @@ if (!Profile->get_mixbus()) {
 	rsas->add(ExistingNewlyCreatedBoth, _("existing selection and newly-created regions"));
 
 	add_option (_("Editor"), rsas);
-	
+
 	add_option (_("Editor"), new OptionEditorHeading (_("Waveforms")));
 
 if (!Profile->get_mixbus()) {
