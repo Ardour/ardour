@@ -3256,9 +3256,10 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 		return;
 	}
 
-	framepos_t the_start;
-	framepos_t the_end;
-	framepos_t cnt;
+	framepos_t pos;
+	framepos_t new_start;
+	framepos_t new_end;
+	framecnt_t new_length;
 	bool in_command = false;
 
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
@@ -3279,21 +3280,22 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 		/* now adjust lengths */
 		for (vector<boost::shared_ptr<Region> >::iterator i = regions.begin(); i != regions.end(); ++i) {
 
-			the_start = max (start, (framepos_t) (*i)->position());
-			if (max_framepos - the_start < (*i)->length()) {
-				the_end = the_start + (*i)->length() - 1;
+			pos = (*i)->position();
+			new_start = max (start, pos);
+			if (max_framepos - pos > (*i)->length()) {
+				new_end = pos + (*i)->length() - 1;
 			} else {
-				the_end = max_framepos;
+				new_end = max_framepos;
 			}
-			the_end = min (end, the_end);
-			cnt = the_end - the_start + 1;
+			new_end = min (end, new_end);
+			new_length = new_end - new_start + 1;
 
 			if(!in_command) {
 				begin_reversible_command (_("trim to selection"));
 				in_command = true;
 			}
 			(*i)->clear_changes ();
-			(*i)->trim_to (the_start, cnt);
+			(*i)->trim_to (new_start, new_length);
 			_session->add_command (new StatefulDiffCommand (*i));
 		}
 	}
