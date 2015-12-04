@@ -443,13 +443,20 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	/* our control surfaces */
 
-	ControlProtocolManager& m = ControlProtocolManager::instance ();
-	for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
-		if ((*i)->protocol) {
-			list<boost::shared_ptr<Bundle> > b = (*i)->protocol->bundles ();
-			for (list<boost::shared_ptr<Bundle> >::iterator j = b.begin(); j != b.end(); ++j) {
-				if ((*j)->ports_are_inputs() == inputs) {
-					program->add_bundle (*j);
+	/* XXX assume for now that all control protocols with ports use
+	 * MIDI. If anyone created a control protocol that used audio ports,
+	 * this will break.
+	 */
+
+	if ((type == DataType::MIDI || type == DataType::NIL)) {
+		ControlProtocolManager& m = ControlProtocolManager::instance ();
+		for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
+			if ((*i)->protocol) {
+				list<boost::shared_ptr<Bundle> > b = (*i)->protocol->bundles ();
+				for (list<boost::shared_ptr<Bundle> >::iterator j = b.begin(); j != b.end(); ++j) {
+					if ((*j)->ports_are_inputs() == inputs) {
+						program->add_bundle (*j);
+					}
 				}
 			}
 		}
