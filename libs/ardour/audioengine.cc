@@ -867,6 +867,8 @@ AudioEngine::start (bool for_latency)
 int
 AudioEngine::stop (bool for_latency)
 {
+	bool stop_engine = true;
+
 	if (!_backend) {
 		return 0;
 	}
@@ -877,15 +879,20 @@ AudioEngine::stop (bool for_latency)
 		pl.acquire ();
 	}
 
-	if (_backend->stop ()) {
-		return -1;
+	if (for_latency && _backend->can_change_systemic_latency_when_running()) {
+		stop_engine = false;
+	} else {
+		if (_backend->stop ()) {
+			pl.release ();
+			return -1;
+		}
 	}
 
 	if (pl.locked ()) {
 		pl.release ();
 	}
 
-	if (_session && _running &&
+	if (_session && _running && stop_engine &&
 	    (_session->state_of_the_state() & Session::Loading) == 0 &&
 	    (_session->state_of_the_state() & Session::Deletion) == 0) {
 		// it's not a halt, but should be handled the same way:
@@ -893,16 +900,20 @@ AudioEngine::stop (bool for_latency)
 		_session->engine_halted ();
 	}
 
-	_running = false;
+	if (stop_engine) {
+		_running = false;
+	}
 	_processed_frames = 0;
 	_measuring_latency = MeasureNone;
 	_latency_output_port = 0;
 	_latency_input_port = 0;
 	_started_for_latency = false;
 
-	Port::PortDrop ();
+	if (stop_engine) {
+		Port::PortDrop ();
+	}
 
-	if (!for_latency) {
+	if (!for_latency && stop_engine) {
 		Stopped (); /* EMIT SIGNAL */
 	}
 
@@ -1272,6 +1283,19 @@ AudioEngine::setup_required () const
 int
 AudioEngine::prepare_for_latency_measurement ()
 {
+	if (!_backend) {
+		return -1;
+	}
+
+	if (_backend->can_change_systemic_latency_when_running()) {
+		if (start()) {
+			return -1;
+		}
+		_backend->set_systemic_input_latency (0);
+		_backend->set_systemic_output_latency (0);
+		return 0;
+	}
+
 	if (running()) {
 		_stopped_for_latency = true;
 		stop (true);
@@ -1288,10 +1312,8 @@ AudioEngine::prepare_for_latency_measurement ()
 int
 AudioEngine::start_latency_detection (bool for_midi)
 {
-	if (!running()) {
-		if (prepare_for_latency_measurement ()) {
-			return -1;
-		}
+	if (prepare_for_latency_measurement ()) {
+		return -1;
 	}
 
 	PortEngine& pe (port_engine());
@@ -1398,7 +1420,9 @@ AudioEngine::stop_latency_detection ()
 		_latency_input_port = 0;
 	}
 
-	stop (true);
+	if (!_backend->can_change_systemic_latency_when_running()) {
+		stop (true);
+	}
 
 	if (_stopped_for_latency) {
 		start ();
