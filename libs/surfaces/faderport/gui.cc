@@ -349,14 +349,14 @@ FPGUI::build_available_action_menu ()
 
 	available_action_model->clear ();
 
-	/* Because there are button bindings built in that are not
-	in the key binding map, there needs to be a way to undo
-	a profile edit. */
 	TreeIter rowp;
 	TreeModel::Row parent;
+
+	/* Disabled item (row 0) */
+
 	rowp = available_action_model->append();
 	parent = *(rowp);
-	parent[action_columns.name] = _("Remove Binding");
+	parent[action_columns.name] = _("Disabled");
 
 	/* Key aliasing */
 
@@ -529,12 +529,46 @@ FPGUI::build_trns_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 	build_action_combo (cb, actions, FaderPort::Trns, bs);
 }
 
+bool
+FPGUI::find_action_in_model (const TreeModel::iterator& iter, std::string const & action_path, TreeModel::iterator* found)
+{
+	TreeModel::Row row = *iter;
+	string path = row[action_columns.path];
+
+	if (path == action_path) {
+		*found = iter;
+		return true;
+	}
+
+	return false;
+}
+
 void
 FPGUI::build_user_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 {
 	cb.set_model (available_action_model);
 	cb.pack_start (action_columns.name);
 	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::action_changed), &cb, FaderPort::User, bs));
+
+	/* set the active "row" to the right value for the current button binding */
+
+	string current_action = fp.get_action (FaderPort::User, false, bs); /* lookup release action */
+
+	if (current_action.empty()) {
+		cb.set_active (0); /* "disabled" */
+		return;
+	}
+
+	TreeModel::iterator iter = available_action_model->children().end();
+
+	available_action_model->foreach_iter (sigc::bind (sigc::mem_fun (*this, &FPGUI::find_action_in_model), current_action, &iter));
+
+	if (iter != available_action_model->children().end()) {
+		cb.set_active (iter);
+	} else {
+		cb.set_active (0);
+	}
+
 }
 
 Glib::RefPtr<Gtk::ListStore>
