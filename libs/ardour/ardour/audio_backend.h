@@ -350,6 +350,11 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      */
     virtual bool can_change_buffer_size_when_running () const = 0;
 
+		/** return true if the backend can measure and update
+		 * systemic latencies without restart.
+		 */
+		virtual bool can_change_systemic_latency_when_running () const { return false; }
+
     /* Set the hardware parameters.
      *
      * If called when the current state is stopped or paused,
