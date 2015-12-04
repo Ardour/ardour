@@ -315,6 +315,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\demangle.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\enums.cc"
 				>
 			</File>
@@ -344,10 +348,6 @@
 			</File>
 			<File
 				RelativePath="..\fpu.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\glib_semaphore.cc"
 				>
 			</File>
 			<File
@@ -677,10 +677,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\pbd\glib_semaphore.h"
-				>
-			</File>
-			<File
 				RelativePath="..\pbd\libpbd_visibility.h"
 				>
 			</File>
@@ -754,10 +750,6 @@
 			</File>
 			<File
 				RelativePath="..\pbd\search_path.h"
-				>
-			</File>
-			<File
-				RelativePath="..\pbd\semaphore.h"
 				>
 			</File>
 			<File
