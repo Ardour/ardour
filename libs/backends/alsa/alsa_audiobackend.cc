@@ -483,6 +483,9 @@ int
 AlsaAudioBackend::set_systemic_input_latency (uint32_t sl)
 {
 	_systemic_audio_input_latency = sl;
+	if (_run) {
+		update_systemic_audio_latencies();
+	}
 	return 0;
 }
 
@@ -490,6 +493,9 @@ int
 AlsaAudioBackend::set_systemic_output_latency (uint32_t sl)
 {
 	_systemic_audio_output_latency = sl;
+	if (_run) {
+		update_systemic_audio_latencies();
+	}
 	return 0;
 }
 
@@ -499,6 +505,9 @@ AlsaAudioBackend::set_systemic_midi_input_latency (std::string const device, uin
 	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
 	if (!nfo) return -1;
 	nfo->systemic_input_latency = sl;
+	if (_run && nfo->enabled) {
+		update_systemic_midi_latencies ();
+	}
 	return 0;
 }
 
@@ -508,7 +517,47 @@ AlsaAudioBackend::set_systemic_midi_output_latency (std::string const device, ui
 	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
 	if (!nfo) return -1;
 	nfo->systemic_output_latency = sl;
+	if (_run && nfo->enabled) {
+		update_systemic_midi_latencies ();
+	}
 	return 0;
+}
+
+void
+AlsaAudioBackend::update_systemic_audio_latencies ()
+{
+	const uint32_t lcpp = (_periods_per_cycle - 2) * _samples_per_period;
+	LatencyRange lr;
+
+	lr.min = lr.max = lcpp + (_measure_latency ? 0 : _systemic_audio_input_latency);
+	for (std::vector<AlsaPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+		set_latency_range (*it, true, lr);
+	}
+
+	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_output_latency);
+	for (std::vector<AlsaPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+		set_latency_range (*it, false, lr);
+	}
+	update_latencies ();
+}
+
+void
+AlsaAudioBackend::update_systemic_midi_latencies ()
+{
+#if 0
+	// TODO, need a way to associate the port with the corresponding AlsaMidiDeviceInfo
+	for (std::vector<AlsaPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+		LatencyRange lr;
+		lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
+		set_latency_range (*it, false, lr);
+	}
+	for (std::vector<AlsaPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+		LatencyRange lr;
+		lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
+		set_latency_range (*it, true, lr);
+	}
+#endif
+	update_latencies ();
 }
 
 /* Retrieving parameters */
@@ -679,6 +728,7 @@ AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
 	if (!nfo) return -1;
 	nfo->enabled = enable;
+	// TODO - trigger update when already running
 	return 0;
 }
 
@@ -1236,7 +1286,7 @@ AlsaAudioBackend::register_system_audio_ports()
 	const int a_ins = _n_inputs;
 	const int a_out = _n_outputs;
 
-	// TODO set latency depending on _periods_per_cycle and  _samples_per_period
+	const uint32_t lcpp = (_periods_per_cycle - 2) * _samples_per_period;
 
 	/* audio ports */
 	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_input_latency);
@@ -1249,7 +1299,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		_system_inputs.push_back(static_cast<AlsaPort*>(p));
 	}
 
-	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_output_latency);
+	lr.min = lr.max = lcpp + (_measure_latency ? 0 : _systemic_audio_output_latency);
 	for (int i = 1; i <= a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
@@ -1311,7 +1361,7 @@ AlsaAudioBackend::register_system_midi_ports()
 				}
 				LatencyRange lr;
 				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
-				set_latency_range (p, false, lr);
+				set_latency_range (p, true, lr);
 				static_cast<AlsaMidiPort*>(p)->set_n_periods(_periods_per_cycle); // TODO check MIDI alignment
 				_system_midi_out.push_back(static_cast<AlsaPort*>(p));
 				_rmidi_out.push_back (mout);

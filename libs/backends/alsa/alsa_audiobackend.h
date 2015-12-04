@@ -184,6 +184,8 @@ class AlsaAudioBackend : public AudioBackend {
 		bool can_change_sample_rate_when_running () const;
 		bool can_change_buffer_size_when_running () const;
 
+		bool can_change_systemic_latency_when_running () const { return true; }
+
 		int set_device_name (const std::string&);
 		int set_input_device_name (const std::string&);
 		int set_output_device_name (const std::string&);
@@ -442,6 +444,9 @@ class AlsaAudioBackend : public AudioBackend {
 			}
 			return NULL;
 		}
+
+		void update_systemic_audio_latencies ();
+		void update_systemic_midi_latencies ();
 
 }; // class AlsaAudioBackend
 
