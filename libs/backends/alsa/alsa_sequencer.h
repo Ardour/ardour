@@ -33,7 +33,7 @@ namespace ARDOUR {
 
 class AlsaSeqMidiIO : virtual public AlsaMidiIO {
 public:
-	AlsaSeqMidiIO (const char *port_name, const bool input);
+	AlsaSeqMidiIO (const std::string &name, const char *port_name, const bool input);
 	virtual ~AlsaSeqMidiIO ();
 
 protected:
@@ -47,14 +47,14 @@ private:
 class AlsaSeqMidiOut : public AlsaSeqMidiIO, public AlsaMidiOut
 {
 public:
-	AlsaSeqMidiOut (const char *port_name);
+	AlsaSeqMidiOut (const std::string &name, const char *port_name);
 	void* main_process_thread ();
 };
 
 class AlsaSeqMidiIn : public AlsaSeqMidiIO, public AlsaMidiIn
 {
 public:
-	AlsaSeqMidiIn (const char *port_name);
+	AlsaSeqMidiIn (const std::string &name, const char *port_name);
 
 	void* main_process_thread ();
 };

@@ -33,7 +33,7 @@ namespace ARDOUR {
 
 class AlsaRawMidiIO : virtual public AlsaMidiIO {
 public:
-	AlsaRawMidiIO (const char *device, const bool input);
+	AlsaRawMidiIO (const std::string &name, const char *device, const bool input);
 	virtual ~AlsaRawMidiIO ();
 
 protected:
@@ -46,14 +46,14 @@ private:
 class AlsaRawMidiOut : public AlsaRawMidiIO, public AlsaMidiOut
 {
 public:
-	AlsaRawMidiOut (const char *device);
+	AlsaRawMidiOut (const std::string &name, const char *device);
 	void* main_process_thread ();
 };
 
 class AlsaRawMidiIn : public AlsaRawMidiIO, public AlsaMidiIn
 {
 public:
-	AlsaRawMidiIn (const char *device);
+	AlsaRawMidiIn (const std::string &name, const char *device);
 
 	void* main_process_thread ();
 

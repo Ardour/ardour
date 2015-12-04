@@ -38,10 +38,11 @@ using namespace ARDOUR;
 #define _DEBUGPRINT(STR) ;
 #endif
 
-AlsaRawMidiIO::AlsaRawMidiIO (const char *device, const bool input)
+AlsaRawMidiIO::AlsaRawMidiIO (const std::string &name, const char *device, const bool input)
 	: AlsaMidiIO()
 	, _device (0)
 {
+	_name = name;
 	init (device, input);
 }
 
@@ -107,8 +108,8 @@ initerr:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-AlsaRawMidiOut::AlsaRawMidiOut (const char *device)
-		: AlsaRawMidiIO (device, false)
+AlsaRawMidiOut::AlsaRawMidiOut (const std::string &name, const char *device)
+		: AlsaRawMidiIO (name, device, false)
 		, AlsaMidiOut ()
 {
 }
@@ -223,8 +224,8 @@ retry:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-AlsaRawMidiIn::AlsaRawMidiIn (const char *device)
-		: AlsaRawMidiIO (device, true)
+AlsaRawMidiIn::AlsaRawMidiIn (const std::string &name, const char *device)
+		: AlsaRawMidiIO (name, device, true)
 		, AlsaMidiIn ()
 		, _event(0,0)
 		, _first_time(true)

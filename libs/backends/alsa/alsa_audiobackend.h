@@ -395,7 +395,7 @@ class AlsaAudioBackend : public AudioBackend {
 		/* port engine */
 		PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
 		int register_system_audio_ports ();
-		int register_system_midi_ports ();
+		int register_system_midi_ports (const std::string device = "");
 		void unregister_ports (bool system_only = false);
 
 		std::vector<AlsaPort *> _ports;
@@ -406,6 +406,9 @@ class AlsaAudioBackend : public AudioBackend {
 
 		std::vector<AlsaMidiOut *> _rmidi_out;
 		std::vector<AlsaMidiIn  *> _rmidi_in;
+
+		unsigned _midi_ins;
+		unsigned _midi_outs;
 
 		struct PortConnectData {
 			std::string a;

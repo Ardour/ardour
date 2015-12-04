@@ -70,6 +70,8 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _dsp_load (0)
 	, _processed_samples (0)
 	, _port_change_flag (false)
+	, _midi_ins (0)
+	, _midi_outs (0)
 {
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
@@ -544,19 +546,27 @@ AlsaAudioBackend::update_systemic_audio_latencies ()
 void
 AlsaAudioBackend::update_systemic_midi_latencies ()
 {
-#if 0
-	// TODO, need a way to associate the port with the corresponding AlsaMidiDeviceInfo
-	for (std::vector<AlsaPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+	uint32_t i = 0;
+	for (std::vector<AlsaPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
+		assert (_rmidi_out.size() > i);
+		AlsaMidiOut *rm = _rmidi_out.at(i);
+		struct AlsaMidiDeviceInfo * nfo = midi_device_info (rm->name());
+		assert (nfo);
 		LatencyRange lr;
 		lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
 		set_latency_range (*it, false, lr);
 	}
-	for (std::vector<AlsaPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+
+	i = 0;
+	for (std::vector<AlsaPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
+		assert (_rmidi_in.size() > i);
+		AlsaMidiIO *rm = _rmidi_in.at(i);
+		struct AlsaMidiDeviceInfo * nfo = midi_device_info (rm->name());
+		assert (nfo);
 		LatencyRange lr;
 		lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
 		set_latency_range (*it, true, lr);
 	}
-#endif
 	update_latencies ();
 }
 
@@ -712,6 +722,9 @@ AlsaAudioBackend::set_midi_option (const std::string& opt)
 	if (opt != get_standard_device_name(DeviceNone) && opt != _("ALSA raw devices") && opt != _("ALSA sequencer")) {
 		return -1;
 	}
+	if (_run && _midi_driver_option != opt) {
+		return -1;
+	}
 	_midi_driver_option = opt;
 	return 0;
 }
@@ -727,8 +740,41 @@ AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 {
 	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
 	if (!nfo) return -1;
+	const bool prev_enabled = nfo->enabled;
 	nfo->enabled = enable;
-	// TODO - trigger update when already running
+
+	if (_run && prev_enabled != enable) {
+		if (enable) {
+			// add ports for the given device
+			register_system_midi_ports(device);
+		} else {
+			// remove all ports provided by the given device
+			uint32_t i = 0;
+			for (std::vector<AlsaPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end ();) {
+				assert (_rmidi_out.size() > i);
+				AlsaMidiOut *rm = _rmidi_out.at(i);
+				if (rm->name () != device) { ++it; ++i; continue; }
+				it = _system_midi_out.erase (it);
+				unregister_port (*it);
+				rm->stop();
+				_rmidi_out.erase (_rmidi_out.begin() + i);
+				delete rm;
+			}
+
+			i = 0;
+			for (std::vector<AlsaPort*>::iterator it = _system_midi_in.begin (); it != _system_midi_in.end ();) {
+				assert (_rmidi_in.size() > i);
+				AlsaMidiIn *rm = _rmidi_in.at(i);
+				if (rm->name () != device) { ++it; ++i; continue; }
+				it = _system_midi_in.erase (it);
+				unregister_port (*it);
+				rm->stop();
+				_rmidi_in.erase (_rmidi_in.begin() + i);
+				delete rm;
+			}
+		}
+		update_systemic_midi_latencies ();
+	}
 	return 0;
 }
 
@@ -909,6 +955,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	_measure_latency = for_latency_measurement;
 
+	_midi_ins = _midi_outs = 0;
 	register_system_midi_ports();
 
 	if (register_system_audio_ports()) {
@@ -990,6 +1037,7 @@ AlsaAudioBackend::stop ()
 
 	unregister_ports();
 	delete _pcmi; _pcmi = 0;
+	_midi_ins = _midi_outs = 0;
 	release_device();
 
 	return (_active == false) ? 0 : -1;
@@ -1312,11 +1360,11 @@ AlsaAudioBackend::register_system_audio_ports()
 }
 
 int
-AlsaAudioBackend::register_system_midi_ports()
+AlsaAudioBackend::register_system_midi_ports(const std::string device)
 {
 	std::map<std::string, std::string> devices;
-	int midi_ins = 0;
-	int midi_outs = 0;
+
+	// TODO use consistent numbering when re-adding devices: _midi_ins, _midi_outs
 
 	if (_midi_driver_option == get_standard_device_name(DeviceNone)) {
 		return 0;
@@ -1327,15 +1375,18 @@ AlsaAudioBackend::register_system_midi_ports()
 	}
 
 	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		if (!device.empty() && device != i->first) {
+			continue;
+		}
 		struct AlsaMidiDeviceInfo * nfo = midi_device_info(i->first);
 		if (!nfo) continue;
 		if (!nfo->enabled) continue;
 
 		AlsaMidiOut *mout;
 		if (_midi_driver_option == _("ALSA raw devices")) {
-			mout = new AlsaRawMidiOut (i->second.c_str());
+			mout = new AlsaRawMidiOut (i->first, i->second.c_str());
 		} else {
-			mout = new AlsaSeqMidiOut (i->second.c_str());
+			mout = new AlsaSeqMidiOut (i->first, i->second.c_str());
 		}
 
 		if (mout->state ()) {
@@ -1353,7 +1404,7 @@ AlsaAudioBackend::register_system_midi_ports()
 				delete mout;
 			} else {
 				char tmp[64];
-				snprintf(tmp, sizeof(tmp), "system:midi_playback_%d", ++midi_ins);
+				snprintf(tmp, sizeof(tmp), "system:midi_playback_%d", ++_midi_ins);
 				PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 				if (!p) {
 					mout->stop();
@@ -1370,9 +1421,9 @@ AlsaAudioBackend::register_system_midi_ports()
 
 		AlsaMidiIn *midin;
 		if (_midi_driver_option == _("ALSA raw devices")) {
-			midin = new AlsaRawMidiIn (i->second.c_str());
+			midin = new AlsaRawMidiIn (i->first, i->second.c_str());
 		} else {
-			midin = new AlsaSeqMidiIn (i->second.c_str());
+			midin = new AlsaSeqMidiIn (i->first, i->second.c_str());
 		}
 
 		if (midin->state ()) {
@@ -1390,7 +1441,7 @@ AlsaAudioBackend::register_system_midi_ports()
 				delete midin;
 			} else {
 				char tmp[64];
-				snprintf(tmp, sizeof(tmp), "system:midi_capture_%d", ++midi_outs);
+				snprintf(tmp, sizeof(tmp), "system:midi_capture_%d", ++_midi_outs);
 				PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 				if (!p) {
 					midin->stop();

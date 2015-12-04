@@ -42,6 +42,8 @@ public:
 
 	virtual void* main_process_thread () = 0;
 
+	const std::string & name () const { return _name; }
+
 protected:
 	pthread_t _main_thread;
 	pthread_mutex_t _notify_mutex;
@@ -68,7 +70,8 @@ protected:
 
 	RingBuffer<uint8_t>* _rb;
 
-protected:
+	std::string _name;
+
 	virtual void init (const char *device_name, const bool input) = 0;
 
 };

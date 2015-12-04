@@ -37,10 +37,11 @@ using namespace ARDOUR;
 #define _DEBUGPRINT(STR) ;
 #endif
 
-AlsaSeqMidiIO::AlsaSeqMidiIO (const char *device, const bool input)
+AlsaSeqMidiIO::AlsaSeqMidiIO (const std::string &name, const char *device, const bool input)
 	: AlsaMidiIO()
 	, _seq (0)
 {
+	_name = name;
 	init (device, input);
 }
 
@@ -117,8 +118,8 @@ initerr:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-AlsaSeqMidiOut::AlsaSeqMidiOut (const char *device)
-		: AlsaSeqMidiIO (device, false)
+AlsaSeqMidiOut::AlsaSeqMidiOut (const std::string &name, const char *device)
+		: AlsaSeqMidiIO (name, device, false)
 		, AlsaMidiOut ()
 {
 }
@@ -227,8 +228,8 @@ retry:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-AlsaSeqMidiIn::AlsaSeqMidiIn (const char *device)
-		: AlsaSeqMidiIO (device, true)
+AlsaSeqMidiIn::AlsaSeqMidiIn (const std::string &name, const char *device)
+		: AlsaSeqMidiIO (name, device, true)
 		, AlsaMidiIn ()
 {
 }
