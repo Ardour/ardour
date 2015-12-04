@@ -197,8 +197,8 @@ class PortAudioBackend : public AudioBackend {
 		int set_output_channels (uint32_t);
 		int set_systemic_input_latency (uint32_t);
 		int set_systemic_output_latency (uint32_t);
-		int set_systemic_midi_input_latency (std::string const, uint32_t) { return 0; }
-		int set_systemic_midi_output_latency (std::string const, uint32_t) { return 0; }
+		int set_systemic_midi_input_latency (std::string const, uint32_t);
+		int set_systemic_midi_output_latency (std::string const, uint32_t);
 
 		int reset_device () { return 0; };
 
@@ -213,10 +213,10 @@ class PortAudioBackend : public AudioBackend {
 		uint32_t     output_channels () const;
 		uint32_t     systemic_input_latency () const;
 		uint32_t     systemic_output_latency () const;
-		uint32_t     systemic_midi_input_latency (std::string const) const { return 0; }
-		uint32_t     systemic_midi_output_latency (std::string const) const { return 0; }
+		uint32_t     systemic_midi_input_latency (std::string const) const;
+		uint32_t     systemic_midi_output_latency (std::string const) const;
 
-		bool can_set_systemic_midi_latencies () const { return false; }
+		bool can_set_systemic_midi_latencies () const { return true; }
 
 		/* External control app */
 		std::string control_app_name () const;
@@ -227,15 +227,9 @@ class PortAudioBackend : public AudioBackend {
 		int set_midi_option (const std::string&);
 		std::string midi_option () const;
 
-		std::vector<DeviceStatus> enumerate_midi_devices () const {
-			return std::vector<AudioBackend::DeviceStatus> ();
-		}
-		int set_midi_device_enabled (std::string const, bool) {
-			return 0;
-		}
-		bool midi_device_enabled (std::string const) const {
-			return true;
-		}
+		std::vector<DeviceStatus> enumerate_midi_devices () const;
+		int set_midi_device_enabled (std::string const, bool);
+		bool midi_device_enabled (std::string const) const;
 
 	protected:
 		/* State Control */
@@ -401,6 +395,8 @@ class PortAudioBackend : public AudioBackend {
 
 		uint32_t _systemic_audio_input_latency;
 		uint32_t _systemic_audio_output_latency;
+
+		MidiDeviceInfo* midi_device_info(const std::string&) const;
 
 		/* portaudio specific  */
 		int name_to_id(std::string) const;

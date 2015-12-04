@@ -31,6 +31,8 @@
 #include "winmmemidi_input_device.h"
 #include "winmmemidi_output_device.h"
 
+#include "midi_device_info.h"
+
 namespace ARDOUR {
 
 struct WinMMEMIDIPacket {
@@ -79,6 +81,12 @@ public:
 	std::vector<WinMMEMidiInputDevice*> get_inputs () { return m_inputs; }
 	std::vector<WinMMEMidiOutputDevice*> get_outputs () { return m_outputs; }
 
+	void update_device_info ();
+
+	std::vector<MidiDeviceInfo*> get_device_info () { return m_device_info; }
+
+	MidiDeviceInfo* get_device_info (const std::string& name);
+
 	std::string port_id (uint32_t, bool input);
 	std::string port_name (uint32_t, bool input);
 
@@ -91,6 +99,12 @@ public:
 	}
 
 private: // Methods
+
+	void clear_device_info ();
+
+	static bool get_input_name_from_index (int index, std::string& name);
+	static bool get_output_name_from_index (int index, std::string& name);
+
 	void discover ();
 	void cleanup ();
 
@@ -104,6 +118,8 @@ private: // Methods
 	void stop_devices ();
 
 private: // Data
+
+	std::vector<MidiDeviceInfo*> m_device_info;
 
 	std::vector<WinMMEMidiInputDevice*> m_inputs;
 	std::vector<WinMMEMidiOutputDevice*> m_outputs;

@@ -109,8 +109,7 @@ WinMMEMidiIO::port_id (uint32_t port, bool input)
 	return ss.str();
 }
 
-std::string
-WinMMEMidiIO::port_name (uint32_t port, bool input)
+std::string WinMMEMidiIO::port_name(uint32_t port, bool input)
 {
 	if (input) {
 		if (port < m_inputs.size ()) {
@@ -201,6 +200,86 @@ WinMMEMidiIO::stop_devices ()
 }
 
 void
+WinMMEMidiIO::clear_device_info ()
+{
+	for (std::vector<MidiDeviceInfo*>::iterator i = m_device_info.begin();
+	     i != m_device_info.end();
+	     ++i) {
+	  delete *i;
+	}
+	m_device_info.clear();
+}
+
+bool
+WinMMEMidiIO::get_input_name_from_index (int index, std::string& name)
+{
+	MIDIINCAPS capabilities;
+	MMRESULT result = midiInGetDevCaps(index, &capabilities, sizeof(capabilities));
+	if (result == MMSYSERR_NOERROR) {
+		name = capabilities.szPname;
+		return true;
+	}
+	return false;
+}
+
+bool
+WinMMEMidiIO::get_output_name_from_index (int index, std::string& name)
+{
+	MIDIOUTCAPS capabilities;
+	MMRESULT result = midiOutGetDevCaps(index, &capabilities, sizeof(capabilities));
+	if (result == MMSYSERR_NOERROR) {
+		name = capabilities.szPname;
+		return true;
+	}
+	return false;
+}
+
+void
+WinMMEMidiIO::update_device_info ()
+{
+	std::set<std::string> device_names;
+
+	int in_count = midiInGetNumDevs ();
+
+	for (int i = 0; i < in_count; ++i) {
+		std::string input_name;
+		if (get_input_name_from_index(i, input_name)) {
+			device_names.insert(input_name);
+		}
+	}
+
+	int out_count = midiOutGetNumDevs ();
+
+	for (int i = 0; i < out_count; ++i) {
+		std::string output_name;
+		if (get_output_name_from_index(i, output_name)) {
+			device_names.insert(output_name);
+		}
+	}
+
+	clear_device_info ();
+
+	for (std::set<std::string>::const_iterator i = device_names.begin();
+	     i != device_names.end();
+	     ++i) {
+	  m_device_info.push_back(new MidiDeviceInfo(*i));
+	}
+}
+
+MidiDeviceInfo*
+WinMMEMidiIO::get_device_info (const std::string& name)
+{
+	for (std::vector<MidiDeviceInfo*>::const_iterator i = m_device_info.begin();
+	     i != m_device_info.end();
+	     ++i) {
+		if ((*i)->device_name == name) {
+			return *i;
+		}
+	}
+	return 0;
+}
+
+void
 WinMMEMidiIO::create_input_devices ()
 {
 	int srcCount = midiInGetNumDevs ();
@@ -208,6 +287,25 @@ WinMMEMidiIO::create_input_devices ()
 	DEBUG_MIDI (string_compose ("MidiIn count: %1\n", srcCount));
 
 	for (int i = 0; i < srcCount; ++i) {
+		std::string input_name;
+		if (!get_input_name_from_index (i, input_name)) {
+			DEBUG_MIDI ("Unable to get MIDI input name from index\n");
+			continue;
+		}
+
+		MidiDeviceInfo* info = get_device_info (input_name);
+
+		if (!info) {
+			DEBUG_MIDI ("Unable to MIDI device info from name\n");
+			continue;
+		}
+
+		if (!info->enable) {
+			DEBUG_MIDI(string_compose(
+			    "MIDI input device %1 not enabled, not opening device\n", input_name));
+			continue;
+		}
+
 		try {
 			WinMMEMidiInputDevice* midi_input = new WinMMEMidiInputDevice (i);
 			if (midi_input) {
@@ -228,6 +326,25 @@ WinMMEMidiIO::create_output_devices ()
 	DEBUG_MIDI (string_compose ("MidiOut count: %1\n", dstCount));
 
 	for (int i = 0; i < dstCount; ++i) {
+		std::string output_name;
+		if (!get_output_name_from_index (i, output_name)) {
+			DEBUG_MIDI ("Unable to get MIDI output name from index\n");
+			continue;
+		}
+
+		MidiDeviceInfo* info = get_device_info (output_name);
+
+		if (!info) {
+			DEBUG_MIDI ("Unable to MIDI device info from name\n");
+			continue;
+		}
+
+		if (!info->enable) {
+			DEBUG_MIDI(string_compose(
+			    "MIDI output device %1 not enabled, not opening device\n", output_name));
+			continue;
+		}
+
 		try {
 			WinMMEMidiOutputDevice* midi_output = new WinMMEMidiOutputDevice(i);
 			if (midi_output) {

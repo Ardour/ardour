@@ -156,6 +156,7 @@ PortAudioBackend::set_driver (const std::string& name)
 bool
 PortAudioBackend::update_devices ()
 {
+	// update midi device info?
 	return _pcmio->update_devices();
 }
 
@@ -329,6 +330,24 @@ PortAudioBackend::set_systemic_output_latency (uint32_t sl)
 	return 0;
 }
 
+int
+PortAudioBackend::set_systemic_midi_input_latency (std::string const device, uint32_t sl)
+{
+	MidiDeviceInfo* nfo = midi_device_info (device);
+	if (!nfo) return -1;
+	nfo->systemic_input_latency = sl;
+	return 0;
+}
+
+int
+PortAudioBackend::set_systemic_midi_output_latency (std::string const device, uint32_t sl)
+{
+	MidiDeviceInfo* nfo = midi_device_info (device);
+	if (!nfo) return -1;
+	nfo->systemic_output_latency = sl;
+	return 0;
+}
+
 /* Retrieving parameters */
 std::string
 PortAudioBackend::device_name () const
@@ -390,6 +409,22 @@ PortAudioBackend::systemic_output_latency () const
 	return _systemic_audio_output_latency;
 }
 
+uint32_t
+PortAudioBackend::systemic_midi_input_latency (std::string const device) const
+{
+	MidiDeviceInfo* nfo = midi_device_info (device);
+	if (!nfo) return 0;
+	return nfo->systemic_input_latency;
+}
+
+uint32_t
+PortAudioBackend::systemic_midi_output_latency (std::string const device) const
+{
+	MidiDeviceInfo* nfo = midi_device_info (device);
+	if (!nfo) return 0;
+	return nfo->systemic_output_latency;
+}
+
 std::string
 PortAudioBackend::control_app_name () const
 {
@@ -429,6 +464,61 @@ std::string
 PortAudioBackend::midi_option () const
 {
 	return _midi_driver_option;
+}
+
+std::vector<AudioBackend::DeviceStatus>
+PortAudioBackend::enumerate_midi_devices () const
+{
+	std::vector<AudioBackend::DeviceStatus> midi_device_status;
+	std::vector<MidiDeviceInfo*> device_info;
+
+	if (_midi_driver_option == winmme_driver_name) {
+		_midiio->update_device_info ();
+		device_info = _midiio->get_device_info ();
+	}
+
+	for (std::vector<MidiDeviceInfo*>::const_iterator i = device_info.begin();
+	     i != device_info.end();
+	     ++i) {
+		midi_device_status.push_back(DeviceStatus((*i)->device_name, true));
+	}
+	return midi_device_status;
+}
+
+MidiDeviceInfo*
+PortAudioBackend::midi_device_info (const std::string& device_name) const
+{
+	std::vector<MidiDeviceInfo*> dev_info;
+
+	if (_midi_driver_option == winmme_driver_name) {
+		dev_info = _midiio->get_device_info();
+
+		for (std::vector<MidiDeviceInfo*>::const_iterator i = dev_info.begin();
+		     i != dev_info.end();
+		     ++i) {
+			if ((*i)->device_name == device_name) {
+				return *i;
+			}
+		}
+	}
+	return 0;
+}
+
+int
+PortAudioBackend::set_midi_device_enabled (std::string const device, bool enable)
+{
+	MidiDeviceInfo* nfo = midi_device_info(device);
+	if (!nfo) return -1;
+	nfo->enable = enable;
+	return 0;
+}
+
+bool
+PortAudioBackend::midi_device_enabled (std::string const device) const
+{
+	MidiDeviceInfo* nfo = midi_device_info(device);
+	if (!nfo) return false;
+	return nfo->enable;
 }
 
 /* State Control */
@@ -1309,7 +1399,13 @@ PortAudioBackend::register_system_midi_ports()
 		              DataType::MIDI,
 		              static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
+
+		MidiDeviceInfo* info = _midiio->get_device_info((*i)->name());
+		if (info) { // assert?
+			lr.min = lr.max = _samples_per_period + info->systemic_input_latency;
+		}
 		set_latency_range (p, false, lr);
+
 		PortMidiPort* midi_port = static_cast<PortMidiPort*>(p);
 		midi_port->set_pretty_name ((*i)->name());
 		_system_midi_in.push_back (midi_port);
@@ -1327,7 +1423,13 @@ PortAudioBackend::register_system_midi_ports()
 		              DataType::MIDI,
 		              static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
+
+		MidiDeviceInfo* info = _midiio->get_device_info((*i)->name());
+		if (info) { // assert?
+			lr.min = lr.max = _samples_per_period + info->systemic_output_latency;
+		}
 		set_latency_range (p, false, lr);
+
 		PortMidiPort* midi_port = static_cast<PortMidiPort*>(p);
 		midi_port->set_n_periods(2);
 		midi_port->set_pretty_name ((*i)->name());
