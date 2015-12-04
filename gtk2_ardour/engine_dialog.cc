@@ -2311,26 +2311,6 @@ EngineControl::push_state_to_backend (bool start)
 	}
 
 	if (was_running) {
-
-		if (!change_driver && !change_device && !change_channels && !change_latency && !change_midi) {
-			/* no changes in any parameters that absolutely require a
-			 * restart, so check those that might be changeable without a
-			 * restart
-			 */
-
-			if (change_rate && !backend->can_change_sample_rate_when_running()) {
-				/* can't do this while running ... */
-				restart_required = true;
-			}
-
-			if (change_bufsize && !backend->can_change_buffer_size_when_running()) {
-				/* can't do this while running ... */
-				restart_required = true;
-			}
-		}
-	}
-
-	if (was_running) {
 		if (restart_required) {
 			if (ARDOUR::AudioEngine::instance()->stop()) {
 				return -1;
