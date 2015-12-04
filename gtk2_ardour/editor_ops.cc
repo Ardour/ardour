@@ -3354,67 +3354,6 @@ Editor::region_fill_track ()
 }
 
 void
-Editor::region_fill_selection ()
-{
-	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
-		return;
-	}
-
-	if (selection->time.empty()) {
-		return;
-	}
-
-	boost::shared_ptr<Region> region = _regions->get_single_selection ();
-	if (region == 0) {
-		return;
-	}
-
-	framepos_t start = selection->time[clicked_selection].start;
-	framepos_t end = selection->time[clicked_selection].end;
-
-	boost::shared_ptr<Playlist> playlist;
-
-	if (selection->tracks.empty()) {
-		return;
-	}
-
-	framepos_t selection_length = end - start;
-	float times = (float)selection_length / region->length();
-	bool in_command = false;
-
-	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
-	RegionSelection foo;
-
-	for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
-
-		if ((playlist = (*i)->playlist()) == 0) {
-			continue;
-		}
-
-		if (!in_command) {
-			begin_reversible_command (Operations::fill_selection);
-			in_command = true;
-		}
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-		latest_regionviews.clear ();
-		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
-
-		playlist->clear_changes ();
-		playlist->add_region (RegionFactory::create (region, true), start, times);
-		_session->add_command (new StatefulDiffCommand (playlist));
-		c.disconnect ();
-		foo.insert (foo.end(), latest_regionviews.begin(), latest_regionviews.end());
-	}
-
-	if (in_command) {
-		if (!foo.empty()) {
-			selection->set (foo);
-		}
-		commit_reversible_command ();
-	}
-}
-
-void
 Editor::set_region_sync_position ()
 {
 	set_sync_point (get_preferred_edit_position (), get_regions_from_selection_and_edit_point ());
