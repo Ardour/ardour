@@ -875,7 +875,10 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	_pcmi = new Alsa_pcmi (
 			(duplex & 2) ? alsa_device.c_str() : NULL,
 			(duplex & 1) ? alsa_device.c_str() : NULL,
-			0, _samplerate, _samples_per_period, _periods_per_cycle, 0);
+			/* ctrl name */ 0,
+			_samplerate, _samples_per_period,
+			_periods_per_cycle, /* _periods_per_cycle */ 2,
+			/* debug */ 0);
 
 	AudioBackend::ErrorCode error_code = NoError;
 	switch (_pcmi->state()) {

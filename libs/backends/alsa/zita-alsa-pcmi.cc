@@ -44,11 +44,13 @@ Alsa_pcmi::Alsa_pcmi (
 		const char        *ctrl_name,
 		unsigned int       fsamp,
 		unsigned int       fsize,
-		unsigned int       nfrag,
+		unsigned int       play_nfrag,
+		unsigned int       capt_nfrag,
 		unsigned int       debug)
 	: _fsamp (fsamp)
 	, _fsize (fsize)
-	, _nfrag (nfrag)
+	, _play_nfrag (play_nfrag)
+	, _capt_nfrag (capt_nfrag)
 	, _debug (debug)
 	, _state (-1)
 	, _play_handle (0)
@@ -95,12 +97,12 @@ int Alsa_pcmi::pcm_start (void)
 	if (_play_handle)
 	{
 		n = snd_pcm_avail_update (_play_handle);
-		if (n != _fsize * _nfrag)
+		if (n != _fsize * _play_nfrag)
 		{
 			if (_debug & DEBUG_STAT) fprintf  (stderr, "Alsa_pcmi: full buffer not available at start.\n");
 			return -1;
 		}
-		for (i = 0; i < _nfrag; i++)
+		for (i = 0; i < _play_nfrag; i++)
 		{
 			play_init (_fsize);
 			for (j = 0; j < _play_nchan; j++) clear_chan (j, _fsize);
@@ -353,7 +355,7 @@ void Alsa_pcmi::printinfo (void)
 		fprintf (stdout, "\n  nchan  : %d\n", _play_nchan);
 		fprintf (stdout, "  fsamp  : %d\n", _fsamp);
 		fprintf (stdout, "  fsize  : %ld\n", _fsize);
-		fprintf (stdout, "  nfrag  : %d\n", _nfrag);
+		fprintf (stdout, "  nfrag  : %d\n", _play_nfrag);
 		fprintf (stdout, "  format : %s\n", snd_pcm_format_name (_play_format));
 	}
 	else fprintf (stdout, " not enabled\n");
@@ -363,7 +365,7 @@ void Alsa_pcmi::printinfo (void)
 		fprintf (stdout, "\n  nchan  : %d\n", _capt_nchan);
 		fprintf (stdout, "  fsamp  : %d\n", _fsamp);
 		fprintf (stdout, "  fsize  : %ld\n", _fsize);
-		fprintf (stdout, "  nfrag  : %d\n", _nfrag);
+		fprintf (stdout, "  nfrag  : %d\n", _capt_nfrag);
 		fprintf (stdout, "  format : %s\n", snd_pcm_format_name (_capt_format));
 		if (_play_handle) fprintf (stdout, "%s\n", _synced ? "synced" : "not synced");
 	}
@@ -436,7 +438,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't allocate playback sw params\n");
 			return;
 		}
-		if (set_hwpar (_play_handle, _play_hwpar, "playback", &_play_nchan) < 0) return;
+		if (set_hwpar (_play_handle, _play_hwpar, "playback", _play_nfrag, &_play_nchan) < 0) return;
 		if (set_swpar (_play_handle, _play_swpar, "playback") < 0) return;
 	}
 
@@ -452,7 +454,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't allocate capture sw params\n");
 			return;
 		}
-		if (set_hwpar (_capt_handle, _capt_hwpar, "capture", &_capt_nchan) < 0) return;
+		if (set_hwpar (_capt_handle, _capt_hwpar, "capture", _capt_nfrag, &_capt_nchan) < 0) return;
 		if (set_swpar (_capt_handle, _capt_swpar, "capture") < 0) return;
 	}
 
@@ -470,7 +472,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 			_state = -4;
 			return;
 		}
-		if (snd_pcm_hw_params_get_periods (_play_hwpar, &nfrag, &dir) || (nfrag != _nfrag) || dir)
+		if (snd_pcm_hw_params_get_periods (_play_hwpar, &nfrag, &dir) || (nfrag != _play_nfrag) || dir)
 		{
 			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't get requested number of periods for playback.\n");
 			_state = -5;
@@ -582,7 +584,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 			_state = -4;
 			return;
 		}
-		if (snd_pcm_hw_params_get_periods (_capt_hwpar, &nfrag, &dir) || (nfrag != _nfrag) || dir)
+		if (snd_pcm_hw_params_get_periods (_capt_hwpar, &nfrag, &dir) || (nfrag != _capt_nfrag) || dir)
 		{
 			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't get requested number of periods for capture.\n");
 			_state = -5;
@@ -679,7 +681,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 }
 
 
-int Alsa_pcmi::set_hwpar (snd_pcm_t *handle,  snd_pcm_hw_params_t *hwpar, const char *sname, unsigned int *nchan)
+int Alsa_pcmi::set_hwpar (snd_pcm_t *handle,  snd_pcm_hw_params_t *hwpar, const char *sname, unsigned int nfrag, unsigned int *nchan)
 {
 	bool err;
 
@@ -760,16 +762,16 @@ int Alsa_pcmi::set_hwpar (snd_pcm_t *handle,  snd_pcm_hw_params_t *hwpar, const 
 				sname, _fsize);
 		return -4;
 	}
-	if (snd_pcm_hw_params_set_periods (handle, hwpar, _nfrag, 0) < 0)
+	if (snd_pcm_hw_params_set_periods (handle, hwpar, nfrag, 0) < 0)
 	{
 		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s periods to %u.\n",
-				sname, _nfrag);
+				sname, nfrag);
 		return -5;
 	}
-	if (snd_pcm_hw_params_set_buffer_size (handle, hwpar, _fsize * _nfrag) < 0)
+	if (snd_pcm_hw_params_set_buffer_size (handle, hwpar, _fsize * nfrag) < 0)
 	{
 		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s buffer length to %lu.\n",
-				sname, _fsize * _nfrag);
+				sname, _fsize * nfrag);
 		return -4;
 	}
 	if (snd_pcm_hw_params (handle, hwpar) < 0)
