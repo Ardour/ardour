@@ -330,6 +330,15 @@ AlsaAudioBackend::available_output_channel_count (const std::string& device) con
 	return 128;
 }
 
+std::vector<uint32_t>
+AlsaAudioBackend::available_period_sizes (const std::string& driver) const
+{
+	std::vector<uint32_t> ps;
+	ps.push_back (2);
+	ps.push_back (3);
+	return ps;
+}
+
 bool
 AlsaAudioBackend::can_change_sample_rate_when_running () const
 {
@@ -419,6 +428,19 @@ AlsaAudioBackend::set_sample_rate (float sr)
 	if (sr <= 0) { return -1; }
 	_samplerate = sr;
 	engine.sample_rate_change (sr);
+	return 0;
+}
+
+int
+AlsaAudioBackend::set_peridod_size (uint32_t n)
+{
+	if (n == 0 || n > 3) {
+		return -1;
+	}
+	if (_run) {
+		return -1;
+	}
+	_periods_per_cycle = n;
 	return 0;
 }
 
@@ -524,6 +546,12 @@ uint32_t
 AlsaAudioBackend::buffer_size () const
 {
 	return _samples_per_period;
+}
+
+uint32_t
+AlsaAudioBackend::period_size () const
+{
+	return _periods_per_cycle;
 }
 
 bool
@@ -1208,6 +1236,8 @@ AlsaAudioBackend::register_system_audio_ports()
 	const int a_ins = _n_inputs;
 	const int a_out = _n_outputs;
 
+	// TODO set latency depending on _periods_per_cycle and  _samples_per_period
+
 	/* audio ports */
 	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_input_latency);
 	for (int i = 1; i <= a_ins; ++i) {
@@ -1282,7 +1312,7 @@ AlsaAudioBackend::register_system_midi_ports()
 				LatencyRange lr;
 				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
 				set_latency_range (p, false, lr);
-				static_cast<AlsaMidiPort*>(p)->set_n_periods(2);
+				static_cast<AlsaMidiPort*>(p)->set_n_periods(_periods_per_cycle); // TODO check MIDI alignment
 				_system_midi_out.push_back(static_cast<AlsaPort*>(p));
 				_rmidi_out.push_back (mout);
 			}

@@ -148,10 +148,10 @@ class AlsaMidiPort : public AlsaPort {
 		const AlsaMidiBuffer * const_buffer () const { return & _buffer[_bufperiod]; }
 
 		void next_period() { if (_n_periods > 1) { get_buffer(0); _bufperiod = (_bufperiod + 1) % _n_periods; } }
-		void set_n_periods(int n) { if (n > 0 && n < 3) { _n_periods = n; } }
+		void set_n_periods(int n) { if (n > 0 && n < 4) { _n_periods = n; } }
 
 	private:
-		AlsaMidiBuffer _buffer[2];
+		AlsaMidiBuffer _buffer[3];
 		int _n_periods;
 		int _bufperiod;
 }; // class AlsaMidiPort
@@ -168,6 +168,8 @@ class AlsaAudioBackend : public AudioBackend {
 		bool is_realtime () const;
 
 		bool use_separate_input_and_output_devices () const { return true; }
+		bool can_set_period_size () const { return true; }
+
 		std::vector<DeviceStatus> enumerate_devices () const;
 		std::vector<DeviceStatus> enumerate_input_devices () const;
 		std::vector<DeviceStatus> enumerate_output_devices () const;
@@ -175,6 +177,7 @@ class AlsaAudioBackend : public AudioBackend {
 		std::vector<float> available_sample_rates2 (const std::string&, const std::string&) const;
 		std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
 		std::vector<uint32_t> available_buffer_sizes2 (const std::string&, const std::string&) const;
+		std::vector<uint32_t> available_period_sizes (const std::string& driver) const;
 		uint32_t available_input_channel_count (const std::string& device) const;
 		uint32_t available_output_channel_count (const std::string& device) const;
 
@@ -186,6 +189,7 @@ class AlsaAudioBackend : public AudioBackend {
 		int set_output_device_name (const std::string&);
 		int set_sample_rate (float);
 		int set_buffer_size (uint32_t);
+		int set_peridod_size (uint32_t);
 		int set_interleaved (bool yn);
 		int set_input_channels (uint32_t);
 		int set_output_channels (uint32_t);
@@ -202,6 +206,7 @@ class AlsaAudioBackend : public AudioBackend {
 		std::string  output_device_name () const;
 		float        sample_rate () const;
 		uint32_t     buffer_size () const;
+		uint32_t     period_size () const;
 		bool         interleaved () const;
 		uint32_t     input_channels () const;
 		uint32_t     output_channels () const;
