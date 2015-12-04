@@ -421,9 +421,9 @@ EngineControl::start_engine ()
 }
 
 bool
-EngineControl::stop_engine ()
+EngineControl::stop_engine (bool for_latency)
 {
-	if (ARDOUR::AudioEngine::instance()->stop()) {
+	if (ARDOUR::AudioEngine::instance()->stop(for_latency)) {
 		MessageDialog msg(*this,
 		                  ARDOUR::AudioEngine::instance()->get_last_backend_error());
 		msg.run();
@@ -2301,7 +2301,8 @@ EngineControl::push_state_to_backend (bool start)
 
 	/* determine if we need to stop the backend before changing parameters */
 
-	if (change_driver || change_device || change_channels || change_latency ||
+	if (change_driver || change_device || change_channels ||
+			(change_latency && !backend->can_change_systemic_latency_when_running ()) ||
 			(change_rate && !backend->can_change_sample_rate_when_running()) ||
 			change_midi ||
 			(change_bufsize && !backend->can_change_buffer_size_when_running())) {
@@ -2378,6 +2379,10 @@ EngineControl::push_state_to_backend (bool start)
 					backend->set_midi_device_enabled ((*p)->name, true);
 				} else {
 					backend->set_midi_device_enabled ((*p)->name, false);
+				}
+				if (backend->can_change_systemic_latency_when_running ()) {
+					backend->set_systemic_midi_input_latency ((*p)->name, 0);
+					backend->set_systemic_midi_output_latency ((*p)->name, 0);
 				}
 				continue;
 			}
@@ -2630,8 +2635,7 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 		/* latency tab */
 
 		if (ARDOUR::AudioEngine::instance()->running()) {
-			// TODO - mark as 'stopped for latency
-			stop_engine ();
+			stop_engine (true);
 		}
 
 		{
