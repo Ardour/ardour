@@ -68,5 +68,5 @@ static ControlProtocolDescriptor faderport_midi_descriptor = {
 	/*destroy :           */   delete_faderport_midi_protocol
 };
 
-extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { printf("HERE ********************************\n"); return &faderport_midi_descriptor; }
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &faderport_midi_descriptor; }
 
