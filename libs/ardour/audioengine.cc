@@ -1278,9 +1278,9 @@ AudioEngine::prepare_for_latency_measurement ()
 	}
 
 	if (start (true)) {
-		_started_for_latency = true;
 		return -1;
 	}
+	_started_for_latency = true;
 
 	return 0;
 }
