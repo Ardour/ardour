@@ -228,6 +228,22 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     virtual std::vector<DeviceStatus> enumerate_output_devices () const
     { return std::vector<DeviceStatus>(); }
 
+
+	/** An interface to set buffers/period for playback latency.
+	 * useful for ALSA or JACK/ALSA on Linux.
+	 *
+	 * @return true if the backend supports period-size configuration
+	 */
+	virtual bool can_set_period_size () const { return false; }
+
+	/** Returns a vector of supported period-sizes for the given driver */
+	virtual std::vector<uint32_t> available_period_sizes (const std::string& driver) const { return std::vector<uint32_t>(); }
+
+	/** Set the period size to be used.
+	 * must be called before starting the backend.
+	 */
+	virtual int set_peridod_size (uint32_t) { return -1; }
+
 	/**
 	 * @return true if backend supports requesting an update to the device list
 	 * and any cached properties associated with the devices.
@@ -426,6 +442,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     virtual uint32_t     systemic_output_latency () const = 0;
     virtual uint32_t     systemic_midi_input_latency (std::string const) const = 0;
     virtual uint32_t     systemic_midi_output_latency (std::string const) const = 0;
+    virtual uint32_t     period_size () const { return 0; }
 
     /** override this if this implementation returns true from
      * requires_driver_selection()
