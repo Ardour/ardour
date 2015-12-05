@@ -1665,9 +1665,9 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 
 		if ((sb > sa) && (eb <= ea)) {
 			overlap = OverlapInternal;
-		} else if ((eb >= sa) && (eb <= ea)) {
+		} else if ((eb > sa) && (eb <= ea)) {
 			overlap = OverlapStart;
-		} else if ((sb > sa) && (sb <= ea)) {
+		} else if ((sb > sa) && (sb < ea)) {
 			overlap = OverlapEnd;
 		} else if ((sa >= sb) && (sa <= eb) && (ea <= eb)) {
 			overlap = OverlapExternal;
