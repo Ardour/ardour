@@ -752,11 +752,12 @@ def configure(conf):
     if Options.options.freedesktop:
         output = subprocess.Popen("itstool --version", shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
         o = output[0].decode('utf-8')
+        itstool = o.split(' ')[0]
         version = o.split(' ')[1].split('.')
         # use  distutils.version.StrictVersion  or something python to check >= 1.0.4
         # but first make sure that all build-hosts (incl. OSX-10.5/PPC) have that python lib.
         # lazy approach: just use major version 2.X.X
-        if version[0] < "2":
+        if itstool != "itstool" or version[0] < "2":
             print("--freedesktop requires itstool > 2.0.0 to translate files.")
             sys.exit(-1)
 
