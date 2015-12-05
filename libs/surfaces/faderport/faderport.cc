@@ -769,6 +769,7 @@ FaderPort::set_state (const XMLNode& node, int version)
 bool
 FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
+	DEBUG_TRACE (DEBUG::FaderPort, "FaderPort::connection_handler  start\n");
 	if (!_input_port || !_output_port) {
 		return false;
 	}
@@ -789,6 +790,7 @@ FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1,
 			connection_state &= ~OutputConnected;
 		}
 	} else {
+		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("Connections between %1 and %2 changed, but I ignored it\n", name1, name2));
 		/* not our ports */
 		return false;
 	}
@@ -809,6 +811,8 @@ FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1,
 	}
 
 	ConnectionChange (); /* emit signal for our GUI */
+
+	DEBUG_TRACE (DEBUG::FaderPort, "FaderPort::connection_handler  end\n");
 
 	return true; /* connection status changed */
 }
