@@ -91,6 +91,8 @@ SessionDirectory::old_sound_path () const
 	return Glib::build_filename (m_root_path, old_sound_dir_name);
 }
 
+static bool leading_dot (const std::string& value) { return value.at(0) == '.'; }
+
 const std::string
 SessionDirectory::sources_root () const
 {
@@ -141,6 +143,9 @@ SessionDirectory::sources_root () const
 		Glib::Dir dir(sources_root_path);
 
 		std::list<std::string> entries (dir.begin(), dir.end());
+
+		// filter out dirs starting with a dot. e.g ".DS_Store"
+		entries.remove_if (leading_dot);
 
 		if (entries.size() == 1) {
 			if (entries.front() != legalized_root) {
