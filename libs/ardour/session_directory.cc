@@ -91,8 +91,6 @@ SessionDirectory::old_sound_path () const
 	return Glib::build_filename (m_root_path, old_sound_dir_name);
 }
 
-static bool leading_dot (const std::string& value) { return value.at(0) == '.'; }
-
 const std::string
 SessionDirectory::sources_root () const
 {
@@ -142,10 +140,20 @@ SessionDirectory::sources_root () const
 	try {
 		Glib::Dir dir(sources_root_path);
 
-		std::list<std::string> entries (dir.begin(), dir.end());
+		std::list<std::string> entries;
 
-		// filter out dirs starting with a dot. e.g ".DS_Store"
-		entries.remove_if (leading_dot);
+		for (Glib::DirIterator di = dir.begin(); di != dir.end(); di++) {
+			// ignore hidden files (eg. OS X ".DS_Store")
+			if ((*di).at(0) == '.') {
+				continue;
+			}
+			// and skip regular files (eg. Win Thumbs.db)
+			string fullpath = Glib::build_filename (sources_root_path, *di);
+			if (!Glib::file_test (fullpath, Glib::FILE_TEST_IS_DIR)) {
+				continue;
+			}
+			entries.push_back(*di);
+		}
 
 		if (entries.size() == 1) {
 			if (entries.front() != legalized_root) {
