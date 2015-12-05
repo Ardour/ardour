@@ -69,9 +69,9 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _systemic_audio_output_latency (0)
 	, _dsp_load (0)
 	, _processed_samples (0)
-	, _port_change_flag (false)
 	, _midi_ins (0)
 	, _midi_outs (0)
+	, _port_change_flag (false)
 {
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
