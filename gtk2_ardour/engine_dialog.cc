@@ -321,6 +321,8 @@ EngineControl::connect_changed_signals ()
 	    sigc::mem_fun (*this, &EngineControl::sample_rate_changed));
 	buffer_size_combo_connection = buffer_size_combo.signal_changed ().connect (
 	    sigc::mem_fun (*this, &EngineControl::buffer_size_changed));
+	nperiods_combo_connection = nperiods_combo.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::nperiods_changed));
 	device_combo_connection = device_combo.signal_changed ().connect (
 	    sigc::mem_fun (*this, &EngineControl::device_changed));
 	midi_option_combo_connection = midi_option_combo.signal_changed ().connect (
@@ -350,6 +352,7 @@ EngineControl::block_changed_signals ()
 		driver_combo_connection.block ();
 		sample_rate_combo_connection.block ();
 		buffer_size_combo_connection.block ();
+		nperiods_combo_connection.block ();
 		device_combo_connection.block ();
 		input_device_combo_connection.block ();
 		output_device_combo_connection.block ();
@@ -370,6 +373,7 @@ EngineControl::unblock_changed_signals ()
 		driver_combo_connection.unblock ();
 		sample_rate_combo_connection.unblock ();
 		buffer_size_combo_connection.unblock ();
+		nperiods_combo_connection.unblock ();
 		device_combo_connection.unblock ();
 		input_device_combo_connection.unblock ();
 		output_device_combo_connection.unblock ();
@@ -572,9 +576,18 @@ EngineControl::build_full_control_notebook ()
 	buffer_size_duration_label.set_alignment (0.0); /* left-align */
 	basic_packer.attach (buffer_size_duration_label, 2, 3, row, row+1, SHRINK, (AttachOptions) 0);
 
-	/* button spans 2 rows */
+	int ctrl_btn_span = 1;
+	if (backend->can_set_period_size ()) {
+		row++;
+		label = manage (left_aligned_label (_("Periods:")));
+		basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
+		basic_packer.attach (nperiods_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
+		++ctrl_btn_span;
+	}
 
-	basic_packer.attach (control_app_button, 3, 4, row-1, row+1, xopt, xopt);
+	/* button spans 2 or 3 rows */
+
+	basic_packer.attach (control_app_button, 3, 4, row - ctrl_btn_span, row + 1, xopt, xopt);
 	row++;
 
 	input_channels.set_name ("InputChannels");
@@ -829,6 +842,19 @@ EngineControl::update_sensitivity ()
 	} else {
 		sample_rate_combo.set_sensitive (false);
 		valid = false;
+	}
+
+	if (get_popdown_string_count (nperiods_combo) > 0) {
+		if (!ARDOUR::AudioEngine::instance()->running()) {
+			nperiods_combo.set_sensitive (true);
+		} else {
+			nperiods_combo.set_sensitive (false);
+		}
+	} else {
+		nperiods_combo.set_sensitive (false);
+		if (backend->can_set_period_size()) {
+			valid = false;
+		}
 	}
 
 	if (_have_control) {
@@ -1443,6 +1469,31 @@ EngineControl::set_buffersize_popdown_strings ()
 }
 
 void
+EngineControl::set_nperiods_popdown_strings ()
+{
+	DEBUG_ECONTROL ("set_nperiods_popdown_strings");
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	vector<uint32_t> np;
+	vector<string> s;
+
+	if (backend->can_set_period_size()) {
+		np = backend->available_period_sizes (get_driver());
+	}
+
+	for (vector<uint32_t>::const_iterator x = np.begin(); x != np.end(); ++x) {
+		s.push_back (nperiods_as_string (*x));
+	}
+
+	set_popdown_strings (nperiods_combo, s);
+
+	if (!s.empty()) {
+		set_active_text_if_present (nperiods_combo, nperiods_as_string (backend->period_size())); // XXX 
+	}
+
+	update_sensitivity ();
+}
+
+void
 EngineControl::device_changed ()
 {
 	SignalBlocker blocker (*this, "device_changed");
@@ -1490,6 +1541,7 @@ EngineControl::device_changed ()
 
 		set_samplerate_popdown_strings ();
 		set_buffersize_popdown_strings ();
+		set_nperiods_popdown_strings ();
 
 		/* TODO set min + max channel counts here */
 
@@ -1528,6 +1580,15 @@ EngineControl::bufsize_as_string (uint32_t sz)
 	return buf;
 }
 
+string
+EngineControl::nperiods_as_string (uint32_t np)
+{
+	char buf[8];
+	snprintf (buf, sizeof (buf), "%u", np);
+	return buf;
+}
+
+
 void
 EngineControl::sample_rate_changed ()
 {
@@ -1548,6 +1609,13 @@ EngineControl::buffer_size_changed ()
 }
 
 void
+EngineControl::nperiods_changed ()
+{
+	DEBUG_ECONTROL ("nperiods_changed");
+	show_buffer_duration ();
+}
+
+void
 EngineControl::show_buffer_duration ()
 {
 	DEBUG_ECONTROL ("show_buffer_duration");
@@ -1559,17 +1627,12 @@ EngineControl::show_buffer_duration ()
 	uint32_t samples = atoi (bs_text); /* will ignore trailing text */
 	uint32_t rate = get_rate();
 
-	/* Developers: note the hard-coding of a double buffered model
-	   in the (2 * samples) computation of latency. we always start
-	   the audiobackend in this configuration.
-	 */
-	/* note to jack1 developers: ardour also always starts the engine
-	 * in async mode (no jack2 --sync option) which adds an extra cycle
-	 * of latency with jack2 (and *3 would be correct)
-	 * The value can also be wrong if jackd is started externally..
+	/* Except for ALSA and Dummy backends, we don't know the number of periods
+	 * per cycle and settings.
 	 *
-	 * At the time of writing the ALSA backend always uses double-buffering *2,
-	 * The Dummy backend *1, and who knows what ASIO really does :)
+	 * jack1 vs jack2 have different default latencies since jack2 start
+	 * in async-mode unless --sync is given which adds an extra cycle
+	 * of latency. The value is not known if jackd is started externally..
 	 *
 	 * So just display the period size, that's also what
 	 * ARDOUR_UI::update_sample_rate() does for the status bar.
@@ -1762,6 +1825,7 @@ EngineControl::store_state (State state)
 	state->output_device = get_output_device_name ();
 	state->sample_rate = get_rate ();
 	state->buffer_size = get_buffer_size ();
+	state->n_periods = get_nperiods ();
 	state->input_latency = get_input_latency ();
 	state->output_latency = get_output_latency ();
 	state->input_channels = get_input_channels ();
@@ -1788,6 +1852,8 @@ EngineControl::maybe_display_saved_state ()
 			sample_rate_combo.set_active_text (rate_as_string (state->sample_rate));
 		}
 		set_active_text_if_present (buffer_size_combo, bufsize_as_string (state->buffer_size));
+
+		set_active_text_if_present (nperiods_combo, nperiods_as_string (state->n_periods));
 		/* call this explicitly because we're ignoring changes to
 		   the controls at this point.
 		 */
@@ -1826,6 +1892,7 @@ EngineControl::get_state ()
 			node->add_property ("output-device", (*i)->output_device);
 			node->add_property ("sample-rate", (*i)->sample_rate);
 			node->add_property ("buffer-size", (*i)->buffer_size);
+			node->add_property ("n-periods", (*i)->n_periods);
 			node->add_property ("input-latency", (*i)->input_latency);
 			node->add_property ("output-latency", (*i)->output_latency);
 			node->add_property ("input-channels", (*i)->input_channels);
@@ -1942,6 +2009,13 @@ EngineControl::set_state (const XMLNode& root)
 				continue;
 			}
 			state->buffer_size = atoi (prop->value ());
+
+			if ((prop = grandchild->property ("n-periods")) == 0) {
+				// optional (new value in 4.5)
+				state->n_periods = 0;
+			} else {
+				state->n_periods = atoi (prop->value ());
+			}
 
 			if ((prop = grandchild->property ("input-latency")) == 0) {
 				continue;
@@ -2137,6 +2211,7 @@ EngineControl::set_current_state (const State& state)
 	output_device_combo.set_active_text (state->output_device);
 	sample_rate_combo.set_active_text (rate_as_string (state->sample_rate));
 	set_active_text_if_present (buffer_size_combo, bufsize_as_string (state->buffer_size));
+	set_active_text_if_present (nperiods_combo, nperiods_as_string (state->n_periods));
 	input_latency.set_value (state->input_latency);
 	output_latency.set_value (state->output_latency);
 	midi_option_combo.set_active_text (state->midi_option);
@@ -2161,6 +2236,7 @@ EngineControl::push_state_to_backend (bool start)
 	bool change_device = false;
 	bool change_rate = false;
 	bool change_bufsize = false;
+	bool change_nperiods = false;
 	bool change_latency = false;
 	bool change_channels = false;
 	bool change_midi = false;
@@ -2205,6 +2281,10 @@ EngineControl::push_state_to_backend (bool start)
 				change_bufsize = true;
 			}
 
+			if (backend->can_set_period_size() && get_nperiods() != backend->period_size()) {
+				change_nperiods = true;
+			}
+
 			if (get_midi_option() != backend->midi_option()) {
 				change_midi = true;
 			}
@@ -2244,6 +2324,7 @@ EngineControl::push_state_to_backend (bool start)
 			change_channels = true;
 			change_latency = true;
 			change_midi = true;
+			change_nperiods = backend->can_set_period_size();
 		}
 
 	} else {
@@ -2301,7 +2382,7 @@ EngineControl::push_state_to_backend (bool start)
 
 	/* determine if we need to stop the backend before changing parameters */
 
-	if (change_driver || change_device || change_channels ||
+	if (change_driver || change_device || change_channels || change_nperiods ||
 			(change_latency && !backend->can_change_systemic_latency_when_running ()) ||
 			(change_rate && !backend->can_change_sample_rate_when_running()) ||
 			change_midi ||
@@ -2310,6 +2391,7 @@ EngineControl::push_state_to_backend (bool start)
 	} else {
 		restart_required = false;
 	}
+
 
 	if (was_running) {
 		if (restart_required) {
@@ -2344,6 +2426,10 @@ EngineControl::push_state_to_backend (bool start)
 	}
 	if (change_bufsize && backend->set_buffer_size (get_buffer_size())) {
 		error << string_compose (_("Cannot set buffer size to %1"), get_buffer_size()) << endmsg;
+		return -1;
+	}
+	if (change_nperiods && backend->set_peridod_size (get_nperiods())) {
+		error << string_compose (_("Cannot set periods to %1"), get_nperiods()) << endmsg;
 		return -1;
 	}
 
@@ -2471,6 +2557,13 @@ EngineControl::get_buffer_size () const
 	}
 
 	return samples;
+}
+
+uint32_t
+EngineControl::get_nperiods () const
+{
+	string txt = nperiods_combo.get_active_text ();
+	return atoi (txt.c_str());
 }
 
 string
@@ -2905,6 +2998,10 @@ EngineControl::engine_running ()
 
 	set_active_text_if_present (buffer_size_combo, bufsize_as_string (backend->buffer_size()));
 	sample_rate_combo.set_active_text (rate_as_string (backend->sample_rate()));
+
+	if (backend->can_set_period_size ()) {
+		set_active_text_if_present (nperiods_combo, nperiods_as_string (backend->period_size()));
+	}
 
 	connect_disconnect_button.set_label (string_compose (_("Disconnect from %1"), backend->name()));
 	connect_disconnect_button.show();

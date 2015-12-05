@@ -70,6 +70,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     Gtk::ComboBoxText midi_option_combo;
     Gtk::ComboBoxText buffer_size_combo;
     Gtk::Label        buffer_size_duration_label;
+    Gtk::ComboBoxText nperiods_combo;
     Gtk::Adjustment input_latency_adjustment;
     Gtk::SpinButton input_latency;
     Gtk::Adjustment output_latency_adjustment;
@@ -128,6 +129,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void backend_changed ();
     void sample_rate_changed ();
     void buffer_size_changed ();
+    void nperiods_changed ();
     void parameter_changed ();
     void midi_option_changed ();
 
@@ -137,7 +139,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
 	void update_midi_options ();
 
-    std::string bufsize_as_string (uint32_t);
+	std::string bufsize_as_string (uint32_t);
+	std::string nperiods_as_string (uint32_t);
 
 	std::vector<float> get_default_sample_rates ();
 	std::vector<uint32_t> get_default_buffer_sizes ();
@@ -147,6 +150,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     float get_rate() const;
     uint32_t get_buffer_size() const;
+    uint32_t get_nperiods() const;
     uint32_t get_input_channels() const;
     uint32_t get_output_channels() const;
     uint32_t get_input_latency() const;
@@ -170,6 +174,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     bool set_output_device_popdown_strings ();
     void set_samplerate_popdown_strings ();
     void set_buffersize_popdown_strings ();
+    void set_nperiods_popdown_strings ();
     void list_devices ();
     void show_buffer_duration ();
 
@@ -210,6 +215,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	std::string output_device;
 	float sample_rate;
 	uint32_t buffer_size;
+	uint32_t n_periods;
 	uint32_t input_latency;
 	uint32_t output_latency;
 	uint32_t input_channels;
@@ -284,6 +290,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	sigc::connection driver_combo_connection;
 	sigc::connection sample_rate_combo_connection;
 	sigc::connection buffer_size_combo_connection;
+	sigc::connection nperiods_combo_connection;
 	sigc::connection device_combo_connection;
 	sigc::connection input_device_combo_connection;
 	sigc::connection output_device_combo_connection;
