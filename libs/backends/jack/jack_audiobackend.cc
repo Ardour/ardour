@@ -54,6 +54,7 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, boos
 	, _freewheeling (false)
 	, _target_sample_rate (48000)
 	, _target_buffer_size (1024)
+	, _target_num_periods (2)
 	, _target_interleaved (false)
 	, _target_input_channels (0)
 	, _target_output_channels (0)
@@ -203,6 +204,17 @@ JACKAudioBackend::available_buffer_sizes (const string& device) const
 	return s;
 }
 
+std::vector<uint32_t>
+JACKAudioBackend::available_period_sizes (const std::string& driver) const
+{
+	vector<uint32_t> s;
+	if (ARDOUR::get_jack_audio_driver_supports_setting_period_count (driver)) {
+		s.push_back (2);
+		s.push_back (3);
+	}
+	return s;
+}
+
 uint32_t
 JACKAudioBackend::available_input_channel_count (const string& /*device*/) const
 {
@@ -243,6 +255,16 @@ JACKAudioBackend::set_sample_rate (float sr)
                 return 0;
 	}
 
+	return -1;
+}
+
+int
+JACKAudioBackend::set_peridod_size (uint32_t nperiods)
+{
+	if (!available()) {
+		_target_num_periods = nperiods;
+		return 0;
+	}
 	return -1;
 }
 
@@ -381,6 +403,12 @@ JACKAudioBackend::buffer_size () const
 	return _target_buffer_size;
 }
 
+uint32_t
+JACKAudioBackend::period_size () const
+{
+	return _target_num_periods;
+}
+
 bool
 JACKAudioBackend::interleaved () const
 {
@@ -461,7 +489,7 @@ JACKAudioBackend::setup_jack_startup_command (bool for_latency_measurement)
 	options.driver = _target_driver;
 	options.samplerate = _target_sample_rate;
 	options.period_size = _target_buffer_size;
-	options.num_periods = 2;
+	options.num_periods = _target_num_periods;
 	options.input_device = _target_device;
 	options.output_device = _target_device;
 	if (for_latency_measurement) {

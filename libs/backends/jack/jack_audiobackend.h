@@ -58,6 +58,7 @@ class JACKAudioBackend : public AudioBackend {
 
     std::vector<float> available_sample_rates (const std::string& device) const;
     std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
+    std::vector<uint32_t> available_period_sizes (const std::string& driver) const;
     uint32_t available_input_channel_count (const std::string& device) const;
     uint32_t available_output_channel_count (const std::string& device) const;
 
@@ -67,6 +68,7 @@ class JACKAudioBackend : public AudioBackend {
     int set_device_name (const std::string&);
     int set_sample_rate (float);
     int set_buffer_size (uint32_t);
+    int set_peridod_size (uint32_t);
     int set_interleaved (bool yn);
     int set_input_channels (uint32_t);
     int set_output_channels (uint32_t);
@@ -80,6 +82,7 @@ class JACKAudioBackend : public AudioBackend {
     std::string  device_name () const;
     float        sample_rate () const;
     uint32_t     buffer_size () const;
+    uint32_t     period_size () const;
     bool         interleaved () const;
     uint32_t     input_channels () const;
     uint32_t     output_channels () const;
@@ -167,6 +170,9 @@ class JACKAudioBackend : public AudioBackend {
     bool can_set_systemic_midi_latencies () const {
 	return false;
     }
+    bool can_set_period_size () const {
+	return true;
+    }
 
     int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index);
     int      midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
@@ -253,6 +259,7 @@ class JACKAudioBackend : public AudioBackend {
     std::string  _target_device;
     float        _target_sample_rate;
     uint32_t     _target_buffer_size;
+    uint32_t     _target_num_periods;
     SampleFormat _target_sample_format;
     bool         _target_interleaved;
     uint32_t     _target_input_channels;
