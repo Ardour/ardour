@@ -308,12 +308,12 @@ setup_enum_writer ()
 	REGISTER (_LayerModel);
 
 	REGISTER_ENUM (InsertMergeReject);
-        REGISTER_ENUM (InsertMergeRelax);
-        REGISTER_ENUM (InsertMergeReplace);
-        REGISTER_ENUM (InsertMergeTruncateExisting);
-        REGISTER_ENUM (InsertMergeTruncateAddition);
-        REGISTER_ENUM (InsertMergeExtend);
-        REGISTER (_InsertMergePolicy);
+	REGISTER_ENUM (InsertMergeRelax);
+	REGISTER_ENUM (InsertMergeReplace);
+	REGISTER_ENUM (InsertMergeTruncateExisting);
+	REGISTER_ENUM (InsertMergeTruncateAddition);
+	REGISTER_ENUM (InsertMergeExtend);
+	REGISTER (_InsertMergePolicy);
 
 	REGISTER_ENUM (AfterFaderListen);
 	REGISTER_ENUM (PreFaderListen);
