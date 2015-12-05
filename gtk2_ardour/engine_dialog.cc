@@ -852,9 +852,6 @@ EngineControl::update_sensitivity ()
 		}
 	} else {
 		nperiods_combo.set_sensitive (false);
-		if (backend->can_set_period_size()) {
-			valid = false;
-		}
 	}
 
 	if (_have_control) {
@@ -2281,7 +2278,8 @@ EngineControl::push_state_to_backend (bool start)
 				change_bufsize = true;
 			}
 
-			if (backend->can_set_period_size() && get_nperiods() != backend->period_size()) {
+			if (backend->can_set_period_size() && get_popdown_string_count (nperiods_combo) > 0
+					&& get_nperiods() != backend->period_size()) {
 				change_nperiods = true;
 			}
 
@@ -2324,7 +2322,7 @@ EngineControl::push_state_to_backend (bool start)
 			change_channels = true;
 			change_latency = true;
 			change_midi = true;
-			change_nperiods = backend->can_set_period_size();
+			change_nperiods = backend->can_set_period_size() && get_popdown_string_count (nperiods_combo) > 0;
 		}
 
 	} else {
