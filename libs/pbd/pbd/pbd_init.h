@@ -17,9 +17,16 @@
 
 */
 
-#ifndef __libpbd_pbd_h__
-#define __libpbd_pbd_h__
+#ifndef __libpbd_pbd_init_h__
+#define __libpbd_pbd_init_h__
 
-#include "pbd_init.h"
+#include "pbd/libpbd_visibility.h"
+
+namespace PBD {
+
+	LIBPBD_API bool init ();
+	LIBPBD_API void cleanup ();
+
+} // namespace PBD
 
 #endif

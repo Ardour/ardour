@@ -29,7 +29,7 @@
 
 #include <glibmm/thread.h>
 
-#include "pbd/pbd.h"
+#include "pbd/pbd_init.h"
 #include "pbd/debug.h"
 #include "pbd/error.h"
 #include "pbd/id.h"
