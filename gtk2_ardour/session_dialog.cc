@@ -740,13 +740,13 @@ SessionDialog::redisplay_recent_sessions ()
 			row[recent_session_columns.sample_rate] = rate_as_string (sr);
 			switch (sf) {
 			case FormatFloat:
-				row[recent_session_columns.disk_format] = _("32 bit float");
+				row[recent_session_columns.disk_format] = _("32-bit float");
 				break;
 			case FormatInt24:
-				row[recent_session_columns.disk_format] = _("24 bit");
+				row[recent_session_columns.disk_format] = _("24-bit");
 				break;
 			case FormatInt16:
-				row[recent_session_columns.disk_format] = _("16 bit");
+				row[recent_session_columns.disk_format] = _("16-bit");
 				break;
 			}
 		} else {
@@ -787,13 +787,13 @@ SessionDialog::redisplay_recent_sessions ()
 					child_row[recent_session_columns.sample_rate] = rate_as_string (sr);
 					switch (sf) {
 					case FormatFloat:
-						child_row[recent_session_columns.disk_format] = _("32 bit float");
+						child_row[recent_session_columns.disk_format] = _("32-bit float");
 						break;
 					case FormatInt24:
-						child_row[recent_session_columns.disk_format] = _("24 bit");
+						child_row[recent_session_columns.disk_format] = _("24-bit");
 						break;
 					case FormatInt16:
-						child_row[recent_session_columns.disk_format] = _("16 bit");
+						child_row[recent_session_columns.disk_format] = _("16-bit");
 						break;
 					}
 				} else {

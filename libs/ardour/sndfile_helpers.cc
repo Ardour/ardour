@@ -34,7 +34,7 @@ const char * const sndfile_header_formats_strings[SNDFILE_HEADER_FORMATS+1] = {
 	N_("WAV"),
 	N_("AIFF"),
 	N_("CAF"),
-	N_("W64 (64 bit WAV)"),
+	N_("W64 (64-bit WAV)"),
 	N_("FLAC"),
 	N_("Ogg/Vorbis"),
 	N_("raw (no header)"),
@@ -63,11 +63,11 @@ int sndfile_header_formats[SNDFILE_HEADER_FORMATS] = {
 };
 
 const char * const sndfile_bitdepth_formats_strings[SNDFILE_BITDEPTH_FORMATS+1] = {
-	N_("Signed 16 bit PCM"),
-	N_("Signed 24 bit PCM"),
-	N_("Signed 32 bit PCM"),
-	N_("Signed 8 bit PCM"),
-	N_("32 bit float"),
+	N_("Signed 16-bit PCM"),
+	N_("Signed 24-bit PCM"),
+	N_("Signed 32-bit PCM"),
+	N_("Signed 8-bit PCM"),
+	N_("32-bit float"),
 	0
 };
 

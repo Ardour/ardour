@@ -156,19 +156,19 @@ HasSampleFormat::get_sample_format_name (ExportFormatBase::SampleFormat format)
 {
 	switch (format) {
 	  case ExportFormatBase::SF_8:
-		return _("8bit");
+		return _("8-bit");
 	  case ExportFormatBase::SF_16:
-		return _("16bit");
+		return _("16-bit");
 	  case ExportFormatBase::SF_24:
-		return _("24bit");
+		return _("24-bit");
 	  case ExportFormatBase::SF_32:
-		return _("32bit");
+		return _("32-bit");
 	  case ExportFormatBase::SF_Float:
 		return _("float");
 	  case ExportFormatBase::SF_Double:
 		return _("double");
 	  case ExportFormatBase::SF_U8:
-		return _("8bit unsigned");
+		return _("8-bit unsigned");
 	  case ExportFormatBase::SF_Vorbis:
 		return _("Vorbis sample format");
 	  case ExportFormatBase::SF_None:

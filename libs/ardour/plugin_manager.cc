@@ -831,13 +831,13 @@ static std::string dll_info (std::string path) {
 	type = *((uint16_t*) &buf[4]);
 	switch (type) {
 		case 0x014c:
-			rv = _("i386 (32bit)");
+			rv = _("i386 (32-bit)");
 			break;
 		case  0x0200:
 			rv = _("Itanium");
 			break;
 		case 0x8664:
-			rv = _("x64 (64bit)");
+			rv = _("x64 (64-bit)");
 			break;
 		case 0:
 			rv = _("Native Architecture");
