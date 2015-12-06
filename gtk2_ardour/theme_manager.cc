@@ -91,7 +91,6 @@ ThemeManager::ThemeManager()
 	alias_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	alias_display.get_column (1)->set_expand (false);
 	alias_display.set_reorderable (false);
-	alias_display.get_selection()->set_mode (SELECTION_NONE);
 	alias_display.set_headers_visible (true);
 
 	alias_display.signal_button_press_event().connect (sigc::mem_fun (*this, &ThemeManager::alias_button_press_event), false);
