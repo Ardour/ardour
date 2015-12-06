@@ -29,24 +29,7 @@ def configure(conf):
 def build(bld):
     # Host Library
     obj = bld(features = 'cxx cxxshlib')
-    obj.source = '''
-            dsp/onsets/DetectionFunction.cpp
-            dsp/onsets/PeakPicking.cpp
-            dsp/phasevocoder/PhaseVocoder.cpp
-            dsp/rateconversion/Decimator.cpp
-            dsp/rhythm/BeatSpectrum.cpp
-            dsp/signalconditioning/DFProcess.cpp
-            dsp/signalconditioning/Filter.cpp
-            dsp/signalconditioning/FiltFilt.cpp
-            dsp/signalconditioning/Framer.cpp
-            dsp/transforms/FFT.cpp
-            dsp/wavelet/Wavelet.cpp
-            maths/Correlation.cpp
-            maths/CosineDistance.cpp
-            maths/KLDivergence.cpp
-            maths/MathUtilities.cpp
-            base/Pitch.cpp
-    '''
+    obj.source = 'qm-dsp.cpp'
     autowaf.ensure_visible_symbols (obj, True)
     obj.export_includes = ['.']
     obj.includes     = ['.']
