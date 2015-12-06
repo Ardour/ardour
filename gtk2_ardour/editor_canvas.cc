@@ -698,6 +698,7 @@ Editor::autoscroll_canvas ()
 		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (cx, cy));
 		ev.x = d.x;
 		ev.y = d.y;
+		ev.state = mask;
 
 		motion_handler (0, (GdkEvent*) &ev, true);
 
@@ -738,6 +739,7 @@ Editor::autoscroll_canvas ()
 		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (cx, cy));
 		ev.x = d.x;
 		ev.y = d.y;
+		ev.state = mask;
 
 		motion_handler (0, (GdkEvent*) &ev, true);
 
