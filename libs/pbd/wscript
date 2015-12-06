@@ -28,61 +28,7 @@ out = 'build'
 
 path_prefix = 'libs/pbd/'
 
-libpbd_sources = [
-    'basename.cc',
-    'base_ui.cc',
-    'boost_debug.cc',
-    'cartesian.cc',
-    'command.cc',
-    'configuration_variable.cc',
-    'convert.cc',
-    'controllable.cc',
-    'controllable_descriptor.cc',
-    'crossthread.cc',
-    'cpus.cc',
-    'debug.cc',
-    'demangle.cc',
-    'enumwriter.cc',
-    'event_loop.cc',
-    'enums.cc',
-    'epa.cc',
-    'error.cc',
-    'ffs.cc',
-    'file_utils.cc',
-    'fpu.cc',
-    'id.cc',
-    'locale_guard.cc',
-    'localtime_r.cc',
-    'malign.cc',
-    'md5.cc',
-    'mountpoint.cc',
-    'openuri.cc',
-    'pathexpand.cc',
-    'pbd_init.cc',
-    'pool.cc',
-    'property_list.cc',
-    'pthread_utils.cc',
-    'receiver.cc',
-    'resource.cc',
-    'search_path.cc',
-    'semutils.cc',
-    'shortpath.cc',
-    'signals.cc',
-    'stacktrace.cc',
-    'stateful_diff_command.cc',
-    'stateful.cc',
-    'strreplace.cc',
-    'strsplit.cc',
-    'system_exec.cc',
-    'textreceiver.cc',
-    'timer.cc',
-    'timing.cc',
-    'transmitter.cc',
-    'undo.cc',
-    'uuid.cc',
-    'whitespace.cc',
-    'xml++.cc',
-]
+libpbd_sources = [ 'pbd.cc' ]
 
 def options(opt):
     autowaf.set_options(opt)
@@ -147,9 +93,6 @@ def build(bld):
         obj.defines += [ 'USE_X86_64_ASM' ]
     if bld.env['build_target'] == 'mingw':
         obj.defines += [ 'NO_POSIX_MEMALIGN' ]
-        obj.source += [ 'windows_special_dirs.cc' ]
-        obj.source += [ 'windows_timer_utils.cc' ]
-        obj.source += [ 'windows_mmcss.cc' ]
         obj.uselib += ' OLE'
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
