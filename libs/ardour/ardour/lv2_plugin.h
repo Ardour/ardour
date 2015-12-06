@@ -97,6 +97,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void cleanup ();
 
 	int set_block_size (pframes_t);
+	bool requires_fixed_sized_buffers () const;
 
 	int connect_and_run (BufferSet& bufs,
 	                     ChanMapping in, ChanMapping out,
@@ -178,6 +179,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	uint32_t      _patch_port_in_index;
 	uint32_t      _patch_port_out_index;
 	URIMap&       _uri_map;
+	bool          _no_sample_accurate_ctrl;
 
 	friend const void* lv2plugin_get_port_value(const char* port_symbol,
 	                                            void*       user_data,

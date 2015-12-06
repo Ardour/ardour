@@ -155,6 +155,7 @@ public:
 	LilvNode* units_midiNote;
 	LilvNode* patch_writable;
 	LilvNode* patch_Message;
+	LilvNode* lv2_noSampleAccurateCtrl;
 #ifdef HAVE_LV2_1_2_0
 	LilvNode* bufz_powerOf2BlockLength;
 	LilvNode* bufz_fixedBlockLength;
@@ -286,6 +287,7 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
 	, _uri_map(URIMap::instance())
+	, _no_sample_accurate_ctrl (false)
 {
 	init(c_plugin, rate);
 }
@@ -300,6 +302,7 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
 	, _uri_map(URIMap::instance())
+	, _no_sample_accurate_ctrl (false)
 {
 	init(other._impl->plugin, other._sample_rate);
 
@@ -481,6 +484,12 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		throw failed_constructor();
 	}
 	lilv_nodes_free(required_features);
+
+	LilvNodes* optional_features = lilv_plugin_get_optional_features (plugin);
+	if (lilv_nodes_contains (optional_features, _world.lv2_noSampleAccurateCtrl)) {
+		_no_sample_accurate_ctrl = true;
+	}
+	lilv_nodes_free(optional_features);
 #endif
 
 #ifdef HAVE_LILV_0_16_0
@@ -683,6 +692,25 @@ LV2Plugin::set_block_size (pframes_t nframes)
 	}
 #endif
 	return 0;
+}
+
+bool
+LV2Plugin::requires_fixed_sized_buffers () const
+{
+	/* This controls if Ardour will split the plugin's run()
+	 * on automation events in order to pass sample-accurate automation
+	 * via standard control-ports.
+	 *
+	 * When returning true Ardour will *not* sub-divide the process-cycle.
+	 * Automation events that happen between cycle-start and cycle-end will be
+	 * ignored (ctrl values are interpolated to cycle-start).
+	 * NB. Atom Sequences are still sample accurate.
+	 *
+	 * Note: This does not guarantee a fixed block-size.
+	 * e.g The process cycle may be split when looping, also
+	 * the period-size may change any time: see set_block_size()
+	 */
+	return _no_sample_accurate_ctrl;
 }
 
 LV2Plugin::~LV2Plugin ()
@@ -2448,6 +2476,7 @@ LV2World::LV2World()
 	units_db           = lilv_new_uri(world, LV2_UNITS__db);
 	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
 	patch_Message      = lilv_new_uri(world, LV2_PATCH__Message);
+	lv2_noSampleAccurateCtrl = lilv_new_uri(world, LV2_CORE_PREFIX "NoSampleAccurateCtrl"); // XXX
 #ifdef HAVE_LV2_1_2_0
 	bufz_powerOf2BlockLength = lilv_new_uri(world, LV2_BUF_SIZE__powerOf2BlockLength);
 	bufz_fixedBlockLength    = lilv_new_uri(world, LV2_BUF_SIZE__fixedBlockLength);
@@ -2463,6 +2492,7 @@ LV2World::~LV2World()
 	lilv_node_free(bufz_fixedBlockLength);
 	lilv_node_free(bufz_powerOf2BlockLength);
 #endif
+	lilv_node_free(lv2_noSampleAccurateCtrl);
 	lilv_node_free(patch_Message);
 	lilv_node_free(patch_writable);
 	lilv_node_free(units_hz);
