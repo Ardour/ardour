@@ -114,7 +114,7 @@ def configure(conf):
 def build(bld):
 
     # Make signals_generated.h using signals.py
-    bld(rule = 'python ${SRC} ${TGT}', source = 'pbd/signals.py', target = 'pbd/signals_generated.h')
+    bld(rule = sys.executable + ' ${SRC} ${TGT}', source = 'pbd/signals.py', target = 'pbd/signals_generated.h')
 
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
