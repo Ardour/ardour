@@ -1702,9 +1702,9 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 
 	if (note->length() > 0) {
 		const framepos_t note_end_frames = min (source_beats_to_region_frames (note->end_time()), _region->length());
-		ev->set_x1 (trackview.editor().sample_to_pixel (note_end_frames));
+		ev->set_x1 (std::max(1., trackview.editor().sample_to_pixel (note_end_frames)) - 1);
 	} else {
-		ev->set_x1 (trackview.editor().sample_to_pixel (_region->length()));
+		ev->set_x1 (std::max(1., trackview.editor().sample_to_pixel (_region->length())) - 1);
 	}
 
 	ev->set_y1 (y0 + std::max(1., floor(midi_stream_view()->note_height()) - 1));
