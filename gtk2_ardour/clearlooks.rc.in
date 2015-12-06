@@ -985,11 +985,6 @@ style "ardour_button" ="default_button"
 	ythickness = 1
 }
 
-style "padded_button" = "default_button"
-{
-	xthickness = 8
-}
-
 style "tooltip" = "medium_text"
 {
 	fg[NORMAL] = @fg_tooltip
@@ -1032,8 +1027,6 @@ class "GtkCheckButton" style:highest "ardour_button"
 class "GtkArrow" style:highest "tearoff_arrow"
 class "GtkProgressBar" style:highest "ardour_progressbars"
 
-
-widget "*PaddedButton" style:highest "padded_button"
 widget "*VerboseCanvasCursor" style:highest "verbose_canvas_cursor"
 widget "*MarkerText" style:highest "marker_text"
 widget "*ArdourContextMenu*" style:highest "default_menu"

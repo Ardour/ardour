@@ -74,13 +74,10 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	HBox* docroot_hbox = manage (new HBox);
 
 	path_entry.set_width_chars(38);
-	path_browse_button.set_name ("PaddedButton");
 	path_entry.set_text("/usr/bin/harvid");
 	docroot_entry.set_width_chars(38);
 	docroot_entry.set_text(Config->get_video_server_docroot());
-	docroot_browse_button.set_name ("PaddedButton");
 
-	listenaddr_combo.set_name ("PaddedButton");
 #ifndef __APPLE__
 	/* Note: on OSX icsd is not able to bind to IPv4 localhost */
 	listenaddr_combo.append_text("127.0.0.1");

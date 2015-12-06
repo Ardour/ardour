@@ -129,8 +129,6 @@ ExportDialog::init ()
 	export_button = add_button (_("Export"), RESPONSE_FAST);
 	set_default_response (RESPONSE_FAST);
 
-	list_files_button.set_name ("PaddedButton");
-
 	cancel_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::close_dialog));
 	export_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::do_export));
 

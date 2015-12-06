@@ -61,10 +61,6 @@ ExportFilenameSelector::ExportFilenameSelector () :
 
 	path_entry.set_activates_default ();
 
-	date_format_combo.set_name ("PaddedButton");
-	time_format_combo.set_name ("PaddedButton");
-	browse_button.set_name ("PaddedButton");
-
 	label_sizegroup = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	label_sizegroup->add_widget (label_label);
 	label_sizegroup->add_widget (path_label);

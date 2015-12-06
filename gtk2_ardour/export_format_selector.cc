@@ -37,11 +37,6 @@ ExportFormatSelector::ExportFormatSelector () :
 	pack_start (remove_button, false, false, 3);
 	pack_start (new_button, false, false, 3);
 
-	format_combo.set_name ("PaddedButton");
-	edit_button.set_name ("PaddedButton");
-	remove_button.set_name ("PaddedButton");
-	new_button.set_name ("PaddedButton");
-
 	edit_button.signal_clicked().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &ExportFormatSelector::open_edit_dialog), false)));
 	remove_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &ExportFormatSelector::remove_format), true));
 	new_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportFormatSelector::add_new_format));

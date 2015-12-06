@@ -78,7 +78,6 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 
 	time_format_list = Gtk::ListStore::create (time_format_cols);
 	time_format_combo.set_model (time_format_list);
-	time_format_combo.set_name ("PaddedButton");
 
 	iter = time_format_list->append();
 	row = *iter;

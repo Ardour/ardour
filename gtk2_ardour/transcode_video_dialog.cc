@@ -95,7 +95,6 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	path_hbox->pack_start (path_label, false, false, 3);
 	path_hbox->pack_start (path_entry, true, true, 3);
 	path_hbox->pack_start (browse_button, false, false, 3);
-	browse_button.set_name ("PaddedButton");
 
 	path_entry.set_width_chars(38);
 	height_spinner.set_sensitive(false);
@@ -181,8 +180,6 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true, 4);
 
-	video_combo.set_name ("PaddedButton");
-
 	if (ffok) {
 		video_combo.append_text(_("Reference from Current Location (Previously Transcoded Files Only)"));
 		video_combo.append_text(_("Import/Transcode Video to Session"));
@@ -226,7 +223,6 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 
 	l = manage (new Label (_("Scale Video: Width = "), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, 0, 1);
-	scale_combo.set_name ("PaddedButton");
 	t->attach (scale_combo, 1, 2, 0, 1);
 	t->attach (aspect_checkbox, 2, 3, 0, 1);
 	t->attach (height_spinner, 3, 4, 0, 1);
@@ -253,7 +249,6 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 
 	l = manage (new Label (_("Extract Audio:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, 2, 3);
-	audio_combo.set_name ("PaddedButton");
 	t->attach (audio_combo, 1, 4, 2, 3);
 	t->attach (ltc_detect, 1, 4, 3, 4);
 	if (as.size() == 0) {
