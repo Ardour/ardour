@@ -120,7 +120,7 @@ PersistentTooltip::show ()
 	}
 
 	if (!_window) {
-		_window = new Window (WINDOW_POPUP);
+		_window = new Gtk::Window (WINDOW_POPUP);
 		_window->set_name (X_("ContrastingPopup"));
 		_window->set_position (WIN_POS_MOUSE);
 		_window->set_decorated (false);
