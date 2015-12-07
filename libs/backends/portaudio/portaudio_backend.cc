@@ -616,6 +616,9 @@ PortAudioBackend::portaudio_callback(const void* input,
 	                                  status_flags)) {
 		return paAbort;
 	}
+
+	process_port_connection_changes();
+
 	return paContinue;
 }
 
@@ -838,6 +841,8 @@ PortAudioBackend::freewheel_process_thread()
 		if (!blocking_process_freewheel()) {
 			break;
 		}
+
+		process_port_connection_changes();
 	}
 
 	pthread_mutex_unlock (&_freewheel_mutex);
