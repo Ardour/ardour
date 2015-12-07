@@ -645,7 +645,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 	/* compute the amount of pointer motion in frames, and where
 	   the region would be if we moved it by that much.
 	*/
-	*pending_region_position = adjusted_frame (_drags->current_pointer_frame () + snap_delta (event->button.state), event, true);
+	*pending_region_position = adjusted_frame (_drags->current_pointer_frame (), event, false);
 
 	framepos_t sync_frame;
 	framecnt_t sync_offset;
@@ -657,11 +657,12 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 	 */
 	if (sync_dir >= 0 || (sync_dir < 0 && *pending_region_position >= sync_offset)) {
 
-		sync_frame = *pending_region_position + (sync_dir * sync_offset);
+		framecnt_t const sd = snap_delta (event->button.state);
+		sync_frame = *pending_region_position + (sync_dir * sync_offset) + sd;
 
 		_editor->snap_to_with_modifier (sync_frame, event);
 
-		*pending_region_position = _primary->region()->adjust_to_sync (sync_frame) - snap_delta (event->button.state);
+		*pending_region_position = _primary->region()->adjust_to_sync (sync_frame) - sd;
 
 	} else {
 		*pending_region_position = _last_frame_position;
