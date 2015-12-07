@@ -17,6 +17,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifndef __CANVAS_UTILS_H__
+#define __CANVAS_UTILS_H__
+
 #include <cairomm/context.h>
 
 #include "canvas/visibility.h"
@@ -33,3 +36,4 @@ namespace ArdourCanvas {
 	Distance LIBCANVAS_API distance_to_segment_squared (Duple const & p, Duple const & p1, Duple const & p2, double& t, Duple& at);
 }
 
+#endif // __CANVAS_UTILS_H__
