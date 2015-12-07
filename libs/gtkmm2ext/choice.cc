@@ -41,7 +41,7 @@ Choice::Choice (string title, string prompt, vector<string> choices, bool center
 	set_name ("ChoiceWindow");
 
 	HBox* dhbox = manage (new HBox());
-	Image* dimage = manage (new Gtk::Image(Stock::DIALOG_QUESTION, Gtk::ICON_SIZE_DIALOG));
+	Gtk::Image* dimage = manage (new Gtk::Image(Stock::DIALOG_QUESTION, Gtk::ICON_SIZE_DIALOG));
 	Label* label = manage (new Label (prompt));
 
 	dhbox->pack_start (*dimage, true, false, 10);
