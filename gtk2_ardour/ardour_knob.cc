@@ -45,7 +45,6 @@
 #include "i18n.h"
 
 using namespace Gtkmm2ext;
-using namespace Gdk;
 using namespace Gtk;
 using namespace Glib;
 using namespace PBD;

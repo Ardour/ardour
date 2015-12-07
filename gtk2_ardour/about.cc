@@ -43,7 +43,6 @@
 #endif
 
 using namespace Gtk;
-using namespace Gdk;
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;

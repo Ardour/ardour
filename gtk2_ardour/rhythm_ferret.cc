@@ -37,7 +37,6 @@
 
 using namespace std;
 using namespace Gtk;
-using namespace Gdk;
 using namespace PBD;
 using namespace ARDOUR;
 
