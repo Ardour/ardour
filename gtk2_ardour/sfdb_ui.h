@@ -321,6 +321,9 @@ class SoundFileOmega : public SoundFileBrowser
 	void where_combo_changed ();
 
 	void do_something (int action);
+
+	bool _import_active;
+	bool _reset_post_import;
 };
 
 #endif // __ardour_sfdb_ui_h__

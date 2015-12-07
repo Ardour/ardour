@@ -1293,6 +1293,11 @@ SoundFileOmega::reset_options_noret ()
 bool
 SoundFileOmega::reset_options ()
 {
+	if (_import_active) {
+		_reset_post_import = true;
+		return true;
+	}
+
 	vector<string> paths = get_paths ();
 
 	if (paths.empty()) {
@@ -1664,6 +1669,8 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	, copy_files_btn ( _("Copy files to session"))
 	, selected_audio_track_cnt (selected_audio_tracks)
 	, selected_midi_track_cnt (selected_midi_tracks)
+	, _import_active (false)
+	, _reset_post_import (false)
 {
 	VBox* vbox;
 	HBox* hbox;
@@ -1977,10 +1984,19 @@ SoundFileOmega::do_something (int action)
 
 	SrcQuality quality = get_src_quality();
 
+	_import_active = true;
+
 	if (copy_files_btn.get_active()) {
 		PublicEditor::instance().do_import (paths, chns, mode, quality, where, instrument);
 	} else {
 		PublicEditor::instance().do_embed (paths, chns, mode, where, instrument);
+	}
+
+	_import_active = false;
+
+	if (_reset_post_import) {
+		_reset_post_import = false;
+		reset_options ();
 	}
 }
 
