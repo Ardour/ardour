@@ -27,41 +27,7 @@ out = 'build'
 
 path_prefix = 'libs/canvas/'
 
-canvas_sources = [
-        'arc.cc',
-        'arrow.cc',
-        'canvas.cc',
-        'circle.cc',
-        'colors.cc',
-        'colorspace.cc',
-        'container.cc',
-        'curve.cc',
-        'debug.cc',
-        'item.cc',
-        'fill.cc',
-        'flag.cc',
-        'image.cc',
-        'line.cc',
-        'line_set.cc',
-        'lookup_table.cc',
-        'outline.cc',
-        'pixbuf.cc',
-        'poly_item.cc',
-        'poly_line.cc',
-        'polygon.cc',
-        'rectangle.cc',
-        'root_group.cc',
-        'ruler.cc',
-        'scroll_group.cc',
-        'stateful_image.cc',
-        'text.cc',
-        'tracking_text.cc',
-        'types.cc',
-        'utils.cc',
-        'wave_view.cc',
-        'widget.cc',
-        'xfade_curve.cc',
-]
+canvas_sources = [ 'libcanvas.cc' ]
 
 def options(opt):
     autowaf.set_options(opt)
