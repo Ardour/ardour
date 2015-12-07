@@ -51,7 +51,7 @@ using std::string;
 gain_t* SndFileSource::out_coefficient = 0;
 gain_t* SndFileSource::in_coefficient = 0;
 framecnt_t SndFileSource::xfade_frames = 64;
-const Source::Flag SndFileSource::default_writable_flags = Source::Flag (
+const ARDOUR::Source::Flag SndFileSource::default_writable_flags = Source::Flag (
 		Source::Writable |
 		Source::Removable |
 		Source::RemovableIfEmpty |
