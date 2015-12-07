@@ -208,7 +208,7 @@ FileSource::move_to_trash (const string& trash_dir_name)
 	if (::rename (_path.c_str(), newpath.c_str()) != 0) {
 		PBD::error << string_compose (
 				_("cannot rename file source from %1 to %2 (%3)"),
-				_path, newpath, strerror (errno)) << endmsg;
+				_path, newpath, std::strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -484,7 +484,7 @@ FileSource::find_2X (Session& s, DataType type, const string& path, bool must_ex
 			if (must_exist) {
 				error << string_compose(
 						_("Filesource: cannot find required file (%1): %2"),
-						path, strerror (errno)) << endmsg;
+						path, std::strerror (errno)) << endmsg;
 				goto out;
 			}
 
@@ -492,7 +492,7 @@ FileSource::find_2X (Session& s, DataType type, const string& path, bool must_ex
 			if (errno != ENOENT) {
 				error << string_compose(
 						_("Filesource: cannot check for existing file (%1): %2"),
-						path, strerror (errno)) << endmsg;
+						path, std::strerror (errno)) << endmsg;
 				goto out;
 			}
 #endif
@@ -593,7 +593,7 @@ FileSource::rename (const string& newpath)
 	if (Glib::file_test (oldpath.c_str(), Glib::FILE_TEST_EXISTS)) {
 		/* rename only needed if file exists on disk */
 		if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
-			error << string_compose (_("cannot rename file %1 to %2 (%3)"), oldpath, newpath, strerror(errno)) << endmsg;
+			error << string_compose (_("cannot rename file %1 to %2 (%3)"), oldpath, newpath, std::strerror(errno)) << endmsg;
 			return -1;
 		}
 	}
