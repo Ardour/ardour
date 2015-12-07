@@ -63,7 +63,7 @@ using namespace Glib;
 using namespace Editing;
 using Gtkmm2ext::Keyboard;
 
-struct ColumnInfo {
+struct RegionColumnInfo {
     int         index;
     const char* label;
     const char* tooltip;
@@ -111,7 +111,7 @@ EditorRegions::EditorRegions (Editor* e)
 	TreeViewColumn* col;
 	Gtk::Label* l;
 
-	ColumnInfo ci[] = {
+	RegionColumnInfo ci[] = {
 		{ 0,   _("Region"),    _("Region name, with number of channels in []'s") },
 		{ 1,   _("Position"),  _("Position of start of region") },
 		{ 2,   _("End"),       _("Position of end of region") },

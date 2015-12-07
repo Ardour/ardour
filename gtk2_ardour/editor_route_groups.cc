@@ -57,7 +57,7 @@ using namespace PBD;
 using namespace Gtk;
 using Gtkmm2ext::Keyboard;
 
-struct ColumnInfo {
+struct RouteColumnInfo {
     int         index;
     const char* label;
     const char* tooltip;
@@ -93,7 +93,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	TreeViewColumn* col;
 	Gtk::Label* l;
 
-	ColumnInfo ci[] = {
+	RouteColumnInfo ci[] = {
 		{ 0,   _("Col"),            _("Group Tab Color") },
 		{ 1,   _("Name"),           _("Name of Group") },
 		{ 2,  S_("Visible|V"),      _("Group is visible?") },
