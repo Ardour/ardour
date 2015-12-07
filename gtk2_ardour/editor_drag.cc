@@ -3206,7 +3206,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	Timecode::BBT_Time when;
 
 	TempoMap& map (_editor->session()->tempo_map());
-	map.bbt_time (last_pointer_frame(), when);
+	map.bbt_time (_marker->position(), when);
 
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy meter mark"));
@@ -3336,7 +3336,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	motion (event, false);
 
 	TempoMap& map (_editor->session()->tempo_map());
-	framepos_t beat_time = map.round_to_beat (last_pointer_frame(), RoundNearest);
+	framepos_t beat_time = map.round_to_beat (_marker->position(), RoundNearest);
 	Timecode::BBT_Time when;
 
 	map.bbt_time (beat_time, when);
