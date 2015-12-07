@@ -278,7 +278,7 @@ TransformDialog::ValueChooser::get(std::list<Operation>& ops)
 		Gtk::TreeModel::const_iterator p = property_combo.get_active();
 		val.prop = (*p)[model.property_cols.property];
 	} else if (val.source == Transform::Value::LITERAL) {
-		val.value = Variant(
+		val.value = ARDOUR::Variant(
 			MidiModel::NoteDiffCommand::value_type(target_property),
 			value_spinner.get_value());
 	}
