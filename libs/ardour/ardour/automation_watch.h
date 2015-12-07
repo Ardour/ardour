@@ -16,6 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#ifndef __ardour_automation_watch_h__
+#define __ardour_automation_watch_h__
 
 #include <set>
 #include <boost/shared_ptr.hpp>
@@ -60,3 +62,5 @@ class LIBARDOUR_API AutomationWatch : public sigc::trackable, public ARDOUR::Ses
 };
 
 }
+
+#endif // __ardour_automation_watch_h__
