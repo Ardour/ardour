@@ -639,7 +639,7 @@ Keyboard::reset_bindings ()
 		new_path += ".old";
 
 		if (::g_rename (user_keybindings_path.c_str(), new_path.c_str())) {
-			error << string_compose (_("Cannot rename your own keybinding file (%1)"), strerror (errno)) << endmsg;
+			error << string_compose (_("Cannot rename your own keybinding file (%1)"), std::strerror (errno)) << endmsg;
 			return -1;
 		}
 	}
