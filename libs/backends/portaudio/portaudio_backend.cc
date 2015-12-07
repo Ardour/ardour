@@ -617,8 +617,6 @@ PortAudioBackend::portaudio_callback(const void* input,
 		return paAbort;
 	}
 
-	process_port_connection_changes();
-
 	return paContinue;
 }
 
@@ -666,6 +664,8 @@ PortAudioBackend::process_callback(const float* input,
 		_main_thread = pthread_self();
 		AudioEngine::thread_init_callback (this);
 	}
+
+	process_port_connection_changes();
 
 	return blocking_process_main (input, output);
 }
