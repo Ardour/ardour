@@ -587,7 +587,7 @@ Strip::notify_panner_width_changed (bool force_update)
 
 		double pos = pannable->pan_width_control->internal_to_interface (pannable->pan_width_control->get_value());
 
-		if (force_update || pos != _last_pan_azi_position_written) {
+		if (force_update || pos != _last_pan_width_position_written) {
 
 			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 
@@ -603,7 +603,7 @@ Strip::notify_panner_width_changed (bool force_update)
 				queue_parameter_display (PanWidthAutomation, pos);
 			}
 
-			_last_pan_azi_position_written = pos;
+			_last_pan_width_position_written = pos;
 		}
 	}
 }
