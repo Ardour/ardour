@@ -1,0 +1,7 @@
+#include "mono_panner.cc"
+#include "mono_panner_editor.cc"
+#include "panner2d.cc"
+#include "panner_interface.cc"
+#include "panner_ui.cc"
+#include "stereo_panner.cc"
+#include "stereo_panner_editor.cc"

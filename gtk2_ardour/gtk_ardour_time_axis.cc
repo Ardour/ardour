@@ -1,0 +1,6 @@
+#include "axis_view.cc"
+#include "automation_time_axis.cc"
+#include "audio_time_axis.cc"
+#include "midi_time_axis.cc"
+#include "route_time_axis.cc"
+#include "time_axis_view.cc"

@@ -1,0 +1,7 @@
+#include "ardour_ui.cc"
+#include "ardour_ui2.cc"
+#include "ardour_ui_dependents.cc"
+#include "ardour_ui_dialogs.cc"
+#include "ardour_ui_ed.cc"
+#include "ardour_ui_mixer.cc"
+#include "ardour_ui_options.cc"

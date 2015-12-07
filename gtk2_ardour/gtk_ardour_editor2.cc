@@ -1,0 +1,6 @@
+#include "editor.cc"
+#include "editor_actions.cc"
+#include "editor_canvas.cc"
+#include "editor_canvas_events.cc"
+#include "editor_mouse.cc"
+#include "editor_ops.cc"

@@ -1,0 +1,7 @@
+#include "audio_region_view.cc"
+#include "automation_region_view.cc"
+#include "ghostregion.cc"
+#include "midi_region_view.cc"
+#include "region_view.cc"
+#include "tape_region_view.cc"
+#include "time_axis_view_item.cc"
