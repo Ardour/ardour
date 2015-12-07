@@ -1,0 +1,7 @@
+#include "audio_playlist_importer.cc"
+#include "audio_region_importer.cc"
+#include "audio_track_importer.cc"
+#include "element_importer.cc"
+#include "element_import_handler.cc"
+#include "location_importer.cc"
+#include "tempo_map_importer.cc"

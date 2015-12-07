@@ -1,0 +1,7 @@
+#include "port_manager.cc"
+#include "audio_backend.cc"
+#include "audioengine.cc"
+#include "port.cc"
+#include "port_set.cc"
+#include "process_thread.cc"
+#include "thread_buffers.cc"

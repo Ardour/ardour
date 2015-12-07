@@ -1,0 +1,17 @@
+#include "export_channel.cc"
+#include "export_channel_configuration.cc"
+#include "export_failed.cc"
+#include "export_filename.cc"
+#include "export_format_base.cc"
+#include "export_format_manager.cc"
+#include "export_formats.cc"
+#include "export_format_specification.cc"
+#include "export_graph_builder.cc"
+#include "export_preset.cc"
+#include "export_profile_manager.cc"
+#include "export_status.cc"
+#include "export_timespan.cc"
+
+#include "soundcloud_upload.cc"
+
+#include "export_handler.cc"
