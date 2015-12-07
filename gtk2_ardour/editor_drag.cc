@@ -464,7 +464,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 
 				_last_pointer_x = _drags->current_pointer_x ();
 				_last_pointer_y = current_pointer_y ();
-				_last_pointer_frame = adjusted_current_frame (event);
+				_last_pointer_frame = adjusted_current_frame (event, false);
 			}
 
 			return true;
