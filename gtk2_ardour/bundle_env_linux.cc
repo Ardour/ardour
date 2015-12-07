@@ -88,10 +88,10 @@ fixup_bundle_environment (int /*argc*/, char* argv[], string & localedir)
 	g_setenv ("SUIL_MODULE_DIR", (dir_path + "/lib").c_str(), 1);
 	g_setenv ("PATH", (dir_path + "/bin:" + std::string(g_getenv ("PATH"))).c_str(), 1);
 
-	/* unset GTK_RC_FILES so that we only load the RC files that we define
+	/* unset GTK2_RC_FILES so that we only load the RC files that we define
 	 */
 
-	g_unsetenv ("GTK_RC_FILES");
+	g_unsetenv ("GTK2_RC_FILES");
 
 	/* Tell fontconfig where to find fonts.conf. Use the system version
 	   if it exists, otherwise use the stuff we included in the bundle

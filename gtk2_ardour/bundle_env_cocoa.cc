@@ -105,10 +105,10 @@ fixup_bundle_environment (int, char* [], string & localedir)
 	g_setenv ("SUIL_MODULE_DIR", (bundle_dir + "/lib").c_str(), 1);
 	g_setenv ("PATH", (bundle_dir + "/MacOS:" + std::string(g_getenv ("PATH"))).c_str(), 1);
 
-	/* unset GTK_RC_FILES so that we only load the RC files that we define
+	/* unset GTK2_RC_FILES so that we only load the RC files that we define
 	 */
 
-	g_unsetenv ("GTK_RC_FILES");
+	g_unsetenv ("GTK2_RC_FILES");
 	g_setenv ("CHARSETALIASDIR", bundle_dir.c_str(), 1);
 	g_setenv ("FONTCONFIG_FILE", Glib::build_filename (bundle_dir, "Resources/fonts.conf").c_str(), 1);
 }

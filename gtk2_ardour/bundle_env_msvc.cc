@@ -467,8 +467,8 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 	Glib::setenv ("GTK_PATH", path, true);
 
 
-	// Unset GTK_RC_FILES so that we only load the RC files that we define
-	Glib::unsetenv ("GTK_RC_FILES");
+	// Unset GTK2_RC_FILES so that we only load the RC files that we define
+	Glib::unsetenv ("GTK2_RC_FILES");
 
 
 	// and set a '$HOME' environment variable. This variable changes the value returned

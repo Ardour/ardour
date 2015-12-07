@@ -50,8 +50,8 @@ fixup_bundle_environment (int, char* [], string & localedir)
 	// setting a FONTCONFIG_FILE won't hurt either see bundle_env_msvc.cc
 	// (pangocairo prefers the windows gdi backend unless PANGOCAIRO_BACKEND=fc is set)
 
-	// Unset GTK_RC_FILES so that only ardour specific files are loaded
-	Glib::unsetenv ("GTK_RC_FILES");
+	// Unset GTK2_RC_FILES so that only ardour specific files are loaded
+	Glib::unsetenv ("GTK2_RC_FILES");
 
 	std::string path;
 
