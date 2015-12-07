@@ -36,7 +36,7 @@ class MIDISceneChanger : public SceneChanger
 	~MIDISceneChanger ();
 
 	void run (framepos_t start, framepos_t end);
-	void set_input_port (MIDI::Port*);
+	void set_input_port (boost::shared_ptr<MidiPort>);
 	void set_output_port (boost::shared_ptr<MidiPort>);
 
 	uint8_t bank_at (framepos_t, uint8_t channel);
@@ -56,7 +56,7 @@ class MIDISceneChanger : public SceneChanger
     private:
 	typedef std::multimap<framepos_t,boost::shared_ptr<MIDISceneChange> > Scenes;
 
-	MIDI::Port* input_port;
+	boost::shared_ptr<MidiPort> input_port;
 	boost::shared_ptr<MidiPort> output_port;
 	Glib::Threads::RWLock scene_lock;
 	Scenes scenes;

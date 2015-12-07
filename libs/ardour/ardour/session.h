@@ -1009,27 +1009,26 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	SceneChanger* scene_changer() const { return _scene_changer; }
 
-	boost::shared_ptr<Port> ltc_input_port() const;
-	boost::shared_ptr<Port> ltc_output_port() const;
+	/* asynchronous MIDI control ports */
 
-	boost::shared_ptr<IO> ltc_input_io() { return _ltc_input; }
-	boost::shared_ptr<IO> ltc_output_io() { return _ltc_output; }
+	boost::shared_ptr<Port> midi_input_port () const;
+	boost::shared_ptr<Port> midi_output_port () const;
+	boost::shared_ptr<Port> mmc_output_port () const;
+	boost::shared_ptr<Port> mmc_input_port () const;
+	boost::shared_ptr<Port> scene_input_port () const;
+	boost::shared_ptr<Port> scene_output_port () const;
 
-	MIDI::Port* midi_input_port () const;
-	MIDI::Port* midi_output_port () const;
-	MIDI::Port* mmc_output_port () const;
-	MIDI::Port* mmc_input_port () const;
-
-	MIDI::Port* scene_input_port () const;
-	MIDI::Port* scene_output_port () const;
-
-	boost::shared_ptr<MidiPort> scene_in () const;
-	boost::shared_ptr<MidiPort> scene_out () const;
+	/* synchronous MIDI ports used for synchronization */
 
 	boost::shared_ptr<MidiPort> midi_clock_output_port () const;
 	boost::shared_ptr<MidiPort> midi_clock_input_port () const;
 	boost::shared_ptr<MidiPort> mtc_output_port () const;
 	boost::shared_ptr<MidiPort> mtc_input_port () const;
+	boost::shared_ptr<Port> ltc_input_port() const;
+	boost::shared_ptr<Port> ltc_output_port() const;
+
+	boost::shared_ptr<IO> ltc_input_io() { return _ltc_input; }
+	boost::shared_ptr<IO> ltc_output_io() { return _ltc_output; }
 
 	MIDI::MachineControl& mmc() { return *_mmc; }
 

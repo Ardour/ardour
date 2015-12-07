@@ -226,13 +226,16 @@ MIDISceneChanger::locate (framepos_t pos)
 }
 
 void
-MIDISceneChanger::set_input_port (MIDI::Port* mp)
+MIDISceneChanger::set_input_port (boost::shared_ptr<MidiPort> mp)
 {
-	input_port = mp;
-
 	incoming_connections.drop_connections();
+	input_port.reset ();
 
-	if (input_port) {
+	boost::shared_ptr<AsyncMIDIPort> async = boost::dynamic_pointer_cast<AsyncMIDIPort> (mp);
+
+	if (async) {
+
+		input_port = mp;
 
 		/* midi port is asynchronous. MIDI parsing will be carried out
 		 * by the MIDI UI thread which will emit the relevant signals
@@ -240,8 +243,8 @@ MIDISceneChanger::set_input_port (MIDI::Port* mp)
 		 */
 
 		for (int channel = 0; channel < 16; ++channel) {
-			input_port->parser()->channel_bank_change[channel].connect_same_thread (incoming_connections, boost::bind (&MIDISceneChanger::bank_change_input, this, _1, _2, channel));
-			input_port->parser()->channel_program_change[channel].connect_same_thread (incoming_connections, boost::bind (&MIDISceneChanger::program_change_input, this, _1, _2, channel));
+			async->parser()->channel_bank_change[channel].connect_same_thread (incoming_connections, boost::bind (&MIDISceneChanger::bank_change_input, this, _1, _2, channel));
+			async->parser()->channel_program_change[channel].connect_same_thread (incoming_connections, boost::bind (&MIDISceneChanger::program_change_input, this, _1, _2, channel));
 		}
 	}
 }
@@ -286,7 +289,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 
 		int bank = -1;
 		if (have_seen_bank_changes) {
-			bank = input_port->channel (channel)->bank();
+			bank = boost::dynamic_pointer_cast<AsyncMIDIPort>(input_port)->channel (channel)->bank();
 		}
 
 		jump_to (bank, program);
@@ -317,7 +320,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 
 	int bank = -1;
 	if (have_seen_bank_changes) {
-		bank = input_port->channel (channel)->bank();
+		bank = boost::dynamic_pointer_cast<AsyncMIDIPort>(input_port)->channel (channel)->bank();
 	}
 
 	MIDISceneChange* msc =new MIDISceneChange (channel, bank, program & 0x7f);

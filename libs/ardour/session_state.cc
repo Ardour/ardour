@@ -217,11 +217,11 @@ Session::post_engine_init ()
 	MIDISceneChanger* msc;
 
 	_scene_changer = msc = new MIDISceneChanger (*this);
-	msc->set_input_port (scene_input_port());
-	msc->set_output_port (scene_out());
+	msc->set_input_port (boost::dynamic_pointer_cast<MidiPort>(scene_input_port()));
+	msc->set_output_port (boost::dynamic_pointer_cast<MidiPort>(scene_output_port()));
 
 	boost::function<framecnt_t(void)> timer_func (boost::bind (&Session::audible_frame, this));
-	boost::dynamic_pointer_cast<AsyncMIDIPort>(scene_in())->set_timer (timer_func);
+	boost::dynamic_pointer_cast<AsyncMIDIPort>(scene_input_port())->set_timer (timer_func);
 
 	setup_midi_machine_control ();
 
@@ -3875,7 +3875,20 @@ void
 Session::setup_midi_machine_control ()
 {
 	_mmc = new MIDI::MachineControl;
-	_mmc->set_ports (_midi_ports->mmc_input_port(), _midi_ports->mmc_output_port());
+
+	boost::shared_ptr<AsyncMIDIPort> async_in = boost::dynamic_pointer_cast<AsyncMIDIPort> (_midi_ports->mmc_input_port());
+	boost::shared_ptr<AsyncMIDIPort> async_out = boost::dynamic_pointer_cast<AsyncMIDIPort> (_midi_ports->mmc_output_port());
+
+	if (!async_out || !async_out) {
+		return;
+	}
+
+	/* XXXX argh, passing raw pointers back into libmidi++ */
+
+	MIDI::Port* mmc_in = async_in.get();
+	MIDI::Port* mmc_out = async_out.get();
+
+	_mmc->set_ports (mmc_in, mmc_out);
 
 	_mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
 	_mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));

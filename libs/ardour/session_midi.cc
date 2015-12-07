@@ -630,21 +630,48 @@ Session::start_midi_thread ()
 	return 0;
 }
 
-MIDI::Port*
+boost::shared_ptr<ARDOUR::Port>
 Session::midi_input_port () const
 {
 	return _midi_ports->midi_input_port ();
 }
-MIDI::Port*
+
+boost::shared_ptr<ARDOUR::Port>
 Session::midi_output_port () const
 {
 	return _midi_ports->midi_output_port ();
 }
+
+boost::shared_ptr<ARDOUR::Port>
+Session::mmc_output_port () const
+{
+	return _midi_ports->mmc_output_port ();
+}
+
+boost::shared_ptr<ARDOUR::Port>
+Session::mmc_input_port () const
+{
+	return _midi_ports->mmc_input_port ();
+}
+
+boost::shared_ptr<ARDOUR::Port>
+Session::scene_output_port () const
+{
+	return _midi_ports->scene_output_port ();
+}
+
+boost::shared_ptr<ARDOUR::Port>
+Session::scene_input_port () const
+{
+	return _midi_ports->scene_input_port ();
+}
+
 boost::shared_ptr<MidiPort>
 Session::midi_clock_output_port () const
 {
 	return _midi_ports->midi_clock_output_port ();
 }
+
 boost::shared_ptr<MidiPort>
 Session::midi_clock_input_port () const
 {
@@ -661,38 +688,3 @@ Session::mtc_input_port () const
 	return _midi_ports->mtc_input_port ();
 }
 
-MIDI::Port*
-Session::mmc_output_port () const
-{
-	return _midi_ports->mmc_output_port ();
-}
-
-MIDI::Port*
-Session::mmc_input_port () const
-{
-	return _midi_ports->mmc_input_port ();
-}
-
-MIDI::Port*
-Session::scene_output_port () const
-{
-	return _midi_ports->scene_output_port ();
-}
-
-MIDI::Port*
-Session::scene_input_port () const
-{
-	return _midi_ports->scene_input_port ();
-}
-
-boost::shared_ptr<MidiPort>
-Session::scene_in () const
-{
-	return _midi_ports->scene_in ();
-}
-
-boost::shared_ptr<MidiPort>
-Session::scene_out () const
-{
-	return _midi_ports->scene_out ();
-}

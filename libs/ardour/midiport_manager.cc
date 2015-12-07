@@ -83,23 +83,6 @@ MidiPortManager::create_ports ()
 	_scene_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("Scene in"), true);
 	_scene_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("Scene out"), true);
 
-	/* XXX nasty type conversion needed because of the mixed inheritance
-	 * required to integrate MIDI::IPMidiPort and ARDOUR::AsyncMIDIPort.
-	 *
-	 * At some point, we'll move IPMidiPort into Ardour and make it
-	 * inherit from ARDOUR::MidiPort not MIDI::Port, and then this
-	 * mess can go away
-	 */
-
-	_midi_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_midi_in).get();
-	_midi_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_midi_out).get();
-
-	_mmc_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_mmc_in).get();
-	_mmc_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_mmc_out).get();
-
-	_scene_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_scene_in).get();
-	_scene_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_scene_out).get();
-
 	/* Now register ports used for sync (MTC and MIDI Clock)
 	 */
 
@@ -137,12 +120,12 @@ MidiPortManager::set_midi_port_states (const XMLNodeList&nodes)
 	ports.insert (make_pair (_mtc_output_port->name(), _mtc_output_port));
 	ports.insert (make_pair (_midi_clock_input_port->name(), _midi_clock_input_port));
 	ports.insert (make_pair (_midi_clock_output_port->name(), _midi_clock_output_port));
-	ports.insert (make_pair (_midi_input_port->name(), _midi_in));
-	ports.insert (make_pair (_midi_output_port->name(), _midi_out));
-	ports.insert (make_pair (_mmc_input_port->name(), _mmc_in));
-	ports.insert (make_pair (_mmc_output_port->name(), _mmc_out));
-	ports.insert (make_pair (_scene_output_port->name(), _scene_out));
-	ports.insert (make_pair (_scene_input_port->name(), _scene_in));
+	ports.insert (make_pair (_midi_in->name(), _midi_in));
+	ports.insert (make_pair (_midi_out->name(), _midi_out));
+	ports.insert (make_pair (_mmc_in->name(), _mmc_in));
+	ports.insert (make_pair (_mmc_out->name(), _mmc_out));
+	ports.insert (make_pair (_scene_out->name(), _scene_out));
+	ports.insert (make_pair (_scene_in->name(), _scene_in));
 
 	for (XMLNodeList::const_iterator n = nodes.begin(); n != nodes.end(); ++n) {
 		if ((prop = (*n)->property (X_("name"))) == 0) {
@@ -169,12 +152,12 @@ MidiPortManager::get_midi_port_states () const
 	ports.insert (make_pair (_mtc_output_port->name(), _mtc_output_port));
 	ports.insert (make_pair (_midi_clock_input_port->name(), _midi_clock_input_port));
 	ports.insert (make_pair (_midi_clock_output_port->name(), _midi_clock_output_port));
-	ports.insert (make_pair (_midi_input_port->name(), _midi_in));
-	ports.insert (make_pair (_midi_output_port->name(), _midi_out));
-	ports.insert (make_pair (_mmc_input_port->name(), _mmc_in));
-	ports.insert (make_pair (_mmc_output_port->name(), _mmc_out));
-	ports.insert (make_pair (_scene_output_port->name(), _scene_out));
-	ports.insert (make_pair (_scene_input_port->name(), _scene_in));
+	ports.insert (make_pair (_midi_in->name(), _midi_in));
+	ports.insert (make_pair (_midi_out->name(), _midi_out));
+	ports.insert (make_pair (_mmc_in->name(), _mmc_in));
+	ports.insert (make_pair (_mmc_out->name(), _mmc_out));
+	ports.insert (make_pair (_scene_out->name(), _scene_out));
+	ports.insert (make_pair (_scene_in->name(), _scene_in));
 
 	for (PortMap::const_iterator p = ports.begin(); p != ports.end(); ++p) {
 		s.push_back (&p->second->get_state());

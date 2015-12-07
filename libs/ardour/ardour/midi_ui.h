@@ -61,7 +61,7 @@ class LIBARDOUR_API MidiControlUI : public AbstractUI<MidiUIRequest>
   private:
 	ARDOUR::Session& _session;
 
-	bool midi_input_handler (Glib::IOCondition, AsyncMIDIPort*);
+	bool midi_input_handler (Glib::IOCondition, boost::shared_ptr<AsyncMIDIPort>);
 	void reset_ports ();
 	void clear_ports ();
 

@@ -53,18 +53,14 @@ class LIBARDOUR_API MidiPortManager {
      * callback.
      */
 
-    MIDI::Port* midi_input_port () const { return _midi_input_port; }
-    MIDI::Port* midi_output_port () const { return _midi_output_port; }
-    MIDI::Port* mmc_input_port () const { return _mmc_input_port; }
-    MIDI::Port* mmc_output_port () const { return _mmc_output_port; }
-    MIDI::Port* scene_input_port () const { return _scene_input_port; }
-    MIDI::Port* scene_output_port () const { return _scene_output_port; }
+    boost::shared_ptr<ARDOUR::Port> midi_input_port () const { return _midi_in; }
+    boost::shared_ptr<ARDOUR::Port> midi_output_port () const { return _midi_out; }
 
-    boost::shared_ptr<MidiPort> mmc_in() const { return boost::dynamic_pointer_cast<MidiPort>(_mmc_in); }
-    boost::shared_ptr<MidiPort> mmc_out() const { return boost::dynamic_pointer_cast<MidiPort>(_mmc_out); }
+    boost::shared_ptr<ARDOUR::Port> mmc_input_port() const { return boost::dynamic_pointer_cast<MidiPort>(_mmc_in); }
+    boost::shared_ptr<ARDOUR::Port> mmc_output_port() const { return boost::dynamic_pointer_cast<MidiPort>(_mmc_out); }
 
-    boost::shared_ptr<MidiPort> scene_in() const { return boost::dynamic_pointer_cast<MidiPort>(_scene_in); }
-    boost::shared_ptr<MidiPort> scene_out() const { return boost::dynamic_pointer_cast<MidiPort>(_scene_out); }
+    boost::shared_ptr<ARDOUR::Port> scene_input_port() const { return boost::dynamic_pointer_cast<MidiPort>(_scene_in); }
+    boost::shared_ptr<ARDOUR::Port> scene_output_port() const { return boost::dynamic_pointer_cast<MidiPort>(_scene_out); }
 
     /* Ports used for synchronization. These have their I/O handled inside the
      * process callback.
@@ -81,16 +77,7 @@ class LIBARDOUR_API MidiPortManager {
     PBD::Signal0<void> PortsChanged;
 
   protected:
-    /* asynchronously handled ports: MIDI::Port */
-    MIDI::Port* _midi_input_port;
-    MIDI::Port* _midi_output_port;
-    MIDI::Port* _mmc_input_port;
-    MIDI::Port* _mmc_output_port;
-    MIDI::Port* _scene_input_port;
-    MIDI::Port* _scene_output_port;
-    /* these point to the same objects as the members above,
-       but cast to their ARDOUR::Port base class
-    */
+    /* asynchronously handled ports: ARDOUR::AsyncMIDIPort */
     boost::shared_ptr<Port> _midi_in;
     boost::shared_ptr<Port> _midi_out;
     boost::shared_ptr<Port> _mmc_in;
