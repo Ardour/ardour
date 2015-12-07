@@ -35,6 +35,7 @@
 #include "ardour/debug.h"
 #include "ardour/midi_ui.h"
 #include "ardour/meter.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
@@ -45,6 +46,7 @@
 #include "ardour/track.h"
 #include "ardour/midi_track.h"
 #include "ardour/user_bundle.h"
+#include "ardour/profile.h"
 
 #include "mackie_control_protocol.h"
 #include "surface_port.h"
@@ -166,6 +168,8 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 		return;
 	}
 
+	mb_pan_controllable.reset();
+
 	route_connections.drop_connections ();
 
 	_solo->set_control (boost::shared_ptr<AutomationControl>());
@@ -218,10 +222,19 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	boost::shared_ptr<Pannable> pannable = _route->pannable();
 
+if(Profile->get_mixbus()) {
+	const uint32_t port_channel_post_pan = 2; // gtk2_ardour/mixbus_ports.h
+	boost::shared_ptr<ARDOUR::PluginInsert> plug = _route->ch_post();
+	mb_pan_controllable = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_channel_post_pan)));
+
+	mb_pan_controllable->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
+} else {
 	if (pannable && _route->panner()) {
 		pannable->pan_azimuth_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
 		pannable->pan_width_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_width_changed, this, false), ui_context());
 	}
+}
+	
 	_route->gain_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_gain_changed, this, false), ui_context());
 	_route->PropertyChanged.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
 
@@ -244,6 +257,9 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	possible_pot_parameters.clear();
 
+if (Profile->get_mixbus()) {
+	possible_pot_parameters.push_back (PanAzimuthAutomation);
+} else {
 	if (pannable) {
 		boost::shared_ptr<Panner> panner = _route->panner();
 		if (panner) {
@@ -259,6 +275,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 			}
 		}
 	}
+}
 
 	if (_route->trim() && route()->trim()->active()) {
 		possible_pot_parameters.push_back (TrimAutomation);
@@ -543,7 +560,7 @@ Strip::notify_panner_azi_changed (bool force_update)
 
 		control = i->second;
 
-		double pos = pannable->pan_azimuth_control->internal_to_interface (pannable->pan_azimuth_control->get_value());
+		double pos = mb_pan_controllable->internal_to_interface (mb_pan_controllable->get_value());
 
 		if (force_update || pos != _last_pan_azi_position_written) {
 
@@ -799,6 +816,12 @@ Strip::do_parameter_display (AutomationType type, float val)
 		break;
 
 	case PanAzimuthAutomation:
+if (Profile->get_mixbus()) {
+	char buf[16];
+	snprintf (buf, sizeof (buf), "%2.1f", val);
+	_surface->write (display (1, buf));
+	screen_hold = true;
+} else {
 		if (_route) {
 			boost::shared_ptr<Pannable> p = _route->pannable();
 			if (p && _route->panner()) {
@@ -807,6 +830,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 				screen_hold = true;
 			}
 		}
+}
 		break;
 
 	case PanWidthAutomation:
@@ -994,6 +1018,12 @@ Strip::update_automation ()
 		notify_gain_changed (false);
 	}
 
+if ( Profile->get_mixbus() ) {
+	ARDOUR::AutoState panner_state = mb_pan_controllable->automation_state();
+	if (panner_state == Touch || panner_state == Play) {
+		notify_panner_azi_changed (false);
+	}
+} else {
 	if (_route->panner()) {
 		ARDOUR::AutoState panner_state = _route->panner()->automation_state();
 		if (panner_state == Touch || panner_state == Play) {
@@ -1001,6 +1031,7 @@ Strip::update_automation ()
 			notify_panner_width_changed (false);
 		}
 	}
+}
 	if (_route->trim() && route()->trim()->active()) {
 		ARDOUR::AutoState trim_state = _route->trim_control()->automation_state();
 		if (trim_state == Touch || trim_state == Play) {
@@ -1309,7 +1340,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 			_vpot->set_control (_route->group_gain_control());
 			control_by_parameter[GainAutomation] = _vpot;
 			if (pannable) {
-				_fader->set_control (pannable->pan_azimuth_control);
+				_fader->set_control (mb_pan_controllable);
 				control_by_parameter[PanAzimuthAutomation] = _fader;
 			} else {
 				_fader->set_control (boost::shared_ptr<AutomationControl>());
@@ -1320,7 +1351,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 			_fader->set_control (_route->group_gain_control());
 			control_by_parameter[GainAutomation] = _fader;
 			if (pannable) {
-				_vpot->set_control (pannable->pan_azimuth_control);
+				_vpot->set_control (mb_pan_controllable);
 				control_by_parameter[PanAzimuthAutomation] = _vpot;
 			} else {
 				_vpot->set_control (boost::shared_ptr<AutomationControl>());
