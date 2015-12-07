@@ -34,8 +34,9 @@ namespace PBD {
 }
 
 namespace ARDOUR {
-	class Session;
+	class AsyncMIDIPort;
 	class MidiPort;
+	class Session;
 }
 
 namespace MIDI {
@@ -54,9 +55,9 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	int set_active (bool yn);
 	static bool probe() { return true; }
 
-        ARDOUR::Port* input_port () const { return ((ARDOUR::Port*) _input_port); }
-        ARDOUR::Port* output_port () const { return ((ARDOUR::Port*) _output_port); }
-	
+	boost::shared_ptr<ARDOUR::Port> input_port () const;
+	boost::shared_ptr<ARDOUR::Port> output_port () const;
+
 	void set_feedback_interval (ARDOUR::microseconds_t);
 
 	int set_feedback (bool yn);
@@ -103,9 +104,11 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	}
 
 	PBD::Signal0<void> ConnectionChange;
+
   private:
-        MIDI::Port* _input_port;
-        MIDI::Port* _output_port;
+	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
+	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
+
 	ARDOUR::microseconds_t _feedback_interval;
 	ARDOUR::microseconds_t last_feedback_time;
 
@@ -143,6 +146,16 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	void reset_controllables ();
 	void drop_all ();
 
+	enum ConnectionState {
+		InputConnected = 0x1,
+		OutputConnected = 0x2
+	};
+
+	int connection_state;
+	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
+	PBD::ScopedConnection port_connection;
+	void connected();
+
 	std::string _current_binding;
 	uint32_t _bank_size;
 	uint32_t _current_bank;
@@ -156,6 +169,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	mutable void *gui;
 	void build_gui ();
+
+
 };
 
 #endif /* ardour_generic_midi_control_protocol_h */

@@ -34,6 +34,8 @@
 
 #include "midi++/port.h"
 
+#include "ardour/async_midi_port.h"
+#include "ardour/audioengine.h"
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/session.h"
@@ -58,12 +60,13 @@ using namespace std;
 
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	: ControlProtocol (s, _("Generic MIDI"))
+	, connection_state (ConnectionState (0))
 	, _motorised (false)
 	, _threshold (10)
 	, gui (0)
 {
-	_input_port = s.midi_input_port ();
-	_output_port = s.midi_output_port ();
+	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort> (s.midi_input_port ());
+	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort> (s.midi_output_port ());
 
 	do_feedback = false;
 	_feedback_interval = 10000; // microseconds
@@ -93,6 +96,11 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	/* this one is cross-thread */
 
 	Route::RemoteControlIDChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::reset_controllables, this), midi_ui_context());
+
+	/* Catch port connections and disconnections (cross-thread) */
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR,
+	                                                                      boost::bind (&GenericMidiControlProtocol::connection_handler, this, _1, _2, _3, _4, _5),
+	                                                                      midi_ui_context());
 
 	reload_maps ();
 }
@@ -229,7 +237,9 @@ GenericMidiControlProtocol::drop_bindings ()
 int
 GenericMidiControlProtocol::set_active (bool /*yn*/)
 {
-	/* start/stop delivery/outbound thread */
+	/* nothing to do here: the MIDI UI thread in libardour handles all our
+	   I/O needs.
+	*/
 	return 0;
 }
 
@@ -1136,4 +1146,68 @@ void
 GenericMidiControlProtocol::set_threshold (int t)
 {
 	_threshold = t;
+}
+
+bool
+GenericMidiControlProtocol::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
+{
+	if (!_input_port || !_output_port) {
+		return false;
+	}
+
+	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_input_port)->name());
+	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_output_port)->name());
+
+	if (ni == name1 || ni == name2) {
+		if (yn) {
+			connection_state |= InputConnected;
+		} else {
+			connection_state &= ~InputConnected;
+		}
+	} else if (no == name1 || no == name2) {
+		if (yn) {
+			connection_state |= OutputConnected;
+		} else {
+			connection_state &= ~OutputConnected;
+		}
+	} else {
+		/* not our ports */
+		return false;
+	}
+
+	if ((connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
+
+		/* XXX this is a horrible hack. Without a short sleep here,
+		   something prevents the device wakeup messages from being
+		   sent and/or the responses from being received.
+		*/
+
+		g_usleep (100000);
+		connected ();
+
+	} else {
+
+	}
+
+	ConnectionChange (); /* emit signal for our GUI */
+
+	return true; /* connection status changed */
+}
+
+void
+GenericMidiControlProtocol::connected ()
+{
+	cerr << "Now connected\n";
+}
+
+boost::shared_ptr<Port>
+GenericMidiControlProtocol::output_port() const
+{
+	return _output_port;
+}
+
+boost::shared_ptr<Port>
+GenericMidiControlProtocol::input_port() const
+{
+	return _input_port;
 }

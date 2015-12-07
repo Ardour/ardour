@@ -65,7 +65,7 @@ private:
 	void bank_changed ();
 	void motorised_changed ();
 	void threshold_changed ();
-	
+
 	void update_port_combos ();
 	PBD::ScopedConnection connection_change_connection;
 	void connection_handler ();
@@ -131,6 +131,7 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	, motorised_button ("Motorised")
 	, threshold_adjustment (p.threshold(), 1, 127, 1, 10)
 	, threshold_spinner (threshold_adjustment)
+	, ignore_active_change (false)
 {
 	vector<string> popdowns;
 	popdowns.push_back (_("Reset All"));
@@ -179,7 +180,7 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (output_combo, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	n++;
-	
+
 	//MIDI binding file selector...
 	label = manage (new Label (_("MIDI Bindings:")));
 	label->set_alignment (0, 0.5);
