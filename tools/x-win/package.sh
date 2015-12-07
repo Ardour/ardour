@@ -15,7 +15,7 @@ test -f gtk2_ardour/wscript || exit 1
 : ${ROOT=/home/ardour}
 : ${MAKEFLAGS=-j4}
 : ${TMPDIR=/var/tmp}
-: ${SRCDIR=/var/tmp/winsrc}  # source-code tgz cache
+: ${SRCCACHE=/var/tmp/winsrc}  # source-code tgz cache
 
 # TODO: grep from build/config.log instead
 while [ $# -gt 0 ] ; do
@@ -63,7 +63,7 @@ else
 fi
 
 : ${PREFIX=${ROOT}/win-stack-$WARCH}
-export SRCDIR
+export SRCCACHE
 
 if [ "$(id -u)" = "0" ]; then
 	apt-get -y install nsis curl
@@ -72,7 +72,7 @@ fi
 
 function download {
 echo "--- Downloading.. $2"
-test -f ${SRCDIR}/$1 || curl -k -L -o ${SRCDIR}/$1 $2
+test -f ${SRCCACHE}/$1 || curl -k -L -o ${SRCCACHE}/$1 $2
 }
 
 ################################################################################
@@ -188,15 +188,15 @@ if test -z "$NOVIDEOTOOLS"; then
 
 	rsync -a -q --partial \
 		rsync://ardour.org/video-tools/harvid_win-${HARVID_VERSION}.tar.xz \
-		"${SRCDIR}/harvid_win-${HARVID_VERSION}.tar.xz"
+		"${SRCCACHE}/harvid_win-${HARVID_VERSION}.tar.xz"
 
 	rsync -a -q --partial \
 		rsync://ardour.org/video-tools/xjadeo_win-${XJADEO_VERSION}.tar.xz \
-		"${SRCDIR}/xjadeo_win-${XJADEO_VERSION}.tar.xz"
+		"${SRCCACHE}/xjadeo_win-${XJADEO_VERSION}.tar.xz"
 
 	mkdir $DESTDIR/video
-	tar -xf "${SRCDIR}/harvid_win-${HARVID_VERSION}.tar.xz" -C "$DESTDIR/video/"
-	tar -xf "${SRCDIR}/xjadeo_win-${XJADEO_VERSION}.tar.xz" -C "$DESTDIR/video/"
+	tar -xf "${SRCCACHE}/harvid_win-${HARVID_VERSION}.tar.xz" -C "$DESTDIR/video/"
+	tar -xf "${SRCCACHE}/xjadeo_win-${XJADEO_VERSION}.tar.xz" -C "$DESTDIR/video/"
 
 	echo " === unzipped"
 	du -sh $DESTDIR/video
@@ -209,12 +209,12 @@ fi
 ### http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.9.1/threads-win32/sjlj/x86_64-4.9.1-release-win32-sjlj-rt_v3-rev1.7z
 if ! grep " using ./waf configure" build/config.log | grep -q -- "--optimize"; then
 	download gdb-static-win3264.tar.xz http://robin.linuxaudio.org/gdb-static-win3264.tar.xz
-	cd ${SRCDIR}
+	cd ${SRCCACHE}
 	tar xf gdb-static-win3264.tar.xz
 	cd - > /dev/null
 
 	echo " === Creating debug.bat"
-	cp -r ${SRCDIR}/gdb_$WARCH $DESTDIR/gdb
+	cp -r ${SRCCACHE}/gdb_$WARCH $DESTDIR/gdb
 	cat > $DESTDIR/debug.bat << EOF
 cd bin
 START ..\\gdb\\bin\\gdb.exe -iex "set logging overwrite on" -iex "set height 0" -iex "set logging on %UserProfile%\\${PRODUCT_NAME}-debug.log" -iex "target exec ${PRODUCT_EXE}" -iex "run"
@@ -236,20 +236,20 @@ if test x$WITH_X42_LV2 != x ; then
 	METERS_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/x42-meters.latest.txt)
 	rsync -a -q --partial \
 		rsync://x42-plugins.com/x42/win/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip \
-		"${SRCDIR}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
-	unzip -q -d "$ALIBDIR/LV2/" "${SRCDIR}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
+		"${SRCCACHE}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
+	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
 
 	SETBFREE_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/setBfree.latest.txt)
 	rsync -a -q --partial \
 		rsync://x42-plugins.com/x42/win/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip \
-		"${SRCDIR}/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip"
-	unzip -q -d "$ALIBDIR/LV2/" "${SRCDIR}/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip"
+		"${SRCCACHE}/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip"
+	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip"
 
 	MIDIFILTER_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/x42-midifilter.latest.txt)
 	rsync -a -q --partial \
 		rsync://x42-plugins.com/x42/win/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip \
-		"${SRCDIR}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
-	unzip -q -d "$ALIBDIR/LV2/" "${SRCDIR}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
+		"${SRCCACHE}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
+	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
 fi
 
 if test x$WITH_HARRISON_LV2 != x ; then
@@ -258,10 +258,10 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	echo "Including Harrison LV2s"
 
 	curl -s -S --fail -# \
-		-z "${SRCDIR}/harrison_lv2s.${WARCH}.zip" \
-		-o "${SRCDIR}/harrison_lv2s.${WARCH}.zip" \
+		-z "${SRCCACHE}/harrison_lv2s.${WARCH}.zip" \
+		-o "${SRCCACHE}/harrison_lv2s.${WARCH}.zip" \
 		http://www.harrisonconsoles.com/mixbus/mb3/${WARCH}/harrison_lv2s.zip
-	unzip -q -d "$ALIBDIR/LV2/" "${SRCDIR}/harrison_lv2s.${WARCH}.zip"
+	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/harrison_lv2s.${WARCH}.zip"
 fi
 
 if test -n "$MIXBUS"; then
@@ -269,11 +269,11 @@ if test -n "$MIXBUS"; then
 
 	mkdir -p $ALIBDIR/ladspa/strip
 	curl -s -S --fail -# \
-		-z "${SRCDIR}/harrison_channelstrip.${WARCH}.dll" \
-		-o "${SRCDIR}/harrison_channelstrip.${WARCH}.dll" \
+		-z "${SRCCACHE}/harrison_channelstrip.${WARCH}.dll" \
+		-o "${SRCCACHE}/harrison_channelstrip.${WARCH}.dll" \
 		http://www.harrisonconsoles.com/mixbus/mb3/${WARCH}/harrison_channelstrip.dll
 
-	cp "${SRCDIR}/harrison_channelstrip.${WARCH}.dll" \
+	cp "${SRCCACHE}/harrison_channelstrip.${WARCH}.dll" \
 		"$ALIBDIR/ladspa/strip/harrison_channelstrip.dll"
 fi
 
