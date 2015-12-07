@@ -1,0 +1,8 @@
+#include "midi.cc"
+#include "channel.cc"
+#include "ipmidi_port.cc"
+#include "parser.cc"
+#include "port.cc"
+#include "midnam_patch.cc"
+#include "mmc.cc"
+#include "mtc.cc"
