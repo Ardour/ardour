@@ -680,10 +680,7 @@ FaderPort::midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::
 
 	if (ioc & IO_IN) {
 
-		if (port) {
-			port->clear ();
-		}
-
+		port->clear ();
 		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
 		framepos_t now = session->engine().sample_time();
 		port->parse (now);
