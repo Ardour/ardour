@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __ardour_midi_automation_list_binder_h__
+#define __ardour_midi_automation_list_binder_h__
+
 #include "pbd/memento_command.h"
 #include "evoral/Parameter.hpp"
 #include "ardour/session.h"
@@ -41,5 +44,6 @@ private:
 	Evoral::Parameter _parameter;
 };
 
-}
+} // namespace ARDOUR
 
+#endif // __ardour_midi_automation_list_binder_h__
