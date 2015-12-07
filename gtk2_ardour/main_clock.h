@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_main_clock_h__
+#define __gtk_ardour_main_clock_h__
+
 #include "audio_clock.h"
 
 /** A simple subclass of AudioClock that adds a few things to its context menu:
@@ -42,3 +45,5 @@ private:
 
 	bool on_button_press_event (GdkEventButton *ev);
 };
+
+#endif // __gtk_ardour_main_clock_h__

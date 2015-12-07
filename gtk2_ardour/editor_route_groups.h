@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_editor_route_groups_h__
+#define __gtk_ardour_editor_route_groups_h__
+
 #include "gtkmm2ext/stateful_button.h"
 #include "editor_component.h"
 
@@ -93,4 +96,4 @@ private:
 	Gtk::ColorSelectionDialog color_dialog;
 };
 
-
+#endif // __gtk_ardour_editor_route_groups_h__

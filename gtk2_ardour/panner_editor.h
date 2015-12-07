@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_panner_editor_h__
+#define __gtk_ardour_panner_editor_h__
+
 #include "ardour_dialog.h"
 
 class PannerEditor : public ArdourDialog
@@ -27,3 +30,5 @@ public:
 private:
 	void close_button_clicked ();
 };
+
+#endif // __gtk_ardour_panner_editor_h__

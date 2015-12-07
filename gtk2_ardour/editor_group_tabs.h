@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_editor_group_tabs_h__
+#define __gtk_ardour_editor_group_tabs_h__
+
 #include <gtkmm/menu.h>
 #include "group_tabs.h"
 
@@ -39,3 +42,5 @@ private:
 	ARDOUR::RouteList selected_routes () const;
 	void sync_order_keys ();
 };
+
+#endif // __gtk_ardour_editor_group_tabs_h__

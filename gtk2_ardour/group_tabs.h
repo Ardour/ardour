@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_group_tabs_h__
+#define __gtk_ardour_group_tabs_h__
+
 #include <gtkmm/menu.h>
 #include "editor_component.h"
 #include "gtkmm2ext/cairo_widget.h"
@@ -136,3 +139,5 @@ private:
 	/** colors that have been used for new route group tabs */
 	static std::list<Gdk::Color> _used_colors;
 };
+
+#endif // __gtk_ardour_group_tabs_h__
