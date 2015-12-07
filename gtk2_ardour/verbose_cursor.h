@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_verbose_cursor_h__
+#define __gtk_ardour_verbose_cursor_h__
+
 #include "ardour/types.h"
 #include "canvas/canvas.h"
 
@@ -48,3 +51,5 @@ private:
 
 	void color_handler ();
 };
+
+#endif // __gtk_ardour_verbose_cursor_h__

@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_editor_cursors_h__
+#define __gtk_ardour_editor_cursors_h__
+
 #include "pbd/signals.h"
 #include "ardour/types.h"
 
@@ -55,3 +58,5 @@ class EditorCursor {
 	ArdourCanvas::Arrow*  _track_canvas_item;
 	framepos_t            _current_frame;
 };
+
+#endif // __gtk_ardour_editor_cursors_h__

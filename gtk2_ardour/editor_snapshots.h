@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_editor_snapshots_h__
+#define __gtk_ardour_editor_snapshots_h__
+
 #include <gtkmm/widget.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
@@ -62,3 +65,5 @@ private:
 	void remove (std::string);
 	void rename (std::string);
 };
+
+#endif // __gtk_ardour_editor_snapshots_h__

@@ -31,6 +31,9 @@
 
 *****************************************************************************/
 
+#ifndef __gtk_ardour_sfdb_freesound_mootcher_h__
+#define __gtk_ardour_sfdb_freesound_mootcher_h__
+
 #include <string>
 #include <stdio.h>
 #include <cstring>
@@ -120,3 +123,4 @@ private:
 	std::string xmlLocation;
 };
 
+#endif // __gtk_ardour_sfdb_freesound_mootcher_h__
