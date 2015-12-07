@@ -295,3 +295,8 @@ AutoSpin::set_bounds (gfloat init, gfloat up, gfloat down, bool with_reset)
 		adjustment.set_value (init);
 	}
 }
+
+#undef upper
+#undef lower
+#undef step_increment
+#undef page_increment
