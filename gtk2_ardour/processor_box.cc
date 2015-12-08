@@ -1564,7 +1564,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 			weird_plugin_dialog (**p, err_streams);
 			return true;
 			// XXX SHAREDPTR delete plugin here .. do we even need to care?
-		} else if (plugins.size() == 1) {
+		} else if (plugins.size() == 1 && Config->get_open_gui_after_adding_plugin()) {
 			if (_session->engine().connected () && processor_can_be_edited (processor)) {
 				if ((*p)->has_editor ()) {
 					edit_processor (processor);
