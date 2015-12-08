@@ -1606,6 +1606,10 @@ public:
 		, _timeout_adjustment (0, 0, 3000, 50, 50)
 		, _timeout_slider (_timeout_adjustment)
 	{
+		// TODO define an OptionActionButton (with callback),
+		// then use the OptionEditorPage's table
+		// and standardOptionEditorHeading
+
 		Label *l;
 		std::stringstream ss;
 		Table* t = manage (new Table (2, 6));
@@ -1740,6 +1744,12 @@ public:
 		parameter_changed ("vst-scan-timeout");
 		parameter_changed ("discover-audio-units");
 		parameter_changed ("verbose-plugin-scan");
+	}
+
+	void add_to_page (OptionEditorPage* p) {
+		int const n = p->table.property_n_rows();
+		p->table.resize (n + 1, 3);
+		p->table.attach (*_box, 0, 3, n, n + 1, FILL | EXPAND);
 	}
 
 private:
@@ -2892,6 +2902,17 @@ if (!Profile->get_mixbus()) {
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
 	/* Plugin options (currrently VST only) */
 	add_option (_("Plugins"), new PluginOptions (_rc_config));
+#endif
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined HAVE_LV2)
+	add_option (_("Plugins"), new OptionEditorHeading (_("Plugin GUI")));
+	add_option (_("Plugins"),
+	     new BoolOption (
+		     "open-gui-after-adding-plugin",
+		     _("Automatically open the plugin GUI when adding a new plugin."),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_open_gui_after_adding_plugin),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_open_gui_after_adding_plugin)
+		     ));
 #endif
 
 	/* INTERFACE */
