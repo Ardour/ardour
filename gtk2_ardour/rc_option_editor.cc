@@ -1083,6 +1083,68 @@ private:
 	HScale _dpi_slider;
 };
 
+class VstTimeOutSliderOption : public OptionEditorBox
+{
+public:
+	VstTimeOutSliderOption (RCConfiguration* c)
+		: _rc_config (c)
+		, _timeout_adjustment (0, 0, 3000, 50, 50)
+		, _timeout_slider (_timeout_adjustment)
+	{
+		_timeout_slider.set_digits (0);
+		_timeout_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &VstTimeOutSliderOption::timeout_changed));
+
+		_timeout_slider.set_draw_value(false);
+		_timeout_slider.add_mark(   0,  Gtk::POS_TOP, _("\u221e")); // infinity
+		_timeout_slider.add_mark( 300,  Gtk::POS_TOP, _("30 sec"));
+		_timeout_slider.add_mark( 600,  Gtk::POS_TOP, _("1 min"));
+		_timeout_slider.add_mark(1200,  Gtk::POS_TOP, _("2 mins"));
+		_timeout_slider.add_mark(1800,  Gtk::POS_TOP, _("3 mins"));
+		_timeout_slider.add_mark(2400,  Gtk::POS_TOP, _("4 mins"));
+		_timeout_slider.add_mark(3000,  Gtk::POS_TOP, _("5 mins"));
+
+		Gtkmm2ext::UI::instance()->set_tip(_timeout_slider,
+			 _("Specify the default timeout for plugin instantiation. Plugins that require more time to load will be blacklisted. A value of 0 disables the timeout."));
+
+		Label* l = manage (left_aligned_label (_("Scan Time Out:")));
+		HBox* h = manage (new HBox);
+		h->set_spacing (4);
+		h->pack_start (*l, false, false);
+		h->pack_start (_timeout_slider, true, true);
+
+		_box->pack_start (*h, false, false);
+	}
+
+	void parameter_changed (string const & p)
+	{
+		if (p == "vst-scan-timeout") {
+			int const x = _rc_config->get_vst_scan_timeout();
+			_timeout_adjustment.set_value (x);
+		}
+	}
+
+	void set_state_from_config ()
+	{
+		parameter_changed ("vst-scan-timeout");
+	}
+
+private:
+
+	void timeout_changed ()
+	{
+		int x = floor(_timeout_adjustment.get_value());
+		_rc_config->set_vst_scan_timeout(x);
+	}
+
+	RCConfiguration* _rc_config;
+	Adjustment _timeout_adjustment;
+	HScale _timeout_slider;
+};
+
+
+
+
+
 class ClipLevelOptions : public OptionEditorBox
 {
 public:
@@ -1592,249 +1654,6 @@ private:
 	CheckButton _show_video_export_info_button;
 	CheckButton _show_video_server_dialog_button;
 	CheckButton _video_advanced_setup_button;
-};
-
-class PluginOptions : public OptionEditorBox
-{
-public:
-	PluginOptions (RCConfiguration* c)
-		: _rc_config (c)
-		, _display_plugin_scan_progress (_("Always Display Plugin Scan Progress"))
-		, _discover_vst_on_start (_("Scan for [new] VST Plugins on Application Start"))
-		, _discover_au_on_start (_("Scan for AudioUnit Plugins on Application Start"))
-		, _verbose_plugin_scan (_("Verbose Plugin Scan"))
-		, _timeout_adjustment (0, 0, 3000, 50, 50)
-		, _timeout_slider (_timeout_adjustment)
-	{
-		// TODO define an OptionActionButton (with callback),
-		// then use the OptionEditorPage's table
-		// and standardOptionEditorHeading
-
-		Label *l;
-		std::stringstream ss;
-		Table* t = manage (new Table (2, 6));
-		t->set_spacings (4);
-		Button* b;
-		int n = 0;
-
-		ss << "<b>" << _("General") << "</b>";
-		l = manage (left_aligned_label (ss.str()));
-		l->set_use_markup (true);
-		t->attach (*manage (new Label ("")), 0, 3, n, n+1, FILL | EXPAND); ++n;
-		t->attach (*l, 0, 2, n, n+1, FILL | EXPAND); ++n;
-
-		b = manage (new Button (_("Scan for Plugins")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::refresh_clicked));
-		t->attach (*b, 0, 2, n, n+1, FILL); ++n;
-
-		t->attach (_display_plugin_scan_progress, 0, 2, n, n+1); ++n;
-		_display_plugin_scan_progress.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::display_plugin_scan_progress_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_display_plugin_scan_progress,
-					    _("<b>When enabled</b> a popup window showing plugin scan progress is displayed for indexing (cache load) and discovery (detect new plugins)"));
-
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
-		_timeout_slider.set_digits (0);
-		_timeout_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &PluginOptions::timeout_changed));
-
-		Gtkmm2ext::UI::instance()->set_tip(_timeout_slider,
-			 _("Specify the default timeout for plugin instantiation in 1/10 seconds. Plugins that require more time to load will be blacklisted. A value of 0 disables the timeout."));
-
-		l = manage (left_aligned_label (_("Scan Time Out [deciseconds]")));;
-		HBox* h = manage (new HBox);
-		h->set_spacing (4);
-		h->pack_start (*l, false, false);
-		h->pack_start (_timeout_slider, true, true);
-		t->attach (*h, 0, 2, n, n+1); ++n;
-
-		ss.str("");
-		ss << "<b>" << _("VST") << "</b>";
-		l = manage (left_aligned_label (ss.str()));
-		l->set_use_markup (true);
-		t->attach (*manage (new Label ("")), 0, 3, n, n+1, FILL | EXPAND); ++n;
-		t->attach (*l, 0, 2, n, n+1, FILL | EXPAND); ++n;
-
-		b = manage (new Button (_("Clear VST Cache")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_vst_cache_clicked));
-		t->attach (*b, 0, 1, n, n+1, FILL);
-
-		b = manage (new Button (_("Clear VST Blacklist")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_vst_blacklist_clicked));
-		t->attach (*b, 1, 2, n, n+1, FILL);
-		++n;
-
-		t->attach (_discover_vst_on_start, 0, 2, n, n+1); ++n;
-		_discover_vst_on_start.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::discover_vst_on_start_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_discover_vst_on_start,
-					    _("<b>When enabled</b> new VST plugins are searched, tested and added to the cache index on application start. When disabled new plugins will only be available after triggering a 'Scan' manually"));
-
-#ifdef LXVST_SUPPORT
-		t->attach (*manage (right_aligned_label (_("Linux VST Path:"))), 0, 1, n, n+1);
-		b = manage (new Button (_("Edit")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::edit_lxvst_path_clicked));
-		t->attach (*b, 1, 2, n, n+1, FILL); ++n;
-#endif
-
-#ifdef WINDOWS_VST_SUPPORT
-		t->attach (*manage (right_aligned_label (_("Windows VST Path:"))), 0, 1, n, n+1);
-		b = manage (new Button (_("Edit")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::edit_vst_path_clicked));
-		t->attach (*b, 1, 2, n, n+1, FILL); ++n;
-
-		// currently verbose logging is only implemented for Windows VST.
-		t->attach (_verbose_plugin_scan, 0, 2, n, n+1); ++n;
-		_verbose_plugin_scan.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::verbose_plugin_scan_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_verbose_plugin_scan,
-					    _("<b>When enabled</b> additional information for every plugin is added to the Log Window."));
-#endif
-#endif // any VST
-
-#ifdef AUDIOUNIT_SUPPORT
-		ss.str("");
-		ss << "<b>" << _("Audio Unit") << "</b>";
-		l = manage (left_aligned_label (ss.str()));
-		l->set_use_markup (true);
-		t->attach (*manage (new Label ("")), 0, 3, n, n+1, FILL | EXPAND); ++n;
-		t->attach (*l, 0, 2, n, n+1, FILL | EXPAND); ++n;
-
-		t->attach (_discover_au_on_start, 0, 2, n, n+1); ++n;
-		_discover_au_on_start.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::discover_au_on_start_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_discover_au_on_start,
-					    _("<b>When enabled</b> Audio Unit Plugins are discovered on application start. When disabled AU plugins will only be available after triggering a 'Scan' manually. The first successful scan will enable AU auto-scan, Any crash during plugin discovery will disable it."));
-
-		++n;
-		b = manage (new Button (_("Clear AU Cache")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_au_cache_clicked));
-		t->attach (*b, 0, 1, n, n+1, FILL);
-
-		b = manage (new Button (_("Clear AU Blacklist")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_au_blacklist_clicked));
-		t->attach (*b, 1, 2, n, n+1, FILL);
-		++n;
-#endif
-
-		_box->pack_start (*t,true,true);
-	}
-
-	void parameter_changed (string const & p) {
-		if (p == "show-plugin-scan-window") {
-			bool const x = UIConfiguration::instance().get_show_plugin_scan_window();
-			_display_plugin_scan_progress.set_active (x);
-		}
-		else if (p == "discover-vst-on-start") {
-			bool const x = _rc_config->get_discover_vst_on_start();
-			_discover_vst_on_start.set_active (x);
-		}
-		else if (p == "vst-scan-timeout") {
-			int const x = _rc_config->get_vst_scan_timeout();
-			_timeout_adjustment.set_value (x);
-		}
-		else if (p == "discover-audio-units") {
-			bool const x = _rc_config->get_discover_audio_units();
-			_discover_au_on_start.set_active (x);
-		}
-		else if (p == "verbose-plugin-scan") {
-			bool const x = _rc_config->get_verbose_plugin_scan();
-			_verbose_plugin_scan.set_active (x);
-		}
-	}
-
-	void set_state_from_config () {
-		parameter_changed ("show-plugin-scan-window");
-		parameter_changed ("discover-vst-on-start");
-		parameter_changed ("vst-scan-timeout");
-		parameter_changed ("discover-audio-units");
-		parameter_changed ("verbose-plugin-scan");
-	}
-
-	void add_to_page (OptionEditorPage* p) {
-		int const n = p->table.property_n_rows();
-		p->table.resize (n + 1, 3);
-		p->table.attach (*_box, 0, 3, n, n + 1, FILL | EXPAND);
-	}
-
-private:
-	RCConfiguration* _rc_config;
-	CheckButton _display_plugin_scan_progress;
-	CheckButton _discover_vst_on_start;
-	CheckButton _discover_au_on_start;
-	CheckButton _verbose_plugin_scan;
-	Adjustment _timeout_adjustment;
-	HScale _timeout_slider;
-
-	void display_plugin_scan_progress_toggled () {
-		bool const x = _display_plugin_scan_progress.get_active();
-		UIConfiguration::instance().set_show_plugin_scan_window(x);
-	}
-
-	void discover_vst_on_start_toggled () {
-		bool const x = _discover_vst_on_start.get_active();
-		_rc_config->set_discover_vst_on_start(x);
-	}
-
-	void discover_au_on_start_toggled () {
-		bool const x = _discover_au_on_start.get_active();
-		_rc_config->set_discover_audio_units(x);
-	}
-
-	void verbose_plugin_scan_toggled () {
-		bool const x = _verbose_plugin_scan.get_active();
-		_rc_config->set_verbose_plugin_scan(x);
-	}
-
-	void timeout_changed () {
-		int x = floor(_timeout_adjustment.get_value());
-		_rc_config->set_vst_scan_timeout(x);
-	}
-
-	void clear_vst_cache_clicked () {
-		PluginManager::instance().clear_vst_cache();
-	}
-
-	void clear_vst_blacklist_clicked () {
-		PluginManager::instance().clear_vst_blacklist();
-	}
-
-	void clear_au_cache_clicked () {
-		PluginManager::instance().clear_au_cache();
-	}
-
-	void clear_au_blacklist_clicked () {
-		PluginManager::instance().clear_au_blacklist();
-	}
-
-
-	void edit_vst_path_clicked () {
-		Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
-				_("Set Windows VST Search Path"),
-				_rc_config->get_plugin_path_vst(),
-				PluginManager::instance().get_default_windows_vst_path()
-			);
-		ResponseType r = (ResponseType) pd->run ();
-		pd->hide();
-		if (r == RESPONSE_ACCEPT) {
-			_rc_config->set_plugin_path_vst(pd->get_serialized_paths());
-		}
-		delete pd;
-	}
-
-	// todo consolidate with edit_vst_path_clicked..
-	void edit_lxvst_path_clicked () {
-		Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
-				_("Set Linux VST Search Path"),
-				_rc_config->get_plugin_path_lxvst(),
-				PluginManager::instance().get_default_lxvst_path()
-				);
-		ResponseType r = (ResponseType) pd->run ();
-		pd->hide();
-		if (r == RESPONSE_ACCEPT) {
-			_rc_config->set_plugin_path_lxvst(pd->get_serialized_paths());
-		}
-		delete pd;
-	}
-
-	void refresh_clicked () {
-		PluginManager::instance().refresh();
-	}
 };
 
 
@@ -2900,8 +2719,89 @@ if (!Profile->get_mixbus()) {
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
-	/* Plugin options (currrently VST only) */
-	add_option (_("Plugins"), new PluginOptions (_rc_config));
+	add_option (_("Plugins"), new OptionEditorHeading (_("General")));
+
+	add_option (_("Plugins"),
+			new RcActionButton (_("Scan for Plugins"),
+				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
+
+	bo = new BoolOption (
+			"show-plugin-scan-window",
+			_("Always Display Plugin Scan Progress"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_plugin_scan_window),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_plugin_scan_window)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> a popup window showing plugin scan progress is displayed for indexing (cache load) and discovery (detect new plugins)"));
+
+#endif
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+	add_option (_("Plugins"), new OptionEditorHeading (_("VST")));
+
+	bo = new BoolOption (
+			"discover-vst-on-start",
+			_("Scan for [new] VST Plugins on Application Start"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_vst_on_start),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_vst_on_start)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> new VST plugins are searched, tested and added to the cache index on application start. When disabled new plugins will only be available after triggering a 'Scan' manually"));
+
+#ifdef WINDOWS_VST_SUPPORT
+	// currently verbose logging is only implemented for Windows VST.
+	bo = new BoolOption (
+			"verbose-plugin-scan",
+			_("Verbose Plugin Scan"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_verbose_plugin_scan),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_verbose_plugin_scan)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> additional information for every plugin is added to the Log Window."));
+#endif
+
+	add_option (_("Plugins"), new VstTimeOutSliderOption (_rc_config));
+
+	add_option (_("Plugins"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_vst_cache),
+				_("VST Cache:")));
+
+	add_option (_("Plugins"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_vst_blacklist),
+				_("VST Blacklist:")));
+#endif
+
+#ifdef LXVST_SUPPORT
+	add_option (_("Plugins"),
+			new RcActionButton (_("Edit"),
+				sigc::mem_fun (*this, &RCOptionEditor::edit_lxvst_path),
+			_("Linux VST Path:")));
+#endif
+
+#ifdef WINDOWS_VST_SUPPORT
+	add_option (_("Plugins"),
+			new RcActionButton (_("Edit"),
+				sigc::mem_fun (*this, &RCOptionEditor::edit_lxvst_path),
+			_("Windows VST Path:")));
+#endif
+
+#ifdef AUDIOUNIT_SUPPORT
+	add_option (_("Plugins"), new OptionEditorHeading (_("Audio Unit")));
+
+	bo = new BoolOption (
+			"discover-audio-units",
+			_("Scan for AudioUnit Plugins on Application Start"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_audio_units),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_audio_units)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> Audio Unit Plugins are discovered on application start. When disabled AU plugins will only be available after triggering a 'Scan' manually. The first successful scan will enable AU auto-scan, Any crash during plugin discovery will disable it."));
 #endif
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined HAVE_LV2)
@@ -2909,7 +2809,7 @@ if (!Profile->get_mixbus()) {
 	add_option (_("Plugins"),
 	     new BoolOption (
 		     "open-gui-after-adding-plugin",
-		     _("Automatically open the plugin GUI when adding a new plugin."),
+		     _("Automatically open the plugin GUI when adding a new plugin"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_open_gui_after_adding_plugin),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_open_gui_after_adding_plugin)
 		     ));
@@ -3243,6 +3143,55 @@ RCOptionEditor::parameter_changed (string const & p)
 void RCOptionEditor::ltc_generator_volume_changed () {
 	_rc_config->set_ltc_output_volume (pow(10, _ltc_volume_adjustment->get_value() / 20));
 }
+
+void RCOptionEditor::plugin_scan_refresh () {
+	PluginManager::instance().refresh();
+}
+
+void RCOptionEditor::clear_vst_cache () {
+	PluginManager::instance().clear_vst_cache();
+}
+
+void RCOptionEditor::clear_vst_blacklist () {
+	PluginManager::instance().clear_vst_blacklist();
+}
+
+void RCOptionEditor::clear_au_cache () {
+	PluginManager::instance().clear_au_cache();
+}
+
+void RCOptionEditor::clear_au_blacklist () {
+	PluginManager::instance().clear_au_blacklist();
+}
+
+void RCOptionEditor::edit_lxvst_path () {
+	Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
+			_("Set Linux VST Search Path"),
+			_rc_config->get_plugin_path_lxvst(),
+			PluginManager::instance().get_default_lxvst_path()
+			);
+	ResponseType r = (ResponseType) pd->run ();
+	pd->hide();
+	if (r == RESPONSE_ACCEPT) {
+		_rc_config->set_plugin_path_lxvst(pd->get_serialized_paths());
+	}
+	delete pd;
+}
+
+void RCOptionEditor::edit_vst_path () {
+	Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
+			_("Set Windows VST Search Path"),
+			_rc_config->get_plugin_path_vst(),
+			PluginManager::instance().get_default_windows_vst_path()
+			);
+	ResponseType r = (ResponseType) pd->run ();
+	pd->hide();
+	if (r == RESPONSE_ACCEPT) {
+		_rc_config->set_plugin_path_vst(pd->get_serialized_paths());
+	}
+	delete pd;
+}
+
 
 void
 RCOptionEditor::populate_sync_options ()

@@ -55,7 +55,16 @@ private:
 	Gtk::Adjustment* _ltc_volume_adjustment;
 	BoolOption* _ltc_send_continuously;
 
-        PBD::ScopedConnection parameter_change_connection;
+	PBD::ScopedConnection parameter_change_connection;
+
+	/* plugin actions */
+	void plugin_scan_refresh ();
+	void clear_vst_cache ();
+	void clear_vst_blacklist ();
+	void clear_au_cache ();
+	void clear_au_blacklist ();
+	void edit_lxvst_path ();
+	void edit_vst_path ();
 };
 
 #endif /* __gtk_ardour_rc_option_editor_h__ */
