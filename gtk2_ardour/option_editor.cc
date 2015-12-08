@@ -113,6 +113,31 @@ OptionEditorBox::add_to_page (OptionEditorPage* p)
 	add_widget_to_page (p, _box);
 }
 
+RcActionButton::RcActionButton (std::string const & t, const Glib::SignalProxy0< void >::SlotType & slot, std::string const & l)
+	: _label (NULL)
+{
+	_button = manage (new Button (t));
+	_button->signal_clicked().connect (slot);
+	if (!l.empty ()) {
+		_label = manage (right_aligned_label (l));
+	}
+}
+
+void
+RcActionButton::add_to_page (OptionEditorPage *p)
+{
+	int const n = p->table.property_n_rows();
+	int m = n + 1;
+	p->table.resize (m, 3);
+	if (_label) {
+		p->table.attach (*_label,  1, 2, n, n + 1, FILL | EXPAND);
+		p->table.attach (*_button, 2, 3, n, n + 1, FILL | EXPAND);
+	} else {
+		p->table.attach (*_button, 1, 3, n, n + 1, FILL | EXPAND);
+	}
+}
+
+
 BoolOption::BoolOption (string const & i, string const & n, sigc::slot<bool> g, sigc::slot<bool, bool> s)
 	: Option (i, n),
 	  _get (g),

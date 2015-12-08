@@ -121,6 +121,22 @@ protected:
 	Gtk::VBox* _box; ///< constituent box for subclasses to add widgets to
 };
 
+class RcActionButton : public OptionEditorComponent
+{
+public:
+	RcActionButton (std::string const & t, const Glib::SignalProxy0< void >::SlotType & slot, std::string const & l = "");
+	void add_to_page (OptionEditorPage *);
+
+	void parameter_changed (std::string const & p) {}
+	void set_state_from_config () {}
+	Gtk::Widget& tip_widget() { return *_button; }
+
+protected:
+	Gtk::Button* _button;
+	Gtk::Label* _label;
+	std::string _name;
+};
+
 /** Base class for components which provide UI to change an option */
 class Option : public OptionEditorComponent
 {
