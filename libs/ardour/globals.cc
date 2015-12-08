@@ -41,6 +41,7 @@
 #include "pbd/gstdio_compat.h"
 
 #ifdef PLATFORM_WINDOWS
+#include <stdio.h> // for _setmaxstdio
 #include <windows.h> // for LARGE_INTEGER
 #endif
 
@@ -272,6 +273,21 @@ lotsa_files_please ()
 		}
 	} else {
 		error << string_compose (_("Could not get system open files limit (%1)"), strerror (errno)) << endmsg;
+	}
+#else
+	/* this only affects stdio. 2048 is the maxium possible (512 the default).
+	 *
+	 * If we want more, we'll have to replaces the POSIX I/O interfaces with
+	 * Win32 API calls (CreateFile, WriteFile, etc) which allows for 16K.
+	 *
+	 * see http://stackoverflow.com/questions/870173/is-there-a-limit-on-number-of-open-files-in-windows
+	 * and http://bugs.mysql.com/bug.php?id=24509
+	 */
+	int newmax = _setmaxstdio (2048);
+	if (newmax > 0) {
+		info << string_compose (_("Your system is configured to limit %1 to only %2 open files"), PROGRAM_NAME, newmax) << endmsg;
+	} else {
+		error << string_compose (_("Could not set system open files limit. Current limit is %1 open files"), _getmaxstdio)  << endmsg;
 	}
 #endif
 }
