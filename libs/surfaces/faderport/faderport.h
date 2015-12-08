@@ -222,7 +222,6 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 			, name (str)
 			, id (i)
 			, out (o)
-			, led_on (false)
 			, flash (false)
 		{}
 
@@ -230,7 +229,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		void set_action (boost::function<void()> function, bool on_press, FaderPort::ButtonState = ButtonState (0));
 		std::string get_action (bool press, FaderPort::ButtonState bs = ButtonState (0));
 
-		void set_led_state (boost::shared_ptr<MIDI::Port>, int onoff, bool force = false);
+		void set_led_state (boost::shared_ptr<MIDI::Port>, bool onoff);
 		void invoke (ButtonState bs, bool press);
 		bool uses_flash () const { return flash; }
 		void set_flash (bool yn) { flash = yn; }
@@ -245,7 +244,6 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		std::string name;
 		ButtonID id;
 		int out;
-		bool led_on;
 		bool flash;
 
 		struct ToDo {
@@ -280,8 +278,8 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 
 	PBD::ScopedConnectionList session_connections;
 	void connect_session_signals ();
-	void notify_record_state_changed ();
-	void notify_transport_state_changed ();
+	void map_recenable_state ();
+	void map_transport_state ();
 
 	sigc::connection blink_connection;
 	typedef std::list<ButtonID> Blinkers;

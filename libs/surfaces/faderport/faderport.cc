@@ -281,7 +281,7 @@ void
 FaderPort::all_lights_out ()
 {
 	for (ButtonMap::iterator b = buttons.begin(); b != buttons.end(); ++b) {
-		b->second.set_led_state (_output_port, false, true);
+		b->second.set_led_state (_output_port, false);
 	}
 }
 
@@ -535,8 +535,8 @@ FaderPort::sysex_handler (MIDI::Parser &p, MIDI::byte *buf, size_t sz)
 
 	/* catch up on state */
 
-	notify_transport_state_changed ();
-	notify_record_state_changed ();
+	map_transport_state ();
+	map_recenable_state ();
 }
 
 int
@@ -618,7 +618,7 @@ FaderPort::close ()
 }
 
 void
-FaderPort::notify_record_state_changed ()
+FaderPort::map_recenable_state ()
 {
 	switch (session->record_status()) {
 	case Session::Disabled:
@@ -634,10 +634,21 @@ FaderPort::notify_record_state_changed ()
 }
 
 void
-FaderPort::notify_transport_state_changed ()
+FaderPort::map_transport_state ()
 {
 	get_button (Loop).set_led_state (_output_port, session->get_play_loop());
-	get_button (Play).set_led_state (_output_port, session->transport_speed() == 1.0);
+
+	float ts = session->transport_speed();
+
+	if (ts == 0) {
+		stop_blinking (Play);
+	} else if (fabs (ts) == 1.0) {
+		stop_blinking (Play);
+		get_button (Play).set_led_state (_output_port, true);
+	} else {
+		start_blinking (Play);
+	}
+
 	get_button (Stop).set_led_state (_output_port, session->transport_stopped ());
 	get_button (Rewind).set_led_state (_output_port, session->transport_speed() < 0.0);
 	get_button (Ffwd).set_led_state (_output_port, session->transport_speed() > 1.0);
@@ -663,8 +674,8 @@ FaderPort::parameter_changed (string what)
 void
 FaderPort::connect_session_signals()
 {
-	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_record_state_changed, this), this);
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::notify_transport_state_changed, this), this);
+	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_recenable_state, this), this);
+	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_transport_state, this), this);
 	/* not session, but treat it similarly */
 	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::parameter_changed, this, _1), this);
 }
@@ -933,13 +944,8 @@ FaderPort::Button::set_action (boost::function<void()> f, bool when_pressed, Fad
 }
 
 void
-FaderPort::Button::set_led_state (boost::shared_ptr<MIDI::Port> port, int onoff, bool force)
+FaderPort::Button::set_led_state (boost::shared_ptr<MIDI::Port> port, bool onoff)
 {
-	if (!force && (led_on == (bool) onoff)) {
-		/* nothing to do */
-		return;
-	}
-
 	if (out < 0) {
 		/* fader button ID - no LED */
 		return;
@@ -950,7 +956,6 @@ FaderPort::Button::set_led_state (boost::shared_ptr<MIDI::Port> port, int onoff,
 	buf[1] = out;
 	buf[2] = onoff ? 1 : 0;
 	port->write (buf, 3, 0);
-	led_on = (onoff ? true : false);
 }
 
 int
@@ -1151,19 +1156,38 @@ FaderPort::map_cut ()
 void
 FaderPort::map_mute (void*)
 {
-	get_button (Mute).set_led_state (_output_port, _current_route->muted());
+	if (_current_route) {
+		if (_current_route->muted()) {
+			stop_blinking (Mute);
+			get_button (Mute).set_led_state (_output_port, true);
+		} else if (_current_route->muted_by_others()) {
+			start_blinking (Mute);
+		} else {
+			stop_blinking (Mute);
+		}
+	} else {
+		stop_blinking (Mute);
+	}
 }
 
 void
 FaderPort::map_solo (bool, void*, bool)
 {
-	get_button (Solo).set_led_state (_output_port, _current_route->soloed() || _current_route->listening_via_monitor());
+	if (_current_route) {
+		get_button (Solo).set_led_state (_output_port, _current_route->soloed() || _current_route->listening_via_monitor());
+	} else {
+		get_button (Solo).set_led_state (_output_port, false);
+	}
 }
 
 void
 FaderPort::map_listen (void*, bool)
 {
-	get_button (Solo).set_led_state (_output_port, _current_route->listening_via_monitor());
+	if (_current_route) {
+		get_button (Solo).set_led_state (_output_port, _current_route->listening_via_monitor());
+	} else {
+		get_button (Solo).set_led_state (_output_port, false);
+	}
 }
 
 void
@@ -1236,12 +1260,16 @@ FaderPort::map_route_state ()
 		get_button (Rec).set_led_state (_output_port, false);
 	} else {
 		/* arguments to these map_*() methods are all ignored */
-		map_mute (0);
 		map_solo (false, 0, false);
 		map_recenable ();
 		map_gain ();
-		map_cut ();
 		map_auto ();
+
+		if (_current_route == session->monitor_out()) {
+			map_cut ();
+		} else {
+			map_mute (0);
+		}
 	}
 }
 
