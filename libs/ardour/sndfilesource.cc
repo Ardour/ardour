@@ -255,6 +255,7 @@ SndFileSource::close ()
 	if (_sndfile) {
 		sf_close (_sndfile);
 		_sndfile = 0;
+		file_closed ();
 	}
 }
 
