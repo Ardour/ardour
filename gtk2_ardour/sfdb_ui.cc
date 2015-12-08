@@ -192,10 +192,10 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 
 	main_box.pack_start (bottom_box, false, false);
 
-	play_btn.set_image (*(manage (new Image (Stock::MEDIA_PLAY, ICON_SIZE_BUTTON))));
+	play_btn.set_image (*(manage (new Gtk::Image (Stock::MEDIA_PLAY, ICON_SIZE_BUTTON))));
 //	play_btn.set_label (_("Play"));
 
-	stop_btn.set_image (*(manage (new Image (Stock::MEDIA_STOP, ICON_SIZE_BUTTON))));
+	stop_btn.set_image (*(manage (new Gtk::Image (Stock::MEDIA_STOP, ICON_SIZE_BUTTON))));
 //	stop_btn.set_label (_("Stop"));
 
 	bottom_box.set_homogeneous (false);

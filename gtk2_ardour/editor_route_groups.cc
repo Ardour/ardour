@@ -174,11 +174,11 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	Widget* w;
 
-	w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
+	w = manage (new Gtk::Image (Stock::ADD, ICON_SIZE_BUTTON));
 	w->show();
 	add_button->add (*w);
 
-	w = manage (new Image (Stock::REMOVE, ICON_SIZE_BUTTON));
+	w = manage (new Gtk::Image (Stock::REMOVE, ICON_SIZE_BUTTON));
 	w->show();
 	remove_button->add (*w);
 

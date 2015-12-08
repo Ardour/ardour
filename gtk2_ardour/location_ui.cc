@@ -63,7 +63,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 {
          i_am_the_modifier = 0;
 
-         remove_button.set_image (*manage (new Image (Stock::REMOVE, Gtk::ICON_SIZE_MENU)));
+         remove_button.set_image (*manage (new Gtk::Image (Stock::REMOVE, Gtk::ICON_SIZE_MENU)));
 
 	 start_to_playhead_button.set_name ("LocationEditCdButton");
 	 end_to_playhead_button.set_name ("LocationEditCdButton");
