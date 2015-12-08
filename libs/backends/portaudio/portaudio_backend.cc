@@ -1303,7 +1303,7 @@ PortAudioBackend::register_system_midi_ports()
 	for (std::vector<WinMMEMidiInputDevice*>::const_iterator i = inputs.begin ();
 	     i != inputs.end ();
 	     ++i) {
-		std::string port_name = "system_midi:" + (*i)->name() + " capture";
+		std::string port_name = "system:midi_capture_" + (*i)->name();
 		PortHandle p =
 		    add_port (port_name,
 		              DataType::MIDI,
@@ -1321,7 +1321,7 @@ PortAudioBackend::register_system_midi_ports()
 	for (std::vector<WinMMEMidiOutputDevice*>::const_iterator i = outputs.begin ();
 	     i != outputs.end ();
 	     ++i) {
-		std::string port_name = "system_midi:" + (*i)->name() + " playback";
+		std::string port_name = "system:midi_playback_" + (*i)->name();
 		PortHandle p =
 		    add_port (port_name,
 		              DataType::MIDI,
