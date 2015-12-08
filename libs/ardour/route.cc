@@ -890,7 +890,6 @@ Route::set_solo (bool yn, void *src, bool group_override)
 
 	if (self_soloed() != yn) {
 		set_self_solo (yn);
-		set_mute_master_solo ();
 		solo_changed (true, src, group_override); /* EMIT SIGNAL */
 		_solo_control->Changed (); /* EMIT SIGNAL */
 	}
@@ -911,6 +910,7 @@ Route::set_self_solo (bool yn)
 {
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: set SELF solo => %2\n", name(), yn));
 	_self_solo = yn;
+	set_mute_master_solo ();
 }
 
 void
