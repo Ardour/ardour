@@ -215,6 +215,26 @@ AudioEngine::process_callback (pframes_t nframes)
 		return 0;
 	}
 
+	/* The coreaudio-backend calls thread_init_callback() if
+	 * the hardware changes or pthread_self() changes.
+	 *
+	 * However there are cases when neither holds true, yet
+	 * the thread-pool changes: e.g. connect a headphone to
+	 * a shared mic/headphone jack.
+	 * It's probably related to, or caused by clocksource changes.
+	 *
+	 * For reasons yet unknown Glib::Threads::Private() can
+	 * use a different thread-private in the same pthread
+	 * (coreaudio render callback).
+	 *
+	 * Coreaudio must set something which influences
+	 * pthread_key_t uniqness or reset the key using
+	 * pthread_getspecific().
+	 */
+	if (! SessionEvent::has_per_thread_pool ()) {
+		thread_init_callback (NULL);
+	}
+
 	bool return_after_remove_check = false;
 
 	if (_measuring_latency == MeasureAudio && _mtdm) {
