@@ -212,15 +212,14 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 		ruler_items.push_back (MenuElem (_("New location marker"), sigc::bind ( sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, false)));
 		ruler_items.push_back (MenuElem (_("Clear all locations"), sigc::mem_fun(*this, &Editor::clear_markers)));
 		ruler_items.push_back (MenuElem (_("Unhide locations"), sigc::mem_fun(*this, &Editor::unhide_markers)));
-		ruler_items.push_back (SeparatorElem ());
 		break;
+
 	case RangeMarkerBarItem:
 		ruler_items.push_back (MenuElem (_("New range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_range), where)));
 		ruler_items.push_back (MenuElem (_("Clear all ranges"), sigc::mem_fun(*this, &Editor::clear_ranges)));
 		ruler_items.push_back (MenuElem (_("Unhide ranges"), sigc::mem_fun(*this, &Editor::unhide_ranges)));
-		ruler_items.push_back (SeparatorElem ());
-
 		break;
+
 	case TransportMarkerBarItem:
 		ruler_items.push_back (MenuElem (_("New Loop range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_loop), where)));
 		ruler_items.push_back (MenuElem (_("New Punch range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_punch), where)));
@@ -230,7 +229,6 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 		// TODO
 		ruler_items.push_back (MenuElem (_("New CD track marker"), sigc::bind ( sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, true)));
 		break;
-
 
 	case TempoBarItem:
 		ruler_items.push_back (MenuElem (_("New Tempo"), sigc::bind ( sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
