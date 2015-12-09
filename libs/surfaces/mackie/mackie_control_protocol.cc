@@ -31,6 +31,7 @@
 #include <errno.h>
 
 #include <boost/shared_array.hpp>
+#include <glibmm/miscutils.h>
 
 #include "midi++/types.h"
 #include "midi++/port.h"
@@ -720,11 +721,13 @@ MackieControlProtocol::set_profile (const string& profile_name)
 	if (profile_name == "default") {
 		/* reset to default */
 		_device_profile = DeviceProfile (profile_name);
+		return;
 	}
 
 	map<string,DeviceProfile>::iterator d = DeviceProfile::device_profiles.find (profile_name);
 
 	if (d == DeviceProfile::device_profiles.end()) {
+		_device_profile = DeviceProfile (profile_name);
 		return;
 	}
 
@@ -1051,7 +1054,17 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 	}
 
 	if ((prop = node.property (X_("device-profile"))) != 0) {
-		set_profile (prop->value());
+		if (prop->value().empty()) {
+			string default_profile_name;
+
+			default_profile_name = Glib::get_user_name();
+			default_profile_name += ' ';
+			default_profile_name += _device_info.name();
+
+			set_profile (default_profile_name);
+		} else {
+			set_profile (prop->value());
+		}
 	}
 
 	XMLNode* dnode = node.child (X_("Configurations"));
