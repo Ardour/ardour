@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-18 16:48+0100\n"
-"PO-Revision-Date: 2015-01-18 11:41+0100\n"
+"POT-Creation-Date: 2015-11-11 15:37+0100\n"
+"PO-Revision-Date: 2015-12-09 12:33+0100\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -17,11 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
-#: actions.cc:336
-msgid "programming error: %1"
-msgstr "Programmierfehler: %1"
-
-#: actions.cc:511
+#: actions.cc:519
 msgid "Unknown action name: %1"
 msgstr "Unbekannter Aktionsname: %1"
 
@@ -57,49 +53,49 @@ msgstr ""
 "\n"
 "Kurzbefehl: "
 
-#: gtk_ui.cc:638
+#: gtk_ui.cc:670
 msgid "Press To Exit"
 msgstr "Zum Beenden drücken"
 
-#: gtk_ui.cc:674
+#: gtk_ui.cc:706
 msgid "I'm sorry %1, I can't do that"
 msgstr "Leider kann ich das nicht tun, %1"
 
-#: keyboard.cc:73
+#: keyboard.cc:69
 msgid "Command"
 msgstr "Befehl"
 
-#: keyboard.cc:74 keyboard.cc:77 keyboard.cc:90 keyboard.cc:94
+#: keyboard.cc:70 keyboard.cc:87
 msgid "Control"
 msgstr "Strg"
 
-#: keyboard.cc:75 keyboard.cc:78 keyboard.cc:92 keyboard.cc:95
+#: keyboard.cc:71 keyboard.cc:89
 msgid "Key|Shift"
 msgstr "Key|Shift"
 
-#: keyboard.cc:76
+#: keyboard.cc:72
 msgid "Option"
 msgstr "Option"
 
-#: keyboard.cc:91
+#: keyboard.cc:88
 msgid "Alt"
 msgstr "Alt"
 
-#: keyboard.cc:93
-msgid "Meta"
-msgstr "Meta"
+#: keyboard.cc:90
+msgid "Windows"
+msgstr "Windows"
 
-#: keyboard.cc:144 keyboard.cc:540
+#: keyboard.cc:141 keyboard.cc:580
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: keyboard.cc:551
+#: keyboard.cc:591
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Die Tastenkürzel-Datei \"%1\" konnte nicht gefunden werden oder enthält "
 "Fehler."
 
-#: keyboard.cc:602
+#: keyboard.cc:642
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Kann Ihre eigene Tastaturkürzeldatei nicht umbenennen (%1)"
 
@@ -144,6 +140,6 @@ msgstr "Klicken, um in ein eigenes Fenster abzureißen"
 msgid "Click to put this back in the main window"
 msgstr "Klicken, um an das Hauptfenster anzudocken"
 
-#: textviewer.cc:34
+#: textviewer.cc:32
 msgid "Close"
 msgstr "Schließen"
