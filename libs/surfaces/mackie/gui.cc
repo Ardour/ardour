@@ -202,8 +202,6 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 
 	vector<string> profiles;
 
-	profiles.push_back ("default");
-
 	for (std::map<std::string,DeviceProfile>::iterator i = DeviceProfile::device_profiles.begin(); i != DeviceProfile::device_profiles.end(); ++i) {
 		profiles.push_back (i->first);
 	}

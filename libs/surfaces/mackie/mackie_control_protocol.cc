@@ -718,12 +718,6 @@ MackieControlProtocol::connect_session_signals()
 void
 MackieControlProtocol::set_profile (const string& profile_name)
 {
-	if (profile_name == "default") {
-		/* reset to default */
-		_device_profile = DeviceProfile (profile_name);
-		return;
-	}
-
 	map<string,DeviceProfile>::iterator d = DeviceProfile::device_profiles.find (profile_name);
 
 	if (d == DeviceProfile::device_profiles.end()) {
