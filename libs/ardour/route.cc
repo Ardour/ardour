@@ -136,17 +136,14 @@ Route::init ()
 	_solo_control.reset (new SoloControllable (X_("solo"), shared_from_this ()));
 	_mute_control.reset (new MuteControllable (X_("mute"), shared_from_this ()));
 	_phase_control.reset (new PhaseControllable (X_("phase"), shared_from_this ()));
-	_group_gain_control.reset (new GroupGainControllable (X_("groupgain"), shared_from_this ()));
 
 	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
 	_mute_control->set_flags (Controllable::Flag (_mute_control->flags() | Controllable::Toggle));
 	_phase_control->set_flags (Controllable::Flag (_phase_control->flags() | Controllable::Toggle));
-	_group_gain_control->set_flags (Controllable::Flag (_group_gain_control->flags() | Controllable::GainLike));
 
 	add_control (_solo_control);
 	add_control (_mute_control);
 	add_control (_phase_control);
-	add_control (_group_gain_control);
 
 	/* panning */
 
@@ -176,6 +173,11 @@ Route::init ()
 
 	_amp.reset (new Amp (_session));
 	add_processor (_amp, PostFader);
+
+	// amp should exist before amp controls
+	_group_gain_control.reset (new GroupGainControllable (X_("groupgain"), shared_from_this ()));
+	_group_gain_control->set_flags (Controllable::Flag (_group_gain_control->flags() | Controllable::GainLike));
+	add_control (_group_gain_control);
 
 	/* and input trim */
 	_trim.reset (new Amp (_session, "trim"));
@@ -3996,6 +3998,13 @@ Route::GroupGainControllable::set_value (double val)
 	// I am not sure why I need the * .5 to make this work
 	float normalized_position = r->gain_control()->interface_to_internal (val * 0.5);
 	r->set_gain ((gain_t)normalized_position, this);
+}
+
+double
+Route::GroupGainControllable::get_value () const
+{
+	boost::shared_ptr<Route> r = _route.lock ();
+	return 2.0 * r->gain_control()->internal_to_interface (r->gain_control()->get_value ());
 }
 
 Route::PhaseControllable::PhaseControllable (std::string name, boost::shared_ptr<Route> r)

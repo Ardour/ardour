@@ -427,8 +427,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	public:
 		GroupGainControllable (std::string name, boost::shared_ptr<Route>);
 		void set_value (double);
-		// We get the value from the amp where we get the changed signal from
-		//double get_value () const;
+		double get_value () const;
 	private:
 		boost::weak_ptr<Route> _route;
 	};
