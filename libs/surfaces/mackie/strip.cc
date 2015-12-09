@@ -483,11 +483,11 @@ Strip::notify_processor_changed (bool force_update)
 		if (control == _fader) {
 			if (!_fader->in_use()) {
 				_surface->write (_fader->set_position (normalized_position));
-				queue_parameter_display (SendAutomation, normalized_position);
+				queue_parameter_display (SendAutomation, gain_coefficient);
 			}
 		} else if (control == _vpot) {
 			_surface->write (_vpot->set (normalized_position, true, Pot::dot));
-			queue_parameter_display (SendAutomation, normalized_position);
+			queue_parameter_display (SendAutomation, gain_coefficient);
 		}
 	}
 }
