@@ -907,8 +907,9 @@ Strip::handle_pot (Pot& pot, float delta)
 	}
 	double p = pot.get_value ();
 	p += delta;
-	p = max (ac->lower(), p);
-	p = min (ac->upper(), p);
+	// fader and pot should be the same and fader is hard coded 0 -> 1
+	p = max (0.0, p);
+	p = min (1.0, p);
 	pot.set_value (p);
 }
 
