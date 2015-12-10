@@ -109,6 +109,8 @@ class MackieControlProtocol
 		Auxes,
 		Selected,
 		Plugins,
+		Dynamics,
+		EQ,
 	};
 
 	enum PotMode {

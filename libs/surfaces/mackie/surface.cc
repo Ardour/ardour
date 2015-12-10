@@ -33,6 +33,7 @@
 #include "ardour/route.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
+#include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 #include "ardour/utils.h"
@@ -64,7 +65,7 @@ using namespace std;
 using namespace PBD;
 using ARDOUR::Route;
 using ARDOUR::Panner;
-using ARDOUR::Pannable;
+using ARDOUR::Profile;
 using ARDOUR::AutomationControl;
 using namespace ArdourSurface;
 using namespace Mackie;
@@ -1070,10 +1071,14 @@ Surface::update_view_mode_display ()
 	case MackieControlProtocol::Busses:
 		show_two_char_display ("BS");
 		id = Button::Busses;
-		text = _("Busses");
+		if (Profile->get_mixbus()) {
+			text = _("Mixbusses");
+		} else {
+			text = _("Busses");
+		}
 		break;
 	case MackieControlProtocol::Auxes:
-		show_two_char_display ("AB");
+		show_two_char_display ("Au");
 		id = Button::Aux;
 		text = _("Auxes");
 		break;
@@ -1081,6 +1086,16 @@ Surface::update_view_mode_display ()
 		show_two_char_display ("SE");
 		id = Button::User;
 		text = _("Selected Routes");
+		break;
+	case MackieControlProtocol::Dynamics:
+		show_two_char_display ("DI");
+		id = Button::User;
+		text = _("Dynamics");
+		break;
+	case MackieControlProtocol::EQ:
+		show_two_char_display ("EQ");
+		id = Button::User;
+		text = _("EQ");
 		break;
 	default:
 		break;

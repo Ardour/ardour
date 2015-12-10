@@ -408,7 +408,18 @@ MackieControlProtocol::marker_press (Button &)
 {
 	string markername;
 
-	session->locations()->next_available_name (markername,"mcu");
+	/* Don't add another mark if one exists within 1/100th of a second of
+	 * the current position.
+	 */
+
+
+	framepos_t where = session->audible_frame();
+
+	if (session->locations()->mark_at (where, session->frame_rate() / 100.0)) {
+		return off;
+	}
+
+	session->locations()->next_available_name (markername,"marker");
 	add_marker (markername);
 
 	return on;

@@ -51,6 +51,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
+#include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
@@ -309,12 +310,19 @@ MackieControlProtocol::get_sorted_routes()
 			}
 			break;
 		case Busses:
-			if (!is_track(route)) {
-				if (route->route_group()) {
-					route->route_group()->set_active (true, this);
+			if (Profile->get_mixbus()) {
+				if (route->mixbus()) {
+					sorted.push_back (route);
+					remote_ids.insert (route->remote_control_id());
 				}
-				sorted.push_back (route);
-				remote_ids.insert (route->remote_control_id());
+			} else {
+				if (!is_track(route)) {
+					if (route->route_group()) {
+						route->route_group()->set_active (true, this);
+					}
+					sorted.push_back (route);
+					remote_ids.insert (route->remote_control_id());
+				}
 			}
 			break;
 		case MidiTracks:
@@ -328,7 +336,7 @@ MackieControlProtocol::get_sorted_routes()
 			break;
 		case Plugins:
 			break;
-		case Auxes: // for now aux and buss are same
+		case Auxes: // in ardour, for now aux and buss are same. for mixbus, see "Busses" case above
 			if (!is_track(route)) {
 				if (route->route_group()) {
 					route->route_group()->set_active (true, this);
@@ -348,6 +356,12 @@ MackieControlProtocol::get_sorted_routes()
 				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
+			break;
+		case Dynamics:
+			/* display shows a single route */
+			break;
+		case EQ:
+			/* display shows a single route */
 			break;
 		}
 
@@ -1483,7 +1497,6 @@ MackieControlProtocol::build_button_map ()
 	DEFINE_BUTTON_HANDLER (Button::UserA, &MackieControlProtocol::user_a_press, &MackieControlProtocol::user_a_release);
 	DEFINE_BUTTON_HANDLER (Button::UserB, &MackieControlProtocol::user_b_press, &MackieControlProtocol::user_b_release);
 	DEFINE_BUTTON_HANDLER (Button::MasterFaderTouch, &MackieControlProtocol::master_fader_touch_press, &MackieControlProtocol::master_fader_touch_release);
-
 }
 
 void
@@ -1504,6 +1517,8 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 	string action = _device_profile.get_button_action (button.bid(), _modifier_state);
 
 	if (!action.empty()) {
+
+		std::cerr << "Button has action: " << action << std::endl;
 
 		if (action.find ('/') != string::npos) { /* good chance that this is really an action */
 

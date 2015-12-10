@@ -222,19 +222,19 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	boost::shared_ptr<Pannable> pannable = _route->pannable();
 
-if(Profile->get_mixbus()) {
-	const uint32_t port_channel_post_pan = 2; // gtk2_ardour/mixbus_ports.h
-	boost::shared_ptr<ARDOUR::PluginInsert> plug = _route->ch_post();
-	mb_pan_controllable = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_channel_post_pan)));
+	if(Profile->get_mixbus()) {
+		const uint32_t port_channel_post_pan = 2; // gtk2_ardour/mixbus_ports.h
+		boost::shared_ptr<ARDOUR::PluginInsert> plug = _route->ch_post();
+		mb_pan_controllable = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_channel_post_pan)));
 
-	mb_pan_controllable->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
-} else {
-	if (pannable && _route->panner()) {
-		pannable->pan_azimuth_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
-		pannable->pan_width_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_width_changed, this, false), ui_context());
+		mb_pan_controllable->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
+	} else {
+		if (pannable && _route->panner()) {
+			pannable->pan_azimuth_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
+			pannable->pan_width_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_width_changed, this, false), ui_context());
+		}
 	}
-}
-	
+
 	_route->gain_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_gain_changed, this, false), ui_context());
 	_route->PropertyChanged.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
 
@@ -257,25 +257,25 @@ if(Profile->get_mixbus()) {
 
 	possible_pot_parameters.clear();
 
-if (Profile->get_mixbus()) {
-	possible_pot_parameters.push_back (PanAzimuthAutomation);
-} else {
-	if (pannable) {
-		boost::shared_ptr<Panner> panner = _route->panner();
-		if (panner) {
-			set<Evoral::Parameter> automatable = panner->what_can_be_automated ();
-			set<Evoral::Parameter>::iterator a;
+	if (Profile->get_mixbus()) {
+		possible_pot_parameters.push_back (PanAzimuthAutomation);
+	} else {
+		if (pannable) {
+			boost::shared_ptr<Panner> panner = _route->panner();
+			if (panner) {
+				set<Evoral::Parameter> automatable = panner->what_can_be_automated ();
+				set<Evoral::Parameter>::iterator a;
 
-			if ((a = automatable.find (PanAzimuthAutomation)) != automatable.end()) {
-				possible_pot_parameters.push_back (PanAzimuthAutomation);
-			}
+				if ((a = automatable.find (PanAzimuthAutomation)) != automatable.end()) {
+					possible_pot_parameters.push_back (PanAzimuthAutomation);
+				}
 
-			if ((a = automatable.find (PanWidthAutomation)) != automatable.end()) {
-				possible_pot_parameters.push_back (PanWidthAutomation);
+				if ((a = automatable.find (PanWidthAutomation)) != automatable.end()) {
+					possible_pot_parameters.push_back (PanWidthAutomation);
+				}
 			}
 		}
 	}
-}
 
 	if (_route->trim() && route()->trim()->active()) {
 		possible_pot_parameters.push_back (TrimAutomation);
