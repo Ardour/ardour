@@ -100,6 +100,7 @@ Mixer_UI::Mixer_UI ()
         , _route_deletion_in_progress (false)
 	, _following_editor_selection (false)
 	, _maximised (false)
+	, _show_mixer_list (true)
 {
 	/* allow this window to become the key focus window */
 	set_flags (CAN_FOCUS);
@@ -1430,6 +1431,24 @@ Mixer_UI::route_group_property_changed (RouteGroup* group, const PropertyChange&
 }
 
 void
+Mixer_UI::show_mixer_list (bool yn)
+{
+	if (yn) {
+		list_vpacker.show ();
+		
+		//if user wants to show the pane, we should make sure that it is wide enough to be visible 
+		int width = list_hpane.get_position();
+		if (width < 40)
+			list_hpane.set_position(40);
+	} else {
+		list_vpacker.hide ();
+	}
+	
+	_show_mixer_list = yn;
+}
+
+
+void
 Mixer_UI::route_group_name_edit (const std::string& path, const std::string& new_text)
 {
 	RouteGroup* group;
@@ -1639,6 +1658,17 @@ Mixer_UI::set_state (const XMLNode& node)
 		}
 	}
 
+	if ((prop = node.property ("show-mixer-list"))) {
+		bool yn = string_is_affirmative (prop->value());
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleMixerList"));
+		assert (act);
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		/* do it twice to force the change */
+		tact->set_active (!yn);
+		tact->set_active (yn);
+	}
+
 
 	return 0;
 }
@@ -1681,6 +1711,8 @@ Mixer_UI::get_state (void)
 	node->add_property ("narrow-strips", _strip_width == Narrow ? "yes" : "no");
 
 	node->add_property ("show-mixer", _visible ? "yes" : "no");
+
+	node->add_property ("show-mixer-list", _show_mixer_list ? "yes" : "no");
 
 	node->add_property ("maximised", _maximised ? "yes" : "no");
 

@@ -75,6 +75,8 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	XMLNode& get_state (void);
 	int set_state (const XMLNode& );
 
+	void show_mixer_list (bool yn);
+	
 	void show_window ();
 	bool hide_window (GdkEventAny *ev);
 	void show_strip (MixerStrip *);
@@ -293,6 +295,9 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	/// true if we are in fullscreen mode
 	bool _maximised;
+
+	// true if mixer list is visible
+	bool _show_mixer_list;
 };
 
 #endif /* __ardour_mixer_ui_h__ */

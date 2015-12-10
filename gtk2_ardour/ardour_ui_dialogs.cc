@@ -586,3 +586,14 @@ ARDOUR_UI::toggle_mixer_space()
 		}
 	}
 }
+
+void
+ARDOUR_UI::toggle_mixer_list()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMixerList");
+
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+			mixer->show_mixer_list (tact->get_active());
+	}
+}
