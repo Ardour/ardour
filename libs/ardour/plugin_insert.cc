@@ -952,6 +952,7 @@ PluginInsert::state (bool full)
 	node.add_child_nocopy (* _configured_in.state (X_("ConfiguredInput")));
 	node.add_child_nocopy (* _configured_out.state (X_("ConfiguredOutput")));
 
+	_plugins[0]->set_insert_id(this->id());
 	node.add_child_nocopy (_plugins[0]->get_state());
 
 	for (Controls::iterator c = controls().begin(); c != controls().end(); ++c) {
@@ -1123,6 +1124,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		if ((*niter)->name() == plugin->state_node_name()) {
 
 			for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+				(*i)->set_insert_id (this->id());
 				(*i)->set_state (**niter, version);
 			}
 

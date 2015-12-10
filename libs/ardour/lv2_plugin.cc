@@ -1664,7 +1664,13 @@ LV2Plugin::work_response(uint32_t size, const void* data)
 void
 LV2Plugin::set_insert_id(PBD::ID id)
 {
-	_insert_id = id;
+	if (_insert_id == "0") {
+		_insert_id = id;
+	} else if (_insert_id != id) {
+		lilv_state_free(_impl->state);
+		_impl->state = NULL;
+		_insert_id   = id;
+	}
 }
 
 int
