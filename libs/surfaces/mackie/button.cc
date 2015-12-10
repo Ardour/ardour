@@ -101,6 +101,8 @@ Button::name_to_id (const std::string& name)
 	if (!g_ascii_strcasecmp (name.c_str(), "Busses")) { return Busses; }
 	if (!g_ascii_strcasecmp (name.c_str(), "Outputs")) { return Outputs; }
 	if (!g_ascii_strcasecmp (name.c_str(), "User")) { return User; }
+	if (!g_ascii_strcasecmp (name.c_str(), "UserA")) { return UserA; }
+	if (!g_ascii_strcasecmp (name.c_str(), "UserB")) { return UserB; }
 	if (!g_ascii_strcasecmp (name.c_str(), "Shift")) { return Shift; }
 	if (!g_ascii_strcasecmp (name.c_str(), "Option")) { return Option; }
 	if (!g_ascii_strcasecmp (name.c_str(), "Ctrl")) { return Ctrl; }
