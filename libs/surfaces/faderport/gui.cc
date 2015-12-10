@@ -496,6 +496,8 @@ FPGUI::build_mix_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 	vector<pair<string,string> > actions;
 
 	actions.push_back (make_pair (string (_("Toggle Editor & Mixer Windows")), string (X_("Common/toggle-editor-mixer"))));
+	actions.push_back (make_pair (string (_("Show/Hide Mixer list")), string (X_("Common/ToggleMixerList"))));
+	actions.push_back (make_pair (string("Toggle Meterbridge"), string(X_("Common/toggle-meterbridge"))));
 	actions.push_back (make_pair (string (_("Show/Hide Editor mixer strip")), string (X_("Editor/show-editor-mixer"))));
 
 	build_action_combo (cb, actions, FaderPort::Mix, bs);
@@ -506,12 +508,13 @@ FPGUI::build_proj_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 {
 	vector<pair<string,string> > actions;
 
-	actions.push_back (make_pair (string("Toggle Meterbridge"), string(X_("Common/toggle-meterbridge"))));
-	actions.push_back (make_pair (string("Toggle Summary"), string(X_("Editor/ToggleSummary"))));
 	actions.push_back (make_pair (string("Toggle Editor Lists"), string(X_("Editor/show-editor-list"))));
+	actions.push_back (make_pair (string("Toggle Summary"), string(X_("Editor/ToggleSummary"))));
+	actions.push_back (make_pair (string("Toggle Meterbridge"), string(X_("Common/toggle-meterbridge"))));
 	actions.push_back (make_pair (string (_("Zoom to Session")), string (X_("Editor/zoom-to-session"))));
-	actions.push_back (make_pair (string (_("Zoom In")), string (X_("Editor/temporal-zoom-in"))));
-	actions.push_back (make_pair (string (_("Zoom Out")), string (X_("Editor/temporal-zoom-out"))));
+
+//	actions.push_back (make_pair (string (_("Zoom In")), string (X_("Editor/temporal-zoom-in"))));
+//	actions.push_back (make_pair (string (_("Zoom Out")), string (X_("Editor/temporal-zoom-out"))));
 
 	build_action_combo (cb, actions, FaderPort::Proj, bs);
 }
@@ -521,10 +524,14 @@ FPGUI::build_trns_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 {
 	vector<pair<string,string> > actions;
 
-	actions.push_back (make_pair (string("Toggle Locations"), string(X_("Window/toggle-locations"))));
+	actions.push_back (make_pair (string("Toggle Big Clock"), string(X_("Window/toggle-big-clock"))));  //note:  this would really make sense if the Big Clock had transport buttons on it
+	actions.push_back (make_pair (string("Toggle Locations window"), string(X_("Window/toggle-locations"))));
 	actions.push_back (make_pair (string("Toggle Metronome"), string(X_("Transport/ToggleClick"))));
-	actions.push_back (make_pair (string("Toggle Sync"), string(X_("Transport/ToggleExternalSync"))));
-	actions.push_back (make_pair (string("Set Playhead @pointer"), string(X_("Editor/set-playhead"))));
+	actions.push_back (make_pair (string("Toggle External Sync"), string(X_("Transport/ToggleExternalSync"))));
+	actions.push_back (make_pair (string("Toggle Follow Playhead"), string(X_("Editor/toggle-follow-playhead"))));
+
+//	actions.push_back (make_pair (string("Set Playhead @pointer"), string(X_("Editor/set-playhead"))));
+
 
 	build_action_combo (cb, actions, FaderPort::Trns, bs);
 }
