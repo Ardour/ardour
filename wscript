@@ -342,6 +342,8 @@ int main() { return 0; }''',
             conf.env['build_host'] = 'mavericks'
         elif re.search ("^14[.]", version) != None:
             conf.env['build_host'] = 'yosemite'
+        elif re.search ("^15[.]", version) != None:
+            conf.env['build_host'] = 'el_capitan'
         else:
             conf.env['build_host'] = 'irrelevant'
 
@@ -363,8 +365,10 @@ int main() { return 0; }''',
                 conf.env['build_target'] = 'mountainlion'
             elif re.search ("^13[.]", version) != None:
                 conf.env['build_target'] = 'mavericks'
-            else:
+            elif re.search ("^14[.]", version) != None:
                 conf.env['build_target'] = 'yosemite'
+            else:
+                conf.env['build_target'] = 'el_capitan'
         else:
             match = re.search(
                     "(?P<cpu>i[0-6]86|x86_64|powerpc|ppc|ppc64|arm|s390x?)",
@@ -385,7 +389,7 @@ int main() { return 0; }''',
         #
         compiler_flags.append ('-U__STRICT_ANSI__')
 
-    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite' ]:
+    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan' ]:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
@@ -399,7 +403,7 @@ int main() { return 0; }''',
         else:
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
 
-    if (is_clang and platform == "darwin") or conf.env['build_host'] in ['mavericks', 'yosemite']:
+    if (is_clang and platform == "darwin") or conf.env['build_host'] in ['mavericks', 'yosemite', 'el_capitan']:
         # Silence warnings about the non-existing osx clang compiler flags
         # -compatibility_version and -current_version.  These are Waf
         # generated and not needed with clang
@@ -511,7 +515,7 @@ int main() { return 0; }''',
                 ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1070",
                  '-mmacosx-version-min=10.7'))
 
-    elif conf.env['build_target'] in [ 'mavericks', 'yosemite' ]:
+    elif conf.env['build_target'] in [ 'mavericks', 'yosemite', 'el_capitan' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.8"))
