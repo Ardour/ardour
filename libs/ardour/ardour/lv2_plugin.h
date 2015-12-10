@@ -280,6 +280,7 @@ public:
 
 	PluginPtr load (Session& session);
 	virtual bool in_category (const std::string &c) const;
+	virtual bool is_instrument() const;
 
 	char * _plugin_uri;
 };
