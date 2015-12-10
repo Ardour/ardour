@@ -592,6 +592,10 @@ int main() { return 0; }''',
     if opt.nls:
         compiler_flags.append('-DENABLE_NLS')
 
+    # use sparingly, prefer runtime profile
+    if Options.options.program_name.lower() == "mixbus":
+        compiler_flags.append ('-DMIXBUS')
+
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
 
