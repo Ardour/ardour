@@ -321,8 +321,14 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (true);
 		} else {
 			sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
+			if (_session && _session->locations()->auto_loop_location()) {
+				// disable looping with external sync.
+				// This is not necessary because session-transport ignores the loop-state,
+				// but makes it clear to the user that it's disabled.
+				toggle_session_auto_loop();
+			}
 			auto_loop_button.set_sensitive (false);
-			/* XXX need to make auto-play is off as well as insensitive */
+			/* XXX we need to make sure that auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
