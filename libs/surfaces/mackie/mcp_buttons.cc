@@ -409,13 +409,13 @@ MackieControlProtocol::marker_press (Button &)
 	string markername;
 
 	/* Don't add another mark if one exists within 1/100th of a second of
-	 * the current position.
+	 * the current position and we're not rolling.
 	 */
 
 
 	framepos_t where = session->audible_frame();
 
-	if (session->locations()->mark_at (where, session->frame_rate() / 100.0)) {
+	if (session->transport_stopped() && session->locations()->mark_at (where, session->frame_rate() / 100.0)) {
 		return off;
 	}
 
