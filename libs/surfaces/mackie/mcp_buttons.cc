@@ -22,6 +22,7 @@
 #include "pbd/memento_command.h"
 
 #include "ardour/debug.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/location.h"
@@ -688,9 +689,14 @@ MackieControlProtocol::plugin_release (Button &)
 LedState
 MackieControlProtocol::eq_press (Button &)
 {
-	//set_view_mode (EQ);
-	// not implemented yet, turn off (see comments for send button)
-	return off;
+	if (Profile->get_mixbus()) {
+		if (_last_selected_routes.size() == 1) {
+			set_subview_mode (EQ);
+			return on;
+		}
+	}
+	return none;
+
 }
 LedState
 MackieControlProtocol::eq_release (Button &)
@@ -700,9 +706,11 @@ MackieControlProtocol::eq_release (Button &)
 LedState
 MackieControlProtocol::dyn_press (Button &)
 {
-	//set_view_mode (Dynamics);
-	// same as send
-	return off;
+	if (Profile->get_mixbus()) {
+		set_subview_mode (Dynamics);
+		return on;
+	}
+	return none;
 }
 LedState
 MackieControlProtocol::dyn_release (Button &)

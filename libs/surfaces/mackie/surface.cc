@@ -1037,6 +1037,29 @@ Surface::update_potmode ()
 	}
 }
 
+bool
+Surface::update_subview_mode_display ()
+{
+	switch (_mcp.subview_mode()) {
+	case MackieControlProtocol::None:
+		for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+			(*s)->use_subview (MackieControlProtocol::None, strips.front()->route());
+		}
+		/* normal display is required */
+		return false;
+	case MackieControlProtocol::EQ:
+		for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+			(*s)->use_subview (MackieControlProtocol::EQ, strips.front()->route());
+		}
+		break;
+	case MackieControlProtocol::Dynamics:
+		break;
+	}
+
+	/* no normal display required */
+	return true;
+}
+
 void
 Surface::update_view_mode_display ()
 {
@@ -1044,6 +1067,10 @@ Surface::update_view_mode_display ()
 	int id = -1;
 
 	if (!_active) {
+		return;
+	}
+
+	if (update_subview_mode_display ()) {
 		return;
 	}
 
@@ -1086,16 +1113,6 @@ Surface::update_view_mode_display ()
 		show_two_char_display ("SE");
 		id = Button::User;
 		text = _("Selected Routes");
-		break;
-	case MackieControlProtocol::Dynamics:
-		show_two_char_display ("DI");
-		id = Button::User;
-		text = _("Dynamics");
-		break;
-	case MackieControlProtocol::EQ:
-		show_two_char_display ("EQ");
-		id = Button::User;
-		text = _("EQ");
 		break;
 	default:
 		break;

@@ -109,8 +109,12 @@ class MackieControlProtocol
 		Auxes,
 		Selected,
 		Plugins,
-		Dynamics,
+	};
+
+	enum SubViewMode {
+		None,
 		EQ,
+		Dynamics,
 	};
 
 	enum PotMode {
@@ -145,6 +149,7 @@ class MackieControlProtocol
 
 	FlipMode flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
+	SubViewMode subview_mode () const { return _subview_mode; }
 	PotMode pot_mode () const { return _pot_mode; }
 	bool zoom_mode () const { return modifier_state() & MODIFIER_ZOOM; }
 	bool     metering_active () const { return _metering_active; }
@@ -155,8 +160,10 @@ class MackieControlProtocol
 	bool selected (boost::shared_ptr<ARDOUR::Route>) const;
 
 	void set_view_mode (ViewMode);
+	void set_subview_mode (SubViewMode);
 	void set_flip_mode (FlipMode);
 	void set_pot_mode (PotMode);
+	void pot_mode_globals ();
 	void display_view_mode ();
 
 	XMLNode& get_state ();
@@ -322,6 +329,7 @@ class MackieControlProtocol
 	bool                     _scrub_mode;
 	FlipMode                 _flip_mode;
 	ViewMode                 _view_mode;
+	SubViewMode              _subview_mode;
 	PotMode                  _pot_mode;
 	int                      _current_selected_track;
 	int                      _modifier_state;

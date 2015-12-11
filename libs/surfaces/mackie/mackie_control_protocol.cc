@@ -113,6 +113,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _scrub_mode (false)
 	, _flip_mode (Normal)
 	, _view_mode (Mixer)
+	, _subview_mode (None)
 	, _pot_mode (Pan)
 	, _current_selected_track (-1)
 	, _modifier_state (0)
@@ -356,12 +357,6 @@ MackieControlProtocol::get_sorted_routes()
 				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
-			break;
-		case Dynamics:
-			/* display shows a single route */
-			break;
-		case EQ:
-			/* display shows a single route */
 			break;
 		}
 
@@ -1518,8 +1513,6 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 
 	if (!action.empty()) {
 
-		std::cerr << "Button has action: " << action << std::endl;
-
 		if (action.find ('/') != string::npos) { /* good chance that this is really an action */
 
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Looked up action for button %1 with modifier %2, got [%3]\n",
@@ -1629,11 +1622,19 @@ MackieControlProtocol::clear_ports ()
 }
 
 void
+MackieControlProtocol::set_subview_mode (SubViewMode sm)
+{
+	_subview_mode = sm;
+	display_view_mode ();
+}
+
+void
 MackieControlProtocol::set_view_mode (ViewMode m)
 {
 	_last_bank[_view_mode] = _current_initial_bank;
 
 	_view_mode = m;
+	_subview_mode = None;
 
 	switch_banks(_last_bank[_view_mode], true);
 }
@@ -1641,12 +1642,22 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 void
 MackieControlProtocol::display_view_mode ()
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->update_view_mode_display ();
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			(*s)->update_view_mode_display ();
+		}
 	}
 
+	/* turn buttons related to vpot mode on or off as required */
+	if (_subview_mode != None) {
+		update_global_button (Button::Trim, off);
+		update_global_button (Button::Send, off);
+		update_global_button (Button::Pan, off);
+	} else {
+		pot_mode_globals ();
+	}
 }
 
 void
@@ -1676,6 +1687,7 @@ MackieControlProtocol::set_pot_mode (PotMode m)
 	if (flip_mode()) {
 		return;
 	}
+
 	_pot_mode = m;
 
 	{
@@ -1686,6 +1698,15 @@ MackieControlProtocol::set_pot_mode (PotMode m)
 
 		}
 	}
+
+	pot_mode_globals ();
+}
+
+void
+MackieControlProtocol::pot_mode_globals ()
+{
+	update_global_button (Button::Eq, off);
+	update_global_button (Button::Dyn, off);
 
 	switch (_pot_mode) {
 	case Trim:

@@ -99,6 +99,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _block_screen_redisplay_until (0)
 	, _pan_mode (PanAzimuthAutomation)
 	, _trim_mode (TrimAutomation)
+	, vpot_parameter (PanAzimuthAutomation)
 	, _last_gain_position_written (-1.0)
 	, _last_pan_azi_position_written (-1.0)
 	, _last_pan_width_position_written (-1.0)
@@ -192,6 +193,14 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	control_by_parameter[TrimAutomation] = (Control*) 0;
 	control_by_parameter[PhaseAutomation] = (Control*) 0;
 	control_by_parameter[SendAutomation] = (Control*) 0;
+	control_by_parameter[EQParam1] = (Control*) 0;
+	control_by_parameter[EQParam2] = (Control*) 0;
+	control_by_parameter[EQParam3] = (Control*) 0;
+	control_by_parameter[EQParam4] = (Control*) 0;
+	control_by_parameter[EQParam5] = (Control*) 0;
+	control_by_parameter[EQParam6] = (Control*) 0;
+	control_by_parameter[EQParam7] = (Control*) 0;
+	control_by_parameter[EQParam8] = (Control*) 0;
 
 	reset_saved_values ();
 
@@ -522,19 +531,71 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 void
 Strip::show_route_name ()
 {
-	if (!_route) {
+	MackieControlProtocol::SubViewMode svm = _surface->mcp().subview_mode();
+
+	if (svm == MackieControlProtocol::None) {
+		if (!_route) {
+			return;
+		}
+		string line1;
+		string fullname = _route->name();
+
+		if (fullname.length() <= 6) {
+			line1 = fullname;
+		} else {
+			line1 = PBD::short_version (fullname, 6);
+		}
+
+		_surface->write (display (0, line1));
+
+	} else if (svm == MackieControlProtocol::EQ) {
+		if (_vpot == control_by_parameter[EQParam1]) {
+			_surface->write (display (0, "HiFreq"));
+		} else if (_vpot == control_by_parameter[EQParam2]) {
+			_surface->write (display (0, "HiGain"));
+		} else if (_vpot == control_by_parameter[EQParam3]) {
+			_surface->write (display (0, "MidFreq"));
+		} else if (_vpot == control_by_parameter[EQParam4]) {
+			_surface->write (display (0, "MidGain"));
+		} else if (_vpot == control_by_parameter[EQParam5]) {
+			_surface->write (display (0, "LoFreq"));
+		} else if (_vpot == control_by_parameter[EQParam6]) {
+			_surface->write (display (0, "LoGain"));
+		} else if (_vpot == control_by_parameter[EQParam7]) {
+			_surface->write (display (0, "HPFreq"));
+		} else if (_vpot == control_by_parameter[EQParam8]) {
+			_surface->write (display (0, "In/Out"));
+		}
+	} else if (svm == MackieControlProtocol::Dynamics) {
+
+	}
+
+}
+
+void
+Strip::notify_eq_change (AutomationType p, uint32_t port_number, bool force_update)
+{
+	if (!_subview_route) {
+		/* no longer in EQ subview mode */
 		return;
 	}
-	string line1;
-	string fullname = _route->name();
 
-	if (fullname.length() <= 6) {
-		line1 = fullname;
-	} else {
-		line1 = PBD::short_version (fullname, 6);
+	if (_vpot != control_by_parameter[p]) {
+		/* vpot is no longer controlling this EQ parameter */
+		return;
 	}
 
-	_surface->write (display (0, line1));
+	boost::shared_ptr<PluginInsert> eq = _subview_route->ch_eq();
+
+	if (eq) {
+		boost::shared_ptr<AutomationControl> control = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_number)));
+
+		if (control) {
+			float val = control->get_value();
+			queue_parameter_display (p, val);
+			_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
+		}
+	}
 }
 
 void
@@ -801,13 +862,13 @@ void
 Strip::do_parameter_display (AutomationType type, float val)
 {
 	bool screen_hold = false;
+	char buf[16];
 
 	switch (type) {
 	case GainAutomation:
 		if (val == 0.0) {
 			_surface->write (display (1, " -inf "));
 		} else {
-			char buf[16];
 			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
 			_surface->write (display (1, buf));
@@ -816,26 +877,24 @@ Strip::do_parameter_display (AutomationType type, float val)
 		break;
 
 	case PanAzimuthAutomation:
-if (Profile->get_mixbus()) {
-	char buf[16];
-	snprintf (buf, sizeof (buf), "%2.1f", val);
-	_surface->write (display (1, buf));
-	screen_hold = true;
-} else {
-		if (_route) {
-			boost::shared_ptr<Pannable> p = _route->pannable();
-			if (p && _route->panner()) {
-				string str =_route->panner()->value_as_string (p->pan_azimuth_control);
-				_surface->write (display (1, str));
-				screen_hold = true;
+		if (Profile->get_mixbus()) {
+			snprintf (buf, sizeof (buf), "%2.1f", val);
+			_surface->write (display (1, buf));
+			screen_hold = true;
+		} else {
+			if (_route) {
+				boost::shared_ptr<Pannable> p = _route->pannable();
+				if (p && _route->panner()) {
+					string str =_route->panner()->value_as_string (p->pan_azimuth_control);
+					_surface->write (display (1, str));
+					screen_hold = true;
+				}
 			}
 		}
-}
 		break;
 
 	case PanWidthAutomation:
 		if (_route) {
-			char buf[16];
 			snprintf (buf, sizeof (buf), "%5ld%%", lrintf ((val * 200.0)-100));
 			_surface->write (display (1, buf));
 			screen_hold = true;
@@ -844,7 +903,6 @@ if (Profile->get_mixbus()) {
 
 	case TrimAutomation:
 		if (_route) {
-			char buf[16];
 			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
 			_surface->write (display (1, buf));
@@ -867,14 +925,23 @@ if (Profile->get_mixbus()) {
 		if (val == 0.0) {
 			_surface->write (display (1, " -inf "));
 		} else {
-			char buf[16];
 			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
 			_surface->write (display (1, buf));
 			screen_hold = true;
 		}
 		break;
-
+	case EQParam1:
+	case EQParam2:
+	case EQParam3:
+	case EQParam4:
+	case EQParam5:
+	case EQParam6:
+	case EQParam7:
+	case EQParam8:
+		snprintf (buf, sizeof (buf), "%6.1f", val);
+		_surface->write (display (1, buf));
+		screen_hold = true;
 	default:
 		break;
 	}
@@ -1164,6 +1231,10 @@ Strip::vpot_mode_string ()
 		return "LFE";
 	}
 
+	if (_subview_route) {
+		return string();
+	}
+
 	return "???";
 }
 
@@ -1216,8 +1287,10 @@ Strip::return_to_vpot_mode_display ()
 	/* returns the second line of the two-line per-strip display
 	   back the mode where it shows what the VPot controls.
 	*/
-
-	if (_route) {
+	if (_subview_route) {
+		/* do nothing - second line shows value of current subview parameter */
+		return;
+	} else if (_route) {
 		_surface->write (display (1, vpot_mode_string()));
 	} else {
 		_surface->write (blank_display (1));
@@ -1314,13 +1387,72 @@ Strip::next_pot_mode ()
 }
 
 void
-Strip::set_vpot_parameter (Evoral::Parameter p)
+Strip::use_subview (MackieControlProtocol::SubViewMode sm, boost::shared_ptr<Route> target_route)
+{
+	if (!_route) {
+		return;
+	}
+
+	switch (sm) {
+	case MackieControlProtocol::None:
+		if (vpot_parameter != NullAutomation) {
+			set_vpot_parameter (vpot_parameter);
+		}
+		break;
+
+	case MackieControlProtocol::EQ:
+		switch (_index) {
+		case 0:
+			set_vpot_parameter (ARDOUR::EQParam1, target_route);
+			break;
+		case 1:
+			set_vpot_parameter (ARDOUR::EQParam2, target_route);
+			break;
+		case 2:
+			set_vpot_parameter (ARDOUR::EQParam3, target_route);
+			break;
+		case 3:
+			set_vpot_parameter (ARDOUR::EQParam4, target_route);
+			break;
+		case 4:
+			set_vpot_parameter (ARDOUR::EQParam5, target_route);
+			break;
+		case 5:
+			set_vpot_parameter (ARDOUR::EQParam6, target_route);
+			break;
+		case 6:
+			set_vpot_parameter (ARDOUR::EQParam7, target_route);
+			break;
+		case 7:
+			set_vpot_parameter (ARDOUR::EQParam8, target_route);
+			break;
+		}
+		break;
+
+	case MackieControlProtocol::Dynamics:
+		break;
+	}
+}
+
+void
+Strip::set_vpot_parameter (Evoral::Parameter p, boost::shared_ptr<Route> target_route)
 {
 	boost::shared_ptr<Pannable> pannable;
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to vpot mode %1\n", p.type()));
 
 	reset_saved_values ();
+
+	/* target route is either null, or points to a route other than the one
+	   we are controlling/viewing, to be used while in a particular subview
+	   state (e.g. EQ or Dynamics)
+	*/
+
+	if (target_route != _subview_route) {
+		subview_connections.drop_connections ();
+	}
+
+	_subview_route = target_route;
 
 	/* unset any mapping between the vpot and any existing parameters */
 
@@ -1335,6 +1467,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 	case PanAzimuthAutomation:
 		_pan_mode = PanAzimuthAutomation;
 		pannable = _route->pannable ();
+		vpot_parameter = PanAzimuthAutomation;
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			/* gain to vpot, pan azi to fader */
 			_vpot->set_control (_route->group_gain_control());
@@ -1362,6 +1495,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 	case PanWidthAutomation:
 		_pan_mode = PanWidthAutomation;
 		pannable = _route->pannable ();
+		vpot_parameter = PanWidthAutomation;
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			/* gain to vpot, pan width to fader */
 			_vpot->set_control (_route->group_gain_control());
@@ -1394,6 +1528,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 		break;
 	case TrimAutomation:
 		_trim_mode = TrimAutomation;
+		vpot_parameter = TrimAutomation;
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			/* gain to vpot, trim to fader */
 			_vpot->set_control (_route->group_gain_control());
@@ -1420,6 +1555,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 		break;
 	case PhaseAutomation:
 		_trim_mode = PhaseAutomation;
+		vpot_parameter = PhaseAutomation;
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			/* gain to vpot, phase to fader */
 			_vpot->set_control (_route->group_gain_control());
@@ -1445,43 +1581,98 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 		}
 		break;
 	case SendAutomation:
-		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-			// gain to vpot, send to fader
-			_vpot->set_control (_route->group_gain_control());
-			control_by_parameter[GainAutomation] = _vpot;
-			// test for send to control
-			boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
-			if (p && p->name() != "Monitor 1") {
-				boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
-				boost::shared_ptr<Amp> a = s->amp();
-				_fader->set_control (a->gain_control());
-				// connect to signal
-				send_connections.drop_connections ();
-				a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
-				control_by_parameter[SendAutomation] = _fader;
+		if (!Profile->get_mixbus()) {
+			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
+				// gain to vpot, send to fader
+				_vpot->set_control (_route->group_gain_control());
+				control_by_parameter[GainAutomation] = _vpot;
+				// test for send to control
+				boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
+				if (p && p->name() != "Monitor 1") {
+					boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
+					boost::shared_ptr<Amp> a = s->amp();
+					_fader->set_control (a->gain_control());
+					// connect to signal
+					send_connections.drop_connections ();
+					a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
+					control_by_parameter[SendAutomation] = _fader;
+				} else {
+					_fader->set_control (boost::shared_ptr<AutomationControl>());
+					control_by_parameter[SendAutomation] = 0;
+				}
 			} else {
-				_fader->set_control (boost::shared_ptr<AutomationControl>());
-				control_by_parameter[SendAutomation] = 0;
-			}
-		} else {
-			// gain to fader, send to vpot
-			_fader->set_control (_route->group_gain_control());
-			control_by_parameter[GainAutomation] = _fader;
-			boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
-			if (p && p->name() != "Monitor 1") {
-				boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
-				boost::shared_ptr<Amp> a = s->amp();
-				_vpot->set_control (a->gain_control());
-				// connect to signal
-				send_connections.drop_connections ();
-				a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
-				control_by_parameter[SendAutomation] = _vpot;
+				// gain to fader, send to vpot
+				_fader->set_control (_route->group_gain_control());
+				control_by_parameter[GainAutomation] = _fader;
+				boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
+				if (p && p->name() != "Monitor 1") {
+					boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
+					boost::shared_ptr<Amp> a = s->amp();
+					_vpot->set_control (a->gain_control());
+					// connect to signal
+					send_connections.drop_connections ();
+					a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
+					control_by_parameter[SendAutomation] = _vpot;
 			} else {
-				_vpot->set_control (boost::shared_ptr<AutomationControl>());
-				control_by_parameter[SendAutomation] = 0;
+				// gain to fader, send to vpot
+				_fader->set_control (_route->group_gain_control());
+				control_by_parameter[GainAutomation] = _fader;
+				boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
+				if (p && p->name() != "Monitor 1") {
+					boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
+					boost::shared_ptr<Amp> a = s->amp();
+					_vpot->set_control (a->gain_control());
+					// connect to signal
+					send_connections.drop_connections ();
+					a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
+					control_by_parameter[SendAutomation] = _vpot;
+				} else {
+					_vpot->set_control (boost::shared_ptr<AutomationControl>());
+					control_by_parameter[SendAutomation] = 0;
+				}
 			}
 		}
 		break;
+	case EQParam1: {
+		const uint32_t eq_hi_freq = 3; /* gtk2_ardour/mixbus_ports.h */
+		hookup_eq (EQParam1, eq_hi_freq);
+		break;
+	}
+	case EQParam2: {
+		const uint32_t eq_hi_gain = 4; /* gtk2_ardour/mixbus_ports.h */
+		hookup_eq (EQParam2, eq_hi_gain);
+		break;
+	}
+	case EQParam3: {
+		const uint32_t eq_mid_freq = 5; /* gtk2_ardour/mixbus_ports.h */
+		hookup_eq (EQParam3, eq_mid_freq);
+		break;
+	}
+	case EQParam4: {
+		const uint32_t eq_mid_gain = 6; /* gtk2_ardour/mixbus_ports.h */
+		hookup_eq (EQParam4, eq_mid_gain);
+		break;
+	}
+	case EQParam5: {
+		const uint32_t eq_lo_freq = 7; /* gtk2_ardour/mixbus_ports.h */
+		hookup_eq (EQParam5, eq_lo_freq);
+		break;
+	}
+	case EQParam6: {
+		const uint32_t eq_lo_gain = 8; /* gtk2_ardour/mixbus_ports.h */
+		hookup_eq (EQParam6, eq_lo_gain);
+		break;
+	}
+	case EQParam7: {
+		const uint32_t eq_hp_freq = 2; /* gtk2_ardour/mixbus_ports.h */
+		hookup_eq (EQParam7, eq_hp_freq);
+		break;
+	}
+	case EQParam8: {
+		const uint32_t eq_in = 1; /* gtk2_ardour/mixbus_ports.h */
+		hookup_eq (EQParam8, eq_in);
+		break;
+	}
 	default:
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("vpot mode %1 not known.\n", p));
 		break;
@@ -1530,4 +1721,28 @@ Strip::notify_metering_state_changed()
 
 	_transport_is_rolling = transport_is_rolling;
 	_metering_active = metering_active;
+}
+
+void
+Strip::hookup_eq (AutomationType param, uint32_t port_number)
+{
+	if (!_subview_route) {
+		_vpot->set_control (boost::shared_ptr<AutomationControl>());
+		return;
+	}
+
+	boost::shared_ptr<PluginInsert> eq = _subview_route->ch_eq();
+
+	if (!eq) {
+		_vpot->set_control (boost::shared_ptr<AutomationControl>());
+	}
+
+	boost::shared_ptr<AutomationControl> control = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_number)));
+
+	if (control) {
+		control->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_eq_change, this, param, port_number, false), ui_context());
+		_vpot->set_control (control);
+		control_by_parameter[param] = _vpot;
+		show_route_name ();
+	}
 }

@@ -15,6 +15,7 @@
 
 #include "control_group.h"
 #include "types.h"
+#include "mackie_control_protocol.h"
 #include "midi_byte_array.h"
 #include "device_info.h"
 
@@ -88,6 +89,8 @@ public:
 	void block_screen_display_for (uint32_t msecs);
 	void block_vpot_mode_display_for (uint32_t msecs);
 
+	void use_subview (MackieControlProtocol::SubViewMode, boost::shared_ptr<ARDOUR::Route>);
+
 private:
 	Button*  _solo;
 	Button*  _recenable;
@@ -106,11 +109,14 @@ private:
 	uint64_t _block_vpot_mode_redisplay_until;
 	uint64_t _block_screen_redisplay_until;
 	boost::shared_ptr<ARDOUR::Route> _route;
+	boost::shared_ptr<ARDOUR::Route> _subview_route;
 	PBD::ScopedConnectionList route_connections;
+	PBD::ScopedConnectionList subview_connections;
 	PBD::ScopedConnectionList send_connections;
 
 	ARDOUR::AutomationType  _pan_mode;
 	ARDOUR::AutomationType  _trim_mode;
+	ARDOUR::AutomationType  vpot_parameter;
 
 	float _last_gain_position_written;
 	float _last_pan_azi_position_written;
@@ -135,7 +141,7 @@ private:
 	std::string vpot_mode_string ();
 
 	boost::shared_ptr<ARDOUR::AutomationControl> mb_pan_controllable;
-	
+
 	void return_to_vpot_mode_display ();
 
 	struct RedisplayRequest {
@@ -155,7 +161,7 @@ private:
 	std::vector<Evoral::Parameter> possible_pot_parameters;
 	std::vector<Evoral::Parameter> possible_trim_parameters;
 	void next_pot_mode ();
-	void set_vpot_parameter (Evoral::Parameter);
+	void set_vpot_parameter (Evoral::Parameter, boost::shared_ptr<ARDOUR::Route> target_route = boost::shared_ptr<ARDOUR::Route>());
 	void show_route_name ();
 
 	void reset_saved_values ();
@@ -164,6 +170,9 @@ private:
 
 	typedef std::map<Evoral::Parameter,Control*> ControlParameterMap;
 	ControlParameterMap control_by_parameter;
+
+	void hookup_eq (ARDOUR::AutomationType, uint32_t);
+	void notify_eq_change (ARDOUR::AutomationType, uint32_t, bool force);
 };
 
 }
