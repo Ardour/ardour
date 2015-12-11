@@ -690,8 +690,9 @@ LedState
 MackieControlProtocol::eq_press (Button &)
 {
 	if (Profile->get_mixbus()) {
-		if (_last_selected_routes.size() == 1) {
-			set_subview_mode (EQ);
+		boost::shared_ptr<Route> r = first_selected_route ();
+		if (r) {
+			set_subview_mode (EQ, r);
 			return on;
 		}
 	}
@@ -707,11 +708,17 @@ LedState
 MackieControlProtocol::dyn_press (Button &)
 {
 	if (Profile->get_mixbus()) {
-		set_subview_mode (Dynamics);
-		return on;
+		boost::shared_ptr<Route> r = first_selected_route ();
+
+		if (r) {
+			set_subview_mode (Dynamics, r);
+			return on;
+		}
 	}
+
 	return none;
 }
+
 LedState
 MackieControlProtocol::dyn_release (Button &)
 {

@@ -575,7 +575,7 @@ Strip::show_route_name ()
 void
 Strip::notify_eq_change (AutomationType p, uint32_t port_number, bool force_update)
 {
-	if (!_subview_route) {
+	if (_surface->mcp().subview_mode() == MackieControlProtocol::None) {
 		/* no longer in EQ subview mode */
 		return;
 	}
@@ -585,7 +585,7 @@ Strip::notify_eq_change (AutomationType p, uint32_t port_number, bool force_upda
 		return;
 	}
 
-	boost::shared_ptr<PluginInsert> eq = _subview_route->ch_eq();
+	boost::shared_ptr<PluginInsert> eq = _surface->mcp().subview_route()->ch_eq();
 
 	if (eq) {
 		boost::shared_ptr<AutomationControl> control = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_number)));
@@ -1231,7 +1231,7 @@ Strip::vpot_mode_string ()
 		return "LFE";
 	}
 
-	if (_subview_route) {
+	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
 		return string();
 	}
 
@@ -1287,7 +1287,8 @@ Strip::return_to_vpot_mode_display ()
 	/* returns the second line of the two-line per-strip display
 	   back the mode where it shows what the VPot controls.
 	*/
-	if (_subview_route) {
+
+	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
 		/* do nothing - second line shows value of current subview parameter */
 		return;
 	} else if (_route) {
@@ -1387,13 +1388,13 @@ Strip::next_pot_mode ()
 }
 
 void
-Strip::use_subview (MackieControlProtocol::SubViewMode sm, boost::shared_ptr<Route> target_route)
+Strip::subview_mode_changed ()
 {
-	if (!_route) {
-		return;
-	}
+	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
 
-	switch (sm) {
+	subview_connections.drop_connections ();
+
+	switch (_surface->mcp().subview_mode()) {
 	case MackieControlProtocol::None:
 		if (vpot_parameter != NullAutomation) {
 			set_vpot_parameter (vpot_parameter);
@@ -1403,28 +1404,28 @@ Strip::use_subview (MackieControlProtocol::SubViewMode sm, boost::shared_ptr<Rou
 	case MackieControlProtocol::EQ:
 		switch (_index) {
 		case 0:
-			set_vpot_parameter (ARDOUR::EQParam1, target_route);
+			set_vpot_parameter (ARDOUR::EQParam1);
 			break;
 		case 1:
-			set_vpot_parameter (ARDOUR::EQParam2, target_route);
+			set_vpot_parameter (ARDOUR::EQParam2);
 			break;
 		case 2:
-			set_vpot_parameter (ARDOUR::EQParam3, target_route);
+			set_vpot_parameter (ARDOUR::EQParam3);
 			break;
 		case 3:
-			set_vpot_parameter (ARDOUR::EQParam4, target_route);
+			set_vpot_parameter (ARDOUR::EQParam4);
 			break;
 		case 4:
-			set_vpot_parameter (ARDOUR::EQParam5, target_route);
+			set_vpot_parameter (ARDOUR::EQParam5);
 			break;
 		case 5:
-			set_vpot_parameter (ARDOUR::EQParam6, target_route);
+			set_vpot_parameter (ARDOUR::EQParam6);
 			break;
 		case 6:
-			set_vpot_parameter (ARDOUR::EQParam7, target_route);
+			set_vpot_parameter (ARDOUR::EQParam7);
 			break;
 		case 7:
-			set_vpot_parameter (ARDOUR::EQParam8, target_route);
+			set_vpot_parameter (ARDOUR::EQParam8);
 			break;
 		}
 		break;
@@ -1435,24 +1436,13 @@ Strip::use_subview (MackieControlProtocol::SubViewMode sm, boost::shared_ptr<Rou
 }
 
 void
-Strip::set_vpot_parameter (Evoral::Parameter p, boost::shared_ptr<Route> target_route)
+Strip::set_vpot_parameter (Evoral::Parameter p)
 {
 	boost::shared_ptr<Pannable> pannable;
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to vpot mode %1\n", p.type()));
 
 	reset_saved_values ();
-
-	/* target route is either null, or points to a route other than the one
-	   we are controlling/viewing, to be used while in a particular subview
-	   state (e.g. EQ or Dynamics)
-	*/
-
-	if (target_route != _subview_route) {
-		subview_connections.drop_connections ();
-	}
-
-	_subview_route = target_route;
 
 	/* unset any mapping between the vpot and any existing parameters */
 
@@ -1726,12 +1716,14 @@ Strip::notify_metering_state_changed()
 void
 Strip::hookup_eq (AutomationType param, uint32_t port_number)
 {
-	if (!_subview_route) {
+	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
+
+	if (!r) {
 		_vpot->set_control (boost::shared_ptr<AutomationControl>());
 		return;
 	}
 
-	boost::shared_ptr<PluginInsert> eq = _subview_route->ch_eq();
+	boost::shared_ptr<PluginInsert> eq = r->ch_eq();
 
 	if (!eq) {
 		_vpot->set_control (boost::shared_ptr<AutomationControl>());

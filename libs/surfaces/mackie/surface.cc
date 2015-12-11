@@ -1029,7 +1029,7 @@ Surface::update_flip_mode_display ()
 	}
 }
 
- void
+void
 Surface::update_potmode ()
 {
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
@@ -1037,27 +1037,16 @@ Surface::update_potmode ()
 	}
 }
 
-bool
-Surface::update_subview_mode_display ()
+void
+Surface::subview_mode_changed ()
 {
-	switch (_mcp.subview_mode()) {
-	case MackieControlProtocol::None:
-		for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-			(*s)->use_subview (MackieControlProtocol::None, strips.front()->route());
-		}
-		/* normal display is required */
-		return false;
-	case MackieControlProtocol::EQ:
-		for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-			(*s)->use_subview (MackieControlProtocol::EQ, strips.front()->route());
-		}
-		break;
-	case MackieControlProtocol::Dynamics:
-		break;
+	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->subview_mode_changed ();
 	}
 
-	/* no normal display required */
-	return true;
+	if (_mcp.subview_mode() == MackieControlProtocol::None) {
+		update_view_mode_display ();
+	}
 }
 
 void
@@ -1067,10 +1056,6 @@ Surface::update_view_mode_display ()
 	int id = -1;
 
 	if (!_active) {
-		return;
-	}
-
-	if (update_subview_mode_display ()) {
 		return;
 	}
 

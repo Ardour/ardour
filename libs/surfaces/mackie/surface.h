@@ -156,6 +156,7 @@ public:
 	void update_potmode ();
 
 	void gui_selection_changed (const ARDOUR::StrongRouteNotificationList&);
+	void subview_mode_changed ();
 
 	MackieControlProtocol& mcp() const { return _mcp; }
 
@@ -205,7 +206,6 @@ public:
 	int connection_state;
 
 	MidiByteArray display_line (std::string const& msg, int line_num);
-	bool update_subview_mode_display ();
 
   public:
 	/* IP MIDI devices need to keep a handle on this and destroy it */

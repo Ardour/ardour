@@ -150,6 +150,7 @@ class MackieControlProtocol
 	FlipMode flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
 	SubViewMode subview_mode () const { return _subview_mode; }
+	boost::shared_ptr<ARDOUR::Route> subview_route() const;
 	PotMode pot_mode () const { return _pot_mode; }
 	bool zoom_mode () const { return modifier_state() & MODIFIER_ZOOM; }
 	bool     metering_active () const { return _metering_active; }
@@ -158,9 +159,10 @@ class MackieControlProtocol
 	bool is_audio_track (boost::shared_ptr<ARDOUR::Route>) const;
 	bool is_midi_track (boost::shared_ptr<ARDOUR::Route>) const;
 	bool selected (boost::shared_ptr<ARDOUR::Route>) const;
+	boost::shared_ptr<ARDOUR::Route> first_selected_route () const;
 
 	void set_view_mode (ViewMode);
-	void set_subview_mode (SubViewMode);
+	void set_subview_mode (SubViewMode, boost::shared_ptr<ARDOUR::Route>);
 	void set_flip_mode (FlipMode);
 	void set_pot_mode (PotMode);
 	void pot_mode_globals ();
@@ -330,6 +332,7 @@ class MackieControlProtocol
 	FlipMode                 _flip_mode;
 	ViewMode                 _view_mode;
 	SubViewMode              _subview_mode;
+	boost::shared_ptr<ARDOUR::Route> _subview_route;
 	PotMode                  _pot_mode;
 	int                      _current_selected_track;
 	int                      _modifier_state;

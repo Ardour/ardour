@@ -1622,10 +1622,33 @@ MackieControlProtocol::clear_ports ()
 }
 
 void
-MackieControlProtocol::set_subview_mode (SubViewMode sm)
+MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route> r)
 {
 	_subview_mode = sm;
-	display_view_mode ();
+	_subview_route = r;
+
+	if (_subview_mode == None) {
+		assert (!_subview_route);
+	}
+
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			(*s)->subview_mode_changed ();
+		}
+	}
+
+	/* turn buttons related to vpot mode on or off as required */
+
+	if (_subview_mode != None) {
+		update_global_button (Button::Trim, off);
+		update_global_button (Button::Send, off);
+		update_global_button (Button::Pan, off);
+	} else {
+		pot_mode_globals ();
+	}
+
 }
 
 void
@@ -1648,15 +1671,6 @@ MackieControlProtocol::display_view_mode ()
 		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 			(*s)->update_view_mode_display ();
 		}
-	}
-
-	/* turn buttons related to vpot mode on or off as required */
-	if (_subview_mode != None) {
-		update_global_button (Button::Trim, off);
-		update_global_button (Button::Send, off);
-		update_global_button (Button::Pan, off);
-	} else {
-		pot_mode_globals ();
 	}
 }
 
@@ -2149,4 +2163,22 @@ MackieControlProtocol::selected (boost::shared_ptr<Route> r) const
 		}
 	}
 	return false;
+}
+
+boost::shared_ptr<Route>
+MackieControlProtocol::first_selected_route () const
+{
+	if (_last_selected_routes.empty()) {
+		return boost::shared_ptr<Route>();
+	}
+
+	boost::shared_ptr<Route> r = _last_selected_routes.front().lock();
+
+	return r; /* may be null */
+}
+
+boost::shared_ptr<Route>
+MackieControlProtocol::subview_route () const
+{
+	return _subview_route;
 }

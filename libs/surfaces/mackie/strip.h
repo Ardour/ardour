@@ -77,6 +77,7 @@ public:
 	void zero ();
 
 	void potmode_changed (bool notify=false);
+	void subview_mode_changed ();
 
 	void lock_controls ();
 	void unlock_controls ();
@@ -88,8 +89,6 @@ public:
 
 	void block_screen_display_for (uint32_t msecs);
 	void block_vpot_mode_display_for (uint32_t msecs);
-
-	void use_subview (MackieControlProtocol::SubViewMode, boost::shared_ptr<ARDOUR::Route>);
 
 private:
 	Button*  _solo;
@@ -109,7 +108,6 @@ private:
 	uint64_t _block_vpot_mode_redisplay_until;
 	uint64_t _block_screen_redisplay_until;
 	boost::shared_ptr<ARDOUR::Route> _route;
-	boost::shared_ptr<ARDOUR::Route> _subview_route;
 	PBD::ScopedConnectionList route_connections;
 	PBD::ScopedConnectionList subview_connections;
 	PBD::ScopedConnectionList send_connections;
@@ -161,7 +159,7 @@ private:
 	std::vector<Evoral::Parameter> possible_pot_parameters;
 	std::vector<Evoral::Parameter> possible_trim_parameters;
 	void next_pot_mode ();
-	void set_vpot_parameter (Evoral::Parameter, boost::shared_ptr<ARDOUR::Route> target_route = boost::shared_ptr<ARDOUR::Route>());
+	void set_vpot_parameter (Evoral::Parameter);
 	void show_route_name ();
 
 	void reset_saved_values ();
