@@ -106,6 +106,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	: ControlProtocol (session, X_("Mackie"))
 	, AbstractUI<MackieControlUIRequest> ("mackie")
 	, _current_initial_bank (0)
+	, _frame_last (0)
 	, _timecode_type (ARDOUR::AnyTime::BBT)
 	, _gui (0)
 	, _scrub_mode (false)
@@ -1143,6 +1144,13 @@ MackieControlProtocol::update_timecode_display()
 	// do assignment here so current_frame is fixed
 	framepos_t current_frame = session->transport_frame();
 	string timecode;
+	// For large jumps in play head possition do full reset
+	int moved = (current_frame - _frame_last) / session->frame_rate ();
+	if (moved) {
+		DEBUG_TRACE (DEBUG::MackieControl, "Timecode reset\n");
+		_timecode_last = string (10, ' ');
+	}
+	_frame_last = current_frame;
 
 	switch (_timecode_type) {
 	case ARDOUR::AnyTime::BBT:

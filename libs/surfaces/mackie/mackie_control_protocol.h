@@ -308,6 +308,7 @@ class MackieControlProtocol
 	Mackie::Timer            _frm_left_last;
 	// last written timecode string
 	std::string              _timecode_last;
+	framepos_t				 _frame_last;
 	// Which timecode are we displaying? BBT or Timecode
 	ARDOUR::AnyTime::Type    _timecode_type;
 	// Bundle to represent our input ports
