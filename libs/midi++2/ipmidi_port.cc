@@ -257,7 +257,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 		error << "cannot set non-blocking mode for IP MIDI input socket (" << ::strerror (errno) << ')' << endmsg;
 		return false;
 	}
-	imode = 1;
+	mode = 1; /* just in case it was modified in the previous call */
 	if (ioctlsocket(sockout,FIONBIO,&mode)) {
 		error << "cannot set non-blocking mode for IP MIDI output socket (" << ::strerror (errno) << ')' << endmsg;
 		return false;
