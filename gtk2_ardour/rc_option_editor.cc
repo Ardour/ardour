@@ -2786,7 +2786,7 @@ if (!Profile->get_mixbus()) {
 #ifdef WINDOWS_VST_SUPPORT
 	add_option (_("Plugins"),
 			new RcActionButton (_("Edit"),
-				sigc::mem_fun (*this, &RCOptionEditor::edit_lxvst_path),
+				sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
 			_("Windows VST Path:")));
 #endif
 
