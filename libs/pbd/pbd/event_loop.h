@@ -20,6 +20,7 @@
 #ifndef __pbd_event_loop_h__
 #define __pbd_event_loop_h__
 
+#include <string>
 #include <boost/function.hpp>
 #include <boost/bind.hpp> /* we don't need this here, but anything calling call_slot() probably will, so this is convenient */
 #include <glibmm/threads.h>
@@ -41,7 +42,7 @@ namespace PBD
 class LIBPBD_API EventLoop
 {
   public:
-	EventLoop() {}
+	EventLoop (std::string const&);
 	virtual ~EventLoop() {}
 
 	enum RequestType {
@@ -73,12 +74,14 @@ class LIBPBD_API EventLoop
 	virtual void call_slot (InvalidationRecord*, const boost::function<void()>&) = 0;
         virtual Glib::Threads::Mutex& slot_invalidation_mutex() = 0;
 
+        std::string event_loop_name() const { return _name; }
+
 	static EventLoop* get_event_loop_for_thread();
 	static void set_event_loop_for_thread (EventLoop* ui);
 
   private:
         static Glib::Threads::Private<EventLoop> thread_event_loop;
-
+	std::string _name;
 };
 
 }

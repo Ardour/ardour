@@ -54,8 +54,6 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
         Glib::Threads::Thread* event_loop_thread() const { return run_loop_thread; }
         bool caller_is_self () const { return Glib::Threads::Thread::self() == run_loop_thread; }
 
-	std::string name() const { return _name; }
-
 	bool ok() const { return _ok; }
 
 	static RequestType new_request_type();
@@ -107,7 +105,6 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	virtual void handle_ui_requests () = 0;
 
   private:
-	std::string _name;
 	BaseUI* base_ui_instance;
 
 	CrossThreadChannel request_channel;

@@ -27,6 +27,11 @@ static void do_not_delete_the_loop_pointer (void*) { }
 
 Glib::Threads::Private<EventLoop> EventLoop::thread_event_loop (do_not_delete_the_loop_pointer);
 
+EventLoop::EventLoop (string const& name)
+	: _name (name)
+{
+}
+
 EventLoop*
 EventLoop::get_event_loop_for_thread() {
 	return thread_event_loop.get ();
