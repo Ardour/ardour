@@ -59,6 +59,12 @@ fixup_bundle_environment (int /*argc*/, char* argv[], string & localedir)
 
 	std::string path;
 	std::string dir_path = Glib::path_get_dirname (Glib::path_get_dirname (argv[0]));
+#if defined WINDOWS_VST_SUPPORT
+	// argv[0] will be "wine"
+	if (g_getenv ("INSTALL_DIR")) {
+		dir_path = g_getenv ("INSTALL_DIR");
+	}
+#endif
 
 #ifdef ENABLE_NLS
 	if (!ARDOUR::translations_are_enabled ()) {

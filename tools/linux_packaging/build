@@ -237,12 +237,24 @@ fi
 echo export 'PATH=/usr/local/bin:/opt/bin:$PATH' >> $ENVIRONMENT
 
 # create startup helper script
+if test -d $BUILD_ROOT/vst; then
+	WINEEXE=wine
+	echo export INSTALL_DIR >> $ENVIRONMENT
+else
+	WINEEXE=
+fi
 
-sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/;s/%EXENAME%/'"${EXENAME}"'/' < ardour.sh.in > $APPBIN/${EXENAME}${major_version}
+sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/;s/%EXENAME%/'"${EXENAME}"'/;s/%WINE%/'"$WINEEXE"'/' < ardour.sh.in > $APPBIN/${EXENAME}${major_version}
 rm $ENVIRONMENT && chmod 775 $APPBIN/${EXENAME}${major_version}
 
 echo "Copying ardour executable ...."
-cp -v $BUILD_ROOT/gtk2_ardour/ardour-${release_version} $APPBIN/${EXENAME}-${release_version}
+if test -d $BUILD_ROOT/vst; then
+	#cp -v $BUILD_ROOT/gtk2_ardour/libgtk2_ardour.so $APPLIB/
+	cp -v $BUILD_ROOT/gtk2_ardour/ardour-${release_version}-vst.exe.so $APPBIN/${EXENAME}-${release_version}
+else
+	cp -v $BUILD_ROOT/gtk2_ardour/ardour-${release_version}* $APPBIN/${EXENAME}-${release_version}
+fi
+
 if test x$STRIP = xall ; then
 	strip -s $APPBIN/${EXENAME}-${release_version}
 fi
@@ -426,7 +438,7 @@ if test -f $BUILD_ROOT/libs/ardouralsautil/ardour-request-device; then
 fi
 
 OURLIBDIR=$BUILD_ROOT/libs
-OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/canvas:$OURLIBDIR/libsndfile:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/timecode:$OURLIBDIR/taglib:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp:$OURLIBDIR/ardouralsautil:$OURLIBDIR/ptformat
+OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/canvas:$OURLIBDIR/libsndfile:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/timecode:$OURLIBDIR/taglib:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp:$OURLIBDIR/ardouralsautil:$OURLIBDIR/ptformat:$BUILD_ROOT/gtk2_ardour
 
 echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
