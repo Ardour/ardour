@@ -36,7 +36,6 @@
 #endif
 
 #if defined(PLATFORM_WINDOWS)
-static WSADATA g_wsaData;
 typedef int socklen_t;
 #else
 #include <unistd.h>
@@ -117,7 +116,6 @@ get_address (int sock, struct in_addr *inaddr, const string& ifname )
 {
 	// Get interface address from supplied name.
 
-#if !defined(PLATFORM_WINDOWS)
 	struct ifreq ifr;
 	::strncpy(ifr.ifr_name, ifname.c_str(), sizeof(ifr.ifr_name));
 
@@ -141,18 +139,11 @@ get_address (int sock, struct in_addr *inaddr, const string& ifname )
 	inaddr->s_addr = sa.sin_addr.s_addr;
 
 	return true;
-
-#else
-
-	return false;
-
-#endif	// !PLATFORM_WINDOWS'
 }
 
 bool
 IPMIDIPort::open_sockets (int base_port, const string& ifname)
 {
-#if !defined(PLATFORM_WINDOWS)
 	int protonum = 0;
 	struct protoent *proto = ::getprotobyname("IP");
 
@@ -249,9 +240,6 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	}
 
 	return true;
-#else
-	return false;
-#endif	// !PLATFORM_WINDOWS'
 }
 
 int
