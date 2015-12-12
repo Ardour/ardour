@@ -42,7 +42,7 @@ using namespace std;
 template<typename RequestBuffer> void
 cleanup_request_buffer (void* ptr)
 {
-        RequestBuffer* rb = (RequestBuffer*) ptr;
+	RequestBuffer* rb = (RequestBuffer*) ptr;
 
 	/* this is called when the thread for which this request buffer was
 	 * allocated dies. That could be before or after the end of the UI
@@ -98,15 +98,15 @@ AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_
 
 	RequestBuffer* b = per_thread_request_buffer.get();
 
-        if (b) {
-                /* thread already registered with this UI
-                 */
-                return;
-        }
+	if (b) {
+		/* thread already registered with this UI
+		*/
+		return;
+	}
 
 	/* create a new request queue/ringbuffer */
 
-        b = new RequestBuffer (num_requests, *this);
+	b = new RequestBuffer (num_requests, *this);
 
 	{
 		/* add the new request queue (ringbuffer) to our map
@@ -158,7 +158,7 @@ AbstractUI<RequestObject>::get_request (RequestType rt)
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: allocated per-thread request of type %2, caller %3\n", name(), rt, pthread_name()));
 
 		vec.buf[0]->type = rt;
-                vec.buf[0]->valid = true;
+		vec.buf[0]->valid = true;
 		return vec.buf[0];
 	}
 
@@ -187,51 +187,51 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 	for (i = request_buffers.begin(); i != request_buffers.end(); ++i) {
 
-                while (true) {
+		while (true) {
 
-                        /* we must process requests 1 by 1 because
-                           the request may run a recursive main
-                           event loop that will itself call
-                           handle_ui_requests. when we return
-                           from the request handler, we cannot
-                           expect that the state of queued requests
-                           is even remotely consistent with
-                           the condition before we called it.
-                        */
+			/* we must process requests 1 by 1 because
+			 * the request may run a recursive main
+			 * event loop that will itself call
+			 * handle_ui_requests. when we return
+			 * from the request handler, we cannot
+			 * expect that the state of queued requests
+			 * is even remotely consistent with
+			 * the condition before we called it.
+			 */
 
-                        i->second->get_read_vector (&vec);
+			i->second->get_read_vector (&vec);
 
-                        if (vec.len[0] == 0) {
-                                break;
-                        } else {
-                                if (vec.buf[0]->valid) {
-                                        request_buffer_map_lock.unlock ();
-                                        do_request (vec.buf[0]);
-                                        request_buffer_map_lock.lock ();
-                                        if (vec.buf[0]->invalidation) {
-                                                vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
-                                        }
-                                        i->second->increment_read_ptr (1);
-                                }
-                        }
-                }
-        }
+			if (vec.len[0] == 0) {
+				break;
+			} else {
+				if (vec.buf[0]->valid) {
+					request_buffer_map_lock.unlock ();
+					do_request (vec.buf[0]);
+					request_buffer_map_lock.lock ();
+					if (vec.buf[0]->invalidation) {
+						vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
+					}
+					i->second->increment_read_ptr (1);
+				}
+			}
+		}
+	}
 
-        /* clean up any dead request buffers (their thread has exited) */
+	/* clean up any dead request buffers (their thread has exited) */
 
 	for (i = request_buffers.begin(); i != request_buffers.end(); ) {
-             if ((*i).second->dead) {
-		     DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 deleting dead per-thread request buffer for %3 @ %4\n",
-									  name(), pthread_name(), i->second));
-                     delete (*i).second;
-                     RequestBufferMapIterator tmp = i;
-                     ++tmp;
-                     request_buffers.erase (i);
-                     i = tmp;
-             } else {
-                     ++i;
-             }
-        }
+		if ((*i).second->dead) {
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 deleting dead per-thread request buffer for %3 @ %4\n",
+						name(), pthread_name(), i->second));
+			delete (*i).second;
+			RequestBufferMapIterator tmp = i;
+			++tmp;
+			request_buffers.erase (i);
+			i = tmp;
+		} else {
+			++i;
+		}
+	}
 
 	request_buffer_map_lock.unlock ();
 
@@ -243,25 +243,25 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		RequestObject* req = request_list.front ();
 		request_list.pop_front ();
 
-                /* We need to use this lock, because its the one
-                   returned by slot_invalidation_mutex() and protects
-                   against request invalidation.
-                */
+		/* We need to use this lock, because its the one
+		 * returned by slot_invalidation_mutex() and protects
+		 * against request invalidation.
+		 */
 
-                request_buffer_map_lock.lock ();
-                if (!req->valid) {
+		request_buffer_map_lock.lock ();
+		if (!req->valid) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 handling invalid heap request, type %3, deleting\n", name(), pthread_name(), req->type));
-                        delete req;
-                        request_buffer_map_lock.unlock ();
-                        continue;
-                }
+			delete req;
+			request_buffer_map_lock.unlock ();
+			continue;
+		}
 
-                /* we're about to execute this request, so its
-                   too late for any invalidation. mark
-                   the request as "done" before we start.
-                */
+		/* we're about to execute this request, so its
+		 * too late for any invalidation. mark
+		 * the request as "done" before we start.
+		 */
 
-                if (req->invalidation) {
+		if (req->invalidation) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 remove request from its invalidation list\n", name(), pthread_name()));
 
 			/* after this call, if the object referenced by the
@@ -269,8 +269,8 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			 * try to mark the request as invalid.
 			 */
 
-                        req->invalidation->requests.remove (req);
-                }
+			req->invalidation->requests.remove (req);
+		}
 
 		/* at this point, an object involved in a functor could be
 		 * deleted before we actually execute the functor. so there is
@@ -281,7 +281,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		 * references to objects to enter into the request queue.
 		 */
 
-                request_buffer_map_lock.unlock ();
+		request_buffer_map_lock.unlock ();
 
 		/* unlock the request lock while we execute the request, so
 		 * that we don't needlessly block other threads (note: not RT
@@ -392,12 +392,12 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 	 * a functor that uses an object that is being deleted.
 	 */
 
-        req->invalidation = invalidation;
+	req->invalidation = invalidation;
 
-        if (invalidation) {
-                invalidation->requests.push_back (req);
-                invalidation->event_loop = this;
-        }
+	if (invalidation) {
+		invalidation->requests.push_back (req);
+		invalidation->event_loop = this;
+	}
 
 	send_request (req);
 }
