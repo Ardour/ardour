@@ -121,6 +121,22 @@ protected:
 	Gtk::VBox* _box; ///< constituent box for subclasses to add widgets to
 };
 
+class RcConfigDisplay : public OptionEditorComponent
+{
+public:
+	RcConfigDisplay (std::string const &, std::string const &, sigc::slot<std::string>, char s = '\0');
+	void add_to_page (OptionEditorPage *);
+	void parameter_changed (std::string const & p);
+	void set_state_from_config ();
+	Gtk::Widget& tip_widget() { return *_info; }
+protected:
+	sigc::slot<std::string> _get;
+	Gtk::Label* _label;
+	Gtk::Label* _info;
+	std::string _id;
+	char _sep;
+};
+
 class RcActionButton : public OptionEditorComponent
 {
 public:

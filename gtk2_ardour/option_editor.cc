@@ -137,6 +137,45 @@ RcActionButton::add_to_page (OptionEditorPage *p)
 	}
 }
 
+RcConfigDisplay::RcConfigDisplay (string const & i, string const & n, sigc::slot<string> g, char s)
+	: _get (g)
+	, _id (i)
+	, _sep (s)
+{
+	_label = manage (right_aligned_label (n));
+	_info = manage (new Label);
+	_info-> set_line_wrap (true);
+	set_state_from_config ();
+}
+
+void
+RcConfigDisplay::set_state_from_config ()
+{
+	string p = _get();
+	if (_sep) {
+		std::replace (p.begin(), p.end(), _sep, '\n');
+	}
+	_info->set_text (p);
+}
+
+void
+RcConfigDisplay::parameter_changed (std::string const & p)
+{
+	if (p == _id) {
+		set_state_from_config ();
+	}
+}
+
+void
+RcConfigDisplay::add_to_page (OptionEditorPage *p)
+{
+	int const n = p->table.property_n_rows();
+	int m = n + 1;
+	p->table.resize (m, 3);
+	p->table.attach (*_label, 1, 2, n, n + 1, FILL | EXPAND);
+	p->table.attach (*_info,  2, 3, n, n + 1, FILL | EXPAND);
+}
+
 
 BoolOption::BoolOption (string const & i, string const & n, sigc::slot<bool> g, sigc::slot<bool, bool> s)
 	: Option (i, n),
