@@ -44,7 +44,7 @@ MidiControlUI* MidiControlUI::_instance = 0;
 #include "pbd/abstract_ui.cc"  /* instantiate the template */
 
 MidiControlUI::MidiControlUI (Session& s)
-	: AbstractUI<MidiUIRequest> (X_("midiui"))
+	: AbstractUI<MidiUIRequest> (X_("midiUI"))
 	, _session (s)
 {
 	_instance = this;
@@ -131,8 +131,8 @@ MidiControlUI::thread_init ()
 
 	pthread_set_name (X_("midiUI"));
 
-	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("MIDI"), 2048);
-	SessionEvent::create_per_thread_pool (X_("MIDI I/O"), 128);
+	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("midiUI"), 2048);
+	SessionEvent::create_per_thread_pool (X_("midiUI"), 128);
 
 	memset (&rtparam, 0, sizeof (rtparam));
 	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
