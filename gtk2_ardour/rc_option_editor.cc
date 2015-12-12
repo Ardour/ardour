@@ -2781,6 +2781,13 @@ if (!Profile->get_mixbus()) {
 			new RcActionButton (_("Edit"),
 				sigc::mem_fun (*this, &RCOptionEditor::edit_lxvst_path),
 			_("Linux VST Path:")));
+
+	add_option (_("Plugins"),
+			new RcConfigDisplay (
+				"plugin-path-lxvst",
+				_("Path:"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_lxvst),
+				':'));
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
@@ -2788,6 +2795,12 @@ if (!Profile->get_mixbus()) {
 			new RcActionButton (_("Edit"),
 				sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
 			_("Windows VST Path:")));
+	add_option (_("Plugins"),
+			new RcConfigDisplay (
+				"plugin-path-vst",
+				_("Path:"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_vst),
+				';'));
 #endif
 
 #ifdef AUDIOUNIT_SUPPORT
