@@ -704,7 +704,7 @@ UI::popup_error (const string& text)
 
 	MessageDialog msg (text);
 	msg.set_title (string_compose (_("I'm sorry %1, I can't do that"), g_get_user_name()));
-	msg.set_wmclass (X_("error"), name());
+	msg.set_wmclass (X_("error"), Glib::get_application_name());
 	msg.set_position (WIN_POS_MOUSE);
 	msg.run ();
 }
