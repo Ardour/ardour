@@ -211,8 +211,8 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 					if (vec.buf[0]->invalidation) {
 						vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
 					}
-					i->second->increment_read_ptr (1);
 				}
+				i->second->increment_read_ptr (1);
 			}
 		}
 	}
