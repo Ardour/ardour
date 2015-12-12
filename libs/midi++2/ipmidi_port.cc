@@ -212,6 +212,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	}
 
 	// Will Hall, Oct 2007
+#ifndef PLATFORM_WINDOWS
 	if (!ifname.empty()) {
 		struct in_addr if_addr_out;
 		if (!get_address(sockout, &if_addr_out, ifname)) {
@@ -223,6 +224,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 			return false;
 		}
 	}
+#endif
 
 	::memset(&addrout, 0, sizeof(struct sockaddr_in));
 	addrout.sin_family = AF_INET;
@@ -249,14 +251,14 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	}
 
 #else
-	// If iMode!=0, non-blocking mode is enabled.
+	// If imode !=0, non-blocking mode is enabled.
 	u_long mode=1;
-	if (ioctlsocket(sockin,FIONBIO,&imode)) {
+	if (ioctlsocket(sockin,FIONBIO,&mode)) {
 		error << "cannot set non-blocking mode for IP MIDI input socket (" << ::strerror (errno) << ')' << endmsg;
 		return false;
 	}
 	imode = 1;
-	if (ioctlsocket(sockout,FIONBIO,&iMode)) {
+	if (ioctlsocket(sockout,FIONBIO,&mode)) {
 		error << "cannot set non-blocking mode for IP MIDI output socket (" << ::strerror (errno) << ')' << endmsg;
 		return false;
 	}
