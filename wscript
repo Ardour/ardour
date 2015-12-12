@@ -389,19 +389,26 @@ int main() { return 0; }''',
         #
         compiler_flags.append ('-U__STRICT_ANSI__')
 
+    if opt.use_libcpp:
+       cxx_flags.append('--stdlib=libc++')
+       linker_flags.append('--stdlib=libc++')
+
     if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan' ]:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
-            cxx_flags.append('--stdlib=libstdc++')
             # Mavericks and later changed the syntax to be used when including Carbon headers,
             # from requiring a full path to requiring just the header name.
             cxx_flags.append('-DCARBON_FLAT_HEADERS')
-            linker_flags.append('--stdlib=libstdc++')
+
+            if not opt.use_libcpp:
+                cxx_flags.append('--stdlib=libstdc++')
+                linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
             conf.define("_DARWIN_C_SOURCE", 1)
         else:
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
+
 
     if (is_clang and platform == "darwin") or conf.env['build_host'] in ['mavericks', 'yosemite', 'el_capitan']:
         # Silence warnings about the non-existing osx clang compiler flags
@@ -728,6 +735,8 @@ def options(opt):
                     help='Do not ask questions that require confirmation during the build')
     opt.add_option('--cxx11', action='store_true', default=False, dest='cxx11',
                     help='Turn on c++11 compiler flags (-std=c++11)')
+    opt.add_option('--use-libc++', action='store_true', default=False, dest='use_libcpp',
+                    help='use libc++ instead of default or auto-detected stdlib')
     opt.add_option('--address-sanitizer', action='store_true', default=False, dest='asan',
                     help='Turn on AddressSanitizer (requires GCC >= 4.8 or clang >= 3.1)')
     opt.add_option('--ptformat', action='store_true', default=False, dest='ptformat',
