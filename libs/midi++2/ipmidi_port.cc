@@ -31,6 +31,7 @@
 #endif
 #if defined(PLATFORM_WINDOWS)
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #else
 #include <netdb.h>
 #endif
@@ -111,6 +112,7 @@ IPMIDIPort::close_sockets ()
 	}
 }
 
+#ifndef PLATFORM_WINDOWS
 static bool
 get_address (int sock, struct in_addr *inaddr, const string& ifname )
 {
@@ -140,6 +142,7 @@ get_address (int sock, struct in_addr *inaddr, const string& ifname )
 
 	return true;
 }
+#endif
 
 bool
 IPMIDIPort::open_sockets (int base_port, const string& ifname)
@@ -172,6 +175,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	// INADDR_ANY will bind to default interface,
 	// specify alternate interface nameon which to bind...
 	struct in_addr if_addr_in;
+#ifndef PLATFORM_WINDOWS
 	if (!ifname.empty()) {
 		if (!get_address(sockin, &if_addr_in, ifname)) {
 			error << string_compose ("socket(in): could not find interface address for %1", ifname) << endmsg;
@@ -185,6 +189,9 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	} else {
 		if_addr_in.s_addr = htonl (INADDR_ANY);
 	}
+#else
+	if_addr_in.s_addr = htonl (INADDR_ANY);
+#endif
 
 	struct ip_mreq mreq;
 	mreq.imr_multiaddr.s_addr = ::inet_addr("225.0.0.37");
@@ -229,6 +236,8 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 		return false;
 	}
 
+#ifndef PLATFORM_WINDOWS
+
 	if (fcntl (sockin, F_SETFL, O_NONBLOCK)) {
 		error << "cannot set non-blocking mode for IP MIDI input socket (" << ::strerror (errno) << ')' << endmsg;
 		return false;
@@ -238,6 +247,20 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 		error << "cannot set non-blocking mode for IP MIDI output socket (" << ::strerror (errno) << ')' << endmsg;
 		return false;
 	}
+
+#else
+	// If iMode!=0, non-blocking mode is enabled.
+	u_long mode=1;
+	if (ioctlsocket(sockin,FIONBIO,&imode)) {
+		error << "cannot set non-blocking mode for IP MIDI input socket (" << ::strerror (errno) << ')' << endmsg;
+		return false;
+	}
+	imode = 1;
+	if (ioctlsocket(sockout,FIONBIO,&iMode)) {
+		error << "cannot set non-blocking mode for IP MIDI output socket (" << ::strerror (errno) << ')' << endmsg;
+		return false;
+	}
+#endif
 
 	return true;
 }
@@ -287,4 +310,3 @@ IPMIDIPort::parse (framecnt_t timestamp)
 		::perror ("failed to recv from socket");
 	}
 }
-
