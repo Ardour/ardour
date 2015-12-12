@@ -225,7 +225,7 @@ libxml_structured_error_func (void* /* parsing_context*/,
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
-	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
+	: Gtkmm2ext::UI (X_("gui"), argcp, argvp)
 	, session_loaded (false)
 	, gui_object_state (new GUIObjectState)
 	, primary_clock   (new MainClock (X_("primary"),   X_("transport"), true ))
