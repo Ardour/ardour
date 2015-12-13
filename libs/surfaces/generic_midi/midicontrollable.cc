@@ -204,20 +204,22 @@ MIDIControllable::control_to_midi (float val)
 float
 MIDIControllable::midi_to_control (int val)
 {
-        /* fiddle with MIDI value so that we get an odd number of integer steps
-           and can thus represent "middle" precisely as 0.5. this maps to
-           the range 0..+1.0 (0 to 126)
-        */
+	/* fiddle with MIDI value so that we get an odd number of integer steps
+		and can thus represent "middle" precisely as 0.5. this maps to
+		the range 0..+1.0 (0 to 126)
+	*/
 
-        float fv = (val == 0 ? 0 : float (val - 1) / (max_value_for_type() - 1));
+	float fv = (val == 0 ? 0 : float (val - 1) / (max_value_for_type() - 1));
 
-        if (controllable->is_gain_like()) {
-                return slider_position_to_gain (fv);
-        }
+	if (controllable->is_gain_like()) {
+		return controllable->interface_to_internal (fv);
+	}
+	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Raw value %1 float %2\n", val, fv));
 
 	float control_min = controllable->lower ();
 	float control_max = controllable->upper ();
 	float control_range = control_max - control_min;
+	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Min %1 Max %2 Range %3\n", control_min, control_max, control_range));
 
 	AutomationControl *actl = dynamic_cast<AutomationControl*> (controllable);
 	if (actl) {
