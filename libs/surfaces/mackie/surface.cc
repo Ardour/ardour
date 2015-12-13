@@ -366,9 +366,7 @@ Surface::init_strips (uint32_t n)
 void
 Surface::master_monitor_may_have_changed ()
 {
-	std::cerr << "MMmhc\n";
 	setup_master ();
-	std::cerr << " done\n";
 }
 
 void
@@ -423,7 +421,6 @@ Surface::master_gain_changed ()
 
 	boost::shared_ptr<AutomationControl> ac = _master_fader->control();
 	if (!ac) {
-		std::cerr << "no control!\n";
 		return;
 	}
 
@@ -433,8 +430,6 @@ Surface::master_gain_changed ()
 	}
 
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::master_gain_changed: updating surface master fader\n");
-
-	std::cerr << "send " << normalized_position << std::endl;
 
 	_port->write (_master_fader->set_position (normalized_position));
 	_last_master_gain_written = normalized_position;
