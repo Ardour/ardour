@@ -83,7 +83,7 @@ AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_
 	 * do so in a realtime-safe manner (no locks).
 	 */
 
- 	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("in %1 (thread name %4), %2 (%5) wants to register with %3\n", event_loop_name(), thread_name, target_gui, pthread_name(), pthread_self()));
+	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("in %1 (thread name %4), %2 (%5) wants to register with %3\n", event_loop_name(), thread_name, target_gui, pthread_name(), DEBUG_THREAD_SELF));
 
 	if (target_gui != event_loop_name()) {
 		/* this UI is not the UI that the calling thread is trying to
