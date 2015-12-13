@@ -169,6 +169,8 @@ public:
 
 	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool);
 
+	void master_monitor_may_have_changed ();
+
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
@@ -183,6 +185,7 @@ public:
 	Mackie::JogWheel*      _jog_wheel;
 	Fader*                 _master_fader;
 	float                  _last_master_gain_written;
+	PBD::ScopedConnection   master_connection;
 
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 	MidiByteArray host_connection_query (MidiByteArray& bytes);

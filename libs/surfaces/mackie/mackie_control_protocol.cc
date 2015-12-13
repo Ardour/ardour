@@ -696,6 +696,7 @@ MackieControlProtocol::connect_session_signals()
 {
 	// receive routes added
 	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_route_added, this, _1), this);
+	session->RouteAddedOrRemoved.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_route_added_or_removed, this), this);
 	// receive record state toggled
 	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_record_state_changed, this), this);
 	// receive transport state changed
@@ -1190,6 +1191,15 @@ void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 	}
 }
 
+void
+MackieControlProtocol::notify_route_added_or_removed ()
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->master_monitor_may_have_changed ();
+	}
+}
+
 // RouteList is the set of routes that have just been added
 void
 MackieControlProtocol::notify_route_added (ARDOUR::RouteList & rl)
@@ -1199,6 +1209,15 @@ MackieControlProtocol::notify_route_added (ARDOUR::RouteList & rl)
 
 		if (surfaces.empty()) {
 			return;
+		}
+	}
+
+	/* special case: single route, and it is the monitor or master out */
+
+	if (rl.size() == 1 && (rl.front()->is_monitor() || rl.front()->is_master())) {
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			(*s)->master_monitor_may_have_changed ();
 		}
 	}
 

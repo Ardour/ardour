@@ -364,6 +364,14 @@ Surface::init_strips (uint32_t n)
 }
 
 void
+Surface::master_monitor_may_have_changed ()
+{
+	std::cerr << "MMmhc\n";
+	setup_master ();
+	std::cerr << " done\n";
+}
+
+void
 Surface::setup_master ()
 {
 	boost::shared_ptr<Route> m;
@@ -373,28 +381,37 @@ Surface::setup_master ()
 	}
 
 	if (!m) {
+		_master_fader->set_control (boost::shared_ptr<AutomationControl>());
+		master_connection.disconnect ();
 		return;
 	}
 
-	_master_fader = dynamic_cast<Fader*> (Fader::factory (*this, _mcp.device_info().strip_cnt(), "master", *groups["master"]));
+	if (!_master_fader) {
+		_master_fader = dynamic_cast<Fader*> (Fader::factory (*this, _mcp.device_info().strip_cnt(), "master", *groups["master"]));
+
+		Groups::iterator group_it;
+		group_it = groups.find("master");
+
+		DeviceInfo device_info = _mcp.device_info();
+		GlobalButtonInfo master_button = device_info.get_global_button(Button::MasterFaderTouch);
+		Button* bb = dynamic_cast<Button*> (Button::factory (
+			                                    *this,
+			                                    Button::MasterFaderTouch,
+			                                    master_button.id,
+			                                    master_button.label,
+			                                    *(group_it->second)
+			                                    ));
+
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface %1 Master Fader new button BID %2 id %3\n",
+		                                                   number(), Button::MasterFaderTouch, bb->id()));
+	} else {
+		master_connection.disconnect ();
+	}
 
 	_master_fader->set_control (m->gain_control());
-	m->gain_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&Surface::master_gain_changed, this), ui_context());
-
-	Groups::iterator group_it;
-	group_it = groups.find("master");
-
-	DeviceInfo device_info = _mcp.device_info();
-	GlobalButtonInfo master_button = device_info.get_global_button(Button::MasterFaderTouch);
-	Button* bb = dynamic_cast<Button*> (Button::factory (
-		*this,
-		Button::MasterFaderTouch,
-		master_button.id,
-		master_button.label,
-		*(group_it->second)
-));
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface %1 Master Fader new button BID %2 id %3\n",
-		number(), Button::MasterFaderTouch, bb->id()));
+	m->gain_control()->Changed.connect (master_connection, MISSING_INVALIDATOR, boost::bind (&Surface::master_gain_changed, this), ui_context());
+	_last_master_gain_written = FLT_MAX; /* some essentially impossible value */
+	master_gain_changed ();
 }
 
 void
@@ -406,6 +423,7 @@ Surface::master_gain_changed ()
 
 	boost::shared_ptr<AutomationControl> ac = _master_fader->control();
 	if (!ac) {
+		std::cerr << "no control!\n";
 		return;
 	}
 
@@ -415,6 +433,8 @@ Surface::master_gain_changed ()
 	}
 
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::master_gain_changed: updating surface master fader\n");
+
+	std::cerr << "send " << normalized_position << std::endl;
 
 	_port->write (_master_fader->set_position (normalized_position));
 	_last_master_gain_written = normalized_position;
