@@ -378,7 +378,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void goto_start ();
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
-	void request_transport_speed (double speed, bool as_default = false);
+	void request_transport_speed (double speed, bool as_default = true);
 	void request_transport_speed_nonzero (double, bool as_default = false);
 	void request_overwrite_buffer (Track *);
 	void adjust_playback_buffering();

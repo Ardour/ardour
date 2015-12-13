@@ -109,7 +109,7 @@ void
 Session::request_transport_speed (double speed, bool as_default)
 {
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
-	ev->third_yes_or_no = true; // as_default
+	ev->third_yes_or_no = as_default; // as_default
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1 as default = %2\n", speed, as_default));
 	queue_event (ev);
 }
@@ -1342,7 +1342,9 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 		}
 
 	} else if (transport_stopped() && speed == 1.0) {
-
+		if (as_default) {
+			_default_transport_speed = speed;
+		}
 		/* we are stopped and we want to start rolling at speed 1 */
 
 		if (Config->get_loop_is_mode() && play_loop) {
