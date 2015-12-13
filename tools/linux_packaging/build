@@ -608,7 +608,7 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	curl -s -S --fail -# \
 		-z "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
 		-o "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
-		http://www.harrisonconsoles.com/mixbus/mb3/${HARCH}/harrison_lv2s.zip
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_lv2s.${HARCH}.zip"
 	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/harrison_lv2s.${HARCH}.zip"
 fi
 
@@ -619,7 +619,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -# \
 		-z "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
 		-o "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
-		http://www.harrisonconsoles.com/mixbus/mb3/${HARCH}/harrison_channelstrip.so
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_channelstrip.${HARCH}.so"
 
 	cp "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
 		$APPLIB/ladspa/strip/harrison_channelstrip.so

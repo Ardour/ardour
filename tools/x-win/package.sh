@@ -260,7 +260,7 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	curl -s -S --fail -# \
 		-z "${SRCCACHE}/harrison_lv2s.${WARCH}.zip" \
 		-o "${SRCCACHE}/harrison_lv2s.${WARCH}.zip" \
-		http://www.harrisonconsoles.com/mixbus/mb3/${WARCH}/harrison_lv2s.zip
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_lv2s.${WARCH}.zip"
 	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/harrison_lv2s.${WARCH}.zip"
 fi
 
@@ -271,7 +271,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -# \
 		-z "${SRCCACHE}/harrison_channelstrip.${WARCH}.dll" \
 		-o "${SRCCACHE}/harrison_channelstrip.${WARCH}.dll" \
-		http://www.harrisonconsoles.com/mixbus/mb3/${WARCH}/harrison_channelstrip.dll
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_channelstrip.${WARCH}.dll"
 
 	cp "${SRCCACHE}/harrison_channelstrip.${WARCH}.dll" \
 		"$ALIBDIR/ladspa/strip/harrison_channelstrip.dll"

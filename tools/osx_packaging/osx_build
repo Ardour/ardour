@@ -594,7 +594,7 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	curl -s -S --fail -#  \
 		-z "${CACHEDIR}/harrison_lv2s.${OSX_BENSID}.zip" \
 		-o "${CACHEDIR}/harrison_lv2s.${OSX_BENSID}.zip" \
-		http://www.harrisonconsoles.com/mixbus/mb3/${OSX_BENSID}/harrison_lv2s.zip
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_lv2s.${OSX_BENSID}.zip"
 
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
@@ -680,7 +680,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -#  \
 		-z "${CACHEDIR}/harrison_channelstrip.${OSX_BENSID}.so" \
 		-o "${CACHEDIR}/harrison_channelstrip.${OSX_BENSID}.so" \
-		http://www.harrisonconsoles.com/mixbus/mb3/${OSX_BENSID}/harrison_channelstrip.so
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_channelstrip.${OSX_BENSID}.so"
 
 	cp "${CACHEDIR}/harrison_channelstrip.${OSX_BENSID}.so" \
 		"${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip/harrison_channelstrip.so"
