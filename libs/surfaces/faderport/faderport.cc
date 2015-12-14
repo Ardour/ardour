@@ -561,7 +561,7 @@ FaderPort::set_active (bool yn)
 		blink_timeout->attach (main_loop()->get_context());
 
 		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
-		periodic_connection = blink_timeout->connect (sigc::mem_fun (*this, &FaderPort::periodic));
+		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &FaderPort::periodic));
 		periodic_timeout->attach (main_loop()->get_context());
 
 	} else {
