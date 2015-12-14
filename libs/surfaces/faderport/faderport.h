@@ -281,6 +281,9 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void map_recenable_state ();
 	void map_transport_state ();
 
+	sigc::connection periodic_connection;
+	bool periodic ();
+
 	sigc::connection blink_connection;
 	typedef std::list<ButtonID> Blinkers;
 	Blinkers blinkers;
