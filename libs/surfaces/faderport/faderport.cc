@@ -542,7 +542,7 @@ FaderPort::sysex_handler (MIDI::Parser &p, MIDI::byte *buf, size_t sz)
 int
 FaderPort::set_active (bool yn)
 {
-	DEBUG_TRACE (DEBUG::FaderPort, string_compose("MackieControlProtocol::set_active init with yn: '%1'\n", yn));
+	DEBUG_TRACE (DEBUG::FaderPort, string_compose("Faderport::set_active init with yn: '%1'\n", yn));
 
 	if (yn == active()) {
 		return 0;
@@ -569,7 +569,7 @@ FaderPort::set_active (bool yn)
 
 	ControlProtocol::set_active (yn);
 
-	DEBUG_TRACE (DEBUG::FaderPort, string_compose("MackieControlProtocol::set_active done with yn: '%1'\n", yn));
+	DEBUG_TRACE (DEBUG::FaderPort, string_compose("Faderport::set_active done with yn: '%1'\n", yn));
 
 	return 0;
 }
