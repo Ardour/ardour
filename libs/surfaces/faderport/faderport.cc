@@ -1103,6 +1103,12 @@ FaderPort::set_current_route (boost::shared_ptr<Route> r)
 void
 FaderPort::map_auto ()
 {
+	/* December 14th 2015: setting the LED states of these buttons
+	   interferes with fader operation.
+	*/
+
+	return;
+
 	boost::shared_ptr<AutomationControl> control = _current_route->gain_control ();
 	const AutoState as = control->automation_state ();
 
