@@ -152,8 +152,11 @@ FaderPort::FaderPort (Session& s)
 	get_button (Undo).set_flash (true);
 
 	get_button (FP_Read).set_action (boost::bind (&FaderPort::read, this), true);
+	get_button (FP_Read).set_action (boost::bind (&FaderPort::off, this), false, LongPress);
 	get_button (FP_Write).set_action (boost::bind (&FaderPort::write, this), true);
+	get_button (FP_Write).set_action (boost::bind (&FaderPort::off, this), false, LongPress);
 	get_button (FP_Touch).set_action (boost::bind (&FaderPort::touch, this), true);
+	get_button (FP_Touch).set_action (boost::bind (&FaderPort::off, this), false, LongPress);
 	get_button (FP_Off).set_action (boost::bind (&FaderPort::off, this), true);
 
 	get_button (Play).set_action (boost::bind (&BasicUI::transport_play, this, true), true);
@@ -1123,11 +1126,9 @@ FaderPort::set_current_route (boost::shared_ptr<Route> r)
 void
 FaderPort::map_auto ()
 {
-	/* December 14th 2015: setting the LED states of these buttons
-	   interferes with fader operation.
-	*/
-
-	return;
+	/* Under no circumstances send a message to "enable" the LED state of
+	 * the Off button, because this will disable the fader.
+	 */
 
 	boost::shared_ptr<AutomationControl> control = _current_route->gain_control ();
 	const AutoState as = control->automation_state ();
@@ -1137,25 +1138,21 @@ FaderPort::map_auto ()
 			get_button (FP_Read).set_led_state (_output_port, true);
 			get_button (FP_Write).set_led_state (_output_port, false);
 			get_button (FP_Touch).set_led_state (_output_port, false);
-			get_button (FP_Off).set_led_state (_output_port, false);
 		break;
 		case ARDOUR::Write:
 			get_button (FP_Read).set_led_state (_output_port, false);
 			get_button (FP_Write).set_led_state (_output_port, true);
 			get_button (FP_Touch).set_led_state (_output_port, false);
-			get_button (FP_Off).set_led_state (_output_port, false);
 		break;
 		case ARDOUR::Touch:
 			get_button (FP_Read).set_led_state (_output_port, false);
 			get_button (FP_Write).set_led_state (_output_port, false);
 			get_button (FP_Touch).set_led_state (_output_port, true);
-			get_button (FP_Off).set_led_state (_output_port, false);
 		break;
 		case ARDOUR::Off:
 			get_button (FP_Read).set_led_state (_output_port, false);
 			get_button (FP_Write).set_led_state (_output_port, false);
 			get_button (FP_Touch).set_led_state (_output_port, false);
-			get_button (FP_Off).set_led_state (_output_port, true);
 		break;
 	}
 
