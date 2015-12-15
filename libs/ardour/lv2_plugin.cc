@@ -2482,7 +2482,7 @@ LV2World::LV2World()
 	units_db           = lilv_new_uri(world, LV2_UNITS__db);
 	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
 	patch_Message      = lilv_new_uri(world, LV2_PATCH__Message);
-	lv2_noSampleAccurateCtrl = lilv_new_uri(world, LV2_CORE_PREFIX "NoSampleAccurateControl");
+	lv2_noSampleAccurateCtrl = lilv_new_uri(world, LV2_CORE_PREFIX "noSampleAccurateControls");
 #ifdef HAVE_LV2_1_2_0
 	bufz_powerOf2BlockLength = lilv_new_uri(world, LV2_BUF_SIZE__powerOf2BlockLength);
 	bufz_fixedBlockLength    = lilv_new_uri(world, LV2_BUF_SIZE__fixedBlockLength);
