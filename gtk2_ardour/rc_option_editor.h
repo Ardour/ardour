@@ -56,6 +56,7 @@ private:
 	BoolOption* _ltc_send_continuously;
 
 	PBD::ScopedConnection parameter_change_connection;
+	PBD::ScopedConnection engine_started_connection;
 
 	/* plugin actions */
 	void plugin_scan_refresh ();

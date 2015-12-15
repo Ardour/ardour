@@ -2019,6 +2019,7 @@ RCOptionEditor::RCOptionEditor ()
 	_ltc_port->set_popdown_strings (physical_inputs);
 
 	populate_sync_options ();
+	AudioEngine::instance()->Running.connect (engine_started_connection, MISSING_INVALIDATOR, boost::bind (&RCOptionEditor::populate_sync_options, this), gui_context());
 
 	add_option (_("Transport"), _ltc_port);
 
@@ -3224,4 +3225,6 @@ RCOptionEditor::populate_sync_options ()
 			_rc_config->set_sync_source(sync_opts.front());
 		}
 	}
+
+	parameter_changed ("sync-source");
 }
