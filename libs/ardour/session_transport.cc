@@ -163,6 +163,12 @@ Session::force_locate (framepos_t target_frame, bool with_roll)
 void
 Session::request_play_loop (bool yn, bool change_transport_roll)
 {
+	if (_slave && yn) {
+		// don't attempt to loop when not using Internal Transport
+		// see also gtk2_ardour/ardour_ui_options.cc parameter_changed()
+		return;
+	}
+
 	SessionEvent* ev;
 	Location *location = _locations->auto_loop_location();
 	double target_speed;
