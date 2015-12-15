@@ -999,6 +999,11 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
         conf.env.append_value('CFLAGS', '-DCOMPILER_MINGW')
         conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
         conf.env.append_value('CXXFLAGS', '-DCOMPILER_MINGW')
+        if conf.options.cxx11:
+            conf.env.append_value('CFLAGS', '-D_USE_MATH_DEFINES')
+            conf.env.append_value('CXXFLAGS', '-D_USE_MATH_DEFINES')
+            conf.env.append_value('CFLAGS', '-DWIN32')
+            conf.env.append_value('CXXFLAGS', '-DWIN32')
         conf.env.append_value('LIB', 'pthread')
         # needed for at least libsmf
         conf.check_cc(function_name='htonl', header_name='winsock2.h', lib='ws2_32')
