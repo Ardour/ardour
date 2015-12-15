@@ -325,7 +325,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 				// disable looping with external sync.
 				// This is not necessary because session-transport ignores the loop-state,
 				// but makes it clear to the user that it's disabled.
-				toggle_session_auto_loop();
+				_session->request_play_loop (false, false);
 			}
 			auto_loop_button.set_sensitive (false);
 			/* XXX we need to make sure that auto-play is off as well as insensitive */
