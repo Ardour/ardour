@@ -586,7 +586,7 @@ Strip::notify_eq_change (AutomationType type, uint32_t band, bool force_update)
 }
 
 void
-Strip::notify_dyn_change (AutomationType type, bool force_update)
+Strip::notify_dyn_change (AutomationType type, bool force_update, bool propagate_mode)
 {
 	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
 
@@ -601,6 +601,7 @@ Strip::notify_dyn_change (AutomationType type, bool force_update)
 	}
 
 	boost::shared_ptr<AutomationControl> control;
+	bool reset_all = false;
 
 	switch (type) {
 	case CompThreshold:
@@ -611,6 +612,7 @@ Strip::notify_dyn_change (AutomationType type, bool force_update)
 		break;
 	case CompMode:
 		control = r->comp_mode_controllable ();
+		reset_all = true;
 		break;
 	case CompMakeup:
 		control = r->comp_makeup_controllable ();
@@ -623,6 +625,10 @@ Strip::notify_dyn_change (AutomationType type, bool force_update)
 		break;
 	default:
 		break;
+	}
+
+	if (propagate_mode && reset_all) {
+		_surface->subview_mode_changed ();
 	}
 
 	if (control) {
@@ -764,7 +770,7 @@ Strip::select_event (Button&, ButtonState bs)
 void
 Strip::vselect_event (Button&, ButtonState bs)
 {
-	if (_surface->mcp().subview_mode() != None) {
+	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
 
 		/* subview mode: vpot press acts like a button for toggle parameters */
 
@@ -1489,11 +1495,19 @@ Strip::subview_mode_changed ()
 		break;
 
 	case MackieControlProtocol::EQ:
-		setup_eq_vpot (r);
+		if (r) {
+			setup_eq_vpot (r);
+		} else {
+			/* leave it as it was */
+		}
 		break;
 
 	case MackieControlProtocol::Dynamics:
-		setup_dyn_vpot (r);
+		if (r) {
+			setup_dyn_vpot (r);
+		} else {
+			/* leave it as it was */
+		}
 		break;
 	}
 }
@@ -1542,7 +1556,7 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Route> r)
         pc = available[pos];
         param = params[pos];
 
-        pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_dyn_change, this, param, false), ui_context());
+        pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_dyn_change, this, param, false, true), ui_context());
         _vpot->set_control (pc);
 
         string pot_id;
@@ -1552,7 +1566,11 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Route> r)
 	        pot_id = "Thresh";
 	        break;
         case CompSpeed:
-	        pot_id = "Speed";
+	        if (mc) {
+		        pot_id = r->comp_speed_name (mc->get_value());
+	        } else {
+		        pot_id = "Speed";
+	        }
 	        break;
         case CompMode:
 	        pot_id = "Mode";
@@ -1574,7 +1592,7 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Route> r)
 	        _surface->write (display (0, pot_id));
         }
 
-        notify_dyn_change (param, true);
+        notify_dyn_change (param, true, false);
 }
 
 void
