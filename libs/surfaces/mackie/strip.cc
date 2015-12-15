@@ -764,6 +764,28 @@ Strip::select_event (Button&, ButtonState bs)
 void
 Strip::vselect_event (Button&, ButtonState bs)
 {
+	if (_surface->mcp().subview_mode() != None) {
+
+		/* subview mode: vpot press acts like a button for toggle parameters */
+
+		if (bs != press) {
+			return;
+		}
+
+		boost::shared_ptr<AutomationControl> control = _vpot->control ();
+		if (!control) {
+			return;
+		}
+
+		if (control->toggled()) {
+			if (control->toggled()) {
+				control->set_value (!control->get_value());
+			}
+		}
+
+		return;
+	}
+
 	if (bs == press) {
 
 		int ms = _surface->mcp().main_modifier_state();
@@ -1939,4 +1961,3 @@ Strip::notify_metering_state_changed()
 	_transport_is_rolling = transport_is_rolling;
 	_metering_active = metering_active;
 }
-
