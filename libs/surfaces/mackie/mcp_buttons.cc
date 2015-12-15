@@ -924,14 +924,16 @@ MackieControlProtocol::audiotracks_release (Mackie::Button&)
 	return none;
 }
 Mackie::LedState
-MackieControlProtocol::audioinstruments_press (Mackie::Button&)
+MackieControlProtocol::audioinstruments_press (Mackie::Button& b)
 {
-	return none;
+	return dyn_press (b);
 }
+
 Mackie::LedState
-MackieControlProtocol::audioinstruments_release (Mackie::Button&)
+MackieControlProtocol::audioinstruments_release (Mackie::Button& b)
 {
-	return none;
+	return dyn_release (b);
+
 }
 Mackie::LedState
 MackieControlProtocol::aux_press (Mackie::Button&)

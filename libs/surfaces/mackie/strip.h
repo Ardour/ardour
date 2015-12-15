@@ -171,9 +171,11 @@ private:
 	typedef std::map<ARDOUR::AutomationType,Control*> ControlParameterMap;
 	ControlParameterMap control_by_parameter;
 
-	void hookup_eq (ARDOUR::AutomationType, uint32_t);
 	void notify_eq_change (ARDOUR::AutomationType, uint32_t band, bool force);
-	void setup_eq_vpots (boost::shared_ptr<ARDOUR::Route>);
+	void setup_eq_vpot (boost::shared_ptr<ARDOUR::Route>);
+
+	void notify_dyn_change (ARDOUR::AutomationType, bool force);
+	void setup_dyn_vpot (boost::shared_ptr<ARDOUR::Route>);
 };
 
 }

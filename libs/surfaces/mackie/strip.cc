@@ -18,8 +18,9 @@
 */
 
 #include <sstream>
+#include <vector>
+
 #include <stdint.h>
-#include "strip.h"
 
 #include <sys/time.h>
 
@@ -51,6 +52,7 @@
 #include "mackie_control_protocol.h"
 #include "surface_port.h"
 #include "surface.h"
+#include "strip.h"
 #include "button.h"
 #include "led.h"
 #include "pot.h"
@@ -545,7 +547,7 @@ Strip::notify_eq_change (AutomationType type, uint32_t band, bool force_update)
 		return;
 	}
 
-	if (_surface->mcp().subview_mode() == MackieControlProtocol::None) {
+	if (_surface->mcp().subview_mode() != MackieControlProtocol::EQ) {
 		/* no longer in EQ subview mode */
 		return;
 	}
@@ -570,6 +572,54 @@ Strip::notify_eq_change (AutomationType type, uint32_t band, bool force_update)
 		break;
 	case EQEnable:
 		control = r->eq_enable_controllable ();
+		break;
+	default:
+		break;
+	}
+
+	if (control) {
+		float val = control->get_value();
+		queue_parameter_display (type, val);
+		/* update pot/encoder */
+		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
+	}
+}
+
+void
+Strip::notify_dyn_change (AutomationType type, bool force_update)
+{
+	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
+
+	if (!r) {
+		/* not in subview mode */
+		return;
+	}
+
+	if (_surface->mcp().subview_mode() != MackieControlProtocol::Dynamics) {
+		/* no longer in EQ subview mode */
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> control;
+
+	switch (type) {
+	case CompThreshold:
+		control = r->comp_threshold_controllable ();
+		break;
+	case CompSpeed:
+		control = r->comp_speed_controllable ();
+		break;
+	case CompMode:
+		control = r->comp_mode_controllable ();
+		break;
+	case CompMakeup:
+		control = r->comp_makeup_controllable ();
+		break;
+	case CompRedux:
+		control = r->comp_redux_controllable ();
+		break;
+	case CompEnable:
+		control = r->comp_enable_controllable ();
 		break;
 	default:
 		break;
@@ -926,15 +976,25 @@ Strip::do_parameter_display (AutomationType type, float val)
 	case EQQ:
 	case EQShape:
 	case EQHPF:
+	case CompThreshold:
+	case CompSpeed:
+	case CompMakeup:
+	case CompRedux:
 		snprintf (buf, sizeof (buf), "%6.1f", val);
 		_surface->write (display (1, buf));
 		screen_hold = true;
 		break;
 	case EQEnable:
+	case CompEnable:
 		if (val >= 0.5) {
 			_surface->write (display (1, "on"));
 		} else {
 			_surface->write (display (1, "off"));
+		}
+		break;
+	case CompMode:
+		if (_surface->mcp().subview_route()) {
+			_surface->write (display (1, _surface->mcp().subview_route()->comp_mode_name (val)));
 		}
 		break;
 	default:
@@ -1407,16 +1467,96 @@ Strip::subview_mode_changed ()
 		break;
 
 	case MackieControlProtocol::EQ:
-		setup_eq_vpots (r);
+		setup_eq_vpot (r);
 		break;
 
 	case MackieControlProtocol::Dynamics:
+		setup_dyn_vpot (r);
 		break;
 	}
 }
 
 void
-Strip::setup_eq_vpots (boost::shared_ptr<Route> r)
+Strip::setup_dyn_vpot (boost::shared_ptr<Route> r)
+{
+	if (!r) {
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> tc = r->comp_threshold_controllable ();
+        boost::shared_ptr<AutomationControl> sc = r->comp_speed_controllable ();
+        boost::shared_ptr<AutomationControl> mc = r->comp_mode_controllable ();
+        boost::shared_ptr<AutomationControl> kc = r->comp_makeup_controllable ();
+        boost::shared_ptr<AutomationControl> rc = r->comp_redux_controllable ();
+        boost::shared_ptr<AutomationControl> ec = r->comp_enable_controllable ();
+
+        uint32_t pos = _surface->mcp().global_index (*this);
+
+        /* we will control the pos-th available parameter, from the list in the
+         * order shown above.
+         */
+
+        vector<boost::shared_ptr<AutomationControl> > available;
+        vector<AutomationType> params;
+
+        if (tc) { available.push_back (tc); params.push_back (CompThreshold); }
+        if (sc) { available.push_back (sc); params.push_back (CompSpeed); }
+        if (mc) { available.push_back (mc); params.push_back (CompMode); }
+        if (kc) { available.push_back (kc); params.push_back (CompMakeup); }
+        if (rc) { available.push_back (rc); params.push_back (CompRedux); }
+        if (ec) { available.push_back (ec); params.push_back (CompEnable); }
+
+        if (pos >= available.size()) {
+	        /* this knob is not needed to control the available parameters */
+	        _vpot->set_control (boost::shared_ptr<AutomationControl>());
+	        _surface->write (display (0, string()));
+	        _surface->write (display (1, string()));
+	        return;
+        }
+
+        boost::shared_ptr<AutomationControl> pc;
+        AutomationType param;
+
+        pc = available[pos];
+        param = params[pos];
+
+        pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_dyn_change, this, param, false), ui_context());
+        _vpot->set_control (pc);
+
+        string pot_id;
+
+        switch (param) {
+        case CompThreshold:
+	        pot_id = "Thresh";
+	        break;
+        case CompSpeed:
+	        pot_id = "Speed";
+	        break;
+        case CompMode:
+	        pot_id = "Mode";
+	        break;
+        case CompMakeup:
+	        pot_id = "Makeup";
+	        break;
+        case CompRedux:
+	        pot_id = "Redux";
+	        break;
+        case CompEnable:
+	        pot_id = "on/off";
+	        break;
+        default:
+	        break;
+        }
+
+        if (!pot_id.empty()) {
+	        _surface->write (display (0, pot_id));
+        }
+
+        notify_dyn_change (param, true);
+}
+
+void
+Strip::setup_eq_vpot (boost::shared_ptr<Route> r)
 {
 	uint32_t bands = r->eq_band_cnt ();
 
@@ -1800,7 +1940,3 @@ Strip::notify_metering_state_changed()
 	_metering_active = metering_active;
 }
 
-void
-Strip::hookup_eq (AutomationType param, uint32_t band)
-{
-}

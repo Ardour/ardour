@@ -1728,6 +1728,7 @@ MackieControlProtocol::pot_mode_globals ()
 {
 	update_global_button (Button::Eq, off);
 	update_global_button (Button::Dyn, off);
+	update_global_button (Button::AudioInstruments, off);
 
 	switch (_pot_mode) {
 	case Trim:
