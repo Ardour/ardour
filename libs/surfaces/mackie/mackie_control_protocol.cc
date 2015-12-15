@@ -1619,17 +1619,34 @@ MackieControlProtocol::clear_ports ()
 }
 
 void
+MackieControlProtocol::notify_subview_route_deleted ()
+{
+	/* return to global/mixer view */
+	_subview_route.reset ();
+	set_view_mode (Mixer);
+}
+
+void
 MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route> r)
 {
-	SubViewMode old = _subview_mode;
+	SubViewMode old_mode = _subview_mode;
+	boost::shared_ptr<Route> old_route = _subview_route;
 
 	_subview_mode = sm;
 
 	if (r) {
-		_subview_route = r;
+		/* retain _subview_route even if it is reset to null implicitly */
+ 		_subview_route = r;
 	}
 
-	if (_subview_mode != old) {
+	if ((_subview_mode != old_mode) || (_subview_route != old_route)) {
+
+		if (r != old_route) {
+			subview_route_connections.drop_connections ();
+			if (_subview_route) {
+				_subview_route->DropReferences.connect (subview_route_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_subview_route_deleted, this), this);
+			}
+		}
 
 		/* subview mode did actually change */
 
@@ -1642,18 +1659,35 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 			}
 
 			for (Surfaces::iterator s = copy.begin(); s != copy.end(); ++s) {
-			(*s)->subview_mode_changed ();
+				(*s)->subview_mode_changed ();
 			}
 		}
 
-		/* turn buttons related to vpot mode on or off as required */
+		if (_subview_mode != old_mode) {
 
-		if (_subview_mode != None) {
-			update_global_button (Button::Trim, off);
-			update_global_button (Button::Send, off);
-			update_global_button (Button::Pan, off);
-		} else {
-			pot_mode_globals ();
+			/* turn buttons related to vpot mode on or off as required */
+
+			switch (_subview_mode) {
+			case MackieControlProtocol::None:
+				pot_mode_globals ();
+				break;
+			case MackieControlProtocol::EQ:
+				update_global_button (Button::Eq, on);
+				update_global_button (Button::Dyn, off);
+				update_global_button (Button::AudioInstruments, off); /* faking up Dyn */
+				update_global_button (Button::Trim, off);
+				update_global_button (Button::Send, off);
+				update_global_button (Button::Pan, off);
+				break;
+			case MackieControlProtocol::Dynamics:
+				update_global_button (Button::Eq, off);
+				update_global_button (Button::Dyn, on);
+				update_global_button (Button::AudioInstruments, on); /* faking up Dyn */
+				update_global_button (Button::Trim, off);
+				update_global_button (Button::Send, off);
+				update_global_button (Button::Pan, off);
+				break;
+			}
 		}
 	}
 }

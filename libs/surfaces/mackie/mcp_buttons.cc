@@ -711,7 +711,7 @@ MackieControlProtocol::eq_press (Button &)
 		boost::shared_ptr<Route> r = first_selected_route ();
 		if (r && r->eq_band_cnt() > 0) {
 			set_subview_mode (EQ, r);
-			return on;
+			return none; /* led state handled by set_subview_mode() */
 		}
 	}
 	return none;
@@ -730,7 +730,7 @@ MackieControlProtocol::dyn_press (Button &)
 
 		if (r) {
 			set_subview_mode (Dynamics, r);
-			return on;
+			return none; /* led state handled by set_subview_mode() */
 		}
 	}
 
