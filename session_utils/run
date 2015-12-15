@@ -1,0 +1,6 @@
+#!/bin/sh
+TOP=`dirname "$0"`/..
+. "$TOP/build/gtk2_ardour/ardev_common_waf.sh"
+SELF=$1
+shift
+exec "$TOP/build/session_utils/$SELF" "$@"

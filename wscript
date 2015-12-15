@@ -223,6 +223,7 @@ children = [
         'mcp',
         'patchfiles',
         'headless',
+        'session_utils',
         # shared helper binaries (plugin-scanner, exec-wrapper)
         'libs/fst',
         'libs/vfork',

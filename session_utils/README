@@ -1,0 +1,29 @@
+Ardour Session Utilities
+========================
+
+This folder contains some tools which directly use libardour to access ardour
+sessions.
+
+The overall goal it to provide some non-interactive unix-style commandline
+tools, which are installed along with DAW.
+
+
+Adding new tools
+----------------
+
+One c++ source per tool, see "example.cc" and "export.cc"
+
+  cp session_utils/example.cc session_utils/your_new_tool_name.cc
+  edit session_utils/new_tool_name.cc
+	./waf
+
+The tool is automatically compiled and deployed when installing, using the
+program-name as prefix.  e.g.  "export.cc" becomes "ardour4-export".
+(or "mixbus3-export", depending on the project configuration)
+
+
+Test run from the source
+------------------------
+
+  cd session_utils
+  ./run ardour4-your_new_tool_name

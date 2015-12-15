@@ -1,0 +1,14 @@
+#!/bin/sh
+TOP=`dirname "$0"`/..
+. "$TOP/build/gtk2_ardour/ardev_common_waf.sh"
+SELF=$1
+shift
+
+export ARDOUR_INSIDE_GDB=1
+
+if test -n "`which gdb`"; then
+	exec gdb --args "$TOP/build/session_utils/$SELF" "$@"
+fi
+if test -n "`which lldb`"; then
+	exec lldb -- "$TOP/build/session_utils/$SELF" "$@"
+fi

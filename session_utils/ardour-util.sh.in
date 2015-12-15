@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# This is a wrapper script for using the ardour-session utilities
+# it is intended to be symlinked into $PATH for every session-tool
+
+export GTK_PATH=@CONFDIR@:@LIBDIR@${GTK_PATH:+:$GTK_PATH}
+export LD_LIBRARY_PATH=@LIBDIR@${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+
+# Running Ardour requires these 3 variables to be set
+
+export ARDOUR_DATA_PATH=@DATADIR@
+export ARDOUR_CONFIG_PATH=@CONFDIR@
+export ARDOUR_DLL_PATH=@LIBDIR@
+export VAMP_PATH=@LIBDIR@/vamp
+
+SELF=`basename $0`
+exec "@LIBDIR@/utils/$SELF" "$@"
