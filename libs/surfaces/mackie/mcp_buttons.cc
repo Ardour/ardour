@@ -98,6 +98,10 @@ MackieControlProtocol::cmd_alt_release (Button &)
 LedState
 MackieControlProtocol::left_press (Button &)
 {
+	if (_subview_mode != None) {
+		return none;
+	}
+
 	Sorted sorted = get_sorted_routes();
 	uint32_t strip_cnt = n_strips ();
 
@@ -122,6 +126,10 @@ MackieControlProtocol::left_release (Button &)
 LedState
 MackieControlProtocol::right_press (Button &)
 {
+	if (_subview_mode != None) {
+		return none;
+	}
+
 	Sorted sorted = get_sorted_routes();
 	uint32_t strip_cnt = n_strips();
 	uint32_t route_cnt = sorted.size();
@@ -266,6 +274,9 @@ MackieControlProtocol::cursor_down_release (Button&)
 LedState
 MackieControlProtocol::channel_left_press (Button &)
 {
+	if (_subview_mode != None) {
+		return none;
+	}
 	Sorted sorted = get_sorted_routes();
 	if (sorted.size() > n_strips()) {
 		prev_track();
@@ -284,6 +295,9 @@ MackieControlProtocol::channel_left_release (Button &)
 LedState
 MackieControlProtocol::channel_right_press (Button &)
 {
+	if (_subview_mode != None) {
+		return none;
+	}
 	Sorted sorted = get_sorted_routes();
 	if (sorted.size() > n_strips()) {
 		next_track();
@@ -569,6 +583,10 @@ MackieControlProtocol::enter_release (Button &)
 LedState
 MackieControlProtocol::bank_release (Button& b, uint32_t basic_bank_num)
 {
+	if (_subview_mode != None) {
+		return none;
+	}
+
 	uint32_t bank_num = basic_bank_num;
 
 	if (b.long_press_count() > 0) {
@@ -691,7 +709,7 @@ MackieControlProtocol::eq_press (Button &)
 {
 	if (Profile->get_mixbus()) {
 		boost::shared_ptr<Route> r = first_selected_route ();
-		if (r) {
+		if (r && r->eq_band_cnt() > 0) {
 			set_subview_mode (EQ, r);
 			return on;
 		}

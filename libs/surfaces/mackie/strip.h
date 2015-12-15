@@ -57,6 +57,7 @@ public:
 
 	void add (Control & control);
 	int index() const { return _index; } // zero based
+	Surface* surface() const { return _surface; }
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>, bool with_messages = true);
 
@@ -111,6 +112,7 @@ private:
 	PBD::ScopedConnectionList route_connections;
 	PBD::ScopedConnectionList subview_connections;
 	PBD::ScopedConnectionList send_connections;
+	int       eq_band;
 
 	ARDOUR::AutomationType  _pan_mode;
 	ARDOUR::AutomationType  _trim_mode;
@@ -156,21 +158,22 @@ private:
 	void vselect_event (Button&, ButtonState);
 	void fader_touch_event (Button&, ButtonState);
 
-	std::vector<Evoral::Parameter> possible_pot_parameters;
-	std::vector<Evoral::Parameter> possible_trim_parameters;
+	std::vector<ARDOUR::AutomationType> possible_pot_parameters;
+	std::vector<ARDOUR::AutomationType> possible_trim_parameters;
 	void next_pot_mode ();
-	void set_vpot_parameter (Evoral::Parameter);
+	void set_vpot_parameter (ARDOUR::AutomationType);
 	void show_route_name ();
 
 	void reset_saved_values ();
 
 	bool is_midi_track () const;
 
-	typedef std::map<Evoral::Parameter,Control*> ControlParameterMap;
+	typedef std::map<ARDOUR::AutomationType,Control*> ControlParameterMap;
 	ControlParameterMap control_by_parameter;
 
 	void hookup_eq (ARDOUR::AutomationType, uint32_t);
-	void notify_eq_change (ARDOUR::AutomationType, uint32_t, bool force);
+	void notify_eq_change (ARDOUR::AutomationType, uint32_t band, bool force);
+	void setup_eq_vpots (boost::shared_ptr<ARDOUR::Route>);
 };
 
 }

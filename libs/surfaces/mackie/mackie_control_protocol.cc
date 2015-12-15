@@ -434,12 +434,9 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		}
 	}
 
-	/* reset this to get the right display of view mode after the switch */
-	display_view_mode ();
-
 	/* make sure selection is correct */
 
-	_gui_track_selection_changed (&_last_selected_routes, false);
+	_gui_track_selection_changed (&_last_selected_routes, false, false);
 
 	/* current bank has not been saved */
 	session->set_dirty();
@@ -1624,31 +1621,41 @@ MackieControlProtocol::clear_ports ()
 void
 MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route> r)
 {
-	_subview_mode = sm;
-	_subview_route = r;
+	SubViewMode old = _subview_mode;
 
-	if (_subview_mode == None) {
-		assert (!_subview_route);
+	_subview_mode = sm;
+
+	if (r) {
+		_subview_route = r;
 	}
 
-	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	if (_subview_mode != old) {
 
-		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		/* subview mode did actually change */
+
+		{
+			Surfaces copy; /* can't hold surfaces lock while calling Strip::subview_mode_changed */
+
+			{
+				Glib::Threads::Mutex::Lock lm (surfaces_lock);
+				copy = surfaces;
+			}
+
+			for (Surfaces::iterator s = copy.begin(); s != copy.end(); ++s) {
 			(*s)->subview_mode_changed ();
+			}
+		}
+
+		/* turn buttons related to vpot mode on or off as required */
+
+		if (_subview_mode != None) {
+			update_global_button (Button::Trim, off);
+			update_global_button (Button::Send, off);
+			update_global_button (Button::Pan, off);
+		} else {
+			pot_mode_globals ();
 		}
 	}
-
-	/* turn buttons related to vpot mode on or off as required */
-
-	if (_subview_mode != None) {
-		update_global_button (Button::Trim, off);
-		update_global_button (Button::Send, off);
-		update_global_button (Button::Pan, off);
-	} else {
-		pot_mode_globals ();
-	}
-
 }
 
 void
@@ -1657,7 +1664,7 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 	_last_bank[_view_mode] = _current_initial_bank;
 
 	_view_mode = m;
-	_subview_mode = None;
+	set_subview_mode (None, boost::shared_ptr<Route>());
 
 	switch_banks(_last_bank[_view_mode], true);
 }
@@ -1775,11 +1782,11 @@ MackieControlProtocol::force_special_route_to_strip (boost::shared_ptr<Route> r,
 void
 MackieControlProtocol::gui_track_selection_changed (ARDOUR::RouteNotificationListPtr rl, bool save_list)
 {
-	_gui_track_selection_changed (rl.get(), save_list);
+	_gui_track_selection_changed (rl.get(), save_list, true);
 }
 
 void
-MackieControlProtocol::_gui_track_selection_changed (ARDOUR::RouteNotificationList* rl, bool save_list)
+MackieControlProtocol::_gui_track_selection_changed (ARDOUR::RouteNotificationList* rl, bool save_list, bool gui_selection_did_change)
 {
 	/* We need to keep a list of the most recently selected routes around,
 	   but we are not allowed to keep shared_ptr<Route> unless we want to
@@ -1809,6 +1816,11 @@ MackieControlProtocol::_gui_track_selection_changed (ARDOUR::RouteNotificationLi
 
 	if (save_list) {
 		_last_selected_routes = *rl;
+	}
+
+	if (gui_selection_did_change) {
+		/* actual GUI selection changed */
+		set_subview_mode (_subview_mode, first_selected_route());
 	}
 }
 
@@ -2181,4 +2193,20 @@ boost::shared_ptr<Route>
 MackieControlProtocol::subview_route () const
 {
 	return _subview_route;
+}
+
+uint32_t
+MackieControlProtocol::global_index (Strip& strip)
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	uint32_t global = 0;
+
+	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		if ((*s).get() == strip.surface()) {
+			return global + strip.index();
+		}
+		global += (*s)->n_strips ();
+	}
+
+	return global;
 }

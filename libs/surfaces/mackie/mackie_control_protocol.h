@@ -58,6 +58,7 @@ namespace Mackie {
 	class Control;
 	class SurfacePort;
 	class Button;
+	class Strip;
 }
 
 gboolean ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data);
@@ -184,6 +185,8 @@ class MackieControlProtocol
 
 	boost::shared_ptr<Mackie::Surface> get_surface_by_raw_pointer (void*) const;
 	boost::shared_ptr<Mackie::Surface> nth_surface (uint32_t) const;
+
+	uint32_t global_index (Mackie::Strip&);
 
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
 
@@ -366,7 +369,7 @@ class MackieControlProtocol
 	void force_special_route_to_strip (boost::shared_ptr<ARDOUR::Route> r, uint32_t surface, uint32_t strip_number);
 	void build_button_map ();
 	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr, bool save_list);
-	void _gui_track_selection_changed (ARDOUR::RouteNotificationList*, bool save_list);
+	void _gui_track_selection_changed (ARDOUR::RouteNotificationList*, bool save_list, bool gui_did_change);
 	int ipmidi_restart ();
         void initialize ();
         int set_device_info (const std::string& device_name);

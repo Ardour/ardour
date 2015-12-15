@@ -25,6 +25,8 @@
 
 #include <glibmm/convert.h>
 
+#include "pbd/stacktrace.h"
+
 #include "midi++/port.h"
 
 #include "ardour/audioengine.h"
@@ -941,8 +943,6 @@ Surface::map_routes (const vector<boost::shared_ptr<Route> >& routes)
 	for (; s != strips.end(); ++s) {
 		(*s)->set_route (boost::shared_ptr<Route>());
 	}
-
-
 }
 
 static char
