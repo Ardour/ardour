@@ -33,6 +33,7 @@ EXTERNAL_JACK=
 VENDOR=Ardour ;
 EXENAME=ardour
 GCC5ABI=false
+USEWINE=false
 BUILDTYPE=""
 NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libevoral"
 
@@ -239,6 +240,7 @@ echo export 'PATH=/usr/local/bin:/opt/bin:$PATH' >> $ENVIRONMENT
 # create startup helper script
 if test -d $BUILD_ROOT/vst; then
 	WINEEXE=wine
+	USEWINE=true
 	echo export INSTALL_DIR >> $ENVIRONMENT
 else
 	WINEEXE=
@@ -682,7 +684,7 @@ chmod a+x $APPBIN/${APP_VER_NAME}.uninstall.sh
 #
 # Add the stage2.run script
 #
-sed -e "s/%REPLACE_MAJOR_VERSION%/${major_version}/;s/%REPLACE_PGM%/${APPNAME}/;s/%REPLACE_VENDOR%/${VENDOR}/;s/%REPLACE_EXE%/${EXENAME}/;s/%REPLACE_GCC5%/${GCC5ABI}/" < stage2.run.in > stage2.run
+sed -e "s/%REPLACE_MAJOR_VERSION%/${major_version}/;s/%REPLACE_PGM%/${APPNAME}/;s/%REPLACE_VENDOR%/${VENDOR}/;s/%REPLACE_EXE%/${EXENAME}/;s/%REPLACE_GCC5%/${GCC5ABI}/;s/%REPLACE_WINE%/${USEWINE}/" < stage2.run.in > stage2.run
 chmod a+x stage2.run
 
 
