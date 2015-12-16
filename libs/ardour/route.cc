@@ -5055,7 +5055,14 @@ Route::pan_elevation_control() const
 	if (Profile->get_mixbus() || !_pannable || !panner()) {
 		return boost::shared_ptr<AutomationControl>();
 	}
-	return _pannable->pan_elevation_control;
+
+	set<Evoral::Parameter> c = panner()->what_can_be_automated ();
+
+	if (c.find (PanElevationAutomation) != c.end()) {
+		return _pannable->pan_elevation_control;
+	} else {
+		return boost::shared_ptr<AutomationControl>();
+	}
 }
 boost::shared_ptr<AutomationControl>
 Route::pan_width_control() const
@@ -5063,7 +5070,14 @@ Route::pan_width_control() const
 	if (Profile->get_mixbus() || !_pannable || !panner()) {
 		return boost::shared_ptr<AutomationControl>();
 	}
-	return _pannable->pan_width_control;
+
+	set<Evoral::Parameter> c = panner()->what_can_be_automated ();
+
+	if (c.find (PanWidthAutomation) != c.end()) {
+		return _pannable->pan_width_control;
+	} else {
+		return boost::shared_ptr<AutomationControl>();
+	}
 }
 boost::shared_ptr<AutomationControl>
 Route::pan_frontback_control() const
@@ -5071,7 +5085,14 @@ Route::pan_frontback_control() const
 	if (Profile->get_mixbus() || !_pannable || !panner()) {
 		return boost::shared_ptr<AutomationControl>();
 	}
-	return _pannable->pan_frontback_control;
+
+	set<Evoral::Parameter> c = panner()->what_can_be_automated ();
+
+	if (c.find (PanFrontBackAutomation) != c.end()) {
+		return _pannable->pan_frontback_control;
+	} else {
+		return boost::shared_ptr<AutomationControl>();
+	}
 }
 boost::shared_ptr<AutomationControl>
 Route::pan_lfe_control() const
@@ -5079,7 +5100,14 @@ Route::pan_lfe_control() const
 	if (Profile->get_mixbus() || !_pannable || !panner()) {
 		return boost::shared_ptr<AutomationControl>();
 	}
-	return _pannable->pan_lfe_control;
+
+	set<Evoral::Parameter> c = panner()->what_can_be_automated ();
+
+	if (c.find (PanLFEAutomation) != c.end()) {
+		return _pannable->pan_lfe_control;
+	} else {
+		return boost::shared_ptr<AutomationControl>();
+	}
 }
 
 uint32_t
