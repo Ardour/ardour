@@ -73,6 +73,8 @@ WaveView::DrawingRequestQueue WaveView::request_queue;
 PBD::Signal0<void> WaveView::VisualPropertiesChanged;
 PBD::Signal0<void> WaveView::ClipLevelChanged;
 
+#undef ENABLE_THREADED_WAVEFORM_RENDERING
+
 WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (c)
 	, _region (region)
@@ -835,7 +837,12 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 
 	if (!ret || !full_image) {
 
-		if ((rendered && get_image_in_thread) || always_get_image_in_thread) {
+#ifndef ENABLE_THREADED_WAVEFORM_RENDERING
+		if (1)
+#else
+		if ((rendered && get_image_in_thread) || always_get_image_in_thread)
+#endif
+		{
 
 			DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: generating image in caller thread\n", name));
 
