@@ -1318,6 +1318,9 @@ MackieControlProtocol::notify_transport_state_changed()
 	update_global_button (Button::Rewind, session->transport_speed() < 0.0);
 	update_global_button (Button::Ffwd, session->transport_speed() > 1.0);
 
+	// sometimes a return to start leaves time code at old time
+	_timecode_last = string (10, ' ');
+
 	notify_metering_state_changed ();
 }
 
