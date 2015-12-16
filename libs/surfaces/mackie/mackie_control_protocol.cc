@@ -1706,6 +1706,7 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 	set_subview_mode (None, boost::shared_ptr<Route>());
 
 	switch_banks(_last_bank[_view_mode], true);
+	display_view_mode ();
 }
 
 void

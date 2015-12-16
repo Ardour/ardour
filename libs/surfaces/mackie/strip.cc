@@ -522,11 +522,16 @@ Strip::show_route_name ()
 		return;
 	}
 
+	string fullname = string();
 	if (!_route) {
-		return;
+		// make sure first three strips get cleared of view mode
+		if (_index > 2) {
+			return;
+		}
+	} else {
+		fullname = _route->name();
 	}
 	string line1;
-	string fullname = _route->name();
 
 	if (fullname.length() <= 6) {
 		line1 = fullname;
@@ -1092,9 +1097,16 @@ Strip::periodic (ARDOUR::microseconds_t now)
 {
 	bool reshow_vpot_mode = false;
 	bool reshow_name = false;
+	bool good_strip = true;
 
 	if (!_route) {
-		return;
+		// view mode may cover as many as 3 strips
+		// needs to be cleared when there are less than 3 routes
+		if (_index > 2) {
+			return;
+		} else {
+			good_strip = false;
+		}
 	}
 
 	if (_block_screen_redisplay_until >= now) {
@@ -1109,7 +1121,7 @@ Strip::periodic (ARDOUR::microseconds_t now)
 		/* timeout reached, reset */
 
 		_block_screen_redisplay_until = 0;
-		reshow_vpot_mode = true;
+		reshow_vpot_mode = (true && good_strip);
 		reshow_name = true;
 	}
 
@@ -1120,7 +1132,7 @@ Strip::periodic (ARDOUR::microseconds_t now)
 		/* timeout reached, reset */
 
 		_block_vpot_mode_redisplay_until = 0;
-		reshow_vpot_mode = true;
+		reshow_vpot_mode = (true && good_strip);
 	}
 
 	if (reshow_name) {
@@ -1129,14 +1141,16 @@ Strip::periodic (ARDOUR::microseconds_t now)
 
 	if (reshow_vpot_mode) {
 		return_to_vpot_mode_display ();
-	} else {
+	} else if (good_strip) {
 		/* no point doing this if we just switched back to vpot mode
 		   display */
 		update_automation ();
 	}
 
   meters:
-	update_meter ();
+	if (good_strip) {
+		update_meter ();
+	}
 }
 
 void
