@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-06 02:53+0300\n"
-"PO-Revision-Date: 2015-12-06 04:46+0300\n"
+"POT-Creation-Date: 2015-12-15 03:17+0300\n"
+"PO-Revision-Date: 2015-12-16 05:30+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
 "Language: ru\n"
@@ -65,11 +65,11 @@ msgstr ""
 
 #: audio_backend.cc:39
 msgid "Failed to open audio device"
-msgstr ""
+msgstr "Не удалось открыть звуковое устройство"
 
 #: audio_backend.cc:41
 msgid "Failed to close audio device"
-msgstr ""
+msgstr "Не удалось закрыть звуковое устройство"
 
 #: audio_backend.cc:43
 msgid "Audio device not valid"
@@ -77,11 +77,11 @@ msgstr ""
 
 #: audio_backend.cc:45
 msgid "Audio device unavailable"
-msgstr ""
+msgstr "Звуковое устройство недоступно"
 
 #: audio_backend.cc:47
 msgid "Audio device not connected"
-msgstr ""
+msgstr "Звуковое устройство не подключено"
 
 #: audio_backend.cc:49
 msgid "Failed to request and reserve audio device"
@@ -89,35 +89,35 @@ msgstr ""
 
 #: audio_backend.cc:51
 msgid "Audio device Input/Output error"
-msgstr ""
+msgstr "Ошибка ввода-вывода при работе со звуковым устройством"
 
 #: audio_backend.cc:53
 msgid "Failed to open MIDI device"
-msgstr ""
+msgstr "Не удалось открыть MIDI-устройство"
 
 #: audio_backend.cc:55
 msgid "Failed to close MIDI device"
-msgstr ""
+msgstr "Не удалось закрыть MIDI-устройство"
 
 #: audio_backend.cc:57
 msgid "MIDI device unavailable"
-msgstr ""
+msgstr "MIDI-устройство недоступно"
 
 #: audio_backend.cc:59
 msgid "MIDI device not connected"
-msgstr ""
+msgstr "MIDI-устройство не подключено"
 
 #: audio_backend.cc:61
 msgid "MIDI device Input/Output error"
-msgstr ""
+msgstr "Ошибка ввода-вывода при работе с MIDI-устройством"
 
 #: audio_backend.cc:63
 msgid "Sample format is not supported"
-msgstr ""
+msgstr "Формат сэмпла не поддерживается"
 
 #: audio_backend.cc:65
 msgid "Sample rate is not supported"
-msgstr ""
+msgstr "Частота сэмплирования не поддерживается"
 
 #: audio_backend.cc:67
 msgid "Requested input latency is not supported"
@@ -129,27 +129,27 @@ msgstr ""
 
 #: audio_backend.cc:71
 msgid "Period size is not supported"
-msgstr ""
+msgstr "Размер периода не поддерживается"
 
 #: audio_backend.cc:73
 msgid "Period count is not supported"
-msgstr ""
+msgstr "Количество периодов не поддерживается"
 
 #: audio_backend.cc:75
 msgid "Device configuration not supported"
-msgstr ""
+msgstr "Конфигурация устройства не поддерживается"
 
 #: audio_backend.cc:77
 msgid "Channel count configuration not supported"
-msgstr ""
+msgstr "Конфигурация числа каналов не поддерживается"
 
 #: audio_backend.cc:79
 msgid "Input channel count configuration not supported"
-msgstr ""
+msgstr "Конфигурация числа каналов входа не поддерживается"
 
 #: audio_backend.cc:81
 msgid "Output channel count configuration not supported"
-msgstr ""
+msgstr "Конфигурация числа каналов выхода не поддерживается"
 
 #: audio_backend.cc:83
 msgid "Unable to aquire realtime permissions"
@@ -165,7 +165,7 @@ msgstr ""
 
 #: audio_backend.cc:89
 msgid "Failed to start process thread"
-msgstr ""
+msgstr "Не удалось запустить поток обработки"
 
 #: audio_backend.cc:91
 msgid "Failed to start freewheel thread"
@@ -173,7 +173,7 @@ msgstr ""
 
 #: audio_backend.cc:93
 msgid "Failed to register audio/midi ports"
-msgstr ""
+msgstr "Не удалось зарегистрировать звуковые и MIDI-порты"
 
 #: audio_backend.cc:95
 msgid "Failed to re-connect audio/midi ports"
@@ -181,7 +181,7 @@ msgstr ""
 
 #: audio_backend.cc:97
 msgid "Out Of Memory Error"
-msgstr ""
+msgstr "Ошибка: закончилась свободная память"
 
 #: audio_backend.cc:99
 msgid "Could not reconnect to Audio/MIDI engine"
@@ -378,15 +378,15 @@ msgstr "Не удалось загрузить модуль VAMP под назв
 msgid "VAMP Plugin \"%1\" could not be loaded"
 msgstr "Не удалось загрузить модуль VAMP под названием \"%1\""
 
-#: audioengine.cc:733
+#: audioengine.cc:753
 msgid "AudioEngine: cannot load module \"%1\" (%2)"
 msgstr "AudioEngine: невозможно загрузить модуль \"%1\" (%2)"
 
-#: audioengine.cc:739
+#: audioengine.cc:759
 msgid "AudioEngine: backend at \"%1\" has no descriptor function."
 msgstr "AudioEngine: бэкэнд на \"%1\" не имеет функции дескрипторов."
 
-#: audioengine.cc:818
+#: audioengine.cc:838
 msgid "Could not create backend for %1: %2"
 msgstr "Не удалось создать движок для %1: %2"
 
@@ -977,44 +977,48 @@ msgstr "Не удалось определить текущий рабочий �
 msgid "unknown file type for session %1"
 msgstr "Неизвестный тип файла для сессии %1"
 
-#: globals.cc:264
+#: globals.cc:265
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr "Не удалось установить системный лимит открытых файлов в \"unlimited\""
 
-#: globals.cc:266
+#: globals.cc:267
 msgid "Could not set system open files limit to %1"
 msgstr "Не удалось установить системный лимит открытых файлов в %1"
 
-#: globals.cc:270
+#: globals.cc:271 globals.cc:288
 msgid "Your system is configured to limit %1 to only %2 open files"
 msgstr ""
 "Ваша система сконфигурирована с ограничением %1 в только %2 открытых файлов"
 
-#: globals.cc:274
+#: globals.cc:275
 msgid "Could not get system open files limit (%1)"
 msgstr "Не удалось получить системный лимит открытых файлов (%1)"
 
-#: globals.cc:456
+#: globals.cc:290
+msgid "Could not set system open files limit. Current limit is %1 open files"
+msgstr ""
+
+#: globals.cc:472
 msgid "Loading configuration"
 msgstr "Загрузка конфигурации"
 
-#: globals.cc:520 session.cc:1031
+#: globals.cc:536 session.cc:1031
 msgid "Monitor"
 msgstr "Монитор"
 
-#: globals.cc:521 session_state.cc:632
+#: globals.cc:537 session_state.cc:632
 msgid "Master"
 msgstr "Мастер"
 
-#: globals.cc:522
+#: globals.cc:538
 msgid "Control"
 msgstr ""
 
-#: globals.cc:523
+#: globals.cc:539
 msgid "Click"
 msgstr ""
 
-#: globals.cc:524
+#: globals.cc:540
 msgid "Mackie"
 msgstr "Mackie"
 
@@ -1428,7 +1432,7 @@ msgstr "Дубликат MIDI-устройства` %1' в `%2' проигнор
 msgid "Removing MIDI patch file %1"
 msgstr ""
 
-#: midi_scene_changer.cc:309
+#: midi_scene_changer.cc:312
 msgid "Scene "
 msgstr "Сцена"
 
@@ -1644,19 +1648,19 @@ msgstr ""
 msgid "programming error: "
 msgstr "Программная ошибка: "
 
-#: plugin_insert.cc:1009
+#: plugin_insert.cc:1010
 msgid "XML node describing plugin is missing the `type' field"
 msgstr "В XML-узле описания плагина отсутствует поле `type'"
 
-#: plugin_insert.cc:1024
+#: plugin_insert.cc:1025
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr "Неизвестный тип плагина %1 в статусе вставки плагина"
 
-#: plugin_insert.cc:1052
+#: plugin_insert.cc:1053
 msgid "Plugin has no unique ID field"
 msgstr "Плагин не имеет уникального идентификационного поля"
 
-#: plugin_insert.cc:1077
+#: plugin_insert.cc:1078
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
@@ -1665,15 +1669,15 @@ msgstr ""
 "Возможно, он был удален или перемещен с тех пор, как был в последний раз "
 "использован."
 
-#: plugin_insert.cc:1200
+#: plugin_insert.cc:1202
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr "PluginInsert: Auto: нет номера порта LADSPA"
 
-#: plugin_insert.cc:1207
+#: plugin_insert.cc:1209
 msgid "PluginInsert: Auto: port id out of range"
 msgstr "PluginInsert: Auto: ID порта вне диапазона"
 
-#: plugin_insert.cc:1243
+#: plugin_insert.cc:1245
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr ""
 "PluginInsert: управление возможностью автоматизизации %1 не найдено. "
@@ -1993,43 +1997,43 @@ msgstr "Импорт: src_new() не удался: %1"
 msgid "return %1"
 msgstr "Возврат %1"
 
-#: route.cc:839
+#: route.cc:841
 msgid "Cleared Explicit solo: %1\n"
 msgstr ""
 
-#: route.cc:842
+#: route.cc:844
 msgid "Cleared Implicit solo: %1 up:%2 down:%3\n"
 msgstr ""
 
-#: route.cc:1369 route.cc:2941
+#: route.cc:1371 route.cc:2943
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "Неизвестный тип процессора \"%1\". Игнорирован"
 
-#: route.cc:1391
+#: route.cc:1393
 msgid "processor could not be created. Ignored."
 msgstr "Процессор не может быть создан. Игнорирован"
 
-#: route.cc:2364 route.cc:2589
+#: route.cc:2366 route.cc:2591
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "Отправлен плохой узел в Route::set_state() [%1]"
 
-#: route.cc:2424
+#: route.cc:2426
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr "Статус панаромирования найден для маршрута (%1) без паннера!"
 
-#: route.cc:2498 route.cc:2502 route.cc:2703 route.cc:2707
+#: route.cc:2500 route.cc:2504 route.cc:2705 route.cc:2709
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr ""
 "Плохо сформированная строка порядкового ключа в файле состояния! [%1] ... "
 "игнорирован."
 
-#: route.cc:2713
+#: route.cc:2715
 msgid "Converting deprecated order key for %1 using Editor order %2"
 msgstr ""
 "Преобразование устаревшего порядкового ключа для %1 с использованием "
 "редактора порядка %2"
 
-#: route.cc:3347
+#: route.cc:3349
 msgid "Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"
 msgstr ""
 
@@ -2773,35 +2777,35 @@ msgstr "Сессия: неизвестный тип дисковых поток�
 msgid "Session: could not load diskstream via XML state"
 msgstr "Сессия: Не удалось загрузить дисковые потоки через XML-статус"
 
-#: session_state.cc:3949
+#: session_state.cc:3962
 msgid "Cannot rename read-only session."
 msgstr "Невозможно переименовать сеанс, доступный только для чтения."
 
-#: session_state.cc:3953
+#: session_state.cc:3966
 msgid "Cannot rename session while recording"
 msgstr "Невозможно переименовать сеанс во время записи."
 
-#: session_state.cc:4038 session_state.cc:4039 session_state.cc:4081
-#: session_state.cc:4085
+#: session_state.cc:4051 session_state.cc:4052 session_state.cc:4094
+#: session_state.cc:4098
 msgid "renaming %s as %2 failed (%3)"
 msgstr "Переименование %s в %2 не удалось (%3)"
 
-#: session_state.cc:4101 session_state.cc:4102 session_state.cc:4116
-#: session_state.cc:4117
+#: session_state.cc:4114 session_state.cc:4115 session_state.cc:4129
+#: session_state.cc:4130
 msgid "renaming %1 as %2 failed (%3)"
 msgstr "Не удалось переименовать %1 в %2 (%3)"
 
-#: session_state.cc:4426
+#: session_state.cc:4439
 msgid "Cannot create new session folder %1"
 msgstr ""
 
-#: session_state.cc:4488 session_state.cc:4563
+#: session_state.cc:4501 session_state.cc:4576
 msgid ""
 "\n"
 "copying \"%1\" failed !"
 msgstr ""
 
-#: session_state.cc:4761
+#: session_state.cc:4774
 msgid "unknown reason"
 msgstr ""
 
@@ -2826,7 +2830,7 @@ msgstr ""
 msgid "Locate called for negative sample position - ignored"
 msgstr "Размещение, вызываемое для негативной позиции образца,  игнорировано"
 
-#: session_transport.cc:1384
+#: session_transport.cc:1386
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
@@ -2945,15 +2949,15 @@ msgstr "Прямой порядок байтов (Intel)"
 msgid "Big-endian (PowerPC)"
 msgstr "От старшего к младшему (PowerPC)"
 
-#: sndfilesource.cc:281
+#: sndfilesource.cc:282
 msgid "SndFileSource: cannot open file \"%1\" for %2"
 msgstr ""
 
-#: sndfilesource.cc:299
+#: sndfilesource.cc:300
 msgid "SndFileSource: cannot open file \"%1\" for %2 (%3)"
 msgstr "sndFileSource: Не удалось открыть файл  \"%1\" для %2 (% 3)"
 
-#: sndfilesource.cc:307
+#: sndfilesource.cc:308
 msgid ""
 "SndFileSource: file only contains %1 channels; %2 is invalid as a channel "
 "number"
@@ -2961,11 +2965,11 @@ msgstr ""
 "SndFileSource: файл содержит только %1 каналов; %2 недействителен в качестве "
 "каналаномер"
 
-#: sndfilesource.cc:322
+#: sndfilesource.cc:323
 msgid "Cannot mark RF64 audio file for automatic downgrade to WAV: %1"
 msgstr ""
 
-#: sndfilesource.cc:374 sndfilesource.cc:704
+#: sndfilesource.cc:375 sndfilesource.cc:705
 msgid ""
 "cannot set broadcast info for audio file %1 (%2); dropping broadcast info "
 "for this file"
@@ -2973,65 +2977,65 @@ msgstr ""
 "SndFileSource: файл содержит только %1 каналов; %2 недействителен в качестве "
 "номера канала"
 
-#: sndfilesource.cc:417
+#: sndfilesource.cc:418
 msgid "could not open file %1 for reading."
 msgstr ""
 
-#: sndfilesource.cc:452
+#: sndfilesource.cc:453
 msgid "SndFileSource: could not seek to frame %1 within %2 (%3)"
 msgstr "SndFileSource: невозможно обратиться к кадру %1 в %2 (% 3)"
 
-#: sndfilesource.cc:461
+#: sndfilesource.cc:462
 msgid ""
 "SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"
 msgstr ""
 "SndFileSource: @ %1 не смог прочитать кадр %2 в пределах (%3) (len = %5, ret "
 "was %6)"
 
-#: sndfilesource.cc:503 sndfilesource.cc:532
+#: sndfilesource.cc:504 sndfilesource.cc:533
 msgid "attempt to write a non-writable audio file source (%1)"
 msgstr "Попытка записать на незаписываемый источник звукового файла (%1)"
 
-#: sndfilesource.cc:508 utils.cc:564 utils.cc:588 utils.cc:602 utils.cc:621
+#: sndfilesource.cc:509 utils.cc:564 utils.cc:588 utils.cc:602 utils.cc:621
 msgid "programming error: %1 %2"
 msgstr "Программная ошибка: %1 %2"
 
-#: sndfilesource.cc:635 sndfilesource.cc:653
+#: sndfilesource.cc:636 sndfilesource.cc:654
 msgid "attempt to flush a non-writable audio file source (%1)"
 msgstr "Попытка смыть незаписываемый источник звука файла (%1)"
 
-#: sndfilesource.cc:640
+#: sndfilesource.cc:641
 msgid "could not allocate file %1 to write header"
 msgstr "Не удалось выделить файл %1 для записи заголовока"
 
-#: sndfilesource.cc:658
+#: sndfilesource.cc:659
 msgid "could not allocate file %1 to flush contents"
 msgstr "Не удалось выделить файл %1, чтобы флешировать содержание."
 
-#: sndfilesource.cc:670
+#: sndfilesource.cc:671
 msgid ""
 "attempt to store broadcast info in a non-writable audio file source (%1)"
 msgstr ""
 "Попытка сохранить данные вещания в незаписываемый файл источника звука (%1)"
 
-#: sndfilesource.cc:675
+#: sndfilesource.cc:676
 msgid "attempt to set BWF info for an un-opened audio file source (%1)"
 msgstr ""
 "Попытка установить BWF данные для неоткрытого источника звукового файла (%1)"
 
-#: sndfilesource.cc:719
+#: sndfilesource.cc:720
 msgid "%1: cannot seek to %2 (libsndfile error: %3)"
 msgstr "%1: невозможно искать в %2 (libsndfile ошибка: %3)"
 
-#: sndfilesource.cc:829
+#: sndfilesource.cc:830
 msgid "SndFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"
 msgstr "SndFileSource: \"%1\" плохоe RETVAL-чтение: %2 of %5 (%3: %4)"
 
-#: sndfilesource.cc:842 sndfilesource.cc:892 sndfilesource.cc:899
+#: sndfilesource.cc:843 sndfilesource.cc:893 sndfilesource.cc:900
 msgid "SndFileSource: \"%1\" bad write (%2)"
 msgstr "SndFileSource: \"%1\" плохая запись (%2)"
 
-#: sndfilesource.cc:922
+#: sndfilesource.cc:923
 msgid ""
 "Filesource: start time is already set for existing file (%1): Cannot change "
 "start time."
@@ -3039,7 +3043,7 @@ msgstr ""
 "Filesource: время начала уже установлено для существующего файла (%1): Не "
 "удается изменить время начала."
 
-#: sndfilesource.cc:981
+#: sndfilesource.cc:982
 msgid "SndFileSource: cannot open file \"%1\" for reading"
 msgstr ""
 
