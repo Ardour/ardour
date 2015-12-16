@@ -5032,3 +5032,334 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 		bufs.set_count (io->n_ports());
 	}
 }
+
+boost::shared_ptr<AutomationControl>
+Route::pan_azimuth_control() const
+{
+#ifdef MIXBUS
+	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
+	assert (plug);
+	const uint32_t port_channel_post_pan = 2; // gtk2_ardour/mixbus_ports.h
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_channel_post_pan)));
+#else
+	if (!_pannable || !panner()) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+	return _pannable->pan_azimuth_control;
+#endif
+}
+
+boost::shared_ptr<AutomationControl>
+Route::pan_elevation_control() const
+{
+	if (Profile->get_mixbus() || !_pannable || !panner()) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+	return _pannable->pan_elevation_control;
+}
+boost::shared_ptr<AutomationControl>
+Route::pan_width_control() const
+{
+	if (Profile->get_mixbus() || !_pannable || !panner()) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+	return _pannable->pan_width_control;
+}
+boost::shared_ptr<AutomationControl>
+Route::pan_frontback_control() const
+{
+	if (Profile->get_mixbus() || !_pannable || !panner()) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+	return _pannable->pan_frontback_control;
+}
+boost::shared_ptr<AutomationControl>
+Route::pan_lfe_control() const
+{
+	if (Profile->get_mixbus() || !_pannable || !panner()) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+	return _pannable->pan_lfe_control;
+}
+
+uint32_t
+Route::eq_band_cnt () const
+{
+	if (Profile->get_mixbus()) {
+		return 3;
+	} else {
+		/* Ardour has no well-known EQ object */
+		return 0;
+	}
+}
+
+boost::shared_ptr<AutomationControl>
+Route::eq_gain_controllable (uint32_t band) const
+{
+#ifdef MIXBUS
+	boost::shared_ptr<PluginInsert> eq = ch_eq();
+
+	if (!eq) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	uint32_t port_number;
+	switch (band) {
+	case 0:
+		if (is_master() || mixbus()) {
+			port_number = 4;
+		} else {
+			port_number = 8;
+		}
+		break;
+	case 1:
+		if (is_master() || mixbus()) {
+			port_number = 3;
+		} else {
+			port_number = 6;
+		}
+		break;
+	case 2:
+		if (is_master() || mixbus()) {
+			port_number = 2;
+		} else {
+			port_number = 4;
+		}
+		break;
+	default:
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_number)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+boost::shared_ptr<AutomationControl>
+Route::eq_freq_controllable (uint32_t band) const
+{
+#ifdef MIXBUS
+
+	if (mixbus() || is_master()) {
+		/* no frequency controls for mixbusses or master */
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	boost::shared_ptr<PluginInsert> eq = ch_eq();
+
+	if (!eq) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	uint32_t port_number;
+	switch (band) {
+	case 0:
+		port_number = 7;
+		break;
+	case 1:
+		port_number = 5;
+		break;
+	case 2:
+		port_number = 3;
+		break;
+	default:
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_number)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+
+boost::shared_ptr<AutomationControl>
+Route::eq_q_controllable (uint32_t band) const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+
+boost::shared_ptr<AutomationControl>
+Route::eq_shape_controllable (uint32_t band) const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+
+boost::shared_ptr<AutomationControl>
+Route::eq_enable_controllable () const
+{
+#ifdef MIXBUS
+	boost::shared_ptr<PluginInsert> eq = ch_eq();
+
+	if (!eq) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 1)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+
+boost::shared_ptr<AutomationControl>
+Route::eq_hpf_controllable () const
+{
+#ifdef MIXBUS
+	boost::shared_ptr<PluginInsert> eq = ch_eq();
+
+	if (!eq) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 2)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+
+string
+Route::eq_band_name (uint32_t band) const
+{
+	if (Profile->get_mixbus()) {
+		switch (band) {
+		case 0:
+			return _("lo");
+		case 1:
+			return _("mid");
+		case 2:
+			return _("hi");
+		default:
+			return string();
+		}
+	} else {
+		return string ();
+	}
+}
+
+boost::shared_ptr<AutomationControl>
+Route::comp_enable_controllable () const
+{
+#ifdef MIXBUS
+	boost::shared_ptr<PluginInsert> comp = ch_comp();
+
+	if (!comp) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 1)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+boost::shared_ptr<AutomationControl>
+Route::comp_threshold_controllable () const
+{
+#ifdef MIXBUS
+	boost::shared_ptr<PluginInsert> comp = ch_comp();
+
+	if (!comp) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 2)));
+
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+boost::shared_ptr<AutomationControl>
+Route::comp_speed_controllable () const
+{
+#ifdef MIXBUS
+	boost::shared_ptr<PluginInsert> comp = ch_comp();
+
+	if (!comp) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 3)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+boost::shared_ptr<AutomationControl>
+Route::comp_mode_controllable () const
+{
+#ifdef MIXBUS
+	boost::shared_ptr<PluginInsert> comp = ch_comp();
+
+	if (!comp) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 4)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+boost::shared_ptr<AutomationControl>
+Route::comp_makeup_controllable () const
+{
+#ifdef MIXBUS
+	boost::shared_ptr<PluginInsert> comp = ch_comp();
+
+	if (!comp) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 5)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+boost::shared_ptr<AutomationControl>
+Route::comp_redux_controllable () const
+{
+#ifdef MIXBUS
+	boost::shared_ptr<PluginInsert> comp = ch_comp();
+
+	if (!comp) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 6)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+
+string
+Route::comp_mode_name (uint32_t mode) const
+{
+#ifdef MIXBUS
+	switch (mode) {
+	case 0:
+		return _("Leveler");
+	case 1:
+		return _("Compressor");
+	case 2:
+		return _("Limiter");
+	}
+
+	return _("???");
+#else
+	return _("???");
+#endif
+}
+
+string
+Route::comp_speed_name (uint32_t mode) const
+{
+#ifdef MIXBUS
+	switch (mode) {
+	case 0:
+		return _("Attk");
+	case 1:
+		return _("Ratio");
+	case 2:
+		return _("Rels");
+	}
+	return _("???");
+#else
+	return _("???");
+#endif
+}

@@ -473,6 +473,50 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	boost::shared_ptr<Processor> the_instrument() const;
         InstrumentInfo& instrument_info() { return _instrument_info; }
 
+        /* "well-known" controls for panning. Any or all of these may return
+         * null.
+         */
+
+        boost::shared_ptr<AutomationControl> pan_azimuth_control() const;
+        boost::shared_ptr<AutomationControl> pan_elevation_control() const;
+        boost::shared_ptr<AutomationControl> pan_width_control() const;
+        boost::shared_ptr<AutomationControl> pan_frontback_control() const;
+        boost::shared_ptr<AutomationControl> pan_lfe_control() const;
+
+        /* "well-known" controls for an EQ in this route. Any or all may
+         * be null. eq_band_cnt() must return 0 if there is no EQ present.
+         * Passing an @param band value >= eq_band_cnt() will guarantee the
+         * return of a null ptr (or an empty string for eq_band_name()).
+         */
+        uint32_t eq_band_cnt () const;
+        std::string eq_band_name (uint32_t) const;
+        boost::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const;
+        boost::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const;
+        boost::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const;
+        boost::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const;
+        boost::shared_ptr<AutomationControl> eq_enable_controllable () const;
+        boost::shared_ptr<AutomationControl> eq_hpf_controllable () const;
+
+        /* "well-known" controls for a compressor in this route. Any or all may
+         * be null.
+         */
+        boost::shared_ptr<AutomationControl> comp_enable_controllable () const;
+        boost::shared_ptr<AutomationControl> comp_threshold_controllable () const;
+        boost::shared_ptr<AutomationControl> comp_speed_controllable () const;
+        boost::shared_ptr<AutomationControl> comp_mode_controllable () const;
+        boost::shared_ptr<AutomationControl> comp_makeup_controllable () const;
+        boost::shared_ptr<AutomationControl> comp_redux_controllable () const;
+
+        /* @param mode must be supplied by the comp_mode_controllable(). All other values
+         * result in undefined behaviour
+         */
+        std::string comp_mode_name (uint32_t mode) const;
+        /* @param mode - as for comp mode name. This returns the name for the
+         * parameter/control accessed via comp_speed_controllable(), which can
+         * be mode dependent.
+         */
+        std::string comp_speed_name (uint32_t mode) const;
+
 	void protect_automation ();
 
 	enum {
