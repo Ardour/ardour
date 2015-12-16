@@ -1410,13 +1410,16 @@ Strip::next_pot_mode ()
 	if (!ac) {
 		return;
 	}
+
+
 	if (_surface->mcp().pot_mode() == MackieControlProtocol::Pan) {
-		if (possible_pot_parameters.empty() || (possible_pot_parameters.size() == 1 && possible_pot_parameters.front() == ac->parameter())) {
+
+		if (possible_pot_parameters.empty() || (possible_pot_parameters.size() == 1 && possible_pot_parameters.front() == ac->parameter().type())) {
 			return;
 		}
 
 		for (i = possible_pot_parameters.begin(); i != possible_pot_parameters.end(); ++i) {
-			if ((*i) == ac->parameter()) {
+			if ((*i) == ac->parameter().type()) {
 				break;
 			}
 		}
@@ -1432,14 +1435,15 @@ Strip::next_pot_mode ()
 		if (i == possible_pot_parameters.end()) {
 			i = possible_pot_parameters.begin();
 		}
+
 		set_vpot_parameter (*i);
 	} else if (_surface->mcp().pot_mode() == MackieControlProtocol::Trim) {
-				if (possible_trim_parameters.empty() || (possible_trim_parameters.size() == 1 && possible_trim_parameters.front() == ac->parameter())) {
+		if (possible_trim_parameters.empty() || (possible_trim_parameters.size() == 1 && possible_trim_parameters.front() == ac->parameter().type())) {
 			return;
 		}
 
 		for (i = possible_trim_parameters.begin(); i != possible_trim_parameters.end(); ++i) {
-			if ((*i) == ac->parameter()) {
+			if ((*i) == ac->parameter().type()) {
 				break;
 			}
 		}
