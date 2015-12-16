@@ -349,30 +349,39 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/toggle_punch_out", "", toggle_punch_out);
 		REGISTER_CALLBACK (serv, "/ardour/rec_enable_toggle", "", rec_enable_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/toggle_all_rec_enables", "", toggle_all_rec_enables);
-		
+
 		/*
 		 * NOTE:  these messages are provided for (arguably broken) apps
 		 *   that MUST send float args ( TouchOSC and Lemur ).
 		 * Normally these ardour transport messages don't require an argument,
-		 * so we're providing redundant calls with vestigial "float" args. 
-		*/
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_loop_toggle", "f", loop_toggle);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_add_marker", "f", add_marker);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_goto_start", "f", goto_start);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_goto_end", "f", goto_end);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_rewind", "f", rewind);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_ffwd", "f", ffwd);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_transport_stop", "f", transport_stop);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_transport_play", "f", transport_play);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_save_state", "f", save_state);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_prev_marker", "f", prev_marker);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_next_marker", "f", next_marker);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_undo", "f", undo);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_redo", "f", redo);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_toggle_punch_in", "f", toggle_punch_in);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_toggle_punch_out", "f", toggle_punch_out);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_rec_enable_toggle", "f", rec_enable_toggle);
-		REGISTER_CALLBACK (serv, "/ardour/unused_argument_toggle_all_rec_enables", "f", toggle_all_rec_enables);
+		 * so we're providing redundant calls with vestigial "float" args.
+		 *
+		 * Is it really useful to ignore the parameter?
+		 *  http://hexler.net/docs/touchosc-controls-reference suggests that
+		 *  push buttons do send 0,1. We will have to provide semantic equivalents
+		 *  rather than simply ignore the parameter.
+		 *  e.g  push & release the button will send
+		 *    .../undo f 1
+		 *    .../undo f 0
+		 *  resulting in two undos.
+		 */
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/loop_toggle", "f", loop_toggle);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/add_marker", "f", add_marker);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/goto_start", "f", goto_start);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/goto_end", "f", goto_end);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/rewind", "f", rewind);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/ffwd", "f", ffwd);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/transport_stop", "f", transport_stop);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/transport_play", "f", transport_play);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/save_state", "f", save_state);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/prev_marker", "f", prev_marker);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/next_marker", "f", next_marker);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/undo", "f", undo);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/redo", "f", redo);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/toggle_punch_in", "f", toggle_punch_in);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/toggle_punch_out", "f", toggle_punch_out);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/rec_enable_toggle", "f", rec_enable_toggle);
+		REGISTER_CALLBACK (serv, "/ardour/unused_argument/toggle_all_rec_enables", "f", toggle_all_rec_enables);
 
 		REGISTER_CALLBACK (serv, "/ardour/routes/mute", "ii", route_mute);
 		REGISTER_CALLBACK (serv, "/ardour/routes/solo", "ii", route_solo);
