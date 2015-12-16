@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cstdlib>
-
+#include <glibmm.h>
 
 #include "pbd/debug.h"
 #include "pbd/event_loop.h"
@@ -9,6 +9,8 @@
 #include "pbd/pthread_utils.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/filename_extensions.h"
+#include "ardour/types.h"
 
 #include "common.h"
 
@@ -88,7 +90,7 @@ SessionUtils::init ()
 {
 	if (!ARDOUR::init (false, true, localedir)) {
 		cerr << "Ardour failed to initialize\n" << endl;
-		::exit (1);
+		::exit (EXIT_FAILURE);
 	}
 
 	event_loop = new MyEventLoop ("util");
@@ -101,12 +103,27 @@ SessionUtils::init ()
 	test_receiver.listen_to (warning);
 }
 
+// TODO return NULL, rather than exit() ?!
 static Session * _load_session (string dir, string state)
 {
 	AudioEngine* engine = AudioEngine::create ();
 
 	if (!engine->set_backend ("None (Dummy)", "Unit-Test", "")) {
 		std::cerr << "Cannot create Audio/MIDI engine\n";
+		::exit (EXIT_FAILURE);
+	}
+
+	float sr;
+	SampleFormat sf;
+
+	std::string s = Glib::build_filename (dir, state + statefile_suffix);
+	if (Session::get_info_from_path (s, sr, sf) == 0) {
+		if (engine->set_sample_rate (sr)) {
+			std::cerr << "Cannot set session's samplerate.\n";
+			::exit (EXIT_FAILURE);
+		}
+	} else {
+		std::cerr << "Cannot get samplerate from session.\n";
 		::exit (EXIT_FAILURE);
 	}
 
@@ -130,16 +147,16 @@ SessionUtils::load_session (string dir, string state)
 		s = _load_session (dir, state);
 	} catch (failed_constructor& e) {
 		cerr << "failed_constructor: " << e.what() << "\n";
-		exit (EXIT_FAILURE);
+		::exit (EXIT_FAILURE);
 	} catch (AudioEngine::PortRegistrationFailure& e) {
 		cerr << "PortRegistrationFailure: " << e.what() << "\n";
-		exit (EXIT_FAILURE);
+		::exit (EXIT_FAILURE);
 	} catch (exception& e) {
 		cerr << "exception: " << e.what() << "\n";
-		exit (EXIT_FAILURE);
+		::exit (EXIT_FAILURE);
 	} catch (...) {
 		cerr << "unknown exception.\n";
-		exit (EXIT_FAILURE);
+		::exit (EXIT_FAILURE);
 	}
 	return s;
 }
