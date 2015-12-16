@@ -142,6 +142,18 @@ namespace ARDOUR {
 		TrimAutomation,
 		PhaseAutomation,
 		SendAutomation,
+		EQGain,
+		EQFrequency,
+		EQQ,
+		EQShape,
+		EQHPF,
+		EQEnable,
+		CompThreshold,
+		CompSpeed,
+		CompMode,
+		CompMakeup,
+		CompRedux,
+		CompEnable,
 	};
 
 	enum AutoState {
