@@ -312,10 +312,12 @@ MackieControlProtocol::get_sorted_routes()
 			break;
 		case Busses:
 			if (Profile->get_mixbus()) {
+#ifdef MIXBUS
 				if (route->mixbus()) {
 					sorted.push_back (route);
 					remote_ids.insert (route->remote_control_id());
 				}
+#endif				
 			} else {
 				if (!is_track(route)) {
 					if (route->route_group()) {

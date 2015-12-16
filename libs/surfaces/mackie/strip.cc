@@ -1906,22 +1906,23 @@ Strip::set_vpot_parameter (AutomationType p)
 					send_connections.drop_connections ();
 					a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
 					control_by_parameter[SendAutomation] = _vpot;
-			} else {
-				// gain to fader, send to vpot
-				_fader->set_control (_route->group_gain_control());
-				control_by_parameter[GainAutomation] = _fader;
-				boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
-				if (p && p->name() != "Monitor 1") {
-					boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
-					boost::shared_ptr<Amp> a = s->amp();
-					_vpot->set_control (a->gain_control());
-					// connect to signal
-					send_connections.drop_connections ();
-					a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
-					control_by_parameter[SendAutomation] = _vpot;
 				} else {
-					_vpot->set_control (boost::shared_ptr<AutomationControl>());
-					control_by_parameter[SendAutomation] = 0;
+					// gain to fader, send to vpot
+					_fader->set_control (_route->group_gain_control());
+					control_by_parameter[GainAutomation] = _fader;
+					boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
+					if (p && p->name() != "Monitor 1") {
+						boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
+						boost::shared_ptr<Amp> a = s->amp();
+						_vpot->set_control (a->gain_control());
+						// connect to signal
+						send_connections.drop_connections ();
+						a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
+						control_by_parameter[SendAutomation] = _vpot;
+					} else {
+						_vpot->set_control (boost::shared_ptr<AutomationControl>());
+						control_by_parameter[SendAutomation] = 0;
+					}
 				}
 			}
 		}
