@@ -1538,79 +1538,79 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Route> r)
 	}
 
 	boost::shared_ptr<AutomationControl> tc = r->comp_threshold_controllable ();
-        boost::shared_ptr<AutomationControl> sc = r->comp_speed_controllable ();
-        boost::shared_ptr<AutomationControl> mc = r->comp_mode_controllable ();
-        boost::shared_ptr<AutomationControl> kc = r->comp_makeup_controllable ();
-        boost::shared_ptr<AutomationControl> rc = r->comp_redux_controllable ();
-        boost::shared_ptr<AutomationControl> ec = r->comp_enable_controllable ();
+	boost::shared_ptr<AutomationControl> sc = r->comp_speed_controllable ();
+	boost::shared_ptr<AutomationControl> mc = r->comp_mode_controllable ();
+	boost::shared_ptr<AutomationControl> kc = r->comp_makeup_controllable ();
+	boost::shared_ptr<AutomationControl> rc = r->comp_redux_controllable ();
+	boost::shared_ptr<AutomationControl> ec = r->comp_enable_controllable ();
 
-        uint32_t pos = _surface->mcp().global_index (*this);
+	uint32_t pos = _surface->mcp().global_index (*this);
 
-        /* we will control the pos-th available parameter, from the list in the
-         * order shown above.
-         */
+	/* we will control the pos-th available parameter, from the list in the
+	 * order shown above.
+	 */
 
-        vector<boost::shared_ptr<AutomationControl> > available;
-        vector<AutomationType> params;
+	vector<boost::shared_ptr<AutomationControl> > available;
+	vector<AutomationType> params;
 
-        if (tc) { available.push_back (tc); params.push_back (CompThreshold); }
-        if (sc) { available.push_back (sc); params.push_back (CompSpeed); }
-        if (mc) { available.push_back (mc); params.push_back (CompMode); }
-        if (kc) { available.push_back (kc); params.push_back (CompMakeup); }
-        if (rc) { available.push_back (rc); params.push_back (CompRedux); }
-        if (ec) { available.push_back (ec); params.push_back (CompEnable); }
+	if (tc) { available.push_back (tc); params.push_back (CompThreshold); }
+	if (sc) { available.push_back (sc); params.push_back (CompSpeed); }
+	if (mc) { available.push_back (mc); params.push_back (CompMode); }
+	if (kc) { available.push_back (kc); params.push_back (CompMakeup); }
+	if (rc) { available.push_back (rc); params.push_back (CompRedux); }
+	if (ec) { available.push_back (ec); params.push_back (CompEnable); }
 
-        if (pos >= available.size()) {
-	        /* this knob is not needed to control the available parameters */
-	        _vpot->set_control (boost::shared_ptr<AutomationControl>());
-	        _surface->write (display (0, string()));
-	        _surface->write (display (1, string()));
-	        return;
-        }
+	if (pos >= available.size()) {
+		/* this knob is not needed to control the available parameters */
+		_vpot->set_control (boost::shared_ptr<AutomationControl>());
+		_surface->write (display (0, string()));
+		_surface->write (display (1, string()));
+		return;
+	}
 
-        boost::shared_ptr<AutomationControl> pc;
-        AutomationType param;
+	boost::shared_ptr<AutomationControl> pc;
+	AutomationType param;
 
-        pc = available[pos];
-        param = params[pos];
+	pc = available[pos];
+	param = params[pos];
 
-        pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_dyn_change, this, param, false, true), ui_context());
-        _vpot->set_control (pc);
+	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_dyn_change, this, param, false, true), ui_context());
+	_vpot->set_control (pc);
 
-        string pot_id;
+	string pot_id;
 
-        switch (param) {
-        case CompThreshold:
-	        pot_id = "Thresh";
-	        break;
-        case CompSpeed:
-	        if (mc) {
-		        pot_id = r->comp_speed_name (mc->get_value());
-	        } else {
-		        pot_id = "Speed";
-	        }
-	        break;
-        case CompMode:
-	        pot_id = "Mode";
-	        break;
-        case CompMakeup:
-	        pot_id = "Makeup";
-	        break;
-        case CompRedux:
-	        pot_id = "Redux";
-	        break;
-        case CompEnable:
-	        pot_id = "on/off";
-	        break;
-        default:
-	        break;
-        }
+	switch (param) {
+	case CompThreshold:
+		pot_id = "Thresh";
+		break;
+	case CompSpeed:
+		if (mc) {
+			pot_id = r->comp_speed_name (mc->get_value());
+		} else {
+			pot_id = "Speed";
+		}
+		break;
+	case CompMode:
+		pot_id = "Mode";
+		break;
+	case CompMakeup:
+		pot_id = "Makeup";
+		break;
+	case CompRedux:
+		pot_id = "Redux";
+		break;
+	case CompEnable:
+		pot_id = "on/off";
+		break;
+	default:
+		break;
+	}
 
-        if (!pot_id.empty()) {
-	        _surface->write (display (0, pot_id));
-        }
+	if (!pot_id.empty()) {
+		_surface->write (display (0, pot_id));
+	}
 
-        notify_dyn_change (param, true, false);
+	notify_dyn_change (param, true, false);
 }
 
 void
