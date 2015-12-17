@@ -1736,6 +1736,8 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 				prop->value()) << endmsg;
 		}
 
+		// TODO: special case track-templates
+		// (state must be saved with the template)
 		std::string state_file = Glib::build_filename(
 			plugin_dir(),
 			Glib::build_filename(prop->value(), "state.ttl"));

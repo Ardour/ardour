@@ -4164,6 +4164,10 @@ Route::save_as_template (const string& path, const string& name)
 	IO::set_name_in_state (*node.children().front(), name);
 
 	tree.set_root (&node);
+	// TODO: special case LV2 plugin state
+	// copy of serialize it. Alternatively:
+	// create a plugin-preset (which can be loaded separately)
+
 	/* return zero on success, non-zero otherwise */
 	return !tree.write (path.c_str());
 }
