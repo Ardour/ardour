@@ -1113,6 +1113,18 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		}
 	}
 
+	PBD::ID this_id =  this->id();
+
+	if (regenerate_xml_or_string_ids ()) {
+		/* when duplicating a track, we need to use the
+		 * original ID for loading plugin state (from file)
+		 */
+		const XMLProperty* prop;
+		if ((prop = node.property ("id")) != 0) {
+			plugin->set_insert_id (prop->value ());
+		}
+	}
+
 	Processor::set_state (node, version);
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
@@ -1124,12 +1136,21 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		if ((*niter)->name() == plugin->state_node_name()) {
 
 			for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-				(*i)->set_insert_id (this->id());
+				if (!regenerate_xml_or_string_ids ()) {
+					(*i)->set_insert_id (this->id());
+				}
 				(*i)->set_state (**niter, version);
+				if (regenerate_xml_or_string_ids ()) {
+					(*i)->set_insert_id (this_id);
+				}
 			}
 
 			break;
 		}
+	}
+
+	if (regenerate_xml_or_string_ids ()) {
+			plugin->set_insert_id (this_id);
 	}
 
 	if (version < 3000) {
