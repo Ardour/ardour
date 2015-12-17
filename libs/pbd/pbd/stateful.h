@@ -131,9 +131,11 @@ class LIBPBD_API Stateful {
 	*/
 	virtual void mid_thaw (const PropertyChange&) { }
 
+	bool regenerate_xml_or_string_ids () const;
+
   private:
 	friend struct ForceIDRegeneration;
-	static Glib::Threads::Private<bool> regenerate_xml_or_string_ids;
+	static Glib::Threads::Private<bool> _regenerate_xml_or_string_ids;
 	PBD::ID  _id;
 	gint     _stateful_frozen;
 
