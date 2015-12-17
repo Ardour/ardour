@@ -314,7 +314,7 @@ else
 fi
 
 if %REPLACE_WINE%; then
-	if -z "`which wine`"; then
+	if test -z "`which wine`"; then
 		echo ""
 		echo "!!! ERROR !!! - 'wine' was not found."
 		echo ""
@@ -393,8 +393,7 @@ fi
 #################################################
 if %REPLACE_WINE%; then
 	echo ""
-	echo "Searching for libwine.so (Windows VST support)"
-	echo ""
+	echo "Searching libwine.so (Windows VST support)"
 	# we need to add libwine to ardour's LD_LIBRARY_PATH
 	# libwine itself includes paths to the various system-components
 	# which may be different on each platform.
@@ -424,6 +423,7 @@ if %REPLACE_WINE%; then
 		read -p "Press ENTER to exit installer:" BLAH
 		exit 1
 	fi
+	echo "Using: $LIBWINE"
   # this replaces/overwrites the bundled libwine
 	cp -L "$LIBWINE" `pwd`/${BUNDLE_DIR}/lib/libwine.so.1
 fi
