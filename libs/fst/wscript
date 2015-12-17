@@ -66,6 +66,7 @@ def build(bld):
         obj.target = 'ardour-vst-scanner.exe.so'
         obj.uselib = ['GIOMM', 'DL']
         obj.use = [ 'libpbd' ]
+        obj.cxxflags  = [ '-fPIC' ]
     else:
         obj = bld (features = 'cxx c cxxprogram')
         obj.source = ( 'scanner.cc' )

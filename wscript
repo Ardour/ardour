@@ -490,10 +490,9 @@ int main() { return 0; }''',
 
     if conf.env['build_target'] == 'x86_64' and opt.windows_vst:
         print("\n\n==================================================")
-        print("You cannot use VST plugins with a 64 bit host. Please run waf with --windows-vst=0")
-        print("\nIt is theoretically possible to build a 32 bit host on a 64 bit system.")
-        print("However, this is tricky and not recommended for beginners.")
-        sys.exit (-1)
+        print("64bit Windows VST support on 64bit Linux is experimental."
+        print("(This version of ardour will not load 32bit VSTs)"
+        print("==================================================\n\n")
 
     if conf.env['LXVST_SUPPORT'] == True:
         if conf.env['build_target'] == 'x86_64':
