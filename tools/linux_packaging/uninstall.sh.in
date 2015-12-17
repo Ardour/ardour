@@ -148,6 +148,7 @@ then
 		${SUPER} xdg-icon-resource uninstall --size 22 ${ICON_NAME}
 		${SUPER} xdg-icon-resource uninstall --size 32 ${ICON_NAME}
 		${SUPER} xdg-icon-resource uninstall --size 48 ${ICON_NAME}
+		${SUPER} xdg-icon-resource uninstall --size 256 ${ICON_NAME}
 
 		if [ -e /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg ]; 
 		then
