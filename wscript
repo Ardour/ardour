@@ -490,8 +490,8 @@ int main() { return 0; }''',
 
     if conf.env['build_target'] == 'x86_64' and opt.windows_vst:
         print("\n\n==================================================")
-        print("64bit Windows VST support on 64bit Linux is experimental."
-        print("(This version of ardour will not load 32bit VSTs)"
+        print("64bit Windows VST support on 64bit Linux is experimental.")
+        print("(This version of ardour will not load 32bit VSTs)")
         print("==================================================\n\n")
 
     if conf.env['LXVST_SUPPORT'] == True:
