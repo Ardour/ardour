@@ -4158,7 +4158,30 @@ Route::shift (framepos_t pos, framecnt_t frames)
 int
 Route::save_as_template (const string& path, const string& name)
 {
+	{
+		// would be nice to use foreach_processor()
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		std::string state_dir = path.substr (0, path.find_last_of ('.')); // strip template_suffix
+		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<PluginInsert> pi  = boost::dynamic_pointer_cast<PluginInsert> (*i);
+			if (pi) {
+				pi->set_state_dir (state_dir);
+			}
+		}
+	}
+
 	XMLNode& node (state (false));
+
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<PluginInsert> pi  = boost::dynamic_pointer_cast<PluginInsert> (*i);
+			if (pi) {
+				pi->set_state_dir ();
+			}
+		}
+	}
+
 	XMLTree tree;
 
 	IO::set_name_in_state (*node.children().front(), name);

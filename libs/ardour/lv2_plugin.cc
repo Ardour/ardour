@@ -44,6 +44,7 @@
 #include "ardour/debug.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
+#include "ardour/template_utils.h"
 #include "ardour/tempo.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
@@ -968,7 +969,11 @@ LV2Plugin::c_ui_type()
 const std::string
 LV2Plugin::plugin_dir() const
 {
-	return Glib::build_filename(_session.plugins_dir(), _insert_id.to_s());
+	if (!_plugin_state_dir.empty ()){
+		return Glib::build_filename(_plugin_state_dir, _insert_id.to_s());
+	} else {
+		return Glib::build_filename(_session.plugins_dir(), _insert_id.to_s());
+	}
 }
 
 /** Directory for files created by the plugin (except during save). */
@@ -1034,6 +1039,10 @@ LV2Plugin::add_state(XMLNode* root) const
 			child->add_property("value", string(buf));
 			root->add_child_nocopy(*child);
 		}
+	}
+
+	if (!_plugin_state_dir.empty()) {
+		root->add_property("template-dir", _plugin_state_dir);
 	}
 
 	if (_has_state_interface) {
@@ -1673,6 +1682,12 @@ LV2Plugin::set_insert_id(PBD::ID id)
 	}
 }
 
+void
+LV2Plugin::set_state_dir (const std::string& d)
+{
+	_plugin_state_dir = d;
+}
+
 int
 LV2Plugin::set_state(const XMLNode& node, int version)
 {
@@ -1728,6 +1743,13 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		set_parameter(port_id, atof(value));
 	}
 
+	if ((prop = node.property("template-dir")) != 0) {
+		// portable templates, strip absolute path
+		set_state_dir (Glib::build_filename (
+					ARDOUR::user_route_template_directory (),
+					Glib::path_get_basename (prop->value ())));
+	}
+
 	_state_version = 0;
 	if ((prop = node.property("state-dir")) != 0) {
 		if (sscanf(prop->value().c_str(), "state%u", &_state_version) != 1) {
@@ -1736,8 +1758,6 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 				prop->value()) << endmsg;
 		}
 
-		// TODO: special case track-templates
-		// (state must be saved with the template)
 		std::string state_file = Glib::build_filename(
 			plugin_dir(),
 			Glib::build_filename(prop->value(), "state.ttl"));
@@ -1748,6 +1768,13 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
 		lilv_state_free(_impl->state);
 		_impl->state = state;
+	}
+
+	if (!_plugin_state_dir.empty ()) {
+		// force save with session, next time (increment counter)
+		lilv_state_free (_impl->state);
+		_impl->state = NULL;
+		set_state_dir ("");
 	}
 
 	latency_compute_run();

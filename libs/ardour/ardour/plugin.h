@@ -101,6 +101,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual int set_state (const XMLNode &, int version);
 
 	virtual void set_insert_id (PBD::ID id) {}
+	virtual void set_state_dir (const std::string& d = "") {}
 
 	virtual std::string unique_id() const = 0;
 	virtual const char * label() const = 0;

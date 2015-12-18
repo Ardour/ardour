@@ -121,6 +121,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	get_scale_points(uint32_t port_index) const;
 
 	void set_insert_id(PBD::ID id);
+	void set_state_dir (const std::string& d = "");
 
 	int      set_state (const XMLNode& node, int version);
 	bool     save_preset (std::string uri);
@@ -176,6 +177,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	framepos_t    _next_cycle_start;  ///< Expected start frame of next run cycle
 	double        _next_cycle_speed;  ///< Expected start frame of next run cycle
 	PBD::ID       _insert_id;
+	std::string   _plugin_state_dir;
 	uint32_t      _patch_port_in_index;
 	uint32_t      _patch_port_out_index;
 	URIMap&       _uri_map;

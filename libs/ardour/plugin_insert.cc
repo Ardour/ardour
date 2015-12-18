@@ -1191,6 +1191,13 @@ PluginInsert::update_id (PBD::ID id)
 }
 
 void
+PluginInsert::set_state_dir (const std::string& d)
+{
+	// state() only saves the state of the first plugin
+	_plugins[0]->set_state_dir (d);
+}
+
+void
 PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 {
 	XMLNodeList nlist = node.children();
