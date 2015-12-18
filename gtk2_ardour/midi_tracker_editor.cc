@@ -57,6 +57,8 @@ MidiTrackerEditor::MidiTrackerEditor (Session* s, boost::shared_ptr<MidiRegion> 
 	, buttons (1, 1)
 	, region (r)
 	, track (tr)
+	, midi_model (region->midi_source(0)->model())
+
 {
 	/* We do not handle nested sources/regions. Caller should have tackled this */
 
@@ -108,8 +110,8 @@ MidiTrackerEditor::MidiTrackerEditor (Session* s, boost::shared_ptr<MidiRegion> 
 
 	redisplay_model ();
 
-	region->midi_source(0)->model()->ContentsChanged.connect (content_connection, invalidator (*this), 
-								  boost::bind (&MidiTrackerEditor::redisplay_model, this), gui_context());
+	midi_model->ContentsChanged.connect (content_connection, invalidator (*this),
+	                                     boost::bind (&MidiTrackerEditor::redisplay_model, this), gui_context());
 
 	buttons.attach (sound_notes_button, 0, 1, 0, 1);
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action ("Editor", "sound-midi-notes");
@@ -218,8 +220,7 @@ MidiTrackerEditor::scroll_event (GdkEventScroll* ev)
 
 	if (apply) {
 
-		boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
-		MidiModel::NoteDiffCommand* cmd = m->new_note_diff_command (opname);
+		MidiModel::NoteDiffCommand* cmd = midi_model->new_note_diff_command (opname);
 		vector<TreeModel::Path> previous_selection;
 
 		if (was_selected) {
@@ -312,7 +313,7 @@ MidiTrackerEditor::scroll_event (GdkEventScroll* ev)
 			}
 		}
 
-		m->apply_command (*_session, cmd);
+		midi_model->apply_command (*_session, cmd);
 
 		/* reset selection to be as it was before we rebuilt */
 		
@@ -400,7 +401,6 @@ MidiTrackerEditor::key_release (GdkEventKey* ev)
 	TreeViewColumn* col;
 	TreeModel::iterator iter;
 	MidiModel::NoteDiffCommand* cmd;
-	boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
 	boost::shared_ptr<NoteType> note;
 	boost::shared_ptr<NoteType> copy;
 
@@ -411,11 +411,11 @@ MidiTrackerEditor::key_release (GdkEventKey* ev)
 		 */
 		view.get_cursor (path, col);
 		iter = model->get_iter (path);
-		cmd = m->new_note_diff_command (_("insert new note"));
+		cmd = midi_model->new_note_diff_command (_("insert new note"));
 		note = (*iter)[columns._note];
 		copy.reset (new NoteType (*note.get()));
 		cmd->add (copy);
-		m->apply_command (*_session, cmd);
+		midi_model->apply_command (*_session, cmd);
 		/* model has been redisplayed by now */
 		path.next ();
 		/* select, start editing column 2 (note) */
@@ -474,14 +474,13 @@ MidiTrackerEditor::delete_selected_note ()
 		}
 	}
 
-	boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
-	MidiModel::NoteDiffCommand* cmd = m->new_note_diff_command (_("delete notes (from list)"));
+	MidiModel::NoteDiffCommand* cmd = midi_model->new_note_diff_command (_("delete notes (from list)"));
 
 	for (Notes::iterator i = to_delete.begin(); i != to_delete.end(); ++i) {
 		cmd->remove (*i);
 	}
 
-	m->apply_command (*_session, cmd);
+	midi_model->apply_command (*_session, cmd);
 }
 
 void
@@ -577,8 +576,7 @@ MidiTrackerEditor::edited (const std::string& path, const std::string& text)
 
 	if (apply) {
 
-		boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
-		MidiModel::NoteDiffCommand* cmd = m->new_note_diff_command (opname);
+		MidiModel::NoteDiffCommand* cmd = midi_model->new_note_diff_command (opname);
 
 		TreeView::Selection::ListHandle_Path rows = view.get_selection()->get_selected_rows ();
 		
@@ -606,7 +604,7 @@ MidiTrackerEditor::edited (const std::string& path, const std::string& text)
 			}
 		}
 
-		m->apply_command (*_session, cmd);
+		midi_model->apply_command (*_session, cmd);
 
 		/* model has been redisplayed by now */
 		/* keep selected row(s), move cursor there, don't continue editing */
@@ -632,7 +630,7 @@ MidiTrackerEditor::redisplay_model ()
 	if (_session) {
 
 		BeatsFramesConverter conv (_session->tempo_map(), region->position());
-		MidiModel::Notes notes = region->midi_source(0)->model()->notes();
+		MidiModel::Notes notes = midi_model->notes();
 		TreeModel::Row row;
 
 		set_first_row_frame();

@@ -100,6 +100,7 @@ class MidiTrackerEditor : public ArdourWindow
 
 	boost::shared_ptr<ARDOUR::MidiRegion> region;
 	boost::shared_ptr<ARDOUR::MidiTrack>  track;
+	boost::shared_ptr<ARDOUR::MidiModel>  midi_model;
 
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;
