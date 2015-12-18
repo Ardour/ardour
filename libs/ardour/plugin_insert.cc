@@ -1113,19 +1113,14 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		}
 	}
 
-	PBD::ID this_id =  this->id();
-
-	if (regenerate_xml_or_string_ids ()) {
-		/* when duplicating a track, we need to use the
-		 * original ID for loading plugin state (from file)
-		 */
-		const XMLProperty* prop;
-		if ((prop = node.property ("id")) != 0) {
-			plugin->set_insert_id (prop->value ());
-		}
-	}
-
 	Processor::set_state (node, version);
+
+	PBD::ID new_id = this->id();
+	PBD::ID old_id = this->id();
+
+	if ((prop = node.property ("id")) != 0) {
+		old_id = prop->value ();
+	}
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
@@ -1136,21 +1131,31 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		if ((*niter)->name() == plugin->state_node_name()) {
 
 			for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+				/* Plugin state can include external files which are named after the ID.
+				 *
+				 * If regenerate_xml_or_string_ids() is set, the ID will already have
+				 * been changed, so we need to use the old ID from the XML to load the
+				 * state and then update the ID.
+				 *
+				 * When copying a plugin-state, route_ui takes care of of updating the ID,
+				 * but we need to call set_insert_id() to clear the cached plugin-state
+				 * and force a change.
+				 */
 				if (!regenerate_xml_or_string_ids ()) {
-					(*i)->set_insert_id (this->id());
+					(*i)->set_insert_id (new_id);
+				} else {
+					(*i)->set_insert_id (old_id);
 				}
+
 				(*i)->set_state (**niter, version);
+
 				if (regenerate_xml_or_string_ids ()) {
-					(*i)->set_insert_id (this_id);
+					(*i)->set_insert_id (new_id);
 				}
 			}
 
 			break;
 		}
-	}
-
-	if (regenerate_xml_or_string_ids ()) {
-			plugin->set_insert_id (this_id);
 	}
 
 	if (version < 3000) {
