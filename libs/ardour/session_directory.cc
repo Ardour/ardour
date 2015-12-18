@@ -24,6 +24,7 @@
 #include "pbd/error.h"
 #include "pbd/compose.h"
 #include "pbd/file_utils.h"
+#include "pbd/openuri.h"
 
 #include "ardour/directory_names.h"
 #include "ardour/session_directory.h"
@@ -162,6 +163,7 @@ SessionDirectory::sources_root () const
 			root_cache[m_root_path] = Glib::build_filename (sources_root_path, entries.front());
 		}
 		else if (entries.size() > 1) {
+			PBD::open_uri (sources_root_path);
 			PBD::fatal << string_compose (_("The session's interchange dir is tainted.\nThere is more than one folder in '%1'.\nPlease remove extra subdirs to reduce possible filename ambiguties."), sources_root_path) << endmsg;
 			assert (0); // not reached
 		}
