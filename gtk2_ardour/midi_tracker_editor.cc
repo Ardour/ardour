@@ -637,7 +637,6 @@ MidiTrackerEditor::redisplay_model ()
 		set_nrows();
 
 		// Generate each row
-		MidiModel::Notes::iterator inote = notes.begin();
 		for (uint32_t irow = 0; irow < nrows; irow++) {
 			row = *(model->append());
 			framepos_t row_frame = frame_at_row(irow);
@@ -649,41 +648,54 @@ MidiTrackerEditor::redisplay_model ()
 			ss << row_bbt;
 			row[columns.time] = ss.str();
 
-			// TODO: find notes to insert
+			// NoteOns
+			// TODO: Add support for
+			// - Overlapping notes
+			// - Delay
+			// - NoteOff
+			Evoral::Beats row_beats = conv.from (row_frame);
+			MidiModel::Notes::const_iterator inote = midi_model->note_lower_bound(row_beats);
+			if (inote != notes.end()
+			    && (*inote).get() > (void*)1000 // WTF!!!!
+			    && (*inote)->time() == row_beats) {
+				row[columns.channel] = (*inote)->channel() + 1;
+				row[columns.note_name] = Evoral::midi_note_name ((*inote)->note());
+				row[columns.velocity] = (*inote)->velocity();
+				// Keep the note around for playing it
+				row[columns._note] = (*inote);
+			}
 		}
 
-		// Generate rows of notes on and off (is kept around as it could be
-		// useful for the above loop)
-		for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
-			// Display note on
-			row = *(model->append());
-			row[columns.channel] = (*i)->channel() + 1;
-			row[columns.note_name] = Evoral::midi_note_name ((*i)->note());
-			row[columns.velocity] = (*i)->velocity();
+		// // Generate rows of notes on and off (is kept around as it could be
+		// // useful for the above loop)
+		// for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
+		// 	// Display note on
+		// 	row = *(model->append());
+		// 	row[columns.channel] = (*i)->channel() + 1;
+		// 	row[columns.note_name] = Evoral::midi_note_name ((*i)->note());
+		// 	row[columns.velocity] = (*i)->velocity();
 
-			// Start time
-			Timecode::BBT_Time start_bbt;
-			_session->tempo_map().bbt_time (conv.to ((*i)->time()), start_bbt);
-			stringstream ss;
-			ss << start_bbt;
-			row[columns.time] = ss.str();
+		// 	// Start time
+		// 	Timecode::BBT_Time start_bbt;
+		// 	_session->tempo_map().bbt_time (conv.to ((*i)->time()), start_bbt);
+		// 	stringstream ss;
+		// 	ss << start_bbt;
+		// 	row[columns.time] = ss.str();
 
-			// Display note off
-			row = *(model->append());
-			row[columns.channel] = (*i)->channel() + 1;
-			row[columns.note_name] = note_off_str;
-			row[columns.velocity] = (*i)->off_velocity();
+		// 	// Display note off
+		// 	row = *(model->append());
+		// 	row[columns.channel] = (*i)->channel() + 1;
+		// 	row[columns.note_name] = note_off_str;
+		// 	row[columns.velocity] = (*i)->off_velocity();
 
-			// End time
-			Timecode::BBT_Time end_bbt;
-			_session->tempo_map().bbt_time (conv.to ((*i)->end_time()), end_bbt);
-			ss.str ("");
-			ss << end_bbt;
-			row[columns.time] = ss.str();
+		// 	// End time
+		// 	Timecode::BBT_Time end_bbt;
+		// 	_session->tempo_map().bbt_time (conv.to ((*i)->end_time()), end_bbt);
+		// 	ss.str ("");
+		// 	ss << end_bbt;
+		// 	row[columns.time] = ss.str();
 
-			// Keep the note around for playing it
-			row[columns._note] = (*i);
-		}
+		// }
 	}
 
 	view.set_model (model);
