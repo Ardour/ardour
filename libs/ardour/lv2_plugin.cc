@@ -44,7 +44,6 @@
 #include "ardour/debug.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
-#include "ardour/template_utils.h"
 #include "ardour/tempo.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
@@ -1744,10 +1743,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 	}
 
 	if ((prop = node.property("template-dir")) != 0) {
-		// portable templates, strip absolute path
-		set_state_dir (Glib::build_filename (
-					ARDOUR::user_route_template_directory (),
-					Glib::path_get_basename (prop->value ())));
+		set_state_dir (prop->value ());
 	}
 
 	_state_version = 0;

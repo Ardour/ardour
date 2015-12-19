@@ -714,6 +714,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	void setup_invisible_processors ();
 	void unpan ();
 
+	void set_plugin_state_dir (boost::weak_ptr<Processor>, const std::string&);
+
 	boost::shared_ptr<CapturingProcessor> _capturing_processor;
 
 	/** A handy class to keep processor state while we attempt a reconfiguration

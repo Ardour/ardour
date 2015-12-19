@@ -1839,6 +1839,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	static int get_session_info_from_path (XMLTree& state_tree, const std::string& xmlpath);
 	static const uint32_t session_end_shift;
+
+	std::string _template_state_dir;
 };
 
 

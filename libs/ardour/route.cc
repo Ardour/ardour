@@ -2253,6 +2253,11 @@ Route::get_template()
 XMLNode&
 Route::state(bool full_state)
 {
+	if (!_session._template_state_dir.empty()) {
+		assert (!full_state); // only for templates
+		foreach_processor (sigc::bind (sigc::mem_fun (*this, &Route::set_plugin_state_dir), _session._template_state_dir));
+	}
+
 	XMLNode *node = new XMLNode("Route");
 	ProcessorList::iterator i;
 	char buf[32];
@@ -2345,6 +2350,10 @@ Route::state(bool full_state)
 			after->id().print (buf, sizeof (buf));
 			node->add_property (X_("processor-after-last-custom-meter"), buf);
 		}
+	}
+
+	if (!_session._template_state_dir.empty()) {
+		foreach_processor (sigc::bind (sigc::mem_fun (*this, &Route::set_plugin_state_dir), ""));
 	}
 
 	return *node;
@@ -4154,42 +4163,30 @@ Route::shift (framepos_t pos, framecnt_t frames)
 	}
 }
 
+void
+Route::set_plugin_state_dir (boost::weak_ptr<Processor> p, const std::string& d)
+{
+	boost::shared_ptr<Processor> processor (p.lock ());
+	boost::shared_ptr<PluginInsert> pi  = boost::dynamic_pointer_cast<PluginInsert> (processor);
+	if (!pi) {
+		return;
+	}
+	pi->set_state_dir (d);
+}
 
 int
 Route::save_as_template (const string& path, const string& name)
 {
-	{
-		// would be nice to use foreach_processor()
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-		std::string state_dir = path.substr (0, path.find_last_of ('.')); // strip template_suffix
-		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			boost::shared_ptr<PluginInsert> pi  = boost::dynamic_pointer_cast<PluginInsert> (*i);
-			if (pi) {
-				pi->set_state_dir (state_dir);
-			}
-		}
-	}
+	std::string state_dir = path.substr (0, path.find_last_of ('.')); // strip template_suffix
+	PBD::Unwinder<std::string> uw (_session._template_state_dir, state_dir);
 
 	XMLNode& node (state (false));
-
-	{
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			boost::shared_ptr<PluginInsert> pi  = boost::dynamic_pointer_cast<PluginInsert> (*i);
-			if (pi) {
-				pi->set_state_dir ();
-			}
-		}
-	}
 
 	XMLTree tree;
 
 	IO::set_name_in_state (*node.children().front(), name);
 
 	tree.set_root (&node);
-	// TODO: special case LV2 plugin state
-	// copy of serialize it. Alternatively:
-	// create a plugin-preset (which can be loaded separately)
 
 	/* return zero on success, non-zero otherwise */
 	return !tree.write (path.c_str());

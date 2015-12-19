@@ -73,6 +73,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
 #include "pbd/localtime_r.h"
+#include "pbd/unwind.h"
 
 #include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
@@ -2161,23 +2162,14 @@ Session::save_template (string template_name, bool replace_existing)
 
 	XMLTree tree;
 
-	tree.set_root (&get_template());
+	{
+		PBD::Unwinder<std::string> uw (_template_state_dir, template_dir_path);
+		tree.set_root (&get_template());
+	}
+
 	if (!tree.write (template_file_path)) {
 		error << _("template not saved") << endmsg;
 		return -1;
-	}
-
-	if (!ARDOUR::Profile->get_trx()) {
-		/* copy plugin state directory */
-
-		std::string template_plugin_state_path (Glib::build_filename (template_dir_path, X_("plugins")));
-
-		if (g_mkdir_with_parents (template_plugin_state_path.c_str(), 0755) != 0) {
-			error << string_compose(_("Could not create directory for Session template plugin state\"%1\" (%2)"),
-									template_plugin_state_path, g_strerror (errno)) << endmsg;
-			return -1;
-		}
-		copy_files (plugins_dir(), template_plugin_state_path);
 	}
 
 	store_recent_templates (template_file_path);
