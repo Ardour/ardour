@@ -1029,12 +1029,14 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 
 	uint32_t first_tick_in_new_meter = 0;
 	Metrics::const_iterator i;
+	Metrics::const_iterator mi;
+
 	TempoSection* prev_ts = tempo;
 
-	for (i = metrics.begin(); i != metrics.end(); ++i) {
+	for (mi = metrics.begin(); mi != metrics.end(); ++mi) {
 		MeterSection* m = 0;
 
-		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
+		if ((m = dynamic_cast<MeterSection*> (*mi)) != 0) {
 
 			if (m->start() >= prev_ts->start()) {
 				first_tick_in_new_meter = ((((m->start().bars - 1) * meter->divisions_per_bar()) + (m->start().beats - 1)) * BBT_Time::ticks_per_beat) + m->start().ticks; // expressed in ticks from the previous meter
