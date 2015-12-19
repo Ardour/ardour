@@ -188,7 +188,7 @@ TempoSection::tempo_at_frame (framepos_t frame, double end_bpm, framepos_t end_f
 	if (_type == Constant) {
 		return beats_per_minute();
 	}
- 
+
 	return tick_tempo_at_time (frame_to_minute (frame, frame_rate), end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate)) / BBT_Time::ticks_per_beat;
 }
 
@@ -1320,6 +1320,8 @@ TempoMap::beats_to_bbt (double beats)
 double
 TempoMap::tick_at_frame (framecnt_t frame) const
 {
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
 	Metrics::const_iterator i;
 	const TempoSection* prev_ts = &first_tempo();
 	double accumulated_ticks = 0.0;
@@ -1363,6 +1365,8 @@ TempoMap::tick_at_frame (framecnt_t frame) const
 framecnt_t
 TempoMap::frame_at_tick (double tick) const
 {
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
 	double accumulated_ticks = 0.0;
 	const TempoSection* prev_ts =  &first_tempo();
 	uint32_t cnt = 0;
@@ -1548,6 +1552,8 @@ TempoMap::round_to_beat (framepos_t fr, RoundMode dir)
 framepos_t
 TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 {
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
 	uint32_t ticks = (uint32_t) floor (tick_at_frame (fr) + 0.5);
 	uint32_t beats = (uint32_t) floor (ticks / BBT_Time::ticks_per_beat);
 	uint32_t ticks_one_subdivisions_worth = (uint32_t)BBT_Time::ticks_per_beat / sub_num;
