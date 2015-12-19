@@ -2185,14 +2185,10 @@ Editor::set_snap_to (SnapType st)
 	case SnapToBeatDiv4:
 	case SnapToBeatDiv3:
 	case SnapToBeatDiv2: {
-		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
-		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
-
-		compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(),
-					    current_bbt_points_begin, current_bbt_points_end);
-		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples(),
-					 current_bbt_points_begin, current_bbt_points_end);
-		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end);
+		std::vector<TempoMap::BBTPoint> grid;
+		compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+		compute_bbt_ruler_scale (grid, leftmost_frame, leftmost_frame + current_page_samples());
+		update_tempo_based_rulers (grid);
 		break;
 	}
 
@@ -3952,11 +3948,9 @@ Editor::set_show_measures (bool yn)
 				tempo_lines->show();
 			}
 
-			ARDOUR::TempoMap::BBTPointList::const_iterator begin;
-			ARDOUR::TempoMap::BBTPointList::const_iterator end;
-
-			compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(), begin, end);
-			draw_measures (begin, end);
+			std::vector<TempoMap::BBTPoint> grid;
+			compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+			draw_measures (grid);
 		}
 
 		instant_save ();
@@ -4582,14 +4576,10 @@ Editor::visual_changer (const VisualChange& vc)
 
 		compute_fixed_ruler_scale ();
 
-		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
-		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
-
-		compute_current_bbt_points (vc.time_origin, pending_visual_change.time_origin + current_page_samples(),
-					    current_bbt_points_begin, current_bbt_points_end);
-		compute_bbt_ruler_scale (vc.time_origin, pending_visual_change.time_origin + current_page_samples(),
-					 current_bbt_points_begin, current_bbt_points_end);
-		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end);
+		std::vector<TempoMap::BBTPoint> grid;
+		compute_current_bbt_points (grid, vc.time_origin, pending_visual_change.time_origin + current_page_samples());
+		compute_bbt_ruler_scale (grid, vc.time_origin, pending_visual_change.time_origin + current_page_samples());
+		update_tempo_based_rulers (grid);
 
 		update_video_timeline();
 	}

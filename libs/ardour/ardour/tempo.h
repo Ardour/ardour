@@ -55,6 +55,7 @@ class LIBARDOUR_API Tempo {
 		: _beats_per_minute (bpm), _note_type(type) {}
 
 	double beats_per_minute () const { return _beats_per_minute;}
+	double ticks_per_minute () const { return _beats_per_minute * Timecode::BBT_Time::ticks_per_beat;}
 	double note_type () const { return _note_type;}
 	/** audio samples per beat
 	 * @param sr samplerate
@@ -146,10 +147,15 @@ class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
 /** A section of timeline with a certain Tempo. */
 class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
   public:
-	TempoSection (const Timecode::BBT_Time& start, double qpm, double note_type)
-		: MetricSection (start), Tempo (qpm, note_type), _bar_offset (-1.0)  {}
-	TempoSection (framepos_t start, double qpm, double note_type)
-		: MetricSection (start), Tempo (qpm, note_type), _bar_offset (-1.0) {}
+	enum TempoSectionType {
+		Ramp,
+		Constant,
+	};
+
+	TempoSection (const Timecode::BBT_Time& start, double qpm, double note_type, TempoSectionType tempo_type)
+		: MetricSection (start), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type)  {}
+	TempoSection (framepos_t start, double qpm, double note_type, TempoSectionType tempo_type)
+		: MetricSection (start), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type) {}
 	TempoSection (const XMLNode&);
 
 	static const std::string xml_state_node_name;
@@ -160,7 +166,41 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	void update_bbt_time_from_bar_offset (const Meter&);
 	double bar_offset() const { return _bar_offset; }
 
+	void set_type (TempoSectionType type);
+	TempoSectionType type () const { return _type; }
+
+	double tempo_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+	framepos_t frame_at_tempo (double tempo, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+
+	double tick_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+	framepos_t frame_at_tick (double tick, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+
+	double beat_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+	framepos_t frame_at_beat (double beat, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+
   private:
+
+	framecnt_t minute_to_frame (double time, framecnt_t frame_rate) const;
+	double frame_to_minute (framecnt_t frame, framecnt_t frame_rate) const;
+
+	/*  tempo ramp functions. zero-based with time in minutes,
+	 * 'tick tempo' in ticks per minute and tempo in bpm.
+	 *  time relative to section start.
+	 */
+	double c_func (double end_tpm, double end_time) const;
+	double a_func (double begin_tpm, double end_tpm, double end_time) const;
+
+	double tempo_at_time (double time, double end_bpm, double end_time) const;
+	double time_at_tempo (double tempo, double end_bpm, double end_time) const;
+	double tick_tempo_at_time (double time, double end_tpm, double end_time) const;
+	double time_at_tick_tempo (double tick_tempo, double end_tpm, double end_time) const;
+
+	double tick_at_time (double time, double end_tpm, double end_time) const;
+	double time_at_tick (double tick, double end_tpm, double end_time) const;
+
+	double beat_at_time (double time, double end_tpm, double end_time) const;
+	double time_at_beat (double beat, double end_tpm, double end_time) const;
+
 	/* this value provides a fractional offset into the bar in which
 	   the tempo section is located in. A value of 0.0 indicates that
 	   it occurs on the first beat of the bar, a value of 0.5 indicates
@@ -170,6 +210,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	   position within the bar if/when the meter changes.
 	*/
 	double _bar_offset;
+	TempoSectionType _type;
 };
 
 typedef std::list<MetricSection*> Metrics;
@@ -231,11 +272,11 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	struct BBTPoint {
 		framepos_t          frame;
 		const MeterSection* meter;
-		const TempoSection* tempo;
+		const Tempo* tempo;
 		uint32_t            bar;
 		uint32_t            beat;
 
-		BBTPoint (const MeterSection& m, const TempoSection& t, framepos_t f,
+		BBTPoint (const MeterSection& m, const Tempo& t, framepos_t f,
 		          uint32_t b, uint32_t e)
 			: frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
 
@@ -245,19 +286,18 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 		bool is_bar() const { return beat == 1; }
 	};
 
-	typedef std::vector<BBTPoint> BBTPointList;
-
 	template<class T> void apply_with_metrics (T& obj, void (T::*method)(const Metrics&)) {
 		Glib::Threads::RWLock::ReaderLock lm (lock);
 		(obj.*method)(metrics);
 	}
 
-	void get_grid (BBTPointList::const_iterator&, BBTPointList::const_iterator&,
+	void get_grid (std::vector<BBTPoint>&,
 	               framepos_t start, framepos_t end);
 
 	/* TEMPO- AND METER-SENSITIVE FUNCTIONS
 
-	   bbt_time(), bbt_time_rt(), frame_time() and bbt_duration_at()
+	   bbt_time(), beat_at_frame(), frame_at_beat(), tick_at_frame(),
+	   frame_at_tick(),frame_time() and bbt_duration_at()
 	   are all sensitive to tempo and meter, and will give answers
 	   that align with the grid formed by tempo and meter sections.
 
@@ -267,11 +307,12 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	void bbt_time (framepos_t when, Timecode::BBT_Time&);
 
-	/* realtime safe variant of ::bbt_time(), will throw
-	   std::logic_error if the map is not large enough
-	   to provide an answer.
-	*/
-	void       bbt_time_rt (framepos_t when, Timecode::BBT_Time&);
+	double tick_at_frame (framecnt_t frame) const;
+	framecnt_t frame_at_tick (double tick) const;
+
+	double beat_at_frame (framecnt_t frame) const;
+	framecnt_t frame_at_beat (double beat) const;
+
 	framepos_t frame_time (const Timecode::BBT_Time&);
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
 
@@ -293,19 +334,19 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }
 
-	const Tempo& tempo_at (framepos_t) const;
+	const Tempo tempo_at (framepos_t) const;
 	const Meter& meter_at (framepos_t) const;
 
 	const TempoSection& tempo_section_at (framepos_t) const;
 	const MeterSection& meter_section_at (framepos_t) const;
 
-	void add_tempo (const Tempo&, Timecode::BBT_Time where);
+	void add_tempo (const Tempo&, Timecode::BBT_Time where, TempoSection::TempoSectionType type);
 	void add_meter (const Meter&, Timecode::BBT_Time where);
 
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
 
-	void replace_tempo (const TempoSection&, const Tempo&, const Timecode::BBT_Time& where);
+	void replace_tempo (const TempoSection&, const Tempo&, const Timecode::BBT_Time& where, TempoSection::TempoSectionType type);
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
 
 	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
@@ -352,32 +393,26 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	Metrics                       metrics;
 	framecnt_t                    _frame_rate;
 	mutable Glib::Threads::RWLock lock;
-	BBTPointList                  _map;
 
 	void recompute_map (bool reassign_tempo_bbt, framepos_t end = -1);
-	void extend_map (framepos_t end);
-	void require_map_to (framepos_t pos);
-	void require_map_to (const Timecode::BBT_Time&);
+
 	void _extend_map (TempoSection* tempo, MeterSection* meter,
 	                  Metrics::iterator next_metric,
-	                  Timecode::BBT_Time current, framepos_t current_frame, framepos_t end);
-
-	BBTPointList::const_iterator bbt_before_or_at (framepos_t);
-	BBTPointList::const_iterator bbt_before_or_at (const Timecode::BBT_Time&);
-	BBTPointList::const_iterator bbt_after_or_at (framepos_t);
+			  Timecode::BBT_Time current, framepos_t current_frame, framepos_t end);
 
 	framepos_t round_to_type (framepos_t fr, RoundMode dir, BBTPointType);
-	void bbt_time (framepos_t, Timecode::BBT_Time&, const BBTPointList::const_iterator&);
-	framecnt_t bbt_duration_at_unlocked (const Timecode::BBT_Time& when, const Timecode::BBT_Time& bbt, int dir);
 
 	const MeterSection& first_meter() const;
 	MeterSection&       first_meter();
 	const TempoSection& first_tempo() const;
 	TempoSection&       first_tempo();
 
+	Timecode::BBT_Time beats_to_bbt (double beats);
+	int32_t bars_in_meter_section (MeterSection* ms) const;
+
 	void do_insert (MetricSection* section);
 
-	void add_tempo_locked (const Tempo&, Timecode::BBT_Time where, bool recompute);
+	void add_tempo_locked (const Tempo&, Timecode::BBT_Time where, bool recompute, TempoSection::TempoSectionType type);
 	void add_meter_locked (const Meter&, Timecode::BBT_Time where, bool recompute);
 
 	bool remove_tempo_locked (const TempoSection&);

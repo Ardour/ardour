@@ -165,10 +165,10 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
                         }
 			break;
 		case Mark::Minor:
-			cr->rel_line_to (0, -height/4.0);
+			cr->rel_line_to (0, -height/3.0);
 			break;
 		case Mark::Micro:
-			cr->rel_line_to (0, -height/16.0);
+			cr->rel_line_to (0, -height/5.0);
 			break;
 		}
 		cr->stroke ();

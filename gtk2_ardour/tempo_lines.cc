@@ -54,12 +54,12 @@ TempoLines::hide ()
 }
 
 void
-TempoLines::draw_ticks (const ARDOUR::TempoMap::BBTPointList::const_iterator& b,
-                        unsigned                                              divisions,
+TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
+			unsigned                                              divisions,
                         framecnt_t                                            leftmost_frame,
                         framecnt_t                                            frame_rate)
 {
-	const double   fpb  = b->tempo->frames_per_beat(frame_rate);
+	const double   fpb  = grid.begin()->tempo->frames_per_beat(frame_rate);
 	const uint32_t base = UIConfiguration::instance().color_mod("measure line beat", "measure line beat");
 
 	for (unsigned l = 1; l < divisions; ++l) {
@@ -74,7 +74,8 @@ TempoLines::draw_ticks (const ARDOUR::TempoMap::BBTPointList::const_iterator& b,
 		/* draw line with alpha corresponding to coarsest level */
 		const uint8_t    a = max(8, (int)rint(UINT_RGBA_A(base) / (0.8 * log2(level))));
 		const uint32_t   c = UINT_RGBA_CHANGE_A(base, a);
-		const framepos_t f = b->frame + (l * (fpb / (double)divisions));
+		const framepos_t f = grid.begin()->frame + (l * (fpb / (double)divisions));
+		//const framepos_t f = frame_at_tick (last_beat_in_ticks + (l * (BBT_Time::ticks_per_beat / (double)divisions)));
 		if (f > leftmost_frame) {
 			lines.add (PublicEditor::instance().sample_to_pixel_unrounded (f), 1.0, c);
 		}
@@ -82,13 +83,12 @@ TempoLines::draw_ticks (const ARDOUR::TempoMap::BBTPointList::const_iterator& b,
 }
 
 void
-TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
-                  const ARDOUR::TempoMap::BBTPointList::const_iterator& end,
-                  unsigned                                              divisions,
+TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
+		  unsigned                                              divisions,
                   framecnt_t                                            leftmost_frame,
                   framecnt_t                                            frame_rate)
 {
-	ARDOUR::TempoMap::BBTPointList::const_iterator i;
+	std::vector<ARDOUR::TempoMap::BBTPoint>::const_iterator i;
 	double  beat_density;
 
 	uint32_t beats = 0;
@@ -97,10 +97,10 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 
 	/* get the first bar spacing */
 
-	i = end;
+	i = grid.end();
 	i--;
-	bars = (*i).bar - (*begin).bar;
-	beats = distance (begin, end) - bars;
+	bars = (*i).bar - (*grid.begin()).bar;
+	beats = distance (grid.begin(), grid.end()) - bars;
 
 	beat_density = (beats * 10.0f) / lines.canvas()->width();
 
@@ -116,15 +116,14 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	}
 
 	lines.clear ();
-
-	if (beat_density <= 0.12 && begin != end && begin->frame > 0) {
-		/* draw subdivisions of the beat before the first visible beat line */
-		ARDOUR::TempoMap::BBTPointList::const_iterator prev = begin;
-		--prev;
-		draw_ticks(prev, divisions, leftmost_frame, frame_rate);
+	if (beat_density <= 0.12 && grid.begin() != grid.end() && grid.begin()->frame > 0) {
+		/* draw subdivisions of the beat before the first visible beat line XX this shouldn't happen now */
+		std::vector<ARDOUR::TempoMap::BBTPoint> vec;
+		vec.push_back (*i);
+		draw_ticks (vec, divisions, leftmost_frame, frame_rate);
 	}
 
-	for (i = begin; i != end; ++i) {
+	for (i = grid.begin(); i != grid.end(); ++i) {
 
 		if ((*i).is_bar()) {
 			color = UIConfiguration::instance().color ("measure line bar");
@@ -141,7 +140,10 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 
 		if (beat_density <= 0.12) {
 			/* draw subdivisions of this beat */
-			draw_ticks(i, divisions, leftmost_frame, frame_rate);
+			std::vector<ARDOUR::TempoMap::BBTPoint> vec;
+			vec.push_back (*i);
+
+			draw_ticks(vec, divisions, leftmost_frame, frame_rate);
 		}
 	}
 }

@@ -42,8 +42,7 @@ Pool Click::pool ("click", sizeof (Click), 1024);
 void
 Session::click (framepos_t start, framecnt_t nframes)
 {
-	TempoMap::BBTPointList::const_iterator points_begin;
-	TempoMap::BBTPointList::const_iterator points_end;
+	vector<TempoMap::BBTPoint> points;
 	Sample *buf;
 	framecnt_t click_distance;
 
@@ -72,13 +71,13 @@ Session::click (framepos_t start, framecnt_t nframes)
 	BufferSet& bufs = get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
 	buf = bufs.get_audio(0).data();
 
-	_tempo_map->get_grid (points_begin, points_end, start, end);
+	_tempo_map->get_grid (points, start, end);
 
-	if (distance (points_begin, points_end) == 0) {
+	if (distance (points.begin(), points.end()) == 0) {
 		goto run_clicks;
 	}
 
-	for (TempoMap::BBTPointList::const_iterator i = points_begin; i != points_end; ++i) {
+	for (vector<TempoMap::BBTPoint>::iterator i = points.begin(); i != points.end(); ++i) {
 		switch ((*i).beat) {
 		case 1:
 			if (click_emphasis_data && Config->get_use_click_emphasis () == true) {

@@ -106,12 +106,21 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 		pulse_selector.set_active_text (strings[3]); // "quarter"
 	}
 
+	strings.clear();
+
+	tempo_types.insert (make_pair (_("ramped"), TempoSection::TempoSectionType::Ramp));
+	strings.push_back (_("ramped"));
+	tempo_types.insert (make_pair (_("constant"), TempoSection::TempoSectionType::Constant));
+	strings.push_back (_("constant"));
+	set_popdown_strings (tempo_type, strings);
+	tempo_type.set_active_text (strings[0]); // "ramped"
+
 	Table* table;
 
 	if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
-		table = manage (new Table (5, 5));
+		table = manage (new Table (5, 6));
 	} else {
-		table = manage (new Table (5, 4));
+		table = manage (new Table (5, 5));
 	}
 
 	table->set_spacings (6);
@@ -156,8 +165,12 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 		table->attach (*when_label, 0, 1, row, row+1);
 	}
 
+	Label* tempo_type_label = manage (new Label(_("Tempo Type:"), ALIGN_LEFT, ALIGN_CENTER));
+	table->attach (*tempo_type_label, 0, 1, row+1, row+2);
+	table->attach (tempo_type, 1, 2, row+1, row + 2);
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_end (*table);
+
 	table->show_all ();
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
@@ -253,6 +266,19 @@ TempoDialog::get_note_type ()
 	if (x == note_types.end()) {
 		error << string_compose(_("incomprehensible pulse note type (%1)"), pulse_selector.get_active_text()) << endmsg;
 		return 0;
+	}
+
+	return x->second;
+}
+
+TempoSection::TempoSectionType
+TempoDialog::get_tempo_type ()
+{
+	TempoTypes::iterator x = tempo_types.find (tempo_type.get_active_text());
+
+	if (x == tempo_types.end()) {
+		error << string_compose(_("incomprehensible pulse note type (%1)"), tempo_type.get_active_text()) << endmsg;
+		return TempoSection::TempoSectionType::Constant;
 	}
 
 	return x->second;

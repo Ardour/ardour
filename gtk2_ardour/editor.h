@@ -885,8 +885,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void update_just_timecode ();
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
-	void update_tempo_based_rulers (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
-					ARDOUR::TempoMap::BBTPointList::const_iterator& end);
+	void update_tempo_based_rulers (std::vector<ARDOUR::TempoMap::BBTPoint>& grid);
 	void popup_ruler_menu (framepos_t where = 0, ItemType type = RegionItem);
 	void update_ruler_visibility ();
 	void set_ruler_visible (RulerType, bool);
@@ -949,9 +948,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
 	uint32_t bbt_accent_modulo;
-	void compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
-				      ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin,
-				      ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end);
+	void compute_bbt_ruler_scale (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, framepos_t lower, framepos_t upper);
 
 	ArdourCanvas::Ruler* timecode_ruler;
 	ArdourCanvas::Ruler* bbt_ruler;
@@ -1636,8 +1633,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Container* time_line_group;
 
 	void hide_measures ();
-	void draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
-			    ARDOUR::TempoMap::BBTPointList::const_iterator& end);
+	void draw_measures (std::vector<ARDOUR::TempoMap::BBTPoint>&);
 
 	void new_tempo_section ();
 
@@ -1698,9 +1694,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
-	void compute_current_bbt_points (framepos_t left, framepos_t right,
-					 ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
-					 ARDOUR::TempoMap::BBTPointList::const_iterator& end);
+	void compute_current_bbt_points (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, framepos_t left, framepos_t right);
 
 	void tempo_map_changed (const PBD::PropertyChange&);
 	void redisplay_tempo (bool immediate_redraw);

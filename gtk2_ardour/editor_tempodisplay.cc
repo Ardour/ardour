@@ -114,13 +114,12 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 		tempo_lines->tempo_map_changed();
 	}
 
-	ARDOUR::TempoMap::BBTPointList::const_iterator begin;
-	ARDOUR::TempoMap::BBTPointList::const_iterator end;
+	std::vector<TempoMap::BBTPoint> grid;
 
-	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(), begin, end);
+	compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
-	draw_measures (begin, end);
-	update_tempo_based_rulers (begin, end);
+	draw_measures (grid);
+	update_tempo_based_rulers (grid);
 }
 
 void
@@ -131,32 +130,31 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	}
 
 	if (immediate_redraw) {
-		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
-		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
+		std::vector<TempoMap::BBTPoint> grid;
 
-		compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(),
-					    current_bbt_points_begin, current_bbt_points_end);
-		draw_measures (current_bbt_points_begin, current_bbt_points_end);
-		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end); // redraw rulers and measures
+		compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+		draw_measures (grid);
+		update_tempo_based_rulers (grid); // redraw rulers and measure lines
 
 	} else {
 		Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::mem_fun (*this, &Editor::redisplay_tempo), true), false));
 	}
 }
 
+/* computes a grid starting a beat before and ending a beat after leftmost and rightmost respectively */
 void
-Editor::compute_current_bbt_points (framepos_t leftmost, framepos_t rightmost,
-				    ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
-				    ARDOUR::TempoMap::BBTPointList::const_iterator& end)
+Editor::compute_current_bbt_points (std::vector<TempoMap::BBTPoint>& grid, framepos_t leftmost, framepos_t rightmost)
 {
 	if (!_session) {
 		return;
 	}
 
+	framecnt_t beat_before_lower_pos = _session->tempo_map().frame_at_beat (floor(_session->tempo_map().beat_at_frame (leftmost)));
+	framecnt_t beat_after_upper_pos = _session->tempo_map().frame_at_beat (floor (_session->tempo_map().beat_at_frame (rightmost)) + 1.0);
+
 	/* prevent negative values of leftmost from creeping into tempomap
 	 */
-
-	_session->tempo_map().get_grid (begin, end, max (leftmost, (framepos_t) 0), rightmost);
+	_session->tempo_map().get_grid (grid, max (beat_before_lower_pos, (framepos_t) 0), beat_after_upper_pos);
 }
 
 void
@@ -168,10 +166,9 @@ Editor::hide_measures ()
 }
 
 void
-Editor::draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
-		       ARDOUR::TempoMap::BBTPointList::const_iterator& end)
+Editor::draw_measures (std::vector<ARDOUR::TempoMap::BBTPoint>& grid)
 {
-	if (_session == 0 || _show_measures == false || distance (begin, end) == 0) {
+	if (_session == 0 || _show_measures == false || distance (grid.begin(), grid.end()) == 0) {
 		return;
 	}
 
@@ -180,7 +177,7 @@ Editor::draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	}
 
 	const unsigned divisions = get_grid_beat_divisions(leftmost_frame);
-	tempo_lines->draw (begin, end, divisions, leftmost_frame, _session->frame_rate());
+	tempo_lines->draw (grid, divisions, leftmost_frame, _session->frame_rate());
 }
 
 void
@@ -214,7 +211,7 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 
 	begin_reversible_command (_("add tempo mark"));
         XMLNode &before = map.get_state();
-	map.add_tempo (Tempo (bpm,nt), requested);
+	map.add_tempo (Tempo (bpm,nt), requested, tempo_dialog.get_tempo_type());
         XMLNode &after = map.get_state();
 	_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 	commit_reversible_command ();
@@ -329,7 +326,7 @@ Editor::edit_tempo_section (TempoSection* section)
 
 	begin_reversible_command (_("replace tempo mark"));
 	XMLNode &before = _session->tempo_map().get_state();
-	_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), when);
+	_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), when, tempo_dialog.get_tempo_type());
 	XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();

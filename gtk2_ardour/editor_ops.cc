@@ -6552,7 +6552,7 @@ Editor::define_one_bar (framepos_t start, framepos_t end)
 	} else {
 		Timecode::BBT_Time bbt;
 		_session->tempo_map().bbt_time (start, bbt);
-		_session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), bbt);
+		_session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), bbt, TempoSection::TempoSectionType::Ramp);
 	}
 
 	XMLNode& after (_session->tempo_map().get_state());

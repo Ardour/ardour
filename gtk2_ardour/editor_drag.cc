@@ -3344,14 +3344,14 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy tempo mark"));
 		XMLNode &before = map.get_state();
-		map.add_tempo (_marker->tempo(), when);
+		map.add_tempo (_marker->tempo(), when, _marker->tempo().type());
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command (new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 
 	} else {
 		/* we removed it before, so add it back now */
-		map.add_tempo (_marker->tempo(), when);
+		map.add_tempo (_marker->tempo(), when, _marker->tempo().type());
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command (new MementoCommand<TempoMap>(map, before_state, &after));
 		_editor->commit_reversible_command ();
@@ -3369,7 +3369,7 @@ TempoMarkerDrag::aborted (bool moved)
 	if (moved) {
 		TempoMap& map (_editor->session()->tempo_map());
 		/* we removed it before, so add it back now */
-		map.add_tempo (_marker->tempo(), _marker->tempo().start());
+		map.add_tempo (_marker->tempo(), _marker->tempo().start(), _marker->tempo().type());
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
 		delete _marker;

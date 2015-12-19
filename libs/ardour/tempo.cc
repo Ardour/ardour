@@ -126,6 +126,16 @@ TempoSection::TempoSection (const XMLNode& node)
 			throw failed_constructor();
 		}
 	}
+
+	if ((prop = node.property ("tempo-type")) == 0) {
+		_type = TempoSectionType::Ramp;
+	} else {
+		if (strstr(prop->value().c_str(),"Constant")) {
+			_type = TempoSectionType::Constant;
+		} else {
+			_type = TempoSectionType::Ramp;
+		}
+	}
 }
 
 XMLNode&
@@ -149,6 +159,9 @@ TempoSection::get_state() const
 	snprintf (buf, sizeof (buf), "%s", movable()?"yes":"no");
 	root->add_property ("movable", buf);
 
+	snprintf (buf, sizeof (buf), "%s", _type == Constant?"Constant":"Ramp");
+	root->add_property ("tempo-type", buf);
+
 	return *root;
 }
 
@@ -160,6 +173,143 @@ TempoSection::update_bar_offset_from_bbt (const Meter& m)
 		(m.divisions_per_bar() * BBT_Time::ticks_per_beat);
 
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Tempo set bar offset to %1 from %2 w/%3\n", _bar_offset, start(), m.divisions_per_bar()));
+}
+
+void
+TempoSection::set_type (TempoSectionType type)
+{
+	_type = type;
+}
+
+double
+TempoSection::tempo_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+{
+
+	if (_type == Constant) {
+		return beats_per_minute();
+	}
+ 
+	return tick_tempo_at_time (frame_to_minute (frame, frame_rate), end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate)) / BBT_Time::ticks_per_beat;
+}
+
+framepos_t
+TempoSection::frame_at_tempo (double tempo, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+{
+	if (_type == Constant) {
+		return 0;
+	}
+
+	return minute_to_frame (time_at_tick_tempo (tempo *  BBT_Time::ticks_per_beat,  end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate)), frame_rate);
+}
+
+double
+TempoSection::tick_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+{
+	if (_type == Constant) {
+		return frame / frames_per_beat (frame_rate);
+	}
+
+	return tick_at_time (frame_to_minute (frame, frame_rate), end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate));
+}
+
+framepos_t
+TempoSection::frame_at_tick (double tick, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+{
+	if (_type == Constant) {
+		return (framepos_t) floor (tick * frames_per_beat(frame_rate));
+	}
+
+	return minute_to_frame (time_at_tick (tick, end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate)), frame_rate);
+}
+
+double TempoSection::beat_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+{
+	return tick_at_frame (frame, end_bpm, end_frame, frame_rate) / BBT_Time::ticks_per_beat;
+}
+
+framepos_t TempoSection::frame_at_beat (double beat, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+{
+	return frame_at_tick (beat * BBT_Time::ticks_per_beat, end_bpm, end_frame, frame_rate);
+}
+
+framecnt_t
+TempoSection::minute_to_frame (double time, framecnt_t frame_rate) const
+{
+	return time * 60.0 * frame_rate;
+}
+
+double
+TempoSection::frame_to_minute (framecnt_t frame, framecnt_t frame_rate) const
+{
+	return (frame / (double) frame_rate) / 60.0;
+}
+
+/* constant for exp */
+double
+TempoSection::a_func (double begin_tpm, double end_tpm, double end_time) const
+{
+	return log (end_tpm / ticks_per_minute()) /  c_func (end_tpm, end_time);
+}
+double
+TempoSection::c_func (double end_tpm, double end_time) const
+{
+	return log (end_tpm / ticks_per_minute()) /  end_time;
+}
+
+/* tempo in tpm at time in minutes */
+double
+TempoSection::tick_tempo_at_time (double time, double end_tpm, double end_time) const
+{
+	return exp (c_func (end_tpm, end_time) * time) * ticks_per_minute();
+}
+
+/* time in minutes at tempo in tpm */
+double
+TempoSection::time_at_tick_tempo (double tick_tempo, double end_tpm, double end_time) const
+{
+	return log (tick_tempo / ticks_per_minute()) / c_func (end_tpm, end_time);
+}
+
+/* tempo in bpm at time in minutes */
+double
+TempoSection::tempo_at_time (double time, double end_bpm, double end_time) const
+{
+	return tick_tempo_at_time (time, end_bpm *  BBT_Time::ticks_per_beat, end_time) / BBT_Time::ticks_per_beat;
+}
+
+/* time in minutes at tempo in bpm */
+double
+TempoSection::time_at_tempo (double tempo, double end_bpm, double end_time) const
+{
+	return time_at_tick_tempo (tempo * BBT_Time::ticks_per_beat, end_bpm * BBT_Time::ticks_per_beat, end_time);
+}
+
+/* tick at time in minutes */
+double
+TempoSection::tick_at_time (double time, double end_tpm, double end_time) const
+{
+	return ((exp (c_func (end_tpm, end_time) * time)) - 1) * ticks_per_minute() / c_func (end_tpm, end_time);
+}
+
+/* time in minutes at tick */
+double
+TempoSection::time_at_tick (double tick, double end_tpm, double end_time) const
+{
+	return log (((c_func (end_tpm, end_time) * tick) / ticks_per_minute()) + 1) / c_func (end_tpm, end_time);
+}
+
+/* beat at time in minutes */
+double
+TempoSection::beat_at_time (double time, double end_tpm, double end_time) const
+{
+	return tick_at_time (time, end_tpm, end_time) / BBT_Time::ticks_per_beat;
+}
+
+/* time in munutes at beat */
+double
+TempoSection::time_at_beat (double beat, double end_tpm, double end_time) const
+{
+	return time_at_tick (beat * BBT_Time::ticks_per_beat, end_tpm, end_time);
 }
 
 void
@@ -180,7 +330,6 @@ TempoSection::update_bbt_time_from_bar_offset (const Meter& meter)
 
 	/* remember the 1-based counting properties of beats */
 	new_start.beats += 1;
-
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("from bar offset %1 and dpb %2, ticks = %3->%4 beats = %5\n",
 						       _bar_offset, meter.divisions_per_bar(), ticks, new_start.ticks, new_start.beats));
 
@@ -284,8 +433,7 @@ TempoMap::TempoMap (framecnt_t fr)
 	start.beats = 1;
 	start.ticks = 0;
 
-	// these leak memory, well Metrics does
-	TempoSection *t = new TempoSection (start, _default_tempo.beats_per_minute(), _default_tempo.note_type());
+	TempoSection *t = new TempoSection (start, _default_tempo.beats_per_minute(), _default_tempo.note_type(), TempoSection::TempoSectionType::Ramp);
 	MeterSection *m = new MeterSection (start, _default_meter.divisions_per_bar(), _default_meter.note_divisor());
 
 	t->set_movable (false);
@@ -489,15 +637,16 @@ TempoMap::do_insert (MetricSection* section)
 }
 
 void
-TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_Time& where)
+TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_Time& where, TempoSection::TempoSectionType type)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		TempoSection& first (first_tempo());
+		TempoSection::TempoSectionType tt = first.type();
 
 		if (ts.start() != first.start()) {
 			remove_tempo_locked (ts);
-			add_tempo_locked (tempo, where, true);
+			add_tempo_locked (tempo, where, true, tt);
 		} else {
 			{
 				/* cannot move the first tempo section */
@@ -511,11 +660,11 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_T
 }
 
 void
-TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
+TempoMap::add_tempo (const Tempo& tempo, BBT_Time where, ARDOUR::TempoSection::TempoSectionType type)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		add_tempo_locked (tempo, where, true);
+		add_tempo_locked (tempo, where, true, type);
 	}
 
 
@@ -523,12 +672,11 @@ TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
 }
 
 void
-TempoMap::add_tempo_locked (const Tempo& tempo, BBT_Time where, bool recompute)
+TempoMap::add_tempo_locked (const Tempo& tempo, BBT_Time where, bool recompute, ARDOUR::TempoSection::TempoSectionType type)
 {
 	/* new tempos always start on a beat */
 	where.ticks = 0;
-
-	TempoSection* ts = new TempoSection (where, tempo.beats_per_minute(), tempo.note_type());
+	TempoSection* ts = new TempoSection (where, tempo.beats_per_minute(), tempo.note_type(), type);
 
 	/* find the meter to use to set the bar offset of this
 	 * tempo section.
@@ -768,38 +916,6 @@ TempoMap::first_tempo ()
 }
 
 void
-TempoMap::require_map_to (framepos_t pos)
-{
-	Glib::Threads::RWLock::WriterLock lm (lock);
-
-	if (_map.empty() || _map.back().frame < pos) {
-		extend_map (pos);
-	}
-}
-
-void
-TempoMap::require_map_to (const BBT_Time& bbt)
-{
-	Glib::Threads::RWLock::WriterLock lm (lock);
-
-	/* since we have no idea where BBT is if its off the map, see the last
-	 * point in the map is past BBT, and if not add an arbitrary amount of
-	 * time until it is.
-	 */
-
-	int additional_minutes = 1;
-
-	while (1) {
-		if (!_map.empty() && _map.back().bar >= (bbt.bars + 1)) {
-			break;
-		}
-		/* add some more distance, using bigger steps each time */
-		extend_map (_map.back().frame + (_frame_rate * 60 * additional_minutes));
-		additional_minutes *= 2;
-	}
-}
-
-void
 TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 {
 	/* CALLER MUST HOLD WRITE LOCK */
@@ -818,10 +934,12 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 		end = max_framepos;
 
 	} else {
+		/*
 		if (!_map.empty ()) {
-			/* never allow the map to be shortened */
+			/* never allow the map to be shortened /
 			end = max (end, _map.back().frame);
 		}
+		*/
 	}
 
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("recomputing tempo map, zero to %1\n", end));
@@ -857,7 +975,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	current.bars = 1;
 	current.beats = 1;
 	current.ticks = 0;
-
 	if (reassign_tempo_bbt) {
 
 		MeterSection* rmeter = meter;
@@ -892,10 +1009,7 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	++next_metric; // skip meter (or tempo)
 	++next_metric; // skip tempo (or meter)
 
-	_map.clear ();
-
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add first bar at 1|1 @ %2\n", current.bars, current_frame));
-	_map.push_back (BBTPoint (*meter, *tempo,(framepos_t) llrint(current_frame), 1, 1));
 
 	if (end == 0) {
 		/* silly call from Session::process() during startup
@@ -907,207 +1021,71 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 }
 
 void
-TempoMap::extend_map (framepos_t end)
-{
-	/* CALLER MUST HOLD WRITE LOCK */
-
-	if (_map.empty()) {
-		recompute_map (false, end);
-		return;
-	}
-
-	BBTPointList::const_iterator i = _map.end();
-	Metrics::iterator next_metric;
-
-	--i;
-
-	BBT_Time last_metric_start;
-
-	if ((*i).tempo->frame() > (*i).meter->frame()) {
-		last_metric_start = (*i).tempo->start();
-	} else {
-		last_metric_start = (*i).meter->start();
-	}
-
-	/* find the metric immediately after the tempo + meter sections for the
-	 * last point in the map
-	 */
-
-	for (next_metric = metrics.begin(); next_metric != metrics.end(); ++next_metric) {
-		if ((*next_metric)->start() > last_metric_start) {
-			break;
-		}
-	}
-
-	/* we cast away const here because this is the one place where we need
-	 * to actually modify the frame time of each metric section.
-	 */
-
-	_extend_map (const_cast<TempoSection*> ((*i).tempo),
-		     const_cast<MeterSection*> ((*i).meter),
-		     next_metric, BBT_Time ((*i).bar, (*i).beat, 0), (*i).frame, end);
-}
-
-void
 TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 		       Metrics::iterator next_metric,
 		       BBT_Time current, framepos_t current_frame, framepos_t end)
 {
 	/* CALLER MUST HOLD WRITE LOCK */
 
-	TempoSection* ts;
-	MeterSection* ms;
-	double beat_frames;
-	double current_frame_exact;
-	framepos_t bar_start_frame;
+	uint32_t first_tick_in_new_meter = 0;
+	Metrics::const_iterator i;
+	TempoSection* prev_ts = tempo;
 
-	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Extend map to %1 from %2 = %3\n", end, current, current_frame));
+	for (i = metrics.begin(); i != metrics.end(); ++i) {
+		MeterSection* m = 0;
 
-	if (current.beats == 1) {
-		bar_start_frame = current_frame;
-	} else {
-		bar_start_frame = 0;
-	}
+		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
 
-	beat_frames = meter->frames_per_grid (*tempo,_frame_rate);
-	current_frame_exact = current_frame;
+			if (m->start() >= prev_ts->start()) {
+				first_tick_in_new_meter = ((((m->start().bars - 1) * meter->divisions_per_bar()) + (m->start().beats - 1)) * BBT_Time::ticks_per_beat) + m->start().ticks; // expressed in ticks from the previous meter
+				for (i = metrics.begin(); i != metrics.end(); ++i) {
+					TempoSection* t;
 
-	while (current_frame < end) {
+					if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 
-		current.beats++;
-		current_frame_exact += beat_frames;
-		current_frame = llrint(current_frame_exact);
+						if (t->start() >= m->start() && t->start() > prev_ts->start()) {
+							//cerr << "new ts start bars = " << t->start().bars << " beats = " << t->start().beats << " ticks = " << t->start().ticks << endl;
+							//cerr << "prev ts start bars = " << prev_ts->start().bars << " beats = " << prev_ts->start().beats << " ticks = " << prev_ts->start().ticks << endl;
 
-		if (current.beats > meter->divisions_per_bar()) {
-			current.bars++;
-			current.beats = 1;
-		}
+							/*tempo section (t) lies in the previous meter */
+							double ticks_at_ts = ((((t->start().bars - 1 ) * meter->divisions_per_bar()) + (t->start().beats - 1) )  * BBT_Time::ticks_per_beat) + t->start().ticks;
 
-		if (next_metric != metrics.end()) {
 
-			/* no operator >= so invert operator < */
+							double ticks_at_prev_ts = ((((prev_ts->start().bars - 1) * meter->divisions_per_bar()) + (prev_ts->start().beats - 1))  * BBT_Time::ticks_per_beat) + prev_ts->start().ticks;
 
-			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("now at %1 next metric @ %2\n", current, (*next_metric)->start()));
+							double ticks_relative_to_prev_ts = ticks_at_ts - ticks_at_prev_ts;
+							/* assume (falsely) that the target tempo is constant */
+							double length_estimate = (ticks_relative_to_prev_ts /  BBT_Time::ticks_per_beat) * meter->frames_per_grid (*t, _frame_rate);
+							double system_precision_at_target_tempo =  (_frame_rate / t->ticks_per_minute());
+							cerr << " system_precision_at_target_tempo = " << system_precision_at_target_tempo << endl;
+							double tick_error = system_precision_at_target_tempo + 1.0; // sorry for the wtf
 
-			if (!(current < (*next_metric)->start())) {
+							while (fabs (tick_error) >= system_precision_at_target_tempo) {
 
-		set_metrics:
-				if (((ts = dynamic_cast<TempoSection*> (*next_metric)) != 0)) {
+								double actual_ticks = prev_ts->tick_at_frame (length_estimate, t->beats_per_minute(), (framepos_t) length_estimate, _frame_rate);
+								tick_error = ticks_relative_to_prev_ts - actual_ticks;
+								length_estimate += (tick_error / BBT_Time::ticks_per_beat) * meter->frames_per_grid (*t, _frame_rate);
+								cerr << "actual ticks = " << actual_ticks << endl;
 
-					tempo = ts;
+								cerr << "tick error  = " << tick_error << endl;
+							}
+							t->set_frame (length_estimate + prev_ts->frame());
 
-					/* new tempo section: if its on a beat,
-					 * we don't have to do anything other
-					 * than recompute various distances,
-					 * done further below as we transition
-					 * the next metric section.
-					 *
-					 * if its not on the beat, we have to
-					 * compute the duration of the beat it
-					 * is within, which will be different
-					 * from the preceding following ones
-					 * since it takes part of its duration
-					 * from the preceding tempo and part
-					 * from this new tempo.
-					 */
-
-					if (tempo->start().ticks != 0) {
-
-						double next_beat_frames = tempo->frames_per_beat (_frame_rate);
-
-						DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into non-beat-aligned tempo metric at %1 = %2, adjust next beat using %3\n",
-						                                               tempo->start(), current_frame, tempo->bar_offset()));
-
-						/* back up to previous beat */
-						current_frame_exact -= beat_frames;
-						current_frame = llrint(current_frame_exact);
-
-						/* set tempo section location
-						 * based on offset from last
-						 * bar start
-						 */
-						tempo->set_frame (bar_start_frame +
-						                  llrint ((ts->bar_offset() * meter->divisions_per_bar() * beat_frames)));
-
-						/* advance to the location of
-						 * the new (adjusted) beat. do
-						 * this by figuring out the
-						 * offset within the beat that
-						 * would have been there
-						 * without the tempo
-						 * change. then stretch the
-						 * beat accordingly.
-						 */
-
-						double offset_within_old_beat = (tempo->frame() - current_frame) / beat_frames;
-
-						current_frame_exact += (offset_within_old_beat * beat_frames) + ((1.0 - offset_within_old_beat) * next_beat_frames);
-						current_frame = llrint(current_frame_exact);
-
-						/* next metric doesn't have to
-						 * match this precisely to
-						 * merit a reloop ...
-						 */
-						DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Adjusted last beat to %1\n", current_frame));
-
-					} else {
-
-						DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into beat-aligned tempo metric at %1 = %2\n",
-						                                               tempo->start(), current_frame));
-						tempo->set_frame (current_frame);
+							if (m->start() < t->start() && m->start() == prev_ts->start()) {
+								m->set_frame (prev_ts->frame());
+							} else if (m->start() < t->start() && m->start() > prev_ts->start()) {
+								m->set_frame (prev_ts->frame_at_tick ((first_tick_in_new_meter - ticks_at_prev_ts), t->beats_per_minute(), (framepos_t) length_estimate, _frame_rate));
+							}
+						}
+						prev_ts = t;
 					}
-
-				} else if ((ms = dynamic_cast<MeterSection*>(*next_metric)) != 0) {
-
-					meter = ms;
-
-					/* new meter section: always defines the
-					 * start of a bar.
-					 */
-
-					DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into meter section at %1 vs %2 (%3)\n",
-					                                               meter->start(), current, current_frame));
-
-					assert (current.beats == 1);
-
-					meter->set_frame (current_frame);
 				}
-
-				beat_frames = meter->frames_per_grid (*tempo, _frame_rate);
-
-				DEBUG_TRACE (DEBUG::TempoMath, string_compose ("New metric with beat frames = %1 dpb %2 meter %3 tempo %4\n",
-				                                               beat_frames, meter->divisions_per_bar(), *((Meter*)meter), *((Tempo*)tempo)));
-
-				++next_metric;
-
-				if (next_metric != metrics.end() && ((*next_metric)->start() == current)) {
-					/* same position so go back and set this one up before advancing
-					 */
-					goto set_metrics;
-				}
-
 			}
-		}
-
-		if (current.beats == 1) {
-			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Bar at %1|1 @ %2\n", current.bars, current_frame));
-			_map.push_back (BBTPoint (*meter, *tempo, current_frame, current.bars, 1));
-			bar_start_frame = current_frame;
-		} else {
-			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Beat at %1|%2 @ %3\n", current.bars, current.beats, current_frame));
-			_map.push_back (BBTPoint (*meter, *tempo, current_frame, current.bars, current.beats));
-		}
-
-		if (next_metric == metrics.end()) {
-			/* no more metrics - we've timestamped them all, stop here */
-			if (end == max_framepos) {
-				DEBUG_TRACE (DEBUG::TempoMath, string_compose ("stop extending map now that we've reach the end @ %1|%2 = %3\n",
-				                                               current.bars, current.beats, current_frame));
-				break;
-			}
+			meter = m;
 		}
 	}
 }
+
 
 TempoMetric
 TempoMap::metric_at (framepos_t frame, Metrics::const_iterator* last) const
@@ -1168,8 +1146,6 @@ TempoMap::metric_at (BBT_Time bbt) const
 void
 TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt)
 {
-	require_map_to (frame);
-
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
 	if (frame < 0) {
@@ -1179,40 +1155,262 @@ TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt)
 		warning << string_compose (_("tempo map asked for BBT time at frame %1\n"), frame) << endmsg;
 		return;
 	}
-
-	return bbt_time (frame, bbt, bbt_before_or_at (frame));
+	bbt = beats_to_bbt (beat_at_frame (frame));
 }
 
-void
-TempoMap::bbt_time_rt (framepos_t frame, BBT_Time& bbt)
+int32_t
+TempoMap::bars_in_meter_section (MeterSection* ms) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
+	/* YOU MUST HAVE THE READ LOCK */
+	Metrics::const_iterator i;
 
-	if (!lm.locked()) {
-		throw std::logic_error ("TempoMap::bbt_time_rt() could not lock tempo map");
+	MeterSection* next_ms = 0;
+	const MeterSection* prev_ms = &first_meter();
+
+	for (i = metrics.begin(); i != metrics.end(); ++i) {
+		MeterSection* m;
+		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
+			if (ms->frame() < m->frame()) {
+				next_ms = m;
+				break;
+			}
+			prev_ms = m;
+		}
 	}
+	if (next_ms) {
+		double ticks_at_next = tick_at_frame (next_ms->frame());
+		double ticks_at_prev = tick_at_frame (prev_ms->frame());
+		double ticks_in_meter = ticks_at_next - ticks_at_prev;
 
-	if (_map.empty() || _map.back().frame < frame) {
-		throw std::logic_error (string_compose ("map not long enough to reach %1", frame));
+		return (int32_t) floor ((ticks_in_meter / BBT_Time::ticks_per_beat) / prev_ms->note_divisor());
 	}
-
-	return bbt_time (frame, bbt, bbt_before_or_at (frame));
+	return -1;
 }
 
-void
-TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt, const BBTPointList::const_iterator& i)
+Timecode::BBT_Time
+TempoMap::beats_to_bbt (double beats)
 {
-	/* CALLER MUST HOLD READ LOCK */
+	/* CALLER HOLDS READ LOCK */
+	BBT_Time ret;
+	MeterSection* prev_ms = &first_meter();
 
-	bbt.bars = (*i).bar;
-	bbt.beats = (*i).beat;
+	framecnt_t frame = frame_at_beat (beats);
+	uint32_t cnt = 0;
 
-	if ((*i).frame == frame) {
-		bbt.ticks = 0;
-	} else {
-		bbt.ticks = llrint (((frame - (*i).frame) / (*i).tempo->frames_per_beat(_frame_rate)) *
-		                    BBT_Time::ticks_per_beat);
+	if (n_meters() < 2) {
+		uint32_t bars = (uint32_t) floor (beats / prev_ms->note_divisor());
+		double remaining_beats = beats - (bars *  prev_ms->note_divisor());
+		double remaining_ticks = (remaining_beats - floor (remaining_beats)) * BBT_Time::ticks_per_beat;
+
+		ret.ticks = (uint32_t) floor (remaining_ticks + 0.5);
+		ret.beats = (uint32_t) floor (remaining_beats);
+		ret.bars = bars;
+
+		/* 0 0 0 to 1 1 0 - based mapping*/
+		++ret.bars;
+		++ret.beats;
+
+		if (ret.ticks >= BBT_Time::ticks_per_beat) {
+			++ret.beats;
+			ret.ticks -= BBT_Time::ticks_per_beat;
+		}
+
+		if (ret.beats > prev_ms->note_divisor()) {
+			++ret.bars;
+			ret.beats = 1;
+		}
+
+		return ret;
 	}
+
+	uint32_t first_beat_in_meter = 0;
+	uint32_t accumulated_bars = 0;
+	Metrics::const_iterator i;
+
+	for (i = metrics.begin(); i != metrics.end(); ++i) {
+		MeterSection* m = 0;
+
+		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
+			first_beat_in_meter = beat_at_frame (m->frame());
+
+			if (beats < first_beat_in_meter) {
+				/* this is the meter after the one our beat is on*/
+				break;
+			}
+			int32_t const bars_in_ms = bars_in_meter_section (m);
+
+			if (bars_in_ms > 0) {
+				accumulated_bars += bars_in_ms;
+			}
+
+			prev_ms = m;
+			++cnt;
+		}
+	}
+	//cerr << "beats to bbr with beats = " << beats << " first_beat_in_meter =  " << first_beat_in_meter << " accumulated_bars = " << accumulated_bars <<  endl;
+
+	if (beats > first_beat_in_meter) {
+		/* prev_ms is the relevant one here */
+
+		/* now get the ticks at frame */
+		double ticks_at_frame = tick_at_frame (frame);
+
+		/* find the number of ticks at the beginning of the meter section (bar 1)*/
+		double ticks_at_ms = tick_at_frame (prev_ms->frame());
+
+		double beats_used_by_ms = (ticks_at_frame - ticks_at_ms) / BBT_Time::ticks_per_beat;
+
+		uint32_t bars = (uint32_t) floor (beats_used_by_ms / prev_ms->note_divisor());
+		double remaining_beats = beats_used_by_ms - (bars *  prev_ms->note_divisor());
+		double remaining_ticks = (remaining_beats - floor (remaining_beats)) * BBT_Time::ticks_per_beat;
+
+		ret.bars = bars + accumulated_bars;
+		ret.beats = (uint32_t) floor (remaining_beats);
+		ret.ticks = (uint32_t) floor (remaining_ticks + 0.5);
+
+		/* now ensure we srtart at 1 1 0 */
+		++ret.bars;
+		++ret.beats;
+		//cerr << "part 1 ret bars = " << ret.bars << " ret beats = " << ret.beats << " ret ticks = " << ret.ticks << endl;
+		if (ret.ticks >= BBT_Time::ticks_per_beat) {
+			++ret.beats;
+			ret.ticks -= BBT_Time::ticks_per_beat;
+		}
+
+		if (ret.beats > prev_ms->note_divisor()) {
+			++ret.bars;
+			ret.beats = 1;
+		}
+
+		return ret;
+	}
+
+	/* find the number of ticks at the beginning of the meter section (bar 1)*/
+	double ticks_at_ms = tick_at_frame (prev_ms->frame());
+
+	/* now get the ticks at frame */
+	double ticks_at_frame = tick_at_frame (frame);
+
+	double ticks_within_ms = ticks_at_frame - ticks_at_ms;
+
+	ret.bars = (uint32_t) floor (((ticks_within_ms / BBT_Time::ticks_per_beat) / prev_ms->note_divisor())) + accumulated_bars;
+	uint32_t remaining_ticks = ticks_within_ms - (ret.bars * prev_ms->note_divisor() * BBT_Time::ticks_per_beat);
+	ret.beats = (uint32_t) floor (remaining_ticks);
+	remaining_ticks -= ret.beats * BBT_Time::ticks_per_beat;
+
+	/* only round ticks */
+	ret.ticks = (uint32_t) floor (remaining_ticks + 0.5);
+
+	/* now ensure we srtart at 1 1 0 */
+	++ret.bars;
+	++ret.beats;
+	if (ret.ticks >= BBT_Time::ticks_per_beat) {
+		++ret.beats;
+		ret.ticks -= BBT_Time::ticks_per_beat;
+	}
+
+	if (ret.beats > prev_ms->note_divisor()) {
+		++ret.bars;
+		ret.beats = 1;
+	}
+
+	return ret;
+}
+
+double
+TempoMap::tick_at_frame (framecnt_t frame) const
+{
+	Metrics::const_iterator i;
+	const TempoSection* prev_ts = &first_tempo();
+	double accumulated_ticks = 0.0;
+	uint32_t cnt = 0;
+
+	for (i = metrics.begin(); i != metrics.end(); ++i) {
+		TempoSection* t;
+
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+
+			if (frame < t->frame()) {
+				/*the previous ts is the one containing the frame */
+
+				framepos_t time = frame - prev_ts->frame();
+				framepos_t last_frame = t->frame() - prev_ts->frame();
+				double last_beats_per_minute = t->beats_per_minute();
+
+				return prev_ts->tick_at_frame (time, last_beats_per_minute, last_frame, _frame_rate) + accumulated_ticks;
+			}
+
+			if (cnt > 0 && t->frame() > prev_ts->frame()) {
+				framepos_t time = t->frame() - prev_ts->frame();
+				framepos_t last_frame = t->frame() - prev_ts->frame();
+				double last_beats_per_minute = t->beats_per_minute();
+				accumulated_ticks += prev_ts->tick_at_frame (time, last_beats_per_minute, last_frame, _frame_rate);
+			}
+
+			prev_ts = t;
+			++cnt;
+		}
+	}
+
+	/* treated s linear for this ts */
+	framecnt_t frames_in_section = frame - prev_ts->frame();
+	double ticks_in_section = (frames_in_section / prev_ts->frames_per_beat (_frame_rate)) * Timecode::BBT_Time::ticks_per_beat;
+
+	return ticks_in_section + accumulated_ticks;
+
+}
+
+framecnt_t
+TempoMap::frame_at_tick (double tick) const
+{
+	double accumulated_ticks = 0.0;
+	const TempoSection* prev_ts =  &first_tempo();
+	uint32_t cnt = 0;
+
+	Metrics::const_iterator i;
+
+	for (i = metrics.begin(); i != metrics.end(); ++i) {
+		TempoSection* t;
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+
+			if (cnt > 0 && t->frame() > prev_ts->frame()) {
+				framepos_t time = t->frame() - prev_ts->frame();
+				framepos_t last_time = t->frame() - prev_ts->frame();
+				double last_beats_per_minute = t->beats_per_minute();
+				accumulated_ticks += prev_ts->tick_at_frame (time, last_beats_per_minute, last_time, _frame_rate);
+			}
+
+			if (tick < accumulated_ticks) {
+				/* prev_ts is the one affecting us. */
+
+				double ticks_in_section = tick - tick_at_frame (prev_ts->frame());
+				framepos_t section_start = prev_ts->frame();
+				framepos_t last_time = t->frame() - prev_ts->frame();
+				double last_beats_per_minute = t->beats_per_minute();
+				return prev_ts->frame_at_tick (ticks_in_section, last_beats_per_minute, last_time, _frame_rate) + section_start;
+			}
+
+			prev_ts = t;
+			++cnt;
+		}
+	}
+	double ticks_in_section = tick - tick_at_frame (prev_ts->frame());
+	double dtime = (ticks_in_section / BBT_Time::ticks_per_beat) * prev_ts->frames_per_beat(_frame_rate);
+	framecnt_t ret = ((framecnt_t) floor (dtime)) + prev_ts->frame();
+
+	return ret;
+}
+
+double
+TempoMap::beat_at_frame (framecnt_t frame) const
+{
+	return tick_at_frame (frame) / BBT_Time::ticks_per_beat;
+}
+
+framecnt_t
+TempoMap::frame_at_beat (double beat) const
+{
+	return frame_at_tick (beat * BBT_Time::ticks_per_beat);
 }
 
 framepos_t
@@ -1227,69 +1425,112 @@ TempoMap::frame_time (const BBT_Time& bbt)
 		throw std::logic_error ("beats are counted from one");
 	}
 
-	require_map_to (bbt);
-
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	BBTPointList::const_iterator s = bbt_before_or_at (BBT_Time (1, 1, 0));
-	BBTPointList::const_iterator e = bbt_before_or_at (BBT_Time (bbt.bars, bbt.beats, 0));
+	Metrics::const_iterator i;
+	uint32_t accumulated_bars = 0;
 
-	if (bbt.ticks != 0) {
-		return ((*e).frame - (*s).frame) +
-			llrint ((*e).tempo->frames_per_beat (_frame_rate) * (bbt.ticks/BBT_Time::ticks_per_beat));
-	} else {
-		return ((*e).frame - (*s).frame);
+	MeterSection* prev_ms = &first_meter();
+
+	for (i = metrics.begin(); i != metrics.end(); ++i) {
+		MeterSection* m;
+		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
+			int32_t const bims = bars_in_meter_section (m);
+
+			if (bims < 0 || bbt.bars <= (accumulated_bars + bims)) {
+				break;
+			}
+			if (bims > 0 ) {
+				accumulated_bars += bims;
+			}
+			prev_ms = m;
+		}
 	}
+
+	uint32_t remaining_bars = bbt.bars - accumulated_bars - 1; // back to zero - based bars
+	double const ticks_within_prev_taken_by_remaining_bars = remaining_bars * prev_ms->note_divisor() * BBT_Time::ticks_per_beat;
+	double const ticks_after_space_used_by_bars = ((bbt.beats - 1) * BBT_Time::ticks_per_beat) + bbt.ticks; // back to zero - based beats
+	double const ticks_target = ticks_within_prev_taken_by_remaining_bars + ticks_after_space_used_by_bars;
+
+	TempoSection* prev_ts = &first_tempo();
+	double accumulated_ticks = 0.0;
+	uint32_t cnt = 0;
+
+	for (i = metrics.begin(); i != metrics.end(); ++i) {
+		TempoSection* t;
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if (t->frame() < prev_ms->frame()) {
+				continue;
+			}
+
+			if (cnt > 0 && t->frame() > prev_ts->frame()) {
+				/*find the number of ticke in this section */
+				framepos_t const time = t->frame() - prev_ts->frame();
+				framepos_t const last_time = t->frame() - prev_ts->frame();
+				double const last_beats_per_minute = t->beats_per_minute();
+				accumulated_ticks += prev_ts->tick_at_frame (time, last_beats_per_minute, last_time, _frame_rate);
+			}
+
+			if (ticks_target < accumulated_ticks) {
+				double const ticks_in_section = ticks_target - tick_at_frame (prev_ts->frame());
+				framepos_t const section_start_time = prev_ts->frame();
+				framepos_t const last_time = t->frame() - prev_ts->frame();
+				double const last_beats_per_minute = t->beats_per_minute();
+				framepos_t const ret = prev_ts->frame_at_tick (ticks_in_section, last_beats_per_minute, last_time, _frame_rate) + section_start_time;
+				return ret;
+			}
+
+			prev_ts = t;
+			++cnt;
+		}
+	}
+
+	/*treat this ts as constant tempo */
+	double const ticks_in_this_ts = ticks_target - tick_at_frame (prev_ts->frame());
+	double const dtime = (ticks_in_this_ts / BBT_Time::ticks_per_beat) * prev_ts->frames_per_beat(_frame_rate);
+	framecnt_t const ret = ((framecnt_t) floor (dtime)) + prev_ts->frame();
+	return ret;
 }
+
 
 framecnt_t
 TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 {
-	BBT_Time when;
-	bbt_time (pos, when);
 
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return bbt_duration_at_unlocked (when, bbt, dir);
-}
 
-framecnt_t
-TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, int /*dir*/)
-{
-	if (bbt.bars == 0 && bbt.beats == 0 && bbt.ticks == 0) {
-		return 0;
-	}
+	Metrics::const_iterator i;
+	TempoSection* first = 0;
+	TempoSection* second = 0;
 
-	/* round back to the previous precise beat */
-	BBTPointList::const_iterator wi = bbt_before_or_at (BBT_Time (when.bars, when.beats, 0));
-	BBTPointList::const_iterator start (wi);
+	for (i = metrics.begin(); i != metrics.end(); ++i) {
+		TempoSection* t;
 
-	assert (wi != _map.end());
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 
-	uint32_t bars = 0;
-	uint32_t beats = 0;
+			if ((*i)->frame() > pos) {
+				second = t;
+				break;
+			}
 
-	while (wi != _map.end() && bars < bbt.bars) {
-		++wi;
-		if ((*wi).is_bar()) {
-			++bars;
+			first = t;
 		}
 	}
-	assert (wi != _map.end());
+	if (first && second) {
+		framepos_t const last_time = second->frame() - first->frame();
+		double const last_beats_per_minute = second->beats_per_minute();
 
-	while (wi != _map.end() && beats < bbt.beats) {
-		++wi;
-		++beats;
+		framepos_t const time = pos - first->frame();
+		double const tick_at_time = first->tick_at_frame (time, last_beats_per_minute, last_time, _frame_rate);
+		double const bbt_ticks = bbt.ticks + (bbt.beats * BBT_Time::ticks_per_beat);
+
+		double const time_at_bbt = first->frame_at_tick (tick_at_time + bbt_ticks, last_beats_per_minute, last_time, _frame_rate);
+
+		return time_at_bbt - time;
 	}
-	assert (wi != _map.end());
 
-	/* add any additional frames related to ticks in the added value */
-
-	if (bbt.ticks != 0) {
-		return ((*wi).frame - (*start).frame) +
-			(*wi).tempo->frames_per_beat (_frame_rate) * (bbt.ticks/BBT_Time::ticks_per_beat);
-	} else {
-		return ((*wi).frame - (*start).frame);
-	}
+	double const ticks = bbt.ticks + (bbt.beats * BBT_Time::ticks_per_beat);
+	return (framecnt_t) floor ((ticks / BBT_Time::ticks_per_beat) * first->frames_per_beat(_frame_rate));
 }
 
 framepos_t
@@ -1307,52 +1548,38 @@ TempoMap::round_to_beat (framepos_t fr, RoundMode dir)
 framepos_t
 TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 {
-	require_map_to (fr);
+	uint32_t ticks = (uint32_t) floor (tick_at_frame (fr) + 0.5);
+	uint32_t beats = (uint32_t) floor (ticks / BBT_Time::ticks_per_beat);
+	uint32_t ticks_one_subdivisions_worth = (uint32_t)BBT_Time::ticks_per_beat / sub_num;
 
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-	BBTPointList::const_iterator i = bbt_before_or_at (fr);
-	BBT_Time the_beat;
-	uint32_t ticks_one_subdivisions_worth;
-
-	bbt_time (fr, the_beat, i);
-
-	DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("round %1 to nearest 1/%2 beat, before-or-at = %3 @ %4|%5 precise = %6\n",
-						     fr, sub_num, (*i).frame, (*i).bar, (*i).beat, the_beat));
-
-	ticks_one_subdivisions_worth = (uint32_t)BBT_Time::ticks_per_beat / sub_num;
+	ticks -= beats * BBT_Time::ticks_per_beat;
 
 	if (dir > 0) {
-
 		/* round to next (or same iff dir == RoundUpMaybe) */
 
-		uint32_t mod = the_beat.ticks % ticks_one_subdivisions_worth;
+		uint32_t mod = ticks % ticks_one_subdivisions_worth;
 
 		if (mod == 0 && dir == RoundUpMaybe) {
 			/* right on the subdivision, which is fine, so do nothing */
 
 		} else if (mod == 0) {
 			/* right on the subdivision, so the difference is just the subdivision ticks */
-			the_beat.ticks += ticks_one_subdivisions_worth;
+			ticks += ticks_one_subdivisions_worth;
 
 		} else {
 			/* not on subdivision, compute distance to next subdivision */
 
-			the_beat.ticks += ticks_one_subdivisions_worth - mod;
+			ticks += ticks_one_subdivisions_worth - mod;
 		}
 
-		if (the_beat.ticks > BBT_Time::ticks_per_beat) {
-			assert (i != _map.end());
-			++i;
-			assert (i != _map.end());
-			the_beat.ticks -= BBT_Time::ticks_per_beat;
+		if (ticks >= BBT_Time::ticks_per_beat) {
+			ticks -= BBT_Time::ticks_per_beat;
 		}
-
-
 	} else if (dir < 0) {
 
 		/* round to previous (or same iff dir == RoundDownMaybe) */
 
-		uint32_t difference = the_beat.ticks % ticks_one_subdivisions_worth;
+		uint32_t difference = ticks % ticks_one_subdivisions_worth;
 
 		if (difference == 0 && dir == RoundDownAlways) {
 			/* right on the subdivision, but force-rounding down,
@@ -1360,236 +1587,136 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 			difference = ticks_one_subdivisions_worth;
 		}
 
-		if (the_beat.ticks < difference) {
-			if (i == _map.begin()) {
-				/* can't go backwards from wherever pos is, so just return it */
-				return fr;
-			}
-			--i;
-			the_beat.ticks = BBT_Time::ticks_per_beat - the_beat.ticks;
+		if (ticks < difference) {
+			ticks = BBT_Time::ticks_per_beat - ticks;
 		} else {
-			the_beat.ticks -= difference;
+			ticks -= difference;
 		}
 
 	} else {
 		/* round to nearest */
-
 		double rem;
 
 		/* compute the distance to the previous and next subdivision */
 
-		if ((rem = fmod ((double) the_beat.ticks, (double) ticks_one_subdivisions_worth)) > ticks_one_subdivisions_worth/2.0) {
+		if ((rem = fmod ((double) ticks, (double) ticks_one_subdivisions_worth)) > ticks_one_subdivisions_worth/2.0) {
 
 			/* closer to the next subdivision, so shift forward */
 
-			the_beat.ticks = lrint (the_beat.ticks + (ticks_one_subdivisions_worth - rem));
+			ticks = lrint (ticks + (ticks_one_subdivisions_worth - rem));
 
-			DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("moved forward to %1\n", the_beat.ticks));
+			DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("moved forward to %1\n", ticks));
 
-			if (the_beat.ticks > BBT_Time::ticks_per_beat) {
-				assert (i != _map.end());
-				++i;
-				assert (i != _map.end());
-				the_beat.ticks -= BBT_Time::ticks_per_beat;
-				DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("fold beat to %1\n", the_beat));
+			if (ticks > BBT_Time::ticks_per_beat) {
+				++beats;
+				ticks -= BBT_Time::ticks_per_beat;
+				DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("fold beat to %1\n", beats));
 			}
 
 		} else if (rem > 0) {
 
 			/* closer to previous subdivision, so shift backward */
 
-			if (rem > the_beat.ticks) {
-				if (i == _map.begin()) {
+			if (rem > ticks) {
+				if (beats == 0) {
 					/* can't go backwards past zero, so ... */
 					return 0;
 				}
 				/* step back to previous beat */
-				--i;
-				the_beat.ticks = lrint (BBT_Time::ticks_per_beat - rem);
-				DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("step back beat to %1\n", the_beat));
+				--beats;
+				ticks = lrint (BBT_Time::ticks_per_beat - rem);
+				DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("step back beat to %1\n", beats));
 			} else {
-				the_beat.ticks = lrint (the_beat.ticks - rem);
-				DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("moved backward to %1\n", the_beat.ticks));
+				ticks = lrint (ticks - rem);
+				DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("moved backward to %1\n", ticks));
 			}
 		} else {
 			/* on the subdivision, do nothing */
 		}
 	}
-
-	return (*i).frame + (the_beat.ticks/BBT_Time::ticks_per_beat) *
-		(*i).tempo->frames_per_beat (_frame_rate);
+	return frame_at_tick ((beats * BBT_Time::ticks_per_beat) + ticks);
 }
 
 framepos_t
 TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 {
-	require_map_to (frame);
-
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	BBTPointList::const_iterator fi;
 
-	if (dir > 0) {
-		fi = bbt_after_or_at (frame);
-	} else {
-		fi = bbt_before_or_at (frame);
-	}
+	double const beat_at_framepos = beat_at_frame (frame);
 
-	assert (fi != _map.end());
-
-	DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("round from %1 (%3|%4 @ %5) to %6 in direction %2\n", frame, dir, (*fi).bar, (*fi).beat, (*fi).frame,
-						     (type == Bar ? "bar" : "beat")));
+	BBT_Time bbt (beats_to_bbt (beat_at_framepos));
 
 	switch (type) {
 	case Bar:
 		if (dir < 0) {
 			/* find bar previous to 'frame' */
-
-			if (fi == _map.begin()) {
-				return 0;
-			}
-
-			if ((*fi).is_bar() && (*fi).frame == frame) {
-				if (dir == RoundDownMaybe) {
-					return frame;
-				}
-				--fi;
-			}
-
-			while (!(*fi).is_bar()) {
-				if (fi == _map.begin()) {
-					break;
-				}
-				fi--;
-			}
-			DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("rounded to bar: map iter at %1|%2 %3, return\n",
-								     (*fi).bar, (*fi).beat, (*fi).frame));
-			return (*fi).frame;
+			bbt.beats = 1;
+			bbt.ticks = 0;
+			return frame_time (bbt);
 
 		} else if (dir > 0) {
-
 			/* find bar following 'frame' */
-
-			if ((*fi).is_bar() && (*fi).frame == frame) {
-				if (dir == RoundUpMaybe) {
-					return frame;
-				}
-				++fi;
-			}
-
-			while (!(*fi).is_bar()) {
-				fi++;
-				if (fi == _map.end()) {
-					--fi;
-					break;
-				}
-			}
-
-			DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("rounded to bar: map iter at %1|%2 %3, return\n",
-								     (*fi).bar, (*fi).beat, (*fi).frame));
-			return (*fi).frame;
-
+			++bbt.bars;
+			bbt.beats = 1;
+			bbt.ticks = 0;
+			return frame_time (bbt);
 		} else {
-
 			/* true rounding: find nearest bar */
 
-			BBTPointList::const_iterator prev = fi;
-			BBTPointList::const_iterator next = fi;
+			framepos_t raw_ft = frame_time (bbt);
+			bbt.beats = 1;
+			bbt.ticks = 0;
+			framepos_t prev_ft = frame_time (bbt);
+			++bbt.bars;
+			framepos_t next_ft = frame_time (bbt);
 
-			if ((*fi).frame == frame) {
-				return frame;
-			}
-
-			while ((*prev).beat != 1) {
-				if (prev == _map.begin()) {
-					break;
-				}
-				prev--;
-			}
-
-			while ((next != _map.end()) && (*next).beat != 1) {
-				next++;
-			}
-
-			if ((next == _map.end()) || (frame - (*prev).frame) < ((*next).frame - frame)) {
-				return (*prev).frame;
+			if ((raw_ft - prev_ft) > (next_ft - prev_ft) / 2) { 
+				return next_ft;
 			} else {
-				return (*next).frame;
+				return prev_ft;
 			}
-
 		}
 
 		break;
 
 	case Beat:
 		if (dir < 0) {
-
-			if (fi == _map.begin()) {
-				return 0;
-			}
-
-			if ((*fi).frame > frame || ((*fi).frame == frame && dir == RoundDownAlways)) {
-				DEBUG_TRACE (DEBUG::SnapBBT, "requested frame is on beat, step back\n");
-				--fi;
-			}
-			DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("rounded to beat: map iter at %1|%2 %3, return\n",
-								     (*fi).bar, (*fi).beat, (*fi).frame));
-			return (*fi).frame;
+			return frame_at_beat (floor (beat_at_framepos));
 		} else if (dir > 0) {
-			if ((*fi).frame < frame || ((*fi).frame == frame && dir == RoundUpAlways)) {
-				DEBUG_TRACE (DEBUG::SnapBBT, "requested frame is on beat, step forward\n");
-				++fi;
-			}
-			DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("rounded to beat: map iter at %1|%2 %3, return\n",
-								     (*fi).bar, (*fi).beat, (*fi).frame));
-			return (*fi).frame;
+			return frame_at_beat (ceil (beat_at_framepos));
 		} else {
-			/* find beat nearest to frame */
-			if ((*fi).frame == frame) {
-				return frame;
-			}
-
-			BBTPointList::const_iterator prev = fi;
-			BBTPointList::const_iterator next = fi;
-
-			/* fi is already the beat before_or_at frame, and
-			   we've just established that its not at frame, so its
-			   the beat before frame.
-			*/
-			++next;
-
-			if ((next == _map.end()) || (frame - (*prev).frame) < ((*next).frame - frame)) {
-				return (*prev).frame;
-			} else {
-				return (*next).frame;
-			}
+			return frame_at_beat (floor (beat_at_framepos + 0.5));
 		}
 		break;
 	}
 
-	abort(); /* NOTREACHED */
 	return 0;
 }
 
 void
-TempoMap::get_grid (TempoMap::BBTPointList::const_iterator& begin,
-		    TempoMap::BBTPointList::const_iterator& end,
+TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 		    framepos_t lower, framepos_t upper)
 {
-	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
-		if (_map.empty() || (_map.back().frame < upper)) {
-			recompute_map (false, upper);
-		}
-	}
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+	uint32_t const upper_beat = (uint32_t) floor (beat_at_frame (upper));
+	uint32_t cnt = (uint32_t) ceil (beat_at_frame (lower));
 
-	begin = lower_bound (_map.begin(), _map.end(), lower);
-	end = upper_bound (_map.begin(), _map.end(), upper);
+	while (cnt <= upper_beat) {
+		framecnt_t const pos = frame_at_beat (cnt);
+		MeterSection const meter = meter_section_at (pos);
+		Tempo const tempo = tempo_at (pos);
+		BBT_Time const bbt = beats_to_bbt ((double) cnt);
+
+		points.push_back (BBTPoint (meter, tempo, pos, bbt.bars, bbt.beats));
+		++cnt;
+	}
 }
 
 const TempoSection&
 TempoMap::tempo_section_at (framepos_t frame) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
+
 	Metrics::const_iterator i;
 	TempoSection* prev = 0;
 
@@ -1614,11 +1741,34 @@ TempoMap::tempo_section_at (framepos_t frame) const
 	return *prev;
 }
 
-const Tempo&
+const Tempo
 TempoMap::tempo_at (framepos_t frame) const
 {
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
 	TempoMetric m (metric_at (frame));
+	TempoSection* prev_ts = 0;
+
+	Metrics::const_iterator i;
+
+	for (i = metrics.begin(); i != metrics.end(); ++i) {
+		TempoSection* t;
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if ((prev_ts) && t->frame() > frame) {
+				/* this is the one past frame */
+				framepos_t const time = frame - prev_ts->frame();
+				framepos_t const last_time = t->frame() - prev_ts->frame();
+				double const last_beats_per_minute = t->beats_per_minute();
+				double const ret = prev_ts->tempo_at_frame (time, last_beats_per_minute, last_time, _frame_rate);
+				Tempo const ret_tempo (ret, m.tempo().note_type ());
+				return ret_tempo;
+			}
+			prev_ts = t;
+		}
+	}
+
 	return m.tempo();
+
 }
 
 const MeterSection&
@@ -1856,8 +2006,7 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
 				// which is correct for our purpose
 			}
 
-			BBTPointList::const_iterator bi = bbt_before_or_at ((*i)->frame());
-			bbt_time ((*i)->frame(), bbt, bi);
+			bbt_time ((*i)->frame(), bbt);
 
 			// cerr << "timestamp @ " << (*i)->frame() << " with " << bbt.bars << "|" << bbt.beats << "|" << bbt.ticks << " => ";
 
@@ -1970,205 +2119,14 @@ TempoMap::remove_time (framepos_t where, framecnt_t amount)
 framepos_t
 TempoMap::framepos_plus_beats (framepos_t pos, Evoral::Beats beats) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-	Metrics::const_iterator next_tempo;
-	const TempoSection* tempo = 0;
-
-	/* Find the starting tempo metric */
-
-	for (next_tempo = metrics.begin(); next_tempo != metrics.end(); ++next_tempo) {
-
-		const TempoSection* t;
-
-		if ((t = dynamic_cast<const TempoSection*>(*next_tempo)) != 0) {
-
-			/* This is a bit of a hack, but pos could be -ve, and if it is,
-			   we consider the initial metric changes (at time 0) to actually
-			   be in effect at pos.
-			*/
-
-			framepos_t f = (*next_tempo)->frame ();
-
-			if (pos < 0 && f == 0) {
-				f = pos;
-			}
-
-			if (f > pos) {
-				break;
-			}
-
-			tempo = t;
-		}
-	}
-
-	/* We now have:
-
-	   tempo       -> the Tempo for "pos"
-	   next_tempo  -> first tempo after "pos", possibly metrics.end()
-	*/
-	assert(tempo);
-
-	DEBUG_TRACE (DEBUG::TempoMath,
-	             string_compose ("frame %1 plus %2 beats, start with tempo = %3 @ %4\n",
-	                             pos, beats, *((const Tempo*)tempo), tempo->frame()));
-
-	while (!!beats) {
-
-		/* Distance to the end of this section in frames */
-		framecnt_t distance_frames = (next_tempo == metrics.end() ? max_framepos : ((*next_tempo)->frame() - pos));
-
-		/* Distance to the end in beats */
-		Evoral::Beats distance_beats = Evoral::Beats::ticks_at_rate(
-			distance_frames, tempo->frames_per_beat (_frame_rate));
-
-		/* Amount to subtract this time */
-		Evoral::Beats const delta = min (distance_beats, beats);
-
-		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tdistance to %1 = %2 (%3 beats)\n",
-							       (next_tempo == metrics.end() ? max_framepos : (*next_tempo)->frame()),
-							       distance_frames, distance_beats));
-
-		/* Update */
-		beats -= delta;
-		pos += delta.to_ticks(tempo->frames_per_beat (_frame_rate));
-
-		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tnow at %1, %2 beats left\n", pos, beats));
-
-		/* step forwards to next tempo section */
-
-		if (next_tempo != metrics.end()) {
-
-			tempo = dynamic_cast<const TempoSection*>(*next_tempo);
-
-			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tnew tempo = %1 @ %2 fpb = %3\n",
-								       *((const Tempo*)tempo), tempo->frame(),
-								       tempo->frames_per_beat (_frame_rate)));
-
-			while (next_tempo != metrics.end ()) {
-
-				++next_tempo;
-
-				if (next_tempo != metrics.end() && dynamic_cast<const TempoSection*>(*next_tempo)) {
-					break;
-				}
-			}
-		}
-	}
-
-	return pos;
+	return frame_at_beat (beat_at_frame (pos) + beats.to_double());
 }
 
 /** Subtract some (fractional) beats from a frame position, and return the result in frames */
 framepos_t
 TempoMap::framepos_minus_beats (framepos_t pos, Evoral::Beats beats) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-	Metrics::const_reverse_iterator prev_tempo;
-	const TempoSection* tempo = 0;
-
-	/* Find the starting tempo metric */
-
-	for (prev_tempo = metrics.rbegin(); prev_tempo != metrics.rend(); ++prev_tempo) {
-
-		const TempoSection* t;
-
-		if ((t = dynamic_cast<const TempoSection*>(*prev_tempo)) != 0) {
-
-			/* This is a bit of a hack, but pos could be -ve, and if it is,
-			   we consider the initial metric changes (at time 0) to actually
-			   be in effect at pos.
-			*/
-
-			framepos_t f = (*prev_tempo)->frame ();
-
-			if (pos < 0 && f == 0) {
-				f = pos;
-			}
-
-			/* this is slightly more complex than the forward case
-			   because we reach the tempo in effect at pos after
-			   passing through pos (rather before, as in the
-			   forward case). having done that, we then need to
-			   keep going to get the previous tempo (or
-			   metrics.rend())
-			*/
-
-			if (f <= pos) {
-				if (tempo == 0) {
-					/* first tempo with position at or
-					   before pos
-					*/
-					tempo = t;
-				} else if (f < pos) {
-					/* some other tempo section that
-					   is even earlier than 'tempo'
-					*/
-					break;
-				}
-			}
-		}
-	}
-
-	assert(tempo);
-	DEBUG_TRACE (DEBUG::TempoMath,
-	             string_compose ("frame %1 minus %2 beats, start with tempo = %3 @ %4 prev at beg? %5\n",
-	                             pos, beats, *((const Tempo*)tempo), tempo->frame(),
-	                             prev_tempo == metrics.rend()));
-
-	/* We now have:
-
-	   tempo       -> the Tempo for "pos"
-	   prev_tempo  -> the first metric before "pos", possibly metrics.rend()
-	*/
-
-	while (!!beats) {
-
-		/* Distance to the start of this section in frames */
-		framecnt_t distance_frames = (pos - tempo->frame());
-
-		/* Distance to the start in beats */
-		Evoral::Beats distance_beats = Evoral::Beats::ticks_at_rate(
-			distance_frames, tempo->frames_per_beat (_frame_rate));
-
-		/* Amount to subtract this time */
-		Evoral::Beats const sub = min (distance_beats, beats);
-
-		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tdistance to %1 = %2 (%3 beats)\n",
-							       tempo->frame(), distance_frames, distance_beats));
-		/* Update */
-
-		beats -= sub;
-		pos -= sub.to_double() * tempo->frames_per_beat (_frame_rate);
-
-		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tnow at %1, %2 beats left, prev at end ? %3\n", pos, beats,
-							       (prev_tempo == metrics.rend())));
-
-		/* step backwards to prior TempoSection */
-
-		if (prev_tempo != metrics.rend()) {
-
-			tempo = dynamic_cast<const TempoSection*>(*prev_tempo);
-
-			DEBUG_TRACE (DEBUG::TempoMath,
-			             string_compose ("\tnew tempo = %1 @ %2 fpb = %3\n",
-			                             *((const Tempo*)tempo), tempo->frame(),
-			                             tempo->frames_per_beat (_frame_rate)));
-
-			while (prev_tempo != metrics.rend ()) {
-
-				++prev_tempo;
-
-				if (prev_tempo != metrics.rend() && dynamic_cast<const TempoSection*>(*prev_tempo) != 0) {
-					break;
-				}
-			}
-		} else {
-			pos -= llrint (beats.to_double() * tempo->frames_per_beat (_frame_rate));
-			beats = Evoral::Beats();
-		}
-	}
-
-	return pos;
+	return frame_at_beat (beat_at_frame (pos) - beats.to_double());
 }
 
 /** Add the BBT interval op to pos and return the result */
@@ -2305,6 +2263,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 	}
 
 	return pos;
+
 }
 
 /** Count the number of beats that are equivalent to distance when going forward,
@@ -2313,126 +2272,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 Evoral::Beats
 TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-	Metrics::const_iterator next_tempo;
-	const TempoSection* tempo = 0;
-	framepos_t effective_pos = max (pos, (framepos_t) 0);
-
-	/* Find the relevant initial tempo metric  */
-
-	for (next_tempo = metrics.begin(); next_tempo != metrics.end(); ++next_tempo) {
-
-		const TempoSection* t;
-
-		if ((t = dynamic_cast<const TempoSection*>(*next_tempo)) != 0) {
-
-			if ((*next_tempo)->frame() > effective_pos) {
-				break;
-			}
-
-			tempo = t;
-		}
-	}
-
-	/* We now have:
-
-	   tempo -> the Tempo for "pos"
-	   next_tempo -> the next tempo after "pos", possibly metrics.end()
-	*/
-	assert (tempo);
-
-	DEBUG_TRACE (DEBUG::TempoMath,
-	             string_compose ("frame %1 walk by %2 frames, start with tempo = %3 @ %4\n",
-	                             pos, distance, *((const Tempo*)tempo), tempo->frame()));
-
-	Evoral::Beats beats = Evoral::Beats();
-
-	while (distance) {
-
-		/* End of this section */
-		framepos_t end;
-		/* Distance to `end' in frames */
-		framepos_t distance_to_end;
-
-		if (next_tempo == metrics.end ()) {
-			/* We can't do (end - pos) if end is max_framepos, as it will overflow if pos is -ve */
-			end = max_framepos;
-			distance_to_end = max_framepos;
-		} else {
-			end = (*next_tempo)->frame ();
-			distance_to_end = end - pos;
-		}
-
-		/* Amount to subtract this time in frames */
-		framecnt_t const sub = min (distance, distance_to_end);
-
-		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("to reach end at %1 (end ? %2), distance= %3 sub=%4\n", end, (next_tempo == metrics.end()),
-							       distance_to_end, sub));
-
-		/* Update */
-		pos += sub;
-		distance -= sub;
-		assert (tempo);
-		beats += Evoral::Beats::ticks_at_rate(sub, tempo->frames_per_beat (_frame_rate));
-
-		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("now at %1, beats = %2 distance left %3\n",
-							       pos, beats, distance));
-
-		/* Move on if there's anything to move to */
-
-		if (next_tempo != metrics.end()) {
-
-			tempo = dynamic_cast<const TempoSection*>(*next_tempo);
-
-			DEBUG_TRACE (DEBUG::TempoMath,
-			             string_compose ("\tnew tempo = %1 @ %2 fpb = %3\n",
-			                             *((const Tempo*)tempo), tempo->frame(),
-			                             tempo->frames_per_beat (_frame_rate)));
-
-			while (next_tempo != metrics.end ()) {
-
-				++next_tempo;
-
-				if (next_tempo != metrics.end() && dynamic_cast<const TempoSection*>(*next_tempo)) {
-					break;
-				}
-			}
-
-			if (next_tempo == metrics.end()) {
-				DEBUG_TRACE (DEBUG::TempoMath, "no more tempo sections\n");
-			} else {
-				DEBUG_TRACE (DEBUG::TempoMath, string_compose ("next tempo section is %1 @ %2\n",
-									       **next_tempo, (*next_tempo)->frame()));
-			}
-
-		}
-		assert (tempo);
-	}
-
-	return beats;
-}
-
-TempoMap::BBTPointList::const_iterator
-TempoMap::bbt_before_or_at (framepos_t pos)
-{
-	/* CALLER MUST HOLD READ LOCK */
-
-	BBTPointList::const_iterator i;
-
-	if (pos < 0) {
-		/* not really correct, but we should catch pos < 0 at a higher
-		   level
-		*/
-		return _map.begin();
-	}
-
-	i = lower_bound (_map.begin(), _map.end(), pos);
-	assert (i != _map.end());
-	if ((*i).frame > pos) {
-		assert (i != _map.begin());
-		--i;
-	}
-	return i;
+	return Evoral::Beats(beat_at_frame (pos + distance) - beat_at_frame (pos));
 }
 
 struct bbtcmp {
@@ -2440,40 +2280,6 @@ struct bbtcmp {
 	    return a < b;
     }
 };
-
-TempoMap::BBTPointList::const_iterator
-TempoMap::bbt_before_or_at (const BBT_Time& bbt)
-{
-	BBTPointList::const_iterator i;
-	bbtcmp cmp;
-
-	i = lower_bound (_map.begin(), _map.end(), bbt, cmp);
-	assert (i != _map.end());
-	if ((*i).bar > bbt.bars || (*i).beat > bbt.beats) {
-		assert (i != _map.begin());
-		--i;
-	}
-	return i;
-}
-
-TempoMap::BBTPointList::const_iterator
-TempoMap::bbt_after_or_at (framepos_t pos)
-{
-	/* CALLER MUST HOLD READ LOCK */
-
-	BBTPointList::const_iterator i;
-
-	if (_map.back().frame == pos) {
-		i = _map.end();
-		assert (i != _map.begin());
-		--i;
-		return i;
-	}
-
-	i = upper_bound (_map.begin(), _map.end(), pos);
-	assert (i != _map.end());
-	return i;
-}
 
 std::ostream&
 operator<< (std::ostream& o, const Meter& m) {

@@ -223,9 +223,29 @@ intptr_t Session::vst_callback (
 				Timecode::BBT_Time bbt;
 
 				try {
-					session->tempo_map().bbt_time_rt (now, bbt);
-					double ppqBar;
-					double ppqPos = vst_ppq (tm, bbt, ppqBar);
+					session->tempo_map().bbt_time (now, bbt);
+
+					/* PPQ = pulse per quarter
+					 * VST's "pulse" is our "division".
+					 *
+					 * 8 divisions per bar, 1 division = quarter, so 8 quarters per bar, ppq = 1
+					 * 8 divisions per bar, 1 division = eighth, so  4 quarters per bar, ppq = 2
+					 * 4 divisions per bar, 1 division = quarter, so  4 quarters per bar, ppq = 1
+					 * 4 divisions per bar, 1 division = half, so 8 quarters per bar, ppq = 0.5
+					 * 4 divisions per bar, 1 division = fifth, so (4 * 5/4) quarters per bar, ppq = 5/4
+					 *
+					 * general: divs_per_bar / (note_type / 4.0)
+					 */
+					double ppq_scaling =  tm.meter().note_divisor() / 4.0;
+
+					/* Note that this assumes constant meter/tempo throughout the session. Stupid VST */
+					double ppqBar = double(bbt.bars - 1) * tm.meter().divisions_per_bar();
+					double ppqBeat = double(bbt.beats - 1);
+					double ppqTick = double(bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
+
+					ppqBar *= ppq_scaling;
+					ppqBeat *= ppq_scaling;
+					ppqTick *= ppq_scaling;
 
 					if (value & (kVstPpqPosValid)) {
 						timeinfo->ppqPos = ppqPos;

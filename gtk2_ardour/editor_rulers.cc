@@ -710,15 +710,13 @@ Editor::update_fixed_rulers ()
 }
 
 void
-Editor::update_tempo_based_rulers (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
-				    ARDOUR::TempoMap::BBTPointList::const_iterator& end)
+Editor::update_tempo_based_rulers (std::vector<TempoMap::BBTPoint>& grid)
 {
 	if (_session == 0) {
 		return;
 	}
 
-	compute_bbt_ruler_scale (leftmost_frame, leftmost_frame+current_page_samples(),
-				 begin, end);
+	compute_bbt_ruler_scale (grid, leftmost_frame, leftmost_frame+current_page_samples());
 
 	_bbt_metric->units_per_pixel = samples_per_pixel;
 
@@ -1011,19 +1009,19 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 }
 
 void
-Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
-				 ARDOUR::TempoMap::BBTPointList::const_iterator begin,
-				 ARDOUR::TempoMap::BBTPointList::const_iterator end)
+Editor::compute_bbt_ruler_scale (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, framepos_t lower, framepos_t upper)
 {
 	if (_session == 0) {
 		return;
 	}
 
-	TempoMap::BBTPointList::const_iterator i;
+	std::vector<TempoMap::BBTPoint>::const_iterator i;
 	Timecode::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
+	framecnt_t beat_before_lower_pos = _session->tempo_map().frame_at_beat (floor(_session->tempo_map().beat_at_frame (lower)));
+	framecnt_t beat_after_upper_pos = _session->tempo_map().frame_at_beat (floor (_session->tempo_map().beat_at_frame (upper)) + 1.0);
 
-	_session->bbt_time (lower, lower_beat);
-	_session->bbt_time (upper, upper_beat);
+	_session->bbt_time (beat_before_lower_pos, lower_beat);
+	_session->bbt_time (beat_after_upper_pos, upper_beat);
 	uint32_t beats = 0;
 
 	bbt_accent_modulo = 1;
@@ -1103,19 +1101,21 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
                 bbt_beat_subdivision = 4;
 		break;
 	}
-
-	if (distance (begin, end) == 0) {
+	if (distance (grid.begin(), grid.end()) == 0) {
 		return;
 	}
 
-	i = end;
+	i = grid.end();
 	i--;
-	if ((*i).beat >= (*begin).beat) {
-		bbt_bars = (*i).bar - (*begin).bar;
+
+	/* XX ?? */
+	if ((*i).beat >= (*grid.begin()).beat) {
+		bbt_bars = (*i).bar - (*grid.begin()).bar;
 	} else {
-		bbt_bars = (*i).bar - (*begin).bar - 1;
+		bbt_bars = (*i).bar - (*grid.begin()).bar;
 	}
-	beats = distance (begin, end) - bbt_bars;
+
+	beats = distance (grid.begin(), grid.end()) - bbt_bars;
 
 	/* Only show the bar helper if there aren't many bars on the screen */
 	if ((bbt_bars < 2) || (beats < 5)) {
@@ -1140,7 +1140,7 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
 		bbt_ruler_scale =  bbt_show_ticks_detail;
 	}
 
-	if ((bbt_ruler_scale == bbt_show_ticks_detail) && (lower_beat.beats == upper_beat.beats) && (upper_beat.ticks - lower_beat.ticks <= Timecode::BBT_Time::ticks_per_beat / 4)) {
+	if ((bbt_ruler_scale == bbt_show_ticks_detail) && beats < 3) {
 		bbt_ruler_scale =  bbt_show_ticks_super_detail;
 	}
 }
@@ -1161,38 +1161,34 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		return;
 	}
 
-	TempoMap::BBTPointList::const_iterator i;
+	std::vector<TempoMap::BBTPoint>::const_iterator i;
 
 	char buf[64];
 	gint  n = 0;
 	framepos_t pos;
 	Timecode::BBT_Time next_beat;
-	framepos_t next_beat_pos;
 	uint32_t beats = 0;
 	uint32_t tick = 0;
 	uint32_t skip;
 	uint32_t t;
-	framepos_t frame_skip;
-	double frame_skip_error;
 	double bbt_position_of_helper;
-	double accumulated_error;
 	bool i_am_accented = false;
 	bool helper_active = false;
 	ArdourCanvas::Ruler::Mark mark;
 
-	ARDOUR::TempoMap::BBTPointList::const_iterator begin;
-	ARDOUR::TempoMap::BBTPointList::const_iterator end;
+	std::vector<TempoMap::BBTPoint> grid;
 
-	compute_current_bbt_points (lower, upper, begin, end);
+	compute_current_bbt_points (grid, lower, upper);
 
-	if (distance (begin, end) == 0) {
+	if (distance (grid.begin(), grid.end()) == 0) {
 		return;
 	}
 
 	switch (bbt_ruler_scale) {
 
 	case bbt_show_beats:
-		beats = distance (begin, end);
+
+		beats = distance (grid.begin(), grid.end());
 		bbt_nmarks = beats + 2;
 
 		mark.label = "";
@@ -1200,7 +1196,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		mark.style = ArdourCanvas::Ruler::Mark::Micro;
 		marks.push_back (mark);
 
-		for (n = 1, i = begin; n < bbt_nmarks && i != end; ++i) {
+		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
@@ -1228,7 +1224,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 
 	case bbt_show_ticks:
 
-		beats = distance (begin, end);
+		beats = distance (grid.begin(), grid.end());
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
 
 		bbt_position_of_helper = lower + (30 * Editor::get_current_zoom ());
@@ -1240,7 +1236,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		mark.style = ArdourCanvas::Ruler::Mark::Micro;
 		marks.push_back (mark);
 
-		for (n = 1, i = begin; n < bbt_nmarks && i != end; ++i) {
+		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
@@ -1265,45 +1261,20 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 			}
 
 			/* Add the tick marks */
+			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
+			tick = skip; // the first non-beat tick
+			t = 0;
+			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
 
-			/* Find the next beat */
-			next_beat.beats = (*i).beat;
-			next_beat.bars = (*i).bar;
-			next_beat.ticks = 0;
+				next_beat.beats = (*i).beat;
+				next_beat.bars = (*i).bar;
+				next_beat.ticks = tick;
+				pos = _session->tempo_map().frame_time (next_beat);
 
-			if ((*i).meter->divisions_per_bar() > (next_beat.beats + 1)) {
-				  next_beat.beats += 1;
-			} else {
-				  next_beat.bars += 1;
-				  next_beat.beats = 1;
-			}
-
-			next_beat_pos = _session->tempo_map().frame_time(next_beat);
-
-			frame_skip = (framepos_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
-			frame_skip_error -= frame_skip;
-			skip = (uint32_t) (Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision);
-
-			pos = (*i).frame + frame_skip;
-			accumulated_error = frame_skip_error;
-
-			tick = skip;
-
-			for (t = 0; (tick < Timecode::BBT_Time::ticks_per_beat) && (n < bbt_nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
-
-			        if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
+				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
 					i_am_accented = true;
 				}
-
 				mark.label = "";
-
-				/* Error compensation for float to framepos_t*/
-				accumulated_error += frame_skip_error;
-				if (accumulated_error > 1) {
-					pos += 1;
-					accumulated_error -= 1.0f;
-				}
-
 				mark.position = pos;
 
 				if ((bbt_beat_subdivision > 4) && i_am_accented) {
@@ -1313,7 +1284,10 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 				}
 				i_am_accented = false;
 				marks.push_back (mark);
-				n++;
+
+				tick += skip;
+				++t;
+				++n;
 			}
 		}
 
@@ -1321,17 +1295,17 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 
 	case bbt_show_ticks_detail:
 
-		beats = distance (begin, end);
+		beats = distance (grid.begin(), grid.end());
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
 
-		bbt_position_of_helper = lower + (30 * Editor::get_current_zoom ());
+		bbt_position_of_helper = lower + (3 * Editor::get_current_zoom ());
 
 		mark.label = "";
 		mark.position = lower;
 		mark.style = ArdourCanvas::Ruler::Mark::Micro;
 		marks.push_back (mark);
 
-		for (n = 1,   i = begin; n < bbt_nmarks && i != end; ++i) {
+		for (n = 1,   i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 			        snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
@@ -1356,36 +1330,20 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 			}
 
 			/* Add the tick marks */
+			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
+			tick = skip; // the first non-beat tick
 
-			/* Find the next beat */
+			t = 0;
+			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
 
-			next_beat.beats = (*i).beat;
-			next_beat.bars = (*i).bar;
+				next_beat.beats = (*i).beat;
+				next_beat.bars = (*i).bar;
+				next_beat.ticks = tick;
+				pos = _session->tempo_map().frame_time (next_beat);
 
-			if ((*i).meter->divisions_per_bar() > (next_beat.beats + 1)) {
-				  next_beat.beats += 1;
-			} else {
-				  next_beat.bars += 1;
-				  next_beat.beats = 1;
-			}
-
-			next_beat_pos = _session->tempo_map().frame_time(next_beat);
-
-			frame_skip = (framepos_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
-			frame_skip_error -= frame_skip;
-			skip = (uint32_t) (Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision);
-
-			pos = (*i).frame + frame_skip;
-			accumulated_error = frame_skip_error;
-
-			tick = skip;
-
-			for (t = 0; (tick < Timecode::BBT_Time::ticks_per_beat) && (n < bbt_nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
-
-			        if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
-				        i_am_accented = true;
+				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
+					i_am_accented = true;
 				}
-
 				if (i_am_accented && (pos > bbt_position_of_helper)){
 				        snprintf (buf, sizeof(buf), "%" PRIu32, tick);
 				} else {
@@ -1393,14 +1351,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 				}
 
 				mark.label = buf;
-
-				/* Error compensation for float to framepos_t*/
-				accumulated_error += frame_skip_error;
-				if (accumulated_error > 1) {
-				        pos += 1;
-					accumulated_error -= 1.0f;
-				}
-
 				mark.position = pos;
 
 				if ((bbt_beat_subdivision > 4) && i_am_accented) {
@@ -1409,7 +1359,11 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 					mark.style = ArdourCanvas::Ruler::Mark::Micro;
 				}
 				i_am_accented = false;
-				n++;
+				marks.push_back (mark);
+
+				tick += skip;
+				++t;
+				++n;
 			}
 		}
 
@@ -1417,17 +1371,17 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 
 	case bbt_show_ticks_super_detail:
 
-		beats = distance (begin, end);
+		beats = distance (grid.begin(), grid.end());
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
 
-		bbt_position_of_helper = lower + (30 * Editor::get_current_zoom ());
+		bbt_position_of_helper = lower + (3 * Editor::get_current_zoom ());
 
 		mark.label = "";
 		mark.position = lower;
 		mark.style = ArdourCanvas::Ruler::Mark::Micro;
 		marks.push_back (mark);
 
-		for (n = 1,   i = begin; n < bbt_nmarks && i != end; ++i) {
+		for (n = 1,   i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				  snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
@@ -1452,61 +1406,40 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 			}
 
 			/* Add the tick marks */
-
-			/* Find the next beat */
+			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
 
 			next_beat.beats = (*i).beat;
 			next_beat.bars = (*i).bar;
+			tick = skip; // the first non-beat tick
+			t = 0;
+			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
 
-			if ((*i).meter->divisions_per_bar() > (next_beat.beats + 1)) {
-				  next_beat.beats += 1;
-			} else {
-				  next_beat.bars += 1;
-				  next_beat.beats = 1;
-			}
+				next_beat.ticks = tick;
+				pos = _session->tempo_map().frame_time (next_beat);
+				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
+					i_am_accented = true;
+				}
 
-			next_beat_pos = _session->tempo_map().frame_time(next_beat);
+				if (pos > bbt_position_of_helper) {
+					snprintf (buf, sizeof(buf), "%" PRIu32, tick);
+				} else {
+					buf[0] = '\0';
+				}
 
-			frame_skip = (framepos_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
-			frame_skip_error -= frame_skip;
-			skip = (uint32_t) (Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision);
+				mark.label = buf;
+				mark.position = pos;
 
-			pos = (*i).frame + frame_skip;
-			accumulated_error = frame_skip_error;
+				if ((bbt_beat_subdivision > 4) && i_am_accented) {
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Micro;
+				}
+				i_am_accented = false;
+				marks.push_back (mark);
 
-			tick = skip;
-
-			for (t = 0; (tick < Timecode::BBT_Time::ticks_per_beat) && (n < bbt_nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
-
-				  if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
-					  i_am_accented = true;
-				  }
-
-				  if (pos > bbt_position_of_helper) {
- 					  snprintf (buf, sizeof(buf), "%" PRIu32, tick);
-				  } else {
-					  buf[0] = '\0';
-				  }
-
-				  mark.label = buf;
-
-				  /* Error compensation for float to framepos_t*/
-				  accumulated_error += frame_skip_error;
-				  if (accumulated_error > 1) {
-					  pos += 1;
-					  accumulated_error -= 1.0f;
-				  }
-
-				  mark.position = pos;
-
-				  if ((bbt_beat_subdivision > 4) && i_am_accented) {
-					  mark.style = ArdourCanvas::Ruler::Mark::Minor;
-				  } else {
-					  mark.style = ArdourCanvas::Ruler::Mark::Micro;
-				  }
-				  i_am_accented = false;
-				  marks.push_back (mark);
-				  n++;
+				tick += skip;
+				++t;
+				++n;
 			}
 		}
 
@@ -1523,7 +1456,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 
 	case bbt_show_64:
         		bbt_nmarks = (gint) (bbt_bars / 64) + 1;
-			for (n = 0,   i = begin; i != end && n < bbt_nmarks; i++) {
+			for (n = 0,   i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
 				if ((*i).is_bar()) {
 					if ((*i).bar % 64 == 1) {
 						if ((*i).bar % 256 == 1) {
@@ -1548,7 +1481,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 
 	case bbt_show_16:
        		bbt_nmarks = (bbt_bars / 16) + 1;
-		for (n = 0,  i = begin; i != end && n < bbt_nmarks; i++) {
+		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
 		        if ((*i).is_bar()) {
 			  if ((*i).bar % 16 == 1) {
 			        if ((*i).bar % 64 == 1) {
@@ -1573,7 +1506,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 
 	case bbt_show_4:
 		bbt_nmarks = (bbt_bars / 4) + 1;
-		for (n = 0,   i = begin; i != end && n < bbt_nmarks; ++i) {
+		for (n = 0,   i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
 		        if ((*i).is_bar()) {
 			  if ((*i).bar % 4 == 1) {
 			        if ((*i).bar % 16 == 1) {
@@ -1599,7 +1532,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 	case bbt_show_1:
 //	default:
 	        bbt_nmarks = bbt_bars + 2;
-		for (n = 0,  i = begin; i != end && n < bbt_nmarks; ++i) {
+		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
 		        if ((*i).is_bar()) {
 			  if ((*i).bar % 4 == 1) {
 				        snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);

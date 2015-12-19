@@ -29,9 +29,8 @@ public:
 
 	void tempo_map_changed();
 
-	void draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
-	           const ARDOUR::TempoMap::BBTPointList::const_iterator& end,
-	           unsigned                                              divisions,
+	void draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
+		   unsigned                                              divisions,
 	           ARDOUR::framecnt_t                                    leftmost_frame,
 	           ARDOUR::framecnt_t                                    frame_rate);
 
@@ -39,8 +38,8 @@ public:
 	void hide();
 
 private:
-	void draw_ticks (const ARDOUR::TempoMap::BBTPointList::const_iterator& b,
-	                 unsigned                                              divisions,
+	void draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
+			 unsigned                                              divisions,
 	                 ARDOUR::framecnt_t                                    leftmost_frame,
 	                 ARDOUR::framecnt_t                                    frame_rate);
 
