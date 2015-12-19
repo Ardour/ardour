@@ -303,6 +303,10 @@ Strip::notify_all()
 		zero ();
 		return;
 	}
+	// The active V-pot control may not be active for this strip
+	// But if we zero it in the controls function it may erase
+	// the one we do want
+	_surface->write (_vpot->zero());
 
 	notify_solo_changed ();
 	notify_mute_changed ();
@@ -400,7 +404,6 @@ Strip::notify_trim_changed (bool force_update)
 	if (_route) {
 
 		if (!_route->trim() || !route()->trim()->active()) {
-			_surface->write (_vpot->zero());
 			return;
 		}
 		Control* control = 0;
@@ -437,7 +440,6 @@ Strip::notify_phase_changed (bool force_update)
 {
 	if (_route) {
 		if (!_route->phase_invert().size()) {
-			_surface->write (_vpot->zero());
 			return;
 		}
 
@@ -470,7 +472,6 @@ Strip::notify_processor_changed (bool force_update)
 	if (_route) {
 		boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
 		if (!p) {
-			_surface->write (_vpot->zero());
 			return;
 		}
 
@@ -656,7 +657,6 @@ Strip::notify_panner_azi_changed (bool force_update)
 	boost::shared_ptr<AutomationControl> pan_control = _route->pan_azimuth_control ();
 
 	if (!pan_control) {
-		_surface->write (_vpot->zero());
 		return;
 	}
 
@@ -702,7 +702,6 @@ Strip::notify_panner_width_changed (bool force_update)
 	boost::shared_ptr<AutomationControl> pan_control = _route->pan_width_control ();
 
 	if (!pan_control) {
-		_surface->write (_vpot->zero());
 		return;
 	}
 
