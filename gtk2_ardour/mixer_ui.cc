@@ -199,12 +199,8 @@ Mixer_UI::Mixer_UI ()
 	list_vpacker.pack_start (rhs_pane1, true, true);
 
 	global_hpacker.pack_start (scroller, true, true);
-#ifdef GTKOSX
-	/* current gtk-quartz has dirty updates on borders like this one */
 	global_hpacker.pack_start (out_packer, false, false, 0);
-#else
-	global_hpacker.pack_start (out_packer, false, false, 12);
-#endif
+
 	list_hpane.pack1(list_vpacker, false, true);
 	list_hpane.pack2(global_hpacker, true, false);
 

@@ -50,10 +50,7 @@ class MonitorSection : public RouteUI
 	std::string state_id() const;
 
 	private:
-	Gtk::VBox vpacker;
 	Gtk::HBox hpacker;
-	Gtk::VBox upper_packer;
-	Gtk::VBox lower_packer;
 	Gtkmm2ext::TearOff* _tearoff;
 
 	Gtk::HBox  channel_table_packer;
@@ -93,7 +90,6 @@ class MonitorSection : public RouteUI
 
 	void maybe_add_bundle_to_output_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &);
 	void bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle>);
-	void output_button_resized (Gtk::Allocation&);
 	void update_output_display ();
 	void disconnect_output ();
 	void edit_output_configuration ();
@@ -126,7 +122,7 @@ class MonitorSection : public RouteUI
 	ArdourButton solo_in_place_button;
 	ArdourButton afl_button;
 	ArdourButton pfl_button;
-	Gtk::HBox        solo_model_box;
+	Gtk::VBox    solo_model_box;
 
 	void solo_use_in_place ();
 	void solo_use_afl ();
