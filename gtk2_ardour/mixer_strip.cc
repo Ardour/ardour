@@ -96,6 +96,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, mute_solo_table (1, 2)
 	, bottom_button_table (1, 3)
 	, meter_point_button (_("pre"))
+	, monitor_section_button (0)
 	, midi_input_enable_button (0)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
@@ -126,6 +127,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, mute_solo_table (1, 2)
 	, bottom_button_table (1, 3)
 	, meter_point_button (_("pre"))
+	, monitor_section_button (0)
 	, midi_input_enable_button (0)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
@@ -491,13 +493,23 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	if (route()->is_master()) {
-		mute_solo_table.attach (*mute_button, 0, 2, 0, 1);
 		solo_button->hide ();
 		mute_button->show ();
 		rec_mon_table.hide ();
 		if (solo_iso_table.get_parent()) {
 			solo_iso_table.get_parent()->remove(solo_iso_table);
 		}
+		if (monitor_section_button == 0) {
+			Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
+			monitor_section_button = manage (new ArdourButton);
+			monitor_section_button->set_name ("monitor section button");
+			monitor_section_button->set_related_action (act);
+			set_tooltip (monitor_section_button, _("Show/Hide Monitoring Section"));
+			mute_solo_table.attach (*monitor_section_button, 1, 2, 0, 1);
+			monitor_section_button->show();
+			monitor_section_button->unset_flags (Gtk::CAN_FOCUS);
+		}
+		parameter_changed ("use-monitor-bus");
 	} else {
 		bottom_button_table.attach (group_button, 1, 2, 0, 1);
 		mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
@@ -2076,6 +2088,9 @@ MixerStrip::set_button_names ()
 		mute_button->set_text (_("Mute"));
 		monitor_input_button->set_text (_("In"));
 		monitor_disk_button->set_text (_("Disk"));
+		if (monitor_section_button) {
+			monitor_section_button->set_text (_("Mon"));
+		}
 
 		if (_route && _route->solo_safe()) {
 			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
@@ -2102,6 +2117,9 @@ MixerStrip::set_button_names ()
 		mute_button->set_text (S_("Mute|M"));
 		monitor_input_button->set_text (S_("MonitorInput|I"));
 		monitor_disk_button->set_text (S_("MonitorDisk|D"));
+		if (monitor_section_button) {
+			monitor_section_button->set_text (S_("Mon|O"));
+		}
 
 		if (_route && _route->solo_safe()) {
 			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
@@ -2198,6 +2216,25 @@ MixerStrip::parameter_changed (string p)
 	}
 	else if (p == "track-name-number") {
 		name_changed ();
+	}
+	else if (p == "use-monitor-bus") {
+		if (monitor_section_button) {
+			if (mute_button->get_parent()) {
+				mute_button->get_parent()->remove(*mute_button);
+			}
+			if (monitor_section_button->get_parent()) {
+				monitor_section_button->get_parent()->remove(*monitor_section_button);
+			}
+			if (_session->monitor_out()) {
+				mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
+				mute_solo_table.attach (*monitor_section_button, 1, 2, 0, 1);
+				mute_button->show();
+				monitor_section_button->show();
+			} else {
+				mute_solo_table.attach (*mute_button, 0, 2, 0, 1);
+				mute_button->show();
+			}
+		}
 	}
 }
 

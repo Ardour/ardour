@@ -203,6 +203,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_editing_space();
 	void toggle_mixer_space();
 	void toggle_mixer_list();
+	void toggle_monitor_section_visibility ();
 	void toggle_keep_tearoffs();
 
 	static PublicEditor* _instance;

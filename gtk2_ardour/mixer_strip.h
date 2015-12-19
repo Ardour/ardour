@@ -184,6 +184,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	ArdourButton input_button;
 	ArdourButton output_button;
 
+	ArdourButton* monitor_section_button;
+
 	void input_button_resized (Gtk::Allocation&);
 	void output_button_resized (Gtk::Allocation&);
 

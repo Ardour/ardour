@@ -597,3 +597,14 @@ ARDOUR_UI::toggle_mixer_list()
 			mixer->show_mixer_list (tact->get_active());
 	}
 }
+
+void
+ARDOUR_UI::toggle_monitor_section_visibility ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
+
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+			mixer->show_monitor_section (tact->get_active());
+	}
+}

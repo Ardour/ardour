@@ -259,6 +259,7 @@ Mixer_UI::Mixer_UI ()
 Mixer_UI::~Mixer_UI ()
 {
 	if (_monitor_section) {
+		monitor_section_detached ();
 		delete _monitor_section;
 	}
 	delete _plugin_selector;
@@ -363,6 +364,11 @@ Mixer_UI::add_strips (RouteList& routes)
 				out_packer.pack_end (_monitor_section->tearoff(), false, false);
 				_monitor_section->set_session (_session);
 				_monitor_section->tearoff().show_all ();
+
+				_monitor_section->tearoff().Detach.connect (sigc::mem_fun(*this, &Mixer_UI::monitor_section_detached));
+				_monitor_section->tearoff().Attach.connect (sigc::mem_fun(*this, &Mixer_UI::monitor_section_attached));
+
+				monitor_section_attached ();
 
 				route->DropReferences.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::monitor_section_going_away, this), gui_context());
 
@@ -803,9 +809,11 @@ Mixer_UI::session_going_away ()
 		delete (*i);
 	}
 
-        if (_monitor_section) {
-                _monitor_section->tearoff().hide_visible ();
-        }
+	if (_monitor_section) {
+		_monitor_section->tearoff().hide_visible ();
+	}
+
+	monitor_section_detached ();
 
 	strips.clear ();
 
@@ -1447,6 +1455,22 @@ Mixer_UI::show_mixer_list (bool yn)
 	_show_mixer_list = yn;
 }
 
+void
+Mixer_UI::show_monitor_section (bool yn)
+{
+	if (!monitor_section()) {
+		return;
+	}
+	if (monitor_section()->tearoff().torn_off()) {
+		return;
+	}
+
+	if (yn) {
+		monitor_section()->tearoff().show();
+	} else {
+		monitor_section()->tearoff().hide();
+	}
+}
 
 void
 Mixer_UI::route_group_name_edit (const std::string& path, const std::string& new_text)
@@ -1881,6 +1905,10 @@ Mixer_UI::parameter_changed (string const & p)
 		}
 	} else if (p == "remote-model") {
 		reset_remote_control_ids ();
+	} else if (p == "use-monitor-bus") {
+		if (!_session->monitor_out()) {
+			monitor_section_detached ();
+		}
 	}
 }
 
@@ -2026,6 +2054,7 @@ void
 Mixer_UI::monitor_section_going_away ()
 {
 	if (_monitor_section) {
+		monitor_section_detached ();
 		out_packer.remove (_monitor_section->tearoff());
 		_monitor_section->set_session (0);
 	}
@@ -2073,4 +2102,20 @@ Mixer_UI::restore_mixer_space ()
 	unfullscreen();
 
 	_maximised = false;
+}
+
+void
+Mixer_UI::monitor_section_attached ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	act->set_sensitive (true);
+	tact->set_active ();
+}
+
+void
+Mixer_UI::monitor_section_detached ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
+	act->set_sensitive (false);
 }

@@ -218,6 +218,9 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleMixerList"), _("Toggle Mixer List"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixer_list));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_toggle_action (common_actions, X_("ToggleMonitorSection"), _("Toggle Monitor Section Visibility"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_monitor_section_visibility));
+	act->set_sensitive (false);
+
 if (Profile->get_mixbus())
 	ActionManager::register_action (common_actions, X_("show-ui-prefs"), _("Show more UI preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_ui_prefs));
 

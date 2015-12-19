@@ -76,6 +76,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	int set_state (const XMLNode& );
 
 	void show_mixer_list (bool yn);
+	void show_monitor_section (bool);
 	
 	void show_window ();
 	bool hide_window (GdkEventAny *ev);
@@ -292,6 +293,9 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	bool _following_editor_selection;
 
 	void monitor_section_going_away ();
+
+	void monitor_section_attached ();
+	void monitor_section_detached ();
 
 	/// true if we are in fullscreen mode
 	bool _maximised;
