@@ -128,7 +128,7 @@ TempoSection::TempoSection (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("tempo-type")) == 0) {
-		_type = TempoSectionType::Ramp;
+		_type = TempoSectionType::Constant;
 	} else {
 		if (strstr(prop->value().c_str(),"Constant")) {
 			_type = TempoSectionType::Constant;
