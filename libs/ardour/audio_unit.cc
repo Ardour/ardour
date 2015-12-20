@@ -1810,8 +1810,8 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 			*outDeltaSampleOffsetToNextBeat = 0;
 		} else {
 			*outDeltaSampleOffsetToNextBeat = (UInt32)
-				floor (((Timecode::BBT_Time::ticks_per_beat - bbt.ticks)/Timecode::BBT_Time::ticks_per_beat) * // fraction of a beat to next beat
-				       metric.tempo().frames_per_beat (_session.frame_rate())); // frames per beat
+				double beat_frac_to_next = (Timecode::BBT_Time::ticks_per_beat - bbt.ticks) / Timecode::BBT_Time::ticks_per_beat ;
+				tmap.frame_at_beat (tmap.beat_at_frame (_session.transport_frame() + input_offset) + beat_frac_to_next);
 		}
 	}
 
