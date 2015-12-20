@@ -194,6 +194,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	when_beat_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	when_beat_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TempoDialog::entry_key_release), false);
 	pulse_selector.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::pulse_change));
+	tempo_type.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::tempo_type_change));
 	tap_tempo_button.signal_button_press_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_button_press), false);
 	tap_tempo_button.signal_focus_out_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_focus_out));
 
@@ -286,6 +287,12 @@ TempoDialog::get_tempo_type ()
 
 void
 TempoDialog::pulse_change ()
+{
+	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
+}
+
+void
+TempoDialog::tempo_type_change ()
 {
 	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 }

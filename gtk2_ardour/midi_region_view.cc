@@ -4123,7 +4123,7 @@ MidiRegionView::get_grid_beats(framepos_t pos) const
 {
 	PublicEditor& editor  = trackview.editor();
 	bool          success = false;
-	Evoral::Beats beats   = editor.get_grid_type_as_beats(success, pos);
+	Evoral::Beats beats   = editor.get_grid_type_as_beats (success, pos);
 	if (!success) {
 		beats = Evoral::Beats(1);
 	}

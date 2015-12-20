@@ -54,6 +54,7 @@ private:
 	bool bpm_button_release (GdkEventButton* );
 	bool entry_key_release (GdkEventKey* );
 	void pulse_change ();
+	void tempo_type_change ();
 	bool tap_tempo_button_press (GdkEventButton* );
 	bool tap_tempo_focus_out (GdkEventFocus* );
 

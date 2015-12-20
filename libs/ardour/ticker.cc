@@ -308,7 +308,7 @@ double
 MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
 {
 	const Tempo& current_tempo = _session->tempo_map().tempo_at (transport_position);
-	double frames_per_beat = current_tempo.frames_per_beat (_session->nominal_frame_rate());
+	double frames_per_beat = _session->tempo_map().frames_per_beat_at (transport_position, _session->nominal_frame_rate());
 
 	double quarter_notes_per_beat = 4.0 / current_tempo.note_type();
 	double frames_per_quarter_note = frames_per_beat / quarter_notes_per_beat;

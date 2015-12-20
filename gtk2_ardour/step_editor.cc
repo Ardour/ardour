@@ -118,7 +118,12 @@ StepEditor::prepare_step_edit_region ()
 		const Meter& m = _mtv.session()->tempo_map().meter_at (step_edit_insert_position);
 		const Tempo& t = _mtv.session()->tempo_map().tempo_at (step_edit_insert_position);
 
-		step_edit_region = _mtv.add_region (step_edit_insert_position, floor (m.frames_per_bar (t, _mtv.session()->frame_rate())), true);
+		double baf = _mtv.session()->tempo_map().beat_at_frame (step_edit_insert_position);
+		double next_bar_in_beats =  baf + m.divisions_per_bar();
+		framecnt_t next_bar_pos = _mtv.session()->tempo_map().frame_at_beat (next_bar_in_beats);
+		framecnt_t len = next_bar_pos - step_edit_insert_position;
+
+		step_edit_region = _mtv.add_region (step_edit_insert_position, len, true);
 
 		RegionView* rv = _mtv.midi_view()->find_view (step_edit_region);
 		step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
