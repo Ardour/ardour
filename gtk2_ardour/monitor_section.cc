@@ -333,13 +333,6 @@ MonitorSection::MonitorSection (Session* s)
 	rude_box->pack_start (rude_solo_button, true, true);
 	rude_box->pack_start (rude_iso_button, true, true);
 
-	// solo mode (SiP, AFL, PFL)
-	VBox* solo_mode_box = manage (new VBox);
-	solo_mode_box->set_spacing (PX_SCALE(3));
-	solo_mode_box->pack_start (solo_in_place_button, true, false);
-	solo_mode_box->pack_start (afl_button, true, false);
-	solo_mode_box->pack_start (pfl_button, true, false);
-
 	// solo options (right align)
 	HBox* tbx1 = manage (new HBox);
 	tbx1->pack_end (exclusive_solo_button, false, false);
@@ -347,16 +340,16 @@ MonitorSection::MonitorSection (Session* s)
 	HBox* tbx2 = manage (new HBox);
 	tbx2->pack_end (solo_mute_override_button, false, false);
 
-	VBox* solo_opt_box = manage (new VBox);
-	solo_opt_box->set_spacing (PX_SCALE(3));
-	solo_opt_box->pack_start (*tbx1, true, false);
-	solo_opt_box->pack_start (*tbx2, true, false);
+	HBox* tbx0 = manage (new HBox); // space
 
-	// combined solo mode & options
-	HBox* solo_box = manage (new HBox);
-	solo_box->set_spacing (PX_SCALE(4));
-	solo_box->pack_start (*solo_mode_box, true, false);
-	solo_box->pack_end (*solo_opt_box, true, true);
+	// combined solo mode (Sip, AFL, PFL) & solo options
+	Table *solo_tbl = manage (new Table);
+	solo_tbl->attach (solo_in_place_button,   0, 1, 0, 1, EXPAND|FILL, SHRINK, 0, 2);
+	solo_tbl->attach (pfl_button,             0, 1, 1, 2, EXPAND|FILL, SHRINK, 0, 2);
+	solo_tbl->attach (afl_button,             0, 1, 2, 3, EXPAND|FILL, SHRINK, 0, 2);
+	solo_tbl->attach (*tbx0,                  1, 2, 0, 3, EXPAND|FILL, SHRINK, 2, 2);
+	solo_tbl->attach (*tbx1,                  2, 3, 1, 2, EXPAND|FILL, SHRINK, 0, 2);
+	solo_tbl->attach (*tbx2,                  2, 3, 2, 3, EXPAND|FILL, SHRINK, 0, 2);
 
 	// boost, cut, dim  volume control
 	Table *level_tbl = manage (new Table);
@@ -416,7 +409,7 @@ MonitorSection::MonitorSection (Session* s)
 	vpacker->set_border_width (PX_SCALE(3));
 	vpacker->set_spacing (PX_SCALE(10));
 	vpacker->pack_start (*rude_box, false, false, PX_SCALE(3));
-	vpacker->pack_start (*solo_box, false, false);
+	vpacker->pack_start (*solo_tbl, false, false);
 	vpacker->pack_start (*level_tbl, false, false, PX_SCALE(16));
 	vpacker->pack_start (*lower_packer, true, false); // expand, center
 	vpacker->pack_end   (*out_packer, false, false, PX_SCALE(16));
@@ -438,7 +431,7 @@ MonitorSection::MonitorSection (Session* s)
 	channel_table.show ();
 
 	rude_box->show();
-	solo_box->show_all();
+	solo_tbl->show_all();
 	level_tbl->show();
 	lower_packer->show ();
 	out_packer->show ();
