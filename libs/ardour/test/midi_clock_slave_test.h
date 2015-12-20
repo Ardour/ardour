@@ -48,7 +48,7 @@ class TestSlaveSessionProxy : public ISlaveSessionProxy {
           meter             (4.0, 4.0)
         {
           _tempo_map = new TempoMap (FRAME_RATE);
-          _tempo_map->add_tempo (tempo, Timecode::BBT_Time(1, 1, 0));
+          _tempo_map->add_tempo (tempo, Timecode::BBT_Time(1, 1, 0), TempoSection::TempoSectionType::Constant);
           _tempo_map->add_meter (meter, Timecode::BBT_Time(1, 1, 0));
         }
 
