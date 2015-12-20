@@ -649,6 +649,7 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_T
 		} else {
 			{
 				/* cannot move the first tempo section */
+				first.set_type (type);
 				*static_cast<Tempo*>(&first) = tempo;
 				recompute_map (false);
 			}
