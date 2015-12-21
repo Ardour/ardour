@@ -19,7 +19,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'portaudio-2.0', uselib_store='PORTAUDIO', atleast_version='19')
     conf.check(header_name='pa_asio.h', define_name='WITH_ASIO', mandatory=False)
 
-def build(bld):
+def build_portaudio (bld, name, defines):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = [ 'portaudio_backend.cc',
                    'portaudio_io.cc',
@@ -29,8 +29,8 @@ def build(bld):
                    'midi_util.cc',
                  ]
     obj.includes = ['.']
-    obj.name     = 'portaudio_backend'
-    obj.target   = 'portaudio_backend'
+    obj.name     = name
+    obj.target   = name
     obj.use      = 'libardour libpbd'
     obj.uselib   = ['PORTAUDIO']
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
@@ -38,3 +38,8 @@ def build(bld):
                    'ARDOURBACKEND_DLL_EXPORTS',
                    'USE_MMCSS_THREAD_PRIORITIES'
                   ]
+    obj.defines += defines
+
+def build(bld):
+    build_portaudio (bld, 'portaudio_callback_backend', ['BACKEND_NAME="PortAudio (default)"'])
+    build_portaudio (bld, 'portaudio_blocking_backend', ['BACKEND_NAME="PortAudio (no-callback)"', 'USE_BLOCKING_API'])

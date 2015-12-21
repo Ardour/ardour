@@ -2001,7 +2001,7 @@ static bool already_configured ();
 static bool available ();
 
 static ARDOUR::AudioBackendInfo _descriptor = {
-	"PortAudio",
+	BACKEND_NAME,
 	instantiate,
 	deinstantiate,
 	backend_factory,
