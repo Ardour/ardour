@@ -1216,6 +1216,10 @@ ProcessorBox::build_possible_aux_menu ()
 		return 0;
 	}
 
+	if (_route->is_monitor ()) {
+		return 0;
+	}
+
 	using namespace Menu_Helpers;
 	Menu* menu = manage (new Menu);
 	MenuList& items = menu->items();
@@ -1261,6 +1265,9 @@ ProcessorBox::show_processor_menu (int arg)
 		}
 	}
 
+	ActionManager::get_action (X_("ProcessorMenu"), "newinsert")->set_sensitive (!_route->is_monitor ());
+	ActionManager::get_action (X_("ProcessorMenu"), "newsend")->set_sensitive (!_route->is_monitor ());
+
 	ProcessorEntry* single_selection = 0;
 	if (processor_display.selection().size() == 1) {
 		single_selection = processor_display.selection().front();
@@ -1287,7 +1294,7 @@ ProcessorBox::show_processor_menu (int arg)
 
 	Gtk::MenuItem* send_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/send_options"));
 	if (send_menu_item) {
-		if (single_selection) {
+		if (single_selection && !_route->is_monitor()) {
 			Menu* m = single_selection->build_send_options_menu ();
 			if (m && !m->items().empty()) {
 				send_menu_item->set_submenu (*m);
