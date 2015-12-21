@@ -30,6 +30,10 @@
 #include "route_ui.h"
 #include "monitor_selector.h"
 
+#include "plugin_selector.h"
+#include "route_processor_selection.h"
+#include "processor_box.h"
+
 namespace Gtkmm2ext {
 	class TearOff;
 	class MotionFeedback;
@@ -48,6 +52,8 @@ class MonitorSection : public RouteUI
 	Gtkmm2ext::TearOff& tearoff() const { return *_tearoff; }
 
 	std::string state_id() const;
+
+	PluginSelector* plugin_selector() { return _plugin_selector; }
 
 	private:
 	Gtk::HBox hpacker;
@@ -154,5 +160,10 @@ class MonitorSection : public RouteUI
 	bool _inhibit_solo_model_update;
 
 	void assign_controllables ();
+
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
+
+	ProcessorBox* insert_box;
+	PluginSelector* _plugin_selector;
+	RouteProcessorSelection _rr_selection;
 };

@@ -37,6 +37,7 @@
 #include "ardour/port.h"
 #include "ardour/route.h"
 #include "ardour/user_bundle.h"
+#include "ardour/plugin_manager.h"
 
 #include "gui_thread.h"
 #include "monitor_section.h"
@@ -94,6 +95,12 @@ MonitorSection::MonitorSection (Session* s)
 		register_actions ();
 
 	}
+
+	_plugin_selector = new PluginSelector (PluginManager::instance());
+	insert_box = new ProcessorBox (_session, boost::bind (&MonitorSection::plugin_selector, this), _rr_selection, 0);
+	insert_box->set_no_show_all ();
+	insert_box->show ();
+	// TODO allow keyboard shortcuts in ProcessorBox
 
 	set_session (s);
 
@@ -266,7 +273,7 @@ MonitorSection::MonitorSection (Session* s)
 
 	gain_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
 	gain_control->set_name("monitor knob");
-	gain_control->set_size_request (PX_SCALE(70), PX_SCALE(70));
+	gain_control->set_size_request (PX_SCALE(60), PX_SCALE(60));
 
 	gain_display = new ArdourDisplay ();
 	gain_display->set_name("monitor section cut");
@@ -394,7 +401,7 @@ MonitorSection::MonitorSection (Session* s)
 	lower_packer->pack_start (channel_table_packer, false, false);
 	lower_packer->pack_start (*mono_dim_box, false, false);
 	lower_packer->pack_start (cut_all_button, false, false);
-	lower_packer->pack_start (*master_box, false, false, PX_SCALE(16));
+	lower_packer->pack_start (*master_box, false, false, PX_SCALE(10));
 
 		// output port select
 	VBox* out_packer = manage (new VBox);
@@ -410,13 +417,13 @@ MonitorSection::MonitorSection (Session* s)
 	vpacker->set_spacing (PX_SCALE(10));
 	vpacker->pack_start (*rude_box, false, false, PX_SCALE(3));
 	vpacker->pack_start (*solo_tbl, false, false);
-	vpacker->pack_start (*level_tbl, false, false, PX_SCALE(16));
-	vpacker->pack_start (*lower_packer, true, false); // expand, center
-	vpacker->pack_end   (*out_packer, false, false, PX_SCALE(16));
+	vpacker->pack_start (*level_tbl, false, false);
+	vpacker->pack_start (*lower_packer, false, false);
+	vpacker->pack_start (*insert_box, true, true);
+	vpacker->pack_end   (*out_packer, false, false);
 
 	hpacker.set_spacing (0);
 	hpacker.pack_start (*vpacker, true, true);
-
 
 	gain_control->show_all ();
 	gain_display->show_all ();
@@ -471,6 +478,7 @@ MonitorSection::~MonitorSection ()
 	_channel_buttons.clear ();
 	_output_changed_connection.disconnect ();
 
+	delete insert_box;
 	delete output_button;
 	delete gain_control;
 	delete gain_display;
@@ -489,6 +497,7 @@ void
 MonitorSection::set_session (Session* s)
 {
 	AxisView::set_session (s);
+	_plugin_selector->set_session (_session);
 
 	if (_session) {
 
@@ -501,6 +510,7 @@ MonitorSection::set_session (Session* s)
 			_route->output()->changed.connect (_output_changed_connection, invalidator (*this),
 											boost::bind (&MonitorSection::update_output_display, this),
 											gui_context());
+			insert_box->set_route (_route);
 		} else {
 			/* session with no monitor section */
 			_output_changed_connection.disconnect();
