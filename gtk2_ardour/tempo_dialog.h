@@ -44,7 +44,7 @@ public:
 	double get_bpm ();
 	double get_note_type ();
 	bool   get_bbt_time (Timecode::BBT_Time&);
-	ARDOUR::TempoSection::TempoSectionType get_tempo_type ();
+	ARDOUR::TempoSection::Type get_tempo_type ();
 
 private:
 	void init (const Timecode::BBT_Time& start, double, double, bool);
@@ -61,7 +61,7 @@ private:
 	typedef std::map<std::string,float> NoteTypes;
 	NoteTypes note_types;
 
-	typedef std::map<std::string, ARDOUR::TempoSection::TempoSectionType> TempoTypes;
+	typedef std::map<std::string, ARDOUR::TempoSection::Type> TempoTypes;
 	TempoTypes tempo_types;
 
 	bool tapped;      // whether the tap-tempo button has been clicked

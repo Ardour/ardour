@@ -147,14 +147,14 @@ class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
 /** A section of timeline with a certain Tempo. */
 class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
   public:
-	enum TempoSectionType {
+	enum Type {
 		Ramp,
 		Constant,
 	};
 
-	TempoSection (const Timecode::BBT_Time& start, double qpm, double note_type, TempoSectionType tempo_type)
+	TempoSection (const Timecode::BBT_Time& start, double qpm, double note_type, Type tempo_type)
 		: MetricSection (start), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type)  {}
-	TempoSection (framepos_t start, double qpm, double note_type, TempoSectionType tempo_type)
+	TempoSection (framepos_t start, double qpm, double note_type, Type tempo_type)
 		: MetricSection (start), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type) {}
 	TempoSection (const XMLNode&);
 
@@ -166,8 +166,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	void update_bbt_time_from_bar_offset (const Meter&);
 	double bar_offset() const { return _bar_offset; }
 
-	void set_type (TempoSectionType type);
-	TempoSectionType type () const { return _type; }
+	void set_type (Type type);
+	Type type () const { return _type; }
 
 	double tempo_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
 	framepos_t frame_at_tempo (double tempo, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
@@ -210,7 +210,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	   position within the bar if/when the meter changes.
 	*/
 	double _bar_offset;
-	TempoSectionType _type;
+	Type _type;
 };
 
 typedef std::list<MetricSection*> Metrics;
@@ -343,13 +343,13 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	TempoSection* tempo_section_after (framepos_t) const;
 	const MeterSection& meter_section_at (framepos_t) const;
 
-	void add_tempo (const Tempo&, Timecode::BBT_Time where, TempoSection::TempoSectionType type);
+	void add_tempo (const Tempo&, Timecode::BBT_Time where, TempoSection::Type type);
 	void add_meter (const Meter&, Timecode::BBT_Time where);
 
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
 
-	void replace_tempo (const TempoSection&, const Tempo&, const Timecode::BBT_Time& where, TempoSection::TempoSectionType type);
+	void replace_tempo (const TempoSection&, const Tempo&, const Timecode::BBT_Time& where, TempoSection::Type type);
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
 
 	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
@@ -415,7 +415,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	void do_insert (MetricSection* section);
 
-	void add_tempo_locked (const Tempo&, Timecode::BBT_Time where, bool recompute, TempoSection::TempoSectionType type);
+	void add_tempo_locked (const Tempo&, Timecode::BBT_Time where, bool recompute, TempoSection::Type type);
 	void add_meter_locked (const Meter&, Timecode::BBT_Time where, bool recompute);
 
 	bool remove_tempo_locked (const TempoSection&);

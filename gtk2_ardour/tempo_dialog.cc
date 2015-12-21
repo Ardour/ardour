@@ -108,9 +108,9 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 
 	strings.clear();
 
-	tempo_types.insert (make_pair (_("ramped"), TempoSection::TempoSectionType::Ramp));
+	tempo_types.insert (make_pair (_("ramped"), TempoSection::Type::Ramp));
 	strings.push_back (_("ramped"));
-	tempo_types.insert (make_pair (_("constant"), TempoSection::TempoSectionType::Constant));
+	tempo_types.insert (make_pair (_("constant"), TempoSection::Type::Constant));
 	strings.push_back (_("constant"));
 	set_popdown_strings (tempo_type, strings);
 	tempo_type.set_active_text (strings[0]); // "ramped"
@@ -272,14 +272,14 @@ TempoDialog::get_note_type ()
 	return x->second;
 }
 
-TempoSection::TempoSectionType
+TempoSection::Type
 TempoDialog::get_tempo_type ()
 {
 	TempoTypes::iterator x = tempo_types.find (tempo_type.get_active_text());
 
 	if (x == tempo_types.end()) {
 		error << string_compose(_("incomprehensible pulse note type (%1)"), tempo_type.get_active_text()) << endmsg;
-		return TempoSection::TempoSectionType::Constant;
+		return TempoSection::Type::Constant;
 	}
 
 	return x->second;

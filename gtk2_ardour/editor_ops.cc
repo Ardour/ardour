@@ -6480,7 +6480,9 @@ Editor::define_one_bar (framepos_t start, framepos_t end)
 
 	/* length = 1 bar */
 
-	/* now we want frames per beat.
+	/* We're going to deliver a constant tempo here,
+	   so we can use frames per beat to determine length.
+	   now we want frames per beat.
 	   we have frames per bar, and beats per bar, so ...
 	*/
 
@@ -6552,7 +6554,7 @@ Editor::define_one_bar (framepos_t start, framepos_t end)
 	} else {
 		Timecode::BBT_Time bbt;
 		_session->tempo_map().bbt_time (start, bbt);
-		_session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), bbt, TempoSection::TempoSectionType::Ramp);
+		_session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), bbt, TempoSection::Type::Constant);
 	}
 
 	XMLNode& after (_session->tempo_map().get_state());

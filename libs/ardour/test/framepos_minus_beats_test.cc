@@ -23,7 +23,7 @@ FrameposMinusBeatsTest::singleTempoTest ()
 	Meter meter (4, 4);
 
 	map.add_meter (meter, BBT_Time (1, 1, 0));
-	map.add_tempo (tempo, BBT_Time (1, 1, 0), TempoSection::TempoSectionType::Constant);
+	map.add_tempo (tempo, BBT_Time (1, 1, 0), TempoSection::Type::Constant);
 
 	/* Subtract 1 beat from beat 3 of the first bar */
 	framepos_t r = map.framepos_minus_beats (frames_per_beat * 2, Beats(1));
@@ -63,9 +63,9 @@ FrameposMinusBeatsTest::doubleTempoTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, BBT_Time (1, 1, 0), TempoSection::TempoSectionType::Constant);
+	map.add_tempo (tempoA, BBT_Time (1, 1, 0), TempoSection::Type::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, BBT_Time (4, 1, 0), TempoSection::TempoSectionType::Constant);
+	map.add_tempo (tempoB, BBT_Time (4, 1, 0), TempoSection::Type::Constant);
 
 	/* Now some tests */
 
@@ -115,9 +115,9 @@ FrameposMinusBeatsTest::doubleTempoWithMeterTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, BBT_Time (1, 1, 0), TempoSection::TempoSectionType::Constant);
+	map.add_tempo (tempoA, BBT_Time (1, 1, 0), TempoSection::Type::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, BBT_Time (4, 1, 0), TempoSection::TempoSectionType::Constant);
+	map.add_tempo (tempoB, BBT_Time (4, 1, 0), TempoSection::Type::Constant);
 	Meter meterB (3, 4);
 	map.add_meter (meterB, BBT_Time (4, 1, 0));
 

@@ -128,12 +128,12 @@ TempoSection::TempoSection (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("tempo-type")) == 0) {
-		_type = TempoSectionType::Constant;
+		_type = Type::Constant;
 	} else {
 		if (strstr(prop->value().c_str(),"Constant")) {
-			_type = TempoSectionType::Constant;
+			_type = Type::Constant;
 		} else {
-			_type = TempoSectionType::Ramp;
+			_type = Type::Ramp;
 		}
 	}
 }
@@ -176,7 +176,7 @@ TempoSection::update_bar_offset_from_bbt (const Meter& m)
 }
 
 void
-TempoSection::set_type (TempoSectionType type)
+TempoSection::set_type (Type type)
 {
 	_type = type;
 }
@@ -433,7 +433,7 @@ TempoMap::TempoMap (framecnt_t fr)
 	start.beats = 1;
 	start.ticks = 0;
 
-	TempoSection *t = new TempoSection (start, _default_tempo.beats_per_minute(), _default_tempo.note_type(), TempoSection::TempoSectionType::Ramp);
+	TempoSection *t = new TempoSection (start, _default_tempo.beats_per_minute(), _default_tempo.note_type(), TempoSection::Type::Ramp);
 	MeterSection *m = new MeterSection (start, _default_meter.divisions_per_bar(), _default_meter.note_divisor());
 
 	t->set_movable (false);
@@ -637,7 +637,7 @@ TempoMap::do_insert (MetricSection* section)
 }
 
 void
-TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_Time& where, TempoSection::TempoSectionType type)
+TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_Time& where, TempoSection::Type type)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
@@ -660,7 +660,7 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_T
 }
 
 void
-TempoMap::add_tempo (const Tempo& tempo, BBT_Time where, ARDOUR::TempoSection::TempoSectionType type)
+TempoMap::add_tempo (const Tempo& tempo, BBT_Time where, ARDOUR::TempoSection::Type type)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
@@ -672,7 +672,7 @@ TempoMap::add_tempo (const Tempo& tempo, BBT_Time where, ARDOUR::TempoSection::T
 }
 
 void
-TempoMap::add_tempo_locked (const Tempo& tempo, BBT_Time where, bool recompute, ARDOUR::TempoSection::TempoSectionType type)
+TempoMap::add_tempo_locked (const Tempo& tempo, BBT_Time where, bool recompute, ARDOUR::TempoSection::Type type)
 {
 	/* new tempos always start on a beat */
 	where.ticks = 0;
@@ -1058,7 +1058,7 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 							double ticks_relative_to_prev_ts = ticks_at_ts - ticks_at_prev_ts;
 							/* assume (falsely) that the target tempo is constant */
 							double length_estimate = (ticks_relative_to_prev_ts /  BBT_Time::ticks_per_beat) * meter->frames_per_grid (*t, _frame_rate);
-							if (prev_ts->type() == TempoSection::TempoSectionType::Constant) {
+							if (prev_ts->type() == TempoSection::Type::Constant) {
 								cerr << "constant type " << endl;
 								length_estimate = (ticks_relative_to_prev_ts / BBT_Time::ticks_per_beat) * prev_ts->frames_per_beat (_frame_rate);
 							}

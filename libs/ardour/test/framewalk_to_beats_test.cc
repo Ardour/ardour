@@ -21,7 +21,7 @@ FramewalkToBeatsTest::singleTempoTest ()
 	Meter meter (4, 4);
 
 	map.add_meter (meter, BBT_Time (1, 1, 0));
-	map.add_tempo (tempo, BBT_Time (1, 1, 0), TempoSection::TempoSectionType::Constant);
+	map.add_tempo (tempo, BBT_Time (1, 1, 0), TempoSection::Type::Constant);
 
 	/* Walk 1 beats-worth of frames from beat 3 */
 	double r = map.framewalk_to_beats (frames_per_beat * 2, frames_per_beat * 1).to_double();
@@ -70,9 +70,9 @@ FramewalkToBeatsTest::doubleTempoTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, BBT_Time (1, 1, 0), TempoSection::TempoSectionType::Constant);
+	map.add_tempo (tempoA, BBT_Time (1, 1, 0), TempoSection::Type::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, BBT_Time (4, 1, 0), TempoSection::TempoSectionType::Constant);
+	map.add_tempo (tempoB, BBT_Time (4, 1, 0), TempoSection::Type::Constant);
 
 	/* Now some tests */
 
@@ -125,11 +125,11 @@ FramewalkToBeatsTest::tripleTempoTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, BBT_Time (1, 1, 0), TempoSection::TempoSectionType::Constant);
+	map.add_tempo (tempoA, BBT_Time (1, 1, 0), TempoSection::Type::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, BBT_Time (2, 1, 0), TempoSection::TempoSectionType::Constant);
+	map.add_tempo (tempoB, BBT_Time (2, 1, 0), TempoSection::Type::Constant);
 	Tempo tempoC (160);
-	map.add_tempo (tempoC, BBT_Time (3, 1, 0), TempoSection::TempoSectionType::Constant);
+	map.add_tempo (tempoC, BBT_Time (3, 1, 0), TempoSection::Type::Constant);
 
 	/* Walk from 1|3 to 4|1 */
 	double r = map.framewalk_to_beats (2 * 24e3, (2 * 24e3) + (4 * 12e3) + (4 * 18e3)).to_double();
