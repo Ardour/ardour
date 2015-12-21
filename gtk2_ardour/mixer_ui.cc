@@ -2053,6 +2053,8 @@ Mixer_UI::monitor_section_going_away ()
 		monitor_section_detached ();
 		out_packer.remove (_monitor_section->tearoff());
 		_monitor_section->set_session (0);
+		delete _monitor_section;
+		_monitor_section = 0;
 	}
 }
 
