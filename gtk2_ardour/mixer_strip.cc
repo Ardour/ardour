@@ -1265,7 +1265,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 						<< Gtkmm2ext::markup_escape_text ( pn.empty() ? connection_name : pn );
 				}
 
-				if (connection_name.find("ardour:") == 0) {
+				if (connection_name.find(RouteUI::program_port_prefix) == 0) {
 					if (ardour_track_name.empty()) {
 						// "ardour:Master/in 1" -> "ardour:Master/"
 						string::size_type slash = connection_name.find("/");

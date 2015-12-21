@@ -17,6 +17,8 @@
 
 */
 
+#include <boost/algorithm/string.hpp>
+
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/doi.h>
@@ -71,6 +73,7 @@ using namespace std;
 uint32_t RouteUI::_max_invert_buttons = 3;
 PBD::Signal1<void, boost::shared_ptr<Route> > RouteUI::BusSendDisplayChanged;
 boost::weak_ptr<Route> RouteUI::_showing_sends_to;
+std::string RouteUI::program_port_prefix;
 
 RouteUI::RouteUI (ARDOUR::Session* sess)
 	: AxisView(sess)
@@ -84,6 +87,12 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	, output_selector (0)
 	, _invert_menu(0)
 {
+	if (program_port_prefix.empty()) {
+		// compare to gtk2_ardour/port_group.cc
+		string lpn (PROGRAM_NAME);
+		boost::to_lower (lpn);
+		program_port_prefix = lpn + ":"; // e.g. "ardour:"
+	}
 	if (sess) init ();
 }
 

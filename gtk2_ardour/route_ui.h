@@ -270,6 +270,8 @@ class RouteUI : public virtual AxisView
 
 	virtual void bus_send_display_changed (boost::shared_ptr<ARDOUR::Route>);
 
+	static std::string program_port_prefix;
+
   private:
 	void check_rec_enable_sensitivity ();
 	void parameter_changed (std::string const &);
