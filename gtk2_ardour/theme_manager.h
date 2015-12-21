@@ -60,6 +60,7 @@ class ThemeManager : public Gtk::VBox
         void on_timeline_item_gradient_depth_change ();
 	void on_all_dialogs_toggled ();
 	void on_transients_follow_front_toggled ();
+	void on_floating_monitor_section_toggled ();
 	void on_icon_set_changed ();
 
   private:
@@ -92,6 +93,7 @@ class ThemeManager : public Gtk::VBox
         Gtk::Label timeline_item_gradient_depth_label;
 	Gtk::CheckButton all_dialogs;
 	Gtk::CheckButton transients_follow_front;
+	Gtk::CheckButton floating_monitor_section;
 	Gtk::CheckButton gradient_waveforms;
 	Gtk::Label icon_set_label;
 	Gtk::ComboBoxText icon_set_dropdown;

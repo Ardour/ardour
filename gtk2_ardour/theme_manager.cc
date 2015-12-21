@@ -35,6 +35,7 @@
 #include "pbd/compose.h"
 
 #include "ardour/filesystem_paths.h"
+#include "ardour/profile.h"
 
 #include "canvas/container.h"
 #include "canvas/rectangle.h"
@@ -70,6 +71,7 @@ ThemeManager::ThemeManager()
 	, timeline_item_gradient_depth_label (_("Timeline item gradient depth"))
 	, all_dialogs (_("All floating windows are dialogs"))
 	, transients_follow_front (_("Transient windows follow front window."))
+	, floating_monitor_section (_("Float detached monitor-section window"))
 	, icon_set_label (_("Icon Set"))
 	, palette_viewport (*palette_scroller.get_hadjustment(), *palette_scroller.get_vadjustment())
 	, palette_group (0)
@@ -113,6 +115,9 @@ ThemeManager::ThemeManager()
 #ifndef __APPLE__
 	pack_start (all_dialogs, PACK_SHRINK);
 	pack_start (transients_follow_front, PACK_SHRINK);
+	if (!Profile->get_mixbus()) {
+		pack_start (floating_monitor_section, PACK_SHRINK);
+	}
 #endif
 	pack_start (flat_buttons, PACK_SHRINK);
 	pack_start (blink_rec_button, PACK_SHRINK);
@@ -183,6 +188,7 @@ ThemeManager::ThemeManager()
 	timeline_item_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_timeline_item_gradient_depth_change));
 	all_dialogs.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_all_dialogs_toggled));
 	transients_follow_front.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_transients_follow_front_toggled));
+	floating_monitor_section.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_floating_monitor_section_toggled));
 	icon_set_dropdown.signal_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_icon_set_changed));
 
 	Gtkmm2ext::UI::instance()->set_tip (all_dialogs,
@@ -306,6 +312,12 @@ ThemeManager::on_transients_follow_front_toggled ()
 }
 
 void
+ThemeManager::on_floating_monitor_section_toggled ()
+{
+	UIConfiguration::instance().set_floating_monitor_section (floating_monitor_section.get_active());
+}
+
+void
 ThemeManager::on_waveform_gradient_depth_change ()
 {
 	double v = waveform_gradient_depth.get_value();
@@ -368,6 +380,7 @@ ThemeManager::set_ui_to_state()
 	 */
 	all_dialogs.set_active (UIConfiguration::instance().get_all_floating_windows_are_dialogs());
 	transients_follow_front.set_active (UIConfiguration::instance().get_transients_follow_front());
+	floating_monitor_section.set_active (UIConfiguration::instance().get_floating_monitor_section());
 	flat_buttons.set_active (UIConfiguration::instance().get_flat_buttons());
 	blink_rec_button.set_active (UIConfiguration::instance().get_blink_rec_arm());
 	region_color_button.set_active (UIConfiguration::instance().get_color_regions_using_track_color());
