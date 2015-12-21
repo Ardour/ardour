@@ -1941,6 +1941,37 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 		if ((*p)->can_support_io_configuration(in, out)) {
 			DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 ID=%2 in=%3 out=%4\n",(*p)->name(), (*p)->id(), in, out));
 			configuration.push_back(make_pair(in, out));
+
+			if (is_monitor()) {
+				// restriction for Monitor Section Processors
+				if (in.n_audio() != out.n_audio() || out.n_midi() > 0) {
+					/* do not allow to add/remove channels (for now)
+					 * The Monitor follows the master-bus and has no panner (unpan)
+					 * but do allow processors with midi-in to be added (e.g VSTs with control that
+					 * will remain unconnected)
+					 */
+					DEBUG_TRACE (DEBUG::Processors, "Monitor: Channel configuration not allowed.\n");
+					return list<pair<ChanCount, ChanCount> > ();
+				}
+				if (boost::dynamic_pointer_cast<InternalSend> (*p)) {
+					// internal sends make no sense, only feedback
+					DEBUG_TRACE (DEBUG::Processors, "Monitor: No Sends allowed.\n");
+					return list<pair<ChanCount, ChanCount> > ();
+				}
+				if (boost::dynamic_pointer_cast<PortInsert> (*p)) {
+					/* External Sends can be problematic. one can add/remove ports
+					 * there signal leaves the DAW to external monitors anyway, so there's
+					 * no real use for allowing them here anyway.
+					 */
+					DEBUG_TRACE (DEBUG::Processors, "Monitor: No External Sends allowed.\n");
+					return list<pair<ChanCount, ChanCount> > ();
+				}
+				if (boost::dynamic_pointer_cast<Send> (*p)) {
+					// ditto
+					DEBUG_TRACE (DEBUG::Processors, "Monitor: No Sends allowed.\n");
+					return list<pair<ChanCount, ChanCount> > ();
+				}
+			}
 			in = out;
 		} else {
 			if (err) {
