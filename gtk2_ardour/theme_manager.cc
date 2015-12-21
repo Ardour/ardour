@@ -115,10 +115,10 @@ ThemeManager::ThemeManager()
 #ifndef __APPLE__
 	pack_start (all_dialogs, PACK_SHRINK);
 	pack_start (transients_follow_front, PACK_SHRINK);
+#endif
 	if (!Profile->get_mixbus()) {
 		pack_start (floating_monitor_section, PACK_SHRINK);
 	}
-#endif
 	pack_start (flat_buttons, PACK_SHRINK);
 	pack_start (blink_rec_button, PACK_SHRINK);
 	pack_start (region_color_button, PACK_SHRINK);
@@ -197,6 +197,9 @@ ThemeManager::ThemeManager()
 							    PROGRAM_NAME));
 	Gtkmm2ext::UI::instance()->set_tip (transients_follow_front,
 					    string_compose (_("Make transient windows follow the front window when toggling between the editor and mixer.\n"
+							      "This requires a restart of %1 to take effect"), PROGRAM_NAME));
+	Gtkmm2ext::UI::instance()->set_tip (floating_monitor_section,
+					    string_compose (_("When detaching the monitoring section, mark it as \"Utility\" window to stay in front.\n"
 							      "This requires a restart of %1 to take effect"), PROGRAM_NAME));
 
 	set_size_request (-1, 400);
