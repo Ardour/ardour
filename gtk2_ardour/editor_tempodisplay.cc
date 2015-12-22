@@ -101,6 +101,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 
 }
 
+
 void
 Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 {
@@ -116,6 +117,27 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 
 	std::vector<TempoMap::BBTPoint> grid;
 
+	compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
+	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
+	draw_measures (grid);
+	update_tempo_based_rulers (grid);
+}
+
+void
+Editor::marker_position_changed ()
+{
+// yes its identical...
+	if (!_session) {
+		return;
+	}
+
+	ENSURE_GUI_THREAD (*this, &Editor::tempo_map_changed);
+
+	if (tempo_lines) {
+		tempo_lines->tempo_map_changed();
+	}
+
+	std::vector<TempoMap::BBTPoint> grid;
 	compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	draw_measures (grid);

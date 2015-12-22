@@ -25,6 +25,7 @@
 #include <gdk/gdk.h>
 #include <stdint.h>
 
+#include "ardour/tempo.h"
 #include "ardour/types.h"
 
 #include "canvas/types.h"
@@ -731,6 +732,8 @@ public:
 
 private:
 	TempoMarker* _marker;
+	ARDOUR::TempoSection* _real_section;
+
 	bool _copy;
 	XMLNode* before_state;
 };

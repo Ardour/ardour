@@ -27,6 +27,7 @@
 #include <glibmm/threads.h>
 
 #include "pbd/undo.h"
+
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 
@@ -54,7 +55,8 @@ class LIBARDOUR_API Tempo {
 	Tempo (double bpm, double type=4.0) // defaulting to quarter note
 		: _beats_per_minute (bpm), _note_type(type) {}
 
-	double beats_per_minute () const { return _beats_per_minute;}
+	double beats_per_minute () const { return _beats_per_minute; }
+
 	double ticks_per_minute () const { return _beats_per_minute * Timecode::BBT_Time::ticks_per_beat;}
 	double note_type () const { return _note_type;}
 	/** audio samples per beat
@@ -125,6 +127,7 @@ class LIBARDOUR_API MetricSection {
 	virtual XMLNode& get_state() const = 0;
 
   private:
+
 	Timecode::BBT_Time _start;
 	framepos_t         _frame;
 	bool               _movable;
@@ -350,6 +353,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void remove_meter (const MeterSection&, bool send_signal);
 
 	void replace_tempo (const TempoSection&, const Tempo&, const Timecode::BBT_Time& where, TempoSection::Type type);
+	void gui_set_tempo_frame (TempoSection&, framepos_t where);
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
 
 	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
@@ -383,7 +387,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	int n_meters () const;
 
 	framecnt_t frame_rate () const { return _frame_rate; }
-
+	PBD::Signal0<void> MetricPositionChanged;
   private:
 
 	friend class ::BBTTest;

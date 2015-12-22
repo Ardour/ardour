@@ -515,7 +515,6 @@ Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 	if (_editor->session()) {
 		const TempoMap& map (_editor->session()->tempo_map());
 		framecnt_t pos = grab_frame();
-		const Meter& m = map.meter_at (pos);
 		/* not that the frame rate used here can be affected by pull up/down which
 		   might be wrong.
 		*/
@@ -3255,6 +3254,7 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	DEBUG_TRACE (DEBUG::Drags, "New TempoMarkerDrag\n");
 
 	_marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
+	_real_section = &_marker->tempo();
 	assert (_marker);
 }
 
@@ -3310,12 +3310,15 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 			/* get current state */
 			before_state = &map.get_state();
 			/* remove the section while we drag it */
-			map.remove_tempo (section, true);
+			//map.remove_tempo (section, true);
 		}
 	}
 
-	framepos_t const pf = adjusted_current_frame (event);
+	framepos_t const pf = adjusted_current_frame (event, false);
+	TempoMap& map (_editor->session()->tempo_map());
 	_marker->set_position (pf);
+	map.gui_set_tempo_frame (*_real_section, pf);
+
 	show_verbose_cursor_time (pf);
 }
 
@@ -3351,7 +3354,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	} else {
 		/* we removed it before, so add it back now */
-		map.add_tempo (_marker->tempo(), when, _marker->tempo().type());
+		map.replace_tempo (*_real_section, _marker->tempo().beats_per_minute() , when, _marker->tempo().type());
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command (new MementoCommand<TempoMap>(map, before_state, &after));
 		_editor->commit_reversible_command ();

@@ -65,6 +65,7 @@ Meter::frames_per_bar (const Tempo& tempo, framecnt_t sr) const
 	return frames_per_grid (tempo, sr) * _divisions_per_bar;
 }
 
+
 /***********************************************************************/
 
 const string TempoSection::xml_state_node_name = "Tempo";
@@ -72,7 +73,7 @@ const string TempoSection::xml_state_node_name = "Tempo";
 TempoSection::TempoSection (const XMLNode& node)
 	: MetricSection (BBT_Time()), Tempo (TempoMap::default_tempo())
 {
-	XMLProperty const * prop;
+	const XMLProperty *prop;
 	BBT_Time start;
 	LocaleGuard lg;
 
@@ -326,7 +327,8 @@ TempoSection::update_bbt_time_from_bar_offset (const Meter& meter)
 
 	double ticks = BBT_Time::ticks_per_beat * meter.divisions_per_bar() * _bar_offset;
 	new_start.beats = (uint32_t) floor (ticks/BBT_Time::ticks_per_beat);
-	new_start.ticks = 0; /* (uint32_t) fmod (ticks, BBT_Time::ticks_per_beat); */
+	//new_start.ticks = 0; /* (uint32_t) fmod (ticks, BBT_Time::ticks_per_beat); */
+	new_start.ticks = (uint32_t) fmod (ticks, BBT_Time::ticks_per_beat);
 
 	/* remember the 1-based counting properties of beats */
 	new_start.beats += 1;
@@ -443,6 +445,7 @@ TempoMap::TempoMap (framecnt_t fr)
 
 	metrics.push_back (t);
 	metrics.push_back (m);
+
 }
 
 TempoMap::~TempoMap ()
@@ -647,9 +650,9 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_T
 			remove_tempo_locked (ts);
 			add_tempo_locked (tempo, where, true, type);
 		} else {
+			first.set_type (type);
 			{
 				/* cannot move the first tempo section */
-				first.set_type (type);
 				*static_cast<Tempo*>(&first) = tempo;
 				recompute_map (false);
 			}
@@ -657,6 +660,28 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_T
 	}
 
 	PropertyChanged (PropertyChange ());
+}
+
+void
+TempoMap::gui_set_tempo_frame (TempoSection& ts, framepos_t frame)
+{
+	{
+		TempoSection& first (first_tempo());
+
+		if (ts.start() != first.start()) {
+			BBT_Time bbt;
+			bbt_time (frame, bbt);
+			{
+				Glib::Threads::RWLock::WriterLock lm (lock);
+				ts.set_frame (frame);
+				ts.set_start (bbt);
+
+				recompute_map (false);
+			}
+		}
+	}
+
+	MetricPositionChanged (); // Emit Signal
 }
 
 void
@@ -933,13 +958,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 		*/
 		end = max_framepos;
 
-	} else {
-		/*
-		if (!_map.empty ()) {
-			/* never allow the map to be shortened /
-			end = max (end, _map.back().frame);
-		}
-		*/
 	}
 
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("recomputing tempo map, zero to %1\n", end));
@@ -1051,15 +1069,11 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 
 							/*tempo section (t) lies in the previous meter */
 							double ticks_at_ts = ((((t->start().bars - 1 ) * meter->divisions_per_bar()) + (t->start().beats - 1) )  * BBT_Time::ticks_per_beat) + t->start().ticks;
-
-
 							double ticks_at_prev_ts = ((((prev_ts->start().bars - 1) * meter->divisions_per_bar()) + (prev_ts->start().beats - 1))  * BBT_Time::ticks_per_beat) + prev_ts->start().ticks;
-
 							double ticks_relative_to_prev_ts = ticks_at_ts - ticks_at_prev_ts;
 							/* assume (falsely) that the target tempo is constant */
 							double length_estimate = (ticks_relative_to_prev_ts /  BBT_Time::ticks_per_beat) * meter->frames_per_grid (*t, _frame_rate);
 							if (prev_ts->type() == TempoSection::Type::Constant) {
-								cerr << "constant type " << endl;
 								length_estimate = (ticks_relative_to_prev_ts / BBT_Time::ticks_per_beat) * prev_ts->frames_per_beat (_frame_rate);
 							}
 							cerr<< "initial length extimate = " << length_estimate << " ticks_relative_to_prev_ts " << ticks_relative_to_prev_ts << endl;
@@ -1378,6 +1392,8 @@ TempoMap::frame_at_tick (double tick) const
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
 	double accumulated_ticks = 0.0;
+	double accumulated_ticks_to_prev = 0.0;
+
 	const TempoSection* prev_ts =  &first_tempo();
 	uint32_t cnt = 0;
 
@@ -1397,12 +1413,13 @@ TempoMap::frame_at_tick (double tick) const
 			if (tick < accumulated_ticks) {
 				/* prev_ts is the one affecting us. */
 
-				double ticks_in_section = tick - tick_at_frame (prev_ts->frame());
+				double ticks_in_section = tick - accumulated_ticks_to_prev;
 				framepos_t section_start = prev_ts->frame();
 				framepos_t last_time = t->frame() - prev_ts->frame();
 				double last_beats_per_minute = t->beats_per_minute();
 				return prev_ts->frame_at_tick (ticks_in_section, last_beats_per_minute, last_time, _frame_rate) + section_start;
 			}
+			accumulated_ticks_to_prev = accumulated_ticks;
 
 			prev_ts = t;
 			++cnt;
