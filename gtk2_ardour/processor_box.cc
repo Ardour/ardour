@@ -1041,6 +1041,13 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 	return true;
 }
 
+static std::list<Gtk::TargetEntry> drop_targets()
+{
+	std::list<Gtk::TargetEntry> tmp;
+	tmp.push_back (Gtk::TargetEntry ("processor"));
+	return tmp;
+}
+
 ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelector*()> get_plugin_selector,
 			    RouteProcessorSelection& rsel, MixerStrip* parent, bool owner_is_mixer)
 	: _parent_strip (parent)
@@ -1050,6 +1057,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	, _placement (-1)
 	, _visible_prefader_processors (0)
 	, _rr_selection(rsel)
+	, processor_display (drop_targets())
 	, _redisplay_pending (false)
 
 {
