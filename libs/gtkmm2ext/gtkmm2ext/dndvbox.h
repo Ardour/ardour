@@ -51,9 +51,13 @@ template <class T>
 class /*LIBGTKMM2EXT_API*/ DnDVBox : public Gtk::EventBox
 {
 public:
-	DnDVBox () : _active (0), _drag_icon (0), _expecting_unwanted_button_event (false), _placeholder (0)
+	DnDVBox (std::list<Gtk::TargetEntry> targets)
+		: _targets (targets)
+		, _active (0)
+		, _drag_icon (0)
+		, _expecting_unwanted_button_event (false)
+		, _placeholder (0)
 	{
-		_targets.push_back (Gtk::TargetEntry ("processor"));
 
 		add (_internal_vbox);
 		add_events (
@@ -220,6 +224,7 @@ public:
 	 *  Parameters are the source DnDVBox, our child which the other one was dropped on (or 0) and the DragContext.
 	 */
 	sigc::signal<void, DnDVBox*, T*, Glib::RefPtr<Gdk::DragContext> const & > DropFromAnotherBox;
+	sigc::signal<void, Gtk::SelectionData const &, T*, Glib::RefPtr<Gdk::DragContext> const & > DropFromExternal;
 	sigc::signal<void> SelectionChanged;
 
 private:
@@ -351,6 +356,12 @@ private:
 	{
 		/* work out where it was dropped */
 		std::pair<T*, double> const drop = get_child_at_position (y);
+
+		if (selection_data.get_target () != _targets.front ().get_target ()) {
+			DropFromExternal (selection_data, drop.first, context);
+			context->drag_finish (false, false, time);
+			return;
+		}
 
 		if (_drag_source == this) {
 

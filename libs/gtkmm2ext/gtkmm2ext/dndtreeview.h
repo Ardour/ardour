@@ -104,12 +104,11 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 
 		} else if (selection_data.get_target() == object_type) {
 
-			/* we don't care about the data passed around by DnD, but
-			   we have to provide something otherwise it will stop.
+			/* return a pointer to this object, which allows
+			 * the receiver to call on_drag_data_received()
 			 */
-
-			guchar c;
-			selection_data.set (8, (guchar*)&c, 1);
+			void *c = this;
+			selection_data.set (8, (guchar*)&c, sizeof(void*));
 		}
 	}
 
@@ -142,7 +141,7 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 	 * object that wants to get the list of dragged items.
 	 */
 
-	void get_object_drag_data (std::list<DataType>& l, Gtk::TreeView** source) {
+	void get_object_drag_data (std::list<DataType>& l, Gtk::TreeView** source) const {
 
 		if (drag_data.source == 0) {
 			return;
