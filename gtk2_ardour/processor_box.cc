@@ -1045,6 +1045,7 @@ static std::list<Gtk::TargetEntry> drop_targets()
 {
 	std::list<Gtk::TargetEntry> tmp;
 	tmp.push_back (Gtk::TargetEntry ("processor"));
+	tmp.push_back (Gtk::TargetEntry ("PluginInfoPtr"));
 	return tmp;
 }
 
@@ -1085,6 +1086,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 
 	processor_display.Reordered.connect (sigc::mem_fun (*this, &ProcessorBox::reordered));
 	processor_display.DropFromAnotherBox.connect (sigc::mem_fun (*this, &ProcessorBox::object_drop));
+	processor_display.DropFromExternal.connect (sigc::mem_fun (*this, &ProcessorBox::plugin_drop));
 
 	processor_scroller.show ();
 	processor_display.show ();
@@ -1145,6 +1147,74 @@ ProcessorBox::route_going_away ()
 	/* don't keep updating display as processors are deleted */
 	no_processor_redisplay = true;
 	_route.reset ();
+}
+
+void
+ProcessorBox::plugin_drop(Gtk::SelectionData const &data, ProcessorEntry* position, Glib::RefPtr<Gdk::DragContext> const & context)
+{
+		if (data.get_target() != "PluginInfoPtr") {
+			return;
+		}
+		if (!_session) {
+			return;
+		}
+
+		boost::shared_ptr<Processor> p;
+		if (position) {
+			p = position->processor ();
+			if (!p) {
+				/* dropped on the blank entry (which will be before the
+					 fader), so use the first non-blank child as our
+					 `dropped on' processor */
+				list<ProcessorEntry*> c = processor_display.children ();
+				list<ProcessorEntry*>::iterator i = c.begin ();
+
+				assert (i != c.end ());
+				p = (*i)->processor ();
+				assert (p);
+			}
+		}
+
+		const void * d = data.get_data();
+		const Gtkmm2ext::DnDTreeView<ARDOUR::PluginInfoPtr> * tv = reinterpret_cast<const Gtkmm2ext::DnDTreeView<ARDOUR::PluginInfoPtr>*>(d);
+
+		std::list<ARDOUR::PluginInfoPtr> nfos;
+		TreeView* source;
+		tv->get_object_drag_data (nfos, &source);
+
+		Route::ProcessorStreams err;
+		Route::ProcessorList pl;
+
+		for (list<PluginInfoPtr>::const_iterator i = nfos.begin(); i != nfos.end(); ++i) {
+			PluginPtr p = (*i)->load (*_session);
+			if (!p) {
+				continue;
+			}
+			boost::shared_ptr<Processor> processor (new PluginInsert (*_session, p));
+			if (Config->get_new_plugins_active ()) {
+				processor->activate ();
+			}
+			pl.push_back (processor);
+		}
+
+		if (_route->add_processors (pl, p, &err)) {
+			string msg = _(
+					"Adding the given processor(s) failed probably,\n\
+because the I/O configuration of the plugins could\n\
+not match the configuration of this track.");
+			MessageDialog am (msg);
+			am.run ();
+		} else if (pl.size() == 1 && Config->get_open_gui_after_adding_plugin()) {
+			boost::shared_ptr<Processor> processor = pl.front();
+			boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
+			if (_session->engine().connected () && processor_can_be_edited (processor)) {
+				if (pi && pi->plugin()->has_editor ()) {
+					edit_processor (processor);
+				} else {
+					generic_edit_processor (processor);
+				}
+			}
+		}
 }
 
 void
