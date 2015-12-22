@@ -43,6 +43,7 @@
 #include "ardour/route_group.h"
 #include "ardour/route_sorters.h"
 #include "ardour/session.h"
+#include "ardour/revision.h" // XXX remove after 4.5 release
 
 #include "keyboard.h"
 #include "mixer_ui.h"
@@ -211,10 +212,16 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_frame.set_shadow_type (Gtk::SHADOW_IN);
 	favorite_plugins_frame.add (favorite_plugins_scroller);
 
-	rhs_pane1.pack1 (favorite_plugins_frame, false, true);
-	rhs_pane1.pack2 (track_display_frame);
-	rhs_pane2.pack1 (rhs_pane1);
-	rhs_pane2.pack2 (group_display_frame);
+	//  XXX remove after 4.5 release
+	if (!strcmp (ARDOUR::revision, "4.5") || strcmp (PROGRAM_NAME, "Ardour")) {
+		rhs_pane2.pack1 (track_display_frame);
+		rhs_pane2.pack2 (group_display_frame);
+	} else {
+		rhs_pane1.pack1 (favorite_plugins_frame, false, true);
+		rhs_pane1.pack2 (track_display_frame);
+		rhs_pane2.pack1 (rhs_pane1);
+		rhs_pane2.pack2 (group_display_frame);
+	}
 
 	list_vpacker.pack_start (rhs_pane2, true, true);
 
