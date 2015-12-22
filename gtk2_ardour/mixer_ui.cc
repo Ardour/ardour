@@ -211,11 +211,10 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_frame.set_shadow_type (Gtk::SHADOW_IN);
 	favorite_plugins_frame.add (favorite_plugins_scroller);
 
-	rhs_pane1.pack1 (track_display_frame);
-	rhs_pane1.pack2 (group_display_frame);
-
-	rhs_pane2.pack1 (favorite_plugins_frame, false, true);
-	rhs_pane2.pack2 (rhs_pane1);
+	rhs_pane1.pack1 (favorite_plugins_frame, false, true);
+	rhs_pane1.pack2 (track_display_frame);
+	rhs_pane2.pack1 (rhs_pane1);
+	rhs_pane2.pack2 (group_display_frame);
 
 	list_vpacker.pack_start (rhs_pane2, true, true);
 
@@ -1829,7 +1828,6 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 {
 	int pos;
 	XMLProperty* prop = 0;
-	char buf[32];
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	XMLNode* geometry;
 	int height;
@@ -1854,8 +1852,7 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 		}
 
 		if (!geometry || (prop = geometry->property("mixer-rhs-pane1-pos")) == 0) {
-			pos = height / 2;
-			snprintf (buf, sizeof(buf), "%d", pos);
+			pos = height / 3;
 		} else {
 			pos = atoi (prop->value());
 		}
@@ -1870,8 +1867,7 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 		}
 
 		if (!geometry || (prop = geometry->property("mixer-rhs-pane2-pos")) == 0) {
-			pos = height / 4;
-			snprintf (buf, sizeof(buf), "%d", pos);
+			pos = 2 * height / 3;
 		} else {
 			pos = atoi (prop->value());
 		}
@@ -1886,8 +1882,7 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 		}
 
 		if (!geometry || (prop = geometry->property("mixer-list-hpane-pos")) == 0) {
-			pos = 75;
-			snprintf (buf, sizeof(buf), "%d", pos);
+			pos = std::max ((float)100, rintf ((float) 125 * UIConfiguration::instance().get_ui_scale()));
 		} else {
 			pos = max (36, atoi (prop->value ()));
 		}
