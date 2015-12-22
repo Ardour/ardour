@@ -214,8 +214,8 @@ Mixer_UI::Mixer_UI ()
 	rhs_pane1.pack1 (track_display_frame);
 	rhs_pane1.pack2 (group_display_frame);
 
-	rhs_pane2.pack1 (rhs_pane1);
-	rhs_pane2.pack2 (favorite_plugins_frame);
+	rhs_pane2.pack1 (favorite_plugins_frame, false, true);
+	rhs_pane2.pack2 (rhs_pane1);
 
 	list_vpacker.pack_start (rhs_pane2, true, true);
 
@@ -1804,7 +1804,7 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 		}
 
 		if (!geometry || (prop = geometry->property("mixer-rhs-pane1-pos")) == 0) {
-			pos = height / 3;
+			pos = height / 2;
 			snprintf (buf, sizeof(buf), "%d", pos);
 		} else {
 			pos = atoi (prop->value());
@@ -1820,7 +1820,7 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 		}
 
 		if (!geometry || (prop = geometry->property("mixer-rhs-pane2-pos")) == 0) {
-			pos = 2 * height / 3;
+			pos = height / 4;
 			snprintf (buf, sizeof(buf), "%d", pos);
 		} else {
 			pos = atoi (prop->value());
