@@ -1632,12 +1632,35 @@ Mixer_UI::set_window_pos_and_size ()
 	move (m_root_x, m_root_y);
 }
 
-	void
+void
 Mixer_UI::get_window_pos_and_size ()
 {
 	get_position(m_root_x, m_root_y);
 	get_size(m_width, m_height);
 }
+
+struct PluginStateSorter {
+public:
+	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
+		std::list<std::string>::const_iterator aiter = std::find(_user.begin(), _user.end(), (*a).unique_id);
+		std::list<std::string>::const_iterator biter = std::find(_user.begin(), _user.end(), (*b).unique_id);
+		if (aiter != _user.end() && biter != _user.end()) {
+			return std::distance (_user.begin(), aiter)  < std::distance (_user.begin(), biter);
+		}
+		if (aiter != _user.end()) {
+			return true;
+		}
+		if (biter != _user.end()) {
+			return false;
+		}
+		printf("BITTER\n");
+		return ARDOUR::cmp_nocase((*a).name, (*b).name) == -1;
+	}
+
+	PluginStateSorter(std::list<std::string> user) : _user (user)  {}
+private:
+	std::list<std::string> _user;
+};
 
 int
 Mixer_UI::set_state (const XMLNode& node)
@@ -1721,6 +1744,22 @@ Mixer_UI::set_state (const XMLNode& node)
 		tact->set_active (yn);
 	}
 
+	XMLNode* plugin_order;
+	if ((plugin_order = find_named_node (node, "PluginOrder")) != 0) {
+		std::list<string> order;
+		const XMLNodeList& kids = plugin_order->children("PluginInfo");
+		XMLNodeConstIterator i;
+		for (i = kids.begin(); i != kids.end(); ++i) {
+			if ((prop = (*i)->property ("unique-id"))) {
+				order.push_back (prop->value());
+			}
+		}
+
+		store_current_favorite_order ();
+		PluginStateSorter cmp (order);
+		favorite_order.sort (cmp);
+		sync_treeview_from_favorite_order ();
+	}
 
 	return 0;
 }
@@ -1770,6 +1809,17 @@ Mixer_UI::get_state (void)
 
 	node->add_property ("maximised", _maximised ? "yes" : "no");
 
+	store_current_favorite_order ();
+	XMLNode* plugin_order = new XMLNode ("PluginOrder");
+	int cnt = 0;
+	for (PluginInfoList::const_iterator i = favorite_order.begin(); i != favorite_order.end(); ++i, ++cnt) {
+			XMLNode* p = new XMLNode ("PluginInfo");
+			p->add_property ("sort", cnt);
+			p->add_property ("unique-id", (*i)->unique_id);
+			plugin_order->add_child_nocopy (*p);
+		;
+	}
+	node->add_child_nocopy (*plugin_order);
 	return *node;
 }
 
@@ -2167,37 +2217,91 @@ Mixer_UI::monitor_section_detached ()
 	act->set_sensitive (false);
 }
 
-
 void
-Mixer_UI::refiller (PluginManager& manager, const PluginInfoList& plugs)
+Mixer_UI::store_current_favorite_order ()
 {
-	for (PluginInfoList::const_iterator i = plugs.begin(); i != plugs.end(); ++i) {
-		if (manager.get_status (*i) != PluginManager::Favorite) {
-			continue;
-		}
-		TreeModel::Row newrow = *(favorite_plugins_model->append());
-		newrow[favorite_plugins_columns.name] = (*i)->name;
-		newrow[favorite_plugins_columns.plugin] = *i;
+	typedef Gtk::TreeModel::Children type_children;
+	type_children children = favorite_plugins_model->children();
+	favorite_order.clear();
+	for(type_children::iterator iter = children.begin(); iter != children.end(); ++iter)
+	{
+		Gtk::TreeModel::Row row = *iter;
+		favorite_order.push_back (row[favorite_plugins_columns.plugin]);
+		std::string name = row[favorite_plugins_columns.name];
 	}
 }
 
 void
+Mixer_UI::refiller (PluginInfoList& result, const PluginInfoList& plugs)
+{
+	PluginManager& manager (PluginManager::instance());
+	for (PluginInfoList::const_iterator i = plugs.begin(); i != plugs.end(); ++i) {
+		if (manager.get_status (*i) != PluginManager::Favorite) {
+			continue;
+		}
+		result.push_back (*i);
+	}
+}
+
+struct PluginCustomSorter {
+public:
+	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
+		PluginInfoList::const_iterator aiter = std::find(_user.begin(), _user.end(), a);
+		PluginInfoList::const_iterator biter = std::find(_user.begin(), _user.end(), b);
+
+		if (aiter != _user.end() && biter != _user.end()) {
+			return std::distance (_user.begin(), aiter)  < std::distance (_user.begin(), biter);
+		}
+		if (aiter != _user.end()) {
+			return true;
+		}
+		if (biter != _user.end()) {
+			return false;
+		}
+		return ARDOUR::cmp_nocase((*a).name, (*b).name) == -1;
+	}
+	PluginCustomSorter(PluginInfoList user) : _user (user)  {}
+private:
+	PluginInfoList _user;
+};
+
+void
 Mixer_UI::refill_favorite_plugins ()
 {
+	PluginInfoList plugs;
 	PluginManager& mgr (PluginManager::instance());
-	favorite_plugins_model->clear ();
 
 #ifdef LV2_SUPPORT
-	refiller (mgr, mgr.lv2_plugin_info ());
+	refiller (plugs, mgr.lv2_plugin_info ());
 #endif
 #ifdef WINDOWS_VST_SUPPORT
-	refiller (mgr, mgr.windows_vst_plugin_info ());
+	refiller (plugs, mgr.windows_vst_plugin_info ());
 #endif
 #ifdef LXVST_SUPPORT
-	refiller (mgr, mgr.lxvst_plugin_info ());
+	refiller (plugs, mgr.lxvst_plugin_info ());
 #endif
 #ifdef AUDIOUNIT_SUPPORT
-	refiller (mgr, mgr.au_plugin_info ());
+	refiller (plugs, mgr.au_plugin_info ());
 #endif
-	refiller (mgr, mgr.ladspa_plugin_info ());
+	refiller (plugs, mgr.ladspa_plugin_info ());
+
+	store_current_favorite_order ();
+
+	PluginCustomSorter cmp (favorite_order);
+	plugs.sort (cmp);
+
+	favorite_order = plugs;
+
+	sync_treeview_from_favorite_order ();
+}
+
+void
+Mixer_UI::sync_treeview_from_favorite_order ()
+{
+	favorite_plugins_model->clear ();
+	for (PluginInfoList::const_iterator i = favorite_order.begin(); i != favorite_order.end(); ++i) {
+		TreeModel::Row newrow = *(favorite_plugins_model->append());
+		newrow[favorite_plugins_columns.name] = (*i)->name;
+		newrow[favorite_plugins_columns.plugin] = *i;
+	}
 }

@@ -262,6 +262,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 			Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
 	};
 
+	ARDOUR::PluginInfoList favorite_order;
 
 	TrackDisplayModelColumns    track_columns;
 	GroupDisplayModelColumns    group_columns;
@@ -317,8 +318,10 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void monitor_section_attached ();
 	void monitor_section_detached ();
 
-	void refiller (ARDOUR::PluginManager& manager, const ARDOUR::PluginInfoList& plugs);
+	void store_current_favorite_order();
+	void refiller (ARDOUR::PluginInfoList& result, const ARDOUR::PluginInfoList& plugs);
 	void refill_favorite_plugins ();
+	void sync_treeview_from_favorite_order ();
 
 	/// true if we are in fullscreen mode
 	bool _maximised;
