@@ -53,9 +53,9 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 	if (!ArdourVideoToolPaths::transcoder_exe(ffmpeg_exe, ffprobe_exe)) {
 		warning << string_compose(
 				_(
-					"No ffprobe or ffmpeg executables could be found on this system.\n"
-					"Video import and export is not possible until you install those tools.\n"
+					"ffmpeg installation was not found on this system.\n"
 					"%1 requires ffmpeg and ffprobe from ffmpeg.org - version 1.1 or newer.\n"
+					"Video import and export is not possible until you install tools.\n"
 					"\n"
 					"The tools are included with the %1 releases from ardour.org "
 					"and also available with the video-server at http://x42.github.com/harvid/\n"

@@ -112,7 +112,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	/* check if ffmpeg can be found */
 	_transcoder = new TranscodeFfmpeg(X_(""));
 	if (!_transcoder->ffexec_ok()) {
-		l = manage (new Label (_("No ffprobe or ffmpeg executables could be found on this system. Video Export is not possible until you install those tools. See the Log window for more information."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("ffmpeg installation was not found. Video Export is not possible. See the Log window for more information."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 		l->set_line_wrap();
 		vbox->pack_start (*l, false, false, 8);
 		get_vbox()->pack_start (*vbox, false, false);
