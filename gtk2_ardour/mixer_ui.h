@@ -39,8 +39,12 @@
 #include "ardour/ardour.h"
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
+#include "ardour/plugin.h"
+#include "ardour/plugin_manager.h"
 
 #include "gtkmm2ext/visibility_tracker.h"
+#include "gtkmm2ext/dndtreeview.h"
+#include "gtkmm2ext/treeutils.h"
 
 #include "enums.h"
 #include "mixer_actor.h"
@@ -115,10 +119,13 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	Gtk::Button				group_display_button;
 	Gtk::ScrolledWindow		track_display_scroller;
 	Gtk::ScrolledWindow		group_display_scroller;
+	Gtk::ScrolledWindow		favorite_plugins_scroller;
 	Gtk::VBox				group_display_vbox;
 	Gtk::Frame				track_display_frame;
 	Gtk::Frame				group_display_frame;
+	Gtk::Frame				favorite_plugins_frame;
 	Gtk::VPaned				rhs_pane1;
+	Gtk::VPaned				rhs_pane2;
 	Gtk::HBox				strip_packer;
 	Gtk::HBox				out_packer;
 	Gtk::HPaned				list_hpane;
@@ -246,14 +253,27 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	    Gtk::TreeModelColumn<ARDOUR::RouteGroup*>	group;
 	};
 
+	struct PluginsDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    PluginsDisplayModelColumns() {
+		    add (name);
+		    add (plugin);
+	    }
+	    Gtk::TreeModelColumn<std::string> name;
+			Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
+	};
+
+
 	TrackDisplayModelColumns    track_columns;
 	GroupDisplayModelColumns    group_columns;
+	PluginsDisplayModelColumns  favorite_plugins_columns;
 
 	Gtk::TreeView track_display;
 	Gtk::TreeView group_display;
+	Gtkmm2ext::DnDTreeView<ARDOUR::PluginInfoPtr> favorite_plugins_display;
 
 	Glib::RefPtr<Gtk::ListStore> track_model;
 	Glib::RefPtr<Gtk::ListStore> group_model;
+	Glib::RefPtr<Gtk::ListStore> favorite_plugins_model;
 
 	bool group_display_button_press (GdkEventButton*);
 	void group_display_selection_changed ();
@@ -296,6 +316,9 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	void monitor_section_attached ();
 	void monitor_section_detached ();
+
+	void refiller (ARDOUR::PluginManager& manager, const ARDOUR::PluginInfoList& plugs);
+	void refill_favorite_plugins ();
 
 	/// true if we are in fullscreen mode
 	bool _maximised;

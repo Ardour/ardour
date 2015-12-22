@@ -193,10 +193,31 @@ Mixer_UI::Mixer_UI ()
 	group_display_frame.set_shadow_type (Gtk::SHADOW_IN);
 	group_display_frame.add (group_display_vbox);
 
+	favorite_plugins_model = ListStore::create (favorite_plugins_columns);
+	favorite_plugins_display.set_model (favorite_plugins_model);
+	favorite_plugins_display.append_column (_("Favorite Plugins"), favorite_plugins_columns.name);
+	favorite_plugins_display.set_name ("EditGroupList");
+	favorite_plugins_display.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE); // XXX needs focus/keyboard
+	favorite_plugins_display.set_reorderable (false); // ?!
+	favorite_plugins_display.set_headers_visible (true);
+	favorite_plugins_display.set_rules_hint (true);
+	favorite_plugins_display.set_can_focus (false);
+	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "PluginInfoPtr");
+
+	favorite_plugins_scroller.add (favorite_plugins_display);
+	favorite_plugins_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+
+	favorite_plugins_frame.set_name ("BaseFrame");
+	favorite_plugins_frame.set_shadow_type (Gtk::SHADOW_IN);
+	favorite_plugins_frame.add (favorite_plugins_scroller);
+
 	rhs_pane1.pack1 (track_display_frame);
 	rhs_pane1.pack2 (group_display_frame);
 
-	list_vpacker.pack_start (rhs_pane1, true, true);
+	rhs_pane2.pack1 (rhs_pane1);
+	rhs_pane2.pack2 (favorite_plugins_frame);
+
+	list_vpacker.pack_start (rhs_pane2, true, true);
 
 	global_hpacker.pack_start (scroller, true, true);
 	global_hpacker.pack_start (out_packer, false, false, 0);
@@ -206,6 +227,8 @@ Mixer_UI::Mixer_UI ()
 
 	rhs_pane1.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
 							static_cast<Gtk::Paned*> (&rhs_pane1)));
+	rhs_pane2.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
+							static_cast<Gtk::Paned*> (&rhs_pane2)));
 	list_hpane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
 							 static_cast<Gtk::Paned*> (&list_hpane)));
 
@@ -237,19 +260,28 @@ Mixer_UI::Mixer_UI ()
 	group_display_button_label.show();
 	group_display_button.show();
 	group_display_scroller.show();
+	favorite_plugins_scroller.show();
 	group_display_vbox.show();
 	group_display_frame.show();
+	favorite_plugins_frame.show();
 	rhs_pane1.show();
+	rhs_pane2.show();
 	strip_packer.show();
 	out_packer.show();
 	list_hpane.show();
 	group_display.show();
+	favorite_plugins_display.show();
 
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 
 #ifndef DEFER_PLUGIN_SELECTOR_LOAD
 	_plugin_selector = new PluginSelector (PluginManager::instance ());
+#else
+#error implement deferred Plugin-Favorite list
 #endif
+	PluginManager::instance ().PluginListChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
+	PluginManager::instance ().PluginStatusesChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
+	refill_favorite_plugins();
 }
 
 Mixer_UI::~Mixer_UI ()
@@ -1722,6 +1754,8 @@ Mixer_UI::get_state (void)
 
 		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&rhs_pane1)->gobj()));
 		geometry->add_property(X_("mixer_rhs_pane1_pos"), string(buf));
+		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&rhs_pane2)->gobj()));
+		geometry->add_property(X_("mixer_rhs_pane2_pos"), string(buf));
 		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&list_hpane)->gobj()));
 		geometry->add_property(X_("mixer_list_hpane_pos"), string(buf));
 
@@ -1780,6 +1814,21 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 			rhs_pane1.set_position (pos);
 		}
 
+	} else if (which == static_cast<Gtk::Paned*> (&rhs_pane2)) {
+		if (done[1]) {
+			return;
+		}
+
+		if (!geometry || (prop = geometry->property("mixer-rhs-pane2-pos")) == 0) {
+			pos = 2 * height / 3;
+			snprintf (buf, sizeof(buf), "%d", pos);
+		} else {
+			pos = atoi (prop->value());
+		}
+
+		if ((done[1] = GTK_WIDGET(rhs_pane2.gobj())->allocation.height > pos)) {
+			rhs_pane2.set_position (pos);
+		}
 	} else if (which == static_cast<Gtk::Paned*> (&list_hpane)) {
 
 		if (done[2]) {
@@ -2116,4 +2165,39 @@ Mixer_UI::monitor_section_detached ()
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
 	act->set_sensitive (false);
+}
+
+
+void
+Mixer_UI::refiller (PluginManager& manager, const PluginInfoList& plugs)
+{
+	for (PluginInfoList::const_iterator i = plugs.begin(); i != plugs.end(); ++i) {
+		if (manager.get_status (*i) != PluginManager::Favorite) {
+			continue;
+		}
+		TreeModel::Row newrow = *(favorite_plugins_model->append());
+		newrow[favorite_plugins_columns.name] = (*i)->name;
+		newrow[favorite_plugins_columns.plugin] = *i;
+	}
+}
+
+void
+Mixer_UI::refill_favorite_plugins ()
+{
+	PluginManager& mgr (PluginManager::instance());
+	favorite_plugins_model->clear ();
+
+#ifdef LV2_SUPPORT
+	refiller (mgr, mgr.lv2_plugin_info ());
+#endif
+#ifdef WINDOWS_VST_SUPPORT
+	refiller (mgr, mgr.windows_vst_plugin_info ());
+#endif
+#ifdef LXVST_SUPPORT
+	refiller (mgr, mgr.lxvst_plugin_info ());
+#endif
+#ifdef AUDIOUNIT_SUPPORT
+	refiller (mgr, mgr.au_plugin_info ());
+#endif
+	refiller (mgr, mgr.ladspa_plugin_info ());
 }
