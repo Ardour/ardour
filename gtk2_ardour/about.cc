@@ -145,6 +145,7 @@ static const char* authors[] = {
 	N_("Dave Flick"),
 	N_("Hans Fugal"),
 	N_("Robin Gareus"),
+	N_("Nil Geisweiller"),
 	N_("Christopher George"),
 	N_("Chris Goddard"),
 	N_("J. Abelardo Gutierrez"),
