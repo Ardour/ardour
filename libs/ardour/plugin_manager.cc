@@ -1123,6 +1123,7 @@ PluginManager::save_statuses ()
 		ofs << endl;
 	}
 	g_file_set_contents (path.c_str(), ofs.str().c_str(), -1, NULL);
+	PluginStatusesChanged (); /* EMIT SIGNAL */
 }
 
 void
