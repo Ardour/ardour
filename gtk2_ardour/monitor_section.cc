@@ -414,13 +414,13 @@ MonitorSection::MonitorSection (Session* s)
 	 */
 	VBox* vpacker = manage (new VBox);
 	vpacker->set_border_width (PX_SCALE(3));
-	vpacker->set_spacing (PX_SCALE(10));
-	vpacker->pack_start (*rude_box, false, false, PX_SCALE(3));
-	vpacker->pack_start (*solo_tbl, false, false);
-	vpacker->pack_start (*level_tbl, false, false);
-	vpacker->pack_start (*lower_packer, false, false);
-	vpacker->pack_start (*insert_box, true, true);
-	vpacker->pack_end   (*out_packer, false, false);
+	vpacker->pack_start (*rude_box,            false, false, PX_SCALE(3));
+	vpacker->pack_start (rude_audition_button, false, false, 0);
+	vpacker->pack_start (*solo_tbl,            false, false, PX_SCALE(8));
+	vpacker->pack_start (*level_tbl,           false, false, PX_SCALE(8));
+	vpacker->pack_start (*lower_packer,        false, false, PX_SCALE(8));
+	vpacker->pack_start (*insert_box,          true,  true,  PX_SCALE(8));
+	vpacker->pack_end   (*out_packer,          false, false, PX_SCALE(3));
 
 	hpacker.set_spacing (0);
 	hpacker.pack_start (*vpacker, true, true);
