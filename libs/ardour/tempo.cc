@@ -1389,7 +1389,7 @@ TempoMap::tick_at_frame (framecnt_t frame) const
 framecnt_t
 TempoMap::frame_at_tick (double tick) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock);
+	/* HOLD THE READER LOCK */
 
 	double accumulated_ticks = 0.0;
 	double accumulated_ticks_to_prev = 0.0;
@@ -1425,7 +1425,7 @@ TempoMap::frame_at_tick (double tick) const
 			++cnt;
 		}
 	}
-	double ticks_in_section = tick - tick_at_frame (prev_ts->frame());
+	double ticks_in_section = tick - accumulated_ticks_to_prev;
 	double dtime = (ticks_in_section / BBT_Time::ticks_per_beat) * prev_ts->frames_per_beat(_frame_rate);
 	framecnt_t ret = ((framecnt_t) floor (dtime)) + prev_ts->frame();
 
@@ -1435,12 +1435,16 @@ TempoMap::frame_at_tick (double tick) const
 double
 TempoMap::beat_at_frame (framecnt_t frame) const
 {
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
 	return tick_at_frame (frame) / BBT_Time::ticks_per_beat;
 }
 
 framecnt_t
 TempoMap::frame_at_beat (double beat) const
 {
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
 	return frame_at_tick (beat * BBT_Time::ticks_per_beat);
 }
 
@@ -1485,6 +1489,8 @@ TempoMap::frame_time (const BBT_Time& bbt)
 
 	TempoSection* prev_ts = &first_tempo();
 	double accumulated_ticks = 0.0;
+	double accumulated_ticks_to_prev = 0.0;
+
 	uint32_t cnt = 0;
 
 	for (i = metrics.begin(); i != metrics.end(); ++i) {
@@ -1503,21 +1509,21 @@ TempoMap::frame_time (const BBT_Time& bbt)
 			}
 
 			if (ticks_target < accumulated_ticks) {
-				double const ticks_in_section = ticks_target - tick_at_frame (prev_ts->frame());
+				double const ticks_in_section = ticks_target - accumulated_ticks_to_prev;
 				framepos_t const section_start_time = prev_ts->frame();
 				framepos_t const last_time = t->frame() - prev_ts->frame();
 				double const last_beats_per_minute = t->beats_per_minute();
 				framepos_t const ret = prev_ts->frame_at_tick (ticks_in_section, last_beats_per_minute, last_time, _frame_rate) + section_start_time;
 				return ret;
 			}
-
+			accumulated_ticks_to_prev = accumulated_ticks;
 			prev_ts = t;
 			++cnt;
 		}
 	}
 
 	/*treat this ts as constant tempo */
-	double const ticks_in_this_ts = ticks_target - tick_at_frame (prev_ts->frame());
+	double const ticks_in_this_ts = ticks_target - accumulated_ticks_to_prev;
 	double const dtime = (ticks_in_this_ts / BBT_Time::ticks_per_beat) * prev_ts->frames_per_beat(_frame_rate);
 	framecnt_t const ret = ((framecnt_t) floor (dtime)) + prev_ts->frame();
 	return ret;
