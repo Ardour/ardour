@@ -126,7 +126,6 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 void
 Editor::marker_position_changed ()
 {
-// yes its identical...
 	if (!_session) {
 		return;
 	}
@@ -136,10 +135,27 @@ Editor::marker_position_changed ()
 	if (tempo_lines) {
 		tempo_lines->tempo_map_changed();
 	}
+	TempoMarker* tempo_marker;
+	MeterMarker* meter_marker;
+	const TempoSection *ts;
+	const MeterSection *ms;
 
+	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
+		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
+			if ((ts = &tempo_marker->tempo()) != 0) {
+				cerr << "tempo section found for tempo marker " << endl;
+				tempo_marker->set_position (ts->frame ());
+			}
+		}
+		if ((meter_marker = dynamic_cast<MeterMarker*> (*x)) != 0) {
+			if ((ms = &meter_marker->meter()) != 0) {
+				cerr << "meter section found for meter marker " << endl;
+				meter_marker->set_position (ms->frame ());
+			}
+		}
+	}
 	std::vector<TempoMap::BBTPoint> grid;
 	compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
-	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	draw_measures (grid);
 	update_tempo_based_rulers (grid);
 }

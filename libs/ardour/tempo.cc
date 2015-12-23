@@ -1220,8 +1220,8 @@ TempoMap::beats_to_bbt (double beats)
 
 	framecnt_t frame = frame_at_beat (beats);
 	uint32_t cnt = 0;
-
-	if (n_meters() < 2) {
+	/* XX most of this is utter crap */
+	if (n_meters() == 1) {
 		uint32_t bars = (uint32_t) floor (beats / prev_ms->note_divisor());
 		double remaining_beats = beats - (bars *  prev_ms->note_divisor());
 		double remaining_ticks = (remaining_beats - floor (remaining_beats)) * BBT_Time::ticks_per_beat;
