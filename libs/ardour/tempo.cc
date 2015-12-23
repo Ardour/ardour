@@ -673,8 +673,6 @@ TempoMap::gui_set_tempo_frame (TempoSection& ts, framepos_t frame)
 	{
 		TempoSection& first (first_tempo());
 		if (ts.frame() != first.frame()) {
-			const MeterSection* meter = &meter_section_at (frame);
-
 			BBT_Time bbt;
 			{
 				Glib::Threads::RWLock::WriterLock lm (lock);
@@ -686,8 +684,11 @@ TempoMap::gui_set_tempo_frame (TempoSection& ts, framepos_t frame)
 
 				Metrics::const_iterator i;
 				TempoSection* prev_ts = 0;
+				MeterSection* meter = 0;
+
 				for (i = metrics.begin(); i != metrics.end(); ++i) {
 					TempoSection* t;
+					MeterSection* m;
 
 					if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 
@@ -697,9 +698,18 @@ TempoMap::gui_set_tempo_frame (TempoSection& ts, framepos_t frame)
 
 						prev_ts = t;
 					}
+
+					if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
+
+						if ((*i)->frame() > frame) {
+							break;
+						}
+
+						meter = m;
+					}
 				}
 
-				if (prev_ts) {
+				if (prev_ts && meter) {
 
 					/* set the start bbt */
 					double const ticks_to_ts = prev_ts->tick_at_frame (frame - prev_ts->frame(), ts.beats_per_minute(), frame - prev_ts->frame(), _frame_rate);
