@@ -1204,16 +1204,6 @@ because the I/O configuration of the plugins could\n\
 not match the configuration of this track.");
 			MessageDialog am (msg);
 			am.run ();
-		} else if (pl.size() == 1 && Config->get_open_gui_after_adding_plugin()) {
-			boost::shared_ptr<Processor> processor = pl.front();
-			boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
-			if (_session->engine().connected () && processor_can_be_edited (processor)) {
-				if (pi && pi->plugin()->has_editor ()) {
-					edit_processor (processor);
-				} else {
-					generic_edit_processor (processor);
-				}
-			}
 		}
 }
 
