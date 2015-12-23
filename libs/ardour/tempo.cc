@@ -533,13 +533,12 @@ TempoMap::do_insert (MetricSection* section)
 {
 	bool need_add = true;
 
-	assert (section->start().ticks == 0);
-
 	/* we only allow new meters to be inserted on beat 1 of an existing
 	 * measure.
 	 */
 
 	if (dynamic_cast<MeterSection*>(section)) {
+		assert (section->start().ticks == 0);
 
 		/* we need to (potentially) update the BBT times of tempo
 		   sections based on this new meter.
@@ -699,8 +698,6 @@ TempoMap::add_tempo (const Tempo& tempo, BBT_Time where, ARDOUR::TempoSection::T
 void
 TempoMap::add_tempo_locked (const Tempo& tempo, BBT_Time where, bool recompute, ARDOUR::TempoSection::Type type)
 {
-	/* new tempos always start on a beat */
-	where.ticks = 0;
 	TempoSection* ts = new TempoSection (where, tempo.beats_per_minute(), tempo.note_type(), type);
 
 	/* find the meter to use to set the bar offset of this
@@ -960,6 +957,9 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 
 	}
 
+	MetricSectionSorter cmp;
+	metrics.sort (cmp);
+
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("recomputing tempo map, zero to %1\n", end));
 
 	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
@@ -1068,35 +1068,35 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 							//cerr << "prev ts start bars = " << prev_ts->start().bars << " beats = " << prev_ts->start().beats << " ticks = " << prev_ts->start().ticks << endl;
 
 							/*tempo section (t) lies in the previous meter */
-							double ticks_at_ts = ((((t->start().bars - 1 ) * meter->divisions_per_bar()) + (t->start().beats - 1) )  * BBT_Time::ticks_per_beat) + t->start().ticks;
-							double ticks_at_prev_ts = ((((prev_ts->start().bars - 1) * meter->divisions_per_bar()) + (prev_ts->start().beats - 1))  * BBT_Time::ticks_per_beat) + prev_ts->start().ticks;
-							double ticks_relative_to_prev_ts = ticks_at_ts - ticks_at_prev_ts;
+							double const ticks_at_ts = ((((t->start().bars - 1 ) * meter->divisions_per_bar()) + (t->start().beats - 1) )  * BBT_Time::ticks_per_beat) + t->start().ticks;
+							double const ticks_at_prev_ts = ((((prev_ts->start().bars - 1) * meter->divisions_per_bar()) + (prev_ts->start().beats - 1))  * BBT_Time::ticks_per_beat) + prev_ts->start().ticks;
+							double const ticks_relative_to_prev_ts = ticks_at_ts - ticks_at_prev_ts;
 							/* assume (falsely) that the target tempo is constant */
 							double length_estimate = (ticks_relative_to_prev_ts /  BBT_Time::ticks_per_beat) * meter->frames_per_grid (*t, _frame_rate);
 							if (prev_ts->type() == TempoSection::Type::Constant) {
 								length_estimate = (ticks_relative_to_prev_ts / BBT_Time::ticks_per_beat) * prev_ts->frames_per_beat (_frame_rate);
 							}
 							cerr<< "initial length extimate = " << length_estimate << " ticks_relative_to_prev_ts " << ticks_relative_to_prev_ts << endl;
-							double system_precision_at_target_tempo =  (_frame_rate / t->ticks_per_minute());
+							double const system_precision_at_target_tempo =  (_frame_rate / t->ticks_per_minute());
 							cerr << " system_precision_at_target_tempo = " << system_precision_at_target_tempo << endl;
 							double tick_error = system_precision_at_target_tempo + 1.0; // sorry for the wtf
 
 							while (fabs (tick_error) >= system_precision_at_target_tempo) {
 
-								double actual_ticks = prev_ts->tick_at_frame (length_estimate, t->beats_per_minute(), (framepos_t) length_estimate, _frame_rate);
+								double const actual_ticks = prev_ts->tick_at_frame (length_estimate, t->beats_per_minute(), (framepos_t) length_estimate, _frame_rate);
 								tick_error = ticks_relative_to_prev_ts - actual_ticks;
 								length_estimate += (tick_error / BBT_Time::ticks_per_beat) * meter->frames_per_grid (*t, _frame_rate);
 								//cerr << "actual ticks = " << actual_ticks << endl;
 
 								//cerr << "tick error  = " << tick_error << endl;
 							}
-							cerr << "setting t frame to " << length_estimate + prev_ts->frame() << "tick error  = " << tick_error << endl;
+							cerr << "setting t frame to " << length_estimate + prev_ts->frame() << " tick error  = " << tick_error << endl;
 							t->set_frame (length_estimate + prev_ts->frame());
 
 							if (m->start() < t->start() && m->start() == prev_ts->start()) {
 								m->set_frame (prev_ts->frame());
 							} else if (m->start() < t->start() && m->start() > prev_ts->start()) {
-								cerr << "setting m frame to " << prev_ts->frame_at_tick ((first_tick_in_new_meter - ticks_at_prev_ts), t->beats_per_minute(), (framepos_t) length_estimate, _frame_rate) << " ticks = " << first_tick_in_new_meter - ticks_at_prev_ts  << endl;
+								cerr << "recompute map - setting meter frame to " << prev_ts->frame_at_tick ((first_tick_in_new_meter - ticks_at_prev_ts), t->beats_per_minute(), (framepos_t) length_estimate, _frame_rate) << " ticks = " << first_tick_in_new_meter - ticks_at_prev_ts  << endl;
 
 								m->set_frame (prev_ts->frame_at_tick ((first_tick_in_new_meter - ticks_at_prev_ts), t->beats_per_minute(), (framepos_t) length_estimate, _frame_rate));
 							}
