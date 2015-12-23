@@ -32,6 +32,7 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
 
+#include "ardour/amp.h"
 #include "ardour/audioengine.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/port.h"
@@ -81,7 +82,9 @@ MonitorSection::MonitorSection (Session* s)
 	, pfl_button (_("PFL"), ArdourButton::led_default_elements)
 	, exclusive_solo_button (ArdourButton::led_default_elements)
 	, solo_mute_override_button (ArdourButton::led_default_elements)
+	, toggle_processorbox_button (ArdourButton::default_elements)
 	, _inhibit_solo_model_update (false)
+	, _ui_initialized (false)
 {
 
 	using namespace Menu_Helpers;
@@ -180,6 +183,14 @@ MonitorSection::MonitorSection (Session* s)
 		solo_mute_override_button.set_related_action (act);
 	}
 
+	/* Processor Box hide/shos */
+	toggle_processorbox_button.set_text (_("Processors"));
+	toggle_processorbox_button.set_name (X_("monitor processors toggle"));
+	set_tooltip (&toggle_processorbox_button, _("Allow to add monitor effect processors"));
+
+	proctoggle = ToggleAction::create ();
+	toggle_processorbox_button.set_related_action (proctoggle);
+	proctoggle->signal_toggled().connect (sigc::mem_fun(*this, &MonitorSection::repack_processor_box), false);
 
 	/* Knobs */
 	Label* solo_boost_label;
@@ -254,7 +265,7 @@ MonitorSection::MonitorSection (Session* s)
 	// dim button
 	dim_all_button.set_text (_("Dim"));
 	dim_all_button.set_name ("monitor section dim");
-	dim_all_button.set_size_request (-1, PX_SCALE(30));
+	dim_all_button.set_size_request (-1, PX_SCALE(25));
 	act = ActionManager::get_action (X_("Monitor"), X_("monitor-dim-all"));
 	if (act) {
 		dim_all_button.set_related_action (act);
@@ -263,7 +274,7 @@ MonitorSection::MonitorSection (Session* s)
 	// mono button
 	mono_button.set_text (_("Mono"));
 	mono_button.set_name ("monitor section mono");
-	mono_button.set_size_request (-1, PX_SCALE(30));
+	mono_button.set_size_request (-1, PX_SCALE(25));
 	act = ActionManager::get_action (X_("Monitor"), X_("monitor-mono"));
 	if (act) {
 		mono_button.set_related_action (act);
@@ -347,6 +358,9 @@ MonitorSection::MonitorSection (Session* s)
 	HBox* tbx2 = manage (new HBox);
 	tbx2->pack_end (solo_mute_override_button, false, false);
 
+	HBox* tbx3 = manage (new HBox);
+	tbx3->pack_end (toggle_processorbox_button, false, false);
+
 	HBox* tbx0 = manage (new HBox); // space
 
 	// combined solo mode (Sip, AFL, PFL) & solo options
@@ -355,8 +369,9 @@ MonitorSection::MonitorSection (Session* s)
 	solo_tbl->attach (pfl_button,             0, 1, 1, 2, EXPAND|FILL, SHRINK, 0, 2);
 	solo_tbl->attach (afl_button,             0, 1, 2, 3, EXPAND|FILL, SHRINK, 0, 2);
 	solo_tbl->attach (*tbx0,                  1, 2, 0, 3, EXPAND|FILL, SHRINK, 2, 2);
-	solo_tbl->attach (*tbx1,                  2, 3, 1, 2, EXPAND|FILL, SHRINK, 0, 2);
-	solo_tbl->attach (*tbx2,                  2, 3, 2, 3, EXPAND|FILL, SHRINK, 0, 2);
+	solo_tbl->attach (*tbx1,                  2, 3, 0, 1, EXPAND|FILL, SHRINK, 0, 2);
+	solo_tbl->attach (*tbx2,                  2, 3, 1, 2, EXPAND|FILL, SHRINK, 0, 2);
+	solo_tbl->attach (*tbx3,                  2, 3, 2, 3, EXPAND|FILL, SHRINK, 0, 2);
 
 	// boost, cut, dim  volume control
 	Table *level_tbl = manage (new Table);
@@ -391,17 +406,14 @@ MonitorSection::MonitorSection (Session* s)
 	spin_packer->pack_start (*gain_control, false, false);
 	spin_packer->pack_start (*gain_display, false, false);
 
-	HBox* master_box = manage (new HBox);
-	master_box->pack_start (*spin_packer, true, false);
+	master_packer.pack_start (*spin_packer, true, false);
 
-	// combined gain section (channels, mute, dim, master)
+	// combined gain section (channels, mute, dim)
 	VBox* lower_packer = manage (new VBox);
-	lower_packer->set_spacing (PX_SCALE(8));
-	lower_packer->pack_start (channel_table_header, false, false);
-	lower_packer->pack_start (channel_table_packer, false, false);
-	lower_packer->pack_start (*mono_dim_box, false, false);
-	lower_packer->pack_start (cut_all_button, false, false);
-	lower_packer->pack_start (*master_box, false, false, PX_SCALE(10));
+	lower_packer->pack_start (channel_table_header, false, false, PX_SCALE(0));
+	lower_packer->pack_start (channel_table_packer, false, false, PX_SCALE(8));
+	lower_packer->pack_start (*mono_dim_box,        false, false, PX_SCALE(2));
+	lower_packer->pack_start (cut_all_button,       false, false, PX_SCALE(2));
 
 		// output port select
 	VBox* out_packer = manage (new VBox);
@@ -412,18 +424,18 @@ MonitorSection::MonitorSection (Session* s)
 	/****************************************************************************
 	 * TOP LEVEL LAYOUT
 	 */
-	VBox* vpacker = manage (new VBox);
-	vpacker->set_border_width (PX_SCALE(3));
-	vpacker->pack_start (*rude_box,            false, false, PX_SCALE(3));
-	vpacker->pack_start (rude_audition_button, false, false, 0);
-	vpacker->pack_start (*solo_tbl,            false, false, PX_SCALE(8));
-	vpacker->pack_start (*level_tbl,           false, false, PX_SCALE(8));
-	vpacker->pack_start (*lower_packer,        false, false, PX_SCALE(8));
-	vpacker->pack_start (*insert_box,          true,  true,  PX_SCALE(8));
-	vpacker->pack_end   (*out_packer,          false, false, PX_SCALE(3));
+	vpacker.set_border_width (PX_SCALE(3));
+	vpacker.pack_start (*rude_box,            false, false, PX_SCALE(3));
+	vpacker.pack_start (rude_audition_button, false, false, 0);
+	vpacker.pack_start (*solo_tbl,            false, false, PX_SCALE(8));
+	vpacker.pack_start (*insert_box,          true,  true,  PX_SCALE(8));
+	vpacker.pack_start (*level_tbl,           false, false, PX_SCALE(8));
+	vpacker.pack_start (*lower_packer,        false, false, PX_SCALE(8));
+	vpacker.pack_start (master_packer,        false, false, PX_SCALE(10));
+	vpacker.pack_end   (*out_packer,          false, false, PX_SCALE(3));
 
 	hpacker.set_spacing (0);
-	hpacker.pack_start (*vpacker, true, true);
+	hpacker.pack_start (vpacker, true, true);
 
 	gain_control->show_all ();
 	gain_display->show_all ();
@@ -434,7 +446,7 @@ MonitorSection::MonitorSection (Session* s)
 
 	mono_dim_box->show ();
 	spin_packer->show ();
-	master_box->show ();
+	master_packer.show ();
 	channel_table.show ();
 
 	rude_box->show();
@@ -443,7 +455,7 @@ MonitorSection::MonitorSection (Session* s)
 	lower_packer->show ();
 	out_packer->show ();
 
-	vpacker->show ();
+	vpacker.show ();
 	hpacker.show ();
 
 	populate_buttons ();
@@ -464,7 +476,9 @@ MonitorSection::MonitorSection (Session* s)
 	_tearoff->tearoff_window().set_title (X_("Monitor"));
 	_tearoff->tearoff_window().signal_key_press_event().connect (sigc::ptr_fun (forward_key_press), false);
 
-	update_output_display();
+	update_output_display ();
+	repack_processor_box ();
+	_ui_initialized = true;
 
 	/* catch changes that affect us */
 	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
@@ -497,6 +511,39 @@ MonitorSection::~MonitorSection ()
 	_output_selector = 0;
 }
 
+
+void
+MonitorSection::repack_processor_box ()
+{
+	bool show_processor_box = proctoggle->get_active ();
+
+	if (count_processors () > 0) {
+		proctoggle->set_active (true);
+		proctoggle->set_sensitive (false);
+		show_processor_box = true;
+	} else {
+		proctoggle->set_sensitive (true);
+	}
+
+	if (insert_box->is_visible() == show_processor_box) {
+		return;
+	}
+
+	if (show_processor_box) {
+		if (master_packer.get_parent()) {
+			master_packer.get_parent()->remove (master_packer);
+		}
+		insert_box->show();
+		vpacker.pack_start (master_packer,        false, false, PX_SCALE(10));
+	} else {
+		if (master_packer.get_parent()) {
+			master_packer.get_parent()->remove (master_packer);
+		}
+		insert_box->hide();
+		vpacker.pack_start (master_packer,        true,  false, PX_SCALE(10));
+	}
+}
+
 void
 MonitorSection::set_session (Session* s)
 {
@@ -515,6 +562,10 @@ MonitorSection::set_session (Session* s)
 											boost::bind (&MonitorSection::update_output_display, this),
 											gui_context());
 			insert_box->set_route (_route);
+			_route->processors_changed.connect (*this, invalidator (*this), boost::bind (&MonitorSection::processors_changed, this, _1), gui_context());
+			if (_ui_initialized) {
+				repack_processor_box ();  // too early
+			}
 		} else {
 			/* session with no monitor section */
 			_output_changed_connection.disconnect();
@@ -1541,4 +1592,33 @@ MonitorSection::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost:
 	if ((a && _route->output()->has_port (a)) || (b && _route->output()->has_port (b))) {
 		update_output_display ();
 	}
+}
+
+void
+MonitorSection::help_count_processors (boost::weak_ptr<Processor> p, uint32_t* cnt) const
+{
+	boost::shared_ptr<Processor> processor (p.lock ());
+	if (!processor || !processor->display_to_user()) {
+		return;
+	}
+	if (boost::dynamic_pointer_cast<Amp>(processor)) {
+		return;
+	}
+	++(*cnt);
+}
+
+uint32_t
+MonitorSection::count_processors ()
+{
+	uint32_t processor_count = 0;
+	if (_route) {
+		_route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &MonitorSection::help_count_processors), &processor_count));
+	}
+	return processor_count;
+}
+
+void
+MonitorSection::processors_changed (ARDOUR::RouteProcessorChange)
+{
+	repack_processor_box ();
 }

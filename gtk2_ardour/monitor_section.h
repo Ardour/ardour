@@ -57,10 +57,12 @@ class MonitorSection : public RouteUI
 
 	private:
 	Gtk::HBox hpacker;
+	Gtk::VBox vpacker;
 	Gtkmm2ext::TearOff* _tearoff;
 
 	Gtk::HBox  channel_table_packer;
 	Gtk::HBox  table_hpacker;
+	Gtk::HBox  master_packer;
 	Gtk::Table channel_table;
 	Gtk::Table channel_table_header;
 	Gtk::ScrolledWindow channel_table_scroller;
@@ -142,6 +144,7 @@ class MonitorSection : public RouteUI
 	ArdourButton rude_audition_button;
 	ArdourButton exclusive_solo_button;
 	ArdourButton solo_mute_override_button;
+	ArdourButton toggle_processorbox_button;
 
 	void do_blink (bool);
 	void solo_blink (bool);
@@ -163,7 +166,15 @@ class MonitorSection : public RouteUI
 
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
 
+	void repack_processor_box ();
+
 	ProcessorBox* insert_box;
 	PluginSelector* _plugin_selector;
 	RouteProcessorSelection _rr_selection;
+	void help_count_processors (boost::weak_ptr<ARDOUR::Processor> p, uint32_t* cnt) const;
+	uint32_t count_processors ();
+
+	void processors_changed (ARDOUR::RouteProcessorChange);
+	Glib::RefPtr<Gtk::ToggleAction> proctoggle;
+	bool _ui_initialized;
 };

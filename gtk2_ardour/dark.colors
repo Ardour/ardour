@@ -258,6 +258,7 @@
     <ColorAlias name="midi frame base" alias="color 87"/>
     <ColorAlias name="midi input button: fill active" alias="color 48"/>
     <ColorAlias name="monitor section button: fill active" alias="color 42"/>
+    <ColorAlias name="monitor processors toggle: fill active" alias="color 42"/>
     <ColorAlias name="midi input button: led active" alias="color 4"/>
     <ColorAlias name="midi meter color0" alias="color 52"/>
     <ColorAlias name="midi meter color1" alias="color 53"/>
