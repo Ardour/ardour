@@ -4807,7 +4807,7 @@ Route::setup_invisible_processors ()
 
 	if (_monitor_control && is_monitor ()) {
 		assert (!_monitor_control->display_to_user ());
-		new_processors.push_front (_monitor_control);
+		new_processors.insert (amp, _monitor_control);
 	}
 
 	/* INTERNAL RETURN */
