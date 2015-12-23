@@ -426,6 +426,12 @@ struct MetricSectionSorter {
     }
 };
 
+struct MetricSectionFrameSorter {
+    bool operator() (const MetricSection* a, const MetricSection* b) {
+	    return a->frame() < b->frame();
+    }
+};
+
 TempoMap::TempoMap (framecnt_t fr)
 {
 	_frame_rate = fr;
@@ -666,15 +672,64 @@ TempoMap::gui_set_tempo_frame (TempoSection& ts, framepos_t frame)
 {
 	{
 		TempoSection& first (first_tempo());
+		if (ts.frame() != first.frame()) {
+			const MeterSection* meter = &meter_section_at (frame);
 
-		if (ts.start() != first.start()) {
 			BBT_Time bbt;
-			bbt_time (frame, bbt);
 			{
 				Glib::Threads::RWLock::WriterLock lm (lock);
-				ts.set_frame (frame);
-				ts.set_start (bbt);
 
+				ts.set_frame (frame);
+
+				MetricSectionFrameSorter fcmp;
+				metrics.sort (fcmp);
+
+				Metrics::const_iterator i;
+				TempoSection* prev_ts = 0;
+				for (i = metrics.begin(); i != metrics.end(); ++i) {
+					TempoSection* t;
+
+					if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+
+						if ((*i)->frame() > frame - 1) {
+							break;
+						}
+
+						prev_ts = t;
+					}
+				}
+
+				if (prev_ts) {
+
+					/* set the start bbt */
+					double const ticks_to_ts = prev_ts->tick_at_frame (frame - prev_ts->frame(), ts.beats_per_minute(), frame - prev_ts->frame(), _frame_rate);
+					double beats = ticks_to_ts / BBT_Time::ticks_per_beat;
+					Timecode::BBT_Time bbt;
+
+					bbt.bars = (uint32_t) floor (beats / meter->divisions_per_bar());
+					beats -= bbt.bars * meter->divisions_per_bar();
+					bbt.beats = (uint32_t) floor (beats);
+					beats -= bbt.beats;
+					bbt.ticks = (uint32_t) floor (beats * BBT_Time::ticks_per_beat);
+
+					/* now add the prev ts bbt */
+					bbt.bars += prev_ts->start().bars;
+					bbt.beats += prev_ts->start().beats;
+
+					if (bbt.beats > meter->divisions_per_bar()) {
+						++bbt.bars;
+						bbt.beats -= meter->divisions_per_bar();
+					}
+					bbt.ticks += prev_ts->start().ticks;
+					if (bbt.ticks > BBT_Time::ticks_per_beat) {
+						++bbt.beats;
+						bbt.ticks -= BBT_Time::ticks_per_beat;
+					}
+					ts.set_start (bbt);
+				}
+
+				MetricSectionSorter cmp;
+				metrics.sort (cmp);
 				recompute_map (false);
 			}
 		}
@@ -726,7 +781,7 @@ TempoMap::add_tempo_locked (const Tempo& tempo, BBT_Time where, bool recompute, 
 		}
 	}
 
-	ts->update_bar_offset_from_bbt (*meter);
+	//ts->update_bar_offset_from_bbt (*meter);
 
 	/* and insert it */
 
@@ -957,9 +1012,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 
 	}
 
-	MetricSectionSorter cmp;
-	metrics.sort (cmp);
-
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("recomputing tempo map, zero to %1\n", end));
 
 	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
@@ -1010,7 +1062,7 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 				 * based on its bar offset position.
 				 */
 
-				ts->update_bbt_time_from_bar_offset (*rmeter);
+				//ts->update_bbt_time_from_bar_offset (*rmeter);
 
 			} else if ((ms = dynamic_cast<MeterSection*>(*i)) != 0) {
 				rmeter = ms;
@@ -1062,8 +1114,42 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 					TempoSection* t;
 
 					if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+						if (t->position_lock_style() == AudioTime) {
+							/* set the start bbt */
+							double const ticks_at_ts = prev_ts->tick_at_frame (t->frame(), t->beats_per_minute(), t->frame(), _frame_rate);
+							double const ticks_at_prev_ts = ((((prev_ts->start().bars - 1) * meter->divisions_per_bar()) + (prev_ts->start().beats - 1))  * BBT_Time::ticks_per_beat) + prev_ts->start().ticks;
 
-						if (t->start() >= m->start() && t->start() > prev_ts->start()) {
+							double const ticks_relative_to_prev_ts = ticks_at_ts - ticks_at_prev_ts;
+							double beats = ticks_relative_to_prev_ts / BBT_Time::ticks_per_beat;
+
+							Timecode::BBT_Time bbt;
+							bbt.bars = (uint32_t) floor (beats / meter->divisions_per_bar());
+							beats -= bbt.bars * meter->divisions_per_bar();
+							bbt.beats = (uint32_t) floor (beats);
+							beats -= bbt.beats;
+							bbt.ticks = (uint32_t) floor (beats * BBT_Time::ticks_per_beat);
+							/* now add the prev ts bbt */
+							bbt.bars += prev_ts->start().bars;
+							bbt.beats += prev_ts->start().beats;
+
+							if (bbt.beats > meter->divisions_per_bar()) {
+								++bbt.bars;
+								bbt.beats -= meter->divisions_per_bar();
+							}
+							bbt.ticks += prev_ts->start().ticks;
+							if (bbt.ticks > BBT_Time::ticks_per_beat) {
+								++bbt.beats;
+								bbt.ticks -= BBT_Time::ticks_per_beat;
+							}
+							t->set_start (bbt);
+
+							if (m->start() < t->start() && m->start() == prev_ts->start()) {
+								m->set_frame (prev_ts->frame());
+							} else if (m->start() < t->start() && m->start() > prev_ts->start()) {
+								m->set_frame (prev_ts->frame_at_tick ((first_tick_in_new_meter - ticks_at_prev_ts), t->beats_per_minute(), t->frame(), _frame_rate) + prev_ts->frame());
+							}
+
+						} else if (t->start() >= m->start() && t->start() > prev_ts->start()) {
 							//cerr << "new ts start bars = " << t->start().bars << " beats = " << t->start().beats << " ticks = " << t->start().ticks << endl;
 							//cerr << "prev ts start bars = " << prev_ts->start().bars << " beats = " << prev_ts->start().beats << " ticks = " << prev_ts->start().ticks << endl;
 
@@ -1086,19 +1172,15 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 								double const actual_ticks = prev_ts->tick_at_frame (length_estimate, t->beats_per_minute(), (framepos_t) length_estimate, _frame_rate);
 								tick_error = ticks_relative_to_prev_ts - actual_ticks;
 								length_estimate += (tick_error / BBT_Time::ticks_per_beat) * meter->frames_per_grid (*t, _frame_rate);
-								//cerr << "actual ticks = " << actual_ticks << endl;
-
-								//cerr << "tick error  = " << tick_error << endl;
 							}
-							cerr << "setting t frame to " << length_estimate + prev_ts->frame() << " tick error  = " << tick_error << endl;
 							t->set_frame (length_estimate + prev_ts->frame());
 
 							if (m->start() < t->start() && m->start() == prev_ts->start()) {
 								m->set_frame (prev_ts->frame());
 							} else if (m->start() < t->start() && m->start() > prev_ts->start()) {
-								cerr << "recompute map - setting meter frame to " << prev_ts->frame_at_tick ((first_tick_in_new_meter - ticks_at_prev_ts), t->beats_per_minute(), (framepos_t) length_estimate, _frame_rate) << " ticks = " << first_tick_in_new_meter - ticks_at_prev_ts  << endl;
+								cerr << "recompute map - music lock style setting meter frame to " << prev_ts->frame_at_tick ((first_tick_in_new_meter - ticks_at_prev_ts), t->beats_per_minute(), (framepos_t) length_estimate, _frame_rate) << " ticks = " << first_tick_in_new_meter - ticks_at_prev_ts  << endl;
 
-								m->set_frame (prev_ts->frame_at_tick ((first_tick_in_new_meter - ticks_at_prev_ts), t->beats_per_minute(), (framepos_t) length_estimate, _frame_rate));
+								m->set_frame (prev_ts->frame_at_tick ((first_tick_in_new_meter - ticks_at_prev_ts), t->beats_per_minute(), (framepos_t) length_estimate, _frame_rate) + prev_ts->frame());
 							}
 						}
 						prev_ts = t;
@@ -1344,7 +1426,6 @@ TempoMap::beats_to_bbt (double beats)
 double
 TempoMap::tick_at_frame (framecnt_t frame) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock);
 
 	Metrics::const_iterator i;
 	const TempoSection* prev_ts = &first_tempo();
@@ -1927,7 +2008,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 
 					if (ts->bar_offset() < 0.0) {
 						if (last_meter) {
-							ts->update_bar_offset_from_bbt (*last_meter);
+							//ts->update_bar_offset_from_bbt (*last_meter);
 						}
 					}
 				}
