@@ -23,6 +23,7 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/treeview.h>
+#include "gtkmm2ext/dndtreeview.h"
 #include <gtkmm2ext/selector.h>
 
 #include "ardour/plugin.h"
@@ -99,7 +100,7 @@ class PluginSelector : public ArdourDialog
 	};
 	PluginColumns plugin_columns;
 	Glib::RefPtr<Gtk::ListStore> plugin_model;
-	Gtk::TreeView plugin_display;
+	Gtkmm2ext::DnDTreeView<ARDOUR::PluginInfoPtr> plugin_display;
 	Gtk::Button* btn_add;
 	Gtk::Button* btn_remove;
 

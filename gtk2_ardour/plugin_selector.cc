@@ -105,6 +105,10 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	plugin_display.set_headers_clickable (true);
 	plugin_display.set_reorderable (false);
 	plugin_display.set_rules_hint (true);
+	plugin_display.add_object_drag (plugin_columns.plugin.index(), "PluginInfoPtr");
+
+	// setting a sort-column prevents re-ordering via Drag/Drop
+	plugin_model->set_sort_column (plugin_columns.name.index(), Gtk::SORT_ASCENDING);
 
 	CellRendererToggle* fav_cell = dynamic_cast<CellRendererToggle*>(plugin_display.get_column_cell_renderer (0));
 	fav_cell->property_activatable() = true;
