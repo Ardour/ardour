@@ -48,9 +48,12 @@ class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 	void add_drop_targets (std::list<Gtk::TargetEntry>&);
 	void add_object_drag (int column, std::string type_name);
 
-	void on_drag_begin (Glib::RefPtr<Gdk::DragContext> const & context) {
-		Gtk::TreeView::on_drag_begin (context);
-		start_object_drag ();
+	void on_drag_begin (Glib::RefPtr<Gdk::DragContext> const & context);
+
+	bool on_button_press_event (GdkEventButton *ev) {
+		press_start_x = ev->x;
+		press_start_y = ev->y;
+		return TreeView::on_button_press_event (ev);
 	}
 
 	void on_drag_leave(const Glib::RefPtr<Gdk::DragContext>& context, guint time) {
@@ -65,11 +68,19 @@ class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 
 	bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
 
+	void set_drag_column (int c) {
+		_drag_column = c;
+	}
+
   protected:
 	std::list<Gtk::TargetEntry> draggable;
 	Gdk::DragAction             suggested_action;
 	int                         data_column;
 	std::string                 object_type;
+
+	double press_start_x;
+	double press_start_y;
+	int _drag_column;
 
 	struct DragData {
 	    DragData () : source (0) {}
