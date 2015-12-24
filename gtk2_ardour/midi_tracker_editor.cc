@@ -700,6 +700,7 @@ MidiTrackerEditor::redisplay_model ()
 		// Generate each row
 		for (uint32_t irow = 0; irow < mtm.nrows; irow++) {
 			row = *(model->append());
+			Evoral::Beats row_beats = mtm.beats_at_row(irow);
 			uint32_t row_frame = mtm.frame_at_row(irow);
 
 			// Time
@@ -717,7 +718,7 @@ MidiTrackerEditor::redisplay_model ()
 				row[columns.channel] = note->channel() + 1;
 				row[columns.note_name] = note_off_str;
 				row[columns.velocity] = note->velocity();
-				// TODO: set delay in ticks
+				row[columns.delay] = (note->end_time() - row_beats).to_relative_ticks();
 			}
 
 			// Notes on
@@ -728,47 +729,14 @@ MidiTrackerEditor::redisplay_model ()
 				row[columns.channel] = note->channel() + 1;
 				row[columns.note_name] = Evoral::midi_note_name (note->note());
 				row[columns.velocity] = note->velocity();
-				// TODO: set delay in ticks
+				row[columns.delay] = (note->time() - row_beats).to_relative_ticks();
 				// Keep the note around for playing it
 				row[columns._note] = note;
 			}
 
 			// TODO: Add support for
 			// - Overlapping notes
-			// - Delay
-			// - Notes off
 		}
-
-		// // Generate rows of notes on and off (is kept around as it could be
-		// // useful for the above loop)
-		// for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
-		// 	// Display note on
-		// 	row = *(model->append());
-		// 	row[columns.channel] = (*i)->channel() + 1;
-		// 	row[columns.note_name] = Evoral::midi_note_name ((*i)->note());
-		// 	row[columns.velocity] = (*i)->velocity();
-
-		// 	// Start time
-		// 	Timecode::BBT_Time start_bbt;
-		// 	_session->tempo_map().bbt_time (conv.to ((*i)->time()), start_bbt);
-		// 	stringstream ss;
-		// 	ss << start_bbt;
-		// 	row[columns.time] = ss.str();
-
-		// 	// Display note off
-		// 	row = *(model->append());
-		// 	row[columns.channel] = (*i)->channel() + 1;
-		// 	row[columns.note_name] = note_off_str;
-		// 	row[columns.velocity] = (*i)->off_velocity();
-
-		// 	// End time
-		// 	Timecode::BBT_Time end_bbt;
-		// 	_session->tempo_map().bbt_time (conv.to ((*i)->end_time()), end_bbt);
-		// 	ss.str ("");
-		// 	ss << end_bbt;
-		// 	row[columns.time] = ss.str();
-
-		// }
 	}
 
 	view.set_model (model);

@@ -133,7 +133,7 @@ class MidiTrackerEditor : public ArdourWindow
 		Gtk::TreeModelColumn<std::string> note_name;
 		Gtk::TreeModelColumn<uint8_t>     channel;
 		Gtk::TreeModelColumn<uint8_t>     velocity;
-		Gtk::TreeModelColumn<int16_t>     delay;
+		Gtk::TreeModelColumn<int64_t>     delay;
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note;
 	};
 
