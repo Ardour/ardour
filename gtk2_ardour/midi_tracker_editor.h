@@ -42,6 +42,73 @@ namespace ARDOUR {
 	class Session;
 };
 
+// Data structure holding the matrix of events for the tracker
+// representation
+class MidiTrackerMatrix {
+public:
+	// Holds a note and its associated track number (a maximum of 4096
+	// tracks should be more than enough).
+	typedef Evoral::Note<Evoral::Beats> NoteType;
+	typedef std::pair<boost::shared_ptr<NoteType>, uint16_t> NoteTrack;
+	typedef std::multimap<uint32_t, NoteTrack> RowToNotes;
+	typedef std::pair<RowToNotes::const_iterator, RowToNotes::const_iterator> NotesRange;
+
+	MidiTrackerMatrix(ARDOUR::Session* session,
+	                  boost::shared_ptr<ARDOUR::MidiRegion> region,
+	                  boost::shared_ptr<ARDOUR::MidiModel> midi_model,
+	                  uint16_t rpb);
+
+	void updateMatrix(); 
+
+	// Find the beats corresponding to the first row
+	Evoral::Beats find_first_row_beats();
+
+	// Find the beats corresponding to the last row
+	Evoral::Beats find_last_row_beats();
+
+	// Find the number of rows of the region
+	uint32_t find_nrows();
+
+	// Return the frame at the corresponding row index
+	framepos_t frame_at_row(uint32_t irow);
+
+	// Return the beats at the corresponding row index
+	Evoral::Beats beats_at_row(uint32_t irow);
+
+	// Return the row index corresponding to the given beats
+	uint32_t row_at_beats(Evoral::Beats beats);
+
+	// Number of rows per beat
+	uint16_t rows_per_beat;
+
+	// Beats corresponding to the first row
+	Evoral::Beats first_beats_ceiling;
+
+	// Beats corresponding to the last row
+	Evoral::Beats last_beats_floor;
+
+	// Number of rows of that region (given the choosen resolution)
+	uint32_t nrows;
+
+	// Number of tracker tracks of that midi track (determined by the number of
+	// overlapping notes)
+	uint16_t ntracks;
+
+	// Map row index to notes on
+	RowToNotes notes_on;
+
+	// Map row index to notes off (basically the same corresponding notes
+	// on).
+	RowToNotes notes_off;
+
+private:
+	double _ticks_per_row;		// number of ticks per rows
+	ARDOUR::Session* _session;
+	boost::shared_ptr<ARDOUR::MidiRegion> _region;
+	boost::shared_ptr<ARDOUR::MidiModel>  _midi_model;
+	ARDOUR::BeatsFramesConverter _conv;	
+};
+
 class MidiTrackerEditor : public ArdourWindow
 {
   public:
@@ -80,11 +147,6 @@ class MidiTrackerEditor : public ArdourWindow
 	};
 
 	static const std::string note_off_str;
-
-	uint32_t rows_per_beat;		// number of rows per beat
-	uint32_t nrows;				// total number of rows in the region
-	double ticks_per_row;		// number of ticks per rows
-	framepos_t first_row_frame;	// frame corresponding to the first row
 	
 	MidiTrackerModelColumns      columns;
 	Glib::RefPtr<Gtk::ListStore> model;
@@ -118,19 +180,6 @@ class MidiTrackerEditor : public ArdourWindow
 
 	void delete_selected_note ();
 	void selection_changed ();
-
-	// Find the frame corresponding to the first row and initialize
-	// first_row_frame
-	void set_first_row_frame();
-
-	// Find the number of rows of the region
-	void set_nrows();
-
-	// Return the frame at the corresponding row index
-	framepos_t frame_at_row(uint32_t irow);
-
-	// Like above but the reference is given in first argument
-	framepos_t frame_at_row(framepos_t ref_frame, uint32_t irow);
 };
 
 #endif /* __ardour_gtk2_midi_tracker_editor_h_ */

@@ -35,7 +35,7 @@
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/actions.h"
 
-#include "ardour_ui.h"
+#include "ui_config.h"
 #include "midi_tracker_editor.h"
 #include "note_player.h"
 
@@ -48,12 +48,77 @@ using namespace Glib;
 using namespace ARDOUR;
 using Timecode::BBT_Time;
 
+///////////////////////
+// MidiTrackerMatrix //
+///////////////////////
+
+MidiTrackerMatrix::MidiTrackerMatrix(ARDOUR::Session* session,
+                                     boost::shared_ptr<ARDOUR::MidiRegion> region,
+                                     boost::shared_ptr<ARDOUR::MidiModel> midi_model,
+                                     uint16_t rpb)
+	: rows_per_beat(rpb), _ticks_per_row(BBT_Time::ticks_per_beat/rows_per_beat),
+	  _session(session), _region(region), _midi_model(midi_model),
+	  _conv(_session->tempo_map(), _region->position())
+{
+	updateMatrix();
+}
+
+void MidiTrackerMatrix::updateMatrix()
+{
+	first_beats_ceiling = find_first_row_beats();
+	last_beats_floor = find_last_row_beats();
+	nrows = find_nrows();
+
+	MidiModel::Notes notes = _midi_model->notes();
+	for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
+		// TODO: determine the correct tracker track
+		uint32_t row_on = row_at_beats((*i)->time());
+		uint32_t row_off = row_at_beats((*i)->end_time());
+		notes_on.insert(RowToNotes::value_type(row_on, NoteTrack(*i, 0)));
+		notes_off.insert(RowToNotes::value_type(row_off, NoteTrack(*i, 0)));
+	}
+}
+
+Evoral::Beats MidiTrackerMatrix::find_first_row_beats()
+{	
+	Evoral::Beats first_beats = _conv.from (_region->first_frame());	
+	return first_beats.round_up_to_beat();
+}
+
+Evoral::Beats MidiTrackerMatrix::find_last_row_beats()
+{	
+	Evoral::Beats last_beats = _conv.from (_region->last_frame());	
+	return last_beats.round_down_to_beat();
+}
+
+uint32_t MidiTrackerMatrix::find_nrows()
+{
+	return (last_beats_floor - first_beats_ceiling).to_double() * rows_per_beat;
+}
+
+framepos_t MidiTrackerMatrix::frame_at_row(uint32_t irow)
+{
+	return _conv.to (beats_at_row(irow));
+}
+
+Evoral::Beats MidiTrackerMatrix::beats_at_row(uint32_t irow)
+{
+	return first_beats_ceiling + (irow*1.0) / rows_per_beat;
+}
+
+uint32_t MidiTrackerMatrix::row_at_beats(Evoral::Beats beats)
+{
+	return (beats - first_beats_ceiling).to_double() * rows_per_beat;
+}
+
+///////////////////////
+// MidiTrackerEditor //
+///////////////////////
+
 const std::string MidiTrackerEditor::note_off_str = "===";
 
-MidiTrackerEditor::MidiTrackerEditor (Session* s, boost::shared_ptr<MidiRegion> r, boost::shared_ptr<MidiTrack> tr)
+MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<MidiRegion> r, boost::shared_ptr<MidiTrack> tr)
 	: ArdourWindow (r->name())
-	, rows_per_beat(4 /* TODO: user define */)
-	, ticks_per_row(BBT_Time::ticks_per_beat/rows_per_beat)
 	, buttons (1, 1)
 	, region (r)
 	, track (tr)
@@ -85,7 +150,7 @@ MidiTrackerEditor::MidiTrackerEditor (Session* s, boost::shared_ptr<MidiRegion> 
 	view.append_column (_("Note"), columns.note_name);
 	view.append_column (_("Ch"), columns.channel);
 	view.append_column (_("Vel"), columns.velocity);
-	view.append_column (_("Del"), columns.delay);
+	view.append_column (_("Delay"), columns.delay);
 
 	view.set_headers_visible (true);
 	view.set_rules_hint (true);
@@ -629,17 +694,13 @@ MidiTrackerEditor::redisplay_model ()
 
 	if (_session) {
 
-		BeatsFramesConverter conv (_session->tempo_map(), region->position());
-		MidiModel::Notes notes = midi_model->notes();
+		MidiTrackerMatrix mtm(_session, region, midi_model, 4 /* TODO: user defined */);
 		TreeModel::Row row;
-
-		set_first_row_frame();
-		set_nrows();
-
+		
 		// Generate each row
-		for (uint32_t irow = 0; irow < nrows; irow++) {
+		for (uint32_t irow = 0; irow < mtm.nrows; irow++) {
 			row = *(model->append());
-			framepos_t row_frame = frame_at_row(irow);
+			uint32_t row_frame = mtm.frame_at_row(irow);
 
 			// Time
 			Timecode::BBT_Time row_bbt;
@@ -648,22 +709,22 @@ MidiTrackerEditor::redisplay_model ()
 			ss << row_bbt;
 			row[columns.time] = ss.str();
 
-			// NoteOns
+			// Notes on
+			MidiTrackerMatrix::RowToNotes::const_iterator i = mtm.notes_on.find(irow);
+			if (i != mtm.notes_on.end()) {
+				// TODO: for now we just get the note, must support multiple notes/tracks
+				boost::shared_ptr<NoteType> note = i->second.first;
+				row[columns.channel] = note->channel() + 1;
+				row[columns.note_name] = Evoral::midi_note_name (note->note());
+				row[columns.velocity] = note->velocity();
+				// Keep the note around for playing it
+				row[columns._note] = note;
+			}
+
 			// TODO: Add support for
 			// - Overlapping notes
 			// - Delay
-			// - NoteOff
-			Evoral::Beats row_beats = conv.from (row_frame);
-			MidiModel::Notes::const_iterator inote = midi_model->note_lower_bound(row_beats);
-			if (inote != notes.end()
-			    && (*inote).get() > (void*)1000 // WTF!!!!
-			    && (*inote)->time() == row_beats) {
-				row[columns.channel] = (*inote)->channel() + 1;
-				row[columns.note_name] = Evoral::midi_note_name ((*inote)->note());
-				row[columns.velocity] = (*inote)->velocity();
-				// Keep the note around for playing it
-				row[columns._note] = (*inote);
-			}
+			// - Notes off
 		}
 
 		// // Generate rows of notes on and off (is kept around as it could be
@@ -704,7 +765,7 @@ MidiTrackerEditor::redisplay_model ()
 void
 MidiTrackerEditor::selection_changed ()
 {
-	if (!ARDOUR_UI::config()->get_sound_midi_notes()) {
+	if (!UIConfiguration::instance().get_sound_midi_notes()) {
 		return;
 	}
 
@@ -723,45 +784,4 @@ MidiTrackerEditor::selection_changed ()
 	}
 
 	player->play ();
-}
-
-void MidiTrackerEditor::set_first_row_frame()
-{
-	// Get the region's first BBT starting at a beat
-	Timecode::BBT_Time first_beat_bbt;
-	_session->tempo_map().bbt_time (region->first_frame(), first_beat_bbt);
-
-	// Set the ticks to 0 in order to start finding the first beat
-	first_beat_bbt.ticks = 0;
-	framepos_t first_beat_frame = _session->tempo_map().frame_time(first_beat_bbt);
-
-	// Find the corresponding frame of the first valid row
-	for (uint32_t irow = 0; ; irow++) {
-		framepos_t row_frame = frame_at_row (irow, first_beat_frame);
-		if (region->first_frame() < row_frame) {
-			first_row_frame = row_frame;
-			return;
-		}
-	}
-}
-
-void MidiTrackerEditor::set_nrows()
-{
-	for (uint32_t irow = 0; ; irow++) {
-		if (region->last_frame() < frame_at_row (irow)) {
-			nrows = irow;
-			return;
-		}
-	}
-}
-
-framepos_t MidiTrackerEditor::frame_at_row(framepos_t ref_frame, uint32_t irow)
-{
-	double row_beats = (irow*1.0) / rows_per_beat;
-	return _session->tempo_map().framepos_plus_beats (ref_frame, Evoral::Beats(row_beats));
-}
-
-framepos_t MidiTrackerEditor::frame_at_row(uint32_t irow)
-{
-	return frame_at_row(first_row_frame, irow);
 }
