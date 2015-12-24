@@ -694,7 +694,7 @@ MidiTrackerEditor::redisplay_model ()
 
 	if (_session) {
 
-		MidiTrackerMatrix mtm(_session, region, midi_model, 4 /* TODO: user defined */);
+		MidiTrackerMatrix mtm(_session, region, midi_model, 8 /* TODO: user defined */);
 		TreeModel::Row row;
 		
 		// Generate each row
@@ -709,14 +709,26 @@ MidiTrackerEditor::redisplay_model ()
 			ss << row_bbt;
 			row[columns.time] = ss.str();
 
-			// Notes on
-			MidiTrackerMatrix::RowToNotes::const_iterator i = mtm.notes_on.find(irow);
-			if (i != mtm.notes_on.end()) {
+			// Notes off
+			MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm.notes_off.find(irow);
+			if (i_off != mtm.notes_off.end()) {
 				// TODO: for now we just get the note, must support multiple notes/tracks
-				boost::shared_ptr<NoteType> note = i->second.first;
+				boost::shared_ptr<NoteType> note = i_off->second.first;
+				row[columns.channel] = note->channel() + 1;
+				row[columns.note_name] = note_off_str;
+				row[columns.velocity] = note->velocity();
+				// TODO: set delay in ticks
+			}
+
+			// Notes on
+			MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm.notes_on.find(irow);
+			if (i_on != mtm.notes_on.end()) {
+				// TODO: for now we just get the note, must support multiple notes/tracks
+				boost::shared_ptr<NoteType> note = i_on->second.first;
 				row[columns.channel] = note->channel() + 1;
 				row[columns.note_name] = Evoral::midi_note_name (note->note());
 				row[columns.velocity] = note->velocity();
+				// TODO: set delay in ticks
 				// Keep the note around for playing it
 				row[columns._note] = note;
 			}
