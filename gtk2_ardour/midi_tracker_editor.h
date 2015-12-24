@@ -49,8 +49,7 @@ public:
 	// Holds a note and its associated track number (a maximum of 4096
 	// tracks should be more than enough).
 	typedef Evoral::Note<Evoral::Beats> NoteType;
-	typedef std::pair<boost::shared_ptr<NoteType>, uint16_t> NoteTrack;
-	typedef std::multimap<uint32_t, NoteTrack> RowToNotes;
+	typedef std::multimap<uint32_t, boost::shared_ptr<NoteType> > RowToNotes;
 	typedef std::pair<RowToNotes::const_iterator, RowToNotes::const_iterator> NotesRange;
 
 	MidiTrackerMatrix(ARDOUR::Session* session,
@@ -95,12 +94,12 @@ public:
 	// overlapping notes)
 	uint16_t ntracks;
 
-	// Map row index to notes on
-	RowToNotes notes_on;
+	// Map row index to notes on for each track
+	std::vector<RowToNotes> notes_on;
 
-	// Map row index to notes off (basically the same corresponding notes
-	// on).
-	RowToNotes notes_off;
+	// Map row index to notes off (basically the same corresponding notes on)
+	// for each track
+	std::vector<RowToNotes> notes_off;
 
 private:
 	double _ticks_per_row;		// number of ticks per rows
@@ -148,6 +147,10 @@ class MidiTrackerEditor : public ArdourWindow
 	};
 
 	static const std::string note_off_str;
+
+	// If the resolution isn't fine enough and multiple notes do not fit in the
+	// same row, then this string is printed.
+	static const std::string undefined_str;
 	
 	MidiTrackerModelColumns      columns;
 	Glib::RefPtr<Gtk::ListStore> model;

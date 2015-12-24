@@ -69,13 +69,18 @@ void MidiTrackerMatrix::updateMatrix()
 	last_beats_floor = find_last_row_beats();
 	nrows = find_nrows();
 
+	// TODO: support multiple tracks
+	notes_on.clear();
+	notes_on.push_back(RowToNotes());
+	notes_off.clear();
+	notes_off.push_back(RowToNotes());
+	
 	MidiModel::Notes notes = _midi_model->notes();
 	for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
-		// TODO: determine the correct tracker track
 		uint32_t row_on = row_at_beats((*i)->time());
 		uint32_t row_off = row_at_beats((*i)->end_time());
-		notes_on.insert(RowToNotes::value_type(row_on, NoteTrack(*i, 0)));
-		notes_off.insert(RowToNotes::value_type(row_off, NoteTrack(*i, 0)));
+		notes_on[0].insert(RowToNotes::value_type(row_on, *i));
+		notes_off[0].insert(RowToNotes::value_type(row_off, *i));
 	}
 }
 
@@ -117,6 +122,7 @@ uint32_t MidiTrackerMatrix::row_at_beats(Evoral::Beats beats)
 ///////////////////////
 
 const std::string MidiTrackerEditor::note_off_str = "===";
+const std::string MidiTrackerEditor::undefined_str = "***";
 
 MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<MidiRegion> r, boost::shared_ptr<MidiTrack> tr)
 	: ArdourWindow (r->name())
@@ -711,33 +717,49 @@ MidiTrackerEditor::redisplay_model ()
 			ss << row_bbt;
 			row[columns.time] = ss.str();
 
-			// Notes off
-			MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm.notes_off.find(irow);
-			if (i_off != mtm.notes_off.end()) {
-				// TODO: for now we just get the note, must support multiple notes/tracks
-				boost::shared_ptr<NoteType> note = i_off->second.first;
-				row[columns.channel] = note->channel() + 1;
-				row[columns.note_name] = note_off_str;
-				row[columns.velocity] = note->velocity();
-				int64_t delay_ticks = (note->end_time() - row_beats).to_relative_ticks();
-				row[columns.delay] = delay_ticks;
-			}
-
-			// Notes on
-			MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm.notes_on.find(irow);
-			if (i_on != mtm.notes_on.end()) {
-				// TODO: for now we just get the note, must support multiple notes/tracks
-				boost::shared_ptr<NoteType> note = i_on->second.first;
-				row[columns.channel] = note->channel() + 1;
-				row[columns.note_name] = Evoral::midi_note_name (note->note());
-				row[columns.velocity] = note->velocity();
-				row[columns.delay] = (note->time() - row_beats).to_relative_ticks();
-				// Keep the note around for playing it
-				row[columns._note] = note;
-			}
-
 			// TODO: Add support for
-			// - Overlapping notes
+			// - Multiple tracks (overlapping notes)
+			// - Insane but sane delay
+
+			size_t notes_off_count = mtm.notes_off[0].count(irow);
+			size_t notes_on_count = mtm.notes_on[0].count(irow);
+
+			if (notes_on_count > 0 || notes_off_count > 0) {
+				MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm.notes_off[0].find(irow);
+				MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm.notes_on[0].find(irow);
+
+				// Determine whether the row is defined
+				bool undefined = (notes_off_count > 1 || notes_on_count > 1)
+					|| (notes_off_count == 1 && notes_on_count == 1
+					    && i_off->second->end_time() != i_on->second->time());
+
+				if (undefined) {
+					row[columns.note_name] = undefined_str;
+				} else {
+					// Notes off
+					MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm.notes_off[0].find(irow);
+					if (i_off != mtm.notes_off[0].end()) {
+						boost::shared_ptr<NoteType> note = i_off->second;
+						row[columns.channel] = note->channel() + 1;
+						row[columns.note_name] = note_off_str;
+						row[columns.velocity] = note->velocity();
+						int64_t delay_ticks = (note->end_time() - row_beats).to_relative_ticks();
+						row[columns.delay] = delay_ticks;
+					}
+
+					// Notes on
+					MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm.notes_on[0].find(irow);
+					if (i_on != mtm.notes_on[0].end()) {
+						boost::shared_ptr<NoteType> note = i_on->second;
+						row[columns.channel] = note->channel() + 1;
+						row[columns.note_name] = Evoral::midi_note_name (note->note());
+						row[columns.velocity] = note->velocity();
+						row[columns.delay] = (note->time() - row_beats).to_relative_ticks();
+						// Keep the note around for playing it
+						row[columns._note] = note;
+					}
+				}
+			}
 		}
 	}
 
