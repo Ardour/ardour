@@ -106,6 +106,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	plugin_display.set_reorderable (false);
 	plugin_display.set_rules_hint (true);
 	plugin_display.add_object_drag (plugin_columns.plugin.index(), "PluginInfoPtr");
+	plugin_display.set_drag_column (plugin_columns.name.index());
 
 	// setting a sort-column prevents re-ordering via Drag/Drop
 	plugin_model->set_sort_column (plugin_columns.name.index(), Gtk::SORT_ASCENDING);

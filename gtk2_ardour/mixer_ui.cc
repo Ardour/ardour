@@ -204,6 +204,7 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.set_rules_hint (true);
 	favorite_plugins_display.set_can_focus (false);
 	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "PluginInfoPtr");
+	favorite_plugins_display.set_drag_column (favorite_plugins_columns.name.index());
 
 	favorite_plugins_scroller.add (favorite_plugins_display);
 	favorite_plugins_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
