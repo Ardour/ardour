@@ -75,7 +75,8 @@ public:
 	// Return the beats at the corresponding row index
 	Evoral::Beats beats_at_row(uint32_t irow);
 
-	// Return the row index corresponding to the given beats
+	// Return the row index corresponding to the given beats, offsetting
+	// half-row to account for negative delay.
 	uint32_t row_at_beats(Evoral::Beats beats);
 
 	// Number of rows per beat

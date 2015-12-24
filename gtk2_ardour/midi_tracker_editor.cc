@@ -108,7 +108,8 @@ Evoral::Beats MidiTrackerMatrix::beats_at_row(uint32_t irow)
 
 uint32_t MidiTrackerMatrix::row_at_beats(Evoral::Beats beats)
 {
-	return (beats - first_beats_ceiling).to_double() * rows_per_beat;
+	Evoral::Beats half_row(0.5/rows_per_beat);
+	return (beats - first_beats_ceiling + half_row).to_double() * rows_per_beat;
 }
 
 ///////////////////////
@@ -718,7 +719,8 @@ MidiTrackerEditor::redisplay_model ()
 				row[columns.channel] = note->channel() + 1;
 				row[columns.note_name] = note_off_str;
 				row[columns.velocity] = note->velocity();
-				row[columns.delay] = (note->end_time() - row_beats).to_relative_ticks();
+				int64_t delay_ticks = (note->end_time() - row_beats).to_relative_ticks();
+				row[columns.delay] = delay_ticks;
 			}
 
 			// Notes on
