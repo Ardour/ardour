@@ -1662,7 +1662,6 @@ public:
 		if (biter != _user.end()) {
 			return false;
 		}
-		printf("BITTER\n");
 		return ARDOUR::cmp_nocase((*a).name, (*b).name) == -1;
 	}
 
@@ -1753,18 +1752,22 @@ Mixer_UI::set_state (const XMLNode& node)
 		tact->set_active (yn);
 	}
 
+
 	XMLNode* plugin_order;
 	if ((plugin_order = find_named_node (node, "PluginOrder")) != 0) {
+		store_current_favorite_order ();
 		std::list<string> order;
 		const XMLNodeList& kids = plugin_order->children("PluginInfo");
 		XMLNodeConstIterator i;
 		for (i = kids.begin(); i != kids.end(); ++i) {
 			if ((prop = (*i)->property ("unique-id"))) {
-				order.push_back (prop->value());
+				std::string unique_id = prop->value();
+				order.push_back (unique_id);
+				if ((prop = (*i)->property ("expanded"))) {
+					favorite_ui_state[unique_id] = string_is_affirmative (prop->value());
+				}
 			}
 		}
-
-		store_current_favorite_order ();
 		PluginStateSorter cmp (order);
 		favorite_order.sort (cmp);
 		sync_treeview_from_favorite_order ();
@@ -1825,6 +1828,9 @@ Mixer_UI::get_state (void)
 			XMLNode* p = new XMLNode ("PluginInfo");
 			p->add_property ("sort", cnt);
 			p->add_property ("unique-id", (*i)->unique_id);
+			try {
+				p->add_property ("expanded", favorite_ui_state.at ((*i)->unique_id));
+			} catch (const std::out_of_range&) { }
 			plugin_order->add_child_nocopy (*p);
 		;
 	}
@@ -2234,6 +2240,7 @@ Mixer_UI::store_current_favorite_order ()
 		ARDOUR::PluginPresetPtr ppp = row[favorite_plugins_columns.plugin];
 		favorite_order.push_back (ppp->_pip);
 		std::string name = row[favorite_plugins_columns.name];
+		favorite_ui_state[(*ppp->_pip).unique_id] = favorite_plugins_display.row_expanded (favorite_plugins_model->get_path(iter));
 	}
 }
 
@@ -2323,6 +2330,11 @@ Mixer_UI::sync_treeview_from_favorite_order ()
 			child_row[favorite_plugins_columns.name] = (*j).label;
 			child_row[favorite_plugins_columns.plugin] = PluginPresetPtr (new PluginPreset(pip, &(*j)));
 		}
+		try {
+			if (favorite_ui_state.at (pip->unique_id)) {
+				favorite_plugins_display.expand_row (favorite_plugins_model->get_path(newrow), true);
+			}
+		} catch (const std::out_of_range&) { }
 	}
 }
 

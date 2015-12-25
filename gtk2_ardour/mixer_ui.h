@@ -278,6 +278,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	};
 
 	ARDOUR::PluginInfoList favorite_order;
+	std::map<std::string, bool> favorite_ui_state;
 
 	TrackDisplayModelColumns    track_columns;
 	GroupDisplayModelColumns    group_columns;
