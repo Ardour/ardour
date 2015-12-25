@@ -348,6 +348,11 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	Gtkmm2ext::DnDVBox<ProcessorEntry> processor_display;
 	Gtk::ScrolledWindow    processor_scroller;
 
+	boost::shared_ptr<ARDOUR::Processor> find_drop_position (ProcessorEntry* position);
+
+	void _drop_plugin_preset (Gtk::SelectionData const &, ARDOUR::Route::ProcessorList &);
+	void _drop_plugin (Gtk::SelectionData const &, ARDOUR::Route::ProcessorList &);
+
 	void plugin_drop (Gtk::SelectionData const &, ProcessorEntry* position, Glib::RefPtr<Gdk::DragContext> const & context);
 	void object_drop (Gtkmm2ext::DnDVBox<ProcessorEntry> *, ProcessorEntry *, Glib::RefPtr<Gdk::DragContext> const &);
 

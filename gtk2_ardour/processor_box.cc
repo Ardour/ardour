@@ -1046,6 +1046,7 @@ static std::list<Gtk::TargetEntry> drop_targets()
 	std::list<Gtk::TargetEntry> tmp;
 	tmp.push_back (Gtk::TargetEntry ("processor"));
 	tmp.push_back (Gtk::TargetEntry ("PluginInfoPtr"));
+	tmp.push_back (Gtk::TargetEntry ("PluginPresetPtr"));
 	return tmp;
 }
 
@@ -1149,41 +1150,66 @@ ProcessorBox::route_going_away ()
 	_route.reset ();
 }
 
-void
-ProcessorBox::plugin_drop(Gtk::SelectionData const &data, ProcessorEntry* position, Glib::RefPtr<Gdk::DragContext> const & context)
+boost::shared_ptr<Processor>
+ProcessorBox::find_drop_position (ProcessorEntry* position)
 {
-		if (data.get_target() != "PluginInfoPtr") {
-			return;
-		}
-		if (!_session) {
-			return;
-		}
+	boost::shared_ptr<Processor> p;
+	if (position) {
+		p = position->processor ();
+		if (!p) {
+			/* dropped on the blank entry (which will be before the
+				 fader), so use the first non-blank child as our
+				 `dropped on' processor */
+			list<ProcessorEntry*> c = processor_display.children ();
+			list<ProcessorEntry*>::iterator i = c.begin ();
 
-		boost::shared_ptr<Processor> p;
-		if (position) {
-			p = position->processor ();
-			if (!p) {
-				/* dropped on the blank entry (which will be before the
-					 fader), so use the first non-blank child as our
-					 `dropped on' processor */
-				list<ProcessorEntry*> c = processor_display.children ();
-				list<ProcessorEntry*>::iterator i = c.begin ();
-
-				assert (i != c.end ());
-				p = (*i)->processor ();
-				assert (p);
-			}
+			assert (i != c.end ());
+			p = (*i)->processor ();
+			assert (p);
 		}
+	}
+	return p;
+}
 
+void
+ProcessorBox::_drop_plugin_preset (Gtk::SelectionData const &data, Route::ProcessorList &pl)
+{
 		const void * d = data.get_data();
-		const Gtkmm2ext::DnDTreeView<ARDOUR::PluginInfoPtr> * tv = reinterpret_cast<const Gtkmm2ext::DnDTreeView<ARDOUR::PluginInfoPtr>*>(d);
+		const Gtkmm2ext::DnDTreeView<ARDOUR::PluginPresetPtr>* tv = reinterpret_cast<const Gtkmm2ext::DnDTreeView<ARDOUR::PluginPresetPtr>*>(d);
 
-		std::list<ARDOUR::PluginInfoPtr> nfos;
+		PluginPresetList nfos;
 		TreeView* source;
 		tv->get_object_drag_data (nfos, &source);
 
-		Route::ProcessorStreams err;
-		Route::ProcessorList pl;
+		for (list<PluginPresetPtr>::const_iterator i = nfos.begin(); i != nfos.end(); ++i) {
+			PluginPresetPtr ppp = (*i);
+			PluginInfoPtr pip = ppp->_pip;
+			PluginPtr p = pip->load (*_session);
+			if (!p) {
+				continue;
+			}
+
+			if (ppp->_preset.valid) {
+				p->load_preset (ppp->_preset);
+			}
+
+			boost::shared_ptr<Processor> processor (new PluginInsert (*_session, p));
+			if (Config->get_new_plugins_active ()) {
+				processor->activate ();
+			}
+			pl.push_back (processor);
+		}
+}
+
+void
+ProcessorBox::_drop_plugin (Gtk::SelectionData const &data, Route::ProcessorList &pl)
+{
+		const void * d = data.get_data();
+		const Gtkmm2ext::DnDTreeView<ARDOUR::PluginInfoPtr>* tv = reinterpret_cast<const Gtkmm2ext::DnDTreeView<ARDOUR::PluginInfoPtr>*>(d);
+		PluginInfoList nfos;
+
+		TreeView* source;
+		tv->get_object_drag_data (nfos, &source);
 
 		for (list<PluginInfoPtr>::const_iterator i = nfos.begin(); i != nfos.end(); ++i) {
 			PluginPtr p = (*i)->load (*_session);
@@ -1196,35 +1222,43 @@ ProcessorBox::plugin_drop(Gtk::SelectionData const &data, ProcessorEntry* positi
 			}
 			pl.push_back (processor);
 		}
-
-		if (_route->add_processors (pl, p, &err)) {
-			string msg = _(
-					"Adding the given processor(s) failed probably,\n\
-because the I/O configuration of the plugins could\n\
-not match the configuration of this track.");
-			MessageDialog am (msg);
-			am.run ();
-		}
 }
 
 void
-ProcessorBox::object_drop(DnDVBox<ProcessorEntry>* source, ProcessorEntry* position, Glib::RefPtr<Gdk::DragContext> const & context)
+ProcessorBox::plugin_drop (Gtk::SelectionData const &data, ProcessorEntry* position, Glib::RefPtr<Gdk::DragContext> const & context)
 {
-	boost::shared_ptr<Processor> p;
-	if (position) {
-		p = position->processor ();
-		if (!p) {
-			/* dropped on the blank entry (which will be before the
-			   fader), so use the first non-blank child as our
-			   `dropped on' processor */
-			list<ProcessorEntry*> c = processor_display.children ();
-			list<ProcessorEntry*>::iterator i = c.begin ();
-
-			assert (i != c.end ());
-			p = (*i)->processor ();
-			assert (p);
-		}
+	if (!_session) {
+		return;
 	}
+
+	boost::shared_ptr<Processor> p = find_drop_position (position);
+	Route::ProcessorList pl;
+
+	if (data.get_target() == "PluginInfoPtr") {
+		_drop_plugin (data, pl);
+	}
+	else if (data.get_target() == "PluginPresetPtr") {
+		_drop_plugin_preset (data, pl);
+	}
+	else {
+		return;
+	}
+
+	Route::ProcessorStreams err;
+	if (_route->add_processors (pl, p, &err)) {
+		string msg = _(
+				"Processor Drag/Drop failed. Probably because\n\
+the I/O configuration of the plugins could\n\
+not match the configuration of this track.");
+		MessageDialog am (msg);
+		am.run ();
+	}
+}
+
+void
+ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* position, Glib::RefPtr<Gdk::DragContext> const & context)
+{
+	boost::shared_ptr<Processor> p = find_drop_position (position);
 
 	list<ProcessorEntry*> children = source->selection ();
 	list<boost::shared_ptr<Processor> > procs;
