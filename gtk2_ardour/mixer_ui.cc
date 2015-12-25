@@ -205,6 +205,7 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.set_can_focus (false);
 	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "PluginPresetPtr");
 	favorite_plugins_display.set_drag_column (favorite_plugins_columns.name.index());
+	favorite_plugins_display.signal_row_activated().connect (sigc::mem_fun (*this, &Mixer_UI::plugin_row_activated));
 
 	favorite_plugins_scroller.add (favorite_plugins_display);
 	favorite_plugins_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -2326,6 +2327,39 @@ Mixer_UI::sync_treeview_from_favorite_order ()
 		}
 	}
 }
+
+void
+Mixer_UI::plugin_row_activated (const TreeModel::Path& path, TreeViewColumn* column)
+{
+	if (!_session || _selection.routes.empty()) {
+		return;
+	}
+
+	TreeIter iter;
+	if (!(iter = favorite_plugins_model->get_iter (path))) {
+		return;
+	}
+
+	ARDOUR::PluginPresetPtr ppp = (*iter)[favorite_plugins_columns.plugin];
+	PluginInfoPtr pip = ppp->_pip;
+
+	for (RouteUISelection::iterator i = _selection.routes.begin(); i != _selection.routes.end(); ++i) {
+		boost::shared_ptr<ARDOUR::Route> rt = (*i)->route();
+		if (!rt) { continue; }
+
+		PluginPtr p = pip->load (*_session);
+		if (!p) { continue; }
+
+		if (ppp->_preset.valid) {
+			p->load_preset (ppp->_preset);
+		}
+
+		Route::ProcessorStreams err;
+		boost::shared_ptr<Processor> processor (new PluginInsert (*_session, p));
+		rt->add_processor_by_index (processor, -1, &err, Config->get_new_plugins_active ());
+	}
+}
+
 
 bool
 PluginTreeStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path& dest, const Gtk::SelectionData& data) const

@@ -198,6 +198,8 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void track_list_delete (const Gtk::TreeModel::Path&);
 	void track_list_reorder (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* new_order);
 
+	void plugin_row_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
+
 	void initial_track_display ();
 	void show_track_list_menu ();
 
