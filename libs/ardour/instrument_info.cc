@@ -175,12 +175,8 @@ InstrumentInfo::plugin_programs_to_channel_name_set (boost::shared_ptr<Processor
 		std::vector<Plugin::PresetRecord>::iterator i;
 		int n;
 
-		/* XXX note the assumption that plugin presets start their numbering at
-		 * zero
-		 */
-
 		for (n = 0, i = presets.begin(); i != presets.end(); ++i, ++n) {
-			if ((*i).number >= 0) {
+			if ((*i).valid) {
 				patch_list.push_back (boost::shared_ptr<Patch> (new Patch ((*i).label, n)));
 			} else {
 				patch_list.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("program %1", n), n)));

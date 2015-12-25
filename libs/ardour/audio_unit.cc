@@ -2327,7 +2327,7 @@ AUPlugin::find_presets ()
 	for (FactoryPresetMap::iterator i = factory_preset_map.begin(); i != factory_preset_map.end(); ++i) {
 		/* XXX: dubious */
 		string const uri = string_compose ("%1", _presets.size ());
-		_presets.insert (make_pair (uri, Plugin::PresetRecord (uri, i->first, i->second)));
+		_presets.insert (make_pair (uri, Plugin::PresetRecord (uri, i->first, false)));
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Adding Factory Preset: %1 > %2\n", i->first, i->second));
 	}
 }
