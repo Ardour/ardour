@@ -59,6 +59,19 @@ class PluginSelector;
 class MixerGroupTabs;
 class MonitorSection;
 
+class PluginTreeStore : public Gtk::TreeStore
+{
+public:
+	static Glib::RefPtr<PluginTreeStore> create(const Gtk::TreeModelColumnRecord& columns) {
+		return Glib::RefPtr<PluginTreeStore> (new PluginTreeStore (columns));
+	}
+
+protected:
+	PluginTreeStore (const Gtk::TreeModelColumnRecord& columns) : Gtk::TreeStore (columns) {}
+	virtual bool row_draggable_vfunc (const Gtk::TreeModel::Path&) const { return true; }
+	virtual bool row_drop_possible_vfunc (const Gtk::TreeModel::Path&, const Gtk::SelectionData&) const;
+};
+
 class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public MixerActor, public Gtkmm2ext::VisibilityTracker
 {
   public:
@@ -259,7 +272,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 		    add (plugin);
 	    }
 	    Gtk::TreeModelColumn<std::string> name;
-			Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
+			Gtk::TreeModelColumn<ARDOUR::PluginPresetPtr> plugin;
 	};
 
 	ARDOUR::PluginInfoList favorite_order;
@@ -270,11 +283,11 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	Gtk::TreeView track_display;
 	Gtk::TreeView group_display;
-	Gtkmm2ext::DnDTreeView<ARDOUR::PluginInfoPtr> favorite_plugins_display;
+	Gtkmm2ext::DnDTreeView<ARDOUR::PluginPresetPtr> favorite_plugins_display;
 
 	Glib::RefPtr<Gtk::ListStore> track_model;
 	Glib::RefPtr<Gtk::ListStore> group_model;
-	Glib::RefPtr<Gtk::ListStore> favorite_plugins_model;
+	Glib::RefPtr<PluginTreeStore> favorite_plugins_model;
 
 	bool group_display_button_press (GdkEventButton*);
 	void group_display_selection_changed ();

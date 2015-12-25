@@ -194,7 +194,7 @@ Mixer_UI::Mixer_UI ()
 	group_display_frame.set_shadow_type (Gtk::SHADOW_IN);
 	group_display_frame.add (group_display_vbox);
 
-	favorite_plugins_model = ListStore::create (favorite_plugins_columns);
+	favorite_plugins_model = PluginTreeStore::create (favorite_plugins_columns);
 	favorite_plugins_display.set_model (favorite_plugins_model);
 	favorite_plugins_display.append_column (_("Favorite Plugins"), favorite_plugins_columns.name);
 	favorite_plugins_display.set_name ("EditGroupList");
@@ -203,7 +203,7 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.set_headers_visible (true);
 	favorite_plugins_display.set_rules_hint (true);
 	favorite_plugins_display.set_can_focus (false);
-	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "PluginInfoPtr");
+	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "PluginPresetPtr");
 	favorite_plugins_display.set_drag_column (favorite_plugins_columns.name.index());
 
 	favorite_plugins_scroller.add (favorite_plugins_display);
@@ -288,7 +288,6 @@ Mixer_UI::Mixer_UI ()
 #endif
 	PluginManager::instance ().PluginListChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
 	PluginManager::instance ().PluginStatusesChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
-	refill_favorite_plugins();
 }
 
 Mixer_UI::~Mixer_UI ()
@@ -825,6 +824,7 @@ Mixer_UI::set_session (Session* sess)
 		show_window();
 	}
 
+	refill_favorite_plugins();
 	start_updating ();
 }
 
@@ -2229,7 +2229,8 @@ Mixer_UI::store_current_favorite_order ()
 	for(type_children::iterator iter = children.begin(); iter != children.end(); ++iter)
 	{
 		Gtk::TreeModel::Row row = *iter;
-		favorite_order.push_back (row[favorite_plugins_columns.plugin]);
+		ARDOUR::PluginPresetPtr ppp = row[favorite_plugins_columns.plugin];
+		favorite_order.push_back (ppp->_pip);
 		std::string name = row[favorite_plugins_columns.name];
 	}
 }
@@ -2303,8 +2304,39 @@ Mixer_UI::sync_treeview_from_favorite_order ()
 {
 	favorite_plugins_model->clear ();
 	for (PluginInfoList::const_iterator i = favorite_order.begin(); i != favorite_order.end(); ++i) {
+		PluginInfoPtr pip = (*i);
+
 		TreeModel::Row newrow = *(favorite_plugins_model->append());
 		newrow[favorite_plugins_columns.name] = (*i)->name;
-		newrow[favorite_plugins_columns.plugin] = *i;
+		newrow[favorite_plugins_columns.plugin] = PluginPresetPtr (new PluginPreset(pip));
+		if (!_session) {
+			continue;
+		}
+
+		PluginPtr plugin = (*i)->load (*_session);
+
+		// TODO subscribe to PresetAdded, PresetRemoved, update the list
+		// currently plugin->PresetAdded is *per* plugin-instance, and thus useless here
+
+		vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets();
+		for (vector<ARDOUR::Plugin::PresetRecord>::const_iterator j = presets.begin(); j != presets.end(); ++j) {
+			Gtk::TreeModel::Row child_row = *(favorite_plugins_model->append (newrow.children()));
+			child_row[favorite_plugins_columns.name] = (*j).label;
+			child_row[favorite_plugins_columns.plugin] = PluginPresetPtr (new PluginPreset(pip, &(*j)));
+		}
 	}
+}
+
+bool
+PluginTreeStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path& dest, const Gtk::SelectionData& data) const
+{
+	if (data.get_target() != "GTK_TREE_MODEL_ROW") {
+		return false;
+	}
+	Gtk::TreeModel::Path _dest = dest; // un const
+	const bool is_child = _dest.up (); // explicit bool for clang
+	if (!is_child || _dest.empty ()) {
+		return true;
+	}
+	return false;
 }
