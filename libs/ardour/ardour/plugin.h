@@ -207,6 +207,9 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	PBD::Signal0<void> PresetAdded;
 	PBD::Signal0<void> PresetRemoved;
 
+	/** Emitted when any preset has been changed */
+	static PBD::Signal2<void, std::string, Plugin*> PresetsChanged;
+
 	/** Emitted when a preset has been loaded */
 	PBD::Signal0<void> PresetLoaded;
 
@@ -312,6 +315,8 @@ private:
 	/** Fill _presets with our presets */
 	virtual void find_presets () = 0;
 
+	void update_presets (std::string src_unique_id, Plugin* src );
+
 	/** Add state to an existing XMLNode */
 	virtual void add_state (XMLNode *) const = 0;
 
@@ -321,6 +326,8 @@ private:
 	bool _have_pending_stop_events;
 	PresetRecord _last_preset;
 	bool _parameter_changed_since_last_preset;
+
+	PBD::ScopedConnection _preset_connection;
 
 	void resolve_midi ();
 };

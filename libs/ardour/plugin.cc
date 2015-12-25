@@ -78,6 +78,8 @@ static bool seen_get_state_message = false;
 static bool seen_set_state_message = false;
 #endif
 
+PBD::Signal2<void, std::string, Plugin*> Plugin::PresetsChanged;
+
 bool
 PluginInfo::is_instrument () const
 {
@@ -93,6 +95,7 @@ Plugin::Plugin (AudioEngine& e, Session& s)
 	, _parameter_changed_since_last_preset (false)
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
+	PresetsChanged.connect_same_thread (_preset_connection, boost::bind (&Plugin::update_presets, this, _1 ,_2));
 }
 
 Plugin::Plugin (const Plugin& other)
@@ -107,6 +110,7 @@ Plugin::Plugin (const Plugin& other)
 	, _parameter_changed_since_last_preset (false)
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
+	PresetsChanged.connect_same_thread (_preset_connection, boost::bind (&Plugin::update_presets, this, _1 ,_2));
 }
 
 Plugin::~Plugin ()
@@ -122,6 +126,7 @@ Plugin::remove_preset (string name)
 	_last_preset.uri = "";
 	_parameter_changed_since_last_preset = false;
 	PresetRemoved (); /* EMIT SIGNAL */
+	PresetsChanged (unique_id(), this); /* EMIT SIGNAL */
 }
 
 /** @return PresetRecord with empty URI on failure */
@@ -133,6 +138,7 @@ Plugin::save_preset (string name)
 	if (!uri.empty()) {
 		_presets.insert (make_pair (uri, PresetRecord (uri, name)));
 		PresetAdded (); /* EMIT SIGNAL */
+		PresetsChanged (unique_id(), this); /* EMIT SIGNAL */
 	}
 
 	return PresetRecord (uri, name);
@@ -309,6 +315,17 @@ Plugin::resolve_midi ()
 	_have_pending_stop_events = true;
 }
 
+void
+Plugin::update_presets (std::string src_unique_id, Plugin* src )
+{
+	if (src == this || unique_id() != src_unique_id) {
+		return;
+	}
+	_have_presets = false;
+	// TODO check if a preset was added/removed and emit the proper signal
+	// so far no subscriber distinguishes between PresetAdded and PresetRemoved
+	PresetAdded();
+}
 
 vector<Plugin::PresetRecord>
 Plugin::get_presets ()
