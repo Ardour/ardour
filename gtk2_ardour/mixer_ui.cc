@@ -289,6 +289,7 @@ Mixer_UI::Mixer_UI ()
 #endif
 	PluginManager::instance ().PluginListChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
 	PluginManager::instance ().PluginStatusesChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
+	ARDOUR::Plugin::PresetsChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
 }
 
 Mixer_UI::~Mixer_UI ()
@@ -2315,9 +2316,6 @@ Mixer_UI::sync_treeview_from_favorite_order ()
 		}
 
 		PluginPtr plugin = (*i)->load (*_session);
-
-		// TODO subscribe to PresetAdded, PresetRemoved, update the list
-		// currently plugin->PresetAdded is *per* plugin-instance, and thus useless here
 
 		vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets();
 		for (vector<ARDOUR::Plugin::PresetRecord>::const_iterator j = presets.begin(); j != presets.end(); ++j) {
