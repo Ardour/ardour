@@ -325,6 +325,25 @@ private:
 	void resolve_midi ();
 };
 
+struct PluginPreset {
+	PluginInfoPtr   _pip;
+	Plugin::PresetRecord _preset;
+
+	PluginPreset (PluginInfoPtr pip, const Plugin::PresetRecord *preset = NULL)
+		: _pip (pip)
+	{
+		if (preset) {
+			_preset.uri    = preset->uri;
+			_preset.label  = preset->label;
+			_preset.number = preset->number;
+			_preset.user   = preset->user;
+		}
+	}
+};
+
+typedef boost::shared_ptr<PluginPreset> PluginPresetPtr;
+typedef std::list<PluginPresetPtr> PluginPresetList;
+
 PluginPtr find_plugin(ARDOUR::Session&, std::string unique_id, ARDOUR::PluginType);
 
 } // namespace ARDOUR
