@@ -198,14 +198,15 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.set_model (favorite_plugins_model);
 	favorite_plugins_display.append_column (_("Favorite Plugins"), favorite_plugins_columns.name);
 	favorite_plugins_display.set_name ("EditGroupList");
-	favorite_plugins_display.get_selection()->set_mode (Gtk::SELECTION_MULTIPLE); // XXX needs focus/keyboard
-	favorite_plugins_display.set_reorderable (false); // ?!
+	favorite_plugins_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
+	favorite_plugins_display.set_reorderable (false);
 	favorite_plugins_display.set_headers_visible (true);
 	favorite_plugins_display.set_rules_hint (true);
 	favorite_plugins_display.set_can_focus (false);
 	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "PluginPresetPtr");
 	favorite_plugins_display.set_drag_column (favorite_plugins_columns.name.index());
 	favorite_plugins_display.signal_row_activated().connect (sigc::mem_fun (*this, &Mixer_UI::plugin_row_activated));
+	favorite_plugins_display.signal_button_press_event().connect (sigc::mem_fun (*this, &Mixer_UI::plugin_row_button_press), false);
 
 	favorite_plugins_scroller.add (favorite_plugins_display);
 	favorite_plugins_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -2339,20 +2340,74 @@ Mixer_UI::sync_treeview_from_favorite_order ()
 }
 
 void
+Mixer_UI::popup_note_context_menu (GdkEventButton *ev)
+{
+	using namespace Gtk::Menu_Helpers;
+
+	Gtk::Menu* m = manage (new Menu);
+	MenuList& items = m->items ();
+
+	if (_selection.routes.empty()) {
+		items.push_back (MenuElem (_("No Track/Bus is selected.")));
+		m->popup (ev->button, ev->time);
+		return;
+	}
+
+	items.push_back (MenuElem (_("Add at the top"),
+				sigc::bind (sigc::mem_fun (*this, &Mixer_UI::add_selected_processor), AddTop)));
+	items.push_back (MenuElem (_("Add Pre-Fader"),
+				sigc::bind (sigc::mem_fun (*this, &Mixer_UI::add_selected_processor), AddPreFader)));
+	items.push_back (MenuElem (_("Add Post-Fader"),
+				sigc::bind (sigc::mem_fun (*this, &Mixer_UI::add_selected_processor), AddPostFader)));
+	items.push_back (MenuElem (_("Add at the end"),
+				sigc::bind (sigc::mem_fun (*this, &Mixer_UI::add_selected_processor), AddBottom)));
+	m->popup (ev->button, ev->time);
+}
+
+bool
+Mixer_UI::plugin_row_button_press (GdkEventButton *ev)
+{
+	if ((ev->type == GDK_BUTTON_PRESS) && (ev->button == 3) ) {
+		popup_note_context_menu (ev);
+		return true;
+	}
+	return false;
+}
+
+void
+Mixer_UI::add_selected_processor (ProcessorPosition pos)
+{
+	Glib::RefPtr<Gtk::TreeView::Selection> selection = favorite_plugins_display.get_selection();
+	if (!selection) {
+		return;
+	}
+	Gtk::TreeModel::iterator iter = selection->get_selected();
+	if (!iter) {
+		return;
+	}
+	ARDOUR::PluginPresetPtr ppp = (*iter)[favorite_plugins_columns.plugin];
+	add_favorite_processor (ppp, pos);
+}
+
+void
 Mixer_UI::plugin_row_activated (const TreeModel::Path& path, TreeViewColumn* column)
+{
+	TreeIter iter;
+	if (!(iter = favorite_plugins_model->get_iter (path))) {
+		return;
+	}
+	ARDOUR::PluginPresetPtr ppp = (*iter)[favorite_plugins_columns.plugin];
+	add_favorite_processor (ppp, AddPreFader); // TODO: preference?!
+}
+
+void
+Mixer_UI::add_favorite_processor (ARDOUR::PluginPresetPtr ppp, ProcessorPosition pos)
 {
 	if (!_session || _selection.routes.empty()) {
 		return;
 	}
 
-	TreeIter iter;
-	if (!(iter = favorite_plugins_model->get_iter (path))) {
-		return;
-	}
-
-	ARDOUR::PluginPresetPtr ppp = (*iter)[favorite_plugins_columns.plugin];
 	PluginInfoPtr pip = ppp->_pip;
-
 	for (RouteUISelection::iterator i = _selection.routes.begin(); i != _selection.routes.end(); ++i) {
 		boost::shared_ptr<ARDOUR::Route> rt = (*i)->route();
 		if (!rt) { continue; }
@@ -2366,10 +2421,23 @@ Mixer_UI::plugin_row_activated (const TreeModel::Path& path, TreeViewColumn* col
 
 		Route::ProcessorStreams err;
 		boost::shared_ptr<Processor> processor (new PluginInsert (*_session, p));
-		rt->add_processor_by_index (processor, -1, &err, Config->get_new_plugins_active ());
+
+		switch (pos) {
+			case AddTop:
+				rt->add_processor_by_index (processor, 0, &err, Config->get_new_plugins_active ());
+				break;
+			case AddPreFader:
+				rt->add_processor (processor, PreFader, &err, Config->get_new_plugins_active ());
+				break;
+			case AddPostFader:
+				rt->add_processor (processor, PostFader, &err, Config->get_new_plugins_active ());
+				break;
+			case AddBottom:
+				rt->add_processor_by_index (processor, -1, &err, Config->get_new_plugins_active ());
+				break;
+		}
 	}
 }
-
 
 bool
 PluginTreeStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path& dest, const Gtk::SelectionData& data) const

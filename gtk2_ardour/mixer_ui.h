@@ -199,6 +199,18 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void track_list_reorder (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* new_order);
 
 	void plugin_row_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
+	bool plugin_row_button_press (GdkEventButton*);
+	void popup_note_context_menu (GdkEventButton*);
+
+	enum ProcessorPosition {
+		AddTop,
+		AddPreFader,
+		AddPostFader,
+		AddBottom
+	};
+
+	void add_selected_processor (ProcessorPosition);
+	void add_favorite_processor (ARDOUR::PluginPresetPtr, ProcessorPosition);
 
 	void initial_track_display ();
 	void show_track_list_menu ();
