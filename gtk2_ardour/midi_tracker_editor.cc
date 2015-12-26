@@ -84,14 +84,16 @@ void MidiTrackerMatrix::updateMatrix()
 		uint32_t row_off_min_delay = row_at_beats_min_delay(off_time);
 		uint32_t row_off = row_at_beats(off_time);
 
-		if (row_on == row_off && row_on_max_delay != row_off_min_delay) {
-			notes_on[0].insert(RowToNotes::value_type(row_on_max_delay, *i));
+		if (row_on == row_off && row_on != row_off_min_delay) {
+			notes_on[0].insert(RowToNotes::value_type(row_on, *i));
 			notes_off[0].insert(RowToNotes::value_type(row_off_min_delay, *i));
+		} else if (row_on == row_off && row_on_max_delay != row_off) {
+			notes_on[0].insert(RowToNotes::value_type(row_on_max_delay, *i));
+			notes_off[0].insert(RowToNotes::value_type(row_off, *i));
 		} else {
 			notes_on[0].insert(RowToNotes::value_type(row_on, *i));
 			notes_off[0].insert(RowToNotes::value_type(row_off, *i));
 		}
-		// TODO: take care of the previous and next note, not just note off
 	}
 }
 
@@ -742,7 +744,6 @@ MidiTrackerEditor::redisplay_model ()
 
 			// TODO: Add support for
 			// - Multiple tracks (overlapping notes)
-			// - Insane but sane delay
 
 			size_t notes_off_count = mtm.notes_off[0].count(irow);
 			size_t notes_on_count = mtm.notes_on[0].count(irow);
