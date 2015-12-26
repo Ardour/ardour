@@ -1828,9 +1828,9 @@ Mixer_UI::get_state (void)
 			XMLNode* p = new XMLNode ("PluginInfo");
 			p->add_property ("sort", cnt);
 			p->add_property ("unique-id", (*i)->unique_id);
-			try {
-				p->add_property ("expanded", favorite_ui_state.at ((*i)->unique_id));
-			} catch (const std::out_of_range&) { }
+			if (favorite_ui_state.find ((*i)->unique_id) != favorite_ui_state.end ()) {
+				p->add_property ("expanded", favorite_ui_state[(*i)->unique_id]);
+			}
 			plugin_order->add_child_nocopy (*p);
 		;
 	}
@@ -2330,11 +2330,11 @@ Mixer_UI::sync_treeview_from_favorite_order ()
 			child_row[favorite_plugins_columns.name] = (*j).label;
 			child_row[favorite_plugins_columns.plugin] = PluginPresetPtr (new PluginPreset(pip, &(*j)));
 		}
-		try {
-			if (favorite_ui_state.at (pip->unique_id)) {
+		if (favorite_ui_state.find (pip->unique_id) != favorite_ui_state.end ()) {
+			if (favorite_ui_state[pip->unique_id]) {
 				favorite_plugins_display.expand_row (favorite_plugins_model->get_path(newrow), true);
 			}
-		} catch (const std::out_of_range&) { }
+		}
 	}
 }
 
