@@ -317,6 +317,11 @@ Session::Session (AudioEngine &eng,
 			throw SessionException (_("Cannot connect to audio/midi engine"));
 		}
 
+		// set samplerate for plugins added early
+		// e.g from templates or MB channelstrip
+		set_block_size (_engine.samples_per_cycle());
+		set_frame_rate (_engine.sample_rate());
+
 		if (create (mix_template, bus_profile)) {
 			destroy ();
 			throw SessionException (_("Session initialization failed"));
