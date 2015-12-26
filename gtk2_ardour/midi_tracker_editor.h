@@ -74,9 +74,18 @@ public:
 	// Return the beats at the corresponding row index
 	Evoral::Beats beats_at_row(uint32_t irow);
 
-	// Return the row index corresponding to the given beats, offsetting
-	// half-row to account for negative delay.
+	// Return the row index corresponding to the given beats, assuming the
+	// minimum allowed delay is -_ticks_per_row/2 and the maximum allowed delay
+	// is _ticks_per_row/2.
 	uint32_t row_at_beats(Evoral::Beats beats);
+
+	// Return the row index assuming the beats is allowed to have the minimum
+	// negative delay (1 - _ticks_per_row).
+	uint32_t row_at_beats_min_delay(Evoral::Beats beats);
+
+	// Return the row index assuming the beats is allowed to have the maximum
+	// positive delay (_ticks_per_row - 1).
+	uint32_t row_at_beats_max_delay(Evoral::Beats beats);
 
 	// Number of rows per beat
 	uint16_t rows_per_beat;
@@ -102,7 +111,7 @@ public:
 	std::vector<RowToNotes> notes_off;
 
 private:
-	double _ticks_per_row;		// number of ticks per rows
+	uint32_t _ticks_per_row;		// number of ticks per rows
 	ARDOUR::Session* _session;
 	boost::shared_ptr<ARDOUR::MidiRegion> _region;
 	boost::shared_ptr<ARDOUR::MidiModel>  _midi_model;

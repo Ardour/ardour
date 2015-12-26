@@ -77,10 +77,21 @@ void MidiTrackerMatrix::updateMatrix()
 	
 	MidiModel::Notes notes = _midi_model->notes();
 	for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
-		uint32_t row_on = row_at_beats((*i)->time());
-		uint32_t row_off = row_at_beats((*i)->end_time());
-		notes_on[0].insert(RowToNotes::value_type(row_on, *i));
-		notes_off[0].insert(RowToNotes::value_type(row_off, *i));
+		Evoral::Beats on_time = (*i)->time();
+		Evoral::Beats off_time = (*i)->end_time();
+		uint32_t row_on_max_delay = row_at_beats_max_delay(on_time);
+		uint32_t row_on = row_at_beats(on_time);
+		uint32_t row_off_min_delay = row_at_beats_min_delay(off_time);
+		uint32_t row_off = row_at_beats(off_time);
+
+		if (row_on == row_off && row_on_max_delay != row_off_min_delay) {
+			notes_on[0].insert(RowToNotes::value_type(row_on_max_delay, *i));
+			notes_off[0].insert(RowToNotes::value_type(row_off_min_delay, *i));
+		} else {
+			notes_on[0].insert(RowToNotes::value_type(row_on, *i));
+			notes_off[0].insert(RowToNotes::value_type(row_off, *i));
+		}
+		// TODO: take care of the previous and next note, not just note off
 	}
 }
 
@@ -115,6 +126,17 @@ uint32_t MidiTrackerMatrix::row_at_beats(Evoral::Beats beats)
 {
 	Evoral::Beats half_row(0.5/rows_per_beat);
 	return (beats - first_beats_ceiling + half_row).to_double() * rows_per_beat;
+}
+
+uint32_t MidiTrackerMatrix::row_at_beats_min_delay(Evoral::Beats beats)
+{
+	Evoral::Beats tpr_minus_1 = Evoral::Beats::ticks(_ticks_per_row - 1);
+	return (beats - first_beats_ceiling + tpr_minus_1).to_double() * rows_per_beat;
+}
+
+uint32_t MidiTrackerMatrix::row_at_beats_max_delay(Evoral::Beats beats)
+{
+	return (beats - first_beats_ceiling).to_double() * rows_per_beat;
 }
 
 ///////////////////////
@@ -714,7 +736,8 @@ MidiTrackerEditor::redisplay_model ()
 			Timecode::BBT_Time row_bbt;
 			_session->tempo_map().bbt_time(row_frame, row_bbt);
 			stringstream ss;
-			ss << row_bbt;
+			// ss << row_bbt;
+			print_padded(ss, row_bbt);
 			row[columns.time] = ss.str();
 
 			// TODO: Add support for
