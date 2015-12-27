@@ -2362,7 +2362,6 @@ Mixer_UI::plugin_row_button_press (GdkEventButton *ev)
 {
 	if ((ev->type == GDK_BUTTON_PRESS) && (ev->button == 3) ) {
 		popup_note_context_menu (ev);
-		return true;
 	}
 	return false;
 }
