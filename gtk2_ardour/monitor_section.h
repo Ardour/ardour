@@ -166,7 +166,7 @@ class MonitorSection : public RouteUI
 
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
 
-	void repack_processor_box ();
+	void update_processor_box ();
 
 	ProcessorBox* insert_box;
 	PluginSelector* _plugin_selector;

@@ -190,7 +190,7 @@ MonitorSection::MonitorSection (Session* s)
 
 	proctoggle = ToggleAction::create ();
 	toggle_processorbox_button.set_related_action (proctoggle);
-	proctoggle->signal_toggled().connect (sigc::mem_fun(*this, &MonitorSection::repack_processor_box), false);
+	proctoggle->signal_toggled().connect (sigc::mem_fun(*this, &MonitorSection::update_processor_box), false);
 
 	/* Knobs */
 	Label* solo_boost_label;
@@ -477,7 +477,7 @@ MonitorSection::MonitorSection (Session* s)
 	_tearoff->tearoff_window().signal_key_press_event().connect (sigc::ptr_fun (forward_key_press), false);
 
 	update_output_display ();
-	repack_processor_box ();
+	update_processor_box ();
 	_ui_initialized = true;
 
 	/* catch changes that affect us */
@@ -513,16 +513,14 @@ MonitorSection::~MonitorSection ()
 
 
 void
-MonitorSection::repack_processor_box ()
+MonitorSection::update_processor_box ()
 {
 	bool show_processor_box = proctoggle->get_active ();
 
-	if (count_processors () > 0) {
-		proctoggle->set_active (true);
-		proctoggle->set_sensitive (false);
-		show_processor_box = true;
+	if (count_processors () > 0 && !show_processor_box) {
+		toggle_processorbox_button.set_name (X_("monitor processors present"));
 	} else {
-		proctoggle->set_sensitive (true);
+		toggle_processorbox_button.set_name (X_("monitor processors toggle"));
 	}
 
 	if (insert_box->is_visible() == show_processor_box) {
@@ -564,7 +562,7 @@ MonitorSection::set_session (Session* s)
 			insert_box->set_route (_route);
 			_route->processors_changed.connect (*this, invalidator (*this), boost::bind (&MonitorSection::processors_changed, this, _1), gui_context());
 			if (_ui_initialized) {
-				repack_processor_box ();  // too early
+				update_processor_box ();
 			}
 		} else {
 			/* session with no monitor section */
@@ -1620,5 +1618,5 @@ MonitorSection::count_processors ()
 void
 MonitorSection::processors_changed (ARDOUR::RouteProcessorChange)
 {
-	repack_processor_box ();
+	update_processor_box ();
 }
