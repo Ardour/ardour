@@ -37,6 +37,7 @@
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/window_title.h>
 
+#include "ardour/amp.h"
 #include "ardour/debug.h"
 #include "ardour/midi_track.h"
 #include "ardour/plugin_manager.h"
@@ -2422,7 +2423,16 @@ Mixer_UI::add_favorite_processor (ARDOUR::PluginPresetPtr ppp, ProcessorPosition
 				rt->add_processor (processor, PreFader, &err, Config->get_new_plugins_active ());
 				break;
 			case AddPostFader:
-				rt->add_processor (processor, PostFader, &err, Config->get_new_plugins_active ());
+				{
+					int idx = 0;
+					for (;;++idx) {
+						boost::shared_ptr<Processor> np = rt->nth_processor (idx);
+						if (!np || boost::dynamic_pointer_cast<Amp> (np)) {
+							break;
+						}
+					}
+					rt->add_processor_by_index (processor, ++idx, &err, Config->get_new_plugins_active ());
+				}
 				break;
 			case AddBottom:
 				rt->add_processor_by_index (processor, -1, &err, Config->get_new_plugins_active ());
