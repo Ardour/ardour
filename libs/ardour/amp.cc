@@ -54,12 +54,7 @@ Amp::Amp (Session& s, std::string type)
 	_gain_control->set_flags (Controllable::GainLike);
 
 	add_control(_gain_control);
-}
-
-std::string
-Amp::display_name() const
-{
-	return _type == "trim" ? _("Trim") : _("Fader");
+	set_display_name (_type == "trim" ? _("Trim") : _("Fader"));
 }
 
 bool

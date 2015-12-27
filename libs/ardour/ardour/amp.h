@@ -38,7 +38,9 @@ class LIBARDOUR_API Amp : public Processor {
 public:
 	Amp(Session& s, std::string type = "amp");
 
-	std::string display_name() const;
+	std::string display_name () const { return _display_name; }
+	void set_display_name (const std::string& name) { _display_name = name; }
+
 	std::string type() const { return _type;}
 
 	bool visible () const;
@@ -120,6 +122,8 @@ private:
 	bool   _apply_gain_automation;
 	float  _current_gain;
 	framepos_t _current_automation_frame;
+
+	std::string _display_name;
 
 	boost::shared_ptr<GainControl> _gain_control;
 

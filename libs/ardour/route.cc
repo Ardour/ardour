@@ -174,6 +174,10 @@ Route::init ()
 	_amp.reset (new Amp (_session));
 	add_processor (_amp, PostFader);
 
+	if (is_monitor ()) {
+		_amp->set_display_name ("Monitor");
+	}
+
 	// amp should exist before amp controls
 	_group_gain_control.reset (new GroupGainControllable (X_("groupgain"), shared_from_this ()));
 	_group_gain_control->set_flags (Controllable::Flag (_group_gain_control->flags() | Controllable::GainLike));
