@@ -3210,7 +3210,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy meter mark"));
 		XMLNode &before = map.get_state();
-		map.add_meter (_marker->meter(), when);
+		map.add_meter (_marker->meter(), map.beat_at_frame (_marker->position()), when);
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
@@ -3220,7 +3220,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		/* we removed it before, so add it back now */
 
-		map.add_meter (_marker->meter(), when);
+		map.add_meter (_marker->meter(), map.beat_at_frame (_marker->position()), when);
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
 		_editor->commit_reversible_command ();
@@ -3239,7 +3239,7 @@ MeterMarkerDrag::aborted (bool moved)
 	if (moved) {
 		TempoMap& map (_editor->session()->tempo_map());
 		/* we removed it before, so add it back now */
-		map.add_meter (_marker->meter(), _marker->meter().frame());
+		map.add_meter (_marker->meter(), map.beat_at_frame (_marker->meter().frame()), _marker->meter().bbt());
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
 		delete _marker;
@@ -3309,15 +3309,15 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 			TempoMap& map (_editor->session()->tempo_map());
 			/* get current state */
 			before_state = &map.get_state();
-			/* remove the section while we drag it */
-			//map.remove_tempo (section, true);
 		}
+		_marker->hide();
 	}
 
 	framepos_t const pf = adjusted_current_frame (event, false);
-	TempoMap& map (_editor->session()->tempo_map());
-	_marker->set_position (pf);
-	map.gui_set_tempo_frame (*_real_section, pf);
+	double const baf = _editor->session()->tempo_map().beat_at_frame (pf);
+
+	_marker->set_position (adjusted_current_frame (event, false));
+	_editor->session()->tempo_map().gui_set_tempo_frame (*_real_section, pf, baf);
 
 	show_verbose_cursor_time (pf);
 }
@@ -3339,22 +3339,18 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	motion (event, false);
 
 	TempoMap& map (_editor->session()->tempo_map());
-	framepos_t beat_time = map.round_to_beat (_marker->position(), RoundNearest);
-	Timecode::BBT_Time when;
-
-	map.bbt_time (beat_time, when);
 
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy tempo mark"));
 		XMLNode &before = map.get_state();
-		map.add_tempo (_marker->tempo(), when, _marker->tempo().type());
+		map.add_tempo (_marker->tempo(), map.beat_at_frame (_marker->position()), _marker->tempo().type());
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command (new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 
 	} else {
 		/* we removed it before, so add it back now */
-		map.replace_tempo (*_real_section, _marker->tempo().beats_per_minute() , when, _marker->tempo().type());
+		map.replace_tempo (*_real_section, _marker->tempo().beats_per_minute() , map.beat_at_frame (_marker->position()), _marker->tempo().type());
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command (new MementoCommand<TempoMap>(map, before_state, &after));
 		_editor->commit_reversible_command ();

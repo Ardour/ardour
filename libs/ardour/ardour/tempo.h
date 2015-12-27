@@ -99,26 +99,24 @@ class LIBARDOUR_API Meter {
 /** A section of timeline with a certain Tempo or Meter. */
 class LIBARDOUR_API MetricSection {
   public:
-	MetricSection (const Timecode::BBT_Time& start)
-		: _start (start), _frame (0), _movable (true), _position_lock_style (MusicTime) {}
-	MetricSection (framepos_t start)
-		: _frame (start), _movable (true), _position_lock_style (MusicTime) {}
+	MetricSection (double start)
+		: _beat (start), _frame (0), _movable (true), _position_lock_style (MusicTime) {}
+	MetricSection (framepos_t frame)
+		: _beat (0), _frame (frame), _movable (true), _position_lock_style (MusicTime) {}
 
 	virtual ~MetricSection() {}
+	const double start () const { return _beat; }
 
-	const Timecode::BBT_Time& start() const { return _start; }
-	framepos_t                frame() const { return _frame; }
+	const double& beat() const { return _beat; }
+	void set_beat (double beat) { _beat = beat;}
 
-	void set_movable (bool yn) { _movable = yn; }
-	bool movable() const { return _movable; }
-
+	framepos_t frame() const { return _frame; }
 	virtual void set_frame (framepos_t f) {
 		_frame = f;
 	}
 
-	virtual void set_start (const Timecode::BBT_Time& w) {
-		_start = w;
-	}
+	void set_movable (bool yn) { _movable = yn; }
+	bool movable() const { return _movable; }
 
 	/* MeterSections are not stateful in the full sense,
 	   but we do want them to control their own
@@ -129,8 +127,7 @@ class LIBARDOUR_API MetricSection {
 	void set_position_lock_style (PositionLockStyle ps) { _position_lock_style = ps; }
 
 private:
-
-	Timecode::BBT_Time _start;
+	double             _beat;
 	framepos_t         _frame;
 	bool               _movable;
 	PositionLockStyle  _position_lock_style;
@@ -139,15 +136,23 @@ private:
 /** A section of timeline with a certain Meter. */
 class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
   public:
-	MeterSection (const Timecode::BBT_Time& start, double bpb, double note_type)
-		: MetricSection (start), Meter (bpb, note_type) {}
-	MeterSection (framepos_t start, double bpb, double note_type)
-		: MetricSection (start), Meter (bpb, note_type) {}
+	MeterSection (double start, const Timecode::BBT_Time& bbt, double bpb, double note_type)
+		: MetricSection (start), Meter (bpb, note_type), _bbt (bbt) {}
+	MeterSection (framepos_t frame, double bpb, double note_type)
+		: MetricSection (frame), Meter (bpb, note_type) {}
 	MeterSection (const XMLNode&);
 
 	static const std::string xml_state_node_name;
 
 	XMLNode& get_state() const;
+
+	void set_start (std::pair<double, Timecode::BBT_Time>& w) {
+		set_beat (w.first);
+		_bbt = w.second;
+	}
+	const Timecode::BBT_Time& bbt() const { return _bbt; }
+private:
+	Timecode::BBT_Time _bbt;
 };
 
 /** A section of timeline with a certain Tempo. */
@@ -158,15 +163,19 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 		Constant,
 	};
 
-	TempoSection (const Timecode::BBT_Time& start, double qpm, double note_type, Type tempo_type)
+	TempoSection (const double& start, double qpm, double note_type, Type tempo_type)
 		: MetricSection (start), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type)  {}
-	TempoSection (framepos_t start, double qpm, double note_type, Type tempo_type)
-		: MetricSection (start), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type) {}
+	TempoSection (framepos_t frame, double qpm, double note_type, Type tempo_type)
+		: MetricSection (frame), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type) {}
 	TempoSection (const XMLNode&);
 
 	static const std::string xml_state_node_name;
 
 	XMLNode& get_state() const;
+
+	void set_start (const double& w) {
+		set_beat (w);
+	}
 
 	void update_bar_offset_from_bbt (const Meter&);
 	void update_bbt_time_from_bar_offset (const Meter&);
@@ -183,6 +192,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 
 	double beat_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
 	framepos_t frame_at_beat (double beat, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+
+	Timecode::BBT_Time legacy_bbt () { return _legacy_bbt; }
 
   private:
 
@@ -217,6 +228,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	*/
 	double _bar_offset;
 	Type _type;
+	Timecode::BBT_Time _legacy_bbt;
 };
 
 typedef std::list<MetricSection*> Metrics;
@@ -232,7 +244,7 @@ class LIBARDOUR_API TempoMetric {
 	void set_tempo (const Tempo& t)              { _tempo = &t; }
 	void set_meter (const Meter& m)              { _meter = &m; }
 	void set_frame (framepos_t f)                { _frame = f; }
-	void set_start (const Timecode::BBT_Time& t) { _start = t; }
+	void set_start (const double& t)             { _start = t; }
 
 	void set_metric (const MetricSection* section) {
 		const MeterSection* meter;
@@ -250,13 +262,13 @@ class LIBARDOUR_API TempoMetric {
 	const Meter&              meter() const { return *_meter; }
 	const Tempo&              tempo() const { return *_tempo; }
 	framepos_t                frame() const { return _frame; }
-	const Timecode::BBT_Time& start() const { return _start; }
+	const double& start() const { return _start; }
 
   private:
 	const Meter*       _meter;
 	const Tempo*       _tempo;
 	framepos_t         _frame;
-	Timecode::BBT_Time _start;
+	double             _start;
 };
 
 /** Tempo Map - mapping of timecode to musical time.
@@ -346,18 +358,17 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	const Meter& meter_at (framepos_t) const;
 
 	const TempoSection& tempo_section_at (framepos_t) const;
-	TempoSection* tempo_section_after (framepos_t) const;
 	const MeterSection& meter_section_at (framepos_t) const;
 
-	void add_tempo (const Tempo&, Timecode::BBT_Time where, TempoSection::Type type);
-	void add_meter (const Meter&, Timecode::BBT_Time where);
+	void add_tempo (const Tempo&, double where, TempoSection::Type type);
+	void add_meter (const Meter&, double start, Timecode::BBT_Time where);
 
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
 
-	void replace_tempo (const TempoSection&, const Tempo&, const Timecode::BBT_Time& where, TempoSection::Type type);
-	void gui_set_tempo_frame (TempoSection&, framepos_t where);
-	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
+	void replace_tempo (const TempoSection&, const Tempo&, const double& where, TempoSection::Type type);
+	void gui_set_tempo_frame (TempoSection&, framepos_t where, double beat);
+	void replace_meter (const MeterSection&, const Meter&, const double& start, const Timecode::BBT_Time& where);
 
 	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat (framepos_t frame, RoundMode dir);
@@ -393,6 +404,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	PBD::Signal0<void> MetricPositionChanged;
 
+	double bbt_to_beats (Timecode::BBT_Time bbt);
+
 private:
 
 	friend class ::BBTTest;
@@ -424,8 +437,8 @@ private:
 
 	void do_insert (MetricSection* section);
 
-	void add_tempo_locked (const Tempo&, Timecode::BBT_Time where, bool recompute, TempoSection::Type type);
-	void add_meter_locked (const Meter&, Timecode::BBT_Time where, bool recompute);
+	void add_tempo_locked (const Tempo&, double where, bool recompute, TempoSection::Type type);
+	void add_meter_locked (const Meter&, double start, Timecode::BBT_Time where, bool recompute);
 
 	bool remove_tempo_locked (const TempoSection&);
 	bool remove_meter_locked (const MeterSection&);

@@ -143,13 +143,11 @@ Editor::marker_position_changed ()
 	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
 		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
 			if ((ts = &tempo_marker->tempo()) != 0) {
-				cerr << "tempo section found for tempo marker " << endl;
 				tempo_marker->set_position (ts->frame ());
 			}
 		}
 		if ((meter_marker = dynamic_cast<MeterMarker*> (*x)) != 0) {
 			if ((ms = &meter_marker->meter()) != 0) {
-				cerr << "meter section found for meter marker " << endl;
 				meter_marker->set_position (ms->frame ());
 			}
 		}
@@ -249,7 +247,7 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 
 	begin_reversible_command (_("add tempo mark"));
         XMLNode &before = map.get_state();
-	map.add_tempo (Tempo (bpm,nt), requested, tempo_dialog.get_tempo_type());
+	map.add_tempo (Tempo (bpm,nt), map.bbt_to_beats (requested), tempo_dialog.get_tempo_type());
         XMLNode &after = map.get_state();
 	_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 	commit_reversible_command ();
@@ -288,7 +286,7 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
 
 	begin_reversible_command (_("add meter mark"));
         XMLNode &before = map.get_state();
-	map.add_meter (Meter (bpb, note_type), requested);
+	map.add_meter (Meter (bpb, note_type), map.bbt_to_beats (requested), requested);
 	_session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
 	commit_reversible_command ();
 
@@ -338,7 +336,7 @@ Editor::edit_meter_section (MeterSection* section)
 
 	begin_reversible_command (_("replace tempo mark"));
         XMLNode &before = _session->tempo_map().get_state();
-	_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), when);
+	_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), _session->tempo_map().bbt_to_beats (when), when);
         XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
@@ -364,7 +362,7 @@ Editor::edit_tempo_section (TempoSection* section)
 
 	begin_reversible_command (_("replace tempo mark"));
 	XMLNode &before = _session->tempo_map().get_state();
-	_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), when, tempo_dialog.get_tempo_type());
+	_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), _session->tempo_map().bbt_to_beats (when), tempo_dialog.get_tempo_type());
 	XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();

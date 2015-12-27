@@ -14,7 +14,7 @@ TempoTest::recomputeMapTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meterA (4, 4);
-	map.add_meter (meterA, BBT_Time (1, 1, 0));
+	map.add_meter (meterA, 0.0, BBT_Time (1, 1, 0));
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
@@ -35,11 +35,11 @@ TempoTest::recomputeMapTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, BBT_Time (1, 1, 0), TempoSection::Type::Constant);
+	map.add_tempo (tempoA, 0.0, TempoSection::Type::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, BBT_Time (4, 1, 0), TempoSection::Type::Constant);
+	map.add_tempo (tempoB, 12.0, TempoSection::Type::Constant);
 	Meter meterB (3, 4);
-	map.add_meter (meterB, BBT_Time (4, 1, 0));
+	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0));
 
 	list<MetricSection*>::iterator i = map.metrics.begin();
 	CPPUNIT_ASSERT_EQUAL (framepos_t (0), (*i)->frame ());

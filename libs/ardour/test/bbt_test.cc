@@ -16,7 +16,7 @@ BBTTest::addTest ()
 	Tempo    tempo(120);
 	Meter    meter(4.0, 4.0);
 
-	map.add_meter (meter, BBT_Time(1, 1, 0));
+	map.add_meter (meter, 0.0, BBT_Time(1, 1, 0));
 
 	/* add some good stuff here */
 }
