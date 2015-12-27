@@ -214,11 +214,17 @@ smf_extract_vlq(const unsigned char *buf, const size_t buffer_length, uint32_t *
 {
 	uint32_t val = 0;
 	const unsigned char *c = buf;
+	int i = 0;
 
-	for (;;) {
+	for (;; ++i) {
 		if (c >= buf + buffer_length) {
 			g_critical("End of buffer in extract_vlq().");
 			return (-1);
+		}
+
+		if (i == 4 && (val & 0xfe000000)) {
+			g_critical("SMF error: Variable Length Quantities longer than four bytes are not supported yet.");
+			return (-2);
 		}
 
 		val = (val << 7) + (*c & 0x7F);
@@ -233,7 +239,7 @@ smf_extract_vlq(const unsigned char *buf, const size_t buffer_length, uint32_t *
 	*value = val;
 	*len = c - buf + 1;
 
-	if (*len > 4) {
+	if (*len > 5) {
 		g_critical("SMF error: Variable Length Quantities longer than four bytes are not supported yet.");
 		return (-2);
 	}
