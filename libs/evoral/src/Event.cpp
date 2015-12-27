@@ -38,7 +38,23 @@ init_event_id_counter(event_id_t n)
 event_id_t
 next_event_id ()
 {
-	return g_atomic_int_add (&_event_id_counter, 1);
+	/* libsmf supports reading variable-length data up to 4 bytes only.
+	 * so we wrap around at 2^(4 * 7) - 1
+	 *
+	 * interestingly enough libsmf happily writes data longer than that, but then
+	 * fails to load it in ./libs/evoral/src/libsmf/smf_load.c:237
+	 * g_critical("SMF error: Variable Length Quantities longer than four bytes are not supported yet.");
+	 *
+	 * event-IDs only have to be unique per .mid file.
+	 * Previously (Ardour 4.2ish) Ardour re-generated those IDs when loading the
+	 * file but that lead to .mid files being modified on every load/save.
+	 *
+	 * For now just assume that by the time 2^28 is reached, files with low ids have vanished.
+	 * There is only one user who managed to get to 268 million events so far.
+	 * quite a feat: id-counter="6483089" event-counter="276390506"
+	 * Eventually a proper solution will have to be implemented.
+	 */
+	return g_atomic_int_add (&_event_id_counter, 1) & 268435455;
 }
 
 #ifdef EVORAL_EVENT_ALLOC
