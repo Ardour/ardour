@@ -589,7 +589,7 @@ void
 PlugUIBase::add_plugin_setting ()
 {
 #ifndef NO_PLUGIN_STATE
-	NewPluginPresetDialog d (plugin);
+	NewPluginPresetDialog d (plugin, _("New Preset"));
 
 	switch (d.run ()) {
 	case Gtk::RESPONSE_ACCEPT:

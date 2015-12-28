@@ -225,11 +225,24 @@ ProcessorEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::Select
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
 		boost::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin();
 		assert (plugin);
-		NewPluginPresetDialog d (plugin);
+
+		PluginManager& manager (PluginManager::instance());
+		bool fav = manager.get_status (_plugin_preset_pointer->_pip) == PluginManager::Favorite;
+
+		NewPluginPresetDialog d (plugin,
+				string_compose(_("New Favorite Preset for \"%1\""),_plugin_preset_pointer->_pip->name), !fav);
 
 		_plugin_preset_pointer->_preset.valid = false;
 
 		switch (d.run ()) {
+			case Gtk::RESPONSE_CANCEL:
+				data.set (data.get_target(), 8, NULL, 0);
+				return true;
+				break;
+
+			case Gtk::RESPONSE_NO:
+				break;
+
 			case Gtk::RESPONSE_ACCEPT:
 				if (d.name().empty()) {
 					break;

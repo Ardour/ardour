@@ -2508,6 +2508,9 @@ Mixer_UI::plugin_drop (const Glib::RefPtr<Gdk::DragContext>&, const Gtk::Selecti
 	if (data.get_target() != "PluginPresetPtr") {
 		return;
 	}
+	if (data.get_length() != sizeof (PluginPresetPtr)) {
+		return;
+	}
 	const void *d = data.get_data();
 	const PluginPresetPtr ppp = *(static_cast<const PluginPresetPtr*> (d));
 

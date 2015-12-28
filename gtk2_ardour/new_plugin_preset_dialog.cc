@@ -25,8 +25,8 @@
 using namespace std;
 using namespace Gtk;
 
-NewPluginPresetDialog::NewPluginPresetDialog (boost::shared_ptr<ARDOUR::Plugin> p)
-	: ArdourDialog (_("New Preset"))
+NewPluginPresetDialog::NewPluginPresetDialog (boost::shared_ptr<ARDOUR::Plugin> p, std::string title, bool favorite_btn)
+	: ArdourDialog (title)
 	, _replace (_("Replace existing preset with this name"))
 {
 	HBox* h = manage (new HBox);
@@ -40,9 +40,13 @@ NewPluginPresetDialog::NewPluginPresetDialog (boost::shared_ptr<ARDOUR::Plugin> 
 	get_vbox()->pack_start (_replace);
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	if (favorite_btn) {
+		add_button (_("New Favorite Only"), RESPONSE_NO);
+	}
 	_add = add_button (Stock::ADD, RESPONSE_ACCEPT);
 	set_default_response (RESPONSE_ACCEPT);
 	_name.set_activates_default(true);
+
 
 	show_all ();
 
