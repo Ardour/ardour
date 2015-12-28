@@ -85,6 +85,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	   there's no way to know if the device exists or not.
 	 */
 	static bool probe() { return true; }
+	static void* request_factory (uint32_t);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -160,7 +161,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	std::string get_action (ButtonID, bool on_press, FaderPort::ButtonState = ButtonState (0));
 
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
-	
+
   private:
 	boost::shared_ptr<ARDOUR::Route> _current_route;
 	boost::weak_ptr<ARDOUR::Route> pre_master_route;

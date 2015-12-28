@@ -22,6 +22,7 @@
 #include <glibmm/fileutils.h>
 
 #include "pbd/compose.h"
+#include "pbd/event_loop.h"
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
 
@@ -485,5 +486,17 @@ ControlProtocolManager::midi_connectivity_established ()
 
 	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
 		(*p)->midi_connectivity_established ();
+	}
+}
+
+void
+ControlProtocolManager::register_request_buffer_factories ()
+{
+	Glib::Threads::Mutex::Lock lm (protocols_lock);
+
+	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
+		if ((*i)->descriptor->request_buffer_factory) {
+			EventLoop::register_request_buffer_factory ((*i)->descriptor->name, (*i)->descriptor->request_buffer_factory);
+		}
 	}
 }

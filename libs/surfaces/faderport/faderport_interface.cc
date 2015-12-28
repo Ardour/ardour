@@ -56,6 +56,12 @@ probe_faderport_midi_protocol (ControlProtocolDescriptor* /*descriptor*/)
 	return FaderPort::probe ();
 }
 
+static void*
+faderport_request_buffer_factory (uint32_t num_requests)
+{
+	return FaderPort::request_factory (num_requests);
+}
+
 static ControlProtocolDescriptor faderport_midi_descriptor = {
 	/*name :              */   "Faderport",
 	/*id :                */   "uri://ardour.org/surfaces/faderport:0",
@@ -65,7 +71,8 @@ static ControlProtocolDescriptor faderport_midi_descriptor = {
 	/*supports_feedback : */   true,
 	/*probe :             */   probe_faderport_midi_protocol,
 	/*initialize :        */   new_faderport_midi_protocol,
-	/*destroy :           */   delete_faderport_midi_protocol
+	/*destroy :           */   delete_faderport_midi_protocol,
+	/*request_buffer_factory */ faderport_request_buffer_factory
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &faderport_midi_descriptor; }

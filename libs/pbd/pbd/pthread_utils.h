@@ -55,8 +55,8 @@ LIBPBD_API const char* pthread_name ();
 LIBPBD_API void pthread_set_name (const char* name);
 
 namespace PBD {
-	LIBPBD_API extern void notify_gui_about_thread_creation (std::string, pthread_t, std::string, int requests = 256);
-	LIBPBD_API extern PBD::Signal4<void,std::string,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
+	LIBPBD_API extern void notify_event_loops_about_thread_creation (pthread_t, const std::string&, int requests = 256);
+	LIBPBD_API extern PBD::Signal3<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
 }
 
 #endif /* __pbd_pthread_utils__ */

@@ -21,6 +21,8 @@
 #define __pbd_event_loop_h__
 
 #include <string>
+#include <vector>
+#include <map>
 #include <boost/function.hpp>
 #include <boost/bind.hpp> /* we don't need this here, but anything calling call_slot() probably will, so this is convenient */
 #include <glibmm/threads.h>
@@ -79,9 +81,40 @@ class LIBPBD_API EventLoop
 	static EventLoop* get_event_loop_for_thread();
 	static void set_event_loop_for_thread (EventLoop* ui);
 
+	struct ThreadBufferMapping {
+		pthread_t emitting_thread;
+		std::string target_thread_name;
+		void* request_buffer;
+	};
+
+	static std::vector<ThreadBufferMapping> get_request_buffers_for_target_thread (const std::string&);
+
+	static void register_request_buffer_factory (const std::string& target_thread_name, void* (*factory) (uint32_t));
+	static void pre_register (const std::string& emitting_thread_name, uint32_t num_requests);
+
   private:
         static Glib::Threads::Private<EventLoop> thread_event_loop;
 	std::string _name;
+
+	typedef std::map<std::string,ThreadBufferMapping> ThreadRequestBufferList;
+	static ThreadRequestBufferList thread_buffer_requests;
+	static Glib::Threads::RWLock   thread_buffer_requests_lock;
+
+	struct RequestBufferSupplier {
+
+		/* @param name : name of object/entity that will/may accept
+		   requests from other threads, via a request buffer.
+		*/
+		std::string name;
+
+		/* @param factory : a function that can be called (with an
+		   argument specifying the @param number_of_requests) to create and
+		   return a request buffer for communicating with @param name)
+		*/
+		void* (*factory)(uint32_t nunber_of_requests);
+	};
+	typedef std::vector<RequestBufferSupplier> RequestBufferSuppliers;
+	static RequestBufferSuppliers request_buffer_suppliers;
 };
 
 }

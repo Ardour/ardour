@@ -79,6 +79,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int start ();
 	int stop ();
 
+	static void* request_factory (uint32_t);
+
   protected:
         void thread_init ();
 	void do_request (OSCUIRequest*);

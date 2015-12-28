@@ -66,7 +66,7 @@ using namespace std;
 
 FaderPort::FaderPort (Session& s)
 	: ControlProtocol (s, _("Faderport"))
-	, AbstractUI<FaderPortRequest> ("faderport")
+	, AbstractUI<FaderPortRequest> (name())
 	, gui (0)
 	, connection_state (ConnectionState (0))
 	, _device_active (false)
@@ -210,6 +210,17 @@ FaderPort::~FaderPort ()
 	tear_down_gui ();
 }
 
+void*
+FaderPort::request_factory (uint32_t num_requests)
+{
+	/* AbstractUI<T>::request_buffer_factory() is a template method only
+	   instantiated in this source module. To provide something visible for
+	   use in the interface/descriptor, we have this static method that is
+	   template-free.
+	*/
+	return request_buffer_factory (num_requests);
+}
+
 void
 FaderPort::start_midi_handling ()
 {
@@ -267,10 +278,10 @@ FaderPort::thread_init ()
 {
 	struct sched_param rtparam;
 
-	pthread_set_name (X_("FaderPort"));
+	pthread_set_name (event_loop_name().c_str());
 
-	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("FaderPort"), 2048);
-	ARDOUR::SessionEvent::create_per_thread_pool (X_("FaderPort"), 128);
+	PBD::notify_event_loops_about_thread_creation (pthread_self(), event_loop_name(), 2048);
+	ARDOUR::SessionEvent::create_per_thread_pool (event_loop_name(), 128);
 
 	memset (&rtparam, 0, sizeof (rtparam));
 	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */

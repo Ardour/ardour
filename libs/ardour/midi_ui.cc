@@ -60,6 +60,17 @@ MidiControlUI::~MidiControlUI ()
 	_instance = 0;
 }
 
+void*
+MidiControlUI::request_factory (uint32_t num_requests)
+{
+	/* AbstractUI<T>::request_buffer_factory() is a template method only
+	   instantiated in this source module. To provide something visible for
+	   use when registering the factory, we have this static method that is
+	   template-free.
+	*/
+	return request_buffer_factory (num_requests);
+}
+
 void
 MidiControlUI::do_request (MidiUIRequest* req)
 {
@@ -131,7 +142,7 @@ MidiControlUI::thread_init ()
 
 	pthread_set_name (X_("midiUI"));
 
-	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("midiUI"), 2048);
+	PBD::notify_event_loops_about_thread_creation (pthread_self(), X_("midiUI"), 2048);
 	SessionEvent::create_per_thread_pool (X_("midiUI"), 128);
 
 	memset (&rtparam, 0, sizeof (rtparam));

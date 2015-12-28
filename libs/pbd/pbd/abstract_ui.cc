@@ -14,7 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #include <unistd.h>
@@ -65,17 +64,28 @@ template <typename RequestObject>
 AbstractUI<RequestObject>::AbstractUI (const string& name)
 	: BaseUI (name)
 {
-	void (AbstractUI<RequestObject>::*pmf)(string,pthread_t,string,uint32_t) = &AbstractUI<RequestObject>::register_thread;
+	void (AbstractUI<RequestObject>::*pmf)(pthread_t,string,uint32_t) = &AbstractUI<RequestObject>::register_thread;
 
 	/* better to make this connect a handler that runs in the UI event loop but the syntax seems hard, and
 	   register_thread() is thread safe anyway.
 	*/
 
-	PBD::ThreadCreatedWithRequestSize.connect_same_thread (new_thread_connection, boost::bind (pmf, this, _1, _2, _3, _4));
+	PBD::ThreadCreatedWithRequestSize.connect_same_thread (new_thread_connection, boost::bind (pmf, this, _1, _2, _3));
+
+	/* find pre-registerer threads */
+
+	vector<EventLoop::ThreadBufferMapping> tbm = EventLoop::get_request_buffers_for_target_thread (event_loop_name());
+
+	{
+		Glib::Threads::Mutex::Lock lm (request_buffer_map_lock);
+		for (vector<EventLoop::ThreadBufferMapping>::iterator t = tbm.begin(); t != tbm.end(); ++t) {
+			request_buffers[t->emitting_thread] = static_cast<RequestBuffer*> (t->request_buffer);
+		}
+	}
 }
 
 template <typename RequestObject> void
-AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_id, string thread_name, uint32_t num_requests)
+AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_name, uint32_t num_requests)
 {
 	/* the calling thread wants to register with the thread that runs this
 	 * UI's event loop, so that it will have its own per-thread queue of
@@ -83,36 +93,39 @@ AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_
 	 * do so in a realtime-safe manner (no locks).
 	 */
 
-	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("in %1 (thread name %4), %2 (%5) wants to register with %3\n", event_loop_name(), thread_name, target_gui, pthread_name(), DEBUG_THREAD_SELF));
-
-	if (target_gui != event_loop_name()) {
-		/* this UI is not the UI that the calling thread is trying to
-		   register with
-		*/
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 : not the registration target\n", event_loop_name()));
-		return;
-	}
+	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("in %1 (thread name %4), %2 (%5) wants to register with UIs\n", event_loop_name(), thread_name, pthread_name(), DEBUG_THREAD_SELF));
 
 	/* the per_thread_request_buffer is a thread-private variable.
 	   See pthreads documentation for more on these, but the key
 	   thing is that it is a variable that as unique value for
-	   each thread, guaranteed.
+	   each thread, guaranteed. Note that the thread in question
+	   is the caller of this function, which is assumed to be the
+	   thread from which signals will be emitted that this UI's
+	   event loop will catch.
 	*/
 
 	RequestBuffer* b = per_thread_request_buffer.get();
 
-	if (b) {
-		/* thread already registered with this UI
+	if (!b) {
+
+		/* create a new request queue/ringbuffer */
+
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("create new request buffer for %1 in %2\n", thread_name, event_loop_name()));
+
+		b = new RequestBuffer (num_requests);
+		/* set this thread's per_thread_request_buffer to this new
+		   queue/ringbuffer. remember that only this thread will
+		   get this queue when it calls per_thread_request_buffer.get()
+
+		   the second argument is a function that will be called
+		   when the thread exits, and ensures that the buffer is marked
+		   dead. it will then be deleted during a call to handle_ui_requests()
 		*/
+
+		per_thread_request_buffer.set (b);
+	} else {
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 : %2 is already registered\n", event_loop_name(), thread_name));
-		return;
 	}
-
-	/* create a new request queue/ringbuffer */
-
-	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("create new request buffer for %1 in %2\n", thread_name, event_loop_name()));
-
-	b = new RequestBuffer (num_requests, *this);
 
 	{
 		/* add the new request queue (ringbuffer) to our map
@@ -125,16 +138,6 @@ AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_
 		request_buffers[thread_id] = b;
 	}
 
-	/* set this thread's per_thread_request_buffer to this new
-	   queue/ringbuffer. remember that only this thread will
-	   get this queue when it calls per_thread_request_buffer.get()
-
-	   the second argument is a function that will be called
-	   when the thread exits, and ensures that the buffer is marked
-	   dead. it will then be deleted during a call to handle_ui_requests()
-	*/
-
-	per_thread_request_buffer.set (b);
 }
 
 template <typename RequestObject> RequestObject*
@@ -229,6 +232,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		if ((*i).second->dead) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 deleting dead per-thread request buffer for %3 @ %4\n",
 			                                                     event_loop_name(), pthread_name(), i->second));
+			cerr << event_loop_name() << " noticed that a buffer was dead\n";
 			delete (*i).second;
 			RequestBufferMapIterator tmp = i;
 			++tmp;
@@ -357,6 +361,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 			   single-reader/single-writer semantics
 			*/
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send heap request type %3\n", event_loop_name(), pthread_name(), req->type));
+			cerr << "Send request to " << event_loop_name() << " via LIST from " << pthread_name() << endl;
 			Glib::Threads::Mutex::Lock lm (request_list_lock);
 			request_list.push_back (req);
 		}
@@ -406,4 +411,12 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 	}
 
 	send_request (req);
+}
+
+template<typename RequestObject> void*
+AbstractUI<RequestObject>::request_buffer_factory (uint32_t num_requests)
+{
+	RequestBuffer*  mcr = new RequestBuffer (num_requests);
+	per_thread_request_buffer.set (mcr);
+	return mcr;
 }

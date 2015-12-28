@@ -51,6 +51,7 @@ class LIBARDOUR_API MidiControlUI : public AbstractUI<MidiUIRequest>
 	~MidiControlUI ();
 
 	static MidiControlUI* instance() { return _instance; }
+	static void* request_factory (uint32_t num_requests);
 
 	void change_midi_ports ();
 

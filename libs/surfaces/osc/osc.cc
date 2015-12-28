@@ -73,7 +73,7 @@ static void error_callback(int, const char *, const char *)
 
 OSC::OSC (Session& s, uint32_t port)
 	: ControlProtocol (s, X_("Open Sound Control (OSC)"))
-	, AbstractUI<OSCUIRequest> ("osc")
+	, AbstractUI<OSCUIRequest> (name())
 	, local_server (0)
 	, remote_server (0)
 	, _port(port)
@@ -94,6 +94,17 @@ OSC::~OSC()
 {
 	stop ();
 	_instance = 0;
+}
+
+void*
+OSC::request_factory (uint32_t num_requests)
+{
+	/* AbstractUI<T>::request_buffer_factory() is a template method only
+	   instantiated in this source module. To provide something visible for
+	   use in the interface/descriptor, we have this static method that is
+	   template-free.
+	*/
+	return request_buffer_factory (num_requests);
 }
 
 void
@@ -226,7 +237,7 @@ OSC::start ()
 void
 OSC::thread_init ()
 {
-	pthread_set_name (X_("OSC"));
+	pthread_set_name (event_loop_name().c_str());
 
 	if (_osc_unix_server) {
 		Glib::RefPtr<IOSource> src = IOSource::create (lo_server_get_socket_fd (_osc_unix_server), IO_IN|IO_HUP|IO_ERR);
@@ -244,8 +255,8 @@ OSC::thread_init ()
 		g_source_ref (remote_server);
 	}
 
-	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("OSC"), 2048);
-	SessionEvent::create_per_thread_pool (X_("OSC"), 128);
+	PBD::notify_event_loops_about_thread_creation (pthread_self(), event_loop_name(), 2048);
+	SessionEvent::create_per_thread_pool (event_loop_name(), 128);
 }
 
 int

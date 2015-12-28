@@ -164,7 +164,7 @@ WiimoteControlProtocol::thread_init ()
 	pthread_set_name (X_("wiimote"));
 
 	// allow to make requests to the GUI and RT thread(s)
-	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self (), X_("wiimote"), 2048);
+	PBD::notify_event_loops_about_thread_creation (pthread_self (), X_("wiimote"), 2048);
 	BasicUI::register_thread ("wiimote");
 
 	// connect a Wiimote

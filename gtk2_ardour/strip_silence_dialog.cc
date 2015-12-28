@@ -237,7 +237,10 @@ StripSilenceDialog::_detection_thread_work (void* arg)
 void *
 StripSilenceDialog::detection_thread_work ()
 {
-	ARDOUR_UI::instance()->register_thread ("gui", pthread_self(), "silence", 32);
+	/* Do not register with all UIs, but do register with the GUI,
+	   because we will need to queue some GUI (only) requests
+	*/
+	ARDOUR_UI::instance()->register_thread (pthread_self(), "silence", 32);
 
 	/* Hold this lock when we are doing work */
 	_lock.lock ();

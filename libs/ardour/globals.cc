@@ -97,6 +97,7 @@
 #include "ardour/event_type_map.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_region.h"
+#include "ardour/midi_ui.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/mix.h"
 #include "ardour/operations.h"
@@ -513,6 +514,22 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 #endif
 	(void) EventTypeMap::instance();
 
+	ControlProtocolManager::instance().discover_control_protocols ();
+
+	/* for each control protocol, check for a request buffer factory method
+	   and if it exists, store it in the EventLoop list of such
+	   methods. This allows the relevant threads to register themselves
+	   with EventLoops so that signal emission can be RT-safe.
+	*/
+
+	ControlProtocolManager::instance().register_request_buffer_factories ();
+	/* it would be nice if this could auto-register itself in the
+	   constructor, since MidiControlUI is a singleton, but it can't be
+	   created until after the engine is running. Therefore we have to
+	   explicitly register it here.
+	*/
+	EventLoop::register_request_buffer_factory (X_("midiUI"), MidiControlUI::request_factory);
+
         ProcessThread::init ();
 	/* the + 4 is a bit of a handwave. i don't actually know
 	   how many more per-thread buffer sets we need above
@@ -553,8 +570,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 void
 ARDOUR::init_post_engine ()
 {
-	ControlProtocolManager::instance().discover_control_protocols ();
-
 	XMLNode* node;
 	if ((node = Config->control_protocol_state()) != 0) {
 		ControlProtocolManager::instance().set_state (*node, Stateful::loading_state_version);

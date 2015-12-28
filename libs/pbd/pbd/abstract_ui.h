@@ -58,20 +58,20 @@ class ABSTRACT_UI_API AbstractUI : public BaseUI
 	AbstractUI (const std::string& name);
 	virtual ~AbstractUI() {}
 
-	void register_thread (std::string, pthread_t, std::string, uint32_t num_requests);
+	void register_thread (pthread_t, std::string, uint32_t num_requests);
 	void call_slot (EventLoop::InvalidationRecord*, const boost::function<void()>&);
         Glib::Threads::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
 
 	Glib::Threads::Mutex request_buffer_map_lock;
 
+	static void* request_buffer_factory (uint32_t num_requests);
+
   protected:
 	struct RequestBuffer : public PBD::RingBufferNPT<RequestObject> {
                 bool dead;
-                AbstractUI<RequestObject>& ui;
-                RequestBuffer (uint32_t size, AbstractUI<RequestObject>& uir)
+                RequestBuffer (uint32_t size)
                         : PBD::RingBufferNPT<RequestObject> (size)
-                        , dead (false)
-                        , ui (uir) {}
+	                , dead (false) {}
         };
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
 
@@ -105,5 +105,3 @@ class ABSTRACT_UI_API AbstractUI : public BaseUI
 };
 
 #endif /* __pbd_abstract_ui_h__ */
-
-

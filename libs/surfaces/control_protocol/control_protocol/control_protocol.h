@@ -154,16 +154,24 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 extern "C" {
 	class ControlProtocolDescriptor {
 	public:
-	    const char* name;      /* descriptive */
-	    const char* id;        /* unique and version-specific */
-	    void*       ptr;       /* protocol can store a value here */
-	    void*       module;    /* not for public access */
-	    int         mandatory; /* if non-zero, always load and do not make optional */
-	    bool        supports_feedback; /* if true, protocol has toggleable feedback mechanism */
-	    bool             (*probe)(ControlProtocolDescriptor*);
-	    ControlProtocol* (*initialize)(ControlProtocolDescriptor*,Session*);
-	    void             (*destroy)(ControlProtocolDescriptor*,ControlProtocol*);
-
+		const char* name;      /* descriptive */
+		const char* id;        /* unique and version-specific */
+		void*       ptr;       /* protocol can store a value here */
+		void*       module;    /* not for public access */
+		int         mandatory; /* if non-zero, always load and do not make optional */
+		bool        supports_feedback; /* if true, protocol has toggleable feedback mechanism */
+		bool             (*probe)(ControlProtocolDescriptor*);
+		ControlProtocol* (*initialize)(ControlProtocolDescriptor*,Session*);
+		void             (*destroy)(ControlProtocolDescriptor*,ControlProtocol*);
+		/* this is required if the control protocol connects to signals
+		   from libardour. they all do. It should allocate a
+		   type-specific request buffer for the calling thread, and
+		   store it in a thread-local location that will be used to
+		   find it when sending the event loop a message
+		   (e.g. call_slot()). It should also return the allocated
+		   buffer as a void*.
+		*/
+		void*            (*request_buffer_factory)(uint32_t);
 	};
 }
 

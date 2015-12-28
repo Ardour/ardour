@@ -44,7 +44,7 @@ static pthread_mutex_t thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
 static Glib::Threads::Private<char> thread_name (free);
 
 namespace PBD {
-	PBD::Signal4<void,std::string, pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
+	PBD::Signal3<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
 }
 
 using namespace PBD;
@@ -58,10 +58,18 @@ static int thread_creator (pthread_t* thread_id, const pthread_attr_t* attr, voi
 #endif
 }
 
+
 void
-PBD::notify_gui_about_thread_creation (std::string target_gui, pthread_t thread, std::string str, int request_count)
+PBD::notify_event_loops_about_thread_creation (pthread_t thread, const std::string& emitting_thread_name, int request_count)
 {
-	ThreadCreatedWithRequestSize (target_gui, thread, str, request_count);
+	/* notify threads that may exist in the future (they may also exist
+	 * already, in which case they will catch the
+	 * ThreadCreatedWithRequestSize signal)
+	 */
+	EventLoop::pre_register (emitting_thread_name, request_count);
+
+	/* notify all existing threads */
+	ThreadCreatedWithRequestSize (thread, emitting_thread_name, request_count);
 }
 
 struct ThreadStartWithName {
@@ -199,4 +207,3 @@ pthread_cancel_one (pthread_t thread)
 	pthread_cancel (thread);
 	pthread_mutex_unlock (&thread_map_lock);
 }
-
