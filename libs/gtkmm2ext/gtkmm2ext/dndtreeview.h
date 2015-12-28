@@ -144,6 +144,7 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 			TreeView::on_drag_data_received (context, x, y, selection_data, info, time);
 		} else if (selection_data.get_target() == object_type) {
 			signal_drop (context, selection_data);
+			context->drag_finish (true, false, time);
 		} else {
 			/* some kind of target type added by the app, which will be handled by a signal handler */
 		}
