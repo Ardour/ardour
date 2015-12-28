@@ -433,7 +433,6 @@ private:
 	TempoSection&       first_tempo();
 
 	Timecode::BBT_Time beats_to_bbt (double beats);
-	int32_t bars_in_meter_section (MeterSection* ms) const;
 
 	void do_insert (MetricSection* section);
 
