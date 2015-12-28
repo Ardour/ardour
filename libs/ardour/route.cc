@@ -387,26 +387,77 @@ void
 Route::set_property (AutomationType at, double val, void* src)
 {
 	boost::shared_ptr<RouteList> rl;
+	boost::shared_ptr<AutomationControl> ac;
 
 	switch (at) {
 	case GainAutomation:
+		/* route must mediate group control */
 		set_gain (val, src);
 		break;
 
+	case RecEnableAutomation:
+		/* session must mediate group control */
+		rl.reset (new RouteList);
+		rl->push_back (shared_from_this());
+		_session.set_record_enabled (rl, val >= 0.5 ? true : false);
+		break;
+
 	case SoloAutomation:
+		/* session must mediate group control */
 		rl.reset (new RouteList);
 		rl->push_back (shared_from_this());
 		if (Config->get_solo_control_is_listen_control()) {
-			_session.set_listen (rl, !listening_via_monitor());
+			_session.set_listen (rl, val >= 0.5 ? true : false);
 		} else {
-			_session.set_solo (rl, !self_soloed());
+			_session.set_solo (rl, val >= 0.5 ? true : false);
 		}
 		break;
 
 	case MuteAutomation:
+		/* session must mediate group control */
 		rl.reset (new RouteList);
 		rl->push_back (shared_from_this());
 		_session.set_mute (rl, !muted());
+		break;
+
+	case PanAzimuthAutomation:
+		/* no mediation necessary */
+		ac = pan_azimuth_control ();
+		if (ac) {
+			ac->set_value (val);
+		}
+		break;
+
+	case PanElevationAutomation:
+		/* no mediation necessary */
+		ac = pan_elevation_control ();
+		if (ac) {
+			ac->set_value (val);
+		}
+		break;
+
+	case PanWidthAutomation:
+		/* no mediation necessary */
+		ac = pan_width_control ();
+		if (ac) {
+			ac->set_value (val);
+		}
+		break;
+
+	case PanFrontBackAutomation:
+		/* no mediation necessary */
+		ac = pan_frontback_control ();
+		if (ac) {
+			ac->set_value (val);
+		}
+		break;
+
+	case PanLFEAutomation:
+		/* no mediation necessary */
+		ac = pan_lfe_control ();
+		if (ac) {
+			ac->set_value (val);
+		}
 		break;
 
 	default:

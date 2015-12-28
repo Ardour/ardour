@@ -183,6 +183,13 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	_route = r;
 
+	_solo->set_route (r);
+	_mute->set_route (r);
+	_select->set_route (r);
+	_recenable->set_route (r);
+	_fader->set_route (r);
+	_vpot->set_route (r);
+
 	control_by_parameter.clear ();
 
 	control_by_parameter[PanAzimuthAutomation] = (Control*) 0;

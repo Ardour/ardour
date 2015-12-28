@@ -29,11 +29,14 @@
 
 #include "pbd/signals.h"
 
+#include "ardour/types.h"
+
 #include "mackie_control_exception.h"
 #include "midi_byte_array.h"
 
 namespace ARDOUR {
 	class AutomationControl;
+	class Route;
 }
 
 namespace ArdourSurface {
@@ -61,8 +64,24 @@ public:
 
 	virtual MidiByteArray zero() = 0;
 
+	/* we keep a pointer to an AutomationControl so that we can convert
+	 * easily between interface (GUI) values (normalized to 0..1.0) and
+	 * internal values (whatever range the control itself might have).
+	 */
+
 	boost::shared_ptr<ARDOUR::AutomationControl> control () const { return normal_ac; }
 	virtual void set_control (boost::shared_ptr<ARDOUR::AutomationControl>);
+
+	/* this is the route (possibly null) which has some kind of parameter
+	 * controlled by this Control
+	 */
+
+	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
+	virtual void set_route (boost::shared_ptr<ARDOUR::Route>);
+
+	/* this describes the parameter that we control */
+
+	ARDOUR::AutomationType automation_type() const;
 
 	float get_value ();
 	void set_value (float val);
@@ -78,6 +97,7 @@ public:
 	std::string _name;
 	Group& _group;
 	bool _in_use;
+	boost::shared_ptr<ARDOUR::Route> _route;
 };
 
 }

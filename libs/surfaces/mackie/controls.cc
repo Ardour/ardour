@@ -21,6 +21,7 @@
 #include <sstream>
 
 #include "ardour/automation_control.h"
+#include "ardour/route.h"
 
 #include "controls.h"
 #include "types.h"
@@ -53,6 +54,22 @@ Control::Control (int id, std::string name, Group & group)
 {
 }
 
+void
+Control::set_route (boost::shared_ptr<ARDOUR::Route> r)
+{
+	_route = r;
+}
+
+ARDOUR::AutomationType
+Control::automation_type () const
+{
+	if (!normal_ac) {
+		return ARDOUR::NullAutomation;
+	}
+
+	return ARDOUR::AutomationType (normal_ac->parameter().type());
+}
+
 /** @return true if the control is in use, or false otherwise.
     Buttons are `in use' when they are held down.
     Faders with touch support are `in use' when they are being touched.
@@ -72,17 +89,13 @@ Control::set_in_use (bool in_use)
 }
 
 void
-Control::set_control (boost::shared_ptr<AutomationControl> ac)
-{
-	normal_ac = ac;
-}
-
-void
 Control::set_value (float val)
 {
-	if (normal_ac) {
-		normal_ac->set_value (normal_ac->interface_to_internal (val));
+	if (!_route || !normal_ac) {
+		return;
 	}
+
+	_route->set_property (automation_type(), normal_ac->interface_to_internal (val), this);
 }
 
 float
