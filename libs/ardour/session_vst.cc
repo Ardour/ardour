@@ -318,7 +318,9 @@ intptr_t Session::vst_callback (
 
 	case audioMasterSizeWindow:
 		SHOW_CALLBACK ("audioMasterSizeWindow");
-		// index: width, value: height
+		plug->state()->width = index;
+		plug->state()->height = value;
+		plug->state()->want_resize = 1;
 		return 0;
 
 	case audioMasterGetSampleRate:
