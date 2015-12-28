@@ -119,6 +119,8 @@ public:
 	bool is_selectable() const {return _selectable;}
 	void set_selectable(bool s) { _selectable = s; }
 
+	bool drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::SelectionData &);
+
 	enum Position {
 		PreFader,
 		Fader,
@@ -165,6 +167,7 @@ private:
 	PBD::ScopedConnection active_connection;
 	PBD::ScopedConnection name_connection;
 	PBD::ScopedConnection config_connection;
+	ARDOUR::PluginPresetPtr _plugin_preset_pointer;
 
 	class Control : public sigc::trackable {
 	public:

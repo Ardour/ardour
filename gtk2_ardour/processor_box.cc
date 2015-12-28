@@ -75,6 +75,7 @@
 #include "send_ui.h"
 #include "timers.h"
 #include "tooltips.h"
+#include "new_plugin_preset_dialog.h"
 
 #include "i18n.h"
 
@@ -131,6 +132,12 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	if (boost::dynamic_pointer_cast<UnknownProcessor> (_processor)) {
 		_button.set_elements(ArdourButton::Element(_button.elements() & ~ArdourButton::Indicator));
 		_unknown_processor = true;
+	}
+	{
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+		if (pi && pi->plugin()) {
+			_plugin_preset_pointer = PluginPresetPtr (new PluginPreset (pi->plugin()->get_info()));
+		}
 	}
 	if (_processor) {
 
@@ -210,6 +217,41 @@ string
 ProcessorEntry::drag_text () const
 {
 	return name (Wide);
+}
+bool
+ProcessorEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::SelectionData &data)
+{
+	if (data.get_target() == "PluginPresetPtr" && _plugin_preset_pointer) {
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+		boost::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin();
+		assert (plugin);
+		NewPluginPresetDialog d (plugin);
+
+		_plugin_preset_pointer->_preset.valid = false;
+
+		switch (d.run ()) {
+			case Gtk::RESPONSE_ACCEPT:
+				if (d.name().empty()) {
+					break;
+				}
+
+				if (d.replace ()) {
+					plugin->remove_preset (d.name ());
+				}
+
+				Plugin::PresetRecord const r = plugin->save_preset (d.name());
+
+				if (!r.uri.empty ()) {
+					_plugin_preset_pointer->_preset.uri   = r.uri;
+					_plugin_preset_pointer->_preset.label = r.label;
+					_plugin_preset_pointer->_preset.user  = r.user;
+					_plugin_preset_pointer->_preset.valid = r.valid;
+				}
+		}
+		data.set (data.get_target(), 8, (const guchar *) &_plugin_preset_pointer, sizeof (PluginPresetPtr));
+		return true;
+	}
+	return false;
 }
 
 void

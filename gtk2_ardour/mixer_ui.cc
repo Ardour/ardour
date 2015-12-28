@@ -207,6 +207,7 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.set_drag_column (favorite_plugins_columns.name.index());
 	favorite_plugins_display.signal_row_activated().connect (sigc::mem_fun (*this, &Mixer_UI::plugin_row_activated));
 	favorite_plugins_display.signal_button_press_event().connect (sigc::mem_fun (*this, &Mixer_UI::plugin_row_button_press), false);
+	favorite_plugins_display.signal_drop.connect (sigc::mem_fun (*this, &Mixer_UI::plugin_drop));
 
 	favorite_plugins_scroller.add (favorite_plugins_display);
 	favorite_plugins_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -2499,4 +2500,20 @@ PluginTreeStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path& dest, const
 		return true;
 	}
 	return false;
+}
+
+void
+Mixer_UI::plugin_drop (const Glib::RefPtr<Gdk::DragContext>&, const Gtk::SelectionData& data)
+{
+	if (data.get_target() != "PluginPresetPtr") {
+		return;
+	}
+	const void *d = data.get_data();
+	const PluginPresetPtr ppp = *(static_cast<const PluginPresetPtr*> (d));
+
+	PluginManager::PluginStatusType status = PluginManager::Favorite;
+	PluginManager& manager (PluginManager::instance());
+
+	manager.set_status (ppp->_pip->type, ppp->_pip->unique_id, status);
+	manager.save_statuses ();
 }

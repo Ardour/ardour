@@ -201,6 +201,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void plugin_row_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
 	bool plugin_row_button_press (GdkEventButton*);
 	void popup_note_context_menu (GdkEventButton*);
+	void plugin_drop (const Glib::RefPtr<Gdk::DragContext>&, const Gtk::SelectionData& data);
 
 	enum ProcessorPosition {
 		AddTop,
