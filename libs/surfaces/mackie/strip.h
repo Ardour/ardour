@@ -140,8 +140,6 @@ private:
 	void update_meter ();
 	std::string vpot_mode_string ();
 
-	boost::shared_ptr<ARDOUR::AutomationControl> mb_pan_controllable;
-
 	void return_to_vpot_mode_display ();
 
 	struct RedisplayRequest {

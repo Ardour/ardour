@@ -172,8 +172,6 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 		return;
 	}
 
-	mb_pan_controllable.reset();
-
 	route_connections.drop_connections ();
 
 	_solo->set_control (boost::shared_ptr<AutomationControl>());
