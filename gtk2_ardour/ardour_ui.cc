@@ -2507,7 +2507,9 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 		prompter.set_prompt (_("Name of new snapshot"));
 	}
 
-	if (!switch_to_it) {
+	if (switch_to_it) {
+		prompter.set_initial_text (_session->snap_name());
+	} else {
 		char timebuf[128];
 		time_t n;
 		struct tm local_time;
