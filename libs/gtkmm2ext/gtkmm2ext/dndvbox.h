@@ -44,6 +44,8 @@ public:
 
 	/** @return True if the child can be selected in the list ( if you don't want it to copy/paste/drag then turn this off ) */
 	virtual bool is_selectable () const = 0;
+
+	virtual bool drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::SelectionData &) { return false; }
 };
 
 /** A VBox whose contents can be dragged and dropped */
@@ -345,9 +347,11 @@ private:
 		return false;
 	}
 
-	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const &, Gtk::SelectionData & selection_data, guint, guint, T* child)
+	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const &context, Gtk::SelectionData & selection_data, guint, guint, T* child)
 	{
-		selection_data.set (selection_data.get_target(), 8, (const guchar *) &child, sizeof (&child));
+		if (!child->drag_data_get(context, selection_data)) {
+			selection_data.set (selection_data.get_target(), 8, (const guchar *) &child, sizeof (&child));
+		}
 	}
 
 	void drag_data_received (

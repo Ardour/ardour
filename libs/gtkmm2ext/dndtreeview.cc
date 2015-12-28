@@ -106,6 +106,11 @@ DnDTreeViewBase::on_drag_begin (Glib::RefPtr<Gdk::DragContext> const & context) 
 	start_object_drag ();
 }
 
+void
+DnDTreeViewBase::on_drag_end (Glib::RefPtr<Gdk::DragContext> const & context) {
+	Gtk::TreeView::on_drag_end (context);
+	end_object_drag ();
+}
 
 void
 DnDTreeViewBase::add_drop_targets (list<TargetEntry>& targets)

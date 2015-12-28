@@ -49,6 +49,7 @@ class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 	void add_object_drag (int column, std::string type_name);
 
 	void on_drag_begin (Glib::RefPtr<Gdk::DragContext> const & context);
+	void on_drag_end (Glib::RefPtr<Gdk::DragContext> const & context);
 
 	bool on_button_press_event (GdkEventButton *ev) {
 		press_start_x = ev->x;
@@ -97,6 +98,12 @@ class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 		drag_data.data_column = data_column;
 		drag_data.object_type = object_type;
 	}
+
+	void end_object_drag () {
+		drag_data.source = 0;
+		drag_data.data_column = -1;
+		drag_data.object_type = "";
+	}
 };
 
 template<class DataType>
@@ -106,7 +113,7 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 	DnDTreeView() {}
 	~DnDTreeView() {}
 
-	sigc::signal<void,const std::list<DataType>&,Gtk::TreeView*,int,int,Glib::RefPtr<Gdk::DragContext>&> signal_drop;
+	sigc::signal<void, const Glib::RefPtr<Gdk::DragContext>&, const Gtk::SelectionData&> signal_drop;
 
 	void on_drag_data_get(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time) {
 		if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
@@ -134,14 +141,9 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 		}
 
 		if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
-
 			TreeView::on_drag_data_received (context, x, y, selection_data, info, time);
-
-
 		} else if (selection_data.get_target() == object_type) {
-
-			end_object_drag (const_cast<Glib::RefPtr<Gdk::DragContext>& > (context), x, y);
-
+			signal_drop (context, selection_data);
 		} else {
 			/* some kind of target type added by the app, which will be handled by a signal handler */
 		}
@@ -169,15 +171,6 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 
 		*source = drag_data.source;
 	}
-
-  private:
-	void end_object_drag (Glib::RefPtr<Gdk::DragContext>& context, int x, int y) {
-		std::list<DataType> l;
-		Gtk::TreeView* source;
-		get_object_drag_data (l, &source);
-		signal_drop (l, source, x, y, context);
-	}
-
 };
 
 } // namespace
