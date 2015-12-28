@@ -105,9 +105,9 @@ class LIBARDOUR_API MetricSection {
 		: _beat (0), _frame (frame), _movable (true), _position_lock_style (MusicTime) {}
 
 	virtual ~MetricSection() {}
-	const double start () const { return _beat; }
 
-	const double& beat() const { return _beat; }
+	const double start () const { return _beat; }
+	const double& beat () const { return _beat; }
 	void set_beat (double beat) { _beat = beat;}
 
 	framepos_t frame() const { return _frame; }
@@ -123,6 +123,7 @@ class LIBARDOUR_API MetricSection {
 	   XML state information.
 	*/
 	virtual XMLNode& get_state() const = 0;
+
 	PositionLockStyle position_lock_style () const { return _position_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps) { _position_lock_style = ps; }
 
@@ -205,10 +206,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	 *  time relative to section start.
 	 */
 	double c_func (double end_tpm, double end_time) const;
-	double a_func (double begin_tpm, double end_tpm, double end_time) const;
+	double a_func (double end_tpm, double c_func) const;
 
-	double tempo_at_time (double time, double end_bpm, double end_time) const;
-	double time_at_tempo (double tempo, double end_bpm, double end_time) const;
 	double tick_tempo_at_time (double time, double end_tpm, double end_time) const;
 	double time_at_tick_tempo (double tick_tempo, double end_tpm, double end_time) const;
 

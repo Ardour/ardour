@@ -182,6 +182,8 @@ TempoSection::set_type (Type type)
 	_type = type;
 }
 
+/** returns the tempo at the zero-based (relative to tempo section) frame.
+*/
 double
 TempoSection::tempo_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
 {
@@ -193,6 +195,9 @@ TempoSection::tempo_at_frame (framepos_t frame, double end_bpm, framepos_t end_f
 	return tick_tempo_at_time (frame_to_minute (frame, frame_rate), end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate)) / BBT_Time::ticks_per_beat;
 }
 
+/** returns the zero-based frame (relative to tempo section)
+   where the tempo occurs.
+*/
 framepos_t
 TempoSection::frame_at_tempo (double tempo, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
 {
@@ -203,6 +208,10 @@ TempoSection::frame_at_tempo (double tempo, double end_bpm, framepos_t end_frame
 	return minute_to_frame (time_at_tick_tempo (tempo *  BBT_Time::ticks_per_beat,  end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate)), frame_rate);
 }
 
+/** returns the zero-based tick (relative to tempo section)
+   where the zero-based frame (relative to tempo section)
+   lies.
+*/
 double
 TempoSection::tick_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
 {
@@ -213,6 +222,10 @@ TempoSection::tick_at_frame (framepos_t frame, double end_bpm, framepos_t end_fr
 	return tick_at_time (frame_to_minute (frame, frame_rate), end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate));
 }
 
+/** returns the zero-based frame (relative to tempo section)
+   where the zero-based tick (relative to tempo section)
+   falls.
+*/
 framepos_t
 TempoSection::frame_at_tick (double tick, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
 {
@@ -223,12 +236,23 @@ TempoSection::frame_at_tick (double tick, double end_bpm, framepos_t end_frame, 
 	return minute_to_frame (time_at_tick (tick, end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate)), frame_rate);
 }
 
-double TempoSection::beat_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+/** returns the zero-based beat (relative to tempo section)
+   where the zero-based frame (relative to tempo section)
+   lies.
+*/
+double
+TempoSection::beat_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
 {
 	return tick_at_frame (frame, end_bpm, end_frame, frame_rate) / BBT_Time::ticks_per_beat;
 }
 
-framepos_t TempoSection::frame_at_beat (double beat, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+/** returns the zero-based frame (relative to tempo section start frame)
+   where the zero-based beat (relative to tempo section start)
+   falls.
+*/
+
+framepos_t
+TempoSection::frame_at_beat (double beat, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
 {
 	return frame_at_tick (beat * BBT_Time::ticks_per_beat, end_bpm, end_frame, frame_rate);
 }
@@ -245,12 +269,14 @@ TempoSection::frame_to_minute (framecnt_t frame, framecnt_t frame_rate) const
 	return (frame / (double) frame_rate) / 60.0;
 }
 
-/* constant for exp */
+/* position function */
 double
-TempoSection::a_func (double begin_tpm, double end_tpm, double end_time) const
+TempoSection::a_func (double end_tpm, double c_func) const
 {
-	return log (end_tpm / ticks_per_minute()) /  c_func (end_tpm, end_time);
+	return log (end_tpm / ticks_per_minute()) /  c_func;
 }
+
+/*function constant*/
 double
 TempoSection::c_func (double end_tpm, double end_time) const
 {
@@ -269,20 +295,6 @@ double
 TempoSection::time_at_tick_tempo (double tick_tempo, double end_tpm, double end_time) const
 {
 	return log (tick_tempo / ticks_per_minute()) / c_func (end_tpm, end_time);
-}
-
-/* tempo in bpm at time in minutes */
-double
-TempoSection::tempo_at_time (double time, double end_bpm, double end_time) const
-{
-	return tick_tempo_at_time (time, end_bpm *  BBT_Time::ticks_per_beat, end_time) / BBT_Time::ticks_per_beat;
-}
-
-/* time in minutes at tempo in bpm */
-double
-TempoSection::time_at_tempo (double tempo, double end_bpm, double end_time) const
-{
-	return time_at_tick_tempo (tempo * BBT_Time::ticks_per_beat, end_bpm * BBT_Time::ticks_per_beat, end_time);
 }
 
 /* tick at time in minutes */
