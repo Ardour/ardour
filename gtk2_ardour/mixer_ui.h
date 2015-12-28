@@ -212,6 +212,8 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void add_selected_processor (ProcessorPosition);
 	void add_favorite_processor (ARDOUR::PluginPresetPtr, ProcessorPosition);
 	void remove_selected_from_favorites ();
+	void delete_selected_preset ();
+	ARDOUR::PluginPresetPtr selected_plugin ();
 
 	void initial_track_display ();
 	void show_track_list_menu ();

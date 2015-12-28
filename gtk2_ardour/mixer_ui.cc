@@ -2344,7 +2344,6 @@ Mixer_UI::popup_note_context_menu (GdkEventButton *ev)
 	if (_selection.routes.empty()) {
 		items.push_back (MenuElem (_("No Track/Bus is selected.")));
 	} else {
-
 		items.push_back (MenuElem (_("Add at the top"),
 					sigc::bind (sigc::mem_fun (*this, &Mixer_UI::add_selected_processor), AddTop)));
 		items.push_back (MenuElem (_("Add Pre-Fader"),
@@ -2354,8 +2353,16 @@ Mixer_UI::popup_note_context_menu (GdkEventButton *ev)
 		items.push_back (MenuElem (_("Add at the end"),
 					sigc::bind (sigc::mem_fun (*this, &Mixer_UI::add_selected_processor), AddBottom)));
 	}
+
 	items.push_back (SeparatorElem());
+
 	items.push_back (MenuElem (_("Remove from favorites"), sigc::mem_fun (*this, &Mixer_UI::remove_selected_from_favorites)));
+
+	ARDOUR::PluginPresetPtr ppp = selected_plugin();
+	if (ppp && ppp->_preset.valid) {
+		items.push_back (MenuElem (_("Delete Preset"), sigc::mem_fun (*this, &Mixer_UI::delete_selected_preset)));
+	}
+
 	m->popup (ev->button, ev->time);
 }
 
@@ -2368,39 +2375,57 @@ Mixer_UI::plugin_row_button_press (GdkEventButton *ev)
 	return false;
 }
 
-void
-Mixer_UI::add_selected_processor (ProcessorPosition pos)
+
+PluginPresetPtr
+Mixer_UI::selected_plugin ()
 {
 	Glib::RefPtr<Gtk::TreeView::Selection> selection = favorite_plugins_display.get_selection();
 	if (!selection) {
-		return;
+		return PluginPresetPtr();
 	}
 	Gtk::TreeModel::iterator iter = selection->get_selected();
 	if (!iter) {
+		return PluginPresetPtr();
+	}
+	return (*iter)[favorite_plugins_columns.plugin];
+}
+
+void
+Mixer_UI::add_selected_processor (ProcessorPosition pos)
+{
+	ARDOUR::PluginPresetPtr ppp = selected_plugin();
+	if (ppp) {
+		add_favorite_processor (ppp, pos);
+	}
+}
+
+void
+Mixer_UI::delete_selected_preset ()
+{
+	if (!_session) {
 		return;
 	}
-	ARDOUR::PluginPresetPtr ppp = (*iter)[favorite_plugins_columns.plugin];
-	add_favorite_processor (ppp, pos);
+	ARDOUR::PluginPresetPtr ppp = selected_plugin();
+	if (!ppp || !ppp->_preset.valid) {
+		return;
+	}
+	PluginPtr plugin = ppp->_pip->load (*_session);
+	plugin->get_presets();
+	plugin->remove_preset (ppp->_preset.label);
 }
 
 void
 Mixer_UI::remove_selected_from_favorites ()
 {
-	Glib::RefPtr<Gtk::TreeView::Selection> selection = favorite_plugins_display.get_selection();
-	if (!selection) {
+	ARDOUR::PluginPresetPtr ppp = selected_plugin();
+	if (!ppp) {
 		return;
 	}
-	Gtk::TreeModel::iterator iter = selection->get_selected();
-	if (!iter) {
-		return;
-	}
-	ARDOUR::PluginPresetPtr ppp = (*iter)[favorite_plugins_columns.plugin];
 	PluginManager::PluginStatusType status = PluginManager::Normal;
 	PluginManager& manager (PluginManager::instance());
 
 	manager.set_status (ppp->_pip->type, ppp->_pip->unique_id, status);
 	manager.save_statuses ();
-	sync_treeview_from_favorite_order ();
 }
 
 void
