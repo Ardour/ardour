@@ -2371,6 +2371,16 @@ bool
 Mixer_UI::plugin_row_button_press (GdkEventButton *ev)
 {
 	if ((ev->type == GDK_BUTTON_PRESS) && (ev->button == 3) ) {
+		TreeModel::Path path;
+		TreeViewColumn* column;
+		int cellx, celly;
+		if (favorite_plugins_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+			Glib::RefPtr<Gtk::TreeView::Selection> selection = favorite_plugins_display.get_selection();
+			if (selection) {
+				selection->unselect_all();
+				selection->select(path);
+			}
+		}
 		popup_note_context_menu (ev);
 	}
 	return false;
