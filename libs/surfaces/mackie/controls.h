@@ -61,11 +61,6 @@ public:
 
 	virtual MidiByteArray zero() = 0;
 
-	/** If we are doing an in_use timeout for a fader without touch, this
-	 *  is its touch button control; otherwise 0.
-	 */
-	Control* in_use_touch_control;
-
 	boost::shared_ptr<ARDOUR::AutomationControl> control () const { return normal_ac; }
 	virtual void set_control (boost::shared_ptr<ARDOUR::AutomationControl>);
 
