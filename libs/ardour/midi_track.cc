@@ -394,6 +394,16 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		return dret;
 	}
 
+	if (_mute_control->list() && _mute_control->automation_playback()) {
+		bool        valid = false;
+		const float mute  = _mute_control->list()->rt_safe_eval(transport_frame, valid);
+		if (mute >= 0.5 && !muted()) {
+			_mute_control->set_value_unchecked(1.0);  // mute
+		} else if (mute < 0.5 && muted()) {
+			_mute_control->set_value_unchecked(0.0);  // unmute
+		}
+	}
+
 	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 
 	fill_buffers_with_input (bufs, _input, nframes);
