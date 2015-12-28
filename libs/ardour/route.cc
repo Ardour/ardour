@@ -384,6 +384,37 @@ Route::ensure_track_or_route_name(string name, Session &session)
 }
 
 void
+Route::set_property (AutomationType at, double val, void* src)
+{
+	boost::shared_ptr<RouteList> rl;
+
+	switch (at) {
+	case GainAutomation:
+		set_gain (val, src);
+		break;
+
+	case SoloAutomation:
+		rl.reset (new RouteList);
+		rl->push_back (shared_from_this());
+		if (Config->get_solo_control_is_listen_control()) {
+			_session.set_listen (rl, !listening_via_monitor());
+		} else {
+			_session.set_solo (rl, !self_soloed());
+		}
+		break;
+
+	case MuteAutomation:
+		rl.reset (new RouteList);
+		rl->push_back (shared_from_this());
+		_session.set_mute (rl, !muted());
+		break;
+
+	default:
+		break;
+	}
+}
+
+void
 Route::inc_gain (gain_t fraction, void *src)
 {
 	_amp->inc_gain (fraction, src);

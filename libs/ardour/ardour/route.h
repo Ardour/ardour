@@ -141,6 +141,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	void shift (framepos_t, framecnt_t);
 
+	void set_property (AutomationType, double val, void* src);
+
 	void set_gain (gain_t val, void *src);
 	void inc_gain (gain_t delta, void *src);
 
