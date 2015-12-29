@@ -118,6 +118,9 @@ private:
 	ARDOUR::BeatsFramesConverter _conv;	
 };
 
+// TODO: for now the number of tracks showed on the GUI is hardwired
+#define GUI_NUMBER_OF_TRACKS 4
+
 class MidiTrackerEditor : public ArdourWindow
 {
   public:
@@ -132,18 +135,20 @@ class MidiTrackerEditor : public ArdourWindow
 		MidiTrackerModelColumns()
 		{
 			add (time);
-			add (note_name);
-			add (channel);
-			add (velocity);
-			add (delay);
-			add (_note);		// We keep that around to play the note
+			for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; ++i) {
+				add (note_name[i]);
+				add (channel[i]);
+				add (velocity[i]);
+				add (delay[i]);
+				add (_note[i]);		// We keep that around to play the note
+			}
 		};
 		Gtk::TreeModelColumn<std::string> time;
-		Gtk::TreeModelColumn<std::string> note_name;
-		Gtk::TreeModelColumn<uint8_t>     channel;
-		Gtk::TreeModelColumn<uint8_t>     velocity;
-		Gtk::TreeModelColumn<int64_t>     delay;
-		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note;
+		Gtk::TreeModelColumn<std::string> note_name[GUI_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<uint8_t>     channel[GUI_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<uint8_t>     velocity[GUI_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<int64_t>     delay[GUI_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note[GUI_NUMBER_OF_TRACKS];
 	};
 
 	enum tracker_columns {

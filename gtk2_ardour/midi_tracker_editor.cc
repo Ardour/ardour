@@ -69,30 +69,58 @@ void MidiTrackerMatrix::updateMatrix()
 	last_beats_floor = find_last_row_beats();
 	nrows = find_nrows();
 
-	// TODO: support multiple tracks
-	notes_on.clear();
-	notes_on.push_back(RowToNotes());
-	notes_off.clear();
-	notes_off.push_back(RowToNotes());
-	
-	MidiModel::Notes notes = _midi_model->notes();
-	for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
-		Evoral::Beats on_time = (*i)->time();
-		Evoral::Beats off_time = (*i)->end_time();
-		uint32_t row_on_max_delay = row_at_beats_max_delay(on_time);
-		uint32_t row_on = row_at_beats(on_time);
-		uint32_t row_off_min_delay = row_at_beats_min_delay(off_time);
-		uint32_t row_off = row_at_beats(off_time);
+	// Distribute the notes across N tracks so that no overlapping notes can
+	// exist on the same track. When a note on hits, it is placed on the first
+	// available track, ordered by vector index. In case several notes on are
+	// hit simultaneously, then the lowest pitch one is placed on the first
+	// available track, ordered by vector index.
+	const MidiModel::Notes& notes = _midi_model->notes();
+	MidiModel::StrictNotes strict_notes(notes.begin(), notes.end());
+	std::vector<MidiModel::Notes> notes_per_track;
+	for (MidiModel::StrictNotes::const_iterator note = strict_notes.begin();
+	     note != strict_notes.end(); ++note) {
+		int freetrack = -1;		// index of the first free track
+		for (int i = 0; i < (int)notes_per_track.size(); i++) {
+			if ((*notes_per_track[i].rbegin())->end_time() <= (*note)->time()) {
+				freetrack = i;
+				break;
+			}
+		}
+		// No free track found, create a new one.
+		if (freetrack < 0) {
+			freetrack = notes_per_track.size();
+			notes_per_track.push_back(MidiModel::Notes());
+		}
+		// Insert the note in the first free track
+		notes_per_track[freetrack].insert(*note);
+	}
+	ntracks = notes_per_track.size();
 
-		if (row_on == row_off && row_on != row_off_min_delay) {
-			notes_on[0].insert(RowToNotes::value_type(row_on, *i));
-			notes_off[0].insert(RowToNotes::value_type(row_off_min_delay, *i));
-		} else if (row_on == row_off && row_on_max_delay != row_off) {
-			notes_on[0].insert(RowToNotes::value_type(row_on_max_delay, *i));
-			notes_off[0].insert(RowToNotes::value_type(row_off, *i));
-		} else {
-			notes_on[0].insert(RowToNotes::value_type(row_on, *i));
-			notes_off[0].insert(RowToNotes::value_type(row_off, *i));
+	notes_on.clear();
+	notes_on.resize(ntracks);
+	notes_off.clear();
+	notes_off.resize(ntracks);
+
+	for (uint16_t itrack = 0; itrack < ntracks; ++itrack) {
+		for (MidiModel::Notes::iterator inote = notes_per_track[itrack].begin();
+		     inote != notes_per_track[itrack].end(); ++inote) {
+			Evoral::Beats on_time = (*inote)->time();
+			Evoral::Beats off_time = (*inote)->end_time();
+			uint32_t row_on_max_delay = row_at_beats_max_delay(on_time);
+			uint32_t row_on = row_at_beats(on_time);
+			uint32_t row_off_min_delay = row_at_beats_min_delay(off_time);
+			uint32_t row_off = row_at_beats(off_time);
+
+			if (row_on == row_off && row_on != row_off_min_delay) {
+				notes_on[itrack].insert(RowToNotes::value_type(row_on, *inote));
+				notes_off[itrack].insert(RowToNotes::value_type(row_off_min_delay, *inote));
+			} else if (row_on == row_off && row_on_max_delay != row_off) {
+				notes_on[itrack].insert(RowToNotes::value_type(row_on_max_delay, *inote));
+				notes_off[itrack].insert(RowToNotes::value_type(row_off, *inote));
+			} else {
+				notes_on[itrack].insert(RowToNotes::value_type(row_on, *inote));
+				notes_off[itrack].insert(RowToNotes::value_type(row_off, *inote));
+			}
 		}
 	}
 }
@@ -171,17 +199,25 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 	model = ListStore::create (columns);
 	view.set_model (model);
 
-	TreeModel::Row row;
-
 	view.signal_key_press_event().connect (sigc::mem_fun (*this, &MidiTrackerEditor::key_press), false);
 	view.signal_key_release_event().connect (sigc::mem_fun (*this, &MidiTrackerEditor::key_release), false);
 	view.signal_scroll_event().connect (sigc::mem_fun (*this, &MidiTrackerEditor::scroll_event), false);
 
 	view.append_column (_("Time"), columns.time);
-	view.append_column (_("Note"), columns.note_name);
-	view.append_column (_("Ch"), columns.channel);
-	view.append_column (_("Vel"), columns.velocity);
-	view.append_column (_("Delay"), columns.delay);
+	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++) {
+		stringstream ss_note;
+		stringstream ss_ch;
+		stringstream ss_vel;
+		stringstream ss_delay;
+		ss_note << "Note-" << i;
+		ss_ch << "Ch-" << i;
+		ss_vel << "Vel-" << i;
+		ss_delay << "Delay-" << i;
+		view.append_column (_(ss_note.str().c_str()), columns.note_name[i]);
+		view.append_column (_(ss_ch.str().c_str()), columns.channel[i]);
+		view.append_column (_(ss_vel.str().c_str()), columns.velocity[i]);
+		view.append_column (_(ss_delay.str().c_str()), columns.delay[i]);
+	}
 
 	view.set_headers_visible (true);
 	view.set_rules_hint (true);
@@ -333,7 +369,7 @@ MidiTrackerEditor::scroll_event (GdkEventScroll* ev)
 
 				if ((iter = model->get_iter (*i))) {
 					
-					note = (*iter)[columns._note];		
+					note = (*iter)[columns._note[0]];
 					
 					switch (prop) {
 					case MidiModel::NoteDiffCommand::StartTime:
@@ -376,7 +412,7 @@ MidiTrackerEditor::scroll_event (GdkEventScroll* ev)
 			previous_selection.push_back (path);
 
 			if (iter) {
-				boost::shared_ptr<NoteType> note = (*iter)[columns._note];
+				boost::shared_ptr<NoteType> note = (*iter)[columns._note[0]];
 				
 				switch (prop) {
 				case MidiModel::NoteDiffCommand::StartTime:
@@ -508,7 +544,7 @@ MidiTrackerEditor::key_release (GdkEventKey* ev)
 		view.get_cursor (path, col);
 		iter = model->get_iter (path);
 		cmd = midi_model->new_note_diff_command (_("insert new note"));
-		note = (*iter)[columns._note];
+		note = (*iter)[columns._note[0]];
 		copy.reset (new NoteType (*note.get()));
 		cmd->add (copy);
 		midi_model->apply_command (*_session, cmd);
@@ -565,7 +601,7 @@ MidiTrackerEditor::delete_selected_note ()
 		TreeIter iter;
 
 		if ((iter = model->get_iter (*i))) {
-			boost::shared_ptr<NoteType> note = (*iter)[columns._note];
+			boost::shared_ptr<NoteType> note = (*iter)[columns._note[0]];
 			to_delete.push_back (note);
 		}
 	}
@@ -628,7 +664,7 @@ MidiTrackerEditor::edited (const std::string& path, const std::string& text)
 		return;
 	}
 
-	boost::shared_ptr<NoteType> note = (*iter)[columns._note];
+	boost::shared_ptr<NoteType> note = (*iter)[columns._note[0]];
 	MidiModel::NoteDiffCommand::Property prop (MidiModel::NoteDiffCommand::NoteNumber);
 
 	int    ival;
@@ -679,7 +715,7 @@ MidiTrackerEditor::edited (const std::string& path, const std::string& text)
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 			if ((iter = model->get_iter (*i))) {
 
-				note = (*iter)[columns._note];		
+				note = (*iter)[columns._note[0]];
 				
 				switch (prop) {
 				case MidiModel::NoteDiffCommand::Velocity:
@@ -742,45 +778,46 @@ MidiTrackerEditor::redisplay_model ()
 			print_padded(ss, row_bbt);
 			row[columns.time] = ss.str();
 
-			// TODO: Add support for
-			// - Multiple tracks (overlapping notes)
+			// TODO: don't dismiss off-beat rows near the region boundaries
 
-			size_t notes_off_count = mtm.notes_off[0].count(irow);
-			size_t notes_on_count = mtm.notes_on[0].count(irow);
+			for (size_t i = 0; i < (size_t)mtm.ntracks; i++) {
+				size_t notes_off_count = mtm.notes_off[i].count(irow);
+				size_t notes_on_count = mtm.notes_on[i].count(irow);
 
-			if (notes_on_count > 0 || notes_off_count > 0) {
-				MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm.notes_off[0].find(irow);
-				MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm.notes_on[0].find(irow);
+				if (notes_on_count > 0 || notes_off_count > 0) {
+					MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm.notes_off[i].find(irow);
+					MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm.notes_on[i].find(irow);
 
-				// Determine whether the row is defined
-				bool undefined = (notes_off_count > 1 || notes_on_count > 1)
-					|| (notes_off_count == 1 && notes_on_count == 1
-					    && i_off->second->end_time() != i_on->second->time());
+					// Determine whether the row is defined
+					bool undefined = (notes_off_count > 1 || notes_on_count > 1)
+						|| (notes_off_count == 1 && notes_on_count == 1
+						    && i_off->second->end_time() != i_on->second->time());
 
-				if (undefined) {
-					row[columns.note_name] = undefined_str;
-				} else {
-					// Notes off
-					MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm.notes_off[0].find(irow);
-					if (i_off != mtm.notes_off[0].end()) {
-						boost::shared_ptr<NoteType> note = i_off->second;
-						row[columns.channel] = note->channel() + 1;
-						row[columns.note_name] = note_off_str;
-						row[columns.velocity] = note->velocity();
-						int64_t delay_ticks = (note->end_time() - row_beats).to_relative_ticks();
-						row[columns.delay] = delay_ticks;
-					}
+					if (undefined) {
+						row[columns.note_name[i]] = undefined_str;
+					} else {
+						// Notes off
+						MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm.notes_off[i].find(irow);
+						if (i_off != mtm.notes_off[i].end()) {
+							boost::shared_ptr<NoteType> note = i_off->second;
+							row[columns.channel[i]] = note->channel() + 1;
+							row[columns.note_name[i]] = note_off_str;
+							row[columns.velocity[i]] = note->velocity();
+							int64_t delay_ticks = (note->end_time() - row_beats).to_relative_ticks();
+							row[columns.delay[i]] = delay_ticks;
+						}
 
-					// Notes on
-					MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm.notes_on[0].find(irow);
-					if (i_on != mtm.notes_on[0].end()) {
-						boost::shared_ptr<NoteType> note = i_on->second;
-						row[columns.channel] = note->channel() + 1;
-						row[columns.note_name] = Evoral::midi_note_name (note->note());
-						row[columns.velocity] = note->velocity();
-						row[columns.delay] = (note->time() - row_beats).to_relative_ticks();
-						// Keep the note around for playing it
-						row[columns._note] = note;
+						// Notes on
+						MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm.notes_on[i].find(irow);
+						if (i_on != mtm.notes_on[i].end()) {
+							boost::shared_ptr<NoteType> note = i_on->second;
+							row[columns.channel[i]] = note->channel() + 1;
+							row[columns.note_name[i]] = Evoral::midi_note_name (note->note());
+							row[columns.velocity[i]] = note->velocity();
+							row[columns.delay[i]] = (note->time() - row_beats).to_relative_ticks();
+							// Keep the note around for playing it
+							row[columns._note[i]] = note;
+						}
 					}
 				}
 			}
@@ -806,7 +843,7 @@ MidiTrackerEditor::selection_changed ()
 
 	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 		if ((iter = model->get_iter (*i))) {
-			note = (*iter)[columns._note];		
+			note = (*iter)[columns._note[0]];
 			player->add (note);
 		}
 	}
