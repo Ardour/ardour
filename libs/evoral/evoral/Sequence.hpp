@@ -133,6 +133,25 @@ public:
 		}
 	};
 
+	// Like EarlierNoteComparator, but in case the two notes have the same
+	// time, then other attributes are used to determine their order, so that
+	// the ordering relationship is strict rather than partial. This is
+	// currently used by the Midi Tracker Editor.
+	//
+	// Only channel and pitch attributes are used. For now it is assumed
+	// (perhaps wrongly) that simultaneous notes cannot exist on the same midi
+	// region if these 2 attributes are equal.
+	struct EarlierNoteStrictComparator {
+		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
+		                       const boost::shared_ptr< const Note<Time> > b) const {
+			return a->time() < b->time()
+				|| (a->time() == b->time()
+				    && (a->channel() < b->channel()
+				        || (a->channel() == b->channel()
+				            && a->note() < b->note())));
+		}
+	};
+
 #if 0 // NOT USED
 	struct LaterNoteComparator {
 		typedef const Note<Time>* value_type;
@@ -152,6 +171,9 @@ public:
 	};
 
 	typedef std::multiset<NotePtr, EarlierNoteComparator> Notes;
+	// Like Notes, except they are strictly ordered. We keep a multiset in case
+	// the comparator isn't strict after all.
+	typedef std::multiset<NotePtr, EarlierNoteStrictComparator> StrictNotes;
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
