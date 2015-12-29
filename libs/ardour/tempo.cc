@@ -712,81 +712,77 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const doubl
 void
 TempoMap::gui_set_tempo_frame (TempoSection& ts, framepos_t frame, double  beat_where)
 {
-	TempoSection& first (first_tempo());
-	if (ts.frame() != first.frame()) {
-		{
-			Glib::Threads::RWLock::WriterLock lm (lock);
-			/* currently this is always done in audio time */
-			if (0) {
-			//if (ts.position_lock_style() == AudioTime) {
-				/* MusicTime */
-				ts.set_start (beat_where);
-				MetricSectionSorter cmp;
-				metrics.sort (cmp);
-			} else {
-				/*AudioTime*/
-				ts.set_frame (frame);
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
 
-				MetricSectionFrameSorter fcmp;
-				metrics.sort (fcmp);
+		/* currently this is always done in audio time */
+		//if (ts.position_lock_style() == MusicTime) {
+		if (0) {
+			/* MusicTime */
+			ts.set_start (beat_where);
+			MetricSectionSorter cmp;
+			metrics.sort (cmp);
+		} else {
+			/*AudioTime*/
+			ts.set_frame (frame);
 
-				Metrics::const_iterator i;
-				TempoSection* prev_ts = 0;
-				TempoSection* next_ts = 0;
+			MetricSectionFrameSorter fcmp;
+			metrics.sort (fcmp);
 
-				for (i = metrics.begin(); i != metrics.end(); ++i) {
-					TempoSection* t;
-					if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			Metrics::const_iterator i;
+			TempoSection* prev_ts = 0;
+			TempoSection* next_ts = 0;
 
-						if (t->frame() >= frame) {
-							break;
-						}
+			for (i = metrics.begin(); i != metrics.end(); ++i) {
+				TempoSection* t;
+				if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 
-						prev_ts = t;
+					if (t->frame() >= frame) {
+						break;
 					}
-				}
 
-				for (i = metrics.begin(); i != metrics.end(); ++i) {
-					TempoSection* t;
-					if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
-
-						if (t->frame() > frame) {
-							next_ts = t;
-							break;
-						}
-					}
-				}
-
-				if (prev_ts) {
-					/* set the start beat */
-					double beats_to_ts = prev_ts->beat_at_frame (frame - prev_ts->frame(), ts.beats_per_minute(), frame - prev_ts->frame(), _frame_rate);
-					double beats = beats_to_ts + prev_ts->start();
-
-					if (next_ts) {
-						if (next_ts->start() < beats) {
-							/* with frame-based editing, it is possible to get in a
-							   situation where if the tempo was placed at the mouse pointer frame,
-							   the following music-based tempo would jump to an earlier frame,
-							   changing the start beat of the moved tempo.
-							   in this case, we have to do some beat-based comparison TODO
-							*/
-
-							ts.set_start (next_ts->start());
-						} else if (prev_ts->start() > beats) {
-							ts.set_start (prev_ts->start());
-						} else {
-							ts.set_start (beats);
-						}
-					} else {
-						ts.set_start (beats);
-					}
-					MetricSectionSorter cmp;
-					metrics.sort (cmp);
+					prev_ts = t;
 				}
 			}
 
-			recompute_map (false);
+			for (i = metrics.begin(); i != metrics.end(); ++i) {
+				TempoSection* t;
+				if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+
+					if (t->frame() > frame) {
+						next_ts = t;
+						break;
+					}
+				}
+			}
+
+			if (prev_ts) {
+				/* set the start beat */
+				double beats_to_ts = prev_ts->beat_at_frame (frame - prev_ts->frame(), ts.beats_per_minute(), frame - prev_ts->frame(), _frame_rate);
+				double beats = beats_to_ts + prev_ts->start();
+
+				if (next_ts) {
+					if (next_ts->start() < beats) {
+						/* with frame-based editing, it is possible to get in a
+						   situation where if the tempo was placed at the mouse pointer frame,
+						   the following music-based tempo would jump to an earlier frame,
+						   changing the start beat of the moved tempo.
+						   in this case, we have to do some beat-based comparison TODO
+						*/
+					} else if (prev_ts->start() > beats) {
+						ts.set_start (prev_ts->start());
+					} else {
+						ts.set_start (beats);
+					}
+				} else {
+					ts.set_start (beats);
+				}
+				MetricSectionSorter cmp;
+				metrics.sort (cmp);
+			}
 		}
+
+		recompute_map (false);
 	}
 
 	MetricPositionChanged (); // Emit Signal
@@ -1020,12 +1016,6 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 {
 	/* CALLER MUST HOLD WRITE LOCK */
 
-	MeterSection* meter = 0;
-	TempoSection* tempo = 0;
-	double current_frame;
-	BBT_Time current;
-	Metrics::iterator next_metric;
-
 	if (end < 0) {
 
 		/* we will actually stop once we hit
@@ -1037,122 +1027,59 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("recomputing tempo map, zero to %1\n", end));
 
-	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
-		MeterSection* ms;
-
-		if ((ms = dynamic_cast<MeterSection *> (*i)) != 0) {
-			meter = ms;
-			break;
-		}
-	}
-
-	assert(meter);
-
-	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
-		TempoSection* ts;
-
-		if ((ts = dynamic_cast<TempoSection *> (*i)) != 0) {
-			tempo = ts;
-			break;
-		}
-	}
-
-	assert(tempo);
-
-	/* assumes that the first meter & tempo are at frame zero */
-	current_frame = 0;
-	meter->set_frame (0);
-	tempo->set_frame (0);
-
-	/* assumes that the first meter & tempo are at 1|1|0 */
-	current.bars = 1;
-	current.beats = 1;
-	current.ticks = 0;
-
-	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("start with meter = %1 tempo = %2\n", *((Meter*)meter), *((Tempo*)tempo)));
-
-	next_metric = metrics.begin();
-	++next_metric; // skip meter (or tempo)
-	++next_metric; // skip tempo (or meter)
-
-	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add first bar at 1|1 @ %2\n", current.bars, current_frame));
-
 	if (end == 0) {
 		/* silly call from Session::process() during startup
 		 */
 		return;
 	}
 
-	_extend_map (tempo, meter, next_metric, current, current_frame, end);
-}
-
-void
-TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
-		       Metrics::iterator next_metric,
-		       BBT_Time current, framepos_t current_frame, framepos_t end)
-{
-	/* CALLER MUST HOLD WRITE LOCK */
-
 	Metrics::const_iterator i;
-	Metrics::const_iterator mi;
 
-	TempoSection* prev_ts = tempo;
+	TempoSection* prev_ts = 0;
+
+	for (i = metrics.begin(); i != metrics.end(); ++i) {
+		TempoSection* t;
+
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+
+			if (prev_ts) {
+				double const beats_relative_to_prev_ts = t->start() - prev_ts->start();
+				double const ticks_relative_to_prev_ts = beats_relative_to_prev_ts * BBT_Time::ticks_per_beat;
+
+				/* assume (falsely) that the target tempo is constant */
+				double const t_fpb = t->frames_per_beat (_frame_rate);
+				double const av_fpb = (prev_ts->frames_per_beat (_frame_rate) + t_fpb) / 2.0;
+				/* this walk shouldn't be needed as given c, time a = log (Ta / T0) / c. what to do? */
+				double length_estimate = beats_relative_to_prev_ts * av_fpb;
+
+				if (prev_ts->type() == TempoSection::Type::Constant) {
+					length_estimate = beats_relative_to_prev_ts * prev_ts->frames_per_beat (_frame_rate);
+				}
+
+				double const system_precision_at_target_tempo = (_frame_rate / t->ticks_per_minute()) * 1.5;
+				double tick_error = system_precision_at_target_tempo + 1.0; // sorry for the wtf
+
+				while (fabs (tick_error) > system_precision_at_target_tempo) {
+
+					double const actual_ticks = prev_ts->tick_at_frame (length_estimate, t->beats_per_minute(),
+											    (framepos_t) length_estimate, _frame_rate);
+					tick_error = ticks_relative_to_prev_ts - actual_ticks;
+					length_estimate += tick_error * (t->ticks_per_minute() / _frame_rate);
+				}
+
+				t->set_frame (length_estimate + prev_ts->frame());
+			}
+			prev_ts = t;
+		}
+	}
+
+	Metrics::const_iterator mi;
+	MeterSection* meter = 0;
 
 	for (mi = metrics.begin(); mi != metrics.end(); ++mi) {
-		MeterSection* m = 0;
-
-		if ((m = dynamic_cast<MeterSection*> (*mi)) != 0) {
-
-			for (i = metrics.begin(); i != metrics.end(); ++i) {
-				TempoSection* t;
-
-				if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
-
-					if (t->start() > prev_ts->start()) {
-
-						/*tempo section (t) lies in the previous meter */
-						double const beats_relative_to_prev_ts = t->start() - prev_ts->start();
-						double const ticks_relative_to_prev_ts = beats_relative_to_prev_ts * BBT_Time::ticks_per_beat;
-
-						/* assume (falsely) that the target tempo is constant */
-						double const t_fpb = t->frames_per_beat (_frame_rate);
-						double const av_fpb = (prev_ts->frames_per_beat (_frame_rate) + t_fpb) / 2.0;
-						/* this walk shouldn't be needed as given c, time a = log (Ta / T0) / c. what to do? */ 
-						double length_estimate = beats_relative_to_prev_ts * av_fpb;
-
-						if (prev_ts->type() == TempoSection::Type::Constant) {
-							length_estimate = beats_relative_to_prev_ts * prev_ts->frames_per_beat (_frame_rate);
-						}
-
-						double const system_precision_at_target_tempo = (_frame_rate / t->ticks_per_minute()) * 1.5;
-						double tick_error = system_precision_at_target_tempo + 1.0; // sorry for the wtf
-
-						while (fabs (tick_error) > system_precision_at_target_tempo) {
-
-							double const actual_ticks = prev_ts->tick_at_frame (length_estimate, t->beats_per_minute(),
-													    (framepos_t) length_estimate, _frame_rate);
-							tick_error = ticks_relative_to_prev_ts - actual_ticks;
-							length_estimate += tick_error * (t->ticks_per_minute() / _frame_rate);
-						}
-
-						t->set_frame (length_estimate + prev_ts->frame());
-
-						double const meter_start_beats = m->start();
-						if (meter_start_beats < t->start() && meter_start_beats == prev_ts->start()) {
-
-							m->set_frame (prev_ts->frame());
-						} else if (meter_start_beats < t->start() && meter_start_beats > prev_ts->start()) {
-							framepos_t new_frame = prev_ts->frame_at_beat (m->start() - prev_ts->start(),
-												       t->beats_per_minute(),
-												       t->frame() - prev_ts->frame(),
-												       _frame_rate) + prev_ts->frame();
-							m->set_frame (new_frame);
-						}
-					}
-					prev_ts = t;
-				}
-			}
-			meter = m;
+		/* we can do this beacuse we have the tempo section frames set */
+		if ((meter = dynamic_cast<MeterSection*> (*mi)) != 0) {
+			meter->set_frame (frame_at_tick (meter->start() * BBT_Time::ticks_per_beat));
 		}
 	}
 }

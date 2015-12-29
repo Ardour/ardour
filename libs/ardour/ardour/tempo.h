@@ -420,10 +420,6 @@ private:
 
 	void recompute_map (bool reassign_tempo_bbt, framepos_t end = -1);
 
-	void _extend_map (TempoSection* tempo, MeterSection* meter,
-	                  Metrics::iterator next_metric,
-			  Timecode::BBT_Time current, framepos_t current_frame, framepos_t end);
-
 	framepos_t round_to_type (framepos_t fr, RoundMode dir, BBTPointType);
 
 	const MeterSection& first_meter() const;
