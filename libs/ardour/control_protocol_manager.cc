@@ -332,8 +332,6 @@ ControlProtocolManager::control_protocol_discover (string path)
 			DEBUG_TRACE (DEBUG::ControlProtocols,
 				     string_compose(_("Control surface protocol discovered: \"%1\"\n"), cpi->name));
 		}
-
-		delete (Glib::Module*)descriptor->module;
 	}
 
 	return 0;
@@ -365,8 +363,6 @@ ControlProtocolManager::get_descriptor (string path)
 
 	if (descriptor) {
 		descriptor->module = (void*)module;
-	} else {
-		delete module;
 	}
 
 	return descriptor;
