@@ -90,11 +90,14 @@ public:
 	// Number of rows per beat
 	uint16_t rows_per_beat;
 
+	// Determined by the number of rows per beat
+	Evoral::Beats snap;
+
 	// Beats corresponding to the first row
-	Evoral::Beats first_beats_ceiling;
+	Evoral::Beats first_beats;
 
 	// Beats corresponding to the last row
-	Evoral::Beats last_beats_floor;
+	Evoral::Beats last_beats;
 
 	// Number of rows of that region (given the choosen resolution)
 	uint32_t nrows;

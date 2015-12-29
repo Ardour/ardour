@@ -56,7 +56,8 @@ MidiTrackerMatrix::MidiTrackerMatrix(ARDOUR::Session* session,
                                      boost::shared_ptr<ARDOUR::MidiRegion> region,
                                      boost::shared_ptr<ARDOUR::MidiModel> midi_model,
                                      uint16_t rpb)
-	: rows_per_beat(rpb), _ticks_per_row(BBT_Time::ticks_per_beat/rows_per_beat),
+	: rows_per_beat(rpb), snap(1.0/rows_per_beat),
+	  _ticks_per_row(BBT_Time::ticks_per_beat/rows_per_beat),
 	  _session(session), _region(region), _midi_model(midi_model),
 	  _conv(_session->tempo_map(), _region->position())
 {
@@ -65,8 +66,8 @@ MidiTrackerMatrix::MidiTrackerMatrix(ARDOUR::Session* session,
 
 void MidiTrackerMatrix::updateMatrix()
 {
-	first_beats_ceiling = find_first_row_beats();
-	last_beats_floor = find_last_row_beats();
+	first_beats = find_first_row_beats();
+	last_beats = find_last_row_beats();
 	nrows = find_nrows();
 
 	// Distribute the notes across N tracks so that no overlapping notes can
@@ -127,19 +128,17 @@ void MidiTrackerMatrix::updateMatrix()
 
 Evoral::Beats MidiTrackerMatrix::find_first_row_beats()
 {	
-	Evoral::Beats first_beats = _conv.from (_region->first_frame());	
-	return first_beats.round_up_to_beat();
+	return _conv.from (_region->first_frame()).snap_to (snap);
 }
 
 Evoral::Beats MidiTrackerMatrix::find_last_row_beats()
-{	
-	Evoral::Beats last_beats = _conv.from (_region->last_frame());	
-	return last_beats.round_down_to_beat();
+{
+	return _conv.from (_region->last_frame()).snap_to (snap);
 }
 
 uint32_t MidiTrackerMatrix::find_nrows()
 {
-	return (last_beats_floor - first_beats_ceiling).to_double() * rows_per_beat;
+	return (last_beats - first_beats).to_double() * rows_per_beat;
 }
 
 framepos_t MidiTrackerMatrix::frame_at_row(uint32_t irow)
@@ -149,24 +148,24 @@ framepos_t MidiTrackerMatrix::frame_at_row(uint32_t irow)
 
 Evoral::Beats MidiTrackerMatrix::beats_at_row(uint32_t irow)
 {
-	return first_beats_ceiling + (irow*1.0) / rows_per_beat;
+	return first_beats + (irow*1.0) / rows_per_beat;
 }
 
 uint32_t MidiTrackerMatrix::row_at_beats(Evoral::Beats beats)
 {
 	Evoral::Beats half_row(0.5/rows_per_beat);
-	return (beats - first_beats_ceiling + half_row).to_double() * rows_per_beat;
+	return (beats - first_beats + half_row).to_double() * rows_per_beat;
 }
 
 uint32_t MidiTrackerMatrix::row_at_beats_min_delay(Evoral::Beats beats)
 {
 	Evoral::Beats tpr_minus_1 = Evoral::Beats::ticks(_ticks_per_row - 1);
-	return (beats - first_beats_ceiling + tpr_minus_1).to_double() * rows_per_beat;
+	return (beats - first_beats + tpr_minus_1).to_double() * rows_per_beat;
 }
 
 uint32_t MidiTrackerMatrix::row_at_beats_max_delay(Evoral::Beats beats)
 {
-	return (beats - first_beats_ceiling).to_double() * rows_per_beat;
+	return (beats - first_beats).to_double() * rows_per_beat;
 }
 
 ///////////////////////
