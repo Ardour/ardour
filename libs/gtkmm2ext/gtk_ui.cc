@@ -67,8 +67,8 @@ BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 
 template class AbstractUI<Gtkmm2ext::UIRequest>;
 
-UI::UI (string namestr, int *argc, char ***argv)
-	: AbstractUI<UIRequest> (namestr)
+UI::UI (string application_name, string thread_name, int *argc, char ***argv)
+	: AbstractUI<UIRequest> (thread_name)
 	, _receiver (*this)
 	, errors (0)
 
@@ -111,7 +111,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 	errors->text().set_name ("ErrorText");
 	errors->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Editor/toggle-log-window")));
 
-	Glib::set_application_name(namestr);
+	Glib::set_application_name (application_name);
 
 	WindowTitle title(Glib::get_application_name());
 	title += _("Log");

@@ -113,7 +113,7 @@ class LIBGTKMM2EXT_API UI : public AbstractUI<UIRequest>
 	MyReceiver _receiver;
 
   public:
-	UI (std::string name, int *argc, char **argv[]);
+	UI (std::string, std::string, int *argc, char **argv[]);
 	virtual ~UI ();
 
 	static UI *instance() { return theGtkUI; }
