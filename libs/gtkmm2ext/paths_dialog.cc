@@ -26,8 +26,8 @@ using namespace Gtk;
 using namespace std;
 using namespace Gtkmm2ext;
 
-PathsDialog::PathsDialog (std::string title, std::string current_paths, std::string default_paths)
-	: Dialog (title, true)
+PathsDialog::PathsDialog (Gtk::Window& parent, std::string title, std::string current_paths, std::string default_paths)
+	: Dialog (title, parent, true)
 	, paths_list_view(1, false, Gtk::SELECTION_SINGLE)
 	, add_path_button(_("Add"))
 	, remove_path_button(_("Delete"))

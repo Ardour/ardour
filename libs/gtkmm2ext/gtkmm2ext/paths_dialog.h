@@ -30,7 +30,7 @@ namespace Gtkmm2ext {
 class LIBGTKMM2EXT_API PathsDialog : public Gtk::Dialog
 {
   public:
-	PathsDialog (std::string, std::string current_paths = "", std::string default_paths = "");
+	PathsDialog (Gtk::Window& parent, std::string, std::string current_paths = "", std::string default_paths = "");
 	~PathsDialog ();
 
 	std::string get_serialized_paths ();
