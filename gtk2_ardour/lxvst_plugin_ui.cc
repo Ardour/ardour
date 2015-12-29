@@ -78,9 +78,12 @@ LXVSTPluginUI::resize_callback ()
 	void* gtk_parent_window = _vst->state()->extra_data;
 
 	if (gtk_parent_window) {
+		_socket.set_size_request(
+				new_width + _vst->state()->hoffset,
+				new_height + _vst->state()->voffset);
+
 		((Gtk::Window*) gtk_parent_window)->resize (new_width, new_height + LXVST_H_FIDDLE);
 	}
-
 	_vst->state()->want_resize = 0;
 }
 
