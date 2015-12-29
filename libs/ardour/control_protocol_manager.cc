@@ -226,6 +226,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 	delete cpi.state;
 	cpi.state = 0;
 	delete (Glib::Module*)cpi.descriptor->module;
+	cpi.descriptor->module = 0;
 
 	ProtocolStatusChange (&cpi);
 
