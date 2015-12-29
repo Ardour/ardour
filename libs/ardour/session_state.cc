@@ -248,6 +248,7 @@ Session::post_engine_init ()
 		delete _tempo_map;
 		_tempo_map = new TempoMap (_current_frame_rate);
 		_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
+		_tempo_map->MetricPositionChanged.connect_same_thread (*this, boost::bind (&Session::gui_tempo_map_changed, this));
 
 		/* MidiClock requires a tempo map */
 

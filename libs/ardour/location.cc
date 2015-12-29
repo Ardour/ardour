@@ -207,8 +207,8 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 
 			start_changed (this); /* EMIT SIGNAL */
 			StartChanged (); /* EMIT SIGNAL */
-			end_changed (this); /* EMIT SIGNAL */
-			EndChanged (); /* EMIT SIGNAL */
+			//end_changed (this); /* EMIT SIGNAL */
+			//EndChanged (); /* EMIT SIGNAL */
 		}
 
 		/* moving the start (position) of a marker with a scene change
@@ -281,8 +281,8 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 			if (allow_bbt_recompute) {
 				recompute_bbt_from_frames ();
 			}
-			start_changed (this); /* EMIT SIGNAL */
-			StartChanged (); /* EMIT SIGNAL */
+			//start_changed (this); /* EMIT SIGNAL */
+			//StartChanged (); /* EMIT SIGNAL */
 			end_changed (this); /* EMIT SIGNAL */
 			EndChanged (); /* EMIT SIGNAL */
 		}
@@ -396,19 +396,15 @@ Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 		assert (_end >= 0);
 	}
 
-	if (start_change) {
-		start_changed(this); /* EMIT SIGNAL */
-		StartChanged(); /* EMIT SIGNAL */
-	}
-
-	if (end_change) {
-		end_changed(this); /* EMIT SIGNAL */
-		EndChanged(); /* EMIT SIGNAL */
-	}
-
 	if (start_change && end_change) {
 		changed (this);
 		Changed ();
+	} else if (start_change) {
+		start_changed(this); /* EMIT SIGNAL */
+		StartChanged(); /* EMIT SIGNAL */
+	} else if (end_change) {
+		end_changed(this); /* EMIT SIGNAL */
+		EndChanged(); /* EMIT SIGNAL */
 	}
 
 	return 0;
@@ -726,8 +722,8 @@ Location::recompute_bbt_from_frames ()
 		return;
 	}
 
-	_session.bbt_time (_start, _bbt_start);
-	_session.bbt_time (_end, _bbt_end);
+	_bbt_start = _session.tempo_map().beat_at_frame (_start);
+	_bbt_end = _session.tempo_map().beat_at_frame (_end);
 }
 
 void
@@ -738,7 +734,7 @@ Location::recompute_frames_from_bbt ()
 	}
 
 	TempoMap& map (_session.tempo_map());
-	set (map.frame_time (_bbt_start), map.frame_time (_bbt_end), false);
+	set (map.frame_at_beat (_bbt_start), map.frame_at_beat (_bbt_end), false);
 }
 
 void

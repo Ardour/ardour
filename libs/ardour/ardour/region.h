@@ -27,7 +27,6 @@
 
 #include "pbd/undo.h"
 #include "pbd/signals.h"
-
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
 #include "ardour/automatable.h"
@@ -429,7 +428,7 @@ class LIBARDOUR_API Region
 	framecnt_t              _last_length;
 	framepos_t              _last_position;
 	mutable RegionEditState _first_edit;
-	Timecode::BBT_Time      _bbt_time;
+	double                  _beat;
 	layer_t                 _layer;
 
 	void register_properties ();

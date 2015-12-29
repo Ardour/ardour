@@ -434,7 +434,7 @@ MeterSection::get_state() const
 		  bbt().beats,
 		  bbt().ticks);
 	root->add_property ("bbt", buf);
-	snprintf (buf, sizeof (buf), "%f", start());
+	snprintf (buf, sizeof (buf), "%lf", start());
 	root->add_property ("start", buf);
 	snprintf (buf, sizeof (buf), "%f", _note_type);
 	root->add_property ("note-type", buf);
@@ -469,7 +469,7 @@ TempoMap::TempoMap (framecnt_t fr)
 	start.beats = 1;
 	start.ticks = 0;
 
-	TempoSection *t = new TempoSection (0.0, _default_tempo.beats_per_minute(), _default_tempo.note_type(), TempoSection::Type::Ramp);
+	TempoSection *t = new TempoSection (0.0, _default_tempo.beats_per_minute(), _default_tempo.note_type(), TempoSection::Type::Constant);
 	MeterSection *m = new MeterSection (0.0, start, _default_meter.divisions_per_bar(), _default_meter.note_divisor());
 
 	t->set_movable (false);
@@ -583,7 +583,7 @@ TempoMap::do_insert (MetricSection* section)
 			pair<double, BBT_Time> corrected = make_pair (m->start(), m->bbt());
 			corrected.second.beats = 1;
 			corrected.second.ticks = 0;
-
+			corrected.first = bbt_to_beats (corrected.second);
 			warning << string_compose (_("Meter changes can only be positioned on the first beat of a bar. Moving from %1 to %2"),
 						   m->bbt(), corrected.second) << endmsg;
 			m->set_start (corrected);
@@ -1255,9 +1255,10 @@ TempoMap::beats_to_bbt (double beats)
 double
 TempoMap::tick_at_frame (framecnt_t frame) const
 {
+	/* HOLD (at least) THE READER LOCK */
 
 	Metrics::const_iterator i;
-	const TempoSection* prev_ts = 0;
+	TempoSection* prev_ts = 0;
 	double accumulated_ticks = 0.0;
 
 	for (i = metrics.begin(); i != metrics.end(); ++i) {
@@ -1268,27 +1269,24 @@ TempoMap::tick_at_frame (framecnt_t frame) const
 			if ((prev_ts) && frame < t->frame()) {
 				/*the previous ts is the one containing the frame */
 
-				framepos_t time = frame - prev_ts->frame();
-				framepos_t last_frame = t->frame() - prev_ts->frame();
-				double last_beats_per_minute = t->beats_per_minute();
+				framepos_t const time = frame - prev_ts->frame();
+				framepos_t const last_frame = t->frame() - prev_ts->frame();
+				double const last_beats_per_minute = t->beats_per_minute();
 
 				return prev_ts->tick_at_frame (time, last_beats_per_minute, last_frame, _frame_rate) + accumulated_ticks;
 			}
 
 			if (prev_ts && t->frame() > prev_ts->frame()) {
-				framepos_t time = t->frame() - prev_ts->frame();
-				framepos_t last_frame = t->frame() - prev_ts->frame();
-				double last_beats_per_minute = t->beats_per_minute();
-				accumulated_ticks += prev_ts->tick_at_frame (time, last_beats_per_minute, last_frame, _frame_rate);
+				accumulated_ticks = t->beat() * BBT_Time::ticks_per_beat;
 			}
 
 			prev_ts = t;
 		}
 	}
 
-	/* treated s linear for this ts */
-	framecnt_t frames_in_section = frame - prev_ts->frame();
-	double ticks_in_section = (frames_in_section / prev_ts->frames_per_beat (_frame_rate)) * Timecode::BBT_Time::ticks_per_beat;
+	/* treated as constant for this ts */
+	framecnt_t const frames_in_section = frame - prev_ts->frame();
+	double const ticks_in_section = (frames_in_section / prev_ts->frames_per_beat (_frame_rate)) * Timecode::BBT_Time::ticks_per_beat;
 
 	return ticks_in_section + accumulated_ticks;
 
@@ -1310,28 +1308,26 @@ TempoMap::frame_at_tick (double tick) const
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 
 			if (prev_ts && t->frame() > prev_ts->frame()) {
-				framepos_t const time = t->frame() - prev_ts->frame();
-				framepos_t const last_time = t->frame() - prev_ts->frame();
-				double const last_beats_per_minute = t->beats_per_minute();
-				accumulated_ticks += prev_ts->tick_at_frame (time, last_beats_per_minute, last_time, _frame_rate);
+				accumulated_ticks = t->beat() * BBT_Time::ticks_per_beat;
 			}
 
 			if (prev_ts && tick < accumulated_ticks) {
 				/* prev_ts is the one affecting us. */
 
 				double const ticks_in_section = tick - accumulated_ticks_to_prev;
-				framepos_t const section_start = prev_ts->frame();
 				framepos_t const last_time = t->frame() - prev_ts->frame();
 				double const last_beats_per_minute = t->beats_per_minute();
 
-				return prev_ts->frame_at_tick (ticks_in_section, last_beats_per_minute, last_time, _frame_rate) + section_start;
+				return prev_ts->frame_at_tick (ticks_in_section, last_beats_per_minute, last_time, _frame_rate) + prev_ts->frame();
 			}
 			accumulated_ticks_to_prev = accumulated_ticks;
 			prev_ts = t;
 		}
 	}
+	/* must be treated as constant, irrespective of _type */
 	double const ticks_in_section = tick - accumulated_ticks_to_prev;
-	double const dtime = (ticks_in_section / BBT_Time::ticks_per_beat) * prev_ts->frames_per_beat(_frame_rate);
+	double const dtime = (ticks_in_section / BBT_Time::ticks_per_beat) * prev_ts->frames_per_beat (_frame_rate);
+
 	framecnt_t const ret = ((framecnt_t) floor (dtime)) + prev_ts->frame();
 
 	return ret;

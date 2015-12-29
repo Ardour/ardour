@@ -1640,6 +1640,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	TempoMap    *_tempo_map;
 	void          tempo_map_changed (const PBD::PropertyChange&);
+	void          gui_tempo_map_changed ();
 
 	/* edit/mix groups */
 

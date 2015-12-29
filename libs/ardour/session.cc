@@ -5438,6 +5438,16 @@ Session::tempo_map_changed (const PropertyChange&)
 }
 
 void
+Session::gui_tempo_map_changed ()
+{
+	//clear_clicks (); ?
+
+	playlists->update_after_tempo_map_change ();
+
+	_locations->apply (*this, &Session::update_locations_after_tempo_map_change);
+}
+
+void
 Session::update_locations_after_tempo_map_change (const Locations::LocationList& loc)
 {
 	for (Locations::LocationList::const_iterator i = loc.begin(); i != loc.end(); ++i) {
