@@ -2383,7 +2383,7 @@ AUPluginInfo::load (Session& session)
 Glib::ustring
 AUPluginInfo::au_cache_path ()
 {
-	return Glib::build_filename (ARDOUR::user_config_directory(), "au_cache");
+	return Glib::build_filename (ARDOUR::user_cache_directory(), "au_cache");
 }
 
 PluginInfoList*
