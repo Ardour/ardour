@@ -292,6 +292,13 @@ MidiTrackerEditor::redisplay_model ()
 			// TODO: don't dismiss off-beat rows near the region boundaries
 
 			for (size_t i = 0; i < (size_t)mtm.ntracks; i++) {
+
+				// // Fill with blank
+				// row[columns.channel[i]] = "--";
+				// row[columns.note_name[i]] = "----";
+				// row[columns.velocity[i]] = "---";
+				// row[columns.delay[i]] = "-----";
+				
 				size_t notes_off_count = mtm.notes_off[i].count(irow);
 				size_t notes_on_count = mtm.notes_on[i].count(irow);
 
