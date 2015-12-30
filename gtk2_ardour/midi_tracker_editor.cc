@@ -282,7 +282,6 @@ MidiTrackerEditor::redisplay_model ()
 			Timecode::BBT_Time row_bbt;
 			_session->tempo_map().bbt_time(row_frame, row_bbt);
 			stringstream ss;
-			// ss << row_bbt;
 			print_padded(ss, row_bbt);
 			row[columns.time] = ss.str();
 
@@ -312,21 +311,24 @@ MidiTrackerEditor::redisplay_model ()
 						MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm.notes_off[i].find(irow);
 						if (i_off != mtm.notes_off[i].end()) {
 							boost::shared_ptr<NoteType> note = i_off->second;
-							row[columns.channel[i]] = note->channel() + 1;
+							row[columns.channel[i]] = to_string (note->channel() + 1);
 							row[columns.note_name[i]] = note_off_str;
-							row[columns.velocity[i]] = note->velocity();
+							row[columns.velocity[i]] = to_string ((int)note->velocity());
 							int64_t delay_ticks = (note->end_time() - row_beats).to_relative_ticks();
-							row[columns.delay[i]] = delay_ticks;
+							if (delay_ticks != 0)
+								row[columns.delay[i]] = to_string(delay_ticks);
 						}
 
 						// Notes on
 						MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm.notes_on[i].find(irow);
 						if (i_on != mtm.notes_on[i].end()) {
 							boost::shared_ptr<NoteType> note = i_on->second;
-							row[columns.channel[i]] = note->channel() + 1;
+							row[columns.channel[i]] = to_string (note->channel() + 1);
 							row[columns.note_name[i]] = Evoral::midi_note_name (note->note());
-							row[columns.velocity[i]] = note->velocity();
-							row[columns.delay[i]] = (note->time() - row_beats).to_relative_ticks();
+							row[columns.velocity[i]] = to_string ((int)note->velocity());
+							int64_t delay_ticks = (note->time() - row_beats).to_relative_ticks();
+							if (delay_ticks != 0)
+								row[columns.delay[i]] = to_string (delay_ticks);
 							// Keep the note around for playing it
 							row[columns._note[i]] = note;
 						}

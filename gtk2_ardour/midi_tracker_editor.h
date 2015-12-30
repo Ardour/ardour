@@ -151,9 +151,9 @@ class MidiTrackerEditor : public ArdourWindow
 		};
 		Gtk::TreeModelColumn<std::string> time;
 		Gtk::TreeModelColumn<std::string> note_name[GUI_NUMBER_OF_TRACKS];
-		Gtk::TreeModelColumn<uint8_t>     channel[GUI_NUMBER_OF_TRACKS];
-		Gtk::TreeModelColumn<uint8_t>     velocity[GUI_NUMBER_OF_TRACKS];
-		Gtk::TreeModelColumn<int64_t>     delay[GUI_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<std::string> channel[GUI_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<std::string> velocity[GUI_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<std::string> delay[GUI_NUMBER_OF_TRACKS];
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note[GUI_NUMBER_OF_TRACKS];
 		Gtk::TreeModelColumn<std::string> _color;
 	};
@@ -193,6 +193,15 @@ class MidiTrackerEditor : public ArdourWindow
 	PBD::ScopedConnection content_connection;
 
 	void redisplay_model ();
+
+
+	// Make it up for the lack of C++11 support
+	template<typename T> std::string to_string(const T& v)
+	{
+		std::stringstream ss;
+		ss << v;
+		return ss.str();
+	}
 };
 
 #endif /* __ardour_gtk2_midi_tracker_editor_h_ */
