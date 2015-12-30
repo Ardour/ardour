@@ -1053,7 +1053,7 @@ public:
 
 		_box->pack_start (*h, false, false);
 
-		set_note (_("Adjusting the scale require an application restart to re-layout."));
+		set_note (_("Adjusting the scale requires an application restart to re-layout."));
 
 		_dpi_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &FontScalingOptions::dpi_changed));
 	}
