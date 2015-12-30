@@ -130,7 +130,7 @@ class MidiTrackerEditor : public ArdourWindow
 	typedef Evoral::Note<Evoral::Beats> NoteType;
 
 	MidiTrackerEditor(ARDOUR::Session*, boost::shared_ptr<ARDOUR::MidiRegion>,
-		       boost::shared_ptr<ARDOUR::MidiTrack>);
+	                  boost::shared_ptr<ARDOUR::MidiTrack>);
 	~MidiTrackerEditor();
 
   private:

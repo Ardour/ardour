@@ -220,6 +220,7 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 
 	view.set_headers_visible (true);
 	view.set_rules_hint (true);
+	view.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
 	view.get_selection()->set_mode (SELECTION_MULTIPLE);
 	view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &MidiTrackerEditor::selection_changed));
 
