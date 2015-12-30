@@ -87,9 +87,13 @@ public:
 	}
 
 	/** Add a child at the end of the widget.  The DnDVBox will take responsibility for deleting the child */
-	void add_child (T* child)
+	void add_child (T* child, std::list<Gtk::TargetEntry> targets = std::list<Gtk::TargetEntry>())
 	{
-		child->action_widget().drag_source_set (_targets);
+		if (targets.empty ()) {
+			child->action_widget().drag_source_set (_targets);
+		} else {
+			child->action_widget().drag_source_set (targets);
+		}
 		child->action_widget().signal_drag_begin().connect (sigc::bind (mem_fun (*this, &DnDVBox::drag_begin), child));
 		child->action_widget().signal_drag_data_get().connect (sigc::bind (mem_fun (*this, &DnDVBox::drag_data_get), child));
 		child->action_widget().signal_drag_end().connect (sigc::bind (mem_fun (*this, &DnDVBox::drag_end), child));
