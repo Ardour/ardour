@@ -56,20 +56,19 @@ static VSTState * vstfx_first = NULL;
 
 const char magic[] = "VSTFX Plugin State v002";
 
-int  gui_thread_id = 0;
 static int gui_quit = 0;
 
 /*This will be our connection to X*/
 
-Display* LXVST_XDisplay = NULL;
+static Display* LXVST_XDisplay = NULL;
 
 /*The thread handle for the GUI event loop*/
 
-pthread_t LXVST_gui_event_thread;
+static pthread_t LXVST_gui_event_thread;
 
 /*Util functions to get the value of a property attached to an XWindow*/
 
-bool LXVST_xerror;
+static bool LXVST_xerror;
 
 int TempErrorHandler(Display *display, XErrorEvent *e)
 {
@@ -525,7 +524,7 @@ int vstfx_init (void* ptr)
 
 	/*Create the thread - use default attrs for now, don't think we need anything special*/
 
-	thread_create_result = pthread_create(&LXVST_gui_event_thread, NULL, gui_event_loop, NULL);
+	thread_create_result = pthread_create(&LXVST_gui_event_thread, &thread_attributes, gui_event_loop, NULL);
 
 	if(thread_create_result!=0)
 	{
@@ -534,6 +533,7 @@ int vstfx_init (void* ptr)
 		vstfx_error ("** ERROR ** VSTFX: Failed starting GUI event thread");
 
 		XCloseDisplay(LXVST_XDisplay);
+		gui_quit = 1;
 
 		return -1;
 	}
@@ -545,6 +545,9 @@ int vstfx_init (void* ptr)
 
 void vstfx_exit()
 {
+	if (gui_quit) {
+		return;
+	}
 	gui_quit = 1;
 
 	/*We need to pthread_join the gui_thread here so
