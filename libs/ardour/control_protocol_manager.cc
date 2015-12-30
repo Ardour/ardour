@@ -193,6 +193,18 @@ int
 ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 {
 	if (!cpi.protocol) {
+
+		/* we could still have a descriptor even if the protocol was
+		   never instantiated. Close the associated module (shared
+		   object/DLL) and make sure we forget about it.
+		*/
+
+		if (cpi.descriptor) {
+			cerr << "Closing descriptor for CPI anyway\n";
+			delete (Glib::Module*) cpi.descriptor->module;
+			cpi.descriptor = 0;
+		}
+
 		return 0;
 	}
 
@@ -226,7 +238,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 
 	delete cpi.state;
 	cpi.state = 0;
-
+	cerr << "Tear down CPI module for " << cpi.name << endl;
 	delete (Glib::Module*) cpi.descriptor->module;
 	/* cpi->descriptor is now inaccessible since dlclose() or equivalent
 	 * has been performed, and the descriptor is (or could be) a static
