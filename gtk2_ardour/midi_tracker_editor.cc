@@ -177,7 +177,6 @@ const std::string MidiTrackerEditor::undefined_str = "***";
 
 MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<MidiRegion> r, boost::shared_ptr<MidiTrack> tr)
 	: ArdourWindow (r->name())
-	, buttons (1, 1)
 	, region (r)
 	, track (tr)
 	, midi_model (region->midi_source(0)->model())
@@ -198,11 +197,10 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 	model = ListStore::create (columns);
 	view.set_model (model);
 
-	view.signal_key_press_event().connect (sigc::mem_fun (*this, &MidiTrackerEditor::key_press), false);
-	view.signal_key_release_event().connect (sigc::mem_fun (*this, &MidiTrackerEditor::key_release), false);
-	view.signal_scroll_event().connect (sigc::mem_fun (*this, &MidiTrackerEditor::scroll_event), false);
-
-	view.append_column (_("Time"), columns.time);
+	Gtk::TreeViewColumn viewcolumn_time (_("Time"), columns.time);
+	Gtk::CellRenderer* cellrenderer_time = viewcolumn_time.get_first_cell_renderer ();		
+	viewcolumn_time.add_attribute(cellrenderer_time->property_cell_background (), columns._color);
+	view.append_column (viewcolumn_time);
 	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++) {
 		stringstream ss_note;
 		stringstream ss_ch;
@@ -212,31 +210,33 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 		ss_ch << "Ch-" << i;
 		ss_vel << "Vel-" << i;
 		ss_delay << "Delay-" << i;
-		view.append_column (_(ss_note.str().c_str()), columns.note_name[i]);
-		view.append_column (_(ss_ch.str().c_str()), columns.channel[i]);
-		view.append_column (_(ss_vel.str().c_str()), columns.velocity[i]);
-		view.append_column (_(ss_delay.str().c_str()), columns.delay[i]);
+
+		Gtk::TreeViewColumn viewcolumn_note (_(ss_note.str().c_str()), columns.note_name[i]);
+		Gtk::TreeViewColumn viewcolumn_channel (_(ss_ch.str().c_str()), columns.channel[i]);
+		Gtk::TreeViewColumn viewcolumn_velocity (_(ss_vel.str().c_str()), columns.velocity[i]);
+		Gtk::TreeViewColumn viewcolumn_delay (_(ss_delay.str().c_str()), columns.delay[i]);
+
+		Gtk::CellRenderer* cellrenderer_note = viewcolumn_note.get_first_cell_renderer ();		
+		Gtk::CellRenderer* cellrenderer_channel = viewcolumn_channel.get_first_cell_renderer ();		
+		Gtk::CellRenderer* cellrenderer_velocity = viewcolumn_velocity.get_first_cell_renderer ();		
+		Gtk::CellRenderer* cellrenderer_delay = viewcolumn_delay.get_first_cell_renderer ();		
+
+		viewcolumn_note.add_attribute(cellrenderer_note->property_cell_background (), columns._color);
+		viewcolumn_channel.add_attribute(cellrenderer_channel->property_cell_background (), columns._color);
+		viewcolumn_velocity.add_attribute(cellrenderer_velocity->property_cell_background (), columns._color);
+		viewcolumn_delay.add_attribute(cellrenderer_delay->property_cell_background (), columns._color);
+
+		view.append_column (viewcolumn_note);
+		view.append_column (viewcolumn_channel);
+		view.append_column (viewcolumn_velocity);
+		view.append_column (viewcolumn_delay);
 	}
 
 	view.set_headers_visible (true);
 	view.set_rules_hint (true);
 	view.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
 	view.get_selection()->set_mode (SELECTION_MULTIPLE);
-	view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &MidiTrackerEditor::selection_changed));
-
-	for (int i = 0; i < TRACKER_COLNUM_COUNT; ++i) {
-		CellRendererText* renderer = dynamic_cast<CellRendererText*>(view.get_column_cell_renderer (i));
-
-		TreeViewColumn* col = view.get_column (i);
-		col->set_data (X_("colnum"), GUINT_TO_POINTER(i));
-
-		renderer->property_editable() = true;
-
-		renderer->signal_editing_started().connect (sigc::bind (sigc::mem_fun (*this, &MidiTrackerEditor::editing_started), i));
-		renderer->signal_editing_canceled().connect (sigc::mem_fun (*this, &MidiTrackerEditor::editing_canceled));
-		renderer->signal_edited().connect (sigc::mem_fun (*this, &MidiTrackerEditor::edited));
-	}
-
+	
 	scroller.add (view);
 	scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
@@ -245,21 +245,12 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 	midi_model->ContentsChanged.connect (content_connection, invalidator (*this),
 	                                     boost::bind (&MidiTrackerEditor::redisplay_model, this), gui_context());
 
-	buttons.attach (sound_notes_button, 0, 1, 0, 1);
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action ("Editor", "sound-midi-notes");
-	if (act) {
-		gtk_activatable_set_related_action (GTK_ACTIVATABLE (sound_notes_button.gobj()), act->gobj());	
-	}
-
 	view.show ();
 	scroller.show ();
-	buttons.show ();
 	vbox.show ();
-	sound_notes_button.show ();
 
 	vbox.set_spacing (6);
 	vbox.set_border_width (6);
-	vbox.pack_start (buttons, false, false);
 	vbox.pack_start (scroller, true, true);
 
 	add (vbox);
@@ -268,489 +259,6 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 
 MidiTrackerEditor::~MidiTrackerEditor ()
 {
-}
-
-bool
-MidiTrackerEditor::scroll_event (GdkEventScroll* ev)
-{
-	TreeModel::Path path;
-	TreeViewColumn* col;
-	int cellx;
-	int celly;
-	int idelta = 0;
-	double fdelta = 0;
-	MidiModel::NoteDiffCommand::Property prop (MidiModel::NoteDiffCommand::NoteNumber);
-	bool apply = false;
-	bool was_selected = false;
-	char const * opname;
-
-	if (!view.get_path_at_pos (ev->x, ev->y, path, col, cellx, celly)) {
-		return false;
-	}
-	
-	if (view.get_selection()->count_selected_rows() == 0) {
-		was_selected = false;
-	} else if (view.get_selection()->is_selected (path)) {
-		was_selected = true;
-	} else {
-		was_selected = false;
-	}
-	
-	int colnum = GPOINTER_TO_UINT (col->get_data (X_("colnum")));
-
-	switch (colnum) {
-	case TIME_COLNUM:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
-			fdelta = 1/64.0;
-		} else {
-			fdelta = 1/4.0;
-		}
-		if (ev->direction == GDK_SCROLL_DOWN || ev->direction == GDK_SCROLL_LEFT) {
-			fdelta = -fdelta;
-		}
-		prop = MidiModel::NoteDiffCommand::StartTime;
-		opname = _("edit note time");
-		apply = true;
-		break;
-	case NOTE_COLNUM:
-		idelta = 1;
-		if (ev->direction == GDK_SCROLL_DOWN || ev->direction == GDK_SCROLL_LEFT) {
-			idelta = -idelta;
-		}
-		prop = MidiModel::NoteDiffCommand::NoteNumber;
-		opname = _("edit note name");
-		apply = true;
-		break;
-	case CHANNEL_COLNUM:
-		idelta = 1;
-		if (ev->direction == GDK_SCROLL_DOWN || ev->direction == GDK_SCROLL_LEFT) {
-			idelta = -idelta;
-		}
-		prop = MidiModel::NoteDiffCommand::Channel;
-		opname = _("edit note channel");
-		apply = true;
-		break;
-	case VELOCITY_COLNUM:
-		idelta = 1;
-		if (ev->direction == GDK_SCROLL_DOWN || ev->direction == GDK_SCROLL_LEFT) {
-			idelta = -idelta;
-		}
-		prop = MidiModel::NoteDiffCommand::Velocity;
-		opname = _("edit note velocity");
-		apply = true;
-		break;
-
-	case DELAY_COLNUM:
-		opname = _("edit note delay");
-		apply = true;
-		break;
-
-	default:
-		break;
-	}
-
-
-	if (apply) {
-
-		MidiModel::NoteDiffCommand* cmd = midi_model->new_note_diff_command (opname);
-		vector<TreeModel::Path> previous_selection;
-
-		if (was_selected) {
-
-			/* use selection */
-			
-			TreeView::Selection::ListHandle_Path rows = view.get_selection()->get_selected_rows ();
-			TreeModel::iterator iter;
-			boost::shared_ptr<NoteType> note;
-			
-			for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
-
-				previous_selection.push_back (*i);
-
-				if ((iter = model->get_iter (*i))) {
-					
-					note = (*iter)[columns._note[0]];
-					
-					switch (prop) {
-					case MidiModel::NoteDiffCommand::StartTime:
-						if (note->time() + fdelta >= 0) {
-							cmd->change (note, prop, note->time() + fdelta);
-						} else {
-							cmd->change (note, prop, Evoral::Beats());
-						}
-						break;
-					case MidiModel::NoteDiffCommand::Velocity:
-						cmd->change (note, prop, (uint8_t) (note->velocity() + idelta));
-						break;
-					case MidiModel::NoteDiffCommand::Length:
-						if (note->length().to_double() + fdelta >=
-						    Evoral::Beats::tick().to_double()) {
-							cmd->change (note, prop, note->length() + fdelta);
-						} else {
-							cmd->change (note, prop, Evoral::Beats::tick());
-						}
-						break;
-					case MidiModel::NoteDiffCommand::Channel:
-						cmd->change (note, prop, (uint8_t) (note->channel() + idelta));
-						break;
-					case MidiModel::NoteDiffCommand::NoteNumber:
-						cmd->change (note, prop, (uint8_t) (note->note() + idelta));
-						break;
-					default:
-						continue;
-					}
-				}
-			}
-
-		} else {
-
-			/* just this row */
-			
-			TreeModel::iterator iter;
-			iter = model->get_iter (path);
-
-			previous_selection.push_back (path);
-
-			if (iter) {
-				boost::shared_ptr<NoteType> note = (*iter)[columns._note[0]];
-				
-				switch (prop) {
-				case MidiModel::NoteDiffCommand::StartTime:
-					if (note->time() + fdelta >= 0) {
-						cmd->change (note, prop, note->time() + fdelta);
-					} else {
-						cmd->change (note, prop, Evoral::Beats());
-					}
-					break;
-				case MidiModel::NoteDiffCommand::Velocity:
-					cmd->change (note, prop, (uint8_t) (note->velocity() + idelta));
-					break;
-				case MidiModel::NoteDiffCommand::Length:
-					if (note->length() + fdelta >=
-					    Evoral::Beats::tick().to_double()) {
-						cmd->change (note, prop, note->length() + fdelta);
-					} else {
-						cmd->change (note, prop, Evoral::Beats::tick());
-					}
-					break;
-				case MidiModel::NoteDiffCommand::Channel:
-					cmd->change (note, prop, (uint8_t) (note->channel() + idelta));
-					break;
-				case MidiModel::NoteDiffCommand::NoteNumber:
-					cmd->change (note, prop, (uint8_t) (note->note() + idelta));
-					break;
-				default:
-					break;
-				}
-			}
-		}
-
-		midi_model->apply_command (*_session, cmd);
-
-		/* reset selection to be as it was before we rebuilt */
-		
-		for (vector<TreeModel::Path>::iterator i = previous_selection.begin(); i != previous_selection.end(); ++i) {
-			view.get_selection()->select (*i);
-		}
-	}
-
-	return true;
-}
-
-bool
-MidiTrackerEditor::key_press (GdkEventKey* ev)
-{
-	bool ret = false;
-	TreeModel::Path path;
-	TreeViewColumn* col;
-	int colnum;
-
-	switch (ev->keyval) {
-	case GDK_Tab:
-		if (edit_column > 0) {
-			colnum = edit_column;
-			path = edit_path;
-			if (editing_editable) {
-				editing_editable->editing_done ();
-			}
-			if (colnum >= 5) {
-				/* wrap to next line */
-				colnum = 0;
-				path.next();
-			} else {
-				colnum++;
-			}
-			col = view.get_column (colnum);
-			view.set_cursor (path, *col, true);
-			ret = true;
-		}
-		break;
-		
-	case GDK_Up:
-	case GDK_uparrow:
-		if (edit_column > 0) {
-			colnum = edit_column;
-			path = edit_path;
-			if (editing_editable) {
-				editing_editable->editing_done ();
-			}
-			path.prev ();
-			col = view.get_column (colnum);
-			view.set_cursor (path, *col, true);
-			ret = true;
-		}
-		break;
-
-	case GDK_Down:
-	case GDK_downarrow:
-		if (edit_column > 0) {
-			colnum = edit_column;
-			path = edit_path;
-			if (editing_editable) {
-				editing_editable->editing_done ();
-			}
-			path.next ();
-			col = view.get_column (colnum);
-			view.set_cursor (path, *col, true);
-			ret = true;
-		}
-		break;
-
-	case GDK_Escape:
-		stop_editing (true);
-		break;
-		
-	}
-
-	return ret;
-}
-
-bool
-MidiTrackerEditor::key_release (GdkEventKey* ev)
-{
-	bool ret = false;
-	TreeModel::Path path;
-	TreeViewColumn* col;
-	TreeModel::iterator iter;
-	MidiModel::NoteDiffCommand* cmd;
-	boost::shared_ptr<NoteType> note;
-	boost::shared_ptr<NoteType> copy;
-
-	switch (ev->keyval) {
-	case GDK_Insert:
-		/* add a new note to the model, based on the note at the cursor
-		 * pos
-		 */
-		view.get_cursor (path, col);
-		iter = model->get_iter (path);
-		cmd = midi_model->new_note_diff_command (_("insert new note"));
-		note = (*iter)[columns._note[0]];
-		copy.reset (new NoteType (*note.get()));
-		cmd->add (copy);
-		midi_model->apply_command (*_session, cmd);
-		/* model has been redisplayed by now */
-		path.next ();
-		/* select, start editing column 2 (note) */
-		col = view.get_column (2);
-		view.set_cursor (path, *col, true);
-		break;
-
-	case GDK_Delete:
-	case GDK_BackSpace:
-		if (edit_column < 0) {
-			delete_selected_note ();
-		}
-		ret = true;
-		break;
-
-	case GDK_z:
-		if (_session && Gtkmm2ext::Keyboard::modifier_state_contains (ev->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
-			_session->undo (1);
-			ret = true;
-		}
-		break;
-		
-	case GDK_r:
-		if (_session && Gtkmm2ext::Keyboard::modifier_state_contains (ev->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
-			_session->redo (1);
-			ret = true;
-		}
-		break;
-
-	default:
-		break;
-	}
-
-	return ret;
-}
-
-void
-MidiTrackerEditor::delete_selected_note ()
-{
-	Glib::RefPtr<TreeSelection> selection = view.get_selection();
-	TreeView::Selection::ListHandle_Path rows = selection->get_selected_rows ();
-
-	if (rows.empty()) {
-		return;
-	}
-
-	typedef vector<boost::shared_ptr<NoteType> > Notes;
-	Notes to_delete;
-
-	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
-		TreeIter iter;
-
-		if ((iter = model->get_iter (*i))) {
-			boost::shared_ptr<NoteType> note = (*iter)[columns._note[0]];
-			to_delete.push_back (note);
-		}
-	}
-
-	MidiModel::NoteDiffCommand* cmd = midi_model->new_note_diff_command (_("delete notes (from list)"));
-
-	for (Notes::iterator i = to_delete.begin(); i != to_delete.end(); ++i) {
-		cmd->remove (*i);
-	}
-
-	midi_model->apply_command (*_session, cmd);
-}
-
-void
-MidiTrackerEditor::stop_editing (bool cancelled)
-{
-	if (!cancelled) {
-		if (editing_editable) {
-			editing_editable->editing_done ();
-		}
-	} else {
-		if (editing_renderer) {
-			editing_renderer->stop_editing (cancelled);
-		}
-	}
-}
-
-void
-MidiTrackerEditor::editing_started (CellEditable* ed, const string& path, int colno)
-{
-	edit_path = TreePath (path);
-	edit_column = colno;
-	editing_renderer = dynamic_cast<CellRendererText*>(view.get_column_cell_renderer (colno));
-	editing_editable = ed;
-
-	if (ed) {
-		Gtk::Entry *e = dynamic_cast<Gtk::Entry*> (ed);
-		if (e) {
-			e->signal_key_press_event().connect (sigc::mem_fun (*this, &MidiTrackerEditor::key_press), false);
-			e->signal_key_release_event().connect (sigc::mem_fun (*this, &MidiTrackerEditor::key_release), false);
-		}
-	}
-}
-
-void
-MidiTrackerEditor::editing_canceled ()
-{
-	edit_path.clear ();
-	edit_column = -1;
-	editing_renderer = 0;
-	editing_editable = 0;
-}
-
-void
-MidiTrackerEditor::edited (const std::string& path, const std::string& text)
-{
-	TreeModel::iterator iter = model->get_iter (path);
-
-	if (!iter || text.empty()) {
-		return;
-	}
-
-	boost::shared_ptr<NoteType> note = (*iter)[columns._note[0]];
-	MidiModel::NoteDiffCommand::Property prop (MidiModel::NoteDiffCommand::NoteNumber);
-
-	int    ival;
-	bool   apply = false;
-	int    idelta = 0;
-	double fdelta = 0;
-	char const * opname;
-	switch (edit_column) {
-	case 0: // start
-		break;
-	case 1: // channel
-		// correct ival for zero-based counting after scan
-		if (sscanf (text.c_str(), "%d", &ival) == 1 && --ival != note->channel()) {
-			idelta = ival - note->channel();
-			prop = MidiModel::NoteDiffCommand::Channel;
-			opname = _("change note channel");
-			apply = true;
-		}
-		break;
-	case 2: // note
-		if (sscanf (text.c_str(), "%d", &ival) == 1 && ival != note->note()) {
-			idelta = ival - note->note();
-			prop = MidiModel::NoteDiffCommand::NoteNumber;
-			opname = _("change note number");
-			apply = true;
-		}
-		break;
-	case 3: // name
-		break;
-	case 4: // velocity
-		if (sscanf (text.c_str(), "%d", &ival) == 1 && ival != note->velocity()) {
-			idelta = ival - note->velocity();
-			prop = MidiModel::NoteDiffCommand::Velocity;
-			opname = _("change note velocity");
-			apply = true;
-		}
-		break;
-	default:
-		break;
-	}
-
-	if (apply) {
-
-		MidiModel::NoteDiffCommand* cmd = midi_model->new_note_diff_command (opname);
-
-		TreeView::Selection::ListHandle_Path rows = view.get_selection()->get_selected_rows ();
-		
-		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
-			if ((iter = model->get_iter (*i))) {
-
-				note = (*iter)[columns._note[0]];
-				
-				switch (prop) {
-				case MidiModel::NoteDiffCommand::Velocity:
-					cmd->change (note, prop, (uint8_t) (note->velocity() + idelta));
-					break;
-				case MidiModel::NoteDiffCommand::Length:
-					cmd->change (note, prop, note->length() + fdelta);
-					break;
-				case MidiModel::NoteDiffCommand::Channel:
-					cmd->change (note, prop, (uint8_t) (note->channel() + idelta));
-					break;
-				case MidiModel::NoteDiffCommand::NoteNumber:
-					cmd->change (note, prop, (uint8_t) (note->note() + idelta));
-					break;
-				default:
-					continue;
-				}
-			}
-		}
-
-		midi_model->apply_command (*_session, cmd);
-
-		/* model has been redisplayed by now */
-		/* keep selected row(s), move cursor there, don't continue editing */
-		
-		TreeViewColumn* col = view.get_column (edit_column);
-		view.set_cursor (edit_path, *col, 0);
-
-		/* reset edit info, since we're done */
-
-		edit_path.clear ();
-		edit_column = -1;
-		editing_renderer = 0;
-		editing_editable = 0;
-	}
 }
 
 void
@@ -777,6 +285,10 @@ MidiTrackerEditor::redisplay_model ()
 			// ss << row_bbt;
 			print_padded(ss, row_bbt);
 			row[columns.time] = ss.str();
+
+			// If the row is on a beat the color differs
+			row[columns._color] = row_beats == row_beats.round_up_to_beat() ?
+				"#202020" : "#101010";
 
 			// TODO: don't dismiss off-beat rows near the region boundaries
 
@@ -825,28 +337,4 @@ MidiTrackerEditor::redisplay_model ()
 	}
 
 	view.set_model (model);
-}
-
-void
-MidiTrackerEditor::selection_changed ()
-{
-	if (!UIConfiguration::instance().get_sound_midi_notes()) {
-		return;
-	}
-
-	TreeModel::Path path;
-	TreeModel::iterator iter;
-	boost::shared_ptr<NoteType> note;
-	TreeView::Selection::ListHandle_Path rows = view.get_selection()->get_selected_rows ();
-
-	NotePlayer* player = new NotePlayer (track);
-
-	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
-		if ((iter = model->get_iter (*i))) {
-			note = (*iter)[columns._note[0]];
-			player->add (note);
-		}
-	}
-
-	player->play ();
 }

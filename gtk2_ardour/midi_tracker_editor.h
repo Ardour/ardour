@@ -145,6 +145,9 @@ class MidiTrackerEditor : public ArdourWindow
 				add (delay[i]);
 				add (_note[i]);		// We keep that around to play the note
 			}
+			add (_color);		// The background color differs when the row is
+								// on beats and bars. This is to keep track of
+								// it.
 		};
 		Gtk::TreeModelColumn<std::string> time;
 		Gtk::TreeModelColumn<std::string> note_name[GUI_NUMBER_OF_TRACKS];
@@ -152,6 +155,7 @@ class MidiTrackerEditor : public ArdourWindow
 		Gtk::TreeModelColumn<uint8_t>     velocity[GUI_NUMBER_OF_TRACKS];
 		Gtk::TreeModelColumn<int64_t>     delay[GUI_NUMBER_OF_TRACKS];
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note[GUI_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<std::string> _color;
 	};
 
 	enum tracker_columns {
@@ -188,19 +192,19 @@ class MidiTrackerEditor : public ArdourWindow
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;
 
-	void edited (const std::string&, const std::string&);
-	void editing_started (Gtk::CellEditable*, const std::string& path, int);
-	void editing_canceled ();
-	void stop_editing (bool cancelled = false);
+	// void edited (const std::string&, const std::string&);
+	// void editing_started (Gtk::CellEditable*, const std::string& path, int);
+	// void editing_canceled ();
+	// void stop_editing (bool cancelled = false);
 
 	void redisplay_model ();
 
-	bool key_press (GdkEventKey* ev);
-	bool key_release (GdkEventKey* ev);
-	bool scroll_event (GdkEventScroll*);
+	// bool key_press (GdkEventKey* ev);
+	// bool key_release (GdkEventKey* ev);
+	// bool scroll_event (GdkEventScroll*);
 
 	void delete_selected_note ();
-	void selection_changed ();
+	// void selection_changed ();
 };
 
 #endif /* __ardour_gtk2_midi_tracker_editor_h_ */
