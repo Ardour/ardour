@@ -221,8 +221,14 @@ ProcessorEntry::drag_text () const
 bool
 ProcessorEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::SelectionData &data)
 {
-	if (data.get_target() == "PluginPresetPtr" && _plugin_preset_pointer) {
+	if (data.get_target() == "PluginPresetPtr") {
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+
+		if (!_plugin_preset_pointer || !pi) {
+			data.set (data.get_target(), 8, NULL, 0);
+			return true;
+		}
+
 		boost::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin();
 		assert (plugin);
 
@@ -1102,6 +1108,13 @@ static std::list<Gtk::TargetEntry> drop_targets()
 	tmp.push_back (Gtk::TargetEntry ("processor"));
 	tmp.push_back (Gtk::TargetEntry ("PluginInfoPtr"));
 	tmp.push_back (Gtk::TargetEntry ("PluginPresetPtr"));
+	return tmp;
+}
+
+static std::list<Gtk::TargetEntry> drop_targets_noplugin()
+{
+	std::list<Gtk::TargetEntry> tmp;
+	tmp.push_back (Gtk::TargetEntry ("processor"));
 	return tmp;
 }
 
@@ -2069,7 +2082,16 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 		e->show_all_controls ();
 	}
 
-	processor_display.add_child (e);
+	if (plugin_insert
+#ifdef MIXBUS
+			&& !plugin_insert->plugin(0)->is_channelstrip()
+#endif
+		 )
+	{
+		processor_display.add_child (e);
+	} else {
+		processor_display.add_child (e, drop_targets_noplugin());
+	}
 }
 
 void
