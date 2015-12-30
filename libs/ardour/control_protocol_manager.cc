@@ -223,10 +223,16 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 	}
 
 	cpi.protocol = 0;
+
 	delete cpi.state;
 	cpi.state = 0;
-	delete (Glib::Module*)cpi.descriptor->module;
-	cpi.descriptor->module = 0;
+
+	delete (Glib::Module*) cpi.descriptor->module;
+	/* cpi->descriptor is now inaccessible since dlclose() or equivalent
+	 * has been performed, and the descriptor is (or could be) a static
+	 * object made accessible by dlopen().
+	 */
+	cpi.descriptor = 0;
 
 	ProtocolStatusChange (&cpi);
 
