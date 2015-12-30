@@ -206,10 +206,10 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 		stringstream ss_ch;
 		stringstream ss_vel;
 		stringstream ss_delay;
-		ss_note << "Note-" << i;
-		ss_ch << "Ch-" << i;
-		ss_vel << "Vel-" << i;
-		ss_delay << "Delay-" << i;
+		ss_note << "Note" << i;
+		ss_ch << "Ch" << i;
+		ss_vel << "Vel" << i;
+		ss_delay << "Delay" << i;
 
 		Gtk::TreeViewColumn viewcolumn_note (_(ss_note.str().c_str()), columns.note_name[i]);
 		Gtk::TreeViewColumn viewcolumn_channel (_(ss_ch.str().c_str()), columns.channel[i]);
