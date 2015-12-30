@@ -192,19 +192,7 @@ class MidiTrackerEditor : public ArdourWindow
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;
 
-	// void edited (const std::string&, const std::string&);
-	// void editing_started (Gtk::CellEditable*, const std::string& path, int);
-	// void editing_canceled ();
-	// void stop_editing (bool cancelled = false);
-
 	void redisplay_model ();
-
-	// bool key_press (GdkEventKey* ev);
-	// bool key_release (GdkEventKey* ev);
-	// bool scroll_event (GdkEventScroll*);
-
-	void delete_selected_note ();
-	// void selection_changed ();
 };
 
 #endif /* __ardour_gtk2_midi_tracker_editor_h_ */
