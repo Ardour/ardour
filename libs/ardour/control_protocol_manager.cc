@@ -238,7 +238,6 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 
 	delete cpi.state;
 	cpi.state = 0;
-	cerr << "Tear down CPI module for " << cpi.name << endl;
 	delete (Glib::Module*) cpi.descriptor->module;
 	/* cpi->descriptor is now inaccessible since dlclose() or equivalent
 	 * has been performed, and the descriptor is (or could be) a static
