@@ -1105,16 +1105,24 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 static std::list<Gtk::TargetEntry> drop_targets()
 {
 	std::list<Gtk::TargetEntry> tmp;
-	tmp.push_back (Gtk::TargetEntry ("processor"));
-	tmp.push_back (Gtk::TargetEntry ("PluginInfoPtr"));
-	tmp.push_back (Gtk::TargetEntry ("PluginPresetPtr"));
+	tmp.push_back (Gtk::TargetEntry ("processor")); // from processor-box to processor-box
+	tmp.push_back (Gtk::TargetEntry ("PluginInfoPtr")); // from plugin-manager
+	tmp.push_back (Gtk::TargetEntry ("PluginPresetPtr")); // from sidebar
 	return tmp;
 }
 
-static std::list<Gtk::TargetEntry> drop_targets_noplugin()
+static std::list<Gtk::TargetEntry> drag_targets()
 {
 	std::list<Gtk::TargetEntry> tmp;
-	tmp.push_back (Gtk::TargetEntry ("processor"));
+	tmp.push_back (Gtk::TargetEntry ("PluginPresetPtr")); // to sidebar (optional preset)
+	tmp.push_back (Gtk::TargetEntry ("processor")); // to processor-box (copy)
+	return tmp;
+}
+
+static std::list<Gtk::TargetEntry> drag_targets_noplugin()
+{
+	std::list<Gtk::TargetEntry> tmp;
+	tmp.push_back (Gtk::TargetEntry ("processor")); // to processor box (sends, faders re-order)
 	return tmp;
 }
 
@@ -2088,9 +2096,9 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 #endif
 		 )
 	{
-		processor_display.add_child (e);
+		processor_display.add_child (e, drag_targets());
 	} else {
-		processor_display.add_child (e, drop_targets_noplugin());
+		processor_display.add_child (e, drag_targets_noplugin());
 	}
 }
 
