@@ -166,7 +166,7 @@ MonitorSection::MonitorSection (Session* s)
 
 	/* Solo option buttons */
 	exclusive_solo_button.set_text (_("Excl. Solo"));
-	exclusive_solo_button.set_name (X_("monitor solo exclusive"));
+	exclusive_solo_button.set_name (X_("monitor section solo option"));
 	set_tooltip (&exclusive_solo_button, _("Exclusive solo means that only 1 solo is active at a time"));
 
 	act = ActionManager::get_action (X_("Monitor"), X_("toggle-exclusive-solo"));
@@ -175,7 +175,7 @@ MonitorSection::MonitorSection (Session* s)
 	}
 
 	solo_mute_override_button.set_text (_("Solo » Mute"));
-	solo_mute_override_button.set_name (X_("monitor solo override"));
+	solo_mute_override_button.set_name (X_("monitor section solo option"));
 	set_tooltip (&solo_mute_override_button, _("If enabled, solo will override mute\n(a soloed & muted track or bus will be audible)"));
 
 	act = ActionManager::get_action (X_("Monitor"), X_("toggle-mute-overrides-solo"));
@@ -185,7 +185,7 @@ MonitorSection::MonitorSection (Session* s)
 
 	/* Processor Box hide/shos */
 	toggle_processorbox_button.set_text (_("Processors"));
-	toggle_processorbox_button.set_name (X_("monitor processors toggle"));
+	toggle_processorbox_button.set_name (X_("monitor section processors toggle"));
 	set_tooltip (&toggle_processorbox_button, _("Allow to add monitor effect processors"));
 
 	proctoggle = ToggleAction::create ();
@@ -200,12 +200,11 @@ MonitorSection::MonitorSection (Session* s)
 	/* Solo Boost Knob */
 
 	solo_boost_control = new ArdourKnob ();
-	solo_boost_control->set_name("monitor knob");
+	solo_boost_control->set_name("monitor section knob");
 	solo_boost_control->set_size_request (PX_SCALE(36), PX_SCALE(36));
 	set_tooltip (*solo_boost_control, _("Gain increase for soloed signals (0dB is normal)"));
 
 	solo_boost_display = new ArdourDisplay ();
-	solo_boost_display->set_name("monitor section cut");
 	solo_boost_display->set_size_request (PX_SCALE(68), PX_SCALE(20));
 	solo_boost_display->add_controllable_preset(_("0 dB"), 0.0);
 	solo_boost_display->add_controllable_preset(_("3 dB"), 3.0);
@@ -217,12 +216,12 @@ MonitorSection::MonitorSection (Session* s)
 	/* Solo (SiP) cut */
 
 	solo_cut_control = new ArdourKnob ();
-	solo_cut_control->set_name ("monitor knob");
+	solo_cut_control->set_name ("monitor section knob");
 	solo_cut_control->set_size_request (PX_SCALE(36), PX_SCALE(36));
 	set_tooltip (*solo_cut_control, _("Gain reduction non-soloed signals\nA value above -inf dB causes \"solo-in-front\""));
 
 	solo_cut_display = new ArdourDisplay ();
-	solo_cut_display->set_name("monitor section cut");
+	solo_cut_display->set_name("monitor section dropdown"); // XXX
 	solo_cut_display->set_size_request (PX_SCALE(68), PX_SCALE(20));
 	solo_cut_display->add_controllable_preset(_("0 dB"), 0.0);
 	solo_cut_display->add_controllable_preset(_("-6 dB"), -6.0);
@@ -235,12 +234,11 @@ MonitorSection::MonitorSection (Session* s)
 	/* Dim */
 
 	dim_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
-	dim_control->set_name ("monitor knob");
+	dim_control->set_name ("monitor section knob");
 	dim_control->set_size_request (PX_SCALE(36), PX_SCALE(36));
 	set_tooltip (*dim_control, _("Gain reduction to use when dimming monitor outputs"));
 
 	dim_display = new ArdourDisplay ();
-	dim_display->set_name("monitor section cut");
 	dim_display->set_size_request (PX_SCALE(68), PX_SCALE(20));
 	dim_display->add_controllable_preset(_("0 dB"), 0.0);
 	dim_display->add_controllable_preset(_("-3 dB"), -3.0);
@@ -252,8 +250,7 @@ MonitorSection::MonitorSection (Session* s)
 
 	// mute button
 	cut_all_button.set_text (_("Mute"));
-	cut_all_button.set_name ("monitor section cut");
-	cut_all_button.set_name (X_("monitor section cut"));
+	cut_all_button.set_name ("mute button");
 	cut_all_button.set_size_request (-1, PX_SCALE(30));
 	cut_all_button.show ();
 
@@ -283,11 +280,10 @@ MonitorSection::MonitorSection (Session* s)
 	/* Gain */
 
 	gain_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
-	gain_control->set_name("monitor knob");
+	gain_control->set_name("monitor section knob");
 	gain_control->set_size_request (PX_SCALE(60), PX_SCALE(60));
 
 	gain_display = new ArdourDisplay ();
-	gain_display->set_name("monitor section cut");
 	gain_display->set_size_request (PX_SCALE(68), PX_SCALE(20));
 	gain_display->add_controllable_preset(_("0 dB"), 0.0);
 	gain_display->add_controllable_preset(_("-3 dB"), -3.0);
@@ -301,7 +297,7 @@ MonitorSection::MonitorSection (Session* s)
 
 	output_button = new ArdourButton ();
 	output_button->set_text (_("Output"));
-	output_button->set_name (X_("monitor section cut"));
+	output_button->set_name (X_("monitor section cut")); // XXX
 	output_button->set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 	output_button->set_layout_ellipsize_width (PX_SCALE(128) * PANGO_SCALE);
 
@@ -518,9 +514,9 @@ MonitorSection::update_processor_box ()
 	bool show_processor_box = proctoggle->get_active ();
 
 	if (count_processors () > 0 && !show_processor_box) {
-		toggle_processorbox_button.set_name (X_("monitor processors present"));
+		toggle_processorbox_button.set_name (X_("monitor section processors present"));
 	} else {
-		toggle_processorbox_button.set_name (X_("monitor processors toggle"));
+		toggle_processorbox_button.set_name (X_("monitor section processors toggle"));
 	}
 
 	if (insert_box->is_visible() == show_processor_box) {
@@ -626,10 +622,10 @@ MonitorSection::set_session (Session* s)
 
 MonitorSection::ChannelButtonSet::ChannelButtonSet ()
 {
-	cut.set_name (X_("monitor section cut"));
+	cut.set_name (X_("mute button"));
 	dim.set_name (X_("monitor section dim"));
-	solo.set_name (X_("monitor section solo"));
-	invert.set_name (X_("monitor section invert"));
+	solo.set_name (X_("solo button"));
+	invert.set_name (X_("invert button"));
 
 	cut.unset_flags (Gtk::CAN_FOCUS);
 	dim.unset_flags (Gtk::CAN_FOCUS);

@@ -502,7 +502,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		if (monitor_section_button == 0) {
 			Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
 			monitor_section_button = manage (new ArdourButton);
-			monitor_section_button->set_name ("monitor section button");
+			monitor_section_button->set_name ("master monitor section button");
 			monitor_section_button->set_related_action (act);
 			set_tooltip (monitor_section_button, _("Show/Hide Monitoring Section"));
 			mute_solo_table.attach (*monitor_section_button, 1, 2, 0, 1);
