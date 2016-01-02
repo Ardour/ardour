@@ -1108,7 +1108,7 @@ OSC::route_plugin_parameter (int rid, int piid, int par, float val)
 
 		boost::shared_ptr<AutomationControl> c = pi->automation_control (Evoral::Parameter(PluginAutomation, 0, controlid));
 		// cerr << "parameter:" << redi->describe_parameter(controlid) << " val:" << val << "\n";
-		c->set_value (val);
+		c->set_value (val, PBD::Controllable::NoGroup);
 	} else {
 		PBD::warning << "OSC: Parameter # " << par <<  " for plugin # " << piid << " on RID '" << rid << "' is out of range" << endmsg;
 		PBD::info << "OSC: Valid range min=" << pd.lower << " max=" << pd.upper << endmsg;

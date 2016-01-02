@@ -463,19 +463,19 @@ VBAPanner::set_position (double p)
 	int over = p;
 	over -= (p >= 0) ? 0 : 1;
 	p -= (double)over;
-	_pannable->pan_azimuth_control->set_value (p);
+	_pannable->pan_azimuth_control->set_value (p, Controllable::NoGroup);
 }
 
 void
 VBAPanner::set_width (double w)
 {
-        _pannable->pan_width_control->set_value (min (1.0, max (-1.0, w)));
+	_pannable->pan_width_control->set_value (min (1.0, max (-1.0, w)), Controllable::NoGroup);
 }
 
 void
 VBAPanner::set_elevation (double e)
 {
-        _pannable->pan_elevation_control->set_value (min (1.0, max (0.0, e)));
+	_pannable->pan_elevation_control->set_value (min (1.0, max (0.0, e)), Controllable::NoGroup);
 }
 
 void

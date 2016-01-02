@@ -365,14 +365,14 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 				delta = tozero + remain;
 				_dead_zone_delta = 0;
 			} else {
-				c->set_value (c->normal());
+				c->set_value (c->normal(), Controllable::NoGroup);
 				_dead_zone_delta = remain / px_deadzone;
 				return true;
 			}
 		}
 
 		if (fabsf (rintf((val - _normal) / scale) + _dead_zone_delta) < 1) {
-			c->set_value (c->normal());
+			c->set_value (c->normal(), Controllable::NoGroup);
 			_dead_zone_delta += delta / px_deadzone;
 			return true;
 		}
@@ -430,7 +430,7 @@ ArdourKnob::on_button_release_event (GdkEventButton *ev)
 	if ( (_grabbed_y == ev->y && _grabbed_x == ev->x) && Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {  //no move, shift-click sets to default
 		boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 		if (!c) return false;
-		c->set_value (c->normal());
+		c->set_value (c->normal(), Controllable::NoGroup);
 		return true;
 	}
 

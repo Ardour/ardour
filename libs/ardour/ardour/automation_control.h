@@ -85,9 +85,12 @@ public:
 	 * Derived classes MUST call ::writable() to verify
 	 * that writing to the parameter is legal at that time.
 	 */
-	void set_value (double);
 	double get_value () const;
-
+	/* inherited from PBD::Controllable.
+	 * Derived classes MUST call ::writable() to verify
+	 * that writing to the parameter is legal at that time.
+	 */
+	void set_value (double value, PBD::Controllable::GroupControlDisposition group_override);
 	/* automation related value setting */
 	virtual bool writable () const;
 	/* Call to ::set_value() with no test for writable() because
@@ -110,7 +113,6 @@ public:
 	void commit_transaction (bool did_write);
 
 protected:
-
 	ARDOUR::Session& _session;
 
 	const ParameterDescriptor _desc;

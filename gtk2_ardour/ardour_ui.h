@@ -430,7 +430,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	    };
 
 	    TransportControllable (std::string name, ARDOUR_UI&, ToggleType);
-	    void set_value (double);
+	    void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 	    double get_value (void) const;
 
 	    ARDOUR_UI& ui;

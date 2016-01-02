@@ -89,7 +89,7 @@ public:
 			, _route (route)
 		{}
 
-		void set_value (double val);
+		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 		void set_value_unchecked (double);
 		bool writable() const { return true; }
 

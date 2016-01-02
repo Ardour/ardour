@@ -72,7 +72,7 @@ AutomationControl::get_value() const
  *  @param value `user' value
  */
 void
-AutomationControl::set_value (double value)
+AutomationControl::set_value (double value, PBD::Controllable::GroupControlDisposition /* group_override */)
 {
 	bool to_list = _list && ((AutomationList*)_list.get())->automation_write();
 
@@ -135,7 +135,7 @@ AutomationControl::start_touch(double when)
 
 		if (alist()->automation_state() == Touch) {
 			/* subtle. aligns the user value with the playback */
-			set_value (get_value ());
+			set_value (get_value (), Controllable::NoGroup);
 			alist()->start_touch (when);
 			if (!_desc.toggled) {
 				AutomationWatch::instance().add_automation_watch (shared_from_this());

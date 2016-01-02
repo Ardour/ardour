@@ -4687,7 +4687,7 @@ ARDOUR_UI::TransportControllable::TransportControllable (std::string name, ARDOU
 }
 
 void
-ARDOUR_UI::TransportControllable::set_value (double val)
+ARDOUR_UI::TransportControllable::set_value (double val, PBD::Controllable::GroupControlDisposition /*group_override*/)
 {
 	if (val < 0.5) {
 		/* do nothing: these are radio-style actions */

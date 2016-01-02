@@ -29,6 +29,8 @@
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
+using PBD::Controllable;
+
 MonoPannerEditor::MonoPannerEditor (MonoPanner* p)
 	: PannerEditor (_("Mono Panner"))
 	, _panner (p)
@@ -98,7 +100,7 @@ MonoPannerEditor::left_changed ()
 
 	_ignore_changes = true;
 	_right.set_value (100 * v);
-	_panner->get_controllable()->set_value (v);
+	_panner->get_controllable()->set_value (v, Controllable::NoGroup);
 	_ignore_changes = false;
 }
 
@@ -113,7 +115,7 @@ MonoPannerEditor::right_changed ()
 
 	_ignore_changes = true;
 	_left.set_value (100 * (1 - v));
-	_panner->get_controllable()->set_value (v);
+	_panner->get_controllable()->set_value (v, Controllable::NoGroup);
 	_ignore_changes = false;
 }
 

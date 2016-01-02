@@ -74,8 +74,8 @@ Panner2in2out::Panner2in2out (boost::shared_ptr<Pannable> p)
 	: Panner (p)
 {
         if (!_pannable->has_state()) {
-                _pannable->pan_azimuth_control->set_value (0.5);
-                _pannable->pan_width_control->set_value (1.0);
+	        _pannable->pan_azimuth_control->set_value (0.5, Controllable::NoGroup);
+	        _pannable->pan_width_control->set_value (1.0, Controllable::NoGroup);
         }
 
         double const w = width();
@@ -119,7 +119,7 @@ void
 Panner2in2out::set_position (double p)
 {
         if (clamp_position (p)) {
-                _pannable->pan_azimuth_control->set_value (p);
+	        _pannable->pan_azimuth_control->set_value (p, Controllable::NoGroup);
         }
 }
 
@@ -127,7 +127,7 @@ void
 Panner2in2out::set_width (double p)
 {
         if (clamp_width (p)) {
-                _pannable->pan_width_control->set_value (p);
+	        _pannable->pan_width_control->set_value (p, Controllable::NoGroup);
         }
 }
 

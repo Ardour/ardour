@@ -190,7 +190,7 @@ Track::RecEnableControl::RecEnableControl (boost::shared_ptr<Track> t)
 }
 
 void
-Track::RecEnableControl::set_value (double val)
+Track::RecEnableControl::set_value (double val, Controllable::GroupControlDisposition /* group_override */)
 {
 	if (writable()) {
 		set_value_unchecked (val);

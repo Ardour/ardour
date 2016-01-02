@@ -923,7 +923,7 @@ GenericPluginUI::control_port_toggled (ControlUI* cui)
 	} else {
 		cui->button->set_name ("PluginEditorButton");
 	}
-	insert->automation_control (cui->parameter())->set_value (active);
+	insert->automation_control (cui->parameter())->set_value (active, Controllable::NoGroup);
 	cui->ignore_change--;
 }
 
@@ -932,7 +932,7 @@ GenericPluginUI::control_combo_changed (ControlUI* cui)
 {
 	if (!cui->ignore_change && cui->scale_points) {
 		string value = cui->combo->get_active_text();
-		insert->automation_control (cui->parameter())->set_value ((*cui->scale_points)[value]);
+		insert->automation_control (cui->parameter())->set_value ((*cui->scale_points)[value], Controllable::NoGroup);
 	}
 }
 

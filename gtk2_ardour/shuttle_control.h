@@ -46,7 +46,7 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	struct ShuttleControllable : public PBD::Controllable {
 		ShuttleControllable (ShuttleControl&);
-		void set_value (double);
+		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 		double get_value (void) const;
 
                 double lower() const { return -1.0; }

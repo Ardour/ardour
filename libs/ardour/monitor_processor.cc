@@ -37,7 +37,7 @@ using namespace std;
 /* specialize for bool because of set_value() semantics */
 
 namespace ARDOUR {
-        template<> void MPControl<bool>::set_value (double v) {
+	template<> void MPControl<bool>::set_value (double v, PBD::Controllable::GroupControlDisposition /*group_override*/) {
                 bool newval = fabs (v) >= 0.5;
                 if (newval != _value) {
                         _value = newval;

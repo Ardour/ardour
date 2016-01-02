@@ -51,6 +51,8 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR_UI_UTILS;
 
+using PBD::Controllable;
+
 MonoPanner::ColorScheme MonoPanner::colors;
 bool MonoPanner::have_colors = false;
 
@@ -318,11 +320,11 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
 
 		if (ev->x <= width/3) {
 			/* left side dbl click */
-			position_control->set_value (0);
+			position_control->set_value (0, Controllable::NoGroup);
 		} else if (ev->x > 2*width/3) {
-			position_control->set_value (1.0);
+			position_control->set_value (1.0, Controllable::NoGroup);
 		} else {
-			position_control->set_value (0.5);
+			position_control->set_value (0.5, Controllable::NoGroup);
 		}
 
 		_dragging = false;
@@ -393,12 +395,12 @@ MonoPanner::on_scroll_event (GdkEventScroll* ev)
 		case GDK_SCROLL_UP:
 		case GDK_SCROLL_LEFT:
 			pv -= step;
-			position_control->set_value (pv);
+			position_control->set_value (pv, Controllable::NoGroup);
 			break;
 		case GDK_SCROLL_DOWN:
 		case GDK_SCROLL_RIGHT:
 			pv += step;
-			position_control->set_value (pv);
+			position_control->set_value (pv, Controllable::NoGroup);
 			break;
 	}
 
@@ -423,7 +425,7 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 	if (!detented && ARDOUR::Panner::equivalent (position_control->get_value(), 0.5)) {
 		detented = true;
 		/* snap to center */
-		position_control->set_value (0.5);
+		position_control->set_value (0.5, Controllable::NoGroup);
 	}
 
 	if (detented) {
@@ -432,13 +434,13 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 		/* have we pulled far enough to escape ? */
 
 		if (fabs (accumulated_delta) >= 0.025) {
-			position_control->set_value (position_control->get_value() + accumulated_delta);
+			position_control->set_value (position_control->get_value() + accumulated_delta, Controllable::NoGroup);
 			detented = false;
 			accumulated_delta = false;
 		}
 	} else {
 		double pv = position_control->get_value(); // 0..1.0 ; 0 = left
-		position_control->set_value (pv + delta);
+		position_control->set_value (pv + delta, Controllable::NoGroup);
 	}
 
 	last_drag_x = ev->x;
@@ -465,15 +467,15 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 	switch (ev->keyval) {
 		case GDK_Left:
 			pv -= step;
-			position_control->set_value (pv);
+			position_control->set_value (pv, Controllable::NoGroup);
 			break;
 		case GDK_Right:
 			pv += step;
-			position_control->set_value (pv);
+			position_control->set_value (pv, Controllable::NoGroup);
 			break;
 		case GDK_0:
 		case GDK_KP_0:
-			position_control->set_value (0.0);
+			position_control->set_value (0.0, Controllable::NoGroup);
 			break;
 		default:
 			return false;

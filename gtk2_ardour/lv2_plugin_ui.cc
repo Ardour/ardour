@@ -59,7 +59,7 @@ LV2PluginUI::write_from_ui(void*       controller,
 		me->_updates.insert (port_index);
 
 		if (ac) {
-			ac->set_value(*(const float*)buffer);
+			ac->set_value(*(const float*)buffer, Controllable::NoGroup);
 		}
 	} else if (format == URIMap::instance().urids.atom_eventTransfer) {
 

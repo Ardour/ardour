@@ -31,6 +31,8 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
+using PBD::Controllable;
+
 StereoPannerEditor::StereoPannerEditor (StereoPanner* p)
 	: PannerEditor (_("Stereo Panner"))
 	, _panner (p)
@@ -103,7 +105,7 @@ StereoPannerEditor::position_changed ()
 
 	_ignore_changes = true;
 	double const v = _position.get_value() / 100;
-	_panner->get_position_controllable()->set_value (v);
+	_panner->get_position_controllable()->set_value (v, Controllable::NoGroup);
 	set_width_range ();
 	_ignore_changes = false;
 }
@@ -117,7 +119,7 @@ StereoPannerEditor::width_changed ()
 
 	_ignore_changes = true;
 	double const v = _width.get_value() / 100;
-	_panner->get_width_controllable()->set_value (v);
+	_panner->get_width_controllable()->set_value (v, Controllable::NoGroup);
 	set_position_range ();
 	_ignore_changes = false;
 }

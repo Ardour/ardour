@@ -95,7 +95,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 		               const ParameterDescriptor&        desc,
 		               boost::shared_ptr<AutomationList> list=boost::shared_ptr<AutomationList>());
 
-		void set_value (double val);
+		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 		void set_value_unchecked (double);
 		double get_value (void) const;
 		void catch_up_with_external_value (double val);
@@ -113,8 +113,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 		                       const ParameterDescriptor&        desc,
 		                       boost::shared_ptr<AutomationList> list=boost::shared_ptr<AutomationList>());
 
-		void set_value (const Variant& val);
-		void set_value (double val);
+		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 		void set_value_unchecked (double);
 		double get_value (void) const;
 		XMLNode& get_state();

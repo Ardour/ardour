@@ -54,7 +54,7 @@ public:
 
 	/* Controllable API */
 
-	void set_value (double v) {
+	void set_value (double v, PBD::Controllable::GroupControlDisposition group_override) {
 		T newval = (T) v;
 		if (newval != _value) {
 			_value = std::max (_lower, std::min (_upper, newval));

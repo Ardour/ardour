@@ -711,7 +711,7 @@ ProcessorEntry::Control::slider_adjusted ()
 		return;
 	}
 
-	c->set_value ( c->interface_to_internal(_adjustment.get_value ()) );
+	c->set_value ( c->interface_to_internal(_adjustment.get_value ()) , Controllable::NoGroup);
 	set_tooltip ();
 }
 
@@ -726,7 +726,7 @@ ProcessorEntry::Control::button_clicked ()
 
 	bool const n = _button.get_active ();
 
-	c->set_value (n ? 0 : 1);
+	c->set_value (n ? 0 : 1, Controllable::NoGroup);
 	_button.set_active (!n);
 	set_tooltip ();
 }

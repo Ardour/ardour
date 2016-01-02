@@ -242,27 +242,27 @@ Pannable::set_state (const XMLNode& root, int version)
 			if ((*niter)->name() == X_("azimuth")) {
 				prop = (*niter)->property (X_("value"));
 				if (prop) {
-					pan_azimuth_control->set_value (atof (prop->value()));
+					pan_azimuth_control->set_value (atof (prop->value()), Controllable::NoGroup);
 				}
 			} else if ((*niter)->name() == X_("width")) {
 				prop = (*niter)->property (X_("value"));
 				if (prop) {
-					pan_width_control->set_value (atof (prop->value()));
+					pan_width_control->set_value (atof (prop->value()), Controllable::NoGroup);
 				}
 			} else if ((*niter)->name() == X_("elevation")) {
 				prop = (*niter)->property (X_("value"));
 				if (prop) {
-					pan_elevation_control->set_value (atof (prop->value()));
+					pan_elevation_control->set_value (atof (prop->value()), Controllable::NoGroup);
 				}
 			} else if ((*niter)->name() == X_("frontback")) {
 				prop = (*niter)->property (X_("value"));
 				if (prop) {
-					pan_frontback_control->set_value (atof (prop->value()));
+					pan_frontback_control->set_value (atof (prop->value()), Controllable::NoGroup);
 				}
 			} else if ((*niter)->name() == X_("lfe")) {
 				prop = (*niter)->property (X_("value"));
 				if (prop) {
-					pan_lfe_control->set_value (atof (prop->value()));
+					pan_lfe_control->set_value (atof (prop->value()), Controllable::NoGroup);
 				}
 			}
 		}

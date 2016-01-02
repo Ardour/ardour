@@ -75,7 +75,7 @@ Pannerbalance::Pannerbalance (boost::shared_ptr<Pannable> p)
 	: Panner (p)
 {
 	if (!_pannable->has_state()) {
-		_pannable->pan_azimuth_control->set_value (0.5);
+		_pannable->pan_azimuth_control->set_value (0.5, Controllable::NoGroup);
 	}
 
 	update ();
@@ -102,7 +102,7 @@ Pannerbalance::position () const
 Pannerbalance::set_position (double p)
 {
 	if (clamp_position (p)) {
-		_pannable->pan_azimuth_control->set_value (p);
+		_pannable->pan_azimuth_control->set_value (p, Controllable::NoGroup);
 	}
 }
 

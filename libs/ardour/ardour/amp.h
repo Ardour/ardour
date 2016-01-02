@@ -92,7 +92,7 @@ public:
 			range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
 		}
 
-		void set_value (double val);
+		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 		void set_value_unchecked (double);
 
 		double internal_to_interface (double) const;

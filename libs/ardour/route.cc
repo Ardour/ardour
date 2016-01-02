@@ -178,11 +178,6 @@ Route::init ()
 		_amp->set_display_name ("Monitor");
 	}
 
-	// amp should exist before amp controls
-	_group_gain_control.reset (new GroupGainControllable (X_("groupgain"), shared_from_this ()));
-	_group_gain_control->set_flags (Controllable::Flag (_group_gain_control->flags() | Controllable::GainLike));
-	add_control (_group_gain_control);
-
 	/* and input trim */
 	_trim.reset (new Amp (_session, "trim"));
 	_trim->set_display_to_user (false);
@@ -2804,7 +2799,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 				gain_t val;
 
 				if (sscanf (prop->value().c_str(), "%f", &val) == 1) {
-					_amp->gain_control()->set_value (val);
+					_amp->gain_control()->set_value (val, Controllable::NoGroup);
 				}
 			}
 
@@ -3885,12 +3880,76 @@ Route::set_latency_compensation (framecnt_t longest_session_latency)
 	}
 }
 
-Route::SoloControllable::SoloControllable (std::string name, boost::shared_ptr<Route> r)
-	: AutomationControl (r->session(),
-	                     Evoral::Parameter (SoloAutomation),
-	                     ParameterDescriptor(Evoral::Parameter (SoloAutomation)),
-	                     boost::shared_ptr<AutomationList>(), name)
+void
+Route::set_control (RouteAutomationControl& control, double val, PBD::Controllable::GroupControlDisposition /*group_override*/)
+{
+	boost::shared_ptr<RouteList> rl;
+
+	switch (control.parameter().type()) {
+	case GainAutomation:
+		/* route must mediate group control */
+		set_gain (val, this); /* any "src" argument will do other than our route group */
+		return;
+		break;
+
+	case RecEnableAutomation:
+		/* session must mediate group control */
+		rl.reset (new RouteList);
+		rl->push_back (shared_from_this());
+		_session.set_record_enabled (rl, val >= 0.5 ? true : false);
+		return;
+		break;
+
+	case SoloAutomation:
+		/* session must mediate group control */
+		rl.reset (new RouteList);
+		rl->push_back (shared_from_this());
+		if (Config->get_solo_control_is_listen_control()) {
+			_session.set_listen (rl, val >= 0.5 ? true : false);
+		} else {
+			_session.set_solo (rl, val >= 0.5 ? true : false);
+		}
+
+		return;
+		break;
+
+	case MuteAutomation:
+		/* session must mediate group control */
+		rl.reset (new RouteList);
+		rl->push_back (shared_from_this());
+		_session.set_mute (rl, !muted());
+		return;
+		break;
+
+	case PanAzimuthAutomation:
+	case PanElevationAutomation:
+	case PanWidthAutomation:
+	case PanFrontBackAutomation:
+	case PanLFEAutomation:
+		break;
+
+	default:
+		/* Not a route automation control */
+		return;
+	}
+
+	control.route_set_value (val);
+}
+
+
+Route::RouteAutomationControl::RouteAutomationControl (const std::string& name,
+                                                       AutomationType atype,
+                                                       boost::shared_ptr<AutomationList> alist,
+                                                       boost::shared_ptr<Route> r)
+	: AutomationControl (r->session(), Evoral::Parameter (atype),
+	                     ParameterDescriptor (Evoral::Parameter (atype)),
+	                     alist, name)
 	, _route (r)
+{
+}
+
+Route::SoloControllable::SoloControllable (std::string name, boost::shared_ptr<Route> r)
+	: RouteAutomationControl (name, SoloAutomation, boost::shared_ptr<AutomationList>(), r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(SoloAutomation)));
 	gl->set_interpolation(Evoral::ControlList::Discrete);
@@ -3898,7 +3957,7 @@ Route::SoloControllable::SoloControllable (std::string name, boost::shared_ptr<R
 }
 
 void
-Route::SoloControllable::set_value (double val)
+Route::SoloControllable::set_value (double val, PBD::Controllable::GroupControlDisposition /* group_override */)
 {
 	if (writable()) {
 		set_value_unchecked (val);
@@ -3942,11 +4001,7 @@ Route::SoloControllable::get_value () const
 }
 
 Route::MuteControllable::MuteControllable (std::string name, boost::shared_ptr<Route> r)
-	: AutomationControl (r->session(),
-	                     Evoral::Parameter (MuteAutomation),
-	                     ParameterDescriptor (Evoral::Parameter (MuteAutomation)),
-	                     boost::shared_ptr<AutomationList>(),
-	                     name)
+	: RouteAutomationControl (name, MuteAutomation, boost::shared_ptr<AutomationList>(), r)
 	, _route (r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(MuteAutomation)));
@@ -3979,7 +4034,7 @@ Route::MuteControllable::set_superficial_value(bool muted)
 }
 
 void
-Route::MuteControllable::set_value (double val)
+Route::MuteControllable::set_value (double val, PBD::Controllable::GroupControlDisposition /* group_override */)
 {
 	if (writable()) {
 		set_value_unchecked (val);
@@ -4022,42 +4077,8 @@ Route::MuteControllable::get_value () const
 	return (r && r->muted()) ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
 }
 
-Route::GroupGainControllable::GroupGainControllable (std::string name, boost::shared_ptr<Route> r)
-	: AutomationControl (r->session(),
-						Evoral::Parameter (GainAutomation),
-						ParameterDescriptor (Evoral::Parameter (GainAutomation)),
-						boost::shared_ptr<AutomationList>(),
-						name)
-	, _route (r)
-{
-	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(GainAutomation)));
-	gl->set_interpolation(Evoral::ControlList::Discrete);
-	set_list (gl);
-}
-
-void
-Route::GroupGainControllable::set_value (double val)
-{
-	boost::shared_ptr<Route> r = _route.lock ();
-	// I am not sure why I need the * .5 to make this work
-	float normalized_position = r->gain_control()->interface_to_internal (val * 0.5);
-	r->set_gain ((gain_t)normalized_position, this);
-}
-
-double
-Route::GroupGainControllable::get_value () const
-{
-	boost::shared_ptr<Route> r = _route.lock ();
-	return 2.0 * r->gain_control()->internal_to_interface (r->gain_control()->get_value ());
-}
-
 Route::PhaseControllable::PhaseControllable (std::string name, boost::shared_ptr<Route> r)
-	: AutomationControl (r->session(),
-						Evoral::Parameter (PhaseAutomation),
-						ParameterDescriptor (Evoral::Parameter (PhaseAutomation)),
-						boost::shared_ptr<AutomationList>(),
-						name)
-	, _route (r)
+	: RouteAutomationControl (name, PhaseAutomation, boost::shared_ptr<AutomationList>(), r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(PhaseAutomation)));
 	gl->set_interpolation(Evoral::ControlList::Discrete);
@@ -4065,7 +4086,7 @@ Route::PhaseControllable::PhaseControllable (std::string name, boost::shared_ptr
 }
 
 void
-Route::PhaseControllable::set_value (double v)
+Route::PhaseControllable::set_value (double v, PBD::Controllable::GroupControlDisposition /* group_override */)
 {
 	boost::shared_ptr<Route> r = _route.lock ();
 	if (r->phase_invert().size()) {

@@ -35,7 +35,7 @@ PanControllable::lower () const
 }
 
 void
-PanControllable::set_value (double v)
+PanControllable::set_value (double v, PBD::Controllable::GroupControlDisposition /* group_override */)
 {
 	if (writable()) {
 		set_value_unchecked (v);
@@ -49,7 +49,7 @@ PanControllable::set_value_unchecked (double v)
 
         if (!p) {
                 /* no panner: just do it */
-                AutomationControl::set_value (v);
+	        AutomationControl::set_value (v, Controllable::NoGroup);
                 return;
         }
 
@@ -70,7 +70,7 @@ PanControllable::set_value_unchecked (double v)
         }
 
         if (can_set) {
-                AutomationControl::set_value (v);
+	        AutomationControl::set_value (v, Controllable::NoGroup);
         }
 }
 

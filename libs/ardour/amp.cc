@@ -368,7 +368,7 @@ Amp::inc_gain (gain_t factor, void *src)
 void
 Amp::set_gain (gain_t val, void *)
 {
-	_gain_control->set_value (val);
+	_gain_control->set_value (val, Controllable::NoGroup);
 }
 
 XMLNode&
@@ -396,7 +396,7 @@ Amp::set_state (const XMLNode& node, int version)
 }
 
 void
-Amp::GainControl::set_value (double val)
+Amp::GainControl::set_value (double val, PBD::Controllable::GroupControlDisposition /* group_override */)
 {
 	if (writable()) {
 		set_value_unchecked (val);
@@ -406,7 +406,7 @@ Amp::GainControl::set_value (double val)
 void
 Amp::GainControl::set_value_unchecked (double val)
 {
-	AutomationControl::set_value (std::max (std::min (val, (double)_desc.upper), (double)_desc.lower));
+	AutomationControl::set_value (std::max (std::min (val, (double)_desc.upper), (double)_desc.lower), Controllable::NoGroup);
 	_amp->session().set_dirty ();
 }
 

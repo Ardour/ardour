@@ -678,7 +678,7 @@ ShuttleControl::ShuttleControllable::ShuttleControllable (ShuttleControl& s)
 }
 
 void
-ShuttleControl::ShuttleControllable::set_value (double val)
+ShuttleControl::ShuttleControllable::set_value (double val, PBD::Controllable::GroupControlDisposition /*group_override*/)
 {
 	sc.set_shuttle_fract ((val - lower()) / (upper() - lower()), true);
 }

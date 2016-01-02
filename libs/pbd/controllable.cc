@@ -143,7 +143,7 @@ Controllable::set_state (const XMLNode& node, int /*version*/)
 		float val;
 
 		if (sscanf (prop->value().c_str(), "%f", &val) == 1) {
-			set_value (val);
+			set_value (val, NoGroup);
 		}
         }
 

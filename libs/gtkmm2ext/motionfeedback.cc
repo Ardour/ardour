@@ -46,6 +46,7 @@ using namespace Gtkmm2ext;
 using namespace sigc;
 
 using PBD::error;
+using PBD::Controllable;
 
 Gdk::Color* MotionFeedback::base_color;
 
@@ -191,11 +192,11 @@ MotionFeedback::pixwin_button_release_event (GdkEventButton *ev)
 		}
                 if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
                         /* shift click back to the default */
-                        _controllable->set_value (default_value);
+	                _controllable->set_value (default_value, Controllable::NoGroup);
                         return true;
                 } else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			/* ctrl click back to the minimum value */
-			_controllable->set_value (_controllable->lower ());
+	                _controllable->set_value (_controllable->lower (), Controllable::NoGroup);
 		}
 		break;
 
@@ -246,7 +247,7 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
                 y_delta *= multiplier;
                 y_delta /= 10;
 
-                _controllable->set_value (adjust ((grab_is_fine ? step_inc : page_inc) * y_delta));
+                _controllable->set_value (adjust ((grab_is_fine ? step_inc : page_inc) * y_delta), Controllable::NoGroup);
 
         } else if (ev->state & Gdk::BUTTON2_MASK) {
 
@@ -263,7 +264,7 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
                 angle = -(2.0/3.0) * (angle - 1.25);
                 angle *= multiplier;
 
-                _controllable->set_value (to_control_value (angle));
+                _controllable->set_value (to_control_value (angle), Controllable::NoGroup);
         }
 
 
@@ -301,32 +302,32 @@ MotionFeedback::pixwin_key_press_event (GdkEventKey *ev)
 	switch (ev->keyval) {
 	case GDK_Page_Up:
 	        retval = true;
-		_controllable->set_value (adjust (multiplier * page_inc));
+	        _controllable->set_value (adjust (multiplier * page_inc), Controllable::NoGroup);
 		break;
 
 	case GDK_Page_Down:
 	        retval = true;
-		_controllable->set_value (adjust (-multiplier * page_inc));
+	        _controllable->set_value (adjust (-multiplier * page_inc), Controllable::NoGroup);
 		break;
 
 	case GDK_Up:
 	        retval = true;
-		_controllable->set_value (adjust (multiplier * step_inc));
+	        _controllable->set_value (adjust (multiplier * step_inc), Controllable::NoGroup);
 		break;
 
 	case GDK_Down:
 	        retval = true;
-		_controllable->set_value (adjust (-multiplier * step_inc));
+	        _controllable->set_value (adjust (-multiplier * step_inc), Controllable::NoGroup);
 		break;
 
 	case GDK_Home:
 	        retval = true;
-		_controllable->set_value (_controllable->lower());
+	        _controllable->set_value (_controllable->lower(), Controllable::NoGroup);
 		break;
 
 	case GDK_End:
 	        retval = true;
-		_controllable->set_value (_controllable->upper());
+	        _controllable->set_value (_controllable->upper(), Controllable::NoGroup);
 		break;
 	}
 
@@ -406,12 +407,12 @@ MotionFeedback::pixwin_scroll_event (GdkEventScroll* ev)
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
 	case GDK_SCROLL_RIGHT:
-		_controllable->set_value (adjust (scale * page_inc));
+		_controllable->set_value (adjust (scale * page_inc), Controllable::NoGroup);
 		break;
 
 	case GDK_SCROLL_DOWN:
 	case GDK_SCROLL_LEFT:
-		_controllable->set_value (adjust (-scale * page_inc));
+		_controllable->set_value (adjust (-scale * page_inc), Controllable::NoGroup);
 		break;
 	}
 

@@ -36,7 +36,7 @@ class Pannable;
 
 class LIBARDOUR_API PanControllable : public AutomationControl
 {
-public:
+  public:
 	PanControllable (Session& s, std::string name, Pannable* o, Evoral::Parameter param)
 		: AutomationControl (s,
 		                     param,
@@ -47,10 +47,10 @@ public:
 	{}
 
 	double lower () const;
-	void set_value (double);
+	void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 	void set_value_unchecked (double);
 
-private:
+  private:
 	Pannable* owner;
 };
 

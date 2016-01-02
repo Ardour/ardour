@@ -40,6 +40,8 @@
 using namespace ARDOUR;
 using namespace Gtk;
 
+using PBD::Controllable;
+
 AutomationBarController::AutomationBarController (
 		boost::shared_ptr<Automatable>       printer,
 		boost::shared_ptr<AutomationControl> ac,
@@ -153,7 +155,7 @@ void
 AutomationController::value_adjusted ()
 {
 	if (!_ignore_change) {
-		_controllable->set_value (_controllable->interface_to_internal(_adjustment->get_value()));
+		_controllable->set_value (_controllable->interface_to_internal(_adjustment->get_value()), Controllable::NoGroup);
 	}
 
 	/* A bar controller will automatically follow the adjustment, but for a
@@ -248,7 +250,7 @@ AutomationController::run_note_select_dialog()
 		const double value = ((_controllable->desc().unit == ARDOUR::ParameterDescriptor::HZ)
 		                      ? midi_note_to_hz(dialog->note_number())
 		                      : dialog->note_number());
-		_controllable->set_value(clamp(value, desc.lower, desc.upper));
+		_controllable->set_value(clamp(value, desc.lower, desc.upper), Controllable::NoGroup);
 	}
 	delete dialog;
 }
@@ -263,7 +265,7 @@ AutomationController::set_freq_beats(double beats)
 	const double                       bpm     = tempo.beats_per_minute();
 	const double                       bps     = bpm / 60.0;
 	const double                       freq    = bps / beats;
-	_controllable->set_value(clamp(freq, desc.lower, desc.upper));
+	_controllable->set_value(clamp(freq, desc.lower, desc.upper), Controllable::NoGroup);
 }
 
 void
@@ -271,7 +273,7 @@ AutomationController::set_ratio(double ratio)
 {
 	const ARDOUR::ParameterDescriptor& desc  = _controllable->desc();
 	const double                       value = _controllable->get_value() * ratio;
-	_controllable->set_value(clamp(value, desc.lower, desc.upper));
+	_controllable->set_value(clamp(value, desc.lower, desc.upper), Controllable::NoGroup);
 }
 
 bool

@@ -47,6 +47,7 @@ namespace PBD {
  *
  * Without overriding upper() and lower(), a derived class will function
  * as a control whose value can range between 0 and 1.0.
+ *
  */
 
 class LIBPBD_API Controllable : public PBD::StatefulDestructible {
@@ -75,8 +76,27 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 	 * but passed to the processor as a linear quantity.
 	 */
 
-	/** Get and Set `internal' value */
-	virtual void set_value (double) = 0;
+	/* Within an application, various Controllables might be considered to
+	 * be "grouped" in a way that implies that setting 1 of them also
+	 * modifies others in the group.
+	 */
+
+	enum GroupControlDisposition {
+		WholeGroup,  /* set all controls in the same "group" as this one */
+		NoGroup,     /* set only this control */
+		UseGroup     /* use group settings to decide which group controls are altered */
+	};
+
+	/** Get and Set `internal' value
+	 *
+	 * All derived classes must implement this.
+         *
+         * Basic derived classes will ignore @param group_override,
+         * but more sophisticated children, notably those that
+         * proxy the value setting logic via an object that is aware of group
+         * relationships between this control and others, will find it useful.
+         */
+        virtual void set_value (double, GroupControlDisposition group_override) = 0;
 	virtual double get_value (void) const = 0;
 
 	/** Conversions between `internal', 'interface', and 'user' values */
@@ -87,11 +107,11 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 
 	/** Get and Set `interface' value  (typically, fraction of knob travel) */
 	virtual float get_interface() const { return (internal_to_interface(get_value())); }
-	virtual void set_interface (float fraction) { fraction = min( max(0.0f, fraction), 1.0f);  set_value(interface_to_internal(fraction)); }
+	virtual void set_interface (float fraction) { fraction = min( max(0.0f, fraction), 1.0f);  set_value(interface_to_internal(fraction), NoGroup); }
 
 	/** Get and Set `user' value  ( dB or milliseconds, etc.  This MIGHT be the same as the internal value, but in a few cases it is not ) */
 	virtual float get_user() const { return (internal_to_user(get_value())); }
-	virtual void set_user (float user_v) { set_value(user_to_internal(user_v)); }
+	virtual void set_user (float user_v) { set_value(user_to_internal(user_v), NoGroup); }
 	virtual std::string get_user_string() const { return std::string(); }
 
 	PBD::Signal0<void> LearningFinished;
@@ -126,6 +146,7 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 	static Controllable* by_id (const PBD::ID&);
 	static Controllable* by_name (const std::string&);
         static const std::string xml_node_name;
+
   private:
 	std::string _name;
 	std::string _units;
@@ -150,7 +171,7 @@ class LIBPBD_API IgnorableControllable : public Controllable
 	IgnorableControllable () : PBD::Controllable ("ignoreMe") {}
 	~IgnorableControllable () {}
 
-	void set_value (double /*v*/) {}
+	void set_value (double /*v*/, PBD::Controllable::GroupControlDisposition /* group_override */) {}
 	double get_value () const { return 0.0; }
 };
 

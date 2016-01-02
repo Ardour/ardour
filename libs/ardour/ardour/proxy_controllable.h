@@ -31,7 +31,7 @@ namespace ARDOUR {
 */
 
 class LIBARDOUR_API ProxyControllable : public PBD::Controllable {
-public:
+  public:
 	ProxyControllable (const std::string& name, PBD::Controllable::Flag flags,
 			   boost::function1<bool,double> setter,
 			   boost::function0<double> getter)
@@ -40,7 +40,7 @@ public:
 		, _getter (getter)
 	{}
 
-	void set_value (double v) { if (_setter (v)) { Changed(); /* EMIT SIGNAL */ } }
+	void set_value (double v, PBD::Controllable::GroupControlDisposition /*group_override*/) { if (_setter (v)) { Changed(); /* EMIT SIGNAL */ } }
 	double get_value () const { return _getter (); }
 
 	double internal_to_user (double i) const { return accurate_coefficient_to_dB (i);}
@@ -51,7 +51,7 @@ public:
 		return std::string(theBuf);
 	}
 
-private:
+  private:
 	boost::function1<bool,double> _setter;
 	boost::function0<double> _getter;
 };

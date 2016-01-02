@@ -383,23 +383,44 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	/* Controls (not all directly owned by the Route */
 
-	boost::shared_ptr<AutomationControl> get_control (const Evoral::Parameter& param);
-
-	class SoloControllable : public AutomationControl {
+	class RouteAutomationControl : public AutomationControl {
 	public:
-		SoloControllable (std::string name, boost::shared_ptr<Route>);
-		void set_value (double);
-		void set_value_unchecked (double);
-		double get_value () const;
+		RouteAutomationControl (const std::string& name,
+		                        AutomationType atype,
+		                        boost::shared_ptr<AutomationList> alist,
+		                        boost::shared_ptr<Route> route);
 
-	private:
+		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override) {
+			boost::shared_ptr<Route> r = _route.lock();
+			if (r) {
+				r->set_control (*this, val, group_override);
+			}
+		}
+
+	protected:
+		friend class Route;
+
+		void route_set_value (double val) {
+			AutomationControl::set_value (val, Controllable::NoGroup);
+		}
+
 		boost::weak_ptr<Route> _route;
 	};
 
-	struct MuteControllable : public AutomationControl {
+	boost::shared_ptr<AutomationControl> get_control (const Evoral::Parameter& param);
+
+	class SoloControllable : public RouteAutomationControl {
+	public:
+		SoloControllable (std::string name, boost::shared_ptr<Route>);
+		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+		void set_value_unchecked (double);
+		double get_value () const;
+	};
+
+	struct MuteControllable : public RouteAutomationControl {
 	public:
 		MuteControllable (std::string name, boost::shared_ptr<Route>);
-		void set_value (double);
+		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 		void set_value_unchecked (double);
 		double get_value () const;
 
@@ -410,27 +431,18 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		boost::weak_ptr<Route> _route;
 	};
 
-	class LIBARDOUR_API PhaseControllable : public AutomationControl {
+	class LIBARDOUR_API PhaseControllable : public RouteAutomationControl {
 	public:
 		PhaseControllable (std::string name, boost::shared_ptr<Route>);
-		void set_value (double);
+		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 		void set_channel (uint32_t);
 		double get_value () const;
 		uint32_t channel() const;
-
 	private:
-		boost::weak_ptr<Route> _route;
 		uint32_t _current_phase;
 	};
 
-	class LIBARDOUR_API GroupGainControllable : public AutomationControl {
-	public:
-		GroupGainControllable (std::string name, boost::shared_ptr<Route>);
-		void set_value (double);
-		double get_value () const;
-	private:
-		boost::weak_ptr<Route> _route;
-	};
+	void set_control (RouteAutomationControl&, double val, PBD::Controllable::GroupControlDisposition group_override);
 
 	boost::shared_ptr<SoloControllable> solo_control() const {
 		return _solo_control;
@@ -446,10 +458,6 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	boost::shared_ptr<PhaseControllable> phase_control() const {
 		return _phase_control;
-	}
-
-	boost::shared_ptr<GroupGainControllable> group_gain_control() const {
-		return _group_gain_control;
 	}
 
 	/* Route doesn't own these items, but sub-objects that it does own have them
@@ -544,7 +552,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool has_external_redirects() const;
 
         /* can only be executed by a route for which is_monitor() is true
-   	   (i.e. the monitor out)
+	   (i.e. the monitor out)
         */
         void monitor_run (framepos_t start_frame, framepos_t end_frame,
 			  pframes_t nframes, int declick);
@@ -635,7 +643,6 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	boost::shared_ptr<MuteControllable> _mute_control;
 	boost::shared_ptr<MuteMaster> _mute_master;
 	boost::shared_ptr<PhaseControllable> _phase_control;
-	boost::shared_ptr<GroupGainControllable> _group_gain_control;
 
 	virtual void act_on_mute () {}
 
@@ -679,7 +686,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	int set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
 
- 	uint32_t _order_key;
+	uint32_t _order_key;
 	bool _has_order_key;
         uint32_t _remote_control_id;
 

@@ -52,6 +52,8 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR_UI_UTILS;
 
+using PBD::Controllable;
+
 StereoPanner::ColorScheme StereoPanner::colors[3];
 bool StereoPanner::have_colors = false;
 
@@ -355,21 +357,21 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 				/* left side dbl click */
 				if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
 					/* 2ndary-double click on left, collapse to hard left */
-					width_control->set_value (0);
-					position_control->set_value (0);
+					width_control->set_value (0, Controllable::NoGroup);
+					position_control->set_value (0, Controllable::NoGroup);
 				} else {
-					position_control->set_value (min_pos);
+					position_control->set_value (min_pos, Controllable::NoGroup);
 				}
 			} else if (ev->x > 2*width/3) {
 				if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
 					/* 2ndary-double click on right, collapse to hard right */
-					width_control->set_value (0);
-					position_control->set_value (1.0);
+					width_control->set_value (0, Controllable::NoGroup);
+					position_control->set_value (1.0, Controllable::NoGroup);
 				} else {
-					position_control->set_value (max_pos);
+					position_control->set_value (max_pos, Controllable::NoGroup);
 				}
 			} else {
-				position_control->set_value (0.5);
+				position_control->set_value (0.5, Controllable::NoGroup);
 			}
 
 		} else {
@@ -381,13 +383,13 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 
 			if (ev->x <= width/3) {
 				/* left side dbl click */
-				width_control->set_value (max_width); // reset width to 100%
+				width_control->set_value (max_width, Controllable::NoGroup); // reset width to 100%
 			} else if (ev->x > 2*width/3) {
 				/* right side dbl click */
-				width_control->set_value (-max_width); // reset width to inverted 100%
+				width_control->set_value (-max_width, Controllable::NoGroup); // reset width to inverted 100%
 			} else {
 				/* center dbl click */
-				width_control->set_value (0); // collapse width to 0%
+				width_control->set_value (0, Controllable::NoGroup); // collapse width to 0%
 			}
 		}
 
@@ -500,19 +502,19 @@ StereoPanner::on_scroll_event (GdkEventScroll* ev)
 	switch (ev->direction) {
 	case GDK_SCROLL_LEFT:
 		wv += step;
-		width_control->set_value (wv);
+		width_control->set_value (wv, Controllable::NoGroup);
 		break;
 	case GDK_SCROLL_UP:
 		pv -= step;
-		position_control->set_value (pv);
+		position_control->set_value (pv, Controllable::NoGroup);
 		break;
 	case GDK_SCROLL_RIGHT:
 		wv -= step;
-		width_control->set_value (wv);
+		width_control->set_value (wv, Controllable::NoGroup);
 		break;
 	case GDK_SCROLL_DOWN:
 		pv += step;
-		position_control->set_value (pv);
+		position_control->set_value (pv, Controllable::NoGroup);
 		break;
 	}
 
@@ -551,9 +553,9 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 			double pv = position_control->get_value();
 
 			if (dragging_left) {
-				position_control->set_value (pv - delta);
+				position_control->set_value (pv - delta, Controllable::NoGroup);
 			} else {
-				position_control->set_value (pv + delta);
+				position_control->set_value (pv + delta, Controllable::NoGroup);
 			}
 
 			if (delta > 0.0) {
@@ -563,9 +565,9 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 				   other side remains in place when we set
 				   the position as well.
 				*/
-				width_control->set_value (current_width + (delta * 2.0));
+				width_control->set_value (current_width + (delta * 2.0), Controllable::NoGroup);
 			} else {
-				width_control->set_value (current_width + delta);
+				width_control->set_value (current_width + delta, Controllable::NoGroup);
 			}
 
 			_panner->thaw ();
@@ -579,7 +581,7 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 			if (!detented && fabs (current_width) < 0.02) {
 				detented = true;
 				/* snap to zero */
-				width_control->set_value (0);
+				width_control->set_value (0, Controllable::NoGroup);
 			}
 
 			if (detented) {
@@ -589,21 +591,21 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 				/* have we pulled far enough to escape ? */
 
 				if (fabs (accumulated_delta) >= 0.025) {
-					width_control->set_value (current_width + accumulated_delta);
+					width_control->set_value (current_width + accumulated_delta, Controllable::NoGroup);
 					detented = false;
 					accumulated_delta = false;
 				}
 
 			} else {
 				/* width needs to change by 2 * delta because both L & R move */
-				width_control->set_value (current_width + (delta * 2.0));
+				width_control->set_value (current_width + (delta * 2.0), Controllable::NoGroup);
 			}
 		}
 
 	} else if (dragging_position) {
 
 		double pv = position_control->get_value(); // 0..1.0 ; 0 = left
-		position_control->set_value (pv + delta);
+		position_control->set_value (pv + delta, Controllable::NoGroup);
 	}
 
 	last_drag_x = ev->x;
@@ -635,30 +637,30 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
 	switch (ev->keyval) {
 	case GDK_Up:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
-			width_control->set_value (1.0);
+			width_control->set_value (1.0, Controllable::NoGroup);
 		} else {
-			width_control->set_value (wv + step);
+			width_control->set_value (wv + step, Controllable::NoGroup);
 		}
 		break;
 	case GDK_Down:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
-			width_control->set_value (-1.0);
+			width_control->set_value (-1.0, Controllable::NoGroup);
 		} else {
-			width_control->set_value (wv - step);
+			width_control->set_value (wv - step, Controllable::NoGroup);
 		}
 		break;
 
 	case GDK_Left:
 		pv -= step;
-		position_control->set_value (pv);
+		position_control->set_value (pv, Controllable::NoGroup);
 		break;
 	case GDK_Right:
 		pv += step;
-		position_control->set_value (pv);
+		position_control->set_value (pv, Controllable::NoGroup);
 		break;
 	case GDK_0:
 	case GDK_KP_0:
-		width_control->set_value (0.0);
+		width_control->set_value (0.0, Controllable::NoGroup);
 		break;
 
 	default:

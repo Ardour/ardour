@@ -756,7 +756,7 @@ Strip::select_event (Button&, ButtonState bs)
 			/* reset to default */
 			boost::shared_ptr<AutomationControl> ac = _fader->control ();
 			if (ac) {
-				ac->set_value (ac->normal());
+				ac->set_value (ac->normal(), Controllable::NoGroup);
 			}
 			return;
 		}
@@ -789,7 +789,7 @@ Strip::vselect_event (Button&, ButtonState bs)
 
 		if (control->toggled()) {
 			if (control->toggled()) {
-				control->set_value (!control->get_value());
+				control->set_value (!control->get_value(), Controllable::NoGroup);
 			}
 		}
 
@@ -807,7 +807,7 @@ Strip::vselect_event (Button&, ButtonState bs)
 			if (ac) {
 
 				/* reset to default/normal value */
-				ac->set_value (ac->normal());
+				ac->set_value (ac->normal(), Controllable::NoGroup);
 			}
 
 		}  else {
@@ -830,7 +830,7 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 
 		if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
 			if (ac) {
-				ac->set_value (ac->normal());
+				ac->set_value (ac->normal(), Controllable::NoGroup);
 			}
 		} else {
 
@@ -907,7 +907,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 				/* apply change */
 
 				for (MackieControlProtocol::ControlList::iterator c = controls.begin(); c != controls.end(); ++c) {
-					(*c)->set_value (new_value);
+					(*c)->set_value (new_value, Controllable::NoGroup);
 				}
 
 			} else {
@@ -1778,7 +1778,7 @@ Strip::set_vpot_parameter (AutomationType p)
 				_pan_mode = PanAzimuthAutomation;
 				if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 					/* gain to vpot, pan azi to fader */
-					_vpot->set_control (_route->group_gain_control());
+					_vpot->set_control (_route->gain_control());
 					vpot_parameter = GainAutomation;
 					control_by_parameter[GainAutomation] = _vpot;
 					_fader->set_control (pan_control);
@@ -1790,7 +1790,7 @@ Strip::set_vpot_parameter (AutomationType p)
 			} else {
 				/* gain to fader, pan azi to vpot */
 				vpot_parameter = PanAzimuthAutomation;
-				_fader->set_control (_route->group_gain_control());
+				_fader->set_control (_route->gain_control());
 				control_by_parameter[GainAutomation] = _fader;
 				_vpot->set_control (pan_control);
 				control_by_parameter[PanAzimuthAutomation] = _vpot;
@@ -1807,7 +1807,7 @@ Strip::set_vpot_parameter (AutomationType p)
 				_pan_mode = PanWidthAutomation;
 				if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 					/* gain to vpot, pan width to fader */
-					_vpot->set_control (_route->group_gain_control());
+					_vpot->set_control (_route->gain_control());
 					vpot_parameter = GainAutomation;
 					control_by_parameter[GainAutomation] = _vpot;
 					_fader->set_control (pan_control);
@@ -1819,7 +1819,7 @@ Strip::set_vpot_parameter (AutomationType p)
 			} else {
 				/* gain to fader, pan width to vpot */
 				vpot_parameter = PanWidthAutomation;
-				_fader->set_control (_route->group_gain_control());
+				_fader->set_control (_route->gain_control());
 				control_by_parameter[GainAutomation] = _fader;
 				_vpot->set_control (pan_control);
 				control_by_parameter[PanWidthAutomation] = _vpot;
@@ -1841,7 +1841,7 @@ Strip::set_vpot_parameter (AutomationType p)
 		vpot_parameter = TrimAutomation;
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			/* gain to vpot, trim to fader */
-			_vpot->set_control (_route->group_gain_control());
+			_vpot->set_control (_route->gain_control());
 			control_by_parameter[GainAutomation] = _vpot;
 			if (_route->trim() && route()->trim()->active()) {
 				_fader->set_control (_route->trim_control());
@@ -1852,7 +1852,7 @@ Strip::set_vpot_parameter (AutomationType p)
 			}
 		} else {
 			/* gain to fader, trim to vpot */
-			_fader->set_control (_route->group_gain_control());
+			_fader->set_control (_route->gain_control());
 			control_by_parameter[GainAutomation] = _fader;
 			if (_route->trim() && route()->trim()->active()) {
 				_vpot->set_control (_route->trim_control());
@@ -1868,7 +1868,7 @@ Strip::set_vpot_parameter (AutomationType p)
 		vpot_parameter = PhaseAutomation;
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			/* gain to vpot, phase to fader */
-			_vpot->set_control (_route->group_gain_control());
+			_vpot->set_control (_route->gain_control());
 			control_by_parameter[GainAutomation] = _vpot;
 			if (_route->phase_invert().size()) {
 				_fader->set_control (_route->phase_control());
@@ -1879,7 +1879,7 @@ Strip::set_vpot_parameter (AutomationType p)
 			}
 		} else {
 			/* gain to fader, phase to vpot */
-			_fader->set_control (_route->group_gain_control());
+			_fader->set_control (_route->gain_control());
 			control_by_parameter[GainAutomation] = _fader;
 			if (_route->phase_invert().size()) {
 				_vpot->set_control (_route->phase_control());
@@ -1894,7 +1894,7 @@ Strip::set_vpot_parameter (AutomationType p)
 		if (!Profile->get_mixbus()) {
 			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 				// gain to vpot, send to fader
-				_vpot->set_control (_route->group_gain_control());
+				_vpot->set_control (_route->gain_control());
 				control_by_parameter[GainAutomation] = _vpot;
 				// test for send to control
 				boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
@@ -1912,7 +1912,7 @@ Strip::set_vpot_parameter (AutomationType p)
 				}
 			} else {
 				// gain to fader, send to vpot
-				_fader->set_control (_route->group_gain_control());
+				_fader->set_control (_route->gain_control());
 				control_by_parameter[GainAutomation] = _fader;
 				boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
 				if (p && p->name() != "Monitor 1") {
@@ -1925,7 +1925,7 @@ Strip::set_vpot_parameter (AutomationType p)
 					control_by_parameter[SendAutomation] = _vpot;
 				} else {
 					// gain to fader, send to vpot
-					_fader->set_control (_route->group_gain_control());
+					_fader->set_control (_route->gain_control());
 					control_by_parameter[GainAutomation] = _fader;
 					boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
 					if (p && p->name() != "Monitor 1") {

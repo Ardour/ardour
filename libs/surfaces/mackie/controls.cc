@@ -81,7 +81,7 @@ void
 Control::set_value (float val)
 {
 	if (normal_ac) {
-		normal_ac->set_value (normal_ac->interface_to_internal (val));
+		normal_ac->set_value (normal_ac->interface_to_internal (val), PBD::Controllable::NoGroup);
 	}
 }
 

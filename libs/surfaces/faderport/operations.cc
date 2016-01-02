@@ -30,6 +30,7 @@
 
 using namespace ARDOUR;
 using namespace ArdourSurface;
+using namespace PBD;
 
 /* this value is chosen to given smooth motion from 0..1.0 in about 270 degrees
  * of encoder rotation.
@@ -232,7 +233,7 @@ FaderPort::ardour_pan_azimuth (int delta)
 		return;
 	}
 
-	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta / encoder_divider)));
+	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta / encoder_divider)), Controllable::NoGroup);
 }
 
 
@@ -255,7 +256,7 @@ FaderPort::ardour_pan_width(int delta)
 		return;
 	}
 
-	width->set_value (width->interface_to_internal (width->internal_to_interface (width->get_value()) + (delta / encoder_divider)));
+	width->set_value (width->interface_to_internal (width->internal_to_interface (width->get_value()) + (delta / encoder_divider)), Controllable::NoGroup);
 }
 
 void

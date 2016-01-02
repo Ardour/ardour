@@ -543,7 +543,7 @@ MidiTrack::non_realtime_locate (framepos_t pos)
 		    (rcontrol = region->control(tcontrol->parameter()))) {
 			const Evoral::Beats pos_beats = bfc.from(pos - origin);
 			if (rcontrol->list()->size() > 0) {
-				tcontrol->set_value(rcontrol->list()->eval(pos_beats.to_double()));
+				tcontrol->set_value(rcontrol->list()->eval(pos_beats.to_double()), Controllable::NoGroup);
 			}
 		}
 	}
@@ -725,7 +725,7 @@ MidiTrack::set_parameter_automation_state (Evoral::Parameter param, AutoState st
 }
 
 void
-MidiTrack::MidiControl::set_value(double val)
+MidiTrack::MidiControl::set_value (double val, PBD::Controllable::GroupControlDisposition /* group_override */)
 {
 	if (writable()) {
 		set_value_unchecked (val);
@@ -790,7 +790,7 @@ MidiTrack::MidiControl::set_value_unchecked(double val)
 		_route->write_immediate_event(size,  ev);
 	}
 
-	AutomationControl::set_value(val);
+	AutomationControl::set_value(val, Controllable::NoGroup);
 }
 
 void

@@ -660,7 +660,7 @@ PluginInsert::reset_parameters_to_default ()
 			continue;
 		}
 
-		ac->set_value (dflt);
+		ac->set_value (dflt, Controllable::NoGroup);
 	}
 	return all;
 }
@@ -1337,7 +1337,7 @@ PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
 
 /** @param val `user' value */
 void
-PluginInsert::PluginControl::set_value (double user_val)
+PluginInsert::PluginControl::set_value (double user_val, PBD::Controllable::GroupControlDisposition /* group_override */)
 {
 	if (writable()) {
 		set_value_unchecked (user_val);
@@ -1358,13 +1358,13 @@ PluginInsert::PluginControl::set_value_unchecked (double user_val)
 		iasp->set_parameter (_list->parameter().id(), user_val);
 	}
 
-	AutomationControl::set_value (user_val);
+	AutomationControl::set_value (user_val, Controllable::NoGroup);
 }
 
 void
 PluginInsert::PluginControl::catch_up_with_external_value (double user_val)
 {
-	AutomationControl::set_value (user_val);
+	AutomationControl::set_value (user_val, Controllable::NoGroup);
 }
 
 XMLNode&
@@ -1410,7 +1410,7 @@ PluginInsert::PluginPropertyControl::PluginPropertyControl (PluginInsert*       
 }
 
 void
-PluginInsert::PluginPropertyControl::set_value (double user_val)
+PluginInsert::PluginPropertyControl::set_value (double user_val, PBD::Controllable::GroupControlDisposition /* group_override*/)
 {
 	if (writable()) {
 		set_value_unchecked (user_val);
@@ -1434,7 +1434,7 @@ PluginInsert::PluginPropertyControl::set_value_unchecked (double user_val)
 	}
 
 	_value = value;
-	AutomationControl::set_value(user_val);
+	AutomationControl::set_value (user_val, Controllable::NoGroup);
 }
 
 XMLNode&
