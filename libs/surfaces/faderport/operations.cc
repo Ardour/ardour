@@ -280,7 +280,7 @@ FaderPort::mixbus_pan (int delta)
 		return;
 	}
 
-	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta / encoder_divider)));
+	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta / encoder_divider)), Controllable::NoGroup);
 #endif
 }
 
