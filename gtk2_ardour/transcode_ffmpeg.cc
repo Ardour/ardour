@@ -138,9 +138,20 @@ TranscodeFfmpeg::probe ()
 		} \
 	}
 
+	std::string duration_from_format;
+
 	for (std::vector<std::vector<std::string> >::iterator i = lines.begin(); i != lines.end(); ++i) {
 		if (i->at(0) == X_("format")) {
 			/* format,filename,#streams,format-name,format-long-name,start-time,duration,size,bitrate */
+			for (std::vector<std::string>::iterator kv = i->begin(); kv != i->end(); ++kv) {
+				const size_t kvsep = kv->find('=');
+				if(kvsep == std::string::npos) continue;
+				std::string key = kv->substr(0, kvsep);
+				std::string value = kv->substr(kvsep + 1);
+				if (key == X_("duration")) {
+					duration_from_format = value;
+				}
+			}
 		} else
 		if (i->at(0) == X_("stream")) {
 			if (i->at(5) == X_("codec_type=video") && m_width == 0) {
@@ -172,7 +183,7 @@ TranscodeFfmpeg::probe ()
 						PARSE_FRACTIONAL_FPS(m_fps)
 					} else if (key == X_("time_base")) {
 						PARSE_FRACTIONAL_FPS(timebase)
-					} else if (key == X_("timecode") && m_duration == 0) {
+					} else if (key == X_("timecode") && m_duration == 0 && m_fps > 0) {
 						int h,m,s; char f[32];
 						if (sscanf(i->at(16).c_str(), "%d:%d:%d:%32s",&h,&m,&s,f) == 4) {
 							m_duration = (ARDOUR::framecnt_t) floor(m_fps * (
@@ -238,6 +249,11 @@ TranscodeFfmpeg::probe ()
 		}
 	}
 	/* end parse */
+
+	if (m_duration == 0 && !duration_from_format.empty() && m_fps > 0) {
+		warning << "using video-duration from format (container)." << endmsg;
+		m_duration = atof(duration_from_format) * m_fps;
+	}
 
 #if 0 /* DEBUG */
 	printf("FPS: %f\n", m_fps);
