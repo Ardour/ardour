@@ -140,11 +140,9 @@ LV2PluginUI::control_changed (uint32_t port_index)
 bool
 LV2PluginUI::start_updating(GdkEventAny*)
 {
-	if (!_output_ports.empty()) {
-		_screen_update_connection.disconnect();
-		_screen_update_connection = Timers::super_rapid_connect
-		        (sigc::mem_fun(*this, &LV2PluginUI::output_update));
-	}
+	_screen_update_connection.disconnect();
+	_screen_update_connection = Timers::super_rapid_connect
+		(sigc::mem_fun(*this, &LV2PluginUI::output_update));
 	return false;
 }
 
@@ -152,10 +150,7 @@ bool
 LV2PluginUI::stop_updating(GdkEventAny*)
 {
 	//cout << "stop_updating" << endl;
-
-	if (!_output_ports.empty()) {
-		_screen_update_connection.disconnect();
-	}
+	_screen_update_connection.disconnect();
 	return false;
 }
 
