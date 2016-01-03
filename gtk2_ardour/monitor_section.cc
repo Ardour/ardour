@@ -679,25 +679,25 @@ MonitorSection::populate_buttons ()
 		channel_table.attach (cbs->solo, 3, 4, i+row_offset, i+row_offset+1, EXPAND|FILL);
 		channel_table.attach (cbs->invert, 4, 5, i+row_offset, i+row_offset+1, EXPAND|FILL);
 
-		snprintf (buf, sizeof (buf), "monitor-cut-%u", i+1);
+		snprintf (buf, sizeof (buf), "monitor-cut-%u", i);
 		act = ActionManager::get_action (X_("Monitor"), buf);
 		if (act) {
 			cbs->cut.set_related_action (act);
 		}
 
-		snprintf (buf, sizeof (buf), "monitor-dim-%u", i+1);
+		snprintf (buf, sizeof (buf), "monitor-dim-%u", i);
 		act = ActionManager::get_action (X_("Monitor"), buf);
 		if (act) {
 			cbs->dim.set_related_action (act);
 		}
 
-		snprintf (buf, sizeof (buf), "monitor-solo-%u", i+1);
+		snprintf (buf, sizeof (buf), "monitor-solo-%u", i);
 		act = ActionManager::get_action (X_("Monitor"), buf);
 		if (act) {
 			cbs->solo.set_related_action (act);
 		}
 
-		snprintf (buf, sizeof (buf), "monitor-invert-%u", i+1);
+		snprintf (buf, sizeof (buf), "monitor-invert-%u", i);
 		act = ActionManager::get_action (X_("Monitor"), buf);
 		if (act) {
 			cbs->invert.set_related_action (act);
@@ -789,8 +789,6 @@ MonitorSection::cut_channel (uint32_t chn)
 	char buf[64];
 	snprintf (buf, sizeof (buf), "monitor-cut-%u", chn);
 
-	--chn; // 0-based in backend
-
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), buf);
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
@@ -807,8 +805,6 @@ MonitorSection::dim_channel (uint32_t chn)
 
 	char buf[64];
 	snprintf (buf, sizeof (buf), "monitor-dim-%u", chn);
-
-	--chn; // 0-based in backend
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), buf);
 	if (act) {
@@ -828,8 +824,6 @@ MonitorSection::solo_channel (uint32_t chn)
 	char buf[64];
 	snprintf (buf, sizeof (buf), "monitor-solo-%u", chn);
 
-	--chn; // 0-based in backend
-
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), buf);
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
@@ -847,8 +841,6 @@ MonitorSection::invert_channel (uint32_t chn)
 
 	char buf[64];
 	snprintf (buf, sizeof (buf), "monitor-invert-%u", chn);
-
-	--chn; // 0-based in backend
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), buf);
 	if (act) {
@@ -889,9 +881,7 @@ MonitorSection::register_actions ()
 	tact->set_active (Config->get_solo_mute_override());
 
 
-	/* note the 1-based counting (for naming - backend uses 0-based) */
-
-	for (uint32_t chn = 1; chn <= 16; ++chn) {
+	for (uint32_t chn = 0; chn < 16; ++chn) {
 
 		action_name = string_compose (X_("monitor-cut-%1"), chn);
 		action_descr = string_compose (_("Cut monitor channel %1"), chn);
