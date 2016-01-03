@@ -976,8 +976,20 @@ PluginInsert::set_control_ids (const XMLNode& node, int version)
 		if ((*iter)->name() == Controllable::xml_node_name) {
 			const XMLProperty* prop;
 
-			if ((prop = (*iter)->property (X_("parameter"))) != 0) {
-				uint32_t p = atoi (prop->value());
+			uint32_t p = (uint32_t)-1;
+#ifdef LV2_SUPPORT
+			if ((prop = (*iter)->property (X_("symbol"))) != 0) {
+				boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugins[0]);
+				if (lv2plugin) {
+					p = lv2plugin->port_index(prop->value().c_str());
+				}
+			}
+#endif
+			if (p == (uint32_t)-1 && (prop = (*iter)->property (X_("parameter"))) != 0) {
+				p = atoi (prop->value());
+			}
+
+			if (p != (uint32_t)-1) {
 
 				/* this may create the new controllable */
 
@@ -1375,6 +1387,12 @@ PluginInsert::PluginControl::get_state ()
 	XMLNode& node (AutomationControl::get_state());
 	ss << parameter().id();
 	node.add_property (X_("parameter"), ss.str());
+#ifdef LV2_SUPPORT
+	boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugin->_plugins[0]);
+	if (lv2plugin) {
+		node.add_property (X_("symbol"), lv2plugin->port_symbol (parameter().id()));
+	}
+#endif
 
 	return node;
 }
