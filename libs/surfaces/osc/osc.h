@@ -145,7 +145,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *, const char *, lo_arg **, int, void *) { \
+        int cb_ ## name (const char *, const char *types, lo_arg ** argv, int argc, void *) { \
+		if (argc > 0 && !strcmp (types, "f") && argv[0]->f != 1.0) { return 0; } \
 		name (); \
 		return 0; \
 	}
