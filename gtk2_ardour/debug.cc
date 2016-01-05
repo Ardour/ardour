@@ -30,3 +30,4 @@ PBD::DebugBits PBD::DEBUG::CutNPaste = PBD::new_debug_bit ("cutnpaste");
 PBD::DebugBits PBD::DEBUG::Accelerators = PBD::new_debug_bit ("accelerators");
 PBD::DebugBits PBD::DEBUG::GUITiming = PBD::new_debug_bit ("guitiming");
 PBD::DebugBits PBD::DEBUG::EngineControl = PBD::new_debug_bit ("enginecontrol");
+PBD::DebugBits PBD::DEBUG::Selection = PBD::new_debug_bit ("selection");
