@@ -4161,9 +4161,12 @@ Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 
 	dialog.add_button (_("Delete All Unused"), RESPONSE_YES); // needs clarification. this and all remaining ones
 	dialog.add_button (_("Delete Playlist"), RESPONSE_ACCEPT);
-	dialog.add_button (_("Keep Playlist"), RESPONSE_REJECT);
+	Button* keep = dialog.add_button (_("Keep Playlist"), RESPONSE_REJECT);
 	dialog.add_button (_("Keep Remaining"), RESPONSE_NO); // ditto
 	dialog.add_button (_("Cancel"), RESPONSE_CANCEL);
+
+	// by default gtk uses the left most button
+	keep->grab_focus ();
 
 	switch (dialog.run ()) {
 	case RESPONSE_NO:
