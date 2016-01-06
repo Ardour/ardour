@@ -1408,7 +1408,6 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, framepos_t position
 	 {
 		 PropertyList plist;
 
-		 plist.add (Properties::position, region->position ());
 		 plist.add (Properties::length, before);
 		 plist.add (Properties::name, before_name);
 		 plist.add (Properties::left_of_split, true);
@@ -1427,7 +1426,6 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, framepos_t position
 	 {
 		 PropertyList plist;
 
-		 plist.add (Properties::position, region->position() + before);
 		 plist.add (Properties::length, after);
 		 plist.add (Properties::name, after_name);
 		 plist.add (Properties::right_of_split, true);
