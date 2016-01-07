@@ -17,21 +17,6 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-/* use an additional midi message parser
- *
- * coreaudio does packetize midi. every packet includes a timestamp.
- * With any real midi-device with a phyical layer
- * 1 packet = 1 event (no concurrent events are possible on a cable)
- *
- * Howver, some USB-midi keyboards manage to send concurrent events
- * which end up in the same packet (eg. 6 byte message: 2 note-on).
- *
- * An additional parser is needed to separate them
- */
-#define USE_MIDI_PARSER
-
-
 #include <regex.h>
 #include <sys/mman.h>
 #include <sys/time.h>
@@ -119,13 +104,6 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _dsp_load (0)
 	, _processed_samples (0)
 	, _port_change_flag (false)
-#ifdef USE_MIDI_PARSER
-	, _unbuffered_bytes(0)
-	, _total_bytes(0)
-	, _expected_bytes(0)
-	, _status_byte(0)
-	, _parser_bytes(0)
-#endif
 {
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
@@ -1365,6 +1343,7 @@ CoreAudioBackend::midi_event_get (
 	return 0;
 }
 
+
 int
 CoreAudioBackend::midi_event_put (
 		void* port_buffer,
@@ -1383,6 +1362,7 @@ CoreAudioBackend::midi_event_put (
 	dst.push_back (boost::shared_ptr<CoreMidiEvent>(new CoreMidiEvent (timestamp, buffer, size)));
 	return 0;
 }
+
 
 uint32_t
 CoreAudioBackend::get_midi_event_count (void* port_buffer)
@@ -1674,101 +1654,6 @@ CoreAudioBackend::freewheel_thread ()
 	}
 	return 0;
 }
-
-#ifdef USE_MIDI_PARSER
-bool
-CoreAudioBackend::midi_process_byte (const uint8_t byte)
-{
-	if (byte >= 0xf8) {
-		// Realtime
-		if (byte == 0xfd) {
-			// undefined
-			return false;
-		}
-		midi_prepare_byte_event (byte);
-		return true;
-	}
-	if (byte == 0xf7) {
-		// Sysex end
-		if (_status_byte == 0xf0) {
-			midi_record_byte (byte);
-			return midi_prepare_buffered_event ();
-		}
-		_total_bytes = 0;
-		_unbuffered_bytes = 0;
-		_expected_bytes = 0;
-		_status_byte = 0;
-		return false;
-	}
-	if (byte >= 0x80) {
-		// Non-realtime status byte
-		if (_total_bytes) {
-			_total_bytes = 0;
-			_unbuffered_bytes = 0;
-		}
-		_status_byte = byte;
-		switch (byte & 0xf0) {
-			case 0x80:
-			case 0x90:
-			case 0xa0:
-			case 0xb0:
-			case 0xe0:
-				// Note On, Note Off, Aftertouch, Control Change, Pitch Wheel
-				_expected_bytes = 3;
-				break;
-			case 0xc0:
-			case 0xd0:
-				// Program Change, Channel Pressure
-				_expected_bytes = 2;
-				break;
-			case 0xf0:
-				switch (byte) {
-					case 0xf0:
-						// Sysex
-						_expected_bytes = 0;
-						break;
-					case 0xf1:
-					case 0xf3:
-						// MTC Quarter Frame, Song Select
-						_expected_bytes = 2;
-						break;
-					case 0xf2:
-						// Song Position
-						_expected_bytes = 3;
-						break;
-					case 0xf4:
-					case 0xf5:
-						// Undefined
-						_expected_bytes = 0;
-						_status_byte = 0;
-						return false;
-					case 0xf6:
-						// Tune Request
-						midi_prepare_byte_event (byte);
-						_expected_bytes = 0;
-						_status_byte = 0;
-						return true;
-				}
-		}
-		midi_record_byte (byte);
-		return false;
-	}
-	// Data byte
-	if (! _status_byte) {
-		// Data bytes without a status will be discarded.
-		_total_bytes++;
-		_unbuffered_bytes++;
-		return false;
-	}
-	if (! _total_bytes) {
-		midi_record_byte (_status_byte);
-	}
-	midi_record_byte(byte);
-	return (_total_bytes == _expected_bytes) ? midi_prepare_buffered_event() : false;
-}
-#endif
-
-
 int
 CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t host_time)
 {
@@ -1816,39 +1701,20 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	/* get midi */
 	i=0;
 	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
-		CoreMidiBuffer* mbuf = static_cast<CoreMidiBuffer*>((*it)->get_buffer(0));
-		mbuf->clear();
-		uint64_t time_ns;
-		uint8_t data[128]; // matches CoreMidi's MIDIPacket
-		size_t size = sizeof(data);
-		while (_midiio->recv_event (i, nominal_time, time_ns, data, size)) {
-			pframes_t time = floor((float) time_ns * _samplerate * 1e-9);
-			assert (time < n_samples);
-#ifndef USE_MIDI_PARSER
-			midi_event_put((void*)mbuf, time, data, size);
-#else
-			assert (size < 128);// coremidi limit per packet
-			bool first_time = true; // this would need to be rememberd per port.
-			for (size_t mb = 0; mb < size; ++mb) {
-				if (first_time && !(data[mb] & 0x80)) {
-					/* expect a status byte at the beginning or every Packet.
-					 *
-					 * This parser drops messages spanning multiple packets
-					 * (sysex > 127 bytes).
-					 * see also libs/backends/alsa/alsa_rawmidi.cc
-					 * which implements a complete parser per port without this limit.
-					 */
-					continue;
-				}
-				first_time = false;
-
-				if (midi_process_byte (data[mb])) {
-					midi_event_put ((void*)mbuf, time, _parser_buffer, _parser_bytes);
-				}
-			}
-#endif
-			size = sizeof(data);
-		}
+                CoreMidiPort* port = dynamic_cast<CoreMidiPort*> (*it);
+                if (!port) {
+                        continue;
+                }
+                uint64_t time_ns;
+                uint8_t data[128]; // matches CoreMidi's MIDIPacket
+                size_t size = sizeof(data);
+                
+                while (_midiio->recv_event (i, nominal_time, time_ns, data, size)) {
+                        pframes_t time = floor((float) time_ns * _samplerate * 1e-9);
+                        assert (time < n_samples);
+                        port->parse_events (time, data, size);
+                        size = sizeof(data); /* prepare for next call to recv_event */
+                }
 	}
 
 	/* get audio */
@@ -2186,6 +2052,13 @@ CoreMidiPort::CoreMidiPort (CoreAudioBackend &b, const std::string& name, PortFl
 	: CoreBackendPort (b, name, flags)
 	, _n_periods (1)
 	, _bufperiod (0)
+        , _event (0, 0)
+        , _first_time(true)
+        , _unbuffered_bytes(0)
+        , _total_bytes(0)
+        , _expected_bytes(0)
+        , _status_byte(0)
+
 {
 	_buffer[0].clear ();
 	_buffer[1].clear ();
@@ -2213,8 +2086,160 @@ void* CoreMidiPort::get_buffer (pframes_t /* nframes */)
 		}
 		std::sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
 	}
+        if (!_buffer[_bufperiod].empty()) {
+                fprintf (stderr, "COREMIDI: %s have data in buffer (%d events)\n", name().c_str(), _buffer[_bufperiod].size());
+        }
 	return &(_buffer[_bufperiod]);
 }
+
+int
+CoreMidiPort::queue_event (
+        void* port_buffer,
+        pframes_t timestamp,
+        const uint8_t* buffer, size_t size)
+{
+	if (!buffer || !port_buffer) return -1;
+        _event._pending = false;
+	CoreMidiBuffer& dst = * static_cast<CoreMidiBuffer*>(port_buffer);
+	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
+#ifndef NDEBUG
+		// nevermind, ::get_buffer() sorts events
+		fprintf (stderr, "CoreMidiBuffer: unordered event: %d > %d\n",
+				(pframes_t)dst.back ()->timestamp (), timestamp);
+#endif
+	}
+        fprintf (stderr, "coremidi: queue event/buffer size %d @ %d\n", size, timestamp);
+	dst.push_back (boost::shared_ptr<CoreMidiEvent>(new CoreMidiEvent (timestamp, buffer, size)));
+	return 0;
+}
+
+void
+CoreMidiPort::parse_events (const uint64_t time, const uint8_t *data, const size_t size) 
+{
+        CoreMidiBuffer* mbuf = static_cast<CoreMidiBuffer*>(get_buffer(0));
+
+        mbuf->clear();
+        
+	if (_event._pending) {
+		if (queue_event (mbuf, _event._time, _parser_buffer, _event._size)) {
+			return;
+		}
+	}
+
+	for (size_t i = 0; i < size; ++i) {
+		if (_first_time && !(data[i] & 0x80)) {
+			continue;
+		}
+
+		_first_time = false; 
+                
+		if (process_byte(time, data[i])) {
+			if (queue_event (mbuf, _event._time, _parser_buffer, _event._size)) {
+				return;
+			}
+		}
+	}
+}
+
+// based on JackMidiRawInputWriteQueue by Devin Anderson //
+bool
+CoreMidiPort::process_byte(const uint64_t time, const uint8_t byte)
+{
+	if (byte >= 0xf8) {
+		// Realtime
+		if (byte == 0xfd) {
+			return false;
+		}
+		_parser_buffer[0] = byte;
+		prepare_byte_event(time, byte);
+		return true;
+	}
+	if (byte == 0xf7) {
+		// Sysex end
+		if (_status_byte == 0xf0) {
+			record_byte(byte);
+			return prepare_buffered_event(time);
+		}
+    _total_bytes = 0;
+    _unbuffered_bytes = 0;
+		_expected_bytes = 0;
+		_status_byte = 0;
+		return false;
+	}
+	if (byte >= 0x80) {
+		// Non-realtime status byte
+		if (_total_bytes) {
+			printf ("CoreMidiPort: discarded bogus midi message\n");
+#if 0
+			for (size_t i=0; i < _total_bytes; ++i) {
+				printf("%02x ", _parser_buffer[i]);
+			}
+			printf("\n");
+#endif
+			_total_bytes = 0;
+			_unbuffered_bytes = 0;
+		}
+		_status_byte = byte;
+		switch (byte & 0xf0) {
+			case 0x80:
+			case 0x90:
+			case 0xa0:
+			case 0xb0:
+			case 0xe0:
+				// Note On, Note Off, Aftertouch, Control Change, Pitch Wheel
+				_expected_bytes = 3;
+				break;
+			case 0xc0:
+			case 0xd0:
+				// Program Change, Channel Pressure
+				_expected_bytes = 2;
+				break;
+			case 0xf0:
+				switch (byte) {
+					case 0xf0:
+						// Sysex
+						_expected_bytes = 0;
+						break;
+					case 0xf1:
+					case 0xf3:
+						// MTC Quarter Frame, Song Select
+						_expected_bytes = 2;
+						break;
+					case 0xf2:
+						// Song Position
+						_expected_bytes = 3;
+						break;
+					case 0xf4:
+					case 0xf5:
+						// Undefined
+						_expected_bytes = 0;
+						_status_byte = 0;
+						return false;
+					case 0xf6:
+						// Tune Request
+						prepare_byte_event(time, byte);
+						_expected_bytes = 0;
+						_status_byte = 0;
+						return true;
+				}
+		}
+		record_byte(byte);
+		return false;
+	}
+	// Data byte
+	if (! _status_byte) {
+		// Data bytes without a status will be discarded.
+		_total_bytes++;
+		_unbuffered_bytes++;
+		return false;
+	}
+	if (! _total_bytes) {
+		record_byte(_status_byte);
+	}
+	record_byte(byte);
+	return (_total_bytes == _expected_bytes) ? prepare_buffered_event(time) : false;
+}
+
 
 CoreMidiEvent::CoreMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size)
 	: _size (size)
