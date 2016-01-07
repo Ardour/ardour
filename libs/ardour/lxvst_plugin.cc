@@ -17,6 +17,10 @@
 
 */
 
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
+#include "ardour/filesystem_paths.h"
 #include "ardour/linux_vst_support.h"
 #include "ardour/session.h"
 #include "ardour/lxvst_plugin.h"
@@ -92,6 +96,68 @@ LXVSTPluginInfo::load (Session& session)
 	catch (failed_constructor &err) {
 		return PluginPtr ((Plugin*) 0);
 	}
+}
+
+std::vector<Plugin::PresetRecord>
+LXVSTPluginInfo::get_presets(Session&)
+{
+	std::vector<Plugin::PresetRecord> p;
+#ifndef NO_PLUGIN_STATE
+	if (!Config->get_use_lxvst()) {
+		return p;
+	}
+
+#if 0 // TODO - cache, instantiating the plugin can be heavy
+	/* Built-in presets */
+	VSTHandle* handle = vstfx_load(path.c_str());
+	Session::vst_current_loading_id = atoi (unique_id);
+	AEffect* plugin = handle->main_entry (Session::vst_callback);
+	Session::vst_current_loading_id = 0;
+
+	plugin->dispatcher (plugin, effOpen, 0, 0, 0, 0); // :(
+	int const vst_version = plugin->dispatcher (plugin, effGetVstVersion, 0, 0, NULL, 0);
+
+	for (int i = 0; i < plugin->numPrograms; ++i) {
+		Plugin::PresetRecord r (string_compose (X_("VST:%1:%2"), unique_id, i), "", false);
+		if (vst_version >= 2) {
+			char buf[256];
+			if (plugin->dispatcher (plugin, 29, i, 0, buf, 0) == 1) {
+				r.label = buf;
+			} else {
+				r.label = string_compose (_("Preset %1"), i);
+			}
+		} else {
+			r.label = string_compose (_("Preset %1"), i);
+		}
+		p.push_back (r);
+	}
+
+	plugin->dispatcher (plugin, effMainsChanged, 0, 0, 0, 0);
+	plugin->dispatcher (plugin, effClose, 0, 0, 0, 0); // :(
+
+	if (handle->plugincnt) {
+		handle->plugincnt--;
+	}
+	vstfx_unload (handle);
+#endif
+	/* user presets */
+	XMLTree* t = new XMLTree;
+	std::string pf = Glib::build_filename (ARDOUR::user_config_directory (), "presets", string_compose ("vst-%1", unique_id));
+	if (Glib::file_test (pf, Glib::FILE_TEST_EXISTS)) {
+		t->set_filename (pf);
+		if (t->read ()) {
+			XMLNode* root = t->root ();
+			for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
+				XMLProperty* uri = (*i)->property (X_("uri"));
+				XMLProperty* label = (*i)->property (X_("label"));
+				p.push_back (Plugin::PresetRecord (uri->value(), label->value(), true));
+			}
+		}
+	}
+	delete t;
+#endif
+
+	return p;
 }
 
 LXVSTPluginInfo::LXVSTPluginInfo()
