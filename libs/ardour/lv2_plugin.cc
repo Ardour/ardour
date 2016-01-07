@@ -2622,6 +2622,47 @@ LV2PluginInfo::load(Session& session)
 	return PluginPtr();
 }
 
+std::vector<Plugin::PresetRecord>
+LV2PluginInfo::get_presets(Session&)
+{
+	std::vector<Plugin::PresetRecord> p;
+#ifndef NO_PLUGIN_STATE
+	const LilvPlugin* lp = NULL;
+	try {
+		PluginPtr plugin;
+		const LilvPlugins* plugins = lilv_world_get_all_plugins(_world.world);
+		LilvNode* uri = lilv_new_uri(_world.world, _plugin_uri);
+		if (!uri) { throw failed_constructor(); }
+		lp = lilv_plugins_get_by_uri(plugins, uri);
+		if (!lp) { throw failed_constructor(); }
+		lilv_node_free(uri);
+	} catch (failed_constructor& err) {
+		return p;
+	}
+	assert (lp);
+	// see LV2Plugin::find_presets
+	LilvNode* lv2_appliesTo = lilv_new_uri(_world.world, LV2_CORE__appliesTo);
+	LilvNode* pset_Preset   = lilv_new_uri(_world.world, LV2_PRESETS__Preset);
+	LilvNode* rdfs_label    = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
+
+	LilvNodes* presets = lilv_plugin_get_related(lp, pset_Preset);
+	LILV_FOREACH(nodes, i, presets) {
+		const LilvNode* preset = lilv_nodes_get(presets, i);
+		lilv_world_load_resource(_world.world, preset);
+		LilvNode* name = get_value(_world.world, preset, rdfs_label);
+		if (name) {
+			p.push_back (Plugin::PresetRecord(lilv_node_as_string(preset), lilv_node_as_string(name)));
+			lilv_node_free(name);
+		}
+	}
+	lilv_nodes_free(presets);
+	lilv_node_free(rdfs_label);
+	lilv_node_free(pset_Preset);
+	lilv_node_free(lv2_appliesTo);
+#endif
+	return p;
+}
+
 bool
 LV2PluginInfo::in_category (const std::string &c) const
 {
