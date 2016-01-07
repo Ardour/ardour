@@ -2358,7 +2358,7 @@ Mixer_UI::popup_note_context_menu (GdkEventButton *ev)
 	items.push_back (MenuElem (_("Remove from favorites"), sigc::mem_fun (*this, &Mixer_UI::remove_selected_from_favorites)));
 
 	ARDOUR::PluginPresetPtr ppp = selected_plugin();
-	if (ppp && ppp->_preset.valid) {
+	if (ppp && ppp->_preset.valid && ppp->_preset.user) {
 		items.push_back (MenuElem (_("Delete Preset"), sigc::mem_fun (*this, &Mixer_UI::delete_selected_preset)));
 	}
 
@@ -2418,7 +2418,7 @@ Mixer_UI::delete_selected_preset ()
 		return;
 	}
 	ARDOUR::PluginPresetPtr ppp = selected_plugin();
-	if (!ppp || !ppp->_preset.valid) {
+	if (!ppp || !ppp->_preset.valid || !ppp->_preset.user) {
 		return;
 	}
 	PluginPtr plugin = ppp->_pip->load (*_session);
