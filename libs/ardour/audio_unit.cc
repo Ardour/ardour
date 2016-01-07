@@ -2124,16 +2124,16 @@ static bool au_preset_filter (const string& str, void* arg)
 		   include "<manufacturer>/<plugin-name>" in their path.
 		*/
 
-		Plugin* p = (Plugin *) arg;
-		string match = p->maker();
+		AUPluginInfo* p = (AUPluginInfo *) arg;
+		string match = p->creator;
 		match += '/';
-		match += p->name();
+		match += p->name;
 
 		ret = str.find (match) != string::npos;
 
 		if (ret == false) {
-			string m = p->maker ();
-			string n = p->name ();
+			string m = p->creator;
+			string n = p->name;
 			strip_whitespace_edges (m);
 			strip_whitespace_edges (n);
 			match = m;
@@ -2285,7 +2285,10 @@ AUPlugin::find_presets ()
 
 	user_preset_map.clear ();
 
-	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter, this, true, true, true);
+	PluginInfoPtr nfo = get_info();
+	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter,
+			boost::dynamic_pointer_cast<AUPluginInfo> (nfo).get(),
+			true, true, true);
 
 	if (preset_files.empty()) {
 		DEBUG_TRACE (DEBUG::AudioUnits, "AU No Preset Files found for given plugin.\n");
@@ -2378,6 +2381,81 @@ AUPluginInfo::load (Session& session)
 		DEBUG_TRACE (DEBUG::AudioUnits, "failed to load component/plugin\n");
 		return PluginPtr ();
 	}
+}
+
+std::vector<Plugin::PresetRecord>
+AUPluginInfo::get_presets(Session& session)
+{
+	std::vector<Plugin::PresetRecord> p;
+	boost::shared_ptr<CAComponent> comp;
+#ifndef NO_PLUGIN_STATE
+	try {
+		comp = boost::shared_ptr<CAComponent>(new CAComponent(*descriptor));
+		if (!comp->IsValid()) {
+			throw failed_constructor();
+		}
+	} catch (failed_constructor& err) {
+		return p;
+	}
+
+	// user presets
+
+	if (!preset_search_path_initialized) {
+		Glib::ustring p = Glib::get_home_dir();
+		p += "/Library/Audio/Presets:";
+		p += preset_search_path;
+		preset_search_path = p;
+		preset_search_path_initialized = true;
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Preset Path: %1\n", preset_search_path));
+	}
+
+	vector<string> preset_files;
+	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter, this, true, true, true);
+
+	for (vector<string>::iterator x = preset_files.begin(); x != preset_files.end(); ++x) {
+		string path = *x;
+		string preset_name;
+		preset_name = Glib::path_get_basename (path);
+		preset_name = preset_name.substr (0, preset_name.find_last_of ('.'));
+		if (check_and_get_preset_name (comp.get()->Comp(), path, preset_name)) {
+			p.push_back (Plugin::PresetRecord (path, preset_name));
+		}
+	}
+
+	// factory presets
+
+	CFArrayRef presets;
+	UInt32 dataSize;
+	Boolean isWritable;
+
+	boost::shared_ptr<CAAudioUnit> unit (new CAAudioUnit);
+	if (noErr != CAAudioUnit::Open (*(comp.get()), *unit)) {
+		return p;
+	}
+	if (noErr != unit->GetPropertyInfo (kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, &dataSize, &isWritable)) {
+		unit->Uninitialize ();
+		return p;
+	}
+	if (noErr != unit->GetProperty (kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, (void*) &presets, &dataSize)) {
+		unit->Uninitialize ();
+		return p;
+	}
+	if (!presets) {
+		unit->Uninitialize ();
+		return p;
+	}
+
+	CFIndex cnt = CFArrayGetCount (presets);
+	for (CFIndex i = 0; i < cnt; ++i) {
+		AUPreset* preset = (AUPreset*) CFArrayGetValueAtIndex (presets, i);
+		string const uri = string_compose ("%1", i);
+		string name = CFStringRefToStdString (preset->presetName);
+		p.push_back (Plugin::PresetRecord (uri, name, false));
+	}
+	CFRelease (presets);
+	unit->Uninitialize ();
+#endif // NO_PLUGIN_STATE
+	return p;
 }
 
 Glib::ustring
