@@ -75,8 +75,11 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	switch (direction) {
 	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
-			//for mouse-wheel zoom, force zoom-focus to mouse
-			temporal_zoom_step_mouse_focus (false);
+			if (UIConfiguration::instance().get_use_mouse_position_as_zoom_focus_on_scroll()) {
+				temporal_zoom_step_mouse_focus (false);
+			} else {
+				temporal_zoom_step (false);
+			}
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
 			scroll_left_step ();
@@ -101,8 +104,11 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
-			//for mouse-wheel zoom, force zoom-focus to mouse
-			temporal_zoom_step_mouse_focus (true);
+			if (UIConfiguration::instance().get_use_mouse_position_as_zoom_focus_on_scroll()) {
+				temporal_zoom_step_mouse_focus (true);
+			} else {
+				temporal_zoom_step (true);
+			}
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
 			scroll_right_step ();
@@ -1025,8 +1031,7 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 			if (Keyboard::modifier_state_equals(event->scroll.state,
 			                                    Keyboard::ScrollHorizontalModifier)) {
 				scroll_left_half_page ();
-			} else if (Profile->get_mixbus()) {
-				//for mouse-wheel zoom, force zoom-focus to mouse
+			} else if (UIConfiguration::instance().get_use_mouse_position_as_zoom_focus_on_scroll()) {
 				temporal_zoom_step_mouse_focus (false);
 			} else {
 				temporal_zoom_step (false);
@@ -1038,8 +1043,7 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 			if (Keyboard::modifier_state_equals(event->scroll.state,
 			                                    Keyboard::ScrollHorizontalModifier)) {
 				scroll_right_half_page ();
-			} else if (Profile->get_mixbus()) {
-				//for mouse-wheel zoom, force zoom-focus to mouse
+			} else if (UIConfiguration::instance().get_use_mouse_position_as_zoom_focus_on_scroll()) {
 				temporal_zoom_step_mouse_focus (true);
 			} else {
 				temporal_zoom_step (true);

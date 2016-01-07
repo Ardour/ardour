@@ -2108,6 +2108,14 @@ if (!Profile->get_mixbus()) {
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_zoom_tools),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_zoom_tools)
 			    ));
+
+	add_option (_("Editor"),
+		    new BoolOption (
+			    "use-mouse-position-as-zoom-focus-on-scroll",
+			    _("Always use mouse cursor position as zoom focus when zooming using mouse scroll wheel"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_mouse_position_as_zoom_focus_on_scroll),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_mouse_position_as_zoom_focus_on_scroll)
+			    ));
 }  // !mixbus
 
 	add_option (_("Editor"),
