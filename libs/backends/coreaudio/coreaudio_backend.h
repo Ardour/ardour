@@ -349,7 +349,9 @@ class CoreAudioBackend : public AudioBackend {
 
 		/* MIDI */
 		int midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index);
-		int midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
+	        int midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size) {
+                        return _midi_event_put (port_buffer, timestamp, buffer, size);
+                }
 
 		uint32_t get_midi_event_count (void* port_buffer);
 		void     midi_clear (void* port_buffer);
@@ -381,6 +383,8 @@ class CoreAudioBackend : public AudioBackend {
 		void* freewheel_thread ();
 		void pre_process ();
 		void coremidi_rediscover ();
+
+	        static int _midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
 
 	private:
 		std::string _instance_name;

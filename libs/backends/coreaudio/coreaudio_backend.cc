@@ -1343,9 +1343,8 @@ CoreAudioBackend::midi_event_get (
 	return 0;
 }
 
-
 int
-CoreAudioBackend::midi_event_put (
+CoreAudioBackend::_midi_event_put (
 		void* port_buffer,
 		pframes_t timestamp,
 		const uint8_t* buffer, size_t size)
