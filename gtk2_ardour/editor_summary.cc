@@ -695,7 +695,8 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 	switch (ev->direction) {
 		case GDK_SCROLL_UP:
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
-				x -= 64;
+				_editor->scroll_left_half_page ();
+				return true;
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 				_editor->temporal_zoom_step (false);
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
@@ -709,7 +710,8 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 			break;
 		case GDK_SCROLL_DOWN:
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
-				x += 64;
+				_editor->scroll_right_half_page ();
+				return true;
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 				_editor->temporal_zoom_step (true);
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
@@ -727,7 +729,8 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
 				x -= 1;
 			} else {
-				x -= 8;
+				_editor->scroll_left_half_page ();
+				return true;
 			}
 			break;
 		case GDK_SCROLL_RIGHT:
@@ -736,7 +739,8 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
 				x += 1;
 			} else {
-				x += 8;
+				_editor->scroll_right_half_page ();
+				return true;
 			}
 			break;
 		default:
