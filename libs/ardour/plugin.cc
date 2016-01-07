@@ -86,6 +86,16 @@ PluginInfo::is_instrument () const
 	return (n_inputs.n_midi() != 0) && (n_outputs.n_audio() > 0);
 }
 
+std::vector<Plugin::PresetRecord>
+PluginInfo::get_presets(Session& session) {
+	PluginPtr plugin = load (session);
+	if (plugin) {
+		return plugin->get_presets();
+	} else {
+		return std::vector<Plugin::PresetRecord> ();
+	}
+}
+
 Plugin::Plugin (AudioEngine& e, Session& s)
 	: _engine (e)
 	, _session (s)

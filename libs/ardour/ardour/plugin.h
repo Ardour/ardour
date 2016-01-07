@@ -336,6 +336,8 @@ class LIBARDOUR_API PluginInfo {
 	virtual bool is_instrument() const;
 	virtual bool in_category (const std::string &) const { return false; }
 
+	virtual std::vector<Plugin::PresetRecord> get_presets(Session& session);
+
 	/* NOTE: this block of virtual methods looks like the interface
 	   to a Processor, but Plugin does not inherit from Processor.
 	   It is therefore not required that these precisely match
