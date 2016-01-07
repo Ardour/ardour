@@ -2839,7 +2839,6 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 void
 ARDOUR_UI::load_from_application_api (const std::string& path)
 {
-	printf("ARDOUR_UI::load_from_application_api\n");
 	ARDOUR_COMMAND_LINE::session_name = path;
 	/* Cancel SessionDialog if it's visible to make OSX delegates work.
 	 *
