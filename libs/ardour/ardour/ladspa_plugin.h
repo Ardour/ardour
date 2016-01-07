@@ -151,6 +151,7 @@ class LIBARDOUR_API LadspaPluginInfo : public PluginInfo {
 	~LadspaPluginInfo () { };
 
 	PluginPtr load (Session& session);
+	virtual std::vector<Plugin::PresetRecord> get_presets(Session& session);
 };
 
 typedef boost::shared_ptr<LadspaPluginInfo> LadspaPluginInfoPtr;

@@ -738,6 +738,29 @@ LadspaPluginInfo::load (Session& session)
 	}
 }
 
+std::vector<Plugin::PresetRecord>
+LadspaPluginInfo::get_presets(Session& session)
+{
+	std::vector<Plugin::PresetRecord> p;
+#if (defined HAVE_LRDF && !defined NO_PLUGIN_STATE)
+	if (!isdigit (unique_id[0])) {
+		return p;
+	}
+	uint32_t id = atol (unique_id);
+	lrdf_uris* set_uris = lrdf_get_setting_uris(id);
+
+	if (set_uris) {
+		for (uint32_t i = 0; i < (uint32_t) set_uris->count; ++i) {
+			if (char* label = lrdf_get_label (set_uris->items[i])) {
+				p.push_back (Plugin::PresetRecord (set_uris->items[i], label));
+			}
+		}
+		lrdf_free_uris(set_uris);
+	}
+#endif
+	return p;
+}
+
 LadspaPluginInfo::LadspaPluginInfo()
 {
        type = ARDOUR::LADSPA;
