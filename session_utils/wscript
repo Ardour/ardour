@@ -17,6 +17,15 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
+    if not "dummy" in conf.env['BACKENDS']:
+        print ('session-utils depend on the dummy backend.')
+        autowaf.display_msg(conf, 'build session-utils', 'no')
+        return
+    # no wine
+    if Options.options.windows_vst and Options.options.dist_target != 'mingw':
+        autowaf.display_msg(conf, 'build session-utils', 'no')
+        return
+    autowaf.display_msg(conf, 'build session-utils', 'yes')
     conf.load('misc')
     conf.load('compiler_cxx')
     autowaf.configure(conf)
@@ -65,6 +74,9 @@ def build_ardour_util(bld, util):
 
 def build(bld):
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
+    # session-utils depend on the dummy backend
+    if not "dummy" in bld.env['BACKENDS']:
+        return
     # no wine
     if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
         return
