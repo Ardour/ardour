@@ -72,7 +72,6 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 
 	Duple event_coords = _track_canvas->window_to_canvas (Duple (ev->x, ev->y));
 
-  retry:
 	switch (direction) {
 	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
@@ -83,8 +82,8 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			zoom_focus = temp_focus;
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
-			direction = GDK_SCROLL_LEFT;
-			goto retry;
+			scroll_left_step ();
+			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
@@ -112,8 +111,8 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			zoom_focus = temp_focus;
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
-			direction = GDK_SCROLL_RIGHT;
-			goto retry;
+			scroll_right_step ();
+			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
