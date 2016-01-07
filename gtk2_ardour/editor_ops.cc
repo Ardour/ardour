@@ -1687,6 +1687,14 @@ Editor::tav_zoom_smooth (bool coarser, bool force_all)
 	}
 }
 
+void
+Editor::temporal_zoom_step_mouse_focus (bool coarser)
+{
+	Editing::ZoomFocus temp_focus = zoom_focus;
+	zoom_focus = Editing::ZoomFocusMouse;
+	temporal_zoom_step (coarser);
+	zoom_focus = temp_focus;
+}
 
 void
 Editor::temporal_zoom_step (bool coarser)
