@@ -76,10 +76,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 			//for mouse-wheel zoom, force zoom-focus to mouse
-			Editing::ZoomFocus temp_focus = zoom_focus;
-			zoom_focus = Editing::ZoomFocusMouse;
-			temporal_zoom_step (false);
-			zoom_focus = temp_focus;
+			temporal_zoom_step_mouse_focus (false);
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
 			scroll_left_step ();
@@ -105,10 +102,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 			//for mouse-wheel zoom, force zoom-focus to mouse
-			Editing::ZoomFocus temp_focus = zoom_focus;
-			zoom_focus = Editing::ZoomFocusMouse;
-			temporal_zoom_step (true);
-			zoom_focus = temp_focus;
+			temporal_zoom_step_mouse_focus (true);
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
 			scroll_right_step ();
@@ -1033,10 +1027,7 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 				scroll_left_half_page ();
 			} else if (Profile->get_mixbus()) {
 				//for mouse-wheel zoom, force zoom-focus to mouse
-				Editing::ZoomFocus temp_focus = zoom_focus;
-				zoom_focus = Editing::ZoomFocusMouse;
-				temporal_zoom_step (false);
-				zoom_focus = temp_focus;
+				temporal_zoom_step_mouse_focus (false);
 			} else {
 				temporal_zoom_step (false);
 			}
@@ -1049,10 +1040,7 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 				scroll_right_half_page ();
 			} else if (Profile->get_mixbus()) {
 				//for mouse-wheel zoom, force zoom-focus to mouse
-				Editing::ZoomFocus temp_focus = zoom_focus;
-				zoom_focus = Editing::ZoomFocusMouse;
-				temporal_zoom_step (true);
-				zoom_focus = temp_focus;
+				temporal_zoom_step_mouse_focus (true);
 			} else {
 				temporal_zoom_step (true);
 			}
