@@ -338,6 +338,8 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	ButtonID id (ButtonID (tb->controller_number));
 	Button& button (get_button (id));
 
+        DEBUG_TRACE (DEBUG::FaderPort, string_compose ("button event for ID %1, press ? %2\n", tb->controller_number, tb->value ? "yes" : "no"));
+
 	if (tb->value) {
 		buttons_down.insert (id);
 	} else {
@@ -515,6 +517,8 @@ FaderPort::fader_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 void
 FaderPort::sysex_handler (MIDI::Parser &p, MIDI::byte *buf, size_t sz)
 {
+        DEBUG_TRACE (DEBUG::FaderPort, string_compose ("sysex message received, size = %1\n", sz));
+
 	if (sz < 17) {
 		return;
 	}
@@ -845,6 +849,7 @@ FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1,
 		*/
 
 		g_usleep (100000);
+                DEBUG_TRACE (DEBUG::FaderPort, "device now connected for both input and output\n");
 		connected ();
 
 	} else {
@@ -862,7 +867,7 @@ FaderPort::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1,
 void
 FaderPort::connected ()
 {
-	DEBUG_TRACE (DEBUG::FaderPort, "connection status changed\n");
+	DEBUG_TRACE (DEBUG::FaderPort, "sending device inquiry message...\n");
 
 	start_midi_handling ();
 
