@@ -1913,7 +1913,6 @@ LV2Plugin::cleanup()
 {
 	DEBUG_TRACE(DEBUG::LV2, string_compose("%1 cleanup\n", name()));
 
-	activate();
 	deactivate();
 	lilv_instance_free(_impl->instance);
 	_impl->instance = NULL;
