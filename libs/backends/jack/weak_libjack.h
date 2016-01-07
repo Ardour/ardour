@@ -195,7 +195,13 @@ int have_libjack(void);
 #endif
 
 // prototype for function currently only available in jack1 headers
-int jack_port_rename (jack_client_t* client, jack_port_t *port, const char *port_name);
+#ifdef __cplusplus
+extern "C" {
+#endif
+        int jack_port_rename (jack_client_t* client, jack_port_t *port, const char *port_name);
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef USE_WEAK_JACK
 
