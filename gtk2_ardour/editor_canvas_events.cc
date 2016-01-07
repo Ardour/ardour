@@ -64,7 +64,6 @@ using Gtkmm2ext::Keyboard;
 bool
 Editor::track_canvas_scroll (GdkEventScroll* ev)
 {
-	framepos_t xdelta;
 	int direction = ev->direction;
 
 	/* this event arrives without transformation by the canvas, so we have
@@ -134,21 +133,13 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		break;
 
 	case GDK_SCROLL_LEFT:
-		xdelta = (current_page_samples() / 8);
-		if (leftmost_frame > xdelta) {
-			reset_x_origin (leftmost_frame - xdelta);
-		} else {
-			reset_x_origin (0);
-		}
+		scroll_left_step ();
+		return true;
 		break;
 
 	case GDK_SCROLL_RIGHT:
-		xdelta = (current_page_samples() / 8);
-		if (max_framepos - xdelta > leftmost_frame) {
-			reset_x_origin (leftmost_frame + xdelta);
-		} else {
-			reset_x_origin (max_framepos - current_page_samples());
-		}
+		scroll_right_step ();
+		return true;
 		break;
 
 	default:
