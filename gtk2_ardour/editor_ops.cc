@@ -1589,6 +1589,31 @@ Editor::scroll_up_one_track (bool skip_child_views)
 	return false;
 }
 
+void
+Editor::scroll_left_step ()
+{
+	framepos_t xdelta = (current_page_samples() / 8);
+
+	if (leftmost_frame > xdelta) {
+		reset_x_origin (leftmost_frame - xdelta);
+	} else {
+		reset_x_origin (0);
+	}
+}
+
+
+void
+Editor::scroll_right_step ()
+{
+	framepos_t xdelta = (current_page_samples() / 8);
+
+	if (max_framepos - xdelta > leftmost_frame) {
+		reset_x_origin (leftmost_frame + xdelta);
+	} else {
+		reset_x_origin (max_framepos - current_page_samples());
+	}
+}
+
 /* ZOOM */
 
 void

@@ -374,6 +374,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool scroll_up_one_track (bool skip_child_views = false);
 	bool scroll_down_one_track (bool skip_child_views = false);
 
+	void scroll_left_step ();
+	void scroll_right_step ();
+
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
 
