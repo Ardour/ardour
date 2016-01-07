@@ -1614,6 +1614,28 @@ Editor::scroll_right_step ()
 	}
 }
 
+void
+Editor::scroll_left_half_page ()
+{
+	framepos_t xdelta = (current_page_samples() / 2);
+	if (leftmost_frame > xdelta) {
+		reset_x_origin (leftmost_frame - xdelta);
+	} else {
+		reset_x_origin (0);
+	}
+}
+
+void
+Editor::scroll_right_half_page ()
+{
+	framepos_t xdelta = (current_page_samples() / 2);
+	if (max_framepos - xdelta > leftmost_frame) {
+		reset_x_origin (leftmost_frame + xdelta);
+	} else {
+		reset_x_origin (max_framepos - current_page_samples());
+	}
+}
+
 /* ZOOM */
 
 void
