@@ -47,6 +47,7 @@ public:
 	~WindowsVSTPluginInfo () {}
 
 	PluginPtr load (Session& session);
+	virtual std::vector<Plugin::PresetRecord> get_presets(Session&);
 };
 
 } // namespace ARDOUR

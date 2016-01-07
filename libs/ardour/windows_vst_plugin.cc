@@ -19,6 +19,10 @@
 
 #include "fst.h"
 
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
+#include "ardour/filesystem_paths.h"
 #include "ardour/windows_vst_plugin.h"
 #include "ardour/session.h"
 
@@ -88,6 +92,37 @@ WindowsVSTPluginInfo::load (Session& session)
 	catch (failed_constructor &err) {
 		return PluginPtr ((Plugin*) 0);
 	}
+}
+
+std::vector<Plugin::PresetRecord>
+WindowsVSTPluginInfo::get_presets(Session&)
+{
+	std::vector<Plugin::PresetRecord> p;
+#ifndef NO_PLUGIN_STATE
+	if (!Config->get_use_lxvst()) {
+		return p;
+	}
+
+	// TODO cache and load factory-preset names
+
+	/* user presets */
+	XMLTree* t = new XMLTree;
+	std::string pf = Glib::build_filename (ARDOUR::user_config_directory (), "presets", string_compose ("vst-%1", unique_id));
+	if (Glib::file_test (pf, Glib::FILE_TEST_EXISTS)) {
+		t->set_filename (pf);
+		if (t->read ()) {
+			XMLNode* root = t->root ();
+			for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
+				XMLProperty* uri = (*i)->property (X_("uri"));
+				XMLProperty* label = (*i)->property (X_("label"));
+				p.push_back (Plugin::PresetRecord (uri->value(), label->value(), true));
+			}
+		}
+	}
+	delete t;
+#endif
+
+	return p;
 }
 
 WindowsVSTPluginInfo::WindowsVSTPluginInfo()
