@@ -194,7 +194,7 @@ int have_libjack(void);
 #include <jack/metadata.h>
 #endif
 
-// prototype for function currently only available in jack1 headers
+// prototype for function which is not available in older jack headers
 #ifdef __cplusplus
 extern "C" {
 #endif
