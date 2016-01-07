@@ -1028,8 +1028,10 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 
 		switch (event->scroll.direction) {
 		case GDK_SCROLL_UP:
-
-			if (Profile->get_mixbus()) {
+			if (Keyboard::modifier_state_equals(event->scroll.state,
+			                                    Keyboard::ScrollHorizontalModifier)) {
+				scroll_left_half_page ();
+			} else if (Profile->get_mixbus()) {
 				//for mouse-wheel zoom, force zoom-focus to mouse
 				Editing::ZoomFocus temp_focus = zoom_focus;
 				zoom_focus = Editing::ZoomFocusMouse;
@@ -1042,7 +1044,10 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 			break;
 
 		case GDK_SCROLL_DOWN:
-			if (Profile->get_mixbus()) {
+			if (Keyboard::modifier_state_equals(event->scroll.state,
+			                                    Keyboard::ScrollHorizontalModifier)) {
+				scroll_right_half_page ();
+			} else if (Profile->get_mixbus()) {
 				//for mouse-wheel zoom, force zoom-focus to mouse
 				Editing::ZoomFocus temp_focus = zoom_focus;
 				zoom_focus = Editing::ZoomFocusMouse;
