@@ -150,6 +150,7 @@ class CoreMidiPort : public CoreBackendPort {
 		void set_n_periods(int n) { if (n > 0 && n < 3) { _n_periods = n; } }
 
         void parse_events (const uint64_t time, const uint8_t *data, const size_t size);
+        void clear_events ();
 
 	private:
 		CoreMidiBuffer _buffer[2];
@@ -158,7 +159,7 @@ class CoreMidiPort : public CoreBackendPort {
 
         int queue_event (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
 	bool process_byte (const uint64_t, const uint8_t);
-
+        
 	void record_byte(uint8_t byte) {
 		if (_total_bytes < sizeof(_parser_buffer)) {
 			_parser_buffer[_total_bytes] = byte;

@@ -1707,7 +1707,9 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
                 uint64_t time_ns;
                 uint8_t data[128]; // matches CoreMidi's MIDIPacket
                 size_t size = sizeof(data);
-                
+
+                port->clear_events ();
+
                 while (_midiio->recv_event (i, nominal_time, time_ns, data, size)) {
                         pframes_t time = floor((float) time_ns * _samplerate * 1e-9);
                         assert (time < n_samples);
@@ -2079,6 +2081,9 @@ void* CoreMidiPort::get_buffer (pframes_t /* nframes */)
 				i != get_connections ().end ();
 				++i) {
 			const CoreMidiBuffer * src = static_cast<const CoreMidiPort*>(*i)->const_buffer ();
+                        if (!src->empty()) {
+                                fprintf (stderr, "Copying %d events from %s\n", src->size(), (*i)->name().c_str());
+                        }
 			for (CoreMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				(_buffer[_bufperiod]).push_back (boost::shared_ptr<CoreMidiEvent>(new CoreMidiEvent (**it)));
 			}
@@ -2097,20 +2102,15 @@ CoreMidiPort::queue_event (
         pframes_t timestamp,
         const uint8_t* buffer, size_t size)
 {
-	if (!buffer || !port_buffer) return -1;
-        _event._pending = false;
-	CoreMidiBuffer& dst = * static_cast<CoreMidiBuffer*>(port_buffer);
-	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
-#ifndef NDEBUG
-		// nevermind, ::get_buffer() sorts events
-		fprintf (stderr, "CoreMidiBuffer: unordered event: %d > %d\n",
-				(pframes_t)dst.back ()->timestamp (), timestamp);
-#endif
-	}
-        fprintf (stderr, "coremidi: queue event/buffer size %d @ %d\n", size, timestamp);
-	dst.push_back (boost::shared_ptr<CoreMidiEvent>(new CoreMidiEvent (timestamp, buffer, size)));
-	return 0;
+        return CoreAudioBackend::_midi_event_put (port_buffer, timestamp, buffer, size);
 }
+
+void
+CoreMidiPort::clear_events ()
+{
+        CoreMidiBuffer* mbuf = static_cast<CoreMidiBuffer*>(get_buffer(0));
+        mbuf->clear();
+}        
 
 void
 CoreMidiPort::parse_events (const uint64_t time, const uint8_t *data, const size_t size) 
