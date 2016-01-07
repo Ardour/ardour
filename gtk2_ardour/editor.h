@@ -377,6 +377,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void scroll_left_step ();
 	void scroll_right_step ();
 
+	void scroll_left_half_page ();
+	void scroll_right_half_page ();
+
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
 

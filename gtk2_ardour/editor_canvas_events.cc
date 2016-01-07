@@ -1018,7 +1018,6 @@ Editor::canvas_meter_marker_event (GdkEvent *event, ArdourCanvas::Item* item, Me
 bool
 Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType type)
 {
-	framepos_t xdelta;
 	bool handled = false;
 
 	if (event->type == GDK_SCROLL) {
@@ -1056,22 +1055,12 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 			break;
 
 		case GDK_SCROLL_LEFT:
-			xdelta = (current_page_samples() / 2);
-			if (leftmost_frame > xdelta) {
-				reset_x_origin (leftmost_frame - xdelta);
-			} else {
-				reset_x_origin (0);
-			}
+			scroll_left_half_page ();
 			handled = true;
 			break;
 
 		case GDK_SCROLL_RIGHT:
-			xdelta = (current_page_samples() / 2);
-			if (max_framepos - xdelta > leftmost_frame) {
-				reset_x_origin (leftmost_frame + xdelta);
-			} else {
-				reset_x_origin (max_framepos - current_page_samples());
-			}
+			scroll_right_half_page ();
 			handled = true;
 			break;
 
