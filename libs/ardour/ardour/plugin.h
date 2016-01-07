@@ -48,45 +48,9 @@ class Session;
 class BufferSet;
 class PluginInsert;
 class Plugin;
+class PluginInfo;
 
 typedef boost::shared_ptr<Plugin> PluginPtr;
-
-class LIBARDOUR_API PluginInfo {
-  public:
-	PluginInfo () { }
-	virtual ~PluginInfo () { }
-
-	std::string name;
-	std::string category;
-	std::string creator;
-	std::string path;
-	ChanCount n_inputs;
-	ChanCount n_outputs;
-	ARDOUR::PluginType type;
-
-	std::string unique_id;
-
-	virtual PluginPtr load (Session& session) = 0;
-	virtual bool is_instrument() const;
-	virtual bool in_category (const std::string &) const { return false; }
-
-	/* NOTE: this block of virtual methods looks like the interface
-	   to a Processor, but Plugin does not inherit from Processor.
-	   It is therefore not required that these precisely match
-	   the interface, but it is likely that they will evolve together.
-	*/
-
-	/* this returns true if the plugin can change its inputs or outputs on demand.
-	   LADSPA, LV2 and VST plugins cannot do this. AudioUnits can.
-	*/
-
-	virtual bool reconfigurable_io() const { return false; }
-
-  protected:
-	friend class PluginManager;
-	uint32_t index;
-};
-
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
 typedef std::list<PluginInfoPtr> PluginInfoList;
 
@@ -352,6 +316,42 @@ typedef boost::shared_ptr<PluginPreset> PluginPresetPtr;
 typedef std::list<PluginPresetPtr> PluginPresetList;
 
 PluginPtr find_plugin(ARDOUR::Session&, std::string unique_id, ARDOUR::PluginType);
+
+class LIBARDOUR_API PluginInfo {
+  public:
+	PluginInfo () { }
+	virtual ~PluginInfo () { }
+
+	std::string name;
+	std::string category;
+	std::string creator;
+	std::string path;
+	ChanCount n_inputs;
+	ChanCount n_outputs;
+	ARDOUR::PluginType type;
+
+	std::string unique_id;
+
+	virtual PluginPtr load (Session& session) = 0;
+	virtual bool is_instrument() const;
+	virtual bool in_category (const std::string &) const { return false; }
+
+	/* NOTE: this block of virtual methods looks like the interface
+	   to a Processor, but Plugin does not inherit from Processor.
+	   It is therefore not required that these precisely match
+	   the interface, but it is likely that they will evolve together.
+	*/
+
+	/* this returns true if the plugin can change its inputs or outputs on demand.
+	   LADSPA, LV2 and VST plugins cannot do this. AudioUnits can.
+	*/
+
+	virtual bool reconfigurable_io() const { return false; }
+
+  protected:
+	friend class PluginManager;
+	uint32_t index;
+};
 
 } // namespace ARDOUR
 
