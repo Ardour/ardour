@@ -2318,9 +2318,7 @@ Mixer_UI::sync_treeview_from_favorite_order ()
 			continue;
 		}
 
-		PluginPtr plugin = (*i)->load (*_session);
-
-		vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets();
+		vector<ARDOUR::Plugin::PresetRecord> presets = (*i)->get_presets(*_session);
 		for (vector<ARDOUR::Plugin::PresetRecord>::const_iterator j = presets.begin(); j != presets.end(); ++j) {
 			Gtk::TreeModel::Row child_row = *(favorite_plugins_model->append (newrow.children()));
 			child_row[favorite_plugins_columns.name] = (*j).label;
