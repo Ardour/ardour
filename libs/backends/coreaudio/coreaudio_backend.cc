@@ -2103,9 +2103,7 @@ void* CoreMidiPort::get_buffer (pframes_t /* nframes */)
 		}
 		std::sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
 	}
-	if (!_buffer[_bufperiod].empty()) {
-		fprintf (stderr, "COREMIDI: %s have data in buffer (%d events)\n", name().c_str(), _buffer[_bufperiod].size());
-	}
+
 	return &(_buffer[_bufperiod]);
 }
 
