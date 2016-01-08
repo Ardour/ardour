@@ -2257,8 +2257,8 @@ public:
 	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
 		PluginInfoList::const_iterator aiter = _user.begin();
 		PluginInfoList::const_iterator biter = _user.begin();
-		while (aiter != _user.end()) { if ((*aiter)->name == a->name) { break; } ++aiter; }
-		while (biter != _user.end()) { if ((*biter)->name == b->name) { break; } ++biter; }
+		while (aiter != _user.end()) { if ((*aiter)->unique_id == a->unique_id) { break; } ++aiter; }
+		while (biter != _user.end()) { if ((*biter)->unique_id == b->unique_id) { break; } ++biter; }
 
 		if (aiter != _user.end() && biter != _user.end()) {
 			return std::distance (_user.begin(), aiter) < std::distance (_user.begin(), biter);
