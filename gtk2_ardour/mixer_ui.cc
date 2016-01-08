@@ -2255,11 +2255,13 @@ Mixer_UI::refiller (PluginInfoList& result, const PluginInfoList& plugs)
 struct PluginCustomSorter {
 public:
 	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
-		PluginInfoList::const_iterator aiter = std::find(_user.begin(), _user.end(), a);
-		PluginInfoList::const_iterator biter = std::find(_user.begin(), _user.end(), b);
+		PluginInfoList::const_iterator aiter = _user.begin();
+		PluginInfoList::const_iterator biter = _user.begin();
+		while (aiter != _user.end()) { if ((*aiter)->name == a->name) { break; } ++aiter; }
+		while (biter != _user.end()) { if ((*biter)->name == b->name) { break; } ++biter; }
 
 		if (aiter != _user.end() && biter != _user.end()) {
-			return std::distance (_user.begin(), aiter)  < std::distance (_user.begin(), biter);
+			return std::distance (_user.begin(), aiter) < std::distance (_user.begin(), biter);
 		}
 		if (aiter != _user.end()) {
 			return true;
