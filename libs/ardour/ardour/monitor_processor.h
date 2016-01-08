@@ -154,6 +154,8 @@ public:
 	bool dim_all () const;
 	bool mono () const;
 
+	bool monitor_active () const { return _monitor_active; }
+
 	PBD::Signal0<void> Changed;
 
 	boost::shared_ptr<PBD::Controllable> channel_cut_control (uint32_t) const;
@@ -198,6 +200,8 @@ private:
 	std::vector<ChannelRecord*> _channels;
 
 	uint32_t             solo_cnt;
+	bool                 _monitor_active;
+
 
 	/* pointers - created first, but managed by boost::shared_ptr<> */
 
@@ -224,6 +228,7 @@ private:
 	MPControl<volatile gain_t>& _solo_boost_level;
 
 	void allocate_channels (uint32_t);
+	void update_monitor_state ();
 };
 
 } /* namespace */

@@ -49,6 +49,7 @@ namespace ARDOUR {
 MonitorProcessor::MonitorProcessor (Session& s)
         : Processor (s, X_("MonitorOut"))
         , solo_cnt (0)
+        , _monitor_active (false)
 
         , _dim_all_ptr (new MPControl<bool> (false, _("monitor dim"), Controllable::Toggle))
         , _cut_all_ptr (new MPControl<bool> (false, _("monitor cut"), Controllable::Toggle))
@@ -218,7 +219,8 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
                 }
         }
 
-        return 0;
+	update_monitor_state ();
+	return 0;
 }
 
 XMLNode&
@@ -363,61 +365,68 @@ MonitorProcessor::can_support_io_configuration (const ChanCount& in, ChanCount& 
 void
 MonitorProcessor::set_polarity (uint32_t chn, bool invert)
 {
-        if (invert) {
-                _channels[chn]->polarity = -1.0f;
-        } else {
-                _channels[chn]->polarity = 1.0f;
-        }
+	if (invert) {
+		_channels[chn]->polarity = -1.0f;
+	} else {
+		_channels[chn]->polarity = 1.0f;
+	}
+	update_monitor_state ();
 }
 
 void
 MonitorProcessor::set_dim (uint32_t chn, bool yn)
 {
-        _channels[chn]->dim = yn;
+	_channels[chn]->dim = yn;
+	update_monitor_state ();
 }
 
 void
 MonitorProcessor::set_cut (uint32_t chn, bool yn)
 {
-        if (yn) {
-                _channels[chn]->cut = GAIN_COEFF_ZERO;
-        } else {
-                _channels[chn]->cut = GAIN_COEFF_UNITY;
-        }
+	if (yn) {
+		_channels[chn]->cut = GAIN_COEFF_ZERO;
+	} else {
+		_channels[chn]->cut = GAIN_COEFF_UNITY;
+	}
+	update_monitor_state ();
 }
 
 void
 MonitorProcessor::set_solo (uint32_t chn, bool solo)
 {
-        if (solo != _channels[chn]->soloed) {
-                _channels[chn]->soloed = solo;
+	if (solo != _channels[chn]->soloed) {
+		_channels[chn]->soloed = solo;
 
-                if (solo) {
-                        solo_cnt++;
-                } else {
-                        if (solo_cnt > 0) {
-                                solo_cnt--;
-                        }
-                }
-        }
+		if (solo) {
+			solo_cnt++;
+		} else {
+			if (solo_cnt > 0) {
+				solo_cnt--;
+			}
+		}
+	}
+	update_monitor_state ();
 }
 
 void
 MonitorProcessor::set_mono (bool yn)
 {
-        _mono = yn;
+	_mono = yn;
+	update_monitor_state ();
 }
 
 void
 MonitorProcessor::set_cut_all (bool yn)
 {
-        _cut_all = yn;
+	_cut_all = yn;
+	update_monitor_state ();
 }
 
 void
 MonitorProcessor::set_dim_all (bool yn)
 {
-        _dim_all = yn;
+	_dim_all = yn;
+	update_monitor_state ();
 }
 
 bool
@@ -468,6 +477,29 @@ bool
 MonitorProcessor::cut_all () const
 {
         return _cut_all;
+}
+
+void
+MonitorProcessor::update_monitor_state ()
+{
+	bool en = false;
+
+	if (_cut_all || _dim_all || _mono) {
+		en = true;
+	}
+
+	const uint32_t nchans = _channels.size();
+	for (uint32_t i = 0; i < nchans && !en; ++i) {
+		if (cut (i) || dimmed (i) || soloed (i) || inverted (i)) {
+			en = true;
+			break;
+		}
+	}
+
+	if (_monitor_active != en) {
+		_monitor_active = en;
+		_session.MonitorChanged();
+	}
 }
 
 boost::shared_ptr<Controllable>

@@ -57,11 +57,13 @@
 #include "ardour/chan_count.h"
 #include "ardour/delivery.h"
 #include "ardour/interthread_info.h"
+#include "ardour/location.h"
+#include "ardour/monitor_processor.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session_configuration.h"
 #include "ardour/session_event.h"
-#include "ardour/location.h"
 #include "ardour/interpolation.h"
+#include "ardour/route.h"
 #include "ardour/route_graph.h"
 
 
@@ -749,6 +751,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	PBD::Signal1<void,bool> SoloActive;
 	PBD::Signal0<void> SoloChanged;
 	PBD::Signal0<void> IsolatedChanged;
+	PBD::Signal0<void> MonitorChanged;
 
 	PBD::Signal0<void> session_routes_reconnected;
 
@@ -757,6 +760,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void add_monitor_section ();
 	void reset_monitor_section ();
 	void remove_monitor_section ();
+	bool monitor_active() const { return (_monitor_out && _monitor_out->monitor_control () && _monitor_out->monitor_control ()->monitor_active()); }
 
 	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
 	boost::shared_ptr<Route> master_out() const { return _master_out; }
