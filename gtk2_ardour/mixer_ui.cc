@@ -799,6 +799,8 @@ Mixer_UI::set_session (Session* sess)
 		return;
 	}
 
+	refill_favorite_plugins();
+
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	set_state (*node);
 
@@ -821,8 +823,6 @@ Mixer_UI::set_session (Session* sess)
 	if (_visible) {
 		show_window();
 	}
-
-	refill_favorite_plugins();
 	start_updating ();
 }
 
