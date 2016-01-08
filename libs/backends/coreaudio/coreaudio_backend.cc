@@ -2094,9 +2094,6 @@ void* CoreMidiPort::get_buffer (pframes_t /* nframes */)
 		     i != get_connections ().end ();
 		     ++i) {
 			const CoreMidiBuffer * src = static_cast<const CoreMidiPort*>(*i)->const_buffer ();
-			if (!src->empty()) {
-				fprintf (stderr, "Copying %d events from %s\n", src->size(), (*i)->name().c_str());
-			}
 			for (CoreMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				(_buffer[_bufperiod]).push_back (boost::shared_ptr<CoreMidiEvent>(new CoreMidiEvent (**it)));
 			}
