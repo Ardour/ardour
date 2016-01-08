@@ -110,6 +110,7 @@ class MonitorSection : public RouteUI
 
 	static Glib::RefPtr<Gtk::ActionGroup> monitor_actions;
 	void register_actions ();
+	void connect_actions ();
 
 	void cut_channel (uint32_t);
 	void dim_channel (uint32_t);

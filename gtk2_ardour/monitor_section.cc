@@ -92,11 +92,9 @@ MonitorSection::MonitorSection (Session* s)
 	Glib::RefPtr<Action> act;
 
 	if (!monitor_actions) {
-
-		/* do some static stuff */
-
 		register_actions ();
-
+	} else {
+		connect_actions ();
 	}
 
 	_plugin_selector = new PluginSelector (PluginManager::instance());
@@ -917,6 +915,60 @@ MonitorSection::register_actions ()
 			sigc::mem_fun (*this, &MonitorSection::solo_use_pfl));
 
 	ActionManager::add_action_group (solo_actions);
+}
+
+void
+MonitorSection::connect_actions ()
+{
+	Glib::RefPtr<Action> act;
+	Glib::RefPtr<ToggleAction> tact;
+
+#define MON_TOG(NAME, FUNC) \
+	act = ActionManager::get_action (X_("Monitor"), NAME); \
+	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act); \
+	assert (tact); \
+	tact->signal_toggled().connect (sigc::mem_fun (*this, &MonitorSection::FUNC)); \
+
+	MON_TOG("monitor-mono", mono);
+	MON_TOG("monitor-cut-all", cut_all);
+	MON_TOG("monitor-dim-all", dim_all);
+
+	MON_TOG("toggle-exclusive-solo", toggle_exclusive_solo);
+	tact->set_active (Config->get_exclusive_solo());
+
+	MON_TOG("toggle-mute-overrides-solo", toggle_mute_overrides_solo);
+	tact->set_active (Config->get_solo_mute_override());
+#undef MON_TOG
+
+#define MON_BIND(NAME, FUNC, ARG) \
+	act = ActionManager::get_action (X_("Monitor"), NAME); \
+	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act); \
+	assert (tact); \
+	tact->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MonitorSection::FUNC), ARG));
+
+	for (uint32_t chn = 0; chn < 16; ++chn) {
+		std::string action_name = string_compose (X_("monitor-cut-%1"), chn);
+		MON_BIND(action_name.c_str(), cut_channel, chn);
+		action_name = string_compose (X_("monitor-dim-%1"), chn);
+		MON_BIND(action_name.c_str(), dim_channel, chn);
+		action_name = string_compose (X_("monitor-solo-%1"), chn);
+		MON_BIND(action_name.c_str(), solo_channel, chn);
+		action_name = string_compose (X_("monitor-invert-%1"), chn);
+		MON_BIND(action_name.c_str(), invert_channel, chn);
+	}
+#undef MON_BIND
+
+#define SOLO_RADIO(NAME, FUNC) \
+	act = ActionManager::get_action (X_("Solo"), NAME); \
+	ract = Glib::RefPtr<RadioAction>::cast_dynamic (act); \
+	assert (ract); \
+	ract->signal_toggled().connect (sigc::mem_fun (*this, &MonitorSection::FUNC)); \
+
+	Glib::RefPtr<RadioAction> ract;
+	SOLO_RADIO ("solo-use-in-place", solo_use_in_place);
+	SOLO_RADIO ("solo-use-afl", solo_use_afl);
+	SOLO_RADIO ("solo-use-pfl", solo_use_pfl);
+#undef SOLO_RADIO
 }
 
 void
