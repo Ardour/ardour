@@ -525,60 +525,60 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	printf("STATE: %d\n", _pcmio->state ());
 #endif
 	switch (_pcmio->state ()) {
-		case 0: /* OK */
-			break;
-		case -1:
-			PBD::error << _("CoreAudioBackend: Invalid Device ID.") << endmsg;
-			error_code = AudioDeviceInvalidError;
-			break;
-		case -2:
-			PBD::error << _("CoreAudioBackend: Failed to resolve Device-Component by ID.") << endmsg;
-			error_code = AudioDeviceNotAvailableError;
-			break;
-		case -3:
-			PBD::error << _("CoreAudioBackend: failed to open device.") << endmsg;
-			error_code = AudioDeviceOpenError;
-			break;
-		case -4:
-			PBD::error << _("CoreAudioBackend: cannot set requested sample rate.") << endmsg;
-			error_code = SampleRateNotSupportedError;
-			break;
-		case -5:
-			PBD::error << _("CoreAudioBackend: cannot configure requested buffer size.") << endmsg;
-			error_code = PeriodSizeNotSupportedError;
-			break;
-		case -6:
-			PBD::error << _("CoreAudioBackend: unsupported sample format.") << endmsg;
-			error_code = SampleFormatNotSupportedError;
-			break;
-		case -7:
-			PBD::error << _("CoreAudioBackend: Failed to enable Device.") << endmsg;
-			error_code = BackendInitializationError; // XXX
-			break;
-		case -8:
-			PBD::error << _("CoreAudioBackend: Cannot allocate buffers, out-of-memory.") << endmsg;
-			error_code = OutOfMemoryError;
-			break;
-		case -9:
-			PBD::error << _("CoreAudioBackend: Failed to set device-property listeners.") << endmsg;
-			error_code = BackendInitializationError; // XXX
-			break;
-		case -10:
-			PBD::error << _("CoreAudioBackend: Setting Process Callback failed.") << endmsg;
-			error_code = AudioDeviceIOError;
-			break;
-		case -11:
-			PBD::error << _("CoreAudioBackend: cannot use requested period size.") << endmsg;
-			error_code = PeriodSizeNotSupportedError;
-			break;
-		case -12:
-			PBD::error << _("CoreAudioBackend: cannot create aggregate device.") << endmsg;
-			error_code = DeviceConfigurationNotSupportedError;
-			break;
-		default:
-			PBD::error << _("CoreAudioBackend: initialization failure.") << endmsg;
-			error_code = BackendInitializationError;
-			break;
+	case 0: /* OK */
+		break;
+	case -1:
+		PBD::error << _("CoreAudioBackend: Invalid Device ID.") << endmsg;
+		error_code = AudioDeviceInvalidError;
+		break;
+	case -2:
+		PBD::error << _("CoreAudioBackend: Failed to resolve Device-Component by ID.") << endmsg;
+		error_code = AudioDeviceNotAvailableError;
+		break;
+	case -3:
+		PBD::error << _("CoreAudioBackend: failed to open device.") << endmsg;
+		error_code = AudioDeviceOpenError;
+		break;
+	case -4:
+		PBD::error << _("CoreAudioBackend: cannot set requested sample rate.") << endmsg;
+		error_code = SampleRateNotSupportedError;
+		break;
+	case -5:
+		PBD::error << _("CoreAudioBackend: cannot configure requested buffer size.") << endmsg;
+		error_code = PeriodSizeNotSupportedError;
+		break;
+	case -6:
+		PBD::error << _("CoreAudioBackend: unsupported sample format.") << endmsg;
+		error_code = SampleFormatNotSupportedError;
+		break;
+	case -7:
+		PBD::error << _("CoreAudioBackend: Failed to enable Device.") << endmsg;
+		error_code = BackendInitializationError; // XXX
+		break;
+	case -8:
+		PBD::error << _("CoreAudioBackend: Cannot allocate buffers, out-of-memory.") << endmsg;
+		error_code = OutOfMemoryError;
+		break;
+	case -9:
+		PBD::error << _("CoreAudioBackend: Failed to set device-property listeners.") << endmsg;
+		error_code = BackendInitializationError; // XXX
+		break;
+	case -10:
+		PBD::error << _("CoreAudioBackend: Setting Process Callback failed.") << endmsg;
+		error_code = AudioDeviceIOError;
+		break;
+	case -11:
+		PBD::error << _("CoreAudioBackend: cannot use requested period size.") << endmsg;
+		error_code = PeriodSizeNotSupportedError;
+		break;
+	case -12:
+		PBD::error << _("CoreAudioBackend: cannot create aggregate device.") << endmsg;
+		error_code = DeviceConfigurationNotSupportedError;
+		break;
+	default:
+		PBD::error << _("CoreAudioBackend: initialization failure.") << endmsg;
+		error_code = BackendInitializationError;
+		break;
 	}
 	if (_pcmio->state ()) {
 		return error_code;
@@ -586,18 +586,18 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 
 	if (_n_outputs != _pcmio->n_playback_channels ()) {
 		if (_n_outputs == 0) {
-		 _n_outputs = _pcmio->n_playback_channels ();
+			_n_outputs = _pcmio->n_playback_channels ();
 		} else {
-		 _n_outputs = std::min (_n_outputs, _pcmio->n_playback_channels ());
+			_n_outputs = std::min (_n_outputs, _pcmio->n_playback_channels ());
 		}
 		PBD::info << _("CoreAudioBackend: adjusted output channel count to match device.") << endmsg;
 	}
 
 	if (_n_inputs != _pcmio->n_capture_channels ()) {
 		if (_n_inputs == 0) {
-		 _n_inputs = _pcmio->n_capture_channels ();
+			_n_inputs = _pcmio->n_capture_channels ();
 		} else {
-		 _n_inputs = std::min (_n_inputs, _pcmio->n_capture_channels ());
+			_n_inputs = std::min (_n_inputs, _pcmio->n_capture_channels ());
 		}
 		PBD::info << _("CoreAudioBackend: adjusted input channel count to match device.") << endmsg;
 	}
@@ -740,10 +740,10 @@ size_t
 CoreAudioBackend::raw_buffer_size (DataType t)
 {
 	switch (t) {
-		case DataType::AUDIO:
-			return _samples_per_period * sizeof(Sample);
-		case DataType::MIDI:
-			return _max_buffer_size; // XXX not really limited
+	case DataType::AUDIO:
+		return _samples_per_period * sizeof(Sample);
+	case DataType::MIDI:
+		return _max_buffer_size; // XXX not really limited
 	}
 	return 0;
 }
@@ -811,7 +811,7 @@ CoreAudioBackend::create_process_thread (boost::function<void()> func)
 	ThreadData* td = new ThreadData (this, func, stacksize);
 
 	if (_realtime_pthread_create (SCHED_FIFO, -21, stacksize,
-				&thread_id, coreaudio_process_thread, td)) {
+	                              &thread_id, coreaudio_process_thread, td)) {
 		pthread_attr_init (&attr);
 		pthread_attr_setstacksize (&attr, stacksize);
 		if (pthread_create (&thread_id, &attr, coreaudio_process_thread, td)) {
@@ -944,9 +944,9 @@ CoreAudioBackend::get_port_by_name (const std::string& name) const
 
 int
 CoreAudioBackend::get_ports (
-		const std::string& port_name_pattern,
-		DataType type, PortFlags flags,
-		std::vector<std::string>& port_names) const
+	const std::string& port_name_pattern,
+	DataType type, PortFlags flags,
+	std::vector<std::string>& port_names) const
 {
 	int rv = 0;
 	regex_t port_regex;
@@ -982,9 +982,9 @@ CoreAudioBackend::port_data_type (PortEngine::PortHandle port) const
 
 PortEngine::PortHandle
 CoreAudioBackend::register_port (
-		const std::string& name,
-		ARDOUR::DataType type,
-		ARDOUR::PortFlags flags)
+	const std::string& name,
+	ARDOUR::DataType type,
+	ARDOUR::PortFlags flags)
 {
 	if (name.size () == 0) { return 0; }
 	if (flags & IsPhysical) { return 0; }
@@ -993,27 +993,27 @@ CoreAudioBackend::register_port (
 
 PortEngine::PortHandle
 CoreAudioBackend::add_port (
-		const std::string& name,
-		ARDOUR::DataType type,
-		ARDOUR::PortFlags flags)
+	const std::string& name,
+	ARDOUR::DataType type,
+	ARDOUR::PortFlags flags)
 {
 	assert(name.size ());
 	if (find_port (name)) {
 		PBD::warning << _("CoreAudioBackend::register_port: Port already exists:")
-				<< " (" << name << ")" << endmsg;
+		             << " (" << name << ")" << endmsg;
 		return 0;
 	}
 	CoreBackendPort* port = NULL;
 	switch (type) {
-		case DataType::AUDIO:
-			port = new CoreAudioPort (*this, name, flags);
-			break;
-		case DataType::MIDI:
-			port = new CoreMidiPort (*this, name, flags);
-			break;
-		default:
-			PBD::error << _("CoreAudioBackend::register_port: Invalid Data Type.") << endmsg;
-			return 0;
+	case DataType::AUDIO:
+		port = new CoreAudioPort (*this, name, flags);
+		break;
+	case DataType::MIDI:
+		port = new CoreMidiPort (*this, name, flags);
+		break;
+	default:
+		PBD::error << _("CoreAudioBackend::register_port: Invalid Data Type.") << endmsg;
+		return 0;
 	}
 
 	_ports.push_back (port);
@@ -1051,8 +1051,8 @@ CoreAudioBackend::register_system_audio_ports()
 
 #ifndef NDEBUG
 	printf("COREAUDIO LATENCY: i:%d, o:%d\n",
-			coreaudio_reported_input_latency,
-			coreaudio_reported_output_latency);
+	       coreaudio_reported_input_latency,
+	       coreaudio_reported_output_latency);
 #endif
 
 	/* audio ports */
@@ -1211,12 +1211,12 @@ CoreAudioBackend::connect (const std::string& src, const std::string& dst)
 
 	if (!src_port) {
 		PBD::warning << _("CoreAudioBackend::connect: Invalid Source port:")
-				<< " (" << src <<")" << endmsg;
+		             << " (" << src <<")" << endmsg;
 		return -1;
 	}
 	if (!dst_port) {
 		PBD::warning << _("CoreAudioBackend::connect: Invalid Destination port:")
-			<< " (" << dst <<")" << endmsg;
+		             << " (" << dst <<")" << endmsg;
 		return -1;
 	}
 	return src_port->connect (dst_port);
@@ -1245,7 +1245,7 @@ CoreAudioBackend::connect (PortEngine::PortHandle src, const std::string& dst)
 	}
 	if (!dst_port) {
 		PBD::warning << _("CoreAudioBackend::connect: Invalid Destination Port")
-			<< " (" << dst << ")" << endmsg;
+		             << " (" << dst << ")" << endmsg;
 		return -1;
 	}
 	return static_cast<CoreBackendPort*>(src)->connect (dst_port);
@@ -1326,9 +1326,9 @@ CoreAudioBackend::get_connections (PortEngine::PortHandle port, std::vector<std:
 /* MIDI */
 int
 CoreAudioBackend::midi_event_get (
-		pframes_t& timestamp,
-		size_t& size, uint8_t** buf, void* port_buffer,
-		uint32_t event_index)
+	pframes_t& timestamp,
+	size_t& size, uint8_t** buf, void* port_buffer,
+	uint32_t event_index)
 {
 	if (!buf || !port_buffer) return -1;
 	CoreMidiBuffer& source = * static_cast<CoreMidiBuffer*>(port_buffer);
@@ -1345,9 +1345,9 @@ CoreAudioBackend::midi_event_get (
 
 int
 CoreAudioBackend::_midi_event_put (
-		void* port_buffer,
-		pframes_t timestamp,
-		const uint8_t* buffer, size_t size)
+	void* port_buffer,
+	pframes_t timestamp,
+	const uint8_t* buffer, size_t size)
 {
 	if (!buffer || !port_buffer) return -1;
 	CoreMidiBuffer& dst = * static_cast<CoreMidiBuffer*>(port_buffer);
@@ -1355,7 +1355,7 @@ CoreAudioBackend::_midi_event_put (
 #ifndef NDEBUG
 		// nevermind, ::get_buffer() sorts events
 		fprintf (stderr, "CoreMidiBuffer: unordered event: %d > %d\n",
-				(pframes_t)dst.back ()->timestamp (), timestamp);
+		         (pframes_t)dst.back ()->timestamp (), timestamp);
 #endif
 	}
 	dst.push_back (boost::shared_ptr<CoreMidiEvent>(new CoreMidiEvent (timestamp, buffer, size)));
@@ -1487,9 +1487,9 @@ CoreAudioBackend::n_physical_outputs () const
 		CoreBackendPort* port = _ports[i];
 		if (port->is_output () && port->is_physical ()) {
 			switch (port->type ()) {
-				case DataType::AUDIO: ++n_audio; break;
-				case DataType::MIDI: ++n_midi; break;
-				default: break;
+			case DataType::AUDIO: ++n_audio; break;
+			case DataType::MIDI: ++n_midi; break;
+			default: break;
 			}
 		}
 	}
@@ -1508,9 +1508,9 @@ CoreAudioBackend::n_physical_inputs () const
 		CoreBackendPort* port = _ports[i];
 		if (port->is_input () && port->is_physical ()) {
 			switch (port->type ()) {
-				case DataType::AUDIO: ++n_audio; break;
-				case DataType::MIDI: ++n_midi; break;
-				default: break;
+			case DataType::AUDIO: ++n_audio; break;
+			case DataType::MIDI: ++n_midi; break;
+			default: break;
 			}
 		}
 	}
@@ -1565,12 +1565,12 @@ CoreAudioBackend::pre_process ()
 void
 CoreAudioBackend::reset_midi_parsers ()
 {
-        for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-                CoreMidiPort* port = dynamic_cast<CoreMidiPort*>(*it);
-                if (port) {
-                        port->reset_parser ();
-                }
-        }
+	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+		CoreMidiPort* port = dynamic_cast<CoreMidiPort*>(*it);
+		if (port) {
+			port->reset_parser ();
+		}
+	}
 }
 
 void *
@@ -1598,7 +1598,7 @@ CoreAudioBackend::freewheel_thread ()
 				_freewheel = false; // first mark as disabled
 				_reinit_thread_callback = true; // hand over _main_thread
 				_freewheel_ack = false; // prepare next handshake
-                                reset_midi_parsers ();
+				reset_midi_parsers ();
 				_midiio->set_enabled(true);
 				engine.freewheel_callback (_freewheeling);
 			} else {
@@ -1626,7 +1626,7 @@ CoreAudioBackend::freewheel_thread ()
 			_main_thread = pthread_self();
 			AudioEngine::thread_init_callback (this);
 			_midiio->set_enabled(false);
-                        reset_midi_parsers ();
+			reset_midi_parsers ();
 		}
 
 		// process port updates first in every cycle.
@@ -1713,22 +1713,22 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	/* get midi */
 	i=0;
 	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
-                CoreMidiPort* port = dynamic_cast<CoreMidiPort*> (*it);
-                if (!port) {
-                        continue;
-                }
-                uint64_t time_ns;
-                uint8_t data[128]; // matches CoreMidi's MIDIPacket
-                size_t size = sizeof(data);
+		CoreMidiPort* port = dynamic_cast<CoreMidiPort*> (*it);
+		if (!port) {
+			continue;
+		}
+		uint64_t time_ns;
+		uint8_t data[128]; // matches CoreMidi's MIDIPacket
+		size_t size = sizeof(data);
 
-                port->clear_events ();
+		port->clear_events ();
 
-                while (_midiio->recv_event (i, nominal_time, time_ns, data, size)) {
-                        pframes_t time = floor((float) time_ns * _samplerate * 1e-9);
-                        assert (time < n_samples);
-                        port->parse_events (time, data, size);
-                        size = sizeof(data); /* prepare for next call to recv_event */
-                }
+		while (_midiio->recv_event (i, nominal_time, time_ns, data, size)) {
+			pframes_t time = floor((float) time_ns * _samplerate * 1e-9);
+			assert (time < n_samples);
+			port->parse_events (time, data, size);
+			size = sizeof(data); /* prepare for next call to recv_event */
+		}
 	}
 
 	/* get audio */
@@ -1949,8 +1949,8 @@ int CoreBackendPort::connect (CoreBackendPort *port)
 	if (is_connected (port)) {
 #if 0 // don't bother to warn about this for now. just ignore it
 		PBD::info << _("CoreBackendPort::connect (): ports are already connected:")
-			<< " (" << name () << ") -> (" << port->name () << ")"
-			<< endmsg;
+		          << " (" << name () << ") -> (" << port->name () << ")"
+		          << endmsg;
 #endif
 		return -1;
 	}
@@ -1978,8 +1978,8 @@ int CoreBackendPort::disconnect (CoreBackendPort *port)
 
 	if (!is_connected (port)) {
 		PBD::warning << _("CoreBackendPort::disconnect (): ports are not connected:")
-			<< " (" << name () << ") -> (" << port->name () << ")"
-			<< endmsg;
+		             << " (" << name () << ") -> (" << port->name () << ")"
+		             << endmsg;
 		return -1;
 	}
 	_disconnect (port, true);
@@ -2066,12 +2066,12 @@ CoreMidiPort::CoreMidiPort (CoreAudioBackend &b, const std::string& name, PortFl
 	: CoreBackendPort (b, name, flags)
 	, _n_periods (1)
 	, _bufperiod (0)
-        , _event (0, 0)
-        , _first_time(true)
-        , _unbuffered_bytes(0)
-        , _total_bytes(0)
-        , _expected_bytes(0)
-        , _status_byte(0)
+	, _event (0, 0)
+	, _first_time(true)
+	, _unbuffered_bytes(0)
+	, _total_bytes(0)
+	, _expected_bytes(0)
+	, _status_byte(0)
 
 {
 	_buffer[0].clear ();
@@ -2091,58 +2091,58 @@ void* CoreMidiPort::get_buffer (pframes_t /* nframes */)
 	if (is_input ()) {
 		(_buffer[_bufperiod]).clear ();
 		for (std::vector<CoreBackendPort*>::const_iterator i = get_connections ().begin ();
-				i != get_connections ().end ();
-				++i) {
+		     i != get_connections ().end ();
+		     ++i) {
 			const CoreMidiBuffer * src = static_cast<const CoreMidiPort*>(*i)->const_buffer ();
-                        if (!src->empty()) {
-                                fprintf (stderr, "Copying %d events from %s\n", src->size(), (*i)->name().c_str());
-                        }
+			if (!src->empty()) {
+				fprintf (stderr, "Copying %d events from %s\n", src->size(), (*i)->name().c_str());
+			}
 			for (CoreMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				(_buffer[_bufperiod]).push_back (boost::shared_ptr<CoreMidiEvent>(new CoreMidiEvent (**it)));
 			}
 		}
 		std::sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
 	}
-        if (!_buffer[_bufperiod].empty()) {
-                fprintf (stderr, "COREMIDI: %s have data in buffer (%d events)\n", name().c_str(), _buffer[_bufperiod].size());
-        }
+	if (!_buffer[_bufperiod].empty()) {
+		fprintf (stderr, "COREMIDI: %s have data in buffer (%d events)\n", name().c_str(), _buffer[_bufperiod].size());
+	}
 	return &(_buffer[_bufperiod]);
 }
 
 int
 CoreMidiPort::queue_event (
-        void* port_buffer,
-        pframes_t timestamp,
-        const uint8_t* buffer, size_t size)
+	void* port_buffer,
+	pframes_t timestamp,
+	const uint8_t* buffer, size_t size)
 {
-        return CoreAudioBackend::_midi_event_put (port_buffer, timestamp, buffer, size);
+	return CoreAudioBackend::_midi_event_put (port_buffer, timestamp, buffer, size);
 }
 
 void
 CoreMidiPort::reset_parser ()
 {
-        _event._pending = false;
-        _first_time = true;
-        _unbuffered_bytes = 0;
-        _total_bytes = 0;
-        _expected_bytes = 0;
-        _status_byte = 0;
+	_event._pending = false;
+	_first_time = true;
+	_unbuffered_bytes = 0;
+	_total_bytes = 0;
+	_expected_bytes = 0;
+	_status_byte = 0;
 }
 
 void
 CoreMidiPort::clear_events ()
 {
-        CoreMidiBuffer* mbuf = static_cast<CoreMidiBuffer*>(get_buffer(0));
-        mbuf->clear();
-}        
+	CoreMidiBuffer* mbuf = static_cast<CoreMidiBuffer*>(get_buffer(0));
+	mbuf->clear();
+}
 
 void
-CoreMidiPort::parse_events (const uint64_t time, const uint8_t *data, const size_t size) 
+CoreMidiPort::parse_events (const uint64_t time, const uint8_t *data, const size_t size)
 {
-        CoreMidiBuffer* mbuf = static_cast<CoreMidiBuffer*>(get_buffer(0));
+	CoreMidiBuffer* mbuf = static_cast<CoreMidiBuffer*>(get_buffer(0));
 
-        mbuf->clear();
-        
+	mbuf->clear();
+
 	if (_event._pending) {
 		if (queue_event (mbuf, _event._time, _parser_buffer, _event._size)) {
 			return;
@@ -2154,8 +2154,8 @@ CoreMidiPort::parse_events (const uint64_t time, const uint8_t *data, const size
 			continue;
 		}
 
-		_first_time = false; 
-                
+		_first_time = false;
+
 		if (process_byte(time, data[i])) {
 			if (queue_event (mbuf, _event._time, _parser_buffer, _event._size)) {
 				return;
@@ -2183,8 +2183,8 @@ CoreMidiPort::process_byte(const uint64_t time, const uint8_t byte)
 			record_byte(byte);
 			return prepare_buffered_event(time);
 		}
-    _total_bytes = 0;
-    _unbuffered_bytes = 0;
+		_total_bytes = 0;
+		_unbuffered_bytes = 0;
 		_expected_bytes = 0;
 		_status_byte = 0;
 		return false;
@@ -2204,47 +2204,47 @@ CoreMidiPort::process_byte(const uint64_t time, const uint8_t byte)
 		}
 		_status_byte = byte;
 		switch (byte & 0xf0) {
-			case 0x80:
-			case 0x90:
-			case 0xa0:
-			case 0xb0:
-			case 0xe0:
-				// Note On, Note Off, Aftertouch, Control Change, Pitch Wheel
-				_expected_bytes = 3;
+		case 0x80:
+		case 0x90:
+		case 0xa0:
+		case 0xb0:
+		case 0xe0:
+			// Note On, Note Off, Aftertouch, Control Change, Pitch Wheel
+			_expected_bytes = 3;
+			break;
+		case 0xc0:
+		case 0xd0:
+			// Program Change, Channel Pressure
+			_expected_bytes = 2;
+			break;
+		case 0xf0:
+			switch (byte) {
+			case 0xf0:
+				// Sysex
+				_expected_bytes = 0;
 				break;
-			case 0xc0:
-			case 0xd0:
-				// Program Change, Channel Pressure
+			case 0xf1:
+			case 0xf3:
+				// MTC Quarter Frame, Song Select
 				_expected_bytes = 2;
 				break;
-			case 0xf0:
-				switch (byte) {
-					case 0xf0:
-						// Sysex
-						_expected_bytes = 0;
-						break;
-					case 0xf1:
-					case 0xf3:
-						// MTC Quarter Frame, Song Select
-						_expected_bytes = 2;
-						break;
-					case 0xf2:
-						// Song Position
-						_expected_bytes = 3;
-						break;
-					case 0xf4:
-					case 0xf5:
-						// Undefined
-						_expected_bytes = 0;
-						_status_byte = 0;
-						return false;
-					case 0xf6:
-						// Tune Request
-						prepare_byte_event(time, byte);
-						_expected_bytes = 0;
-						_status_byte = 0;
-						return true;
-				}
+			case 0xf2:
+				// Song Position
+				_expected_bytes = 3;
+				break;
+			case 0xf4:
+			case 0xf5:
+				// Undefined
+				_expected_bytes = 0;
+				_status_byte = 0;
+				return false;
+			case 0xf6:
+				// Tune Request
+				prepare_byte_event(time, byte);
+				_expected_bytes = 0;
+				_status_byte = 0;
+				return true;
+			}
 		}
 		record_byte(byte);
 		return false;
