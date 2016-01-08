@@ -175,7 +175,7 @@ Route::init ()
 	add_processor (_amp, PostFader);
 
 	if (is_monitor ()) {
-		_amp->set_display_name ("Monitor");
+		_amp->set_display_name (_("Monitor"));
 	}
 
 	/* and input trim */
