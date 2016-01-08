@@ -1022,6 +1022,7 @@ Session::remove_monitor_section ()
 	if (auditioner) {
 		auditioner->connect ();
 	}
+	Config->ParameterChanged ("use-monitor-bus");
 }
 
 void
@@ -1173,6 +1174,7 @@ Session::add_monitor_section ()
 	if (auditioner) {
 		auditioner->connect ();
 	}
+	Config->ParameterChanged ("use-monitor-bus");
 }
 
 void
