@@ -2225,7 +2225,7 @@ MixerStrip::parameter_changed (string p)
 			if (monitor_section_button->get_parent()) {
 				monitor_section_button->get_parent()->remove(*monitor_section_button);
 			}
-			if (_session->monitor_out()) {
+			if (Config->get_use_monitor_bus ()) {
 				mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
 				mute_solo_table.attach (*monitor_section_button, 1, 2, 0, 1);
 				mute_button->show();
