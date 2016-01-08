@@ -1109,11 +1109,13 @@ LV2Plugin::find_presets()
 		const LilvNode* preset = lilv_nodes_get(presets, i);
 		lilv_world_load_resource(_world.world, preset);
 		LilvNode* name = get_value(_world.world, preset, rdfs_label);
+		bool userpreset = true; // TODO
 		if (name) {
 			_presets.insert(std::make_pair(lilv_node_as_string(preset),
 			                               Plugin::PresetRecord(
 				                               lilv_node_as_string(preset),
-				                               lilv_node_as_string(name))));
+				                               lilv_node_as_string(name),
+				                               userpreset)));
 			lilv_node_free(name);
 		} else {
 			warning << string_compose(
@@ -2649,8 +2651,9 @@ LV2PluginInfo::get_presets(Session&)
 		const LilvNode* preset = lilv_nodes_get(presets, i);
 		lilv_world_load_resource(_world.world, preset);
 		LilvNode* name = get_value(_world.world, preset, rdfs_label);
+		bool userpreset = true; // TODO
 		if (name) {
-			p.push_back (Plugin::PresetRecord(lilv_node_as_string(preset), lilv_node_as_string(name)));
+			p.push_back (Plugin::PresetRecord (lilv_node_as_string(preset), lilv_node_as_string(name), userpreset));
 			lilv_node_free(name);
 		}
 	}
