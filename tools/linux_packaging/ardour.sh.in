@@ -6,7 +6,7 @@ checkdebug(){
     for arg in "$@"
         do
             case "$arg" in
-                --debug )
+                --gdb )
                     DEBUG="T"
             esac
         done
