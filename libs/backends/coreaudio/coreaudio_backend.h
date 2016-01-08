@@ -151,6 +151,7 @@ class CoreMidiPort : public CoreBackendPort {
 
         void parse_events (const uint64_t time, const uint8_t *data, const size_t size);
         void clear_events ();
+        void reset_parser ();
 
 	private:
 		CoreMidiBuffer _buffer[2];
@@ -511,6 +512,8 @@ class CoreAudioBackend : public AudioBackend {
 			}
 			return NULL;
 		}
+        
+        void reset_midi_parsers ();
 
 }; // class CoreAudioBackend
 

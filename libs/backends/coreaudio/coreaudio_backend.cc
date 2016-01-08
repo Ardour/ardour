@@ -1562,6 +1562,17 @@ CoreAudioBackend::pre_process ()
 	}
 }
 
+void
+CoreAudioBackend::reset_midi_parsers ()
+{
+        for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+                CoreMidiPort* port = dynamic_cast<CoreMidiPort*>(*it);
+                if (port) {
+                        port->reset_parser ();
+                }
+        }
+}
+
 void *
 CoreAudioBackend::freewheel_thread ()
 {
@@ -1587,6 +1598,7 @@ CoreAudioBackend::freewheel_thread ()
 				_freewheel = false; // first mark as disabled
 				_reinit_thread_callback = true; // hand over _main_thread
 				_freewheel_ack = false; // prepare next handshake
+                                reset_midi_parsers ();
 				_midiio->set_enabled(true);
 				engine.freewheel_callback (_freewheeling);
 			} else {
@@ -1614,6 +1626,7 @@ CoreAudioBackend::freewheel_thread ()
 			_main_thread = pthread_self();
 			AudioEngine::thread_init_callback (this);
 			_midiio->set_enabled(false);
+                        reset_midi_parsers ();
 		}
 
 		// process port updates first in every cycle.
@@ -2103,6 +2116,17 @@ CoreMidiPort::queue_event (
         const uint8_t* buffer, size_t size)
 {
         return CoreAudioBackend::_midi_event_put (port_buffer, timestamp, buffer, size);
+}
+
+void
+CoreMidiPort::reset_parser ()
+{
+        _event._pending = false;
+        _first_time = true;
+        _unbuffered_bytes = 0;
+        _total_bytes = 0;
+        _expected_bytes = 0;
+        _status_byte = 0;
 }
 
 void
