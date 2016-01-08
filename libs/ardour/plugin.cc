@@ -120,6 +120,12 @@ Plugin::~Plugin ()
 void
 Plugin::remove_preset (string name)
 {
+	Plugin::PresetRecord const * p = preset_by_label (name);
+	if (!p->user) {
+		PBD::error << _("Cannot remove plugin factory preset.") << PBD::endmsg;
+		return;
+	}
+
 	do_remove_preset (name);
 	_presets.erase (preset_by_label (name)->uri);
 
@@ -133,6 +139,11 @@ Plugin::remove_preset (string name)
 Plugin::PresetRecord
 Plugin::save_preset (string name)
 {
+	if (preset_by_label (name)) {
+		PBD::error << _("Preset with given name already exists.") << PBD::endmsg;
+		return Plugin::PresetRecord ();
+	}
+
 	string const uri = do_save_preset (name);
 
 	if (!uri.empty()) {
