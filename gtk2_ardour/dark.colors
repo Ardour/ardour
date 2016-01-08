@@ -228,7 +228,9 @@
     <ColorAlias name="marker drag line" alias="color 44"/>
     <ColorAlias name="marker label" alias="color 4"/>
     <ColorAlias name="marker track" alias="color 31"/>
-    <ColorAlias name="master monitor section button: fill active" alias="color 42"/>
+    <ColorAlias name="master monitor section button normal: fill active" alias="color 42"/>
+    <ColorAlias name="master monitor section button active: fill"        alias="color 40"/>
+    <ColorAlias name="master monitor section button active: fill active" alias="color 54"/>
     <ColorAlias name="measure line bar" alias="color 13"/>
     <ColorAlias name="measure line beat" alias="color 33"/>
     <ColorAlias name="meter background bottom" alias="color 46"/>

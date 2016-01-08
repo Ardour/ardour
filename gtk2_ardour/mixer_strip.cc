@@ -501,8 +501,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		}
 		if (monitor_section_button == 0) {
 			Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
+			_session->MonitorChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_changed, this), gui_context());
+
 			monitor_section_button = manage (new ArdourButton);
-			monitor_section_button->set_name ("master monitor section button");
+			monitor_changed ();
 			monitor_section_button->set_related_action (act);
 			set_tooltip (monitor_section_button, _("Show/Hide Monitoring Section"));
 			mute_solo_table.attach (*monitor_section_button, 1, 2, 0, 1);
@@ -1946,6 +1948,18 @@ MixerStrip::meter_point_string (MeterPoint mp)
 	}
 
 	return string();
+}
+
+/** Called when the monitor-section state */
+void
+MixerStrip::monitor_changed ()
+{
+	assert (monitor_section_button);
+	if (_session->monitor_active()) {
+		monitor_section_button->set_name ("master monitor section button active");
+	} else {
+		monitor_section_button->set_name ("master monitor section button normal");
+	}
 }
 
 /** Called when the metering point has changed */

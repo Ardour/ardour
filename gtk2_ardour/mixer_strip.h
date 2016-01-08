@@ -180,6 +180,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	ArdourButton                 meter_point_button;
 
 	void meter_changed ();
+	void monitor_changed ();
 
 	ArdourButton input_button;
 	ArdourButton output_button;
