@@ -2538,6 +2538,16 @@ PluginTreeStore::row_drop_possible_vfunc(const Gtk::TreeModel::Path& dest, const
 	if (data.get_target() != "GTK_TREE_MODEL_ROW") {
 		return false;
 	}
+
+	// only allow to re-order top-level items
+	TreePath src;
+	if (TreePath::get_from_selection_data (data, src)) {
+		if (src.up() && src.up()) {
+			return false;
+		}
+	}
+
+	// don't allow to drop as child-rows.
 	Gtk::TreeModel::Path _dest = dest; // un const
 	const bool is_child = _dest.up (); // explicit bool for clang
 	if (!is_child || _dest.empty ()) {
