@@ -354,6 +354,8 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void refiller (ARDOUR::PluginInfoList& result, const ARDOUR::PluginInfoList& plugs);
 	void refill_favorite_plugins ();
 	void sync_treeview_from_favorite_order ();
+	void sync_treeview_favorite_ui_state (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&);
+	void save_favorite_ui_state (const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);
 
 	/// true if we are in fullscreen mode
 	bool _maximised;

@@ -208,6 +208,9 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.signal_row_activated().connect (sigc::mem_fun (*this, &Mixer_UI::plugin_row_activated));
 	favorite_plugins_display.signal_button_press_event().connect (sigc::mem_fun (*this, &Mixer_UI::plugin_row_button_press), false);
 	favorite_plugins_display.signal_drop.connect (sigc::mem_fun (*this, &Mixer_UI::plugin_drop));
+	favorite_plugins_display.signal_row_expanded().connect (sigc::mem_fun (*this, &Mixer_UI::save_favorite_ui_state));
+	favorite_plugins_display.signal_row_collapsed().connect (sigc::mem_fun (*this, &Mixer_UI::save_favorite_ui_state));
+	favorite_plugins_model->signal_row_has_child_toggled().connect (sigc::mem_fun (*this, &Mixer_UI::sync_treeview_favorite_ui_state));
 
 	favorite_plugins_scroller.add (favorite_plugins_display);
 	favorite_plugins_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -2241,6 +2244,15 @@ Mixer_UI::store_current_favorite_order ()
 }
 
 void
+Mixer_UI::save_favorite_ui_state (const TreeModel::iterator& iter, const TreeModel::Path& path)
+{
+	Gtk::TreeModel::Row row = *iter;
+	ARDOUR::PluginPresetPtr ppp = row[favorite_plugins_columns.plugin];
+	assert (ppp);
+	favorite_ui_state[(*ppp->_pip).unique_id] = favorite_plugins_display.row_expanded (favorite_plugins_model->get_path(iter));
+}
+
+void
 Mixer_UI::refiller (PluginInfoList& result, const PluginInfoList& plugs)
 {
 	PluginManager& manager (PluginManager::instance());
@@ -2304,6 +2316,25 @@ Mixer_UI::refill_favorite_plugins ()
 	favorite_order = plugs;
 
 	sync_treeview_from_favorite_order ();
+}
+
+void
+Mixer_UI::sync_treeview_favorite_ui_state (const TreeModel::Path& path, const TreeModel::iterator&)
+{
+	TreeIter iter;
+	if (!(iter = favorite_plugins_model->get_iter (path))) {
+		return;
+	}
+	ARDOUR::PluginPresetPtr ppp = (*iter)[favorite_plugins_columns.plugin];
+	if (!ppp) {
+		return;
+	}
+	PluginInfoPtr pip = ppp->_pip;
+	if (favorite_ui_state.find (pip->unique_id) != favorite_ui_state.end ()) {
+		if (favorite_ui_state[pip->unique_id]) {
+			favorite_plugins_display.expand_row (path, true);
+		}
+	}
 }
 
 void
