@@ -2410,7 +2410,7 @@ AUPluginInfo::get_presets (bool user_only) const
 	}
 
 	vector<string> preset_files;
-	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter, this, true, true, true);
+	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter, const_cast<AUPluginInfo*>(this), true, true, true);
 
 	for (vector<string>::iterator x = preset_files.begin(); x != preset_files.end(); ++x) {
 		string path = *x;
