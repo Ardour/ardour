@@ -2384,7 +2384,7 @@ AUPluginInfo::load (Session& session)
 }
 
 std::vector<Plugin::PresetRecord>
-AUPluginInfo::get_presets(Session& session)
+AUPluginInfo::get_presets (bool user_only) const
 {
 	std::vector<Plugin::PresetRecord> p;
 	boost::shared_ptr<CAComponent> comp;
@@ -2422,7 +2422,10 @@ AUPluginInfo::get_presets(Session& session)
 		}
 	}
 
-#if 0 // don't include factory presets in the sidebar, for now
+	if (user_only) {
+		return p;
+	}
+
 	// factory presets
 
 	CFArrayRef presets;
@@ -2455,7 +2458,6 @@ AUPluginInfo::get_presets(Session& session)
 	}
 	CFRelease (presets);
 	unit->Uninitialize ();
-#endif // factory presets
 
 #endif // NO_PLUGIN_STATE
 	return p;

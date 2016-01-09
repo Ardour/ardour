@@ -739,7 +739,7 @@ LadspaPluginInfo::load (Session& session)
 }
 
 std::vector<Plugin::PresetRecord>
-LadspaPluginInfo::get_presets(Session& session)
+LadspaPluginInfo::get_presets (bool /*user_only*/) const
 {
 	std::vector<Plugin::PresetRecord> p;
 #if (defined HAVE_LRDF && !defined NO_PLUGIN_STATE)

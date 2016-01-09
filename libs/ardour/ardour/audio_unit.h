@@ -232,7 +232,7 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 
 	PluginPtr load (Session& session);
 
-	virtual std::vector<Plugin::PresetRecord> get_presets(Session& session);
+	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 
 	bool needs_midi_input ();
 	bool is_effect () const;

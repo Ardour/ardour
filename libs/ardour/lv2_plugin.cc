@@ -2624,7 +2624,7 @@ LV2PluginInfo::load(Session& session)
 }
 
 std::vector<Plugin::PresetRecord>
-LV2PluginInfo::get_presets(Session&)
+LV2PluginInfo::get_presets (bool /*user_only*/) const
 {
 	std::vector<Plugin::PresetRecord> p;
 #ifndef NO_PLUGIN_STATE

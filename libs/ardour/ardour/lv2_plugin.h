@@ -281,7 +281,7 @@ public:
 	static PluginInfoList* discover ();
 
 	PluginPtr load (Session& session);
-	virtual std::vector<Plugin::PresetRecord> get_presets(Session& session);
+	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 	virtual bool in_category (const std::string &c) const;
 	virtual bool is_instrument() const;
 

@@ -95,7 +95,7 @@ WindowsVSTPluginInfo::load (Session& session)
 }
 
 std::vector<Plugin::PresetRecord>
-WindowsVSTPluginInfo::get_presets(Session&)
+WindowsVSTPluginInfo::get_presets (bool user_only) const
 {
 	std::vector<Plugin::PresetRecord> p;
 #ifndef NO_PLUGIN_STATE
@@ -103,7 +103,9 @@ WindowsVSTPluginInfo::get_presets(Session&)
 		return p;
 	}
 
-	// TODO cache and load factory-preset names
+	if (!user_only) {
+		// TODO cache and load factory-preset names
+	}
 
 	/* user presets */
 	XMLTree* t = new XMLTree;

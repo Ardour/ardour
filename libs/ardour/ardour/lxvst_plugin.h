@@ -47,7 +47,7 @@ class LIBARDOUR_API LXVSTPluginInfo : public PluginInfo
 	~LXVSTPluginInfo () {}
 
 	PluginPtr load (Session& session);
-	virtual std::vector<Plugin::PresetRecord> get_presets(Session&);
+	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 };
 
 } // namespace ARDOUR
