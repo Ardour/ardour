@@ -28,6 +28,26 @@ using namespace ARDOUR;
 static int _debug_mode = 0;
 #endif
 
+
+/** 
+ * MIDI Data flow
+ * 
+ * (A) INPUT (incoming from outside the application)
+ * 
+ *    - midiInputCallback (in its own thread, async WRT process callback):
+ *       takes OS X MIDIPacket, copies into lock-free ringbuffer
+ *
+ *    - processCallback (in its own thread):
+ *
+ *   (1) loop on all input ports:
+ *       1A) call recv_event() to read from ringbuffer into stack buffer, also assign-timestamp, 
+ *       1B) call parse_events() using stack buffer, when appropriate
+ *          pushes CoreMidiEvent into std::vector<CoreMidiEvent>
+ *
+ *   (2) in MidiPort::cycle_start() (also part of the process callback call tree), MidiPort::get_midi_buffer()
+ *       calls CoreAudioBackend::midi_event_get () returns a pointer to the  data of the specified CoreMidiEvent
+ */
+
 static void notifyProc (const MIDINotification *message, void *refCon) {
 	CoreMidiIo *self = static_cast<CoreMidiIo*>(refCon);
 	self->notify_proc(message);
