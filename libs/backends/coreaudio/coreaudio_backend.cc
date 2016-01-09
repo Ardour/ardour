@@ -2110,7 +2110,11 @@ CoreMidiPort::queue_event (
 	pframes_t timestamp,
 	const uint8_t* buffer, size_t size)
 {
-	return CoreAudioBackend::_midi_event_put (port_buffer, timestamp, buffer, size);
+	const int ret = CoreAudioBackend::_midi_event_put (port_buffer, timestamp, buffer, size);
+        if (!ret) { /* success */
+                _event._pending = false;
+        }
+        return ret;
 }
 
 void
