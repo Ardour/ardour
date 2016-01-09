@@ -122,7 +122,7 @@ Plugin::remove_preset (string name)
 {
 	Plugin::PresetRecord const * p = preset_by_label (name);
 	if (!p->user) {
-		PBD::error << _("Cannot remove plugin factory preset.") << std::endmsg;
+		PBD::error << _("Cannot remove plugin factory preset.") << endmsg;
 		return;
 	}
 
@@ -140,7 +140,7 @@ Plugin::PresetRecord
 Plugin::save_preset (string name)
 {
 	if (preset_by_label (name)) {
-		PBD::error << _("Preset with given name already exists.") << std::endmsg;
+		PBD::error << _("Preset with given name already exists.") << endmsg;
 		return Plugin::PresetRecord ();
 	}
 
