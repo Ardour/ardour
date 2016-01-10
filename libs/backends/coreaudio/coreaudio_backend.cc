@@ -2140,8 +2140,6 @@ CoreMidiPort::parse_events (const uint64_t time, const uint8_t *data, const size
 {
 	CoreMidiBuffer* mbuf = static_cast<CoreMidiBuffer*>(get_buffer(0));
 
-	mbuf->clear();
-
 	if (_event._pending) {
 		if (queue_event (mbuf, _event._time, _parser_buffer, _event._size)) {
 			return;
