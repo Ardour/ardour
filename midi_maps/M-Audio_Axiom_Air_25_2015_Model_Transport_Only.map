@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="M-Audio Axiom Air 25 (2015 Model) - Transport Controls">
+
+<!-- Based on file by Chooch Schubert -->
+<!-- Simplified and updated by Guy Sherman in Jan 2016 -->
+
+<!-- Transport Controls -->
+  <Binding channel="1" ctl="113" function="loop-toggle"/>
+  <Binding channel="1" ctl="114" function="transport-start"/>
+  <Binding channel="1" ctl="115" function="transport-end"/>
+  <Binding channel="1" ctl="116" function="transport-stop"/>
+  <Binding channel="1" ctl="117" function="transport-roll"/>
+  <!-- NB: this one will be a bit odd out-of-the-box: it will only stay enabled while you press the button -->
+  <!-- To fix it: reconfigure the record button from a Momentary switch to a Toggle switch as in ... -->
+  <!-- this manual: http://m-audio.de/download/file/fid/803 On page 8. Then look at page 10 for instructions -->
+  <!-- on saving this into the keyboard's persistent memory -->
+  <Binding channel="1" ctl="118" action="Transport/Record"/>
+
+
+</ArdourMIDIBindings>
