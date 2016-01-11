@@ -338,7 +338,7 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	ButtonID id (ButtonID (tb->controller_number));
 	Button& button (get_button (id));
 
-	DEBUG_TRACE (DEBUG::FaderPort, string_compose ("button event for ID %1 named %3, press ? %2\n", (int) tb->controller_number, (tb->value ? "yes" : "no"), button.name));
+	DEBUG_TRACE (DEBUG::FaderPort, string_compose ("button event for ID %1 press ? %2\n", (int) tb->controller_number, (tb->value ? "yes" : "no")));
 
 	if (tb->value) {
 		buttons_down.insert (id);
