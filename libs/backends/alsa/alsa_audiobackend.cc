@@ -1220,10 +1220,27 @@ std::string
 AlsaAudioBackend::get_port_name (PortEngine::PortHandle port) const
 {
 	if (!valid_port (port)) {
-		PBD::error << _("AlsaBackend::get_port_name: Invalid Port(s)") << endmsg;
+		PBD::warning << _("AlsaBackend::get_port_name: Invalid Port(s)") << endmsg;
 		return std::string ();
 	}
 	return static_cast<AlsaPort*>(port)->name ();
+}
+
+int
+AlsaAudioBackend::get_port_property (PortHandle port, const std::string& key, std::string& value, std::string& type) const
+{
+	if (!valid_port (port)) {
+		PBD::warning << _("AlsaBackend::get_port_property: Invalid Port(s)") << endmsg;
+		return -1;
+	}
+	if (key == "http://jackaudio.org/metadata/pretty-name") {
+		type = "";
+		value = static_cast<AlsaPort*>(port)->pretty_name ();
+		if (!value.empty()) {
+			return 0;
+		}
+	}
+	return -1;
 }
 
 PortEngine::PortHandle
@@ -1347,7 +1364,9 @@ AlsaAudioBackend::register_system_audio_ports()
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
-		_system_inputs.push_back(static_cast<AlsaPort*>(p));
+		AlsaPort *ap = static_cast<AlsaPort*>(p);
+		//ap->set_pretty_name ("")
+		_system_inputs.push_back (ap);
 	}
 
 	lr.min = lr.max = lcpp + (_measure_latency ? 0 : _systemic_audio_output_latency);
@@ -1357,7 +1376,9 @@ AlsaAudioBackend::register_system_audio_ports()
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
-		_system_outputs.push_back(static_cast<AlsaPort*>(p));
+		AlsaPort *ap = static_cast<AlsaPort*>(p);
+		//ap->set_pretty_name ("")
+		_system_outputs.push_back (ap);
 	}
 	return 0;
 }
@@ -1417,7 +1438,9 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
 				set_latency_range (p, true, lr);
 				static_cast<AlsaMidiPort*>(p)->set_n_periods(_periods_per_cycle); // TODO check MIDI alignment
-				_system_midi_out.push_back(static_cast<AlsaPort*>(p));
+				AlsaPort *ap = static_cast<AlsaPort*>(p);
+				ap->set_pretty_name (i->first);
+				_system_midi_out.push_back (ap);
 				_rmidi_out.push_back (mout);
 			}
 		}
@@ -1454,7 +1477,9 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 				LatencyRange lr;
 				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
 				set_latency_range (p, false, lr);
-				_system_midi_in.push_back(static_cast<AlsaPort*>(p));
+				AlsaPort *ap = static_cast<AlsaPort*>(p);
+				ap->set_pretty_name (i->first);
+				_system_midi_in.push_back (ap);
 				_rmidi_in.push_back (midin);
 			}
 		}
