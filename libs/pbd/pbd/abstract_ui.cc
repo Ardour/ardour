@@ -361,7 +361,6 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 			   single-reader/single-writer semantics
 			*/
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send heap request type %3\n", event_loop_name(), pthread_name(), req->type));
-			cerr << "Send request to " << event_loop_name() << " via LIST from " << pthread_name() << endl;
 			Glib::Threads::Mutex::Lock lm (request_list_lock);
 			request_list.push_back (req);
 		}
