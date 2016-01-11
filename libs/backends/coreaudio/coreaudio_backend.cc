@@ -922,7 +922,7 @@ int
 CoreAudioBackend::get_port_property (PortHandle port, const std::string& key, std::string& value, std::string& type) const
 {
 	if (!valid_port (port)) {
-		PBD::warning << _("CoreAudioBackend::get_port_name: Invalid Port(s)") << endmsg;
+		PBD::warning << _("CoreAudioBackend::get_port_property: Invalid Port(s)") << endmsg;
 		return -1;
 	}
 	if (key == "http://jackaudio.org/metadata/pretty-name") {
