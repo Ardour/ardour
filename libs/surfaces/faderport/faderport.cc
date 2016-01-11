@@ -182,7 +182,7 @@ FaderPort::FaderPort (Session& s)
 	get_button (Loop).set_action (boost::bind (&BasicUI::add_marker, this, string()), true, ShiftDown);
 
 	get_button (Punch).set_action (boost::bind (&BasicUI::prev_marker, this), true, ShiftDown);
-	get_button (User).set_action (boost::bind (&BasicUI::next_marker, this), true, ShiftDown);
+	get_button (User).set_action (boost::bind (&BasicUI::next_marker, this), true, ButtonState(ShiftDown|UserDown));
 
 	get_button (Mute).set_action (boost::bind (&FaderPort::mute, this), true);
 	get_button (Solo).set_action (boost::bind (&FaderPort::solo, this), true);
@@ -338,7 +338,7 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	ButtonID id (ButtonID (tb->controller_number));
 	Button& button (get_button (id));
 
-        DEBUG_TRACE (DEBUG::FaderPort, string_compose ("button event for ID %1, press ? %2\n", tb->controller_number, tb->value ? "yes" : "no"));
+	DEBUG_TRACE (DEBUG::FaderPort, string_compose ("button event for ID %1 named %3, press ? %2\n", (int) tb->controller_number, (tb->value ? "yes" : "no"), button.name));
 
 	if (tb->value) {
 		buttons_down.insert (id);
@@ -351,10 +351,7 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 
 	switch (id) {
 	case Shift:
-		/* set this bit on press, do NOT clear it on release */
-		if (tb->value) {
-			bs = ShiftDown;
-		}
+		bs = ShiftDown;
 		break;
 	case Stop:
 		bs = StopDown;
@@ -388,7 +385,7 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 
 	if (bs) {
 		button_state = (tb->value ? ButtonState (button_state|bs) : ButtonState (button_state&~bs));
-		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("reset button state to %1%2 using %3%4\n", hex, button_state, bs, dec));
+		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("reset button state to %1 using %2\n", button_state, (int) bs));
 	}
 
 	if (button.uses_flash()) {
@@ -400,18 +397,8 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	if (c == consumed.end()) {
 		button.invoke (button_state, tb->value ? true : false);
 	} else {
+		DEBUG_TRACE (DEBUG::FaderPort, "button was consumed, ignored\n");
 		consumed.erase (c);
-	}
-
-	if (!tb->value && (id != Shift)) {
-		/* non-shift key was released, clear shift modifier */
-		button_state = ButtonState (button_state&~ShiftDown);
-		DEBUG_TRACE (DEBUG::FaderPort, "clear shift modifier\n");
-	}
-
-	if (!tb->value && (id != User)) {
-		consumed.insert (User);
-		DEBUG_TRACE (DEBUG::FaderPort, "clear user modifier\n");
 	}
 }
 
@@ -894,12 +881,12 @@ FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 
 	if (press) {
 		if ((x = on_press.find (bs)) == on_press.end()) {
-			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("no press action for button %1 state %2%3\%4\n", id, hex, bs, dec));
+			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("no press action for button %1 state %2 @ %3 in %4\n", id, bs, this, &on_press));
 			return;
 		}
 	} else {
 		if ((x = on_release.find (bs)) == on_release.end()) {
-			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("no release action for button %1 state %2%3\%4\n", id, hex, bs, dec));
+			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("no release action for button %1 state %2 @%3 in %4\n", id, bs, this, &on_release));
 			return;
 		}
 	}
@@ -974,9 +961,11 @@ FaderPort::Button::set_action (boost::function<void()> f, bool when_pressed, Fad
 	todo.type = InternalFunction;
 
 	if (when_pressed) {
+		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("set button %1 (%2) @ %5 to some functor on press + %3 in %4\n", id, name, bs, &on_press, this));
 		todo.function = f;
 		on_press[bs] = todo;
 	} else {
+		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("set button %1 (%2) @ %5 to some functor on release + %3\n", id, name, bs, this));
 		todo.function = f;
 		on_release[bs] = todo;
 	}
@@ -1016,9 +1005,6 @@ FaderPort::Button::set_state (XMLNode const& node)
 	state_pairs.push_back (make_pair (string ("plain"), ButtonState (0)));
 	state_pairs.push_back (make_pair (string ("shift"), ShiftDown));
 	state_pairs.push_back (make_pair (string ("long"), LongPress));
-
-	on_press.clear ();
-	on_release.clear ();
 
 	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
 		string propname;
