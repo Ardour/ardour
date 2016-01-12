@@ -449,19 +449,9 @@ Automatable::control_factory(const Evoral::Parameter& param)
 			warning << "PluginPropertyAutomation for non-Plugin" << endl;
 		}
 	} else if (param.type() == GainAutomation) {
-		Amp* amp = dynamic_cast<Amp*>(this);
-		if (amp) {
-			control = new Amp::GainControl(X_("gaincontrol"), _a_session, amp, param);
-		} else {
-			warning << "GainAutomation for non-Amp" << endl;
-		}
+		control = new Amp::GainControl(_a_session, param);
 	} else if (param.type() == TrimAutomation) {
-		Amp* amp = dynamic_cast<Amp*>(this);
-		if (amp) {
-			control = new Amp::GainControl(X_("trimcontrol"), _a_session, amp, param);
-		} else {
-			warning << "TrimAutomation for non-Amp" << endl;
-		}
+		control = new Amp::GainControl(_a_session, param);
 	} else if (param.type() == PanAzimuthAutomation || param.type() == PanWidthAutomation || param.type() == PanElevationAutomation) {
 		Pannable* pannable = dynamic_cast<Pannable*>(this);
 		if (pannable) {

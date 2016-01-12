@@ -733,8 +733,12 @@ void
 Session::setup_click ()
 {
 	_clicking = false;
+
+	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
+	boost::shared_ptr<AutomationControl> gain_control = boost::shared_ptr<Amp::GainControl> (new Amp::GainControl (*this, Evoral::Parameter(GainAutomation), gl));
+
 	_click_io.reset (new ClickIO (*this, X_("Click")));
-	_click_gain.reset (new Amp (*this));
+	_click_gain.reset (new Amp (*this, _("Fader"), gain_control, true));
 	_click_gain->activate ();
 	if (state_tree) {
 		setup_click_state (state_tree->root());

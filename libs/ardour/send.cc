@@ -86,12 +86,14 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 
 	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
-	_amp.reset (new Amp (_session));
+	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
+	_gain_control = boost::shared_ptr<Amp::GainControl> (new Amp::GainControl (_session, Evoral::Parameter(GainAutomation), gl));
+	add_control (_gain_control);
+
+	_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));
 	_meter.reset (new PeakMeter (_session, name()));
 
 	_delayline.reset (new DelayLine (_session, name()));
-
-	add_control (_amp->gain_control ());
 
 	if (panner_shell()) {
 		panner_shell()->Changed.connect_same_thread (*this, boost::bind (&Send::panshell_changed, this));
@@ -400,5 +402,3 @@ Send::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 {
 	return _amp->value_as_string (ac);
 }
-
-

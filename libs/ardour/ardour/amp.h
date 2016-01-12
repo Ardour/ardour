@@ -36,12 +36,10 @@ class IO;
  */
 class LIBARDOUR_API Amp : public Processor {
 public:
-	Amp(Session& s, std::string type = "amp");
+	Amp(Session& s, const std::string& display_name, boost::shared_ptr<AutomationControl> control, bool control_midi_also);
 
 	std::string display_name () const { return _display_name; }
 	void set_display_name (const std::string& name) { _display_name = name; }
-
-	std::string type() const { return _type;}
 
 	bool visible () const;
 
@@ -81,16 +79,8 @@ public:
 	/* automation */
 
 	struct GainControl : public AutomationControl {
-		GainControl (std::string name, Session& session, Amp* a, const Evoral::Parameter &param,
-				boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>() )
-			: AutomationControl (session, param, ParameterDescriptor(param), al, name)
-			, _amp (a) {
-			set_flags (Controllable::Flag (flags() | Controllable::GainLike));
-			alist()->reset_default (1.0);
-
-			lower_db = accurate_coefficient_to_dB (_desc.lower);
-			range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
-		}
+		GainControl (Session& session, const Evoral::Parameter &param,
+		             boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>());
 
 		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 		void set_value_unchecked (double);
@@ -101,17 +91,17 @@ public:
 		double user_to_internal (double) const;
 		std::string get_user_string () const;
 
-		Amp* _amp;
 		double lower_db;
 		double range_db;
 	};
 
+
 	boost::shared_ptr<GainControl> gain_control() {
-		return _gain_control;
+		return boost::dynamic_pointer_cast<GainControl> (_gain_control);
 	}
 
 	boost::shared_ptr<const GainControl> gain_control() const {
-		return _gain_control;
+		return boost::dynamic_pointer_cast<GainControl> (_gain_control);
 	}
 
 	std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
@@ -125,11 +115,10 @@ private:
 
 	std::string _display_name;
 
-	boost::shared_ptr<GainControl> _gain_control;
+	boost::shared_ptr<AutomationControl> _gain_control;
 
 	/** Buffer that we should use for gain automation */
 	gain_t* _gain_automation_buffer;
-	std::string _type;
 	bool _midi_amp;
 };
 

@@ -38,23 +38,18 @@ using namespace PBD;
 // used for low-pass filter denormal protection
 #define GAIN_COEFF_TINY (1e-10) // -200dB
 
-Amp::Amp (Session& s, std::string type)
+Amp::Amp (Session& s, const std::string& name, boost::shared_ptr<AutomationControl> gc, bool control_midi_also)
 	: Processor(s, "Amp")
 	, _apply_gain(true)
 	, _apply_gain_automation(false)
 	, _current_gain(GAIN_COEFF_ZERO)
 	, _current_automation_frame (INT64_MAX)
+	, _gain_control (gc)
 	, _gain_automation_buffer(0)
-	, _type (type)
-	, _midi_amp (type != "trim")
+	, _midi_amp (control_midi_also)
 {
-	Evoral::Parameter p (_type == "trim" ? TrimAutomation : GainAutomation);
-	boost::shared_ptr<AutomationList> gl (new AutomationList (p));
-	_gain_control = boost::shared_ptr<GainControl> (new GainControl ((_type == "trim") ? X_("trimcontrol") : X_("gaincontrol"), s, this, p, gl));
-	_gain_control->set_flags (Controllable::GainLike);
-
-	add_control(_gain_control);
-	set_display_name (_type == "trim" ? _("Trim") : _("Fader"));
+	set_display_name (name);
+	add_control (_gain_control);
 }
 
 bool
@@ -375,8 +370,8 @@ XMLNode&
 Amp::state (bool full_state)
 {
 	XMLNode& node (Processor::state (full_state));
-	node.add_property("type", _type);
-        node.add_child_nocopy (_gain_control->get_state());
+	node.add_property("type", _gain_control->parameter().type() == GainAutomation ? "amp" : "trim");
+	node.add_child_nocopy (_gain_control->get_state());
 
 	return node;
 }
@@ -395,6 +390,17 @@ Amp::set_state (const XMLNode& node, int version)
 	return 0;
 }
 
+Amp::GainControl::GainControl (Session& session, const Evoral::Parameter &param, boost::shared_ptr<AutomationList> al)
+	: AutomationControl (session, param, ParameterDescriptor(param),
+	                     al ? al : boost::shared_ptr<AutomationList> (new AutomationList (param)),
+	                     param.type() == GainAutomation ? X_("gaincontrol") : X_("trimcontrol")) {
+
+	alist()->reset_default (1.0);
+
+	lower_db = accurate_coefficient_to_dB (_desc.lower);
+	range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
+}
+
 void
 Amp::GainControl::set_value (double val, PBD::Controllable::GroupControlDisposition /* group_override */)
 {
@@ -407,7 +413,7 @@ void
 Amp::GainControl::set_value_unchecked (double val)
 {
 	AutomationControl::set_value (std::max (std::min (val, (double)_desc.upper), (double)_desc.lower), Controllable::NoGroup);
-	_amp->session().set_dirty ();
+	_session.set_dirty ();
 }
 
 double

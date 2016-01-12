@@ -78,6 +78,7 @@ class LIBARDOUR_API Send : public Delivery
 
   protected:
 	bool _metering;
+	boost::shared_ptr<AutomationControl> _gain_control;
 	boost::shared_ptr<Amp> _amp;
 	boost::shared_ptr<PeakMeter> _meter;
 	boost::shared_ptr<DelayLine> _delayline;

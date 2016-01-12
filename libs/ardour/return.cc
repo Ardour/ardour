@@ -49,7 +49,11 @@ Return::Return (Session& s, bool internal)
 {
 	/* never muted */
 
-	_amp.reset (new Amp (_session));
+	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
+	_gain_control = boost::shared_ptr<Amp::GainControl> (new Amp::GainControl (_session, Evoral::Parameter (GainAutomation), gl));
+	add_control (_gain_control);
+
+	_amp.reset (new Amp (_session, X_("Fader"), _gain_control, true));
 	_meter.reset (new PeakMeter (_session, name()));
 }
 
@@ -159,4 +163,3 @@ Return::configure_io (ChanCount in, ChanCount out)
 
 	return true;
 }
-

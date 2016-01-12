@@ -675,7 +675,9 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	virtual void maybe_declick (BufferSet&, framecnt_t, int);
 
+	boost::shared_ptr<AutomationControl> _gain_control;
 	boost::shared_ptr<Amp>       _amp;
+	boost::shared_ptr<AutomationControl> _trim_control;
 	boost::shared_ptr<Amp>       _trim;
 	boost::shared_ptr<PeakMeter> _meter;
 	boost::shared_ptr<DelayLine> _delayline;

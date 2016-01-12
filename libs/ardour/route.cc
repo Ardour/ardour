@@ -171,7 +171,11 @@ Route::init ()
 
 	/* add amp processor  */
 
-	_amp.reset (new Amp (_session));
+	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
+	_gain_control = boost::shared_ptr<Amp::GainControl> (new Amp::GainControl (_session, Evoral::Parameter(GainAutomation), gl));
+	add_control (_gain_control);
+
+	_amp.reset (new Amp (_session, X_("Fader"), _gain_control, true));
 	add_processor (_amp, PostFader);
 
 	if (is_monitor ()) {
@@ -179,7 +183,12 @@ Route::init ()
 	}
 
 	/* and input trim */
-	_trim.reset (new Amp (_session, "trim"));
+
+	boost::shared_ptr<AutomationList> tl (new AutomationList (Evoral::Parameter (TrimAutomation)));
+	_trim_control = boost::shared_ptr<Amp::GainControl> (new Amp::GainControl (_session, Evoral::Parameter(TrimAutomation), tl));
+	add_control (_trim_control);
+
+	_trim.reset (new Amp (_session, X_("Trim"), _trim_control, false));
 	_trim->set_display_to_user (false);
 
 	if (dynamic_cast<AudioTrack*>(this)) {
