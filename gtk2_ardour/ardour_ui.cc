@@ -2110,7 +2110,12 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 	if (affect_transport) {
 		if (rolling) {
 			_session->request_stop (with_abort, true);
-		} else if (!_session->config.get_external_sync()) {
+		} else {
+			/* the only external sync condition we can be in here
+			 * would be Engine (JACK) sync, in which case we still
+			 * want to do this.
+			 */
+
 			if (UIConfiguration::instance().get_follow_edits() && ( editor->get_selection().time.front().start == _session->transport_frame() ) ) {  //if playhead is exactly at the start of a range, we can assume it was placed there by follow_edits
 				_session->request_play_range (&editor->get_selection().time, true);
 				_session->set_requested_return_frame( editor->get_selection().time.front().start );  //force an auto-return here
