@@ -1488,8 +1488,16 @@ Strip::next_pot_mode ()
 			return;
 		}
 		p = _route->nth_send (_current_send + 1);
-		if (p && p->name() != "Monitor 1") {
+		if (p) {
 			_current_send++;
+			if (p->name() == "Monitor 1") { // skip monitor
+				p = _route->nth_send (_current_send + 1);
+				if (p) {
+					_current_send++;
+				} else {
+					_current_send = 0;
+				}
+			}
 		} else {
 			_current_send = 0;
 		}
