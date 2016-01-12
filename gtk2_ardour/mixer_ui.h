@@ -43,7 +43,6 @@
 #include "ardour/plugin_manager.h"
 
 
-#include "gtkmm2ext/visibility_tracker.h"
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/treeutils.h"
 
@@ -75,7 +74,7 @@ protected:
 	virtual bool row_drop_possible_vfunc (const Gtk::TreeModel::Path&, const Gtk::SelectionData&) const;
 };
 
-class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public MixerActor, public Gtkmm2ext::VisibilityTracker
+class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public MixerActor
 {
   public:
 	static Mixer_UI* instance();

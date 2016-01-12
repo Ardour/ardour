@@ -25,7 +25,7 @@
 #include "pbd/strsplit.h"
 #include "pbd/file_utils.h"
 
-#include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
@@ -357,12 +357,14 @@ FPGUI::build_available_action_menu ()
 	vector<string> labels;
 	vector<string> tooltips;
 	vector<string> keys;
-	vector<AccelKey> bindings;
+	vector<Glib::RefPtr<Gtk::Action> > actions;
+
+	Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
+
 	typedef std::map<string,TreeIter> NodeMap;
 	NodeMap nodes;
 	NodeMap::iterator r;
 
-	ActionManager::get_all_actions (labels, paths, tooltips, keys, bindings);
 
 	vector<string>::iterator k;
 	vector<string>::iterator p;

@@ -3206,10 +3206,10 @@ void RCOptionEditor::clear_au_blacklist () {
 void RCOptionEditor::edit_lxvst_path () {
 	Glib::RefPtr<Gdk::Window> win = get_parent_window ();
 	Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
-			*this, _("Set Linux VST Search Path"),
-			_rc_config->get_plugin_path_lxvst(),
-			PluginManager::instance().get_default_lxvst_path()
-			);
+		*current_toplevel(), _("Set Linux VST Search Path"),
+		_rc_config->get_plugin_path_lxvst(),
+		PluginManager::instance().get_default_lxvst_path()
+		);
 	ResponseType r = (ResponseType) pd->run ();
 	pd->hide();
 	if (r == RESPONSE_ACCEPT) {
@@ -3220,10 +3220,10 @@ void RCOptionEditor::edit_lxvst_path () {
 
 void RCOptionEditor::edit_vst_path () {
 	Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
-			*this, _("Set Windows VST Search Path"),
-			_rc_config->get_plugin_path_vst(),
-			PluginManager::instance().get_default_windows_vst_path()
-			);
+		*current_toplevel(), _("Set Windows VST Search Path"),
+		_rc_config->get_plugin_path_vst(),
+		PluginManager::instance().get_default_windows_vst_path()
+		);
 	ResponseType r = (ResponseType) pd->run ();
 	pd->hide();
 	if (r == RESPONSE_ACCEPT) {

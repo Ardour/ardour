@@ -305,7 +305,6 @@ Mixer_UI::track_editor_selection ()
 	PublicEditor::instance().get_selection().TracksChanged.connect (sigc::mem_fun (*this, &Mixer_UI::follow_editor_selection));
 }
 
-void
 Gtk::Window*
 Mixer_UI::use_own_window (bool and_fill_it)
 {
@@ -325,70 +324,29 @@ Mixer_UI::use_own_window (bool and_fill_it)
 	return win;
 }
 
+void
 Mixer_UI::show_window ()
 {
-	if (_parent_window) {
-		_parent_window->present ();
-	}
+	Tabbable::show_window ();
 
-	if (!_visible) { /* was hidden, update status */
+	/* show/hide group tabs as required */
+	parameter_changed ("show-group-tabs");
 
-		set_window_pos_and_size ();
+	/* now reset each strips width so the right widgets are shown */
+	MixerStrip* ms;
 
-		/* show/hide group tabs as required */
-		parameter_changed ("show-group-tabs");
+	TreeModel::Children rows = track_model->children();
+	TreeModel::Children::iterator ri;
 
-		/* now reset each strips width so the right widgets are shown */
-		MixerStrip* ms;
-
-		TreeModel::Children rows = track_model->children();
-		TreeModel::Children::iterator ri;
-
-		for (ri = rows.begin(); ri != rows.end(); ++ri) {
-			ms = (*ri)[track_columns.strip];
-			ms->set_width_enum (ms->get_width_enum (), ms->width_owner());
-			/* Fix visibility of mixer strip stuff */
-			ms->parameter_changed (X_("mixer-element-visibility"));
-		}
-	}
-
-	if (!_parent_window) {
-		/* not in its own window, just switch main tabs to show mixer */
-		int pagenum = ARDOUR_UI::instance()->tabs().page_num (*this);
-		ARDOUR_UI::instance()->tabs().set_current_page (pagenum);
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+		ms = (*ri)[track_columns.strip];
+		ms->set_width_enum (ms->get_width_enum (), ms->width_owner());
+		/* Fix visibility of mixer strip stuff */
+		ms->parameter_changed (X_("mixer-element-visibility"));
 	}
 
 	/* force focus into main area */
 	scroller_base.grab_focus ();
-	_visible = true;
-}
-
-bool
-Mixer_UI::hide_window (GdkEventAny *ev)
-{
-	if (_parent_window) {
-		/* unpack Mixer_UI from parent, put it back in the main tabbed
-		 * notebook
-		 */
-
-		get_window_pos_and_size ();
-
-		get_parent()->remove (*this);
-		ARDOUR_UI::instance()->tabs().insert_page (*this, _("Mixer"), 1);
-		ARDOUR_UI::instance()->tabs().set_tab_detachable (*this);
-		ARDOUR_UI::instance()->tabs().set_current_page (0);
-
-		show_all ();
-
-		delete_when_idle (_parent_window);
-		_parent_window = 0;
-	}
-
-	ARDOUR_UI::instance()->tabs().set_current_page (0);
-
-	_visible = false;
-
-	return true;
 }
 
 void
@@ -1002,31 +960,6 @@ Mixer_UI::fast_update_strips ()
 }
 
 void
-Mixer_UI::show_window ()
-{
-	Tabbable::show_window ();
-
-	/* show/hide group tabs as required */
-	parameter_changed ("show-group-tabs");
-
-	/* now reset each strips width so the right widgets are shown */
-	MixerStrip* ms;
-
-	TreeModel::Children rows = track_model->children();
-	TreeModel::Children::iterator ri;
-
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		ms = (*ri)[track_columns.strip];
-		ms->set_width_enum (ms->get_width_enum (), ms->width_owner());
-		/* Fix visibility of mixer strip stuff */
-		ms->parameter_changed (X_("mixer-element-visibility"));
-	}
-
-	/* force focus into main area */
-	scroller_base.grab_focus ();
-}
-
-void
 Mixer_UI::set_all_strips_visibility (bool yn)
 {
 	TreeModel::Children rows = track_model->children();
@@ -1351,7 +1284,7 @@ Mixer_UI::strip_property_changed (const PropertyChange& what_changed, MixerStrip
 		}
 	}
 
-x	error << _("track display list item for renamed strip not found!") << endmsg;
+	error << _("track display list item for renamed strip not found!") << endmsg;
 }
 
 bool
@@ -1723,54 +1656,8 @@ int
 Mixer_UI::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
-	XMLNode* geometry;
 
-	m_width = default_width;
-	m_height = default_height;
-	m_root_x = 1;
-	m_root_y = 1;
-
-	if ((geometry = find_named_node (node, "geometry")) != 0) {
-
-		/* if there's a geometry node, we have our own window */
-
-		create_own_window ();
-		Gtk::Notebook* notebook = (Gtk::Notebook*) _parent_window->get_child();
-		Gtk::Widget* parent = get_parent();
-		if (parent) {
-			((Gtk::Container*)parent)->remove (*this);
-		}
-		notebook->append_page (*this, _("Mixer"));
-
-		XMLProperty* prop;
-
-		if ((prop = geometry->property("x_size")) == 0) {
-			prop = geometry->property ("x-size");
-		}
-		if (prop) {
-			m_width = atoi(prop->value());
-		}
-		if ((prop = geometry->property("y_size")) == 0) {
-			prop = geometry->property ("y-size");
-		}
-		if (prop) {
-			m_height = atoi(prop->value());
-		}
-
-		if ((prop = geometry->property ("x_pos")) == 0) {
-			prop = geometry->property ("x-pos");
-		}
-		if (prop) {
-			m_root_x = atoi (prop->value());
-
-		}
-		if ((prop = geometry->property ("y_pos")) == 0) {
-			prop = geometry->property ("y-pos");
-		}
-		if (prop) {
-			m_root_y = atoi (prop->value());
-		}
-	}
+	Tabbable::set_state (node, version);
 
 	if ((prop = node.property ("narrow-strips"))) {
 		if (string_is_affirmative (prop->value())) {

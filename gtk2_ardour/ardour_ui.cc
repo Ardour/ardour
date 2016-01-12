@@ -226,12 +226,7 @@ libxml_structured_error_func (void* /* parsing_context*/,
 
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
-<<<<<<< HEAD
-
 	: Gtkmm2ext::UI (PROGRAM_NAME, X_("gui"), argcp, argvp)
-=======
-	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
->>>>>>> first compilable version of tabbable design.
 	, session_loaded (false)
 	, gui_object_state (new GUIObjectState)
 	, primary_clock   (new MainClock (X_("primary"),   X_("transport"), true ))
@@ -2928,8 +2923,6 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 		if (get_session_parameters (true, false)) {
 			exit (1);
 		}
-
-		goto_editor_window ();
 	}
 }
 
