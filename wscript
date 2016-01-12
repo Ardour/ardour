@@ -645,7 +645,7 @@ def options(opt):
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler FLAGS')
     opt.add_option('--with-backends', type='string', action='store', default='jack', dest='with_backends',
-                    help='Specify which backend modules are to be included(jack,alsa,wavesaudio,dummy,coreaudio)')
+                    help='Specify which backend modules are to be included(jack,alsa,dummy,coreaudio)')
     opt.add_option('--backtrace', action='store_true', default=False, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
@@ -1095,19 +1095,10 @@ int main () { return 0; }
     conf.env['BUILD_JACKBACKEND'] = any('jack' in b for b in backends)
     conf.env['BUILD_ALSABACKEND'] = any('alsa' in b for b in backends)
     conf.env['BUILD_DUMMYBACKEND'] = any('dummy' in b for b in backends)
-    conf.env['BUILD_WAVESBACKEND'] = any('wavesaudio' in b for b in backends)
     conf.env['BUILD_CORECRAPPITA'] = any('coreaudio' in b for b in backends)
-
-    if conf.env['BUILD_CORECRAPPITA'] and conf.env['BUILD_WAVESBACKEND']:
-        print("Coreaudio + Waves Backend are mutually exclusive")
-        sys.exit(1)
 
     if sys.platform != 'darwin' and conf.env['BUILD_CORECRAPPITA']:
         print("Coreaudio backend is only available for OSX")
-        sys.exit(1)
-
-    if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_WAVESBACKEND']:
-        print("Waves Backend is not for Linux")
         sys.exit(1)
 
     if re.search ("linux", sys.platform) == None and conf.env['BUILD_ALSABACKEND']:
@@ -1187,7 +1178,6 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Mac i386 Architecture', opts.generic)
     write_config_text('Mac ppc Architecture',  opts.ppc)
-    write_config_text('Waves Backend',         conf.env['BUILD_WAVESBACKEND'])
     write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
     write_config_text('Windows key',           opts.windows_key)
