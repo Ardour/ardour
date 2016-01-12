@@ -1,6 +1,6 @@
 .TH ARDOUR 1 2002-12-29
 .SH NOM
-ardour \- une station de travail audio-numérique
+ardour \- une station de travail audio-numÃ©rique
 .SH SYNOPSIS
 ardour
 .B \-b
@@ -12,30 +12,30 @@ ardour
 .B \-\-help
 .SH DESCRIPTION
 Ardour est un enregistreur sur disque dur multi-canaux (HDR) et une station de
-travail audio-numérique (DAW).
-Il est capable d'enregistrer simultanément 24 ou plus canaux audio 32 bits à
+travail audio-numÃ©rique (DAW).
+Il est capable d'enregistrer simultanÃ©ment 24 ou plus canaux audio 32 bits Ã 
 48 kHz.
 Ardour a pour vocation de fonctionner comme un enregistreur sur disque dur
-"professionnel", en remplacement de solutions matérielles dédiées comme le
-Mackie HDR, le Tascam 2424 et les plus traditionnels système à bande tels que
-la série Alesis ADAT.
-Il est aussi conçu pour procurer les mêmes ou de meilleures fonctionnalités
-que des systèmes logiciels comme ProTools, Samplitude, Logic Audio, Nuendo et
-Cubase VST (nous reconnaissons ces marques comme marques déposées appartenant
-à leurs propriétaires respectifs).
-Il supporte MIDI Machine Control, et peut ainsi être contrôlé depuis
-n'importe quel contrôleur MMC, comme le Mackie Digital 8 Bus mixer et de nombreux autres mélangeurs audio-numériques modernes.
+"professionnel", en remplacement de solutions matÃ©rielles dÃ©diÃ©es comme le
+Mackie HDR, le Tascam 2424 et les plus traditionnels systÃ¨me Ã  bande tels que
+la sÃ©rie Alesis ADAT.
+Il est aussi conÃ§u pour procurer les mÃªmes ou de meilleures fonctionnalitÃ©s
+que des systÃ¨mes logiciels comme ProTools, Samplitude, Logic Audio, Nuendo et
+Cubase VST (nous reconnaissons ces marques comme marques dÃ©posÃ©es appartenant
+Ã  leurs propriÃ©taires respectifs).
+Il supporte MIDI Machine Control, et peut ainsi Ãªtre contrÃ´lÃ© depuis
+n'importe quel contrÃ´leur MMC, comme le Mackie Digital 8 Bus mixer et de nombreux autres mÃ©langeurs audio-numÃ©riques modernes.
 .SH OPTIONS
 .TP
 .B \-b
 Affiche tous les noms des codes clavier possibles.
 .TP
 .B \-U
-Indiquer le chemin vers le fichier GTK RC à utiliser.
+Indiquer le chemin vers le fichier GTK RC Ã  utiliser.
 Le fichier fourni s'appelle
 .B ardour_ui.rc
-et se trouve dans la racine du répertoire du code source d'Ardour.
-Ce fichier gère l'utilisation de toutes les couleurs et polices de caractère
+et se trouve dans la racine du rÃ©pertoire du code source d'Ardour.
+Ce fichier gÃ¨re l'utilisation de toutes les couleurs et polices de caractÃ¨re
 dans Ardour.
 Ardour fonctionnera sans, mais son aspect sera, disons, affreux.
 .TP
@@ -44,10 +44,10 @@ Affiche le message d'aide.
 .SH FICHIERS
 .TP
 .B ardour.rc
-Paramètre par défaut et de démarrage d'Ardour.
+ParamÃ¨tre par dÃ©faut et de dÃ©marrage d'Ardour.
 .TP
 .B ardour_ui.rc
-Définitions pour l'interface d'Ardour.
+DÃ©finitions pour l'interface d'Ardour.
 .SH ENVIRONNEMENT
 .TP
 .B ARDOUR_RC
@@ -65,7 +65,7 @@ Paul Davis.
 Ne
 .I pas
 le contacter directement.
-Contactez-le plutôt à <ardour-dev@lists.ardour.org>.
+Contactez-le plutÃ´t Ã  <ardour-dev@lists.ardour.org>.
 Vous pouvez vous inscrire ici :
 .br
 http://lists.ardour.org/listinfo.cgi/ardour-dev-ardour.org
