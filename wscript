@@ -645,7 +645,7 @@ def options(opt):
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler FLAGS')
     opt.add_option('--with-backends', type='string', action='store', default='jack', dest='with_backends',
-                    help='Specify which backend modules are to be included(jack,alsa,dummy,coreaudio)')
+                    help='Specify which backend modules are to be included(jack,alsa,dummy,portaudio,coreaudio)')
     opt.add_option('--backtrace', action='store_true', default=False, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
@@ -1086,16 +1086,16 @@ int main () { return 0; }
         print("Must configure and build at least one backend")
         sys.exit(1)
 
-    if conf.is_tracks_build():
-        # For Tracks, override backends on OS X or Windows
-        if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
-            backends = [ 'wavesaudio' ]
-
     conf.env['BACKENDS'] = backends
     conf.env['BUILD_JACKBACKEND'] = any('jack' in b for b in backends)
     conf.env['BUILD_ALSABACKEND'] = any('alsa' in b for b in backends)
     conf.env['BUILD_DUMMYBACKEND'] = any('dummy' in b for b in backends)
+    conf.env['BUILD_PABACKEND'] = any('portaudio' in b for b in backends)
     conf.env['BUILD_CORECRAPPITA'] = any('coreaudio' in b for b in backends)
+
+    if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
+        print("PortAudio Backend is not for Linux")
+        sys.exit(1)
 
     if sys.platform != 'darwin' and conf.env['BUILD_CORECRAPPITA']:
         print("Coreaudio backend is only available for OSX")
@@ -1168,6 +1168,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('LXVST support',         conf.is_defined('LXVST_SUPPORT'))
     write_config_text('OGG',                   conf.is_defined('HAVE_OGG'))
     write_config_text('Phone home',            conf.is_defined('PHONE_HOME'))
+    write_config_text('PortAudio Backend',     conf.env['BUILD_PABACKEND'])
     write_config_text('Program name',          opts.program_name)
     write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
     write_config_text('PT format',             conf.is_defined('PTFORMAT'))
