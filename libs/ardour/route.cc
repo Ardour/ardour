@@ -46,6 +46,7 @@
 #include "ardour/capturing_processor.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
+#include "ardour/gain_control.h"
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
 #include "ardour/meter.h"
@@ -172,7 +173,7 @@ Route::init ()
 	/* add amp processor  */
 
 	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
-	_gain_control = boost::shared_ptr<Amp::GainControl> (new Amp::GainControl (_session, Evoral::Parameter(GainAutomation), gl));
+	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(GainAutomation), gl));
 	add_control (_gain_control);
 
 	_amp.reset (new Amp (_session, X_("Fader"), _gain_control, true));
@@ -185,7 +186,7 @@ Route::init ()
 	/* and input trim */
 
 	boost::shared_ptr<AutomationList> tl (new AutomationList (Evoral::Parameter (TrimAutomation)));
-	_trim_control = boost::shared_ptr<Amp::GainControl> (new Amp::GainControl (_session, Evoral::Parameter(TrimAutomation), tl));
+	_trim_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(TrimAutomation), tl));
 	add_control (_trim_control);
 
 	_trim.reset (new Amp (_session, X_("Trim"), _trim_control, false));

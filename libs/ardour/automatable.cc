@@ -28,6 +28,7 @@
 #include "ardour/amp.h"
 #include "ardour/automatable.h"
 #include "ardour/event_type_map.h"
+#include "ardour/gain_control.h"
 #include "ardour/midi_track.h"
 #include "ardour/pan_controllable.h"
 #include "ardour/pannable.h"
@@ -449,9 +450,9 @@ Automatable::control_factory(const Evoral::Parameter& param)
 			warning << "PluginPropertyAutomation for non-Plugin" << endl;
 		}
 	} else if (param.type() == GainAutomation) {
-		control = new Amp::GainControl(_a_session, param);
+		control = new GainControl(_a_session, param);
 	} else if (param.type() == TrimAutomation) {
-		control = new Amp::GainControl(_a_session, param);
+		control = new GainControl(_a_session, param);
 	} else if (param.type() == PanAzimuthAutomation || param.type() == PanWidthAutomation || param.type() == PanElevationAutomation) {
 		Pannable* pannable = dynamic_cast<Pannable*>(this);
 		if (pannable) {

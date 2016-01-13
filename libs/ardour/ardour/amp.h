@@ -29,6 +29,7 @@
 namespace ARDOUR {
 
 class BufferSet;
+class GainControl;
 class IO;
 
 /** Applies a declick operation to all audio inputs, passing the same number of
@@ -76,32 +77,13 @@ public:
 
 	static void update_meters();
 
-	/* automation */
 
-	struct GainControl : public AutomationControl {
-		GainControl (Session& session, const Evoral::Parameter &param,
-		             boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>());
-
-		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
-		void set_value_unchecked (double);
-
-		double internal_to_interface (double) const;
-		double interface_to_internal (double) const;
-		double internal_to_user (double) const;
-		double user_to_internal (double) const;
-		std::string get_user_string () const;
-
-		double lower_db;
-		double range_db;
-	};
-
-
-	boost::shared_ptr<GainControl> gain_control() {
-		return boost::dynamic_pointer_cast<GainControl> (_gain_control);
+	boost::shared_ptr<AutomationControl> gain_control() {
+		return _gain_control;
 	}
 
-	boost::shared_ptr<const GainControl> gain_control() const {
-		return boost::dynamic_pointer_cast<GainControl> (_gain_control);
+	boost::shared_ptr<const AutomationControl> gain_control() const {
+		return _gain_control;
 	}
 
 	std::string value_as_string (boost::shared_ptr<AutomationControl>) const;

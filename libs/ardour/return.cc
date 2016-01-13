@@ -24,6 +24,7 @@
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
 #include "ardour/buffer_set.h"
+#include "ardour/gain_control.h"
 #include "ardour/io.h"
 #include "ardour/meter.h"
 #include "ardour/return.h"
@@ -50,7 +51,7 @@ Return::Return (Session& s, bool internal)
 	/* never muted */
 
 	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
-	_gain_control = boost::shared_ptr<Amp::GainControl> (new Amp::GainControl (_session, Evoral::Parameter (GainAutomation), gl));
+	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter (GainAutomation), gl));
 	add_control (_gain_control);
 
 	_amp.reset (new Amp (_session, X_("Fader"), _gain_control, true));

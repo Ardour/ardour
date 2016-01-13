@@ -71,6 +71,7 @@
 #include "ardour/engine_state_controller.h"
 #endif
 #include "ardour/filename_extensions.h"
+#include "ardour/gain_control.h"
 #include "ardour/graph.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/scene_changer.h"
@@ -735,7 +736,7 @@ Session::setup_click ()
 	_clicking = false;
 
 	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
-	boost::shared_ptr<AutomationControl> gain_control = boost::shared_ptr<Amp::GainControl> (new Amp::GainControl (*this, Evoral::Parameter(GainAutomation), gl));
+	boost::shared_ptr<AutomationControl> gain_control = boost::shared_ptr<GainControl> (new GainControl (*this, Evoral::Parameter(GainAutomation), gl));
 
 	_click_io.reset (new ClickIO (*this, X_("Click")));
 	_click_gain.reset (new Amp (*this, _("Fader"), gain_control, true));

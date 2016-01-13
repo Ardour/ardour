@@ -26,6 +26,7 @@
 #include "ardour/amp.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
+#include "ardour/gain_control.h"
 #include "ardour/io.h"
 #include "ardour/meter.h"
 #include "ardour/panner_shell.h"
@@ -87,7 +88,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
 	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
-	_gain_control = boost::shared_ptr<Amp::GainControl> (new Amp::GainControl (_session, Evoral::Parameter(GainAutomation), gl));
+	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(GainAutomation), gl));
 	add_control (_gain_control);
 
 	_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));

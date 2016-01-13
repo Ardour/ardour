@@ -26,6 +26,7 @@
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
+#include "ardour/gain_control.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
@@ -388,71 +389,6 @@ Amp::set_state (const XMLNode& node, int version)
         }
 
 	return 0;
-}
-
-Amp::GainControl::GainControl (Session& session, const Evoral::Parameter &param, boost::shared_ptr<AutomationList> al)
-	: AutomationControl (session, param, ParameterDescriptor(param),
-	                     al ? al : boost::shared_ptr<AutomationList> (new AutomationList (param)),
-	                     param.type() == GainAutomation ? X_("gaincontrol") : X_("trimcontrol")) {
-
-	alist()->reset_default (1.0);
-
-	lower_db = accurate_coefficient_to_dB (_desc.lower);
-	range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
-}
-
-void
-Amp::GainControl::set_value (double val, PBD::Controllable::GroupControlDisposition /* group_override */)
-{
-	if (writable()) {
-		set_value_unchecked (val);
-	}
-}
-
-void
-Amp::GainControl::set_value_unchecked (double val)
-{
-	AutomationControl::set_value (std::max (std::min (val, (double)_desc.upper), (double)_desc.lower), Controllable::NoGroup);
-	_session.set_dirty ();
-}
-
-double
-Amp::GainControl::internal_to_interface (double v) const
-{
-	if (_desc.type == GainAutomation) {
-		return gain_to_slider_position (v);
-	} else {
-		return (accurate_coefficient_to_dB (v) - lower_db) / range_db;
-	}
-}
-
-double
-Amp::GainControl::interface_to_internal (double v) const
-{
-	if (_desc.type == GainAutomation) {
-		return slider_position_to_gain (v);
-	} else {
-		return dB_to_coefficient (lower_db + v * range_db);
-	}
-}
-
-double
-Amp::GainControl::internal_to_user (double v) const
-{
-	return accurate_coefficient_to_dB (v);
-}
-
-double
-Amp::GainControl::user_to_internal (double u) const
-{
-	return dB_to_coefficient (u);
-}
-
-std::string
-Amp::GainControl::get_user_string () const
-{
-	char theBuf[32]; sprintf( theBuf, _("%3.1f dB"), accurate_coefficient_to_dB (get_value()));
-	return std::string(theBuf);
 }
 
 /** Write gain automation for this cycle into the buffer previously passed in to
