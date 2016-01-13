@@ -267,39 +267,38 @@ TempoDialog::pulse_change ()
 bool
 TempoDialog::tap_tempo_button_press (GdkEventButton *ev)
 {
-	gint64 now;
-	now = g_get_monotonic_time (); // microseconds
+	double t;
 
+	// Linear least-squares regression
 	if (tapped) {
-		double interval, bpm;
-		static const double decay = 0.5;
+		t = 1e-6 * (g_get_monotonic_time () - first_t); // Subtract first_t to avoid precision problems
 
-		interval = (now - last_tap) * 1.0e-6;
-		if (interval <= 6.0) {
-			// <= 6 seconds (say): >= 10 bpm
-			if (average_interval > 0) {
-				if (average_interval > interval / 1.2 && average_interval < interval * 1.2) {
-				average_interval = interval * decay
-					+ average_interval * (1.0-decay);
-				} else {
-					average_interval = 0;
-				}
-			} else {
-				average_interval = interval;
-			}
+		double n = tap_count;
+		sum_y += t;
+		sum_x += n;
+		sum_xy += n * t;
+		sum_xx += n * n;
+		double T = (sum_xy/n - sum_x/n * sum_y/n) / (sum_xx/n - sum_x/n * sum_x/n);
 
-			if (average_interval > 0) {
-				bpm = 60.0 / average_interval;
-				bpm_spinner.set_value (bpm);
-			}
+		if (t - last_t < T / 1.2 || t - last_t > T * 1.2) {
+			tapped = false;
 		} else {
-			average_interval = 0;
+			bpm_spinner.set_value (60.0 / T);
 		}
-	} else {
-		average_interval = 0;
+	}
+	if (!tapped) {
+		first_t = g_get_monotonic_time ();
+		t = 0.0;
+		sum_y = 0.0;
+		sum_x = 1.0;
+		sum_xy = 0.0;
+		sum_xx = 1.0;
+		tap_count = 1.0;
+
 		tapped = true;
 	}
-	last_tap = now;
+	tap_count++;
+	last_t = t;
 
 	return true;
 }
