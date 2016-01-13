@@ -137,7 +137,7 @@ BaseUI::request_handler (Glib::IOCondition ioc)
 
 		/* handle requests */
 
-		DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::request_handler\n");
+		DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: request handler\n", event_loop_name()));
 		handle_ui_requests ();
 	}
 
@@ -147,7 +147,7 @@ BaseUI::request_handler (Glib::IOCondition ioc)
 void
 BaseUI::signal_new_request ()
 {
-	DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::signal_new_request\n");
+	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: signal_new_request\n", event_loop_name()));
 	request_channel.wakeup ();
 }
 
@@ -157,6 +157,6 @@ BaseUI::signal_new_request ()
 void
 BaseUI::attach_request_source ()
 {
-	DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::attach_request_source\n");
+	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: attach request source\n", event_loop_name()));
 	request_channel.attach (m_context);
 }
