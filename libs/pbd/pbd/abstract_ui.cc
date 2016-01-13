@@ -18,6 +18,7 @@
 
 #include <unistd.h>
 #include <iostream>
+#include <algorithm>
 
 #include "pbd/stacktrace.h"
 #include "pbd/abstract_ui.h"
@@ -194,6 +195,8 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 	request_buffer_map_lock.lock ();
 
+	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 check %2 request buffers for requests\n", event_loop_name(), request_buffers.size()));
+
 	for (i = request_buffers.begin(); i != request_buffers.end(); ++i) {
 
 		while (true) {
@@ -210,16 +213,25 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 			i->second->get_read_vector (&vec);
 
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("$1 reading requests from RB[%2], requests = %3 + %4\n", event_loop_name(), std::distance (request_buffers.begin(), i), vec.len[0], vec.len[1]));
+
 			if (vec.len[0] == 0) {
 				break;
 			} else {
 				if (vec.buf[0]->valid) {
+					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, unlocking before calling\n", event_loop_name()));
 					request_buffer_map_lock.unlock ();
+					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, calling ::do_request()\n", event_loop_name()));
 					do_request (vec.buf[0]);
 					request_buffer_map_lock.lock ();
 					if (vec.buf[0]->invalidation) {
+						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
 						vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
+					} else {
+						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: no invalidation record for that request\n", event_loop_name()));
 					}
+				} else {
+					DEBUG_TRACE (PBD::DEBUG::AbstractUI, "invalid request, ignoring\n");
 				}
 				i->second->increment_read_ptr (1);
 			}
