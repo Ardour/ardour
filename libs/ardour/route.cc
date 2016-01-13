@@ -172,8 +172,7 @@ Route::init ()
 
 	/* add amp processor  */
 
-	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
-	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(GainAutomation), gl));
+	_gain_control = boost::shared_ptr<GainControllable> (new GainControllable (_session, GainAutomation, shared_from_this ()));
 	add_control (_gain_control);
 
 	_amp.reset (new Amp (_session, X_("Fader"), _gain_control, true));
@@ -185,8 +184,7 @@ Route::init ()
 
 	/* and input trim */
 
-	boost::shared_ptr<AutomationList> tl (new AutomationList (Evoral::Parameter (TrimAutomation)));
-	_trim_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(TrimAutomation), tl));
+	_trim_control = boost::shared_ptr<GainControllable> (new GainControllable (_session, TrimAutomation, shared_from_this ()));
 	add_control (_trim_control);
 
 	_trim.reset (new Amp (_session, X_("Trim"), _trim_control, false));
@@ -389,9 +387,20 @@ Route::ensure_track_or_route_name(string name, Session &session)
 }
 
 void
-Route::inc_gain (gain_t fraction, void *src)
+Route::inc_gain (gain_t factor, void *src)
 {
-	_amp->inc_gain (fraction, src);
+	/* To be used ONLY when doing group-relative gain adjustment, from
+	 * ::set_gain()
+	 */
+
+	float desired_gain = _gain_control->user_double();
+
+	if (fabsf (desired_gain) < GAIN_COEFF_SMALL) {
+		// really?! what's the idea here?
+		_gain_control->route_set_value (0.000001f + (0.000001f * factor));
+	} else {
+		_gain_control->route_set_value (desired_gain + (desired_gain * factor));
+	}
 }
 
 void
@@ -442,24 +451,18 @@ Route::set_gain (gain_t val, void *src)
 		return;
 	}
 
-	if (val == _amp->gain()) {
+	if (val == _gain_control->get_value()) {
 		return;
 	}
 
-	_amp->set_gain (val, src);
-}
-
-void
-Route::inc_trim (gain_t fraction, void *src)
-{
-	_trim->inc_gain (fraction, src);
+	_gain_control->route_set_value (val);
 }
 
 void
 Route::set_trim (gain_t val, void * /* src */)
 {
 	// TODO route group, see set_gain()
-	_trim->set_gain (val, 0);
+	_trim_control->route_set_value (val);
 }
 
 void
@@ -3891,14 +3894,20 @@ Route::set_latency_compensation (framecnt_t longest_session_latency)
 }
 
 void
-Route::set_control (RouteAutomationControl& control, double val, PBD::Controllable::GroupControlDisposition /*group_override*/)
+Route::set_control (AutomationType type, double val, PBD::Controllable::GroupControlDisposition /*group_override*/)
 {
 	boost::shared_ptr<RouteList> rl;
 
-	switch (control.parameter().type()) {
+	switch (type) {
 	case GainAutomation:
 		/* route must mediate group control */
 		set_gain (val, this); /* any "src" argument will do other than our route group */
+		return;
+		break;
+
+	case TrimAutomation:
+		/* route must mediate group control */
+		set_trim (val, this); /* any "src" argument will do other than our route group */
 		return;
 		break;
 
@@ -3931,19 +3940,12 @@ Route::set_control (RouteAutomationControl& control, double val, PBD::Controllab
 		return;
 		break;
 
-	case PanAzimuthAutomation:
-	case PanElevationAutomation:
-	case PanWidthAutomation:
-	case PanFrontBackAutomation:
-	case PanLFEAutomation:
-		break;
-
 	default:
 		/* Not a route automation control */
+		fatal << string_compose (_("programming error: %1%2\n"), X_("illegal type of route automation control passed to Route::set_control(): "), enum_2_string(type)) << endmsg;
+		/*NOTREACHED*/
 		return;
 	}
-
-	control.route_set_value (val);
 }
 
 
@@ -3956,6 +3958,13 @@ Route::RouteAutomationControl::RouteAutomationControl (const std::string& name,
 	                     alist, name)
 	, _route (r)
 {
+}
+
+Route::GainControllable::GainControllable (Session& s, AutomationType atype, boost::shared_ptr<Route> r)
+	: GainControl (s, Evoral::Parameter(atype))
+	, _route (r)
+{
+
 }
 
 Route::SoloControllable::SoloControllable (std::string name, boost::shared_ptr<Route> r)
@@ -4436,13 +4445,13 @@ Route::panner_shell() const
 boost::shared_ptr<AutomationControl>
 Route::gain_control() const
 {
-	return _amp->gain_control();
+	return _gain_control;
 }
 
 boost::shared_ptr<AutomationControl>
 Route::trim_control() const
 {
-	return _trim->gain_control();
+	return _trim_control;
 }
 
 boost::shared_ptr<AutomationControl>

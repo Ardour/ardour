@@ -166,7 +166,7 @@ AudioTrack::deprecated_use_diskstream_connections ()
 	diskstream->deprecated_io_node = 0;
 
 	if ((prop = node.property ("gain")) != 0) {
-		_amp->set_gain (atof (prop->value().c_str()), this);
+		_amp->gain_control()->set_value (atof (prop->value().c_str()), PBD::Controllable::NoGroup);
 	}
 
 	if ((prop = node.property ("input-connection")) != 0) {

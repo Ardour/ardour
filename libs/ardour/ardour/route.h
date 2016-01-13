@@ -41,6 +41,7 @@
 #include "pbd/destructible.h"
 
 #include "ardour/ardour.h"
+#include "ardour/gain_control.h"
 #include "ardour/instrument_info.h"
 #include "ardour/io.h"
 #include "ardour/libardour_visibility.h"
@@ -145,7 +146,6 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	void inc_gain (gain_t delta, void *src);
 
 	void set_trim (gain_t val, void *src);
-	void inc_trim (gain_t delta, void *src);
 
 	void set_mute_points (MuteMaster::MutePoint);
 	MuteMaster::MutePoint mute_points () const;
@@ -381,7 +381,9 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	void clear_fed_by ();
 	bool add_fed_by (boost::shared_ptr<Route>, bool sends_only);
 
-	/* Controls (not all directly owned by the Route */
+	/* Controls (not all directly owned by the Route) */
+
+	boost::shared_ptr<AutomationControl> get_control (const Evoral::Parameter& param);
 
 	class RouteAutomationControl : public AutomationControl {
 	public:
@@ -393,7 +395,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override) {
 			boost::shared_ptr<Route> r = _route.lock();
 			if (r) {
-				r->set_control (*this, val, group_override);
+				r->set_control ((AutomationType) parameter().type(), val, group_override);
 			}
 		}
 
@@ -407,7 +409,28 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		boost::weak_ptr<Route> _route;
 	};
 
-	boost::shared_ptr<AutomationControl> get_control (const Evoral::Parameter& param);
+	class GainControllable : public GainControl  {
+	public:
+		GainControllable (Session& session,
+		                  AutomationType type,
+		                  boost::shared_ptr<Route> route);
+
+		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override) {
+			boost::shared_ptr<Route> r = _route.lock();
+			if (r) {
+				r->set_control ((AutomationType) parameter().type(), val, group_override);
+			}
+		}
+
+	protected:
+		friend class Route;
+
+		void route_set_value (double val) {
+			GainControl::set_value (val, Controllable::NoGroup);
+		}
+
+		boost::weak_ptr<Route> _route;
+	};
 
 	class SoloControllable : public RouteAutomationControl {
 	public:
@@ -442,7 +465,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		uint32_t _current_phase;
 	};
 
-	void set_control (RouteAutomationControl&, double val, PBD::Controllable::GroupControlDisposition group_override);
+	void set_control (AutomationType, double val, PBD::Controllable::GroupControlDisposition group_override);
 
 	boost::shared_ptr<SoloControllable> solo_control() const {
 		return _solo_control;
@@ -675,9 +698,9 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	virtual void maybe_declick (BufferSet&, framecnt_t, int);
 
-	boost::shared_ptr<AutomationControl> _gain_control;
+	boost::shared_ptr<GainControllable> _gain_control;
 	boost::shared_ptr<Amp>       _amp;
-	boost::shared_ptr<AutomationControl> _trim_control;
+	boost::shared_ptr<GainControllable> _trim_control;
 	boost::shared_ptr<Amp>       _trim;
 	boost::shared_ptr<PeakMeter> _meter;
 	boost::shared_ptr<DelayLine> _delayline;

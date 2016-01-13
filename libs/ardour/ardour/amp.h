@@ -70,13 +70,9 @@ public:
 
 	static void declick (BufferSet& bufs, framecnt_t nframes, int dir);
 
-	gain_t         gain () const { return _gain_control->get_value(); }
-
-	void           set_gain (gain_t g, void *src);
-	void           inc_gain (gain_t delta, void *src);
+	gain_t gain () const { return _gain_control->get_value(); }
 
 	static void update_meters();
-
 
 	boost::shared_ptr<AutomationControl> gain_control() {
 		return _gain_control;

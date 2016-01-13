@@ -470,10 +470,10 @@ GainMeterBase::gain_activated ()
 	/* clamp to displayable values */
 	if (_data_type == DataType::AUDIO) {
 		f = min (f, 6.0f);
-		_amp->set_gain (dB_to_coefficient(f), this);
+		_amp->gain_control()->set_value (dB_to_coefficient(f), Controllable::NoGroup);
 	} else {
 		f = min (fabs (f), 2.0f);
-		_amp->set_gain (f, this);
+		_amp->gain_control()->set_value (f, Controllable::NoGroup);
 	}
 
 	if (gain_display.has_focus()) {
@@ -534,7 +534,7 @@ GainMeterBase::gain_adjusted ()
 		if (_route && _route->amp() == _amp) {
 			_route->set_gain (value, this);
 		} else {
-			_amp->set_gain (value, this);
+			_amp->gain_control()->set_value (value, Controllable::NoGroup);
 		}
 	}
 

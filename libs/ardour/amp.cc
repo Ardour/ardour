@@ -348,25 +348,6 @@ Amp::apply_simple_gain (AudioBuffer& buf, framecnt_t nframes, gain_t target)
 	}
 }
 
-void
-Amp::inc_gain (gain_t factor, void *src)
-{
-	float desired_gain = _gain_control->user_double();
-
-	if (fabsf (desired_gain) < GAIN_COEFF_SMALL) {
-		// really?! what's the idea here?
-		set_gain (0.000001f + (0.000001f * factor), src);
-	} else {
-		set_gain (desired_gain + (desired_gain * factor), src);
-	}
-}
-
-void
-Amp::set_gain (gain_t val, void *)
-{
-	_gain_control->set_value (val, Controllable::NoGroup);
-}
-
 XMLNode&
 Amp::state (bool full_state)
 {

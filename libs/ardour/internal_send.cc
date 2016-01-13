@@ -74,10 +74,10 @@ InternalSend::init_gain ()
 {
 	if (_role == Listen) {
 		/* send to monitor bus is always at unity */
-		_amp->set_gain (GAIN_COEFF_UNITY, this);
+		_gain_control->set_value (GAIN_COEFF_UNITY, PBD::Controllable::NoGroup);
 	} else {
 		/* aux sends start at -inf dB */
-		_amp->set_gain (GAIN_COEFF_ZERO, this);
+		_gain_control->set_value (GAIN_COEFF_ZERO, PBD::Controllable::NoGroup);
 	}
 }
 

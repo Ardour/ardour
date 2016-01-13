@@ -1109,7 +1109,7 @@ OSC::route_set_send_gain_abs (int rid, int sid, float val)
 		boost::shared_ptr<Amp> a = s->amp();
 
 		if (a) {
-			a->set_gain (val, this);
+			a->gain_control()->set_value (val, PBD::Controllable::NoGroup);
 		}
 	}
 	return 0;
@@ -1141,7 +1141,7 @@ OSC::route_set_send_gain_dB (int rid, int sid, float val)
 		boost::shared_ptr<Amp> a = s->amp();
 
 		if (a) {
-			a->set_gain (dB_to_coefficient (val), this);
+			a->gain_control()->set_value (dB_to_coefficient (val), PBD::Controllable::NoGroup);
 		}
 	}
 	return 0;

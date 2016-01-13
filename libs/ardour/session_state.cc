@@ -3740,7 +3740,7 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "click-gain") {
 
 		if (_click_gain) {
-			_click_gain->set_gain (Config->get_click_gain(), this);
+			_click_gain->gain_control()->set_value (Config->get_click_gain(), Controllable::NoGroup);
 		}
 
 	} else if (p == "send-mtc") {
