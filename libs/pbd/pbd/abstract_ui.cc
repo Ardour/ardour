@@ -213,7 +213,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 			i->second->get_read_vector (&vec);
 
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("$1 reading requests from RB[%2], requests = %3 + %4\n", event_loop_name(), std::distance (request_buffers.begin(), i), vec.len[0], vec.len[1]));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 reading requests from RB[%2], requests = %3 + %4\n", event_loop_name(), std::distance (request_buffers.begin(), i), vec.len[0], vec.len[1]));
 
 			if (vec.len[0] == 0) {
 				break;
