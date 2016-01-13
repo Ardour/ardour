@@ -1395,6 +1395,7 @@ MackieControlProtocol::bundles ()
 void
 MackieControlProtocol::do_request (MackieControlUIRequest* req)
 {
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("doing request type %1\n", req->type));
 	if (req->type == CallSlot) {
 
 		call_slot (MISSING_INVALIDATOR, req->the_slot);
