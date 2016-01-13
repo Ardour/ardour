@@ -88,22 +88,22 @@ DISPLAYCONTROL(ShowWaveforms)
 DISPLAYCONTROL(ShowWaveformsRecording)
 
 // if this is changed, remember to update the string table in sfdb_ui.cc
-IMPORTMODE(ImportAsRegion=0)
-IMPORTMODE(ImportToTrack=1)
-IMPORTMODE(ImportAsTrack=2)
-IMPORTMODE(ImportAsTapeTrack=3)
+IMPORTMODE(ImportAsRegion)
+IMPORTMODE(ImportToTrack)
+IMPORTMODE(ImportAsTrack)
+IMPORTMODE(ImportAsTapeTrack)
 
 // if this is changed, remember to update the string table in sfdb_ui.cc
-IMPORTPOSITION(ImportAtTimestamp=0)
-IMPORTPOSITION(ImportAtEditPoint=1)
-IMPORTPOSITION(ImportAtPlayhead=2)
-IMPORTPOSITION(ImportAtStart=3)
+IMPORTPOSITION(ImportAtTimestamp)
+IMPORTPOSITION(ImportAtEditPoint)
+IMPORTPOSITION(ImportAtPlayhead)
+IMPORTPOSITION(ImportAtStart)
 
 // if this is changed, remember to update the string table in sfdb_ui.cc
-IMPORTDISPOSITION(ImportDistinctFiles=0)
-IMPORTDISPOSITION(ImportMergeFiles=1)
-IMPORTDISPOSITION(ImportSerializeFiles=2)
-IMPORTDISPOSITION(ImportDistinctChannels=3)
+IMPORTDISPOSITION(ImportDistinctFiles)
+IMPORTDISPOSITION(ImportMergeFiles)
+IMPORTDISPOSITION(ImportSerializeFiles)
+IMPORTDISPOSITION(ImportDistinctChannels)
 
 EDITPOINT(EditAtPlayhead)
 EDITPOINT(EditAtSelectedMarker)
