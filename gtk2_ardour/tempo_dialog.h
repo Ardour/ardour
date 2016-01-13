@@ -60,8 +60,10 @@ private:
 	NoteTypes note_types;
 
 	bool tapped;      // whether the tap-tempo button has been clicked
-	gint64 last_tap;
-	double average_interval;
+	double sum_x, sum_xx, sum_xy, sum_y;
+	double tap_count;
+	double last_t;
+	gint64 first_t;
 
 	Gtk::ComboBoxText pulse_selector;
 	Gtk::Adjustment   bpm_adjustment;
