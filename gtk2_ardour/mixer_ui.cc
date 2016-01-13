@@ -2392,7 +2392,10 @@ Mixer_UI::popup_note_context_menu (GdkEventButton *ev)
 
 	ARDOUR::PluginPresetPtr ppp = selected_plugin();
 	if (ppp && ppp->_preset.valid && ppp->_preset.user) {
-		items.push_back (MenuElem (_("Delete Preset"), sigc::mem_fun (*this, &Mixer_UI::delete_selected_preset)));
+		// we cannot currently delete AU presets
+		if (!ppp->_pip || ppp->_pip->type != AudioUnit) {
+			items.push_back (MenuElem (_("Delete Preset"), sigc::mem_fun (*this, &Mixer_UI::delete_selected_preset)));
+		}
 	}
 
 	m->popup (ev->button, ev->time);
