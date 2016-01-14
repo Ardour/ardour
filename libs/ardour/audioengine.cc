@@ -63,6 +63,8 @@ using namespace PBD;
 
 AudioEngine* AudioEngine::_instance = 0;
 
+static gint audioengine_thread_cnt = 1;
+
 #ifdef SILENCE_AFTER
 #define SILENCE_AFTER_SECONDS 600
 #endif
@@ -1224,10 +1226,11 @@ AudioEngine::thread_init_callback (void* arg)
 
 	pthread_set_name (X_("audioengine"));
 
-	SessionEvent::create_per_thread_pool (X_("AudioEngine"), 512);
+	const int thread_num = g_atomic_int_add (&audioengine_thread_cnt, 1);
+	const string thread_name = string_compose (X_("AudioEngine %1"), thread_num);
 
-	PBD::notify_event_loops_about_thread_creation (pthread_self(), X_("AudioEngine"), 4096);
-
+	SessionEvent::create_per_thread_pool (thread_name, 512);
+	PBD::notify_event_loops_about_thread_creation (pthread_self(), thread_name, 4096);
 	AsyncMIDIPort::set_process_thread (pthread_self());
 
 	if (arg) {
