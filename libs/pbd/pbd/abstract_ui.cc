@@ -213,7 +213,8 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 			i->second->get_read_vector (&vec);
 
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 reading requests from RB[%2], requests = %3 + %4\n", event_loop_name(), std::distance (request_buffers.begin(), i), vec.len[0], vec.len[1]));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 reading requests from RB[%2] @ %5, requests = %3 + %4\n",
+			                                                     event_loop_name(), std::distance (request_buffers.begin(), i), vec.len[0], vec.len[1], i->second));
 
 			if (vec.len[0] == 0) {
 				break;
@@ -366,7 +367,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 		RequestBuffer* rbuf = per_thread_request_buffer.get ();
 
 		if (rbuf != 0) {
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send per-thread request type %3\n", event_loop_name(), pthread_name(), req->type));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send per-thread request type %3 using ringbuffer @ %4\n", event_loop_name(), pthread_name(), req->type, rbuf));
 			rbuf->increment_write_ptr (1);
 		} else {
 			/* no per-thread buffer, so just use a list with a lock so that it remains
