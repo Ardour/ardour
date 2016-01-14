@@ -2782,6 +2782,13 @@ EngineControl::check_audio_latency_measurement ()
 		return true;
 	}
 
+	if (mtdm->get_peak () > 0.707f) {
+		// get_peak() resets the peak-hold in the detector.
+		// this GUI callback is at 10Hz and so will be fine (test-signal is at higher freq)
+		lm_results.set_markup (string_compose (results_markup, _("Input signal is > -3dBFS. Lower the signal level (output gain, input gain) on the audio-interface.")));
+		return true;
+	}
+
 	if (mtdm->err () > 0.3) {
 		mtdm->invert ();
 		mtdm->resolve ();
