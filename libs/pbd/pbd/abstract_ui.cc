@@ -80,7 +80,21 @@ AbstractUI<RequestObject>::AbstractUI (const string& name)
 	{
 		Glib::Threads::Mutex::Lock lm (request_buffer_map_lock);
 		for (vector<EventLoop::ThreadBufferMapping>::iterator t = tbm.begin(); t != tbm.end(); ++t) {
-			request_buffers[t->emitting_thread] = static_cast<RequestBuffer*> (t->request_buffer);
+			RequestBuffer* rb = static_cast<RequestBuffer*> (t->request_buffer);
+
+			/* it could be dead */
+
+			if (!rb->dead) {
+				request_buffers[t->emitting_thread] = rb;
+			} else {
+				/* don't delete it, because we have no way to
+				   remove it from the
+				   EventLoop::thread_request_buffers map here,
+				   which means that we will rediscover the
+				   pointer in the future, and indirect to check
+				   "dead". 
+				*/
+			}
 		}
 	}
 }
