@@ -555,18 +555,6 @@ MackieControlProtocol::clicking_release (Button &)
 	return Config->get_clicking();
 }
 
-LedState MackieControlProtocol::global_solo_press (Button &)
-{
-	bool state = !session->soloing();
-	session->set_solo (session->get_routes(), state);
-	return state;
-}
-
-LedState MackieControlProtocol::global_solo_release (Button &)
-{
-	return session->soloing();
-}
-
 LedState
 MackieControlProtocol::enter_press (Button &)
 {
@@ -859,16 +847,23 @@ MackieControlProtocol::write_release (Mackie::Button&)
 {
 	return none;
 }
+
 Mackie::LedState
 MackieControlProtocol::clearsolo_press (Mackie::Button&)
 {
+	// clears all solos and listens (pfl/afl)
+	session->set_solo (session->get_routes(), false);
+	session->set_listen (session->get_routes(), false);
 	return none;
 }
+
 Mackie::LedState
 MackieControlProtocol::clearsolo_release (Mackie::Button&)
 {
+	//return session->soloing();
 	return none;
 }
+
 Mackie::LedState
 MackieControlProtocol::track_press (Mackie::Button&)
 {

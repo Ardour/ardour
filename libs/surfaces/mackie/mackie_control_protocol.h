@@ -423,8 +423,6 @@ class MackieControlProtocol
 	Mackie::LedState channel_right_release(Mackie::Button &);
 	Mackie::LedState clicking_press(Mackie::Button &);
 	Mackie::LedState clicking_release(Mackie::Button &);
-	Mackie::LedState global_solo_press(Mackie::Button &);
-	Mackie::LedState global_solo_release(Mackie::Button &);
 	Mackie::LedState marker_press(Mackie::Button &);
 	Mackie::LedState marker_release(Mackie::Button &);
 	Mackie::LedState save_press(Mackie::Button &);
