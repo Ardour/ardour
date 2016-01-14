@@ -5,7 +5,7 @@
   <DeviceInfo bank-size="9" motorized="no" threshold="15"/>
 
 <!-- Transport Controls -->
-  <Binding msg="B0 2c 7f" function="rec-enable"/>
+  <Binding msg="B0 2c 7f" function="toggle-rec-enable"/>
   <Binding msg="B0 2d 7f" function="transport-roll"/>
   <Binding msg="B0 2e 7f" function="transport-stop"/>
   <Binding msg="B0 2f 7f" function="transport-start"/>

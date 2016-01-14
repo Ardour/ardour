@@ -374,7 +374,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 
 			}
 		} else {
-			if (msg->value > 64.0f) {
+			if ( msg->value > 0x40 ) {
 				controllable->set_value (1, Controllable::NoGroup);
 				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
 			} else {

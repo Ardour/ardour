@@ -43,7 +43,7 @@
 <!-- one -->
 <Binding channel="1" note="40" action="Editor/track-record-enable-toggle"/>
 <!-- Two -->
-<Binding channel="1" note="41" function="rec-enable"/>
+<Binding channel="1" note="41" function="toggle-rec-enable"/>
 
 
 

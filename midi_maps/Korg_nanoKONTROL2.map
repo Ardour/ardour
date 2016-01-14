@@ -10,12 +10,12 @@
 
   <DeviceInfo bank-size="8"/>
 	
-  <Binding msg="B0 2d 7f" function="rec-enable"/>
-  <Binding msg="B0 2d 00" function="rec-disable"/>
   <Binding channel="1" ctl="41" function="transport-roll"/>
   <Binding channel="1" ctl="42" function="transport-stop"/>
   <Binding channel="1" ctl="43" function="transport-start"/>
   <Binding channel="1" ctl="44" function="transport-end"/>
+  <Binding channel="1" ctl="44" function="transport-end"/>
+  <Binding channel="1" ctl="45" function="toggle-rec-enable"/>
   <Binding channel="1" ctl="46" function="loop-toggle"/>
   <Binding msg="B0 3c 7f" action="Editor/add-location-from-playhead"/>
   <Binding msg="B0 3d 7f" action="Editor/jump-backward-to-mark"/>

@@ -118,7 +118,7 @@
 	<Binding channel="1" note="86" function="transport-start"/>	<!-- FF -->
 	<Binding channel="1" note="87" function="transport-end"/>		<!-- STOP -->
 	<Binding channel="1" note="88" function="transport-roll"/>	<!-- PLAY -->
-	<Binding channel="1" note="89" function="rec-enable"/>		<!-- REC -->
+	<Binding channel="1" note="89" function="toggle-rec-enable"/>		<!-- REC -->
 
 </ArdourMIDIBindings>
 

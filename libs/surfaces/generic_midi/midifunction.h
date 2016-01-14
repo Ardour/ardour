@@ -50,6 +50,7 @@ class MIDIFunction : public MIDIInvokable
 		TransportStart,
 		TransportEnd,
 		TransportLoopToggle,
+		TransportRecordToggle,
 		TransportRecordEnable,
 		TransportRecordDisable,
 		/* 1 argument functions: RID */

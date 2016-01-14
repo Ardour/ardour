@@ -10,8 +10,7 @@
   <Binding channel="1" ctl="114" function="transport-stop"/>
   <Binding channel="1" ctl="115" function="transport-roll"/>
   <Binding channel="1" ctl="116" function="loop-toggle"/>
-  <Binding channel="1" ctl="117" function="rec-enable"/>
-  <Binding channel="1" ctl="117" function="rec-disable"/>
+  <Binding channel="1" ctl="117" function="toggle-rec-enable"/>
 
 <!-- Gain controls. Faders are mapped to faders. -->
 

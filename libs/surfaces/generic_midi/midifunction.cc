@@ -58,6 +58,8 @@ MIDIFunction::setup (GenericMidiControlProtocol& ui, const std::string& invokabl
 		_function = TransportEnd;
 	} else if (strcasecmp (_invokable_name.c_str(), "loop-toggle") == 0) {
 		_function = TransportLoopToggle;
+	} else if (strcasecmp (_invokable_name.c_str(), "toggle-rec-enable") == 0) {
+		_function = TransportRecordToggle;
 	} else if (strcasecmp (_invokable_name.c_str(), "rec-enable") == 0) {
 		_function = TransportRecordEnable;
 	} else if (strcasecmp (_invokable_name.c_str(), "rec-disable") == 0) {
@@ -144,6 +146,11 @@ MIDIFunction::execute ()
 	case TransportLoopToggle:
 		_ui->loop_toggle ();
 		DEBUG_TRACE (DEBUG::GenericMidi, "Function: loop_toggle\n");
+		break;
+
+	case TransportRecordToggle:
+		_ui->rec_enable_toggle ();
+		DEBUG_TRACE (DEBUG::GenericMidi, "Function: toggle_record_enable\n");
 		break;
 
 	case TransportRecordEnable:
