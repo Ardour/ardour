@@ -175,25 +175,42 @@ EventLoop::pre_register (const string& emitting_thread_name, uint32_t num_reques
 		   AbstractUI constructor. Note that if
 		*/
 
-		const string key = string_compose ("%1/%2", mapping.emitting_thread, mapping.target_thread_name);
+		const string key = string_compose ("%1/%2", emitting_thread_name, mapping.target_thread_name);
 
-		/* note that there is no cleanup mechanism to remove
-		 * dead/out-of-date entries from this map.
+		/* management of the thread_request_buffers map works as
+		 * follows:
 		 *
-		 * the request buffers themselves will be cleaned up
-		 * when the requesting thread exits (by the
-		 * thread-local-storage (TLS) cleanup mechanism). 
+		 * when the factory method was called above, the pointer to the
+		 * created buffer is set as a thread-local-storage (TLS) value
+		 * for this (the emitting) thread.
 		 *
-		 * but an entry will remain in the map.
+		 * The TLS value is set up with a destructor that marks the
+		 * request buffer as "dead" when the emitting thread exits.
 		 *
-		 * really need a way to register some end-of-thread callback
-		 * that will remove the entry from the thread_buffer_requests
-		 * container. but there is no such thing in the pthreads API
+		 * An entry will remain in the map after the thread exits.
 		 *
-		 * the target thread only searches the map once, when the event
-		 * loop object is constructed. if it finds invalid buffers
-		 * it will (a) never get any requests for them anyway (b) will
-		 * find them marked "dead" and delete them.
+		 * The receiving thread may (if it receives requests from other
+		 * threads) notice the dead buffer. If it does, it will delete
+		 * the request buffer, and call
+		 * ::remove_request_buffer_from_map() to get rid of it from the map.
+		 *
+		 * This does mean that the lifetime of the request buffer is
+		 * indeterminate: if the receiving thread were to receive no
+		 * further requests, the request buffer will live on
+		 * forever. But this is OK, because if there are no requests
+		 * arriving, the receiving thread is not attempting to use the
+		 * request buffer(s) in any way.
+		 *
+		 * Note, however, that *if* an emitting thread is recreated
+		 * with the same name (e.g. when a control surface is
+		 * enabled/disabled/enabled), then the request buffer for the
+		 * new thread will replace the map entry for the key, because
+		 * of the matching thread names. This does mean that
+		 * potentially the request buffer can leak in this case, but
+		 * (a) these buffers are not really that large anyway (b) the
+		 * scenario is not particularly common (c) the buffers would
+		 * typically last across a session instance if not program
+		 * lifetime anyway.
 		 */
 
 		thread_buffer_requests[key] = mapping;
