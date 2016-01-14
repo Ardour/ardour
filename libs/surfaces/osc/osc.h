@@ -69,6 +69,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
+	bool has_editor () const { return true; }
+	void* get_gui () const;
+	void  tear_down_gui ();
+
 	int set_active (bool yn);
 	bool get_active () const;
 	int set_feedback (bool yn);
@@ -80,6 +84,16 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int stop ();
 
 	static void* request_factory (uint32_t);
+
+	enum OSCDebugMode {
+		Off,
+		Unhandled,
+		All
+	};
+
+	std::string get_server_url ();
+	void set_debug_mode (OSCDebugMode m) { _debugmode = m; }
+	OSCDebugMode get_debug_mode () { return _debugmode; }
 
   protected:
         void thread_init ();
@@ -100,6 +114,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	std::string _osc_url_file;
 	std::string _namespace_root;
 	bool _send_route_changes;
+	OSCDebugMode _debugmode;
 
 	void register_callbacks ();
 
@@ -111,7 +126,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	// end "Application Hook" handles
 
-	std::string get_server_url ();
 	std::string get_unix_server_url ();
 
 	void send_current_value (const char* path, lo_arg** argv, int argc, lo_message msg);
@@ -127,11 +141,17 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void transport_speed (lo_message msg);
 	void record_enabled (lo_message msg);
 
+#define OSC_DEBUG \
+	if (_debugmode == All) { \
+		PBD::info << "OSC: " << path << " " << types << endmsg; \
+	}
+
 #define PATH_CALLBACK_MSG(name)					\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *, const char *, lo_arg **, int, void *data) { \
+        int cb_ ## name (const char *path, const char *types, lo_arg **, int, void *data) { \
+		OSC_DEBUG;              \
 		name (data);		\
 		return 0;		\
 	}
@@ -145,7 +165,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *, const char *types, lo_arg ** argv, int argc, void *) { \
+        int cb_ ## name (const char *path, const char *types, lo_arg ** argv, int argc, void *) { \
+		OSC_DEBUG;              \
 		if (argc > 0 && !strcmp (types, "f") && argv[0]->f != 1.0) { return 0; } \
 		name (); \
 		return 0; \
@@ -173,7 +194,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *, const char *, lo_arg **argv, int argc, void *) { \
+        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *) { \
+		OSC_DEBUG;              \
                 if (argc > 0) {						\
 			name (optional argv[0]->type);		\
                 }							\
@@ -187,7 +209,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *, const char *, lo_arg **argv, int argc, void *) { \
+        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *) { \
+		OSC_DEBUG;              \
                 if (argc > 1) {						\
 			name (argv[0]->arg1type, argv[1]->arg2type); \
                 }							\
@@ -198,7 +221,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
                return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *, const char *, lo_arg **argv, int argc, void *) { \
+        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *) { \
+		OSC_DEBUG;              \
                 if (argc > 1) {                                                \
                  name (argv[0]->arg1type, argv[1]->arg2type,argv[2]->arg3type); \
                 }                                                      \
@@ -209,7 +233,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
                return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *, const char *, lo_arg **argv, int argc, void *) { \
+        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *) { \
+		OSC_DEBUG;              \
                 if (argc > 1) {                                                \
                  name (argv[0]->arg1type, argv[1]->arg2type,argv[2]->arg3type,argv[3]->arg4type); \
                 }                                                      \
@@ -254,12 +279,14 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	void update_clock ();
 
-
 	typedef std::list<OSCRouteObserver*> RouteObservers;
 
 	RouteObservers route_observers;
 
 	static OSC* _instance;
+
+	mutable void *gui;
+	void build_gui ();
 };
 
 } // namespace

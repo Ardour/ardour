@@ -83,6 +83,8 @@ OSC::OSC (Session& s, uint32_t port)
 	, _osc_unix_server (0)
 	, _namespace_root ("/ardour")
 	, _send_route_changes (true)
+	, _debugmode (Off)
+	, gui (0)
 {
 	_instance = this;
 
@@ -329,9 +331,6 @@ OSC::register_callbacks()
 
 		serv = srvs[i];
 
-		/* this is a special catchall handler */
-
-		lo_server_add_method (serv, 0, 0, _catchall, this);
 
 #define REGISTER_CALLBACK(serv,path,types, function) lo_server_add_method (serv, path, types, OSC::_ ## function, this)
 
@@ -413,6 +412,10 @@ OSC::register_callbacks()
 		//lo_server_add_method(serv, "/register_auto_update", "siss", OSC::global_register_auto_update_handler, this);
 		//lo_server_add_method(serv, "/unregister_auto_update", "sss", OSC::_global_unregister_auto_update_handler, this);
 
+		/* this is a special catchall handler,
+		 * register at the end so this is only called if no
+		 * other handler matches (used for debug) */
+		lo_server_add_method (serv, 0, 0, _catchall, this);
 	}
 }
 
@@ -673,6 +676,10 @@ OSC::catchall (const char *path, const char* /*types*/, lo_arg **argv, int argc,
 		}
 
 		ret = 0;
+	}
+
+	if ((ret && _debugmode == Unhandled) || _debugmode == All) {
+		PBD::info << "Unhandled OSC message: " << path << endmsg;
 	}
 
 	return ret;
@@ -1163,7 +1170,9 @@ OSC::route_plugin_parameter_print (int rid, int piid, int par)
 XMLNode&
 OSC::get_state ()
 {
-	return ControlProtocol::get_state();
+	XMLNode& node (ControlProtocol::get_state());
+	node.add_property("debugmode", (int) _debugmode); // TODO: enum2str
+	return node;
 }
 
 int
@@ -1171,6 +1180,10 @@ OSC::set_state (const XMLNode& node, int version)
 {
 	if (ControlProtocol::set_state (node, version)) {
 		return -1;
+	}
+	XMLProperty const * p = node.property (X_("debugmode"));
+	if (p) {
+		_debugmode = OSCDebugMode (std::stoi(p->value ()));
 	}
 
 	return 0;

@@ -19,6 +19,7 @@ def build(bld):
             osc_controllable.cc
             osc_route_observer.cc
             interface.cc
+            osc_gui.cc
     '''
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_osc"' ]
@@ -26,8 +27,8 @@ def build(bld):
     obj.includes     = ['.', './osc']
     obj.name         = 'libardour_osc'
     obj.target       = 'ardour_osc'
-    obj.uselib       = ' LO '
-    obj.use          = 'libardour libardour_cp libpbd'
+    obj.uselib       = 'LO GTKMM GTK GDK'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
 def shutdown():
