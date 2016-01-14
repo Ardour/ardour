@@ -34,6 +34,7 @@ public:
     int    inv (void) { return _inv; }
     double del (void) { return _del; }
     double err (void) { return _err; }
+    float get_peak () { const float rv = _peak; _peak = 0; return rv; }
 
 private:
     class Freq {
@@ -54,6 +55,7 @@ private:
     int     _cnt;
     int     _inv;
     Freq    _freq [13];
+    float   _peak;
 };
 
 #endif /* __libardour_mtdm_h__ */

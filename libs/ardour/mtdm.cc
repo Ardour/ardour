@@ -23,6 +23,7 @@
 MTDM::MTDM (int fsamp)
   : _cnt (0)
   , _inv (0)
+  , _peak (0)
 {
     int   i;
     Freq  *F;
@@ -56,11 +57,13 @@ int MTDM::process (size_t len, float *ip, float *op)
     int    i;
     float  vip, vop, a, c, s;
     Freq   *F;
+		float peak = 0;
 
     while (len--)
     {
         vop = 0.0f;
 	vip = *ip++;
+	if (fabsf(vip) > peak) { peak = vip; }
 	for (i = 0, F = _freq; i < 13; i++, F++)
 	{
 	    a = 2 * (float) M_PI * (F->p & 65535) / 65536.0;
@@ -85,6 +88,8 @@ int MTDM::process (size_t len, float *ip, float *op)
             _cnt = 0;
 	}
     }
+
+    if (peak > _peak) { _peak = vip; }
 
     return 0;
 }
