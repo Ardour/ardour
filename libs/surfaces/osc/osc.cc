@@ -1183,7 +1183,7 @@ OSC::set_state (const XMLNode& node, int version)
 	}
 	XMLProperty const * p = node.property (X_("debugmode"));
 	if (p) {
-		_debugmode = OSCDebugMode (std::stoi(p->value ()));
+		_debugmode = OSCDebugMode (PBD::atoi(p->value ()));
 	}
 
 	return 0;
