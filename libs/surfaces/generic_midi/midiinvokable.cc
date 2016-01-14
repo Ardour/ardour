@@ -75,7 +75,7 @@ MIDIInvokable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /* is_on */)
 void
 MIDIInvokable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 {
-	if (control_additional == msg->controller_number) {
+	if (control_additional == msg->controller_number && msg->value > 0x40 ) {
 		execute ();
 	}
 }
