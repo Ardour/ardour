@@ -143,14 +143,14 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 #define OSC_DEBUG \
 	if (_debugmode == All) { \
-		PBD::info << "OSC: " << path << " " << types << endmsg; \
+		debugmsg (dgettext(PACKAGE, "OSC"), path, types, argv, argc); \
 	}
 
 #define PATH_CALLBACK_MSG(name)					\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *path, const char *types, lo_arg **, int, void *data) { \
+        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
 		OSC_DEBUG;              \
 		name (data);		\
 		return 0;		\
@@ -282,6 +282,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	typedef std::list<OSCRouteObserver*> RouteObservers;
 
 	RouteObservers route_observers;
+	void debugmsg (const char *prefix, const char *path, const char* types, lo_arg **argv, int argc);
 
 	static OSC* _instance;
 

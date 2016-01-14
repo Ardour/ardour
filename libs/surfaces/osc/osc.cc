@@ -618,7 +618,7 @@ OSC::_catchall (const char *path, const char *types, lo_arg **argv, int argc, vo
 }
 
 int
-OSC::catchall (const char *path, const char* /*types*/, lo_arg **argv, int argc, lo_message msg)
+OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
 	size_t len;
 	int ret = 1; /* unhandled */
@@ -679,10 +679,68 @@ OSC::catchall (const char *path, const char* /*types*/, lo_arg **argv, int argc,
 	}
 
 	if ((ret && _debugmode == Unhandled) || _debugmode == All) {
-		PBD::info << "Unhandled OSC message: " << path << endmsg;
+		debugmsg (_("Unhandled OSC message"), path, types, argv, argc);
 	}
 
 	return ret;
+}
+
+void
+OSC::debugmsg (const char *prefix, const char *path, const char* types, lo_arg **argv, int argc)
+{
+	std::stringstream ss;
+	for (int i = 0; i < argc; ++i) {
+		lo_type type = (lo_type)types[i];
+			ss << " ";
+		switch (type) {
+			case LO_INT32:
+				ss << "i:" << argv[i]->i;
+				break;
+			case LO_FLOAT:
+				ss << "f:" << argv[i]->f;
+				break;
+			case LO_DOUBLE:
+				ss << "d:" << argv[i]->d;
+				break;
+			case LO_STRING:
+				ss << "s:" << &argv[i]->s;
+				break;
+			case LO_INT64:
+				ss << "h:" << argv[i]->h;
+				break;
+			case LO_CHAR:
+				ss << "c:" << argv[i]->s;
+				break;
+			case LO_TIMETAG:
+				ss << "<Timetag>";
+				break;
+			case LO_BLOB:
+				ss << "<BLOB>";
+				break;
+			case LO_TRUE:
+				ss << "#T";
+				break;
+			case LO_FALSE:
+				ss << "#F";
+				break;
+			case LO_NIL:
+				ss << "NIL";
+				break;
+			case LO_INFINITUM:
+				ss << "#inf";
+				break;
+			case LO_MIDI:
+				ss << "<MIDI>";
+				break;
+			case LO_SYMBOL:
+				ss << "<SYMBOL>";
+				break;
+			default:
+				ss << "<??>";
+				break;
+		}
+	}
+	PBD::info << prefix << ": " << path << ss.str() << endmsg;
 }
 
 void
