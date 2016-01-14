@@ -245,7 +245,6 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		if ((*i).second->dead) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 deleting dead per-thread request buffer for %3 @ %4\n",
 			                                                     event_loop_name(), pthread_name(), i->second));
-			cerr << event_loop_name() << " noticed that a buffer was dead\n";
 			/* remove it from the EventLoop static map of all request buffers */
 			EventLoop::remove_request_buffer_from_map ((*i).second);
 			/* delete it */
