@@ -18,6 +18,7 @@
 */
 
 #include "pbd/compose.h"
+#include "pbd/debug.h"
 #include "pbd/event_loop.h"
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
@@ -107,6 +108,8 @@ EventLoop::get_request_buffers_for_target_thread (const std::string& target_thre
 		}
 	}
 
+	DEBUG_TRACE (PBD::DEBUG::EventLoop, string_compose ("for thread \"%1\", found %2 request buffers\n", target_thread, ret.size()));
+
 	return ret;
 }
 
@@ -186,5 +189,6 @@ EventLoop::pre_register (const string& emitting_thread_name, uint32_t num_reques
 		 */
 
 		thread_buffer_requests[key] = mapping;
+		DEBUG_TRACE (PBD::DEBUG::EventLoop, string_compose ("pre-registered request buffer for \"%1\" to send to \"%2\", buffer @ %3\n", emitting_thread_name, trs->name, mapping.request_buffer));
 	}
 }
