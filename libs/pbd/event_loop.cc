@@ -17,6 +17,10 @@
 
 */
 
+#include <cstring>
+
+#include <pthread.h>
+
 #include "pbd/compose.h"
 #include "pbd/debug.h"
 #include "pbd/event_loop.h"
@@ -171,24 +175,30 @@ EventLoop::pre_register (const string& emitting_thread_name, uint32_t num_reques
 		   AbstractUI constructor. Note that if
 		*/
 
-		/* make a key composed of the emitter and receiver thread names */
+		const string key = string_compose ("%1/%2", mapping.emitting_thread, mapping.target_thread_name);
 
-		string key = emitting_thread_name;
-		key += '/';
-		key +=  mapping.target_thread_name;
-
-		/* if the emitting thread was killed and recreated (with the
-		 * same name), this will replace the entry in
-		 * thread_buffer_requests. The old entry will be lazily deleted
-		 * when the target thread finds the request buffer and realizes
-		 * that it is dead.
+		/* note that there is no cleanup mechanism to remove
+		 * dead/out-of-date entries from this map.
 		 *
-		 * If the request buffer is replaced before the target thread
-		 * ever finds the dead version, we will leak the old request
-		 * buffer.
+		 * the request buffers themselves will be cleaned up
+		 * when the requesting thread exits (by the
+		 * thread-local-storage (TLS) cleanup mechanism). 
+		 *
+		 * but an entry will remain in the map.
+		 *
+		 * really need a way to register some end-of-thread callback
+		 * that will remove the entry from the thread_buffer_requests
+		 * container. but there is no such thing in the pthreads API
+		 *
+		 * the target thread only searches the map once, when the event
+		 * loop object is constructed. if it finds invalid buffers
+		 * it will (a) never get any requests for them anyway (b) will
+		 * find them marked "dead" and delete them.
 		 */
 
 		thread_buffer_requests[key] = mapping;
-		DEBUG_TRACE (PBD::DEBUG::EventLoop, string_compose ("pre-registered request buffer for \"%1\" to send to \"%2\", buffer @ %3\n", emitting_thread_name, trs->name, mapping.request_buffer));
+		DEBUG_TRACE (PBD::DEBUG::EventLoop, string_compose ("pre-registered request buffer for \"%1\" to send to \"%2\", buffer @ %3 (key was %4)\n",
+		                                                    emitting_thread_name, trs->name, mapping.request_buffer, key));
 	}
 }
+
