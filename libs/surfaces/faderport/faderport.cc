@@ -208,6 +208,10 @@ FaderPort::~FaderPort ()
 	}
 
 	tear_down_gui ();
+
+	/* stop event loop */
+	DEBUG_TRACE (DEBUG::FaderPort, "BaseUI::quit ()\n");
+	BaseUI::quit ();
 }
 
 void*
