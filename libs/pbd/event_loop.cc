@@ -219,3 +219,15 @@ EventLoop::pre_register (const string& emitting_thread_name, uint32_t num_reques
 	}
 }
 
+void
+EventLoop::remove_request_buffer_from_map (void* ptr)
+{
+	Glib::Threads::RWLock::ReaderLock lm (thread_buffer_requests_lock);
+
+	for (ThreadRequestBufferList::iterator x = thread_buffer_requests.begin(); x != thread_buffer_requests.end(); ++x) {
+		if (x->second.request_buffer == ptr) {
+			thread_buffer_requests.erase (x);
+			break;
+		}
+	}
+}

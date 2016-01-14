@@ -54,7 +54,7 @@ cleanup_request_buffer (void* ptr)
 	 * a request. If the UI has finished processing requests, then
 	 * we will leak this buffer object.
 	 */
-
+	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("thread \"%1\" exits: marking request buffer as dead @ %2\n", pthread_name(), rb));
 	rb->dead = true;
 }
 
@@ -246,9 +246,13 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 deleting dead per-thread request buffer for %3 @ %4\n",
 			                                                     event_loop_name(), pthread_name(), i->second));
 			cerr << event_loop_name() << " noticed that a buffer was dead\n";
+			/* remove it from the EventLoop static map of all request buffers */
+			EventLoop::remove_request_buffer_from_map ((*i).second);
+			/* delete it */
 			delete (*i).second;
 			RequestBufferMapIterator tmp = i;
 			++tmp;
+			/* remove it from this thread's list of request buffers */
 			request_buffers.erase (i);
 			i = tmp;
 		} else {

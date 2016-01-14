@@ -93,6 +93,7 @@ class LIBPBD_API EventLoop
 
 	static void register_request_buffer_factory (const std::string& target_thread_name, void* (*factory) (uint32_t));
 	static void pre_register (const std::string& emitting_thread_name, uint32_t num_requests);
+	static void remove_request_buffer_from_map (void* ptr);
 
   private:
         static Glib::Threads::Private<EventLoop> thread_event_loop;
