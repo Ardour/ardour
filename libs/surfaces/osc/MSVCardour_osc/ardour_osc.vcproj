@@ -280,6 +280,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\osc_gui.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\osc_route_observer.cc"
 				>
 			</File>
