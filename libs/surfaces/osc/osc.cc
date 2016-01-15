@@ -678,7 +678,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		ret = 0;
 	}
 
-	if ((ret && _debugmode == Unhandled) || _debugmode == All) {
+	if ((ret && _debugmode == Unhandled)) {
 		debugmsg (_("Unhandled OSC message"), path, types, argv, argc);
 	}
 
@@ -736,7 +736,7 @@ OSC::debugmsg (const char *prefix, const char *path, const char* types, lo_arg *
 				ss << "<SYMBOL>";
 				break;
 			default:
-				ss << "<??>";
+				ss << "< ?? >";
 				break;
 		}
 	}
