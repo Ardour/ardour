@@ -2224,7 +2224,14 @@ MackieControlProtocol::selected (boost::shared_ptr<Route> r) const
 bool
 MackieControlProtocol::is_hidden (boost::shared_ptr<Route> r) const
 {
-	return ((r->remote_control_id()) >>31) != 0;
+	if (!r) {
+		return false;
+	}
+	bool group = false;
+	if (r->route_group()) {
+		group = r->route_group()->is_hidden();
+	}
+	return (((r->remote_control_id()) >>31) != 0) || group;
 }
 
 boost::shared_ptr<Route>
