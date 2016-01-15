@@ -1062,7 +1062,9 @@ LV2Plugin::add_state(XMLNode* root) const
 			0,
 			NULL);
 
-		if (!_impl->state || !lilv_state_equals(state, _impl->state)) {
+		if (!_plugin_state_dir.empty()
+		    || !_impl->state
+		    || !lilv_state_equals(state, _impl->state)) {
 			lilv_state_save(_world.world,
 			                _uri_map.urid_map(),
 			                _uri_map.urid_unmap(),
@@ -1071,8 +1073,14 @@ LV2Plugin::add_state(XMLNode* root) const
 			                new_dir.c_str(),
 			                "state.ttl");
 
-			lilv_state_free(_impl->state);
-			_impl->state = state;
+			if (_plugin_state_dir.empty()) {
+				// normal session save
+				lilv_state_free(_impl->state);
+				_impl->state = state;
+			} else {
+				// template save (dedicated state-dir)
+				lilv_state_free(state);
+			}
 		} else {
 			// State is identical, decrement version and nuke directory
 			lilv_state_free(state);
