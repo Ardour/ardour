@@ -37,6 +37,8 @@
 #include "ardour/types.h"
 #include "control_protocol/control_protocol.h"
 
+#include "i18n.h"
+
 class OSCControllable;
 class OSCRouteObserver;
 
