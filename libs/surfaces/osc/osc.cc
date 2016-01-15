@@ -676,6 +676,34 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		}
 
 		ret = 0;
+	} else if (argc == 1 && types[0] == 'f') { // single float -- probably TouchOSC
+		if (!strncmp (path, "/ardour/routes/gainabs/", 23) && strlen (path) > 23) {
+			int rid = atoi (&path[23]);
+			// use some power-scale mapping??
+			route_set_gain_abs (rid, argv[0]->f);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/ardour/routes/trimabs/", 23) && strlen (path) > 23) {
+			int rid = atoi (&path[23]);
+			// normalize 0..1 ?
+			route_set_trim_abs (rid, argv[0]->f);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/ardour/routes/mute/", 20) && strlen (path) > 20) {
+			int rid = atoi (&path[20]);
+			route_mute (rid, argv[0]->f == 1.0);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/ardour/routes/solo/", 20) && strlen (path) > 20) {
+			int rid = atoi (&path[20]);
+			route_solo (rid, argv[0]->f == 1.0);
+			ret = 0;
+		}
+		else if (!strncmp (path, "/ardour/routes/recenable/", 25) && strlen (path) > 25) {
+			int rid = atoi (&path[25]);
+			route_recenable (rid, argv[0]->f == 1.0);
+			ret = 0;
+		}
 	}
 
 	if ((ret && _debugmode == Unhandled)) {
