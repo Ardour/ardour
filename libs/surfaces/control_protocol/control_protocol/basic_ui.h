@@ -43,6 +43,10 @@ class LIBCONTROLCP_API BasicUI {
 	virtual ~BasicUI ();
 
 	void add_marker (const std::string& = std::string());
+	void remove_marker_at_playhead ();
+	
+//	void mark_in();
+//	void mark_out();
 
 	void register_thread (std::string name);
 
@@ -61,6 +65,9 @@ class LIBCONTROLCP_API BasicUI {
 	void transport_play (bool jump_back = true);
 	void set_transport_speed (double speed);
 	double get_transport_speed ();
+
+	void jump_by_seconds( double sec );
+	void jump_by_bars(double bars);
 
 	ARDOUR::framepos_t transport_frame ();
 	void locate (ARDOUR::framepos_t frame, bool play = false);

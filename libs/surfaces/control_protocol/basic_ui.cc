@@ -23,6 +23,7 @@
 
 #include "ardour/session.h"
 #include "ardour/location.h"
+#include "ardour/tempo.h"
 
 #include "control_protocol/basic_ui.h"
 
@@ -122,6 +123,34 @@ BasicUI::add_marker (const std::string& markername)
 	XMLNode &after = session->locations()->get_state();
 	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
 	session->commit_reversible_command ();
+}
+
+void
+BasicUI::remove_marker_at_playhead ()
+{
+	if (session) {
+		//set up for undo
+		XMLNode &before = session->locations()->get_state();
+		bool removed = false;
+
+		//find location(s) at this time
+		Locations::LocationList locs;
+		session->locations()->find_all_between (session->audible_frame(), session->audible_frame()+1, locs, Location::Flags(0));
+		for (Locations::LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
+			if ((*i)->is_mark()) {
+				session->locations()->remove (*i);
+				removed = true;
+			}
+		}
+
+		//store undo
+		if (removed) {
+			session->begin_reversible_command (_("remove marker"));
+			XMLNode &after = session->locations()->get_state();
+			session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
+			session->commit_reversible_command ();
+		}
+	}
 }
 
 void
@@ -284,6 +313,36 @@ void
 BasicUI::locate (framepos_t where, bool roll_after_locate)
 {
 	session->request_locate (where, roll_after_locate);
+}
+
+void
+BasicUI::jump_by_seconds (double secs)
+{
+	framepos_t current = session->transport_frame();
+	double s = (double) current / (double) session->nominal_frame_rate();
+	
+	s+= secs;
+	if (s < 0) current = 0;
+	s = s * session->nominal_frame_rate();
+	
+	session->request_locate ( floor(s) );
+}
+
+void
+BasicUI::jump_by_bars (double bars)
+{
+	Timecode::BBT_Time bbt;
+	TempoMap& tmap (session->tempo_map());
+	tmap.bbt_time (session->transport_frame(), bbt);
+
+	bars += bbt.bars;
+	if (bars < 0) bars = 0;
+	
+	AnyTime any;
+	any.type = AnyTime::BBT;
+	any.bbt.bars = bars;
+	
+	session->request_locate ( session->convert_to_frames (any) );
 }
 
 bool

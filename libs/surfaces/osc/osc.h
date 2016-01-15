@@ -175,6 +175,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	}
 
 	PATH_CALLBACK(add_marker);
+	PATH_CALLBACK(remove_marker_at_playhead);
 	PATH_CALLBACK(loop_toggle);
 	PATH_CALLBACK(goto_start);
 	PATH_CALLBACK(goto_end);
@@ -206,6 +207,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	PATH_CALLBACK1(set_transport_speed,f,);
 	PATH_CALLBACK1(access_action,s,&);
+
+	PATH_CALLBACK1(jump_by_bars,f,);
+	PATH_CALLBACK1(jump_by_seconds,f,);
 
 #define PATH_CALLBACK2(name,arg1type,arg2type)			\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \

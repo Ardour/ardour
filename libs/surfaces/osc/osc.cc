@@ -336,6 +336,7 @@ OSC::register_callbacks()
 
 		REGISTER_CALLBACK (serv, "/routes/list", "", routes_list);
 		REGISTER_CALLBACK (serv, "/ardour/add_marker", "", add_marker);
+		REGISTER_CALLBACK (serv, "/ardour/remove_marker", "", remove_marker_at_playhead);
 		REGISTER_CALLBACK (serv, "/ardour/access_action", "s", access_action);
 		REGISTER_CALLBACK (serv, "/ardour/loop_toggle", "", loop_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/loop_location", "ii", loop_location);
@@ -359,6 +360,9 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/toggle_punch_out", "", toggle_punch_out);
 		REGISTER_CALLBACK (serv, "/ardour/rec_enable_toggle", "", rec_enable_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/toggle_all_rec_enables", "", toggle_all_rec_enables);
+		REGISTER_CALLBACK (serv, "/ardour/jump_bars", "f", jump_by_bars);
+		REGISTER_CALLBACK (serv, "/ardour/jump_seconds", "f", jump_by_seconds);
+
 
 		/*
 		 * NOTE: these messages are provided for (arguably broken) apps
@@ -372,6 +376,7 @@ OSC::register_callbacks()
 		 */
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/loop_toggle", "f", loop_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/add_marker", "f", add_marker);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/remove_marker", "f", remove_marker_at_playhead);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/goto_start", "f", goto_start);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/goto_end", "f", goto_end);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/rewind", "f", rewind);
@@ -387,6 +392,10 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_punch_out", "f", toggle_punch_out);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/rec_enable_toggle", "f", rec_enable_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_all_rec_enables", "f", toggle_all_rec_enables);
+
+		//ToDo
+//		REGISTER_CALLBACK (serv, "/ardour/pushbutton/mark_in", "f", mark_in);
+//		REGISTER_CALLBACK (serv, "/ardour/pushbutton/mark_out", "f", mark_out);
 
 		REGISTER_CALLBACK (serv, "/ardour/routes/mute", "ii", route_mute);
 		REGISTER_CALLBACK (serv, "/ardour/routes/solo", "ii", route_solo);
