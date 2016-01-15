@@ -81,6 +81,11 @@ class LIBCONTROLCP_API BasicUI {
 	void redo ();
 	void toggle_punch_in ();
 	void toggle_punch_out ();
+	
+	void mark_in();
+	void mark_out();
+
+	void toggle_click();
 
 	void set_record_enable (bool yn);
 	bool get_record_enabled ();

@@ -362,6 +362,9 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/toggle_all_rec_enables", "", toggle_all_rec_enables);
 		REGISTER_CALLBACK (serv, "/ardour/jump_bars", "f", jump_by_bars);
 		REGISTER_CALLBACK (serv, "/ardour/jump_seconds", "f", jump_by_seconds);
+		REGISTER_CALLBACK (serv, "/ardour/mark_in", "", mark_in);
+		REGISTER_CALLBACK (serv, "/ardour/mark_out", "", mark_out);
+		REGISTER_CALLBACK (serv, "/ardour/toggle_click", "", toggle_click);
 
 
 		/*
@@ -392,10 +395,9 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_punch_out", "f", toggle_punch_out);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/rec_enable_toggle", "f", rec_enable_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_all_rec_enables", "f", toggle_all_rec_enables);
-
-		//ToDo
-//		REGISTER_CALLBACK (serv, "/ardour/pushbutton/mark_in", "f", mark_in);
-//		REGISTER_CALLBACK (serv, "/ardour/pushbutton/mark_out", "f", mark_out);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/mark_in", "f", mark_in);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/mark_out", "f", mark_out);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_click", "f", toggle_click);
 
 		REGISTER_CALLBACK (serv, "/ardour/routes/mute", "ii", route_mute);
 		REGISTER_CALLBACK (serv, "/ardour/routes/solo", "ii", route_solo);

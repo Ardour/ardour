@@ -192,6 +192,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK(toggle_punch_out);
 	PATH_CALLBACK(rec_enable_toggle);
 	PATH_CALLBACK(toggle_all_rec_enables);
+	PATH_CALLBACK(mark_in);
+	PATH_CALLBACK(mark_out);
+	PATH_CALLBACK(toggle_click);
 
 #define PATH_CALLBACK1(name,type,optional)					\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
