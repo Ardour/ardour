@@ -160,6 +160,7 @@ class MackieControlProtocol
 	bool is_audio_track (boost::shared_ptr<ARDOUR::Route>) const;
 	bool is_midi_track (boost::shared_ptr<ARDOUR::Route>) const;
 	bool selected (boost::shared_ptr<ARDOUR::Route>) const;
+	bool is_hidden (boost::shared_ptr<ARDOUR::Route>) const;
 	boost::shared_ptr<ARDOUR::Route> first_selected_route () const;
 
 	void set_view_mode (ViewMode);

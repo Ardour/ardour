@@ -298,11 +298,13 @@ MackieControlProtocol::get_sorted_routes()
 			if (route->route_group()) {
 				route->route_group()->set_active (true, this);
 			}
-			sorted.push_back (route);
-			remote_ids.insert (route->remote_control_id());
+			if (! is_hidden(route)) {
+				sorted.push_back (route);
+				remote_ids.insert (route->remote_control_id());
+			}
 			break;
 		case AudioTracks:
-			if (is_audio_track(route)) {
+			if (is_audio_track(route) && !is_hidden(route)) {
 				if (route->route_group()) {
 					route->route_group()->set_active (true, this);
 				}
@@ -319,7 +321,7 @@ MackieControlProtocol::get_sorted_routes()
 				}
 #endif				
 			} else {
-				if (!is_track(route)) {
+				if (!is_track(route) && !is_hidden(route)) {
 					if (route->route_group()) {
 						route->route_group()->set_active (true, this);
 					}
@@ -329,7 +331,7 @@ MackieControlProtocol::get_sorted_routes()
 			}
 			break;
 		case MidiTracks:
-			if (is_midi_track(route)) {
+			if (is_midi_track(route) && !is_hidden(route)) {
 				if (route->route_group()) {
 					route->route_group()->set_active (true, this);
 				}
@@ -340,7 +342,7 @@ MackieControlProtocol::get_sorted_routes()
 		case Plugins:
 			break;
 		case Auxes: // in ardour, for now aux and buss are same. for mixbus, see "Busses" case above
-			if (!is_track(route)) {
+			if (!is_track(route) && !is_hidden(route)) {
 				if (route->route_group()) {
 					route->route_group()->set_active (true, this);
 				}
@@ -348,8 +350,8 @@ MackieControlProtocol::get_sorted_routes()
 				remote_ids.insert (route->remote_control_id());
 			}
 			break;
-		case Selected: // For example: a group
-			if (selected(route)) {
+		case Selected: // For example: a group (this is USER)
+			if (selected(route) && !is_hidden(route)) {
 				/* Selected may be a group in which case we want to
 				 * control each track separately.
 				 */
@@ -2217,6 +2219,12 @@ MackieControlProtocol::selected (boost::shared_ptr<Route> r) const
 		}
 	}
 	return false;
+}
+
+bool
+MackieControlProtocol::is_hidden (boost::shared_ptr<Route> r) const
+{
+	return ((r->remote_control_id()) >>31) != 0;
 }
 
 boost::shared_ptr<Route>
