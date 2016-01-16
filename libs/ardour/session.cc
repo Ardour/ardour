@@ -3755,6 +3755,7 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 		if (!(*i)->is_auditioner() && (*i)->listening_via_monitor()) {
 			if (Config->get_solo_control_is_listen_control()) {
 				listeners++;
+				something_soloed = true;
 			} else {
 				(*i)->set_listen (false, this);
 			}
