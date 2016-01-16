@@ -224,6 +224,19 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 					request_buffer_map_lock.unlock ();
 					DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: valid request, calling ::do_request()\n", event_loop_name()));
 					do_request (vec.buf[0]);
+
+					/* if the request was CallSlot, then we need to ensure that we reset the functor in the request, in case it
+					 * held a shared_ptr<>. Failure to do so can lead to dangling references to objects passed to PBD::Signals.
+					 *
+					 * Note that this method (::handle_ui_requests()) is by definition called from the event loop thread, so
+					 * caller_is_self() is true, which means that the execution of the functor has definitely happened after
+					 * do_request() returns and we no longer need the functor for any reason.
+					 */
+
+					if (vec.buf[0]->type == CallSlot) {
+						vec.buf[0]->the_slot = 0;
+					}
+
 					request_buffer_map_lock.lock ();
 					if (vec.buf[0]->invalidation) {
 						DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: removing invalidation record for that request\n", event_loop_name()));
