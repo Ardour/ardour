@@ -1107,6 +1107,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	framecnt_t              _worst_track_latency;
 	bool                    _have_captured;
 	bool                    _non_soloed_outs_muted;
+	bool                    _listening;
 	uint32_t                _listen_cnt;
 	uint32_t                _solo_isolated_cnt;
 	bool                    _writable;

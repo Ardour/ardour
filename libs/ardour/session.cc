@@ -183,6 +183,7 @@ Session::Session (AudioEngine &eng,
 	, _worst_track_latency (0)
 	, _have_captured (false)
 	, _non_soloed_outs_muted (false)
+	, _listening (false)
 	, _listen_cnt (0)
 	, _solo_isolated_cnt (0)
 	, _writable (false)
@@ -3740,6 +3741,7 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	/* now figure out if anything that matters is soloed (or is "listening")*/
 
 	bool something_soloed = false;
+	bool something_listening = false;
 	uint32_t listeners = 0;
 	uint32_t isolated = 0;
 
@@ -3755,7 +3757,7 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 		if (!(*i)->is_auditioner() && (*i)->listening_via_monitor()) {
 			if (Config->get_solo_control_is_listen_control()) {
 				listeners++;
-				something_soloed = true;
+				something_listening = true;
 			} else {
 				(*i)->set_listen (false, this);
 			}
@@ -3769,6 +3771,11 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	if (something_soloed != _non_soloed_outs_muted) {
 		_non_soloed_outs_muted = something_soloed;
 		SoloActive (_non_soloed_outs_muted); /* EMIT SIGNAL */
+	}
+
+	if (something_listening != _listening) {
+		_listening = something_listening;
+		SoloActive (_listening);
 	}
 
 	_listen_cnt = listeners;
