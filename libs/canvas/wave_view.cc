@@ -73,7 +73,7 @@ WaveView::DrawingRequestQueue WaveView::request_queue;
 PBD::Signal0<void> WaveView::VisualPropertiesChanged;
 PBD::Signal0<void> WaveView::ClipLevelChanged;
 
-#undef ENABLE_THREADED_WAVEFORM_RENDERING
+#define ENABLE_THREADED_WAVEFORM_RENDERING
 
 WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (c)
