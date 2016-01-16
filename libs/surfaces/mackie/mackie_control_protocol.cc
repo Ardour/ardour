@@ -1301,7 +1301,11 @@ MackieControlProtocol::notify_remote_id_changed()
 
 	if (sorted.size() - _current_initial_bank < sz) {
 		// but don't shift backwards past the zeroth channel
-		switch_banks (max((Sorted::size_type) 0, sorted.size() - sz));
+		if (sorted.size() < sz) {  // avoid unsigned math mistake below
+			switch_banks(0, true);
+		} else {
+			switch_banks (max((Sorted::size_type) 0, sorted.size() - sz), true);
+		}
 	} else {
 		// Otherwise just refresh the current bank
 		refresh_current_bank();
