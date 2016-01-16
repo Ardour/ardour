@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <boost/scoped_array.hpp>
+#include <glibmm/threads.h>
 
 #include "pbd/ringbuffer.h"
 
@@ -85,6 +86,7 @@ public:
 	int set_state (const XMLNode&, int version);
 
 	bool queue_trigger (Trigger*);
+	void add_trigger (Trigger*);
 
 protected:
 	XMLNode& state (bool full);
@@ -96,6 +98,7 @@ private:
 
 	typedef std::vector<Trigger*> Triggers;
 	Triggers active_triggers;
+	Glib::Threads::Mutex trigger_lock;
 	Triggers all_triggers;
 
 	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing);

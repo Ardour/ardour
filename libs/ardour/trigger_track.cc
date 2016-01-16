@@ -55,6 +55,13 @@ TriggerTrack::init ()
 	return 0;
 }
 
+void
+TriggerTrack::add_trigger (Trigger* trigger)
+{
+	Glib::Threads::Mutex::Lock lm (trigger_lock);
+	all_triggers.push_back (trigger);
+}
+
 bool
 TriggerTrack::queue_trigger (Trigger* trigger)
 {
