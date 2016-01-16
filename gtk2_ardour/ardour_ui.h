@@ -609,6 +609,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool process_snapshot_session_prompter (ArdourPrompter& prompter, bool switch_to_it);
 	void snapshot_session (bool switch_to_it);
 
+	void quick_snapshot_session (bool switch_to_it);  //does not promtp for name, just makes a timestamped file
+
 	SaveAsDialog* save_as_dialog;
 
 	bool save_as_progress_update (float fraction, int64_t cnt, int64_t total, Gtk::Label* label, Gtk::ProgressBar* bar);

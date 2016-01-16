@@ -336,7 +336,6 @@ OSC::register_callbacks()
 
 		REGISTER_CALLBACK (serv, "/routes/list", "", routes_list);
 		REGISTER_CALLBACK (serv, "/ardour/add_marker", "", add_marker);
-		REGISTER_CALLBACK (serv, "/ardour/remove_marker", "", remove_marker_at_playhead);
 		REGISTER_CALLBACK (serv, "/ardour/access_action", "s", access_action);
 		REGISTER_CALLBACK (serv, "/ardour/loop_toggle", "", loop_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/loop_location", "ii", loop_location);
@@ -360,11 +359,23 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/toggle_punch_out", "", toggle_punch_out);
 		REGISTER_CALLBACK (serv, "/ardour/rec_enable_toggle", "", rec_enable_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/toggle_all_rec_enables", "", toggle_all_rec_enables);
+		REGISTER_CALLBACK (serv, "/ardour/remove_marker", "", remove_marker_at_playhead);
 		REGISTER_CALLBACK (serv, "/ardour/jump_bars", "f", jump_by_bars);
 		REGISTER_CALLBACK (serv, "/ardour/jump_seconds", "f", jump_by_seconds);
 		REGISTER_CALLBACK (serv, "/ardour/mark_in", "", mark_in);
 		REGISTER_CALLBACK (serv, "/ardour/mark_out", "", mark_out);
 		REGISTER_CALLBACK (serv, "/ardour/toggle_click", "", toggle_click);
+		REGISTER_CALLBACK (serv, "/ardour/midi_panic", "", midi_panic);
+		REGISTER_CALLBACK (serv, "/ardour/toggle_roll", "", toggle_roll);
+		REGISTER_CALLBACK (serv, "/ardour/stop_forget", "", stop_forget);
+		REGISTER_CALLBACK (serv, "/ardour/set_punch_range", "", set_punch_range);
+		REGISTER_CALLBACK (serv, "/ardour/set_loop_range", "", set_loop_range);
+		REGISTER_CALLBACK (serv, "/ardour/set_session_range", "", set_session_range);
+		REGISTER_CALLBACK (serv, "/ardour/toggle_monitor_mute", "", toggle_monitor_mute);
+		REGISTER_CALLBACK (serv, "/ardour/toggle_monitor_dim", "", toggle_monitor_dim);
+		REGISTER_CALLBACK (serv, "/ardour/toggle_monitor_mono", "", toggle_monitor_mono);
+		REGISTER_CALLBACK (serv, "/ardour/quick_snapshot_switch", "", quick_snapshot_switch);
+		REGISTER_CALLBACK (serv, "/ardour/quick_snapshot_stay", "", quick_snapshot_stay);
 
 
 		/*
@@ -379,7 +390,6 @@ OSC::register_callbacks()
 		 */
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/loop_toggle", "f", loop_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/add_marker", "f", add_marker);
-		REGISTER_CALLBACK (serv, "/ardour/pushbutton/remove_marker", "f", remove_marker_at_playhead);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/goto_start", "f", goto_start);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/goto_end", "f", goto_end);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/rewind", "f", rewind);
@@ -395,10 +405,23 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_punch_out", "f", toggle_punch_out);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/rec_enable_toggle", "f", rec_enable_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_all_rec_enables", "f", toggle_all_rec_enables);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/remove_marker", "f", remove_marker_at_playhead);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/mark_in", "f", mark_in);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/mark_out", "f", mark_out);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_click", "f", toggle_click);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/midi_panic", "f", midi_panic);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_roll", "f", toggle_roll);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/stop_forget", "f", stop_forget);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/set_punch_range", "f", set_punch_range);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/set_loop_range", "f", set_loop_range);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/set_session_range", "f", set_session_range);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_monitor_mute", "f", toggle_monitor_mute);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_monitor_dim", "f", toggle_monitor_dim);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_monitor_mono", "f", toggle_monitor_mono);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/quick_snapshot_switch", "f", quick_snapshot_switch);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/quick_snapshot_stay", "f", quick_snapshot_stay);
 
+		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
 		REGISTER_CALLBACK (serv, "/ardour/routes/mute", "ii", route_mute);
 		REGISTER_CALLBACK (serv, "/ardour/routes/solo", "ii", route_solo);
 		REGISTER_CALLBACK (serv, "/ardour/routes/recenable", "ii", route_recenable);

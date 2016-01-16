@@ -2453,6 +2453,21 @@ ARDOUR_UI::save_session_as ()
 	}
 }
 
+void
+ARDOUR_UI::quick_snapshot_session (bool switch_to_it)
+{
+		char timebuf[128];
+		time_t n;
+		struct tm local_time;
+
+		time (&n);
+		localtime_r (&n, &local_time);
+		strftime (timebuf, sizeof(timebuf), "%FT%H.%M.%S", &local_time);
+
+		save_state (timebuf, switch_to_it);
+}
+
+
 bool
 ARDOUR_UI::process_snapshot_session_prompter (ArdourPrompter& prompter, bool switch_to_it)
 {

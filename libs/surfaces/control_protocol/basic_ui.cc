@@ -363,6 +363,73 @@ BasicUI::toggle_click ()
 	access_action("Transport/ToggleClick");
 }
 
+void
+BasicUI::midi_panic ()
+{
+	access_action("MIDI/panic");
+}
+
+void
+BasicUI::toggle_roll ()
+{
+	access_action("Transport/ToggleRoll");
+}
+
+void
+BasicUI::stop_forget ()
+{
+	access_action("Transport/ToggleRollForgetCapture");
+}
+
+void
+BasicUI::set_punch_range ()
+{
+	access_action("Editor/set-punch-from-edit-range");
+}
+
+void
+BasicUI::set_loop_range ()
+{
+	access_action("Editor/set-loop-from-edit-range");
+}
+
+void
+BasicUI::set_session_range ()
+{
+	access_action("Editor/set-session-from-edit-range");
+}
+
+void
+BasicUI::toggle_monitor_mute ()
+{
+	//access_action("Editor/toggle_monitor_mute");   ToDo
+}
+
+void
+BasicUI::toggle_monitor_dim ()
+{
+	//access_action("Editor/toggle_monitor_dim");    ToDo
+}
+
+void
+BasicUI::toggle_monitor_mono ()
+{
+	//access_action("Editor/toggle_monitor_mono");    ToDo
+}
+
+void
+BasicUI::quick_snapshot_stay ()
+{
+	access_action("Main/QuickSnapshotStay");
+}
+
+void
+BasicUI::quick_snapshot_switch ()
+{
+	access_action("Main/QuickSnapshotSwitch");
+}
+
+
 bool
 BasicUI::locating ()
 {

@@ -175,7 +175,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	}
 
 	PATH_CALLBACK(add_marker);
-	PATH_CALLBACK(remove_marker_at_playhead);
 	PATH_CALLBACK(loop_toggle);
 	PATH_CALLBACK(goto_start);
 	PATH_CALLBACK(goto_end);
@@ -192,9 +191,21 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK(toggle_punch_out);
 	PATH_CALLBACK(rec_enable_toggle);
 	PATH_CALLBACK(toggle_all_rec_enables);
+	PATH_CALLBACK(remove_marker_at_playhead);
 	PATH_CALLBACK(mark_in);
 	PATH_CALLBACK(mark_out);
 	PATH_CALLBACK(toggle_click);
+	PATH_CALLBACK(midi_panic);
+	PATH_CALLBACK(toggle_roll);
+	PATH_CALLBACK(stop_forget);
+	PATH_CALLBACK(set_punch_range);
+	PATH_CALLBACK(set_loop_range);
+	PATH_CALLBACK(set_session_range);
+	PATH_CALLBACK(toggle_monitor_mute);
+	PATH_CALLBACK(toggle_monitor_dim);
+	PATH_CALLBACK(toggle_monitor_mono);
+	PATH_CALLBACK(quick_snapshot_stay);
+	PATH_CALLBACK(quick_snapshot_switch);
 
 #define PATH_CALLBACK1(name,type,optional)					\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \

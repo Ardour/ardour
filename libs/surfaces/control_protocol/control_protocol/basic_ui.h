@@ -86,6 +86,22 @@ class LIBCONTROLCP_API BasicUI {
 	void mark_out();
 
 	void toggle_click();
+	void midi_panic();
+
+	void toggle_monitor_mute();
+	void toggle_monitor_dim();
+	void toggle_monitor_mono();
+
+	void quick_snapshot_stay ();
+	void quick_snapshot_switch ();
+
+	void toggle_roll();  //this provides the same operation as the "spacebar", it's a lot smarter than "play".
+
+	void stop_forget();
+
+	void set_punch_range();
+	void set_loop_range();
+	void set_session_range();
 
 	void set_record_enable (bool yn);
 	bool get_record_enabled ();
