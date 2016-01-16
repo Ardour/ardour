@@ -109,6 +109,7 @@ class MackieControlProtocol
 		Busses,
 		Auxes,
 		Selected,
+		Hidden,
 		Plugins,
 	};
 

@@ -960,6 +960,7 @@ MackieControlProtocol::outputs_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::outputs_release (Mackie::Button&)
 {
+	set_view_mode (Hidden);
 	return none;
 }
 Mackie::LedState

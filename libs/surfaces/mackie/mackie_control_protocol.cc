@@ -304,15 +304,18 @@ MackieControlProtocol::get_sorted_routes()
 			}
 			break;
 		case AudioTracks:
+			if (route->route_group()) {
+				route->route_group()->set_active (true, this);
+			}
 			if (is_audio_track(route) && !is_hidden(route)) {
-				if (route->route_group()) {
-					route->route_group()->set_active (true, this);
-				}
 				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
 			break;
 		case Busses:
+			if (route->route_group()) {
+				route->route_group()->set_active (true, this);
+			}
 			if (Profile->get_mixbus()) {
 #ifdef MIXBUS
 				if (route->mixbus()) {
@@ -322,19 +325,16 @@ MackieControlProtocol::get_sorted_routes()
 #endif				
 			} else {
 				if (!is_track(route) && !is_hidden(route)) {
-					if (route->route_group()) {
-						route->route_group()->set_active (true, this);
-					}
 					sorted.push_back (route);
 					remote_ids.insert (route->remote_control_id());
 				}
 			}
 			break;
 		case MidiTracks:
+			if (route->route_group()) {
+				route->route_group()->set_active (true, this);
+			}
 			if (is_midi_track(route) && !is_hidden(route)) {
-				if (route->route_group()) {
-					route->route_group()->set_active (true, this);
-				}
 				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
@@ -342,10 +342,20 @@ MackieControlProtocol::get_sorted_routes()
 		case Plugins:
 			break;
 		case Auxes: // in ardour, for now aux and buss are same. for mixbus, see "Busses" case above
+			if (route->route_group()) {
+				route->route_group()->set_active (true, this);
+			}
 			if (!is_track(route) && !is_hidden(route)) {
-				if (route->route_group()) {
-					route->route_group()->set_active (true, this);
-				}
+				sorted.push_back (route);
+				remote_ids.insert (route->remote_control_id());
+			}
+			break;
+		case Hidden: // Show all the tracks we have hidden
+			if (route->route_group()) {
+				route->route_group()->set_active (true, this);
+			}
+			if (is_hidden(route)) {
+				// maybe separate groups
 				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
