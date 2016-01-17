@@ -29,7 +29,9 @@
 
 #include "ardour/session_handle.h"
 
+#include "ardour_dropdown.h"
 #include "ardour_window.h"
+#include "editing.h"
 
 namespace Evoral {
 	template<typename Time> class Note;
@@ -88,10 +90,10 @@ public:
 	uint32_t row_at_beats_max_delay(Evoral::Beats beats);
 
 	// Number of rows per beat
-	uint16_t rows_per_beat;
+	uint8_t rows_per_beat;
 
 	// Determined by the number of rows per beat
-	Evoral::Beats snap;
+	Evoral::Beats beats_per_row;
 
 	// Beats corresponding to the first row
 	Evoral::Beats first_beats;
@@ -183,7 +185,9 @@ class MidiTrackerEditor : public ArdourWindow
 	Gtk::CellEditable*           editing_editable;
 	Gtk::Table                   buttons;
 	Gtk::VBox                    vbox;
-	Gtk::ToggleButton            sound_notes_button;
+	ArdourDropdown               beats_per_row_selector;
+	std::vector<std::string>     beats_per_row_strings;
+	uint8_t                      rows_per_beat;
 
 	boost::shared_ptr<ARDOUR::MidiRegion> region;
 	boost::shared_ptr<ARDOUR::MidiTrack>  track;
@@ -192,8 +196,21 @@ class MidiTrackerEditor : public ArdourWindow
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;
 
+	// void setup_toolbar ();
+
+	void build_beats_per_row_menu ();
+	void register_actions ();
+	void setup_tooltips ();
+
 	void redisplay_model ();
 
+	// Beats per row corresponds to a SnapType. I could have user an integer
+	// directly but I prefer to use the SnapType to be more consistent with the
+	// main editor.
+	void set_beats_per_row_to (Editing::SnapType);
+	void beats_per_row_selection_done (Editing::SnapType);
+	Glib::RefPtr<Gtk::RadioAction> beats_per_row_action (Editing::SnapType);
+	void beats_per_row_chosen (Editing::SnapType);
 
 	// Make it up for the lack of C++11 support
 	template<typename T> std::string to_string(const T& v)

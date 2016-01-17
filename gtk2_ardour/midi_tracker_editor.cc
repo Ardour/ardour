@@ -21,6 +21,8 @@
 
 #include <gtkmm/cellrenderercombo.h>
 
+#include "pbd/file_utils.h"
+
 #include "evoral/midi_util.h"
 #include "evoral/Note.hpp"
 
@@ -34,10 +36,12 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/utils.h"
 
 #include "ui_config.h"
 #include "midi_tracker_editor.h"
 #include "note_player.h"
+#include "tooltips.h"
 
 #include "i18n.h"
 
@@ -46,6 +50,9 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Glib;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
+using namespace PBD;
+using namespace Editing;
 using Timecode::BBT_Time;
 
 ///////////////////////
@@ -56,7 +63,7 @@ MidiTrackerMatrix::MidiTrackerMatrix(ARDOUR::Session* session,
                                      boost::shared_ptr<ARDOUR::MidiRegion> region,
                                      boost::shared_ptr<ARDOUR::MidiModel> midi_model,
                                      uint16_t rpb)
-	: rows_per_beat(rpb), snap(1.0/rows_per_beat),
+	: rows_per_beat(rpb), beats_per_row(1.0/rows_per_beat),
 	  _ticks_per_row(BBT_Time::ticks_per_beat/rows_per_beat),
 	  _session(session), _region(region), _midi_model(midi_model),
 	  _conv(_session->tempo_map(), _region->position())
@@ -128,12 +135,12 @@ void MidiTrackerMatrix::updateMatrix()
 
 Evoral::Beats MidiTrackerMatrix::find_first_row_beats()
 {	
-	return _conv.from (_region->first_frame()).snap_to (snap);
+	return _conv.from (_region->first_frame()).snap_to (beats_per_row);
 }
 
 Evoral::Beats MidiTrackerMatrix::find_last_row_beats()
 {
-	return _conv.from (_region->last_frame()).snap_to (snap);
+	return _conv.from (_region->last_frame()).snap_to (beats_per_row);
 }
 
 uint32_t MidiTrackerMatrix::find_nrows()
@@ -172,6 +179,30 @@ uint32_t MidiTrackerMatrix::row_at_beats_max_delay(Evoral::Beats beats)
 // MidiTrackerEditor //
 ///////////////////////
 
+static const gchar *_beats_per_row_strings[] = {
+	N_("Beats/128"),
+	N_("Beats/64"),
+	N_("Beats/32"),
+	N_("Beats/28"),
+	N_("Beats/24"),
+	N_("Beats/20"),
+	N_("Beats/16"),
+	N_("Beats/14"),
+	N_("Beats/12"),
+	N_("Beats/10"),
+	N_("Beats/8"),
+	N_("Beats/7"),
+	N_("Beats/6"),
+	N_("Beats/5"),
+	N_("Beats/4"),
+	N_("Beats/3"),
+	N_("Beats/2"),
+	N_("Beats"),
+	0
+};
+
+#define COMBO_TRIANGLE_WIDTH 25
+
 const std::string MidiTrackerEditor::note_off_str = "===";
 const std::string MidiTrackerEditor::undefined_str = "***";
 
@@ -190,6 +221,16 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 
 	set_session (s);
 
+	// Beats per row combo
+	beats_per_row_strings =  I18N (_beats_per_row_strings);
+	build_beats_per_row_menu ();
+
+	register_actions ();
+	setup_tooltips ();
+
+	// setup_toolbar ();
+
+	// Tracker matrix
 	edit_column = -1;
 	editing_renderer = 0;
 	editing_editable = 0;
@@ -237,8 +278,11 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 	view.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
 	view.get_selection()->set_mode (SELECTION_MULTIPLE);
 	
+	// Scroller
 	scroller.add (view);
 	scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
+
+	set_beats_per_row_to(SnapToBeatDiv4);
 
 	redisplay_model ();
 
@@ -247,10 +291,12 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 
 	view.show ();
 	scroller.show ();
+	beats_per_row_selector.show ();
 	vbox.show ();
 
 	vbox.set_spacing (6);
 	vbox.set_border_width (6);
+	vbox.pack_start (beats_per_row_selector, false, false);
 	vbox.pack_start (scroller, true, true);
 
 	add (vbox);
@@ -262,6 +308,34 @@ MidiTrackerEditor::~MidiTrackerEditor ()
 }
 
 void
+MidiTrackerEditor::register_actions ()
+{
+	Glib::RefPtr<ActionGroup> beats_per_row_actions = ActionGroup::create (X_("BeatsPerRow"));
+	RadioAction::Group beats_per_row_choice_group;
+
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-onetwentyeighths"), _("Beats Per Row to One Twenty Eighths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv128)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-sixtyfourths"), _("Beats Per Row to Sixty Fourths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv64)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-thirtyseconds"), _("Beats Per Row to Thirty Seconds"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv32)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-twentyeighths"), _("Beats Per Row to Twenty Eighths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv28)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-twentyfourths"), _("Beats Per Row to Twenty Fourths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv24)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-twentieths"), _("Beats Per Row to Twentieths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv20)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-asixteenthbeat"), _("Beats Per Row to Sixteenths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv16)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-fourteenths"), _("Beats Per Row to Fourteenths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv14)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-twelfths"), _("Beats Per Row to Twelfths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv12)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-tenths"), _("Beats Per Row to Tenths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv10)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-eighths"), _("Beats Per Row to Eighths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv8)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-sevenths"), _("Beats Per Row to Sevenths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv7)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-sixths"), _("Beats Per Row to Sixths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv6)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-fifths"), _("Beats Per Row to Fifths"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv5)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-quarters"), _("Beats Per Row to Quarters"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv4)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-thirds"), _("Beats Per Row to Thirds"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv3)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-halves"), _("Beats Per Row to Halves"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeatDiv2)));
+	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-beat"), _("Beats Per Row to Beat"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeat)));
+
+	ActionManager::add_action_group (beats_per_row_actions);
+}
+
+void
 MidiTrackerEditor::redisplay_model ()
 {
 	view.set_model (Glib::RefPtr<Gtk::ListStore>(0));
@@ -269,7 +343,7 @@ MidiTrackerEditor::redisplay_model ()
 
 	if (_session) {
 
-		MidiTrackerMatrix mtm(_session, region, midi_model, 8 /* TODO: user defined */);
+		MidiTrackerMatrix mtm(_session, region, midi_model, rows_per_beat);
 		TreeModel::Row row;
 		
 		// Generate each row
@@ -346,4 +420,182 @@ MidiTrackerEditor::redisplay_model ()
 	}
 
 	view.set_model (model);
+}
+
+// void
+// MidiTrackerEditor::setup_toolbar ()
+// {
+// 	Glib::RefPtr<SizeGroup> mouse_mode_size_group = SizeGroup::create (SIZE_GROUP_VERTICAL);
+// 	mouse_mode_size_group->add_widget (beats_per_row_selector);
+// }
+
+void
+MidiTrackerEditor::build_beats_per_row_menu ()
+{
+	using namespace Menu_Helpers;
+
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv128 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv128)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv64 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv64)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv32 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv32)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv28 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv28)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv24 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv24)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv20 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv20)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv16 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv16)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv14 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv14)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv12 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv12)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv10 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv10)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv8 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv8)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv7 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv7)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv6 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv6)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv5 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv5)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv4 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv4)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv3 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv3)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeatDiv2 - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeatDiv2)));
+	beats_per_row_selector.AddMenuElem (MenuElem ( beats_per_row_strings[(int)SnapToBeat - (int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_selection_done), (SnapType) SnapToBeat)));
+
+	set_size_request_to_display_given_text (beats_per_row_selector, beats_per_row_strings, COMBO_TRIANGLE_WIDTH, 2);
+}
+
+void
+MidiTrackerEditor::setup_tooltips ()
+{
+	set_tooltip (beats_per_row_selector, _("Beats Per Row"));
+}
+
+void MidiTrackerEditor::set_beats_per_row_to (SnapType st)
+{
+	unsigned int snap_ind = (int)st - (int)SnapToBeatDiv128;
+
+	string str = beats_per_row_strings[snap_ind];
+
+	if (str != beats_per_row_selector.get_text()) {
+		beats_per_row_selector.set_text (str);
+	}
+
+	switch (st) {
+	case SnapToBeatDiv128: rows_per_beat = 128; break;
+	case SnapToBeatDiv64: rows_per_beat = 64; break;
+	case SnapToBeatDiv32: rows_per_beat = 32; break;
+	case SnapToBeatDiv28: rows_per_beat = 28; break;
+	case SnapToBeatDiv24: rows_per_beat = 24; break;
+	case SnapToBeatDiv20: rows_per_beat = 20; break;
+	case SnapToBeatDiv16: rows_per_beat = 16; break;
+	case SnapToBeatDiv14: rows_per_beat = 14; break;
+	case SnapToBeatDiv12: rows_per_beat = 12; break;
+	case SnapToBeatDiv10: rows_per_beat = 10; break;
+	case SnapToBeatDiv8: rows_per_beat = 8; break;
+	case SnapToBeatDiv7: rows_per_beat = 7; break;
+	case SnapToBeatDiv6: rows_per_beat = 6; break;
+	case SnapToBeatDiv5: rows_per_beat = 5; break;
+	case SnapToBeatDiv4: rows_per_beat = 4; break;
+	case SnapToBeatDiv3: rows_per_beat = 3; break;
+	case SnapToBeatDiv2: rows_per_beat = 2; break;
+	case SnapToBeat: rows_per_beat = 1; break;
+	default:
+		/* relax */
+		break;
+	}
+
+	redisplay_model ();
+}
+
+void MidiTrackerEditor::beats_per_row_selection_done (SnapType snaptype)
+{
+	RefPtr<RadioAction> ract = beats_per_row_action (snaptype);
+	if (ract) {
+		ract->set_active ();
+	}
+}
+
+RefPtr<RadioAction>
+MidiTrackerEditor::beats_per_row_action (SnapType type)
+{
+	const char* action = 0;
+	RefPtr<Action> act;
+
+	switch (type) {
+	case Editing::SnapToBeatDiv128:
+		action = "beats-per-row-onetwentyeighths";
+		break;
+	case Editing::SnapToBeatDiv64:
+		action = "beats-per-row-sixtyfourths";
+		break;
+	case Editing::SnapToBeatDiv32:
+		action = "beats-per-row-thirtyseconds";
+		break;
+	case Editing::SnapToBeatDiv28:
+		action = "beats-per-row-twentyeighths";
+		break;
+	case Editing::SnapToBeatDiv24:
+		action = "beats-per-row-twentyfourths";
+		break;
+	case Editing::SnapToBeatDiv20:
+		action = "beats-per-row-twentieths";
+		break;
+	case Editing::SnapToBeatDiv16:
+		action = "beats-per-row-asixteenthbeat";
+		break;
+	case Editing::SnapToBeatDiv14:
+		action = "beats-per-row-fourteenths";
+		break;
+	case Editing::SnapToBeatDiv12:
+		action = "beats-per-row-twelfths";
+		break;
+	case Editing::SnapToBeatDiv10:
+		action = "beats-per-row-tenths";
+		break;
+	case Editing::SnapToBeatDiv8:
+		action = "beats-per-row-eighths";
+		break;
+	case Editing::SnapToBeatDiv7:
+		action = "beats-per-row-sevenths";
+		break;
+	case Editing::SnapToBeatDiv6:
+		action = "beats-per-row-sixths";
+		break;
+	case Editing::SnapToBeatDiv5:
+		action = "beats-per-row-fifths";
+		break;
+	case Editing::SnapToBeatDiv4:
+		action = "beats-per-row-quarters";
+		break;
+	case Editing::SnapToBeatDiv3:
+		action = "beats-per-row-thirds";
+		break;
+	case Editing::SnapToBeatDiv2:
+		action = "beats-per-row-halves";
+		break;
+	case Editing::SnapToBeat:
+		action = "beats-per-row-beat";
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible beats-per-row", (int) type) << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	act = ActionManager::get_action (X_("BeatsPerRow"), action);
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		return ract;
+
+	} else  {
+		error << string_compose (_("programming error: %1"), "MidiTrackerEditor::beats_per_row_chosen could not find action to match type.") << endmsg;
+		return RefPtr<RadioAction>();
+	}
+}
+
+void
+MidiTrackerEditor::beats_per_row_chosen (SnapType type)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = beats_per_row_action (type);
+
+	if (ract && ract->get_active()) {
+		set_beats_per_row_to (type);
+	}
 }
