@@ -385,6 +385,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/fit_all_tracks", "", fit_all_tracks);
 		REGISTER_CALLBACK (serv, "/ardour/zoom_100_ms", "", zoom_100_ms);
 		REGISTER_CALLBACK (serv, "/ardour/zoom_1_sec", "", zoom_1_sec);
+		REGISTER_CALLBACK (serv, "/ardour/zoom_10_sec", "", zoom_10_sec);
 		REGISTER_CALLBACK (serv, "/ardour/zoom_1_min", "", zoom_1_min);
 		REGISTER_CALLBACK (serv, "/ardour/zoom_5_min", "", zoom_5_min);
 		REGISTER_CALLBACK (serv, "/ardour/zoom_10_min", "", zoom_10_min);
@@ -448,6 +449,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_all_tracks", "f", fit_all_tracks);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_100_ms", "f", zoom_100_ms);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_1_sec", "f", zoom_1_sec);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_10_sec", "f", zoom_10_sec);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_1_min", "f", zoom_1_min);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_5_min", "f", zoom_5_min);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_10_min", "f", zoom_10_min);

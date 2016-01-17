@@ -215,6 +215,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK(fit_all_tracks);
 	PATH_CALLBACK(zoom_100_ms);
 	PATH_CALLBACK(zoom_1_sec);
+	PATH_CALLBACK(zoom_10_sec);
 	PATH_CALLBACK(zoom_1_min);
 	PATH_CALLBACK(zoom_5_min);
 	PATH_CALLBACK(zoom_10_min);
