@@ -517,6 +517,7 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange&)
 			}
 		}
 	}
+	_editor->_routes->reset_remote_control_ids ();
 }
 
 void
