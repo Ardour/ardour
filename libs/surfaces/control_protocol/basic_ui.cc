@@ -345,89 +345,44 @@ BasicUI::jump_by_bars (double bars)
 	session->request_locate ( session->convert_to_frames (any) );
 }
 
-void
-BasicUI::mark_in ()
-{
-	access_action("Editor/start-range");
-}
+void BasicUI::mark_in () { access_action("Editor/start-range"); }
+void BasicUI::mark_out () { access_action("Editor/finish-range"); }
 
-void
-BasicUI::mark_out ()
-{
-	access_action("Editor/finish-range");
-}
+void BasicUI::toggle_click () { access_action("Transport/ToggleClick"); }
+void BasicUI::midi_panic () { access_action("MIDI/panic"); }
+void BasicUI::toggle_roll () { access_action("Transport/ToggleRoll"); }
+void BasicUI::stop_forget () { access_action("Transport/ToggleRollForgetCapture"); }
 
-void
-BasicUI::toggle_click ()
-{
-	access_action("Transport/ToggleClick");
-}
+void BasicUI::set_punch_range () { access_action("Editor/set-punch-from-edit-range"); }
+void BasicUI::set_loop_range () { access_action("Editor/set-loop-from-edit-range"); }
+void BasicUI::set_session_range () { access_action("Editor/set-session-from-edit-range"); }
 
-void
-BasicUI::midi_panic ()
-{
-	access_action("MIDI/panic");
-}
+void BasicUI::toggle_monitor_mute () { /*access_action("Editor/toggle_monitor_mute");  */ }
+void BasicUI::toggle_monitor_dim () {  /*access_action("Editor/toggle_monitor_dim");  */ }
+void BasicUI::toggle_monitor_mono () { /*access_action("Editor/toggle_monitor_mono");  */ }
 
-void
-BasicUI::toggle_roll ()
-{
-	access_action("Transport/ToggleRoll");
-}
+void BasicUI::quick_snapshot_stay () { access_action("Main/QuickSnapshotStay"); }
+void BasicUI::quick_snapshot_switch () { access_action("Main/QuickSnapshotSwitch"); }
 
-void
-BasicUI::stop_forget ()
-{
-	access_action("Transport/ToggleRollForgetCapture");
-}
+void BasicUI::fit_1_track() { access_action("Editor/fit_1_track"); }
+void BasicUI::fit_2_tracks() { access_action("Editor/fit_2_tracks"); }
+void BasicUI::fit_4_tracks() { access_action("Editor/fit_4_tracks"); }
+void BasicUI::fit_8_tracks() { access_action("Editor/fit_8_tracks"); }
+void BasicUI::fit_16_tracks() { access_action("Editor/fit_16_tracks"); }
+void BasicUI::fit_32_tracks() { access_action("Editor/fit_32_tracks"); }
+void BasicUI::fit_all_tracks() { access_action("Editor/fit_all_tracks"); }
 
-void
-BasicUI::set_punch_range ()
-{
-	access_action("Editor/set-punch-from-edit-range");
-}
+void BasicUI::zoom_10_ms() { access_action("Editor/zoom_10_ms"); }
+void BasicUI::zoom_100_ms() { access_action("Editor/zoom_100_ms"); }
+void BasicUI::zoom_1_sec() { access_action("Editor/zoom_1_sec"); }
+void BasicUI::zoom_10_sec() { access_action("Editor/zoom_10_sec"); }
+void BasicUI::zoom_1_min() { access_action("Editor/zoom_1_min"); }
+void BasicUI::zoom_5_min() { access_action("Editor/zoom_5_min"); }
+void BasicUI::zoom_10_min() { access_action("Editor/zoom_10_min"); }
+void BasicUI::zoom_to_session() { access_action("Editor/zooom-to-session"); }
 
-void
-BasicUI::set_loop_range ()
-{
-	access_action("Editor/set-loop-from-edit-range");
-}
-
-void
-BasicUI::set_session_range ()
-{
-	access_action("Editor/set-session-from-edit-range");
-}
-
-void
-BasicUI::toggle_monitor_mute ()
-{
-	//access_action("Editor/toggle_monitor_mute");   ToDo
-}
-
-void
-BasicUI::toggle_monitor_dim ()
-{
-	//access_action("Editor/toggle_monitor_dim");    ToDo
-}
-
-void
-BasicUI::toggle_monitor_mono ()
-{
-	//access_action("Editor/toggle_monitor_mono");    ToDo
-}
-
-void
-BasicUI::quick_snapshot_stay ()
-{
-	access_action("Main/QuickSnapshotStay");
-}
-
-void
-BasicUI::quick_snapshot_switch ()
-{
-	access_action("Main/QuickSnapshotSwitch");
-}
+void BasicUI::scroll_up_1_track() { access_action("Editor/scroll_up_1_track"); }
+void BasicUI::scroll_dn_1_track() { access_action("Editor/scroll_dn_1_track"); }
 
 
 bool

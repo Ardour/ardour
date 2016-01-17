@@ -376,6 +376,19 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/toggle_monitor_mono", "", toggle_monitor_mono);
 		REGISTER_CALLBACK (serv, "/ardour/quick_snapshot_switch", "", quick_snapshot_switch);
 		REGISTER_CALLBACK (serv, "/ardour/quick_snapshot_stay", "", quick_snapshot_stay);
+		REGISTER_CALLBACK (serv, "/ardour/fit_1_track", "", fit_1_track);
+		REGISTER_CALLBACK (serv, "/ardour/fit_2_tracks", "", fit_2_tracks);
+		REGISTER_CALLBACK (serv, "/ardour/fit_4_tracks", "", fit_4_tracks);
+		REGISTER_CALLBACK (serv, "/ardour/fit_8_tracks", "", fit_8_tracks);
+		REGISTER_CALLBACK (serv, "/ardour/fit_16_tracks", "", fit_16_tracks);
+		REGISTER_CALLBACK (serv, "/ardour/fit_32_tracks", "", fit_32_tracks);
+		REGISTER_CALLBACK (serv, "/ardour/fit_all_tracks", "", fit_all_tracks);
+		REGISTER_CALLBACK (serv, "/ardour/zoom_100_ms", "", zoom_100_ms);
+		REGISTER_CALLBACK (serv, "/ardour/zoom_1_sec", "", zoom_1_sec);
+		REGISTER_CALLBACK (serv, "/ardour/zoom_1_min", "", zoom_1_min);
+		REGISTER_CALLBACK (serv, "/ardour/zoom_5_min", "", zoom_5_min);
+		REGISTER_CALLBACK (serv, "/ardour/zoom_10_min", "", zoom_10_min);
+		REGISTER_CALLBACK (serv, "/ardour/zoom_to_session", "", zoom_to_session);
 
 
 		/*
@@ -420,6 +433,21 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_monitor_mono", "f", toggle_monitor_mono);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/quick_snapshot_switch", "f", quick_snapshot_switch);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/quick_snapshot_stay", "f", quick_snapshot_stay);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_1_track", "f", fit_1_track);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_2_tracks", "f", fit_2_tracks);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_4_tracks", "f", fit_4_tracks);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_8_tracks", "f", fit_8_tracks);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_16_tracks", "f", fit_16_tracks);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_32_tracks", "f", fit_32_tracks);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/fit_all_tracks", "f", fit_all_tracks);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_100_ms", "f", zoom_100_ms);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_1_sec", "f", zoom_1_sec);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_1_min", "f", zoom_1_min);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_5_min", "f", zoom_5_min);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_10_min", "f", zoom_10_min);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_to_session", "f", zoom_to_session);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/scroll_up_1_track", "f", scroll_up_1_track);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/scroll_dn_1_track", "f", scroll_dn_1_track);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
 		REGISTER_CALLBACK (serv, "/ardour/routes/mute", "ii", route_mute);

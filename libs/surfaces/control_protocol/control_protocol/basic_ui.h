@@ -106,6 +106,26 @@ class LIBCONTROLCP_API BasicUI {
 	void set_record_enable (bool yn);
 	bool get_record_enabled ();
 
+	//editor visibility stuff  (why do we have to make explicit numbers here?  because "gui actions" don't accept args 
+	void fit_1_track();
+	void fit_2_tracks();
+	void fit_4_tracks();
+	void fit_8_tracks();
+	void fit_16_tracks();
+	void fit_32_tracks();
+	void fit_all_tracks();
+	void zoom_10_ms();
+	void zoom_100_ms();
+	void zoom_1_sec();
+	void zoom_10_sec();
+	void zoom_1_min();
+	void zoom_5_min();
+	void zoom_10_min();
+	void zoom_to_session();
+	
+	void scroll_up_1_track();
+	void scroll_dn_1_track();
+
 	void rec_enable_toggle ();
 	void toggle_all_rec_enables ();
 

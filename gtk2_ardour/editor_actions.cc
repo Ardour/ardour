@@ -275,6 +275,22 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "expand-tracks", _("Expand Track Height"), sigc::bind (sigc::mem_fun (*this, &Editor::tav_zoom_step), false));
 	reg_sens (editor_actions, "shrink-tracks", _("Shrink Track Height"), sigc::bind (sigc::mem_fun (*this, &Editor::tav_zoom_step), true));
 
+	reg_sens (editor_actions, "fit_1_track", _("Fit 1 Track"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 1));
+	reg_sens (editor_actions, "fit_2_tracks", _("Fit 2 Tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 2));
+	reg_sens (editor_actions, "fit_4_tracks", _("Fit 4 Tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 4));
+	reg_sens (editor_actions, "fit_8_tracks", _("Fit 8 Tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 8));
+	reg_sens (editor_actions, "fit_16_tracks", _("Fit 16 Tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 16));
+	reg_sens (editor_actions, "fit_32_tracks", _("Fit 32 Tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 32));
+	reg_sens (editor_actions, "fit_all_tracks", _("Fit All Tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 0));
+
+	reg_sens (editor_actions, "zoom_10_ms", _("Zoom to 10 ms"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 10));
+	reg_sens (editor_actions, "zoom_100_ms", _("Zoom to 100 ms"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 100));
+	reg_sens (editor_actions, "zoom_1_sec", _("Zoom to 1 sec"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 1000));
+	reg_sens (editor_actions, "zoom_10_sec", _("Zoom to 10 sec"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 10 * 1000));
+	reg_sens (editor_actions, "zoom_1_min", _("Zoom to 1 min"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 60 * 1000));
+	reg_sens (editor_actions, "zoom_5_min", _("Zoom to 5 min"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 5 * 60 * 1000));
+	reg_sens (editor_actions, "zoom_10_min", _("Zoom to 10 min"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 10 * 60 * 1000));
+
 	act = reg_sens (editor_actions, "move-selected-tracks-up", _("Move Selected Tracks Up"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), true));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "move-selected-tracks-down", _("Move Selected Tracks Down"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), false));
