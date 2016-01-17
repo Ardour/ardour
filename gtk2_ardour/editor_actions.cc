@@ -281,13 +281,9 @@ Editor::register_actions ()
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "scroll-tracks-up", _("Scroll Tracks Up"), sigc::mem_fun(*this, &Editor::scroll_tracks_up));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "scroll-tracks-down", _("Scroll Tracks Down"), sigc::mem_fun(*this, &Editor::scroll_tracks_down));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "step-tracks-up", _("Step Tracks Up"), sigc::mem_fun(*this, &Editor::scroll_tracks_up_line));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "step-tracks-down", _("Step Tracks Down"), sigc::mem_fun(*this, &Editor::scroll_tracks_down_line));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	reg_sens (editor_actions, "scroll-backward", _("Scroll Backward"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_backward), 0.8f));
 	reg_sens (editor_actions, "scroll-forward", _("Scroll Forward"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_forward), 0.8f));
