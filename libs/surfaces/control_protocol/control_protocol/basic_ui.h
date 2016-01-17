@@ -122,9 +122,13 @@ class LIBCONTROLCP_API BasicUI {
 	void zoom_5_min();
 	void zoom_10_min();
 	void zoom_to_session();
-	
+	void temporal_zoom_in();
+	void temporal_zoom_out();
+
 	void scroll_up_1_track();
 	void scroll_dn_1_track();
+	void scroll_up_1_page();
+	void scroll_dn_1_page();
 
 	void rec_enable_toggle ();
 	void toggle_all_rec_enables ();

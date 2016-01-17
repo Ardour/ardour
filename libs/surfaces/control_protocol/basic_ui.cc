@@ -379,10 +379,14 @@ void BasicUI::zoom_10_sec() { access_action("Editor/zoom_10_sec"); }
 void BasicUI::zoom_1_min() { access_action("Editor/zoom_1_min"); }
 void BasicUI::zoom_5_min() { access_action("Editor/zoom_5_min"); }
 void BasicUI::zoom_10_min() { access_action("Editor/zoom_10_min"); }
-void BasicUI::zoom_to_session() { access_action("Editor/zooom-to-session"); }
+void BasicUI::zoom_to_session() { access_action("Editor/zoom-to-session"); }
+void BasicUI::temporal_zoom_in() { access_action("Editor/temporal-zoom-in"); }
+void BasicUI::temporal_zoom_out() { access_action("Editor/temporal-zoom-out"); }
 
-void BasicUI::scroll_up_1_track() { access_action("Editor/scroll_up_1_track"); }
-void BasicUI::scroll_dn_1_track() { access_action("Editor/scroll_dn_1_track"); }
+void BasicUI::scroll_up_1_track() { access_action("Editor/step-tracks-up"); }
+void BasicUI::scroll_dn_1_track() { access_action("Editor/step-tracks-down"); }
+void BasicUI::scroll_up_1_page() { access_action("Editor/scroll-tracks-up"); }
+void BasicUI::scroll_dn_1_page() { access_action("Editor/scroll-tracks-down"); }
 
 
 bool

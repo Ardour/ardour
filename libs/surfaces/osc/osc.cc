@@ -389,6 +389,12 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/zoom_5_min", "", zoom_5_min);
 		REGISTER_CALLBACK (serv, "/ardour/zoom_10_min", "", zoom_10_min);
 		REGISTER_CALLBACK (serv, "/ardour/zoom_to_session", "", zoom_to_session);
+		REGISTER_CALLBACK (serv, "/ardour/temporal_zoom_in", "f", temporal_zoom_in);
+		REGISTER_CALLBACK (serv, "/ardour/temporal_zoom_out", "f", temporal_zoom_out);
+		REGISTER_CALLBACK (serv, "/ardour/scroll_up_1_track", "f", scroll_up_1_track);
+		REGISTER_CALLBACK (serv, "/ardour/scroll_dn_1_track", "f", scroll_dn_1_track);
+		REGISTER_CALLBACK (serv, "/ardour/scroll_up_1_page", "f", scroll_up_1_page);
+		REGISTER_CALLBACK (serv, "/ardour/scroll_dn_1_page", "f", scroll_dn_1_page);
 
 
 		/*
@@ -446,8 +452,12 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_5_min", "f", zoom_5_min);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_10_min", "f", zoom_10_min);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/zoom_to_session", "f", zoom_to_session);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/temporal_zoom_in", "f", temporal_zoom_in);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/temporal_zoom_out", "f", temporal_zoom_out);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/scroll_up_1_track", "f", scroll_up_1_track);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/scroll_dn_1_track", "f", scroll_dn_1_track);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/scroll_up_1_page", "f", scroll_up_1_page);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/scroll_dn_1_page", "f", scroll_dn_1_page);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
 		REGISTER_CALLBACK (serv, "/ardour/routes/mute", "ii", route_mute);

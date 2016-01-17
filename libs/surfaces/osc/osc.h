@@ -219,8 +219,12 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK(zoom_5_min);
 	PATH_CALLBACK(zoom_10_min);
 	PATH_CALLBACK(zoom_to_session);
+	PATH_CALLBACK(temporal_zoom_in);
+	PATH_CALLBACK(temporal_zoom_out);
 	PATH_CALLBACK(scroll_up_1_track);
 	PATH_CALLBACK(scroll_dn_1_track);
+	PATH_CALLBACK(scroll_up_1_page);
+	PATH_CALLBACK(scroll_dn_1_page);
 
 #define PATH_CALLBACK1(name,type,optional)					\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
