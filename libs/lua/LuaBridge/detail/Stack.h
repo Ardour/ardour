@@ -69,7 +69,7 @@ struct Stack <int>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static inline int get (lua_State* L, int index)
   {
     return static_cast <int> (luaL_checkinteger (L, index));
@@ -83,7 +83,7 @@ struct Stack <int const&>
   {
     lua_pushnumber (L, static_cast <lua_Number> (value));
   }
-  
+
   static inline int get (lua_State* L, int index)
   {
     return static_cast <int > (luaL_checknumber (L, index));
@@ -100,7 +100,7 @@ struct Stack <unsigned int>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static inline unsigned int get (lua_State* L, int index)
   {
     return static_cast <unsigned int> (luaL_checkinteger (L, index));
@@ -114,7 +114,7 @@ struct Stack <unsigned int const&>
   {
     lua_pushnumber (L, static_cast <lua_Number> (value));
   }
-  
+
   static inline unsigned int get (lua_State* L, int index)
   {
     return static_cast <unsigned int > (luaL_checknumber (L, index));
@@ -132,7 +132,7 @@ struct Stack <unsigned char>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static inline unsigned char get (lua_State* L, int index)
   {
     return static_cast <unsigned char> (luaL_checkinteger (L, index));
@@ -146,7 +146,7 @@ struct Stack <unsigned char const&>
   {
     lua_pushnumber (L, static_cast <lua_Number> (value));
   }
-  
+
   static inline unsigned char get (lua_State* L, int index)
   {
     return static_cast <unsigned char> (luaL_checknumber (L, index));
@@ -164,7 +164,7 @@ struct Stack <short>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static inline short get (lua_State* L, int index)
   {
     return static_cast <short> (luaL_checkinteger (L, index));
@@ -178,7 +178,7 @@ struct Stack <short const&>
   {
     lua_pushnumber (L, static_cast <lua_Number> (value));
   }
-  
+
   static inline short get (lua_State* L, int index)
   {
     return static_cast <short> (luaL_checknumber (L, index));
@@ -196,7 +196,7 @@ struct Stack <unsigned short>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static inline unsigned short get (lua_State* L, int index)
   {
     return static_cast <unsigned short> (luaL_checkinteger (L, index));
@@ -210,7 +210,7 @@ struct Stack <unsigned short const&>
   {
     lua_pushnumber (L, static_cast <lua_Number> (value));
   }
-  
+
   static inline unsigned short get (lua_State* L, int index)
   {
     return static_cast <unsigned short> (luaL_checknumber (L, index));
@@ -228,7 +228,7 @@ struct Stack <long>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static inline long get (lua_State* L, int index)
   {
     return static_cast <long> (luaL_checkinteger (L, index));
@@ -242,7 +242,7 @@ struct Stack <long const&>
   {
     lua_pushnumber (L, static_cast <lua_Number> (value));
   }
-  
+
   static inline long get (lua_State* L, int index)
   {
     return static_cast <long> (luaL_checknumber (L, index));
@@ -260,7 +260,7 @@ struct Stack <unsigned long>
   {
     lua_pushinteger (L, static_cast <lua_Integer> (value));
   }
-  
+
   static inline unsigned long get (lua_State* L, int index)
   {
     return static_cast <unsigned long> (luaL_checkinteger (L, index));
@@ -274,7 +274,7 @@ struct Stack <unsigned long const&>
   {
     lua_pushnumber (L, static_cast <lua_Number> (value));
   }
-  
+
   static inline unsigned long get (lua_State* L, int index)
   {
     return static_cast <unsigned long> (luaL_checknumber (L, index));
@@ -292,7 +292,7 @@ struct Stack <float>
   {
     lua_pushnumber (L, static_cast <lua_Number> (value));
   }
-  
+
   static inline float get (lua_State* L, int index)
   {
     return static_cast <float> (luaL_checknumber (L, index));
@@ -306,7 +306,7 @@ struct Stack <float const&>
   {
     lua_pushnumber (L, static_cast <lua_Number> (value));
   }
-  
+
   static inline float get (lua_State* L, int index)
   {
     return static_cast <float> (luaL_checknumber (L, index));
@@ -323,7 +323,7 @@ template <> struct Stack <double>
   {
     lua_pushnumber (L, static_cast <lua_Number> (value));
   }
-  
+
   static inline double get (lua_State* L, int index)
   {
     return static_cast <double> (luaL_checknumber (L, index));
@@ -336,7 +336,7 @@ template <> struct Stack <double const&>
   {
     lua_pushnumber (L, static_cast <lua_Number> (value));
   }
-  
+
   static inline double get (lua_State* L, int index)
   {
     return static_cast <double> (luaL_checknumber (L, index));
@@ -353,7 +353,7 @@ struct Stack <bool> {
   {
     lua_pushboolean (L, value ? 1 : 0);
   }
-  
+
   static inline bool get (lua_State* L, int index)
   {
     return lua_toboolean (L, index) ? true : false;
@@ -366,7 +366,7 @@ struct Stack <bool const&> {
   {
     lua_pushboolean (L, value ? 1 : 0);
   }
-  
+
   static inline bool get (lua_State* L, int index)
   {
     return lua_toboolean (L, index) ? true : false;
@@ -385,7 +385,7 @@ struct Stack <char>
     char str [2] = { value, 0 };
     lua_pushstring (L, str);
   }
-  
+
   static inline char get (lua_State* L, int index)
   {
     return luaL_checkstring (L, index) [0];
@@ -400,7 +400,7 @@ struct Stack <char const&>
     char str [2] = { value, 0 };
     lua_pushstring (L, str);
   }
-  
+
   static inline char get (lua_State* L, int index)
   {
     return luaL_checkstring (L, index) [0];

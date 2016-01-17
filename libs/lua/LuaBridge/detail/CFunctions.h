@@ -154,12 +154,12 @@ struct CFunc
   static int readOnlyError (lua_State* L)
   {
     std::string s;
-    
+
     s = s + "'" + lua_tostring (L, lua_upvalueindex (1)) + "' is read-only";
 
     return luaL_error (L, s.c_str ());
   }
-  
+
   //----------------------------------------------------------------------------
   /**
       lua_CFunction to get a variable.

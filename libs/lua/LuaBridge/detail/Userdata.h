@@ -112,7 +112,7 @@ private:
       {
         lua_pop (L, 2);
         mismatch = true;
-      }      
+      }
     }
 
     if (!mismatch)
@@ -262,7 +262,7 @@ ud __parent (nil)
       {
         lua_pop (L, 2);
         mismatch = true;
-      }      
+      }
     }
     else
     {
@@ -796,7 +796,7 @@ struct RefStackHelper <T, false>
       luaL_error (L, "nil passed to reference");
     return *t;
   }
-    
+
 };
 
 // reference to const
@@ -804,7 +804,7 @@ template <class T>
 struct Stack <T const&>
 {
   typedef RefStackHelper <T, TypeTraits::isContainer <T>::value> helper_t;
-  
+
   static inline void push (lua_State* L, T const& t)
   {
     helper_t::push (L, t);

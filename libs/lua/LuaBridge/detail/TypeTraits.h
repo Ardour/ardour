@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /*
   https://github.com/vinniefalco/LuaBridge
-  
+
   Copyright 2012, Vinnie Falco <vinnie.falco@gmail.com>
 
   License: The MIT License (http://www.opensource.org/licenses/mit-license.php)
@@ -81,10 +81,10 @@ struct TypeTraits
 
     template <typename C>
     static no& test (typename C::isNotContainer*);
- 
+
     template <typename>
     static yes& test (...);
- 
+
   public:
     static const bool value = sizeof (test <ContainerTraits <T> >(0)) == sizeof (yes);
   };

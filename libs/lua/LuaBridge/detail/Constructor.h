@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /*
   https://github.com/vinniefalco/LuaBridge
-  
+
   Copyright 2012, Vinnie Falco <vinnie.falco@gmail.com>
   Copyright 2007, Nathan Reed
 
@@ -180,7 +180,7 @@ struct Constructor <T, TypeList <P1, TypeList <P2, TypeList <P3,
 template <class T, class P1, class P2, class P3, class P4,
   class P5, class P6, class P7, class P8>
 struct Constructor <T, TypeList <P1, TypeList <P2, TypeList <P3,
-  TypeList <P4, TypeList <P5, TypeList <P6, TypeList <P7, 
+  TypeList <P4, TypeList <P5, TypeList <P6, TypeList <P7,
   TypeList <P8> > > > > > > > >
 {
   static T* call (const TypeListValues<TypeList <P1, TypeList <P2,
