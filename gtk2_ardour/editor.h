@@ -1800,8 +1800,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void snap_type_selection_done (Editing::SnapType);
 	void snap_mode_selection_done (Editing::SnapMode);
-	void snap_mode_chosen (Editing::SnapMode);
 	void snap_type_chosen (Editing::SnapType);
+	void snap_mode_chosen (Editing::SnapMode);
 
 	Glib::RefPtr<Gtk::RadioAction> snap_type_action (Editing::SnapType);
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
