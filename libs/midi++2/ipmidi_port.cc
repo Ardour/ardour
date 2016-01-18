@@ -194,7 +194,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 #endif
 
 	struct ip_mreq mreq;
-	mreq.imr_multiaddr.s_addr = ::inet_addr("225.0.0.37");
+	mreq.imr_multiaddr.s_addr = ::inet_addr("225.0.0.37"); /* ipMIDI group multicast address */
 	mreq.imr_interface.s_addr = if_addr_in.s_addr;
 	if(::setsockopt (sockin, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *) &mreq, sizeof(mreq)) < 0) {
 		::perror("setsockopt(IP_ADD_MEMBERSHIP)");
@@ -231,11 +231,25 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	addrout.sin_addr.s_addr = ::inet_addr("225.0.0.37");
 	addrout.sin_port = htons (base_port);
 
+	int loop;
+	socklen_t size;
+	if (::getsockopt (sockin, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, &size)) {
+		::perror ("getsockopt(IP_MULTICAST_LOOP)");
+	} else {
+		cout << "********* 1. multicast loopback: " << loop << " size was " << size << endl;
+	}
+
 	// Turn off loopback...
-	int loop = 0;
+	loop = 0;
 	if (::setsockopt(sockout, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, sizeof (loop)) < 0) {
 		::perror("setsockopt(IP_MULTICAST_LOOP)");
 		return false;
+	}
+
+	if (::getsockopt (sockin, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, &size)) {
+		::perror ("getsockopt(IP_MULTICAST_LOOP)");
+	} else {
+		cout << "********* 2. multicast loopback: " << loop << " size was " << size << endl;
 	}
 
 #ifndef PLATFORM_WINDOWS
