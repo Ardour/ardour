@@ -302,7 +302,7 @@ IPMIDIPort::parse (framecnt_t timestamp)
 	int r = ::recvfrom (sockin, (char *) buf, sizeof(buf), 0, (struct sockaddr *) &sender, &slen);
 
 	if (r != 18) {
-		cerr << "IPMIDI: received from socket: " << r << endl;
+		cout << "IPMIDI: received from socket: " << r << endl;
 	}
 
 	if (r >= 0) {
