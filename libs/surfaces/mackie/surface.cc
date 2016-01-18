@@ -369,7 +369,9 @@ Surface::init_strips (uint32_t n)
 void
 Surface::master_monitor_may_have_changed ()
 {
-	setup_master ();
+	if (_number == _mcp.device_info().master_position()) {
+		setup_master ();
+	}
 }
 
 void
