@@ -1050,7 +1050,13 @@ Strip::handle_fader (Fader& fader, float position)
 		return;
 	}
 
-	fader.set_value (position);
+	Controllable::GroupControlDisposition gcd = Controllable::UseGroup;
+
+	if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
+		gcd = Controllable::NoGroup;
+	}
+
+	fader.set_value (position, gcd);
 
 	/* From the Mackie Control MIDI implementation docs:
 
