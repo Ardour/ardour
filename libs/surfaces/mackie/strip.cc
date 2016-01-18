@@ -828,18 +828,11 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 
 		boost::shared_ptr<AutomationControl> ac = _fader->control ();
 
-		if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
-			if (ac) {
-				ac->set_value (ac->normal(), Controllable::NoGroup);
-			}
-		} else {
+		_fader->set_in_use (true);
+		_fader->start_touch (_surface->mcp().transport_frame());
 
-			_fader->set_in_use (true);
-			_fader->start_touch (_surface->mcp().transport_frame());
-
-			if (ac) {
-				queue_parameter_display ((AutomationType) ac->parameter().type(), ac->get_value());
-			}
+		if (ac) {
+			queue_parameter_display ((AutomationType) ac->parameter().type(), ac->get_value());
 		}
 
 	} else {
