@@ -235,14 +235,36 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	int loop = 0;
 
 #ifdef PLATFORM_WINDOWS
+
+	/* https://msdn.microsoft.com/en-us/library/windows/desktop/ms739161%28v=vs.85%29.aspx
+	 *
+	 * ------------------------------------------------------------------------------
+	 * Note The Winsock version of the IP_MULTICAST_LOOP option is
+	 * semantically different than the UNIX version of the
+	 * IP_MULTICAST_LOOP option:
+	 *
+	 * In Winsock, the IP_MULTICAST_LOOP option applies only to the receive path.
+	 * In the UNIX version, the IP_MULTICAST_LOOP option applies to the send path.
+	 *
+	 * For example, applications ON and OFF (which are easier to track than
+	 * X and Y) join the same group on the same interface; application ON
+	 * sets the IP_MULTICAST_LOOP option on, application OFF sets the
+	 * IP_MULTICAST_LOOP option off. If ON and OFF are Winsock
+	 * applications, OFF can send to ON, but ON cannot sent to OFF. In
+	 * contrast, if ON and OFF are UNIX applications, ON can send to OFF,
+	 * but OFF cannot send to ON.
+	 * ------------------------------------------------------------------------------
+	 *
+	 * Alles klar? Gut! 
+	 */
+
 	const int target_sock = sockin;
 #else
 	const int target_sock = sockout;
 #endif
 
 	if (::setsockopt (target_sock, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, sizeof (loop)) < 0) {
-		//::perror("setsockopt(IP_MULTICAST_LOOP)");
-		cout << "Cannot set loopback status\n";
+		::perror("setsockopt(IP_MULTICAST_LOOP)");
 		return false;
 	}
 
@@ -271,7 +293,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 		return false;
 	}
 #endif
-	cout << "ipmidi ports setup!!!!!!!\n";
+
 	return true;
 }
 
