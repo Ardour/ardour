@@ -240,7 +240,8 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 #endif
 
 	if (::getsockopt (sockin, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, &size)) {
-		::perror ("getsockopt(IP_MULTICAST_LOOP)");
+		// ::perror ("getsockopt(IP_MULTICAST_LOOP)");
+		cout << "Cannot get loopback status\n";
 	} else {
 		cout << "********* 1. multicast loopback: " << loop << " size was " << size << endl;
 	}
@@ -248,12 +249,14 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	// Turn off loopback...
 	loop = 0;
 	if (::setsockopt(sockout, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, sizeof (loop)) < 0) {
-		::perror("setsockopt(IP_MULTICAST_LOOP)");
+		//::perror("setsockopt(IP_MULTICAST_LOOP)");
+		cout << "Cannot set loopback status\n";
 		return false;
 	}
 
 	if (::getsockopt (sockin, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, &size)) {
-		::perror ("getsockopt(IP_MULTICAST_LOOP)");
+		// ::perror ("getsockopt(IP_MULTICAST_LOOP)");
+		cout << "Cannot Get loopback status 2\n";
 	} else {
 		cout << "********* 2. multicast loopback: " << loop << " size was " << size << endl;
 	}
@@ -283,7 +286,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 		return false;
 	}
 #endif
-
+	cout << "ipmidi ports setup!!!!!!!\n";
 	return true;
 }
 
