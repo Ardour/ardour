@@ -27,6 +27,7 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include "pbd/controllable.h"
 #include "pbd/signals.h"
 
 #include "mackie_control_exception.h"
@@ -70,7 +71,7 @@ public:
 	virtual void set_control (boost::shared_ptr<ARDOUR::AutomationControl>);
 
 	float get_value ();
-	void set_value (float val);
+	void set_value (float val, PBD::Controllable::GroupControlDisposition gcd = PBD::Controllable::UseGroup);
 
 	virtual void start_touch (double when);
 	virtual void stop_touch (bool mark, double when);

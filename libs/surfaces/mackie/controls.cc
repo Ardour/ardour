@@ -78,10 +78,10 @@ Control::set_control (boost::shared_ptr<AutomationControl> ac)
 }
 
 void
-Control::set_value (float val)
+Control::set_value (float val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	if (normal_ac) {
-		normal_ac->set_value (normal_ac->interface_to_internal (val), PBD::Controllable::NoGroup);
+		normal_ac->set_value (normal_ac->interface_to_internal (val), group_override);
 	}
 }
 
