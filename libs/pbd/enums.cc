@@ -31,7 +31,7 @@ setup_libpbd_enums ()
 	vector<string> s;
 
 	Controllable::Flag controllable_flags;
-
+	Controllable::GroupControlDisposition controllable_group_disposition;
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -40,4 +40,11 @@ setup_libpbd_enums ()
 	REGISTER_CLASS_ENUM (Controllable, Toggle);
 	REGISTER_CLASS_ENUM (Controllable, GainLike);
 	REGISTER (controllable_flags);
+
+	REGISTER_CLASS_ENUM (Controllable, WholeGroup);
+	REGISTER_CLASS_ENUM (Controllable, UseGroup);
+	REGISTER_CLASS_ENUM (Controllable, NoGroup);
+	REGISTER (controllable_group_disposition);
+
 }
+
