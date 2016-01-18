@@ -231,46 +231,19 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	addrout.sin_addr.s_addr = ::inet_addr("225.0.0.37");
 	addrout.sin_port = htons (base_port);
 
-	struct sockaddr_in any;
-	::memset(&any, 0, sizeof(struct sockaddr_in));
-	addrout.sin_family = AF_INET;
-	addrout.sin_addr.s_addr = INADDR_ANY;
-	addrout.sin_port = htons (base_port);
+	// Turn off loopback...
+	int loop = 0;
 
-	if (::bind(sockout, (struct sockaddr *) (&any), sizeof(any)) < 0) {
-		::perror("bind");
-		cout << "ipmidi bind error\n";
-		return false;
-	}
-
-#ifndef PLATFORM_WINDOWS
-	int loop;
-	socklen_t size;
+#ifdef PLATFORM_WINDOWS
+	const int target_sock = sockin;
 #else
-	u_char loop;
-	int size;
+	const int target_sock = sockout;
 #endif
 
-	if (::getsockopt (sockout, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, &size)) {
-		// ::perror ("getsockopt(IP_MULTICAST_LOOP)");
-		cout << "Cannot get loopback status\n";
-	} else {
-		cout << "********* 1. multicast loopback: " << loop << " size was " << size << endl;
-	}
-
-	// Turn off loopback...
-	loop = 0;
-	if (::setsockopt(sockout, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, sizeof (loop)) < 0) {
+	if (::setsockopt (target_sock, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, sizeof (loop)) < 0) {
 		//::perror("setsockopt(IP_MULTICAST_LOOP)");
 		cout << "Cannot set loopback status\n";
 		return false;
-	}
-
-	if (::getsockopt (sockout, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, &size)) {
-		// ::perror ("getsockopt(IP_MULTICAST_LOOP)");
-		cout << "Cannot Get loopback status 2\n";
-	} else {
-		cout << "********* 2. multicast loopback: " << loop << " size was " << size << endl;
 	}
 
 #ifndef PLATFORM_WINDOWS
