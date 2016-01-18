@@ -231,9 +231,15 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	addrout.sin_addr.s_addr = ::inet_addr("225.0.0.37");
 	addrout.sin_port = htons (base_port);
 
+#ifndef PLATFORM_WINDOWS
 	int loop;
 	socklen_t size;
-	if (::getsockopt (sockin, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, &size)) {
+#else
+	u_char loop;
+	int size;
+#endif
+
+	if (::getsockopt (sockin, IPPROTO_IP, IP_MULTICAST_LOOP, (void *) &loop, &size)) {
 		::perror ("getsockopt(IP_MULTICAST_LOOP)");
 	} else {
 		cout << "********* 1. multicast loopback: " << loop << " size was " << size << endl;
@@ -241,12 +247,12 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 
 	// Turn off loopback...
 	loop = 0;
-	if (::setsockopt(sockout, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, sizeof (loop)) < 0) {
+	if (::setsockopt(sockout, IPPROTO_IP, IP_MULTICAST_LOOP, (void *) &loop, sizeof (loop)) < 0) {
 		::perror("setsockopt(IP_MULTICAST_LOOP)");
 		return false;
 	}
 
-	if (::getsockopt (sockin, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, &size)) {
+	if (::getsockopt (sockin, IPPROTO_IP, IP_MULTICAST_LOOP, (void *) &loop, &size)) {
 		::perror ("getsockopt(IP_MULTICAST_LOOP)");
 	} else {
 		cout << "********* 2. multicast loopback: " << loop << " size was " << size << endl;
