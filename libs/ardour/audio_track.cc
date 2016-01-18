@@ -629,7 +629,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 	/* reset stuff that has already been accounted for in the freeze process */
 
-	set_gain (GAIN_COEFF_UNITY, this);
+	set_gain (GAIN_COEFF_UNITY, Controllable::NoGroup);
 	_amp->gain_control()->set_automation_state (Off);
 	/* XXX need to use _main_outs _panner->set_automation_state (Off); */
 

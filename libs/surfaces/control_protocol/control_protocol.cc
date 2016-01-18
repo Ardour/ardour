@@ -248,7 +248,7 @@ ControlProtocol::route_set_gain (uint32_t table_index, float gain)
 	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r != 0) {
-		r->set_gain (gain, this);
+		r->set_gain (gain, Controllable::UseGroup);
 	}
 }
 

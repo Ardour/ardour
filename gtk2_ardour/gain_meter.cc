@@ -532,7 +532,7 @@ GainMeterBase::gain_adjusted ()
 
 	if (!ignore_toggle) {
 		if (_route && _route->amp() == _amp) {
-			_route->set_gain (value, this);
+			_route->set_gain (value, Controllable::UseGroup);
 		} else {
 			_amp->gain_control()->set_value (value, Controllable::NoGroup);
 		}

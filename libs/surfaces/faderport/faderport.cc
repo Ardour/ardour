@@ -499,7 +499,11 @@ FaderPort::fader_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 			if (gain) {
 				int ival = (fader_msb << 7) | fader_lsb;
 				float val = gain->interface_to_internal (ival/16384.0);
-				_current_route->set_gain (val, this);
+				/* even though the faderport only controls a
+				   single route at a time, allow the fader to
+				   modify the group, if appropriate.
+				*/
+				_current_route->set_gain (val, Controllable::UseGroup);
 			}
 		}
 	}

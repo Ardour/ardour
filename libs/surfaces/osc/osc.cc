@@ -1013,7 +1013,7 @@ OSC::route_set_gain_abs (int rid, float level)
 	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
 	if (r) {
-		r->set_gain (level, this);
+		r->set_gain (level, PBD::Controllable::NoGroup);
 	}
 
 	return 0;

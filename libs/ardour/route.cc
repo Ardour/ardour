@@ -387,7 +387,7 @@ Route::ensure_track_or_route_name(string name, Session &session)
 }
 
 void
-Route::inc_gain (gain_t factor, void *src)
+Route::inc_gain (gain_t factor)
 {
 	/* To be used ONLY when doing group-relative gain adjustment, from
 	 * ::set_gain()
@@ -404,9 +404,9 @@ Route::inc_gain (gain_t factor, void *src)
 }
 
 void
-Route::set_gain (gain_t val, void *src)
+Route::set_gain (gain_t val, Controllable::GroupControlDisposition group_override)
 {
-	if (src != 0 && _route_group && src != _route_group && _route_group->is_active() && _route_group->is_gain()) {
+	if (_route_group && (group_override != Controllable::NoGroup) && _route_group->is_active() && _route_group->is_gain()) {
 
 		if (_route_group->is_relative()) {
 
@@ -441,11 +441,11 @@ Route::set_gain (gain_t val, void *src)
 				}
 			}
 
-			_route_group->foreach_route (boost::bind (&Route::inc_gain, _1, factor, _route_group));
+			_route_group->foreach_route (boost::bind (&Route::inc_gain, _1, factor));
 
 		} else {
 
-			_route_group->foreach_route (boost::bind (&Route::set_gain, _1, val, _route_group));
+			_route_group->foreach_route (boost::bind (&Route::set_gain, _1, val, Controllable::NoGroup));
 		}
 
 		return;
@@ -3894,14 +3894,14 @@ Route::set_latency_compensation (framecnt_t longest_session_latency)
 }
 
 void
-Route::set_control (AutomationType type, double val, PBD::Controllable::GroupControlDisposition /*group_override*/)
+Route::set_control (AutomationType type, double val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	boost::shared_ptr<RouteList> rl;
 
 	switch (type) {
 	case GainAutomation:
 		/* route must mediate group control */
-		set_gain (val, this); /* any "src" argument will do other than our route group */
+		set_gain (val, group_override); 
 		return;
 		break;
 
