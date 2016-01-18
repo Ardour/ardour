@@ -85,8 +85,9 @@ bool
 MidiControlUI::midi_input_handler (IOCondition ioc, boost::shared_ptr<AsyncMIDIPort> port)
 {
 	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("something happend on  %1\n", boost::shared_ptr<ARDOUR::Port> (port)->name()));
-
+	cerr << "Something happened on " << boost::shared_ptr<ARDOUR::Port> (port)->name() << " ioc = " << hex << ioc << dec << endl;
 	if (ioc & ~IO_IN) {
+		cerr << "....no input ... do nothing\n";
 		return false;
 	}
 
@@ -94,6 +95,7 @@ MidiControlUI::midi_input_handler (IOCondition ioc, boost::shared_ptr<AsyncMIDIP
 
 		port->clear ();
 		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", boost::shared_ptr<ARDOUR::Port>(port)->name()));
+		cerr << "....input appears ready\n";
 		framepos_t now = _session.engine().sample_time();
 		port->parse (now);
 	}

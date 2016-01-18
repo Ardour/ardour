@@ -301,6 +301,10 @@ IPMIDIPort::parse (framecnt_t timestamp)
 	socklen_t slen = sizeof(sender);
 	int r = ::recvfrom (sockin, (char *) buf, sizeof(buf), 0, (struct sockaddr *) &sender, &slen);
 
+	if (r != 18) {
+		cerr << "IPMIDI: received from socket: " << r << endl;
+	}
+
 	if (r >= 0) {
 
 		_parser->set_timestamp (timestamp);
