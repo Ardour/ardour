@@ -231,6 +231,18 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	addrout.sin_addr.s_addr = ::inet_addr("225.0.0.37");
 	addrout.sin_port = htons (base_port);
 
+	struct sockaddr_in any;
+	::memset(&any, 0, sizeof(struct sockaddr_in));
+	addrout.sin_family = AF_INET;
+	addrout.sin_addr.s_addr = INADDR_ANY;
+	addrout.sin_port = htons (base_port);
+
+	if (::bind(sockout, (struct sockaddr *) (&any), sizeof(any)) < 0) {
+		::perror("bind");
+		cout << "ipmidi bind error\n";
+		return false;
+	}
+
 #ifndef PLATFORM_WINDOWS
 	int loop;
 	socklen_t size;
@@ -239,7 +251,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	int size;
 #endif
 
-	if (::getsockopt (sockin, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, &size)) {
+	if (::getsockopt (sockout, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, &size)) {
 		// ::perror ("getsockopt(IP_MULTICAST_LOOP)");
 		cout << "Cannot get loopback status\n";
 	} else {
@@ -254,7 +266,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 		return false;
 	}
 
-	if (::getsockopt (sockin, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, &size)) {
+	if (::getsockopt (sockout, IPPROTO_IP, IP_MULTICAST_LOOP, (char *) &loop, &size)) {
 		// ::perror ("getsockopt(IP_MULTICAST_LOOP)");
 		cout << "Cannot Get loopback status 2\n";
 	} else {
