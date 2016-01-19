@@ -62,7 +62,7 @@ class LIBCONTROLCP_API BasicUI {
 	void rewind ();
 	void ffwd ();
 	void transport_stop ();
-	void transport_play (bool jump_back = true);
+	void transport_play (bool jump_back = false);
 	void set_transport_speed (double speed);
 	double get_transport_speed ();
 
