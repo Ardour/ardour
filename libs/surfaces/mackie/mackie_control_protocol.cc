@@ -295,34 +295,25 @@ MackieControlProtocol::get_sorted_routes()
 
 		switch (_view_mode) {
 		case Mixer:
-			if (route->route_group()) {
-				route->route_group()->set_active (true, this);
-			}
 			if (! is_hidden(route)) {
 				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
 			break;
 		case AudioTracks:
-			if (route->route_group()) {
-				route->route_group()->set_active (true, this);
-			}
 			if (is_audio_track(route) && !is_hidden(route)) {
 				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
 			break;
 		case Busses:
-			if (route->route_group()) {
-				route->route_group()->set_active (true, this);
-			}
 			if (Profile->get_mixbus()) {
 #ifdef MIXBUS
 				if (route->mixbus()) {
 					sorted.push_back (route);
 					remote_ids.insert (route->remote_control_id());
 				}
-#endif				
+#endif
 			} else {
 				if (!is_track(route) && !is_hidden(route)) {
 					sorted.push_back (route);
@@ -331,9 +322,6 @@ MackieControlProtocol::get_sorted_routes()
 			}
 			break;
 		case MidiTracks:
-			if (route->route_group()) {
-				route->route_group()->set_active (true, this);
-			}
 			if (is_midi_track(route) && !is_hidden(route)) {
 				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
@@ -342,18 +330,12 @@ MackieControlProtocol::get_sorted_routes()
 		case Plugins:
 			break;
 		case Auxes: // in ardour, for now aux and buss are same. for mixbus, see "Busses" case above
-			if (route->route_group()) {
-				route->route_group()->set_active (true, this);
-			}
 			if (!is_track(route) && !is_hidden(route)) {
 				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
 			break;
 		case Hidden: // Show all the tracks we have hidden
-			if (route->route_group()) {
-				route->route_group()->set_active (true, this);
-			}
 			if (is_hidden(route)) {
 				// maybe separate groups
 				sorted.push_back (route);
@@ -362,12 +344,6 @@ MackieControlProtocol::get_sorted_routes()
 			break;
 		case Selected: // For example: a group (this is USER)
 			if (selected(route) && !is_hidden(route)) {
-				/* Selected may be a group in which case we want to
-				 * control each track separately.
-				 */
-				if (route->route_group()) {
-					route->route_group()->set_active (false, this);
-				}
 				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
@@ -1660,7 +1636,7 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 
 	if (r) {
 		/* retain _subview_route even if it is reset to null implicitly */
- 		_subview_route = r;
+		_subview_route = r;
 	}
 
 	if ((_subview_mode != old_mode) || (_subview_route != old_route)) {
