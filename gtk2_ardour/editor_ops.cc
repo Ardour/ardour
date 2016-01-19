@@ -7427,7 +7427,7 @@ Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 			pl->shift (pos, -frames, true, ignore_music_glue);
 
 			if (!in_command) {
-				begin_reversible_command (_("cut time"));
+				begin_reversible_command (_("remove time"));
 				in_command = true;
 			}
 			XMLNode &after = pl->get_state();
@@ -7439,7 +7439,7 @@ Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
 		if (rtav) {
 			if (!in_command) {
-				begin_reversible_command (_("cut time"));
+				begin_reversible_command (_("remove time"));
 				in_command = true;
 			}
 			rtav->route ()->shift (pos, -frames);
@@ -7512,7 +7512,7 @@ Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 
 		if (moved) {
 			if (!in_command) {
-				begin_reversible_command (_("cut time"));
+				begin_reversible_command (_("remove time"));
 				in_command = true;
 			}
 			XMLNode& after (_session->locations()->get_state());
