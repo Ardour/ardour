@@ -349,7 +349,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/** Emitted when a property of one of our route groups changes.
 	 *  The parameter is the RouteGroup that has changed.
 	 */
-	PBD::Signal1<void, RouteGroup *> RouteGroupPropertyChanged;
+	PBD::Signal2<void, RouteGroup *, PBD::PropertyChange> RouteGroupPropertyChanged;
 	/** Emitted when a route is added to one of our route groups.
 	 *  First parameter is the RouteGroup, second is the route.
 	 */
@@ -1560,7 +1560,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void route_added_to_route_group (RouteGroup *, boost::weak_ptr<Route>);
 	void route_removed_from_route_group (RouteGroup *, boost::weak_ptr<Route>);
-	void route_group_property_changed (RouteGroup *);
+	void route_group_property_changed (RouteGroup *, PBD::PropertyChange);
 
 	/* SOURCES */
 

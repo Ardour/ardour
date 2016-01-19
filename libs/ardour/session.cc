@@ -5638,9 +5638,9 @@ Session::solo_control_mode_changed ()
 
 /** Called when a property of one of our route groups changes */
 void
-Session::route_group_property_changed (RouteGroup* rg)
+Session::route_group_property_changed (RouteGroup* rg, PropertyChange pc)
 {
-	RouteGroupPropertyChanged (rg); /* EMIT SIGNAL */
+	RouteGroupPropertyChanged (rg, pc); /* EMIT SIGNAL */
 }
 
 /** Called when a route is added to one of our route groups */
