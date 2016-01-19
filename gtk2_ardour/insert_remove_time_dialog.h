@@ -38,6 +38,7 @@ public:
 
 private:
 	void move_markers_toggled ();
+	void doit ();
 
 	PublicEditor& _editor;
 	Gtk::ComboBoxText _intersected_combo;

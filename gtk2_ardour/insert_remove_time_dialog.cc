@@ -96,7 +96,9 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	get_vbox()->pack_start (*tempo_box);
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	add_button (remove ? _("Remove time") : _("Insert time"), Gtk::RESPONSE_OK);
+	Gtk::Button *btn = manage (new Gtk::Button (remove ? _("Remove time") : _("Insert time")));
+	btn->signal_clicked().connect (sigc::mem_fun(*this, &InsertRemoveTimeDialog::doit));
+	get_action_area()->pack_start (*btn);
 	show_all ();
 
 	move_markers_toggled ();
@@ -163,6 +165,17 @@ framepos_t
 InsertRemoveTimeDialog::distance () const
 {
 	return _clock.current_duration (_editor.get_preferred_edit_position ());
+}
+
+void
+InsertRemoveTimeDialog::doit ()
+{
+	if (distance () == 0) {
+		Gtk::MessageDialog msg (*this, _("Invalid or zero duration entered. Please enter a valid duration"));
+		msg.run ();
+		return;
+	}
+	response (RESPONSE_OK);
 }
 
 void
