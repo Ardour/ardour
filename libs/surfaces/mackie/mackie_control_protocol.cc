@@ -703,8 +703,6 @@ MackieControlProtocol::connect_session_signals()
 	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
 	// receive rude solo changed
 	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), this);
-	// need to know if group parameters change... might be hidden.
-	session->RouteGroupPropertyChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_remote_id_changed, this), this);
 
 	// make sure remote id changed signals reach here
 	// see also notify_route_added
