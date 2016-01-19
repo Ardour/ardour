@@ -208,7 +208,6 @@ class MackieControlProtocol
 	void notify_route_added_or_removed ();
 	void notify_route_added (ARDOUR::RouteList &);
 	void notify_remote_id_changed();
-	void notify_group_property_changed (PBD::PropertyChange);
 
 	void recalibrate_faders ();
 	void toggle_backlight ();

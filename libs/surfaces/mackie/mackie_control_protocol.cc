@@ -704,7 +704,7 @@ MackieControlProtocol::connect_session_signals()
 	// receive rude solo changed
 	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), this);
 	// need to know if group parameters change... might be hidden.
-	session->RouteGroupPropertyChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_group_property_changed, this, _2), this);
+	session->RouteGroupPropertyChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_remote_id_changed, this), this);
 
 	// make sure remote id changed signals reach here
 	// see also notify_route_added
@@ -1256,17 +1256,6 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 			surface->write (rude_solo->set_state (active ? flashing : off));
 		}
 	}
-}
-
-void
-MackieControlProtocol::notify_group_property_changed (PropertyChange pc)
-{
-	if (!pc.contains (Properties::hidden)) {
-		return;
-	}
-
-	/* re-pick routes to show, as if remote ID(s) had changed */
-	notify_remote_id_changed ();
 }
 
 void
