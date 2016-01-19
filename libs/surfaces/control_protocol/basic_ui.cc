@@ -212,6 +212,18 @@ BasicUI::rec_enable_toggle ()
 }
 
 void
+BasicUI::all_tracks_rec_in ()
+{
+	session->set_all_tracks_record_enabled (true);
+}
+
+void
+BasicUI::all_tracks_rec_out ()
+{
+	session->set_all_tracks_record_enabled (false);
+}
+
+void
 BasicUI::save_state ()
 {
 	session->save_state ("");

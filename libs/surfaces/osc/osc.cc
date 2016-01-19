@@ -359,6 +359,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/toggle_punch_out", "", toggle_punch_out);
 		REGISTER_CALLBACK (serv, "/ardour/rec_enable_toggle", "", rec_enable_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/toggle_all_rec_enables", "", toggle_all_rec_enables);
+		REGISTER_CALLBACK (serv, "/ardour/all_tracks_rec_in", "f", all_tracks_rec_in);
+		REGISTER_CALLBACK (serv, "/ardour/all_tracks_rec_out", "f", all_tracks_rec_out);
 		REGISTER_CALLBACK (serv, "/ardour/remove_marker", "", remove_marker_at_playhead);
 		REGISTER_CALLBACK (serv, "/ardour/jump_bars", "f", jump_by_bars);
 		REGISTER_CALLBACK (serv, "/ardour/jump_seconds", "f", jump_by_seconds);
@@ -425,6 +427,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_punch_out", "f", toggle_punch_out);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/rec_enable_toggle", "f", rec_enable_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/toggle_all_rec_enables", "f", toggle_all_rec_enables);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/all_tracks_rec_in", "f", all_tracks_rec_in);
+		REGISTER_CALLBACK (serv, "/ardour/pushbutton/all_tracks_rec_out", "f", all_tracks_rec_out);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/remove_marker", "f", remove_marker_at_playhead);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/mark_in", "f", mark_in);
 		REGISTER_CALLBACK (serv, "/ardour/pushbutton/mark_out", "f", mark_out);

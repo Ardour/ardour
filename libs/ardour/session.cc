@@ -1833,6 +1833,19 @@ Session::enable_record ()
 }
 
 void
+Session::set_all_tracks_record_enabled (bool enable )
+{
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr) {
+			tr->set_record_enabled (enable, this);
+		}
+	}
+}
+
+
+void
 Session::disable_record (bool rt_context, bool force)
 {
 	RecordState rs;

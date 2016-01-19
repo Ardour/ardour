@@ -305,6 +305,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void maybe_enable_record ();
 	void disable_record (bool rt_context, bool force = false);
 	void step_back_from_record ();
+	
+	void set_all_tracks_record_enabled(bool);
 
 	void maybe_write_autosave ();
 

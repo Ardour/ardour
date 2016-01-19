@@ -133,6 +133,9 @@ class LIBCONTROLCP_API BasicUI {
 	void rec_enable_toggle ();
 	void toggle_all_rec_enables ();
 
+	void all_tracks_rec_in ();
+	void all_tracks_rec_out ();
+
 	ARDOUR::framecnt_t timecode_frames_per_hour ();
 
 	void timecode_time (framepos_t where, Timecode::Time&);
