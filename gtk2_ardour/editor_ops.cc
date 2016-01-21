@@ -5701,7 +5701,7 @@ Editor::toggle_record_enable ()
 			first = false;
 		}
 
-		rtav->track()->set_record_enabled (new_state, this);
+		rtav->track()->set_record_enabled (new_state, Controllable::UseGroup);
 	}
 }
 
@@ -5727,7 +5727,7 @@ Editor::toggle_solo ()
 		rl->push_back (rtav->route());
 	}
 
-	_session->set_solo (rl, new_state, Session::rt_cleanup, true);
+	_session->set_solo (rl, new_state, Session::rt_cleanup, Controllable::UseGroup);
 }
 
 void
@@ -5752,7 +5752,7 @@ Editor::toggle_mute ()
 		rl->push_back (rtav->route());
 	}
 
-	_session->set_mute (rl, new_state, Session::rt_cleanup, true);
+	_session->set_mute (rl, new_state, Session::rt_cleanup, Controllable::UseGroup);
 }
 
 void

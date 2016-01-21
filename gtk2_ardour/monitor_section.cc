@@ -1210,7 +1210,7 @@ MonitorSection::cancel_isolate (GdkEventButton*)
 {
 	if (_session) {
 		boost::shared_ptr<RouteList> rl (_session->get_routes ());
-		_session->set_solo_isolated (rl, false, Session::rt_cleanup, true);
+		_session->set_solo_isolated (rl, false, Session::rt_cleanup, Controllable::NoGroup);
 	}
 
 	return true;

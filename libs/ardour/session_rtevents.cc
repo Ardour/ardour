@@ -33,13 +33,15 @@ using namespace ARDOUR;
 using namespace Glib;
 
 void
-Session::set_monitoring (boost::shared_ptr<RouteList> rl, MonitorChoice mc, SessionEvent::RTeventCallback after, bool group_override)
+Session::set_monitoring (boost::shared_ptr<RouteList> rl, MonitorChoice mc, 
+                         SessionEvent::RTeventCallback after,
+                         Controllable::GroupControlDisposition group_override)
 {
 	queue_event (get_rt_event (rl, mc, after, group_override, &Session::rt_set_monitoring));
 }
 
 void
-Session::rt_set_monitoring (boost::shared_ptr<RouteList> rl, MonitorChoice mc, bool /* group_override */)
+Session::rt_set_monitoring (boost::shared_ptr<RouteList> rl, MonitorChoice mc, Controllable::GroupControlDisposition /*group_override*/)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_auditioner()) {
@@ -56,11 +58,11 @@ Session::rt_set_monitoring (boost::shared_ptr<RouteList> rl, MonitorChoice mc, b
 void
 Session::clear_all_solo_state (boost::shared_ptr<RouteList> rl)
 {
-	queue_event (get_rt_event (rl, false, rt_cleanup, false, &Session::rt_clear_all_solo_state));
+	queue_event (get_rt_event (rl, false, rt_cleanup, Controllable::NoGroup, &Session::rt_clear_all_solo_state));
 }
 
 void
-Session::rt_clear_all_solo_state (boost::shared_ptr<RouteList> rl, bool /* yn */, bool /* group_override */)
+Session::rt_clear_all_solo_state (boost::shared_ptr<RouteList> rl, bool /* yn */, Controllable::GroupControlDisposition /* group_override */)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if ((*i)->is_auditioner()) {
@@ -72,17 +74,18 @@ Session::rt_clear_all_solo_state (boost::shared_ptr<RouteList> rl, bool /* yn */
 }
 
 void
-Session::set_solo (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
+Session::set_solo (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after,
+                   Controllable::GroupControlDisposition group_override)
 {
 	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_solo));
 }
 
 void
-Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
+Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, Controllable::GroupControlDisposition group_override)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_auditioner()) {
-			(*i)->set_solo (yn, this, group_override);
+			(*i)->set_solo (yn, group_override);
 		}
 	}
 
@@ -104,38 +107,38 @@ Session::set_just_one_solo (boost::shared_ptr<Route> r, bool yn, SessionEvent::R
 	boost::shared_ptr<RouteList> rl (new RouteList);
 	rl->push_back (r);
 
-	queue_event (get_rt_event (rl, yn, after, false, &Session::rt_set_just_one_solo));
+	queue_event (get_rt_event (rl, yn, after, Controllable::NoGroup, &Session::rt_set_just_one_solo));
 }
 
 void
-Session::rt_set_just_one_solo (boost::shared_ptr<RouteList> just_one, bool yn, bool /*ignored*/)
+Session::rt_set_just_one_solo (boost::shared_ptr<RouteList> just_one, bool yn, Controllable::GroupControlDisposition /*ignored*/)
 {
 	boost::shared_ptr<RouteList> rl = routes.reader ();
 	boost::shared_ptr<Route> r = just_one->front();
 
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_auditioner() && r != *i) {
-			(*i)->set_solo (!yn, (*i)->route_group());
+			(*i)->set_solo (!yn, Controllable::NoGroup);
 		}
 	}
 
-	r->set_solo (yn, r->route_group());
+	r->set_solo (yn, Controllable::NoGroup);
 
 	set_dirty();
 }
 
 void
-Session::set_listen (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
+Session::set_listen (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, Controllable::GroupControlDisposition group_override)
 {
 	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_listen));
 }
 
 void
-Session::rt_set_listen (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
+Session::rt_set_listen (boost::shared_ptr<RouteList> rl, bool yn, Controllable::GroupControlDisposition group_override)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_auditioner()) {
-			(*i)->set_listen (yn, this, group_override);
+			(*i)->set_listen (yn, group_override);
 		}
 	}
 
@@ -143,7 +146,7 @@ Session::rt_set_listen (boost::shared_ptr<RouteList> rl, bool yn, bool group_ove
 }
 
 void
-Session::set_mute (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
+Session::set_mute (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, Controllable::GroupControlDisposition group_override)
 {
 	/* Set superficial value of mute controls for automation. */
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
@@ -155,11 +158,11 @@ Session::set_mute (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeve
 }
 
 void
-Session::rt_set_mute (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_override*/)
+Session::rt_set_mute (boost::shared_ptr<RouteList> rl, bool yn, Controllable::GroupControlDisposition group_override)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_monitor() && !(*i)->is_auditioner()) {
-			(*i)->set_mute (yn, this);
+			(*i)->set_mute (yn, group_override);
 		}
 	}
 
@@ -167,17 +170,17 @@ Session::rt_set_mute (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_ove
 }
 
 void
-Session::set_solo_isolated (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
+Session::set_solo_isolated (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, Controllable::GroupControlDisposition group_override)
 {
 	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_solo_isolated));
 }
 
 void
-Session::rt_set_solo_isolated (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_override*/)
+Session::rt_set_solo_isolated (boost::shared_ptr<RouteList> rl, bool yn, Controllable::GroupControlDisposition group_override)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_master() && !(*i)->is_monitor() && !(*i)->is_auditioner()) {
-			(*i)->set_solo_isolated (yn, this);
+			(*i)->set_solo_isolated (yn, group_override);
 		}
 	}
 
@@ -185,7 +188,7 @@ Session::rt_set_solo_isolated (boost::shared_ptr<RouteList> rl, bool yn, bool /*
 }
 
 void
-Session::set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
+Session::set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, Controllable::GroupControlDisposition group_override)
 {
 	if (!writable()) {
 		return;
@@ -206,7 +209,7 @@ Session::set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, SessionEv
 		boost::shared_ptr<Track> t;
 
 		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
-			t->prep_record_enabled (yn, (group_override ? (void*) t->route_group() : (void *) this));
+			t->prep_record_enabled (yn, group_override);
 		}
 	}
 
@@ -214,7 +217,7 @@ Session::set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, SessionEv
 }
 
 void
-Session::rt_set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
+Session::rt_set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, Controllable::GroupControlDisposition group_override)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if ((*i)->is_auditioner() || (*i)->record_safe ()) {
@@ -224,7 +227,7 @@ Session::rt_set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, bool g
 		boost::shared_ptr<Track> t;
 
 		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
-			t->set_record_enabled (yn, (group_override ? (void*) t->route_group() : (void *) this));
+			t->set_record_enabled (yn, group_override);
 		}
 	}
 
@@ -233,14 +236,14 @@ Session::rt_set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, bool g
 
 
 void
-Session::set_record_safe (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
+Session::set_record_safe (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, Controllable::GroupControlDisposition group_override)
 {
 	set_record_enabled (rl, false, after, group_override);
 	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_record_safe));
 }
 
 void
-Session::rt_set_record_safe (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
+Session::rt_set_record_safe (boost::shared_ptr<RouteList> rl, bool yn, Controllable::GroupControlDisposition group_override)
 {
 	for (RouteList::iterator i = rl->begin (); i != rl->end (); ++i) {
 		if ((*i)->is_auditioner ()) { // REQUIRES REVIEW Can audiotioner be in Record Safe mode?
@@ -250,7 +253,7 @@ Session::rt_set_record_safe (boost::shared_ptr<RouteList> rl, bool yn, bool grou
 		boost::shared_ptr<Track> t;
 
 		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
-			t->set_record_safe (yn, (group_override ? (void*) t->route_group () : (void *) this));
+			t->set_record_safe (yn, group_override);
 		}
 	}
 

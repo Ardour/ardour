@@ -18,6 +18,7 @@
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/route_group_member.h"
+#include "ardour/route_group.h"
 
 using namespace ARDOUR;
 
@@ -33,4 +34,13 @@ RouteGroupMember::set_route_group (RouteGroup *rg)
 
 	_route_group = rg;
 	route_group_changed (); /* EMIT SIGNAL */
+}
+
+bool
+RouteGroupMember::use_group (PBD::Controllable::GroupControlDisposition gcd, bool (RouteGroup::*predicate)(void) const) const
+{
+	return (gcd != PBD::Controllable::NoGroup) &&
+		(_route_group &&
+		 ((gcd == PBD::Controllable::WholeGroup) ||
+		  (_route_group->is_active() && (_route_group->*predicate)())));
 }

@@ -103,23 +103,23 @@ MidiTrack::create_diskstream ()
 
 
 void
-MidiTrack::set_record_enabled (bool yn, void *src)
+MidiTrack::set_record_enabled (bool yn, Controllable::GroupControlDisposition group_override)
 {
 	if (_step_editing) {
 		return;
 	}
 
-	Track::set_record_enabled (yn, src);
+	Track::set_record_enabled (yn, group_override);
 }
 
 void
-MidiTrack::set_record_safe (bool yn, void *src)
+MidiTrack::set_record_safe (bool yn, Controllable::GroupControlDisposition group_override)
 {
 	if (_step_editing) { /* REQUIRES REVIEW */
 		return;
 	}
 
-	Track::set_record_safe (yn, src);
+	Track::set_record_safe (yn, group_override);
 }
 
 void
@@ -725,15 +725,22 @@ MidiTrack::set_parameter_automation_state (Evoral::Parameter param, AutoState st
 }
 
 void
-MidiTrack::MidiControl::set_value (double val, PBD::Controllable::GroupControlDisposition /* group_override */)
+MidiTrack::MidiControl::set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	if (writable()) {
-		set_value_unchecked (val);
+		_set_value (val, group_override);
 	}
 }
 
 void
-MidiTrack::MidiControl::set_value_unchecked(double val)
+MidiTrack::MidiControl::set_value_unchecked (double val)
+{
+	/* used only by automation playback */
+	_set_value (val, Controllable::NoGroup);
+}
+
+void
+MidiTrack::MidiControl::_set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	const Evoral::Parameter &parameter = _list ? _list->parameter() : Control::parameter();
 	const Evoral::ParameterDescriptor &desc = EventTypeMap::instance().descriptor(parameter);
@@ -790,7 +797,7 @@ MidiTrack::MidiControl::set_value_unchecked(double val)
 		_route->write_immediate_event(size,  ev);
 	}
 
-	AutomationControl::set_value(val, Controllable::NoGroup);
+	AutomationControl::set_value(val, group_override);
 }
 
 void

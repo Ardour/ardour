@@ -35,21 +35,27 @@ PanControllable::lower () const
 }
 
 void
-PanControllable::set_value (double v, PBD::Controllable::GroupControlDisposition /* group_override */)
+PanControllable::set_value (double v, PBD::Controllable::GroupControlDisposition group_override)
 {
 	if (writable()) {
-		set_value_unchecked (v);
+		_set_value (v, group_override);
 	}
+}
+void
+PanControllable::set_value_unchecked (double v)
+{
+	/* used only automation playback */
+	_set_value (v, Controllable::NoGroup);
 }
 
 void
-PanControllable::set_value_unchecked (double v)
+PanControllable::_set_value (double v, Controllable::GroupControlDisposition group_override)
 {
 	boost::shared_ptr<Panner> p = owner->panner();
 
         if (!p) {
                 /* no panner: just do it */
-	        AutomationControl::set_value (v, Controllable::NoGroup);
+	        AutomationControl::set_value (v, group_override);
                 return;
         }
 
@@ -70,7 +76,7 @@ PanControllable::set_value_unchecked (double v)
         }
 
         if (can_set) {
-	        AutomationControl::set_value (v, Controllable::NoGroup);
+	        AutomationControl::set_value (v, group_override);
         }
 }
 

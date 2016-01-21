@@ -25,9 +25,9 @@
 #include <string>
 #include <stdint.h>
 
+#include "pbd/controllable.h"
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
-#include "pbd/signals.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
@@ -108,7 +108,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 
 	/* to use these, #include "ardour/route_group_specialized.h" */
 
-	template<class T> void apply (void (Track::*func)(T, void *), T val, void *src);
+	template<class T> void apply (void (Track::*func)(T, PBD::Controllable::GroupControlDisposition), T val, PBD::Controllable::GroupControlDisposition);
 
 	/* fills at_set with all members of the group that are AudioTracks */
 
@@ -134,7 +134,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 
 	int set_state (const XMLNode&, int version);
 
-private:
+  private:
 	boost::shared_ptr<RouteList> routes;
 	boost::shared_ptr<Route> subgroup_bus;
 

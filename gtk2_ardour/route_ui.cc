@@ -259,7 +259,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->active_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_active_changed, this), gui_context());
 	_route->mute_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_mute_display, this), gui_context());
 
-	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::comment_changed, this, _1), gui_context());
+	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::comment_changed, this), gui_context());
 
 	_route->solo_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_safe_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
@@ -426,7 +426,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 					}
 
 					DisplaySuspender ds;
-					_session->set_mute (rl, !_route->muted(), Session::rt_cleanup, true);
+					_session->set_mute (rl, !_route->muted(), Session::rt_cleanup, Controllable::WholeGroup);
 				}
 
 			} else {
@@ -454,7 +454,7 @@ RouteUI::mute_release (GdkEventButton* /*ev*/)
 {
 	if (_mute_release){
 		DisplaySuspender ds;
-		_session->set_mute (_mute_release->routes, _mute_release->active, Session::rt_cleanup, true);
+		_session->set_mute (_mute_release->routes, _mute_release->active, Session::rt_cleanup, Controllable::UseGroup);
 		delete _mute_release;
 		_mute_release = 0;
 	}
@@ -555,9 +555,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 				DisplaySuspender ds;
 				if (Config->get_solo_control_is_listen_control()) {
-					_session->set_listen (_session->get_routes(), !_route->listening_via_monitor(),  Session::rt_cleanup, false);
+					_session->set_listen (_session->get_routes(), !_route->listening_via_monitor(),  Session::rt_cleanup, Controllable::NoGroup);
 				} else {
-					_session->set_solo (_session->get_routes(), !_route->self_soloed(),  Session::rt_cleanup, false);
+					_session->set_solo (_session->get_routes(), !_route->self_soloed(),  Session::rt_cleanup, Controllable::NoGroup);
 				}
 
 			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
@@ -589,7 +589,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 				// shift-click: toggle solo isolated status
 
-				_route->set_solo_isolated (!_route->solo_isolated(), this);
+				_route->set_solo_isolated (!_route->solo_isolated(), Controllable::UseGroup);
 				delete _solo_release;
 				_solo_release = 0;
 
@@ -620,9 +620,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 					DisplaySuspender ds;
 					if (Config->get_solo_control_is_listen_control()) {
-						_session->set_listen (rl, !_route->listening_via_monitor(),  Session::rt_cleanup, true);
+						_session->set_listen (rl, !_route->listening_via_monitor(),  Session::rt_cleanup, Controllable::WholeGroup);
 					} else {
-						_session->set_solo (rl, !_route->self_soloed(),  Session::rt_cleanup, true);
+						_session->set_solo (rl, !_route->self_soloed(),  Session::rt_cleanup, Controllable::WholeGroup);
 					}
 				}
 
@@ -663,9 +663,9 @@ RouteUI::solo_release (GdkEventButton* /*ev*/)
 		} else {
 			DisplaySuspender ds;
 			if (Config->get_solo_control_is_listen_control()) {
-				_session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, false);
+				_session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, Controllable::UseGroup);
 			} else {
-				_session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, false);
+				_session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, Controllable::UseGroup);
 			}
 		}
 
@@ -735,7 +735,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 				}
 
 				DisplaySuspender ds;
-				_session->set_record_enabled (rl, !_route->record_enabled(), Session::rt_cleanup, true);
+				_session->set_record_enabled (rl, !_route->record_enabled(), Session::rt_cleanup, Controllable::WholeGroup);
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
@@ -865,7 +865,7 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 	}
 
 	DisplaySuspender ds;
-	_session->set_monitoring (rl, mc, Session::rt_cleanup, true);
+	_session->set_monitoring (rl, mc, Session::rt_cleanup, Controllable::UseGroup);
 
 	return false;
 }
@@ -1437,11 +1437,11 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 			if (model) {
 				/* disable isolate for all routes */
 				DisplaySuspender ds;
-				_session->set_solo_isolated (_session->get_routes(), false, Session::rt_cleanup, true);
+				_session->set_solo_isolated (_session->get_routes(), false, Session::rt_cleanup, Controllable::NoGroup);
 			} else {
 				/* enable isolate for all routes */
 				DisplaySuspender ds;
-				_session->set_solo_isolated (_session->get_routes(), true, Session::rt_cleanup, true);
+				_session->set_solo_isolated (_session->get_routes(), true, Session::rt_cleanup, Controllable::NoGroup);
 			}
 
 		} else {
@@ -1453,7 +1453,7 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 				boost::shared_ptr<RouteList> rl (new RouteList);
 				rl->push_back (_route);
 				DisplaySuspender ds;
-				_session->set_solo_isolated (rl, !view, Session::rt_cleanup, true);
+				_session->set_solo_isolated (rl, !view, Session::rt_cleanup, Controllable::NoGroup);
 			}
 		}
 	}
@@ -1478,20 +1478,20 @@ RouteUI::solo_safe_button_release (GdkEventButton* ev)
 				/* disable solo safe for all routes */
 				DisplaySuspender ds;
 				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-					(*i)->set_solo_safe (false, this);
+					(*i)->set_solo_safe (false, Controllable::NoGroup);
 				}
 			} else {
 				/* enable solo safe for all routes */
 				DisplaySuspender ds;
 				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-					(*i)->set_solo_safe (true, this);
+					(*i)->set_solo_safe (true, Controllable::NoGroup);
 				}
 			}
 		}
 		else {
 			if (model == view) {
 				/* flip just this route */
-				_route->set_solo_safe (!view, this);
+				_route->set_solo_safe (!view, Controllable::NoGroup);
 			}
 		}
 	}
@@ -1508,14 +1508,14 @@ RouteUI::toggle_solo_isolated (Gtk::CheckMenuItem* check)
         /* called AFTER the view has changed */
 
         if (model != view) {
-                _route->set_solo_isolated (view, this);
+	        _route->set_solo_isolated (view, Controllable::UseGroup);
         }
 }
 
 void
 RouteUI::toggle_solo_safe (Gtk::CheckMenuItem* check)
 {
-	_route->set_solo_safe (check->get_active(), this);
+	_route->set_solo_safe (check->get_active(), Controllable::UseGroup);
 }
 
 /** Ask the user to choose a colour, and then apply that color to my route
@@ -1702,17 +1702,13 @@ RouteUI::setup_comment_editor ()
 }
 
 void
-RouteUI::comment_changed (void *src)
+RouteUI::comment_changed ()
 {
-	ENSURE_GUI_THREAD (*this, &MixerStrip::comment_changed, src)
-
-	if (src != this) {
-		ignore_comment_edit = true;
-		if (comment_area) {
-			comment_area->get_buffer()->set_text (_route->comment());
-		}
-		ignore_comment_edit = false;
+	ignore_comment_edit = true;
+	if (comment_area) {
+		comment_area->get_buffer()->set_text (_route->comment());
 	}
+	ignore_comment_edit = false;
 }
 
 void

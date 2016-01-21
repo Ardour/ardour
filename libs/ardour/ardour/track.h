@@ -108,9 +108,9 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 
 	bool record_enabled() const;
 	bool record_safe () const;
-	void set_record_enabled (bool yn, void *src);
-	void set_record_safe (bool yn, void *src);
-	void prep_record_enabled (bool yn, void *src);
+	void set_record_enabled (bool yn, PBD::Controllable::GroupControlDisposition);
+	void set_record_safe (bool yn, PBD::Controllable::GroupControlDisposition);
+	void prep_record_enabled (bool yn, PBD::Controllable::GroupControlDisposition);
 
 	bool using_diskstream_id (PBD::ID) const;
 
@@ -203,7 +203,8 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 		FreezeState                        state;
 	};
 
-	struct RecEnableControl : public AutomationControl {
+	class RecEnableControl : public AutomationControl {
+	public:
 		RecEnableControl (boost::shared_ptr<Track> t);
 
 		void set_value (double, PBD::Controllable::GroupControlDisposition);
@@ -211,6 +212,9 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 		double get_value (void) const;
 
 		boost::weak_ptr<Track> track;
+
+	private:
+		void _set_value (double, PBD::Controllable::GroupControlDisposition);
 	};
 
 	virtual void set_state_part_two () = 0;

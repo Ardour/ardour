@@ -1349,15 +1349,21 @@ PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
 
 /** @param val `user' value */
 void
-PluginInsert::PluginControl::set_value (double user_val, PBD::Controllable::GroupControlDisposition /* group_override */)
+PluginInsert::PluginControl::set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	if (writable()) {
-		set_value_unchecked (user_val);
+		_set_value (user_val, group_override);
 	}
+}
+void
+PluginInsert::PluginControl::set_value_unchecked (double user_val)
+{
+	/* used only by automation playback */
+	_set_value (user_val, Controllable::NoGroup);
 }
 
 void
-PluginInsert::PluginControl::set_value_unchecked (double user_val)
+PluginInsert::PluginControl::_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	/* FIXME: probably should be taking out some lock here.. */
 
@@ -1370,7 +1376,7 @@ PluginInsert::PluginControl::set_value_unchecked (double user_val)
 		iasp->set_parameter (_list->parameter().id(), user_val);
 	}
 
-	AutomationControl::set_value (user_val, Controllable::NoGroup);
+	AutomationControl::set_value (user_val, group_override);
 }
 
 void

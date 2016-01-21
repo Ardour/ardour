@@ -241,7 +241,7 @@ class RouteUI : public virtual AxisView
 	void toggle_comment_editor ();
 
 	gint comment_key_release_handler (GdkEventKey*);
-	void comment_changed (void *src);
+	void comment_changed ();
 	void comment_edited ();
 	bool ignore_comment_edit;
 

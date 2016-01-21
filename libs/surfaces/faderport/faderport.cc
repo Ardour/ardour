@@ -1107,9 +1107,9 @@ FaderPort::set_current_route (boost::shared_ptr<Route> r)
 	if (_current_route) {
 		_current_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::drop_current_route, this), this);
 
-		_current_route->mute_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_mute, this, _1), this);
-		_current_route->solo_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_solo, this, _1, _2, _3), this);
-		_current_route->listen_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_listen, this, _1, _2), this);
+		_current_route->mute_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_mute, this), this);
+		_current_route->solo_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_solo, this), this);
+		_current_route->listen_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_listen, this), this);
 
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_route);
 		if (t) {
@@ -1187,7 +1187,7 @@ FaderPort::map_cut ()
 }
 
 void
-FaderPort::map_mute (void*)
+FaderPort::map_mute ()
 {
 	if (_current_route) {
 		if (_current_route->muted()) {
@@ -1204,7 +1204,7 @@ FaderPort::map_mute (void*)
 }
 
 void
-FaderPort::map_solo (bool, void*, bool)
+FaderPort::map_solo ()
 {
 	if (_current_route) {
 		get_button (Solo).set_led_state (_output_port, _current_route->soloed() || _current_route->listening_via_monitor());
@@ -1214,7 +1214,7 @@ FaderPort::map_solo (bool, void*, bool)
 }
 
 void
-FaderPort::map_listen (void*, bool)
+FaderPort::map_listen ()
 {
 	if (_current_route) {
 		get_button (Solo).set_led_state (_output_port, _current_route->listening_via_monitor());
@@ -1292,8 +1292,7 @@ FaderPort::map_route_state ()
 		stop_blinking (Solo);
 		get_button (Rec).set_led_state (_output_port, false);
 	} else {
-		/* arguments to these map_*() methods are all ignored */
-		map_solo (false, 0, false);
+		map_solo ();
 		map_recenable ();
 		map_gain ();
 		map_auto ();
@@ -1301,7 +1300,7 @@ FaderPort::map_route_state ()
 		if (_current_route == session->monitor_out()) {
 			map_cut ();
 		} else {
-			map_mute (0);
+			map_mute ();
 		}
 	}
 }

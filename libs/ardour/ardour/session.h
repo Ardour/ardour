@@ -739,16 +739,16 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	static const SessionEvent::RTeventCallback rt_cleanup;
 
-	void set_solo (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
+	void set_solo (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
 	void clear_all_solo_state (boost::shared_ptr<RouteList>);
 	void set_just_one_solo (boost::shared_ptr<Route>, bool, SessionEvent::RTeventCallback after = rt_cleanup);
-	void set_mute (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
-	void set_listen (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
-	void set_record_enabled (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
-	void set_record_safe (boost::shared_ptr<RouteList>, bool yn, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
-	void set_solo_isolated (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
-	void set_monitoring (boost::shared_ptr<RouteList>, MonitorChoice, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
-	void set_exclusive_input_active (boost::shared_ptr<RouteList> rt, bool onoff, bool flip_others=false);
+	void set_mute (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
+	void set_listen (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
+	void set_record_enabled (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
+	void set_record_safe (boost::shared_ptr<RouteList>, bool yn, SessionEvent::RTeventCallback after = rt_cleanup, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
+	void set_solo_isolated (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
+	void set_monitoring (boost::shared_ptr<RouteList>, MonitorChoice, SessionEvent::RTeventCallback after = rt_cleanup, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
+	void set_exclusive_input_active (boost::shared_ptr<RouteList> rt, bool onoff, bool flip_others = false);
 
 	PBD::Signal1<void,bool> SoloActive;
 	PBD::Signal0<void> SoloChanged;
@@ -1544,10 +1544,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* mixer stuff */
 
-	void route_listen_changed (bool group_override, boost::weak_ptr<Route>);
-	void route_mute_changed (void *src);
-	void route_solo_changed (bool self_solo_change, bool group_override, boost::weak_ptr<Route>);
-	void route_solo_isolated_changed (void *src, boost::weak_ptr<Route>);
+	void route_listen_changed (PBD::Controllable::GroupControlDisposition, boost::weak_ptr<Route>);
+	void route_mute_changed ();
+	void route_solo_changed (bool self_solo_change, PBD::Controllable::GroupControlDisposition group_override, boost::weak_ptr<Route>);
+	void route_solo_isolated_changed (boost::weak_ptr<Route>);
 	void update_route_solo_state (boost::shared_ptr<RouteList> r = boost::shared_ptr<RouteList>());
 
 	void listen_position_changed ();
@@ -1772,8 +1772,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* realtime "apply to set of routes" operations */
 	template<typename T> SessionEvent*
-		get_rt_event (boost::shared_ptr<RouteList> rl, T targ, SessionEvent::RTeventCallback after, bool group_override,
-		              void (Session::*method) (boost::shared_ptr<RouteList>, T, bool)) {
+		get_rt_event (boost::shared_ptr<RouteList> rl, T targ, SessionEvent::RTeventCallback after, PBD::Controllable::GroupControlDisposition group_override,
+		              void (Session::*method) (boost::shared_ptr<RouteList>, T, PBD::Controllable::GroupControlDisposition)) {
 		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 		ev->rt_slot = boost::bind (method, this, rl, targ, group_override);
 		ev->rt_return = after;
@@ -1782,15 +1782,15 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		return ev;
 	}
 
-	void rt_set_solo (boost::shared_ptr<RouteList>, bool yn, bool group_override);
-	void rt_clear_all_solo_state (boost::shared_ptr<RouteList>, bool yn, bool group_override);
-	void rt_set_just_one_solo (boost::shared_ptr<RouteList>, bool yn, bool /* ignored*/ );
-	void rt_set_mute (boost::shared_ptr<RouteList>, bool yn, bool group_override);
-	void rt_set_listen (boost::shared_ptr<RouteList>, bool yn, bool group_override);
-	void rt_set_solo_isolated (boost::shared_ptr<RouteList>, bool yn, bool group_override);
-	void rt_set_record_enabled (boost::shared_ptr<RouteList>, bool yn, bool group_override);
-	void rt_set_record_safe (boost::shared_ptr<RouteList>, bool yn, bool group_override);
-	void rt_set_monitoring (boost::shared_ptr<RouteList>, MonitorChoice, bool group_override);
+	void rt_set_solo (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
+	void rt_clear_all_solo_state (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
+	void rt_set_just_one_solo (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition  /* ignored*/ );
+	void rt_set_mute (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
+	void rt_set_listen (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
+	void rt_set_solo_isolated (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
+	void rt_set_record_enabled (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
+	void rt_set_record_safe (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
+	void rt_set_monitoring (boost::shared_ptr<RouteList>, MonitorChoice, PBD::Controllable::GroupControlDisposition group_override);
 
 	/** temporary list of Diskstreams used only during load of 2.X sessions */
 	std::list<boost::shared_ptr<Diskstream> > _diskstreams_2X;

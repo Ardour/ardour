@@ -453,7 +453,7 @@ EditorRoutes::on_tv_solo_isolate_toggled (std::string const & path_string)
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	if (rtv) {
-		rtv->route()->set_solo_isolated (!rtv->route()->solo_isolated(), this);
+		rtv->route()->set_solo_isolated (!rtv->route()->solo_isolated(), Controllable::UseGroup);
 	}
 }
 
@@ -467,7 +467,7 @@ EditorRoutes::on_tv_solo_safe_toggled (std::string const & path_string)
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	if (rtv) {
-		rtv->route()->set_solo_safe (!rtv->route()->solo_safe(), this);
+		rtv->route()->set_solo_safe (!rtv->route()->solo_safe(), Controllable::UseGroup);
 	}
 }
 
@@ -711,8 +711,8 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		}
 
 		(*x)->route()->mute_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_mute_display, this), gui_context());
-		(*x)->route()->solo_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_display, this, _1), gui_context());
-		(*x)->route()->listen_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_display, this, _1), gui_context());
+		(*x)->route()->solo_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_display, this), gui_context());
+		(*x)->route()->listen_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_display, this), gui_context());
 		(*x)->route()->solo_isolated_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_isolate_display, this), gui_context());
 		(*x)->route()->solo_safe_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_safe_display, this), gui_context());
 		(*x)->route()->active_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_active_display, this), gui_context ());
@@ -721,7 +721,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 	update_rec_display ();
 	update_mute_display ();
-	update_solo_display (true);
+	update_solo_display ();
 	update_solo_isolate_display ();
 	update_solo_safe_display ();
 	update_input_active_display ();
@@ -1632,7 +1632,7 @@ EditorRoutes::update_mute_display ()
 }
 
 void
-EditorRoutes::update_solo_display (bool /* selfsoloed */)
+EditorRoutes::update_solo_display ()
 {
 	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));

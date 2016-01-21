@@ -128,9 +128,9 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	virtual bool can_record() { return false; }
 
-	virtual void set_record_enabled (bool /*yn*/, void * /*src*/) {}
+	virtual void set_record_enabled (bool /*yn*/, PBD::Controllable::GroupControlDisposition) {}
 	virtual bool record_enabled() const { return false; }
-	virtual void set_record_safe (bool yn, void *src) {}
+	virtual void set_record_safe (bool /*yn*/, PBD::Controllable::GroupControlDisposition) {}
 	virtual bool record_safe () const {return false; }
 	virtual void nonrealtime_handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
 	virtual void realtime_handle_transport_stopped () {}
@@ -145,20 +145,20 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	void set_gain (gain_t val, PBD::Controllable::GroupControlDisposition);
 	void inc_gain (gain_t delta);
 
-	void set_trim (gain_t val, void *src);
+	void set_trim (gain_t val, PBD::Controllable::GroupControlDisposition);
 
 	void set_mute_points (MuteMaster::MutePoint);
 	MuteMaster::MutePoint mute_points () const;
 
 	bool muted () const;
-	void set_mute (bool yn, void* src);
+	void set_mute (bool yn, PBD::Controllable::GroupControlDisposition);
 
 	bool muted_by_others() const;
 
 	/* controls use set_solo() to modify this route's solo state
 	 */
 
-	void set_solo (bool yn, void *src, bool group_override = false);
+	void set_solo (bool yn, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
 	bool soloed () const { return self_soloed () || soloed_by_others (); }
 	void clear_all_solo_state ();
 
@@ -167,13 +167,13 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool soloed_by_others_downstream () const { return _soloed_by_others_downstream; }
 	bool self_soloed () const { return _self_solo; }
 
-	void set_solo_isolated (bool yn, void *src);
+	void set_solo_isolated (bool yn, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
 	bool solo_isolated() const;
 
-	void set_solo_safe (bool yn, void *src);
+	void set_solo_safe (bool yn, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
 	bool solo_safe() const;
 
-	void set_listen (bool yn, void* src, bool group_override = false);
+	void set_listen (bool yn, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
 	bool listening_via_monitor () const;
 	void enable_monitor_send ();
 
@@ -286,12 +286,12 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	PBD::Signal0<void>       active_changed;
 	PBD::Signal0<void>       phase_invert_changed;
 	PBD::Signal0<void>       denormal_protection_changed;
-	PBD::Signal2<void,void*,bool> listen_changed;
-	PBD::Signal3<void,bool,void*,bool> solo_changed;
-	PBD::Signal1<void,void*> solo_safe_changed;
-	PBD::Signal1<void,void*> solo_isolated_changed;
-	PBD::Signal1<void,void*> comment_changed;
-	PBD::Signal1<void,void*> mute_changed;
+	PBD::Signal1<void,PBD::Controllable::GroupControlDisposition>  listen_changed;
+	PBD::Signal2<void,bool,PBD::Controllable::GroupControlDisposition>  solo_changed;
+	PBD::Signal0<void>       solo_safe_changed;
+	PBD::Signal0<void>       solo_isolated_changed;
+	PBD::Signal0<void>       comment_changed;
+	PBD::Signal0<void>       mute_changed;
 	PBD::Signal0<void>       mute_points_changed;
 
 	/** track numbers - assigned by session
@@ -438,6 +438,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 		void set_value_unchecked (double);
 		double get_value () const;
+	private:
+		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 	};
 
 	struct MuteControllable : public RouteAutomationControl {
@@ -452,17 +454,20 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	private:
 		boost::weak_ptr<Route> _route;
+		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 	};
 
 	class LIBARDOUR_API PhaseControllable : public RouteAutomationControl {
 	public:
 		PhaseControllable (std::string name, boost::shared_ptr<Route>);
 		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+		/* currently no automation, so no need for set_value_unchecked() */
 		void set_channel (uint32_t);
 		double get_value () const;
 		uint32_t channel() const;
 	private:
 		uint32_t _current_phase;
+		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 	};
 
 	void set_control (AutomationType, double val, PBD::Controllable::GroupControlDisposition group_override);
@@ -654,7 +659,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool           _solo_isolated;
 	uint32_t       _solo_isolated_by_upstream;
 
-	void mod_solo_isolated_by_upstream (bool, void*);
+	void mod_solo_isolated_by_upstream (bool);
 
 	bool           _denormal_protection;
 

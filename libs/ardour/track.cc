@@ -190,22 +190,30 @@ Track::RecEnableControl::RecEnableControl (boost::shared_ptr<Track> t)
 }
 
 void
-Track::RecEnableControl::set_value (double val, Controllable::GroupControlDisposition /* group_override */)
+Track::RecEnableControl::set_value (double val, Controllable::GroupControlDisposition group_override)
 {
 	if (writable()) {
-		set_value_unchecked (val);
+		_set_value (val, group_override);
 	}
 }
 
 void
 Track::RecEnableControl::set_value_unchecked (double val)
 {
+	if (writable()) {
+		_set_value (val, Controllable::NoGroup);
+	}
+}
+
+void
+Track::RecEnableControl::_set_value (double val, Controllable::GroupControlDisposition group_override)
+{
 	boost::shared_ptr<Track> t = track.lock ();
 	if (!t) {
 		return;
 	}
 
-	t->set_record_enabled (val >= 0.5 ? true : false, this);
+	t->set_record_enabled (val >= 0.5 ? true : false, group_override);
 }
 
 double
@@ -238,7 +246,7 @@ Track::can_record()
 }
 
 void
-Track::prep_record_enabled (bool yn, void *src)
+Track::prep_record_enabled (bool yn, Controllable::GroupControlDisposition group_override)
 {
 	if (yn && record_safe ()) {
 	    return;
@@ -252,8 +260,8 @@ Track::prep_record_enabled (bool yn, void *src)
 		return;
 	}
 
-	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_recenable()) {
-		_route_group->apply (&Track::prep_record_enabled, yn, _route_group);
+	if (use_group (group_override, &RouteGroup::is_recenable)) {
+		_route_group->apply (&Track::prep_record_enabled, yn, Controllable::NoGroup);
 		return;
 	}
 
@@ -282,7 +290,7 @@ Track::prep_record_enabled (bool yn, void *src)
 }
 
 void
-Track::set_record_enabled (bool yn, void *src)
+Track::set_record_enabled (bool yn, Controllable::GroupControlDisposition group_override)
 {
 	if (_diskstream->record_safe ()) {
 	    return;
@@ -296,8 +304,8 @@ Track::set_record_enabled (bool yn, void *src)
 		return;
 	}
 
-	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_recenable()) {
-		_route_group->apply (&Track::set_record_enabled, yn, _route_group);
+	if (use_group (group_override, &RouteGroup::is_recenable)) {
+		_route_group->apply (&Track::set_record_enabled, yn, Controllable::NoGroup);
 		return;
 	}
 
@@ -313,18 +321,18 @@ Track::record_safe () const
 }
 
 void
-Track::set_record_safe (bool yn, void *src)
+Track::set_record_safe (bool yn, Controllable::GroupControlDisposition group_override)
 {
-	if (!_session.writable()) { /* REQUIRES REVIEW */
+	if (!_session.writable()) {
 		return;
 	}
 
-	if (_freeze_record.state == Frozen) { /* REQUIRES REVIEW */
+	if (_freeze_record.state == Frozen) {
 		return;
 	}
 
-	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_recenable()) {
-		_route_group->apply (&Track::set_record_safe, yn, _route_group);
+	if (use_group (group_override, &RouteGroup::is_recenable)) {
+		_route_group->apply (&Track::set_record_safe, yn, Controllable::NoGroup);
 		return;
 	}
 
@@ -1149,4 +1157,3 @@ Track::metering_state () const
 	}
 	return rv ? MeteringInput : MeteringRoute;
 }
-

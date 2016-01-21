@@ -26,13 +26,13 @@
 namespace ARDOUR {
 
 template<class T> void
-RouteGroup::apply (void (Track::*func)(T, void *), T val, void* /*src*/)
+RouteGroup::apply (void (Track::*func)(T, PBD::Controllable::GroupControlDisposition), T val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); i++) {
 		boost::shared_ptr<Track> at;
 
 		if ((at = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
-			(at.get()->*func)(val, this);
+			(at.get()->*func)(val, group_override);
 		}
 	}
 }
