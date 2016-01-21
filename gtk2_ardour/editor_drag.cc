@@ -4712,20 +4712,24 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 }
 
 void
-TimeFXDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
+TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	_primary->get_time_axis_view().hide_timestretch ();
-
 	if (!movement_occurred) {
 		return;
 	}
 
-	if (last_pointer_frame() < _primary->region()->position()) {
+	motion (event, false);
+
+	_primary->get_time_axis_view().hide_timestretch ();
+
+	framepos_t adjusted_frame_pos = adjusted_current_frame (event);
+
+	if (adjusted_frame_pos < _primary->region()->position()) {
 		/* backwards drag of the left edge - not usable */
 		return;
 	}
 
-	framecnt_t newlen = last_pointer_frame() - _primary->region()->position();
+	framecnt_t newlen = adjusted_frame_pos - _primary->region()->position();
 
 	float percentage = (double) newlen / (double) _primary->region()->length();
 
