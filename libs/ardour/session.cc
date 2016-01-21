@@ -3673,7 +3673,7 @@ Session::route_solo_changed (bool self_solo_change, Controllable::GroupControlDi
 	 * The first argument to the signal that this method is connected to is the
 	 * GroupControlDisposition value that was used to change solo.
 	 *
-	 * If the solo change was done with group semantics (either WholeGroup
+	 * If the solo change was done with group semantics (either InverseGroup
 	 * (force the entire group to change even if the group shared solo is
 	 * disabled) or UseGroup (use the group, which may or may not have the
 	 * shared solo property enabled)) then as we propagate the change to

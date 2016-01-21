@@ -426,7 +426,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 					}
 
 					DisplaySuspender ds;
-					_session->set_mute (rl, !_route->muted(), Session::rt_cleanup, Controllable::WholeGroup);
+					_session->set_mute (rl, !_route->muted(), Session::rt_cleanup, Controllable::InverseGroup);
 				}
 
 			} else {
@@ -620,9 +620,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 					DisplaySuspender ds;
 					if (Config->get_solo_control_is_listen_control()) {
-						_session->set_listen (rl, !_route->listening_via_monitor(),  Session::rt_cleanup, Controllable::WholeGroup);
+						_session->set_listen (rl, !_route->listening_via_monitor(),  Session::rt_cleanup, Controllable::InverseGroup);
 					} else {
-						_session->set_solo (rl, !_route->self_soloed(),  Session::rt_cleanup, Controllable::WholeGroup);
+						_session->set_solo (rl, !_route->self_soloed(),  Session::rt_cleanup, Controllable::InverseGroup);
 					}
 				}
 
@@ -735,7 +735,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 				}
 
 				DisplaySuspender ds;
-				_session->set_record_enabled (rl, !_route->record_enabled(), Session::rt_cleanup, Controllable::WholeGroup);
+				_session->set_record_enabled (rl, !_route->record_enabled(), Session::rt_cleanup, Controllable::InverseGroup);
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
