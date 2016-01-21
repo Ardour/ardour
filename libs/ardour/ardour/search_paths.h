@@ -107,6 +107,14 @@ namespace ARDOUR {
 	 */
 	LIBARDOUR_API PBD::Searchpath template_search_path ();
 
+
+	/**
+	 * return a Searchpath containing directories in which to look for
+	 * lua scripts
+	 */
+	LIBARDOUR_API PBD::Searchpath lua_search_path ();
+
+
 } // namespace ARDOUR
 
 #endif /* __libardour_search_paths_h__ */

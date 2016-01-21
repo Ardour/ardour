@@ -43,5 +43,6 @@ const char* const automation_dir_name = X_("automation");
 const char* const analysis_dir_name = X_("analysis");
 const char* const plugins_dir_name = X_("plugins");
 const char* const externals_dir_name = X_("externals");
+const char* const lua_dir_name = X_("scripts");
 
 }

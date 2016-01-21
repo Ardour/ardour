@@ -163,6 +163,15 @@ route_template_search_path ()
 	return spath;
 }
 
+Searchpath
+lua_search_path ()
+{
+	Searchpath spath (ardour_data_search_path());
+	spath.add_subdirectory_to_paths(lua_dir_name);
+
+	return spath;
+}
+
 #ifdef PLATFORM_WINDOWS
 
 const char*
