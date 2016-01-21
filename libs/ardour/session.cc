@@ -1839,7 +1839,7 @@ Session::set_all_tracks_record_enabled (bool enable )
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
-			tr->set_record_enabled (enable, this);
+			tr->set_record_enabled (enable, Controllable::NoGroup);
 		}
 	}
 }
