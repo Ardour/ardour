@@ -53,7 +53,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	, _share_color (_("Color"))
 	, _share_monitoring (_("Monitoring"))
 {
-	set_modal (true);
 	set_skip_taskbar_hint (true);
 	set_resizable (true);
 	set_name (N_("RouteGroupDialog"));
