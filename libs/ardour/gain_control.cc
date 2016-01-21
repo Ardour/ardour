@@ -37,17 +37,24 @@ GainControl::GainControl (Session& session, const Evoral::Parameter &param, boos
 }
 
 void
-GainControl::set_value (double val, PBD::Controllable::GroupControlDisposition /* group_override */)
+GainControl::set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	if (writable()) {
-		set_value_unchecked (val);
+		_set_value (val, group_override);
 	}
 }
 
 void
 GainControl::set_value_unchecked (double val)
 {
-	AutomationControl::set_value (std::max (std::min (val, (double)_desc.upper), (double)_desc.lower), Controllable::NoGroup);
+	/* used only automation playback */
+	_set_value (val, Controllable::NoGroup);
+}
+
+void
+GainControl::_set_value (double val, Controllable::GroupControlDisposition group_override)
+{
+	AutomationControl::set_value (std::max (std::min (val, (double)_desc.upper), (double)_desc.lower), group_override);
 	_session.set_dirty ();
 }
 

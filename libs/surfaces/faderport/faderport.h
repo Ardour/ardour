@@ -302,9 +302,9 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	PBD::ScopedConnectionList route_connections;
 
 	void map_route_state ();
-	void map_solo (bool,void*,bool);
-	void map_listen (void*,bool);
-	void map_mute (void*);
+	void map_solo ();
+	void map_listen ();
+	void map_mute ();
 	void map_recenable ();
 	void map_gain ();
 	void map_cut ();

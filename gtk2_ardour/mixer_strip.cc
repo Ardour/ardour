@@ -637,7 +637,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	update_mute_display ();
 	update_solo_display ();
 	name_changed ();
-	comment_changed (0);
+	comment_changed ();
 	route_group_changed ();
 
 	connect_to_pan ();

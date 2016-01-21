@@ -876,15 +876,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 				DEBUG_TRACE (DEBUG::MackieControl, "add button on press\n");
 				_surface->mcp().add_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
 
-				float new_value;
-				int ms = _surface->mcp().main_modifier_state();
-
-				if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
-					/* reset to default/normal value */
-					new_value = control->normal();
-				} else {
-					new_value = control->get_value() ? 0.0 : 1.0;
-				}
+				float new_value = control->get_value() ? 0.0 : 1.0;
 
 				/* get all controls that either have their
 				 * button down or are within a range of
@@ -897,10 +889,18 @@ Strip::handle_button (Button& button, ButtonState bs)
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("there are %1 buttons down for control type %2, new value = %3\n",
 									    controls.size(), control->parameter().type(), new_value));
 
-				/* apply change */
+				/* apply change, with potential modifier semantics */
+
+				Controllable::GroupControlDisposition gcd;
+
+				if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
+					gcd = Controllable::NoGroup;
+				} else {
+					gcd = Controllable::UseGroup;
+				}
 
 				for (MackieControlProtocol::ControlList::iterator c = controls.begin(); c != controls.end(); ++c) {
-					(*c)->set_value (new_value, Controllable::NoGroup);
+					(*c)->set_value (new_value, gcd);
 				}
 
 			} else {

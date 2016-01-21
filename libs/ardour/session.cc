@@ -3281,10 +3281,10 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		boost::weak_ptr<Route> wpr (*x);
 		boost::shared_ptr<Route> r (*x);
 
-		r->listen_changed.connect_same_thread (*this, boost::bind (&Session::route_listen_changed, this, _2, wpr));
-		r->solo_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, _3, wpr));
-		r->solo_isolated_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_isolated_changed, this, _1, wpr));
-		r->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this, _1));
+		r->listen_changed.connect_same_thread (*this, boost::bind (&Session::route_listen_changed, this, _1, wpr));
+		r->solo_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, _2, wpr));
+		r->solo_isolated_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_isolated_changed, this, wpr));
+		r->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this));
 		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
 		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
 
@@ -3450,7 +3450,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 				continue;
 			}
 
-			(*iter)->set_solo (false, this);
+			(*iter)->set_solo (false, Controllable::NoGroup);
 
 			rs->remove (*iter);
 
@@ -3558,13 +3558,13 @@ Session::remove_route (boost::shared_ptr<Route> route)
 }
 
 void
-Session::route_mute_changed (void* /*src*/)
+Session::route_mute_changed ()
 {
 	set_dirty ();
 }
 
 void
-Session::route_listen_changed (bool group_override, boost::weak_ptr<Route> wpr)
+Session::route_listen_changed (Controllable::GroupControlDisposition group_override, boost::weak_ptr<Route> wpr)
 {
 	boost::shared_ptr<Route> route = wpr.lock();
 	if (!route) {
@@ -3575,18 +3575,32 @@ Session::route_listen_changed (bool group_override, boost::weak_ptr<Route> wpr)
 	if (route->listening_via_monitor ()) {
 
 		if (Config->get_exclusive_solo()) {
-			/* new listen: disable all other listen, except solo-grouped channels */
+
 			RouteGroup* rg = route->route_group ();
-			bool leave_group_alone = (rg && rg->is_active() && rg->is_solo());
-			if (group_override && rg) {
-				leave_group_alone = !leave_group_alone;
-			}
+			const bool group_already_accounted_for = route->use_group (group_override, &RouteGroup::is_solo);
+
 			boost::shared_ptr<RouteList> r = routes.reader ();
+
 			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-				if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() || (leave_group_alone && ((*i)->route_group() == rg))) {
+				if ((*i) == route) {
+					/* already changed */
 					continue;
 				}
-				(*i)->set_listen (false, this, group_override);
+
+				if ((*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+					/* route does not get solo propagated to it */
+					continue;
+				}
+
+				if ((group_already_accounted_for && (*i)->route_group() && (*i)->route_group() == rg)) {
+					/* this route is a part of the same solo group as the route
+					 * that was changed. Changing that route did change or will
+					 * change all group members appropriately, so we can ignore it
+					 * here
+					 */
+					continue;
+				}
+				(*i)->set_listen (false, Controllable::NoGroup);
 			}
 		}
 
@@ -3600,7 +3614,7 @@ Session::route_listen_changed (bool group_override, boost::weak_ptr<Route> wpr)
 	update_route_solo_state ();
 }
 void
-Session::route_solo_isolated_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
+Session::route_solo_isolated_changed (boost::weak_ptr<Route> wpr)
 {
 	boost::shared_ptr<Route> route = wpr.lock ();
 
@@ -3630,7 +3644,7 @@ Session::route_solo_isolated_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 }
 
 void
-Session::route_solo_changed (bool self_solo_change, bool group_override,  boost::weak_ptr<Route> wpr)
+Session::route_solo_changed (bool self_solo_change, Controllable::GroupControlDisposition group_override,  boost::weak_ptr<Route> wpr)
 {
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("route solo change, self = %1\n", self_solo_change));
 
@@ -3651,21 +3665,51 @@ Session::route_solo_changed (bool self_solo_change, bool group_override,  boost:
 		delta = -1;
 	}
 
+	/* the route may be a member of a group that has shared-solo
+	 * semantics. If so, then all members of that group should follow the
+	 * solo of the changed route. But ... this is optional, controlled by a
+	 * Controllable::GroupControlDisposition.
+	 *
+	 * The first argument to the signal that this method is connected to is the
+	 * GroupControlDisposition value that was used to change solo.
+	 *
+	 * If the solo change was done with group semantics (either WholeGroup
+	 * (force the entire group to change even if the group shared solo is
+	 * disabled) or UseGroup (use the group, which may or may not have the
+	 * shared solo property enabled)) then as we propagate the change to
+	 * the entire session we should IGNORE THE GROUP that the changed route
+	 * belongs to.
+	 */
+
 	RouteGroup* rg = route->route_group ();
-	bool leave_group_alone = (rg && rg->is_active() && rg->is_solo());
-	if (group_override && rg) {
-		leave_group_alone = !leave_group_alone;
-	}
+	const bool group_already_accounted_for = route->use_group (group_override, &RouteGroup::is_solo);
+
 	if (delta == 1 && Config->get_exclusive_solo()) {
 
 		/* new solo: disable all other solos, but not the group if its solo-enabled */
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if ((*i) == route || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() ||
-			    (leave_group_alone && ((*i)->route_group() == rg))) {
+
+			if ((*i) == route) {
+				/* already changed */
 				continue;
 			}
-			(*i)->set_solo (false, this, group_override);
+
+			if ((*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+				/* route does not get solo propagated to it */
+				continue;
+			}
+
+			if ((group_already_accounted_for && (*i)->route_group() && (*i)->route_group() == rg)) {
+				/* this route is a part of the same solo group as the route
+				 * that was changed. Changing that route did change or will
+				 * change all group members appropriately, so we can ignore it
+				 * here
+				 */
+				continue;
+			}
+
+			(*i)->set_solo (false, group_override);
 		}
 	}
 
@@ -3679,8 +3723,22 @@ Session::route_solo_changed (bool self_solo_change, bool group_override,  boost:
 		bool via_sends_only;
 		bool in_signal_flow;
 
-		if ((*i) == route || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() ||
-		    (leave_group_alone && ((*i)->route_group() == rg))) {
+		if ((*i) == route) {
+			/* already changed */
+			continue;
+		}
+
+		if ((*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+			/* route does not get solo propagated to it */
+			continue;
+		}
+
+		if ((group_already_accounted_for && (*i)->route_group() && (*i)->route_group() == rg)) {
+			/* this route is a part of the same solo group as the route
+			 * that was changed. Changing that route did change or will
+			 * change all group members appropriately, so we can ignore it
+			 * here
+			 */
 			continue;
 		}
 
@@ -3746,7 +3804,7 @@ Session::route_solo_changed (bool self_solo_change, bool group_override,  boost:
 	for (RouteList::iterator i = uninvolved.begin(); i != uninvolved.end(); ++i) {
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("mute change for %1, which neither feeds or is fed by %2\n", (*i)->name(), route->name()));
 		(*i)->act_on_mute ();
-		(*i)->mute_changed (this);
+		(*i)->mute_changed ();
 	}
 
 	SoloChanged (); /* EMIT SIGNAL */
@@ -3777,7 +3835,7 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 				listeners++;
 				something_listening = true;
 			} else {
-				(*i)->set_listen (false, this);
+				(*i)->set_listen (false, Controllable::NoGroup);
 			}
 		}
 

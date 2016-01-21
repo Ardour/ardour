@@ -406,7 +406,7 @@ Route::inc_gain (gain_t factor)
 void
 Route::set_gain (gain_t val, Controllable::GroupControlDisposition group_override)
 {
-	if (_route_group && (group_override != Controllable::NoGroup) && _route_group->is_active() && _route_group->is_gain()) {
+	if (use_group (group_override, &RouteGroup::is_gain)) {
 
 		if (_route_group->is_relative()) {
 
@@ -459,7 +459,7 @@ Route::set_gain (gain_t val, Controllable::GroupControlDisposition group_overrid
 }
 
 void
-Route::set_trim (gain_t val, void * /* src */)
+Route::set_trim (gain_t val, Controllable::GroupControlDisposition /* group override */)
 {
 	// TODO route group, see set_gain()
 	_trim_control->route_set_value (val);
@@ -784,19 +784,14 @@ Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t
 }
 
 void
-Route::set_listen (bool yn, void* src, bool group_override)
+Route::set_listen (bool yn, Controllable::GroupControlDisposition group_override)
 {
 	if (_solo_safe) {
 		return;
 	}
 
-	bool group_active = _route_group && _route_group->is_active() && _route_group->is_solo();
-	if (group_override && _route_group) {
-		group_active = !group_active;
-	}
-
-	if (_route_group && src != _route_group && group_active) {
-		_route_group->foreach_route (boost::bind (&Route::set_listen, _1, yn, _route_group, group_override));
+	if (use_group (group_override, &RouteGroup::is_solo)) {
+		_route_group->foreach_route (boost::bind (&Route::set_listen, _1, yn, Controllable::NoGroup));
 		return;
 	}
 
@@ -811,7 +806,7 @@ Route::set_listen (bool yn, void* src, bool group_override)
 			}
 			_mute_master->set_soloed_by_others (false);
 
-			listen_changed (src, group_override); /* EMIT SIGNAL */
+			listen_changed (group_override); /* EMIT SIGNAL */
 		}
 	}
 }
@@ -827,11 +822,11 @@ Route::listening_via_monitor () const
 }
 
 void
-Route::set_solo_safe (bool yn, void *src)
+Route::set_solo_safe (bool yn, Controllable::GroupControlDisposition /* group_override */)
 {
 	if (_solo_safe != yn) {
 		_solo_safe = yn;
-		solo_safe_changed (src);
+		solo_safe_changed ();
 	}
 }
 
@@ -868,17 +863,17 @@ Route::clear_all_solo_state ()
 
 	{
 		PBD::Unwinder<bool> uw (_solo_safe, false);
-		set_solo (false, this);
+		set_solo (false, Controllable::NoGroup);
 	}
 
 	if (emit_changed) {
 		set_mute_master_solo ();
-		solo_changed (false, this, false); /* EMIT SIGNAL */
+		solo_changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
 	}
 }
 
 void
-Route::set_solo (bool yn, void *src, bool group_override)
+Route::set_solo (bool yn, Controllable::GroupControlDisposition group_override)
 {
 	if (_solo_safe) {
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 ignore solo change due to solo-safe\n", name()));
@@ -890,21 +885,17 @@ Route::set_solo (bool yn, void *src, bool group_override)
 		return;
 	}
 
-	bool group_active = _route_group && _route_group->is_active() && _route_group->is_solo();
-	if (group_override && _route_group) {
-		group_active = !group_active;
-	}
-	if (_route_group && src != _route_group && group_active) {
-		_route_group->foreach_route (boost::bind (&Route::set_solo, _1, yn, _route_group, group_override));
+	if (use_group (group_override, &RouteGroup::is_solo)) {
+		_route_group->foreach_route (boost::bind (&Route::set_solo, _1, yn, Controllable::NoGroup));
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: set solo => %2, src: %3 grp ? %4 currently self-soloed ? %5\n",
-						  name(), yn, src, (src == _route_group), self_soloed()));
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: set solo => %2, grp ? %3 currently self-soloed ? %4\n",
+	                                          name(), yn, enum_2_string(group_override), self_soloed()));
 
 	if (self_soloed() != yn) {
 		set_self_solo (yn);
-		solo_changed (true, src, group_override); /* EMIT SIGNAL */
+		solo_changed (true, group_override); /* EMIT SIGNAL */
 		_solo_control->Changed (); /* EMIT SIGNAL */
 	}
 
@@ -915,7 +906,7 @@ Route::set_solo (bool yn, void *src, bool group_override)
 	*/
 
 	if (yn && Profile->get_trx()) {
-		set_mute (false, src);
+		set_mute (false, Controllable::UseGroup);
 	}
 }
 
@@ -982,7 +973,7 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 	}
 
 	set_mute_master_solo ();
-	solo_changed (false, this, false); /* EMIT SIGNAL */
+	solo_changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
 }
 
 void
@@ -1004,7 +995,7 @@ Route::mod_solo_by_others_downstream (int32_t delta)
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 SbD delta %2 = %3\n", name(), delta, _soloed_by_others_downstream));
 
 	set_mute_master_solo ();
-	solo_changed (false, this, false); /* EMIT SIGNAL */
+	solo_changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
 }
 
 void
@@ -1015,7 +1006,7 @@ Route::set_mute_master_solo ()
 }
 
 void
-Route::mod_solo_isolated_by_upstream (bool yn, void* src)
+Route::mod_solo_isolated_by_upstream (bool yn)
 {
 	bool old = solo_isolated ();
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod_solo_isolated_by_upstream cur: %2 d: %3\n",
@@ -1034,19 +1025,19 @@ Route::mod_solo_isolated_by_upstream (bool yn, void* src)
 	if (solo_isolated() != old) {
 		/* solo isolated status changed */
 		_mute_master->set_solo_ignore (solo_isolated());
-		solo_isolated_changed (src); /* EMIT SIGNAL */
+		solo_isolated_changed (); /* EMIT SIGNAL */
 	}
 }
 
 void
-Route::set_solo_isolated (bool yn, void *src)
+Route::set_solo_isolated (bool yn, Controllable::GroupControlDisposition group_override)
 {
 	if (is_master() || is_monitor() || is_auditioner()) {
 		return;
 	}
 
-	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_solo()) {
-		_route_group->foreach_route (boost::bind (&Route::set_solo_isolated, _1, yn, _route_group));
+	if (use_group (group_override, &RouteGroup::is_solo)) {
+		_route_group->foreach_route (boost::bind (&Route::set_solo_isolated, _1, yn, Controllable::NoGroup));
 		return;
 	}
 
@@ -1084,13 +1075,13 @@ Route::set_solo_isolated (bool yn, void *src)
 		bool does_feed = feeds (*i, &sends_only);
 
 		if (does_feed && !sends_only) {
-			(*i)->mod_solo_isolated_by_upstream (yn, src);
+			(*i)->mod_solo_isolated_by_upstream (yn);
 		}
 	}
 
 	/* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
 
-	solo_isolated_changed (src); /* EMIT SIGNAL */
+	solo_isolated_changed (); /* EMIT SIGNAL */
 }
 
 bool
@@ -1106,16 +1097,16 @@ Route::set_mute_points (MuteMaster::MutePoint mp)
 	mute_points_changed (); /* EMIT SIGNAL */
 
 	if (_mute_master->muted_by_self()) {
-		mute_changed (this); /* EMIT SIGNAL */
+		mute_changed (); /* EMIT SIGNAL */
 		_mute_control->Changed (); /* EMIT SIGNAL */
 	}
 }
 
 void
-Route::set_mute (bool yn, void *src)
+Route::set_mute (bool yn, Controllable::GroupControlDisposition group_override)
 {
-	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_mute()) {
-		_route_group->foreach_route (boost::bind (&Route::set_mute, _1, yn, _route_group));
+	if (use_group (group_override, &RouteGroup::is_mute)) {
+		_route_group->foreach_route (boost::bind (&Route::set_mute, _1, yn, Controllable::NoGroup));
 		return;
 	}
 
@@ -1126,7 +1117,7 @@ Route::set_mute (bool yn, void *src)
 		*/
 		act_on_mute ();
 		/* tell everyone else */
-		mute_changed (src); /* EMIT SIGNAL */
+		mute_changed (); /* EMIT SIGNAL */
 		_mute_control->Changed (); /* EMIT SIGNAL */
 	}
 }
@@ -2514,11 +2505,11 @@ Route::set_state (const XMLNode& node, int version)
 	}
 
 	if ((prop = node.property ("solo-isolated")) != 0) {
-		set_solo_isolated (string_is_affirmative (prop->value()), this);
+		set_solo_isolated (string_is_affirmative (prop->value()), Controllable::NoGroup);
 	}
 
 	if ((prop = node.property ("solo-safe")) != 0) {
-		set_solo_safe (string_is_affirmative (prop->value()), this);
+		set_solo_safe (string_is_affirmative (prop->value()), Controllable::NoGroup);
 	}
 
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
@@ -2673,7 +2664,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 
 		/* XXX force reset of solo status */
 
-		set_solo (yn, this);
+		set_solo (yn);
 	}
 
 	if ((prop = node.property (X_("muted"))) != 0) {
@@ -3240,7 +3231,7 @@ void
 Route::set_comment (string cmt, void *src)
 {
 	_comment = cmt;
-	comment_changed (src);
+	comment_changed ();
 	_session.set_dirty ();
 }
 
@@ -3414,7 +3405,7 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 		if (_solo_isolated_by_upstream) {
 			// solo-isolate currently only propagates downstream
 			if (idelta < 0) {
-				mod_solo_isolated_by_upstream (false, this);
+				mod_solo_isolated_by_upstream (false);
 			}
 			// TODO think: mod_solo_isolated_by_upstream() does not take delta arg,
 			// but idelta can't be smaller than -1, can it?
@@ -3434,7 +3425,7 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 			}
 
 			if (idelta < 0 && does_feed && !sends_only) {
-				(*i)->mod_solo_isolated_by_upstream (false, this);
+				(*i)->mod_solo_isolated_by_upstream (false);
 			}
 		}
 	}
@@ -3901,13 +3892,13 @@ Route::set_control (AutomationType type, double val, PBD::Controllable::GroupCon
 	switch (type) {
 	case GainAutomation:
 		/* route must mediate group control */
-		set_gain (val, group_override); 
+		set_gain (val, group_override);
 		return;
 		break;
 
 	case TrimAutomation:
 		/* route must mediate group control */
-		set_trim (val, this); /* any "src" argument will do other than our route group */
+		set_trim (val, group_override); /* any "src" argument will do other than our route group */
 		return;
 		break;
 
@@ -3915,7 +3906,7 @@ Route::set_control (AutomationType type, double val, PBD::Controllable::GroupCon
 		/* session must mediate group control */
 		rl.reset (new RouteList);
 		rl->push_back (shared_from_this());
-		_session.set_record_enabled (rl, val >= 0.5 ? true : false);
+		_session.set_record_enabled (rl, val >= 0.5 ? true : false, Session::rt_cleanup, group_override);
 		return;
 		break;
 
@@ -3924,7 +3915,7 @@ Route::set_control (AutomationType type, double val, PBD::Controllable::GroupCon
 		rl.reset (new RouteList);
 		rl->push_back (shared_from_this());
 		if (Config->get_solo_control_is_listen_control()) {
-			_session.set_listen (rl, val >= 0.5 ? true : false);
+			_session.set_listen (rl, val >= 0.5 ? true : false, Session::rt_cleanup, group_override);
 		} else {
 			_session.set_solo (rl, val >= 0.5 ? true : false);
 		}
@@ -3936,7 +3927,7 @@ Route::set_control (AutomationType type, double val, PBD::Controllable::GroupCon
 		/* session must mediate group control */
 		rl.reset (new RouteList);
 		rl->push_back (shared_from_this());
-		_session.set_mute (rl, !muted());
+		_session.set_mute (rl, !muted(), Session::rt_cleanup, group_override);
 		return;
 		break;
 
@@ -3976,15 +3967,15 @@ Route::SoloControllable::SoloControllable (std::string name, boost::shared_ptr<R
 }
 
 void
-Route::SoloControllable::set_value (double val, PBD::Controllable::GroupControlDisposition /* group_override */)
+Route::SoloControllable::set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	if (writable()) {
-		set_value_unchecked (val);
+		_set_value (val, group_override);
 	}
 }
 
 void
-Route::SoloControllable::set_value_unchecked (double val)
+Route::SoloControllable::_set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	const bool bval = ((val >= 0.5) ? true : false);
 
@@ -3998,10 +3989,18 @@ Route::SoloControllable::set_value_unchecked (double val)
 	rl->push_back (r);
 
 	if (Config->get_solo_control_is_listen_control()) {
-		_session.set_listen (rl, bval);
+		_session.set_listen (rl, bval, Session::rt_cleanup, group_override);
 	} else {
-		_session.set_solo (rl, bval);
+		_session.set_solo (rl, bval, Session::rt_cleanup, group_override);
 	}
+}
+
+void
+Route::SoloControllable::set_value_unchecked (double val)
+{
+	/* Used only by automation playback */
+
+	_set_value (val, Controllable::NoGroup);
 }
 
 double
@@ -4053,15 +4052,22 @@ Route::MuteControllable::set_superficial_value(bool muted)
 }
 
 void
-Route::MuteControllable::set_value (double val, PBD::Controllable::GroupControlDisposition /* group_override */)
+Route::MuteControllable::set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	if (writable()) {
-		set_value_unchecked (val);
+		_set_value (val, group_override);
 	}
 }
 
 void
 Route::MuteControllable::set_value_unchecked (double val)
+{
+	/* used only automation playback */
+	_set_value (val, Controllable::NoGroup);
+}
+
+void
+Route::MuteControllable::_set_value (double val, Controllable::GroupControlDisposition group_override)
 {
 	const bool bval = ((val >= 0.5) ? true : false);
 
@@ -4074,12 +4080,12 @@ Route::MuteControllable::set_value_unchecked (double val)
 		// Set superficial/automation value to drive controller (and possibly record)
 		set_superficial_value (bval);
 		// Playing back automation, set route mute directly
-		r->set_mute (bval, this);
+		r->set_mute (bval, Controllable::NoGroup);
 	} else {
 		// Set from user, queue mute event
 		boost::shared_ptr<RouteList> rl (new RouteList);
 		rl->push_back (r);
-		_session.set_mute (rl, bval, Session::rt_cleanup);
+		_session.set_mute (rl, bval, Session::rt_cleanup, group_override);
 	}
 }
 

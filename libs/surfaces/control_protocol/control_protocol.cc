@@ -199,7 +199,7 @@ ControlProtocol::route_set_rec_enable (uint32_t table_index, bool yn)
 	boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(r);
 
 	if (at) {
-		at->set_record_enabled (yn, this);
+		at->set_record_enabled (yn, Controllable::NoGroup);
 	}
 }
 
@@ -312,7 +312,7 @@ ControlProtocol::route_set_muted (uint32_t table_index, bool yn)
 	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r != 0) {
-		r->set_mute (yn, this);
+		r->set_mute (yn, Controllable::UseGroup);
 	}
 }
 
@@ -343,7 +343,7 @@ ControlProtocol::route_set_soloed (uint32_t table_index, bool yn)
 	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r != 0) {
-		r->set_solo (yn, this);
+		r->set_solo (yn, Controllable::UseGroup);
 	}
 }
 

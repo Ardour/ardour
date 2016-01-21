@@ -33,7 +33,8 @@ namespace ARDOUR {
 
 class Session;
 
-struct LIBARDOUR_API GainControl : public AutomationControl {
+class LIBARDOUR_API GainControl : public AutomationControl {
+  public:
 	GainControl (Session& session, const Evoral::Parameter &param,
 	             boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>());
 
@@ -48,6 +49,8 @@ struct LIBARDOUR_API GainControl : public AutomationControl {
 
 	double lower_db;
 	double range_db;
+  private:
+	void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 };
 
 } /* namespace */

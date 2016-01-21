@@ -50,8 +50,8 @@ public:
 
 	boost::shared_ptr<Diskstream> create_diskstream ();
 	void set_diskstream (boost::shared_ptr<Diskstream>);
-	void set_record_enabled (bool yn, void *src);
-	void set_record_safe (bool yn, void *src);
+	void set_record_enabled (bool yn, PBD::Controllable::GroupControlDisposition);
+	void set_record_safe (bool yn, PBD::Controllable::GroupControlDisposition);
 
 	DataType data_type () const {
 		return DataType::MIDI;
@@ -94,6 +94,9 @@ public:
 		bool writable() const { return true; }
 
 		MidiTrack* _route;
+
+	private:
+		void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	};
 
 	virtual void set_parameter_automation_state (Evoral::Parameter param, AutoState);

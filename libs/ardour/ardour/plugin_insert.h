@@ -103,6 +103,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	private:
 		PluginInsert* _plugin;
+		void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	};
 
 	/** A control that manipulates a plugin property (message). */

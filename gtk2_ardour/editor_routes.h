@@ -86,7 +86,7 @@ private:
 	bool idle_update_mute_rec_solo_etc ();
 	void update_rec_display ();
 	void update_mute_display ();
-	void update_solo_display (bool);
+	void update_solo_display ();
 	void update_solo_isolate_display ();
 	void update_solo_safe_display ();
 	void update_input_active_display ();

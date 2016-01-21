@@ -2247,10 +2247,10 @@ ARDOUR_UI::toggle_record_enable (uint32_t rid)
 
 	if ((r = _session->route_by_remote_id (rid)) != 0) {
 
-		Track* t;
+		boost::shared_ptr<Track> t;
 
-		if ((t = dynamic_cast<Track*>(r.get())) != 0) {
-			t->set_record_enabled (!t->record_enabled(), this);
+		if ((t = boost::dynamic_pointer_cast<Track>(r)) != 0) {
+			t->set_record_enabled (!t->record_enabled(), Controllable::UseGroup);
 		}
 	}
 }

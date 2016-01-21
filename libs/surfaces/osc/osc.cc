@@ -1047,7 +1047,7 @@ OSC::route_mute (int rid, int yn)
 	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
 	if (r) {
-		r->set_mute (yn, this);
+		r->set_mute (yn, PBD::Controllable::NoGroup);
 	}
 
 	return 0;
@@ -1063,7 +1063,7 @@ OSC::route_solo (int rid, int yn)
 	if (r) {
 		boost::shared_ptr<RouteList> rl (new RouteList);
 		rl->push_back (r);
-		session->set_solo (rl, yn);
+		session->set_solo (rl, yn, Session::rt_cleanup, PBD::Controllable::NoGroup);
 	}
 
 	return 0;
@@ -1077,7 +1077,7 @@ OSC::route_recenable (int rid, int yn)
 	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
 	if (r) {
-		r->set_record_enabled (yn, this);
+		r->set_record_enabled (yn, PBD::Controllable::NoGroup);
 	}
 
 	return 0;
@@ -1112,7 +1112,7 @@ OSC::route_set_trim_abs (int rid, float level)
 	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
 	if (r) {
-		r->set_trim (level, this);
+		r->set_trim (level, PBD::Controllable::NoGroup);
 	}
 
 	return 0;
