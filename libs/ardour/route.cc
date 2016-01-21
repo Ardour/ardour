@@ -3898,7 +3898,7 @@ Route::set_control (AutomationType type, double val, PBD::Controllable::GroupCon
 
 	case TrimAutomation:
 		/* route must mediate group control */
-		set_trim (val, group_override); /* any "src" argument will do other than our route group */
+		set_trim (val, group_override);
 		return;
 		break;
 
