@@ -82,7 +82,7 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 	 */
 
 	enum GroupControlDisposition {
-		WholeGroup,  /* set all controls in the same "group" as this one */
+		InverseGroup,  /* set all controls in the same "group" as this one */
 		NoGroup,     /* set only this control */
 		UseGroup     /* use group settings to decide which group controls are altered */
 	};

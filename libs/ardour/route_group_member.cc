@@ -40,7 +40,8 @@ bool
 RouteGroupMember::use_group (PBD::Controllable::GroupControlDisposition gcd, bool (RouteGroup::*predicate)(void) const) const
 {
 	return (gcd != PBD::Controllable::NoGroup) &&
-		(_route_group &&
-		 ((gcd == PBD::Controllable::WholeGroup) ||
-		  (_route_group->is_active() && (_route_group->*predicate)())));
+		_route_group &&
+		(_route_group->*predicate)() &&
+		(((_route_group->is_active()) && (gcd != PBD::Controllable::InverseGroup)) ||
+		 ((!_route_group->is_active()) && (gcd == PBD::Controllable::InverseGroup)));
 }

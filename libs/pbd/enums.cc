@@ -41,7 +41,7 @@ setup_libpbd_enums ()
 	REGISTER_CLASS_ENUM (Controllable, GainLike);
 	REGISTER (controllable_flags);
 
-	REGISTER_CLASS_ENUM (Controllable, WholeGroup);
+	REGISTER_CLASS_ENUM (Controllable, InverseGroup);
 	REGISTER_CLASS_ENUM (Controllable, UseGroup);
 	REGISTER_CLASS_ENUM (Controllable, NoGroup);
 	REGISTER (controllable_group_disposition);
