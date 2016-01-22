@@ -560,6 +560,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gain_control.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\globals.cc"
 				>
 			</File>
@@ -1647,6 +1651,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\filter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\gain_control.h"
 				>
 			</File>
 			<File
