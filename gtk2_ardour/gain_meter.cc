@@ -186,7 +186,7 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 			     boost::shared_ptr<PeakMeter> pm,
 			     boost::shared_ptr<Amp> amp)
 {
- 	connections.clear ();
+	connections.clear ();
 	model_connections.drop_connections ();
 
 	if (!pm && !amp) {
@@ -202,7 +202,7 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 	_amp = amp;
 	_route = r;
 
- 	level_meter->set_meter (pm.get());
+	level_meter->set_meter (pm.get());
 	gain_slider->set_controllable (amp->gain_control());
 
 	if (amp) {
