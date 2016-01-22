@@ -848,9 +848,9 @@ GainMeterBase::gain_automation_style_changed ()
 void
 GainMeterBase::gain_automation_state_changed ()
 {
-	ENSURE_GUI_THREAD (*this, &GainMeterBase::gain_automation_state_changed)
+	ENSURE_GUI_THREAD (*this, &GainMeterBase::gain_automation_state_changed);
 
-	bool x;
+	cerr << "GMB:autostate change to " << _amp->gain_control()->alist()->automation_state() << endl;
 
 	switch (_width) {
 	case Wide:
@@ -861,22 +861,24 @@ GainMeterBase::gain_automation_state_changed ()
 		break;
 	}
 
-	x = (_amp->gain_control()->alist()->automation_state() != ARDOUR::Off);
+	const bool automation_watch_required = (_amp->gain_control()->alist()->automation_state() != ARDOUR::Off);
 
-	if (gain_automation_state_button.get_active() != x) {
+	if (gain_automation_state_button.get_active() != automation_watch_required) {
 		ignore_toggle = true;
-		gain_automation_state_button.set_active (x);
+		gain_automation_state_button.set_active (automation_watch_required);
 		ignore_toggle = false;
 	}
 
 	update_gain_sensitive ();
 
-	/* start watching automation so that things move */
-
 	gain_watching.disconnect();
 
-	if (x) {
+	if (automation_watch_required) {
+		/* start watching automation so that things move */
 		gain_watching = Timers::rapid_connect (sigc::mem_fun (*this, &GainMeterBase::effective_gain_display));
+	} else {
+		/* update once to get the correct value shown as we re-enter off/manual mode */
+		effective_gain_display();
 	}
 }
 
