@@ -36,6 +36,15 @@ GainControl::GainControl (Session& session, const Evoral::Parameter &param, boos
 	range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
 }
 
+double
+GainControl::get_value() const
+{
+	if (!_master) {
+		return AutomationControl::get_value();
+	}
+	return AutomationControl::get_value() * _master->get_value();
+}
+
 void
 GainControl::set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
@@ -95,5 +104,31 @@ GainControl::get_user_string () const
 {
 	char theBuf[32]; sprintf( theBuf, _("%3.1f dB"), accurate_coefficient_to_dB (get_value()));
 	return std::string(theBuf);
+}
+
+void
+GainControl::set_master (boost::shared_ptr<GainControl> m)
+{
+	double old_master_val;
+
+	if (_master) {
+		old_master_val = _master->get_value();
+	} else {
+		old_master_val = 1.0;
+	}
+
+	_master = m;
+
+	double new_master_val;
+
+	if (_master) {
+		new_master_val = _master->get_value();
+	} else {
+		new_master_val = 1.0;
+	}
+
+	if (old_master_val != new_master_val) {
+		Changed(); /* EMIT SIGNAL */
+	}
 }
 
