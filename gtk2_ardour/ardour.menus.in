@@ -558,6 +558,12 @@
         <menuitem action='attach-preferences'/>
         <menuitem action='detach-preferences'/>
       </menu>
+      <menu action='MastersMenu'>
+          <menuitem action='show-preferences'/>
+          <menuitem action='hide-preferences'/>
+          <menuitem action='attach-preferences'/>
+          <menuitem action='detach-preferences'/>
+      </menu>
       <menuitem action='toggle-meterbridge'/>
       <menuitem action='toggle-luawindow'/>
       <separator/>

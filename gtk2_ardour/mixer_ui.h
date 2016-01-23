@@ -146,12 +146,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	MixerGroupTabs* _group_tabs;
 
-	// for restoring window geometry.
-	int m_root_x, m_root_y, m_width, m_height;
-
-	void set_window_pos_and_size ();
-	void get_window_pos_and_size ();
-
 	bool on_scroll_event (GdkEventScroll*);
 
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
