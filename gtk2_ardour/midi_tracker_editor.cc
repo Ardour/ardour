@@ -226,77 +226,23 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 	build_beats_per_row_menu ();
 
 	register_actions ();
+
 	setup_tooltips ();
-
-	// setup_toolbar ();
-
-	// Tracker matrix
-	edit_column = -1;
-	editing_renderer = 0;
-	editing_editable = 0;
-
-	model = ListStore::create (columns);
-	view.set_model (model);
-
-	Gtk::TreeViewColumn viewcolumn_time (_("Time"), columns.time);
-	Gtk::CellRenderer* cellrenderer_time = viewcolumn_time.get_first_cell_renderer ();		
-	viewcolumn_time.add_attribute(cellrenderer_time->property_cell_background (), columns._color);
-	view.append_column (viewcolumn_time);
-	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++) {
-		stringstream ss_note;
-		stringstream ss_ch;
-		stringstream ss_vel;
-		stringstream ss_delay;
-		ss_note << "Note" << i;
-		ss_ch << "Ch" << i;
-		ss_vel << "Vel" << i;
-		ss_delay << "Delay" << i;
-
-		Gtk::TreeViewColumn viewcolumn_note (_(ss_note.str().c_str()), columns.note_name[i]);
-		Gtk::TreeViewColumn viewcolumn_channel (_(ss_ch.str().c_str()), columns.channel[i]);
-		Gtk::TreeViewColumn viewcolumn_velocity (_(ss_vel.str().c_str()), columns.velocity[i]);
-		Gtk::TreeViewColumn viewcolumn_delay (_(ss_delay.str().c_str()), columns.delay[i]);
-
-		Gtk::CellRenderer* cellrenderer_note = viewcolumn_note.get_first_cell_renderer ();		
-		Gtk::CellRenderer* cellrenderer_channel = viewcolumn_channel.get_first_cell_renderer ();		
-		Gtk::CellRenderer* cellrenderer_velocity = viewcolumn_velocity.get_first_cell_renderer ();		
-		Gtk::CellRenderer* cellrenderer_delay = viewcolumn_delay.get_first_cell_renderer ();		
-
-		viewcolumn_note.add_attribute(cellrenderer_note->property_cell_background (), columns._color);
-		viewcolumn_channel.add_attribute(cellrenderer_channel->property_cell_background (), columns._color);
-		viewcolumn_velocity.add_attribute(cellrenderer_velocity->property_cell_background (), columns._color);
-		viewcolumn_delay.add_attribute(cellrenderer_delay->property_cell_background (), columns._color);
-
-		view.append_column (viewcolumn_note);
-		view.append_column (viewcolumn_channel);
-		view.append_column (viewcolumn_velocity);
-		view.append_column (viewcolumn_delay);
-	}
-
-	view.set_headers_visible (true);
-	view.set_rules_hint (true);
-	view.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
-	view.get_selection()->set_mode (SELECTION_MULTIPLE);
-	
-	// Scroller
-	scroller.add (view);
-	scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
-
-	set_beats_per_row_to(SnapToBeatDiv4);
+	setup_toolbar ();
+	setup_matrix ();
+	setup_scroller ();
+	set_beats_per_row_to (SnapToBeatDiv4);
 
 	redisplay_model ();
 
 	midi_model->ContentsChanged.connect (content_connection, invalidator (*this),
 	                                     boost::bind (&MidiTrackerEditor::redisplay_model, this), gui_context());
 
-	view.show ();
-	scroller.show ();
-	beats_per_row_selector.show ();
 	vbox.show ();
 
 	vbox.set_spacing (6);
 	vbox.set_border_width (6);
-	vbox.pack_start (beats_per_row_selector, false, false);
+	vbox.pack_start (toolbar, false, false);
 	vbox.pack_start (scroller, true, true);
 
 	add (vbox);
@@ -422,12 +368,74 @@ MidiTrackerEditor::redisplay_model ()
 	view.set_model (model);
 }
 
-// void
-// MidiTrackerEditor::setup_toolbar ()
-// {
-// 	Glib::RefPtr<SizeGroup> mouse_mode_size_group = SizeGroup::create (SIZE_GROUP_VERTICAL);
-// 	mouse_mode_size_group->add_widget (beats_per_row_selector);
-// }
+void
+MidiTrackerEditor::setup_matrix ()
+{
+	edit_column = -1;
+	editing_renderer = 0;
+	editing_editable = 0;
+
+	model = ListStore::create (columns);
+	view.set_model (model);
+
+	Gtk::TreeViewColumn viewcolumn_time (_("Time"), columns.time);
+	Gtk::CellRenderer* cellrenderer_time = viewcolumn_time.get_first_cell_renderer ();		
+	viewcolumn_time.add_attribute(cellrenderer_time->property_cell_background (), columns._color);
+	view.append_column (viewcolumn_time);
+	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++) {
+		stringstream ss_note;
+		stringstream ss_ch;
+		stringstream ss_vel;
+		stringstream ss_delay;
+		ss_note << "Note" << i;
+		ss_ch << "Ch" << i;
+		ss_vel << "Vel" << i;
+		ss_delay << "Delay" << i;
+
+		Gtk::TreeViewColumn viewcolumn_note (_(ss_note.str().c_str()), columns.note_name[i]);
+		Gtk::TreeViewColumn viewcolumn_channel (_(ss_ch.str().c_str()), columns.channel[i]);
+		Gtk::TreeViewColumn viewcolumn_velocity (_(ss_vel.str().c_str()), columns.velocity[i]);
+		Gtk::TreeViewColumn viewcolumn_delay (_(ss_delay.str().c_str()), columns.delay[i]);
+
+		Gtk::CellRenderer* cellrenderer_note = viewcolumn_note.get_first_cell_renderer ();		
+		Gtk::CellRenderer* cellrenderer_channel = viewcolumn_channel.get_first_cell_renderer ();		
+		Gtk::CellRenderer* cellrenderer_velocity = viewcolumn_velocity.get_first_cell_renderer ();		
+		Gtk::CellRenderer* cellrenderer_delay = viewcolumn_delay.get_first_cell_renderer ();		
+
+		viewcolumn_note.add_attribute(cellrenderer_note->property_cell_background (), columns._color);
+		viewcolumn_channel.add_attribute(cellrenderer_channel->property_cell_background (), columns._color);
+		viewcolumn_velocity.add_attribute(cellrenderer_velocity->property_cell_background (), columns._color);
+		viewcolumn_delay.add_attribute(cellrenderer_delay->property_cell_background (), columns._color);
+
+		view.append_column (viewcolumn_note);
+		view.append_column (viewcolumn_channel);
+		view.append_column (viewcolumn_velocity);
+		view.append_column (viewcolumn_delay);
+	}
+
+	view.set_headers_visible (true);
+	view.set_rules_hint (true);
+	view.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
+	view.get_selection()->set_mode (SELECTION_MULTIPLE);
+
+	view.show ();
+}
+
+void
+MidiTrackerEditor::setup_toolbar ()
+{
+	beats_per_row_selector.show ();
+	toolbar.pack_start (beats_per_row_selector, false, false);
+	toolbar.show ();
+}
+
+void
+MidiTrackerEditor::setup_scroller ()
+{
+	scroller.add (view);
+	scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
+	scroller.show ();
+}
 
 void
 MidiTrackerEditor::build_beats_per_row_menu ()

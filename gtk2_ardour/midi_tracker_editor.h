@@ -184,6 +184,7 @@ class MidiTrackerEditor : public ArdourWindow
 	Gtk::CellRendererText*       editing_renderer;
 	Gtk::CellEditable*           editing_editable;
 	Gtk::Table                   buttons;
+	Gtk::HBox                    toolbar;
 	Gtk::VBox                    vbox;
 	ArdourDropdown               beats_per_row_selector;
 	std::vector<std::string>     beats_per_row_strings;
@@ -196,12 +197,12 @@ class MidiTrackerEditor : public ArdourWindow
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;
 
-	// void setup_toolbar ();
-
 	void build_beats_per_row_menu ();
 	void register_actions ();
 	void setup_tooltips ();
-
+	void setup_toolbar ();
+	void setup_matrix ();
+	void setup_scroller ();
 	void redisplay_model ();
 
 	// Beats per row corresponds to a SnapType. I could have user an integer
