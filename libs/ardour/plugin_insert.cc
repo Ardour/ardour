@@ -439,7 +439,9 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 	}
 
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->connect_and_run(bufs, in_map, out_map, nframes, offset);
+		if ((*i)->connect_and_run(bufs, in_map, out_map, nframes, offset)) {
+			deactivate ();
+		}
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			in_map.offset_to(*t, natural_input_streams().get(*t));
 			out_map.offset_to(*t, natural_output_streams().get(*t));
