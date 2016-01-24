@@ -37,6 +37,7 @@
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/rgb_macros.h"
 
 #include "ui_config.h"
 #include "midi_tracker_editor.h"
@@ -208,6 +209,11 @@ const std::string MidiTrackerEditor::undefined_str = "***";
 
 MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<MidiRegion> r, boost::shared_ptr<MidiTrack> tr)
 	: ArdourWindow (r->name())
+	, visible_blank (false)
+	, visible_note (true)
+	, visible_channel (true)
+	, visible_velocity (true)
+	, visible_delay (true)
 	, region (r)
 	, track (tr)
 	, midi_model (region->midi_source(0)->model())
@@ -279,6 +285,58 @@ MidiTrackerEditor::register_actions ()
 	ActionManager::register_radio_action (beats_per_row_actions, beats_per_row_choice_group, X_("beats-per-row-beat"), _("Beats Per Row to Beat"), (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::beats_per_row_chosen), Editing::SnapToBeat)));
 
 	ActionManager::add_action_group (beats_per_row_actions);
+}
+
+bool
+MidiTrackerEditor::visible_blank_press(GdkEventButton*)
+{
+	visible_blank = !visible_blank;
+	if (visible_blank)
+		visible_blank_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	else
+		visible_blank_button.set_active_state (Gtkmm2ext::Off);
+	return false;
+}
+
+bool
+MidiTrackerEditor::visible_note_press(GdkEventButton*)
+{
+	visible_note = !visible_note;
+	if (visible_note)
+		visible_note_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	else
+		visible_note_button.set_active_state (Gtkmm2ext::Off);
+	return false;
+}
+bool
+MidiTrackerEditor::visible_channel_press(GdkEventButton*)
+{
+	visible_channel = !visible_channel;
+	if (visible_channel)
+		visible_channel_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	else
+		visible_channel_button.set_active_state (Gtkmm2ext::Off);
+	return false;
+}
+bool
+MidiTrackerEditor::visible_velocity_press(GdkEventButton*)
+{
+	visible_velocity = !visible_velocity;
+	if (visible_velocity)
+		visible_velocity_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	else
+		visible_velocity_button.set_active_state (Gtkmm2ext::Off);
+	return false;
+}
+bool
+MidiTrackerEditor::visible_delay_press(GdkEventButton*)
+{
+	visible_delay = !visible_delay;
+	if (visible_delay)
+		visible_delay_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	else
+		visible_delay_button.set_active_state (Gtkmm2ext::Off);
+	return false;
 }
 
 void
@@ -424,8 +482,65 @@ MidiTrackerEditor::setup_matrix ()
 void
 MidiTrackerEditor::setup_toolbar ()
 {
+	uint32_t inactive_button_color = RGBA_TO_UINT(255, 255, 255, 64);
+	uint32_t active_button_color = RGBA_TO_UINT(168, 248, 48, 255);
+	toolbar.set_spacing (2);
+
+	// Add beats per row selection
 	beats_per_row_selector.show ();
 	toolbar.pack_start (beats_per_row_selector, false, false);
+
+	// Add visible blank button
+	visible_blank_button.set_name ("visible blank button");
+	visible_blank_button.set_text (S_("---|-"));
+	visible_blank_button.set_fixed_colors(active_button_color, inactive_button_color);
+	visible_blank_button.set_active_state (Gtkmm2ext::Off);
+	visible_blank_button.show ();
+	visible_blank_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MidiTrackerEditor::visible_blank_press), false);
+	toolbar.pack_start (visible_blank_button, false, false);
+
+	// Add visible note button
+	visible_note_button.set_name ("visible note button");
+	visible_note_button.set_text (S_("Note|N"));
+	visible_note_button.set_fixed_colors(active_button_color, inactive_button_color);
+	visible_note_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	visible_note_button.show ();
+	visible_note_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MidiTrackerEditor::visible_note_press), false);
+	toolbar.pack_start (visible_note_button, false, false);
+
+	// Add visible channel button
+	visible_channel_button.set_name ("visible channel button");
+	visible_channel_button.set_text (S_("Channel|C"));
+	visible_channel_button.set_fixed_colors(active_button_color, inactive_button_color);
+	visible_channel_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	visible_channel_button.show ();
+	visible_channel_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MidiTrackerEditor::visible_channel_press), false);
+	toolbar.pack_start (visible_channel_button, false, false);
+
+	// Add visible velocity button
+	visible_velocity_button.set_name ("visible velocity button");
+	visible_velocity_button.set_text (S_("Velocity|V"));
+	visible_velocity_button.set_fixed_colors(active_button_color, inactive_button_color);
+	visible_velocity_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	visible_velocity_button.show ();
+	visible_velocity_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MidiTrackerEditor::visible_velocity_press), false);
+	toolbar.pack_start (visible_velocity_button, false, false);
+
+	// Add visible delay button
+	visible_delay_button.set_name ("visible delay button");
+	visible_delay_button.set_text (S_("Delay|D"));
+	visible_delay_button.set_fixed_colors(active_button_color, inactive_button_color);
+	visible_delay_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	visible_delay_button.show ();
+	visible_delay_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MidiTrackerEditor::visible_delay_press), false);
+	toolbar.pack_start (visible_delay_button, false, false);
+
+	// Add automation button
+	automation_button.set_name ("automation button");
+	automation_button.set_text (S_("Automation|A"));
+	automation_button.show ();
+	toolbar.pack_start (automation_button, false, false);
+
 	toolbar.show ();
 }
 
@@ -468,6 +583,11 @@ void
 MidiTrackerEditor::setup_tooltips ()
 {
 	set_tooltip (beats_per_row_selector, _("Beats Per Row"));
+	set_tooltip (visible_blank_button, _("Toggle Blank Visibility"));
+	set_tooltip (visible_note_button, _("Toggle Note Visibility"));
+	set_tooltip (visible_channel_button, _("Toggle Channel Visibility"));
+	set_tooltip (visible_velocity_button, _("Toggle Velocity Visibility"));
+	set_tooltip (visible_delay_button, _("Toggle Delay Visibility"));
 }
 
 void MidiTrackerEditor::set_beats_per_row_to (SnapType st)

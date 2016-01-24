@@ -189,6 +189,17 @@ class MidiTrackerEditor : public ArdourWindow
 	ArdourDropdown               beats_per_row_selector;
 	std::vector<std::string>     beats_per_row_strings;
 	uint8_t                      rows_per_beat;
+	ArdourButton                 visible_blank_button;
+	ArdourButton                 visible_note_button;
+	ArdourButton                 visible_channel_button;
+	ArdourButton                 visible_velocity_button;
+	ArdourButton                 visible_delay_button;
+	bool                         visible_blank;
+	bool                         visible_note;
+	bool                         visible_channel;
+	bool                         visible_velocity;
+	bool                         visible_delay;
+	ArdourButton                 automation_button;
 
 	boost::shared_ptr<ARDOUR::MidiRegion> region;
 	boost::shared_ptr<ARDOUR::MidiTrack>  track;
@@ -199,6 +210,12 @@ class MidiTrackerEditor : public ArdourWindow
 
 	void build_beats_per_row_menu ();
 	void register_actions ();
+	bool visible_blank_press(GdkEventButton*);
+	bool visible_note_press(GdkEventButton*);
+	bool visible_channel_press(GdkEventButton*);
+	bool visible_velocity_press(GdkEventButton*);
+	bool visible_delay_press(GdkEventButton*);
+
 	void setup_tooltips ();
 	void setup_toolbar ();
 	void setup_matrix ();
