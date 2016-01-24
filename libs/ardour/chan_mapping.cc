@@ -45,15 +45,15 @@ ChanMapping::get(DataType t, uint32_t from, bool* valid)
 {
 	Mappings::iterator tm = _mappings.find(t);
 	if (tm == _mappings.end()) {
-		*valid = false;
+		if (valid) { *valid = false; }
 		return -1;
 	}
 	TypeMapping::iterator m = tm->second.find(from);
 	if (m == tm->second.end()) {
-		*valid = false;
+		if (valid) { *valid = false; }
 		return -1;
 	}
-	*valid = true;
+	if (valid) { *valid = true; }
 	return m->second;
 }
 

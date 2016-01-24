@@ -40,6 +40,7 @@ public:
 	ChanMapping(ARDOUR::ChanCount identity);
 
 	uint32_t get(DataType t, uint32_t from, bool* valid);
+	uint32_t get(DataType t, uint32_t from) { return get (t, from, NULL); }
 	void     set(DataType t, uint32_t from, uint32_t to);
 	void     offset_from(DataType t, int32_t delta);
 	void     offset_to(DataType t, int32_t delta);
