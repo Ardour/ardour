@@ -28,20 +28,20 @@
 #include "gain_meter.h"
 
 namespace ARDOUR {
-class GainControl;
+	class GainControl;
+	class VCA;
 }
-
 
 class VCAMasterStrip : public AxisView, public Gtk::VBox
 {
-	public:
-	VCAMasterStrip (ARDOUR::Session* /*, boost::shared_ptr<ARDOUR::GainControl> gc*/);
+      public:
+	VCAMasterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::VCA>);
 
-	std::string name() const { return "myname"; }
+	std::string name() const;
 	std::string state_id() const { return "VCAMasterStrip"; }
-	
-	
-	private:
+
+      private:
+	boost::shared_ptr<ARDOUR::VCA> vca;
 	ArdourButton name_button;
 	ArdourButton active_button;
 	GainMeter    gain_meter;
