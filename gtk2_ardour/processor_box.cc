@@ -30,6 +30,7 @@
 #include "pbd/convert.h"
 
 #include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
 
 #include <gtkmm/messagedialog.h>
 
@@ -45,6 +46,8 @@
 #include "ardour/audioengine.h"
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
+#include "ardour/luaproc.h"
+#include "ardour/luascripting.h"
 #include "ardour/meter.h"
 #include "ardour/panner_shell.h"
 #include "ardour/plugin_insert.h"
@@ -72,6 +75,7 @@
 #include "public_editor.h"
 #include "return_ui.h"
 #include "route_processor_selection.h"
+#include "script_selector.h"
 #include "send_ui.h"
 #include "timers.h"
 #include "tooltips.h"
@@ -136,7 +140,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	}
 	{
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
-		if (pi && pi->plugin()) {
+		if (pi && pi->plugin() && pi->plugin()->get_info()->type != ARDOUR::Lua) {
 			_plugin_preset_pointer = PluginPresetPtr (new PluginPreset (pi->plugin()->get_info()));
 		}
 	}
@@ -1738,6 +1742,48 @@ ProcessorBox::choose_plugin ()
 
 /** @return true if an error occurred, otherwise false */
 bool
+ProcessorBox::choose_lua ()
+{
+	LuaScriptInfoPtr spi;
+
+	ScriptSelector ss (_("Add Lua DSP Processor"), LuaScriptInfo::DSP);
+	switch (ss.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+			spi = ss.script();
+			break;
+		default:
+			return true;
+	}
+
+	PluginPtr p;
+	try {
+		LuaPluginInfoPtr lpi (new LuaPluginInfo(spi));
+		p = (lpi->load (*_session));
+	} catch (...) {
+		string msg = _(
+				"Failed to instantiate Lua DSP Processor,\n"
+				"probably because the script is invalid (no dsp function).");
+		MessageDialog am (msg);
+		am.run ();
+		return true;
+	}
+
+	boost::shared_ptr<Processor> processor (new PluginInsert (*_session, p));
+
+	Route::ProcessorStreams err_streams;
+	if (_route->add_processor_by_index (processor, _placement, &err_streams, Config->get_new_plugins_active ())) {
+		string msg = _(
+				"Failed to add Lua DSP Processor at the given position,\n"
+				"probably because the I/O configuration of the plugins\n"
+				"could not match the configuration of this track.");
+		MessageDialog am (msg);
+		am.run ();
+	}
+	return false;
+}
+
+/** @return true if an error occurred, otherwise false */
+bool
 ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 {
 	for (SelectedPlugins::const_iterator p = plugins.begin(); p != plugins.end(); ++p) {
@@ -2515,7 +2561,6 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				}
 
 				p.reset (pi);
-
 			} else {
 				/* XXX its a bit limiting to assume that everything else
 				   is a plugin.
@@ -2802,6 +2847,8 @@ ProcessorBox::register_actions ()
 	processor_box_actions.register_action (popup_act_grp, X_("newplugin"), _("New Plugin"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_plugin));
 
+	act = processor_box_actions.register_action (popup_act_grp, X_("newlua"), _("New Lua Proc"),
+			sigc::ptr_fun (ProcessorBox::rb_choose_lua));
 	act = processor_box_actions.register_action (popup_act_grp, X_("newinsert"), _("New Insert"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_insert));
 	ActionManager::engine_sensitive_actions.push_back (act);
@@ -2889,6 +2936,15 @@ ProcessorBox::rb_choose_plugin ()
 		return;
 	}
 	_current_processor_box->choose_plugin ();
+}
+
+void
+ProcessorBox::rb_choose_lua ()
+{
+	if (_current_processor_box == 0) {
+		return;
+	}
+	_current_processor_box->choose_lua ();
 }
 
 void
