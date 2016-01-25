@@ -2038,7 +2038,7 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	send->set_metering (true);
 	_current_delivery->DropReferences.connect (send_gone_connection, invalidator (*this), boost::bind (&MixerStrip::revert_to_default_display, this), gui_context());
 
-	gain_meter().set_controls (_route, send->meter(), send->amp());
+	gain_meter().set_controls (_route, send->meter(), send->amp(), send->gain_control());
 	gain_meter().setup_meters ();
 
 	uint32_t const in = _current_delivery->pans_required();
@@ -2077,7 +2077,7 @@ MixerStrip::revert_to_default_display ()
 
 	set_current_delivery (_route->main_outs ());
 
-	gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->amp());
+	gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->amp(), _route->gain_control());
 	gain_meter().setup_meters ();
 
 	panner_ui().set_panner (_route->main_outs()->panner_shell(), _route->main_outs()->panner());

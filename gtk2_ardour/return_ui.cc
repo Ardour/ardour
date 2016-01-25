@@ -38,7 +38,7 @@ ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session* s
 	:_return (r)
 	, _gpm (session, 250)
 {
- 	_gpm.set_controls (boost::shared_ptr<Route>(), r->meter(), r->amp());
+	_gpm.set_controls (boost::shared_ptr<Route>(), r->meter(), r->amp(), r->gain_control());
 
 	_hbox.pack_start (_gpm, true, true);
 	set_name (X_("ReturnUIFrame"));

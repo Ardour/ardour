@@ -832,7 +832,7 @@ SoundFileBrowser::add_gain_meter ()
 
 	boost::shared_ptr<Route> r = _session->the_auditioner ();
 
-	gm->set_controls (r, r->shared_peak_meter(), r->amp());
+	gm->set_controls (r, r->shared_peak_meter(), r->amp(), r->gain_control());
 	gm->set_fader_name (X_("GainFader"));
 
 	meter_packer.set_border_width (12);
