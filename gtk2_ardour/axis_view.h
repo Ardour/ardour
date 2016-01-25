@@ -55,9 +55,6 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 
 	sigc::signal<void> Hiding;
 
-	void set_old_order_key (uint32_t ok) { _old_order_key = ok; }
-	uint32_t old_order_key() const { return _old_order_key; }
-
 	virtual std::string state_id() const = 0;
 	/* for now, we always return properties in string form.
 	 */
@@ -102,7 +99,6 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 	Gtk::Label name_label;
 
 	mutable boost::unordered_map<std::string, std::string> property_hashtable;
-	uint32_t _old_order_key;
 }; /* class AxisView */
 
 #endif /* __ardour_gtk_axis_view_h__ */
