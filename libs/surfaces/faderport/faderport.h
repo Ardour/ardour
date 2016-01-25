@@ -146,6 +146,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		Stop = 5,
 		Play = 6,
 		RecEnable = 7,
+		Footswitch = 126,
 		FaderTouch = 127,
 	};
 

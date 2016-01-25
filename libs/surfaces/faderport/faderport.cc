@@ -136,6 +136,7 @@ FaderPort::FaderPort (Session& s)
 	buttons.insert (std::make_pair (Stop, Button (*this, _("Stop"), Stop, 2)));
 	buttons.insert (std::make_pair (Play, Button (*this, _("Play"), Play, 1)));
 	buttons.insert (std::make_pair (RecEnable, Button (*this, _("RecEnable"), RecEnable, 0)));
+	buttons.insert (std::make_pair (Footswitch, Button (*this, _("Footswitch"), Footswitch, -1)));
 	buttons.insert (std::make_pair (FaderTouch, Button (*this, _("Fader (touch)"), FaderTouch, -1)));
 
 	get_button (Shift).set_flash (true);
