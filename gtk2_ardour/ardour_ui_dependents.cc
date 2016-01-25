@@ -36,7 +36,6 @@
 #include "actions.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
-#include "master_faders.h"
 #include "meterbridge.h"
 #include "luawindow.h"
 #include "mixer_ui.h"
@@ -164,8 +163,7 @@ ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
 		tabbable = mixer;
 	} else if (w == GTK_WIDGET(rc_option_editor->contents().gobj())) {
 		tabbable = rc_option_editor;
-	} else if (w == GTK_WIDGET(masters->contents().gobj())) {
-		tabbable = masters;
+	} else {
 		return 0;
 	}
 
@@ -274,7 +272,6 @@ ARDOUR_UI::setup_windows ()
 
 	/* order of addition affects order seen in initial window display */
 
-	masters->add_to_notebook (_tabs, _("Masters"));
 	rc_option_editor->add_to_notebook (_tabs, _("Preferences"));
 	mixer->add_to_notebook (_tabs, _("Mixer"));
 	editor->add_to_notebook (_tabs, _("Editor"));
@@ -390,8 +387,6 @@ ARDOUR_UI::setup_windows ()
 			_tabs.set_current_page (_tabs.page_num (mixer->contents()));
 		} else if (rc_option_editor && current_tab == "preferences") {
 			_tabs.set_current_page (_tabs.page_num (rc_option_editor->contents()));
-		} else if (masters && current_tab == "masters") {
-			_tabs.set_current_page (_tabs.page_num (masters->contents()));
 		} else if (editor) {
 			_tabs.set_current_page (_tabs.page_num (editor->contents()));
 		}
