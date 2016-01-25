@@ -241,6 +241,7 @@ Mixer_UI::Mixer_UI ()
 	list_vpacker.pack_start (rhs_pane2, true, true);
 
 	global_hpacker.pack_start (scroller, true, true);
+	global_hpacker.pack_start (vca_packer, false, false);
 	global_hpacker.pack_start (out_packer, false, false);
 
 	list_hpane.pack1(list_vpacker, false, true);
@@ -280,6 +281,7 @@ Mixer_UI::Mixer_UI ()
 	rhs_pane1.show();
 	rhs_pane2.show();
 	strip_packer.show();
+	vca_packer.show();
 	out_packer.show();
 	list_hpane.show();
 	group_display.show();

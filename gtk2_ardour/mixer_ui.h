@@ -141,6 +141,7 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	Gtk::VPaned				rhs_pane1;
 	Gtk::VPaned				rhs_pane2;
 	Gtk::HBox				strip_packer;
+	Gtk::HBox				vca_packer;
 	Gtk::HBox				out_packer;
 	Gtk::HPaned				list_hpane;
 
