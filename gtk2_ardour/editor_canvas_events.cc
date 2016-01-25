@@ -1030,7 +1030,7 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 		case GDK_SCROLL_UP:
 			if (Keyboard::modifier_state_equals(event->scroll.state,
 			                                    Keyboard::ScrollHorizontalModifier)) {
-				scroll_left_half_page ();
+				scroll_left_step ();
 			} else if (UIConfiguration::instance().get_use_mouse_position_as_zoom_focus_on_scroll()) {
 				temporal_zoom_step_mouse_focus (false);
 			} else {
@@ -1042,7 +1042,7 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 		case GDK_SCROLL_DOWN:
 			if (Keyboard::modifier_state_equals(event->scroll.state,
 			                                    Keyboard::ScrollHorizontalModifier)) {
-				scroll_right_half_page ();
+				scroll_right_step ();
 			} else if (UIConfiguration::instance().get_use_mouse_position_as_zoom_focus_on_scroll()) {
 				temporal_zoom_step_mouse_focus (true);
 			} else {
