@@ -122,6 +122,7 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	mixer->set_session (s);
 	meterbridge->set_session (s);
 	luawindow->set_session (s);
+	masters->set_session (s);
 
 	/* its safe to do this now */
 
