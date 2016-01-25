@@ -495,9 +495,9 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	boost::shared_ptr<Panner> panner() const;  /* may return null */
 	boost::shared_ptr<PannerShell> panner_shell() const;
-	boost::shared_ptr<AutomationControl> gain_control() const;
+	boost::shared_ptr<GainControl> gain_control() const;
 	boost::shared_ptr<Pannable> pannable() const;
-	boost::shared_ptr<AutomationControl> trim_control() const;
+	boost::shared_ptr<GainControl> trim_control() const;
 
 	/**
 	   Return the first processor that accepts has at least one MIDI input

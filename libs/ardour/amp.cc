@@ -39,7 +39,7 @@ using namespace PBD;
 // used for low-pass filter denormal protection
 #define GAIN_COEFF_TINY (1e-10) // -200dB
 
-Amp::Amp (Session& s, const std::string& name, boost::shared_ptr<AutomationControl> gc, bool control_midi_also)
+Amp::Amp (Session& s, const std::string& name, boost::shared_ptr<GainControl> gc, bool control_midi_also)
 	: Processor(s, "Amp")
 	, _apply_gain(true)
 	, _apply_gain_automation(false)

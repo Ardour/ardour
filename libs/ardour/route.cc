@@ -410,7 +410,7 @@ Route::set_gain (gain_t val, Controllable::GroupControlDisposition group_overrid
 
 		if (_route_group->is_relative()) {
 
-			gain_t usable_gain = _amp->gain();
+			gain_t usable_gain = _gain_control->get_value();
 			if (usable_gain < 0.000001f) {
 				usable_gain = 0.000001f;
 			}
@@ -4448,13 +4448,13 @@ Route::panner_shell() const
 	return _main_outs->panner_shell();
 }
 
-boost::shared_ptr<AutomationControl>
+boost::shared_ptr<GainControl>
 Route::gain_control() const
 {
 	return _gain_control;
 }
 
-boost::shared_ptr<AutomationControl>
+boost::shared_ptr<GainControl>
 Route::trim_control() const
 {
 	return _trim_control;

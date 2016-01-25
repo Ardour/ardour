@@ -32,7 +32,7 @@ namespace ARDOUR {
 
 class Amp;
 class PeakMeter;
-
+class GainControl;
 
 class LIBARDOUR_API Return : public IOProcessor
 {
@@ -46,6 +46,7 @@ public:
 
 	boost::shared_ptr<Amp> amp() const { return _amp; }
 	boost::shared_ptr<PeakMeter> meter() const { return _meter; }
+	boost::shared_ptr<GainControl> gain_control() const { return _gain_control; }
 
 	bool metering() const { return _metering; }
 	void set_metering (bool yn) { _metering = yn; }
@@ -64,7 +65,7 @@ public:
 
   protected:
 	bool _metering;
-	boost::shared_ptr<AutomationControl> _gain_control;
+	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<Amp> _amp;
 	boost::shared_ptr<PeakMeter> _meter;
 

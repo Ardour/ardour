@@ -178,7 +178,7 @@ gain_t
 RouteGroup::get_min_factor (gain_t factor)
 {
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		gain_t const g = (*i)->amp()->gain();
+		gain_t const g = (*i)->gain_control()->get_value();
 
 		if ((g + g * factor) >= 0.0f) {
 			continue;
@@ -198,7 +198,7 @@ gain_t
 RouteGroup::get_max_factor (gain_t factor)
 {
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); i++) {
-		gain_t const g = (*i)->amp()->gain();
+		gain_t const g = (*i)->gain_control()->get_value();
 
 		// if the current factor woulnd't raise this route above maximum
 		if ((g + g * factor) <= 1.99526231f) {

@@ -37,7 +37,7 @@ class IO;
  */
 class LIBARDOUR_API Amp : public Processor {
 public:
-	Amp(Session& s, const std::string& display_name, boost::shared_ptr<AutomationControl> control, bool control_midi_also);
+	Amp(Session& s, const std::string& display_name, boost::shared_ptr<GainControl> control, bool control_midi_also);
 
 	std::string display_name () const { return _display_name; }
 	void set_display_name (const std::string& name) { _display_name = name; }
@@ -69,16 +69,13 @@ public:
 	static void apply_simple_gain(AudioBuffer& buf, framecnt_t nframes, gain_t target);
 
 	static void declick (BufferSet& bufs, framecnt_t nframes, int dir);
-
-	gain_t gain () const { return _gain_control->get_value(); }
-
 	static void update_meters();
 
-	boost::shared_ptr<AutomationControl> gain_control() {
+	boost::shared_ptr<GainControl> gain_control() {
 		return _gain_control;
 	}
 
-	boost::shared_ptr<const AutomationControl> gain_control() const {
+	boost::shared_ptr<const GainControl> gain_control() const {
 		return _gain_control;
 	}
 
@@ -93,7 +90,7 @@ private:
 
 	std::string _display_name;
 
-	boost::shared_ptr<AutomationControl> _gain_control;
+	boost::shared_ptr<GainControl> _gain_control;
 
 	/** Buffer that we should use for gain automation */
 	gain_t* _gain_automation_buffer;
