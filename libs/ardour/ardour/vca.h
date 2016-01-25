@@ -35,16 +35,18 @@ class LIBARDOUR_API VCA : public SessionHandleRef {
   public:
 	VCA (Session& session, const std::string& name);
 
+	std::string name() const { return _name; }
+
 	void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	double get_value () const;
 
-	boost::shared_ptr<AutomationControl> control() const { return _control; }
+	boost::shared_ptr<GainControl> control() const { return _control; }
 
 	void add (boost::shared_ptr<Route>);
 	void remove (boost::shared_ptr<Route>);
 
   private:
-	std::string name;
+	std::string _name;
 	boost::shared_ptr<GainControl> _control;
 };
 

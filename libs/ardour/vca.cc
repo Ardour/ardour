@@ -27,7 +27,7 @@ using std::string;
 
 VCA::VCA (Session& s, const string& n)
 	: SessionHandleRef (s)
-	, name (n)
+	, _name (n)
 	, _control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
 {
 }
