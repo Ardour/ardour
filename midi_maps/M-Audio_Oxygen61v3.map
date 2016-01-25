@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="M-Audio Oxygen 61 v3">
+  <!-- 2016-01-17 Sebastiaan Lokhorst: initial version -->
+  <!-- Preset 1 in the Oxygen 61 v3 -->
+
+  <!-- Faders, mapped to track gain 1-8 and Master -->
+  <Binding channel="1" ctl="74" uri="/route/gain 1"/>
+  <Binding channel="1" ctl="71" uri="/route/gain 2"/>
+  <Binding channel="1" ctl="91" uri="/route/gain 3"/>
+  <Binding channel="1" ctl="93" uri="/route/gain 4"/>
+  <Binding channel="1" ctl="73" uri="/route/gain 5"/>
+  <Binding channel="1" ctl="72" uri="/route/gain 6"/>
+  <Binding channel="1" ctl="5" uri="/route/gain 7"/>
+  <Binding channel="1" ctl="84" uri="/route/gain 8"/>
+  <Binding channel="1" ctl="7" uri="/bus/gain master"/>
+
+  <!-- Buttons below the faders, mapped to track mute 1-8 and Master -->
+  <Binding channel="1" pgm="0" uri="/route/mute 1"/>
+  <Binding channel="1" pgm="1" uri="/route/mute 2"/>
+  <Binding channel="1" pgm="2" uri="/route/mute 3"/>
+  <Binding channel="1" pgm="3" uri="/route/mute 4"/>
+  <Binding channel="1" pgm="4" uri="/route/mute 5"/>
+  <Binding channel="1" pgm="5" uri="/route/mute 6"/>
+  <Binding channel="1" pgm="6" uri="/route/mute 7"/>
+  <Binding channel="1" pgm="7" uri="/route/mute 8"/>
+  <Binding channel="1" pgm="8" uri="/bus/mute master"/>
+
+  <!-- Encoders, mapped to pan direction -->
+  <Binding channel="1" ctl="75" uri="/route/pandirection 1"/>
+  <Binding channel="1" ctl="76" uri="/route/pandirection 2"/>
+  <Binding channel="1" ctl="92" uri="/route/pandirection 3"/>
+  <Binding channel="1" ctl="95" uri="/route/pandirection 4"/>
+  <Binding channel="1" ctl="10" uri="/route/pandirection 5"/>
+  <Binding channel="1" ctl="77" uri="/route/pandirection 6"/>
+  <Binding channel="1" ctl="78" uri="/route/pandirection 7"/>
+  <Binding channel="1" ctl="79" uri="/route/pandirection 8"/>
+
+  <!-- Transport controls -->
+  <Binding channel="16" ctl="113" function="loop-toggle"/>
+  <Binding channel="16" ctl="114" function="transport-start"/>
+  <Binding channel="16" ctl="115" function="transport-end"/>
+  <Binding channel="16" ctl="116" function="transport-stop"/>
+  <Binding channel="16" ctl="117" function="transport-roll"/>
+  <Binding channel="16" ctl="118" function="rec-enable"/>
+
+</ArdourMIDIBindings>
