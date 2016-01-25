@@ -190,12 +190,15 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 	connections.clear ();
 	model_connections.drop_connections ();
 
-	if (!pm && !amp) {
+	/* no meter and no control? nothing to do ... */
+
+	if (!pm && !control) {
 		level_meter->set_meter (0);
 		gain_slider->set_controllable (boost::shared_ptr<PBD::Controllable>());
 		_meter.reset ();
 		_amp.reset ();
 		_route.reset ();
+		_control.reset ();
 		return;
 	}
 
@@ -203,8 +206,6 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 	_amp = amp;
 	_route = r;
 	_control = control;
-
-	assert (_control);
 
 	level_meter->set_meter (pm.get());
 	gain_slider->set_controllable (_control);
@@ -731,13 +732,13 @@ GainMeterBase::meter_point_clicked ()
 void
 GainMeterBase::amp_start_touch ()
 {
-	_control->start_touch (_amp->session().transport_frame());
+	_control->start_touch (_control->session().transport_frame());
 }
 
 void
 GainMeterBase::amp_stop_touch ()
 {
-	_control->stop_touch (false, _amp->session().transport_frame());
+	_control->stop_touch (false, _control->session().transport_frame());
 }
 
 gint
