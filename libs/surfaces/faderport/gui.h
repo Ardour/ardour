@@ -62,6 +62,7 @@ private:
 	Gtk::ComboBox proj_combo[3];
 	Gtk::ComboBox trns_combo[3];
 	Gtk::ComboBox user_combo[2];
+	Gtk::ComboBox foot_combo[3];
 
 	void update_port_combos ();
 	PBD::ScopedConnection connection_change_connection;
@@ -100,6 +101,7 @@ private:
 	void build_proj_action_combo (Gtk::ComboBox&, FaderPort::ButtonState);
 	void build_trns_action_combo (Gtk::ComboBox&, FaderPort::ButtonState);
 	void build_user_action_combo (Gtk::ComboBox&, FaderPort::ButtonState);
+	void build_foot_action_combo (Gtk::ComboBox&, FaderPort::ButtonState);
 
 	void build_available_action_menu ();
 	void action_changed (Gtk::ComboBox*, FaderPort::ButtonID, FaderPort::ButtonState);

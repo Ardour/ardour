@@ -80,7 +80,7 @@ FaderPort::build_gui ()
 FPGUI::FPGUI (FaderPort& p)
 	: fp (p)
 	, table (2, 5)
-	, action_table (4, 4)
+	, action_table (5, 4)
 	, ignore_active_change (false)
 {
 	set_border_width (12);
@@ -137,6 +137,10 @@ FPGUI::FPGUI (FaderPort& p)
 	build_trns_action_combo (trns_combo[2], FaderPort::LongPress);
 
 	build_available_action_menu ();
+
+	build_foot_action_combo (foot_combo[0], FaderPort::ButtonState(0));
+	build_foot_action_combo (foot_combo[1], FaderPort::ShiftDown);
+	build_foot_action_combo (foot_combo[2], FaderPort::LongPress);
 
 	/* No shift-press combo for User because that is labelled as "next"
 	 * (marker)
@@ -232,6 +236,24 @@ FPGUI::FPGUI (FaderPort& p)
 	align = manage (new Alignment);
 	align->set (0.0, 0.5);
 	align->add (user_combo[1]);
+	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	action_row++;
+
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Footswitch")));
+	l->set_alignment (1.0, 0.5);
+	action_table.attach (*l, 0, 1, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (foot_combo[0]);
+	action_table.attach (*align, 1, 2, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (foot_combo[1]);
+	action_table.attach (*align, 2, 3, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (foot_combo[2]);
 	action_table.attach (*align, 3, 4, action_row, action_row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	action_row++;
 
@@ -534,6 +556,20 @@ FPGUI::build_trns_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 
 
 	build_action_combo (cb, actions, FaderPort::Trns, bs);
+}
+
+void
+FPGUI::build_foot_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
+{
+	vector<pair<string,string> > actions;
+
+	actions.push_back (make_pair (string("Toggle Roll"), string(X_("Transport/ToggleRoll"))));
+	actions.push_back (make_pair (string("Toggle Rec-Enable"), string(X_("Transport/Record"))));
+
+//	actions.push_back (make_pair (string (_("Zoom In")), string (X_("Editor/temporal-zoom-in"))));
+//	actions.push_back (make_pair (string (_("Zoom Out")), string (X_("Editor/temporal-zoom-out"))));
+
+	build_action_combo (cb, actions, FaderPort::Proj, bs);
 }
 
 bool
