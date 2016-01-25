@@ -235,7 +235,7 @@ ControlProtocol::route_get_gain (uint32_t table_index)
 		return 0.0f;
 	}
 
-	return r->amp()->gain ();
+	return r->gain_control()->get_value();
 }
 
 void
