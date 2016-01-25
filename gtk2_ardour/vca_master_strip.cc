@@ -16,15 +16,24 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "ardour/vca.h"
+
 #include "vca_master_strip.h"
 
 using namespace ARDOUR;
+using std::string;
 
-VCAMasterStrip::VCAMasterStrip (Session* s)
+VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	: AxisView (s)
+	, vca (v)
 	, gain_meter (s, 250)
 {
-	name_button.set_text ("name");
+	gain_meter.set_controls (boost::shared_ptr<Route>(),
+	                         boost::shared_ptr<PeakMeter>(),
+	                         boost::shared_ptr<Amp>(),
+	                         vca->control());
+
+	name_button.set_text (vca->name());
 	active_button.set_text ("active");
 
 	pack_start (active_button, false, false);
@@ -36,3 +45,8 @@ VCAMasterStrip::VCAMasterStrip (Session* s)
 	gain_meter.show_all ();
 }
 
+string
+VCAMasterStrip::name() const
+{
+	return vca->name();
+}
