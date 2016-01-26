@@ -405,7 +405,16 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
-				/* Primary-button1 applies change to the mix group even if it is not active
+				/* Primary-button1 inverts the implication of
+				   the group being active. If the group is
+				   active (for mute), then this modifier means
+				   "do not apply to mute". If the group is
+				   inactive (for mute), then this modifier
+				   means "apply to route". This is all
+				   accomplished by passing just the actual
+				   route, along with the InverseGroup group
+				   control disposition.
+
 				   NOTE: Primary-button2 is MIDI learn.
 				*/
 
@@ -413,16 +422,11 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 				if (ev->button == 1) {
 
-					if (_route->route_group()) {
+					rl.reset (new RouteList);
+					rl->push_back (_route);
 
-						rl = _route->route_group()->route_list();
-
-						if (_mute_release) {
-							_mute_release->routes = rl;
-						}
-					} else {
-						rl.reset (new RouteList);
-						rl->push_back (_route);
+					if (_mute_release) {
+						_mute_release->routes = rl;
 					}
 
 					DisplaySuspender ds;
