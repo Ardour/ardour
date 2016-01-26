@@ -739,14 +739,8 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 				boost::shared_ptr<RouteList> rl;
 
-				if (_route->route_group()) {
-
-					rl = _route->route_group()->route_list();
-
-				} else {
-					rl.reset (new RouteList);
-					rl->push_back (_route);
-				}
+				rl.reset (new RouteList);
+				rl->push_back (_route);
 
 				DisplaySuspender ds;
 				_session->set_record_enabled (rl, !_route->record_enabled(), Session::rt_cleanup, Controllable::InverseGroup);
