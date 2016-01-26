@@ -962,6 +962,12 @@ static Gtkmm2ext::ActiveState next_state (Gtkmm2ext::ActiveState s){
 			break;
 		default: assert(0); break; // not reached
 	}
+	/* impossible, but keep some compiles happy */
+	fatal << string_compose (_("programming error: %1"),
+			X_("Illegal Active State."))
+		<< endmsg;
+	abort(); /*NOTREACHED*/
+	return Gtkmm2ext::Off;
 }
 
 static Gtkmm2ext::ActiveState prev_state (Gtkmm2ext::ActiveState s){
@@ -977,6 +983,12 @@ static Gtkmm2ext::ActiveState prev_state (Gtkmm2ext::ActiveState s){
 			break;
 		default: assert(0); break; // not reached
 	}
+	/* impossible, but keep some compiles happy */
+	fatal << string_compose (_("programming error: %1"),
+			X_("Illegal Active State."))
+		<< endmsg;
+	abort(); /*NOTREACHED*/
+	return Gtkmm2ext::Off;
 }
 
 bool
