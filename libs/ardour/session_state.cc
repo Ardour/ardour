@@ -119,6 +119,7 @@
 #include "ardour/tempo.h"
 #include "ardour/ticker.h"
 #include "ardour/user_bundle.h"
+#include "ardour/vca_manager.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -171,6 +172,7 @@ Session::pre_engine_init (string fullpath)
 	set_next_event ();
 	_all_route_group->set_active (true, this);
 	interpolation.add_channel_to (0, 0);
+	_vca_manager = new VCAManager (*this);
 
 	if (config.get_use_video_sync()) {
 		waiting_for_sync_offset = true;
