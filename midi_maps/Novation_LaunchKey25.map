@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Novation Launchkey 25">
+
+<!-- Transport controls -->
+
+  <Binding channel="1" ctl="112" function="transport-start"/>
+  <Binding channel="1" ctl="113" function="transport-end"/>
+  <Binding channel="1" ctl="114" function="transport-stop"/>
+  <Binding channel="1" ctl="115" function="transport-roll"/>
+  <Binding channel="1" ctl="116" function="loop-toggle"/>
+  <Binding channel="1" ctl="117" function="toggle-rec-enable"/>
+
+</ArdourMIDIBindings>
