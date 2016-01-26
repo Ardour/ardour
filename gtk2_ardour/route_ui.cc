@@ -610,19 +610,29 @@ RouteUI::solo_press(GdkEventButton* ev)
 				boost::shared_ptr<RouteList> rl;
 
 				if (ev->button == 1) {
-					if (ARDOUR::Profile->get_mixbus() && _route->route_group()) {
 
-						rl = _route->route_group()->route_list();
+					/* Primary-button1 inverts the implication of
+					   the group being active. If the group is
+					   active (for solo), then this modifier means
+					   "do not apply to solo". If the group is
+					   inactive (for mute), then this modifier
+					   means "apply to route". This is all
+					   accomplished by passing just the actual
+					   route, along with the InverseGroup group
+					   control disposition.
 
-						if (_solo_release) {
-							_solo_release->routes = rl;
-						}
-					} else {
-						rl.reset (new RouteList);
-						rl->push_back (_route);
+					   NOTE: Primary-button2 is MIDI learn.
+					*/
+
+					rl.reset (new RouteList);
+					rl->push_back (_route);
+
+					if (_solo_release) {
+						_solo_release->routes = rl;
 					}
 
 					DisplaySuspender ds;
+
 					if (Config->get_solo_control_is_listen_control()) {
 						_session->set_listen (rl, !_route->listening_via_monitor(),  Session::rt_cleanup, Controllable::InverseGroup);
 					} else {
