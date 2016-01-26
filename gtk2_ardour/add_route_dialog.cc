@@ -52,7 +52,7 @@ using namespace ARDOUR_UI_UTILS;
 std::vector<std::string> AddRouteDialog::channel_combo_strings;
 
 AddRouteDialog::AddRouteDialog ()
-	: ArdourDialog (_("Add Track or Bus"))
+	: ArdourDialog (_("Add Track/Bus/VCA"))
 	, routes_adjustment (1, 1, 128, 1, 4)
 	, routes_spinner (routes_adjustment)
 	, configuration_label (_("Configuration:"))
@@ -80,6 +80,7 @@ AddRouteDialog::AddRouteDialog ()
 	track_bus_combo.append_text (_("Audio+MIDI Tracks"));
 	track_bus_combo.append_text (_("Audio Busses"));
 	track_bus_combo.append_text (_("MIDI Busses"));
+	track_bus_combo.append_text (_("VCA Masters"));
 	track_bus_combo.set_active (0);
 
 	insert_at_combo.append_text (_("First"));
@@ -225,8 +226,10 @@ AddRouteDialog::type_wanted() const
 		return MidiTrack;
 	} else if (str == _("Audio+MIDI Tracks")) {
 		return MixedTrack;
-	} else {
+	} else if (str == _("Audio Tracks")) {
 		return AudioTrack;
+	} else {
+		return VCAMaster;
 	}
 }
 
@@ -235,6 +238,7 @@ AddRouteDialog::maybe_update_name_template_entry ()
 {
 	if (
 		name_template_entry.get_text() != "" &&
+		name_template_entry.get_text() != _("VCA") &&
 		name_template_entry.get_text() != _("Audio") &&
 		name_template_entry.get_text() != _("MIDI")  &&
 		name_template_entry.get_text() != _("Audio+MIDI")  &&
@@ -259,6 +263,9 @@ AddRouteDialog::maybe_update_name_template_entry ()
 	case MidiBus:
 		name_template_entry.set_text (_("Bus"));
 		break;
+	case VCAMaster:
+		name_template_entry.set_text (_("VCA"));
+		break;
 	}
 }
 
@@ -273,6 +280,7 @@ AddRouteDialog::track_type_chosen ()
 		configuration_label.set_sensitive (true);
 		mode_label.set_sensitive (true);
 		instrument_label.set_sensitive (false);
+		route_group_combo.set_sensitive (true);
 		break;
 	case MidiTrack:
 		channel_combo.set_sensitive (false);
@@ -281,6 +289,7 @@ AddRouteDialog::track_type_chosen ()
 		configuration_label.set_sensitive (false);
 		mode_label.set_sensitive (false);
 		instrument_label.set_sensitive (true);
+		route_group_combo.set_sensitive (true);
 		break;
 	case MixedTrack:
           	{
@@ -296,6 +305,7 @@ AddRouteDialog::track_type_chosen ()
 		configuration_label.set_sensitive (true);
 		mode_label.set_sensitive (true);
 		instrument_label.set_sensitive (true);
+		route_group_combo.set_sensitive (true);
 		break;
 	case AudioBus:
 		mode_combo.set_sensitive (false);
@@ -304,6 +314,16 @@ AddRouteDialog::track_type_chosen ()
 		configuration_label.set_sensitive (true);
 		mode_label.set_sensitive (true);
 		instrument_label.set_sensitive (false);
+		route_group_combo.set_sensitive (true);
+		break;
+	case VCAMaster:
+		mode_combo.set_sensitive (false);
+		channel_combo.set_sensitive (false);
+		instrument_combo.set_sensitive (false);
+		configuration_label.set_sensitive (false);
+		mode_label.set_sensitive (false);
+		instrument_label.set_sensitive (false);
+		route_group_combo.set_sensitive (false);
 		break;
 	case MidiBus:
 		mode_combo.set_sensitive (false);
@@ -333,7 +353,8 @@ AddRouteDialog::name_template_is_default() const
 	if (n == _("Audio") ||
 	    n == _("MIDI") ||
 	    n == _("Audio+MIDI") ||
-	    n == _("Bus")) {
+	    n == _("Bus") ||
+	    n == _("VCA")) {
 		return true;
 	}
 
@@ -411,6 +432,8 @@ AddRouteDialog::channels ()
 			}
 		}
 		ret.set (DataType::MIDI, 1);
+		break;
+	default:
 		break;
 	}
 

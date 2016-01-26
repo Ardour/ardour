@@ -4034,6 +4034,9 @@ ARDOUR_UI::add_route ()
 	case AddRouteDialog::MidiBus:
 		session_add_midi_bus (route_group, count, name_template, strict_io, instrument, 0);
 		break;
+	case AddRouteDialog::VCAMaster:
+		/* do something */
+		break;
 	}
 }
 

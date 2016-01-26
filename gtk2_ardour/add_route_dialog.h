@@ -55,6 +55,7 @@ class AddRouteDialog : public ArdourDialog
 		MixedTrack,
 		AudioBus,
 		MidiBus
+		VCAMaster,
 	};
 	TypeWanted type_wanted() const;
 
