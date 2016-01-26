@@ -282,7 +282,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		t->RecordEnableChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
 
 		rec_enable_button->show();
- 		rec_enable_button->set_controllable (t->rec_enable_control());
+		rec_enable_button->set_controllable (t->rec_enable_control());
 
                 if (is_midi_track()) {
                         midi_track()->StepEditStatusChange.connect (route_connections, invalidator (*this),
@@ -1842,7 +1842,7 @@ RouteUI::map_frozen ()
 {
 	ENSURE_GUI_THREAD (*this, &RouteUI::map_frozen)
 
- 	AudioTrack* at = dynamic_cast<AudioTrack*>(_route.get());
+	AudioTrack* at = dynamic_cast<AudioTrack*>(_route.get());
 
 	if (at) {
 		switch (at->freeze_state()) {
