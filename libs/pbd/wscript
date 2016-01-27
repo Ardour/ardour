@@ -62,6 +62,7 @@ libpbd_sources = [
     'pool.cc',
     'property_list.cc',
     'pthread_utils.cc',
+    'reallocpool.cc',
     'receiver.cc',
     'resource.cc',
     'search_path.cc',
