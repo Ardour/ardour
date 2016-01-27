@@ -110,7 +110,13 @@ Controllable::get_state ()
 	LocaleGuard lg (X_("C"));
 	char buf[64];
 
-	node->add_property (X_("name"), _name); // not reloaded from XML state, just there to look at
+	/* Waves' "Pressure3" has a parameter called "µ-iness"
+	 * which causes a  parser error : Input is not proper UTF-8, indicate encoding !
+	 *  Bytes: 0xB5 0x2D 0x69 0x6E
+	 *          <Controllable name="�-iness" id="2391" flags="" value="0.000000000000" p
+	 */
+	//node->add_property (X_("name"), _name); // not reloaded from XML state, just there to look at
+
 	id().print (buf, sizeof (buf));
 	node->add_property (X_("id"), buf);
 	node->add_property (X_("flags"), enum_2_string (_flags));
