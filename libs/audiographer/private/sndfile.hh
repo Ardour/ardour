@@ -52,6 +52,13 @@
 #ifndef SNDFILE_HH
 #define SNDFILE_HH
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <glib.h>
+#include "pbd/gstdio_compat.h"
+
 #include <sndfile.h>
 
 #include <string>
@@ -182,7 +189,17 @@ SndfileHandle::SndfileHandle (const char *path, int mode, int fmt, int chans, in
 		p->sfinfo.sections = 0 ;
 		p->sfinfo.seekable = 0 ;
 
-		p->sf = sf_open (path, mode, &p->sfinfo) ;
+		bool writable = false;
+		if (mode & SFM_WRITE) {
+			writable = true;
+		}
+#ifdef PLATFORM_WINDOWS
+		int fd = g_open (path, writable ? O_CREAT | O_RDWR : O_RDONLY, writable ? 0644 : 0444);
+#else
+		int fd = ::open (path, writable ? O_CREAT | O_RDWR : O_RDONLY, writable ? 0644 : 0444);
+#endif
+
+		p->sf = sf_open_fd (fd, mode, &p->sfinfo, true) ;
 		} ;
 
 	return ;
@@ -204,7 +221,17 @@ SndfileHandle::SndfileHandle (std::string const & path, int mode, int fmt, int c
 		p->sfinfo.sections = 0 ;
 		p->sfinfo.seekable = 0 ;
 
-		p->sf = sf_open (path.c_str (), mode, &p->sfinfo) ;
+		bool writable = false;
+		if (mode & SFM_WRITE) {
+			writable = true;
+		}
+#ifdef PLATFORM_WINDOWS
+		int fd = g_open (path.c_str(), writable ? O_CREAT | O_RDWR : O_RDONLY, writable ? 0644 : 0444);
+#else
+		int fd = ::open (path.c_str(), writable ? O_CREAT | O_RDWR : O_RDONLY, writable ? 0644 : 0444);
+#endif
+
+		p->sf = sf_open_fd (fd, mode, &p->sfinfo, true) ;
 		} ;
 
 	return ;
