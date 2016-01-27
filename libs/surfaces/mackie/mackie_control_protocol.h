@@ -117,6 +117,7 @@ class MackieControlProtocol
 		None,
 		EQ,
 		Dynamics,
+		Sends,
 	};
 
 	enum PotMode {

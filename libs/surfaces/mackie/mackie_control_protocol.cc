@@ -1670,6 +1670,7 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 				pot_mode_globals ();
 				break;
 			case MackieControlProtocol::EQ:
+				update_global_button (Button::Send, off);
 				update_global_button (Button::Eq, on);
 				update_global_button (Button::Dyn, off);
 				update_global_button (Button::AudioInstruments, off); /* faking up Dyn */
@@ -1678,8 +1679,18 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 				update_global_button (Button::Pan, off);
 				break;
 			case MackieControlProtocol::Dynamics:
+				update_global_button (Button::Send, off);
 				update_global_button (Button::Eq, off);
 				update_global_button (Button::Dyn, on);
+				update_global_button (Button::AudioInstruments, on); /* faking up Dyn */
+				update_global_button (Button::Trim, off);
+				update_global_button (Button::Send, off);
+				update_global_button (Button::Pan, off);
+				break;
+			case MackieControlProtocol::Sends:
+				update_global_button (Button::Send, on);
+				update_global_button (Button::Eq, off);
+				update_global_button (Button::Dyn, off);
 				update_global_button (Button::AudioInstruments, on); /* faking up Dyn */
 				update_global_button (Button::Trim, off);
 				update_global_button (Button::Send, off);

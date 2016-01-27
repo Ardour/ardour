@@ -878,7 +878,20 @@ MackieControlProtocol::track_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::send_press (Mackie::Button&)
 {
-	/* XXX to come */
+	boost::shared_ptr<Route> r = first_selected_route ();
+	if (r) {
+#ifndef MIXBUS
+		if (!r->nth_send (0)) {
+			/* no sends ... no send subview mode */
+			if (!surfaces.empty()) {
+				surfaces.front()->display_message_for (_("No sends for this track/bus"), 1000);
+			}
+			return none;
+		}
+#endif
+		set_subview_mode (Sends, r);
+		return none; /* led state handled by set_subview_mode() */
+	}
 	return none;
 }
 Mackie::LedState

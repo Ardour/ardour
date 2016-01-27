@@ -511,6 +511,35 @@ Strip::show_route_name ()
 }
 
 void
+Strip::notify_send_level_change (AutomationType type, uint32_t send_num, bool force_update)
+{
+	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
+
+	if (!r) {
+		/* not in subview mode */
+		return;
+	}
+
+	if (_surface->mcp().subview_mode() != MackieControlProtocol::Sends) {
+		/* no longer in EQ subview mode */
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> control = r->send_level_controllable (send_num);
+	if (!control) {
+		return;
+	}
+
+	if (control) {
+		float val = control->get_value();
+		cerr << "Queue send level display of " << val << endl;
+		queue_parameter_display (type, val);
+		/* update pot/encoder */
+		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
+	}
+}
+
+void
 Strip::notify_eq_change (AutomationType type, uint32_t band, bool force_update)
 {
 	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
@@ -949,6 +978,16 @@ Strip::do_parameter_display (AutomationType type, float val)
 			} else {
 				_surface->write (display (1, "Invert"));
 			}
+			screen_hold = true;
+		}
+		break;
+
+	case BusSendLevel:
+		if (_route) {
+			float dB = accurate_coefficient_to_dB (val);
+			snprintf (buf, sizeof (buf), "%6.1f", dB);
+			cerr << "send level write " << val << " as \"" << buf << '"' << endl;
+			_surface->write (display (1, buf));
 			screen_hold = true;
 		}
 		break;
@@ -1458,6 +1497,16 @@ Strip::subview_mode_changed ()
 		} else {
 			/* leave it as it was */
 		}
+		eq_band = -1;
+		break;
+
+	case MackieControlProtocol::Sends:
+		if (r) {
+			setup_sends_vpot (r);
+		} else {
+			/* leave it as it was */
+		}
+		eq_band = -1;
 		break;
 	}
 }
@@ -1676,6 +1725,37 @@ Strip::setup_eq_vpot (boost::shared_ptr<Route> r)
 
 		notify_eq_change (param, eq_band, true);
 	}
+}
+
+void
+Strip::setup_sends_vpot (boost::shared_ptr<Route> r)
+{
+	if (!r) {
+		return;
+	}
+
+	const uint32_t global_pos = _surface->mcp().global_index (*this);
+
+	boost::shared_ptr<Processor> send = r->nth_send (global_pos);
+
+	if (!send) {
+		_surface->write (display (0, string()));
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> pc = r->send_level_controllable (global_pos);
+
+	if (!pc) {
+		return;
+	}
+
+	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_send_level_change, this, BusSendLevel, global_pos, false), ui_context());
+	_vpot->set_control (pc);
+
+	cerr << "Send name @ " << global_pos << " = " << send->name() << endl;
+	_surface->write (display (0, send->name()));
+
+	notify_send_level_change (BusSendLevel, global_pos, true);
 }
 
 void

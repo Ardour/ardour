@@ -176,6 +176,9 @@ private:
 
 	void notify_dyn_change (ARDOUR::AutomationType, bool force, bool propagate_mode_change);
 	void setup_dyn_vpot (boost::shared_ptr<ARDOUR::Route>);
+
+	void notify_send_level_change (ARDOUR::AutomationType, uint32_t band, bool force);
+	void setup_sends_vpot (boost::shared_ptr<ARDOUR::Route>);
 };
 
 }
