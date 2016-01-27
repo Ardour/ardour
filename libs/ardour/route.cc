@@ -5512,7 +5512,11 @@ Route::send_level_controllable (uint32_t n) const
 	const uint32_t port_id = port_channel_post_aux1_level + (2*n); // gtk2_ardour/mixbus_ports.h
 	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_id)));
 #else
-	return boost::shared_ptr<AutomationControl>();
+	boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(nth_send (n));
+	if (!s) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+	return s->gain_control ();
 #endif
 }
 
@@ -5531,6 +5535,11 @@ Route::send_enable_controllable (uint32_t n) const
 	const uint32_t port_id = port_channel_post_aux1_asgn + (2*n); // gtk2_ardour/mixbus_ports.h
 	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_id)));
 #else
+	/* although Ardour sends have enable/disable as part of the Processor
+	   API, it is not exposed as a controllable.
+
+	   XXX: we should fix this.
+	*/
 	return boost::shared_ptr<AutomationControl>();
 #endif
 }
