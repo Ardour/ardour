@@ -4811,18 +4811,9 @@ Editor::duplicate_selection (float times)
 	}
 
 	boost::shared_ptr<Playlist> playlist;
-	vector<boost::shared_ptr<Region> > new_regions;
-	vector<boost::shared_ptr<Region> >::iterator ri;
-
-	create_region_from_selection (new_regions);
-
-	if (new_regions.empty()) {
-		return;
-	}
-
-	ri = new_regions.begin();
 
 	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+
 	bool in_command = false;
 
 	for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
@@ -4830,27 +4821,34 @@ Editor::duplicate_selection (float times)
 			continue;
 		}
 		playlist->clear_changes ();
-		framepos_t end;
+
 		if (clicked_selection) {
-			end = selection->time[clicked_selection].end;
+			playlist->duplicate_range (selection->time[clicked_selection], times);
 		} else {
-			end = selection->time.end_frame();
+			playlist->duplicate_ranges (selection->time, times);
 		}
-		playlist->duplicate (*ri, end + 1, times);
 
 		if (!in_command) {
-			begin_reversible_command (_("duplicate selection"));
+			begin_reversible_command (_("duplicate range selection"));
 			in_command = true;
 		}
 		_session->add_command (new StatefulDiffCommand (playlist));
 
-		++ri;
-		if (ri == new_regions.end()) {
-			--ri;
-		}
 	}
 
 	if (in_command) {
+		// now "move" range selection to after the current range selection
+		framecnt_t distance = 0;
+
+		if (clicked_selection) {
+			distance = selection->time[clicked_selection].end -
+			           selection->time[clicked_selection].start;
+		} else {
+			distance = selection->time.end_frame() - selection->time.start();
+		}
+
+		selection->move_time (distance);
+
 		commit_reversible_command ();
 	}
 }
