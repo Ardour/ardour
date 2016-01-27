@@ -5496,3 +5496,41 @@ Route::comp_speed_name (uint32_t mode) const
 	return _("???");
 #endif
 }
+
+boost::shared_ptr<AutomationControl>
+Route::send_level_controllable (uint32_t n) const
+{
+#ifdef  MIXBUS
+	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
+	assert (plug);
+
+	if (n >= 8) {
+		/* no such bus */
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	const uint32_t port_id = port_channel_post_aux1_level + (2*n); // gtk2_ardour/mixbus_ports.h
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_id)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+
+boost::shared_ptr<AutomationControl>
+Route::send_enable_controllable (uint32_t n) const
+{
+#ifdef  MIXBUS
+	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
+	assert (plug);
+
+	if (n >= 8) {
+		/* no such bus */
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	const uint32_t port_id = port_channel_post_aux1_asgn + (2*n); // gtk2_ardour/mixbus_ports.h
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_id)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}

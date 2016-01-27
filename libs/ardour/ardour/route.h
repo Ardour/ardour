@@ -553,7 +553,17 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
          */
         std::string comp_speed_name (uint32_t mode) const;
 
-	void protect_automation ();
+        /* "well-known" controls for sends to well-known busses in this route. Any or all may
+         * be null.
+         *
+         * In Mixbus, these are the sends that connect to the mixbusses.
+         * In Ardour, these are user-created sends that connect to user-created
+         * Aux busses.
+         */
+        boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const;
+        boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const;
+
+        void protect_automation ();
 
 	enum {
 		/* These numbers are taken from MIDI Machine Control,
