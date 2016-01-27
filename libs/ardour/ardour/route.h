@@ -224,8 +224,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	boost::shared_ptr<Processor> processor_by_id (PBD::ID) const;
 
-	boost::shared_ptr<Processor> nth_plugin (uint32_t n);
-	boost::shared_ptr<Processor> nth_send (uint32_t n);
+	boost::shared_ptr<Processor> nth_plugin (uint32_t n) const;
+	boost::shared_ptr<Processor> nth_send (uint32_t n) const;
 
 	bool has_io_processor_named (const std::string&);
 	ChanCount max_processor_streams () const { return processor_max_streams; }

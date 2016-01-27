@@ -4491,10 +4491,10 @@ Route::get_control (const Evoral::Parameter& param)
 }
 
 boost::shared_ptr<Processor>
-Route::nth_plugin (uint32_t n)
+Route::nth_plugin (uint32_t n) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-	ProcessorList::iterator i;
+	ProcessorList::const_iterator i;
 
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
 		if (boost::dynamic_pointer_cast<PluginInsert> (*i)) {
@@ -4508,10 +4508,10 @@ Route::nth_plugin (uint32_t n)
 }
 
 boost::shared_ptr<Processor>
-Route::nth_send (uint32_t n)
+Route::nth_send (uint32_t n) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-	ProcessorList::iterator i;
+	ProcessorList::const_iterator i;
 
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
 		if (boost::dynamic_pointer_cast<Send> (*i)) {
