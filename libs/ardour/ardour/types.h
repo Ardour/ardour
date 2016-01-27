@@ -141,7 +141,6 @@ namespace ARDOUR {
 		RecEnableAutomation,
 		TrimAutomation,
 		PhaseAutomation,
-		SendAutomation,
 		EQGain,
 		EQFrequency,
 		EQQ,

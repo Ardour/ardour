@@ -878,7 +878,7 @@ MackieControlProtocol::track_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::send_press (Mackie::Button&)
 {
-	set_pot_mode (Send);
+	/* XXX to come */
 	return none;
 }
 Mackie::LedState

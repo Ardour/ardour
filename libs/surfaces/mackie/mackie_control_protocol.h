@@ -121,7 +121,6 @@ class MackieControlProtocol
 
 	enum PotMode {
 		Trim,
-		Send,
 		Pan,
 	};
 

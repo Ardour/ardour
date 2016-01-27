@@ -195,7 +195,6 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	control_by_parameter[GainAutomation] = (Control*) 0;
 	control_by_parameter[TrimAutomation] = (Control*) 0;
 	control_by_parameter[PhaseAutomation] = (Control*) 0;
-	control_by_parameter[SendAutomation] = (Control*) 0;
 
 	reset_saved_values ();
 
@@ -469,38 +468,6 @@ Strip::notify_phase_changed (bool force_update)
 void
 Strip::notify_processor_changed (bool force_update)
 {
-	if (_route) {
-		boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
-		if (!p) {
-			return;
-		}
-
-		Control* control = 0;
-		ControlParameterMap::iterator i = control_by_parameter.find (SendAutomation);
-
-		if (i == control_by_parameter.end()) {
-			return;
-		}
-
-		control = i->second;
-
-		boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
-		boost::shared_ptr<Amp> a = s->amp();
-		boost::shared_ptr<AutomationControl> ac = a->gain_control();
-
-		float gain_coefficient = ac->get_value();
-		float normalized_position = ac->internal_to_interface (gain_coefficient);
-
-		if (control == _fader) {
-			if (!_fader->in_use()) {
-				_surface->write (_fader->set_position (normalized_position));
-				queue_parameter_display (SendAutomation, gain_coefficient);
-			}
-		} else if (control == _vpot) {
-			_surface->write (_vpot->set (normalized_position, true, Pot::dot));
-			queue_parameter_display (SendAutomation, gain_coefficient);
-		}
-	}
 }
 
 void
@@ -986,16 +953,6 @@ Strip::do_parameter_display (AutomationType type, float val)
 		}
 		break;
 
-	case SendAutomation:
-		if (val == 0.0) {
-			_surface->write (display (1, " -inf "));
-		} else {
-			float dB = accurate_coefficient_to_dB (val);
-			snprintf (buf, sizeof (buf), "%6.1f", dB);
-			_surface->write (display (1, buf));
-			screen_hold = true;
-		}
-		break;
 	case EQGain:
 	case EQFrequency:
 	case EQQ:
@@ -1318,12 +1275,6 @@ Strip::vpot_mode_string ()
 		return "Trim";
 	} else if (control_by_parameter.find (PhaseAutomation)->second == _vpot) {
 		return string_compose ("Phase%1", _route->phase_control()->channel() + 1);
-	} else if (control_by_parameter.find (SendAutomation)->second == _vpot) {
-		// should be bus name
-		boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
-		if (p) {
-			return p->name();
-		}
 	} else if (control_by_parameter.find (PanAzimuthAutomation)->second == _vpot) {
 		return "Pan";
 	} else if (control_by_parameter.find (PanWidthAutomation)->second == _vpot) {
@@ -1361,11 +1312,6 @@ Strip::potmode_changed (bool notify)
 	case MackieControlProtocol::Trim:
 		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Trim mode.\n");
 		set_vpot_parameter (_trim_mode);
-		break;
-	case MackieControlProtocol::Send:
-		// _current_send has the number of the send we will show
-		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Send mode.\n");
-		set_vpot_parameter (SendAutomation);
 		break;
 	}
 
@@ -1481,26 +1427,6 @@ Strip::next_pot_mode ()
 			i = possible_trim_parameters.begin();
 		}
 		set_vpot_parameter (*i);
-	} else if (_surface->mcp().pot_mode() == MackieControlProtocol::Send) {
-		boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
-		if (!p) {
-			return;
-		}
-		p = _route->nth_send (_current_send + 1);
-		if (p) {
-			_current_send++;
-			if (p->name() == "Monitor 1") { // skip monitor
-				p = _route->nth_send (_current_send + 1);
-				if (p) {
-					_current_send++;
-				} else {
-					_current_send = 0;
-				}
-			}
-		} else {
-			_current_send = 0;
-		}
-		set_vpot_parameter (SendAutomation);
 	}
 }
 
@@ -1894,60 +1820,6 @@ Strip::set_vpot_parameter (AutomationType p)
 			} else {
 				_vpot->set_control (boost::shared_ptr<AutomationControl>());
 				control_by_parameter[PhaseAutomation] = 0;
-			}
-		}
-		break;
-	case SendAutomation:
-		if (!Profile->get_mixbus()) {
-			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-				// gain to vpot, send to fader
-				_vpot->set_control (_route->gain_control());
-				control_by_parameter[GainAutomation] = _vpot;
-				// test for send to control
-				boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
-				if (p && p->name() != "Monitor 1") {
-					boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
-					boost::shared_ptr<Amp> a = s->amp();
-					_fader->set_control (a->gain_control());
-					// connect to signal
-					send_connections.drop_connections ();
-					a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
-					control_by_parameter[SendAutomation] = _fader;
-				} else {
-					_fader->set_control (boost::shared_ptr<AutomationControl>());
-					control_by_parameter[SendAutomation] = 0;
-				}
-			} else {
-				// gain to fader, send to vpot
-				_fader->set_control (_route->gain_control());
-				control_by_parameter[GainAutomation] = _fader;
-				boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
-				if (p && p->name() != "Monitor 1") {
-					boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
-					boost::shared_ptr<Amp> a = s->amp();
-					_vpot->set_control (a->gain_control());
-					// connect to signal
-					send_connections.drop_connections ();
-					a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
-					control_by_parameter[SendAutomation] = _vpot;
-				} else {
-					// gain to fader, send to vpot
-					_fader->set_control (_route->gain_control());
-					control_by_parameter[GainAutomation] = _fader;
-					boost::shared_ptr<Processor> p = _route->nth_send (_current_send);
-					if (p && p->name() != "Monitor 1") {
-						boost::shared_ptr<Send> s =  boost::dynamic_pointer_cast<Send>(p);
-						boost::shared_ptr<Amp> a = s->amp();
-						_vpot->set_control (a->gain_control());
-						// connect to signal
-						send_connections.drop_connections ();
-						a->gain_control()->Changed.connect(send_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_processor_changed, this, false), ui_context());
-						control_by_parameter[SendAutomation] = _vpot;
-					} else {
-						_vpot->set_control (boost::shared_ptr<AutomationControl>());
-						control_by_parameter[SendAutomation] = 0;
-					}
-				}
 			}
 		}
 		break;

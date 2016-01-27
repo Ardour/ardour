@@ -1769,11 +1769,6 @@ MackieControlProtocol::pot_mode_globals ()
 		update_global_button (Button::Send, off);
 		update_global_button (Button::Pan, off);
 		break;
-	case Send:
-		update_global_button (Button::Track, off);
-		update_global_button (Button::Send, on);
-		update_global_button (Button::Pan, off);
-		break;
 	case Pan:
 		update_global_button (Button::Track, off);
 		update_global_button (Button::Send, off);
