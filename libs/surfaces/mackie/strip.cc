@@ -532,7 +532,6 @@ Strip::notify_send_level_change (AutomationType type, uint32_t send_num, bool fo
 
 	if (control) {
 		float val = control->get_value();
-		cerr << "Queue send level display of " << val << endl;
 		queue_parameter_display (type, val);
 		/* update pot/encoder */
 		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
@@ -986,7 +985,6 @@ Strip::do_parameter_display (AutomationType type, float val)
 		if (_route) {
 			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
-			cerr << "send level write " << val << " as \"" << buf << '"' << endl;
 			_surface->write (display (1, buf));
 			screen_hold = true;
 		}
@@ -1752,7 +1750,6 @@ Strip::setup_sends_vpot (boost::shared_ptr<Route> r)
 	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_send_level_change, this, BusSendLevel, global_pos, false), ui_context());
 	_vpot->set_control (pc);
 
-	cerr << "Send name @ " << global_pos << " = " << send->name() << endl;
 	_surface->write (display (0, send->name()));
 
 	notify_send_level_change (BusSendLevel, global_pos, true);
