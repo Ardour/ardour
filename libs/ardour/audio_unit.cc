@@ -659,9 +659,9 @@ AUPlugin::discover_parameters ()
 			const CAAUParameter* param = param_info.GetParamInfo (d.id);
 			const AudioUnitParameterInfo& info (param->ParamInfo());
 
-			const int len = CFStringGetLength (param->GetName());;
+			const int len = CFStringGetLength (param->GetName());
 			char local_buffer[len*2];
-			Boolean good = CFStringGetCString(param->GetName(),local_buffer,len*2,kCFStringEncodingMacRoman);
+			Boolean good = CFStringGetCString (param->GetName(), local_buffer ,len*2 , kCFStringEncodingUTF8);
 			if (!good) {
 				d.label = "???";
 			} else {
