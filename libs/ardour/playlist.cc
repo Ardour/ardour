@@ -1316,6 +1316,39 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, framepos_t position
 	 }
 }
 
+void
+Playlist::duplicate_range (AudioRange& range, float times)
+{
+	boost::shared_ptr<Playlist> pl = copy (range.start, range.length(), true);
+	framecnt_t offset = range.end - range.start;
+	paste (pl, range.start + offset, times);
+}
+
+void
+Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float /* times */)
+{
+	if (ranges.empty()) {
+		return;
+	}
+
+	framepos_t min_pos = max_framepos;
+	framepos_t max_pos = 0;
+
+	for (std::list<AudioRange>::const_iterator i = ranges.begin();
+	     i != ranges.end();
+	     ++i) {
+		min_pos = min (min_pos, (*i).start);
+		max_pos = max (max_pos, (*i).end);
+	}
+
+	framecnt_t offset = max_pos - min_pos;
+
+	for (list<AudioRange>::iterator i = ranges.begin(); i != ranges.end(); ++i) {
+		boost::shared_ptr<Playlist> pl = copy ((*i).start, (*i).length(), true);
+		paste (pl, (*i).start + offset, 1.0f); // times ??
+	}
+}
+
  void
  Playlist::shift (framepos_t at, frameoffset_t distance, bool move_intersected, bool ignore_music_glue)
  {

@@ -142,6 +142,8 @@ public:
 	void duplicate (boost::shared_ptr<Region>, framepos_t position, float times);
 	void duplicate (boost::shared_ptr<Region>, framepos_t position, framecnt_t gap, float times);
 	void duplicate_until (boost::shared_ptr<Region>, framepos_t position, framecnt_t gap, framepos_t end);
+	void duplicate_range (AudioRange&, float times);
+	void duplicate_ranges (std::list<AudioRange>&, float times);
 	void nudge_after (framepos_t start, framecnt_t distance, bool forwards);
 	boost::shared_ptr<Region> combine (const RegionList&);
 	void uncombine (boost::shared_ptr<Region>);
