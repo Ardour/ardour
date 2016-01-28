@@ -237,7 +237,6 @@ bool
 FileSource::find (Session& s, DataType type, const string& path, bool must_exist,
 		  bool& isnew, uint16_t& /* chan */, string& found_path)
 {
-	bool ret = false;
 	string keeppath;
 
 	isnew = false;
@@ -249,7 +248,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 
 		if (dirs.size() == 0) {
 			error << _("FileSource: search path not set") << endmsg;
-			goto out;
+			return false;
 		}
 
 		for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
@@ -298,7 +297,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 			    FileSource::AmbiguousFileName(path, de_duped_hits).get_value_or(-1);
 
 			if (which < 0) {
-				goto out;
+				return false;
 			} else {
 				keeppath = de_duped_hits[which];
 			}
@@ -311,7 +310,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 				/* do not generate an error here, leave that to
 				   whoever deals with the false return value.
 				*/
-				goto out;
+				return false;
 			} else {
 				isnew = true;
 			}
@@ -340,10 +339,8 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 	}
 
 	found_path = keeppath;
-	ret = true;
 
-out:
-	return ret;
+	return true;
 }
 
 /** Find the actual source file based on \a filename.
