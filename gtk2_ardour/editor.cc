@@ -323,6 +323,7 @@ Editor::Editor ()
 	clicked_regionview = 0;
 	clicked_axisview = 0;
 	clicked_routeview = 0;
+	clicked_selection = 0;
 	clicked_control_point = 0;
 	last_update_frame = 0;
 	last_paste_pos = 0;
