@@ -788,7 +788,7 @@ Surface::turn_it_on ()
 		(*s)->notify_all ();
 	}
 
-	update_view_mode_display ();
+	update_view_mode_display (false);
 
 	if (_mcp.device_info ().has_global_controls ()) {
 		_mcp.update_global_button (Button::Read, _mcp.metering_active ());
@@ -1037,14 +1037,10 @@ Surface::subview_mode_changed ()
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->subview_mode_changed ();
 	}
-
-	if (_mcp.subview_mode() == MackieControlProtocol::None) {
-		update_view_mode_display ();
-	}
 }
 
 void
-Surface::update_view_mode_display ()
+Surface::update_view_mode_display (bool with_helpful_text)
 {
 	string text;
 	int id = -1;
@@ -1129,7 +1125,7 @@ Surface::update_view_mode_display ()
 		}
 	}
 
-	if (!text.empty()) {
+	if (with_helpful_text && !text.empty()) {
 		display_message_for (text, 1000);
 	}
 }
@@ -1174,6 +1170,18 @@ Surface::route_is_locked_to_strip (boost::shared_ptr<Route> r) const
 			return true;
 		}
 	}
+	return false;
+}
+
+bool
+Surface::route_is_mapped (boost::shared_ptr<Route> r) const
+{
+	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
+		if ((*s)->route() == r) {
+			return true;
+		}
+	}
+
 	return false;
 }
 

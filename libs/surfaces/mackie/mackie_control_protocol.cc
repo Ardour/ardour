@@ -1654,18 +1654,29 @@ MackieControlProtocol::subview_mode_would_be_ok (SubViewMode mode, boost::shared
 	return false;
 }
 
+bool
+MackieControlProtocol::redisplay_subview_mode ()
+{
+	Surfaces copy; /* can't hold surfaces lock while calling Strip::subview_mode_changed */
+
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		copy = surfaces;
+	}
+
+	for (Surfaces::iterator s = copy.begin(); s != copy.end(); ++s) {
+		(*s)->subview_mode_changed ();
+	}
+
+	/* don't call this again from a timeout */
+	return false;
+}
+
 int
 MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route> r)
 {
 	SubViewMode old_mode = _subview_mode;
 	boost::shared_ptr<Route> old_route = _subview_route;
-
-	_subview_mode = sm;
-
-	if (r) {
-		/* retain _subview_route even if it is reset to null implicitly */
-		_subview_route = r;
-	}
 
 	if (!subview_mode_would_be_ok (sm, r)) {
 
@@ -1690,10 +1701,25 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 			}
 			if (!msg.empty()) {
 				surfaces.front()->display_message_for (msg, 1000);
+				if (_subview_mode != None) {
+					/* redisplay current subview mode after
+					   that message goes away.
+					*/
+					Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (1000); // milliseconds
+					redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay_subview_mode));
+					redisplay_timeout->attach (main_loop()->get_context());
+				}
 			}
 		}
 
 		return -1;
+	}
+
+	_subview_mode = sm;
+
+	if (r) {
+		/* retain _subview_route even if it is reset to null implicitly */
+		_subview_route = r;
 	}
 
 	if ((_subview_mode != old_mode) || (_subview_route != old_route)) {
@@ -1707,18 +1733,7 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 
 		/* subview mode did actually change */
 
-		{
-			Surfaces copy; /* can't hold surfaces lock while calling Strip::subview_mode_changed */
-
-			{
-				Glib::Threads::Mutex::Lock lm (surfaces_lock);
-				copy = surfaces;
-			}
-
-			for (Surfaces::iterator s = copy.begin(); s != copy.end(); ++s) {
-				(*s)->subview_mode_changed ();
-			}
-		}
+		redisplay_subview_mode ();
 
 		if (_subview_mode != old_mode) {
 
@@ -1776,12 +1791,10 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 void
 MackieControlProtocol::display_view_mode ()
 {
-	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-			(*s)->update_view_mode_display ();
-		}
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->update_view_mode_display (true);
 	}
 }
 
@@ -1924,7 +1937,18 @@ MackieControlProtocol::_gui_track_selection_changed (ARDOUR::RouteNotificationLi
 
 	if (gui_selection_did_change) {
 
-		/* actual GUI selection changed, which may affect subview state */
+		/* note: this method is also called when we switch banks.
+		 * But ... we don't allow bank switching when in subview mode.
+		 *
+		 * so .. we only have to care about subview mode if the
+		 * GUI selection has changed.
+		 *
+		 * It is possible that first_selected_route() may return null if we
+		 * are no longer displaying/mapping that route. In that case,
+		 * we will exit subview mode. If first_selected_route() is
+		 * null, and subview mode is not None, then the first call to
+		 * set_subview_mode() will fail, and we will reset to None.
+		 */
 
 		if (set_subview_mode (_subview_mode, first_selected_route())) {
 			set_subview_mode (None, boost::shared_ptr<Route>());
@@ -2294,6 +2318,20 @@ MackieControlProtocol::is_hidden (boost::shared_ptr<Route> r) const
 	return (((r->remote_control_id()) >>31) != 0);
 }
 
+bool
+MackieControlProtocol::is_mapped (boost::shared_ptr<Route> r) const
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		if ((*s)->route_is_mapped (r)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 boost::shared_ptr<Route>
 MackieControlProtocol::first_selected_route () const
 {
@@ -2302,6 +2340,21 @@ MackieControlProtocol::first_selected_route () const
 	}
 
 	boost::shared_ptr<Route> r = _last_selected_routes.front().lock();
+
+	if (r) {
+		/* check it is on one of our surfaces */
+
+		if (is_mapped (r)) {
+			return r;
+		}
+
+		/* route is not mapped. thus, the currently selected route is
+		 * not on the surfaces, and so from our perspective, there is
+		 * no currently selected route.
+		 */
+
+		r.reset ();
+	}
 
 	return r; /* may be null */
 }

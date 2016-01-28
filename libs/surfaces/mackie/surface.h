@@ -80,6 +80,7 @@ public:
 	Strip* nth_strip (uint32_t n) const;
 
 	bool route_is_locked_to_strip (boost::shared_ptr<ARDOUR::Route>) const;
+	bool route_is_mapped (boost::shared_ptr<ARDOUR::Route>) const;
 
 	/// This collection owns the groups
 	typedef std::map<std::string,Group*> Groups;
@@ -151,7 +152,7 @@ public:
 	void show_two_char_display (const std::string & msg, const std::string & dots = "  ");
 	void show_two_char_display (unsigned int value, const std::string & dots = "  ");
 
-	void update_view_mode_display ();
+	void update_view_mode_display (bool with_helpful_text);
 	void update_flip_mode_display ();
 	void update_potmode ();
 

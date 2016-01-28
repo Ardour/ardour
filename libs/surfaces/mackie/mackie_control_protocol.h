@@ -163,6 +163,7 @@ class MackieControlProtocol
 	bool is_midi_track (boost::shared_ptr<ARDOUR::Route>) const;
 	bool selected (boost::shared_ptr<ARDOUR::Route>) const;
 	bool is_hidden (boost::shared_ptr<ARDOUR::Route>) const;
+	bool is_mapped (boost::shared_ptr<ARDOUR::Route>) const;
 	boost::shared_ptr<ARDOUR::Route> first_selected_route () const;
 
 	void set_view_mode (ViewMode);
@@ -367,6 +368,7 @@ class MackieControlProtocol
 	int create_surfaces ();
 	bool periodic();
 	bool redisplay();
+	bool redisplay_subview_mode ();
 	bool hui_heartbeat ();
 	void build_gui ();
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
