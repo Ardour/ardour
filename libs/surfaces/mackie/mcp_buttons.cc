@@ -689,20 +689,16 @@ MackieControlProtocol::plugin_press (Button &)
 LedState
 MackieControlProtocol::plugin_release (Button &)
 {
-	set_view_mode (Plugins);
+	// Do not do this yet, since it does nothing
+	// set_view_mode (Plugins);
 	return none; /* LED state set by set_view_mode */
 }
 LedState
 MackieControlProtocol::eq_press (Button &)
 {
-	if (Profile->get_mixbus()) {
-		boost::shared_ptr<Route> r = first_selected_route ();
-		if (r && r->eq_band_cnt() > 0) {
-			set_subview_mode (EQ, r);
-			return none; /* led state handled by set_subview_mode() */
-		}
-	}
-	return none;
+	boost::shared_ptr<Route> r = first_selected_route ();
+	set_subview_mode (EQ, r);
+	return none; /* led state handled by set_subview_mode() */
 
 }
 LedState
@@ -713,16 +709,9 @@ MackieControlProtocol::eq_release (Button &)
 LedState
 MackieControlProtocol::dyn_press (Button &)
 {
-	if (Profile->get_mixbus()) {
-		boost::shared_ptr<Route> r = first_selected_route ();
-
-		if (r) {
-			set_subview_mode (Dynamics, r);
-			return none; /* led state handled by set_subview_mode() */
-		}
-	}
-
-	return none;
+	boost::shared_ptr<Route> r = first_selected_route ();
+	set_subview_mode (Dynamics, r);
+	return none; /* led state handled by set_subview_mode() */
 }
 
 LedState
@@ -879,20 +868,8 @@ Mackie::LedState
 MackieControlProtocol::send_press (Mackie::Button&)
 {
 	boost::shared_ptr<Route> r = first_selected_route ();
-	if (r) {
-#ifndef MIXBUS
-		if (!r->nth_send (0)) {
-			/* no sends ... no send subview mode */
-			if (!surfaces.empty()) {
-				surfaces.front()->display_message_for (_("No sends for this track/bus"), 1000);
-			}
-			return none;
-		}
-#endif
-		set_subview_mode (Sends, r);
-		return none; /* led state handled by set_subview_mode() */
-	}
-	return none;
+	set_subview_mode (Sends, r);
+	return none; /* led state handled by set_subview_mode() */
 }
 Mackie::LedState
 MackieControlProtocol::send_release (Mackie::Button&)

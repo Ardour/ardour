@@ -1624,7 +1624,43 @@ MackieControlProtocol::notify_subview_route_deleted ()
 	set_view_mode (Mixer);
 }
 
-void
+bool
+MackieControlProtocol::subview_mode_would_be_ok (SubViewMode mode, boost::shared_ptr<Route> r)
+{
+
+	if (!r) {
+		/* no selected track? no subview mode */
+		return false;
+	}
+
+	switch (mode) {
+	case None:
+		return true;
+		break;
+
+	case Sends:
+		if (r->send_level_controllable (0)) {
+			return true;
+		}
+		break;
+
+	case EQ:
+		if (r->eq_band_cnt() > 0) {
+			return true;
+		}
+		break;
+
+	case Dynamics:
+		if (r->comp_enable_controllable()) {
+			return true;
+		}
+		break;
+	}
+
+	return false;
+}
+
+int
 MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route> r)
 {
 	SubViewMode old_mode = _subview_mode;
@@ -1635,6 +1671,35 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 	if (r) {
 		/* retain _subview_route even if it is reset to null implicitly */
 		_subview_route = r;
+	}
+
+	if (!subview_mode_would_be_ok (sm, r)) {
+
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+		if (!surfaces.empty()) {
+
+			string msg;
+
+			switch (sm) {
+			case Sends:
+				msg = _("no sends for selected track/bus");
+				break;
+			case EQ:
+				msg = _("no EQ in the track/bus");
+				break;
+			case Dynamics:
+				msg = _("no dynamics in selected track/bus");
+				break;
+			default:
+				break;
+			}
+			if (!msg.empty()) {
+				surfaces.front()->display_message_for (msg, 1000);
+			}
+		}
+
+		return -1;
 	}
 
 	if ((_subview_mode != old_mode) || (_subview_route != old_route)) {
@@ -1699,6 +1764,8 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 			}
 		}
 	}
+
+	return 0;
 }
 
 void
@@ -1752,6 +1819,10 @@ MackieControlProtocol::set_pot_mode (PotMode m)
 	if (flip_mode()) {
 		return;
 	}
+
+	/* switch to a pot mode cancels any subview mode */
+
+	set_subview_mode (None, boost::shared_ptr<Route>());
 
 	_pot_mode = m;
 
@@ -1859,8 +1930,12 @@ MackieControlProtocol::_gui_track_selection_changed (ARDOUR::RouteNotificationLi
 	}
 
 	if (gui_selection_did_change) {
-		/* actual GUI selection changed */
-		set_subview_mode (_subview_mode, first_selected_route());
+
+		/* actual GUI selection changed, which may affect subview state */
+
+		if (set_subview_mode (_subview_mode, first_selected_route())) {
+			set_subview_mode (None, boost::shared_ptr<Route>());
+		}
 	}
 }
 

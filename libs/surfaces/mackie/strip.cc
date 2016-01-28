@@ -771,22 +771,51 @@ Strip::vselect_event (Button&, ButtonState bs)
 {
 	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
 
-		/* subview mode: vpot press acts like a button for toggle parameters */
+		/* most subview modes: vpot press acts like a button for toggle parameters */
 
 		if (bs != press) {
 			return;
 		}
 
-		boost::shared_ptr<AutomationControl> control = _vpot->control ();
-		if (!control) {
-			return;
-		}
+		if (_surface->mcp().subview_mode() != MackieControlProtocol::Sends) {
 
-		if (control->toggled()) {
+			boost::shared_ptr<AutomationControl> control = _vpot->control ();
+			if (!control) {
+				return;
+			}
+
 			if (control->toggled()) {
-				control->set_value (!control->get_value(), Controllable::NoGroup);
+				if (control->toggled()) {
+					control->set_value (!control->get_value(), Controllable::NoGroup);
+				}
+			}
+		} else {
+
+			/* Send mode: press enables/disables the relevant send */
+
+			if (_route) {
+
+				const uint32_t global_pos = _surface->mcp().global_index (*this);
+				boost::shared_ptr<AutomationControl> control = _route->send_enable_controllable (global_pos);
+
+				if (control) {
+					bool currently_enabled = (bool) control->get_value();
+					control->set_value (!currently_enabled, Controllable::UseGroup);
+
+					if (currently_enabled) {
+						/* we just turned it off */
+						display (1, "off");
+					} else {
+						/* we just turned it on, show the level
+						*/
+						control = _route->send_level_controllable (global_pos);
+						do_parameter_display (BusSendLevel, control->get_value());
+					}
+				}
 			}
 		}
+
+		/* done with this event in subview mode */
 
 		return;
 	}
@@ -1477,6 +1506,8 @@ Strip::subview_mode_changed ()
 	switch (_surface->mcp().subview_mode()) {
 	case MackieControlProtocol::None:
 		set_vpot_parameter (vpot_parameter);
+		/* need to show strip name again */
+		show_route_name ();
 		notify_metering_state_changed ();
 		eq_band = -1;
 		break;

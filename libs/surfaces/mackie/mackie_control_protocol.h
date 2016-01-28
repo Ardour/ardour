@@ -152,6 +152,7 @@ class MackieControlProtocol
 	FlipMode flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
 	SubViewMode subview_mode () const { return _subview_mode; }
+	static bool subview_mode_would_be_ok (SubViewMode, boost::shared_ptr<ARDOUR::Route>);
 	boost::shared_ptr<ARDOUR::Route> subview_route() const;
 	PotMode pot_mode () const { return _pot_mode; }
 	bool zoom_mode () const { return modifier_state() & MODIFIER_ZOOM; }
@@ -165,7 +166,7 @@ class MackieControlProtocol
 	boost::shared_ptr<ARDOUR::Route> first_selected_route () const;
 
 	void set_view_mode (ViewMode);
-	void set_subview_mode (SubViewMode, boost::shared_ptr<ARDOUR::Route>);
+	int set_subview_mode (SubViewMode, boost::shared_ptr<ARDOUR::Route>);
 	void set_flip_mode (FlipMode);
 	void set_pot_mode (PotMode);
 	void pot_mode_globals ();
