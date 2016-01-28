@@ -4734,10 +4734,7 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 	switch (ep) {
 	case EditAtPlayhead:
 		if (_dragging_playhead) {
-			if (!mouse_frame (where, ignored)) {
-				/* XXX not right but what can we do ? */
-				return 0;
-			}
+			where = *_control_scroll_target;
 		} else {
 			where = _session->audible_frame();
 		}
