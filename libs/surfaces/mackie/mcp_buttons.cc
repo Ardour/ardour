@@ -108,9 +108,9 @@ MackieControlProtocol::left_press (Button &)
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank left with current initial = %1 nstrips = %2 tracks/busses = %3\n",
 							   _current_initial_bank, strip_cnt, sorted.size()));
 	if (_current_initial_bank > 0) {
-		switch_banks ((_current_initial_bank - 1) / strip_cnt * strip_cnt);
+		(void) switch_banks ((_current_initial_bank - 1) / strip_cnt * strip_cnt);
 	} else {
-		switch_banks (0);
+		(void) switch_banks (0);
 	}
 
 
@@ -120,7 +120,7 @@ MackieControlProtocol::left_press (Button &)
 LedState
 MackieControlProtocol::left_release (Button &)
 {
-	return off;
+	return none;
 }
 
 LedState
@@ -141,23 +141,16 @@ MackieControlProtocol::right_press (Button &)
 
 	if (_current_initial_bank < max_bank) {
 		uint32_t new_initial = (_current_initial_bank / strip_cnt * strip_cnt) + strip_cnt;
-
-		switch_banks (new_initial);
-	} else {
-		switch_banks (max_bank);
+		(void) switch_banks (new_initial);
 	}
 
-	return on;
+	return none;
 }
 
 LedState
 MackieControlProtocol::right_release (Button &)
 {
-	if (zoom_mode()) {
-
-	}
-
-	return off;
+	return none;
 }
 
 LedState
@@ -581,7 +574,7 @@ MackieControlProtocol::bank_release (Button& b, uint32_t basic_bank_num)
 		bank_num = 8 + basic_bank_num;
 	}
 
-	switch_banks (n_strips() * bank_num);
+	(void) switch_banks (n_strips() * bank_num);
 
 	return on;
 }

@@ -374,31 +374,38 @@ MackieControlProtocol::n_strips (bool with_locked_strips) const
 	return strip_count;
 }
 
-void
+int
 MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch banking to start at %1 force ? %2 current = %3\n", initial, force, _current_initial_bank));
 
 	if (initial == _current_initial_bank && !force) {
-		return;
+		/* everything is as it should be */
+		return 0;
 	}
 
 	Sorted sorted = get_sorted_routes();
 	uint32_t strip_cnt = n_strips (false); // do not include locked strips
 					       // in this count
 
+	if (initial >= sorted.size()) {
+		/* too high, we can't get there */
+		return -1;
+	}
+
 	if (sorted.size() <= strip_cnt && _current_initial_bank == 0 && !force) {
 		/* no banking - not enough routes to fill all strips and we're
 		 * not at the first one.
 		 */
-		return;
+		return -1;
 	}
+
 	_current_initial_bank = initial;
 	_current_selected_track = -1;
 
 	// Map current bank of routes onto each surface(+strip)
 
-	if (_current_initial_bank <= sorted.size()) {
+	if (_current_initial_bank < sorted.size()) {
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to %1, %2, available routes %3 on %4 surfaces\n",
 								   _current_initial_bank, strip_cnt, sorted.size(),
@@ -422,6 +429,9 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 			(*si)->map_routes (routes);
 		}
+
+	} else {
+		return -1;
 	}
 
 	/* make sure selection is correct */
@@ -430,6 +440,8 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	/* current bank has not been saved */
 	session->set_dirty();
+
+	return 0;
 }
 
 int
@@ -653,7 +665,7 @@ MackieControlProtocol::update_surfaces()
 
 	// do the initial bank switch to connect signals
 	// _current_initial_bank is initialised by set_state
-	switch_banks (_current_initial_bank, true);
+	(void) switch_banks (_current_initial_bank, true);
 
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::update_surfaces() finished\n");
 }
@@ -1069,7 +1081,7 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 		state_version = version;
 	}
 
-	switch_banks (bank, true);
+	(void) switch_banks (bank, true);
 
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::set_state done\n");
 
@@ -1276,9 +1288,9 @@ MackieControlProtocol::notify_remote_id_changed()
 	if (sorted.size() - _current_initial_bank < sz) {
 		// but don't shift backwards past the zeroth channel
 		if (sorted.size() < sz) {  // avoid unsigned math mistake below
-			switch_banks(0, true);
+			(void) switch_banks(0, true);
 		} else {
-			switch_banks (max((Sorted::size_type) 0, sorted.size() - sz), true);
+			(void) switch_banks (max((Sorted::size_type) 0, sorted.size() - sz), true);
 		}
 	} else {
 		// Otherwise just refresh the current bank
@@ -1777,14 +1789,18 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 void
 MackieControlProtocol::set_view_mode (ViewMode m)
 {
-	_last_bank[_view_mode] = _current_initial_bank;
+	ViewMode old_view_mode = _view_mode;
 
 	_view_mode = m;
 
+	if (switch_banks(_last_bank[m], true)) {
+		_view_mode = old_view_mode;
+		return;
+	}
+
+	_last_bank[_view_mode] = _current_initial_bank;
 	/* leave subview mode, whatever it was */
 	set_subview_mode (None, boost::shared_ptr<Route>());
-
-	switch_banks(_last_bank[_view_mode], true);
 	display_view_mode ();
 }
 
@@ -2182,7 +2198,7 @@ MackieControlProtocol::ipmidi_restart ()
 	if (create_surfaces ()) {
 		return -1;
 	}
-	switch_banks (_current_initial_bank, true);
+	(void) switch_banks (_current_initial_bank, true);
 	needs_ipmidi_restart = false;
 	return 0;
 }

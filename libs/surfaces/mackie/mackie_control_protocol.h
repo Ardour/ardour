@@ -282,7 +282,7 @@ class MackieControlProtocol
 	Sorted get_sorted_routes();
 
 	// bank switching
-	void switch_banks (uint32_t first_remote_id, bool force = false);
+	int switch_banks (uint32_t first_remote_id, bool force = false);
 	void prev_track ();
 	void next_track ();
 
