@@ -329,8 +329,12 @@ MackieControlProtocol::get_sorted_routes()
 			break;
 		case Plugins:
 			break;
-		case Auxes: // in ardour, for now aux and buss are same. for mixbus, see "Busses" case above
+		case Auxes: // in ardour, for now aux and buss are same. for mixbus, "Busses" are mixbuses, "Auxes" are ardour buses
+#ifdef MIXBUS
+			if (!route->mixbus() && !is_track(route) && !is_hidden(route)) {
+#else
 			if (!is_track(route) && !is_hidden(route)) {
+#endif
 				sorted.push_back (route);
 				remote_ids.insert (route->remote_control_id());
 			}
