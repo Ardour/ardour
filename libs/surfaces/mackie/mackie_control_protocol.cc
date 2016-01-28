@@ -1627,31 +1627,25 @@ MackieControlProtocol::notify_subview_route_deleted ()
 bool
 MackieControlProtocol::subview_mode_would_be_ok (SubViewMode mode, boost::shared_ptr<Route> r)
 {
-
-	if (!r) {
-		/* no selected track? no subview mode */
-		return false;
-	}
-
 	switch (mode) {
 	case None:
 		return true;
 		break;
 
 	case Sends:
-		if (r->send_level_controllable (0)) {
+		if (r && r->send_level_controllable (0)) {
 			return true;
 		}
 		break;
 
 	case EQ:
-		if (r->eq_band_cnt() > 0) {
+		if (r && r->eq_band_cnt() > 0) {
 			return true;
 		}
 		break;
 
 	case Dynamics:
-		if (r->comp_enable_controllable()) {
+		if (r && r->comp_enable_controllable()) {
 			return true;
 		}
 		break;
