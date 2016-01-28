@@ -357,8 +357,8 @@ BasicUI::jump_by_bars (double bars)
 	session->request_locate ( session->convert_to_frames (any) );
 }
 
-void BasicUI::mark_in () { access_action("Editor/start-range"); }
-void BasicUI::mark_out () { access_action("Editor/finish-range"); }
+void BasicUI::mark_in () { access_action("Editor/start-range-from-playhead"); }
+void BasicUI::mark_out () { access_action("Editor/finish-range-from-playhead"); }
 
 void BasicUI::toggle_click () { access_action("Transport/ToggleClick"); }
 void BasicUI::midi_panic () { access_action("MIDI/panic"); }

@@ -39,7 +39,7 @@ using namespace PBD;
 using namespace Editing;
 
 void
-Editor::keyboard_selection_finish (bool /*add*/)
+Editor::keyboard_selection_finish (bool /*add*/, Editing::EditIgnoreOption ign)
 {
 	if (_session) {
 
@@ -49,7 +49,7 @@ Editor::keyboard_selection_finish (bool /*add*/)
 		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
 			end = _session->audible_frame();
 		} else {
-			end = get_preferred_edit_position();
+			end = get_preferred_edit_position(ign);
 		}
 
 		//snap the selection start/end
@@ -69,7 +69,7 @@ Editor::keyboard_selection_finish (bool /*add*/)
 }
 
 void
-Editor::keyboard_selection_begin ()
+Editor::keyboard_selection_begin (Editing::EditIgnoreOption ign)
 {
 	if (_session) {
 
@@ -77,9 +77,11 @@ Editor::keyboard_selection_begin ()
 		framepos_t end = selection->time.end_frame();  //0 if no current selection
 
 		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
+printf("if you don't wait a second, this wil be wrong");
 			start = _session->audible_frame();
 		} else {
-			start = get_preferred_edit_position();
+printf("keyboard_selection_begin:: getting pref\n");
+			start = get_preferred_edit_position(ign);
 		}
 
 		//snap the selection start/end
