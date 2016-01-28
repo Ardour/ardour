@@ -67,6 +67,10 @@ public:
 	void printstats ();
 	void dumpsegments ();
 
+#ifdef RAP_WITH_CALL_STATS
+	size_t mem_used () const { return _cur_used; }
+#endif
+
 private:
 	std::string _name;
 	size_t _poolsize;

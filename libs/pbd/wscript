@@ -164,6 +164,7 @@ def build(bld):
                 test/signals_test.cc
                 test/convert_test.cc
                 test/filesystem_test.cc
+                test/reallocpool_test.cc
                 test/xml_test.cc
                 test/test_common.cc
         '''.split()
