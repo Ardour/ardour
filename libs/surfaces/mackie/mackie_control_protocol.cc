@@ -1734,7 +1734,6 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 				update_global_button (Button::Dyn, off);
 				update_global_button (Button::AudioInstruments, off); /* faking up Dyn */
 				update_global_button (Button::Trim, off);
-				update_global_button (Button::Send, off);
 				update_global_button (Button::Pan, off);
 				break;
 			case MackieControlProtocol::Dynamics:
@@ -1743,7 +1742,6 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 				update_global_button (Button::Dyn, on);
 				update_global_button (Button::AudioInstruments, on); /* faking up Dyn */
 				update_global_button (Button::Trim, off);
-				update_global_button (Button::Send, off);
 				update_global_button (Button::Pan, off);
 				break;
 			case MackieControlProtocol::Sends:
@@ -1752,7 +1750,6 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 				update_global_button (Button::Dyn, off);
 				update_global_button (Button::AudioInstruments, on); /* faking up Dyn */
 				update_global_button (Button::Trim, off);
-				update_global_button (Button::Send, off);
 				update_global_button (Button::Pan, off);
 				break;
 			}
@@ -1768,6 +1765,8 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 	_last_bank[_view_mode] = _current_initial_bank;
 
 	_view_mode = m;
+
+	/* leave subview mode, whatever it was */
 	set_subview_mode (None, boost::shared_ptr<Route>());
 
 	switch_banks(_last_bank[_view_mode], true);
