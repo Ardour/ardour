@@ -790,7 +790,7 @@ void
 Selection::set (TimeAxisView* track)
 {
 	clear_objects ();  //enforce object/range exclusivity
-	clear_tracks ();
+	clear_tracks (false);
 	add (track);
 }
 
@@ -798,7 +798,7 @@ void
 Selection::set (const TrackViewList& track_list)
 {
 	clear_objects();  //enforce object/range exclusivity
-	clear_tracks ();
+	clear_tracks (false);
 	add (track_list);
 }
 
