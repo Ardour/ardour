@@ -5571,3 +5571,15 @@ Route::send_name (uint32_t n) const
 	}
 #endif
 }
+
+boost::shared_ptr<AutomationControl>
+Route::master_send_enable_controllable () const
+{
+#ifdef  MIXBUS
+	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
+	assert (plug);
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_channel_post_mstr_assign)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}

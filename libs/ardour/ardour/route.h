@@ -567,6 +567,14 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
          */
         std::string send_name (uint32_t n) const;
 
+        /* well known control that enables/disables sending to the master bus.
+         *
+         * In Ardour, this returns null.
+         * In Mixbus, it will return a suitable control, or null depending on
+         * the route.
+         */
+        boost::shared_ptr<AutomationControl> master_send_enable_controllable () const;
+
         void protect_automation ();
 
 	enum {
