@@ -166,6 +166,8 @@ class MackieControlProtocol
 	bool is_mapped (boost::shared_ptr<ARDOUR::Route>) const;
 	boost::shared_ptr<ARDOUR::Route> first_selected_route () const;
 
+	void set_automation_state (ARDOUR::AutoState);
+
 	void set_view_mode (ViewMode);
 	int set_subview_mode (SubViewMode, boost::shared_ptr<ARDOUR::Route>);
 	void set_flip_mode (FlipMode);

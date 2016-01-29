@@ -2416,3 +2416,20 @@ MackieControlProtocol::request_factory (uint32_t num_requests)
 	*/
 	return request_buffer_factory (num_requests);
 }
+
+void
+MackieControlProtocol::set_automation_state (AutoState as)
+{
+	for (RouteNotificationList::iterator wr = _last_selected_routes.begin(); wr != _last_selected_routes.end(); ++wr) {
+		boost::shared_ptr<Route> r = (*wr).lock();
+		if (!r) {
+			continue;
+		}
+		boost::shared_ptr<AutomationControl> ac = r->gain_control();
+		if (!ac) {
+			continue;
+		}
+
+		ac->set_automation_state (as);
+	}
+}

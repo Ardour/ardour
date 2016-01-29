@@ -740,12 +740,13 @@ MackieControlProtocol::name_value_release (Button &)
 LedState
 MackieControlProtocol::touch_press (Button &)
 {
-	return off;
+	return none;
 }
 LedState
 MackieControlProtocol::touch_release (Button &)
 {
-	return off;
+	set_automation_state (ARDOUR::Touch);
+	return none;
 }
 LedState
 MackieControlProtocol::cancel_press (Button &)
@@ -810,14 +811,14 @@ MackieControlProtocol::master_fader_touch_release (Mackie::Button &)
 Mackie::LedState
 MackieControlProtocol::read_press (Mackie::Button&)
 {
-	_metering_active = !_metering_active;
-	notify_metering_state_changed ();
-	return _metering_active;
+	return none;
 }
+
 Mackie::LedState
 MackieControlProtocol::read_release (Mackie::Button&)
 {
-	return _metering_active;
+	set_automation_state (ARDOUR::Off);
+	return none;
 }
 Mackie::LedState
 MackieControlProtocol::write_press (Mackie::Button&)
@@ -827,6 +828,7 @@ MackieControlProtocol::write_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::write_release (Mackie::Button&)
 {
+	set_automation_state (ARDOUR::Write);
 	return none;
 }
 
