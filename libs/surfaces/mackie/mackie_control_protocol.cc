@@ -123,6 +123,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _initialized (false)
 	, configuration_state (0)
 	, state_version (0)
+	, _group_on (false)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 

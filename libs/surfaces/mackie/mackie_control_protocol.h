@@ -355,6 +355,7 @@ class MackieControlProtocol
 	XMLNode*                 configuration_state;
 	int                      state_version;
 	int                      _last_bank[9];
+	bool                     _group_on;
 
 	boost::shared_ptr<ArdourSurface::Mackie::Surface>	_master_surface;
 

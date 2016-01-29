@@ -985,7 +985,8 @@ MackieControlProtocol::grp_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::grp_release (Mackie::Button&)
 {
-	return none;
+	_group_on = !_group_on;
+	return _group_on;
 }
 Mackie::LedState
 MackieControlProtocol::nudge_press (Mackie::Button&)
