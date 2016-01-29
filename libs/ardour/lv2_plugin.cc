@@ -2527,6 +2527,9 @@ LV2World::LV2World()
 
 LV2World::~LV2World()
 {
+	if (!world) {
+		return;
+	}
 #ifdef HAVE_LV2_1_2_0
 	lilv_node_free(bufz_nominalBlockLength);
 	lilv_node_free(bufz_fixedBlockLength);
@@ -2570,6 +2573,7 @@ LV2World::~LV2World()
 	lilv_node_free(atom_Chunk);
 	lilv_node_free(atom_AtomPort);
 	lilv_world_free(world);
+	world = NULL;
 }
 
 void
