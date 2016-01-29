@@ -116,36 +116,37 @@ Selection::clear ()
 }
 
 void
-Selection::clear_objects ()
+Selection::clear_objects (bool with_signal)
 {
-	clear_regions ();
-	clear_points ();
-	clear_lines();
-	clear_playlists ();
-	clear_midi_notes ();
-	clear_midi_regions ();
+	clear_regions (with_signal);
+	clear_points (with_signal);
+	clear_lines(with_signal);
+	clear_playlists (with_signal);
+	clear_midi_notes (with_signal);
+	clear_midi_regions (with_signal);
 }
 
 void
-Selection::clear_tracks ()
+Selection::clear_tracks (bool with_signal)
 {
 	if (!tracks.empty()) {
 		for (TrackViewList::iterator x = tracks.begin(); x != tracks.end(); ++x) {
 			(*x)->set_selected (false);
 		}
 		tracks.clear ();
-		if (!_no_tracks_changed) {
+		if (!_no_tracks_changed && with_signal) {
 			TracksChanged();
 		}
 	}
 }
 
 void
-Selection::clear_time ()
+Selection::clear_time (bool with_signal)
 {
 	time.clear();
-
-	TimeChanged ();
+	if (with_signal) {
+		TimeChanged ();
+	}
 }
 
 void
@@ -159,23 +160,27 @@ Selection::dump_region_layers()
 
 
 void
-Selection::clear_regions ()
+Selection::clear_regions (bool with_signal)
 {
 	if (!regions.empty()) {
 		regions.clear_all ();
-		RegionsChanged();
+		if (with_signal) {
+			RegionsChanged();
+		}
 	}
 }
 
 void
-Selection::clear_midi_notes ()
+Selection::clear_midi_notes (bool with_signal)
 {
 	if (!midi_notes.empty()) {
 		for (MidiNoteSelection::iterator x = midi_notes.begin(); x != midi_notes.end(); ++x) {
 			delete *x;
 		}
 		midi_notes.clear ();
-		MidiNotesChanged ();
+		if (with_signal) {
+			MidiNotesChanged ();
+		}
 	}
 
 	// clear note selections for MRV's that have note selections
@@ -193,16 +198,18 @@ Selection::clear_midi_notes ()
 }
 
 void
-Selection::clear_midi_regions ()
+Selection::clear_midi_regions (bool with_signal)
 {
 	if (!midi_regions.empty()) {
 		midi_regions.clear ();
-		MidiRegionsChanged ();
+		if (with_signal) {
+			MidiRegionsChanged ();
+		}
 	}
 }
 
 void
-Selection::clear_playlists ()
+Selection::clear_playlists (bool with_signal)
 {
 	/* Selections own their playlists */
 
@@ -214,25 +221,31 @@ Selection::clear_playlists ()
 
 	if (!playlists.empty()) {
 		playlists.clear ();
-		PlaylistsChanged();
+		if (with_signal) {
+			PlaylistsChanged();
+		}
 	}
 }
 
 void
-Selection::clear_lines ()
+Selection::clear_lines (bool with_signal)
 {
 	if (!lines.empty()) {
 		lines.clear ();
-		LinesChanged();
+		if (with_signal) {
+			LinesChanged();
+		}
 	}
 }
 
 void
-Selection::clear_markers ()
+Selection::clear_markers (bool with_signal)
 {
 	if (!markers.empty()) {
 		markers.clear ();
-		MarkersChanged();
+		if (with_signal) {
+			MarkersChanged();
+		}
 	}
 }
 
@@ -776,7 +789,7 @@ Selection::remove (boost::shared_ptr<ARDOUR::AutomationList> ac)
 void
 Selection::set (TimeAxisView* track)
 {
-	clear_objects();  //enforce object/range exclusivity
+	clear_objects ();  //enforce object/range exclusivity
 	clear_tracks ();
 	add (track);
 }
@@ -1090,11 +1103,13 @@ Selection::add (list<Selectable*> const & selectables)
 }
 
 void
-Selection::clear_points ()
+Selection::clear_points (bool with_signal)
 {
 	if (!points.empty()) {
 		points.clear ();
-		PointsChanged ();
+		if (with_signal) {
+			PointsChanged ();
+		}
 	}
 }
 

@@ -200,18 +200,18 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 
 	void clear_all() { clear_time(); clear_tracks(); clear_objects(); }
 
-	void clear_time();  //clears any time selection  ( i.e. Range )
-	void clear_tracks ();  //clears the track header selections
-	void clear_objects();  //clears the items listed below
+	void clear_time(bool with_signal = true);  //clears any time selection  ( i.e. Range )
+	void clear_tracks (bool with_signal = true);  //clears the track header selections
+	void clear_objects(bool with_signal = true);  //clears the items listed below
 
 	// these items get cleared wholesale in clear_objects
-	void clear_regions();
-	void clear_lines ();
-	void clear_playlists ();
-	void clear_points ();
-	void clear_markers ();
-	void clear_midi_notes ();
-	void clear_midi_regions ();
+	void clear_regions(bool with_signal = true);
+	void clear_lines (bool with_signal = true);
+	void clear_playlists (bool with_signal = true);
+	void clear_points (bool with_signal = true);
+	void clear_markers (bool with_signal = true);
+	void clear_midi_notes (bool with_signal = true);
+	void clear_midi_regions (bool with_signal = true);
 
 	void foreach_region (void (ARDOUR::Region::*method)(void));
 	void foreach_regionview (void (RegionView::*method)(void));
