@@ -1765,23 +1765,17 @@ Strip::setup_sends_vpot (boost::shared_ptr<Route> r)
 
 	const uint32_t global_pos = _surface->mcp().global_index (*this);
 
-	boost::shared_ptr<Processor> send = r->nth_send (global_pos);
-
-	if (!send) {
-		_surface->write (display (0, string()));
-		return;
-	}
-
 	boost::shared_ptr<AutomationControl> pc = r->send_level_controllable (global_pos);
 
 	if (!pc) {
+		_surface->write (display (0, string()));
 		return;
 	}
 
 	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_send_level_change, this, BusSendLevel, global_pos, false), ui_context());
 	_vpot->set_control (pc);
 
-	_surface->write (display (0, send->name()));
+	_surface->write (display (0, r->send_name(global_pos)));
 
 	notify_send_level_change (BusSendLevel, global_pos, true);
 }
