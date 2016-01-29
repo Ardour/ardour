@@ -11,4 +11,5 @@
   <GlobalControls value="no"/>
   <JogWheel value="no"/>
   <TouchSenseFaders value="yes"/>
+  <HasSeparateMeters value="no"/>
 </MackieProtocolDevice>
