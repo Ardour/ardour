@@ -96,6 +96,7 @@ EngineControl::EngineControl ()
 	, lm_running (false)
 	, midi_back_button (_("Back to settings"))
 	, ignore_changes (0)
+	, ignore_device_changes (0)
 	, _desired_sample_rate (0)
 	, started_at_least_once (false)
 	, queue_device_changed (false)
@@ -2220,6 +2221,7 @@ EngineControl::push_state_to_backend (bool start)
 {
 	DEBUG_ECONTROL ("push_state_to_backend");
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	PBD::Unwinder<uint32_t> protect_ignore_device_changes (ignore_device_changes, ignore_device_changes + 1);
 
 	if (!backend) {
 		return 0;
@@ -3041,6 +3043,9 @@ EngineControl::engine_stopped ()
 void
 EngineControl::device_list_changed ()
 {
+	if (ignore_device_changes) {
+		return;
+	}
 	PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1); // ??
 	list_devices ();
 	midi_option_changed();

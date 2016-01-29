@@ -120,7 +120,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     Gtk::CheckButton aj_button;
 
-    uint32_t ignore_changes;
+    uint32_t ignore_changes; // state save/load
+    uint32_t ignore_device_changes; // AudioEngine::DeviceListChanged
     uint32_t _desired_sample_rate;
     bool     started_at_least_once;
     bool     queue_device_changed;
