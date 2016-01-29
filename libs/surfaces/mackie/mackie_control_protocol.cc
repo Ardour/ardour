@@ -1759,23 +1759,26 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 				break;
 			case MackieControlProtocol::EQ:
 				update_global_button (Button::Send, off);
+				update_global_button (Button::Plugin, off);
 				update_global_button (Button::Eq, on);
 				update_global_button (Button::Dyn, off);
-				update_global_button (Button::Trim, off);
+				update_global_button (Button::Track, off);
 				update_global_button (Button::Pan, off);
 				break;
 			case MackieControlProtocol::Dynamics:
 				update_global_button (Button::Send, off);
+				update_global_button (Button::Plugin, off);
 				update_global_button (Button::Eq, off);
 				update_global_button (Button::Dyn, on);
-				update_global_button (Button::Trim, off);
+				update_global_button (Button::Track, off);
 				update_global_button (Button::Pan, off);
 				break;
 			case MackieControlProtocol::Sends:
 				update_global_button (Button::Send, on);
+				update_global_button (Button::Plugin, off);
 				update_global_button (Button::Eq, off);
 				update_global_button (Button::Dyn, off);
-				update_global_button (Button::Trim, off);
+				update_global_button (Button::Track, off);
 				update_global_button (Button::Pan, off);
 				break;
 			}
@@ -1862,19 +1865,21 @@ MackieControlProtocol::set_pot_mode (PotMode m)
 void
 MackieControlProtocol::pot_mode_globals ()
 {
-	update_global_button (Button::Eq, off);
-	update_global_button (Button::Dyn, off);
-	update_global_button (Button::AudioInstruments, off);
-
 	switch (_pot_mode) {
 	case Trim:
+		update_global_button (Button::Eq, off);
+		update_global_button (Button::Dyn, off);
 		update_global_button (Button::Track, on);
 		update_global_button (Button::Send, off);
+		update_global_button (Button::Plugin, off);
 		update_global_button (Button::Pan, off);
 		break;
 	case Pan:
+		update_global_button (Button::Eq, off);
+		update_global_button (Button::Dyn, off);
 		update_global_button (Button::Track, off);
 		update_global_button (Button::Send, off);
+		update_global_button (Button::Plugin, off);
 		update_global_button (Button::Pan, on);
 	};
 }
