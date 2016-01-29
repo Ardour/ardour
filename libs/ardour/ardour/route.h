@@ -562,6 +562,10 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
          */
         boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const;
         boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const;
+        /* for the same value of @param n, this returns the name of the send
+         * associated with the pair of controllables returned by the above two methods.
+         */
+        std::string send_name (uint32_t n) const;
 
         void protect_automation ();
 

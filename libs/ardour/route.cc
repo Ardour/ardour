@@ -5551,3 +5551,23 @@ Route::send_enable_controllable (uint32_t n) const
 	return boost::shared_ptr<AutomationControl>();
 #endif
 }
+
+string
+Route::send_name (uint32_t n) const
+{
+#ifdef MIXBUS
+	if (n >= 8) {
+		return string();
+	}
+	boost::shared_ptr<Route> r = _session.get_mixbus (n);
+	assert (r);
+	return r->name();
+#else
+	boost::shared_ptr<Processor> p = nth_send (n);
+	if (p) {
+		return p->name();
+	} else {
+		return string();
+	}
+#endif
+}
