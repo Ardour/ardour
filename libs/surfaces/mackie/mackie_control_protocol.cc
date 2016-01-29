@@ -1696,34 +1696,37 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 
 	if (!subview_mode_would_be_ok (sm, r)) {
 
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		if (r) {
 
-		if (!surfaces.empty()) {
+			Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-			string msg;
+			if (!surfaces.empty()) {
 
-			switch (sm) {
-			case Sends:
-				msg = _("no sends for selected track/bus");
-				break;
-			case EQ:
-				msg = _("no EQ in the track/bus");
-				break;
-			case Dynamics:
-				msg = _("no dynamics in selected track/bus");
-				break;
-			default:
-				break;
-			}
-			if (!msg.empty()) {
-				surfaces.front()->display_message_for (msg, 1000);
-				if (_subview_mode != None) {
-					/* redisplay current subview mode after
-					   that message goes away.
-					*/
-					Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (1000); // milliseconds
-					redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay_subview_mode));
-					redisplay_timeout->attach (main_loop()->get_context());
+				string msg;
+
+				switch (sm) {
+				case Sends:
+					msg = _("no sends for selected track/bus");
+					break;
+				case EQ:
+					msg = _("no EQ in the track/bus");
+					break;
+				case Dynamics:
+					msg = _("no dynamics in selected track/bus");
+					break;
+				default:
+					break;
+				}
+				if (!msg.empty()) {
+					surfaces.front()->display_message_for (msg, 1000);
+					if (_subview_mode != None) {
+						/* redisplay current subview mode after
+						   that message goes away.
+						*/
+						Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (1000); // milliseconds
+						redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay_subview_mode));
+						redisplay_timeout->attach (main_loop()->get_context());
+					}
 				}
 			}
 		}
