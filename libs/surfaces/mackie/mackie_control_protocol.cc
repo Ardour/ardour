@@ -1802,7 +1802,7 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 		return;
 	}
 
-	_last_bank[_view_mode] = _current_initial_bank;
+	_last_bank[old_view_mode] = _current_initial_bank;
 	/* leave subview mode, whatever it was */
 	set_subview_mode (None, boost::shared_ptr<Route>());
 	display_view_mode ();
