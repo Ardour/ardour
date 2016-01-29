@@ -614,10 +614,6 @@ MackieControlProtocol::update_global_button (int id, LedState ls)
 	if (x != surface->controls_by_device_independent_id.end()) {
 		Button * button = dynamic_cast<Button*> (x->second);
 		surface->write (button->set_state (ls));
-
-		if (ls == on) {
-			// blinkers.erase (id);
-		}
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Button %1 not found\n", id));
 	}
