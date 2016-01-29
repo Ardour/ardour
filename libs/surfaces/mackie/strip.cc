@@ -837,8 +837,17 @@ Strip::vselect_event (Button&, ButtonState bs)
 
 		}  else {
 
+#ifdef MIXBUS
+			if (_route) {
+				boost::shared_ptr<AutomationControl> ac = _route->master_send_enable_controllable ();
+				if (ac) {
+					bool enabled = ac->get_value();
+					ac->set_value (!enabled, Controllable::UseGroup);
+				}
+#else
 			DEBUG_TRACE (DEBUG::MackieControl, "switching to next pot mode\n");
 			next_pot_mode ();
+#endif
 		}
 
 	}
