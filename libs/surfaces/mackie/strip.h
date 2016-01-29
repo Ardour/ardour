@@ -70,7 +70,7 @@ public:
 	void handle_pot (Pot&, float delta);
 
 	void periodic (ARDOUR::microseconds_t now_usecs);
-	void redisplay (ARDOUR::microseconds_t now_usecs);
+	void redisplay (ARDOUR::microseconds_t now_usecs, bool force = true);
 
 	MidiByteArray display (uint32_t line_number, const std::string&);
 	MidiByteArray blank_display (uint32_t line_number);
@@ -92,6 +92,11 @@ public:
 	void block_vpot_mode_display_for (uint32_t msecs);
 
 private:
+	enum VPotDisplayMode {
+		Name,
+		Value
+	};
+
 	Button*  _solo;
 	Button*  _recenable;
 	Button*  _mute;
@@ -106,8 +111,10 @@ private:
 	bool     _controls_locked;
 	bool     _transport_is_rolling;
 	bool     _metering_active;
-	uint64_t _block_vpot_mode_redisplay_until;
+	std::string pending_display[2];
+	std::string current_display[2];
 	uint64_t _block_screen_redisplay_until;
+	uint64_t return_to_vpot_mode_display_at;
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;
 	PBD::ScopedConnectionList subview_connections;
@@ -144,16 +151,7 @@ private:
 
 	void return_to_vpot_mode_display ();
 
-	struct RedisplayRequest {
-		ARDOUR::AutomationType type;
-		float val;
-	};
-
-	RingBuffer<RedisplayRequest> redisplay_requests;
-
 	void do_parameter_display (ARDOUR::AutomationType, float val);
-	void queue_parameter_display (ARDOUR::AutomationType, float val);
-
 	void select_event (Button&, ButtonState);
 	void vselect_event (Button&, ButtonState);
 	void fader_touch_event (Button&, ButtonState);

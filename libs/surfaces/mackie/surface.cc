@@ -896,10 +896,10 @@ Surface::periodic (uint64_t now_usecs)
 }
 
 void
-Surface::redisplay (ARDOUR::microseconds_t now)
+Surface::redisplay (ARDOUR::microseconds_t now, bool force)
 {
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->redisplay (now);
+		(*s)->redisplay (now, force);
 	}
 }
 

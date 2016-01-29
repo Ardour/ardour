@@ -34,9 +34,12 @@ class Meter : public Control
 public:
 	Meter (int id, std::string name, Group & group)
 		: Control  (id, name, group)
+		, _enabled (false)
 		, overload_on (false) {}
 
+
 	void send_update (Surface&, float dB);
+	bool enabled () const { return _enabled; }
 
 	MidiByteArray zero();
 
@@ -45,6 +48,7 @@ public:
 	void notify_metering_state_changed(Surface& surface, bool transport_is_rolling, bool metering_active);
 
   private:
+	bool _enabled;
 	bool overload_on;
 };
 

@@ -469,14 +469,14 @@ MackieControlProtocol::set_active (bool yn)
 			set_device (_device_info.name(), true);
 		}
 
-		/* set up periodic task for metering and automation
+		/* set up periodic task for timecode display and metering and automation
 		 */
 
 		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
 		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::periodic));
 		periodic_timeout->attach (main_loop()->get_context());
 
-		/* a faster periodic task used to display parameter updates */
+		/* periodic task used to update strip displays */
 
 		Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (10); // milliseconds
 		redisplay_connection = redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay));
@@ -515,14 +515,14 @@ MackieControlProtocol::periodic ()
 		return false;
 	}
 
-	if (needs_ipmidi_restart) {
-		ipmidi_restart ();
+	if (!_initialized) {
+		/* wait for higher-frequency redisplay() callback to initialize
+		 * us
+		 */
 		return true;
 	}
 
-	if (!_initialized) {
-		initialize();
-	}
+	update_timecode_display ();
 
 	ARDOUR::microseconds_t now_usecs = ARDOUR::get_microseconds ();
 
@@ -533,8 +533,6 @@ MackieControlProtocol::periodic ()
 			(*s)->periodic (now_usecs);
 		}
 	}
-
-	update_timecode_display ();
 
 	return true;
 }
@@ -561,7 +559,7 @@ MackieControlProtocol::redisplay ()
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
 		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-			(*s)->redisplay (now);
+			(*s)->redisplay (now, false);
 		}
 	}
 

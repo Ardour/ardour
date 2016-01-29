@@ -19,6 +19,7 @@
 
 #include <sstream>
 #include <vector>
+#include <climits>
 
 #include <stdint.h>
 
@@ -97,8 +98,8 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _controls_locked (false)
 	, _transport_is_rolling (false)
 	, _metering_active (true)
-	, _block_vpot_mode_redisplay_until (0)
 	, _block_screen_redisplay_until (0)
+	, return_to_vpot_mode_display_at (UINT64_MAX)
 	, eq_band (-1)
 	, _pan_mode (PanAzimuthAutomation)
 	, _trim_mode (TrimAutomation)
@@ -108,7 +109,6 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _last_pan_width_position_written (-1.0)
 	, _last_trim_position_written (-1.0)
 	, _current_send (0)
-	, redisplay_requests (256)
 {
 	_fader = dynamic_cast<Fader*> (Fader::factory (*_surface, index, "fader", *this));
 	_vpot = dynamic_cast<Pot*> (Pot::factory (*_surface, Pot::ID + index, "vpot", *this));
@@ -377,19 +377,18 @@ Strip::notify_gain_changed (bool force_update)
 		float gain_coefficient = ac->get_value();
 		float normalized_position = ac->internal_to_interface (gain_coefficient);
 
-
 		if (force_update || normalized_position != _last_gain_position_written) {
 
 			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 				if (!control->in_use()) {
 					_surface->write (_vpot->set (normalized_position, true, Pot::wrap));
 				}
-				queue_parameter_display (GainAutomation, gain_coefficient);
+				do_parameter_display (GainAutomation, gain_coefficient);
 			} else {
 				if (!control->in_use()) {
 					_surface->write (_fader->set_position (normalized_position));
 				}
-				queue_parameter_display (GainAutomation, gain_coefficient);
+				do_parameter_display (GainAutomation, gain_coefficient);
 			}
 
 			_last_gain_position_written = normalized_position;
@@ -423,11 +422,11 @@ Strip::notify_trim_changed (bool force_update)
 			if (control == _fader) {
 				if (!_fader->in_use()) {
 					_surface->write (_fader->set_position (normalized_position));
-					queue_parameter_display (TrimAutomation, gain_coefficient);
+					do_parameter_display (TrimAutomation, gain_coefficient);
 				}
 			} else if (control == _vpot) {
 				_surface->write (_vpot->set (normalized_position, true, Pot::dot));
-				queue_parameter_display (TrimAutomation, gain_coefficient);
+				do_parameter_display (TrimAutomation, gain_coefficient);
 			}
 			_last_trim_position_written = normalized_position;
 		}
@@ -456,11 +455,11 @@ Strip::notify_phase_changed (bool force_update)
 		if (control == _fader) {
 			if (!_fader->in_use()) {
 				_surface->write (_fader->set_position (normalized_position));
-				queue_parameter_display (PhaseAutomation, normalized_position);
+				do_parameter_display (PhaseAutomation, normalized_position);
 			}
 		} else if (control == _vpot) {
 			_surface->write (_vpot->set (normalized_position, true, Pot::wrap));
-			queue_parameter_display (PhaseAutomation, normalized_position);
+			do_parameter_display (PhaseAutomation, normalized_position);
 		}
 	}
 }
@@ -507,7 +506,7 @@ Strip::show_route_name ()
 		line1 = PBD::short_version (fullname, 6);
 	}
 
-	_surface->write (display (0, line1));
+	pending_display[0] = line1;
 }
 
 void
@@ -532,7 +531,7 @@ Strip::notify_send_level_change (AutomationType type, uint32_t send_num, bool fo
 
 	if (control) {
 		float val = control->get_value();
-		queue_parameter_display (type, control->internal_to_interface (val));
+		do_parameter_display (type, control->internal_to_interface (val));
 		/* update pot/encoder */
 		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
@@ -580,7 +579,7 @@ Strip::notify_eq_change (AutomationType type, uint32_t band, bool force_update)
 
 	if (control) {
 		float val = control->get_value();
-		queue_parameter_display (type, val);
+		do_parameter_display (type, val);
 		/* update pot/encoder */
 		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
@@ -634,7 +633,7 @@ Strip::notify_dyn_change (AutomationType type, bool force_update, bool propagate
 
 	if (control) {
 		float val = control->get_value();
-		queue_parameter_display (type, val);
+		do_parameter_display (type, val);
 		/* update pot/encoder */
 		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
@@ -673,12 +672,12 @@ Strip::notify_panner_azi_changed (bool force_update)
 			if (!_fader->in_use()) {
 				_surface->write (_fader->set_position (normalized_pos));
 				/* show actual internal value to user */
-				queue_parameter_display (PanAzimuthAutomation, internal_pos);
+				do_parameter_display (PanAzimuthAutomation, internal_pos);
 			}
 		} else if (control == _vpot) {
 			_surface->write (_vpot->set (normalized_pos, true, Pot::dot));
 			/* show actual internal value to user */
-			queue_parameter_display (PanAzimuthAutomation, internal_pos);
+			do_parameter_display (PanAzimuthAutomation, internal_pos);
 		}
 
 		_last_pan_azi_position_written = normalized_pos;
@@ -718,13 +717,13 @@ Strip::notify_panner_width_changed (bool force_update)
 			if (control == _fader) {
 				if (!control->in_use()) {
 					_surface->write (_fader->set_position (pos));
-					queue_parameter_display (PanWidthAutomation, pos);
+					do_parameter_display (PanWidthAutomation, pos);
 				}
 			}
 
 		} else if (control == _vpot) {
 			_surface->write (_vpot->set (pos, true, Pot::spread));
-			queue_parameter_display (PanWidthAutomation, pos);
+			do_parameter_display (PanWidthAutomation, pos);
 		}
 
 		_last_pan_width_position_written = pos;
@@ -804,7 +803,7 @@ Strip::vselect_event (Button&, ButtonState bs)
 
 					if (currently_enabled) {
 						/* we just turned it off */
-						display (1, "off");
+						pending_display[1] = "off";
 					} else {
 						/* we just turned it on, show the level
 						*/
@@ -856,7 +855,7 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 		_fader->start_touch (_surface->mcp().transport_frame());
 
 		if (ac) {
-			queue_parameter_display ((AutomationType) ac->parameter().type(), ac->get_value());
+			do_parameter_display ((AutomationType) ac->parameter().type(), ac->get_value());
 		}
 
 	} else {
@@ -937,17 +936,6 @@ Strip::handle_button (Button& button, ButtonState bs)
 }
 
 void
-Strip::queue_parameter_display (AutomationType type, float val)
-{
-	RedisplayRequest req;
-
-	req.type = type;
-	req.val = val;
-
-	redisplay_requests.write (&req, 1);
-}
-
-void
 Strip::do_parameter_display (AutomationType type, float val)
 {
 	bool screen_hold = false;
@@ -956,11 +944,11 @@ Strip::do_parameter_display (AutomationType type, float val)
 	switch (type) {
 	case GainAutomation:
 		if (val == 0.0) {
-			_surface->write (display (1, " -inf "));
+			pending_display[1] = " -inf ";
 		} else {
 			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
-			_surface->write (display (1, buf));
+			pending_display[1] = buf;
 			screen_hold = true;
 		}
 		break;
@@ -968,14 +956,13 @@ Strip::do_parameter_display (AutomationType type, float val)
 	case PanAzimuthAutomation:
 		if (Profile->get_mixbus()) {
 			snprintf (buf, sizeof (buf), "%2.1f", val);
-			_surface->write (display (1, buf));
+			pending_display[1] = buf;
 			screen_hold = true;
 		} else {
 			if (_route) {
 				boost::shared_ptr<Pannable> p = _route->pannable();
 				if (p && _route->panner()) {
-					string str =_route->panner()->value_as_string (p->pan_azimuth_control);
-					_surface->write (display (1, str));
+					pending_display[1] =_route->panner()->value_as_string (p->pan_azimuth_control);
 					screen_hold = true;
 				}
 			}
@@ -985,7 +972,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 	case PanWidthAutomation:
 		if (_route) {
 			snprintf (buf, sizeof (buf), "%5ld%%", lrintf ((val * 200.0)-100));
-			_surface->write (display (1, buf));
+			pending_display[1] = buf;
 			screen_hold = true;
 		}
 		break;
@@ -994,7 +981,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 		if (_route) {
 			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
-			_surface->write (display (1, buf));
+			pending_display[1] = buf;
 			screen_hold = true;
 		}
 		break;
@@ -1002,9 +989,9 @@ Strip::do_parameter_display (AutomationType type, float val)
 	case PhaseAutomation:
 		if (_route) {
 			if (_route->phase_control()->get_value() < 0.5) {
-				_surface->write (display (1, "Normal"));
+				pending_display[1] = "Normal";
 			} else {
-				_surface->write (display (1, "Invert"));
+				pending_display[1] = "Invert";
 			}
 			screen_hold = true;
 		}
@@ -1014,7 +1001,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 		if (_route) {
 			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
-			_surface->write (display (1, buf));
+			pending_display[1] = buf;
 			screen_hold = true;
 		}
 		break;
@@ -1029,20 +1016,20 @@ Strip::do_parameter_display (AutomationType type, float val)
 	case CompMakeup:
 	case CompRedux:
 		snprintf (buf, sizeof (buf), "%6.1f", val);
-		_surface->write (display (1, buf));
+		pending_display[1] = buf;
 		screen_hold = true;
 		break;
 	case EQEnable:
 	case CompEnable:
 		if (val >= 0.5) {
-			_surface->write (display (1, "on"));
+			pending_display[1] = "on";
 		} else {
-			_surface->write (display (1, "off"));
+			pending_display[1] = "off";
 		}
 		break;
 	case CompMode:
 		if (_surface->mcp().subview_route()) {
-			_surface->write (display (1, _surface->mcp().subview_route()->comp_mode_name (val)));
+			pending_display[1] = _surface->mcp().subview_route()->comp_mode_name (val);
 		}
 		break;
 	default:
@@ -1050,6 +1037,9 @@ Strip::do_parameter_display (AutomationType type, float val)
 	}
 
 	if (screen_hold) {
+		/* we just queued up a parameter to be displayed.
+		   1 second from now, switch back to vpot mode display.
+		*/
 		block_vpot_mode_display_for (1000);
 	}
 }
@@ -1116,81 +1106,39 @@ Strip::handle_pot (Pot& pot, float delta)
 void
 Strip::periodic (ARDOUR::microseconds_t now)
 {
-	bool reshow_vpot_mode = false;
-	bool reshow_name = false;
-	bool good_strip = true;
-
-	if (!_route) {
-		// view mode may cover as many as 3 strips
-		// needs to be cleared when there are less than 3 routes
-		if (_index > 2) {
-			return;
-		} else {
-			good_strip = false;
-		}
-	}
-
-	if (_block_screen_redisplay_until >= now) {
-		if (_surface->mcp().device_info().has_separate_meters()) {
-			goto meters;
-		}
-		/* no drawing here, for now */
-		return;
-
-	} else if (_block_screen_redisplay_until) {
-
-		/* timeout reached, reset */
-
-		_block_screen_redisplay_until = 0;
-		reshow_vpot_mode = (true && good_strip);
-		reshow_name = true;
-	}
-
-	if (_block_vpot_mode_redisplay_until >= now) {
-		return;
-	} else if (_block_vpot_mode_redisplay_until) {
-
-		/* timeout reached, reset */
-
-		_block_vpot_mode_redisplay_until = 0;
-		reshow_vpot_mode = (true && good_strip);
-	}
-
-	if (reshow_name) {
-		show_route_name ();
-	}
-
-	if (reshow_vpot_mode) {
-		return_to_vpot_mode_display ();
-	} else if (good_strip) {
-		/* no point doing this if we just switched back to vpot mode
-		   display */
-		update_automation ();
-	}
-
-  meters:
-	if (good_strip) {
-		update_meter ();
-	}
+	update_meter ();
+	update_automation ();
 }
 
 void
-Strip::redisplay (ARDOUR::microseconds_t now)
+Strip::redisplay (ARDOUR::microseconds_t now, bool force)
 {
-	RedisplayRequest req;
-	bool have_request = false;
-
-	while (redisplay_requests.read (&req, 1) == 1) {
-		/* read them all */
-		have_request = true;
-	}
-
 	if (_block_screen_redisplay_until >= now) {
+		/* no drawing allowed */
 		return;
 	}
 
-	if (have_request) {
-		do_parameter_display (req.type, req.val);
+	if (_block_screen_redisplay_until) {
+		/* we were blocked, but the time period has elapsed, so we must
+		 * force a redraw.
+		 */
+		force = true;
+		_block_screen_redisplay_until = 0;
+	}
+
+	if (force || (current_display[0] != pending_display[0])) {
+		_surface->write (display (0, pending_display[0]));
+		current_display[0] = pending_display[0];
+	}
+
+	if (return_to_vpot_mode_display_at <= now) {
+		return_to_vpot_mode_display_at = UINT64_MAX;
+		return_to_vpot_mode_display ();
+	}
+
+	if (force || (current_display[1] != pending_display[1])) {
+		_surface->write (display (1, pending_display[1]));
+		current_display[1] = pending_display[1];
 	}
 }
 
@@ -1234,6 +1182,10 @@ Strip::update_automation ()
 void
 Strip::update_meter ()
 {
+	if (!_route) {
+		return;
+	}
+
 	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
 		return;
 	}
@@ -1241,6 +1193,7 @@ Strip::update_meter ()
 	if (_meter && _transport_is_rolling && _metering_active) {
 		float dB = const_cast<PeakMeter&> (_route->peak_meter()).meter_level (0, MeterMCP);
 		_meter->send_update (*_surface, dB);
+		return;
 	}
 }
 
@@ -1253,6 +1206,10 @@ Strip::zero ()
 
 	_surface->write (blank_display (0));
 	_surface->write (blank_display (1));
+	pending_display[0] = string();
+	pending_display[1] = string();
+	current_display[0] = string();
+	current_display[1] = string();
 }
 
 MidiByteArray
@@ -1395,7 +1352,7 @@ Strip::block_screen_display_for (uint32_t msecs)
 void
 Strip::block_vpot_mode_display_for (uint32_t msecs)
 {
-	_block_vpot_mode_redisplay_until = ARDOUR::get_microseconds() + (msecs * 1000);
+	return_to_vpot_mode_display_at = ARDOUR::get_microseconds() + (msecs * 1000);
 }
 
 void
@@ -1409,9 +1366,9 @@ Strip::return_to_vpot_mode_display ()
 		/* do nothing - second line shows value of current subview parameter */
 		return;
 	} else if (_route) {
-		_surface->write (display (1, vpot_mode_string()));
+		pending_display[1] = vpot_mode_string();
 	} else {
-		_surface->write (blank_display (1));
+		pending_display[1] = string();
 	}
 }
 
@@ -1423,7 +1380,7 @@ Strip::next_pot_mode ()
 	if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 		/* do not change vpot mode while in flipped mode */
 		DEBUG_TRACE (DEBUG::MackieControl, "not stepping pot mode - in flip mode\n");
-		_surface->write (display (1, "Flip"));
+		pending_display[1] = "Flip";
 		block_vpot_mode_display_for (1000);
 		return;
 	}
@@ -1573,8 +1530,8 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Route> r)
 	if (pos >= available.size()) {
 		/* this knob is not needed to control the available parameters */
 		_vpot->set_control (boost::shared_ptr<AutomationControl>());
-		_surface->write (display (0, string()));
-		_surface->write (display (1, string()));
+		pending_display[0] = string();
+		pending_display[1] = string();
 		return;
 	}
 
@@ -1617,7 +1574,9 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Route> r)
 	}
 
 	if (!pot_id.empty()) {
-		_surface->write (display (0, pot_id));
+		pending_display[0] = pot_id;
+	} else {
+		pending_display[0] = string();
 	}
 
 	notify_dyn_change (param, true, false);
@@ -1710,8 +1669,8 @@ Strip::setup_eq_vpot (boost::shared_ptr<Route> r)
 		default:
 			/* nothing to control */
 			_vpot->set_control (boost::shared_ptr<AutomationControl>());
-			_surface->write (display (0, string()));
-			_surface->write (display (1, string()));
+			pending_display[0] = string();
+			pending_display[1] = string();
 			/* done */
 			return;
 			break;
@@ -1749,7 +1708,9 @@ Strip::setup_eq_vpot (boost::shared_ptr<Route> r)
 		}
 
 		if (!pot_id.empty()) {
-			_surface->write (display (0, pot_id));
+			pending_display[0] = pot_id;
+		} else {
+			pending_display[0] = string();
 		}
 
 		notify_eq_change (param, eq_band, true);
@@ -1768,14 +1729,15 @@ Strip::setup_sends_vpot (boost::shared_ptr<Route> r)
 	boost::shared_ptr<AutomationControl> pc = r->send_level_controllable (global_pos);
 
 	if (!pc) {
-		_surface->write (display (0, string()));
+		pending_display[0] = string();
+		pending_display[1] = string();
 		return;
 	}
 
 	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_send_level_change, this, BusSendLevel, global_pos, false), ui_context());
 	_vpot->set_control (pc);
 
-	_surface->write (display (0, r->send_name(global_pos)));
+	pending_display[0] = r->send_name (global_pos);
 
 	notify_send_level_change (BusSendLevel, global_pos, true);
 }
@@ -1787,7 +1749,7 @@ Strip::set_vpot_parameter (AutomationType p)
 		control_by_parameter[vpot_parameter] = 0;
 		vpot_parameter = NullAutomation;
 		_vpot->set_control (boost::shared_ptr<AutomationControl>());
-		_surface->write (display (1, string()));
+		pending_display[1] = string();
 		return;
 	}
 
@@ -1931,7 +1893,7 @@ Strip::set_vpot_parameter (AutomationType p)
 
 	}
 
-	_surface->write (display (1, vpot_mode_string()));
+	pending_display[1] = vpot_mode_string ();
 }
 
 bool
