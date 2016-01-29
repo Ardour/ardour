@@ -166,6 +166,8 @@ class MackieControlProtocol
 	bool is_mapped (boost::shared_ptr<ARDOUR::Route>) const;
 	boost::shared_ptr<ARDOUR::Route> first_selected_route () const;
 
+	void check_fader_automation_state ();
+	void update_fader_automation_state ();
 	void set_automation_state (ARDOUR::AutoState);
 
 	void set_view_mode (ViewMode);
@@ -328,6 +330,7 @@ class MackieControlProtocol
 	PBD::ScopedConnectionList route_connections;
 	PBD::ScopedConnectionList subview_route_connections;
 	PBD::ScopedConnectionList gui_connections;
+	PBD::ScopedConnectionList fader_automation_connections;
 	// timer for two quick marker left presses
 	Mackie::Timer            _frm_left_last;
 	// last written timecode string
@@ -357,7 +360,6 @@ class MackieControlProtocol
 	XMLNode*                 configuration_state;
 	int                      state_version;
 	int                      _last_bank[9];
-	bool                     _group_on;
 
 	boost::shared_ptr<ArdourSurface::Mackie::Surface>	_master_surface;
 

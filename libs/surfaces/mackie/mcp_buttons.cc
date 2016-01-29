@@ -817,7 +817,7 @@ MackieControlProtocol::read_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::read_release (Mackie::Button&)
 {
-	set_automation_state (ARDOUR::Off);
+	set_automation_state (ARDOUR::Play);
 	return none;
 }
 Mackie::LedState
@@ -987,8 +987,11 @@ MackieControlProtocol::grp_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::grp_release (Mackie::Button&)
 {
-	_group_on = !_group_on;
-	return _group_on;
+	/* There is no "Off" button for automation,
+	   so we use Group for this purpose.
+	*/
+	set_automation_state (Off);
+	return none;
 }
 Mackie::LedState
 MackieControlProtocol::nudge_press (Mackie::Button&)

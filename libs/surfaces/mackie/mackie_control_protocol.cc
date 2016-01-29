@@ -123,7 +123,6 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _initialized (false)
 	, configuration_state (0)
 	, state_version (0)
-	, _group_on (false)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
@@ -615,6 +614,10 @@ MackieControlProtocol::update_global_button (int id, LedState ls)
 	if (x != surface->controls_by_device_independent_id.end()) {
 		Button * button = dynamic_cast<Button*> (x->second);
 		surface->write (button->set_state (ls));
+
+		if (ls == on) {
+			// blinkers.erase (id);
+		}
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Button %1 not found\n", id));
 	}
@@ -1962,6 +1965,8 @@ MackieControlProtocol::_gui_track_selection_changed (ARDOUR::RouteNotificationLi
 
 	if (gui_selection_did_change) {
 
+		check_fader_automation_state ();
+
 		/* note: this method is also called when we switch banks.
 		 * But ... we don't allow bank switching when in subview mode.
 		 *
@@ -1978,6 +1983,82 @@ MackieControlProtocol::_gui_track_selection_changed (ARDOUR::RouteNotificationLi
 		if (set_subview_mode (_subview_mode, first_selected_route())) {
 			set_subview_mode (None, boost::shared_ptr<Route>());
 		}
+	}
+}
+
+void
+MackieControlProtocol::check_fader_automation_state ()
+{
+	fader_automation_connections.drop_connections ();
+
+	boost::shared_ptr<Route> r = first_selected_route ();
+
+	if (!r) {
+		update_global_button (Button::Read, off);
+		update_global_button (Button::Write, off);
+		update_global_button (Button::Touch, off);
+		update_global_button (Button::Trim, off);
+		update_global_button (Button::Latch, off);
+		update_global_button (Button::Grp, on);
+		return;
+	}
+
+	r->gain_control()->alist()->automation_state_changed.connect (fader_automation_connections,
+	                                                              MISSING_INVALIDATOR,
+	                                                              boost::bind (&MackieControlProtocol::update_fader_automation_state, this),
+	                                                              this);
+
+	update_fader_automation_state ();
+}
+
+void
+MackieControlProtocol::update_fader_automation_state ()
+{
+	boost::shared_ptr<Route> r = first_selected_route ();
+
+	if (!r) {
+		update_global_button (Button::Read, off);
+		update_global_button (Button::Write, off);
+		update_global_button (Button::Touch, off);
+		update_global_button (Button::Trim, off);
+		update_global_button (Button::Latch, off);
+		update_global_button (Button::Grp, on);
+		return;
+	}
+
+	switch (r->gain_control()->automation_state()) {
+	case Off:
+		update_global_button (Button::Read, off);
+		update_global_button (Button::Write, off);
+		update_global_button (Button::Touch, off);
+		update_global_button (Button::Trim, off);
+		update_global_button (Button::Latch, off);
+		update_global_button (Button::Grp, on);
+		break;
+	case Play:
+		update_global_button (Button::Read, on);
+		update_global_button (Button::Write, off);
+		update_global_button (Button::Touch, off);
+		update_global_button (Button::Trim, off);
+		update_global_button (Button::Latch, off);
+		update_global_button (Button::Grp, off);
+		break;
+	case Write:
+		update_global_button (Button::Read, off);
+		update_global_button (Button::Write, on);
+		update_global_button (Button::Touch, off);
+		update_global_button (Button::Trim, off);
+		update_global_button (Button::Latch, off);
+		update_global_button (Button::Grp, off);
+		break;
+	case Touch:
+		update_global_button (Button::Read, off);
+		update_global_button (Button::Write, off);
+		update_global_button (Button::Touch, on);
+		update_global_button (Button::Trim, off);
+		update_global_button (Button::Latch, off);
+		update_global_button (Button::Grp, off);
+		break;
 	}
 }
 
@@ -2420,16 +2501,17 @@ MackieControlProtocol::request_factory (uint32_t num_requests)
 void
 MackieControlProtocol::set_automation_state (AutoState as)
 {
-	for (RouteNotificationList::iterator wr = _last_selected_routes.begin(); wr != _last_selected_routes.end(); ++wr) {
-		boost::shared_ptr<Route> r = (*wr).lock();
-		if (!r) {
-			continue;
-		}
-		boost::shared_ptr<AutomationControl> ac = r->gain_control();
-		if (!ac) {
-			continue;
-		}
+	boost::shared_ptr<Route> r = first_selected_route ();
 
-		ac->set_automation_state (as);
+	if (!r) {
+		return;
 	}
+
+	boost::shared_ptr<AutomationControl> ac = r->gain_control();
+
+	if (!ac) {
+		return;
+	}
+
+	ac->set_automation_state (as);
 }
