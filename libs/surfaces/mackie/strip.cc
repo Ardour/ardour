@@ -792,10 +792,12 @@ Strip::vselect_event (Button&, ButtonState bs)
 
 			/* Send mode: press enables/disables the relevant send */
 
-			if (_route) {
+			boost::shared_ptr<Route> r = _surface->mcp().subview_route();
+
+			if (r) {
 
 				const uint32_t global_pos = _surface->mcp().global_index (*this);
-				boost::shared_ptr<AutomationControl> control = _route->send_enable_controllable (global_pos);
+				boost::shared_ptr<AutomationControl> control = r->send_enable_controllable (global_pos);
 
 				if (control) {
 					bool currently_enabled = (bool) control->get_value();
