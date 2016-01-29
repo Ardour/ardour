@@ -5151,7 +5151,9 @@ Route::pan_azimuth_control() const
 {
 #ifdef MIXBUS
 	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
-	assert (plug);
+	if (!plug) {
+		return boost::shared_ptr<AutomationControl>();
+	}
 	const uint32_t port_channel_post_pan = 2; // gtk2_ardour/mixbus_ports.h
 	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_channel_post_pan)));
 #else
@@ -5510,7 +5512,9 @@ Route::send_level_controllable (uint32_t n) const
 {
 #ifdef  MIXBUS
 	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
-	assert (plug);
+	if (!plug) {
+		return boost::shared_ptr<AutomationControl>();
+	}
 
 	if (n >= 8) {
 		/* no such bus */
@@ -5533,7 +5537,9 @@ Route::send_enable_controllable (uint32_t n) const
 {
 #ifdef  MIXBUS
 	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
-	assert (plug);
+	if (!plug) {
+		return boost::shared_ptr<AutomationControl>();
+	}
 
 	if (n >= 8) {
 		/* no such bus */
@@ -5577,7 +5583,9 @@ Route::master_send_enable_controllable () const
 {
 #ifdef  MIXBUS
 	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
-	assert (plug);
+	if (!plug) {
+		return boost::shared_ptr<AutomationControl>();
+	}
 	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_channel_post_mstr_assign)));
 #else
 	return boost::shared_ptr<AutomationControl>();
