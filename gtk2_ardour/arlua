@@ -1,0 +1,21 @@
+#!/bin/sh
+TOP=`dirname "$0"`/..
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
+export UBUNTU_MENUPROXY=""
+
+if [ $# -gt 0 ] ; then
+    case $1 in
+        -g|--gdb) GDB=gdb; shift ;;
+    esac
+fi
+
+if test -z "$GDB"; then
+	exec $TOP/build/tools/luadevel/luasession "$@"
+fi
+
+if test -n "`which gdb`"; then
+	exec gdb --args $TOP/build/tools/luadevel/luasession "$@"
+fi
+if test -n "`which lldb`"; then
+	exec lldb -- $TOP/build/tools/luadevel/luasession "$@"
+fi

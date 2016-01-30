@@ -1,0 +1,9 @@
+#!/bin/sh
+
+export LD_LIBRARY_PATH=@LIBDIR@${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export ARDOUR_DATA_PATH=@DATADIR@
+export ARDOUR_CONFIG_PATH=@CONFDIR@
+export ARDOUR_DLL_PATH=@LIBDIR@
+export VAMP_PATH=@LIBDIR@/vamp
+
+exec @LIBDIR@/luasession "$@"

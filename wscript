@@ -230,6 +230,7 @@ children = [
         'libs/vfork',
         'libs/ardouralsautil',
         'cfgtool',
+        'tools/luadevel',
 ]
 
 i18n_children = [
