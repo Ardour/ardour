@@ -26,6 +26,7 @@
 #include "surface.h"
 #include "surface_port.h"
 #include "control_group.h"
+#include "mackie_control_protocol.h"
 
 using namespace PBD;
 using namespace ArdourSurface;
@@ -56,7 +57,7 @@ Meter::notify_metering_state_changed(Surface& surface, bool transport_is_rolling
 	msg << id();
 
 	// Enable (0x07) / Disable (0x00) level meter on LCD, peak hold display on horizontal meter and signal LED
-	_enabled = (transport_is_rolling && metering_active);
+	_enabled = ((surface.mcp().device_info().has_separate_meters() || transport_is_rolling) && metering_active);
 	msg << (_enabled ? 0x07 : 0x00);
 
 	// sysex trailer
