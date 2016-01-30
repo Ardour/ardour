@@ -10,4 +10,7 @@
   <Binding channel="1" ctl="116" function="loop-toggle"/>
   <Binding channel="1" ctl="117" function="toggle-rec-enable"/>
 
+<!-- Round buttons beside transport -->
+  <Binding channel="1" ctl="104" action="Editor/select-next-route"/>
+  <Binding channel="1" ctl="105" action="Editor/select-prev-route"/>
 </ArdourMIDIBindings>
