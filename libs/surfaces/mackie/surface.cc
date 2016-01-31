@@ -790,9 +790,9 @@ Surface::turn_it_on ()
 
 	update_view_mode_display (false);
 
-	if (_mcp.device_info ().has_global_controls ()) {
-		_mcp.update_global_button (Button::Read, _mcp.metering_active ());
-	}
+//	if (_mcp.device_info ().has_global_controls ()) {
+//		_mcp.update_global_button (Button::Read, _mcp.metering_active ());
+//	}
 }
 
 void
