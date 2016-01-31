@@ -364,6 +364,7 @@ LedState
 MackieControlProtocol::drop_press (Button &)
 {
 	gui_invoke ("Editor/start-range-from-playhead");
+	update_global_button (Button::Replace, flashing);
 	return on;
 }
 
