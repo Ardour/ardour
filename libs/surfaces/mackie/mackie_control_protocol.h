@@ -120,10 +120,10 @@ class MackieControlProtocol
 		EQ,
 		Dynamics,
 		Sends,
+		TrackView,
 	};
 
 	enum PotMode {
-		Trim,
 		Pan,
 	};
 

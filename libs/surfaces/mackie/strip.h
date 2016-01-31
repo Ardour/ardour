@@ -177,6 +177,8 @@ private:
 
 	void notify_send_level_change (ARDOUR::AutomationType, uint32_t band, bool force);
 	void setup_sends_vpot (boost::shared_ptr<ARDOUR::Route>);
+
+	void setup_trackview_vpot (boost::shared_ptr<ARDOUR::Route>);
 };
 
 }

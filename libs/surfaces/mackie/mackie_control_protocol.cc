@@ -1681,6 +1681,11 @@ MackieControlProtocol::subview_mode_would_be_ok (SubViewMode mode, boost::shared
 			return true;
 		}
 		break;
+
+	case TrackView:
+		if (r) {
+			return true;
+		}
 	}
 
 	return false;
@@ -1730,6 +1735,8 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 				case Dynamics:
 					msg = _("no dynamics in selected track/bus");
 					break;
+				case TrackView:
+					msg = _("no track view possible");
 				default:
 					break;
 				}
@@ -1800,6 +1807,14 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 				update_global_button (Button::Eq, off);
 				update_global_button (Button::Dyn, off);
 				update_global_button (Button::Track, off);
+				update_global_button (Button::Pan, off);
+				break;
+			case MackieControlProtocol::TrackView:
+				update_global_button (Button::Send, on);
+				update_global_button (Button::Plugin, off);
+				update_global_button (Button::Eq, off);
+				update_global_button (Button::Dyn, off);
+				update_global_button (Button::Track, on);
 				update_global_button (Button::Pan, off);
 				break;
 			}
@@ -1887,14 +1902,6 @@ void
 MackieControlProtocol::pot_mode_globals ()
 {
 	switch (_pot_mode) {
-	case Trim:
-		update_global_button (Button::Eq, off);
-		update_global_button (Button::Dyn, off);
-		update_global_button (Button::Track, on);
-		update_global_button (Button::Send, off);
-		update_global_button (Button::Plugin, off);
-		update_global_button (Button::Pan, off);
-		break;
 	case Pan:
 		update_global_button (Button::Eq, off);
 		update_global_button (Button::Dyn, off);

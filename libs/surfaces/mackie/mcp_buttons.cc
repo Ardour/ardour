@@ -886,7 +886,7 @@ MackieControlProtocol::clearsolo_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::track_press (Mackie::Button&)
 {
-	set_pot_mode (Trim);
+	set_subview_mode (TrackView, first_selected_route());
 	return none;
 }
 Mackie::LedState

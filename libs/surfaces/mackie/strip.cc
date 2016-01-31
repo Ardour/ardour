@@ -102,7 +102,6 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, return_to_vpot_mode_display_at (UINT64_MAX)
 	, eq_band (-1)
 	, _pan_mode (PanAzimuthAutomation)
-	, _trim_mode (TrimAutomation)
 	, vpot_parameter (PanAzimuthAutomation)
 	, _last_gain_position_written (-1.0)
 	, _last_pan_azi_position_written (-1.0)
@@ -193,7 +192,6 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	control_by_parameter[PanFrontBackAutomation] = (Control*) 0;
 	control_by_parameter[PanLFEAutomation] = (Control*) 0;
 	control_by_parameter[GainAutomation] = (Control*) 0;
-	control_by_parameter[TrimAutomation] = (Control*) 0;
 	control_by_parameter[PhaseAutomation] = (Control*) 0;
 
 	reset_saved_values ();
@@ -269,23 +267,9 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 		possible_pot_parameters.push_back (PanLFEAutomation);
 	}
 
-	if (_route->trim() && route()->trim()->active()) {
-		possible_pot_parameters.push_back (TrimAutomation);
-	}
-
-	possible_trim_parameters.clear();
-
-	if (_route->trim() && route()->trim()->active()) {
-		possible_trim_parameters.push_back (TrimAutomation);
-		_trim_mode = TrimAutomation;
-	}
-
 	if (_route->phase_invert().size()) {
 		possible_trim_parameters.push_back (PhaseAutomation);
 		_route->phase_control()->set_channel(0);
-		if (_trim_mode != TrimAutomation) {
-			_trim_mode = PhaseAutomation;
-		}
 	}
 	_current_send = 0;
 	/* Update */
@@ -1343,10 +1327,6 @@ Strip::potmode_changed (bool notify)
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Assign pot to Pan mode %1\n", enum_2_string (_pan_mode)));
 		set_vpot_parameter (_pan_mode);
 		break;
-	case MackieControlProtocol::Trim:
-		DEBUG_TRACE (DEBUG::MackieControl, "Assign pot to Trim mode.\n");
-		set_vpot_parameter (_trim_mode);
-		break;
 	}
 
 	if (notify) {
@@ -1429,38 +1409,6 @@ Strip::next_pot_mode ()
 		}
 
 		set_vpot_parameter (*i);
-	} else if (_surface->mcp().pot_mode() == MackieControlProtocol::Trim) {
-		if (possible_trim_parameters.empty() || (possible_trim_parameters.size() == 1 && possible_trim_parameters.front() == ac->parameter().type())) {
-			return;
-		}
-
-		for (i = possible_trim_parameters.begin(); i != possible_trim_parameters.end(); ++i) {
-			if ((*i) == ac->parameter().type()) {
-				break;
-			}
-		}
-		if ((*i) == PhaseAutomation && _route->phase_invert().size() > 1) {
-			// There are more than one channel of phase
-			if ((_route->phase_control()->channel() + 1) < _route->phase_invert().size()) {
-				_route->phase_control()->set_channel(_route->phase_control()->channel() + 1);
-				set_vpot_parameter (*i);
-				return;
-			} else {
-				_route->phase_control()->set_channel(0);
-			}
-		}
-		/* move to the next mode in the list, or back to the start (which will
-		also happen if the current mode is not in the current pot mode list)
-		*/
-
-		if (i != possible_trim_parameters.end()) {
-			++i;
-		}
-
-		if (i == possible_trim_parameters.end()) {
-			i = possible_trim_parameters.begin();
-		}
-		set_vpot_parameter (*i);
 	}
 }
 
@@ -1505,7 +1453,20 @@ Strip::subview_mode_changed ()
 		}
 		eq_band = -1;
 		break;
+	case MackieControlProtocol::TrackView:
+		if (r) {
+			setup_trackview_vpot (r);
+		} else {
+			/* leave it as it was */
+		}
+		eq_band = -1;
+		break;
 	}
+}
+
+void
+Strip::setup_trackview_vpot (boost::shared_ptr<Route> r)
+{
 }
 
 void
