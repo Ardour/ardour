@@ -100,6 +100,8 @@ class MackieControlProtocol
 	static const int MODIFIER_CMDALT;
 	static const int MODIFIER_ZOOM;
 	static const int MODIFIER_SCRUB;
+	static const int MODIFIER_MARKER;
+	static const int MODIFIER_NUDGE;
 	static const int MAIN_MODIFIER_MASK;
 
 	enum ViewMode {
@@ -360,6 +362,7 @@ class MackieControlProtocol
 	XMLNode*                 configuration_state;
 	int                      state_version;
 	int                      _last_bank[9];
+	bool                     marker_modifier_consumed_by_button;
 
 	boost::shared_ptr<ArdourSurface::Mackie::Surface>	_master_surface;
 

@@ -414,12 +414,28 @@ MackieControlProtocol::timecode_beats_release (Button &)
 LedState
 MackieControlProtocol::marker_press (Button &)
 {
+	_modifier_state |= MODIFIER_MARKER;
+	marker_modifier_consumed_by_button = false;
+	return on;
+}
+
+LedState
+MackieControlProtocol::marker_release (Button &)
+{
+	if (marker_modifier_consumed_by_button) {
+		/* marker was used a modifier for some other button(s), so do
+		   nothing
+		*/
+		return off;
+	}
+
 	string markername;
+
+	_modifier_state &= ~MODIFIER_MARKER;
 
 	/* Don't add another mark if one exists within 1/100th of a second of
 	 * the current position and we're not rolling.
 	 */
-
 
 	framepos_t where = session->audible_frame();
 
@@ -430,12 +446,6 @@ MackieControlProtocol::marker_press (Button &)
 	session->locations()->next_available_name (markername,"marker");
 	add_marker (markername);
 
-	return on;
-}
-
-LedState
-MackieControlProtocol::marker_release (Button &)
-{
 	return off;
 }
 
@@ -494,7 +504,9 @@ MackieControlProtocol::record_release (Button &)
 LedState
 MackieControlProtocol::rewind_press (Button &)
 {
-	if (main_modifier_state() == MODIFIER_CONTROL) {
+	if (modifier_state() & MODIFIER_MARKER) {
+		prev_marker ();
+	} else if (main_modifier_state() == MODIFIER_SHIFT) {
 		goto_start ();
 	} else {
 		rewind ();
@@ -511,7 +523,9 @@ MackieControlProtocol::rewind_release (Button &)
 LedState
 MackieControlProtocol::ffwd_press (Button &)
 {
-	if (main_modifier_state() == MODIFIER_CONTROL) {
+	if (modifier_state() & MODIFIER_MARKER) {
+		next_marker ();
+	} else if (main_modifier_state() == MODIFIER_SHIFT) {
 		goto_end();
 	} else {
 		ffwd ();

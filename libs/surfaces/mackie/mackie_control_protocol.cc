@@ -91,6 +91,7 @@ const int MackieControlProtocol::MODIFIER_SHIFT = 0x4;
 const int MackieControlProtocol::MODIFIER_CMDALT = 0x8;
 const int MackieControlProtocol::MODIFIER_ZOOM = 0x10;
 const int MackieControlProtocol::MODIFIER_SCRUB = 0x20;
+const int MackieControlProtocol::MODIFIER_MARKER = 0x40;
 const int MackieControlProtocol::MAIN_MODIFIER_MASK = (MackieControlProtocol::MODIFIER_OPTION|
 						       MackieControlProtocol::MODIFIER_CONTROL|
 						       MackieControlProtocol::MODIFIER_SHIFT|
@@ -123,6 +124,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _initialized (false)
 	, configuration_state (0)
 	, state_version (0)
+	, marker_modifier_consumed_by_button (false)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
@@ -1512,6 +1514,10 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 	if  (bs != press && bs != release) {
 		update_led (surface, button, none);
 		return;
+	}
+
+	if ((button_id != Button::Marker) && (modifier_state() & MODIFIER_MARKER)) {
+		marker_modifier_consumed_by_button = true;
 	}
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2 (%3)\n", (bs == press ? "press" : "release"), button.id(),
