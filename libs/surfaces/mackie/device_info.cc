@@ -346,7 +346,7 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 
 	if ((child = node.child ("HasSeparateMeters")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
-			_has_meters = _has_separate_meters = string_is_affirmative (prop->value());
+			_has_separate_meters = string_is_affirmative (prop->value());
 		}
 	} else {
 		_has_separate_meters = false;
@@ -451,7 +451,7 @@ DeviceInfo::has_meters() const
 bool
 DeviceInfo::has_separate_meters() const
 {
-	return _has_meters;
+	return _has_separate_meters;
 }
 
 bool
