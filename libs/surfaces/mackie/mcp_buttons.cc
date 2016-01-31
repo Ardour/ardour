@@ -863,8 +863,16 @@ Mackie::LedState
 MackieControlProtocol::clearsolo_press (Mackie::Button&)
 {
 	// clears all solos and listens (pfl/afl)
-	session->set_solo (session->get_routes(), false);
-	session->set_listen (session->get_routes(), false);
+
+	if (session) {
+		if (session->soloing()) {
+			session->set_solo (session->get_routes(), false);
+		} else if (session->listening()) {
+			session->set_listen (session->get_routes(), false);
+		}
+
+		session->clear_all_solo_state (session->get_routes()); // safeguard, ideally this won't do anything, check the log-window
+	}
 	return none;
 }
 
