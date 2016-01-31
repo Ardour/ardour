@@ -363,6 +363,7 @@ class MackieControlProtocol
 	int                      state_version;
 	int                      _last_bank[9];
 	bool                     marker_modifier_consumed_by_button;
+	bool                     nudge_modifier_consumed_by_button;
 
 	boost::shared_ptr<ArdourSurface::Mackie::Surface>	_master_surface;
 

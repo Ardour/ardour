@@ -509,6 +509,8 @@ MackieControlProtocol::rewind_press (Button &)
 {
 	if (modifier_state() & MODIFIER_MARKER) {
 		prev_marker ();
+	} else if (modifier_state() & MODIFIER_NUDGE) {
+		gui_invoke ("Editor/nudge-playhead-backward");
 	} else if (main_modifier_state() == MODIFIER_SHIFT) {
 		goto_start ();
 	} else {
@@ -528,6 +530,8 @@ MackieControlProtocol::ffwd_press (Button &)
 {
 	if (modifier_state() & MODIFIER_MARKER) {
 		next_marker ();
+	} else if (modifier_state() & MODIFIER_NUDGE) {
+		gui_invoke ("Editor/nudge-playhead-forward");
 	} else if (main_modifier_state() == MODIFIER_SHIFT) {
 		goto_end();
 	} else {
@@ -1018,12 +1022,26 @@ MackieControlProtocol::grp_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::nudge_press (Mackie::Button&)
 {
-	return none;
+	_modifier_state |= MODIFIER_NUDGE;
+	nudge_modifier_consumed_by_button = false;
+	return on;
 }
 Mackie::LedState
 MackieControlProtocol::nudge_release (Mackie::Button&)
 {
-	return none;
+	_modifier_state &= ~MODIFIER_NUDGE;
+
+	/* XXX these action names are stupid, because the action can affect
+	 * regions, markers or the playhead depending on selection state. 
+	 */
+
+	if (main_modifier_state() & MODIFIER_SHIFT) {
+		gui_invoke ("Region/nudge-backward");
+	} else {
+		gui_invoke ("Region/nudge-forward");
+	}
+
+	return off;
 }
 Mackie::LedState
 MackieControlProtocol::replace_press (Mackie::Button&)
