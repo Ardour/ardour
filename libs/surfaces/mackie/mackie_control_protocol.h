@@ -388,6 +388,11 @@ class MackieControlProtocol
         int set_device_info (const std::string& device_name);
 	void update_configuration_state ();
 
+	/* accepts an Action name from the application GUI definitions, and
+	   invokes it
+	*/
+	void gui_invoke (std::string const &);
+
 	/* MIDI port connection management */
 
 	PBD::ScopedConnection port_connection;

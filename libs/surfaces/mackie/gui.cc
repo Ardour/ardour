@@ -915,3 +915,16 @@ MackieControlProtocolGUI::active_port_changed (Gtk::ComboBox* combo, boost::weak
 		}
 	}
 }
+
+/* special case: MackieControlProtocol object method that requires GUI headers */
+
+void
+MackieControlProtocol::gui_invoke (string const& action_name)
+{
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (action_name.c_str());
+	if (act) {
+		act->activate ();
+	} else {
+		std::cerr << "no such action: " << action_name << std::endl;
+	}
+}
