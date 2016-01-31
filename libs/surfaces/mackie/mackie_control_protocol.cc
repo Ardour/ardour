@@ -1327,6 +1327,11 @@ MackieControlProtocol::notify_transport_state_changed()
 	update_global_button (Button::Rewind, session->transport_speed() < 0.0);
 	update_global_button (Button::Ffwd, session->transport_speed() > 1.0);
 
+	/* turn off any LEDs for range buttons */
+
+	update_global_button (Button::Drop, off);
+	update_global_button (Button::Replace, off);
+
 	// sometimes a return to start leaves time code at old time
 	_timecode_last = string (10, ' ');
 

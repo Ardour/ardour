@@ -60,6 +60,7 @@ LedState
 MackieControlProtocol::option_press (Button &)
 {
 	_modifier_state |= MODIFIER_OPTION;
+	gui_invoke ("Editor/set-loop-from-edit-range");
 	return on;
 }
 LedState
@@ -73,6 +74,7 @@ MackieControlProtocol::control_press (Button &)
 {
 	_modifier_state |= MODIFIER_CONTROL;
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("CONTROL Press: modifier state now set to %1\n", _modifier_state));
+	gui_invoke ("Editor/set-punch-from-edit-range");
 	return on;
 }
 LedState
@@ -86,6 +88,7 @@ LedState
 MackieControlProtocol::cmd_alt_press (Button &)
 {
 	_modifier_state |= MODIFIER_CMDALT;
+	gui_invoke ("Editor/set-session-from-edit-range");
 	return on;
 }
 LedState
@@ -360,14 +363,14 @@ MackieControlProtocol::undo_release (Button&)
 LedState
 MackieControlProtocol::drop_press (Button &)
 {
-	session->remove_last_capture();
+	gui_invoke ("Editor/start-range-from-playhead");
 	return on;
 }
 
 LedState
 MackieControlProtocol::drop_release (Button &)
 {
-	return off;
+	return none;
 }
 
 LedState
@@ -1025,7 +1028,9 @@ MackieControlProtocol::nudge_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::replace_press (Mackie::Button&)
 {
-	return none;
+	gui_invoke ("Editor/finish-range-from-playhead");
+	update_global_button (Button::Drop, off);
+	return off;
 }
 Mackie::LedState
 MackieControlProtocol::replace_release (Mackie::Button&)
