@@ -522,6 +522,39 @@ Strip::notify_send_level_change (AutomationType type, uint32_t send_num, bool fo
 }
 
 void
+Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool force_update)
+{
+	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
+
+	if (!r) {
+		/* not in subview mode */
+		return;
+	}
+
+	if (_surface->mcp().subview_mode() != MackieControlProtocol::TrackView) {
+		/* no longer in EQ subview mode */
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> control;
+
+	switch (type) {
+	case TrimAutomation:
+		control = r->trim_control();
+		break;
+	default:
+		break;
+	}
+
+	if (control) {
+		float val = control->get_value();
+		do_parameter_display (type, control->internal_to_interface (val));
+		/* update pot/encoder */
+		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
+	}
+}
+
+void
 Strip::notify_eq_change (AutomationType type, uint32_t band, bool force_update)
 {
 	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
@@ -1465,11 +1498,6 @@ Strip::subview_mode_changed ()
 }
 
 void
-Strip::setup_trackview_vpot (boost::shared_ptr<Route> r)
-{
-}
-
-void
 Strip::setup_dyn_vpot (boost::shared_ptr<Route> r)
 {
 	if (!r) {
@@ -1712,6 +1740,66 @@ Strip::setup_sends_vpot (boost::shared_ptr<Route> r)
 	pending_display[0] = r->send_name (global_pos);
 
 	notify_send_level_change (BusSendLevel, global_pos, true);
+}
+
+void
+Strip::setup_trackview_vpot (boost::shared_ptr<Route> r)
+{
+	if (!r) {
+		return;
+	}
+
+	const uint32_t global_pos = _surface->mcp().global_index (*this);
+
+	if (global_pos >= 8) {
+		pending_display[0] = string();
+		pending_display[1] = string();
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> pc;
+	string label;
+
+	switch (global_pos) {
+	case 0:
+		pc = r->trim_control ();
+		label = "Trim";
+		break;
+	case 1:
+		// pc = r->trim_control ();
+		break;
+	case 2:
+		// pc = r->trim_control ();
+		break;
+	case 3:
+		// pc = r->trim_control ();
+		break;
+	case 4:
+		//pc = r->trim_control ();
+		break;
+	case 5:
+		// pc = r->trim_control ();
+		break;
+	case 6:
+		// pc = r->trim_control ();
+		break;
+	case 7:
+		// pc = r->trim_control ();
+		break;
+	}
+
+	if (!pc) {
+		pending_display[0] = string();
+		pending_display[1] = string();
+		return;
+	}
+
+	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_trackview_change, this, TrimAutomation, global_pos, false), ui_context());
+	_vpot->set_control (pc);
+
+	pending_display[0] = label;
+
+	notify_trackview_change (TrimAutomation, global_pos, true);
 }
 
 void

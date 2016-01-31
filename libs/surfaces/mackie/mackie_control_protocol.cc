@@ -1808,7 +1808,7 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 				update_global_button (Button::Pan, off);
 				break;
 			case MackieControlProtocol::TrackView:
-				update_global_button (Button::Send, on);
+				update_global_button (Button::Send, off);
 				update_global_button (Button::Plugin, off);
 				update_global_button (Button::Eq, off);
 				update_global_button (Button::Dyn, off);
