@@ -77,10 +77,8 @@ Editor::keyboard_selection_begin (Editing::EditIgnoreOption ign)
 		framepos_t end = selection->time.end_frame();  //0 if no current selection
 
 		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
-printf("if you don't wait a second, this wil be wrong");
 			start = _session->audible_frame();
 		} else {
-printf("keyboard_selection_begin:: getting pref\n");
 			start = get_preferred_edit_position(ign);
 		}
 
