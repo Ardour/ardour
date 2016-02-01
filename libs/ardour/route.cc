@@ -139,6 +139,9 @@ Route::init ()
 	_mute_control.reset (new MuteControllable (X_("mute"), shared_from_this ()));
 	_phase_control.reset (new PhaseControllable (X_("phase"), shared_from_this ()));
 
+	_solo_isolate_control.reset (new SoloIsolateControllable (X_("solo-iso"), shared_from_this ()));
+	_solo_safe_control.reset (new SoloSafeControllable (X_("solo-safe"), shared_from_this ()));
+
 	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
 	_mute_control->set_flags (Controllable::Flag (_mute_control->flags() | Controllable::Toggle));
 	_phase_control->set_flags (Controllable::Flag (_phase_control->flags() | Controllable::Toggle));
@@ -827,7 +830,8 @@ Route::set_solo_safe (bool yn, Controllable::GroupControlDisposition /* group_ov
 {
 	if (_solo_safe != yn) {
 		_solo_safe = yn;
-		solo_safe_changed ();
+		solo_safe_changed (); /* EMIT SIGNAL */
+		_solo_safe_control->Changed(); /* EMIT SIGNAL */
 	}
 }
 
@@ -1083,6 +1087,7 @@ Route::set_solo_isolated (bool yn, Controllable::GroupControlDisposition group_o
 	/* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
 
 	solo_isolated_changed (); /* EMIT SIGNAL */
+	_solo_isolate_control->Changed(); /* EMIT SIGNAL */
 }
 
 bool

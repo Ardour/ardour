@@ -41,13 +41,11 @@ Route::set_control (AutomationType type, double val, PBD::Controllable::GroupCon
 	case GainAutomation:
 		/* route must mediate group control */
 		set_gain (val, group_override);
-		return;
 		break;
 
 	case TrimAutomation:
 		/* route must mediate group control */
 		set_trim (val, group_override);
-		return;
 		break;
 
 	case RecEnableAutomation:
@@ -55,7 +53,6 @@ Route::set_control (AutomationType type, double val, PBD::Controllable::GroupCon
 		rl.reset (new RouteList);
 		rl->push_back (shared_from_this());
 		_session.set_record_enabled (rl, val >= 0.5 ? true : false, Session::rt_cleanup, group_override);
-		return;
 		break;
 
 	case SoloAutomation:
@@ -65,10 +62,8 @@ Route::set_control (AutomationType type, double val, PBD::Controllable::GroupCon
 		if (Config->get_solo_control_is_listen_control()) {
 			_session.set_listen (rl, val >= 0.5 ? true : false, Session::rt_cleanup, group_override);
 		} else {
-			_session.set_solo (rl, val >= 0.5 ? true : false);
+			_session.set_solo (rl, val >= 0.5 ? true : false, Session::rt_cleanup, group_override);
 		}
-
-		return;
 		break;
 
 	case MuteAutomation:
@@ -135,22 +130,11 @@ Route::SoloControllable::set_value (double val, PBD::Controllable::GroupControlD
 void
 Route::SoloControllable::_set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
-	const bool bval = ((val >= 0.5) ? true : false);
-
-	boost::shared_ptr<RouteList> rl (new RouteList);
-
 	boost::shared_ptr<Route> r = _route.lock ();
 	if (!r) {
 		return;
 	}
-
-	rl->push_back (r);
-
-	if (Config->get_solo_control_is_listen_control()) {
-		_session.set_listen (rl, bval, Session::rt_cleanup, group_override);
-	} else {
-		_session.set_solo (rl, bval, Session::rt_cleanup, group_override);
-	}
+	r->set_control (SoloAutomation, val, group_override);
 }
 
 void
@@ -227,23 +211,20 @@ Route::MuteControllable::set_value_unchecked (double val)
 void
 Route::MuteControllable::_set_value (double val, Controllable::GroupControlDisposition group_override)
 {
-	const bool bval = ((val >= 0.5) ? true : false);
-
 	boost::shared_ptr<Route> r = _route.lock ();
+
 	if (!r) {
 		return;
 	}
 
 	if (_list && ((AutomationList*)_list.get())->automation_playback()) {
 		// Set superficial/automation value to drive controller (and possibly record)
+		const bool bval = ((val >= 0.5) ? true : false);
 		set_superficial_value (bval);
 		// Playing back automation, set route mute directly
 		r->set_mute (bval, Controllable::NoGroup);
 	} else {
-		// Set from user, queue mute event
-		boost::shared_ptr<RouteList> rl (new RouteList);
-		rl->push_back (r);
-		_session.set_mute (rl, bval, Session::rt_cleanup, group_override);
+		r->set_control (MuteAutomation, val, group_override);
 	}
 }
 
@@ -300,3 +281,95 @@ Route::PhaseControllable::channel () const
 	return _current_phase;
 }
 
+Route::SoloIsolateControllable::SoloIsolateControllable (std::string name, boost::shared_ptr<Route> r)
+	: RouteAutomationControl (name, SoloIsolateAutomation, get_descriptor(), boost::shared_ptr<AutomationList>(), r)
+{
+	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(SoloIsolateAutomation)));
+	gl->set_interpolation(Evoral::ControlList::Discrete);
+	set_list (gl);
+}
+
+
+double
+Route::SoloIsolateControllable::get_value () const
+{
+	boost::shared_ptr<Route> r = _route.lock ();
+	if (!r) {
+		return 0.0; /* "false" */
+	}
+
+	return r->solo_isolated() ? 1.0 : 0.0;
+}
+
+void
+Route::SoloIsolateControllable::set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
+{
+	_set_value (val, gcd);
+}
+
+void
+Route::SoloIsolateControllable::_set_value (double val, PBD::Controllable::GroupControlDisposition)
+{
+	boost::shared_ptr<Route> r = _route.lock ();
+	if (!r) {
+		return;
+	}
+
+	/* no group semantics yet */
+	r->set_solo_isolated (val >= 0.5 ? true : false);
+}
+
+ParameterDescriptor
+Route::SoloIsolateControllable::get_descriptor()
+{
+	ParameterDescriptor desc;
+	desc.type = SoloIsolateAutomation;
+	desc.toggled = true;
+	return desc;
+}
+
+Route::SoloSafeControllable::SoloSafeControllable (std::string name, boost::shared_ptr<Route> r)
+	: RouteAutomationControl (name, SoloSafeAutomation, get_descriptor(), boost::shared_ptr<AutomationList>(), r)
+{
+	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(SoloSafeAutomation)));
+	gl->set_interpolation(Evoral::ControlList::Discrete);
+	set_list (gl);
+}
+
+void
+Route::SoloSafeControllable::set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
+{
+	_set_value (val, gcd);
+}
+
+void
+Route::SoloSafeControllable::_set_value (double val, PBD::Controllable::GroupControlDisposition)
+{
+	boost::shared_ptr<Route> r = _route.lock ();
+	if (!r) {
+		return;
+	}
+
+	/* no group semantics yet */
+	r->set_solo_safe (val >= 0.5 ? true : false);
+}
+
+double
+Route::SoloSafeControllable::get_value () const
+{
+	boost::shared_ptr<Route> r = _route.lock ();
+	if (!r) {
+		return 0.0; /* "false" */
+	}
+
+	return r->solo_safe() ? 1.0 : 0.0;
+}
+
+ParameterDescriptor
+Route::SoloSafeControllable::get_descriptor()
+{
+	ParameterDescriptor desc;
+	desc.type = SoloSafeAutomation;
+	desc.toggled = true;
+	return desc;
+}

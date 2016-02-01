@@ -417,6 +417,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override) {
 			boost::shared_ptr<Route> r = _route.lock();
 			if (r) {
+				/* Route must mediate group control */
 				r->set_control ((AutomationType) parameter().type(), val, group_override);
 			}
 		}
@@ -469,6 +470,28 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 	};
 
+	class LIBARDOUR_API SoloIsolateControllable : public RouteAutomationControl {
+	public:
+		SoloIsolateControllable (std::string name, boost::shared_ptr<Route>);
+		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+		/* currently no automation, so no need for set_value_unchecked() */
+		double get_value () const;
+	private:
+		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+		static ParameterDescriptor get_descriptor ();
+	};
+
+	class LIBARDOUR_API SoloSafeControllable : public RouteAutomationControl {
+	public:
+		SoloSafeControllable (std::string name, boost::shared_ptr<Route>);
+		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+		/* currently no automation, so no need for set_value_unchecked() */
+		double get_value () const;
+	private:
+		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+		static ParameterDescriptor get_descriptor ();
+	};
+
 	void set_control (AutomationType, double val, PBD::Controllable::GroupControlDisposition group_override);
 
 	boost::shared_ptr<SoloControllable> solo_control() const {
@@ -485,6 +508,21 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	boost::shared_ptr<PhaseControllable> phase_control() const {
 		return _phase_control;
+	}
+
+	boost::shared_ptr<SoloIsolateControllable> solo_isolate_control() const {
+		return _solo_isolate_control;
+	}
+
+	boost::shared_ptr<SoloSafeControllable> solo_safe_control() const {
+		return _solo_safe_control;
+	}
+
+	boost::shared_ptr<AutomationControl> monitoring_control() const {
+		/* tracks override this to provide actual monitoring control;
+		   busses have no possible choices except input monitoring.
+		*/
+		return boost::shared_ptr<AutomationControl> ();
 	}
 
 	/* Route doesn't own these items, but sub-objects that it does own have them
@@ -692,6 +730,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	boost::shared_ptr<MuteControllable> _mute_control;
 	boost::shared_ptr<MuteMaster> _mute_master;
 	boost::shared_ptr<PhaseControllable> _phase_control;
+	boost::shared_ptr<SoloIsolateControllable> _solo_isolate_control;
+	boost::shared_ptr<SoloSafeControllable> _solo_safe_control;
 
 	virtual void act_on_mute () {}
 
