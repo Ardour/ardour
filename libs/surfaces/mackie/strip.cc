@@ -515,7 +515,7 @@ Strip::notify_send_level_change (AutomationType type, uint32_t send_num, bool fo
 
 	if (control) {
 		float val = control->get_value();
-		do_parameter_display (type, control->internal_to_interface (val));
+		do_parameter_display (type, val);
 		/* update pot/encoder */
 		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
