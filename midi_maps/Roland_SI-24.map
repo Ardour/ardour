@@ -114,8 +114,8 @@
 
 	<!-- Transport buttons -->
 	<Binding channel="1" note="84" function="transport-stop"/>	<!-- PAUSE -->
-	<Binding channel="1" note="85" function="transport-stop"/>	<!-- REW -->
-	<Binding channel="1" note="86" function="transport-start"/>	<!-- FF -->
+	<Binding channel="1" note="85" action="Transport/Rewind"/>	<!-- REW -->
+	<Binding channel="1" note="86" action="Transport/Forward"/>	<!-- FF -->
 	<Binding channel="1" note="87" function="transport-end"/>		<!-- STOP -->
 	<Binding channel="1" note="88" function="transport-roll"/>	<!-- PLAY -->
 	<Binding channel="1" note="89" function="toggle-rec-enable"/>		<!-- REC -->

@@ -8,8 +8,8 @@
   <Binding msg="B0 2c 7f" function="toggle-rec-enable"/>
   <Binding msg="B0 2d 7f" function="transport-roll"/>
   <Binding msg="B0 2e 7f" function="transport-stop"/>
-  <Binding msg="B0 2f 7f" function="transport-start"/>
-  <Binding msg="B0 30 7f" function="transport-end"/>
+  <Binding msg="B0 2f 7f" action="Transport/Rewind"/>
+  <Binding msg="B0 30 7f" action="Transport/Forward"/>
   <Binding msg="B0 31 7f" function="loop-toggle"/>
 
 <!-- The "Scene" button toggles between four banks. For this to work as     -->

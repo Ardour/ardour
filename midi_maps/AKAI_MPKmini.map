@@ -30,10 +30,10 @@
 	<Binding channel="16" pgm="3" function="transport-stop"/>					<!-- STOP -->
 	<Binding channel="16" pgm="4" function="toggle-rec-enable"/>				<!-- REC -->
 
-	<Binding channel="16" pgm="5" function="transport-start"/>					<!-- BEGIN -->
+	<Binding channel="16" pgm="5" action="Transport/Rewind"/>					<!-- REWD -->
 	<Binding channel="16" pgm="6" action="Editor/jump-backward-to-mark"/> 		<!-- BACK -->
 	<Binding channel="16" pgm="7" action="Editor/jump-forward-to-mark"/> 		<!-- NEXT -->
-	<Binding channel="16" pgm="8" function="transport-end"/>					<!-- END -->
+	<Binding channel="16" pgm="8" action="Transport/Forward"/>					<!-- FFWD -->
 
 	<Binding channel="16" pgm="9" action="Editor/remove-last-capture"/>			<!-- Remove last capture -->
 	<Binding channel="16" pgm="10" action="Editor/jump-backward-to-mark"/>		<!--  -->

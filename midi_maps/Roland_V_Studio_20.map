@@ -8,8 +8,8 @@
 <Binding channel="1" note="46" function="next-bank" momentary="yes"/>
 <!-- Transport controls -->
 <Binding channel="2" note="33" action="Transport/GotoZero" momentary="yes"/>  <!-- Fix for non-working transport-zero action -->
-<Binding channel="1" note="91" function="transport-start" momentary="yes"/>
-<Binding channel="1" note="92" function="transport-end" momentary="yes"/>
+<Binding channel="1" note="91" action="Transport/Rewind" momentary="yes"/>
+<Binding channel="1" note="92" action="Transport/Forward" momentary="yes"/>
 <Binding channel="1" note="93" function="transport-stop" momentary="yes"/>
 <Binding channel="1" note="94" function="transport-roll" momentary="yes"/>
 <Binding channel="1" note="95" action="Transport/Record"  momentary="yes"/> <!-- Makes record toggle -->

@@ -2,8 +2,8 @@
 <ArdourMIDIBindings version="1.0.0" name="M-Audio Oxygen8 V2">
   <DeviceInfo bank-size="8"/>
   <Binding channel="1" ctl="20" function="loop-toggle"/>
-  <Binding channel="1" ctl="21" function="transport-start"/>
-  <Binding channel="1" ctl="22" function="transport-end"/>
+  <Binding channel="1" ctl="21" action="Transport/Rewind"/>
+  <Binding channel="1" ctl="22" action="Transport/Forward"/>
   <Binding channel="1" ctl="23" function="transport-stop"/>
   <Binding channel="1" ctl="24" function="transport-roll"/>
   <Binding channel="1" ctl="25" function="toggle-rec-enable"/>

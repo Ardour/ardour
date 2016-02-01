@@ -3,8 +3,8 @@
 
 <!-- Transport controls -->
 
-  <Binding channel="1" ctl="112" function="transport-start"/>
-  <Binding channel="1" ctl="113" function="transport-end"/>
+  <Binding channel="1" ctl="112" action="Transport/Rewind"/>
+  <Binding channel="1" ctl="113" action="Transport/Forward"/>
   <Binding channel="1" ctl="114" function="transport-stop"/>
   <Binding channel="1" ctl="115" function="transport-roll"/>
   <Binding channel="1" ctl="116" function="loop-toggle"/>

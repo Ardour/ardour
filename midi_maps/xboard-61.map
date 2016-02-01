@@ -67,7 +67,7 @@ NOTE:	I have assumed that the top row knobs are mapped to midi
 	<Binding channel="1" note="36" function="loop-toggle"/>
 	<Binding channel="1" note="38" function="transport-roll"/>
 	<Binding channel="1" note="40" function="transport-stop"/>
-	<Binding channel="1" note="37" function="transport-start"/>
-	<Binding channel="1" note="39" function="transport-end"/>
+	<Binding channel="1" note="37" action="Transport/Rewind"/>
+	<Binding channel="1" note="39" action="Transport/Forward"/>
 
 </ArdourMIDIBindings>
