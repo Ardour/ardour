@@ -51,10 +51,23 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
 	PBD::Signal0<void> TrackModeChanged;
 
-	virtual void set_monitoring (MonitorChoice);
+	class LIBARDOUR_API MonitoringControllable : public RouteAutomationControl {
+	public:
+		MonitoringControllable (std::string name, boost::shared_ptr<Track>);
+		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+		/* currently no automation, so no need for set_value_unchecked() */
+		double get_value () const;
+	private:
+		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+		static ParameterDescriptor get_descriptor();
+	};
+
+	void set_monitoring (MonitorChoice, PBD::Controllable::GroupControlDisposition group_override);
 	MonitorChoice monitoring_choice() const { return _monitoring; }
         MonitorState monitoring_state () const;
 	PBD::Signal0<void> MonitoringChanged;
+
+	boost::shared_ptr<AutomationControl> monitoring_control() const { return _monitoring_control; }
 
 	MeterState metering_state () const;
 
@@ -179,6 +192,7 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	TrackMode     _mode;
 	bool          _needs_butler;
 	MonitorChoice _monitoring;
+	boost::shared_ptr<MonitoringControllable> _monitoring_control;
 
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {

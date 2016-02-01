@@ -48,6 +48,7 @@
 #include "ardour/port.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
+#include "ardour/route_group_specialized.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
 #include "ardour/utils.h"
@@ -957,11 +958,16 @@ MidiTrack::act_on_mute ()
 }
 
 void
-MidiTrack::set_monitoring (MonitorChoice mc)
+MidiTrack::set_monitoring (MonitorChoice mc, Controllable::GroupControlDisposition gcd)
 {
+	if (use_group (gcd, &RouteGroup::is_monitoring)) {
+		_route_group->apply (&Track::set_monitoring, mc, Controllable::NoGroup);
+		return;
+	}
+
 	if (mc != _monitoring) {
 
-		Track::set_monitoring (mc);
+		Track::set_monitoring (mc, gcd);
 
 		/* monitoring state changed, so flush out any on notes at the
 		 * port level.

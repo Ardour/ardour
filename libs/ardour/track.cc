@@ -64,6 +64,7 @@ Track::init ()
 	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
 	_rec_enable_control = boost::shared_ptr<RecEnableControl> (new RecEnableControl(rt));
 	_rec_enable_control->set_flags (Controllable::Toggle);
+        _monitoring_control.reset (new MonitoringControllable (X_("monitoring"), rt));
 
 	/* don't add rec_enable_control to controls because we don't want it to
 	 * appear as an automatable parameter
@@ -1131,8 +1132,13 @@ Track::check_initial_delay (framecnt_t nframes, framepos_t& transport_frame)
 }
 
 void
-Track::set_monitoring (MonitorChoice mc)
+Track::set_monitoring (MonitorChoice mc, Controllable::GroupControlDisposition gcd)
 {
+	if (use_group (gcd, &RouteGroup::is_monitoring)) {
+		_route_group->apply (&Track::set_monitoring, mc, Controllable::NoGroup);
+		return;
+	}
+
 	if (mc !=  _monitoring) {
 		_monitoring = mc;
 
@@ -1141,6 +1147,7 @@ Track::set_monitoring (MonitorChoice mc)
 		}
 
 		MonitoringChanged (); /* EMIT SIGNAL */
+		_monitoring_control->Changed (); /* EMIT SIGNAL */
 	}
 }
 
@@ -1156,4 +1163,70 @@ Track::metering_state () const
 		rv = _meter_point == MeterInput;
 	}
 	return rv ? MeteringInput : MeteringRoute;
+}
+
+Track::MonitoringControllable::MonitoringControllable (std::string name, boost::shared_ptr<Track> r)
+	: RouteAutomationControl (name, MonitoringAutomation, get_descriptor(), boost::shared_ptr<AutomationList>(), r)
+{
+	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(MonitoringAutomation)));
+	gl->set_interpolation(Evoral::ControlList::Discrete);
+	set_list (gl);
+}
+
+void
+Track::MonitoringControllable::set_value (double val, Controllable::GroupControlDisposition gcd)
+{
+	_set_value (val, gcd);
+}
+
+void
+Track::MonitoringControllable::_set_value (double val, Controllable::GroupControlDisposition gcd)
+{
+	boost::shared_ptr<Route> r = _route.lock();
+	if (!r) {
+		return;
+	}
+
+	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (r);
+	if (!t) {
+		return;
+	}
+
+	int mc = (int) val;
+
+	if (mc < MonitorAuto || mc > MonitorDisk) {
+		return;
+	}
+
+	/* no group effect at present */
+
+	t->set_monitoring ((MonitorChoice) mc, gcd);
+}
+
+double
+Track::MonitoringControllable::get_value () const
+{
+	boost::shared_ptr<Route> r = _route.lock();
+	if (!r) {
+		return 0.0;
+	}
+
+	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (r);
+	if (!t) {
+		return 0.0;
+	}
+
+	return t->monitoring_choice();
+}
+
+ParameterDescriptor
+Track::MonitoringControllable::get_descriptor()
+{
+	ParameterDescriptor desc;
+	desc.type = MonitoringAutomation;
+	desc.enumeration = true;
+	desc.integer_step = true;
+	desc.lower = MonitorAuto;
+	desc.upper = MonitorDisk; /* XXX bump when we add MonitorCue */
+	return desc;
 }
