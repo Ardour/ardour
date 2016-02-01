@@ -1192,13 +1192,21 @@ MackieControlProtocol::update_timecode_display()
 void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 {
 	if (p == "punch-in") {
-		// no such button right now
-		// update_global_button (Button::PunchIn, session->config.get_punch_in());
+		update_global_button (Button::Save, session->config.get_punch_in() ? flashing : off);
 	} else if (p == "punch-out") {
-		// no such button right now
-		// update_global_button (Button::PunchOut, session->config.get_punch_out());
+		update_global_button (Button::Undo, session->config.get_punch_out() ? flashing : off);
 	} else if (p == "clicking") {
 		update_global_button (Button::Click, Config->get_clicking());
+	} else if (p == "follow-edits") {
+		/* we can't respond to this at present, because "follow-edits"
+		 * is  a property of the (G)UI configuration object, to which we
+		 * have no access. For now, this means that the lit state of
+		 * this button (if there is one) won't reflect the setting.
+		 */
+
+		//update_global_button (Button::Enter, session->config.get_follow_edits() ? on : off);
+	} else if (p == "external-sync") {
+		update_global_button (Button::Cancel, session->config.get_external_sync() ? on : off);
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("parameter changed: %1\n", p));
 	}

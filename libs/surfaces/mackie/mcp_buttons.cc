@@ -372,14 +372,14 @@ MackieControlProtocol::drop_release (Button &)
 LedState
 MackieControlProtocol::save_press (Button &)
 {
-	session->save_state ("");
-	return on;
+	toggle_punch_in ();
+	return none;
 }
 
 LedState
 MackieControlProtocol::save_release (Button &)
 {
-	return off;
+	return none;
 }
 
 LedState
@@ -573,14 +573,14 @@ MackieControlProtocol::clicking_release (Button &)
 LedState
 MackieControlProtocol::enter_press (Button &)
 {
-	Enter(); /* EMIT SIGNAL */
-	return off;
+	access_action ("Transport/ToggleFollowEdits");
+	return none;
 }
 
 LedState
 MackieControlProtocol::enter_release (Button &)
 {
-	return off;
+	return none;
 }
 
 LedState
@@ -773,12 +773,13 @@ MackieControlProtocol::touch_release (Button &)
 LedState
 MackieControlProtocol::cancel_press (Button &)
 {
-	return off;
+	access_action ("Transport/ToggleExternalSync");
+	return none;
 }
 LedState
 MackieControlProtocol::cancel_release (Button &)
 {
-	return off;
+	return none;
 }
 LedState
 MackieControlProtocol::user_a_press (Button &)
