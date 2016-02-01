@@ -426,6 +426,8 @@ MackieControlProtocol::marker_press (Button &)
 LedState
 MackieControlProtocol::marker_release (Button &)
 {
+	_modifier_state &= ~MODIFIER_MARKER;
+
 	if (marker_modifier_consumed_by_button) {
 		/* marker was used a modifier for some other button(s), so do
 		   nothing
@@ -434,8 +436,6 @@ MackieControlProtocol::marker_release (Button &)
 	}
 
 	string markername;
-
-	_modifier_state &= ~MODIFIER_MARKER;
 
 	/* Don't add another mark if one exists within 1/100th of a second of
 	 * the current position and we're not rolling.
