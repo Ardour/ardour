@@ -504,7 +504,7 @@ Strip::notify_send_level_change (AutomationType type, uint32_t send_num, bool fo
 	}
 
 	if (_surface->mcp().subview_mode() != MackieControlProtocol::Sends) {
-		/* no longer in EQ subview mode */
+		/* no longer in Sends subview mode */
 		return;
 	}
 
