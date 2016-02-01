@@ -1232,19 +1232,21 @@ Strip::handle_pot (Pot& pot, float delta)
 		 */
 
 		if (delta > 0) {
-			ac->set_value (min (ac->upper(), ac->get_value() + 1.0), Controllable::UseGroup);
+			ac->set_value (min (ac->upper(), ac->get_value() + 1.0), gcd);
 		} else {
-			ac->set_value (max (ac->lower(), ac->get_value() - 1.0), Controllable::UseGroup);
+			ac->set_value (max (ac->lower(), ac->get_value() - 1.0), gcd);
 		}
 
 	} else {
 
-		double p = pot.get_value ();
+		double p = ac->get_value();
+
 		p += delta;
-		// fader and pot should be the same and fader is hard coded 0 -> 1
-		p = max (0.0, p);
-		p = min (1.0, p);
-		pot.set_value (p);
+
+		p = max (ac->lower(), p);
+		p = min (ac->upper(), p);
+
+		ac->set_value (p, gcd);
 	}
 }
 
