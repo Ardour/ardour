@@ -99,7 +99,7 @@ SurfacePort::~SurfacePort()
 		}
 
 		if (_async_out) {
-			_output_port->drain (10000);
+			_output_port->drain (10000, 250000);
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("unregistering output port %1\n", _async_out->name()));
 			AudioEngine::instance()->unregister_port (_async_out);
 			_async_out.reset ((ARDOUR::Port*) 0);

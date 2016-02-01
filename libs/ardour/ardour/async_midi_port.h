@@ -58,7 +58,7 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 	int write (const MIDI::byte *msg, size_t msglen, MIDI::timestamp_t timestamp);
         int read (MIDI::byte *buf, size_t bufsize);
 	/* waits for output to be cleared */
-	void drain (int check_interval_usecs);
+        void drain (int check_interval_usecs, int total_usecs_to_wait);
 
 	/* clears async request communication channel */
 	void clear () {

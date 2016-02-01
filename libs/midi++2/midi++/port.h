@@ -75,7 +75,7 @@ class LIBMIDIPP_API Port {
 	 * executes any part of a JACK process callback (will
 	 * simply return immediately in that situation).
 	 */
-	virtual void drain (int /* check_interval_usecs */) {}
+	virtual void drain (int /* check_interval_usecs */, int /* total_usecs_to_wait */) {}
 
 	/** Write a message to port.
 	 * @return true on success.

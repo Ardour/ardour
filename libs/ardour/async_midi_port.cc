@@ -168,7 +168,7 @@ AsyncMIDIPort::cycle_end (MIDI::pframes_t nframes)
  * Cannot be called from a processing thread.
  */
 void
-AsyncMIDIPort::drain (int check_interval_usecs)
+AsyncMIDIPort::drain (int check_interval_usecs, int total_usecs_to_wait)
 {
 	RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0} };
 
@@ -183,12 +183,16 @@ AsyncMIDIPort::drain (int check_interval_usecs)
 		return;
 	}
 
-	while (1) {
+	microseconds_t now = get_microseconds ();
+	microseconds_t end = now + total_usecs_to_wait;
+
+	while (now < end) {
 		output_fifo.get_write_vector (&vec);
 		if (vec.len[0] + vec.len[1] >= output_fifo.bufsize() - 1) {
 			break;
 		}
 		Glib::usleep (check_interval_usecs);
+		now = get_microseconds();
 	}
 }
 
