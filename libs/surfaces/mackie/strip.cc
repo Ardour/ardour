@@ -212,15 +212,6 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	_route->mute_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_mute_changed, this), ui_context());
 
-	if (_route->trim() && route()->trim()->active()) {
-		_route->trim_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_trim_changed, this, false), ui_context());
-	}
-
-	if (_route->phase_invert().size()) {
-		_route->phase_invert_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_phase_changed, this, false), ui_context());
-		_route->phase_control()->set_channel(0);
-	}
-
 	boost::shared_ptr<AutomationControl> pan_control = _route->pan_azimuth_control();
 	if (pan_control) {
 		pan_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
@@ -298,8 +289,6 @@ Strip::notify_all()
 	notify_panner_azi_changed ();
 	notify_panner_width_changed ();
 	notify_record_enable_changed ();
-	notify_trim_changed ();
-	notify_phase_changed ();
 	notify_processor_changed ();
 }
 
@@ -376,74 +365,6 @@ Strip::notify_gain_changed (bool force_update)
 			}
 
 			_last_gain_position_written = normalized_position;
-		}
-	}
-}
-
-void
-Strip::notify_trim_changed (bool force_update)
-{
-	if (_route) {
-
-		if (!_route->trim() || !route()->trim()->active()) {
-			return;
-		}
-		Control* control = 0;
-		ControlParameterMap::iterator i = control_by_parameter.find (TrimAutomation);
-
-		if (i == control_by_parameter.end()) {
-			return;
-		}
-
-		control = i->second;
-
-		boost::shared_ptr<AutomationControl> ac = _route->trim_control();
-
-		float gain_coefficient = ac->get_value();
-		float normalized_position = ac->internal_to_interface (gain_coefficient);
-
-		if (force_update || normalized_position != _last_trim_position_written) {
-			if (control == _fader) {
-				if (!_fader->in_use()) {
-					_surface->write (_fader->set_position (normalized_position));
-					do_parameter_display (TrimAutomation, gain_coefficient);
-				}
-			} else if (control == _vpot) {
-				_surface->write (_vpot->set (normalized_position, true, Pot::dot));
-				do_parameter_display (TrimAutomation, gain_coefficient);
-			}
-			_last_trim_position_written = normalized_position;
-		}
-	}
-}
-
-void
-Strip::notify_phase_changed (bool force_update)
-{
-	if (_route) {
-		if (!_route->phase_invert().size()) {
-			return;
-		}
-
-		Control* control = 0;
-		ControlParameterMap::iterator i = control_by_parameter.find (PhaseAutomation);
-
-		if (i == control_by_parameter.end()) {
-			return;
-		}
-
-		control = i->second;
-
-		float normalized_position = _route->phase_control()->get_value();
-
-		if (control == _fader) {
-			if (!_fader->in_use()) {
-				_surface->write (_fader->set_position (normalized_position));
-				do_parameter_display (PhaseAutomation, normalized_position);
-			}
-		} else if (control == _vpot) {
-			_surface->write (_vpot->set (normalized_position, true, Pot::wrap));
-			do_parameter_display (PhaseAutomation, normalized_position);
 		}
 	}
 }
@@ -539,7 +460,7 @@ Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool for
 	boost::shared_ptr<AutomationControl> control;
 
 	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (r);
-
+	
 	switch (type) {
 	case TrimAutomation:
 		control = r->trim_control();
@@ -554,6 +475,9 @@ Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool for
 		if (track) {
 			control = track->monitoring_control();
 		}
+		break;
+	case PhaseAutomation:
+		control = r->phase_control ();
 		break;
 	default:
 		break;
@@ -1070,7 +994,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 
 	case PhaseAutomation:
 		if (_route) {
-			if (_route->phase_control()->get_value() < 0.5) {
+			if (val < 0.5) {
 				pending_display[1] = "Normal";
 			} else {
 				pending_display[1] = "Invert";
@@ -1315,13 +1239,6 @@ Strip::update_automation ()
 		state = pan_control->automation_state ();
 		if (state == Touch || state == Play) {
 			notify_panner_width_changed (false);
-		}
-	}
-
-	if (_route->trim() && route()->trim()->active()) {
-		ARDOUR::AutoState trim_state = _route->trim_control()->automation_state();
-		if (trim_state == Touch || trim_state == Play) {
-			notify_trim_changed (false);
 		}
 	}
 }
@@ -1916,7 +1833,12 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Route> r)
 		}
 		break;
 	case 4:
-		//pc = r->trim_control ();
+		pc = r->phase_control();
+		if (pc) {
+			pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_trackview_change, this, PhaseAutomation, global_pos, false), ui_context());
+			notify_trackview_change (PhaseAutomation, global_pos, true);
+			pending_display[0] = "Phase";
+		}
 		break;
 	case 5:
 		// pc = r->trim_control ();
