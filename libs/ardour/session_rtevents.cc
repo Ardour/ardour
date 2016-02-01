@@ -41,13 +41,13 @@ Session::set_monitoring (boost::shared_ptr<RouteList> rl, MonitorChoice mc,
 }
 
 void
-Session::rt_set_monitoring (boost::shared_ptr<RouteList> rl, MonitorChoice mc, Controllable::GroupControlDisposition /*group_override*/)
+Session::rt_set_monitoring (boost::shared_ptr<RouteList> rl, MonitorChoice mc, Controllable::GroupControlDisposition group_override)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_auditioner()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*i);
 			if (t) {
-				t->set_monitoring (mc);
+				t->set_monitoring (mc, group_override);
 			}
 		}
 	}
