@@ -24,6 +24,8 @@
 #include "ardour/types.h"
 #include "ardour/utils.h"
 
+#include "i18n.h"
+
 namespace ARDOUR {
 
 ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
@@ -43,10 +45,20 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	, max_unbound(0)
 	, enumeration(false)
 {
+	ScalePoints sp;
+
 	switch((AutomationType)parameter.type()) {
 	case GainAutomation:
 		upper  = Config->get_max_gain();
 		normal = 1.0f;
+		break;
+	case BusSendLevel:
+		upper = Config->get_max_gain ();
+		normal = 1.0f;
+		break;
+	case BusSendEnable:
+		normal = 1.0f;
+		toggled = true;
 		break;
 	case TrimAutomation:
 		upper  = 10; // +20dB
@@ -91,6 +103,26 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		lower  = 0.0;
 		normal = 8192.0;
 		upper  = 16383.0;
+		break;
+	case PhaseAutomation:
+		toggled = true;
+		break;
+	case MonitoringAutomation:
+		enumeration = true;
+		integer_step = true;
+		lower = MonitorAuto;
+		upper = MonitorDisk; /* XXX bump when we add MonitorCue */
+		scale_points.reset (new ScalePoints);
+		scale_points->insert (std::make_pair (_("Auto"), (float) MonitorAuto));
+		scale_points->insert (std::make_pair (_("Input"), (float) MonitorInput));
+		scale_points->insert (std::make_pair (_("Disk"), (float) MonitorDisk));
+		// scale_points->insert (std::make_pair (_("Cue"), (float) MonitorCue));
+		break;
+	case SoloIsolateAutomation:
+		toggled = true;
+		break;
+	case SoloSafeAutomation:
+		toggled = true;
 		break;
 	default:
 		break;
