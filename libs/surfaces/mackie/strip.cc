@@ -959,7 +959,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 				Controllable::GroupControlDisposition gcd;
 
 				if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
-					gcd = Controllable::NoGroup;
+					gcd = Controllable::InverseGroup;
 				} else {
 					gcd = Controllable::UseGroup;
 				}
