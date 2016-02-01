@@ -817,18 +817,25 @@ Strip::vselect_event (Button&, ButtonState bs)
 				return;
 			}
 
+			Controllable::GroupControlDisposition gcd;
+			if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
+				gcd = Controllable::InverseGroup;
+			} else {
+				gcd = Controllable::UseGroup;
+			}
+
 			if (control->toggled()) {
 				if (control->toggled()) {
-					control->set_value (!control->get_value(), Controllable::UseGroup);
+					control->set_value (!control->get_value(), gcd);
 				}
 
 			} else if (control->desc().enumeration || control->desc().integer_step) {
 
 				double val = control->get_value ();
 				if (val <= control->upper() - 1.0) {
-					control->set_value (val + 1.0, Controllable::UseGroup);
+					control->set_value (val + 1.0, gcd);
 				} else {
-					control->set_value (control->lower(), Controllable::UseGroup);
+					control->set_value (control->lower(), gcd);
 				}
 			}
 
@@ -849,7 +856,15 @@ Strip::vselect_event (Button&, ButtonState bs)
 
 				if (control) {
 					bool currently_enabled = (bool) control->get_value();
-					control->set_value (!currently_enabled, Controllable::UseGroup);
+					Controllable::GroupControlDisposition gcd;
+
+					if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
+						gcd = Controllable::InverseGroup;
+					} else {
+						gcd = Controllable::UseGroup;
+					}
+
+					control->set_value (!currently_enabled, gcd);
 
 					if (currently_enabled) {
 						/* we just turned it off */
@@ -889,8 +904,16 @@ Strip::vselect_event (Button&, ButtonState bs)
 			if (_route) {
 				boost::shared_ptr<AutomationControl> ac = _route->master_send_enable_controllable ();
 				if (ac) {
+					Controllable::GroupControlDisposition gcd;
+
+					if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
+						gcd = Controllable::InverseGroup;
+					} else {
+						gcd = Controllable::UseGroup;
+					}
+
 					bool enabled = ac->get_value();
-					ac->set_value (!enabled, Controllable::UseGroup);
+					ac->set_value (!enabled, gcd);
 				}
 #else
 			DEBUG_TRACE (DEBUG::MackieControl, "switching to next pot mode\n");
@@ -1149,7 +1172,7 @@ Strip::handle_fader (Fader& fader, float position)
 	Controllable::GroupControlDisposition gcd = Controllable::UseGroup;
 
 	if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
-		gcd = Controllable::NoGroup;
+		gcd = Controllable::InverseGroup;
 	}
 
 	fader.set_value (position, gcd);
@@ -1179,14 +1202,22 @@ Strip::handle_pot (Pot& pot, float delta)
 		return;
 	}
 
+	Controllable::GroupControlDisposition gcd;
+
+	if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
+		gcd = Controllable::InverseGroup;
+	} else {
+		gcd = Controllable::UseGroup;
+	}
+
 	if (ac->toggled()) {
 
 		/* make it like a single-step, directional switch */
 
 		if (delta > 0) {
-			pot.set_value (1.0);
+			ac->set_value (1.0, gcd);
 		} else {
-			pot.set_value (0.0);
+			ac->set_value (0.0, gcd);
 		}
 
 	} else if (ac->desc().enumeration || ac->desc().integer_step) {
