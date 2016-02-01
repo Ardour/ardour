@@ -802,12 +802,26 @@ Strip::vselect_event (Button&, ButtonState bs)
 
 			if (control->toggled()) {
 				if (control->toggled()) {
-					control->set_value (!control->get_value(), Controllable::NoGroup);
+					control->set_value (!control->get_value(), Controllable::UseGroup);
+				}
+
+			} else if (control->desc().enumeration || control->desc().integer_step) {
+
+				double val = control->get_value ();
+				if (val <= control->upper() - 1.0) {
+					control->set_value (val + 1.0, Controllable::UseGroup);
+				} else {
+					control->set_value (control->lower(), Controllable::UseGroup);
 				}
 			}
+
 		} else {
 
-			/* Send mode: press enables/disables the relevant send */
+			/* Send mode: press enables/disables the relevant
+			 * send, but the vpot is bound to the send-level so we
+			 * need to lookup the enable/disable control
+			 * explicitly.
+			 */
 
 			boost::shared_ptr<Route> r = _surface->mcp().subview_route();
 
@@ -1123,12 +1137,43 @@ Strip::handle_pot (Pot& pot, float delta)
 	if (!ac) {
 		return;
 	}
-	double p = pot.get_value ();
-	p += delta;
-	// fader and pot should be the same and fader is hard coded 0 -> 1
-	p = max (0.0, p);
-	p = min (1.0, p);
-	pot.set_value (p);
+
+	if (ac->toggled()) {
+
+		/* make it like a single-step, directional switch */
+
+		if (delta > 0) {
+			pot.set_value (1.0);
+		} else {
+			pot.set_value (0.0);
+		}
+
+	} else if (ac->desc().enumeration || ac->desc().integer_step) {
+
+		/* use Controllable::get_value() to avoid the
+		 * "scaling-to-interface" that takes place in
+		 * Control::get_value() via the pot member.
+		 *
+		 * an enumeration with 4 values will have interface values of
+		 * 0.0, 0.25, 0.5 and 0.75 or some similar oddness. Lets not
+		 * deal with that.
+		 */
+
+		if (delta > 0) {
+			ac->set_value (min (ac->upper(), ac->get_value() + 1.0), Controllable::UseGroup);
+		} else {
+			ac->set_value (max (ac->lower(), ac->get_value() - 1.0), Controllable::UseGroup);
+		}
+
+	} else {
+
+		double p = pot.get_value ();
+		p += delta;
+		// fader and pot should be the same and fader is hard coded 0 -> 1
+		p = max (0.0, p);
+		p = min (1.0, p);
+		pot.set_value (p);
+	}
 }
 
 void
