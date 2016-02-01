@@ -112,11 +112,6 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		integer_step = true;
 		lower = MonitorAuto;
 		upper = MonitorDisk; /* XXX bump when we add MonitorCue */
-		scale_points.reset (new ScalePoints);
-		scale_points->insert (std::make_pair (_("Auto"), (float) MonitorAuto));
-		scale_points->insert (std::make_pair (_("Input"), (float) MonitorInput));
-		scale_points->insert (std::make_pair (_("Disk"), (float) MonitorDisk));
-		// scale_points->insert (std::make_pair (_("Cue"), (float) MonitorCue));
 		break;
 	case SoloIsolateAutomation:
 		toggled = true;
