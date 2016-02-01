@@ -57,6 +57,7 @@
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
+#include "ardour/parameter_descriptor.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port.h"
 #include "ardour/port_insert.h"

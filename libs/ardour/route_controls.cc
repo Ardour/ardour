@@ -22,6 +22,7 @@
 #endif
 
 #include "ardour/automation_control.h"
+#include "ardour/parameter_descriptor.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 
@@ -94,6 +95,16 @@ Route::RouteAutomationControl::RouteAutomationControl (const std::string& name,
 	: AutomationControl (r->session(), Evoral::Parameter (atype),
 	                     ParameterDescriptor (Evoral::Parameter (atype)),
 	                     alist, name)
+	, _route (r)
+{
+}
+
+Route::RouteAutomationControl::RouteAutomationControl (const std::string& name,
+                                                       AutomationType atype,
+                                                       const ParameterDescriptor& desc,
+                                                       boost::shared_ptr<AutomationList> alist,
+                                                       boost::shared_ptr<Route> r)
+	: AutomationControl (r->session(), Evoral::Parameter (atype), desc, alist, name)
 	, _route (r)
 {
 }

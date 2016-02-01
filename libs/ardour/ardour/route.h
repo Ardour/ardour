@@ -392,12 +392,11 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		                        boost::shared_ptr<AutomationList> alist,
 		                        boost::shared_ptr<Route> route);
 
-		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override) {
-			boost::shared_ptr<Route> r = _route.lock();
-			if (r) {
-				r->set_control ((AutomationType) parameter().type(), val, group_override);
-			}
-		}
+		RouteAutomationControl (const std::string& name,
+		                        AutomationType atype,
+		                        const ParameterDescriptor& descriptor,
+		                        boost::shared_ptr<AutomationList> alist,
+		                        boost::shared_ptr<Route> route);
 
 	protected:
 		friend class Route;
