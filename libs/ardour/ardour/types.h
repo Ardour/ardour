@@ -117,6 +117,13 @@ namespace ARDOUR {
 	};
 
 	/** See evoral/Parameter.hpp
+	 *
+	 * When you add things here, you REALLY SHOULD add a case clause to
+	 * the constructor of ParameterDescriptor, unless the Controllables
+	 * that the enum refers to are completely standard (0-1.0 range, 0.0 as
+	 * normal, non-toggled, non-enumerated). Anything else needs to be
+	 * added there so that things that try to represent them can do so
+	 * with as much information as possible.
 	 */
 	enum AutomationType {
 		NullAutomation,
