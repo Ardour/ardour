@@ -59,7 +59,6 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 		double get_value () const;
 	private:
 		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		static ParameterDescriptor get_descriptor();
 	};
 
 	void set_monitoring (MonitorChoice, PBD::Controllable::GroupControlDisposition group_override);

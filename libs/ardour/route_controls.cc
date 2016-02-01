@@ -94,16 +94,6 @@ Route::RouteAutomationControl::RouteAutomationControl (const std::string& name,
 {
 }
 
-Route::RouteAutomationControl::RouteAutomationControl (const std::string& name,
-                                                       AutomationType atype,
-                                                       const ParameterDescriptor& desc,
-                                                       boost::shared_ptr<AutomationList> alist,
-                                                       boost::shared_ptr<Route> r)
-	: AutomationControl (r->session(), Evoral::Parameter (atype), desc, alist, name)
-	, _route (r)
-{
-}
-
 Route::GainControllable::GainControllable (Session& s, AutomationType atype, boost::shared_ptr<Route> r)
 	: GainControl (s, Evoral::Parameter(atype))
 	, _route (r)
@@ -266,6 +256,9 @@ double
 Route::PhaseControllable::get_value () const
 {
 	boost::shared_ptr<Route> r = _route.lock ();
+	if (!r) {
+		return 0.0;
+	}
 	return (double) r->phase_invert (_current_phase);
 }
 
@@ -282,7 +275,7 @@ Route::PhaseControllable::channel () const
 }
 
 Route::SoloIsolateControllable::SoloIsolateControllable (std::string name, boost::shared_ptr<Route> r)
-	: RouteAutomationControl (name, SoloIsolateAutomation, get_descriptor(), boost::shared_ptr<AutomationList>(), r)
+	: RouteAutomationControl (name, SoloIsolateAutomation, boost::shared_ptr<AutomationList>(), r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(SoloIsolateAutomation)));
 	gl->set_interpolation(Evoral::ControlList::Discrete);
@@ -319,17 +312,8 @@ Route::SoloIsolateControllable::_set_value (double val, PBD::Controllable::Group
 	r->set_solo_isolated (val >= 0.5 ? true : false);
 }
 
-ParameterDescriptor
-Route::SoloIsolateControllable::get_descriptor()
-{
-	ParameterDescriptor desc;
-	desc.type = SoloIsolateAutomation;
-	desc.toggled = true;
-	return desc;
-}
-
 Route::SoloSafeControllable::SoloSafeControllable (std::string name, boost::shared_ptr<Route> r)
-	: RouteAutomationControl (name, SoloSafeAutomation, get_descriptor(), boost::shared_ptr<AutomationList>(), r)
+	: RouteAutomationControl (name, SoloSafeAutomation, boost::shared_ptr<AutomationList>(), r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(SoloSafeAutomation)));
 	gl->set_interpolation(Evoral::ControlList::Discrete);
@@ -365,11 +349,3 @@ Route::SoloSafeControllable::get_value () const
 	return r->solo_safe() ? 1.0 : 0.0;
 }
 
-ParameterDescriptor
-Route::SoloSafeControllable::get_descriptor()
-{
-	ParameterDescriptor desc;
-	desc.type = SoloSafeAutomation;
-	desc.toggled = true;
-	return desc;
-}

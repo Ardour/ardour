@@ -391,13 +391,6 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		                        AutomationType atype,
 		                        boost::shared_ptr<AutomationList> alist,
 		                        boost::shared_ptr<Route> route);
-
-		RouteAutomationControl (const std::string& name,
-		                        AutomationType atype,
-		                        const ParameterDescriptor& descriptor,
-		                        boost::shared_ptr<AutomationList> alist,
-		                        boost::shared_ptr<Route> route);
-
 	protected:
 		friend class Route;
 
@@ -478,7 +471,6 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		double get_value () const;
 	private:
 		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		static ParameterDescriptor get_descriptor ();
 	};
 
 	class LIBARDOUR_API SoloSafeControllable : public RouteAutomationControl {
@@ -489,7 +481,6 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		double get_value () const;
 	private:
 		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		static ParameterDescriptor get_descriptor ();
 	};
 
 	void set_control (AutomationType, double val, PBD::Controllable::GroupControlDisposition group_override);

@@ -1166,7 +1166,7 @@ Track::metering_state () const
 }
 
 Track::MonitoringControllable::MonitoringControllable (std::string name, boost::shared_ptr<Track> r)
-	: RouteAutomationControl (name, MonitoringAutomation, get_descriptor(), boost::shared_ptr<AutomationList>(), r)
+	: RouteAutomationControl (name, MonitoringAutomation, boost::shared_ptr<AutomationList>(), r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(MonitoringAutomation)));
 	gl->set_interpolation(Evoral::ControlList::Discrete);
@@ -1217,16 +1217,4 @@ Track::MonitoringControllable::get_value () const
 	}
 
 	return t->monitoring_choice();
-}
-
-ParameterDescriptor
-Track::MonitoringControllable::get_descriptor()
-{
-	ParameterDescriptor desc;
-	desc.type = MonitoringAutomation;
-	desc.enumeration = true;
-	desc.integer_step = true;
-	desc.lower = MonitorAuto;
-	desc.upper = MonitorDisk; /* XXX bump when we add MonitorCue */
-	return desc;
 }

@@ -4115,6 +4115,7 @@ Route::set_phase_invert (uint32_t c, bool yn)
 	if (_phase_invert[c] != yn) {
 		_phase_invert[c] = yn;
 		phase_invert_changed (); /* EMIT SIGNAL */
+		_phase_control->Changed(); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 }
