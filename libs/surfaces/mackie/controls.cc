@@ -21,6 +21,7 @@
 #include <sstream>
 
 #include "ardour/automation_control.h"
+#include "pbd/enumwriter.h"
 
 #include "controls.h"
 #include "types.h"

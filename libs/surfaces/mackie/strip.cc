@@ -102,12 +102,10 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, return_to_vpot_mode_display_at (UINT64_MAX)
 	, eq_band (-1)
 	, _pan_mode (PanAzimuthAutomation)
-	, vpot_parameter (PanAzimuthAutomation)
 	, _last_gain_position_written (-1.0)
 	, _last_pan_azi_position_written (-1.0)
 	, _last_pan_width_position_written (-1.0)
 	, _last_trim_position_written (-1.0)
-	, _current_send (0)
 {
 	_fader = dynamic_cast<Fader*> (Fader::factory (*_surface, index, "fader", *this));
 	_vpot = dynamic_cast<Pot*> (Pot::factory (*_surface, Pot::ID + index, "vpot", *this));
@@ -184,16 +182,6 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	_route = r;
 
-	control_by_parameter.clear ();
-
-	control_by_parameter[PanAzimuthAutomation] = (Control*) 0;
-	control_by_parameter[PanWidthAutomation] = (Control*) 0;
-	control_by_parameter[PanElevationAutomation] = (Control*) 0;
-	control_by_parameter[PanFrontBackAutomation] = (Control*) 0;
-	control_by_parameter[PanLFEAutomation] = (Control*) 0;
-	control_by_parameter[GainAutomation] = (Control*) 0;
-	control_by_parameter[PhaseAutomation] = (Control*) 0;
-
 	reset_saved_values ();
 
 	if (!r) {
@@ -258,16 +246,15 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 		possible_pot_parameters.push_back (PanLFEAutomation);
 	}
 
-	if (_route->phase_invert().size()) {
-		possible_trim_parameters.push_back (PhaseAutomation);
-		_route->phase_control()->set_channel(0);
-	}
-	_current_send = 0;
-	/* Update */
 	_pan_mode = PanAzimuthAutomation;
-	potmode_changed (false);
-	notify_all ();
 
+	if (_surface->mcp().subview_mode() == MackieControlProtocol::None) {
+		set_vpot_parameter (_pan_mode);
+	}
+
+	_fader->set_control (_route->gain_control());
+
+	notify_all ();
 }
 
 void
@@ -335,37 +322,48 @@ Strip::notify_route_deleted ()
 void
 Strip::notify_gain_changed (bool force_update)
 {
-	if (_route) {
+	if (!_route) {
+		return;
+	}
 
-		Control* control;
+	boost::shared_ptr<AutomationControl> ac = _route->gain_control();
+	Control* control;
+
+	if (!ac) {
+		/* doesn't seem possible but lets be safe */
+		return;
+	}
+
+	/* track gain control could be on vpot or fader, depending in
+	 * flip mode.
+	 */
+
+	if (_vpot->control() == ac) {
+		control = _vpot;
+	} else if (_fader->control() == ac) {
+		control = _fader;
+	} else {
+		return;
+	}
+
+	float gain_coefficient = ac->get_value();
+	float normalized_position = ac->internal_to_interface (gain_coefficient);
+
+	if (force_update || normalized_position != _last_gain_position_written) {
 
 		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-			control = _vpot;
-		} else {
-			control = _fader;
-		}
-
-		boost::shared_ptr<AutomationControl> ac = _route->gain_control();
-
-		float gain_coefficient = ac->get_value();
-		float normalized_position = ac->internal_to_interface (gain_coefficient);
-
-		if (force_update || normalized_position != _last_gain_position_written) {
-
-			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-				if (!control->in_use()) {
-					_surface->write (_vpot->set (normalized_position, true, Pot::wrap));
-				}
-				do_parameter_display (GainAutomation, gain_coefficient);
-			} else {
-				if (!control->in_use()) {
-					_surface->write (_fader->set_position (normalized_position));
-				}
-				do_parameter_display (GainAutomation, gain_coefficient);
+			if (!control->in_use()) {
+				_surface->write (_vpot->set (normalized_position, true, Pot::wrap));
 			}
-
-			_last_gain_position_written = normalized_position;
+			do_parameter_display (GainAutomation, gain_coefficient);
+		} else {
+			if (!control->in_use()) {
+				_surface->write (_fader->set_position (normalized_position));
+			}
+			do_parameter_display (GainAutomation, gain_coefficient);
 		}
+
+		_last_gain_position_written = normalized_position;
 	}
 }
 
@@ -460,7 +458,7 @@ Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool for
 	boost::shared_ptr<AutomationControl> control;
 
 	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (r);
-	
+
 	switch (type) {
 	case TrimAutomation:
 		control = r->trim_control();
@@ -609,34 +607,24 @@ Strip::notify_panner_azi_changed (bool force_update)
 	boost::shared_ptr<AutomationControl> pan_control = _route->pan_azimuth_control ();
 
 	if (!pan_control) {
+		/* basically impossible, since we're here because that control
+		 *  changed, but sure, whatever.
+		 */
 		return;
 	}
 
-	Control* control = 0;
-	ControlParameterMap::iterator i = control_by_parameter.find (PanAzimuthAutomation);
-
-	if (i == control_by_parameter.end()) {
+	if (_vpot->control() != pan_control) {
 		return;
 	}
-
-	control = i->second;
 
 	double normalized_pos = pan_control->internal_to_interface (pan_control->get_value());
 	double internal_pos = pan_control->get_value();
 
 	if (force_update || (normalized_pos != _last_pan_azi_position_written)) {
 
-		if (control == _fader) {
-			if (!_fader->in_use()) {
-				_surface->write (_fader->set_position (normalized_pos));
-				/* show actual internal value to user */
-				do_parameter_display (PanAzimuthAutomation, internal_pos);
-			}
-		} else if (control == _vpot) {
-			_surface->write (_vpot->set (normalized_pos, true, Pot::dot));
-			/* show actual internal value to user */
-			do_parameter_display (PanAzimuthAutomation, internal_pos);
-		}
+		_surface->write (_vpot->set (normalized_pos, true, Pot::dot));
+		/* show actual internal value to user */
+		do_parameter_display (PanAzimuthAutomation, internal_pos);
 
 		_last_pan_azi_position_written = normalized_pos;
 	}
@@ -654,35 +642,22 @@ Strip::notify_panner_width_changed (bool force_update)
 	boost::shared_ptr<AutomationControl> pan_control = _route->pan_width_control ();
 
 	if (!pan_control) {
+		/* basically impossible, since we're here because that control
+		 *  changed, but sure, whatever.
+		 */
 		return;
 	}
 
-	Control* control = 0;
-	ControlParameterMap::iterator i = control_by_parameter.find (PanWidthAutomation);
-
-	if (i == control_by_parameter.end()) {
+	if (_vpot->control() != pan_control) {
 		return;
 	}
-
-	control = i->second;
 
 	double pos = pan_control->internal_to_interface (pan_control->get_value());
 
 	if (force_update || pos != _last_pan_width_position_written) {
 
-		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-
-			if (control == _fader) {
-				if (!control->in_use()) {
-					_surface->write (_fader->set_position (pos));
-					do_parameter_display (PanWidthAutomation, pos);
-				}
-			}
-
-		} else if (control == _vpot) {
-			_surface->write (_vpot->set (pos, true, Pot::spread));
-			do_parameter_display (PanWidthAutomation, pos);
-		}
+		_surface->write (_vpot->set (pos, true, Pot::spread));
+		do_parameter_display (PanWidthAutomation, pos);
 
 		_last_pan_width_position_written = pos;
 	}
@@ -839,8 +814,10 @@ Strip::vselect_event (Button&, ButtonState bs)
 					bool enabled = ac->get_value();
 					ac->set_value (!enabled, gcd);
 				}
+			}
 #else
 			DEBUG_TRACE (DEBUG::MackieControl, "switching to next pot mode\n");
+			/* switch vpot to control next available parameter */
 			next_pot_mode ();
 #endif
 		}
@@ -949,6 +926,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 
 	switch (type) {
 	case GainAutomation:
+	case BusSendLevel:
 		if (val == 0.0) {
 			pending_display[1] = " -inf ";
 		} else {
@@ -999,15 +977,6 @@ Strip::do_parameter_display (AutomationType type, float val)
 			} else {
 				pending_display[1] = "Invert";
 			}
-			screen_hold = true;
-		}
-		break;
-
-	case BusSendLevel:
-		if (_route) {
-			float dB = accurate_coefficient_to_dB (val);
-			snprintf (buf, sizeof (buf), "%6.1f", dB);
-			pending_display[1] = buf;
 			screen_hold = true;
 		}
 		break;
@@ -1351,55 +1320,55 @@ Strip::gui_selection_changed (const ARDOUR::StrongRouteNotificationList& rl)
 string
 Strip::vpot_mode_string ()
 {
+	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+		return string();
+	}
+
 	boost::shared_ptr<AutomationControl> ac = _vpot->control();
+
 	if (!ac) {
 		return string();
 	}
 
-	if (control_by_parameter.find (GainAutomation)->second == _vpot) {
-		return "Fader";
-	} else if (control_by_parameter.find (TrimAutomation)->second == _vpot) {
-		return "Trim";
-	} else if (control_by_parameter.find (PhaseAutomation)->second == _vpot) {
-		return string_compose ("Phase%1", _route->phase_control()->channel() + 1);
-	} else if (control_by_parameter.find (PanAzimuthAutomation)->second == _vpot) {
+	switch (ac->desc().type) {
+	case PanAzimuthAutomation:
 		return "Pan";
-	} else if (control_by_parameter.find (PanWidthAutomation)->second == _vpot) {
+	case PanWidthAutomation:
 		return "Width";
-	} else if (control_by_parameter.find (PanElevationAutomation)->second == _vpot) {
+	case PanElevationAutomation:
 		return "Elev";
-	} else if (control_by_parameter.find (PanFrontBackAutomation)->second == _vpot) {
+	case PanFrontBackAutomation:
 		return "F/Rear";
-	} else if (control_by_parameter.find (PanLFEAutomation)->second == _vpot) {
+	case PanLFEAutomation:
 		return "LFE";
-	}
-
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
-		return string();
+	default:
+		break;
 	}
 
 	return "???";
 }
 
- void
-Strip::potmode_changed (bool notify)
+void
+Strip::flip_mode_changed ()
 {
-	if (!_route) {
-		return;
-	}
+	if (_surface->mcp().subview_mode() == MackieControlProtocol::Sends) {
 
-	// WIP
-	int pm = _surface->mcp().pot_mode();
-	switch (pm) {
-	case MackieControlProtocol::Pan:
-		// This needs to set current pan mode (azimuth or width... or whatever)
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Assign pot to Pan mode %1\n", enum_2_string (_pan_mode)));
-		set_vpot_parameter (_pan_mode);
-		break;
-	}
+		boost::shared_ptr<AutomationControl> pot_control = _vpot->control();
+		boost::shared_ptr<AutomationControl> fader_control = _fader->control();
 
-	if (notify) {
-		notify_all ();
+		if (pot_control && fader_control) {
+			_vpot->set_control (fader_control);
+			_fader->set_control (pot_control);
+		}
+
+		if (_surface->mcp().flip_mode() == MackieControlProtocol::Normal) {
+			do_parameter_display (GainAutomation, fader_control->get_value());
+		} else {
+			do_parameter_display (BusSendLevel, fader_control->get_value());
+		}
+
+	} else {
+		/* do nothing */
 	}
 }
 
@@ -1453,32 +1422,33 @@ Strip::next_pot_mode ()
 	}
 
 
-	if (_surface->mcp().pot_mode() == MackieControlProtocol::Pan) {
-
-		if (possible_pot_parameters.empty() || (possible_pot_parameters.size() == 1 && possible_pot_parameters.front() == ac->parameter().type())) {
-			return;
-		}
-
-		for (i = possible_pot_parameters.begin(); i != possible_pot_parameters.end(); ++i) {
-			if ((*i) == ac->parameter().type()) {
-				break;
-			}
-		}
-
-		/* move to the next mode in the list, or back to the start (which will
-		also happen if the current mode is not in the current pot mode list)
-		*/
-
-		if (i != possible_pot_parameters.end()) {
-			++i;
-		}
-
-		if (i == possible_pot_parameters.end()) {
-			i = possible_pot_parameters.begin();
-		}
-
-		set_vpot_parameter (*i);
+	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+		return;
 	}
+
+	if (possible_pot_parameters.empty() || (possible_pot_parameters.size() == 1 && possible_pot_parameters.front() == ac->parameter().type())) {
+		return;
+	}
+
+	for (i = possible_pot_parameters.begin(); i != possible_pot_parameters.end(); ++i) {
+		if ((*i) == ac->parameter().type()) {
+			break;
+		}
+	}
+
+	/* move to the next mode in the list, or back to the start (which will
+	   also happen if the current mode is not in the current pot mode list)
+	*/
+
+	if (i != possible_pot_parameters.end()) {
+		++i;
+	}
+
+	if (i == possible_pot_parameters.end()) {
+		i = possible_pot_parameters.begin();
+	}
+
+	set_vpot_parameter (*i);
 }
 
 void
@@ -1490,7 +1460,7 @@ Strip::subview_mode_changed ()
 
 	switch (_surface->mcp().subview_mode()) {
 	case MackieControlProtocol::None:
-		set_vpot_parameter (vpot_parameter);
+		set_vpot_parameter (_pan_mode);
 		/* need to show strip name again */
 		show_route_name ();
 		notify_metering_state_changed ();
@@ -1864,8 +1834,6 @@ void
 Strip::set_vpot_parameter (AutomationType p)
 {
 	if (!_route || (p == NullAutomation)) {
-		control_by_parameter[vpot_parameter] = 0;
-		vpot_parameter = NullAutomation;
 		_vpot->set_control (boost::shared_ptr<AutomationControl>());
 		pending_display[1] = string();
 		return;
@@ -1877,138 +1845,26 @@ Strip::set_vpot_parameter (AutomationType p)
 
 	reset_saved_values ();
 
-	/* unset any mapping between the vpot and any existing parameters */
-
-	for (ControlParameterMap::iterator i = control_by_parameter.begin(); i != control_by_parameter.end(); ++i) {
-
-		if (i != control_by_parameter.end() && i->second == _vpot) {
-			i->second = 0;
-		}
-	}
-
 	switch (p) {
 	case PanAzimuthAutomation:
-		if ((pan_control = _route->pan_azimuth_control ())) {
-			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-				_pan_mode = PanAzimuthAutomation;
-				if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-					/* gain to vpot, pan azi to fader */
-					_vpot->set_control (_route->gain_control());
-					vpot_parameter = GainAutomation;
-					control_by_parameter[GainAutomation] = _vpot;
-					_fader->set_control (pan_control);
-					control_by_parameter[PanAzimuthAutomation] = _fader;
-				} else {
-					_fader->set_control (boost::shared_ptr<AutomationControl>());
-					control_by_parameter[PanAzimuthAutomation] = 0;
-				}
-			} else {
-				/* gain to fader, pan azi to vpot */
-				vpot_parameter = PanAzimuthAutomation;
-				_fader->set_control (_route->gain_control());
-				control_by_parameter[GainAutomation] = _fader;
-				_vpot->set_control (pan_control);
-				control_by_parameter[PanAzimuthAutomation] = _vpot;
-			}
-		} else {
-			_vpot->set_control (boost::shared_ptr<AutomationControl>());
-			control_by_parameter[PanAzimuthAutomation] = 0;
-		}
+		pan_control = _route->pan_azimuth_control ();
 		break;
-
 	case PanWidthAutomation:
-		if ((pan_control = _route->pan_width_control ())) {
-			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-				_pan_mode = PanWidthAutomation;
-				if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-					/* gain to vpot, pan width to fader */
-					_vpot->set_control (_route->gain_control());
-					vpot_parameter = GainAutomation;
-					control_by_parameter[GainAutomation] = _vpot;
-					_fader->set_control (pan_control);
-					control_by_parameter[PanWidthAutomation] = _fader;
-				} else {
-					_fader->set_control (boost::shared_ptr<AutomationControl>());
-					control_by_parameter[PanWidthAutomation] = 0;
-				}
-			} else {
-				/* gain to fader, pan width to vpot */
-				vpot_parameter = PanWidthAutomation;
-				_fader->set_control (_route->gain_control());
-				control_by_parameter[GainAutomation] = _fader;
-				_vpot->set_control (pan_control);
-				control_by_parameter[PanWidthAutomation] = _vpot;
-			}
-		} else {
-			_vpot->set_control (boost::shared_ptr<AutomationControl>());
-			control_by_parameter[PanWidthAutomation] = 0;
-		}
+		pan_control = _route->pan_width_control ();
 		break;
-
 	case PanElevationAutomation:
 		break;
 	case PanFrontBackAutomation:
 		break;
 	case PanLFEAutomation:
 		break;
-	case TrimAutomation:
-		_trim_mode = TrimAutomation;
-		vpot_parameter = TrimAutomation;
-		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-			/* gain to vpot, trim to fader */
-			_vpot->set_control (_route->gain_control());
-			control_by_parameter[GainAutomation] = _vpot;
-			if (_route->trim() && route()->trim()->active()) {
-				_fader->set_control (_route->trim_control());
-				control_by_parameter[TrimAutomation] = _fader;
-			} else {
-				_fader->set_control (boost::shared_ptr<AutomationControl>());
-				control_by_parameter[TrimAutomation] = 0;
-			}
-		} else {
-			/* gain to fader, trim to vpot */
-			_fader->set_control (_route->gain_control());
-			control_by_parameter[GainAutomation] = _fader;
-			if (_route->trim() && route()->trim()->active()) {
-				_vpot->set_control (_route->trim_control());
-				control_by_parameter[TrimAutomation] = _vpot;
-			} else {
-				_vpot->set_control (boost::shared_ptr<AutomationControl>());
-				control_by_parameter[TrimAutomation] = 0;
-			}
-		}
-		break;
-	case PhaseAutomation:
-		_trim_mode = PhaseAutomation;
-		vpot_parameter = PhaseAutomation;
-		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-			/* gain to vpot, phase to fader */
-			_vpot->set_control (_route->gain_control());
-			control_by_parameter[GainAutomation] = _vpot;
-			if (_route->phase_invert().size()) {
-				_fader->set_control (_route->phase_control());
-				control_by_parameter[PhaseAutomation] = _fader;
-			} else {
-				_fader->set_control (boost::shared_ptr<AutomationControl>());
-				control_by_parameter[PhaseAutomation] = 0;
-			}
-		} else {
-			/* gain to fader, phase to vpot */
-			_fader->set_control (_route->gain_control());
-			control_by_parameter[GainAutomation] = _fader;
-			if (_route->phase_invert().size()) {
-				_vpot->set_control (_route->phase_control());
-				control_by_parameter[PhaseAutomation] = _vpot;
-			} else {
-				_vpot->set_control (boost::shared_ptr<AutomationControl>());
-				control_by_parameter[PhaseAutomation] = 0;
-			}
-		}
-		break;
 	default:
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("vpot mode %1 not known.\n", p));
-		break;
+		return;
+	}
 
+	if (pan_control) {
+		_pan_mode = p;
+		_vpot->set_control (pan_control);
 	}
 
 	pending_display[1] = vpot_mode_string ();

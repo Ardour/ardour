@@ -507,7 +507,7 @@ MackieControlProtocol::rewind_press (Button &)
 		prev_marker ();
 	} else if (modifier_state() & MODIFIER_NUDGE) {
 		access_action ("Editor/nudge-playhead-backward");
-	} else if (main_modifier_state() == MODIFIER_SHIFT) {
+	} else if (main_modifier_state() & MODIFIER_SHIFT) {
 		goto_start ();
 	} else {
 		rewind ();
@@ -528,7 +528,7 @@ MackieControlProtocol::ffwd_press (Button &)
 		next_marker ();
 	} else if (modifier_state() & MODIFIER_NUDGE) {
 		access_action ("Editor/nudge-playhead-forward");
-	} else if (main_modifier_state() == MODIFIER_SHIFT) {
+	} else if (main_modifier_state() & MODIFIER_SHIFT) {
 		goto_end();
 	} else {
 		ffwd ();
@@ -688,7 +688,8 @@ MackieControlProtocol::F8_release (Button &)
 LedState
 MackieControlProtocol::pan_press (Button &)
 {
-	set_pot_mode (Pan);
+	/* XXX eventually pan may have its own subview mode */
+	set_subview_mode (MackieControlProtocol::None, boost::shared_ptr<Route>());
 	return none;
 }
 LedState

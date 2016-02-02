@@ -116,7 +116,6 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _flip_mode (Normal)
 	, _view_mode (Mixer)
 	, _subview_mode (None)
-	, _pot_mode (Pan)
 	, _current_selected_track (-1)
 	, _modifier_state (0)
 	, _ipmidi_base (MIDI::IPMIDIPort::lowest_ipmidi_port_default)
@@ -649,14 +648,10 @@ MackieControlProtocol::update_global_led (int id, LedState ls)
 void
 MackieControlProtocol::device_ready ()
 {
-	/* this is not required to be called, but for devices which do
-	 * handshaking, it can be called once the device has verified the
-	 * connection.
-	 */
-
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device ready init (active=%1)\n", active()));
 	update_surfaces ();
-	set_pot_mode (_pot_mode);
+	set_subview_mode (MackieControlProtocol::None, boost::shared_ptr<Route>());
+	set_flip_mode (Normal);
 }
 
 // send messages to surface to set controls to correct values
@@ -1713,7 +1708,6 @@ MackieControlProtocol::redisplay_subview_mode ()
 int
 MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route> r)
 {
-	SubViewMode old_mode = _subview_mode;
 	boost::shared_ptr<Route> old_route = _subview_route;
 
 	if (!subview_mode_would_be_ok (sm, r)) {
@@ -1765,61 +1759,62 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 		_subview_route = r;
 	}
 
-	if ((_subview_mode != old_mode) || (_subview_route != old_route)) {
+	if (r != old_route) {
+		subview_route_connections.drop_connections ();
 
-		if (r != old_route) {
-			subview_route_connections.drop_connections ();
-			if (_subview_route) {
-				_subview_route->DropReferences.connect (subview_route_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_subview_route_deleted, this), this);
-			}
+		/* Catch the current subview route going away */
+		if (_subview_route) {
+			_subview_route->DropReferences.connect (subview_route_connections, MISSING_INVALIDATOR,
+			                                        boost::bind (&MackieControlProtocol::notify_subview_route_deleted, this),
+			                                        this);
 		}
+	}
 
-		/* subview mode did actually change */
+	redisplay_subview_mode ();
 
-		redisplay_subview_mode ();
+	/* turn buttons related to vpot mode on or off as required */
 
-		if (_subview_mode != old_mode) {
-
-			/* turn buttons related to vpot mode on or off as required */
-
-			switch (_subview_mode) {
-			case MackieControlProtocol::None:
-				pot_mode_globals ();
-				break;
-			case MackieControlProtocol::EQ:
-				update_global_button (Button::Send, off);
-				update_global_button (Button::Plugin, off);
-				update_global_button (Button::Eq, on);
-				update_global_button (Button::Dyn, off);
-				update_global_button (Button::Track, off);
-				update_global_button (Button::Pan, off);
-				break;
-			case MackieControlProtocol::Dynamics:
-				update_global_button (Button::Send, off);
-				update_global_button (Button::Plugin, off);
-				update_global_button (Button::Eq, off);
-				update_global_button (Button::Dyn, on);
-				update_global_button (Button::Track, off);
-				update_global_button (Button::Pan, off);
-				break;
-			case MackieControlProtocol::Sends:
-				update_global_button (Button::Send, on);
-				update_global_button (Button::Plugin, off);
-				update_global_button (Button::Eq, off);
-				update_global_button (Button::Dyn, off);
-				update_global_button (Button::Track, off);
-				update_global_button (Button::Pan, off);
-				break;
-			case MackieControlProtocol::TrackView:
-				update_global_button (Button::Send, off);
-				update_global_button (Button::Plugin, off);
-				update_global_button (Button::Eq, off);
-				update_global_button (Button::Dyn, off);
-				update_global_button (Button::Track, on);
-				update_global_button (Button::Pan, off);
-				break;
-			}
-		}
+	switch (_subview_mode) {
+	case MackieControlProtocol::None:
+		update_global_button (Button::Send, off);
+		update_global_button (Button::Plugin, off);
+		update_global_button (Button::Eq, off);
+		update_global_button (Button::Dyn, off);
+		update_global_button (Button::Track, off);
+		update_global_button (Button::Pan, on);
+		break;
+	case MackieControlProtocol::EQ:
+		update_global_button (Button::Send, off);
+		update_global_button (Button::Plugin, off);
+		update_global_button (Button::Eq, on);
+		update_global_button (Button::Dyn, off);
+		update_global_button (Button::Track, off);
+		update_global_button (Button::Pan, off);
+		break;
+	case MackieControlProtocol::Dynamics:
+		update_global_button (Button::Send, off);
+		update_global_button (Button::Plugin, off);
+		update_global_button (Button::Eq, off);
+		update_global_button (Button::Dyn, on);
+		update_global_button (Button::Track, off);
+		update_global_button (Button::Pan, off);
+		break;
+	case MackieControlProtocol::Sends:
+		update_global_button (Button::Send, on);
+		update_global_button (Button::Plugin, off);
+		update_global_button (Button::Eq, off);
+		update_global_button (Button::Dyn, off);
+		update_global_button (Button::Track, off);
+		update_global_button (Button::Pan, off);
+		break;
+	case MackieControlProtocol::TrackView:
+		update_global_button (Button::Send, off);
+		update_global_button (Button::Plugin, off);
+		update_global_button (Button::Eq, off);
+		update_global_button (Button::Dyn, off);
+		update_global_button (Button::Track, on);
+		update_global_button (Button::Pan, off);
+		break;
 	}
 
 	return 0;
@@ -1856,61 +1851,19 @@ MackieControlProtocol::display_view_mode ()
 void
 MackieControlProtocol::set_flip_mode (FlipMode fm)
 {
-	if (_flip_mode != fm) {
-		if (fm == Normal) {
-			update_global_button (Button::Flip, off);
-		} else {
-			update_global_button (Button::Flip, on);
-		}
-
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
-
-		_flip_mode = fm;
-
-		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-			(*s)->update_flip_mode_display ();
-		}
-	}
-}
-
-void
-MackieControlProtocol::set_pot_mode (PotMode m)
-{
-	// maybe not in flip mode.
-	if (flip_mode()) {
-		return;
+	if (fm == Normal) {
+		update_global_button (Button::Flip, off);
+	} else {
+		update_global_button (Button::Flip, on);
 	}
 
-	/* switch to a pot mode cancels any subview mode */
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-	set_subview_mode (None, boost::shared_ptr<Route>());
+	_flip_mode = fm;
 
-	_pot_mode = m;
-
-	{
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
-
-		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-			(*s)->update_potmode ();
-
-		}
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->update_flip_mode_display ();
 	}
-
-	pot_mode_globals ();
-}
-
-void
-MackieControlProtocol::pot_mode_globals ()
-{
-	switch (_pot_mode) {
-	case Pan:
-		update_global_button (Button::Eq, off);
-		update_global_button (Button::Dyn, off);
-		update_global_button (Button::Track, off);
-		update_global_button (Button::Send, off);
-		update_global_button (Button::Plugin, off);
-		update_global_button (Button::Pan, on);
-	};
 }
 
 void

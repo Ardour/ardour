@@ -154,7 +154,6 @@ public:
 
 	void update_view_mode_display (bool with_helpful_text);
 	void update_flip_mode_display ();
-	void update_potmode ();
 
 	void gui_selection_changed (const ARDOUR::StrongRouteNotificationList&);
 	void subview_mode_changed ();

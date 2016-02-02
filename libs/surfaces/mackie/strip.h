@@ -77,7 +77,7 @@ public:
 
 	void zero ();
 
-	void potmode_changed (bool notify=false);
+	void flip_mode_changed ();
 	void subview_mode_changed ();
 
 	void lock_controls ();
@@ -122,14 +122,11 @@ private:
 	int       eq_band;
 
 	ARDOUR::AutomationType  _pan_mode;
-	ARDOUR::AutomationType  _trim_mode;
-	ARDOUR::AutomationType  vpot_parameter;
 
 	float _last_gain_position_written;
 	float _last_pan_azi_position_written;
 	float _last_pan_width_position_written;
 	float _last_trim_position_written;
-	uint32_t _current_send;
 
 	void notify_solo_changed ();
 	void notify_mute_changed ();
@@ -148,6 +145,7 @@ private:
 	boost::shared_ptr<ARDOUR::AutomationControl> mb_pan_controllable;
 
 	void return_to_vpot_mode_display ();
+	void next_pot_mode ();
 
 	void do_parameter_display (ARDOUR::AutomationType, float val);
 	void select_event (Button&, ButtonState);
@@ -156,16 +154,12 @@ private:
 
 	std::vector<ARDOUR::AutomationType> possible_pot_parameters;
 	std::vector<ARDOUR::AutomationType> possible_trim_parameters;
-	void next_pot_mode ();
 	void set_vpot_parameter (ARDOUR::AutomationType);
 	void show_route_name ();
 
 	void reset_saved_values ();
 
 	bool is_midi_track () const;
-
-	typedef std::map<ARDOUR::AutomationType,Control*> ControlParameterMap;
-	ControlParameterMap control_by_parameter;
 
 	void notify_eq_change (ARDOUR::AutomationType, uint32_t band, bool force);
 	void setup_eq_vpot (boost::shared_ptr<ARDOUR::Route>);

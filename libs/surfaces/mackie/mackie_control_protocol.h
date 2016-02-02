@@ -123,10 +123,6 @@ class MackieControlProtocol
 		TrackView,
 	};
 
-	enum PotMode {
-		Pan,
-	};
-
 	enum FlipMode {
 		Normal, /* fader controls primary, vpot controls secondary */
 		Mirror, /* fader + vpot control secondary */
@@ -156,7 +152,6 @@ class MackieControlProtocol
 	SubViewMode subview_mode () const { return _subview_mode; }
 	static bool subview_mode_would_be_ok (SubViewMode, boost::shared_ptr<ARDOUR::Route>);
 	boost::shared_ptr<ARDOUR::Route> subview_route() const;
-	PotMode pot_mode () const { return _pot_mode; }
 	bool zoom_mode () const { return modifier_state() & MODIFIER_ZOOM; }
 	bool     metering_active () const { return _metering_active; }
 
@@ -175,8 +170,6 @@ class MackieControlProtocol
 	void set_view_mode (ViewMode);
 	int set_subview_mode (SubViewMode, boost::shared_ptr<ARDOUR::Route>);
 	void set_flip_mode (FlipMode);
-	void set_pot_mode (PotMode);
-	void pot_mode_globals ();
 	void display_view_mode ();
 
 	XMLNode& get_state ();
@@ -350,7 +343,6 @@ class MackieControlProtocol
 	ViewMode                 _view_mode;
 	SubViewMode              _subview_mode;
 	boost::shared_ptr<ARDOUR::Route> _subview_route;
-	PotMode                  _pot_mode;
 	int                      _current_selected_track;
 	int                      _modifier_state;
 	ButtonMap                 button_map;

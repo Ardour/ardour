@@ -1019,15 +1019,7 @@ void
 Surface::update_flip_mode_display ()
 {
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->potmode_changed (true);
-	}
-}
-
-void
-Surface::update_potmode ()
-{
-	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->potmode_changed (false);
+		(*s)->flip_mode_changed ();
 	}
 }
 
