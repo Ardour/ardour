@@ -1368,6 +1368,15 @@ Strip::flip_mode_changed ()
 			do_parameter_display (BusSendLevel, fader_control->get_value());
 		}
 
+		/* update fader */
+
+		_surface->write (_fader->set_position (pot_control->internal_to_interface (pot_control->get_value ())));
+
+		/* update pot */
+
+		_surface->write (_vpot->set (fader_control->internal_to_interface (fader_control->get_value()), true, Pot::wrap));
+
+
 	} else {
 		/* do nothing */
 	}
