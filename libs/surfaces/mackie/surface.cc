@@ -637,7 +637,7 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 	}
 
 	float delta = 0;
-	if (mcp().main_modifier_state() == MackieControlProtocol::MODIFIER_CONTROL) {
+	if (mcp().main_modifier_state() == MackieControlProtocol::MODIFIER_SHIFT) {
 		delta = sign * (ticks / (float) 0xff);
 	} else {
 		delta = sign * (ticks / (float) 0x3f);
