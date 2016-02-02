@@ -631,6 +631,17 @@ PTFFormat::parserest5(void) {
 }
 
 void
+PTFFormat::resort(std::vector<wav_t> *ws) {
+	int j = 0;
+	std::sort((*ws).begin(), (*ws).end());
+	for (std::vector<wav_t>::iterator i = (*ws).begin();
+			i != (*ws).end(); ++i) {
+		(*i).index = j;
+		j++;
+	}
+}
+
+void
 PTFFormat::parseaudio5(void) {
 	int i,k,l;
 	int lengthofname, wavnumber;
@@ -670,6 +681,7 @@ PTFFormat::parseaudio5(void) {
 
 	wavnumber = 0;
 	i+=16;
+	char ext[5];
 	while (i < len && numberofwavs > 0) {
 		i++;
 		if (		(ptfunxored[i  ] == 0x5a) &&
@@ -684,11 +696,19 @@ PTFFormat::parseaudio5(void) {
 			wavname[l] = ptfunxored[i+l];
 			l++;
 		}
-		i+=lengthofname + 4;
+		i+=lengthofname;
+		ext[0] = ptfunxored[i++];
+		ext[1] = ptfunxored[i++];
+		ext[2] = ptfunxored[i++];
+		ext[3] = ptfunxored[i++];
+		ext[4] = '\0';
+
 		wavname[l] = 0;
-		if (foundin(wavname, ".wav")) {
+		if (foundin(wavname, ".L") || foundin(wavname, ".R")) {
+			extension = string("");
+		} else if (foundin(wavname, ".wav") || foundin(ext, "WAVE")) {
 			extension = string(".wav");
-		} else if (foundin(wavname, ".aif")) {
+		} else if (foundin(wavname, ".aif") || foundin(ext, "AIFF")) {
 			extension = string(".aif");
 		} else {
 			extension = string("");
@@ -707,6 +727,8 @@ PTFFormat::parseaudio5(void) {
 		numberofwavs--;
 		i += 7;
 	}
+	resort(&actualwavs);
+	resort(&audiofiles);
 }
 
 void
