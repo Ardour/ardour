@@ -2073,7 +2073,7 @@ MackieControlProtocol::select_range ()
 	if (!routes.empty()) {
 		for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
 
-			if (main_modifier_state() == MODIFIER_CONTROL) {
+			if (main_modifier_state() == MODIFIER_SHIFT) {
 				ToggleRouteSelection ((*r)->remote_control_id ());
 			} else {
 				if (r == routes.begin()) {
