@@ -1124,14 +1124,14 @@ Strip::handle_pot (Pot& pot, float delta)
 
 	} else {
 
-		double p = ac->get_value();
+		double p = ac->get_interface();
 
 		p += delta;
 
-		p = max (ac->lower(), p);
-		p = min (ac->upper(), p);
+		p = max (0, p);
+		p = min (1.0, p);
 
-		ac->set_value (p, gcd);
+		ac->set_interface ( ac->interface_to_internal(p), gcd);
 	}
 }
 
