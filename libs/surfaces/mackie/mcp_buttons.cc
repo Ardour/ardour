@@ -738,12 +738,14 @@ MackieControlProtocol::dyn_release (Button &)
 LedState
 MackieControlProtocol::flip_press (Button &)
 {
-	if (_flip_mode != Normal) {
-		set_flip_mode (Normal);
-	} else {
-		set_flip_mode (Mirror);
+	if (subview_mode() == MackieControlProtocol::Sends) {
+		if (_flip_mode != Normal) {
+			set_flip_mode (Normal);
+		} else {
+			set_flip_mode (Mirror);
+		}
+		return ((_flip_mode != Normal) ? on : off);
 	}
-	return ((_flip_mode != Normal) ? on : off);
 }
 LedState
 MackieControlProtocol::flip_release (Button &)

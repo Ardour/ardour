@@ -1708,6 +1708,10 @@ MackieControlProtocol::redisplay_subview_mode ()
 int
 MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route> r)
 {
+	if (_flip_mode != Normal) {
+		set_flip_mode (Normal);
+	}
+
 	boost::shared_ptr<Route> old_route = _subview_route;
 
 	if (!subview_mode_would_be_ok (sm, r)) {
@@ -1823,6 +1827,9 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 void
 MackieControlProtocol::set_view_mode (ViewMode m)
 {
+	if (_flip_mode != Normal) {
+		set_flip_mode (Normal);
+	}
 	ViewMode old_view_mode = _view_mode;
 
 	_view_mode = m;
