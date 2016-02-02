@@ -569,7 +569,7 @@ FPGUI::build_foot_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 	actions.push_back (make_pair (string("Toggle Loop"), string(X_("Transport/Loop"))));
 	actions.push_back (make_pair (string("Toggle Click"), string(X_("Transport/ToggleClick"))));
 
-	build_action_combo (cb, actions, FaderPort::Proj, bs);
+	build_action_combo (cb, actions, FaderPort::Footswitch, bs);
 }
 
 bool
