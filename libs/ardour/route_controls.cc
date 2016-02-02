@@ -233,6 +233,7 @@ Route::MuteControllable::get_value () const
 
 Route::PhaseControllable::PhaseControllable (std::string name, boost::shared_ptr<Route> r)
 	: RouteAutomationControl (name, PhaseAutomation, boost::shared_ptr<AutomationList>(), r)
+	, _current_phase (0)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(PhaseAutomation)));
 	gl->set_interpolation(Evoral::ControlList::Discrete);
