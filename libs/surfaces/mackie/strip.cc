@@ -680,15 +680,6 @@ Strip::select_event (Button&, ButtonState bs)
 			return;
 		}
 
-		if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
-			/* reset to default */
-			boost::shared_ptr<AutomationControl> ac = _fader->control ();
-			if (ac) {
-				ac->set_value (ac->normal(), Controllable::NoGroup);
-			}
-			return;
-		}
-
 		DEBUG_TRACE (DEBUG::MackieControl, "add select button on press\n");
 		_surface->mcp().add_down_select_button (_surface->number(), _index);
 		_surface->mcp().select_range ();
