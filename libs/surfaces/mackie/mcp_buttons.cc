@@ -746,7 +746,10 @@ MackieControlProtocol::flip_press (Button &)
 		}
 		return ((_flip_mode != Normal) ? on : off);
 	}
+
+	return none;
 }
+
 LedState
 MackieControlProtocol::flip_release (Button &)
 {
