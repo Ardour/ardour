@@ -351,18 +351,15 @@ Strip::notify_gain_changed (bool force_update)
 
 	if (force_update || normalized_position != _last_gain_position_written) {
 
-		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
-			if (!control->in_use()) {
+		if (!control->in_use()) {
+			if (control == _vpot) {
 				_surface->write (_vpot->set (normalized_position, true, Pot::wrap));
-			}
-			do_parameter_display (GainAutomation, gain_coefficient);
-		} else {
-			if (!control->in_use()) {
+			} else {
 				_surface->write (_fader->set_position (normalized_position));
 			}
-			do_parameter_display (GainAutomation, gain_coefficient);
 		}
 
+		do_parameter_display (GainAutomation, gain_coefficient);
 		_last_gain_position_written = normalized_position;
 	}
 }
@@ -435,8 +432,11 @@ Strip::notify_send_level_change (AutomationType type, uint32_t send_num, bool fo
 	if (control) {
 		float val = control->get_value();
 		do_parameter_display (type, val);
-		/* update pot/encoder */
-		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
+
+		if (_vpot->control() == control) {
+			/* update pot/encoder */
+			_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
+		}
 	}
 }
 
