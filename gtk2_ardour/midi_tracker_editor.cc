@@ -211,7 +211,7 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 	: ArdourWindow (r->name())
 	, visible_blank (false)
 	, visible_note (true)
-	, visible_channel (true)
+	, visible_channel (false)
 	, visible_velocity (true)
 	, visible_delay (true)
 	, region (r)
@@ -288,54 +288,103 @@ MidiTrackerEditor::register_actions ()
 }
 
 bool
-MidiTrackerEditor::visible_blank_press(GdkEventButton*)
+MidiTrackerEditor::visible_blank_press(GdkEventButton* ev)
 {
+	/* ignore double/triple clicks */
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
+		return true;
+	}
+
 	visible_blank = !visible_blank;
 	if (visible_blank)
 		visible_blank_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	else
 		visible_blank_button.set_active_state (Gtkmm2ext::Off);
+	redisplay_model ();
 	return false;
 }
 
-bool
-MidiTrackerEditor::visible_note_press(GdkEventButton*)
+void
+MidiTrackerEditor::redisplay_visible_note(bool visible_note)
 {
+	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++)
+		view.get_column(i*4 + 1)->set_visible(visible_note);
+	visible_note_button.set_active_state (visible_note ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+}
+
+bool
+MidiTrackerEditor::visible_note_press(GdkEventButton* ev)
+{
+	/* ignore double/triple clicks */
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
+		return true;
+	}
+
 	visible_note = !visible_note;
-	if (visible_note)
-		visible_note_button.set_active_state (Gtkmm2ext::ExplicitActive);
-	else
-		visible_note_button.set_active_state (Gtkmm2ext::Off);
+	redisplay_visible_note(visible_note);
 	return false;
 }
-bool
-MidiTrackerEditor::visible_channel_press(GdkEventButton*)
+
+void
+MidiTrackerEditor::redisplay_visible_channel(bool visible_channel)
 {
+	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++)
+		view.get_column(i*4 + 2)->set_visible(visible_channel);
+	visible_channel_button.set_active_state (visible_channel ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+}
+
+bool
+MidiTrackerEditor::visible_channel_press(GdkEventButton* ev)
+{
+	/* ignore double/triple clicks */
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
+		return true;
+	}
+
 	visible_channel = !visible_channel;
-	if (visible_channel)
-		visible_channel_button.set_active_state (Gtkmm2ext::ExplicitActive);
-	else
-		visible_channel_button.set_active_state (Gtkmm2ext::Off);
+	redisplay_visible_channel(visible_channel);
 	return false;
 }
-bool
-MidiTrackerEditor::visible_velocity_press(GdkEventButton*)
+
+void
+MidiTrackerEditor::redisplay_visible_velocity(bool visible_velocity)
 {
+	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++)
+		view.get_column(i*4 + 3)->set_visible(visible_velocity);
+	visible_velocity_button.set_active_state (visible_velocity ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+}
+
+bool
+MidiTrackerEditor::visible_velocity_press(GdkEventButton* ev)
+{
+	/* ignore double/triple clicks */
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
+		return true;
+	}
+
 	visible_velocity = !visible_velocity;
-	if (visible_velocity)
-		visible_velocity_button.set_active_state (Gtkmm2ext::ExplicitActive);
-	else
-		visible_velocity_button.set_active_state (Gtkmm2ext::Off);
+	redisplay_visible_velocity(visible_velocity);
 	return false;
 }
-bool
-MidiTrackerEditor::visible_delay_press(GdkEventButton*)
+
+void
+MidiTrackerEditor::redisplay_visible_delay(bool visible_delay)
 {
+	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++)
+		view.get_column(i*4 + 4)->set_visible(visible_delay);
+	visible_delay_button.set_active_state (visible_delay ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+}
+
+bool
+MidiTrackerEditor::visible_delay_press(GdkEventButton* ev)
+{
+	/* ignore double/triple clicks */
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
+		return true;
+	}
+
 	visible_delay = !visible_delay;
-	if (visible_delay)
-		visible_delay_button.set_active_state (Gtkmm2ext::ExplicitActive);
-	else
-		visible_delay_button.set_active_state (Gtkmm2ext::Off);
+	redisplay_visible_delay(visible_delay);
 	return false;
 }
 
@@ -371,11 +420,13 @@ MidiTrackerEditor::redisplay_model ()
 
 			for (size_t i = 0; i < (size_t)mtm.ntracks; i++) {
 
-				// // Fill with blank
-				// row[columns.channel[i]] = "--";
-				// row[columns.note_name[i]] = "----";
-				// row[columns.velocity[i]] = "---";
-				// row[columns.delay[i]] = "-----";
+				if (visible_blank) {
+					// Fill with blank
+					row[columns.note_name[i]] = "----";
+					row[columns.channel[i]] = "--";
+					row[columns.velocity[i]] = "---";
+					row[columns.delay[i]] = "-----";
+				}
 				
 				size_t notes_off_count = mtm.notes_off[i].count(irow);
 				size_t notes_on_count = mtm.notes_on[i].count(irow);
@@ -396,8 +447,8 @@ MidiTrackerEditor::redisplay_model ()
 						MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm.notes_off[i].find(irow);
 						if (i_off != mtm.notes_off[i].end()) {
 							boost::shared_ptr<NoteType> note = i_off->second;
-							row[columns.channel[i]] = to_string (note->channel() + 1);
 							row[columns.note_name[i]] = note_off_str;
+							row[columns.channel[i]] = to_string (note->channel() + 1);
 							row[columns.velocity[i]] = to_string ((int)note->velocity());
 							int64_t delay_ticks = (note->end_time() - row_beats).to_relative_ticks();
 							if (delay_ticks != 0)
@@ -436,10 +487,10 @@ MidiTrackerEditor::setup_matrix ()
 	model = ListStore::create (columns);
 	view.set_model (model);
 
-	Gtk::TreeViewColumn viewcolumn_time (_("Time"), columns.time);
-	Gtk::CellRenderer* cellrenderer_time = viewcolumn_time.get_first_cell_renderer ();		
-	viewcolumn_time.add_attribute(cellrenderer_time->property_cell_background (), columns._color);
-	view.append_column (viewcolumn_time);
+	Gtk::TreeViewColumn* viewcolumn_time  = new Gtk::TreeViewColumn (_("Time"), columns.time);
+	Gtk::CellRenderer* cellrenderer_time = viewcolumn_time->get_first_cell_renderer ();		
+	viewcolumn_time->add_attribute(cellrenderer_time->property_cell_background (), columns._color);
+	view.append_column (*viewcolumn_time);
 	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++) {
 		stringstream ss_note;
 		stringstream ss_ch;
@@ -450,26 +501,32 @@ MidiTrackerEditor::setup_matrix ()
 		ss_vel << "Vel" << i;
 		ss_delay << "Delay" << i;
 
-		Gtk::TreeViewColumn viewcolumn_note (_(ss_note.str().c_str()), columns.note_name[i]);
-		Gtk::TreeViewColumn viewcolumn_channel (_(ss_ch.str().c_str()), columns.channel[i]);
-		Gtk::TreeViewColumn viewcolumn_velocity (_(ss_vel.str().c_str()), columns.velocity[i]);
-		Gtk::TreeViewColumn viewcolumn_delay (_(ss_delay.str().c_str()), columns.delay[i]);
+		// TODO be careful of potential memory leaks
+		Gtk::TreeViewColumn* viewcolumn_note = new Gtk::TreeViewColumn (_(ss_note.str().c_str()), columns.note_name[i]);
+		Gtk::TreeViewColumn* viewcolumn_channel = new Gtk::TreeViewColumn (_(ss_ch.str().c_str()), columns.channel[i]);
+		Gtk::TreeViewColumn* viewcolumn_velocity = new Gtk::TreeViewColumn (_(ss_vel.str().c_str()), columns.velocity[i]);
+		Gtk::TreeViewColumn* viewcolumn_delay = new Gtk::TreeViewColumn (_(ss_delay.str().c_str()), columns.delay[i]);
 
-		Gtk::CellRenderer* cellrenderer_note = viewcolumn_note.get_first_cell_renderer ();		
-		Gtk::CellRenderer* cellrenderer_channel = viewcolumn_channel.get_first_cell_renderer ();		
-		Gtk::CellRenderer* cellrenderer_velocity = viewcolumn_velocity.get_first_cell_renderer ();		
-		Gtk::CellRenderer* cellrenderer_delay = viewcolumn_delay.get_first_cell_renderer ();		
+		Gtk::CellRenderer* cellrenderer_note = viewcolumn_note->get_first_cell_renderer ();		
+		Gtk::CellRenderer* cellrenderer_channel = viewcolumn_channel->get_first_cell_renderer ();		
+		Gtk::CellRenderer* cellrenderer_velocity = viewcolumn_velocity->get_first_cell_renderer ();		
+		Gtk::CellRenderer* cellrenderer_delay = viewcolumn_delay->get_first_cell_renderer ();		
 
-		viewcolumn_note.add_attribute(cellrenderer_note->property_cell_background (), columns._color);
-		viewcolumn_channel.add_attribute(cellrenderer_channel->property_cell_background (), columns._color);
-		viewcolumn_velocity.add_attribute(cellrenderer_velocity->property_cell_background (), columns._color);
-		viewcolumn_delay.add_attribute(cellrenderer_delay->property_cell_background (), columns._color);
+		viewcolumn_note->add_attribute(cellrenderer_note->property_cell_background (), columns._color);
+		viewcolumn_channel->add_attribute(cellrenderer_channel->property_cell_background (), columns._color);
+		viewcolumn_velocity->add_attribute(cellrenderer_velocity->property_cell_background (), columns._color);
+		viewcolumn_delay->add_attribute(cellrenderer_delay->property_cell_background (), columns._color);
 
-		view.append_column (viewcolumn_note);
-		view.append_column (viewcolumn_channel);
-		view.append_column (viewcolumn_velocity);
-		view.append_column (viewcolumn_delay);
+		view.append_column (*viewcolumn_note);
+		view.append_column (*viewcolumn_channel);
+		view.append_column (*viewcolumn_velocity);
+		view.append_column (*viewcolumn_delay);
 	}
+
+	redisplay_visible_note(visible_note);
+	redisplay_visible_channel(visible_channel);
+	redisplay_visible_velocity(visible_velocity);
+	redisplay_visible_delay(visible_delay);
 
 	view.set_headers_visible (true);
 	view.set_rules_hint (true);
@@ -494,7 +551,7 @@ MidiTrackerEditor::setup_toolbar ()
 	visible_blank_button.set_name ("visible blank button");
 	visible_blank_button.set_text (S_("---|-"));
 	visible_blank_button.set_fixed_colors(active_button_color, inactive_button_color);
-	visible_blank_button.set_active_state (Gtkmm2ext::Off);
+	visible_blank_button.set_active_state (visible_blank ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	visible_blank_button.show ();
 	visible_blank_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MidiTrackerEditor::visible_blank_press), false);
 	toolbar.pack_start (visible_blank_button, false, false);
@@ -503,7 +560,7 @@ MidiTrackerEditor::setup_toolbar ()
 	visible_note_button.set_name ("visible note button");
 	visible_note_button.set_text (S_("Note|N"));
 	visible_note_button.set_fixed_colors(active_button_color, inactive_button_color);
-	visible_note_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	visible_note_button.set_active_state (visible_note ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	visible_note_button.show ();
 	visible_note_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MidiTrackerEditor::visible_note_press), false);
 	toolbar.pack_start (visible_note_button, false, false);
@@ -512,7 +569,7 @@ MidiTrackerEditor::setup_toolbar ()
 	visible_channel_button.set_name ("visible channel button");
 	visible_channel_button.set_text (S_("Channel|C"));
 	visible_channel_button.set_fixed_colors(active_button_color, inactive_button_color);
-	visible_channel_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	visible_channel_button.set_active_state (visible_channel ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	visible_channel_button.show ();
 	visible_channel_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MidiTrackerEditor::visible_channel_press), false);
 	toolbar.pack_start (visible_channel_button, false, false);
@@ -521,7 +578,7 @@ MidiTrackerEditor::setup_toolbar ()
 	visible_velocity_button.set_name ("visible velocity button");
 	visible_velocity_button.set_text (S_("Velocity|V"));
 	visible_velocity_button.set_fixed_colors(active_button_color, inactive_button_color);
-	visible_velocity_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	visible_velocity_button.set_active_state (visible_velocity ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	visible_velocity_button.show ();
 	visible_velocity_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MidiTrackerEditor::visible_velocity_press), false);
 	toolbar.pack_start (visible_velocity_button, false, false);
@@ -530,7 +587,7 @@ MidiTrackerEditor::setup_toolbar ()
 	visible_delay_button.set_name ("visible delay button");
 	visible_delay_button.set_text (S_("Delay|D"));
 	visible_delay_button.set_fixed_colors(active_button_color, inactive_button_color);
-	visible_delay_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	visible_delay_button.set_active_state (visible_delay ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	visible_delay_button.show ();
 	visible_delay_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MidiTrackerEditor::visible_delay_press), false);
 	toolbar.pack_start (visible_delay_button, false, false);

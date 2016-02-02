@@ -210,11 +210,15 @@ class MidiTrackerEditor : public ArdourWindow
 
 	void build_beats_per_row_menu ();
 	void register_actions ();
-	bool visible_blank_press(GdkEventButton*);
-	bool visible_note_press(GdkEventButton*);
-	bool visible_channel_press(GdkEventButton*);
-	bool visible_velocity_press(GdkEventButton*);
-	bool visible_delay_press(GdkEventButton*);
+	bool visible_blank_press (GdkEventButton*);
+	bool visible_note_press (GdkEventButton*);
+	bool visible_channel_press (GdkEventButton*);
+	bool visible_velocity_press (GdkEventButton*);
+	bool visible_delay_press (GdkEventButton*);
+	void redisplay_visible_note (bool visible_note);
+	void redisplay_visible_channel (bool visible_channel);
+	void redisplay_visible_velocity (bool visible_velocity);
+	void redisplay_visible_delay (bool visible_delay);
 
 	void setup_tooltips ();
 	void setup_toolbar ();
