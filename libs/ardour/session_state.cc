@@ -3373,22 +3373,16 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	}
 
 	case ControllableDescriptor::PanDirection:
-        {
-                c = r->pannable()->pan_azimuth_control;
+		c = r->pan_azimuth_control();
 		break;
-        }
 
 	case ControllableDescriptor::PanWidth:
-        {
-                c = r->pannable()->pan_width_control;
+	        c = r->pan_width_control();
 		break;
-        }
 
 	case ControllableDescriptor::PanElevation:
-        {
-                c = r->pannable()->pan_elevation_control;
+	        c = r->pan_elevation_control();
 		break;
-        }
 
 	case ControllableDescriptor::Balance:
 		/* XXX simple pan control */
@@ -3418,26 +3412,12 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		break;
 	}
 
-	case ControllableDescriptor::SendGain:
-	{
+	case ControllableDescriptor::SendGain: {
 		uint32_t send = desc.target (0);
-
-		/* revert to zero-based counting */
-
 		if (send > 0) {
 			--send;
 		}
-
-		boost::shared_ptr<Processor> p = r->nth_send (send);
-
-		if (p) {
-			boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
-			boost::shared_ptr<Amp> a = s->amp();
-
-			if (a) {
-				c = s->amp()->gain_control();
-			}
-		}
+		c = r->send_level_controllable (send);
 		break;
 	}
 
