@@ -151,6 +151,24 @@ setup_enum_writer ()
 	REGISTER_ENUM (FadeInAutomation);
 	REGISTER_ENUM (FadeOutAutomation);
 	REGISTER_ENUM (EnvelopeAutomation);
+	REGISTER_ENUM (SoloIsolateAutomation);
+	REGISTER_ENUM (SoloSafeAutomation);
+	REGISTER_ENUM (PhaseAutomation);
+	REGISTER_ENUM (MonitoringAutomation);
+	REGISTER_ENUM (EQGain);
+	REGISTER_ENUM (EQFrequency);
+	REGISTER_ENUM (EQQ);
+	REGISTER_ENUM (EQShape);
+	REGISTER_ENUM (EQHPF);
+	REGISTER_ENUM (EQEnable);
+	REGISTER_ENUM (CompThreshold);
+	REGISTER_ENUM (CompSpeed);
+	REGISTER_ENUM (CompMode);
+	REGISTER_ENUM (CompMakeup);
+	REGISTER_ENUM (CompRedux);
+	REGISTER_ENUM (CompEnable);
+	REGISTER_ENUM (BusSendLevel);
+	REGISTER_ENUM (BusSendEnable);
 	REGISTER (_AutomationType);
 
 	REGISTER_ENUM (Off);
