@@ -207,7 +207,7 @@ BasicUI::rec_enable_toggle ()
 		break;
 	case Session::Recording:
 	case Session::Enabled:
-		session->disable_record (true);
+		session->disable_record (false, true);
 	}
 }
 
