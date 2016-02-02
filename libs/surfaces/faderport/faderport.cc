@@ -75,6 +75,7 @@ FaderPort::FaderPort (Session& s)
 	, fader_is_touched (false)
 	, button_state (ButtonState (0))
 	, blink_state (false)
+	, rec_enable_state (false)
 {
 	last_encoder_time = 0;
 
@@ -551,6 +552,9 @@ FaderPort::sysex_handler (MIDI::Parser &p, MIDI::byte *buf, size_t sz)
 
 	/* catch up on state */
 
+	/* make sure that rec_enable_state is consistent with current device state */
+	get_button (RecEnable).set_led_state (_output_port, rec_enable_state);
+
 	map_transport_state ();
 	map_recenable_state ();
 }
@@ -633,6 +637,8 @@ FaderPort::blink ()
 		get_button(*b).set_led_state (_output_port, blink_state);
 	}
 
+	map_recenable_state ();
+
 	return true;
 }
 
@@ -656,16 +662,41 @@ FaderPort::close ()
 void
 FaderPort::map_recenable_state ()
 {
+	/* special case for RecEnable because its status can change as a
+	 * confluence of unrelated parameters: (a) session rec-enable state (b)
+	 * rec-enabled tracks. So we don't add the button to the blinkers list,
+	 * we just call this:
+	 *
+	 *  * from the blink callback
+	 *  * when the session tells us about a status change
+	 *
+	 * We do the last one so that the button changes state promptly rather
+	 * than waiting for the next blink callback. The change in "blinking"
+	 * based on having record-enabled tracks isn't urgent, and that happens
+	 * during the blink callback.
+	 */
+
+	bool onoff;
+
 	switch (session->record_status()) {
 	case Session::Disabled:
-		stop_blinking (RecEnable);
+		onoff = false;
 		break;
 	case Session::Enabled:
-		start_blinking (RecEnable);
+		onoff = blink_state;
 		break;
 	case Session::Recording:
-		stop_blinking (RecEnable);
+		if (session->have_rec_enabled_track ()) {
+			onoff = true;
+		} else {
+			onoff = blink_state;
+		}
 		break;
+	}
+
+	if (onoff != rec_enable_state) {
+		get_button(RecEnable).set_led_state (_output_port, onoff);
+		rec_enable_state = onoff;
 	}
 }
 
