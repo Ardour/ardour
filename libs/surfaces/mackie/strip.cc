@@ -456,7 +456,6 @@ Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool for
 	}
 
 	boost::shared_ptr<AutomationControl> control;
-
 	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (r);
 
 	switch (type) {
@@ -483,11 +482,13 @@ Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool for
 
 	if (control) {
 		float val = control->get_value();
-		if (control->desc().enumeration || control->desc().integer_step) {
-			do_parameter_display (type, val);
-		} else {
-			do_parameter_display (type, control->internal_to_interface (val));
-		}
+
+		/* Note: all of the displayed controllables require the display
+		 * of their *actual* ("internal") value, not the version mapped
+		 * into the normalized 0..1.0 ("interface") range.
+		 */
+
+		do_parameter_display (type, val);
 		/* update pot/encoder */
 		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
