@@ -391,10 +391,7 @@ Strip::show_route_name ()
 
 	string fullname = string();
 	if (!_route) {
-		// make sure first three strips get cleared of view mode
-		if (_index > 2) {
-			return;
-		}
+		fullname = string();
 	} else {
 		fullname = _route->name();
 	}
@@ -1470,6 +1467,10 @@ Strip::subview_mode_changed ()
 		set_vpot_parameter (_pan_mode);
 		/* need to show strip name again */
 		show_route_name ();
+		if (!_route) {
+			_surface->write (_vpot->set (0, true, Pot::wrap));
+			_surface->write (_fader->set_position (0.0));
+		}
 		notify_metering_state_changed ();
 		eq_band = -1;
 		break;
