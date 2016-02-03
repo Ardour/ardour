@@ -892,6 +892,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\route_controls.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\route_graph.cc"
 				>
 			</File>
