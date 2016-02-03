@@ -4209,6 +4209,16 @@ Route::trim_control() const
 	return _trim_control;
 }
 
+boost::shared_ptr<Route::PhaseControllable>
+Route::phase_control() const
+{
+	if (phase_invert().size()) {
+		return _phase_control;
+	} else {
+		return boost::shared_ptr<PhaseControllable>();
+	}
+}
+
 boost::shared_ptr<AutomationControl>
 Route::get_control (const Evoral::Parameter& param)
 {

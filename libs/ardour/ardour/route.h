@@ -497,10 +497,6 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		return _mute_master;
 	}
 
-	boost::shared_ptr<PhaseControllable> phase_control() const {
-		return _phase_control;
-	}
-
 	boost::shared_ptr<SoloIsolateControllable> solo_isolate_control() const {
 		return _solo_isolate_control;
 	}
@@ -526,6 +522,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	boost::shared_ptr<GainControl> gain_control() const;
 	boost::shared_ptr<Pannable> pannable() const;
 	boost::shared_ptr<GainControl> trim_control() const;
+
+	boost::shared_ptr<PhaseControllable> phase_control() const;
 
 	/**
 	   Return the first processor that accepts has at least one MIDI input
