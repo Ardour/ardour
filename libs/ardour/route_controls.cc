@@ -70,7 +70,7 @@ Route::set_control (AutomationType type, double val, PBD::Controllable::GroupCon
 		/* session must mediate group control */
 		rl.reset (new RouteList);
 		rl->push_back (shared_from_this());
-		_session.set_mute (rl, !muted(), Session::rt_cleanup, group_override);
+		_session.set_mute (rl, val >= 0.5 ? true : false, Session::rt_cleanup, group_override);
 		return;
 		break;
 
