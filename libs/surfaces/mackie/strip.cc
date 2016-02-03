@@ -395,15 +395,12 @@ Strip::show_route_name ()
 	} else {
 		fullname = _route->name();
 	}
-	string line1;
 
 	if (fullname.length() <= 6) {
-		line1 = fullname;
+		pending_display[0] = fullname;
 	} else {
-		line1 = PBD::short_version (fullname, 6);
+		pending_display[0] = PBD::short_version (fullname, 6);
 	}
-
-	pending_display[0] = line1;
 }
 
 void
@@ -1751,7 +1748,7 @@ Strip::setup_sends_vpot (boost::shared_ptr<Route> r)
 	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_send_level_change, this, BusSendLevel, global_pos, false), ui_context());
 	_vpot->set_control (pc);
 
-	pending_display[0] = r->send_name (global_pos);
+	pending_display[0] = PBD::short_version (r->send_name (global_pos), 6);
 
 	notify_send_level_change (BusSendLevel, global_pos, true);
 }
