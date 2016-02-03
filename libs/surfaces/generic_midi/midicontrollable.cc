@@ -142,7 +142,7 @@ MIDIControllable::set_controllable (Controllable* c)
 
 	if (controllable) {
 		controllable->Destroyed.connect (controllable_death_connection, MISSING_INVALIDATOR,
-						 boost::bind (&MIDIControllable::drop_controllable, this),
+						 boost::bind (&MIDIControllable::drop_controllable, this, _1),
 						 MidiControlUI::instance());
 	}
 }
@@ -264,9 +264,11 @@ MIDIControllable::lookup_controllable()
 }
 
 void
-MIDIControllable::drop_controllable ()
+MIDIControllable::drop_controllable (Controllable* c)
 {
-	set_controllable (0);
+	if (c == controllable) {
+		set_controllable (0);
+	}
 }
 
 void
