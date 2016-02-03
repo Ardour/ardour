@@ -794,6 +794,7 @@ FaderPort::get_state ()
 	node.add_child_nocopy (get_button (Proj).get_state());
 	node.add_child_nocopy (get_button (Trns).get_state());
 	node.add_child_nocopy (get_button (User).get_state());
+	node.add_child_nocopy (get_button (Footswitch).get_state());
 
 	return node;
 }
