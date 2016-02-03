@@ -115,7 +115,11 @@ Controllable::get_state ()
 	 *  Bytes: 0xB5 0x2D 0x69 0x6E
 	 *          <Controllable name="�-iness" id="2391" flags="" value="0.000000000000" p
 	 */
-	//node->add_property (X_("name"), _name); // not reloaded from XML state, just there to look at
+
+	// this is not reloaded from XML, but it must be present because it is
+	// used to find and identify XML nodes by various Controllable-derived objects
+
+	node->add_property (X_("name"), _name);
 
 	id().print (buf, sizeof (buf));
 	node->add_property (X_("id"), buf);
