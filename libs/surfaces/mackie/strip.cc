@@ -912,6 +912,16 @@ Strip::do_parameter_display (AutomationType type, float val)
 
 	switch (type) {
 	case GainAutomation:
+		if (val == 0.0) {
+			pending_display[1] = " -inf ";
+		} else {
+			float dB = accurate_coefficient_to_dB (val);
+			snprintf (buf, sizeof (buf), "%6.1f", dB);
+			pending_display[1] = buf;
+			screen_hold = true;
+		}
+		break;
+
 	case BusSendLevel:
 		if (Profile->get_mixbus()) {  //Mixbus sends are already stored in dB
 			snprintf (buf, sizeof (buf), "%2.1f", val);
