@@ -374,12 +374,26 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 
 			}
 		} else {
-			if ( msg->value > 0x40 ) {
-				controllable->set_value (1, Controllable::NoGroup);
+
+			/* toggle control: make the toggle flip only if the
+			 * incoming control value exceeds 0.5 (0x40), so that
+			 * the typical button which sends "CC N=0x7f" on press
+			 * and "CC N=0x0" on release can be used to drive
+			 * toggles on press.
+			 *
+			 * No other arrangement really makes sense for a toggle
+			 * controllable. Acting on the press+release makes the
+			 * action momentary, which is almost never
+			 * desirable. If the physical button only sends a
+			 * message on press (or release), then it will be
+			 * expected to send a controller value >= 0.5
+			 * (0x40). It is hard to imagine why anyone would make
+			 * a MIDI controller button that sent 0x0 when pressed.
+			 */
+
+			if (msg->value >= 0x40) {
+				controllable->set_value (controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::NoGroup);
 				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
-			} else {
-				controllable->set_value (0, Controllable::NoGroup);
-				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 0  %2\n", (int) msg->controller_number, current_uri()));
 			}
 		}
 
