@@ -54,6 +54,8 @@ using namespace Gtk;
 using namespace ArdourSurface;
 using namespace Mackie;
 
+#define SHIFT_IS_THE_ONLY_MODIFIER
+
 void*
 MackieControlProtocol::get_gui () const
 {
@@ -477,6 +479,7 @@ MackieControlProtocolGUI::build_available_action_menu ()
 	rowp = available_action_model->append();
 	parent = *(rowp);
 	parent[available_action_columns.name] = _("Shift");
+#ifndef SHIFT_IS_THE_ONLY_MODIFIER
 	rowp = available_action_model->append();
 	parent = *(rowp);
 	parent[available_action_columns.name] = _("Control");
@@ -486,7 +489,7 @@ MackieControlProtocolGUI::build_available_action_menu ()
 	rowp = available_action_model->append();
 	parent = *(rowp);
 	parent[available_action_columns.name] = _("CmdAlt");
-
+#endif
 
 	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
 
@@ -557,15 +560,16 @@ MackieControlProtocolGUI::build_function_key_editor ()
 	CellRendererCombo* renderer;
 
 	renderer = make_action_renderer (available_action_model, function_key_columns.plain);
-	col = manage (new TreeViewColumn (_("Plain"), *renderer));
+	col = manage (new TreeViewColumn (_("Normal Action"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.plain);
 	function_key_editor.append_column (*col);
 
 	renderer = make_action_renderer (available_action_model, function_key_columns.shift);
-	col = manage (new TreeViewColumn (_("Shift"), *renderer));
+	col = manage (new TreeViewColumn (_("Action with Shift"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.shift);
 	function_key_editor.append_column (*col);
 
+#ifndef SHIFT_IS_THE_ONLY_MODIFIER
 	renderer = make_action_renderer (available_action_model, function_key_columns.control);
 	col = manage (new TreeViewColumn (_("Control"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.control);
@@ -585,6 +589,7 @@ MackieControlProtocolGUI::build_function_key_editor ()
 	col = manage (new TreeViewColumn (_("Shift+Control"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.shiftcontrol);
 	function_key_editor.append_column (*col);
+#endif
 
 	function_key_model = ListStore::create (function_key_columns);
 	function_key_editor.set_model (function_key_model);
@@ -602,9 +607,19 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 	DeviceProfile dp (_cp.device_profile());
 	DeviceInfo di;
 
-	for (int n = 0; n < Mackie::Button::FinalGlobalButton; ++n) {
+	vector<Mackie::Button::ID> Fn_buttons;
+	Fn_buttons.push_back (Mackie::Button::F1);
+	Fn_buttons.push_back (Mackie::Button::F2);
+	Fn_buttons.push_back (Mackie::Button::F3);
+	Fn_buttons.push_back (Mackie::Button::F4);
+	Fn_buttons.push_back (Mackie::Button::F5);
+	Fn_buttons.push_back (Mackie::Button::F6);
+	Fn_buttons.push_back (Mackie::Button::F7);
+	Fn_buttons.push_back (Mackie::Button::F8);
 
-		Mackie::Button::ID bid = (Mackie::Button::ID) n;
+	for (vector<Mackie::Button::ID>::iterator i = Fn_buttons.begin(); i != Fn_buttons.end(); ++i) {
+
+		Mackie::Button::ID bid = *i;
 
 		row = *(function_key_model->append());
 		if (di.global_buttons().find (bid) == di.global_buttons().end()) {
@@ -636,23 +651,6 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 			}
 		}
 
-		action = dp.get_button_action (bid, MackieControlProtocol::MODIFIER_CONTROL);
-		if (action.empty()) {
-			row[function_key_columns.control] = defstring;
-		} else {
-			if (action.find ('/') == string::npos) {
-				/* Probably a key alias */
-				row[function_key_columns.control] = action;
-			} else {
-				act = ActionManager::get_action (action.c_str());
-				if (act) {
-					row[function_key_columns.control] = act->get_label();
-				} else {
-					row[function_key_columns.control] = defstring;
-				}
-			}
-		}
-
 		action = dp.get_button_action (bid, MackieControlProtocol::MODIFIER_SHIFT);
 		if (action.empty()) {
 			row[function_key_columns.shift] = defstring;
@@ -666,6 +664,24 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 					row[function_key_columns.shift] = act->get_label();
 				} else {
 					row[function_key_columns.shift] = defstring;
+				}
+			}
+		}
+
+#ifndef SHIFT_IS_THE_ONLY_MODIFIER
+		action = dp.get_button_action (bid, MackieControlProtocol::MODIFIER_CONTROL);
+		if (action.empty()) {
+			row[function_key_columns.control] = defstring;
+		} else {
+			if (action.find ('/') == string::npos) {
+				/* Probably a key alias */
+				row[function_key_columns.control] = action;
+			} else {
+				act = ActionManager::get_action (action.c_str());
+				if (act) {
+					row[function_key_columns.control] = act->get_label();
+				} else {
+					row[function_key_columns.control] = defstring;
 				}
 			}
 		}
@@ -715,6 +731,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 				row[function_key_columns.shiftcontrol] = defstring;
 			}
 		}
+#endif
 	}
 
 	function_key_editor.set_model (function_key_model);
@@ -764,6 +781,7 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 			case 3:
 				modifier = MackieControlProtocol::MODIFIER_SHIFT;
 				break;
+#ifndef SHIFT_IS_THE_ONLY_MODIFIER
 			case 4:
 				modifier = MackieControlProtocol::MODIFIER_CONTROL;
 				break;
@@ -776,6 +794,7 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 			case 7:
 				modifier = (MackieControlProtocol::MODIFIER_SHIFT|MackieControlProtocol::MODIFIER_CONTROL);
 				break;
+#endif
 			default:
 				modifier = 0;
 			}
@@ -915,4 +934,3 @@ MackieControlProtocolGUI::active_port_changed (Gtk::ComboBox* combo, boost::weak
 		}
 	}
 }
-
