@@ -423,9 +423,14 @@ MackieControlProtocol::timecode_beats_release (Button &)
 LedState
 MackieControlProtocol::marker_press (Button &)
 {
-	_modifier_state |= MODIFIER_MARKER;
-	marker_modifier_consumed_by_button = false;
-	return on;
+	if (main_modifier_state() & MODIFIER_SHIFT) {
+		access_action ("Editor/set-session-from-edit-range");
+		return off;
+	} else {
+		_modifier_state |= MODIFIER_MARKER;
+		marker_modifier_consumed_by_button = false;
+		return on;
+	}
 }
 
 LedState
@@ -1083,9 +1088,6 @@ MackieControlProtocol::click_press (Mackie::Button&)
 {
 	if (main_modifier_state() & MODIFIER_SHIFT) {
 		access_action ("Editor/set-punch-from-edit-range");
-		return off;
-	} else if (main_modifier_state() & MODIFIER_OPTION) {
-		access_action ("Editor/set-session-from-edit-range");
 		return off;
 	} else {
 		bool state = !Config->get_clicking();
