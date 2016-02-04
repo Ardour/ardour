@@ -1187,9 +1187,9 @@ MackieControlProtocol::update_timecode_display()
 void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 {
 	if (p == "punch-in") {
-		update_global_button (Button::Save, session->config.get_punch_in() ? flashing : off);
+		update_global_button (Button::Drop, session->config.get_punch_in() ? flashing : off);
 	} else if (p == "punch-out") {
-		update_global_button (Button::Undo, session->config.get_punch_out() ? flashing : off);
+		update_global_button (Button::Replace, session->config.get_punch_out() ? flashing : off);
 	} else if (p == "clicking") {
 		update_global_button (Button::Click, Config->get_clicking());
 	} else if (p == "follow-edits") {

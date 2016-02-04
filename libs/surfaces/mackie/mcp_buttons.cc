@@ -60,7 +60,6 @@ LedState
 MackieControlProtocol::option_press (Button &)
 {
 	_modifier_state |= MODIFIER_OPTION;
-	access_action ("Editor/set-loop-from-edit-range");
 	return on;
 }
 LedState
@@ -74,7 +73,6 @@ MackieControlProtocol::control_press (Button &)
 {
 	_modifier_state |= MODIFIER_CONTROL;
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("CONTROL Press: modifier state now set to %1\n", _modifier_state));
-	access_action ("Editor/set-punch-from-edit-range");
 	return on;
 }
 LedState
@@ -88,7 +86,6 @@ LedState
 MackieControlProtocol::cmd_alt_press (Button &)
 {
 	_modifier_state |= MODIFIER_CMDALT;
-	access_action ("Editor/set-session-from-edit-range");
 	return on;
 }
 LedState
@@ -235,7 +232,7 @@ MackieControlProtocol::cursor_up_press (Button&)
 			VerticalZoomInAll (); /* EMIT SIGNAL */
 		}
 	} else {
-		StepTracksUp (); /* EMIT SIGNAL */
+		access_action ("Editor/select-prev-route");
 	}
 	return off;
 }
@@ -256,7 +253,7 @@ MackieControlProtocol::cursor_down_press (Button&)
 			VerticalZoomOutAll (); /* EMIT SIGNAL */
 		}
 	} else {
-		StepTracksDown (); /* EMIT SIGNAL */
+		access_action ("Editor/select-next-route");
 	}
 	return off;
 }
@@ -346,7 +343,11 @@ MackieControlProtocol::scrub_release (Mackie::Button &)
 LedState
 MackieControlProtocol::undo_press (Button&)
 {
-	toggle_punch_out ();
+	if (main_modifier_state() == MODIFIER_SHIFT) {
+		redo();
+	} else {
+		undo ();
+	}
 	return none;
 }
 
@@ -359,7 +360,11 @@ MackieControlProtocol::undo_release (Button&)
 LedState
 MackieControlProtocol::drop_press (Button &)
 {
-	access_action ("Editor/start-range-from-playhead");
+	if (main_modifier_state() == MODIFIER_SHIFT) {
+		toggle_punch_in();
+	} else {
+		access_action ("Editor/start-range-from-playhead");
+	}
 	return none;
 }
 
@@ -372,7 +377,12 @@ MackieControlProtocol::drop_release (Button &)
 LedState
 MackieControlProtocol::save_press (Button &)
 {
-	toggle_punch_in ();
+	if (main_modifier_state() == MODIFIER_SHIFT) {
+		quick_snapshot_switch();
+	} else {
+		save_state ();
+	}
+	
 	return none;
 }
 
@@ -545,9 +555,14 @@ MackieControlProtocol::ffwd_release (Button &)
 LedState
 MackieControlProtocol::loop_press (Button &)
 {
-	bool was_on = session->get_play_loop();
-	session->request_play_loop (!was_on);
-	return was_on ? off : on;
+	if (main_modifier_state() & MODIFIER_SHIFT) {
+		access_action ("Editor/set-loop-from-edit-range");
+		return off;
+	} else {
+		bool was_on = session->get_play_loop();
+		session->request_play_loop (!was_on);
+		return was_on ? off : on;
+	}
 }
 
 LedState
@@ -557,23 +572,13 @@ MackieControlProtocol::loop_release (Button &)
 }
 
 LedState
-MackieControlProtocol::clicking_press (Button &)
-{
-	bool state = !Config->get_clicking();
-	Config->set_clicking (state);
-	return state;
-}
-
-LedState
-MackieControlProtocol::clicking_release (Button &)
-{
-	return Config->get_clicking();
-}
-
-LedState
 MackieControlProtocol::enter_press (Button &)
 {
-	access_action ("Transport/ToggleFollowEdits");
+	if (main_modifier_state() & MODIFIER_SHIFT) {
+		access_action ("Transport/ToggleFollowEdits");
+	} else {
+		access_action ("Editor/select-all-tracks");
+	}
 	return none;
 }
 
@@ -779,7 +784,11 @@ MackieControlProtocol::touch_release (Button &)
 LedState
 MackieControlProtocol::cancel_press (Button &)
 {
-	access_action ("Transport/ToggleExternalSync");
+	if (main_modifier_state() & MODIFIER_SHIFT) {
+		access_action ("Transport/ToggleExternalSync");
+	} else {
+		access_action ("Editor/escape");
+	}
 	return none;
 }
 LedState
@@ -1057,7 +1066,11 @@ MackieControlProtocol::nudge_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::replace_press (Mackie::Button&)
 {
-	access_action ("Editor/finish-range-from-playhead");
+	if (main_modifier_state() == MODIFIER_SHIFT) {
+		toggle_punch_out();
+	} else {
+		access_action ("Editor/finish-range-from-playhead");
+	}
 	return off;
 }
 Mackie::LedState
@@ -1068,7 +1081,17 @@ MackieControlProtocol::replace_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::click_press (Mackie::Button&)
 {
-	return none;
+	if (main_modifier_state() & MODIFIER_SHIFT) {
+		access_action ("Editor/set-punch-from-edit-range");
+		return off;
+	} else if (main_modifier_state() & MODIFIER_OPTION) {
+		access_action ("Editor/set-session-from-edit-range");
+		return off;
+	} else {
+		bool state = !Config->get_clicking();
+		Config->set_clicking (state);
+		return state;
+	}
 }
 Mackie::LedState
 MackieControlProtocol::click_release (Mackie::Button&)
