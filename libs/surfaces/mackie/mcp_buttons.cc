@@ -362,7 +362,7 @@ MackieControlProtocol::drop_press (Button &)
 {
 	if (main_modifier_state() == MODIFIER_SHIFT) {
 		toggle_punch_in();
-		return session->config.get_punch_in() ? flashing : off;
+		return none;
 	} else {
 		access_action ("Editor/start-range-from-playhead");
 	}
@@ -1077,11 +1077,11 @@ MackieControlProtocol::replace_press (Mackie::Button&)
 {
 	if (main_modifier_state() == MODIFIER_SHIFT) {
 		toggle_punch_out();
-		return session->config.get_punch_out() ? flashing : off;
+		return none;
 	} else {
 		access_action ("Editor/finish-range-from-playhead");
 	}
-	return off;
+	return none;
 }
 Mackie::LedState
 MackieControlProtocol::replace_release (Mackie::Button&)
