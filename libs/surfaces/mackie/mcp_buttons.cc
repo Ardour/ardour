@@ -362,6 +362,7 @@ MackieControlProtocol::drop_press (Button &)
 {
 	if (main_modifier_state() == MODIFIER_SHIFT) {
 		toggle_punch_in();
+		return session->config.get_punch_in() ? flashing : off;
 	} else {
 		access_action ("Editor/start-range-from-playhead");
 	}
@@ -437,6 +438,9 @@ LedState
 MackieControlProtocol::marker_release (Button &)
 {
 	_modifier_state &= ~MODIFIER_MARKER;
+
+	if (main_modifier_state() & MODIFIER_SHIFT)
+		return off;   //if shift was held, we already did the action
 
 	if (marker_modifier_consumed_by_button) {
 		/* marker was used a modifier for some other button(s), so do
@@ -1073,6 +1077,7 @@ MackieControlProtocol::replace_press (Mackie::Button&)
 {
 	if (main_modifier_state() == MODIFIER_SHIFT) {
 		toggle_punch_out();
+		return session->config.get_punch_out() ? flashing : off;
 	} else {
 		access_action ("Editor/finish-range-from-playhead");
 	}
