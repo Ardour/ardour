@@ -5240,6 +5240,8 @@ Route::comp_mode_name (uint32_t mode) const
 		return _("Compressor");
 	case 2:
 		return _("Limiter");
+	case 3:
+		return mixbus() ? _("Sidechain") : _("Limiter");
 	}
 
 	return _("???");
@@ -5258,6 +5260,7 @@ Route::comp_speed_name (uint32_t mode) const
 	case 1:
 		return _("Ratio");
 	case 2:
+	case 3:
 		return _("Rels");
 	}
 	return _("???");
