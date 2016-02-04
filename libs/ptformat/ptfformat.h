@@ -113,7 +113,7 @@ public:
 	unsigned char c0;
 	unsigned char c1;
 	unsigned char *ptfunxored;
-	int len;
+	uint64_t len;
 
 private:
 	bool foundin(std::string haystack, std::string needle);
@@ -131,6 +131,7 @@ private:
 	void parseaudio5(void);
 	void parseaudio(void);
 	void resort(std::vector<wav_t> *ws);
+	uint8_t mostfrequent(uint32_t start, uint32_t stop);
 	std::vector<wav_t> actualwavs;
 	float ratefactor;
 	std::string extension;
