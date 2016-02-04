@@ -314,6 +314,8 @@ class MackieControlProtocol
 
 	static MackieControlProtocol* _instance;
 
+	bool profile_exists (std::string const&) const;
+
 	Mackie::DeviceInfo       _device_info;
 	Mackie::DeviceProfile    _device_profile;
 	sigc::connection          periodic_connection;

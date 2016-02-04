@@ -41,11 +41,13 @@ class DeviceProfile
 	std::string get_button_action (Button::ID, int modifier_state) const;
 	void set_button_action (Button::ID, int modifier_state, const std::string&);
 
-	const std::string& name() const;
+	std::string name() const;
 	void set_path (const std::string&);
 
 	static void reload_device_profiles ();
 	static std::map<std::string,DeviceProfile> device_profiles;
+	static std::string name_when_edited (std::string const& name);
+	static const std::string default_profile_name;
 
   private:
 	struct ButtonActions {
@@ -62,6 +64,9 @@ class DeviceProfile
 	std::string _name;
 	std::string _path;
 	ButtonActionMap _button_map;
+	bool edited;
+
+	static const std::string edited_indicator;
 
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;

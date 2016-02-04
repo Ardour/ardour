@@ -1031,6 +1031,12 @@ MackieControlProtocol::get_state()
 	return node;
 }
 
+bool
+MackieControlProtocol::profile_exists (string const & name) const
+{
+	return DeviceProfile::device_profiles.find (name) != DeviceProfile::device_profiles.end();
+}
+
 int
 MackieControlProtocol::set_state (const XMLNode & node, int version)
 {
@@ -1061,13 +1067,38 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 		if (prop->value().empty()) {
 			string default_profile_name;
 
-			default_profile_name = Glib::get_user_name();
-			default_profile_name += ' ';
-			default_profile_name += _device_info.name();
+			/* start by looking for a user-edited profile for the current device name */
+
+			default_profile_name = DeviceProfile::name_when_edited (_device_info.name());
+
+			if (!profile_exists (default_profile_name)) {
+
+				/* no user-edited profile for this device name, so try the user-edited default profile */
+
+				default_profile_name = DeviceProfile::name_when_edited (DeviceProfile::default_profile_name);
+
+				if (!profile_exists (default_profile_name)) {
+
+					/* no user-edited version, so just try the device name */
+
+					default_profile_name = _device_info.name();
+
+					if (!profile_exists (default_profile_name)) {
+
+						/* no generic device specific profile, just try the fixed default */
+						default_profile_name = DeviceProfile::default_profile_name;
+					}
+				}
+			}
 
 			set_profile (default_profile_name);
+
 		} else {
-			set_profile (prop->value());
+			if (profile_exists (prop->value())) {
+				set_profile (prop->value());
+			} else {
+				set_profile (DeviceProfile::default_profile_name);
+			}
 		}
 	}
 

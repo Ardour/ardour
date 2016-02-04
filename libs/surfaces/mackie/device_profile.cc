@@ -44,9 +44,12 @@ using std::string;
 using std::vector;
 
 std::map<std::string,DeviceProfile> DeviceProfile::device_profiles;
+const std::string DeviceProfile::edited_indicator (" (edited)");
+const std::string DeviceProfile::default_profile_name ("User");
 
 DeviceProfile::DeviceProfile (const string& n)
 	: _name (n)
+	, edited (false)
 {
 }
 
@@ -191,6 +194,8 @@ DeviceProfile::set_state (const XMLNode& node, int /* version */)
 		}
 	}
 
+	edited = false;
+
 	return 0;
 }
 
@@ -200,7 +205,7 @@ DeviceProfile::get_state () const
 	XMLNode* node = new XMLNode ("MackieDeviceProfile");
 	XMLNode* child = new XMLNode ("Name");
 
-	child->add_property ("value", _name);
+	child->add_property ("value", name());
 	node->add_child_nocopy (*child);
 
 	if (_button_map.empty()) {
@@ -292,13 +297,31 @@ DeviceProfile::set_button_action (Button::ID id, int modifier_state, const strin
 		i->second.plain = action;
 	}
 
+	edited = true;
+
 	save ();
 }
 
-const string&
+string
+DeviceProfile::name_when_edited (string const& base)
+{
+	return string_compose ("%1 %2", base, edited_indicator);
+}
+
+string
 DeviceProfile::name() const
 {
-	return _name;
+	if (edited) {
+		if (_name.find (edited_indicator) == string::npos) {
+			/* modify name to included edited indicator */
+			return name_when_edited (_name);
+		} else {
+			/* name already contains edited indicator */
+			return _name;
+		}
+	} else {
+		return _name;
+	}
 }
 
 void
@@ -338,7 +361,7 @@ DeviceProfile::save ()
 		return;
 	}
 
-	fullpath = Glib::build_filename (fullpath, legalize_for_path (_name) + ".profile");
+	fullpath = Glib::build_filename (fullpath, string_compose ("%1%2", legalize_for_path (name()), devprofile_suffix));
 
 	XMLTree tree;
 	tree.set_root (&get_state());
@@ -347,4 +370,3 @@ DeviceProfile::save ()
 		error << string_compose ("MCP profile not saved to %1", fullpath) << endmsg;
 	}
 }
-
