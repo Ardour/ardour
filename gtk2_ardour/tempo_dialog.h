@@ -39,7 +39,7 @@ class TempoDialog : public ArdourDialog
 {
 public:
 	TempoDialog (ARDOUR::TempoMap&, framepos_t, const std::string & action);
-	TempoDialog (ARDOUR::TempoSection&, const std::string & action);
+	TempoDialog (ARDOUR::TempoMap&, ARDOUR::TempoSection&, const std::string & action);
 
 	double get_bpm ();
 	double get_note_type ();
@@ -47,7 +47,7 @@ public:
 	ARDOUR::TempoSection::Type get_tempo_type ();
 
 private:
-	void init (const Timecode::BBT_Time& start, double, double, bool);
+	void init (const Timecode::BBT_Time& start, double bpm , double note_type, ARDOUR::TempoSection::Type type, bool movable);
 	bool is_user_input_valid() const;
 	void bpm_changed ();
 	bool bpm_button_press (GdkEventButton* );
@@ -88,7 +88,7 @@ class MeterDialog : public ArdourDialog
 public:
 
 	MeterDialog (ARDOUR::TempoMap&, framepos_t, const std::string & action);
-	MeterDialog (ARDOUR::MeterSection&, const std::string & action);
+	MeterDialog (ARDOUR::TempoMap&, ARDOUR::MeterSection&, const std::string & action);
 
 	double get_bpb ();
 	double get_note_type ();

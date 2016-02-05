@@ -3368,7 +3368,7 @@ TempoMarkerDrag::aborted (bool moved)
 	if (moved) {
 		TempoMap& map (_editor->session()->tempo_map());
 		/* we removed it before, so add it back now */
-		map.add_tempo (_marker->tempo(), _marker->tempo().start(), _marker->tempo().type());
+		map.add_tempo (_marker->tempo(), _marker->tempo().beat(), _marker->tempo().type());
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
 		delete _marker;

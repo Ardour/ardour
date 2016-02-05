@@ -47,10 +47,10 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	Tempo tempo (map.tempo_at (frame));
 	map.bbt_time (frame, when);
 
-	init (when, tempo.beats_per_minute(), tempo.note_type(), true);
+	init (when, tempo.beats_per_minute(), tempo.note_type(), TempoSection::Type::Constant, true);
 }
 
-TempoDialog::TempoDialog (TempoSection& section, const string&)
+TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 	: ArdourDialog (_("Edit Tempo"))
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
@@ -59,11 +59,13 @@ TempoDialog::TempoDialog (TempoSection& section, const string&)
 	, pulse_selector_label (_("Pulse note"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
-	init (section.start(), section.beats_per_minute(), section.note_type(), section.movable());
+	Timecode::BBT_Time when;
+	map.bbt_time (map.frame_at_beat (section.beat()), when);
+	init (when, section.beats_per_minute(), section.note_type(), section.type(), section.movable());
 }
 
 void
-TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type, bool movable)
+TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type, TempoSection::Type type, bool movable)
 {
 	vector<string> strings;
 	NoteTypes::iterator x;
@@ -113,7 +115,16 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	tempo_types.insert (make_pair (_("constant"), TempoSection::Type::Constant));
 	strings.push_back (_("constant"));
 	set_popdown_strings (tempo_type, strings);
-	tempo_type.set_active_text (strings[0]); // "ramped"
+	TempoTypes::iterator tt;
+	for (tt = tempo_types.begin(); tt != tempo_types.end(); ++tt) {
+		if (tt->second == type) {
+			tempo_type.set_active_text (tt->first);
+			break;
+		}
+	}
+	if (tt == tempo_types.end()) {
+		tempo_type.set_active_text (strings[0]); // "ramped"
+	}
 
 	Table* table;
 
@@ -278,7 +289,7 @@ TempoDialog::get_tempo_type ()
 	TempoTypes::iterator x = tempo_types.find (tempo_type.get_active_text());
 
 	if (x == tempo_types.end()) {
-		error << string_compose(_("incomprehensible pulse note type (%1)"), tempo_type.get_active_text()) << endmsg;
+		error << string_compose(_("incomprehensible tempo type (%1)"), tempo_type.get_active_text()) << endmsg;
 		return TempoSection::Type::Constant;
 	}
 
@@ -354,10 +365,12 @@ MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 	init (when, meter.divisions_per_bar(), meter.note_divisor(), true);
 }
 
-MeterDialog::MeterDialog (MeterSection& section, const string&)
+MeterDialog::MeterDialog (TempoMap& map, MeterSection& section, const string&)
 	: ArdourDialog (_("Edit Meter"))
 {
-	init (section.start(), section.divisions_per_bar(), section.note_divisor(), section.movable());
+	Timecode::BBT_Time when;
+	map.bbt_time (map.frame_at_beat (section.beat()), when);
+	init (when, section.divisions_per_bar(), section.note_divisor(), section.movable());
 }
 
 void

@@ -74,26 +74,35 @@ TempoSection::TempoSection (const XMLNode& node)
 	: MetricSection (0.0), Tempo (TempoMap::default_tempo())
 {
 	const XMLProperty *prop;
-	BBT_Time start;
 	LocaleGuard lg;
+	BBT_Time bbt;
+	double beat;
 
-	if ((prop = node.property ("start")) == 0) {
-		error << _("MeterSection XML node has no \"start\" property") << endmsg;
-		throw failed_constructor();
+	if ((prop = node.property ("start")) != 0) {
+		if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
+			    &bbt.bars,
+			    &bbt.beats,
+			    &bbt.ticks) == 3) {
+			/* legacy session - start used to be in bbt*/
+			_legacy_bbt = bbt;
+			beat = -1.0;
+			set_beat (beat);
+		}
+	} else {
+		error << _("TempoSection XML node has no \"start\" property") << endmsg;
 	}
 
-	if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
-		    &bbt.bars,
-		    &bbt.beats,
-		    &bbt.ticks) == 3) {
-		/* legacy session - start used to be in bbt*/
-		_legacy_bbt = bbt;
-		start = -1.0;
-	} else if (sscanf (prop->value().c_str(), "%lf", &start) != 1 || start < 0.0) {
-		error << _("TempoSection XML node has an illegal \"start\" value") << endmsg;
+
+	if ((prop = node.property ("beat")) != 0) {
+		if (sscanf (prop->value().c_str(), "%lf", &beat) != 1 || beat < 0.0) {
+			error << _("TempoSection XML node has an illegal \"beat\" value") << endmsg;
+		} else {
+			set_beat (beat);
+		}
+	} else {
+		error << _("TempoSection XML node has no \"beat\" property") << endmsg;
 	}
 
-	set_start (start);
 
 	if ((prop = node.property ("beats-per-minute")) == 0) {
 		error << _("TempoSection XML node has no \"beats-per-minute\" property") << endmsg;
@@ -150,7 +159,7 @@ TempoSection::get_state() const
 	LocaleGuard lg;
 
 	snprintf (buf, sizeof (buf), "%f", beat());
-	root->add_property ("start", buf);
+	root->add_property ("beat", buf);
 	snprintf (buf, sizeof (buf), "%f", _beats_per_minute);
 	root->add_property ("beats-per-minute", buf);
 	snprintf (buf, sizeof (buf), "%f", _note_type);
@@ -170,10 +179,10 @@ void
 
 TempoSection::update_bar_offset_from_bbt (const Meter& m)
 {
-	_bar_offset = (start() * BBT_Time::ticks_per_beat) /
+	_bar_offset = (beat() * BBT_Time::ticks_per_beat) /
 		(m.divisions_per_bar() * BBT_Time::ticks_per_beat);
 
-	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Tempo set bar offset to %1 from %2 w/%3\n", _bar_offset, start(), m.divisions_per_bar()));
+	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Tempo set bar offset to %1 from %2 w/%3\n", _bar_offset, beat(), m.divisions_per_bar()));
 }
 
 void
@@ -328,22 +337,22 @@ TempoSection::time_at_beat (double beat, double end_tpm, double end_time) const
 void
 TempoSection::update_bbt_time_from_bar_offset (const Meter& meter)
 {
-	double new_start;
+	double new_beat;
 
 	if (_bar_offset < 0.0) {
 		/* not set yet */
 		return;
 	}
 
-	new_start = start();
+	new_beat = beat();
 
 	double ticks = BBT_Time::ticks_per_beat * meter.divisions_per_bar() * _bar_offset;
-	new_start = ticks / BBT_Time::ticks_per_beat;
+	new_beat = ticks / BBT_Time::ticks_per_beat;
 
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("from bar offset %1 and dpb %2, ticks = %3->%4 beats = %5\n",
-						       _bar_offset, meter.divisions_per_bar(), ticks, new_start, new_start));
+						       _bar_offset, meter.divisions_per_bar(), ticks, new_beat, new_beat));
 
-	set_start (new_start);
+	set_beat (new_beat);
 }
 
 /***********************************************************************/
@@ -361,20 +370,28 @@ MeterSection::MeterSection (const XMLNode& node)
 	double beat = 0.0;
 	pair<double, BBT_Time> start;
 
-	if ((prop = node.property ("start")) == 0) {
-		error << _("MeterSection XML node has no \"start\" property") << endmsg;
-		throw failed_constructor();
-	}
-	if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
+	if ((prop = node.property ("start")) != 0) {
+		if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
 		    &bbt.bars,
 		    &bbt.beats,
-		    &bbt.ticks) == 3) {
-		/* legacy session - start used to be in bbt*/
-		beat = -1.0;
-	} else if (sscanf (prop->value().c_str(), "%lf", &beat) != 1 || beat < 0.0) {
-		error << _("MeterSection XML node has an illegal \"start\" value") << endmsg;
-		throw failed_constructor();
+		    &bbt.ticks) < 3) {
+			error << _("MeterSection XML node has an illegal \"start\" value") << endmsg;
+		} else {
+			/* legacy session - start used to be in bbt*/
+			beat = -1.0;
+		}
+	} else {
+		error << _("MeterSection XML node has no \"start\" property") << endmsg;
 	}
+
+	if ((prop = node.property ("beat")) != 0) {
+		if (sscanf (prop->value().c_str(), "%lf", &beat) != 1 || beat < 0.0) {
+			error << _("MeterSection XML node has an illegal \"beat\" value") << endmsg;
+		}
+	} else {
+		error << _("MeterSection XML node has no \"beat\" property") << endmsg;
+	}
+
 	start.first = beat;
 
 	if ((prop = node.property ("bbt")) == 0) {
@@ -386,9 +403,10 @@ MeterSection::MeterSection (const XMLNode& node)
 		error << _("MeterSection XML node has an illegal \"bbt\" value") << endmsg;
 		throw failed_constructor();
 	}
+
 	start.second = bbt;
 
-	set_start (start);
+	set_beat (start);
 
 	/* beats-per-bar is old; divisions-per-bar is new */
 
@@ -434,8 +452,8 @@ MeterSection::get_state() const
 		  bbt().beats,
 		  bbt().ticks);
 	root->add_property ("bbt", buf);
-	snprintf (buf, sizeof (buf), "%lf", start());
-	root->add_property ("start", buf);
+	snprintf (buf, sizeof (buf), "%lf", beat());
+	root->add_property ("beat", buf);
 	snprintf (buf, sizeof (buf), "%f", _note_type);
 	root->add_property ("note-type", buf);
 	snprintf (buf, sizeof (buf), "%f", _divisions_per_bar);
@@ -450,7 +468,7 @@ MeterSection::get_state() const
 
 struct MetricSectionSorter {
     bool operator() (const MetricSection* a, const MetricSection* b) {
-	    return a->start() < b->start();
+	    return a->beat() < b->beat();
     }
 };
 
@@ -580,13 +598,13 @@ TempoMap::do_insert (MetricSection* section)
 
 		if ((m->bbt().beats != 1) || (m->bbt().ticks != 0)) {
 
-			pair<double, BBT_Time> corrected = make_pair (m->start(), m->bbt());
+			pair<double, BBT_Time> corrected = make_pair (m->beat(), m->bbt());
 			corrected.second.beats = 1;
 			corrected.second.ticks = 0;
-			corrected.first = bbt_to_beats (corrected.second);
+			corrected.first = bbt_to_beats_unlocked (corrected.second);
 			warning << string_compose (_("Meter changes can only be positioned on the first beat of a bar. Moving from %1 to %2"),
 						   m->bbt(), corrected.second) << endmsg;
-			m->set_start (corrected);
+			m->set_beat (corrected);
 		}
 	}
 
@@ -608,7 +626,7 @@ TempoMap::do_insert (MetricSection* section)
 
 			/* Tempo sections */
 
-			if (tempo->start() == insert_tempo->start()) {
+			if (tempo->beat() == insert_tempo->beat()) {
 
 				if (!tempo->movable()) {
 
@@ -630,7 +648,7 @@ TempoMap::do_insert (MetricSection* section)
 			/* Meter Sections */
 			MeterSection* const meter = dynamic_cast<MeterSection*> (*i);
 			MeterSection* const insert_meter = dynamic_cast<MeterSection*> (section);
-			if (meter->start() == insert_meter->start()) {
+			if (meter->beat() == insert_meter->beat()) {
 
 				if (!meter->movable()) {
 
@@ -666,7 +684,7 @@ TempoMap::do_insert (MetricSection* section)
 			for (i = metrics.begin(); i != metrics.end(); ++i) {
 				MeterSection* const meter = dynamic_cast<MeterSection*> (*i);
 
-				if (meter && meter->start() > insert_meter->start()) {
+				if (meter && meter->beat() > insert_meter->beat()) {
 					break;
 				}
 			}
@@ -675,7 +693,7 @@ TempoMap::do_insert (MetricSection* section)
 				TempoSection* const tempo = dynamic_cast<TempoSection*> (*i);
 
 				if (tempo) {
-					if (tempo->start() > insert_tempo->start()) {
+					if (tempo->beat() > insert_tempo->beat()) {
 						break;
 					}
 				}
@@ -693,7 +711,7 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const doubl
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		TempoSection& first (first_tempo());
 
-		if (ts.start() != first.start()) {
+		if (ts.beat() != first.beat()) {
 			remove_tempo_locked (ts);
 			add_tempo_locked (tempo, where, true, type);
 		} else {
@@ -719,7 +737,7 @@ TempoMap::gui_set_tempo_frame (TempoSection& ts, framepos_t frame, double  beat_
 		//if (ts.position_lock_style() == MusicTime) {
 		if (0) {
 			/* MusicTime */
-			ts.set_start (beat_where);
+			ts.set_beat (beat_where);
 			MetricSectionSorter cmp;
 			metrics.sort (cmp);
 		} else {
@@ -759,23 +777,23 @@ TempoMap::gui_set_tempo_frame (TempoSection& ts, framepos_t frame, double  beat_
 			if (prev_ts) {
 				/* set the start beat */
 				double beats_to_ts = prev_ts->beat_at_frame (frame - prev_ts->frame(), ts.beats_per_minute(), frame - prev_ts->frame(), _frame_rate);
-				double beats = beats_to_ts + prev_ts->start();
+				double beats = beats_to_ts + prev_ts->beat();
 
 				if (next_ts) {
-					if (next_ts->start() < beats) {
+					if (next_ts->beat() < beats) {
 						/* with frame-based editing, it is possible to get in a
 						   situation where if the tempo was placed at the mouse pointer frame,
 						   the following music-based tempo would jump to an earlier frame,
-						   changing the start beat of the moved tempo.
+						   changing the beat beat of the moved tempo.
 						   in this case, we have to do some beat-based comparison TODO
 						*/
-					} else if (prev_ts->start() > beats) {
-						ts.set_start (prev_ts->start());
+					} else if (prev_ts->beat() > beats) {
+						ts.set_beat (prev_ts->beat());
 					} else {
-						ts.set_start (beats);
+						ts.set_beat (beats);
 					}
 				} else {
-					ts.set_start (beats);
+					ts.set_beat (beats);
 				}
 				MetricSectionSorter cmp;
 				metrics.sort (cmp);
@@ -813,14 +831,14 @@ TempoMap::add_tempo_locked (const Tempo& tempo, double where, bool recompute, AR
 }
 
 void
-TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const double& start, const BBT_Time& where)
+TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_Time& where)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		MeterSection& first (first_meter());
-		if (ms.start() != first.start()) {
+		if (ms.beat() != first.beat()) {
 			remove_meter_locked (ms);
-			add_meter_locked (meter, start, where, true);
+			add_meter_locked (meter, bbt_to_beats_unlocked (where), where, true);
 		} else {
 			/* cannot move the first meter section */
 			*static_cast<Meter*>(&first) = meter;
@@ -832,11 +850,11 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const doubl
 }
 
 void
-TempoMap::add_meter (const Meter& meter, double start, BBT_Time where)
+TempoMap::add_meter (const Meter& meter, double beat, BBT_Time where)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		add_meter_locked (meter, start, where, true);
+		add_meter_locked (meter, beat, where, true);
 	}
 
 
@@ -850,7 +868,7 @@ TempoMap::add_meter (const Meter& meter, double start, BBT_Time where)
 }
 
 void
-TempoMap::add_meter_locked (const Meter& meter, double start, BBT_Time where, bool recompute)
+TempoMap::add_meter_locked (const Meter& meter, double beat, BBT_Time where, bool recompute)
 {
 	/* a new meter always starts a new bar on the first beat. so
 	   round the start time appropriately. remember that
@@ -867,7 +885,7 @@ TempoMap::add_meter_locked (const Meter& meter, double start, BBT_Time where, bo
 	/* new meters *always* start on a beat. */
 	where.ticks = 0;
 
-	do_insert (new MeterSection (start, where, meter.divisions_per_bar(), meter.note_divisor()));
+	do_insert (new MeterSection (beat, where, meter.divisions_per_bar(), meter.note_divisor()));
 
 	if (recompute) {
 		recompute_map (true);
@@ -1043,7 +1061,7 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 
 			if (prev_ts) {
-				double const beats_relative_to_prev_ts = t->start() - prev_ts->start();
+				double const beats_relative_to_prev_ts = t->beat() - prev_ts->beat();
 				double const ticks_relative_to_prev_ts = beats_relative_to_prev_ts * BBT_Time::ticks_per_beat;
 
 				/* assume (falsely) that the target tempo is constant */
@@ -1079,7 +1097,7 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	for (mi = metrics.begin(); mi != metrics.end(); ++mi) {
 		/* we can do this beacuse we have the tempo section frames set */
 		if ((meter = dynamic_cast<MeterSection*> (*mi)) != 0) {
-			meter->set_frame (frame_at_tick (meter->start() * BBT_Time::ticks_per_beat));
+			meter->set_frame (frame_at_tick (meter->beat() * BBT_Time::ticks_per_beat));
 		}
 	}
 }
@@ -1155,11 +1173,18 @@ TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt)
 		warning << string_compose (_("tempo map asked for BBT time at frame %1\n"), frame) << endmsg;
 		return;
 	}
-	bbt = beats_to_bbt (beat_at_frame (frame));
+	bbt = beats_to_bbt_unlocked (beat_at_frame (frame));
 }
 
 double
 TempoMap::bbt_to_beats (Timecode::BBT_Time bbt)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+	return bbt_to_beats_unlocked (bbt);
+}
+
+double
+TempoMap::bbt_to_beats_unlocked (Timecode::BBT_Time bbt)
 {
 	/* CALLER HOLDS READ LOCK */
 
@@ -1174,13 +1199,13 @@ TempoMap::bbt_to_beats (Timecode::BBT_Time bbt)
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
 			double bars_to_m = 0.0;
 			if (prev_ms) {
-				bars_to_m = (m->start() - prev_ms->start()) / prev_ms->divisions_per_bar();
+				bars_to_m = (m->beat() - prev_ms->beat()) / prev_ms->divisions_per_bar();
 			}
 			if ((bars_to_m + accumulated_bars) > (bbt.bars - 1)) {
 				break;
 			}
 			if (prev_ms) {
-				accumulated_beats += m->start() - prev_ms->start();
+				accumulated_beats += m->beat() - prev_ms->beat();
 				accumulated_bars += bars_to_m;
 			}
 			prev_ms = m;
@@ -1189,13 +1214,19 @@ TempoMap::bbt_to_beats (Timecode::BBT_Time bbt)
 
 	double const remaining_bars = (bbt.bars - 1) - accumulated_bars;
 	double const remaining_bars_in_beats = remaining_bars * prev_ms->divisions_per_bar();
-	double const ret = remaining_bars_in_beats + accumulated_beats + (bbt.ticks / BBT_Time::ticks_per_beat);
-
+	double const ret = remaining_bars_in_beats + accumulated_beats + (bbt.beats - 1) + (bbt.ticks / BBT_Time::ticks_per_beat);
 	return ret;
 }
 
 Timecode::BBT_Time
 TempoMap::beats_to_bbt (double beats)
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+	return beats_to_bbt_unlocked (beats);
+}
+
+Timecode::BBT_Time
+TempoMap::beats_to_bbt_unlocked (double beats)
 {
 	/* CALLER HOLDS READ LOCK */
 
@@ -1209,21 +1240,21 @@ TempoMap::beats_to_bbt (double beats)
 
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
 
-			if (beats < m->start()) {
+			if (beats < m->beat()) {
 				/* this is the meter after the one our beat is on*/
 				break;
 			}
 
 			if (prev_ms) {
 				/* we need a whole number of bars. */
-				accumulated_bars += ((m->start() - prev_ms->start()) + 1) / prev_ms->divisions_per_bar();
+				accumulated_bars += ((m->beat() - prev_ms->beat()) + 1) / prev_ms->divisions_per_bar();
 			}
 
 			prev_ms = m;
 		}
 	}
 
-	double const beats_in_ms = beats - prev_ms->start();
+	double const beats_in_ms = beats - prev_ms->beat();
 	uint32_t const bars_in_ms = (uint32_t) floor (beats_in_ms / prev_ms->divisions_per_bar());
 	uint32_t const total_bars = bars_in_ms + accumulated_bars;
 	double const remaining_beats = beats_in_ms - (bars_in_ms * prev_ms->divisions_per_bar());
@@ -1362,7 +1393,7 @@ TempoMap::frame_time (const BBT_Time& bbt)
 	}
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	framepos_t const ret = frame_at_beat (bbt_to_beats (bbt));
+	framepos_t const ret = frame_at_beat (bbt_to_beats_unlocked (bbt));
 
 	return ret;
 }
@@ -1521,7 +1552,7 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 
 	double const beat_at_framepos = beat_at_frame (frame);
 
-	BBT_Time bbt (beats_to_bbt (beat_at_framepos));
+	BBT_Time bbt (beats_to_bbt_unlocked (beat_at_framepos));
 
 	switch (type) {
 	case Bar:
@@ -1581,7 +1612,7 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 		framecnt_t const pos = frame_at_beat (cnt);
 		MeterSection const meter = meter_section_at (pos);
 		Tempo const tempo = tempo_at (pos);
-		BBT_Time const bbt = beats_to_bbt ((double) cnt);
+		BBT_Time const bbt = beats_to_bbt_unlocked ((double) cnt);
 
 		points.push_back (BBTPoint (meter, tempo, pos, bbt.bars, bbt.beats));
 		++cnt;
@@ -1790,15 +1821,15 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 			MeterSection* prev_ms;
 			TempoSection* prev_ts;
 			if ((prev_ms = dynamic_cast<MeterSection*>(*i)) != 0) {
-				if (prev_ms->start() < 0.0) {
+				if (prev_ms->beat() < 0.0) {
 					/*XX we cannot possibly make this work??. */
 					pair<double, BBT_Time> start = make_pair (((prev_ms->bbt().bars - 1) * 4.0) + (prev_ms->bbt().beats - 1) + (prev_ms->bbt().ticks / BBT_Time::ticks_per_beat), prev_ms->bbt());
-					prev_ms->set_start (start);
+					prev_ms->set_beat (start);
 				}
 			} else if ((prev_ts = dynamic_cast<TempoSection*>(*i)) != 0) {
-				if (prev_ts->start() < 0.0) {
+				if (prev_ts->beat() < 0.0) {
 					double const start = ((prev_ts->legacy_bbt().bars - 1) * 4.0) + (prev_ts->legacy_bbt().beats - 1) + (prev_ts->legacy_bbt().ticks / BBT_Time::ticks_per_beat);
-					prev_ts->set_start (start);
+					prev_ts->set_beat (start);
 
 				}
 			}
@@ -1815,15 +1846,15 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 				TempoSection* ts;
 				TempoSection* prev_ts;
 				if ((prev_ms = dynamic_cast<MeterSection*>(*prev)) != 0 && (ms = dynamic_cast<MeterSection*>(*i)) != 0) {
-					if (prev_ms->start() == ms->start()) {
-						cerr << string_compose (_("Multiple meter definitions found at %1"), prev_ms->start()) << endmsg;
-						error << string_compose (_("Multiple meter definitions found at %1"), prev_ms->start()) << endmsg;
+					if (prev_ms->beat() == ms->beat()) {
+						cerr << string_compose (_("Multiple meter definitions found at %1"), prev_ms->beat()) << endmsg;
+						error << string_compose (_("Multiple meter definitions found at %1"), prev_ms->beat()) << endmsg;
 						return -1;
 					}
 				} else if ((prev_ts = dynamic_cast<TempoSection*>(*prev)) != 0 && (ts = dynamic_cast<TempoSection*>(*i)) != 0) {
-					if (prev_ts->start() == ts->start()) {
-						cerr << string_compose (_("Multiple tempo definitions found at %1"), prev_ts->start()) << endmsg;
-						error << string_compose (_("Multiple tempo definitions found at %1"), prev_ts->start()) << endmsg;
+					if (prev_ts->beat() == ts->beat()) {
+						cerr << string_compose (_("Multiple tempo definitions found at %1"), prev_ts->beat()) << endmsg;
+						error << string_compose (_("Multiple tempo definitions found at %1"), prev_ts->beat()) << endmsg;
 						return -1;
 					}
 				}
@@ -1849,7 +1880,7 @@ TempoMap::dump (std::ostream& o) const
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 
 		if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
-			o << "Tempo @ " << *i << " (Bar-offset: " << t->bar_offset() << ") " << t->beats_per_minute() << " BPM (pulse = 1/" << t->note_type() << ") at " << t->start() << " frame= " << t->frame() << " (movable? "
+			o << "Tempo @ " << *i << " (Bar-offset: " << t->bar_offset() << ") " << t->beats_per_minute() << " BPM (pulse = 1/" << t->note_type() << ") at " << t->beat() << " frame= " << t->frame() << " (movable? "
 			  << t->movable() << ')' << endl;
 		} else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			o << "Meter @ " << *i << ' ' << m->divisions_per_bar() << '/' << m->note_divisor() << " at " << m->bbt() << " frame= " << m->frame()
@@ -1930,22 +1961,22 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
 			if (prev) {
 				if (ts){
 					if ((t = dynamic_cast<TempoSection*>(prev)) != 0) {
-						ts->set_start (t->start());
+						ts->set_beat (t->beat());
 					}
 					if ((m = dynamic_cast<MeterSection*>(prev)) != 0) {
-						ts->set_start (m->start());
+						ts->set_beat (m->beat());
 					}
 					ts->set_frame (prev->frame());
 
 				}
 				if (ms) {
 					if ((m = dynamic_cast<MeterSection*>(prev)) != 0) {
-						pair<double, BBT_Time> start = make_pair (m->start(), m->bbt());
-						ms->set_start (start);
+						pair<double, BBT_Time> start = make_pair (m->beat(), m->bbt());
+						ms->set_beat (start);
 					}
 					if ((t = dynamic_cast<TempoSection*>(prev)) != 0) {
-						pair<double, BBT_Time> start = make_pair (t->start(), beats_to_bbt (t->start()));
-						ms->set_start (start);
+						pair<double, BBT_Time> start = make_pair (t->beat(), beats_to_bbt_unlocked (t->beat()));
+						ms->set_beat (start);
 					}
 					ms->set_frame (prev->frame());
 				}
@@ -1958,9 +1989,9 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
 			// cerr << bbt << endl;
 
 			if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
-				t->set_start (beat_at_frame (m->frame()));
+				t->set_beat (beat_at_frame (m->frame()));
 				tempo = t;
-				// cerr << "NEW TEMPO, frame = " << (*i)->frame() << " start = " << (*i)->start() <<endl;
+				// cerr << "NEW TEMPO, frame = " << (*i)->frame() << " beat = " << (*i)->beat() <<endl;
 			} else if ((m = dynamic_cast<MeterSection*>(*i)) != 0) {
 				bbt_time (m->frame(), bbt);
 
@@ -1984,9 +2015,9 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
 					}
 				}
 				pair<double, BBT_Time> start = make_pair (beat_at_frame (m->frame()), bbt);
-				m->set_start (start);
+				m->set_beat (start);
 				meter = m;
-				// cerr << "NEW METER, frame = " << (*i)->frame() << " start = " << (*i)->start() <<endl;
+				// cerr << "NEW METER, frame = " << (*i)->frame() << " beat = " << (*i)->beat() <<endl;
 			} else {
 				fatal << _("programming error: unhandled MetricSection type") << endmsg;
 				abort(); /*NOTREACHED*/

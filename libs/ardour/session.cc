@@ -5440,7 +5440,7 @@ Session::tempo_map_changed (const PropertyChange&)
 void
 Session::gui_tempo_map_changed ()
 {
-	//clear_clicks (); ?
+	clear_clicks ();
 
 	playlists->update_after_tempo_map_change ();
 

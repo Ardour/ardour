@@ -317,7 +317,7 @@ Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 void
 Editor::edit_meter_section (MeterSection* section)
 {
-	MeterDialog meter_dialog (*section, _("done"));
+	MeterDialog meter_dialog (_session->tempo_map(), *section, _("done"));
 
 	switch (meter_dialog.run()) {
 	case RESPONSE_ACCEPT:
@@ -336,7 +336,7 @@ Editor::edit_meter_section (MeterSection* section)
 
 	begin_reversible_command (_("replace tempo mark"));
         XMLNode &before = _session->tempo_map().get_state();
-	_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), _session->tempo_map().bbt_to_beats (when), when);
+	_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), when);
         XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
@@ -345,7 +345,7 @@ Editor::edit_meter_section (MeterSection* section)
 void
 Editor::edit_tempo_section (TempoSection* section)
 {
-	TempoDialog tempo_dialog (*section, _("done"));
+	TempoDialog tempo_dialog (_session->tempo_map(), *section, _("done"));
 
 	switch (tempo_dialog.run ()) {
 	case RESPONSE_ACCEPT:
