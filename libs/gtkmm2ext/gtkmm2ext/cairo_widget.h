@@ -54,7 +54,7 @@ public:
 	   that only use the Active and Normal active states.
 	*/
 	void set_active (bool);
-	bool get_active () { return active_state() != Gtkmm2ext::Off; }
+	bool get_active () const { return active_state() != Gtkmm2ext::Off; }
 
 	/* widgets can be told to only draw their "foreground, and thus leave
 	   in place whatever background is drawn by their parent. the default
