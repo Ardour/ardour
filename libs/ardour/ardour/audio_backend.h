@@ -258,6 +258,23 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
 	 */
 	virtual bool update_devices () { return false; }
 
+	/**
+	 * @return true if backend supports a blocking or buffered mode, false by
+	 * default unless implemented by a derived class.
+	 */
+	virtual bool can_use_buffered_io () { return false; }
+
+	/**
+	 * Set the backend to use a blocking or buffered I/O mode
+	 */
+	virtual void set_use_buffered_io (bool) { }
+
+	/**
+	 * @return Set the backend to use a blocking or buffered I/O mode, false by
+	 * default unless implemented by a derived class.
+	 */
+	virtual bool get_use_buffered_io () { return false; }
+
     /** Returns a collection of float identifying sample rates that are
      * potentially usable with the hardware identified by @param device.
      * Any of these values may be supplied in other calls to this backend
