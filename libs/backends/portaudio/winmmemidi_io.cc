@@ -20,6 +20,7 @@
 #include <mmsystem.h>
 
 #include <sstream>
+#include <set>
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
