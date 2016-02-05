@@ -1197,9 +1197,8 @@ Region::state ()
 	/* note: flags are stored by derived classes */
 
 	if (_position_lock_style != AudioTime) {
-		stringstream str;
-		str << _beat;
-		node->add_property ("beat", str.str());
+		snprintf (buf, sizeof(buf), "%lf", _beat);
+		node->add_property ("beat", buf);
 	}
 
 	for (uint32_t n=0; n < _sources.size(); ++n) {
@@ -1270,26 +1269,23 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 
 	if (_position_lock_style == MusicTime) {
 		if ((prop = node.property ("bbt-position")) == 0) {
-			/* missing BBT info, revert to audio time locking */
-			_position_lock_style = AudioTime;
+			if ((prop = node.property ("beat")) == 0) {
+				/* missing BBT info, revert to audio time locking */
+				_position_lock_style = AudioTime;
+			} else {
+				if (sscanf (prop->value().c_str(), "%lf", &_beat) != 1) {
+					_position_lock_style = AudioTime;
+				}
+			}
+
 		} else {
 			if (sscanf (prop->value().c_str(), "%d|%d|%d",
 				    &bbt_time.bars,
 				    &bbt_time.beats,
 				    &bbt_time.ticks) != 3) {
 				_position_lock_style = AudioTime;
-			}
-			_beat = _session.tempo_map().bbt_to_beats (bbt_time);
-		}
-	}
-
-	if (_position_lock_style == MusicTime) {
-		if ((prop = node.property ("beat")) == 0) {
-			/* missing BBT info, revert to audio time locking */
-			_position_lock_style = AudioTime;
-		} else {
-			if (sscanf (prop->value().c_str(), "%lf", &_beat) != 1) {
-				_position_lock_style = AudioTime;
+			} else {
+				_beat = _session.tempo_map().bbt_to_beats (bbt_time);
 			}
 		}
 	}
