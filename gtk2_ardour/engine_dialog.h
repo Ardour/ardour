@@ -87,6 +87,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     ArdourButton    midi_devices_button;
     ArdourButton    start_stop_button;
     ArdourButton    update_devices_button;
+    ArdourButton    use_buffered_io_button;
 
     Gtk::Button     connect_disconnect_button;
 
@@ -162,6 +163,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     std::string get_driver() const;
     std::string get_backend() const;
     std::string get_midi_option () const;
+    bool get_use_buffered_io () const;
 
 	std::string get_default_device (const std::string&,
 	                                const std::vector<std::string>&);
@@ -222,6 +224,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	uint32_t input_channels;
 	uint32_t output_channels;
 	bool active;
+	bool use_buffered_io;
 	std::string midi_option;
 	std::vector<MidiDeviceSettings> midi_devices;
 	time_t lru;
@@ -234,6 +237,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 		, input_channels (0)
 		, output_channels (0)
 		, active (false)
+		, use_buffered_io (false)
 		, lru (0) {}
 
     };
@@ -306,6 +310,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void control_app_button_clicked ();
     void start_stop_button_clicked ();
     void update_devices_button_clicked ();
+    void use_buffered_io_button_clicked ();
     void use_latency_button_clicked ();
     void manage_control_app_sensitivity ();
     int push_state_to_backend (bool start);

@@ -87,6 +87,7 @@ EngineControl::EngineControl ()
 	, midi_devices_button (_("Midi Device Setup"))
 	, start_stop_button (_("Stop"))
 	, update_devices_button (_("Refresh Devices"))
+	, use_buffered_io_button (_("Use Buffered I/O"), ArdourButton::led_default_elements)
 	, lm_measure_label (_("Measure"))
 	, lm_use_button (_("Use results"))
 	, lm_back_button (_("Back to settings ... (ignore results)"))
@@ -280,6 +281,11 @@ EngineControl::EngineControl ()
 	update_devices_button.set_sensitive (false);
 	update_devices_button.set_name ("generic button");
 	update_devices_button.set_can_focus(true);
+
+	use_buffered_io_button.signal_clicked.connect (mem_fun (*this, &EngineControl::use_buffered_io_button_clicked));
+	use_buffered_io_button.set_sensitive (false);
+	use_buffered_io_button.set_name ("generic button");
+	use_buffered_io_button.set_can_focus(true);
 
 	cancel_button = add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CANCEL);
 	ok_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
@@ -503,6 +509,7 @@ EngineControl::build_notebook ()
 
 	basic_packer.attach (start_stop_button, 3, 4, 0, 1, xopt, xopt);
 	basic_packer.attach (update_devices_button, 3, 4, 1, 2, xopt, xopt);
+	basic_packer.attach (use_buffered_io_button, 3, 4, 2, 3, xopt, xopt);
 
 	lm_button_audio.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_audio_latency));
 	lm_button_audio.set_name ("generic button");
@@ -854,14 +861,21 @@ EngineControl::update_sensitivity ()
 		if (ARDOUR::AudioEngine::instance()->running()) {
 			start_stop_button.set_text("Stop");
 			update_devices_button.set_sensitive(false);
+			use_buffered_io_button.set_sensitive(false);
 		} else {
 			if (backend->can_request_update_devices()) {
 				update_devices_button.show();
 			} else {
 				update_devices_button.hide();
 			}
+			if (backend->can_use_buffered_io()) {
+				use_buffered_io_button.show();
+			} else {
+				use_buffered_io_button.hide();
+			}
 			start_stop_button.set_text("Start");
 			update_devices_button.set_sensitive(true);
+			use_buffered_io_button.set_sensitive(true);
 		}
 	} else {
 		update_devices_button.set_sensitive(false);
@@ -1823,6 +1837,7 @@ EngineControl::store_state (State state)
 	state->output_channels = get_output_channels ();
 	state->midi_option = get_midi_option ();
 	state->midi_devices = _midi_devices;
+	state->use_buffered_io = get_use_buffered_io ();
 	state->lru = time (NULL) ;
 }
 
@@ -1851,6 +1866,8 @@ EngineControl::maybe_display_saved_state ()
 		show_buffer_duration ();
 		input_latency.set_value (state->input_latency);
 		output_latency.set_value (state->output_latency);
+
+		use_buffered_io_button.set_active (state->use_buffered_io);
 
 		if (!state->midi_option.empty()) {
 			midi_option_combo.set_active_text (state->midi_option);
@@ -1889,6 +1906,7 @@ EngineControl::get_state ()
 			node->add_property ("input-channels", (*i)->input_channels);
 			node->add_property ("output-channels", (*i)->output_channels);
 			node->add_property ("active", (*i)->active ? "yes" : "no");
+			node->add_property ("use-buffered-io", (*i)->use_buffered_io ? "yes" : "no");
 			node->add_property ("midi-option", (*i)->midi_option);
 			node->add_property ("lru", (*i)->active ? time (NULL) : (*i)->lru);
 
@@ -2032,6 +2050,11 @@ EngineControl::set_state (const XMLNode& root)
 				continue;
 			}
 			state->active = string_is_affirmative (prop->value ());
+
+			if ((prop = grandchild->property ("use-buffered-io")) == 0) {
+				continue;
+			}
+			state->use_buffered_io = string_is_affirmative (prop->value ());
 
 			if ((prop = grandchild->property ("midi-option")) == 0) {
 				continue;
@@ -2206,6 +2229,7 @@ EngineControl::set_current_state (const State& state)
 	input_latency.set_value (state->input_latency);
 	output_latency.set_value (state->output_latency);
 	midi_option_combo.set_active_text (state->midi_option);
+	use_buffered_io_button.set_active (state->use_buffered_io);
 	return true;
 }
 
@@ -2232,6 +2256,7 @@ EngineControl::push_state_to_backend (bool start)
 	bool change_latency = false;
 	bool change_channels = false;
 	bool change_midi = false;
+	bool change_buffered_io = false;
 
 	uint32_t ochan = get_output_channels ();
 	uint32_t ichan = get_input_channels ();
@@ -2280,6 +2305,12 @@ EngineControl::push_state_to_backend (bool start)
 
 			if (get_midi_option() != backend->midi_option()) {
 				change_midi = true;
+			}
+
+			if (backend->can_use_buffered_io()) {
+				if (get_use_buffered_io() != backend->get_use_buffered_io()) {
+					change_buffered_io = true;
+				}
 			}
 
 			/* zero-requested channels means "all available" */
@@ -2451,6 +2482,10 @@ EngineControl::push_state_to_backend (bool start)
 		backend->set_midi_option (get_midi_option());
 	}
 
+	if (change_buffered_io) {
+		backend->set_use_buffered_io (use_buffered_io_button.get_active());
+	}
+
 	if (1 /* TODO */) {
 		for (vector<MidiDeviceSettings>::const_iterator p = _midi_devices.begin(); p != _midi_devices.end(); ++p) {
 			if (_measure_midi) {
@@ -2565,6 +2600,12 @@ EngineControl::get_midi_option () const
 	return midi_option_combo.get_active_text();
 }
 
+bool
+EngineControl::get_use_buffered_io () const
+{
+	return use_buffered_io_button.get_active();
+}
+
 uint32_t
 EngineControl::get_input_channels() const
 {
@@ -2673,6 +2714,20 @@ EngineControl::update_devices_button_clicked ()
 	if (backend->update_devices()) {
 		device_list_changed ();
 	}
+}
+
+void
+EngineControl::use_buffered_io_button_clicked ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+
+	if (!backend) {
+		return;
+	}
+
+	bool set_buffered_io = !use_buffered_io_button.get_active();
+	use_buffered_io_button.set_active (set_buffered_io);
+	backend->set_use_buffered_io (set_buffered_io);
 }
 
 void
