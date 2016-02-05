@@ -66,6 +66,7 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _pcmio (0)
 	, _run (false)
 	, _active (false)
+	, _use_blocking_api(false)
 	, _freewheel (false)
 	, _freewheeling (false)
 	, _freewheel_ack (false)
@@ -158,6 +159,18 @@ PortAudioBackend::update_devices ()
 {
 	// update midi device info?
 	return _pcmio->update_devices();
+}
+
+void
+PortAudioBackend::set_use_buffered_io (bool use_buffered_io)
+{
+	DEBUG_AUDIO (string_compose ("Portaudio: use_buffered_io %1 \n", use_buffered_io));
+
+	if (running()) {
+		return;
+	}
+
+	_use_blocking_api = use_buffered_io;
 }
 
 std::string
@@ -572,21 +585,21 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	PaErrorCode err = paNoError;
 
-#ifdef USE_BLOCKING_API
-	err = _pcmio->open_blocking_stream(name_to_id(_input_audio_device),
-	                                   name_to_id(_output_audio_device),
-	                                   _samplerate,
-	                                   _samples_per_period);
-
-#else
-	err = _pcmio->open_callback_stream(name_to_id(_input_audio_device),
-	                                   name_to_id(_output_audio_device),
-	                                   _samplerate,
-	                                   _samples_per_period,
-	                                   portaudio_callback,
-	                                   this);
-
-#endif
+	if (_use_blocking_api) {
+		DEBUG_AUDIO("Opening blocking audio stream\n");
+		err = _pcmio->open_blocking_stream(name_to_id(_input_audio_device),
+		                                   name_to_id(_output_audio_device),
+		                                   _samplerate,
+		                                   _samples_per_period);
+	} else {
+		DEBUG_AUDIO("Opening callback audio stream\n");
+		err = _pcmio->open_callback_stream(name_to_id(_input_audio_device),
+		                                   name_to_id(_output_audio_device),
+		                                   _samplerate,
+		                                   _samples_per_period,
+		                                   portaudio_callback,
+		                                   this);
+	}
 
 	// reintepret Portaudio error messages
 	switch (err) {
@@ -669,22 +682,22 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	_run = true;
 	_port_change_flag = false;
 
-#ifdef USE_BLOCKING_API
-	if (!start_blocking_process_thread()) {
-		return ProcessThreadStartError;
-	}
-#else
-	if (_pcmio->start_stream() != paNoError) {
-		DEBUG_AUDIO("Unable to start stream\n");
-		return AudioDeviceOpenError;
-	}
+	if (_use_blocking_api) {
+		if (!start_blocking_process_thread()) {
+			return ProcessThreadStartError;
+		}
+	} else {
+		if (_pcmio->start_stream() != paNoError) {
+			DEBUG_AUDIO("Unable to start stream\n");
+			return AudioDeviceOpenError;
+		}
 
-	if (!start_freewheel_process_thread()) {
-		DEBUG_AUDIO("Unable to start freewheel thread\n");
-		stop();
-		return ProcessThreadStartError;
+		if (!start_freewheel_process_thread()) {
+			DEBUG_AUDIO("Unable to start freewheel thread\n");
+			stop();
+			return ProcessThreadStartError;
+		}
 	}
-#endif
 
 	return NoError;
 }
@@ -814,19 +827,18 @@ PortAudioBackend::stop ()
 
 	_run = false;
 
-#ifdef USE_BLOCKING_API
-	if (!stop_blocking_process_thread ()) {
-		return -1;
-	}
-#else
-	_pcmio->close_stream ();
-	_active = false;
+	if (_use_blocking_api) {
+		if (!stop_blocking_process_thread()) {
+			return -1;
+		}
+	} else {
+		_pcmio->close_stream();
+		_active = false;
 
-	if (!stop_freewheel_process_thread ()) {
-		return -1;
+		if (!stop_freewheel_process_thread()) {
+			return -1;
+		}
 	}
-
-#endif
 
 	unregister_ports();
 
@@ -1127,16 +1139,15 @@ PortAudioBackend::join_process_threads ()
 bool
 PortAudioBackend::in_process_thread ()
 {
-#ifdef USE_BLOCKING_API
-	if (pthread_equal (_main_blocking_thread, pthread_self()) != 0) {
-		return true;
+	if (_use_blocking_api) {
+		if (pthread_equal(_main_blocking_thread, pthread_self()) != 0) {
+			return true;
+		}
+	} else {
+		if (pthread_equal(_main_thread, pthread_self()) != 0) {
+			return true;
+		}
 	}
-#else
-	if (pthread_equal (_main_thread, pthread_self()) != 0) {
-		return true;
-	}
-#endif
-
 	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
 	{
 		if (pthread_equal (*i, pthread_self ()) != 0) {

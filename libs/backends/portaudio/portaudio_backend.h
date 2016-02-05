@@ -174,6 +174,10 @@ class PortAudioBackend : public AudioBackend {
 		bool can_request_update_devices () { return true; }
 		bool update_devices ();
 
+		bool can_use_buffered_io () { return true; }
+		void set_use_buffered_io (bool);
+		bool get_use_buffered_io () { return _use_blocking_api; }
+
 		bool use_separate_input_and_output_devices () const;
 		std::vector<DeviceStatus> enumerate_devices () const;
 		std::vector<DeviceStatus> enumerate_input_devices () const;
@@ -356,6 +360,7 @@ class PortAudioBackend : public AudioBackend {
 
 		bool  _run; /* keep going or stop, ardour thread */
 		bool  _active; /* is running, process thread */
+		bool  _use_blocking_api;
 		bool  _freewheel;
 		bool  _freewheeling;
 		bool  _freewheel_ack;
