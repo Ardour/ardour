@@ -42,4 +42,3 @@ def build_portaudio (bld, name, defines):
 
 def build(bld):
     build_portaudio (bld, 'portaudio_callback_backend', ['BACKEND_NAME="PortAudio (default)"'])
-    build_portaudio (bld, 'portaudio_blocking_backend', ['BACKEND_NAME="PortAudio (no-callback)"', 'USE_BLOCKING_API'])
