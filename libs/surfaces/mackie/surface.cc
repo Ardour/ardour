@@ -390,10 +390,14 @@ Surface::setup_master ()
 	}
 
 	if (!_master_fader) {
-		_master_fader = dynamic_cast<Fader*> (Fader::factory (*this, _mcp.device_info().strip_cnt(), "master", *groups["master"]));
-
 		Groups::iterator group_it;
 		group_it = groups.find("master");
+
+		if (group_it == groups.end()) {
+			groups["master"] = new Group ("master");
+		}
+
+		_master_fader = dynamic_cast<Fader*> (Fader::factory (*this, _mcp.device_info().strip_cnt(), "master", *group_it->second));
 
 		DeviceInfo device_info = _mcp.device_info();
 		GlobalButtonInfo master_button = device_info.get_global_button(Button::MasterFaderTouch);
