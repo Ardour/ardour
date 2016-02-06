@@ -7224,12 +7224,10 @@ Editor::do_insert_time ()
 		return;
 	}
 
-	InsertTimeOption opt = d.intersected_region_action ();
-
 	insert_time (
 		get_preferred_edit_position(),
 		d.distance(),
-		opt,
+		d.intersected_region_action (),
 		d.all_playlists(),
 		d.move_glued(),
 		d.move_markers(),
