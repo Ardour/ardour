@@ -425,7 +425,7 @@ LedState
 MackieControlProtocol::marker_press (Button &)
 {
 	if (main_modifier_state() & MODIFIER_SHIFT) {
-		access_action ("Editor/set-session-from-edit-range");
+		access_action ("Editor/remove-location-from-playhead");
 		return off;
 	} else {
 		_modifier_state |= MODIFIER_MARKER;
@@ -884,6 +884,11 @@ MackieControlProtocol::clearsolo_press (Mackie::Button&)
 {
 	// clears all solos and listens (pfl/afl)
 
+	if (main_modifier_state() & MODIFIER_SHIFT) {
+		access_action ("Editor/set-session-from-edit-range");
+		return none;
+	}
+	
 	if (session) {
 		if (session->soloing()) {
 			session->set_solo (session->get_routes(), false);
