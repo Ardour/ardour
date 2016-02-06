@@ -65,7 +65,7 @@ using namespace std;
 #include "pbd/abstract_ui.cc" // instantiate template
 
 FaderPort::FaderPort (Session& s)
-	: ControlProtocol (s, _("Faderport"))
+	: ControlProtocol (s, _("PreSonus FaderPort"))
 	, AbstractUI<FaderPortRequest> (name())
 	, gui (0)
 	, connection_state (ConnectionState (0))

@@ -63,7 +63,7 @@ faderport_request_buffer_factory (uint32_t num_requests)
 }
 
 static ControlProtocolDescriptor faderport_midi_descriptor = {
-	/*name :              */   "Faderport",
+	/*name :              */   "PreSonus FaderPort",
 	/*id :                */   "uri://ardour.org/surfaces/faderport:0",
 	/*ptr :               */   0,
 	/*module :            */   0,
