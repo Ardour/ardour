@@ -7225,7 +7225,7 @@ Editor::do_insert_time ()
 	}
 
 	insert_time (
-		get_preferred_edit_position(),
+		get_preferred_edit_position (EDIT_IGNORE_MOUSE),
 		d.distance(),
 		d.intersected_region_action (),
 		d.all_playlists(),
