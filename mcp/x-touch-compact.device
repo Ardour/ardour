@@ -8,7 +8,7 @@
   <TwoCharacterDisplay value="no"/>
   <Extenders value="0"/>
   <MasterPosition value="0"/>
-  <GlobalControls value="no"/>
+  <GlobalControls value="yes"/>
   <JogWheel value="no"/>
   <TouchSenseFaders value="yes"/>
   <HasSeparateMeters value="no"/>
