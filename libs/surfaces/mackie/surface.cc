@@ -722,7 +722,9 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 		DEBUG_TRACE (DEBUG::MackieControl, "Logic Control Device denies connection\n");
 		_active = false;
 		break;
+
 	default:
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("unknown device ID byte %1", (int) bytes[5]));
 		error << "MCP: unknown sysex: " << bytes << endmsg;
 	}
 }
