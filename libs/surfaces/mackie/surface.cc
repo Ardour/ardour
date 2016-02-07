@@ -703,6 +703,13 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 		}
 		break;
 
+	case 0x06:
+		/* Behringer X-Touch Compact: Device Ready
+		*/
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Behringer X-Touch Compact ready, current status = %1\n", _active));
+		turn_it_on ();
+		break;
+
 	case 0x03: /* LCP Connection Confirmation */
 		DEBUG_TRACE (DEBUG::MackieControl, "Logic Control Device confirms connection, ardour replies\n");
 		if (bytes[4] == 0x10 || bytes[4] == 0x11) {
