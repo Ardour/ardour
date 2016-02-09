@@ -297,8 +297,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
 	framecnt_t         get_current_zoom () const { return samples_per_pixel; }
 	void               cycle_zoom_focus ();
-	void temporal_zoom_step (bool coarser);
-	void temporal_zoom_step_mouse_focus (bool coarser);
+	void temporal_zoom_step (bool zoom_out);
+	void temporal_zoom_step_scale (bool zoom_out, double scale);
+	void temporal_zoom_step_mouse_focus (bool zoom_out);
+	void temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale);
 	void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top);
 	void tav_zoom_step (bool coarser);
 	void tav_zoom_smooth (bool coarser, bool force_all);

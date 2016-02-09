@@ -1710,25 +1710,43 @@ Editor::tav_zoom_smooth (bool coarser, bool force_all)
 }
 
 void
-Editor::temporal_zoom_step_mouse_focus (bool coarser)
+Editor::temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale)
 {
 	Editing::ZoomFocus temp_focus = zoom_focus;
 	zoom_focus = Editing::ZoomFocusMouse;
-	temporal_zoom_step (coarser);
+	temporal_zoom_step_scale (zoom_out, scale);
 	zoom_focus = temp_focus;
 }
 
 void
-Editor::temporal_zoom_step (bool coarser)
+Editor::temporal_zoom_step_mouse_focus (bool zoom_out)
 {
-	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, coarser)
+	temporal_zoom_step_mouse_focus_scale (zoom_out, 2.0);
+}
+
+void
+Editor::temporal_zoom_step (bool zoom_out)
+{
+	temporal_zoom_step_scale (zoom_out, 2.0);
+}
+
+void
+Editor::temporal_zoom_step_scale (bool zoom_out, double scale)
+{
+	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, zoom_out, scale)
 
 	framecnt_t nspp = samples_per_pixel;
 
-	if (coarser) {
-		nspp *= 2;
+	if (zoom_out) {
+		nspp *= scale;
+		if (nspp == samples_per_pixel) {
+			nspp *= 2.0;
+		}
 	} else {
-		nspp /= 2;
+		nspp /= scale;
+		if (nspp == samples_per_pixel) {
+			nspp /= 2.0;
+		}
 	}
 
 	temporal_zoom (nspp);
