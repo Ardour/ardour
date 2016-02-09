@@ -1189,5 +1189,21 @@ class CrossfadeEdgeDrag : public Drag
 	bool start;
 };
 
+class RulerZoomDrag : public Drag
+{
+public:
+	RulerZoomDrag (Editor*, ArdourCanvas::Item*);
+
+	void start_grab (GdkEvent*, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent*, bool);
+	void aborted (bool);
+
+	virtual bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+};
+
 #endif /* __gtk2_ardour_editor_drag_h_ */
 

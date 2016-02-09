@@ -2538,6 +2538,14 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Editor"),
 		    new BoolOption (
+			    "use-time-rulers-to-zoom-with-vertical-drag",
+			    _("Use time rulers area to zoom when clicking and dragging vertically"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_time_rulers_to_zoom_with_vertical_drag),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_time_rulers_to_zoom_with_vertical_drag)
+			    ));
+
+	add_option (_("Editor"),
+		    new BoolOption (
 			    "update-editor-during-summary-drag",
 			    _("Update editor window during drags of the summary"),
 			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_update_editor_during_summary_drag),

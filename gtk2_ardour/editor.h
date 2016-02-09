@@ -2272,6 +2272,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	friend class ControlPointDrag;
 	friend class LineDrag;
 	friend class RubberbandSelectDrag;
+	friend class RulerZoomDrag;
 	friend class EditorRubberbandSelectDrag;
 	friend class TimeFXDrag;
 	friend class ScrubDrag;

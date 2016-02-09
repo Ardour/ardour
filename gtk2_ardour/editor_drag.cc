@@ -6447,3 +6447,56 @@ void
 RegionCutDrag::aborted (bool)
 {
 }
+
+RulerZoomDrag::RulerZoomDrag (Editor* e, ArdourCanvas::Item* item)
+	: Drag (e, item, true)
+{
+}
+
+void
+RulerZoomDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
+{
+	Drag::start_grab (event, c);
+
+	framepos_t where = _editor->canvas_event_sample(event);
+
+	_editor->_dragging_playhead = true;
+
+	_editor->playhead_cursor->set_position (where);
+}
+
+void
+RulerZoomDrag::motion (GdkEvent* event, bool)
+{
+	framepos_t where = _editor->canvas_event_sample(event);
+
+	_editor->playhead_cursor->set_position (where);
+
+	const double movement_limit = 20.0;
+	const double scale = 1.08;
+	const double y_delta = last_pointer_y() - current_pointer_y();
+
+	if (y_delta > 0 && y_delta < movement_limit) {
+		_editor->temporal_zoom_step_mouse_focus_scale (true, scale);
+	} else if (y_delta < 0 && y_delta > -movement_limit) {
+		_editor->temporal_zoom_step_mouse_focus_scale (false, scale);
+	}
+}
+
+void
+RulerZoomDrag::finished (GdkEvent*, bool)
+{
+	_editor->_dragging_playhead = false;
+
+	Session* s = _editor->session ();
+	if (s) {
+		s->request_locate (_editor->playhead_cursor->current_frame (), _was_rolling);
+		_editor->_pending_locate_request = true;
+	}
+
+}
+
+void
+RulerZoomDrag::aborted (bool)
+{
+}
