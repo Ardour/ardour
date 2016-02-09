@@ -39,17 +39,22 @@ class LIBARDOUR_API ExportStatus {
 	/* Status info */
 
 	volatile bool           stop;
-	volatile bool           running;
 
 	void abort (bool error_occurred = false);
 	bool aborted () const { return _aborted; }
 	bool errors () const { return _errors; }
+	bool running () const { return _running; }
+
+	void set_running (bool r) {
+		assert (!_run_lock.trylock()); // must hold lock
+		_running = r;
+	}
+	Glib::Threads::Mutex& lock () { return _run_lock; }
 
 	PBD::Signal0<void>      Finished;
 	void finish ();
-	bool finished () const { return _finished; }
 
-        void cleanup ();
+	void cleanup ();
 
 	/* Progress info */
 
@@ -77,8 +82,9 @@ class LIBARDOUR_API ExportStatus {
   private:
 	volatile bool          _aborted;
 	volatile bool          _errors;
-	volatile bool          _finished;
+	volatile bool          _running;
 
+	Glib::Threads::Mutex   _run_lock;
 };
 
 } // namespace ARDOUR

@@ -33,10 +33,10 @@ ExportStatus::ExportStatus ()
 void
 ExportStatus::init ()
 {
+	Glib::Threads::Mutex::Lock l (_run_lock);
 	stop = false;
-	running = false;
+	_running = false;
 	_aborted = false;
-	_finished = false;
 	_errors = false;
 
 	active_job = Exporting;
@@ -57,17 +57,17 @@ ExportStatus::init ()
 void
 ExportStatus::abort (bool error_occurred)
 {
+	Glib::Threads::Mutex::Lock l (_run_lock);
 	_aborted = true;
-	_finished = true;
 	_errors = _errors || error_occurred;
-	running = false;
+	_running = false;
 }
 
 void
 ExportStatus::finish ()
 {
-	_finished = true;
-	running = false;
+	Glib::Threads::Mutex::Lock l (_run_lock);
+	set_running (false);
 	Finished(); /* EMIT SIGNAL */
 }
 

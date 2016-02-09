@@ -150,6 +150,7 @@ ExportHandler::do_export ()
 
 	/* Start export */
 
+	Glib::Threads::Mutex::Lock l (export_status->lock());
 	start_timespan ();
 }
 
@@ -160,7 +161,7 @@ ExportHandler::start_timespan ()
 
 	if (config_map.empty()) {
 		// freewheeling has to be stopped from outside the process cycle
-		export_status->running = false;
+		export_status->set_running (false);
 		return;
 	}
 
@@ -219,11 +220,13 @@ ExportHandler::handle_duplicate_format_extensions()
 int
 ExportHandler::process (framecnt_t frames)
 {
-	if (!export_status->running) {
+	if (!export_status->running ()) {
 		return 0;
 	} else if (normalizing) {
+		Glib::Threads::Mutex::Lock l (export_status->lock());
 		return process_normalize ();
 	} else {
+		Glib::Threads::Mutex::Lock l (export_status->lock());
 		return process_timespan (frames);
 	}
 }
