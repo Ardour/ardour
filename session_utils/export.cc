@@ -120,7 +120,7 @@ static int export_session (Session *session,
 
 	// TODO trap SIGINT -> status->abort();
 
-	while (status->running) {
+	while (status->running ()) {
 		double progress = 0.0;
 		switch (status->active_job) {
 		case ExportStatus::Normalizing:

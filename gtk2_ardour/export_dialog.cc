@@ -186,7 +186,7 @@ ExportDialog::notify_errors (bool force)
 void
 ExportDialog::close_dialog ()
 {
-	if (status->running) {
+	if (status->running ()) {
 		status->abort();
 	}
 
@@ -299,8 +299,6 @@ ExportDialog::do_export ()
 void
 ExportDialog::show_progress ()
 {
-	status->running = true;
-
 	cancel_button->set_label (_("Stop Export"));
 	export_button->set_sensitive (false);
 
@@ -312,7 +310,7 @@ ExportDialog::show_progress ()
 
 	gtk_main_iteration ();
 
-	while (status->running) {
+	while (status->running ()) {
 		if (gtk_events_pending()) {
 			gtk_main_iteration ();
 		} else {

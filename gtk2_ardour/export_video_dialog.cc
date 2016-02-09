@@ -755,7 +755,7 @@ ExportVideoDialog::launch_export ()
 
 	audio_progress_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ExportVideoDialog::audio_progress_display), 100);
 	_previous_progress = 0.0;
-	while (status->running) {
+	while (status->running ()) {
 		if (_aborted) { status->abort(); }
 		if (gtk_events_pending()) {
 			gtk_main_iteration ();
