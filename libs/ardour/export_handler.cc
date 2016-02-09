@@ -272,9 +272,9 @@ ExportHandler::process_normalize ()
 {
 	if (graph_builder->process_normalize ()) {
 		finish_timespan ();
-		export_status->normalizing = false;
+		export_status->active_job = ExportStatus::Exporting;
 	} else {
-		export_status->normalizing = true;
+		export_status->active_job = ExportStatus::Normalizing;
 	}
 
 	export_status->current_normalize_cycle++;
@@ -316,6 +316,7 @@ ExportHandler::finish_timespan ()
 			 * TODO: check Umlauts and encoding in filename.
 			 * TagLib eventually calls CreateFileA(),
 			 */
+			export_status->active_job = ExportStatus::Tagging;
 			graph_builder->reset ();
 			AudiofileTagger::tag_file(filename, *SessionMetadata::Metadata());
 		}
@@ -330,7 +331,7 @@ ExportHandler::finish_timespan ()
 				...
 			};
 #endif
-
+			export_status->active_job = ExportStatus::Command;
 			PBD::ScopedConnection command_connection;
 			std::map<char, std::string> subs;
 			subs.insert (std::pair<char, std::string> ('f', filename));

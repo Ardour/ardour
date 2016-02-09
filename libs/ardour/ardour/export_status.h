@@ -53,7 +53,13 @@ class LIBARDOUR_API ExportStatus {
 
 	/* Progress info */
 
-	volatile bool           normalizing;
+	volatile enum Progress {
+		Exporting,
+		Normalizing,
+		Tagging,
+		Uploading,
+		Command }
+	                        active_job;
 
 	volatile uint32_t       total_timespans;
 	volatile uint32_t       timespan;

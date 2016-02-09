@@ -39,7 +39,7 @@ ExportStatus::init ()
 	_finished = false;
 	_errors = false;
 
-	normalizing = false;
+	active_job = Exporting;
 
 	total_timespans = 0;
 	timespan = 0;
