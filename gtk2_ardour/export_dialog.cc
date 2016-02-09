@@ -339,16 +339,31 @@ gint
 ExportDialog::progress_timeout ()
 {
 	std::string status_text;
-	float progress = 0.0;
-	if (status->normalizing) {
-		status_text = string_compose (_("Normalizing '%3' (timespan %1 of %2)"),
-		                              status->timespan, status->total_timespans, status->timespan_name);
-		progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
-	} else {
+	float progress = -1;
+	switch (status->active_job) {
+	case ExportStatus::Exporting:
 		status_text = string_compose (_("Exporting '%3' (timespan %1 of %2)"),
 		                              status->timespan, status->total_timespans, status->timespan_name);
 		progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
+		break;
+	case ExportStatus::Normalizing:
+		status_text = string_compose (_("Normalizing '%3' (timespan %1 of %2)"),
+		                              status->timespan, status->total_timespans, status->timespan_name);
+		progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
+		break;
+	case ExportStatus::Tagging:
+		status_text = string_compose (_("Tagging '%3' (timespan %1 of %2)"),
+		                              status->timespan, status->total_timespans, status->timespan_name);
+		break;
+	case ExportStatus::Uploading:
+		status_text = string_compose (_("Uploading '%3' (timespan %1 of %2)"),
+		                              status->timespan, status->total_timespans, status->timespan_name);
+		break;
+	case ExportStatus::Command:
+		status_text = string_compose (_("Running Post Export Command for '%1'"), status->timespan_name);
+		break;
 	}
+
 	progress_bar.set_text (status_text);
 
 	if (progress < previous_progress) {
@@ -358,7 +373,12 @@ ExportDialog::progress_timeout ()
 	}
 	previous_progress = progress;
 
-	progress_bar.set_fraction (progress);
+	if (progress >= 0) {
+		progress_bar.set_fraction (progress);
+	} else {
+		progress_bar.set_pulse_step(.1);
+		progress_bar.pulse();
+	}
 	return TRUE;
 }
 

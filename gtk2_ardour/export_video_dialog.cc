@@ -555,23 +555,36 @@ gint
 ExportVideoDialog::audio_progress_display ()
 {
 	std::string status_text;
-	double progress = 0.0;
-		if (status->normalizing) {
+	double progress = -1.0;
+	switch (status->active_job) {
+		case ExportStatus::Normalizing:
 			pbar.set_text (_("Normalizing audio"));
 			progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
-			progress = progress / (_twopass ? 4.0 : 3.0) + (_twopass ? .25 : 1.0/3.0);
-		} else {
+			progress = progress / (_twopass ? 4.0 : 3.0) + (_twopass ? .25 : 1.0 / 3.0);
+			break;
+		case ExportStatus::Exporting:
 			pbar.set_text (_("Exporting audio"));
 			progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
 			progress = progress / ((_twopass ? 2.0 : 1.0) + (_normalize ? 2.0 : 1.0));
-		}
-		if (progress < _previous_progress) {
-			// Work around gtk bug
-			pbar.hide();
-			pbar.show();
-		}
-		_previous_progress = progress;
+			break;
+		default:
+			pbar.set_text (_("Exporting audio"));
+			break;
+	}
+
+	if (progress < _previous_progress) {
+		// Work around gtk bug
+		pbar.hide();
+		pbar.show();
+	}
+	_previous_progress = progress;
+
+	if (progress >= 0) {
 		pbar.set_fraction (progress);
+	} else {
+		pbar.set_pulse_step(.1);
+		pbar.pulse();
+	}
 	return TRUE;
 }
 

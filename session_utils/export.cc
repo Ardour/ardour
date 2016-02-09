@@ -121,12 +121,19 @@ static int export_session (Session *session,
 	// TODO trap SIGINT -> status->abort();
 
 	while (status->running) {
-		if (status->normalizing) {
-			double progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
+		double progress = 0.0;
+		switch (status->active_job) {
+		case ExportStatus::Normalizing:
+			progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
 			printf ("* Normalizing %.1f%%      \r", 100. * progress); fflush (stdout);
-		} else {
-			double progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
+			break;
+		case ExportStatus::Exporting:
+			progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
 			printf ("* Exporting Audio %.1f%%  \r", 100. * progress); fflush (stdout);
+			break;
+		default:
+			printf ("* Exporting...            \r");
+			break;
 		}
 		Glib::usleep (1000000);
 	}
