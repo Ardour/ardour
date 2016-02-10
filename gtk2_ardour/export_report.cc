@@ -20,6 +20,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/stock.h>
 
+#include "gtkmm2ext/utils.h"
 #include "canvas/utils.h"
 #include "canvas/colors.h"
 
@@ -37,6 +38,10 @@ ExportReport::ExportReport (StatusPtr s)
 {
 
 	AnalysisResults & ar = status->result_map;
+
+	std::vector<double> dashes;
+	dashes.push_back (3.0);
+	dashes.push_back (5.0);
 
 	for (AnalysisResults::iterator i = ar.begin (); i != ar.end (); ++i) {
 		Label *l;
@@ -131,10 +136,6 @@ ExportReport::ExportReport (StatusPtr s)
 			cr->set_source_rgba (.9, .9, .9, 1.0);
 			layout->show_in_cairo_context (cr);
 
-			std::vector<double> dashes;
-			dashes.push_back (3.0);
-			dashes.push_back (5.0);
-
 			for (int g = -53; g <= -8; g += 5) {
 				// grid-lines. [110] -59LUFS .. [650]: -5 LUFS
 				layout->set_text (string_compose ("%1", g));
@@ -197,10 +198,56 @@ ExportReport::ExportReport (StatusPtr s)
 			}
 			cr->stroke ();
 
+			// zero line
 			cr->set_source_rgba (.3, .3, .3, 0.7);
 			cr->move_to (0, height_2 - .5);
 			cr->line_to (peaks, height_2 - .5);
 			cr->stroke ();
+
+			cr->set_dash (dashes, 2.0);
+			cr->set_line_cap (Cairo::LINE_CAP_ROUND);
+
+			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (get_pango_context ());
+			layout->set_alignment (Pango::ALIGN_LEFT);
+			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+			int w, h;
+
+			layout->set_text (_("dBFS"));
+			layout->get_pixel_size (w, h);
+			Gtkmm2ext::rounded_rectangle (cr,
+					5, rint (height_2 - w * .5 - 1), h + 2, w + 2, 4);
+			cr->set_source_rgba (.1, .1, .1, 0.5);
+			cr->fill ();
+			cr->move_to (6, rint (height_2 + w * .5));
+			cr->set_source_rgba (.9, .9, .9, 1.0);
+			cr->save ();
+			cr->rotate (M_PI / -2.0);
+			layout->show_in_cairo_context (cr);
+			cr->restore ();
+
+#define PEAKANNOTATION(POS, TXT) {                            \
+			const float yy = rint (POS);                            \
+			layout->set_text (TXT);                                 \
+			layout->get_pixel_size (w, h);                          \
+			cr->set_operator (Cairo::OPERATOR_OVER);                \
+			Gtkmm2ext::rounded_rectangle (cr,                       \
+			    5, rint ((POS) - h * .5 - 1), w + 2, h + 2, 4);     \
+			cr->set_source_rgba (.1, .1, .1, 0.5);                  \
+			cr->fill ();                                            \
+			cr->move_to (6, rint ((POS) - h * .5));                 \
+			cr->set_source_rgba (.9, .9, .9, 1.0);                  \
+			layout->show_in_cairo_context (cr);                     \
+			cr->move_to (8 + w, yy - .5);                           \
+			cr->line_to (peaks, yy - .5);                           \
+			cr->set_source_rgba (.3, .3, .3, 1.0);                  \
+			cr->set_operator (Cairo::OPERATOR_ADD);                 \
+			cr->stroke ();                                          \
+			}
+
+			PEAKANNOTATION (height_2 * 0.5, _("-6"));
+			PEAKANNOTATION (height_2 * 1.5, _("-6"));
+			PEAKANNOTATION (height_2 * 0.2921, _("-3"));
+			PEAKANNOTATION (height_2 * 1.7079, _("-3"));
 
 			wave->flush ();
 			CimgArea *wv = manage (new CimgArea (wave));
