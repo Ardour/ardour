@@ -604,6 +604,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\export_report.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\export_timespan_selector.cc"
 				>
 			</File>
@@ -1551,6 +1555,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\export_range_markers_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\export_report.h"
 				>
 			</File>
 			<File
