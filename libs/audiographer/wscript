@@ -64,6 +64,7 @@ def build(bld):
         'src/general/sample_format_converter.cc',
         'src/routines.cc',
         'src/debug_utils.cc',
+        'src/general/analyser.cc',
         'src/general/broadcast_info.cc',
         'src/general/normalizer.cc'
         ]
@@ -83,7 +84,7 @@ def build(bld):
     audiographer.name           = 'libaudiographer'
     audiographer.target         = 'audiographer'
     audiographer.export_includes = ['.', './src']
-    audiographer.includes       = ['.', './src']
+    audiographer.includes       = ['.', './src','../ardour','../timecode','../evoral']
     audiographer.uselib         = 'GLIB GLIBMM GTHREAD SAMPLERATE SNDFILE FFTW3F'
     audiographer.use            = 'libpbd'
     audiographer.vnum           = AUDIOGRAPHER_LIB_VERSION
