@@ -5506,13 +5506,9 @@ NoteDrag::motion (GdkEvent * event, bool)
 		 * odd with them. so show the note value anyway, always.
 		 */
 
-		char buf[12];
 		uint8_t new_note = min (max (_primary->note()->note() + note_delta, 0), 127);
 
-		snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (new_note).c_str(),
-		          (int) floor ((double)new_note));
-
-		show_verbose_cursor_text (buf);
+		_region->show_verbose_cursor_for_new_note_value (_primary->note(), new_note);
 	}
 }
 

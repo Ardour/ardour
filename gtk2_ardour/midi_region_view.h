@@ -337,6 +337,9 @@ public:
 
 	void note_deleted (NoteBase*);
 
+	void show_verbose_cursor_for_new_note_value(boost::shared_ptr<NoteType> current_note,
+	                                            uint8_t new_note) const;
+
 protected:
 	void region_resized (const PBD::PropertyChange&);
 
@@ -390,6 +393,8 @@ private:
 
 	void add_to_selection (NoteBase*);
 	void remove_from_selection (NoteBase*);
+
+	std::string get_note_name (boost::shared_ptr<NoteType> note, uint8_t note_value) const;
 
 	void show_verbose_cursor (std::string const &, double, double) const;
 	void show_verbose_cursor (boost::shared_ptr<NoteType>) const;

@@ -3997,11 +3997,10 @@ MidiRegionView::delete_sysex (SysEx* /*sysex*/)
 	// display_sysexes();
 }
 
-void
-MidiRegionView::show_verbose_cursor (boost::shared_ptr<NoteType> n) const
+std::string
+MidiRegionView::get_note_name (boost::shared_ptr<NoteType> n, uint8_t note_value) const
 {
 	using namespace MIDI::Name;
-
 	std::string name;
 
 	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
@@ -4014,19 +4013,36 @@ MidiRegionView::show_verbose_cursor (boost::shared_ptr<NoteType> n) const
 			                               n->channel(),
 			                               patch_key.bank(),
 			                               patch_key.program(),
-			                               n->note());
+			                               note_value);
 		}
-		mtv->set_note_highlight (n->note());
 	}
 
 	char buf[128];
 	snprintf (buf, sizeof (buf), "%d %s\nCh %d Vel %d",
-	          (int) n->note (),
-	          name.empty() ? Evoral::midi_note_name (n->note()).c_str() : name.c_str(),
+	          (int) note_value,
+	          name.empty() ? Evoral::midi_note_name (note_value).c_str() : name.c_str(),
 	          (int) n->channel() + 1,
 	          (int) n->velocity());
 
-	show_verbose_cursor(buf, 10, 20);
+	return buf;
+}
+
+void
+MidiRegionView::show_verbose_cursor_for_new_note_value(boost::shared_ptr<NoteType> current_note,
+                                                       uint8_t new_value) const
+{
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	if (mtv) {
+		mtv->set_note_highlight (new_value);
+	}
+
+	show_verbose_cursor(get_note_name(current_note, new_value), 10, 20);
+}
+
+void
+MidiRegionView::show_verbose_cursor (boost::shared_ptr<NoteType> n) const
+{
+	show_verbose_cursor_for_new_note_value(n, n->note());
 }
 
 void
