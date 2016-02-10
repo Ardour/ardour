@@ -24,6 +24,8 @@
 #include "canvas/utils.h"
 #include "canvas/colors.h"
 
+#include <pangomm/layout.h>
+
 #include "i18n.h"
 
 using namespace Gtk;
@@ -47,18 +49,57 @@ ExportReport::ExportReport (StatusPtr s)
 
 		ExportAnalysisPtr p = i->second;
 		if (i->second->have_loudness) {
-			// TODO loudness histogram, HBox
-			// TODO use cairo-widget and BIG numbers
-			l = manage (new Label(string_compose (_("Loudness: %1 LUFS"), p->loudness)));
-			vb->pack_start (*l);
-			l = manage (new Label(string_compose (_("Loudness Range: %1 LU"), p->loudness_range)));
-			vb->pack_start (*l);
+			Cairo::RefPtr<Cairo::ImageSurface> nums = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, 256, 128);
+			Cairo::RefPtr<Cairo::ImageSurface> hist = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, 540, 128);
+
+			Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (nums);
+			cr->rectangle (0, 0, 256, 128);
+			cr->set_source_rgba (0, 0, 0, 1.0);
+			cr->fill ();
+
+			int w, h;
+			Glib::RefPtr<Pango::Layout> _layout = Pango::Layout::create (get_pango_context());
+			//_layout->set_font_description (fd);
+			_layout->set_text (string_compose (_("Loudness: %1%2 LUFS"), std::setprecision(1), p->loudness));
+			_layout->get_pixel_size (w, h);
+			_layout->set_alignment(Pango::ALIGN_LEFT);
+			cr->move_to (6, 6);
+			cr->set_source_rgba (.7, .7, .7, 1.0);
+			_layout->show_in_cairo_context (cr);
+
+			_layout->set_text (string_compose (_("Range: %1%2 LU"), std::setprecision(1), p->loudness_range));
+			cr->move_to (6, 12 + h);
+			_layout->show_in_cairo_context (cr);
+			nums->flush ();
+
+			/* draw loudness histogram */
+			// TODO grid-lines.
+			cr = Cairo::Context::create (hist);
+			cr->rectangle (0, 0, 540, 128);
+			cr->set_source_rgba (0, 0, 0, 1.0);
+			cr->fill ();
+			cr->set_source_rgba (.7, .7, .7, 1.0);
+			cr->set_line_width (1.0);
+			for (size_t x = 0 ; x < 510; ++x) {
+				cr->move_to (x - .5, 128.0);
+				cr->line_to (x - .5, 128.0 - 128.0 * p->loudness_hist[x] / (float) p->loudness_hist_max);
+			}
+			cr->stroke ();
+
+			hist->flush ();
+			CimgArea *nu = manage (new CimgArea (nums));
+			CimgArea *hi = manage (new CimgArea (hist));
+			HBox *hb = manage (new HBox());
+			hb->set_spacing (4);
+			hb->pack_start (*nu);
+			hb->pack_start (*hi);
+			vb->pack_start (*hb);
 		}
 
 		{
 			// TODO re-use Canvas::WaveView::draw_image() somehow.
-			const size_t peaks = sizeof(p->_peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 2;
-			const float height_2 = 150.0;
+			const size_t peaks = sizeof(p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 2;
+			const float height_2 = 100.0;
 			Cairo::RefPtr<Cairo::ImageSurface> wave = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, peaks, 2 * height_2);
 			Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (wave);
 			cr->rectangle (0, 0, peaks, 2 * height_2);
@@ -67,8 +108,8 @@ ExportReport::ExportReport (StatusPtr s)
 			cr->set_source_rgba (.7, .7, .7, 1.0);
 			cr->set_line_width (1.0);
 			for (size_t x = 0 ; x < peaks; ++x) {
-				cr->move_to (x - .5, height_2 - height_2 * p->_peaks[x].max);
-				cr->line_to (x - .5, height_2 - height_2 * p->_peaks[x].min);
+				cr->move_to (x - .5, height_2 - height_2 * p->peaks[x].max);
+				cr->line_to (x - .5, height_2 - height_2 * p->peaks[x].min);
 			}
 			cr->stroke ();
 			wave->flush ();
@@ -80,7 +121,7 @@ ExportReport::ExportReport (StatusPtr s)
 		{
 			// TODO: get geometry from ExportAnalysis
 			const size_t width = 800;
-			const size_t height = 256;
+			const size_t height = 200;
 			Cairo::RefPtr<Cairo::ImageSurface> spec = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, width, height);
 			Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (spec);
 			cr->rectangle (0, 0, width, height);
@@ -88,7 +129,7 @@ ExportReport::ExportReport (StatusPtr s)
 			cr->fill ();
 			for (size_t x = 0 ; x < width; ++x) {
 				for (size_t y = 0 ; y < height; ++y) {
-					const float pk = p->_spectrum[x][y];
+					const float pk = p->spectrum[x][y];
 					ArdourCanvas::Color c = ArdourCanvas::hsva_to_color (252 - 260 * pk, .9, .3 + pk * .4);
 					ArdourCanvas::set_source_rgba (cr, c);
 					cr->rectangle (x - .5, y - .5, 1, 1);
