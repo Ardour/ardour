@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 #include "ardour/libardour_visibility.h"
+#include "ardour/export_analysis.h"
 #include "ardour/types.h"
 
 #include "pbd/signals.h"
@@ -78,6 +79,8 @@ class LIBARDOUR_API ExportStatus {
 
 	volatile uint32_t       total_normalize_cycles;
 	volatile uint32_t       current_normalize_cycle;
+
+	AnalysisResults         result_map;
 
   private:
 	volatile bool          _aborted;

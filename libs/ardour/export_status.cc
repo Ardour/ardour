@@ -52,6 +52,7 @@ ExportStatus::init ()
 
 	total_normalize_cycles = 0;
 	current_normalize_cycle = 0;
+	result_map.clear();
 }
 
 void

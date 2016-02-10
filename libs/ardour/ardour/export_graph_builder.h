@@ -22,6 +22,7 @@
 #define __ardour_export_graph_builder_h__
 
 #include "ardour/export_handler.h"
+#include "ardour/export_analysis.h"
 
 #include "audiographer/utils/identity_vertex.h"
 
@@ -32,6 +33,7 @@ namespace AudioGrapher {
 	class SampleRateConverter;
 	class PeakReader;
 	class Normalizer;
+	class Analyser;
 	template <typename T> class Chunker;
 	template <typename T> class SampleFormatConverter;
 	template <typename T> class Interleaver;
@@ -55,7 +57,9 @@ class LIBARDOUR_API ExportGraphBuilder
 
 	typedef boost::shared_ptr<AudioGrapher::Sink<Sample> > FloatSinkPtr;
 	typedef boost::shared_ptr<AudioGrapher::IdentityVertex<Sample> > IdentityVertexPtr;
+	typedef boost::shared_ptr<AudioGrapher::Analyser> AnalysisPtr;
 	typedef std::map<ExportChannelPtr,  IdentityVertexPtr> ChannelMap;
+	typedef std::map<std::string, AnalysisPtr> AnalysisMap;
 
   public:
 
@@ -71,8 +75,13 @@ class LIBARDOUR_API ExportGraphBuilder
 	void cleanup (bool remove_out_files = false);
 	void set_current_timespan (boost::shared_ptr<ExportTimespan> span);
 	void add_config (FileSpec const & config);
+	void get_analysis_results (AnalysisResults& results);
 
   private:
+
+	void add_analyser (const std::string& fn, AnalysisPtr ap) {
+		analysis_map.insert (std::make_pair (fn, ap));
+	}
 
 	void add_split_config (FileSpec const & config);
 
@@ -125,6 +134,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		boost::ptr_list<Encoder> children;
 		int                data_width;
 
+		AnalysisPtr     analyser;
 		// Only one of these should be available at a time
 		FloatConverterPtr float_converter;
 		IntConverterPtr int_converter;
@@ -244,6 +254,8 @@ class LIBARDOUR_API ExportGraphBuilder
 	framecnt_t process_buffer_frames;
 
 	std::list<Normalizer *> normalizers;
+
+	AnalysisMap analysis_map;
 
 	Glib::ThreadPool thread_pool;
 };

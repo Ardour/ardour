@@ -295,11 +295,12 @@ ExportHandler::command_output(std::string output, size_t size)
 void
 ExportHandler::finish_timespan ()
 {
+	graph_builder->get_analysis_results (export_status->result_map);
+
 	while (config_map.begin() != timespan_bounds.second) {
 
 		ExportFormatSpecPtr fmt = config_map.begin()->second.format;
 		std::string filename = config_map.begin()->second.filename->get_path(fmt);
-
 		if (fmt->with_cue()) {
 			export_cd_marker_file (current_timespan, fmt, filename, CDMarkerCUE);
 		}
@@ -312,15 +313,17 @@ ExportHandler::finish_timespan ()
 			export_cd_marker_file (current_timespan, fmt, filename, MP4Chaps);
 		}
 
+		/* close file first, otherwise TagLib enounters an ERROR_SHARING_VIOLATION
+		 * The process cannot access the file because it is being used.
+		 * ditto for post-export and upload.
+		 */
+		graph_builder->reset ();
+
 		if (fmt->tag()) {
-			/* close file first, otherwise TagLib enounters an ERROR_SHARING_VIOLATION
-			 * The process cannot access the file because it is being used.
-			 *
-			 * TODO: check Umlauts and encoding in filename.
+			/* TODO: check Umlauts and encoding in filename.
 			 * TagLib eventually calls CreateFileA(),
 			 */
 			export_status->active_job = ExportStatus::Tagging;
-			graph_builder->reset ();
 			AudiofileTagger::tag_file(filename, *SessionMetadata::Metadata());
 		}
 

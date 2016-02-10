@@ -28,6 +28,7 @@
 #include "audiographer/general/chunker.h"
 #include "audiographer/general/interleaver.h"
 #include "audiographer/general/normalizer.h"
+#include "audiographer/general/analyser.h"
 #include "audiographer/general/peak_reader.h"
 #include "audiographer/general/sample_format_converter.h"
 #include "audiographer/general/sr_converter.h"
@@ -110,6 +111,7 @@ ExportGraphBuilder::reset ()
 	channel_configs.clear ();
 	channels.clear ();
 	normalizers.clear ();
+	analysis_map.clear();
 }
 
 void
@@ -170,6 +172,16 @@ ExportGraphBuilder::add_config (FileSpec const & config)
 		copy.filename->set_channel (chan);
 
 		add_split_config (copy);
+	}
+}
+
+void
+ExportGraphBuilder::get_analysis_results (AnalysisResults& results) {
+	for (AnalysisMap::iterator i = analysis_map.begin(); i != analysis_map.end(); ++i) {
+		ExportAnalysisPtr p = i->second->result ();
+		if (p) {
+			results.insert (std::make_pair (i->first, p));
+		}
 	}
 }
 
@@ -287,39 +299,39 @@ ExportGraphBuilder::Encoder::copy_files (std::string orig_path)
 
 /* SFC */
 
-ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &, FileSpec const & new_config, framecnt_t max_frames)
+ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_config, framecnt_t max_frames)
 	: data_width(0)
 {
 	config = new_config;
 	data_width = sndfile_data_width (Encoder::get_real_format (config));
 	unsigned channels = new_config.channel_config->get_n_chans();
+	analyser.reset (new Analyser (config.format->sample_rate(), channels, max_frames,
+				(framecnt_t) ceil (parent.timespan->get_length () * config.format->sample_rate () / (double) parent.session.nominal_frame_rate ())));
+	parent.add_analyser (config.filename->get_path (config.format), analyser);
 
 	if (data_width == 8 || data_width == 16) {
 		short_converter = ShortConverterPtr (new SampleFormatConverter<short> (channels));
 		short_converter->init (max_frames, config.format->dither_type(), data_width);
 		add_child (config);
+		analyser->add_output (short_converter);
 	} else if (data_width == 24 || data_width == 32) {
 		int_converter = IntConverterPtr (new SampleFormatConverter<int> (channels));
 		int_converter->init (max_frames, config.format->dither_type(), data_width);
 		add_child (config);
+		analyser->add_output (int_converter);
 	} else {
 		int actual_data_width = 8 * sizeof(Sample);
 		float_converter = FloatConverterPtr (new SampleFormatConverter<Sample> (channels));
 		float_converter->init (max_frames, config.format->dither_type(), actual_data_width);
 		add_child (config);
+		analyser->add_output (float_converter);
 	}
 }
 
 ExportGraphBuilder::FloatSinkPtr
 ExportGraphBuilder::SFC::sink ()
 {
-	if (data_width == 8 || data_width == 16) {
-		return short_converter;
-	} else if (data_width == 24 || data_width == 32) {
-		return int_converter;
-	} else {
-		return float_converter;
-	}
+	return analyser;
 }
 
 void
