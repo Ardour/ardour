@@ -837,7 +837,7 @@ then
 		echo ""
 		echo "!!! WARNING !!! - Your system seems to use frequency scaling."
 		echo "This can have a serious impact on audio latency."
-		echo "For best results turn it off, e.g. by chosing the 'performance' governor."
+		echo "For best results turn it off, e.g. by choosing the 'performance' governor."
 		echo ""
 		read -p "Press ENTER to continue:" BLAH
 	fi
