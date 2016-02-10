@@ -104,6 +104,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	, _editor (ed)
 	, name_entry (0)
 	, ending_name_edit (false)
+	, by_popup_menu (false)
 	, control_parent (0)
 	, _order (0)
 	, _effective_height (0)
@@ -652,8 +653,18 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 bool
 TimeAxisView::name_entry_focus_out (GdkEventFocus*)
 {
+	if (by_popup_menu) {
+		by_popup_menu = false;
+		return false;
+	}
 	end_name_edit (RESPONSE_OK);
 	return false;
+}
+
+void
+TimeAxisView::name_entry_populate_popup (Gtk::Menu *)
+{
+	by_popup_menu = true;
 }
 
 void
@@ -675,6 +686,7 @@ TimeAxisView::begin_name_edit ()
 		name_entry->signal_focus_out_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_out));
 		name_entry->set_text (name_label.get_text());
 		name_entry->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisView::end_name_edit), RESPONSE_OK));
+		name_entry->signal_populate_popup().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_populate_popup));
 
 		if (name_label.is_ancestor (name_hbox)) {
 			name_hbox.remove (name_label);
