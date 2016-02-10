@@ -16,15 +16,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "export_report.h"
-
+#include <pangomm/layout.h>
 #include <gtkmm/label.h>
 #include <gtkmm/stock.h>
 
 #include "canvas/utils.h"
 #include "canvas/colors.h"
 
-#include <pangomm/layout.h>
+#include "ui_config.h"
+#include "export_report.h"
 
 #include "i18n.h"
 
@@ -37,18 +37,21 @@ ExportReport::ExportReport (StatusPtr s)
 {
 
 	AnalysisResults & ar = status->result_map;
-	//size_t n_results = ar.size();
 
-	for (AnalysisResults::iterator i = ar.begin(); i != ar.end(); ++i) {
+	for (AnalysisResults::iterator i = ar.begin (); i != ar.end (); ++i) {
 		Label *l;
-		VBox *vb = manage (new VBox());
+		VBox *vb = manage (new VBox ());
 		vb->set_spacing (6);
 
-		l = manage (new Label(string_compose (_("File: %1"), i->first)));
+		l = manage (new Label (string_compose (_("File: %1"), i->first)));
 		vb->pack_start (*l);
 
 		ExportAnalysisPtr p = i->second;
+
 		if (i->second->have_loudness) {
+			/* EBU R128 loudness numerics and histogram */
+			int w, h;
+			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (get_pango_context ());
 			Cairo::RefPtr<Cairo::ImageSurface> nums = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, 256, 128);
 			Cairo::RefPtr<Cairo::ImageSurface> hist = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, 540, 128);
 
@@ -57,39 +60,119 @@ ExportReport::ExportReport (StatusPtr s)
 			cr->set_source_rgba (0, 0, 0, 1.0);
 			cr->fill ();
 
-			int w, h;
-			Glib::RefPtr<Pango::Layout> _layout = Pango::Layout::create (get_pango_context());
-			//_layout->set_font_description (fd);
-			_layout->set_text (string_compose (_("Loudness: %1%2 LUFS"), std::setprecision(1), p->loudness));
-			_layout->get_pixel_size (w, h);
-			_layout->set_alignment(Pango::ALIGN_LEFT);
-			cr->move_to (6, 6);
-			cr->set_source_rgba (.7, .7, .7, 1.0);
-			_layout->show_in_cairo_context (cr);
+			layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+			layout->set_alignment (Pango::ALIGN_LEFT);
+			layout->set_text (_("Ebu R128"));
+			layout->get_pixel_size (w, h);
 
-			_layout->set_text (string_compose (_("Range: %1%2 LU"), std::setprecision(1), p->loudness_range));
-			cr->move_to (6, 12 + h);
-			_layout->show_in_cairo_context (cr);
+			cr->save ();
+			cr->set_source_rgba (.5, .5, .5, 1.0);
+			cr->move_to (6, rint (64 + w * .5));
+			cr->rotate (M_PI / -2.0);
+			layout->show_in_cairo_context (cr);
+			cr->restore ();
+
+			cr->set_source_rgba (.7, .7, .7, 1.0);
+
+			if (p->loudness == -200 &&  p->loudness_range == 0) {
+				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
+				layout->set_text (string_compose (_("not available"), std::setprecision (1), std::fixed,  p->loudness));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (128 - w * .5), rint (64 - h));
+				layout->show_in_cairo_context (cr);
+
+				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				layout->set_text (_("(too short integration time)"));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (128 - w * .5), rint (64 + h));
+				layout->show_in_cairo_context (cr);
+
+			} else {
+				int y0 = 6;
+				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				layout->set_text (string_compose (_("Loudness:"), std::setprecision (1), std::fixed,  p->loudness));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (128 - w * .5), y0);
+				layout->show_in_cairo_context (cr);
+				y0 += h * 1.25;
+
+				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
+				layout->set_text (string_compose (_("%1%2%3 LUFS"), std::setprecision (1), std::fixed,  p->loudness));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (128 - w * .5), y0);
+				layout->show_in_cairo_context (cr);
+				y0 += h * 1.5;
+
+				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				layout->set_text (string_compose (_("Loudness Range:"), std::setprecision (1), std::fixed,  p->loudness));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (128 - w * .5), y0);
+				layout->show_in_cairo_context (cr);
+				y0 += h * 1.25;
+
+				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
+				layout->set_text (string_compose (_("%1%2%3 LU"), std::setprecision (1), std::fixed, p->loudness_range));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (128 - w * .5), y0);
+				layout->show_in_cairo_context (cr);
+			}
 			nums->flush ();
 
 			/* draw loudness histogram */
-			// TODO grid-lines.
 			cr = Cairo::Context::create (hist);
 			cr->rectangle (0, 0, 540, 128);
 			cr->set_source_rgba (0, 0, 0, 1.0);
 			cr->fill ();
+
+			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+			layout->set_alignment (Pango::ALIGN_LEFT);
+			layout->set_text (_("LUFS"));
+			cr->move_to (6, 6);
+			cr->set_source_rgba (.9, .9, .9, 1.0);
+			layout->show_in_cairo_context (cr);
+
+			std::vector<double> dashes;
+			dashes.push_back (3.0);
+			dashes.push_back (5.0);
+
+			for (int g = -53; g <= -8; g += 5) {
+				// grid-lines. [110] -59LUFS .. [650]: -5 LUFS
+				layout->set_text (string_compose ("%1", g));
+				layout->get_pixel_size (w, h);
+
+				cr->save ();
+				cr->set_source_rgba (.9, .9, .9, 1.0);
+				cr->move_to (rint ((g + 59.0) * 10.0 - h * .5), w + 6.0);
+				cr->rotate (M_PI / -2.0);
+				layout->show_in_cairo_context (cr);
+				cr->restore ();
+
+				cr->save ();
+				cr->set_source_rgba (.3, .3, .3, 1.0);
+				cr->set_dash (dashes, 1.0);
+				cr->set_line_cap (Cairo::LINE_CAP_ROUND);
+				cr->move_to (rint ((g + 59.0) * 10.0) + .5, w + 8.0);
+				cr->line_to (rint ((g + 59.0) * 10.0) + .5, 128.0);
+				cr->stroke ();
+				cr->restore ();
+			}
+
+			cr->set_operator (Cairo::OPERATOR_ADD);
 			cr->set_source_rgba (.7, .7, .7, 1.0);
 			cr->set_line_width (1.0);
-			for (size_t x = 0 ; x < 510; ++x) {
-				cr->move_to (x - .5, 128.0);
-				cr->line_to (x - .5, 128.0 - 128.0 * p->loudness_hist[x] / (float) p->loudness_hist_max);
+
+			if (p->loudness_hist_max > 0) {
+				for (size_t x = 0 ; x < 510; ++x) {
+					cr->move_to (x - .5, 128.0);
+					cr->line_to (x - .5, 128.0 - 128.0 * p->loudness_hist[x] / (float) p->loudness_hist_max);
+					cr->stroke ();
+				}
 			}
-			cr->stroke ();
 
 			hist->flush ();
 			CimgArea *nu = manage (new CimgArea (nums));
 			CimgArea *hi = manage (new CimgArea (hist));
-			HBox *hb = manage (new HBox());
+			HBox *hb = manage (new HBox ());
 			hb->set_spacing (4);
 			hb->pack_start (*nu);
 			hb->pack_start (*hi);
@@ -97,8 +180,9 @@ ExportReport::ExportReport (StatusPtr s)
 		}
 
 		{
+			/* draw waveform */
 			// TODO re-use Canvas::WaveView::draw_image() somehow.
-			const size_t peaks = sizeof(p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 2;
+			const size_t peaks = sizeof (p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 2;
 			const float height_2 = 100.0;
 			Cairo::RefPtr<Cairo::ImageSurface> wave = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, peaks, 2 * height_2);
 			Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (wave);
@@ -112,16 +196,22 @@ ExportReport::ExportReport (StatusPtr s)
 				cr->line_to (x - .5, height_2 - height_2 * p->peaks[x].min);
 			}
 			cr->stroke ();
-			wave->flush ();
 
+			cr->set_source_rgba (.3, .3, .3, 0.7);
+			cr->move_to (0, height_2 - .5);
+			cr->line_to (peaks, height_2 - .5);
+			cr->stroke ();
+
+			wave->flush ();
 			CimgArea *wv = manage (new CimgArea (wave));
 			vb->pack_start (*wv);
 		}
 
 		{
-			// TODO: get geometry from ExportAnalysis
-			const size_t width = 800;
-			const size_t height = 200;
+			const size_t swh = sizeof (p->spectrum) / sizeof (float);
+			const size_t height = sizeof (p->spectrum[0]) / sizeof (float);
+			const size_t width = swh / height;
+
 			Cairo::RefPtr<Cairo::ImageSurface> spec = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, width, height);
 			Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (spec);
 			cr->rectangle (0, 0, width, height);
@@ -142,7 +232,7 @@ ExportReport::ExportReport (StatusPtr s)
 		}
 
 		// TODO ellipsize tab-text
-		pages.pages().push_back (Notebook_Helpers::TabElem (*vb, Glib::path_get_basename (i->first)));
+		pages.pages ().push_back (Notebook_Helpers::TabElem (*vb, Glib::path_get_basename (i->first)));
 	}
 
 	pages.set_show_tabs (true);
@@ -150,13 +240,13 @@ ExportReport::ExportReport (StatusPtr s)
 	pages.set_name ("ExportReportNotebook");
 	pages.set_current_page (0);
 
-	get_vbox()->set_spacing (12);
-	get_vbox()->pack_start (pages);
+	get_vbox ()->set_spacing (12);
+	get_vbox ()->pack_start (pages);
 
 	add_button (Stock::CLOSE, RESPONSE_ACCEPT);
 	set_default_response (RESPONSE_ACCEPT);
 	show_all ();
-	//pages.signal_switch_page().connect (sigc::mem_fun (*this, &ExportReport::handle_page_change));
+	//pages.signal_switch_page ().connect (sigc::mem_fun (*this, &ExportReport::handle_page_change));
 }
 
 int
