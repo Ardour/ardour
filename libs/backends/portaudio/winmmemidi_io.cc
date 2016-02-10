@@ -216,9 +216,17 @@ WinMMEMidiIO::get_input_name_from_index (int index, std::string& name)
 {
 	MIDIINCAPS capabilities;
 	MMRESULT result = midiInGetDevCaps(index, &capabilities, sizeof(capabilities));
+
 	if (result == MMSYSERR_NOERROR) {
+		DEBUG_MIDI(string_compose("Input Device: name : %1, mid : %2, pid : %3\n",
+		                          capabilities.szPname,
+		                          capabilities.wMid,
+		                          capabilities.wPid));
+
 		name = capabilities.szPname;
 		return true;
+	} else {
+		DEBUG_MIDI ("Unable to get WinMME input device capabilities\n");
 	}
 	return false;
 }
@@ -229,8 +237,14 @@ WinMMEMidiIO::get_output_name_from_index (int index, std::string& name)
 	MIDIOUTCAPS capabilities;
 	MMRESULT result = midiOutGetDevCaps(index, &capabilities, sizeof(capabilities));
 	if (result == MMSYSERR_NOERROR) {
+		DEBUG_MIDI(string_compose("Output Device: name : %1, mid : %2, pid : %3\n",
+		                          capabilities.szPname,
+		                          capabilities.wMid,
+		                          capabilities.wPid));
 		name = capabilities.szPname;
 		return true;
+	} else {
+		DEBUG_MIDI ("Unable to get WinMME output device capabilities\n");
 	}
 	return false;
 }
