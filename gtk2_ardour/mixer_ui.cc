@@ -2011,7 +2011,7 @@ Mixer_UI::parameter_changed (string const & p)
 	} else if (p == "remote-model") {
 		reset_remote_control_ids ();
 	} else if (p == "use-monitor-bus") {
-		if (!_session->monitor_out()) {
+		if (_session && !_session->monitor_out()) {
 			monitor_section_detached ();
 		}
 	}
