@@ -28,6 +28,7 @@
 #include "ardour/export_handler.h"
 
 #include "export_dialog.h"
+#include "export_report.h"
 #include "gui_thread.h"
 #include "nag.h"
 
@@ -318,7 +319,16 @@ ExportDialog::show_progress ()
 		}
 	}
 
+	status->finish ();
+
+	if (!status->aborted() && status->result_map.size() > 0) {
+		hide();
+		ExportReport er (status);
+		er.run();
+	}
+
 	if (!status->aborted()) {
+		hide();
 
 		NagScreen* ns = NagScreen::maybe_nag (_("export"));
 
@@ -329,8 +339,6 @@ ExportDialog::show_progress ()
 	} else {
 		notify_errors ();
 	}
-
-	status->finish ();
 }
 
 gint

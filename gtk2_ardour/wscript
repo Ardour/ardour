@@ -97,6 +97,7 @@ gtk2_ardour_sources = [
         'export_format_dialog.cc',
         'export_format_selector.cc',
         'export_preset_selector.cc',
+        'export_report.cc',
         'export_timespan_selector.cc',
         'fft.cc',
         'fft_graph.cc',
