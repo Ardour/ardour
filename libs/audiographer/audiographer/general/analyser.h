@@ -55,6 +55,7 @@ class /*LIBAUDIOGRAPHER_API*/ Analyser : public ListedSource<float>, public Sink
 	framecnt_t   _n_samples;
 	framecnt_t   _pos;
 	framecnt_t   _spp;
+	framecnt_t   _fpp;
 
 	float* _bufs[2];
 

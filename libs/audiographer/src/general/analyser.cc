@@ -30,26 +30,32 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 	, _pos (0)
 {
 	assert (bufsize % channels == 0);
-	//printf("NEW ANALYSER %p r:%.1f c:%d f:%ld l%ld\n", this, sample_rate, channels, bufsize, n_samples);
+	//printf ("NEW ANALYSER %p r:%.1f c:%d f:%ld l%ld\n", this, sample_rate, channels, bufsize, n_samples);
 	if (channels > 0 && channels <= 2) {
 		using namespace Vamp::HostExt;
-		PluginLoader* loader (PluginLoader::getInstance());
+		PluginLoader* loader (PluginLoader::getInstance ());
 		_ebur128_plugin = loader->loadPlugin ("libardourvampplugins:ebur128", sample_rate, PluginLoader::ADAPT_ALL_SAFE);
 		assert (_ebur128_plugin);
 		_ebur128_plugin->reset ();
 		_ebur128_plugin->initialise (channels, _bufsize, _bufsize);
 	}
-	_bufs[0] = (float*) malloc (sizeof(float) * _bufsize);
-	_bufs[1] = (float*) malloc (sizeof(float) * _bufsize);
-	const size_t peaks = sizeof(_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 2;
+	_bufs[0] = (float*) malloc (sizeof (float) * _bufsize);
+	_bufs[1] = (float*) malloc (sizeof (float) * _bufsize);
+
+	const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 2;
 	_spp = ceil ((_n_samples + 1.f) / (float) peaks);
+
+	const size_t swh = sizeof (_result.spectrum) / sizeof (float);
+	const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
+	const size_t width = swh / height;
+	_fpp = ceil ((_n_samples + 1.f) / (float) width);
 
 	_fft_data_size   = _bufsize / 2;
 	_fft_freq_per_bin = sample_rate / _fft_data_size / 2.f;
 
-	_fft_data_in  = (float *) fftwf_malloc (sizeof(float) * _bufsize);
-	_fft_data_out = (float *) fftwf_malloc (sizeof(float) * _bufsize);
-	_fft_power    = (float *) malloc (sizeof(float) * _fft_data_size);
+	_fft_data_in  = (float *) fftwf_malloc (sizeof (float) * _bufsize);
+	_fft_data_out = (float *) fftwf_malloc (sizeof (float) * _bufsize);
+	_fft_power    = (float *) malloc (sizeof (float) * _fft_data_size);
 
 	for (uint32_t i = 0; i < _fft_data_size; ++i) {
 		_fft_power[i] = 0;
@@ -60,7 +66,7 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 
 	_fft_plan = fftwf_plan_r2r_1d (_bufsize, _fft_data_in, _fft_data_out, FFTW_R2HC, FFTW_MEASURE);
 
-	_hann_window = (float *) malloc(sizeof(float) * _bufsize);
+	_hann_window = (float *) malloc (sizeof (float) * _bufsize);
 	double sum = 0.0;
 
 	for (uint32_t i = 0; i < _bufsize; ++i) {
@@ -88,10 +94,10 @@ Analyser::~Analyser ()
 void
 Analyser::process (ProcessContext<float> const & c)
 {
-	framecnt_t n_samples = c.frames() / c.channels();
-	assert (c.frames() % c.channels() == 0);
+	framecnt_t n_samples = c.frames () / c.channels ();
+	assert (c.frames () % c.channels () == 0);
 	assert (n_samples <= _bufsize);
-	//printf("PROC %p @%ld F: %ld, S: %ld C:%d\n", this, _pos, c.frames(), n_samples, c.channels());
+	//printf ("PROC %p @%ld F: %ld, S: %ld C:%d\n", this, _pos, c.frames (), n_samples, c.channels ());
 	float const * d = c.data ();
 	framecnt_t s;
 	for (s = 0; s < n_samples; ++s) {
@@ -127,43 +133,50 @@ Analyser::process (ProcessContext<float> const & c)
 #undef FRe
 #undef FIm
 
-	// TODO: get geometry from  ExportAnalysis
-	const framecnt_t x0 = _pos / _spp;
-	const framecnt_t x1 = (_pos + n_samples) / _spp;
+	const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
+	const framecnt_t x0 = _pos / _fpp;
+	framecnt_t x1 = (_pos + n_samples) / _fpp;
+	if (x0 == x1) x1 = x0 + 1;
 	const float range = 80; // dB
-	const double ypb = 200.0 / _fft_data_size;
 
 	for (uint32_t i = 1; i < _fft_data_size - 1; ++i) {
 		const float level = fft_power_at_bin (i, i);
 		if (level < -range) continue;
 		const float pk = level > 0.0 ? 1.0 : (range + level) / range;
-		const uint32_t y = 200 - ceil (i * ypb); // log-y?
-		assert (y < 200);
+#if 0 // linear
+		const uint32_t y0 = height - ceil (i * (float) height / _fft_data_size);
+		uint32_t y1= height - ceil (i * (float) height / _fft_data_size);
+#else // logscale
+		const uint32_t y0 = height - ceilf (height * logf (1.f + .02f * i) / logf (1.f + .02f * _fft_data_size));
+		uint32_t y1 = height - ceilf (height * logf (1.f + .02f * (i + 1.f)) / logf (1.f + .02f * _fft_data_size));
+#endif
+		if (y0 == y1 && y0 > 0) y1 = y0 - 1;
 		for (int x = x0; x < x1; ++x) {
-			assert (x >= 0 && x < 800);
-			if (_result.spectrum[x][y] < pk) { _result.spectrum[x][y] = pk; }
+			for (uint32_t y = y0; y > y1; --y) {
+				if (_result.spectrum[x][y] < pk) { _result.spectrum[x][y] = pk; }
+			}
 		}
 	}
 
 	_pos += n_samples;
 
 	/* pass audio audio through */
-	ListedSource<float>::output(c);
+	ListedSource<float>::output (c);
 }
 
 ARDOUR::ExportAnalysisPtr
 Analyser::result ()
 {
-	//printf("PROCESSED %ld / %ld samples\n", _pos, _n_samples);
+	//printf ("PROCESSED %ld / %ld samples\n", _pos, _n_samples);
 	if (_pos == 0) {
 		return ARDOUR::ExportAnalysisPtr ();
 	}
 	if (_ebur128_plugin) {
 		Vamp::Plugin::FeatureSet features = _ebur128_plugin->getRemainingFeatures ();
-		if (!features.empty() && features.size() == 3) {
+		if (!features.empty () && features.size () == 3) {
 			_result.loudness = features[0][0].values[0];
 			_result.loudness_range = features[1][0].values[0];
-			assert (features[2][0].values.size() == 540);
+			assert (features[2][0].values.size () == 540);
 			for (int i = 0; i < 540; ++i) {
 				_result.loudness_hist[i] = features[2][0].values[i];
 				if (_result.loudness_hist[i] > _result.loudness_hist_max) {
@@ -179,5 +192,5 @@ float
 Analyser::fft_power_at_bin (const uint32_t b, const float norm) const
 {
 	const float a = _fft_power[b] * norm;
-	return a > 1e-12 ? 10.0 * fast_log10(a) : -INFINITY;
+	return a > 1e-12 ? 10.0 * fast_log10 (a) : -INFINITY;
 }
