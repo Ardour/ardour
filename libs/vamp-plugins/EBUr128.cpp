@@ -111,7 +111,7 @@ VampEBUr128::getOutputDescriptors() const
     OutputDescriptor zc;
     zc.identifier = "loundless";
     zc.name = "Integrated loudness";
-    zc.description = "Integrated loudness";
+    zc.description = "Integrated Loudness";
     zc.unit = "LUFS";
     zc.hasFixedBinCount = true;
     zc.binCount = 0;
@@ -121,10 +121,21 @@ VampEBUr128::getOutputDescriptors() const
     list.push_back(zc);
 
     zc.identifier = "range";
-    zc.name = "Integrated loudness Range";
-    zc.description = "Dynamic Range of the audio";
+    zc.name = "Integrated Loudness Range";
+    zc.description = "Dynamic Range of the Audio";
     zc.unit = "LU";
     zc.hasFixedBinCount = true;
+    zc.binCount = 0;
+    zc.hasKnownExtents = false;
+    zc.isQuantized = false;
+    zc.sampleType = OutputDescriptor::OneSamplePerStep;
+    list.push_back(zc);
+
+    zc.identifier = "histogram";
+    zc.name = "Loudness Histogram";
+    zc.description = "Dynamic Range of the audio";
+    zc.unit = "";
+    zc.hasFixedBinCount = false;
     zc.binCount = 0;
     zc.hasKnownExtents = false;
     zc.isQuantized = false;
@@ -165,6 +176,14 @@ VampEBUr128::getRemainingFeatures()
     range.hasTimestamp = false;
     range.values.push_back(ebu.range_max () - ebu.range_min ());
     returnFeatures[1].push_back(range);
+
+    Feature hist;
+    hist.hasTimestamp = false;
+    const int * hist_M = ebu.histogram_M();
+    for (int i = 110; i < 650; ++i) {
+	hist.values.push_back(hist_M[i]);
+    }
+    returnFeatures[2].push_back(hist);
 
     return returnFeatures;
 }

@@ -31,26 +31,33 @@ namespace ARDOUR {
 		ExportAnalysis ()
 			: loudness (0)
 			, loudness_range (0)
+			, loudness_hist_max (0)
 			, have_loudness (false)
 		{
-			memset (_peaks, 0, sizeof(_peaks));
-			memset (_spectrum, 0, sizeof(_spectrum));
+			memset (peaks, 0, sizeof(peaks));
+			memset (spectrum, 0, sizeof(spectrum));
+			memset (loudness_hist, 0, sizeof(loudness_hist));
 		}
 
 		ExportAnalysis (const ExportAnalysis& other)
 			: loudness (other.loudness)
 			, loudness_range (other.loudness_range)
+			, loudness_hist_max (other.loudness_hist_max)
 			, have_loudness (other.have_loudness)
 		{
-			memcpy (_peaks, other._peaks, sizeof(_peaks));
-			memcpy (_spectrum, other._spectrum, sizeof(_spectrum));
+			memcpy (peaks, other.peaks, sizeof(peaks));
+			memcpy (spectrum, other.spectrum, sizeof(spectrum));
+			memcpy (loudness_hist, other.loudness_hist, sizeof(loudness_hist));
 		}
 
 		float loudness;
 		float loudness_range;
+		int loudness_hist[540];
+		int loudness_hist_max;
 		bool have_loudness;
-		PeakData _peaks[800];
-		float _spectrum[800][256];
+
+		PeakData peaks[800];
+		float spectrum[800][200];
 	};
 
 	typedef boost::shared_ptr<ExportAnalysis> ExportAnalysisPtr;
