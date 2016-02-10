@@ -33,10 +33,12 @@ namespace ARDOUR {
 			, loudness_range (0)
 			, loudness_hist_max (0)
 			, have_loudness (false)
+			, n_channels (1)
 		{
 			memset (peaks, 0, sizeof(peaks));
 			memset (spectrum, 0, sizeof(spectrum));
 			memset (loudness_hist, 0, sizeof(loudness_hist));
+			memset (freq, 0, sizeof(freq));
 		}
 
 		ExportAnalysis (const ExportAnalysis& other)
@@ -44,10 +46,12 @@ namespace ARDOUR {
 			, loudness_range (other.loudness_range)
 			, loudness_hist_max (other.loudness_hist_max)
 			, have_loudness (other.have_loudness)
+			, n_channels (other.n_channels)
 		{
 			memcpy (peaks, other.peaks, sizeof(peaks));
 			memcpy (spectrum, other.spectrum, sizeof(spectrum));
 			memcpy (loudness_hist, other.loudness_hist, sizeof(loudness_hist));
+			memcpy (freq, other.freq, sizeof(freq));
 		}
 
 		float loudness;
@@ -56,7 +60,10 @@ namespace ARDOUR {
 		int loudness_hist_max;
 		bool have_loudness;
 
-		PeakData peaks[800];
+		uint32_t n_channels;
+		uint32_t freq[6]; // y-pos, 50, 100, 500, 1k, 5k, 10k [Hz]
+
+		PeakData peaks[2][800];
 		float spectrum[800][200];
 	};
 

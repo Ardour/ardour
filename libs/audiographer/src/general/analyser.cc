@@ -42,7 +42,7 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 	_bufs[0] = (float*) malloc (sizeof (float) * _bufsize);
 	_bufs[1] = (float*) malloc (sizeof (float) * _bufsize);
 
-	const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 2;
+	const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
 	_spp = ceil ((_n_samples + 1.f) / (float) peaks);
 
 	const size_t swh = sizeof (_result.spectrum) / sizeof (float);
@@ -64,6 +64,20 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 		_fft_data_out[i] = 0;
 	}
 
+	const float nyquist = (sample_rate * .5);
+#if 0 // linear
+#define YPOS(FREQ) ceil (height * (1.0 - FREQ / nyquist))
+#else
+#define YPOS(FREQ) ceil (height * (1 - logf (1.f + .1f * _fft_data_size * FREQ / nyquist) / logf (1.f + .1f * _fft_data_size)))
+#endif
+
+	_result.freq[0] = YPOS (50);
+	_result.freq[1] = YPOS (100);
+	_result.freq[2] = YPOS (500);
+	_result.freq[3] = YPOS (1000);
+	_result.freq[4] = YPOS (5000);
+	_result.freq[5] = YPOS (10000);
+
 	_fft_plan = fftwf_plan_r2r_1d (_bufsize, _fft_data_in, _fft_data_out, FFTW_R2HC, FFTW_MEASURE);
 
 	_hann_window = (float *) malloc (sizeof (float) * _bufsize);
@@ -76,6 +90,12 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 	const double isum = 2.0 / sum;
 	for (uint32_t i = 0; i < _bufsize; ++i) {
 		_hann_window[i] *= isum;
+	}
+
+	if (channels == 2) {
+		_result.n_channels = 2;
+	} else {
+		_result.n_channels = 1;
 	}
 }
 
@@ -106,25 +126,28 @@ Analyser::process (ProcessContext<float> const & c)
 		for (unsigned int c = 0; c < _channels; ++c) {
 			const float v = *d;
 			_bufs[c][s] = v;
-			if (_result.peaks[pk].min > v) { _result.peaks[pk].min = *d; }
-			if (_result.peaks[pk].max < v) { _result.peaks[pk].max = *d; }
+			const unsigned int cc = c % _result.n_channels; // TODO optimize
+			if (_result.peaks[cc][pk].min > v) { _result.peaks[cc][pk].min = *d; }
+			if (_result.peaks[cc][pk].max < v) { _result.peaks[cc][pk].max = *d; }
 			_fft_data_in[s] += v * _hann_window[s] / (float) _channels;
 			++d;
 		}
 	}
+
 	for (; s < _bufsize; ++s) {
+		_fft_data_in[s] = 0;
 		for (unsigned int c = 0; c < _channels; ++c) {
 			_bufs[c][s] = 0.f;
-			_fft_data_in[s] = 0;
 		}
 	}
+
 	if (_ebur128_plugin) {
 		_ebur128_plugin->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
 	}
+
 	fftwf_execute (_fft_plan);
 
 	_fft_power[0] = _fft_data_out[0] * _fft_data_out[0];
-
 #define FRe (_fft_data_out[i])
 #define FIm (_fft_data_out[_bufsize - i])
 	for (uint32_t i = 1; i < _fft_data_size - 1; ++i) {
@@ -147,8 +170,8 @@ Analyser::process (ProcessContext<float> const & c)
 		const uint32_t y0 = height - ceil (i * (float) height / _fft_data_size);
 		uint32_t y1= height - ceil (i * (float) height / _fft_data_size);
 #else // logscale
-		const uint32_t y0 = height - ceilf (height * logf (1.f + .02f * i) / logf (1.f + .02f * _fft_data_size));
-		uint32_t y1 = height - ceilf (height * logf (1.f + .02f * (i + 1.f)) / logf (1.f + .02f * _fft_data_size));
+		const uint32_t y0 = height - ceilf (height * logf (1.f + .1f * i) / logf (1.f + .1f * _fft_data_size));
+		uint32_t y1 = height - ceilf (height * logf (1.f + .1f * (i + 1.f)) / logf (1.f + .1f * _fft_data_size));
 #endif
 		if (y0 == y1 && y0 > 0) y1 = y0 - 1;
 		for (int x = x0; x < x1; ++x) {
