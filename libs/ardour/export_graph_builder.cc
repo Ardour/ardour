@@ -307,7 +307,10 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 	unsigned channels = new_config.channel_config->get_n_chans();
 	analyser.reset (new Analyser (config.format->sample_rate(), channels, max_frames,
 				(framecnt_t) ceil (parent.timespan->get_length () * config.format->sample_rate () / (double) parent.session.nominal_frame_rate ())));
-	parent.add_analyser (config.filename->get_path (config.format), analyser);
+	_analyse = config.format->analyse();
+	if (_analyse) {
+		parent.add_analyser (config.filename->get_path (config.format), analyser);
+	}
 
 	if (data_width == 8 || data_width == 16) {
 		short_converter = ShortConverterPtr (new SampleFormatConverter<short> (channels));
@@ -331,7 +334,15 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 ExportGraphBuilder::FloatSinkPtr
 ExportGraphBuilder::SFC::sink ()
 {
-	return analyser;
+	if (_analyse) {
+		return analyser;
+	} else if (data_width == 8 || data_width == 16) {
+		return short_converter;
+	} else if (data_width == 24 || data_width == 32) {
+		return int_converter;
+	} else {
+		return float_converter;
+	}
 }
 
 void

@@ -173,6 +173,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	, _with_mp4chaps (false)
 	, _soundcloud_upload (false)
 	, _command ("")
+	, _analyse (true)
 {
 	format_ids.insert (F_None);
 	endiannesses.insert (E_FileDefault);
@@ -186,6 +187,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 	, _silence_beginning (s)
 	, _silence_end (s)
 	, _soundcloud_upload (false)
+	, _analyse (true)
 {
 	_silence_beginning.type = Time::Timecode;
 	_silence_end.type = Time::Timecode;
@@ -199,6 +201,7 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 	, _silence_beginning (other.session)
 	, _silence_end (other.session)
 	, _soundcloud_upload (false)
+	, _analyse (other._analyse)
 {
 	if (modify_name) {
 		set_name (other.name() + " (copy)");

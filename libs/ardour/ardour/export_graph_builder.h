@@ -135,6 +135,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		int                data_width;
 
 		AnalysisPtr     analyser;
+		bool            _analyse;
 		// Only one of these should be available at a time
 		FloatConverterPtr float_converter;
 		IntConverterPtr int_converter;
