@@ -179,9 +179,9 @@ VampEBUr128::getRemainingFeatures()
 
     Feature hist;
     hist.hasTimestamp = false;
-    const int * hist_M = ebu.histogram_M();
+    const int * hist_S = ebu.histogram_S();
     for (int i = 110; i < 650; ++i) {
-	hist.values.push_back(hist_M[i]);
+	hist.values.push_back(hist_S[i]);
     }
     returnFeatures[2].push_back(hist);
 
