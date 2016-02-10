@@ -1574,6 +1574,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\export_analysis.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\export_channel.h"
 				>
 			</File>
