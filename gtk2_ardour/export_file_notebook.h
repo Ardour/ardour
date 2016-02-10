@@ -94,6 +94,7 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 		void save_format_to_manager (FormatPtr format);
 		void update_tab_label ();
 		void critical_selection_changed ();
+		void analysis_changed ();
 
 		ARDOUR::ExportProfileManager::FormatStatePtr   format_state;
 		ARDOUR::ExportProfileManager::FilenameStatePtr filename_state;
@@ -110,7 +111,8 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 		Gtk::Alignment          filename_align;
 		ExportFilenameSelector  filename_selector;
 
-		Gtk::CheckButton	soundcloud_upload_button;
+		Gtk::CheckButton        soundcloud_upload_button;
+		Gtk::CheckButton        analysis_button;
 		Gtk::HBox               tab_widget;
 		Gtk::Label              tab_label;
 		Gtk::Alignment          tab_close_alignment;

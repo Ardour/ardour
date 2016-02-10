@@ -109,9 +109,13 @@ ExportFileNotebook::update_soundcloud_upload ()
 			}
 		}
 	}
-
 	soundcloud_export_selector->set_visible (show_credentials_entry);
+}
 
+void
+ExportFileNotebook::FilePage::analysis_changed ()
+{
+	format_state->format->set_analyse (analysis_button.get_active ());
 }
 
 void
@@ -181,6 +185,7 @@ ExportFileNotebook::handle_page_change (GtkNotebookPage*, uint32_t page)
 	} else {
 		last_visible_page = page;
 	}
+	update_soundcloud_upload ();
 }
 
 ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager, ExportFileNotebook * parent, uint32_t number,
@@ -193,6 +198,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
   format_label (_("Format"), Gtk::ALIGN_LEFT),
   filename_label (_("Location"), Gtk::ALIGN_LEFT),
   soundcloud_upload_button (_("Upload to Soundcloud")),
+  analysis_button (_("Analyze Exported Audio")),
   tab_number (number)
 {
 	set_border_width (12);
@@ -201,7 +207,12 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	pack_start (format_align, false, false, 0);
 	pack_start (filename_label, false, false, 0);
 	pack_start (filename_align, false, false, 0);
-	pack_start (soundcloud_upload_button, false, false, 0);
+
+	Gtk::HBox *hbox = Gtk::manage (new Gtk::HBox());
+	hbox->set_spacing (6);
+	hbox->pack_start (soundcloud_upload_button, false, false, 0);
+	hbox->pack_start (analysis_button, false, false, 0);
+	pack_start (*hbox, false, false, 0);
 
 	format_align.add (format_selector);
 	format_align.set_padding (6, 12, 18, 0);
@@ -219,7 +230,8 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 
 	/* Set states */
 	format_selector.set_state (format_state, s);
- 	filename_selector.set_state (filename_state, s);
+	filename_selector.set_state (filename_state, s);
+	analysis_button.set_active (format_state->format->analyse());
 
 	/* Signals */
 
@@ -237,6 +249,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 		sigc::mem_fun (*this, &ExportFileNotebook::FilePage::critical_selection_changed));
 
 	soundcloud_upload_button.signal_toggled().connect (sigc::mem_fun (*parent, &ExportFileNotebook::update_soundcloud_upload));
+	analysis_button.signal_toggled().connect (sigc::mem_fun (*this, &ExportFileNotebook::FilePage::analysis_changed));
 	/* Tab widget */
 
 	tab_close_button.add (*Gtk::manage (new Gtk::Image (::get_icon("close"))));
