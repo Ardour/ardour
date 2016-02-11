@@ -180,8 +180,9 @@ public:
 		return true;
 	}
 
-	/** @return minimum number of frames (in x) and pixels (in y) that should be considered a movement */
-	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+	/** @return minimum number of pixels (in x) and pixels (in y) that should be
+	 * considered a movement */
+	virtual std::pair<double, double> move_threshold () const {
 		return std::make_pair (1, 1);
 	}
 
@@ -242,6 +243,12 @@ protected:
 
 	double current_pointer_x () const;
 	double current_pointer_y () const;
+
+	double pointer_delta_from_grab_x () const
+	{ return current_pointer_x() - grab_x(); }
+
+	double pointer_delta_from_grab_y () const
+	{ return current_pointer_y() - grab_y(); }
 
 	/* sets snap delta from unsnapped pos */
 	void setup_snap_delta (framepos_t pos);
@@ -391,7 +398,7 @@ public:
 		return true;
 	}
 
-	std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+	std::pair<double, double> move_threshold () const {
 		return std::make_pair (4, 4);
 	}
 
@@ -918,7 +925,7 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+	std::pair<double, double> move_threshold () const {
 		return std::make_pair (8, 1);
 	}
 
@@ -1076,7 +1083,7 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+	std::pair<double, double> move_threshold () const {
 		return std::make_pair (4, 4);
 	}
 
@@ -1140,7 +1147,7 @@ class CrossfadeEdgeDrag : public Drag
 		return false;
 	}
 
-	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+	virtual std::pair<double, double> move_threshold () const {
 		return std::make_pair (4, 4);
 	}
 

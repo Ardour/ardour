@@ -387,14 +387,13 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 		return false;
 	}
 
-	pair<framecnt_t, int> const threshold = move_threshold ();
+	pair<double, double> const threshold = move_threshold ();
 
 	bool const old_move_threshold_passed = _move_threshold_passed;
 
 	if (!_move_threshold_passed) {
-
-		bool const xp = (::llabs (_drags->current_pointer_frame () - _raw_grab_frame) >= threshold.first);
-		bool const yp = (::fabs ((current_pointer_y () - _grab_y)) >= threshold.second);
+		bool const xp = (fabs(pointer_delta_from_grab_x()) >= threshold.first);
+		bool const yp = (fabs(pointer_delta_from_grab_y()) >= threshold.second);
 
 		_move_threshold_passed = ((xp && x_movement_matters()) || (yp && y_movement_matters()));
 	}
