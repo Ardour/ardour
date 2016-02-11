@@ -323,7 +323,7 @@ ExportDialog::show_progress ()
 
 	if (!status->aborted() && status->result_map.size() > 0) {
 		hide();
-		ExportReport er (status);
+		ExportReport er (_session, status);
 		er.run();
 	}
 

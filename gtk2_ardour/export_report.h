@@ -52,7 +52,7 @@ class ExportReport : public ArdourDialog
 {
 public:
 	typedef boost::shared_ptr<ARDOUR::ExportStatus> StatusPtr;
-	ExportReport (StatusPtr s);
+	ExportReport (ARDOUR::Session*, StatusPtr);
 	int run ();
 
 private:

@@ -18,12 +18,17 @@
 
 #include <pangomm/layout.h>
 #include <gtkmm/label.h>
+#include <gtkmm/table.h>
 #include <gtkmm/stock.h>
 
 #include "gtkmm2ext/utils.h"
 #include "canvas/utils.h"
 #include "canvas/colors.h"
 
+#include "ardour/audiofilesource.h"
+#include "ardour/session.h"
+
+#include "audio_clock.h"
 #include "ui_config.h"
 #include "export_report.h"
 
@@ -32,7 +37,7 @@
 using namespace Gtk;
 using namespace ARDOUR;
 
-ExportReport::ExportReport (StatusPtr s)
+ExportReport::ExportReport (Session* _session, StatusPtr s)
 	: ArdourDialog (_("Export Report/Analysis"))
 	, status (s)
 {
@@ -46,14 +51,67 @@ ExportReport::ExportReport (StatusPtr s)
 	for (AnalysisResults::iterator i = ar.begin (); i != ar.end (); ++i) {
 		Label *l;
 		VBox *vb = manage (new VBox ());
+		Table *t = manage (new Table (4,4));
+		t->set_spacings (6);
 		vb->set_spacing (6);
+		vb->pack_start (*t);
 
-		l = manage (new Label (string_compose (_("File: %1"), i->first)));
-		vb->pack_start (*l);
+		std::string path = i->first;
+
+		l = manage (new Label (_("File:"), ALIGN_END));
+		t->attach (*l, 0, 1, 0, 1);
+		l = manage (new Label (path, ALIGN_START));
+		t->attach (*l, 1, 4, 0, 1);
+
+		SoundFileInfo info;
+		std::string errmsg;
+
+		if (AudioFileSource::get_soundfile_info (path, info, errmsg)) {
+			AudioClock * clock;
+
+			framecnt_t const nfr = _session ? _session->nominal_frame_rate() : 25;
+			double src_coef = (double) nfr / info.samplerate;
+
+			l = manage (new Label (_("Channels:"), ALIGN_END));
+			t->attach (*l, 0, 1, 1, 2);
+			l = manage (new Label (string_compose ("%1", info.channels)));
+			t->attach (*l, 1, 2, 1, 2);
+
+			l = manage (new Label (_("Format:"), ALIGN_END));
+			t->attach (*l, 2, 3, 1, 3);
+			l = manage (new Label (info.format_name));
+			t->attach (*l, 3, 4, 1, 3);
+
+			l = manage (new Label (_("Sample rate:"), ALIGN_END));
+			t->attach (*l, 0, 1, 2, 3);
+			l = manage (new Label (string_compose (_("%1 Hz"), info.samplerate)));
+			t->attach (*l, 1, 2, 2, 3);
+
+			l = manage (new Label (_("Duration:"), ALIGN_END));
+			t->attach (*l, 0, 1, 3, 4);
+			clock = manage (new AudioClock ("sfboxLengthClock", true, "", false, false, true, false));
+			clock->set_session (_session);
+			clock->set_mode (AudioClock::MinSec);
+			clock->set (info.length * src_coef + 0.5, true);
+			t->attach (*clock, 1, 2, 3, 4);
+
+			l = manage (new Label (_("Timecode:"), ALIGN_END));
+			t->attach (*l, 2, 3, 3, 4);
+			clock = manage (new AudioClock ("sfboxTimecodeClock", true, "", false, false, false, false));
+			clock->set_session (_session);
+			clock->set_mode (AudioClock::Timecode);
+			clock->set (info.timecode * src_coef + 0.5, true);
+			t->attach (*clock, 3, 4, 3, 4);
+		} else {
+			l = manage (new Label (_("Error:"), ALIGN_END));
+			t->attach (*l, 0, 1, 1, 2);
+			l = manage (new Label (errmsg, ALIGN_START));
+			t->attach (*l, 1, 4, 1, 2);
+		}
 
 		ExportAnalysisPtr p = i->second;
 
-		if (i->second->have_loudness) {
+		{
 			/* EBU R128 loudness numerics and histogram */
 			int w, h;
 			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (get_pango_context ());
@@ -79,23 +137,52 @@ ExportReport::ExportReport (StatusPtr s)
 
 			cr->set_source_rgba (.7, .7, .7, 1.0);
 
-			if (p->loudness == -200 &&  p->loudness_range == 0) {
+			if (!i->second->have_loudness) {
+				layout->set_alignment (Pango::ALIGN_CENTER);
 				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
-				layout->set_text (string_compose (_("not available"), std::setprecision (1), std::fixed,  p->loudness));
+				layout->set_text (string_compose (_("not\navailable"), std::setprecision (1), std::fixed,  p->loudness));
 				layout->get_pixel_size (w, h);
-				cr->move_to (rint (128 - w * .5), rint (64 - h));
+				cr->move_to (rint (128 - w * .5), rint (64 - h * .5));
 				layout->show_in_cairo_context (cr);
+			}
+			else if (p->loudness == -200 && p->loudness_range == 0) {
+				layout->set_alignment (Pango::ALIGN_CENTER);
+				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
+				layout->set_text (string_compose (_("not\navailable"), std::setprecision (1), std::fixed,  p->loudness));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (128 - w * .5), rint (64 - h * .6));
+				layout->show_in_cairo_context (cr);
+				int y0 = h * .5;
 
 				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
 				layout->set_text (_("(too short integration time)"));
 				layout->get_pixel_size (w, h);
-				cr->move_to (rint (128 - w * .5), rint (64 + h));
+				cr->move_to (rint (128 - w * .5), rint (64 + y0));
 				layout->show_in_cairo_context (cr);
 
 			} else {
-				int y0 = 6;
+				// calc height
+				int ht = 0;
 				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
-				layout->set_text (string_compose (_("Loudness:"), std::setprecision (1), std::fixed,  p->loudness));
+				layout->set_text (string_compose (_("Integrated Loudness:"), std::setprecision (1), std::fixed,  p->loudness));
+				layout->get_pixel_size (w, h);
+				ht += h * 1.25;
+				layout->set_text (string_compose (_("Loudness Range:"), std::setprecision (1), std::fixed,  p->loudness));
+				layout->get_pixel_size (w, h);
+				ht += h * 1.25;
+				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
+				layout->set_text (string_compose (_("%1%2%3 LUFS"), std::setprecision (1), std::fixed,  p->loudness));
+				layout->get_pixel_size (w, h);
+				ht += h * 1.5;
+				layout->set_text (string_compose (_("%1%2%3 LU"), std::setprecision (1), std::fixed, p->loudness_range));
+				layout->get_pixel_size (w, h);
+				ht += h;
+
+				int y0 = (128 - ht) * .5;
+
+				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				layout->set_alignment (Pango::ALIGN_LEFT);
+				layout->set_text (string_compose (_("Integrated Loudness:"), std::setprecision (1), std::fixed,  p->loudness));
 				layout->get_pixel_size (w, h);
 				cr->move_to (rint (128 - w * .5), y0);
 				layout->show_in_cairo_context (cr);
@@ -129,17 +216,45 @@ ExportReport::ExportReport (StatusPtr s)
 			cr->set_source_rgba (0, 0, 0, 1.0);
 			cr->fill ();
 
-			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
-			layout->set_alignment (Pango::ALIGN_LEFT);
-			layout->set_text (_("LUFS"));
+			cr->set_source_rgba (.7, .7, .7, 1.0);
+			cr->set_line_width (1.0);
+
+			if (p->loudness_hist_max > 0 && i->second->have_loudness) {
+				for (size_t x = 0 ; x < 510; ++x) {
+					cr->move_to (x - .5, 128.0);
+					cr->line_to (x - .5, 128.0 - 128.0 * p->loudness_hist[x] / (float) p->loudness_hist_max);
+					cr->stroke ();
+				}
+			}
+
+			layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+			layout->set_alignment (Pango::ALIGN_CENTER);
+
+			layout->set_text (_("LUFS\n(short)"));
+			layout->get_pixel_size (w, h);
+			Gtkmm2ext::rounded_rectangle (cr, 5, 5, w + 2, h + 2, 4);
+			cr->set_source_rgba (.1, .1, .1, 0.7);
+			cr->fill ();
+
 			cr->move_to (6, 6);
 			cr->set_source_rgba (.9, .9, .9, 1.0);
 			layout->show_in_cairo_context (cr);
 
+			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+			layout->set_alignment (Pango::ALIGN_LEFT);
 			for (int g = -53; g <= -8; g += 5) {
 				// grid-lines. [110] -59LUFS .. [650]: -5 LUFS
 				layout->set_text (string_compose ("%1", g));
 				layout->get_pixel_size (w, h);
+
+				cr->set_operator (Cairo::OPERATOR_OVER);
+				Gtkmm2ext::rounded_rectangle (cr,
+						rint ((g + 59.0) * 10.0 - h * .5), 5,
+						h + 2, w + 2, 4);
+				const float pk = (g + 59.0) / 54.0;
+				ArdourCanvas::Color c = ArdourCanvas::hsva_to_color (252 - 260 * pk, .9, .3 + pk * .4, .6);
+				ArdourCanvas::set_source_rgba (cr, c);
+				cr->fill ();
 
 				cr->save ();
 				cr->set_source_rgba (.9, .9, .9, 1.0);
@@ -148,6 +263,7 @@ ExportReport::ExportReport (StatusPtr s)
 				layout->show_in_cairo_context (cr);
 				cr->restore ();
 
+				cr->set_operator (Cairo::OPERATOR_ADD);
 				cr->save ();
 				cr->set_source_rgba (.3, .3, .3, 1.0);
 				cr->set_dash (dashes, 1.0);
@@ -159,16 +275,7 @@ ExportReport::ExportReport (StatusPtr s)
 			}
 
 			cr->set_operator (Cairo::OPERATOR_ADD);
-			cr->set_source_rgba (.7, .7, .7, 1.0);
-			cr->set_line_width (1.0);
 
-			if (p->loudness_hist_max > 0) {
-				for (size_t x = 0 ; x < 510; ++x) {
-					cr->move_to (x - .5, 128.0);
-					cr->line_to (x - .5, 128.0 - 128.0 * p->loudness_hist[x] / (float) p->loudness_hist_max);
-					cr->stroke ();
-				}
-			}
 
 			hist->flush ();
 			CimgArea *nu = manage (new CimgArea (nums));
@@ -180,28 +287,28 @@ ExportReport::ExportReport (StatusPtr s)
 			vb->pack_start (*hb);
 		}
 
-		{
+		for (uint32_t c = 0; c < p->n_channels; ++c) {
 			/* draw waveform */
 			// TODO re-use Canvas::WaveView::draw_image() somehow.
-			const size_t peaks = sizeof (p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 2;
-			const float height_2 = 100.0;
-			Cairo::RefPtr<Cairo::ImageSurface> wave = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, peaks, 2 * height_2);
+			const size_t width = sizeof (p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
+			const float height_2 = p->n_channels == 2 ? 66.0 : 100.0;
+			Cairo::RefPtr<Cairo::ImageSurface> wave = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, width, 2 * height_2);
 			Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (wave);
-			cr->rectangle (0, 0, peaks, 2 * height_2);
+			cr->rectangle (0, 0, width, 2 * height_2);
 			cr->set_source_rgba (0, 0, 0, 1.0);
 			cr->fill ();
 			cr->set_source_rgba (.7, .7, .7, 1.0);
 			cr->set_line_width (1.0);
-			for (size_t x = 0 ; x < peaks; ++x) {
-				cr->move_to (x - .5, height_2 - height_2 * p->peaks[x].max);
-				cr->line_to (x - .5, height_2 - height_2 * p->peaks[x].min);
+			for (size_t x = 0 ; x < width; ++x) {
+				cr->move_to (x - .5, height_2 - height_2 * p->peaks[c][x].max);
+				cr->line_to (x - .5, height_2 - height_2 * p->peaks[c][x].min);
 			}
 			cr->stroke ();
 
 			// zero line
 			cr->set_source_rgba (.3, .3, .3, 0.7);
 			cr->move_to (0, height_2 - .5);
-			cr->line_to (peaks, height_2 - .5);
+			cr->line_to (width, height_2 - .5);
 			cr->stroke ();
 
 			cr->set_dash (dashes, 2.0);
@@ -209,22 +316,23 @@ ExportReport::ExportReport (StatusPtr s)
 
 			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (get_pango_context ());
 			layout->set_alignment (Pango::ALIGN_LEFT);
-			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+			layout->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
 			int w, h;
 
 			layout->set_text (_("dBFS"));
 			layout->get_pixel_size (w, h);
 			Gtkmm2ext::rounded_rectangle (cr,
-					5, rint (height_2 - w * .5 - 1), h + 2, w + 2, 4);
-			cr->set_source_rgba (.1, .1, .1, 0.5);
+					7, rint (height_2 - w * .5 - 1), h + 2, w + 2, 4);
+			cr->set_source_rgba (.1, .1, .1, 0.7);
 			cr->fill ();
-			cr->move_to (6, rint (height_2 + w * .5));
+			cr->move_to (8, rint (height_2 + w * .5));
 			cr->set_source_rgba (.9, .9, .9, 1.0);
 			cr->save ();
 			cr->rotate (M_PI / -2.0);
 			layout->show_in_cairo_context (cr);
 			cr->restore ();
 
+			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
 #define PEAKANNOTATION(POS, TXT) {                            \
 			const float yy = rint (POS);                            \
 			layout->set_text (TXT);                                 \
@@ -232,20 +340,20 @@ ExportReport::ExportReport (StatusPtr s)
 			cr->set_operator (Cairo::OPERATOR_OVER);                \
 			Gtkmm2ext::rounded_rectangle (cr,                       \
 			    5, rint ((POS) - h * .5 - 1), w + 2, h + 2, 4);     \
-			cr->set_source_rgba (.1, .1, .1, 0.5);                  \
+			cr->set_source_rgba (.1, .1, .1, 0.7);                  \
 			cr->fill ();                                            \
 			cr->move_to (6, rint ((POS) - h * .5));                 \
 			cr->set_source_rgba (.9, .9, .9, 1.0);                  \
 			layout->show_in_cairo_context (cr);                     \
 			cr->move_to (8 + w, yy - .5);                           \
-			cr->line_to (peaks, yy - .5);                           \
+			cr->line_to (width, yy - .5);                           \
 			cr->set_source_rgba (.3, .3, .3, 1.0);                  \
 			cr->set_operator (Cairo::OPERATOR_ADD);                 \
 			cr->stroke ();                                          \
 			}
 
-			PEAKANNOTATION (height_2 * 0.5, _("-6"));
-			PEAKANNOTATION (height_2 * 1.5, _("-6"));
+			PEAKANNOTATION (height_2 * 0.6452, _("-9"));
+			PEAKANNOTATION (height_2 * 1.3548, _("-9"));
 			PEAKANNOTATION (height_2 * 0.2921, _("-3"));
 			PEAKANNOTATION (height_2 * 1.7079, _("-3"));
 
@@ -255,6 +363,8 @@ ExportReport::ExportReport (StatusPtr s)
 		}
 
 		{
+			int w, h;
+			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (get_pango_context ());
 			const size_t swh = sizeof (p->spectrum) / sizeof (float);
 			const size_t height = sizeof (p->spectrum[0]) / sizeof (float);
 			const size_t width = swh / height;
@@ -273,6 +383,18 @@ ExportReport::ExportReport (StatusPtr s)
 					cr->fill ();
 				}
 			}
+
+			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+			cr->set_line_width (1.0);
+			cr->set_dash (dashes, 2.0);
+			cr->set_line_cap (Cairo::LINE_CAP_ROUND);
+			//PEAKANNOTATION (p->freq[0], _("50Hz"));
+			PEAKANNOTATION (p->freq[1], _("100Hz"));
+			PEAKANNOTATION (p->freq[2], _("500Hz"));
+			PEAKANNOTATION (p->freq[3], _("1kHz"));
+			PEAKANNOTATION (p->freq[4], _("5kHz"));
+			PEAKANNOTATION (p->freq[5], _("10kHz"));
+
 			spec->flush ();
 			CimgArea *sp = manage (new CimgArea (spec));
 			vb->pack_start (*sp);
