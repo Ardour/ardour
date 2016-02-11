@@ -170,6 +170,8 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 		int mnw = 0; // max numeric width
 		int lin[4] = { 0, 0, 0, 0 }; // max line height
 
+		TXTSIZE(0, _("(too short integration time)"), get_SmallFont);
+
 		TXTSIZE(0, _("Peak:"), get_SmallFont);
 		TXTSIZE(1, string_compose (_("%1 dBFS"), std::setprecision (1), std::fixed, dbfs), get_LargeFont);
 		TXTSIZE(2, _("True Peak:"), get_SmallFont);
@@ -255,24 +257,24 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 			if (!i->second->have_loudness) {
 				layout->set_alignment (Pango::ALIGN_CENTER);
 				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
-				layout->set_text (_("not\navailable"));
+				layout->set_text (_("Not\nAvailable"));
 				layout->get_pixel_size (w, h);
-				cr->move_to (rint (nw2 - w * .5), rint (hh - h * .5));
+				cr->move_to (rint (nw2 - w * .5), rint ((hh - h) * .5));
 				layout->show_in_cairo_context (cr);
 			}
 			else if (p->loudness == -200 && p->loudness_range == 0) {
 				layout->set_alignment (Pango::ALIGN_CENTER);
 				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
-				layout->set_text (_("not\navailable"));
+				layout->set_text (_("Not\nAvailable"));
 				layout->get_pixel_size (w, h);
-				cr->move_to (rint (nw2 - w * .5), rint (hh - h * .6));
+				cr->move_to (rint (nw2 - w * .5), rint (hh * .5 - h * .6));
 				layout->show_in_cairo_context (cr);
 				int yy = h * .5;
 
 				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
 				layout->set_text (_("(too short integration time)"));
 				layout->get_pixel_size (w, h);
-				cr->move_to (rint (nw2 - w * .5), rint (hh + yy));
+				cr->move_to (rint (nw2 - w * .5), rint (hh * .5 + yy));
 				layout->show_in_cairo_context (cr);
 
 			} else {
