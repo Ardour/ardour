@@ -26,6 +26,7 @@
 #include "pbd/xml++.h"
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
+#include "pbd/localtime_r.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/session.h"
@@ -62,7 +63,7 @@ ExportFilename::ExportFilename (Session & session) :
 {
 	time_t rawtime;
 	std::time (&rawtime);
-	time_struct = localtime (&rawtime);
+	localtime_r (&rawtime, &time_struct);
 
 	folder = session.session_directory().export_path();
 
@@ -319,7 +320,7 @@ string
 ExportFilename::get_formatted_time (string const & format) const
 {
 	char buffer [80];
-	strftime (buffer, 80, format.c_str(), time_struct);
+	strftime (buffer, 80, format.c_str(), &time_struct);
 
 	string return_value (buffer);
 	return return_value;

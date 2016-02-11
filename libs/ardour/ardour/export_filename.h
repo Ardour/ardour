@@ -112,8 +112,7 @@ class LIBARDOUR_API ExportFilename {
 	TimeFormat time_format;
 
 	std::string get_formatted_time (std::string const & format) const;
-	// Due to the static allocation used in strftime(), no destructor or copy-ctor is needed for this
-	struct tm * time_struct;
+	struct tm time_struct;
 
 	ExportTimespanPtr timespan;
 	ExportChannelConfigPtr channel_config;
