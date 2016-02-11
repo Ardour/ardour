@@ -305,10 +305,10 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 	config = new_config;
 	data_width = sndfile_data_width (Encoder::get_real_format (config));
 	unsigned channels = new_config.channel_config->get_n_chans();
-	analyser.reset (new Analyser (config.format->sample_rate(), channels, max_frames,
-				(framecnt_t) ceil (parent.timespan->get_length () * config.format->sample_rate () / (double) parent.session.nominal_frame_rate ())));
 	_analyse = config.format->analyse();
 	if (_analyse) {
+		analyser.reset (new Analyser (config.format->sample_rate(), channels, max_frames,
+					(framecnt_t) ceil (parent.timespan->get_length () * config.format->sample_rate () / (double) parent.session.nominal_frame_rate ())));
 		parent.add_analyser (config.filename->get_path (config.format), analyser);
 	}
 
@@ -316,18 +316,19 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 		short_converter = ShortConverterPtr (new SampleFormatConverter<short> (channels));
 		short_converter->init (max_frames, config.format->dither_type(), data_width);
 		add_child (config);
-		analyser->add_output (short_converter);
+		if (_analyse) { analyser->add_output (short_converter); }
+
 	} else if (data_width == 24 || data_width == 32) {
 		int_converter = IntConverterPtr (new SampleFormatConverter<int> (channels));
 		int_converter->init (max_frames, config.format->dither_type(), data_width);
 		add_child (config);
-		analyser->add_output (int_converter);
+		if (_analyse) { analyser->add_output (int_converter); }
 	} else {
 		int actual_data_width = 8 * sizeof(Sample);
 		float_converter = FloatConverterPtr (new SampleFormatConverter<Sample> (channels));
 		float_converter->init (max_frames, config.format->dither_type(), actual_data_width);
 		add_child (config);
-		analyser->add_output (float_converter);
+		if (_analyse) { analyser->add_output (float_converter); }
 	}
 }
 
