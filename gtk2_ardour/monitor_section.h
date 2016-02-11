@@ -36,10 +36,7 @@
 
 namespace Gtkmm2ext {
 	class TearOff;
-	class MotionFeedback;
 }
-
-class VolumeController;
 
 class MonitorSection : public RouteUI
 {

@@ -26,7 +26,6 @@
 #include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/tearoff.h"
 #include "gtkmm2ext/actions.h"
-#include "gtkmm2ext/motionfeedback.h"
 #include "gtkmm2ext/utils.h"
 
 #include <gtkmm/menu.h>
@@ -45,7 +44,6 @@
 #include "public_editor.h"
 #include "timers.h"
 #include "tooltips.h"
-#include "volume_controller.h"
 #include "ui_config.h"
 #include "utils.h"
 
