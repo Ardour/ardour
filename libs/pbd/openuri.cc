@@ -57,8 +57,14 @@ PBD::open_uri (const char* uri)
 		global_epa->restore ();
 	}
 
+	std::string s(uri);
+	while (s.find("\\") != std::string::npos)
+		s.replace(s.find("\\"), 1, "\\\\");
+	while (s.find("\"") != std::string::npos)
+		s.replace(s.find("\\"), 1, "\\\"");
+
 	std::string command = "xdg-open ";
-	command += uri;
+	command += '"' + s + '"';
 	command += " &";
 	(void) system (command.c_str());
 
