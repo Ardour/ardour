@@ -47,7 +47,8 @@ class /*LIBAUDIOGRAPHER_API*/ Analyser : public ListedSource<float>, public Sink
 	float fft_power_at_bin (const uint32_t b, const float norm) const;
 
 	ARDOUR::ExportAnalysis _result;
-	Vamp::Plugin* _ebur128_plugin;
+	Vamp::Plugin*  _ebur128_plugin;
+	Vamp::Plugin** _dbtp_plugin;
 
 	float        _sample_rate;
 	unsigned int _channels;

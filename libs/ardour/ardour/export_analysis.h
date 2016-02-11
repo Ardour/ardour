@@ -29,10 +29,13 @@ namespace ARDOUR {
 	struct ExportAnalysis {
 	public:
 		ExportAnalysis ()
-			: loudness (0)
+			: peak (0)
+			, truepeak (0)
+			, loudness (0)
 			, loudness_range (0)
 			, loudness_hist_max (0)
 			, have_loudness (false)
+			, have_dbtp (false)
 			, n_channels (1)
 		{
 			memset (peaks, 0, sizeof(peaks));
@@ -42,10 +45,13 @@ namespace ARDOUR {
 		}
 
 		ExportAnalysis (const ExportAnalysis& other)
-			: loudness (other.loudness)
+			: peak (other.peak)
+			, truepeak (other.truepeak)
+			, loudness (other.loudness)
 			, loudness_range (other.loudness_range)
 			, loudness_hist_max (other.loudness_hist_max)
 			, have_loudness (other.have_loudness)
+			, have_dbtp (other.have_dbtp)
 			, n_channels (other.n_channels)
 		{
 			memcpy (peaks, other.peaks, sizeof(peaks));
@@ -54,11 +60,14 @@ namespace ARDOUR {
 			memcpy (freq, other.freq, sizeof(freq));
 		}
 
+		float peak;
+		float truepeak;
 		float loudness;
 		float loudness_range;
 		int loudness_hist[540];
 		int loudness_hist_max;
 		bool have_loudness;
+		bool have_dbtp;
 
 		uint32_t n_channels;
 		uint32_t freq[6]; // y-pos, 50, 100, 500, 1k, 5k, 10k [Hz]

@@ -23,6 +23,7 @@ using namespace AudioGrapher;
 
 Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize, framecnt_t n_samples)
 	: _ebur128_plugin (0)
+	, _dbtp_plugin (0)
 	, _sample_rate (sample_rate)
 	, _channels (channels)
 	, _bufsize (bufsize / channels)
@@ -37,8 +38,27 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 		_ebur128_plugin = loader->loadPlugin ("libardourvampplugins:ebur128", sample_rate, PluginLoader::ADAPT_ALL_SAFE);
 		assert (_ebur128_plugin);
 		_ebur128_plugin->reset ();
-		_ebur128_plugin->initialise (channels, _bufsize, _bufsize);
+		if (!_ebur128_plugin->initialise (channels, _bufsize, _bufsize)) {
+			printf ("FAILED TO INITIALIZE EBUR128\n");
+			delete _ebur128_plugin;
+			_ebur128_plugin = 0;
+		}
 	}
+
+	_dbtp_plugin = (Vamp::Plugin**) malloc (sizeof(Vamp::Plugin*) * channels);
+	for (unsigned int c = 0; c < _channels; ++c) {
+		using namespace Vamp::HostExt;
+		PluginLoader* loader (PluginLoader::getInstance ());
+		_dbtp_plugin[c] = loader->loadPlugin ("libardourvampplugins:dBTP", sample_rate, PluginLoader::ADAPT_ALL_SAFE);
+		assert (_dbtp_plugin[c]);
+		_dbtp_plugin[c]->reset ();
+		if (!_dbtp_plugin[c]->initialise (1, _bufsize, _bufsize)) {
+			printf ("FAILED TO INITIALIZE DBTP %d\n", c);
+			delete _dbtp_plugin[c];
+			_dbtp_plugin[c] = 0;
+		}
+	}
+
 	_bufs[0] = (float*) malloc (sizeof (float) * _bufsize);
 	_bufs[1] = (float*) malloc (sizeof (float) * _bufsize);
 
@@ -102,6 +122,10 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 Analyser::~Analyser ()
 {
 	delete _ebur128_plugin;
+	for (unsigned int c = 0; c < _channels; ++c) {
+		delete _dbtp_plugin[c];
+	}
+	free (_dbtp_plugin);
 	free (_bufs[0]);
 	free (_bufs[1]);
 	fftwf_destroy_plan (_fft_plan);
@@ -120,13 +144,15 @@ Analyser::process (ProcessContext<float> const & c)
 	//printf ("PROC %p @%ld F: %ld, S: %ld C:%d\n", this, _pos, c.frames (), n_samples, c.channels ());
 	float const * d = c.data ();
 	framecnt_t s;
+	const unsigned cmask = _result.n_channels - 1; // [0, 1]
 	for (s = 0; s < n_samples; ++s) {
 		_fft_data_in[s] = 0;
 		const framecnt_t pk = (_pos + s) / _spp;
 		for (unsigned int c = 0; c < _channels; ++c) {
 			const float v = *d;
+			if (fabsf(v) > _result.peak) { _result.peak = fabsf(v); }
 			_bufs[c][s] = v;
-			const unsigned int cc = c % _result.n_channels; // TODO optimize
+			const unsigned int cc = c & cmask;
 			if (_result.peaks[cc][pk].min > v) { _result.peaks[cc][pk].min = *d; }
 			if (_result.peaks[cc][pk].max < v) { _result.peaks[cc][pk].max = *d; }
 			_fft_data_in[s] += v * _hann_window[s] / (float) _channels;
@@ -143,6 +169,15 @@ Analyser::process (ProcessContext<float> const & c)
 
 	if (_ebur128_plugin) {
 		_ebur128_plugin->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
+	}
+
+	float const * const data = c.data ();
+	for (unsigned int c = 0; c < _channels; ++c) {
+		if (!_dbtp_plugin[c]) { continue; }
+		for (s = 0; s < n_samples; ++s) {
+			_bufs[0][s] = data[s * _channels + c];
+		}
+		_dbtp_plugin[c]->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
 	}
 
 	fftwf_execute (_fft_plan);
@@ -208,6 +243,17 @@ Analyser::result ()
 			_result.have_loudness = true;
 		}
 	}
+
+	for (unsigned int c = 0; c < _channels; ++c) {
+		if (!_dbtp_plugin[c]) { continue; }
+		Vamp::Plugin::FeatureSet features = _dbtp_plugin[c]->getRemainingFeatures ();
+		if (!features.empty () && features.size () == 1) {
+			_result.have_dbtp = true;
+			float p = features[0][0].values[0];
+			if (p > _result.truepeak) { _result.truepeak = p; }
+		}
+	}
+
 	return ARDOUR::ExportAnalysisPtr (new ARDOUR::ExportAnalysis (_result));
 }
 
