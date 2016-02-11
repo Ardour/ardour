@@ -133,6 +133,8 @@ private:
 	void note_range_changed ();
 	void contents_height_changed ();
 
+	void update_control_names ();
+
 	bool                         _ignore_signals;
 	MidiScroomer*                _range_scroomer;
 	PianoRollHeader*             _piano_roll_header;
