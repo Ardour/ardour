@@ -308,6 +308,12 @@ void
 ExportFileNotebook::FilePage::update_example_filename()
 {
 	if (profile_manager) {
+		if (profile_manager->get_timespans().size() > 1
+				|| profile_manager->get_timespans().front()->timespans->size() > 1) {
+			filename_selector.require_timespan (true);
+		} else {
+			filename_selector.require_timespan (false);
+		}
 
 		std::string example;
 		if (format_state->format) {

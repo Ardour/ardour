@@ -31,12 +31,14 @@ ExportFilenameSelector::ExportFilenameSelector () :
 
 	label_label (_("Label:"), Gtk::ALIGN_LEFT),
 	session_checkbox (_("Session Name")),
+	timespan_checkbox (_("Timespan Name")),
 	revision_checkbox (_("Revision:")),
 
 	path_label (_("Folder:"), Gtk::ALIGN_LEFT),
 	browse_button (_("Browse")),
 
-	example_filename_label ("", Gtk::ALIGN_LEFT)
+	example_filename_label ("", Gtk::ALIGN_LEFT),
+	_require_timespan (false)
 {
 	include_label.set_markup (_("<i>Build filename(s) from these components:</i>"));
 
@@ -45,13 +47,14 @@ ExportFilenameSelector::ExportFilenameSelector () :
 	pack_start (include_hbox, false, false, 0);
 	pack_start (example_filename_label, false, false, 12);
 
+	include_hbox.pack_start (session_checkbox, false, false, 3);
+	include_hbox.pack_start (timespan_checkbox, false, false, 3);
 	include_hbox.pack_start (label_label, false, false, 3);
 	include_hbox.pack_start (label_entry, false, false, 3);
-	include_hbox.pack_start (session_checkbox, false, false, 3);
-	include_hbox.pack_start (date_format_combo, false, false, 3);
-	include_hbox.pack_start (time_format_combo, false, false, 3);
 	include_hbox.pack_start (revision_checkbox, false, false, 3);
 	include_hbox.pack_start (revision_spinbutton, false, false, 3);
+	include_hbox.pack_start (date_format_combo, false, false, 3);
+	include_hbox.pack_start (time_format_combo, false, false, 3);
 
 	label_entry.set_activates_default ();
 
@@ -95,6 +98,7 @@ ExportFilenameSelector::ExportFilenameSelector () :
 	path_entry.signal_activate().connect (sigc::mem_fun (*this, &ExportFilenameSelector::check_folder), false);
 
 	session_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFilenameSelector::change_session_selection));
+	timespan_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFilenameSelector::change_timespan_selection));
 
 	revision_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFilenameSelector::change_revision_selection));
 	revision_spinbutton.signal_value_changed().connect (sigc::mem_fun (*this, &ExportFilenameSelector::change_revision_value));
@@ -116,6 +120,7 @@ ExportFilenameSelector::load_state ()
 
 	label_entry.set_text (filename->include_label ? filename->get_label() : "");
 	session_checkbox.set_active (filename->include_session);
+	timespan_checkbox.set_active (filename->include_timespan);
 	revision_checkbox.set_active (filename->include_revision);
 	revision_spinbutton.set_value (filename->get_revision());
 	path_entry.set_text (filename->get_folder());
@@ -273,6 +278,42 @@ ExportFilenameSelector::change_time_format ()
 
 	TimeFormat format = time_format_combo.get_active()->get_value (time_format_cols.format);
 	filename->set_time_format (format);
+	CriticalSelectionChanged();
+}
+
+void
+ExportFilenameSelector::require_timespan (bool r)
+{
+	_require_timespan = r;
+	update_timespan_sensitivity ();
+}
+
+void
+ExportFilenameSelector::update_timespan_sensitivity ()
+{
+	bool implicit = _require_timespan;
+
+	if (!implicit
+			&& !filename->include_session
+			&& !filename->include_label
+			&& !filename->include_revision
+			&& !filename->include_channel_config
+			&& !filename->include_channel
+			&& !filename->include_date
+			&& !filename->include_format_name) {
+		implicit = true;
+	}
+	timespan_checkbox.set_inconsistent (implicit);
+}
+
+void
+ExportFilenameSelector::change_timespan_selection ()
+{
+	if (!filename) {
+		return;
+	}
+
+	filename->include_timespan = timespan_checkbox.get_active();
 	CriticalSelectionChanged();
 }
 

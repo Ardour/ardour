@@ -38,6 +38,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	void set_state (ARDOUR::ExportProfileManager::FilenameStatePtr state_, ARDOUR::Session * session_);
 	void set_example_filename (std::string filename);
+	void require_timespan (bool);
 
 	/* Compatibility with other elements */
 
@@ -55,6 +56,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void change_time_format ();
 
 	void change_session_selection ();
+	void change_timespan_selection ();
 	void change_revision_selection ();
 	void change_revision_value ();
 
@@ -72,6 +74,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Gtk::Entry        label_entry;
 
 	Gtk::CheckButton  session_checkbox;
+	Gtk::CheckButton  timespan_checkbox;
 
 	Gtk::CheckButton  revision_checkbox;
 	Gtk::SpinButton   revision_spinbutton;
@@ -115,6 +118,9 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Glib::RefPtr<Gtk::ListStore> time_format_list;
 	Gtk::ComboBox                time_format_combo;
 
+	/* timespan logic */
+	void update_timespan_sensitivity ();
+	bool _require_timespan;
 };
 
 #endif /* __export_filename_selector_h__ */
