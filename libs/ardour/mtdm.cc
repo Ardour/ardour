@@ -17,6 +17,7 @@
 */
 
 #include <math.h>
+#include <assert.h>
 
 #include "ardour/mtdm.h"
 
@@ -58,6 +59,7 @@ int MTDM::process (size_t len, float *ip, float *op)
     float  vip, vop, a, c, s;
     Freq   *F;
 		float peak = 0;
+		assert (len > 0);
 
     while (len--)
     {

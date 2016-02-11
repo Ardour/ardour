@@ -31,6 +31,7 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 	, _pos (0)
 {
 	assert (bufsize % channels == 0);
+	assert (bufsize > 1);
 	//printf ("NEW ANALYSER %p r:%.1f c:%d f:%ld l%ld\n", this, sample_rate, channels, bufsize, n_samples);
 	if (channels > 0 && channels <= 2) {
 		using namespace Vamp::HostExt;
