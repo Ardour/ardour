@@ -86,9 +86,9 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 
 	const float nyquist = (sample_rate * .5);
 #if 0 // linear
-#define YPOS(FREQ) ceil (height * (1.0 - FREQ / nyquist))
+#define YPOS(FREQ) rint (height * (1.0 - FREQ / nyquist))
 #else
-#define YPOS(FREQ) ceil (height * (1 - logf (1.f + .1f * _fft_data_size * FREQ / nyquist) / logf (1.f + .1f * _fft_data_size)))
+#define YPOS(FREQ) rint (height * (1 - logf (1.f + .1f * _fft_data_size * FREQ / nyquist) / logf (1.f + .1f * _fft_data_size)))
 #endif
 
 	_result.freq[0] = YPOS (50);
@@ -197,21 +197,24 @@ Analyser::process (ProcessContext<float> const & c)
 	if (x0 == x1) x1 = x0 + 1;
 	const float range = 80; // dB
 
-	for (uint32_t i = 1; i < _fft_data_size - 1; ++i) {
+	for (uint32_t i = 0; i < _fft_data_size - 1; ++i) {
 		const float level = fft_power_at_bin (i, i);
 		if (level < -range) continue;
 		const float pk = level > 0.0 ? 1.0 : (range + level) / range;
 #if 0 // linear
-		const uint32_t y0 = height - ceil (i * (float) height / _fft_data_size);
-		uint32_t y1= height - ceil (i * (float) height / _fft_data_size);
+		const uint32_t y0 = floor (i * (float) height / _fft_data_size);
+		uint32_t y1 = ceil ((i + 1.0) * (float) height / _fft_data_size);
 #else // logscale
-		const uint32_t y0 = height - ceilf (height * logf (1.f + .1f * i) / logf (1.f + .1f * _fft_data_size));
-		uint32_t y1 = height - ceilf (height * logf (1.f + .1f * (i + 1.f)) / logf (1.f + .1f * _fft_data_size));
+		const uint32_t y0 = floor (height * logf (1.f + .1f * i) / logf (1.f + .1f * _fft_data_size));
+		uint32_t y1 = ceilf (height * logf (1.f + .1f * (i + 1.f)) / logf (1.f + .1f * _fft_data_size));
 #endif
-		if (y0 == y1 && y0 > 0) y1 = y0 - 1;
+		assert (y0 < height);
+		assert (y1 > 0 && y1 <= height);
+		if (y0 == y1) y1 = y0 + 1;
 		for (int x = x0; x < x1; ++x) {
-			for (uint32_t y = y0; y > y1; --y) {
-				if (_result.spectrum[x][y] < pk) { _result.spectrum[x][y] = pk; }
+			for (uint32_t y = y0; y < y1 && y < height; ++y) {
+				uint32_t yy = height - 1 - y;
+				if (_result.spectrum[x][yy] < pk) { _result.spectrum[x][yy] = pk; }
 			}
 		}
 	}
