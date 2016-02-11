@@ -43,6 +43,7 @@ def build(bld):
             OnsetDetect.cpp
             PercussionOnsetDetector.cpp
             SpectralCentroid.cpp
+            TruePeak.cpp
             ZeroCrossing.cpp
     '''
     obj.export_includes = ['.']

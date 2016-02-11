@@ -47,6 +47,7 @@
 #include "AmplitudeFollower.h"
 #include "OnsetDetect.h"
 #include "EBUr128.h"
+#include "TruePeak.h"
 #ifdef HAVE_AUBIO
 #include "Onset.h"
 #endif
@@ -57,6 +58,7 @@ static Vamp::PluginAdapter<PercussionOnsetDetector> percussionOnsetAdapter;
 static Vamp::PluginAdapter<AmplitudeFollower> amplitudeAdapter;
 static Vamp::PluginAdapter<OnsetDetector> onsetDetectorAdapter;
 static Vamp::PluginAdapter<VampEBUr128> VampEBUr128Adapter;
+static Vamp::PluginAdapter<VampTruePeak> VampTruePeakAdapter;
 #ifdef HAVE_AUBIO
 static Vamp::PluginAdapter<Onset> onsetAdapter;
 #endif
@@ -73,10 +75,10 @@ const VampPluginDescriptor *vampGetPluginDescriptor(unsigned int version,
     case  3: return amplitudeAdapter.getDescriptor();
     case  4: return onsetDetectorAdapter.getDescriptor();
     case  5: return VampEBUr128Adapter.getDescriptor();
+    case  6: return VampTruePeakAdapter.getDescriptor();
 #ifdef HAVE_AUBIO
-    case  6: return onsetAdapter.getDescriptor();
+    case  7: return onsetAdapter.getDescriptor();
 #endif
     default: return 0;
     }
 }
-
