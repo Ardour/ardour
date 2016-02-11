@@ -148,6 +148,14 @@ ExportHandler::do_export ()
 	}
 	export_status->total_timespans = timespan_set.size();
 
+	if (export_status->total_timespans > 1) {
+		// always include timespan if there's more than one.
+		for (ConfigMap::iterator it = config_map.begin(); it != config_map.end(); ++it) {
+			FileSpec & spec = it->second;
+			spec.filename->include_timespan = true;
+		}
+	}
+
 	/* Start export */
 
 	Glib::Threads::Mutex::Lock l (export_status->lock());

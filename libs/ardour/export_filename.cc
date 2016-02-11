@@ -169,6 +169,18 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 {
 	string path;
 	bool filename_empty = true;
+	bool with_timespan = include_timespan;
+
+	if (!include_session
+			&& !include_label
+			&& !include_revision
+			&& !include_timespan
+			&& !include_channel_config
+			&& !include_channel
+			&& !include_date
+			&& !include_format_name) {
+		with_timespan = true;
+	}
 
 	if (include_session) {
 		path += filename_empty ? "" : "_";
@@ -189,7 +201,7 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 		filename_empty = false;
 	}
 
-	if (include_timespan && timespan) {
+	if (with_timespan && timespan) {
 		path += filename_empty ? "" : "_";
 		path += timespan->name();
 		filename_empty = false;
@@ -224,6 +236,10 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 		path += filename_empty ? "" : "_";
 		path += format->name();
 		filename_empty = false;
+	}
+
+	if (path.empty ()) {
+		path = "export";
 	}
 
 	path += ".";
