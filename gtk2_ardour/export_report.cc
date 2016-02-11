@@ -23,6 +23,8 @@
 #include <gtkmm/table.h>
 #include <gtkmm/stock.h>
 
+#include "pbd/openuri.h"
+#include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/utils.h"
 #include "canvas/utils.h"
 #include "canvas/colors.h"
@@ -57,8 +59,10 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 		Label *l;
 		VBox *vb = manage (new VBox ());
 		Table *t = manage (new Table (4, 4));
+		t->set_border_width (0);
 		t->set_spacings (4);
 		vb->set_spacing (4);
+		vb->set_border_width (4);
 		vb->pack_start (*t, false, false, 2);
 
 		std::string path = i->first;
@@ -72,7 +76,11 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 		l->set_max_width_chars (64);
 		l->set_text (path);
 		l->set_alignment (ALIGN_START, ALIGN_CENTER);
-		t->attach (*l, 1, 4, 0, 1, FILL, SHRINK);
+		t->attach (*l, 1, 3, 0, 1, FILL, SHRINK);
+
+		Button *b = manage (new Button (_("Open Folder")));
+		t->attach (*b, 3, 4, 0, 2, FILL, SHRINK);
+		b->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::open_clicked), path));
 
 		SoundFileInfo info;
 		std::string errmsg;
@@ -103,25 +111,25 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 			l->set_max_width_chars (64);
 			l->set_text (fmt);
 			l->set_alignment (ALIGN_START, ALIGN_CENTER);
-			t->attach (*l, 1, 4, 1, 2, FILL, SHRINK);
+			t->attach (*l, 1, 3, 1, 2, FILL, SHRINK);
 
 			l = manage (new Label (_("Channels:"), ALIGN_END));
 			t->attach (*l, 0, 1, 2, 3);
-			l = manage (new Label (string_compose ("%1", info.channels)));
+			l = manage (new Label (string_compose ("%1", info.channels), ALIGN_START));
 			t->attach (*l, 1, 2, 2, 3);
 
 			l = manage (new Label (_("Sample rate:"), ALIGN_END));
-			t->attach (*l, 2, 3, 2, 3);
-			l = manage (new Label (string_compose (_("%1 Hz"), info.samplerate)));
-			t->attach (*l, 3, 4, 2, 3);
+			t->attach (*l, 0, 1, 3, 4);
+			l = manage (new Label (string_compose (_("%1 Hz"), info.samplerate), ALIGN_START));
+			t->attach (*l, 1, 2, 3, 4);
 
 			l = manage (new Label (_("Duration:"), ALIGN_END));
-			t->attach (*l, 0, 1, 3, 4);
+			t->attach (*l, 2, 3, 2, 3);
 			clock = manage (new AudioClock ("sfboxLengthClock", true, "", false, false, true, false));
 			clock->set_session (_session);
 			clock->set_mode (AudioClock::MinSec);
 			clock->set (info.length * src_coef + 0.5, true);
-			t->attach (*clock, 1, 2, 3, 4);
+			t->attach (*clock, 3, 4, 2, 3);
 
 			l = manage (new Label (_("Timecode:"), ALIGN_END));
 			t->attach (*l, 2, 3, 3, 4);
@@ -332,7 +340,7 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 			layout->set_alignment (Pango::ALIGN_LEFT);
 			for (int g = -53; g <= -8; g += 5) {
 				// grid-lines. [110] -59LUFS .. [650]: -5 LUFS
-				layout->set_text (string_compose ("%1", g));
+				layout->set_text (string_compose ("%1", std::setw(3), std::setfill(' '), g));
 				layout->get_pixel_size (w, h);
 
 				cr->set_operator (Cairo::OPERATOR_OVER);
@@ -578,4 +586,10 @@ int
 ExportReport::run ()
 {
 	return ArdourDialog::run ();
+}
+
+void
+ExportReport::open_clicked (std::string p)
+{
+	PBD::open_uri (Glib::path_get_dirname(p));
 }

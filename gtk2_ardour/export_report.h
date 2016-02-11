@@ -56,7 +56,8 @@ public:
 	int run ();
 
 private:
-	StatusPtr       status;
+	void open_clicked (std::string);
 
+	StatusPtr       status;
 	Gtk::Notebook   pages;
 };
