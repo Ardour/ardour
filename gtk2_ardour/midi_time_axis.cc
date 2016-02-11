@@ -169,12 +169,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ignore_toggle = false;
 
 	if (is_midi_track()) {
-		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");
-		time_axis_frame.set_name ("MidiTimeAxisViewControlsBaseUnselected");
 		_note_mode = midi_track()->note_mode();
-	} else { // MIDI bus (which doesn't exist yet..)
-		controls_ebox.set_name ("MidiBusControlsBaseUnselected");
-		time_axis_frame.set_name ("MidiBusControlsBaseUnselected");
 	}
 
 	/* if set_state above didn't create a gain automation child, we need to make one */
@@ -193,7 +188,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	/* map current state of the route */
 	ensure_pan_views (false);
-
+	update_control_names();
 	processors_changed (RouteProcessorChange ());
 
 	_route->processors_changed.connect (*this, invalidator (*this),
@@ -237,11 +232,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		top_hbox.remove(scroomer_placeholder);
 		time_axis_hbox.pack_end(*v, false, false, 0);
 		midi_scroomer_size_group->add_widget (*v);
-
-		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
-		time_axis_frame.set_name ("MidiTrackControlsBaseUnselected");
-		controls_base_selected_name = "MidiTrackControlsBaseSelected";
-		controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 
 		midi_view()->NoteRangeChanged.connect (
 			sigc::mem_fun(*this, &MidiTimeAxisView::update_range));
@@ -1287,31 +1277,36 @@ void
 MidiTimeAxisView::route_active_changed ()
 {
 	RouteUI::route_active_changed ();
+	update_control_names();
+}
 
+void
+MidiTimeAxisView::update_control_names ()
+{
 	if (is_track()) {
 		if (_route->active()) {
-			controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
-			time_axis_frame.set_name ("MidiTrackControlsBaseUnselected");
 			controls_base_selected_name = "MidiTrackControlsBaseSelected";
 			controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 		} else {
-			controls_ebox.set_name ("MidiTrackControlsBaseInactiveUnselected");
-			time_axis_frame.set_name ("MidiTrackControlsBaseInactiveUnselected");
 			controls_base_selected_name = "MidiTrackControlsBaseInactiveSelected";
 			controls_base_unselected_name = "MidiTrackControlsBaseInactiveUnselected";
 		}
-	} else {
+	} else { // MIDI bus (which doesn't exist yet..)
 		if (_route->active()) {
-			controls_ebox.set_name ("BusControlsBaseUnselected");
-			time_axis_frame.set_name ("BusControlsBaseUnselected");
 			controls_base_selected_name = "BusControlsBaseSelected";
 			controls_base_unselected_name = "BusControlsBaseUnselected";
 		} else {
-			controls_ebox.set_name ("BusControlsBaseInactiveUnselected");
-			time_axis_frame.set_name ("BusControlsBaseInactiveUnselected");
 			controls_base_selected_name = "BusControlsBaseInactiveSelected";
 			controls_base_unselected_name = "BusControlsBaseInactiveUnselected";
 		}
+	}
+
+	if (get_selected()) {
+		controls_ebox.set_name (controls_base_selected_name);
+		time_axis_frame.set_name (controls_base_selected_name);
+	} else {
+		controls_ebox.set_name (controls_base_unselected_name);
+		time_axis_frame.set_name (controls_base_unselected_name);
 	}
 }
 
