@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libsndfile-1D.lib libsamplerate-0D.lib"
+				AdditionalDependencies="libfftw3-3.lib libfftw3f-3.lib libfftw3l-3.lib libsndfile-1D.lib libsamplerate-0D.lib vampsdkD.lib vamphostsdkD.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32D.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"
@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libsndfile-1.lib libsamplerate-0.lib"
+				AdditionalDependencies="libfftw3-3.lib libfftw3f-3.lib libfftw3l-3.lib libsndfile-1.lib libsamplerate-0.lib vampsdk.lib vamphostsdk.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				SubSystem="2"
@@ -220,7 +220,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libsndfile-1.lib libsamplerate-0.lib"
+				AdditionalDependencies="libfftw3-3.lib libfftw3f-3.lib libfftw3l-3.lib libsndfile-1.lib libsamplerate-0.lib vampsdkRDC.lib vamphostsdkRDC.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32RDC.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"
@@ -272,6 +272,10 @@
 			<Filter
 				Name="General"
 				>
+				<File
+					RelativePath="..\src\general\analyser.cc"
+					>
+				</File>
 				<File
 					RelativePath="..\src\general\broadcast_info.cc"
 					>
