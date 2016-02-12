@@ -112,6 +112,7 @@ libardour_sources = [
         'ltc_file_reader.cc',
         'ltc_slave.cc',
         'luabindings.cc',
+        'luascripting.cc',
         'meter.cc',
         'midi_automation_list_binder.cc',
         'midi_buffer.cc',
