@@ -698,7 +698,7 @@ ExportReport::audition (std::string path, unsigned n_chn, int page)
 										 path, n,
 										 Source::Flag (ARDOUR::AudioFileSource::NoPeakFile), false));
 			if (afs->sample_rate() != _session->nominal_frame_rate()) {
-				boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, ARDOUR::SrcBest));
+				boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, ARDOUR::SrcGood));
 				srclist.push_back(sfs);
 			} else {
 				srclist.push_back(afs);
