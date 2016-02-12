@@ -70,7 +70,7 @@ GroupTabs::set_session (Session* s)
 			_session_connections, invalidator (*this), boost::bind (&GroupTabs::route_removed_from_route_group, this, _1, _2), gui_context()
 			);
 
-		_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&GroupTabs::set_dirty, this), gui_context());
+		_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&GroupTabs::set_dirty, this, (cairo_rectangle_t*)0), gui_context());
 	}
 }
 
