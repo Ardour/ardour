@@ -20,6 +20,7 @@
 #include <gtkmm/notebook.h>
 
 #include "gtkmm2ext/cairo_widget.h"
+#include "gtkmm2ext/gui_thread.h"
 
 #include "ardour/export_status.h"
 
@@ -56,8 +57,14 @@ public:
 	int run ();
 
 private:
-	void open_clicked (std::string);
+	void open_folder (std::string);
+	void audition (std::string, unsigned int);
+	void stop_audition ();
+	void audition_active (bool);
 
-	StatusPtr       status;
-	Gtk::Notebook   pages;
+	StatusPtr        status;
+	Gtk::Notebook    pages;
+	ARDOUR::Session* _session;
+	Gtk::Button*     stop_btn;
+	PBD::ScopedConnectionList auditioner_connections;
 };

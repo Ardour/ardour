@@ -30,8 +30,14 @@
 #include "canvas/colors.h"
 
 #include "ardour/audiofilesource.h"
+#include "ardour/audioregion.h"
+#include "ardour/auditioner.h"
+#include "ardour/dB.h"
+#include "ardour/region_factory.h"
 #include "ardour/session.h"
-#include "ardour/ardour/dB.h"
+#include "ardour/smf_source.h"
+#include "ardour/source_factory.h"
+#include "ardour/srcfilesource.h"
 
 #include "audio_clock.h"
 #include "ui_config.h"
@@ -42,9 +48,10 @@
 using namespace Gtk;
 using namespace ARDOUR;
 
-ExportReport::ExportReport (Session* _session, StatusPtr s)
+ExportReport::ExportReport (Session* session, StatusPtr s)
 	: ArdourDialog (_("Export Report/Analysis"))
 	, status (s)
+	, _session (session)
 {
 	set_resizable (false);
 	pages.set_scrollable ();
@@ -79,8 +86,11 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 		t->attach (*l, 1, 3, 0, 1, FILL, SHRINK);
 
 		Button *b = manage (new Button (_("Open Folder")));
-		t->attach (*b, 3, 4, 0, 2, FILL, SHRINK);
-		b->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::open_clicked), path));
+		t->attach (*b, 3, 4, 0, 1, FILL, SHRINK);
+		b->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::open_folder), path));
+
+		Button *start_btn = manage (new Button (_("Audition")));
+		t->attach (*start_btn, 3, 4, 1, 2, FILL, SHRINK);
 
 		SoundFileInfo info;
 		std::string errmsg;
@@ -88,6 +98,7 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 		framecnt_t file_length = 0;
 		framecnt_t sample_rate = 0;
 		framecnt_t start_off = 0;
+		framecnt_t channels = 0;
 
 		if (AudioFileSource::get_soundfile_info (path, info, errmsg)) {
 			AudioClock * clock;
@@ -95,6 +106,7 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 			file_length = info.length;
 			sample_rate = info.samplerate;
 			start_off = info.timecode;
+			channels = info.channels;
 
 			/* File Info Table */
 
@@ -143,6 +155,12 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 			t->attach (*l, 0, 1, 1, 2);
 			l = manage (new Label (errmsg, ALIGN_START));
 			t->attach (*l, 1, 4, 1, 2);
+		}
+
+		if (channels > 0 && _session) {
+			start_btn->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::audition), path, channels));
+		} else {
+			start_btn->set_sensitive (false);
 		}
 
 		int w, h;
@@ -602,19 +620,109 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 	get_vbox ()->set_spacing (4);
 	get_vbox ()->pack_start (pages, false, false);
 
-	add_button (Stock::CLOSE, RESPONSE_ACCEPT);
-	set_default_response (RESPONSE_ACCEPT);
+	if (_session) {
+		_session->AuditionActive.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_active, this, _1), gui_context());
+		// TODO need a reference to the current page.. and Time-axis image-surface...
+		//_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_progress, this, _1, _2), gui_context());
+	}
+
+	stop_btn = add_button (Stock::MEDIA_STOP, RESPONSE_ACCEPT);
+	add_button (Stock::CLOSE, RESPONSE_CLOSE);
+
+	set_default_response (RESPONSE_CLOSE);
+	stop_btn->signal_clicked().connect (sigc::mem_fun (*this, &ExportReport::stop_audition));
+	stop_btn->set_sensitive (false);
 	show_all ();
 }
 
 int
 ExportReport::run ()
 {
-	return ArdourDialog::run ();
+	while (ArdourDialog::run () != RESPONSE_CLOSE) { }
+	if (_session) {
+		_session->cancel_audition();
+	}
+	return RESPONSE_CLOSE;
 }
 
 void
-ExportReport::open_clicked (std::string p)
+ExportReport::open_folder (std::string p)
 {
 	PBD::open_uri (Glib::path_get_dirname(p));
+}
+
+void
+ExportReport::audition_active (bool active)
+{
+	stop_btn->set_sensitive (active);
+}
+
+void
+ExportReport::audition (std::string path, unsigned n_chn)
+{
+	assert (_session);
+	_session->cancel_audition();
+
+	/* can't really happen, unless the user replaces the file while the dialog is open.. */
+	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		PBD::warning << string_compose(_("Could not read file: %1 (%2)."), path, strerror(errno)) << endmsg;
+		return;
+	}
+	if (SMFSource::valid_midi_file (path)) { return; }
+
+	boost::shared_ptr<Region> r;
+	SourceList srclist;
+	boost::shared_ptr<AudioFileSource> afs;
+	bool old_sbp = AudioSource::get_build_peakfiles ();
+
+	/* don't even think of building peakfiles for these files */
+	AudioSource::set_build_peakfiles (false);
+
+	for (int n = 0; n < n_chn; ++n) {
+		try {
+			afs = boost::dynamic_pointer_cast<AudioFileSource> (
+				SourceFactory::createExternal (DataType::AUDIO, *_session,
+										 path, n,
+										 Source::Flag (ARDOUR::AudioFileSource::NoPeakFile), false));
+			if (afs->sample_rate() != _session->nominal_frame_rate()) {
+				boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, ARDOUR::SrcBest));
+				srclist.push_back(sfs);
+			} else {
+				srclist.push_back(afs);
+			}
+		} catch (failed_constructor& err) {
+			PBD::error << _("Could not access soundfile: ") << path << endmsg;
+			AudioSource::set_build_peakfiles (old_sbp);
+			return;
+		}
+	}
+
+	AudioSource::set_build_peakfiles (old_sbp);
+
+	if (srclist.empty()) {
+		return;
+	}
+
+	afs = boost::dynamic_pointer_cast<AudioFileSource> (srclist[0]);
+	std::string rname = region_name_from_path (afs->path(), false);
+
+	PBD::PropertyList plist;
+
+	plist.add (ARDOUR::Properties::start, 0);
+	plist.add (ARDOUR::Properties::length, srclist[0]->length(srclist[0]->timeline_position()));
+	plist.add (ARDOUR::Properties::name, rname);
+	plist.add (ARDOUR::Properties::layer, 0);
+
+	r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
+
+	r->set_position(0);
+	_session->audition_region(r);
+}
+
+void
+ExportReport::stop_audition ()
+{
+	if (_session) {
+		_session->cancel_audition();
+	}
 }
