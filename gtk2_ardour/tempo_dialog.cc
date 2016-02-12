@@ -47,7 +47,7 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	Tempo tempo (map.tempo_at (frame));
 	map.bbt_time (frame, when);
 
-	init (when, tempo.beats_per_minute(), tempo.note_type(), TempoSection::Type::Constant, true);
+	init (when, tempo.beats_per_minute(), tempo.note_type(), TempoSection::Constant, true);
 }
 
 TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
@@ -110,9 +110,9 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 
 	strings.clear();
 
-	tempo_types.insert (make_pair (_("ramped"), TempoSection::Type::Ramp));
+	tempo_types.insert (make_pair (_("ramped"), TempoSection::Ramp));
 	strings.push_back (_("ramped"));
-	tempo_types.insert (make_pair (_("constant"), TempoSection::Type::Constant));
+	tempo_types.insert (make_pair (_("constant"), TempoSection::Constant));
 	strings.push_back (_("constant"));
 	set_popdown_strings (tempo_type, strings);
 	TempoTypes::iterator tt;
@@ -290,7 +290,7 @@ TempoDialog::get_tempo_type ()
 
 	if (x == tempo_types.end()) {
 		error << string_compose(_("incomprehensible tempo type (%1)"), tempo_type.get_active_text()) << endmsg;
-		return TempoSection::Type::Constant;
+		return TempoSection::Constant;
 	}
 
 	return x->second;
