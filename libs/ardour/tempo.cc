@@ -141,12 +141,12 @@ TempoSection::TempoSection (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("tempo-type")) == 0) {
-		_type = Type::Constant;
+		_type = Constant;
 	} else {
 		if (strstr(prop->value().c_str(),"Constant")) {
-			_type = Type::Constant;
+			_type = Constant;
 		} else {
-			_type = Type::Ramp;
+			_type = Ramp;
 		}
 	}
 }
@@ -487,7 +487,7 @@ TempoMap::TempoMap (framecnt_t fr)
 	start.beats = 1;
 	start.ticks = 0;
 
-	TempoSection *t = new TempoSection (0.0, _default_tempo.beats_per_minute(), _default_tempo.note_type(), TempoSection::Type::Constant);
+	TempoSection *t = new TempoSection (0.0, _default_tempo.beats_per_minute(), _default_tempo.note_type(), TempoSection::Constant);
 	MeterSection *m = new MeterSection (0.0, start, _default_meter.divisions_per_bar(), _default_meter.note_divisor());
 
 	t->set_movable (false);
@@ -1070,7 +1070,7 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 				/* this walk shouldn't be needed as given c, time a = log (Ta / T0) / c. what to do? */
 				double length_estimate = beats_relative_to_prev_ts * av_fpb;
 
-				if (prev_ts->type() == TempoSection::Type::Constant) {
+				if (prev_ts->type() == TempoSection::Constant) {
 					length_estimate = beats_relative_to_prev_ts * prev_ts->frames_per_beat (_frame_rate);
 				}
 

@@ -22,7 +22,7 @@ FrameposPlusBeatsTest::singleTempoTest ()
 	Meter meter (4, 4);
 
 	map.add_meter (meter, 0.0, BBT_Time (1, 1, 0));
-	map.add_tempo (tempo, 0.0, TempoSection::Type::Constant);
+	map.add_tempo (tempo, 0.0, TempoSection::Constant);
 
 	/* Add 1 beat to beat 3 of the first bar */
 	framepos_t r = map.framepos_plus_beats (frames_per_beat * 2, Evoral::Beats(1));
@@ -62,9 +62,9 @@ FrameposPlusBeatsTest::doubleTempoTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, 0.0, TempoSection::Type::Constant);
+	map.add_tempo (tempoA, 0.0, TempoSection::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 12.0, TempoSection::Type::Constant);
+	map.add_tempo (tempoB, 12.0, TempoSection::Constant);
 
 	/* Now some tests */
 
@@ -114,9 +114,9 @@ FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, 0.0, TempoSection::Type::Constant);
+	map.add_tempo (tempoA, 0.0, TempoSection::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 12.0, TempoSection::Type::Constant);
+	map.add_tempo (tempoB, 12.0, TempoSection::Constant);
 	Meter meterB (3, 4);
 	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0));
 

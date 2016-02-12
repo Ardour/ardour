@@ -35,9 +35,9 @@ TempoTest::recomputeMapTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, 0.0, TempoSection::Type::Constant);
+	map.add_tempo (tempoA, 0.0, TempoSection::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 12.0, TempoSection::Type::Constant);
+	map.add_tempo (tempoB, 12.0, TempoSection::Constant);
 	Meter meterB (3, 4);
 	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0));
 
