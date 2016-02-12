@@ -33,7 +33,7 @@
 namespace AudioGrapher
 {
 
-class /*LIBAUDIOGRAPHER_API*/ Analyser : public ListedSource<float>, public Sink<float>
+class LIBAUDIOGRAPHER_API Analyser : public ListedSource<float>, public Sink<float>
 {
   public:
 	Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize, framecnt_t n_samples);
