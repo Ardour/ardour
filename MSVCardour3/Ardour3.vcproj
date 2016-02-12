@@ -1248,10 +1248,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\volume_controller.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\vst_plugin_ui.cc"
 				>
 			</File>
@@ -2279,10 +2275,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\visibility_group.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\volume_controller.h"
 				>
 			</File>
 			<File

@@ -378,10 +378,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\motionfeedback.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\paths_dialog.cc"
 				>
 			</File>
@@ -399,10 +395,6 @@
 			</File>
 			<File
 				RelativePath="..\popup.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\prolooks_helpers.c"
 				>
 			</File>
 			<File
@@ -596,10 +588,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtkmm2ext\motionfeedback.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtkmm2ext\persistent_tooltip.h"
 				>
 			</File>
@@ -613,10 +601,6 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\popup.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\prolooks-helpers.h"
 				>
 			</File>
 			<File
