@@ -221,11 +221,11 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 			layout->show_in_cairo_context (cr);
 
 			layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
-			layout->set_text (string_compose (_("%1 dBFS"), std::setprecision (1), std::fixed,
-						accurate_coefficient_to_dB (p->peak)));
+			layout->set_text (string_compose (_("%1 dBFS"), std::setprecision (1), std::fixed, dbfs));
 			layout->get_pixel_size (w, h);
 			cr->move_to (rint (nw2 - w * .5), y0[1]);
-			if (p->peak > .944) { cr->set_source_rgba (1.0, .5, .5, 1.0); }
+			if (dbfs >= 0.f) { cr->set_source_rgba (1.0, .1, .1, 1.0); }
+			else if (dbfs > -1.f) { cr->set_source_rgba (1.0, .7, .0, 1.0); }
 			layout->show_in_cairo_context (cr);
 
 			if (p->have_dbtp) {
@@ -237,11 +237,11 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 				layout->show_in_cairo_context (cr);
 
 				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
-				layout->set_text (string_compose (_("%1 dBTP"), std::setprecision (1), std::fixed,
-						accurate_coefficient_to_dB (p->truepeak)));
+				layout->set_text (string_compose (_("%1 dBTP"), std::setprecision (1), std::fixed, dbtp));
 				layout->get_pixel_size (w, h);
 				cr->move_to (rint (nw2 - w * .5), y0[3]);
-				if (p->truepeak > .944) { cr->set_source_rgba (1.0, .5, .5, 1.0); }
+				if (dbtp >= 0.f) { cr->set_source_rgba (1.0, .1, .1, 1.0); }
+				else if (dbtp > -1.f) { cr->set_source_rgba (1.0, .7, .0, 1.0); }
 				layout->show_in_cairo_context (cr);
 			}
 
@@ -423,6 +423,29 @@ ExportReport::ExportReport (Session* _session, StatusPtr s)
 				cr->line_to (m_l + x - .5, height_2 - height_2 * p->peaks[c][x].min);
 			}
 			cr->stroke ();
+
+			// > 0dBFS
+			cr->set_source_rgba (1.0, 0, 0, 1.0);
+			for (size_t x = 0 ; x < width; ++x) {
+				if (p->peaks[c][x].max >= 1.0) {
+					cr->move_to (m_l + x - .5, 0);
+					cr->line_to (m_l + x - .5, height_2 * .22);
+				}
+				if (p->peaks[c][x].min <= -1.0) {
+					cr->move_to (m_l + x - .5, height_2 * 1.78);
+					cr->line_to (m_l + x - .5, height_2 * 2.);
+				}
+			}
+			cr->stroke ();
+
+
+			// > -1dBTP
+			cr->set_source_rgba (1.0, 0.7, 0, 0.7);
+			for (std::set<framepos_t>::const_iterator i = p->truepeakpos[c].begin (); i != p->truepeakpos[c].end (); ++i) {
+				cr->move_to (m_l + (*i) - .5, height_2 * 0.22);
+				cr->line_to (m_l + (*i) - .5, height_2 * 1.78);
+				cr->stroke ();
+			}
 
 			// zero line
 			cr->set_source_rgba (.3, .3, .3, 0.7);
