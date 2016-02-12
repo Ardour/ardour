@@ -248,13 +248,21 @@ Analyser::result ()
 		}
 	}
 
+	const unsigned cmask = _result.n_channels - 1; // [0, 1]
 	for (unsigned int c = 0; c < _channels; ++c) {
 		if (!_dbtp_plugin[c]) { continue; }
 		Vamp::Plugin::FeatureSet features = _dbtp_plugin[c]->getRemainingFeatures ();
-		if (!features.empty () && features.size () == 1) {
+		if (!features.empty () && features.size () == 2) {
 			_result.have_dbtp = true;
 			float p = features[0][0].values[0];
 			if (p > _result.truepeak) { _result.truepeak = p; }
+
+			for (std::vector<float>::const_iterator i = features[1][0].values.begin();
+					i != features[1][0].values.end(); ++i) {
+				const framecnt_t pk = (*i) / _spp;
+				const unsigned int cc = c & cmask;
+				_result.truepeakpos[cc].insert (pk);
+			}
 		}
 	}
 

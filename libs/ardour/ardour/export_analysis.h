@@ -20,6 +20,7 @@
 #define __ardour_export_analysis_h__
 
 #include <map>
+#include <set>
 #include <cstring>
 #include <boost/shared_ptr.hpp>
 
@@ -53,6 +54,7 @@ namespace ARDOUR {
 			, have_loudness (other.have_loudness)
 			, have_dbtp (other.have_dbtp)
 			, n_channels (other.n_channels)
+			, truepeakpos (other.truepeakpos)
 		{
 			memcpy (peaks, other.peaks, sizeof(peaks));
 			memcpy (spectrum, other.spectrum, sizeof(spectrum));
@@ -74,6 +76,7 @@ namespace ARDOUR {
 
 		PeakData peaks[2][800];
 		float spectrum[800][200];
+		std::set<framecnt_t> truepeakpos[2]; // bins with >= -1dBTB
 	};
 
 	typedef boost::shared_ptr<ExportAnalysis> ExportAnalysisPtr;
