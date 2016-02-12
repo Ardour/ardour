@@ -130,6 +130,7 @@ private:
 	float      _m;
 	float      _p;
 	bool       _res;
+	bool       _res_peak;
 	float     *_buf;
 	Resampler  _src;
 };
@@ -169,6 +170,8 @@ protected:
 
 private:
 	TruePeakMeter::TruePeakdsp _meter;
+	Feature _above_m1;
+	unsigned int m_rate;
 };
 
 #endif

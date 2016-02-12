@@ -386,32 +386,32 @@ TruePeakdsp::process (float const *d, int n)
 	_src.out_data = _buf;
 	_src.process ();
 
-	float m = _res ? 0 : _m;
-	float p = _res ? 0 : _p;
+	float x = 0;
 	float v;
 	float *b = _buf;
 	while (n--) {
 		v = fabsf(*b++);
-		if (v > m) m = v;
-		if (v > p) p = v;
+		if (v > x) x = v;
 		v = fabsf(*b++);
-		if (v > m) m = v;
-		if (v > p) p = v;
+		if (v > x) x = v;
 		v = fabsf(*b++);
-		if (v > m) m = v;
-		if (v > p) p = v;
+		if (v > x) x = v;
 		v = fabsf(*b++);
-		if (v > m) m = v;
-		if (v > p) p = v;
+		if (v > x) x = v;
 	}
 
 	if (_res) {
-		_m = m;
-		_p = p;
+		_m = x;
 		_res = false;
-	} else {
-		if (m > _m) { _m = m; }
-		if (p > _p) { _p = p; }
+	} else if (x > _m) {
+		_m = x;
+	}
+
+	if (_res_peak) {
+		_p = x;
+		_res_peak = false;
+	} else if (x > _p) {
+		_p = x;
 	}
 }
 
@@ -426,6 +426,7 @@ void
 TruePeakdsp::read (float &m, float &p)
 {
 	_res = true;
+	_res_peak = true;
 	m = _m;
 	p = _p;
 }
@@ -469,6 +470,7 @@ using namespace TruePeakMeter;
 VampTruePeak::VampTruePeak(float inputSampleRate)
     : Plugin(inputSampleRate)
     , m_blockSize(0)
+    , m_rate (inputSampleRate)
 {
 }
 
@@ -554,6 +556,17 @@ VampTruePeak::getOutputDescriptors() const
 	zc.sampleType = OutputDescriptor::OneSamplePerStep;
 	list.push_back(zc);
 
+	zc.identifier = "peaks";
+	zc.name = "TruePeakPeaks";
+	zc.description = "Location of Peaks above -1dBTP";
+	zc.unit = "sec";
+	zc.hasFixedBinCount = true;
+	zc.binCount = 0;
+	zc.hasKnownExtents = false;
+	zc.isQuantized = false;
+	zc.sampleType = OutputDescriptor::OneSamplePerStep;
+	list.push_back(zc);
+
 	return list;
 }
 
@@ -570,7 +583,12 @@ VampTruePeak::process(const float *const *inputBuffers,
 
 	_meter.process (inputBuffers[0], m_blockSize);
 
-	// TODO return momentary
+	// TODO optional (not rt safe)
+	if (_meter.read () >= .89125 /* -1dBTP */) {
+		long f = Vamp::RealTime::realTime2Frame (timestamp, m_rate);
+		_above_m1.values.push_back ((float) f);
+	}
+
 	return FeatureSet();
 }
 
@@ -586,6 +604,9 @@ VampTruePeak::getRemainingFeatures()
 	dbtp.hasTimestamp = false;
 	dbtp.values.push_back(p);
 	returnFeatures[0].push_back(dbtp);
+
+	_above_m1.hasTimestamp = false;
+	returnFeatures[1].push_back(_above_m1);
 
 	return returnFeatures;
 }
