@@ -880,6 +880,8 @@ EngineControl::update_sensitivity ()
 	} else {
 		update_devices_button.set_sensitive(false);
 		update_devices_button.hide();
+		use_buffered_io_button.set_sensitive(false);
+		use_buffered_io_button.hide();
 		start_stop_button.set_sensitive(false);
 		start_stop_button.hide();
 	}
