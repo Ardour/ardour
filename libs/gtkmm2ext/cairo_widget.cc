@@ -230,10 +230,14 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
  */
 
 void
-CairoWidget::set_dirty ()
+CairoWidget::set_dirty (cairo_rectangle_t *area)
 {
 	ENSURE_GUI_THREAD (*this, &CairoWidget::set_dirty);
-	queue_draw ();
+	if (!area) {
+		queue_draw ();
+	} else {
+		queue_draw_area (area->x, area->y, area->width, area->height);
+	}
 }
 
 /** Handle a size allocation.

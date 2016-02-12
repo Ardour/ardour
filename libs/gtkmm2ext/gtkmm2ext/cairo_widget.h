@@ -35,7 +35,7 @@ public:
 	CairoWidget ();
 	virtual ~CairoWidget ();
 
-	void set_dirty ();
+	void set_dirty (cairo_rectangle_t *area = 0);
 
 	Gtkmm2ext::ActiveState active_state() const { return _active_state; }
 	Gtkmm2ext::VisualState visual_state() const { return _visual_state; }
