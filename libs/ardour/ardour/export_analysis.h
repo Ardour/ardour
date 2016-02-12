@@ -54,8 +54,9 @@ namespace ARDOUR {
 			, have_loudness (other.have_loudness)
 			, have_dbtp (other.have_dbtp)
 			, n_channels (other.n_channels)
-			, truepeakpos (other.truepeakpos)
 		{
+			truepeakpos[0] = other.truepeakpos[0];
+			truepeakpos[1] = other.truepeakpos[1];
 			memcpy (peaks, other.peaks, sizeof(peaks));
 			memcpy (spectrum, other.spectrum, sizeof(spectrum));
 			memcpy (loudness_hist, other.loudness_hist, sizeof(loudness_hist));
