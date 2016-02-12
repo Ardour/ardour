@@ -90,6 +90,7 @@ ExportFilename::get_state ()
 
 	add_field (node, "label", include_label, label);
 	add_field (node, "session", include_session);
+	add_field (node, "timespan", include_timespan);
 	add_field (node, "revision", include_revision);
 	add_field (node, "time", include_time, enum_2_string (time_format));
 	add_field (node, "date", include_date, enum_2_string (date_format));
@@ -139,6 +140,9 @@ ExportFilename::set_state (const XMLNode & node)
 
 	pair = get_field (node, "session");
 	include_session = pair.first;
+
+	pair = get_field (node, "timespan");
+	include_timespan = pair.first;
 
 	pair = get_field (node, "revision");
 	include_revision = pair.first;
