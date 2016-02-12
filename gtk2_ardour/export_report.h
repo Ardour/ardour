@@ -63,10 +63,16 @@ public:
 	}
 
 	void set_playhead (float pos) {
-		// TODO re-expose minimal area only, old playhead pos, new playead pos
-		if (_playhead == pos) { return; }
+		if (rint (_playhead * _aw) == rint (pos * _aw)) {
+			return;
+		}
+		if (_playhead == -1 || pos == -1) {
+			set_dirty ();
+		} else {
+			invalidate (_playhead);
+			invalidate (pos);
+		}
 		_playhead = pos;
-		set_dirty ();
 	}
 
 	void set_audition_axis (float x0, float w) {
@@ -78,6 +84,17 @@ private:
 	Cairo::RefPtr<Cairo::ImageSurface> _surface;
 	float _playhead;
 	float _x0, _aw;
+
+	void invalidate (float pos) {
+		if (pos < 0 || pos > 1) { return; }
+		const float x = pos * _aw;
+		cairo_rectangle_t r;
+		r.y = 0;
+		r.x = _x0 + x - 1;
+		r.width = 3;
+		r.height = _surface->get_height();
+		set_dirty (&r);
+	}
 };
 
 class ExportReport : public ArdourDialog
