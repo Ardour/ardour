@@ -4088,10 +4088,10 @@ framepos_t
 MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, framecnt_t& grid_frames) const
 {
 	PublicEditor& editor = trackview.editor ();
-
+	const Evoral::Beats p_beat = region_frames_to_region_beats (p);
 	const Evoral::Beats grid_beats = get_grid_beats(p);
 
-	grid_frames = region_beats_to_region_frames (grid_beats);
+	grid_frames = region_beats_to_region_frames (p_beat + grid_beats) - region_beats_to_region_frames (p_beat);
 
 	/* Hack so that we always snap to the note that we are over, instead of snapping
 	   to the next one if we're more than halfway through the one we're over.
