@@ -48,11 +48,11 @@ ExportFilenameSelector::ExportFilenameSelector () :
 	pack_start (example_filename_label, false, false, 12);
 
 	include_hbox.pack_start (session_checkbox, false, false, 3);
-	include_hbox.pack_start (timespan_checkbox, false, false, 3);
 	include_hbox.pack_start (label_label, false, false, 3);
 	include_hbox.pack_start (label_entry, false, false, 3);
 	include_hbox.pack_start (revision_checkbox, false, false, 3);
 	include_hbox.pack_start (revision_spinbutton, false, false, 3);
+	include_hbox.pack_start (timespan_checkbox, false, false, 3);
 	include_hbox.pack_start (date_format_combo, false, false, 3);
 	include_hbox.pack_start (time_format_combo, false, false, 3);
 
@@ -303,13 +303,26 @@ ExportFilenameSelector::update_timespan_sensitivity ()
 			&& !filename->include_format_name) {
 		implicit = true;
 	}
-	timespan_checkbox.set_inconsistent (implicit);
+
+	// remember prev state, force enable if implicit active.
+	if (implicit && !timespan_checkbox.get_inconsistent()) {
+		timespan_checkbox.set_inconsistent (true);
+		filename->include_timespan = true;
+	}
+	else if (!implicit && timespan_checkbox.get_inconsistent()) {
+		filename->include_timespan = timespan_checkbox.get_active();
+		timespan_checkbox.set_inconsistent (false);
+	}
+
 }
 
 void
 ExportFilenameSelector::change_timespan_selection ()
 {
 	if (!filename) {
+		return;
+	}
+	if (timespan_checkbox.get_inconsistent()) {
 		return;
 	}
 
