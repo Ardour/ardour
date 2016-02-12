@@ -311,6 +311,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\portaudio\midi_device_info.h"
+				>
+			</File>
+			<File
 				RelativePath="..\portaudio\midi_util.h"
 				>
 			</File>
