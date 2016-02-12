@@ -32,6 +32,9 @@ public:
 	CimgArea (Cairo::RefPtr<Cairo::ImageSurface> sf)
 		: CairoWidget()
 		, _surface(sf)
+		, _playhead(-1)
+		, _x0 (0)
+		, _aw (0)
 	{
 		set_size_request (sf->get_width (), sf->get_height ());
 	}
@@ -43,10 +46,38 @@ public:
 		cairo_set_source_surface (cr, _surface->cobj(), 0, 0);
 		cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 		cairo_paint (cr);
+
+		if (_playhead > 0 && _playhead < 1.0 && _aw > 0) {
+			cairo_rectangle (cr, _x0, 0, _aw, _surface->get_height());
+			cairo_set_source_rgba (cr, .4, .4, .6, .4);
+			cairo_fill (cr);
+
+			const float x = _playhead * _aw;
+			const float h = _surface->get_height();
+			cairo_set_source_rgba (cr, 1, 0, 0, 1);
+			cairo_set_line_width (cr, 1.5);
+			cairo_move_to (cr, _x0 + x, 0);
+			cairo_line_to (cr, _x0 + x, h);
+			cairo_stroke (cr);
+		}
+	}
+
+	void set_playhead (float pos) {
+		// TODO re-expose minimal area only, old playhead pos, new playead pos
+		if (_playhead == pos) { return; }
+		_playhead = pos;
+		set_dirty ();
+	}
+
+	void set_audition_axis (float x0, float w) {
+		_x0 = x0;
+		_aw = w;
 	}
 
 private:
 	Cairo::RefPtr<Cairo::ImageSurface> _surface;
+	float _playhead;
+	float _x0, _aw;
 };
 
 class ExportReport : public ArdourDialog
@@ -58,13 +89,19 @@ public:
 
 private:
 	void open_folder (std::string);
-	void audition (std::string, unsigned int);
+	void audition (std::string, unsigned int, int);
 	void stop_audition ();
 	void audition_active (bool);
+	void audition_progress (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
+	void on_switch_page (GtkNotebookPage*, guint page_num);
 
 	StatusPtr        status;
 	Gtk::Notebook    pages;
 	ARDOUR::Session* _session;
 	Gtk::Button*     stop_btn;
 	PBD::ScopedConnectionList auditioner_connections;
+
+	std::vector<CimgArea*> timeline;
+	int _audition_num;
+	int _page_num;
 };

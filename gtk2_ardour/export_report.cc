@@ -52,6 +52,8 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 	: ArdourDialog (_("Export Report/Analysis"))
 	, status (s)
 	, _session (session)
+	, _audition_num (-1)
+	, _page_num (0)
 {
 	set_resizable (false);
 	pages.set_scrollable ();
@@ -62,7 +64,8 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 	dashes.push_back (3.0);
 	dashes.push_back (5.0);
 
-	for (AnalysisResults::iterator i = ar.begin (); i != ar.end (); ++i) {
+	int page = 0;
+	for (AnalysisResults::iterator i = ar.begin (); i != ar.end (); ++i, ++page) {
 		Label *l;
 		VBox *vb = manage (new VBox ());
 		Table *t = manage (new Table (4, 4));
@@ -98,7 +101,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		framecnt_t file_length = 0;
 		framecnt_t sample_rate = 0;
 		framecnt_t start_off = 0;
-		framecnt_t channels = 0;
+		unsigned int channels = 0;
 
 		if (AudioFileSource::get_soundfile_info (path, info, errmsg)) {
 			AudioClock * clock;
@@ -157,8 +160,8 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			t->attach (*l, 1, 4, 1, 2);
 		}
 
-		if (channels > 0 && _session) {
-			start_btn->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::audition), path, channels));
+		if (channels > 0 && file_length > 0 && sample_rate > 0 && _session) {
+			start_btn->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::audition), path, channels, page));
 		} else {
 			start_btn->set_sensitive (false);
 		}
@@ -499,7 +502,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			vb->pack_start (*wv);
 		}
 
-		if (file_length > 0 && sample_rate > 0)
+		if (channels > 0 && file_length > 0 && sample_rate > 0)
 		{
 			/* Time Axis  -- re-use waveform width */
 			const size_t width = sizeof (p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
@@ -550,7 +553,11 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 
 			ytme->flush ();
 			CimgArea *tm = manage (new CimgArea (ytme));
+			tm->set_audition_axis (m_l, width);
+			timeline.push_back (tm);
 			vb->pack_start (*tm);
+		} else {
+			timeline.push_back (0);
 		}
 
 		{
@@ -610,6 +617,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		}
 
 		pages.pages ().push_back (Notebook_Helpers::TabElem (*vb, Glib::path_get_basename (i->first)));
+		pages.signal_switch_page().connect (sigc::mem_fun (*this, &ExportReport::on_switch_page));
 	}
 
 	pages.set_show_tabs (true);
@@ -622,8 +630,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 
 	if (_session) {
 		_session->AuditionActive.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_active, this, _1), gui_context());
-		// TODO need a reference to the current page.. and Time-axis image-surface...
-		//_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_progress, this, _1, _2), gui_context());
+		_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_progress, this, _1, _2), gui_context());
 	}
 
 	stop_btn = add_button (Stock::MEDIA_STOP, RESPONSE_ACCEPT);
@@ -638,7 +645,13 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 int
 ExportReport::run ()
 {
-	while (ArdourDialog::run () != RESPONSE_CLOSE) { }
+	do {
+		int i = ArdourDialog::run ();
+		if (i == Gtk::RESPONSE_DELETE_EVENT || i == RESPONSE_CLOSE) {
+			break;
+		}
+	} while (1);
+
 	if (_session) {
 		_session->cancel_audition();
 	}
@@ -658,7 +671,7 @@ ExportReport::audition_active (bool active)
 }
 
 void
-ExportReport::audition (std::string path, unsigned n_chn)
+ExportReport::audition (std::string path, unsigned n_chn, int page)
 {
 	assert (_session);
 	_session->cancel_audition();
@@ -678,7 +691,7 @@ ExportReport::audition (std::string path, unsigned n_chn)
 	/* don't even think of building peakfiles for these files */
 	AudioSource::set_build_peakfiles (false);
 
-	for (int n = 0; n < n_chn; ++n) {
+	for (unsigned int n = 0; n < n_chn; ++n) {
 		try {
 			afs = boost::dynamic_pointer_cast<AudioFileSource> (
 				SourceFactory::createExternal (DataType::AUDIO, *_session,
@@ -717,12 +730,37 @@ ExportReport::audition (std::string path, unsigned n_chn)
 
 	r->set_position(0);
 	_session->audition_region(r);
+	_audition_num = page;
 }
 
 void
 ExportReport::stop_audition ()
 {
+	if (_audition_num == _page_num) {
+		assert (timeline[_audition_num]);
+		timeline[_audition_num]->set_playhead (-1);
+	}
 	if (_session) {
 		_session->cancel_audition();
+	}
+	_audition_num = -1;
+}
+
+void
+ExportReport::on_switch_page (GtkNotebookPage*, guint page_num)
+{
+	if (_audition_num == _page_num) {
+		assert (timeline[_audition_num]);
+		timeline[_audition_num]->set_playhead (-1);
+	}
+	_page_num = page_num;
+}
+
+void
+ExportReport::audition_progress (framecnt_t pos, framecnt_t len)
+{
+	if (_audition_num == _page_num) {
+		assert (timeline[_audition_num]);
+		timeline[_audition_num]->set_playhead ((float)pos / len);
 	}
 }
