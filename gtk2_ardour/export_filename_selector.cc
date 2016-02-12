@@ -40,7 +40,7 @@ ExportFilenameSelector::ExportFilenameSelector () :
 	example_filename_label ("", Gtk::ALIGN_LEFT),
 	_require_timespan (false)
 {
-	include_label.set_markup (_("<i>Build filename(s) from these components:</i>"));
+	include_label.set_markup (_("Build filename(s) from these components:"));
 
 	pack_start (path_hbox, false, false, 12);
 	pack_start (include_label, false, false, 6);
@@ -212,7 +212,7 @@ ExportFilenameSelector::set_example_filename (std::string filename)
 	if (filename == "") {
 		example_filename_label.set_markup (_("<small><i>Sorry, no example filename can be shown at the moment</i></small>"));
 	} else {
-		example_filename_label.set_markup (string_compose(_("<small><i>Current (approximate) filename: \"%1\"</i></small>"), filename));
+		example_filename_label.set_markup (string_compose(_("<i>Current (approximate) filename</i>: \"%1\""), filename));
 	}
 }
 
