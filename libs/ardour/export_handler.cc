@@ -355,15 +355,17 @@ ExportHandler::finish_timespan ()
 			subs.insert (std::pair<char, std::string> ('n', session.name ()));
 
 			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs);
+			info << "Post-export command line : {" << se->GetString() << "}" << endmsg;
 			se->ReadStdout.connect_same_thread(command_connection, boost::bind(&ExportHandler::command_output, this, _1, _2));
-			if (se->start (2) == 0) {
+			int ret = se->start (2);
+			if (ret == 0) {
 				// successfully started
 				while (se->is_running ()) {
 					// wait for system exec to terminate
 					Glib::usleep (1000);
 				}
 			} else {
-				error << "post-export hook failed! " << fmt->command() << endmsg;
+				error << "Post-export command FAILED with Error: " << ret << endmsg;
 			}
 			delete (se);
 		}

@@ -282,6 +282,18 @@ SystemExec::make_argp_escaped(std::string command, const std::map<char, std::str
 	argp[n] = NULL;
 }
 
+string
+SystemExec::GetString ()
+{
+	stringstream out;
+	if (argp) {
+		for (int i = 0; argp[i]; ++i) {
+			out << argp[i];
+		}
+	}
+	return out.str();
+}
+
 SystemExec::~SystemExec ()
 {
 	terminate ();

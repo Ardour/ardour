@@ -115,6 +115,8 @@ class LIBPBD_API SystemExec
 
 		virtual ~SystemExec ();
 
+		std::string GetString();
+
 		/** fork and execute the given program
 		 *
 		 * @param stderr_mode select what to do with program's standard error
