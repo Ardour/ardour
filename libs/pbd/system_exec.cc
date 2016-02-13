@@ -215,7 +215,7 @@ SystemExec::SystemExec (std::string command, const std::map<char, std::string> s
 		for (int i = 1; argp[i]; ++i) {
 			std::string tmp (argp[i]);
 			while (tmp.find("\"") != std::string::npos)
-				tmp.replace(s.find("\""), 1, "\\\"");
+				tmp.replace(tmp.find("\""), 1, "\\\"");
 			wa += " \"";
 			wa += tmp;
 			wa += '"';
