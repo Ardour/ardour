@@ -201,12 +201,27 @@ SystemExec::SystemExec (std::string command, const std::map<char, std::string> s
 	make_argp_escaped(command, subs);
 
 #ifdef PLATFORM_WINDOWS
-	std::string wa;
-	for (int i = 0; argp[i]; ++i) {
-		if (!wa.empty ()) wa += " ";
-		wa += '"' + argp[i] + '"';
+	if (argp[0] && strlen (argp[0]) > 0) {
+		std::string wa = argp[0];
+		// only add quotes to command if required..
+		if (argp[0][0] != '"'
+				&& argp[0][strlen(argp[0])-1] != '"'
+				&& strchr(argp[0], ' ')) {
+			wa = "\"";
+			wa += argp[0];
+			wa += "\"";
+		}
+		// ...but always quote all args
+		for (int i = 1; argp[i]; ++i) {
+			std::string tmp (argp[i]);
+			while (tmp.find("\"") != std::string::npos)
+				tmp.replace(s.find("\""), 1, "\\\"");
+			wa += " \"";
+			wa += tmp
+			wa += '"';
+		}
+		w_args = strdup(wa.c_str());
 	}
-	w_args = strdup(wa.c_str());
 #else
 	if (find_file (Searchpath (Glib::getenv ("PATH")), argp[0], cmd)) {
 		// argp[0] exists in $PATH` - set it to the actual path where it was found
@@ -323,6 +338,9 @@ interposer_thread (void *arg) {
 string
 SystemExec::to_s () const
 {
+#ifdef PLATFORM_WINDOWS
+	return string (w_args ? w_args :: "");
+#else
 	stringstream out;
 	if (argp) {
 		for (int i = 0; argp[i]; ++i) {
@@ -330,6 +348,7 @@ SystemExec::to_s () const
 		}
 	}
 	return out.str();
+#endif
 }
 
 #ifdef PLATFORM_WINDOWS /* Windows Process */
