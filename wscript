@@ -203,6 +203,7 @@ children = [
         'libs/qm-dsp',
         'libs/vamp-plugins',
         'libs/libltc',
+        'libs/lua',
         'libs/ptformat',
         # core ardour libraries
         'libs/pbd',

@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+from waflib import TaskGen
+import os
+import sys
+
+# Variables for 'waf dist'
+APPNAME = 'liblua'
+VERSION = "3.5.1"
+I18N_PACKAGE = 'liblua'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    conf.load('compiler_c')
+    autowaf.configure(conf)
+
+def build(bld):
+    obj=bld.stlib (source = ['lua.cc', 'luastate.cc'],
+               cflags = [ '-fPIC' ],
+               cxxflags = [ '-fPIC' ],
+               includes = ['.'],
+               export_includes = ['.'],
+               target = 'liblua',
+               uselib = [ 'SIGCPP', 'DL' ]
+               )
+    autowaf.ensure_visible_symbols (obj, True)
+
+def shutdown():
+    autowaf.shutdown()
