@@ -170,6 +170,7 @@ SystemExec::init ()
 	stdinP[0] = stdinP[1] = INVALID_HANDLE_VALUE;
 	stdoutP[0] = stdoutP[1] = INVALID_HANDLE_VALUE;
 	stderrP[0] = stderrP[1] = INVALID_HANDLE_VALUE;
+	w_args = NULL;
 #endif
 }
 
@@ -199,6 +200,14 @@ SystemExec::SystemExec (std::string command, const std::map<char, std::string> s
 	init ();
 	make_argp_escaped(command, subs);
 
+#ifdef PLATFORM_WINDOWS
+	std::string wa;
+	for (int i = 0; argp[i]; ++i) {
+		if (!wa.empty ()) wa += " ";
+		wa += '"' + argp[i] + '"';
+	}
+	w_args = strdup(wa.c_str());
+#else
 	if (find_file (Searchpath (Glib::getenv ("PATH")), argp[0], cmd)) {
 		// argp[0] exists in $PATH` - set it to the actual path where it was found
 		free (argp[0]);
@@ -208,7 +217,7 @@ SystemExec::SystemExec (std::string command, const std::map<char, std::string> s
 
 	// Glib::find_program_in_path () is only available in Glib >= 2.28
 	// cmd = Glib::find_program_in_path (argp[0]);
-
+#endif
 	make_envp();
 }
 
