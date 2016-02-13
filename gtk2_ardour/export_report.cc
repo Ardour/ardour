@@ -554,6 +554,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			ytme->flush ();
 			CimgArea *tm = manage (new CimgArea (ytme));
 			tm->set_audition_axis (m_l, width);
+			tm->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
 			timeline.push_back (tm);
 			vb->pack_start (*tm);
 		} else {
@@ -762,5 +763,13 @@ ExportReport::audition_progress (framecnt_t pos, framecnt_t len)
 	if (_audition_num == _page_num) {
 		assert (timeline[_audition_num]);
 		timeline[_audition_num]->set_playhead ((float)pos / len);
+	}
+}
+
+void
+ExportReport::audition_seek (int page, float pos)
+{
+	if (_audition_num == page && _session) {
+		_session->the_auditioner()->seek_to_percent (100.f * pos);
 	}
 }

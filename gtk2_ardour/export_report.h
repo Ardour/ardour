@@ -80,6 +80,17 @@ public:
 		_aw = w;
 	}
 
+	sigc::signal<void, float> seek_playhead;
+
+protected:
+	bool on_button_press_event (GdkEventButton *ev) {
+		CairoWidget::on_button_press_event (ev);
+		if (ev->button == 1 && _aw > 0 && ev->x >= _x0 && ev->x <= _x0 + _aw) {
+			seek_playhead (((float) ev->x - _x0) / (float)_aw);
+		}
+		return true;
+	}
+
 private:
 	Cairo::RefPtr<Cairo::ImageSurface> _surface;
 	float _playhead;
@@ -109,6 +120,7 @@ private:
 	void audition (std::string, unsigned int, int);
 	void stop_audition ();
 	void audition_active (bool);
+	void audition_seek (int, float);
 	void audition_progress (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
 	void on_switch_page (GtkNotebookPage*, guint page_num);
 
