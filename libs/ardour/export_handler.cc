@@ -355,7 +355,7 @@ ExportHandler::finish_timespan ()
 			subs.insert (std::pair<char, std::string> ('n', session.name ()));
 
 			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs);
-			info << "Post-export command line : {" << se->GetString() << "}" << endmsg;
+			info << "Post-export command line : {" << se->to_s () << "}" << endmsg;
 			se->ReadStdout.connect_same_thread(command_connection, boost::bind(&ExportHandler::command_output, this, _1, _2));
 			int ret = se->start (2);
 			if (ret == 0) {

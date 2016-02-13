@@ -282,18 +282,6 @@ SystemExec::make_argp_escaped(std::string command, const std::map<char, std::str
 	argp[n] = NULL;
 }
 
-string
-SystemExec::GetString ()
-{
-	stringstream out;
-	if (argp) {
-		for (int i = 0; argp[i]; ++i) {
-			out << argp[i];
-		}
-	}
-	return out.str();
-}
-
 SystemExec::~SystemExec ()
 {
 	terminate ();
@@ -321,6 +309,18 @@ interposer_thread (void *arg) {
 	sex->output_interposer();
 	pthread_exit(0);
 	return 0;
+}
+
+string
+SystemExec::to_s () const
+{
+	stringstream out;
+	if (argp) {
+		for (int i = 0; argp[i]; ++i) {
+			out << argp[i] << " ";
+		}
+	}
+	return out.str();
 }
 
 #ifdef PLATFORM_WINDOWS /* Windows Process */

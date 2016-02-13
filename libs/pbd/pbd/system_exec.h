@@ -115,7 +115,7 @@ class LIBPBD_API SystemExec
 
 		virtual ~SystemExec ();
 
-		std::string GetString();
+		std::string to_s() const;
 
 		/** fork and execute the given program
 		 *
