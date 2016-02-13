@@ -2972,7 +2972,8 @@ Route::set_processor_state (const XMLNode& node)
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
 				           prop->value() == "windows-vst" ||
-					   prop->value() == "lxvst" ||
+				           prop->value() == "lxvst" ||
+				           prop->value() == "luaproc" ||
 				           prop->value() == "audiounit") {
 
 					if (_session.get_disable_all_loaded_plugins ()) {

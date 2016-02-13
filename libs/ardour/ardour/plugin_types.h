@@ -28,6 +28,7 @@ namespace ARDOUR {
 		LV2,
 		Windows_VST,
 		LXVST,
+		Lua,
 	};
 
 }

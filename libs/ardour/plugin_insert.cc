@@ -33,6 +33,7 @@
 #include "ardour/debug.h"
 #include "ardour/event_type_map.h"
 #include "ardour/ladspa_plugin.h"
+#include "ardour/luaproc.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 
@@ -671,6 +672,7 @@ boost::shared_ptr<Plugin>
 PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 {
 	boost::shared_ptr<LadspaPlugin> lp;
+	boost::shared_ptr<LuaProc> lua;
 #ifdef LV2_SUPPORT
 	boost::shared_ptr<LV2Plugin> lv2p;
 #endif
@@ -686,6 +688,8 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 
 	if ((lp = boost::dynamic_pointer_cast<LadspaPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LadspaPlugin (*lp));
+	} else if ((lua = boost::dynamic_pointer_cast<LuaProc> (other)) != 0) {
+		return boost::shared_ptr<Plugin> (new LuaProc (*lua));
 #ifdef LV2_SUPPORT
 	} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LV2Plugin (*lv2p));
@@ -1035,6 +1039,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		type = ARDOUR::LXVST;
 	} else if (prop->value() == X_("audiounit")) {
 		type = ARDOUR::AudioUnit;
+	} else if (prop->value() == X_("luaproc")) {
+		type = ARDOUR::Lua;
 	} else {
 		error << string_compose (_("unknown plugin type %1 in plugin insert state"),
 				  prop->value())
@@ -1094,6 +1100,15 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			prop->value())
 		      << endmsg;
 		return -1;
+	}
+
+	if (type == ARDOUR::Lua) {
+		XMLNode *ls = node.child (plugin->state_node_name().c_str());
+		// we need to load the script to set the name and parameters.
+		boost::shared_ptr<LuaProc> lp = boost::dynamic_pointer_cast<LuaProc>(plugin);
+		if (ls && lp) {
+			lp->set_script_from_state (*ls);
+		}
 	}
 
 	// The name of the PluginInsert comes from the plugin, nothing else

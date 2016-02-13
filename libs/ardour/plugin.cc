@@ -46,6 +46,7 @@
 #include "ardour/chan_count.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/data_type.h"
+#include "ardour/luaproc.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/plugin.h"
@@ -162,6 +163,13 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 	PluginInfoList plugs;
 
 	switch (type) {
+	case ARDOUR::Lua:
+		{
+			PluginPtr plugin (new LuaProc (session.engine(), session, ""));
+			return plugin;
+		}
+		break;
+
 	case ARDOUR::LADSPA:
 		plugs = mgr.ladspa_plugin_info();
 		break;

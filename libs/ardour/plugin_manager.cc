@@ -1102,6 +1102,10 @@ PluginManager::save_statuses ()
 		case LXVST:
 			ofs << "LXVST";
 			break;
+		case Lua:
+			assert (0);
+			continue;
+			break;
 		}
 
 		ofs << ' ';
