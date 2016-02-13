@@ -217,7 +217,7 @@ SystemExec::SystemExec (std::string command, const std::map<char, std::string> s
 			while (tmp.find("\"") != std::string::npos)
 				tmp.replace(s.find("\""), 1, "\\\"");
 			wa += " \"";
-			wa += tmp
+			wa += tmp;
 			wa += '"';
 		}
 		w_args = strdup(wa.c_str());
@@ -339,7 +339,7 @@ string
 SystemExec::to_s () const
 {
 #ifdef PLATFORM_WINDOWS
-	return string (w_args ? w_args :: "");
+	return string (w_args ? w_args : "");
 #else
 	stringstream out;
 	if (argp) {
