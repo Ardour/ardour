@@ -584,7 +584,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			for (size_t x = 0 ; x < width; ++x) {
 				for (size_t y = 0 ; y < height; ++y) {
 					const float pk = p->spectrum[x][y];
-					ArdourCanvas::Color c = ArdourCanvas::hsva_to_color (252 - 260 * pk, .9, .3 + pk * .4);
+					ArdourCanvas::Color c = ArdourCanvas::hsva_to_color (252 - 260 * pk, .9, sqrt(pk));
 					ArdourCanvas::set_source_rgba (cr, c);
 					cr->rectangle (m_l + x - .5, y - .5, 1, 1);
 					cr->fill ();
