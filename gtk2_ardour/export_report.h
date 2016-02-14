@@ -35,6 +35,7 @@ public:
 		, _playhead(-1)
 		, _x0 (0)
 		, _aw (0)
+		, _highlight (false)
 	{
 		set_size_request (sf->get_width (), sf->get_height ());
 	}
@@ -48,9 +49,11 @@ public:
 		cairo_paint (cr);
 
 		if (_playhead > 0 && _playhead < 1.0 && _aw > 0) {
-			cairo_rectangle (cr, _x0, 0, _aw, _surface->get_height());
-			cairo_set_source_rgba (cr, .4, .4, .6, .4);
-			cairo_fill (cr);
+			if (_highlight) {
+				cairo_rectangle (cr, _x0, 0, _aw, _surface->get_height());
+				cairo_set_source_rgba (cr, .4, .4, .6, .4);
+				cairo_fill (cr);
+			}
 
 			const float x = _playhead * _aw;
 			const float h = _surface->get_height();
@@ -75,9 +78,10 @@ public:
 		_playhead = pos;
 	}
 
-	void set_audition_axis (float x0, float w) {
+	void set_audition_axis (float x0, float w, bool h = false) {
 		_x0 = x0;
 		_aw = w;
+		_highlight = h;
 	}
 
 	sigc::signal<void, float> seek_playhead;
@@ -95,6 +99,7 @@ private:
 	Cairo::RefPtr<Cairo::ImageSurface> _surface;
 	float _playhead;
 	float _x0, _aw;
+	bool _highlight;
 
 	void invalidate (float pos) {
 		if (pos < 0 || pos > 1) { return; }
@@ -130,7 +135,7 @@ private:
 	Gtk::Button*     stop_btn;
 	PBD::ScopedConnectionList auditioner_connections;
 
-	std::vector<CimgArea*> timeline;
+	std::map<int, std::list<CimgArea*> > timeline;
 	int _audition_num;
 	int _page_num;
 };

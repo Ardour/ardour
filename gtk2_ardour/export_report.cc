@@ -78,6 +78,8 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		std::string path = i->first;
 		ExportAnalysisPtr p = i->second;
 
+		std::list<CimgArea*> playhead_widgets;
+
 		l = manage (new Label (_("File:"), ALIGN_END));
 		t->attach (*l, 0, 1, 0, 1);
 		l = manage (new Label ());
@@ -499,6 +501,9 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 
 			wave->flush ();
 			CimgArea *wv = manage (new CimgArea (wave));
+			wv->set_audition_axis (m_l, width);
+			playhead_widgets.push_back (wv);
+			wv->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
 			vb->pack_start (*wv);
 		}
 
@@ -553,12 +558,10 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 
 			ytme->flush ();
 			CimgArea *tm = manage (new CimgArea (ytme));
-			tm->set_audition_axis (m_l, width);
+			tm->set_audition_axis (m_l, width, true);
+			playhead_widgets.push_back (tm);
 			tm->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
-			timeline.push_back (tm);
 			vb->pack_start (*tm);
-		} else {
-			timeline.push_back (0);
 		}
 
 		{
@@ -614,9 +617,13 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 
 			spec->flush ();
 			CimgArea *sp = manage (new CimgArea (spec));
+			sp->set_audition_axis (m_l, width);
+			playhead_widgets.push_back (sp);
+			sp->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
 			vb->pack_start (*sp);
 		}
 
+		timeline[page] = playhead_widgets;
 		pages.pages ().push_back (Notebook_Helpers::TabElem (*vb, Glib::path_get_basename (i->first)));
 		pages.signal_switch_page().connect (sigc::mem_fun (*this, &ExportReport::on_switch_page));
 	}
@@ -670,8 +677,11 @@ ExportReport::audition_active (bool active)
 {
 	stop_btn->set_sensitive (active);
 	if (!active && _audition_num == _page_num) {
-		assert (timeline[_audition_num]);
-		timeline[_audition_num]->set_playhead (-1);
+		for (std::list<CimgArea*>::const_iterator i = timeline[_audition_num].begin();
+				i != timeline[_audition_num].end();
+				++i) {
+			(*i)->set_playhead (-1);
+		}
 	}
 }
 
@@ -742,8 +752,11 @@ void
 ExportReport::stop_audition ()
 {
 	if (_audition_num == _page_num) {
-		assert (timeline[_audition_num]);
-		timeline[_audition_num]->set_playhead (-1);
+		for (std::list<CimgArea*>::const_iterator i = timeline[_audition_num].begin();
+				i != timeline[_audition_num].end();
+				++i) {
+			(*i)->set_playhead (-1);
+		}
 	}
 	if (_session) {
 		_session->cancel_audition();
@@ -755,8 +768,11 @@ void
 ExportReport::on_switch_page (GtkNotebookPage*, guint page_num)
 {
 	if (_audition_num == _page_num) {
-		assert (timeline[_audition_num]);
-		timeline[_audition_num]->set_playhead (-1);
+		for (std::list<CimgArea*>::const_iterator i = timeline[_audition_num].begin();
+				i != timeline[_audition_num].end();
+				++i) {
+			(*i)->set_playhead (-1);
+		}
 	}
 	_page_num = page_num;
 }
@@ -765,8 +781,12 @@ void
 ExportReport::audition_progress (framecnt_t pos, framecnt_t len)
 {
 	if (_audition_num == _page_num) {
-		assert (timeline[_audition_num]);
-		timeline[_audition_num]->set_playhead ((float)pos / len);
+		const float p = (float)pos / len;
+		for (std::list<CimgArea*>::const_iterator i = timeline[_audition_num].begin();
+				i != timeline[_audition_num].end();
+				++i) {
+			(*i)->set_playhead (p);
+		}
 	}
 }
 
