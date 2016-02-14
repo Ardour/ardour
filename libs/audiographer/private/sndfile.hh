@@ -193,6 +193,9 @@ SndfileHandle::SndfileHandle (const char *path, int mode, int fmt, int chans, in
 		if (mode & SFM_WRITE) {
 			writable = true;
 		}
+		if (writable) {
+			::g_unlink (path);
+		}
 #ifdef PLATFORM_WINDOWS
 		int fd = g_open (path, writable ? O_CREAT | O_RDWR : O_RDONLY, writable ? 0644 : 0444);
 #else
@@ -224,6 +227,9 @@ SndfileHandle::SndfileHandle (std::string const & path, int mode, int fmt, int c
 		bool writable = false;
 		if (mode & SFM_WRITE) {
 			writable = true;
+		}
+		if (writable) {
+			::g_unlink (path.c_str());
 		}
 #ifdef PLATFORM_WINDOWS
 		int fd = g_open (path.c_str(), writable ? O_CREAT | O_RDWR : O_RDONLY, writable ? 0644 : 0444);
