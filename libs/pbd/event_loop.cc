@@ -147,7 +147,7 @@ EventLoop::pre_register (const string& emitting_thread_name, uint32_t num_reques
 	 */
 
 	ThreadBufferMapping mapping;
-	Glib::Threads::RWLock::ReaderLock lm (thread_buffer_requests_lock);
+	Glib::Threads::RWLock::WriterLock lm (thread_buffer_requests_lock);
 
 	for (RequestBufferSuppliers::iterator trs = request_buffer_suppliers.begin(); trs != request_buffer_suppliers.end(); ++trs) {
 
