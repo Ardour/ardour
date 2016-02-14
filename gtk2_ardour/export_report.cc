@@ -91,11 +91,8 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		t->attach (*l, 1, 3, 0, 1, FILL, SHRINK);
 
 		Button *b = manage (new Button (_("Open Folder")));
-		t->attach (*b, 3, 4, 0, 1, FILL, SHRINK);
+		t->attach (*b, 3, 4, 0, 2, FILL, SHRINK);
 		b->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::open_folder), path));
-
-		Button *start_btn = manage (new Button (_("Audition")));
-		t->attach (*start_btn, 3, 4, 1, 2, FILL, SHRINK);
 
 		SoundFileInfo info;
 		std::string errmsg;
@@ -112,6 +109,8 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			sample_rate = info.samplerate;
 			start_off = info.timecode;
 			channels = info.channels;
+
+			files.insert (std::make_pair (page, AuditionInfo (path, channels)));
 
 			/* File Info Table */
 
@@ -160,12 +159,6 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			t->attach (*l, 0, 1, 1, 2);
 			l = manage (new Label (errmsg, ALIGN_START));
 			t->attach (*l, 1, 4, 1, 2);
-		}
-
-		if (channels > 0 && file_length > 0 && sample_rate > 0 && _session) {
-			start_btn->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::audition), path, channels, page));
-		} else {
-			start_btn->set_sensitive (false);
 		}
 
 		int w, h;
@@ -624,7 +617,16 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		}
 
 		timeline[page] = playhead_widgets;
-		pages.pages ().push_back (Notebook_Helpers::TabElem (*vb, Glib::path_get_basename (i->first)));
+
+		HBox *tab = manage (new HBox ());
+		l = manage (new Label (Glib::path_get_basename (path)));
+		Gtk::Image *img =  manage (new Image (Stock::MEDIA_PLAY, ICON_SIZE_MENU));
+		tab->pack_start (*img);
+		tab->pack_start (*l);
+		l->show();
+		tab->show();
+		img->hide();
+		pages.pages ().push_back (Notebook_Helpers::TabElem (*vb, *tab));
 		pages.signal_switch_page().connect (sigc::mem_fun (*this, &ExportReport::on_switch_page));
 	}
 
@@ -641,11 +643,13 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_progress, this, _1, _2), gui_context());
 	}
 
+	play_btn = add_button (Stock::MEDIA_PLAY, RESPONSE_ACCEPT);
 	stop_btn = add_button (Stock::MEDIA_STOP, RESPONSE_ACCEPT);
 	add_button (Stock::CLOSE, RESPONSE_CLOSE);
 
 	set_default_response (RESPONSE_CLOSE);
 	stop_btn->signal_clicked().connect (sigc::mem_fun (*this, &ExportReport::stop_audition));
+	play_btn->signal_clicked().connect (sigc::mem_fun (*this, &ExportReport::play_audition));
 	stop_btn->set_sensitive (false);
 	show_all ();
 }
@@ -676,12 +680,28 @@ void
 ExportReport::audition_active (bool active)
 {
 	stop_btn->set_sensitive (active);
-	if (!active && _audition_num == _page_num) {
+	play_btn->set_sensitive (!active);
+
+	if (!active && _audition_num == _page_num && timeline.find (_audition_num) != timeline.end ()) {
 		for (std::list<CimgArea*>::const_iterator i = timeline[_audition_num].begin();
 				i != timeline[_audition_num].end();
 				++i) {
 			(*i)->set_playhead (-1);
 		}
+	}
+
+	if (_audition_num >= 0 ) {
+		Widget *page = pages.get_nth_page (_audition_num);
+		HBox *box = static_cast<Gtk::HBox*> (pages.get_tab_label (*page));
+		if (!active) {
+			(*(box->get_children().begin()))->hide ();
+		} else {
+			(*(box->get_children().begin()))->show ();
+		}
+	}
+
+	if (!active) {
+		_audition_num = -1;
 	}
 }
 
@@ -690,6 +710,8 @@ ExportReport::audition (std::string path, unsigned n_chn, int page)
 {
 	assert (_session);
 	_session->cancel_audition();
+
+	if (n_chn ==0) { return; }
 
 	/* can't really happen, unless the user replaces the file while the dialog is open.. */
 	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
@@ -749,9 +771,17 @@ ExportReport::audition (std::string path, unsigned n_chn, int page)
 }
 
 void
+ExportReport::play_audition ()
+{
+	if (_audition_num >= 0 || !_session) { return; }
+	if (files.find (_page_num) == files.end()) { return; }
+	audition (files[_page_num].path, files[_page_num].channels, _page_num);
+}
+
+void
 ExportReport::stop_audition ()
 {
-	if (_audition_num == _page_num) {
+	if (_audition_num == _page_num && timeline.find (_audition_num) != timeline.end ()) {
 		for (std::list<CimgArea*>::const_iterator i = timeline[_audition_num].begin();
 				i != timeline[_audition_num].end();
 				++i) {
@@ -761,7 +791,6 @@ ExportReport::stop_audition ()
 	if (_session) {
 		_session->cancel_audition();
 	}
-	_audition_num = -1;
 }
 
 void
@@ -780,7 +809,7 @@ ExportReport::on_switch_page (GtkNotebookPage*, guint page_num)
 void
 ExportReport::audition_progress (framecnt_t pos, framecnt_t len)
 {
-	if (_audition_num == _page_num) {
+	if (_audition_num == _page_num && timeline.find (_audition_num) != timeline.end ()) {
 		const float p = (float)pos / len;
 		for (std::list<CimgArea*>::const_iterator i = timeline[_audition_num].begin();
 				i != timeline[_audition_num].end();

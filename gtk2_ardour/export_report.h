@@ -124,6 +124,7 @@ private:
 	void open_folder (std::string);
 	void audition (std::string, unsigned int, int);
 	void stop_audition ();
+	void play_audition ();
 	void audition_active (bool);
 	void audition_seek (int, float);
 	void audition_progress (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
@@ -133,9 +134,19 @@ private:
 	Gtk::Notebook    pages;
 	ARDOUR::Session* _session;
 	Gtk::Button*     stop_btn;
+	Gtk::Button*     play_btn;
 	PBD::ScopedConnectionList auditioner_connections;
 
+	struct AuditionInfo {
+		AuditionInfo (std::string p, unsigned int c) : path (p), channels (c) {}
+		AuditionInfo () : channels (0) {}
+		std::string  path;
+		unsigned int channels;
+	};
+
 	std::map<int, std::list<CimgArea*> > timeline;
+	std::map<int, AuditionInfo> files;
+
 	int _audition_num;
 	int _page_num;
 };
