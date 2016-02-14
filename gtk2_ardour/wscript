@@ -207,6 +207,7 @@ gtk2_ardour_sources = [
         'ruler_dialog.cc',
         'save_as_dialog.cc',
         'search_path_option.cc',
+        'script_selector.cc',
         'selection.cc',
         'selection_memento.cc',
         'send_ui.cc',
