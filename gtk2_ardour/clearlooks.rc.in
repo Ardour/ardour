@@ -811,7 +811,7 @@ style "track_name_display" = "medium_text"
 	text[SELECTED] = @foreground
 
 	base[NORMAL] = @bases
-	base[ACTIVE] = lighter(@bases)
+	base[ACTIVE] = @bg_selected
 	base[SELECTED] = @bg_selected
 
 	bg[NORMAL] = lighter(@bases)
