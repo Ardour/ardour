@@ -669,6 +669,10 @@ void
 ExportReport::audition_active (bool active)
 {
 	stop_btn->set_sensitive (active);
+	if (!active && _audition_num == _page_num) {
+		assert (timeline[_audition_num]);
+		timeline[_audition_num]->set_playhead (-1);
+	}
 }
 
 void
