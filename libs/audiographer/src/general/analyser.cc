@@ -21,7 +21,7 @@
 
 using namespace AudioGrapher;
 
-const float Analyser::fft_range_db (80); // dB
+const float Analyser::fft_range_db (120); // dB
 
 Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize, framecnt_t n_samples)
 	: _ebur128_plugin (0)
