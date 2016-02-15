@@ -226,7 +226,7 @@ OSC::start ()
 
 	register_callbacks();
 
-	session_loaded (@session);
+	session_loaded (*session);
 
 	// lo_server_thread_add_method(_sthread, NULL, NULL, OSC::_dummy_handler, this);
 
