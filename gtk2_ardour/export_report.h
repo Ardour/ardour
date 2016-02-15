@@ -18,6 +18,7 @@
 
 #include <cairo/cairo.h>
 #include <gtkmm/notebook.h>
+#include <gtkmm/togglebutton.h>
 
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -32,22 +33,60 @@ public:
 	CimgArea (Cairo::RefPtr<Cairo::ImageSurface> sf)
 		: CairoWidget()
 		, _surface(sf)
-		, _playhead(-1)
-		, _x0 (0)
-		, _aw (0)
-		, _highlight (false)
 	{
 		set_size_request (sf->get_width (), sf->get_height ());
 	}
+
+protected:
+	virtual void background (cairo_t* cr, cairo_rectangle_t* r) {
+		cairo_set_source_surface (cr, _surface->cobj(), 0, 0);
+		cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+		cairo_paint (cr);
+	}
+
+	virtual void overlay (cairo_t* cr, cairo_rectangle_t* r) {}
 
 	virtual void render (cairo_t* cr, cairo_rectangle_t* r)
 	{
 		cairo_rectangle (cr, r->x, r->y, r->width, r->height);
 		cairo_clip (cr);
-		cairo_set_source_surface (cr, _surface->cobj(), 0, 0);
-		cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-		cairo_paint (cr);
+		background (cr, r);
+		overlay (cr, r);
+	}
 
+	Cairo::RefPtr<Cairo::ImageSurface> _surface;
+};
+
+class CimgPlayheadArea : public CimgArea
+{
+public:
+	CimgPlayheadArea (Cairo::RefPtr<Cairo::ImageSurface> sf, float x0, float w, bool h = false)
+	: CimgArea (sf)
+	, _playhead(-1)
+	, _x0 (x0)
+	, _aw (w)
+	, _highlight (h)
+	{
+	}
+
+	void set_playhead (float pos) {
+		if (rint (_playhead * _aw) == rint (pos * _aw)) {
+			return;
+		}
+		if (_playhead == -1 || pos == -1) {
+			set_dirty ();
+		} else {
+			invalidate (_playhead);
+			invalidate (pos);
+		}
+		_playhead = pos;
+	}
+
+	sigc::signal<void, float> seek_playhead;
+
+protected:
+
+	virtual void overlay (cairo_t* cr, cairo_rectangle_t* r) {
 		if (_playhead > 0 && _playhead < 1.0 && _aw > 0) {
 			if (_highlight) {
 				cairo_rectangle (cr, _x0, 0, _aw, _surface->get_height());
@@ -65,28 +104,6 @@ public:
 		}
 	}
 
-	void set_playhead (float pos) {
-		if (rint (_playhead * _aw) == rint (pos * _aw)) {
-			return;
-		}
-		if (_playhead == -1 || pos == -1) {
-			set_dirty ();
-		} else {
-			invalidate (_playhead);
-			invalidate (pos);
-		}
-		_playhead = pos;
-	}
-
-	void set_audition_axis (float x0, float w, bool h = false) {
-		_x0 = x0;
-		_aw = w;
-		_highlight = h;
-	}
-
-	sigc::signal<void, float> seek_playhead;
-
-protected:
 	bool on_button_press_event (GdkEventButton *ev) {
 		CairoWidget::on_button_press_event (ev);
 		if (ev->button == 1 && _aw > 0 && ev->x >= _x0 && ev->x <= _x0 + _aw) {
@@ -96,7 +113,6 @@ protected:
 	}
 
 private:
-	Cairo::RefPtr<Cairo::ImageSurface> _surface;
 	float _playhead;
 	float _x0, _aw;
 	bool _highlight;
@@ -113,6 +129,60 @@ private:
 	}
 };
 
+class CimgWaveArea : public CimgPlayheadArea
+{
+public:
+	CimgWaveArea (
+			Cairo::RefPtr<Cairo::ImageSurface> sf,
+			Cairo::RefPtr<Cairo::ImageSurface> sf_log,
+			Cairo::RefPtr<Cairo::ImageSurface> sf_rect,
+			Cairo::RefPtr<Cairo::ImageSurface> sf_logrec,
+			float x0, float w)
+	: CimgPlayheadArea (sf, x0, w)
+	, _sf_log (sf_log)
+	, _sf_rect (sf_rect)
+	, _sf_logrec (sf_logrec)
+	, _logscale (false)
+	, _rectified (false)
+	{
+	}
+
+	void set_logscale (Gtk::ToggleButton *b) {
+		bool en = b->get_active ();
+		_logscale = en;
+		set_dirty ();
+	}
+
+	void set_rectified (Gtk::ToggleButton *b) {
+		bool en = b->get_active ();
+		_rectified = en;
+		set_dirty ();
+	}
+
+protected:
+
+	virtual void background (cairo_t* cr, cairo_rectangle_t* r) {
+		if (_logscale && _rectified) {
+			cairo_set_source_surface (cr, _sf_logrec->cobj(), 0, 0);
+		} else if (_logscale) {
+			cairo_set_source_surface (cr, _sf_log->cobj(), 0, 0);
+		} else if (_rectified) {
+			cairo_set_source_surface (cr, _sf_rect->cobj(), 0, 0);
+		} else {
+			cairo_set_source_surface (cr, _surface->cobj(), 0, 0);
+		}
+		cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+		cairo_paint (cr);
+	}
+
+private:
+	Cairo::RefPtr<Cairo::ImageSurface> _sf_log;
+	Cairo::RefPtr<Cairo::ImageSurface> _sf_rect;
+	Cairo::RefPtr<Cairo::ImageSurface> _sf_logrec;
+	bool _logscale;
+	bool _rectified;
+};
+
 class ExportReport : public ArdourDialog
 {
 public:
@@ -121,6 +191,9 @@ public:
 	int run ();
 
 private:
+	void draw_waveform (Cairo::RefPtr<Cairo::ImageSurface>& wave,
+			ARDOUR::ExportAnalysisPtr, uint32_t, int, size_t, int, int, bool, bool);
+
 	void open_folder (std::string);
 	void audition (std::string, unsigned int, int);
 	void stop_audition ();
@@ -144,7 +217,7 @@ private:
 		unsigned int channels;
 	};
 
-	std::map<int, std::list<CimgArea*> > timeline;
+	std::map<int, std::list<CimgPlayheadArea*> > timeline;
 	std::map<int, AuditionInfo> files;
 
 	int _audition_num;

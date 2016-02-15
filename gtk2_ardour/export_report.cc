@@ -29,6 +29,8 @@
 #include "canvas/utils.h"
 #include "canvas/colors.h"
 
+#include "audiographer/general/analyser.h"
+
 #include "ardour/audiofilesource.h"
 #include "ardour/audioregion.h"
 #include "ardour/auditioner.h"
@@ -40,8 +42,9 @@
 #include "ardour/srcfilesource.h"
 
 #include "audio_clock.h"
-#include "ui_config.h"
 #include "export_report.h"
+#include "logmeter.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -69,23 +72,27 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		Label *l;
 		VBox *vb = manage (new VBox ());
 		Table *t = manage (new Table (4, 4));
+		Table *wtbl = manage (new Table (3, 2));
+		int wrow = 0;
 		t->set_border_width (0);
 		t->set_spacings (4);
+		wtbl->set_spacings (4);
 		vb->set_spacing (4);
 		vb->set_border_width (4);
 		vb->pack_start (*t, false, false, 2);
+		vb->pack_start (*wtbl, false, false, 2);
 
 		std::string path = i->first;
 		ExportAnalysisPtr p = i->second;
 
-		std::list<CimgArea*> playhead_widgets;
+		std::list<CimgPlayheadArea*> playhead_widgets;
 
 		l = manage (new Label (_("File:"), ALIGN_END));
 		t->attach (*l, 0, 1, 0, 1);
 		l = manage (new Label ());
 		l->set_ellipsize (Pango::ELLIPSIZE_START);
-		l->set_width_chars (64);
-		l->set_max_width_chars (64);
+		l->set_width_chars (48);
+		l->set_max_width_chars (48);
 		l->set_text (path);
 		l->set_alignment (ALIGN_START, ALIGN_CENTER);
 		t->attach (*l, 1, 3, 0, 1, FILL, SHRINK);
@@ -123,8 +130,8 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			std::replace (fmt.begin (), fmt.end (), '\n', ' ');
 			l = manage (new Label ());
 			l->set_ellipsize (Pango::ELLIPSIZE_START);
-			l->set_width_chars (64);
-			l->set_max_width_chars (64);
+			l->set_width_chars (48);
+			l->set_max_width_chars (48);
 			l->set_text (fmt);
 			l->set_alignment (ALIGN_START, ALIGN_CENTER);
 			t->attach (*l, 1, 3, 1, 2, FILL, SHRINK);
@@ -183,10 +190,19 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
   if (w > mml) { mml = w; }                                            \
 }
 
+		int m_r = 0; // right side
+		int mnh = 0; // mono height
 		int mnw = 0; // max numeric width
+		int anw = 0; // spectrum annotation text width
+
 		int lin[4] = { 0, 0, 0, 0 }; // max line height
 
 		TXTSIZE(0, _("(too short integration time)"), get_SmallFont);
+
+		TXTSIZE(0, _("-88"), get_SmallMonospaceFont);
+		anw = w;
+		m_r = anw + 10;
+		mnh = h + 1;
 
 		TXTSIZE(0, _("Peak:"), get_SmallFont);
 		TXTSIZE(1, string_compose (_("%1 dBFS"), std::setprecision (1), std::fixed, dbfs), get_LargeFont);
@@ -201,14 +217,14 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		mnw += 8;
 		const int ht = lin[0] * 1.25 + lin[1] * 1.25 + lin[2] * 1.25 + lin[3] + 8;
 		const int hh = std::max (100, ht);
-		int m_l =  2 * mnw + /*hist-width*/ 540 + /*box spacing*/ 8 - /*peak-width*/ 800; // margin left
+		int m_l =  2 * mnw + /*hist-width*/ 540 + /*box spacing*/ 8 - /*peak-width*/ 800 - m_r; // margin left
 
 		int mml = 0; // min margin left -- ensure left margin is wide enough
 		TXTWIDTH (_("Time"), get_SmallFont);
 		TXTWIDTH (_("100"), get_SmallMonospaceFont);
-		m_l = (std::max (m_l, mml + 8) + 3) & ~3;
+		m_l = (std::max(anw + mnh + 14, std::max (m_l, mml + 8)) + 3) & ~3;
 
-		mnw = (m_l - /*hist-width*/ 540 - /*box spacing*/ 8 + /*peak-width*/ 800) / 2;
+		mnw = (m_l - /*hist-width*/ 540 - /*box spacing*/ 8 + /*peak-width*/ 800 + m_r) / 2;
 		const int nw2 = mnw / 2; // nums, horizontal center
 
 		int y0[4];
@@ -335,6 +351,8 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 					cr->line_to (x - .5, (float) hh * (1.0 - p->loudness_hist[x] / (float) p->loudness_hist_max));
 					cr->stroke ();
 				}
+			} else {
+				// TODO print "Not Avail"
 			}
 
 			layout->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
@@ -388,6 +406,23 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 				cr->restore ();
 			}
 
+			// add normalization gain factor here (for want of a better place)
+			if (p->normalized) {
+				const float ndb = accurate_coefficient_to_dB (p->norm_gain_factor);
+				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				layout->set_alignment (Pango::ALIGN_LEFT);
+				layout->set_text (string_compose (_("Normalization Gain: %1 dB"), std::setprecision (2), std::showpos, std::fixed, ndb));
+				layout->get_pixel_size (w, h);
+				cr->set_operator (Cairo::OPERATOR_OVER);
+				layout->get_pixel_size (w, h);
+				Gtkmm2ext::rounded_rectangle (cr, 5, rint (.5 * (hh - w) - 1), h + 2, w + 2, 4);
+				cr->set_source_rgba (.1, .1, .1, 0.7);
+				cr->fill ();
+				cr->set_source_rgba (.3, .7, .3, 1.0);
+				cr->move_to (6, hh - h - 2);
+				layout->show_in_cairo_context (cr);
+			}
+
 			hist->flush ();
 
 			CimgArea *nu = manage (new CimgArea (nums));
@@ -398,7 +433,9 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			hb->pack_start (*nu, false, false);
 			hb->pack_start (*hi, false, false);
 			hb->pack_start (*eb, false, false);
-			vb->pack_start (*hb, false, false);
+
+			wtbl->attach (*hb, 0, 2, wrow, wrow + 1, SHRINK, SHRINK);
+			++wrow;
 		}
 
 #define XAXISLABEL(POS, TXT) {                            \
@@ -419,85 +456,33 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		for (uint32_t c = 0; c < p->n_channels; ++c) {
 			/* draw waveform */
 			const size_t width = sizeof (p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
-			const float height_2 = std::min (100, 8 * lin[0] / (int) p->n_channels); // TODO refine
 
-			Cairo::RefPtr<Cairo::ImageSurface> wave = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, m_l + width, 2 * height_2);
-			Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (wave);
-			cr->set_operator (Cairo::OPERATOR_SOURCE);
-			cr->rectangle (0, 0, m_l, 2 * height_2);
-			cr->set_source_rgba (0, 0, 0, 0);
-			cr->fill ();
-			cr->rectangle (m_l, 0, width, 2 * height_2);
-			cr->set_source_rgba (0, 0, 0, 1.0);
-			cr->fill ();
-			cr->set_operator (Cairo::OPERATOR_OVER);
+			Cairo::RefPtr<Cairo::ImageSurface> wave;
+			Cairo::RefPtr<Cairo::ImageSurface> wave_log;
+			Cairo::RefPtr<Cairo::ImageSurface> wave_rect;
+			Cairo::RefPtr<Cairo::ImageSurface> wave_lr;
+			draw_waveform(wave, p, c, m_l, width, anw, lin[0], false, false);
+			draw_waveform(wave_log, p, c, m_l, width, anw, lin[0], true, false);
+			draw_waveform(wave_rect, p, c, m_l, width, anw, lin[0], false, true);
+			draw_waveform(wave_lr, p, c, m_l, width, anw, lin[0], true, true);
 
-			cr->set_source_rgba (.7, .7, .7, 1.0);
-			cr->set_line_width (1.0);
-			for (size_t x = 0 ; x < width; ++x) {
-				cr->move_to (m_l + x - .5, height_2 - height_2 * p->peaks[c][x].max);
-				cr->line_to (m_l + x - .5, height_2 - height_2 * p->peaks[c][x].min);
-			}
-			cr->stroke ();
+			CimgWaveArea *wv = manage (new CimgWaveArea (wave, wave_log, wave_rect, wave_lr, m_l, width));
 
-			// > 0dBFS
-			cr->set_source_rgba (1.0, 0, 0, 1.0);
-			for (size_t x = 0 ; x < width; ++x) {
-				if (p->peaks[c][x].max >= 1.0) {
-					cr->move_to (m_l + x - .5, 0);
-					cr->line_to (m_l + x - .5, height_2 * .22);
-				}
-				if (p->peaks[c][x].min <= -1.0) {
-					cr->move_to (m_l + x - .5, height_2 * 1.78);
-					cr->line_to (m_l + x - .5, height_2 * 2.);
-				}
-			}
-			cr->stroke ();
-
-
-			// > -1dBTP
-			cr->set_source_rgba (1.0, 0.7, 0, 0.7);
-			for (std::set<framepos_t>::const_iterator i = p->truepeakpos[c].begin (); i != p->truepeakpos[c].end (); ++i) {
-				cr->move_to (m_l + (*i) - .5, height_2 * 0.22);
-				cr->line_to (m_l + (*i) - .5, height_2 * 1.78);
-				cr->stroke ();
-			}
-
-			// zero line
-			cr->set_source_rgba (.3, .3, .3, 0.7);
-			cr->move_to (m_l + 0, height_2 - .5);
-			cr->line_to (m_l + width, height_2 - .5);
-			cr->stroke ();
-
-			// Unit
-			layout->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
-			layout->set_alignment (Pango::ALIGN_LEFT);
-			layout->set_text (_("dBFS"));
-			layout->get_pixel_size (w, h);
-			cr->move_to (rint (.5 * (m_l - h)), rint (height_2 + w * .5));
-			cr->set_source_rgba (.9, .9, .9, 1.0);
-			cr->save ();
-			cr->rotate (M_PI / -2.0);
-			layout->show_in_cairo_context (cr);
-			cr->restore ();
-
-			// x-Axis
-			cr->set_line_width (1.0);
-			cr->set_dash (dashes, 2.0);
-			cr->set_line_cap (Cairo::LINE_CAP_ROUND);
-
-			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
-			XAXISLABEL (height_2 * 0.6452, _("-9"));
-			XAXISLABEL (height_2 * 1.3548, _("-9"));
-			XAXISLABEL (height_2 * 0.2921, _("-3"));
-			XAXISLABEL (height_2 * 1.7079, _("-3"));
-
-			wave->flush ();
-			CimgArea *wv = manage (new CimgArea (wave));
-			wv->set_audition_axis (m_l, width);
 			playhead_widgets.push_back (wv);
 			wv->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
-			vb->pack_start (*wv);
+
+			VBox *lrb = manage (new VBox());
+			ToggleButton *log = manage (new ToggleButton (S_("Logscale|L")));
+			ToggleButton *rec = manage (new ToggleButton (S_("Rectified|R")));
+			lrb->pack_start (*log, false, false, 5);
+			lrb->pack_end (*rec, false, false, 5);
+			log->signal_toggled ().connect (sigc::bind (sigc::mem_fun (wv, &CimgWaveArea::set_logscale), log));
+			rec->signal_toggled ().connect (sigc::bind (sigc::mem_fun (wv, &CimgWaveArea::set_rectified), rec));
+			lrb->show_all ();
+
+			wtbl->attach (*wv, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
+			wtbl->attach (*lrb, 1, 2, wrow, wrow + 1, SHRINK, SHRINK);
+			++wrow;
 		}
 
 		if (channels > 0 && file_length > 0 && sample_rate > 0)
@@ -546,15 +531,15 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			layout->set_text (_("Time"));
 			cr->set_source_rgba (.9, .9, .9, 1.0);
 			layout->get_pixel_size (w, h);
-			cr->move_to (rint (.5 * (m_l - w)), rint (.5 * (height - h)));
+			cr->move_to (rint (m_l - w - anw - 2), rint (.5 * (height - h)));
 			layout->show_in_cairo_context (cr);
 
 			ytme->flush ();
-			CimgArea *tm = manage (new CimgArea (ytme));
-			tm->set_audition_axis (m_l, width, true);
+			CimgPlayheadArea *tm = manage (new CimgPlayheadArea (ytme, m_l, width, true));
 			playhead_widgets.push_back (tm);
 			tm->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
-			vb->pack_start (*tm);
+			wtbl->attach (*tm, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
+			++wrow;
 		}
 
 		{
@@ -588,7 +573,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			layout->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
 			layout->set_text (_("Hz"));
 			layout->get_pixel_size (w, h);
-			cr->move_to (rint (.5 * (m_l - h)), rint ((height + w) * .5));
+			cr->move_to (rint (m_l - h - anw - 2), rint ((height + w) * .5));
 			cr->set_source_rgba (.9, .9, .9, 1.0);
 			cr->save ();
 			cr->rotate (M_PI / -2.0);
@@ -607,13 +592,65 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			XAXISLABEL (p->freq[3], _("1K"));
 			XAXISLABEL (p->freq[4], _("5K"));
 			XAXISLABEL (p->freq[5], _("10K"));
-
 			spec->flush ();
-			CimgArea *sp = manage (new CimgArea (spec));
-			sp->set_audition_axis (m_l, width);
+
+			// annotations
+			Cairo::RefPtr<Cairo::ImageSurface> scale = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, m_r, height);
+			cr = Cairo::Context::create (scale);
+			cr->set_operator (Cairo::OPERATOR_SOURCE);
+			cr->rectangle (0, 0, m_r, height);
+			cr->set_source_rgba (0, 0, 0, 0);
+			cr->fill ();
+
+			cr->set_operator (Cairo::OPERATOR_OVER);
+			layout->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
+			layout->set_alignment (Pango::ALIGN_LEFT);
+			layout->set_text (_("dBFS"));
+			layout->get_pixel_size (w, h);
+			cr->move_to (rint (.5 * (m_r - w)), height - h - 2);
+			cr->set_source_rgba (.9, .9, .9, 1.0);
+			layout->show_in_cairo_context (cr);
+
+			int innertop = ceil (mnh * .5) + 1;
+			size_t innerheight = (height - 2 * innertop - h - 2);
+
+			cr->rectangle (1, innertop - 1,  m_r - 2 - anw, innerheight + 2);
+			cr->set_source_rgba (0, 0, 0, 1.0);
+			cr->fill_preserve ();
+			cr->set_line_width (1.0);
+			cr->set_source_rgba (.7, .7, .6, 1.0);
+			cr->stroke ();
+
+			for (size_t y = 0 ; y < innerheight - 2; ++y) {
+					const float pk = 1.0 - (float) y / innerheight;
+					ArdourCanvas::Color c = ArdourCanvas::hsva_to_color (252 - 260 * pk, .9, sqrt(pk));
+					ArdourCanvas::set_source_rgba (cr, c);
+					cr->rectangle (2, innertop + y + .5, m_r - 4 - anw, 1);
+					cr->fill ();
+			}
+
+			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+			for (int i = 0; i <= 4; ++i) {
+				const float fract = (float) i / 4.0;
+				const float yalign = .5; // (i == 4) ? 0 : (i == 0) ? 1.0 : .5;
+				char buf[16];
+				snprintf (buf, sizeof (buf), "%.0f", AudioGrapher::Analyser::fft_range_db * -fract);
+				layout->set_text (buf);
+				layout->get_pixel_size (w, h);
+
+				cr->move_to (m_r - anw, rint (innertop + fract * innerheight - h * yalign));
+				cr->set_source_rgba (.9, .9, .9, 1.0);
+				layout->show_in_cairo_context (cr);
+			}
+			scale->flush ();
+
+			CimgPlayheadArea *sp = manage (new CimgPlayheadArea (spec, m_l, width));
 			playhead_widgets.push_back (sp);
 			sp->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
-			vb->pack_start (*sp);
+			CimgArea *an = manage (new CimgArea (scale));
+			wtbl->attach (*sp, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
+			wtbl->attach (*an, 1, 2, wrow, wrow + 1, SHRINK, SHRINK);
+			++wrow;
 		}
 
 		timeline[page] = playhead_widgets;
@@ -683,7 +720,7 @@ ExportReport::audition_active (bool active)
 	play_btn->set_sensitive (!active);
 
 	if (!active && _audition_num == _page_num && timeline.find (_audition_num) != timeline.end ()) {
-		for (std::list<CimgArea*>::const_iterator i = timeline[_audition_num].begin();
+		for (std::list<CimgPlayheadArea*>::const_iterator i = timeline[_audition_num].begin();
 				i != timeline[_audition_num].end();
 				++i) {
 			(*i)->set_playhead (-1);
@@ -782,7 +819,7 @@ void
 ExportReport::stop_audition ()
 {
 	if (_audition_num == _page_num && timeline.find (_audition_num) != timeline.end ()) {
-		for (std::list<CimgArea*>::const_iterator i = timeline[_audition_num].begin();
+		for (std::list<CimgPlayheadArea*>::const_iterator i = timeline[_audition_num].begin();
 				i != timeline[_audition_num].end();
 				++i) {
 			(*i)->set_playhead (-1);
@@ -797,7 +834,7 @@ void
 ExportReport::on_switch_page (GtkNotebookPage*, guint page_num)
 {
 	if (_audition_num == _page_num) {
-		for (std::list<CimgArea*>::const_iterator i = timeline[_audition_num].begin();
+		for (std::list<CimgPlayheadArea*>::const_iterator i = timeline[_audition_num].begin();
 				i != timeline[_audition_num].end();
 				++i) {
 			(*i)->set_playhead (-1);
@@ -811,7 +848,7 @@ ExportReport::audition_progress (framecnt_t pos, framecnt_t len)
 {
 	if (_audition_num == _page_num && timeline.find (_audition_num) != timeline.end ()) {
 		const float p = (float)pos / len;
-		for (std::list<CimgArea*>::const_iterator i = timeline[_audition_num].begin();
+		for (std::list<CimgPlayheadArea*>::const_iterator i = timeline[_audition_num].begin();
 				i != timeline[_audition_num].end();
 				++i) {
 			(*i)->set_playhead (p);
@@ -825,4 +862,164 @@ ExportReport::audition_seek (int page, float pos)
 	if (_audition_num == page && _session) {
 		_session->the_auditioner()->seek_to_percent (100.f * pos);
 	}
+}
+
+void
+ExportReport::draw_waveform (Cairo::RefPtr<Cairo::ImageSurface>& wave, ExportAnalysisPtr p, uint32_t c, int m_l, size_t width, int anw, int height, bool log, bool rect)
+{
+	int w, h;
+	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (get_pango_context ());
+	const float height_2 = std::min (100, 8 * height / (int) p->n_channels); // TODO refine
+	const float ht = 2.f * height_2;
+
+	std::vector<double> dashes;
+	dashes.push_back (3.0);
+	dashes.push_back (5.0);
+
+	wave = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, m_l + width, ht);
+	Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (wave);
+	cr->set_operator (Cairo::OPERATOR_SOURCE);
+	cr->rectangle (0, 0, m_l, ht);
+	cr->set_source_rgba (0, 0, 0, 0);
+	cr->fill ();
+	cr->rectangle (m_l, 0, width, ht);
+	cr->set_source_rgba (0, 0, 0, 1.0);
+	cr->fill ();
+	cr->set_operator (Cairo::OPERATOR_OVER);
+
+	cr->set_source_rgba (.7, .7, .7, 1.0);
+	cr->set_line_width (1.0);
+
+	// -1dB range
+	float clip_top;
+	float clip_bot;
+
+	if (rect) {
+		clip_bot = ht;
+
+		if (log) {
+			clip_top = ht * (1.f - alt_log_meter (-1));
+			for (size_t x = 0 ; x < width; ++x) {
+				const float v = alt_log_meter (fast_coefficient_to_dB (std::max (fabsf (p->peaks[c][x].max), fabsf (p->peaks[c][x].min))));
+				cr->move_to (m_l + x - .5, ht - ht * v);
+				cr->line_to (m_l + x - .5, ht);
+			}
+			cr->stroke ();
+		} else {
+			clip_top = ht * (1.f - dB_to_coefficient (-1));
+			for (size_t x = 0 ; x < width; ++x) {
+				const float v = std::max (fabsf (p->peaks[c][x].max), fabsf (p->peaks[c][x].min));
+				cr->move_to (m_l + x - .5, ht - ht * v);
+				cr->line_to (m_l + x - .5, ht);
+			}
+			cr->stroke ();
+		}
+	} else {
+		if (log) {
+			clip_top = height_2 - height_2 * alt_log_meter (-1);
+			clip_bot = height_2 + height_2 * alt_log_meter (-1);
+			for (size_t x = 0 ; x < width; ++x) {
+				float pmax, pmin;
+				if (p->peaks[c][x].max > 0) {
+					pmax =  alt_log_meter (fast_coefficient_to_dB (p->peaks[c][x].max));
+				} else {
+					pmax = -alt_log_meter (fast_coefficient_to_dB (-p->peaks[c][x].max));
+				}
+
+				if (p->peaks[c][x].min > 0) {
+					pmin =  alt_log_meter (fast_coefficient_to_dB (p->peaks[c][x].min));
+				} else {
+					pmin = -alt_log_meter (fast_coefficient_to_dB (-p->peaks[c][x].min));
+				}
+				cr->move_to (m_l + x - .5, height_2 - height_2 * pmax);
+				cr->line_to (m_l + x - .5, height_2 - height_2 * pmin);
+			}
+			cr->stroke ();
+		} else {
+			clip_top = height_2 - height_2 * dB_to_coefficient (-1);
+			clip_bot = height_2 + height_2 * dB_to_coefficient (-1);
+			for (size_t x = 0 ; x < width; ++x) {
+				cr->move_to (m_l + x - .5, height_2 - height_2 * p->peaks[c][x].max);
+				cr->line_to (m_l + x - .5, height_2 - height_2 * p->peaks[c][x].min);
+			}
+			cr->stroke ();
+		}
+	}
+
+	// > 0dBFS
+	cr->set_source_rgba (1.0, 0, 0, 1.0);
+	for (size_t x = 0 ; x < width; ++x) {
+		if (p->peaks[c][x].max >= 1.0) {
+			cr->move_to (m_l + x - .5, 0);
+			cr->line_to (m_l + x - .5, clip_top);
+		}
+		if (p->peaks[c][x].min <= -1.0) {
+			cr->move_to (m_l + x - .5, clip_bot);
+			cr->line_to (m_l + x - .5, ht);
+		}
+	}
+	cr->stroke ();
+
+	// > -1dBTP
+	cr->set_source_rgba (1.0, 0.7, 0, 0.7);
+	for (std::set<framepos_t>::const_iterator i = p->truepeakpos[c].begin (); i != p->truepeakpos[c].end (); ++i) {
+		cr->move_to (m_l + (*i) - .5, clip_top);
+		cr->line_to (m_l + (*i) - .5, clip_bot);
+		cr->stroke ();
+	}
+
+	if (!rect) {
+		// zero line
+		cr->set_source_rgba (.3, .3, .3, 0.7);
+		cr->move_to (m_l + 0, height_2 - .5);
+		cr->line_to (m_l + width, height_2 - .5);
+		cr->stroke ();
+	}
+
+	// Unit
+	layout->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
+	layout->set_alignment (Pango::ALIGN_LEFT);
+	layout->set_text (_("dBFS"));
+	layout->get_pixel_size (w, h);
+	cr->move_to (rint (m_l - h - anw - 10), rint (height_2 + w * .5));
+	cr->set_source_rgba (.9, .9, .9, 1.0);
+	cr->save ();
+	cr->rotate (M_PI / -2.0);
+	layout->show_in_cairo_context (cr);
+	cr->restore ();
+
+	// x-Axis
+	cr->set_line_width (1.0);
+	cr->set_dash (dashes, 2.0);
+	cr->set_line_cap (Cairo::LINE_CAP_ROUND);
+
+	layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+
+	if (rect) {
+		if (log) {
+			XAXISLABEL ((ht - ht * alt_log_meter (-36)), _("-36"));
+			XAXISLABEL ((ht - ht * alt_log_meter (-18)), _("-18"));
+			XAXISLABEL ((ht - ht * alt_log_meter (-9)), _("-9"));
+			XAXISLABEL ((ht - ht * alt_log_meter (-3)), _("-3"));
+		} else {
+			XAXISLABEL ((ht - ht * .1259), _("-18"));
+			XAXISLABEL ((ht - ht * .3548), _("-9"));
+			XAXISLABEL ((ht - ht * .7079), _("-3"));
+		}
+	} else {
+		if (log) {
+			XAXISLABEL ((height_2 - height_2 * alt_log_meter (-18)), _("-18"));
+			XAXISLABEL ((height_2 - height_2 * alt_log_meter (-9)), _("-9"));
+			XAXISLABEL ((height_2 - height_2 * alt_log_meter (-3)), _("-3"));
+			XAXISLABEL ((height_2 + height_2 * alt_log_meter (-18)), _("-18"));
+			XAXISLABEL ((height_2 + height_2 * alt_log_meter (-9)), _("-9"));
+			XAXISLABEL ((height_2 + height_2 * alt_log_meter (-3)), _("-3"));
+		} else {
+			XAXISLABEL (height_2 * 0.6452, _("-9"));
+			XAXISLABEL (height_2 * 1.3548, _("-9"));
+			XAXISLABEL (height_2 * 0.2921, _("-3"));
+			XAXISLABEL (height_2 * 1.7079, _("-3"));
+		}
+	}
+	wave->flush ();
 }
