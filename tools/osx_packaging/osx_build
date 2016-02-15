@@ -32,35 +32,34 @@ while [ $# -gt 0 ] ; do
 	# top level build targets
 	#
 
-	--sae) WITH_NLS= ; 
-               SAE=1 ; 
-	       WITH_LADSPA=1; 
-               STRIP= ; 
-	       PRODUCT_PKG_DIR=ArdourSAE ; 
-	       APPNAME=Ardour ;
-	       shift ;;
-	--mixbus) MIXBUS=1; 
-	          WITH_HARRISON_LV2=1 ;
-	          WITH_X42_LV2=1 ;
-	          WITH_NLS=1 ; 
-                  SAE= ; 
-                  WITH_LADSPA=; 
-                  STRIP= ; 
-		  PRODUCT_PKG_DIR=Mixbus;
-		  APPNAME=Mixbus ;
-                  shift ;;
-	--public) WITH_NLS= ; 
-	          SAE= ; 
-                  WITH_LADSPA=1; 
-		  PRODUCT_PKG_DIR=Ardour;
-		  APPNAME=Ardour ;
-		  shift ;;
-	--allinone) SAE= ; 
-	            WITH_NLS= ; 
-		    WITH_LADSPA=1; 
-		    STRIP= ; 
-		    PRODUCT_PKG_DIR=Ardour ;
-		    shift ;;
+	--sae)
+		SAE=1 ;
+		WITH_LADSPA=1;
+		STRIP= ;
+		PRODUCT_PKG_DIR=ArdourSAE ;
+		APPNAME=Ardour ;
+		shift ;;
+	--mixbus) MIXBUS=1;
+		WITH_HARRISON_LV2=1 ;
+		WITH_X42_LV2=1 ;
+		WITH_NLS=1 ;
+		SAE= ;
+		WITH_LADSPA=;
+		STRIP= ;
+		PRODUCT_PKG_DIR=Mixbus;
+		APPNAME=Mixbus ;
+		shift ;;
+	--public)
+		SAE= ;
+		WITH_LADSPA=1;
+		PRODUCT_PKG_DIR=Ardour;
+		APPNAME=Ardour ;
+		shift ;;
+	--allinone) SAE= ;
+		WITH_LADSPA=1;
+		STRIP= ;
+		PRODUCT_PKG_DIR=Ardour ;
+		shift ;;
 	--test) SAE= ; WITH_LADSPA=; STRIP= ; shift ;;
 
 	#
