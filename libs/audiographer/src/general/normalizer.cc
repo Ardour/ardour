@@ -37,7 +37,7 @@ Normalizer::~Normalizer()
 }
 
 /// Sets the peak found in the material to be normalized \see PeakReader \n RT safe
-void Normalizer::set_peak (float peak)
+float Normalizer::set_peak (float peak)
 {
 	if (peak == 0.0f || peak == target) {
 		/* don't even try */
@@ -46,6 +46,7 @@ void Normalizer::set_peak (float peak)
 		enabled = true;
 		gain = target / peak;
 	}
+	return enabled ? gain : 1.0;
 }
 
 /** Allocates a buffer for using with const ProcessContexts

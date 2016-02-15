@@ -21,6 +21,8 @@
 
 using namespace AudioGrapher;
 
+const float Analyser::fft_range_db (80); // dB
+
 Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize, framecnt_t n_samples)
 	: _ebur128_plugin (0)
 	, _dbtp_plugin (0)
@@ -196,12 +198,11 @@ Analyser::process (ProcessContext<float> const & c)
 	const framecnt_t x0 = _pos / _fpp;
 	framecnt_t x1 = (_pos + n_samples) / _fpp;
 	if (x0 == x1) x1 = x0 + 1;
-	const float range = 80; // dB
 
 	for (uint32_t i = 0; i < _fft_data_size - 1; ++i) {
 		const float level = fft_power_at_bin (i, i);
-		if (level < -range) continue;
-		const float pk = level > 0.0 ? 1.0 : (range + level) / range;
+		if (level < -fft_range_db) continue;
+		const float pk = level > 0.0 ? 1.0 : (fft_range_db + level) / fft_range_db;
 #if 0 // linear
 		const uint32_t y0 = floor (i * (float) height / _fft_data_size);
 		uint32_t y1 = ceil ((i + 1.0) * (float) height / _fft_data_size);

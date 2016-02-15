@@ -21,7 +21,7 @@ public:
 	~Normalizer();
 
 	/// Sets the peak found in the material to be normalized \see PeakReader \n RT safe
-	void set_peak (float peak);
+	float set_peak (float peak);
 
 	/** Allocates a buffer for using with const ProcessContexts
 	  * This function does not need to be called if

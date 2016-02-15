@@ -332,6 +332,14 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 	}
 }
 
+void
+ExportGraphBuilder::SFC::set_peak (float gain)
+{
+	if (_analyse) {
+		analyser->set_normalization_gain (gain);
+	}
+}
+
 ExportGraphBuilder::FloatSinkPtr
 ExportGraphBuilder::SFC::sink ()
 {
@@ -476,7 +484,10 @@ ExportGraphBuilder::Normalizer::process()
 void
 ExportGraphBuilder::Normalizer::start_post_processing()
 {
-	normalizer->set_peak (peak_reader->get_peak());
+	const float gain = normalizer->set_peak (peak_reader->get_peak());
+	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
+		(*i).set_peak (gain);
+	}
 	tmp_file->seek (0, SEEK_SET);
 	tmp_file->add_output (normalizer);
 	parent.normalizers.push_back (this);

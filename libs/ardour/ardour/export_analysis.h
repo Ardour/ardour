@@ -37,6 +37,8 @@ namespace ARDOUR {
 			, loudness_hist_max (0)
 			, have_loudness (false)
 			, have_dbtp (false)
+			, norm_gain_factor (1.0)
+			, normalized (false)
 			, n_channels (1)
 		{
 			memset (peaks, 0, sizeof(peaks));
@@ -53,6 +55,8 @@ namespace ARDOUR {
 			, loudness_hist_max (other.loudness_hist_max)
 			, have_loudness (other.have_loudness)
 			, have_dbtp (other.have_dbtp)
+			, norm_gain_factor (other.norm_gain_factor)
+			, normalized (other.normalized)
 			, n_channels (other.n_channels)
 		{
 			truepeakpos[0] = other.truepeakpos[0];
@@ -71,6 +75,8 @@ namespace ARDOUR {
 		int loudness_hist_max;
 		bool have_loudness;
 		bool have_dbtp;
+		float norm_gain_factor;
+		bool normalized;
 
 		uint32_t n_channels;
 		uint32_t freq[6]; // y-pos, 50, 100, 500, 1k, 5k, 10k [Hz]

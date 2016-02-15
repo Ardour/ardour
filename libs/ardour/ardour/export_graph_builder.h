@@ -124,6 +124,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		void add_child (FileSpec const & new_config);
 		void remove_children (bool remove_out_files);
 		bool operator== (FileSpec const & other_config) const;
+		void set_peak (float);
 
 	                                        private:
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<Sample> > FloatConverterPtr;

@@ -41,7 +41,14 @@ class LIBAUDIOGRAPHER_API Analyser : public ListedSource<float>, public Sink<flo
 	void process (ProcessContext<float> const & c);
 	ARDOUR::ExportAnalysisPtr result ();
 
+	void set_normalization_gain (float gain) {
+		_result.normalized = true;
+		_result.norm_gain_factor = gain;
+	}
+
 	using Sink<float>::process;
+
+	static const float fft_range_db;
 
 	private:
 	float fft_power_at_bin (const uint32_t b, const float norm) const;
