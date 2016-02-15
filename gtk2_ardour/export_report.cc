@@ -415,11 +415,11 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 				layout->get_pixel_size (w, h);
 				cr->set_operator (Cairo::OPERATOR_OVER);
 				layout->get_pixel_size (w, h);
-				Gtkmm2ext::rounded_rectangle (cr, 5, rint (.5 * (hh - w) - 1), h + 2, w + 2, 4);
+				Gtkmm2ext::rounded_rectangle (cr, 5, hh - h - 4, w + 2, h + 2, 4);
 				cr->set_source_rgba (.1, .1, .1, 0.7);
 				cr->fill ();
 				cr->set_source_rgba (.3, .7, .3, 1.0);
-				cr->move_to (6, hh - h - 2);
+				cr->move_to (6, hh - h - 3);
 				layout->show_in_cairo_context (cr);
 			}
 
@@ -453,6 +453,19 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
   cr->stroke ();                                          \
 }
 
+
+		{
+			VBox *lrb = manage (new VBox());
+			ToggleButton *log = manage (new ToggleButton (S_("Logscale|Lg")));
+			ToggleButton *rec = manage (new ToggleButton (S_("Rectified|Rf")));
+			lrb->pack_start (*log, false, false, 5);
+			lrb->pack_end (*rec, false, false, 5);
+			log->signal_toggled ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::on_logscale_toggled), log));
+			rec->signal_toggled ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::on_rectivied_toggled), rec));
+			lrb->show_all ();
+			wtbl->attach (*lrb, 1, 2, wrow, wrow + p->n_channels, SHRINK, SHRINK);
+		}
+
 		for (uint32_t c = 0; c < p->n_channels; ++c) {
 			/* draw waveform */
 			const size_t width = sizeof (p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
@@ -469,19 +482,9 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			CimgWaveArea *wv = manage (new CimgWaveArea (wave, wave_log, wave_rect, wave_lr, m_l, width));
 
 			playhead_widgets.push_back (wv);
+			waves.push_back (wv);
 			wv->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
-
-			VBox *lrb = manage (new VBox());
-			ToggleButton *log = manage (new ToggleButton (S_("Logscale|L")));
-			ToggleButton *rec = manage (new ToggleButton (S_("Rectified|R")));
-			lrb->pack_start (*log, false, false, 5);
-			lrb->pack_end (*rec, false, false, 5);
-			log->signal_toggled ().connect (sigc::bind (sigc::mem_fun (wv, &CimgWaveArea::set_logscale), log));
-			rec->signal_toggled ().connect (sigc::bind (sigc::mem_fun (wv, &CimgWaveArea::set_rectified), rec));
-			lrb->show_all ();
-
 			wtbl->attach (*wv, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
-			wtbl->attach (*lrb, 1, 2, wrow, wrow + 1, SHRINK, SHRINK);
 			++wrow;
 		}
 
@@ -861,6 +864,24 @@ ExportReport::audition_seek (int page, float pos)
 {
 	if (_audition_num == page && _session) {
 		_session->the_auditioner()->seek_to_percent (100.f * pos);
+	}
+}
+
+void
+ExportReport::on_logscale_toggled (Gtk::ToggleButton* b)
+{
+	bool en = b->get_active ();
+	for (std::list<CimgWaveArea*>::iterator i = waves.begin (); i != waves.end (); ++i) {
+		(*i)->set_logscale (en);
+	}
+}
+
+void
+ExportReport::on_rectivied_toggled (Gtk::ToggleButton* b)
+{
+	bool en = b->get_active ();
+	for (std::list<CimgWaveArea*>::iterator i = waves.begin (); i != waves.end (); ++i) {
+		(*i)->set_rectified (en);
 	}
 }
 

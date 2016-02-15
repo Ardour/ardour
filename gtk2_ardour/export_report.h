@@ -147,14 +147,12 @@ public:
 	{
 	}
 
-	void set_logscale (Gtk::ToggleButton *b) {
-		bool en = b->get_active ();
+	void set_logscale (bool en) {
 		_logscale = en;
 		set_dirty ();
 	}
 
-	void set_rectified (Gtk::ToggleButton *b) {
-		bool en = b->get_active ();
+	void set_rectified (bool en) {
 		_rectified = en;
 		set_dirty ();
 	}
@@ -202,6 +200,8 @@ private:
 	void audition_seek (int, float);
 	void audition_progress (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
 	void on_switch_page (GtkNotebookPage*, guint page_num);
+	void on_logscale_toggled (Gtk::ToggleButton*);
+	void on_rectivied_toggled (Gtk::ToggleButton*);
 
 	StatusPtr        status;
 	Gtk::Notebook    pages;
@@ -219,6 +219,7 @@ private:
 
 	std::map<int, std::list<CimgPlayheadArea*> > timeline;
 	std::map<int, AuditionInfo> files;
+	std::list<CimgWaveArea*> waves;
 
 	int _audition_num;
 	int _page_num;
