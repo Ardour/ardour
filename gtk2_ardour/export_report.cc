@@ -199,7 +199,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 
 		TXTSIZE(0, _("(too short integration time)"), get_SmallFont);
 
-		TXTSIZE(0, _("-88"), get_SmallMonospaceFont);
+		TXTSIZE(0, _("-888"), get_SmallMonospaceFont);
 		anw = w;
 		m_r = anw + 10;
 		mnh = h + 1;
