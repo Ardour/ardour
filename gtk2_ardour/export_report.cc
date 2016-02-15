@@ -346,64 +346,71 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			cr->set_line_width (1.0);
 
 			if (p->loudness_hist_max > 0 && i->second->have_loudness) {
+				// draw data
 				for (size_t x = 0 ; x < 510; ++x) {
 					cr->move_to (x - .5, hh);
 					cr->line_to (x - .5, (float) hh * (1.0 - p->loudness_hist[x] / (float) p->loudness_hist_max));
 					cr->stroke ();
 				}
-			} else {
-				// TODO print "Not Avail"
-			}
 
-			layout->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
-			layout->set_alignment (Pango::ALIGN_CENTER);
+				layout->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
+				layout->set_alignment (Pango::ALIGN_CENTER);
 
-			// Label
-			layout->set_text (_("LUFS\n(short)"));
-			layout->get_pixel_size (w, h);
-			Gtkmm2ext::rounded_rectangle (cr, 5, rint (.5 * (hh - w) - 1), h + 2, w + 2, 4);
-			cr->set_source_rgba (.1, .1, .1, 0.7);
-			cr->fill ();
-			cr->save ();
-			cr->move_to (6, rint (.5 * (hh + w)));
-			cr->set_source_rgba (.9, .9, .9, 1.0);
-			cr->rotate (M_PI / -2.0);
-			layout->show_in_cairo_context (cr);
-			cr->restore ();
-
-			// x-Axis
-			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
-			layout->set_alignment (Pango::ALIGN_LEFT);
-			for (int g = -53; g <= -8; g += 5) {
-				// grid-lines. [110] -59LUFS .. [650]: -5 LUFS
-				layout->set_text (string_compose ("%1", std::setw(3), std::setfill(' '), g));
+				// y-axis label
+				layout->set_text (_("LUFS\n(short)"));
 				layout->get_pixel_size (w, h);
-
-				cr->set_operator (Cairo::OPERATOR_OVER);
-				Gtkmm2ext::rounded_rectangle (cr,
-						rint ((g + 59.0) * 10.0 - h * .5), 5,
-						h + 2, w + 2, 4);
-				const float pk = (g + 59.0) / 54.0;
-				ArdourCanvas::Color c = ArdourCanvas::hsva_to_color (252 - 260 * pk, .9, .3 + pk * .4, .6);
-				ArdourCanvas::set_source_rgba (cr, c);
+				Gtkmm2ext::rounded_rectangle (cr, 5, rint (.5 * (hh - w) - 1), h + 2, w + 2, 4);
+				cr->set_source_rgba (.1, .1, .1, 0.7);
 				cr->fill ();
-
 				cr->save ();
+				cr->move_to (6, rint (.5 * (hh + w)));
 				cr->set_source_rgba (.9, .9, .9, 1.0);
-				cr->move_to (rint ((g + 59.0) * 10.0 - h * .5), w + 6.0);
 				cr->rotate (M_PI / -2.0);
 				layout->show_in_cairo_context (cr);
 				cr->restore ();
 
-				cr->set_operator (Cairo::OPERATOR_ADD);
-				cr->save ();
-				cr->set_source_rgba (.3, .3, .3, 1.0);
-				cr->set_dash (dashes, 1.0);
-				cr->set_line_cap (Cairo::LINE_CAP_ROUND);
-				cr->move_to (rint ((g + 59.0) * 10.0) + .5, w + 8.0);
-				cr->line_to (rint ((g + 59.0) * 10.0) + .5, hh);
-				cr->stroke ();
-				cr->restore ();
+				// x-Axis labels
+				layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+				layout->set_alignment (Pango::ALIGN_LEFT);
+				for (int g = -53; g <= -8; g += 5) {
+					// grid-lines. [110] -59LUFS .. [650]: -5 LUFS
+					layout->set_text (string_compose ("%1", std::setw(3), std::setfill(' '), g));
+					layout->get_pixel_size (w, h);
+
+					cr->set_operator (Cairo::OPERATOR_OVER);
+					Gtkmm2ext::rounded_rectangle (cr,
+							rint ((g + 59.0) * 10.0 - h * .5), 5,
+							h + 2, w + 2, 4);
+					const float pk = (g + 59.0) / 54.0;
+					ArdourCanvas::Color c = ArdourCanvas::hsva_to_color (252 - 260 * pk, .9, .3 + pk * .4, .6);
+					ArdourCanvas::set_source_rgba (cr, c);
+					cr->fill ();
+
+					cr->save ();
+					cr->set_source_rgba (.9, .9, .9, 1.0);
+					cr->move_to (rint ((g + 59.0) * 10.0 - h * .5), w + 6.0);
+					cr->rotate (M_PI / -2.0);
+					layout->show_in_cairo_context (cr);
+					cr->restore ();
+
+					cr->set_operator (Cairo::OPERATOR_ADD);
+					cr->save ();
+					cr->set_source_rgba (.3, .3, .3, 1.0);
+					cr->set_dash (dashes, 1.0);
+					cr->set_line_cap (Cairo::LINE_CAP_ROUND);
+					cr->move_to (rint ((g + 59.0) * 10.0) + .5, w + 8.0);
+					cr->line_to (rint ((g + 59.0) * 10.0) + .5, hh);
+					cr->stroke ();
+					cr->restore ();
+				}
+
+			} else {
+				layout->set_alignment (Pango::ALIGN_CENTER);
+				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
+				layout->set_text (_("Not\nAvailable"));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint ((510 - w) * .5), rint ((hh - h) * .5));
+				layout->show_in_cairo_context (cr);
 			}
 
 			// add normalization gain factor here (for want of a better place)
@@ -534,7 +541,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			layout->set_text (_("Time"));
 			cr->set_source_rgba (.9, .9, .9, 1.0);
 			layout->get_pixel_size (w, h);
-			cr->move_to (rint (m_l - w - anw - 2), rint (.5 * (height - h)));
+			cr->move_to (rint (m_l - w - 8), rint (.5 * (height - h)));
 			layout->show_in_cairo_context (cr);
 
 			ytme->flush ();
@@ -576,7 +583,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			layout->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
 			layout->set_text (_("Hz"));
 			layout->get_pixel_size (w, h);
-			cr->move_to (rint (m_l - h - anw - 2), rint ((height + w) * .5));
+			cr->move_to (rint (m_l - h - anw - 10), rint ((height + w) * .5));
 			cr->set_source_rgba (.9, .9, .9, 1.0);
 			cr->save ();
 			cr->rotate (M_PI / -2.0);
