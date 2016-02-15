@@ -88,7 +88,6 @@ OSC::OSC (Session& s, uint32_t port)
 {
 	_instance = this;
 
-	session_loaded (s);
 	session->Exported.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::session_exported, this, _1, _2), this);
 }
 
@@ -226,6 +225,8 @@ OSC::start ()
 	}
 
 	register_callbacks();
+
+	session_loaded (@session);
 
 	// lo_server_thread_add_method(_sthread, NULL, NULL, OSC::_dummy_handler, this);
 
