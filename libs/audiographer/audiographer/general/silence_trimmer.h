@@ -12,6 +12,24 @@
 
 namespace AudioGrapher {
 
+template<typename T> struct SilenceTester;
+
+// this needs to be implemented for every datatype T
+// currently Ardour always uses Sample aka float
+template <>
+struct SilenceTester<float> {
+	public:
+	SilenceTester (const float dB) {
+		threshold = dB > -318.8f ? pow (10.0f, dB * 0.05f) : 0.0f;
+	}
+	bool is_silent (const float d) {
+		return fabsf (d) <= threshold;
+	}
+	private:
+	float threshold;
+};
+
+
 /// Removes and adds silent frames to beginning and/or end of stream
 template<typename T = DefaultSampleType>
 class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
@@ -23,9 +41,10 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
   public:
 
 	/// Constructor, \see reset() \n Not RT safe
-	SilenceTrimmer(framecnt_t silence_buffer_size_ = 1024)
+	SilenceTrimmer(framecnt_t silence_buffer_size_ = 1024, float thresh_dB = -INFINITY)
 	  : silence_buffer_size (0)
 	  , silence_buffer (0)
+	  , tester (thresh_dB)
 	{
 		reset (silence_buffer_size_);
 		add_supported_flag (ProcessContext<T>::EndOfInput);
@@ -231,7 +250,7 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 	bool find_first_non_zero_sample (ProcessContext<T> const & c, framecnt_t & result_frame)
 	{
 		for (framecnt_t i = 0; i < c.frames(); ++i) {
-			if (c.data()[i] != static_cast<T>(0.0)) {
+			if (!tester.is_silent (c.data()[i])) {
 				result_frame = i;
 				// Round down to nearest interleaved "frame" beginning
 				result_frame -= result_frame % c.channels();
@@ -284,6 +303,8 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 
 	framecnt_t silence_buffer_size;
 	T *        silence_buffer;
+
+	SilenceTester<T> tester;
 };
 
 } // namespace
