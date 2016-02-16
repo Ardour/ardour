@@ -860,8 +860,8 @@ OSC::update_clock ()
 void
 OSC::session_loaded (Session& s)
 {
-	lo_address listener = lo_address_new (NULL, "7770");
-	lo_send (listener, "/session/loaded", "ss", s.path().c_str(), s.name().c_str());
+//	lo_address listener = lo_address_new (NULL, "7770");
+//	lo_send (listener, "/session/loaded", "ss", s.path().c_str(), s.name().c_str());
 }
 
 void
