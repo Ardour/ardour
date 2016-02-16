@@ -127,6 +127,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		void set_peak (float);
 
 	                                        private:
+		typedef boost::shared_ptr<AudioGrapher::Chunker<float> > ChunkerPtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<Sample> > FloatConverterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<int> >   IntConverterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<short> > ShortConverterPtr;
@@ -135,6 +136,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		boost::ptr_list<Encoder> children;
 		int                data_width;
 
+		ChunkerPtr      chunker;
 		AnalysisPtr     analyser;
 		bool            _analyse;
 		// Only one of these should be available at a time

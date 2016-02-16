@@ -311,8 +311,11 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 		framecnt_t sb = config.format->silence_beginning_at (parent.timespan->get_start(), sample_rate);
 		framecnt_t se = config.format->silence_end_at (parent.timespan->get_end(), sample_rate);
 		framecnt_t duration = parent.timespan->get_length () + sb + se;
+		max_frames = min ((framecnt_t) 8192 * channels, max ((framecnt_t) 4096 * channels, max_frames));
+		chunker.reset (new Chunker<Sample> (max_frames));
 		analyser.reset (new Analyser (config.format->sample_rate(), channels, max_frames,
 					(framecnt_t) ceil (duration * config.format->sample_rate () / sample_rate)));
+		chunker->add_output (analyser);
 		parent.add_analyser (config.filename->get_path (config.format), analyser);
 	}
 
@@ -348,7 +351,7 @@ ExportGraphBuilder::FloatSinkPtr
 ExportGraphBuilder::SFC::sink ()
 {
 	if (_analyse) {
-		return analyser;
+		return chunker;
 	} else if (data_width == 8 || data_width == 16) {
 		return short_converter;
 	} else if (data_width == 24 || data_width == 32) {
