@@ -141,25 +141,27 @@ Analyser::~Analyser ()
 }
 
 void
-Analyser::process (ProcessContext<float> const & c)
+Analyser::process (ProcessContext<float> const & ctx)
 {
-	framecnt_t n_samples = c.frames () / c.channels ();
-	assert (c.frames () % c.channels () == 0);
+	framecnt_t n_samples = ctx.frames () / ctx.channels ();
+	assert (ctx.channels () == _channels);
+	assert (ctx.frames () % ctx.channels () == 0);
 	assert (n_samples <= _bufsize);
-	//printf ("PROC %p @%ld F: %ld, S: %ld C:%d\n", this, _pos, c.frames (), n_samples, c.channels ());
-	float const * d = c.data ();
+	//printf ("PROC %p @%ld F: %ld, S: %ld C:%d\n", this, _pos, ctx.frames (), n_samples, ctx.channels ());
+
+	float const * d = ctx.data ();
 	framecnt_t s;
 	const unsigned cmask = _result.n_channels - 1; // [0, 1]
 	for (s = 0; s < n_samples; ++s) {
 		_fft_data_in[s] = 0;
-		const framecnt_t pk = (_pos + s) / _spp;
+		const framecnt_t pbin = (_pos + s) / _spp;
 		for (unsigned int c = 0; c < _channels; ++c) {
 			const float v = *d;
 			if (fabsf(v) > _result.peak) { _result.peak = fabsf(v); }
 			_bufs[c][s] = v;
 			const unsigned int cc = c & cmask;
-			if (_result.peaks[cc][pk].min > v) { _result.peaks[cc][pk].min = *d; }
-			if (_result.peaks[cc][pk].max < v) { _result.peaks[cc][pk].max = *d; }
+			if (_result.peaks[cc][pbin].min > v) { _result.peaks[cc][pbin].min = *d; }
+			if (_result.peaks[cc][pbin].max < v) { _result.peaks[cc][pbin].max = *d; }
 			_fft_data_in[s] += v * _hann_window[s] / (float) _channels;
 			++d;
 		}
@@ -176,7 +178,7 @@ Analyser::process (ProcessContext<float> const & c)
 		_ebur128_plugin->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
 	}
 
-	float const * const data = c.data ();
+	float const * const data = ctx.data ();
 	for (unsigned int c = 0; c < _channels; ++c) {
 		if (!_dbtp_plugin[c]) { continue; }
 		for (s = 0; s < n_samples; ++s) {
@@ -226,7 +228,7 @@ Analyser::process (ProcessContext<float> const & c)
 	_pos += n_samples;
 
 	/* pass audio audio through */
-	ListedSource<float>::output (c);
+	ListedSource<float>::output (ctx);
 }
 
 ARDOUR::ExportAnalysisPtr
