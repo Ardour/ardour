@@ -242,9 +242,31 @@ ARDOUR::ExportAnalysisPtr
 Analyser::result ()
 {
 	DEBUG_TRACE (PBD::DEBUG::ExportAnalysis, string_compose ("Processed %1 / %2 samples\n", _pos, _n_samples));
-	if (_pos == 0 || ::llabs (_pos -_n_samples) > 1) {
-		printf("NO ANAL\n");
+	if (_pos == 0 || _pos > _n_samples + 1) {
 		return ARDOUR::ExportAnalysisPtr ();
+	}
+
+	if (_pos + 1 < _n_samples) {
+		// crude re-bin (silence stripped version)
+		const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
+		for (framecnt_t b = peaks - 1; b > 0; --b) {
+			for (unsigned int c = 0; c < _result.n_channels; ++c) {
+				const framecnt_t sb = b * _pos / _n_samples;
+				_result.peaks[c][b].min = _result.peaks[c][sb].min;
+				_result.peaks[c][b].max = _result.peaks[c][sb].max;
+			}
+		}
+
+		const size_t swh = sizeof (_result.spectrum) / sizeof (float);
+		const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
+		const size_t width = swh / height;
+		for (framecnt_t b = width - 1; b > 0; --b) {
+			// TODO round down to prev _fft_data_size bin
+			const framecnt_t sb = b * _pos / _n_samples;
+			for (unsigned int y = 0; y < height; ++y) {
+				_result.spectrum[b][y] = _result.spectrum[sb][y];
+			}
+		}
 	}
 
 	if (_ebur128_plugin) {
