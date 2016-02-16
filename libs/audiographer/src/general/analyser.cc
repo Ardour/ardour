@@ -18,6 +18,8 @@
 
 #include "audiographer/general/analyser.h"
 #include "pbd/fastlog.h"
+#include "pbd/compose.h"
+#include "ardour/debug.h"
 
 using namespace AudioGrapher;
 
@@ -34,7 +36,9 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 {
 	assert (bufsize % channels == 0);
 	assert (bufsize > 1);
-	//printf ("NEW ANALYSER %p r:%.1f c:%d f:%ld l%ld\n", this, sample_rate, channels, bufsize, n_samples);
+
+	DEBUG_TRACE (PBD::DEBUG::ExportAnalysis, string_compose ("Analyser r:%1 c:%2 f:%3 d:%4", sample_rate, channels, bufsize, n_samples));
+
 	if (channels > 0 && channels <= 2) {
 		using namespace Vamp::HostExt;
 		PluginLoader* loader (PluginLoader::getInstance ());
@@ -42,7 +46,6 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 		assert (_ebur128_plugin);
 		_ebur128_plugin->reset ();
 		if (!_ebur128_plugin->initialise (channels, _bufsize, _bufsize)) {
-			printf ("FAILED TO INITIALIZE EBUR128\n");
 			delete _ebur128_plugin;
 			_ebur128_plugin = 0;
 		}
@@ -56,7 +59,6 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 		assert (_dbtp_plugin[c]);
 		_dbtp_plugin[c]->reset ();
 		if (!_dbtp_plugin[c]->initialise (1, _bufsize, _bufsize)) {
-			printf ("FAILED TO INITIALIZE DBTP %d\n", c);
 			delete _dbtp_plugin[c];
 			_dbtp_plugin[c] = 0;
 		}
@@ -230,8 +232,8 @@ Analyser::process (ProcessContext<float> const & c)
 ARDOUR::ExportAnalysisPtr
 Analyser::result ()
 {
-	//printf ("PROCESSED %ld / %ld samples\n", _pos, _n_samples);
 	if (_pos == 0) {
+	DEBUG_TRACE (PBD::DEBUG::ExportAnalysis, string_compose ("Processed %1 / %2 samples", _pos, _n_samples));
 		return ARDOUR::ExportAnalysisPtr ();
 	}
 	if (_ebur128_plugin) {
