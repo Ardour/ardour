@@ -394,14 +394,24 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 				layout->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
 				layout->set_alignment (Pango::ALIGN_CENTER);
 
-				// y-axis label
+				// x-axis label
 				layout->set_text (_("LUFS\n(short)"));
 				layout->get_pixel_size (w, h);
-				Gtkmm2ext::rounded_rectangle (cr, 5, rint (.5 * (hh - w) - 1), h + 2, w + 2, 4);
+				Gtkmm2ext::rounded_rectangle (cr, 5, 5, w + 2, h + 2, 4);
+				cr->set_source_rgba (.1, .1, .1, 0.7);
+				cr->fill ();
+				cr->move_to (6, 6);
+				cr->set_source_rgba (.9, .9, .9, 1.0);
+				layout->show_in_cairo_context (cr);
+
+				// y-axis label
+				layout->set_text (_("Multiplicity"));
+				layout->get_pixel_size (w, h);
+				Gtkmm2ext::rounded_rectangle (cr, 5, hh - w - 3, h + 2, w + 2, 4);
 				cr->set_source_rgba (.1, .1, .1, 0.7);
 				cr->fill ();
 				cr->save ();
-				cr->move_to (6, rint (.5 * (hh + w)));
+				cr->move_to (6, hh - 2);
 				cr->set_source_rgba (.9, .9, .9, 1.0);
 				cr->rotate (M_PI / -2.0);
 				layout->show_in_cairo_context (cr);
