@@ -34,10 +34,10 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 	, _n_samples (n_samples)
 	, _pos (0)
 {
+	DEBUG_TRACE (PBD::DEBUG::ExportAnalysis, string_compose ("Analyser r:%1 c:%2 f:%3 d:%4\n", sample_rate, channels, bufsize, n_samples));
+
 	assert (bufsize % channels == 0);
 	assert (bufsize > 1);
-
-	DEBUG_TRACE (PBD::DEBUG::ExportAnalysis, string_compose ("Analyser r:%1 c:%2 f:%3 d:%4", sample_rate, channels, bufsize, n_samples));
 
 	if (channels > 0 && channels <= 2) {
 		using namespace Vamp::HostExt;
@@ -68,12 +68,12 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 	_bufs[1] = (float*) malloc (sizeof (float) * _bufsize);
 
 	const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
-	_spp = ceil ((_n_samples + 1.f) / (float) peaks);
+	_spp = ceil ((_n_samples + 2.f) / (float) peaks);
 
 	const size_t swh = sizeof (_result.spectrum) / sizeof (float);
 	const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
 	const size_t width = swh / height;
-	_fpp = ceil ((_n_samples + 1.f) / (float) width);
+	_fpp = ceil ((_n_samples + 2.f) / (float) width);
 
 	_fft_data_size   = _bufsize / 2;
 	_fft_freq_per_bin = sample_rate / _fft_data_size / 2.f;
@@ -143,11 +143,18 @@ Analyser::~Analyser ()
 void
 Analyser::process (ProcessContext<float> const & ctx)
 {
-	framecnt_t n_samples = ctx.frames () / ctx.channels ();
+	const framecnt_t n_samples = ctx.frames () / ctx.channels ();
 	assert (ctx.channels () == _channels);
 	assert (ctx.frames () % ctx.channels () == 0);
 	assert (n_samples <= _bufsize);
 	//printf ("PROC %p @%ld F: %ld, S: %ld C:%d\n", this, _pos, ctx.frames (), n_samples, ctx.channels ());
+
+	// allow 1 sample slack for resampling
+	if (_pos + n_samples > _n_samples + 1) {
+		_pos += n_samples;
+		ListedSource<float>::output (ctx);
+		return;
+	}
 
 	float const * d = ctx.data ();
 	framecnt_t s;
@@ -234,10 +241,12 @@ Analyser::process (ProcessContext<float> const & ctx)
 ARDOUR::ExportAnalysisPtr
 Analyser::result ()
 {
-	DEBUG_TRACE (PBD::DEBUG::ExportAnalysis, string_compose ("Processed %1 / %2 samples", _pos, _n_samples));
-	if (_pos == 0 || _pos != _n_samples) {
+	DEBUG_TRACE (PBD::DEBUG::ExportAnalysis, string_compose ("Processed %1 / %2 samples\n", _pos, _n_samples));
+	if (_pos == 0 || ::llabs (_pos -_n_samples) > 1) {
+		printf("NO ANAL\n");
 		return ARDOUR::ExportAnalysisPtr ();
 	}
+
 	if (_ebur128_plugin) {
 		Vamp::Plugin::FeatureSet features = _ebur128_plugin->getRemainingFeatures ();
 		if (!features.empty () && features.size () == 3) {
