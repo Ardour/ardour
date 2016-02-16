@@ -18,8 +18,6 @@
 
 #include "audiographer/general/analyser.h"
 #include "pbd/fastlog.h"
-#include "pbd/compose.h"
-#include "ardour/debug.h"
 
 using namespace AudioGrapher;
 
@@ -34,11 +32,9 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 	, _n_samples (n_samples)
 	, _pos (0)
 {
-	DEBUG_TRACE (PBD::DEBUG::ExportAnalysis, string_compose ("Analyser r:%1 c:%2 f:%3 d:%4\n", sample_rate, channels, bufsize, n_samples));
-
+	//printf ("NEW ANALYSER %p r:%.1f c:%d f:%ld l%ld\n", this, sample_rate, channels, bufsize, n_samples);
 	assert (bufsize % channels == 0);
 	assert (bufsize > 1);
-
 	if (channels > 0 && channels <= 2) {
 		using namespace Vamp::HostExt;
 		PluginLoader* loader (PluginLoader::getInstance ());
@@ -241,7 +237,7 @@ Analyser::process (ProcessContext<float> const & ctx)
 ARDOUR::ExportAnalysisPtr
 Analyser::result ()
 {
-	DEBUG_TRACE (PBD::DEBUG::ExportAnalysis, string_compose ("Processed %1 / %2 samples\n", _pos, _n_samples));
+	//printf ("PROCESSED %ld / %ld samples\n", _pos, _n_samples);
 	if (_pos == 0 || _pos > _n_samples + 1) {
 		return ARDOUR::ExportAnalysisPtr ();
 	}
