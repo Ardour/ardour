@@ -195,7 +195,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		int mnw = 0; // max numeric width
 		int anw = 0; // spectrum annotation text width
 
-		int lin[4] = { 0, 0, 0, 0 }; // max line height
+		int lin[6] = { 0, 0, 0, 0, 0, 0 }; // max line height
 
 		TXTSIZE(0, _("(too short integration time)"), get_SmallFont);
 
@@ -208,6 +208,8 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		TXTSIZE(1, string_compose (_("%1 dBFS"), std::setprecision (1), std::fixed, dbfs), get_LargeFont);
 		TXTSIZE(2, _("True Peak:"), get_SmallFont);
 		TXTSIZE(3, string_compose (_("%1 dBTP"), std::setprecision (1), std::fixed, dbtp), get_LargeFont);
+		TXTSIZE(4, _("Normalization Gain:"), get_SmallFont);
+		TXTSIZE(5, _("+888.88 dB"), get_SmallMonospaceFont);
 
 		TXTSIZE(0, _("Integrated Loudness:"), get_SmallFont);
 		TXTSIZE(1, string_compose (_("%1 LUFS"), std::setprecision (1), std::fixed, p->loudness), get_LargeFont);
@@ -215,8 +217,9 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		TXTSIZE(3, string_compose (_("%1 LU"), std::setprecision (1), std::fixed, p->loudness_range), get_LargeFont);
 
 		mnw += 8;
-		const int ht = lin[0] * 1.25 + lin[1] * 1.25 + lin[2] * 1.25 + lin[3] + 8;
-		const int hh = std::max (100, ht);
+		const int ht = lin[0] * 1.25 + lin[1] * 1.25 + lin[2] * 1.25 + lin[3] *1.25 + lin[4] * 1.25 + lin[5];
+		const int hh = std::max (100, ht + 12);
+		const int htn = lin[0] * 1.25 + lin[1] * 1.25 + lin[2] * 1.25 + lin[3];
 		int m_l =  2 * mnw + /*hist-width*/ 540 + /*box spacing*/ 8 - /*peak-width*/ 800 - m_r; // margin left
 
 		int mml = 0; // min margin left -- ensure left margin is wide enough
@@ -228,10 +231,16 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		const int nw2 = mnw / 2; // nums, horizontal center
 
 		int y0[4];
-		y0[0] = (hh - ht) * .5 + lin[0] * .25;
+		if (p->normalized) {
+			y0[0] = (hh - ht) * .5;
+		} else {
+			y0[0] = (hh - htn) * .5;
+		}
 		y0[1] = y0[0] + lin[0] * 1.25;
 		y0[2] = y0[1] + lin[1] * 1.25;
 		y0[3] = y0[2] + lin[2] * 1.25;
+		y0[4] = y0[3] + lin[3] * 1.25;
+		y0[5] = y0[4] + lin[4] * 1.25;
 
 
 		{ /* peak, loudness and R128 histogram */
@@ -277,6 +286,35 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 				layout->show_in_cairo_context (cr);
 			}
 
+			if (p->normalized) {
+				const float ndb = accurate_coefficient_to_dB (p->norm_gain_factor);
+				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				layout->set_text (_("Normalization Gain:"));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (nw2 - w * .5), y0[4]);
+				cr->set_source_rgba (.7, .7, .7, 1.0);
+				layout->show_in_cairo_context (cr);
+
+				layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+				layout->set_text (string_compose (_("%1 dB"), std::setprecision (2), std::showpos, std::fixed, ndb));
+
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (nw2 - w * .5), y0[5]);
+				// TODO tweak thresholds
+				if (p->norm_gain_factor < 1.0) {
+					cr->set_source_rgba (1.0, .7, .1, 1.0);
+				} else if (p->norm_gain_factor == 1.0) {
+					cr->set_source_rgba (.7, .7, .7, 1.0);
+				} else if (fabsf (ndb) < 12) {
+					cr->set_source_rgba (.1, 1.0, .1, 1.0);
+				} else if (fabsf (ndb) < 18) {
+					cr->set_source_rgba (1.0, .7, .1, 1.0);
+				} else {
+					cr->set_source_rgba (1.0, .1, .1, 1.0);
+				}
+				layout->show_in_cairo_context (cr);
+			}
+
 			nums->flush ();
 
 			/* EBU R128 numerics */
@@ -299,7 +337,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
 				layout->set_text (_("Not\nAvailable"));
 				layout->get_pixel_size (w, h);
-				cr->move_to (rint (nw2 - w * .5), rint (hh * .5 - h * .6));
+				cr->move_to (rint (nw2 - w * .5), rint (hh * .5 - h * .66));
 				layout->show_in_cairo_context (cr);
 				int yy = h * .5;
 
@@ -410,23 +448,6 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 				layout->set_text (_("Not\nAvailable"));
 				layout->get_pixel_size (w, h);
 				cr->move_to (rint ((510 - w) * .5), rint ((hh - h) * .5));
-				layout->show_in_cairo_context (cr);
-			}
-
-			// add normalization gain factor here (for want of a better place)
-			if (p->normalized) {
-				const float ndb = accurate_coefficient_to_dB (p->norm_gain_factor);
-				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
-				layout->set_alignment (Pango::ALIGN_LEFT);
-				layout->set_text (string_compose (_("Normalization Gain: %1 dB"), std::setprecision (2), std::showpos, std::fixed, ndb));
-				layout->get_pixel_size (w, h);
-				cr->set_operator (Cairo::OPERATOR_OVER);
-				layout->get_pixel_size (w, h);
-				Gtkmm2ext::rounded_rectangle (cr, 5, hh - h - 4, w + 2, h + 2, 4);
-				cr->set_source_rgba (.1, .1, .1, 0.7);
-				cr->fill ();
-				cr->set_source_rgba (.3, .7, .3, 1.0);
-				cr->move_to (6, hh - h - 3);
 				layout->show_in_cairo_context (cr);
 			}
 
