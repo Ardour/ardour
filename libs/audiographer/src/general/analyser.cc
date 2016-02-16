@@ -234,8 +234,8 @@ Analyser::process (ProcessContext<float> const & ctx)
 ARDOUR::ExportAnalysisPtr
 Analyser::result ()
 {
-	if (_pos == 0) {
 	DEBUG_TRACE (PBD::DEBUG::ExportAnalysis, string_compose ("Processed %1 / %2 samples", _pos, _n_samples));
+	if (_pos == 0 || _pos != _n_samples) {
 		return ARDOUR::ExportAnalysisPtr ();
 	}
 	if (_ebur128_plugin) {

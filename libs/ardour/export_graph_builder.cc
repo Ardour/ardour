@@ -307,8 +307,12 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 	unsigned channels = new_config.channel_config->get_n_chans();
 	_analyse = config.format->analyse();
 	if (_analyse) {
+		framecnt_t sample_rate = parent.session.nominal_frame_rate();
+		framecnt_t sb = config.format->silence_beginning_at (parent.timespan->get_start(), sample_rate);
+		framecnt_t se = config.format->silence_end_at (parent.timespan->get_end(), sample_rate);
+		framecnt_t duration = parent.timespan->get_length () + sb + se;
 		analyser.reset (new Analyser (config.format->sample_rate(), channels, max_frames,
-					(framecnt_t) ceil (parent.timespan->get_length () * config.format->sample_rate () / (double) parent.session.nominal_frame_rate ())));
+					(framecnt_t) ceil (duration * config.format->sample_rate () / sample_rate)));
 		parent.add_analyser (config.filename->get_path (config.format), analyser);
 	}
 
