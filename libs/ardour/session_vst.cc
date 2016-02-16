@@ -249,11 +249,18 @@ intptr_t Session::vst_callback (
 				_timeInfo.flags |= (kVstSmpteValid);
 			}
 
+			//ToDo: 
+			//if this is found to be burdensome to plugins,
+			//we should cache the previous state at a global level,
+			//and only set this flag when the transport changes state
+			_timeInfo.flags |= (kVstTransportChanged);
+
 			if (session->transport_speed() != 0.0f) {
 				_timeInfo.flags |= (kVstTransportPlaying);
 			}
 
 			if (session->get_play_loop()) {
+				_timeInfo.flags |= (kVstTransportCycleActive);
 			}
 
 		} else {

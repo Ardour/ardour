@@ -135,7 +135,12 @@
 
 struct RemoteVstPlugin;
 
+#define kVstTransportChanged 1
 #define kVstTransportPlaying (1 << 1)
+#define kVstTransportCycleActive (1 << 2)
+
+#define kVstAutomationWriting (1 << 6)
+#define kVstAutomationReading (1 << 7)
 
 #define kVstNanosValid (1 << 8)
 #define kVstPpqPosValid (1 << 9)
