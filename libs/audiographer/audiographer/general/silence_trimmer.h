@@ -156,6 +156,26 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 
 		framecnt_t frame_index = 0;
 
+		/* TODO this needs a general overhaul.
+		 *
+		 * - decouple "required silence duration" from buffer-size.
+		 * - add hold-times for in/out
+		 * - optional high pass filter (for DC offset)
+		 * -> allocate a buffer "hold time" worth of samples.
+		 * check if all samples in buffer are above/below threshold,
+		 *
+		 * * in_beginning, in_end may be in the same cycle.
+		 * * end-trim should not be on a buffersize boundary
+		 * * results should be consistent for all buffer-sizes and samplerates
+		 *
+		 * (currently this is mosly fine because the "Chunker"
+		 * produces a fixAed 8K stream, but this 8K are for interleaved
+		 * data all channels and it's regardless of sample-rate)
+		 *
+		 * https://github.com/x42/silan/blob/master/src/main.c#L130
+		 * may lend itself for some inspiration.
+		 */
+
 		if (in_beginning) {
 
 			bool has_data = true;
@@ -229,10 +249,12 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 			ListedSource<T>::output (c);
 		}
 
+		if (in_end) {
+			c.set_flag (ProcessContext<T>::EndOfInput);
+		}
+
 		// Finally, if in end, add silence to end
 		if (in_end && add_to_end) {
-			c.set_flag (ProcessContext<T>::EndOfInput);
-
 			if (debug_level (DebugVerbose)) {
 				debug_stream () << DebugUtils::demangled_name (*this) <<
 					" adding to end" << std::endl;
