@@ -2155,9 +2155,10 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						? *metric_i : NULL;
 					if (m != m_end && (!metric || metric->frame() > (*m).time())) {
 						const Evoral::MIDIEvent<framepos_t> ev(*m, false);
-						assert (ev.time() < nframes);
-						LV2_Evbuf_Iterator eend = lv2_evbuf_end(_ev_buffers[port_index]);
-						lv2_evbuf_write(&eend, ev.time(), 0, type, ev.size(), ev.buffer());
+						if (ev.time() < nframes) {
+							LV2_Evbuf_Iterator eend = lv2_evbuf_end(_ev_buffers[port_index]);
+							lv2_evbuf_write(&eend, ev.time(), 0, type, ev.size(), ev.buffer());
+						}
 						++m;
 					} else {
 						tmetric.set_metric(metric);
