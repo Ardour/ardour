@@ -78,6 +78,8 @@ SampleRateConverter::allocate_buffers (framecnt_t max_frames)
 	if (!active) { return max_frames; }
 
 	framecnt_t max_frames_out = (framecnt_t) ceil (max_frames * src_data.src_ratio);
+	max_frames_out -= max_frames_out % channels;
+
 	if (data_out_size < max_frames_out) {
 
 		delete[] data_out;
