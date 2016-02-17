@@ -39,15 +39,15 @@ MissingPluginDialog::MissingPluginDialog (Session * s, list<string> const & plug
 	Label* m = manage (new Label);
 
 	stringstream t;
-	t << "This session contains the following plugins that cannot be found on this system:\n\n";
+	t << _("This session contains the following plugins that cannot be found on this system:\n\n");
 
 	for (list<string>::const_iterator i = plugins.begin(); i != plugins.end(); ++i) {
 		t << *i << "\n";
 	}
 
-	t << "\nThose plugins will be replaced with inactive stubs.\n";
-	t << "It is recommended that you install the missing plugins and re-load the session.\n";
-	t << "(also check the blacklist, Window > Log and Preferences > Plugins)\n";
+	t << _("\nThose plugins will be replaced with inactive stubs.\n"
+	       "It is recommended that you install the missing plugins and re-load the session.\n"
+	       "(also check the blacklist, Window > Log and Preferences > Plugins)");
 
         m->set_markup (t.str ());
         get_vbox()->pack_start (*m, false, false);
