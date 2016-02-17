@@ -135,7 +135,7 @@ _pingback (void *arg)
 	char* v = curl_easy_escape (c, cm->version.c_str(), cm->version.length());
 	url += v;
 	url += '?';
-	free (v);
+	curl_free (v);
 
 #ifndef PLATFORM_WINDOWS
 	struct utsname utb;
@@ -153,18 +153,18 @@ _pingback (void *arg)
 	s = string_compose ("s=%1", query);
 	url += s;
 	url += '&';
-	free (query);
+	curl_free (query);
 
 	query = curl_easy_escape (c, utb.release, strlen (utb.release));
 	s = string_compose ("r=%1", query);
 	url += s;
 	url += '&';
-	free (query);
+	curl_free (query);
 
 	query = curl_easy_escape (c, utb.machine, strlen (utb.machine));
 	s = string_compose ("m=%1", query);
 	url += s;
-	free (query);
+	curl_free (query);
 #else
 	std::string val;
 	if (_query_registry("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "ProductName", val)) {
@@ -172,7 +172,7 @@ _pingback (void *arg)
 		url += "r=";
 		url += query;
 		url += '&';
-		free (query);
+		curl_free (query);
 	} else {
 		url += "r=&";
 	}
@@ -187,7 +187,7 @@ _pingback (void *arg)
 		url += "m=";
 		url += query;
 		url += '&';
-		free (query);
+		curl_free (query);
 	} else {
 		url += "m=&";
 	}
