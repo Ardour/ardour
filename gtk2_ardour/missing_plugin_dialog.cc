@@ -47,6 +47,7 @@ MissingPluginDialog::MissingPluginDialog (Session * s, list<string> const & plug
 
 	t << "\nThose plugins will be replaced with inactive stubs.\n";
 	t << "It is recommended that you install the missing plugins and re-load the session.\n";
+	t << "(also check the blacklist, Window > Log and Preferences > Plugins)\n";
 
         m->set_markup (t.str ());
         get_vbox()->pack_start (*m, false, false);
