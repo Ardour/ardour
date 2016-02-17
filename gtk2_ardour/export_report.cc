@@ -751,7 +751,7 @@ ExportReport::run ()
 void
 ExportReport::open_folder (std::string p)
 {
-	PBD::open_uri (Glib::path_get_dirname(p));
+	PBD::open_folder (Glib::path_get_dirname(p));
 }
 
 void
