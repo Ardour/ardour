@@ -314,7 +314,7 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 		max_frames = min ((framecnt_t) 8192 * channels, max ((framecnt_t) 4096 * channels, max_frames));
 		chunker.reset (new Chunker<Sample> (max_frames));
 		analyser.reset (new Analyser (config.format->sample_rate(), channels, max_frames,
-					(framecnt_t) ceil (duration * config.format->sample_rate () / sample_rate)));
+					(framecnt_t) ceil (duration * config.format->sample_rate () / (double) sample_rate)));
 		chunker->add_output (analyser);
 		parent.add_analyser (config.filename->get_path (config.format), analyser);
 	}
