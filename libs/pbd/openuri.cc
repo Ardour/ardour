@@ -84,13 +84,15 @@ PBD::open_folder (const std::string& d)
 {
 #ifdef __APPLE__
 	CURL *curl = curl_easy_init ();
+	bool rv = false;
 	if (curl) {
 		char * e = curl_easy_escape (curl, d.c_str(), d.size());
 		std::string url = "file:///" + std::string(e);
-		PBD::open_uri (url);
+		rv = PBD::open_uri (url);
 		curl_free (e);
 	}
+	return rv;
 #else
-	PBD::open_uri (d);
+	return PBD::open_uri (d);
 #endif
 }
