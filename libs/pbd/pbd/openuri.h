@@ -27,6 +27,7 @@
 namespace PBD {
         LIBPBD_API bool open_uri (const char*);
         LIBPBD_API bool open_uri (const std::string&);
+        LIBPBD_API bool open_folder (const std::string&);
 }
 
 #endif

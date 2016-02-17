@@ -29,6 +29,7 @@
 #include "pbd/openuri.h"
 
 #ifdef __APPLE__
+#include <curl/curl.h>
 	extern bool cocoa_open_url (const char*);
 #endif
 
@@ -76,4 +77,20 @@ bool
 PBD::open_uri (const std::string& uri)
 {
 	return open_uri (uri.c_str());
+}
+
+bool
+PBD::open_folder (const std::string& d)
+{
+#ifdef __APPLE__
+	CURL *curl = curl_easy_init ();
+	if (curl) {
+		char * e = curl_easy_escape (curl, d.c_str(), d.size());
+		std::string url = "file:///" + std::string(e);
+		PBD::open_uri (url);
+		curl_free (e);
+	}
+#else
+	PBD::open_uri (d);
+#endif
 }
