@@ -143,6 +143,18 @@ Keyboard::Keyboard ()
 
 	RelevantModifierKeyMask = (GdkModifierType) gtk_accelerator_get_default_mod_mask ();
 
+#ifdef __APPLE__
+        /* Remove SUPER,HYPER,META.
+         *
+         * GTK on OS X adds META when Command is pressed for various indefensible reasons, since
+         * it also uses MOD2 to indicate Command.
+         */
+
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~GDK_SUPER_MASK);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~GDK_HYPER_MASK);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~GDK_META_MASK);
+#endif
+
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | PrimaryModifier);
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | SecondaryModifier);
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | TertiaryModifier);
