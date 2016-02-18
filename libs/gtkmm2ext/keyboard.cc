@@ -238,6 +238,65 @@ Keyboard::_snooper (GtkWidget *widget, GdkEventKey *event, gpointer data)
 	return ((Keyboard *) data)->snooper (widget, event);
 }
 
+static string
+show_gdk_event_state (int state)
+{
+	string s;
+	if (state & GDK_SHIFT_MASK) {
+		s += "+SHIFT";
+	}
+	if (state & GDK_LOCK_MASK) {
+		s += "+LOCK";
+	}
+	if (state & GDK_CONTROL_MASK) {
+		s += "+CONTROL";
+	}
+	if (state & GDK_MOD1_MASK) {
+		s += "+MOD1";
+	}
+	if (state & GDK_MOD2_MASK) {
+		s += "+MOD2";
+	}
+	if (state & GDK_MOD3_MASK) {
+		s += "+MOD3";
+	}
+	if (state & GDK_MOD4_MASK) {
+		s += "+MOD4";
+	}
+	if (state & GDK_MOD5_MASK) {
+		s += "+MOD5";
+	}
+	if (state & GDK_BUTTON1_MASK) {
+		s += "+BUTTON1";
+	}
+	if (state & GDK_BUTTON2_MASK) {
+		s += "+BUTTON2";
+	}
+	if (state & GDK_BUTTON3_MASK) {
+		s += "+BUTTON3";
+	}
+	if (state & GDK_BUTTON4_MASK) {
+		s += "+BUTTON4";
+	}
+	if (state & GDK_BUTTON5_MASK) {
+		s += "+BUTTON5";
+	}
+	if (state & GDK_SUPER_MASK) {
+		s += "+SUPER";
+	}
+	if (state & GDK_HYPER_MASK) {
+		s += "+HYPER";
+	}
+	if (state & GDK_META_MASK) {
+		s += "+META";
+	}
+	if (state & GDK_RELEASE_MASK) {
+		s += "+RELEASE";
+	}
+
+	return s;
+}
+
 gint
 Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 {
@@ -247,9 +306,9 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 	DEBUG_TRACE (
 		DEBUG::Keyboard,
 		string_compose (
-			"Snoop widget %1 name: [%6] key %2 type %3 state %4 magic %5\n",
+			"Snoop widget %1 name: [%6] key %2 [%8] type %3 state %4 [%7] magic %5\n",
 			widget, event->keyval, event->type, event->state, _some_magic_widget_has_focus,
-			gtk_widget_get_name (widget)
+			gtk_widget_get_name (widget), show_gdk_event_state (event->state), gdk_keyval_name (event->keyval)
 			)
 		);
 
