@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="SSL Nucleus (via platform MIDI)"/>
+  <DeviceType value="MCU"/>
+  <Strips value="8"/>
+  <Extenders value="1"/>
+  <MasterPosition value="0"/>
+  <MasterFader value="no"/>
+  <TimecodeDisplay value="no"/>
+  <TwoCharacterDisplay value="yes"/>
+  <HasSeparateMeters value="yes"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
+  <TouchSenseFaders value="yes"/>
+  <LogicControlButtons value="yes"/>
+</MackieProtocolDevice>
