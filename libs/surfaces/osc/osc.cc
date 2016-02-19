@@ -252,7 +252,7 @@ OSC::thread_init ()
 
 	if (_osc_server) {
 #ifdef PLATFORM_WINDOWS
-		Glib::RefPtr<IOChannel> iochan = Glib::IOChannel::create_from_win32_socket (lo_server_get_socket_fd (_osc_server));
+		Glib::RefPtr<IOChannel> chan = Glib::IOChannel::create_from_win32_socket (lo_server_get_socket_fd (_osc_server));
 		Glib::RefPtr<IOSource> src  = IOSource::create (chan, IO_IN|IO_HUP|IO_ERR);
 #else
 		Glib::RefPtr<IOSource> src  = IOSource::create (lo_server_get_socket_fd (_osc_server), IO_IN|IO_HUP|IO_ERR);
