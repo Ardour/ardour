@@ -410,10 +410,18 @@ if %REPLACE_WINE%; then
 	# if this check were quick and easy.. it should be done in the startup-script, but it's not
 	# so here we go... (updating wine may require re-installing ardour)
 	#
+	# on recent Ubuntu wine does load both:
+	#   /usr/lib/i386-linux-gnu/libwine.so.1
+	# AND
+	#   /usr/lib/x86_64-linux-gnu/libwine.so.1
+	# so we need to work around this (thanks).
+	# (this hack break 64bit LinuxVST builds, but we don't do those anyway)
+
 	LIBWINE=$(
 		LD_DEBUG=files wine `pwd`/${BUNDLE_DIR}/lib/ardour-vst-scanner.exe.so 2>&1 \
 						 | grep -e "calling init:.*libwine" \
 						 | sed 's/^.*calling init: //' \
+						 | grep -v x86_64-linux-gnu
 						 | uniq \
 			)
 	if ! test -f "$LIBWINE"; then
