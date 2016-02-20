@@ -384,7 +384,9 @@ Surface::setup_master ()
 	}
 
 	if (!m) {
-		_master_fader->set_control (boost::shared_ptr<AutomationControl>());
+		if (_master_fader) {
+			_master_fader->set_control (boost::shared_ptr<AutomationControl>());
+		}
 		master_connection.disconnect ();
 		return;
 	}
