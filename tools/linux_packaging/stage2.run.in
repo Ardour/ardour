@@ -421,7 +421,7 @@ if %REPLACE_WINE%; then
 		LD_DEBUG=files wine `pwd`/${BUNDLE_DIR}/lib/ardour-vst-scanner.exe.so 2>&1 \
 						 | grep -e "calling init:.*libwine" \
 						 | sed 's/^.*calling init: //' \
-						 | grep -v x86_64-linux-gnu
+						 | grep -v x86_64-linux-gnu \
 						 | uniq \
 			)
 	if ! test -f "$LIBWINE"; then
