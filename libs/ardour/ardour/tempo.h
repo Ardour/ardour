@@ -403,8 +403,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	Timecode::BBT_Time beats_to_bbt (double beats);
 
 private:
-	double bbt_to_beats_unlocked (Timecode::BBT_Time bbt);
-	Timecode::BBT_Time beats_to_bbt_unlocked (double beats);
+	double bbt_to_beats_locked (Timecode::BBT_Time bbt);
+	Timecode::BBT_Time beats_to_bbt_locked (double beats);
 
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;

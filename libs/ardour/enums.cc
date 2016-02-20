@@ -34,6 +34,7 @@
 #include "ardour/mute_master.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
+#include "ardour/tempo.h"
 #include "ardour/track.h"
 #include "ardour/types.h"
 
@@ -103,6 +104,7 @@ setup_enum_writer ()
 	Diskstream::Flag _Diskstream_Flag;
 	Location::Flags _Location_Flags;
 	PositionLockStyle _PositionLockStyle;
+	TempoSection::Type _TempoSection_Type;
 	Track::FreezeState _Track_FreezeState;
 	AutomationList::InterpolationStyle _AutomationList_InterpolationStyle;
 	AnyTime::Type _AnyTime_Type;
@@ -527,6 +529,10 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsRangeMarker);
 	REGISTER_CLASS_ENUM (Location, IsSkip);
 	REGISTER_BITS (_Location_Flags);
+
+	REGISTER_CLASS_ENUM (TempoSection, Ramp);
+	REGISTER_CLASS_ENUM (TempoSection, Constant);
+	REGISTER (_TempoSection_Type);
 
 	REGISTER_CLASS_ENUM (Track, NoFreeze);
 	REGISTER_CLASS_ENUM (Track, Frozen);

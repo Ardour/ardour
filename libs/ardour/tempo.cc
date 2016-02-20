@@ -24,8 +24,11 @@
 #include <unistd.h>
 
 #include <glibmm/threads.h>
+
+#include "pbd/enumwriter.h"
 #include "pbd/xml++.h"
 #include "evoral/Beats.hpp"
+
 #include "ardour/debug.h"
 #include "ardour/lmath.h"
 #include "ardour/tempo.h"
@@ -89,7 +92,7 @@ TempoSection::TempoSection (const XMLNode& node)
 			set_beat (beat);
 		}
 	} else {
-		error << _("TempoSection XML node has no \"start\" property") << endmsg;
+		warning << _("TempoSection XML node has no \"start\" property") << endmsg;
 	}
 
 
@@ -143,11 +146,7 @@ TempoSection::TempoSection (const XMLNode& node)
 	if ((prop = node.property ("tempo-type")) == 0) {
 		_type = Constant;
 	} else {
-		if (strstr(prop->value().c_str(),"Constant")) {
-			_type = Constant;
-		} else {
-			_type = Ramp;
-		}
+		_type = Type (string_2_enum (prop->value(), _type));
 	}
 }
 
@@ -168,9 +167,7 @@ TempoSection::get_state() const
 	// root->add_property ("bar-offset", buf);
 	snprintf (buf, sizeof (buf), "%s", movable()?"yes":"no");
 	root->add_property ("movable", buf);
-
-	snprintf (buf, sizeof (buf), "%s", _type == Constant?"Constant":"Ramp");
-	root->add_property ("tempo-type", buf);
+	root->add_property ("tempo-type", enum_2_string (_type));
 
 	return *root;
 }
@@ -601,7 +598,7 @@ TempoMap::do_insert (MetricSection* section)
 			pair<double, BBT_Time> corrected = make_pair (m->beat(), m->bbt());
 			corrected.second.beats = 1;
 			corrected.second.ticks = 0;
-			corrected.first = bbt_to_beats_unlocked (corrected.second);
+			corrected.first = bbt_to_beats_locked (corrected.second);
 			warning << string_compose (_("Meter changes can only be positioned on the first beat of a bar. Moving from %1 to %2"),
 						   m->bbt(), corrected.second) << endmsg;
 			m->set_beat (corrected);
@@ -838,7 +835,7 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 		MeterSection& first (first_meter());
 		if (ms.beat() != first.beat()) {
 			remove_meter_locked (ms);
-			add_meter_locked (meter, bbt_to_beats_unlocked (where), where, true);
+			add_meter_locked (meter, bbt_to_beats_locked (where), where, true);
 		} else {
 			/* cannot move the first meter section */
 			*static_cast<Meter*>(&first) = meter;
@@ -1173,18 +1170,18 @@ TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt)
 		warning << string_compose (_("tempo map asked for BBT time at frame %1\n"), frame) << endmsg;
 		return;
 	}
-	bbt = beats_to_bbt_unlocked (beat_at_frame (frame));
+	bbt = beats_to_bbt_locked (beat_at_frame (frame));
 }
 
 double
 TempoMap::bbt_to_beats (Timecode::BBT_Time bbt)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return bbt_to_beats_unlocked (bbt);
+	return bbt_to_beats_locked (bbt);
 }
 
 double
-TempoMap::bbt_to_beats_unlocked (Timecode::BBT_Time bbt)
+TempoMap::bbt_to_beats_locked (Timecode::BBT_Time bbt)
 {
 	/* CALLER HOLDS READ LOCK */
 
@@ -1222,11 +1219,11 @@ Timecode::BBT_Time
 TempoMap::beats_to_bbt (double beats)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return beats_to_bbt_unlocked (beats);
+	return beats_to_bbt_locked (beats);
 }
 
 Timecode::BBT_Time
-TempoMap::beats_to_bbt_unlocked (double beats)
+TempoMap::beats_to_bbt_locked (double beats)
 {
 	/* CALLER HOLDS READ LOCK */
 
@@ -1393,7 +1390,7 @@ TempoMap::frame_time (const BBT_Time& bbt)
 	}
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	framepos_t const ret = frame_at_beat (bbt_to_beats_unlocked (bbt));
+	framepos_t const ret = frame_at_beat (bbt_to_beats_locked (bbt));
 
 	return ret;
 }
@@ -1552,7 +1549,7 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 
 	double const beat_at_framepos = beat_at_frame (frame);
 
-	BBT_Time bbt (beats_to_bbt_unlocked (beat_at_framepos));
+	BBT_Time bbt (beats_to_bbt_locked (beat_at_framepos));
 
 	switch (type) {
 	case Bar:
@@ -1612,7 +1609,7 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 		framecnt_t const pos = frame_at_beat (cnt);
 		MeterSection const meter = meter_section_at (pos);
 		Tempo const tempo = tempo_at (pos);
-		BBT_Time const bbt = beats_to_bbt_unlocked ((double) cnt);
+		BBT_Time const bbt = beats_to_bbt_locked ((double) cnt);
 
 		points.push_back (BBTPoint (meter, tempo, pos, bbt.bars, bbt.beats));
 		++cnt;
@@ -1975,7 +1972,7 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
 						ms->set_beat (start);
 					}
 					if ((t = dynamic_cast<TempoSection*>(prev)) != 0) {
-						pair<double, BBT_Time> start = make_pair (t->beat(), beats_to_bbt_unlocked (t->beat()));
+						pair<double, BBT_Time> start = make_pair (t->beat(), beats_to_bbt_locked (t->beat()));
 						ms->set_beat (start);
 					}
 					ms->set_frame (prev->frame());
