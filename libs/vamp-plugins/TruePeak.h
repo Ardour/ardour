@@ -123,7 +123,7 @@ public:
 	void  read (float &m, float &p);
 	void  reset (void);
 
-	void init (float fsamp);
+	bool init (float fsamp);
 
 private:
 

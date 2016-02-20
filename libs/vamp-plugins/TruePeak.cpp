@@ -439,11 +439,14 @@ TruePeakdsp::reset ()
 	_p = 0;
 }
 
-void
+bool
 TruePeakdsp::init (float fsamp)
 {
 	_src.setup(fsamp, fsamp * 4.0, 1, 24, 1.0);
 	_buf = (float*) malloc(32768 * sizeof(float));
+	if (!_buf) {
+		return false;
+	}
 
 	/* q/d initialize */
 	float zero[8192];
@@ -455,6 +458,7 @@ TruePeakdsp::init (float fsamp)
 	_src.out_count = 32768;
 	_src.out_data = _buf;
 	_src.process ();
+	return true;
 }
 
 }
@@ -522,13 +526,15 @@ VampTruePeak::initialise(size_t channels, size_t stepSize, size_t blockSize)
 		return false;
 	}
 
-	if (blockSize > 8192) {
+	if (blockSize == 0 || blockSize > 8192) {
+		return false;
+	}
+
+	if (!_meter.init (m_inputSampleRate)) {
 		return false;
 	}
 
 	m_blockSize = blockSize;
-
-	_meter.init (m_inputSampleRate);
 
 	return true;
 }
