@@ -4016,6 +4016,21 @@ Session::route_by_id (PBD::ID id)
 	return boost::shared_ptr<Route> ((Route*) 0);
 }
 
+boost::shared_ptr<Processor>
+Session::processor_by_id (PBD::ID id) const
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		boost::shared_ptr<Processor> p = (*i)->Route::processor_by_id (id);
+		if (p) {
+			return p;
+		}
+	}
+
+	return boost::shared_ptr<Processor> ();
+}
+
 boost::shared_ptr<Track>
 Session::track_by_diskstream_id (PBD::ID id)
 {

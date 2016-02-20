@@ -916,6 +916,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* Controllables */
 
+	boost::shared_ptr<Processor> processor_by_id (PBD::ID) const;
+
 	boost::shared_ptr<PBD::Controllable> controllable_by_id (const PBD::ID&);
 	boost::shared_ptr<PBD::Controllable> controllable_by_descriptor (const PBD::ControllableDescriptor&);
 
