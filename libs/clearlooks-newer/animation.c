@@ -128,7 +128,7 @@ lookup_animation_info (const GtkWidget *widget)
 
 /* Create all the relevant information for the animation, and insert it into the hash table. */
 static void
-add_animation (const GtkWidget *widget, gdouble stop_time)
+add_animation (GtkWidget *widget, gdouble stop_time)
 {
 	AnimationInfo *value;
 

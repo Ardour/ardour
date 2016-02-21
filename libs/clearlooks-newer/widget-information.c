@@ -11,7 +11,7 @@
    Smooth-Engine.
 */
 gboolean
-ge_object_is_a (const GObject * object, const gchar * type_name)
+ge_object_is_a (GObject * object, const gchar * type_name)
 {
   gboolean result = FALSE;
 

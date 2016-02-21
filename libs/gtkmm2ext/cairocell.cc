@@ -79,6 +79,10 @@ CairoFontDescription::CairoFontDescription (Pango::FontDescription& fd)
 		_weight = Cairo::FONT_WEIGHT_BOLD;
 		break;
 
+	/* to silence warnings when compiling with newer pango versions. */
+	default:
+		_weight = Cairo::FONT_WEIGHT_NORMAL;
+		break;
 	}
 
 	face = fd.get_family();

@@ -1241,12 +1241,12 @@ clearlooks_glossy_draw_radiobutton (cairo_t *cr,
 	CairoColor highlight;
 	cairo_pattern_t *pt;
 	gboolean inconsistent;
-	gboolean draw_bullet = (checkbox->shadow_type == GTK_SHADOW_IN);
+	gboolean draw_bullet = (checkbox->shadow_type == (ClearlooksShadowType)GTK_SHADOW_IN);
 
 	(void) width;
 	(void) height;
 
-	inconsistent = (checkbox->shadow_type == GTK_SHADOW_ETCHED_IN);
+	inconsistent = (checkbox->shadow_type == (ClearlooksShadowType)GTK_SHADOW_ETCHED_IN);
 	draw_bullet |= inconsistent;
 
 	if (widget->disabled)
@@ -1332,9 +1332,9 @@ clearlooks_glossy_draw_checkbox (cairo_t *cr,
 	const CairoColor *border;
 	const CairoColor *dot;
 	gboolean inconsistent = FALSE;
-	gboolean draw_bullet = (checkbox->shadow_type == GTK_SHADOW_IN);
+	gboolean draw_bullet = (checkbox->shadow_type == (ClearlooksShadowType)GTK_SHADOW_IN);
 
-	inconsistent = (checkbox->shadow_type == GTK_SHADOW_ETCHED_IN);
+	inconsistent = (checkbox->shadow_type == (ClearlooksShadowType)GTK_SHADOW_ETCHED_IN);
 	draw_bullet |= inconsistent;
 
 	if (widget->disabled)

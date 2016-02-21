@@ -73,7 +73,7 @@
 
 #define GE_WIDGET_HAS_DEFAULT(object) ((object) && GE_IS_WIDGET(object) && GTK_WIDGET_HAS_DEFAULT(object))
 
-GE_INTERNAL gboolean ge_object_is_a (const GObject * object, const gchar * type_name);
+GE_INTERNAL gboolean ge_object_is_a (GObject * object, const gchar * type_name);
 
 GE_INTERNAL gboolean ge_is_combo_box_entry (GtkWidget * widget);
 GE_INTERNAL gboolean ge_is_combo_box (GtkWidget * widget, gboolean as_list);
