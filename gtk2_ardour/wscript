@@ -122,6 +122,7 @@ gtk2_ardour_sources = [
         'led.cc',
         'level_meter.cc',
         'location_ui.cc',
+        'luainstance.cc',
         'main.cc',
         'main_clock.cc',
         'marker.cc',
