@@ -247,11 +247,11 @@ key_binding(PianoKeyboard *pk, const char *key)
 }
 
 static void
-bind_key(PianoKeyboard *pk, const char *key, int note)
+bind_key(PianoKeyboard *pk, char *key, int note)
 {
 	assert(pk->key_bindings != NULL);
 
-	g_hash_table_insert(pk->key_bindings, (const gpointer)key, (gpointer)((intptr_t)note));
+	g_hash_table_insert(pk->key_bindings, (gpointer)key, (gpointer)((intptr_t)note));
 }
 
 static void
@@ -686,7 +686,12 @@ piano_keyboard_new(void)
 	pk->note_being_pressed_using_mouse = -1;
 	pk->last_key = 0;
 	pk->monophonic = FALSE;
-	memset((void *)pk->notes, 0, sizeof(struct PKNote) * NNOTES);
+
+	/* Avoiding memset due to pk->notes being volatile. */
+	for (int i = 0; i<sizeof(struct PKNote)*NNOTES; i++) {
+		((volatile int*)pk->notes)[i] = 0;
+	}
+
 	pk->key_bindings = g_hash_table_new(g_str_hash, g_str_equal);
 	bind_keys_qwerty(pk);
 
