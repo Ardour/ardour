@@ -73,7 +73,13 @@ WaveView::DrawingRequestQueue WaveView::request_queue;
 PBD::Signal0<void> WaveView::VisualPropertiesChanged;
 PBD::Signal0<void> WaveView::ClipLevelChanged;
 
+/* NO_THREAD_WAVEVIEWS is defined by the top level wscript
+ * if --no-threaded-waveviws is provided at the configure step.
+ */
+
+#ifndef NO_THREADED_WAVEVIEWS
 #define ENABLE_THREADED_WAVEFORM_RENDERING
+#endif
 
 WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (c)

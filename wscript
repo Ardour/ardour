@@ -741,6 +741,8 @@ def options(opt):
                     help='Turn on AddressSanitizer (requires GCC >= 4.8 or clang >= 3.1)')
     opt.add_option('--ptformat', action='store_true', default=False, dest='ptformat',
                     help='Turn on PT session import option')
+    opt.add_option('--no-threaded-waveviews', action='store_true', default=False, dest='no_threaded_waveviews',
+                    help='Disable threaded waveview rendering')
 
     for i in children:
         opt.recurse(i)
@@ -1079,7 +1081,10 @@ int main () { return 0; }
     if opts.ptformat:
         conf.define('PTFORMAT', 1)
         conf.env['PTFORMAT'] = True
-
+    if opts.no_threaded_waveviews:
+        conf.define('NO_THREADED_WAVEVIEWS', 1)
+        conf.env['NO_THREADED_WAVEVIEWS'] = True
+        
     backends = opts.with_backends.split(',')
 
     if not backends:
