@@ -430,6 +430,10 @@
     <ColorAlias name="stereo panner outline" alias="color 70"/>
     <ColorAlias name="stereo panner rule" alias="color 70"/>
     <ColorAlias name="stereo panner text" alias="color 4"/>
+    <ColorAlias name="stretch clock: background" alias="color 67"/>
+    <ColorAlias name="stretch clock: cursor" alias="color 8"/>
+    <ColorAlias name="stretch clock: edited text" alias="color 8"/>
+    <ColorAlias name="stretch clock: text" alias="color 91"/>
     <ColorAlias name="sync mark" alias="color 75"/>
     <ColorAlias name="tempo bar" alias="color 46"/>
     <ColorAlias name="tempo marker" alias="color 19"/>

@@ -17,7 +17,6 @@
 
 */
 
-#include "time_fx_dialog.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -31,10 +30,12 @@
 
 #include <gtkmm2ext/utils.h>
 
+#include "audio_clock.h"
 #include "editor.h"
 #include "audio_time_axis.h"
 #include "audio_region_view.h"
 #include "region_selection.h"
+#include "time_fx_dialog.h"
 
 #ifdef USE_RUBBERBAND
 #include <rubberband/RubberBandStretcher.h>
@@ -49,21 +50,27 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
+TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, framecnt_t oldlen, framecnt_t new_length, framepos_t position)
 	: ArdourDialog (X_("time fx dialog"))
 	, editor (e)
 	, pitching (pitch)
+	, quick_button (_("Quick but Ugly"))
+	, antialias_button (_("Skip Anti-aliasing"))
+	, stretch_opts_label (_("Contents:"))
+	, precise_button (_("Minimize time distortion"))
+	, preserve_formants_button(_("Preserve Formants"))
+	, original_length (oldlen)
 	, pitch_octave_adjustment (0.0, -4.0, 4.0, 1, 2.0)
 	, pitch_semitone_adjustment (0.0, -12.0, 12.0, 1.0, 4.0)
 	, pitch_cent_adjustment (0.0, -499.0, 500.0, 5.0, 15.0)
 	, pitch_octave_spinner (pitch_octave_adjustment)
 	, pitch_semitone_spinner (pitch_semitone_adjustment)
 	, pitch_cent_spinner (pitch_cent_adjustment)
-	, quick_button (_("Quick but Ugly"))
-	, antialias_button (_("Skip Anti-aliasing"))
-	, stretch_opts_label (_("Contents:"))
-	, precise_button (_("Minimize time distortion"))
-	, preserve_formants_button(_("Preserve Formants"))
+	, percent_adjustment (100.0, -1000.0, 1000.0, 1.0, 10.0)
+	, duration_clock (0)
+	, duration_chosen (_("Duration"))
+	, choice_group (duration_chosen.get_group())
+	, percent_chosen (choice_group, _("Percent"))
 {
 	set_modal (true);
 	set_skip_taskbar_hint (true);
@@ -123,31 +130,55 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 
 		upper_button_box.pack_start (*table, false, true);
 	} else {
-		Table* table = manage (new Table (2, 3, false));
+		Table* table = manage (new Table (4, 2, false));
+		int row = 0;
+
 		table->set_row_spacings	(6);
-		table->set_col_spacing	(1, 6);
-		l = manage (new Label ("", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false ));
-		l->set_padding (8, 0);
-		table->attach (*l, 0, 1, 0, 2, Gtk::FILL, Gtk::FILL, 0, 0);
+		table->set_col_spacings	(6);
 
 #ifdef USE_RUBBERBAND
 		vector<string> strings;
+		duration_clock = manage (new AudioClock (X_("stretch"), true, "stretch", true, false, true, false, true));
+		duration_clock->set_session (e.session());
+		duration_clock->set (new_length, true);
+		duration_clock->set_mode (AudioClock::BBT);
+		duration_clock->set_bbt_reference (position);
 
-		table->attach (stretch_opts_label, 1, 2, 0, 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		Gtk::Alignment* clock_align = manage (new Gtk::Alignment);
+		clock_align->add (*duration_clock);
+		clock_align->set (0.0, 0.5, 0.0, 1.0);
+
+		Gtk::RadioButtonGroup group;
+		table->attach (duration_chosen, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
+		table->attach (*clock_align, 1, 2, row, row+1, Gtk::AttachOptions (Gtk::EXPAND|Gtk::FILL), Gtk::FILL, 0, 0);
+		row++;
+
+		const double fract = ((double) new_length) / original_length;
+		/* note the *100.0 to convert fract into a percentage */
+		percent_adjustment.set_value (fract*100.0);
+		Gtk::SpinButton* spinner = manage (new Gtk::SpinButton (percent_adjustment, 1.0, 3));
+
+		table->attach (percent_chosen, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
+		table->attach (*spinner, 1, 2, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
+		row++;
+
+		table->attach (stretch_opts_label, 0, 1, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 
 		set_popdown_strings (stretch_opts_selector, editor.rb_opt_strings);
 		/* set default */
 		stretch_opts_selector.set_active_text (editor.rb_opt_strings[editor.rb_current_opt]);
-		table->attach (stretch_opts_selector, 2, 3, 0, 1, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
+		table->attach (stretch_opts_selector, 1, 2, row, row+1, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
+		row++;
 
-		table->attach (precise_button, 1, 3, 1, 2, Gtk::FILL, Gtk::EXPAND, 0, 0);
-
+		table->attach (precise_button, 0, 2, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		row++;
 #else
 		quick_button.set_name (N_("TimeFXButton"));
-		table->attach (quick_button, 1, 3, 0, 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		table->attach (quick_button, 1, 3, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		row++;
 
 		antialias_button.set_name (N_("TimeFXButton"));
-		table->attach (antialias_button, 1, 3, 1, 2, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		table->attach (antialias_button, 1, 3, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 
 #endif
 
@@ -199,3 +230,39 @@ TimeFXDialog::delete_in_progress (GdkEventAny*)
 	return TRUE;
 }
 
+float
+TimeFXDialog::get_time_fraction () const
+{
+	if (pitching) {
+		return 1.0;
+	}
+
+	if (duration_chosen.get_active()) {
+		return duration_clock->current_duration () / original_length;
+	}
+
+	return percent_adjustment.get_value() / 100.0;
+}
+
+float
+TimeFXDialog::get_pitch_fraction () const
+{
+	if (!pitching) {
+		return 1.0;
+	}
+
+	float cents = pitch_octave_adjustment.get_value() * 1200.0;
+
+	cents += pitch_semitone_adjustment.get_value() * 100.0;
+	cents += pitch_cent_adjustment.get_value();
+
+	if (cents == 0.0) {
+		return 1.0;
+	}
+
+	// one octave == 1200 cents
+	// adding one octave doubles the frequency
+	// ratio is 2^^octaves
+
+	return pow(2, cents/1200);
+}

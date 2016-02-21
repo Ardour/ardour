@@ -29,6 +29,13 @@
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
 
+#include "ardour/audioregion.h"
+#include "ardour/midi_stretch.h"
+#include "ardour/pitch.h"
+#include "ardour/region.h"
+#include "ardour/session.h"
+#include "ardour/stretch.h"
+
 #include <gtkmm2ext/utils.h>
 
 #include "audio_region_view.h"
@@ -36,13 +43,6 @@
 #include "editor.h"
 #include "region_selection.h"
 #include "time_fx_dialog.h"
-
-#include "ardour/audioregion.h"
-#include "ardour/midi_stretch.h"
-#include "ardour/pitch.h"
-#include "ardour/region.h"
-#include "ardour/session.h"
-#include "ardour/stretch.h"
 
 #ifdef USE_RUBBERBAND
 #include <rubberband/RubberBandStretcher.h>
@@ -146,21 +146,17 @@ Editor::pitch_shift (RegionSelection& regions, float fraction)
 int
 Editor::time_fx (RegionList& regions, float val, bool pitching)
 {
-	delete current_timefx;
-	current_timefx = new TimeFXDialog (*this, pitching);
-	current_timefx->regions = regions;
-
-	/* See if we have any audio regions on our list */
-	RegionList::iterator i = regions.begin ();
-	while (i != regions.end() && boost::dynamic_pointer_cast<AudioRegion> (*i) == 0) {
-		++i;
-	}
-
-	if (i == regions.end ()) {
-		/* No audio regions; we can just do the timefx without a dialogue */
-		do_timefx ();
+	if (regions.empty()) {
 		return 0;
 	}
+
+	const framecnt_t oldlen = (framecnt_t) (regions.front()->length());
+	const framecnt_t newlen = (framecnt_t) (regions.front()->length() * val);
+	const framecnt_t pos = regions.front()->position ();
+
+	delete current_timefx;
+	current_timefx = new TimeFXDialog (*this, pitching, oldlen, newlen, pos);
+	current_timefx->regions = regions;
 
 	switch (current_timefx->run ()) {
 	case RESPONSE_ACCEPT:
@@ -171,34 +167,14 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 	}
 
 	current_timefx->status = 0;
+	current_timefx->request.time_fraction = current_timefx->get_time_fraction ();
+	current_timefx->request.pitch_fraction = current_timefx->get_pitch_fraction ();
 
-	if (pitching) {
-
-		float cents = current_timefx->pitch_octave_adjustment.get_value() * 1200.0;
-		float pitch_fraction;
-		cents += current_timefx->pitch_semitone_adjustment.get_value() * 100.0;
-		cents += current_timefx->pitch_cent_adjustment.get_value();
-
-		if (cents == 0.0) {
-			// user didn't change anything
-			current_timefx->hide ();
-			return 0;
-		}
-
-		// one octave == 1200 cents
-		// adding one octave doubles the frequency
-		// ratio is 2^^octaves
-
-		pitch_fraction = pow(2, cents/1200);
-
-		current_timefx->request.time_fraction = 1.0;
-		current_timefx->request.pitch_fraction = pitch_fraction;
-
-	} else {
-
-		current_timefx->request.time_fraction = val;
-		current_timefx->request.pitch_fraction = 1.0;
-
+	if (current_timefx->request.time_fraction == 1.0 &&
+	    current_timefx->request.pitch_fraction == 1.0) {
+		/* nothing to do */
+		current_timefx->hide ();
+		return 0;
 	}
 
 #ifdef USE_RUBBERBAND
@@ -413,4 +389,3 @@ Editor::timefx_thread (void *arg)
 #endif
 	return 0;
 }
-
