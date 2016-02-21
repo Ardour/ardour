@@ -89,6 +89,16 @@ struct TypeTraits
     static const bool value = sizeof (test <ContainerTraits <T> >(0)) == sizeof (yes);
   };
 
+  /** Determine if T is an enum */
+  template <typename T>
+  class isEnum
+  {
+  public:
+    //static const bool value = std::is_enum<T>::value; // C++11
+    static const bool value = boost::is_enum<T>::value;
+  };
+
+
   /** Determine if T is const qualified.
   */
   /** @{ */

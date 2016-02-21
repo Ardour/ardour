@@ -1,7 +1,8 @@
 //------------------------------------------------------------------------------
 /*
   https://github.com/vinniefalco/LuaBridge
-  
+
+  Copyright 2016, Robin Gareus <robin@gareus.org>
   Copyright 2012, Vinnie Falco <vinnie.falco@gmail.com>
 
   License: The MIT License (http://www.opensource.org/licenses/mit-license.php)
@@ -68,7 +69,7 @@ protected:
   /**
     Get an untyped pointer to the contained class.
   */
-  inline void* const getPointer ()
+  inline void* getPointer () const
   {
     return m_p;
   }
@@ -610,7 +611,7 @@ struct UserdataSharedHelper <C, true>
   either be of the intrusive variety, or in the style of the RefCountedPtr
   type provided by LuaBridge (that uses a global hash table).
 */
-template <class C, bool byContainer>
+template <class C, bool byContainer, bool isEnum>
 struct StackHelper
 {
   static inline void push (lua_State* L, C const& c)
@@ -636,7 +637,7 @@ struct StackHelper
   retrieved may result in undefined behavior if Lua garbage collected it.
 */
 template <class T>
-struct StackHelper <T, false>
+struct StackHelper <T, false, false>
 {
   static inline void push (lua_State* L, T const& t)
   {
@@ -646,6 +647,22 @@ struct StackHelper <T, false>
   static inline T const& get (lua_State* L, int index)
   {
     return *Userdata::get <T> (L, index, true);
+  }
+};
+
+template <class T>
+struct StackHelper <T, false, true>
+{
+  static inline void push (lua_State* L, T const& t)
+  {
+    int v = static_cast <int> (t);
+    lua_pushinteger (L, static_cast <lua_Integer> (v));
+  }
+
+  static inline T get (lua_State* L, int index)
+  {
+    int v = static_cast <int> (luaL_checkinteger (L, index));
+    return T (v);
   }
 };
 
@@ -661,13 +678,15 @@ public:
   static inline void push (lua_State* L, T const& t)
   {
     StackHelper <T,
-      TypeTraits::isContainer <T>::value>::push (L, t);
+      TypeTraits::isContainer <T>::value,
+      TypeTraits::isEnum<T>::value>::push (L, t);
   }
 
   static inline T get (lua_State* L, int index)
   {
     return StackHelper <T,
-      TypeTraits::isContainer <T>::value>::get (L, index);
+      TypeTraits::isContainer <T>::value,
+      TypeTraits::isEnum<T>::value>::get (L, index);
   }
 };
 
@@ -689,7 +708,7 @@ struct Stack <T*>
     UserdataPtr::push (L, p);
   }
 
-  static inline T* const get (lua_State* L, int index)
+  static inline T* get (lua_State* L, int index)
   {
     return Userdata::get <T> (L, index, false);
   }
@@ -704,7 +723,7 @@ struct Stack <T* const>
     UserdataPtr::push (L, p);
   }
 
-  static inline T* const get (lua_State* L, int index)
+  static inline T* get (lua_State* L, int index)
   {
     return Userdata::get <T> (L, index, false);
   }
@@ -719,7 +738,7 @@ struct Stack <T const*>
     UserdataPtr::push (L, p);
   }
 
-  static inline T const* const get (lua_State* L, int index)
+  static inline T const* get (lua_State* L, int index)
   {
     return Userdata::get <T> (L, index, true);
   }
@@ -734,7 +753,7 @@ struct Stack <T const* const>
     UserdataPtr::push (L, p);
   }
 
-  static inline T const* const get (lua_State* L, int index)
+  static inline T const* get (lua_State* L, int index)
   {
     return Userdata::get <T> (L, index, true);
   }
@@ -761,8 +780,8 @@ struct Stack <T&>
 template <class C, bool byContainer>
 struct RefStackHelper
 {
-  typedef C return_type;  
-	
+  typedef C return_type;
+
   static inline void push (lua_State* L, C const& t)
   {
     UserdataSharedHelper <C,
@@ -781,12 +800,12 @@ struct RefStackHelper
 template <class T>
 struct RefStackHelper <T, false>
 {
-  typedef T const& return_type;  
-	
-	static inline void push (lua_State* L, T const& t)
-	{
-	  UserdataPtr::push (L, &t);
-	}
+  typedef T const& return_type;
+
+  static inline void push (lua_State* L, T const& t)
+  {
+    UserdataPtr::push (L, &t);
+  }
 
   static return_type get (lua_State* L, int index)
   {

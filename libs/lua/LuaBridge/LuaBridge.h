@@ -1,7 +1,8 @@
 //------------------------------------------------------------------------------
 /*
   https://github.com/vinniefalco/LuaBridge
-  
+
+  Copyright 2016, Robin Gareus <robin@gareus.org>
   Copyright 2012, Vinnie Falco <vinnie.falco@gmail.com>
   Copyright 2007, Nathan Reed
 
@@ -38,6 +39,17 @@
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
+
+#include <bitset>
+#include <list>
+#include <map>
+#include <set>
+#include <vector>
+
+#include <inttypes.h>
+#include <boost/ref.hpp>
+#include <boost/type_traits.hpp>
+#include <boost/shared_ptr.hpp>
 
 #define LUABRIDGE_MAJOR_VERSION 2
 #define LUABRIDGE_MINOR_VERSION 0
@@ -137,6 +149,6 @@ inline void setHideMetatables (bool shouldHide)
   Security::setHideMetatables (shouldHide);
 }
 
-}
+} // end Namespace
 
 #endif

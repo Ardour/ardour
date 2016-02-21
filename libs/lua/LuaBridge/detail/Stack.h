@@ -2,6 +2,7 @@
 /*
   https://github.com/vinniefalco/LuaBridge
 
+  Copyright 2016, Robin Gareus <robin@gareus.org>
   Copyright 2012, Vinnie Falco <vinnie.falco@gmail.com>
   Copyright 2007, Nathan Reed
 
@@ -278,6 +279,70 @@ struct Stack <unsigned long const&>
   static inline unsigned long get (lua_State* L, int index)
   {
     return static_cast <unsigned long> (luaL_checknumber (L, index));
+  }
+};
+
+//------------------------------------------------------------------------------
+/**
+    Stack specialization for `long long`.
+*/
+template <>
+struct Stack <long long>
+{
+  static inline void push (lua_State* L, long long value)
+  {
+    lua_pushinteger (L, static_cast <lua_Integer> (value));
+  }
+
+  static inline long long get (lua_State* L, int index)
+  {
+    return static_cast <long long> (luaL_checkinteger (L, index));
+  }
+};
+
+template <>
+struct Stack <long long const&>
+{
+  static inline void push (lua_State* L, long long value)
+  {
+    lua_pushnumber (L, static_cast <lua_Number> (value));
+  }
+
+  static inline long long get (lua_State* L, int index)
+  {
+    return static_cast <long long> (luaL_checknumber (L, index));
+  }
+};
+
+//------------------------------------------------------------------------------
+/**
+    Stack specialization for `unsigned long long`.
+*/
+template <>
+struct Stack <unsigned long long>
+{
+  static inline void push (lua_State* L, unsigned long long value)
+  {
+    lua_pushinteger (L, static_cast <lua_Integer> (value));
+  }
+
+  static inline unsigned long long get (lua_State* L, int index)
+  {
+    return static_cast <unsigned long long> (luaL_checkinteger (L, index));
+  }
+};
+
+template <>
+struct Stack <unsigned long long const&>
+{
+  static inline void push (lua_State* L, unsigned long long value)
+  {
+    lua_pushnumber (L, static_cast <lua_Number> (value));
+  }
+
+  static inline unsigned long long get (lua_State* L, int index)
+  {
+    return static_cast <unsigned long long> (luaL_checknumber (L, index));
   }
 };
 
