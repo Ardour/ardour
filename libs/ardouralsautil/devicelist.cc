@@ -18,6 +18,8 @@
  */
 
 #include <alsa/asoundlib.h>
+#include <glib.h>
+
 #include "pbd/convert.h"
 #include "ardouralsautil/devicelist.h"
 
@@ -34,6 +36,12 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 	string devname;
 	int cardnum = -1;
 	int device = -1;
+	const char* fixed_name;
+
+	if ((fixed_name = g_getenv ("ARDOUR_ALSA_DEVICE"))) {
+		devices.insert (make_pair<string,string> (fixed_name, fixed_name));
+		return;
+	}
 
 	assert (duplex > 0);
 
