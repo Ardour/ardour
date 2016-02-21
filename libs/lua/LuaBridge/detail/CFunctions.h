@@ -378,7 +378,106 @@ struct CFunc
     }
   };
 
+  /**
+      lua_CFunction to calls for function references.
+  */
+  template <class MemFnPtr,
+            class ReturnType = typename FuncTraits <MemFnPtr>::ReturnType>
+  struct CallMemberRef
+  {
+    typedef typename FuncTraits <MemFnPtr>::ClassType T;
+    typedef typename FuncTraits <MemFnPtr>::Params Params;
 
+    static int f (lua_State* L)
+    {
+      assert (isfulluserdata (L, lua_upvalueindex (1)));
+      T* const t = Userdata::get <T> (L, 1, false);
+      MemFnPtr const& fnptr = *static_cast <MemFnPtr const*> (lua_touserdata (L, lua_upvalueindex (1)));
+      assert (fnptr != 0);
+      ArgList <Params, 2> args (L);
+      Stack <ReturnType>::push (L, FuncTraits <MemFnPtr>::call (t, fnptr, args));
+      LuaRef v (newTable (L));
+      FuncArgs <Params, 0>::refs (v, args);
+      v.push(L);
+      return 2;
+    }
+  };
+
+  template <class MemFnPtr,
+            class ReturnType = typename FuncTraits <MemFnPtr>::ReturnType>
+  struct CallConstMemberRef
+  {
+    typedef typename FuncTraits <MemFnPtr>::ClassType T;
+    typedef typename FuncTraits <MemFnPtr>::Params Params;
+
+    static int f (lua_State* L)
+    {
+      assert (isfulluserdata (L, lua_upvalueindex (1)));
+      T const* const t = Userdata::get <T> (L, 1, true);
+      MemFnPtr const& fnptr = *static_cast <MemFnPtr const*> (lua_touserdata (L, lua_upvalueindex (1)));
+      assert (fnptr != 0);
+      ArgList <Params, 2> args(L);
+      Stack <ReturnType>::push (L, FuncTraits <MemFnPtr>::call (t, fnptr, args));
+      LuaRef v (newTable (L));
+      FuncArgs <Params, 0>::refs (v, args);
+      v.push(L);
+      return 2;
+    }
+  };
+
+  template <class MemFnPtr, class T,
+            class ReturnType = typename FuncTraits <MemFnPtr>::ReturnType>
+  struct CallMemberRefPtr
+  {
+    typedef typename FuncTraits <MemFnPtr>::Params Params;
+
+    static int f (lua_State* L)
+    {
+      assert (isfulluserdata (L, lua_upvalueindex (1)));
+      boost::shared_ptr<T>* const t = Userdata::get <boost::shared_ptr<T> > (L, 1, false);
+      T* const tt = t->get();
+      if (!tt) {
+        return luaL_error (L, "shared_ptr is nil");
+      }
+      MemFnPtr const& fnptr = *static_cast <MemFnPtr const*> (lua_touserdata (L, lua_upvalueindex (1)));
+      assert (fnptr != 0);
+      ArgList <Params, 2> args (L);
+      Stack <ReturnType>::push (L, FuncTraits <MemFnPtr>::call (tt, fnptr, args));
+      LuaRef v (newTable (L));
+      FuncArgs <Params, 0>::refs (v, args);
+      v.push(L);
+      return 2;
+    }
+  };
+
+  template <class MemFnPtr, class T,
+            class ReturnType = typename FuncTraits <MemFnPtr>::ReturnType>
+  struct CallMemberRefWPtr
+  {
+    typedef typename FuncTraits <MemFnPtr>::Params Params;
+
+    static int f (lua_State* L)
+    {
+      assert (isfulluserdata (L, lua_upvalueindex (1)));
+      boost::weak_ptr<T>* const tw = Userdata::get <boost::weak_ptr<T> > (L, 1, false);
+      boost::shared_ptr<T> const t = tw->lock();
+      if (!t) {
+        return luaL_error (L, "cannot lock weak_ptr");
+      }
+      T* const tt = t.get();
+      if (!tt) {
+        return luaL_error (L, "weak_ptr is nil");
+      }
+      MemFnPtr const& fnptr = *static_cast <MemFnPtr const*> (lua_touserdata (L, lua_upvalueindex (1)));
+      assert (fnptr != 0);
+      ArgList <Params, 2> args (L);
+      Stack <ReturnType>::push (L, FuncTraits <MemFnPtr>::call (tt, fnptr, args));
+      LuaRef v (newTable (L));
+      FuncArgs <Params, 0>::refs (v, args);
+      v.push(L);
+      return 2;
+    }
+  };
 
   //----------------------------------------------------------------------------
   /**
@@ -466,7 +565,99 @@ struct CFunc
     }
   };
 
+  template <class MemFnPtr>
+  struct CallMemberRef <MemFnPtr, void>
+  {
+    typedef typename FuncTraits <MemFnPtr>::ClassType T;
+    typedef typename FuncTraits <MemFnPtr>::Params Params;
 
+    static int f (lua_State* L)
+    {
+      assert (isfulluserdata (L, lua_upvalueindex (1)));
+      T* const t = Userdata::get <T> (L, 1, false);
+      MemFnPtr const& fnptr = *static_cast <MemFnPtr const*> (lua_touserdata (L, lua_upvalueindex (1)));
+      assert (fnptr != 0);
+      ArgList <Params, 2> args (L);
+      FuncTraits <MemFnPtr>::call (t, fnptr, args);
+      LuaRef v (newTable (L));
+      FuncArgs <Params, 0>::refs (v, args);
+      v.push(L);
+      return 1;
+    }
+  };
+
+  template <class MemFnPtr>
+  struct CallConstMemberRef <MemFnPtr, void>
+  {
+    typedef typename FuncTraits <MemFnPtr>::ClassType T;
+    typedef typename FuncTraits <MemFnPtr>::Params Params;
+
+    static int f (lua_State* L)
+    {
+      assert (isfulluserdata (L, lua_upvalueindex (1)));
+      T const* const t = Userdata::get <T> (L, 1, true);
+      MemFnPtr const& fnptr = *static_cast <MemFnPtr const*> (lua_touserdata (L, lua_upvalueindex (1)));
+      assert (fnptr != 0);
+      ArgList <Params, 2> args (L);
+      FuncTraits <MemFnPtr>::call (t, fnptr, args);
+      LuaRef v (newTable (L));
+      FuncArgs <Params, 0>::refs (v, args);
+      v.push(L);
+      return 1;
+    }
+  };
+
+  template <class MemFnPtr, class T>
+  struct CallMemberRefPtr <MemFnPtr, T, void>
+  {
+    typedef typename FuncTraits <MemFnPtr>::Params Params;
+
+    static int f (lua_State* L)
+    {
+      assert (isfulluserdata (L, lua_upvalueindex (1)));
+      boost::shared_ptr<T>* const t = Userdata::get <boost::shared_ptr<T> > (L, 1, false);
+      T* const tt = t->get();
+      if (!tt) {
+        return luaL_error (L, "shared_ptr is nil");
+      }
+      MemFnPtr const& fnptr = *static_cast <MemFnPtr const*> (lua_touserdata (L, lua_upvalueindex (1)));
+      assert (fnptr != 0);
+      ArgList <Params, 2> args (L);
+      FuncTraits <MemFnPtr>::call (tt, fnptr, args);
+      LuaRef v (newTable (L));
+      FuncArgs <Params, 0>::refs (v, args);
+      v.push(L);
+      return 1;
+    }
+  };
+
+  template <class MemFnPtr, class T>
+  struct CallMemberRefWPtr <MemFnPtr, T, void>
+  {
+    typedef typename FuncTraits <MemFnPtr>::Params Params;
+
+    static int f (lua_State* L)
+    {
+      assert (isfulluserdata (L, lua_upvalueindex (1)));
+      boost::weak_ptr<T>* const tw = Userdata::get <boost::weak_ptr<T> > (L, 1, false);
+      boost::shared_ptr<T> const t = tw->lock();
+      if (!t) {
+        return luaL_error (L, "cannot lock weak_ptr");
+      }
+      T* const tt = t.get();
+      if (!tt) {
+        return luaL_error (L, "weak_ptr is nil");
+      }
+      MemFnPtr const& fnptr = *static_cast <MemFnPtr const*> (lua_touserdata (L, lua_upvalueindex (1)));
+      assert (fnptr != 0);
+      ArgList <Params, 2> args (L);
+      FuncTraits <MemFnPtr>::call (tt, fnptr, args);
+      LuaRef v (newTable (L));
+      FuncArgs <Params, 0>::refs (v, args);
+      v.push(L);
+      return 1;
+    }
+  };
 
   //--------------------------------------------------------------------------
   /**
@@ -544,6 +735,18 @@ struct CFunc
   };
 
   template <class MemFnPtr>
+  struct CallMemberRefPtrFunctionHelper
+  {
+    typedef typename FuncTraits <MemFnPtr>::ClassType T;
+    static void add (lua_State* L, char const* name, MemFnPtr mf)
+    {
+      new (lua_newuserdata (L, sizeof (MemFnPtr))) MemFnPtr (mf);
+      lua_pushcclosure (L, &CallMemberRefPtr <MemFnPtr, T>::f, 1);
+      rawsetfield (L, -3, name); // class table
+    }
+  };
+
+  template <class MemFnPtr>
   struct CallMemberWPtrFunctionHelper
   {
     typedef typename FuncTraits <MemFnPtr>::ClassType T;
@@ -551,6 +754,42 @@ struct CFunc
     {
       new (lua_newuserdata (L, sizeof (MemFnPtr))) MemFnPtr (mf);
       lua_pushcclosure (L, &CallMemberWPtr <MemFnPtr, T>::f, 1);
+      rawsetfield (L, -3, name); // class table
+    }
+  };
+
+  template <class MemFnPtr>
+  struct CallMemberRefWPtrFunctionHelper
+  {
+    typedef typename FuncTraits <MemFnPtr>::ClassType T;
+    static void add (lua_State* L, char const* name, MemFnPtr mf)
+    {
+      new (lua_newuserdata (L, sizeof (MemFnPtr))) MemFnPtr (mf);
+      lua_pushcclosure (L, &CallMemberRefWPtr <MemFnPtr, T>::f, 1);
+      rawsetfield (L, -3, name); // class table
+    }
+  };
+
+  template <class MemFnPtr, bool isConst>
+  struct CallMemberRefFunctionHelper
+  {
+    static void add (lua_State* L, char const* name, MemFnPtr mf)
+    {
+      new (lua_newuserdata (L, sizeof (MemFnPtr))) MemFnPtr (mf);
+      lua_pushcclosure (L, &CallConstMemberRef <MemFnPtr>::f, 1);
+      lua_pushvalue (L, -1);
+      rawsetfield (L, -5, name); // const table
+      rawsetfield (L, -3, name); // class table
+    }
+  };
+
+  template <class MemFnPtr>
+  struct CallMemberRefFunctionHelper <MemFnPtr, false>
+  {
+    static void add (lua_State* L, char const* name, MemFnPtr mf)
+    {
+      new (lua_newuserdata (L, sizeof (MemFnPtr))) MemFnPtr (mf);
+      lua_pushcclosure (L, &CallMemberRef <MemFnPtr>::f, 1);
       rawsetfield (L, -3, name); // class table
     }
   };

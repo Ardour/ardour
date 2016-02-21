@@ -815,6 +815,13 @@ private:
       return *this;
     }
 
+    template <class MemFn>
+    Class <T>& addRefFunction (char const* name, MemFn mf)
+    {
+      CFunc::CallMemberRefFunctionHelper <MemFn, FuncTraits <MemFn>::isConstMemberFunction>::add (L, name, mf);
+      return *this;
+    }
+
 
     //--------------------------------------------------------------------------
     /**
@@ -1028,6 +1035,17 @@ private:
 
       set_shared_class ();
       CFunc::CallMemberPtrFunctionHelper <MemFn>::add (L, name, mf);
+      return *this;
+    }
+
+    template <class MemFn>
+    WSPtrClass <T>& addRefFunction (char const* name, MemFn mf)
+    {
+      set_weak_class ();
+      CFunc::CallMemberRefWPtrFunctionHelper <MemFn>::add (L, name, mf);
+
+      set_shared_class ();
+      CFunc::CallMemberRefPtrFunctionHelper <MemFn>::add (L, name, mf);
       return *this;
     }
 

@@ -77,6 +77,7 @@ class LuaRef;
 #include "detail/LuaException.h"
 #include "detail/LuaRef.h"
 #include "detail/Iterator.h"
+#include "detail/FuncArgs.h"
 
 //------------------------------------------------------------------------------
 /**

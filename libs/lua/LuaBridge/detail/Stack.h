@@ -61,6 +61,31 @@ struct Stack <lua_CFunction>
 
 //------------------------------------------------------------------------------
 /**
+    Stack specialization for passing references to built-in types.
+
+    This allows to call functions using primitives, but
+    the value assigned by the C++ function is *lost*.
+
+    http://sourceforge.net/p/luabind/mailman/message/32692027/
+
+    Alternatives:
+     - wrap all C++ function that have non const reference arguments
+    (cleanest solution)
+
+     - use a struct to wrap the value (not a primitive)
+    (needs major work to special case arguments in CFunc::)
+
+     - wrap the function and provide the assigned value
+     as addition return values
+
+    Either would place hard constraints on the lua code though.
+
+    We currently only need this for Ardour::Editor::do_import() framecnt_t&
+    and the returned position is not important.
+*/
+
+//------------------------------------------------------------------------------
+/**
     Stack specialization for `int`.
 */
 template <>
@@ -90,6 +115,23 @@ struct Stack <int const&>
     return static_cast <int > (luaL_checknumber (L, index));
   }
 };
+
+template <>
+struct Stack <int &>
+{
+  static inline void push (lua_State* L, int &value)
+  {
+    lua_pushnumber (L, static_cast <lua_Number> (value));
+  }
+
+  static inline int& get (lua_State* L, int index)
+  {
+    int l = static_cast <int> (luaL_checknumber (L, index));
+    boost::reference_wrapper<int> r (l);
+    return r.get();
+  }
+};
+
 //------------------------------------------------------------------------------
 /**
     Stack specialization for `unsigned int`.
@@ -119,6 +161,22 @@ struct Stack <unsigned int const&>
   static inline unsigned int get (lua_State* L, int index)
   {
     return static_cast <unsigned int > (luaL_checknumber (L, index));
+  }
+};
+
+template <>
+struct Stack <unsigned int &>
+{
+  static inline void push (lua_State* L, unsigned int& value)
+  {
+    lua_pushnumber (L, static_cast <lua_Number> (value));
+  }
+
+  static inline unsigned int& get (lua_State* L, int index)
+  {
+    unsigned int l = static_cast <unsigned int> (luaL_checknumber (L, index));
+    boost::reference_wrapper<unsigned int> r (l);
+    return r.get();
   }
 };
 
@@ -154,6 +212,22 @@ struct Stack <unsigned char const&>
   }
 };
 
+template <>
+struct Stack <unsigned char &>
+{
+  static inline void push (lua_State* L, unsigned char& value)
+  {
+    lua_pushnumber (L, static_cast <lua_Number> (value));
+  }
+
+  static inline unsigned char& get (lua_State* L, int index)
+  {
+    unsigned char l = static_cast <unsigned char> (luaL_checknumber (L, index));
+    boost::reference_wrapper<unsigned char> r (l);
+    return r.get();
+  }
+};
+
 //------------------------------------------------------------------------------
 /**
     Stack specialization for `short`.
@@ -183,6 +257,22 @@ struct Stack <short const&>
   static inline short get (lua_State* L, int index)
   {
     return static_cast <short> (luaL_checknumber (L, index));
+  }
+};
+
+template <>
+struct Stack <short &>
+{
+  static inline void push (lua_State* L, short& value)
+  {
+    lua_pushnumber (L, static_cast <lua_Number> (value));
+  }
+
+  static inline short& get (lua_State* L, int index)
+  {
+    short l = static_cast <short> (luaL_checknumber (L, index));
+    boost::reference_wrapper<short> r (l);
+    return r.get();
   }
 };
 
@@ -218,6 +308,22 @@ struct Stack <unsigned short const&>
   }
 };
 
+template <>
+struct Stack <unsigned short &>
+{
+  static inline void push (lua_State* L, unsigned short& value)
+  {
+    lua_pushnumber (L, static_cast <lua_Number> (value));
+  }
+
+  static inline unsigned short& get (lua_State* L, int index)
+  {
+    unsigned short l = static_cast <unsigned short> (luaL_checknumber (L, index));
+    boost::reference_wrapper<unsigned short> r (l);
+    return r.get();
+  }
+};
+
 //------------------------------------------------------------------------------
 /**
     Stack specialization for `long`.
@@ -247,6 +353,22 @@ struct Stack <long const&>
   static inline long get (lua_State* L, int index)
   {
     return static_cast <long> (luaL_checknumber (L, index));
+  }
+};
+
+template <>
+struct Stack <long &>
+{
+  static inline void push (lua_State* L, long& value)
+  {
+    lua_pushnumber (L, static_cast <lua_Number> (value));
+  }
+
+  static inline long& get (lua_State* L, int index)
+  {
+    long l = static_cast <long> (luaL_checknumber (L, index));
+    boost::reference_wrapper<long> r (l);
+    return r.get();
   }
 };
 
@@ -282,6 +404,22 @@ struct Stack <unsigned long const&>
   }
 };
 
+template <>
+struct Stack <unsigned long &>
+{
+  static inline void push (lua_State* L, unsigned long& value)
+  {
+    lua_pushnumber (L, static_cast <lua_Number> (value));
+  }
+
+  static inline unsigned long& get (lua_State* L, int index)
+  {
+    unsigned long l = static_cast <unsigned long> (luaL_checknumber (L, index));
+    boost::reference_wrapper<unsigned long> r (l);
+    return r.get();
+  }
+};
+
 //------------------------------------------------------------------------------
 /**
     Stack specialization for `long long`.
@@ -311,6 +449,22 @@ struct Stack <long long const&>
   static inline long long get (lua_State* L, int index)
   {
     return static_cast <long long> (luaL_checknumber (L, index));
+  }
+};
+
+template <>
+struct Stack <long long &>
+{
+  static inline void push (lua_State* L, long long& value)
+  {
+    lua_pushnumber (L, static_cast <lua_Number> (value));
+  }
+
+  static inline long long& get (lua_State* L, int index)
+  {
+    long long l = static_cast <long long> (luaL_checknumber (L, index));
+    boost::reference_wrapper<long long> r (l);
+    return r.get();
   }
 };
 
@@ -378,6 +532,22 @@ struct Stack <float const&>
   }
 };
 
+template <>
+struct Stack <float &>
+{
+  static inline void push (lua_State* L, float& value)
+  {
+    lua_pushnumber (L, static_cast <lua_Number> (value));
+  }
+
+  static inline float& get (lua_State* L, int index)
+  {
+    float l = static_cast <float> (luaL_checknumber (L, index));
+    boost::reference_wrapper<float> r (l);
+    return r.get();
+  }
+};
+
 //------------------------------------------------------------------------------
 /**
     Stack specialization for `double`.
@@ -408,6 +578,21 @@ template <> struct Stack <double const&>
   }
 };
 
+template <> struct Stack <double &>
+{
+  static inline void push (lua_State* L, double& value)
+  {
+    lua_pushnumber (L, static_cast <lua_Number> (value));
+  }
+
+  static inline double& get (lua_State* L, int index)
+  {
+    double l = static_cast <double> (luaL_checknumber (L, index));
+    boost::reference_wrapper<double> r (l);
+    return r.get();
+  }
+};
+
 //------------------------------------------------------------------------------
 /**
     Stack specialization for `bool`.
@@ -435,6 +620,21 @@ struct Stack <bool const&> {
   static inline bool get (lua_State* L, int index)
   {
     return lua_toboolean (L, index) ? true : false;
+  }
+};
+
+template <>
+struct Stack <bool &> {
+  static inline void push (lua_State* L, bool& value)
+  {
+    lua_pushboolean (L, value ? 1 : 0);
+  }
+
+  static inline bool& get (lua_State* L, int index)
+  {
+    bool l = lua_toboolean (L, index) ? true : false;
+    boost::reference_wrapper<bool> r (l);
+    return r.get();
   }
 };
 
@@ -472,12 +672,8 @@ struct Stack <char const&>
   }
 };
 
-//------------------------------------------------------------------------------
-/**
-    Stack specialization for `float`.
-*/
 template <>
-struct Stack <char const*>
+struct Stack <char const *>
 {
   static inline void push (lua_State* L, char const* str)
   {
@@ -487,9 +683,26 @@ struct Stack <char const*>
       lua_pushnil (L);
   }
 
-  static inline char const* get (lua_State* L, int index)
+  static inline char const *get (lua_State* L, int index)
   {
     return lua_isnil (L, index) ? 0 : luaL_checkstring (L, index);
+  }
+};
+
+template <>
+struct Stack <char &>
+{
+  static inline void push (lua_State* L, char& value)
+  {
+    char str [2] = { value, 0 };
+    lua_pushstring (L, str);
+  }
+
+  static inline char get (lua_State* L, int index)
+  {
+    char l = luaL_checkstring (L, index) [0];
+    boost::reference_wrapper<char> r (l);
+    return r.get();
   }
 };
 
@@ -513,10 +726,6 @@ struct Stack <std::string>
   }
 };
 
-//------------------------------------------------------------------------------
-/**
-    Stack specialization for `std::string const&`.
-*/
 template <>
 struct Stack <std::string const&>
 {
@@ -530,5 +739,23 @@ struct Stack <std::string const&>
     size_t len;
     const char *str = luaL_checklstring(L, index, &len);
     return std::string (str, len);
+  }
+};
+
+template <>
+struct Stack <std::string &>
+{
+  static inline void push (lua_State* L, std::string& str)
+  {
+    lua_pushlstring (L, str.c_str (), str.size());
+  }
+
+  static inline std::string& get (lua_State* L, int index)
+  {
+    size_t len;
+    const char *str = luaL_checklstring(L, index, &len);
+    std::string l (str, len);
+    boost::reference_wrapper<std::string> r (l);
+    return r.get();
   }
 };
