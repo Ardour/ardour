@@ -247,7 +247,7 @@ key_binding(PianoKeyboard *pk, const char *key)
 }
 
 static void
-bind_key(PianoKeyboard *pk, char *key, int note)
+bind_key(PianoKeyboard *pk, const char *key, int note)
 {
 	assert(pk->key_bindings != NULL);
 
@@ -688,7 +688,7 @@ piano_keyboard_new(void)
 	pk->monophonic = FALSE;
 
 	/* Avoiding memset due to pk->notes being volatile. */
-	for (int i = 0; i<sizeof(struct PKNote)*NNOTES; i++) {
+	for (int i = 0; i<(int)sizeof(struct PKNote)*NNOTES; i++) {
 		((volatile int*)pk->notes)[i] = 0;
 	}
 
