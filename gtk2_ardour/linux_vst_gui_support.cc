@@ -689,7 +689,7 @@ vstfx_launch_editor (VSTState* vstfx)
 		return 0;
 
 	Window parent_window;
-	struct ERect* er;
+	struct ERect* er = NULL;
 
 	int x_size = 1;
 	int y_size = 1;
@@ -724,11 +724,15 @@ vstfx_launch_editor (VSTState* vstfx)
 
 	vstfx->plugin->dispatcher (vstfx->plugin, effEditGetRect, 0, 0, &er, 0 );
 
-	x_size = er->right - er->left;
-	y_size = er->bottom - er->top;
+	if (er) {
+		// Don't crash is plugin does not implement effEditGetRect
+		// it'll result in 1x1 px window but that's not our problem :)
+		x_size = er->right - er->left;
+		y_size = er->bottom - er->top;
+	}
 
-	vstfx->width =  x_size;
-	vstfx->height =  y_size;
+	vstfx->width = x_size;
+	vstfx->height = y_size;
 
 	XResizeWindow(LXVST_XDisplay, parent_window, x_size, y_size);
 
