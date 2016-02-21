@@ -56,7 +56,7 @@ static ClearlooksStyleClass *clearlooks_style_class;
 static GtkStyleClass *clearlooks_parent_class;
 
 static void
-clearlooks_set_widget_parameters (const GtkWidget      *widget,
+clearlooks_set_widget_parameters (GtkWidget      *widget,
                                   const GtkStyle       *style,
                                   GtkStateType          state_type,
                                   WidgetParameters     *params)
@@ -709,9 +709,9 @@ clearlooks_style_draw_box (DRAW_ARGS)
 
 		if (!params.ltr)
 		{
-			if (progressbar.orientation == GTK_PROGRESS_LEFT_TO_RIGHT)
+			if (progressbar.orientation == (ClearlooksOrientation)GTK_PROGRESS_LEFT_TO_RIGHT)
 				progressbar.orientation = GTK_PROGRESS_RIGHT_TO_LEFT;
-			else if (progressbar.orientation == GTK_PROGRESS_RIGHT_TO_LEFT)
+			else if (progressbar.orientation == (ClearlooksOrientation)GTK_PROGRESS_RIGHT_TO_LEFT)
 				progressbar.orientation = GTK_PROGRESS_LEFT_TO_RIGHT;
 		}
 
@@ -738,8 +738,8 @@ clearlooks_style_draw_box (DRAW_ARGS)
 			}
 			else
 			{
-				if (progressbar.orientation == GTK_PROGRESS_RIGHT_TO_LEFT ||
-				    progressbar.orientation == GTK_PROGRESS_LEFT_TO_RIGHT)
+				if (progressbar.orientation == (ClearlooksOrientation)GTK_PROGRESS_RIGHT_TO_LEFT ||
+				    progressbar.orientation == (ClearlooksOrientation)GTK_PROGRESS_LEFT_TO_RIGHT)
 				{
 					tmp.x -= 1;
 					tmp.width += 2;
