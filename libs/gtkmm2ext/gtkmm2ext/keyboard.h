@@ -179,7 +179,6 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	};
 
 	sigc::signal0<void> ZoomVerticalModifierReleased;
-	sigc::signal0<void> GrabFocus;
 
   protected:
 	static Keyboard* _the_keyboard;
