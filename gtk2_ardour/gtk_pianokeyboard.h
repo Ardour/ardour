@@ -61,7 +61,7 @@ struct _PianoKeyboard
 	int			note_being_pressed_using_mouse;
 	int         last_key;
 	gboolean    monophonic;
-	volatile struct PKNote 	notes[NNOTES];
+	struct PKNote 	notes[NNOTES];
 	/* Table used to translate from PC keyboard character to MIDI note number. */
 	GHashTable		*key_bindings;
 };
