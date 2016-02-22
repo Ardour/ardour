@@ -601,7 +601,7 @@ msgstr ""
 "de CD"
 
 #: export_handler.cc:492 export_handler.cc:495
-msgid "an error occured while writing a TOC/CUE file: %1"
+msgid "an error occurred while writing a TOC/CUE file: %1"
 msgstr "Erreur lors de l'écriture du fichier TOC/CUE : %1"
 
 #: export_handler.cc:744 export_handler.cc:802

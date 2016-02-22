@@ -100,7 +100,7 @@ Parser::midi_event_type_name (eventType t)
 		return "active sense";
 
 	default:
-		return "unknow MIDI event type";
+		return "unknown MIDI event type";
 	}
 }
 

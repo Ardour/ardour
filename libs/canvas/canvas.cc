@@ -1161,7 +1161,7 @@ GtkCanvas::start_tooltip_timeout (Item* item)
 bool
 GtkCanvas::really_start_tooltip_timeout ()
 {
-	/* an idle has occured since we entered a tooltip-bearing widget. Now
+	/* an idle has occurred since we entered a tooltip-bearing widget. Now
 	 * wait 1 second and if the timeout isn't cancelled, show the tooltip.
 	 */
 

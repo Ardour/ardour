@@ -577,7 +577,7 @@ msgid "Editor: cannot open \"%1\" as export file for CD marker file"
 msgstr ""
 
 #: export_handler.cc:492 export_handler.cc:495
-msgid "an error occured while writing a TOC/CUE file: %1"
+msgid "an error occurred while writing a TOC/CUE file: %1"
 msgstr ""
 
 #: export_handler.cc:744 export_handler.cc:802

@@ -3173,7 +3173,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 		}
 
 		/* check to see how the original region (in the
-		 * playlist before compounding occured) overlaps
+		 * playlist before compounding occurred) overlaps
 		 * with the new state of the compound region.
 		 */
 

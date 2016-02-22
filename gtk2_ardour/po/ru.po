@@ -8518,7 +8518,7 @@ msgid "Processors"
 msgstr "Обработчики"
 
 #: monitor_section.cc:189
-msgid "Allow to add monitor effect processors"
+msgid "Allow one to add monitor effect processors"
 msgstr ""
 
 #: monitor_section.cc:205
