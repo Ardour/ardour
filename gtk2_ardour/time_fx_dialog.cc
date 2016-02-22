@@ -224,6 +224,11 @@ TimeFXDialog::start_updates ()
 void
 TimeFXDialog::update_progress_gui (float p)
 {
+	/* time/pitch FX are applied in a dedicated thread, so we cannot just
+	   update the GUI when notified about progress. That is deferred to a
+	   timer-driven callback which will ensure that the visual progress
+	   indicator is updated.
+	*/
 	progress = p;
 }
 
