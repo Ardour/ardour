@@ -91,6 +91,8 @@
 #include "ardour/slave.h"
 #include "ardour/system_exec.h"
 
+#include "LuaBridge/LuaBridge.h"
+
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
 #endif
@@ -141,6 +143,7 @@ typedef uint64_t microseconds_t;
 #include "route_time_axis.h"
 #include "route_params_ui.h"
 #include "save_as_dialog.h"
+#include "script_selector.h"
 #include "session_dialog.h"
 #include "session_metadata_dialog.h"
 #include "session_option_editor.h"
@@ -3927,6 +3930,88 @@ ARDOUR_UI::add_route (Gtk::Window* /* ignored */)
 	case AddRouteDialog::AudioBus:
 		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template);
 		break;
+	}
+}
+
+void
+ARDOUR_UI::add_lua_script ()
+{
+	if (!_session) {
+		return;
+	}
+
+	LuaScriptInfoPtr spi;
+	ScriptSelector ss ("Add Lua Session Script", LuaScriptInfo::Session);
+	switch (ss.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+			spi = ss.script();
+			break;
+		default:
+			return;
+	}
+
+	std::string script = "";
+
+	try {
+		script = Glib::file_get_contents (spi->path);
+	} catch (Glib::FileError e) {
+		string msg = string_compose (_("Cannot read session script '%1': %2"), spi->path, e.what());
+		MessageDialog am (msg);
+		am.run ();
+		return;
+	}
+
+	LuaScriptParamList lsp = LuaScripting::session_script_params (spi);
+	std::vector<std::string> reg = _session->registered_lua_functions ();
+
+	ScriptParameterDialog spd (_("Set Script Parameters"), spi, reg, lsp);
+	switch (spd.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+			break;
+		default:
+			return;
+	}
+
+	try {
+		_session->register_lua_function (spd.name(), script, lsp);
+	} catch (luabridge::LuaException const& e) {
+		string msg = string_compose (_("Session script '%1' instantiation failed: %2"), spd.name(), e.what ());
+		MessageDialog am (msg);
+		am.run ();
+	} catch (SessionException e) {
+		string msg = string_compose (_("Loading Session script '%1' failed: %2"), spd.name(), e.what ());
+		MessageDialog am (msg);
+		am.run ();
+	}
+}
+
+void
+ARDOUR_UI::remove_lua_script ()
+{
+	if (!_session) {
+		return;
+	}
+	if (_session->registered_lua_function_count () ==  0) {
+		string msg = _("There are no active Lua session scripts present in this session.");
+		MessageDialog am (msg);
+		am.run ();
+		return;
+	}
+
+	std::vector<std::string> reg = _session->registered_lua_functions ();
+	SessionScriptManager sm ("Remove Lua Session Script", reg);
+	switch (sm.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+			break;
+		default:
+			return;
+	}
+	try {
+		_session->unregister_lua_function (sm.name());
+	} catch (luabridge::LuaException const& e) {
+		string msg = string_compose (_("Session script '%1' removal failed: %2"), sm.name(), e.what ());
+		MessageDialog am (msg);
+		am.run ();
 	}
 }
 

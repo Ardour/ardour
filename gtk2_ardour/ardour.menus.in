@@ -27,6 +27,11 @@
 #endif
       <!--menuitem action='importFromSession'/-->
 
+      <menu name='Scripting' action='Scripting'>
+        <menuitem action='AddLuaScript'/>
+        <menuitem action='RemoveLuaScript'/>
+      </menu>
+
       <menuitem action='OpenVideo'/>
       <menuitem action='CloseVideo'/>
 
