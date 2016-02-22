@@ -88,7 +88,7 @@ ARDOUR_UI::create_editor ()
 		return -1;
 	}
 
-        editor->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), editor));
+	// editor->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), editor));
 
 	return 0;
 }

@@ -59,6 +59,7 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/grouped_buttons.h"
 #include "gtkmm2ext/gtk_ui.h"
+#include <gtkmm2ext/keyboard.h>
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 #include "gtkmm2ext/choice.h"
@@ -5856,6 +5857,7 @@ Editor::use_own_window (bool and_fill_it)
 		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Editor"), this);
 
 		// win->signal_realize().connect (*this, &Editor::on_realize);
+		win->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
 		win->signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
 		win->set_data ("ardour-bindings", bindings);
 

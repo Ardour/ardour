@@ -34,6 +34,7 @@
 #include <glibmm/threads.h>
 
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/keyboard.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/window_title.h>
@@ -317,6 +318,7 @@ Mixer_UI::use_own_window (bool and_fill_it)
 		win->set_name ("MixerWindow");
 		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Mixer"), this);
 		win->signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_scroll_event), false);
+		win->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
 		win->set_data ("ardour-bindings", bindings);
 		update_title ();
 	}

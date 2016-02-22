@@ -48,7 +48,7 @@ ARDOUR_UI::create_mixer ()
 		return -1;
 	}
 
-        mixer->signal_event().connect (sigc::bind (sigc::ptr_fun (&Gtkmm2ext::Keyboard::catch_user_event_for_pre_dialog_focus), mixer));
+	// mixer->signal_event().connect (sigc::bind (sigc::ptr_fun (&Gtkmm2ext::Keyboard::catch_user_event_for_pre_dialog_focus), mixer));
 
 	return 0;
 }
