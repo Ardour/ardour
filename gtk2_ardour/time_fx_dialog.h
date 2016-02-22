@@ -72,6 +72,8 @@ class TimeFXDialog : public ArdourDialog, public ProgressReporter
 	float get_time_fraction () const;
 	float get_pitch_fraction () const;
 
+	void start_updates ();
+
   private:
 	ARDOUR::framecnt_t      original_length;
 	Gtk::Adjustment pitch_octave_adjustment;
@@ -80,12 +82,17 @@ class TimeFXDialog : public ArdourDialog, public ProgressReporter
 	Gtk::SpinButton pitch_octave_spinner;
 	Gtk::SpinButton pitch_semitone_spinner;
 	Gtk::SpinButton pitch_cent_spinner;
-	Gtk::Adjustment percent_adjustment;
+	Gtk::Adjustment duration_adjustment;
 	AudioClock*     duration_clock;
-	Gtk::RadioButton duration_chosen;
-	Gtk::RadioButtonGroup choice_group;
-	Gtk::RadioButton percent_chosen;
+	bool            ignore_adjustment_change;
+	bool            ignore_clock_change;
+	sigc::connection update_connection;
+	float           progress;
+
 	void update_progress_gui (float);
+	void duration_clock_changed ();
+	void duration_adjustment_changed ();
+	void timer_update ();
 };
 
 #endif /* __ardour_time_fx_dialog_h__ */

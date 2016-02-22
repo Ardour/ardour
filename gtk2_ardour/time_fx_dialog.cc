@@ -27,6 +27,8 @@
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
+#include "pbd/unwind.h"
+#include "pbd/stacktrace.h"
 
 #include <gtkmm2ext/utils.h>
 
@@ -36,6 +38,7 @@
 #include "audio_region_view.h"
 #include "region_selection.h"
 #include "time_fx_dialog.h"
+#include "timers.h"
 
 #ifdef USE_RUBBERBAND
 #include <rubberband/RubberBandStretcher.h>
@@ -56,7 +59,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, framecnt_t oldlen, framecnt_t
 	, pitching (pitch)
 	, quick_button (_("Quick but Ugly"))
 	, antialias_button (_("Skip Anti-aliasing"))
-	, stretch_opts_label (_("Contents:"))
+	, stretch_opts_label (_("Contents"))
 	, precise_button (_("Minimize time distortion"))
 	, preserve_formants_button(_("Preserve Formants"))
 	, original_length (oldlen)
@@ -66,11 +69,11 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, framecnt_t oldlen, framecnt_t
 	, pitch_octave_spinner (pitch_octave_adjustment)
 	, pitch_semitone_spinner (pitch_semitone_adjustment)
 	, pitch_cent_spinner (pitch_cent_adjustment)
-	, percent_adjustment (100.0, -1000.0, 1000.0, 1.0, 10.0)
+	, duration_adjustment (100.0, -1000.0, 1000.0, 1.0, 10.0)
 	, duration_clock (0)
-	, duration_chosen (_("Duration"))
-	, choice_group (duration_chosen.get_group())
-	, percent_chosen (choice_group, _("Percent"))
+	, ignore_adjustment_change (false)
+	, ignore_clock_change (false)
+	, progress (0.0f)
 {
 	set_modal (true);
 	set_skip_taskbar_hint (true);
@@ -134,11 +137,11 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, framecnt_t oldlen, framecnt_t
 		int row = 0;
 
 		table->set_row_spacings	(6);
-		table->set_col_spacings	(6);
+		table->set_col_spacings	(12);
 
 #ifdef USE_RUBBERBAND
 		vector<string> strings;
-		duration_clock = manage (new AudioClock (X_("stretch"), true, "stretch", true, false, true, false, true));
+		duration_clock = manage (new AudioClock (X_("stretch"), true, X_("stretch"), true, false, true, false, true));
 		duration_clock->set_session (e.session());
 		duration_clock->set (new_length, true);
 		duration_clock->set_mode (AudioClock::BBT);
@@ -148,17 +151,18 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, framecnt_t oldlen, framecnt_t
 		clock_align->add (*duration_clock);
 		clock_align->set (0.0, 0.5, 0.0, 1.0);
 
-		Gtk::RadioButtonGroup group;
-		table->attach (duration_chosen, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
+		l = manage (new Gtk::Label (_("Duration")));
+		table->attach (*l, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
 		table->attach (*clock_align, 1, 2, row, row+1, Gtk::AttachOptions (Gtk::EXPAND|Gtk::FILL), Gtk::FILL, 0, 0);
 		row++;
 
 		const double fract = ((double) new_length) / original_length;
 		/* note the *100.0 to convert fract into a percentage */
-		percent_adjustment.set_value (fract*100.0);
-		Gtk::SpinButton* spinner = manage (new Gtk::SpinButton (percent_adjustment, 1.0, 3));
+		duration_adjustment.set_value (fract*100.0);
+		Gtk::SpinButton* spinner = manage (new Gtk::SpinButton (duration_adjustment, 1.0, 3));
 
-		table->attach (percent_chosen, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
+		l = manage (new Gtk::Label (_("Percent")));
+		table->attach (*l, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
 		table->attach (*spinner, 1, 2, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
 		row++;
 
@@ -172,6 +176,10 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, framecnt_t oldlen, framecnt_t
 
 		table->attach (precise_button, 0, 2, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 		row++;
+
+		duration_clock->ValueChanged.connect (sigc::mem_fun (*this, &TimeFXDialog::duration_clock_changed));
+		duration_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &TimeFXDialog::duration_adjustment_changed));
+
 #else
 		quick_button.set_name (N_("TimeFXButton"));
 		table->attach (quick_button, 1, 3, row, row+1, Gtk::FILL, Gtk::EXPAND, 0, 0);
@@ -208,9 +216,25 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, framecnt_t oldlen, framecnt_t
 }
 
 void
+TimeFXDialog::start_updates ()
+{
+	update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &TimeFXDialog::timer_update));
+}
+
+void
 TimeFXDialog::update_progress_gui (float p)
 {
-	progress_bar.set_fraction (p);
+	progress = p;
+}
+
+void
+TimeFXDialog::timer_update ()
+{
+	progress_bar.set_fraction (progress);
+
+	if (request.done || request.cancel) {
+		update_connection.disconnect ();
+	}
 }
 
 void
@@ -237,11 +261,7 @@ TimeFXDialog::get_time_fraction () const
 		return 1.0;
 	}
 
-	if (duration_chosen.get_active()) {
-		return duration_clock->current_duration () / original_length;
-	}
-
-	return percent_adjustment.get_value() / 100.0;
+	return duration_adjustment.get_value() / 100.0;
 }
 
 float
@@ -265,4 +285,28 @@ TimeFXDialog::get_pitch_fraction () const
 	// ratio is 2^^octaves
 
 	return pow(2, cents/1200);
+}
+
+void
+TimeFXDialog::duration_adjustment_changed ()
+{
+	if (ignore_adjustment_change) {
+		return;
+	}
+
+	PBD::Unwinder<bool> uw (ignore_clock_change, true);
+
+	duration_clock->set ((framecnt_t) (original_length * (duration_adjustment.get_value()/ 100.0)));
+}
+
+void
+TimeFXDialog::duration_clock_changed ()
+{
+	if (ignore_clock_change) {
+		return;
+	}
+
+	PBD::Unwinder<bool> uw (ignore_adjustment_change, true);
+
+	duration_adjustment.set_value (100.0 * (duration_clock->current_duration() / (double) original_length));
 }
