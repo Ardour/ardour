@@ -25,7 +25,7 @@ fi
 
 GLIB=$(ldd @LIBDIR@/ardour-@VERSION@ 2> /dev/null | grep glib-2.0 | sed 's/.*=> \([^ ]*\) .*/\1/')
 
-if [ "$GLIB" = "" ]; then
+if ! type nm >/dev/null 2>&1 || [ "$GLIB" = "" ]; then
 	echo "WARNING: Could not check your glib-2.0 for mutex locking atomic operations."
 	echo ""
 elif [ $(nm -D --radix=dec --defined-only -S $GLIB | grep -w g_atomic_int_add | cut -d ' ' -f 2) -gt 32 ]; then
