@@ -391,6 +391,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		keyboard->set_state (*node, Stateful::loading_state_version);
 	}
 
+	keyboard->GrabFocus.connect (sigc::mem_fun (*this, &ARDOUR_UI::grab_focus_after_dialog));
+
 	/* we don't like certain modifiers */
 	Bindings::set_ignored_state (GDK_LOCK_MASK|GDK_MOD2_MASK|GDK_MOD3_MASK);
 
@@ -5066,5 +5068,15 @@ ARDOUR_UI::cancel_solo ()
 		}
 
 		_session->clear_all_solo_state (_session->get_routes()); // safeguard, ideally this won't do anything, check the log-window
+	}
+}
+
+void
+ARDOUR_UI::grab_focus_after_dialog ()
+{
+	if (mixer && mixer->fully_visible()) {
+		mixer->grab_focus ();
+	} else if (editor) {
+		editor->grab_focus ();
 	}
 }

@@ -432,6 +432,14 @@ Keyboard::close_current_dialog ()
 	if (current_window) {
 		current_window->hide ();
 		current_window = 0;
+#ifdef __APPLE__
+		/* Since Apple users has a basically unconfigurable window
+		   manager, and since users there cannot use
+		   focus-follows-mouse, we force focus back to some application
+		   "main window" after closing a dialog via Primary-w.
+		*/
+		GrabFocus ();
+#endif
 	}
 }
 
