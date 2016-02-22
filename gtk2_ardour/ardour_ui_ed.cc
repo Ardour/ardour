@@ -87,6 +87,7 @@ ARDOUR_UI::create_editor ()
 
 	editor->Realized.connect (sigc::mem_fun (*this, &ARDOUR_UI::editor_realized));
 	editor->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), true));
+        editor->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), editor));
 
 	return 0;
 }

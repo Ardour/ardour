@@ -23,6 +23,8 @@
    is to cut down on the nasty compile times for these classes.
 */
 
+#include "gtkmm2ext/keyboard.h"
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "mixer_ui.h"
@@ -46,6 +48,7 @@ ARDOUR_UI::create_mixer ()
 	}
 
 	mixer->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), false));
+        mixer->signal_event().connect (sigc::bind (sigc::ptr_fun (&Gtkmm2ext::Keyboard::catch_user_event_for_pre_dialog_focus), mixer));
 
 	return 0;
 }

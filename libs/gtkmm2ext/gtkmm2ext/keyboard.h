@@ -166,6 +166,8 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static std::string current_binding_name () { return _current_binding_name; }
 	static std::map<std::string,std::string> binding_files;
 
+        static bool catch_user_event_for_pre_dialog_focus (GdkEvent* ev, Gtk::Window* w);
+
 	int reset_bindings ();
 
 	struct AccelKeyLess {
@@ -211,6 +213,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static void set_modifier (uint32_t newval, uint32_t& variable);
 
 	static bool _some_magic_widget_has_focus;
+        static Gtk::Window* pre_dialog_active_window;
 };
 
 } /* namespace */

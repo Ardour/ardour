@@ -111,9 +111,9 @@ bool Keyboard::bindings_changed_after_save_became_legal = false;
 map<string,string> Keyboard::binding_files;
 string Keyboard::_current_binding_name;
 map<AccelKey,pair<string,string>,Keyboard::AccelKeyLess> Keyboard::release_keys;
+Gtk::Window* Keyboard::pre_dialog_active_window = 0;
 
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
-
 GdkModifierType Keyboard::RelevantModifierKeyMask;
 
 void
@@ -432,15 +432,35 @@ Keyboard::close_current_dialog ()
 	if (current_window) {
 		current_window->hide ();
 		current_window = 0;
-#ifdef __APPLE__
-		/* Since Apple users has a basically unconfigurable window
-		   manager, and since users there cannot use
-		   focus-follows-mouse, we force focus back to some application
-		   "main window" after closing a dialog via Primary-w.
-		*/
-		GrabFocus ();
-#endif
+
+                if (pre_dialog_active_window) {
+                        pre_dialog_active_window->present ();
+                        pre_dialog_active_window = 0;
+                }
 	}
+}
+
+bool
+Keyboard::catch_user_event_for_pre_dialog_focus (GdkEvent* ev, Gtk::Window* w)
+{
+        switch (ev->type) {
+        case GDK_BUTTON_PRESS:
+        case GDK_BUTTON_RELEASE:
+        case GDK_KEY_PRESS:
+        case GDK_KEY_RELEASE:
+                pre_dialog_active_window = w;
+                break;
+
+        case GDK_FOCUS_CHANGE:
+                if (ev->focus_change.in) {
+                        pre_dialog_active_window = w;
+                }
+                break;
+
+        default:
+                break;
+        }
+        return false;
 }
 
 bool
