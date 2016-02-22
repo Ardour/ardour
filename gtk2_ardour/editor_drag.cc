@@ -4000,7 +4000,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 				if (move_both || (*x).move_both) {
 					copy_location->set_start (new_start);
 					copy_location->set_end (new_end);
-				} else 	if (new_start < copy_location->end()) {
+				} else	if (new_start < copy_location->end()) {
 					copy_location->set_start (new_start);
 				} else if (newframe > 0) {
 					//_editor->snap_to (next, RoundUpAlways, true);
@@ -4716,31 +4716,37 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 void
 TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!movement_occurred) {
-		return;
-	}
+	/* this may have been a single click, no drag. We still want the dialog
+	   to show up in that case, so that the user can manually edit the
+	   parameters for the timestretch.
+	*/
 
-	motion (event, false);
+	float fraction = 1.0;
 
-	_primary->get_time_axis_view().hide_timestretch ();
+	if (movement_occurred) {
 
-	framepos_t adjusted_frame_pos = adjusted_current_frame (event);
+		motion (event, false);
 
-	if (adjusted_frame_pos < _primary->region()->position()) {
-		/* backwards drag of the left edge - not usable */
-		return;
-	}
+		_primary->get_time_axis_view().hide_timestretch ();
 
-	framecnt_t newlen = adjusted_frame_pos - _primary->region()->position();
+		framepos_t adjusted_frame_pos = adjusted_current_frame (event);
 
-	float percentage = (double) newlen / (double) _primary->region()->length();
+		if (adjusted_frame_pos < _primary->region()->position()) {
+			/* backwards drag of the left edge - not usable */
+			return;
+		}
+
+		framecnt_t newlen = adjusted_frame_pos - _primary->region()->position();
+
+		fraction = (double) newlen / (double) _primary->region()->length();
 
 #ifndef USE_RUBBERBAND
-	// Soundtouch uses percentage / 100 instead of normal (/ 1)
-	if (_primary->region()->data_type() == DataType::AUDIO) {
-		percentage = (float) ((double) newlen - (double) _primary->region()->length()) / ((double) newlen) * 100.0f;
-	}
+		// Soundtouch uses fraction / 100 instead of normal (/ 1)
+		if (_primary->region()->data_type() == DataType::AUDIO) {
+			fraction = (float) ((double) newlen - (double) _primary->region()->length()) / ((double) newlen) * 100.0f;
+		}
 #endif
+	}
 
 	if (!_editor->get_selection().regions.empty()) {
 		/* primary will already be included in the selection, and edit
@@ -4749,7 +4755,7 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 		   selection.
 		*/
 
-		if (_editor->time_stretch (_editor->get_selection().regions, percentage) == -1) {
+		if (_editor->time_stretch (_editor->get_selection().regions, fraction) == -1) {
 			error << _("An error occurred while executing time stretch operation") << endmsg;
 		}
 	}
