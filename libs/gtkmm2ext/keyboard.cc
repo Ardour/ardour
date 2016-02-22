@@ -112,6 +112,7 @@ bool Keyboard::bindings_changed_after_save_became_legal = false;
 map<string,string> Keyboard::binding_files;
 string Keyboard::_current_binding_name;
 string Keyboard::binding_filename_suffix = X_(".keys");
+Gtk::Window* Keyboard::pre_dialog_active_window = 0;
 
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
 GdkModifierType Keyboard::RelevantModifierKeyMask;
