@@ -184,9 +184,9 @@ RouteGroupDialog::do_run ()
 {
 	while (1) {
 		int const r = run ();
-		if (r == Gtk::RESPONSE_CANCEL) {
-			/* cancel, so just bail now */
-			return Gtk::RESPONSE_CANCEL;
+
+		if (r != Gtk::RESPONSE_OK) {
+			return true;
 		}
 
 		if (unique_name (_name.get_text())) {
