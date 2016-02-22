@@ -95,6 +95,10 @@ NormalizeDialog::target () const
 void
 NormalizeDialog::update_progress_gui (float p)
 {
+	/* Normalization is run inside the GUI thread, so we can directly
+	 * update the progress bar when notified about progress.
+	 */
+
 	_progress_bar->set_fraction (p);
 }
 
