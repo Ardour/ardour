@@ -89,7 +89,7 @@ SampleRateConverter::allocate_buffers (framecnt_t max_frames)
 		max_leftover_frames = 4 * max_frames;
 		leftover_data = (float *) realloc (leftover_data, max_leftover_frames * sizeof (float));
 		if (throw_level (ThrowObject) && !leftover_data) {
-			throw Exception (*this, "A memory allocation error occured");
+			throw Exception (*this, "A memory allocation error occurred");
 		}
 
 		max_frames_in = max_frames;
@@ -164,7 +164,7 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 		err = src_process (src_state, &src_data);
 		if (throw_level (ThrowProcess) && err) {
 			throw Exception (*this, str (format
-			("An error occured during sample rate conversion: %1%")
+			("An error occurred during sample rate conversion: %1%")
 			% src_strerror (err)));
 		}
 

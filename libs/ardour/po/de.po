@@ -790,7 +790,7 @@ msgstr ""
 "Adresse oder Passwort falsch?"
 
 #: export_handler.cc:503 export_handler.cc:506
-msgid "an error occured while writing a TOC/CUE file: %1"
+msgid "an error occurred while writing a TOC/CUE file: %1"
 msgstr "beim Schreiben einer TOC/CUE Datei trat ein Fehler auf:%1"
 
 #: export_handler.cc:796 export_handler.cc:854

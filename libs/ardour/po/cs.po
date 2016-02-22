@@ -594,7 +594,7 @@ msgid "Editor: cannot open \"%1\" as export file for CD marker file"
 msgstr "Editor: Nelze otevřít \"%1\" jako soubor vyvedení pro značku CD"
 
 #: export_handler.cc:492 export_handler.cc:495
-msgid "an error occured while writing a TOC/CUE file: %1"
+msgid "an error occurred while writing a TOC/CUE file: %1"
 msgstr "Při zápisu souboru TOC/CUE se vyskytla chyba:%1"
 
 #: export_handler.cc:744 export_handler.cc:802

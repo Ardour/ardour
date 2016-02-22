@@ -182,7 +182,7 @@ MonitorSection::MonitorSection (Session* s)
 	/* Processor Box hide/shos */
 	toggle_processorbox_button.set_text (_("Processors"));
 	toggle_processorbox_button.set_name (X_("monitor section processors toggle"));
-	set_tooltip (&toggle_processorbox_button, _("Allow to add monitor effect processors"));
+	set_tooltip (&toggle_processorbox_button, _("Allow one to add monitor effect processors"));
 
 	proctoggle = ToggleAction::create ();
 	toggle_processorbox_button.set_related_action (proctoggle);

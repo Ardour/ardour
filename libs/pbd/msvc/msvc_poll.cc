@@ -71,7 +71,7 @@ int   ret = 0;
 
 					if (0 > pos)
 					{
-						// An error occured ('errno' should have been set by '_tell()')
+						// An error occurred ('errno' should have been set by '_tell()')
 						ret = (-1);
 						fds[loop].revents = POLLERR;
 						if (fds[loop].events & POLLRDNORM)

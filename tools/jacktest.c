@@ -10,7 +10,7 @@ jack_port_t *input_port;
 jack_port_t *output_port;
 jack_client_t *client;
 int loopsize = 25000;
-int xrun_occured = 0;
+int xrun_occurred = 0;
 int consecutive_xruns = 0;
 float first_xrun = 0.0f;
 float last_load = 0.0f;
@@ -59,14 +59,14 @@ process (jack_nframes_t nframes, void *arg)
 		printf ("loopsize = %d\n", loopsize);
 	}
 
-	if (xrun_occured) {
+	if (xrun_occurred) {
 		if (consecutive_xruns == 0) {
 			first_xrun = last_load;
 		}
 		consecutive_xruns++;
 	}
 
-	xrun_occured = 0;
+	xrun_occurred = 0;
 
 	if (consecutive_xruns >= 10) {
 		fprintf (stderr, "Stopping with load = %f (first xrun at %f)\n", last_load, first_xrun);
@@ -90,8 +90,8 @@ jack_shutdown (void *arg)
 int
 jack_xrun (void *arg)
 {
-	fprintf (stderr, "xrun occured with loop size = %d\n", loopsize);
-	xrun_occured = 1;
+	fprintf (stderr, "xrun occurred with loop size = %d\n", loopsize);
+	xrun_occurred = 1;
 	return 0;
 }
 

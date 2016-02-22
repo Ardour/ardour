@@ -536,7 +536,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 
 		switch (editor.current_mouse_mode()) {
 		case MouseRange:
-			/* no motion occured - simple click */
+			/* no motion occurred - simple click */
 			clear_editor_note_selection ();
 			_mouse_changed_selection = true;
 			break;

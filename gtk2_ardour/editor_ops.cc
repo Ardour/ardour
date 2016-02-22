@@ -4567,7 +4567,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 		list<boost::shared_ptr<Playlist> > foo;
 
-		/* the pmap is in the same order as the tracks in which selected regions occured */
+		/* the pmap is in the same order as the tracks in which selected regions occurred */
 
 		for (vector<PlaylistMapping>::iterator i = pmap.begin(); i != pmap.end(); ++i) {
 			if ((*i).pl) {

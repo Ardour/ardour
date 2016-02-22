@@ -4126,9 +4126,9 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-MarkerDrag::aborted (bool movement_occured)
+MarkerDrag::aborted (bool movement_occurred)
 {
-	if (!movement_occured) {
+	if (!movement_occurred) {
 		return;
 	}
 
@@ -4382,9 +4382,9 @@ LineDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-LineDrag::finished (GdkEvent* event, bool movement_occured)
+LineDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (movement_occured) {
+	if (movement_occurred) {
 		motion (event, false);
 		_line->end_drag (false, 0);
 		_editor->commit_reversible_command ();
@@ -5361,9 +5361,9 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-RangeMarkerBarDrag::aborted (bool movement_occured)
+RangeMarkerBarDrag::aborted (bool movement_occurred)
 {
-	if (movement_occured) {
+	if (movement_occurred) {
 		_drag_rect->hide ();
 	}
 }
