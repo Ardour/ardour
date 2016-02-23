@@ -330,6 +330,8 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 			case LXVST:
 				compstr = X_("LXVST");
 				break;
+			case Lua:
+				break;
 			}
 
 		} else if (mode == _("Author contains")) {
