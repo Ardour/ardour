@@ -456,9 +456,7 @@ echo
 
 echo "Copying other stuff to $APPDIR  ..."
 
-#cp $BUILD_ROOT/gtk2_ardour/ergonomic-us.bindings  $Resources
-
-cp $BUILD_ROOT/gtk2_ardour/mnemonic-us.bindings  $Resources
+cp $BUILD_ROOT/gtk2_ardour/ardour.keys  $Resources
 cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Resources
 cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Resources
 cp $BUILD_ROOT/gtk2_ardour/clearlooks.rc $Resources
@@ -467,8 +465,6 @@ cp $BUILD_ROOT/gtk2_ardour/clearlooks.rc $Resources
 
 cp ../../system_config $Resources/system_config
 cp ../../instant.xml $Resources/instant.xml
-cp ../../gtk2_ardour/step_editing.bindings $Resources
-cp ../../gtk2_ardour/mixer.bindings $Resources
 cp -r ../../gtk2_ardour/icons $Resources
 cp -r ../../gtk2_ardour/pixmaps $Resources
 cp ../../gtk2_ardour/dark.colors $Resources
