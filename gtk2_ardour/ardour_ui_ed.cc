@@ -51,6 +51,7 @@
 #include "editor.h"
 #include "actions.h"
 #include "meterbridge.h"
+#include "luawindow.h"
 #include "mixer_ui.h"
 #include "startup.h"
 #include "window_manager.h"
@@ -89,6 +90,20 @@ ARDOUR_UI::create_editor ()
 	}
 
 	// editor->signal_event().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), editor));
+
+	return 0;
+}
+
+int
+ARDOUR_UI::create_luawindow ()
+
+{
+	try {
+		luawindow = LuaWindow::instance ();
+	}
+	catch (failed_constructor& err) {
+		return -1;
+	}
 
 	return 0;
 }
@@ -273,6 +288,7 @@ ARDOUR_UI::install_actions ()
 		global_actions.register_action (common_actions, X_("show-ui-prefs"), _("Show more UI preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_ui_prefs));
 	}
 
+	global_actions.register_action (common_actions, X_("toggle-luawindow"), S_("Window|Scripting"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_luawindow));
 	global_actions.register_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
 
 	act = global_actions.register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));

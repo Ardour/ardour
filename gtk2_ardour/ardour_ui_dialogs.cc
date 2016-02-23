@@ -49,6 +49,7 @@
 #include "gui_thread.h"
 #include "keyeditor.h"
 #include "location_ui.h"
+#include "luawindow.h"
 #include "main_clock.h"
 #include "meterbridge.h"
 #include "meter_patterns.h"
@@ -665,6 +666,29 @@ ARDOUR_UI::toggle_meterbridge ()
 		meterbridge->hide_window (NULL);
 	}
 }
+
+void
+ARDOUR_UI::toggle_luawindow ()
+{
+	assert (editor && luawindow);
+
+	bool show = false;
+	bool obscuring = false;
+
+	if (luawindow->not_visible ()) {
+		show = true;
+	}
+	// TODO check overlap
+
+	if (show) {
+		luawindow->show_window ();
+		luawindow->present ();
+		luawindow->raise ();
+	} else {
+		luawindow->hide_window (NULL);
+	}
+}
+
 
 void
 ARDOUR_UI::new_midi_tracer_window ()

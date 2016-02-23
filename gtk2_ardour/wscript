@@ -123,6 +123,7 @@ gtk2_ardour_sources = [
         'level_meter.cc',
         'location_ui.cc',
         'luainstance.cc',
+        'luawindow.cc',
         'main.cc',
         'main_clock.cc',
         'marker.cc',

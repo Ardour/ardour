@@ -37,6 +37,7 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "meterbridge.h"
+#include "luawindow.h"
 #include "mixer_ui.h"
 #include "keyboard.h"
 #include "splash.h"
@@ -119,6 +120,7 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	BootMessage (_("Setup Mixer"));
 	mixer->set_session (s);
 	meterbridge->set_session (s);
+	luawindow->set_session (s);
 
 	/* its safe to do this now */
 
@@ -254,6 +256,11 @@ ARDOUR_UI::setup_windows ()
 
 	if (create_meterbridge ()) {
 		error << _("UI: cannot setup meterbridge") << endmsg;
+		return -1;
+	}
+
+	if (create_luawindow ()) {
+		error << _("UI: cannot setup luawindow") << endmsg;
 		return -1;
 	}
 

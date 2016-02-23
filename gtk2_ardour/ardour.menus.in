@@ -528,6 +528,7 @@
           <menuitem action='detach-preferences'/>
       </menu>
       <menuitem action='toggle-meterbridge'/>
+      <menuitem action='toggle-luawindow'/>
       <separator/>
       <menuitem action='toggle-inspector'/>
       <menuitem action='toggle-locations'/>

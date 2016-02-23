@@ -126,6 +126,8 @@ class ShuttleControl;
 class Splash;
 class TimeInfoBox;
 class Meterbridge;
+class LuaWindow;
+class LuaScriptManager;
 class MidiTracer;
 class NSM_Client;
 class LevelMeterHBox;
@@ -208,6 +210,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_monitor_section_visibility ();
 	void toggle_keep_tearoffs();
 
+	void lua_script_manager();
+
 	static PublicEditor* _instance;
 
 	/** Emitted frequently with the audible frame, false, and the edit point as
@@ -255,6 +259,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         void add_routes_thread ();
 
 	void start_duplicate_routes ();
+
+	void add_lua_script ();
+	void remove_lua_script ();
 
 	void add_video (Gtk::Window* float_window);
 	void remove_video ();
@@ -383,6 +390,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void tabbable_state_change (Gtkmm2ext::Tabbable&);
 
 	void toggle_meterbridge ();
+	void toggle_luawindow ();
 
 	int  setup_windows ();
 	void setup_transport ();
@@ -645,9 +653,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	int         create_mixer ();
 	int         create_editor ();
+	int         create_meterbridge ();
+	int         create_luawindow ();
 
 	Meterbridge  *meterbridge;
-	int         create_meterbridge ();
+	LuaWindow    *luawindow;
 
         /* Dialogs that can be created via new<T> */
 
@@ -661,6 +671,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::Proxy<RouteParams_UI> route_params;
         WM::Proxy<EngineControl> audio_midi_setup;
         WM::Proxy<ExportVideoDialog> export_video_dialog;
+        WM::Proxy<LuaScriptManager> lua_script_window;
 
         /* Windows/Dialogs that require a creator method */
 
