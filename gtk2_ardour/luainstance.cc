@@ -681,7 +681,7 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 bool
 LuaInstance::unregister_lua_slot (const PBD::ID& id)
 {
-	LuaCallbackMap::const_iterator i = _callbacks.find (id);
+	LuaCallbackMap::iterator i = _callbacks.find (id);
 	if (i != _callbacks.end()) {
 		SlotChanged (id, "", ActionHook()); /* EMIT SIGNAL */
 		_callbacks.erase (i);
