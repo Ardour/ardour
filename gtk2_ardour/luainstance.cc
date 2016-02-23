@@ -644,7 +644,9 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 	ActionHook ah;
 	try {
 		LuaState l;
+#ifndef NDEBUG
 		l.Print.connect (&_lua_print);
+#endif
 		lua_State* L = l.getState();
 		register_hooks (L);
 		l.do_command ("function ardour () end");
@@ -840,7 +842,9 @@ LuaCallback::get_state (void)
 void
 LuaCallback::init (void)
 {
+#ifndef NDEBUG
 	lua.Print.connect (&_lua_print);
+#endif
 
 	lua.do_command (
 			"function ScriptManager ()"
