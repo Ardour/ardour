@@ -633,6 +633,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void remove_marker (ArdourCanvas::Item&, GdkEvent*);
 	gint really_remove_marker (ARDOUR::Location* loc);
 	void goto_nth_marker (int nth);
+	void trigger_script (int nth);
 	void toggle_marker_lines ();
 	void set_marker_line_visibility (bool);
 
@@ -1613,6 +1614,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_region_mute ();
 
 	void initialize_canvas ();
+
+	void manage_action_scripts ();
+	void set_script_action_name (int i, const std::string&);
 
 	/* display control */
 

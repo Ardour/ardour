@@ -205,6 +205,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void play_with_preroll () = 0;
 	virtual void maybe_locate_with_edit_preroll (framepos_t location) = 0;
 	virtual void goto_nth_marker (int nth) = 0;
+	virtual void trigger_script (int nth) = 0;
 	virtual void add_location_from_playhead_cursor () = 0;
 	virtual void remove_location_at_playhead_cursor () = 0;
 	virtual void set_show_measures (bool yn) = 0;

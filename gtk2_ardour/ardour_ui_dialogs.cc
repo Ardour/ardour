@@ -49,6 +49,7 @@
 #include "gui_thread.h"
 #include "keyeditor.h"
 #include "location_ui.h"
+#include "lua_script_manager.h"
 #include "luawindow.h"
 #include "main_clock.h"
 #include "meterbridge.h"
@@ -845,4 +846,10 @@ ARDOUR_UI::toggle_monitor_section_visibility ()
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 			mixer->show_monitor_section (tact->get_active());
 	}
+}
+
+void
+ARDOUR_UI::lua_script_manager ()
+{
+	lua_script_window.show ();
 }

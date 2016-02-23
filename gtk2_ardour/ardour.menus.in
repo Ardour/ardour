@@ -280,7 +280,24 @@
         <menuitem action='set-tempo-from-edit-range'/>
       </menu>
       <menuitem action='set-mouse-mode-object-range'/>
+      <separator/>
+      <menu action="ActionScripts">
+        <menuitem action='manage-action-scripts'/>
+        <separator/>
+        <menuitem action='script-action-1'/>
+        <menuitem action='script-action-2'/>
+        <menuitem action='script-action-3'/>
+        <menuitem action='script-action-4'/>
+        <menuitem action='script-action-5'/>
+        <menuitem action='script-action-6'/>
+        <menuitem action='script-action-7'/>
+        <menuitem action='script-action-8'/>
+        <menuitem action='script-action-9'/>
+      </menu>
+#ifndef GTKOSX
+      <separator/>
       <menuitem action='menu-show-preferences'/>
+#endif
     </menu>         
 
     <menu name='RegionMenu' action='RegionMenu'>

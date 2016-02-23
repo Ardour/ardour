@@ -147,6 +147,7 @@ Editor::register_actions ()
 	myactions.register_action (editor_menu_actions, X_("View"), _("View"));
 	myactions.register_action (editor_menu_actions, X_("ZoomFocus"), _("Zoom Focus"));
 	myactions.register_action (editor_menu_actions, X_("ZoomMenu"), _("Zoom"));
+	myactions.register_action (editor_menu_actions, X_("ActionScripts"), _("Scripted Actions"));
 
 	register_region_actions ();
 
@@ -245,6 +246,7 @@ Editor::register_actions ()
 		string const n = string_compose (_("Locate to Mark %1"), i);
 		reg_sens (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), i - 1));
 	}
+
 
 	reg_sens (editor_actions, "jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
 	reg_sens (editor_actions, "alternate-jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
@@ -473,6 +475,13 @@ Editor::register_actions ()
 
 	myactions.register_action (editor_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), sigc::mem_fun (*this, &Editor::cycle_zoom_focus));
 
+	act = reg_sens (editor_actions, "manage-action-scripts", _("Manage"),
+				sigc::mem_fun(*this, &Editor::manage_action_scripts));
+	for (int i = 1; i <= 9; ++i) {
+		string const a = string_compose (X_("script-action-%1"), i);
+		string const n = string_compose (_("Unset #%1"), i);
+		reg_sens (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::trigger_script), i - 1));
+	}
 
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = myactions.create_action_group (X_("MouseMode"));
 	RadioAction::Group mouse_mode_group;
