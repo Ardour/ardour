@@ -111,6 +111,7 @@ libardour_sources = [
         'location_importer.cc',
         'ltc_file_reader.cc',
         'ltc_slave.cc',
+        'luabindings.cc',
         'meter.cc',
         'midi_automation_list_binder.cc',
         'midi_buffer.cc',
@@ -364,6 +365,7 @@ def build(bld):
     obj.use          = ['libpbd','libmidipp','libevoral',
                         'libaudiographer',
                         'libtimecode',
+                        'liblua',
                         ]
     if bld.env['build_target'] != 'mingw':
         obj.uselib += ['DL']
@@ -443,7 +445,7 @@ def build(bld):
                 source   = avx_sources,
                 cxxflags = avx_cxxflags,
                 includes = [ '.' ],
-                use = [ 'libtimecode', 'libpbd', 'libevoral', ],
+                use = [ 'libtimecode', 'libpbd', 'libevoral', 'liblua' ],
                 target   = 'sse_avx_functions')
 
             obj.use += ['sse_avx_functions' ]
