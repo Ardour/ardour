@@ -42,9 +42,12 @@
 #include "pbd/error.h"
 #include "pbd/event_loop.h"
 #include "pbd/rcu.h"
+#include "pbd/reallocpool.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
 #include "pbd/undo.h"
+
+#include "lua/luastate.h"
 
 #include "evoral/types.hpp"
 
@@ -57,6 +60,7 @@
 #include "ardour/chan_count.h"
 #include "ardour/delivery.h"
 #include "ardour/interthread_info.h"
+#include "ardour/luascripting.h"
 #include "ardour/location.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/rc_configuration.h"
@@ -81,6 +85,10 @@ class Parser;
 namespace PBD {
 class Controllable;
 class ControllableDescriptor;
+}
+
+namespace luabridge {
+	class LuaRef;
 }
 
 namespace Evoral {
@@ -724,6 +732,13 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	PBD::Signal1<void,bool> AuditionActive;
 
+	/* session script */
+	void register_lua_function (const std::string&, const std::string&, const LuaScriptParamList&);
+	void unregister_lua_function (const std::string& name);
+	std::vector<std::string> registered_lua_functions ();
+	uint32_t registered_lua_function_count () const { return _n_lua_scripts; }
+	void scripts_changed (); // called from lua, updates _n_lua_scripts
+
 	/* flattening stuff */
 
 	boost::shared_ptr<Region> write_one_track (Track&, framepos_t start, framepos_t end,
@@ -1273,6 +1288,21 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool              pending_locate_flush;
 	bool              pending_abort;
 	bool              pending_auto_loop;
+
+	PBD::ReallocPool _mempool;
+	LuaState lua;
+	Glib::Threads::Mutex lua_lock;
+	luabridge::LuaRef * _lua_run;
+	luabridge::LuaRef * _lua_add;
+	luabridge::LuaRef * _lua_del;
+	luabridge::LuaRef * _lua_list;
+	luabridge::LuaRef * _lua_load;
+	luabridge::LuaRef * _lua_save;
+	luabridge::LuaRef * _lua_cleanup;
+	uint32_t            _n_lua_scripts;
+
+	void setup_lua ();
+	void try_run_lua (pframes_t);
 
 	Butler* _butler;
 

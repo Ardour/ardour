@@ -358,6 +358,7 @@ Session::process_with_events (pframes_t nframes)
 	}
 
 	if (events.empty() || next_event == events.end()) {
+		try_run_lua (nframes); // also during export ?? ->move to process_without_events()
 		process_without_events (nframes);
 		return;
 	}
@@ -424,6 +425,8 @@ Session::process_with_events (pframes_t nframes)
 				frames_moved = (framecnt_t) (this_event->action_frame - _transport_frame);
 				this_nframes = abs (floor(frames_moved / _transport_speed));
 			}
+
+			try_run_lua (this_nframes);
 
 			if (this_nframes) {
 

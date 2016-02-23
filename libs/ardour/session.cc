@@ -73,6 +73,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/gain_control.h"
 #include "ardour/graph.h"
+#include "ardour/luabindings.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/scene_changer.h"
 #include "ardour/midi_patch_manager.h"
@@ -105,6 +106,8 @@
 
 #include "midi++/port.h"
 #include "midi++/mmc.h"
+
+#include "LuaBridge/LuaBridge.h"
 
 #include "i18n.h"
 
@@ -227,6 +230,8 @@ Session::Session (AudioEngine &eng,
 	, pending_locate_flush (false)
 	, pending_abort (false)
 	, pending_auto_loop (false)
+	, _mempool ("Session", 1048576)
+	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 	, _butler (new Butler (*this))
 	, _post_transport_work (0)
 	,  cumulative_rf_motion (0)
@@ -306,6 +311,8 @@ Session::Session (AudioEngine &eng,
 	pthread_cond_init (&_rt_emit_cond, 0);
 
 	pre_engine_init (fullpath);
+
+	setup_lua ();
 
 	if (_is_new) {
 
@@ -590,8 +597,19 @@ Session::destroy ()
 	delete state_tree;
 	state_tree = 0;
 
-	/* reset dynamic state version back to default */
+	// unregister all lua functions, drop held references (if any)
+	(*_lua_cleanup)();
+	lua.do_command ("Session = nil");
+	delete _lua_run;
+	delete _lua_add;
+	delete _lua_del;
+	delete _lua_list;
+	delete _lua_save;
+	delete _lua_load;
+	delete _lua_cleanup;
+	lua.collect_garbage ();
 
+	/* reset dynamic state version back to default */
 	Stateful::loading_state_version = 0;
 
 	_butler->drop_references ();
@@ -4894,6 +4912,228 @@ Session::audition_playlist ()
 	SessionEvent* ev = new SessionEvent (SessionEvent::Audition, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 	ev->region.reset ();
 	queue_event (ev);
+}
+
+
+void
+Session::register_lua_function (
+		const std::string& name,
+		const std::string& script,
+		const LuaScriptParamList& args
+		)
+{
+	Glib::Threads::Mutex::Lock lm (lua_lock);
+
+	lua_State* L = lua.getState();
+
+	const std::string& bytecode = LuaScripting::get_factory_bytecode (script);
+	luabridge::LuaRef tbl_arg (luabridge::newTable(L));
+	for (LuaScriptParamList::const_iterator i = args.begin(); i != args.end(); ++i) {
+		if ((*i)->optional && !(*i)->is_set) { continue; }
+		tbl_arg[(*i)->name] = (*i)->value;
+	}
+	(*_lua_add)(name, bytecode, tbl_arg); // throws luabridge::LuaException
+	set_dirty();
+}
+
+void
+Session::unregister_lua_function (const std::string& name)
+{
+	Glib::Threads::Mutex::Lock lm (lua_lock);
+	(*_lua_del)(name); // throws luabridge::LuaException
+	lua.collect_garbage ();
+	set_dirty();
+}
+
+std::vector<std::string>
+Session::registered_lua_functions ()
+{
+	Glib::Threads::Mutex::Lock lm (lua_lock);
+	std::vector<std::string> rv;
+
+	try {
+		luabridge::LuaRef list ((*_lua_list)());
+		for (luabridge::Iterator i (list); !i.isNil (); ++i) {
+			if (!i.key ().isString ()) { assert(0); continue; }
+			rv.push_back (i.key ().cast<std::string> ());
+		}
+	} catch (luabridge::LuaException const& e) { }
+	return rv;
+}
+
+#ifndef NDEBUG
+static void _lua_print (std::string s) {
+	std::cout << "SessionLua: " << s << "\n";
+}
+#endif
+
+void
+Session::try_run_lua (pframes_t nframes)
+{
+	if (_n_lua_scripts == 0) return;
+	Glib::Threads::Mutex::Lock tm (lua_lock, Glib::Threads::TRY_LOCK);
+	if (tm.locked ()) {
+		try { (*_lua_run)(nframes); } catch (luabridge::LuaException const& e) { }
+	}
+}
+
+void
+Session::setup_lua ()
+{
+#ifndef NDEBUG
+	lua.Print.connect (&_lua_print);
+#endif
+	lua.do_command (
+			"function ArdourSession ()"
+			"  local self = { scripts = {}, instances = {} }"
+			""
+			"  local remove = function (n)"
+			"   self.scripts[n] = nil"
+			"   self.instances[n] = nil"
+			"   Session:scripts_changed()" // call back
+			"  end"
+			""
+			"  local addinternal = function (n, f, a)"
+			"   assert(type(n) == 'string', 'function-name must be string')"
+			"   assert(type(f) == 'function', 'Given script is a not a function')"
+			"   assert(type(a) == 'table' or type(a) == 'nil', 'Given argument is invalid')"
+			"   assert(self.scripts[n] == nil, 'Callback \"'.. n ..'\" already exists.')"
+			"   self.scripts[n] = { ['f'] = f, ['a'] = a }"
+			"   local env = _ENV;  env.f = nil env.io = nil env.os = nil env.loadfile = nil env.require = nil env.dofile = nil env.package = nil env.debug = nil"
+			"   local env = { print = print, Session = Session, tostring = tostring, assert = assert, ipairs = ipairs, error = error, select = select, string = string, type = type, tonumber = tonumber, collectgarbage = collectgarbage, pairs = pairs, math = math, table = table, pcall = pcall }"
+			"   self.instances[n] = load (string.dump(f, true), nil, nil, env)(a)"
+			"   Session:scripts_changed()" // call back
+			"  end"
+			""
+			"  local add = function (n, b, a)"
+			"   assert(type(b) == 'string', 'ByteCode must be string')"
+			"   load (b)()" // assigns f
+			"   assert(type(f) == 'string', 'Assigned ByteCode must be string')"
+			"   addinternal (n, load(f), a)"
+			"  end"
+			""
+			"  local run = function (...)"
+			"   for n, s in pairs (self.instances) do"
+			"     local status, err = pcall (s, ...)"
+			"     if not status then"
+			"       print ('fn \"'.. n .. '\": ', err)"
+			"       remove (n)"
+			"      end"
+			"   end"
+			"   collectgarbage()"
+			"  end"
+			""
+			"  local cleanup = function ()"
+			"   self.scripts = nil"
+			"   self.instances = nil"
+			"  end"
+			""
+			"  local list = function ()"
+			"   local rv = {}"
+			"   for n, _ in pairs (self.scripts) do"
+			"     rv[n] = true"
+			"   end"
+			"   return rv"
+			"  end"
+			""
+			"  local function basic_serialize (o)"
+			"    if type(o) == \"number\" then"
+			"     return tostring(o)"
+			"    else"
+			"     return string.format(\"%q\", o)"
+			"    end"
+			"  end"
+			""
+			"  local function serialize (name, value)"
+			"   local rv = name .. ' = '"
+			"   collectgarbage()"
+			"   if type(value) == \"number\" or type(value) == \"string\" or type(value) == \"nil\" then"
+			"    return rv .. basic_serialize(value) .. ' '"
+			"   elseif type(value) == \"table\" then"
+			"    rv = rv .. '{} '"
+			"    for k,v in pairs(value) do"
+			"     local fieldname = string.format(\"%s[%s]\", name, basic_serialize(k))"
+			"     rv = rv .. serialize(fieldname, v) .. ' '"
+			"     collectgarbage()" // string concatenation allocates a new string :(
+			"    end"
+			"    return rv;"
+			"   elseif type(value) == \"function\" then"
+			"     return rv .. string.format(\"%q\", string.dump(value, true))"
+			"   else"
+			"    error('cannot save a ' .. type(value))"
+			"   end"
+			"  end"
+			""
+			""
+			"  local save = function ()"
+			"   return (serialize('scripts', self.scripts))"
+			"  end"
+			""
+			"  local restore = function (state)"
+			"   self.scripts = {}"
+			"   load (state)()"
+			"   for n, s in pairs (scripts) do"
+			"    addinternal (n, load(s['f']), s['a'])"
+			"   end"
+			"  end"
+			""
+			" return { run = run, add = add, remove = remove,"
+		  "          list = list, restore = restore, save = save, cleanup = cleanup}"
+			" end"
+			" "
+			" sess = ArdourSession ()"
+			" ArdourSession = nil"
+			" "
+			"function ardour () end"
+			);
+
+	lua_State* L = lua.getState();
+
+	try {
+		luabridge::LuaRef lua_sess = luabridge::getGlobal (L, "sess");
+		lua.do_command ("sess = nil"); // hide it.
+		lua.do_command ("collectgarbage()");
+
+		_lua_run = new luabridge::LuaRef(lua_sess["run"]);
+		_lua_add = new luabridge::LuaRef(lua_sess["add"]);
+		_lua_del = new luabridge::LuaRef(lua_sess["remove"]);
+		_lua_list = new luabridge::LuaRef(lua_sess["list"]);
+		_lua_save = new luabridge::LuaRef(lua_sess["save"]);
+		_lua_load = new luabridge::LuaRef(lua_sess["restore"]);
+		_lua_cleanup = new luabridge::LuaRef(lua_sess["cleanup"]);
+	} catch (luabridge::LuaException const& e) {
+		fatal << string_compose (_("programming error: %1"),
+				X_("Failed to setup Lua interpreter"))
+			<< endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	LuaBindings::stddef (L);
+	LuaBindings::common (L);
+	LuaBindings::dsp (L);
+	luabridge::push <Session *> (L, this);
+	lua_setglobal (L, "Session");
+}
+
+void
+Session::scripts_changed ()
+{
+	assert (!lua_lock.trylock()); // must hold lua_lock
+
+	try {
+		luabridge::LuaRef list ((*_lua_list)());
+		int cnt = 0;
+		for (luabridge::Iterator i (list); !i.isNil (); ++i) {
+			if (!i.key ().isString ()) { assert(0); continue; }
+			++cnt;
+		}
+		_n_lua_scripts = cnt;
+	} catch (luabridge::LuaException const& e) {
+		fatal << string_compose (_("programming error: %1"),
+				X_("Indexing Lua Session Scripts failed."))
+			<< endmsg;
+		abort(); /*NOTREACHED*/
+	}
 }
 
 void

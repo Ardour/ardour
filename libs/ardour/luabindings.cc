@@ -438,6 +438,7 @@ LuaBindings::common (lua_State* L)
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ARDOUR")
 		.beginClass <Session> ("Session")
+		.addFunction ("scripts_changed", &Session::scripts_changed) // used internally
 		.addFunction ("transport_rolling", &Session::transport_rolling)
 		.addFunction ("request_transport_speed", &Session::request_transport_speed)
 		.addFunction ("transport_frame", &Session::transport_frame)

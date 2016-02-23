@@ -122,6 +122,8 @@
 
 #include "control_protocol/control_protocol.h"
 
+#include "LuaBridge/LuaBridge.h"
+
 #include "i18n.h"
 #include <locale.h>
 
@@ -1249,6 +1251,26 @@ Session::state (bool full_state)
 		node->add_child_copy (*_extra_xml);
 	}
 
+	{
+		Glib::Threads::Mutex::Lock lm (lua_lock);
+		std::string saved;
+		{
+			luabridge::LuaRef savedstate ((*_lua_save)());
+			saved = savedstate.cast<std::string>();
+		}
+		lua.collect_garbage ();
+		lm.release ();
+
+		gchar* b64 = g_base64_encode ((const guchar*)saved.c_str (), saved.size ());
+		std::string b64s (b64);
+		g_free (b64);
+
+		XMLNode* script_node = new XMLNode (X_("Script"));
+		script_node->add_property (X_("lua"), LUA_VERSION);
+		script_node->add_content (b64s);
+		node->add_child_nocopy (*script_node);
+	}
+
 	return *node;
 }
 
@@ -1457,6 +1479,21 @@ Session::set_state (const XMLNode& node, int version)
 
 	if ((child = find_named_node (node, ControlProtocolManager::state_node_name)) != 0) {
 		ControlProtocolManager::instance().set_state (*child, version);
+	}
+
+	if ((child = find_named_node (node, "Script"))) {
+		for (XMLNodeList::const_iterator n = child->children ().begin (); n != child->children ().end (); ++n) {
+			if (!(*n)->is_content ()) { continue; }
+			gsize size;
+			guchar* buf = g_base64_decode ((*n)->content ().c_str (), &size);
+			try {
+				Glib::Threads::Mutex::Lock lm (lua_lock);
+				(*_lua_load)(std::string ((const char*)buf, size));
+			} catch (luabridge::LuaException const& e) {
+				cerr << "LuaException:" << e.what () << endl;
+			}
+			g_free (buf);
+		}
 	}
 
 	update_route_record_state ();
