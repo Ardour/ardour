@@ -177,6 +177,7 @@ ExportFormats=$Shared/export
 Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
 PatchFiles=$Shared/patchfiles
+LuaScripts=$Shared/scripts
 MackieControl=$Shared/mcp
 
 if [ x$PRINT_SYSDEPS != x ] ; then
@@ -209,6 +210,7 @@ mkdir -p $Locale
 mkdir -p $Surfaces
 mkdir -p $MidiMaps
 mkdir -p $PatchFiles
+mkdir -p $LuaScripts
 mkdir -p $MackieControl
 mkdir -p $ExportFormats
 mkdir -p $Panners
@@ -370,6 +372,12 @@ done
 # got to be careful with names here
 for x in $BUILD_ROOT/../patchfiles/*.midnam ; do
     cp "$x" $PatchFiles
+done
+
+# Lua Scripts Files
+# got to be careful with names here
+for x in $BUILD_ROOT/../scripts/*.lua ; do
+    cp "$x" $LuaScripts
 done
 
 # MackieControl data

@@ -223,6 +223,7 @@ children = [
         'midi_maps',
         'mcp',
         'patchfiles',
+        'scripts',
         'headless',
         'session_utils',
         # shared helper binaries (plugin-scanner, exec-wrapper)
