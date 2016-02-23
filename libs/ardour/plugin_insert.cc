@@ -560,7 +560,7 @@ PluginInsert::automation_run (BufferSet& bufs, framepos_t start, pframes_t nfram
 		return;
 	}
 
-	if (!find_next_event (now, end, next_event) || requires_fixed_sized_buffers()) {
+	if (!find_next_event (now, end, next_event) || _plugins.front()->requires_fixed_sized_buffers()) {
 
 		/* no events have a time within the relevant range */
 
