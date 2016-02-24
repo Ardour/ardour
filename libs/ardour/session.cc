@@ -5501,6 +5501,7 @@ Session::unmark_aux_send_id (uint32_t id)
 void
 Session::unmark_return_id (uint32_t id)
 {
+	if (_state_of_the_state & Deletion) { return; }
 	if (id < return_bitset.size()) {
 		return_bitset[id] = false;
 	}
