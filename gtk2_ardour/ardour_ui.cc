@@ -100,6 +100,11 @@
 #include "ardour/audio_unit.h"
 #endif
 
+// fix for OSX (nsm.h has a check function, AU/Apple defines check)
+#ifdef check
+#undef check
+#endif
+
 #include "timecode/time.h"
 
 typedef uint64_t microseconds_t;
