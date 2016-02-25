@@ -48,6 +48,7 @@
 #include "audio_clock.h"
 #include "actions.h"
 #include "main_clock.h"
+#include "mixer_ui.h"
 #include "utils.h"
 #include "theme_manager.h"
 #include "midi_tracer.h"
@@ -163,6 +164,16 @@ ARDOUR_UI::tearoff_settings (const char* name) const
 }
 
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
+
+static
+bool drag_failed (const Glib::RefPtr<Gdk::DragContext>& context, DragResult result, Tabbable* tab)
+{
+	if (result == Gtk::DRAG_RESULT_NO_TARGET) {
+		tab->detach ();
+		return true;
+	}
+	return false;
+}
 
 void
 ARDOUR_UI::setup_transport ()
@@ -383,6 +394,43 @@ ARDOUR_UI::setup_transport ()
 		transport_hbox.pack_start (meter_box, false, false);
 		transport_hbox.pack_start (editor_meter_peak_display, false, false);
 	}
+
+	Gtk::VBox*   window_button_box = manage (new Gtk::VBox);
+
+	editor_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), editor));
+	mixer_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), mixer));
+	prefs_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), rc_option_editor));
+
+	/* catch context clicks so that we can show a menu on these buttons */
+
+	editor_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("editor")), false);
+	mixer_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("mixer")), false);
+	prefs_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("preferences")), false);
+
+	editor_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-editor-visibility")));
+	editor_visibility_button.set_name (X_("page switch button"));
+	mixer_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-mixer-visibility")));
+	mixer_visibility_button.set_name (X_("page switch button"));
+	prefs_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-preferences-visibility")));
+	prefs_visibility_button.set_name (X_("page switch button"));
+
+	Gtkmm2ext::UI::instance()->set_tip (editor_visibility_button,
+	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
+	                                                      "To put the window back, use the Window > %1 > Attach menu action"), editor->name()));
+
+	Gtkmm2ext::UI::instance()->set_tip (mixer_visibility_button,
+	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
+	                                                      "To put the window back, use the Window > %1 > Attach menu action"), mixer->name()));
+
+	Gtkmm2ext::UI::instance()->set_tip (prefs_visibility_button,
+	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
+	                                                      "To put the window back, use the Window > %1 > Attach menu action"), rc_option_editor->name()));
+
+	window_button_box->pack_start (editor_visibility_button, true, false);
+	window_button_box->pack_start (mixer_visibility_button, true, false);
+	window_button_box->pack_start (prefs_visibility_button, true, false);
+
+	transport_hbox.pack_end (*window_button_box, false, false);
 
 	/* desensitize */
 
@@ -638,4 +686,3 @@ ARDOUR_UI::update_title ()
 	}
 
 }
-

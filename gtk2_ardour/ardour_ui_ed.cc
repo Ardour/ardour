@@ -546,16 +546,6 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_action (midi_actions, X_("panic"), _("Panic"), sigc::mem_fun(*this, &ARDOUR_UI::midi_panic));
 }
 
-static
-bool drag_failed (const Glib::RefPtr<Gdk::DragContext>& context, DragResult result, Tabbable* tab)
-{
-	if (result == Gtk::DRAG_RESULT_NO_TARGET) {
-		tab->detach ();
-		return true;
-	}
-	return false;
-}
-
 void
 ARDOUR_UI::build_menu_bar ()
 {
@@ -599,43 +589,6 @@ ARDOUR_UI::build_menu_bar ()
 #else
 	use_menubar_as_top_menubar ();
 #endif
-
-	Gtk::HBox*   window_button_box = manage (new Gtk::HBox);
-
-	editor_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), editor));
-	mixer_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), mixer));
-	prefs_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), rc_option_editor));
-
-	/* catch context clicks so that we can show a menu on these buttons */
-
-	editor_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("editor")), false);
-	mixer_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("mixer")), false);
-	prefs_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("preferences")), false);
-
-	editor_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-editor-visibility")));
-	editor_visibility_button.set_name (X_("page switch button"));
-	mixer_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-mixer-visibility")));
-	mixer_visibility_button.set_name (X_("page switch button"));
-	prefs_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-preferences-visibility")));
-	prefs_visibility_button.set_name (X_("page switch button"));
-
-	Gtkmm2ext::UI::instance()->set_tip (editor_visibility_button,
-	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To put the window back, use the Window > %1 > Attach menu action"), editor->name()));
-
-	Gtkmm2ext::UI::instance()->set_tip (mixer_visibility_button,
-	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To put the window back, use the Window > %1 > Attach menu action"), mixer->name()));
-
-	Gtkmm2ext::UI::instance()->set_tip (prefs_visibility_button,
-	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To put the window back, use the Window > %1 > Attach menu action"), rc_option_editor->name()));
-
-	window_button_box->pack_start (editor_visibility_button, false, false);
-	window_button_box->pack_start (mixer_visibility_button, false, false);
-	window_button_box->pack_start (prefs_visibility_button, false, false);
-
-	menu_hbox.pack_start (*window_button_box, false, false, 20);
 
 	bool wall_clock = false;
 	bool disk_space = false;
