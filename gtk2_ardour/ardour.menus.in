@@ -601,7 +601,7 @@
           <menuitem action='detach-mixer'/>
   </popup>
 
-  <popup action="prefsTabbableButtonMenu">
+  <popup action="preferencesTabbableButtonMenu">
           <menuitem action='show-preferences'/>
           <menuitem action='hide-preferences'/>
           <menuitem action='attach-preferences'/>
