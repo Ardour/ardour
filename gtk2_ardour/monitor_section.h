@@ -174,7 +174,7 @@ class MonitorSection : public RouteUI
 	uint32_t count_processors ();
 
 	void processors_changed (ARDOUR::RouteProcessorChange);
-	Glib::RefPtr<Gtk::ToggleAction> proctoggle;
+	Glib::RefPtr<Gtk::Action> proctoggle;
 	bool _ui_initialized;
 
   private:

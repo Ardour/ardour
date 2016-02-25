@@ -185,9 +185,9 @@ MonitorSection::MonitorSection (Session* s)
 	toggle_processorbox_button.set_name (X_("monitor section processors toggle"));
 	set_tooltip (&toggle_processorbox_button, _("Allow one to add monitor effect processors"));
 
-	proctoggle = ToggleAction::create ();
+	proctoggle = myactions.register_toggle_action (monitor_actions, "toggle-monitor-processor-box", _("Toggle Monitor Section Processor Box"),
+	                                               sigc::mem_fun(*this, &MonitorSection::update_processor_box));
 	toggle_processorbox_button.set_related_action (proctoggle);
-	proctoggle->signal_toggled().connect (sigc::mem_fun(*this, &MonitorSection::update_processor_box), false);
 
 	/* Knobs */
 	Label* solo_boost_label;
@@ -508,7 +508,7 @@ MonitorSection::~MonitorSection ()
 void
 MonitorSection::update_processor_box ()
 {
-	bool show_processor_box = proctoggle->get_active ();
+	bool show_processor_box = Glib::RefPtr<ToggleAction>::cast_dynamic (proctoggle)->get_active ();
 
 	if (count_processors () > 0 && !show_processor_box) {
 		toggle_processorbox_button.set_name (X_("monitor section processors present"));

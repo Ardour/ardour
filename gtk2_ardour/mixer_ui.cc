@@ -437,7 +437,8 @@ Mixer_UI::add_strips (RouteList& routes)
 			strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 		}
 
-	} catch (...) {
+	} catch (const std::exception& e) {
+		error << string_compose (_("Error adding GUI elements for new tracks/busses %1"), e.what()) << endmsg;
 	}
 
 	no_track_list_redisplay = false;
