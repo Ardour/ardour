@@ -374,6 +374,88 @@ ARDOUR_UI::toggle_editor_and_mixer ()
 }
 
 void
+ARDOUR_UI::step_up_through_tabs ()
+{
+	std::vector<Tabbable*> candidates;
+
+	/* this list must match the order of visibility buttons */
+
+	if (!editor->window_visible()) {
+		candidates.push_back (editor);
+	}
+
+	if (!mixer->window_visible()) {
+		candidates.push_back (mixer);
+	}
+
+	if (!rc_option_editor->window_visible()) {
+		candidates.push_back (rc_option_editor);
+	}
+
+	if (candidates.size() < 2) {
+		/* nothing to be done with zero or one visible in tabs */
+		return;
+	}
+
+	std::vector<Tabbable*>::iterator prev = candidates.end();
+	std::vector<Tabbable*>::iterator i;
+	Gtk::Widget* w = _tabs.get_nth_page (_tabs.get_current_page ());
+
+	for (i = candidates.begin(); i != candidates.end(); ++i) {
+		if (w == &(*i)->contents()) {
+			if (prev != candidates.end()) {
+				_tabs.set_current_page (_tabs.page_num ((*prev)->contents()));
+			} else {
+				_tabs.set_current_page (_tabs.page_num (candidates.back()->contents()));
+			}
+			return;
+		}
+		prev = i;
+	}
+}
+
+void
+ARDOUR_UI::step_down_through_tabs ()
+{
+	std::vector<Tabbable*> candidates;
+
+	/* this list must match the order of visibility buttons */
+
+	if (!editor->window_visible()) {
+		candidates.push_back (editor);
+	}
+
+	if (!mixer->window_visible()) {
+		candidates.push_back (mixer);
+	}
+
+	if (!rc_option_editor->window_visible()) {
+		candidates.push_back (rc_option_editor);
+	}
+
+	if (candidates.size() < 2) {
+		/* nothing to be done with zero or one visible in tabs */
+		return;
+	}
+
+	std::vector<Tabbable*>::reverse_iterator next = candidates.rend();
+	std::vector<Tabbable*>::reverse_iterator i;
+	Gtk::Widget* w = _tabs.get_nth_page (_tabs.get_current_page ());
+
+	for (i = candidates.rbegin(); i != candidates.rend(); ++i) {
+		if (w == &(*i)->contents()) {
+			if (next != candidates.rend()) {
+				_tabs.set_current_page (_tabs.page_num ((*next)->contents()));
+			} else {
+				_tabs.set_current_page (_tabs.page_num (candidates.front()->contents()));
+			}
+			break;
+		}
+		next = i;
+	}
+}
+
+void
 ARDOUR_UI::key_change_tabbable_visibility (Tabbable* t)
 {
 	if (!t) {

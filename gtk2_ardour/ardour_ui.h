@@ -853,6 +853,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void load_bindings ();
 	bool tabbable_visibility_button_press (GdkEventButton* ev, std::string const& tabbable_name);
+
+	void step_up_through_tabs ();
+	void step_down_through_tabs ();
 };
 
 #endif /* __ardour_gui_h__ */

@@ -260,6 +260,8 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/Forward|<@TERTIARY@>Right|fast forward
 @markers|Editor/selected-marker-to-next-region-boundary|<@PRIMARY@><@TERTIARY@>Right|move to next region edge
 
+@wvis|Common/next-tab|<@PRIMARY@>Page_Down|next tab
+@wvis|Common/previous-tab|<@PRIMARY@>Page_Up|previous tab
 @vis|Editor/scroll-tracks-down|Page_Down|scroll down (page)
 @vis|Editor/scroll-tracks-up|Page_Up|scroll up (page)
 @trans|Transport/GotoStart|Home|to start marker
