@@ -3343,14 +3343,14 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy tempo mark"));
 		XMLNode &before = map.get_state();
-		map.add_tempo (_marker->tempo(), map.beat_at_frame (_marker->position()), _marker->tempo().type());
+		map.add_tempo (_marker->tempo(), _real_section->beat(), _marker->tempo().type());
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command (new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 
 	} else {
 		/* we removed it before, so add it back now */
-		map.replace_tempo (*_real_section, _marker->tempo().beats_per_minute() , map.beat_at_frame (_marker->position()), _marker->tempo().type());
+		map.replace_tempo (*_real_section, _marker->tempo().beats_per_minute() , _real_section->beat(), _marker->tempo().type());
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command (new MementoCommand<TempoMap>(map, before_state, &after));
 		_editor->commit_reversible_command ();

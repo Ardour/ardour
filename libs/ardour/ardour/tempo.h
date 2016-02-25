@@ -165,9 +165,9 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	};
 
 	TempoSection (const double& beat, double qpm, double note_type, Type tempo_type)
-		: MetricSection (beat), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type)  {}
+		: MetricSection (beat), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type), _c_func (0.0)  {}
 	TempoSection (framepos_t frame, double qpm, double note_type, Type tempo_type)
-		: MetricSection (frame), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type) {}
+		: MetricSection (frame), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type), _c_func (0.0) {}
 	TempoSection (const XMLNode&);
 
 	static const std::string xml_state_node_name;
@@ -181,14 +181,20 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	void set_type (Type type);
 	Type type () const { return _type; }
 
-	double tempo_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
-	framepos_t frame_at_tempo (double tempo, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+	double tempo_at_frame (framepos_t frame, framecnt_t frame_rate) const;
+	framepos_t frame_at_tempo (double tempo, framecnt_t frame_rate) const;
 
-	double tick_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
-	framepos_t frame_at_tick (double tick, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+	double tick_at_frame (framepos_t frame, framecnt_t frame_rate) const;
+	framepos_t frame_at_tick (double tick, framecnt_t frame_rate) const;
 
-	double beat_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
-	framepos_t frame_at_beat (double beat, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+	double beat_at_frame (framepos_t frame, framecnt_t frame_rate) const;
+	framepos_t frame_at_beat (double beat, framecnt_t frame_rate) const;
+
+	framecnt_t ramp_duration_from_tempo_and_beat (double end_tpm, double end_beat, framecnt_t frame_rate);
+
+	double compute_c_func (double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+	double get_c_func () const { return _c_func; }
+	void set_c_func (double c_func) { _c_func = c_func; }
 
 	Timecode::BBT_Time legacy_bbt () { return _legacy_bbt; }
 
@@ -201,17 +207,17 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	 * 'tick tempo' in ticks per minute and tempo in bpm.
 	 *  time relative to section start.
 	 */
-	double c_func (double end_tpm, double end_time) const;
 	double a_func (double end_tpm, double c_func) const;
+	double c_func (double end_tpm, double end_time) const;
 
-	double tick_tempo_at_time (double time, double end_tpm, double end_time) const;
-	double time_at_tick_tempo (double tick_tempo, double end_tpm, double end_time) const;
+	double tick_tempo_at_time (double time) const;
+	double time_at_tick_tempo (double tick_tempo) const;
 
-	double tick_at_time (double time, double end_tpm, double end_time) const;
-	double time_at_tick (double tick, double end_tpm, double end_time) const;
+	double tick_at_time (double time) const;
+	double time_at_tick (double tick) const;
 
-	double beat_at_time (double time, double end_tpm, double end_time) const;
-	double time_at_beat (double beat, double end_tpm, double end_time) const;
+	double beat_at_time (double time) const;
+	double time_at_beat (double beat) const;
 
 	/* this value provides a fractional offset into the bar in which
 	   the tempo section is located in. A value of 0.0 indicates that
@@ -223,6 +229,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	*/
 	double _bar_offset;
 	Type _type;
+	double _c_func;
 	Timecode::BBT_Time _legacy_bbt;
 };
 

@@ -106,7 +106,6 @@ TempoSection::TempoSection (const XMLNode& node)
 		error << _("TempoSection XML node has no \"beat\" property") << endmsg;
 	}
 
-
 	if ((prop = node.property ("beats-per-minute")) == 0) {
 		error << _("TempoSection XML node has no \"beats-per-minute\" property") << endmsg;
 		throw failed_constructor();
@@ -191,27 +190,27 @@ TempoSection::set_type (Type type)
 /** returns the tempo at the zero-based (relative to tempo section) frame.
 */
 double
-TempoSection::tempo_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+TempoSection::tempo_at_frame (framepos_t frame, framecnt_t frame_rate) const
 {
 
 	if (_type == Constant) {
 		return beats_per_minute();
 	}
 
-	return tick_tempo_at_time (frame_to_minute (frame, frame_rate), end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate)) / BBT_Time::ticks_per_beat;
+	return tick_tempo_at_time (frame_to_minute (frame, frame_rate)) / BBT_Time::ticks_per_beat;
 }
 
 /** returns the zero-based frame (relative to tempo section)
    where the tempo occurs.
 */
 framepos_t
-TempoSection::frame_at_tempo (double tempo, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+TempoSection::frame_at_tempo (double bpm, framecnt_t frame_rate) const
 {
 	if (_type == Constant) {
 		return 0;
 	}
 
-	return minute_to_frame (time_at_tick_tempo (tempo *  BBT_Time::ticks_per_beat,  end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate)), frame_rate);
+	return minute_to_frame (time_at_tick_tempo (bpm *  BBT_Time::ticks_per_beat), frame_rate);
 }
 
 /** returns the zero-based tick (relative to tempo section)
@@ -219,13 +218,13 @@ TempoSection::frame_at_tempo (double tempo, double end_bpm, framepos_t end_frame
    lies.
 */
 double
-TempoSection::tick_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+TempoSection::tick_at_frame (framepos_t frame, framecnt_t frame_rate) const
 {
 	if (_type == Constant) {
 		return (frame / frames_per_beat (frame_rate)) * BBT_Time::ticks_per_beat;
 	}
 
-	return tick_at_time (frame_to_minute (frame, frame_rate), end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate));
+	return tick_at_time (frame_to_minute (frame, frame_rate));
 }
 
 /** returns the zero-based frame (relative to tempo section)
@@ -233,13 +232,13 @@ TempoSection::tick_at_frame (framepos_t frame, double end_bpm, framepos_t end_fr
    falls.
 */
 framepos_t
-TempoSection::frame_at_tick (double tick, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+TempoSection::frame_at_tick (double tick, framecnt_t frame_rate) const
 {
 	if (_type == Constant) {
 		return (framepos_t) floor ((tick  / BBT_Time::ticks_per_beat) * frames_per_beat (frame_rate));
 	}
 
-	return minute_to_frame (time_at_tick (tick, end_bpm *  BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate)), frame_rate);
+	return minute_to_frame (time_at_tick (tick), frame_rate);
 }
 
 /** returns the zero-based beat (relative to tempo section)
@@ -247,9 +246,9 @@ TempoSection::frame_at_tick (double tick, double end_bpm, framepos_t end_frame, 
    lies.
 */
 double
-TempoSection::beat_at_frame (framepos_t frame, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+TempoSection::beat_at_frame (framepos_t frame, framecnt_t frame_rate) const
 {
-	return tick_at_frame (frame, end_bpm, end_frame, frame_rate) / BBT_Time::ticks_per_beat;
+	return tick_at_frame (frame, frame_rate) / BBT_Time::ticks_per_beat;
 }
 
 /** returns the zero-based frame (relative to tempo section start frame)
@@ -258,15 +257,80 @@ TempoSection::beat_at_frame (framepos_t frame, double end_bpm, framepos_t end_fr
 */
 
 framepos_t
-TempoSection::frame_at_beat (double beat, double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+TempoSection::frame_at_beat (double beat, framecnt_t frame_rate) const
 {
-	return frame_at_tick (beat * BBT_Time::ticks_per_beat, end_bpm, end_frame, frame_rate);
+	return frame_at_tick (beat * BBT_Time::ticks_per_beat, frame_rate);
+}
+/*
+Ramp Overview
+
+
+Tempo |                   *
+Tt----|-----------------*|
+Ta----|--------------|*  |
+      |            * |   |
+      |         *    |   |
+      |     *        |   |
+T0----|*             |   |
+      |              |   |
+      _______________|___|_____
+      time           a   t (next tempo)
+      [        c         ] defines c
+
+Duration in beats at time a is the integral of some Tempo function.
+In our case, the Tempo function (Tempo at time t) is
+T(t) = T0(e^(ct))
+
+where c is the function constant:
+c = log(Ta/T0)/a
+and
+a = log(Ta/T0)/c
+
+We define c for a tempo ramp by placing a new tempo at some distance t away from our existing one.
+
+Given the function constant, the beat function (duration in beats at some time t) is:
+b(t) = T0(e^(ct) - 1) / c
+
+To find the time t at any beat b on the curve, we use the inverse function of the beat function:
+t(b) = log((cb / T0) + 1) / c
+
+When we add or move the next tempo section, we change the function constant. We take advantage of t being equal to a here.
+The problem is that we usually don't know t.
+We do know the beat duration until the next tempo section.
+Substituting t = a into the beat function allows us to find a in terms of beat duration b and the two relevant tempos:
+a = b log (Ta / T0) / (T0 (e^(log (Ta / T0)) - 1))
+
+We then use a to set the function constant c (above).
+
+Most of this stuff is taken from this paper:
+WHERE’S THE BEAT?
+TOOLS FOR DYNAMIC TEMPO CALCULATIONS
+Jan C. Schacher
+Martin Neukom
+
+https://www.zhdk.ch/fileadmin/data_subsites/data_icst/Downloads/Timegrid/ICST_Tempopolyphony_ICMC07.pdf
+
+*/
+
+/* compute the duration of this tempo section givan the end tempo and duration in beats of some later tempo section*/
+framecnt_t
+TempoSection::ramp_duration_from_tempo_and_beat (double end_bpm, double end_beat, framecnt_t frame_rate)
+{
+	double const log_tempo_ratio = log ((end_bpm * BBT_Time::ticks_per_beat) / ticks_per_minute());
+	return minute_to_frame (((end_beat * BBT_Time::ticks_per_beat) * log_tempo_ratio) / (ticks_per_minute() * (exp (log_tempo_ratio) - 1)), frame_rate);
+}
+
+/* compute the function constant from some later tempo section, given tempo (beats/min.) and distance (in frames) from this tempo section */
+double
+TempoSection::compute_c_func (double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const
+{
+	return c_func (end_bpm * BBT_Time::ticks_per_beat, frame_to_minute (end_frame, frame_rate));
 }
 
 framecnt_t
 TempoSection::minute_to_frame (double time, framecnt_t frame_rate) const
 {
-	return time * 60.0 * frame_rate;
+	return (framecnt_t) floor ((time * 60.0 * frame_rate) + 0.5);
 }
 
 double
@@ -291,44 +355,44 @@ TempoSection::c_func (double end_tpm, double end_time) const
 
 /* tempo in tpm at time in minutes */
 double
-TempoSection::tick_tempo_at_time (double time, double end_tpm, double end_time) const
+TempoSection::tick_tempo_at_time (double time) const
 {
-	return exp (c_func (end_tpm, end_time) * time) * ticks_per_minute();
+	return exp (_c_func * time) * ticks_per_minute();
 }
 
 /* time in minutes at tempo in tpm */
 double
-TempoSection::time_at_tick_tempo (double tick_tempo, double end_tpm, double end_time) const
+TempoSection::time_at_tick_tempo (double tick_tempo) const
 {
-	return log (tick_tempo / ticks_per_minute()) / c_func (end_tpm, end_time);
+	return log (tick_tempo / ticks_per_minute()) / _c_func;
 }
 
 /* tick at time in minutes */
 double
-TempoSection::tick_at_time (double time, double end_tpm, double end_time) const
+TempoSection::tick_at_time (double time) const
 {
-	return ((exp (c_func (end_tpm, end_time) * time)) - 1) * ticks_per_minute() / c_func (end_tpm, end_time);
+	return ((exp (_c_func * time)) - 1) * ticks_per_minute() / _c_func;
 }
 
 /* time in minutes at tick */
 double
-TempoSection::time_at_tick (double tick, double end_tpm, double end_time) const
+TempoSection::time_at_tick (double tick) const
 {
-	return log (((c_func (end_tpm, end_time) * tick) / ticks_per_minute()) + 1) / c_func (end_tpm, end_time);
+	return log (((_c_func * tick) / ticks_per_minute()) + 1) / _c_func;
 }
 
 /* beat at time in minutes */
 double
-TempoSection::beat_at_time (double time, double end_tpm, double end_time) const
+TempoSection::beat_at_time (double time) const
 {
-	return tick_at_time (time, end_tpm, end_time) / BBT_Time::ticks_per_beat;
+	return tick_at_time (time) / BBT_Time::ticks_per_beat;
 }
 
 /* time in munutes at beat */
 double
-TempoSection::time_at_beat (double beat, double end_tpm, double end_time) const
+TempoSection::time_at_beat (double beat) const
 {
-	return time_at_tick (beat * BBT_Time::ticks_per_beat, end_tpm, end_time);
+	return time_at_tick (beat * BBT_Time::ticks_per_beat);
 }
 
 void
@@ -707,7 +771,6 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const doubl
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		TempoSection& first (first_tempo());
-
 		if (ts.beat() != first.beat()) {
 			remove_tempo_locked (ts);
 			add_tempo_locked (tempo, where, true, type);
@@ -740,7 +803,6 @@ TempoMap::gui_set_tempo_frame (TempoSection& ts, framepos_t frame, double  beat_
 		} else {
 			/*AudioTime*/
 			ts.set_frame (frame);
-
 			MetricSectionFrameSorter fcmp;
 			metrics.sort (fcmp);
 
@@ -772,8 +834,10 @@ TempoMap::gui_set_tempo_frame (TempoSection& ts, framepos_t frame, double  beat_
 			}
 
 			if (prev_ts) {
-				/* set the start beat */
-				double beats_to_ts = prev_ts->beat_at_frame (frame - prev_ts->frame(), ts.beats_per_minute(), frame - prev_ts->frame(), _frame_rate);
+				/* set the start beat - we need to reset the function constant before beat calculations make sense*/
+				prev_ts->set_c_func (prev_ts->compute_c_func (ts.beats_per_minute(), frame - prev_ts->frame(), _frame_rate));
+
+				double beats_to_ts = prev_ts->beat_at_frame (frame - prev_ts->frame(), _frame_rate);
 				double beats = beats_to_ts + prev_ts->beat();
 
 				if (next_ts) {
@@ -791,6 +855,8 @@ TempoMap::gui_set_tempo_frame (TempoSection& ts, framepos_t frame, double  beat_
 					}
 				} else {
 					ts.set_beat (beats);
+					ts.set_c_func (0.0);
+
 				}
 				MetricSectionSorter cmp;
 				metrics.sort (cmp);
@@ -1058,31 +1124,17 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 
 			if (prev_ts) {
-				double const beats_relative_to_prev_ts = t->beat() - prev_ts->beat();
-				double const ticks_relative_to_prev_ts = beats_relative_to_prev_ts * BBT_Time::ticks_per_beat;
+				double const ticks_relative_to_prev = (t->beat() - prev_ts->beat()) * BBT_Time::ticks_per_beat;
 
-				/* assume (falsely) that the target tempo is constant */
-				double const t_fpb = t->frames_per_beat (_frame_rate);
-				double const av_fpb = (prev_ts->frames_per_beat (_frame_rate) + t_fpb) / 2.0;
-				/* this walk shouldn't be needed as given c, time a = log (Ta / T0) / c. what to do? */
-				double length_estimate = beats_relative_to_prev_ts * av_fpb;
-
-				if (prev_ts->type() == TempoSection::Constant) {
-					length_estimate = beats_relative_to_prev_ts * prev_ts->frames_per_beat (_frame_rate);
+				framecnt_t duration;
+				if (prev_ts->type() == TempoSection::Ramp) {
+					duration = prev_ts->ramp_duration_from_tempo_and_beat (t->beats_per_minute(), t->beat() - prev_ts->beat(), _frame_rate);
+				} else {
+					duration = (framecnt_t) floor (ticks_relative_to_prev * prev_ts->frames_per_beat (_frame_rate) * BBT_Time::ticks_per_beat);
 				}
 
-				double const system_precision_at_target_tempo = (_frame_rate / t->ticks_per_minute()) * 1.5;
-				double tick_error = system_precision_at_target_tempo + 1.0; // sorry for the wtf
-
-				while (fabs (tick_error) > system_precision_at_target_tempo) {
-
-					double const actual_ticks = prev_ts->tick_at_frame (length_estimate, t->beats_per_minute(),
-											    (framepos_t) length_estimate, _frame_rate);
-					tick_error = ticks_relative_to_prev_ts - actual_ticks;
-					length_estimate += tick_error * (t->ticks_per_minute() / _frame_rate);
-				}
-
-				t->set_frame (length_estimate + prev_ts->frame());
+				prev_ts->set_c_func (prev_ts->compute_c_func (t->beats_per_minute(), duration, _frame_rate));
+				t->set_frame (duration + prev_ts->frame());
 			}
 			prev_ts = t;
 		}
@@ -1298,10 +1350,8 @@ TempoMap::tick_at_frame (framecnt_t frame) const
 				/*the previous ts is the one containing the frame */
 
 				framepos_t const time = frame - prev_ts->frame();
-				framepos_t const last_frame = t->frame() - prev_ts->frame();
-				double const last_beats_per_minute = t->beats_per_minute();
 
-				return prev_ts->tick_at_frame (time, last_beats_per_minute, last_frame, _frame_rate) + accumulated_ticks;
+				return prev_ts->tick_at_frame (time, _frame_rate) + accumulated_ticks;
 			}
 
 			if (prev_ts && t->frame() > prev_ts->frame()) {
@@ -1343,10 +1393,8 @@ TempoMap::frame_at_tick (double tick) const
 				/* prev_ts is the one affecting us. */
 
 				double const ticks_in_section = tick - accumulated_ticks_to_prev;
-				framepos_t const last_time = t->frame() - prev_ts->frame();
-				double const last_beats_per_minute = t->beats_per_minute();
 
-				return prev_ts->frame_at_tick (ticks_in_section, last_beats_per_minute, last_time, _frame_rate) + prev_ts->frame();
+				return prev_ts->frame_at_tick (ticks_in_section, _frame_rate) + prev_ts->frame();
 			}
 			accumulated_ticks_to_prev = accumulated_ticks;
 			prev_ts = t;
@@ -1420,14 +1468,10 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 		}
 	}
 	if (first && second) {
-		framepos_t const last_time = second->frame() - first->frame();
-		double const last_beats_per_minute = second->beats_per_minute();
-
 		framepos_t const time = pos - first->frame();
-		double const tick_at_time = first->tick_at_frame (time, last_beats_per_minute, last_time, _frame_rate);
+		double const tick_at_time = first->tick_at_frame (time, _frame_rate);
 		double const bbt_ticks = bbt.ticks + (bbt.beats * BBT_Time::ticks_per_beat);
-
-		double const time_at_bbt = first->frame_at_tick (tick_at_time + bbt_ticks, last_beats_per_minute, last_time, _frame_rate);
+		double const time_at_bbt = first->frame_at_tick (tick_at_time + bbt_ticks, _frame_rate);
 
 		return time_at_bbt - time;
 	}
@@ -1670,7 +1714,7 @@ TempoMap::frames_per_beat_at (framepos_t frame, framecnt_t sr) const
 	}
 
 	if (ts_after) {
-		return  (60.0 * _frame_rate) / (ts_at->tempo_at_frame (frame - ts_at->frame(), ts_after->beats_per_minute(), ts_after->frame(), _frame_rate));
+		return  (60.0 * _frame_rate) / (ts_at->tempo_at_frame (frame - ts_at->frame(), _frame_rate));
 	}
 	/* must be treated as constant tempo */
 	return ts_at->frames_per_beat (_frame_rate);
@@ -1692,9 +1736,7 @@ TempoMap::tempo_at (framepos_t frame) const
 			if ((prev_ts) && t->frame() > frame) {
 				/* this is the one past frame */
 				framepos_t const time = frame - prev_ts->frame();
-				framepos_t const last_time = t->frame() - prev_ts->frame();
-				double const last_beats_per_minute = t->beats_per_minute();
-				double const ret = prev_ts->tempo_at_frame (time, last_beats_per_minute, last_time, _frame_rate);
+				double const ret = prev_ts->tempo_at_frame (time, _frame_rate);
 				Tempo const ret_tempo (ret, m.tempo().note_type ());
 				return ret_tempo;
 			}
@@ -2191,7 +2233,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 				}
 
 				if (next_tempo) {
-					pos += tempo->frame_at_beat (bars * meter->divisions_per_bar(), next_tempo->beats_per_minute(), next_tempo->frame(), _frame_rate);
+					pos += tempo->frame_at_beat (bars * meter->divisions_per_bar(), _frame_rate);
 				} else {
 					pos += llrint (frames_per_beat * (bars * meter->divisions_per_bar()));
 				}
@@ -2211,7 +2253,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 	}
 
 	if (next_tempo) {
-		pos += tempo->frame_at_beat (bars * meter->divisions_per_bar(), next_tempo->beats_per_minute(), next_tempo->frame(), _frame_rate);
+		pos += tempo->frame_at_beat (bars * meter->divisions_per_bar(), _frame_rate);
 	} else {
 		pos += llrint (frames_per_beat * (bars * meter->divisions_per_bar()));
 	}
@@ -2243,7 +2285,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 				}
 
 				if (next_tempo) {
-					pos += tempo->frame_at_beat (beats, next_tempo->beats_per_minute(), next_tempo->frame(), _frame_rate);
+					pos += tempo->frame_at_beat (beats, _frame_rate);
 				} else {
 					pos += llrint (beats * frames_per_beat);
 				}
@@ -2262,13 +2304,13 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 	}
 
 	if (next_tempo) {
-		pos += tempo->frame_at_beat (beats, next_tempo->beats_per_minute(), next_tempo->frame(), _frame_rate);
+		pos += tempo->frame_at_beat (beats, _frame_rate);
 	} else {
 		pos += llrint (beats * frames_per_beat);
 	}
 
 	if (op.ticks) {
-		pos += tempo->frame_at_tick (op.ticks, next_tempo->beats_per_minute(), next_tempo->frame(), _frame_rate);
+		pos += tempo->frame_at_tick (op.ticks, _frame_rate);
 	}
 
 	return pos;
