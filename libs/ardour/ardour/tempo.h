@@ -190,8 +190,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	double beat_at_frame (framepos_t frame, framecnt_t frame_rate) const;
 	framepos_t frame_at_beat (double beat, framecnt_t frame_rate) const;
 
-	framecnt_t ramp_duration_from_tempo_and_beat (double end_tpm, double end_beat, framecnt_t frame_rate);
-
+	void set_c_func_from_tempo_and_beat (double end_bpm, double end_beat, framecnt_t frame_rate);
 	double compute_c_func (double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
 	double get_c_func () const { return _c_func; }
 	void set_c_func (double c_func) { _c_func = c_func; }

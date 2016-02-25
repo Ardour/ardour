@@ -264,7 +264,7 @@ TempoSection::frame_at_beat (double beat, framecnt_t frame_rate) const
 /*
 Ramp Overview
 
-
+      |                     *
 Tempo |                   *
 Tt----|-----------------*|
 Ta----|--------------|*  |
@@ -272,7 +272,7 @@ Ta----|--------------|*  |
       |         *    |   |
       |     *        |   |
 T0----|*             |   |
-      |              |   |
+  *   |              |   |
       _______________|___|_____
       time           a   t (next tempo)
       [        c         ] defines c
@@ -286,21 +286,21 @@ c = log(Ta/T0)/a
 and
 a = log(Ta/T0)/c
 
-We define c for a tempo ramp by placing a new tempo at some distance t away from our existing one.
-
-Given the function constant, the beat function (duration in beats at some time t) is:
+Given the function constant, the integral of the Tempo function (the beat function, which is the duration in beats at some time t) is:
 b(t) = T0(e^(ct) - 1) / c
 
-To find the time t at any beat b on the curve, we use the inverse function of the beat function:
+To find the time t at any beat b, we use the inverse function of the beat function (the time function) which can be shown to be :
 t(b) = log((cb / T0) + 1) / c
 
-When we add or move the next tempo section, we change the function constant. We take advantage of t being equal to a here.
+We define c for a tempo ramp by placing a new tempo at some distance t away from our existing one.
 The problem is that we usually don't know t.
-We do know the beat duration until the next tempo section.
-Substituting t = a into the beat function allows us to find a in terms of beat duration b and the two relevant tempos:
+We do know the duration in beats where the next tempo section lies.
+Where t = a (when we define c), we can solve a in terms of beat duration b and the two relevant tempos using the beat function:
 a = b log (Ta / T0) / (T0 (e^(log (Ta / T0)) - 1))
 
 We then use a to set the function constant c (above).
+Solving a and setting c in one operation allows us to further reduce the problem to:
+c = T0 (e^(log (Ta / T0)) - 1) / b
 
 Most of this stuff is taken from this paper:
 WHERE’S THE BEAT?
@@ -312,12 +312,12 @@ https://www.zhdk.ch/fileadmin/data_subsites/data_icst/Downloads/Timegrid/ICST_Te
 
 */
 
-/* compute the duration of this tempo section givan the end tempo and duration in beats of some later tempo section*/
-framecnt_t
-TempoSection::ramp_duration_from_tempo_and_beat (double end_bpm, double end_beat, framecnt_t frame_rate)
+/* set this ramp's function constant using the end tempo and duration in beats of some later tempo section*/
+void
+TempoSection::set_c_func_from_tempo_and_beat (double end_bpm, double end_beat, framecnt_t frame_rate)
 {
 	double const log_tempo_ratio = log ((end_bpm * BBT_Time::ticks_per_beat) / ticks_per_minute());
-	return minute_to_frame (((end_beat * BBT_Time::ticks_per_beat) * log_tempo_ratio) / (ticks_per_minute() * (exp (log_tempo_ratio) - 1)), frame_rate);
+	_c_func = ticks_per_minute() *  (exp (log_tempo_ratio) - 1) / (end_beat * BBT_Time::ticks_per_beat);
 }
 
 /* compute the function constant from some later tempo section, given tempo (beats/min.) and distance (in frames) from this tempo section */
@@ -1124,17 +1124,16 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 
 			if (prev_ts) {
-				double const ticks_relative_to_prev = (t->beat() - prev_ts->beat()) * BBT_Time::ticks_per_beat;
-
-				framecnt_t duration;
 				if (prev_ts->type() == TempoSection::Ramp) {
-					duration = prev_ts->ramp_duration_from_tempo_and_beat (t->beats_per_minute(), t->beat() - prev_ts->beat(), _frame_rate);
+					prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat() - prev_ts->beat(), _frame_rate);
+					t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), _frame_rate) + prev_ts->frame());
 				} else {
-					duration = (framecnt_t) floor (ticks_relative_to_prev * prev_ts->frames_per_beat (_frame_rate) * BBT_Time::ticks_per_beat);
+					double const ticks_relative_to_prev = (t->beat() - prev_ts->beat()) * BBT_Time::ticks_per_beat;
+					framecnt_t const duration = (framecnt_t) floor (ticks_relative_to_prev * prev_ts->frames_per_beat (_frame_rate)
+											 * BBT_Time::ticks_per_beat);
+					prev_ts->set_c_func (0.0);
+					t->set_frame (duration + prev_ts->frame());
 				}
-
-				prev_ts->set_c_func (prev_ts->compute_c_func (t->beats_per_minute(), duration, _frame_rate));
-				t->set_frame (duration + prev_ts->frame());
 			}
 			prev_ts = t;
 		}
@@ -1144,7 +1143,7 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	MeterSection* meter = 0;
 
 	for (mi = metrics.begin(); mi != metrics.end(); ++mi) {
-		/* we can do this beacuse we have the tempo section frames set */
+		/* We now have the tempo map set. use it to set meter positions.*/
 		if ((meter = dynamic_cast<MeterSection*> (*mi)) != 0) {
 			meter->set_frame (frame_at_tick (meter->beat() * BBT_Time::ticks_per_beat));
 		}
