@@ -186,7 +186,6 @@ MonitorSection::MonitorSection (Session* s)
 	set_tooltip (&toggle_processorbox_button, _("Allow one to add monitor effect processors"));
 
 	proctoggle = ActionManager::get_action (X_("Monitor"), X_("toggle-monitor-processor-box"));
-	assert(proctoggle);
 	toggle_processorbox_button.set_related_action (proctoggle);
 
 	/* Knobs */
@@ -911,7 +910,7 @@ MonitorSection::register_actions ()
 	myactions.register_radio_action (solo_actions, solo_group, "solo-use-pfl", _("Pre Fade Listen (PFL) solo"),
 			sigc::mem_fun (*this, &MonitorSection::solo_use_pfl));
 
-	proctoggle = myactions.register_toggle_action (monitor_actions, "toggle-monitor-processor-box", _("Toggle Monitor Section Processor Box"),
+	myactions.register_toggle_action (monitor_actions, "toggle-monitor-processor-box", _("Toggle Monitor Section Processor Box"),
 			sigc::mem_fun(*this, &MonitorSection::update_processor_box));
 }
 
