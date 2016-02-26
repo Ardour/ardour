@@ -432,6 +432,8 @@ Mixer_UI::add_strips (RouteList& routes)
 		}
 
 	} catch (const std::exception& e) {
+		// this should never happen as it leaks memory and leaves connections established
+		assert(false);
 		error << string_compose (_("Error adding GUI elements for new tracks/busses %1"), e.what()) << endmsg;
 	}
 
