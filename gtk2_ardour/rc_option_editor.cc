@@ -2902,11 +2902,6 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_name_highlight)
 		     ));
 
-#ifndef __APPLE__
-	/* font scaling does nothing with GDK/Quartz */
-	add_option (S_("Preferences|GUI"), new FontScalingOptions ());
-#endif
-
 	add_option (S_("Preferences|GUI"),
 		    new BoolOption (
 			    "super-rapid-clock-update",
@@ -2916,7 +2911,7 @@ if (!Profile->get_mixbus()) {
 			    ));
 
 
-#ifndef GTKOSX
+#ifndef __APPLE__
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (S_("Preferences|GUI"), new FontScalingOptions ());
 #endif
