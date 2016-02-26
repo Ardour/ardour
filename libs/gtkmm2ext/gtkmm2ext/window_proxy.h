@@ -87,6 +87,7 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
 
 	void save_pos_and_size ();
 	void set_pos_and_size ();
+	void set_pos ();
 
 	virtual bool delete_event_handler (GdkEventAny *ev);
 

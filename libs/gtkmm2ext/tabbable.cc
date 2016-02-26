@@ -197,6 +197,7 @@ void
 Tabbable::make_visible ()
 {
 	if (_window && (current_toplevel() == _window)) {
+		set_pos ();
 		_window->present ();
 	} else {
 

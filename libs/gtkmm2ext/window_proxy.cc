@@ -333,7 +333,7 @@ WindowProxy::set_pos_and_size ()
 	}
 
 	if (_width != -1 && _height != -1) {
-		_window->set_default_size (_width, _height);
+		_window->resize (_width, _height);
 	}
 
 	if (_x_off != -1 && _y_off != -1) {
@@ -341,3 +341,19 @@ WindowProxy::set_pos_and_size ()
 	}
 }
 
+void
+WindowProxy::set_pos ()
+{
+	if (!_window) {
+		return;
+	}
+
+	if (_width != -1 || _height != -1 || _x_off != -1 || _y_off != -1) {
+		/* cancel any mouse-based positioning */
+		_window->set_position (Gtk::WIN_POS_NONE);
+	}
+
+	if (_x_off != -1 && _y_off != -1) {
+		_window->move (_x_off, _y_off);
+	}
+}
