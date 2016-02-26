@@ -374,11 +374,18 @@ Bindings::activate (KeyboardKey kb, Operation op)
                 break;
         }
 
-        KeybindingMap::iterator k = kbm->find (kb);
+        /* if shift was pressed, GDK will send us (e.g) 'E' rather than 'e'.
+           Our bindings all use the lower case character/keyname, so switch
+           to the lower case before doing the lookup.
+        */
+
+        KeyboardKey unshifted (kb.state(), gdk_keyval_to_lower (kb.key()));
+
+        KeybindingMap::iterator k = kbm->find (unshifted);
 
         if (k == kbm->end()) {
                 /* no entry for this key in the state map */
-	        DEBUG_TRACE (DEBUG::Bindings, string_compose ("no binding for %1\n", kb));
+	        DEBUG_TRACE (DEBUG::Bindings, string_compose ("no binding for %1\n", unshifted));
 	        return false;
         }
 
@@ -394,7 +401,7 @@ Bindings::activate (KeyboardKey kb, Operation op)
 
         if (action) {
 	        /* lets do it ... */
-	        DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2\n", kb, k->second.action_name));
+	        DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2\n", unshifted, k->second.action_name));
 	        action->activate ();
         }
 
@@ -478,7 +485,7 @@ Bindings::push_to_gtk (KeyboardKey kb, RefPtr<Action> what)
 	         */
 
 	        Gtk::AccelMap::add_entry (what->get_accel_path(), kb.key(), (Gdk::ModifierType) kb.state());
-        } 
+        }
 }
 
 bool
