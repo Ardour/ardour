@@ -298,7 +298,7 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/numpad-decimal|KP_Decimal|numpad decimal should initiate and finalize a locate-to-marker
 @trans|Transport/alternate-numpad-decimal|KP_Separator|(some keybd layouts have separator instead of decimal)
 
-@transTransport/numpad-0|KP_0|some text
+@trans|Transport/numpad-0|KP_0|some text
 @-trans|Transport/numpad-1|KP_1|some text
 @-trans|Transport/numpad-2|KP_2|some text
 @-trans|Transport/numpad-3|KP_3|some text
