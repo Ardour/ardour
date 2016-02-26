@@ -261,6 +261,7 @@ TempoSection::frame_at_beat (double beat, framecnt_t frame_rate) const
 {
 	return frame_at_tick (beat * BBT_Time::ticks_per_beat, frame_rate);
 }
+
 /*
 Ramp Overview
 
@@ -273,7 +274,7 @@ Ta----|--------------|*  |
       |     *        |   |
 T0----|*             |   |
   *   |              |   |
-      _______________|___|_____
+      _______________|___|____
       time           a   t (next tempo)
       [        c         ] defines c
 
@@ -281,32 +282,42 @@ Duration in beats at time a is the integral of some Tempo function.
 In our case, the Tempo function (Tempo at time t) is
 T(t) = T0(e^(ct))
 
-where c is the function constant:
+where c is the function constant
 c = log(Ta/T0)/a
-and
+so
 a = log(Ta/T0)/c
 
-Given the function constant, the integral of the Tempo function (the beat function, which is the duration in beats at some time t) is:
+The integral over t of our Tempo function (the beat function, which is the duration in beats at some time t) is:
 b(t) = T0(e^(ct) - 1) / c
 
-To find the time t at any beat b, we use the inverse function of the beat function (the time function) which can be shown to be :
+To find the time t at beat duration b, we use the inverse function of the beat function (the time function) which can be shown to be:
 t(b) = log((cb / T0) + 1) / c
 
-We define c for a tempo ramp by placing a new tempo at some distance t away from our existing one.
-The problem is that we usually don't know t.
-We do know the duration in beats where the next tempo section lies.
-Where t = a (when we define c), we can solve a in terms of beat duration b and the two relevant tempos using the beat function:
-a = b log (Ta / T0) / (T0 (e^(log (Ta / T0)) - 1))
+The time t at which Tempo T occurs is a as above:
+t(T) = log(T / T0) / c
 
-We then use a to set the function constant c (above).
-Solving a and setting c in one operation allows us to further reduce the problem to:
+We define c for this tempo ramp by placing a new tempo section at some time t after this one.
+Our problem is that we usually don't know t.
+We usually do know the duration in beats between this and the next tempo section.
+Where t = a (i.e. when a is equal to the time of the next tempo section), we can solve t in terms of
+beat duration and our two tempos.
+A bit of scribbling with the beat function gives us:
+t = b log (Ta / T0) / (T0 (e^(log (Ta / T0)) - 1))
+
+By substituting our expanded t as a in the c function above, we see that our problem is reduced to:
 c = T0 (e^(log (Ta / T0)) - 1) / b
 
+We can now evaluate and store c for use in beat, time and tempo calculations until the following tempo section
+(the one that defines c in conjunction with this one) is changed or moved.
+
 Most of this stuff is taken from this paper:
+
 WHERE’S THE BEAT?
 TOOLS FOR DYNAMIC TEMPO CALCULATIONS
 Jan C. Schacher
 Martin Neukom
+Zurich University of Arts
+Institute for Computer Music and Sound Technology
 
 https://www.zhdk.ch/fileadmin/data_subsites/data_icst/Downloads/Timegrid/ICST_Tempopolyphony_ICMC07.pdf
 
