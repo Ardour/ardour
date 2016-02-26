@@ -912,6 +912,7 @@ PortAudioBackend::freewheel_process_thread()
 				_reinit_thread_callback = true; // hand over _main_thread
 				_freewheel_ack = false; // prepare next handshake
 				_midiio->set_enabled(true);
+				engine.freewheel_callback (_freewheeling);
 			} else {
 				first_run = true;
 				_freewheel = true;
