@@ -504,7 +504,7 @@ GroupTabs::collect (RouteGroup* g)
 		++j;
 	}
 
-	sync_order_keys ();
+	_session->sync_order_keys ();
 }
 
 void
