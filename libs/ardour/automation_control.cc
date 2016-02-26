@@ -199,6 +199,9 @@ AutomationControl::internal_to_interface (double val) const
 double
 AutomationControl::interface_to_internal (double val) const
 {
+	if (!isfinite (val)) {
+		val = 0;
+	}
 	if (_desc.logarithmic) {
 		if (val <= 0) {
 			val = 0;
