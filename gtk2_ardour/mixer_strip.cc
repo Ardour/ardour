@@ -1351,9 +1351,10 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 
 	if (for_input) {
 		set_tooltip (&input_button, tooltip_cstr);
-  	} else {
+	} else {
 		set_tooltip (&output_button, tooltip_cstr);
 	}
+	delete[] tooltip_cstr;
 
 	if (each_io_has_one_connection) {
 		if (total_connection_count == ardour_connection_count) {
