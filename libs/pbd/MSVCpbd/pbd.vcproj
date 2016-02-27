@@ -729,6 +729,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pbd\reallocpool.h"
+				>
+			</File>
+			<File
 				RelativePath="..\pbd\receiver.h"
 				>
 			</File>
