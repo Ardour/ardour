@@ -55,7 +55,8 @@ KeyEditor::KeyEditor ()
 	: ArdourWindow (_("Key Bindings"))
 	, unbind_button (_("Remove shortcut"))
 	, unbind_box (BUTTONBOX_END)
-
+	, sort_column(0)
+	, sort_type(Gtk::SORT_ASCENDING)
 {
 	last_keyval = 0;
 
@@ -150,6 +151,7 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 	view.append_column (_("Action"), columns.name);
 	view.append_column (_("Shortcut"), columns.binding);
 	view.set_headers_visible (true);
+	view.set_headers_clickable (true);
 	view.get_selection()->set_mode (SELECTION_SINGLE);
 	view.set_reorderable (false);
 	view.set_size_request (500,300);
@@ -158,6 +160,13 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 	view.set_name (X_("KeyEditorTree"));
 
 	view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &Tab::action_selected));
+
+	view.get_column(0)->set_sort_column (columns.name);
+	view.get_column(1)->set_sort_column (columns.binding);
+	model->set_sort_column (owner.sort_column,  owner.sort_type);
+	model->signal_sort_column_changed().connect (sigc::mem_fun (*this, &Tab::sort_column_changed));
+
+	signal_map().connect (sigc::mem_fun (*this, &Tab::tab_mapped));
 
 	scroller.add (view);
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -328,6 +337,23 @@ KeyEditor::Tab::populate ()
 		}
 		row[columns.action] = *a;
 	}
+}
+
+void
+KeyEditor::Tab::sort_column_changed ()
+{
+	int column;
+	SortType type;
+	if (model->get_sort_column_id (column, type)) {
+		owner.sort_column = column;
+		owner.sort_type = type;
+	}
+}
+
+void
+KeyEditor::Tab::tab_mapped ()
+{
+	model->set_sort_column (owner.sort_column,  owner.sort_type);
 }
 
 void
