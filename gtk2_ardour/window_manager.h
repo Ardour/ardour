@@ -27,6 +27,8 @@
 #include <glibmm/refptr.h>
 #include <sigc++/trackable.h>
 
+#include "lua_script_manager.h"
+
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/window_proxy.h"
 

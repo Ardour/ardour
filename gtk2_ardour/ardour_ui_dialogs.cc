@@ -49,7 +49,6 @@
 #include "gui_thread.h"
 #include "keyeditor.h"
 #include "location_ui.h"
-#include "lua_script_manager.h"
 #include "luawindow.h"
 #include "main_clock.h"
 #include "meterbridge.h"
