@@ -16,6 +16,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#ifndef _gtk2_ardour_lua_script_manager_h_
+#define _gtk2_ardour_lua_script_manager_h_
+
 #include <gtkmm.h>
 #include "ardour/luascripting.h"
 
@@ -100,3 +103,5 @@ private:
 	Gtk::Button _c_add_button;
 	Gtk::Button _c_del_button;
 };
+
+#endif /* _gtk2_ardour_lua_script_manager_h_ */
