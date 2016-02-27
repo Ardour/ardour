@@ -300,6 +300,8 @@ ExportDialog::do_export ()
 void
 ExportDialog::show_progress ()
 {
+	export_notebook.set_sensitive (false);
+
 	cancel_button->set_label (_("Stop Export"));
 	export_button->set_sensitive (false);
 
@@ -339,6 +341,7 @@ ExportDialog::show_progress ()
 	} else {
 		notify_errors ();
 	}
+	export_notebook.set_sensitive (true);
 }
 
 gint
