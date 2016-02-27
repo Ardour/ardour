@@ -1054,12 +1054,12 @@ private:
     {
       set_weak_class ();
       lua_pushcclosure (L,
-          &weak.ctorPlacementProxy <typename FuncTraits <MemFn>::Params, boost::weak_ptr<T> >, 0);
+          &weak. template ctorPlacementProxy <typename FuncTraits <MemFn>::Params, boost::weak_ptr<T> >, 0);
       rawsetfield(L, -2, "__call");
 
       set_shared_class ();
       lua_pushcclosure (L,
-          &shared.ctorPlacementProxy <typename FuncTraits <MemFn>::Params, boost::shared_ptr<T> >, 0);
+          &shared. template ctorPlacementProxy <typename FuncTraits <MemFn>::Params, boost::shared_ptr<T> >, 0);
       rawsetfield(L, -2, "__call");
       return *this;
     }
