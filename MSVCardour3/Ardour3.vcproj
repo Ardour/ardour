@@ -1694,6 +1694,26 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\lua_script_manager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\luainstance.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\luasignal.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\luasignal_syms.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\luawindow.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\lv2_external_ui.h"
 				>
 			</File>
@@ -2075,6 +2095,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\save_as_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\script_selector.h"
 				>
 			</File>
 			<File
