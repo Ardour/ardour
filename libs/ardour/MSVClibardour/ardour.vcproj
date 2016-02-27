@@ -1566,6 +1566,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\dsp_filter.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\dsp_load_calculator.h"
 				>
 			</File>
@@ -1767,6 +1771,18 @@
 			</File>
 			<File
 				RelativePath="..\ardour\ltc_file_reader.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\luabindings.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\luaproc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\luascripting.h"
 				>
 			</File>
 			<File
