@@ -294,6 +294,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\cairo_icon.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\cairo_packer.cc"
 				>
 			</File>
@@ -418,6 +422,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\tabbable.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\tearoff.cc"
 				>
 			</File>
@@ -439,6 +447,10 @@
 			</File>
 			<File
 				RelativePath="..\visibility_tracker.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\window_proxy.cc"
 				>
 			</File>
 			<File
@@ -485,6 +497,10 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\bindings.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtkmm2ext\cairo_icon.h"
 				>
 			</File>
 			<File
@@ -632,6 +648,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtkmm2ext\tabbable.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtkmm2ext\tearoff.h"
 				>
 			</File>
@@ -653,6 +673,10 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\widget_state.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtkmm2ext\window_proxy.h"
 				>
 			</File>
 			<File
