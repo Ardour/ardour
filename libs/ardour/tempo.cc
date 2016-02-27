@@ -443,6 +443,20 @@ TempoSection::update_bbt_time_from_bar_offset (const Meter& meter)
 
 /***********************************************************************/
 
+/*
+if a meter section is position locked to frames, then it can only be at 1|1|0.
+thus we can have multiple 1|1|0s in the session tempo map.
+
+like this:
+
+BBT  1|1|0 2|1|0 3|1|0 1|1|0
+beat   0     4     8    12
+
+all other meter sections are locked to beats.
+
+the beat of a meter section is used to find its position rather than the stored bbt.
+*/
+
 const string MeterSection::xml_state_node_name = "Meter";
 
 MeterSection::MeterSection (const XMLNode& node)
@@ -696,10 +710,6 @@ TempoMap::do_insert (MetricSection* section)
 	if ((m = dynamic_cast<MeterSection*>(section)) != 0) {
 		assert (m->bbt().ticks == 0);
 
-		/* we need to (potentially) update the BBT times of tempo
-		   sections based on this new meter.
-		*/
-
 		if ((m->bbt().beats != 1) || (m->bbt().ticks != 0)) {
 
 			pair<double, BBT_Time> corrected = make_pair (m->beat(), m->bbt());
@@ -727,7 +737,6 @@ TempoMap::do_insert (MetricSection* section)
 		if (tempo && insert_tempo) {
 
 			/* Tempo sections */
-			PositionLockStyle const tpl = tempo->position_lock_style();
 			PositionLockStyle const ipl = insert_tempo->position_lock_style();
 			if ((ipl == MusicTime && tempo->beat() == insert_tempo->beat()) || (ipl == AudioTime && tempo->frame() == insert_tempo->frame())) {
 
@@ -751,7 +760,6 @@ TempoMap::do_insert (MetricSection* section)
 			/* Meter Sections */
 			MeterSection* const meter = dynamic_cast<MeterSection*> (*i);
 			MeterSection* const insert_meter = dynamic_cast<MeterSection*> (section);
-			PositionLockStyle const mpl = meter->position_lock_style();
 			PositionLockStyle const ipl = insert_meter->position_lock_style();
 
 			if ((ipl == MusicTime && meter->beat() == insert_meter->beat()) || (ipl == AudioTime && meter->frame() == insert_meter->frame())) {
@@ -792,9 +800,7 @@ TempoMap::do_insert (MetricSection* section)
 
 				if (meter) {
 					PositionLockStyle const ipl = insert_meter->position_lock_style();
-					if (ipl == MusicTime && meter->beat() > insert_meter->beat()) {
-						break;
-					} else if (ipl == AudioTime && meter->frame() > insert_meter->frame()) {
+					if ((ipl == MusicTime && meter->beat() > insert_meter->beat()) || (ipl == AudioTime && meter->frame() > insert_meter->frame())) {
 						break;
 					}
 				}
@@ -813,7 +819,7 @@ TempoMap::do_insert (MetricSection* section)
 		}
 
 		metrics.insert (i, section);
-		dump (std::cerr);
+		//dump (std::cerr);
 	}
 }
 
