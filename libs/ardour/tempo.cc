@@ -80,6 +80,7 @@ TempoSection::TempoSection (const XMLNode& node)
 	LocaleGuard lg;
 	BBT_Time bbt;
 	double beat;
+	uint32_t frame;
 
 	if ((prop = node.property ("start")) != 0) {
 		if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
@@ -102,8 +103,13 @@ TempoSection::TempoSection (const XMLNode& node)
 		} else {
 			set_beat (beat);
 		}
-	} else {
-		error << _("TempoSection XML node has no \"beat\" property") << endmsg;
+	}
+	if ((prop = node.property ("frame")) != 0) {
+		if (sscanf (prop->value().c_str(), "%" PRIu32, &frame) != 1) {
+			error << _("TempoSection XML node has an illegal \"frame\" value") << endmsg;
+		} else {
+			set_frame (frame);
+		}
 	}
 
 	if ((prop = node.property ("beats-per-minute")) == 0) {
@@ -147,6 +153,12 @@ TempoSection::TempoSection (const XMLNode& node)
 	} else {
 		_type = Type (string_2_enum (prop->value(), _type));
 	}
+
+	if ((prop = node.property ("lock-style")) == 0) {
+		set_position_lock_style (MusicTime);
+	} else {
+		set_position_lock_style (PositionLockStyle (string_2_enum (prop->value(), position_lock_style())));
+	}
 }
 
 XMLNode&
@@ -158,6 +170,8 @@ TempoSection::get_state() const
 
 	snprintf (buf, sizeof (buf), "%f", beat());
 	root->add_property ("beat", buf);
+	snprintf (buf, sizeof (buf), "%li", frame());
+	root->add_property ("frame", buf);
 	snprintf (buf, sizeof (buf), "%f", _beats_per_minute);
 	root->add_property ("beats-per-minute", buf);
 	snprintf (buf, sizeof (buf), "%f", _note_type);
@@ -167,6 +181,7 @@ TempoSection::get_state() const
 	snprintf (buf, sizeof (buf), "%s", movable()?"yes":"no");
 	root->add_property ("movable", buf);
 	root->add_property ("tempo-type", enum_2_string (_type));
+	root->add_property ("lock-style", enum_2_string (position_lock_style()));
 
 	return *root;
 }
@@ -282,7 +297,7 @@ Duration in beats at time a is the integral of some Tempo function.
 In our case, the Tempo function (Tempo at time t) is
 T(t) = T0(e^(ct))
 
-where c is the function constant
+with function constant
 c = log(Ta/T0)/a
 so
 a = log(Ta/T0)/c
@@ -298,17 +313,16 @@ t(T) = log(T / T0) / c
 
 We define c for this tempo ramp by placing a new tempo section at some time t after this one.
 Our problem is that we usually don't know t.
-We usually do know the duration in beats between this and the next tempo section.
-Where t = a (i.e. when a is equal to the time of the next tempo section), we can solve t in terms of
-beat duration and our two tempos.
-A bit of scribbling with the beat function gives us:
+We almost always know the duration in beats between this and the new section, so we need to find c in terms of the beat function.
+Where a = t (i.e. when a is equal to the time of the next tempo section), the beat function reveals:
 t = b log (Ta / T0) / (T0 (e^(log (Ta / T0)) - 1))
 
-By substituting our expanded t as a in the c function above, we see that our problem is reduced to:
+By substituting our expanded t as a in the c function above, our problem is reduced to:
 c = T0 (e^(log (Ta / T0)) - 1) / b
 
-We can now evaluate and store c for use in beat, time and tempo calculations until the following tempo section
-(the one that defines c in conjunction with this one) is changed or moved.
+We can now store c for future time calculations.
+If the following tempo section (the one that defines c in conjunction with this one)
+is changed or moved, c is no longer valid.
 
 Most of this stuff is taken from this paper:
 
@@ -440,6 +454,7 @@ MeterSection::MeterSection (const XMLNode& node)
 	const XMLProperty *prop;
 	BBT_Time bbt;
 	double beat = 0.0;
+	framepos_t frame = 0;
 	pair<double, BBT_Time> start;
 
 	if ((prop = node.property ("start")) != 0) {
@@ -460,8 +475,6 @@ MeterSection::MeterSection (const XMLNode& node)
 		if (sscanf (prop->value().c_str(), "%lf", &beat) != 1 || beat < 0.0) {
 			error << _("MeterSection XML node has an illegal \"beat\" value") << endmsg;
 		}
-	} else {
-		error << _("MeterSection XML node has no \"beat\" property") << endmsg;
 	}
 
 	start.first = beat;
@@ -479,6 +492,14 @@ MeterSection::MeterSection (const XMLNode& node)
 	start.second = bbt;
 
 	set_beat (start);
+
+	if ((prop = node.property ("frame")) != 0) {
+		if (sscanf (prop->value().c_str(), "%li", &frame) != 1) {
+			error << _("MeterSection XML node has an illegal \"frame\" value") << endmsg;
+		} else {
+			set_frame (frame);
+		}
+	}
 
 	/* beats-per-bar is old; divisions-per-bar is new */
 
@@ -504,6 +525,14 @@ MeterSection::MeterSection (const XMLNode& node)
 		throw failed_constructor();
 	}
 
+	if ((prop = node.property ("lock-style")) == 0) {
+		warning << _("MeterSection XML node has no \"lock-style\" property") << endmsg;
+		//throw failed_constructor();
+		set_position_lock_style (PositionLockStyle::MusicTime);
+	} else {
+		set_position_lock_style (PositionLockStyle (string_2_enum (prop->value(), position_lock_style())));
+	}
+
 	if ((prop = node.property ("movable")) == 0) {
 		error << _("MeterSection XML node has no \"movable\" property") << endmsg;
 		throw failed_constructor();
@@ -527,7 +556,10 @@ MeterSection::get_state() const
 	snprintf (buf, sizeof (buf), "%lf", beat());
 	root->add_property ("beat", buf);
 	snprintf (buf, sizeof (buf), "%f", _note_type);
+	root->add_property ("frame", buf);
+	snprintf (buf, sizeof (buf), "%li", frame());
 	root->add_property ("note-type", buf);
+	root->add_property ("lock-style", enum_2_string (position_lock_style()));
 	snprintf (buf, sizeof (buf), "%f", _divisions_per_bar);
 	root->add_property ("divisions-per-bar", buf);
 	snprintf (buf, sizeof (buf), "%s", movable()?"yes":"no");
@@ -697,8 +729,9 @@ TempoMap::do_insert (MetricSection* section)
 		if (tempo && insert_tempo) {
 
 			/* Tempo sections */
-
-			if (tempo->beat() == insert_tempo->beat()) {
+			PositionLockStyle const tpl = tempo->position_lock_style();
+			PositionLockStyle const ipl = insert_tempo->position_lock_style();
+			if (tpl == ipl && ((ipl == MusicTime && tempo->beat() == insert_tempo->beat()) || (ipl == AudioTime && tempo->frame() == insert_tempo->frame()))) {
 
 				if (!tempo->movable()) {
 
@@ -720,7 +753,10 @@ TempoMap::do_insert (MetricSection* section)
 			/* Meter Sections */
 			MeterSection* const meter = dynamic_cast<MeterSection*> (*i);
 			MeterSection* const insert_meter = dynamic_cast<MeterSection*> (section);
-			if (meter->beat() == insert_meter->beat()) {
+			PositionLockStyle const mpl = meter->position_lock_style();
+			PositionLockStyle const ipl = insert_meter->position_lock_style();
+
+			if (mpl == ipl && ((ipl == MusicTime && meter->beat() == insert_meter->beat()) || (ipl == AudioTime && meter->frame() == insert_meter->frame()))) {
 
 				if (!meter->movable()) {
 
@@ -756,8 +792,14 @@ TempoMap::do_insert (MetricSection* section)
 			for (i = metrics.begin(); i != metrics.end(); ++i) {
 				MeterSection* const meter = dynamic_cast<MeterSection*> (*i);
 
-				if (meter && meter->beat() > insert_meter->beat()) {
-					break;
+				if (meter) {
+					PositionLockStyle const ipl = insert_meter->position_lock_style();
+					if (ipl == MusicTime && meter->beat() > insert_meter->beat()) {
+						break;
+					}
+					if (ipl == AudioTime && meter->frame() > insert_meter->frame()) {
+						break;
+					}
 				}
 			}
 		} else if (insert_tempo) {
@@ -765,7 +807,8 @@ TempoMap::do_insert (MetricSection* section)
 				TempoSection* const tempo = dynamic_cast<TempoSection*> (*i);
 
 				if (tempo) {
-					if (tempo->beat() > insert_tempo->beat()) {
+					PositionLockStyle const ipl = insert_tempo->position_lock_style();
+					if ((ipl == MusicTime && tempo->beat() > insert_tempo->beat()) || (ipl == AudioTime && tempo->frame() > insert_tempo->frame())) {
 						break;
 					}
 				}
@@ -799,19 +842,59 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const doubl
 }
 
 void
+TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const framepos_t& frame, TempoSection::Type type)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
+		TempoSection& first (first_tempo());
+		if (ts.beat() != first.beat()) {
+			remove_tempo_locked (ts);
+			add_tempo_locked (tempo, frame, true, type);
+		} else {
+			first.set_type (type);
+			{
+				/* cannot move the first tempo section */
+				*static_cast<Tempo*>(&first) = tempo;
+				recompute_map (false);
+			}
+		}
+	}
+
+	PropertyChanged (PropertyChange ());
+}
+
+void
 TempoMap::gui_set_tempo_frame (TempoSection& ts, framepos_t frame, double  beat_where)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 
-		/* currently this is always done in audio time */
-		//if (ts.position_lock_style() == MusicTime) {
-		if (0) {
+		if (ts.position_lock_style() == MusicTime) {
+			std::cerr << "Music " << " beat where : " << beat_where << " frame : " << frame <<std::endl;
 			/* MusicTime */
 			ts.set_beat (beat_where);
+			Metrics::const_iterator i;
+
+			TempoSection* prev_ts = 0;
 			MetricSectionSorter cmp;
 			metrics.sort (cmp);
+			for (i = metrics.begin(); i != metrics.end(); ++i) {
+				TempoSection* t;
+				if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+
+					if (t->beat() >= beat_where) {
+						break;
+					}
+
+					prev_ts = t;
+				}
+			}
+
+			prev_ts->set_c_func_from_tempo_and_beat (ts.beats_per_minute(), ts.beat() - prev_ts->beat(), _frame_rate);
+			ts.set_frame (prev_ts->frame_at_beat (ts.beat() - prev_ts->beat(), _frame_rate));
 		} else {
+			std::cerr << "Audio " << " beat where : " << beat_where << " frame : " << frame <<std::endl;
+
 			/*AudioTime*/
 			ts.set_frame (frame);
 			MetricSectionFrameSorter fcmp;
@@ -893,9 +976,35 @@ TempoMap::add_tempo (const Tempo& tempo, double where, ARDOUR::TempoSection::Typ
 }
 
 void
+TempoMap::add_tempo (const Tempo& tempo, framepos_t frame, ARDOUR::TempoSection::Type type)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
+		add_tempo_locked (tempo, frame, true, type);
+	}
+
+
+	PropertyChanged (PropertyChange ());
+}
+
+void
 TempoMap::add_tempo_locked (const Tempo& tempo, double where, bool recompute, ARDOUR::TempoSection::Type type)
 {
+
 	TempoSection* ts = new TempoSection (where, tempo.beats_per_minute(), tempo.note_type(), type);
+
+	do_insert (ts);
+
+	if (recompute) {
+		recompute_map (false);
+	}
+}
+
+void
+TempoMap::add_tempo_locked (const Tempo& tempo, framepos_t frame, bool recompute, ARDOUR::TempoSection::Type type)
+{
+	TempoSection* ts = new TempoSection (frame, tempo.beats_per_minute(), tempo.note_type(), type);
+	std::cerr << "add tempo locked frame = " << ts->frame() << " pos lock : " << ts->position_lock_style() << std::endl;
 
 	do_insert (ts);
 
@@ -924,11 +1033,49 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 }
 
 void
+TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const framepos_t& frame)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
+		MeterSection& first (first_meter());
+		if (ms.beat() != first.beat()) {
+			remove_meter_locked (ms);
+			add_meter_locked (meter, frame, true);
+		} else {
+			/* cannot move the first meter section */
+			*static_cast<Meter*>(&first) = meter;
+			recompute_map (true);
+		}
+	}
+
+	PropertyChanged (PropertyChange ());
+}
+
+
+void
 TempoMap::add_meter (const Meter& meter, double beat, BBT_Time where)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		add_meter_locked (meter, beat, where, true);
+	}
+
+
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::TempoMap)) {
+		dump (std::cerr);
+	}
+#endif
+
+	PropertyChanged (PropertyChange ());
+}
+
+void
+TempoMap::add_meter (const Meter& meter, framepos_t frame)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
+		add_meter_locked (meter, frame, true);
 	}
 
 
@@ -960,6 +1107,29 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, BBT_Time where, boo
 	where.ticks = 0;
 
 	do_insert (new MeterSection (beat, where, meter.divisions_per_bar(), meter.note_divisor()));
+
+	if (recompute) {
+		recompute_map (true);
+	}
+
+}
+
+void
+TempoMap::add_meter_locked (const Meter& meter, framepos_t frame, bool recompute)
+{
+
+	/* MusicTime meters *always* start on 1|1|0. */
+	MeterSection* ms = new MeterSection (frame, meter.divisions_per_bar(), meter.note_divisor());
+	BBT_Time bbt;
+	pair<double, BBT_Time> pr;
+	bbt.bars = 1;
+	bbt.beats = 1;
+	bbt.ticks = 0;
+	/* just a dummy - the actual beat should be applied in recompute_map() as thins is AudioTime */
+	pr.first = 0.0;
+	pr.second = bbt;
+	ms->set_beat (pr);
+	do_insert (ms);
 
 	if (recompute) {
 		recompute_map (true);
@@ -1126,37 +1296,58 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	}
 
 	Metrics::const_iterator i;
-
 	TempoSection* prev_ts = 0;
 
 	for (i = metrics.begin(); i != metrics.end(); ++i) {
 		TempoSection* t;
 
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
-
 			if (prev_ts) {
-				if (prev_ts->type() == TempoSection::Ramp) {
-					prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat() - prev_ts->beat(), _frame_rate);
-					t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), _frame_rate) + prev_ts->frame());
-				} else {
-					double const ticks_relative_to_prev = (t->beat() - prev_ts->beat()) * BBT_Time::ticks_per_beat;
-					framecnt_t const duration = (framecnt_t) floor (ticks_relative_to_prev * prev_ts->frames_per_beat (_frame_rate)
-											 * BBT_Time::ticks_per_beat);
-					prev_ts->set_c_func (0.0);
-					t->set_frame (duration + prev_ts->frame());
+				if (t->position_lock_style() == AudioTime) {
+					if (prev_ts->type() == TempoSection::Ramp) {
+						prev_ts->set_c_func (prev_ts->compute_c_func (t->beats_per_minute(), t->frame() - prev_ts->frame(), _frame_rate));
+						t->set_beat (prev_ts->beat_at_frame (t->frame() - prev_ts->frame(), _frame_rate) + prev_ts->beat());
+					} else {
+						prev_ts->set_c_func (0.0);
+						t->set_beat (prev_ts->beat_at_frame (t->frame() - prev_ts->frame(), _frame_rate) + prev_ts->beat());
+					}
+				} else if (t->position_lock_style() == MusicTime) {
+					if (prev_ts->type() == TempoSection::Ramp) {
+						prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat() - prev_ts->beat(), _frame_rate);
+						t->set_frame (prev_ts->frame_at_beat (t->beat() - prev_ts->beat(), _frame_rate) + prev_ts->frame());
+					} else {
+						double const ticks_relative_to_prev = (t->beat() - prev_ts->beat()) * BBT_Time::ticks_per_beat;
+						framecnt_t const duration = (framecnt_t) floor (ticks_relative_to_prev * prev_ts->frames_per_beat (_frame_rate)
+												* BBT_Time::ticks_per_beat);
+						prev_ts->set_c_func (0.0);
+						t->set_frame (duration + prev_ts->frame());
+					}
 				}
 			}
 			prev_ts = t;
 		}
 	}
 
-	Metrics::const_iterator mi;
 	MeterSection* meter = 0;
 
-	for (mi = metrics.begin(); mi != metrics.end(); ++mi) {
+	for (Metrics::const_iterator mi = metrics.begin(); mi != metrics.end(); ++mi) {
 		/* We now have the tempo map set. use it to set meter positions.*/
 		if ((meter = dynamic_cast<MeterSection*> (*mi)) != 0) {
-			meter->set_frame (frame_at_tick (meter->beat() * BBT_Time::ticks_per_beat));
+			if (meter->position_lock_style() == AudioTime) {
+				/* a frame based meter has to have a 1|1|0 bbt */
+				pair<double, BBT_Time> pr;
+				BBT_Time where;
+
+				where.bars = 1;
+				where.beats = 1;
+				where.ticks = 0;
+
+				pr.first = tick_at_frame (meter->frame()) / BBT_Time::ticks_per_beat;
+				pr.second = where;
+				meter->set_beat (pr);
+			} else if (meter->position_lock_style() == MusicTime) {
+				meter->set_frame (frame_at_tick (meter->beat() * BBT_Time::ticks_per_beat));
+			}
 		}
 	}
 }

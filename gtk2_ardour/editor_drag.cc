@@ -3210,7 +3210,13 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy meter mark"));
 		XMLNode &before = map.get_state();
-		map.add_meter (_marker->meter(), map.beat_at_frame (_marker->position()), when);
+
+		if (_marker->meter().position_lock_style() == AudioTime) {
+			map.add_meter (_marker->meter(), _marker->position());
+		} else {
+			map.add_meter (_marker->meter(), map.bbt_to_beats (when), when);
+		}
+
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
@@ -3219,8 +3225,12 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->begin_reversible_command (_("move meter mark"));
 
 		/* we removed it before, so add it back now */
+		if (_marker->meter().position_lock_style() == AudioTime) {
+			map.add_meter (_marker->meter(), _marker->position());
+		} else {
+			map.add_meter (_marker->meter(), map.beat_at_frame (_marker->position()), when);
+		}
 
-		map.add_meter (_marker->meter(), map.beat_at_frame (_marker->position()), when);
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
 		_editor->commit_reversible_command ();
@@ -3336,21 +3346,32 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	motion (event, false);
+	//motion (event, false);
 
 	TempoMap& map (_editor->session()->tempo_map());
 
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy tempo mark"));
 		XMLNode &before = map.get_state();
-		map.add_tempo (_marker->tempo(), _real_section->beat(), _marker->tempo().type());
+
+		if (_marker->tempo().position_lock_style() == MusicTime) {
+			map.add_tempo (_marker->tempo(), _real_section->beat(), _marker->tempo().type());
+		} else {
+			map.add_tempo (_marker->tempo(), _real_section->frame(), _marker->tempo().type());
+		}
+
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command (new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 
 	} else {
 		/* we removed it before, so add it back now */
-		map.replace_tempo (*_real_section, _marker->tempo().beats_per_minute() , _real_section->beat(), _marker->tempo().type());
+		if (_marker->tempo().position_lock_style() == MusicTime) {
+			map.replace_tempo (*_real_section, _marker->tempo().beats_per_minute() , _real_section->beat(), _marker->tempo().type());
+		} else {
+			map.replace_tempo (*_real_section, _marker->tempo().beats_per_minute() , _real_section->frame(), _marker->tempo().type());
+		}
+
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command (new MementoCommand<TempoMap>(map, before_state, &after));
 		_editor->commit_reversible_command ();
@@ -3368,7 +3389,11 @@ TempoMarkerDrag::aborted (bool moved)
 	if (moved) {
 		TempoMap& map (_editor->session()->tempo_map());
 		/* we removed it before, so add it back now */
-		map.add_tempo (_marker->tempo(), _marker->tempo().beat(), _marker->tempo().type());
+		if (_marker->tempo().position_lock_style() == MusicTime) {
+			map.add_tempo (_marker->tempo(), _marker->tempo().beat(), _marker->tempo().type());
+		} else {
+			map.add_tempo (_marker->tempo(), _marker->tempo().frame(), _marker->tempo().type());
+		}
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
 		delete _marker;

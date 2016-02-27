@@ -47,7 +47,7 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	Tempo tempo (map.tempo_at (frame));
 	map.bbt_time (frame, when);
 
-	init (when, tempo.beats_per_minute(), tempo.note_type(), TempoSection::Constant, true);
+	init (when, tempo.beats_per_minute(), tempo.note_type(), TempoSection::Constant, true, PositionLockStyle::MusicTime);
 }
 
 TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
@@ -61,11 +61,11 @@ TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 {
 	Timecode::BBT_Time when;
 	map.bbt_time (map.frame_at_beat (section.beat()), when);
-	init (when, section.beats_per_minute(), section.note_type(), section.type(), section.movable());
+	init (when, section.beats_per_minute(), section.note_type(), section.type(), section.movable(), section.position_lock_style());
 }
 
 void
-TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type, TempoSection::Type type, bool movable)
+TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type, TempoSection::Type type, bool movable, PositionLockStyle style)
 {
 	vector<string> strings;
 	NoteTypes::iterator x;
@@ -123,15 +123,33 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 		}
 	}
 	if (tt == tempo_types.end()) {
-		tempo_type.set_active_text (strings[0]); // "ramped"
+		tempo_type.set_active_text (strings[1]); // "constant"
+	}
+
+	strings.clear();
+
+	lock_styles.insert (make_pair (_("music"), PositionLockStyle::MusicTime));
+	strings.push_back (_("music"));
+	lock_styles.insert (make_pair (_("audio"), PositionLockStyle::AudioTime));
+	strings.push_back (_("audio"));
+	set_popdown_strings (lock_style, strings);
+	LockStyles::iterator ls;
+	for (ls = lock_styles.begin(); ls != lock_styles.end(); ++ls) {
+		if (ls->second == style) {
+			lock_style.set_active_text (ls->first);
+			break;
+		}
+	}
+	if (ls == lock_styles.end()) {
+		lock_style.set_active_text (strings[0]); // "music"
 	}
 
 	Table* table;
 
 	if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
-		table = manage (new Table (5, 6));
+		table = manage (new Table (5, 7));
 	} else {
-		table = manage (new Table (5, 5));
+		table = manage (new Table (5, 6));
 	}
 
 	table->set_spacings (6);
@@ -182,6 +200,12 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_end (*table);
 
+	Label* lock_style_label = manage (new Label(_("Lock Style:"), ALIGN_LEFT, ALIGN_CENTER));
+	table->attach (*lock_style_label, 0, 1, row+2, row+3);
+	table->attach (lock_style, 1, 2, row+2, row + 3);
+	get_vbox()->set_border_width (12);
+	get_vbox()->pack_end (*table);
+
 	table->show_all ();
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
@@ -206,6 +230,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	when_beat_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TempoDialog::entry_key_release), false);
 	pulse_selector.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::pulse_change));
 	tempo_type.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::tempo_type_change));
+	lock_style.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::lock_style_change));
 	tap_tempo_button.signal_button_press_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_button_press), false);
 	tap_tempo_button.signal_focus_out_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_focus_out));
 
@@ -296,6 +321,19 @@ TempoDialog::get_tempo_type ()
 	return x->second;
 }
 
+PositionLockStyle
+TempoDialog::get_lock_style ()
+{
+	LockStyles::iterator x = lock_styles.find (lock_style.get_active_text());
+
+	if (x == lock_styles.end()) {
+		error << string_compose(_("incomprehensible lock style (%1)"), lock_style.get_active_text()) << endmsg;
+		return PositionLockStyle::MusicTime;
+	}
+
+	return x->second;
+}
+
 void
 TempoDialog::pulse_change ()
 {
@@ -304,6 +342,12 @@ TempoDialog::pulse_change ()
 
 void
 TempoDialog::tempo_type_change ()
+{
+	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
+}
+
+void
+TempoDialog::lock_style_change ()
 {
 	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 }
@@ -362,7 +406,7 @@ MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 	Meter meter (map.meter_at(frame));
 
 	map.bbt_time (frame, when);
-	init (when, meter.divisions_per_bar(), meter.note_divisor(), true);
+	init (when, meter.divisions_per_bar(), meter.note_divisor(), true, PositionLockStyle::MusicTime);
 }
 
 MeterDialog::MeterDialog (TempoMap& map, MeterSection& section, const string&)
@@ -370,11 +414,11 @@ MeterDialog::MeterDialog (TempoMap& map, MeterSection& section, const string&)
 {
 	Timecode::BBT_Time when;
 	map.bbt_time (map.frame_at_beat (section.beat()), when);
-	init (when, section.divisions_per_bar(), section.note_divisor(), section.movable());
+	init (when, section.divisions_per_bar(), section.note_divisor(), section.movable(), section.position_lock_style());
 }
 
 void
-MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, bool movable)
+MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, bool movable, PositionLockStyle style)
 {
 	char buf[64];
 	vector<string> strings;
@@ -417,9 +461,28 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 		note_type.set_active_text (strings[3]); // "quarter"
 	}
 
+	strings.clear();
+
+	lock_styles.insert (make_pair (_("music"), PositionLockStyle::MusicTime));
+	strings.push_back (_("music"));
+	lock_styles.insert (make_pair (_("audio ur brane wul xplod"), PositionLockStyle::AudioTime));
+	strings.push_back (_("audio"));
+	set_popdown_strings (lock_style, strings);
+	LockStyles::iterator ls;
+	for (ls = lock_styles.begin(); ls != lock_styles.end(); ++ls) {
+		if (ls->second == style) {
+			lock_style.set_active_text (ls->first);
+			break;
+		}
+	}
+	if (ls == lock_styles.end()) {
+		lock_style.set_active_text (strings[0]); // "music"
+	}
+
 	Label* note_label = manage (new Label (_("Note value:"), ALIGN_LEFT, ALIGN_CENTER));
+	Label* lock_label = manage (new Label (_("Lock style:"), ALIGN_LEFT, ALIGN_CENTER));
 	Label* bpb_label = manage (new Label (_("Beats per bar:"), ALIGN_LEFT, ALIGN_CENTER));
-	Table* table = manage (new Table (3, 2));
+	Table* table = manage (new Table (3, 3));
 	table->set_spacings (6);
 
 	table->attach (*bpb_label, 0, 1, 0, 1, FILL|EXPAND, FILL|EXPAND);
@@ -437,6 +500,9 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 		table->attach (*when_label, 0, 1, 2, 3, FILL | EXPAND, FILL | EXPAND);
 		table->attach (when_bar_entry, 1, 2, 2, 3, FILL | EXPAND, FILL | EXPAND);
 	}
+
+	table->attach (*lock_label, 0, 1, 3, 4, FILL|EXPAND, FILL|EXPAND);
+	table->attach (lock_style, 1, 2, 3, 4, FILL|EXPAND, SHRINK);
 
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (*table, false, false);
@@ -456,6 +522,8 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 	when_bar_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &MeterDialog::entry_key_press), false);
 	when_bar_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &MeterDialog::entry_key_release));
 	note_type.signal_changed().connect (sigc::mem_fun (*this, &MeterDialog::note_type_change));
+	lock_style.signal_changed().connect (sigc::mem_fun (*this, &MeterDialog::lock_style_change));
+
 }
 
 bool
@@ -527,6 +595,12 @@ MeterDialog::note_type_change ()
         set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 }
 
+void
+MeterDialog::lock_style_change ()
+{
+        set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
+}
+
 double
 MeterDialog::get_bpb ()
 {
@@ -547,6 +621,19 @@ MeterDialog::get_note_type ()
 	if (x == note_types.end()) {
 		error << string_compose(_("incomprehensible meter note type (%1)"), note_type.get_active_text()) << endmsg;
 		return 0;
+	}
+
+	return x->second;
+}
+
+PositionLockStyle
+MeterDialog::get_lock_style ()
+{
+	LockStyles::iterator x = lock_styles.find (lock_style.get_active_text());
+
+	if (x == lock_styles.end()) {
+		error << string_compose(_("incomprehensible meter lock style (%1)"), lock_style.get_active_text()) << endmsg;
+		return PositionLockStyle::MusicTime;
 	}
 
 	return x->second;

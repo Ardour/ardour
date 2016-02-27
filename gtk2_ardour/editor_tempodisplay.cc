@@ -238,16 +238,18 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 
 	double bpm = 0;
 	Timecode::BBT_Time requested;
-
 	bpm = tempo_dialog.get_bpm ();
 	double nt = tempo_dialog.get_note_type();
 	bpm = max (0.01, bpm);
 
 	tempo_dialog.get_bbt_time (requested);
-
 	begin_reversible_command (_("add tempo mark"));
         XMLNode &before = map.get_state();
-	map.add_tempo (Tempo (bpm,nt), map.bbt_to_beats (requested), tempo_dialog.get_tempo_type());
+	if (tempo_dialog.get_lock_style() == MusicTime) {
+		map.add_tempo (Tempo (bpm,nt), map.bbt_to_beats (requested), tempo_dialog.get_tempo_type());
+	} else {
+		map.add_tempo (Tempo (bpm,nt), frame, tempo_dialog.get_tempo_type());
+	}
         XMLNode &after = map.get_state();
 	_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 	commit_reversible_command ();
@@ -286,7 +288,11 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
 
 	begin_reversible_command (_("add meter mark"));
         XMLNode &before = map.get_state();
-	map.add_meter (Meter (bpb, note_type), map.bbt_to_beats (requested), requested);
+	if (meter_dialog.get_lock_style() == MusicTime) {
+		map.add_meter (Meter (bpb, note_type), map.bbt_to_beats (requested), requested);
+	} else {
+		map.add_meter (Meter (bpb, note_type), frame, meter_dialog.get_lock_style());
+	}
 	_session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
 	commit_reversible_command ();
 
@@ -330,13 +336,17 @@ Editor::edit_meter_section (MeterSection* section)
 	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
 
 	double note_type = meter_dialog.get_note_type ();
-
 	Timecode::BBT_Time when;
 	meter_dialog.get_bbt_time(when);
+	framepos_t const frame = _session->tempo_map().frame_at_beat (_session->tempo_map().bbt_to_beats (when));
 
 	begin_reversible_command (_("replace tempo mark"));
         XMLNode &before = _session->tempo_map().get_state();
-	_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), when);
+	if (meter_dialog.get_lock_style() == MusicTime) {
+		_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), when);
+	} else {
+		_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), frame);
+	}
         XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
@@ -356,13 +366,20 @@ Editor::edit_tempo_section (TempoSection* section)
 
 	double bpm = tempo_dialog.get_bpm ();
 	double nt = tempo_dialog.get_note_type ();
+	double beat;
 	Timecode::BBT_Time when;
+
 	tempo_dialog.get_bbt_time(when);
 	bpm = max (0.01, bpm);
+	beat = _session->tempo_map().bbt_to_beats (when);
 
 	begin_reversible_command (_("replace tempo mark"));
 	XMLNode &before = _session->tempo_map().get_state();
-	_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), _session->tempo_map().bbt_to_beats (when), tempo_dialog.get_tempo_type());
+	if (tempo_dialog.get_lock_style() == MusicTime) {
+		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), beat, tempo_dialog.get_tempo_type());
+	} else {
+		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), _session->tempo_map().frame_at_beat (beat), tempo_dialog.get_tempo_type());
+	}
 	XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();

@@ -45,9 +45,10 @@ public:
 	double get_note_type ();
 	bool   get_bbt_time (Timecode::BBT_Time&);
 	ARDOUR::TempoSection::Type get_tempo_type ();
+	ARDOUR::PositionLockStyle get_lock_style ();
 
 private:
-	void init (const Timecode::BBT_Time& start, double bpm , double note_type, ARDOUR::TempoSection::Type type, bool movable);
+	void init (const Timecode::BBT_Time& start, double bpm , double note_type, ARDOUR::TempoSection::Type type, bool movable, ARDOUR::PositionLockStyle style);
 	bool is_user_input_valid() const;
 	void bpm_changed ();
 	bool bpm_button_press (GdkEventButton* );
@@ -55,6 +56,7 @@ private:
 	bool entry_key_release (GdkEventKey* );
 	void pulse_change ();
 	void tempo_type_change ();
+	void lock_style_change ();
 	bool tap_tempo_button_press (GdkEventButton* );
 	bool tap_tempo_focus_out (GdkEventFocus* );
 
@@ -63,6 +65,9 @@ private:
 
 	typedef std::map<std::string, ARDOUR::TempoSection::Type> TempoTypes;
 	TempoTypes tempo_types;
+
+	typedef std::map<std::string, ARDOUR::PositionLockStyle> LockStyles;
+	LockStyles lock_styles;
 
 	bool tapped;      // whether the tap-tempo button has been clicked
 	double sum_x, sum_xx, sum_xy, sum_y;
@@ -80,6 +85,8 @@ private:
 	Gtk::Label   pulse_selector_label;
 	Gtk::Button  tap_tempo_button;
 	Gtk::ComboBoxText tempo_type;
+	Gtk::ComboBoxText lock_style;
+
 
 };
 
@@ -92,20 +99,26 @@ public:
 
 	double get_bpb ();
 	double get_note_type ();
+	ARDOUR::PositionLockStyle get_lock_style ();
 	bool   get_bbt_time (Timecode::BBT_Time&);
 
 private:
-	void init (const Timecode::BBT_Time&, double, double, bool);
+	void init (const Timecode::BBT_Time&, double, double, bool, ARDOUR::PositionLockStyle style);
 	bool is_user_input_valid() const;
 	bool entry_key_press (GdkEventKey* );
 	bool entry_key_release (GdkEventKey* );
 	void note_type_change ();
+	void lock_style_change ();
 
 	typedef std::map<std::string,float> NoteTypes;
 	NoteTypes note_types;
 
+	typedef std::map<std::string, ARDOUR::PositionLockStyle> LockStyles;
+	LockStyles lock_styles;
+
 	Gtk::Entry   bpb_entry;
 	Gtk::ComboBoxText note_type;
+	Gtk::ComboBoxText lock_style;
 	std::vector<std::string> strings;
 	Gtk::Button  ok_button;
 	Gtk::Button  cancel_button;

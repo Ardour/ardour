@@ -100,9 +100,9 @@ class LIBARDOUR_API Meter {
 class LIBARDOUR_API MetricSection {
   public:
 	MetricSection (double beat)
-		: _beat (beat), _frame (0), _movable (true), _position_lock_style (MusicTime) {}
+		: _beat (beat), _frame (0), _movable (true), _position_lock_style (PositionLockStyle::MusicTime) {}
 	MetricSection (framepos_t frame)
-		: _beat (0), _frame (frame), _movable (true), _position_lock_style (MusicTime) {}
+		: _beat (0), _frame (frame), _movable (true), _position_lock_style (PositionLockStyle::AudioTime) {}
 
 	virtual ~MetricSection() {}
 
@@ -362,14 +362,20 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	const MeterSection& meter_section_at (framepos_t) const;
 
 	void add_tempo (const Tempo&, double where, TempoSection::Type type);
+	void add_tempo (const Tempo&, framepos_t frame, TempoSection::Type type);
+
 	void add_meter (const Meter&, double beat, Timecode::BBT_Time where);
+	void add_meter (const Meter&, framepos_t frame);
 
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
 
 	void replace_tempo (const TempoSection&, const Tempo&, const double& where, TempoSection::Type type);
+	void replace_tempo (const TempoSection&, const Tempo&, const framepos_t& where, TempoSection::Type type);
+
 	void gui_set_tempo_frame (TempoSection&, framepos_t where, double beat);
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
+	void replace_meter (const MeterSection&, const Meter&, const framepos_t& frame);
 
 	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat (framepos_t frame, RoundMode dir);
@@ -435,7 +441,10 @@ private:
 	void do_insert (MetricSection* section);
 
 	void add_tempo_locked (const Tempo&, double where, bool recompute, TempoSection::Type type);
+	void add_tempo_locked (const Tempo&, framepos_t frame, bool recompute, TempoSection::Type type);
+
 	void add_meter_locked (const Meter&, double beat, Timecode::BBT_Time where, bool recompute);
+	void add_meter_locked (const Meter&, framepos_t frame, bool recompute);
 
 	bool remove_tempo_locked (const TempoSection&);
 	bool remove_meter_locked (const MeterSection&);
