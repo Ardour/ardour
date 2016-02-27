@@ -712,8 +712,6 @@ TempoMap::do_insert (MetricSection* section)
 		}
 	}
 
-
-
 	/* Look for any existing MetricSection that is of the same type and
 	   in the same bar as the new one, and remove it before adding
 	   the new one. Note that this means that if we find a matching,
@@ -731,7 +729,7 @@ TempoMap::do_insert (MetricSection* section)
 			/* Tempo sections */
 			PositionLockStyle const tpl = tempo->position_lock_style();
 			PositionLockStyle const ipl = insert_tempo->position_lock_style();
-			if (tpl == ipl && ((ipl == MusicTime && tempo->beat() == insert_tempo->beat()) || (ipl == AudioTime && tempo->frame() == insert_tempo->frame()))) {
+			if ((ipl == MusicTime && tempo->beat() == insert_tempo->beat()) || (ipl == AudioTime && tempo->frame() == insert_tempo->frame())) {
 
 				if (!tempo->movable()) {
 
@@ -756,7 +754,7 @@ TempoMap::do_insert (MetricSection* section)
 			PositionLockStyle const mpl = meter->position_lock_style();
 			PositionLockStyle const ipl = insert_meter->position_lock_style();
 
-			if (mpl == ipl && ((ipl == MusicTime && meter->beat() == insert_meter->beat()) || (ipl == AudioTime && meter->frame() == insert_meter->frame()))) {
+			if ((ipl == MusicTime && meter->beat() == insert_meter->beat()) || (ipl == AudioTime && meter->frame() == insert_meter->frame())) {
 
 				if (!meter->movable()) {
 
@@ -796,8 +794,7 @@ TempoMap::do_insert (MetricSection* section)
 					PositionLockStyle const ipl = insert_meter->position_lock_style();
 					if (ipl == MusicTime && meter->beat() > insert_meter->beat()) {
 						break;
-					}
-					if (ipl == AudioTime && meter->frame() > insert_meter->frame()) {
+					} else if (ipl == AudioTime && meter->frame() > insert_meter->frame()) {
 						break;
 					}
 				}
@@ -816,6 +813,7 @@ TempoMap::do_insert (MetricSection* section)
 		}
 
 		metrics.insert (i, section);
+		dump (std::cerr);
 	}
 }
 
@@ -990,7 +988,6 @@ TempoMap::add_tempo (const Tempo& tempo, framepos_t frame, ARDOUR::TempoSection:
 void
 TempoMap::add_tempo_locked (const Tempo& tempo, double where, bool recompute, ARDOUR::TempoSection::Type type)
 {
-
 	TempoSection* ts = new TempoSection (where, tempo.beats_per_minute(), tempo.note_type(), type);
 
 	do_insert (ts);
@@ -1004,7 +1001,6 @@ void
 TempoMap::add_tempo_locked (const Tempo& tempo, framepos_t frame, bool recompute, ARDOUR::TempoSection::Type type)
 {
 	TempoSection* ts = new TempoSection (frame, tempo.beats_per_minute(), tempo.note_type(), type);
-	std::cerr << "add tempo locked frame = " << ts->frame() << " pos lock : " << ts->position_lock_style() << std::endl;
 
 	do_insert (ts);
 
@@ -1316,11 +1312,8 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 						prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat() - prev_ts->beat(), _frame_rate);
 						t->set_frame (prev_ts->frame_at_beat (t->beat() - prev_ts->beat(), _frame_rate) + prev_ts->frame());
 					} else {
-						double const ticks_relative_to_prev = (t->beat() - prev_ts->beat()) * BBT_Time::ticks_per_beat;
-						framecnt_t const duration = (framecnt_t) floor (ticks_relative_to_prev * prev_ts->frames_per_beat (_frame_rate)
-												* BBT_Time::ticks_per_beat);
 						prev_ts->set_c_func (0.0);
-						t->set_frame (duration + prev_ts->frame());
+						t->set_frame (prev_ts->frame_at_beat (t->beat() - prev_ts->beat(), _frame_rate) + prev_ts->frame());
 					}
 				}
 			}
