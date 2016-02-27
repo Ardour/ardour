@@ -268,6 +268,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\LuaBridge\detail\dump.h"
+						>
+					</File>
+					<File
 						RelativePath="..\LuaBridge\detail\FuncArgs.h"
 						>
 					</File>
