@@ -987,6 +987,8 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		framepos_t sample_end = min (center + image_samples, region_end());
 		const int n_peaks = llrintf ((sample_end - sample_start)/ (req->samples_per_pixel));
 
+		assert (n_peaks > 0 && n_peaks < 32767);
+
 		boost::scoped_array<ARDOUR::PeakData> peaks (new PeakData[n_peaks]);
 
 		/* Note that Region::read_peaks() takes a start position based on an
@@ -1000,6 +1002,13 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		                                             req->samples_per_pixel);
 
 		req->image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, req->height);
+
+		// http://cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create
+		// This function always returns a valid pointer, but it will return a pointer to a "nil" surface..
+		// but there's some evidence that req->image can be NULL.
+		// http://tracker.ardour.org/view.php?id=6478
+		assert (req->image);
+
 		/* make sure we record the sample positions that were actually used */
 		req->start = sample_start;
 		req->end = sample_end;
