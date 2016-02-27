@@ -140,7 +140,6 @@ Tabbable::show_own_window (bool and_pack_it)
 
 	tab_requested_by_state = false;
 
-	_window->show_all ();
 	_window->present ();
 }
 
