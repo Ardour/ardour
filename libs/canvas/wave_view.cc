@@ -985,7 +985,7 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 
 		framepos_t sample_start = max (_region_start, (center - image_samples));
 		framepos_t sample_end = min (center + image_samples, region_end());
-		const int n_peaks = llrintf ((sample_end - sample_start)/ (req->samples_per_pixel));
+		const int n_peaks = std::max (1LL, llrint (ceil ((sample_end - sample_start) / (req->samples_per_pixel))));
 
 		assert (n_peaks > 0 && n_peaks < 32767);
 
