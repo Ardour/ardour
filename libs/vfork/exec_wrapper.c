@@ -113,5 +113,14 @@ int main(int argc, char *argv[]) {
 	char buf = 0;
 	(void) write(pok[1], &buf, 1 );
 	close_fd(&pok[1]);
+
+#ifdef __clang_analyzer__
+	// the clang static analyzer warns about a memleak here,
+	// but we don't care. The OS will clean up after us in a jiffy.
+	for (i=0; envp && envp[i]; ++i) {
+		free (envp[i]);
+	}
+	free (envp);
+#endif
 	return -1;
 }
