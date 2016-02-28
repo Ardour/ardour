@@ -205,14 +205,14 @@ TempoSection::set_type (Type type)
 /** returns the tempo at the zero-based (relative to session) frame.
 */
 double
-TempoSection::tempo_at_frame (framepos_t frm, framecnt_t frame_rate) const
+TempoSection::tempo_at_frame (framepos_t f, framecnt_t frame_rate) const
 {
 
 	if (_type == Constant) {
 		return beats_per_minute();
 	}
 
-	return tick_tempo_at_time (frame_to_minute (frm - frame(), frame_rate)) / BBT_Time::ticks_per_beat;
+	return tick_tempo_at_time (frame_to_minute (f - frame(), frame_rate)) / BBT_Time::ticks_per_beat;
 }
 
 /** returns the zero-based frame (relative to session)
@@ -234,13 +234,13 @@ TempoSection::frame_at_tempo (double bpm, framecnt_t frame_rate) const
    lies.
 */
 double
-TempoSection::tick_at_frame (framepos_t frm, framecnt_t frame_rate) const
+TempoSection::tick_at_frame (framepos_t f, framecnt_t frame_rate) const
 {
 	if (_type == Constant) {
-		return (((frm - frame()) / frames_per_beat (frame_rate)) * BBT_Time::ticks_per_beat) + tick();
+		return (((f - frame()) / frames_per_beat (frame_rate)) * BBT_Time::ticks_per_beat) + tick();
 	}
 
-	return tick_at_time (frame_to_minute (frm - frame(), frame_rate)) + tick();
+	return tick_at_time (frame_to_minute (f - frame(), frame_rate)) + tick();
 }
 
 /** returns the zero-based frame (relative to session origin)
@@ -248,13 +248,13 @@ TempoSection::tick_at_frame (framepos_t frm, framecnt_t frame_rate) const
    falls.
 */
 framepos_t
-TempoSection::frame_at_tick (double tck, framecnt_t frame_rate) const
+TempoSection::frame_at_tick (double t, framecnt_t frame_rate) const
 {
 	if (_type == Constant) {
-		return (framepos_t) floor (((tck - tick()) / BBT_Time::ticks_per_beat) * frames_per_beat (frame_rate)) + frame();
+		return (framepos_t) floor (((t - tick()) / BBT_Time::ticks_per_beat) * frames_per_beat (frame_rate)) + frame();
 	}
 
-	return minute_to_frame (time_at_tick (tck - tick()), frame_rate) + frame();
+	return minute_to_frame (time_at_tick (t - tick()), frame_rate) + frame();
 }
 
 /** returns the zero-based beat (relative to session origin)
@@ -543,7 +543,7 @@ MeterSection::MeterSection (const XMLNode& node)
 
 	if ((prop = node.property ("lock-style")) == 0) {
 		warning << _("MeterSection XML node has no \"lock-style\" property") << endmsg;
-		set_position_lock_style (PositionLockStyle::MusicTime);
+		set_position_lock_style (MusicTime);
 	} else {
 		set_position_lock_style (PositionLockStyle (string_2_enum (prop->value(), position_lock_style())));
 	}
@@ -1571,7 +1571,6 @@ TempoMap::frame_at_tick (double tick) const
 	/* HOLD THE READER LOCK */
 
 	double accumulated_ticks = 0.0;
-	double accumulated_ticks_to_prev = 0.0;
 	const TempoSection* prev_ts = 0;
 
 	Metrics::const_iterator i;
@@ -1579,21 +1578,17 @@ TempoMap::frame_at_tick (double tick) const
 	for (i = metrics.begin(); i != metrics.end(); ++i) {
 		TempoSection* t;
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
-
-			if (prev_ts && t->frame() > prev_ts->frame()) {
-				accumulated_ticks = t->tick();
-			}
-
-			if (prev_ts && tick < accumulated_ticks) {
+			if (prev_ts && tick < t->tick()) {
 				/* prev_ts is the one affecting us. */
 				return prev_ts->frame_at_tick (tick, _frame_rate);
 			}
-			accumulated_ticks_to_prev = accumulated_ticks;
+
+			accumulated_ticks = t->tick();
 			prev_ts = t;
 		}
 	}
 	/* must be treated as constant, irrespective of _type */
-	double const ticks_in_section = tick - accumulated_ticks_to_prev;
+	double const ticks_in_section = tick - accumulated_ticks;
 	double const dtime = (ticks_in_section / BBT_Time::ticks_per_beat) * prev_ts->frames_per_beat (_frame_rate);
 
 	framecnt_t const ret = ((framecnt_t) floor (dtime)) + prev_ts->frame();
