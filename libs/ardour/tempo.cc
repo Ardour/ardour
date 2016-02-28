@@ -839,13 +839,18 @@ TempoMap::replace_c_func_from_tempo_and_beat (const double& bpm, const double& b
 
 	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
-			if (prev_ts && beat < t->beat()) {
+			if (prev_ts) {
 				prev_ts->set_c_func_from_tempo_and_beat (bpm, beat, _frame_rate);
-				break;
+
+				if (beat < t->beat()) {
+					return;
+				}
 			}
 			prev_ts = t;
 		}
 	}
+	/* there is always at least one tempo section */
+	prev_ts->set_c_func_from_tempo_and_beat (bpm, beat, _frame_rate);
 }
 
 void
