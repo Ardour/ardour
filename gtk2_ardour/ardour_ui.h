@@ -88,6 +88,7 @@
 #include "global_port_matrix.h"
 #include "keyeditor.h"
 #include "location_ui.h"
+#include "lua_script_manager.h"
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
 #include "session_option_editor.h"
@@ -102,6 +103,7 @@ class EngineControl;
 class ExportVideoDialog;
 class KeyEditor;
 class LocationUIWindow;
+class LuaScriptManager;
 class RCOptionEditor;
 class RouteParams_UI;
 class SessionOptionEditor;
@@ -127,7 +129,6 @@ class Splash;
 class TimeInfoBox;
 class Meterbridge;
 class LuaWindow;
-class LuaScriptManager;
 class MidiTracer;
 class NSM_Client;
 class LevelMeterHBox;

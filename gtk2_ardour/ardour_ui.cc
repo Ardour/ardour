@@ -131,6 +131,7 @@ typedef uint64_t microseconds_t;
 #include "keyboard.h"
 #include "keyeditor.h"
 #include "location_ui.h"
+#include "lua_script_manager.h"
 #include "luawindow.h"
 #include "main_clock.h"
 #include "missing_file_dialog.h"
