@@ -30,6 +30,7 @@
 #include "pbd/signals.h"
 
 #include "ardour/session_handle.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
@@ -47,8 +48,8 @@ class VCAManager : public SessionHandleRef
 	typedef std::list<boost::shared_ptr<VCA> > VCAS;
 	VCAS vcas() const;
 
-	PBD::Signal1<void,boost::shared_ptr<VCA> > VCAAdded;
-	PBD::Signal1<void,boost::shared_ptr<VCA> > VCARemoved;
+	PBD::Signal1<void,VCAList&> VCAAdded;
+	PBD::Signal1<void,VCAList&> VCARemoved;
 
      private:
 	mutable Glib::Threads::Mutex lock;

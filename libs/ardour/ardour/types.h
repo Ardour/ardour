@@ -52,6 +52,7 @@ namespace ARDOUR {
 	class AudioSource;
 	class Route;
 	class Region;
+	class VCA;
 
 	typedef float    Sample;
 	typedef float    pan_t;
@@ -564,6 +565,8 @@ namespace ARDOUR {
 
 	typedef std::list<boost::shared_ptr<Route> > RouteList;
 	typedef std::list<boost::weak_ptr  <Route> > WeakRouteList;
+
+	typedef std::list<boost::shared_ptr<VCA> > VCAList;
 
 	class Bundle;
 	typedef std::vector<boost::shared_ptr<Bundle> > BundleList;

@@ -50,7 +50,10 @@ VCAManager::create_vca (std::string const & name)
 		_vcas.push_back (vca);
 	}
 
-	VCAAdded (vca); /* EMIT SIGNAL */
+	VCAList vcal;
+	vcal.push_back (vca);
+
+	VCAAdded (vcal); /* EMIT SIGNAL */
 	return vca;
 
 }
@@ -64,6 +67,9 @@ VCAManager::remove_vca (boost::shared_ptr<VCA> vca)
 		_vcas.remove (vca);
 	}
 
-	VCARemoved (vca); /* EMIT SIGNAL */
+	VCAList vcal;
+	vcal.push_back (vca);
+
+	VCARemoved (vcal); /* EMIT SIGNAL */
 }
 

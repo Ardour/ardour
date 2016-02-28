@@ -92,6 +92,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/slave.h"
 #include "ardour/system_exec.h"
+#include "ardour/vca_manager.h"
 
 #include "LuaBridge/LuaBridge.h"
 
@@ -1794,6 +1795,16 @@ ARDOUR_UI::open_session ()
 			load_session (path, name);
 		}
 	}
+}
+
+void
+ARDOUR_UI::session_add_vca (const string& name_template)
+{
+	if (!_session) {
+		return;
+	}
+
+	_session->vca_manager().create_vca (name_template);
 }
 
 void
@@ -4035,7 +4046,7 @@ ARDOUR_UI::add_route ()
 		session_add_midi_bus (route_group, count, name_template, strict_io, instrument, 0);
 		break;
 	case AddRouteDialog::VCAMaster:
-		/* do something */
+		session_add_vca (name_template);
 		break;
 	}
 }

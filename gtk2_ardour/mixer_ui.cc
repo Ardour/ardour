@@ -47,6 +47,8 @@
 #include "ardour/route_group.h"
 #include "ardour/route_sorters.h"
 #include "ardour/session.h"
+#include "ardour/vca.h"
+#include "ardour/vca_manager.h"
 
 #include "keyboard.h"
 #include "mixer_ui.h"
@@ -63,6 +65,7 @@
 #include "mixer_group_tabs.h"
 #include "timers.h"
 #include "ui_config.h"
+#include "vca_master_strip.h"
 
 #include "i18n.h"
 
@@ -350,6 +353,9 @@ Mixer_UI::show_window ()
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		ms = (*ri)[track_columns.strip];
+		if (!ms) {
+			continue;
+		}
 		ms->set_width_enum (ms->get_width_enum (), ms->width_owner());
 		/* Fix visibility of mixer strip stuff */
 		ms->parameter_changed (X_("mixer-element-visibility"));
@@ -360,6 +366,29 @@ Mixer_UI::show_window ()
 }
 
 void
+Mixer_UI::add_masters (VCAList& vcas)
+{
+	cerr << "VCA added\n";
+
+	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
+
+		VCAMasterStrip* vms = new VCAMasterStrip (_session, *v);
+
+		TreeModel::Row row = *(track_model->append());
+		row[track_columns.text] = (*v)->name();
+		row[track_columns.visible] = true;
+		row[track_columns.vca] = vms;
+	}
+
+	redisplay_track_list ();
+}
+
+void
+Mixer_UI::remove_master (VCAMasterStrip* vms)
+{
+}
+
+void
 Mixer_UI::add_strips (RouteList& routes)
 {
 	bool from_scratch = track_model->children().size() == 0;
@@ -367,6 +396,10 @@ Mixer_UI::add_strips (RouteList& routes)
 
 	for (Gtk::TreeModel::Children::iterator it = track_model->children().begin(); it != track_model->children().end(); ++it) {
 		boost::shared_ptr<Route> r = (*it)[track_columns.route];
+
+		if (!r) {
+			continue;
+		}
 
 		if (r->order_key() == (routes.front()->order_key() + routes.size())) {
 			insert_iter = it;
@@ -434,6 +467,7 @@ Mixer_UI::add_strips (RouteList& routes)
 			row[track_columns.visible] = strip->route()->is_master() ? true : strip->marked_for_display();
 			row[track_columns.route] = route;
 			row[track_columns.strip] = strip;
+			row[track_columns.vca] = 0;
 
 			if (!from_scratch) {
 				_selection.add (strip);
@@ -540,6 +574,10 @@ Mixer_UI::reset_remote_control_ids ()
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		bool visible = (*ri)[track_columns.visible];
 
+		if (!route) {
+			continue;
+		}
+
 		if (!route->is_master() && !route->is_monitor()) {
 
 			uint32_t new_rid = (visible ? rid : invisible_key--);
@@ -586,6 +624,10 @@ Mixer_UI::sync_order_keys_from_treeview ()
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		bool visible = (*ri)[track_columns.visible];
+
+		if (!route) {
+			continue;
+		}
 
 		uint32_t old_key = route->order_key ();
 
@@ -650,6 +692,9 @@ Mixer_UI::sync_treeview_from_order_keys ()
 
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
+		if (!route) {
+			continue;
+		}
 		sorted_routes.push_back (RoutePlusOrderKey (route, old_order, route->order_key ()));
 	}
 
@@ -826,6 +871,8 @@ Mixer_UI::set_session (Session* sess)
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_title, this), gui_context());
 	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_title, this), gui_context());
 
+	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_masters, this, _1), gui_context());
+
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::parameter_changed, this, _1), gui_context ());
 
 	route_groups_changed ();
@@ -900,7 +947,9 @@ Mixer_UI::update_track_visibility ()
 
 		for (i = rows.begin(); i != rows.end(); ++i) {
 			MixerStrip *strip = (*i)[track_columns.strip];
-			(*i)[track_columns.visible] = strip->marked_for_display ();
+			if (strip) {
+				(*i)[track_columns.visible] = strip->marked_for_display ();
+			}
 		}
 
 		/* force route order keys catch up with visibility changes
@@ -984,7 +1033,7 @@ Mixer_UI::set_all_strips_visibility (bool yn)
 			TreeModel::Row row = (*i);
 			MixerStrip* strip = row[track_columns.strip];
 
-			if (strip == 0) {
+			if (!strip) {
 				continue;
 			}
 
@@ -1013,7 +1062,7 @@ Mixer_UI::set_all_audio_midi_visibility (int tracks, bool yn)
 			TreeModel::Row row = (*i);
 			MixerStrip* strip = row[track_columns.strip];
 
-			if (strip == 0) {
+			if (!strip) {
 				continue;
 			}
 
@@ -1134,11 +1183,22 @@ Mixer_UI::redisplay_track_list ()
 		return;
 	}
 
+	container_clear (vca_packer);
+
 	for (i = rows.begin(); i != rows.end(); ++i) {
+
+		VCAMasterStrip* vms = (*i)[track_columns.vca];
+
+		if (vms) {
+			vca_packer.pack_start (*vms, false, false);
+			vms->show ();
+			cerr << "Packed vca into vca_packer\n";
+			continue;
+		}
 
 		MixerStrip* strip = (*i)[track_columns.strip];
 
-		if (strip == 0) {
+		if (!strip) {
 			/* we're in the middle of changing a row, don't worry */
 			continue;
 		}

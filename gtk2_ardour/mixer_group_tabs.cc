@@ -63,6 +63,10 @@ MixerGroupTabs::compute_tabs () const
 
 		MixerStrip* s = (*i)[_mixer->track_columns.strip];
 
+		if (!s) {
+			continue;
+		}
+
 		if (s->route()->is_master() || s->route()->is_monitor() || !s->marked_for_display()) {
 			continue;
 		}
@@ -151,9 +155,13 @@ MixerGroupTabs::routes_for_tab (Tab const * t) const
 
 		MixerStrip* s = (*i)[_mixer->track_columns.strip];
 
-	 	if (s->route()->is_master() || s->route()->is_monitor() || !s->marked_for_display()) {
-	 		continue;
-	 	}
+		if (!s) {
+			continue;
+		}
+
+		if (s->route()->is_master() || s->route()->is_monitor() || !s->marked_for_display()) {
+			continue;
+		}
 
 		if (x >= t->to) {
 			/* tab finishes before this track starts */

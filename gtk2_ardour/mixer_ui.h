@@ -60,6 +60,7 @@ class MixerStrip;
 class PluginSelector;
 class MixerGroupTabs;
 class MonitorSection;
+class VCAMasterStrip;
 
 class PluginTreeStore : public Gtk::TreeStore
 {
@@ -162,6 +163,9 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	void add_strips (ARDOUR::RouteList&);
 	void remove_strip (MixerStrip *);
 
+	void add_masters (ARDOUR::VCAList&);
+	void remove_master (VCAMasterStrip*);
+
 	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route>);
 
 	void hide_all_strips (bool with_select);
@@ -256,16 +260,20 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	/* various treeviews */
 
 	struct TrackDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    TrackDisplayModelColumns () {
-		    add (text);
-		    add (visible);
-		    add (route);
-		    add (strip);
-	    }
-	    Gtk::TreeModelColumn<bool>           visible;
-	    Gtk::TreeModelColumn<std::string>  text;
-	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> > route;
-	    Gtk::TreeModelColumn<MixerStrip*>    strip;
+		TrackDisplayModelColumns () {
+			add (text);
+			add (visible);
+			add (route);
+			add (strip);
+			add (vca);
+		}
+		Gtk::TreeModelColumn<bool>         visible;
+		Gtk::TreeModelColumn<std::string>  text;
+		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> > route;
+		/* if route is non-null, this must be non-null */
+		Gtk::TreeModelColumn<MixerStrip*>  strip;
+		/* if route is null, this may be non-null */
+		Gtk::TreeModelColumn<VCAMasterStrip*>  vca;
 	};
 
 	struct GroupDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {

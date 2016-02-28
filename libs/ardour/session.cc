@@ -312,7 +312,7 @@ Session::Session (AudioEngine &eng,
 	, _scene_changer (0)
 	, _midi_ports (0)
 	, _mmc (0)
-	, _vca_manager (0)
+	, _vca_manager (new VCAManager (*this))
 {
 	uint32_t sr = 0;
 
