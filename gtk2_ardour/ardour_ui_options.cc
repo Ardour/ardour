@@ -83,31 +83,31 @@ ARDOUR_UI::toggle_time_master ()
 void
 ARDOUR_UI::toggle_send_mtc ()
 {
-	ActionManager::toggle_config_state ("options", "SendMTC", &RCConfiguration::set_send_mtc, &RCConfiguration::get_send_mtc);
+	ActionManager::toggle_config_state ("Options", "SendMTC", &RCConfiguration::set_send_mtc, &RCConfiguration::get_send_mtc);
 }
 
 void
 ARDOUR_UI::toggle_send_mmc ()
 {
-	ActionManager::toggle_config_state ("options", "SendMMC", &RCConfiguration::set_send_mmc, &RCConfiguration::get_send_mmc);
+	ActionManager::toggle_config_state ("Options", "SendMMC", &RCConfiguration::set_send_mmc, &RCConfiguration::get_send_mmc);
 }
 
 void
 ARDOUR_UI::toggle_send_midi_clock ()
 {
-	ActionManager::toggle_config_state ("options", "SendMidiClock", &RCConfiguration::set_send_midi_clock, &RCConfiguration::get_send_midi_clock);
+	ActionManager::toggle_config_state ("Options", "SendMidiClock", &RCConfiguration::set_send_midi_clock, &RCConfiguration::get_send_midi_clock);
 }
 
 void
 ARDOUR_UI::toggle_use_mmc ()
 {
-	ActionManager::toggle_config_state ("options", "UseMMC", &RCConfiguration::set_mmc_control, &RCConfiguration::get_mmc_control);
+	ActionManager::toggle_config_state ("Options", "UseMMC", &RCConfiguration::set_mmc_control, &RCConfiguration::get_mmc_control);
 }
 
 void
 ARDOUR_UI::toggle_send_midi_feedback ()
 {
-	ActionManager::toggle_config_state ("options", "SendMIDIfeedback", &RCConfiguration::set_midi_feedback, &RCConfiguration::get_midi_feedback);
+	ActionManager::toggle_config_state ("Options", "SendMIDIfeedback", &RCConfiguration::set_midi_feedback, &RCConfiguration::get_midi_feedback);
 }
 
 void
@@ -332,16 +332,16 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 	} else if (p == "send-mtc") {
 
-		ActionManager::map_some_state ("options", "SendMTC", &RCConfiguration::get_send_mtc);
+		ActionManager::map_some_state ("Options", "SendMTC", &RCConfiguration::get_send_mtc);
 
 	} else if (p == "send-mmc") {
 
-		ActionManager::map_some_state ("options", "SendMMC", &RCConfiguration::get_send_mmc);
+		ActionManager::map_some_state ("Options", "SendMMC", &RCConfiguration::get_send_mmc);
 
 	} else if (p == "mmc-control") {
-		ActionManager::map_some_state ("options", "UseMMC", &RCConfiguration::get_mmc_control);
+		ActionManager::map_some_state ("Options", "UseMMC", &RCConfiguration::get_mmc_control);
 	} else if (p == "midi-feedback") {
-		ActionManager::map_some_state ("options", "SendMIDIfeedback", &RCConfiguration::get_midi_feedback);
+		ActionManager::map_some_state ("Options", "SendMIDIfeedback", &RCConfiguration::get_midi_feedback);
 	} else if (p == "auto-play") {
 		ActionManager::map_some_state ("Transport", "ToggleAutoPlay", sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_play));
 	} else if (p == "auto-return") {

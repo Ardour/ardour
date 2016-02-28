@@ -530,7 +530,7 @@ ARDOUR_UI::install_actions ()
 	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), hide_return (sigc::bind (sigc::mem_fun (*Config, &RCConfiguration::set_shuttle_units), Percentage)));
 	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), hide_return (sigc::bind (sigc::mem_fun (*Config, &RCConfiguration::set_shuttle_units), Semitones)));
 
-	Glib::RefPtr<ActionGroup> option_actions = global_actions.create_action_group ("options");
+	Glib::RefPtr<ActionGroup> option_actions = global_actions.create_action_group ("Options");
 
 	act = global_actions.register_toggle_action (option_actions, X_("SendMTC"), _("Send MTC"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_send_mtc));
 	ActionManager::session_sensitive_actions.push_back (act);
