@@ -746,7 +746,12 @@ VideoTimeLine::find_xjadeo () {
 			return;
 		}
 
-		version_check.wait ();
+#ifdef PLATFORM_WINDOWS
+		version_check.wait (); // 40ms timeout
+#else
+		version_check.wait (WNOHANG);
+#endif
+
 		int timeout = 300;
 		while (xjadeo_version.empty() && --timeout) {
 			Glib::usleep(10000);

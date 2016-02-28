@@ -76,3 +76,4 @@ UI_CONFIG_VARIABLE (bool, buggy_gradients, "buggy-gradients", false)
 UI_CONFIG_VARIABLE (bool, cairo_image_surface, "cairo-image-surface", false)
 UI_CONFIG_VARIABLE (uint64_t, waveform_cache_size, "waveform-cache-size", 100) /* units of megagbytes */
 UI_CONFIG_VARIABLE (int32_t, recent_session_sort, "recent-session-sort", 0)
+UI_CONFIG_VARIABLE (std::string, xjadeo_binary, "xjadeo-binary", "")

@@ -27,6 +27,7 @@
 #endif
 
 #include "pbd/file_utils.h"
+#include "ui_config.h"
 #include "video_tool_paths.h"
 #include "i18n.h"
 
@@ -107,8 +108,18 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 	std::string reg;
 	std::string program_files = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILES);
 #endif
+	xjadeo_exe = X_("");
+
 	if (getenv("XJREMOTE")) {
 		xjadeo_exe = getenv("XJREMOTE");
+#ifdef __APPLE__
+	} else if (!UIConfiguration::instance().get_xjadeo_binary().empty()
+			&& Glib::file_test (UIConfiguration::instance().get_xjadeo_binary() + "/Contents/MacOS/xjadeo", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
+		xjadeo_exe = UIConfiguration::instance().get_xjadeo_binary() + "/Contents/MacOS/xjadeo";
+#endif
+	} else if (!UIConfiguration::instance().get_xjadeo_binary().empty()
+			&& Glib::file_test (UIConfiguration::instance().get_xjadeo_binary(), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
+		xjadeo_exe = UIConfiguration::instance().get_xjadeo_binary();
 	} else if (find_file (Searchpath(Glib::getenv("PATH")), X_("xjremote"), xjadeo_file_path)) {
 		xjadeo_exe = xjadeo_file_path;
 	} else if (find_file (Searchpath(Glib::getenv("PATH")), X_("xjadeo"), xjadeo_file_path)) {
@@ -139,11 +150,8 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 		xjadeo_exe = X_("C:\\Program Files\\xjadeo\\xjadeo.exe");
 	}
 #endif
-	else  {
-		xjadeo_exe = X_("");
-		return false;
-	}
-	return true;
+
+	return (!xjadeo_exe.empty() && Glib::file_test(xjadeo_exe, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE));
 }
 
 bool

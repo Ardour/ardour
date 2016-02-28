@@ -1546,45 +1546,78 @@ public:
 		, _show_video_export_info_button (_("Show Video Export Info before export"))
 		, _show_video_server_dialog_button (_("Show Video Server Startup Dialog"))
 		, _video_advanced_setup_button (_("Advanced Setup (remote video server)"))
+		, _xjadeo_browse_button (_("Browse..."))
 	{
-		Table* t = manage (new Table (2, 6));
+		Table* t = manage (new Table (8, 4));
 		t->set_spacings (4);
 
-		t->attach (_video_advanced_setup_button, 0, 2, 0, 1);
+		std::stringstream s;
+		s << "<b>" << _("Video Server") << "</b>";
+		Label* l = manage (new Label (s.str()));
+		l->set_use_markup (true);
+		l->set_alignment (0, 0.5);
+		t->attach (*l, 0, 4, 0, 1, EXPAND | FILL, FILL | EXPAND, 0, 8);
+
+		t->attach (_video_advanced_setup_button, 1, 4, 1, 2);
 		_video_advanced_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::video_advanced_setup_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_video_advanced_setup_button,
 					    _("<b>When enabled</b> you can speficify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
 
-		Label* l = manage (new Label (_("Video Server URL:")));
+		l = manage (new Label (_("Video Server URL:")));
 		l->set_alignment (0, 0.5);
-		t->attach (*l, 0, 1, 1, 2, FILL);
-		t->attach (_video_server_url_entry, 1, 2, 1, 2, FILL);
+		t->attach (*l, 1, 2, 2, 3, FILL);
+		t->attach (_video_server_url_entry, 2, 4, 2, 3, FILL);
 		Gtkmm2ext::UI::instance()->set_tip (_video_server_url_entry,
 					    _("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is running locally"));
 
 		l = manage (new Label (_("Video Folder:")));
 		l->set_alignment (0, 0.5);
-		t->attach (*l, 0, 1, 2, 3, FILL);
-		t->attach (_video_server_docroot_entry, 1, 2, 2, 3);
+		t->attach (*l, 1, 2, 3, 4, FILL);
+		t->attach (_video_server_docroot_entry, 2, 4, 3, 4);
 		Gtkmm2ext::UI::instance()->set_tip (_video_server_docroot_entry,
 					    _("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unvailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
 
-		/* small vspace  y=3..4 */
-
-		t->attach (_show_video_export_info_button, 0, 2, 4, 5);
+		t->attach (_show_video_export_info_button, 1, 4, 4, 5);
 		_show_video_export_info_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_export_info_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_show_video_export_info_button,
 					    _("<b>When enabled</b> an information window with details is displayed before the video-export dialog."));
 
-		t->attach (_show_video_server_dialog_button, 0, 2, 5, 6);
+		t->attach (_show_video_server_dialog_button, 1, 4, 5, 6);
 		_show_video_server_dialog_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_server_dialog_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_show_video_server_dialog_button,
 					    _("<b>When enabled</b> the video server is never launched automatically without confirmation"));
+
+		s.str (std::string ());
+		s << "<b>" << _("Video Monitor") << "</b>";
+		l = manage (new Label (s.str()));
+		l->set_use_markup (true);
+		l->set_alignment (0, 0.5);
+		t->attach (*l, 0, 4, 6, 7, EXPAND | FILL, FILL | EXPAND, 0, 8);
+
+		l = manage (new Label (string_compose (_("Custom Path to Video Monitor (%1) - leave empty for default:"),
+#ifdef __APPLE__
+						"Jadeo.app"
+#elif defined PLATFORM_WINDOWS
+						"xjadeo.exe"
+#else
+						"xjadeo"
+#endif
+						)));
+		l->set_alignment (0, 0.5);
+		t->attach (*l, 1, 4, 7, 8, FILL);
+		t->attach (_custom_xjadeo_path, 2, 3, 8, 9);
+		Gtkmm2ext::UI::instance()->set_tip (_custom_xjadeo_path, _("Set a custom path to the Video Monitor Executable, changing this requires a restart."));
+		t->attach (_xjadeo_browse_button, 3, 4, 8, 9, FILL);
 
 		_video_server_url_entry.signal_changed().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
 		_video_server_url_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_url_changed));
 		_video_server_docroot_entry.signal_changed().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_docroot_changed));
 		_video_server_docroot_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_docroot_changed));
+		_custom_xjadeo_path.signal_changed().connect (sigc::mem_fun (*this, &VideoTimelineOptions::custom_xjadeo_path_changed));
+		_xjadeo_browse_button.signal_clicked ().connect (sigc::mem_fun (*this, &VideoTimelineOptions::xjadeo_browse_clicked));
+
+		// xjadeo-path is a UIConfig parameter
+		UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VideoTimelineOptions::parameter_changed));
 
 		_box->pack_start (*t,true,true);
 	}
@@ -1617,6 +1650,30 @@ public:
 		_rc_config->set_video_advanced_setup(x);
 	}
 
+	void custom_xjadeo_path_changed ()
+	{
+		UIConfiguration::instance().set_xjadeo_binary (_custom_xjadeo_path.get_text());
+	}
+
+	void xjadeo_browse_clicked ()
+	{
+		Gtk::FileChooserDialog dialog(_("Set Video Monitor Executable"), Gtk::FILE_CHOOSER_ACTION_OPEN);
+		dialog.set_filename (UIConfiguration::instance().get_xjadeo_binary());
+		dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+		dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+		if (dialog.run () == Gtk::RESPONSE_OK) {
+			const std::string& filename = dialog.get_filename();
+			if (!filename.empty() && (
+#ifdef __APPLE__
+					Glib::file_test (filename + "/Contents/MacOS/xjadeo", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE) ||
+#endif
+					Glib::file_test (filename, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)
+					)) {
+				UIConfiguration::instance().set_xjadeo_binary (filename);
+			}
+		}
+	}
+
 	void parameter_changed (string const & p)
 	{
 		if (p == "video-server-url") {
@@ -1634,6 +1691,8 @@ public:
 			_video_advanced_setup_button.set_active(x);
 			_video_server_docroot_entry.set_sensitive(x);
 			_video_server_url_entry.set_sensitive(x);
+		} else if (p == "xjadeo-binary") {
+			_custom_xjadeo_path.set_text (UIConfiguration::instance().get_xjadeo_binary());
 		}
 	}
 
@@ -1645,15 +1704,18 @@ public:
 		parameter_changed ("show-video-export-info");
 		parameter_changed ("show-video-server-dialog");
 		parameter_changed ("video-advanced-setup");
+		parameter_changed ("xjadeo-binary");
 	}
 
 private:
 	RCConfiguration* _rc_config;
 	Entry _video_server_url_entry;
 	Entry _video_server_docroot_entry;
+	Entry _custom_xjadeo_path;
 	CheckButton _show_video_export_info_button;
 	CheckButton _show_video_server_dialog_button;
 	CheckButton _video_advanced_setup_button;
+	Button _xjadeo_browse_button;
 };
 
 
