@@ -1,7 +1,15 @@
-Download waf (http://code.google.com/p/waf/)
+Download waf (https://waf.io/)
+
 autowaf.py is present in the tools directory of the Ardour source code.
+a patch for C++11/clang can be found in tools/waflib.patch (needed for waf 1.8.19)
 
-From within the waf source tree, run:
+Current waf is build as follows;
 
-./waf-light -v --make-waf --tools=misc,doxygen,/path/to/autowaf.py --prelude=''
-cp ./waf /path/to/ardour/3.0/waf
+ARDOURSRC=`pwd`
+cd /tmp
+curl https://waf.io/waf-1.6.11.tar.bz2 | tar xj
+cd waf-1.6.11
+
+patch -p1 < $ARDOURSRC/tools/waflib.patch
+./waf-light -v --make-waf --tools=misc,doxygen,$ARDOURSRC/tools/autowaf.py --prelude=''
+cp ./waf $ARDOURSRC/waf
