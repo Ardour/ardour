@@ -356,6 +356,9 @@ PixFader::on_size_request (GtkRequisition* req)
 void
 PixFader::on_size_allocate (Gtk::Allocation& alloc)
 {
+	int old_girth = _girth;
+	int old_span = _span;
+
 	CairoWidget::on_size_allocate(alloc);
 
 	if (_orien == VERT) {
@@ -366,7 +369,7 @@ PixFader::on_size_allocate (Gtk::Allocation& alloc)
 		_span = alloc.get_width ();
 	}
 
-	if (is_realized()) {
+	if (is_realized() && ((old_girth != _girth) || (old_span != _span))) {
 		/* recreate patterns in case we've changed size */
 		create_patterns ();
 	}
