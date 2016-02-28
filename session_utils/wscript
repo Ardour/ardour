@@ -54,7 +54,7 @@ def build_ardour_util(bld, util):
         'PACKAGE="'    + "ARDOURUTILS" + '"',
         ]
     obj.install_path = bld.env['LIBDIR'] + '/utils'
-    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD OGG CURL DL'
+    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD OGG CURL DL XML'
     obj.uselib       += ' FFTW3F'
     obj.uselib       += ' AUDIOUNITS OSX LO '
     obj.uselib       += ' TAGLIB '

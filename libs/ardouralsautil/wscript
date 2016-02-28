@@ -34,7 +34,7 @@ def build(bld):
             obj.name     = 'ardouralsautil'
             obj.target   = 'ardouralsautil'
             obj.use      = 'libpbd'
-            obj.uselib   = [ 'ALSA' ]
+            obj.uselib   = [ 'ALSA', 'GLIBMM' ]
             obj.vnum     = '0.0.1'
             obj.install_path = os.path.join(bld.env['LIBDIR'])
 

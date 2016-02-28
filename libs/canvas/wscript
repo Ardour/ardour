@@ -84,7 +84,7 @@ def build(bld):
 
     obj.export_includes = ['.']
     obj.includes     = ['.']
-    obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST'
+    obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST XML'
     obj.use          = [ 'libpbd', 'libevoral', 'libardour', 'libgtkmm2ext', 'libevoral' ]
     obj.name         = 'libcanvas'
     obj.target       = 'canvas'
@@ -92,7 +92,32 @@ def build(bld):
     obj.install_path = bld.env['LIBDIR']
     obj.defines      += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
 
-    if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
+    # canvas unit-tests are outdated
+    if False and bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
+            unit_testobj              = bld(features = 'cxx cxxprogram')
+            unit_testobj.source       = '''
+                    test/group.cc
+                    test/arrow.cc
+                    test/optimizing_lookup_table.cc
+                    test/polygon.cc
+                    test/types.cc
+                    test/render.cc
+                    test/xml.cc
+                    test/wave_view.cc
+                    test/item.cc
+                    test/testrunner.cpp
+                '''.split()
+
+            unit_testobj.includes     = obj.includes + ['test', '../pbd']
+            unit_testobj.uselib       = 'CPPUNIT SIGCPP CAIROMM GTKMM'
+            unit_testobj.uselib_local = 'libcanvas libevoral libardour libgtkmm2ext'
+            unit_testobj.name         = 'libcanvas-unit-tests'
+            unit_testobj.target       = 'run-tests'
+            unit_testobj.install_path = ''
+            unit_testobj.cxxflags     = ['-DPACKAGE="libcanvastest"']
+            unit_testobj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
+            unit_testobj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFDIR']) + '"']
+            unit_testobj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
 
             manual_tests              = '''
                         test/hello_world.cc
@@ -106,7 +131,7 @@ def build(bld):
             for t in manual_tests:
                     target = t[:-3]
                     name = t[t.find('/')+1:-3]
-                    manual_testobj = bld.new_task_gen('cxx', 'program')
+                    manual_testobj = bld(features = 'cxx cxxprogram')
                     manual_testobj.source = t
                     manual_testobj.includes = obj.includes + ['test', '../pbd']
                     manual_testobj.uselib       = 'CPPUNIT SIGCPP CAIROMM GTKMM'
@@ -114,31 +139,6 @@ def build(bld):
                     manual_testobj.name         = 'libcanvas-manual-test-%s' % name
                     manual_testobj.target       = target
                     manual_testobj.install_path = ''
-
-                    unit_testobj              = bld.new_task_gen('cxx', 'program')
-                    unit_testobj.source       = '''
-                        test/group.cc
-                        test/arrow.cc
-                        test/optimizing_lookup_table.cc
-                        test/polygon.cc
-                        test/types.cc
-                        test/render.cc
-                        test/xml.cc
-                        test/wave_view.cc
-                        test/item.cc
-                        test/testrunner.cpp
-                '''.split()
-
-                    unit_testobj.includes     = obj.includes + ['test', '../pbd']
-                    unit_testobj.uselib       = 'CPPUNIT SIGCPP CAIROMM GTKMM'
-                    unit_testobj.uselib_local = 'libcanvas libevoral libardour libgtkmm2ext'
-                    unit_testobj.name         = 'libcanvas-unit-tests'
-                    unit_testobj.target       = 'run-tests'
-                    unit_testobj.install_path = ''
-                    unit_testobj.cxxflags     = ['-DPACKAGE="libcanvastest"']
-                    unit_testobj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
-                    unit_testobj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
-                    unit_testobj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
 
             benchmarks = '''
                         benchmark/items_at_point.cc
@@ -150,7 +150,7 @@ def build(bld):
             for t in benchmarks:
                     target = t[:-3]
                     name = t[t.find('/')+1:-3]
-                    manual_testobj = bld.new_task_gen('cxx', 'program')
+                    manual_testobj = bld(features = 'cxx cxxprogram')
                     manual_testobj.source = [ t, 'benchmark/benchmark.cc' ]
                     manual_testobj.includes = obj.includes + ['test', '../pbd']
                     manual_testobj.uselib       = 'CPPUNIT SIGCPP CAIROMM GTKMM'

@@ -107,7 +107,7 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libgtkmm2ext'
     obj.target       = 'gtkmm2ext'
-    obj.uselib       = 'GTKMM GTK'
+    obj.uselib       = 'GTKMM GTK XML'
     obj.use          = [ 'libpbd', 'libardour' ]
     obj.vnum         = GTKMM2EXT_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']

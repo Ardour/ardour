@@ -72,7 +72,7 @@ def build(bld):
         'PACKAGE="'    + "ARDOURUTILS" + '"',
         ]
 
-    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD OGG CURL DL'
+    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD OGG CURL DL XML'
     obj.uselib       += ' FFTW3F'
     obj.uselib       += ' AUDIOUNITS OSX LO '
     obj.uselib       += ' TAGLIB '
