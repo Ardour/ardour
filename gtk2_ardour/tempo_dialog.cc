@@ -465,8 +465,8 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 
 	lock_styles.insert (make_pair (_("music"), PositionLockStyle::MusicTime));
 	strings.push_back (_("music"));
-	lock_styles.insert (make_pair (_("audio ur brane wul xplod"), PositionLockStyle::AudioTime));
-	strings.push_back (_("audio"));
+	lock_styles.insert (make_pair (_("audio"), PositionLockStyle::AudioTime));
+	strings.push_back (_("audio ur brane wul xplod"));
 	set_popdown_strings (lock_style, strings);
 	LockStyles::iterator ls;
 	for (ls = lock_styles.begin(); ls != lock_styles.end(); ++ls) {
@@ -488,7 +488,7 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 	table->attach (*bpb_label, 0, 1, 0, 1, FILL|EXPAND, FILL|EXPAND);
 	table->attach (bpb_entry, 1, 2, 0, 1, FILL|EXPAND, FILL|EXPAND);
 	table->attach (*note_label, 0, 1, 1, 2, FILL|EXPAND, FILL|EXPAND);
-	table->attach (note_type, 1, 2, 1, 2, FILL|EXPAND, SHRINK);
+	table->attach (note_type, 1, 2, 1, 2, FILL|EXPAND, FILL|EXPAND);
 
 	snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
 	when_bar_entry.set_text (buf);
@@ -499,10 +499,13 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 
 		table->attach (*when_label, 0, 1, 2, 3, FILL | EXPAND, FILL | EXPAND);
 		table->attach (when_bar_entry, 1, 2, 2, 3, FILL | EXPAND, FILL | EXPAND);
-	}
 
-	table->attach (*lock_label, 0, 1, 3, 4, FILL|EXPAND, FILL|EXPAND);
-	table->attach (lock_style, 1, 2, 3, 4, FILL|EXPAND, SHRINK);
+		table->attach (*lock_label, 0, 1, 3, 4, FILL|EXPAND, FILL|EXPAND);
+		table->attach (lock_style, 1, 2, 3, 4, FILL|EXPAND, SHRINK);
+	} else {
+		table->attach (*lock_label, 0, 1, 2, 3, FILL|EXPAND, FILL|EXPAND);
+		table->attach (lock_style, 1, 2, 2, 3, FILL|EXPAND, SHRINK);
+	}
 
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (*table, false, false);

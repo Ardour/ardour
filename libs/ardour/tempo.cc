@@ -824,6 +824,30 @@ TempoMap::do_insert (MetricSection* section)
 	}
 }
 
+/*
+This is for a gui who needs to know the frame of a beat if a proposed tempo section were to be placed there.
+You probably shouldn't use this unless you know what you're doing,
+as it doesn't recompute the tempo map and will make a ramp invalid intil that next happens.
+It is assumed that the next frame calculation is the last time you need this c_func before the next do_insert() and/or recompute_map().
+*/
+void
+TempoMap::replace_c_func_from_tempo_and_beat (const double& bpm, const double& beat)
+{
+	Glib::Threads::RWLock::WriterLock lm (lock);
+	TempoSection* prev_ts = 0;
+	TempoSection* t;
+
+	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if (prev_ts && t->beat() > prev_ts->beat()) {
+				prev_ts->set_c_func_from_tempo_and_beat (bpm, beat, _frame_rate);
+				break;
+			}
+			prev_ts = t;
+		}
+	}
+}
+
 void
 TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const double& where, TempoSection::Type type)
 {
