@@ -1895,7 +1895,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* TRANSPORT */
 
-	add_option (_("Transport"), new OptionEditorHeading (S_("Playhead Behaviour")));
 	add_option (_("Transport"), new OptionEditorHeading (S_("Transport Options")));
 
 	BoolOption* tsf;
