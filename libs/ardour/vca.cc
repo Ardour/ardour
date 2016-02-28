@@ -47,16 +47,11 @@ VCA::get_value() const
 void
 VCA::add (boost::shared_ptr<Route> r)
 {
-	boost::dynamic_pointer_cast<GainControl>(r->gain_control())->set_master (_control);
+	boost::dynamic_pointer_cast<GainControl>(r->gain_control())->add_master (_control);
 }
 
 void
 VCA::remove (boost::shared_ptr<Route> r)
 {
-	boost::shared_ptr<GainControl> route_gain = boost::dynamic_pointer_cast<GainControl>(r->gain_control());
-	boost::shared_ptr<GainControl> current_master = route_gain->master();
-
-	if (current_master == _control) {
-		route_gain->set_master (boost::shared_ptr<GainControl>());
-	}
+	r->gain_control()->remove_master (_control);
 }

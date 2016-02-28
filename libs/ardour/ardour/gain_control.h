@@ -20,7 +20,10 @@
 #define __ardour_gain_control_h__
 
 #include <string>
+#include <list>
+
 #include <boost/shared_ptr.hpp>
+#include <glibmm/threads.h>
 
 #include "pbd/controllable.h"
 
@@ -51,12 +54,18 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	double lower_db;
 	double range_db;
 
-	boost::shared_ptr<GainControl> master() const { return _master; }
-	void set_master (boost::shared_ptr<GainControl>);
+	void add_master (boost::shared_ptr<GainControl>);
+	void remove_master (boost::shared_ptr<GainControl>);
+	void clear_masters ();
 
   private:
 	void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
-	boost::shared_ptr<GainControl> _master;
+	gain_t get_master_gain () const;
+
+	mutable Glib::Threads::Mutex master_lock;
+
+	typedef std::list<boost::shared_ptr<GainControl> > Masters;
+	Masters _masters;
 };
 
 } /* namespace */
