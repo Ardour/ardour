@@ -24,6 +24,14 @@
 #include <math.h>
 #include "ebu_r128_proc.h"
 
+#ifdef COMPILER_MSVC
+#include <float.h>
+// C99 'isfinite()' is not available in MSVC.
+#define isfinite_local(val) (bool)_finite((double)val)
+#else
+#define isfinite_local isfinite
+#endif
+
 namespace Fons {
 
 float Ebu_r128_hist::_bin_power [100] = { 0.0f };
@@ -223,8 +231,8 @@ void Ebu_r128_proc::process (int nfram, const float *const *input)
 	    _wrind &= 63;
 	    _loudness_M = addfrags (8);
 	    _loudness_S = addfrags (60);
-	    if (!isfinite(_loudness_M) || _loudness_M < -200.f) _loudness_M = -200.0f;
-	    if (!isfinite(_loudness_S) || _loudness_S < -200.f) _loudness_S = -200.0f;
+	    if (!isfinite_local(_loudness_M) || _loudness_M < -200.f) _loudness_M = -200.0f;
+	    if (!isfinite_local(_loudness_S) || _loudness_S < -200.f) _loudness_S = -200.0f;
             if (_loudness_M > _maxloudn_M) _maxloudn_M = _loudness_M;
             if (_loudness_S > _maxloudn_S) _maxloudn_S = _loudness_S;
 	    if (_integr)
@@ -329,10 +337,10 @@ float Ebu_r128_proc::detect_process (int nfram)
 	}
 	if (_nchan == 1) si = 2 * sj;
 	else si += _chan_gain [i] * sj;
-	S->_z1 = !isfinite(z1) ? 0 : z1;
-	S->_z2 = !isfinite(z2) ? 0 : z2;
-	S->_z3 = !isfinite(z3) ? 0 : z3;
-	S->_z4 = !isfinite(z4) ? 0 : z4;
+	S->_z1 = !isfinite_local(z1) ? 0 : z1;
+	S->_z2 = !isfinite_local(z2) ? 0 : z2;
+	S->_z3 = !isfinite_local(z3) ? 0 : z3;
+	S->_z4 = !isfinite_local(z4) ? 0 : z4;
     }
     return si;
 }

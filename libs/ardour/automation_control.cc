@@ -18,6 +18,7 @@
 
 */
 
+#include <math.h>
 #include <iostream>
 #include "ardour/automation_control.h"
 #include "ardour/automation_watch.h"
@@ -28,6 +29,14 @@
 #include "pbd/stacktrace.h"
 
 #include "i18n.h"
+
+#ifdef COMPILER_MSVC
+#include <float.h>
+// C99 'isfinite()' is not available in MSVC.
+#define isfinite_local(val) (bool)_finite((double)val)
+#else
+#define isfinite_local isfinite
+#endif
 
 using namespace std;
 using namespace ARDOUR;
@@ -199,7 +208,7 @@ AutomationControl::internal_to_interface (double val) const
 double
 AutomationControl::interface_to_internal (double val) const
 {
-	if (!isfinite (val)) {
+	if (!isfinite_local (val)) {
 		val = 0;
 	}
 	if (_desc.logarithmic) {
