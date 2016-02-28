@@ -29,8 +29,6 @@
 #undef verify
 #endif
 
-#undef Nil // ardour_ui.h ->  window_manager.h -> lua_script_manager.h -> ardour/luascripting.h -> ... lua  uses Nil
-
 #include "ardour_ui.h"
 #include "actions.h"
 #include "opts.h"
