@@ -702,11 +702,11 @@ ARDOUR_UI::save_ardour_state ()
 
 	string current_tab;
 	int current_page_number = _tabs.get_current_page ();
-	if (editor && (current_page_number == _tabs.page_num (editor->contents()))) {
+	if (current_page_number == _tabs.page_num (editor->contents())) {
 		current_tab = "editor";
-	} else if (mixer && (current_page_number == _tabs.page_num (mixer->contents()))) {
+	} else if (current_page_number == _tabs.page_num (mixer->contents())) {
 		current_tab = "mixer";
-	} else if (rc_option_editor && (current_page_number == _tabs.page_num (rc_option_editor->contents()))) {
+	} else if (current_page_number == _tabs.page_num (rc_option_editor->contents())) {
 		current_tab == "preferences";
 	}
 
