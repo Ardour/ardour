@@ -46,6 +46,22 @@ list<Bindings*> Bindings::bindings; /* global. Gulp */
 list<ActionMap*> ActionMap::action_maps; /* global. Gulp */
 PBD::Signal1<void,Bindings*> Bindings::BindingsChanged;
 
+
+/*============================ ActionNameRegistered ===========================*/
+template <typename IteratorValueType>
+struct ActionNameRegistered
+{
+	ActionNameRegistered(std::string const& name)
+	: action_name(name)
+	{}
+
+	bool operator()(IteratorValueType elem) const {
+		return elem.second.action_name == action_name;
+	}
+	std::string const& action_name;
+};
+
+/*================================ MouseButton ================================*/
 MouseButton::MouseButton (uint32_t state, uint32_t keycode)
 {
         uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
@@ -140,6 +156,7 @@ MouseButton::name () const
         return str;
 }
 
+/*================================ KeyboardKey ================================*/
 KeyboardKey::KeyboardKey (uint32_t state, uint32_t keycode)
 {
         uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
@@ -259,6 +276,7 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
         return true;
 }
 
+/*================================= Bindings =================================*/
 Bindings::Bindings (std::string const& name)
 	: _name (name)
 	, _action_map (0)
@@ -363,16 +381,8 @@ Bindings::empty() const
 bool
 Bindings::activate (KeyboardKey kb, Operation op)
 {
-        KeybindingMap* kbm = 0;
+	KeybindingMap& kbm = get_keymap (op);
 
-        switch (op) {
-        case Press:
-                kbm = &press_bindings;
-                break;
-        case Release:
-                kbm = &release_bindings;
-                break;
-        }
 
         /* if shift was pressed, GDK will send us (e.g) 'E' rather than 'e'.
            Our bindings all use the lower case character/keyname, so switch
@@ -381,9 +391,9 @@ Bindings::activate (KeyboardKey kb, Operation op)
 
         KeyboardKey unshifted (kb.state(), gdk_keyval_to_lower (kb.key()));
 
-        KeybindingMap::iterator k = kbm->find (unshifted);
+        KeybindingMap::iterator k = kbm.find (unshifted);
 
-        if (k == kbm->end()) {
+        if (k == kbm.end()) {
                 /* no entry for this key in the state map */
 	        DEBUG_TRACE (DEBUG::Bindings, string_compose ("no binding for %1\n", unshifted));
 	        return false;
@@ -495,156 +505,67 @@ Bindings::replace (KeyboardKey kb, Operation op, string const & action_name, boo
 		return false;
 	}
 
-	/* We have to search the existing binding map by both action and
-	 * keybinding, because the following are possible:
-	 *
-	 *   - key is already used for a different action
-	 *   - action has a different binding
-	 *   - key is not used
-	 *   - action is not bound
-	 */
-
-	RefPtr<Action> action = _action_map->find_action (action_name);
-
-        if (!action) {
-	        return false;
-        }
-
-        KeybindingMap* kbm = 0;
-
-        switch (op) {
-        case Press:
-                kbm = &press_bindings;
-                break;
-        case Release:
-                kbm = &release_bindings;
-                break;
-        }
-
-        KeybindingMap::iterator k = kbm->find (kb);
-
-        if (k != kbm->end()) {
-	        kbm->erase (k);
-        }
-
-        /* now linear search by action */
-
-        for (k = kbm->begin(); k != kbm->end(); ++k) {
-	        if (k->second.action_name == action_name) {
-		        kbm->erase (k);
-		        break;
-	        }
-        }
-
-        add (kb, op, action_name, can_save);
-
-        /* for now, this never fails */
-
-        return true;
+	if (is_registered(op, action_name)) {
+		remove(op, action_name, can_save);
+	}
+	add (kb, op, action_name, can_save);
+	return true;
 }
 
-void
+bool
 Bindings::add (KeyboardKey kb, Operation op, string const& action_name, bool can_save)
 {
-        KeybindingMap* kbm = 0;
+	if (is_registered(op, action_name)) {
+		return false;
+	}
 
-        switch (op) {
-        case Press:
-	        kbm = &press_bindings;
-                break;
-        case Release:
-                kbm = &release_bindings;
-                break;
-        }
+	KeybindingMap& kbm = get_keymap (op);
 
-        KeybindingMap::iterator k = kbm->find (kb);
+	KeybindingMap::value_type new_pair (kb, ActionInfo (action_name));
+	kbm.insert (new_pair).first;
 
-        if (k != kbm->end()) {
-	        kbm->erase (k);
-        }
-        KeybindingMap::value_type new_pair (kb, ActionInfo (action_name));
+	if (can_save) {
+		Keyboard::keybindings_changed ();
+	}
 
-        kbm->insert (new_pair).first;
-
-        if (can_save) {
-	        Keyboard::keybindings_changed ();
-        }
-
-        BindingsChanged (this); /* EMIT SIGNAL */
+	BindingsChanged (this); /* EMIT SIGNAL */
+	return true;
 }
 
-void
-Bindings::remove (KeyboardKey kb, Operation op, bool can_save)
+bool
+Bindings::remove (Operation op, std::string const& action_name, bool can_save)
 {
-        KeybindingMap* kbm = 0;
+	bool erased_action = false;
+	KeybindingMap& kbm = get_keymap (op);
+	for (KeybindingMap::iterator k = kbm.begin(); k != kbm.end(); ++k) {
+		if (k->second.action_name == action_name) {
+			kbm.erase (k);
+			erased_action = true;
+			break;
+		}
+	}
 
-        switch (op) {
-        case Press:
-                kbm = &press_bindings;
-                break;
-        case Release:
-                kbm = &release_bindings;
-                break;
-        }
+	if (!erased_action) {
+		return erased_action;
+	}
 
-        KeybindingMap::iterator k = kbm->find (kb);
+	if (can_save) {
+		Keyboard::keybindings_changed ();
+	}
 
-        if (k != kbm->end()) {
-                kbm->erase (k);
-        }
-
-        if (can_save) {
-	        Keyboard::keybindings_changed ();
-        }
-
-        BindingsChanged (this); /* EMIT SIGNAL */
+	BindingsChanged (this); /* EMIT SIGNAL */
+	return erased_action;
 }
 
-void
-Bindings::remove (RefPtr<Action> action, Operation op, bool can_save)
-{
-        KeybindingMap* kbm = 0;
-
-        switch (op) {
-        case Press:
-                kbm = &press_bindings;
-                break;
-        case Release:
-                kbm = &release_bindings;
-                break;
-        }
-
-        for (KeybindingMap::iterator k = kbm->begin(); k != kbm->end(); ++k) {
-	        if (k->second.action == action) {
-		        kbm->erase (k);
-		        break;
-	        }
-        }
-
-        if (can_save) {
-	        Keyboard::keybindings_changed ();
-        }
-
-        BindingsChanged (this); /* EMIT SIGNAL */
-}
 
 bool
 Bindings::activate (MouseButton bb, Operation op)
 {
-        MouseButtonBindingMap* bbm = 0;
+	MouseButtonBindingMap& bbm = get_mousemap(op);
 
-        switch (op) {
-        case Press:
-                bbm = &button_press_bindings;
-                break;
-        case Release:
-                bbm = &button_release_bindings;
-                break;
-        }
+        MouseButtonBindingMap::iterator b = bbm.find (bb);
 
-        MouseButtonBindingMap::iterator b = bbm->find (bb);
-
-        if (b == bbm->end()) {
+        if (b == bbm.end()) {
                 /* no entry for this key in the state map */
                 return false;
         }
@@ -673,39 +594,20 @@ Bindings::activate (MouseButton bb, Operation op)
 void
 Bindings::add (MouseButton bb, Operation op, string const& action_name)
 {
-        MouseButtonBindingMap* bbm = 0;
-
-        switch (op) {
-        case Press:
-                bbm = &button_press_bindings;
-                break;
-        case Release:
-                bbm = &button_release_bindings;
-                break;
-        }
+	MouseButtonBindingMap& bbm = get_mousemap(op);
 
         MouseButtonBindingMap::value_type newpair (bb, ActionInfo (action_name));
-        bbm->insert (newpair);
+        bbm.insert (newpair);
 }
 
 void
 Bindings::remove (MouseButton bb, Operation op)
 {
-        MouseButtonBindingMap* bbm = 0;
+	MouseButtonBindingMap& bbm = get_mousemap(op);
+        MouseButtonBindingMap::iterator b = bbm.find (bb);
 
-        switch (op) {
-        case Press:
-                bbm = &button_press_bindings;
-                break;
-        case Release:
-                bbm = &button_release_bindings;
-                break;
-        }
-
-        MouseButtonBindingMap::iterator b = bbm->find (bb);
-
-        if (b != bbm->end()) {
-                bbm->erase (b);
+        if (b != bbm.end()) {
+                bbm.erase (b);
         }
 }
 
@@ -885,6 +787,56 @@ Bindings::associate_all ()
 {
 	for (list<Bindings*>::iterator b = bindings.begin(); b != bindings.end(); b++) {
 		(*b)->associate ();
+	}
+}
+
+bool
+Bindings::is_bound (KeyboardKey const& kb, Operation op) const
+{
+	const KeybindingMap& km = get_keymap(op);
+	return km.find(kb) != km.end();
+}
+
+bool
+Bindings::is_registered (Operation op, std::string const& action_name) const
+{
+	const KeybindingMap& km = get_keymap(op);
+	return std::find_if(km.begin(),  km.end(),  ActionNameRegistered<KeybindingMap::const_iterator::value_type>(action_name)) != km.end();
+}
+
+Bindings::KeybindingMap& 
+Bindings::get_keymap (Operation op)
+{
+	switch (op) {
+		case Press:
+			return press_bindings;
+		case Release:
+		default:
+			return release_bindings;
+	}
+}
+
+const Bindings::KeybindingMap& 
+Bindings::get_keymap (Operation op) const
+{
+	switch (op) {
+		case Press:
+			return press_bindings;
+		case Release:
+		default:
+			return release_bindings;
+	}
+}
+
+Bindings::MouseButtonBindingMap& 
+Bindings::get_mousemap (Operation op)
+{
+	switch (op) {
+		case Press:
+			return button_press_bindings;
+		case Release:
+		default:
+			return button_release_bindings;
 	}
 }
 

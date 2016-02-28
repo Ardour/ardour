@@ -51,6 +51,19 @@ using namespace PBD;
 using Gtkmm2ext::Keyboard;
 using Gtkmm2ext::Bindings;
 
+/*========================================== HELPER =========================================*/
+void bindings_collision_dialog (Gtk::Window& parent)
+{
+	ArdourDialog dialog (parent, _("Colliding keybindings"), true);
+	Label label (_("The key sequence is already bound. Please remove the other binding first."));
+
+	dialog.get_vbox()->pack_start (label, true, true);
+	dialog.add_button (_("Ok"), Gtk::RESPONSE_ACCEPT);
+	dialog.show_all ();
+	dialog.run();
+}
+
+/*======================================== KEYEDITOR =========================================*/
 KeyEditor::KeyEditor ()
 	: ArdourWindow (_("Key Bindings"))
 	, unbind_button (_("Remove shortcut"))
@@ -211,13 +224,13 @@ KeyEditor::Tab::unbind ()
 	owner.unbind_button.set_sensitive (false);
 
 	if (i != model->children().end()) {
-		Glib::RefPtr<Action> action = (*i)[columns.action];
-
 		if (!(*i)[columns.bindable]) {
 			return;
 		}
 
-		bindings->remove (action, Gtkmm2ext::Bindings::Press, true);
+		const std::string& action_path = (*i)[columns.path];
+
+		bindings->remove (Gtkmm2ext::Bindings::Press,  action_path , true);
 		(*i)[columns.binding] = string ();
 	}
 }
@@ -227,23 +240,29 @@ KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 {
 	TreeModel::iterator i = view.get_selection()->get_selected();
 
-	if (i != model->children().end()) {
+	if (i == model->children().end()) {
+		return;
+	}
 
-		string action_name = (*i)[columns.path];
+	string action_path = (*i)[columns.path];
 
-		if (!(*i)[columns.bindable]) {
-			return;
-		}
+	if (!(*i)[columns.bindable]) {
+		return;
+	}
 
-		GdkModifierType mod = (GdkModifierType)(Keyboard::RelevantModifierKeyMask & release_event->state);
-		Gtkmm2ext::KeyboardKey new_binding (mod, pressed_key);
+	GdkModifierType mod = (GdkModifierType)(Keyboard::RelevantModifierKeyMask & release_event->state);
+	Gtkmm2ext::KeyboardKey new_binding (mod, pressed_key);
 
-		bool result = bindings->replace (new_binding, Gtkmm2ext::Bindings::Press, action_name);
+	if (bindings->is_bound (new_binding, Gtkmm2ext::Bindings::Press)) {
+		bindings_collision_dialog (owner);
+		return;
+	}
 
-		if (result) {
-			(*i)[columns.binding] = gtk_accelerator_get_label (new_binding.key(), (GdkModifierType) new_binding.state());
-			owner.unbind_button.set_sensitive (true);
-		}
+	bool result = bindings->replace (new_binding, Gtkmm2ext::Bindings::Press, action_path);
+
+	if (result) {
+		(*i)[columns.binding] = gtk_accelerator_get_label (new_binding.key(), (GdkModifierType) new_binding.state());
+		owner.unbind_button.set_sensitive (true);
 	}
 }
 

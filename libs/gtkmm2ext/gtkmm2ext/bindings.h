@@ -136,7 +136,7 @@ class LIBGTKMM2EXT_API ActionMap {
 };
 
 class LIBGTKMM2EXT_API Bindings {
-  public:
+	public:
         enum Operation {
                 Press,
                 Release
@@ -148,6 +148,7 @@ class LIBGTKMM2EXT_API Bindings {
 	        std::string action_name;
 	        Glib::RefPtr<Gtk::Action> action;
         };
+		typedef std::map<KeyboardKey,ActionInfo> KeybindingMap;
 
         Bindings (std::string const& name);
         ~Bindings ();
@@ -161,16 +162,18 @@ class LIBGTKMM2EXT_API Bindings {
         bool empty_keys () const;
         bool empty_mouse () const;
 
-        void add (KeyboardKey, Operation, std::string const&, bool can_save = false);
+        bool add (KeyboardKey, Operation, std::string const&, bool can_save = false);
         bool replace (KeyboardKey, Operation, std::string const& action_name, bool can_save = true);
-        void remove (KeyboardKey, Operation, bool can_save = false);
-        void remove (Glib::RefPtr<Gtk::Action>, Operation, bool can_save = false);
+        bool remove (Operation, std::string const& action_name, bool can_save = false);
 
         bool activate (KeyboardKey, Operation);
 
         void add (MouseButton, Operation, std::string const&);
         void remove (MouseButton, Operation);
         bool activate (MouseButton, Operation);
+
+		bool is_bound (KeyboardKey const&, Operation) const;
+		bool is_registered (Operation op, std::string const& action_name) const;
 
         KeyboardKey get_binding_for_action (Glib::RefPtr<Gtk::Action>, Operation& op);
 
@@ -209,9 +212,7 @@ class LIBGTKMM2EXT_API Bindings {
 
 	static PBD::Signal1<void,Bindings*> BindingsChanged;
 
-  private:
-        typedef std::map<KeyboardKey,ActionInfo> KeybindingMap;
-
+	private:
         std::string  _name;
         ActionMap*   _action_map;
         KeybindingMap press_bindings;
@@ -222,6 +223,10 @@ class LIBGTKMM2EXT_API Bindings {
         MouseButtonBindingMap button_release_bindings;
 
         void push_to_gtk (KeyboardKey, Glib::RefPtr<Gtk::Action>);
+
+		KeybindingMap& get_keymap (Operation op);
+		const KeybindingMap& get_keymap (Operation op) const;
+		MouseButtonBindingMap& get_mousemap (Operation op);
 };
 
 } // namespace
