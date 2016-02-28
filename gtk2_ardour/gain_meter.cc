@@ -983,7 +983,7 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	set_spacing (PX_SCALE(2, 2));
 
 	pack_start (gain_display_box, Gtk::PACK_SHRINK);
-	pack_start (hbox, Gtk::PACK_SHRINK);
+	pack_start (hbox, true, true);
 
 	meter_alignment.set (0.5, 0.5, 0.0, 1.0);
 	meter_alignment.add (*level_meter);
