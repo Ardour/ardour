@@ -345,7 +345,7 @@ Editor::edit_meter_section (MeterSection* section)
 	if (meter_dialog.get_lock_style() == MusicTime) {
 		_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), when);
 	} else {
-		_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), frame);
+		_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), section->frame());
 	}
         XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
@@ -378,7 +378,7 @@ Editor::edit_tempo_section (TempoSection* section)
 	if (tempo_dialog.get_lock_style() == MusicTime) {
 		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), beat, tempo_dialog.get_tempo_type());
 	} else {
-		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), _session->tempo_map().frame_at_beat (beat), tempo_dialog.get_tempo_type());
+		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), section->frame(), tempo_dialog.get_tempo_type());
 	}
 	XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
