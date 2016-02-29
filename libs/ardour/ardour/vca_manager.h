@@ -48,8 +48,7 @@ class VCAManager : public SessionHandleRef, public PBD::StatefulDestructible
 
 	boost::shared_ptr<VCA> vca_by_number(uint32_t) const;
 
-	typedef std::list<boost::shared_ptr<VCA> > VCAS;
-	VCAS vcas() const;
+	VCAList vcas() const;
 
 	PBD::Signal1<void,VCAList&> VCAAdded;
 	PBD::Signal1<void,VCAList&> VCARemoved;
@@ -61,8 +60,9 @@ class VCAManager : public SessionHandleRef, public PBD::StatefulDestructible
 
      private:
 	mutable Glib::Threads::Mutex lock;
-	VCAS _vcas;
+	VCAList _vcas;
 
+	void clear ();
 };
 
 } // namespace

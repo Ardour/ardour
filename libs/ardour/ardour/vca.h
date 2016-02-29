@@ -25,6 +25,7 @@
 #include "pbd/controllable.h"
 #include "pbd/statefuldestructible.h"
 
+#include "ardour/automatable.h"
 #include "ardour/session_handle.h"
 
 namespace ARDOUR {
@@ -32,9 +33,10 @@ namespace ARDOUR {
 class GainControl;
 class Route;
 
-class LIBARDOUR_API VCA : public SessionHandleRef, public PBD::StatefulDestructible  {
+class LIBARDOUR_API VCA : public SessionHandleRef, public PBD::StatefulDestructible, public Automatable {
   public:
 	VCA (Session& session, const std::string& name, uint32_t num);
+	VCA (Session& session, XMLNode const&, int version);
 
 	std::string name() const { return _name; }
 	uint32_t number () const { return _number; }

@@ -2516,7 +2516,7 @@ MixerStrip::vca_button_release (GdkEventButton* ev, uint32_t which)
 		return false;
 	}
 
-	VCAManager::VCAS vcas (_session->vca_manager().vcas());
+	VCAList vcas (_session->vca_manager().vcas());
 
 	if (vcas.empty()) {
 		/* XXX should probably show a message saying "No VCA masters" */
@@ -2527,7 +2527,7 @@ MixerStrip::vca_button_release (GdkEventButton* ev, uint32_t which)
 	MenuList& items = menu->items();
 	RadioMenuItem::Group group;
 
-	for (VCAManager::VCAS::iterator v = vcas.begin(); v != vcas.end(); ++v) {
+	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
 		items.push_back (RadioMenuElem (group, (*v)->name(), sigc::bind (sigc::mem_fun (*this, &MixerStrip::vca_menu_toggle), (*v)->number())));
 	}
 

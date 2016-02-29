@@ -47,10 +47,23 @@ VCA::next_vca_number ()
 
 VCA::VCA (Session& s, const string& name, uint32_t num)
 	: SessionHandleRef (s)
+	, Automatable (s)
 	, _number (num)
 	, _name (name)
 	, _control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
 {
+	add_control (_control);
+}
+
+VCA::VCA (Session& s, XMLNode const & node, int version)
+	: SessionHandleRef (s)
+	, Automatable (s)
+	, _number (0)
+	, _control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
+{
+	add_control (_control);
+
+	set_state (node, version);
 }
 
 void
@@ -90,11 +103,15 @@ VCA::get_state ()
 	XMLNode* node = new XMLNode (xml_node_name);
 	node->add_property (X_("name"), _name);
 	node->add_property (X_("number"), _number);
+
+	node->add_child_nocopy (_control->get_state());
+	node->add_child_nocopy (get_automation_xml_state());
+
 	return *node;
 }
 
 int
-VCA::set_state (XMLNode const& node, int /*version*/)
+VCA::set_state (XMLNode const& node, int version)
 {
 	XMLProperty const* prop;
 
@@ -104,6 +121,16 @@ VCA::set_state (XMLNode const& node, int /*version*/)
 
 	if ((prop = node.property ("number")) != 0) {
 		_number = atoi (prop->value());
+	}
+
+	XMLNodeList const &children (node.children());
+	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->name() == Controllable::xml_node_name) {
+			XMLProperty* prop = (*i)->property ("name");
+			if (prop && prop->value() == X_("gaincontrol")) {
+				_control->set_state (**i, version);
+			}
+		}
 	}
 
 	return 0;

@@ -38,11 +38,17 @@ VCAManager::VCAManager (Session& s)
 
 VCAManager::~VCAManager ()
 {
+	clear ();
+}
+
+void
+VCAManager::clear ()
+{
 	Mutex::Lock lm (lock);
 	_vcas.clear ();
 }
 
-VCAManager::VCAS
+VCAList
 VCAManager::vcas () const
 {
 	Mutex::Lock lm (lock);
@@ -99,7 +105,7 @@ VCAManager::vca_by_number (uint32_t n) const
 {
 	Mutex::Lock lm (lock);
 
-	for (VCAS::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
+	for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
 		if ((*i)->number() == n) {
 			return *i;
 		}
@@ -112,11 +118,43 @@ XMLNode&
 VCAManager::get_state ()
 {
 	XMLNode* node = new XMLNode (xml_node_name);
+
+	{
+		Mutex::Lock lm (lock);
+
+		for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
+			node->add_child_nocopy ((*i)->get_state());
+		}
+	}
+
 	return *node;
 }
 
 int
-VCAManager::set_state (XMLNode const& node, int /*version*/)
+VCAManager::set_state (XMLNode const& node, int version)
 {
+	if (node.name() != xml_node_name) {
+		return -1;
+	}
+
+	XMLNodeList const & children = node.children();
+	VCAList vcal;
+
+	{
+
+		Mutex::Lock lm (lock);
+
+		for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+			if ((*i)->name() == VCA::xml_node_name) {
+				std::cerr << "Adding VCA from XML\n";
+				boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, **i, version));
+				_vcas.push_back (vca);
+				vcal.push_back (vca);
+			}
+		}
+	}
+
+	VCAAdded (vcal); /* EMIT SIGNAL */
+
 	return 0;
 }
