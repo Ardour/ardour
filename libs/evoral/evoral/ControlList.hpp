@@ -107,7 +107,7 @@ public:
 	void                       set_descriptor(const ParameterDescriptor& d) { _desc = d; }
 
 	EventList::size_type size() const { return _events.size(); }
-        double length() const {
+	double length() const {
 		Glib::Threads::RWLock::ReaderLock lm (_lock);
 		return _events.empty() ? 0.0 : _events.back()->when;
 	}
@@ -314,7 +314,7 @@ public:
 
 	bool operator!= (ControlList const &) const;
 
-        void invalidate_insert_iterator ();
+	void invalidate_insert_iterator ();
 
 protected:
 
