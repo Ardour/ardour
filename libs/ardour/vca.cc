@@ -16,6 +16,8 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "pbd/convert.h"
+
 #include "ardour/automation_control.h"
 #include "ardour/gain_control.h"
 #include "ardour/route.h"
@@ -28,6 +30,7 @@ using namespace PBD;
 using std::string;
 
 gint VCA::next_number = 0;
+string VCA::xml_node_name (X_("VCA"));
 
 string
 VCA::default_name_template ()
@@ -73,4 +76,35 @@ void
 VCA::remove (boost::shared_ptr<Route> r)
 {
 	r->gain_control()->remove_master (_control);
+}
+
+void
+VCA::set_name (string const& str)
+{
+	_name = str;
+}
+
+XMLNode&
+VCA::get_state ()
+{
+	XMLNode* node = new XMLNode (xml_node_name);
+	node->add_property (X_("name"), _name);
+	node->add_property (X_("number"), _number);
+	return *node;
+}
+
+int
+VCA::set_state (XMLNode const& node, int /*version*/)
+{
+	XMLProperty const* prop;
+
+	if ((prop = node.property ("name")) != 0) {
+		set_name (prop->value());
+	}
+
+	if ((prop = node.property ("number")) != 0) {
+		_number = atoi (prop->value());
+	}
+
+	return 0;
 }

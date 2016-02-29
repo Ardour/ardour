@@ -23,6 +23,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/controllable.h"
+#include "pbd/statefuldestructible.h"
 
 #include "ardour/session_handle.h"
 
@@ -31,12 +32,14 @@ namespace ARDOUR {
 class GainControl;
 class Route;
 
-class LIBARDOUR_API VCA : public SessionHandleRef {
+class LIBARDOUR_API VCA : public SessionHandleRef, public PBD::StatefulDestructible  {
   public:
 	VCA (Session& session, const std::string& name, uint32_t num);
 
 	std::string name() const { return _name; }
 	uint32_t number () const { return _number; }
+
+	void set_name (std::string const&);
 
 	void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	double get_value () const;
@@ -46,8 +49,13 @@ class LIBARDOUR_API VCA : public SessionHandleRef {
 	void add (boost::shared_ptr<Route>);
 	void remove (boost::shared_ptr<Route>);
 
+	XMLNode& get_state();
+	int set_state (XMLNode const&, int version);
+
 	static std::string default_name_template ();
 	static int next_vca_number ();
+	static std::string xml_node_name;
+
   private:
 	uint32_t    _number;
 	std::string _name;
