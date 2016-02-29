@@ -1213,6 +1213,8 @@ Session::state (bool full_state)
 		}
 	}
 
+	node->add_child_nocopy (_vca_manager->get_state());
+
 	child = node->add_child ("Routes");
 	{
 		boost::shared_ptr<RouteList> r = routes.reader ();
@@ -1457,6 +1459,10 @@ Session::set_state (const XMLNode& node, int version)
 		} else if (load_diskstreams_2X (*child, version)) {
 			goto out;
 		}
+	}
+
+	if ((child = find_named_node (node, VCAManager::xml_node_name)) != 0) {
+		_vca_manager->set_state (*child, version);
 	}
 
 	if ((child = find_named_node (node, "Routes")) == 0) {
