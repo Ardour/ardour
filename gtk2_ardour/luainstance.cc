@@ -114,23 +114,148 @@ LuaInstance::register_classes (lua_State* L)
 		.endClass ()
 
 		.beginClass <PublicEditor> ("Editor")
+		.addFunction ("snap_type", &PublicEditor::snap_type)
+		.addFunction ("snap_mode", &PublicEditor::snap_mode)
+		.addFunction ("set_snap_mode", &PublicEditor::set_snap_mode)
+		.addFunction ("set_snap_threshold", &PublicEditor::set_snap_threshold)
+
 		.addFunction ("undo", &PublicEditor::undo)
 		.addFunction ("redo", &PublicEditor::redo)
+
+		.addFunction ("set_mouse_mode", &PublicEditor::set_mouse_mode)
+		.addFunction ("current_mouse_mode", &PublicEditor::current_mouse_mode)
+
+		.addFunction ("consider_auditioning", &PublicEditor::consider_auditioning)
+
+		.addFunction ("new_region_from_selection", &PublicEditor::new_region_from_selection)
+		.addFunction ("separate_region_from_selection", &PublicEditor::separate_region_from_selection)
+		.addFunction ("pixel_to_sample", &PublicEditor::pixel_to_sample)
+		.addFunction ("sample_to_pixel", &PublicEditor::sample_to_pixel)
+
+#if 0 // Selection is not yet exposed
+		.addFunction ("get_selection", &PublicEditor::get_selection)
+		.addFunction ("get_cut_buffer", &PublicEditor::get_cut_buffer)
+		.addFunction ("track_mixer_selection", &PublicEditor::track_mixer_selection)
+		.addFunction ("extend_selection_to_track", &PublicEditor::extend_selection_to_track)
+#endif
+
 		.addFunction ("play_selection", &PublicEditor::play_selection)
 		.addFunction ("play_with_preroll", &PublicEditor::play_with_preroll)
 		.addFunction ("maybe_locate_with_edit_preroll", &PublicEditor::maybe_locate_with_edit_preroll)
-		.addFunction ("add_location_from_playhead_cursor", &PublicEditor::add_location_from_playhead_cursor)
 		.addFunction ("goto_nth_marker", &PublicEditor::goto_nth_marker)
+
+		.addFunction ("add_location_from_playhead_cursor", &PublicEditor::add_location_from_playhead_cursor)
+		.addFunction ("remove_location_at_playhead_cursor", &PublicEditor::remove_location_at_playhead_cursor)
+
 		.addFunction ("set_show_measures", &PublicEditor::set_show_measures)
-		.addFunction ("mouse_add_new_marker", &PublicEditor::mouse_add_new_marker)
-		.addFunction ("split_regions_at", &PublicEditor::split_regions_at)
-		.addFunction ("maximise_editing_space", &PublicEditor::maximise_editing_space)
-		.addFunction ("restore_editing_space", &PublicEditor::restore_editing_space)
-		.addFunction ("get_regions_from_selection_and_mouse", &PublicEditor::get_regions_from_selection_and_mouse)
 		.addFunction ("show_measures", &PublicEditor::show_measures)
-		.addFunction ("set_zoom_focus", &PublicEditor::set_zoom_focus)
+		.addFunction ("remove_tracks", &PublicEditor::remove_tracks)
+
+		.addFunction ("effective_mouse_mode", &PublicEditor::effective_mouse_mode)
+
 		.addFunction ("do_import", &PublicEditor::do_import)
 		.addFunction ("do_embed", &PublicEditor::do_embed)
+
+		.addFunction ("export_audio", &PublicEditor::export_audio)
+		.addFunction ("stem_export", &PublicEditor::stem_export)
+		.addFunction ("export_selection", &PublicEditor::export_selection)
+		.addFunction ("export_range", &PublicEditor::export_range)
+
+		.addFunction ("set_zoom_focus", &PublicEditor::set_zoom_focus)
+		.addFunction ("get_zoom_focus", &PublicEditor::get_zoom_focus)
+		.addFunction ("get_current_zoom", &PublicEditor::get_current_zoom)
+		.addFunction ("reset_zoom", &PublicEditor::reset_zoom)
+
+#if 0 // These need TimeAxisView* which isn't exposed, yet
+		.addFunction ("playlist_selector", &PublicEditor::playlist_selector)
+		.addFunction ("clear_playlist", &PublicEditor::clear_playlist)
+		.addFunction ("new_playlists", &PublicEditor::new_playlists)
+		.addFunction ("copy_playlists", &PublicEditor::copy_playlists)
+		.addFunction ("clear_playlists", &PublicEditor::clear_playlists)
+#endif
+
+		.addFunction ("select_all_tracks", &PublicEditor::select_all_tracks)
+		.addFunction ("deselect_all", &PublicEditor::deselect_all)
+#if 0
+		.addFunction ("set_selected_track", &PublicEditor::set_selected_track)
+		.addFunction ("set_selected_mixer_strip", &PublicEditor::set_selected_mixer_strip)
+		.addFunction ("hide_track_in_display", &PublicEditor::hide_track_in_display)
+#endif
+		.addFunction ("set_stationary_playhead", &PublicEditor::set_stationary_playhead)
+		.addFunction ("stationary_playhead", &PublicEditor::stationary_playhead)
+		.addFunction ("set_follow_playhead", &PublicEditor::set_follow_playhead)
+		.addFunction ("follow_playhead", &PublicEditor::follow_playhead)
+
+		.addFunction ("dragging_playhead", &PublicEditor::dragging_playhead)
+		.addFunction ("leftmost_sample", &PublicEditor::leftmost_sample)
+		.addFunction ("current_page_samples", &PublicEditor::current_page_samples)
+		.addFunction ("visible_canvas_height", &PublicEditor::visible_canvas_height)
+		.addFunction ("temporal_zoom_step", &PublicEditor::temporal_zoom_step)
+		//.addFunction ("ensure_time_axis_view_is_visible", &PublicEditor::ensure_time_axis_view_is_visible)
+		.addFunction ("override_visible_track_count", &PublicEditor::override_visible_track_count)
+
+		.addFunction ("scroll_tracks_down_line", &PublicEditor::scroll_tracks_down_line)
+		.addFunction ("scroll_tracks_up_line", &PublicEditor::scroll_tracks_up_line)
+		.addFunction ("scroll_down_one_track", &PublicEditor::scroll_down_one_track)
+		.addFunction ("scroll_up_one_track", &PublicEditor::scroll_up_one_track)
+
+		.addFunction ("reset_x_origin", &PublicEditor::reset_x_origin)
+		.addFunction ("get_y_origin", &PublicEditor::get_y_origin)
+		.addFunction ("reset_y_origin", &PublicEditor::reset_y_origin)
+
+		.addFunction ("remove_last_capture", &PublicEditor::remove_last_capture)
+
+		.addFunction ("maximise_editing_space", &PublicEditor::maximise_editing_space)
+		.addFunction ("restore_editing_space", &PublicEditor::restore_editing_space)
+		.addFunction ("toggle_meter_updating", &PublicEditor::toggle_meter_updating)
+
+		//.addFunction ("get_preferred_edit_position", &PublicEditor::get_preferred_edit_position)
+		//.addFunction ("split_regions_at", &PublicEditor::split_regions_at)
+
+		.addFunction ("get_nudge_distance", &PublicEditor::get_nudge_distance)
+		.addFunction ("get_paste_offset", &PublicEditor::get_paste_offset)
+		.addFunction ("get_grid_beat_divisions", &PublicEditor::get_grid_beat_divisions)
+		.addFunction ("get_grid_type_as_beats", &PublicEditor::get_grid_type_as_beats)
+
+		.addFunction ("toggle_ruler_video", &PublicEditor::toggle_ruler_video)
+		.addFunction ("toggle_xjadeo_proc", &PublicEditor::toggle_xjadeo_proc)
+		.addFunction ("get_videotl_bar_height", &PublicEditor::get_videotl_bar_height)
+		.addFunction ("set_video_timeline_height", &PublicEditor::set_video_timeline_height)
+
+#if 0
+		.addFunction ("get_route_view_by_route_id", &PublicEditor::get_route_view_by_route_id)
+		.addFunction ("get_equivalent_regions", &PublicEditor::get_equivalent_regions)
+
+		.addFunction ("axis_view_from_route", &PublicEditor::axis_view_from_route)
+		.addFunction ("axis_views_from_routes", &PublicEditor::axis_views_from_routes)
+		.addFunction ("get_track_views", &PublicEditor::get_track_views)
+		.addFunction ("drags", &PublicEditor::drags)
+#endif
+
+		.addFunction ("center_screen", &PublicEditor::center_screen)
+
+		.addFunction ("get_smart_mode", &PublicEditor::get_smart_mode)
+		.addFunction ("get_pointer_position", &PublicEditor::get_pointer_position)
+
+		.addFunction ("find_location_from_marker", &PublicEditor::find_location_from_marker)
+		.addFunction ("find_marker_from_location_id", &PublicEditor::find_marker_from_location_id)
+		.addFunction ("mouse_add_new_marker", &PublicEditor::mouse_add_new_marker)
+#if 0
+		.addFunction ("get_regions_at", &PublicEditor::get_regions_at)
+		.addFunction ("get_regions_after", &PublicEditor::get_regions_after)
+		.addFunction ("get_regions_from_selection_and_mouse", &PublicEditor::get_regions_from_selection_and_mouse)
+		.addFunction ("get_regionviews_by_id", &PublicEditor::get_regionviews_by_id)
+		.addFunction ("get_per_region_note_selection", &PublicEditor::get_per_region_note_selection)
+#endif
+
+#if 0
+		.addFunction ("mouse_add_new_tempo_event", &PublicEditor::mouse_add_new_tempo_event)
+		.addFunction ("mouse_add_new_meter_event", &PublicEditor::mouse_add_new_meter_event)
+		.addFunction ("edit_tempo_section", &PublicEditor::edit_tempo_section)
+		.addFunction ("edit_meter_section", &PublicEditor::edit_meter_section)
+#endif
+
+		.addFunction ("access_action", &PublicEditor::access_action)
 		.endClass ()
 		.endNamespace ();
 
