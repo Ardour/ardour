@@ -36,22 +36,6 @@ GainControl::GainControl (Session& session, const Evoral::Parameter &param, boos
 	range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
 }
 
-double
-GainControl::get_value() const
-{
-	Glib::Threads::Mutex::Lock sm (master_lock, Glib::Threads::TRY_LOCK);
-
-	if (sm.locked()) {
-		if (_masters.empty()) {
-			return AutomationControl::get_value();
-		}
-		return AutomationControl::get_value() * get_master_gain ();
-	} else {
-		/* could not take lock */
-		return AutomationControl::get_value ();
-	}
-}
-
 void
 GainControl::set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
@@ -116,6 +100,18 @@ GainControl::get_user_string () const
 gain_t
 GainControl::get_master_gain () const
 {
+	Glib::Threads::Mutex::Lock sm (master_lock, Glib::Threads::TRY_LOCK);
+
+	if (sm.locked()) {
+		return get_master_gain_locked ();
+	}
+
+	return 1.0;
+}
+
+gain_t
+GainControl::get_master_gain_locked () const
+{
 	/* Master lock MUST be held */
 
 	gain_t g = 1.0;
@@ -135,9 +131,9 @@ GainControl::add_master (boost::shared_ptr<GainControl> m)
 
 	{
 		Glib::Threads::Mutex::Lock lm (master_lock);
-		old_master_val = get_master_gain ();
+		old_master_val = get_master_gain_locked ();
 		_masters.push_back (m);
-		new_master_val = get_master_gain ();
+		new_master_val = get_master_gain_locked ();
 	}
 
 	if (old_master_val != new_master_val) {
@@ -153,9 +149,9 @@ GainControl::remove_master (boost::shared_ptr<GainControl> m)
 
 	{
 		Glib::Threads::Mutex::Lock lm (master_lock);
-		old_master_val = get_master_gain ();
+		old_master_val = get_master_gain_locked ();
 		_masters.remove (m);
-		new_master_val = get_master_gain ();
+		new_master_val = get_master_gain_locked ();
 	}
 
 	if (old_master_val != new_master_val) {
@@ -171,9 +167,9 @@ GainControl::clear_masters ()
 
 	{
 		Glib::Threads::Mutex::Lock lm (master_lock);
-		old_master_val = get_master_gain ();
+		old_master_val = get_master_gain_locked ();
 		_masters.clear ();
-		new_master_val = get_master_gain ();
+		new_master_val = get_master_gain_locked ();
 	}
 
 	if (old_master_val != new_master_val) {

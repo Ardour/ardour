@@ -43,7 +43,6 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 
 	void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	void set_value_unchecked (double);
-	double get_value () const;
 
 	double internal_to_interface (double) const;
 	double interface_to_internal (double) const;
@@ -54,18 +53,20 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	double lower_db;
 	double range_db;
 
+	gain_t get_master_gain () const;
 	void add_master (boost::shared_ptr<GainControl>);
 	void remove_master (boost::shared_ptr<GainControl>);
 	void clear_masters ();
 
   private:
 	void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
-	gain_t get_master_gain () const;
 
 	mutable Glib::Threads::Mutex master_lock;
 
 	typedef std::list<boost::shared_ptr<GainControl> > Masters;
 	Masters _masters;
+
+	gain_t get_master_gain_locked () const;
 };
 
 } /* namespace */
