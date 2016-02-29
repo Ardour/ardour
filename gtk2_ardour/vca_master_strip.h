@@ -39,9 +39,10 @@ class VCAMasterStrip : public AxisView, public Gtk::VBox
 
 	std::string name() const;
 	std::string state_id() const { return "VCAMasterStrip"; }
+	boost::shared_ptr<ARDOUR::VCA> vca() const { return _vca; }
 
       private:
-	boost::shared_ptr<ARDOUR::VCA> vca;
+	boost::shared_ptr<ARDOUR::VCA> _vca;
 	ArdourButton name_button;
 	ArdourButton active_button;
 	GainMeter    gain_meter;

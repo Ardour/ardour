@@ -35,6 +35,7 @@
 #include "ardour/template_utils.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
+#include "ardour/vca.h"
 
 #include "utils.h"
 #include "add_route_dialog.h"
@@ -264,7 +265,7 @@ AddRouteDialog::maybe_update_name_template_entry ()
 		name_template_entry.set_text (_("Bus"));
 		break;
 	case VCAMaster:
-		name_template_entry.set_text (_("VCA"));
+		name_template_entry.set_text (VCA::default_name_template());
 		break;
 	}
 }

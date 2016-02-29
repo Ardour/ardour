@@ -271,7 +271,7 @@ public:
 	void flush_videotimeline_cache (bool localcacheonly=false);
 	void export_video (bool range = false);
 
-	void session_add_vca (std::string const &);
+	void session_add_vca (std::string const &, uint32_t);
 
 	void session_add_audio_track (
 		int input_channels,

@@ -368,7 +368,7 @@ Mixer_UI::show_window ()
 void
 Mixer_UI::add_masters (VCAList& vcas)
 {
-	cerr << "VCA added\n";
+	cerr << vcas.size() << " VCAs added\n";
 
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
 
@@ -1192,7 +1192,7 @@ Mixer_UI::redisplay_track_list ()
 		if (vms) {
 			vca_packer.pack_start (*vms, false, false);
 			vms->show ();
-			cerr << "Packed vca into vca_packer\n";
+			cerr << "Packed vca " << vms->vca()->number() << " into vca_packer\n";
 			continue;
 		}
 

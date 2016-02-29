@@ -25,15 +25,15 @@ using std::string;
 
 VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	: AxisView (s)
-	, vca (v)
+	, _vca (v)
 	, gain_meter (s, 250)
 {
 	gain_meter.set_controls (boost::shared_ptr<Route>(),
 	                         boost::shared_ptr<PeakMeter>(),
 	                         boost::shared_ptr<Amp>(),
-	                         vca->control());
+	                         _vca->control());
 
-	name_button.set_text (vca->name());
+	name_button.set_text (_vca->name());
 	active_button.set_text ("active");
 
 	pack_start (active_button, false, false);
@@ -48,5 +48,5 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 string
 VCAMasterStrip::name() const
 {
-	return vca->name();
+	return _vca->name();
 }

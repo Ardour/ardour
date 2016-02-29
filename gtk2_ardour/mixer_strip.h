@@ -319,6 +319,9 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	PBD::ScopedConnection _level_meter_connection;
 
 	std::string meter_point_string (ARDOUR::MeterPoint);
+
+	void vca_menu_toggle (uint32_t n);
+	bool vca_button_release (GdkEventButton* ev, uint32_t which);
 };
 
 #endif /* __ardour_mixer_strip__ */

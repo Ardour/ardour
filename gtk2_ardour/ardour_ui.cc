@@ -1798,13 +1798,13 @@ ARDOUR_UI::open_session ()
 }
 
 void
-ARDOUR_UI::session_add_vca (const string& name_template)
+ARDOUR_UI::session_add_vca (const string& name_template, uint32_t n)
 {
 	if (!_session) {
 		return;
 	}
 
-	_session->vca_manager().create_vca (name_template);
+	_session->vca_manager().create_vca (n, name_template);
 }
 
 void
@@ -4046,7 +4046,7 @@ ARDOUR_UI::add_route ()
 		session_add_midi_bus (route_group, count, name_template, strict_io, instrument, 0);
 		break;
 	case AddRouteDialog::VCAMaster:
-		session_add_vca (name_template);
+		session_add_vca (name_template, count);
 		break;
 	}
 }

@@ -52,6 +52,8 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 #include "ardour/user_bundle.h"
+#include "ardour/vca.h"
+#include "ardour/vca_manager.h"
 
 #include "ardour_window.h"
 #include "mixer_strip.h"
@@ -217,9 +219,14 @@ MixerStrip::init ()
 	for (uint32_t n = 0; n < n_vca_buttons; ++n) {
 		ArdourButton* v = manage (new ArdourButton (ArdourButton::default_elements));
 		vca_buttons.push_back (v); /* no ownership transfer, button is managed by its container */
-		vca_table.attach (*v, n, n+1, 0, 1);
+		v->set_no_show_all (true);
+		v->set_name (X_("vca assign"));
+		v->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+		v->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MixerStrip::vca_button_release), n), false);
+		UI::instance()->set_tip (*v, string_compose (_("VCA %1 assign"), n));
+		v->set_text (_("v."));
 		v->show ();
-		v->set_text ("a");
+		vca_table.attach (*v, n, n+1, 0, 1);
 	}
 	vca_table.show ();
 
@@ -2482,4 +2489,49 @@ MixerStrip::set_meter_type (MeterType t)
 {
 	if (_suspend_menu_callbacks) return;
 	gpm.set_type (t);
+}
+
+void
+MixerStrip::vca_menu_toggle (uint32_t n)
+{
+	if (!_route) {
+		return;
+	}
+
+	boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_number (n);
+
+	if (!vca) {
+		return;
+	}
+
+	vca->add (_route);
+}
+
+bool
+MixerStrip::vca_button_release (GdkEventButton* ev, uint32_t which)
+{
+	using namespace Gtk::Menu_Helpers;
+
+	if (!_session || !Keyboard::is_context_menu_event (ev)) {
+		return false;
+	}
+
+	VCAManager::VCAS vcas (_session->vca_manager().vcas());
+
+	if (vcas.empty()) {
+		/* XXX should probably show a message saying "No VCA masters" */
+		return true;
+	}
+
+	Menu* menu = new Menu;
+	MenuList& items = menu->items();
+	RadioMenuItem::Group group;
+
+	for (VCAManager::VCAS::iterator v = vcas.begin(); v != vcas.end(); ++v) {
+		items.push_back (RadioMenuElem (group, (*v)->name(), sigc::bind (sigc::mem_fun (*this, &MixerStrip::vca_menu_toggle), (*v)->number())));
+	}
+
+	menu->popup (1, ev->time);
+
+	return true;
 }
