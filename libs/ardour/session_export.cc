@@ -73,11 +73,15 @@ Session::pre_export ()
 		}
 	}
 
-	/* make sure we are actually rolling */
+	/* prepare transport */
+
+	realtime_stop (true, true);
 
 	if (get_record_enabled()) {
 		disable_record (false);
 	}
+
+	unset_play_loop ();
 
 	/* no slaving */
 
@@ -105,7 +109,8 @@ Session::start_audio_export (framepos_t position)
 	if (!_exporting) {
 		pre_export ();
 	}
-	_export_started = false;
+
+	_export_preroll = 10.0 * nominal_frame_rate (); // TODO make configurable
 
 	/* We're about to call Track::seek, so the butler must have finished everything
 	   up otherwise it could be doing do_refill in its thread while we are doing
@@ -190,8 +195,19 @@ Session::process_export (pframes_t nframes)
 int
 Session::process_export_fw (pframes_t nframes)
 {
-	if (!_export_started) {
-		_export_started = true;
+	if (_export_preroll > 0) {
+
+		_engine.main_thread()->get_buffers ();
+		fail_roll (nframes);
+		_engine.main_thread()->drop_buffers ();
+
+		_export_preroll -= std::min ((framepos_t)nframes, _export_preroll);
+
+		if (_export_preroll > 0) {
+			// clear out buffers (reverb tails etc).
+			return 0;
+		}
+
 		set_transport_speed (1.0, 0, false);
 		butler_transport_work ();
 		g_atomic_int_set (&_butler->should_do_transport_work, 0);
@@ -199,9 +215,9 @@ Session::process_export_fw (pframes_t nframes)
 		return 0;
 	}
 
-        _engine.main_thread()->get_buffers ();
+	_engine.main_thread()->get_buffers ();
 	process_export (nframes);
-        _engine.main_thread()->drop_buffers ();
+	_engine.main_thread()->drop_buffers ();
 
 	return 0;
 }
