@@ -232,6 +232,7 @@ Session::Session (AudioEngine &eng,
 	, pending_auto_loop (false)
 	, _mempool ("Session", 1048576)
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
+	, _n_lua_scripts (0)
 	, _butler (new Butler (*this))
 	, _post_transport_work (0)
 	,  cumulative_rf_motion (0)
