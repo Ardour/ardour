@@ -176,6 +176,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Table solo_iso_table;
 	Gtk::Table mute_solo_table;
 	Gtk::Table bottom_button_table;
+	Gtk::Table vca_table;
 
 	ArdourButton                 meter_point_button;
 

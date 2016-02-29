@@ -126,6 +126,8 @@ class RouteUI : public virtual AxisView
         ArdourButton* solo_safe_led;
         ArdourButton* solo_isolated_led;
 
+	std::vector<ArdourButton*> vca_buttons;
+
 	Gtk::Label monitor_input_button_label;
 	Gtk::Label monitor_disk_button_label;
 
@@ -278,8 +280,8 @@ class RouteUI : public virtual AxisView
 	PBD::ScopedConnectionList route_connections;
 	bool self_destruct;
 
- 	void init ();
- 	void reset ();
+	void init ();
+	void reset ();
 
 	void self_delete ();
         virtual void start_step_editing () {}

@@ -3130,6 +3130,7 @@ if (!ARDOUR::Profile->get_mixbus()) {
 	_mixer_strip_visibility.add (0, X_("SoloIsoLock"), _("Solo Iso / Lock"));
 	_mixer_strip_visibility.add (0, X_("Output"), _("Output"));
 	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
+	_mixer_strip_visibility.add (0, X_("VCA"), _("VCA Assigns"));
 
 	add_option (
 		S_("Preferences|GUI"),

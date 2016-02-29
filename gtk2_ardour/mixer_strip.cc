@@ -79,8 +79,9 @@ using namespace std;
 using namespace ArdourMeter;
 
 MixerStrip* MixerStrip::_entered_mixer_strip;
-
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
+
+static const uint32_t n_vca_buttons = 4;
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	: AxisView(sess)
@@ -95,6 +96,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
 	, bottom_button_table (1, 3)
+	, vca_table (1, 4)
 	, meter_point_button (_("pre"))
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
@@ -126,6 +128,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
 	, bottom_button_table (1, 3)
+	, vca_table (1, 4)
 	, meter_point_button (_("pre"))
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
@@ -208,6 +211,17 @@ MixerStrip::init ()
 		solo_iso_table.attach (*solo_safe_led, 1, 2, 0, 1);
 	}
 	solo_iso_table.show ();
+
+	vca_table.set_homogeneous (true);
+	vca_table.set_spacings (1);
+	for (uint32_t n = 0; n < n_vca_buttons; ++n) {
+		ArdourButton* v = manage (new ArdourButton (ArdourButton::default_elements));
+		vca_buttons.push_back (v); /* no ownership transfer, button is managed by its container */
+		vca_table.attach (*v, n, n+1, 0, 1);
+		v->show ();
+		v->set_text ("a");
+	}
+	vca_table.show ();
 
 	rec_mon_table.set_homogeneous (true);
 	rec_mon_table.set_row_spacings (2);
@@ -304,6 +318,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (solo_iso_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (vca_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
 	if (!ARDOUR::Profile->get_trx()) {
 		global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
@@ -385,6 +400,7 @@ MixerStrip::init ()
 	_visibility.add (&solo_iso_table, X_("SoloIsoLock"), _("Solo Iso / Lock"), false);
 	_visibility.add (&output_button, X_("Output"), _("Output"), false);
 	_visibility.add (&_comment_button, X_("Comments"), _("Comments"), false);
+	_visibility.add (&vca_table, X_("VCA"), _("VCA Assigns"), false);
 
 	parameter_changed (X_("mixer-element-visibility"));
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MixerStrip::parameter_changed));
@@ -1038,9 +1054,9 @@ MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR:
 {
 	using namespace Menu_Helpers;
 
- 	if (b->ports_are_outputs() == false || b->nchannels() != _route->n_inputs() || *b == *_route->output()->bundle()) {
- 		return;
- 	}
+	if (b->ports_are_outputs() == false || b->nchannels() != _route->n_inputs() || *b == *_route->output()->bundle()) {
+		return;
+	}
 
 	list<boost::shared_ptr<Bundle> >::iterator i = input_menu_bundles.begin ();
 	while (i != input_menu_bundles.end() && b->has_same_ports (*i) == false) {
@@ -1066,9 +1082,9 @@ MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR
 {
 	using namespace Menu_Helpers;
 
- 	if (b->ports_are_inputs() == false || b->nchannels() != _route->n_outputs() || *b == *_route->input()->bundle()) {
- 		return;
- 	}
+	if (b->ports_are_inputs() == false || b->nchannels() != _route->n_outputs() || *b == *_route->input()->bundle()) {
+		return;
+	}
 
 	list<boost::shared_ptr<Bundle> >::iterator i = output_menu_bundles.begin ();
 	while (i != output_menu_bundles.end() && b->has_same_ports (*i) == false) {
@@ -1352,7 +1368,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 
 	if (for_input) {
 		set_tooltip (&input_button, tooltip_cstr);
-  	} else {
+	} else {
 		set_tooltip (&output_button, tooltip_cstr);
 	}
 
@@ -1406,7 +1422,7 @@ void
 MixerStrip::update_input_display ()
 {
 	update_io_button (_route, _width, true);
-  	panners.setup_pan ();
+	panners.setup_pan ();
 
 	if (has_audio_outputs ()) {
 		panners.show_all ();
@@ -1420,8 +1436,8 @@ void
 MixerStrip::update_output_display ()
 {
 	update_io_button (_route, _width, false);
-  	gpm.setup_meters ();
-  	panners.setup_pan ();
+	gpm.setup_meters ();
+	panners.setup_pan ();
 
 	if (has_audio_outputs ()) {
 		panners.show_all ();
@@ -1632,7 +1648,7 @@ MixerStrip::build_route_ops_menu ()
 				items.push_back (SeparatorElem());
 				items.push_back (MenuElem (_("Duplicate..."), sigc::mem_fun (*this, &RouteUI::duplicate_selected_routes)));
 			}
-	
+
 			items.push_back (SeparatorElem());
 			items.push_back (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 		}
