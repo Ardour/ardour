@@ -54,10 +54,10 @@ def build(bld):
     obj.use          = 'libvampplugin libqmdsp'
     obj.defines      = [ 'ARDOUR_VAMP_PLUGINS_DLL_EPORTS' ]
     autowaf.ensure_visible_symbols (obj, True)
-    if bld.have_define('HAVE_AUBIO4'):
+    if bld.is_defined('HAVE_AUBIO4'):
         obj.source += ' Onset.cpp '
         obj.uselib += ' AUBIO4 '
-    elif bld.have_define('HAVE_AUBIO'):
+    elif bld.is_defined('HAVE_AUBIO'):
         obj.source += ' Onset.cpp '
         obj.uselib += ' AUBIO '
     obj.vnum         = LIBARDOURVAMPPLUGINS_LIB_VERSION
