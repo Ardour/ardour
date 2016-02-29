@@ -110,7 +110,7 @@ Session::start_audio_export (framepos_t position)
 		pre_export ();
 	}
 
-	_export_preroll = 10.0 * nominal_frame_rate (); // TODO make configurable
+	_export_preroll = Config->get_export_preroll() * nominal_frame_rate ();
 
 	/* We're about to call Track::seek, so the butler must have finished everything
 	   up otherwise it could be doing do_refill in its thread while we are doing
