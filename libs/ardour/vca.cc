@@ -21,13 +21,31 @@
 #include "ardour/route.h"
 #include "ardour/vca.h"
 
+#include "i18n.h"
+
 using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 
-VCA::VCA (Session& s, const string& n)
+gint VCA::next_number = 0;
+
+string
+VCA::default_name_template ()
+{
+	return _("VCA %n");
+}
+
+int
+VCA::next_vca_number ()
+{
+	/* recall that atomic_int_add() returns the value before the add */
+	return g_atomic_int_add (&next_number, 1) + 1;
+}
+
+VCA::VCA (Session& s, const string& name, uint32_t num)
 	: SessionHandleRef (s)
-	, _name (n)
+	, _number (num)
+	, _name (name)
 	, _control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
 {
 }
@@ -48,6 +66,7 @@ void
 VCA::add (boost::shared_ptr<Route> r)
 {
 	boost::dynamic_pointer_cast<GainControl>(r->gain_control())->add_master (_control);
+	std::cerr << name() << " now controlling " << r->name() << std::endl;
 }
 
 void

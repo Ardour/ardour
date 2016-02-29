@@ -17,6 +17,9 @@
 
 */
 
+#include "pbd/convert.h"
+#include "pbd/replace_all.h"
+
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
@@ -41,21 +44,34 @@ VCAManager::vcas () const
 	return _vcas;
 }
 
-boost::shared_ptr<VCA>
-VCAManager::create_vca (std::string const & name)
+int
+VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 {
-	boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, name));
+	VCAList vcal;
+
 	{
 		Mutex::Lock lm (lock);
-		_vcas.push_back (vca);
+
+		for (uint32_t n = 0; n < howmany; ++n) {
+
+			int num = VCA::next_vca_number ();
+			string name = name_template;
+
+			if (name.find ("%n")) {
+				string sn = PBD::to_string (n, std::dec);
+				replace_all (name, "%n", sn);
+			}
+
+			boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, name, num));
+
+			_vcas.push_back (vca);
+			vcal.push_back (vca);
+		}
 	}
 
-	VCAList vcal;
-	vcal.push_back (vca);
-
 	VCAAdded (vcal); /* EMIT SIGNAL */
-	return vca;
 
+	return 0;
 }
 
 
@@ -73,3 +89,16 @@ VCAManager::remove_vca (boost::shared_ptr<VCA> vca)
 	VCARemoved (vcal); /* EMIT SIGNAL */
 }
 
+boost::shared_ptr<VCA>
+VCAManager::vca_by_number (uint32_t n) const
+{
+	Mutex::Lock lm (lock);
+
+	for (VCAS::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
+		if ((*i)->number() == n) {
+			return *i;
+		}
+	}
+
+	return boost::shared_ptr<VCA>();
+}

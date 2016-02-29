@@ -42,8 +42,10 @@ class VCAManager : public SessionHandleRef
 	VCAManager (ARDOUR::Session&);
 	~VCAManager ();
 
-	boost::shared_ptr<VCA> create_vca (std::string const & name = std::string());
+	int create_vca (uint32_t n, std::string const & name = std::string());
 	void remove_vca (boost::shared_ptr<VCA>);
+
+	boost::shared_ptr<VCA> vca_by_number(uint32_t) const;
 
 	typedef std::list<boost::shared_ptr<VCA> > VCAS;
 	VCAS vcas() const;

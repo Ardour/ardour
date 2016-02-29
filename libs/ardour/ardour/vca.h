@@ -33,9 +33,10 @@ class Route;
 
 class LIBARDOUR_API VCA : public SessionHandleRef {
   public:
-	VCA (Session& session, const std::string& name);
+	VCA (Session& session, const std::string& name, uint32_t num);
 
 	std::string name() const { return _name; }
+	uint32_t number () const { return _number; }
 
 	void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	double get_value () const;
@@ -45,9 +46,14 @@ class LIBARDOUR_API VCA : public SessionHandleRef {
 	void add (boost::shared_ptr<Route>);
 	void remove (boost::shared_ptr<Route>);
 
+	static std::string default_name_template ();
+	static int next_vca_number ();
   private:
+	uint32_t    _number;
 	std::string _name;
 	boost::shared_ptr<GainControl> _control;
+
+	static gint next_number;
 };
 
 } /* namespace */
