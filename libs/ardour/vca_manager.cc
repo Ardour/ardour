@@ -23,10 +23,13 @@
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
+#include "i18n.h"
+
 using namespace ARDOUR;
 using namespace Glib::Threads;
 using std::string;
 
+string VCAManager::xml_node_name (X_("VCAManager"));
 
 VCAManager::VCAManager (Session& s)
 	: SessionHandleRef (s)
@@ -35,6 +38,8 @@ VCAManager::VCAManager (Session& s)
 
 VCAManager::~VCAManager ()
 {
+	Mutex::Lock lm (lock);
+	_vcas.clear ();
 }
 
 VCAManager::VCAS
@@ -101,4 +106,17 @@ VCAManager::vca_by_number (uint32_t n) const
 	}
 
 	return boost::shared_ptr<VCA>();
+}
+
+XMLNode&
+VCAManager::get_state ()
+{
+	XMLNode* node = new XMLNode (xml_node_name);
+	return *node;
+}
+
+int
+VCAManager::set_state (XMLNode const& node, int /*version*/)
+{
+	return 0;
 }

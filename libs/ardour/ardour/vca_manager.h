@@ -28,6 +28,7 @@
 #include <glibmm/threads.h>
 
 #include "pbd/signals.h"
+#include "pbd/statefuldestructible.h"
 
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
@@ -36,7 +37,7 @@ namespace ARDOUR {
 
 class VCA;
 
-class VCAManager : public SessionHandleRef
+class VCAManager : public SessionHandleRef, public PBD::StatefulDestructible
 {
      public:
 	VCAManager (ARDOUR::Session&);
@@ -52,6 +53,11 @@ class VCAManager : public SessionHandleRef
 
 	PBD::Signal1<void,VCAList&> VCAAdded;
 	PBD::Signal1<void,VCAList&> VCARemoved;
+
+	XMLNode& get_state();
+	int set_state (XMLNode const&, int version);
+
+	static std::string xml_node_name;
 
      private:
 	mutable Glib::Threads::Mutex lock;
