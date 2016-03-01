@@ -751,7 +751,7 @@ boost::shared_ptr<WaveViewCache::Entry>
 WaveView::cache_request_result (boost::shared_ptr<WaveViewThreadRequest> req) const
 {
 	if (!req->image) {
-		cerr << "asked to cache null image!!!\n";
+		// cerr << "asked to cache null image!!!\n";
 		return boost::shared_ptr<WaveViewCache::Entry> ();
 	}
 
@@ -1005,7 +1005,7 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		                                             req->samples_per_pixel);
 
 		if (req->should_stop()) {
-			cerr << "Request stopped after reading peaks\n";
+			// cerr << "Request stopped after reading peaks\n";
 			return;
 		}
 
@@ -1041,7 +1041,7 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 			draw_absent_image (req->image, peaks.get(), n_peaks);
 		}
 	} else {
-		cerr << "Request stopped before image generation\n";
+		// cerr << "Request stopped before image generation\n";
 	}
 
 	if (in_render_thread && !req->should_stop()) {
