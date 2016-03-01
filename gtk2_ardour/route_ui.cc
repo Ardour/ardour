@@ -144,6 +144,7 @@ RouteUI::init ()
 	multiple_mute_change = false;
 	multiple_solo_change = false;
 	_i_am_the_modifier = 0;
+	vca_button = 0;
 
 	input_selector = 0;
 	output_selector = 0;

@@ -179,7 +179,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Table solo_iso_table;
 	Gtk::Table mute_solo_table;
 	Gtk::Table bottom_button_table;
-	Gtk::Table vca_table;
 
 	ArdourButton                 meter_point_button;
 
@@ -323,8 +322,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	std::string meter_point_string (ARDOUR::MeterPoint);
 
-	void vca_menu_toggle (Gtk::MenuItem*, uint32_t n);
-	bool vca_button_release (GdkEventButton* ev, uint32_t which);
+	void vca_menu_toggle (Gtk::CheckMenuItem*, uint32_t n);
+	bool vca_button_release (GdkEventButton* ev);
 };
 
 #endif /* __ardour_mixer_strip__ */

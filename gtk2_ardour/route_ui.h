@@ -126,7 +126,7 @@ class RouteUI : public virtual AxisView
         ArdourButton* solo_safe_led;
         ArdourButton* solo_isolated_led;
 
-	std::vector<ArdourButton*> vca_buttons;
+	ArdourButton* vca_button;
 
 	Gtk::Label monitor_input_button_label;
 	Gtk::Label monitor_disk_button_label;
