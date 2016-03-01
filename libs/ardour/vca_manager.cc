@@ -69,7 +69,7 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 			string name = name_template;
 
 			if (name.find ("%n")) {
-				string sn = PBD::to_string (n, std::dec);
+				string sn = PBD::to_string (num, std::dec);
 				replace_all (name, "%n", sn);
 			}
 
