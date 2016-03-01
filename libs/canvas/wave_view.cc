@@ -944,7 +944,10 @@ WaveView::queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, frame
 		/* this will stop rendering in progress (which might otherwise
 		   be long lived) for any current request.
 		*/
-		current_request->cancel ();
+		Glib::Threads::Mutex::Lock lm (request_queue_lock);
+		if (current_request) {
+			current_request->cancel ();
+		}
 	}
 
 	start_drawing_thread ();
@@ -1000,6 +1003,11 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		                                             sample_start, sample_end - sample_start,
 		                                             req->channel,
 		                                             req->samples_per_pixel);
+
+		if (req->should_stop()) {
+			cerr << "Request stopped after reading peaks\n";
+			return;
+		}
 
 		req->image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, req->height);
 
@@ -1491,11 +1499,12 @@ WaveView::cancel_my_render_request () const
 	 * ever starting up.
 	 */
 
+	Glib::Threads::Mutex::Lock lm (request_queue_lock);
+
 	if (current_request) {
 		current_request->cancel ();
 	}
 
-	Glib::Threads::Mutex::Lock lm (request_queue_lock);
 
 	/* now remove it from the queue and reset our request pointer so that
 	   have no outstanding request (that we know about)
