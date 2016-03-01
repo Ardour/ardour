@@ -22,7 +22,6 @@
 #include "pbd/xml++.h"
 #include "pbd/error.h"
 #include "pbd/locale_guard.h"
-#include "pbd/stacktrace.h"
 
 #include "i18n.h"
 
@@ -121,10 +120,6 @@ Controllable::get_state ()
 	// used to find and identify XML nodes by various Controllable-derived objects
 
 	node->add_property (X_("name"), _name);
-
-	if (_name == "gaincontrol") {
-		PBD::stacktrace (cerr, 20);
-	}
 
 	id().print (buf, sizeof (buf));
 	node->add_property (X_("id"), buf);
