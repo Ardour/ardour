@@ -29,6 +29,10 @@ namespace Gtk {
 	class ActionGroup;
 }
 
+namespace ARDOUR {
+	class VCA;
+}
+
 class MixerActor : virtual public sigc::trackable
 {
   public:
@@ -47,6 +51,9 @@ class MixerActor : virtual public sigc::trackable
 	RouteUISelection _route_targets;
 
 	virtual void set_route_targets_for_operation () = 0;
+
+	void vca_assign (boost::shared_ptr<ARDOUR::VCA>);
+	void vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
 
 	void solo_action ();
 	void mute_action ();

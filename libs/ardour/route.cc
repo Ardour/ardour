@@ -69,6 +69,7 @@
 #include "ardour/session.h"
 #include "ardour/unknown_processor.h"
 #include "ardour/utils.h"
+#include "ardour/vca.h"
 
 #include "i18n.h"
 
@@ -3345,7 +3346,7 @@ Route::set_processor_state (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-		XMLProperty const * prop = (*niter)->property ("type");
+		XMLProperty* prop = (*niter)->property ("type");
 
 		if (prop->value() == "amp") {
 			_amp->set_state (**niter, Stateful::current_state_version);
@@ -5882,4 +5883,14 @@ Route::master_send_enable_controllable () const
 #else
 	return boost::shared_ptr<AutomationControl>();
 #endif
+}
+
+bool
+Route::slaved_to (boost::shared_ptr<VCA> vca) const
+{
+	if (!vca || !_gain_control) {
+		return false;
+	}
+
+	return _gain_control->slaved_to (vca->control());
 }

@@ -57,6 +57,7 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	void add_master (boost::shared_ptr<GainControl>);
 	void remove_master (boost::shared_ptr<GainControl>);
 	void clear_masters ();
+	bool slaved_to (boost::shared_ptr<GainControl>) const;
 
   private:
 	void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);

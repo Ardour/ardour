@@ -2492,7 +2492,7 @@ MixerStrip::set_meter_type (MeterType t)
 }
 
 void
-MixerStrip::vca_menu_toggle (uint32_t n)
+MixerStrip::vca_menu_toggle (MenuItem* m, uint32_t n)
 {
 	if (!_route) {
 		return;
@@ -2504,7 +2504,42 @@ MixerStrip::vca_menu_toggle (uint32_t n)
 		return;
 	}
 
+	RadioMenuItem* ri = dynamic_cast<RadioMenuItem*> (m);
+
+	if (!ri) {
+		return;
+	}
+
+	if (!ri->get_active()) {
+		_mixer.do_vca_unassign (vca);
+		return;
+	}
+
+	/* Now invoke a global method to apply this all relevant strips/routes */
+
+	_mixer.do_vca_assign (vca);
+}
+
+void
+MixerStrip::vca_assign (boost::shared_ptr<VCA> vca)
+{
+	if (!vca || !_route) {
+		return;
+	}
+
 	vca->add (_route);
+}
+
+void
+MixerStrip::vca_unassign (boost::shared_ptr<VCA> vca)
+{
+	if (!_route) {
+		return;
+	}
+
+	if (!vca) {
+		/* null VCA means drop all VCA assignments */
+	}
 }
 
 bool
@@ -2513,6 +2548,11 @@ MixerStrip::vca_button_release (GdkEventButton* ev, uint32_t which)
 	using namespace Gtk::Menu_Helpers;
 
 	if (!_session || !Keyboard::is_context_menu_event (ev)) {
+		return false;
+	}
+
+	if (!_route) {
+		/* no route - nothing to do */
 		return false;
 	}
 
@@ -2527,8 +2567,15 @@ MixerStrip::vca_button_release (GdkEventButton* ev, uint32_t which)
 	MenuList& items = menu->items();
 	RadioMenuItem::Group group;
 
+	items.push_back (MenuElem (_("Unassign"), sigc::bind (sigc::mem_fun (_mixer, &Mixer_UI::do_vca_unassign), boost::shared_ptr<VCA>())));
+
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-		items.push_back (RadioMenuElem (group, (*v)->name(), sigc::bind (sigc::mem_fun (*this, &MixerStrip::vca_menu_toggle), (*v)->number())));
+		items.push_back (RadioMenuElem (group, (*v)->name()));
+		RadioMenuItem* item = dynamic_cast<RadioMenuItem*> (&items.back());
+		if (_route->slaved_to (*v)) {
+			item->set_active (true);
+		}
+		item->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &MixerStrip::vca_menu_toggle), item, (*v)->number()));
 	}
 
 	menu->popup (1, ev->time);

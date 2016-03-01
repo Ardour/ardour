@@ -116,6 +116,9 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	bool window_not_visible () const;
 
+	void do_vca_assign (boost::shared_ptr<ARDOUR::VCA>);
+	void do_vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
+
   protected:
 	void set_route_targets_for_operation ();
 

@@ -176,3 +176,10 @@ GainControl::clear_masters ()
 		Changed(); /* EMIT SIGNAL */
 	}
 }
+
+bool
+GainControl::slaved_to (boost::shared_ptr<GainControl> gc) const
+{
+	Glib::Threads::Mutex::Lock lm (master_lock);
+	return find (_masters.begin(), _masters.end(), gc) != _masters.end();
+}

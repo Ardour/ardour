@@ -2579,3 +2579,17 @@ Mixer_UI::plugin_drop (const Glib::RefPtr<Gdk::DragContext>&, const Gtk::Selecti
 	manager.set_status (ppp->_pip->type, ppp->_pip->unique_id, status);
 	manager.save_statuses ();
 }
+
+void
+Mixer_UI::do_vca_assign (boost::shared_ptr<VCA> vca)
+{
+	/* call protected MixerActor:: method */
+	vca_assign (vca);
+}
+
+void
+Mixer_UI::do_vca_unassign (boost::shared_ptr<VCA> vca)
+{
+	/* call protected MixerActor:: method */
+	vca_unassign (vca);
+}

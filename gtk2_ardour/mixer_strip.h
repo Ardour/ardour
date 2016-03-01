@@ -131,6 +131,9 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void toggle_processors ();
 	void ab_plugins ();
 
+	void vca_assign (boost::shared_ptr<ARDOUR::VCA>);
+	void vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
+
 	void set_selected(bool yn);
 	bool is_selected() {return _selected;}
 
@@ -320,7 +323,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	std::string meter_point_string (ARDOUR::MeterPoint);
 
-	void vca_menu_toggle (uint32_t n);
+	void vca_menu_toggle (Gtk::MenuItem*, uint32_t n);
 	bool vca_button_release (GdkEventButton* ev, uint32_t which);
 };
 
