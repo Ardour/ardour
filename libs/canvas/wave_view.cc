@@ -1230,13 +1230,12 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		 * draw or the available width of the image.
 		 */
 
-		draw_width = min ((double) image_to_draw->image->get_width() - (draw_start - image_to_draw->start),
-		                  (draw_end - draw_start));
+		draw_width = min ((double) image_to_draw->image->get_width(), (draw_end - draw_start));
 
 
-		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 draw just %2 of %3 (iwidth %4 off %5 img @ %6 rs @ %7)\n", name, draw_width, (draw_end - draw_start),
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 draw just %2 of %3 @ %8 (iwidth %4 off %5 img @ %6 rs @ %7)\n", name, draw_width, (draw_end - draw_start),
 		                                              image_to_draw->image->get_width(), image_origin_in_self_coordinates,
-		                                              image_to_draw->start, _region_start));
+		                                              image_to_draw->start, _region_start, draw_start));
 	} else {
 		draw_width = draw_end - draw_start;
 		DEBUG_TRACE (DEBUG::WaveView, string_compose ("use current image, span entire render width %1..%2\n", draw_start, draw_end));
