@@ -1582,7 +1582,7 @@ WaveView::drawing_thread ()
 		 * as we do rendering.
 		 */
 
-		request_queue_lock.unlock (); /* some RAII would be good here */
+		lm.release (); /* some RAII would be good here */
 
 		try {
 			requestor->generate_image (req, true);
@@ -1590,7 +1590,7 @@ WaveView::drawing_thread ()
 			req->image.clear(); /* just in case it was set before the exception, whatever it was */
 		}
 
-		request_queue_lock.lock ();
+		lm.acquire ();
 
 		req.reset (); /* drop/delete request as appropriate */
 	}
