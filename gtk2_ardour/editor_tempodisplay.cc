@@ -335,7 +335,7 @@ Editor::edit_meter_section (MeterSection* section)
 	double bpb = meter_dialog.get_bpb ();
 	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
 
-	double note_type = meter_dialog.get_note_type ();
+	double const note_type = meter_dialog.get_note_type ();
 	Timecode::BBT_Time when;
 	meter_dialog.get_bbt_time(when);
 	framepos_t const frame = _session->tempo_map().frame_at_beat (_session->tempo_map().bbt_to_beats (when));
@@ -345,7 +345,7 @@ Editor::edit_meter_section (MeterSection* section)
 	if (meter_dialog.get_lock_style() == MusicTime) {
 		_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), when);
 	} else {
-		_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), section->frame());
+		_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), frame);
 	}
         XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
@@ -366,12 +366,12 @@ Editor::edit_tempo_section (TempoSection* section)
 
 	double bpm = tempo_dialog.get_bpm ();
 	double nt = tempo_dialog.get_note_type ();
-	double beat;
 	Timecode::BBT_Time when;
 
 	tempo_dialog.get_bbt_time(when);
+	double const beat = _session->tempo_map().bbt_to_beats (when);
+
 	bpm = max (0.01, bpm);
-	beat = _session->tempo_map().bbt_to_beats (when);
 
 	begin_reversible_command (_("replace tempo mark"));
 	XMLNode &before = _session->tempo_map().get_state();

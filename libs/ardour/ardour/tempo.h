@@ -102,7 +102,7 @@ class LIBARDOUR_API MetricSection {
 	MetricSection (double beat)
 		: _beat (beat), _frame (0), _movable (true), _position_lock_style (PositionLockStyle::MusicTime) {}
 	MetricSection (framepos_t frame)
-		: _beat (0), _frame (frame), _movable (true), _position_lock_style (PositionLockStyle::AudioTime) {}
+		: _beat (0.0), _frame (frame), _movable (true), _position_lock_style (PositionLockStyle::AudioTime) {}
 
 	virtual ~MetricSection() {}
 
@@ -140,7 +140,7 @@ class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
 	MeterSection (double beat, const Timecode::BBT_Time& bbt, double bpb, double note_type)
 		: MetricSection (beat), Meter (bpb, note_type), _bbt (bbt) {}
 	MeterSection (framepos_t frame, double bpb, double note_type)
-		: MetricSection (frame), Meter (bpb, note_type) {}
+		: MetricSection (frame), Meter (bpb, note_type), _bbt (1, 1, 0) {}
 	MeterSection (const XMLNode&);
 
 	static const std::string xml_state_node_name;
@@ -419,7 +419,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 private:
 	double bbt_to_beats_locked (Timecode::BBT_Time bbt);
 	Timecode::BBT_Time beats_to_bbt_locked (double beats);
-
+	double beat_at_frame_locked (framecnt_t frame) const;
+	framecnt_t frame_at_beat_locked (double beat) const;
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;
 	friend class ::TempoTest;
