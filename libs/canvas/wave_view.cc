@@ -164,7 +164,7 @@ WaveView::debug_name() const
 void
 WaveView::image_ready ()
 {
-        DEBUG_TRACE (DEBUG::WaveView, string_compose ("queue draw for %1 at %2 (vis = %3 CR %4)\n", this, g_get_monotonic_time(), visible(), current_request));
+	DEBUG_TRACE (DEBUG::WaveView, string_compose ("queue draw for %1 at %2 (vis = %3 CR %4)\n", this, g_get_monotonic_time(), visible(), current_request));
 	redraw ();
 }
 
@@ -270,7 +270,7 @@ WaveView::set_clip_level (double dB)
 void
 WaveView::invalidate_image_cache ()
 {
-        DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 invalidates image cache and cancels current request\n", this));
+	DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 invalidates image cache and cancels current request\n", this));
 	cancel_my_render_request ();
 	Glib::Threads::Mutex::Lock lci (current_image_lock);
 	_current_image.reset ();
@@ -798,9 +798,9 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 		 * while we're here.
 		 */
 
-                DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 CR %2 stop? %3 image %4\n", this, current_request,
-                                                              (current_request ? current_request->should_stop() : false),
-                                                              (current_request ? current_request->image : 0)));
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 CR %2 stop? %3 image %4\n", this, current_request,
+					(current_request ? current_request->should_stop() : false),
+					(current_request ? current_request->image : 0)));
 
 		if (current_request && !current_request->should_stop() && current_request->image) {
 
@@ -863,7 +863,7 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 			req->height = _height;
 			req->fill_color = _fill_color;
 			req->amplitude = _region_amplitude * _amplitude_above_axis;
-                        req->width = desired_image_width ();
+			req->width = desired_image_width ();
 
 			/* draw image in this (the GUI thread) */
 
@@ -907,21 +907,21 @@ WaveView::get_image_from_cache (framepos_t start, framepos_t end, bool& full) co
 framecnt_t
 WaveView::desired_image_width () const
 {
-        /* compute how wide the image should be, in samples.
-         *
-         * We want at least 1 canvas width's worth, but if that
-         * represents less than 1/10th of a second, use 1/10th of
-         * a second instead.
-         */
+	/* compute how wide the image should be, in samples.
+	 *
+	 * We want at least 1 canvas width's worth, but if that
+	 * represents less than 1/10th of a second, use 1/10th of
+	 * a second instead.
+	 */
 
-        framecnt_t canvas_width_samples = _canvas->visible_area().width() * _samples_per_pixel;
-        const framecnt_t one_tenth_of_second = _region->session().frame_rate() / 10;
+	framecnt_t canvas_width_samples = _canvas->visible_area().width() * _samples_per_pixel;
+	const framecnt_t one_tenth_of_second = _region->session().frame_rate() / 10;
 
-        if (canvas_width_samples > one_tenth_of_second) {
-                return  canvas_width_samples;
-        }
+	if (canvas_width_samples > one_tenth_of_second) {
+		return  canvas_width_samples;
+	}
 
-        return one_tenth_of_second;
+	return one_tenth_of_second;
 }
 
 void
@@ -938,7 +938,7 @@ WaveView::queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, frame
 	req->height = _height;
 	req->fill_color = _fill_color;
 	req->amplitude = _region_amplitude * _amplitude_above_axis;
-        req->width = desired_image_width ();
+	req->width = desired_image_width ();
 
 	if (current_request) {
 		/* this will stop rendering in progress (which might otherwise
@@ -958,14 +958,14 @@ WaveView::queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, frame
 		Glib::Threads::Mutex::Lock lm (request_queue_lock);
 		current_request = req;
 
-                DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 now has current request %2\n", this, req));
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 now has current request %2\n", this, req));
 
-                if (request_queue.insert (this).second) {
-                        /* this waveview was not already in the request queue, make sure we wake
-                           the rendering thread in case it is asleep.
-                        */
-                        request_cond.signal ();
-                }
+		if (request_queue.insert (this).second) {
+			/* this waveview was not already in the request queue, make sure we wake
+				 the rendering thread in case it is asleep.
+				 */
+			request_cond.signal ();
+		}
 	}
 }
 
@@ -976,8 +976,8 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 
 		/* sample position is canonical here, and we want to generate
 		 * an image that spans about 3x the canvas width. We get to that
-                 * width by using an image sample count of the screen width added
-                 * on each side of the desired image center.
+		 * width by using an image sample count of the screen width added
+		 * on each side of the desired image center.
 		 */
 
 		const framepos_t center = req->start + ((req->end - req->start) / 2);
@@ -1045,7 +1045,7 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 	}
 
 	if (in_render_thread && !req->should_stop()) {
-                DEBUG_TRACE (DEBUG::WaveView, string_compose ("done with request for %1 at %2 CR %3 req %4 range %5 .. %6\n", this, g_get_monotonic_time(), current_request, req, req->start, req->end));
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("done with request for %1 at %2 CR %3 req %4 range %5 .. %6\n", this, g_get_monotonic_time(), current_request, req, req->start, req->end));
 		const_cast<WaveView*>(this)->ImageReady (); /* emit signal */
 	}
 
@@ -1075,7 +1075,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		return;
 	}
 
-        DEBUG_TRACE (DEBUG::WaveView, string_compose ("render %1 at %2\n", this, g_get_monotonic_time()));
+	DEBUG_TRACE (DEBUG::WaveView, string_compose ("render %1 at %2\n", this, g_get_monotonic_time()));
 
 	/* a WaveView is intimately connected to an AudioRegion. It will
 	 * display the waveform within the region, anywhere from the start of
@@ -1505,14 +1505,13 @@ WaveView::cancel_my_render_request () const
 		current_request->cancel ();
 	}
 
-
 	/* now remove it from the queue and reset our request pointer so that
 	   have no outstanding request (that we know about)
 	*/
 
 	request_queue.erase (this);
 	current_request.reset ();
-        DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 now has no request %2\n", this));
+	DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 now has no request %2\n", this));
 
 }
 
@@ -1578,7 +1577,7 @@ WaveView::drawing_thread ()
 		requestor = *(request_queue.begin());
 		request_queue.erase (request_queue.begin());
 
-                DEBUG_TRACE (DEBUG::WaveView, string_compose ("start request for %1 at %2\n", requestor, g_get_monotonic_time()));
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("start request for %1 at %2\n", requestor, g_get_monotonic_time()));
 
 		boost::shared_ptr<WaveViewThreadRequest> req = requestor->current_request;
 
@@ -1657,25 +1656,25 @@ WaveViewCache::lookup_image (boost::shared_ptr<ARDOUR::AudioSource> src,
 			continue;
 		}
 
-                switch (Evoral::coverage (start, end, e->start, e->end)) {
-                case Evoral::OverlapExternal:  /* required range is inside image range */
-			DEBUG_TRACE (DEBUG::WaveView, string_compose ("found image spanning %1..%2 covers %3..%4\n",
-			                                              e->start, e->end, start, end));
-			use (src, e);
-                        full_coverage = true;
-                        return e;
+		switch (Evoral::coverage (start, end, e->start, e->end)) {
+			case Evoral::OverlapExternal:  /* required range is inside image range */
+				DEBUG_TRACE (DEBUG::WaveView, string_compose ("found image spanning %1..%2 covers %3..%4\n",
+							e->start, e->end, start, end));
+				use (src, e);
+				full_coverage = true;
+				return e;
 
-                case Evoral::OverlapStart: /* required range start is covered by image range */
-                        if ((e->end - start) > max_coverage) {
-                                best_partial = e;
-                                max_coverage = e->end - start;
-                        }
-                        break;
+			case Evoral::OverlapStart: /* required range start is covered by image range */
+				if ((e->end - start) > max_coverage) {
+					best_partial = e;
+					max_coverage = e->end - start;
+				}
+				break;
 
-                case Evoral::OverlapNone:
-                case Evoral::OverlapEnd:
-                case Evoral::OverlapInternal:
-                        break;
+			case Evoral::OverlapNone:
+			case Evoral::OverlapEnd:
+			case Evoral::OverlapInternal:
+				break;
 		}
 	}
 
