@@ -466,7 +466,7 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 	lock_styles.insert (make_pair (_("music"), PositionLockStyle::MusicTime));
 	strings.push_back (_("music"));
 	lock_styles.insert (make_pair (_("audio"), PositionLockStyle::AudioTime));
-	strings.push_back (_("audio ur brane wul xplod"));
+	strings.push_back (_("audio"));
 	set_popdown_strings (lock_style, strings);
 	LockStyles::iterator ls;
 	for (ls = lock_styles.begin(); ls != lock_styles.end(); ++ls) {

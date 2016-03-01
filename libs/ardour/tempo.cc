@@ -1405,7 +1405,7 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 				pr.second = where;
 				meter->set_beat (pr);
 			} else {
-				meter->set_frame (frame_at_tick (meter->tick()));
+				meter->set_frame (frame_at_tick_locked (meter->tick()));
 			}
 		}
 	}
@@ -1589,7 +1589,7 @@ TempoMap::beats_to_bbt_locked (double beats)
 }
 
 double
-TempoMap::tick_at_frame (framecnt_t frame) const
+TempoMap::tick_at_frame_locked (framecnt_t frame) const
 {
 	/* HOLD (at least) THE READER LOCK */
 
@@ -1617,7 +1617,7 @@ TempoMap::tick_at_frame (framecnt_t frame) const
 }
 
 framecnt_t
-TempoMap::frame_at_tick (double tick) const
+TempoMap::frame_at_tick_locked (double tick) const
 {
 	/* HOLD THE READER LOCK */
 
@@ -1649,27 +1649,27 @@ double
 TempoMap::beat_at_frame (framecnt_t frame) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return tick_at_frame (frame) / BBT_Time::ticks_per_beat;
+	return tick_at_frame_locked (frame) / BBT_Time::ticks_per_beat;
 }
 
 double
 TempoMap::beat_at_frame_locked (framecnt_t frame) const
 {
-	return tick_at_frame (frame) / BBT_Time::ticks_per_beat;
+	return tick_at_frame_locked (frame) / BBT_Time::ticks_per_beat;
 }
 
 framecnt_t
 TempoMap::frame_at_beat (double beat) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return frame_at_tick (beat * BBT_Time::ticks_per_beat);
+	return frame_at_tick_locked (beat * BBT_Time::ticks_per_beat);
 }
 
 framecnt_t
 TempoMap::frame_at_beat_locked (double beat) const
 {
 
-	return frame_at_tick (beat * BBT_Time::ticks_per_beat);
+	return frame_at_tick_locked (beat * BBT_Time::ticks_per_beat);
 }
 
 framepos_t
@@ -1685,7 +1685,15 @@ TempoMap::frame_time (const BBT_Time& bbt)
 	}
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	framepos_t const ret = frame_at_beat (bbt_to_beats_locked (bbt));
+	return frame_time_locked (bbt);;
+}
+
+framepos_t
+TempoMap::frame_time_locked (const BBT_Time& bbt)
+{
+	/* HOLD THE READER LOCK */
+
+	framepos_t const ret = frame_at_beat_locked (bbt_to_beats_locked (bbt));
 
 	return ret;
 }
@@ -1742,7 +1750,7 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	uint32_t ticks = (uint32_t) floor (tick_at_frame (fr) + 0.5);
+	uint32_t ticks = (uint32_t) floor (tick_at_frame_locked (fr) + 0.5);
 	uint32_t beats = (uint32_t) floor (ticks / BBT_Time::ticks_per_beat);
 	uint32_t ticks_one_subdivisions_worth = (uint32_t)BBT_Time::ticks_per_beat / sub_num;
 
@@ -1828,7 +1836,7 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 			/* on the subdivision, do nothing */
 		}
 	}
-	return frame_at_tick ((beats * BBT_Time::ticks_per_beat) + ticks);
+	return frame_at_tick_locked ((beats * BBT_Time::ticks_per_beat) + ticks);
 }
 
 framepos_t
@@ -1874,11 +1882,11 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 
 	case Beat:
 		if (dir < 0) {
-			return frame_at_beat (floor (beat_at_framepos));
+			return frame_at_beat_locked (floor (beat_at_framepos));
 		} else if (dir > 0) {
-			return frame_at_beat (ceil (beat_at_framepos));
+			return frame_at_beat_locked (ceil (beat_at_framepos));
 		} else {
-			return frame_at_beat (floor (beat_at_framepos + 0.5));
+			return frame_at_beat_locked (floor (beat_at_framepos + 0.5));
 		}
 		break;
 	}

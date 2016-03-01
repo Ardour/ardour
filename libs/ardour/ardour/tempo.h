@@ -327,9 +327,6 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	void bbt_time (framepos_t when, Timecode::BBT_Time&);
 
-	double tick_at_frame (framecnt_t frame) const;
-	framecnt_t frame_at_tick (double tick) const;
-
 	double beat_at_frame (framecnt_t frame) const;
 	framecnt_t frame_at_beat (double beat) const;
 
@@ -421,6 +418,10 @@ private:
 	Timecode::BBT_Time beats_to_bbt_locked (double beats);
 	double beat_at_frame_locked (framecnt_t frame) const;
 	framecnt_t frame_at_beat_locked (double beat) const;
+	double tick_at_frame_locked (framecnt_t frame) const;
+	framecnt_t frame_at_tick_locked (double tick) const;
+	framepos_t frame_time_locked (const Timecode::BBT_Time&);
+
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;
 	friend class ::TempoTest;
