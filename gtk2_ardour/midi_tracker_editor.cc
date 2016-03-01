@@ -64,15 +64,21 @@ MidiTrackerMatrix::MidiTrackerMatrix(ARDOUR::Session* session,
                                      boost::shared_ptr<ARDOUR::MidiRegion> region,
                                      boost::shared_ptr<ARDOUR::MidiModel> midi_model,
                                      uint16_t rpb)
-	: rows_per_beat(rpb), beats_per_row(1.0/rows_per_beat),
-	  _ticks_per_row(BBT_Time::ticks_per_beat/rows_per_beat),
-	  _session(session), _region(region), _midi_model(midi_model),
+	: _session(session), _region(region), _midi_model(midi_model),
 	  _conv(_session->tempo_map(), _region->position())
 {
-	updateMatrix();
+	set_rows_per_beat(rpb);
+	update_matrix();
 }
 
-void MidiTrackerMatrix::updateMatrix()
+void MidiTrackerMatrix::set_rows_per_beat(uint16_t rpb)
+{
+	rows_per_beat = rpb;
+	beats_per_row = Evoral::Beats(1.0 / rows_per_beat);
+	_ticks_per_row = BBT_Time::ticks_per_beat/rows_per_beat;
+}
+
+void MidiTrackerMatrix::update_matrix()
 {
 	first_beats = find_first_row_beats();
 	last_beats = find_last_row_beats();
@@ -257,6 +263,7 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 
 MidiTrackerEditor::~MidiTrackerEditor ()
 {
+	delete mtm;
 }
 
 void
@@ -307,7 +314,7 @@ MidiTrackerEditor::visible_blank_press(GdkEventButton* ev)
 void
 MidiTrackerEditor::redisplay_visible_note(bool visible_note)
 {
-	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++)
+	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++)
 		view.get_column(i*4 + 1)->set_visible(visible_note);
 	visible_note_button.set_active_state (visible_note ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
@@ -328,7 +335,7 @@ MidiTrackerEditor::visible_note_press(GdkEventButton* ev)
 void
 MidiTrackerEditor::redisplay_visible_channel(bool visible_channel)
 {
-	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++)
+	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++)
 		view.get_column(i*4 + 2)->set_visible(visible_channel);
 	visible_channel_button.set_active_state (visible_channel ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
@@ -349,7 +356,7 @@ MidiTrackerEditor::visible_channel_press(GdkEventButton* ev)
 void
 MidiTrackerEditor::redisplay_visible_velocity(bool visible_velocity)
 {
-	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++)
+	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++)
 		view.get_column(i*4 + 3)->set_visible(visible_velocity);
 	visible_velocity_button.set_active_state (visible_velocity ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
@@ -370,7 +377,7 @@ MidiTrackerEditor::visible_velocity_press(GdkEventButton* ev)
 void
 MidiTrackerEditor::redisplay_visible_delay(bool visible_delay)
 {
-	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++)
+	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++)
 		view.get_column(i*4 + 4)->set_visible(visible_delay);
 	visible_delay_button.set_active_state (visible_delay ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
@@ -396,14 +403,16 @@ MidiTrackerEditor::redisplay_model ()
 
 	if (_session) {
 
-		MidiTrackerMatrix mtm(_session, region, midi_model, rows_per_beat);
+		mtm->set_rows_per_beat(rows_per_beat);
+		mtm->update_matrix();
+
 		TreeModel::Row row;
 		
 		// Generate each row
-		for (uint32_t irow = 0; irow < mtm.nrows; irow++) {
+		for (uint32_t irow = 0; irow < mtm->nrows; irow++) {
 			row = *(model->append());
-			Evoral::Beats row_beats = mtm.beats_at_row(irow);
-			uint32_t row_frame = mtm.frame_at_row(irow);
+			Evoral::Beats row_beats = mtm->beats_at_row(irow);
+			uint32_t row_frame = mtm->frame_at_row(irow);
 
 			// Time
 			Timecode::BBT_Time row_bbt;
@@ -418,7 +427,7 @@ MidiTrackerEditor::redisplay_model ()
 
 			// TODO: don't dismiss off-beat rows near the region boundaries
 
-			for (size_t i = 0; i < (size_t)mtm.ntracks; i++) {
+			for (size_t i = 0; i < (size_t)mtm->ntracks; i++) {
 
 				if (visible_blank) {
 					// Fill with blank
@@ -428,12 +437,12 @@ MidiTrackerEditor::redisplay_model ()
 					row[columns.delay[i]] = "-----";
 				}
 				
-				size_t notes_off_count = mtm.notes_off[i].count(irow);
-				size_t notes_on_count = mtm.notes_on[i].count(irow);
+				size_t notes_off_count = mtm->notes_off[i].count(irow);
+				size_t notes_on_count = mtm->notes_on[i].count(irow);
 
 				if (notes_on_count > 0 || notes_off_count > 0) {
-					MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm.notes_off[i].find(irow);
-					MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm.notes_on[i].find(irow);
+					MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm->notes_off[i].find(irow);
+					MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm->notes_on[i].find(irow);
 
 					// Determine whether the row is defined
 					bool undefined = (notes_off_count > 1 || notes_on_count > 1)
@@ -444,8 +453,8 @@ MidiTrackerEditor::redisplay_model ()
 						row[columns.note_name[i]] = undefined_str;
 					} else {
 						// Notes off
-						MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm.notes_off[i].find(irow);
-						if (i_off != mtm.notes_off[i].end()) {
+						MidiTrackerMatrix::RowToNotes::const_iterator i_off = mtm->notes_off[i].find(irow);
+						if (i_off != mtm->notes_off[i].end()) {
 							boost::shared_ptr<NoteType> note = i_off->second;
 							row[columns.note_name[i]] = note_off_str;
 							row[columns.channel[i]] = to_string (note->channel() + 1);
@@ -456,8 +465,8 @@ MidiTrackerEditor::redisplay_model ()
 						}
 
 						// Notes on
-						MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm.notes_on[i].find(irow);
-						if (i_on != mtm.notes_on[i].end()) {
+						MidiTrackerMatrix::RowToNotes::const_iterator i_on = mtm->notes_on[i].find(irow);
+						if (i_on != mtm->notes_on[i].end()) {
 							boost::shared_ptr<NoteType> note = i_on->second;
 							row[columns.channel[i]] = to_string (note->channel() + 1);
 							row[columns.note_name[i]] = Evoral::midi_note_name (note->note());
@@ -480,6 +489,8 @@ MidiTrackerEditor::redisplay_model ()
 void
 MidiTrackerEditor::setup_matrix ()
 {
+	mtm = new MidiTrackerMatrix(_session, region, midi_model, rows_per_beat);
+
 	edit_column = -1;
 	editing_renderer = 0;
 	editing_editable = 0;
@@ -491,15 +502,15 @@ MidiTrackerEditor::setup_matrix ()
 	Gtk::CellRenderer* cellrenderer_time = viewcolumn_time->get_first_cell_renderer ();		
 	viewcolumn_time->add_attribute(cellrenderer_time->property_cell_background (), columns._color);
 	view.append_column (*viewcolumn_time);
-	for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; i++) {
+	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++) {
 		stringstream ss_note;
 		stringstream ss_ch;
 		stringstream ss_vel;
 		stringstream ss_delay;
-		ss_note << "Note" << i;
-		ss_ch << "Ch" << i;
-		ss_vel << "Vel" << i;
-		ss_delay << "Delay" << i;
+		ss_note << "Note"; // << i;
+		ss_ch << "Ch"; // << i;
+		ss_vel << "Vel"; // << i;
+		ss_delay << "Delay"; // << i;
 
 		// TODO be careful of potential memory leaks
 		Gtk::TreeViewColumn* viewcolumn_note = new Gtk::TreeViewColumn (_(ss_note.str().c_str()), columns.note_name[i]);

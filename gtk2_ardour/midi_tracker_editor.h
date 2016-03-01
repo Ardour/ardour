@@ -59,7 +59,12 @@ public:
 	                  boost::shared_ptr<ARDOUR::MidiModel> midi_model,
 	                  uint16_t rpb);
 
-	void updateMatrix(); 
+	// Set the number of rows per beat. After changing that you probably need
+	// to update the matrix, see below.
+	void set_rows_per_beat(uint16_t rpb);
+
+	// Build or rebuild the matrix
+	void update_matrix();
 
 	// Find the beats corresponding to the first row
 	Evoral::Beats find_first_row_beats();
@@ -123,8 +128,8 @@ private:
 	ARDOUR::BeatsFramesConverter _conv;	
 };
 
-// TODO: for now the number of tracks showed on the GUI is hardwired
-#define GUI_NUMBER_OF_TRACKS 4
+// Maximum number of tracks in the midi tracker editor
+#define MAX_NUMBER_OF_TRACKS 4 // 256
 
 class MidiTrackerEditor : public ArdourWindow
 {
@@ -140,7 +145,7 @@ class MidiTrackerEditor : public ArdourWindow
 		MidiTrackerModelColumns()
 		{
 			add (time);
-			for (size_t i = 0; i < GUI_NUMBER_OF_TRACKS; ++i) {
+			for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; ++i) {
 				add (note_name[i]);
 				add (channel[i]);
 				add (velocity[i]);
@@ -152,11 +157,11 @@ class MidiTrackerEditor : public ArdourWindow
 								// it.
 		};
 		Gtk::TreeModelColumn<std::string> time;
-		Gtk::TreeModelColumn<std::string> note_name[GUI_NUMBER_OF_TRACKS];
-		Gtk::TreeModelColumn<std::string> channel[GUI_NUMBER_OF_TRACKS];
-		Gtk::TreeModelColumn<std::string> velocity[GUI_NUMBER_OF_TRACKS];
-		Gtk::TreeModelColumn<std::string> delay[GUI_NUMBER_OF_TRACKS];
-		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note[GUI_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<std::string> note_name[MAX_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<std::string> channel[MAX_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<std::string> velocity[MAX_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<std::string> delay[MAX_NUMBER_OF_TRACKS];
+		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note[MAX_NUMBER_OF_TRACKS];
 		Gtk::TreeModelColumn<std::string> _color;
 	};
 
@@ -204,6 +209,8 @@ class MidiTrackerEditor : public ArdourWindow
 	boost::shared_ptr<ARDOUR::MidiRegion> region;
 	boost::shared_ptr<ARDOUR::MidiTrack>  track;
 	boost::shared_ptr<ARDOUR::MidiModel>  midi_model;
+
+	MidiTrackerMatrix* mtm;
 
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;
