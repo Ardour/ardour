@@ -60,6 +60,8 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	bool slaved_to (boost::shared_ptr<VCA>) const;
 	std::vector<uint32_t> masters () const;
 
+	PBD::Signal0<void> VCAStatusChange;
+
 	int set_state (XMLNode const&, int);
 	XMLNode& get_state();
 

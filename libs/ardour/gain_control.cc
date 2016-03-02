@@ -133,11 +133,12 @@ GainControl::add_master (boost::shared_ptr<VCA> vca)
 {
 	gain_t old_master_val;
 	gain_t new_master_val;
+	std::pair<set<boost::shared_ptr<GainControl> >::iterator,bool> res;
 
 	{
 		Glib::Threads::Mutex::Lock lm (master_lock);
 		old_master_val = get_master_gain_locked ();
-		_masters.insert (vca->control());
+		res = _masters.insert (vca->control());
 		_masters_numbers.insert (vca->number());
 		new_master_val = get_master_gain_locked ();
 
@@ -152,6 +153,10 @@ GainControl::add_master (boost::shared_ptr<VCA> vca)
 
 	if (old_master_val != new_master_val) {
 		Changed(); /* EMIT SIGNAL */
+	}
+
+	if (res.second) {
+		VCAStatusChange (); /* EMIT SIGNAL */
 	}
 }
 
@@ -169,17 +174,22 @@ GainControl::remove_master (boost::shared_ptr<VCA> vca)
 {
 	gain_t old_master_val;
 	gain_t new_master_val;
+	set<boost::shared_ptr<GainControl> >::size_type erased = 0;
 
 	{
 		Glib::Threads::Mutex::Lock lm (master_lock);
 		old_master_val = get_master_gain_locked ();
-		_masters.erase (vca->control());
+		erased = _masters.erase (vca->control());
 		_masters_numbers.erase (vca->number());
 		new_master_val = get_master_gain_locked ();
 	}
 
 	if (old_master_val != new_master_val) {
 		Changed(); /* EMIT SIGNAL */
+	}
+
+	if (erased) {
+		VCAStatusChange (); /* EMIT SIGNAL */
 	}
 }
 
@@ -188,10 +198,14 @@ GainControl::clear_masters ()
 {
 	gain_t old_master_val;
 	gain_t new_master_val;
+	bool had_masters = false;
 
 	{
 		Glib::Threads::Mutex::Lock lm (master_lock);
 		old_master_val = get_master_gain_locked ();
+		if (!_masters.empty()) {
+			had_masters = true;
+		}
 		_masters.clear ();
 		_masters_numbers.clear ();
 		new_master_val = get_master_gain_locked ();
@@ -199,6 +213,10 @@ GainControl::clear_masters ()
 
 	if (old_master_val != new_master_val) {
 		Changed(); /* EMIT SIGNAL */
+	}
+
+	if (had_masters) {
+		VCAStatusChange (); /* EMIT SIGNAL */
 	}
 }
 
