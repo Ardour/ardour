@@ -393,7 +393,7 @@ int main() { return 0; }''',
         #
         compiler_flags.append ('-U__STRICT_ANSI__')
 
-    if opt.use_libcpp:
+    if opt.use_libcpp or conf.env['build_host'] in [ 'el_capitan' ]:
        cxx_flags.append('--stdlib=libc++')
        linker_flags.append('--stdlib=libc++')
 
