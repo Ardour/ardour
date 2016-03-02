@@ -16,9 +16,14 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "pbd/convert.h"
+#include "pbd/strsplit.h"
+
 #include "ardour/dB.h"
 #include "ardour/gain_control.h"
 #include "ardour/session.h"
+#include "ardour/vca.h"
+#include "ardour/vca_manager.h"
 
 #include "i18n.h"
 
@@ -124,7 +129,7 @@ GainControl::get_master_gain_locked () const
 }
 
 void
-GainControl::add_master (boost::shared_ptr<GainControl> m)
+GainControl::add_master (boost::shared_ptr<VCA> vca)
 {
 	gain_t old_master_val;
 	gain_t new_master_val;
@@ -132,8 +137,17 @@ GainControl::add_master (boost::shared_ptr<GainControl> m)
 	{
 		Glib::Threads::Mutex::Lock lm (master_lock);
 		old_master_val = get_master_gain_locked ();
-		_masters.push_back (m);
+		_masters.insert (vca->control());
+		_masters_numbers.insert (vca->number());
 		new_master_val = get_master_gain_locked ();
+
+		/* note that we bind @param m as a weak_ptr<GainControl>, thus
+		   avoiding holding a reference to the control in the binding
+		   itself.
+		*/
+
+		vca->DropReferences.connect_same_thread (masters_connections, boost::bind (&GainControl::master_going_away, this, vca));
+
 	}
 
 	if (old_master_val != new_master_val) {
@@ -142,7 +156,16 @@ GainControl::add_master (boost::shared_ptr<GainControl> m)
 }
 
 void
-GainControl::remove_master (boost::shared_ptr<GainControl> m)
+GainControl::master_going_away (boost::weak_ptr<VCA> wv)
+{
+	boost::shared_ptr<VCA> v = wv.lock();
+	if (v) {
+		remove_master (v);
+	}
+}
+
+void
+GainControl::remove_master (boost::shared_ptr<VCA> vca)
 {
 	gain_t old_master_val;
 	gain_t new_master_val;
@@ -150,7 +173,8 @@ GainControl::remove_master (boost::shared_ptr<GainControl> m)
 	{
 		Glib::Threads::Mutex::Lock lm (master_lock);
 		old_master_val = get_master_gain_locked ();
-		_masters.remove (m);
+		_masters.erase (vca->control());
+		_masters_numbers.erase (vca->number());
 		new_master_val = get_master_gain_locked ();
 	}
 
@@ -169,6 +193,7 @@ GainControl::clear_masters ()
 		Glib::Threads::Mutex::Lock lm (master_lock);
 		old_master_val = get_master_gain_locked ();
 		_masters.clear ();
+		_masters_numbers.clear ();
 		new_master_val = get_master_gain_locked ();
 	}
 
@@ -178,8 +203,61 @@ GainControl::clear_masters ()
 }
 
 bool
-GainControl::slaved_to (boost::shared_ptr<GainControl> gc) const
+GainControl::slaved_to (boost::shared_ptr<VCA> vca) const
 {
 	Glib::Threads::Mutex::Lock lm (master_lock);
-	return find (_masters.begin(), _masters.end(), gc) != _masters.end();
+	return find (_masters.begin(), _masters.end(), vca->control()) != _masters.end();
+}
+
+XMLNode&
+GainControl::get_state ()
+{
+	XMLNode& node (AutomationControl::get_state());
+
+	/* store VCA master IDs */
+
+	string str;
+
+	{
+		Glib::Threads::Mutex::Lock lm (master_lock);
+		for (set<uint32_t>::const_iterator m = _masters_numbers.begin(); m != _masters_numbers.end(); ++m) {
+			if (!str.empty()) {
+				str += ',';
+			}
+			str += PBD::to_string (*m, std::dec);
+		}
+	}
+
+	if (!str.empty()) {
+		node.add_property (X_("masters"), str);
+	}
+
+	return node;
+}
+
+int
+GainControl::set_state (XMLNode const& node, int version)
+{
+	AutomationControl::set_state (node, version);
+
+	XMLProperty const* prop = node.property (X_("masters"));
+
+	/* XXXProblem here if we allow VCA's to be slaved to other VCA's .. we
+	 * have to load all VCAs first, then call ::set_state() so that
+	 * vca_by_number() will succeed.
+	 */
+
+	if (prop) {
+		vector<string> masters;
+		split (prop->value(), masters, ',');
+
+		for (vector<string>::const_iterator m = masters.begin(); m != masters.end(); ++m) {
+			boost::shared_ptr<VCA> vca = _session.vca_manager().vca_by_number (PBD::atoi (*m));
+			if (vca) {
+				add_master (vca);
+			}
+		}
+	}
+
+	return 0;
 }

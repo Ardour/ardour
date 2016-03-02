@@ -66,6 +66,11 @@ VCA::VCA (Session& s, XMLNode const & node, int version)
 	set_state (node, version);
 }
 
+VCA::~VCA ()
+{
+	DropReferences (); /* emit signal */
+}
+
 void
 VCA::set_value (double val, Controllable::GroupControlDisposition gcd)
 {
@@ -76,19 +81,6 @@ double
 VCA::get_value() const
 {
 	return _control->get_value();
-}
-
-void
-VCA::add (boost::shared_ptr<Route> r)
-{
-	boost::dynamic_pointer_cast<GainControl>(r->gain_control())->add_master (_control);
-	std::cerr << name() << " now controlling " << r->name() << std::endl;
-}
-
-void
-VCA::remove (boost::shared_ptr<Route> r)
-{
-	r->gain_control()->remove_master (_control);
 }
 
 void

@@ -146,7 +146,6 @@ VCAManager::set_state (XMLNode const& node, int version)
 
 		for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 			if ((*i)->name() == VCA::xml_node_name) {
-				std::cerr << "Adding VCA from XML\n";
 				boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, **i, version));
 				_vcas.push_back (vca);
 				vcal.push_back (vca);

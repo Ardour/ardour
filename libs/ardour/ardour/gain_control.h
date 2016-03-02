@@ -20,7 +20,7 @@
 #define __ardour_gain_control_h__
 
 #include <string>
-#include <list>
+#include <set>
 
 #include <boost/shared_ptr.hpp>
 #include <glibmm/threads.h>
@@ -54,20 +54,28 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	double range_db;
 
 	gain_t get_master_gain () const;
-	void add_master (boost::shared_ptr<GainControl>);
-	void remove_master (boost::shared_ptr<GainControl>);
+	void add_master (boost::shared_ptr<VCA>);
+	void remove_master (boost::shared_ptr<VCA>);
 	void clear_masters ();
-	bool slaved_to (boost::shared_ptr<GainControl>) const;
+	bool slaved_to (boost::shared_ptr<VCA>) const;
+	std::vector<uint32_t> masters () const;
+
+	int set_state (XMLNode const&, int);
+	XMLNode& get_state();
 
   private:
 	void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 
 	mutable Glib::Threads::Mutex master_lock;
 
-	typedef std::list<boost::shared_ptr<GainControl> > Masters;
+	typedef std::set<boost::shared_ptr<GainControl> > Masters;
 	Masters _masters;
+	PBD::ScopedConnectionList masters_connections;
+	std::set<uint32_t> _masters_numbers;
+	std::string _masters_state_string ();
 
 	gain_t get_master_gain_locked () const;
+	void master_going_away (boost::weak_ptr<VCA>);
 };
 
 } /* namespace */

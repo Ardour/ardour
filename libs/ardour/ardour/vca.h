@@ -37,6 +37,7 @@ class LIBARDOUR_API VCA : public SessionHandleRef, public PBD::StatefulDestructi
   public:
 	VCA (Session& session, const std::string& name, uint32_t num);
 	VCA (Session& session, XMLNode const&, int version);
+	~VCA();
 
 	std::string name() const { return _name; }
 	uint32_t number () const { return _number; }
@@ -47,9 +48,6 @@ class LIBARDOUR_API VCA : public SessionHandleRef, public PBD::StatefulDestructi
 	double get_value () const;
 
 	boost::shared_ptr<GainControl> control() const { return _control; }
-
-	void add (boost::shared_ptr<Route>);
-	void remove (boost::shared_ptr<Route>);
 
 	XMLNode& get_state();
 	int set_state (XMLNode const&, int version);
