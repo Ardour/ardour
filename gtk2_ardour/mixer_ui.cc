@@ -368,8 +368,6 @@ Mixer_UI::show_window ()
 void
 Mixer_UI::add_masters (VCAList& vcas)
 {
-	cerr << vcas.size() << " VCAs added\n";
-
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
 
 		VCAMasterStrip* vms = new VCAMasterStrip (_session, *v);
@@ -495,6 +493,16 @@ Mixer_UI::deselect_all_strip_processors ()
 {
 	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
 		(*i)->deselect_all_processors();
+	}
+}
+
+void
+Mixer_UI::select_strip (MixerStrip& ms, bool add)
+{
+	if (add) {
+		_selection.add (&ms);
+	} else {
+		_selection.set (&ms);
 	}
 }
 
@@ -688,24 +696,43 @@ Mixer_UI::sync_treeview_from_order_keys ()
 		return;
 	}
 
-	OrderKeySortedRoutes sorted_routes;
+	OrderingKeys sorted;
+	uint32_t vca_cnt = 0;
+	uint32_t max_route_order_key = 0;
+
+	/* count number of Routes in track_model (there may be some odd reason
+	   why this is not the same as the number in the session, but here we
+	   care about the track model.
+	*/
+
+	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri) {
+		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
+		if (route) {
+			max_route_order_key = max (route->order_key(), max_route_order_key);
+		}
+	}
 
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		if (!route) {
-			continue;
+			/* VCAs need to sort after all routes. We don't display
+			 * them in the same place (March 2016), but we don't
+			 * want them intermixed in the track_model
+			 */
+			sorted.push_back (OrderKeys (old_order, max_route_order_key + ++vca_cnt));
+		} else {
+			sorted.push_back (OrderKeys (old_order, route->order_key ()));
 		}
-		sorted_routes.push_back (RoutePlusOrderKey (route, old_order, route->order_key ()));
 	}
 
 	SortByNewDisplayOrder cmp;
 
-	sort (sorted_routes.begin(), sorted_routes.end(), cmp);
-	neworder.assign (sorted_routes.size(), 0);
+	sort (sorted.begin(), sorted.end(), cmp);
+	neworder.assign (sorted.size(), 0);
 
 	uint32_t n = 0;
 
-	for (OrderKeySortedRoutes::iterator sr = sorted_routes.begin(); sr != sorted_routes.end(); ++sr, ++n) {
+	for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
 
 		neworder[n] = sr->old_display_order;
 
@@ -713,8 +740,8 @@ Mixer_UI::sync_treeview_from_order_keys ()
 			changed = true;
 		}
 
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("MIXER change order for %1 from %2 to %3\n",
-							       sr->route->name(), sr->old_display_order, n));
+		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("MIXER change order from %1 to %2\n",
+							       sr->old_display_order, n));
 	}
 
 	if (changed) {
@@ -1192,7 +1219,6 @@ Mixer_UI::redisplay_track_list ()
 		if (vms) {
 			vca_packer.pack_start (*vms, false, false);
 			vms->show ();
-			cerr << "Packed vca " << vms->vca()->number() << " into vca_packer\n";
 			continue;
 		}
 

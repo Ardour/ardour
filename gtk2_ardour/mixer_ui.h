@@ -92,9 +92,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	void  set_strip_width (Width, bool save = false);
 	Width get_strip_width () const { return _strip_width; }
 
-	void unselect_strip_in_display (MixerStrip*);
-	void select_strip_in_display (MixerStrip*);
-
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int /* version */);
 
@@ -111,7 +108,7 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	void deselect_all_strip_processors();
 	void delete_processors();
-
+	void select_strip (MixerStrip&, bool add=false);
 	void select_none ();
 
 	bool window_not_visible () const;

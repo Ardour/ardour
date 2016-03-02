@@ -24,25 +24,19 @@
 #include <stdint.h>
 #include <vector>
 
-namespace ARDOUR {
-	class Route;
-}
-
-struct RoutePlusOrderKey {
-    boost::shared_ptr<ARDOUR::Route> route; /* we don't really need this, but its handy to keep around */
+struct OrderKeys {
     uint32_t old_display_order;
     uint32_t new_display_order;
 
-    RoutePlusOrderKey (boost::shared_ptr<ARDOUR::Route> r, uint32_t ok, uint32_t nk)
-	    : route (r)
-	    , old_display_order (ok)
-	    , new_display_order (nk) {}
+	OrderKeys (uint32_t ok, uint32_t nk)
+		: old_display_order (ok)
+		, new_display_order (nk) {}
 };
 
-typedef std::vector<RoutePlusOrderKey> OrderKeySortedRoutes;
+typedef std::vector<OrderKeys> OrderingKeys;
 
 struct SortByNewDisplayOrder {
-    bool operator() (const RoutePlusOrderKey& a, const RoutePlusOrderKey& b) {
+    bool operator() (const OrderKeys& a, const OrderKeys& b) {
 	    return a.new_display_order < b.new_display_order;
     }
 };

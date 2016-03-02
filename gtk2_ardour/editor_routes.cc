@@ -1058,21 +1058,21 @@ EditorRoutes::sync_treeview_from_order_keys ()
 		return;
 	}
 
-	OrderKeySortedRoutes sorted_routes;
+	OrderingKeys sorted;
 
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
-		sorted_routes.push_back (RoutePlusOrderKey (route, old_order, route->order_key ()));
+		sorted.push_back (OrderKeys (old_order, route->order_key ()));
 	}
 
 	SortByNewDisplayOrder cmp;
 
-	sort (sorted_routes.begin(), sorted_routes.end(), cmp);
-	neworder.assign (sorted_routes.size(), 0);
+	sort (sorted.begin(), sorted.end(), cmp);
+	neworder.assign (sorted.size(), 0);
 
 	uint32_t n = 0;
 
-	for (OrderKeySortedRoutes::iterator sr = sorted_routes.begin(); sr != sorted_routes.end(); ++sr, ++n) {
+	for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
 
 		neworder[n] = sr->old_display_order;
 
@@ -1080,8 +1080,8 @@ EditorRoutes::sync_treeview_from_order_keys ()
 			changed = true;
 		}
 
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("EDITOR change order for %1 from %2 to %3\n",
-							       sr->route->name(), sr->old_display_order, n));
+		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("EDITOR change order from %1 to %2\n",
+							       sr->old_display_order, n));
 	}
 
 	if (changed) {
