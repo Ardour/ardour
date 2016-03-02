@@ -524,11 +524,12 @@ void
 GainMeterBase::gain_adjusted ()
 {
 	gain_t value;
+	const gain_t master_gain = _control->get_master_gain ();
 
 	/* convert from adjustment range (0..1) to gain coefficient */
 
 	if (_data_type == DataType::AUDIO) {
-		value = slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain());
+		value = slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain()) / master_gain;
 	} else {
 		value = gain_adjustment.get_value();
 	}
@@ -547,11 +548,12 @@ GainMeterBase::gain_adjusted ()
 void
 GainMeterBase::effective_gain_display ()
 {
-	float value = GAIN_COEFF_ZERO;
+	gain_t value = GAIN_COEFF_ZERO;
+	const gain_t master_gain = _control->get_master_gain ();
 
 	switch (_data_type) {
 	case DataType::AUDIO:
-		value = gain_to_slider_position_with_max (_control->get_value(), Config->get_max_gain());
+		value = gain_to_slider_position_with_max (_control->get_value() * master_gain, Config->get_max_gain());
 		break;
 	case DataType::MIDI:
 		value = _control->get_value ();
