@@ -244,11 +244,22 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
         string::size_type lastmod = str.find_last_of ('-');
         guint keyval;
 
+        /* since all key events keycodes are changed to lower case before
+         * looking them up, make sure we only store lower case here. The Shift
+         * part will be stored in the modifier part of the KeyboardKey.
+         *
+         * And yes Mildred, this doesn't cover CapsLock cases. Oh well.
+         */
+
+        string lower;
+
         if (lastmod == string::npos) {
-                keyval = gdk_keyval_from_name (str.c_str());
+	        lower = PBD::downcase (str);
         } else {
-                keyval = gdk_keyval_from_name (str.substr (lastmod+1).c_str());
+	        lower = PBD::downcase (str.substr (lastmod+1));
         }
+
+        keyval = gdk_keyval_from_name (lower.c_str());
 
         if (keyval == GDK_VoidSymbol || keyval == 0) {
 	        return false;
