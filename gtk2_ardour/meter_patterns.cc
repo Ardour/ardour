@@ -1010,6 +1010,11 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 				layout->set_text("mid");
 				layout->get_pixel_size(tw, th);
 				break;
+			default: // DataType::NIL;
+				layout->set_text("");
+				tw = th = 0;
+				assert (0); // not reached
+				break;
 		}
 		if (!background) {
 			c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
