@@ -27,12 +27,15 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 
-#include "ardour/route_group.h"
-#include "ardour/dB.h"
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
 #include "pbd/controllable.h"
 #include "pbd/enumwriter.h"
+
+#include "ardour/dB.h"
+#include "ardour/route_group.h"
+#include "ardour/vca.h"
+#include "ardour/vca_manager.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -1271,6 +1274,35 @@ RouteUI::update_mute_display ()
         }
 
         mute_button->set_active_state (mute_active_state (_session, _route));
+}
+
+void
+RouteUI::update_vca_display ()
+{
+	if (!vca_button) {
+		return;
+	}
+
+	VCAList vcas (_session->vca_manager().vcas());
+	string label;
+
+	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
+		if (_route->slaved_to (*v)) {
+			if (!label.empty()) {
+				label += ' ';
+			}
+			label += PBD::to_string ((*v)->number(), std::dec);
+		}
+	}
+
+	if (label.empty()) {
+		label = _("-vca-");
+		vca_button->set_active_state (Gtkmm2ext::Off);
+	} else {
+		vca_button->set_active_state (Gtkmm2ext::ExplicitActive);
+	}
+
+	vca_button->set_text (label);
 }
 
 void

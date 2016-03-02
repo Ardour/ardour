@@ -242,6 +242,8 @@ class RouteUI : public virtual AxisView
 
 	void update_solo_display ();
 
+	void update_vca_display ();
+
 	virtual void map_frozen ();
 
 	void adjust_latency ();

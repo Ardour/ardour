@@ -83,8 +83,6 @@ using namespace ArdourMeter;
 MixerStrip* MixerStrip::_entered_mixer_strip;
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
 
-static const uint32_t n_vca_buttons = 4;
-
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	: AxisView(sess)
 	, RouteUI (sess)
@@ -649,6 +647,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	update_mute_display ();
 	update_solo_display ();
+	update_vca_display ();
 	name_changed ();
 	comment_changed ();
 	route_group_changed ();
