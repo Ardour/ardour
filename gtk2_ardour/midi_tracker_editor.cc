@@ -312,10 +312,10 @@ MidiTrackerEditor::visible_blank_press(GdkEventButton* ev)
 }
 
 void
-MidiTrackerEditor::redisplay_visible_note(bool visible_note)
+MidiTrackerEditor::redisplay_visible_note()
 {
 	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++)
-		view.get_column(i*4 + 1)->set_visible(visible_note);
+		view.get_column(i*4 + 1)->set_visible(i < mtm->ntracks ? visible_note : false);
 	visible_note_button.set_active_state (visible_note ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
@@ -328,15 +328,15 @@ MidiTrackerEditor::visible_note_press(GdkEventButton* ev)
 	}
 
 	visible_note = !visible_note;
-	redisplay_visible_note(visible_note);
+	redisplay_visible_note();
 	return false;
 }
 
 void
-MidiTrackerEditor::redisplay_visible_channel(bool visible_channel)
+MidiTrackerEditor::redisplay_visible_channel()
 {
 	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++)
-		view.get_column(i*4 + 2)->set_visible(visible_channel);
+		view.get_column(i*4 + 2)->set_visible(i < mtm->ntracks ? visible_channel : false);
 	visible_channel_button.set_active_state (visible_channel ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
@@ -349,15 +349,15 @@ MidiTrackerEditor::visible_channel_press(GdkEventButton* ev)
 	}
 
 	visible_channel = !visible_channel;
-	redisplay_visible_channel(visible_channel);
+	redisplay_visible_channel();
 	return false;
 }
 
 void
-MidiTrackerEditor::redisplay_visible_velocity(bool visible_velocity)
+MidiTrackerEditor::redisplay_visible_velocity()
 {
 	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++)
-		view.get_column(i*4 + 3)->set_visible(visible_velocity);
+		view.get_column(i*4 + 3)->set_visible(i < mtm->ntracks ? visible_velocity : false);
 	visible_velocity_button.set_active_state (visible_velocity ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
@@ -370,15 +370,15 @@ MidiTrackerEditor::visible_velocity_press(GdkEventButton* ev)
 	}
 
 	visible_velocity = !visible_velocity;
-	redisplay_visible_velocity(visible_velocity);
+	redisplay_visible_velocity();
 	return false;
 }
 
 void
-MidiTrackerEditor::redisplay_visible_delay(bool visible_delay)
+MidiTrackerEditor::redisplay_visible_delay()
 {
 	for (size_t i = 0; i < MAX_NUMBER_OF_TRACKS; i++)
-		view.get_column(i*4 + 4)->set_visible(visible_delay);
+		view.get_column(i*4 + 4)->set_visible(i < mtm->ntracks ? visible_delay : false);
 	visible_delay_button.set_active_state (visible_delay ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
@@ -391,7 +391,7 @@ MidiTrackerEditor::visible_delay_press(GdkEventButton* ev)
 	}
 
 	visible_delay = !visible_delay;
-	redisplay_visible_delay(visible_delay);
+	redisplay_visible_delay();
 	return false;
 }
 
@@ -471,9 +471,11 @@ MidiTrackerEditor::redisplay_model ()
 							row[columns.channel[i]] = to_string (note->channel() + 1);
 							row[columns.note_name[i]] = Evoral::midi_note_name (note->note());
 							row[columns.velocity[i]] = to_string ((int)note->velocity());
+
 							int64_t delay_ticks = (note->time() - row_beats).to_relative_ticks();
-							if (delay_ticks != 0)
+							if (delay_ticks != 0) {
 								row[columns.delay[i]] = to_string (delay_ticks);
+							}
 							// Keep the note around for playing it
 							row[columns._note[i]] = note;
 						}
@@ -482,8 +484,13 @@ MidiTrackerEditor::redisplay_model ()
 			}
 		}
 	}
-
 	view.set_model (model);
+
+	// In case tracks have been added or removed
+	redisplay_visible_note();
+	redisplay_visible_channel();
+	redisplay_visible_velocity();
+	redisplay_visible_delay();
 }
 
 void
@@ -533,11 +540,6 @@ MidiTrackerEditor::setup_matrix ()
 		view.append_column (*viewcolumn_velocity);
 		view.append_column (*viewcolumn_delay);
 	}
-
-	redisplay_visible_note(visible_note);
-	redisplay_visible_channel(visible_channel);
-	redisplay_visible_velocity(visible_velocity);
-	redisplay_visible_delay(visible_delay);
 
 	view.set_headers_visible (true);
 	view.set_rules_hint (true);
