@@ -148,7 +148,7 @@ GainControl::add_master (boost::shared_ptr<VCA> vca)
 		*/
 
 		vca->DropReferences.connect_same_thread (masters_connections, boost::bind (&GainControl::master_going_away, this, vca));
-
+		vca->control()->Changed.connect_same_thread (masters_connections, boost::bind (&PBD::Signal0<void>::operator(), &Changed));
 	}
 
 	if (old_master_val != new_master_val) {
