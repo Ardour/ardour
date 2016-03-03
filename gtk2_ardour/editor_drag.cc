@@ -3329,10 +3329,9 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	framepos_t const pf = adjusted_current_frame (event, false);
-	double const baf = _editor->session()->tempo_map().beat_at_frame (pf);
 	Tempo const tp = _marker->tempo();
 	_marker->set_position (pf);
-	_editor->session()->tempo_map().gui_move_tempo (_real_section, tp, pf, baf);
+	_editor->session()->tempo_map().gui_move_tempo (_real_section, tp, pf);
 
 	show_verbose_cursor_time (pf);
 }

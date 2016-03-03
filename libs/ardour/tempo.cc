@@ -867,89 +867,6 @@ TempoMap::do_insert (MetricSection* section)
 	}
 }
 
-/**
-* This is for a gui that needs to know the frame of a beat if a tempo section were to be moved or altered.
-* It actually alters tha ramps up to the beat parameter, so calling this commits you to replacing the section immediately.
-* It will not emit a signal or recompute the map, as you probably want to replace the tempo or do somethig else before that happens.
-* @param section - the section you want to alter
-* @param bpm - the new tempo
-* @param beat - the beat where the altered tempo will fall
-* @return returns - the position in frames where the new tempo section will lie
-*/
-framepos_t
-TempoMap::compute_replacement_tempo_section (TempoSection* section, const Tempo& bpm, const double& beat)
-{
-	Glib::Threads::RWLock::WriterLock lm (lock);
-
-	TempoSection* prev_ts = 0;
-	TempoSection* t;
-	framepos_t ret = 0;
-	MetricSectionSorter cmp;
-
-	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
-		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
-			if (prev_ts) {
-				if (section->beat() == t->beat()) {
-					continue;
-				}
-				if (t->beat() > beat){
-					prev_ts->set_c_func_from_tempo_and_beat (bpm.beats_per_minute(), beat, _frame_rate);
-					section->set_beat (beat);
-					section->set_frame (prev_ts->frame_at_beat (beat, _frame_rate));
-					break;
-				}
-
-				if (t->position_lock_style() == MusicTime) {
-					prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat(), _frame_rate);
-					t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
-				} else {
-					prev_ts->set_c_func (prev_ts->compute_c_func (t->beats_per_minute(), t->frame(), _frame_rate));
-					t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
-				}
-			}
-			prev_ts = t;
-		}
-	}
-	/* now we do the whole thing again because audio-locked sections will have caused a re-order */
-	prev_ts = 0;
-	metrics.sort (cmp);
-
-	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
-		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
-			if (prev_ts) {
-				if (section->beat() == t->beat()) {
-					continue;
-				}
-				if (t->beat() > beat){
-					prev_ts->set_c_func_from_tempo_and_beat (bpm.beats_per_minute(), beat, _frame_rate);
-					ret = prev_ts->frame_at_beat (beat, _frame_rate);
-					section->set_frame (ret);
-					prev_ts = section;
-					break;
-				}
-				if (t->position_lock_style() == MusicTime) {
-					prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat(), _frame_rate);
-					t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
-				} else {
-					prev_ts->set_c_func (prev_ts->compute_c_func (t->beats_per_minute(), t->frame(), _frame_rate));
-					t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
-				}
-			}
-			prev_ts = t;
-		}
-	}
-
-	if (!ret) {
-		prev_ts->set_c_func_from_tempo_and_beat (bpm.beats_per_minute(), beat, _frame_rate);
-		section->set_beat (beat);
-		section->set_frame (prev_ts->frame_at_beat (beat, _frame_rate));
-
-		ret = prev_ts->frame_at_beat (beat, _frame_rate);
-	}
-
-	return ret;
-}
-
 void
 TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const double& where, TempoSection::Type type)
 {
@@ -995,7 +912,7 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const frame
 }
 
 Metrics
-TempoMap::get_new_order (TempoSection* section, const Tempo& bpm, const framepos_t& frame, const double& beat)
+TempoMap::get_new_order (TempoSection* section, const Tempo& bpm, const framepos_t& frame)
 {
 	Metrics imaginary (metrics);
 
@@ -1007,25 +924,22 @@ TempoMap::get_new_order (TempoSection* section, const Tempo& bpm, const framepos
 	MetricSectionFrameSorter fcmp;
 	imaginary.sort (fcmp);
 
-	/* recompute */
+	/* recompute tempos */
 	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 			if (prev_ts) {
 				if (t == section) {
 					/* we have already set the frame - set the beat */
 					prev_ts->set_c_func (prev_ts->compute_c_func (bpm.beats_per_minute(), frame, _frame_rate));
-					//section->set_beat (prev_ts->beat_at_frame (frame, _frame_rate));
 					section->set_beat (prev_ts->beat_at_tempo (bpm.beats_per_minute(), frame, _frame_rate));
 					prev_ts = t;
 					continue;
 				}
 				if (t->position_lock_style() == MusicTime) {
 					prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat(), _frame_rate);
-					//t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
 					t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), t->beat(), _frame_rate));
 				} else {
 					prev_ts->set_c_func (prev_ts->compute_c_func (t->beats_per_minute(), t->frame(), _frame_rate));
-					//t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
 					t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate));
 				}
 			}
@@ -1034,7 +948,6 @@ TempoMap::get_new_order (TempoSection* section, const Tempo& bpm, const framepos
 	}
 	MetricSectionSorter cmp;
 	imaginary.sort (cmp);
-	/* to do - check precision using _at_tempo() methods */
 /*
 	prev_ts = 0;
 	std::cerr << "dumping imaginary order ------" << std::endl;;
@@ -1044,7 +957,66 @@ TempoMap::get_new_order (TempoSection* section, const Tempo& bpm, const framepos
 
 				std::cerr << t->beats_per_minute() << " | " << t->beat() << " | " << t->frame() << std::endl;
 				std::cerr << prev_ts->beats_per_minute() << " | " << prev_ts->beat() << " | " << prev_ts->frame() << std::endl;
-				std::cerr << t->beats_per_minute() << " | " << prev_ts->beat_at_tempo (t->beats_per_minute()) << " | " << prev_ts->tempo_at_beat(t->beat()) << " | " << prev_ts->frame_at_tempo(t->beats_per_minute(), _frame_rate) << std::endl;
+				std::cerr << t->beats_per_minute() << " | " << prev_ts->beat_at_tempo (t->beats_per_minute(), t->frame, _frame_rate) << " | " << prev_ts->tempo_at_beat(t->beat()) << " | " << prev_ts->frame_at_tempo(t->beats_per_minute(), t->beat(), _frame_rate) << std::endl;
+				std::cerr << "   ------" << std::endl;;
+
+			}
+			prev_ts = t;
+		}
+	}
+	std::cerr << "end dump ------";
+*/
+	return imaginary;
+}
+
+Metrics
+TempoMap::get_new_order (TempoSection* section, const Tempo& bpm, const double& beat)
+{
+	Metrics imaginary (metrics);
+
+	TempoSection* prev_ts = 0;
+	TempoSection* t;
+
+	/*set beat and sort */
+	section->set_beat (beat);
+	MetricSectionSorter cmp;
+	imaginary.sort (cmp);
+
+	/* recompute tempo positions */
+	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if (prev_ts) {
+				if (t == section) {
+					/* we've already set the beat - set the frame */
+					prev_ts->set_c_func_from_tempo_and_beat (bpm.beats_per_minute(), beat, _frame_rate);
+					section->set_frame (prev_ts->frame_at_tempo (bpm.beats_per_minute(), beat, _frame_rate));
+					prev_ts = t;
+					continue;
+				}
+				if (t->position_lock_style() == MusicTime) {
+					prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat(), _frame_rate);
+					t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), t->beat(), _frame_rate));
+				} else {
+					prev_ts->set_c_func (prev_ts->compute_c_func (t->beats_per_minute(), t->frame(), _frame_rate));
+					t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate));
+				}
+			}
+			prev_ts = t;
+		}
+	}
+
+	MetricSectionFrameSorter fcmp;
+	imaginary.sort (fcmp);
+/*
+	prev_ts = 0;
+	std::cerr << "dumping imaginary order ------" << std::endl;;
+	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if (prev_ts) {
+
+				std::cerr << t->beats_per_minute() << " | " << t->beat() << " | " << t->frame() << std::endl;
+				std::cerr << "prev : " << prev_ts->beats_per_minute() << " | " << prev_ts->beat() << " | " << prev_ts->frame() << std::endl;
+				std::cerr << "calculated : " << t->beats_per_minute() << " | " << prev_ts->beat_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate) << " | " << prev_ts->tempo_at_beat(t->beat()) << " | " << prev_ts->frame_at_tempo(t->beats_per_minute(), t->frame(), _frame_rate) << std::endl;
 				std::cerr << "   ------" << std::endl;;
 
 			}
@@ -1127,12 +1099,30 @@ TempoMap::get_new_order(MeterSection* section, const Meter& mt, const framepos_t
 	return imaginary;
 }
 
+/**
+* This is for a gui that needs to know the frame of a beat if a tempo section were to be moved or altered.
+* It actually reorders and partially recomputes tha ramps, so calling this commits you to replacing the section immediately.
+* It will not emit a signal as you probably want to replace the tempo or do somethig else before that happens.
+* @param section - the section you want to alter
+* @param bpm - the new tempo
+* @param beat - the beat where the altered tempo will fall
+* @return returns - the position in frames where the new tempo section will lie.
+*/
+framepos_t
+TempoMap::compute_new_tempo_frame (TempoSection* section, const Tempo& bpm, const double& beat)
+{
+	Glib::Threads::RWLock::WriterLock lm (lock);
+	Metrics new_order = get_new_order (section, bpm, beat);
+
+	return section->frame();
+}
+
 void
-TempoMap::gui_move_tempo (TempoSection* ts,  const Tempo& bpm, const framepos_t& frame, const double& beat_where)
+TempoMap::gui_move_tempo (TempoSection* ts,  const Tempo& bpm, const framepos_t& frame)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		Metrics new_order = get_new_order (ts, bpm, frame, beat_where);
+		Metrics new_order = get_new_order (ts, bpm, frame);
 
 		metrics.clear();
 		metrics = new_order;
@@ -1156,7 +1146,6 @@ TempoMap::add_tempo (const Tempo& tempo, double where, ARDOUR::TempoSection::Typ
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		add_tempo_locked (tempo, where, true, type);
 	}
-
 
 	PropertyChanged (PropertyChange ());
 }

@@ -378,7 +378,7 @@ Editor::edit_tempo_section (TempoSection* section)
 	if (tempo_dialog.get_lock_style() == MusicTime) {
 		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), beat, tempo_dialog.get_tempo_type());
 	} else {
-		framepos_t const f = _session->tempo_map().compute_replacement_tempo_section (section, bpm, beat);
+		framepos_t const f = _session->tempo_map().compute_new_tempo_frame (section, Tempo (bpm, nt), beat);
 		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), f, tempo_dialog.get_tempo_type());
 	}
 	XMLNode &after = _session->tempo_map().get_state();

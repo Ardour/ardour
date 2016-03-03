@@ -375,14 +375,12 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
 
-	framepos_t compute_replacement_tempo_section (TempoSection* section, const Tempo& bpm, const double& beat);
-	Metrics get_new_order (TempoSection* section, const Tempo& bpm, const framepos_t& frame, const double& beat);
-	Metrics get_new_order (MeterSection* section, const Meter& mt, const framepos_t& frame, const double& beat);
+	framepos_t compute_new_tempo_frame (TempoSection* section, const Tempo& bpm, const double& beat);
 
 	void replace_tempo (const TempoSection&, const Tempo&, const double& where, TempoSection::Type type);
 	void replace_tempo (const TempoSection&, const Tempo&, const framepos_t& frame, TempoSection::Type type);
 
-	void gui_move_tempo (TempoSection*, const Tempo& bpm, const framepos_t& where, const double& beat);
+	void gui_move_tempo (TempoSection*, const Tempo& bpm, const framepos_t& where);
 	void gui_move_meter (MeterSection*, const Meter& mt, const framepos_t& where, const double& beat);
 
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
@@ -433,6 +431,10 @@ private:
 	double tick_at_frame_locked (framecnt_t frame) const;
 	framecnt_t frame_at_tick_locked (double tick) const;
 	framepos_t frame_time_locked (const Timecode::BBT_Time&);
+
+	Metrics get_new_order (TempoSection* section, const Tempo& bpm, const framepos_t& frame);
+	Metrics get_new_order (TempoSection* section, const Tempo& bpm, const double& beat);
+	Metrics get_new_order (MeterSection* section, const Meter& mt, const framepos_t& frame, const double& beat);
 
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;
