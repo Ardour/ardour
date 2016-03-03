@@ -161,7 +161,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_astate_menu.set_name ("ArdourContextMenu");
 	gain_astyle_menu.set_name ("ArdourContextMenu");
 
-	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeterBase::gain_adjusted));
+	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeterBase::fader_moved));
 	peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeterBase::peak_button_release), false);
 	gain_display.signal_key_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_key_press), false);
 
@@ -521,7 +521,7 @@ GainMeterBase::show_gain ()
 }
 
 void
-GainMeterBase::gain_adjusted ()
+GainMeterBase::fader_moved ()
 {
 	gain_t value;
 	const gain_t master_gain = _control->get_master_gain ();

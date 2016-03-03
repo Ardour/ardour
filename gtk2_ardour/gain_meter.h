@@ -157,7 +157,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 
 	float max_peak;
 
-	void gain_adjusted ();
+	void fader_moved ();
 	void gain_changed ();
 
 	void meter_point_clicked ();
