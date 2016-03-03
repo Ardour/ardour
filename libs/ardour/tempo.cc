@@ -1063,6 +1063,44 @@ TempoMap::get_new_order(MeterSection* section, const Meter& mt, const double& be
 	return imaginary;
 }
 
+Metrics
+TempoMap::get_new_order(MeterSection* section, const Meter& mt, const framepos_t& frame)
+{
+	Metrics imaginary (metrics);
+	MeterSection* prev_ms = 0;
+
+	section->set_frame (frame);
+	MetricSectionFrameSorter fcmp;
+	imaginary.sort (fcmp);
+
+	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
+		MeterSection* m;
+		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
+			if (prev_ms) {
+				if (m->frame() > frame){
+					pair<double, BBT_Time> b_bbt = make_pair (beat_at_frame_locked (frame), BBT_Time (1, 1, 0));
+
+					section->set_beat (b_bbt);
+					prev_ms = section;
+					continue;
+				}
+				if (m->position_lock_style() == MusicTime) {
+					m->set_frame (frame_at_beat_locked (m->beat()));
+				} else {
+					pair<double, BBT_Time> b_bbt = make_pair (beat_at_frame_locked (m->frame()), BBT_Time (1, 1, 0));
+					m->set_beat (b_bbt);
+				}
+			}
+			prev_ms = m;
+		}
+	}
+
+	MetricSectionSorter cmp;
+	imaginary.sort (cmp);
+
+	return imaginary;
+}
+
 /**
 * This is for a gui that needs to know the frame of an audio-locked tempo section if it were to be placed at some beat.
 * It actually reorders and partially recomputes tha ramps, so calling this commits you to replacing the section immediately.
@@ -1097,11 +1135,11 @@ TempoMap::gui_move_tempo (TempoSection* ts,  const Tempo& bpm, const framepos_t&
 }
 
 void
-TempoMap::gui_move_meter (MeterSection* ms, const Meter& mt, const double&  beat_where)
+TempoMap::gui_move_meter (MeterSection* ms, const Meter& mt, const framepos_t&  frame)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		Metrics new_order = get_new_order (ms, mt, beat_where);
+		Metrics new_order = get_new_order (ms, mt, frame);
 
 		metrics.clear();
 		metrics = new_order;
@@ -1585,6 +1623,7 @@ TempoMap::bbt_to_beats_locked (Timecode::BBT_Time bbt)
 
 	double accumulated_beats = 0.0;
 	double accumulated_bars = 0.0;
+	double bars_offset = 0.0;
 	MeterSection* prev_ms = 0;
 
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
@@ -1598,16 +1637,24 @@ TempoMap::bbt_to_beats_locked (Timecode::BBT_Time bbt)
 				break;
 			}
 			if (prev_ms) {
-				accumulated_beats += m->beat() - prev_ms->beat();
-				accumulated_bars += bars_to_m;
+				if (m->position_lock_style() == AudioTime) {
+					accumulated_beats = 0.0;
+					accumulated_bars = 0;
+					bars_offset += bars_to_m;
+				} else {
+					accumulated_beats += m->beat() - prev_ms->beat();
+					accumulated_bars += bars_to_m;
+				}
 			}
 			prev_ms = m;
 		}
 	}
 
-	double const remaining_bars = (bbt.bars - 1) - accumulated_bars;
+	double const remaining_bars = (bbt.bars - bars_offset - 1) - accumulated_bars;
 	double const remaining_bars_in_beats = remaining_bars * prev_ms->divisions_per_bar();
 	double const ret = remaining_bars_in_beats + accumulated_beats + (bbt.beats - 1) + (bbt.ticks / BBT_Time::ticks_per_beat);
+	std::cerr << "ret : " << ret << " bbt : " << bbt.bars << "|" << bbt.beats << "|" << bbt.ticks << std::endl;
+
 	return ret;
 }
 
@@ -1631,14 +1678,18 @@ TempoMap::beats_to_bbt_locked (double beats)
 
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
 
-			if (beats < m->beat()) {
+			if (m->beat() > beats) {
 				/* this is the meter after the one our beat is on*/
 				break;
 			}
 
 			if (prev_ms) {
-				/* we need a whole number of bars. */
-				accumulated_bars += ((m->beat() - prev_ms->beat()) + 1) / prev_ms->divisions_per_bar();
+				if(m->position_lock_style() == AudioTime) {
+					accumulated_bars = 0;
+				} else {
+					/* we need a whole number of bars. */
+					accumulated_bars += ((m->beat() - prev_ms->beat()) + 1) / prev_ms->divisions_per_bar();
+				}
 			}
 
 			prev_ms = m;

@@ -3185,11 +3185,9 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	framepos_t const pf = adjusted_current_frame (event);
-	/* moving a meter doesn't change beat locations, so this shuld be ok */
-	double const baf = _editor->session()->tempo_map().beat_at_frame (pf);
 
 	_marker->set_position (pf);
-	_editor->session()->tempo_map().gui_move_meter (_real_section, _marker->meter(), baf);
+	_editor->session()->tempo_map().gui_move_meter (_real_section, _marker->meter(), pf);
 
 	show_verbose_cursor_time (pf);
 }
