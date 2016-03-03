@@ -32,7 +32,7 @@ namespace ARDOUR {
 	class VCA;
 }
 
-class VCAMasterStrip : public AxisView, public Gtk::VBox
+class VCAMasterStrip : public AxisView, public Gtk::EventBox
 {
       public:
 	VCAMasterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::VCA>);
@@ -43,9 +43,23 @@ class VCAMasterStrip : public AxisView, public Gtk::VBox
 
       private:
 	boost::shared_ptr<ARDOUR::VCA> _vca;
+	Gtk::HBox    vertical_padding;
 	ArdourButton name_button;
 	ArdourButton active_button;
 	GainMeter    gain_meter;
+
+	Gtk::Frame   global_frame;
+	Gtk::VBox    global_vpacker;
+	Gtk::HBox    top_padding;
+	Gtk::HBox    bottom_padding;
+	ArdourButton width_button;
+	ArdourButton color_button;
+	ArdourButton hide_button;
+	ArdourButton number_label;
+	Gtk::HBox    width_hide_box;
+
+	void hide_clicked();
+	bool width_button_pressed (GdkEventButton *);
 };
 
 
