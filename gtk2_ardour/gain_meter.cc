@@ -523,19 +523,57 @@ GainMeterBase::show_gain ()
 void
 GainMeterBase::fader_moved ()
 {
-	gain_t value;
-	const gain_t master_gain = _control->get_master_gain ();
-
-	/* convert from adjustment range (0..1) to gain coefficient */
-
-	if (_data_type == DataType::AUDIO) {
-		value = slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain()) / master_gain;
-	} else {
-		value = gain_adjustment.get_value();
-	}
-
 	if (!ignore_toggle) {
-		if (_route && _route->amp() == _amp) {
+
+		gain_t value;
+		const gain_t master_gain = _control->get_master_gain ();
+
+		/* convert from adjustment range (0..1) to gain coefficient */
+
+		if (_data_type == DataType::AUDIO) {
+
+			if (_control->slaved ()) {
+
+				/* fader has been moved. The initial position of the fader
+				   reflects any master gain (see ::gain_changed() below). So
+				   when we reset the actual gain value, we have to remove the
+				   influence of the master gain (if any).
+
+				   but ... the fader is non-linear. a given number of dB will have a
+				   relatively small effect on fader position far from the 0dB
+				   position, and a larger effect near to it.
+
+				   so... we take the current gain value, and compute where the
+				   fader was BEFORE it was moved. Then we compute how the
+				   position delta that the master gain caused.
+
+				   once we have that value, we subtract it from the current
+				   fader position, which gives us the current fader position as
+				   if there was no master.
+				*/
+
+				const gain_t current_value = _control->get_value (); /* current value */
+				const float position_delta_caused_by_master = gain_to_slider_position_with_max (current_value * master_gain, Config->get_max_gain()) -
+					gain_to_slider_position_with_max (current_value, Config->get_max_gain());
+
+				/* this is "where would the fader be now if the master
+				   wan't changing things?"
+				*/
+
+				const float adjusted_position = min (gain_adjustment.get_upper(), max (gain_adjustment.get_lower(), gain_adjustment.get_value() - position_delta_caused_by_master));
+
+				value = slider_position_to_gain_with_max (adjusted_position, Config->get_max_gain());
+
+			} else {
+
+				value = slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain());
+			}
+
+		} else {
+			value = gain_adjustment.get_value();
+		}
+
+		if (_route && _control == _route->gain_control()) {
 			_route->set_gain (value, Controllable::UseGroup);
 		} else {
 			_control->set_value (value, Controllable::NoGroup);
@@ -548,21 +586,23 @@ GainMeterBase::fader_moved ()
 void
 GainMeterBase::effective_gain_display ()
 {
-	gain_t value = GAIN_COEFF_ZERO;
-	const gain_t master_gain = _control->get_master_gain ();
+	gain_t fader_position = 0;
 
 	switch (_data_type) {
 	case DataType::AUDIO:
-		value = gain_to_slider_position_with_max (_control->get_value() * master_gain, Config->get_max_gain());
+		/* the position of the fader should reflect any master gain,
+		 * not just the control's own inherent value
+		 */
+		fader_position = gain_to_slider_position_with_max (_control->get_value() * _control->get_master_gain(), Config->get_max_gain());
 		break;
 	case DataType::MIDI:
-		value = _control->get_value ();
+		fader_position = _control->get_value ();
 		break;
 	}
 
-	if (gain_adjustment.get_value() != value) {
+	if (gain_adjustment.get_value() != fader_position) {
 		ignore_toggle = true;
-		gain_adjustment.set_value (value);
+		gain_adjustment.set_value (fader_position);
 		ignore_toggle = false;
 	}
 }
