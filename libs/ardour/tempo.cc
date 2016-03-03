@@ -222,7 +222,7 @@ framepos_t
 TempoSection::frame_at_tempo (double bpm, framecnt_t frame_rate) const
 {
 	if (_type == Constant) {
-		return 0;
+		return frame();
 	}
 
 	return minute_to_frame (time_at_tick_tempo (bpm *  BBT_Time::ticks_per_beat), frame_rate) + frame();
@@ -247,7 +247,7 @@ double
 TempoSection::beat_at_tempo (double bpm) const
 {
 	if (_type == Constant) {
-		return 0;
+		return beat();
 	}
 
 	return (tick_at_tick_tempo (bpm *  BBT_Time::ticks_per_beat) / BBT_Time::ticks_per_beat) + beat();
@@ -1006,16 +1006,19 @@ TempoMap::imagine_new_order (TempoSection* section, const Tempo& bpm, const fram
 				if (t == section) {
 					/* we have already set the frame - set the beat */
 					prev_ts->set_c_func (prev_ts->compute_c_func (bpm.beats_per_minute(), frame, _frame_rate));
-					section->set_beat (prev_ts->beat_at_frame (frame, _frame_rate));
+					//section->set_beat (prev_ts->beat_at_frame (frame, _frame_rate));
+					section->set_beat (prev_ts->beat_at_tempo (bpm.beats_per_minute()));
 					prev_ts = t;
 					continue;
 				}
 				if (t->position_lock_style() == MusicTime) {
 					prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat(), _frame_rate);
-					t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
+					//t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
+					t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), _frame_rate));
 				} else {
 					prev_ts->set_c_func (prev_ts->compute_c_func (t->beats_per_minute(), t->frame(), _frame_rate));
-					t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
+					//t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
+					t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute()));
 				}
 			}
 			prev_ts = t;
@@ -1467,18 +1470,22 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 				if (t->position_lock_style() == AudioTime) {
 					if (prev_ts->type() == TempoSection::Ramp) {
 						prev_ts->set_c_func (prev_ts->compute_c_func (t->beats_per_minute(), t->frame(), _frame_rate));
-						t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
+						//t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
+						t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute()));
 					} else {
 						prev_ts->set_c_func (0.0);
-						t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
+						//t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
+						t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute()));
 					}
-				} else if (t->position_lock_style() == MusicTime) {
+				} else {
 					if (prev_ts->type() == TempoSection::Ramp) {
 						prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat(), _frame_rate);
-						t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
+						//t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
+						t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), _frame_rate));
 					} else {
 						prev_ts->set_c_func (0.0);
-						t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
+						//t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
+						t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), _frame_rate));
 					}
 				}
 			}
@@ -1489,7 +1496,7 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 	MeterSection* meter = 0;
 
 	for (Metrics::const_iterator mi = metrics.begin(); mi != metrics.end(); ++mi) {
-		/* We now have the tempo map set. use it to set meter positions.*/
+		/* Now we have the tempos mapped to position, set meter positions.*/
 		if ((meter = dynamic_cast<MeterSection*> (*mi)) != 0) {
 			if (meter->position_lock_style() == AudioTime) {
 				/* a frame based meter has to have a 1|1|0 bbt */
