@@ -216,7 +216,9 @@ TempoSection::tempo_at_frame (framepos_t f, framecnt_t frame_rate) const
 }
 
 /** returns the zero-based frame (relative to session)
-   where the tempo occurs in this section. note that the tempo map may have multiple such values.
+   where the tempo occurs in this section.
+   beat b is only used for constant tempos.
+   note that the tempo map may have multiple such values.
 */
 framepos_t
 TempoSection::frame_at_tempo (double bpm, double b, framecnt_t frame_rate) const
@@ -227,7 +229,7 @@ TempoSection::frame_at_tempo (double bpm, double b, framecnt_t frame_rate) const
 
 	return minute_to_frame (time_at_tick_tempo (bpm *  BBT_Time::ticks_per_beat), frame_rate) + frame();
 }
-/** returns the tempo at the zero-based (relative to session) frame.
+/** returns the tempo at the zero-based (relative to session) beat.
 */
 double
 TempoSection::tempo_at_beat (double b) const
@@ -240,8 +242,9 @@ TempoSection::tempo_at_beat (double b) const
 	return tick_tempo_at_tick ((b - beat()) * BBT_Time::ticks_per_beat) / BBT_Time::ticks_per_beat;
 }
 
-/** returns the zero-based frame (relative to session)
-   where the tempo occurs in this section. note that the tempo map may have multiple such values.
+/** returns the zero-based beat (relative to session)
+   where the tempo occurs given frame f. frame f is only used for constant tempos.
+   note that the session tempo map may have multiple beats at a given tempo.
 */
 double
 TempoSection::beat_at_tempo (double bpm, framepos_t f, framecnt_t frame_rate) const
