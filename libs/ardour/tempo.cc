@@ -1032,6 +1032,10 @@ TempoMap::imagine_new_order (TempoSection* section, const Tempo& bpm, const fram
 			prev_ts = t;
 		}
 	}
+
+	MetricSectionSorter cmp;
+	imaginary.sort (cmp);
+
 	/* to do - check precision using _at_tempo() methods */
 /*
 	prev_ts = 0;
