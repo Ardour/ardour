@@ -183,16 +183,16 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	Type type () const { return _type; }
 
 	double tempo_at_frame (framepos_t frame, framecnt_t frame_rate) const;
-	framepos_t frame_at_tempo (double tempo, framecnt_t frame_rate) const;
+	framepos_t frame_at_tempo (double tempo, double beat, framecnt_t frame_rate) const;
 
 	double tempo_at_beat (double beat) const;
-	double beat_at_tempo (double tempo) const;
-
-	double tick_at_frame (framepos_t frame, framecnt_t frame_rate) const;
-	framepos_t frame_at_tick (double tick, framecnt_t frame_rate) const;
+	double beat_at_tempo (double tempo, framepos_t frame, framecnt_t frame_rate) const;
 
 	double beat_at_frame (framepos_t frame, framecnt_t frame_rate) const;
 	framepos_t frame_at_beat (double beat, framecnt_t frame_rate) const;
+
+	double tick_at_frame (framepos_t frame, framecnt_t frame_rate) const;
+	framepos_t frame_at_tick (double tick, framecnt_t frame_rate) const;
 
 	void set_c_func_from_tempo_and_beat (double end_bpm, double end_beat, framecnt_t frame_rate);
 	double compute_c_func (double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;

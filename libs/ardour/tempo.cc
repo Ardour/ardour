@@ -219,10 +219,10 @@ TempoSection::tempo_at_frame (framepos_t f, framecnt_t frame_rate) const
    where the tempo occurs in this section. note that the tempo map may have multiple such values.
 */
 framepos_t
-TempoSection::frame_at_tempo (double bpm, framecnt_t frame_rate) const
+TempoSection::frame_at_tempo (double bpm, double b, framecnt_t frame_rate) const
 {
 	if (_type == Constant) {
-		return frame();
+		return ((b - beat())  * frames_per_beat (frame_rate))  + frame();
 	}
 
 	return minute_to_frame (time_at_tick_tempo (bpm *  BBT_Time::ticks_per_beat), frame_rate) + frame();
@@ -244,15 +244,36 @@ TempoSection::tempo_at_beat (double b) const
    where the tempo occurs in this section. note that the tempo map may have multiple such values.
 */
 double
-TempoSection::beat_at_tempo (double bpm) const
+TempoSection::beat_at_tempo (double bpm, framepos_t f, framecnt_t frame_rate) const
 {
 	if (_type == Constant) {
-		return beat();
+		double const ticks = (((f - frame()) / frames_per_beat (frame_rate)) * BBT_Time::ticks_per_beat) + tick();
+		return ticks / BBT_Time::ticks_per_beat;
 	}
 
-	return (tick_at_tick_tempo (bpm *  BBT_Time::ticks_per_beat) / BBT_Time::ticks_per_beat) + beat();
+	return (tick_at_tick_tempo (bpm *  BBT_Time::ticks_per_beat) + tick()) / BBT_Time::ticks_per_beat;
 }
 
+/** returns the zero-based beat (relative to session origin)
+   where the zero-based frame (relative to session)
+   lies.
+*/
+double
+TempoSection::beat_at_frame (framepos_t frame, framecnt_t frame_rate) const
+{
+	return tick_at_frame (frame, frame_rate) / BBT_Time::ticks_per_beat;
+}
+
+/** returns the zero-based frame (relative to session start frame)
+   where the zero-based beat (relative to session start)
+   falls.
+*/
+
+framepos_t
+TempoSection::frame_at_beat (double beat, framecnt_t frame_rate) const
+{
+	return frame_at_tick (beat * BBT_Time::ticks_per_beat, frame_rate);
+}
 
 /** returns the zero-based tick (relative to session origin)
    where the zero-based frame (relative to tempo section)
@@ -280,27 +301,6 @@ TempoSection::frame_at_tick (double t, framecnt_t frame_rate) const
 	}
 
 	return minute_to_frame (time_at_tick (t - tick()), frame_rate) + frame();
-}
-
-/** returns the zero-based beat (relative to session origin)
-   where the zero-based frame (relative to session)
-   lies.
-*/
-double
-TempoSection::beat_at_frame (framepos_t frame, framecnt_t frame_rate) const
-{
-	return tick_at_frame (frame, frame_rate) / BBT_Time::ticks_per_beat;
-}
-
-/** returns the zero-based frame (relative to session start frame)
-   where the zero-based beat (relative to session start)
-   falls.
-*/
-
-framepos_t
-TempoSection::frame_at_beat (double beat, framecnt_t frame_rate) const
-{
-	return frame_at_tick (beat * BBT_Time::ticks_per_beat, frame_rate);
 }
 
 /*
@@ -337,6 +337,12 @@ t(b) = log((cb / T0) + 1) / c
 The time t at which Tempo T occurs is a as above:
 t(T) = log(T / T0) / c
 
+The beat at which a Tempo T occurs is:
+b(T) = (T - T0) / c
+
+The Tempo at which beat b occurs is:
+T(b) = b.c + T0
+
 We define c for this tempo ramp by placing a new tempo section at some time t after this one.
 Our problem is that we usually don't know t.
 We almost always know the duration in beats between this and the new section, so we need to find c in terms of the beat function.
@@ -350,8 +356,7 @@ We can now store c for future time calculations.
 If the following tempo section (the one that defines c in conjunction with this one)
 is changed or moved, c is no longer valid.
 
-The private methods' position parameters are all relative to this tempo section.
-the public ones are session-relative
+The public methods are session-relative.
 
 Most of this stuff is taken from this paper:
 
@@ -1007,18 +1012,18 @@ TempoMap::imagine_new_order (TempoSection* section, const Tempo& bpm, const fram
 					/* we have already set the frame - set the beat */
 					prev_ts->set_c_func (prev_ts->compute_c_func (bpm.beats_per_minute(), frame, _frame_rate));
 					//section->set_beat (prev_ts->beat_at_frame (frame, _frame_rate));
-					section->set_beat (prev_ts->beat_at_tempo (bpm.beats_per_minute()));
+					section->set_beat (prev_ts->beat_at_tempo (bpm.beats_per_minute(), frame, _frame_rate));
 					prev_ts = t;
 					continue;
 				}
 				if (t->position_lock_style() == MusicTime) {
 					prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat(), _frame_rate);
 					//t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
-					t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), _frame_rate));
+					t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), t->beat(), _frame_rate));
 				} else {
 					prev_ts->set_c_func (prev_ts->compute_c_func (t->beats_per_minute(), t->frame(), _frame_rate));
 					//t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
-					t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute()));
+					t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate));
 				}
 			}
 			prev_ts = t;
@@ -1471,21 +1476,21 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 					if (prev_ts->type() == TempoSection::Ramp) {
 						prev_ts->set_c_func (prev_ts->compute_c_func (t->beats_per_minute(), t->frame(), _frame_rate));
 						//t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
-						t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute()));
+						t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate));
 					} else {
 						prev_ts->set_c_func (0.0);
 						//t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
-						t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute()));
+						t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate));
 					}
 				} else {
 					if (prev_ts->type() == TempoSection::Ramp) {
 						prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat(), _frame_rate);
 						//t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
-						t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), _frame_rate));
+						t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), t->beat(), _frame_rate));
 					} else {
 						prev_ts->set_c_func (0.0);
 						//t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
-						t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), _frame_rate));
+						t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), t->beat(), _frame_rate));
 					}
 				}
 			}
