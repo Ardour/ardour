@@ -58,6 +58,7 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	void remove_master (boost::shared_ptr<VCA>);
 	void clear_masters ();
 	bool slaved_to (boost::shared_ptr<VCA>) const;
+	bool slaved () const;
 	std::vector<uint32_t> masters () const;
 
 	PBD::Signal0<void> VCAStatusChange;

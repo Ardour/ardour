@@ -227,6 +227,13 @@ GainControl::slaved_to (boost::shared_ptr<VCA> vca) const
 	return find (_masters.begin(), _masters.end(), vca->control()) != _masters.end();
 }
 
+bool
+GainControl::slaved () const
+{
+	Glib::Threads::Mutex::Lock lm (master_lock);
+	return !_masters.empty();
+}
+
 XMLNode&
 GainControl::get_state ()
 {
