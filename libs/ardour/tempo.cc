@@ -1027,31 +1027,25 @@ TempoMap::get_new_order (TempoSection* section, const Tempo& bpm, const double& 
 }
 
 Metrics
-TempoMap::get_new_order(MeterSection* section, const Meter& mt, const framepos_t& frame, const double& beat)
+TempoMap::get_new_order(MeterSection* section, const Meter& mt, const double& beat)
 {
-	/* incomplete */
 	Metrics imaginary (metrics);
-
 	MeterSection* prev_ms = 0;
-	MeterSection* m;
-	MeterSection* our_section = 0;
-	framepos_t ret = 0;
+
+	pair<double, BBT_Time> b_bbt = make_pair (beat, BBT_Time (1, 1, 0));
+	section->set_beat (b_bbt);
 	MetricSectionSorter cmp;
+	imaginary.sort (cmp);
 
 	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
+		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
 			if (prev_ms) {
-				if (section->beat() == m->beat()) {
-					our_section = m;
+				if (m->beat() > beat){
+					section->set_frame (frame_at_beat_locked (beat));
+					prev_ms = section;
 					continue;
 				}
-				if (beat < m->beat()){
-					pair<double, BBT_Time> b_bbt = make_pair (beat, BBT_Time (1, 1, 0));
-					our_section->set_beat (b_bbt);
-					our_section->set_frame (frame_at_beat_locked (beat));
-					break;
-				}
-
 				if (m->position_lock_style() == MusicTime) {
 					m->set_frame (frame_at_beat_locked (m->beat()));
 				} else {
@@ -1062,38 +1056,10 @@ TempoMap::get_new_order(MeterSection* section, const Meter& mt, const framepos_t
 			prev_ms = m;
 		}
 	}
-	/* now we do the whole thing again because audio-locked sections will have caused a re-order */
-	prev_ms = 0;
-	metrics.sort (cmp);
 
-	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
-		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
-			if (prev_ms) {
-				if (section->beat() == m->beat()) {
-					continue;
-				}
-				if (beat < m->beat()){
-					ret = frame_at_beat (beat);
-					section->set_frame (ret);
-					prev_ms = section;
-					break;
-				}
-				if (m->position_lock_style() == MusicTime) {
-					m->set_frame (frame_at_beat (m->beat()));
-				} else {
-					pair<double, BBT_Time> b_bbt = make_pair (beat_at_frame_locked (m->frame()), BBT_Time (1, 1, 0));
-					m->set_beat (b_bbt);
-				}
-			}
-			prev_ms = m;
-		}
-	}
+	MetricSectionFrameSorter fcmp;
+	imaginary.sort (fcmp);
 
-	if (!ret) {
-		pair<double, BBT_Time> b_bbt = make_pair (beat, BBT_Time (1, 1, 0));
-		section->set_beat (b_bbt);
-		section->set_frame (frame_at_beat_locked (beat));
-	}
 	return imaginary;
 }
 
@@ -1131,10 +1097,18 @@ TempoMap::gui_move_tempo (TempoSection* ts,  const Tempo& bpm, const framepos_t&
 }
 
 void
-TempoMap::gui_move_meter (MeterSection* ms, const Meter& mt, const framepos_t& frame, const double&  beat_where)
+TempoMap::gui_move_meter (MeterSection* ms, const Meter& mt, const double&  beat_where)
 {
-	Glib::Threads::RWLock::WriterLock lm (lock);
-	Metrics imaginary = get_new_order (ms, mt, frame, beat_where);
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
+		Metrics new_order = get_new_order (ms, mt, beat_where);
+
+		metrics.clear();
+		metrics = new_order;
+		recompute_map (false);
+	}
+
+	MetricPositionChanged (); // Emit Signal
 }
 
 void
