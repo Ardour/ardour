@@ -375,9 +375,9 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
 
-	framepos_t compute_replacement_tempo_section (TempoSection* section, const double& tempo, const double& beat);
-	Metrics imagine_new_order (TempoSection* section, const Tempo& bpm, const framepos_t& frame, const double& beat);
-	Metrics imagine_new_order (MeterSection* section, const Meter& mt, const framepos_t& frame, const double& beat);
+	framepos_t compute_replacement_tempo_section (TempoSection* section, const Tempo& bpm, const double& beat);
+	Metrics get_new_order (TempoSection* section, const Tempo& bpm, const framepos_t& frame, const double& beat);
+	Metrics get_new_order (MeterSection* section, const Meter& mt, const framepos_t& frame, const double& beat);
 
 	void replace_tempo (const TempoSection&, const Tempo&, const double& where, TempoSection::Type type);
 	void replace_tempo (const TempoSection&, const Tempo&, const framepos_t& frame, TempoSection::Type type);
@@ -445,6 +445,8 @@ private:
 	framecnt_t                    _frame_rate;
 	mutable Glib::Threads::RWLock lock;
 
+	void recompute_tempos ();
+	void recompute_meters ();
 	void recompute_map (bool reassign_tempo_bbt, framepos_t end = -1);
 
 	framepos_t round_to_type (framepos_t fr, RoundMode dir, BBTPointType);

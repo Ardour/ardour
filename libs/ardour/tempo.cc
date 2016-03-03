@@ -392,7 +392,7 @@ TempoSection::compute_c_func (double end_bpm, framepos_t end_frame, framecnt_t f
 framecnt_t
 TempoSection::minute_to_frame (double time, framecnt_t frame_rate) const
 {
-	return (framecnt_t) floor ((time * 60.0 * frame_rate) + 0.5);
+	return (framecnt_t) floor ((time * 60.0 * frame_rate));
 }
 
 double
@@ -877,14 +877,14 @@ TempoMap::do_insert (MetricSection* section)
 * @return returns - the position in frames where the new tempo section will lie
 */
 framepos_t
-TempoMap::compute_replacement_tempo_section (TempoSection* section, const double& bpm, const double& beat)
+TempoMap::compute_replacement_tempo_section (TempoSection* section, const Tempo& bpm, const double& beat)
 {
+	Glib::Threads::RWLock::WriterLock lm (lock);
+
 	TempoSection* prev_ts = 0;
 	TempoSection* t;
 	framepos_t ret = 0;
 	MetricSectionSorter cmp;
-	{
-	Glib::Threads::RWLock::WriterLock lm (lock);
 
 	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
@@ -892,8 +892,8 @@ TempoMap::compute_replacement_tempo_section (TempoSection* section, const double
 				if (section->beat() == t->beat()) {
 					continue;
 				}
-				if (beat < t->beat()){
-					prev_ts->set_c_func_from_tempo_and_beat (bpm, beat, _frame_rate);
+				if (t->beat() > beat){
+					prev_ts->set_c_func_from_tempo_and_beat (bpm.beats_per_minute(), beat, _frame_rate);
 					section->set_beat (beat);
 					section->set_frame (prev_ts->frame_at_beat (beat, _frame_rate));
 					break;
@@ -920,8 +920,8 @@ TempoMap::compute_replacement_tempo_section (TempoSection* section, const double
 				if (section->beat() == t->beat()) {
 					continue;
 				}
-				if (beat < t->beat()){
-					prev_ts->set_c_func_from_tempo_and_beat (bpm, beat, _frame_rate);
+				if (t->beat() > beat){
+					prev_ts->set_c_func_from_tempo_and_beat (bpm.beats_per_minute(), beat, _frame_rate);
 					ret = prev_ts->frame_at_beat (beat, _frame_rate);
 					section->set_frame (ret);
 					prev_ts = section;
@@ -940,13 +940,13 @@ TempoMap::compute_replacement_tempo_section (TempoSection* section, const double
 	}
 
 	if (!ret) {
-		prev_ts->set_c_func_from_tempo_and_beat (bpm, beat, _frame_rate);
+		prev_ts->set_c_func_from_tempo_and_beat (bpm.beats_per_minute(), beat, _frame_rate);
 		section->set_beat (beat);
 		section->set_frame (prev_ts->frame_at_beat (beat, _frame_rate));
 
 		ret = prev_ts->frame_at_beat (beat, _frame_rate);
 	}
-	}
+
 	return ret;
 }
 
@@ -995,7 +995,7 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const frame
 }
 
 Metrics
-TempoMap::imagine_new_order (TempoSection* section, const Tempo& bpm, const framepos_t& frame, const double& beat)
+TempoMap::get_new_order (TempoSection* section, const Tempo& bpm, const framepos_t& frame, const double& beat)
 {
 	Metrics imaginary (metrics);
 
@@ -1032,10 +1032,8 @@ TempoMap::imagine_new_order (TempoSection* section, const Tempo& bpm, const fram
 			prev_ts = t;
 		}
 	}
-
 	MetricSectionSorter cmp;
 	imaginary.sort (cmp);
-
 	/* to do - check precision using _at_tempo() methods */
 /*
 	prev_ts = 0;
@@ -1059,7 +1057,7 @@ TempoMap::imagine_new_order (TempoSection* section, const Tempo& bpm, const fram
 }
 
 Metrics
-TempoMap::imagine_new_order(MeterSection* section, const Meter& mt, const framepos_t& frame, const double& beat)
+TempoMap::get_new_order(MeterSection* section, const Meter& mt, const framepos_t& frame, const double& beat)
 {
 	/* incomplete */
 	Metrics imaginary (metrics);
@@ -1134,10 +1132,10 @@ TempoMap::gui_move_tempo (TempoSection* ts,  const Tempo& bpm, const framepos_t&
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		Metrics new_order = imagine_new_order (ts, bpm, frame, beat_where);
+		Metrics new_order = get_new_order (ts, bpm, frame, beat_where);
+
 		metrics.clear();
 		metrics = new_order;
-
 		recompute_map (false);
 	}
 
@@ -1148,7 +1146,7 @@ void
 TempoMap::gui_move_meter (MeterSection* ms, const Meter& mt, const framepos_t& frame, const double&  beat_where)
 {
 	Glib::Threads::RWLock::WriterLock lm (lock);
-	Metrics imaginary = imagine_new_order (ms, mt, frame, beat_where);
+	Metrics imaginary = get_new_order (ms, mt, frame, beat_where);
 }
 
 void
@@ -1448,33 +1446,12 @@ TempoMap::first_tempo ()
 	abort(); /*NOTREACHED*/
 	return *t;
 }
-
 void
-TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
+TempoMap::recompute_tempos ()
 {
-	/* CALLER MUST HOLD WRITE LOCK */
-
-	if (end < 0) {
-
-		/* we will actually stop once we hit
-		   the last metric.
-		*/
-		end = max_framepos;
-
-	}
-
-	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("recomputing tempo map, zero to %1\n", end));
-
-	if (end == 0) {
-		/* silly call from Session::process() during startup
-		 */
-		return;
-	}
-
-	Metrics::const_iterator i;
 	TempoSection* prev_ts = 0;
 
-	for (i = metrics.begin(); i != metrics.end(); ++i) {
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		TempoSection* t;
 
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
@@ -1504,7 +1481,11 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 			prev_ts = t;
 		}
 	}
+}
 
+void
+TempoMap::recompute_meters ()
+{
 	MeterSection* meter = 0;
 
 	for (Metrics::const_iterator mi = metrics.begin(); mi != metrics.end(); ++mi) {
@@ -1527,6 +1508,32 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 			}
 		}
 	}
+}
+
+void
+TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
+{
+	/* CALLER MUST HOLD WRITE LOCK */
+
+	if (end < 0) {
+
+		/* we will actually stop once we hit
+		   the last metric.
+		*/
+		end = max_framepos;
+
+	}
+
+	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("recomputing tempo map, zero to %1\n", end));
+
+	if (end == 0) {
+		/* silly call from Session::process() during startup
+		 */
+		return;
+	}
+
+	recompute_tempos();
+	recompute_meters();
 }
 
 
