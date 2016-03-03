@@ -60,6 +60,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 
 	void hide_clicked();
 	bool width_button_pressed (GdkEventButton *);
+	void set_selected (bool);
 };
 
 

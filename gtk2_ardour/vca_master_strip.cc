@@ -94,6 +94,11 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	active_button.show_all ();
 	name_button.show_all ();
 	gain_meter.show_all ();
+
+	/* force setting of visible selected status */
+
+	_selected = true;
+	set_selected (false);
 }
 
 string
@@ -112,3 +117,20 @@ VCAMasterStrip::width_button_pressed (GdkEventButton* ev)
 {
 	return false;
 }
+
+void
+VCAMasterStrip::set_selected (bool yn)
+{
+	AxisView::set_selected (yn);
+
+	if (_selected) {
+		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
+		global_frame.set_name ("MixerStripSelectedFrame");
+	} else {
+		global_frame.set_shadow_type (Gtk::SHADOW_IN);
+		global_frame.set_name ("MixerStripFrame");
+	}
+
+	global_frame.queue_draw ();
+}
+
