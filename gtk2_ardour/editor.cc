@@ -3913,7 +3913,7 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 	int pos;
 	XMLProperty const * prop;
 	char buf[32];
-	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
+	XMLNode* geometry = ARDOUR_UI::instance()->editor_settings();
 
 	enum Pane {
 		Horizontal = 0x1,
@@ -3921,8 +3921,6 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 	};
 
 	static Pane done;
-
-	XMLNode* geometry = find_named_node (*node, "geometry");
 
 	if (which == static_cast<Paned*> (&edit_pane)) {
 
@@ -3942,7 +3940,7 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 			pos = atoi (prop->value());
 		}
 
-		if (GTK_WIDGET(edit_pane.gobj())->allocation.width > pos) {
+		if (edit_pane.get_allocation().get_width() > pos) {
 			edit_pane.set_position (pos);
 		}
 
@@ -3963,7 +3961,7 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 			pos = atoi (prop->value());
 		}
 
-		if (GTK_WIDGET(editor_summary_pane.gobj())->allocation.height > pos) {
+		if (editor_summary_pane.get_allocation().get_height() > pos) {
 			editor_summary_pane.set_position (pos);
 		}
 
