@@ -185,6 +185,9 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	double tempo_at_frame (framepos_t frame, framecnt_t frame_rate) const;
 	framepos_t frame_at_tempo (double tempo, framecnt_t frame_rate) const;
 
+	double tempo_at_beat (double beat) const;
+	double beat_at_tempo (double tempo) const;
+
 	double tick_at_frame (framepos_t frame, framecnt_t frame_rate) const;
 	framepos_t frame_at_tick (double tick, framecnt_t frame_rate) const;
 
@@ -193,6 +196,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 
 	void set_c_func_from_tempo_and_beat (double end_bpm, double end_beat, framecnt_t frame_rate);
 	double compute_c_func (double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+
 	double get_c_func () const { return _c_func; }
 	void set_c_func (double c_func) { _c_func = c_func; }
 
@@ -212,6 +216,9 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 
 	double tick_tempo_at_time (double time) const;
 	double time_at_tick_tempo (double tick_tempo) const;
+
+	double tick_tempo_at_tick (double tick) const;
+	double tick_at_tick_tempo (double tick_tempo) const;
 
 	double tick_at_time (double time) const;
 	double time_at_tick (double tick) const;
@@ -369,10 +376,15 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void remove_meter (const MeterSection&, bool send_signal);
 
 	framepos_t compute_replacement_tempo_section (TempoSection* section, const double& tempo, const double& beat);
-	void replace_tempo (const TempoSection&, const Tempo&, const double& where, TempoSection::Type type);
-	void replace_tempo (const TempoSection&, const Tempo&, const framepos_t& where, TempoSection::Type type);
+	Metrics imagine_new_order (TempoSection* section, const Tempo& bpm, const framepos_t& frame, const double& beat);
+	Metrics imagine_new_order (MeterSection* section, const Meter& mt, const framepos_t& frame, const double& beat);
 
-	void gui_set_tempo_frame (TempoSection&, framepos_t where, double beat);
+	void replace_tempo (const TempoSection&, const Tempo&, const double& where, TempoSection::Type type);
+	void replace_tempo (const TempoSection&, const Tempo&, const framepos_t& frame, TempoSection::Type type);
+
+	void gui_move_tempo (TempoSection*, const Tempo& bpm, const framepos_t& where, const double& beat);
+	void gui_move_meter (MeterSection*, const Meter& mt, const framepos_t& where, const double& beat);
+
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
 	void replace_meter (const MeterSection&, const Meter&, const framepos_t& frame);
 

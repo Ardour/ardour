@@ -3122,6 +3122,8 @@ MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	DEBUG_TRACE (DEBUG::Drags, "New MeterMarkerDrag\n");
 	_marker = reinterpret_cast<MeterMarker*> (_item->get_data ("marker"));
 	assert (_marker);
+	_real_section = &_marker->meter();
+
 }
 
 void
@@ -3151,14 +3153,14 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		// leave or lose the original marker (leave if its a copy; lose if its
 		// not, because we'll remove it from the map).
 
+		char name[64];
+		snprintf (name, sizeof(name), "%g/%g", _marker->meter().divisions_per_bar(), _marker->meter().note_divisor ());
+
 		MeterSection section (_marker->meter());
 
 		if (!section.movable()) {
 			return;
 		}
-
-		char name[64];
-		snprintf (name, sizeof(name), "%g/%g", _marker->meter().divisions_per_bar(), _marker->meter().note_divisor ());
 
 		_marker = new MeterMarker (
 			*_editor,
@@ -3172,17 +3174,22 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		swap_grab (&_marker->the_item(), 0, GDK_CURRENT_TIME);
 
 		if (!_copy) {
+			_editor->begin_reversible_command (_("move meter mark"));
 			TempoMap& map (_editor->session()->tempo_map());
 			/* get current state */
 			before_state = &map.get_state();
 			/* remove the section while we drag it */
-			map.remove_meter (section, true);
+			//map.remove_meter (section, true);
 		}
+		_marker->hide();
 	}
 
-	framepos_t const pf = adjusted_current_frame (event);
+	framepos_t const pf = adjusted_current_frame (event, false);
+	double const baf = _editor->session()->tempo_map().beat_at_frame (pf);
 
 	_marker->set_position (pf);
+	_editor->session()->tempo_map().gui_move_meter (_real_section, _marker->meter(), pf, baf);
+
 	show_verbose_cursor_time (pf);
 }
 
@@ -3222,8 +3229,6 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->commit_reversible_command ();
 
 	} else {
-		_editor->begin_reversible_command (_("move meter mark"));
-
 		/* we removed it before, so add it back now */
 		if (_marker->meter().position_lock_style() == AudioTime) {
 			map.add_meter (_marker->meter(), _marker->position());
@@ -3325,9 +3330,9 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	framepos_t const pf = adjusted_current_frame (event, false);
 	double const baf = _editor->session()->tempo_map().beat_at_frame (pf);
-
-	_marker->set_position (adjusted_current_frame (event, false));
-	_editor->session()->tempo_map().gui_set_tempo_frame (*_real_section, pf, baf);
+	Tempo const tp = _marker->tempo();
+	_marker->set_position (pf);
+	_editor->session()->tempo_map().gui_move_tempo (_real_section, tp, pf, baf);
 
 	show_verbose_cursor_time (pf);
 }

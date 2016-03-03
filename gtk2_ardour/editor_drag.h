@@ -705,6 +705,8 @@ public:
 
 private:
 	MeterMarker* _marker;
+	ARDOUR::MeterSection* _real_section;
+
 	bool _copy;
 	XMLNode* before_state;
 };
