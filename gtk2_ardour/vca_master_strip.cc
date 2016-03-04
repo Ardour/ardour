@@ -297,6 +297,12 @@ VCAMasterStrip::vca_button_release (GdkEventButton* ev)
 	items.push_back (MenuElem (_("Unassign"), sigc::mem_fun (*this, &VCAMasterStrip::vca_unassign)));
 
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
+
+		if (*v == _vca) {
+			/* no self-mastering */
+			continue;
+		}
+
 		items.push_back (CheckMenuElem ((*v)->name()));
 		CheckMenuItem* item = dynamic_cast<CheckMenuItem*> (&items.back());
 		if (_vca->control()->slaved_to (*v)) {
