@@ -60,7 +60,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	width_button.set_icon (ArdourIcon::StripWidth);
 	set_tooltip (width_button, _("Click to toggle the width of this VCA strip."));
 
-	assign_button.set_text (_("-vca-"));
+	assign_button.set_name (X_("vca assign"));
 	set_tooltip (assign_button, _("Click to assign a VCA Master to this VCA"));
 	assign_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vca_button_release), false);
 
@@ -126,9 +126,40 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	_selected = true;
 	set_selected (false);
 	set_width (true);
+	update_vca_display ();
 
 	_vca->SoloChange.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::solo_changed, this), gui_context());
 	_vca->MuteChange.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::mute_changed, this), gui_context());
+
+	_vca->control()->VCAStatusChange.connect (vca_connections,
+	                                          invalidator (*this),
+	                                          boost::bind (&VCAMasterStrip::update_vca_display, this),
+	                                          gui_context());
+}
+
+void
+VCAMasterStrip::update_vca_display ()
+{
+	VCAList vcas (_session->vca_manager().vcas());
+	string label;
+
+	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
+		if (_vca->control()->slaved_to (*v)) {
+			if (!label.empty()) {
+				label += ' ';
+			}
+			label += PBD::to_string ((*v)->number(), std::dec);
+		}
+	}
+
+	if (label.empty()) {
+		label = _("-vca-");
+		assign_button.set_active_state (Gtkmm2ext::Off);
+	} else {
+		assign_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	}
+
+	assign_button.set_text (label);
 }
 
 string
