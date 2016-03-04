@@ -140,13 +140,18 @@ VCAManager::set_state (XMLNode const& node, int version)
 	XMLNodeList const & children = node.children();
 	VCAList vcal;
 
-	{
+	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->name() == VCA::xml_node_name) {
+			boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, **i, version));
 
-		Mutex::Lock lm (lock);
+			/* can't hold the lock for the entire loop,
+			 * because the new VCA maybe slaved and needs
+			 * to call back into us to set up its own
+			 * slave/master relationship
+			 */
 
-		for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-			if ((*i)->name() == VCA::xml_node_name) {
-				boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, **i, version));
+			{
+				Mutex::Lock lm (lock);
 				_vcas.push_back (vca);
 				vcal.push_back (vca);
 			}
