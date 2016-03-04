@@ -93,6 +93,7 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	PBD::ScopedConnectionList masters_connections;
 	std::string _masters_state_string ();
 
+	gain_t get_value_locked () const;
 	gain_t get_master_gain_locked () const;
 	void master_going_away (boost::weak_ptr<VCA>);
 	void recompute_masters_ratios (double val);

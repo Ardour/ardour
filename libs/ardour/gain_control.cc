@@ -43,10 +43,10 @@ GainControl::GainControl (Session& session, const Evoral::Parameter &param, boos
 	range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
 }
 
-double
-GainControl::get_value () const
-{
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+gain_t
+GainControl::get_value_locked () const {
+
+	/* read or write masters lock must be held */
 
 	if (_masters.empty()) {
 		return AutomationControl::get_value();
@@ -59,7 +59,14 @@ GainControl::get_value () const
 		g *= mr->second.master()->get_value () * mr->second.ratio();
 	}
 
-	return g;
+	return min (Config->get_max_gain(), g);
+}
+
+double
+GainControl::get_value () const
+{
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	return get_value_locked ();
 }
 
 void
@@ -164,19 +171,20 @@ GainControl::get_master_gain_locked () const
 void
 GainControl::add_master (boost::shared_ptr<VCA> vca)
 {
-	gain_t old_master_val;
+	gain_t current_value;
 	std::pair<Masters::iterator,bool> res;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		old_master_val = get_master_gain_locked ();
+		current_value = get_value_locked ();
 
 		/* ratio will be recomputed below */
 
 		res = _masters.insert (make_pair<uint32_t,MasterRecord> (vca->number(), MasterRecord (vca->control(), 0.0)));
 
 		if (res.second) {
-			recompute_masters_ratios (old_master_val);
+
+			recompute_masters_ratios (current_value);
 
 			/* note that we bind @param m as a weak_ptr<GainControl>, thus
 			   avoiding holding a reference to the control in the binding
@@ -210,15 +218,15 @@ GainControl::master_going_away (boost::weak_ptr<VCA> wv)
 void
 GainControl::remove_master (boost::shared_ptr<VCA> vca)
 {
-	gain_t old_master_val;
+	gain_t current_value;
 	Masters::size_type erased = 0;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		old_master_val = get_master_gain_locked ();
+		current_value = get_value_locked ();
 		erased = _masters.erase (vca->number());
 		if (erased) {
-			recompute_masters_ratios (old_master_val);
+			recompute_masters_ratios (current_value);
 		}
 	}
 
