@@ -118,7 +118,7 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 
 		} else { /* manual (scalar) gain */
 
-			gain_t const dg = _gain_control->user_double() * _gain_control->get_master_gain ();
+			gain_t const dg = _gain_control->get_value();
 
 			if (_current_gain != dg) {
 

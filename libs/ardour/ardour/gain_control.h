@@ -41,6 +41,7 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	GainControl (Session& session, const Evoral::Parameter &param,
 	             boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>());
 
+	double get_value () const;
 	void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	void set_value_unchecked (double);
 
@@ -67,18 +68,45 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	XMLNode& get_state();
 
   private:
-	void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
+	class MasterRecord {
+          public:
+		MasterRecord (boost::shared_ptr<GainControl> gc, uint32_t n, double r)
+			: _master (gc)
+			, _number (n)
+			, _ratio (r)
+		{}
 
-	mutable Glib::Threads::Mutex master_lock;
+		boost::shared_ptr<GainControl> master() const { return _master; }
+		double ratio () const { return _ratio; }
+		uint32_t number() const { return _number; }
 
-	typedef std::set<boost::shared_ptr<GainControl> > Masters;
+		bool operator== (MasterRecord const& other) const {
+			return _number == other._number;
+		}
+
+		bool operator< (MasterRecord const& other) const {
+			return _number < other._number;
+		}
+
+		void reset_ratio (double r) { _ratio = r; }
+
+	  private:
+		const boost::shared_ptr<GainControl> _master;
+		const uint32_t _number;
+		double _ratio;
+	};
+
+	mutable Glib::Threads::RWLock master_lock;
+	typedef std::set<MasterRecord> Masters;
 	Masters _masters;
 	PBD::ScopedConnectionList masters_connections;
-	std::set<uint32_t> _masters_numbers;
 	std::string _masters_state_string ();
 
 	gain_t get_master_gain_locked () const;
 	void master_going_away (boost::weak_ptr<VCA>);
+	void recompute_masters_ratios (double val);
+	
+	void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 };
 
 } /* namespace */

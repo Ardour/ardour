@@ -16,6 +16,8 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cmath>
+
 #include "pbd/convert.h"
 #include "pbd/strsplit.h"
 
@@ -41,6 +43,25 @@ GainControl::GainControl (Session& session, const Evoral::Parameter &param, boos
 	range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
 }
 
+double
+GainControl::get_value () const
+{
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+
+	if (_masters.empty()) {
+		return AutomationControl::get_value();
+	}
+
+	gain_t g = 1.0;
+
+	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+		/* get current master value, scale by our current ratio with that master */
+		g *= mr->master()->get_value () * mr->ratio();
+	}
+
+	return g;
+}
+
 void
 GainControl::set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
@@ -59,7 +80,18 @@ GainControl::set_value_unchecked (double val)
 void
 GainControl::_set_value (double val, Controllable::GroupControlDisposition group_override)
 {
-	AutomationControl::set_value (std::max (std::min (val, (double)_desc.upper), (double)_desc.lower), group_override);
+	val = std::max (std::min (val, (double)_desc.upper), (double)_desc.lower);
+
+	{
+		Glib::Threads::RWLock::WriterLock lm (master_lock);
+
+		if (!_masters.empty()) {
+			recompute_masters_ratios (val);
+		}
+	}
+
+	AutomationControl::set_value (val, group_override);
+
 	_session.set_dirty ();
 }
 
@@ -105,7 +137,7 @@ GainControl::get_user_string () const
 gain_t
 GainControl::get_master_gain () const
 {
-	Glib::Threads::Mutex::Lock sm (master_lock, Glib::Threads::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock sm (master_lock, Glib::Threads::TRY_LOCK);
 
 	if (sm.locked()) {
 		return get_master_gain_locked ();
@@ -117,12 +149,13 @@ GainControl::get_master_gain () const
 gain_t
 GainControl::get_master_gain_locked () const
 {
-	/* Master lock MUST be held */
+	/* Master lock MUST be held (read or write lock is acceptable) */
 
 	gain_t g = 1.0;
 
-	for (Masters::const_iterator m = _masters.begin(); m != _masters.end(); ++m) {
-		g *= (*m)->get_value ();
+	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+		/* get current master value, scale by our current ratio with that master */
+		g *= mr->master()->get_value () * mr->ratio();
 	}
 
 	return g;
@@ -132,15 +165,18 @@ void
 GainControl::add_master (boost::shared_ptr<VCA> vca)
 {
 	gain_t old_master_val;
-	gain_t new_master_val;
-	std::pair<set<boost::shared_ptr<GainControl> >::iterator,bool> res;
+	std::pair<Masters::iterator,bool> res;
 
 	{
-		Glib::Threads::Mutex::Lock lm (master_lock);
+		Glib::Threads::RWLock::WriterLock lm (master_lock);
 		old_master_val = get_master_gain_locked ();
-		res = _masters.insert (vca->control());
-		_masters_numbers.insert (vca->number());
-		new_master_val = get_master_gain_locked ();
+
+		/* ratio will be recomputed below */
+
+		MasterRecord mr (vca->control(), vca->number(), 0.0);
+
+		res = _masters.insert (mr);
+		recompute_masters_ratios (old_master_val);
 
 		/* note that we bind @param m as a weak_ptr<GainControl>, thus
 		   avoiding holding a reference to the control in the binding
@@ -149,10 +185,6 @@ GainControl::add_master (boost::shared_ptr<VCA> vca)
 
 		vca->DropReferences.connect_same_thread (masters_connections, boost::bind (&GainControl::master_going_away, this, vca));
 		vca->control()->Changed.connect_same_thread (masters_connections, boost::bind (&PBD::Signal0<void>::operator(), &Changed));
-	}
-
-	if (old_master_val != new_master_val) {
-		Changed(); /* EMIT SIGNAL */
 	}
 
 	if (res.second) {
@@ -173,19 +205,16 @@ void
 GainControl::remove_master (boost::shared_ptr<VCA> vca)
 {
 	gain_t old_master_val;
-	gain_t new_master_val;
-	set<boost::shared_ptr<GainControl> >::size_type erased = 0;
+	Masters::size_type erased = 0;
 
 	{
-		Glib::Threads::Mutex::Lock lm (master_lock);
+		Glib::Threads::RWLock::WriterLock lm (master_lock);
 		old_master_val = get_master_gain_locked ();
-		erased = _masters.erase (vca->control());
-		_masters_numbers.erase (vca->number());
-		new_master_val = get_master_gain_locked ();
-	}
-
-	if (old_master_val != new_master_val) {
-		Changed(); /* EMIT SIGNAL */
+		MasterRecord mr (vca->control(), vca->number(), 0.0);
+		erased = _masters.erase (mr);
+		if (erased) {
+			recompute_masters_ratios (old_master_val);
+		}
 	}
 
 	if (erased) {
@@ -196,23 +225,14 @@ GainControl::remove_master (boost::shared_ptr<VCA> vca)
 void
 GainControl::clear_masters ()
 {
-	gain_t old_master_val;
-	gain_t new_master_val;
 	bool had_masters = false;
 
 	{
-		Glib::Threads::Mutex::Lock lm (master_lock);
-		old_master_val = get_master_gain_locked ();
+		Glib::Threads::RWLock::WriterLock lm (master_lock);
 		if (!_masters.empty()) {
 			had_masters = true;
 		}
 		_masters.clear ();
-		_masters_numbers.clear ();
-		new_master_val = get_master_gain_locked ();
-	}
-
-	if (old_master_val != new_master_val) {
-		Changed(); /* EMIT SIGNAL */
 	}
 
 	if (had_masters) {
@@ -220,17 +240,65 @@ GainControl::clear_masters ()
 	}
 }
 
+void
+GainControl::recompute_masters_ratios (double val)
+{
+	/* Master WRITE lock must be held */
+
+	/* V' is the new gain value for this
+
+	   Mv(n) is the return value of ::get_value() for the n-th master
+	   Mr(n) is the return value of ::ratio() for the n-th master record
+
+	   the slave should return V' on the next call to ::get_value().
+
+	   but the value is determined by the masters, so we know:
+
+	   V' = (Mv(1) * Mr(1)) * (Mv(2) * Mr(2)) * ... * (Mv(n) * Mr(n))
+
+	   hence:
+
+	   Mr(1) * Mr(2) * ... * (Mr(n) = V' / (Mv(1) * Mv(2) * ... * Mv(n))
+
+	   if we make all ratios equal (i.e. each master contributes the same
+	   fraction of its own gain level to make the final slave gain), then we
+	   have:
+
+	   pow (Mr(n), n) = V' / (Mv(1) * Mv(2) * ... * Mv(n))
+
+	   which gives
+
+	   Mr(n) = pow ((V' / (Mv(1) * Mv(2) * ... * Mv(n))), 1/n)
+
+	   Mr(n) is the new ratio number for the slaves
+	*/
+
+
+	const double nmasters = _masters.size();
+	double masters_total_gain_coefficient = 1.0;
+
+	for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+		masters_total_gain_coefficient *= mr->master()->get_value();
+	}
+
+	const double new_universal_ratio = pow ((val / masters_total_gain_coefficient), (1.0/nmasters));
+
+	for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+		const_cast<MasterRecord*>(&(*mr))->reset_ratio (new_universal_ratio);
+	}
+}
+
 bool
 GainControl::slaved_to (boost::shared_ptr<VCA> vca) const
 {
-	Glib::Threads::Mutex::Lock lm (master_lock);
-	return find (_masters.begin(), _masters.end(), vca->control()) != _masters.end();
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	return find (_masters.begin(), _masters.end(), MasterRecord (vca->control(), vca->number(), 0.0)) != _masters.end();
 }
 
 bool
 GainControl::slaved () const
 {
-	Glib::Threads::Mutex::Lock lm (master_lock);
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 	return !_masters.empty();
 }
 
@@ -244,12 +312,12 @@ GainControl::get_state ()
 	string str;
 
 	{
-		Glib::Threads::Mutex::Lock lm (master_lock);
-		for (set<uint32_t>::const_iterator m = _masters_numbers.begin(); m != _masters_numbers.end(); ++m) {
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
 			if (!str.empty()) {
 				str += ',';
 			}
-			str += PBD::to_string (*m, std::dec);
+			str += PBD::to_string (mr->number(), std::dec);
 		}
 	}
 
@@ -267,7 +335,7 @@ GainControl::set_state (XMLNode const& node, int version)
 
 	XMLProperty const* prop = node.property (X_("masters"));
 
-	/* XXXProblem here if we allow VCA's to be slaved to other VCA's .. we
+	/* XXX Problem here if we allow VCA's to be slaved to other VCA's .. we
 	 * have to load all VCAs first, then call ::set_state() so that
 	 * vca_by_number() will succeed.
 	 */
