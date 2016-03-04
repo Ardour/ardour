@@ -398,8 +398,8 @@ Mixer_UI::remove_master (VCAMasterStrip* vms)
 void
 Mixer_UI::add_strips (RouteList& routes)
 {
-	bool from_scratch = track_model->children().size() == 0;
 	Gtk::TreeModel::Children::iterator insert_iter = track_model->children().end();
+	uint32_t nroutes = 0;
 
 	for (Gtk::TreeModel::Children::iterator it = track_model->children().begin(); it != track_model->children().end(); ++it) {
 		boost::shared_ptr<Route> r = (*it)[track_columns.route];
@@ -408,13 +408,15 @@ Mixer_UI::add_strips (RouteList& routes)
 			continue;
 		}
 
+		nroutes++;
+
 		if (r->order_key() == (routes.front()->order_key() + routes.size())) {
 			insert_iter = it;
 			break;
 		}
 	}
 
-	if(!from_scratch) {
+	if (nroutes) {
 		_selection.clear_routes ();
 	}
 
@@ -476,7 +478,7 @@ Mixer_UI::add_strips (RouteList& routes)
 			row[track_columns.strip] = strip;
 			row[track_columns.vca] = 0;
 
-			if (!from_scratch) {
+			if (nroutes != 0) {
 				_selection.add (strip);
 			}
 
