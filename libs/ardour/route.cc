@@ -663,7 +663,7 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 			break;
 		}
 
-		/* if we're not exporting, stop processing if we come across a routing processor. */
+		/* if we're *not* exporting, stop processing if we come across a routing processor. */
 		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
 			break;
 		}
@@ -671,8 +671,20 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 			break;
 		}
 
-		/* don't run any processors that does routing.
-		 * oh, and don't bother with the peak meter either.
+		/* special case the panner (export outputs)
+		 * Ideally we'd only run the panner, not the delivery itself...
+		 * but panners need separate input/output buffers and some context
+		 * (panshell, panner type, etc). AFAICT there is no ill side effect
+		 * of re-using the main delivery when freewheeling/exporting a region.
+		 */
+		if ((*i) == _main_outs) {
+			assert ((*i)->does_routing());
+			(*i)->run (buffers, start - latency, start - latency + nframes, nframes, true);
+			buffers.set_count ((*i)->output_streams());
+		}
+
+		/* don't run any processors that do routing.
+		 * Also don't bother with metering.
 		 */
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
 			(*i)->run (buffers, start - latency, start - latency + nframes, nframes, true);

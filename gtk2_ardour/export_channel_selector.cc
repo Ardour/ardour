@@ -536,7 +536,8 @@ RegionExportChannelSelector::handle_selection ()
 	factory.reset (new RegionExportChannelFactory (_session, region, track, type));
 	state->config->set_region_processing_type (type);
 
-	for (size_t chan = 0; chan < region_chans; ++chan) {
+	const size_t cc = type == RegionExportChannelFactory::Processed ? track_chans : region_chans;
+	for (size_t chan = 0; chan < cc; ++chan) {
 		state->config->register_channel (factory->create (chan));
 	}
 
