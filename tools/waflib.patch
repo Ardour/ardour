@@ -1,0 +1,13 @@
+diff --git a/waflib/Tools/c_config.py b/waflib/Tools/c_config.py
+index ee1c5c2..0672f3d 100644
+--- a/waflib/Tools/c_config.py
++++ b/waflib/Tools/c_config.py
+@@ -150,6 +150,8 @@ def parse_flags(self, line, uselib, env=None, force_static=False):
+ 		elif st == '-L':
+ 			if not ot: ot = lst.pop(0)
+ 			appu('LIBPATH_' + uselib, [ot])
++		elif x.startswith('-std=c++'):
++			app('CXXFLAGS_' + uselib, [x])
+ 		elif x == '-pthread' or x.startswith('+') or x.startswith('-std'):
+ 			app('CFLAGS_' + uselib, [x])
+ 			app('CXXFLAGS_' + uselib, [x])
