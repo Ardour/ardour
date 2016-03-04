@@ -52,6 +52,18 @@ class LIBARDOUR_API VCA : public SessionHandleRef, public PBD::StatefulDestructi
 	XMLNode& get_state();
 	int set_state (XMLNode const&, int version);
 
+	void add_solo_mute_target (boost::shared_ptr<Route>);
+	void remove_solo_mute_target (boost::shared_ptr<Route>);
+
+	void set_solo (bool yn);
+	bool soloed () const;
+
+	void set_mute (bool yn);
+	bool muted () const;
+
+	PBD::Signal0<void> SoloChange;
+	PBD::Signal0<void> MuteChange;
+
 	static std::string default_name_template ();
 	static int next_vca_number ();
 	static std::string xml_node_name;
@@ -60,8 +72,18 @@ class LIBARDOUR_API VCA : public SessionHandleRef, public PBD::StatefulDestructi
 	uint32_t    _number;
 	std::string _name;
 	boost::shared_ptr<GainControl> _control;
+	RouteList solo_mute_targets;
+	PBD::ScopedConnectionList solo_mute_connections;
+	mutable Glib::Threads::RWLock solo_mute_lock;
+	bool _solo_requested;
+	bool _mute_requested;
 
 	static gint next_number;
+
+	void solo_mute_target_going_away (boost::weak_ptr<Route>);
+	bool soloed_locked () const;
+	bool muted_locked () const;
+
 };
 
 } /* namespace */

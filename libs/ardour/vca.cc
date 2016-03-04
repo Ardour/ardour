@@ -20,7 +20,9 @@
 
 #include "ardour/automation_control.h"
 #include "ardour/gain_control.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/route.h"
+#include "ardour/session.h"
 #include "ardour/vca.h"
 
 #include "i18n.h"
@@ -51,6 +53,8 @@ VCA::VCA (Session& s, const string& name, uint32_t num)
 	, _number (num)
 	, _name (name)
 	, _control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
+	, _solo_requested (false)
+	, _mute_requested (false)
 {
 	add_control (_control);
 }
@@ -60,6 +64,8 @@ VCA::VCA (Session& s, XMLNode const & node, int version)
 	, Automatable (s)
 	, _number (0)
 	, _control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
+	, _solo_requested (false)
+	, _mute_requested (false)
 {
 	add_control (_control);
 
@@ -95,6 +101,8 @@ VCA::get_state ()
 	XMLNode* node = new XMLNode (xml_node_name);
 	node->add_property (X_("name"), _name);
 	node->add_property (X_("number"), _number);
+	node->add_property (X_("soloed"), (_solo_requested ? X_("yes") : X_("no")));
+	node->add_property (X_("muted"), (_mute_requested ? X_("yes") : X_("no")));
 
 	node->add_child_nocopy (_control->get_state());
 	node->add_child_nocopy (get_automation_xml_state());
@@ -126,4 +134,87 @@ VCA::set_state (XMLNode const& node, int version)
 	}
 
 	return 0;
+}
+
+void
+VCA::add_solo_mute_target (boost::shared_ptr<Route> r)
+{
+	Glib::Threads::RWLock::WriterLock lm (solo_mute_lock);
+	solo_mute_targets.push_back (r);
+	r->DropReferences.connect_same_thread (solo_mute_connections, boost::bind (&VCA::solo_mute_target_going_away, this, boost::weak_ptr<Route> (r)));
+}
+
+void
+VCA::remove_solo_mute_target (boost::shared_ptr<Route> r)
+{
+	Glib::Threads::RWLock::WriterLock lm (solo_mute_lock);
+	solo_mute_targets.remove (r);
+}
+
+void
+VCA::solo_mute_target_going_away (boost::weak_ptr<Route> wr)
+{
+	boost::shared_ptr<Route> r (wr.lock());
+	if (!r) {
+		return;
+	}
+
+	Glib::Threads::RWLock::WriterLock lm (solo_mute_lock);
+	solo_mute_targets.remove (r);
+}
+
+void
+VCA::set_solo (bool yn)
+{
+	{
+		Glib::Threads::RWLock::ReaderLock lm (solo_mute_lock);
+
+		if (yn == _solo_requested) {
+			return;
+		}
+
+		if (solo_mute_targets.empty()) {
+			return;
+		}
+
+		boost::shared_ptr<RouteList> rl (new RouteList (solo_mute_targets));
+
+		if (Config->get_solo_control_is_listen_control()) {
+			_session.set_listen (rl, yn, Session::rt_cleanup, Controllable::NoGroup);
+		} else {
+			_session.set_solo (rl, yn, Session::rt_cleanup, Controllable::NoGroup);
+		}
+	}
+
+	_solo_requested = yn;
+	SoloChange(); /* EMIT SIGNAL */
+}
+
+void
+VCA::set_mute (bool yn)
+{
+	{
+		Glib::Threads::RWLock::ReaderLock lm (solo_mute_lock);
+		if (yn == _mute_requested) {
+			return;
+		}
+
+		boost::shared_ptr<RouteList> rl (new RouteList (solo_mute_targets));
+		_session.set_mute (rl, yn, Session::rt_cleanup, Controllable::NoGroup);
+	}
+
+	_mute_requested = yn;
+	MuteChange(); /* EMIT SIGNAL */
+}
+
+bool
+VCA::soloed () const
+{
+	return _solo_requested;
+}
+
+bool
+VCA::muted () const
+{
+	return _mute_requested;
 }
