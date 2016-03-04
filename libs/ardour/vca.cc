@@ -47,7 +47,7 @@ VCA::next_vca_number ()
 	return g_atomic_int_add (&next_number, 1) + 1;
 }
 
-VCA::VCA (Session& s, const string& name, uint32_t num)
+VCA::VCA (Session& s,  uint32_t num, const string& name)
 	: SessionHandleRef (s)
 	, Automatable (s)
 	, _number (num)

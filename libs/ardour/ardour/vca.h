@@ -35,7 +35,7 @@ class Route;
 
 class LIBARDOUR_API VCA : public SessionHandleRef, public PBD::StatefulDestructible, public Automatable {
   public:
-	VCA (Session& session, const std::string& name, uint32_t num);
+	VCA (Session& session,  uint32_t num, const std::string& name);
 	VCA (Session& session, XMLNode const&, int version);
 	~VCA();
 

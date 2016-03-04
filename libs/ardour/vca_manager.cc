@@ -73,7 +73,7 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 				replace_all (name, "%n", sn);
 			}
 
-			boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, name, num));
+			boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, num, name));
 
 			_vcas.push_back (vca);
 			vcal.push_back (vca);
