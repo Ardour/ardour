@@ -56,7 +56,7 @@ GainControl::get_value () const
 
 	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
 		/* get current master value, scale by our current ratio with that master */
-		g *= mr->master()->get_value () * mr->ratio();
+		g *= mr->second.master()->get_value () * mr->second.ratio();
 	}
 
 	return g;
@@ -155,7 +155,7 @@ GainControl::get_master_gain_locked () const
 
 	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
 		/* get current master value, scale by our current ratio with that master */
-		g *= mr->master()->get_value () * mr->ratio();
+		g *= mr->second.master()->get_value () * mr->second.ratio();
 	}
 
 	return g;
@@ -173,18 +173,24 @@ GainControl::add_master (boost::shared_ptr<VCA> vca)
 
 		/* ratio will be recomputed below */
 
-		MasterRecord mr (vca->control(), vca->number(), 0.0);
+		res = _masters.insert (make_pair<uint32_t,MasterRecord> (vca->number(), MasterRecord (vca->control(), 0.0)));
 
-		res = _masters.insert (mr);
-		recompute_masters_ratios (old_master_val);
+		if (res.second) {
+			recompute_masters_ratios (old_master_val);
 
-		/* note that we bind @param m as a weak_ptr<GainControl>, thus
-		   avoiding holding a reference to the control in the binding
-		   itself.
-		*/
+			/* note that we bind @param m as a weak_ptr<GainControl>, thus
+			   avoiding holding a reference to the control in the binding
+			   itself.
+			*/
 
-		vca->DropReferences.connect_same_thread (masters_connections, boost::bind (&GainControl::master_going_away, this, vca));
-		vca->control()->Changed.connect_same_thread (masters_connections, boost::bind (&PBD::Signal0<void>::operator(), &Changed));
+			vca->DropReferences.connect_same_thread (masters_connections, boost::bind (&GainControl::master_going_away, this, vca));
+
+			/* Store the connection inside the MasterRecord, so that when we destroy it, the connection is destroyed
+			   and we no longer hear about changes to the VCA.
+			*/
+
+			vca->control()->Changed.connect_same_thread (res.first->second.connection, boost::bind (&PBD::Signal0<void>::operator(), &Changed));
+		}
 	}
 
 	if (res.second) {
@@ -210,8 +216,7 @@ GainControl::remove_master (boost::shared_ptr<VCA> vca)
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
 		old_master_val = get_master_gain_locked ();
-		MasterRecord mr (vca->control(), vca->number(), 0.0);
-		erased = _masters.erase (mr);
+		erased = _masters.erase (vca->number());
 		if (erased) {
 			recompute_masters_ratios (old_master_val);
 		}
@@ -278,13 +283,13 @@ GainControl::recompute_masters_ratios (double val)
 	double masters_total_gain_coefficient = 1.0;
 
 	for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-		masters_total_gain_coefficient *= mr->master()->get_value();
+		masters_total_gain_coefficient *= mr->second.master()->get_value();
 	}
 
 	const double new_universal_ratio = pow ((val / masters_total_gain_coefficient), (1.0/nmasters));
 
 	for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-		const_cast<MasterRecord*>(&(*mr))->reset_ratio (new_universal_ratio);
+		mr->second.reset_ratio (new_universal_ratio);
 	}
 }
 
@@ -292,7 +297,7 @@ bool
 GainControl::slaved_to (boost::shared_ptr<VCA> vca) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);
-	return find (_masters.begin(), _masters.end(), MasterRecord (vca->control(), vca->number(), 0.0)) != _masters.end();
+	return _masters.find (vca->number()) != _masters.end();
 }
 
 bool
@@ -317,7 +322,7 @@ GainControl::get_state ()
 			if (!str.empty()) {
 				str += ',';
 			}
-			str += PBD::to_string (mr->number(), std::dec);
+			str += PBD::to_string (mr->first, std::dec);
 		}
 	}
 
