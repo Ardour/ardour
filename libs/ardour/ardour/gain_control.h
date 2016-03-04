@@ -91,12 +91,14 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	typedef std::map<uint32_t,MasterRecord> Masters;
 	Masters _masters;
 	PBD::ScopedConnectionList masters_connections;
-	std::string _masters_state_string ();
+	std::string masters_string;
+	PBD::ScopedConnection vca_loaded_connection;
 
 	gain_t get_value_locked () const;
 	gain_t get_master_gain_locked () const;
 	void master_going_away (boost::weak_ptr<VCA>);
 	void recompute_masters_ratios (double val);
+	void vcas_loaded();
 
 	void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 };

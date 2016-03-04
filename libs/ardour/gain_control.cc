@@ -348,22 +348,41 @@ GainControl::set_state (XMLNode const& node, int version)
 
 	XMLProperty const* prop = node.property (X_("masters"));
 
-	/* XXX Problem here if we allow VCA's to be slaved to other VCA's .. we
-	 * have to load all VCAs first, then call ::set_state() so that
-	 * vca_by_number() will succeed.
+	/* Problem here if we allow VCA's to be slaved to other VCA's .. we
+	 * have to load all VCAs first, then set up slave/master relationships
+	 * once we have them all.
 	 */
 
 	if (prop) {
-		vector<string> masters;
-		split (prop->value(), masters, ',');
+		masters_string = prop->value ();
 
-		for (vector<string>::const_iterator m = masters.begin(); m != masters.end(); ++m) {
-			boost::shared_ptr<VCA> vca = _session.vca_manager().vca_by_number (PBD::atoi (*m));
-			if (vca) {
-				add_master (vca);
-			}
+		if (_session.vca_manager().vcas_loaded()) {
+			vcas_loaded ();
+		} else {
+			_session.vca_manager().VCAsLoaded.connect_same_thread (vca_loaded_connection, boost::bind (&GainControl::vcas_loaded, this));
 		}
 	}
 
 	return 0;
+}
+
+void
+GainControl::vcas_loaded ()
+{
+	if (masters_string.empty()) {
+		return;
+	}
+
+	vector<string> masters;
+	split (masters_string, masters, ',');
+
+	for (vector<string>::const_iterator m = masters.begin(); m != masters.end(); ++m) {
+		boost::shared_ptr<VCA> vca = _session.vca_manager().vca_by_number (PBD::atoi (*m));
+		if (vca) {
+			add_master (vca);
+		}
+	}
+
+	vca_loaded_connection.disconnect ();
+	masters_string.clear ();
 }

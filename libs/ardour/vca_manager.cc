@@ -33,6 +33,7 @@ string VCAManager::xml_node_name (X_("VCAManager"));
 
 VCAManager::VCAManager (Session& s)
 	: SessionHandleRef (s)
+	, _vcas_loaded (false)
 {
 }
 
@@ -140,6 +141,8 @@ VCAManager::set_state (XMLNode const& node, int version)
 	XMLNodeList const & children = node.children();
 	VCAList vcal;
 
+	_vcas_loaded = false;
+
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == VCA::xml_node_name) {
 			boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, **i, version));
@@ -158,6 +161,9 @@ VCAManager::set_state (XMLNode const& node, int version)
 		}
 	}
 
+	_vcas_loaded = true;
+
+	VCAsLoaded (); /* EMIT SIGNAL */
 	VCAAdded (vcal); /* EMIT SIGNAL */
 
 	return 0;

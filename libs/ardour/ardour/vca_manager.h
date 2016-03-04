@@ -50,17 +50,21 @@ class VCAManager : public SessionHandleRef, public PBD::StatefulDestructible
 
 	VCAList vcas() const;
 
+	PBD::Signal0<void>          VCAsLoaded;
 	PBD::Signal1<void,VCAList&> VCAAdded;
 	PBD::Signal1<void,VCAList&> VCARemoved;
 
 	XMLNode& get_state();
 	int set_state (XMLNode const&, int version);
 
+	bool vcas_loaded() const { return _vcas_loaded; }
+
 	static std::string xml_node_name;
 
      private:
 	mutable Glib::Threads::Mutex lock;
 	VCAList _vcas;
+	bool _vcas_loaded;
 
 	void clear ();
 };
