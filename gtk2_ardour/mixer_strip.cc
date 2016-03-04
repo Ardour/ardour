@@ -2579,7 +2579,6 @@ MixerStrip::vca_button_release (GdkEventButton* ev)
 		items.push_back (CheckMenuElem ((*v)->name()));
 		CheckMenuItem* item = dynamic_cast<CheckMenuItem*> (&items.back());
 		if (_route->slaved_to (*v)) {
-			cerr << "Yes, slaved to " << (*v)->name() << " aka " << (*v)->number() << endl;
 			item->set_active (true);
 		}
 		item->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &MixerStrip::vca_menu_toggle), item, (*v)->number()));

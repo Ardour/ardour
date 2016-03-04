@@ -19,7 +19,9 @@
 #include "pbd/convert.h"
 
 #include "ardour/rc_configuration.h"
+#include "ardour/session.h"
 #include "ardour/vca.h"
+#include "ardour/vca_manager.h"
 
 #include "tooltips.h"
 #include "vca_master_strip.h"
@@ -30,6 +32,7 @@
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace Gtkmm2ext;
+using namespace Gtk;
 using std::string;
 
 VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
@@ -59,6 +62,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 
 	assign_button.set_text (_("-vca-"));
 	set_tooltip (assign_button, _("Click to assign a VCA Master to this VCA"));
+	assign_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vca_button_release), false);
 
 	width_button.signal_button_press_event().connect (sigc::mem_fun(*this, &VCAMasterStrip::width_button_pressed), false);
 	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &VCAMasterStrip::hide_clicked));
@@ -238,4 +242,70 @@ VCAMasterStrip::solo_changed ()
 	} else {
 		solo_button.set_active_state (Gtkmm2ext::Off);
 	}
+}
+
+void
+VCAMasterStrip::vca_menu_toggle (CheckMenuItem* menuitem, uint32_t n)
+{
+	boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_number (n);
+
+	if (!menuitem->get_active()) {
+		if (!vca) {
+			/* null VCA means drop all VCA assignments */
+			vca_unassign ();
+		} else {
+			_vca->control()->remove_master (vca);
+		}
+	} else {
+		if (vca) {
+			_vca->control()->add_master (vca);
+		}
+	}
+}
+
+void
+VCAMasterStrip::vca_unassign ()
+{
+	_vca->control()->clear_masters ();
+}
+
+bool
+VCAMasterStrip::vca_button_release (GdkEventButton* ev)
+{
+	using namespace Gtk::Menu_Helpers;
+
+	if (!_session) {
+		return false;
+	}
+
+	/* primary click only */
+
+	if (ev->button != 1) {
+		return false;
+	}
+
+	VCAList vcas (_session->vca_manager().vcas());
+
+	if (vcas.empty()) {
+		/* XXX should probably show a message saying "No VCA masters" */
+		return true;
+	}
+
+	Menu* menu = new Menu;
+	MenuList& items = menu->items();
+
+	items.push_back (MenuElem (_("Unassign"), sigc::mem_fun (*this, &VCAMasterStrip::vca_unassign)));
+
+	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
+		items.push_back (CheckMenuElem ((*v)->name()));
+		CheckMenuItem* item = dynamic_cast<CheckMenuItem*> (&items.back());
+		if (_vca->control()->slaved_to (*v)) {
+			item->set_active (true);
+		}
+		item->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &VCAMasterStrip::vca_menu_toggle), item, (*v)->number()));
+	}
+
+	menu->popup (1, ev->time);
+
+	return true;
 }

@@ -22,6 +22,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <gtkmm/box.h>
+#include <gtkmm/menuitem.h>
 
 #include "ardour_button.h"
 #include "axis_view.h"
@@ -73,6 +74,10 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void set_solo_text ();
 	void solo_changed ();
 	void mute_changed ();
+	void vca_menu_toggle (Gtk::CheckMenuItem* menuitem, uint32_t n);
+	void vca_unassign ();
+	bool vca_button_release (GdkEventButton*);
+
 };
 
 
