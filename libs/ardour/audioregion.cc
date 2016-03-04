@@ -1817,11 +1817,13 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, framecnt_t f
 	while (pos < end && !itt.cancel) {
 
 		framecnt_t cur_samples = 0;
+		framecnt_t const to_read = min (end - pos, block_size);
 		/* fill `loudest' with the loudest absolute sample at each instant, across all channels */
 		memset (loudest.get(), 0, sizeof (Sample) * block_size);
+
 		for (uint32_t n = 0; n < n_channels(); ++n) {
 
-			cur_samples = read_raw_internal (buf.get(), pos, block_size, n);
+			cur_samples = read_raw_internal (buf.get(), pos, to_read, n);
 			for (framecnt_t i = 0; i < cur_samples; ++i) {
 				loudest[i] = max (loudest[i], abs (buf[i]));
 			}
