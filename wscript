@@ -139,6 +139,7 @@ clang_dict['extra-cxx-warnings'] = [ '-Woverloaded-virtual', '-Wno-mismatched-ta
 clang_dict['cxx-strict'] = [ '-ansi', '-Wnon-virtual-dtor', '-Woverloaded-virtual', '-fstrict-overflow' ]
 clang_dict['strict'] = ['-Wall', '-Wcast-align', '-Wextra', '-Wwrite-strings' ]
 clang_dict['generic-x86'] = [ '-arch', 'i386' ]
+clang_dict['full-optimization'] = [ '-O3', '-fomit-frame-pointer', '-ffast-math', ]
 compiler_flags_dictionaries['clang'] = clang_dict;
 
 clang_darwin_dict = compiler_flags_dictionaries['clang'].copy();
