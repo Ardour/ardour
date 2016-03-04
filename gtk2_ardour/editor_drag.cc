@@ -3178,17 +3178,18 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			TempoMap& map (_editor->session()->tempo_map());
 			/* get current state */
 			before_state = &map.get_state();
-			/* remove the section while we drag it */
-			//map.remove_meter (section, true);
 		}
 		_marker->hide();
 	}
 
 	framepos_t const pf = adjusted_current_frame (event);
-
+	double const baf = _editor->session()->tempo_map().beat_at_frame (pf);
 	_marker->set_position (pf);
-	_editor->session()->tempo_map().gui_move_meter (_real_section, _marker->meter(), pf);
-
+	if (_marker->meter().position_lock_style() == MusicTime) {
+		_editor->session()->tempo_map().gui_move_meter (_real_section, _marker->meter(), baf);
+	} else {
+		_editor->session()->tempo_map().gui_move_meter (_real_section, _marker->meter(), pf);
+	}
 	show_verbose_cursor_time (pf);
 }
 
@@ -3206,7 +3207,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	motion (event, false);
+	//motion (event, false);
 
 	Timecode::BBT_Time when;
 

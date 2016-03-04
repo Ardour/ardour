@@ -1079,7 +1079,6 @@ TempoMap::get_new_order(MeterSection* section, const Meter& mt, const framepos_t
 			if (prev_ms) {
 				if (m->frame() > frame){
 					pair<double, BBT_Time> b_bbt = make_pair (beat_at_frame_locked (frame), BBT_Time (1, 1, 0));
-
 					section->set_beat (b_bbt);
 					prev_ms = section;
 					continue;
@@ -1140,6 +1139,21 @@ TempoMap::gui_move_meter (MeterSection* ms, const Meter& mt, const framepos_t&  
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		Metrics new_order = get_new_order (ms, mt, frame);
+
+		metrics.clear();
+		metrics = new_order;
+		recompute_meters ();
+	}
+
+	MetricPositionChanged (); // Emit Signal
+}
+
+void
+TempoMap::gui_move_meter (MeterSection* ms, const Meter& mt, const double&  beat)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
+		Metrics new_order = get_new_order (ms, mt, beat);
 
 		metrics.clear();
 		metrics = new_order;
