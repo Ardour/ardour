@@ -5160,12 +5160,13 @@ Editor::strip_region_silence ()
 	StripSilenceDialog d (_session, audio_only);
 	int const r = d.run ();
 
-        d.drop_rects ();
+	d.drop_rects ();
 
-        if (r == Gtk::RESPONSE_OK) {
-                ARDOUR::AudioIntervalMap silences;
-                d.silences (silences);
+	if (r == Gtk::RESPONSE_OK) {
+		ARDOUR::AudioIntervalMap silences;
+		d.silences (silences);
 		StripSilence s (*_session, silences, d.fade_length());
+
 		apply_filter (s, _("strip silence"), &d);
 	}
 }
@@ -5440,6 +5441,11 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 				playlist->clear_changes ();
 				playlist->clear_owned_changes ();
 
+				if (!in_command) {
+					begin_reversible_command (command);
+					in_command = true;
+				}
+
 				if (filter.results.empty ()) {
 
 					/* no regions returned; remove the old one */
@@ -5460,14 +5466,10 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 					}
 
 				}
+
 				/* We might have removed regions, which alters other regions' layering_index,
 				   so we need to do a recursive diff here.
 				*/
-
-				if (!in_command) {
-					begin_reversible_command (command);
-					in_command = true;
-				}
 				vector<Command*> cmds;
 				playlist->rdiff (cmds);
 				_session->add_commands (cmds);
