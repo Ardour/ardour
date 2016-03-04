@@ -143,6 +143,11 @@ FPU::FPU ()
 		error << _("FPU object instantiated more than once") << endmsg;
 	}
 
+	if (getenv("ARDOUR_FPU_FLAGS")) {
+		_flags = Flags (atoi (getenv("ARDOUR_FPU_FLAGS")));
+		return;
+	}
+
 #if !( (defined __x86_64__) || (defined __i386__) || (defined _M_X64) || (defined _M_IX86) ) // !ARCH_X86
 	/* Non-Intel architecture, nothing to do here */
 	return;
