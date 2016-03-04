@@ -52,15 +52,27 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	Gtk::VBox    global_vpacker;
 	Gtk::HBox    top_padding;
 	Gtk::HBox    bottom_padding;
+	Gtk::HBox    width_hide_box;
+	Gtk::HBox    solo_mute_box;
 	ArdourButton width_button;
 	ArdourButton color_button;
 	ArdourButton hide_button;
 	ArdourButton number_label;
-	Gtk::HBox    width_hide_box;
+	ArdourButton solo_button;
+	ArdourButton mute_button;
+	ArdourButton assign_button;
+	bool         wide;
+	PBD::ScopedConnectionList vca_connections;
 
 	void hide_clicked();
 	bool width_button_pressed (GdkEventButton *);
 	void set_selected (bool);
+	bool solo_release (GdkEventButton*);
+	bool mute_release (GdkEventButton*);
+	void set_width (bool wide);
+	void set_solo_text ();
+	void solo_changed ();
+	void mute_changed ();
 };
 
 
