@@ -73,6 +73,8 @@ class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 		_drag_column = c;
 	}
 
+	void set_drag_button_mask(Gdk::ModifierType mask);
+
   protected:
 	std::list<Gtk::TargetEntry> draggable;
 	Gdk::DragAction             suggested_action;
@@ -82,6 +84,7 @@ class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 	double press_start_x;
 	double press_start_y;
 	int _drag_column;
+	Gdk::ModifierType _drag_button_mask;
 
 	struct DragData {
 	    DragData () : source (0) {}

@@ -189,6 +189,7 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	_display.add_object_drag (_columns.region.index(), "regions");
 	_display.set_drag_column (_columns.name.index());
+	_display.set_drag_button_mask(Gdk::BUTTON1_MASK);
 
 	/* setup DnD handling */
 
@@ -995,6 +996,8 @@ EditorRegions::set_full (bool f)
 void
 EditorRegions::show_context_menu (int button, int time)
 {
+	_editor->_drags->abort ();
+
 	if (_menu == 0) {
 		_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("/RegionListMenu"));
 	}
