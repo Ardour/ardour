@@ -754,7 +754,7 @@ TempoMap::do_insert (MetricSection* section)
 	if ((m = dynamic_cast<MeterSection*>(section)) != 0) {
 		assert (m->bbt().ticks == 0);
 
-		if ((m->bbt().beats != 1) || (m->bbt().ticks != 0)) {
+		if (m->position_lock_style() == MusicTime && ((m->bbt().beats != 1) || (m->bbt().ticks != 0))) {
 
 			pair<double, BBT_Time> corrected = make_pair (m->beat(), m->bbt());
 			corrected.second.beats = 1;
@@ -1143,7 +1143,7 @@ TempoMap::gui_move_meter (MeterSection* ms, const Meter& mt, const framepos_t&  
 
 		metrics.clear();
 		metrics = new_order;
-		recompute_map (false);
+		recompute_meters ();
 	}
 
 	MetricPositionChanged (); // Emit Signal
@@ -1458,21 +1458,17 @@ TempoMap::recompute_tempos ()
 				if (t->position_lock_style() == AudioTime) {
 					if (prev_ts->type() == TempoSection::Ramp) {
 						prev_ts->set_c_func (prev_ts->compute_c_func (t->beats_per_minute(), t->frame(), _frame_rate));
-						//t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
 						t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate));
 					} else {
 						prev_ts->set_c_func (0.0);
-						//t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
 						t->set_beat (prev_ts->beat_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate));
 					}
 				} else {
 					if (prev_ts->type() == TempoSection::Ramp) {
 						prev_ts->set_c_func_from_tempo_and_beat (t->beats_per_minute(), t->beat(), _frame_rate);
-						//t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
 						t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), t->beat(), _frame_rate));
 					} else {
 						prev_ts->set_c_func (0.0);
-						//t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
 						t->set_frame (prev_ts->frame_at_tempo (t->beats_per_minute(), t->beat(), _frame_rate));
 					}
 				}
@@ -1482,22 +1478,18 @@ TempoMap::recompute_tempos ()
 	}
 }
 
+/* tempos must be positioned correctly */
 void
 TempoMap::recompute_meters ()
 {
 	MeterSection* meter = 0;
 
 	for (Metrics::const_iterator mi = metrics.begin(); mi != metrics.end(); ++mi) {
-		/* Now we have the tempos mapped to position, set meter positions.*/
 		if ((meter = dynamic_cast<MeterSection*> (*mi)) != 0) {
 			if (meter->position_lock_style() == AudioTime) {
 				/* a frame based meter has to have a 1|1|0 bbt */
 				pair<double, BBT_Time> pr;
-				BBT_Time where;
-
-				where.bars = 1;
-				where.beats = 1;
-				where.ticks = 0;
+				BBT_Time const where (1, 1, 0);
 
 				pr.first = beat_at_frame_locked (meter->frame());
 				pr.second = where;
@@ -2036,17 +2028,24 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 		    framepos_t lower, framepos_t upper)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	uint32_t const upper_beat = (uint32_t) floor (beat_at_frame_locked (upper));
-	uint32_t cnt = (uint32_t) ceil (beat_at_frame_locked (lower));
+	double const upper_beat = floor (beat_at_frame_locked (upper));
+	double cnt = ceil (beat_at_frame_locked (lower));
+	MeterSection old_meter = meter_section_at (lower);
 
 	while (cnt <= upper_beat) {
-		framecnt_t const pos = frame_at_beat (cnt);
-		MeterSection const meter = meter_section_at (pos);
+		MeterSection const meter = meter_section_at (cnt);
+		if (meter.beat() != old_meter.beat()) {
+			if (meter.position_lock_style () == AudioTime) {
+				cnt = meter.beat();
+			}
+			old_meter = meter;
+		}
+		framecnt_t const pos = frame_at_beat_locked (cnt);
 		Tempo const tempo = tempo_at (pos);
 		BBT_Time const bbt = beats_to_bbt_locked ((double) cnt);
 
 		points.push_back (BBTPoint (meter, tempo, pos, bbt.bars, bbt.beats));
-		++cnt;
+		cnt += 1.0;
 	}
 }
 
@@ -2150,6 +2149,35 @@ TempoMap::meter_section_at (framepos_t frame) const
 		if ((t = dynamic_cast<MeterSection*> (*i)) != 0) {
 
 			if ((*i)->frame() > frame) {
+				break;
+			}
+
+			prev = t;
+		}
+	}
+
+	if (prev == 0) {
+		fatal << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	return *prev;
+}
+
+const MeterSection&
+TempoMap::meter_section_at (double beat) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	Metrics::const_iterator i;
+	MeterSection* prev = 0;
+
+	for (i = metrics.begin(); i != metrics.end(); ++i) {
+		MeterSection* t;
+
+		if ((t = dynamic_cast<MeterSection*> (*i)) != 0) {
+
+			if ((*i)->beat() > beat) {
 				break;
 			}
 

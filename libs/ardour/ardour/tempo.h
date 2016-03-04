@@ -365,6 +365,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	const TempoSection& tempo_section_at (framepos_t) const;
 	const MeterSection& meter_section_at (framepos_t) const;
+	const MeterSection& meter_section_at (double) const;
+
 
 	void add_tempo (const Tempo&, double where, TempoSection::Type type);
 	void add_tempo (const Tempo&, framepos_t frame, TempoSection::Type type);
