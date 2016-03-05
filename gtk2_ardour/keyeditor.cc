@@ -238,6 +238,12 @@ KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 {
 	TreeModel::iterator i = view.get_selection()->get_selected();
 
+	/* pressed key could be upper case if Shift was used. We want all
+	   single keys stored as their lower-case version, so ensure this
+	*/
+
+	pressed_key = gdk_keyval_to_lower (pressed_key);
+
 	if (i == model->children().end()) {
 		return;
 	}
