@@ -51,11 +51,25 @@ using namespace PBD;
 using Gtkmm2ext::Keyboard;
 using Gtkmm2ext::Bindings;
 
+/*========================================== HELPER =========================================*/
+void bindings_collision_dialog (Gtk::Window& parent)
+{
+	ArdourDialog dialog (parent, _("Colliding keybindings"), true);
+	Label label (_("The key sequence is already bound. Please remove the other binding first."));
+
+	dialog.get_vbox()->pack_start (label, true, true);
+	dialog.add_button (_("Ok"), Gtk::RESPONSE_ACCEPT);
+	dialog.show_all ();
+	dialog.run();
+}
+
+/*======================================== KEYEDITOR =========================================*/
 KeyEditor::KeyEditor ()
 	: ArdourWindow (_("Key Bindings"))
 	, unbind_button (_("Remove shortcut"))
 	, unbind_box (BUTTONBOX_END)
-
+	, sort_column(0)
+	, sort_type(Gtk::SORT_ASCENDING)
 {
 	last_keyval = 0;
 
@@ -150,6 +164,7 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 	view.append_column (_("Action"), columns.name);
 	view.append_column (_("Shortcut"), columns.binding);
 	view.set_headers_visible (true);
+	view.set_headers_clickable (true);
 	view.get_selection()->set_mode (SELECTION_SINGLE);
 	view.set_reorderable (false);
 	view.set_size_request (500,300);
@@ -158,6 +173,13 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 	view.set_name (X_("KeyEditorTree"));
 
 	view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &Tab::action_selected));
+
+	view.get_column(0)->set_sort_column (columns.name);
+	view.get_column(1)->set_sort_column (columns.binding);
+	model->set_sort_column (owner.sort_column,  owner.sort_type);
+	model->signal_sort_column_changed().connect (sigc::mem_fun (*this, &Tab::sort_column_changed));
+
+	signal_map().connect (sigc::mem_fun (*this, &Tab::tab_mapped));
 
 	scroller.add (view);
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -202,13 +224,13 @@ KeyEditor::Tab::unbind ()
 	owner.unbind_button.set_sensitive (false);
 
 	if (i != model->children().end()) {
-		Glib::RefPtr<Action> action = (*i)[columns.action];
-
 		if (!(*i)[columns.bindable]) {
 			return;
 		}
 
-		bindings->remove (action, Gtkmm2ext::Bindings::Press, true);
+		const std::string& action_path = (*i)[columns.path];
+
+		bindings->remove (Gtkmm2ext::Bindings::Press,  action_path , true);
 		(*i)[columns.binding] = string ();
 	}
 }
@@ -218,23 +240,29 @@ KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 {
 	TreeModel::iterator i = view.get_selection()->get_selected();
 
-	if (i != model->children().end()) {
+	if (i == model->children().end()) {
+		return;
+	}
 
-		string action_name = (*i)[columns.path];
+	string action_path = (*i)[columns.path];
 
-		if (!(*i)[columns.bindable]) {
-			return;
-		}
+	if (!(*i)[columns.bindable]) {
+		return;
+	}
 
-		GdkModifierType mod = (GdkModifierType)(Keyboard::RelevantModifierKeyMask & release_event->state);
-		Gtkmm2ext::KeyboardKey new_binding (mod, pressed_key);
+	GdkModifierType mod = (GdkModifierType)(Keyboard::RelevantModifierKeyMask & release_event->state);
+	Gtkmm2ext::KeyboardKey new_binding (mod, pressed_key);
 
-		bool result = bindings->replace (new_binding, Gtkmm2ext::Bindings::Press, action_name);
+	if (bindings->is_bound (new_binding, Gtkmm2ext::Bindings::Press)) {
+		bindings_collision_dialog (owner);
+		return;
+	}
 
-		if (result) {
-			(*i)[columns.binding] = gtk_accelerator_get_label (new_binding.key(), (GdkModifierType) new_binding.state());
-			owner.unbind_button.set_sensitive (true);
-		}
+	bool result = bindings->replace (new_binding, Gtkmm2ext::Bindings::Press, action_path);
+
+	if (result) {
+		(*i)[columns.binding] = gtk_accelerator_get_label (new_binding.key(), (GdkModifierType) new_binding.state());
+		owner.unbind_button.set_sensitive (true);
 	}
 }
 
@@ -328,6 +356,23 @@ KeyEditor::Tab::populate ()
 		}
 		row[columns.action] = *a;
 	}
+}
+
+void
+KeyEditor::Tab::sort_column_changed ()
+{
+	int column;
+	SortType type;
+	if (model->get_sort_column_id (column, type)) {
+		owner.sort_column = column;
+		owner.sort_type = type;
+	}
+}
+
+void
+KeyEditor::Tab::tab_mapped ()
+{
+	model->set_sort_column (owner.sort_column,  owner.sort_type);
 }
 
 void

@@ -55,6 +55,8 @@ class KeyEditor : public ArdourWindow
 		void unbind ();
 		void bind (GdkEventKey* release_event, guint pressed_key);
 		void action_selected ();
+		void sort_column_changed ();
+		void tab_mapped ();
 
 		struct KeyEditorColumns : public Gtk::TreeModel::ColumnRecord {
 			KeyEditorColumns () {
@@ -104,6 +106,10 @@ class KeyEditor : public ArdourWindow
 	void unbind ();
 	void reset ();
 	void page_change (GtkNotebookPage*, guint);
+
+	unsigned int sort_column;
+	Gtk::SortType sort_type;
+	void toggle_sort_type ();
 };
 
 #endif /* __ardour_gtk_key_editor_h__ */
