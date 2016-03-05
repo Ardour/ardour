@@ -258,25 +258,29 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
                 s |= Keyboard::Level4Modifier;
         }
 
-        string::size_type lastmod = str.find_last_of ('-');
-        guint keyval;
-
-        /* since all key events keycodes are changed to lower case before
-         * looking them up, make sure we only store lower case here. The Shift
-         * part will be stored in the modifier part of the KeyboardKey.
+        /* since all SINGLE key events keycodes are changed to lower case
+         * before looking them up, make sure we only store lower case here. The
+         * Shift part will be stored in the modifier part of the KeyboardKey.
          *
          * And yes Mildred, this doesn't cover CapsLock cases. Oh well.
          */
 
-        string lower;
+        string actual;
 
-        if (lastmod == string::npos) {
-	        lower = PBD::downcase (str);
+        if (str.size() == 1) {
+	        actual = PBD::downcase (str);
         } else {
-	        lower = PBD::downcase (str.substr (lastmod+1));
+	        actual = str;
         }
 
-        keyval = gdk_keyval_from_name (lower.c_str());
+        string::size_type lastmod = actual.find_last_of ('-');
+        guint keyval;
+
+        if (lastmod != string::npos) {
+	        actual = PBD::downcase (str.substr (lastmod+1));
+        }
+
+        keyval = gdk_keyval_from_name (actual.c_str());
 
         if (keyval == GDK_VoidSymbol || keyval == 0) {
 	        return false;
@@ -393,7 +397,6 @@ bool
 Bindings::activate (KeyboardKey kb, Operation op)
 {
 	KeybindingMap& kbm = get_keymap (op);
-
 
         /* if shift was pressed, GDK will send us (e.g) 'E' rather than 'e'.
            Our bindings all use the lower case character/keyname, so switch
@@ -815,7 +818,7 @@ Bindings::is_registered (Operation op, std::string const& action_name) const
 	return std::find_if(km.begin(),  km.end(),  ActionNameRegistered<KeybindingMap::const_iterator::value_type>(action_name)) != km.end();
 }
 
-Bindings::KeybindingMap& 
+Bindings::KeybindingMap&
 Bindings::get_keymap (Operation op)
 {
 	switch (op) {
@@ -827,7 +830,7 @@ Bindings::get_keymap (Operation op)
 	}
 }
 
-const Bindings::KeybindingMap& 
+const Bindings::KeybindingMap&
 Bindings::get_keymap (Operation op) const
 {
 	switch (op) {
@@ -839,7 +842,7 @@ Bindings::get_keymap (Operation op) const
 	}
 }
 
-Bindings::MouseButtonBindingMap& 
+Bindings::MouseButtonBindingMap&
 Bindings::get_mousemap (Operation op)
 {
 	switch (op) {
