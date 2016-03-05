@@ -51,7 +51,6 @@ using namespace PBD;
 using Gtkmm2ext::Keyboard;
 using Gtkmm2ext::Bindings;
 
-/*========================================== HELPER =========================================*/
 void bindings_collision_dialog (Gtk::Window& parent)
 {
 	ArdourDialog dialog (parent, _("Colliding keybindings"), true);
@@ -63,7 +62,6 @@ void bindings_collision_dialog (Gtk::Window& parent)
 	dialog.run();
 }
 
-/*======================================== KEYEDITOR =========================================*/
 KeyEditor::KeyEditor ()
 	: ArdourWindow (_("Key Bindings"))
 	, unbind_button (_("Remove shortcut"))
