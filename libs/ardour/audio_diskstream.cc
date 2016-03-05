@@ -168,7 +168,7 @@ AudioDiskstream::non_realtime_input_change ()
 			need_write_sources = true;
 		}
 
-		if (input_change_pending.type == IOChange::ConfigurationChanged) {
+		if (input_change_pending.type & IOChange::ConfigurationChanged) {
 			RCUWriter<ChannelList> writer (channels);
 			boost::shared_ptr<ChannelList> c = writer.get_copy();
 
