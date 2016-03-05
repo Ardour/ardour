@@ -34,11 +34,12 @@ DnDTreeViewBase::DragData DnDTreeViewBase::drag_data;
 DnDTreeViewBase::DnDTreeViewBase ()
 	: TreeView ()
 	, _drag_column (-1)
+	, _drag_button_mask(Gdk::MODIFIER_MASK)
 {
 	draggable.push_back (TargetEntry ("GTK_TREE_MODEL_ROW", TARGET_SAME_WIDGET));
 	data_column = -1;
 
-	enable_model_drag_source (draggable);
+	enable_model_drag_source (draggable, _drag_button_mask);
 	enable_model_drag_dest (draggable);
 
  	suggested_action = Gdk::DragAction (0);
@@ -119,7 +120,7 @@ DnDTreeViewBase::add_drop_targets (list<TargetEntry>& targets)
 		draggable.push_back (*i);
 	}
 
-	enable_model_drag_source (draggable);
+	enable_model_drag_source (draggable, _drag_button_mask);
 	enable_model_drag_dest (draggable);
 }
 
@@ -130,7 +131,7 @@ DnDTreeViewBase::add_object_drag (int column, string type_name)
 	data_column = column;
 	object_type = type_name;
 
-	enable_model_drag_source (draggable);
+	enable_model_drag_source (draggable, _drag_button_mask);
 	enable_model_drag_dest (draggable);
 }
 
@@ -142,4 +143,9 @@ DnDTreeViewBase::on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int
 	return TreeView::on_drag_drop (context, x, y, time);
 }
 
+void DnDTreeViewBase::set_drag_button_mask(Gdk::ModifierType mask)
+{
+	_drag_button_mask = mask;
+	enable_model_drag_source (draggable, _drag_button_mask);
+}
 
