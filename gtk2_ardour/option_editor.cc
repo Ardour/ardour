@@ -30,6 +30,7 @@
 
 #include "pbd/configuration.h"
 #include "pbd/replace_all.h"
+#include "pbd/strsplit.h"
 
 #include "gui_thread.h"
 #include "option_editor.h"
@@ -471,14 +472,22 @@ OptionEditorPage::OptionEditorPage (Gtk::Notebook& n, std::string const & t)
  */
 OptionEditor::OptionEditor (PBD::Configuration* c, std::string const & t)
 	: _config (c)
+	, option_tree (TreeStore::create (option_columns))
+	, option_treeview (option_tree)
 {
 	using namespace Notebook_Helpers;
 
-
-	_notebook.set_show_tabs (true);
+	_notebook.set_show_tabs (false);
 	_notebook.set_show_border (true);
 	_notebook.set_name ("OptionsNotebook");
 
+	option_treeview.append_column ("", option_columns.name);
+	option_treeview.set_enable_search(true);
+	option_treeview.set_search_column(0);
+	option_treeview.set_name ("OptionsTreeView");
+
+	option_treeview.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
+	option_treeview.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &OptionEditor::treeview_row_selected));
 
 	/* Watch out for changes to parameters */
 	_config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&OptionEditor::parameter_changed, this, _1), gui_context());
@@ -509,6 +518,117 @@ OptionEditor::parameter_changed (std::string const & p)
 	}
 }
 
+void
+OptionEditor::treeview_row_selected ()
+{
+	Glib::RefPtr<Gtk::TreeSelection> selection = option_treeview.get_selection();
+	TreeModel::iterator iter = selection->get_selected();
+	if(iter) {
+		TreeModel::Row row = *iter;
+		Gtk::Widget* w = row[option_columns.widget];
+		if (w) {
+			_notebook.set_current_page (_notebook.page_num (*w));
+		}
+	}
+}
+
+void
+OptionEditor::add_path_to_treeview (std::string const & pn, Gtk::Widget& widget)
+{
+	option_treeview.set_model (Glib::RefPtr<TreeStore>());
+
+	if (pn.find ('/') == std::string::npos) {
+		/* new top level item in tree */
+
+		TreeModel::iterator new_row = option_tree->append ();
+		TreeModel::Row row = *new_row;
+		row[option_columns.name] = pn;
+		row[option_columns.widget] = &widget;
+
+	} else {
+
+		/* find parent */
+
+		/* split page name, which is actually a path, into each
+		 * component
+		 */
+
+		std::vector<std::string> components;
+		split (pn, components, '/');
+
+		/* start with top level children */
+
+		typedef Gtk::TreeModel::Children type_children; //minimise code length.
+		type_children children = option_tree->children();
+
+		/* foreach path component ... */
+
+		for (std::vector<std::string>::const_iterator s = components.begin(); s != components.end(); ++s) {
+
+			bool component_found = false;
+
+			type_children::iterator iter;
+
+			/* look through the children at this level */
+
+			for (iter = children.begin(); iter != children.end(); ++iter) {
+				Gtk::TreeModel::Row row = *iter;
+
+				std::string row_name = row[option_columns.name];
+				if (row_name == (*s)) {
+
+					/* found it */
+
+					component_found = true;
+
+					/* reset children to point to
+					 * the children of this row
+					 */
+
+					children = row.children();
+					break;
+				}
+			}
+
+			if (!component_found) {
+
+				/* missing component. If it is the last
+				 * one, append a real page. Otherwise
+				 * just put an entry in the tree model
+				 * since it is a navigational/sorting
+				 * component.
+				 */
+
+				TreeModel::iterator new_row = option_tree->append (children);
+				TreeModel::Row row = *new_row;
+				row[option_columns.name] = *s;
+
+				++s;
+
+				if (s == components.end()) {
+					row[option_columns.widget] = &widget;
+				} else {
+					row[option_columns.widget] = 0;
+				}
+
+				children = row.children ();
+
+			} else {
+
+				/* component found, just move on to the
+				 * next one. children has already been
+				 * reset appropriately.
+				 */
+
+				++s;
+			}
+		}
+
+	}
+
+	option_treeview.set_model (option_tree);
+}
+
 /** Add a component to a given page.
  *  @param pn Page name (will be created if it doesn't already exist)
  *  @param o Component.
@@ -517,7 +637,10 @@ void
 OptionEditor::add_option (std::string const & pn, OptionEditorComponent* o)
 {
 	if (_pages.find (pn) == _pages.end()) {
-		_pages[pn] = new OptionEditorPage (_notebook, pn);
+		OptionEditorPage* oep = new OptionEditorPage (_notebook, pn);
+		_pages[pn] = oep;
+
+		add_path_to_treeview (pn, oep->box);
 	}
 
 	OptionEditorPage* p = _pages[pn];
@@ -535,7 +658,9 @@ void
 OptionEditor::add_page (std::string const & pn, Gtk::Widget& w)
 {
 	if (_pages.find (pn) == _pages.end()) {
-		_pages[pn] = new OptionEditorPage (_notebook, pn);
+		OptionEditorPage* oep = new OptionEditorPage (_notebook, pn);
+		_pages[pn] = oep;
+		add_path_to_treeview (pn, oep->box);
 	}
 
 	OptionEditorPage* p = _pages[pn];
@@ -594,15 +719,25 @@ OptionEditorContainer::OptionEditorContainer (PBD::Configuration* c, string cons
 	: OptionEditor (c, str)
 {
 	set_border_width (4);
-	pack_start (notebook(), true, true);
-	show_all ();
+	hpacker.pack_start (treeview(), false, false);
+	hpacker.pack_start (notebook(), true, true);
+	pack_start (hpacker, true, true);
+
+	hpacker.show_all ();
+	show ();
 }
 
 OptionEditorWindow::OptionEditorWindow (PBD::Configuration* c, string const& str)
 	: OptionEditor (c, str)
 {
 	container.set_border_width (4);
-	container.pack_start (notebook(), true, true);
-	container.show_all ();
+	hpacker.pack_start (treeview(), false, false);
+	hpacker.pack_start (notebook(), true, true);
+
+	container.pack_start (hpacker, true, true);
+
+	hpacker.show_all ();
+	container.show ();
+
 	add (container);
 }

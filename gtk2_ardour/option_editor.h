@@ -699,11 +699,31 @@ protected:
 
 	PBD::Configuration* _config;
 	Gtk::Notebook& notebook() { return _notebook; }
+	Gtk::TreeView& treeview() { return option_treeview; }
+
+	class OptionColumns : public Gtk::TreeModel::ColumnRecord
+	{
+          public:
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<Gtk::Widget*> widget;
+
+		OptionColumns() {
+			add (name);
+			add (widget);
+		}
+	};
+
+	OptionColumns option_columns;
+	Glib::RefPtr<Gtk::TreeStore> option_tree;
 
 private:
 	PBD::ScopedConnection config_connection;
 	Gtk::Notebook _notebook;
+	Gtk::TreeView option_treeview;
 	std::map<std::string, OptionEditorPage*> _pages;
+
+	void add_path_to_treeview (std::string const &, Gtk::Widget&);
+	void treeview_row_selected ();
 };
 
 /** The OptionEditor dialog-as-container base class */
@@ -712,6 +732,8 @@ class OptionEditorContainer : public OptionEditor, public Gtk::VBox
 public:
 	OptionEditorContainer (PBD::Configuration *, std::string const &);
 	~OptionEditorContainer() {}
+private:
+	Gtk::HBox hpacker;
 };
 
 /** The OptionEditor dialog-as-container base class */
@@ -722,6 +744,7 @@ public:
 	~OptionEditorWindow() {}
 private:
 	Gtk::VBox container;
+	Gtk::HBox hpacker;
 };
 
 #endif /* __gtk_ardour_option_editor_h__ */
