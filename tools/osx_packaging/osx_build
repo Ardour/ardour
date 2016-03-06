@@ -655,6 +655,13 @@ if test x$WITH_X42_LV2 != x ; then
 	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
 		"$CACHEDIR/x42-meters-lv2-osx-${METERS_VERSION}.zip"
 
+	EQ_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/x42-eq.latest.txt)
+	rsync -a -q --partial \
+		rsync://x42-plugins.com/x42/osx/x42-eq-lv2-osx-${EQ_VERSION}.zip \
+		"$CACHEDIR/x42-eq-lv2-osx-${EQ_VERSION}.zip"
+	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+		"$CACHEDIR/x42-eq-lv2-osx-${EQ_VERSION}.zip"
+
 	SETBFREE_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/setBfree.latest.txt)
 	rsync -a -q --partial \
 		rsync://x42-plugins.com/x42/osx/setBfree-lv2-osx-${SETBFREE_VERSION}.zip \

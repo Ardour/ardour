@@ -641,6 +641,12 @@ if test x$WITH_X42_LV2 != x ; then
 		"${CACHEDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
 	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
 
+	EQ_VERSION=$(curl -s -S http://x42-plugins.com/x42/linux/x42-eq.latest.txt)
+	rsync -a -q --partial \
+		rsync://x42-plugins.com/x42/linux/x42-eq-lv2-linux-${WARCH}-${EQ_VERSION}.zip \
+		"${CACHEDIR}/x42-eq-lv2-linux-${WARCH}-${EQ_VERSION}.zip"
+	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/x42-eq-lv2-linux-${WARCH}-${EQ_VERSION}.zip"
+
 	SETBFREE_VERSION=$(curl -s -S http://x42-plugins.com/x42/linux/setBfree.latest.txt)
 	rsync -a -q --partial \
 		rsync://x42-plugins.com/x42/linux/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip \
