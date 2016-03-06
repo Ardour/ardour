@@ -3183,9 +3183,9 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	framepos_t const pf = adjusted_current_frame (event);
-	double const baf = _editor->session()->tempo_map().beat_at_frame (pf);
 	_marker->set_position (pf);
 	if (_marker->meter().position_lock_style() == MusicTime) {
+		double const baf = _editor->session()->tempo_map().beat_at_frame (pf);
 		_editor->session()->tempo_map().gui_move_meter (_real_section, _marker->meter(), baf);
 	} else {
 		_editor->session()->tempo_map().gui_move_meter (_real_section, _marker->meter(), pf);

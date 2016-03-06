@@ -36,6 +36,8 @@ using namespace PBD;
 
 TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	: ArdourDialog (_("New Tempo"))
+	, _map (&map)
+	, _section (0)
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
 	, when_bar_label (_("bar:"), ALIGN_LEFT, ALIGN_CENTER)
@@ -52,6 +54,8 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 
 TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 	: ArdourDialog (_("Edit Tempo"))
+	, _map (&map)
+	, _section (&section)
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
 	, when_bar_label (_("bar:"), ALIGN_LEFT, ALIGN_CENTER)
@@ -269,7 +273,15 @@ TempoDialog::bpm_button_release (GdkEventButton*)
 bool
 TempoDialog::entry_key_release (GdkEventKey*)
 {
-	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
+	Timecode::BBT_Time bbt;
+	get_bbt_time (bbt);
+
+	if (_section && is_user_input_valid()) {
+		set_response_sensitive (RESPONSE_ACCEPT, _map->bbt_valid (_section, Tempo (get_bpm(), get_note_type()), bbt));
+	} else {
+		set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
+	}
+
 	return false;
 }
 

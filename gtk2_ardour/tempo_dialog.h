@@ -75,6 +75,9 @@ private:
 	double last_t;
 	gint64 first_t;
 
+	ARDOUR::TempoMap* _map;
+	ARDOUR::TempoSection* _section;
+
 	Gtk::ComboBoxText pulse_selector;
 	Gtk::Adjustment   bpm_adjustment;
 	Gtk::SpinButton   bpm_spinner;
@@ -86,8 +89,6 @@ private:
 	Gtk::Button  tap_tempo_button;
 	Gtk::ComboBoxText tempo_type;
 	Gtk::ComboBoxText lock_style;
-
-
 };
 
 class MeterDialog : public ArdourDialog

@@ -41,10 +41,10 @@ TempoTest::recomputeMapTest ()
 	Meter meterB (3, 4);
 	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0));
 
-	list<MetricSection*>::iterator i = map.metrics.begin();
+	list<MetricSection*>::iterator i = map._metrics.begin();
 	CPPUNIT_ASSERT_EQUAL (framepos_t (0), (*i)->frame ());
 
-	i = map.metrics.end();
+	i = map._metrics.end();
 	--i;
 	CPPUNIT_ASSERT_EQUAL (framepos_t (288e3), (*i)->frame ());
 }
