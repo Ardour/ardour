@@ -1,0 +1,25 @@
+﻿---
+
+Language: Cpp
+AlignAfterOpenBracket: 'true'
+AlignTrailingComments: 'true'
+AlwaysBreakTemplateDeclarations: 'true'
+AllowShortBlocksOnASingleLine: 'false'
+AllowShortCaseLabelsOnASingleLine: 'false'
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: 'false'
+AllowShortLoopsOnASingleLine: 'false'
+AlwaysBreakAfterDefinitionReturnType: 'true'
+BasedOnStyle: LLVM
+BreakBeforeBraces: 'Linux'
+BreakConstructorInitializersBeforeComma: 'true'
+ColumnLimit: '100'
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+IndentCaseLabels: 'false'
+NamespaceIndentation: 'None'
+PenaltyReturnTypeOnItsOwnLine: '1'
+PointerAlignment: Left
+SpaceBeforeParens: Always
+TabWidth: '2'
+UseTab: ForIndentation
+
