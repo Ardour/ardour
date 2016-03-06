@@ -45,7 +45,6 @@ list<Bindings*> Bindings::bindings;      /* global. Gulp */
 list<ActionMap*> ActionMap::action_maps; /* global. Gulp */
 PBD::Signal1<void, Bindings*> Bindings::BindingsChanged;
 
-/*============================ ActionNameRegistered ===========================*/
 template <typename IteratorValueType>
 struct ActionNameRegistered {
 	ActionNameRegistered (std::string const& name) : action_name (name) {}
@@ -54,7 +53,6 @@ struct ActionNameRegistered {
 	std::string const& action_name;
 };
 
-/*================================ MouseButton ================================*/
 MouseButton::MouseButton (uint32_t state, uint32_t keycode)
 {
 	uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
@@ -151,7 +149,6 @@ MouseButton::name () const
 	return str;
 }
 
-/*================================ KeyboardKey ================================*/
 KeyboardKey::KeyboardKey (uint32_t state, uint32_t keycode)
 {
 	uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
@@ -289,7 +286,6 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
 	return true;
 }
 
-/*================================= Bindings =================================*/
 Bindings::Bindings (std::string const& name) : _name (name), _action_map (0)
 {
 	bindings.push_back (this);
@@ -849,8 +845,6 @@ Bindings::get_mousemap (Operation op)
 		return button_release_bindings;
 	}
 }
-
-/*==========================================ACTION MAP =========================================*/
 
 ActionMap::ActionMap (string const& name) : _name (name), _bindings (0)
 {
