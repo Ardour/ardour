@@ -587,7 +587,7 @@ if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; the
 	OSX_BENSID=osx64
 elif file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q ppc; then
 	OSX_ARCH=ppc
-	OSX_BENSID=ppc
+	OSX_BENSID=osxppc
 else
 	OSX_ARCH=i386
 	OSX_BENSID=osx32
