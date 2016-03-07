@@ -437,6 +437,7 @@ private:
 	framecnt_t frame_at_tick_locked (const Metrics& metrics, double tick) const;
 	framepos_t frame_time_locked (Metrics& metrics, const Timecode::BBT_Time&);
 
+	bool check_solved (Metrics& metrics, bool by_frame);
 	bool solve_map (Metrics& metrics, TempoSection* section, const Tempo& bpm, const framepos_t& frame);
 	bool solve_map (Metrics& metrics, TempoSection* section, const Tempo& bpm, const double& beat);
 	void solve_map (Metrics& metrics, MeterSection* section, const Meter& mt, const framepos_t& frame);
