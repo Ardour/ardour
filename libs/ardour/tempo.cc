@@ -781,8 +781,8 @@ TempoMap::do_insert (MetricSection* section)
 		if (tempo && insert_tempo) {
 
 			/* Tempo sections */
-			PositionLockStyle const ipl = insert_tempo->position_lock_style();
-			if ((ipl == MusicTime && tempo->beat() == insert_tempo->beat()) || (ipl == AudioTime && tempo->frame() == insert_tempo->frame())) {
+			bool const ipm = insert_tempo->position_lock_style() == MusicTime;
+			if ((ipm && tempo->beat() == insert_tempo->beat()) || (!ipm && tempo->frame() == insert_tempo->frame())) {
 
 				if (!tempo->movable()) {
 
@@ -804,9 +804,9 @@ TempoMap::do_insert (MetricSection* section)
 			/* Meter Sections */
 			MeterSection* const meter = dynamic_cast<MeterSection*> (*i);
 			MeterSection* const insert_meter = dynamic_cast<MeterSection*> (section);
-			PositionLockStyle const ipl = insert_meter->position_lock_style();
+			bool const ipm = insert_meter->position_lock_style() == MusicTime;
 
-			if ((ipl == MusicTime && meter->beat() == insert_meter->beat()) || (ipl == AudioTime && meter->frame() == insert_meter->frame())) {
+			if ((ipm && meter->beat() == insert_meter->beat()) || (!ipm && meter->frame() == insert_meter->frame())) {
 
 				if (!meter->movable()) {
 
@@ -843,8 +843,8 @@ TempoMap::do_insert (MetricSection* section)
 				MeterSection* const meter = dynamic_cast<MeterSection*> (*i);
 
 				if (meter) {
-					PositionLockStyle const ipl = insert_meter->position_lock_style();
-					if ((ipl == MusicTime && meter->beat() > insert_meter->beat()) || (ipl == AudioTime && meter->frame() > insert_meter->frame())) {
+					bool const ipm = insert_meter->position_lock_style() == MusicTime;
+					if ((ipm && meter->beat() > insert_meter->beat()) || (!ipm && meter->frame() > insert_meter->frame())) {
 						break;
 					}
 				}
@@ -854,8 +854,8 @@ TempoMap::do_insert (MetricSection* section)
 				TempoSection* const tempo = dynamic_cast<TempoSection*> (*i);
 
 				if (tempo) {
-					PositionLockStyle const ipl = insert_tempo->position_lock_style();
-					if ((ipl == MusicTime && tempo->beat() > insert_tempo->beat()) || (ipl == AudioTime && tempo->frame() > insert_tempo->frame())) {
+					bool const ipm = insert_tempo->position_lock_style() == MusicTime;
+					if ((ipm && tempo->beat() > insert_tempo->beat()) || (!ipm && tempo->frame() > insert_tempo->frame())) {
 						break;
 					}
 				}
@@ -941,7 +941,7 @@ TempoMap::add_tempo_locked (const Tempo& tempo, double where, bool recompute, AR
 	do_insert (ts);
 
 	if (recompute) {
-		recompute_map (_metrics);
+		solve_map (_metrics, ts, ts->beats_per_minute(), ts->beat());
 	}
 }
 
@@ -953,7 +953,7 @@ TempoMap::add_tempo_locked (const Tempo& tempo, framepos_t frame, bool recompute
 	do_insert (ts);
 
 	if (recompute) {
-		recompute_map (_metrics);
+		solve_map (_metrics, ts, ts->beats_per_minute(), ts->frame());
 	}
 }
 
@@ -1102,7 +1102,7 @@ TempoMap::predict_tempo_frame (TempoSection* section, const Tempo& bpm, const BB
 }
 
 void
-TempoMap::gui_move_tempo (TempoSection* ts,  const Tempo& bpm, const framepos_t& frame)
+TempoMap::gui_move_tempo_frame (TempoSection* ts,  const Tempo& bpm, const framepos_t& frame)
 {
 	Metrics future_map;
 	{
@@ -1110,6 +1110,27 @@ TempoMap::gui_move_tempo (TempoSection* ts,  const Tempo& bpm, const framepos_t&
 		TempoSection* new_section = copy_metrics_and_point (future_map, ts);
 		if (solve_map (future_map, new_section, bpm, frame)) {
 			solve_map (_metrics, ts, bpm, frame);
+		}
+	}
+
+	Metrics::const_iterator d = future_map.begin();
+	while (d != future_map.end()) {
+		delete (*d);
+		++d;
+	}
+
+	MetricPositionChanged (); // Emit Signal
+}
+
+void
+TempoMap::gui_move_tempo_beat (TempoSection* ts,  const Tempo& bpm, const double& beat)
+{
+	Metrics future_map;
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
+		TempoSection* new_section = copy_metrics_and_point (future_map, ts);
+		if (solve_map (future_map, new_section, bpm, beat)) {
+			solve_map (_metrics, ts, bpm, beat);
 		}
 	}
 
@@ -1726,7 +1747,7 @@ TempoMap::check_solved (Metrics& metrics, bool by_frame)
 				if (by_frame && t->frame() != prev_ts->frame_at_tempo (t->beats_per_minute(), t->beat(), _frame_rate)) {
 					return false;
 				}
-				if (!by_frame && fabs (t->beat() - prev_ts->beat_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate)) > 0.0000005) {
+				if (!by_frame && fabs (t->beat() - prev_ts->beat_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate)) > 0.00001) {
 					std::cerr << "beat precision too low for bpm: " << t->beats_per_minute() << std::endl <<
 						" |error          :" << t->beat() - prev_ts->beat_at_tempo (t->beats_per_minute(), t->frame(), _frame_rate) << std::endl <<
 						"|frame at beat   :" << prev_ts->frame_at_beat (t->beat(), _frame_rate) << std::endl <<
@@ -1745,21 +1766,61 @@ bool
 TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const Tempo& bpm, const framepos_t& frame)
 {
 	TempoSection* prev_ts = 0;
+	TempoSection* section_prev = 0;
 	MetricSectionFrameSorter fcmp;
 	MetricSectionSorter cmp;
 
 	section->set_frame (frame);
+	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
+		TempoSection* t;
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if (prev_ts) {
+				if (t == section) {
+					section_prev = prev_ts;
+					continue;
+				}
+				if (t->position_lock_style() == MusicTime) {
+					prev_ts->set_c_func (prev_ts->compute_c_func_beat (t->beats_per_minute(), t->beat(), _frame_rate));
+					t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
+				} else {
+					prev_ts->set_c_func (prev_ts->compute_c_func_frame (t->beats_per_minute(), t->frame(), _frame_rate));
+					t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
+				}
+			}
+			prev_ts = t;
+		}
+	}
+
+	if (section_prev) {
+		section_prev->set_c_func (section_prev->compute_c_func_beat (section->beats_per_minute(), section->beat(), _frame_rate));
+		section->set_beat (section_prev->beat_at_frame (frame, _frame_rate));
+	}
+
+	if (section->position_lock_style() == MusicTime) {
+		/* we're setting the frame */
+		section->set_position_lock_style (AudioTime);
+		recompute_tempos (imaginary);
+		section->set_position_lock_style (MusicTime);
+	} else {
+		recompute_tempos (imaginary);
+	}
+
+	if (check_solved (imaginary, true)) {
+		recompute_meters (imaginary);
+		return true;
+	}
 
 	imaginary.sort (fcmp);
 	if (section->position_lock_style() == MusicTime) {
 		/* we're setting the frame */
 		section->set_position_lock_style (AudioTime);
-		recompute_map (imaginary);
+		recompute_tempos (imaginary);
 		section->set_position_lock_style (MusicTime);
 	} else {
-		recompute_map (imaginary);
+		recompute_tempos (imaginary);
 	}
 	if (check_solved (imaginary, true)) {
+		recompute_meters (imaginary);
 		return true;
 	}
 
@@ -1767,12 +1828,13 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const Tempo& bpm
 	if (section->position_lock_style() == MusicTime) {
 		/* we're setting the frame */
 		section->set_position_lock_style (AudioTime);
-		recompute_map (imaginary);
+		recompute_tempos (imaginary);
 		section->set_position_lock_style (MusicTime);
 	} else {
-		recompute_map (imaginary);
+		recompute_tempos (imaginary);
 	}
 	if (check_solved (imaginary, true)) {
+		recompute_meters (imaginary);
 		return true;
 	}
 
@@ -1805,19 +1867,61 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const Tempo& bpm
 {
 	MetricSectionSorter cmp;
 	MetricSectionFrameSorter fcmp;
+	TempoSection* prev_ts = 0;
+	TempoSection* section_prev = 0;
 
 	section->set_beat (beat);
 
-	imaginary.sort (cmp);
+	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
+		TempoSection* t;
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if (prev_ts) {
+				if (t == section) {
+					section_prev = prev_ts;
+					continue;
+				}
+				if (t->position_lock_style() == MusicTime) {
+					prev_ts->set_c_func (prev_ts->compute_c_func_beat (t->beats_per_minute(), t->beat(), _frame_rate));
+					t->set_frame (prev_ts->frame_at_beat (t->beat(), _frame_rate));
+				} else {
+					prev_ts->set_c_func (prev_ts->compute_c_func_frame (t->beats_per_minute(), t->frame(), _frame_rate));
+					t->set_beat (prev_ts->beat_at_frame (t->frame(), _frame_rate));
+				}
+			}
+			prev_ts = t;
+		}
+	}
+	if (section_prev) {
+		section_prev->set_c_func (section_prev->compute_c_func_beat (section->beats_per_minute(), section->beat(), _frame_rate));
+		section->set_frame (section_prev->frame_at_beat (section->beat(), _frame_rate));
+	}
+
 	if (section->position_lock_style() == AudioTime) {
 		/* we're setting the beat */
 		section->set_position_lock_style (MusicTime);
-		recompute_map (imaginary);
+		recompute_tempos (imaginary);
 		section->set_position_lock_style (AudioTime);
 	} else {
-		recompute_map (imaginary);
+		recompute_tempos (imaginary);
 	}
 	if (check_solved (imaginary, false)) {
+		recompute_meters (imaginary);
+		return true;
+	}
+
+	imaginary.sort (cmp);
+
+	if (section->position_lock_style() == AudioTime) {
+		/* we're setting the beat */
+		section->set_position_lock_style (MusicTime);
+		recompute_tempos (imaginary);
+		section->set_position_lock_style (AudioTime);
+	} else {
+		recompute_tempos (imaginary);
+	}
+
+	if (check_solved (imaginary, false)) {
+		recompute_meters (imaginary);
 		return true;
 	}
 
@@ -1825,17 +1929,19 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const Tempo& bpm
 	if (section->position_lock_style() == AudioTime) {
 		/* we're setting the beat */
 		section->set_position_lock_style (MusicTime);
-		recompute_map (imaginary);
+		recompute_tempos (imaginary);
 		section->set_position_lock_style (AudioTime);
 	} else {
-		recompute_map (imaginary);
+		recompute_tempos (imaginary);
 	}
+
 	if (check_solved (imaginary, false)) {
+		recompute_meters (imaginary);
 		return true;
 	}
 
 	/*
-	TempoSection* prev_ts = 0;
+	prev_ts = 0;
 	std::cerr << "dumping beat order ------" << std::endl;
 	std::cerr << "section    : " << section->beats_per_minute() << " | " << section->beat() << " | " << section->frame() << std::endl;
 	std::cerr << "------------------------------------" << std::endl;
