@@ -162,7 +162,9 @@ Analyser::process (ProcessContext<float> const & ctx)
 		for (unsigned int c = 0; c < _channels; ++c) {
 			const float v = *d;
 			if (fabsf(v) > _result.peak) { _result.peak = fabsf(v); }
-			_bufs[c][s] = v;
+			if (c < _result.n_channels) {
+				_bufs[c][s] = v;
+			}
 			const unsigned int cc = c & cmask;
 			if (_result.peaks[cc][pbin].min > v) { _result.peaks[cc][pbin].min = *d; }
 			if (_result.peaks[cc][pbin].max < v) { _result.peaks[cc][pbin].max = *d; }
@@ -173,7 +175,7 @@ Analyser::process (ProcessContext<float> const & ctx)
 
 	for (; s < _bufsize; ++s) {
 		_fft_data_in[s] = 0;
-		for (unsigned int c = 0; c < _channels; ++c) {
+		for (unsigned int c = 0; c < _result.n_channels; ++c) {
 			_bufs[c][s] = 0.f;
 		}
 	}
