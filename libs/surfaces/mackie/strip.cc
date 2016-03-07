@@ -1227,7 +1227,7 @@ Strip::update_meter ()
 	}
 
 	if (_meter && _transport_is_rolling && _metering_active) {
-		float dB = const_cast<PeakMeter&> (_route->peak_meter()).meter_level (0, MeterMCP);
+		float dB = _route->peak_meter()->meter_level (0, MeterMCP);
 		_meter->send_update (*_surface, dB);
 		return;
 	}
