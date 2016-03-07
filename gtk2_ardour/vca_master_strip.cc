@@ -44,7 +44,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	gain_meter.set_controls (boost::shared_ptr<Route>(),
 	                         boost::shared_ptr<PeakMeter>(),
 	                         boost::shared_ptr<Amp>(),
-	                         _vca->control());
+	                         _vca->gain_control());
 
 	solo_button.set_name ("solo button");
 	set_tooltip (solo_button, _("Solo slaves"));
@@ -128,10 +128,10 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	set_width (true);
 	update_vca_display ();
 
-	_vca->SoloChange.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::solo_changed, this), gui_context());
-	_vca->MuteChange.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::mute_changed, this), gui_context());
+	_vca->solo_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::solo_changed, this), gui_context());
+	_vca->mute_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::mute_changed, this), gui_context());
 
-	_vca->control()->VCAStatusChange.connect (vca_connections,
+	_vca->gain_control()->VCAStatusChange.connect (vca_connections,
 	                                          invalidator (*this),
 	                                          boost::bind (&VCAMasterStrip::update_vca_display, this),
 	                                          gui_context());
@@ -144,7 +144,7 @@ VCAMasterStrip::update_vca_display ()
 	string label;
 
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-		if (_vca->control()->slaved_to (*v)) {
+		if (_vca->gain_control()->slaved_to (*v)) {
 			if (!label.empty()) {
 				label += ' ';
 			}
@@ -198,14 +198,14 @@ VCAMasterStrip::set_selected (bool yn)
 bool
 VCAMasterStrip::solo_release (GdkEventButton*)
 {
-	_vca->set_solo (!_vca->soloed());
+	_vca->solo_control()->set_value (_vca->soloed() ? 0.0 : 1.0, PBD::Controllable::NoGroup);
 	return true;
 }
 
 bool
 VCAMasterStrip::mute_release (GdkEventButton*)
 {
-	_vca->set_mute (!_vca->muted());
+	_vca->mute_control()->set_value (_vca->muted() ? 0.0 : 1.0, PBD::Controllable::NoGroup);
 	return true;
 }
 
@@ -285,11 +285,11 @@ VCAMasterStrip::vca_menu_toggle (CheckMenuItem* menuitem, uint32_t n)
 			/* null VCA means drop all VCA assignments */
 			vca_unassign ();
 		} else {
-			_vca->control()->remove_master (vca);
+			_vca->gain_control()->remove_master (vca);
 		}
 	} else {
 		if (vca) {
-			_vca->control()->add_master (vca);
+			_vca->gain_control()->add_master (vca);
 		}
 	}
 }
@@ -297,7 +297,7 @@ VCAMasterStrip::vca_menu_toggle (CheckMenuItem* menuitem, uint32_t n)
 void
 VCAMasterStrip::vca_unassign ()
 {
-	_vca->control()->clear_masters ();
+	_vca->gain_control()->clear_masters ();
 }
 
 bool
@@ -336,7 +336,7 @@ VCAMasterStrip::vca_button_release (GdkEventButton* ev)
 
 		items.push_back (CheckMenuElem ((*v)->name()));
 		CheckMenuItem* item = dynamic_cast<CheckMenuItem*> (&items.back());
-		if (_vca->control()->slaved_to (*v)) {
+		if (_vca->gain_control()->slaved_to (*v)) {
 			item->set_active (true);
 		}
 		item->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &VCAMasterStrip::vca_menu_toggle), item, (*v)->number()));
