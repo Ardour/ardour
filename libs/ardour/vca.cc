@@ -31,7 +31,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 
-gint VCA::next_number = 0;
+gint VCA::next_number = 1;
 string VCA::xml_node_name (X_("VCA"));
 
 string
@@ -43,8 +43,16 @@ VCA::default_name_template ()
 int
 VCA::next_vca_number ()
 {
-	/* recall that atomic_int_add() returns the value before the add */
-	return g_atomic_int_add (&next_number, 1) + 1;
+	/* recall that atomic_int_add() returns the value before the add. We
+	 * start at one, then next one will be two etc.
+	 */
+	return g_atomic_int_add (&next_number, 1);
+}
+
+void
+VCA::set_next_vca_number (uint32_t n)
+{
+	g_atomic_int_set (&next_number, n);
 }
 
 VCA::VCA (Session& s,  uint32_t num, const string& name)

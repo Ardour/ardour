@@ -1099,6 +1099,11 @@ Session::state (bool full_state)
 	snprintf (buf, sizeof (buf), "%d", Evoral::event_id_counter());
 	node->add_property ("event-counter", buf);
 
+	/* save the VCA counter */
+
+	snprintf (buf, sizeof (buf), "%" PRIu32, VCA::next_vca_number());
+	node->add_property ("vca-counter", buf);
+
 	/* various options */
 
 	list<XMLNode*> midi_port_nodes = _midi_ports->get_midi_port_states();
@@ -1357,6 +1362,14 @@ Session::set_state (const XMLNode& node, int version)
 
 	if ((prop = node.property (X_("event-counter"))) != 0) {
 		Evoral::init_event_id_counter (atoi (prop->value()));
+	}
+
+	if ((prop = node.property (X_("vca-counter"))) != 0) {
+		uint32_t x;
+		sscanf (prop->value().c_str(), "%" PRIu32, &x);
+		VCA::set_next_vca_number (x);
+	} else {
+		VCA::set_next_vca_number (1);
 	}
 
 	if ((child = find_named_node (node, "MIDIPorts")) != 0) {

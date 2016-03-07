@@ -55,6 +55,7 @@ class LIBARDOUR_API VCA : public Stripable, public Automatable, public boost::en
 	static std::string default_name_template ();
 	static int next_vca_number ();
 	static std::string xml_node_name;
+	static void set_next_vca_number (uint32_t);
 
 	virtual boost::shared_ptr<GainControl> gain_control() const { return _gain_control; }
 	virtual boost::shared_ptr<AutomationControl> solo_control() const { return _solo_control; }
