@@ -564,7 +564,7 @@ OptionEditor::add_path_to_treeview (std::string const & pn, Gtk::Widget& widget)
 
 		/* foreach path component ... */
 
-		for (std::vector<std::string>::const_iterator s = components.begin(); s != components.end(); ++s) {
+		for (std::vector<std::string>::const_iterator s = components.begin(); s != components.end(); ) {
 
 			bool component_found = false;
 
