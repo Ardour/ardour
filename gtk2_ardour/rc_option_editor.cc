@@ -2481,7 +2481,7 @@ if (!Profile->get_mixbus()) {
 
 	/* SOLO AND MUTE */
 
-	add_option (_("Solo / mute"), new OptionEditorHeading (_("Solo")));
+	add_option (_("Solo & mute"), new OptionEditorHeading (_("Solo")));
 
 	_solo_control_is_listen_control = new BoolOption (
 		"solo-control-is-listen-control",
@@ -2490,9 +2490,9 @@ if (!Profile->get_mixbus()) {
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
 		);
 
-	add_option (_("Solo / mute"), _solo_control_is_listen_control);
+	add_option (_("Solo & mute"), _solo_control_is_listen_control);
 
-	add_option (_("Solo / mute"),
+	add_option (_("Solo & mute"),
 	     new BoolOption (
 		     "exclusive-solo",
 		     _("Exclusive solo"),
@@ -2500,7 +2500,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
 		     ));
 
-	add_option (_("Solo / mute"),
+	add_option (_("Solo & mute"),
 	     new BoolOption (
 		     "show-solo-mutes",
 		     _("Show solo muting"),
@@ -2508,7 +2508,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
 		     ));
 
-	add_option (_("Solo / mute"),
+	add_option (_("Solo & mute"),
 	     new BoolOption (
 		     "solo-mute-override",
 		     _("Soloing overrides muting"),
@@ -2516,7 +2516,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
 		     ));
 
-	add_option (_("Solo / mute"),
+	add_option (_("Solo & mute"),
 	     new FaderOption (
 		     "solo-mute-gain",
 		     _("Solo-in-place mute cut (dB)"),
@@ -2534,7 +2534,7 @@ if (!Profile->get_mixbus()) {
 	_listen_position->add (AfterFaderListen, _("after-fader (AFL)"));
 	_listen_position->add (PreFaderListen, _("pre-fader (PFL)"));
 
-	add_option (_("Solo / mute"), _listen_position);
+	add_option (_("Solo & mute"), _listen_position);
 
 	ComboOption<PFLPosition>* pp = new ComboOption<PFLPosition> (
 		"pfl-position",
@@ -2546,7 +2546,7 @@ if (!Profile->get_mixbus()) {
 	pp->add (PFLFromBeforeProcessors, _("before pre-fader processors"));
 	pp->add (PFLFromAfterProcessors, _("pre-fader but after pre-fader processors"));
 
-	add_option (_("Solo / mute"), pp);
+	add_option (_("Solo & mute"), pp);
 
 	ComboOption<AFLPosition>* pa = new ComboOption<AFLPosition> (
 		"afl-position",
@@ -2558,11 +2558,11 @@ if (!Profile->get_mixbus()) {
 	pa->add (AFLFromBeforeProcessors, _("immediately post-fader"));
 	pa->add (AFLFromAfterProcessors, _("after post-fader processors (before pan)"));
 
-	add_option (_("Solo / mute"), pa);
+	add_option (_("Solo & mute"), pa);
 
-	add_option (_("Solo / mute"), new OptionEditorHeading (_("Default track / bus muting options")));
+	add_option (_("Solo & mute"), new OptionEditorHeading (_("Default track / bus muting options")));
 
-	add_option (_("Solo / mute"),
+	add_option (_("Solo & mute"),
 	     new BoolOption (
 		     "mute-affects-pre-fader",
 		     _("Mute affects pre-fader sends"),
@@ -2570,7 +2570,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_pre_fader)
 		     ));
 
-	add_option (_("Solo / mute"),
+	add_option (_("Solo & mute"),
 	     new BoolOption (
 		     "mute-affects-post-fader",
 		     _("Mute affects post-fader sends"),
@@ -2578,7 +2578,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_post_fader)
 		     ));
 
-	add_option (_("Solo / mute"),
+	add_option (_("Solo & mute"),
 	     new BoolOption (
 		     "mute-affects-control-outs",
 		     _("Mute affects control outputs"),
@@ -2586,7 +2586,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_control_outs)
 		     ));
 
-	add_option (_("Solo / mute"),
+	add_option (_("Solo & mute"),
 	     new BoolOption (
 		     "mute-affects-main-outs",
 		     _("Mute affects main outputs"),
@@ -2594,9 +2594,9 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_main_outs)
 		     ));
 
-	add_option (_("Solo / mute"), new OptionEditorHeading (_("Send Routing")));
+	add_option (_("Solo & mute"), new OptionEditorHeading (_("Send Routing")));
 
-	add_option (_("Solo / mute"),
+	add_option (_("Solo & mute"),
 	     new BoolOption (
 		     "link-send-and-route-panner",
 		     _("Link panners of Aux and External Sends with main panner by default"),
