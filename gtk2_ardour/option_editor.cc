@@ -628,6 +628,7 @@ OptionEditor::add_path_to_treeview (std::string const & pn, Gtk::Widget& widget)
 	}
 
 	option_treeview.set_model (option_tree);
+	option_treeview.expand_all ();
 }
 
 /** Add a component to a given page.
