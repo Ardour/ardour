@@ -48,32 +48,25 @@ FPU* FPU::_instance (0);
 static void
 __cpuid(int regs[4], int cpuid_leaf)
 {
-        int eax, ebx, ecx, edx;
         asm volatile (
 #if defined(__i386__)
 	        "pushl %%ebx;\n\t"
 #endif
-	        "movl %4, %%eax;\n\t"
 	        "cpuid;\n\t"
-	        "movl %%eax, %0;\n\t"
-	        "movl %%ebx, %1;\n\t"
-	        "movl %%ecx, %2;\n\t"
-	        "movl %%edx, %3;\n\t"
+	        "movl %%eax, (%1);\n\t"
+	        "movl %%ebx, 4(%1);\n\t"
+	        "movl %%ecx, 8(%1);\n\t"
+	        "movl %%edx, 12(%1);\n\t"
 #if defined(__i386__)
 	        "popl %%ebx;\n\t"
 #endif
-	        :"=m" (eax), "=m" (ebx), "=m" (ecx), "=m" (edx)
-	        :"r" (cpuid_leaf)
-	        :"%eax",
+	        :"=a" (cpuid_leaf) /* %eax clobbered by CPUID */
+	        :"S" (regs), "a" (cpuid_leaf)
+	        :
 #if !defined(__i386__)
 	         "%ebx",
 #endif
-	         "%ecx", "%edx");
-
-        regs[0] = eax;
-        regs[1] = ebx;
-        regs[2] = ecx;
-        regs[3] = edx;
+	         "%ecx", "%edx", "memory");
 }
 
 #endif /* !PLATFORM_WINDOWS */
