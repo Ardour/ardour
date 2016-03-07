@@ -83,7 +83,7 @@ PBD::Signal3<int,boost::shared_ptr<Route>, boost::shared_ptr<PluginInsert>, Rout
 
 /** Base class for all routable/mixable objects (tracks and busses) */
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
-	: SessionObject (sess, name)
+	: Stripable (sess, name)
 	, Automatable (sess)
 	, GraphNode (sess._process_graph)
 	, _active (true)
@@ -4732,13 +4732,13 @@ Route::gain_control() const
 	return _gain_control;
 }
 
-boost::shared_ptr<GainControl>
+boost::shared_ptr<AutomationControl>
 Route::trim_control() const
 {
 	return _trim_control;
 }
 
-boost::shared_ptr<Route::PhaseControllable>
+boost::shared_ptr<AutomationControl>
 Route::phase_control() const
 {
 	if (phase_invert().size()) {

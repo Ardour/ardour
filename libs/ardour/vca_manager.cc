@@ -18,6 +18,7 @@
 */
 
 #include "pbd/convert.h"
+#include "pbd/error.h"
 #include "pbd/replace_all.h"
 
 #include "ardour/vca.h"
@@ -27,6 +28,7 @@
 
 using namespace ARDOUR;
 using namespace Glib::Threads;
+using namespace PBD;
 using std::string;
 
 string VCAManager::xml_node_name (X_("VCAManager"));
@@ -75,6 +77,8 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 			}
 
 			boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, num, name));
+
+			vca->init ();
 
 			_vcas.push_back (vca);
 			vcal.push_back (vca);
@@ -145,7 +149,12 @@ VCAManager::set_state (XMLNode const& node, int version)
 
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == VCA::xml_node_name) {
-			boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, **i, version));
+			boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, 0, X_("tobereset")));
+
+			if (vca->init() || vca->set_state (**i, version)) {
+				error << _("Cannot set state of a VCA") << endmsg;
+				return -1;
+			}
 
 			/* can't hold the lock for the entire loop,
 			 * because the new VCA maybe slaved and needs

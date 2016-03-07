@@ -150,7 +150,7 @@ Session::set_mute (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeve
 {
 	/* Set superficial value of mute controls for automation. */
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Route::MuteControllable> mc = (*i)->mute_control();
+		boost::shared_ptr<Route::MuteControllable> mc = boost::dynamic_pointer_cast<Route::MuteControllable> ((*i)->mute_control());
 		mc->set_superficial_value(yn);
 	}
 

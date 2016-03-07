@@ -180,7 +180,7 @@ GainControl::add_master (boost::shared_ptr<VCA> vca)
 
 		/* ratio will be recomputed below */
 
-		res = _masters.insert (make_pair<uint32_t,MasterRecord> (vca->number(), MasterRecord (vca->control(), 0.0)));
+		res = _masters.insert (make_pair<uint32_t,MasterRecord> (vca->number(), MasterRecord (vca->gain_control(), 0.0)));
 
 		if (res.second) {
 
@@ -197,7 +197,7 @@ GainControl::add_master (boost::shared_ptr<VCA> vca)
 			   and we no longer hear about changes to the VCA.
 			*/
 
-			vca->control()->Changed.connect_same_thread (res.first->second.connection, boost::bind (&PBD::Signal0<void>::operator(), &Changed));
+			vca->gain_control()->Changed.connect_same_thread (res.first->second.connection, boost::bind (&PBD::Signal0<void>::operator(), &Changed));
 		}
 	}
 

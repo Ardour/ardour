@@ -1,19 +1,19 @@
 /*
-    Copyright (C) 2016 Paul Davis
+  Copyright (C) 2016 Paul Davis
 
-    This program is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the Free
-    Software Foundation; either version 2 of the License, or (at your option)
-    any later version.
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
+  any later version.
 
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  for more details.
 
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License along
+  with this program; if not, write to the Free Software Foundation, Inc.,
+  675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include "pbd/convert.h"
@@ -48,28 +48,26 @@ VCA::next_vca_number ()
 }
 
 VCA::VCA (Session& s,  uint32_t num, const string& name)
-	: SessionHandleRef (s)
+	: Stripable (s, name)
 	, Automatable (s)
 	, _number (num)
-	, _name (name)
-	, _control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
+	, _gain_control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
 	, _solo_requested (false)
 	, _mute_requested (false)
 {
-	add_control (_control);
 }
 
-VCA::VCA (Session& s, XMLNode const & node, int version)
-	: SessionHandleRef (s)
-	, Automatable (s)
-	, _number (0)
-	, _control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
-	, _solo_requested (false)
-	, _mute_requested (false)
+int
+VCA::init ()
 {
-	add_control (_control);
+	_solo_control.reset (new VCASoloControllable (X_("solo"), shared_from_this()));
+	_mute_control.reset (new VCAMuteControllable (X_("mute"), shared_from_this()));
 
-	set_state (node, version);
+	add_control (_gain_control);
+	add_control (_solo_control);
+	add_control (_mute_control);
+
+	return 0;
 }
 
 VCA::~VCA ()
@@ -77,22 +75,10 @@ VCA::~VCA ()
 	DropReferences (); /* emit signal */
 }
 
-void
-VCA::set_value (double val, Controllable::GroupControlDisposition gcd)
+uint32_t
+VCA::remote_control_id () const
 {
-	_control->set_value (val, gcd);
-}
-
-double
-VCA::get_value() const
-{
-	return _control->get_value();
-}
-
-void
-VCA::set_name (string const& str)
-{
-	_name = str;
+	return 9999999 + _number;
 }
 
 XMLNode&
@@ -104,7 +90,7 @@ VCA::get_state ()
 	node->add_property (X_("soloed"), (_solo_requested ? X_("yes") : X_("no")));
 	node->add_property (X_("muted"), (_mute_requested ? X_("yes") : X_("no")));
 
-	node->add_child_nocopy (_control->get_state());
+	node->add_child_nocopy (_gain_control->get_state());
 	node->add_child_nocopy (get_automation_xml_state());
 
 	return *node;
@@ -128,7 +114,7 @@ VCA::set_state (XMLNode const& node, int version)
 		if ((*i)->name() == Controllable::xml_node_name) {
 			XMLProperty* prop = (*i)->property ("name");
 			if (prop && prop->value() == X_("gaincontrol")) {
-				_control->set_state (**i, version);
+				_gain_control->set_state (**i, version);
 			}
 		}
 	}
@@ -187,7 +173,6 @@ VCA::set_solo (bool yn)
 	}
 
 	_solo_requested = yn;
-	SoloChange(); /* EMIT SIGNAL */
 }
 
 void
@@ -204,7 +189,6 @@ VCA::set_mute (bool yn)
 	}
 
 	_mute_requested = yn;
-	MuteChange(); /* EMIT SIGNAL */
 }
 
 bool
@@ -217,4 +201,92 @@ bool
 VCA::muted () const
 {
 	return _mute_requested;
+}
+
+VCA::VCASoloControllable::VCASoloControllable (string const & name, boost::shared_ptr<VCA> vca)
+	: AutomationControl (vca->session(), Evoral::Parameter (SoloAutomation), ParameterDescriptor (Evoral::Parameter (SoloAutomation)),
+	                     boost::shared_ptr<AutomationList>(), name)
+	, _vca (vca)
+{
+}
+
+void
+VCA::VCASoloControllable::set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
+{
+	if (writable()) {
+		_set_value (val, gcd);
+	}
+}
+
+void
+VCA::VCASoloControllable::_set_value (double val, PBD::Controllable::GroupControlDisposition /*gcd*/)
+{
+	boost::shared_ptr<VCA> vca = _vca.lock();
+	if (!vca) {
+		return;
+	}
+	vca->set_solo (val >= 0.5);
+}
+
+void
+VCA::VCASoloControllable::set_value_unchecked (double val)
+{
+	/* used only by automation playback */
+	_set_value (val, Controllable::NoGroup);
+}
+
+double
+VCA::VCASoloControllable::get_value() const
+{
+	boost::shared_ptr<VCA> vca = _vca.lock();
+	if (!vca) {
+		return 0.0;
+	}
+
+	return vca->soloed() ? 1.0 : 0.0;
+}
+
+/*----*/
+
+VCA::VCAMuteControllable::VCAMuteControllable (string const & name, boost::shared_ptr<VCA> vca)
+	: AutomationControl (vca->session(), Evoral::Parameter (MuteAutomation), ParameterDescriptor (Evoral::Parameter (MuteAutomation)),
+	                     boost::shared_ptr<AutomationList>(), name)
+	, _vca (vca)
+{
+}
+
+void
+VCA::VCAMuteControllable::set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
+{
+	if (writable()) {
+		_set_value (val, gcd);
+	}
+}
+
+void
+VCA::VCAMuteControllable::_set_value (double val, PBD::Controllable::GroupControlDisposition /*gcd*/)
+{
+	boost::shared_ptr<VCA> vca = _vca.lock();
+	if (!vca) {
+		return;
+	}
+	vca->set_mute (val >= 0.5);
+}
+
+void
+VCA::VCAMuteControllable::set_value_unchecked (double val)
+{
+	/* used only by automation playback */
+	_set_value (val, Controllable::NoGroup);
+}
+
+double
+VCA::VCAMuteControllable::get_value() const
+{
+	boost::shared_ptr<VCA> vca = _vca.lock();
+	if (!vca) {
+		return 0.0;
+	}
+
+	return vca->muted() ? 1.0 : 0.0;
 }
