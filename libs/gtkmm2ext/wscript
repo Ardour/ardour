@@ -57,6 +57,7 @@ gtkmm2ext_sources = [
         'popup.cc',
         'prompter.cc',
         'scroomer.cc',
+        'searchbar.cc',
         'selector.cc',
         'slider_controller.cc',
         'stateful_button.cc',

@@ -23,6 +23,8 @@
 
 #include <map>
 
+#include <boost/algorithm/string.hpp>
+
 #include <gtkmm/stock.h>
 #include <gtkmm/label.h>
 #include <gtkmm/accelkey.h>
@@ -66,14 +68,20 @@ KeyEditor::KeyEditor ()
 	: ArdourWindow (_("Key Bindings"))
 	, unbind_button (_("Remove shortcut"))
 	, unbind_box (BUTTONBOX_END)
+	, filter_entry (_("Search..."))
+	, filter_string("")
 	, sort_column(0)
 	, sort_type(Gtk::SORT_ASCENDING)
 {
-	last_keyval = 0;
 
 	notebook.signal_switch_page ().connect (sigc::mem_fun (*this, &KeyEditor::page_change));
 
 	vpacker.pack_start (notebook, true, true);
+
+	Glib::RefPtr<Gdk::Pixbuf> icon = ARDOUR_UI_UTILS::get_icon ("search");
+	filter_entry.set_icon_from_pixbuf (icon);
+	filter_entry.signal_search_string_updated ().connect (sigc::mem_fun (*this, &KeyEditor::search_string_updated));
+	vpacker.pack_start (filter_entry, false, false);
 
 	Label* hint = manage (new Label (_("Select an action, then press the key(s) to (re)set its shortcut")));
 	hint->show ();
@@ -124,7 +132,7 @@ KeyEditor::page_change (GtkNotebookPage*, guint)
 }
 
 bool
-KeyEditor::on_key_press_event (GdkEventKey* ev)
+KeyEditor::Tab::on_key_press_event (GdkEventKey* ev)
 {
 	if (!ev->is_modifier) {
 		last_keyval = ev->keyval;
@@ -139,13 +147,13 @@ KeyEditor::on_key_press_event (GdkEventKey* ev)
 }
 
 bool
-KeyEditor::on_key_release_event (GdkEventKey* ev)
+KeyEditor::Tab::on_key_release_event (GdkEventKey* ev)
 {
 	if (last_keyval == 0) {
 		return false;
 	}
 
-	current_tab()->bind (ev, last_keyval);
+	owner.current_tab()->bind (ev, last_keyval);
 
 	last_keyval = 0;
 	return true;
@@ -155,10 +163,17 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 	: owner (ke)
 	, name (str)
 	, bindings (b)
+	, last_keyval (0)
 {
-	model = TreeStore::create(columns);
+	data_model = TreeStore::create(columns);
+	populate ();
+	
+	filter = TreeModelFilter::create(data_model);
+	filter->set_visible_func (sigc::mem_fun (*this, &Tab::visible_func));
 
-	view.set_model (model);
+	sorted_filter = TreeModelSort::create(filter);
+
+	view.set_model (sorted_filter);
 	view.append_column (_("Action"), columns.name);
 	view.append_column (_("Shortcut"), columns.binding);
 	view.set_headers_visible (true);
@@ -170,12 +185,12 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 	view.set_rules_hint (true);
 	view.set_name (X_("KeyEditorTree"));
 
-	view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &Tab::action_selected));
+	view.signal_cursor_changed().connect (sigc::mem_fun (*this, &Tab::action_selected));
 
 	view.get_column(0)->set_sort_column (columns.name);
 	view.get_column(1)->set_sort_column (columns.binding);
-	model->set_sort_column (owner.sort_column,  owner.sort_type);
-	model->signal_sort_column_changed().connect (sigc::mem_fun (*this, &Tab::sort_column_changed));
+	data_model->set_sort_column (owner.sort_column,  owner.sort_type);
+	data_model->signal_sort_column_changed().connect (sigc::mem_fun (*this, &Tab::sort_column_changed));
 
 	signal_map().connect (sigc::mem_fun (*this, &Tab::tab_mapped));
 
@@ -194,49 +209,46 @@ KeyEditor::Tab::action_selected ()
 		return;
 	}
 
-	TreeModel::iterator i = view.get_selection()->get_selected();
+	TreeModel::const_iterator it = view.get_selection()->get_selected();
 
-	owner.unbind_button.set_sensitive (false);
+	if (!it) {
+		return;
+	}
 
-	if (i != model->children().end()) {
+	if (!(*it)[columns.bindable]) {
+		owner.unbind_button.set_sensitive (false);
+		return;
+	}
 
-		string path = (*i)[columns.path];
+	const string& binding = (*it)[columns.binding];
 
-		if (!(*i)[columns.bindable]) {
-			return;
-		}
-
-		string binding = (*i)[columns.binding];
-
-		if (!binding.empty()) {
-			owner.unbind_button.set_sensitive (true);
-		}
+	if (!binding.empty()) {
+		owner.unbind_button.set_sensitive (true);
 	}
 }
 
 void
 KeyEditor::Tab::unbind ()
 {
-	TreeModel::iterator i = view.get_selection()->get_selected();
+	const std::string& action_path = (*view.get_selection()->get_selected())[columns.path];
+
+	TreeModel::iterator it = find_action_path (data_model->children().begin(), data_model->children().end(),  action_path);
+
+	if (!it || !(*it)[columns.bindable]) {
+		return;
+	}
+
+	bindings->remove (Gtkmm2ext::Bindings::Press,  action_path , true);
+	(*it)[columns.binding] = string ();
 
 	owner.unbind_button.set_sensitive (false);
-
-	if (i != model->children().end()) {
-		if (!(*i)[columns.bindable]) {
-			return;
-		}
-
-		const std::string& action_path = (*i)[columns.path];
-
-		bindings->remove (Gtkmm2ext::Bindings::Press,  action_path , true);
-		(*i)[columns.binding] = string ();
-	}
 }
 
 void
 KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 {
-	TreeModel::iterator i = view.get_selection()->get_selected();
+	const std::string& action_path = (*view.get_selection()->get_selected())[columns.path];
+	TreeModel::iterator it = find_action_path (data_model->children().begin(), data_model->children().end(),  action_path);
 
 	/* pressed key could be upper case if Shift was used. We want all
 	   single keys stored as their lower-case version, so ensure this
@@ -244,13 +256,7 @@ KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 
 	pressed_key = gdk_keyval_to_lower (pressed_key);
 
-	if (i == model->children().end()) {
-		return;
-	}
-
-	string action_path = (*i)[columns.path];
-
-	if (!(*i)[columns.bindable]) {
+	if (!it || !(*it)[columns.bindable]) {
 		return;
 	}
 
@@ -265,7 +271,7 @@ KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 	bool result = bindings->replace (new_binding, Gtkmm2ext::Bindings::Press, action_path);
 
 	if (result) {
-		(*i)[columns.binding] = gtk_accelerator_get_label (new_binding.key(), (GdkModifierType) new_binding.state());
+		(*it)[columns.binding] = gtk_accelerator_get_label (new_binding.key(), (GdkModifierType) new_binding.state());
 		owner.unbind_button.set_sensitive (true);
 	}
 }
@@ -290,7 +296,7 @@ KeyEditor::Tab::populate ()
 	vector<string>::iterator l;
 	vector<Glib::RefPtr<Action> >::iterator a;
 
-	model->clear ();
+	data_model->clear ();
 
 	for (a = actions.begin(), l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l, ++a) {
 
@@ -319,7 +325,7 @@ KeyEditor::Tab::populate ()
 
 			TreeIter rowp;
 			TreeModel::Row parent;
-			rowp = model->append();
+			rowp = data_model->append();
 			nodes[category] = rowp;
 			parent = *(rowp);
 			parent[columns.name] = category;
@@ -330,13 +336,13 @@ KeyEditor::Tab::populate ()
 			 * out with information
 			 */
 
-			row = *(model->append (parent.children()));
+			row = *(data_model->append (parent.children()));
 
 		} else {
 
 			/* category/group is present, so just add the child row */
 
-			row = *(model->append ((*r->second)->children()));
+			row = *(data_model->append ((*r->second)->children()));
 
 		}
 
@@ -367,7 +373,7 @@ KeyEditor::Tab::sort_column_changed ()
 {
 	int column;
 	SortType type;
-	if (model->get_sort_column_id (column, type)) {
+	if (data_model->get_sort_column_id (column, type)) {
 		owner.sort_column = column;
 		owner.sort_type = type;
 	}
@@ -376,7 +382,59 @@ KeyEditor::Tab::sort_column_changed ()
 void
 KeyEditor::Tab::tab_mapped ()
 {
-	model->set_sort_column (owner.sort_column,  owner.sort_type);
+	data_model->set_sort_column (owner.sort_column,  owner.sort_type);
+	filter->refilter ();
+}
+
+bool
+KeyEditor::Tab::visible_func(const Gtk::TreeModel::const_iterator& iter) const
+{
+	if (!iter) {
+		return false;
+	}
+
+	// never filter when search string is empty or item is a category
+	if (owner.filter_string.empty () || !(*iter)[columns.bindable]) {
+		return true;
+	}
+
+	// search name
+	std::string name = (*iter)[columns.name];
+	boost::to_lower (name);
+	if (name.find (owner.filter_string) != std::string::npos) {
+		return true;
+	}
+
+	// search binding
+	std::string binding = (*iter)[columns.binding];
+	boost::to_lower (binding);
+	if (binding.find (owner.filter_string) != std::string::npos) {
+		return true;
+	}
+
+	return false;
+}
+
+TreeModel::iterator
+KeyEditor::Tab::find_action_path (TreeModel::const_iterator begin, TreeModel::const_iterator end, const std::string& action_path) const
+{
+	if (!begin) {
+		return end;
+	}
+
+	for (TreeModel::iterator it = begin; it != end; ++it) {
+		if (it->children()) {
+			TreeModel::iterator jt = find_action_path (it->children().begin(), it->children().end(), action_path);
+			if (jt != it->children().end()) {
+				return jt;
+			}
+		}
+		const std::string& path = (*it)[columns.path];
+		if (action_path.compare(path) == 0) {
+			return it;
+		}
+	}
+	return end;
 }
 
 void
@@ -395,3 +453,11 @@ KeyEditor::current_tab ()
 {
 	return dynamic_cast<Tab*> (notebook.get_nth_page (notebook.get_current_page()));
 }
+
+void
+KeyEditor::search_string_updated (const std::string& filter)
+{
+	filter_string = boost::to_lower_copy(filter);
+	current_tab ()->filter->refilter ();
+}
+
