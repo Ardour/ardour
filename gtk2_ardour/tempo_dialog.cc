@@ -277,7 +277,7 @@ TempoDialog::entry_key_release (GdkEventKey*)
 	get_bbt_time (bbt);
 
 	if (_section && is_user_input_valid()) {
-		set_response_sensitive (RESPONSE_ACCEPT, _map->bbt_valid (_section, Tempo (get_bpm(), get_note_type()), bbt));
+		set_response_sensitive (RESPONSE_ACCEPT, _map->can_solve_bbt (_section, Tempo (get_bpm(), get_note_type()), bbt));
 	} else {
 		set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 	}

@@ -386,7 +386,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void gui_move_meter (MeterSection*, const Meter& mt, const framepos_t& frame);
 	void gui_move_meter (MeterSection*, const Meter& mt, const double& beat);
 
-	bool bbt_valid (TempoSection* section, const Tempo& bpm, const Timecode::BBT_Time& bbt);
+	bool can_solve_bbt (TempoSection* section, const Tempo& bpm, const Timecode::BBT_Time& bbt);
 
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
 	void replace_meter (const MeterSection&, const Meter&, const framepos_t& frame);
@@ -437,10 +437,10 @@ private:
 	framecnt_t frame_at_tick_locked (const Metrics& metrics, double tick) const;
 	framepos_t frame_time_locked (Metrics& metrics, const Timecode::BBT_Time&);
 
-	void get_new_order (Metrics& metrics, TempoSection* section, const Tempo& bpm, const framepos_t& frame);
-	void get_new_order (Metrics& metrics, TempoSection* section, const Tempo& bpm, const double& beat);
-	void get_new_order (Metrics& metrics, MeterSection* section, const Meter& mt, const framepos_t& frame);
-	void get_new_order (Metrics& metrics, MeterSection* section, const Meter& mt, const double& beat);
+	bool solve_map (Metrics& metrics, TempoSection* section, const Tempo& bpm, const framepos_t& frame);
+	bool solve_map (Metrics& metrics, TempoSection* section, const Tempo& bpm, const double& beat);
+	void solve_map (Metrics& metrics, MeterSection* section, const Meter& mt, const framepos_t& frame);
+	void solve_map (Metrics& metrics, MeterSection* section, const Meter& mt, const double& beat);
 
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;
