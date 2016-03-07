@@ -219,13 +219,16 @@ VCA::VCASoloControllable::set_value (double val, PBD::Controllable::GroupControl
 }
 
 void
-VCA::VCASoloControllable::_set_value (double val, PBD::Controllable::GroupControlDisposition /*gcd*/)
+VCA::VCASoloControllable::_set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
 {
 	boost::shared_ptr<VCA> vca = _vca.lock();
 	if (!vca) {
 		return;
 	}
+
 	vca->set_solo (val >= 0.5);
+
+	AutomationControl::set_value (val, gcd);
 }
 
 void
@@ -264,13 +267,17 @@ VCA::VCAMuteControllable::set_value (double val, PBD::Controllable::GroupControl
 }
 
 void
-VCA::VCAMuteControllable::_set_value (double val, PBD::Controllable::GroupControlDisposition /*gcd*/)
+VCA::VCAMuteControllable::_set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
 {
 	boost::shared_ptr<VCA> vca = _vca.lock();
+
 	if (!vca) {
 		return;
 	}
+
 	vca->set_mute (val >= 0.5);
+
+	AutomationControl::set_value (val, gcd);
 }
 
 void
