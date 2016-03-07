@@ -189,6 +189,8 @@ AutomationController::end_touch ()
 		}
 
 		_controllable->stop_touch (mark, when);
+	} else {
+		_controllable->stop_touch (false, _controllable->session().transport_frame());
 	}
 }
 
