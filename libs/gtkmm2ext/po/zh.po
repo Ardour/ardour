@@ -1,0 +1,140 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR "Paul Davis"
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# ä¸åé±¼ <YQ-YSY@163.com> ç¿»è¯äº 2016-02-06
+msgid ""
+msgstr ""
+"Project-Id-Version: Ardour 4\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-01-19 19:50+0800\n"
+"PO-Revision-Date: 2016-03-07 09:41+0800\n"
+"Last-Translator: ä¸åé±¼ <YQ-YSY@163.com>\n"
+"Language-Team: ä¸åé±¼ YQ-YSY@163.com\n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.4\n"
+
+#: actions.cc:519
+msgid "Unknown action name: %1"
+msgstr "未知的动作名称：%1"
+
+#: binding_proxy.cc:81
+msgid "operate controller now"
+msgstr "操作控制器现状"
+
+#: bindable_button.cc:48
+msgid "button cannot watch state of non-existing Controllable\n"
+msgstr "按钮无法观察非存在的可控状态\n"
+
+#: cursors.cc:82
+msgid "cursor hotspots info file %1 has an error on line %2"
+msgstr "游标热点信息文件 %1 在线路 %2 上有一个错误"
+
+#: emscale.cc:52
+msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+msgstr ""
+
+#: gtk_ui.cc:117
+msgid "Log"
+msgstr "日志"
+
+#: gtk_ui.cc:374
+msgid ""
+"\n"
+"\n"
+"Shortcut: "
+msgstr ""
+"\n"
+"\n"
+"快捷键："
+
+#: gtk_ui.cc:674
+msgid "Press To Exit"
+msgstr "按下退出"
+
+#: gtk_ui.cc:710
+msgid "I'm sorry %1, I can't do that"
+msgstr "对不起 %1，我不能那样做"
+
+#: keyboard.cc:69
+msgid "Command"
+msgstr "命令"
+
+#: keyboard.cc:70 keyboard.cc:87
+msgid "Control"
+msgstr ""
+
+#: keyboard.cc:71 keyboard.cc:89
+msgid "Key|Shift"
+msgstr "键|Shift"
+
+#: keyboard.cc:72
+msgid "Option"
+msgstr "选项"
+
+#: keyboard.cc:88
+msgid "Alt"
+msgstr ""
+
+#: keyboard.cc:90
+msgid "Windows"
+msgstr ""
+
+#: keyboard.cc:141 keyboard.cc:580
+msgid "Unknown"
+msgstr "未知"
+
+#: keyboard.cc:591
+msgid "key bindings file not found at \"%2\" or contains errors."
+msgstr "在 \"%2\" 找不到按键绑定文件或者包含有错误。"
+
+#: keyboard.cc:642
+msgid "Cannot rename your own keybinding file (%1)"
+msgstr "无法重命名您自己的按键绑定文件（%1）"
+
+#: motionfeedback.cc:487
+msgid "motionfeedback: failed to open a temporary file for writing: %1"
+msgstr "运动反馈：打开一个用于写入的模板文件失败：%1"
+
+#: motionfeedback.cc:517
+msgid "motionfeedback: could not save image set to %1"
+msgstr "运动反馈：无法保存图像设置到 %1"
+
+#: motionfeedback.cc:527
+msgid "motionfeedback: caught PixbufError: %1"
+msgstr "运动反馈：捕捉到 Pixbuf 错误：%1"
+
+#: motionfeedback.cc:529
+msgid "motionfeedback: unknown exception"
+msgstr "运动反馈：未知异常"
+
+#: paths_dialog.cc:32
+msgid "Add"
+msgstr "添加"
+
+#: paths_dialog.cc:33
+msgid "Delete"
+msgstr "删除"
+
+#: paths_dialog.cc:34
+msgid "Reset to Default"
+msgstr "重置为默认"
+
+#: paths_dialog.cc:109
+msgid "Add folder to search path"
+msgstr "添加文件夹到搜索路径"
+
+#: tearoff.cc:57
+msgid "Click to tear this into its own window"
+msgstr "点击可把这个拆解到它自己的窗口中"
+
+#: tearoff.cc:63
+msgid "Click to put this back in the main window"
+msgstr "点击可把这个放回到主窗口中"
+
+#: textviewer.cc:32
+msgid "Close"
+msgstr "关闭"
