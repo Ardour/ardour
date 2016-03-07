@@ -173,7 +173,6 @@ void
 AutomationController::start_touch()
 {
 	_controllable->start_touch (_controllable->session().transport_frame());
-	StartGesture.emit();  /* EMIT SIGNAL */
 }
 
 void
@@ -191,7 +190,6 @@ AutomationController::end_touch ()
 
 		_controllable->stop_touch (mark, when);
 	}
-	StopGesture.emit();  /* EMIT SIGNAL */
 }
 
 void

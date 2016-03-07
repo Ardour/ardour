@@ -77,9 +77,6 @@ public:
 
 	void stop_updating ();
 
-	sigc::signal<void> StartGesture;
-	sigc::signal<void> StopGesture;
-
 private:
 	AutomationController (boost::shared_ptr<ARDOUR::Automatable>       printer,
 	                      boost::shared_ptr<ARDOUR::AutomationControl> ac,
