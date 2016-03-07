@@ -119,6 +119,7 @@
 #include "ardour/tempo.h"
 #include "ardour/ticker.h"
 #include "ardour/user_bundle.h"
+#include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
 #include "control_protocol/control_protocol.h"
