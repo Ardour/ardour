@@ -37,8 +37,17 @@ static const gchar *_grid_strings[] = {
 	N_("Beats/128"),
 	N_("Beats/64"),
 	N_("Beats/32"),
+	N_("Beats/28"),
+	N_("Beats/24"),
+	N_("Beats/20"),
 	N_("Beats/16"),
+	N_("Beats/14"),
+	N_("Beats/12"),
+	N_("Beats/10"),
 	N_("Beats/8"),
+	N_("Beats/7"),
+	N_("Beats/6"),
+	N_("Beats/5"),
 	N_("Beats/4"),
 	N_("Beats/3"),
 	N_("Beats/2"),
@@ -138,24 +147,15 @@ QuantizeDialog::grid_size_to_musical_time (const string& txt) const
 		return b.to_double();
 	}
 
-	if (txt == _("Beats/128")) {
-		return 1.0/128.0;
-	} else if (txt == _("Beats/64")) {
-		return 1.0/64.0;
-	} else if (txt == _("Beats/32")) {
-		return 1.0/32.0;
-	} else if (txt == _("Beats/16")) {
-		return 1.0/16.0;
-	} if (txt == _("Beats/8")) {
-		return 1.0/8.0;
-	} else if (txt == _("Beats/4")) {
-		return 1.0/4.0;
-	} else if (txt == _("Beats/3")) {
-		return 1.0/3.0;
-	} else if (txt == _("Beats/2")) {
-		return 1.0/2.0;
-	} else if (txt == _("Beats")) {
-		return 1.0;
+	string::size_type slash;
+
+	if ((slash = txt.find ('/')) != string::npos) {
+		if (slash < txt.length() - 1) {
+			double divisor = PBD::atof (txt.substr (slash+1));
+			if (divisor != 0.0) {
+				return 1.0/divisor;
+			}
+		}
 	}
 
 	return 1.0;
