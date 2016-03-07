@@ -55,6 +55,12 @@ VCA::set_next_vca_number (uint32_t n)
 	g_atomic_int_set (&next_number, n);
 }
 
+uint32_t
+VCA::get_next_vca_number ()
+{
+	return g_atomic_int_get (&next_number);
+}
+
 VCA::VCA (Session& s,  uint32_t num, const string& name)
 	: Stripable (s, name)
 	, Automatable (s)

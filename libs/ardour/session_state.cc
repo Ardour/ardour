@@ -1102,7 +1102,7 @@ Session::state (bool full_state)
 
 	/* save the VCA counter */
 
-	snprintf (buf, sizeof (buf), "%" PRIu32, VCA::next_vca_number());
+	snprintf (buf, sizeof (buf), "%" PRIu32, VCA::get_next_vca_number());
 	node->add_property ("vca-counter", buf);
 
 	/* various options */

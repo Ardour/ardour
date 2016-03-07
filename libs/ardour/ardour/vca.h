@@ -55,6 +55,9 @@ class LIBARDOUR_API VCA : public Stripable, public Automatable, public boost::en
 	static std::string default_name_template ();
 	static int next_vca_number ();
 	static std::string xml_node_name;
+
+	/* used by Session to save/restore the atomic counter */
+	static uint32_t get_next_vca_number ();
 	static void set_next_vca_number (uint32_t);
 
 	virtual boost::shared_ptr<GainControl> gain_control() const { return _gain_control; }
