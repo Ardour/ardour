@@ -2000,8 +2000,8 @@ RCOptionEditor::RCOptionEditor ()
 	psc->add (1.0, _("1.0 second"));
 	psc->add (2.0, _("2.0 seconds"));
 	add_option (_("Transport"), psc);
-	
-	add_option (_("Transport"), new OptionEditorHeading (S_("Sync/Slave")));
+
+	add_option (_("Transport/Sync"), new OptionEditorHeading (S_("Synchronization and Slave Options")));
 
 	_sync_source = new ComboOption<SyncSource> (
 		"sync-source",
@@ -2010,7 +2010,7 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_source)
 		);
 
-	add_option (_("Transport"), _sync_source);
+	add_option (_("Transport/Sync"), _sync_source);
 
 	_sync_framerate = new BoolOption (
 		     "timecode-sync-frame-rate",
@@ -2026,7 +2026,7 @@ RCOptionEditor::RCOptionEditor ()
 				   "Instead the frame rate indication in the main clock will flash red and %1 will convert between the external "
 				   "timecode standard and the session standard."), PROGRAM_NAME));
 
-	add_option (_("Transport"), _sync_framerate);
+	add_option (_("Transport/Sync"), _sync_framerate);
 
 	_sync_genlock = new BoolOption (
 		"timecode-source-is-synced",
@@ -2047,7 +2047,7 @@ RCOptionEditor::RCOptionEditor ()
 				  ), PROGRAM_NAME));
 
 
-	add_option (_("Transport"), _sync_genlock);
+	add_option (_("Transport/Sync"), _sync_genlock);
 
 	_sync_source_2997 = new BoolOption (
 		"timecode-source-2997",
@@ -2065,9 +2065,9 @@ RCOptionEditor::RCOptionEditor ()
 			 "because the variant of using exactly 29.97 fps has zero timecode drift.\n"
 			 ));
 
-	add_option (_("Transport"), _sync_source_2997);
+	add_option (_("Transport/Sync"), _sync_source_2997);
 
-	add_option (_("Transport"), new OptionEditorHeading (S_("LTC Reader")));
+	add_option (_("Transport/Sync"), new OptionEditorHeading (S_("LTC Reader")));
 
 	_ltc_port = new ComboStringOption (
 		"ltc-source-port",
@@ -2084,12 +2084,12 @@ RCOptionEditor::RCOptionEditor ()
 	populate_sync_options ();
 	AudioEngine::instance()->Running.connect (engine_started_connection, MISSING_INVALIDATOR, boost::bind (&RCOptionEditor::populate_sync_options, this), gui_context());
 
-	add_option (_("Transport"), _ltc_port);
+	add_option (_("Transport/Sync"), _ltc_port);
 
 	// TODO; rather disable this button than not compile it..
-	add_option (_("Transport"), new OptionEditorHeading (S_("LTC Generator")));
+	add_option (_("Transport/Sync"), new OptionEditorHeading (S_("LTC Generator")));
 
-	add_option (_("Transport"),
+	add_option (_("Transport/Sync"),
 		    new BoolOption (
 			    "send-ltc",
 			    _("Enable LTC generator"),
@@ -2117,7 +2117,7 @@ RCOptionEditor::RCOptionEditor ()
 		(_ltc_volume_slider->tip_widget(),
 		 _("Specify the Peak Volume of the generated LTC signal in dbFS. A good value is  0dBu ^= -18dbFS in an EBU calibrated system"));
 
-	add_option (_("Transport"), _ltc_volume_slider);
+	add_option (_("Transport/Sync"), _ltc_volume_slider);
 
 	/* EDITOR */
 
