@@ -1,0 +1,53 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ardour 4\n"
+"POT-Creation-Date: 2015-11-06 11:59+0100\n"
+"PO-Revision-Date: 2016-03-07 09:55+0800\n"
+"Last-Translator: 一善鱼 <YQ-YSY@163.com>\n"
+"Language-Team: 一善鱼 YQ-YSY@163.com\n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.8.4\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+# Intentionally left untranslated.
+#. (itstool) path: component/name
+#: /home/nils/src/ardour/gtk2_ardour/ardour.appdata.xml.in.in:6
+msgid "Ardour"
+msgstr ""
+
+# Intentionally left untranslated.
+#. (itstool) path: component/summary
+#: /home/nils/src/ardour/gtk2_ardour/ardour.appdata.xml.in.in:8
+msgid "Digital Audio Workstation"
+msgstr "数字音频工作站"
+
+#. (itstool) path: description/p
+#: /home/nils/src/ardour/gtk2_ardour/ardour.appdata.xml.in.in:10
+msgid ""
+"Ardour is a multi-channel digital audio workstation, allowing you to record, "
+"edit, mix and master audio and MIDI projects."
+msgstr ""
+"Ardour 是一个多声道数字音频工作站，允许您录制，编辑，混音并且主控音频和 MIDI "
+"项目。"
+
+#. (itstool) path: description/p
+#: /home/nils/src/ardour/gtk2_ardour/ardour.appdata.xml.in.in:14
+msgid ""
+"It is targeted at audio engineers, musicians, soundtrack editors and "
+"composers."
+msgstr "它的应用人群针对的是音频工程师、乐师、声音轨道编辑师和作曲家。"
+
+#. (itstool) path: screenshot/caption
+#: /home/nils/src/ardour/gtk2_ardour/ardour.appdata.xml.in.in:23
+msgid ""
+"The Editor window where you can arrange audio and MIDI data along a timeline"
+msgstr "编辑器窗口是您可以沿着时间线排列音频和 MIDI 数据的地方"
+
+#. (itstool) path: screenshot/caption
+#: /home/nils/src/ardour/gtk2_ardour/ardour.appdata.xml.in.in:27
+msgid "The Mixer window which includes channel strips for each track and bus"
+msgstr "混音器窗口包括有每个音轨和总线的声道工具栏"
