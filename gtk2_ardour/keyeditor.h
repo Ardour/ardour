@@ -27,6 +27,7 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/treestore.h>
+#include "gtkmm2ext/searchbar.h"
 
 #include "ardour_window.h"
 
@@ -41,14 +42,10 @@ class KeyEditor : public ArdourWindow
 
 	void add_tab (std::string const &name, Gtkmm2ext::Bindings&);
 
-  protected:
-	bool on_key_press_event (GdkEventKey*);
-	bool on_key_release_event (GdkEventKey*);
-
-  private:
+	private:
 	class Tab : public Gtk::VBox
 	{
- 	   public:
+		public:
 		Tab (KeyEditor&, std::string const &name, Gtkmm2ext::Bindings*);
 
 		void populate ();
@@ -57,6 +54,7 @@ class KeyEditor : public ArdourWindow
 		void action_selected ();
 		void sort_column_changed ();
 		void tab_mapped ();
+		bool visible_func(const Gtk::TreeModel::const_iterator& iter) const;
 
 		struct KeyEditorColumns : public Gtk::TreeModel::ColumnRecord {
 			KeyEditorColumns () {
@@ -83,8 +81,16 @@ class KeyEditor : public ArdourWindow
 		Gtkmm2ext::Bindings* bindings;
 		Gtk::ScrolledWindow scroller;
 		Gtk::TreeView view;
-		Glib::RefPtr<Gtk::TreeStore> model;
+		Glib::RefPtr<Gtk::TreeStore> data_model;
+		Glib::RefPtr<Gtk::TreeModelFilter> filter;
+		Glib::RefPtr<Gtk::TreeModelSort> sorted_filter;
 		KeyEditorColumns columns;
+		guint last_keyval;
+
+		protected:
+		bool on_key_press_event (GdkEventKey*);
+		bool on_key_release_event (GdkEventKey*);
+		Gtk::TreeModel::iterator find_action_path (Gtk::TreeModel::const_iterator begin, Gtk::TreeModel::const_iterator end, const std::string& path) const;
 	};
 
 	friend class Tab;
@@ -96,7 +102,8 @@ class KeyEditor : public ArdourWindow
 	Gtk::HBox reset_box;
 	Gtk::Button reset_button;
 	Gtk::Label reset_label;
-	guint last_keyval;
+	Gtkmm2ext::SearchBar filter_entry;
+	std::string filter_string;
 
 	typedef std::vector<Tab*> Tabs;
 
@@ -110,6 +117,7 @@ class KeyEditor : public ArdourWindow
 	unsigned int sort_column;
 	Gtk::SortType sort_type;
 	void toggle_sort_type ();
+	void search_string_updated (const std::string&);
 };
 
 #endif /* __ardour_gtk_key_editor_h__ */
