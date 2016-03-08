@@ -90,6 +90,35 @@ Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, Controllable::Gr
 	}
 
 	set_dirty();
+
+	/* XXX boost::shared_ptr<RouteList>  goes out of scope here and is likley free()ed in RT context
+	 * because boost's shared_ptr does reference counting and free/delete in the dtor.
+	 * (this also applies to other rt_  methods here)
+	 */
+}
+
+void
+Session::set_implicit_solo (boost::shared_ptr<RouteList> rl, int delta, bool upstream, SessionEvent::RTeventCallback after,
+                   Controllable::GroupControlDisposition group_override)
+{
+	queue_event (get_rt_event (rl, delta, upstream, after, group_override, &Session::rt_set_implicit_solo));
+}
+
+void
+Session::rt_set_implicit_solo (boost::shared_ptr<RouteList> rl, int delta, bool upstream, PBD::Controllable::GroupControlDisposition)
+{
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		if (!(*i)->is_auditioner()) {
+			if (upstream) {
+				(*i)->mod_solo_by_others_upstream (delta);
+			} else {
+				(*i)->mod_solo_by_others_downstream (delta);
+			}
+		}
+	}
+
+	set_dirty();
+
 	/* XXX boost::shared_ptr<RouteList>  goes out of scope here and is likley free()ed in RT context
 	 * because boost's shared_ptr does reference counting and free/delete in the dtor.
 	 * (this also applies to other rt_  methods here)

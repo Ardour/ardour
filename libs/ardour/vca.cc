@@ -180,7 +180,7 @@ VCA::set_solo (bool yn)
 		if (Config->get_solo_control_is_listen_control()) {
 			_session.set_listen (rl, yn, Session::rt_cleanup, Controllable::NoGroup);
 		} else {
-			_session.set_solo (rl, yn, Session::rt_cleanup, Controllable::NoGroup);
+			_session.set_implicit_solo (rl, (yn ? 1 : -1), true, Session::rt_cleanup, Controllable::NoGroup);
 		}
 	}
 
