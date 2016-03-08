@@ -68,7 +68,7 @@ KeyEditor::KeyEditor ()
 	: ArdourWindow (_("Key Bindings"))
 	, unbind_button (_("Remove shortcut"))
 	, unbind_box (BUTTONBOX_END)
-	, filter_entry (_("Search..."))
+	, filter_entry (_("Search..."), true)
 	, filter_string("")
 	, sort_column(0)
 	, sort_type(Gtk::SORT_ASCENDING)
@@ -80,6 +80,7 @@ KeyEditor::KeyEditor ()
 
 	Glib::RefPtr<Gdk::Pixbuf> icon = ARDOUR_UI_UTILS::get_icon ("search");
 	filter_entry.set_icon_from_pixbuf (icon);
+	filter_entry.set_icon_tooltip_text (_("Click to reset search string"));
 	filter_entry.signal_search_string_updated ().connect (sigc::mem_fun (*this, &KeyEditor::search_string_updated));
 	vpacker.pack_start (filter_entry, false, false);
 
