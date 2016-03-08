@@ -23,9 +23,10 @@
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
+#include "gui_thread.h"
+#include "floating_text_entry.h"
 #include "tooltips.h"
 #include "vca_master_strip.h"
-#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -33,13 +34,13 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace Gtkmm2ext;
 using namespace Gtk;
+using namespace PBD;
 using std::string;
 
 VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	: AxisView (s)
 	, _vca (v)
 	, gain_meter (s, 250)
-	, wide (true)
 {
 	gain_meter.set_controls (boost::shared_ptr<Route>(),
 	                         boost::shared_ptr<PeakMeter>(),
@@ -51,24 +52,19 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::solo_release), false);
 
 	mute_button.set_name ("mute button");
+	mute_button.set_text (_("M"));
 	set_tooltip (mute_button, _("Mute slaves"));
 	mute_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::mute_release), false);
 
 	hide_button.set_icon (ArdourIcon::CloseCross);
 	set_tooltip (&hide_button, _("Hide this VCA strip"));
 
-	width_button.set_icon (ArdourIcon::StripWidth);
-	set_tooltip (width_button, _("Click to toggle the width of this VCA strip."));
-
 	assign_button.set_name (X_("vca assign"));
 	set_tooltip (assign_button, _("Click to assign a VCA Master to this VCA"));
 	assign_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vca_button_release), false);
 
-	width_button.signal_button_press_event().connect (sigc::mem_fun(*this, &VCAMasterStrip::width_button_pressed), false);
 	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &VCAMasterStrip::hide_clicked));
 
-	width_hide_box.set_spacing (2);
-	width_hide_box.pack_start (width_button, false, true);
 	width_hide_box.pack_start (number_label, true, true);
 	width_hide_box.pack_end (hide_button, false, true);
 
@@ -76,15 +72,14 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	solo_mute_box.pack_start (mute_button, true, true);
 	solo_mute_box.pack_start (solo_button, true, true);
 
-	number_label.set_text (PBD::to_string (v->number(), std::dec));
+	number_label.set_text (to_string (v->number(), std::dec));
 	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	number_label.set_no_show_all ();
-	number_label.set_name ("tracknumber label");
-	number_label.set_fixed_colors (0x80808080, 0x80808080);
+	number_label.set_name ("generic button");
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
 
-	name_button.set_text (_vca->name());
+	name_button.signal_button_press_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::name_button_press), false);
 
 	top_padding.set_size_request (-1, 16); /* must match height in GroupTabs::set_size_request() */
 	bottom_padding.set_size_request (-1, 50); /* this one is a hack. there's no trivial way to compute it */
@@ -112,9 +107,11 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	top_padding.show ();
 	bottom_padding.show ();
 	vertical_padding.show ();
-	width_hide_box.show_all ();
-	name_button.show_all ();
-	gain_meter.show_all ();
+	hide_button.show ();
+	number_label.show ();
+	width_hide_box.show ();
+	name_button.show ();
+	gain_meter.show ();
 	solo_mute_box.show_all ();
 	assign_button.show ();
 
@@ -122,8 +119,11 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 
 	_selected = true;
 	set_selected (false);
-	set_width (true);
+	set_solo_text ();
 	update_vca_display ();
+	update_vca_name ();
+
+	_vca->PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
 
 	_vca->solo_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::solo_changed, this), gui_context());
 	_vca->mute_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::mute_changed, this), gui_context());
@@ -145,7 +145,7 @@ VCAMasterStrip::update_vca_display ()
 			if (!label.empty()) {
 				label += ' ';
 			}
-			label += PBD::to_string ((*v)->number(), std::dec);
+			label += to_string ((*v)->number(), std::dec);
 		}
 	}
 
@@ -195,61 +195,32 @@ VCAMasterStrip::set_selected (bool yn)
 bool
 VCAMasterStrip::solo_release (GdkEventButton*)
 {
-	_vca->solo_control()->set_value (_vca->soloed() ? 0.0 : 1.0, PBD::Controllable::NoGroup);
+	_vca->solo_control()->set_value (_vca->soloed() ? 0.0 : 1.0, Controllable::NoGroup);
 	return true;
 }
 
 bool
 VCAMasterStrip::mute_release (GdkEventButton*)
 {
-	_vca->mute_control()->set_value (_vca->muted() ? 0.0 : 1.0, PBD::Controllable::NoGroup);
+	_vca->mute_control()->set_value (_vca->muted() ? 0.0 : 1.0, Controllable::NoGroup);
 	return true;
 }
 
 void
 VCAMasterStrip::set_solo_text ()
 {
-	if (wide) {
-		if (Config->get_solo_control_is_listen_control ()) {
-			switch (Config->get_listen_position()) {
-			case AfterFaderListen:
-				solo_button.set_text (_("AFL"));
-				break;
-			case PreFaderListen:
-				solo_button.set_text (_("PFL"));
-				break;
+	if (Config->get_solo_control_is_listen_control ()) {
+		switch (Config->get_listen_position()) {
+		case AfterFaderListen:
+			solo_button.set_text (_("A"));
+			break;
+		case PreFaderListen:
+			solo_button.set_text (_("P"));
+			break;
 			}
-		} else {
-			solo_button.set_text (_("Solo"));
-		}
 	} else {
-		if (Config->get_solo_control_is_listen_control ()) {
-			switch (Config->get_listen_position()) {
-			case AfterFaderListen:
-				solo_button.set_text (_("A"));
-				break;
-			case PreFaderListen:
-				solo_button.set_text (_("P"));
-				break;
-			}
-		} else {
-			solo_button.set_text (_("S"));
-		}
+		solo_button.set_text (_("S"));
 	}
-}
-
-void
-VCAMasterStrip::set_width (bool w)
-{
-	wide = w;
-
-	if (wide) {
-		mute_button.set_text (_("Mute"));
-	} else {
-		mute_button.set_text (_("m"));
-	}
-
-	set_solo_text ();
 }
 
 void
@@ -342,4 +313,38 @@ VCAMasterStrip::vca_button_release (GdkEventButton* ev)
 	menu->popup (1, ev->time);
 
 	return true;
+}
+
+bool
+VCAMasterStrip::name_button_press (GdkEventButton* ev)
+{
+	if (ev->type == GDK_2BUTTON_PRESS) {
+		Gtk::Window* win = dynamic_cast<Gtk::Window*>(get_toplevel());
+		FloatingTextEntry* fte = new FloatingTextEntry (win, _vca->name());
+		fte->use_text.connect (sigc::mem_fun (*this, &VCAMasterStrip::finish_name_edit));
+		fte->present ();
+		return true;
+	}
+
+	return false;
+}
+
+void
+VCAMasterStrip::finish_name_edit (std::string str)
+{
+	_vca->set_name (str);
+}
+
+void
+VCAMasterStrip::vca_property_changed (PropertyChange const & what_changed)
+{
+	if (what_changed.contains (ARDOUR::Properties::name)) {
+		update_vca_name ();
+	}
+}
+
+void
+VCAMasterStrip::update_vca_name ()
+{
+	name_button.set_text (short_version (_vca->name(), 8));
 }

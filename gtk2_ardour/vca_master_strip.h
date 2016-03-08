@@ -33,6 +33,8 @@ namespace ARDOUR {
 	class VCA;
 }
 
+class FloatingTextEntry;
+
 class VCAMasterStrip : public AxisView, public Gtk::EventBox
 {
       public:
@@ -77,6 +79,10 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void vca_unassign ();
 	bool vca_button_release (GdkEventButton*);
 	void update_vca_display ();
+	void finish_name_edit (std::string);
+	bool name_button_press (GdkEventButton*);
+	void vca_property_changed (PBD::PropertyChange const & what_changed);
+	void update_vca_name ();
 };
 
 
