@@ -251,6 +251,12 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 	gain_changed ();
 	show_gain ();
 	update_gain_sensitive ();
+
+	if (!_meter) {
+		peak_display.hide ();
+	} else {
+		peak_display.show ();
+	}
 }
 
 void
@@ -975,12 +981,11 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_automation_state_button.set_size_request (PX_SCALE(12, 15), PX_SCALE(12, 15));
 	gain_automation_style_button.set_size_request (PX_SCALE(12, 15), PX_SCALE(12, 15));
 
-	fader_vbox = manage (new Gtk::VBox());
-	fader_vbox->set_spacing (0);
-	fader_vbox->pack_start (*gain_slider, true, true);
+	fader_vbox.set_spacing (0);
+	fader_vbox.pack_start (*gain_slider, true, true);
 
 	fader_alignment.set (0.5, 0.5, 0.0, 1.0);
-	fader_alignment.add (*fader_vbox);
+	fader_alignment.add (fader_vbox);
 
 	hbox.pack_start (fader_alignment, true, true);
 
@@ -1042,20 +1047,20 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 
 	if (_route) {
 		_route->active_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::route_active_changed, this), gui_context ());
+		hbox.pack_start (meter_hbox, true, true);
+		meter_hbox.show ();
 	}
-
-	/*
-	   if we have a non-hidden route (ie. we're not the click or the auditioner),
-	   pack some route-dependent stuff.
-	*/
-
-	hbox.pack_start (meter_hbox, true, true);
 
 //	if (r && !r->is_auditioner()) {
 //		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
 //	}
 
-	hbox.show_all ();
+	gain_display_box.show ();
+	gain_display.show ();
+	gain_slider->show ();
+	fader_vbox.show ();
+	fader_alignment.show ();
+	hbox.show ();
 	setup_meters ();
 }
 

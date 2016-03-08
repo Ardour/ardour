@@ -232,7 +232,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 
 	Gtk::HBox  gain_display_box;
 	Gtk::HBox  fader_box;
-	Gtk::VBox* fader_vbox;
+	Gtk::VBox  fader_vbox;
 	Gtk::HBox  hbox;
 	Gtk::HBox  meter_hbox;
 	Gtk::Alignment fader_alignment;
