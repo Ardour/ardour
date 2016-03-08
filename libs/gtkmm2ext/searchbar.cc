@@ -64,12 +64,12 @@ SearchBar::key_press_event (GdkEventKey* ev)
 void
 SearchBar::icon_clicked_event (Gtk::EntryIconPosition, const GdkEventButton*)
 {
-		if (icon_click_resets) {
-			reset ();
-		}
-		else {
-			search_string_changed ();
-		}
+	if (icon_click_resets) {
+		reset ();
+	}
+	else {
+		search_string_changed ();
+	}
 }
 
 void

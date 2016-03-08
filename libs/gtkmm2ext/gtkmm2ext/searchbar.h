@@ -8,8 +8,11 @@ namespace Gtkmm2ext {
 class SearchBar : public Gtk::Entry
 {
 public:
-	SearchBar(const std::string& placeholder_text = "Search...", bool icon_click_resets = true);
+	SearchBar(
+		const std::string& placeholder_text = "Search...",
+		bool icon_click_resets = true);
 
+	// resets the searchbar to the initial state
 	void reset ();
 	// emitted when the filter has been updated
 	sigc::signal<void, const std::string&> signal_search_string_updated () { return sig_search_string_updated; }
