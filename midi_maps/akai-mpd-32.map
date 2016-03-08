@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="AKAI MPD32 by samtuke">
+
+  <!-- NOTE: This map uses 'Cubase' (Preset 3) on the MPD -->
+
+  <!-- Set bank-size to 8 -->
+  <DeviceInfo bank-size="8"/>
+  
+  <!-- Unused
+  Set switch track
+  <Binding channel="16" ctl="110" function="prev-bank"/>
+  <Binding channel="16" ctl="111" function="next-bank"/>
+  -->
+  
+  <!-- Set basic transport controls -->
+  <Binding channel="1" ctl="115" function="transport-start"/>
+  <Binding channel="1" ctl="116" function="transport-end"/>
+  <Binding channel="1" ctl="117" function="transport-stop"/>
+  <Binding channel="1" ctl="118" function="transport-roll"/>
+  <Binding channel="1" ctl="119" function="rec-enable"/>
+  <Binding channel="1" ctl="119" function="rec-disable"/>
+
+  <!-- Unused
+  Set master volume fader
+  <Binding channel="16" ctl="41" uri="/bus/gain master"/>
+  -->
+
+  <!-- Set faders -->
+  <Binding channel="1" ctl="7" uri="/route/gain 1"/>
+  <Binding channel="2" ctl="7" uri="/route/gain 2"/>
+  <Binding channel="3" ctl="7" uri="/route/gain 3"/>
+  <Binding channel="4" ctl="7" uri="/route/gain 4"/>
+  <Binding channel="5" ctl="7" uri="/route/gain 5"/>
+  <Binding channel="6" ctl="7" uri="/route/gain 6"/>
+  <Binding channel="7" ctl="7" uri="/route/gain 7"/>
+  <Binding channel="8" ctl="7" uri="/route/gain 8"/>
+  <Binding channel="9" ctl="7" uri="/route/gain 9"/>
+  <Binding channel="10" ctl="7" uri="/route/gain 10"/>
+  <Binding channel="11" ctl="7" uri="/route/gain 11"/>
+  <Binding channel="12" ctl="7" uri="/route/gain 12"/>
+  <Binding channel="13" ctl="7" uri="/route/gain 13"/>
+  <Binding channel="14" ctl="7" uri="/route/gain 14"/>
+  <Binding channel="15" ctl="7" uri="/route/gain 15"/>
+  <Binding channel="16" ctl="7" uri="/route/gain 16"/>
+  <Binding channel="17" ctl="7" uri="/route/gain 17"/>
+  <Binding channel="18" ctl="7" uri="/route/gain 18"/>
+  <Binding channel="19" ctl="7" uri="/route/gain 19"/>
+  <Binding channel="20" ctl="7" uri="/route/gain 20"/>
+  <Binding channel="21" ctl="7" uri="/route/gain 21"/>
+  <Binding channel="22" ctl="7" uri="/route/gain 22"/>
+  <Binding channel="23" ctl="7" uri="/route/gain 23"/>
+  <Binding channel="24" ctl="7" uri="/route/gain 24"/>
+  
+  <!-- Set knobs to correspond to plugin attributes -->
+  <Binding channel="1" ctl="10" uri="/route/plugin/parameter B1 1 1"/>
+  <Binding channel="2" ctl="10" uri="/route/plugin/parameter B1 1 2"/>
+  <Binding channel="3" ctl="10" uri="/route/plugin/parameter B1 1 3"/>
+  <Binding channel="4" ctl="10" uri="/route/plugin/parameter B1 1 4"/>
+  <Binding channel="5" ctl="10" uri="/route/plugin/parameter B1 1 5"/>
+  <Binding channel="6" ctl="10" uri="/route/plugin/parameter B1 1 6"/>
+  <Binding channel="7" ctl="10" uri="/route/plugin/parameter B1 1 7"/>
+  <Binding channel="8" ctl="10" uri="/route/plugin/parameter B1 1 8"/>
+  <Binding channel="9" ctl="10" uri="/route/plugin/parameter B1 1 9"/>
+  <Binding channel="10" ctl="10" uri="/route/plugin/parameter B1 1 10"/>
+  <Binding channel="11" ctl="10" uri="/route/plugin/parameter B1 1 11"/>
+  <Binding channel="12" ctl="10" uri="/route/plugin/parameter B1 1 12"/>
+  <Binding channel="13" ctl="10" uri="/route/plugin/parameter B1 1 13"/>
+  <Binding channel="14" ctl="10" uri="/route/plugin/parameter B1 1 14"/>
+  <Binding channel="15" ctl="10" uri="/route/plugin/parameter B1 1 15"/>
+  <Binding channel="16" ctl="10" uri="/route/plugin/parameter B1 1 16"/>
+  <Binding channel="17" ctl="10" uri="/route/plugin/parameter B1 1 17"/>
+  <Binding channel="18" ctl="10" uri="/route/plugin/parameter B1 1 18"/>
+  <Binding channel="19" ctl="10" uri="/route/plugin/parameter B1 1 19"/>
+  <Binding channel="20" ctl="10" uri="/route/plugin/parameter B1 1 20"/>
+  <Binding channel="21" ctl="10" uri="/route/plugin/parameter B1 1 21"/>
+  <Binding channel="22" ctl="10" uri="/route/plugin/parameter B1 1 22"/>
+  <Binding channel="23" ctl="10" uri="/route/plugin/parameter B1 1 23"/>
+  <Binding channel="24" ctl="10" uri="/route/plugin/parameter B1 1 24"/>
+
+  <!-- Unused
+  Set master mute button
+  <Binding channel="16" ctl="57" uri="/bus/mute master"/>
+  -->
+
+  <!-- Set mute buttons beneath faders to correspond to banks --> 
+  <Binding channel="1" ctl="64" uri="/route/mute B1"/>    
+  <Binding channel="2" ctl="64" uri="/route/mute B2"/> 
+  <Binding channel="3" ctl="64" uri="/route/mute B3"/> 
+  <Binding channel="4" ctl="64" uri="/route/mute B4"/>
+  <Binding channel="5" ctl="64" uri="/route/mute B5"/>
+  <Binding channel="6" ctl="64" uri="/route/mute B6"/>
+  <Binding channel="7" ctl="64" uri="/route/mute B7"/>
+  <Binding channel="8" ctl="64" uri="/route/mute B8"/>
+  <Binding channel="9" ctl="64" uri="/route/mute B9"/>
+  <Binding channel="10" ctl="64" uri="/route/mute B10"/>
+  <Binding channel="11" ctl="64" uri="/route/mute B11"/>
+  <Binding channel="12" ctl="64" uri="/route/mute B12"/>
+  <Binding channel="13" ctl="64" uri="/route/mute B13"/>
+  <Binding channel="14" ctl="64" uri="/route/mute B14"/>
+  <Binding channel="15" ctl="64" uri="/route/mute B15"/>
+  <Binding channel="16" ctl="64" uri="/route/mute B16"/>
+  <Binding channel="17" ctl="64" uri="/route/mute B17"/>
+  <Binding channel="18" ctl="64" uri="/route/mute B18"/>
+  <Binding channel="19" ctl="64" uri="/route/mute B19"/>
+  <Binding channel="20" ctl="64" uri="/route/mute B20"/>
+  <Binding channel="21" ctl="64" uri="/route/mute B21"/>
+  <Binding channel="22" ctl="64" uri="/route/mute B22"/>
+  <Binding channel="23" ctl="64" uri="/route/mute B23"/>
+  <Binding channel="24" ctl="64" uri="/route/mute B24"/>
+
+  <!-- Pan, unused for now
+  <Binding channel="1"  ctl="75"  uri="/route/pan B2"/>
+  -->
+
+</ArdourMIDIBindings>

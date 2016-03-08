@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="M-Audio Oxygen61 V3 by samtuke">
+
+  <!-- NOTE: This map uses 'P.10' (program 10) on the keyboard, which is the direct link program. Make sure you have set your program to 10 to use it with this map -->
+
+  <!-- The keyboard has 9 faders, but one of them is always master volume, so set bank-size to 8 -->
+  <DeviceInfo bank-size="8"/>
+  
+  <!-- Set arrows labelled 'track' on keyboard to switch banks -->
+  <Binding channel="16" ctl="110" function="prev-bank"/>
+  <Binding channel="16" ctl="111" function="next-bank"/>
+  
+  <!-- Set basic transport controls -->
+  <Binding channel="16" ctl="113" function="loop-toggle"/>
+  <Binding channel="16" ctl="114" function="transport-start"/>
+  <Binding channel="16" ctl="115" function="transport-end"/>
+  <Binding channel="16" ctl="116" function="transport-stop"/>
+  <Binding channel="16" ctl="117" function="transport-roll"/>
+  <Binding channel="16" ctl="118" function="rec-enable"/>
+  <Binding channel="16" ctl="118" function="rec-disable"/>
+
+  <!-- Set master volume fader, this is far right most fader labelled C9 and is master volume on all banks by default -->
+  <Binding channel="16" ctl="41" uri="/bus/gain master"/>
+
+  <!-- Set faders 1-8 to corresponding banks -->
+  <Binding channel="16" ctl="33" uri="/route/gain 1"/>
+  <Binding channel="16" ctl="34" uri="/route/gain 2"/>
+  <Binding channel="16" ctl="35" uri="/route/gain 3"/>
+  <Binding channel="16" ctl="36" uri="/route/gain 4"/>
+  <Binding channel="16" ctl="37" uri="/route/gain 5"/>
+  <Binding channel="16" ctl="38" uri="/route/gain 6"/>
+  <Binding channel="16" ctl="39" uri="/route/gain 7"/>
+  <Binding channel="16" ctl="40" uri="/route/gain 8"/>
+  
+  <!-- Set knobs to correspond to plugin attributes -->
+  <Binding channel="16" ctl="17" uri="/route/plugin/parameter B1 1 1"/>
+  <Binding channel="16" ctl="18" uri="/route/plugin/parameter B1 1 2"/>
+  <Binding channel="16" ctl="19" uri="/route/plugin/parameter B1 1 3"/>
+  <Binding channel="16" ctl="20" uri="/route/plugin/parameter B1 1 4"/>
+  <Binding channel="16" ctl="21" uri="/route/plugin/parameter B1 1 5"/>
+  <Binding channel="16" ctl="22" uri="/route/plugin/parameter B1 1 6"/>
+  <Binding channel="16" ctl="23" uri="/route/plugin/parameter B1 1 7"/>
+  <Binding channel="16" ctl="24" uri="/route/plugin/parameter B1 1 8"/>
+ 
+  <!-- Set master mute button -->
+  <Binding channel="16" ctl="57" uri="/bus/mute master"/>
+
+  <!-- Set mute buttons beneath faders to correspond to banks --> 
+  <Binding channel="16" ctl="49" uri="/route/mute B1"/>    
+  <Binding channel="16" ctl="50" uri="/route/mute B2"/> 
+  <Binding channel="16" ctl="51" uri="/route/mute B3"/> 
+  <Binding channel="16" ctl="52" uri="/route/mute B4"/>
+  <Binding channel="16" ctl="53" uri="/route/mute B5"/>
+  <Binding channel="16" ctl="54" uri="/route/mute B6"/>
+  <Binding channel="16" ctl="55" uri="/route/mute B7"/>
+  <Binding channel="16" ctl="56" uri="/route/mute B8"/>
+
+  <!-- Pan, unused for now
+  <Binding channel="1"  ctl="75"  uri="/route/pan B2"/>
+  -->
+
+</ArdourMIDIBindings>
