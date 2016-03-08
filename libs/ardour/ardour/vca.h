@@ -46,8 +46,10 @@ class LIBARDOUR_API VCA : public Stripable, public Automatable, public boost::en
 	XMLNode& get_state();
 	int set_state (XMLNode const&, int version);
 
-	void add_solo_mute_target (boost::shared_ptr<Route>);
-	void remove_solo_mute_target (boost::shared_ptr<Route>);
+	void add_solo_target (boost::shared_ptr<Route>);
+	void remove_solo_target (boost::shared_ptr<Route>);
+	void add_mute_target (boost::shared_ptr<Route>);
+	void remove_mute_target (boost::shared_ptr<Route>);
 
 	bool soloed () const;
 	bool muted () const;
@@ -125,9 +127,15 @@ class LIBARDOUR_API VCA : public Stripable, public Automatable, public boost::en
 	friend class VCAMuteControllable;
 
 	uint32_t    _number;
-	RouteList solo_mute_targets;
-	PBD::ScopedConnectionList solo_mute_connections;
-	mutable Glib::Threads::RWLock solo_mute_lock;
+
+	RouteList solo_targets;
+	PBD::ScopedConnectionList solo_connections;
+	mutable Glib::Threads::RWLock solo_lock;
+
+	RouteList mute_targets;
+	PBD::ScopedConnectionList mute_connections;
+	mutable Glib::Threads::RWLock mute_lock;
+
 	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<VCASoloControllable> _solo_control;
 	boost::shared_ptr<VCAMuteControllable> _mute_control;
@@ -136,7 +144,8 @@ class LIBARDOUR_API VCA : public Stripable, public Automatable, public boost::en
 
 	static gint next_number;
 
-	void solo_mute_target_going_away (boost::weak_ptr<Route>);
+	void solo_target_going_away (boost::weak_ptr<Route>);
+	void mute_target_going_away (boost::weak_ptr<Route>);
 	bool soloed_locked () const;
 	bool muted_locked () const;
 
