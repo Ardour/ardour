@@ -324,6 +324,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	void vca_menu_toggle (Gtk::CheckMenuItem*, uint32_t n);
 	bool vca_button_release (GdkEventButton* ev);
+
+	void update_track_number_visibility ();
 };
 
 #endif /* __ardour_mixer_strip__ */

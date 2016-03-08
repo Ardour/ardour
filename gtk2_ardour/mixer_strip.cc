@@ -656,6 +656,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	name_changed ();
 	comment_changed ();
 	route_group_changed ();
+	update_track_number_visibility ();
 
 	connect_to_pan ();
 	panners.setup_pan ();
@@ -2261,11 +2262,9 @@ MixerStrip::parameter_changed (string p)
 		   our VisibilityGroup to reflect these changes in our widgets.
 		*/
 		_visibility.set_state (UIConfiguration::instance().get_mixer_strip_visibility ());
-	}
-	else if (p == "track-name-number") {
+	} else if (p == "track-name-number") {
 		name_changed ();
-	}
-	else if (p == "use-monitor-bus") {
+	} else if (p == "use-monitor-bus") {
 		if (monitor_section_button) {
 			if (mute_button->get_parent()) {
 				mute_button->get_parent()->remove(*mute_button);
@@ -2283,6 +2282,8 @@ MixerStrip::parameter_changed (string p)
 				mute_button->show();
 			}
 		}
+	} else if (p == "track-name-number") {
+		update_track_number_visibility();
 	}
 }
 
@@ -2578,4 +2579,29 @@ MixerStrip::vca_button_release (GdkEventButton* ev)
 	menu->popup (1, ev->time);
 
 	return true;
+}
+
+void
+MixerStrip::update_track_number_visibility ()
+{
+	DisplaySuspender ds;
+	bool show_label = _session->config.get_track_name_number();
+
+	if (_route && _route->is_master()) {
+		show_label = false;
+	}
+
+	if (show_label) {
+		number_label.show ();
+		// see ArdourButton::on_size_request(), we should probably use a global size-group here instead.
+		// except the width of the number label is subtracted from the name-hbox, so we
+		// need to explictly calculate it anyway until the name-label & entry become ArdourWidgets.
+		int tnw = (2 + std::max(2u, _session->track_number_decimals())) * number_label.char_pixel_width();
+		if (tnw & 1) --tnw;
+		number_label.set_size_request(tnw, -1);
+		number_label.show ();
+		//name_hbox.set_size_request(TimeAxisView::name_width_px - 2 - tnw, -1); // -2 = cellspacing
+	} else {
+		number_label.hide ();
+	}
 }
