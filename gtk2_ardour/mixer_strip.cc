@@ -2508,10 +2508,8 @@ MixerStrip::vca_menu_toggle (CheckMenuItem* menuitem, uint32_t n)
 	}
 
 	if (!menuitem->get_active()) {
-		cerr << "Unassign from " << n << endl;
 		_mixer.do_vca_unassign (vca);
 	} else {
-		cerr << "Assign to " << n << endl;
 		_mixer.do_vca_assign (vca);
 	}
 }
@@ -2522,8 +2520,8 @@ MixerStrip::vca_assign (boost::shared_ptr<VCA> vca)
 	if (!vca || !_route) {
 		return;
 	}
-	_route->gain_control()->add_master (vca);
-	vca->add_solo_mute_target (_route);
+
+	_route->vca_assign (vca);
 }
 
 void
@@ -2533,14 +2531,7 @@ MixerStrip::vca_unassign (boost::shared_ptr<VCA> vca)
 		return;
 	}
 
-	if (!vca) {
-		/* null VCA means drop all VCA assignments */
-		_route->gain_control()->clear_masters ();
-		/* XXX Need to remove all solo/mute target entries */
-	} else {
-		_route->gain_control()->remove_master (vca);
-		vca->remove_solo_mute_target (_route);
-	}
+	_route->vca_unassign (vca);
 }
 
 bool
