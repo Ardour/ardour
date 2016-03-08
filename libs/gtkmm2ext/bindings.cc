@@ -46,8 +46,6 @@ list<Bindings*> Bindings::bindings; /* global. Gulp */
 list<ActionMap*> ActionMap::action_maps; /* global. Gulp */
 PBD::Signal1<void,Bindings*> Bindings::BindingsChanged;
 
-
-/*============================ ActionNameRegistered ===========================*/
 template <typename IteratorValueType>
 struct ActionNameRegistered
 {
@@ -61,7 +59,6 @@ struct ActionNameRegistered
 	std::string const& action_name;
 };
 
-/*================================ MouseButton ================================*/
 MouseButton::MouseButton (uint32_t state, uint32_t keycode)
 {
 	uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
