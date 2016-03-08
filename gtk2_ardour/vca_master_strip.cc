@@ -85,7 +85,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	number_label.set_fallthrough_to_parent (true);
 
 	name_button.set_text (_vca->name());
-	active_button.set_text ("active");
 
 	top_padding.set_size_request (-1, 16); /* must match height in GroupTabs::set_size_request() */
 	bottom_padding.set_size_request (-1, 50); /* this one is a hack. there's no trivial way to compute it */
@@ -95,7 +94,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 
 	global_vpacker.pack_start (top_padding, false, false);
 	global_vpacker.pack_start (width_hide_box, false, false);
-	global_vpacker.pack_start (active_button, false, false);
 	global_vpacker.pack_start (name_button, false, false);
 	global_vpacker.pack_start (vertical_padding, true, true);
 	global_vpacker.pack_start (solo_mute_box, false, false);
@@ -115,7 +113,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	bottom_padding.show ();
 	vertical_padding.show ();
 	width_hide_box.show_all ();
-	active_button.show_all ();
 	name_button.show_all ();
 	gain_meter.show_all ();
 	solo_mute_box.show_all ();

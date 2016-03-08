@@ -46,7 +46,6 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	boost::shared_ptr<ARDOUR::VCA> _vca;
 	Gtk::HBox    vertical_padding;
 	ArdourButton name_button;
-	ArdourButton active_button;
 	GainMeter    gain_meter;
 
 	Gtk::Frame   global_frame;
