@@ -23,57 +23,57 @@ namespace Gtkmm2ext {
 class LIBGTKMM2EXT_API KeyboardKey
 {
   public:
-        KeyboardKey () {
-                _val = GDK_VoidSymbol;
-        }
+	KeyboardKey () {
+		_val = GDK_VoidSymbol;
+	}
 
-        KeyboardKey (uint32_t state, uint32_t keycode);
+	KeyboardKey (uint32_t state, uint32_t keycode);
 
-        static KeyboardKey null_key() { return KeyboardKey (0, 0); }
+	static KeyboardKey null_key() { return KeyboardKey (0, 0); }
 
-        uint32_t state() const { return _val >> 32; }
-        uint32_t key() const { return _val & 0xffff; }
+	uint32_t state() const { return _val >> 32; }
+	uint32_t key() const { return _val & 0xffff; }
 
-        bool operator<(const KeyboardKey& other) const {
-                return _val < other._val;
-        }
+	bool operator<(const KeyboardKey& other) const {
+		return _val < other._val;
+	}
 
-        bool operator==(const KeyboardKey& other) const {
-                return _val == other._val;
-        }
+	bool operator==(const KeyboardKey& other) const {
+		return _val == other._val;
+	}
 
-        std::string name() const;
-        static bool make_key (const std::string&, KeyboardKey&);
+	std::string name() const;
+	static bool make_key (const std::string&, KeyboardKey&);
 
-        std::string display_label() const;
+	std::string display_label() const;
 
   private:
-        uint64_t _val;
+	uint64_t _val;
 };
 
 class LIBGTKMM2EXT_API MouseButton {
   public:
-        MouseButton () {
-                _val = ~0ULL;
-        }
+	MouseButton () {
+		_val = ~0ULL;
+	}
 
-        MouseButton (uint32_t state, uint32_t button_number);
-        uint32_t state() const { return _val >> 32; }
-        uint32_t button() const { return _val & 0xffff; }
+	MouseButton (uint32_t state, uint32_t button_number);
+	uint32_t state() const { return _val >> 32; }
+	uint32_t button() const { return _val & 0xffff; }
 
-        bool operator<(const MouseButton& other) const {
-                return _val < other._val;
-        }
+	bool operator<(const MouseButton& other) const {
+		return _val < other._val;
+	}
 
-        bool operator==(const MouseButton& other) const {
-                return _val == other._val;
-        }
+	bool operator==(const MouseButton& other) const {
+		return _val == other._val;
+	}
 
-        std::string name() const;
-        static bool make_button (const std::string&, MouseButton&);
+	std::string name() const;
+	static bool make_button (const std::string&, MouseButton&);
 
   private:
-        uint64_t _val;
+	uint64_t _val;
 };
 
 class LIBGTKMM2EXT_API Bindings;
@@ -85,24 +85,24 @@ class LIBGTKMM2EXT_API ActionMap {
 
 	std::string name() const { return _name; }
 
-        Glib::RefPtr<Gtk::ActionGroup> create_action_group (const std::string& group_name);
+	Glib::RefPtr<Gtk::ActionGroup> create_action_group (const std::string& group_name);
 
-        Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, const char* name, const char* label);
-        Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
-						   const char* name, const char* label, sigc::slot<void> sl);
-        Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group,
-							 Gtk::RadioAction::Group&,
-							 const char* name, const char* label,
-                                                         sigc::slot<void,GtkAction*> sl,
-                                                         int value);
-        Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group,
-							 Gtk::RadioAction::Group&,
-							 const char* name, const char* label,
-                                                         sigc::slot<void> sl);
+	Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, const char* name, const char* label);
+	Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
+	                                           const char* name, const char* label, sigc::slot<void> sl);
+	Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group,
+	                                                 Gtk::RadioAction::Group&,
+	                                                 const char* name, const char* label,
+	                                                 sigc::slot<void,GtkAction*> sl,
+	                                                 int value);
+	Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group,
+	                                                 Gtk::RadioAction::Group&,
+	                                                 const char* name, const char* label,
+	                                                 sigc::slot<void> sl);
 	Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
-							  const char* name, const char* label, sigc::slot<void> sl);
+	                                                  const char* name, const char* label, sigc::slot<void> sl);
 
-        Glib::RefPtr<Gtk::Action> find_action (const std::string& name);
+	Glib::RefPtr<Gtk::Action> find_action (const std::string& name);
 
 	void set_bindings (Bindings*);
 	Bindings* bindings() const { return _bindings; }
@@ -112,7 +112,7 @@ class LIBGTKMM2EXT_API ActionMap {
 
 	static std::list<ActionMap*> action_maps;
 
-        /* used by control surface protocols and other UIs */
+	/* used by control surface protocols and other UIs */
 	static void get_all_actions (std::vector<std::string>& paths,
 	                             std::vector<std::string>& labels,
 	                             std::vector<std::string>& tooltips,
@@ -125,85 +125,85 @@ class LIBGTKMM2EXT_API ActionMap {
 	/* hash for faster lookup of actions by name */
 
 	typedef std::map<std::string, Glib::RefPtr<Gtk::Action> > _ActionMap;
-        _ActionMap _actions;
+	_ActionMap _actions;
 
-        /* initialized to null; set after a Bindings object has ::associated()
-         * itself with this action map.
-         */
+	/* initialized to null; set after a Bindings object has ::associated()
+	 * itself with this action map.
+	 */
 
-        Bindings* _bindings;
+	Bindings* _bindings;
 
 };
 
 class LIBGTKMM2EXT_API Bindings {
-	public:
-        enum Operation {
-                Press,
-                Release
-        };
+  public:
+	enum Operation {
+		Press,
+		Release
+	};
 
-        struct ActionInfo {
-	        ActionInfo (std::string const& name) : action_name (name) {}
+	struct ActionInfo {
+		ActionInfo (std::string const& name) : action_name (name) {}
 
-	        std::string action_name;
-	        Glib::RefPtr<Gtk::Action> action;
-        };
-		typedef std::map<KeyboardKey,ActionInfo> KeybindingMap;
+		std::string action_name;
+		Glib::RefPtr<Gtk::Action> action;
+	};
+	typedef std::map<KeyboardKey,ActionInfo> KeybindingMap;
 
-        Bindings (std::string const& name);
-        ~Bindings ();
+	Bindings (std::string const& name);
+	~Bindings ();
 
-        std::string const& name() const { return _name; }
+	std::string const& name() const { return _name; }
 
-        void associate ();
-        void dissociate ();
+	void associate ();
+	void dissociate ();
 
-        bool empty() const;
-        bool empty_keys () const;
-        bool empty_mouse () const;
+	bool empty() const;
+	bool empty_keys () const;
+	bool empty_mouse () const;
 
-        bool add (KeyboardKey, Operation, std::string const&, bool can_save = false);
-        bool replace (KeyboardKey, Operation, std::string const& action_name, bool can_save = true);
-        bool remove (Operation, std::string const& action_name, bool can_save = false);
+	bool add (KeyboardKey, Operation, std::string const&, bool can_save = false);
+	bool replace (KeyboardKey, Operation, std::string const& action_name, bool can_save = true);
+	bool remove (Operation, std::string const& action_name, bool can_save = false);
 
-        bool activate (KeyboardKey, Operation);
+	bool activate (KeyboardKey, Operation);
 
-        void add (MouseButton, Operation, std::string const&);
-        void remove (MouseButton, Operation);
-        bool activate (MouseButton, Operation);
+	void add (MouseButton, Operation, std::string const&);
+	void remove (MouseButton, Operation);
+	bool activate (MouseButton, Operation);
 
-		bool is_bound (KeyboardKey const&, Operation) const;
-		bool is_registered (Operation op, std::string const& action_name) const;
+	bool is_bound (KeyboardKey const&, Operation) const;
+	bool is_registered (Operation op, std::string const& action_name) const;
 
-        KeyboardKey get_binding_for_action (Glib::RefPtr<Gtk::Action>, Operation& op);
+	KeyboardKey get_binding_for_action (Glib::RefPtr<Gtk::Action>, Operation& op);
 
-        bool load (XMLNode const& node);
-        void load_operation (XMLNode const& node);
-        void save (XMLNode& root);
+	bool load (XMLNode const& node);
+	void load_operation (XMLNode const& node);
+	void save (XMLNode& root);
 
-        /* GTK has the following position a Gtk::Action:
-         *
-         *  accel_path: <Actions>/GroupName/ActionName
-         *  name: ActionName
-         *
-         * We want proper namespacing and we're not interested in
-         * the silly <Actions> "extra" namespace. So in Ardour:
-         *
-         * accel_path: <Actions>/GroupName/ActionName
-         * name: GroupName/ActionName
-         *
-         * This (static) method returns the "ardour" name for the action.
-         */
-        static std::string ardour_action_name (Glib::RefPtr<Gtk::Action>);
+	/* GTK has the following position a Gtk::Action:
+	 *
+	 *  accel_path: <Actions>/GroupName/ActionName
+	 *  name: ActionName
+	 *
+	 * We want proper namespacing and we're not interested in
+	 * the silly <Actions> "extra" namespace. So in Ardour:
+	 *
+	 * accel_path: <Actions>/GroupName/ActionName
+	 * name: GroupName/ActionName
+	 *
+	 * This (static) method returns the "ardour" name for the action.
+	 */
+	static std::string ardour_action_name (Glib::RefPtr<Gtk::Action>);
 
-        void set_action_map (ActionMap&);
+	void set_action_map (ActionMap&);
 
-        /* used for editing bindings */
-        void get_all_actions (std::vector<std::string>& paths,
-                              std::vector<std::string>& labels,
-                              std::vector<std::string>& tooltips,
-                              std::vector<std::string>& keys,
-                              std::vector<Glib::RefPtr<Gtk::Action> >& actions);
+	/* used for editing bindings */
+	void get_all_actions (std::vector<std::string>& paths,
+	                      std::vector<std::string>& labels,
+	                      std::vector<std::string>& tooltips,
+	                      std::vector<std::string>& keys,
+	                      std::vector<Glib::RefPtr<Gtk::Action> >& actions);
 
 	/* all bindings currently in existence, as grouped into Bindings */
 	static std::list<Bindings*> bindings;
@@ -212,21 +212,21 @@ class LIBGTKMM2EXT_API Bindings {
 
 	static PBD::Signal1<void,Bindings*> BindingsChanged;
 
-	private:
-        std::string  _name;
-        ActionMap*   _action_map;
-        KeybindingMap press_bindings;
-        KeybindingMap release_bindings;
+  private:
+	std::string  _name;
+	ActionMap*   _action_map;
+	KeybindingMap press_bindings;
+	KeybindingMap release_bindings;
 
-        typedef std::map<MouseButton,ActionInfo> MouseButtonBindingMap;
-        MouseButtonBindingMap button_press_bindings;
-        MouseButtonBindingMap button_release_bindings;
+	typedef std::map<MouseButton,ActionInfo> MouseButtonBindingMap;
+	MouseButtonBindingMap button_press_bindings;
+	MouseButtonBindingMap button_release_bindings;
 
-        void push_to_gtk (KeyboardKey, Glib::RefPtr<Gtk::Action>);
+	void push_to_gtk (KeyboardKey, Glib::RefPtr<Gtk::Action>);
 
-		KeybindingMap& get_keymap (Operation op);
-		const KeybindingMap& get_keymap (Operation op) const;
-		MouseButtonBindingMap& get_mousemap (Operation op);
+	KeybindingMap& get_keymap (Operation op);
+	const KeybindingMap& get_keymap (Operation op) const;
+	MouseButtonBindingMap& get_mousemap (Operation op);
 };
 
 } // namespace

@@ -1,19 +1,19 @@
 /*
-    Copyright (C) 2012 Paul Davis
+  Copyright (C) 2012 Paul Davis
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
@@ -52,7 +52,7 @@ template <typename IteratorValueType>
 struct ActionNameRegistered
 {
 	ActionNameRegistered(std::string const& name)
-	: action_name(name)
+		: action_name(name)
 	{}
 
 	bool operator()(IteratorValueType elem) const {
@@ -64,106 +64,106 @@ struct ActionNameRegistered
 /*================================ MouseButton ================================*/
 MouseButton::MouseButton (uint32_t state, uint32_t keycode)
 {
-        uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
+	uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
 
-        /* this is a slightly wierd test that relies on
-         * gdk_keyval_is_{upper,lower}() returning true for keys that have no
-         * case-sensitivity. This covers mostly non-alphanumeric keys.
-         */
+	/* this is a slightly wierd test that relies on
+	 * gdk_keyval_is_{upper,lower}() returning true for keys that have no
+	 * case-sensitivity. This covers mostly non-alphanumeric keys.
+	 */
 
-        if (gdk_keyval_is_upper (keycode) && gdk_keyval_is_lower (keycode)) {
-                /* key is not subject to case, so ignore SHIFT
-                 */
-                ignore |= GDK_SHIFT_MASK;
-        }
+	if (gdk_keyval_is_upper (keycode) && gdk_keyval_is_lower (keycode)) {
+		/* key is not subject to case, so ignore SHIFT
+		 */
+		ignore |= GDK_SHIFT_MASK;
+	}
 
-        _val = (state & ~ignore);
-        _val <<= 32;
-        _val |= keycode;
+	_val = (state & ~ignore);
+	_val <<= 32;
+	_val |= keycode;
 };
 
 bool
 MouseButton::make_button (const string& str, MouseButton& b)
 {
-        int s = 0;
+	int s = 0;
 
-        if (str.find ("Primary") != string::npos) {
-                s |= Keyboard::PrimaryModifier;
-        }
+	if (str.find ("Primary") != string::npos) {
+		s |= Keyboard::PrimaryModifier;
+	}
 
-        if (str.find ("Secondary") != string::npos) {
-                s |= Keyboard::SecondaryModifier;
-        }
+	if (str.find ("Secondary") != string::npos) {
+		s |= Keyboard::SecondaryModifier;
+	}
 
-        if (str.find ("Tertiary") != string::npos) {
-                s |= Keyboard::TertiaryModifier;
-        }
+	if (str.find ("Tertiary") != string::npos) {
+		s |= Keyboard::TertiaryModifier;
+	}
 
-        if (str.find ("Level4") != string::npos) {
-                s |= Keyboard::Level4Modifier;
-        }
+	if (str.find ("Level4") != string::npos) {
+		s |= Keyboard::Level4Modifier;
+	}
 
-        string::size_type lastmod = str.find_last_of ('-');
-        uint32_t button_number;
+	string::size_type lastmod = str.find_last_of ('-');
+	uint32_t button_number;
 
-        if (lastmod == string::npos) {
-                button_number = PBD::atoi (str);
-        } else {
-                button_number = PBD::atoi (str.substr (lastmod+1));
-        }
+	if (lastmod == string::npos) {
+		button_number = PBD::atoi (str);
+	} else {
+		button_number = PBD::atoi (str.substr (lastmod+1));
+	}
 
-        b = MouseButton (s, button_number);
-        return true;
+	b = MouseButton (s, button_number);
+	return true;
 }
 
 string
 MouseButton::name () const
 {
-        int s = state();
+	int s = state();
 
-        string str;
+	string str;
 
-        if (s & Keyboard::PrimaryModifier) {
-                str += "Primary";
-        }
-        if (s & Keyboard::SecondaryModifier) {
-                if (!str.empty()) {
-                        str += '-';
-                }
-                str += "Secondary";
-        }
-        if (s & Keyboard::TertiaryModifier) {
-                if (!str.empty()) {
-                        str += '-';
-                }
-                str += "Tertiary";
-        }
-        if (s & Keyboard::Level4Modifier) {
-                if (!str.empty()) {
-                        str += '-';
-                }
-                str += "Level4";
-        }
+	if (s & Keyboard::PrimaryModifier) {
+		str += "Primary";
+	}
+	if (s & Keyboard::SecondaryModifier) {
+		if (!str.empty()) {
+			str += '-';
+		}
+		str += "Secondary";
+	}
+	if (s & Keyboard::TertiaryModifier) {
+		if (!str.empty()) {
+			str += '-';
+		}
+		str += "Tertiary";
+	}
+	if (s & Keyboard::Level4Modifier) {
+		if (!str.empty()) {
+			str += '-';
+		}
+		str += "Level4";
+	}
 
-        if (!str.empty()) {
-                str += '-';
-        }
+	if (!str.empty()) {
+		str += '-';
+	}
 
-        char buf[16];
-        snprintf (buf, sizeof (buf), "%u", button());
-        str += buf;
+	char buf[16];
+	snprintf (buf, sizeof (buf), "%u", button());
+	str += buf;
 
-        return str;
+	return str;
 }
 
 /*================================ KeyboardKey ================================*/
 KeyboardKey::KeyboardKey (uint32_t state, uint32_t keycode)
 {
-        uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
+	uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
 
-        _val = (state & ~ignore);
-        _val <<= 32;
-        _val |= keycode;
+	_val = (state & ~ignore);
+	_val <<= 32;
+	_val |= keycode;
 }
 
 string
@@ -177,16 +177,16 @@ KeyboardKey::display_label () const
 	 *  on all platforms, notably the command key on OS X.
 	 */
 
-        uint32_t mod = state();
+	uint32_t mod = state();
 
 #ifdef __APPLE__
-                /* We use both bits (MOD2|META) for Primary on OS X,
-                 * but we don't want MOD2 showing up in listings.
-                 */
+	/* We use both bits (MOD2|META) for Primary on OS X,
+	 * but we don't want MOD2 showing up in listings.
+	 */
 
-                if (mod & GDK_MOD2_MASK) {
-                        mod &= ~GDK_MOD2_MASK;
-                }
+	if (mod & GDK_MOD2_MASK) {
+		mod &= ~GDK_MOD2_MASK;
+	}
 #endif
 
 	return gtk_accelerator_get_label (key(), (GdkModifierType) mod);
@@ -195,100 +195,100 @@ KeyboardKey::display_label () const
 string
 KeyboardKey::name () const
 {
-        int s = state();
+	int s = state();
 
-        string str;
+	string str;
 
-        if (s & Keyboard::PrimaryModifier) {
-                str += "Primary";
-        }
-        if (s & Keyboard::SecondaryModifier) {
-                if (!str.empty()) {
-                        str += '-';
-                }
-                str += "Secondary";
-        }
-        if (s & Keyboard::TertiaryModifier) {
-                if (!str.empty()) {
-                        str += '-';
-                }
-                str += "Tertiary";
-        }
-        if (s & Keyboard::Level4Modifier) {
-                if (!str.empty()) {
-                        str += '-';
-                }
-                str += "Level4";
-        }
+	if (s & Keyboard::PrimaryModifier) {
+		str += "Primary";
+	}
+	if (s & Keyboard::SecondaryModifier) {
+		if (!str.empty()) {
+			str += '-';
+		}
+		str += "Secondary";
+	}
+	if (s & Keyboard::TertiaryModifier) {
+		if (!str.empty()) {
+			str += '-';
+		}
+		str += "Tertiary";
+	}
+	if (s & Keyboard::Level4Modifier) {
+		if (!str.empty()) {
+			str += '-';
+		}
+		str += "Level4";
+	}
 
-        if (!str.empty()) {
-                str += '-';
-        }
+	if (!str.empty()) {
+		str += '-';
+	}
 
-        char const *gdk_name = gdk_keyval_name (key());
+	char const *gdk_name = gdk_keyval_name (key());
 
-        if (gdk_name) {
-	        str += gdk_name;
-        } else {
-	        /* fail! */
-	        return string();
-        }
+	if (gdk_name) {
+		str += gdk_name;
+	} else {
+		/* fail! */
+		return string();
+	}
 
-        return str;
+	return str;
 }
 
 bool
 KeyboardKey::make_key (const string& str, KeyboardKey& k)
 {
-        int s = 0;
+	int s = 0;
 
-        if (str.find ("Primary") != string::npos) {
-                s |= Keyboard::PrimaryModifier;
-        }
+	if (str.find ("Primary") != string::npos) {
+		s |= Keyboard::PrimaryModifier;
+	}
 
-        if (str.find ("Secondary") != string::npos) {
-                s |= Keyboard::SecondaryModifier;
-        }
+	if (str.find ("Secondary") != string::npos) {
+		s |= Keyboard::SecondaryModifier;
+	}
 
-        if (str.find ("Tertiary") != string::npos) {
-                s |= Keyboard::TertiaryModifier;
-        }
+	if (str.find ("Tertiary") != string::npos) {
+		s |= Keyboard::TertiaryModifier;
+	}
 
-        if (str.find ("Level4") != string::npos) {
-                s |= Keyboard::Level4Modifier;
-        }
+	if (str.find ("Level4") != string::npos) {
+		s |= Keyboard::Level4Modifier;
+	}
 
-        /* since all SINGLE key events keycodes are changed to lower case
-         * before looking them up, make sure we only store lower case here. The
-         * Shift part will be stored in the modifier part of the KeyboardKey.
-         *
-         * And yes Mildred, this doesn't cover CapsLock cases. Oh well.
-         */
+	/* since all SINGLE key events keycodes are changed to lower case
+	 * before looking them up, make sure we only store lower case here. The
+	 * Shift part will be stored in the modifier part of the KeyboardKey.
+	 *
+	 * And yes Mildred, this doesn't cover CapsLock cases. Oh well.
+	 */
 
-        string actual;
+	string actual;
 
-        if (str.size() == 1) {
-	        actual = PBD::downcase (str);
-        } else {
-	        actual = str;
-        }
+	if (str.size() == 1) {
+		actual = PBD::downcase (str);
+	} else {
+		actual = str;
+	}
 
-        string::size_type lastmod = actual.find_last_of ('-');
-        guint keyval;
+	string::size_type lastmod = actual.find_last_of ('-');
+	guint keyval;
 
-        if (lastmod != string::npos) {
-	        actual = PBD::downcase (str.substr (lastmod+1));
-        }
+	if (lastmod != string::npos) {
+		actual = PBD::downcase (str.substr (lastmod+1));
+	}
 
-        keyval = gdk_keyval_from_name (actual.c_str());
+	keyval = gdk_keyval_from_name (actual.c_str());
 
-        if (keyval == GDK_VoidSymbol || keyval == 0) {
-	        return false;
-        }
+	if (keyval == GDK_VoidSymbol || keyval == 0) {
+		return false;
+	}
 
-        k = KeyboardKey (s, keyval);
+	k = KeyboardKey (s, keyval);
 
-        return true;
+	return true;
 }
 
 /*================================= Bindings =================================*/
@@ -316,49 +316,49 @@ Bindings::get_binding_for_action (RefPtr<Action> action, Operation& op)
 {
 	const string action_name = ardour_action_name (action);
 
-        for (KeybindingMap::iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
+	for (KeybindingMap::iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
 
-	        /* option one: action has already been associated with the
-	         * binding
-	         */
+		/* option one: action has already been associated with the
+		 * binding
+		 */
 
-	        if (k->second.action == action) {
-		        return k->first;
-	        }
+		if (k->second.action == action) {
+			return k->first;
+		}
 
-	        /* option two: action name matches, so lookup the action,
-	         * setup the association while we're here, and return the binding.
-	         */
+		/* option two: action name matches, so lookup the action,
+		 * setup the association while we're here, and return the binding.
+		 */
 
-	        if (_action_map && k->second.action_name == action_name) {
-		        k->second.action = _action_map->find_action (action_name);
-		        return k->first;
-	        }
+		if (_action_map && k->second.action_name == action_name) {
+			k->second.action = _action_map->find_action (action_name);
+			return k->first;
+		}
 
-        }
+	}
 
-        for (KeybindingMap::iterator k = release_bindings.begin(); k != release_bindings.end(); ++k) {
+	for (KeybindingMap::iterator k = release_bindings.begin(); k != release_bindings.end(); ++k) {
 
-	        /* option one: action has already been associated with the
-	         * binding
-	         */
+		/* option one: action has already been associated with the
+		 * binding
+		 */
 
-	        if (k->second.action == action) {
-		        return k->first;
-	        }
+		if (k->second.action == action) {
+			return k->first;
+		}
 
-	        /* option two: action name matches, so lookup the action,
-	         * setup the association while we're here, and return the binding.
-	         */
+		/* option two: action name matches, so lookup the action,
+		 * setup the association while we're here, and return the binding.
+		 */
 
-	        if (_action_map && k->second.action_name == action_name) {
-		         k->second.action = _action_map->find_action (action_name);
-		         return k->first;
-	         }
+		if (_action_map && k->second.action_name == action_name) {
+			k->second.action = _action_map->find_action (action_name);
+			return k->first;
+		}
 
-        }
+	}
 
-        return KeyboardKey::null_key();
+	return KeyboardKey::null_key();
 }
 
 void
@@ -398,40 +398,40 @@ Bindings::activate (KeyboardKey kb, Operation op)
 {
 	KeybindingMap& kbm = get_keymap (op);
 
-        /* if shift was pressed, GDK will send us (e.g) 'E' rather than 'e'.
-           Our bindings all use the lower case character/keyname, so switch
-           to the lower case before doing the lookup.
-        */
+	/* if shift was pressed, GDK will send us (e.g) 'E' rather than 'e'.
+	   Our bindings all use the lower case character/keyname, so switch
+	   to the lower case before doing the lookup.
+	*/
 
-        KeyboardKey unshifted (kb.state(), gdk_keyval_to_lower (kb.key()));
+	KeyboardKey unshifted (kb.state(), gdk_keyval_to_lower (kb.key()));
 
-        KeybindingMap::iterator k = kbm.find (unshifted);
+	KeybindingMap::iterator k = kbm.find (unshifted);
 
-        if (k == kbm.end()) {
-                /* no entry for this key in the state map */
-	        DEBUG_TRACE (DEBUG::Bindings, string_compose ("no binding for %1\n", unshifted));
-	        return false;
-        }
+	if (k == kbm.end()) {
+		/* no entry for this key in the state map */
+		DEBUG_TRACE (DEBUG::Bindings, string_compose ("no binding for %1\n", unshifted));
+		return false;
+	}
 
-        RefPtr<Action> action;
+	RefPtr<Action> action;
 
-        if (k->second.action) {
-	        action = k->second.action;
-        } else {
-	        if (_action_map) {
-		        action = _action_map->find_action (k->second.action_name);
-	        }
-        }
+	if (k->second.action) {
+		action = k->second.action;
+	} else {
+		if (_action_map) {
+			action = _action_map->find_action (k->second.action_name);
+		}
+	}
 
-        if (action) {
-	        /* lets do it ... */
-	        DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2\n", unshifted, k->second.action_name));
-	        action->activate ();
-        }
+	if (action) {
+		/* lets do it ... */
+		DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2\n", unshifted, k->second.action_name));
+		action->activate ();
+	}
 
-        /* return true even if the action could not be found */
+	/* return true even if the action could not be found */
 
-        return true;
+	return true;
 }
 
 void
@@ -484,32 +484,32 @@ Bindings::dissociate ()
 void
 Bindings::push_to_gtk (KeyboardKey kb, RefPtr<Action> what)
 {
-        /* GTK has the useful feature of showing key bindings for actions in
-         * menus. As of August 2015, we have no interest in trying to
-         * reimplement this functionality, so we will use it even though we no
-         * longer use GTK accelerators for handling key events. To do this, we
-         * need to make sure that there is a fully populated GTK AccelMap set
-         * up with all bindings/actions.
-         */
+	/* GTK has the useful feature of showing key bindings for actions in
+	 * menus. As of August 2015, we have no interest in trying to
+	 * reimplement this functionality, so we will use it even though we no
+	 * longer use GTK accelerators for handling key events. To do this, we
+	 * need to make sure that there is a fully populated GTK AccelMap set
+	 * up with all bindings/actions.
+	 */
 
 	Gtk::AccelKey gtk_key;
 	bool entry_exists = Gtk::AccelMap::lookup_entry (what->get_accel_path(), gtk_key);
 
-        if (!entry_exists) {
+	if (!entry_exists) {
 
-	        /* there is a trick happening here. It turns out that
-	         * gtk_accel_map_add_entry() performs no validation checks on
-	         * the accelerator keyval. This means we can use it to define
-	         * ANY accelerator, even if they violate GTK's rules
-	         * (e.g. about not using navigation keys). This works ONLY when
-	         * the entry in the GTK accelerator map has not already been
-	         * added. The entries will be added by the GTK UIManager when
-	         * building menus, so this code must be called before that
-	         * happens.
-	         */
+		/* there is a trick happening here. It turns out that
+		 * gtk_accel_map_add_entry() performs no validation checks on
+		 * the accelerator keyval. This means we can use it to define
+		 * ANY accelerator, even if they violate GTK's rules
+		 * (e.g. about not using navigation keys). This works ONLY when
+		 * the entry in the GTK accelerator map has not already been
+		 * added. The entries will be added by the GTK UIManager when
+		 * building menus, so this code must be called before that
+		 * happens.
+		 */
 
-	        Gtk::AccelMap::add_entry (what->get_accel_path(), kb.key(), (Gdk::ModifierType) kb.state());
-        }
+		Gtk::AccelMap::add_entry (what->get_accel_path(), kb.key(), (Gdk::ModifierType) kb.state());
+	}
 }
 
 bool
@@ -577,32 +577,32 @@ Bindings::activate (MouseButton bb, Operation op)
 {
 	MouseButtonBindingMap& bbm = get_mousemap(op);
 
-        MouseButtonBindingMap::iterator b = bbm.find (bb);
+	MouseButtonBindingMap::iterator b = bbm.find (bb);
 
-        if (b == bbm.end()) {
-                /* no entry for this key in the state map */
-                return false;
-        }
+	if (b == bbm.end()) {
+		/* no entry for this key in the state map */
+		return false;
+	}
 
-        RefPtr<Action> action;
+	RefPtr<Action> action;
 
-        if (b->second.action) {
-	        action = b->second.action;
-        } else {
-	        if (_action_map) {
-		        action = _action_map->find_action (b->second.action_name);
-	        }
-        }
+	if (b->second.action) {
+		action = b->second.action;
+	} else {
+		if (_action_map) {
+			action = _action_map->find_action (b->second.action_name);
+		}
+	}
 
-        if (action) {
-	        /* lets do it ... */
-	        DEBUG_TRACE (DEBUG::Bindings, string_compose ("activating action %1\n", ardour_action_name (action)));
-	        action->activate ();
-        }
+	if (action) {
+		/* lets do it ... */
+		DEBUG_TRACE (DEBUG::Bindings, string_compose ("activating action %1\n", ardour_action_name (action)));
+		action->activate ();
+	}
 
-        /* return true even if the action could not be found */
+	/* return true even if the action could not be found */
 
-        return true;
+	return true;
 }
 
 void
@@ -610,134 +610,134 @@ Bindings::add (MouseButton bb, Operation op, string const& action_name)
 {
 	MouseButtonBindingMap& bbm = get_mousemap(op);
 
-        MouseButtonBindingMap::value_type newpair (bb, ActionInfo (action_name));
-        bbm.insert (newpair);
+	MouseButtonBindingMap::value_type newpair (bb, ActionInfo (action_name));
+	bbm.insert (newpair);
 }
 
 void
 Bindings::remove (MouseButton bb, Operation op)
 {
 	MouseButtonBindingMap& bbm = get_mousemap(op);
-        MouseButtonBindingMap::iterator b = bbm.find (bb);
+	MouseButtonBindingMap::iterator b = bbm.find (bb);
 
-        if (b != bbm.end()) {
-                bbm.erase (b);
-        }
+	if (b != bbm.end()) {
+		bbm.erase (b);
+	}
 }
 
 void
 Bindings::save (XMLNode& root)
 {
-        XMLNode* presses = new XMLNode (X_("Press"));
+	XMLNode* presses = new XMLNode (X_("Press"));
 
-        for (KeybindingMap::iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
-                XMLNode* child;
+	for (KeybindingMap::iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
+		XMLNode* child;
 
-                if (k->first.name().empty()) {
-	                continue;
-                }
+		if (k->first.name().empty()) {
+			continue;
+		}
 
-                child = new XMLNode (X_("Binding"));
-                child->add_property (X_("key"), k->first.name());
-                child->add_property (X_("action"), k->second.action_name);
-                presses->add_child_nocopy (*child);
-        }
+		child = new XMLNode (X_("Binding"));
+		child->add_property (X_("key"), k->first.name());
+		child->add_property (X_("action"), k->second.action_name);
+		presses->add_child_nocopy (*child);
+	}
 
-        for (MouseButtonBindingMap::iterator k = button_press_bindings.begin(); k != button_press_bindings.end(); ++k) {
-                XMLNode* child;
-                child = new XMLNode (X_("Binding"));
-                child->add_property (X_("button"), k->first.name());
-                child->add_property (X_("action"), k->second.action_name);
-                presses->add_child_nocopy (*child);
-        }
+	for (MouseButtonBindingMap::iterator k = button_press_bindings.begin(); k != button_press_bindings.end(); ++k) {
+		XMLNode* child;
+		child = new XMLNode (X_("Binding"));
+		child->add_property (X_("button"), k->first.name());
+		child->add_property (X_("action"), k->second.action_name);
+		presses->add_child_nocopy (*child);
+	}
 
-        XMLNode* releases = new XMLNode (X_("Release"));
+	XMLNode* releases = new XMLNode (X_("Release"));
 
-        for (KeybindingMap::iterator k = release_bindings.begin(); k != release_bindings.end(); ++k) {
-                XMLNode* child;
+	for (KeybindingMap::iterator k = release_bindings.begin(); k != release_bindings.end(); ++k) {
+		XMLNode* child;
 
-                if (k->first.name().empty()) {
-	                continue;
-                }
+		if (k->first.name().empty()) {
+			continue;
+		}
 
-                child = new XMLNode (X_("Binding"));
-                child->add_property (X_("key"), k->first.name());
-                child->add_property (X_("action"), k->second.action_name);
-                releases->add_child_nocopy (*child);
-        }
+		child = new XMLNode (X_("Binding"));
+		child->add_property (X_("key"), k->first.name());
+		child->add_property (X_("action"), k->second.action_name);
+		releases->add_child_nocopy (*child);
+	}
 
-        for (MouseButtonBindingMap::iterator k = button_release_bindings.begin(); k != button_release_bindings.end(); ++k) {
-                XMLNode* child;
-                child = new XMLNode (X_("Binding"));
-                child->add_property (X_("button"), k->first.name());
-                child->add_property (X_("action"), k->second.action_name);
-                releases->add_child_nocopy (*child);
-        }
+	for (MouseButtonBindingMap::iterator k = button_release_bindings.begin(); k != button_release_bindings.end(); ++k) {
+		XMLNode* child;
+		child = new XMLNode (X_("Binding"));
+		child->add_property (X_("button"), k->first.name());
+		child->add_property (X_("action"), k->second.action_name);
+		releases->add_child_nocopy (*child);
+	}
 
-        root.add_child_nocopy (*presses);
-        root.add_child_nocopy (*releases);
+	root.add_child_nocopy (*presses);
+	root.add_child_nocopy (*releases);
 }
 
 bool
 Bindings::load (XMLNode const& node)
 {
-        const XMLNodeList& children (node.children());
+	const XMLNodeList& children (node.children());
 
-        press_bindings.clear ();
-        release_bindings.clear ();
+	press_bindings.clear ();
+	release_bindings.clear ();
 
-        for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-	        /* each node could be Press or Release */
-	        load_operation (**i);
-        }
+	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+		/* each node could be Press or Release */
+		load_operation (**i);
+	}
 
-        return true;
+	return true;
 }
 
 void
 Bindings::load_operation (XMLNode const& node)
 {
-        if (node.name() == X_("Press") || node.name() == X_("Release")) {
+	if (node.name() == X_("Press") || node.name() == X_("Release")) {
 
-                Operation op;
+		Operation op;
 
-                if (node.name() == X_("Press")) {
-                        op = Press;
-                } else {
-                        op = Release;
-                }
+		if (node.name() == X_("Press")) {
+			op = Press;
+		} else {
+			op = Release;
+		}
 
-                const XMLNodeList& children (node.children());
+		const XMLNodeList& children (node.children());
 
-                for (XMLNodeList::const_iterator p = children.begin(); p != children.end(); ++p) {
+		for (XMLNodeList::const_iterator p = children.begin(); p != children.end(); ++p) {
 
-                        XMLProperty* ap;
-                        XMLProperty* kp;
-                        XMLProperty* bp;
+			XMLProperty* ap;
+			XMLProperty* kp;
+			XMLProperty* bp;
 
-                        ap = (*p)->property ("action");
-                        kp = (*p)->property ("key");
-                        bp = (*p)->property ("button");
+			ap = (*p)->property ("action");
+			kp = (*p)->property ("key");
+			bp = (*p)->property ("button");
 
-                        if (!ap || (!kp && !bp)) {
-                                continue;
-                        }
+			if (!ap || (!kp && !bp)) {
+				continue;
+			}
 
-                        if (kp) {
-                                KeyboardKey k;
-                                if (!KeyboardKey::make_key (kp->value(), k)) {
-                                        continue;
-                                }
-                                add (k, op, ap->value());
-                        } else {
-                                MouseButton b;
-                                if (!MouseButton::make_button (bp->value(), b)) {
-                                        continue;
-                                }
-                                add (b, op, ap->value());
-                        }
-                }
-        }
+			if (kp) {
+				KeyboardKey k;
+				if (!KeyboardKey::make_key (kp->value(), k)) {
+					continue;
+				}
+				add (k, op, ap->value());
+			} else {
+				MouseButton b;
+				if (!MouseButton::make_button (bp->value(), b)) {
+					continue;
+				}
+				add (b, op, ap->value());
+			}
+		}
+	}
 }
 
 void
@@ -822,11 +822,11 @@ Bindings::KeybindingMap&
 Bindings::get_keymap (Operation op)
 {
 	switch (op) {
-		case Press:
-			return press_bindings;
-		case Release:
-		default:
-			return release_bindings;
+	case Press:
+		return press_bindings;
+	case Release:
+	default:
+		return release_bindings;
 	}
 }
 
@@ -834,11 +834,11 @@ const Bindings::KeybindingMap&
 Bindings::get_keymap (Operation op) const
 {
 	switch (op) {
-		case Press:
-			return press_bindings;
-		case Release:
-		default:
-			return release_bindings;
+	case Press:
+		return press_bindings;
+	case Release:
+	default:
+		return release_bindings;
 	}
 }
 
@@ -846,11 +846,11 @@ Bindings::MouseButtonBindingMap&
 Bindings::get_mousemap (Operation op)
 {
 	switch (op) {
-		case Press:
-			return button_press_bindings;
-		case Release:
-		default:
-			return button_release_bindings;
+	case Press:
+		return button_press_bindings;
+	case Release:
+	default:
+		return button_release_bindings;
 	}
 }
 
@@ -885,13 +885,13 @@ ActionMap::get_actions (ActionMap::Actions& acts)
 RefPtr<Action>
 ActionMap::find_action (const string& name)
 {
-        _ActionMap::iterator a = _actions.find (name);
+	_ActionMap::iterator a = _actions.find (name);
 
-        if (a != _actions.end()) {
-                return a->second;
-        }
+	if (a != _actions.end()) {
+		return a->second;
+	}
 
-        return RefPtr<Action>();
+	return RefPtr<Action>();
 }
 
 RefPtr<ActionGroup>
@@ -916,42 +916,42 @@ ActionMap::create_action_group (const string& name)
 RefPtr<Action>
 ActionMap::register_action (RefPtr<ActionGroup> group, const char* name, const char* label)
 {
-        string fullpath;
+	string fullpath;
 
-        RefPtr<Action> act = Action::create (name, label);
+	RefPtr<Action> act = Action::create (name, label);
 
-        fullpath = group->get_name();
-        fullpath += '/';
-        fullpath += name;
+	fullpath = group->get_name();
+	fullpath += '/';
+	fullpath += name;
 
-        if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
-	        group->add (act);
-	        return act;
-        }
+	if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+		group->add (act);
+		return act;
+	}
 
-        /* already registered */
-        return RefPtr<Action> ();
+	/* already registered */
+	return RefPtr<Action> ();
 }
 
 RefPtr<Action>
 ActionMap::register_action (RefPtr<ActionGroup> group,
                             const char* name, const char* label, sigc::slot<void> sl)
 {
-        string fullpath;
+	string fullpath;
 
-        RefPtr<Action> act = Action::create (name, label);
+	RefPtr<Action> act = Action::create (name, label);
 
-        fullpath = group->get_name();
-        fullpath += '/';
-        fullpath += name;
+	fullpath = group->get_name();
+	fullpath += '/';
+	fullpath += name;
 
-        if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
-	        group->add (act, sl);
-	        return act;
-        }
+	if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+		group->add (act, sl);
+		return act;
+	}
 
-        /* already registered */
-        return RefPtr<Action>();
+	/* already registered */
+	return RefPtr<Action>();
 }
 
 RefPtr<Action>
@@ -960,22 +960,22 @@ ActionMap::register_radio_action (RefPtr<ActionGroup> group,
                                   const char* name, const char* label,
                                   sigc::slot<void> sl)
 {
-        string fullpath;
+	string fullpath;
 
-        RefPtr<Action> act = RadioAction::create (rgroup, name, label);
-        RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+	RefPtr<Action> act = RadioAction::create (rgroup, name, label);
+	RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 
-        fullpath = group->get_name();
-        fullpath += '/';
-        fullpath += name;
+	fullpath = group->get_name();
+	fullpath += '/';
+	fullpath += name;
 
-        if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
-	        group->add (act, sl);
-	        return act;
-        }
+	if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+		group->add (act, sl);
+		return act;
+	}
 
-        /* already registered */
-        return RefPtr<Action>();
+	/* already registered */
+	return RefPtr<Action>();
 }
 
 RefPtr<Action>
@@ -985,53 +985,53 @@ ActionMap::register_radio_action (RefPtr<ActionGroup> group,
                                   sigc::slot<void,GtkAction*> sl,
                                   int value)
 {
-        string fullpath;
+	string fullpath;
 
-        RefPtr<Action> act = RadioAction::create (rgroup, name, label);
-        RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-        ract->property_value() = value;
+	RefPtr<Action> act = RadioAction::create (rgroup, name, label);
+	RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+	ract->property_value() = value;
 
-        fullpath = group->get_name();
-        fullpath += '/';
-        fullpath += name;
+	fullpath = group->get_name();
+	fullpath += '/';
+	fullpath += name;
 
-        if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
-	        group->add (act, sigc::bind (sl, act->gobj()));
-	        return act;
-        }
+	if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+		group->add (act, sigc::bind (sl, act->gobj()));
+		return act;
+	}
 
-        /* already registered */
+	/* already registered */
 
-        return RefPtr<Action>();
+	return RefPtr<Action>();
 }
 
 RefPtr<Action>
 ActionMap::register_toggle_action (RefPtr<ActionGroup> group,
                                    const char* name, const char* label, sigc::slot<void> sl)
 {
-        string fullpath;
+	string fullpath;
 
-        fullpath = group->get_name();
-        fullpath += '/';
-        fullpath += name;
+	fullpath = group->get_name();
+	fullpath += '/';
+	fullpath += name;
 
-        RefPtr<Action> act = ToggleAction::create (name, label);
+	RefPtr<Action> act = ToggleAction::create (name, label);
 
-        if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
-	        group->add (act, sl);
-	        return act;
-        }
+	if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+		group->add (act, sl);
+		return act;
+	}
 
-        /* already registered */
-        return RefPtr<Action>();
+	/* already registered */
+	return RefPtr<Action>();
 }
 
 void
 ActionMap::get_all_actions (std::vector<std::string>& paths,
-                           std::vector<std::string>& labels,
-                           std::vector<std::string>& tooltips,
-                           std::vector<std::string>& keys,
-                           std::vector<RefPtr<Action> >& actions)
+                            std::vector<std::string>& labels,
+                            std::vector<std::string>& tooltips,
+                            std::vector<std::string>& keys,
+                            std::vector<RefPtr<Action> >& actions)
 {
 	for (list<ActionMap*>::const_iterator map = action_maps.begin(); map != action_maps.end(); ++map) {
 
