@@ -350,14 +350,8 @@ public:
 	framecnt_t signal_latency() const { return _signal_latency; }
 
 	PBD::Signal0<void>       active_changed;
-	PBD::Signal0<void>       phase_invert_changed;
 	PBD::Signal0<void>       denormal_protection_changed;
-	PBD::Signal1<void,PBD::Controllable::GroupControlDisposition>  listen_changed;
-	PBD::Signal2<void,bool,PBD::Controllable::GroupControlDisposition>  solo_changed;
-	PBD::Signal0<void>       solo_safe_changed;
-	PBD::Signal0<void>       solo_isolated_changed;
 	PBD::Signal0<void>       comment_changed;
-	PBD::Signal0<void>       mute_changed;
 	PBD::Signal0<void>       mute_points_changed;
 
 	/** track numbers - assigned by session

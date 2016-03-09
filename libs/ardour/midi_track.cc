@@ -999,4 +999,3 @@ MidiTrack::monitoring_state () const
 	}
 	return ms;
 }
-

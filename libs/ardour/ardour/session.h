@@ -67,6 +67,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session_configuration.h"
 #include "ardour/session_event.h"
+#include "ardour/session_solo_notifications.h"
 #include "ardour/interpolation.h"
 #include "ardour/plugin.h"
 #include "ardour/route.h"
@@ -165,7 +166,7 @@ private:
 };
 
 /** Ardour Session */
-class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
+class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager, public SessionSoloNotifications<Session>
 {
   public:
 	enum RecordState {
@@ -1683,12 +1684,14 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void reassign_track_numbers ();
 	uint32_t _track_number_decimals;
 
-	/* mixer stuff */
+	/* solo/mute/notifications (see SessionSoloNotifications object) */
 
-	void route_listen_changed (PBD::Controllable::GroupControlDisposition, boost::weak_ptr<Route>);
-	void route_mute_changed ();
-	void route_solo_changed (bool self_solo_change, PBD::Controllable::GroupControlDisposition group_override, boost::weak_ptr<Route>);
-	void route_solo_isolated_changed (boost::weak_ptr<Route>);
+	friend class SessionSoloNotifications;
+	void _route_listen_changed (PBD::Controllable::GroupControlDisposition, boost::shared_ptr<Route>);
+	void _route_mute_changed ();
+	void _route_solo_changed (bool self_solo_change, PBD::Controllable::GroupControlDisposition group_override, boost::shared_ptr<Route>);
+	void _route_solo_isolated_changed (boost::shared_ptr<Route>);
+
 	void update_route_solo_state (boost::shared_ptr<RouteList> r = boost::shared_ptr<RouteList>());
 
 	void listen_position_changed ();
