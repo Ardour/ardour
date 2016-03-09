@@ -23,6 +23,8 @@
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
+#include "gtkmm2ext/keyboard.h"
+
 #include "gui_thread.h"
 #include "floating_text_entry.h"
 #include "tooltips.h"
@@ -41,6 +43,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	: AxisView (s)
 	, _vca (v)
 	, gain_meter (s, 250)
+	, context_menu (0)
 {
 	gain_meter.set_controls (boost::shared_ptr<Route>(),
 	                         boost::shared_ptr<PeakMeter>(),
@@ -318,11 +321,19 @@ VCAMasterStrip::vca_button_release (GdkEventButton* ev)
 bool
 VCAMasterStrip::name_button_press (GdkEventButton* ev)
 {
-	if (ev->type == GDK_2BUTTON_PRESS) {
+	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
 		Gtk::Window* win = dynamic_cast<Gtk::Window*>(get_toplevel());
 		FloatingTextEntry* fte = new FloatingTextEntry (win, _vca->name());
 		fte->use_text.connect (sigc::mem_fun (*this, &VCAMasterStrip::finish_name_edit));
 		fte->present ();
+		return true;
+	}
+
+	if (Keyboard::is_context_menu_event (ev)) {
+		if (!context_menu) {
+			build_context_menu ();
+		}
+		context_menu->popup (1, ev->time);
 		return true;
 	}
 
@@ -347,4 +358,13 @@ void
 VCAMasterStrip::update_vca_name ()
 {
 	name_button.set_text (short_version (_vca->name(), 8));
+}
+
+void
+VCAMasterStrip::build_context_menu ()
+{
+	using namespace Gtk::Menu_Helpers;
+	context_menu = new Menu;
+	MenuList& items = context_menu->items();
+	items.push_back (MenuElem (_("Remove")));
 }
