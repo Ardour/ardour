@@ -641,10 +641,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::setup_comment_button, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::property_changed, this, _1), gui_context());
 
-	_route->gain_control()->VCAStatusChange.connect (route_connections,
-	                                                 invalidator (*this),
-	                                                 boost::bind (&MixerStrip::update_vca_display, this),
-	                                                 gui_context());
+	_route->gain_control()->MasterStatusChange.connect (route_connections,
+	                                                    invalidator (*this),
+	                                                    boost::bind (&MixerStrip::update_vca_display, this),
+	                                                    gui_context());
 
 	set_stuff_from_route ();
 

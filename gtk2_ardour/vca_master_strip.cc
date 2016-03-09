@@ -131,7 +131,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	_vca->solo_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::solo_changed, this), gui_context());
 	_vca->mute_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::mute_changed, this), gui_context());
 
-	_vca->gain_control()->VCAStatusChange.connect (vca_connections,
+	_vca->gain_control()->MasterStatusChange.connect (vca_connections,
 	                                          invalidator (*this),
 	                                          boost::bind (&VCAMasterStrip::update_vca_display, this),
 	                                          gui_context());
@@ -144,7 +144,7 @@ VCAMasterStrip::update_vca_display ()
 	string label;
 
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-		if (_vca->gain_control()->slaved_to (*v)) {
+		if (_vca->gain_control()->slaved_to ((*v)->gain_control())) {
 			if (!label.empty()) {
 				label += ' ';
 			}
@@ -256,11 +256,11 @@ VCAMasterStrip::vca_menu_toggle (CheckMenuItem* menuitem, uint32_t n)
 			/* null VCA means drop all VCA assignments */
 			vca_unassign ();
 		} else {
-			_vca->gain_control()->remove_master (vca);
+			_vca->gain_control()->remove_master (vca->gain_control());
 		}
 	} else {
 		if (vca) {
-			_vca->gain_control()->add_master (vca);
+			_vca->gain_control()->add_master (vca->gain_control());
 		}
 	}
 }
@@ -307,7 +307,7 @@ VCAMasterStrip::vca_button_release (GdkEventButton* ev)
 
 		items.push_back (CheckMenuElem ((*v)->name()));
 		CheckMenuItem* item = dynamic_cast<CheckMenuItem*> (&items.back());
-		if (_vca->gain_control()->slaved_to (*v)) {
+		if (_vca->gain_control()->slaved_to ((*v)->gain_control())) {
 			item->set_active (true);
 		}
 		item->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &VCAMasterStrip::vca_menu_toggle), item, (*v)->number()));
