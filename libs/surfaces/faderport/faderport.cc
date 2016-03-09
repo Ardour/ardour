@@ -1142,9 +1142,8 @@ FaderPort::set_current_route (boost::shared_ptr<Route> r)
 	if (_current_route) {
 		_current_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::drop_current_route, this), this);
 
-		_current_route->mute_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_mute, this), this);
-		_current_route->solo_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_solo, this), this);
-		_current_route->listen_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_listen, this), this);
+		_current_route->mute_control()->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_mute, this), this);
+		_current_route->solo_control()->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_solo, this), this);
 
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_route);
 		if (t) {
@@ -1243,16 +1242,6 @@ FaderPort::map_solo ()
 {
 	if (_current_route) {
 		get_button (Solo).set_led_state (_output_port, _current_route->soloed() || _current_route->listening_via_monitor());
-	} else {
-		get_button (Solo).set_led_state (_output_port, false);
-	}
-}
-
-void
-FaderPort::map_listen ()
-{
-	if (_current_route) {
-		get_button (Solo).set_led_state (_output_port, _current_route->listening_via_monitor());
 	} else {
 		get_button (Solo).set_led_state (_output_port, false);
 	}

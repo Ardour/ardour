@@ -196,9 +196,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	_solo->set_control (_route->solo_control());
 	_mute->set_control (_route->mute_control());
 
-	_route->solo_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
-	_route->listen_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
-
+	_route->solo_control()->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
 	_route->mute_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_mute_changed, this), ui_context());
 
 	boost::shared_ptr<AutomationControl> pan_control = _route->pan_azimuth_control();

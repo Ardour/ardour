@@ -304,7 +304,6 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 
 	void map_route_state ();
 	void map_solo ();
-	void map_listen ();
 	void map_mute ();
 	bool rec_enable_state;
 	void map_recenable ();
