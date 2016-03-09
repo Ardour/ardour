@@ -70,19 +70,19 @@ class LIBARDOUR_API GainControl : public AutomationControl {
   private:
 	class MasterRecord {
           public:
-		MasterRecord (boost::shared_ptr<GainControl> gc, double r)
+		MasterRecord (boost::shared_ptr<AutomationControl> gc, double r)
 			: _master (gc)
 			, _ratio (r)
 		{}
 
-		boost::shared_ptr<GainControl> master() const { return _master; }
+		boost::shared_ptr<AutomationControl> master() const { return _master; }
 		double ratio () const { return _ratio; }
 		void reset_ratio (double r) { _ratio = r; }
 
 		PBD::ScopedConnection connection;
 
          private:
-		boost::shared_ptr<GainControl> _master;
+		boost::shared_ptr<AutomationControl> _master;
 		double _ratio;
 
 	};
