@@ -5899,8 +5899,8 @@ void
 Route::vca_assign (boost::shared_ptr<VCA> vca)
 {
 	_gain_control->add_master (vca->gain_control());
-	vca->add_solo_target (shared_from_this());
-	vca->add_mute_target (shared_from_this());
+	_solo_control->add_master (vca->solo_control());
+	_mute_control->add_master (vca->mute_control());
 }
 
 void
@@ -5909,10 +5909,12 @@ Route::vca_unassign (boost::shared_ptr<VCA> vca)
 	if (!vca) {
 		/* unassign from all */
 		_gain_control->clear_masters ();
-		/* XXXX need to remove from solo/mute target lists */
+		_solo_control->clear_masters ();
+		_mute_control->clear_masters ();
 	} else {
 		_gain_control->remove_master (vca->gain_control());
-		vca->remove_solo_target (shared_from_this());
-		vca->remove_mute_target (shared_from_this());
+		_solo_control->remove_master (vca->solo_control());
+		_mute_control->remove_master (vca->mute_control());
+
 	}
 }

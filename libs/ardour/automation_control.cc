@@ -69,6 +69,31 @@ AutomationControl::writable() const
 	return true;
 }
 
+double
+AutomationControl::get_masters_value_locked () const
+{
+	gain_t v = 1.0;
+
+	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+		/* get current master value, scale by our current ratio with that master */
+		v *= mr->second.master()->get_value () * mr->second.ratio();
+	}
+
+	return min (_desc.upper, v);
+}
+
+double
+AutomationControl::get_value_locked() const
+{
+	/* read or write masters lock must be held */
+
+	if (_masters.empty()) {
+		return Control::get_double (false, _session.transport_frame());
+	}
+
+	return get_masters_value_locked ();
+}
+
 /** Get the current effective `user' value based on automation state */
 double
 AutomationControl::get_value() const
@@ -82,27 +107,6 @@ AutomationControl::get_value() const
 		return Control::get_double (from_list, _session.transport_frame());
 	}
 }
-
-double
-AutomationControl::get_value_locked() const
-{
-	/* read or write masters lock must be held */
-
-	if (_masters.empty()) {
-		return Control::get_double (false, _session.transport_frame());
-	}
-
-	gain_t v = 1.0;
-
-	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-		/* get current master value, scale by our current ratio with that master */
-		v *= mr->second.master()->get_value () * mr->second.ratio();
-	}
-
-	return min (_desc.upper, v);
-}
-
-
 
 /** Set the value and do the right thing based on automation state
  *  (e.g. record if necessary, etc.)
@@ -358,4 +362,3 @@ AutomationControl::slaved () const
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 	return !_masters.empty();
 }
-

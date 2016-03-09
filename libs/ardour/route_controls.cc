@@ -94,6 +94,26 @@ Route::RouteAutomationControl::RouteAutomationControl (const std::string& name,
 {
 }
 
+double
+Route::BooleanRouteAutomationControl::get_masters_value_locked () const
+{
+	/* masters (read/write) lock must be held */
+
+	/* if any master is enabled (val > 0.0) then we consider the master
+	   value to be 1.0
+	*/
+
+	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+		if (mr->second.master()->get_value()) {
+			return 1.0;
+		}
+	}
+
+	return 0.0;
+}
+
+
+
 Route::GainControllable::GainControllable (Session& s, AutomationType atype, boost::shared_ptr<Route> r)
 	: GainControl (s, Evoral::Parameter(atype))
 	, _route (r)
@@ -102,7 +122,7 @@ Route::GainControllable::GainControllable (Session& s, AutomationType atype, boo
 }
 
 Route::SoloControllable::SoloControllable (std::string name, boost::shared_ptr<Route> r)
-	: RouteAutomationControl (name, SoloAutomation, boost::shared_ptr<AutomationList>(), r)
+	: BooleanRouteAutomationControl (name, SoloAutomation, boost::shared_ptr<AutomationList>(), r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(SoloAutomation)));
 	gl->set_interpolation(Evoral::ControlList::Discrete);
@@ -138,7 +158,18 @@ Route::SoloControllable::set_value_unchecked (double val)
 double
 Route::SoloControllable::get_value () const
 {
+	if (slaved()) {
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		return get_masters_value_locked () ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
+	}
+
+	if (_list && ((AutomationList*)_list.get())->automation_playback()) {
+		// Playing back automation, get the value from the list
+		return AutomationControl::get_value();
+	}
+
 	boost::shared_ptr<Route> r = _route.lock ();
+
 	if (!r) {
 		return 0;
 	}
@@ -151,7 +182,7 @@ Route::SoloControllable::get_value () const
 }
 
 Route::MuteControllable::MuteControllable (std::string name, boost::shared_ptr<Route> r)
-	: RouteAutomationControl (name, MuteAutomation, boost::shared_ptr<AutomationList>(), r)
+	: BooleanRouteAutomationControl (name, MuteAutomation, boost::shared_ptr<AutomationList>(), r)
 	, _route (r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(MuteAutomation)));
@@ -221,6 +252,11 @@ Route::MuteControllable::_set_value (double val, Controllable::GroupControlDispo
 double
 Route::MuteControllable::get_value () const
 {
+	if (slaved()) {
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		return get_masters_value_locked () ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
+	}
+
 	if (_list && ((AutomationList*)_list.get())->automation_playback()) {
 		// Playing back automation, get the value from the list
 		return AutomationControl::get_value();
@@ -232,7 +268,7 @@ Route::MuteControllable::get_value () const
 }
 
 Route::PhaseControllable::PhaseControllable (std::string name, boost::shared_ptr<Route> r)
-	: RouteAutomationControl (name, PhaseAutomation, boost::shared_ptr<AutomationList>(), r)
+	: BooleanRouteAutomationControl (name, PhaseAutomation, boost::shared_ptr<AutomationList>(), r)
 	, _current_phase (0)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(PhaseAutomation)));
@@ -276,7 +312,7 @@ Route::PhaseControllable::channel () const
 }
 
 Route::SoloIsolateControllable::SoloIsolateControllable (std::string name, boost::shared_ptr<Route> r)
-	: RouteAutomationControl (name, SoloIsolateAutomation, boost::shared_ptr<AutomationList>(), r)
+	: BooleanRouteAutomationControl (name, SoloIsolateAutomation, boost::shared_ptr<AutomationList>(), r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(SoloIsolateAutomation)));
 	gl->set_interpolation(Evoral::ControlList::Discrete);
@@ -314,7 +350,7 @@ Route::SoloIsolateControllable::_set_value (double val, PBD::Controllable::Group
 }
 
 Route::SoloSafeControllable::SoloSafeControllable (std::string name, boost::shared_ptr<Route> r)
-	: RouteAutomationControl (name, SoloSafeAutomation, boost::shared_ptr<AutomationList>(), r)
+	: BooleanRouteAutomationControl (name, SoloSafeAutomation, boost::shared_ptr<AutomationList>(), r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(SoloSafeAutomation)));
 	gl->set_interpolation(Evoral::ControlList::Discrete);
