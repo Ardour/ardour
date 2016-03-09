@@ -20,10 +20,8 @@
 #define __ardour_gain_control_h__
 
 #include <string>
-#include <map>
 
 #include <boost/shared_ptr.hpp>
-#include <glibmm/threads.h>
 
 #include "pbd/controllable.h"
 
@@ -41,7 +39,6 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	GainControl (Session& session, const Evoral::Parameter &param,
 	             boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>());
 
-	double get_value () const;
 	void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	void set_value_unchecked (double);
 
@@ -54,51 +51,15 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	double lower_db;
 	double range_db;
 
-	gain_t get_master_gain () const;
-	void add_master (boost::shared_ptr<VCA>);
-	void remove_master (boost::shared_ptr<VCA>);
-	void clear_masters ();
-	bool slaved_to (boost::shared_ptr<VCA>) const;
-	bool slaved () const;
-	std::vector<uint32_t> masters () const;
-
-	PBD::Signal0<void> VCAStatusChange;
-
 	int set_state (XMLNode const&, int);
 	XMLNode& get_state();
 
   private:
-	class MasterRecord {
-          public:
-		MasterRecord (boost::shared_ptr<AutomationControl> gc, double r)
-			: _master (gc)
-			, _ratio (r)
-		{}
-
-		boost::shared_ptr<AutomationControl> master() const { return _master; }
-		double ratio () const { return _ratio; }
-		void reset_ratio (double r) { _ratio = r; }
-
-		PBD::ScopedConnection connection;
-
-         private:
-		boost::shared_ptr<AutomationControl> _master;
-		double _ratio;
-
-	};
-
-	mutable Glib::Threads::RWLock master_lock;
-	typedef std::map<uint32_t,MasterRecord> Masters;
-	Masters _masters;
-	PBD::ScopedConnectionList masters_connections;
 	std::string masters_string;
 	PBD::ScopedConnection vca_loaded_connection;
 
-	gain_t get_value_locked () const;
-	gain_t get_master_gain_locked () const;
-	void master_going_away (boost::weak_ptr<VCA>);
-	void recompute_masters_ratios (double val);
 	void vcas_loaded();
+	void recompute_masters_ratios (double val);
 
 	void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 };

@@ -21,10 +21,16 @@
 #ifndef __ardour_automation_control_h__
 #define __ardour_automation_control_h__
 
+#include <map>
+
+#include <glibmm/threads.h>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
 #include "pbd/controllable.h"
+
+#include "evoral/types.hpp"
 #include "evoral/Control.hpp"
 
 #include "ardour/libardour_visibility.h"
@@ -111,10 +117,48 @@ public:
 	const ARDOUR::Session& session() const { return _session; }
 	void commit_transaction (bool did_write);
 
-protected:
+	void add_master (boost::shared_ptr<AutomationControl>);
+	void remove_master (boost::shared_ptr<AutomationControl>);
+	void clear_masters ();
+	bool slaved_to (boost::shared_ptr<AutomationControl>) const;
+	bool slaved () const;
+	std::vector<PBD::ID> masters () const;
+
+	PBD::Signal0<void> MasterStatusChange;
+
+  protected:
 	ARDOUR::Session& _session;
 
 	const ParameterDescriptor _desc;
+
+
+	class MasterRecord {
+          public:
+		MasterRecord (boost::shared_ptr<AutomationControl> gc, double r)
+			: _master (gc)
+			, _ratio (r)
+		{}
+
+		boost::shared_ptr<AutomationControl> master() const { return _master; }
+		double ratio () const { return _ratio; }
+		void reset_ratio (double r) { _ratio = r; }
+
+		PBD::ScopedConnection connection;
+
+         private:
+		boost::shared_ptr<AutomationControl> _master;
+		double _ratio;
+
+	};
+
+	mutable Glib::Threads::RWLock master_lock;
+	typedef std::map<PBD::ID,MasterRecord> Masters;
+	Masters _masters;
+	PBD::ScopedConnectionList masters_connections;
+
+	void master_going_away (boost::weak_ptr<AutomationControl>);
+	virtual void recompute_masters_ratios (double val) { /* do nothing by default */}
+	double get_value_locked() const;
 };
 
 

@@ -43,32 +43,6 @@ GainControl::GainControl (Session& session, const Evoral::Parameter &param, boos
 	range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
 }
 
-gain_t
-GainControl::get_value_locked () const {
-
-	/* read or write masters lock must be held */
-
-	if (_masters.empty()) {
-		return AutomationControl::get_value();
-	}
-
-	gain_t g = 1.0;
-
-	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-		/* get current master value, scale by our current ratio with that master */
-		g *= mr->second.master()->get_value () * mr->second.ratio();
-	}
-
-	return min (Config->get_max_gain(), g);
-}
-
-double
-GainControl::get_value () const
-{
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
-	return get_value_locked ();
-}
-
 void
 GainControl::set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
@@ -96,6 +70,10 @@ GainControl::_set_value (double val, Controllable::GroupControlDisposition group
 			recompute_masters_ratios (val);
 		}
 	}
+
+	/* this sets the Evoral::Control::_user_value for us, which will
+	   be retrieved by AutomationControl::get_value ()
+	*/
 
 	AutomationControl::set_value (val, group_override);
 
@@ -139,118 +117,6 @@ GainControl::get_user_string () const
 {
 	char theBuf[32]; sprintf( theBuf, _("%3.1f dB"), accurate_coefficient_to_dB (get_value()));
 	return std::string(theBuf);
-}
-
-gain_t
-GainControl::get_master_gain () const
-{
-	Glib::Threads::RWLock::ReaderLock sm (master_lock, Glib::Threads::TRY_LOCK);
-
-	if (sm.locked()) {
-		return get_master_gain_locked ();
-	}
-
-	return 1.0;
-}
-
-gain_t
-GainControl::get_master_gain_locked () const
-{
-	/* Master lock MUST be held (read or write lock is acceptable) */
-
-	gain_t g = 1.0;
-
-	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-		/* get current master value, scale by our current ratio with that master */
-		g *= mr->second.master()->get_value () * mr->second.ratio();
-	}
-
-	return g;
-}
-
-void
-GainControl::add_master (boost::shared_ptr<VCA> vca)
-{
-	gain_t current_value;
-	std::pair<Masters::iterator,bool> res;
-
-	{
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		current_value = get_value_locked ();
-
-		/* ratio will be recomputed below */
-
-		res = _masters.insert (make_pair<uint32_t,MasterRecord> (vca->number(), MasterRecord (vca->gain_control(), 0.0)));
-
-		if (res.second) {
-
-			recompute_masters_ratios (current_value);
-
-			/* note that we bind @param m as a weak_ptr<GainControl>, thus
-			   avoiding holding a reference to the control in the binding
-			   itself.
-			*/
-
-			vca->DropReferences.connect_same_thread (masters_connections, boost::bind (&GainControl::master_going_away, this, vca));
-
-			/* Store the connection inside the MasterRecord, so that when we destroy it, the connection is destroyed
-			   and we no longer hear about changes to the VCA.
-			*/
-
-			vca->gain_control()->Changed.connect_same_thread (res.first->second.connection, boost::bind (&PBD::Signal0<void>::operator(), &Changed));
-		}
-	}
-
-	if (res.second) {
-		VCAStatusChange (); /* EMIT SIGNAL */
-	}
-}
-
-void
-GainControl::master_going_away (boost::weak_ptr<VCA> wv)
-{
-	boost::shared_ptr<VCA> v = wv.lock();
-	if (v) {
-		remove_master (v);
-	}
-}
-
-void
-GainControl::remove_master (boost::shared_ptr<VCA> vca)
-{
-	gain_t current_value;
-	Masters::size_type erased = 0;
-
-	{
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		current_value = get_value_locked ();
-		erased = _masters.erase (vca->number());
-		if (erased) {
-			recompute_masters_ratios (current_value);
-		}
-	}
-
-	if (erased) {
-		VCAStatusChange (); /* EMIT SIGNAL */
-	}
-}
-
-void
-GainControl::clear_masters ()
-{
-	bool had_masters = false;
-
-	{
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		if (!_masters.empty()) {
-			had_masters = true;
-		}
-		_masters.clear ();
-	}
-
-	if (had_masters) {
-		VCAStatusChange (); /* EMIT SIGNAL */
-	}
 }
 
 void
@@ -301,25 +167,12 @@ GainControl::recompute_masters_ratios (double val)
 	}
 }
 
-bool
-GainControl::slaved_to (boost::shared_ptr<VCA> vca) const
-{
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
-	return _masters.find (vca->number()) != _masters.end();
-}
-
-bool
-GainControl::slaved () const
-{
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
-	return !_masters.empty();
-}
-
 XMLNode&
 GainControl::get_state ()
 {
 	XMLNode& node (AutomationControl::get_state());
 
+#if 0
 	/* store VCA master IDs */
 
 	string str;
@@ -337,6 +190,7 @@ GainControl::get_state ()
 	if (!str.empty()) {
 		node.add_property (X_("masters"), str);
 	}
+#endif
 
 	return node;
 }
@@ -346,6 +200,7 @@ GainControl::set_state (XMLNode const& node, int version)
 {
 	AutomationControl::set_state (node, version);
 
+#if 0
 	XMLProperty const* prop = node.property (X_("masters"));
 
 	/* Problem here if we allow VCA's to be slaved to other VCA's .. we
@@ -362,6 +217,7 @@ GainControl::set_state (XMLNode const& node, int version)
 			_session.vca_manager().VCAsLoaded.connect_same_thread (vca_loaded_connection, boost::bind (&GainControl::vcas_loaded, this));
 		}
 	}
+#endif
 
 	return 0;
 }
@@ -379,7 +235,7 @@ GainControl::vcas_loaded ()
 	for (vector<string>::const_iterator m = masters.begin(); m != masters.end(); ++m) {
 		boost::shared_ptr<VCA> vca = _session.vca_manager().vca_by_number (PBD::atoi (*m));
 		if (vca) {
-			add_master (vca);
+			add_master (vca->gain_control());
 		}
 	}
 
