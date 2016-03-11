@@ -580,7 +580,8 @@ ExportGraphBuilder::SilenceHandler::SilenceHandler (ExportGraphBuilder & parent,
 	max_frames_in = max_frames;
 	framecnt_t sample_rate = parent.session.nominal_frame_rate();
 
-	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in));
+	// TODO silence-threshold should be per export-preset, with Config->get_silence_threshold being the default
+	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in, Config->get_export_silence_threshold ()));
 	silence_trimmer->set_trim_beginning (config.format->trim_beginning());
 	silence_trimmer->set_trim_end (config.format->trim_end());
 
