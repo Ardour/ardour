@@ -489,7 +489,6 @@ private:
 			return false;
 		}
 
-		printf ("%x\n", ctx->get_suggested_action());
 		if (top_half || bottom_half) {
 			create_or_update_placeholder (c);
 			if (_drag_source == this /* re-order */) {
