@@ -410,6 +410,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\searchbar.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\selector.cc"
 				>
 			</File>
@@ -629,6 +633,10 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\scroomer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtkmm2ext\searchbar.h"
 				>
 			</File>
 			<File
