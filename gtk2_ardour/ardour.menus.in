@@ -307,7 +307,7 @@
       <menuitem action='rename-region'/>
       <menuitem action='show-region-properties'/>
       <menuitem action='loudness-analyze-region'/>
-      <menuitem action='spectal-analyze-region'/>
+      <menuitem action='spectral-analyze-region'/>
       <menu action='RegionMenuEdit'>
          <menuitem action='combine-regions'/>
          <menuitem action='uncombine-regions'/>
