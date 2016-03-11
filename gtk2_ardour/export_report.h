@@ -186,9 +186,11 @@ class ExportReport : public ArdourDialog
 public:
 	typedef boost::shared_ptr<ARDOUR::ExportStatus> StatusPtr;
 	ExportReport (ARDOUR::Session*, StatusPtr);
+	ExportReport (const std::string & title, const ARDOUR::AnalysisResults & ar);
 	int run ();
 
 private:
+	void init (const ARDOUR::AnalysisResults &, bool);
 	void draw_waveform (Cairo::RefPtr<Cairo::ImageSurface>& wave,
 			ARDOUR::ExportAnalysisPtr, uint32_t, int, size_t, int, int, bool, bool);
 
@@ -203,7 +205,6 @@ private:
 	void on_logscale_toggled (Gtk::ToggleButton*);
 	void on_rectivied_toggled (Gtk::ToggleButton*);
 
-	StatusPtr        status;
 	Gtk::Notebook    pages;
 	ARDOUR::Session* _session;
 	Gtk::Button*     stop_btn;

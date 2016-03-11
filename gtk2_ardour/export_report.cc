@@ -53,22 +53,38 @@ using namespace ARDOUR;
 
 ExportReport::ExportReport (Session* session, StatusPtr s)
 	: ArdourDialog (_("Export Report/Analysis"))
-	, status (s)
 	, _session (session)
+	, stop_btn (0)
+	, play_btn (0)
 	, _audition_num (-1)
 	, _page_num (0)
 {
+	init (s->result_map, true);
+}
+
+ExportReport::ExportReport (const std::string & title, const AnalysisResults & ar)
+	: ArdourDialog (title)
+	, _session (0)
+	, stop_btn (0)
+	, play_btn (0)
+	, _audition_num (-1)
+	, _page_num (0)
+{
+	init (ar, false);
+}
+
+void
+ExportReport::init (const AnalysisResults & ar, bool with_file)
+{
 	set_resizable (false);
 	pages.set_scrollable ();
-
-	AnalysisResults & ar = status->result_map;
 
 	std::vector<double> dashes;
 	dashes.push_back (3.0);
 	dashes.push_back (5.0);
 
 	int page = 0;
-	for (AnalysisResults::iterator i = ar.begin (); i != ar.end (); ++i, ++page) {
+	for (AnalysisResults::const_iterator i = ar.begin (); i != ar.end (); ++i, ++page) {
 		Label *l;
 		VBox *vb = manage (new VBox ());
 		Table *t = manage (new Table (4, 4));
@@ -87,19 +103,21 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 
 		std::list<CimgPlayheadArea*> playhead_widgets;
 
-		l = manage (new Label (_("File:"), ALIGN_END));
-		t->attach (*l, 0, 1, 0, 1);
-		l = manage (new Label ());
-		l->set_ellipsize (Pango::ELLIPSIZE_START);
-		l->set_width_chars (48);
-		l->set_max_width_chars (48);
-		l->set_text (path);
-		l->set_alignment (ALIGN_START, ALIGN_CENTER);
-		t->attach (*l, 1, 3, 0, 1, FILL, SHRINK);
+		if (with_file) {
+			l = manage (new Label (_("File:"), ALIGN_END));
+			t->attach (*l, 0, 1, 0, 1);
+			l = manage (new Label ());
+			l->set_ellipsize (Pango::ELLIPSIZE_START);
+			l->set_width_chars (48);
+			l->set_max_width_chars (48);
+			l->set_text (path);
+			l->set_alignment (ALIGN_START, ALIGN_CENTER);
+			t->attach (*l, 1, 3, 0, 1, FILL, SHRINK);
 
-		Button *b = manage (new Button (_("Open Folder")));
-		t->attach (*b, 3, 4, 0, 2, FILL, SHRINK);
-		b->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::open_folder), path));
+			Button *b = manage (new Button (_("Open Folder")));
+			t->attach (*b, 3, 4, 0, 2, FILL, SHRINK);
+			b->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::open_folder), path));
+		}
 
 		SoundFileInfo info;
 		std::string errmsg;
@@ -109,7 +127,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		framecnt_t start_off = 0;
 		unsigned int channels = 0;
 
-		if (AudioFileSource::get_soundfile_info (path, info, errmsg)) {
+		if (with_file && AudioFileSource::get_soundfile_info (path, info, errmsg)) {
 			AudioClock * clock;
 
 			file_length = info.length;
@@ -161,7 +179,7 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 			clock->set_mode (AudioClock::Timecode);
 			clock->set (info.timecode * src_coef + 0.5, true);
 			t->attach (*clock, 3, 4, 3, 4);
-		} else {
+		} else if (with_file) {
 			l = manage (new Label (_("Error:"), ALIGN_END));
 			t->attach (*l, 0, 1, 1, 2);
 			l = manage (new Label (errmsg, ALIGN_START));
@@ -721,14 +739,18 @@ ExportReport::ExportReport (Session* session, StatusPtr s)
 		_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_progress, this, _1, _2), gui_context());
 	}
 
-	play_btn = add_button (Stock::MEDIA_PLAY, RESPONSE_ACCEPT);
-	stop_btn = add_button (Stock::MEDIA_STOP, RESPONSE_ACCEPT);
+	if (_session && with_file) {
+		play_btn = add_button (Stock::MEDIA_PLAY, RESPONSE_ACCEPT);
+		stop_btn = add_button (Stock::MEDIA_STOP, RESPONSE_ACCEPT);
+	}
 	add_button (Stock::CLOSE, RESPONSE_CLOSE);
 
 	set_default_response (RESPONSE_CLOSE);
-	stop_btn->signal_clicked().connect (sigc::mem_fun (*this, &ExportReport::stop_audition));
-	play_btn->signal_clicked().connect (sigc::mem_fun (*this, &ExportReport::play_audition));
-	stop_btn->set_sensitive (false);
+	if (_session && with_file) {
+		stop_btn->signal_clicked().connect (sigc::mem_fun (*this, &ExportReport::stop_audition));
+		play_btn->signal_clicked().connect (sigc::mem_fun (*this, &ExportReport::play_audition));
+		stop_btn->set_sensitive (false);
+	}
 	show_all ();
 }
 
@@ -757,6 +779,9 @@ ExportReport::open_folder (std::string p)
 void
 ExportReport::audition_active (bool active)
 {
+	if (!stop_btn || !play_btn) {
+		return;
+	}
 	stop_btn->set_sensitive (active);
 	play_btn->set_sensitive (!active);
 
