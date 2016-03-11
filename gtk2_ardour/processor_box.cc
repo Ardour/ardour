@@ -223,6 +223,40 @@ ProcessorEntry::drag_text () const
 {
 	return name (Wide);
 }
+
+bool
+ProcessorEntry::can_copy_state (Gtkmm2ext::DnDVBoxChild* o) const
+{
+	ProcessorEntry *other = dynamic_cast<ProcessorEntry*> (o);
+	if (!other) {
+		return false;
+	}
+	boost::shared_ptr<ARDOUR::Processor> otherproc = other->processor();
+	boost::shared_ptr<PluginInsert> my_pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+	boost::shared_ptr<PluginInsert> ot_pi = boost::dynamic_pointer_cast<PluginInsert> (otherproc);
+	if (boost::dynamic_pointer_cast<UnknownProcessor> (_processor)) {
+		return false;
+	}
+	if (boost::dynamic_pointer_cast<UnknownProcessor> (otherproc)) {
+		return false;
+	}
+	if (!my_pi || !ot_pi) {
+		return false;
+	}
+	if (my_pi->type() != ot_pi->type()) {
+		return false;
+	}
+	boost::shared_ptr<Plugin> my_p = my_pi->plugin();
+	boost::shared_ptr<Plugin> ot_p = ot_pi->plugin();
+	if (!my_p || !ot_p) {
+		return false;
+	}
+	if (my_p->unique_id() != ot_p->unique_id()) {
+		return false;
+	}
+	return true;
+}
+
 bool
 ProcessorEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::SelectionData &data)
 {
@@ -330,6 +364,9 @@ ProcessorEntry::setup_visuals ()
 boost::shared_ptr<Processor>
 ProcessorEntry::processor () const
 {
+	if (!_processor) {
+		return boost::shared_ptr<Processor>();
+	}
 	return _processor;
 }
 
@@ -1339,6 +1376,23 @@ not match the configuration of this track.");
 void
 ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* position, Glib::RefPtr<Gdk::DragContext> const & context)
 {
+	if (Gdk::ACTION_LINK == context->get_selected_action()) {
+		list<ProcessorEntry*> children = source->selection ();
+		assert (children.size() == 1);
+		ProcessorEntry* other = *children.begin();
+		assert (other->can_copy_state (position));
+		boost::shared_ptr<ARDOUR::Processor> otherproc = other->processor();
+		boost::shared_ptr<ARDOUR::Processor> proc = position->processor();
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
+		assert (otherproc && proc && pi);
+
+		PBD::ID id = pi->id();
+		XMLNode& state = otherproc->get_state ();
+		proc->set_state (state, Stateful::loading_state_version);
+		boost::dynamic_pointer_cast<PluginInsert>(proc)->update_id (id);
+		return;
+	}
+
 	boost::shared_ptr<Processor> p = find_drop_position (position);
 
 	list<ProcessorEntry*> children = source->selection ();

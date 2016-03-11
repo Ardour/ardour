@@ -122,6 +122,7 @@ public:
 	void set_selectable(bool s) { _selectable = s; }
 
 	bool drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::SelectionData &);
+	bool can_copy_state (Gtkmm2ext::DnDVBoxChild*) const;
 
 	enum Position {
 		PreFader,
