@@ -318,7 +318,7 @@ namespace ARDOUR {
 
 		AudioRange (framepos_t s, framepos_t e, uint32_t i) : start (s), end (e) , id (i) {}
 
-		framecnt_t length() { return end - start + 1; }
+		framecnt_t length() const { return end - start + 1; }
 
 		bool operator== (const AudioRange& other) const {
 			return start == other.start && end == other.end && id == other.id;
