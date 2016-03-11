@@ -46,6 +46,8 @@ public:
 	virtual bool is_selectable () const = 0;
 
 	virtual bool drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::SelectionData &) { return false; }
+
+	virtual bool can_copy_state (DnDVBoxChild*) const = 0;
 };
 
 /** A VBox whose contents can be dragged and dropped */
@@ -59,6 +61,7 @@ public:
 		, _drag_icon (0)
 		, _expecting_unwanted_button_event (false)
 		, _placeholder (0)
+		, _drag_child (0)
 	{
 
 		add (_internal_vbox);
@@ -75,7 +78,7 @@ public:
 
 		_internal_vbox.show ();
 
-		drag_dest_set (_targets);
+		drag_dest_set (_targets, Gtk::DEST_DEFAULT_ALL, Gdk::DragAction (Gdk::ACTION_COPY | Gdk::ACTION_MOVE | Gdk::ACTION_LINK));
 		signal_drag_data_received().connect (mem_fun (*this, &DnDVBox::drag_data_received));
 	}
 
@@ -440,21 +443,33 @@ private:
 		return n;
 	}
 
-	bool drag_motion (Glib::RefPtr<Gdk::DragContext> const &, int /*x*/, int y, guint)
+	bool drag_motion (Glib::RefPtr<Gdk::DragContext> const & ctx, int /*x*/, int y, guint tme)
 	{
 		if (_children.empty ()) {
 			return false;
 		}
 
 		T* before;
-		T* at;
+		T* at = NULL;
 		T* after;
 
 		/* decide where we currently are */
 		double const c = get_children_around_position (y, &before, &at, &after);
 
 		/* whether we're in the top or bottom half of the child that we're over */
-		bool top_half = (c - int (c)) < 0.5;
+		bool top_half = (c - int (c)) < .5;
+		bool bottom_half = !top_half;
+
+		if (_drag_source != this /* re-order */
+				&& _drag_source && at
+				&& _drag_source->_drag_child
+				&& _drag_source->selection ().size () == 1
+				&& at != _drag_source->_drag_child // can't happen or can it?
+				&& at->can_copy_state (_drag_source->_drag_child))
+		{
+			top_half = (c - int (c)) < 0.33;
+			bottom_half = (c - int (c)) > 0.8; // increase area >> 0.66; plugin below will move, or there's space
+		}
 
 		/* Note that when checking on whether to remove a placeholder, we never do
 		   so if _drag_child is 0 as this means that the child being dragged is
@@ -468,14 +483,25 @@ private:
 			return false;
 		}
 
-		if (!top_half && _drag_child && (at == _drag_child || after == _drag_child)) {
+		if (bottom_half && _drag_child && (at == _drag_child || after == _drag_child)) {
 			/* dropping here would have no effect, so remove the visual cue */
 			remove_placeholder ();
 			return false;
 		}
 
-		create_or_update_placeholder (c);
-		return false;
+		printf ("%x\n", ctx->get_suggested_action());
+		if (top_half || bottom_half) {
+			create_or_update_placeholder (c);
+			if (_drag_source == this /* re-order */) {
+				ctx->drag_status (Gdk::ACTION_MOVE, tme);
+			} else {
+				ctx->drag_status (Gdk::ACTION_COPY, tme);
+			}
+		} else {
+			ctx->drag_status (Gdk::ACTION_LINK, tme);
+			remove_placeholder ();
+		}
+		return true;
 	}
 
 	void drag_leave (Glib::RefPtr<Gdk::DragContext> const &, guint)
