@@ -65,6 +65,7 @@
 #include "gtkmm2ext/choice.h"
 #include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
 
+#include "ardour/analysis_graph.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
@@ -102,6 +103,7 @@
 #include "editor_routes.h"
 #include "editor_snapshots.h"
 #include "editor_summary.h"
+#include "export_report.h"
 #include "global_port_matrix.h"
 #include "gui_object.h"
 #include "gui_thread.h"
@@ -121,6 +123,7 @@
 #include "rgb_macros.h"
 #include "rhythm_ferret.h"
 #include "selection.h"
+#include "simple_progress_dialog.h"
 #include "sfdb_ui.h"
 #include "tempo_lines.h"
 #include "time_axis_view.h"
@@ -1714,7 +1717,103 @@ Editor::build_track_region_context_menu ()
 }
 
 void
-Editor::analyze_region_selection ()
+Editor::loudness_analyze_region_selection ()
+{
+	if (!_session) {
+		return;
+	}
+	Selection& s (PublicEditor::instance ().get_selection ());
+	RegionSelection ars = s.regions;
+	ARDOUR::AnalysisGraph ag (_session);
+	framecnt_t total_work = 0;
+
+	for (RegionSelection::iterator j = ars.begin (); j != ars.end (); ++j) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*j);
+		if (!arv) {
+			continue;
+		}
+		if (!boost::dynamic_pointer_cast<AudioRegion> (arv->region ())) {
+			continue;
+		}
+		assert (dynamic_cast<RouteTimeAxisView *> (&arv->get_time_axis_view ()));
+		total_work += arv->region ()->length ();
+	}
+
+	SimpleProgressDialog spd (_("Region Loudness Analysis"), sigc::mem_fun (ag, &AnalysisGraph::cancel));
+	ScopedConnection c;
+	ag.set_total_frames (total_work);
+	ag.Progress.connect_same_thread (c, boost::bind (&SimpleProgressDialog::update_progress, &spd, _1, _2));
+	spd.show();
+
+	for (RegionSelection::iterator j = ars.begin (); j != ars.end (); ++j) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*j);
+		if (!arv) {
+			continue;
+		}
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (arv->region ());
+		if (!ar) {
+			continue;
+		}
+		ag.analyze_region (ar);
+	}
+	spd.hide();
+	if (!ag.canceled ()) {
+		ExportReport er (_("Audio Report/Analysis"), ag.results ());
+		er.run();
+	}
+}
+
+void
+Editor::loudness_analyze_range_selection ()
+{
+	if (!_session) {
+		return;
+	}
+	Selection& s (PublicEditor::instance ().get_selection ());
+	TimeSelection ts = s.time;
+	ARDOUR::AnalysisGraph ag (_session);
+	framecnt_t total_work = 0;
+
+	for (TrackSelection::iterator i = s.tracks.begin (); i != s.tracks.end (); ++i) {
+		boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist> ((*i)->playlist ());
+		if (!pl) {
+			continue;
+		}
+		RouteUI *rui = dynamic_cast<RouteUI *> (*i);
+		if (!pl || !rui) {
+			continue;
+		}
+		for (std::list<AudioRange>::iterator j = ts.begin (); j != ts.end (); ++j) {
+			total_work += j->length ();
+		}
+	}
+
+	SimpleProgressDialog spd (_("Range Loudness Analysis"), sigc::mem_fun (ag, &AnalysisGraph::cancel));
+	ScopedConnection c;
+	ag.set_total_frames (total_work);
+	ag.Progress.connect_same_thread (c, boost::bind (&SimpleProgressDialog::update_progress, &spd, _1, _2));
+	spd.show();
+
+	for (TrackSelection::iterator i = s.tracks.begin (); i != s.tracks.end (); ++i) {
+		boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist> ((*i)->playlist ());
+		if (!pl) {
+			continue;
+		}
+		RouteUI *rui = dynamic_cast<RouteUI *> (*i);
+		if (!pl || !rui) {
+			continue;
+		}
+		ag.analyze_range (rui->route (), pl, ts);
+	}
+	spd.hide();
+	if (!ag.canceled ()) {
+		ExportReport er (_("Audio Report/Analysis"), ag.results ());
+		er.run();
+	}
+}
+
+void
+Editor::spectral_analyze_region_selection ()
 {
 	if (analysis_window == 0) {
 		analysis_window = new AnalysisWindow();
@@ -1732,7 +1831,7 @@ Editor::analyze_region_selection ()
 }
 
 void
-Editor::analyze_range_selection()
+Editor::spectral_analyze_range_selection()
 {
 	if (analysis_window == 0) {
 		analysis_window = new AnalysisWindow();
@@ -1826,7 +1925,8 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Zoom to Range"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), false)));
 
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Spectral Analysis"), sigc::mem_fun(*this, &Editor::analyze_range_selection)));
+	edit_items.push_back (MenuElem (_("Loudness Analysis"), sigc::mem_fun(*this, &Editor::loudness_analyze_range_selection)));
+	edit_items.push_back (MenuElem (_("Spectral Analysis"), sigc::mem_fun(*this, &Editor::spectral_analyze_range_selection)));
 
 	edit_items.push_back (SeparatorElem());
 

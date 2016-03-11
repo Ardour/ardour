@@ -1924,7 +1924,8 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "combine-regions", _("Combine"), sigc::mem_fun (*this, &Editor::combine_regions));
 	reg_sens (_region_actions, "uncombine-regions", _("Uncombine"), sigc::mem_fun (*this, &Editor::uncombine_regions));
 
-	reg_sens (_region_actions, "analyze-region", _("Spectral Analysis..."), sigc::mem_fun (*this, &Editor::analyze_region_selection));
+	reg_sens (_region_actions, "loudness-analyze-region", _("Loudness Analysis..."), sigc::mem_fun (*this, &Editor::loudness_analyze_region_selection));
+	reg_sens (_region_actions, "spectral-analyze-region", _("Spectral Analysis..."), sigc::mem_fun (*this, &Editor::spectral_analyze_region_selection));
 
 	reg_sens (_region_actions, "reset-region-gain-envelopes", _("Reset Envelope"), sigc::mem_fun (*this, &Editor::reset_region_gain_envelopes));
 

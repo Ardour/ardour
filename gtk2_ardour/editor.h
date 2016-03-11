@@ -274,8 +274,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* analysis window */
 
-	void analyze_region_selection();
-	void analyze_range_selection();
+	void loudness_analyze_region_selection();
+	void loudness_analyze_range_selection();
+
+	void spectral_analyze_region_selection();
+	void spectral_analyze_range_selection();
 
 	/* export */
 

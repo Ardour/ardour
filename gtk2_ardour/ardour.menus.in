@@ -306,7 +306,8 @@
       <menuitem action='loop-region'/>
       <menuitem action='rename-region'/>
       <menuitem action='show-region-properties'/>
-      <menuitem action='analyze-region'/>
+      <menuitem action='loudness-analyze-region'/>
+      <menuitem action='spectal-analyze-region'/>
       <menu action='RegionMenuEdit'>
          <menuitem action='combine-regions'/>
          <menuitem action='uncombine-regions'/>
@@ -774,7 +775,8 @@
     <menuitem action='export-region'/>
     <menuitem action='bounce-regions-processed'/>
     <menuitem action='bounce-regions-unprocessed'/>
-    <menuitem action='analyze-region'/>
+    <menuitem action='loudness-analyze-region'/>
+    <menuitem action='spectral-analyze-region'/>
     <separator/>
     <menuitem action='remove-region'/>
     
