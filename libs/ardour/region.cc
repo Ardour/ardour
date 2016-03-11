@@ -270,6 +270,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 	_hidden = false;
 
 	use_sources (other->_sources);
+	set_master_sources (other->_master_sources);
 
 	_position_lock_style = other->_position_lock_style;
 	_first_edit = other->_first_edit;
@@ -329,6 +330,7 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset)
 	_hidden = false;
 
 	use_sources (other->_sources);
+	set_master_sources (other->_master_sources);
 
 	_start = other->_start + offset;
 
