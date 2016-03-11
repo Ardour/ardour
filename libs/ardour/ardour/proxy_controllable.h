@@ -40,7 +40,7 @@ class LIBARDOUR_API ProxyControllable : public PBD::Controllable {
 		, _getter (getter)
 	{}
 
-	void set_value (double v, PBD::Controllable::GroupControlDisposition /*group_override*/) { if (_setter (v)) { Changed(); /* EMIT SIGNAL */ } }
+	void set_value (double v, PBD::Controllable::GroupControlDisposition gcd) { if (_setter (v)) { Changed (true, gcd); /* EMIT SIGNAL */ } }
 	double get_value () const { return _getter (); }
 
 	double internal_to_user (double i) const { return accurate_coefficient_to_dB (i);}

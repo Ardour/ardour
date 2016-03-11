@@ -3411,12 +3411,10 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		boost::weak_ptr<Route> wpr (*x);
 		boost::shared_ptr<Route> r (*x);
 
-		/* we don't connect to control Changed signals for
-		 * solo/mute/listen. The Route calls back to use, via
-		 * the SessionSoloNotifications API, passing us more
-		 * information than would be available from a control Changed signal.
-		 */
-		
+		r->solo_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, _2, wpr));
+		r->solo_isolate_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_solo_isolated_changed, this, wpr));
+		r->mute_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this));
+
 		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
 		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
 
@@ -3694,14 +3692,20 @@ Session::remove_route (boost::shared_ptr<Route> route)
 }
 
 void
-Session::_route_mute_changed ()
+Session::route_mute_changed ()
 {
 	set_dirty ();
 }
 
 void
-Session::_route_listen_changed (Controllable::GroupControlDisposition group_override, boost::shared_ptr<Route> route)
+Session::route_listen_changed (Controllable::GroupControlDisposition group_override, boost::weak_ptr<Route> wpr)
 {
+	boost::shared_ptr<Route> route (wpr.lock());
+
+	if (!route) {
+		return;
+	}
+
 	if (route->listening_via_monitor ()) {
 
 		if (Config->get_exclusive_solo()) {
@@ -3745,8 +3749,14 @@ Session::_route_listen_changed (Controllable::GroupControlDisposition group_over
 }
 
 void
-Session::_route_solo_isolated_changed (boost::shared_ptr<Route> route)
+Session::route_solo_isolated_changed (boost::weak_ptr<Route> wpr)
 {
+	boost::shared_ptr<Route> route (wpr.lock());
+
+	if (!route) {
+		return;
+	}
+
 	bool send_changed = false;
 
 	if (route->solo_isolated()) {
@@ -3767,9 +3777,22 @@ Session::_route_solo_isolated_changed (boost::shared_ptr<Route> route)
 }
 
 void
-Session::_route_solo_changed (bool self_solo_change, Controllable::GroupControlDisposition group_override,  boost::shared_ptr<Route> route)
+Session::route_solo_changed (bool self_solo_change, Controllable::GroupControlDisposition group_override,  boost::weak_ptr<Route> wpr)
 {
+	cerr << "route solo change (self ? " << self_solo_change << endl;
+
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("route solo change, self = %1\n", self_solo_change));
+
+	boost::shared_ptr<Route> route (wpr.lock());
+
+	if (!route) {
+		return;
+	}
+
+	if (Config->get_solo_control_is_listen_control()) {
+		route_listen_changed (group_override, wpr);
+		return;
+	}
 
 	if (!self_solo_change) {
 		// session doesn't care about changes to soloed-by-others
@@ -3924,7 +3947,7 @@ Session::_route_solo_changed (bool self_solo_change, Controllable::GroupControlD
 	for (RouteList::iterator i = uninvolved.begin(); i != uninvolved.end(); ++i) {
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("mute change for %1, which neither feeds or is fed by %2\n", (*i)->name(), route->name()));
 		(*i)->act_on_mute ();
-		(*i)->mute_control()->Changed (); /* EMIT SIGNAL */
+		(*i)->mute_control()->Changed (false, Controllable::NoGroup);
 	}
 
 	SoloChanged (); /* EMIT SIGNAL */

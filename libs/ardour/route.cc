@@ -416,9 +416,9 @@ Route::inc_gain (gain_t factor)
 }
 
 void
-Route::set_gain (gain_t val, Controllable::GroupControlDisposition group_override)
+Route::set_gain (gain_t val, Controllable::GroupControlDisposition gcd)
 {
-	if (use_group (group_override, &RouteGroup::is_gain)) {
+	if (use_group (gcd, &RouteGroup::is_gain)) {
 
 		if (_route_group->is_relative()) {
 
@@ -442,13 +442,13 @@ Route::set_gain (gain_t val, Controllable::GroupControlDisposition group_overrid
 			if (factor > 0.0f) {
 				factor = _route_group->get_max_factor(factor);
 				if (factor == 0.0f) {
-					_amp->gain_control()->Changed(); /* EMIT SIGNAL */
+					_amp->gain_control()->Changed (true, gcd); /* EMIT SIGNAL */
 					return;
 				}
 			} else {
 				factor = _route_group->get_min_factor(factor);
 				if (factor == 0.0f) {
-					_amp->gain_control()->Changed(); /* EMIT SIGNAL */
+					_amp->gain_control()->Changed (true, gcd); /* EMIT SIGNAL */
 					return;
 				}
 			}
@@ -830,8 +830,8 @@ Route::set_listen (bool yn, Controllable::GroupControlDisposition group_override
 			}
 			_mute_master->set_soloed_by_others (false);
 
-			_session.listen_changed (group_override, shared_from_this());
-			_solo_control->Changed(); /* EMIT SIGNAL */
+			/* first argument won't matter because solo <=> listen right now */
+			_solo_control->Changed (false, group_override); /* EMIT SIGNAL */
 		}
 	}
 }
@@ -847,11 +847,11 @@ Route::listening_via_monitor () const
 }
 
 void
-Route::set_solo_safe (bool yn, Controllable::GroupControlDisposition /* group_override */)
+Route::set_solo_safe (bool yn, Controllable::GroupControlDisposition gcd)
 {
 	if (_solo_safe != yn) {
 		_solo_safe = yn;
-		_solo_safe_control->Changed(); /* EMIT SIGNAL */
+		_solo_safe_control->Changed (true, gcd); /* EMIT SIGNAL */
 	}
 }
 
@@ -893,8 +893,7 @@ Route::clear_all_solo_state ()
 
 	if (emit_changed) {
 		set_mute_master_solo ();
-		_session.solo_changed (false, Controllable::UseGroup, shared_from_this());
-		_solo_control->Changed (); /* EMIT SIGNAL */
+		_solo_control->Changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
 	}
 }
 
@@ -921,8 +920,7 @@ Route::set_solo (bool yn, Controllable::GroupControlDisposition group_override)
 
 	if (self_soloed() != yn) {
 		set_self_solo (yn);
-		_session.solo_changed (true, group_override, shared_from_this());
-		_solo_control->Changed (); /* EMIT SIGNAL */
+		_solo_control->Changed (true, group_override); /* EMIT SIGNAL */
 	}
 
 	assert (Config->get_solo_control_is_listen_control() || !_monitor_send || !_monitor_send->active());
@@ -999,8 +997,7 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 	}
 
 	set_mute_master_solo ();
-	_session.solo_changed (false, Controllable::UseGroup, shared_from_this());
-	_solo_control->Changed (); /* EMIT SIGNAL */
+	_solo_control->Changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
 }
 
 void
@@ -1022,8 +1019,7 @@ Route::mod_solo_by_others_downstream (int32_t delta)
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 SbD delta %2 = %3\n", name(), delta, _soloed_by_others_downstream));
 
 	set_mute_master_solo ();
-	_session.solo_changed (false, Controllable::UseGroup, shared_from_this());
-	_solo_control->Changed (); /* EMIT SIGNAL */
+	_solo_control->Changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
 }
 
 void
@@ -1053,8 +1049,7 @@ Route::mod_solo_isolated_by_upstream (bool yn)
 	if (solo_isolated() != old) {
 		/* solo isolated status changed */
 		_mute_master->set_solo_ignore (solo_isolated());
-		_session.solo_isolated_changed (shared_from_this());
-		_solo_isolate_control->Changed(); /* EMIT SIGNAL */
+		_solo_isolate_control->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 	}
 }
 
@@ -1110,8 +1105,7 @@ Route::set_solo_isolated (bool yn, Controllable::GroupControlDisposition group_o
 
 	/* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
 
-	_session.solo_isolated_changed (shared_from_this());
-	_solo_isolate_control->Changed(); /* EMIT SIGNAL */
+	_solo_isolate_control->Changed (true, group_override); /* EMIT SIGNAL */
 }
 
 bool
@@ -1127,8 +1121,7 @@ Route::set_mute_points (MuteMaster::MutePoint mp)
 	mute_points_changed (); /* EMIT SIGNAL */
 
 	if (_mute_master->muted_by_self()) {
-		_session.mute_changed ();
-		_mute_control->Changed (); /* EMIT SIGNAL */
+		_mute_control->Changed (true, Controllable::UseGroup); /* EMIT SIGNAL */
 	}
 }
 
@@ -1147,8 +1140,7 @@ Route::set_mute (bool yn, Controllable::GroupControlDisposition group_override)
 		*/
 		act_on_mute ();
 		/* tell everyone else */
-		_session.mute_changed ();
-		_mute_control->Changed (); /* EMIT SIGNAL */
+		_mute_control->Changed (true, Controllable::NoGroup); /* EMIT SIGNAL */
 	}
 }
 
@@ -4647,7 +4639,7 @@ Route::set_phase_invert (uint32_t c, bool yn)
 {
 	if (_phase_invert[c] != yn) {
 		_phase_invert[c] = yn;
-		_phase_control->Changed(); /* EMIT SIGNAL */
+		_phase_control->Changed (true, Controllable::NoGroup); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 }
@@ -4657,7 +4649,7 @@ Route::set_phase_invert (boost::dynamic_bitset<> p)
 {
 	if (_phase_invert != p) {
 		_phase_invert = p;
-		_phase_control->Changed (); /* EMIT SIGNAL */
+		_phase_control->Changed (true, Controllable::NoGroup); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 }

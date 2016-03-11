@@ -526,7 +526,6 @@ public:
 
 		/* Pretend to change value, but do not affect actual route mute. */
 		void set_superficial_value(bool muted);
-
 	private:
 		boost::weak_ptr<Route> _route;
 		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);

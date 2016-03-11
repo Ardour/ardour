@@ -54,11 +54,11 @@ public:
 
 	/* Controllable API */
 
-	void set_value (double v, PBD::Controllable::GroupControlDisposition group_override) {
+	void set_value (double v, PBD::Controllable::GroupControlDisposition gcd) {
 		T newval = (T) v;
 		if (newval != _value) {
 			_value = std::max (_lower, std::min (_upper, newval));
-			Changed(); /* EMIT SIGNAL */
+			Changed (true, gcd); /* EMIT SIGNAL */
 		}
 	}
 
@@ -84,7 +84,7 @@ public:
 	MPControl& operator=(const T& v) {
 		if (v != _value) {
 			_value = std::max (_lower, std::min (_upper, v));
-			Changed (); /* EMIT SIGNAL */
+			Changed (true, PBD::Controllable::UseGroup); /* EMIT SIGNAL */
 		}
 		return *this;
 	}

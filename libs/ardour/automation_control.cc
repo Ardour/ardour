@@ -113,20 +113,22 @@ AutomationControl::get_value() const
  *  @param value `user' value
  */
 void
-AutomationControl::set_value (double value, PBD::Controllable::GroupControlDisposition /* group_override */)
+AutomationControl::set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
 {
 	bool to_list = _list && ((AutomationList*)_list.get())->automation_write();
 
 	Control::set_double (value, _session.transport_frame(), to_list);
 
-	Changed(); /* EMIT SIGNAL */
+	cerr << "AC was set to " << value << endl;
+
+	Changed (true, gcd);
 }
 
 void
 AutomationControl::set_list (boost::shared_ptr<Evoral::ControlList> list)
 {
 	Control::set_list (list);
-	Changed();  /* EMIT SIGNAL */
+	Changed (true, Controllable::NoGroup);
 }
 
 void
@@ -268,6 +270,7 @@ void
 AutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 {
 	double current_value;
+	double new_value;
 	std::pair<Masters::iterator,bool> res;
 
 	{
@@ -291,15 +294,28 @@ AutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 
 			/* Store the connection inside the MasterRecord, so that when we destroy it, the connection is destroyed
 			   and we no longer hear about changes to the AutomationControl.
+
+			   Note that we fix the "from_self" argument that will
+			   be given to our own Changed signal to "false",
+			   because the change came from the master.
 			*/
 
-			m->Changed.connect_same_thread (res.first->second.connection, boost::bind (&PBD::Signal0<void>::operator(), &Changed));
+
+			m->Changed.connect_same_thread (res.first->second.connection, boost::bind (&PBD::Signal2<void,bool,Controllable::GroupControlDisposition>::operator(), &Changed, false, _2));
 		}
+
+		new_value = get_value_locked ();
 	}
 
 	if (res.second) {
 		MasterStatusChange (); /* EMIT SIGNAL */
 	}
+
+	if (new_value != current_value) {
+		/* effective value changed by master */
+		Changed (false, Controllable::NoGroup);
+	}
+
 }
 
 void
@@ -315,6 +331,7 @@ void
 AutomationControl::remove_master (boost::shared_ptr<AutomationControl> m)
 {
 	double current_value;
+	double new_value;
 	Masters::size_type erased = 0;
 
 	{
@@ -324,29 +341,43 @@ AutomationControl::remove_master (boost::shared_ptr<AutomationControl> m)
 		if (erased) {
 			recompute_masters_ratios (current_value);
 		}
+		new_value = get_value_locked ();
 	}
 
 	if (erased) {
 		MasterStatusChange (); /* EMIT SIGNAL */
+	}
+
+	if (new_value != current_value) {
+		Changed (false, Controllable::NoGroup);
 	}
 }
 
 void
 AutomationControl::clear_masters ()
 {
+	double current_value;
+	double new_value;
 	bool had_masters = false;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
+		current_value = get_value_locked ();
 		if (!_masters.empty()) {
 			had_masters = true;
 		}
 		_masters.clear ();
+		new_value = get_value_locked ();
 	}
 
 	if (had_masters) {
 		MasterStatusChange (); /* EMIT SIGNAL */
 	}
+
+	if (new_value != current_value) {
+		Changed (false, Controllable::NoGroup);
+	}
+
 }
 
 bool

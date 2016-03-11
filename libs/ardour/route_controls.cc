@@ -158,9 +158,13 @@ Route::SoloControllable::set_value_unchecked (double val)
 double
 Route::SoloControllable::get_value () const
 {
+	std::cerr << "RSC get value\n";
+
 	if (slaved()) {
+		std::cerr << "slaved solo control, get master value ... ";
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
-		return get_masters_value_locked () ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
+		double v = get_masters_value_locked () ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
+		std::cerr << v << std::endl;
 	}
 
 	if (_list && ((AutomationList*)_list.get())->automation_playback()) {
@@ -385,4 +389,3 @@ Route::SoloSafeControllable::get_value () const
 
 	return r->solo_safe() ? 1.0 : 0.0;
 }
-

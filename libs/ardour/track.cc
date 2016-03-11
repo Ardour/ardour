@@ -291,7 +291,7 @@ Track::prep_record_enabled (bool yn, Controllable::GroupControlDisposition group
 }
 
 void
-Track::set_record_enabled (bool yn, Controllable::GroupControlDisposition group_override)
+Track::set_record_enabled (bool yn, Controllable::GroupControlDisposition gcd)
 {
 	if (_diskstream->record_safe ()) {
 	    return;
@@ -305,14 +305,14 @@ Track::set_record_enabled (bool yn, Controllable::GroupControlDisposition group_
 		return;
 	}
 
-	if (use_group (group_override, &RouteGroup::is_recenable)) {
+	if (use_group (gcd, &RouteGroup::is_recenable)) {
 		_route_group->apply (&Track::set_record_enabled, yn, Controllable::NoGroup);
 		return;
 	}
 
 	_diskstream->set_record_enabled (yn);
 
-	_rec_enable_control->Changed ();
+	_rec_enable_control->Changed (true, gcd);
 }
 
 bool
@@ -1151,7 +1151,7 @@ Track::set_monitoring (MonitorChoice mc, Controllable::GroupControlDisposition g
 		}
 
 		MonitoringChanged (); /* EMIT SIGNAL */
-		_monitoring_control->Changed (); /* EMIT SIGNAL */
+		_monitoring_control->Changed (true, gcd);
 	}
 }
 

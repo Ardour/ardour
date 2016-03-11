@@ -3875,7 +3875,7 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "solo-control-is-listen-control") {
 		solo_control_mode_changed ();
 	} else if (p == "solo-mute-gain") {
-		_solo_cut_control->Changed();
+		_solo_cut_control->Changed (true, Controllable::NoGroup);
 	} else if (p == "timecode-offset" || p == "timecode-offset-negative") {
 		last_timecode_valid = false;
 	} else if (p == "playback-buffer-seconds") {
