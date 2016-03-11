@@ -3,9 +3,11 @@
 #include <gtkmm/entry.h>
 #include <string>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class SearchBar : public Gtk::Entry
+class LIBGTKMM2EXT_API SearchBar : public Gtk::Entry
 {
 public:
 	SearchBar(
