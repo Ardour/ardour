@@ -27,6 +27,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/export_analysis.h"
+#include "ardour/libardour_visibility.h"
 
 namespace AudioGrapher {
 	class Analyser;
@@ -35,7 +36,7 @@ namespace AudioGrapher {
 }
 
 namespace ARDOUR {
-class AnalysisGraph {
+class LIBARDOUR_API AnalysisGraph {
 	public:
 		AnalysisGraph (ARDOUR::Session*);
 		~AnalysisGraph ();
