@@ -40,7 +40,7 @@ enum /*LIBAUDIOGRAPHER_API*/ ThrowLevel
   * logical and (short-circuiting).
   */
 template<ThrowLevel L = DEFAULT_THROW_LEVEL>
-class /*LIBAUDIOGRAPHER_API*/ Throwing
+class LIBAUDIOGRAPHER_API Throwing
 {
   protected:
 	Throwing() {}
