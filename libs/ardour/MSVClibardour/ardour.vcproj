@@ -284,6 +284,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\analysis_graph.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\async_midi_port.cc"
 				>
 			</File>
@@ -1359,6 +1363,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\analyser.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\analysis_graph.h"
 				>
 			</File>
 			<File
