@@ -2154,6 +2154,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\simple_progress_dialog.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\soundcloud_export_selector.h"
 				>
 			</File>
