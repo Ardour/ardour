@@ -234,7 +234,6 @@ ExportHandler::process (framecnt_t frames)
 		Glib::Threads::Mutex::Lock l (export_status->lock());
 		return process_normalize ();
 	} else {
-		export_status->active_job = ExportStatus::Exporting;
 		Glib::Threads::Mutex::Lock l (export_status->lock());
 		return process_timespan (frames);
 	}
@@ -243,6 +242,7 @@ ExportHandler::process (framecnt_t frames)
 int
 ExportHandler::process_timespan (framecnt_t frames)
 {
+	export_status->active_job = ExportStatus::Exporting;
 	/* update position */
 
 	framecnt_t frames_to_read = 0;
