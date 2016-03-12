@@ -3231,9 +3231,9 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	} else {
 		/* we removed it before, so add it back now */
 		if (_marker->meter().position_lock_style() == AudioTime) {
-			map.add_meter (_marker->meter(), _marker->position());
+			map.replace_meter (*_real_section, _marker->meter(), _marker->position());
 		} else {
-			map.add_meter (_marker->meter(), map.beat_at_frame (_marker->position()), when);
+			map.replace_meter (*_real_section, _marker->meter(), when);
 		}
 
 		XMLNode &after = map.get_state();
@@ -3331,7 +3331,14 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	framepos_t const pf = adjusted_current_frame (event, false);
 	Tempo const tp = _marker->tempo();
 	_marker->set_position (pf);
-	_editor->session()->tempo_map().gui_move_tempo (_real_section, tp, pf);
+	/* just here for a check/laugh
+	if (_real_section->position_lock_style() == MusicTime) {
+		const double baf = _editor->session()->tempo_map().beat_at_frame (pf);
+		_editor->session()->tempo_map().gui_move_tempo_beat (_real_section, tp, baf);
+	} else {
+	*/
+	_editor->session()->tempo_map().gui_move_tempo_frame (_real_section, tp, pf);
+	//}
 
 	show_verbose_cursor_time (pf);
 }

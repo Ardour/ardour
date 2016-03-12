@@ -401,7 +401,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
-	void dump (std::ostream&) const;
+	void dump (Metrics& metrics, std::ostream&) const;
 	void clear ();
 
 	TempoMetric metric_at (Timecode::BBT_Time bbt) const;
@@ -430,13 +430,16 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	PBD::Signal0<void> MetricPositionChanged;
 
 private:
-	double bbt_to_beats_locked (Metrics& metrics, Timecode::BBT_Time bbt);
+	double bbt_to_beats_locked (const Metrics& metrics, Timecode::BBT_Time bbt);
 	Timecode::BBT_Time beats_to_bbt_locked (Metrics& metrics, double beats);
 	double beat_at_frame_locked (Metrics& metrics, framecnt_t frame) const;
-	framecnt_t frame_at_beat_locked (Metrics& metrics, double beat) const;
+	framecnt_t frame_at_beat_locked (const Metrics& metrics, double beat) const;
 	double tick_at_frame_locked (const Metrics& metrics, framecnt_t frame) const;
+	double tick_offset_at (const Metrics& metrics, double tick) const;
+	framecnt_t frame_offset_at (const Metrics& metrics, framepos_t frame) const;
+
 	framecnt_t frame_at_tick_locked (const Metrics& metrics, double tick) const;
-	framepos_t frame_time_locked (Metrics& metrics, const Timecode::BBT_Time&);
+	framepos_t frame_time_locked (const Metrics& metrics, const Timecode::BBT_Time&);
 
 	bool check_solved (Metrics& metrics, bool by_frame);
 	bool solve_map (Metrics& metrics, TempoSection* section, const Tempo& bpm, const framepos_t& frame);
