@@ -30,6 +30,10 @@
 #include "ardour/worker.h"
 #include "pbd/ringbuffer.h"
 
+#ifdef LV2_EXTENDED // -> needs to eventually go upstream to lv2plug.in
+#include "ardour/lv2_extensions.h"
+#endif
+
 #ifndef PATH_MAX
 #define PATH_MAX 1024
 #endif
@@ -91,6 +95,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	const LV2_Feature* const* features () { return _features; }
 
 	std::set<Evoral::Parameter> automatable () const;
+	virtual void set_automation_control (uint32_t, boost::shared_ptr<AutomationControl>);
 
 	void activate ();
 	void deactivate ();
@@ -182,6 +187,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	uint32_t      _patch_port_out_index;
 	URIMap&       _uri_map;
 	bool          _no_sample_accurate_ctrl;
+	bool          _can_write_automation;
 
 	friend const void* lv2plugin_get_port_value(const char* port_symbol,
 	                                            void*       user_data,
@@ -197,7 +203,9 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		PORT_SEQUENCE = 1 << 5,  ///< New atom API event port
 		PORT_MIDI     = 1 << 6,  ///< Event port understands MIDI
 		PORT_POSITION = 1 << 7,  ///< Event port understands position
-		PORT_PATCHMSG = 1 << 8   ///< Event port supports patch:Message
+		PORT_PATCHMSG = 1 << 8,  ///< Event port supports patch:Message
+		PORT_AUTOCTRL = 1 << 9,  ///< Event port supports auto:AutomationControl
+		PORT_CTRLED   = 1 << 10  ///< Port prop auto:AutomationControlled (can be self controlled)
 	} PortFlag;
 
 	typedef unsigned PortFlags;
@@ -207,6 +215,25 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	std::map<std::string,uint32_t> _port_indices;
 
 	PropertyDescriptors _property_descriptors;
+
+	struct AutomationCtrl {
+		AutomationCtrl (const AutomationCtrl &other)
+			: ac (other.ac)
+			, guard (other.guard)
+		{ }
+
+		AutomationCtrl (boost::shared_ptr<ARDOUR::AutomationControl> c)
+			: ac (c)
+			, guard (false)
+		{ }
+		boost::shared_ptr<ARDOUR::AutomationControl> ac;
+		bool guard;
+	};
+
+	typedef boost::shared_ptr<AutomationCtrl> AutomationCtrlPtr;
+	typedef std::map<uint32_t, AutomationCtrlPtr> AutomationCtrlMap;
+	AutomationCtrlMap _ctrl_map;
+	AutomationCtrlPtr get_automation_control (uint32_t);
 
 	/// Message send to/from UI via ports
 	struct UIMessage {

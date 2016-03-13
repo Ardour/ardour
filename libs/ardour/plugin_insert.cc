@@ -251,7 +251,9 @@ PluginInsert::create_automatable_parameters ()
 
 			can_automate (param);
 			boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
-			add_control (boost::shared_ptr<AutomationControl> (new PluginControl(this, param, desc, list)));
+			boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
+			add_control (c);
+			_plugins.front()->set_automation_control (i->id(), c);
 		} else if (i->type() == PluginPropertyAutomation) {
 			Evoral::Parameter param(*i);
 			const ParameterDescriptor& desc = _plugins.front()->get_property_descriptor(param.id());

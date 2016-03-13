@@ -27,6 +27,7 @@
 #include "pbd/error.h"
 
 #include "ardour/uri_map.h"
+#include "ardour/lv2_extensions.h"
 
 namespace ARDOUR {
 
@@ -60,6 +61,15 @@ URIMap::URIDs::init(URIMap& uri_map)
 	patch_Set           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#Set");
 	patch_property      = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#property");
 	patch_value         = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#value");
+#ifdef LV2_EXTENDED
+	auto_event         = uri_map.uri_to_id(LV2_AUTOMATE_URI__event);
+	auto_setup         = uri_map.uri_to_id(LV2_AUTOMATE_URI__setup);
+	auto_finalize      = uri_map.uri_to_id(LV2_AUTOMATE_URI__finalize);
+	auto_start         = uri_map.uri_to_id(LV2_AUTOMATE_URI__start);
+	auto_end           = uri_map.uri_to_id(LV2_AUTOMATE_URI__end);
+	auto_parameter     = uri_map.uri_to_id(LV2_AUTOMATE_URI__parameter);
+	auto_value         = uri_map.uri_to_id(LV2_AUTOMATE_URI__value);
+#endif
 }
 
 URIMap&

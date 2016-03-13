@@ -155,11 +155,23 @@ public:
 	LilvNode* units_midiNote;
 	LilvNode* patch_writable;
 	LilvNode* patch_Message;
-	LilvNode* lv2_noSampleAccurateCtrl;
 #ifdef HAVE_LV2_1_2_0
 	LilvNode* bufz_powerOf2BlockLength;
 	LilvNode* bufz_fixedBlockLength;
 	LilvNode* bufz_nominalBlockLength;
+#endif
+
+#ifdef HAVE_LV2_1_10_0
+	LilvNode* atom_int;
+	LilvNode* atom_float;
+	LilvNode* atom_object; // new in 1.8
+	LilvNode* atom_vector;
+#endif
+#ifdef LV2_EXTENDED
+	LilvNode* lv2_noSampleAccurateCtrl;
+	LilvNode* auto_can_write_automatation; // lv2:optionalFeature
+	LilvNode* auto_automation_control; // atom:supports
+	LilvNode* auto_automation_controlled; // lv2:portProperty
 #endif
 
 private:
@@ -335,6 +347,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_state_version          = 0;
 	_was_activated          = false;
 	_has_state_interface    = false;
+	_can_write_automation   = false;
 	_impl->block_length     = _session.get_block_size();
 
 	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
@@ -484,10 +497,15 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		throw failed_constructor();
 	}
 	lilv_nodes_free(required_features);
+#endif
 
+#ifdef LV2_EXTENDED
 	LilvNodes* optional_features = lilv_plugin_get_optional_features (plugin);
 	if (lilv_nodes_contains (optional_features, _world.lv2_noSampleAccurateCtrl)) {
 		_no_sample_accurate_ctrl = true;
+	}
+	if (lilv_nodes_contains (optional_features, _world.auto_can_write_automatation)) {
+		_can_write_automation = true;
 	}
 	lilv_nodes_free(optional_features);
 #endif
@@ -542,6 +560,11 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 				if (lilv_nodes_contains(atom_supports, _world.time_Position)) {
 					flags |= PORT_POSITION;
 				}
+#ifdef LV2_EXTENDED
+				if (lilv_nodes_contains(atom_supports, _world.auto_automation_control)) {
+					flags |= PORT_AUTOCTRL;
+				}
+#endif
 				if (lilv_nodes_contains(atom_supports, _world.patch_Message)) {
 					flags |= PORT_PATCHMSG;
 					if (flags & PORT_INPUT) {
@@ -565,6 +588,14 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 				lilv_node_as_string(_impl->name), i) << endmsg;
 			throw failed_constructor();
 		}
+
+#ifdef LV2_EXTENDED
+		if (lilv_port_has_property(_impl->plugin, port, _world.auto_automation_controlled)) {
+			if ((flags & PORT_INPUT) && (flags & PORT_CONTROL)) {
+				flags |= PORT_CTRLED;
+			}
+		}
+#endif
 
 		_port_flags.push_back(flags);
 		_port_minimumSize.push_back(minimumSize);
@@ -1904,6 +1935,23 @@ LV2Plugin::automatable() const
 }
 
 void
+LV2Plugin::set_automation_control (uint32_t i, boost::shared_ptr<AutomationControl> c)
+{
+	if ((_port_flags[i] & PORT_CTRLED)) {
+		_ctrl_map [i] = AutomationCtrlPtr (new AutomationCtrl(c));
+	}
+}
+
+LV2Plugin::AutomationCtrlPtr
+LV2Plugin::get_automation_control (uint32_t i)
+{
+	if (_ctrl_map.find (i) == _ctrl_map.end()) {
+		return AutomationCtrlPtr ();
+	}
+	return _ctrl_map[i];
+}
+
+void
 LV2Plugin::activate()
 {
 	DEBUG_TRACE(DEBUG::LV2, string_compose("%1 activate\n", name()));
@@ -2073,6 +2121,15 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	if (_bpm_control_port) {
 		*_bpm_control_port = tmetric.tempo().beats_per_minute();
 	}
+
+#ifdef LV2_EXTENDED
+	if (_can_write_automation && _session.transport_frame() != _next_cycle_start) {
+		// add guard-points after locating
+		for (AutomationCtrlMap::iterator i = _ctrl_map.begin(); i != _ctrl_map.end(); ++i) {
+			i->second->guard = true;
+		}
+	}
+#endif
 
 	ChanCount bufs_count;
 	bufs_count.set(DataType::AUDIO, 1);
@@ -2258,9 +2315,8 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			}
 		}
 
-
 		// Write messages to UI
-		if ((_to_ui || _patch_port_out_index != (uint32_t)-1) &&
+		if ((_to_ui || _can_write_automation || _patch_port_out_index != (uint32_t)-1) &&
 		    (flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
 			LV2_Evbuf* buf = _ev_buffers[port_index];
 			for (LV2_Evbuf_Iterator i = lv2_evbuf_begin(buf);
@@ -2269,6 +2325,78 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				uint32_t frames, subframes, type, size;
 				uint8_t* data;
 				lv2_evbuf_get(i, &frames, &subframes, &type, &size, &data);
+
+#ifdef LV2_EXTENDED
+				// Intercept Automation Write Events
+				if ((flags & PORT_AUTOCTRL)) {
+					LV2_Atom* atom = (LV2_Atom*)(data - sizeof(LV2_Atom));
+					if (atom->type == _uri_map.urids.atom_Blank ||
+							atom->type == _uri_map.urids.atom_Object) {
+						LV2_Atom_Object* obj = (LV2_Atom_Object*)atom;
+						if (obj->body.otype == _uri_map.urids.auto_event) {
+							// only if transport_rolling ??
+							const LV2_Atom* parameter = NULL;
+							const LV2_Atom* value    = NULL;
+							lv2_atom_object_get(obj,
+							                    _uri_map.urids.auto_parameter, &parameter,
+							                    _uri_map.urids.auto_value,     &value,
+							                    0);
+							if (parameter && value) {
+								const uint32_t p = ((const LV2_Atom_Int*)parameter)->body;
+								const float v = ((const LV2_Atom_Float*)value)->body;
+								// -> add automation event..
+								AutomationCtrlPtr c = get_automation_control (p);
+								if (c && c->ac->automation_state() == Touch) {
+									if (c->guard) {
+										c->guard = false;
+										c->ac->list()->add (_session.transport_frame() + frames, v, true, true);
+									} else {
+										c->ac->set_double (v, _session.transport_frame() + frames, true);
+									}
+								}
+							}
+						}
+						else if (obj->body.otype == _uri_map.urids.auto_setup) {
+							// TODO optional arguments, for now we assume the plugin
+							// writes automation for its own inputs
+							// -> put them in "touch" mode (preferably "exclusive plugin touch(TM)"
+							for (AutomationCtrlMap::iterator i = _ctrl_map.begin(); i != _ctrl_map.end(); ++i) {
+								i->second->ac->set_automation_state (Touch);
+							}
+						}
+						else if (obj->body.otype == _uri_map.urids.auto_finalize) {
+							// set [touched] parameters to "play" ??
+						}
+						else if (obj->body.otype == _uri_map.urids.auto_start) {
+							const LV2_Atom* parameter = NULL;
+							lv2_atom_object_get(obj,
+							                    _uri_map.urids.auto_parameter, &parameter,
+							                    0);
+							if (parameter) {
+								const uint32_t p = ((const LV2_Atom_Int*)parameter)->body;
+								AutomationCtrlPtr c = get_automation_control (p);
+								if (c) {
+									c->ac->start_touch (_session.transport_frame());
+									c->guard = true;
+								}
+							}
+						}
+						else if (obj->body.otype == _uri_map.urids.auto_end) {
+							const LV2_Atom* parameter = NULL;
+							lv2_atom_object_get(obj,
+							                    _uri_map.urids.auto_parameter, &parameter,
+							                    0);
+							if (parameter) {
+								const uint32_t p = ((const LV2_Atom_Int*)parameter)->body;
+								AutomationCtrlPtr c = get_automation_control (p);
+								if (c) {
+									c->ac->stop_touch (true, _session.transport_frame());
+								}
+							}
+						}
+					}
+				}
+#endif
 
 				// Intercept patch change messages to emit PropertyChanged signal
 				if ((flags & PORT_PATCHMSG)) {
@@ -2525,7 +2653,12 @@ LV2World::LV2World()
 	units_db           = lilv_new_uri(world, LV2_UNITS__db);
 	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
 	patch_Message      = lilv_new_uri(world, LV2_PATCH__Message);
-	lv2_noSampleAccurateCtrl = lilv_new_uri(world, LV2_CORE_PREFIX "noSampleAccurateControls");
+#ifdef LV2_EXTENDED
+	lv2_noSampleAccurateCtrl    = lilv_new_uri(world, LV2_CORE_PREFIX "noSampleAccurateControls");
+	auto_can_write_automatation = lilv_new_uri(world, LV2_AUTOMATE_URI__can_write);
+	auto_automation_control     = lilv_new_uri(world, LV2_AUTOMATE_URI__control);
+	auto_automation_controlled  = lilv_new_uri(world, LV2_AUTOMATE_URI__controlled);
+#endif
 #ifdef HAVE_LV2_1_2_0
 	bufz_powerOf2BlockLength = lilv_new_uri(world, LV2_BUF_SIZE__powerOf2BlockLength);
 	bufz_fixedBlockLength    = lilv_new_uri(world, LV2_BUF_SIZE__fixedBlockLength);
@@ -2544,7 +2677,12 @@ LV2World::~LV2World()
 	lilv_node_free(bufz_fixedBlockLength);
 	lilv_node_free(bufz_powerOf2BlockLength);
 #endif
+#ifdef LV2_EXTENDED
 	lilv_node_free(lv2_noSampleAccurateCtrl);
+	lilv_node_free(auto_can_write_automatation);
+	lilv_node_free(auto_automation_control);
+	lilv_node_free(auto_automation_controlled);
+#endif
 	lilv_node_free(patch_Message);
 	lilv_node_free(patch_writable);
 	lilv_node_free(units_hz);

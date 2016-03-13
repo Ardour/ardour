@@ -49,6 +49,7 @@ class BufferSet;
 class PluginInsert;
 class Plugin;
 class PluginInfo;
+class AutomationControl;
 
 typedef boost::shared_ptr<Plugin> PluginPtr;
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
@@ -99,6 +100,8 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool parameter_is_control(uint32_t) const = 0;
 	virtual bool parameter_is_input(uint32_t) const = 0;
 	virtual bool parameter_is_output(uint32_t) const = 0;
+
+	virtual void set_automation_control (uint32_t /*port_index*/, boost::shared_ptr<ARDOUR::AutomationControl>) { }
 
 	virtual boost::shared_ptr<ScalePoints> get_scale_points(uint32_t /*port_index*/) const {
 		return boost::shared_ptr<ScalePoints>();
