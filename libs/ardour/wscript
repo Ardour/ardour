@@ -295,6 +295,10 @@ def configure(conf):
                           atleast_version='0.6.0', mandatory=False)
         conf.define ('LV2_SUPPORT', 1)
 
+    # non-standard LV2 extention -- TODO: add option to disable??
+    if conf.is_defined ('HAVE_LV2_1_10_0'):
+        conf.define ('LV2_EXTENDED', 1)
+
 #    autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH',
 #                      mandatory=False)
     autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT',
