@@ -1243,13 +1243,13 @@ RouteUI::mute_active_state (Session* s, boost::shared_ptr<Route> r)
 		return ActiveState(0);
 	}
 
-
 	if (Config->get_show_solo_mutes() && !Config->get_solo_control_is_listen_control ()) {
 
 		if (r->muted ()) {
 			/* full mute */
 			return Gtkmm2ext::ExplicitActive;
-		} else if (r->muted_by_others()) {
+		} else if (r->muted_by_others ()) {
+			/* this will reflect both solo mutes AND master mutes */
 			return Gtkmm2ext::ImplicitActive;
 		} else {
 			/* no mute at all */
@@ -1261,6 +1261,12 @@ RouteUI::mute_active_state (Session* s, boost::shared_ptr<Route> r)
 		if (r->muted()) {
 			/* full mute */
 			return Gtkmm2ext::ExplicitActive;
+		} else if (r->mute_master()->muted_by_others()) {
+			/* note the direct use of MuteMaster API here. We are
+			   not interested in showing
+			   others-soloed-so-this-muted status in this branch.
+			*/
+			return Gtkmm2ext::ImplicitActive;
 		} else {
 			/* no mute at all */
 			return Gtkmm2ext::Off;
