@@ -436,7 +436,7 @@ private:
 	framecnt_t frame_at_beat_locked (const Metrics& metrics, double beat) const;
 	double tick_at_frame_locked (const Metrics& metrics, framecnt_t frame) const;
 
-	double tick_offset_at (const Metrics& metrics, double tick) const;
+	double beat_offset_at (const Metrics& metrics, double beat) const;
 	frameoffset_t frame_offset_at (const Metrics& metrics, framepos_t frame) const;
 
 	framecnt_t frame_at_tick_locked (const Metrics& metrics, double tick) const;
