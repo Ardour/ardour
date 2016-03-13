@@ -25,6 +25,8 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
 
+#include "gtkmm2ext/bindings.h"
+
 #include "evoral/types.hpp"
 
 #include "ardour/session_handle.h"
@@ -179,7 +181,7 @@ class MidiTrackerEditor : public ArdourWindow
 	// If the resolution isn't fine enough and multiple notes do not fit in the
 	// same row, then this string is printed.
 	static const std::string undefined_str;
-	
+
 	MidiTrackerModelColumns      columns;
 	Glib::RefPtr<Gtk::ListStore> model;
 	Gtk::TreeView                view;
@@ -191,6 +193,7 @@ class MidiTrackerEditor : public ArdourWindow
 	Gtk::Table                   buttons;
 	Gtk::HBox                    toolbar;
 	Gtk::VBox                    vbox;
+	Gtkmm2ext::ActionMap         myactions;
 	ArdourDropdown               beats_per_row_selector;
 	std::vector<std::string>     beats_per_row_strings;
 	uint8_t                      rows_per_beat;
@@ -205,6 +208,7 @@ class MidiTrackerEditor : public ArdourWindow
 	bool                         visible_velocity;
 	bool                         visible_delay;
 	ArdourButton                 automation_button;
+	Gtk::Menu                    subplugin_menu;
 
 	boost::shared_ptr<ARDOUR::MidiRegion> region;
 	boost::shared_ptr<ARDOUR::MidiTrack>  track;
@@ -216,7 +220,10 @@ class MidiTrackerEditor : public ArdourWindow
 	PBD::ScopedConnection content_connection;
 
 	void build_beats_per_row_menu ();
+	void build_automation_action_menu ();
+
 	void register_actions ();
+
 	bool visible_blank_press (GdkEventButton*);
 	bool visible_note_press (GdkEventButton*);
 	bool visible_channel_press (GdkEventButton*);
@@ -226,6 +233,7 @@ class MidiTrackerEditor : public ArdourWindow
 	void redisplay_visible_channel ();
 	void redisplay_visible_velocity ();
 	void redisplay_visible_delay ();
+	void automation_click ();
 
 	void setup_tooltips ();
 	void setup_toolbar ();
