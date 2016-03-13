@@ -1529,7 +1529,9 @@ TempoMap::bbt_to_beats_locked (const Metrics& metrics, Timecode::BBT_Time bbt)
 	double accumulated_beats = 0.0;
 	double accumulated_bars = 0.0;
 	MeterSection* prev_ms = 0;
-
+	/* because audio-locked meters have 'fake' integral beats,
+	   we don't have to worry about any offset here.
+	*/
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
@@ -1651,6 +1653,35 @@ TempoMap::tick_at_frame_locked (const Metrics& metrics, framecnt_t frame) const
 
 }
 
+framecnt_t
+TempoMap::frame_at_tick_locked (const Metrics& metrics, double tick) const
+{
+	/* HOLD THE READER LOCK */
+
+	const TempoSection* prev_ts = 0;
+	double accumulated_ticks = 0.0;
+
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		TempoSection* t;
+
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if (prev_ts && t->tick() > tick) {
+				return prev_ts->frame_at_tick (tick, _frame_rate);
+			}
+
+			accumulated_ticks = t->tick();
+			prev_ts = t;
+		}
+	}
+	/* must be treated as constant, irrespective of _type */
+	double const ticks_in_section = tick - accumulated_ticks;
+	double const dtime = (ticks_in_section / BBT_Time::ticks_per_beat) * prev_ts->frames_per_beat (_frame_rate);
+
+	framecnt_t const ret = (((framecnt_t) floor (dtime)) + prev_ts->frame());
+
+	return ret;
+}
+
 double
 TempoMap::tick_offset_at (const Metrics& metrics, double tick) const
 {
@@ -1675,10 +1706,10 @@ TempoMap::tick_offset_at (const Metrics& metrics, double tick) const
 	return beat_off;
 }
 
-framecnt_t
+frameoffset_t
 TempoMap::frame_offset_at (const Metrics& metrics, framepos_t frame) const
 {
-	framecnt_t frame_off = 0;
+	frameoffset_t frame_off = 0;
 
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		MeterSection* m = 0;
@@ -1687,42 +1718,12 @@ TempoMap::frame_offset_at (const Metrics& metrics, framepos_t frame) const
 				break;
 			}
 			if (m->position_lock_style() == AudioTime) {
-				frame_off = frame_at_beat_locked (metrics, m->beat()) - m->frame();
+				frame_off += frame_at_beat_locked (metrics, m->beat()) - m->frame();
 			}
 		}
 	}
 
 	return frame_off;
-}
-
-framecnt_t
-TempoMap::frame_at_tick_locked (const Metrics& metrics, double tick) const
-{
-	/* HOLD THE READER LOCK */
-
-	const TempoSection* prev_ts = 0;
-	double accumulated_ticks = 0.0;
-
-	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
-		TempoSection* t;
-
-		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
-			if (prev_ts && t->tick() > tick) {
-				/* prev_ts is the one affecting us. */
-				return prev_ts->frame_at_tick (tick, _frame_rate);
-			}
-
-			accumulated_ticks = t->tick();
-			prev_ts = t;
-		}
-	}
-	/* must be treated as constant, irrespective of _type */
-	double const ticks_in_section = tick - accumulated_ticks;
-	double const dtime = (ticks_in_section / BBT_Time::ticks_per_beat) * prev_ts->frames_per_beat (_frame_rate);
-
-	framecnt_t const ret = (((framecnt_t) floor (dtime)) + prev_ts->frame());
-
-	return ret;
 }
 
 double
@@ -1943,7 +1944,6 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const Tempo& bpm
 	}
 
 	imaginary.sort (cmp);
-
 	if (section->position_lock_style() == AudioTime) {
 		/* we're setting the beat */
 		section->set_position_lock_style (MusicTime);
@@ -2094,9 +2094,11 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 		framecnt_t const ret = time_at_bbt - offset_pos;
 		return ret - frame_offset_at (_metrics, pos);
 	}
+
 	double const ticks = bbt.ticks + (bbt.beats * BBT_Time::ticks_per_beat);
 	framecnt_t const ret = (framecnt_t) floor ((ticks / BBT_Time::ticks_per_beat) * first->frames_per_beat(_frame_rate));
-	return ret - frame_offset_at (_metrics, pos);
+	/* daft */
+	return (offset_pos + ret) - frame_offset_at (_metrics, pos);
 }
 
 framepos_t
@@ -2272,11 +2274,12 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 
 	while (cnt <= upper_beat) {
 		framecnt_t pos = frame_at_beat_locked (_metrics, cnt);
-		framecnt_t const frame_offset = frame_offset_at (_metrics, pos);
+		Tempo const tempo = tempo_at (pos);
+
+		frameoffset_t const frame_offset = frame_offset_at (_metrics, pos);
 		pos -= frame_offset;
 		MeterSection const meter = meter_section_at (pos);
 
-		Tempo const tempo = tempo_at (pos);
 		BBT_Time const bbt = beats_to_bbt_locked (_metrics, (double) cnt);
 
 		points.push_back (BBTPoint (meter, tempo, pos, bbt.bars, bbt.beats));
@@ -2348,7 +2351,7 @@ const Tempo
 TempoMap::tempo_at (framepos_t frame) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-
+	frameoffset_t const frame_off = frame + frame_offset_at (_metrics, frame);
 	TempoSection* prev_ts = 0;
 
 	Metrics::const_iterator i;
@@ -2356,9 +2359,9 @@ TempoMap::tempo_at (framepos_t frame) const
 	for (i = _metrics.begin(); i != _metrics.end(); ++i) {
 		TempoSection* t;
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
-			if ((prev_ts) && t->frame() > frame) {
+			if ((prev_ts) && t->frame() > frame_off) {
 				/* this is the one past frame */
-				double const ret = prev_ts->tempo_at_frame (frame, _frame_rate);
+				double const ret = prev_ts->tempo_at_frame (frame_off, _frame_rate);
 				Tempo const ret_tempo (ret, prev_ts->note_type());
 				return ret_tempo;
 			}
@@ -2376,7 +2379,7 @@ const MeterSection&
 TempoMap::meter_section_at (framepos_t frame) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-
+	framepos_t const frame_off = frame + frame_offset_at (_metrics, frame);
 	Metrics::const_iterator i;
 	MeterSection* prev = 0;
 
@@ -2385,7 +2388,7 @@ TempoMap::meter_section_at (framepos_t frame) const
 
 		if ((t = dynamic_cast<MeterSection*> (*i)) != 0) {
 
-			if ((*i)->frame() > frame) {
+			if ((*i)->frame() > frame_off) {
 				break;
 			}
 
@@ -2433,7 +2436,9 @@ TempoMap::meter_section_at (double beat) const
 const Meter&
 TempoMap::meter_at (framepos_t frame) const
 {
-	TempoMetric m (metric_at (frame));
+	framepos_t const frame_off = frame + frame_offset_at (_metrics, frame);
+	TempoMetric m (metric_at (frame_off));
+
 	return m.meter();
 }
 

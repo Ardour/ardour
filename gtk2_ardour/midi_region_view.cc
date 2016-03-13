@@ -1703,22 +1703,26 @@ void
 MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
-	const double x = trackview.editor().sample_to_pixel (source_beats_to_region_frames (note->time()));
+	const double x0 = trackview.editor().sample_to_pixel (source_beats_to_region_frames (note->time()));
+	double x1;
 	const double y0 = 1 + floor(midi_stream_view()->note_to_y(note->note()));
-
-	ev->set_x0 (x);
-	ev->set_y0 (y0);
+	double y1;
 
 	/* trim note display to not overlap the end of its region */
 
 	if (note->length() > 0) {
 		const framepos_t note_end_frames = min (source_beats_to_region_frames (note->end_time()), _region->length());
-		ev->set_x1 (std::max(1., trackview.editor().sample_to_pixel (note_end_frames)) - 1);
+		x1 = std::max(1., trackview.editor().sample_to_pixel (note_end_frames)) - 1;
 	} else {
-		ev->set_x1 (std::max(1., trackview.editor().sample_to_pixel (_region->length())) - 1);
+		x1 = std::max(1., trackview.editor().sample_to_pixel (_region->length())) - 1;
 	}
 
-	ev->set_y1 (y0 + std::max(1., floor(midi_stream_view()->note_height()) - 1));
+	y1 = y0 + std::max(1., floor(midi_stream_view()->note_height()) - 1);
+
+	ev->set_x0 (x0);
+	ev->set_x1 (x1);
+	ev->set_y0 (y0);
+	ev->set_y1 (y1);
 
 	if (!note->length()) {
 		if (_active_notes && note->note() < 128) {
@@ -1726,7 +1730,7 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 			if (old_rect) {
 				/* There is an active note on this key, so we have a stuck
 				   note.  Finish the old rectangle here. */
-				old_rect->set_x1 (x);
+				old_rect->set_x1 (x1);
 				old_rect->set_outline_all ();
 			}
 			_active_notes[note->note()] = ev;
@@ -2508,6 +2512,8 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 			to_play.push_back ((*i)->note());
 		}
 		(*i)->move_event(dx, dy);
+		Note* canvas_note = dynamic_cast<Note*>(*i);
+		canvas_note->set_x1 (snap_to_pixel (canvas_note->x1(), false));
 	}
 
 	if (dy && !_selection.empty() && !_no_sound_notes && UIConfiguration::instance().get_sound_midi_notes()) {
