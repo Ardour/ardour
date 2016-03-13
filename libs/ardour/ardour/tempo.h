@@ -432,7 +432,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 private:
 	double bbt_to_beats_locked (const Metrics& metrics, Timecode::BBT_Time bbt);
 	Timecode::BBT_Time beats_to_bbt_locked (Metrics& metrics, double beats);
-	double beat_at_frame_locked (Metrics& metrics, framecnt_t frame) const;
+	double beat_at_frame_locked (const Metrics& metrics, framecnt_t frame) const;
 	framecnt_t frame_at_beat_locked (const Metrics& metrics, double beat) const;
 	double tick_at_frame_locked (const Metrics& metrics, framecnt_t frame) const;
 	double tick_offset_at (const Metrics& metrics, double tick) const;

@@ -1517,10 +1517,8 @@ double
 TempoMap::bbt_to_beats (Timecode::BBT_Time bbt)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	double const ticks = bbt_to_beats_locked (_metrics, bbt) * BBT_Time::ticks_per_beat;
-	double const tick_off = tick_offset_at (_metrics, ticks);
 
-	return (ticks + tick_off) / BBT_Time::ticks_per_beat;
+	return bbt_to_beats_locked (_metrics, bbt);
 }
 
 double
@@ -1561,9 +1559,8 @@ Timecode::BBT_Time
 TempoMap::beats_to_bbt (double beats)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	double const ticks = beats * BBT_Time::ticks_per_beat;
-	double const tick_off = tick_offset_at (_metrics, ticks);
-	return beats_to_bbt_locked (_metrics, (ticks + tick_off) / BBT_Time::ticks_per_beat);
+
+	return beats_to_bbt_locked (_metrics, beats);
 }
 
 Timecode::BBT_Time
@@ -1732,13 +1729,14 @@ double
 TempoMap::beat_at_frame (framecnt_t frame) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	double const tick = tick_at_frame_locked (_metrics, frame);
-	framecnt_t const tick_off = tick_offset_at (_metrics, tick);
-	return (tick + tick_off) / BBT_Time::ticks_per_beat;
+	framecnt_t const offset_frame = frame + frame_offset_at (_metrics, frame);
+	double const tick = tick_at_frame_locked (_metrics, offset_frame);
+
+	return tick / BBT_Time::ticks_per_beat;
 }
 
 double
-TempoMap::beat_at_frame_locked (Metrics& metrics, framecnt_t frame) const
+TempoMap::beat_at_frame_locked (const Metrics& metrics, framecnt_t frame) const
 {
 	return tick_at_frame_locked (metrics, frame) / BBT_Time::ticks_per_beat;
 }
@@ -1747,7 +1745,7 @@ framecnt_t
 TempoMap::frame_at_beat (double beat) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	framecnt_t const frame = frame_at_tick_locked (_metrics, beat * BBT_Time::ticks_per_beat);
+	framecnt_t const frame = frame_at_beat_locked (_metrics, beat);
 	framecnt_t const frame_off = frame_offset_at (_metrics, frame);
 	return frame - frame_off;
 }
@@ -2074,13 +2072,14 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 	Metrics::const_iterator i;
 	TempoSection* first = 0;
 	TempoSection* second = 0;
+	framepos_t const offset_pos = pos + frame_offset_at (_metrics, pos);
 
 	for (i = _metrics.begin(); i != _metrics.end(); ++i) {
 		TempoSection* t;
 
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 
-			if ((*i)->frame() > pos) {
+			if ((*i)->frame() > offset_pos) {
 				second = t;
 				break;
 			}
@@ -2089,15 +2088,15 @@ TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir)
 		}
 	}
 	if (first && second) {
-		double const tick_at_time = first->tick_at_frame (pos, _frame_rate);
+		double const tick_at_time = first->tick_at_frame (offset_pos, _frame_rate);
 		double const bbt_ticks = bbt.ticks + (bbt.beats * BBT_Time::ticks_per_beat);
-		double const time_at_bbt = first->frame_at_tick (tick_at_time + bbt_ticks, _frame_rate);
-
-		return time_at_bbt - pos;
+		framecnt_t const time_at_bbt = first->frame_at_tick (tick_at_time + bbt_ticks, _frame_rate);
+		framecnt_t const ret = time_at_bbt - offset_pos;
+		return ret - frame_offset_at (_metrics, pos);
 	}
 	double const ticks = bbt.ticks + (bbt.beats * BBT_Time::ticks_per_beat);
-
-	return (framecnt_t) floor ((ticks / BBT_Time::ticks_per_beat) * first->frames_per_beat(_frame_rate));
+	framecnt_t const ret = (framecnt_t) floor ((ticks / BBT_Time::ticks_per_beat) * first->frames_per_beat(_frame_rate));
+	return ret - frame_offset_at (_metrics, pos);
 }
 
 framepos_t
@@ -2117,7 +2116,7 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	uint32_t ticks = (uint32_t) floor (tick_at_frame_locked (_metrics, fr) + 0.5);
+	uint32_t ticks = (uint32_t) floor (tick_at_frame_locked (_metrics, fr + frame_offset_at (_metrics, fr)) + 0.5);
 	uint32_t beats = (uint32_t) floor (ticks / BBT_Time::ticks_per_beat);
 	uint32_t ticks_one_subdivisions_worth = (uint32_t)BBT_Time::ticks_per_beat / sub_num;
 
@@ -2203,7 +2202,9 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 			/* on the subdivision, do nothing */
 		}
 	}
-	return frame_at_tick_locked (_metrics, (beats * BBT_Time::ticks_per_beat) + ticks);
+	framepos_t ret_frame = frame_at_tick_locked (_metrics, (beats * BBT_Time::ticks_per_beat) + ticks);
+	return ret_frame - frame_offset_at (_metrics, fr);
+	//return frame_at_tick_locked (_metrics, (beats * BBT_Time::ticks_per_beat) + ticks);
 }
 
 framepos_t
@@ -2211,7 +2212,7 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	double const beat_at_framepos = beat_at_frame_locked (_metrics, frame) + tick_offset_at (_metrics, frame);
+	double const beat_at_framepos = beat_at_frame_locked (_metrics, frame + frame_offset_at (_metrics, frame));
 
 	BBT_Time bbt (beats_to_bbt_locked (_metrics, beat_at_framepos));
 
@@ -2799,14 +2800,14 @@ TempoMap::remove_time (framepos_t where, framecnt_t amount)
 framepos_t
 TempoMap::framepos_plus_beats (framepos_t pos, Evoral::Beats beats) const
 {
-	return frame_at_beat (beat_at_frame (pos) + beats.to_double());
+	return frame_at_beat (beat_at_frame_locked (_metrics, pos) + beats.to_double());
 }
 
 /** Subtract some (fractional) beats from a frame position, and return the result in frames */
 framepos_t
 TempoMap::framepos_minus_beats (framepos_t pos, Evoral::Beats beats) const
 {
-	return frame_at_beat (beat_at_frame (pos) - beats.to_double());
+	return frame_at_beat (beat_at_frame_locked (_metrics, pos) - beats.to_double());
 }
 
 /** Add the BBT interval op to pos and return the result */
