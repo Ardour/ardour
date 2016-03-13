@@ -257,6 +257,10 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	RingBuffer<uint8_t>* _to_ui;
 	RingBuffer<uint8_t>* _from_ui;
 
+#ifdef LV2_EXTENDED
+	const LV2_Inline_Display_Interface* _display_interface;
+#endif
+
 	typedef struct {
 		const void* (*extension_data) (const char* uri);
 	} LV2_DataAccess;
@@ -269,6 +273,9 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2_Feature    _work_schedule_feature;
 	LV2_Feature    _options_feature;
 	LV2_Feature    _def_state_feature;
+#ifdef LV2_EXTENDED
+	LV2_Feature    _queue_draw_feature;
+#endif
 
 	// Options passed to plugin
 	int32_t _seq_size;
@@ -291,6 +298,11 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void run (pframes_t nsamples);
 
 	void load_supported_properties(PropertyDescriptors& descs);
+
+#ifdef LV2_EXTENDED
+	bool has_inline_display ();
+	void* render_inline_display (uint32_t, uint32_t);
+#endif
 
 	void latency_compute_run ();
 	std::string do_save_preset (std::string);

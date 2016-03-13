@@ -111,6 +111,10 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	void realtime_locate ();
 	void monitoring_changed ();
 
+	virtual bool has_inline_display () { return false; }
+	virtual void* render_inline_display (uint32_t, uint32_t) { return NULL; }
+	PBD::Signal0<void> QueueDraw;
+
 	struct PresetRecord {
 	    PresetRecord () : valid (false) {}
 	    PresetRecord (const std::string& u, const std::string& l, bool s = true) : uri (u), label (l), user (s), valid (true)  {}

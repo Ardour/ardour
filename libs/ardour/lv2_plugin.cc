@@ -216,6 +216,14 @@ work_respond(LV2_Worker_Respond_Handle handle,
 	}
 }
 
+/* inline display extension */
+static void
+queue_draw (LV2_Inline_Display_Handle handle)
+{
+	LV2Plugin* plugin = (LV2Plugin*)handle;
+	plugin->QueueDraw(); /* EMIT SIGNAL */
+}
+
 /* log extension */
 
 static int
@@ -260,6 +268,9 @@ struct LV2Plugin::Impl {
 #ifdef HAVE_LV2_1_2_0
 	       , options(0)
 #endif
+#ifdef LV2_EXTENDED
+	       , queue_draw(0)
+#endif
 	{}
 
 	/** Find the LV2 input port with the given designation.
@@ -283,6 +294,9 @@ struct LV2Plugin::Impl {
 	int32_t                      block_length;
 #ifdef HAVE_LV2_1_2_0
 	LV2_Options_Option*          options;
+#endif
+#ifdef LV2_EXTENDED
+	LV2_Inline_Display*          queue_draw;
 #endif
 };
 
@@ -371,7 +385,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	lilv_node_free(state_uri);
 	lilv_node_free(state_iface_uri);
 
-	_features    = (LV2_Feature**)calloc(11, sizeof(LV2_Feature*));
+	_features    = (LV2_Feature**)calloc(12, sizeof(LV2_Feature*));
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_make_path_feature;
@@ -387,6 +401,17 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 
 	lv2_atom_forge_init(&_impl->forge, _uri_map.urid_map());
 	lv2_atom_forge_init(&_impl->ui_forge, _uri_map.urid_map());
+
+#ifdef LV2_EXTENDED
+	_impl->queue_draw = (LV2_Inline_Display*)
+		malloc (sizeof(LV2_Inline_Display));
+	_impl->queue_draw->handle     = this;
+	_impl->queue_draw->queue_draw = queue_draw;
+
+	_queue_draw_feature.URI  = LV2_INLINEDISPLAY__queue_draw;
+	_queue_draw_feature.data = _impl->queue_draw;
+	_features[n_features++]  = &_queue_draw_feature;
+#endif
 
 #ifdef HAVE_LV2_1_2_0
 	LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
@@ -472,6 +497,11 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 			LV2_OPTIONS__interface);
 	}
 	lilv_node_free(options_iface_uri);
+#endif
+
+#ifdef LV2_EXTENDED
+	_display_interface = (const LV2_Inline_Display_Interface*)
+		extension_data (LV2_INLINEDISPLAY__interface);
 #endif
 
 	if (lilv_plugin_has_feature(plugin, _world.lv2_inPlaceBroken)) {
@@ -765,6 +795,9 @@ LV2Plugin::~LV2Plugin ()
 #ifdef HAVE_LV2_1_2_0
 	free(_impl->options);
 #endif
+#ifdef LV2_EXTENDED
+	free(_impl->queue_draw);
+#endif
 
 	free(_features);
 	free(_make_path_feature.data);
@@ -826,6 +859,21 @@ LV2Plugin::ui_is_resizable () const
 
 	return !fs_matches && !nrs_matches;
 }
+
+#ifdef LV2_EXTENDED
+bool
+LV2Plugin::has_inline_display () {
+	return _display_interface ? true : false;
+}
+
+void*
+LV2Plugin::render_inline_display (uint32_t w, uint32_t h) {
+	if (_display_interface) {
+		return _display_interface->render ((void*)_impl->instance->lv2_handle, w, h);
+	}
+	return NULL;
+}
+#endif
 
 string
 LV2Plugin::unique_id() const
