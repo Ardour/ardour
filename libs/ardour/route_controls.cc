@@ -130,6 +130,31 @@ Route::SoloControllable::SoloControllable (std::string name, boost::shared_ptr<R
 }
 
 void
+Route::SoloControllable::master_changed (bool from_self, PBD::Controllable::GroupControlDisposition gcd)
+{
+	boost::shared_ptr<Route> r = _route.lock ();
+
+	if (!r) {
+		return;
+	}
+
+	bool master_soloed;
+
+	{
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		master_soloed = (bool) get_masters_value_locked ();
+	}
+
+	/* Master is considered equivalent to an upstream solo control, not
+	 * direct control over self-soloed.
+	 */
+
+	r->mod_solo_by_others_upstream (master_soloed ? 1 : -1);
+
+	AutomationControl::master_changed (false, gcd);
+}
+
+void
 Route::SoloControllable::set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	if (writable()) {
@@ -158,13 +183,9 @@ Route::SoloControllable::set_value_unchecked (double val)
 double
 Route::SoloControllable::get_value () const
 {
-	std::cerr << "RSC get value\n";
-
 	if (slaved()) {
-		std::cerr << "slaved solo control, get master value ... ";
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
-		double v = get_masters_value_locked () ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
-		std::cerr << v << std::endl;
+		return get_masters_value_locked () ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
 	}
 
 	if (_list && ((AutomationList*)_list.get())->automation_playback()) {
@@ -202,6 +223,7 @@ Route::MuteControllable::set_superficial_value(bool muted)
 
 	const bool to_list = _list && ((AutomationList*)_list.get ())->automation_write ();
 	const double where = _session.audible_frame ();
+
 	if (to_list) {
 		/* Note that we really need this:
 		 *  if (as == Touch && _list->in_new_write_pass ()) {
@@ -216,6 +238,24 @@ Route::MuteControllable::set_superficial_value(bool muted)
 	}
 
 	Control::set_double (muted, where, to_list);
+}
+
+void
+Route::MuteControllable::master_changed (bool from_self, PBD::Controllable::GroupControlDisposition gcd)
+{
+	bool master_muted;
+
+	{
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		master_muted = (bool) get_masters_value_locked ();
+	}
+
+	boost::shared_ptr<Route> r (_route.lock());
+	if (r) {
+		r->mute_master()->mod_muted_by_others (master_muted ? 1 : -1);
+	}
+
+	AutomationControl::master_changed (false, gcd);
 }
 
 void
@@ -258,7 +298,7 @@ Route::MuteControllable::get_value () const
 {
 	if (slaved()) {
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
-		return get_masters_value_locked () ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
+		return get_masters_value_locked () ? 1.0 : 0.0;
 	}
 
 	if (_list && ((AutomationList*)_list.get())->automation_playback()) {
@@ -268,7 +308,7 @@ Route::MuteControllable::get_value () const
 
 	// Not playing back automation, get the actual route mute value
 	boost::shared_ptr<Route> r = _route.lock ();
-	return (r && r->muted()) ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
+	return (r && r->muted()) ? 1.0 : 0.0;
 }
 
 Route::PhaseControllable::PhaseControllable (std::string name, boost::shared_ptr<Route> r)

@@ -110,8 +110,10 @@ Session::rt_set_implicit_solo (boost::shared_ptr<RouteList> rl, int delta, bool 
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_auditioner()) {
 			if (upstream) {
+				std::cerr << "Changing " << (*i)->name() << " upstream by " << delta << std::endl;
 				(*i)->mod_solo_by_others_upstream (delta);
 			} else {
+				std::cerr << "Changing " << (*i)->name() << " downstream by " << delta << std::endl;
 				(*i)->mod_solo_by_others_downstream (delta);
 			}
 		}

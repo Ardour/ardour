@@ -137,94 +137,14 @@ VCA::set_state (XMLNode const& node, int version)
 }
 
 void
-VCA::add_solo_target (boost::shared_ptr<Route> r)
-{
-	Glib::Threads::RWLock::WriterLock lm (solo_lock);
-	solo_targets.push_back (r);
-	r->DropReferences.connect_same_thread (solo_connections, boost::bind (&VCA::solo_target_going_away, this, boost::weak_ptr<Route> (r)));
-}
-
-void
-VCA::remove_solo_target (boost::shared_ptr<Route> r)
-{
-	Glib::Threads::RWLock::WriterLock lm (solo_lock);
-	solo_targets.remove (r);
-}
-
-void
-VCA::solo_target_going_away (boost::weak_ptr<Route> wr)
-{
-	boost::shared_ptr<Route> r (wr.lock());
-	if (!r) {
-		return;
-	}
-	remove_solo_target (r);
-}
-
-void
 VCA::set_solo (bool yn)
 {
-	{
-		Glib::Threads::RWLock::ReaderLock lm (solo_lock);
-
-		if (yn == _solo_requested) {
-			return;
-		}
-
-		if (solo_targets.empty()) {
-			return;
-		}
-
-		boost::shared_ptr<RouteList> rl (new RouteList (solo_targets));
-
-		if (Config->get_solo_control_is_listen_control()) {
-			_session.set_listen (rl, yn, Session::rt_cleanup, Controllable::NoGroup);
-		} else {
-			_session.set_implicit_solo (rl, (yn ? 1 : -1), true, Session::rt_cleanup, Controllable::NoGroup);
-		}
-	}
-
 	_solo_requested = yn;
-}
-
-void
-VCA::add_mute_target (boost::shared_ptr<Route> r)
-{
-	Glib::Threads::RWLock::WriterLock lm (mute_lock);
-	mute_targets.push_back (r);
-	r->DropReferences.connect_same_thread (mute_connections, boost::bind (&VCA::mute_target_going_away, this, boost::weak_ptr<Route> (r)));
-}
-
-void
-VCA::remove_mute_target (boost::shared_ptr<Route> r)
-{
-	Glib::Threads::RWLock::WriterLock lm (mute_lock);
-	mute_targets.remove (r);
-}
-
-void
-VCA::mute_target_going_away (boost::weak_ptr<Route> wr)
-{
-	boost::shared_ptr<Route> r (wr.lock());
-	if (!r) {
-		return;
-	}
-	remove_mute_target (r);
 }
 
 void
 VCA::set_mute (bool yn)
 {
-	{
-		Glib::Threads::RWLock::ReaderLock lm (mute_lock);
-		if (yn == _mute_requested) {
-			return;
-		}
-
-		boost::shared_ptr<RouteList> rl (new RouteList (mute_targets));
-		_session.set_mute (rl, yn, Session::rt_cleanup, Controllable::NoGroup);
-	}
-
 	_mute_requested = yn;
 }
 

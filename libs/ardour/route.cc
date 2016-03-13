@@ -924,14 +924,6 @@ Route::set_solo (bool yn, Controllable::GroupControlDisposition group_override)
 	}
 
 	assert (Config->get_solo_control_is_listen_control() || !_monitor_send || !_monitor_send->active());
-
-	/* XXX TRACKS DEVELOPERS: THIS LOGIC SUGGESTS THAT YOU ARE NOT AWARE OF
-	   Config->get_solo_mute_overrride().
-	*/
-
-	if (yn && Profile->get_trx()) {
-		set_mute (false, Controllable::UseGroup);
-	}
 }
 
 void
@@ -997,7 +989,8 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 	}
 
 	set_mute_master_solo ();
-	_solo_control->Changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
+	cerr << name() << " SC->Changed (false, UseGroup)\n";
+	_solo_control->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 }
 
 void
@@ -1151,6 +1144,21 @@ Route::muted () const
 }
 
 bool
+Route::muted_by_others_soloing () const
+{
+	// This method is only used by route_ui for display state.
+	// The real thing is MuteMaster::muted_by_others_at()
+
+	//master is never muted by others
+	if (is_master())
+		return false;
+
+	//now check to see if something is soloed (and I am not)
+	//see also MuteMaster::mute_gain_at()
+	return _session.soloing() && !soloed() && !solo_isolated();
+}
+
+bool
 Route::muted_by_others () const
 {
 	// This method is only used by route_ui for display state.
@@ -1162,7 +1170,7 @@ Route::muted_by_others () const
 
 	//now check to see if something is soloed (and I am not)
 	//see also MuteMaster::mute_gain_at()
-	return (_session.soloing() && !soloed() && !solo_isolated());
+	return _mute_master->muted_by_others() || (_session.soloing() && !soloed() && !solo_isolated());
 }
 
 #if 0
@@ -5910,6 +5918,5 @@ Route::vca_unassign (boost::shared_ptr<VCA> vca)
 		_gain_control->remove_master (vca->gain_control());
 		_solo_control->remove_master (vca->solo_control());
 		_mute_control->remove_master (vca->mute_control());
-
 	}
 }

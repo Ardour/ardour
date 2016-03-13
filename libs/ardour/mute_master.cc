@@ -41,6 +41,7 @@ MuteMaster::MuteMaster (Session& s, const std::string&)
         , _soloed_by_self (false)
         , _soloed_by_others (false)
         , _solo_ignore (false)
+	, _muted_by_others (0)
 {
 
 	if (Config->get_mute_affects_pre_fader ()) {
@@ -163,6 +164,11 @@ MuteMaster::get_state()
 bool
 MuteMaster::muted_by_others_at (MutePoint mp) const
 {
-	return (!_solo_ignore && _session.soloing() && (_mute_point & mp));
+	return (!_solo_ignore && (_muted_by_others || _session.soloing()) && (_mute_point & mp));
 }
 
+void
+MuteMaster::mod_muted_by_others (int32_t delta)
+{
+	_muted_by_others = max (0, _muted_by_others + delta);
+}

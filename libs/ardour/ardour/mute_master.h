@@ -66,17 +66,21 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 	void set_soloed_by_others (bool yn) { _soloed_by_others = yn; }
 	void set_solo_ignore (bool yn) { _solo_ignore = yn; }
 
+	void mod_muted_by_others (int32_t delta);
+	bool muted_by_others () const { return _muted_by_others; }
+
 	PBD::Signal0<void> MutePointChanged;
 
 	XMLNode& get_state();
 	int set_state(const XMLNode&, int version);
 
   private:
-	volatile MutePoint _mute_point;
-	volatile bool      _muted_by_self;
-	volatile bool      _soloed_by_self;
-	volatile bool      _soloed_by_others;
-	volatile bool      _solo_ignore;
+	MutePoint _mute_point;
+	bool      _muted_by_self;
+	bool      _soloed_by_self;
+	bool      _soloed_by_others;
+	bool      _solo_ignore;
+	int32_t   _muted_by_others;
 };
 
 } // namespace ARDOUR

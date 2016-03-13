@@ -119,8 +119,6 @@ AutomationControl::set_value (double value, PBD::Controllable::GroupControlDispo
 
 	Control::set_double (value, _session.transport_frame(), to_list);
 
-	cerr << "AC was set to " << value << endl;
-
 	Changed (true, gcd);
 }
 
@@ -301,21 +299,37 @@ AutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 			*/
 
 
-			m->Changed.connect_same_thread (res.first->second.connection, boost::bind (&PBD::Signal2<void,bool,Controllable::GroupControlDisposition>::operator(), &Changed, false, _2));
+			m->Changed.connect_same_thread (res.first->second.connection, boost::bind (&AutomationControl::master_changed, this, _1, _2));
 		}
 
 		new_value = get_value_locked ();
 	}
 
 	if (res.second) {
+		/* this will notify everyone that we're now slaved to the master */
 		MasterStatusChange (); /* EMIT SIGNAL */
 	}
 
 	if (new_value != current_value) {
+		/* force a call to to ::master_changed() to carry the
+		 * consequences that would occur if the master assumed
+		 * its current value WHILE we were slaved.
+		 */
+		master_changed (false, Controllable::NoGroup);
 		/* effective value changed by master */
 		Changed (false, Controllable::NoGroup);
 	}
 
+}
+
+void
+AutomationControl::master_changed (bool /*from_self*/, GroupControlDisposition gcd)
+{
+	/* our value has (likely) changed, but not because we were
+	 * modified. Just the master.
+	 */
+
+	Changed (false, gcd); /* EMIT SIGNAL */
 }
 
 void

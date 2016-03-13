@@ -156,6 +156,7 @@ public:
 	Masters _masters;
 	PBD::ScopedConnectionList masters_connections;
 
+	virtual void master_changed (bool from_self, GroupControlDisposition gcd);
 	void master_going_away (boost::weak_ptr<AutomationControl>);
 	virtual void recompute_masters_ratios (double val) { /* do nothing by default */}
 	virtual double get_masters_value_locked () const;

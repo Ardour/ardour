@@ -160,7 +160,8 @@ public:
 	bool muted () const;
 	void set_mute (bool yn, PBD::Controllable::GroupControlDisposition);
 
-	bool muted_by_others() const;
+	bool muted_by_others_soloing () const;
+	bool muted_by_others () const;
 
 	/* controls use set_solo() to modify this route's solo state
 	 */
@@ -508,17 +509,57 @@ public:
 	};
 
 	class SoloControllable : public BooleanRouteAutomationControl {
-	public:
+	    public:
 		SoloControllable (std::string name, boost::shared_ptr<Route>);
 		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 		void set_value_unchecked (double);
 		double get_value () const;
-	private:
+
+		/* Export additional API so that objects that only get access
+		 * to a Controllable/AutomationControl can do more fine-grained
+		 * operations with respect to solo. Obviously, they would need
+		 * to dynamic_cast<Route::SoloControllable> first.
+		 *
+		 * Solo state is not representable by a single scalar value,
+		 * so this AutomationControl maps set_value() and get_value()
+		 * to r->set_self_solo() and r->soloed() respectively. This
+		 * means that the Controllable is technically asymmetric. It is
+		 * possible to call ::set_value (0.0) to disable (self)solo,
+		 * and then call ::get_value() and get a return of 1.0 because
+		 * the Route owner is soloed by upstream/downstream.
+		 */
+
+		void set_self_solo (bool yn) {
+			boost::shared_ptr<Route> r(_route.lock()); if (r) r->set_self_solo (yn);
+		}
+		void mod_solo_by_others_upstream (int32_t delta) {
+			boost::shared_ptr<Route> r(_route.lock()); if (r) r->mod_solo_by_others_upstream (delta);
+		}
+		void mod_solo_by_others_downstream (int32_t delta) {
+			boost::shared_ptr<Route> r(_route.lock()); if (r) r->mod_solo_by_others_downstream (delta);
+		}
+		bool soloed_by_others () const {
+			boost::shared_ptr<Route> r(_route.lock()); if (r) return r->soloed_by_others(); else return false;
+		}
+		bool soloed_by_others_upstream () const {
+			boost::shared_ptr<Route> r(_route.lock()); if (r) return r->soloed_by_others_upstream(); else return false;
+		}
+		bool soloed_by_others_downstream () const {
+			boost::shared_ptr<Route> r(_route.lock()); if (r) return r->soloed_by_others_downstream(); else return false;
+		}
+		bool self_soloed () const {
+			boost::shared_ptr<Route> r(_route.lock()); if (r) return r->self_soloed(); else return false;
+		}
+
+	    protected:
+		void master_changed (bool, PBD::Controllable::GroupControlDisposition);
+
+	    private:
 		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 	};
 
 	struct MuteControllable : public BooleanRouteAutomationControl {
-	public:
+	    public:
 		MuteControllable (std::string name, boost::shared_ptr<Route>);
 		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 		void set_value_unchecked (double);
@@ -526,7 +567,10 @@ public:
 
 		/* Pretend to change value, but do not affect actual route mute. */
 		void set_superficial_value(bool muted);
-	private:
+	    protected:
+		void master_changed (bool, PBD::Controllable::GroupControlDisposition);
+
+	    private:
 		boost::weak_ptr<Route> _route;
 		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 	};
