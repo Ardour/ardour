@@ -1291,7 +1291,7 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 		unsigned char *src = dis->data;
 		unsigned char *dst = cairo_image_surface_get_data (_surf);
 		const int dst_stride =  cairo_image_surface_get_stride (_surf);
-		for(uint32_t y = 0; y < dis->height; ++y) {
+		for (int y = 0; y < dis->height; ++y) {
 			memcpy (dst, src, dis->width * 4 /*ARGB32*/);
 			src += dis->stride;
 			dst += dst_stride;
