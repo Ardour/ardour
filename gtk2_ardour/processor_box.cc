@@ -1201,12 +1201,20 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 
 ProcessorEntry::PluginDisplay::PluginDisplay (boost::shared_ptr<ARDOUR::Plugin> p, uint32_t max_height)
 	: _plug (p)
+	, _surf (0)
 	, _max_height (max_height)
 	, _cur_height (1)
 {
 	set_name ("processor prefader");
 	_plug->QueueDraw.connect (_qdraw_connection, invalidator (*this),
 			boost::bind (&Gtk::Widget::queue_draw, this), gui_context ());
+}
+
+ProcessorEntry::PluginDisplay::~PluginDisplay ()
+{
+	if (_surf) {
+		cairo_surface_destroy (_surf);
+	}
 }
 
 void
@@ -1223,20 +1231,35 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 	double const width = a.get_width();
 	double const height = a.get_height();
 
-	void* csf = _plug->render_inline_display (width, _max_height);
+	Plugin::Display_Image_Surface* csf = _plug->render_inline_display (width, _max_height);
 
-	cairo_surface_t* surf = NULL;
-	if (csf) {
-		surf = (cairo_surface_t*) csf;
-	}
-
-	if (!surf) {
+	if (!csf) {
 		hide ();
 		if (_cur_height != 1) {
 			_cur_height = 1;
 			queue_resize ();
 		}
 		return true;
+	}
+
+	if (!_surf
+			|| csf->width !=  cairo_image_surface_get_width (_surf)
+			|| csf->height !=  cairo_image_surface_get_height (_surf)
+			|| csf->stride !=  cairo_image_surface_get_stride (_surf)
+		 )
+	{
+		if (_surf) {
+			cairo_surface_destroy (_surf);
+		}
+		_surf = cairo_image_surface_create_for_data (
+				csf->data,
+				CAIRO_FORMAT_ARGB32,
+				csf->width,
+				csf->height,
+				csf->stride);
+	} else {
+		memcpy (cairo_image_surface_get_data  (_surf), csf->data, csf->stride * csf->height);
+		cairo_surface_mark_dirty(_surf);
 	}
 
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
@@ -1248,23 +1271,21 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, 0, 0, width, height);
 	cairo_fill (cr);
 
-	if (surf) {
-		cairo_save (cr);
-		cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-		Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, width - 1, height + 1, 7);
-		cairo_clip (cr);
+	cairo_save (cr);
+	cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, width - 1, height + 1, 7);
+	cairo_clip (cr);
 
-		const double xc = floor ((width - cairo_image_surface_get_width (surf)) * .5);
-		const double sh = cairo_image_surface_get_height (surf);
-		uint32_t shm = std::min (_max_height, (uint32_t) ceil (sh));
-		if (shm != _cur_height) {
-			_cur_height = shm;
-			queue_resize ();
-		}
-		cairo_set_source_surface(cr, surf, xc, 0);
-		cairo_paint (cr);
-		cairo_restore (cr);
+	const double xc = floor ((width - csf->width) * .5);
+	const double sh = csf->height;
+	uint32_t shm = std::min (_max_height, (uint32_t) ceil (sh));
+	if (shm != _cur_height) {
+		_cur_height = shm;
+		queue_resize ();
 	}
+	cairo_set_source_surface(cr, _surf, xc, 0);
+	cairo_paint (cr);
+	cairo_restore (cr);
 
 	bool failed = false;
 	std::string name = get_name();
@@ -2258,7 +2279,7 @@ ProcessorBox::help_count_visible_prefader_processors (boost::weak_ptr<Processor>
 	                 )
 	   ) {
 
-		if (boost::dynamic_pointer_cast<Amp>(processor) && 
+		if (boost::dynamic_pointer_cast<Amp>(processor) &&
 		    boost::dynamic_pointer_cast<Amp>(processor)->gain_control()->parameter().type() == GainAutomation) {
 			*amp_seen = true;
 		} else {
@@ -2349,7 +2370,7 @@ ProcessorBox::setup_entry_positions ()
 
 	uint32_t num = 0;
 	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
-		if (boost::dynamic_pointer_cast<Amp>((*i)->processor()) && 
+		if (boost::dynamic_pointer_cast<Amp>((*i)->processor()) &&
 		    boost::dynamic_pointer_cast<Amp>((*i)->processor())->gain_control()->parameter().type() == GainAutomation) {
 			pre_fader = false;
 			(*i)->set_position (ProcessorEntry::Fader, num++);
