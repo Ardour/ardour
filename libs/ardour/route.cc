@@ -807,7 +807,7 @@ Route::set_listen (bool yn, Controllable::GroupControlDisposition group_override
 	}
 
 	if (use_group (group_override, &RouteGroup::is_solo)) {
-		_route_group->foreach_route (boost::bind (&Route::set_listen, _1, yn, Controllable::NoGroup));
+		_route_group->foreach_route (boost::bind (&Route::set_listen, _1, yn, Controllable::ForGroup));
 		return;
 	}
 
@@ -892,6 +892,9 @@ Route::clear_all_solo_state ()
 void
 Route::set_solo (bool yn, Controllable::GroupControlDisposition group_override)
 {
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: set solo => %2, grp ? %3 currently self-soloed ? %4\n",
+	                                          name(), yn, enum_2_string(group_override), self_soloed()));
+
 	if (_solo_safe) {
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 ignore solo change due to solo-safe\n", name()));
 		return;
@@ -903,12 +906,9 @@ Route::set_solo (bool yn, Controllable::GroupControlDisposition group_override)
 	}
 
 	if (use_group (group_override, &RouteGroup::is_solo)) {
-		_route_group->foreach_route (boost::bind (&Route::set_solo, _1, yn, Controllable::NoGroup));
+		_route_group->foreach_route (boost::bind (&Route::set_solo, _1, yn, Controllable::ForGroup));
 		return;
 	}
-
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: set solo => %2, grp ? %3 currently self-soloed ? %4\n",
-	                                          name(), yn, enum_2_string(group_override), self_soloed()));
 
 	if (self_soloed() != yn) {
 		set_self_solo (yn);
@@ -1054,7 +1054,7 @@ Route::set_solo_isolated (bool yn, Controllable::GroupControlDisposition group_o
 	}
 
 	if (use_group (group_override, &RouteGroup::is_solo)) {
-		_route_group->foreach_route (boost::bind (&Route::set_solo_isolated, _1, yn, Controllable::NoGroup));
+		_route_group->foreach_route (boost::bind (&Route::set_solo_isolated, _1, yn, Controllable::ForGroup));
 		return;
 	}
 
@@ -1124,7 +1124,7 @@ void
 Route::set_mute (bool yn, Controllable::GroupControlDisposition group_override)
 {
 	if (use_group (group_override, &RouteGroup::is_mute)) {
-		_route_group->foreach_route (boost::bind (&Route::set_mute, _1, yn, Controllable::NoGroup));
+		_route_group->foreach_route (boost::bind (&Route::set_mute, _1, yn, Controllable::ForGroup));
 		return;
 	}
 

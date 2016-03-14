@@ -3701,7 +3701,7 @@ Session::route_solo_changed (bool self_solo_change, Controllable::GroupControlDi
 	 */
 
 	RouteGroup* rg = route->route_group ();
-	const bool group_already_accounted_for = route->use_group (group_override, &RouteGroup::is_solo);
+	const bool group_already_accounted_for = (group_override == Controllable::ForGroup);
 
 	if (delta == 1 && Config->get_exclusive_solo()) {
 

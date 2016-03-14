@@ -41,7 +41,7 @@ RouteGroupMember::use_group (PBD::Controllable::GroupControlDisposition gcd, boo
 {
 	bool active_for_predicate = _route_group && (_route_group->*predicate)() && _route_group->is_active();
 
-	return (gcd != PBD::Controllable::NoGroup) &&
+	return ((gcd != PBD::Controllable::NoGroup) && (gcd != PBD::Controllable::ForGroup)) &&
 		_route_group && 
 		((active_for_predicate && (gcd != PBD::Controllable::InverseGroup)) ||
 		 (!active_for_predicate && (gcd == PBD::Controllable::InverseGroup)));
