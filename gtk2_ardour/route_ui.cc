@@ -559,9 +559,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 				DisplaySuspender ds;
 				if (Config->get_solo_control_is_listen_control()) {
-					_session->set_listen (_session->get_routes(), !_route->listening_via_monitor(),  Session::rt_cleanup, Controllable::NoGroup);
+					_session->set_listen (_session->get_routes(), !_route->listening_via_monitor(),  Session::rt_cleanup, Controllable::UseGroup);
 				} else {
-					_session->set_solo (_session->get_routes(), !_route->self_soloed(),  Session::rt_cleanup, Controllable::NoGroup);
+					_session->set_solo (_session->get_routes(), !_route->self_soloed(),  Session::rt_cleanup, Controllable::UseGroup);
 				}
 
 			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
