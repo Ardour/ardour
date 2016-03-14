@@ -84,7 +84,11 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 	enum GroupControlDisposition {
 		InverseGroup,  /* set all controls in the same "group" as this one */
 		NoGroup,     /* set only this control */
-		UseGroup     /* use group settings to decide which group controls are altered */
+		UseGroup,     /* use group settings to decide which group controls are altered */
+		ForGroup     /* this setting is being done *for* the group
+		                (i.e. UseGroup was set in the callchain
+		                somewhere).
+		             */
 	};
 
 	/** Get and Set `internal' value

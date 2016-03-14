@@ -44,6 +44,7 @@ setup_libpbd_enums ()
 	REGISTER_CLASS_ENUM (Controllable, InverseGroup);
 	REGISTER_CLASS_ENUM (Controllable, UseGroup);
 	REGISTER_CLASS_ENUM (Controllable, NoGroup);
+	REGISTER_CLASS_ENUM (Controllable, ForGroup);
 	REGISTER (controllable_group_disposition);
 
 }
