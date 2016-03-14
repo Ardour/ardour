@@ -1204,6 +1204,7 @@ ProcessorEntry::PluginDisplay::PluginDisplay (boost::shared_ptr<ARDOUR::Plugin> 
 	, _surf (0)
 	, _max_height (max_height)
 	, _cur_height (1)
+	, _scroll (false)
 {
 	set_name ("processor prefader");
 	_plug->QueueDraw.connect (_qdraw_connection, invalidator (*this),
@@ -1231,9 +1232,8 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 	double const width = a.get_width();
 	double const height = a.get_height();
 
-	Plugin::Display_Image_Surface* csf = _plug->render_inline_display (width, _max_height);
-
-	if (!csf) {
+	Plugin::Display_Image_Surface* dis = _plug->render_inline_display (width, _max_height);
+	if (!dis) {
 		hide ();
 		if (_cur_height != 1) {
 			_cur_height = 1;
@@ -1242,26 +1242,64 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 		return true;
 	}
 
+	/* work-around scroll-bar + aspect ratio
+	 * show inline-view -> height changes -> scrollbar gets added
+	 * -> width changes -> inline-view, fixed aspect ratio -> height changes
+	 * -> scroll bar is removed [-> width changes ; repeat ]
+	 */
+	uint32_t shm = std::min (_max_height, (uint32_t) ceil (dis->height));
+	bool sc = false;
+	Gtk::Container* pr = get_parent();
+	for (uint32_t i = 0; i < 4 && pr; ++i) {
+		// VBox, EventBox, ViewPort, ScrolledWindow
+		pr = pr->get_parent();
+	}
+	Gtk::ScrolledWindow* sw = dynamic_cast<Gtk::ScrolledWindow*> (pr);
+	if (sw) {
+		const Gtk::VScrollbar* vsb = sw->get_vscrollbar();
+		sc = vsb && vsb->is_visible();
+	}
+
+	if (shm != _cur_height) {
+		if (_scroll == sc || _cur_height < shm) {
+			queue_resize ();
+		}
+		_cur_height = shm;
+	}
+	_scroll = sc;
+
+
+	/* allocate a local image-surface,
+	 * We cannot re-use the data via cairo_image_surface_create_for_data(),
+	 * since pixman keeps a reference to it.
+	 * we'd need to hand over the data and ha cairo_surface_destroy to free it.
+	 * it might be possible to work around via cairo_surface_set_user_data().
+	 */
 	if (!_surf
-			|| csf->width !=  cairo_image_surface_get_width (_surf)
-			|| csf->height !=  cairo_image_surface_get_height (_surf)
-			|| csf->stride !=  cairo_image_surface_get_stride (_surf)
-		 )
-	{
+			|| dis->width !=  cairo_image_surface_get_width (_surf)
+			|| dis->height !=  cairo_image_surface_get_height (_surf)
+		 ) {
 		if (_surf) {
 			cairo_surface_destroy (_surf);
 		}
-		_surf = cairo_image_surface_create_for_data (
-				csf->data,
-				CAIRO_FORMAT_ARGB32,
-				csf->width,
-				csf->height,
-				csf->stride);
-	} else {
-		memcpy (cairo_image_surface_get_data  (_surf), csf->data, csf->stride * csf->height);
-		cairo_surface_mark_dirty(_surf);
+		_surf = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, dis->width, dis->height);
 	}
 
+	if (cairo_image_surface_get_stride (_surf) == dis->stride) {
+		memcpy (cairo_image_surface_get_data (_surf), dis->data, dis->stride * dis->height);
+	} else {
+		unsigned char *src = dis->data;
+		unsigned char *dst = cairo_image_surface_get_data (_surf);
+		const int dst_stride =  cairo_image_surface_get_stride (_surf);
+		for(uint32_t y = 0; y < dis->height; ++y) {
+			memcpy (dst, src, dis->width * 4 /*ARGB32*/);
+			src += dis->stride;
+			dst += dst_stride;
+		}
+	}
+	cairo_surface_mark_dirty(_surf);
+
+	// all set. Now paint it black.
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
@@ -1276,13 +1314,7 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, width - 1, height + 1, 7);
 	cairo_clip (cr);
 
-	const double xc = floor ((width - csf->width) * .5);
-	const double sh = csf->height;
-	uint32_t shm = std::min (_max_height, (uint32_t) ceil (sh));
-	if (shm != _cur_height) {
-		_cur_height = shm;
-		queue_resize ();
-	}
+	const double xc = floor ((width - dis->width) * .5);
 	cairo_set_source_surface(cr, _surf, xc, 0);
 	cairo_paint (cr);
 	cairo_restore (cr);

@@ -232,6 +232,7 @@ private:
 		cairo_surface_t* _surf;
 		uint32_t _max_height;
 		uint32_t _cur_height;
+		bool _scroll;
 	};
 
 	class PortIcon : public Gtk::DrawingArea {
