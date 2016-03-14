@@ -866,10 +866,12 @@ LV2Plugin::has_inline_display () {
 	return _display_interface ? true : false;
 }
 
-void*
+Plugin::Display_Image_Surface*
 LV2Plugin::render_inline_display (uint32_t w, uint32_t h) {
 	if (_display_interface) {
-		return _display_interface->render ((void*)_impl->instance->lv2_handle, w, h);
+		/* Plugin::Display_Image_Surface is identical to
+		 * LV2_Inline_Display_Image_Surface */
+		return (Plugin::Display_Image_Surface*) _display_interface->render ((void*)_impl->instance->lv2_handle, w, h);
 	}
 	return NULL;
 }

@@ -301,7 +301,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 #ifdef LV2_EXTENDED
 	bool has_inline_display ();
-	void* render_inline_display (uint32_t, uint32_t);
+	Plugin::Display_Image_Surface* render_inline_display (uint32_t, uint32_t);
 #endif
 
 	void latency_compute_run ();
