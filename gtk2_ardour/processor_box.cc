@@ -28,6 +28,7 @@
 #include <sigc++/bind.h>
 
 #include "pbd/convert.h"
+#include "canvas/utils.h"
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -122,6 +123,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	, _width (w)
 	, _input_icon(true)
 	, _output_icon(false)
+	, _plugin_display(0)
 {
 	_vbox.show ();
 
@@ -149,6 +151,17 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 		_vbox.pack_start (_routing_icon);
 		_vbox.pack_start (_input_icon);
 		_vbox.pack_start (_button, true, true);
+
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+		if (pi && pi->plugin() && pi->plugin()->has_inline_display()) {
+			_plugin_display = new PluginDisplay (pi->plugin(),
+					std::max (60.f, rintf(80.f * UIConfiguration::instance().get_ui_scale())));
+			_vbox.pack_start (*_plugin_display);
+			_plugin_display->set_no_show_all (true);
+			if (Config->get_show_inline_display_by_default ()) {
+				_plugin_display->show ();
+			}
+		}
 		_vbox.pack_end (_output_icon);
 
 		_button.set_active (_processor->active());
@@ -204,6 +217,7 @@ ProcessorEntry::~ProcessorEntry ()
 	for (list<Control*>::iterator i = _controls.begin(); i != _controls.end(); ++i) {
 		delete *i;
 	}
+	delete _plugin_display;
 }
 
 EventBox&
@@ -347,6 +361,7 @@ ProcessorEntry::setup_visuals ()
 
 	switch (_position) {
 	case PreFader:
+		if (_plugin_display) { _plugin_display->set_name ("processor prefader"); }
 		_button.set_name ("processor prefader");
 		break;
 
@@ -355,6 +370,7 @@ ProcessorEntry::setup_visuals ()
 		break;
 
 	case PostFader:
+		if (_plugin_display) { _plugin_display->set_name ("processor postfader"); }
 		_button.set_name ("processor postfader");
 		break;
 	}
@@ -552,6 +568,13 @@ ProcessorEntry::add_control_state (XMLNode* node) const
 	for (list<Control*>::const_iterator i = _controls.begin(); i != _controls.end(); ++i) {
 		(*i)->add_state (node);
 	}
+
+	if (_plugin_display) {
+		XMLNode* c = new XMLNode (X_("Object"));
+		c->add_property (X_("id"), X_("InlineDisplay"));
+		c->add_property (X_("visible"), _plugin_display->is_visible ());
+		node->add_child_nocopy (*c);
+	}
 }
 
 void
@@ -559,6 +582,18 @@ ProcessorEntry::set_control_state (XMLNode const * node)
 {
 	for (list<Control*>::const_iterator i = _controls.begin(); i != _controls.end(); ++i) {
 		(*i)->set_state (node);
+	}
+
+	if (_plugin_display) {
+		XMLNode* n = GUIObjectState::get_node (node, X_("InlineDisplay"));
+		XMLProperty* p = n ? n->property (X_("visible")) : NULL;
+		if (p) {
+			if (string_is_affirmative (p->value ())) {
+				_plugin_display->show();
+			} else {
+				_plugin_display->hide();
+			}
+		}
 	}
 }
 
@@ -584,6 +619,14 @@ ProcessorEntry::build_controls_menu ()
 	Menu* menu = manage (new Menu);
 	MenuList& items = menu->items ();
 
+	if (_plugin_display) {
+		items.push_back (CheckMenuElem (_("Inline Display")));
+		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		c->set_active (_plugin_display->is_visible ());
+		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_inline_display_visibility));
+		items.push_back (SeparatorElem ());
+	}
+
 	items.push_back (
 		MenuElem (_("Show All Controls"), sigc::mem_fun (*this, &ProcessorEntry::show_all_controls))
 		);
@@ -604,6 +647,17 @@ ProcessorEntry::build_controls_menu ()
 	}
 
 	return menu;
+}
+
+void
+ProcessorEntry::toggle_inline_display_visibility ()
+{
+	if (_plugin_display->is_visible ()) {
+		_plugin_display->hide();
+	} else {
+		_plugin_display->show();
+	}
+	_parent->update_gui_object_state (this);
 }
 
 void
@@ -1140,6 +1194,88 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 				audio_sources, audio_sinks, midi_sources, midi_sinks, sources, sinks) << endmsg;
 #endif
 	}
+	cairo_destroy(cr);
+	return true;
+}
+
+
+ProcessorEntry::PluginDisplay::PluginDisplay (boost::shared_ptr<ARDOUR::Plugin> p, uint32_t max_height)
+	: _plug (p)
+	, _max_height (max_height)
+	, _cur_height (1)
+{
+	set_name ("processor prefader");
+	_plug->QueueDraw.connect (_qdraw_connection, invalidator (*this),
+			boost::bind (&Gtk::Widget::queue_draw, this), gui_context ());
+}
+
+void
+ProcessorEntry::PluginDisplay::on_size_request (Gtk::Requisition* req)
+{
+	req->width = 56;
+	req->height = _cur_height;
+}
+
+bool
+ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
+{
+	Gtk::Allocation a = get_allocation();
+	double const width = a.get_width();
+	double const height = a.get_height();
+
+	void* csf = _plug->render_inline_display (width, _max_height);
+
+	cairo_surface_t* surf = NULL;
+	if (csf) {
+		surf = (cairo_surface_t*) csf;
+	}
+
+	if (!surf) {
+		hide ();
+		if (_cur_height != 1) {
+			_cur_height = 1;
+			queue_resize ();
+		}
+		return true;
+	}
+
+	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
+	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_clip (cr);
+
+	Gdk::Color const bg = get_style()->get_bg (STATE_NORMAL);
+	cairo_set_source_rgb (cr, bg.get_red_p (), bg.get_green_p (), bg.get_blue_p ());
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_fill (cr);
+
+	if (surf) {
+		cairo_save (cr);
+		cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+		Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, width - 1, height + 1, 7);
+		cairo_clip (cr);
+
+		const double xc = floor ((width - cairo_image_surface_get_width (surf)) * .5);
+		const double sh = cairo_image_surface_get_height (surf);
+		uint32_t shm = std::min (_max_height, (uint32_t) ceil (sh));
+		if (shm != _cur_height) {
+			_cur_height = shm;
+			queue_resize ();
+		}
+		cairo_set_source_surface(cr, surf, xc, 0);
+		cairo_paint (cr);
+		cairo_restore (cr);
+	}
+
+	bool failed = false;
+	std::string name = get_name();
+	ArdourCanvas::Color fill_color = UIConfiguration::instance().color (string_compose ("%1: fill active", name), &failed);
+
+	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, width - 1, height + 1, 7);
+	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+	cairo_set_line_width(cr, 1.0);
+	ArdourCanvas::set_source_rgb_a (cr, fill_color, 1.0);
+	cairo_stroke (cr);
+
 	cairo_destroy(cr);
 	return true;
 }

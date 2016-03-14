@@ -2908,6 +2908,16 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_open_gui_after_adding_plugin),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_open_gui_after_adding_plugin)
 		     ));
+
+#ifdef LV2_SUPPORT
+	add_option (_("Plugins"),
+	     new BoolOption (
+		     "show-inline-display-by-default,",
+		     _("Show Plugin Inline Display on Mixerstrip by default"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_inline_display_by_default),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_inline_display_by_default)
+		     ));
+#endif
 #endif
 
 	/* INTERFACE */

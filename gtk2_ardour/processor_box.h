@@ -216,8 +216,21 @@ private:
 
 	std::list<Control*> _controls;
 
+	void toggle_inline_display_visibility ();
 	void toggle_control_visibility (Control *);
 	void toggle_panner_link ();
+
+	class PluginDisplay : public Gtk::DrawingArea {
+	public:
+		PluginDisplay(boost::shared_ptr<ARDOUR::Plugin>, uint32_t max_height = 80);
+	private:
+		bool on_expose_event (GdkEventExpose *);
+		void on_size_request (Gtk::Requisition* req);
+		boost::shared_ptr<ARDOUR::Plugin> _plug;
+		PBD::ScopedConnection _qdraw_connection;
+		uint32_t _max_height;
+		uint32_t _cur_height;
+	};
 
 	class PortIcon : public Gtk::DrawingArea {
 	public:
@@ -252,6 +265,7 @@ protected:
 	RoutingIcon _routing_icon;
 	PortIcon _input_icon;
 	PortIcon _output_icon;
+	PluginDisplay *_plugin_display ;
 };
 
 class PluginInsertProcessorEntry : public ProcessorEntry
