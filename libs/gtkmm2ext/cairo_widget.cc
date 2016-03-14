@@ -30,8 +30,7 @@ static const char* has_cairo_widget_background_info = "has_cairo_widget_backgrou
 bool CairoWidget::_flat_buttons = false;
 bool CairoWidget::_widget_prelight = true;
 
-static void noop() { }
-sigc::slot<void> CairoWidget::focus_handler (sigc::ptr_fun (noop));
+sigc::slot<void> CairoWidget::focus_handler;
 
 void CairoWidget::set_source_rgb_a( cairo_t* cr, Gdk::Color col, float a)  //ToDo:  this one and the Canvas version should be in a shared file (?)
 {
