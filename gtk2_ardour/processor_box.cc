@@ -2040,7 +2040,9 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 			return true;
 			// XXX SHAREDPTR delete plugin here .. do we even need to care?
 		} else if (plugins.size() == 1 && Config->get_open_gui_after_adding_plugin()) {
-			if (_session->engine().connected () && processor_can_be_edited (processor)) {
+			if (boost::dynamic_pointer_cast<PluginInsert>(processor)->plugin()->has_inline_display() && Config->get_prefer_inline_over_gui()) {
+				;
+			} else if (_session->engine().connected () && processor_can_be_edited (processor)) {
 				if ((*p)->has_editor ()) {
 					edit_processor (processor);
 				} else {

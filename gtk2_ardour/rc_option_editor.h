@@ -58,6 +58,7 @@ private:
 	HSliderOption* _ltc_volume_slider;
 	Gtk::Adjustment* _ltc_volume_adjustment;
 	BoolOption* _ltc_send_continuously;
+	BoolOption* _plugin_prefer_inline;
 
 	PBD::ScopedConnection parameter_change_connection;
 	PBD::ScopedConnection engine_started_connection;
