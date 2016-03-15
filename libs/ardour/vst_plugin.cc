@@ -600,7 +600,9 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		if (!valid) {
 			continue;
 		}
-		copy_vector (bufs.get_audio(index).data(offset), outs[i], nframes);
+		if (outs[i] != bufs.get_audio(index).data(offset)) {
+			copy_vector (bufs.get_audio(index).data(offset), outs[i], nframes);
+		}
 	}
 	return 0;
 }
