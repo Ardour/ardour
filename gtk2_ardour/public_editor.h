@@ -319,7 +319,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	Glib::RefPtr<Gtk::ActionGroup> editor_menu_actions;
 	Glib::RefPtr<Gtk::ActionGroup> _region_actions;
 
-	virtual void reset_focus () = 0;
+	virtual void reset_focus (Gtk::Widget*) = 0;
 
 	virtual bool canvas_scroll_event (GdkEventScroll* event, bool from_canvas) = 0;
 	virtual bool canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item*, ControlPoint*) = 0;

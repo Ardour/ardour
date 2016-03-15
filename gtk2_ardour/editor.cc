@@ -1178,7 +1178,7 @@ Editor::generic_event_handler (GdkEvent* ev)
 			/* leaving window, so reset focus, thus ending any and
 			   all text entry operations.
 			*/
-			reset_focus();
+			reset_focus (&contents());
 			break;
 		}
 		break;

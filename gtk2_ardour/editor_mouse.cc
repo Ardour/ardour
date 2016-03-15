@@ -2456,7 +2456,7 @@ Editor::escape ()
 		selection->clear ();
 	}
 
-	reset_focus ();
+	reset_focus (&contents());
 }
 
 /** Update _join_object_range_state which indicate whether we are over the top

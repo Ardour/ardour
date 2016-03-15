@@ -30,7 +30,7 @@ static const char* has_cairo_widget_background_info = "has_cairo_widget_backgrou
 bool CairoWidget::_flat_buttons = false;
 bool CairoWidget::_widget_prelight = true;
 
-sigc::slot<void> CairoWidget::focus_handler;
+sigc::slot<void,Gtk::Widget*> CairoWidget::focus_handler;
 
 void CairoWidget::set_source_rgb_a( cairo_t* cr, Gdk::Color col, float a)  //ToDo:  this one and the Canvas version should be in a shared file (?)
 {
@@ -60,7 +60,7 @@ CairoWidget::~CairoWidget ()
 bool
 CairoWidget::on_button_press_event (GdkEventButton*)
 {
-	focus_handler();
+	focus_handler (this);
 	return false;
 }
 
@@ -393,7 +393,7 @@ CairoWidget::set_widget_prelight (bool yn)
 }
 
 void
-CairoWidget::set_focus_handler (sigc::slot<void> s)
+CairoWidget::set_focus_handler (sigc::slot<void,Gtk::Widget*> s)
 {
 	focus_handler = s;
 }

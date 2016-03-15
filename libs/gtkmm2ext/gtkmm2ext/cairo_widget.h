@@ -93,7 +93,7 @@ public:
 	   they wish to invoke any existing focus handler from their own
 	   button press handler, they can just use: focus_handler();
 	*/
-	static void set_focus_handler (sigc::slot<void>);
+	static void set_focus_handler (sigc::slot<void,Gtk::Widget*>);
 
 protected:
 	/** Render the widget to the given Cairo context */
@@ -118,7 +118,7 @@ protected:
 	static bool	_widget_prelight;
 	bool		_grabbed;
 
-	static sigc::slot<void> focus_handler;
+	static sigc::slot<void,Gtk::Widget*> focus_handler;
 
   private:
 	Cairo::RefPtr<Cairo::Surface> image_surface;
