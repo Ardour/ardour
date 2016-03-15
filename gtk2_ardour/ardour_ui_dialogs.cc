@@ -57,6 +57,7 @@
 #include "midi_tracer.h"
 #include "mixer_ui.h"
 #include "public_editor.h"
+#include "processor_box.h"
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
 #include "shuttle_control.h"
@@ -812,6 +813,10 @@ ARDOUR_UI::create_key_editor ()
 
 	if (mixer->bindings) {
 		kedit->add_tab (_("Mixing"), *mixer->bindings);
+	}
+
+	if (ProcessorBox::bindings) {
+		kedit->add_tab (_("Processor Box"), *ProcessorBox::bindings);
 	}
 
 	return kedit;
