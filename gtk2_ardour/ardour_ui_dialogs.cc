@@ -817,6 +817,18 @@ ARDOUR_UI::create_key_editor ()
 	return kedit;
 }
 
+void
+ARDOUR_UI::add_keyboard_binding_tab (std::string const& name, Gtkmm2ext::Bindings& b)
+{
+	key_editor->add_tab (name, b);
+}
+
+void
+ARDOUR_UI::remove_keyboard_binding_tab (std::string const& name)
+{
+	key_editor->remove_tab (name);
+}
+
 BundleManager*
 ARDOUR_UI::create_bundle_manager ()
 {
