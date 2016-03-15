@@ -89,8 +89,8 @@ class KeyEditor : public ArdourWindow
 		guint last_keyval;
 
 		protected:
-		bool on_key_press_event (GdkEventKey*);
-		bool on_key_release_event (GdkEventKey*);
+		bool key_press_event (GdkEventKey*);
+		bool key_release_event (GdkEventKey*);
 		Gtk::TreeModel::iterator find_action_path (Gtk::TreeModel::const_iterator begin, Gtk::TreeModel::const_iterator end, const std::string& path) const;
 	};
 

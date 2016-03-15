@@ -151,8 +151,12 @@ KeyEditor::page_change (GtkNotebookPage*, guint)
 }
 
 bool
-KeyEditor::Tab::on_key_press_event (GdkEventKey* ev)
+KeyEditor::Tab::key_press_event (GdkEventKey* ev)
 {
+	if (view.get_selection()->count_selected_rows() != 1) {
+		return false;
+	}
+
 	if (!ev->is_modifier) {
 		last_keyval = ev->keyval;
 	}
@@ -166,8 +170,12 @@ KeyEditor::Tab::on_key_press_event (GdkEventKey* ev)
 }
 
 bool
-KeyEditor::Tab::on_key_release_event (GdkEventKey* ev)
+KeyEditor::Tab::key_release_event (GdkEventKey* ev)
 {
+	if (view.get_selection()->count_selected_rows() != 1) {
+		return false;
+	}
+
 	if (last_keyval == 0) {
 		return false;
 	}
@@ -186,7 +194,7 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 {
 	data_model = TreeStore::create(columns);
 	populate ();
-	
+
 	filter = TreeModelFilter::create(data_model);
 	filter->set_visible_func (sigc::mem_fun (*this, &Tab::visible_func));
 
@@ -205,6 +213,8 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 	view.set_name (X_("KeyEditorTree"));
 
 	view.signal_cursor_changed().connect (sigc::mem_fun (*this, &Tab::action_selected));
+	view.signal_key_press_event().connect (sigc::mem_fun (*this, &Tab::key_press_event), false);
+	view.signal_key_release_event().connect (sigc::mem_fun (*this, &Tab::key_release_event), false);
 
 	view.get_column(0)->set_sort_column (columns.name);
 	view.get_column(1)->set_sort_column (columns.binding);
@@ -479,4 +489,3 @@ KeyEditor::search_string_updated (const std::string& filter)
 	filter_string = boost::to_lower_copy(filter);
 	current_tab ()->filter->refilter ();
 }
-
