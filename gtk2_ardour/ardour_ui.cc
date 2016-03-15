@@ -5292,6 +5292,7 @@ get_bindings_from_widget_heirarchy (GtkWidget* w)
 		if ((p = g_object_get_data (G_OBJECT(w), "ardour-bindings")) != 0) {
 			break;
 		}
+		w = gtk_widget_get_parent (w);
 	}
 
 	return reinterpret_cast<Gtkmm2ext::Bindings*> (p);
