@@ -1247,7 +1247,7 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 	 * -> width changes -> inline-view, fixed aspect ratio -> height changes
 	 * -> scroll bar is removed [-> width changes ; repeat ]
 	 */
-	uint32_t shm = std::min (_max_height, (uint32_t) ceil (dis->height));
+	uint32_t shm = std::min (_max_height, (uint32_t)dis->height);
 	bool sc = false;
 	Gtk::Container* pr = get_parent();
 	for (uint32_t i = 0; i < 4 && pr; ++i) {
