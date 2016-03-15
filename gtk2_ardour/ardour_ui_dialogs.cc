@@ -758,7 +758,6 @@ ARDOUR_UI::toggle_luawindow ()
 	assert (editor && luawindow);
 
 	bool show = false;
-	bool obscuring = false;
 
 	if (luawindow->not_visible ()) {
 		show = true;
