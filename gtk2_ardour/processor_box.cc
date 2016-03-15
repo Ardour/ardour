@@ -158,7 +158,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 					std::max (60.f, rintf(80.f * UIConfiguration::instance().get_ui_scale())));
 			_vbox.pack_start (*_plugin_display);
 			_plugin_display->set_no_show_all (true);
-			if (Config->get_show_inline_display_by_default ()) {
+			if (UIConfiguration::instance().get_show_inline_display_by_default ()) {
 				_plugin_display->show ();
 			}
 		}
@@ -2039,8 +2039,8 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 			weird_plugin_dialog (**p, err_streams);
 			return true;
 			// XXX SHAREDPTR delete plugin here .. do we even need to care?
-		} else if (plugins.size() == 1 && Config->get_open_gui_after_adding_plugin()) {
-			if (boost::dynamic_pointer_cast<PluginInsert>(processor)->plugin()->has_inline_display() && Config->get_prefer_inline_over_gui()) {
+		} else if (plugins.size() == 1 && UIConfiguration::instance().get_open_gui_after_adding_plugin()) {
+			if (boost::dynamic_pointer_cast<PluginInsert>(processor)->plugin()->has_inline_display() && UIConfiguration::instance().get_prefer_inline_over_gui()) {
 				;
 			} else if (_session->engine().connected () && processor_can_be_edited (processor)) {
 				if ((*p)->has_editor ()) {

@@ -1787,6 +1787,9 @@ RCOptionEditor::RCOptionEditor ()
         , _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
 {
+
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RCOptionEditor::parameter_changed));
+
 	/* MISC */
 
         uint32_t hwcpus = hardware_concurrency ();
@@ -2905,8 +2908,8 @@ if (!Profile->get_mixbus()) {
 	     new BoolOption (
 		     "open-gui-after-adding-plugin",
 		     _("Automatically open the plugin GUI when adding a new plugin"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_open_gui_after_adding_plugin),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_open_gui_after_adding_plugin)
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_open_gui_after_adding_plugin),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_open_gui_after_adding_plugin)
 		     ));
 
 #ifdef LV2_SUPPORT
@@ -2914,15 +2917,15 @@ if (!Profile->get_mixbus()) {
 	     new BoolOption (
 		     "show-inline-display-by-default",
 		     _("Show Plugin Inline Display on Mixerstrip by default"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_inline_display_by_default),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_inline_display_by_default)
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_inline_display_by_default),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_inline_display_by_default)
 		     ));
 
 	_plugin_prefer_inline = new BoolOption (
 			"prefer-inline-over-gui",
 			_("Don't automatically open the plugin GUI when the plugin has an inline display mode"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_prefer_inline_over_gui),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_prefer_inline_over_gui)
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_prefer_inline_over_gui),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_prefer_inline_over_gui)
 			);
 	add_option (_("Plugins"), _plugin_prefer_inline);
 #endif
@@ -3252,7 +3255,7 @@ RCOptionEditor::parameter_changed (string const & p)
 		_ltc_volume_slider->set_sensitive (s);
 	} else if (p == "open-gui-after-adding-plugin" || p == "show-inline-display-by-default") {
 #ifdef LV2_SUPPORT
-		_plugin_prefer_inline->set_sensitive (Config->get_open_gui_after_adding_plugin() && Config->get_show_inline_display_by_default());
+		_plugin_prefer_inline->set_sensitive (UIConfiguration::instance().get_open_gui_after_adding_plugin() && UIConfiguration::instance().get_show_inline_display_by_default());
 #endif
 	}
 }
