@@ -825,13 +825,17 @@ ARDOUR_UI::create_key_editor ()
 void
 ARDOUR_UI::add_keyboard_binding_tab (std::string const& name, Gtkmm2ext::Bindings& b)
 {
-	key_editor->add_tab (name, b);
+	if (key_editor) {
+		key_editor->add_tab (name, b);
+	}
 }
 
 void
 ARDOUR_UI::remove_keyboard_binding_tab (std::string const& name)
 {
-	key_editor->remove_tab (name);
+	if (key_editor) {
+		key_editor->remove_tab (name);
+	}
 }
 
 BundleManager*
