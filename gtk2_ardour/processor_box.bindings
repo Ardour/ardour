@@ -1,0 +1,5 @@
+<Bindings name="processor box">
+  <Press>
+     <Binding key="Delete" action="ProcessorMenu/delete"/>
+  </Press>
+</Bindings>
