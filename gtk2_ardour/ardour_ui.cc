@@ -663,16 +663,16 @@ ARDOUR_UI::~ARDOUR_UI ()
 
 	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
 		// don't bother at 'real' exit. the OS cleans up for us.
-		delete big_clock;
-		delete primary_clock;
-		delete secondary_clock;
-		delete _process_thread;
-		delete meterbridge;
-		delete luawindow;
-		delete editor;
-		delete mixer;
-		delete nsm;
-		delete gui_object_state;
+		delete big_clock; big_clock = 0;
+		delete primary_clock; primary_clock = 0;
+		delete secondary_clock; secondary_clock = 0;
+		delete _process_thread; _process_thread = 0;
+		delete meterbridge; meterbridge = 0;
+		delete luawindow; luawindow = 0;
+		delete editor; editor = 0;
+		delete mixer; mixer = 0;
+		delete nsm; nsm = 0;
+		delete gui_object_state; gui_object_state = 0;
 		FastMeter::flush_pattern_cache ();
 		PixFader::flush_pattern_cache ();
 	}
