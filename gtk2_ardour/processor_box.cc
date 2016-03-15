@@ -3526,6 +3526,10 @@ void
 ProcessorBox::processor_menu_unmapped ()
 {
 	processor_display.remove_placeholder ();
+	/* make all possibly-desensitized actions sensitive again so that
+	   they be activated by other means (e.g. bindings)
+	*/
+	ActionManager::set_sensitive (ActionManager::plugin_selection_sensitive_actions, true);
 }
 
 XMLNode *
