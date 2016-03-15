@@ -41,6 +41,7 @@ class KeyEditor : public ArdourWindow
 	KeyEditor ();
 
 	void add_tab (std::string const &name, Gtkmm2ext::Bindings&);
+	void remove_tab (std::string const &name);
 
 	private:
 	class Tab : public Gtk::VBox

@@ -119,6 +119,24 @@ KeyEditor::add_tab (string const & name, Bindings& bindings)
 	notebook.append_page (*t, name);
 }
 
+
+void
+KeyEditor::remove_tab (string const &name)
+{
+	guint npages = notebook.get_n_pages ();
+
+	for (guint n = 0; n < npages; ++n) {
+		Widget* w = notebook.get_nth_page (n);
+		Tab* tab = dynamic_cast<Tab*> (w);
+		if (tab) {
+			if (tab->name == name) {
+				notebook.remove_page (*w);
+				return;
+			}
+		}
+	}
+}
+
 void
 KeyEditor::unbind ()
 {
