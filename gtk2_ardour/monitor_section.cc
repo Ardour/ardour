@@ -39,6 +39,7 @@
 #include "ardour/user_bundle.h"
 #include "ardour/plugin_manager.h"
 
+#include "ardour_ui.h"
 #include "gui_thread.h"
 #include "monitor_section.h"
 #include "public_editor.h"
@@ -94,7 +95,10 @@ MonitorSection::MonitorSection (Session* s)
 	if (!monitor_actions) {
 		register_actions ();
 		load_bindings ();
-		set_data ("ardour-bindings", bindings);
+		if (bindings) {
+			set_data ("ardour-bindings", bindings);
+			ARDOUR_UI::instance()->add_keyboard_binding_tab (_("Monitor Section"), *bindings);
+		}
 	}
 
 	_plugin_selector = new PluginSelector (PluginManager::instance());
@@ -488,6 +492,8 @@ MonitorSection::MonitorSection (Session* s)
 
 MonitorSection::~MonitorSection ()
 {
+	ARDOUR_UI::instance()->remove_keyboard_binding_tab (_("Monitor Section"));
+
 	for (ChannelButtons::iterator i = _channel_buttons.begin(); i != _channel_buttons.end(); ++i) {
 		delete *i;
 	}
