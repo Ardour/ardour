@@ -336,6 +336,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
 
 	static Glib::RefPtr<Gtk::ActionGroup> processor_box_actions;
+	static Gtkmm2ext::Bindings* bindings;
 	static void register_actions();
 
 #ifndef NDEBUG
@@ -365,7 +366,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	RouteProcessorSelection& _rr_selection;
 	static Gtkmm2ext::ActionMap myactions;
-	static Gtkmm2ext::Bindings* bindings;
 
 	static void load_bindings ();
 
