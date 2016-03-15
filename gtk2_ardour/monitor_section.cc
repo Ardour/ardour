@@ -1,19 +1,19 @@
 /*
-    Copyright (C) 2012 Paul Davis
+  Copyright (C) 2012 Paul Davis
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
@@ -65,7 +65,7 @@ MonitorSection::MonitorSection (Session* s)
 	, RouteUI (s)
 	, _tearoff (0)
 	, channel_table_viewport (*channel_table_scroller.get_hadjustment()
-	, *channel_table_scroller.get_vadjustment ())
+	                          , *channel_table_scroller.get_vadjustment ())
 	, gain_control (0)
 	, dim_control (0)
 	, solo_boost_control (0)
@@ -94,6 +94,7 @@ MonitorSection::MonitorSection (Session* s)
 	if (!monitor_actions) {
 		register_actions ();
 		load_bindings ();
+		set_data ("ardour-bindings", bindings);
 	}
 
 	_plugin_selector = new PluginSelector (PluginManager::instance());
@@ -390,7 +391,7 @@ MonitorSection::MonitorSection (Session* s)
 	mono_dim_box->pack_start (mono_button, true, true);
 	mono_dim_box->pack_end (dim_all_button, true, true);
 
-	// master gain 
+	// master gain
 	Label* spin_label = manage (new Label (_("Monitor")));
 	VBox* spin_packer = manage (new VBox);
 	spin_packer->set_spacing (PX_SCALE(2));
@@ -407,7 +408,7 @@ MonitorSection::MonitorSection (Session* s)
 	lower_packer->pack_start (*mono_dim_box,        false, false, PX_SCALE(2));
 	lower_packer->pack_start (cut_all_button,       false, false, PX_SCALE(2));
 
-		// output port select
+	// output port select
 	VBox* out_packer = manage (new VBox);
 	out_packer->set_spacing (PX_SCALE(2));
 	out_packer->pack_start (*output_label, false, false);
@@ -428,6 +429,8 @@ MonitorSection::MonitorSection (Session* s)
 
 	hpacker.set_spacing (0);
 	hpacker.pack_start (vpacker, true, true);
+
+	add (hpacker);
 
 	gain_control->show_all ();
 	gain_display->show_all ();
@@ -457,7 +460,11 @@ MonitorSection::MonitorSection (Session* s)
 	output_button->signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::output_press), false);
 	output_button->signal_button_release_event().connect (sigc::mem_fun(*this, &MonitorSection::output_release), false);
 
-	_tearoff = new TearOff (hpacker);
+	signal_enter_notify_event().connect (sigc::mem_fun (*this, &MonitorSection::enter_handler));
+	signal_leave_notify_event().connect (sigc::mem_fun (*this, &MonitorSection::leave_handler));
+	set_flags (CAN_FOCUS);
+
+	_tearoff = new TearOff (*this);
 
 	if (!UIConfiguration::instance().get_floating_monitor_section()) {
 		/* if torn off, make this a normal window
@@ -503,6 +510,36 @@ MonitorSection::~MonitorSection ()
 	_output_selector = 0;
 }
 
+bool
+MonitorSection::enter_handler (GdkEventCrossing* ev)
+{
+	grab_focus ();
+	return false;
+}
+
+bool
+MonitorSection::leave_handler (GdkEventCrossing* ev)
+{
+	switch (ev->detail) {
+	case GDK_NOTIFY_INFERIOR:
+		return false;
+	default:
+		break;
+	}
+
+	/* cancel focus if we're not torn off. With X11 WM's that do
+	 * focus-follows-mouse, focus will be taken from us anyway.
+	 */
+
+	Widget* top = get_toplevel();
+
+	if (top->is_toplevel() && top != &_tearoff->tearoff_window()) {
+		Window* win = dynamic_cast<Window*> (top);
+		gtk_window_set_focus (win->gobj(), 0);
+	}
+
+	return false;
+}
 
 void
 MonitorSection::update_processor_box ()
@@ -1630,7 +1667,7 @@ MonitorSection::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost:
 void
 MonitorSection::load_bindings ()
 {
-	bindings = Bindings::get_bindings (X_("monitor-section"), myactions);
+	bindings = Bindings::get_bindings (X_("monitor section"), myactions);
 }
 
 void

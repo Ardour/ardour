@@ -19,6 +19,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/table.h>
+#include <gtkmm/eventbox.h>
 
 #include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/bindings.h"
@@ -26,7 +27,6 @@
 #include "ardour_button.h"
 #include "ardour_knob.h"
 #include "ardour_display.h"
-#include "axis_view.h"
 #include "level_meter.h"
 #include "route_ui.h"
 #include "monitor_selector.h"
@@ -39,7 +39,7 @@ namespace Gtkmm2ext {
 	class TearOff;
 }
 
-class MonitorSection : public RouteUI
+class MonitorSection : public RouteUI, public Gtk::EventBox
 {
   public:
 	MonitorSection (ARDOUR::Session*);
@@ -182,4 +182,6 @@ class MonitorSection : public RouteUI
 	Gtkmm2ext::Bindings* bindings;
 
 	void load_bindings ();
+	bool enter_handler (GdkEventCrossing*);
+	bool leave_handler (GdkEventCrossing*);
 };
