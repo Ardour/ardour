@@ -107,7 +107,9 @@ RefPtr<Action> ProcessorBox::rename_action;
 RefPtr<Action> ProcessorBox::delete_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
-ActionMap      ProcessorBox::processor_box_actions (X_("processor box"));
+RefPtr<ActionGroup> ProcessorBox::processor_box_actions;
+Gtkmm2ext::ActionMap ProcessorBox::myactions (X_("processor box"));
+Gtkmm2ext::Bindings* ProcessorBox::bindings = 0;
 
 static const uint32_t audio_port_color = 0x4A8A0EFF; // Green
 static const uint32_t midi_port_color = 0x960909FF; //Red
@@ -1368,9 +1370,15 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	, _rr_selection(rsel)
 	, processor_display (drop_targets())
 	, _redisplay_pending (false)
-
 {
 	set_session (sess);
+
+	/* ProcessorBox actions and bindings created statically by call to
+	 * ProcessorBox::register_actions(), made by ARDOUR_UI so that actions
+	 * are available for context menus.
+	 */
+
+	processor_display.set_data ("ardour-bindings", bindings);
 
 	_width = Wide;
 	processor_menu = 0;
@@ -1778,13 +1786,25 @@ ProcessorBox::show_processor_menu (int arg)
 bool
 ProcessorBox::enter_notify (GdkEventCrossing*)
 {
+	processor_display.grab_focus ();
 	_current_processor_box = this;
 	return false;
 }
 
 bool
-ProcessorBox::leave_notify (GdkEventCrossing*)
+ProcessorBox::leave_notify (GdkEventCrossing* ev)
 {
+	if (ev->detail == GDK_NOTIFY_INFERIOR) {
+		return false;
+	}
+
+	Widget* top = get_toplevel();
+
+	if (top->is_toplevel()) {
+		Window* win = dynamic_cast<Window*> (top);
+		gtk_window_set_focus (win->gobj(), 0);
+	}
+
 	return false;
 }
 
@@ -1808,8 +1828,9 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 	}
 */
 
-	if ( (op == ProcessorsDelete) && targets.empty() )
+	if ((op == ProcessorsDelete) && targets.empty()) {
 		return false;  //nothing to delete.  return false so the editor-mixer, because the user was probably intending to delete something in the editor
+	}
 
 	switch (op) {
 	case ProcessorsSelectAll:
@@ -2578,7 +2599,7 @@ ProcessorBox::copy_processors (const ProcSelection& to_be_copied)
 		    (boost::dynamic_pointer_cast<Return>((*i)) != 0)) {
 			node->add_child_nocopy ((*i)->get_state());
 		}
-  	}
+	}
 
 	_rr_selection.set (node);
 }
@@ -3085,73 +3106,76 @@ ProcessorBox::get_generic_editor_window (boost::shared_ptr<Processor> processor)
 void
 ProcessorBox::register_actions ()
 {
-	Glib::RefPtr<Gtk::ActionGroup> popup_act_grp = processor_box_actions.create_action_group (X_("ProcessorMenu"));
+	processor_box_actions = myactions.create_action_group (X_("ProcessorMenu"));
+
 	Glib::RefPtr<Action> act;
 
 	/* new stuff */
-	processor_box_actions.register_action (popup_act_grp, X_("newplugin"), _("New Plugin"),
+	myactions.register_action (processor_box_actions, X_("newplugin"), _("New Plugin"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_plugin));
 
-	act = processor_box_actions.register_action (popup_act_grp, X_("newlua"), _("New Lua Proc"),
+	act = myactions.register_action (processor_box_actions, X_("newlua"), _("New Lua Proc"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_lua));
-	act = processor_box_actions.register_action (popup_act_grp, X_("newinsert"), _("New Insert"),
+	act = myactions.register_action (processor_box_actions, X_("newinsert"), _("New Insert"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_insert));
 	ActionManager::engine_sensitive_actions.push_back (act);
-	act = processor_box_actions.register_action (popup_act_grp, X_("newsend"), _("New External Send ..."),
+	act = myactions.register_action (processor_box_actions, X_("newsend"), _("New External Send ..."),
 			sigc::ptr_fun (ProcessorBox::rb_choose_send));
 	ActionManager::engine_sensitive_actions.push_back (act);
 
-	processor_box_actions.register_action (popup_act_grp, X_("newaux"), _("New Aux Send ..."));
+	myactions.register_action (processor_box_actions, X_("newaux"), _("New Aux Send ..."));
 
-	processor_box_actions.register_action (popup_act_grp, X_("controls"), _("Controls"));
-	processor_box_actions.register_action (popup_act_grp, X_("send_options"), _("Send Options"));
+	myactions.register_action (processor_box_actions, X_("controls"), _("Controls"));
+	myactions.register_action (processor_box_actions, X_("send_options"), _("Send Options"));
 
-	processor_box_actions.register_action (popup_act_grp, X_("clear"), _("Clear (all)"),
+	myactions.register_action (processor_box_actions, X_("clear"), _("Clear (all)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear));
-	processor_box_actions.register_action (popup_act_grp, X_("clear_pre"), _("Clear (pre-fader)"),
+	myactions.register_action (processor_box_actions, X_("clear_pre"), _("Clear (pre-fader)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear_pre));
-	processor_box_actions.register_action (popup_act_grp, X_("clear_post"), _("Clear (post-fader)"),
+	myactions.register_action (processor_box_actions, X_("clear_post"), _("Clear (post-fader)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear_post));
 
 	/* standard editing stuff */
 
-	cut_action = processor_box_actions.register_action (popup_act_grp, X_("cut"), _("Cut"),
+	cut_action = myactions.register_action (processor_box_actions, X_("cut"), _("Cut"),
 	                                                    sigc::ptr_fun (ProcessorBox::rb_cut));
-	copy_action = processor_box_actions.register_action (popup_act_grp, X_("copy"), _("Copy"),
+	copy_action = myactions.register_action (processor_box_actions, X_("copy"), _("Copy"),
 	                                                     sigc::ptr_fun (ProcessorBox::rb_copy));
-	delete_action = processor_box_actions.register_action (popup_act_grp, X_("delete"), _("Delete"),
+	delete_action = myactions.register_action (processor_box_actions, X_("delete"), _("Delete"),
 	                                                       sigc::ptr_fun (ProcessorBox::rb_delete));
 
 	ActionManager::plugin_selection_sensitive_actions.push_back (cut_action);
 	ActionManager::plugin_selection_sensitive_actions.push_back (copy_action);
 	ActionManager::plugin_selection_sensitive_actions.push_back (delete_action);
 
-	paste_action = processor_box_actions.register_action (popup_act_grp, X_("paste"), _("Paste"),
+	paste_action = myactions.register_action (processor_box_actions, X_("paste"), _("Paste"),
 			sigc::ptr_fun (ProcessorBox::rb_paste));
-	rename_action = processor_box_actions.register_action (popup_act_grp, X_("rename"), _("Rename"),
+	rename_action = myactions.register_action (processor_box_actions, X_("rename"), _("Rename"),
 			sigc::ptr_fun (ProcessorBox::rb_rename));
-	processor_box_actions.register_action (popup_act_grp, X_("selectall"), _("Select All"),
+	myactions.register_action (processor_box_actions, X_("selectall"), _("Select All"),
 			sigc::ptr_fun (ProcessorBox::rb_select_all));
-	processor_box_actions.register_action (popup_act_grp, X_("deselectall"), _("Deselect All"),
+	myactions.register_action (processor_box_actions, X_("deselectall"), _("Deselect All"),
 			sigc::ptr_fun (ProcessorBox::rb_deselect_all));
 
 	/* activation etc. */
 
-	processor_box_actions.register_action (popup_act_grp, X_("activate_all"), _("Activate All"),
+	myactions.register_action (processor_box_actions, X_("activate_all"), _("Activate All"),
 			sigc::ptr_fun (ProcessorBox::rb_activate_all));
-	processor_box_actions.register_action (popup_act_grp, X_("deactivate_all"), _("Deactivate All"),
+	myactions.register_action (processor_box_actions, X_("deactivate_all"), _("Deactivate All"),
 			sigc::ptr_fun (ProcessorBox::rb_deactivate_all));
-	processor_box_actions.register_action (popup_act_grp, X_("ab_plugins"), _("A/B Plugins"),
+	myactions.register_action (processor_box_actions, X_("ab_plugins"), _("A/B Plugins"),
 			sigc::ptr_fun (ProcessorBox::rb_ab_plugins));
 
 	/* show editors */
-	edit_action = processor_box_actions.register_action (
-		popup_act_grp, X_("edit"), _("Edit..."),
+	edit_action = myactions.register_action (
+		processor_box_actions, X_("edit"), _("Edit..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit));
 
-	edit_generic_action = processor_box_actions.register_action (
-		popup_act_grp, X_("edit-generic"), _("Edit with generic controls..."),
+	edit_generic_action = myactions.register_action (
+		processor_box_actions, X_("edit-generic"), _("Edit with generic controls..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit_generic));
+
+	load_bindings ();
 }
 
 void
@@ -3420,7 +3444,7 @@ ProcessorBox::route_property_changed (const PropertyChange& what_changed)
 
 	for (list<ProcessorEntry*>::iterator iter = children.begin(); iter != children.end(); ++iter) {
 
-  		processor = (*iter)->processor ();
+		processor = (*iter)->processor ();
 
 		if (!processor) {
 			continue;
@@ -3681,4 +3705,10 @@ ProcessorWindowProxy::show_the_right_window ()
 	}
 
 	toggle ();
+}
+
+void
+ProcessorBox::load_bindings ()
+{
+	bindings = Bindings::get_bindings (X_("processor box"), myactions);
 }

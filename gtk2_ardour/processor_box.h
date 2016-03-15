@@ -335,7 +335,9 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorSelected;
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
 
+	static Glib::RefPtr<Gtk::ActionGroup> processor_box_actions;
 	static void register_actions();
+
 #ifndef NDEBUG
 	static bool show_all_processors;
 #endif
@@ -362,6 +364,10 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	uint32_t                  _visible_prefader_processors;
 
 	RouteProcessorSelection& _rr_selection;
+	static Gtkmm2ext::ActionMap myactions;
+	static Gtkmm2ext::Bindings* bindings;
+
+	static void load_bindings ();
 
 	void route_going_away ();
 
@@ -493,8 +499,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	XMLNode* entry_gui_object_state (ProcessorEntry *);
 	PBD::ScopedConnection amp_config_connection;
-
-	static Gtkmm2ext::ActionMap processor_box_actions;
 };
 
 #endif /* __ardour_gtk_processor_box__ */
