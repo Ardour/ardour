@@ -501,19 +501,18 @@ MonitorSection::~MonitorSection ()
 	_channel_buttons.clear ();
 	_output_changed_connection.disconnect ();
 
-	delete insert_box;
-	delete output_button;
-	delete gain_control;
-	delete gain_display;
-	delete dim_control;
-	delete dim_display;
-	delete solo_boost_control;
-	delete solo_boost_display;
-	delete solo_cut_control;
-	delete solo_cut_display;
-	delete _tearoff;
-	delete _output_selector;
-	_output_selector = 0;
+	delete insert_box; insert_box = 0;
+	delete output_button; output_button = 0;
+	delete gain_control; gain_control = 0;
+	delete gain_display; gain_display = 0;
+	delete dim_control; dim_control = 0;
+	delete dim_display; dim_display = 0;
+	delete solo_boost_control; solo_boost_control = 0;
+	delete solo_boost_display; solo_boost_display = 0;
+	delete solo_cut_control; solo_cut_control = 0;
+	delete solo_cut_display; solo_cut_display = 0;
+	delete _tearoff; _tearoff = 0;
+	delete _output_selector; _output_selector = 0;
 }
 
 bool
