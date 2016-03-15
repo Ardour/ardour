@@ -49,7 +49,7 @@ class KeyEditor : public ArdourWindow
 		public:
 		Tab (KeyEditor&, std::string const &name, Gtkmm2ext::Bindings*);
 
-		void populate ();
+		uint32_t populate ();
 		void unbind ();
 		void bind (GdkEventKey* release_event, guint pressed_key);
 		void action_selected ();

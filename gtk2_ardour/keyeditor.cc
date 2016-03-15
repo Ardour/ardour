@@ -114,7 +114,13 @@ void
 KeyEditor::add_tab (string const & name, Bindings& bindings)
 {
 	Tab* t = new Tab (*this, name, &bindings);
-	t->populate ();
+
+	if (t->populate () == 0) {
+		/* no bindings */
+		delete t;
+		return;
+	}
+
 	t->show_all ();
 	notebook.append_page (*t, name);
 }
@@ -135,6 +141,7 @@ KeyEditor::remove_tab (string const &name)
 			}
 		}
 	}
+	cerr << "Removed " << name << endl;
 }
 
 void
@@ -305,7 +312,7 @@ KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 	}
 }
 
-void
+uint32_t
 KeyEditor::Tab::populate ()
 {
 	vector<string> paths;
@@ -395,6 +402,8 @@ KeyEditor::Tab::populate ()
 		}
 		row[columns.action] = *a;
 	}
+
+	return data_model->children().size();
 }
 
 void

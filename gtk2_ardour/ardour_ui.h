@@ -231,9 +231,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	XMLNode* keyboard_settings () const;
 	XMLNode* tearoff_settings (const char*) const;
 
-	void add_keyboard_binding_tab (std::string const & name, Gtkmm2ext::Bindings&);
-	void remove_keyboard_binding_tab (std::string const & name);
-
 	void save_ardour_state ();
 	gboolean configure_handler (GdkEventConfigure* conf);
 

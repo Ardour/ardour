@@ -97,7 +97,6 @@ MonitorSection::MonitorSection (Session* s)
 		load_bindings ();
 		if (bindings) {
 			set_data ("ardour-bindings", bindings);
-			ARDOUR_UI::instance()->add_keyboard_binding_tab (_("Monitor Section"), *bindings);
 		}
 	}
 
@@ -492,8 +491,6 @@ MonitorSection::MonitorSection (Session* s)
 
 MonitorSection::~MonitorSection ()
 {
-	ARDOUR_UI::instance()->remove_keyboard_binding_tab (_("Monitor Section"));
-
 	for (ChannelButtons::iterator i = _channel_buttons.begin(); i != _channel_buttons.end(); ++i) {
 		delete *i;
 	}

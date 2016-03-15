@@ -54,6 +54,7 @@
 #include "main_clock.h"
 #include "meterbridge.h"
 #include "meter_patterns.h"
+#include "monitor_section.h"
 #include "midi_tracer.h"
 #include "mixer_ui.h"
 #include "public_editor.h"
@@ -803,39 +804,11 @@ ARDOUR_UI::create_key_editor ()
 {
 	KeyEditor* kedit = new KeyEditor;
 
-	if (global_bindings) {
-		kedit->add_tab (_("Global"), *global_bindings);
-	}
-
-	if (editor->bindings) {
-		kedit->add_tab (_("Editing"), *editor->bindings);
-	}
-
-	if (mixer->bindings) {
-		kedit->add_tab (_("Mixing"), *mixer->bindings);
-	}
-
-	if (ProcessorBox::bindings) {
-		kedit->add_tab (_("Processor Box"), *ProcessorBox::bindings);
+	for (std::list<Bindings*>::iterator b = Bindings::bindings.begin(); b != Bindings::bindings.end(); ++b) {
+		kedit->add_tab ((*b)->name(), **b);
 	}
 
 	return kedit;
-}
-
-void
-ARDOUR_UI::add_keyboard_binding_tab (std::string const& name, Gtkmm2ext::Bindings& b)
-{
-	if (key_editor) {
-		key_editor->add_tab (name, b);
-	}
-}
-
-void
-ARDOUR_UI::remove_keyboard_binding_tab (std::string const& name)
-{
-	if (key_editor) {
-		key_editor->remove_tab (name);
-	}
 }
 
 BundleManager*
