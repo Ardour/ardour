@@ -5283,6 +5283,20 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 	return key_press_focus_accelerator_handler (*window, ev, bindings);
 }
 
+static Gtkmm2ext::Bindings*
+get_bindings_from_widget_heirarchy (GtkWidget* w)
+{
+	void* p;
+
+	while (w) {
+		if ((p = g_object_get_data (G_OBJECT(w), "ardour-bindings")) != 0) {
+			break;
+		}
+	}
+
+	return reinterpret_cast<Gtkmm2ext::Bindings*> (p);
+}
+
 bool
 ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings* bindings)
 {
@@ -5303,6 +5317,14 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 			 */
 
 			special_handling_of_unmodified_accelerators = true;
+
+		} else {
+
+			Gtkmm2ext::Bindings* focus_bindings = get_bindings_from_widget_heirarchy (focus);
+			if (focus_bindings) {
+				bindings = focus_bindings;
+				DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Switch bindings based on focus widget, now using %1\n", bindings->name()));
+			}
 		}
 	}
 
@@ -5361,7 +5383,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		if (bindings) {
 
-			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing Ardour bindings %1 for this event\n", bindings));
+			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing Ardour bindings %1 @ %2 for this event\n", bindings->name(), bindings));
 
 			if (bindings->activate (k, Bindings::Press)) {
 				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
