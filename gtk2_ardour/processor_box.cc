@@ -157,7 +157,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
 		if (pi && pi->plugin() && pi->plugin()->has_inline_display()) {
 			_plugin_display = new PluginDisplay (pi->plugin(),
-					std::max (60.f, rintf(80.f * UIConfiguration::instance().get_ui_scale())));
+					std::max (60.f, rintf(112.f * UIConfiguration::instance().get_ui_scale())));
 			_vbox.pack_start (*_plugin_display);
 			_plugin_display->set_no_show_all (true);
 			if (UIConfiguration::instance().get_show_inline_display_by_default ()) {
