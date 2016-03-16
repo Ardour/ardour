@@ -77,7 +77,8 @@ AddRouteDialog::AddRouteDialog ()
 	track_bus_combo.append_text (_("Audio Tracks"));
 	track_bus_combo.append_text (_("MIDI Tracks"));
 	track_bus_combo.append_text (_("Audio+MIDI Tracks"));
-	track_bus_combo.append_text (_("Busses"));
+	track_bus_combo.append_text (_("Audio Busses"));
+	track_bus_combo.append_text (_("MIDI Busses"));
 	track_bus_combo.set_active (0);
 
 	insert_at_combo.append_text (_("First"));
@@ -198,8 +199,10 @@ AddRouteDialog::TypeWanted
 AddRouteDialog::type_wanted() const
 {
 	std::string str = track_bus_combo.get_active_text();
-	if (str == _("Busses")) {
+	if (str == _("Audio Busses")) {
 		return AudioBus;
+	} else if (str == _("MIDI Busses")){
+		return MidiBus;
 	} else if (str == _("MIDI Tracks")){
 		return MidiTrack;
 	} else if (str == _("Audio+MIDI Tracks")) {
@@ -232,6 +235,7 @@ AddRouteDialog::maybe_update_name_template_entry ()
 		name_template_entry.set_text (_("Audio+MIDI"));
 		break;
 	case AudioBus:
+	case MidiBus:
 		name_template_entry.set_text (_("Bus"));
 		break;
 	}
@@ -279,6 +283,14 @@ AddRouteDialog::track_type_chosen ()
 		configuration_label.set_sensitive (true);
 		mode_label.set_sensitive (true);
 		instrument_label.set_sensitive (false);
+		break;
+	case MidiBus:
+		mode_combo.set_sensitive (false);
+		channel_combo.set_sensitive (false);
+		instrument_combo.set_sensitive (true);
+		configuration_label.set_sensitive (false);
+		mode_label.set_sensitive (true);
+		instrument_label.set_sensitive (true);
 		break;
 	}
 

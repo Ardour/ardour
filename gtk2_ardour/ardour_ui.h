@@ -289,19 +289,18 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal, route_group, how_many, name_template);
 	}
 
+
 	void session_add_midi_track (ARDOUR::RouteGroup* route_group, uint32_t how_many, std::string const & name_template,
-				     ARDOUR::PluginInfoPtr instrument) {
+			ARDOUR::PluginInfoPtr instrument) {
 		session_add_midi_route (true, route_group, how_many, name_template, instrument);
 	}
 
-        void session_add_mixed_track (const ARDOUR::ChanCount& input, const ARDOUR::ChanCount& output, ARDOUR::RouteGroup* route_group, uint32_t how_many, std::string const & name_template,
-				      ARDOUR::PluginInfoPtr instrument);
+	void session_add_mixed_track (const ARDOUR::ChanCount& input, const ARDOUR::ChanCount& output, ARDOUR::RouteGroup* route_group, uint32_t how_many, std::string const & name_template,
+			ARDOUR::PluginInfoPtr instrument);
 
-	/*void session_add_midi_bus () {
-		session_add_midi_route (false);
-	}*/
+	void session_add_midi_bus (ARDOUR::RouteGroup* route_group, uint32_t how_many, std::string const & name_template, ARDOUR::PluginInfoPtr instrument);
 
-        void attach_to_engine ();
+	void attach_to_engine ();
 	void post_engine ();
 
 	gint exit_on_main_window_close (GdkEventAny *);

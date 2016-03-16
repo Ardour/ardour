@@ -585,6 +585,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = ""
 		);
 
+	RouteList new_midi_route (RouteGroup* route_group, uint32_t how_many, std::string name_template = "", boost::shared_ptr<PluginInfo> instrument = boost::shared_ptr<PluginInfo>());
+
 	void remove_routes (boost::shared_ptr<RouteList>);
 	void remove_route (boost::shared_ptr<Route>);
 

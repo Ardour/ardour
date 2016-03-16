@@ -1806,6 +1806,31 @@ restart with more ports."), PROGRAM_NAME));
 	}
 }
 
+void
+ARDOUR_UI::session_add_midi_bus (RouteGroup* route_group, uint32_t how_many, const string& name_template, PluginInfoPtr instrument)
+{
+
+	if (_session == 0) {
+		warning << _("You cannot add a track without a session already loaded.") << endmsg;
+		return;
+	}
+
+	try {
+		RouteList routes = _session->new_midi_route (route_group, how_many, name_template, instrument);
+		if (routes.size() != how_many) {
+			error << string_compose(P_("could not create %1 new Midi Bus", "could not create %1 new Midi Busses", how_many), how_many) << endmsg;
+		}
+
+	}
+	catch (...) {
+		MessageDialog msg (_main_window,
+				   string_compose (_("There are insufficient ports available\n\
+to create a new track or bus.\n\
+You should save %1, exit and\n\
+restart with more ports."), PROGRAM_NAME));
+		msg.run ();
+	}
+}
 
 void
 ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t how_many, const string& name_template, PluginInfoPtr instrument)
@@ -1815,6 +1840,8 @@ ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t 
 
 	if (disk) {
 		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, instrument);
+	} else {
+		session_add_midi_bus (route_group, how_many, name_template, instrument);
 	}
 }
 
@@ -3938,6 +3965,9 @@ ARDOUR_UI::add_route (Gtk::Window* /* ignored */)
 		break;
 	case AddRouteDialog::AudioBus:
 		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template);
+		break;
+	case AddRouteDialog::MidiBus:
+		session_add_midi_bus (route_group, count, name_template, instrument);
 		break;
 	}
 }

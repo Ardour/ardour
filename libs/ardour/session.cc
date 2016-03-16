@@ -2435,6 +2435,92 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 	return ret;
 }
 
+RouteList
+Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name_template, boost::shared_ptr<PluginInfo> instrument)
+{
+	string bus_name;
+	uint32_t bus_id = 0;
+	string port;
+	RouteList ret;
+
+	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Midi Bus");
+
+	while (how_many) {
+		if (!find_route_name (name_template.empty () ? _("Midi Bus") : name_template, ++bus_id, bus_name, use_number)) {
+			error << "cannot find name for new midi bus" << endmsg;
+			goto failure;
+		}
+
+		try {
+			boost::shared_ptr<Route> bus (new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO)); // XXX Editor::add_routes is not ready for ARDOUR::DataType::MIDI
+
+			if (bus->init ()) {
+				goto failure;
+			}
+
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
+			// boost_debug_shared_ptr_mark_interesting (bus.get(), "Route");
+#endif
+			{
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+
+				if (bus->input()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
+					error << _("cannot configure new midi bus input") << endmsg;
+					goto failure;
+				}
+
+
+				if (bus->output()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
+					error << _("cannot configure new midi bus output") << endmsg;
+					goto failure;
+				}
+			}
+
+			if (route_group) {
+				route_group->add (bus);
+			}
+			if (Config->get_remote_model() == UserOrdered) {
+				bus->set_remote_control_id (next_control_id());
+			}
+
+			ret.push_back (bus);
+			RouteAddedOrRemoved (true); /* EMIT SIGNAL */
+			ARDOUR::GUIIdle ();
+		}
+
+		catch (failed_constructor &err) {
+			error << _("Session: could not create new audio route.") << endmsg;
+			goto failure;
+		}
+
+		catch (AudioEngine::PortRegistrationFailure& pfe) {
+			error << pfe.what() << endmsg;
+			goto failure;
+		}
+
+
+		--how_many;
+	}
+
+  failure:
+	if (!ret.empty()) {
+		StateProtector sp (this);
+		add_routes (ret, false, false, false);
+
+		if (instrument) {
+			for (RouteList::iterator r = ret.begin(); r != ret.end(); ++r) {
+				PluginPtr plugin = instrument->load (*this);
+				boost::shared_ptr<Processor> p (new PluginInsert (*this, plugin));
+				(*r)->add_processor (p, PreFader);
+			}
+		}
+	}
+
+	return ret;
+
+}
+
+
 void
 Session::midi_output_change_handler (IOChange change, void * /*src*/, boost::weak_ptr<Route> wmt)
 {
