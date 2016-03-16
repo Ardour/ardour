@@ -216,6 +216,7 @@ work_respond(LV2_Worker_Respond_Handle handle,
 	}
 }
 
+#ifdef LV2_EXTENDED
 /* inline display extension */
 static void
 queue_draw (LV2_Inline_Display_Handle handle)
@@ -223,6 +224,7 @@ queue_draw (LV2_Inline_Display_Handle handle)
 	LV2Plugin* plugin = (LV2Plugin*)handle;
 	plugin->QueueDraw(); /* EMIT SIGNAL */
 }
+#endif
 
 /* log extension */
 
