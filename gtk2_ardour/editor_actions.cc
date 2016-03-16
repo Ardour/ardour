@@ -752,7 +752,7 @@ Editor::register_actions ()
 void
 Editor::load_bindings ()
 {
-	bindings = Bindings::get_bindings (X_("editor"), myactions);
+	bindings = Bindings::get_bindings (X_("Editor"), myactions);
 	global_hpacker.set_data ("ardour-bindings", bindings);
 }
 

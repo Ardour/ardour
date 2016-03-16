@@ -1669,7 +1669,7 @@ MonitorSection::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost:
 void
 MonitorSection::load_bindings ()
 {
-	bindings = Bindings::get_bindings (X_("monitor section"), myactions);
+	bindings = Bindings::get_bindings (X_("Monitor Section"), myactions);
 }
 
 void

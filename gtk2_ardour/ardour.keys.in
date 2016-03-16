@@ -28,32 +28,32 @@ $ARDOUR Shortcuts \linebreak Mnemonic US-Keypad
 
 ;; GROUP DEFINITIONS
 
-%trans global Transport \& Recording Control
+%trans Global Transport \& Recording Control
 
-%sess global Session \& File Handling
+%sess Global Session \& File Handling
 
-%edit editor Basic Editing
+%edit Editor Basic Editing
 
-%vis editor Changing What's Visible
+%vis Editor Changing What's Visible
 
-%wvis global Window Visibility
+%wvis Global Window Visibility
 
-%eep editor Editing with Edit Point
+%eep Editor Editing with Edit Point
 Most edit functions operate on a single "Edit Point". The edit point can be any of: playhead (default), the mouse or an active marker. The choice of Edit Point (by default) also sets the Zoom Focus.
 
-%aep editor Aligning with the Edit Point
+%aep Editor Aligning with the Edit Point
 Align operations move regions so that their start/end/sync point is at the edit point. "Relative" operations
 just align the first region and moves other selected regions to maintain relative positioning.
 
-%epp editor Edit Point Playback
+%epp Editor Edit Point Playback
 
-%movp editor Moving the Playhead
+%movp Editor Moving the Playhead
 A left click in the rulers positions the playhead unless Ardour is recording. You can use {\tt KP$\_$n} to move the 
 playhead to the n-th marker.
 
-%rop editor Region Operations
+%rop Editor Region Operations
 
-%edit editor Edit Range
+%edit Editor Edit Range
 There are only a few functions that refer to an "Edit Range". The current edit range is defined using combinations of the possible edit points: Playhead, Marker or Mouse.\par
 \begin{tabular}{lll}
 {\bf Edit Point} & {\bf Active Mark?} & {\bf Edit Range} \\
@@ -67,31 +67,31 @@ Marker & no & {\it No edit range defined} \\
 Marker & yes & from Active Marker to Mouse
 \end{tabular}
 
-%select editor Selecting
+%select Editor Selecting
 
-%ranges editor Defining Loop, Punch Range and Tempo Changes
+%ranges Editor Defining Loop, Punch Range and Tempo Changes
 
 %markers editor Markers \& Locations
 The "move" commands all move the active marker(s). Jump to the first 9 markers using
 the keypad digits 1-9 (requires numlock).
 
-%mmode editor Mouse Modes
+%mmode Editor Mouse Modes
 
-%mouse editor Mouse Usage
+%mouse Editor Mouse Usage
 Right click on most objects and controls displays a context menu
 Shift+Right click deletes most objects. 
 OS X users without a 3 button mouse can use {\tt Option+Ctrl+Left} to simulate "Middle" for some purposes.
 Use F1 to step through mouse modes.
 
-%mobject editor Mouse Object Mode
+%mobject Editor Mouse Object Mode
 This mode provides many different operations on both regions and control points, partially depending on where you click/drag with the mouse. The "body" of a region is the area where the waveform is displayed.
 
-%mzoom editor Mouse Zoom Mode
-%mops editor Mouse Ops on Solo/Mute/Rec-enable
-%mopsolo editor Mouse Ops on Solo Buttons only
-%mopsfader editor Mouse Ops on Faders \& Plugin Controls
+%mzoom Editor Mouse Zoom Mode
+%mops Editor Mouse Ops on Solo/Mute/Rec-enable
+%mopsolo Editor Mouse Ops on Solo Buttons only
+%mopsfader Editor Mouse Ops on Faders \& Plugin Controls
 
-%midi global MIDI specific commands
+%midi Global MIDI specific commands
 
 ;; END GROUP DEFINITIONS
 

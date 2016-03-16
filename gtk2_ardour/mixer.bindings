@@ -1,4 +1,4 @@
- <Bindings name="mixer">
+ <Bindings name="Mixer">
   <Press>
    <Binding key="s" action="Mixer/solo"/>
    <Binding key="m" action="Mixer/mute"/>

@@ -5447,7 +5447,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 void
 ARDOUR_UI::load_bindings ()
 {
-	if ((global_bindings = Bindings::get_bindings ("global", global_actions)) == 0) {
+	if ((global_bindings = Bindings::get_bindings (X_("Global"), global_actions)) == 0) {
 		error << _("Global keybindings are missing") << endmsg;
 	}
 }

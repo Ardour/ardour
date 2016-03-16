@@ -86,7 +86,7 @@ MixerActor::register_actions ()
 void
 MixerActor::load_bindings ()
 {
-	bindings = Bindings::get_bindings (X_("mixer"), myactions);
+	bindings = Bindings::get_bindings (X_("Mixer"), myactions);
 }
 
 void

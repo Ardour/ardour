@@ -3710,5 +3710,5 @@ ProcessorWindowProxy::show_the_right_window ()
 void
 ProcessorBox::load_bindings ()
 {
-	bindings = Bindings::get_bindings (X_("processor box"), myactions);
+	bindings = Bindings::get_bindings (X_("Processor Box"), myactions);
 }

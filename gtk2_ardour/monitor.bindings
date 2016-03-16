@@ -1,4 +1,4 @@
-<Bindings name="monitor section">
+<Bindings name="Monitor Section">
   <Press>
      <Binding key="m" action="Monitor/monitor-mono"/>
      <Binding key="c" action="Monitor/monitor-cut-all"/>

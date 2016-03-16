@@ -1,4 +1,4 @@
-<Bindings name="step-editing">
+<Bindings name="Step Editing">
   <Press>
      <Binding key="grave" action="StepEditing/octave-0"/>
      <Binding key="1" action="StepEditing/octave-1"/>

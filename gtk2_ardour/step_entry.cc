@@ -694,7 +694,7 @@ StepEntry::register_actions ()
 void
 StepEntry::load_bindings ()
 {
-	bindings = Bindings::get_bindings (X_("step-editing"), myactions);
+	bindings = Bindings::get_bindings (X_("Step Editing"), myactions);
         set_data ("ardour-bindings", bindings);
 }
 
