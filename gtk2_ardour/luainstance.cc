@@ -16,6 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <cairomm/context.h>
+
 #include "gtkmm2ext/gui_thread.h"
 
 #include "ardour/audioengine.h"
@@ -96,12 +98,103 @@ LuaInstance::register_hooks (lua_State* L)
 }
 
 void
+LuaInstance::bind_cairo (lua_State* L)
+{
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("Cairo")
+		.beginClass <Cairo::Context> ("Context")
+		.addFunction ("save", &Cairo::Context::save)
+		.addFunction ("restore", &Cairo::Context::restore)
+		.addFunction ("set_operator", &Cairo::Context::set_operator)
+		//.addFunction ("set_source", &Cairo::Context::set_operator) // needs RefPtr
+		.addFunction ("set_source_rgb", &Cairo::Context::set_source_rgb)
+		.addFunction ("set_source_rgba", &Cairo::Context::set_source_rgba)
+		.addFunction ("set_line_width", &Cairo::Context::set_line_width)
+		.addFunction ("set_line_cap", &Cairo::Context::set_line_cap)
+		.addFunction ("set_line_join", &Cairo::Context::set_line_join)
+		.addFunction ("set_dash", (void (Cairo::Context::*)(std::vector<double>&, double))&Cairo::Context::set_dash)
+		.addFunction ("unset_dash", &Cairo::Context::unset_dash)
+		.addFunction ("translate", &Cairo::Context::translate)
+		.addFunction ("scale", &Cairo::Context::scale)
+		.addFunction ("rotate", &Cairo::Context::rotate)
+		.addFunction ("begin_new_path", &Cairo::Context::begin_new_path)
+		.addFunction ("begin_new_sub_path", &Cairo::Context::begin_new_sub_path)
+		.addFunction ("move_to", &Cairo::Context::move_to)
+		.addFunction ("line_to", &Cairo::Context::line_to)
+		.addFunction ("curve_to", &Cairo::Context::curve_to)
+		.addFunction ("arc", &Cairo::Context::arc)
+		.addFunction ("arc_negative", &Cairo::Context::arc_negative)
+		.addFunction ("rel_move_to", &Cairo::Context::rel_move_to)
+		.addFunction ("rel_line_to", &Cairo::Context::rel_line_to)
+		.addFunction ("rel_curve_to", &Cairo::Context::rel_curve_to)
+		.addFunction ("rectangle", (void (Cairo::Context::*)(double, double, double, double))&Cairo::Context::rectangle)
+		.addFunction ("close_path", &Cairo::Context::close_path)
+		.addFunction ("paint", &Cairo::Context::paint)
+		.addFunction ("paint_with_alpha", &Cairo::Context::paint_with_alpha)
+		.addFunction ("stroke", &Cairo::Context::stroke)
+		.addFunction ("stroke_preserve", &Cairo::Context::stroke_preserve)
+		.addFunction ("fill", &Cairo::Context::fill)
+		.addFunction ("fill_preserve", &Cairo::Context::fill_preserve)
+		.addFunction ("reset_clip", &Cairo::Context::reset_clip)
+		.addFunction ("clip", &Cairo::Context::clip)
+		.addFunction ("clip_preserve", &Cairo::Context::clip_preserve)
+		.addFunction ("set_font_size", &Cairo::Context::set_font_size)
+		.addFunction ("show_text", &Cairo::Context::show_text)
+		.endClass ()
+		/* enums */
+		// LineCap, LineJoin, Operator
+		.beginNamespace ("LineCap")
+		.addConst ("Butt", CAIRO_LINE_CAP_BUTT)
+		.addConst ("Round", CAIRO_LINE_CAP_ROUND)
+		.addConst ("Square", CAIRO_LINE_CAP_SQUARE)
+		.endNamespace ()
+
+		.beginNamespace ("LineJoin")
+		.addConst ("Miter", CAIRO_LINE_JOIN_MITER)
+		.addConst ("Round", CAIRO_LINE_JOIN_ROUND)
+		.addConst ("Bevel", CAIRO_LINE_JOIN_BEVEL)
+		.endNamespace ()
+
+		.beginNamespace ("Operator")
+		.addConst ("Clear", CAIRO_OPERATOR_CLEAR)
+		.addConst ("Source", CAIRO_OPERATOR_SOURCE)
+		.addConst ("Over", CAIRO_OPERATOR_OVER)
+		.addConst ("Add", CAIRO_OPERATOR_ADD)
+		.endNamespace ()
+
+		.endNamespace ();
+
+/* Lua/cairo bindings operate on Cairo::Context, there is no Cairo::RefPtr wrapper [yet].
+  one can work around this as follows:
+
+  LuaState lua;
+  LuaInstance::register_classes (lua.getState());
+  lua.do_command (
+      "function render (ctx)"
+      "  ctx:rectangle (0, 0, 100, 100)"
+      "  ctx:set_source_rgba (0.1, 1.0, 0.1, 1.0)"
+      "  ctx:fill ()"
+      " end"
+      );
+  {
+		Cairo::RefPtr<Cairo::Context> context = get_window ()->create_cairo_context ();
+    Cairo::Context ctx (context->cobj ());
+
+    luabridge::LuaRef lua_render = luabridge::getGlobal (lua.getState(), "render");
+    lua_render ((Cairo::Context *)&ctx);
+  }
+*/
+
+}
+
+void
 LuaInstance::register_classes (lua_State* L)
 {
 	LuaBindings::stddef (L);
 	LuaBindings::common (L);
 	LuaBindings::session (L);
 
+	bind_cairo (L);
 	register_hooks (L);
 
 	luabridge::getGlobalNamespace (L)

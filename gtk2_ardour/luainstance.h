@@ -79,6 +79,7 @@ public:
 
 	static void register_classes (lua_State* L);
 	static void register_hooks (lua_State* L);
+	static void bind_cairo (lua_State* L);
 
 	void set_session (ARDOUR::Session* s);
 
