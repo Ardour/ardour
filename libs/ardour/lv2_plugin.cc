@@ -2464,19 +2464,18 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							                    _uri_map.urids.patch_value,    &value,
 							                    0);
 
-							if (!property || !value ||
-							    property->type != _uri_map.urids.atom_URID ||
-							    value->type    != _uri_map.urids.atom_Path) {
+							if (property && value &&
+							    property->type == _uri_map.urids.atom_URID &&
+							    value->type    == _uri_map.urids.atom_Path) {
+								const uint32_t prop_id = ((const LV2_Atom_URID*)property)->body;
+								const char*    path    = (const char*)LV2_ATOM_BODY_CONST(value);
+
+								// Emit PropertyChanged signal for UI
+								// TODO: This should emit the control's Changed signal
+								PropertyChanged(prop_id, Variant(Variant::PATH, path));
+							} else {
 								std::cerr << "warning: patch:Set for unknown property" << std::endl;
-								continue;
 							}
-
-							const uint32_t prop_id = ((const LV2_Atom_URID*)property)->body;
-							const char*    path    = (const char*)LV2_ATOM_BODY_CONST(value);
-
-							// Emit PropertyChanged signal for UI
-							// TODO: This should emit the control's Changed signal
-							PropertyChanged(prop_id, Variant(Variant::PATH, path));
 						}
 					}
 				}
