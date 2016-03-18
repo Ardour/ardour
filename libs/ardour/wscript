@@ -112,6 +112,7 @@ libardour_sources = [
         'location_importer.cc',
         'ltc_file_reader.cc',
         'ltc_slave.cc',
+        'lua_api.cc',
         'luabindings.cc',
         'luaproc.cc',
         'luascripting.cc',

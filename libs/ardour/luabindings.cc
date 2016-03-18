@@ -29,6 +29,7 @@
 #include "ardour/chan_mapping.h"
 #include "ardour/dB.h"
 #include "ardour/dsp_filter.h"
+#include "ardour/lua_api.h"
 #include "ardour/luabindings.h"
 #include "ardour/meter.h"
 #include "ardour/midi_track.h"
@@ -147,6 +148,12 @@ LuaBindings::common (lua_State* L)
 		.addVoidConstructor ()
 		.endClass ()
 
+		.beginNamespace ("Route")
+		.beginClass <Route::ProcessorStreams> ("ProcessorStreams")
+		.addVoidConstructor ()
+		.endClass ()
+		.endNamespace ()
+
 		.beginNamespace ("Properties")
 		// templated class definitions
 		.beginClass <PBD::PropertyDescriptor<bool> > ("BoolProperty").endClass ()
@@ -186,6 +193,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("active", &Route::active)
 		.addFunction ("set_active", &Route::set_active)
 		.addFunction ("nth_plugin", &Route::nth_plugin)
+		.addFunction ("add_processor_by_index", &Route::add_processor_by_index)
 		.endClass ()
 
 		.deriveWSPtrClass <Track, Route> ("Track")
@@ -500,6 +508,10 @@ LuaBindings::common (lua_State* L)
 		.endNamespace ()
 
 		.endNamespace () // END Session enums
+
+		.beginNamespace ("LuaAPI")
+		.addFunction ("new_luaproc", ARDOUR::LuaAPI::new_luaproc)
+		.endNamespace ()
 
 		.endNamespace ();// END ARDOUR
 }
