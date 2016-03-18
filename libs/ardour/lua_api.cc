@@ -37,7 +37,7 @@ boost::shared_ptr<Processor>
 ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 {
 	if (!s) {
-		return boost::shared_ptr<Processor> (0);
+		return boost::shared_ptr<Processor> ();
 	}
 
 	LuaScriptInfoPtr spi;
