@@ -67,6 +67,7 @@
 #include "gui_thread.h"
 #include "io_selector.h"
 #include "keyboard.h"
+#include "luainstance.h"
 #include "mixer_ui.h"
 #include "mixer_strip.h"
 #include "plugin_selector.h"
@@ -156,8 +157,14 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
 		if (pi && pi->plugin() && pi->plugin()->has_inline_display()) {
-			_plugin_display = new PluginDisplay (pi->plugin(),
-					std::max (60.f, rintf(112.f * UIConfiguration::instance().get_ui_scale())));
+			if (pi->plugin()->get_info()->type != ARDOUR::Lua) {
+				_plugin_display = new PluginDisplay (pi->plugin(),
+						std::max (60.f, rintf(112.f * UIConfiguration::instance().get_ui_scale())));
+			} else {
+				assert (boost::dynamic_pointer_cast<LuaProc>(pi->plugin()));
+				_plugin_display = new LuaPluginDisplay (boost::dynamic_pointer_cast<LuaProc>(pi->plugin()),
+						std::max (60.f, rintf(112.f * UIConfiguration::instance().get_ui_scale())));
+			}
 			_vbox.pack_start (*_plugin_display);
 			_plugin_display->set_no_show_all (true);
 			if (UIConfiguration::instance().get_show_inline_display_by_default ()) {
@@ -1227,29 +1234,16 @@ ProcessorEntry::PluginDisplay::on_size_request (Gtk::Requisition* req)
 	req->height = _cur_height;
 }
 
-bool
-ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
+
+void
+ProcessorEntry::PluginDisplay::update_height_alloc (uint32_t inline_height)
 {
-	Gtk::Allocation a = get_allocation();
-	double const width = a.get_width();
-	double const height = a.get_height();
-
-	Plugin::Display_Image_Surface* dis = _plug->render_inline_display (width, _max_height);
-	if (!dis) {
-		hide ();
-		if (_cur_height != 1) {
-			_cur_height = 1;
-			queue_resize ();
-		}
-		return true;
-	}
-
 	/* work-around scroll-bar + aspect ratio
 	 * show inline-view -> height changes -> scrollbar gets added
 	 * -> width changes -> inline-view, fixed aspect ratio -> height changes
 	 * -> scroll bar is removed [-> width changes ; repeat ]
 	 */
-	uint32_t shm = std::min (_max_height, (uint32_t)dis->height);
+	uint32_t shm = std::min (_max_height, inline_height);
 	bool sc = false;
 	Gtk::Container* pr = get_parent();
 	for (uint32_t i = 0; i < 4 && pr; ++i) {
@@ -1269,7 +1263,15 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 		_cur_height = shm;
 	}
 	_scroll = sc;
+}
 
+uint32_t
+ProcessorEntry::PluginDisplay::render_inline (cairo_t* cr, uint32_t width)
+{
+	Plugin::Display_Image_Surface* dis = _plug->render_inline_display (width, _max_height);
+	if (!dis) {
+		return 0;
+	}
 
 	/* allocate a local image-surface,
 	 * We cannot re-use the data via cairo_image_surface_create_for_data(),
@@ -1299,9 +1301,22 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 			dst += dst_stride;
 		}
 	}
-	cairo_surface_mark_dirty(_surf);
 
-	// all set. Now paint it black.
+	cairo_surface_mark_dirty(_surf);
+	const double xc = floor ((width - dis->width) * .5);
+	cairo_set_source_surface(cr, _surf, xc, 0);
+	cairo_paint (cr);
+
+	return dis->height;
+}
+
+bool
+ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
+{
+	Gtk::Allocation a = get_allocation();
+	double const width = a.get_width();
+	double const height = a.get_height();
+
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
@@ -1315,11 +1330,22 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 	cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
 	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, width - 1, height + 1, 7);
 	cairo_clip (cr);
+	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 
-	const double xc = floor ((width - dis->width) * .5);
-	cairo_set_source_surface(cr, _surf, xc, 0);
-	cairo_paint (cr);
+	uint32_t ht = render_inline (cr, width);
 	cairo_restore (cr);
+
+	if (ht == 0) {
+		hide ();
+		if (_cur_height != 1) {
+			_cur_height = 1;
+			queue_resize ();
+		}
+		cairo_destroy (cr);
+		return true;
+	} else {
+		update_height_alloc (ht);
+	}
 
 	bool failed = false;
 	std::string name = get_name();
@@ -1334,6 +1360,38 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 	cairo_destroy(cr);
 	return true;
 }
+
+ProcessorEntry::LuaPluginDisplay::LuaPluginDisplay (boost::shared_ptr<ARDOUR::LuaProc> p, uint32_t max_height)
+	: PluginDisplay (p, max_height)
+	, _luaproc (p)
+	, _lua_render_inline (0)
+{
+	p->setup_lua_inline_gui (&lua_gui);
+
+	lua_State* LG = lua_gui.getState ();
+	LuaInstance::bind_cairo (LG);
+	luabridge::LuaRef lua_render = luabridge::getGlobal (LG, "render_inline");
+	assert (lua_render.isFunction ());
+	_lua_render_inline = new luabridge::LuaRef (lua_render);
+}
+
+ProcessorEntry::LuaPluginDisplay::~LuaPluginDisplay ()
+{
+	delete (_lua_render_inline);
+}
+
+uint32_t
+ProcessorEntry::LuaPluginDisplay::render_inline (cairo_t *cr, uint32_t width)
+{
+	Cairo::Context ctx (cr);
+	luabridge::LuaRef rv = (*_lua_render_inline)((Cairo::Context *)&ctx, width, _max_height);
+	if (rv.isTable ()) {
+		uint32_t h = rv[2];
+		return h;
+	}
+	return 0;
+}
+
 
 static std::list<Gtk::TargetEntry> drop_targets()
 {

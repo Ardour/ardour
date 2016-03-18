@@ -44,6 +44,7 @@
 #include "ardour/types.h"
 #include "ardour/ardour.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/luaproc.h"
 #include "ardour/port_insert.h"
 #include "ardour/processor.h"
 #include "ardour/route.h"
@@ -224,15 +225,31 @@ private:
 	public:
 		PluginDisplay(boost::shared_ptr<ARDOUR::Plugin>, uint32_t max_height = 80);
 		~PluginDisplay();
-	private:
+	protected:
 		bool on_expose_event (GdkEventExpose *);
 		void on_size_request (Gtk::Requisition* req);
+
+		void update_height_alloc (uint32_t inline_height);
+		virtual uint32_t render_inline (cairo_t *, uint32_t width);
+
 		boost::shared_ptr<ARDOUR::Plugin> _plug;
 		PBD::ScopedConnection _qdraw_connection;
 		cairo_surface_t* _surf;
 		uint32_t _max_height;
 		uint32_t _cur_height;
 		bool _scroll;
+	};
+
+	class LuaPluginDisplay : public PluginDisplay {
+	public:
+		LuaPluginDisplay(boost::shared_ptr<ARDOUR::LuaProc>, uint32_t max_height = 80);
+		~LuaPluginDisplay();
+	protected:
+		virtual uint32_t render_inline (cairo_t *, uint32_t width);
+	private:
+		boost::shared_ptr<ARDOUR::LuaProc> _luaproc;
+		LuaState lua_gui;
+		luabridge::LuaRef * _lua_render_inline;
 	};
 
 	class PortIcon : public Gtk::DrawingArea {
