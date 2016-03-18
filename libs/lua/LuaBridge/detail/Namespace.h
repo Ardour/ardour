@@ -1382,6 +1382,17 @@ public:
     return *this;
   }
 
+  template <class FP>
+  Namespace& addRefFunction (char const* name, FP const fp)
+  {
+    assert (lua_istable (L, -1));
+
+    new (lua_newuserdata (L, sizeof (fp))) FP (fp);
+    lua_pushcclosure (L, &CFunc::CallRef <FP>::f, 1);
+    rawsetfield (L, -2, name);
+
+    return *this;
+  }
 
   //----------------------------------------------------------------------------
   /**

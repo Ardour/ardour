@@ -248,6 +248,48 @@ struct CFunc
 
   //----------------------------------------------------------------------------
   /**
+      lua_CFunction to call a function with references as arguments.
+  */
+  template <class FnPtr,
+            class ReturnType = typename FuncTraits <FnPtr>::ReturnType>
+  struct CallRef
+  {
+    typedef typename FuncTraits <FnPtr>::Params Params;
+    static int f (lua_State* L)
+    {
+      assert (isfulluserdata (L, lua_upvalueindex (1)));
+      FnPtr const& fnptr = *static_cast <FnPtr const*> (lua_touserdata (L, lua_upvalueindex (1)));
+      assert (fnptr != 0);
+      ArgList <Params, 1> args (L);
+      Stack <typename FuncTraits <FnPtr>::ReturnType>::push (L, FuncTraits <FnPtr>::call (fnptr, args));
+      LuaRef v (newTable (L));
+      FuncArgs <Params, 0>::refs (v, args);
+      v.push(L);
+      return 2;
+    }
+  };
+
+  template <class FnPtr>
+  struct CallRef <FnPtr, void>
+  {
+    typedef typename FuncTraits <FnPtr>::Params Params;
+    static int f (lua_State* L)
+    {
+      assert (isfulluserdata (L, lua_upvalueindex (1)));
+      FnPtr const& fnptr = *static_cast <FnPtr const*> (lua_touserdata (L, lua_upvalueindex (1)));
+      assert (fnptr != 0);
+      ArgList <Params, 1> args (L);
+      FuncTraits <FnPtr>::call (fnptr, args);
+      LuaRef v (newTable (L));
+      FuncArgs <Params, 0>::refs (v, args);
+      v.push(L);
+      return 1;
+    }
+  };
+
+
+  //----------------------------------------------------------------------------
+  /**
       lua_CFunction to call a class member function with a return value.
 
       The member function pointer is in the first upvalue.
