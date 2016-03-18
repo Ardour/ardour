@@ -624,6 +624,10 @@ LuaProc::connect_and_run (BufferSet& bufs,
 void
 LuaProc::add_state (XMLNode* root) const
 {
+	XMLNode*    child;
+	char        buf[32];
+	LocaleGuard lg(X_("C"));
+
 	gchar* b64 = g_base64_encode ((const guchar*)_script.c_str (), _script.size ());
 	std::string b64s (b64);
 	g_free (b64);
@@ -631,6 +635,17 @@ LuaProc::add_state (XMLNode* root) const
 	script_node->add_property (X_("lua"), LUA_VERSION);
 	script_node->add_content (b64s);
 	root->add_child_nocopy (*script_node);
+
+	for (uint32_t i = 0; i < parameter_count(); ++i) {
+		if (parameter_is_input(i) && parameter_is_control(i)) {
+			child = new XMLNode("Port");
+			snprintf(buf, sizeof(buf), "%u", i);
+			child->add_property("id", std::string(buf));
+			snprintf(buf, sizeof(buf), "%+f", _shadow_data[i]);
+			child->add_property("value", std::string(buf));
+			root->add_child_nocopy(*child);
+		}
+	}
 }
 
 int
@@ -672,11 +687,49 @@ LuaProc::set_script_from_state (const XMLNode& node)
 int
 LuaProc::set_state (const XMLNode& node, int version)
 {
+#ifndef NO_PLUGIN_STATE
+	XMLNodeList nodes;
+	XMLProperty *prop;
+	XMLNodeConstIterator iter;
+	XMLNode *child;
+	const char *value;
+	const char *port;
+	uint32_t port_id;
+#endif
+	LocaleGuard lg (X_("C"));
+
 	if (_script.empty ()) {
 		if (set_script_from_state (node)) {
 			return -1;
 		}
 	}
+
+#ifndef NO_PLUGIN_STATE
+	if (node.name() != state_node_name()) {
+		error << _("Bad node sent to LuaProc::set_state") << endmsg;
+		return -1;
+	}
+
+	nodes = node.children ("Port");
+	for (iter = nodes.begin(); iter != nodes.end(); ++iter) {
+		child = *iter;
+		if ((prop = child->property("id")) != 0) {
+			port = prop->value().c_str();
+		} else {
+			warning << _("LuaProc: port has no symbol, ignored") << endmsg;
+			continue;
+		}
+		if ((prop = child->property("value")) != 0) {
+			value = prop->value().c_str();
+		} else {
+			warning << _("LuaProc: port has no value, ignored") << endmsg;
+			continue;
+		}
+		sscanf (port, "%" PRIu32, &port_id);
+		set_parameter (port_id, atof(value));
+	}
+#endif
+
 	return Plugin::set_state (node, version);
 }
 
