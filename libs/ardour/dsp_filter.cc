@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include "ardour/dB.h"
 #include "ardour/dsp_filter.h"
 
 #ifndef M_PI
@@ -41,6 +42,28 @@ ARDOUR::DSP::mmult (float *data, float *mult, const uint32_t n_samples) {
 	}
 }
 
+float
+ARDOUR::DSP::log_meter (float power) {
+	// compare to gtk2_ardour/logmeter.h
+	static const float lower_db = -192.f;
+	static const float upper_db = 0.f;
+	static const float non_linearity = 8.0;
+	return (power < lower_db ? 0.0 : powf ((power - lower_db) / (upper_db - lower_db), non_linearity));
+}
+
+float
+ARDOUR::DSP::log_meter_coeff (float coeff) {
+	if (coeff <= 0) return 0;
+	return log_meter (fast_coefficient_to_dB (coeff));
+}
+
+void
+ARDOUR::DSP::peaks (float *data, float &min, float &max, uint32_t n_samples) {
+	for (uint32_t i = 0; i < n_samples; ++i) {
+		if (data[i] < min) min = data[i];
+		if (data[i] > max) max = data[i];
+	}
+}
 
 LowPass::LowPass (double samplerate, float freq)
 	: _rate (samplerate)

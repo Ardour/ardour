@@ -89,6 +89,19 @@ LuaBindings::stddef (lua_State* L)
 		.registerArray <float> ("FloatArray")
 		.endNamespace ();
 
+	// register float array (int32_t*)
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("ARDOUR")
+		.registerArray <int32_t> ("IntArray")
+		.endNamespace ();
+
+	// std::vector<std::string>
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("ARDOUR")
+		.beginStdVector <double> ("DoubleVector")
+		.endClass ()
+		.endNamespace ();
+
 	// TODO std::set
 }
 
@@ -562,6 +575,10 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("accurate_coefficient_to_dB", &accurate_coefficient_to_dB)
 		.addFunction ("memset", &DSP::memset)
 		.addFunction ("mmult", &DSP::mmult)
+		.addFunction ("log_meter", &DSP::log_meter)
+		.addFunction ("log_meter_coeff", &DSP::log_meter_coeff)
+		.addRefFunction ("peaks", &DSP::peaks)
+
 		.beginClass <DSP::LowPass> ("LowPass")
 		.addConstructor <void (*) (double, float)> ()
 		.addFunction ("proc", &DSP::LowPass::proc)
@@ -575,8 +592,18 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("compute", &DSP::BiQuad::compute)
 		.addFunction ("reset", &DSP::BiQuad::reset)
 		.endClass ()
-		.endNamespace ()
-		.endNamespace ();
+
+		.beginClass <DSP::DspShm> ("DspShm")
+		.addFunction ("allocate", &DSP::DspShm::allocate)
+		.addFunction ("clear", &DSP::DspShm::clear)
+		.addFunction ("to_float", &DSP::DspShm::to_float)
+		.addFunction ("to_int", &DSP::DspShm::to_int)
+		.addFunction ("atomic_set_int", &DSP::DspShm::atomic_set_int)
+		.addFunction ("atomic_get_int", &DSP::DspShm::atomic_get_int)
+		.endClass ()
+
+		.endNamespace () // DSP
+		.endNamespace (); // ARDOUR
 }
 
 void
