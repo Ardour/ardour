@@ -51,7 +51,7 @@ ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 
 	if (!spi) {
 		warning << _("Script with given name was not found\n");
-		return boost::shared_ptr<Processor> (0);
+		return boost::shared_ptr<Processor> ();
 	}
 
 	PluginPtr p;
@@ -60,7 +60,7 @@ ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 		p = (lpi->load (*s));
 	} catch (...) {
 		warning << _("Failed to instantiate Lua Processor\n");
-		return boost::shared_ptr<Processor> (0);
+		return boost::shared_ptr<Processor> ();
 	}
 
 	return boost::shared_ptr<Processor> (new PluginInsert (*s, p));
