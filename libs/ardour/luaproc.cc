@@ -122,9 +122,21 @@ LuaProc::init ()
 	LuaBindings::common (L);
 	LuaBindings::dsp (L);
 
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("Ardour")
+		.beginClass <LuaProc> ("LuaProc")
+		.addFunction ("queue_draw", &LuaProc::queue_draw)
+		.addFunction ("shmem", &LuaProc::instance_shm)
+		.endClass ()
+		.endNamespace ();
+
 	// add session to global lua namespace
 	luabridge::push <Session *> (L, &_session);
 	lua_setglobal (L, "Session");
+
+	// instance
+	luabridge::push <LuaProc *> (L, this);
+	lua_setglobal (L, "self");
 
 	// sandbox
 	lua.do_command ("io = nil os = nil loadfile = nil require = nil dofile = nil package = nil debug = nil");
@@ -205,6 +217,11 @@ LuaProc::load_script ()
 	}
 
 	_ctrl_params.clear ();
+
+	luabridge::LuaRef lua_render = luabridge::getGlobal (L, "render_inline");
+	if (lua_render.isFunction ()) {
+		_lua_has_inline_display = true;
+	}
 
 	luabridge::LuaRef lua_params = luabridge::getGlobal (L, "dsp_params");
 	if (lua_params.isFunction ()) {
@@ -841,6 +858,37 @@ LuaProc::get_scale_points (uint32_t port) const
 	return boost::shared_ptr<ScalePoints> ();
 }
 
+
+void
+LuaProc::setup_lua_inline_gui (LuaState *lua_gui)
+{
+	lua_State* LG = lua_gui->getState ();
+	LuaBindings::stddef (LG);
+	LuaBindings::common (LG);
+	LuaBindings::dsp (LG);
+
+#ifndef NDEBUG
+	lua_gui->Print.connect (sigc::mem_fun (*this, &LuaProc::lua_print));
+#endif
+
+	lua_gui->do_command ("function ardour () end");
+	lua_gui->do_command (_script);
+
+	// TODO think: use a weak-pointer here ?
+	// (the GUI itself uses a shared ptr to this plugin, so we should be good)
+	luabridge::getGlobalNamespace (LG)
+		.beginNamespace ("Ardour")
+		.beginClass <LuaProc> ("LuaProc")
+		.addFunction ("shmem", &LuaProc::instance_shm)
+		.endClass ()
+		.endNamespace ();
+
+	luabridge::push <LuaProc *> (LG, this);
+	lua_setglobal (LG, "self");
+
+	luabridge::push <float *> (LG, _shadow_data);
+	lua_setglobal (LG, "CtrlPorts");
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #include <glibmm/miscutils.h>

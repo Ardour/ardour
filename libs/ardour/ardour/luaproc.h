@@ -30,6 +30,7 @@
 #include "ardour/types.h"
 #include "ardour/plugin.h"
 #include "ardour/luascripting.h"
+#include "ardour/dsp_filter.h"
 
 #include "lua/luastate.h"
 #include "LuaBridge/LuaBridge.h"
@@ -98,6 +99,8 @@ public:
 	std::string do_save_preset (std::string) { return ""; }
 	void do_remove_preset (std::string) { }
 
+	bool has_inline_display () { return _lua_has_inline_display; }
+	void setup_lua_inline_gui (LuaState *lua_gui);
 
 private:
 	void find_presets () { }
@@ -114,6 +117,11 @@ private:
 	std::string _script;
 	std::string _docs;
 	bool _lua_does_channelmapping;
+	bool _lua_has_inline_display;
+
+	void queue_draw () { QueueDraw(); /* EMIT SIGNAL */ }
+	DSP::DspShm* instance_shm () { return &lshm; }
+	DSP::DspShm lshm;
 
 	void init ();
 	bool load_script ();
