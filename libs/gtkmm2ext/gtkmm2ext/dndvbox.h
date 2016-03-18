@@ -78,7 +78,7 @@ public:
 
 		_internal_vbox.show ();
 
-		drag_dest_set (_targets, Gtk::DEST_DEFAULT_ALL, Gdk::DragAction (Gdk::ACTION_COPY | Gdk::ACTION_MOVE | Gdk::ACTION_LINK));
+		drag_dest_set (_targets);
 		signal_drag_data_received().connect (mem_fun (*this, &DnDVBox::drag_data_received));
 	}
 
