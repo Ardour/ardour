@@ -20,6 +20,7 @@
 #define _ardour_lua_api_h_
 
 #include <string>
+#include <lo/lo.h>
 #include <boost/shared_ptr.hpp>
 
 #include "ardour/libardour_visibility.h"
@@ -30,6 +31,20 @@
 namespace ARDOUR { namespace LuaAPI {
 
 	boost::shared_ptr<ARDOUR::Processor> new_luaproc (ARDOUR::Session *s, const std::string&);
+
+	/**
+	 * OSC is kinda special, lo_address is a void* and lo_send() has varags
+	 * and typed arguments which makes it hard to bind, even lo_cpp.
+	 */
+	class LuaOSCAddress {
+		public:
+			LuaOSCAddress (std::string uri) {
+				_addr = lo_address_new_from_url (uri.c_str());
+			}
+			~LuaOSCAddress () { if (_addr) { lo_address_free (_addr); } }
+			int send (lua_State *L);
+			lo_address _addr;
+	};
 
 } } /* namespace */
 

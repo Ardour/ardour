@@ -638,6 +638,18 @@ LuaBindings::session (lua_State* L)
 }
 
 void
+LuaBindings::osc (lua_State* L)
+{
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("OSC")
+		.beginClass<LuaAPI::LuaOSCAddress> ("Address")
+		.addConstructor<void (*) (std::string)> ()
+		.addCFunction ("send", &LuaAPI::LuaOSCAddress::send)
+		.endClass ()
+		.endNamespace ();
+}
+
+void
 LuaBindings::set_session (lua_State* L, Session *s)
 {
 	/* LuaBridge uses unique keys to identify classes/c-types.

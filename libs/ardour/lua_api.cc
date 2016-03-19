@@ -65,3 +65,79 @@ ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 
 	return boost::shared_ptr<Processor> (new PluginInsert (*s, p));
 }
+
+int
+ARDOUR::LuaAPI::LuaOSCAddress::send (lua_State *L)
+{
+	LuaOSCAddress * const luaosc = luabridge::Userdata::get <LuaOSCAddress> (L, 1, false);
+	if (!luaosc) {
+		return luaL_error (L, "Invalid pointer to OSC.Address");
+	}
+	if (!luaosc->_addr) {
+		return luaL_error (L, "Invalid Destination Address");
+	}
+
+	int top = lua_gettop(L);
+	if (top < 3) {
+    return luaL_argerror (L, 1, "invalid number of arguments, :send (path, type, ...)");
+	}
+
+	const char* path = luaL_checkstring (L, 2);
+	const char* type = luaL_checkstring (L, 3);
+	assert (path && type);
+
+	if ((int) strlen(type) != top - 3) {
+    return luaL_argerror (L, 3, "type description does not match arguments");
+	}
+
+	lo_message msg = lo_message_new ();
+
+	for (int i = 4; i <= top; ++i) {
+		char t = type[i - 4];
+		int lt = lua_type(L, i);
+		int ok = -1;
+		switch(lt) {
+			case LUA_TSTRING:
+				if (t == LO_STRING) {
+					ok = lo_message_add_string (msg, luaL_checkstring(L, i));
+				} else if (t ==  LO_CHAR) {
+					char c = luaL_checkstring (L, i) [0];
+					ok = lo_message_add_char (msg, c);
+				}
+				break;
+			case LUA_TBOOLEAN:
+				if (t == LO_TRUE || t == LO_FALSE) {
+					if (lua_toboolean (L, i)) {
+						ok = lo_message_add_true (msg);
+					} else {
+						ok = lo_message_add_false (msg);
+					}
+				}
+				break;
+			case LUA_TNUMBER:
+				if (t == LO_INT32) {
+					ok = lo_message_add_int32 (msg, (int32_t) luaL_checkinteger(L, i));
+				}
+				else if (t == LO_FLOAT) {
+					ok = lo_message_add_float (msg, (float) luaL_checknumber(L, i));
+				}
+				else if (t == LO_DOUBLE) {
+					ok = lo_message_add_double (msg, (double) luaL_checknumber(L, i));
+				}
+				else if (t == LO_INT64) {
+					ok = lo_message_add_double (msg, (int64_t) luaL_checknumber(L, i));
+				}
+				break;
+			default:
+				break;
+		}
+		if (ok != 0) {
+			return luaL_argerror (L, i, "type description does not match parameter");
+		}
+	}
+
+	int rv = lo_send_message (luaosc->_addr, path, msg);
+	lo_message_free (msg);
+	luabridge::Stack<int>::push (L, rv);
+	return 1;
+}
