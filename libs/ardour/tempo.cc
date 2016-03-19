@@ -1454,10 +1454,10 @@ TempoMap::beat_at_pulse (const Metrics& metrics, const double& pulse) const
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
-			if (m->pulse() > pulse) {
-				break;
-			}
 			if (prev_ms) {
+				if (m->pulse() > pulse) {
+					break;
+				}
 				accumulated_beats += (m->pulse() - prev_ms->pulse()) * prev_ms->note_divisor();
 			}
 			prev_ms = m;

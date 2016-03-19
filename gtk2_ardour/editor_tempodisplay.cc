@@ -116,7 +116,6 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 	}
 
 	std::vector<TempoMap::BBTPoint> grid;
-
 	compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	draw_measures (grid);
@@ -185,12 +184,9 @@ Editor::compute_current_bbt_points (std::vector<TempoMap::BBTPoint>& grid, frame
 		return;
 	}
 
-	framecnt_t beat_before_lower_pos = _session->tempo_map().frame_at_beat (floor(_session->tempo_map().beat_at_frame (leftmost)));
-	framecnt_t beat_after_upper_pos = _session->tempo_map().frame_at_beat (floor (_session->tempo_map().beat_at_frame (rightmost)) + 1.0);
-
 	/* prevent negative values of leftmost from creeping into tempomap
 	 */
-	_session->tempo_map().get_grid (grid, max (beat_before_lower_pos, (framepos_t) 0), beat_after_upper_pos);
+	_session->tempo_map().get_grid (grid, max (leftmost, (framepos_t) 0), rightmost);
 }
 
 void
