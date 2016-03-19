@@ -274,6 +274,7 @@ static void setup_lua ()
 	LuaBindings::stddef (L);
 	LuaBindings::common (L);
 	LuaBindings::session (L);
+	LuaBindings::osc (L);
 
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("_G")
