@@ -142,9 +142,6 @@ private:
 	int64_t _stats_max[2];
 	int64_t _stats_cnt;
 #endif
-
-	mutable Glib::Threads::Mutex debug_hack; // prevent concurrent calls to  _lua_dsp() and _lua_params() -- test/debug
-
 };
 
 class LIBARDOUR_API LuaPluginInfo : public PluginInfo

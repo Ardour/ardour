@@ -531,7 +531,6 @@ LuaProc::connect_and_run (BufferSet& bufs,
 
 	try {
 		if (_lua_does_channelmapping) {
-			Glib::Threads::Mutex::Lock lm (debug_hack);
 			// run the DSP function
 			(*_lua_dsp)(&bufs, in, out, nframes, offset);
 		} else {
@@ -595,7 +594,6 @@ LuaProc::connect_and_run (BufferSet& bufs,
 			}
 
 
-			Glib::Threads::Mutex::Lock lm (debug_hack);
 			// run the DSP function
 			(*_lua_dsp)(in_map, out_map, nframes);
 		}
@@ -749,7 +747,6 @@ LuaProc::default_value (uint32_t port)
 		return 0;
 	}
 	int lp = _ctrl_params[port].second;
-	Glib::Threads::Mutex::Lock lm (debug_hack);
 	luabridge::LuaRef lr = (*_lua_params)[lp];
 	return (lr["default"]).cast<float> ();
 }
@@ -781,7 +778,6 @@ LuaProc::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) con
 	assert (port <= parameter_count ());
 	int lp = _ctrl_params[port].second;
 
-	Glib::Threads::Mutex::Lock lm (debug_hack);
 	luabridge::LuaRef lr = (*_lua_params)[lp];
 	desc.lower  = (lr["min"]).cast<float> ();
 	desc.upper  = (lr["max"]).cast<float> ();
@@ -818,7 +814,6 @@ std::string
 LuaProc::get_parameter_docs (uint32_t port) const {
 	assert (port <= parameter_count ());
 	int lp = _ctrl_params[port].second;
-	Glib::Threads::Mutex::Lock lm (debug_hack);
 	luabridge::LuaRef lr = (*_lua_params)[lp];
 	luabridge::LuaRef doc = lr["doc"];
 	if (doc.isString ()) {
@@ -869,7 +864,6 @@ LuaProc::describe_parameter (Evoral::Parameter param)
 {
 	if (param.type () == PluginAutomation && param.id () < parameter_count ()) {
 		int lp = _ctrl_params[param.id ()].second;
-		Glib::Threads::Mutex::Lock lm (debug_hack);
 		luabridge::LuaRef lr = (*_lua_params)[lp];
 		return (lr["name"]).cast<std::string> ();
 	} else {
@@ -893,7 +887,6 @@ boost::shared_ptr<ScalePoints>
 LuaProc::get_scale_points (uint32_t port) const
 {
 	int lp = _ctrl_params[port].second;
-	Glib::Threads::Mutex::Lock lm (debug_hack);
 	luabridge::LuaRef lr = (*_lua_params)[lp];
 
 	if (!lr["scalepoints"].isTable()) {
