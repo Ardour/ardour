@@ -1814,6 +1814,92 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 }
 
 int
+Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Processor> sub, ProcessorStreams* err)
+{
+	/* these can never be removed */
+	if (old == _amp || old == _meter || old == _main_outs || old == _delayline || old == _trim) {
+		return 1;
+	}
+	/* and can't be used as substitute, either */
+	if (sub == _amp || sub == _meter || sub == _main_outs || sub == _delayline || sub == _trim) {
+		return 1;
+	}
+
+	/* I/Os are out, too */
+	if (boost::dynamic_pointer_cast<IOProcessor> (old) || boost::dynamic_pointer_cast<IOProcessor> (sub)) {
+		return 1;
+	}
+
+	/* this function cannot be used to swap/reorder processors */
+	if (find (_processors.begin(), _processors.end(), sub) != _processors.end ()) {
+		return 1;
+	}
+
+	if (!AudioEngine::instance()->connected() || !old || !sub) {
+		return 1;
+	}
+
+	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		ProcessorState pstate (this);
+
+		assert (find (_processors.begin(), _processors.end(), sub) == _processors.end ());
+
+		ProcessorList::iterator i;
+		bool replaced = false;
+		bool enable = old->active ();
+
+		for (i = _processors.begin(); i != _processors.end(); ) {
+			if (*i == old) {
+				i = _processors.erase (i);
+				_processors.insert (i, sub);
+				sub->set_owner (this);
+				replaced = true;
+				break;
+			} else {
+				++i;
+			}
+		}
+
+		if (!replaced) {
+			return 1;
+		}
+
+		if (configure_processors_unlocked (err)) {
+			pstate.restore ();
+			configure_processors_unlocked (0);
+			return -1;
+		}
+
+		_have_internal_generator = false;
+
+		for (i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<PluginInsert> pi;
+			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
+				if (pi->has_no_inputs ()) {
+					_have_internal_generator = true;
+					break;
+				}
+			}
+		}
+
+		if (enable) {
+			sub->activate ();
+		}
+
+		sub->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
+		_output->set_user_latency (0);
+	}
+
+	reset_instrument_info ();
+	old->drop_references ();
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	set_processor_positions ();
+	return 0;
+}
+
+int
 Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* err)
 {
 	ProcessorList deleted;
