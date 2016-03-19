@@ -193,6 +193,7 @@ LuaInstance::register_classes (lua_State* L)
 	LuaBindings::stddef (L);
 	LuaBindings::common (L);
 	LuaBindings::session (L);
+	LuaBindings::osc (L);
 
 	bind_cairo (L);
 	register_hooks (L);
