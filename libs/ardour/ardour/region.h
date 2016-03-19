@@ -132,7 +132,6 @@ class LIBARDOUR_API Region
 
 	frameoffset_t sync_offset (int& dir) const;
 	framepos_t sync_position () const;
-	framepos_t sync_point () const;
 
 	framepos_t adjust_to_sync (framepos_t) const;
 
