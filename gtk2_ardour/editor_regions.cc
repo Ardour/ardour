@@ -379,15 +379,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 			str = region->name();
 		}
 
-		if (region->n_channels() > 1) {
-			std::stringstream foo;
-			foo << region->n_channels ();
-			str += " [";
-			str += foo.str();
-			str += "]";
-		}
-
-		row[_columns.name] = str;
+		populate_row_name (region, row);
 		row[_columns.region] = region;
 		row[_columns.property_toggles_visible] = false;
 
@@ -1281,7 +1273,7 @@ EditorRegions::selection_filter (const RefPtr<TreeModel>& model, const TreeModel
 }
 
 void
-EditorRegions::name_editing_started (CellEditable* ce, const Glib::ustring&)
+EditorRegions::name_editing_started (CellEditable* ce, const Glib::ustring& path)
 {
 	name_editable = ce;
 
@@ -1291,6 +1283,15 @@ EditorRegions::name_editing_started (CellEditable* ce, const Glib::ustring&)
 
 	if (e) {
 		e->set_name (X_("RegionNameEditorEntry"));
+
+		TreeIter iter;
+		if ((iter = _model->get_iter (path))) {
+			boost::shared_ptr<Region> region = (*iter)[_columns.region];
+
+			if(region) {
+				e->set_text(region->name());
+			}
+		}
 	}
 }
 
@@ -1300,11 +1301,11 @@ EditorRegions::name_edit (const std::string& path, const std::string& new_text)
 	name_editable = 0;
 
 	boost::shared_ptr<Region> region;
-	TreeIter iter;
+	TreeIter row_iter;
 
-	if ((iter = _model->get_iter (path))) {
-		region = (*iter)[_columns.region];
-		(*iter)[_columns.name] = new_text;
+	if ((row_iter = _model->get_iter (path))) {
+		region = (*row_iter)[_columns.region];
+		(*row_iter)[_columns.name] = new_text;
 	}
 
 	/* now mapover everything */
@@ -1318,8 +1319,9 @@ EditorRegions::name_edit (const std::string& path, const std::string& new_text)
 				(*i)->region()->set_name (new_text);
 			}
 		}
-	}
 
+		populate_row_name (region, (*row_iter));
+	}
 }
 
 /** @return Region that has been dragged out of the list, or 0 */
