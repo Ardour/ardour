@@ -64,7 +64,7 @@ TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Timecode::BBT_Time when;
-	map.bbt_time (map.frame_at_beat (section.beat()), when);
+	map.bbt_time (section.frame(), when);
 	init (when, section.beats_per_minute(), section.note_type(), section.type(), section.movable(), section.position_lock_style());
 }
 
@@ -425,7 +425,7 @@ MeterDialog::MeterDialog (TempoMap& map, MeterSection& section, const string&)
 	: ArdourDialog (_("Edit Meter"))
 {
 	Timecode::BBT_Time when;
-	map.bbt_time (map.frame_at_beat (section.beat()), when);
+	map.bbt_time (section.frame(), when);
 	init (when, section.divisions_per_bar(), section.note_divisor(), section.movable(), section.position_lock_style());
 }
 

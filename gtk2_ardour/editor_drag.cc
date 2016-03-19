@@ -3143,7 +3143,7 @@ void
 MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (!_marker->meter().movable()) {
-		return;
+		//return;
 	}
 
 	if (first_move) {
@@ -3209,10 +3209,10 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	//motion (event, false);
 
-	Timecode::BBT_Time when;
+	//Timecode::BBT_Time when;
 
 	TempoMap& map (_editor->session()->tempo_map());
-	map.bbt_time (_marker->position(), when);
+	//map.bbt_time (_marker->position(), when);
 
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy meter mark"));
@@ -3221,7 +3221,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (_marker->meter().position_lock_style() == AudioTime) {
 			map.add_meter (_marker->meter(), _marker->position());
 		} else {
-			map.add_meter (_marker->meter(), map.bbt_to_beats (when), when);
+			map.add_meter (_marker->meter(), _real_section->pulse(), _real_section->bbt());
 		}
 
 		XMLNode &after = map.get_state();
@@ -3233,7 +3233,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (_marker->meter().position_lock_style() == AudioTime) {
 			map.replace_meter (*_real_section, _marker->meter(), _marker->position());
 		} else {
-			map.replace_meter (*_real_section, _marker->meter(), when);
+			map.replace_meter (*_real_section, _marker->meter(), _real_section->bbt());
 		}
 
 		XMLNode &after = map.get_state();
@@ -3366,7 +3366,8 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		XMLNode &before = map.get_state();
 
 		if (_marker->tempo().position_lock_style() == MusicTime) {
-			map.add_tempo (_marker->tempo(), _real_section->beat(), _marker->tempo().type());
+			double const beat = map.predict_tempo_beat (_real_section, _marker->tempo(), _real_section->frame());
+			map.add_tempo (_marker->tempo(), beat, _marker->tempo().type());
 		} else {
 			map.add_tempo (_marker->tempo(), _real_section->frame(), _marker->tempo().type());
 		}
@@ -3378,9 +3379,12 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	} else {
 		/* we removed it before, so add it back now */
 		if (_marker->tempo().position_lock_style() == MusicTime) {
-			map.replace_tempo (*_real_section, _marker->tempo().beats_per_minute() , _real_section->beat(), _marker->tempo().type());
+			double const beat = map.predict_tempo_beat (_real_section, _marker->tempo(), _real_section->frame());
+			map.replace_tempo (*_real_section, Tempo (_marker->tempo().beats_per_minute(), _marker->tempo().note_type())
+					   , beat, _marker->tempo().type());
 		} else {
-			map.replace_tempo (*_real_section, _marker->tempo().beats_per_minute() , _real_section->frame(), _marker->tempo().type());
+			map.replace_tempo (*_real_section, Tempo (_marker->tempo().beats_per_minute(), _marker->tempo().note_type())
+					   , _real_section->frame(), _marker->tempo().type());
 		}
 
 		XMLNode &after = map.get_state();
@@ -3401,7 +3405,7 @@ TempoMarkerDrag::aborted (bool moved)
 		TempoMap& map (_editor->session()->tempo_map());
 		/* we removed it before, so add it back now */
 		if (_marker->tempo().position_lock_style() == MusicTime) {
-			map.add_tempo (_marker->tempo(), _marker->tempo().beat(), _marker->tempo().type());
+			map.add_tempo (_marker->tempo(), _marker->tempo().pulse(), _marker->tempo().type());
 		} else {
 			map.add_tempo (_marker->tempo(), _marker->tempo().frame(), _marker->tempo().type());
 		}

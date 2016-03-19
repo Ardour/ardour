@@ -1281,7 +1281,7 @@ AudioClock::set_bbt (framepos_t when, bool /*force*/)
 
 		TempoMetric m (_session->tempo_map().metric_at (pos));
 
-		sprintf (buf, "%-5.1f", _session->tempo_map().tempo_at (pos));
+		sprintf (buf, "%-5.1f", _session->tempo_map().tempo_at (pos).beats_per_minute());
 		_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%3</span> <span foreground=\"green\">%2</span></span>",
 							  INFO_FONT_SIZE, buf, _("Tempo")));
 

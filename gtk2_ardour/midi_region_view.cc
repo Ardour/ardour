@@ -2512,8 +2512,6 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 			to_play.push_back ((*i)->note());
 		}
 		(*i)->move_event(dx, dy);
-		Note* canvas_note = dynamic_cast<Note*>(*i);
-		canvas_note->set_x1 (snap_to_pixel (canvas_note->x1(), false));
 	}
 
 	if (dy && !_selection.empty() && !_no_sound_notes && UIConfiguration::instance().get_sound_midi_notes()) {

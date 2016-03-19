@@ -1109,15 +1109,11 @@ Editor::compute_bbt_ruler_scale (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, 
 	i--;
 
 	/* XX ?? */
-	/*
 	if ((*i).beat >= (*grid.begin()).beat) {
 		bbt_bars = (*i).bar - (*grid.begin()).bar;
 	} else {
 		bbt_bars = (*i).bar - (*grid.begin()).bar;
 	}
-	*/
-	/*XXX totally wrong */
-	bbt_bars = (floor (_session->tempo_map().beat_at_frame (upper)) - floor (_session->tempo_map().beat_at_frame (lower))) / 4; 
 
 	beats = distance (grid.begin(), grid.end()) - bbt_bars;
 

@@ -2342,7 +2342,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						++m;
 					} else {
 						tmetric.set_metric(metric);
-						bbt = tmap.beats_to_bbt (metric->beat());
+						bbt = tmap.pulse_to_bbt (metric->pulse());
 						write_position(&_impl->forge, _ev_buffers[port_index],
 						               tmetric, bbt, _session.transport_speed(),
 						               metric->frame(),
