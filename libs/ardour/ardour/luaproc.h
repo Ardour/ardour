@@ -113,7 +113,6 @@ private:
 	PBD::ReallocPool _mempool;
 	LuaState lua;
 	luabridge::LuaRef * _lua_dsp;
-	luabridge::LuaRef * _lua_params;
 	std::string _script;
 	std::string _docs;
 	bool _lua_does_channelmapping;
@@ -127,7 +126,12 @@ private:
 	bool load_script ();
 	void lua_print (std::string s);
 
+	boost::shared_ptr<ScalePoints> parse_scale_points (luabridge::LuaRef*);
+
 	std::vector<std::pair<bool, int> > _ctrl_params;
+	std::map<int, ARDOUR::ParameterDescriptor> _param_desc;
+	std::map<int, std::string> _param_doc;
+
 	float* _control_data;
 	float* _shadow_data;
 

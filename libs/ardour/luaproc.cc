@@ -43,7 +43,6 @@ LuaProc::LuaProc (AudioEngine& engine,
 	, _mempool ("LuaProc", 1048576) // 1 MB is plenty. (64K would be enough)
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 	, _lua_dsp (0)
-	, _lua_params (0)
 	, _script (script)
 	, _lua_does_channelmapping (false)
 	, _control_data (0)
@@ -66,7 +65,6 @@ LuaProc::LuaProc (const LuaProc &other)
 	, _mempool ("LuaProc", 1048576) // 1 MB is plenty. (64K would be enough)
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 	, _lua_dsp (0)
-	, _lua_params (0)
 	, _script (other.script ())
 	, _lua_does_channelmapping (false)
 	, _control_data (0)
@@ -101,7 +99,6 @@ LuaProc::~LuaProc () {
 #endif
 	lua.do_command ("collectgarbage();");
 	delete (_lua_dsp);
-	delete (_lua_params);
 	delete [] _control_data;
 	delete [] _shadow_data;
 }
@@ -231,8 +228,6 @@ LuaProc::load_script ()
 
 		if (params.isTable ()) {
 
-			_lua_params = new luabridge::LuaRef (params);
-
 			for (luabridge::Iterator i (params); !i.isNil (); ++i) {
 				// required fields
 				if (!i.key ().isNumber ())           { return false; }
@@ -242,17 +237,51 @@ LuaProc::load_script ()
 				if (!i.value ()["min"].isNumber ())  { return false; }
 				if (!i.value ()["max"].isNumber ())  { return false; }
 
+				int pn = i.key ().cast<int> ();
 				std::string type = i.value ()["type"].cast<std::string> ();
 				if (type == "input") {
 					if (!i.value ()["default"].isNumber ()) { return false; }
-					_ctrl_params.push_back (std::make_pair (false, i.key ().cast<int> ()));
+					_ctrl_params.push_back (std::make_pair (false, pn));
 				}
 				else if (type == "output") {
-					_ctrl_params.push_back (std::make_pair (true, i.key ().cast<int> ()));
+					_ctrl_params.push_back (std::make_pair (true, pn));
 				} else {
 					return false;
 				}
-				assert (i.key ().cast<int> () == (int) _ctrl_params.size ());
+				assert (pn == (int) _ctrl_params.size ());
+
+				//_param_desc[pn] = boost::shared_ptr<ParameterDescriptor> (new ParameterDescriptor());
+				luabridge::LuaRef lr = i.value ();
+
+				if (type == "input") {
+					_param_desc[pn].normal     = lr["default"].cast<float> ();
+				} else {
+					_param_desc[pn].normal     = lr["min"].cast<float> (); // output-port, no default
+				}
+				_param_desc[pn].lower        = lr["min"].cast<float> ();
+				_param_desc[pn].upper        = lr["max"].cast<float> ();
+				_param_desc[pn].toggled      = lr["toggled"].isBoolean () && (lr["toggled"]).cast<bool> ();
+				_param_desc[pn].logarithmic  = lr["logarithmic"].isBoolean () && (lr["logarithmic"]).cast<bool> ();
+				_param_desc[pn].integer_step = lr["integer"].isBoolean () && (lr["integer"]).cast<bool> ();
+				_param_desc[pn].sr_dependent = lr["ratemult"].isBoolean () && (lr["ratemult"]).cast<bool> ();
+				_param_desc[pn].enumeration  = lr["enum"].isBoolean () && (lr["enum"]).cast<bool> ();
+
+				if (lr["unit"].isString ()) {
+					std::string unit = lr["unit"].cast<std::string> ();
+					if (unit == "dB")             { _param_desc[pn].unit = ParameterDescriptor::DB; }
+					else if (unit == "Hz")        { _param_desc[pn].unit = ParameterDescriptor::HZ; }
+					else if (unit == "Midi Note") { _param_desc[pn].unit = ParameterDescriptor::MIDI_NOTE; }
+				}
+				_param_desc[pn].label        = (lr["name"]).cast<std::string> ();
+				_param_desc[pn].scale_points = parse_scale_points (&lr);
+
+				luabridge::LuaRef doc = lr["doc"];
+				if (doc.isString ()) {
+					_param_doc[pn] = doc.cast<std::string> ();
+				} else {
+					_param_doc[pn] = "";
+				}
+				assert (!(_param_desc[pn].toggled && _param_desc[pn].logarithmic));
 			}
 		}
 	}
@@ -747,8 +776,7 @@ LuaProc::default_value (uint32_t port)
 		return 0;
 	}
 	int lp = _ctrl_params[port].second;
-	luabridge::LuaRef lr = (*_lua_params)[lp];
-	return (lr["default"]).cast<float> ();
+	return _param_desc[lp].normal;
 }
 
 void
@@ -777,35 +805,20 @@ LuaProc::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) con
 {
 	assert (port <= parameter_count ());
 	int lp = _ctrl_params[port].second;
+	const ParameterDescriptor& d (_param_desc.find(lp)->second);
 
-	luabridge::LuaRef lr = (*_lua_params)[lp];
-	desc.lower  = (lr["min"]).cast<float> ();
-	desc.upper  = (lr["max"]).cast<float> ();
+	desc.lower        = d.lower;
+	desc.upper        = d.upper;
+	desc.normal       = d.normal;
+	desc.toggled      = d.toggled;
+	desc.logarithmic  = d.logarithmic;
+	desc.integer_step = d.integer_step;
+	desc.sr_dependent = d.sr_dependent;
+	desc.enumeration  = d.enumeration;
+	desc.unit         = d.unit;
+	desc.label        = d.label;
+	desc.scale_points = d.scale_points;
 
-	if (_ctrl_params[port].first) {
-		desc.normal = desc.lower; // output-port, no default
-	} else {
-		desc.normal = (lr["default"]).cast<float> ();
-	}
-
-	desc.toggled      = lr["toggled"].isBoolean () && (lr["toggled"]).cast<bool> ();
-	desc.logarithmic  = lr["logarithmic"].isBoolean () && (lr["logarithmic"]).cast<bool> ();
-	desc.integer_step = lr["integer"].isBoolean () && (lr["integer"]).cast<bool> ();
-	desc.sr_dependent = lr["ratemult"].isBoolean () && (lr["ratemult"]).cast<bool> ();
-	desc.enumeration  = lr["enum"].isBoolean () && (lr["enum"]).cast<bool> ();
-
-	// TODO check if assignments make sense, e.g
-	assert (!(desc.toggled && desc.logarithmic));
-
-	if (lr["unit"].isString ()) {
-		std::string unit = lr["unit"].cast<std::string> ();
-		if (unit == "dB") { desc.unit = ParameterDescriptor::DB; }
-		else if (unit == "Hz") { desc.unit = ParameterDescriptor::HZ; }
-		else if (unit == "Midi Note") { desc.unit = ParameterDescriptor::MIDI_NOTE; }
-	}
-
-	desc.label = (lr["name"]).cast<std::string> ();
-	desc.scale_points = get_scale_points (port);
 	desc.update_steps ();
 	return 0;
 }
@@ -814,12 +827,7 @@ std::string
 LuaProc::get_parameter_docs (uint32_t port) const {
 	assert (port <= parameter_count ());
 	int lp = _ctrl_params[port].second;
-	luabridge::LuaRef lr = (*_lua_params)[lp];
-	luabridge::LuaRef doc = lr["doc"];
-	if (doc.isString ()) {
-		return doc.cast<std::string> ();
-	}
-	return "";
+	return _param_doc.find(lp)->second;
 }
 
 uint32_t
@@ -864,11 +872,9 @@ LuaProc::describe_parameter (Evoral::Parameter param)
 {
 	if (param.type () == PluginAutomation && param.id () < parameter_count ()) {
 		int lp = _ctrl_params[param.id ()].second;
-		luabridge::LuaRef lr = (*_lua_params)[lp];
-		return (lr["name"]).cast<std::string> ();
-	} else {
-		return "??";
+		return _param_desc[lp].label;
 	}
+	return "??";
 }
 
 void
@@ -884,18 +890,15 @@ LuaProc::print_parameter (uint32_t param, char* buf, uint32_t len) const
 }
 
 boost::shared_ptr<ScalePoints>
-LuaProc::get_scale_points (uint32_t port) const
+LuaProc::parse_scale_points (luabridge::LuaRef* lr)
 {
-	int lp = _ctrl_params[port].second;
-	luabridge::LuaRef lr = (*_lua_params)[lp];
-
-	if (!lr["scalepoints"].isTable()) {
+	if (!(*lr)["scalepoints"].isTable()) {
 		return boost::shared_ptr<ScalePoints> ();
 	}
 
 	int cnt = 0;
 	boost::shared_ptr<ScalePoints> rv = boost::shared_ptr<ScalePoints>(new ScalePoints());
-	luabridge::LuaRef scalepoints (lr["scalepoints"]);
+	luabridge::LuaRef scalepoints ((*lr)["scalepoints"]);
 
 	for (luabridge::Iterator i (scalepoints); !i.isNil (); ++i) {
 		if (!i.key ().isString ())    { continue; }
@@ -911,6 +914,12 @@ LuaProc::get_scale_points (uint32_t port) const
 	return boost::shared_ptr<ScalePoints> ();
 }
 
+boost::shared_ptr<ScalePoints>
+LuaProc::get_scale_points (uint32_t port) const
+{
+	int lp = _ctrl_params[port].second;
+	return _param_desc.find(lp)->second.scale_points;
+}
 
 void
 LuaProc::setup_lua_inline_gui (LuaState *lua_gui)
