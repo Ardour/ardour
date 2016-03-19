@@ -1049,7 +1049,7 @@ TempoMap::predict_tempo_frame (TempoSection* section, const Tempo& bpm, const BB
 	if (solve_map (future_map, new_section, bpm, pulse_at_beat (future_map, beat))) {
 		ret = new_section->frame();
 	} else {
-		ret = frame_at_beat_locked (future_map, beat);
+		ret = frame_at_beat_locked (_metrics, beat);
 	}
 
 	Metrics::const_iterator d = future_map.begin();
@@ -1071,7 +1071,7 @@ TempoMap::predict_tempo_beat (TempoSection* section, const Tempo& bpm, const fra
 	if (solve_map (future_map, new_section, bpm, frame)) {
 		ret = beat_at_pulse (future_map, new_section->pulse());
 	} else {
-		ret = beat_at_frame_locked (future_map, frame);
+		ret = beat_at_frame_locked (_metrics, frame);
 	}
 
 	Metrics::const_iterator d = future_map.begin();
