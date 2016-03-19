@@ -874,6 +874,7 @@ OSC::session_exported (std::string path, std::string name)
 {
 	lo_address listener = lo_address_new (NULL, "7770");
 	lo_send (listener, "/session/exported", "ss", path.c_str(), name.c_str());
+	lo_address_free (listener);
 }
 
 // end "Application Hook" Handlers //
