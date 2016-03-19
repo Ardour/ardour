@@ -613,16 +613,22 @@ About::About ()
 		codename = "";
 	}
 
+#ifndef NDEBUG
+	const std::string suffix = _(" - debug");
+#else
+	const std::string suffix = "";
+#endif
+
 	set_translator_credits (t);
 	set_copyright (_("Copyright (C) 1999-2015 Paul Davis\n"));
 	set_license (gpl);
 	set_name (X_("Ardour"));
 	set_website (X_("http://ardour.org/"));
 	set_website_label (_("http://ardour.org/"));
-	set_version ((string_compose(_("%1%2\n(built from revision %3)\n%4"),
+	set_version ((string_compose(_("%1%2\n(rev %3)\n%4%5"),
 				     VERSIONSTRING,
 				     codename,
-				     revision, cpu_arch)));
+				     revision, cpu_arch, suffix)));
 
 	Gtk::Button* config_button = manage (new Button (_("Config")));
 
