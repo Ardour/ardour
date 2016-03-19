@@ -18,16 +18,13 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <cstdio>
 
 #ifndef PLATFORM_WINDOWS
 #include <sys/mman.h>
 #endif
 
 #include "pbd/reallocpool.h"
-
-#if defined RAP_WITH_SEGMENT_STATS || defined RAP_WITH_CALL_STATS
-#include <cstdio>
-#endif
 
 #ifdef RAP_WITH_SEGMENT_STATS
 #define STATS_segment collect_segment_stats();
