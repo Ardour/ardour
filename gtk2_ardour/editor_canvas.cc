@@ -638,6 +638,7 @@ Editor::autoscroll_canvas ()
 				scroll_up_one_track ();
 				vertical_motion = true;
 			}
+			no_stop = true;
 
 		} else if (y > autoscroll_boundary.y1) {
 
@@ -645,9 +646,9 @@ Editor::autoscroll_canvas ()
 				scroll_down_one_track ();
 				vertical_motion = true;
 			}
+			no_stop = true;
 		}
 
-		no_stop = true;
 	}
 
 	if (vc.pending || vertical_motion) {
@@ -757,7 +758,6 @@ Editor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const Ardour
 
 	stop_canvas_autoscroll ();
 
-	autoscroll_cnt = 0;
 	autoscroll_horizontal_allowed = allow_horiz;
 	autoscroll_vertical_allowed = allow_vert;
 	autoscroll_boundary = boundary;
@@ -776,6 +776,7 @@ void
 Editor::stop_canvas_autoscroll ()
 {
 	autoscroll_connection.disconnect ();
+	autoscroll_cnt = 0;
 }
 
 Editor::EnterContext*
