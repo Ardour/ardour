@@ -260,6 +260,12 @@ Plugin::input_streams () const
 const Plugin::PresetRecord *
 Plugin::preset_by_label (const string& label)
 {
+#ifndef NO_PLUGIN_STATE
+	if (!_have_presets) {
+		find_presets ();
+		_have_presets = true;
+	}
+#endif
 	// FIXME: O(n)
 	for (map<string, PresetRecord>::const_iterator i = _presets.begin(); i != _presets.end(); ++i) {
 		if (i->second.label == label) {
@@ -273,6 +279,12 @@ Plugin::preset_by_label (const string& label)
 const Plugin::PresetRecord *
 Plugin::preset_by_uri (const string& uri)
 {
+#ifndef NO_PLUGIN_STATE
+	if (!_have_presets) {
+		find_presets ();
+		_have_presets = true;
+	}
+#endif
 	map<string, PresetRecord>::const_iterator pr = _presets.find (uri);
 	if (pr != _presets.end()) {
 		return &pr->second;
