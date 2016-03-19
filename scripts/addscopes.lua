@@ -47,7 +47,10 @@ function factory (params)
 				local a = ARDOUR.LuaAPI.new_luaproc(Session, "Inline Scope");
 				if (not a:isnil()) then
 					t:add_processor_by_index(a, pos, nil, true)
-					a = nil
+					ARDOUR.LuaAPI.set_processor_param (a, 0, 5) -- timescale 5sec
+					-- ARDOUR.LuaAPI.set_processor_param (a, 1, 1) -- logscale on
+					-- ARDOUR.LuaAPI.set_processor_param (a, 2, 3) -- "Max" height
+					a = nil -- explicitly drop shared-ptr reference
 				end
 			end
 		end
