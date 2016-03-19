@@ -322,6 +322,8 @@ ExportHandler::finish_timespan ()
 			export_cd_marker_file (current_timespan, fmt, filename, MP4Chaps);
 		}
 
+		Session::Exported (current_timespan->name(), filename); /* EMIT SIGNAL */
+
 		/* close file first, otherwise TagLib enounters an ERROR_SHARING_VIOLATION
 		 * The process cannot access the file because it is being used.
 		 * ditto for post-export and upload.
