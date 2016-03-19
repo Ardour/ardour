@@ -26,6 +26,7 @@
 #include "ardour/luascripting.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/plugin_manager.h"
 
 #include "i18n.h"
 
@@ -64,6 +65,84 @@ ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 	}
 
 	return boost::shared_ptr<Processor> (new PluginInsert (*s, p));
+}
+
+
+boost::shared_ptr<Processor>
+ARDOUR::LuaAPI::new_plugin (Session *s, const string& name, ARDOUR::PluginType type, const string& preset)
+{
+	if (!s) {
+		return boost::shared_ptr<Processor> ();
+	}
+
+	PluginManager& manager = PluginManager::instance();
+	PluginInfoList all_plugs;
+	all_plugs.insert(all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
+#ifdef WINDOWS_VST_SUPPORT
+	all_plugs.insert(all_plugs.end(), manager.windows_vst_plugin_info().begin(), manager.windows_vst_plugin_info().end());
+#endif
+#ifdef LXVST_SUPPORT
+	all_plugs.insert(all_plugs.end(), manager.lxvst_plugin_info().begin(), manager.lxvst_plugin_info().end());
+#endif
+#ifdef AUDIOUNIT_SUPPORT
+	all_plugs.insert(all_plugs.end(), manager.au_plugin_info().begin(), manager.au_plugin_info().end());
+#endif
+#ifdef LV2_SUPPORT
+	all_plugs.insert(all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
+#endif
+
+	PluginInfoPtr pip;
+	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
+		if (((*i)->name == name || (*i)->unique_id == name) && (*i)->type == type) {
+			pip = *i;
+			break;
+		}
+	}
+	if (!pip) {
+		return boost::shared_ptr<Processor> ();
+	}
+
+	PluginPtr p = pip->load (*s);
+	if (!p) {
+		return boost::shared_ptr<Processor> ();
+	}
+
+	if (!preset.empty()) {
+		const Plugin::PresetRecord *pr = p->preset_by_label (preset);
+		if (pr) {
+			p->load_preset (*pr);
+		}
+	}
+
+	return boost::shared_ptr<Processor> (new PluginInsert (*s, p));
+}
+
+bool
+ARDOUR::LuaAPI::set_plugin_insert_param (boost::shared_ptr<PluginInsert> pi, uint32_t which, float val)
+{
+	boost::shared_ptr<Plugin> plugin = pi->plugin();
+	if (!plugin) { return false; }
+
+	bool ok=false;
+	uint32_t controlid = plugin->nth_parameter (which, ok);
+	if (!ok) { return false; }
+	if (!plugin->parameter_is_input (controlid)) { return false; }
+
+	ParameterDescriptor pd;
+	if (plugin->get_parameter_descriptor (controlid, pd) != 0) { return false; }
+	if (val < pd.lower || val > pd.upper) { return false; }
+
+	boost::shared_ptr<AutomationControl> c = pi->automation_control (Evoral::Parameter(PluginAutomation, 0, controlid));
+	c->set_value (val, PBD::Controllable::NoGroup);
+	return true;
+}
+
+bool
+ARDOUR::LuaAPI::set_processor_param (boost::shared_ptr<Processor> proc, uint32_t which, float val)
+{
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
+	if (!pi) { return false; }
+	return set_plugin_insert_param (pi, which, val);
 }
 
 int

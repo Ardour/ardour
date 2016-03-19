@@ -31,6 +31,9 @@
 namespace ARDOUR { namespace LuaAPI {
 
 	boost::shared_ptr<ARDOUR::Processor> new_luaproc (ARDOUR::Session *s, const std::string&);
+	boost::shared_ptr<ARDOUR::Processor> new_plugin (ARDOUR::Session *s, const std::string&, ARDOUR::PluginType, const std::string& preset = "");
+	bool set_processor_param (boost::shared_ptr<Processor> proc, uint32_t which, float val);
+	bool set_plugin_insert_param (boost::shared_ptr<PluginInsert> pi, uint32_t which, float val);
 
 	/**
 	 * OSC is kinda special, lo_address is a void* and lo_send() has varags
