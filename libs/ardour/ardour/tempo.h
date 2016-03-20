@@ -188,17 +188,17 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	void set_type (Type type);
 	Type type () const { return _type; }
 
-	double tempo_at_frame (framepos_t frame, framecnt_t frame_rate) const;
-	framepos_t frame_at_tempo (double tempo, double beat, framecnt_t frame_rate) const;
+	double tempo_at_frame (const framepos_t& frame, const framecnt_t& frame_rate) const;
+	framepos_t frame_at_tempo (const double& ppm, const double& beat, const framecnt_t& frame_rate) const;
 
-	double tempo_at_pulse (double beat) const;
-	double pulse_at_tempo (double tempo, framepos_t frame, framecnt_t frame_rate) const;
+	double tempo_at_pulse (const double& pulse) const;
+	double pulse_at_tempo (const double& ppm, const framepos_t& frame, const framecnt_t& frame_rate) const;
 
-	double pulse_at_frame (framepos_t frame, framecnt_t frame_rate) const;
-	framepos_t frame_at_pulse (double pulse, framecnt_t frame_rate) const;
+	double pulse_at_frame (const framepos_t& frame, const framecnt_t& frame_rate) const;
+	framepos_t frame_at_pulse (const double& pulse, const framecnt_t& frame_rate) const;
 
-	double compute_c_func_pulse (double end_bpm, double end_pulse, framecnt_t frame_rate);
-	double compute_c_func_frame (double end_bpm, framepos_t end_frame, framecnt_t frame_rate) const;
+	double compute_c_func_pulse (const double& end_bpm, const double& end_pulse, const framecnt_t& frame_rate);
+	double compute_c_func_frame (const double& end_bpm, const framepos_t& end_frame, const framecnt_t& frame_rate) const;
 
 	double get_c_func () const { return _c_func; }
 	void set_c_func (double c_func) { _c_func = c_func; }
@@ -207,8 +207,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 
   private:
 
-	framecnt_t minute_to_frame (double time, framecnt_t frame_rate) const;
-	double frame_to_minute (framecnt_t frame, framecnt_t frame_rate) const;
+	framecnt_t minute_to_frame (const double& time, const framecnt_t& frame_rate) const;
+	double frame_to_minute (const framecnt_t& frame, const framecnt_t& frame_rate) const;
 
 	/*  tempo ramp functions. zero-based with time in minutes,
 	 * 'tick tempo' in ticks per minute and tempo in bpm.
@@ -217,14 +217,14 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	double a_func (double end_tpm, double c_func) const;
 	double c_func (double end_tpm, double end_time) const;
 
-	double pulse_tempo_at_time (double time) const;
-	double time_at_pulse_tempo (double pulse_tempo) const;
+	double pulse_tempo_at_time (const double& time) const;
+	double time_at_pulse_tempo (const double& pulse_tempo) const;
 
-	double pulse_tempo_at_pulse (double pulse) const;
-	double pulse_at_pulse_tempo (double pulse_tempo) const;
+	double pulse_tempo_at_pulse (const double& pulse) const;
+	double pulse_at_pulse_tempo (const double& pulse_tempo) const;
 
-	double pulse_at_time (double time) const;
-	double time_at_pulse (double pulse) const;
+	double pulse_at_time (const double& time) const;
+	double time_at_pulse (const double& pulse) const;
 
 	/* this value provides a fractional offset into the bar in which
 	   the tempo section is located in. A value of 0.0 indicates that
@@ -334,8 +334,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	void bbt_time (framepos_t when, Timecode::BBT_Time&);
 
-	double beat_at_frame (framecnt_t frame) const;
-	framecnt_t frame_at_beat (double beat) const;
+	double beat_at_frame (const framecnt_t& frame) const;
+	framecnt_t frame_at_beat (const double& beat) const;
 
 	framepos_t frame_time (const Timecode::BBT_Time&);
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir);
@@ -358,19 +358,19 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }
 
-	const Tempo tempo_at (framepos_t) const;
-	double frames_per_beat_at (framepos_t, framecnt_t sr) const;
+	const Tempo tempo_at (const framepos_t& frame) const;
+	double frames_per_beat_at (const framepos_t&, const framecnt_t& sr) const;
 
 	const Meter& meter_at (framepos_t) const;
 
 	const TempoSection& tempo_section_at (framepos_t frame) const;
 	const MeterSection& meter_section_at (framepos_t frame) const;
 
-	void add_tempo (const Tempo&, double where, TempoSection::Type type);
-	void add_tempo (const Tempo&, framepos_t frame, TempoSection::Type type);
+	void add_tempo (const Tempo&, const double& beat, TempoSection::Type type);
+	void add_tempo (const Tempo&, const framepos_t& frame, TempoSection::Type type);
 
-	void add_meter (const Meter&, double beat, Timecode::BBT_Time where);
-	void add_meter (const Meter&, framepos_t frame);
+	void add_meter (const Meter&, const double& beat, const Timecode::BBT_Time& where);
+	void add_meter (const Meter&, const framepos_t& frame);
 
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
@@ -423,9 +423,9 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	framecnt_t frame_rate () const { return _frame_rate; }
 
-	double bbt_to_beats (Timecode::BBT_Time bbt);
-	Timecode::BBT_Time beats_to_bbt (double beats);
-	Timecode::BBT_Time pulse_to_bbt (double pulse);
+	double bbt_to_beats (const Timecode::BBT_Time& bbt);
+	Timecode::BBT_Time beats_to_bbt (const double& beats);
+	Timecode::BBT_Time pulse_to_bbt (const double& pulse);
 
 	PBD::Signal0<void> MetricPositionChanged;
 
@@ -449,9 +449,9 @@ private:
 
 	bool check_solved (Metrics& metrics, bool by_frame);
 	bool solve_map (Metrics& metrics, TempoSection* section, const Tempo& bpm, const framepos_t& frame);
-	bool solve_map (Metrics& metrics, TempoSection* section, const Tempo& bpm, const double& beat);
+	bool solve_map (Metrics& metrics, TempoSection* section, const Tempo& bpm, const double& pulse);
 	void solve_map (Metrics& metrics, MeterSection* section, const Meter& mt, const framepos_t& frame);
-	void solve_map (Metrics& metrics, MeterSection* section, const Meter& mt, const double& beat);
+	void solve_map (Metrics& metrics, MeterSection* section, const Meter& mt, const double& pulse);
 
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;
