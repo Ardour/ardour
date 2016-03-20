@@ -375,6 +375,7 @@ AddRouteDialog::channels ()
 		ret.set (DataType::MIDI, 0);
 		break;
 
+	case MidiBus:
 	case MidiTrack:
 		ret.set (DataType::AUDIO, 0);
 		ret.set (DataType::MIDI, 1);
