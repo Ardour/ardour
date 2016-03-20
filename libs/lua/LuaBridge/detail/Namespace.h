@@ -28,6 +28,87 @@
 */
 //==============================================================================
 
+#ifdef LUABINDINGDOC
+#include <typeinfo>
+#include <execinfo.h>
+#include <type_traits>
+#include <cxxabi.h>
+#include <memory>
+#include <string>
+#include <cstdlib>
+
+template <class T>
+std::string type_name()
+{
+	typedef typename std::remove_reference<T>::type TR;
+	std::unique_ptr<char, void(*)(void*)> own
+		(
+		 abi::__cxa_demangle(typeid(TR).name(), nullptr,
+			 nullptr, nullptr),
+		 std::free
+		);
+	std::string r = own != nullptr ? own.get() : typeid(TR).name();
+	if (std::is_const<TR>::value)
+		r += " const";
+	if (std::is_volatile<TR>::value)
+		r += " volatile";
+	if (std::is_lvalue_reference<T>::value)
+		r += "&";
+	else if (std::is_rvalue_reference<T>::value)
+		r += "&&";
+	return r;
+}
+
+//#define LUADOCOUT
+
+#ifdef LUADOCOUT // lua
+#define KEYSTA "[\""
+#define KEYEND "\"] = "
+#else // JSON
+#define KEYSTA "\""
+#define KEYEND "\" = "
+#endif
+
+#define CLASSDOC(TYPE, LUANAME, DECL, PARENTDECL) \
+  if (LuaBindingDoc::printBindings ()) { \
+    std::cout <<   "{ " << KEYSTA << "type"   << KEYEND << " \"" << TYPE << "\",\n"; \
+    std::cout <<   "  " << KEYSTA << "lua"    << KEYEND << " \"" << LUANAME << "\",\n"; \
+    std::cout <<   "  " << KEYSTA << "decl"   << KEYEND << " \"" << DECL << "\",\n"; \
+    std::cout <<   "  " << KEYSTA << "parent" << KEYEND << " \"" << PARENTDECL << "\"\n"; \
+    std::cout <<   "},\n"; \
+  }
+
+#define PRINTDOC(TYPE, LUANAME, RETVAL, DECL) \
+  if (LuaBindingDoc::printBindings ()) { \
+    std::cout <<   "{ " << KEYSTA << "type"   << KEYEND << " \"" << TYPE << "\",\n"; \
+    std::cout <<   "  " << KEYSTA << "lua"    << KEYEND << " \"" << LUANAME << "\",\n"; \
+    if (!(RETVAL).empty()) { \
+      std::cout << "  " << KEYSTA << "ret"    << KEYEND << " \"" << (RETVAL) << "\",\n"; \
+    } \
+    std::cout <<   "  " << KEYSTA << "decl"   << KEYEND << " \"" << DECL << "\"\n"; \
+    std::cout <<   "},\n"; \
+  }
+
+#define FUNDOC(TYPE, NAME, FUNCTOR) \
+  PRINTDOC(TYPE, _name << NAME, \
+      type_name< typename FuncTraits <FUNCTOR>::ReturnType >(), \
+      type_name< typename FuncTraits <FUNCTOR>::DeclType >())
+
+#define DATADOC(TYPE, NAME, FUNCTOR) \
+  PRINTDOC(TYPE, _name << NAME, \
+      std::string(), \
+      type_name< decltype(FUNCTOR) >())\
+
+
+#else
+
+#define CLASSDOC(TYPE, LUANAME, DECL, PARENTDECL)
+#define PRINTDOC(TYPE, LUANAME, RETVAL, DECL)
+#define FUNDOC(TYPE, NAME, FUNCTOR)
+#define DATADOC(TYPE, NAME, FUNCTOR)
+
+#endif
+
 /** Provides C++ to Lua registration capabilities.
 
     This class is not instantiated directly, call `getGlobalNamespace` to start
@@ -108,6 +189,11 @@ private:
 
     lua_State* const L;
     int mutable m_stackSize;
+
+#ifdef LUABINDINGDOC
+    std::string _name;
+    const Namespace* _parent;
+#endif
 
   protected:
     //--------------------------------------------------------------------------
@@ -418,6 +504,10 @@ private:
     ClassBase (ClassBase const& other)
       : L (other.L)
       , m_stackSize (0)
+#ifdef LUABINDINGDOC
+      , _name (other._name)
+      , _parent (other._parent)
+#endif
     {
       m_stackSize = other.m_stackSize;
       other.m_stackSize = 0;
@@ -444,7 +534,7 @@ private:
       -4 (enclosing namespace)
   */
   template <class T>
-  class Class : public ClassBase
+  class Class : virtual public ClassBase
   {
   public:
     //==========================================================================
@@ -453,6 +543,11 @@ private:
     */
     Class (char const* name, Namespace const* parent) : ClassBase (parent->L)
     {
+#ifdef LUABINDINGDOC
+      _parent = parent;
+      _name = parent->_name + name + ":";
+#endif
+      PRINTDOC ("[C] Class", parent->_name << name, std::string(), type_name <T>())
       m_stackSize = parent->m_stackSize + 3;
       parent->m_stackSize = 0;
 
@@ -501,6 +596,10 @@ private:
     Class (char const* name, Namespace const* parent, void const* const staticKey)
       : ClassBase (parent->L)
     {
+#ifdef LUABINDINGDOC
+      _parent = parent;
+      _name = parent->_name + name + ":";
+#endif
       m_stackSize = parent->m_stackSize + 3;
       parent->m_stackSize = 0;
 
@@ -551,6 +650,7 @@ private:
     template <class U>
     Class <T>& addStaticData (char const* name, U* pu, bool isWritable = true)
     {
+      DATADOC ("Static Data Member", name, pu)
       assert (lua_istable (L, -1));
 
       rawgetfield (L, -1, "__propget");
@@ -579,6 +679,7 @@ private:
     }
 
     //--------------------------------------------------------------------------
+#if 0 // unused
     /**
       Add or replace a static property member.
 
@@ -616,6 +717,7 @@ private:
 
       return *this;
     }
+#endif
 
     //--------------------------------------------------------------------------
     /**
@@ -624,6 +726,7 @@ private:
     template <class FP>
     Class <T>& addStaticFunction (char const* name, FP const fp)
     {
+      FUNDOC ("Static Function", name, FP)
       new (lua_newuserdata (L, sizeof (fp))) FP (fp);
       lua_pushcclosure (L, &CFunc::Call <FP>::f, 1);
       rawsetfield (L, -2, name);
@@ -637,6 +740,7 @@ private:
     */
     Class <T>& addStaticCFunction (char const* name, int (*const fp)(lua_State*))
     {
+      DATADOC ("Static C Function", name, fp)
       lua_pushcfunction (L, fp);
       rawsetfield (L, -2, name);
       return *this;
@@ -649,6 +753,7 @@ private:
     template <class U>
     Class <T>& addData (char const* name, const U T::* mp, bool isWritable = true)
     {
+      DATADOC ("Data Member", name, mp)
       typedef const U T::*mp_t;
 
       // Add to __propget in class and const tables.
@@ -677,7 +782,7 @@ private:
       return *this;
     }
 
-
+#if 0 // unused
     //--------------------------------------------------------------------------
     /**
       Add or replace a property member.
@@ -789,7 +894,7 @@ private:
 
       return *this;
     }
-
+#endif
     //--------------------------------------------------------------------------
     /**
         Add or replace a member function.
@@ -797,6 +902,7 @@ private:
     template <class MemFn>
     Class <T>& addFunction (char const* name, MemFn mf)
     {
+      FUNDOC("Member Function", name, MemFn)
       CFunc::CallMemberFunctionHelper <MemFn, FuncTraits <MemFn>::isConstMemberFunction>::add (L, name, mf);
       return *this;
     }
@@ -804,6 +910,7 @@ private:
     template <class MemFn>
     Class <T>& addPtrFunction (char const* name, MemFn mf)
     {
+      FUNDOC("Member Pointer Function", name, MemFn)
       CFunc::CallMemberPtrFunctionHelper <MemFn>::add (L, name, mf);
       return *this;
     }
@@ -811,6 +918,7 @@ private:
     template <class MemFn>
     Class <T>& addWPtrFunction (char const* name, MemFn mf)
     {
+      FUNDOC("Member Weak Pointer Function", name, MemFn)
       CFunc::CallMemberWPtrFunctionHelper <MemFn>::add (L, name, mf);
       return *this;
     }
@@ -818,6 +926,7 @@ private:
     template <class MemFn>
     Class <T>& addRefFunction (char const* name, MemFn mf)
     {
+      FUNDOC("Member Function RefReturn", name, MemFn)
       CFunc::CallMemberRefFunctionHelper <MemFn, FuncTraits <MemFn>::isConstMemberFunction>::add (L, name, mf);
       return *this;
     }
@@ -829,6 +938,7 @@ private:
     */
     Class <T>& addCFunction (char const* name, int (T::*mfp)(lua_State*))
     {
+      DATADOC ("C Function", name, mfp)
       typedef int (T::*MFP)(lua_State*);
       assert (lua_istable (L, -1));
       new (lua_newuserdata (L, sizeof (mfp))) MFP (mfp);
@@ -842,6 +952,7 @@ private:
     // with non-class member functions (e.g STL iterator)
     Class <T>& addExtCFunction (char const* name, int (*const fp)(lua_State*))
     {
+      DATADOC ("Ext C Function", name, fp)
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, fp, 0);
       rawsetfield (L, -3, name); // class table
@@ -854,6 +965,7 @@ private:
     */
     Class <T>& addCFunction (char const* name, int (T::*mfp)(lua_State*) const)
     {
+      DATADOC ("Const C Member Function", name, mfp)
       typedef int (T::*MFP)(lua_State*) const;
       assert (lua_istable (L, -1));
       new (lua_newuserdata (L, sizeof (mfp))) MFP (mfp);
@@ -871,6 +983,7 @@ private:
     template <typename U>
       Class <T>& addConst (char const* name, const U val)
       {
+        DATADOC ("Constant/Enum Member", name, val)
         assert (lua_istable (L, -1));
 
         rawgetfield (L, -1, "__propget"); // static
@@ -901,6 +1014,7 @@ private:
     template <class MemFn, class C>
     Class <T>& addConstructor ()
     {
+      FUNDOC("Constructor", "", MemFn)
       lua_pushcclosure (L,
         &ctorContainerProxy <typename FuncTraits <MemFn>::Params, C>, 0);
       rawsetfield(L, -2, "__call");
@@ -911,6 +1025,7 @@ private:
     template <class MemFn>
     Class <T>& addConstructor ()
     {
+      FUNDOC("Constructor", "", MemFn)
       lua_pushcclosure (L,
         &ctorPlacementProxy <typename FuncTraits <MemFn>::Params, T>, 0);
       rawsetfield(L, -2, "__call");
@@ -927,11 +1042,16 @@ private:
 
   /** C Array to/from table */
   template <typename T>
-  class Array : public ClassBase
+  class Array : virtual public ClassBase
   {
   public:
     Array (char const* name, Namespace const* parent) : ClassBase (parent->L)
     {
+#ifdef LUABINDINGDOC
+      _parent = parent;
+      _name = parent->_name + name + ".";
+#endif
+      PRINTDOC ("[C] Array", parent->_name << name, std::string(), type_name <T>())
       m_stackSize = parent->m_stackSize + 3;
       parent->m_stackSize = 0;
 
@@ -1004,7 +1124,7 @@ private:
 
   /** Boost Weak & Shared Pointer Class Wrapper */
   template <class T>
-  class WSPtrClass : public ClassBase
+  class WSPtrClass : virtual public ClassBase
   {
   public:
     WSPtrClass (char const* name, Namespace const* parent)
@@ -1012,6 +1132,13 @@ private:
       , weak (name, parent)
       , shared (name, parent)
     {
+#ifdef LUABINDINGDOC
+      _parent = parent;
+      _name = parent->_name + name + ":";
+#endif
+      PRINTDOC ("[C] Weak/Shared Pointer Class",
+          parent->_name + name,
+          std::string(), type_name <T>())
       m_stackSize = weak.m_stackSize;
       parent->m_stackSize = weak.m_stackSize = shared.m_stackSize = 0;
       lua_pop (L, 3);
@@ -1022,6 +1149,10 @@ private:
       , weak (name, parent, weakkey)
       , shared (name, parent, sharedkey)
     {
+#ifdef LUABINDINGDOC
+      _parent = parent;
+      _name = parent->_name + name + ":";
+#endif
       m_stackSize = weak.m_stackSize;
       parent->m_stackSize = weak.m_stackSize = shared.m_stackSize = 0;
       lua_pop (L, 3);
@@ -1030,6 +1161,7 @@ private:
     template <class MemFn>
     WSPtrClass <T>& addFunction (char const* name, MemFn mf)
     {
+      FUNDOC ("Weak/Shared Pointer Function", name, MemFn)
       set_weak_class ();
       CFunc::CallMemberWPtrFunctionHelper <MemFn>::add (L, name, mf);
 
@@ -1041,6 +1173,7 @@ private:
     template <class MemFn>
     WSPtrClass <T>& addRefFunction (char const* name, MemFn mf)
     {
+      FUNDOC ("Weak/Shared Pointer Function RefReturn", name, MemFn)
       set_weak_class ();
       CFunc::CallMemberRefWPtrFunctionHelper <MemFn>::add (L, name, mf);
 
@@ -1052,6 +1185,7 @@ private:
     template <class MemFn>
     WSPtrClass <T>& addConstructor ()
     {
+      FUNDOC ("Weak/Shared Pointer Constructor", "", MemFn)
       set_weak_class ();
       lua_pushcclosure (L,
           &weak. template ctorPlacementProxy <typename FuncTraits <MemFn>::Params, boost::weak_ptr<T> >, 0);
@@ -1071,6 +1205,7 @@ private:
 
     WSPtrClass <T>& addExtCFunction (char const* name, int (*const fp)(lua_State*))
     {
+      DATADOC ("Weak/Shared Ext C Function", name, fp)
       set_weak_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, fp, 0);
@@ -1087,6 +1222,10 @@ private:
     template <class U>
     WSPtrClass <T>& addCast (char const* name)
     {
+      PRINTDOC("Weak/Shared Pointer Cast", _name << name,
+          type_name< U >(),
+          type_name< U >() << " (" << type_name< T >() << "::*)()")
+
       // TODO weak ptr
       set_shared_class ();
       assert (lua_istable (L, -1));
@@ -1097,6 +1236,7 @@ private:
 
     WSPtrClass <T>& addNullCheck ()
     {
+      PRINTDOC("Weak/Shared Null Check", _name << "isnil", std::string("bool"), std::string("void (*)()"))
       set_weak_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, &CFunc::WPtrNullCheck <T>::f, 0);
@@ -1146,10 +1286,19 @@ private:
   explicit Namespace (lua_State* L_)
     : L (L_)
     , m_stackSize (0)
+#ifdef LUABINDINGDOC
+    , _name ("")
+    , _parent (0)
+#endif
   {
     lua_getglobal (L, "_G");
     ++m_stackSize;
   }
+
+#ifdef LUABINDINGDOC
+  std::string _name;
+  Namespace const * _parent;
+#endif
 
   //----------------------------------------------------------------------------
   /**
@@ -1161,6 +1310,10 @@ private:
   Namespace (char const* name, Namespace const* parent)
     : L (parent->L)
     , m_stackSize (0)
+#ifdef LUABINDINGDOC
+    , _name (parent->_name + name + ":")
+    , _parent (parent)
+#endif
   {
     m_stackSize = parent->m_stackSize + 1;
     parent->m_stackSize = 0;
@@ -1198,6 +1351,10 @@ private:
   explicit Namespace (Namespace const* child)
     : L (child->L)
     , m_stackSize (0)
+#ifdef LUABINDINGDOC
+    , _name (child->_parent->_name)
+    , _parent (child->_parent)
+#endif
   {
     m_stackSize = child->m_stackSize - 1;
     child->m_stackSize = 1;
@@ -1216,6 +1373,10 @@ private:
   explicit Namespace (ClassBase const* child)
     : L (child->L)
     , m_stackSize (0)
+#ifdef LUABINDINGDOC
+    , _name (child->_parent ? child->_parent->_name : "")
+    , _parent (child->_parent ? child->_parent->_parent : NULL)
+#endif
   {
     m_stackSize = child->m_stackSize - 3;
     child->m_stackSize = 3;
@@ -1235,6 +1396,10 @@ public:
   {
     m_stackSize = other.m_stackSize;
     other.m_stackSize = 0;
+#ifdef LUABINDINGDOC
+    _name = other._name;
+    _parent = other._parent;
+#endif
   }
 
   //----------------------------------------------------------------------------
@@ -1312,6 +1477,7 @@ public:
   template <typename U>
   Namespace& addConst (char const* name, const U val)
   {
+    DATADOC ("Constant/Enum", name, val)
     assert (lua_istable (L, -1));
     rawgetfield (L, -1, "__propget");
     new (lua_newuserdata (L, sizeof (val))) U (val);
@@ -1373,6 +1539,7 @@ public:
   template <class FP>
   Namespace& addFunction (char const* name, FP const fp)
   {
+    FUNDOC ("Free Function", name, FP)
     assert (lua_istable (L, -1));
 
     new (lua_newuserdata (L, sizeof (fp))) FP (fp);
@@ -1385,6 +1552,7 @@ public:
   template <class FP>
   Namespace& addRefFunction (char const* name, FP const fp)
   {
+    FUNDOC ("Free Function RefReturn", name, FP)
     assert (lua_istable (L, -1));
 
     new (lua_newuserdata (L, sizeof (fp))) FP (fp);
@@ -1575,12 +1743,14 @@ public:
   template <class T, class U>
   Class <T> deriveClass (char const* name)
   {
+    CLASSDOC ("[C] Derived Class", _name << name, type_name <T>(), type_name <U>())
     return Class <T> (name, this, ClassInfo <U>::getStaticKey ());
   }
 
   template <class T, class U>
   WSPtrClass <T> deriveWSPtrClass (char const* name)
   {
+    CLASSDOC ("[C] Derived Pointer Class", _name << name, type_name <T>(), type_name <U>())
     return WSPtrClass <T> (name, this,
         ClassInfo <boost::shared_ptr<U> >::getStaticKey (),
         ClassInfo <boost::weak_ptr<U> >::getStaticKey ())
@@ -1601,5 +1771,13 @@ inline Namespace getGlobalNamespace (lua_State* L)
 {
   return Namespace::getGlobalNamespace (L);
 }
+
+
+#undef KEYSTA
+#undef KEYEND
+#undef CLASSDOC
+#undef PRINTDOC
+#undef FUNDOC
+#undef DATADOC
 
 /* vim: set et sw=2: */

@@ -113,6 +113,40 @@ private:
   }
 };
 
+//------------------------------------------------------------------------------
+
+#ifdef LUABINDINGDOC
+class LuaBindingDoc
+{
+public:
+	static bool printBindings ()
+	{
+		return getSettings().print_bindings;
+	}
+
+	static void setPrintBindings (bool en)
+	{
+		getSettings().print_bindings = en;
+	}
+
+private:
+	struct Settings
+	{
+		Settings () : print_bindings (false) { }
+		bool print_bindings;
+	};
+
+	static Settings& getSettings ()
+	{
+		static Settings settings;
+		return settings;
+	}
+};
+#endif
+
+//------------------------------------------------------------------------------
+
+
 #include "detail/Userdata.h"
 #include "detail/CFunctions.h"
 #include "detail/Namespace.h"
@@ -149,6 +183,13 @@ inline void setHideMetatables (bool shouldHide)
 {
   Security::setHideMetatables (shouldHide);
 }
+
+#ifdef LUABINDINGDOC
+inline void setPrintBindings (bool en)
+{
+  LuaBindingDoc::setPrintBindings (en);
+}
+#endif
 
 } // end Namespace
 
