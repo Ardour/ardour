@@ -67,14 +67,9 @@ ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 	return boost::shared_ptr<Processor> (new PluginInsert (*s, p));
 }
 
-
-boost::shared_ptr<Processor>
-ARDOUR::LuaAPI::new_plugin (Session *s, const string& name, ARDOUR::PluginType type, const string& preset)
+PluginInfoPtr
+ARDOUR::LuaAPI::new_plugin_info (const string& name, ARDOUR::PluginType type)
 {
-	if (!s) {
-		return boost::shared_ptr<Processor> ();
-	}
-
 	PluginManager& manager = PluginManager::instance();
 	PluginInfoList all_plugs;
 	all_plugs.insert(all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
@@ -91,13 +86,23 @@ ARDOUR::LuaAPI::new_plugin (Session *s, const string& name, ARDOUR::PluginType t
 	all_plugs.insert(all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
 #endif
 
-	PluginInfoPtr pip;
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 		if (((*i)->name == name || (*i)->unique_id == name) && (*i)->type == type) {
-			pip = *i;
-			break;
+			return *i;
 		}
 	}
+	return PluginInfoPtr ();
+}
+
+boost::shared_ptr<Processor>
+ARDOUR::LuaAPI::new_plugin (Session *s, const string& name, ARDOUR::PluginType type, const string& preset)
+{
+	if (!s) {
+		return boost::shared_ptr<Processor> ();
+	}
+
+	PluginInfoPtr pip = new_plugin_info (name, type);
+
 	if (!pip) {
 		return boost::shared_ptr<Processor> ();
 	}

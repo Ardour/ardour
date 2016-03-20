@@ -587,6 +587,7 @@ LuaBindings::common (lua_State* L)
 
 		.beginNamespace ("LuaAPI")
 		.addFunction ("new_luaproc", ARDOUR::LuaAPI::new_luaproc)
+		.addFunction ("new_plugin_info", ARDOUR::LuaAPI::new_plugin_info)
 		.addFunction ("new_plugin", ARDOUR::LuaAPI::new_plugin)
 		.addFunction ("set_processor_param", ARDOUR::LuaAPI::set_processor_param)
 		.addFunction ("set_plugin_insert_param", ARDOUR::LuaAPI::set_plugin_insert_param)
