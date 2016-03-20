@@ -381,10 +381,6 @@ RegionView::region_changed (const PropertyChange& what_changed)
 	if (what_changed.contains (ARDOUR::Properties::locked)) {
 		region_locked ();
 	}
-	if (what_changed.contains (ARDOUR::Properties::locked)) {
-		/* name will show locked status */
-		region_renamed ();
-	}
 }
 
 void

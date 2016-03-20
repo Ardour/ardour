@@ -1401,15 +1401,12 @@ MidiRegionView::~MidiRegionView ()
 void
 MidiRegionView::region_resized (const PropertyChange& what_changed)
 {
-	RegionView::region_resized(what_changed);
+	RegionView::region_resized(what_changed); // calls RegionView::set_duration()
 
 	if (what_changed.contains (ARDOUR::Properties::position)) {
 		_region_relative_time_converter.set_origin_b(_region->position());
 		_region_relative_time_converter_double.set_origin_b(_region->position());
-		set_duration(_region->length(), 0);
-		if (_enable_display) {
-			redisplay_model();
-		}
+		/* reset_width dependent_items() redisplays model */
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::start) ||
