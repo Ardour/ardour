@@ -66,7 +66,7 @@ std::string type_name()
 #define KEYEND "\"] = "
 #else // JSON
 #define KEYSTA "\""
-#define KEYEND "\" = "
+#define KEYEND "\" : "
 #endif
 
 #define CLASSDOC(TYPE, LUANAME, DECL, PARENTDECL) \
