@@ -223,7 +223,7 @@ framepos_t
 TempoSection::frame_at_tempo (const double& ppm, const double& b, const framecnt_t& frame_rate) const
 {
 	if (_type == Constant) {
-		return ((b - pulse())  * frames_per_beat (frame_rate))  + frame();
+		return ((b - pulse())  * frames_per_pulse (frame_rate))  + frame();
 	}
 
 	return minute_to_frame (time_at_pulse_tempo (ppm), frame_rate) + frame();
@@ -249,7 +249,7 @@ double
 TempoSection::pulse_at_tempo (const double& ppm, const framepos_t& f, const framecnt_t& frame_rate) const
 {
 	if (_type == Constant) {
-		double const beats = ((f - frame()) / frames_per_beat (frame_rate)) + pulse();
+		double const beats = ((f - frame()) / frames_per_pulse (frame_rate)) + pulse();
 		return  beats;
 	}
 
@@ -264,7 +264,7 @@ double
 TempoSection::pulse_at_frame (const framepos_t& f, const framecnt_t& frame_rate) const
 {
 	if (_type == Constant) {
-		return ((f - frame()) / frames_per_beat (frame_rate)) + pulse();
+		return ((f - frame()) / frames_per_pulse (frame_rate)) + pulse();
 	}
 
 	return pulse_at_time (frame_to_minute (f - frame(), frame_rate)) + pulse();
@@ -279,7 +279,7 @@ framepos_t
 TempoSection::frame_at_pulse (const double& p, const framecnt_t& frame_rate) const
 {
 	if (_type == Constant) {
-		return (framepos_t) floor ((p - pulse()) * frames_per_beat (frame_rate)) + frame();
+		return (framepos_t) floor ((p - pulse()) * frames_per_pulse (frame_rate)) + frame();
 	}
 
 	return minute_to_frame (time_at_pulse (p - pulse()), frame_rate) + frame();
@@ -1429,12 +1429,10 @@ TempoMap::pulse_at_beat (const Metrics& metrics, const double& beat) const
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
-			if (prev_ms) {
-				if (m->beat() > beat) {
-					break;
-				}
-				accumulated_beats = m->beat();
+			if (prev_ms && m->beat() > beat) {
+				break;
 			}
+			accumulated_beats = m->beat();
 			prev_ms = m;
 		}
 
@@ -1452,12 +1450,10 @@ TempoMap::beat_at_pulse (const Metrics& metrics, const double& pulse) const
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
-			if (prev_ms) {
-				if (m->pulse() > pulse) {
-					break;
-				}
-				accumulated_beats = m->beat();
+			if (prev_ms && m->pulse() > pulse) {
+				break;
 			}
+			accumulated_beats = m->beat();
 			prev_ms = m;
 		}
 	}
@@ -1727,9 +1723,8 @@ TempoMap::beat_offset_at (const Metrics& metrics, const double& beat) const
 				if (m->position_lock_style() == AudioTime) {
 					beat_off += ((m->pulse() - prev_m->pulse()) / prev_m->note_divisor()) - floor ((m->pulse() - prev_m->pulse()) / prev_m->note_divisor());
 				}
-
-				prev_m = m;
 			}
+			prev_m = m;
 		}
 	}
 
@@ -1789,9 +1784,8 @@ TempoMap::pulse_at_frame_locked (const Metrics& metrics, const framecnt_t& frame
 					double const ret = prev_ts->pulse_at_frame (frame, _frame_rate);
 					return ret;
 				}
-
-				accumulated_pulses = t->pulse();
 			}
+			accumulated_pulses = t->pulse();
 			prev_ts = t;
 		}
 	}
@@ -1833,8 +1827,8 @@ TempoMap::frame_at_pulse_locked (const Metrics& metrics, const double& pulse) co
 				if (t->pulse() > pulse) {
 					return prev_ts->frame_at_pulse (pulse, _frame_rate);
 				}
-				accumulated_pulses = t->pulse();
 			}
+			accumulated_pulses = t->pulse();
 			prev_ts = t;
 		}
 	}
@@ -1981,8 +1975,8 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const Tempo& bpm
 		recompute_meters (imaginary);
 		return true;
 	}
-
 	//dump (imaginary, std::cerr);
+
 	return false;
 }
 
