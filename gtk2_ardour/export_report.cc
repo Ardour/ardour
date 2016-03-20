@@ -248,7 +248,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		mnw = (m_l - /*hist-width*/ 540 - /*box spacing*/ 8 + /*peak-width*/ 800 + m_r) / 2;
 		const int nw2 = mnw / 2; // nums, horizontal center
 
-		int y0[4];
+		int y0[6];
 		if (p->normalized) {
 			y0[0] = (hh - ht) * .5;
 		} else {
