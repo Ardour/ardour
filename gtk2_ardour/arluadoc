@@ -1,0 +1,9 @@
+#!/bin/sh
+TOP=`dirname "$0"`/..
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
+export UBUNTU_MENUPROXY=""
+
+$TOP/build/gtk2_ardour/luadoc "$@" \
+	| sed 's/__cxx11:://g;' \
+	| sed 's/std::basic_string<char, std::char_traits<char>\, std::allocator<char> >/std::string/g;' \
+	| sed 's/, std::allocator<[^>]*> //g;'

@@ -682,6 +682,8 @@ def options(opt):
                    help='Build internal libs as static libraries')
     opt.add_option('--use-external-libs', action='store_true', default=False, dest='use_external_libs',
                    help='Use external/system versions of some bundled libraries')
+    opt.add_option('--luadoc', action='store_true', default=False, dest='luadoc',
+                    help='Compile Tool to dump LuaBindings (needs C++11)')
     opt.add_option('--lv2', action='store_true', default=True, dest='lv2',
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--no-lv2', action='store_false', dest='lv2',
@@ -897,6 +899,10 @@ def configure(conf):
         else:
             print ('No Carbon support available for this build\n')
 
+
+    if Options.options.luadoc:
+        conf.env['LUABINDINGDOC'] = True
+        conf.define ('LUABINDINGDOC', 1)
 
     if Options.options.internal_shared_libs:
         conf.define('INTERNAL_SHARED_LIBS', 1)
@@ -1166,6 +1172,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Freedesktop files',     opts.freedesktop)
     write_config_text('Libjack linking',       conf.env['libjack_link'])
     write_config_text('Libjack metadata',      conf.is_defined ('HAVE_JACK_METADATA'))
+    write_config_text('Lua Binding Doc',       conf.is_defined('LUABINDINGDOC'))
     write_config_text('LV2 UI embedding',      conf.is_defined('HAVE_SUIL'))
     write_config_text('LV2 support',           conf.is_defined('LV2_SUPPORT'))
     write_config_text('LV2 extensions',        conf.is_defined('LV2_EXTENDED'))

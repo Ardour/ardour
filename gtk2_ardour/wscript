@@ -405,6 +405,44 @@ def build(bld):
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
 
+    # Tool to dump lua-bindings (of gtk2ardour + libs)
+    if re.search ("linux", sys.platform) != None and bld.env['LUABINDINGDOC']:
+        obj = bld (features = 'cxx c cxxprogram')
+        obj.install_path = None
+        obj.source    = list(gtk2_ardour_sources)
+        obj.target    = 'luadoc'
+        obj.includes  = ['.', '../libs']
+        obj.ldflags   = ['-no-undefined']
+        obj.use       = [
+                'libpbd',
+                'libardour',
+                'libardour_cp',
+                'libtimecode',
+                'libmidipp',
+                'libgtkmm2ext',
+                'libcanvas',
+                'libptformat',
+                ]
+        obj.defines = [
+                'NOMAIN',
+                'PACKAGE="' + I18N_PACKAGE + '"',
+                'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
+                'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
+                'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
+                ]
+        obj.linkflags = ''
+        obj.uselib    = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML '
+        obj.source += [ 'luadoc.cc', 'bundle_env_linux.cc' ]
+        if bld.is_defined('HAVE_SUIL'):
+            obj.source += [ 'lv2_plugin_ui.cc' ]
+            obj.use += [ 'SUIL' ]
+        if bld.is_defined('LXVST_SUPPORT'):
+            obj.source += [ 'vst_plugin_ui.cc' ]
+            obj.source += [ 'linux_vst_gui_support.cc', 'lxvst_plugin_ui.cc' ]
+            obj.defines += [ 'LXVST_SUPPORT' ]
+            obj.use += [ 'X11' ]
+
+
     if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
         # Windows VST support w/wine
         # If we require VST support we build a stub main() and the FST library

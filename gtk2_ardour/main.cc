@@ -273,6 +273,8 @@ extern "C" {
 
 int ardour_main (int argc, char *argv[])
 
+#elif defined NOMAIN
+int nomain (int argc, char *argv[])
 #else
 int main (int argc, char *argv[])
 #endif
