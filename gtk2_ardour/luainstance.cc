@@ -207,6 +207,9 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("n_midi_regions", &RegionSelection::n_midi_regions)
 		.endClass ()
 
+		.beginClass <ArdourMarker> ("ArdourMarker")
+		.endClass ()
+
 		.beginClass <PublicEditor> ("Editor")
 		.addFunction ("snap_type", &PublicEditor::snap_type)
 		.addFunction ("snap_mode", &PublicEditor::snap_mode)
