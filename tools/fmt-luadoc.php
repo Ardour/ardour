@@ -29,7 +29,6 @@ if (count ($doc) == 0) {
 ################################################################################
 
 $classlist = array ();
-$funclist = array ();
 $constlist = array ();
 
 
@@ -41,6 +40,7 @@ $constlist = array ();
 ################################################################################
 # some internal helper functions first
 
+$funclist = array ();
 $classes = array ();
 $consts = array ();
 
@@ -192,10 +192,52 @@ foreach ($doc as $b) {
 		# we required C functions to be in a class namespace
 	case "Ext C Function":
 		checkclass ($b);
+		$args = array (array ('--custom--' => 0));
+		$ret = array ('...' => 0);
+		$ns = luafn2class ($b['lua']);
+		$cls = $classlist[$ns];
+		## std::Vector std::List types
+		if (preg_match ('/.*<([^>]*)[ ]*>/', $cls['decl'], $templ)) {
+			// XXX -> move to C-source
+			switch (stripclass($ns, $b['lua'])) {
+			case 'add':
+				$args = array (array ('LuaTable {'.$templ[1].'}' => 0));
+				$ret = array ('void' => 0);
+				break;
+			case 'iter':
+				$args = array ();
+				$ret = array ('LuaIter' => 0);
+				break;
+			case 'table':
+				$args = array ();
+				$ret = array ('LuaTable' => 0);
+				break;
+			default:
+				break;
+			}
+		} else if (strpos ($cls['type'], ' Array') !== false) {
+			$templ = preg_replace ('/[&*]*$/', '', $cls['decl']);
+			switch (stripclass($ns, $b['lua'])) {
+			case 'array':
+				$args = array ();
+				$ret = array ('LuaMetaTable' => 0);
+				break;
+			case 'get_table':
+				$args = array ();
+				$ret = array ('LuaTable' => 0);
+				break;
+			case 'set_table':
+				$args = array (array ('LuaTable {'.$templ.'}' => 0));
+				$ret = array ('void' => 0);
+				break;
+			default:
+				break;
+			}
+		}
 		$classlist[luafn2class ($b['lua'])]['func'][] = array (
 			'name' => $b['lua'],
-			'args' => array (array ('--custom--' => 0)), // XXX
-			'ret' => array ('...' => 0), // XXX
+			'args' => $args,
+			'ret'  => $ret,
 			'ref'  => true,
 			'ext'  => true
 		);
@@ -279,6 +321,20 @@ ksort ($classlist);
 
 
 ################################################################################
+################################################################################
+################################################################################
+
+
+#### -- split here --  ####
+
+# from here on, only $classlist and $constlist arrays are relevant.
+
+# TODO: read function documentation from doxygen
+# and/or reference source-code lines e.g from CSV list:
+#   ctags -o /tmp/tags.csv --fields=+afiKkmnsSzt libs/ardour/ardour/session.h
+
+
+################################################################################
 # OUTPUT
 ################################################################################
 
@@ -291,6 +347,10 @@ function ctorname ($name) {
 	return htmlentities (str_replace (':', '.', $name));
 }
 
+function shortname ($name) {
+	return htmlentities (substr ($name, strrpos ($name, ':') + 1));
+}
+
 function varname ($a) {
 	return array_keys ($a)[0];
 }
@@ -299,15 +359,33 @@ function name_sort_cb ($a, $b) {
 	return strcmp ($a['name'], $b['name']);
 }
 
-function typelink ($a, $linkcls = '', $argcls = '') {
+function traverse_parent ($ns, &$inherited) {
+	global $classlist;
+	$rv = '';
+	if (isset ($classlist[$ns]['luaparent'])) {
+		$parents = array_unique ($classlist[$ns]['luaparent']);
+		asort ($parents);
+		foreach ($parents as $p) {
+			if (!empty ($rv)) { $rv .= ', '; }
+			$rv .= typelink ($p);
+			$inherited[$p] = $classlist[$p];
+			traverse_parent ($p, $inherited);
+		}
+	}
+	return $rv;
+}
+
+function typelink ($a, $short = false, $argcls = '', $linkcls = '', $suffix = '') {
 	global $classlist;
 	global $constlist;
+	# all cross-reference links are generated here.
+	# currently anchors on a single page.
 	if (in_array ($a, array_keys ($classlist))) {
-		return '<a class="'.$linkcls.'" href="#'.$a.'">'.$a.'</a>';
+		return '<a class="'.$linkcls.'" href="#'.htmlentities($a).'">'.($short ? shortname($a) : htmlentities($a)).$suffix.'</a>';
 	} else if (in_array ($a, array_keys ($constlist))) {
-		return '<a class="'.$linkcls.'" href="#'.ctorname ($a).'">'.ctorname ($a).'</a>';
+		return '<a class="'.$linkcls.'" href="#'.ctorname ($a).'">'.($short ? shortname($a) : ctorname($a)).$suffix.'</a>';
 	} else {
-		return '<span class="'.$argcls.'">'.$a.'</span>';
+		return '<span class="'.$argcls.'">'.htmlentities($a).$suffix.'</span>';
 	}
 }
 
@@ -318,9 +396,9 @@ function format_args ($args) {
 		if (!$first) { $rv .= ', '; }; $first = false;
 		$flags = $a[varname ($a)];
 		if ($flags & 1) {
-			$rv .= typelink (varname ($a).'&amp;', '', 'em');
+			$rv .= typelink (varname ($a), true, 'em', '', '&amp;');
 		} else {
-			$rv .= typelink (varname ($a), '', 'em');
+			$rv .= typelink (varname ($a), true, 'em');
 		}
 	}
 	$rv .= ')</span>';
@@ -354,26 +432,26 @@ function format_class_members ($ns, $cl, &$dups) {
 			$rv.= ' <tr><td class="def">';
 			if ($f['ref'] && isset ($f['ext'])) {
 				# external C functions
-				$rv.= '<em>LuaTable</em>';
+				$rv.= '<em>'.varname ($f['ret']).'</em>';
 			} elseif ($f['ref'] && varname ($f['ret']) == 'void') {
 				# functions with reference args return args
 				$rv.= '<em>LuaTable</em>(...)';
 			} elseif ($f['ref']) {
-				$rv.= '<em>LuaTable</em>('.typelink (varname ($f['ret'])).', ...)';
+				$rv.= '<em>LuaTable</em>('.typelink (varname ($f['ret'], false, 'em')).', ...)';
 			} else {
-				$rv.= typelink (varname ($f['ret']));
+				$rv.= typelink (varname ($f['ret']), true, 'em');
 			}
 			$rv.= '</td><td class="decl">';
 			$rv.= '<span class="functionname">'.stripclass ($ns, $f['name']).'</span>';
 			$rv.= format_args ($f['args']);
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
-}
+		}
 	}
 	if (isset ($cl['data'])) {
 		usort ($cl['data'], 'name_sort_cb');
 		$rv.= ' <tr><th colspan="3">Data Members</th></tr>'.NL;
 		foreach ($cl['data'] as $f) {
-			$rv.= ' <tr><td class="def">'.typelink (array_keys ($f['ret'])[0]).'</td><td class="decl">';
+			$rv.= ' <tr><td class="def">'.typelink (array_keys ($f['ret'])[0], false, 'em').'</td><td class="decl">';
 			$rv.= '<span class="functionname">'.stripclass ($ns, $f['name']).'</span>';
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
 		}
@@ -384,6 +462,7 @@ function format_class_members ($ns, $cl, &$dups) {
 
 ################################################################################
 # Start Output
+
 ?><!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
@@ -401,7 +480,7 @@ h2.pointerclass    { background-color: #eeaa66; }
 h2.array           { background-color: #66aaee; }
 h2.opaque          { background-color: #6666aa; }
 p.cdecl            { text-align: right; float:right; font-size:90%; margin:0; padding: 0 0 0 1em;}
-ul.classlist       { columns: 2; -webkit-columns: 2; -moz-columns: 2; }
+ul.classindex      { columns: 2; -webkit-columns: 2; -moz-columns: 2; }
 div.clear          { clear:both; }
 table.classmembers { width: 100%; }
 table.classmembers th      { text-align:left; border-bottom:1px solid black; padding-top:1em; }
@@ -427,6 +506,20 @@ div.header p       {margin:.25em;}
 </div>
 <div class="content">
 
+<h1 id="h_intro">Overview</h1>
+<p>
+The top-level entry point are <?=typelink('ARDOUR:Session')?> and <?=typelink('ARDOUR:Editor')?>.
+Most other Classes are used indirectly starting with a Session function. e.g. Session:get_routes().
+</p>
+<p>
+A few classes are dedicated to certain script types, e.g. Lua DSP processors have exclusive access to
+<?=typelink('ARDOUR:DSP')?> and <?=typelink('ARDOUR:ChanMapping')?>. Action Hooks Scripts to
+<?=typelink('LuaSignal:Set')?> etc.
+</p>
+<p>
+Detailed documentation (parameter names, method description) is not yet available. Please stay tuned.
+</p>
+
 <?php
 echo '<h1 id="h_classes">Class Documentation</h1>'.NL;
 
@@ -434,8 +527,8 @@ foreach ($classlist as $ns => $cl) {
 	$dups = array ();
 	$tbl =  format_class_members ($ns, $cl, $dups);
 
+	# format class title
 	if (empty ($tbl)) {
-		# place-holder class (maybe collect at bottom??)
 		echo '<h2 id="'.$ns.'" class="cls opaque"><abbr title="Opaque Object">&empty;</abbr>&nbsp;'.$ns.'</h2>'.NL;
 	}
 	else if (isset ($classlist[$ns]['free'])) {
@@ -453,21 +546,15 @@ foreach ($classlist as $ns => $cl) {
 		echo '<p class="cdecl"><em>C&#8225;</em>: '.htmlentities ($cl['decl']).'</p>'.NL;
 	}
 
+	# print class inheritance
 	$inherited = array ();
-	if (isset ($classlist[$ns]['luaparent'])) {
-		$parents = array_unique ($classlist[$ns]['luaparent']);
-		asort ($parents);
-		echo ' <p>is-a: ';
-		$first = true;
-		foreach ($parents as $p) {
-			if (!$first) { echo ', '; }; $first = false;
-			echo typelink ($p);
-			$inherited[$p] = $classlist[$p];
-		}
-		echo '</p>'.NL;
+	$isa = traverse_parent ($ns, $inherited);
+	if (!empty ($isa)) {
+		echo ' <p>is-a: '.$isa.'</p>'.NL;
 	}
 	echo '<div class="clear"></div>'.NL;
 
+	# member documentation
 	if (empty ($tbl)) {
 		echo '<p>This class object is only used indirectly as return-value and function-parameter.</p>'.NL;
 	} else {
@@ -476,7 +563,7 @@ foreach ($classlist as $ns => $cl) {
 		echo ' </table>'.NL;
 	}
 
-	// traverse all parent classes..
+	# traverse parent classes (inherited members)
 	foreach ($inherited as $pns => $pcl) {
 		$tbl = format_class_members ($pns, $pcl, $dups);
 		if (!empty ($tbl)) {
@@ -499,13 +586,11 @@ foreach ($constlist as $ns => $cs) {
 }
 
 echo '<h1 id="h_index" >Class Index</h1>'.NL;
-echo '<ul class="classlist">'.NL;
+echo '<ul class="classindex">'.NL;
 foreach ($classlist as $ns => $cl) {
-	echo '<li><a href="#'.$ns.'">'.$ns.'</a></li>'.NL;
+	echo '<li>'.typelink($ns).'</li>'.NL;
 }
 echo '</ul>'.NL;
-
-
 
 ?>
 </div>
