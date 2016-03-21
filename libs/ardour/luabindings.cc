@@ -72,38 +72,26 @@ LuaBindings::stddef (lua_State* L)
 {
 	// std::list<std::string>
 	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("ARDOUR")
+		.beginNamespace ("C")
 		.beginStdList <std::string> ("StringList")
 		.endClass ()
-		.endNamespace ();
 
 	// std::vector<std::string>
-	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("ARDOUR")
 		.beginStdVector <std::string> ("StringVector")
 		.endClass ()
-		.endNamespace ();
 
 	// register float array (float*)
-	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("ARDOUR")
 		.registerArray <float> ("FloatArray")
-		.endNamespace ();
 
 	// register float array (int32_t*)
-	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("ARDOUR")
 		.registerArray <int32_t> ("IntArray")
-		.endNamespace ();
 
 	// std::vector<std::string>
-	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("ARDOUR")
 		.beginStdVector <double> ("DoubleVector")
 		.endClass ()
-		.endNamespace ();
 
 	// TODO std::set
+		.endNamespace ();
 }
 
 void
@@ -244,7 +232,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("data_type", &Region::data_type)
 		.addFunction ("stretch", &Region::stretch)
 		.addFunction ("shift", &Region::shift)
-		.addFunction ("sync_offset", &Region::sync_offset)
+		.addRefFunction ("sync_offset", &Region::sync_offset)
 		.addFunction ("sync_position", &Region::sync_position)
 		.addFunction ("hidden", &Region::hidden)
 		.addFunction ("muted", &Region::muted)
@@ -355,7 +343,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("name", &Plugin::name)
 		.addFunction ("maker", &Plugin::maker)
 		.addFunction ("parameter_count", &Plugin::parameter_count)
-		.addFunction ("nth_parameter", &Plugin::nth_parameter)
+		.addRefFunction ("nth_parameter", &Plugin::nth_parameter)
 		.addFunction ("preset_by_label", &Plugin::preset_by_label)
 		.addFunction ("preset_by_uri", &Plugin::preset_by_uri)
 		.addFunction ("load_preset", &Plugin::load_preset)
@@ -499,13 +487,11 @@ LuaBindings::common (lua_State* L)
 		.endClass()
 		.beginStdVector <const AudioBackendInfo*> ("BackendVector").endClass ()
 
-		.beginNamespace ("ARDOUR")
 		.beginClass <AudioBackend::DeviceStatus> ("DeviceStatus")
 		.addData ("name", &AudioBackend::DeviceStatus::name)
 		.addData ("available", &AudioBackend::DeviceStatus::available)
 		.endClass()
 		.beginStdVector <AudioBackend::DeviceStatus> ("DeviceStatusVector").endClass ()
-		.endNamespace ()
 
 		.beginWSPtrClass <AudioBackend> ("AudioBackend")
 		.addFunction ("info", &AudioBackend::info)
