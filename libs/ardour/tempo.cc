@@ -1599,11 +1599,11 @@ TempoMap::beats_to_bbt (const double& beats)
 }
 
 Timecode::BBT_Time
-TempoMap::beats_to_bbt_locked (const Metrics& metrics, const double& beats) const
+TempoMap::beats_to_bbt_locked (const Metrics& metrics, const double& b) const
 {
 	/* CALLER HOLDS READ LOCK */
-
 	MeterSection* prev_ms = 0;
+	const double beats = (b < 0.0) ? 0.0 : b;
 	uint32_t accumulated_bars = 0;
 	double accumulated_beats = 0.0;
 
