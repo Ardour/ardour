@@ -109,7 +109,6 @@ class LIBARDOUR_API MetricSection {
 	virtual ~MetricSection() {}
 
 	const double& pulse () const { return _pulse; }
-	//const double tick () const { return _beat * Timecode::BBT_Time::ticks_per_beat; }
 	void set_pulse (double pulse) { _pulse = pulse; }
 
 	framepos_t frame() const { return _frame; }
@@ -155,7 +154,7 @@ class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
 	}
 
 	const Timecode::BBT_Time& bbt() const { return _bbt; }
-        double beat () { return _beat; }
+        const double& beat () const { return _beat; }
 	void set_beat (double beat) { _beat = beat; }
 
 private:

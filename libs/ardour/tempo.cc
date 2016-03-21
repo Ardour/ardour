@@ -2484,7 +2484,7 @@ TempoMap::meter_section_at_locked (framepos_t frame) const
 
 		if ((t = dynamic_cast<MeterSection*> (*i)) != 0) {
 
-			if ((*i)->frame() > frame_off) {
+			if (prev && (*i)->frame() > frame) {
 				break;
 			}
 
@@ -2656,7 +2656,7 @@ TempoMap::dump (Metrics& metrics, std::ostream& o) const
 			prev_ts = t;
 		} else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			o << "Meter @ " << *i << ' ' << m->divisions_per_bar() << '/' << m->note_divisor() << " at " << m->bbt() << " frame= " << m->frame()
-			  << " pulse: " << m->pulse() <<  " pos lock: " << enum_2_string (m->position_lock_style()) << " (movable? " << m->movable() << ')' << endl;
+			  << " pulse: " << m->pulse() <<  " beat : " << m->beat() << " pos lock: " << enum_2_string (m->position_lock_style()) << " (movable? " << m->movable() << ')' << endl;
 		}
 	}
 	o << "------" << std::endl;
