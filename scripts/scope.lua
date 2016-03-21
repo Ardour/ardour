@@ -140,9 +140,9 @@ function render_inline (ctx, w, max_h)
 
 	-- prepare drawing
 	ctx:set_line_width (1.0)
-	local dash3 = ARDOUR.DoubleVector ()
+	local dash3 = C.DoubleVector ()
 	dash3:add ({1, 3})
-	local dash4 = ARDOUR.DoubleVector ()
+	local dash4 = C.DoubleVector ()
 	dash4:add ({1, 4})
 
 	-- plot every channel
