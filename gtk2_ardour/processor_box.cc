@@ -1384,10 +1384,14 @@ uint32_t
 ProcessorEntry::LuaPluginDisplay::render_inline (cairo_t *cr, uint32_t width)
 {
 	Cairo::Context ctx (cr);
-	luabridge::LuaRef rv = (*_lua_render_inline)((Cairo::Context *)&ctx, width, _max_height);
-	if (rv.isTable ()) {
-		uint32_t h = rv[2];
-		return h;
+	try {
+		luabridge::LuaRef rv = (*_lua_render_inline)((Cairo::Context *)&ctx, width, _max_height);
+		if (rv.isTable ()) {
+			uint32_t h = rv[2];
+			return h;
+		}
+	} catch (luabridge::LuaException const& e) {
+		;
 	}
 	return 0;
 }
