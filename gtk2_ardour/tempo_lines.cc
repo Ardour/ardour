@@ -59,7 +59,7 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
                         framecnt_t                                            leftmost_frame,
                         framecnt_t                                            frame_rate)
 {
-	const double   fpb  = grid.begin()->tempo->frames_per_beat(frame_rate);
+	const double   fpb  = grid.begin()->tempo.frames_per_beat(frame_rate);
 	const uint32_t base = UIConfiguration::instance().color_mod("measure line beat", "measure line beat");
 
 	for (unsigned l = 1; l < divisions; ++l) {
