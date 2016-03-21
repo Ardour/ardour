@@ -1049,9 +1049,17 @@ private:
     {
 #ifdef LUABINDINGDOC
       _parent = parent;
-      _name = parent->_name + name + ".";
+      _name = parent->_name + name + ":";
 #endif
-      PRINTDOC ("[C] Array", parent->_name << name, std::string(), type_name <T>() + "*")
+      PRINTDOC ("[C] Array", parent->_name << name,
+          std::string(), type_name <T>() + "*")
+      PRINTDOC ("Ext C Function", _name << "array",
+          std::string(""), "int (*)(lua_State*)")
+      PRINTDOC ("Ext C Function", _name << "get_table",
+          std::string(""), "int (*)(lua_State*)")
+      PRINTDOC ("Ext C Function", _name << "set_table",
+          std::string(""), "int (*)(lua_State*)")
+
       m_stackSize = parent->m_stackSize + 3;
       parent->m_stackSize = 0;
 
