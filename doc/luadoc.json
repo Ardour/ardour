@@ -1,0 +1,3761 @@
+[
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:StringList",
+ "decl" :  "std::list<std::string >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:StringList:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:StringList:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::list<std::string >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:StringList:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::list<std::string >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:StringList:reverse",
+ "ret" :   "void",
+ "decl" :  "void (std::list<std::string >::*)()"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:StringList:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:StringList:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:StringList:unique",
+ "ret" :   "void",
+ "decl" :  "void (std::list<std::string >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:StringList:push_back",
+ "ret" :   "void",
+ "decl" :  "void (std::list<std::string >::*)(std::string)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:StringList:add",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:StringVector",
+ "decl" :  "std::vector<std::string >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:StringVector:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:StringVector:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::vector<std::string >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:StringVector:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::vector<std::string >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:StringVector:push_back",
+ "ret" :   "void",
+ "decl" :  "void (std::vector<std::string >::*)(std::string)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:StringVector:at",
+ "ret" :   "std::string&",
+ "decl" :  "std::string& (std::vector<std::string >::*)(unsigned long)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:StringVector:add",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:StringVector:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:StringVector:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Array",
+ "lua" :   "ARDOUR:FloatArray",
+ "decl" :  "float*"
+},
+{"type" :  "[C] Array",
+ "lua" :   "ARDOUR:IntArray",
+ "decl" :  "int*"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:DoubleVector",
+ "decl" :  "std::vector<double >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:DoubleVector:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DoubleVector:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::vector<double >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DoubleVector:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::vector<double >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DoubleVector:push_back",
+ "ret" :   "void",
+ "decl" :  "void (std::vector<double >::*)(double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DoubleVector:at",
+ "ret" :   "double&",
+ "decl" :  "double& (std::vector<double >::*)(unsigned long)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:DoubleVector:add",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:DoubleVector:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:DoubleVector:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "PBD:ID",
+ "decl" :  "PBD::ID"
+},
+{"type" :  "Constructor",
+ "lua" :   "PBD:ID:",
+ "ret" :   "void",
+ "decl" :  "void (*)(std::string)"
+},
+{"type" :  "Member Function",
+ "lua" :   "PBD:ID:to_s",
+ "ret" :   "std::string",
+ "decl" :  "std::string (PBD::ID::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "PBD:Stateful",
+ "decl" :  "PBD::Stateful"
+},
+{"type" :  "Member Function",
+ "lua" :   "PBD:Stateful:properties",
+ "ret" :   "PBD::OwnedPropertyList",
+ "decl" :  "PBD::OwnedPropertyList (PBD::Stateful::*)()"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "PBD:StatefulDestructible",
+ "decl" :  "PBD::StatefulDestructible",
+ "parent" :"PBD::Stateful"
+},
+{"type" :  "[C] Class",
+ "lua" :   "PBD:StatefulPtr",
+ "decl" :  "boost::weak_ptr<PBD::Stateful>"
+},
+{"type" :  "[C] Class",
+ "lua" :   "PBD:StatefulPtr",
+ "decl" :  "boost::shared_ptr<PBD::Stateful>"
+},
+{"type" :  "[C] Weak/Shared Pointer Class",
+ "lua" :   "PBD:StatefulPtr",
+ "decl" :  "PBD::Stateful"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "PBD:StatefulPtr:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "PBD:StatefulPtr:properties",
+ "ret" :   "PBD::OwnedPropertyList",
+ "decl" :  "PBD::OwnedPropertyList (PBD::Stateful::*)()"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "PBD:StatefulDestructiblePtr",
+ "decl" :  "boost::shared_ptr<PBD::StatefulDestructible>",
+ "parent" :"boost::shared_ptr<PBD::Stateful>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "PBD:StatefulDestructiblePtr",
+ "decl" :  "boost::weak_ptr<PBD::StatefulDestructible>",
+ "parent" :"boost::weak_ptr<PBD::Stateful>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "PBD:StatefulDestructiblePtr",
+ "decl" :  "PBD::StatefulDestructible",
+ "parent" :"PBD::Stateful"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "PBD:StatefulDestructiblePtr:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "PBD:Controllable",
+ "decl" :  "boost::shared_ptr<PBD::Controllable>",
+ "parent" :"boost::shared_ptr<PBD::StatefulDestructible>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "PBD:Controllable",
+ "decl" :  "boost::weak_ptr<PBD::Controllable>",
+ "parent" :"boost::weak_ptr<PBD::StatefulDestructible>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "PBD:Controllable",
+ "decl" :  "PBD::Controllable",
+ "parent" :"PBD::StatefulDestructible"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "PBD:Controllable:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "PBD:Controllable:get_value",
+ "ret" :   "double",
+ "decl" :  "double (PBD::Controllable::*)()"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "PBD:GroupControlDisposition:InverseGroup",
+ "decl" :  "PBD::Controllable::GroupControlDisposition"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "PBD:GroupControlDisposition:NoGroup",
+ "decl" :  "PBD::Controllable::GroupControlDisposition"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "PBD:GroupControlDisposition:UseGroup",
+ "decl" :  "PBD::Controllable::GroupControlDisposition"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:BBT_TIME",
+ "decl" :  "Timecode::BBT_Time"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:BBT_TIME:",
+ "ret" :   "void",
+ "decl" :  "void (*)(unsigned int, unsigned int, unsigned int)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:PluginInfo",
+ "decl" :  "boost::weak_ptr<ARDOUR::PluginInfo>"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:PluginInfo",
+ "decl" :  "boost::shared_ptr<ARDOUR::PluginInfo>"
+},
+{"type" :  "[C] Weak/Shared Pointer Class",
+ "lua" :   "ARDOUR:PluginInfo",
+ "decl" :  "ARDOUR::PluginInfo"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:PluginInfo:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Constructor",
+ "lua" :   "ARDOUR:PluginInfo:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:Route:ProcessorStreams",
+ "decl" :  "ARDOUR::Route::ProcessorStreams"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:Route:ProcessorStreams:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:Properties:BoolProperty",
+ "decl" :  "PBD::PropertyDescriptor<bool>"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:Properties:FloatProperty",
+ "decl" :  "PBD::PropertyDescriptor<float>"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:Properties:FrameposProperty",
+ "decl" :  "PBD::PropertyDescriptor<long>"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:Properties:Start",
+ "decl" :  "PBD::PropertyDescriptor<long>*"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:Properties:Length",
+ "decl" :  "PBD::PropertyDescriptor<long>*"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:Properties:Position",
+ "decl" :  "PBD::PropertyDescriptor<long>*"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:PropertyChange",
+ "decl" :  "PBD::PropertyChange"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:PropertyChange:containsBool",
+ "ret" :   "bool",
+ "decl" :  "bool (PBD::PropertyChange::*)(PBD::PropertyDescriptor<bool>)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:PropertyChange:containsFloat",
+ "ret" :   "bool",
+ "decl" :  "bool (PBD::PropertyChange::*)(PBD::PropertyDescriptor<float>)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:PropertyChange:containsFramePos",
+ "ret" :   "bool",
+ "decl" :  "bool (PBD::PropertyChange::*)(PBD::PropertyDescriptor<long>)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:PropertyList",
+ "decl" :  "PBD::PropertyList"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:OwnedPropertyList",
+ "decl" :  "PBD::OwnedPropertyList",
+ "parent" :"PBD::PropertyList"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Location",
+ "decl" :  "ARDOUR::Location",
+ "parent" :"PBD::StatefulDestructible"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Location:locked",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Location::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Location:lock",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Location::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Location:start",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Location::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Location:end",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Location::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Location:length",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Location::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Location:set_start",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::Location::*)(long, bool, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Location:set_end",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::Location::*)(long, bool, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Location:set_length",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::Location::*)(long, long, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Location:move_to",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::Location::*)(long)"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:SessionObject",
+ "decl" :  "boost::shared_ptr<ARDOUR::SessionObject>",
+ "parent" :"boost::shared_ptr<PBD::StatefulDestructible>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:SessionObject",
+ "decl" :  "boost::weak_ptr<ARDOUR::SessionObject>",
+ "parent" :"boost::weak_ptr<PBD::StatefulDestructible>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:SessionObject",
+ "decl" :  "ARDOUR::SessionObject",
+ "parent" :"PBD::StatefulDestructible"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:SessionObject:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:SessionObject:name",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::SessionObject::*)()"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Route",
+ "decl" :  "boost::shared_ptr<ARDOUR::Route>",
+ "parent" :"boost::shared_ptr<ARDOUR::SessionObject>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Route",
+ "decl" :  "boost::weak_ptr<ARDOUR::Route>",
+ "parent" :"boost::weak_ptr<ARDOUR::SessionObject>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:Route",
+ "decl" :  "ARDOUR::Route",
+ "parent" :"ARDOUR::SessionObject"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:Route:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Route:set_name",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Route::*)(std::string)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Route:comment",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::Route::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Route:active",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Route::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Route:set_active",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Route::*)(bool, void*)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Route:nth_plugin",
+ "ret" :   "boost::shared_ptr<ARDOUR::Processor>",
+ "decl" :  "boost::shared_ptr<ARDOUR::Processor> (ARDOUR::Route::*)(unsigned int)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Route:add_processor_by_index",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::Route::*)(boost::shared_ptr<ARDOUR::Processor>, int, ARDOUR::Route::ProcessorStreams*, bool)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Route:remove_processor",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::Route::*)(boost::shared_ptr<ARDOUR::Processor>, ARDOUR::Route::ProcessorStreams*, bool)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Route:replace_processor",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::Route::*)(boost::shared_ptr<ARDOUR::Processor>, boost::shared_ptr<ARDOUR::Processor>, ARDOUR::Route::ProcessorStreams*)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Route:n_inputs",
+ "ret" :   "ARDOUR::ChanCount",
+ "decl" :  "ARDOUR::ChanCount (ARDOUR::Route::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Route:n_outputs",
+ "ret" :   "ARDOUR::ChanCount",
+ "decl" :  "ARDOUR::ChanCount (ARDOUR::Route::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Route:set_comment",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Route::*)(std::string, void*)"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Track",
+ "decl" :  "boost::shared_ptr<ARDOUR::Track>",
+ "parent" :"boost::shared_ptr<ARDOUR::Route>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Track",
+ "decl" :  "boost::weak_ptr<ARDOUR::Track>",
+ "parent" :"boost::weak_ptr<ARDOUR::Route>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:Track",
+ "decl" :  "ARDOUR::Track",
+ "parent" :"ARDOUR::Route"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:Track:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Track:set_name",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Track::*)(std::string)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Track:can_record",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Track::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Track:record_enabled",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Track::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Track:record_safe",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Track::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Track:set_record_enabled",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Track::*)(bool, PBD::Controllable::GroupControlDisposition)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Track:set_record_safe",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Track::*)(bool, PBD::Controllable::GroupControlDisposition)"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:AudioTrack",
+ "decl" :  "boost::shared_ptr<ARDOUR::AudioTrack>",
+ "parent" :"boost::shared_ptr<ARDOUR::Track>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:AudioTrack",
+ "decl" :  "boost::weak_ptr<ARDOUR::AudioTrack>",
+ "parent" :"boost::weak_ptr<ARDOUR::Track>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:AudioTrack",
+ "decl" :  "ARDOUR::AudioTrack",
+ "parent" :"ARDOUR::Track"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:AudioTrack:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:MidiTrack",
+ "decl" :  "boost::shared_ptr<ARDOUR::MidiTrack>",
+ "parent" :"boost::shared_ptr<ARDOUR::Track>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:MidiTrack",
+ "decl" :  "boost::weak_ptr<ARDOUR::MidiTrack>",
+ "parent" :"boost::weak_ptr<ARDOUR::Track>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:MidiTrack",
+ "decl" :  "ARDOUR::MidiTrack",
+ "parent" :"ARDOUR::Track"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:MidiTrack:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Region",
+ "decl" :  "boost::shared_ptr<ARDOUR::Region>",
+ "parent" :"boost::shared_ptr<ARDOUR::SessionObject>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Region",
+ "decl" :  "boost::weak_ptr<ARDOUR::Region>",
+ "parent" :"boost::weak_ptr<ARDOUR::SessionObject>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:Region",
+ "decl" :  "ARDOUR::Region",
+ "parent" :"ARDOUR::SessionObject"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:Region:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:position",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:start",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:length",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:layer",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:data_type",
+ "ret" :   "ARDOUR::DataType",
+ "decl" :  "ARDOUR::DataType (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:stretch",
+ "ret" :   "float",
+ "decl" :  "float (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:shift",
+ "ret" :   "float",
+ "decl" :  "float (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:sync_offset",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Region::*)(int&)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:sync_position",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:hidden",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:muted",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:opaque",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:locked",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:position_locked",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:video_locked",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:valid_transients",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:automatic",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:whole_file",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:captured",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:can_move",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:sync_marked",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:external",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:import",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:covers",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)(long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:at_natural_position",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:is_compound",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:set_length",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:set_start",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:set_position",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:set_initial_position",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:nudge_position",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:move_to_natural_position",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:move_start",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:trim_front",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:trim_end",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:trim_to",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(long, long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:cut_front",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:cut_end",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:raise",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:lower",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:raise_to_top",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:lower_to_bottom",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:set_sync_position",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(long)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:clear_sync_position",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:set_hidden",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(bool)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:set_muted",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(bool)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:set_opaque",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(bool)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:set_locked",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(bool)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:set_video_locked",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(bool)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Region:set_position_locked",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Region::*)(bool)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:Source",
+ "decl" :  "boost::weak_ptr<ARDOUR::Source>"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:Source",
+ "decl" :  "boost::shared_ptr<ARDOUR::Source>"
+},
+{"type" :  "[C] Weak/Shared Pointer Class",
+ "lua" :   "ARDOUR:Source",
+ "decl" :  "ARDOUR::Source"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:Source:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:EvoralParameter",
+ "decl" :  "Evoral::Parameter"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:EvoralParameter:",
+ "ret" :   "void",
+ "decl" :  "void (*)(unsigned int, unsigned char, unsigned int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:EvoralParameter:type",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (Evoral::Parameter::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:EvoralParameter:channel",
+ "ret" :   "unsigned char",
+ "decl" :  "unsigned char (Evoral::Parameter::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:EvoralParameter:id",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (Evoral::Parameter::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:PresetRecord",
+ "decl" :  "ARDOUR::Plugin::PresetRecord"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:PresetRecord:uri",
+ "decl" :  "std::string ARDOUR::Plugin::PresetRecord::*"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:PresetRecord:label",
+ "decl" :  "std::string ARDOUR::Plugin::PresetRecord::*"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:PresetRecord:user",
+ "decl" :  "bool ARDOUR::Plugin::PresetRecord::*"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:PresetRecord:valid",
+ "decl" :  "bool ARDOUR::Plugin::PresetRecord::*"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:EvoralControlList",
+ "decl" :  "boost::weak_ptr<Evoral::ControlList>"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:EvoralControlList",
+ "decl" :  "boost::shared_ptr<Evoral::ControlList>"
+},
+{"type" :  "[C] Weak/Shared Pointer Class",
+ "lua" :   "ARDOUR:EvoralControlList",
+ "decl" :  "Evoral::ControlList"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:EvoralControlList:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:EvoralControlList:add",
+ "ret" :   "void",
+ "decl" :  "void (Evoral::ControlList::*)(double, double, bool, bool)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:EvoralControlSet",
+ "decl" :  "boost::weak_ptr<Evoral::ControlSet>"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:EvoralControlSet",
+ "decl" :  "boost::shared_ptr<Evoral::ControlSet>"
+},
+{"type" :  "[C] Weak/Shared Pointer Class",
+ "lua" :   "ARDOUR:EvoralControlSet",
+ "decl" :  "Evoral::ControlSet"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:EvoralControlSet:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Automatable",
+ "decl" :  "boost::shared_ptr<ARDOUR::Automatable>",
+ "parent" :"boost::shared_ptr<Evoral::ControlSet>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Automatable",
+ "decl" :  "boost::weak_ptr<ARDOUR::Automatable>",
+ "parent" :"boost::weak_ptr<Evoral::ControlSet>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:Automatable",
+ "decl" :  "ARDOUR::Automatable",
+ "parent" :"Evoral::ControlSet"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:Automatable:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Automatable:automation_control",
+ "ret" :   "boost::shared_ptr<ARDOUR::AutomationControl>",
+ "decl" :  "boost::shared_ptr<ARDOUR::AutomationControl> (ARDOUR::Automatable::*)(Evoral::Parameter, bool)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:EvoralControl",
+ "decl" :  "boost::weak_ptr<Evoral::Control>"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:EvoralControl",
+ "decl" :  "boost::shared_ptr<Evoral::Control>"
+},
+{"type" :  "[C] Weak/Shared Pointer Class",
+ "lua" :   "ARDOUR:EvoralControl",
+ "decl" :  "Evoral::Control"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:EvoralControl:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:EvoralControl:list",
+ "ret" :   "boost::shared_ptr<Evoral::ControlList>",
+ "decl" :  "boost::shared_ptr<Evoral::ControlList> (Evoral::Control::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:EvoralParameterDescriptor",
+ "decl" :  "Evoral::ParameterDescriptor"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:EvoralParameterDescriptor:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:EvoralParameterDescriptor:lower",
+ "decl" :  "float Evoral::ParameterDescriptor::*"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:EvoralParameterDescriptor:upper",
+ "decl" :  "float Evoral::ParameterDescriptor::*"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:EvoralParameterDescriptor:normal",
+ "decl" :  "float Evoral::ParameterDescriptor::*"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:EvoralParameterDescriptor:toggled",
+ "decl" :  "bool Evoral::ParameterDescriptor::*"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:ParameterDescriptor",
+ "decl" :  "ARDOUR::ParameterDescriptor",
+ "parent" :"Evoral::ParameterDescriptor"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:ParameterDescriptor:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:ParameterDescriptor:label",
+ "decl" :  "std::string ARDOUR::ParameterDescriptor::*"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:ParameterDescriptor:logarithmic",
+ "decl" :  "bool ARDOUR::ParameterDescriptor::*"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Processor",
+ "decl" :  "boost::shared_ptr<ARDOUR::Processor>",
+ "parent" :"boost::shared_ptr<ARDOUR::SessionObject>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Processor",
+ "decl" :  "boost::weak_ptr<ARDOUR::Processor>",
+ "parent" :"boost::weak_ptr<ARDOUR::SessionObject>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:Processor",
+ "decl" :  "ARDOUR::Processor",
+ "parent" :"ARDOUR::SessionObject"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:Processor:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Processor",
+ "decl" :  "boost::shared_ptr<ARDOUR::Processor>",
+ "parent" :"boost::shared_ptr<ARDOUR::Automatable>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:Processor",
+ "decl" :  "boost::weak_ptr<ARDOUR::Processor>",
+ "parent" :"boost::weak_ptr<ARDOUR::Automatable>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:Processor",
+ "decl" :  "ARDOUR::Processor",
+ "parent" :"ARDOUR::Automatable"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:Processor:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Cast",
+ "lua" :   "ARDOUR:Processor:to_insert",
+ "ret" :   "ARDOUR::PluginInsert",
+ "decl" :  "ARDOUR::PluginInsert (ARDOUR::Processor::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Processor:display_name",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::Processor::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Processor:active",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Processor::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Processor:activate",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Processor::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Processor:deactivate",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Processor::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Processor:control",
+ "ret" :   "boost::shared_ptr<Evoral::Control>",
+ "decl" :  "boost::shared_ptr<Evoral::Control> (Evoral::ControlSet::*)(Evoral::Parameter, bool)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:Processor:automation_control",
+ "ret" :   "boost::shared_ptr<ARDOUR::AutomationControl>",
+ "decl" :  "boost::shared_ptr<ARDOUR::AutomationControl> (ARDOUR::Automatable::*)(Evoral::Parameter, bool)"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:PluginInsert",
+ "decl" :  "boost::shared_ptr<ARDOUR::Plugin>",
+ "parent" :"boost::shared_ptr<PBD::StatefulDestructible>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:PluginInsert",
+ "decl" :  "boost::weak_ptr<ARDOUR::Plugin>",
+ "parent" :"boost::weak_ptr<PBD::StatefulDestructible>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:PluginInsert",
+ "decl" :  "ARDOUR::Plugin",
+ "parent" :"PBD::StatefulDestructible"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:PluginInsert:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:label",
+ "ret" :   "char*",
+ "decl" :  "char* (ARDOUR::Plugin::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:name",
+ "ret" :   "char*",
+ "decl" :  "char* (ARDOUR::Plugin::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:maker",
+ "ret" :   "char*",
+ "decl" :  "char* (ARDOUR::Plugin::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:parameter_count",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (ARDOUR::Plugin::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:nth_parameter",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (ARDOUR::Plugin::*)(unsigned int, bool&)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:preset_by_label",
+ "ret" :   "ARDOUR::Plugin::PresetRecord*",
+ "decl" :  "ARDOUR::Plugin::PresetRecord* (ARDOUR::Plugin::*)(std::string)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:preset_by_uri",
+ "ret" :   "ARDOUR::Plugin::PresetRecord*",
+ "decl" :  "ARDOUR::Plugin::PresetRecord* (ARDOUR::Plugin::*)(std::string)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:load_preset",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Plugin::*)(ARDOUR::Plugin::PresetRecord)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:parameter_is_input",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Plugin::*)(unsigned int)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:get_docs",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::Plugin::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:get_parameter_docs",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::Plugin::*)(unsigned int)"
+},
+{"type" :  "Weak/Shared Pointer Function RefReturn",
+ "lua" :   "ARDOUR:PluginInsert:get_parameter_descriptor",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::Plugin::*)(unsigned int, ARDOUR::ParameterDescriptor&)"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:PluginInsert",
+ "decl" :  "boost::shared_ptr<ARDOUR::PluginInsert>",
+ "parent" :"boost::shared_ptr<ARDOUR::Processor>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:PluginInsert",
+ "decl" :  "boost::weak_ptr<ARDOUR::PluginInsert>",
+ "parent" :"boost::weak_ptr<ARDOUR::Processor>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:PluginInsert",
+ "decl" :  "ARDOUR::PluginInsert",
+ "parent" :"ARDOUR::Processor"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:PluginInsert:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:plugin",
+ "ret" :   "boost::shared_ptr<ARDOUR::Plugin>",
+ "decl" :  "boost::shared_ptr<ARDOUR::Plugin> (ARDOUR::PluginInsert::*)(unsigned int)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:activate",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::PluginInsert::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:PluginInsert:deactivate",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::PluginInsert::*)()"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:AutomationControl",
+ "decl" :  "boost::shared_ptr<ARDOUR::AutomationControl>",
+ "parent" :"boost::shared_ptr<Evoral::Control>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:AutomationControl",
+ "decl" :  "boost::weak_ptr<ARDOUR::AutomationControl>",
+ "parent" :"boost::weak_ptr<Evoral::Control>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:AutomationControl",
+ "decl" :  "ARDOUR::AutomationControl",
+ "parent" :"Evoral::Control"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:AutomationControl:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AutomationControl:automation_state",
+ "ret" :   "ARDOUR::AutoState",
+ "decl" :  "ARDOUR::AutoState (ARDOUR::AutomationControl::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AutomationControl:set_automation_style",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::AutomationControl::*)(ARDOUR::AutoStyle)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AutomationControl:start_touch",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::AutomationControl::*)(double)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AutomationControl:stop_touch",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::AutomationControl::*)(bool, double)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AutomationControl:get_value",
+ "ret" :   "double",
+ "decl" :  "double (ARDOUR::AutomationControl::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AutomationControl:set_value",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::AutomationControl::*)(double, PBD::Controllable::GroupControlDisposition)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AutomationControl:writable",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::AutomationControl::*)()"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:PluginControl",
+ "decl" :  "boost::shared_ptr<ARDOUR::PluginInsert::PluginControl>",
+ "parent" :"boost::shared_ptr<ARDOUR::AutomationControl>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:PluginControl",
+ "decl" :  "boost::weak_ptr<ARDOUR::PluginInsert::PluginControl>",
+ "parent" :"boost::weak_ptr<ARDOUR::AutomationControl>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:PluginControl",
+ "decl" :  "ARDOUR::PluginInsert::PluginControl",
+ "parent" :"ARDOUR::AutomationControl"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:PluginControl:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:AudioSource",
+ "decl" :  "boost::shared_ptr<ARDOUR::AudioSource>",
+ "parent" :"boost::shared_ptr<ARDOUR::Source>"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "ARDOUR:AudioSource",
+ "decl" :  "boost::weak_ptr<ARDOUR::AudioSource>",
+ "parent" :"boost::weak_ptr<ARDOUR::Source>"
+},
+{"type" :  "[C] Derived Pointer Class",
+ "lua" :   "ARDOUR:AudioSource",
+ "decl" :  "ARDOUR::AudioSource",
+ "parent" :"ARDOUR::Source"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:AudioSource:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioSource:readable_length",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::AudioSource::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioSource:n_channels",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (ARDOUR::AudioSource::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:AudioTrackList",
+ "decl" :  "std::list<boost::shared_ptr<ARDOUR::AudioTrack> >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:AudioTrackList:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioTrackList:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::list<boost::shared_ptr<ARDOUR::AudioTrack> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioTrackList:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::list<boost::shared_ptr<ARDOUR::AudioTrack> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioTrackList:reverse",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::shared_ptr<ARDOUR::AudioTrack> >::*)()"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:AudioTrackList:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:AudioTrackList:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioTrackList:unique",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::shared_ptr<ARDOUR::AudioTrack> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioTrackList:push_back",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::shared_ptr<ARDOUR::AudioTrack> >::*)(boost::shared_ptr<ARDOUR::AudioTrack>)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:AudioTrackList:add",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:MidiTrackList",
+ "decl" :  "std::list<boost::shared_ptr<ARDOUR::MidiTrack> >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:MidiTrackList:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:MidiTrackList:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::list<boost::shared_ptr<ARDOUR::MidiTrack> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:MidiTrackList:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::list<boost::shared_ptr<ARDOUR::MidiTrack> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:MidiTrackList:reverse",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::shared_ptr<ARDOUR::MidiTrack> >::*)()"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:MidiTrackList:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:MidiTrackList:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:MidiTrackList:unique",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::shared_ptr<ARDOUR::MidiTrack> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:MidiTrackList:push_back",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::shared_ptr<ARDOUR::MidiTrack> >::*)(boost::shared_ptr<ARDOUR::MidiTrack>)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:MidiTrackList:add",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:RouteList",
+ "decl" :  "std::list<boost::shared_ptr<ARDOUR::Route> >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:RouteList:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:RouteList:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::list<boost::shared_ptr<ARDOUR::Route> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:RouteList:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::list<boost::shared_ptr<ARDOUR::Route> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:RouteList:reverse",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::shared_ptr<ARDOUR::Route> >::*)()"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:RouteList:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:RouteList:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:RouteListPtr",
+ "decl" :  "boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route> > >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:RouteListPtr:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Pointer Function",
+ "lua" :   "ARDOUR:RouteListPtr:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::list<boost::shared_ptr<ARDOUR::Route> >::*)()"
+},
+{"type" :  "Member Pointer Function",
+ "lua" :   "ARDOUR:RouteListPtr:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::list<boost::shared_ptr<ARDOUR::Route> >::*)()"
+},
+{"type" :  "Member Pointer Function",
+ "lua" :   "ARDOUR:RouteListPtr:reverse",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::shared_ptr<ARDOUR::Route> >::*)()"
+},
+{"type" :  "Member Pointer Function",
+ "lua" :   "ARDOUR:RouteListPtr:unique",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::shared_ptr<ARDOUR::Route> >::*)()"
+},
+{"type" :  "Member Pointer Function",
+ "lua" :   "ARDOUR:RouteListPtr:push_back",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::shared_ptr<ARDOUR::Route> >::*)(boost::shared_ptr<ARDOUR::Route>)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:RouteListPtr:add",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:RouteListPtr:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:RouteListPtr:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:WeakRouteList",
+ "decl" :  "std::list<boost::weak_ptr<ARDOUR::Route> >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:WeakRouteList:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:WeakRouteList:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::list<boost::weak_ptr<ARDOUR::Route> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:WeakRouteList:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::list<boost::weak_ptr<ARDOUR::Route> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:WeakRouteList:reverse",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::weak_ptr<ARDOUR::Route> >::*)()"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:WeakRouteList:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:WeakRouteList:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:WeakAudioSourceList",
+ "decl" :  "std::list<boost::weak_ptr<ARDOUR::AudioSource> >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:WeakAudioSourceList:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:WeakAudioSourceList:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::list<boost::weak_ptr<ARDOUR::AudioSource> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:WeakAudioSourceList:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::list<boost::weak_ptr<ARDOUR::AudioSource> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:WeakAudioSourceList:reverse",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::weak_ptr<ARDOUR::AudioSource> >::*)()"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:WeakAudioSourceList:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:WeakAudioSourceList:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:WeakPortSet",
+ "decl" :  "std::set<boost::weak_ptr<ARDOUR::AudioPort> > >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:WeakPortSet:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:WeakPortSet:clear",
+ "ret" :   "void",
+ "decl" :  "void (std::set<boost::weak_ptr<ARDOUR::AudioPort> > >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:WeakPortSet:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::set<boost::weak_ptr<ARDOUR::AudioPort> > >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:WeakPortSet:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::set<boost::weak_ptr<ARDOUR::AudioPort> > >::*)()"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:WeakPortSet:add",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:WeakPortSet:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:WeakPortSet:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:WeakSourceList",
+ "decl" :  "std::list<boost::weak_ptr<ARDOUR::Source> >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:WeakSourceList:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:WeakSourceList:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::list<boost::weak_ptr<ARDOUR::Source> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:WeakSourceList:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::list<boost::weak_ptr<ARDOUR::Source> >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:WeakSourceList:reverse",
+ "ret" :   "void",
+ "decl" :  "void (std::list<boost::weak_ptr<ARDOUR::Source> >::*)()"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:WeakSourceList:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:WeakSourceList:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:Tempo",
+ "decl" :  "ARDOUR::Tempo"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:Tempo:",
+ "ret" :   "void",
+ "decl" :  "void (*)(double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Tempo:note_type",
+ "ret" :   "double",
+ "decl" :  "double (ARDOUR::Tempo::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Tempo:beats_per_minute",
+ "ret" :   "double",
+ "decl" :  "double (ARDOUR::Tempo::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Tempo:frames_per_beat",
+ "ret" :   "double",
+ "decl" :  "double (ARDOUR::Tempo::*)(long)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:Meter",
+ "decl" :  "ARDOUR::Meter"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:Meter:",
+ "ret" :   "void",
+ "decl" :  "void (*)(double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Meter:divisions_per_bar",
+ "ret" :   "double",
+ "decl" :  "double (ARDOUR::Meter::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Meter:note_divisor",
+ "ret" :   "double",
+ "decl" :  "double (ARDOUR::Meter::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Meter:frames_per_bar",
+ "ret" :   "double",
+ "decl" :  "double (ARDOUR::Meter::*)(ARDOUR::Tempo, long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Meter:frames_per_grid",
+ "ret" :   "double",
+ "decl" :  "double (ARDOUR::Meter::*)(ARDOUR::Tempo, long)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:TempoMap",
+ "decl" :  "ARDOUR::TempoMap"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:TempoMap:add_tempo",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::TempoMap::*)(ARDOUR::Tempo, Timecode::BBT_Time)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:TempoMap:add_meter",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::TempoMap::*)(ARDOUR::Meter, Timecode::BBT_Time)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:ChanCount",
+ "decl" :  "ARDOUR::ChanCount"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:ChanCount:n_audio",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (ARDOUR::ChanCount::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:DataType",
+ "decl" :  "ARDOUR::DataType"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:DataType:",
+ "ret" :   "void",
+ "decl" :  "void (*)(std::string)"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:PluginType:AudioUnit",
+ "decl" :  "ARDOUR::PluginType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:PluginType:LADSPA",
+ "decl" :  "ARDOUR::PluginType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:PluginType:LV2",
+ "decl" :  "ARDOUR::PluginType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:PluginType:Windows_VST",
+ "decl" :  "ARDOUR::PluginType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:PluginType:LXVST",
+ "decl" :  "ARDOUR::PluginType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:PluginType:Lua",
+ "decl" :  "ARDOUR::PluginType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:AutoStyle:Absolute",
+ "decl" :  "ARDOUR::AutoStyle"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:AutoStyle:Trim",
+ "decl" :  "ARDOUR::AutoStyle"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:AutoState:Off",
+ "decl" :  "ARDOUR::AutoState"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:AutoState:Write",
+ "decl" :  "ARDOUR::AutoState"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:AutoState:Touch",
+ "decl" :  "ARDOUR::AutoState"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:AutoState:Play",
+ "decl" :  "ARDOUR::AutoState"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:AutomationType:PluginAutomation",
+ "decl" :  "ARDOUR::AutomationType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:SrcQuality:SrcBest",
+ "decl" :  "ARDOUR::SrcQuality"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:PlaylistDisposition:CopyPlaylist",
+ "decl" :  "ARDOUR::PlaylistDisposition"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:PlaylistDisposition:NewPlaylist",
+ "decl" :  "ARDOUR::PlaylistDisposition"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:PlaylistDisposition:SharePlaylist",
+ "decl" :  "ARDOUR::PlaylistDisposition"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:AudioBackendInfo",
+ "decl" :  "ARDOUR::AudioBackendInfo"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:AudioBackendInfo:name",
+ "decl" :  "char* ARDOUR::AudioBackendInfo::*"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:BackendVector",
+ "decl" :  "std::vector<ARDOUR::AudioBackendInfo* >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:BackendVector:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:BackendVector:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::vector<ARDOUR::AudioBackendInfo* >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:BackendVector:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::vector<ARDOUR::AudioBackendInfo* >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:BackendVector:push_back",
+ "ret" :   "void",
+ "decl" :  "void (std::vector<ARDOUR::AudioBackendInfo* >::*)(ARDOUR::AudioBackendInfo*)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:BackendVector:at",
+ "ret" :   "ARDOUR::AudioBackendInfo*&",
+ "decl" :  "ARDOUR::AudioBackendInfo*& (std::vector<ARDOUR::AudioBackendInfo* >::*)(unsigned long)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:BackendVector:add",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:BackendVector:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:BackendVector:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:ARDOUR:DeviceStatus",
+ "decl" :  "ARDOUR::AudioBackend::DeviceStatus"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:ARDOUR:DeviceStatus:name",
+ "decl" :  "std::string ARDOUR::AudioBackend::DeviceStatus::*"
+},
+{"type" :  "Data Member",
+ "lua" :   "ARDOUR:ARDOUR:DeviceStatus:available",
+ "decl" :  "bool ARDOUR::AudioBackend::DeviceStatus::*"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector",
+ "decl" :  "std::vector<ARDOUR::AudioBackend::DeviceStatus >"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (std::vector<ARDOUR::AudioBackend::DeviceStatus >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::vector<ARDOUR::AudioBackend::DeviceStatus >::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:push_back",
+ "ret" :   "void",
+ "decl" :  "void (std::vector<ARDOUR::AudioBackend::DeviceStatus >::*)(ARDOUR::AudioBackend::DeviceStatus)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:at",
+ "ret" :   "ARDOUR::AudioBackend::DeviceStatus&",
+ "decl" :  "ARDOUR::AudioBackend::DeviceStatus& (std::vector<ARDOUR::AudioBackend::DeviceStatus >::*)(unsigned long)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:add",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:iter",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:AudioBackend",
+ "decl" :  "boost::weak_ptr<ARDOUR::AudioBackend>"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:AudioBackend",
+ "decl" :  "boost::shared_ptr<ARDOUR::AudioBackend>"
+},
+{"type" :  "[C] Weak/Shared Pointer Class",
+ "lua" :   "ARDOUR:AudioBackend",
+ "decl" :  "ARDOUR::AudioBackend"
+},
+{"type" :  "Weak/Shared Null Check",
+ "lua" :   "ARDOUR:AudioBackend:isnil",
+ "ret" :   "bool",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:info",
+ "ret" :   "ARDOUR::AudioBackendInfo&",
+ "decl" :  "ARDOUR::AudioBackendInfo& (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:sample_rate",
+ "ret" :   "float",
+ "decl" :  "float (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:buffer_size",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:period_size",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:input_channels",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:output_channels",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:dsp_load",
+ "ret" :   "float",
+ "decl" :  "float (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:set_sample_rate",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::AudioBackend::*)(float)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:set_buffer_size",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::AudioBackend::*)(unsigned int)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:set_peridod_size",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::AudioBackend::*)(unsigned int)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:enumerate_drivers",
+ "ret" :   "std::vector<std::string >",
+ "decl" :  "std::vector<std::string > (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:driver_name",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:set_driver",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::AudioBackend::*)(std::string)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:use_separate_input_and_output_devices",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:enumerate_devices",
+ "ret" :   "std::vector<ARDOUR::AudioBackend::DeviceStatus >",
+ "decl" :  "std::vector<ARDOUR::AudioBackend::DeviceStatus > (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:enumerate_input_devices",
+ "ret" :   "std::vector<ARDOUR::AudioBackend::DeviceStatus >",
+ "decl" :  "std::vector<ARDOUR::AudioBackend::DeviceStatus > (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:enumerate_output_devices",
+ "ret" :   "std::vector<ARDOUR::AudioBackend::DeviceStatus >",
+ "decl" :  "std::vector<ARDOUR::AudioBackend::DeviceStatus > (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:device_name",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:input_device_name",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:output_device_name",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::AudioBackend::*)()"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:set_device_name",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::AudioBackend::*)(std::string)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:set_input_device_name",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::AudioBackend::*)(std::string)"
+},
+{"type" :  "Weak/Shared Pointer Function",
+ "lua" :   "ARDOUR:AudioBackend:set_output_device_name",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::AudioBackend::*)(std::string)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:AudioEngine",
+ "decl" :  "ARDOUR::AudioEngine"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioEngine:available_backends",
+ "ret" :   "std::vector<ARDOUR::AudioBackendInfo* >",
+ "decl" :  "std::vector<ARDOUR::AudioBackendInfo* > (ARDOUR::AudioEngine::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioEngine:current_backend_name",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::AudioEngine::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioEngine:set_backend",
+ "ret" :   "boost::shared_ptr<ARDOUR::AudioBackend>",
+ "decl" :  "boost::shared_ptr<ARDOUR::AudioBackend> (ARDOUR::AudioEngine::*)(std::string, std::string, std::string)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioEngine:setup_required",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::AudioEngine::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioEngine:start",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::AudioEngine::*)(bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioEngine:stop",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::AudioEngine::*)(bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioEngine:get_dsp_load",
+ "ret" :   "float",
+ "decl" :  "float (ARDOUR::AudioEngine::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioEngine:set_device_name",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::AudioEngine::*)(std::string)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioEngine:set_sample_rate",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::AudioEngine::*)(float)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioEngine:set_buffer_size",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::AudioEngine::*)(unsigned int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioEngine:get_last_backend_error",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::AudioEngine::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:Session",
+ "decl" :  "ARDOUR::Session"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:scripts_changed",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:transport_rolling",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:request_transport_speed",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Session::*)(double, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:transport_frame",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:transport_speed",
+ "ret" :   "double",
+ "decl" :  "double (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:frame_rate",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:nominal_frame_rate",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:frames_per_timecode_frame",
+ "ret" :   "double",
+ "decl" :  "double (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:timecode_frames_per_hour",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:timecode_frames_per_second",
+ "ret" :   "double",
+ "decl" :  "double (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:timecode_drop_frames",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:request_locate",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Session::*)(long, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:request_stop",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Session::*)(bool, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:last_transport_start",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:goto_start",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:goto_end",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:current_start_frame",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:current_end_frame",
+ "ret" :   "long",
+ "decl" :  "long (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:actively_recording",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:get_routes",
+ "ret" :   "boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route> > >",
+ "decl" :  "boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route> > > (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:get_tracks",
+ "ret" :   "boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route> > >",
+ "decl" :  "boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route> > > (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:name",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:path",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:record_status",
+ "ret" :   "ARDOUR::Session::RecordState",
+ "decl" :  "ARDOUR::Session::RecordState (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:route_by_id",
+ "ret" :   "boost::shared_ptr<ARDOUR::Route>",
+ "decl" :  "boost::shared_ptr<ARDOUR::Route> (ARDOUR::Session::*)(PBD::ID)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:route_by_name",
+ "ret" :   "boost::shared_ptr<ARDOUR::Route>",
+ "decl" :  "boost::shared_ptr<ARDOUR::Route> (ARDOUR::Session::*)(std::string)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:route_by_remote_id",
+ "ret" :   "boost::shared_ptr<ARDOUR::Route>",
+ "decl" :  "boost::shared_ptr<ARDOUR::Route> (ARDOUR::Session::*)(unsigned int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:track_by_diskstream_id",
+ "ret" :   "boost::shared_ptr<ARDOUR::Track>",
+ "decl" :  "boost::shared_ptr<ARDOUR::Track> (ARDOUR::Session::*)(PBD::ID)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:source_by_id",
+ "ret" :   "boost::shared_ptr<ARDOUR::Source>",
+ "decl" :  "boost::shared_ptr<ARDOUR::Source> (ARDOUR::Session::*)(PBD::ID)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:controllable_by_id",
+ "ret" :   "boost::shared_ptr<PBD::Controllable>",
+ "decl" :  "boost::shared_ptr<PBD::Controllable> (ARDOUR::Session::*)(PBD::ID)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:processor_by_id",
+ "ret" :   "boost::shared_ptr<ARDOUR::Processor>",
+ "decl" :  "boost::shared_ptr<ARDOUR::Processor> (ARDOUR::Session::*)(PBD::ID)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:snap_name",
+ "ret" :   "std::string",
+ "decl" :  "std::string (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:tempo_map",
+ "ret" :   "ARDOUR::TempoMap&",
+ "decl" :  "ARDOUR::TempoMap& (ARDOUR::Session::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:RegionFactory",
+ "decl" :  "ARDOUR::RegionFactory"
+},
+{"type" :  "Static Member Function",
+ "lua" :   "ARDOUR:RegionFactory:region_by_id",
+ "ret" :   "boost::shared_ptr<ARDOUR::Region>",
+ "decl" :  "boost::shared_ptr<ARDOUR::Region> (*)(PBD::ID)"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:Session:RecordState:Disabled",
+ "decl" :  "ARDOUR::Session::RecordState"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:Session:RecordState:Enabled",
+ "decl" :  "ARDOUR::Session::RecordState"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:Session:RecordState:Recording",
+ "decl" :  "ARDOUR::Session::RecordState"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:LuaAPI:new_luaproc",
+ "ret" :   "boost::shared_ptr<ARDOUR::Processor>",
+ "decl" :  "boost::shared_ptr<ARDOUR::Processor> (*)(ARDOUR::Session*, std::string)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:LuaAPI:new_plugin_info",
+ "ret" :   "boost::shared_ptr<ARDOUR::PluginInfo>",
+ "decl" :  "boost::shared_ptr<ARDOUR::PluginInfo> (*)(std::string, ARDOUR::PluginType)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:LuaAPI:new_plugin",
+ "ret" :   "boost::shared_ptr<ARDOUR::Processor>",
+ "decl" :  "boost::shared_ptr<ARDOUR::Processor> (*)(ARDOUR::Session*, std::string, ARDOUR::PluginType, std::string)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:LuaAPI:set_processor_param",
+ "ret" :   "bool",
+ "decl" :  "bool (*)(boost::shared_ptr<ARDOUR::Processor>, unsigned int, float)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:LuaAPI:set_plugin_insert_param",
+ "ret" :   "bool",
+ "decl" :  "bool (*)(boost::shared_ptr<ARDOUR::PluginInsert>, unsigned int, float)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:Session",
+ "decl" :  "ARDOUR::Session"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:save_state",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::Session::*)(std::string, bool, bool, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:set_dirty",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:unknown_processors",
+ "ret" :   "std::list<std::string >",
+ "decl" :  "std::list<std::string > (ARDOUR::Session::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:new_route_from_template",
+ "ret" :   "std::list<boost::shared_ptr<ARDOUR::Route> >",
+ "decl" :  "std::list<boost::shared_ptr<ARDOUR::Route> > (ARDOUR::Session::*)(unsigned int, std::string, std::string, ARDOUR::PlaylistDisposition)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "OSC:Address",
+ "decl" :  "ARDOUR::LuaAPI::LuaOSCAddress"
+},
+{"type" :  "Constructor",
+ "lua" :   "OSC:Address:",
+ "ret" :   "void",
+ "decl" :  "void (*)(std::string)"
+},
+{"type" :  "C Function",
+ "lua" :   "OSC:Address:send",
+ "decl" :  "int (ARDOUR::LuaAPI::LuaOSCAddress::*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "Cairo:Context",
+ "decl" :  "Cairo::Context"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:save",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:restore",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:set_operator",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(Cairo::Operator)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:set_source_rgb",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:set_source_rgba",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double, double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:set_line_width",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:set_line_cap",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(Cairo::LineCap)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:set_line_join",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(Cairo::LineJoin)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:set_dash",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(std::vector<double >&, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:unset_dash",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:translate",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:scale",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:rotate",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:begin_new_path",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:begin_new_sub_path",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:move_to",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:line_to",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:curve_to",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double, double, double, double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:arc",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double, double, double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:arc_negative",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double, double, double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:rel_move_to",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:rel_line_to",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:rel_curve_to",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double, double, double, double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:rectangle",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double, double, double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:close_path",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:paint",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:paint_with_alpha",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:stroke",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:stroke_preserve",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:fill",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:fill_preserve",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:reset_clip",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:clip",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:clip_preserve",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:set_font_size",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Cairo:Context:show_text",
+ "ret" :   "void",
+ "decl" :  "void (Cairo::Context::*)(std::string)"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Cairo:LineCap:Butt",
+ "decl" :  "_cairo_line_cap"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Cairo:LineCap:Round",
+ "decl" :  "_cairo_line_cap"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Cairo:LineCap:Square",
+ "decl" :  "_cairo_line_cap"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Cairo:LineJoin:Miter",
+ "decl" :  "_cairo_line_join"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Cairo:LineJoin:Round",
+ "decl" :  "_cairo_line_join"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Cairo:LineJoin:Bevel",
+ "decl" :  "_cairo_line_join"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Cairo:Operator:Clear",
+ "decl" :  "_cairo_operator"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Cairo:Operator:Source",
+ "decl" :  "_cairo_operator"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Cairo:Operator:Over",
+ "decl" :  "_cairo_operator"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Cairo:Operator:Add",
+ "decl" :  "_cairo_operator"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:ConfigChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:EngineRunning",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:EngineStopped",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:EngineHalted",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:EngineDeviceListChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:BufferSizeChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:SampleRateChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:FeedbackDetected",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:SuccessfulGraphSort",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:StartTimeChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:EndTimeChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:Exported",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:SessionConfigChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:TransportStateChange",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:DirtyChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:StateSaved",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:Xrun",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:TransportLooped",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:SoloActive",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:SoloChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:IsolatedChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:MonitorChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:RecordStateChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:RecordArmStateChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:AudioLoopLocationChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:AudioPunchLocationChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:LocationsModified",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:AuditionActive",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:BundleAddedOrRemoved",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:PositionChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:Located",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:RoutesReconnected",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:RouteAdded",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:RouteAddedOrRemoved",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:RouteGroupPropertyChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:RouteAddedToRouteGroup",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:RouteRemovedFromRouteGroup",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:StepEditStatusChange",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:RouteGroupAdded",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:RouteGroupRemoved",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:RouteGroupsReordered",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:SyncOrderKeys",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:PluginListChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:PluginStatusesChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:DiskOverrun",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:DiskUnderrun",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "LuaSignal:RegionPropertyChanged",
+ "decl" :  "LuaSignal::LuaSignal"
+},
+{"type" :  "[C] Class",
+ "lua" :   "LuaSignal:Set",
+ "decl" :  "std::bitset<47ul>"
+},
+{"type" :  "Constructor",
+ "lua" :   "LuaSignal:Set:",
+ "ret" :   "void",
+ "decl" :  "void (*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "LuaSignal:Set:reset",
+ "ret" :   "std::bitset<47ul>&",
+ "decl" :  "std::bitset<47ul>& (std::bitset<47ul>::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "LuaSignal:Set:set",
+ "ret" :   "std::bitset<47ul>&",
+ "decl" :  "std::bitset<47ul>& (std::bitset<47ul>::*)(unsigned long, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "LuaSignal:Set:count",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::bitset<47ul>::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "LuaSignal:Set:any",
+ "ret" :   "bool",
+ "decl" :  "bool (std::bitset<47ul>::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "LuaSignal:Set:none",
+ "ret" :   "bool",
+ "decl" :  "bool (std::bitset<47ul>::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "LuaSignal:Set:test",
+ "ret" :   "bool",
+ "decl" :  "bool (std::bitset<47ul>::*)(unsigned long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "LuaSignal:Set:size",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (std::bitset<47ul>::*)()"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "LuaSignal:Set:add",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "LuaSignal:Set:table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:RegionSelection",
+ "decl" :  "RegionSelection"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:RegionSelection:clear_all",
+ "ret" :   "void",
+ "decl" :  "void (RegionSelection::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:RegionSelection:start",
+ "ret" :   "long",
+ "decl" :  "long (RegionSelection::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:RegionSelection:end_frame",
+ "ret" :   "long",
+ "decl" :  "long (RegionSelection::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:RegionSelection:n_midi_regions",
+ "ret" :   "unsigned long",
+ "decl" :  "unsigned long (RegionSelection::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:ArdourMarker",
+ "decl" :  "ArdourMarker"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:Editor",
+ "decl" :  "PublicEditor"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:snap_type",
+ "ret" :   "Editing::SnapType",
+ "decl" :  "Editing::SnapType (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:snap_mode",
+ "ret" :   "Editing::SnapMode",
+ "decl" :  "Editing::SnapMode (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:set_snap_mode",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(Editing::SnapMode)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:set_snap_threshold",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:undo",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(unsigned int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:redo",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(unsigned int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:set_mouse_mode",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(Editing::MouseMode, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:current_mouse_mode",
+ "ret" :   "Editing::MouseMode",
+ "decl" :  "Editing::MouseMode (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:consider_auditioning",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(boost::shared_ptr<ARDOUR::Region>)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:new_region_from_selection",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:separate_region_from_selection",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:pixel_to_sample",
+ "ret" :   "long",
+ "decl" :  "long (PublicEditor::*)(double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:sample_to_pixel",
+ "ret" :   "double",
+ "decl" :  "double (PublicEditor::*)(long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:play_selection",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:play_with_preroll",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:maybe_locate_with_edit_preroll",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:goto_nth_marker",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:add_location_from_playhead_cursor",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:remove_location_at_playhead_cursor",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:set_show_measures",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:show_measures",
+ "ret" :   "bool",
+ "decl" :  "bool (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:remove_tracks",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:effective_mouse_mode",
+ "ret" :   "Editing::MouseMode",
+ "decl" :  "Editing::MouseMode (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:do_import",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(std::vector<std::string >, Editing::ImportDisposition, Editing::ImportMode, ARDOUR::SrcQuality, long&, boost::shared_ptr<ARDOUR::PluginInfo>)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:do_embed",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(std::vector<std::string >, Editing::ImportDisposition, Editing::ImportMode, long&, boost::shared_ptr<ARDOUR::PluginInfo>)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:export_audio",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:stem_export",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:export_selection",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:export_range",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:set_zoom_focus",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(Editing::ZoomFocus)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:get_zoom_focus",
+ "ret" :   "Editing::ZoomFocus",
+ "decl" :  "Editing::ZoomFocus (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:get_current_zoom",
+ "ret" :   "long",
+ "decl" :  "long (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:reset_zoom",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:select_all_tracks",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:deselect_all",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:set_stationary_playhead",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:stationary_playhead",
+ "ret" :   "bool",
+ "decl" :  "bool (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:set_follow_playhead",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(bool, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:follow_playhead",
+ "ret" :   "bool",
+ "decl" :  "bool (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:dragging_playhead",
+ "ret" :   "bool",
+ "decl" :  "bool (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:leftmost_sample",
+ "ret" :   "long",
+ "decl" :  "long (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:current_page_samples",
+ "ret" :   "long",
+ "decl" :  "long (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:visible_canvas_height",
+ "ret" :   "double",
+ "decl" :  "double (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:temporal_zoom_step",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:override_visible_track_count",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:scroll_tracks_down_line",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:scroll_tracks_up_line",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:scroll_down_one_track",
+ "ret" :   "bool",
+ "decl" :  "bool (PublicEditor::*)(bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:scroll_up_one_track",
+ "ret" :   "bool",
+ "decl" :  "bool (PublicEditor::*)(bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:reset_x_origin",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:get_y_origin",
+ "ret" :   "double",
+ "decl" :  "double (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:reset_y_origin",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:remove_last_capture",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:maximise_editing_space",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:restore_editing_space",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:toggle_meter_updating",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:get_nudge_distance",
+ "ret" :   "long",
+ "decl" :  "long (PublicEditor::*)(long, long&)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:get_paste_offset",
+ "ret" :   "long",
+ "decl" :  "long (PublicEditor::*)(long, unsigned int, long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:get_grid_beat_divisions",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (PublicEditor::*)(long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:get_grid_type_as_beats",
+ "ret" :   "Evoral::Beats",
+ "decl" :  "Evoral::Beats (PublicEditor::*)(bool&, long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:toggle_ruler_video",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:toggle_xjadeo_proc",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:get_videotl_bar_height",
+ "ret" :   "int",
+ "decl" :  "int (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:set_video_timeline_height",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:center_screen",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:get_smart_mode",
+ "ret" :   "bool",
+ "decl" :  "bool (PublicEditor::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:get_pointer_position",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(double&, double&)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:find_location_from_marker",
+ "ret" :   "ARDOUR::Location*",
+ "decl" :  "ARDOUR::Location* (PublicEditor::*)(ArdourMarker*, bool&)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:find_marker_from_location_id",
+ "ret" :   "ArdourMarker*",
+ "decl" :  "ArdourMarker* (PublicEditor::*)(PBD::ID, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:mouse_add_new_marker",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(long, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Editor:access_action",
+ "ret" :   "void",
+ "decl" :  "void (PublicEditor::*)(std::string, std::string)"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToCDFrame",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToTimecodeFrame",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToTimecodeSeconds",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToTimecodeMinutes",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToSeconds",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToMinutes",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv128",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv64",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv32",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv28",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv24",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv20",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv16",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv14",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv12",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv10",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv8",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv7",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv6",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv5",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv4",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv3",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeatDiv2",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBeat",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToBar",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToMark",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToRegionStart",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToRegionEnd",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToRegionSync",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapToRegionBoundary",
+ "decl" :  "Editing::SnapType"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapOff",
+ "decl" :  "Editing::SnapMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapNormal",
+ "decl" :  "Editing::SnapMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:SnapMagnetic",
+ "decl" :  "Editing::SnapMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:MouseObject",
+ "decl" :  "Editing::MouseMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:MouseRange",
+ "decl" :  "Editing::MouseMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:MouseCut",
+ "decl" :  "Editing::MouseMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:MouseTimeFX",
+ "decl" :  "Editing::MouseMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:MouseAudition",
+ "decl" :  "Editing::MouseMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:MouseDraw",
+ "decl" :  "Editing::MouseMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:MouseContent",
+ "decl" :  "Editing::MouseMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ZoomFocusLeft",
+ "decl" :  "Editing::ZoomFocus"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ZoomFocusRight",
+ "decl" :  "Editing::ZoomFocus"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ZoomFocusCenter",
+ "decl" :  "Editing::ZoomFocus"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ZoomFocusPlayhead",
+ "decl" :  "Editing::ZoomFocus"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ZoomFocusMouse",
+ "decl" :  "Editing::ZoomFocus"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ZoomFocusEdit",
+ "decl" :  "Editing::ZoomFocus"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:FollowPlayhead",
+ "decl" :  "Editing::DisplayControl"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ShowMeasures",
+ "decl" :  "Editing::DisplayControl"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ShowWaveforms",
+ "decl" :  "Editing::DisplayControl"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ShowWaveformsRecording",
+ "decl" :  "Editing::DisplayControl"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ImportAsRegion",
+ "decl" :  "Editing::ImportMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ImportToTrack",
+ "decl" :  "Editing::ImportMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ImportAsTrack",
+ "decl" :  "Editing::ImportMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ImportAsTapeTrack",
+ "decl" :  "Editing::ImportMode"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ImportAtTimestamp",
+ "decl" :  "Editing::ImportPosition"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ImportAtEditPoint",
+ "decl" :  "Editing::ImportPosition"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ImportAtPlayhead",
+ "decl" :  "Editing::ImportPosition"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ImportAtStart",
+ "decl" :  "Editing::ImportPosition"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ImportDistinctFiles",
+ "decl" :  "Editing::ImportDisposition"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ImportMergeFiles",
+ "decl" :  "Editing::ImportDisposition"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ImportSerializeFiles",
+ "decl" :  "Editing::ImportDisposition"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "Editing:ImportDistinctChannels",
+ "decl" :  "Editing::ImportDisposition"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:AudioBuffer",
+ "decl" :  "ARDOUR::AudioBuffer"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioBuffer:data",
+ "ret" :   "float*",
+ "decl" :  "float* (ARDOUR::AudioBuffer::*)(long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioBuffer:silence",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::AudioBuffer::*)(long, long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:AudioBuffer:apply_gain",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::AudioBuffer::*)(float, long)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:MidiBuffer",
+ "decl" :  "ARDOUR::MidiBuffer"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:MidiBuffer:silence",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::MidiBuffer::*)(long, long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:MidiBuffer:empty",
+ "ret" :   "bool",
+ "decl" :  "bool (ARDOUR::MidiBuffer::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:BufferSet",
+ "decl" :  "ARDOUR::BufferSet"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:BufferSet:get_audio",
+ "ret" :   "ARDOUR::AudioBuffer&",
+ "decl" :  "ARDOUR::AudioBuffer& (ARDOUR::BufferSet::*)(unsigned long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:BufferSet:count",
+ "ret" :   "ARDOUR::ChanCount",
+ "decl" :  "ARDOUR::ChanCount (ARDOUR::BufferSet::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:ChanMapping",
+ "decl" :  "ARDOUR::ChanMapping"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:ChanMapping:get",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (ARDOUR::ChanMapping::*)(ARDOUR::DataType, unsigned int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:ChanMapping:set",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::ChanMapping::*)(ARDOUR::DataType, unsigned int, unsigned int)"
+},
+{"type" :  "Constant/Enum Member",
+ "lua" :   "ARDOUR:ChanMapping:Invalid",
+ "decl" :  "long"
+},
+{"type" :  "[C] Class",
+ "lua" :   "Evoral:Event",
+ "decl" :  "Evoral::Event<long>"
+},
+{"type" :  "Member Function",
+ "lua" :   "Evoral:Event:clear",
+ "ret" :   "void",
+ "decl" :  "void (Evoral::Event<long>::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Evoral:Event:size",
+ "ret" :   "unsigned int",
+ "decl" :  "unsigned int (Evoral::Event<long>::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Evoral:Event:set_buffer",
+ "ret" :   "void",
+ "decl" :  "void (Evoral::Event<long>::*)(unsigned int, unsigned char*, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "Evoral:Event:buffer",
+ "ret" :   "unsigned char*",
+ "decl" :  "unsigned char* (Evoral::Event<long>::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "Evoral:Beats",
+ "decl" :  "Evoral::Beats"
+},
+{"type" :  "Member Function",
+ "lua" :   "Evoral:Beats:to_double",
+ "ret" :   "double",
+ "decl" :  "double (Evoral::Beats::*)()"
+},
+{"type" :  "[C] Derived Class",
+ "lua" :   "Evoral:MidiEvent",
+ "decl" :  "Evoral::MIDIEvent<long>",
+ "parent" :"Evoral::Event<long>"
+},
+{"type" :  "Member Function",
+ "lua" :   "Evoral:MidiEvent:type",
+ "ret" :   "unsigned char",
+ "decl" :  "unsigned char (Evoral::MIDIEvent<long>::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Evoral:MidiEvent:channel",
+ "ret" :   "unsigned char",
+ "decl" :  "unsigned char (Evoral::MIDIEvent<long>::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Evoral:MidiEvent:set_type",
+ "ret" :   "unsigned char",
+ "decl" :  "unsigned char (Evoral::MIDIEvent<long>::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "Evoral:MidiEvent:set_channel",
+ "ret" :   "unsigned char",
+ "decl" :  "unsigned char (Evoral::MIDIEvent<long>::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:Session",
+ "decl" :  "ARDOUR::Session"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:get_scratch_buffers",
+ "ret" :   "ARDOUR::BufferSet&",
+ "decl" :  "ARDOUR::BufferSet& (ARDOUR::Session::*)(ARDOUR::ChanCount, bool)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:Session:get_silent_buffers",
+ "ret" :   "ARDOUR::BufferSet&",
+ "decl" :  "ARDOUR::BufferSet& (ARDOUR::Session::*)(ARDOUR::ChanCount)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:compute_peak",
+ "ret" :   "float",
+ "decl" :  "float (*)(float*, unsigned int, float)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:find_peaks",
+ "ret" :   "void",
+ "decl" :  "void (*)(float*, unsigned int, float*, float*)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:apply_gain_to_buffer",
+ "ret" :   "void",
+ "decl" :  "void (*)(float*, unsigned int, float)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:mix_buffers_no_gain",
+ "ret" :   "void",
+ "decl" :  "void (*)(float*, float*, unsigned int)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:mix_buffers_with_gain",
+ "ret" :   "void",
+ "decl" :  "void (*)(float*, float*, unsigned int, float)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:copy_vector",
+ "ret" :   "void",
+ "decl" :  "void (*)(float*, float*, unsigned int)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:dB_to_coefficient",
+ "ret" :   "float",
+ "decl" :  "float (*)(float)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:fast_coefficient_to_dB",
+ "ret" :   "float",
+ "decl" :  "float (*)(float)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:accurate_coefficient_to_dB",
+ "ret" :   "float",
+ "decl" :  "float (*)(float)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:memset",
+ "ret" :   "void",
+ "decl" :  "void (*)(float*, float, unsigned int)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:mmult",
+ "ret" :   "void",
+ "decl" :  "void (*)(float*, float*, unsigned int)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:log_meter",
+ "ret" :   "float",
+ "decl" :  "float (*)(float)"
+},
+{"type" :  "Free Function",
+ "lua" :   "ARDOUR:DSP:log_meter_coeff",
+ "ret" :   "float",
+ "decl" :  "float (*)(float)"
+},
+{"type" :  "Free Function RefReturn",
+ "lua" :   "ARDOUR:DSP:peaks",
+ "ret" :   "void",
+ "decl" :  "void (*)(float*, float&, float&, unsigned int)"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:DSP:LowPass",
+ "decl" :  "ARDOUR::DSP::LowPass"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:DSP:LowPass:",
+ "ret" :   "void",
+ "decl" :  "void (*)(double, float)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:LowPass:proc",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::DSP::LowPass::*)(float*, unsigned int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:LowPass:ctrl",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::DSP::LowPass::*)(float*, float, unsigned int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:LowPass:set_cutoff",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::DSP::LowPass::*)(float)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:LowPass:reset",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::DSP::LowPass::*)()"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:DSP:Biquad",
+ "decl" :  "ARDOUR::DSP::BiQuad"
+},
+{"type" :  "Constructor",
+ "lua" :   "ARDOUR:DSP:Biquad:",
+ "ret" :   "void",
+ "decl" :  "void (*)(double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:Biquad:run",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::DSP::BiQuad::*)(float*, unsigned int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:Biquad:compute",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::DSP::BiQuad::*)(ARDOUR::DSP::BiQuad::Type, double, double, double)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:Biquad:reset",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::DSP::BiQuad::*)()"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:DSP:BiQuadType:LowPass",
+ "decl" :  "ARDOUR::DSP::BiQuad::Type"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:DSP:BiQuadType:HighPass",
+ "decl" :  "ARDOUR::DSP::BiQuad::Type"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:DSP:BiQuadType:BandPassSkirt",
+ "decl" :  "ARDOUR::DSP::BiQuad::Type"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:DSP:BiQuadType:BandPass0dB",
+ "decl" :  "ARDOUR::DSP::BiQuad::Type"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:DSP:BiQuadType:Notch",
+ "decl" :  "ARDOUR::DSP::BiQuad::Type"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:DSP:BiQuadType:AllPass",
+ "decl" :  "ARDOUR::DSP::BiQuad::Type"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:DSP:BiQuadType:Peaking",
+ "decl" :  "ARDOUR::DSP::BiQuad::Type"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:DSP:BiQuadType:LowShelf",
+ "decl" :  "ARDOUR::DSP::BiQuad::Type"
+},
+{"type" :  "Constant/Enum",
+ "lua" :   "ARDOUR:DSP:BiQuadType:HighShelf",
+ "decl" :  "ARDOUR::DSP::BiQuad::Type"
+},
+{"type" :  "[C] Class",
+ "lua" :   "ARDOUR:DSP:DspShm",
+ "decl" :  "ARDOUR::DSP::DspShm"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:DspShm:allocate",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::DSP::DspShm::*)(unsigned long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:DspShm:clear",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::DSP::DspShm::*)()"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:DspShm:to_float",
+ "ret" :   "float*",
+ "decl" :  "float* (ARDOUR::DSP::DspShm::*)(unsigned long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:DspShm:to_int",
+ "ret" :   "int*",
+ "decl" :  "int* (ARDOUR::DSP::DspShm::*)(unsigned long)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:DspShm:atomic_set_int",
+ "ret" :   "void",
+ "decl" :  "void (ARDOUR::DSP::DspShm::*)(unsigned long, int)"
+},
+{"type" :  "Member Function",
+ "lua" :   "ARDOUR:DSP:DspShm:atomic_get_int",
+ "ret" :   "int",
+ "decl" :  "int (ARDOUR::DSP::DspShm::*)(unsigned long)"
+},
+{} ]
