@@ -2354,9 +2354,12 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 		    framepos_t lower, framepos_t upper)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	uint32_t const upper_beat = (uint32_t) ceil (beat_at_frame_locked (_metrics, upper));
-	uint32_t cnt = floor (beat_at_frame_locked (_metrics, lower));
-
+	int32_t const upper_beat = (int32_t) ceil (beat_at_frame_locked (_metrics, upper));
+	int32_t cnt = floor (beat_at_frame_locked (_metrics, lower));
+	/* although the map handles negative beats, bbt doesn't. */
+	if (cnt < 0.0) {
+		cnt = 0.0;
+	}
 	while (cnt <= upper_beat) {
 		framecnt_t pos = frame_at_beat_locked (_metrics, cnt);
 		TempoSection const tempo = tempo_section_at_locked (pos);
