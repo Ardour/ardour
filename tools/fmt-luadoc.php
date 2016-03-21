@@ -202,7 +202,7 @@ foreach ($doc as $b) {
 			switch (stripclass($ns, $b['lua'])) {
 			case 'add':
 				$args = array (array ('LuaTable {'.$templ[1].'}' => 0));
-				$ret = array ('void' => 0);
+				$ret = array ('LuaTable' => 0);
 				break;
 			case 'iter':
 				$args = array ();
@@ -235,6 +235,7 @@ foreach ($doc as $b) {
 			}
 		}
 		$classlist[luafn2class ($b['lua'])]['func'][] = array (
+			'bind' => $b,
 			'name' => $b['lua'],
 			'args' => $args,
 			'ret'  => $ret,
@@ -245,6 +246,7 @@ foreach ($doc as $b) {
 	case "Free Function":
 	case "Free Function RefReturn":
 		$funclist[luafn2class ($b['lua'])][] = array (
+			'bind' => $b,
 			'name' => $b['lua'],
 			'args' => decl2args ($b['decl']),
 			'ret'  => arg2lua ($b['ret']),
@@ -261,6 +263,7 @@ foreach ($doc as $b) {
 	case "Static Member Function":
 		checkclass ($b);
 		$classlist[luafn2class ($b['lua'])]['func'][] = array (
+			'bind' => $b,
 			'name' => $b['lua'],
 			'args' => decl2args ($b['decl']),
 			'ret'  => arg2lua ($b['ret']),
@@ -380,7 +383,9 @@ function typelink ($a, $short = false, $argcls = '', $linkcls = '', $suffix = ''
 	global $constlist;
 	# all cross-reference links are generated here.
 	# currently anchors on a single page.
-	if (in_array ($a, array_keys ($classlist))) {
+	if (isset($classlist[$a]['free'])) {
+		return '<a class="'.$linkcls.'" href="#'.htmlentities ($a).'">'.($short ? shortname($a) : ctorname($a)).$suffix.'</a>';
+	} else if (in_array ($a, array_keys ($classlist))) {
 		return '<a class="'.$linkcls.'" href="#'.htmlentities($a).'">'.($short ? shortname($a) : htmlentities($a)).$suffix.'</a>';
 	} else if (in_array ($a, array_keys ($constlist))) {
 		return '<a class="'.$linkcls.'" href="#'.ctorname ($a).'">'.($short ? shortname($a) : ctorname($a)).$suffix.'</a>';
@@ -442,7 +447,7 @@ function format_class_members ($ns, $cl, &$dups) {
 				$rv.= typelink (varname ($f['ret']), true, 'em');
 			}
 			$rv.= '</td><td class="decl">';
-			$rv.= '<span class="functionname">'.stripclass ($ns, $f['name']).'</span>';
+			$rv.= '<span class="functionname"><abbr title="'.htmlentities($f['bind']['decl']).'">'.stripclass ($ns, $f['name']).'</abbr></span>';
 			$rv.= format_args ($f['args']);
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
 		}
@@ -488,6 +493,7 @@ table.classmembers td.def  { text-align:right; padding-right:.5em;  white-space:
 table.classmembers td.decl { text-align:left; padding-left:.5em; white-space: nowrap; }
 table.classmembers td.fill { width: 99%;}
 table.classmembers span.em { font-style: italic;}
+span.functionname abbr     { text-decoration:none; cursor:default;}
 div.header         {text-align:center;}
 div.header h1      {margin:0;}
 div.header p       {margin:.25em;}
@@ -529,16 +535,16 @@ foreach ($classlist as $ns => $cl) {
 
 	# format class title
 	if (empty ($tbl)) {
-		echo '<h2 id="'.$ns.'" class="cls opaque"><abbr title="Opaque Object">&empty;</abbr>&nbsp;'.$ns.'</h2>'.NL;
+		echo '<h2 id="'.htmlentities ($ns).'" class="cls opaque"><abbr title="Opaque Object">&empty;</abbr>&nbsp;'.htmlentities ($ns).'</h2>'.NL;
 	}
 	else if (isset ($classlist[$ns]['free'])) {
-		echo '<h2 id="'.$ns.'" class="cls freeclass"><abbr title="Namespace">&Nopf;</abbr>&nbsp;'.$ns.'</h2>'.NL;
+		echo '<h2 id="'.htmlentities ($ns).'" class="cls freeclass"><abbr title="Namespace">&Nopf;</abbr>&nbsp;'.ctorname($ns).'</h2>'.NL;
 	}
 	else if (isset ($classlist[$ns]['arr'])) {
-		echo '<h2 id="'.$ns.'" class="cls array"><abbr title="C Array">&ctdot;</abbr>&nbsp;'.$ns.'</h2>'.NL;
+		echo '<h2 id="'.htmlentities ($ns).'" class="cls array"><abbr title="C Array">&ctdot;</abbr>&nbsp;'.htmlentities ($ns).'</h2>'.NL;
 	}
 	else if (isset ($classlist[$ns]['ptr'])) {
-		echo '<h2 id="'.$ns.'" class="cls pointerclass"><abbr title="Pointer Class">&Rarr;</abbr>&nbsp;'.$ns.'</h2>'.NL;
+		echo '<h2 id="'.htmlentities ($ns).'" class="cls pointerclass"><abbr title="Pointer Class">&Rarr;</abbr>&nbsp;'. htmlentities ($ns).'</h2>'.NL;
 	} else {
 		echo '<h2 id="'.htmlentities ($ns).'" class="cls class"><abbr title="Class">&comp;</abbr>&nbsp;'.htmlentities ($ns).'</h2>'.NL;
 	}
