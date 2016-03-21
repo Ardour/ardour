@@ -250,8 +250,8 @@ LuaInstance::register_classes (lua_State* L)
 
 		.addFunction ("effective_mouse_mode", &PublicEditor::effective_mouse_mode)
 
-		.addFunction ("do_import", &PublicEditor::do_import)
-		.addFunction ("do_embed", &PublicEditor::do_embed)
+		.addRefFunction ("do_import", &PublicEditor::do_import)
+		.addRefFunction ("do_embed", &PublicEditor::do_embed)
 
 		.addFunction ("export_audio", &PublicEditor::export_audio)
 		.addFunction ("stem_export", &PublicEditor::stem_export)
@@ -309,10 +309,10 @@ LuaInstance::register_classes (lua_State* L)
 		//.addFunction ("get_preferred_edit_position", &PublicEditor::get_preferred_edit_position)
 		//.addFunction ("split_regions_at", &PublicEditor::split_regions_at)
 
-		.addFunction ("get_nudge_distance", &PublicEditor::get_nudge_distance)
+		.addRefFunction ("get_nudge_distance", &PublicEditor::get_nudge_distance)
 		.addFunction ("get_paste_offset", &PublicEditor::get_paste_offset)
 		.addFunction ("get_grid_beat_divisions", &PublicEditor::get_grid_beat_divisions)
-		.addFunction ("get_grid_type_as_beats", &PublicEditor::get_grid_type_as_beats)
+		.addRefFunction ("get_grid_type_as_beats", &PublicEditor::get_grid_type_as_beats)
 
 		.addFunction ("toggle_ruler_video", &PublicEditor::toggle_ruler_video)
 		.addFunction ("toggle_xjadeo_proc", &PublicEditor::toggle_xjadeo_proc)
@@ -332,9 +332,9 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("center_screen", &PublicEditor::center_screen)
 
 		.addFunction ("get_smart_mode", &PublicEditor::get_smart_mode)
-		.addFunction ("get_pointer_position", &PublicEditor::get_pointer_position)
+		.addRefFunction ("get_pointer_position", &PublicEditor::get_pointer_position)
 
-		.addFunction ("find_location_from_marker", &PublicEditor::find_location_from_marker)
+		.addRefFunction ("find_location_from_marker", &PublicEditor::find_location_from_marker)
 		.addFunction ("find_marker_from_location_id", &PublicEditor::find_marker_from_location_id)
 		.addFunction ("mouse_add_new_marker", &PublicEditor::mouse_add_new_marker)
 #if 0
