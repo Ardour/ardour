@@ -116,11 +116,18 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("to_s", &PBD::ID::to_s) // TODO special case LUA __tostring ?
 		.endClass ()
 
-		.beginWSPtrClass <PBD::Stateful> ("Stateful")
+		.beginClass <PBD::Stateful> ("Stateful")
 		.addFunction ("properties", &PBD::Stateful::properties)
 		.endClass ()
 
-		.deriveWSPtrClass <PBD::StatefulDestructible, PBD::Stateful> ("StatefulDestructible")
+		.deriveClass <PBD::StatefulDestructible, PBD::Stateful> ("StatefulDestructible")
+		.endClass ()
+
+		.beginWSPtrClass <PBD::Stateful> ("StatefulPtr")
+		.addFunction ("properties", &PBD::Stateful::properties)
+		.endClass ()
+
+		.deriveWSPtrClass <PBD::StatefulDestructible, PBD::Stateful> ("StatefulDestructiblePtr")
 		.endClass ()
 
 		.deriveWSPtrClass <PBD::Controllable, PBD::StatefulDestructible> ("Controllable")
@@ -181,6 +188,18 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveClass <PBD::OwnedPropertyList, PBD::PropertyList> ("OwnedPropertyList")
+		.endClass ()
+
+		.deriveClass <Location, PBD::StatefulDestructible> ("Location")
+		.addFunction ("locked", &Location::locked)
+		.addFunction ("lock", &Location::lock)
+		.addFunction ("start", &Location::start)
+		.addFunction ("end", &Location::end)
+		.addFunction ("length", &Location::length)
+		.addFunction ("set_start", &Location::set_start)
+		.addFunction ("set_end", &Location::set_end)
+		.addFunction ("set_length", &Location::set)
+		.addFunction ("move_to", &Location::move_to)
 		.endClass ()
 
 		.deriveWSPtrClass <SessionObject, PBD::StatefulDestructible> ("SessionObject")
@@ -354,8 +373,6 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <AutomationControl, Evoral::Control> ("AutomationControl")
 		.addFunction ("automation_state", &AutomationControl::automation_state)
-		.addFunction ("automation_style", &AutomationControl::automation_style)
-		.addFunction ("set_automation_state", &AutomationControl::set_automation_state)
 		.addFunction ("set_automation_style", &AutomationControl::set_automation_style)
 		.addFunction ("start_touch", &AutomationControl::start_touch)
 		.addFunction ("stop_touch", &AutomationControl::stop_touch)
@@ -380,7 +397,11 @@ LuaBindings::common (lua_State* L)
 		.beginStdList <boost::shared_ptr<MidiTrack> > ("MidiTrackList")
 		.endClass ()
 
-	// RouteList ==  boost::shared_ptr<std::list<boost::shared_ptr<Route> > >
+	// RouteList == std::list<boost::shared_ptr<Route> >
+		.beginConstStdList <boost::shared_ptr<Route> > ("RouteList")
+		.endClass ()
+
+	// boost::shared_ptr<RouteList>
 		.beginPtrStdList <boost::shared_ptr<Route> > ("RouteListPtr")
 		.endClass ()
 
@@ -445,9 +466,9 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Lua", ARDOUR::PluginType(Lua))
 		.endNamespace ()
 
-		.beginNamespace ("Autostyle")
-		.addConst ("Absolute", ARDOUR::AutoState(Absolute))
-		.addConst ("Trim", ARDOUR::AutoState(Trim))
+		.beginNamespace ("AutoStyle")
+		.addConst ("Absolute", ARDOUR::AutoStyle(Absolute))
+		.addConst ("Trim", ARDOUR::AutoStyle(Trim))
 		.endNamespace ()
 
 		.beginNamespace ("AutoState")
@@ -635,6 +656,10 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("buffer", (uint8_t*(Evoral::Event<framepos_t>::*)())&Evoral::Event<framepos_t>::buffer)
 		.endClass ()
 
+		.beginClass <Evoral::Beats> ("Beats")
+		.addFunction ("to_double", &Evoral::Beats::to_double)
+		.endClass ()
+
 		.deriveClass <Evoral::MIDIEvent<framepos_t>, Evoral::Event<framepos_t> > ("MidiEvent")
 		// add Ctor?
 		.addFunction ("type", &Evoral::MIDIEvent<framepos_t>::type)
@@ -684,6 +709,19 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("compute", &DSP::BiQuad::compute)
 		.addFunction ("reset", &DSP::BiQuad::reset)
 		.endClass ()
+
+		/* DSP enums */
+		.beginNamespace ("BiQuadType")
+		.addConst ("LowPass", ARDOUR::DSP::BiQuad::LowPass)
+		.addConst ("HighPass", ARDOUR::DSP::BiQuad::HighPass)
+		.addConst ("BandPassSkirt", ARDOUR::DSP::BiQuad::BandPassSkirt)
+		.addConst ("BandPass0dB", ARDOUR::DSP::BiQuad::BandPass0dB)
+		.addConst ("Notch", ARDOUR::DSP::BiQuad::Notch)
+		.addConst ("AllPass", ARDOUR::DSP::BiQuad::AllPass)
+		.addConst ("Peaking", ARDOUR::DSP::BiQuad::Peaking)
+		.addConst ("LowShelf", ARDOUR::DSP::BiQuad::LowShelf)
+		.addConst ("HighShelf", ARDOUR::DSP::BiQuad::HighShelf)
+		.endNamespace ()
 
 		.beginClass <DSP::DspShm> ("DspShm")
 		.addFunction ("allocate", &DSP::DspShm::allocate)
