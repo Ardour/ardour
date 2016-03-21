@@ -336,8 +336,9 @@ Editor::edit_meter_section (MeterSection* section)
 	meter_dialog.get_bbt_time(when);
 	framepos_t const frame = _session->tempo_map().frame_at_beat (_session->tempo_map().bbt_to_beats (when));
 
-	begin_reversible_command (_("replace tempo mark"));
+	begin_reversible_command (_("replace meter mark"));
         XMLNode &before = _session->tempo_map().get_state();
+	section->set_position_lock_style (meter_dialog.get_lock_style());
 	if (meter_dialog.get_lock_style() == MusicTime) {
 		_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), when);
 	} else {
