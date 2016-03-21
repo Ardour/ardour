@@ -71,21 +71,21 @@ std::string type_name()
 
 #define CLASSDOC(TYPE, LUANAME, DECL, PARENTDECL) \
   if (LuaBindingDoc::printBindings ()) { \
-    std::cout <<   "{ " << KEYSTA << "type"   << KEYEND << " \"" << TYPE << "\",\n"; \
-    std::cout <<   "  " << KEYSTA << "lua"    << KEYEND << " \"" << LUANAME << "\",\n"; \
-    std::cout <<   "  " << KEYSTA << "decl"   << KEYEND << " \"" << DECL << "\",\n"; \
-    std::cout <<   "  " << KEYSTA << "parent" << KEYEND << " \"" << PARENTDECL << "\"\n"; \
+    std::cout <<   "{ " << KEYSTA << "type"   << KEYEND << "  \""  << TYPE << "\",\n"; \
+    std::cout <<   "  " << KEYSTA << "lua"    << KEYEND << "   \"" << LUANAME << "\",\n"; \
+    std::cout <<   "  " << KEYSTA << "decl"   << KEYEND << "  \"" << DECL << "\",\n"; \
+    std::cout <<   "  " << KEYSTA << "parent" << KEYEND << "\""  << PARENTDECL << "\"\n"; \
     std::cout <<   "},\n"; \
   }
 
 #define PRINTDOC(TYPE, LUANAME, RETVAL, DECL) \
   if (LuaBindingDoc::printBindings ()) { \
-    std::cout <<   "{ " << KEYSTA << "type"   << KEYEND << " \"" << TYPE << "\",\n"; \
-    std::cout <<   "  " << KEYSTA << "lua"    << KEYEND << " \"" << LUANAME << "\",\n"; \
+    std::cout <<   "{ " << KEYSTA << "type"   << KEYEND << "  \""  << TYPE << "\",\n"; \
+    std::cout <<   "  " << KEYSTA << "lua"    << KEYEND << "   \"" << LUANAME << "\",\n"; \
     if (!(RETVAL).empty()) { \
-      std::cout << "  " << KEYSTA << "ret"    << KEYEND << " \"" << (RETVAL) << "\",\n"; \
+      std::cout << "  " << KEYSTA << "ret"    << KEYEND << "   \"" << (RETVAL) << "\",\n"; \
     } \
-    std::cout <<   "  " << KEYSTA << "decl"   << KEYEND << " \"" << DECL << "\"\n"; \
+    std::cout <<   "  " << KEYSTA << "decl"   << KEYEND << "  \""  << DECL << "\"\n"; \
     std::cout <<   "},\n"; \
   }
 
@@ -726,7 +726,7 @@ private:
     template <class FP>
     Class <T>& addStaticFunction (char const* name, FP const fp)
     {
-      FUNDOC ("Static Function", name, FP)
+      FUNDOC ("Static Member Function", name, FP)
       new (lua_newuserdata (L, sizeof (fp))) FP (fp);
       lua_pushcclosure (L, &CFunc::Call <FP>::f, 1);
       rawsetfield (L, -2, name);
@@ -1051,7 +1051,7 @@ private:
       _parent = parent;
       _name = parent->_name + name + ".";
 #endif
-      PRINTDOC ("[C] Array", parent->_name << name, std::string(), type_name <T>())
+      PRINTDOC ("[C] Array", parent->_name << name, std::string(), type_name <T>() + "*")
       m_stackSize = parent->m_stackSize + 3;
       parent->m_stackSize = 0;
 
@@ -1352,8 +1352,8 @@ private:
     : L (child->L)
     , m_stackSize (0)
 #ifdef LUABINDINGDOC
-    , _name (child->_parent->_name)
-    , _parent (child->_parent)
+    , _name (child->_parent ? child->_parent->_name : "")
+    , _parent (child->_parent ? child->_parent->_parent : NULL)
 #endif
   {
     m_stackSize = child->m_stackSize - 1;
@@ -1750,6 +1750,9 @@ public:
   template <class T, class U>
   WSPtrClass <T> deriveWSPtrClass (char const* name)
   {
+
+    CLASSDOC ("[C] Derived Class", _name << name, type_name <boost::shared_ptr<T> >(), type_name <boost::shared_ptr<U> >())
+    CLASSDOC ("[C] Derived Class", _name << name, type_name <boost::weak_ptr<T> >(), type_name <boost::weak_ptr<U> >())
     CLASSDOC ("[C] Derived Pointer Class", _name << name, type_name <T>(), type_name <U>())
     return WSPtrClass <T> (name, this,
         ClassInfo <boost::shared_ptr<U> >::getStaticKey (),
