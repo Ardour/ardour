@@ -199,7 +199,7 @@ LuaInstance::register_classes (lua_State* L)
 	register_hooks (L);
 
 	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("ARDOUR")
+		.beginNamespace ("ArdourUI")
 		.beginClass <RegionSelection> ("RegionSelection")
 		.addFunction ("clear_all", &RegionSelection::clear_all)
 		.addFunction ("start", &RegionSelection::start)
