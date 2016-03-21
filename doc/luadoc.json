@@ -1,138 +1,164 @@
 [
+{"version" : "4.7-421-g7083d71"},
+
 {"type" :  "[C] Class",
- "lua" :   "ARDOUR:StringList",
+ "lua" :   "C:StringList",
  "decl" :  "std::list<std::string >"
 },
 {"type" :  "Constructor",
- "lua" :   "ARDOUR:StringList:",
+ "lua" :   "C:StringList:",
  "ret" :   "void",
  "decl" :  "void (*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:StringList:empty",
+ "lua" :   "C:StringList:empty",
  "ret" :   "bool",
  "decl" :  "bool (std::list<std::string >::*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:StringList:size",
+ "lua" :   "C:StringList:size",
  "ret" :   "unsigned long",
  "decl" :  "unsigned long (std::list<std::string >::*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:StringList:reverse",
+ "lua" :   "C:StringList:reverse",
  "ret" :   "void",
  "decl" :  "void (std::list<std::string >::*)()"
 },
 {"type" :  "Ext C Function",
- "lua" :   "ARDOUR:StringList:iter",
+ "lua" :   "C:StringList:iter",
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "Ext C Function",
- "lua" :   "ARDOUR:StringList:table",
+ "lua" :   "C:StringList:table",
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:StringList:unique",
+ "lua" :   "C:StringList:unique",
  "ret" :   "void",
  "decl" :  "void (std::list<std::string >::*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:StringList:push_back",
+ "lua" :   "C:StringList:push_back",
  "ret" :   "void",
  "decl" :  "void (std::list<std::string >::*)(std::string)"
 },
 {"type" :  "Ext C Function",
- "lua" :   "ARDOUR:StringList:add",
+ "lua" :   "C:StringList:add",
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "[C] Class",
- "lua" :   "ARDOUR:StringVector",
+ "lua" :   "C:StringVector",
  "decl" :  "std::vector<std::string >"
 },
 {"type" :  "Constructor",
- "lua" :   "ARDOUR:StringVector:",
+ "lua" :   "C:StringVector:",
  "ret" :   "void",
  "decl" :  "void (*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:StringVector:empty",
+ "lua" :   "C:StringVector:empty",
  "ret" :   "bool",
  "decl" :  "bool (std::vector<std::string >::*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:StringVector:size",
+ "lua" :   "C:StringVector:size",
  "ret" :   "unsigned long",
  "decl" :  "unsigned long (std::vector<std::string >::*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:StringVector:push_back",
+ "lua" :   "C:StringVector:push_back",
  "ret" :   "void",
  "decl" :  "void (std::vector<std::string >::*)(std::string)"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:StringVector:at",
+ "lua" :   "C:StringVector:at",
  "ret" :   "std::string&",
  "decl" :  "std::string& (std::vector<std::string >::*)(unsigned long)"
 },
 {"type" :  "Ext C Function",
- "lua" :   "ARDOUR:StringVector:add",
+ "lua" :   "C:StringVector:add",
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "Ext C Function",
- "lua" :   "ARDOUR:StringVector:iter",
+ "lua" :   "C:StringVector:iter",
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "Ext C Function",
- "lua" :   "ARDOUR:StringVector:table",
+ "lua" :   "C:StringVector:table",
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "[C] Array",
- "lua" :   "ARDOUR:FloatArray",
+ "lua" :   "C:FloatArray",
  "decl" :  "float*"
 },
+{"type" :  "Ext C Function",
+ "lua" :   "C:FloatArray:array",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "C:FloatArray:get_table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "C:FloatArray:set_table",
+ "decl" :  "int (*)(lua_State*)"
+},
 {"type" :  "[C] Array",
- "lua" :   "ARDOUR:IntArray",
+ "lua" :   "C:IntArray",
  "decl" :  "int*"
 },
+{"type" :  "Ext C Function",
+ "lua" :   "C:IntArray:array",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "C:IntArray:get_table",
+ "decl" :  "int (*)(lua_State*)"
+},
+{"type" :  "Ext C Function",
+ "lua" :   "C:IntArray:set_table",
+ "decl" :  "int (*)(lua_State*)"
+},
 {"type" :  "[C] Class",
- "lua" :   "ARDOUR:DoubleVector",
+ "lua" :   "C:DoubleVector",
  "decl" :  "std::vector<double >"
 },
 {"type" :  "Constructor",
- "lua" :   "ARDOUR:DoubleVector:",
+ "lua" :   "C:DoubleVector:",
  "ret" :   "void",
  "decl" :  "void (*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:DoubleVector:empty",
+ "lua" :   "C:DoubleVector:empty",
  "ret" :   "bool",
  "decl" :  "bool (std::vector<double >::*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:DoubleVector:size",
+ "lua" :   "C:DoubleVector:size",
  "ret" :   "unsigned long",
  "decl" :  "unsigned long (std::vector<double >::*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:DoubleVector:push_back",
+ "lua" :   "C:DoubleVector:push_back",
  "ret" :   "void",
  "decl" :  "void (std::vector<double >::*)(double)"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:DoubleVector:at",
+ "lua" :   "C:DoubleVector:at",
  "ret" :   "double&",
  "decl" :  "double& (std::vector<double >::*)(unsigned long)"
 },
 {"type" :  "Ext C Function",
- "lua" :   "ARDOUR:DoubleVector:add",
+ "lua" :   "C:DoubleVector:add",
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "Ext C Function",
- "lua" :   "ARDOUR:DoubleVector:iter",
+ "lua" :   "C:DoubleVector:iter",
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "Ext C Function",
- "lua" :   "ARDOUR:DoubleVector:table",
+ "lua" :   "C:DoubleVector:table",
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "[C] Class",
@@ -629,7 +655,7 @@
  "ret" :   "float",
  "decl" :  "float (ARDOUR::Region::*)()"
 },
-{"type" :  "Weak/Shared Pointer Function",
+{"type" :  "Weak/Shared Pointer Function RefReturn",
  "lua" :   "ARDOUR:Region:sync_offset",
  "ret" :   "long",
  "decl" :  "long (ARDOUR::Region::*)(int&)"
@@ -1149,7 +1175,7 @@
  "ret" :   "unsigned int",
  "decl" :  "unsigned int (ARDOUR::Plugin::*)()"
 },
-{"type" :  "Weak/Shared Pointer Function",
+{"type" :  "Weak/Shared Pointer Function RefReturn",
  "lua" :   "ARDOUR:PluginInsert:nth_parameter",
  "ret" :   "unsigned int",
  "decl" :  "unsigned int (ARDOUR::Plugin::*)(unsigned int, bool&)"
@@ -1834,56 +1860,56 @@
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "[C] Class",
- "lua" :   "ARDOUR:ARDOUR:DeviceStatus",
+ "lua" :   "ARDOUR:DeviceStatus",
  "decl" :  "ARDOUR::AudioBackend::DeviceStatus"
 },
 {"type" :  "Data Member",
- "lua" :   "ARDOUR:ARDOUR:DeviceStatus:name",
+ "lua" :   "ARDOUR:DeviceStatus:name",
  "decl" :  "std::string ARDOUR::AudioBackend::DeviceStatus::*"
 },
 {"type" :  "Data Member",
- "lua" :   "ARDOUR:ARDOUR:DeviceStatus:available",
+ "lua" :   "ARDOUR:DeviceStatus:available",
  "decl" :  "bool ARDOUR::AudioBackend::DeviceStatus::*"
 },
 {"type" :  "[C] Class",
- "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector",
+ "lua" :   "ARDOUR:DeviceStatusVector",
  "decl" :  "std::vector<ARDOUR::AudioBackend::DeviceStatus >"
 },
 {"type" :  "Constructor",
- "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:",
+ "lua" :   "ARDOUR:DeviceStatusVector:",
  "ret" :   "void",
  "decl" :  "void (*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:empty",
+ "lua" :   "ARDOUR:DeviceStatusVector:empty",
  "ret" :   "bool",
  "decl" :  "bool (std::vector<ARDOUR::AudioBackend::DeviceStatus >::*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:size",
+ "lua" :   "ARDOUR:DeviceStatusVector:size",
  "ret" :   "unsigned long",
  "decl" :  "unsigned long (std::vector<ARDOUR::AudioBackend::DeviceStatus >::*)()"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:push_back",
+ "lua" :   "ARDOUR:DeviceStatusVector:push_back",
  "ret" :   "void",
  "decl" :  "void (std::vector<ARDOUR::AudioBackend::DeviceStatus >::*)(ARDOUR::AudioBackend::DeviceStatus)"
 },
 {"type" :  "Member Function",
- "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:at",
+ "lua" :   "ARDOUR:DeviceStatusVector:at",
  "ret" :   "ARDOUR::AudioBackend::DeviceStatus&",
  "decl" :  "ARDOUR::AudioBackend::DeviceStatus& (std::vector<ARDOUR::AudioBackend::DeviceStatus >::*)(unsigned long)"
 },
 {"type" :  "Ext C Function",
- "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:add",
+ "lua" :   "ARDOUR:DeviceStatusVector:add",
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "Ext C Function",
- "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:iter",
+ "lua" :   "ARDOUR:DeviceStatusVector:iter",
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "Ext C Function",
- "lua" :   "ARDOUR:ARDOUR:DeviceStatusVector:table",
+ "lua" :   "ARDOUR:DeviceStatusVector:table",
  "decl" :  "int (*)(lua_State*)"
 },
 {"type" :  "[C] Class",
@@ -2940,12 +2966,12 @@
  "ret" :   "Editing::MouseMode",
  "decl" :  "Editing::MouseMode (PublicEditor::*)()"
 },
-{"type" :  "Member Function",
+{"type" :  "Member Function RefReturn",
  "lua" :   "ARDOUR:Editor:do_import",
  "ret" :   "void",
  "decl" :  "void (PublicEditor::*)(std::vector<std::string >, Editing::ImportDisposition, Editing::ImportMode, ARDOUR::SrcQuality, long&, boost::shared_ptr<ARDOUR::PluginInfo>)"
 },
-{"type" :  "Member Function",
+{"type" :  "Member Function RefReturn",
  "lua" :   "ARDOUR:Editor:do_embed",
  "ret" :   "void",
  "decl" :  "void (PublicEditor::*)(std::vector<std::string >, Editing::ImportDisposition, Editing::ImportMode, long&, boost::shared_ptr<ARDOUR::PluginInfo>)"
@@ -3105,7 +3131,7 @@
  "ret" :   "void",
  "decl" :  "void (PublicEditor::*)()"
 },
-{"type" :  "Member Function",
+{"type" :  "Member Function RefReturn",
  "lua" :   "ARDOUR:Editor:get_nudge_distance",
  "ret" :   "long",
  "decl" :  "long (PublicEditor::*)(long, long&)"
@@ -3120,7 +3146,7 @@
  "ret" :   "unsigned int",
  "decl" :  "unsigned int (PublicEditor::*)(long)"
 },
-{"type" :  "Member Function",
+{"type" :  "Member Function RefReturn",
  "lua" :   "ARDOUR:Editor:get_grid_type_as_beats",
  "ret" :   "Evoral::Beats",
  "decl" :  "Evoral::Beats (PublicEditor::*)(bool&, long)"
@@ -3155,12 +3181,12 @@
  "ret" :   "bool",
  "decl" :  "bool (PublicEditor::*)()"
 },
-{"type" :  "Member Function",
+{"type" :  "Member Function RefReturn",
  "lua" :   "ARDOUR:Editor:get_pointer_position",
  "ret" :   "void",
  "decl" :  "void (PublicEditor::*)(double&, double&)"
 },
-{"type" :  "Member Function",
+{"type" :  "Member Function RefReturn",
  "lua" :   "ARDOUR:Editor:find_location_from_marker",
  "ret" :   "ARDOUR::Location*",
  "decl" :  "ARDOUR::Location* (PublicEditor::*)(ArdourMarker*, bool&)"
