@@ -128,16 +128,46 @@ LuaBindings::common (lua_State* L)
 		.addConst ("UseGroup", PBD::Controllable::GroupControlDisposition(PBD::Controllable::UseGroup))
 		.endNamespace ()
 
-		.endNamespace ();
+		.endNamespace (); // PBD
 
 	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("ARDOUR") // XXX really libtimecode
+		.beginNamespace ("Timecode")
 		.beginClass <Timecode::BBT_Time> ("BBT_TIME")
 		.addConstructor <void (*) (uint32_t, uint32_t, uint32_t)> ()
 		.endClass ()
 		.endNamespace ();
 
 	luabridge::getGlobalNamespace (L)
+
+		.beginNamespace ("Evoral")
+		.beginClass <Evoral::Parameter> ("Parameter")
+		.addConstructor <void (*) (uint32_t, uint8_t, uint32_t)> ()
+		.addFunction ("type", &Evoral::Parameter::type)
+		.addFunction ("channel", &Evoral::Parameter::channel)
+		.addFunction ("id", &Evoral::Parameter::id)
+		.endClass ()
+
+		.beginWSPtrClass <Evoral::ControlList> ("ControlList")
+		.addFunction ("add", &Evoral::ControlList::add)
+		.endClass ()
+
+		.beginWSPtrClass <Evoral::ControlSet> ("ControlSet")
+		.endClass ()
+
+		.beginWSPtrClass <Evoral::Control> ("Control")
+		.addFunction ("list", (boost::shared_ptr<Evoral::ControlList>(Evoral::Control::*)())&Evoral::Control::list)
+		.endClass ()
+
+		.beginClass <Evoral::ParameterDescriptor> ("ParameterDescriptor")
+		.addVoidConstructor ()
+		.addData ("lower", &Evoral::ParameterDescriptor::lower)
+		.addData ("upper", &Evoral::ParameterDescriptor::upper)
+		.addData ("normal", &Evoral::ParameterDescriptor::normal)
+		.addData ("toggled", &Evoral::ParameterDescriptor::toggled)
+		.endClass ()
+
+		.endNamespace () // Evoral
+
 		.beginNamespace ("ARDOUR")
 		.beginWSPtrClass <PluginInfo> ("PluginInfo")
 		.addVoidConstructor ()
@@ -281,13 +311,6 @@ LuaBindings::common (lua_State* L)
 		.beginWSPtrClass <Source> ("Source")
 		.endClass ()
 
-		.beginClass <Evoral::Parameter> ("EvoralParameter")
-		.addConstructor <void (*) (uint32_t, uint8_t, uint32_t)> ()
-		.addFunction ("type", &Evoral::Parameter::type)
-		.addFunction ("channel", &Evoral::Parameter::channel)
-		.addFunction ("id", &Evoral::Parameter::id)
-		.endClass ()
-
 		.beginClass <Plugin::PresetRecord> ("PresetRecord")
 		.addData ("uri", &Plugin::PresetRecord::uri, false)
 		.addData ("label", &Plugin::PresetRecord::label, false)
@@ -295,27 +318,8 @@ LuaBindings::common (lua_State* L)
 		.addData ("valid", &Plugin::PresetRecord::valid, false)
 		.endClass ()
 
-		.beginWSPtrClass <Evoral::ControlList> ("EvoralControlList")
-		.addFunction ("add", &Evoral::ControlList::add)
-		.endClass ()
-
-		.beginWSPtrClass <Evoral::ControlSet> ("EvoralControlSet")
-		.endClass ()
-
 		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
 		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
-		.endClass ()
-
-		.beginWSPtrClass <Evoral::Control> ("EvoralControl")
-		.addFunction ("list", (boost::shared_ptr<Evoral::ControlList>(Evoral::Control::*)())&Evoral::Control::list)
-		.endClass ()
-
-		.beginClass <Evoral::ParameterDescriptor> ("EvoralParameterDescriptor")
-		.addVoidConstructor ()
-		.addData ("lower", &Evoral::ParameterDescriptor::lower)
-		.addData ("upper", &Evoral::ParameterDescriptor::upper)
-		.addData ("normal", &Evoral::ParameterDescriptor::normal)
-		.addData ("toggled", &Evoral::ParameterDescriptor::toggled)
 		.endClass ()
 
 		.deriveClass <ParameterDescriptor, Evoral::ParameterDescriptor> ("ParameterDescriptor")
