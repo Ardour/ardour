@@ -3156,12 +3156,6 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		char name[64];
 		snprintf (name, sizeof(name), "%g/%g", _marker->meter().divisions_per_bar(), _marker->meter().note_divisor ());
 
-		MeterSection section (_marker->meter());
-
-		if (!section.movable()) {
-			return;
-		}
-
 		_marker = new MeterMarker (
 			*_editor,
 			*_editor->meter_group,
@@ -3174,7 +3168,6 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		swap_grab (&_marker->the_item(), 0, GDK_CURRENT_TIME);
 
 		if (!_copy) {
-			_editor->begin_reversible_command (_("move meter mark"));
 			TempoMap& map (_editor->session()->tempo_map());
 			/* get current state */
 			before_state = &map.get_state();
@@ -3203,37 +3196,29 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	if (!_marker->meter().movable()) {
-		return;
-	}
-
-	//motion (event, false);
-
-	//Timecode::BBT_Time when;
-
 	TempoMap& map (_editor->session()->tempo_map());
-	//map.bbt_time (_marker->position(), when);
 
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy meter mark"));
 		XMLNode &before = map.get_state();
 
-		if (_marker->meter().position_lock_style() == AudioTime) {
-			map.add_meter (_marker->meter(), _marker->position());
+		if (_real_section->position_lock_style() == AudioTime) {
+			map.add_meter (Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->frame());
 		} else {
-			map.add_meter (_marker->meter(), _real_section->pulse(), _real_section->bbt());
+			map.add_meter (Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->pulse(), _real_section->bbt());
 		}
-
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 
 	} else {
+		_editor->begin_reversible_command (_("move meter mark"));
+
 		/* we removed it before, so add it back now */
-		if (_marker->meter().position_lock_style() == AudioTime) {
-			map.replace_meter (*_real_section, _marker->meter(), _marker->position());
+		if (_real_section->position_lock_style() == AudioTime) {
+			map.replace_meter (*_real_section, Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->frame());
 		} else {
-			map.replace_meter (*_real_section, _marker->meter(), _real_section->bbt());
+			map.replace_meter (*_real_section, Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->bbt());
 		}
 
 		XMLNode &after = map.get_state();

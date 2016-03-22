@@ -946,6 +946,10 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const frame
 			/* cannot move the first meter section */
 			*static_cast<Meter*>(&first) = meter;
 			first.set_position_lock_style (pl);
+			double paf = pulse_at_frame_locked (_metrics, frame);
+			pair<double, BBT_Time> pulse = make_pair (paf, beats_to_bbt_locked (_metrics, beat_at_pulse_locked (_metrics, paf)));
+			first.set_pulse (pulse);
+			first.set_frame (frame);
 			recompute_map (_metrics);
 		}
 	}
@@ -1022,9 +1026,7 @@ TempoMap::add_meter_locked (const Meter& meter, framepos_t frame, bool recompute
 {
 
 	MeterSection* new_meter = new MeterSection (frame, meter.divisions_per_bar(), meter.note_divisor());
-	double paf = pulse_at_frame_locked (_metrics, frame);
-	pair<double, BBT_Time> beat = make_pair (paf, beats_to_bbt_locked (_metrics, beat_at_pulse_locked (_metrics, paf)));
-	new_meter->set_pulse (beat);
+
 	do_insert (new_meter);
 
 	if (recompute) {
@@ -1048,6 +1050,7 @@ TempoMap::predict_tempo_frame (TempoSection* section, const Tempo& bpm, const BB
 	Metrics future_map;
 	framepos_t ret = 0;
 	TempoSection* new_section = copy_metrics_and_point (future_map, section);
+
 	double const beat = bbt_to_beats_locked (future_map, bbt);
 	if (solve_map (future_map, new_section, bpm, pulse_at_beat_locked (future_map, beat))) {
 		ret = new_section->frame();
@@ -1177,8 +1180,7 @@ TempoMap::copy_metrics_and_point (Metrics& copy, TempoSection* section)
 			if (m->position_lock_style() == MusicTime) {
 				copy.push_back (new MeterSection (m->pulse(), m->bbt(), m->divisions_per_bar(), m->note_divisor()));
 			} else {
-				copy.push_back (new MeterSection (m->frame(), m->bbt(), m->divisions_per_bar(), m->note_divisor()));
-
+				copy.push_back (new MeterSection (m->frame(), m->divisions_per_bar(), m->note_divisor()));
 			}
 		}
 	}
@@ -1796,11 +1798,13 @@ TempoMap::frame_at_pulse_locked (const Metrics& metrics, const double& pulse) co
 		TempoSection* t;
 
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
-			if (prev_ts) {
-				if (t->pulse() > pulse) {
-					return prev_ts->frame_at_pulse (pulse, _frame_rate);
+			if (prev_ts && t->pulse() > pulse) {
+				if (prev_ts->pulse() > pulse) {
+					return 0;
 				}
+				return prev_ts->frame_at_pulse (pulse, _frame_rate);
 			}
+
 			accumulated_pulses = t->pulse();
 			prev_ts = t;
 		}
