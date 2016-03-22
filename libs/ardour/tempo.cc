@@ -715,7 +715,7 @@ TempoMap::do_insert (MetricSection* section)
 			corrected.first = bbt_to_beats_locked (_metrics, corrected.second);
 			warning << string_compose (_("Meter changes can only be positioned on the first beat of a bar. Moving from %1 to %2"),
 						   m->bbt(), corrected.second) << endmsg;
-			m->set_pulse (corrected);
+			//m->set_pulse (corrected);
 		}
 	}
 
@@ -822,14 +822,14 @@ TempoMap::do_insert (MetricSection* section)
 }
 
 void
-TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const double& where, TempoSection::Type type)
+TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const double& pulse, TempoSection::Type type)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		TempoSection& first (first_tempo());
 		if (ts.pulse() != first.pulse()) {
 			remove_tempo_locked (ts);
-			add_tempo_locked (tempo, where, true, type);
+			add_tempo_locked (tempo, pulse, true, type);
 		} else {
 			first.set_type (type);
 			{
@@ -865,11 +865,11 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const frame
 }
 
 void
-TempoMap::add_tempo (const Tempo& tempo, const double& where, ARDOUR::TempoSection::Type type)
+TempoMap::add_tempo (const Tempo& tempo, const double& pulse, ARDOUR::TempoSection::Type type)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		add_tempo_locked (tempo, where, true, type);
+		add_tempo_locked (tempo, pulse, true, type);
 	}
 
 	PropertyChanged (PropertyChange ());
@@ -888,9 +888,8 @@ TempoMap::add_tempo (const Tempo& tempo, const framepos_t& frame, ARDOUR::TempoS
 }
 
 void
-TempoMap::add_tempo_locked (const Tempo& tempo, double where, bool recompute, ARDOUR::TempoSection::Type type)
+TempoMap::add_tempo_locked (const Tempo& tempo, double pulse, bool recompute, ARDOUR::TempoSection::Type type)
 {
-	double pulse = pulse_at_beat (_metrics, where);
 	TempoSection* ts = new TempoSection (pulse, tempo.beats_per_minute(), tempo.note_type(), type);
 
 	do_insert (ts);
@@ -1007,7 +1006,7 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, BBT_Time where, boo
 	}
 	/* new meters *always* start on a beat. */
 	where.ticks = 0;
-	double pulse = pulse_at_beat (_metrics, beat);
+	double pulse = pulse_at_beat_locked (_metrics, beat);
 
 	MeterSection* new_meter = new MeterSection (pulse, where, meter.divisions_per_bar(), meter.note_divisor());
 	do_insert (new_meter);
@@ -1024,7 +1023,7 @@ TempoMap::add_meter_locked (const Meter& meter, framepos_t frame, bool recompute
 
 	MeterSection* new_meter = new MeterSection (frame, meter.divisions_per_bar(), meter.note_divisor());
 	double paf = pulse_at_frame_locked (_metrics, frame);
-	pair<double, BBT_Time> beat = make_pair (paf, beats_to_bbt_locked (_metrics, beat_at_pulse (_metrics, paf)));
+	pair<double, BBT_Time> beat = make_pair (paf, beats_to_bbt_locked (_metrics, beat_at_pulse_locked (_metrics, paf)));
 	new_meter->set_pulse (beat);
 	do_insert (new_meter);
 
@@ -1050,7 +1049,7 @@ TempoMap::predict_tempo_frame (TempoSection* section, const Tempo& bpm, const BB
 	framepos_t ret = 0;
 	TempoSection* new_section = copy_metrics_and_point (future_map, section);
 	double const beat = bbt_to_beats_locked (future_map, bbt);
-	if (solve_map (future_map, new_section, bpm, pulse_at_beat (future_map, beat))) {
+	if (solve_map (future_map, new_section, bpm, pulse_at_beat_locked (future_map, beat))) {
 		ret = new_section->frame();
 	} else {
 		ret = frame_at_beat_locked (_metrics, beat);
@@ -1065,7 +1064,7 @@ TempoMap::predict_tempo_frame (TempoSection* section, const Tempo& bpm, const BB
 }
 
 double
-TempoMap::predict_tempo_beat (TempoSection* section, const Tempo& bpm, const framepos_t& frame)
+TempoMap::predict_tempo_pulse (TempoSection* section, const Tempo& bpm, const framepos_t& frame)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	Metrics future_map;
@@ -1073,9 +1072,9 @@ TempoMap::predict_tempo_beat (TempoSection* section, const Tempo& bpm, const fra
 	TempoSection* new_section = copy_metrics_and_point (future_map, section);
 
 	if (solve_map (future_map, new_section, bpm, frame)) {
-		ret = beat_at_pulse (future_map, new_section->pulse());
+		ret = new_section->pulse();
 	} else {
-		ret = beat_at_frame_locked (_metrics, frame);
+		ret = pulse_at_frame_locked (_metrics, frame);
 	}
 
 	Metrics::const_iterator d = future_map.begin();
@@ -1114,7 +1113,7 @@ TempoMap::gui_move_tempo_beat (TempoSection* ts,  const Tempo& bpm, const double
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		TempoSection* new_section = copy_metrics_and_point (future_map, ts);
-		if (solve_map (future_map, new_section, bpm, pulse_at_beat (future_map, beat))) {
+		if (solve_map (future_map, new_section, bpm, pulse_at_beat_locked (future_map, beat))) {
 			solve_map (_metrics, ts, bpm, beat);
 		}
 	}
@@ -1144,7 +1143,7 @@ TempoMap::gui_move_meter (MeterSection* ms, const Meter& mt, const double&  beat
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		solve_map (_metrics, ms, mt, pulse_at_beat (_metrics, beat));
+		solve_map (_metrics, ms, mt, pulse_at_beat_locked (_metrics, beat));
 	}
 
 	MetricPositionChanged (); // Emit Signal
@@ -1388,7 +1387,7 @@ TempoMap::recompute_meters (Metrics& metrics)
 
 			if (meter->position_lock_style() == AudioTime) {
 				pair<double, BBT_Time> pr;
-				pr.first =  pulse_at_frame_locked (metrics, meter->frame());
+				pr.first = pulse_at_frame_locked (metrics, meter->frame());
 				BBT_Time const where = BBT_Time (accumulated_bars + 1, 1, 0);
 				pr.second = where;
 				meter->set_pulse (pr);
@@ -1429,7 +1428,14 @@ TempoMap::recompute_map (Metrics& metrics, framepos_t end)
 }
 
 double
-TempoMap::pulse_at_beat (const Metrics& metrics, const double& beat) const
+TempoMap::pulse_at_beat (const double& beat) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+	return pulse_at_beat_locked (_metrics, beat);
+}
+
+double
+TempoMap::pulse_at_beat_locked (const Metrics& metrics, const double& beat) const
 {
 	MeterSection* prev_ms = 0;
 	double accumulated_beats = 0.0;
@@ -1450,11 +1456,17 @@ TempoMap::pulse_at_beat (const Metrics& metrics, const double& beat) const
 }
 
 double
-TempoMap::beat_at_pulse (const Metrics& metrics, const double& pulse) const
+TempoMap::beat_at_pulse (const double& pulse) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+	return beat_at_pulse_locked (_metrics, pulse);
+}
+
+double
+TempoMap::beat_at_pulse_locked (const Metrics& metrics, const double& pulse) const
 {
 	MeterSection* prev_ms = 0;
 	double accumulated_beats = 0.0;
-
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
@@ -1543,7 +1555,7 @@ TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt)
 	}
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	frameoffset_t const frame_off = frame_offset_at (_metrics, frame);
-	double const beat = beat_at_pulse (_metrics, pulse_at_frame_locked (_metrics, frame + frame_off));
+	double const beat = beat_at_pulse_locked (_metrics, pulse_at_frame_locked (_metrics, frame + frame_off));
 
 	bbt = beats_to_bbt_locked (_metrics, beat);
 }
@@ -1727,7 +1739,7 @@ TempoMap::beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame)
 	framecnt_t const offset_frame = frame + frame_offset_at (metrics, frame);
 	double const pulse = pulse_at_frame_locked (metrics, offset_frame);
 
-	return beat_at_pulse (metrics, pulse);
+	return beat_at_pulse_locked (metrics, pulse);
 }
 
 double
@@ -1741,12 +1753,10 @@ TempoMap::pulse_at_frame_locked (const Metrics& metrics, const framecnt_t& frame
 		TempoSection* t;
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 
-			if (prev_ts) {
-				if (t->frame() > frame) {
-					/*the previous ts is the one containing the frame */
-					double const ret = prev_ts->pulse_at_frame (frame, _frame_rate);
-					return ret;
-				}
+			if (prev_ts && t->frame() > frame) {
+				/*the previous ts is the one containing the frame */
+				double const ret = prev_ts->pulse_at_frame (frame, _frame_rate);
+				return ret;
 			}
 			accumulated_pulses = t->pulse();
 			prev_ts = t;
@@ -1769,7 +1779,7 @@ TempoMap::frame_at_beat (const double& beat) const
 framecnt_t
 TempoMap::frame_at_beat_locked (const Metrics& metrics, const double& beat) const
 {
-	framecnt_t const frame = frame_at_pulse_locked (metrics, pulse_at_beat (metrics, beat));
+	framecnt_t const frame = frame_at_pulse_locked (metrics, pulse_at_beat_locked (metrics, beat));
 	frameoffset_t const frame_off = frame_offset_at (metrics, frame);
 	return frame - frame_off;
 }
@@ -1805,28 +1815,28 @@ TempoMap::frame_at_pulse_locked (const Metrics& metrics, const double& pulse) co
 }
 
 double
-TempoMap::beat_offset_at (const Metrics& metrics, const double& beat) const
+TempoMap::pulse_offset_at (const Metrics& metrics, const double& pulse) const
 {
 	MeterSection* prev_m = 0;
-	double beat_off = 0.0;
+	double pulse_off = first_meter().pulse();
 
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		MeterSection* m = 0;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
 			if (prev_m) {
-				if (m->beat() > beat) {
+				if (m->pulse() > pulse) {
 					break;
 				}
 
 				if (m->position_lock_style() == AudioTime) {
-					beat_off += ((m->pulse() - prev_m->pulse()) / prev_m->note_divisor()) - floor ((m->pulse() - prev_m->pulse()) / prev_m->note_divisor());
+					pulse_off += (m->pulse() - prev_m->pulse()) - floor (m->pulse() - prev_m->pulse());
 				}
 			}
 			prev_m = m;
 		}
 	}
 
-	return beat_off;
+	return pulse_off;
 }
 
 frameoffset_t
@@ -1871,7 +1881,7 @@ TempoMap::frame_time_locked (const Metrics& metrics, const BBT_Time& bbt) const
 {
 	/* HOLD THE READER LOCK */
 
-	framepos_t const ret = frame_at_pulse_locked (metrics, pulse_at_beat (metrics, bbt_to_beats_locked (metrics, bbt)));
+	framepos_t const ret = frame_at_pulse_locked (metrics, pulse_at_beat_locked (metrics, bbt_to_beats_locked (metrics, bbt)));
 
 	return ret;
 }
@@ -1891,6 +1901,7 @@ TempoMap::check_solved (Metrics& metrics, bool by_frame)
 				if (by_frame && t->frame() != prev_ts->frame_at_tempo (t->pulses_per_minute(), t->pulse(), _frame_rate)) {
 					return false;
 				}
+				/*
 				if (!by_frame && fabs (t->pulse() - prev_ts->pulse_at_tempo (t->pulses_per_minute(), t->frame(), _frame_rate)) > 0.00001) {
 					std::cerr << "beat precision too low for bpm: " << t->beats_per_minute() << std::endl <<
 						" |error          :" << t->pulse() - prev_ts->pulse_at_tempo (t->pulses_per_minute(), t->frame(), _frame_rate) << std::endl <<
@@ -1898,6 +1909,7 @@ TempoMap::check_solved (Metrics& metrics, bool by_frame)
 						" |frame at tempo : " << prev_ts->frame_at_tempo (t->pulses_per_minute(), t->pulse(), _frame_rate) << std::endl;
 					return false;
 				}
+				*/
 			}
 			prev_ts = t;
 		}
@@ -2441,7 +2453,7 @@ const Tempo
 TempoMap::tempo_at (const framepos_t& frame) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	frameoffset_t const frame_off = frame_offset_at (_metrics, frame);
+	//frameoffset_t const frame_off = frame_offset_at (_metrics, frame);
 	TempoSection* prev_ts = 0;
 
 	Metrics::const_iterator i;
@@ -2475,7 +2487,7 @@ TempoMap::meter_section_at (framepos_t frame) const
 const MeterSection&
 TempoMap::meter_section_at_locked (framepos_t frame) const
 {
-	framepos_t const frame_off = frame + frame_offset_at (_metrics, frame);
+	//framepos_t const frame_off = frame + frame_offset_at (_metrics, frame);
 	Metrics::const_iterator i;
 	MeterSection* prev = 0;
 
@@ -2636,7 +2648,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 }
 
 void
-TempoMap::dump (Metrics& metrics, std::ostream& o) const
+TempoMap::dump (const Metrics& metrics, std::ostream& o) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock, Glib::Threads::TRY_LOCK);
 	const MeterSection* m;

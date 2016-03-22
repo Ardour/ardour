@@ -242,7 +242,7 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 	begin_reversible_command (_("add tempo mark"));
         XMLNode &before = map.get_state();
 	if (tempo_dialog.get_lock_style() == MusicTime) {
-		map.add_tempo (Tempo (bpm,nt), map.bbt_to_beats (requested), tempo_dialog.get_tempo_type());
+		map.add_tempo (Tempo (bpm,nt), map.pulse_at_beat (map.bbt_to_beats (requested)), tempo_dialog.get_tempo_type());
 	} else {
 		map.add_tempo (Tempo (bpm,nt), frame, tempo_dialog.get_tempo_type());
 	}
@@ -373,7 +373,7 @@ Editor::edit_tempo_section (TempoSection* section)
 	begin_reversible_command (_("replace tempo mark"));
 	XMLNode &before = _session->tempo_map().get_state();
 	if (tempo_dialog.get_lock_style() == MusicTime) {
-		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), beat, tempo_dialog.get_tempo_type());
+		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), _session->tempo_map().pulse_at_beat (beat), tempo_dialog.get_tempo_type());
 	} else {
 		framepos_t const f = _session->tempo_map().predict_tempo_frame (section, Tempo (bpm, nt), when);
 		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), f, tempo_dialog.get_tempo_type());

@@ -365,7 +365,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	const TempoSection& tempo_section_at (framepos_t frame) const;
 	const MeterSection& meter_section_at (framepos_t frame) const;
 
-	void add_tempo (const Tempo&, const double& beat, TempoSection::Type type);
+	void add_tempo (const Tempo&, const double& pulse, TempoSection::Type type);
 	void add_tempo (const Tempo&, const framepos_t& frame, TempoSection::Type type);
 
 	void add_meter (const Meter&, const double& beat, const Timecode::BBT_Time& where);
@@ -375,7 +375,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void remove_meter (const MeterSection&, bool send_signal);
 
 	framepos_t predict_tempo_frame (TempoSection* section, const Tempo& bpm, const Timecode::BBT_Time& bbt);
-	double predict_tempo_beat (TempoSection* section, const Tempo& bpm, const framepos_t& beat);
+	double predict_tempo_pulse (TempoSection* section, const Tempo& bpm, const framepos_t& frame);
 
 	void replace_tempo (const TempoSection&, const Tempo&, const double& where, TempoSection::Type type);
 	void replace_tempo (const TempoSection&, const Tempo&, const framepos_t& frame, TempoSection::Type type);
@@ -399,7 +399,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
-	void dump (Metrics& metrics, std::ostream&) const;
+	void dump (const Metrics& metrics, std::ostream&) const;
 	void clear ();
 
 	TempoMetric metric_at (Timecode::BBT_Time bbt) const;
@@ -426,20 +426,24 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	Timecode::BBT_Time beats_to_bbt (const double& beats);
 	Timecode::BBT_Time pulse_to_bbt (const double& pulse);
 
+	double pulse_at_beat (const double& beat) const;
+	double beat_at_pulse (const double& pulse) const;
+
 	PBD::Signal0<void> MetricPositionChanged;
 
 private:
-	double pulse_at_beat (const Metrics& metrics, const double& beat) const;
-	double beat_at_pulse (const Metrics& metrics, const double& pulse) const;
+	double pulse_at_beat_locked (const Metrics& metrics, const double& beat) const;
+	double beat_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
+	double pulse_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;
+	framecnt_t frame_at_pulse_locked (const Metrics& metrics, const double& beat) const;
+
+	double pulse_offset_at (const Metrics& metrics, const double& pulse) const;
+	frameoffset_t frame_offset_at (const Metrics& metrics, const framepos_t& frame) const;
+
 	double beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;
 	framecnt_t frame_at_beat_locked (const Metrics& metrics, const double& beat) const;
 	double bbt_to_beats_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const ;
 	Timecode::BBT_Time beats_to_bbt_locked (const Metrics& metrics, const double& beats) const;
-	double pulse_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;
-	framecnt_t frame_at_pulse_locked (const Metrics& metrics, const double& beat) const;
-
-	double beat_offset_at (const Metrics& metrics, const double& beat) const;
-	frameoffset_t frame_offset_at (const Metrics& metrics, const framepos_t& frame) const;
 
 	framepos_t frame_time_locked (const Metrics& metrics, const Timecode::BBT_Time&) const;
 
@@ -476,7 +480,7 @@ private:
 
 	void do_insert (MetricSection* section);
 
-	void add_tempo_locked (const Tempo&, double where, bool recompute, TempoSection::Type type);
+	void add_tempo_locked (const Tempo&, double pulse, bool recompute, TempoSection::Type type);
 	void add_tempo_locked (const Tempo&, framepos_t frame, bool recompute, TempoSection::Type type);
 
 	void add_meter_locked (const Meter&, double beat, Timecode::BBT_Time where, bool recompute);
