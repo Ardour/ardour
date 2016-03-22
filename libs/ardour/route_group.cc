@@ -24,6 +24,7 @@
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 #include "pbd/strsplit.h"
+#include "pbd/debug.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_track.h"
