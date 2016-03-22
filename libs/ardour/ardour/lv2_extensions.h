@@ -118,8 +118,8 @@ typedef struct {
 */
 
 #define LV2_PLUGINLICENSE_URI "http://harrisonconsoles.com/lv2/license"
-#define LV2_PLUGINLICENSE_PREFIX LV2_INLINEDISPLAY_URI "#"
-#define LV2_PLUGINLICENSE__interface LV2_INLINEDISPLAY_PREFIX "interface"
+#define LV2_PLUGINLICENSE_PREFIX LV2_PLUGINLICENSE_URI "#"
+#define LV2_PLUGINLICENSE__interface LV2_PLUGINLICENSE_PREFIX "interface"
 
 typedef struct _LV2_License_Interface {
 	/* @return -1 if no license is needed; 0 if unlicensed, 1 if licensed */
