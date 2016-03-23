@@ -51,6 +51,8 @@
 #include <boost/type_traits.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "lua/luastate.h"
+
 #define LUABRIDGE_MAJOR_VERSION 2
 #define LUABRIDGE_MINOR_VERSION 0
 #define LUABRIDGE_VERSION 200

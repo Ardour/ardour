@@ -23,6 +23,7 @@
 #include "pbd/compose.h"
 
 #include "ardour/luascripting.h"
+#include "ardour/lua_script_params.h"
 #include "ardour/search_paths.h"
 
 #include "lua/luastate.h"
@@ -275,24 +276,33 @@ LuaScriptInfo::str2type (const std::string& str) {
 }
 
 LuaScriptParamList
-LuaScripting::script_params (LuaScriptInfoPtr lsi, const std::string &fn)
+LuaScriptParams::script_params (LuaScriptInfoPtr lsi, const std::string &pname)
+{
+	assert (lsi);
+	return LuaScriptParams::script_params (lsi->path, pname);
+}
+
+LuaScriptParamList
+LuaScriptParams::script_params (const std::string& s, const std::string &pname, bool file)
 {
 	LuaScriptParamList rv;
-	assert (lsi);
 
 	LuaState lua;
 	lua_State* L = lua.getState();
-	lua.Print.connect (&LuaScripting::lua_print);
 	lua.do_command ("io = nil;");
 	lua.do_command ("function ardour () end");
 
 	try {
-		lua.do_file (lsi->path);
+		if (file) {
+			lua.do_file (s);
+		} else {
+			lua.do_command (s);
+		}
 	} catch (luabridge::LuaException const& e) {
 		return rv;
 	}
 
-	luabridge::LuaRef lua_params = luabridge::getGlobal (L, fn.c_str());
+	luabridge::LuaRef lua_params = luabridge::getGlobal (L, pname.c_str());
 	if (lua_params.isFunction ()) {
 		luabridge::LuaRef params = lua_params ();
 		if (params.isTable ()) {
@@ -318,6 +328,33 @@ LuaScripting::script_params (LuaScriptInfoPtr lsi, const std::string &fn)
 		}
 	}
 	return rv;
+}
+
+void
+LuaScriptParams::params_to_ref (luabridge::LuaRef *tbl_args, const LuaScriptParamList& args)
+{
+	assert (tbl_args &&  (*tbl_args).isTable ());
+	for (LuaScriptParamList::const_iterator i = args.begin(); i != args.end(); ++i) {
+		if ((*i)->optional && !(*i)->is_set) { continue; }
+		(*tbl_args)[(*i)->name] = (*i)->value;
+	}
+}
+
+void
+LuaScriptParams::ref_to_params (LuaScriptParamList& args, luabridge::LuaRef *tbl_ref)
+{
+	assert (tbl_ref &&  (*tbl_ref).isTable ());
+	for (luabridge::Iterator i (*tbl_ref); !i.isNil (); ++i) {
+		if (!i.key ().isString ()) { assert(0); continue; }
+		std::string name = i.key ().cast<std::string> ();
+		std::string value = i.value ().cast<std::string> ();
+		for (LuaScriptParamList::const_iterator ii = args.begin(); ii != args.end(); ++ii) {
+			if ((*ii)->name == name) {
+				(*ii)->value = value;
+				break;
+			}
+		}
+	}
 }
 
 bool

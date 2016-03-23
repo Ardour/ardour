@@ -101,12 +101,6 @@ public:
 
 	void refresh ();
 	static LuaScriptInfoPtr script_info (const std::string &script ) { return scan_script ("", script); }
-
-	static LuaScriptParamList script_params (LuaScriptInfoPtr, const std::string &);
-	static LuaScriptParamList session_script_params (LuaScriptInfoPtr lsi) {
-		return script_params (lsi, "sess_params");
-	}
-
 	static bool try_compile (const std::string&, const LuaScriptParamList&);
 	static std::string get_factory_bytecode (const std::string&);
 
