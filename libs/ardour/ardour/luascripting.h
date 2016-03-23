@@ -23,6 +23,7 @@
 #include <boost/shared_ptr.hpp>
 #include <glibmm/threads.h>
 
+#include "pbd/signals.h"
 #include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
@@ -36,6 +37,7 @@ class LIBARDOUR_API LuaScriptInfo {
 		Session,
 		EditorHook,
 		EditorAction,
+		Snippet,
 	};
 
 	static std::string type2str (const ScriptType t);
@@ -98,18 +100,19 @@ public:
 	~LuaScripting ();
 
 	LuaScriptList &scripts (LuaScriptInfo::ScriptType);
+	void refresh (bool run_scan = false);
+	PBD::Signal0<void> scripts_changed;
 
-	void refresh ();
-	static LuaScriptInfoPtr script_info (const std::string &script ) { return scan_script ("", script); }
+	static LuaScriptInfoPtr script_info (const std::string &script);
 	static bool try_compile (const std::string&, const LuaScriptParamList&);
 	static std::string get_factory_bytecode (const std::string&);
+	static std::string user_script_dir ();
 
 private:
 	static LuaScripting* _instance; // singleton
 	LuaScripting ();
 
 	void scan ();
-	void check_scan ();
 	static LuaScriptInfoPtr scan_script (const std::string &, const std::string & sc = "");
 	static void lua_print (std::string s);
 
@@ -117,6 +120,7 @@ private:
 	LuaScriptList *_sl_session;
 	LuaScriptList *_sl_hook;
 	LuaScriptList *_sl_action;
+	LuaScriptList *_sl_snippet;
 	LuaScriptList  _empty_script_info;
 
 	Glib::Threads::Mutex _lock;
