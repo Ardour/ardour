@@ -372,12 +372,17 @@ Editor::edit_tempo_section (TempoSection* section)
 
 	begin_reversible_command (_("replace tempo mark"));
 	XMLNode &before = _session->tempo_map().get_state();
+
 	if (tempo_dialog.get_lock_style() == MusicTime) {
-		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), _session->tempo_map().pulse_at_beat (beat), tempo_dialog.get_tempo_type());
+		section->set_position_lock_style (MusicTime);
+		framepos_t const f = _session->tempo_map().predict_tempo_frame (section, Tempo (bpm, nt), when);
+		double const p = _session->tempo_map().predict_tempo_pulse (section, Tempo (bpm, nt), f);
+		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), p, tempo_dialog.get_tempo_type());
 	} else {
 		framepos_t const f = _session->tempo_map().predict_tempo_frame (section, Tempo (bpm, nt), when);
 		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), f, tempo_dialog.get_tempo_type());
 	}
+
 	XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();

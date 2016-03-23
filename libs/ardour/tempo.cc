@@ -946,9 +946,6 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const frame
 			/* cannot move the first meter section */
 			*static_cast<Meter*>(&first) = meter;
 			first.set_position_lock_style (pl);
-			double paf = pulse_at_frame_locked (_metrics, frame);
-			pair<double, BBT_Time> pulse = make_pair (paf, beats_to_bbt_locked (_metrics, beat_at_pulse_locked (_metrics, paf)));
-			first.set_pulse (pulse);
 			first.set_frame (frame);
 			recompute_map (_metrics);
 		}
@@ -1453,8 +1450,8 @@ TempoMap::pulse_at_beat_locked (const Metrics& metrics, const double& beat) cons
 		}
 
 	}
-
-	return prev_ms->pulse() + ((beat - accumulated_beats) / prev_ms->note_divisor());
+	double const ret = prev_ms->pulse() + ((beat - accumulated_beats) / prev_ms->note_divisor());
+	return ret;
 }
 
 double
@@ -1469,6 +1466,7 @@ TempoMap::beat_at_pulse_locked (const Metrics& metrics, const double& pulse) con
 {
 	MeterSection* prev_ms = 0;
 	double accumulated_beats = 0.0;
+
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
@@ -1799,9 +1797,6 @@ TempoMap::frame_at_pulse_locked (const Metrics& metrics, const double& pulse) co
 
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 			if (prev_ts && t->pulse() > pulse) {
-				if (prev_ts->pulse() > pulse) {
-					return 0;
-				}
 				return prev_ts->frame_at_pulse (pulse, _frame_rate);
 			}
 
@@ -2032,8 +2027,8 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const Tempo& bpm
 		}
 	}
 	if (section_prev) {
-		section_prev->set_c_func (section_prev->compute_c_func_pulse (section->pulses_per_minute(), section->pulse(), _frame_rate));
-		section->set_frame (section_prev->frame_at_pulse (section->pulse(), _frame_rate));
+		section_prev->set_c_func (section_prev->compute_c_func_pulse (section->pulses_per_minute(), pulse, _frame_rate));
+		section->set_frame (section_prev->frame_at_pulse (pulse, _frame_rate));
 	}
 
 	if (section->position_lock_style() == AudioTime) {
@@ -2152,24 +2147,24 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt,
 				accumulated_bars += (beats_in_m + 1) / prev_ms->divisions_per_bar();
 			}
 			if (m == section){
-					/*
-					  here we define the pulse for this frame.
-					  we're going to set it 'incorrectly' to the next integer and use this 'error'
-					  as an offset to the map as far as users of the public methods are concerned.
-					  (meters should go on absolute pulses to keep us sane)
-					*/
-					double const pulse_at_f = pulse_at_frame_locked (imaginary, m->frame());
-					pair<double, BBT_Time> b_bbt = make_pair (pulse_at_f, BBT_Time (accumulated_bars + 1, 1, 0));
-					m->set_pulse (b_bbt);
-					m->set_beat (accumulated_beats);
-					prev_ms = m;
-					continue;
+				/*
+				  here we define the pulse for this frame.
+				  we're going to set it 'incorrectly' to the next integer and use this 'error'
+				  as an offset to the map as far as users of the public methods are concerned.
+				  (meters should go on absolute pulses to keep us sane)
+				*/
+				double const pulse_at_f = pulse_at_frame_locked (imaginary, m->frame());
+				pair<double, BBT_Time> b_bbt = make_pair (pulse_at_f, BBT_Time (accumulated_bars + 1, 1, 0));
+				m->set_pulse (b_bbt);
+				m->set_beat (accumulated_beats);
+				prev_ms = m;
+				continue;
 			}
 			if (prev_ms) {
 				if (m->position_lock_style() == MusicTime) {
 					m->set_frame (frame_at_pulse_locked (imaginary, m->pulse()));
 				} else {
-					double const pulse_at_f = ceil (pulse_at_frame_locked (imaginary, frame));
+					double const pulse_at_f = pulse_at_frame_locked (imaginary, frame);
 					pair<double, BBT_Time> b_bbt = make_pair (pulse_at_f, BBT_Time (accumulated_bars + 1, 1, 0));
 					m->set_pulse (b_bbt);
 				}
@@ -2519,9 +2514,7 @@ TempoMap::meter_section_at_locked (framepos_t frame) const
 const Meter&
 TempoMap::meter_at (framepos_t frame) const
 {
-	framepos_t const frame_off = frame + frame_offset_at (_metrics, frame);
-	TempoMetric m (metric_at (frame_off));
-
+	TempoMetric m (metric_at (frame));
 	return m.meter();
 }
 
@@ -2929,7 +2922,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 Evoral::Beats
 TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 {
-	return Evoral::Beats(beat_at_frame (pos + distance) - beat_at_frame (pos));
+	return Evoral::Beats (beat_at_frame (pos + distance) - beat_at_frame (pos));
 }
 
 struct bbtcmp {
