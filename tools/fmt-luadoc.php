@@ -514,7 +514,7 @@ div.header p       {margin:.25em;}
 
 <h1 id="h_intro">Overview</h1>
 <p>
-The top-level entry point are <?=typelink('ARDOUR:Session')?> and <?=typelink('ARDOUR:Editor')?>.
+The top-level entry point are <?=typelink('ARDOUR:Session')?> and <?=typelink('ArdourUI:Editor')?>.
 Most other Classes are used indirectly starting with a Session function. e.g. Session:get_routes().
 </p>
 <p>
@@ -524,6 +524,21 @@ A few classes are dedicated to certain script types, e.g. Lua DSP processors hav
 </p>
 <p>
 Detailed documentation (parameter names, method description) is not yet available. Please stay tuned.
+</p>
+<h2>Short introduction to Ardour classes</h2>
+<p>
+Ardour's structure is object oriented. The main object is the Session. A Session contains Audio Tracks, Midi Tracks and Busses.
+Audio and Midi tracks are derived from a more general "Track" Object,  which in turn is derived from a "Route" (aka Bus).
+(We say "An Audio Track <em>is-a</em> Track <em>is-a</em> Route").
+Tracks contain specifics. For Example a track <em>has-a</em> diskstream (for file i/o).
+</p>
+<p>
+Operations are performed on objects. One gets a reference to an object and then calls a method.
+e.g   obj = Session:route_by_name("Audio")   obj:set_name("Guitar")
+</p>
+<p>
+Object lifetimes are managed by the Session. Most Objects cannot be directly created, but one asks the Session to create or destroy them. This is mainly due to realtime constrains:
+you cannot simply remove a track that is currently processing audio. There are various <em>factory</em> methods for object creation or removal.
 </p>
 
 <?php
