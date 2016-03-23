@@ -3988,6 +3988,7 @@ ARDOUR_UI::add_lua_script ()
 		default:
 			return;
 	}
+	ss.hide();
 
 	std::string script = "";
 

@@ -2080,6 +2080,7 @@ ProcessorBox::choose_lua ()
 		default:
 			return true;
 	}
+	ss.hide ();
 
 	PluginPtr p;
 	try {

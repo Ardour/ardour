@@ -665,6 +665,7 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 		default:
 			return false;
 	}
+	ss.hide ();
 
 	std::string script = "";
 
