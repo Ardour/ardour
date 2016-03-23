@@ -94,7 +94,7 @@ LuaWindow::LuaWindow ()
 	, _btn_open (_("Import"))
 	, _btn_save (_("Save"))
 	, _btn_delete (_("Delete"))
-	, _current_buffer (0)
+	, _current_buffer ()
 {
 	set_name ("Lua");
 
