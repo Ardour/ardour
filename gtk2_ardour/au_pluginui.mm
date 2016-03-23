@@ -418,7 +418,29 @@ AUPluginUI::create_cocoa_view ()
 				return -1;
 			}
 			// make a factory
+
+#if 0 // TODO: release when destoying the UI  -- Test workaround for IK Multimedia crash
+
+			/* 0   Philharmonik 2                      0x000000011df4ebd4 IK::Products::STShell::GUIData::SetListener(IK::Products::STShell::GUIDataListener*) + 4
+				 1   Philharmonik 2                      0x000000011df4a4f8 IK::Products::STShell::GUI::CloseWindow() + 24
+				 2   com.ikmultimedia.audiounit.Philharmonik2    0x00000001164cef3a -[Philharmonik2CocoaView dealloc] + 26
+				 3   libobjc.A.dylib                     0x00007fff8f63a89c objc_object::sidetable_release(bool) + 236
+				 4   libobjc.A.dylib                     0x00007fff8f620e8f (anonymous namespace)::AutoreleasePoolPage::pop(void*) + 575
+				 5   com.apple.CoreFoundation            0x00007fff8500f6f2 _CFAutoreleasePoolPop + 50
+				 6   com.apple.Foundation                0x00007fff81729832 -[NSAutoreleasePool drain] + 153
+				 7   libgdk-quartz-2.0.0.dylib           0x00000001068c5bac gdk_event_prepare + 140
+				 8   libglib-2.0.0.dylib                 0x0000000106255085 g_main_context_prepare + 405
+				 9   libglib-2.0.0.dylib                 0x0000000106255977 g_main_context_iterate + 119
+				 10  libglib-2.0.0.dylib                 0x0000000106255c75 g_main_loop_run + 261
+				 11  libgtk-quartz-2.0.0.dylib           0x0000000106472dd0 gtk_main + 176
+				 12  libgtkmm2ext.dylib                  0x000000010374191d Gtkmm2ext::UI::run(Receiver&) + 385
+				 13  Ardour.bin                          0x000000010054b424 main + 1914
+				 14  Ardour.bin                          0x00000001000309bc start + 52
+			 */
 			id factory = [[[factoryClass alloc] init] autorelease];
+#else
+			id factory = [[factoryClass alloc] init];
+#endif
 			if (factory == NULL) {
 				error << _("AUPluginUI: Could not create an instance of the AU view factory") << endmsg;
 				return -1;
