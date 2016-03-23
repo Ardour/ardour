@@ -4000,7 +4000,7 @@ ARDOUR_UI::add_lua_script ()
 		return;
 	}
 
-	LuaScriptParamList lsp = LuaScripting::session_script_params (spi);
+	LuaScriptParamList lsp = LuaScriptParams::script_params (spi, "sess_params");
 	std::vector<std::string> reg = _session->registered_lua_functions ();
 
 	ScriptParameterDialog spd (_("Set Script Parameters"), spi, reg, lsp);

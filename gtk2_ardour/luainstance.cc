@@ -677,7 +677,7 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 		return false;
 	}
 
-	LuaScriptParamList lsp = LuaScripting::script_params (spi, "action_params");
+	LuaScriptParamList lsp = LuaScriptParams::script_params (spi, "action_params");
 
 	ScriptParameterDialog spd (_("Set Script Parameters"), spi, reg, lsp);
 	switch (spd.run ()) {
@@ -839,18 +839,9 @@ LuaInstance::lua_action (const int id, std::string& name, std::string& script, L
 		if (!lsi) {
 			return false;
 		}
-		args = LuaScripting::script_params (lsi, "action_params");
-		for (luabridge::Iterator i (static_cast<luabridge::LuaRef>(ref["args"])); !i.isNil (); ++i) {
-			if (!i.key ().isString ()) { assert(0); continue; }
-			std::string name = i.key ().cast<std::string> ();
-			std::string value = i.value ().cast<std::string> ();
-			for (LuaScriptParamList::const_iterator ii = args.begin(); ii != args.end(); ++ii) {
-				if ((*ii)->name == name) {
-					(*ii)->value = value;
-					break;
-				}
-			}
-		}
+		args = LuaScriptParams::script_params (lsi, "action_params");
+		luabridge::LuaRef rargs (ref["args"]);
+		LuaScriptParams::ref_to_params (args, &rargs);
 		return true;
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
@@ -1216,18 +1207,9 @@ LuaCallback::lua_slot (std::string& name, std::string& script, ActionHook& ah, A
 		if (!lsi) {
 			return false;
 		}
-		args = LuaScripting::script_params (lsi, "action_params");
-		for (luabridge::Iterator i (static_cast<luabridge::LuaRef>(ref["args"])); !i.isNil (); ++i) {
-			if (!i.key ().isString ()) { assert(0); continue; }
-			std::string name = i.key ().cast<std::string> ();
-			std::string value = i.value ().cast<std::string> ();
-			for (LuaScriptParamList::const_iterator ii = args.begin(); ii != args.end(); ++ii) {
-				if ((*ii)->name == name) {
-					(*ii)->value = value;
-					break;
-				}
-			}
-		}
+		args = LuaScriptParams::script_params (lsi, "action_params");
+		luabridge::LuaRef rargs (ref["args"]);
+		LuaScriptParams::ref_to_params (args, &rargs);
 		return true;
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;

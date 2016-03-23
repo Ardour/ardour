@@ -8,6 +8,7 @@
 #include "pbd/xml++.h"
 
 #include "ardour/luascripting.h"
+#include "ardour/lua_script_params.h"
 #include "ardour/luabindings.h"
 #include "ardour/session_handle.h"
 
