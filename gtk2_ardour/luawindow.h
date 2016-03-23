@@ -26,16 +26,20 @@
 #include <gtkmm/label.h>
 #include <gtkmm/window.h>
 
-#include "ardour/ardour.h"
-#include "ardour/types.h"
-#include "ardour/session_handle.h"
-
-#include "pbd/stateful.h"
 #include "pbd/signals.h"
+#include "pbd/stateful.h"
+
+#include "ardour/ardour.h"
+#include "ardour/luascripting.h"
+#include "ardour/session_handle.h"
+#include "ardour/types.h"
 
 #include "gtkmm2ext/visibility_tracker.h"
 
 #include "lua/luastate.h"
+
+#include "ardour_button.h"
+#include "ardour_dropdown.h"
 
 class LuaWindow :
 	public Gtk::Window,
@@ -52,27 +56,85 @@ class LuaWindow :
 
 	void set_session (ARDOUR::Session* s);
 
+	typedef enum {
+		Buffer_NOFLAG     = 0x00,
+		Buffer_Valid      = 0x01, ///< script is loaded
+		Buffer_HasFile    = 0x02,
+		Buffer_ReadOnly   = 0x04,
+		Buffer_Dirty      = 0x08,
+		Buffer_Scratch    = 0x10,
+	} BufferFlags;
+
+	class ScriptBuffer {
+	public:
+		ScriptBuffer (const std::string&);
+		ScriptBuffer (ARDOUR::LuaScriptInfoPtr);
+		//ScriptBuffer (const ScriptBuffer& other);
+		~ScriptBuffer ();
+
+		bool load ();
+
+		std::string script;
+		std::string name;
+		std::string path;
+		BufferFlags flags;
+		ARDOUR::LuaScriptInfo::ScriptType type;
+	};
+
   private:
 	LuaWindow ();
 	static LuaWindow* _instance;
 
+	LuaState lua;
 	bool _visible;
-	Gtk::VBox global_vpacker;
+
+	Gtk::Menu* _menu_scratch;
+	Gtk::Menu* _menu_snippet;
+	Gtk::Menu* _menu_actions;
+
+	sigc::connection _script_changed_connection;
+
+	Gtk::TextView entry;
+	Gtk::TextView outtext;
+	Gtk::ScrolledWindow scrollout;
+
+	ArdourButton _btn_run;
+	ArdourButton _btn_clear;
+	ArdourButton _btn_open;
+	ArdourButton _btn_save;
+	ArdourButton _btn_delete;
+
+	ArdourDropdown script_select;
+
+	typedef boost::shared_ptr<ScriptBuffer> ScriptBufferPtr;
+	typedef std::vector<ScriptBufferPtr> ScriptBufferList;
+
+	ScriptBufferList script_buffers;
+	ScriptBufferPtr _current_buffer;
 
 	void session_going_away ();
 	void update_title ();
 
-	Gtk::Entry entry;
-	Gtk::TextView outtext;
-	Gtk::ScrolledWindow scrollwin;
+	void setup_buffers ();
+	void refresh_scriptlist ();
+	void rebuild_menu ();
+	uint32_t count_scratch_buffers () const;
+
+	void script_changed ();
+	void script_selection_changed (ScriptBufferPtr n);
+	void update_gui_state ();
 
 	void append_text (std::string s);
 	void scroll_to_bottom ();
 	void clear_output ();
 
-	void entry_activated ();
+	void run_script ();
 
-	LuaState lua;
+	void new_script ();
+	void delete_script ();
+	void import_script ();
+	void save_script ();
 };
+
 
 #endif

@@ -112,6 +112,7 @@ ScriptSelector::script_combo_changed ()
 void
 ScriptSelector::refresh ()
 {
+	LuaScripting::instance ().refresh ();
 	_scripts = LuaScripting::instance ().scripts (_script_type);
 	setup_list ();
 }
@@ -166,10 +167,12 @@ ScriptParameterDialog::ScriptParameterDialog (std::string title,
 	t->attach (_name_entry, 1, 2, ty, ty+1);
 	++ty;
 
-	l = manage (new Label (_("<b>Parameters:</b>"), Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, false));
-	l->set_use_markup ();
-	t->attach (_name_entry, 0, 2, ty, ty+1);
-	++ty;
+	if (_lsp.size () > 0) {
+		l = manage (new Label (_("<b>Instance Parameters</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l->set_use_markup ();
+		t->attach (*l, 0, 2, ty, ty+1);
+		++ty;
+	}
 
 	for (size_t i = 0; i < _lsp.size (); ++i) {
 		CheckButton* c = manage (new CheckButton (_lsp[i]->title));
