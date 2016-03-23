@@ -20,8 +20,9 @@ end
 function factory (params)
 	return function ()
 		-- get configuration
-		local uniq = params["unique"] or "yes"
-		local pos = params["position"] or 0
+		local p = params or {}
+		local uniq = p["unique"] or "yes"
+		local pos = p["position"] or 0
 
 		-- loop over all tracks
 		for t in Session:get_tracks():iter() do
