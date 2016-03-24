@@ -1319,18 +1319,43 @@ LuaCallback::connect_2 (enum LuaSignal::LuaSignal ls, T ref, PBD::Signal2<void, 
 
 template <typename T> void
 LuaCallback::proxy_0 (enum LuaSignal::LuaSignal ls, T ref) {
-	luabridge::LuaRef rv ((*_lua_call)((int)ls, ref));
-	if (! rv.cast<bool> ()) { drop_callback (); /* EMIT SIGNAL */}
+	bool ok = true;
+	{
+		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref));
+		if (! rv.cast<bool> ()) {
+			ok = false;
+		}
+	}
+	/* destroy LuaRef ^^ first before calling drop_callback() */
+	if (!ok) {
+		drop_callback (); /* EMIT SIGNAL */
+	}
 }
 
 template <typename T, typename C1> void
 LuaCallback::proxy_1 (enum LuaSignal::LuaSignal ls, T ref, C1 a1) {
-	luabridge::LuaRef rv ((*_lua_call)((int)ls, ref, a1));
-	if (! rv.cast<bool> ()) { drop_callback (); /* EMIT SIGNAL */}
+	bool ok = true;
+	{
+		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref, a1));
+		if (! rv.cast<bool> ()) {
+			ok = false;
+		}
+	}
+	if (!ok) {
+		drop_callback (); /* EMIT SIGNAL */
+	}
 }
 
 template <typename T, typename C1, typename C2> void
 LuaCallback::proxy_2 (enum LuaSignal::LuaSignal ls, T ref, C1 a1, C2 a2) {
-	luabridge::LuaRef rv ((*_lua_call)((int)ls, ref, a1, a2));
-	if (! rv.cast<bool> ()) { drop_callback (); /* EMIT SIGNAL */}
+	bool ok = true;
+	{
+		const luabridge::LuaRef& rv ((*_lua_call)((int)ls, ref, a1, a2));
+		if (! rv.cast<bool> ()) {
+			ok = false;
+		}
+	}
+	if (!ok) {
+		drop_callback (); /* EMIT SIGNAL */
+	}
 }
