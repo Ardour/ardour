@@ -28,7 +28,7 @@ end
 function factory (params)
 	return function (signal, ref, ...)
 		local uri = params["unique"] or "osc.udp://localhost:7890"
-		local tx = OSC.Address (uri)
+		local tx = LuaOSC.Address (uri)
 		-- debug print (stdout)
 		-- print (signal, ref, ...)
 

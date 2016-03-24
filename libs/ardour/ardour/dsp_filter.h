@@ -27,9 +27,20 @@
 
 namespace ARDOUR { namespace DSP {
 
-	/** a convenience class for lua scripts to use C memory for DSP operations.
+	/** C Shared Memory
 	 *
-	 * It should be allocated during dsp_init() or dsp_configure().
+	 * A convenience class representing a C array or float[] or int32_t[]
+	 * data values. This is useful for lua scripts to perform DSP operations
+	 * directly using C, C++.
+	 * Access to this memory area is always 4 byte aligned: float, int.
+	 *
+	 * This memory area can also be shared between different instances.
+	 *
+	 * Since memory allocation is not realtime safe it should be
+	 * allocated during dsp_init() or dsp_configure().
+	 *
+	 * The memory is free()ed automatically when the lua instance is
+	 * destroyed.
 	 */
 	class DspShm {
 		public:
@@ -45,29 +56,62 @@ namespace ARDOUR { namespace DSP {
 				free (_data);
 			}
 
+			/** [re] allocate memory in host's memory space
+			 *
+			 * @param s size, total number of float or integer elements to store.
+			 */
 			void allocate (size_t s) {
 				_data = realloc (_data, sizeof(float) * s);
 				if (_data) { _size = s; }
 			}
 
+			/** clear memory (set to zero) */
 			void clear () {
 				memset (_data, 0, sizeof(float) * _size);
 			}
 
+			/** access memory as float array
+			 *
+			 * @param off offset in shared memory region
+			 * @returns float[]
+			 */
 			float* to_float (size_t off) {
 				if (off >= _size) { return 0; }
 				return &(((float*)_data)[off]);
 			}
 
+			/** access memory as integer array
+			 *
+			 * @param off offset in shared memory region
+			 * @returns int_32_t[]
+			 */
 			int32_t* to_int (size_t off) {
 				if (off >= _size) { return 0; }
 				return &(((int32_t*)_data)[off]);
 			}
 
+			/** atomically set integer at offset
+			 *
+			 * This involves a memory barrier. This call
+			 * is intended for buffers which are
+			 * shared with another instance.
+			 *
+			 * @param off offset in shared memory region
+			 * @param val value to set
+			 */
 			void atomic_set_int (size_t off, int32_t val) {
 				g_atomic_int_set (&(((int32_t*)_data)[off]), val);
 			}
 
+			/** atomically read integer at offset
+			 *
+			 * This involves a memory barrier. This call
+			 * is intended for buffers which are
+			 * shared with another instance.
+			 *
+			 * @param off offset in shared memory region
+			 * @returns value at offset
+			 */
 			int32_t atomic_get_int (size_t off) {
 				return g_atomic_int_get (&(((int32_t*)_data)[off]));
 			}
@@ -84,12 +128,36 @@ namespace ARDOUR { namespace DSP {
 	float log_meter (float power);
 	float log_meter_coeff (float coeff);
 
+	/** 1st order Low Pass filter */
 	class LIBARDOUR_API LowPass {
 		public:
+			/** instantiate a LPF
+			 *
+			 * @param samplerate samplerate
+			 * @param freq cut-off frequency
+			 */
 			LowPass (double samplerate, float freq);
+			/** process audio data
+			 *
+			 * @param data pointer to audio-data
+			 * @param n_samples number of samples to process
+			 */
 			void proc (float *data, const uint32_t n_samples);
+			/** filter control data
+			 *
+			 * This is useful for parameter smoothing.
+			 *
+			 * @param data pointer to control-data array
+			 * @param val target value
+			 * @param array length
+			 */
 			void ctrl (float *data, const float val, const uint32_t n_samples);
+			/** update filter cut-off frequency
+			 *
+			 * @param freq cut-off frequency
+			 */
 			void set_cutoff (float freq);
+			/** reset filter state */
 			void reset () { _z =  0.f; }
 		private:
 			float _rate;
@@ -97,6 +165,7 @@ namespace ARDOUR { namespace DSP {
 			float _a;
 	};
 
+	/** Biquad Filter */
 	class LIBARDOUR_API BiQuad {
 		public:
 			enum Type {
@@ -111,11 +180,28 @@ namespace ARDOUR { namespace DSP {
 				HighShelf
 			};
 
+			/** Instantiate Biquad Filter
+			 *
+			 * @param samplerate Samplerate
+			 */
 			BiQuad (double samplerate);
 			BiQuad (const BiQuad &other);
 
+			/** process audio data
+			 *
+			 * @param data pointer to audio-data
+			 * @param n_samples number of samples to process
+			 */
 			void run (float *data, const uint32_t n_samples);
-			void compute (Type, double freq, double Q, double gain);
+			/** setup filter, compute coefficients
+			 *
+			 * @param t filter type
+			 * @param freq filter frequency
+			 * @param Q filter quality
+			 * @param gain filter gain
+			 */
+			void compute (Type t, double freq, double Q, double gain);
+			/** reset filter state */
 			void reset () { _z1 = _z2 = 0.0; }
 		private:
 			double _rate;

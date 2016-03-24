@@ -749,10 +749,10 @@ void
 LuaBindings::osc (lua_State* L)
 {
 	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("OSC")
-		.beginClass<LuaAPI::LuaOSCAddress> ("Address")
+		.beginNamespace ("LuaOSC")
+		.beginClass<LuaOSC::Address> ("Address")
 		.addConstructor<void (*) (std::string)> ()
-		.addCFunction ("send", &LuaAPI::LuaOSCAddress::send)
+		.addCFunction ("send", &LuaOSC::Address::send)
 		.endClass ()
 		.endNamespace ();
 }

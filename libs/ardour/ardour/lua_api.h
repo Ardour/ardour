@@ -30,23 +30,98 @@
 
 namespace ARDOUR { namespace LuaAPI {
 
-	boost::shared_ptr<ARDOUR::Processor> new_luaproc (ARDOUR::Session *s, const std::string&);
-	boost::shared_ptr<ARDOUR::PluginInfo> new_plugin_info (const std::string&, ARDOUR::PluginType);
-	boost::shared_ptr<ARDOUR::Processor> new_plugin (ARDOUR::Session *s, const std::string&, ARDOUR::PluginType, const std::string& preset = "");
+	/** create a new Lua Processor (Plugin)
+	 *
+	 * @param s Session Handle
+	 * @param p Identifier or Name of the Processor
+	 * @returns Processor object (may be nil)
+	 */
+	boost::shared_ptr<ARDOUR::Processor> new_luaproc (ARDOUR::Session *s, const std::string& p);
+
+	/** search a Plugin
+	 *
+	 * @param id Plugin Name, ID or URI
+	 * @param type Plugin Type
+	 * @returns PluginInfo or nil if not found
+	 */
+	boost::shared_ptr<ARDOUR::PluginInfo> new_plugin_info (const std::string& id, ARDOUR::PluginType type);
+
+	/** create a new Plugin Instance
+	 *
+	 * @param s Session Handle
+	 * @param id Plugin Name, ID or URI
+	 * @param type Plugin Type
+	 * @returns Processor or nil
+	 */
+	boost::shared_ptr<ARDOUR::Processor> new_plugin (ARDOUR::Session *s, const std::string& id, ARDOUR::PluginType type, const std::string& preset = "");
+
+	/** set a plugin control-input parameter value
+	 *
+	 * @param proc Plugin-Processor
+	 * @param which control-input to set (starting at 0)
+	 * @param value value to set
+	 * @returns true on success, false on error or out-of-bounds value
+	 */
 	bool set_processor_param (boost::shared_ptr<Processor> proc, uint32_t which, float val);
+	/** set a plugin control-input parameter value
+	 *
+	 * This is a wrapper around set_processor_param which looks up the Processor by plugin-insert.
+	 *
+	 * @param proc Plugin-Insert
+	 * @param which control-input to set (starting at 0)
+	 * @param value value to set
+	 * @returns true on success, false on error or out-of-bounds value
+	 */
 	bool set_plugin_insert_param (boost::shared_ptr<PluginInsert> pi, uint32_t which, float val);
 
-	/**
-	 * OSC is kinda special, lo_address is a void* and lo_send() has varags
-	 * and typed arguments which makes it hard to bind, even lo_cpp.
+} } /* namespace */
+
+namespace ARDOUR { namespace LuaOSC {
+	/** OSC transmitter
+	 *
+	 * A Class to send OSC messages.
 	 */
-	class LuaOSCAddress {
+	class Address {
+		/*
+		 * OSC is kinda special, lo_address is a void* and lo_send() has varags
+		 * and typed arguments which makes it hard to bind, even lo_cpp.
+		 */
 		public:
-			LuaOSCAddress (std::string uri) {
+			/** Construct a new OSC transmitter object
+			 * @param uri the destination uri e.g. "osc.udp://localhost:7890"
+			 */
+			Address (std::string uri) {
 				_addr = lo_address_new_from_url (uri.c_str());
 			}
-			~LuaOSCAddress () { if (_addr) { lo_address_free (_addr); } }
-			int send (lua_State *L);
+
+			~Address () { if (_addr) { lo_address_free (_addr); } }
+			/** Transmit an OSC message
+			 *
+			 * Path (string) and type (string) must always be given.
+			 * The number of following args must match the type.
+			 * Supported types are:
+			 *
+			 *  'i': integer (lua number)
+			 *
+			 *  'f': float (lua number)
+			 *
+			 *  'd': double (lua number)
+			 *
+			 *  'h': 64bit integer (lua number)
+			 *
+			 *  's': string (lua string)
+			 *
+			 *  'c': character (lua string)
+			 *
+			 *  'T': boolean (lua bool) -- this is not implicily True, a lua true/false must be given
+			 *
+			 *  'F': boolean (lua bool) -- this is not implicily False, a lua true/false must be given
+			 *
+			 * @param lua: lua arguments: path, types, ...
+			 * @returns boolean true if successful, false on error.
+			 */
+			int send (lua_State *lua);
+		private:
 			lo_address _addr;
 	};
 

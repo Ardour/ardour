@@ -151,9 +151,9 @@ ARDOUR::LuaAPI::set_processor_param (boost::shared_ptr<Processor> proc, uint32_t
 }
 
 int
-ARDOUR::LuaAPI::LuaOSCAddress::send (lua_State *L)
+ARDOUR::LuaOSC::Address::send (lua_State *L)
 {
-	LuaOSCAddress * const luaosc = luabridge::Userdata::get <LuaOSCAddress> (L, 1, false);
+	Address * const luaosc = luabridge::Userdata::get <Address> (L, 1, false);
 	if (!luaosc) {
 		return luaL_error (L, "Invalid pointer to OSC.Address");
 	}
@@ -222,6 +222,6 @@ ARDOUR::LuaAPI::LuaOSCAddress::send (lua_State *L)
 
 	int rv = lo_send_message (luaosc->_addr, path, msg);
 	lo_message_free (msg);
-	luabridge::Stack<int>::push (L, rv);
+	luabridge::Stack<bool>::push (L, (rv == 0));
 	return 1;
 }
