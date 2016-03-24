@@ -138,18 +138,21 @@ private:
 /** A section of timeline with a certain Meter. */
 class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
   public:
-	MeterSection (double beat, const Timecode::BBT_Time& bbt, double bpb, double note_type)
-		: MetricSection (beat), Meter (bpb, note_type), _bbt (bbt) {}
-	MeterSection (framepos_t frame, double bpb, double note_type)
-		: MetricSection (frame), Meter (bpb, note_type), _bbt (1, 1, 0) {}
+	MeterSection (double pulse, double beat, const Timecode::BBT_Time& bbt, double bpb, double note_type)
+		: MetricSection (pulse), Meter (bpb, note_type), _bbt (bbt),  _beat (beat) {}
+	MeterSection (framepos_t frame, double beat, double bpb, double note_type)
+		: MetricSection (frame), Meter (bpb, note_type), _bbt (1, 1, 0), _beat (beat) {}
 	MeterSection (const XMLNode&);
 
 	static const std::string xml_state_node_name;
 
 	XMLNode& get_state() const;
 
-	void set_pulse (std::pair<double, Timecode::BBT_Time>& w) {
-		MetricSection::set_pulse (w.first);
+	void set_pulse (double w) {
+		MetricSection::set_pulse (w);
+	}
+	void set_beat (std::pair<double, Timecode::BBT_Time>& w) {
+		_beat = w.first;
 		_bbt = w.second;
 	}
 

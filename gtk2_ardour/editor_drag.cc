@@ -3168,6 +3168,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		swap_grab (&_marker->the_item(), 0, GDK_CURRENT_TIME);
 
 		if (!_copy) {
+			_editor->begin_reversible_command (_("move meter mark"));
 			TempoMap& map (_editor->session()->tempo_map());
 			/* get current state */
 			before_state = &map.get_state();
@@ -3212,8 +3213,6 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->commit_reversible_command ();
 
 	} else {
-		_editor->begin_reversible_command (_("move meter mark"));
-
 		/* we removed it before, so add it back now */
 		if (_real_section->position_lock_style() == AudioTime) {
 			map.replace_meter (*_real_section, Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->frame());
