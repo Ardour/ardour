@@ -131,4 +131,6 @@ tags
 /icons/win32/msvc_resources.rc
 /tools/osx_packaging/Ardour/*.app
 
+/tools/doxy2json/doxy2json
+
 /MSVCvst_scan/vst_scan.rc
