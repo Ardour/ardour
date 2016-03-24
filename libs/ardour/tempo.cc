@@ -1397,13 +1397,10 @@ TempoMap::recompute_meters (Metrics& metrics)
 			if (meter->position_lock_style() == AudioTime) {
 				pair<double, BBT_Time> bt = make_pair (accumulated_beats, BBT_Time (accumulated_bars + 1, 1, 0));
 				meter->set_beat (bt);
-
-				meter->set_pulse (pulse_at_frame_locked (metrics, meter->frame()));
 			} else {
 				meter->set_frame (frame_at_pulse_locked (metrics, prev_m->pulse() + (meter->beat() - prev_m->beat()) / prev_m->note_divisor()));
-				meter->set_pulse (pulse_at_frame_locked (metrics, meter->frame()));
 			}
-
+			meter->set_pulse (pulse_at_frame_locked (metrics, meter->frame()));
 			prev_m = meter;
 		}
 	}
@@ -2116,12 +2113,11 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt,
 			if (prev_ms) {
 				if (m->position_lock_style() == MusicTime) {
 					m->set_frame (frame_at_pulse_locked (imaginary, prev_ms->pulse() + (m->beat() - prev_ms->beat()) / prev_ms->note_divisor()));
-					m->set_pulse (pulse_at_frame_locked (imaginary, m->frame()));
 				} else {
 					pair<double, BBT_Time> b_bbt = make_pair (accumulated_beats, BBT_Time (accumulated_bars + 1, 1, 0));
 					m->set_beat (b_bbt);
-					m->set_pulse (pulse_at_frame_locked (imaginary, m->frame()));
 				}
+				m->set_pulse (pulse_at_frame_locked (imaginary, m->frame()));
 			}
 			prev_ms = m;
 		}
@@ -2162,7 +2158,7 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt,
 				  (meters should go on absolute pulses to keep us sane)
 				*/
 				pair<double, BBT_Time> b_bbt = make_pair (accumulated_beats, BBT_Time (accumulated_bars + 1, 1, 0));
-				m->set_pulse (pulse_at_frame_locked (imaginary, m->frame()));
+				m->set_pulse (pulse_at_frame_locked (imaginary, frame));
 				m->set_beat (b_bbt);
 				prev_ms = m;
 				continue;
@@ -2170,12 +2166,11 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt,
 			if (prev_ms) {
 				if (m->position_lock_style() == MusicTime) {
 					m->set_frame (frame_at_pulse_locked (imaginary, prev_ms->pulse() + (m->beat() - prev_ms->beat()) / prev_ms->note_divisor()));
-					m->set_pulse (pulse_at_frame_locked (imaginary, m->frame()));
 				} else {
 					pair<double, BBT_Time> b_bbt = make_pair (accumulated_beats, BBT_Time (accumulated_bars + 1, 1, 0));
 					m->set_beat (b_bbt);
-					m->set_pulse (pulse_at_frame_locked (imaginary, frame));
 				}
+				m->set_pulse (pulse_at_frame_locked (imaginary, m->frame()));
 			}
 			prev_ms = m;
 		}
