@@ -46,6 +46,7 @@
 #include "public_editor.h"
 #include "tooltips.h"
 #include "utils.h"
+#include "utils_videotl.h"
 
 #include "i18n.h"
 
@@ -120,7 +121,7 @@ LuaWindow::LuaWindow ()
 
 	_btn_open.set_sensitive (false); // TODO
 	_btn_save.set_sensitive (false);
-	_btn_delete.set_sensitive (false); // TODO
+	_btn_delete.set_sensitive (false);
 
 	// layout
 
@@ -164,7 +165,6 @@ LuaWindow::LuaWindow ()
 	LuaScripting::instance().scripts_changed.connect (*this, invalidator (*this), boost::bind (&LuaWindow::refresh_scriptlist, this), gui_context());
 
 	Glib::RefPtr<Gtk::TextBuffer> tb (entry.get_buffer());
-
 	_script_changed_connection = tb->signal_changed().connect (sigc::mem_fun(*this, &LuaWindow::script_changed));
 }
 
@@ -197,7 +197,6 @@ void LuaWindow::set_session (Session* s)
 	update_title ();
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&LuaWindow::update_title, this), gui_context());
 
-	// expose "Session" point directly
 	lua_State* L = lua.getState();
 	LuaBindings::set_session (L, _session);
 }
@@ -207,7 +206,7 @@ LuaWindow::session_going_away ()
 {
 	ENSURE_GUI_THREAD (*this, &LuaWindow::session_going_away);
 	lua.do_command ("collectgarbage();");
-	//TODO: re-init lua-engine (drop all references) ??
+	//TODO: re-init lua-engine (drop all references)
 
 	SessionHandlePtr::session_going_away ();
 	_session = 0;
@@ -308,24 +307,50 @@ LuaWindow::clear_output ()
 void
 LuaWindow::new_script ()
 {
-#if 0
-	Glib::RefPtr<Gtk::TextBuffer> tb (entry.get_buffer());
-	tb->set_text ("");
-#endif
+	char buf[32];
+	snprintf (buf, sizeof (buf), "#%d", count_scratch_buffers () + 1);
+	script_buffers.push_back (ScriptBufferPtr (new LuaWindow::ScriptBuffer (buf)));
+	script_selection_changed (script_buffers.back ());
+	refresh_scriptlist ();
 }
 
 void
 LuaWindow::delete_script ()
 {
-#if 0
-	Glib::RefPtr<Gtk::TextBuffer> tb (entry.get_buffer());
-	tb->set_text ("");
-#endif
+	assert (_current_buffer->flags & Buffer_Scratch);
+	for (ScriptBufferList::iterator i = script_buffers.begin (); i != script_buffers.end (); ++i) {
+		if ((*i) == _current_buffer) {
+			script_buffers.erase (i);
+			break;
+		}
+	}
+
+	for (ScriptBufferList::const_iterator i = script_buffers.begin (); i != script_buffers.end (); ++i) {
+		if ((*i)->flags & Buffer_Scratch) {
+			script_selection_changed (*i);
+			return;
+		}
+	}
+	new_script ();
 }
 
 void
 LuaWindow::import_script ()
 {
+	// TODO: dialog to select file or enter URL
+	// TODO convert a few URL (eg. pastebin) to raw.
+#if 0
+	char *url = "http://pastebin.com/raw/3UMkZ6nV";
+	char *rv = a3_curl_http_get (url, 0);
+	if (rv) {
+		new_script ();
+		Glib::RefPtr<Gtk::TextBuffer> tb (entry.get_buffer());
+		tb->set_text (rv);
+		_current_buffer->flags &= BufferFlags(~Buffer_Dirty);
+		update_gui_state ();
+	}
+	free (rv);
+#endif
 }
 
 void
@@ -396,7 +421,7 @@ LuaWindow::save_script ()
 		time_t t = time(0);
 		struct tm * timeinfo = localtime (&t);
 		strftime (buf, sizeof(buf), "%s%d", timeinfo);
-		sprintf (buf, "%s%d", buf, random ()); // is this valid?
+		sprintf (buf, "%s%ld", buf, random ()); // is this valid?
 		MD5 md5;
 		std::string fn = md5.digestString (buf);
 
@@ -439,7 +464,6 @@ LuaWindow::setup_buffers ()
 		return;
 	}
 	script_buffers.push_back (ScriptBufferPtr (new LuaWindow::ScriptBuffer("#1")));
-	script_buffers.push_back (ScriptBufferPtr (new LuaWindow::ScriptBuffer("#2"))); // XXX
 	_current_buffer = script_buffers.front();
 
 	refresh_scriptlist ();
@@ -449,7 +473,13 @@ LuaWindow::setup_buffers ()
 uint32_t
 LuaWindow::count_scratch_buffers () const
 {
-	return 0;
+	uint32_t n = 0;
+	for (ScriptBufferList::const_iterator i = script_buffers.begin (); i != script_buffers.end (); ++i) {
+		if ((*i)->flags & Buffer_Scratch) {
+			++n;
+		}
+	}
+	return n;
 }
 
 void
