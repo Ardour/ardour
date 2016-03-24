@@ -264,19 +264,20 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
 
 	string actual;
 
-	if (str.size() == 1) {
-		actual = PBD::downcase (str);
-	} else {
+	string::size_type lastmod = str.find_last_of ('-');
+
+	if (lastmod != string::npos) {
+		actual = str.substr (lastmod+1);
+	}
+	else {
 		actual = str;
 	}
 
-	string::size_type lastmod = actual.find_last_of ('-');
-	guint keyval;
-
-	if (lastmod != string::npos) {
-		actual = PBD::downcase (str.substr (lastmod+1));
+	if (actual.size() == 1) {
+		actual = PBD::downcase (actual);
 	}
 
+	guint keyval;
 	keyval = gdk_keyval_from_name (actual.c_str());
 
 	if (keyval == GDK_VoidSymbol || keyval == 0) {
