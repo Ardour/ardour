@@ -229,6 +229,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void session_configuration_changed (std::string);
 	void session_property_changed (const PBD::PropertyChange&);
+	void metric_position_changed ();
 
 	Field index_to_field () const;
 
