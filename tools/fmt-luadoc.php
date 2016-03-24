@@ -2,20 +2,31 @@
 <?php
 ## USAGE
 #
+## generate doc/luadoc.json.gz (lua binding doc)
 # ./waf configure --luadoc ....
 # ./waf
-# ./gtk2_ardour/arluadoc > doc/luadoc.json
+# ./gtk2_ardour/arluadoc > doc/luadoc.json.gz
 #
+## generate doc/ardourapi.json.gz (ardour header doxygen doc)
+# cd ../../tools/doxy2json
+# ./ardourdoc.sh
+# cd -
+#
+## format HTML (using this scripterl)
 # php tools/fmt-luadoc.php > /tmp/luadoc.html
 #
 
 ################################################################################
 ################################################################################
 
-$json = file_get_contents (dirname (__FILE__).'/../doc/luadoc.json');
+$json = gzdecode (file_get_contents (dirname (__FILE__).'/../doc/luadoc.json.gz'));
 $doc = array ();
 foreach (json_decode ($json, true) as $b) {
 	if (!isset ($b['type'])) { continue; }
+	$b ['ldec'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['decl']));
+	if (isset ($b['ret'])) {
+		$b['ret'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['ret']));
+	}
 	$doc[] = $b;
 }
 
@@ -56,13 +67,14 @@ function my_die ($msg) {
 #	return preg_replace ('/boost::shared_ptr<([^>]*)[ ]*>/', '$1', $ctype);
 #}
 
-function arg2lua ($argtype) {
+function arg2lua ($argtype, $flags = 0) {
 	global $classes;
 	global $consts;
 
 	# LuaBridge abstracts C++ references
-	$flags = preg_match ('/&$/', $argtype);
+	$flags |= preg_match ('/&$/', $argtype);
 	$arg = preg_replace ('/&$/', '', $argtype);
+	$arg = preg_replace ('/ $/', '', $arg);
 
 	# filter out basic types
 	$builtin = array ('float', 'double', 'bool', 'std::string', 'int', 'long', 'unsigned long', 'unsigned int', 'unsigned char', 'char', 'void', 'char*', 'unsigned char*', 'void*');
@@ -72,7 +84,7 @@ function arg2lua ($argtype) {
 
 	# check Class declarations first
 	foreach (array_merge ($classes, $consts) as $b) {
-		if ($b['decl'] == $arg) {
+		if ($b['ldec'] == $arg) {
 			return array ($b['lua'] => $flags);
 		}
 	}
@@ -80,11 +92,15 @@ function arg2lua ($argtype) {
 	# strip class pointers -- TODO Check C'tor for given class
 	$arg = preg_replace ('/[&*]*$/', '', $argtype);
 	foreach (array_merge ($classes, $consts) as $b) {
-		if ($b['decl'] == $arg) {
+		if ($b['ldec'] == $arg) {
 			return array ($b['lua'] => $flags);
 		}
 	}
-	return array ('--MISSING (' . $argtype . ')--' => ($flags | 4));
+	if ($flags & 2) {
+		return array ($argtype => ($flags | 4));
+	} else {
+		return array ('--MISSING (' . $argtype . ')--' => ($flags | 4));
+	}
 }
 
 function stripclass ($classname, $name) {
@@ -126,6 +142,41 @@ function decl2args ($decl) {
 	return $rv;
 }
 
+function canonical_ctor ($b) {
+	$rv = '';
+	if (preg_match('/[^(]*\(([^)*]*)\*\)(\(.*\))/', $b['decl'], $matches)) {
+		$lc = luafn2class ($b['lua']);
+		$cn = str_replace (':', '::', $lc);
+		$fn = substr ($lc, 1 + strrpos ($lc, ':'));
+		$rv = $cn . '::'. $fn . $matches[2];
+	}
+	return $rv;
+}
+
+function canonical_decl ($b) {
+	$rv = '';
+	# match clang's declatation format
+	if (preg_match('/[^(]*\(([^)*]*)\*\)\((.*)\)/', $b['decl'], $matches)) {
+		$fn = substr ($b['lua'], 1 + strrpos ($b['lua'], ':'));
+		$rv = $matches[1] . $fn . '(';
+		$arglist = preg_split ('/, */', $matches[2]);
+		$first = true;
+		foreach ($arglist as $a) {
+			if (!$first) { $rv .= ', '; }; $first = false;
+			if (empty ($a)) { continue; }
+			$a = preg_replace ('/([^>]) >/', '$1>', $a);
+			$a = preg_replace ('/^.*::/', '', $a);
+			$a = preg_replace ('/([^ ])&/', '$1 &', $a);
+			$a = str_replace ('vector', 'std::vector', $a);
+			$a = str_replace ('string const', 'const string', $a);
+			$a = str_replace ('string', 'std::string', $a);
+			$rv .= $a;
+		}
+		$rv .= ')';
+	}
+	return $rv;
+}
+
 ################################################################################
 # step 1: build class indices
 
@@ -134,7 +185,7 @@ foreach ($doc as $b) {
 		$classes[] = $b;
 		$classlist[$b['lua']] = $b;
 		if (strpos ($b['type'], 'Pointer Class') === false) {
-			$classdecl[$b['decl']] = $b;
+			$classdecl[$b['ldec']] = $b;
 		}
 	}
 }
@@ -155,11 +206,11 @@ foreach ($doc as $b) {
 	switch ($b['type']) {
 	case "Constant/Enum":
 	case "Constant/Enum Member":
-		if (strpos ($b['decl'], '::') === false) {
+		if (strpos ($b['ldec'], '::') === false) {
 			# for extern c enums, use the Lua Namespace
-			$b['decl'] = str_replace (':', '::', luafn2class ($b['lua']));
+			$b['ldec'] = str_replace (':', '::', luafn2class ($b['lua']));
 		}
-		$ns = str_replace ('::', ':', $b['decl']);
+		$ns = str_replace ('::', ':', $b['ldec']);
 		$constlist[$ns][] = $b;
 		# arg2lua lookup
 		$b['lua'] = $ns;
@@ -178,30 +229,32 @@ foreach ($doc as $b) {
 		checkclass ($b);
 		$classlist[luafn2class ($b['lua'])]['ctor'][] = array (
 			'name' => luafn2class ($b['lua']),
-			'args' => decl2args ($b['decl']),
+			'args' => decl2args ($b['ldec']),
+			'cand' => canonical_ctor ($b)
 		);
 		break;
 	case "Data Member":
 		checkclass ($b);
 		$classlist[luafn2class ($b['lua'])]['data'][] = array (
 			'name' => $b['lua'],
-			'ret'  => arg2lua (datatype ($b['decl']))
+			'ret'  => arg2lua (datatype ($b['ldec']))
 		);
 		break;
 	case "C Function":
 		# we required C functions to be in a class namespace
 	case "Ext C Function":
 		checkclass ($b);
-		$args = array (array ('--custom--' => 0));
+		$args = array (array ('--lua--' => 0));
 		$ret = array ('...' => 0);
 		$ns = luafn2class ($b['lua']);
 		$cls = $classlist[$ns];
 		## std::Vector std::List types
-		if (preg_match ('/.*<([^>]*)[ ]*>/', $cls['decl'], $templ)) {
+		if (preg_match ('/.*<([^>]*)[ ]*>/', $cls['ldec'], $templ)) {
 			// XXX -> move to C-source
 			switch (stripclass($ns, $b['lua'])) {
 			case 'add':
-				$args = array (array ('LuaTable {'.$templ[1].'}' => 0));
+				#$args = array (array ('LuaTable {'.$templ[1].'}' => 0));
+				$args = array (arg2lua ($templ[1], 2));
 				$ret = array ('LuaTable' => 0);
 				break;
 			case 'iter':
@@ -216,7 +269,7 @@ foreach ($doc as $b) {
 				break;
 			}
 		} else if (strpos ($cls['type'], ' Array') !== false) {
-			$templ = preg_replace ('/[&*]*$/', '', $cls['decl']);
+			$templ = preg_replace ('/[&*]*$/', '', $cls['ldec']);
 			switch (stripclass($ns, $b['lua'])) {
 			case 'array':
 				$args = array ();
@@ -240,7 +293,8 @@ foreach ($doc as $b) {
 			'args' => $args,
 			'ret'  => $ret,
 			'ref'  => true,
-			'ext'  => true
+			'ext'  => true,
+			'cand' => canonical_decl ($b)
 		);
 		break;
 	case "Free Function":
@@ -248,9 +302,10 @@ foreach ($doc as $b) {
 		$funclist[luafn2class ($b['lua'])][] = array (
 			'bind' => $b,
 			'name' => $b['lua'],
-			'args' => decl2args ($b['decl']),
+			'args' => decl2args ($b['ldec']),
 			'ret'  => arg2lua ($b['ret']),
-			'ref'  => (strpos ($b['type'], "RefReturn") !== false)
+			'ref'  => (strpos ($b['type'], "RefReturn") !== false),
+			'cand' => canonical_decl ($b)
 		);
 		break;
 	case "Member Function":
@@ -265,9 +320,10 @@ foreach ($doc as $b) {
 		$classlist[luafn2class ($b['lua'])]['func'][] = array (
 			'bind' => $b,
 			'name' => $b['lua'],
-			'args' => decl2args ($b['decl']),
+			'args' => decl2args ($b['ldec']),
 			'ret'  => arg2lua ($b['ret']),
-			'ref'  => (strpos ($b['type'], "RefReturn") !== false)
+			'ref'  => (strpos ($b['type'], "RefReturn") !== false),
+			'cand' => canonical_decl ($b)
 		);
 		break;
 	case "Constant/Enum":
@@ -332,10 +388,35 @@ ksort ($classlist);
 
 # from here on, only $classlist and $constlist arrays are relevant.
 
-# TODO: read function documentation from doxygen
-# and/or reference source-code lines e.g from CSV list:
-#   ctags -o /tmp/tags.csv --fields=+afiKkmnsSzt libs/ardour/ardour/session.h
+# read function documentation from doxygen
+$json = gzdecode (file_get_contents (dirname (__FILE__).'/../doc/ardourapi.json.gz'));
+$api = array ();
+foreach (json_decode ($json, true) as $a) {
+	if (!isset ($a['decl'])) { continue; }
+	if (empty ($a['decl'])) { continue; }
+	$canon = str_replace (' *', '*', $a['decl']);
+	$api[$canon] = $a;
+}
 
+$dox_found = 0;
+$dox_miss = 0;
+function doxydoc ($canonical_declaration) {
+	global $api;
+	global $dox_found;
+	global $dox_miss;
+	if (isset ($api[$canonical_declaration])) {
+		$dox_found++;
+		return $api[$canonical_declaration]['doc'];
+	}
+	elseif (isset ($api['ARDOUR::'.$canonical_declaration])) {
+		$dox_found++;
+		return $api['ARDOUR::'.$canonical_declaration]['doc'];
+	}
+	else {
+		$dox_miss++;
+		return '';
+	}
+}
 
 ################################################################################
 # OUTPUT
@@ -400,9 +481,13 @@ function format_args ($args) {
 	foreach ($args as $a) {
 		if (!$first) { $rv .= ', '; }; $first = false;
 		$flags = $a[varname ($a)];
-		if ($flags & 1) {
+		if ($flags & 2) {
+			$rv .= '<em>LuaTable</em> {'.typelink (varname ($a), true, 'em').'}';
+		}
+		elseif ($flags & 1) {
 			$rv .= typelink (varname ($a), true, 'em', '', '&amp;');
-		} else {
+		}
+		else {
 			$rv .= typelink (varname ($a), true, 'em');
 		}
 	}
@@ -410,6 +495,31 @@ function format_args ($args) {
 	return $rv;
 }
 
+function format_doxyclass ($cl) {
+	$rv = '';
+	if (isset ($cl['decl'])) {
+		$doc = doxydoc ($cl['decl']);
+		if (!empty ($doc)) {
+			$rv.= '<div class="classdox">'.$doc.'</div>'.NL;
+		}
+	}
+	return $rv;
+}
+
+function format_doxydoc ($f) {
+	$rv = '';
+	if (isset ($f['cand'])) {
+		$doc = doxydoc ($f['cand']);
+		if (!empty ($doc)) {
+			$rv.= '<tr><td></td><td class="doc" colspan="2"><div class="dox">'.$doc;
+			$rv.= '</div></td></tr>'.NL;
+		} else if (0) { # debug
+			$rv.= '<tr><td></td><td class="doc" colspan="2"><p>'.htmlentities($f['cand']).'</p>';
+			$rv.= '</td></tr>'.NL;
+		}
+	}
+	return $rv;
+}
 function format_class_members ($ns, $cl, &$dups) {
 	$rv = '';
 	if (isset ($cl['ctor'])) {
@@ -420,6 +530,7 @@ function format_class_members ($ns, $cl, &$dups) {
 			$rv.= '<span class="functionname">'.ctorname ($f['name']).'</span>';
 			$rv.= format_args ($f['args']);
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
+			$rv.= format_doxydoc($f);
 		}
 	}
 	$nondups = array ();
@@ -442,7 +553,7 @@ function format_class_members ($ns, $cl, &$dups) {
 				# functions with reference args return args
 				$rv.= '<em>LuaTable</em>(...)';
 			} elseif ($f['ref']) {
-				$rv.= '<em>LuaTable</em>('.typelink (varname ($f['ret'], false, 'em')).', ...)';
+				$rv.= '<em>LuaTable</em>('.typelink (varname ($f['ret']), true, 'em').', ...)';
 			} else {
 				$rv.= typelink (varname ($f['ret']), true, 'em');
 			}
@@ -450,6 +561,7 @@ function format_class_members ($ns, $cl, &$dups) {
 			$rv.= '<span class="functionname"><abbr title="'.htmlentities($f['bind']['decl']).'">'.stripclass ($ns, $f['name']).'</abbr></span>';
 			$rv.= format_args ($f['args']);
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
+			$rv.= format_doxydoc($f);
 		}
 	}
 	if (isset ($cl['data'])) {
@@ -487,10 +599,23 @@ h2.opaque          { background-color: #6666aa; }
 p.cdecl            { text-align: right; float:right; font-size:90%; margin:0; padding: 0 0 0 1em;}
 ul.classindex      { columns: 2; -webkit-columns: 2; -moz-columns: 2; }
 div.clear          { clear:both; }
+p.classinfo        { margin: .25em 0;}
+div.classdox       { padding: .1em 1em;}
+div.classdox p     { margin: .5em 0 .5em .6em;}
+div.classdox p     { margin: .5em 0 .5em .6em;}
+div.classdox       { padding: .1em 1em;}
+div.classdox p     { margin: .5em 0 .5em .6em;}
 table.classmembers { width: 100%; }
 table.classmembers th      { text-align:left; border-bottom:1px solid black; padding-top:1em; }
 table.classmembers td.def  { text-align:right; padding-right:.5em;  white-space: nowrap;}
 table.classmembers td.decl { text-align:left; padding-left:.5em; white-space: nowrap; }
+table.classmembers td.doc  { text-align:left; padding-left:.6em; line-height: 1.2em; font-size:80%;}
+table.classmembers td.doc div.dox {background-color:#ddd; padding: .1em 1em;}
+table.classmembers td.doc p { margin: .5em 0; }
+table.classmembers td.doc p.para-brief { font-size:120%; }
+table.classmembers td.doc p.para-returns { font-size:120%; }
+table.classmembers td.doc dl { font-size:120%; line-height: 1.3em; }
+table.classmembers td.doc dt { font-style: italic; }
 table.classmembers td.fill { width: 99%;}
 table.classmembers span.em { font-style: italic;}
 span.functionname abbr     { text-decoration:none; cursor:default;}
@@ -571,13 +696,15 @@ foreach ($classlist as $ns => $cl) {
 	$inherited = array ();
 	$isa = traverse_parent ($ns, $inherited);
 	if (!empty ($isa)) {
-		echo ' <p>is-a: '.$isa.'</p>'.NL;
+		echo ' <p class="classinfo">is-a: '.$isa.'</p>'.NL;
 	}
 	echo '<div class="clear"></div>'.NL;
 
+	echo format_doxyclass ($cl);
+
 	# member documentation
 	if (empty ($tbl)) {
-		echo '<p>This class object is only used indirectly as return-value and function-parameter.</p>'.NL;
+		echo '<p class="classinfo">This class object is only used indirectly as return-value and function-parameter. It provides no methods by itself.</p>'.NL;
 	} else {
 		echo '<table class="classmembers">'.NL;
 		echo $tbl;
@@ -613,6 +740,7 @@ foreach ($classlist as $ns => $cl) {
 }
 echo '</ul>'.NL;
 
+fwrite (STDERR, "Found $dox_found annotations. missing: $dox_miss\n");
 ?>
 </div>
 </body>

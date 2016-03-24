@@ -49,7 +49,7 @@ foreach (json_decode (\$json, true) as \$a) {
 foreach (\$api as \$k => \$a) {
 	\$jout[] = \$a;
 }
-file_put_contents('doc/ardourapi.json', json_encode (\$jout, JSON_PRETTY_PRINT));
+file_put_contents('doc/ardourapi.json.gz', gzencode (json_encode (\$jout, JSON_PRETTY_PRINT)));
 EOF
 
-ls -l doc/ardourapi.json
+ls -l doc/ardourapi.json.gz
