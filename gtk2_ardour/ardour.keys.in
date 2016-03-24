@@ -313,7 +313,6 @@ This mode provides many different operations on both regions and control points,
 
 @-edit|Editor/edit-cursor-to-range-start|F1|some text
 @-edit|Editor/edit-cursor-to-range-end|F2|some text
-@-edit|Editor/pitch-shift-region|F5|some text
 
 @-edit|Editor/save-visual-state-1|<@PRIMARY@>F1|some text
 @-edit|Editor/save-visual-state-2|<@PRIMARY@>F2|some text
