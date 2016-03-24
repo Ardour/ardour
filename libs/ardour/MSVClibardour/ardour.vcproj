@@ -1790,6 +1790,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\lua_script_params.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\luabindings.h"
 				>
 			</File>
