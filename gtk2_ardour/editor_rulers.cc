@@ -1116,25 +1116,25 @@ Editor::compute_bbt_ruler_scale (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, 
 	}
 
 	beats = distance (grid.begin(), grid.end()) - bbt_bars;
-
+	double beat_density = ((distance (grid.begin(), grid.end()) + 1) * ((double) (upper - lower) / (double) (1 + grid.back().frame - grid.front().frame))) / 4.0;
 	/* Only show the bar helper if there aren't many bars on the screen */
 	if ((bbt_bars < 2) || (beats < 5)) {
 	        bbt_bar_helper_on = true;
 	}
 
-	if (bbt_bars > 8192) {
+	if (beat_density > 8192) {
 		bbt_ruler_scale = bbt_show_many;
-	} else if (bbt_bars > 1024) {
+	} else if (beat_density > 1024) {
 		bbt_ruler_scale = bbt_show_64;
-	} else if (bbt_bars > 256) {
+	} else if (beat_density > 256) {
 		bbt_ruler_scale = bbt_show_16;
-	} else if (bbt_bars > 64) {
+	} else if (beat_density > 64) {
 		bbt_ruler_scale = bbt_show_4;
-	} else if (bbt_bars > 10) {
+	} else if (beat_density > 10) {
 		bbt_ruler_scale =  bbt_show_1;
-	} else if (bbt_bars > 2) {
+	} else if (beat_density > 2) {
 		bbt_ruler_scale =  bbt_show_beats;
-	} else  if (bbt_bars > 0) {
+	} else  if (beat_density > 0.5) {
 		bbt_ruler_scale =  bbt_show_ticks;
 	} else {
 		bbt_ruler_scale =  bbt_show_ticks_detail;
