@@ -42,6 +42,13 @@ foreach (json_decode (\$json, true) as \$a) {
 	if (substr (\$a['decl'], 0, 11) == 'luabridge::') { continue; }
 
 	\$a['decl'] = str_replace ('size_t', 'unsigned long', \$a['decl']);
+	\$a['decl'] = str_replace ('uint32_t', 'unsigned int', \$a['decl']);
+	\$a['decl'] = str_replace ('framepos_t', 'long', \$a['decl']);
+	\$a['decl'] = str_replace ('frameoffset_t', 'long', \$a['decl']);
+	\$a['decl'] = str_replace ('int64_t', 'long', \$a['decl']);
+	\$a['decl'] = str_replace ('uint8_t', 'unsigned char', \$a['decl']);
+	\$a['decl'] = str_replace ('pframes_t', 'unsigned int', \$a['decl']);
+	\$a['decl'] = str_replace ('uint64_t', 'unsigned long', \$a['decl']);
 	\$canon = str_replace (' *', '*', \$a['decl']);
 	\$api[\$canon] = \$a;
 	}

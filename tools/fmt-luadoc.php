@@ -155,8 +155,12 @@ function canonical_ctor ($b) {
 
 function canonical_decl ($b) {
 	$rv = '';
+	$pfx = '';
 	# match clang's declatation format
 	if (preg_match('/[^(]*\(([^)*]*)\*\)\((.*)\)/', $b['decl'], $matches)) {
+		if (strpos ($b['type'], 'Free Function') !== false) {
+			$pfx = str_replace (':', '::', luafn2class ($b['lua'])) . '::';
+		}
 		$fn = substr ($b['lua'], 1 + strrpos ($b['lua'], ':'));
 		$rv = $matches[1] . $fn . '(';
 		$arglist = preg_split ('/, */', $matches[2]);
@@ -165,16 +169,17 @@ function canonical_decl ($b) {
 			if (!$first) { $rv .= ', '; }; $first = false;
 			if (empty ($a)) { continue; }
 			$a = preg_replace ('/([^>]) >/', '$1>', $a);
-			$a = preg_replace ('/^.*::/', '', $a);
+			$a = preg_replace ('/^Cairo::/', '', $a); // special case cairo enums
 			$a = preg_replace ('/([^ ])&/', '$1 &', $a);
 			$a = str_replace ('vector', 'std::vector', $a);
+			$a = str_replace ('std::string', 'string', $a);
 			$a = str_replace ('string const', 'const string', $a);
 			$a = str_replace ('string', 'std::string', $a);
 			$rv .= $a;
 		}
 		$rv .= ')';
 	}
-	return $rv;
+	return $pfx . $rv;
 }
 
 ################################################################################
@@ -513,7 +518,7 @@ function format_doxydoc ($f) {
 		if (!empty ($doc)) {
 			$rv.= '<tr><td></td><td class="doc" colspan="2"><div class="dox">'.$doc;
 			$rv.= '</div></td></tr>'.NL;
-		} else if (0) { # debug
+		} else if (1) { # debug
 			$rv.= '<tr><td></td><td class="doc" colspan="2"><p>'.htmlentities($f['cand']).'</p>';
 			$rv.= '</td></tr>'.NL;
 		}
