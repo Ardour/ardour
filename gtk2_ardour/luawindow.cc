@@ -86,6 +86,7 @@ LuaWindow::instance ()
 LuaWindow::LuaWindow ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
 	, VisibilityTracker (*((Gtk::Window*) this))
+	, lua (0)
 	, _visible (false)
 	, _menu_scratch (0)
 	, _menu_snippet (0)
@@ -99,6 +100,7 @@ LuaWindow::LuaWindow ()
 {
 	set_name ("Lua");
 
+	reinit_lua ();
 	update_title ();
 	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
 
@@ -151,14 +153,6 @@ LuaWindow::LuaWindow ()
 	vpane->show_all ();
 	add (*vpane);
 	set_size_request (640, 480); // XXX
-
-	lua.Print.connect (sigc::mem_fun (*this, &LuaWindow::append_text));
-
-	lua_State* L = lua.getState();
-	LuaInstance::register_classes (L);
-	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
-	lua_setglobal (L, "Editor");
-
 	ARDOUR_UI_UTILS::set_tooltip (script_select, _("Select Editor Buffer"));
 
 	setup_buffers ();
@@ -170,6 +164,7 @@ LuaWindow::LuaWindow ()
 
 LuaWindow::~LuaWindow ()
 {
+	delete lua;
 }
 
 void
@@ -187,6 +182,20 @@ LuaWindow::hide_window (GdkEventAny *ev)
 	return just_hide_it (ev, static_cast<Gtk::Window *>(this));
 }
 
+void LuaWindow::reinit_lua ()
+{
+	delete lua;
+	lua = new LuaState();
+	lua->Print.connect (sigc::mem_fun (*this, &LuaWindow::append_text));
+
+	lua_State* L = lua->getState();
+	LuaInstance::register_classes (L);
+	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
+	lua_setglobal (L, "Editor");
+
+
+}
+
 void LuaWindow::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
@@ -197,7 +206,7 @@ void LuaWindow::set_session (Session* s)
 	update_title ();
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&LuaWindow::update_title, this), gui_context());
 
-	lua_State* L = lua.getState();
+	lua_State* L = lua->getState();
 	LuaBindings::set_session (L, _session);
 }
 
@@ -205,14 +214,13 @@ void
 LuaWindow::session_going_away ()
 {
 	ENSURE_GUI_THREAD (*this, &LuaWindow::session_going_away);
-	lua.do_command ("collectgarbage();");
-	//TODO: re-init lua-engine (drop all references)
+	reinit_lua (); // drop state (all variables, session references)
 
 	SessionHandlePtr::session_going_away ();
 	_session = 0;
 	update_title ();
 
-	lua_State* L = lua.getState();
+	lua_State* L = lua->getState();
 	LuaBindings::set_session (L, _session);
 }
 
@@ -261,8 +269,8 @@ LuaWindow::run_script ()
 	if (bytecode.empty()) {
 		// plain script or faulty script -- run directly
 		try {
-			lua.do_command ("function ardour () end");
-			if (0 == lua.do_command (script)) {
+			lua->do_command ("function ardour () end");
+			if (0 == lua->do_command (script)) {
 				append_text ("> OK");
 			}
 		} catch (luabridge::LuaException const& e) {
@@ -271,18 +279,18 @@ LuaWindow::run_script ()
 	} else {
 		// script with factory method
 		try {
-			lua_State* L = lua.getState();
-			lua.do_command ("function ardour () end");
+			lua_State* L = lua->getState();
+			lua->do_command ("function ardour () end");
 
 			LuaScriptParamList args = LuaScriptParams::script_params (script, "action_param", false);
 			luabridge::LuaRef tbl_arg (luabridge::newTable(L));
 			LuaScriptParams::params_to_ref (&tbl_arg, args);
-			lua.do_command (script); // register "factory"
+			lua->do_command (script); // register "factory"
 			luabridge::LuaRef lua_factory = luabridge::getGlobal (L, "factory");
 			if (lua_factory.isFunction()) {
 				lua_factory(tbl_arg)();
 			}
-			lua.do_command ("factory = nil;");
+			lua->do_command ("factory = nil;");
 		} catch (luabridge::LuaException const& e) {
 			append_text (string_compose (_("LuaException: %1"), e.what()));
 		}

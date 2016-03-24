@@ -85,7 +85,7 @@ class LuaWindow :
 	LuaWindow ();
 	static LuaWindow* _instance;
 
-	LuaState lua;
+	LuaState *lua;
 	bool _visible;
 
 	Gtk::Menu* _menu_scratch;
@@ -114,6 +114,7 @@ class LuaWindow :
 
 	void session_going_away ();
 	void update_title ();
+	void reinit_lua ();
 
 	void setup_buffers ();
 	void refresh_scriptlist ();
