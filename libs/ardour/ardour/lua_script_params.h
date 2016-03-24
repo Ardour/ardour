@@ -19,6 +19,7 @@
 #ifndef _ardour_lua_script_params_h_
 #define _ardour_lua_script_params_h_
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/luascripting.h"
 #include "LuaBridge/LuaBridge.h"
 
@@ -32,10 +33,10 @@
  */
 namespace ARDOUR { namespace LuaScriptParams {
 
-	LuaScriptParamList script_params (LuaScriptInfoPtr, const std::string &);
-	LuaScriptParamList script_params (const std::string &, const std::string &, bool file=true);
-	void params_to_ref (luabridge::LuaRef *tbl_args, const LuaScriptParamList&);
-	void ref_to_params (LuaScriptParamList&, luabridge::LuaRef *tbl_args);
+	LIBARDOUR_API LuaScriptParamList script_params (LuaScriptInfoPtr, const std::string &);
+	LIBARDOUR_API LuaScriptParamList script_params (const std::string &, const std::string &, bool file=true);
+	LIBARDOUR_API void params_to_ref (luabridge::LuaRef *tbl_args, const LuaScriptParamList&);
+	LIBARDOUR_API void ref_to_params (LuaScriptParamList&, luabridge::LuaRef *tbl_args);
 
 } } // namespace
 
