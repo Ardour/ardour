@@ -440,7 +440,7 @@ private:
 	double pulse_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;
 	framecnt_t frame_at_pulse_locked (const Metrics& metrics, const double& beat) const;
 
-	double pulse_offset_at (const Metrics& metrics, const double& pulse) const;
+	double beat_offset_at (const Metrics& metrics, const double& beat) const;
 	frameoffset_t frame_offset_at (const Metrics& metrics, const framepos_t& frame) const;
 
 	double beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;

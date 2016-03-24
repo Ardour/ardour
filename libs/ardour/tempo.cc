@@ -1834,34 +1834,35 @@ TempoMap::frame_at_pulse_locked (const Metrics& metrics, const double& pulse) co
 }
 
 double
-TempoMap::pulse_offset_at (const Metrics& metrics, const double& pulse) const
+TempoMap::beat_offset_at (const Metrics& metrics, const double& beat) const
 {
 	MeterSection* prev_m = 0;
-	double pulse_off = first_meter().pulse();
+	double beat_off = first_meter().pulse();
 
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		MeterSection* m = 0;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
 			if (prev_m) {
-				if (m->pulse() > pulse) {
+				if (m->beat() > beat) {
 					break;
 				}
 
 				if (m->position_lock_style() == AudioTime) {
-					pulse_off += (m->pulse() - prev_m->pulse()) - floor (m->pulse() - prev_m->pulse());
+					beat_off += ((m->beat() - prev_m->beat()) / prev_m->note_divisor()) - floor (m->pulse() - prev_m->pulse());
 				}
 			}
 			prev_m = m;
 		}
 	}
 
-	return pulse_off;
+	return beat_off;
 }
 
 frameoffset_t
 TempoMap::frame_offset_at (const Metrics& metrics, const framepos_t& frame) const
 {
 	frameoffset_t frame_off = 0;
+	MeterSection* prev_m = 0;
 
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		MeterSection* m = 0;
@@ -1869,9 +1870,11 @@ TempoMap::frame_offset_at (const Metrics& metrics, const framepos_t& frame) cons
 			if (m->frame() > frame) {
 				break;
 			}
-			if (m->position_lock_style() == AudioTime) {
-				frame_off += frame_at_pulse_locked (metrics, m->pulse()) - m->frame();
+			if (prev_m && m->position_lock_style() == AudioTime) {
+				const double pulse = prev_m->pulse() + ((m->beat() - prev_m->beat()) / prev_m->note_divisor());
+				frame_off += frame_at_pulse_locked (metrics, pulse) - m->frame();
 			}
+			prev_m = m;
 		}
 	}
 
