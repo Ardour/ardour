@@ -62,7 +62,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param value value to set
 	 * @returns true on success, false on error or out-of-bounds value
 	 */
-	bool set_processor_param (boost::shared_ptr<Processor> proc, uint32_t which, float val);
+	bool set_processor_param (boost::shared_ptr<ARDOUR::Processor> proc, uint32_t which, float val);
 	/** set a plugin control-input parameter value
 	 *
 	 * This is a wrapper around set_processor_param which looks up the Processor by plugin-insert.
@@ -72,7 +72,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param value value to set
 	 * @returns true on success, false on error or out-of-bounds value
 	 */
-	bool set_plugin_insert_param (boost::shared_ptr<PluginInsert> pi, uint32_t which, float val);
+	bool set_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, float val);
 
 } } /* namespace */
 
