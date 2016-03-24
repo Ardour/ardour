@@ -1116,7 +1116,7 @@ Editor::compute_bbt_ruler_scale (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, 
 	}
 
 	beats = distance (grid.begin(), grid.end()) - bbt_bars;
-	double beat_density = ((distance (grid.begin(), grid.end()) + 1) * ((double) (upper - lower) / (double) (1 + grid.back().frame - grid.front().frame))) / 4.0;
+	double beat_density = ((distance (grid.begin(), grid.end()) + 1) * ((double) (upper - lower) / (double) (1 + grid.back().frame - grid.front().frame))) / 5.0;
 	/* Only show the bar helper if there aren't many bars on the screen */
 	if ((bbt_bars < 2) || (beats < 5)) {
 	        bbt_bar_helper_on = true;
