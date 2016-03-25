@@ -38,6 +38,7 @@ class LIBARDOUR_API ChanMapping {
 public:
 	ChanMapping() {}
 	ChanMapping(ARDOUR::ChanCount identity);
+	ChanMapping(const ChanMapping&);
 
 	uint32_t get(DataType t, uint32_t from, bool* valid);
 	uint32_t get(DataType t, uint32_t from) { return get (t, from, NULL); }

@@ -27,6 +27,7 @@
 
 #include "ardour/ardour.h"
 #include "ardour/libardour_visibility.h"
+#include "ardour/chan_mapping.h"
 #include "ardour/types.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/processor.h"
@@ -204,6 +205,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	/** details of the match currently being used */
 	Match _match;
+	ARDOUR::ChanMapping _in_map;
+	ARDOUR::ChanMapping _out_map;
 
 	void automation_run (BufferSet& bufs, framepos_t start, pframes_t nframes);
 	void connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now = 0);

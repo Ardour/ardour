@@ -40,6 +40,11 @@ ChanMapping::ChanMapping(ChanCount identity)
 	}
 }
 
+ChanMapping::ChanMapping (const ChanMapping& other )
+	: _mappings (other._mappings)
+{
+}
+
 uint32_t
 ChanMapping::get(DataType t, uint32_t from, bool* valid)
 {
