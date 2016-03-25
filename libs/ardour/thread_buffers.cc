@@ -30,6 +30,7 @@ using namespace std;
 ThreadBuffers::ThreadBuffers ()
 	: silent_buffers (new BufferSet)
 	, scratch_buffers (new BufferSet)
+	, noinplace_buffers (new BufferSet)
 	, route_buffers (new BufferSet)
 	, mix_buffers (new BufferSet)
 	, gain_automation_buffer (0)
@@ -71,6 +72,7 @@ ThreadBuffers::ensure_buffers (ChanCount howmany, size_t custom)
 		}
 
 		scratch_buffers->ensure_buffers (*t, count, size);
+		noinplace_buffers->ensure_buffers (*t, count + count, size); // in + out
 		mix_buffers->ensure_buffers (*t, count, size);
 		silent_buffers->ensure_buffers (*t, count, size);
 		route_buffers->ensure_buffers (*t, count, size);

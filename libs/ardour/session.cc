@@ -5939,6 +5939,12 @@ Session::get_scratch_buffers (ChanCount count, bool silence)
 }
 
 BufferSet&
+Session::get_noinplace_buffers (ChanCount count)
+{
+	return ProcessThread::get_noinplace_buffers (count);
+}
+
+BufferSet&
 Session::get_route_buffers (ChanCount count, bool silence)
 {
 	return ProcessThread::get_route_buffers (count, silence);

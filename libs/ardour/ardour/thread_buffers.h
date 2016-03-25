@@ -39,6 +39,7 @@ public:
 
 	BufferSet* silent_buffers;
 	BufferSet* scratch_buffers;
+	BufferSet* noinplace_buffers;
 	BufferSet* route_buffers;
 	BufferSet* mix_buffers;
 	gain_t*    gain_automation_buffer;

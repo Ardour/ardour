@@ -117,6 +117,25 @@ ProcessThread::get_scratch_buffers (ChanCount count, bool silence)
 }
 
 BufferSet&
+ProcessThread::get_noinplace_buffers (ChanCount count)
+{
+	ThreadBuffers* tb = _private_thread_buffers.get();
+	assert (tb);
+
+	BufferSet* sb = tb->noinplace_buffers;
+	assert (sb);
+
+	if (count != ChanCount::ZERO) {
+		assert(sb->available() >= count);
+		sb->set_count (count);
+	} else {
+		sb->set_count (sb->available());
+	}
+
+	return *sb;
+}
+
+BufferSet&
 ProcessThread::get_route_buffers (ChanCount count, bool silence)
 {
 	ThreadBuffers* tb = _private_thread_buffers.get();
