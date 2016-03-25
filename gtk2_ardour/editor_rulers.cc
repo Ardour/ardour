@@ -1126,9 +1126,9 @@ Editor::compute_bbt_ruler_scale (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, 
 		bbt_ruler_scale = bbt_show_many;
 	} else if (beat_density > 1024) {
 		bbt_ruler_scale = bbt_show_64;
-	} else if (beat_density > 256) {
+	} else if (beat_density > 500) {
 		bbt_ruler_scale = bbt_show_16;
-	} else if (beat_density > 64) {
+	} else if (beat_density > 100) {
 		bbt_ruler_scale = bbt_show_4;
 	} else if (beat_density > 10) {
 		bbt_ruler_scale =  bbt_show_1;
