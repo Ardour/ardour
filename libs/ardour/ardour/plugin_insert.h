@@ -216,8 +216,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	/** details of the match currently being used */
 	Match _match;
-	std::map <int, ARDOUR::ChanMapping> _in_map;
-	std::map <int, ARDOUR::ChanMapping> _out_map;
+	std::map <uint32_t, ARDOUR::ChanMapping> _in_map;
+	std::map <uint32_t, ARDOUR::ChanMapping> _out_map;
 
 	void automation_run (BufferSet& bufs, framepos_t start, pframes_t nframes);
 	void connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now = 0);
