@@ -376,14 +376,15 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 
 	bool valid;
 	if (_match.method == Split) {
+		assert (_in_map.size () == 1);
 		/* fix the input mapping so that we have maps for each of the plugin's inputs */
 
 		/* copy the first stream's buffer contents to the others */
 		/* XXX: audio only */
-		uint32_t first_idx = _in_map.get (DataType::AUDIO, 0, &valid);
+		uint32_t first_idx = _in_map[0].get (DataType::AUDIO, 0, &valid);
 		if (valid) {
 			for (uint32_t i = in_streams.n_audio(); i < natural_input_streams().n_audio(); ++i) {
-				bufs.get_audio(_in_map.get (DataType::AUDIO, i, &valid)).read_from(bufs.get_audio(first_idx), nframes, offset, offset);
+				bufs.get_audio(_in_map[0].get (DataType::AUDIO, i, &valid)).read_from(bufs.get_audio(first_idx), nframes, offset, offset);
 			}
 		}
 	}
@@ -443,19 +444,10 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 
 	}
 
-
-	// copy - for now - since the map is offset below
-	// TODO: use dedicated maps per plugin
-	ChanMapping in_map (_in_map);
-	ChanMapping out_map (_out_map);
-
-	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		if ((*i)->connect_and_run(bufs, in_map, out_map, nframes, offset)) {
+	uint32_t pc = 0;
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+		if ((*i)->connect_and_run(bufs, _in_map[pc], _out_map[pc], nframes, offset)) {
 			deactivate ();
-		}
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			in_map.offset_to(*t, natural_input_streams().get(*t));
-			out_map.offset_to(*t, natural_output_streams().get(*t));
 		}
 	}
 
@@ -494,8 +486,11 @@ PluginInsert::silence (framecnt_t nframes)
 		return;
 	}
 
+	ChanMapping in_map (natural_input_streams ());
+	ChanMapping out_map (natural_output_streams ());
+
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->connect_and_run (_session.get_scratch_buffers ((*i)->get_info()->n_inputs, true), _in_map, _out_map, nframes, 0);
+		(*i)->connect_and_run (_session.get_scratch_buffers ((*i)->get_info()->n_inputs, true), in_map, out_map, nframes, 0);
 	}
 }
 
@@ -752,20 +747,22 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		break;
 	}
 
-	if (_match.method == Split) {
-		/* fix the input mapping so that we have maps for each of the plugin's inputs */
-		_in_map = ChanMapping (natural_input_streams ());
-	} else {
-		_in_map = ChanMapping (input_streams ());
-	}
-	_out_map = ChanMapping (output_streams());
+	// TODO make configurable
+	uint32_t pc = 0;
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+		if (_match.method == Split) {
+			/* TODO see PluginInsert::connect_and_run, channel replication */
+			_in_map[pc] = ChanMapping (natural_input_streams ());
+		} else {
+			_in_map[pc] = ChanMapping (input_streams ());
+		}
+		_out_map[pc] = ChanMapping (output_streams());
 
-#if 0
-	cout << "Set Channel Maps:" << name () << " " << this
-		<< "\nin:\n" << _in_map
-		<< "\nout:\n" << _out_map
-		<< "\n";
-#endif
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			_in_map[pc].offset_to(*t, pc * natural_input_streams().get(*t));
+			_out_map[pc].offset_to(*t, pc * natural_output_streams().get(*t));
+		}
+	}
 
 
 	if (  (old_match.method != _match.method && (old_match.method == Split || _match.method == Split))
