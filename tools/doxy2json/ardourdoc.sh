@@ -14,6 +14,8 @@ echo "# analyzing source.. -> $TMPFILE"
 	$LLVMINCLUDE -I /usr/include/linux \
 	-I libs/ardour -I libs/pbd -I libs/lua -I gtk2_ardour -I libs/timecode \
 	-I libs/ltc -I libs/evoral \
+	-X "_" -X "::" -X "sigc" -X "Atk::" -X "Gdk::" -X "Gtk::" -X "Gio::" \
+	-X "Glib::" -X "Pango::" -X "luabridge::" \
 	libs/ardour/ardour/* libs/pbd/pbd/* \
 	gtk2_ardour/*.h \
 	/usr/include/cairomm-1.0/cairomm/context.h \
@@ -28,22 +30,12 @@ php << EOF
 \$api = array ();
 foreach (json_decode (\$json, true) as \$a) {
 	if (!isset (\$a['decl'])) { continue; }
-	if (empty (\$a['decl'])) { continue; }
-	if (\$a['decl'] == '::') { continue; }
-	if (substr (\$a['decl'], 0, 1) == '_') { continue; }
-	if (substr (\$a['decl'], 0, 2) == '::') { continue; }
-	if (substr (\$a['decl'], 0, 4) == 'sigc') { continue; }
-	if (substr (\$a['decl'], 0, 5) == 'Atk::') { continue; }
-	if (substr (\$a['decl'], 0, 5) == 'Gdk::') { continue; }
-	if (substr (\$a['decl'], 0, 5) == 'Gtk::') { continue; }
-	if (substr (\$a['decl'], 0, 5) == 'Gio::') { continue; }
-	if (substr (\$a['decl'], 0, 6) == 'Glib::') { continue; }
-	if (substr (\$a['decl'], 0, 7) == 'Pango::') { continue; }
-	if (substr (\$a['decl'], 0, 11) == 'luabridge::') { continue; }
 
 	\$a['decl'] = str_replace ('size_t', 'unsigned long', \$a['decl']);
 	\$a['decl'] = str_replace ('uint32_t', 'unsigned int', \$a['decl']);
+	\$a['decl'] = str_replace ('int32_t', 'int', \$a['decl']);
 	\$a['decl'] = str_replace ('framepos_t', 'long', \$a['decl']);
+	\$a['decl'] = str_replace ('framecnt_t', 'long', \$a['decl']);
 	\$a['decl'] = str_replace ('frameoffset_t', 'long', \$a['decl']);
 	\$a['decl'] = str_replace ('int64_t', 'long', \$a['decl']);
 	\$a['decl'] = str_replace ('uint8_t', 'unsigned char', \$a['decl']);
@@ -57,7 +49,7 @@ foreach (json_decode (\$json, true) as \$a) {
 	\$a['decl'] = str_replace ('const unsigned long', 'unsigned long', \$a['decl']);
 	\$canon = str_replace (' *', '*', \$a['decl']);
 	\$api[\$canon] = \$a;
-	}
+}
 \$jout = array ();
 foreach (\$api as \$k => \$a) {
 	\$jout[] = \$a;

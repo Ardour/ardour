@@ -23,8 +23,48 @@
 #include <cstring>
 #include <sstream>
 #include <iomanip>
+#include <map>
 #include <clang-c/Index.h>
 #include <clang-c/Documentation.h>
+
+struct dox2js {
+	dox2js () : clang_argc (2), clang_argv (0), excl_argc (0), excl_argv (0)
+	{
+		excl_argv = (char**) calloc (1, sizeof (char*));
+		clang_argv = (char**) malloc (clang_argc * sizeof (char*));
+		clang_argv[0] = strdup ("-x");
+		clang_argv[1] = strdup ("c++");
+	}
+
+	~dox2js () {
+		for (int i = 0; i < clang_argc; ++i) {
+			free (clang_argv[i]);
+		}
+		for (int i = 0; excl_argv[i]; ++i) {
+			free (excl_argv[i]);
+		}
+		free (clang_argv);
+		free (excl_argv);
+	}
+
+	void add_clang_arg (const char *a) {
+		clang_argv = (char**) realloc (clang_argv, (clang_argc + 2) * sizeof (char*));
+		clang_argv[clang_argc++] = strdup ("-I");
+		clang_argv[clang_argc++] = strdup (a);
+	}
+
+	void add_exclude (const char *a) {
+		excl_argv = (char**) realloc (excl_argv, (excl_argc + 2) * sizeof (char*));
+		excl_argv[excl_argc++] = strdup (a);
+		excl_argv[excl_argc] = NULL;
+	}
+
+	int    clang_argc;
+	char** clang_argv;
+	int    excl_argc;
+	char** excl_argv;
+	std::map <std::string, std::string> results;
+};
 
 static const char*
 kind_to_txt (CXCursor cursor)
@@ -69,20 +109,37 @@ escape_json (const std::string &s)
 	return o.str ();
 }
 
-static void recurse_parents (CXCursor cr) {
+static std::string
+recurse_parents (CXCursor cr) {
+	std::string rv;
 	CXCursor pc = clang_getCursorSemanticParent (cr);
 	if (CXCursor_TranslationUnit == clang_getCursorKind (pc)) {
-		return;
+		return rv;
 	}
 	if (!clang_Cursor_isNull (pc)) {
-		recurse_parents (pc);
-		printf ("%s::", clang_getCString (clang_getCursorDisplayName (pc)));
+		rv += recurse_parents (pc);
+		rv += clang_getCString (clang_getCursorDisplayName (pc));
+		rv += "::";
 	}
+	return rv;
+}
+
+static bool
+check_excludes (const std::string& decl, CXClientData d) {
+	struct dox2js* dj = (struct dox2js*) d;
+	char** excl = dj->excl_argv;
+	for (int i = 0; excl[i]; ++i) {
+		if (decl.compare (0, strlen (excl[i]), excl[i]) == 0) {
+			return true;
+		}
+	}
+	return false;
 }
 
 static enum CXChildVisitResult
-traverse (CXCursor cr, CXCursor /*parent*/, CXClientData)
+traverse (CXCursor cr, CXCursor /*parent*/, CXClientData d)
 {
+	struct dox2js* dj = (struct dox2js*) d;
 	CXComment c = clang_Cursor_getParsedComment (cr);
 
 	if (clang_Comment_getKind (c) != CXComment_Null
@@ -90,45 +147,48 @@ traverse (CXCursor cr, CXCursor /*parent*/, CXClientData)
 			&& 0 != strlen (kind_to_txt (cr))
 		 ) {
 
-		printf ("{ \"decl\" : \"");
-		recurse_parents (cr);
-
 		// TODO: resolve typedef enum { .. } name;
 		// use clang_getCursorDefinition (clang_getCanonicalCursor (cr)) ??
-		printf ("%s\",\n", clang_getCString (clang_getCursorDisplayName (cr)));
+		std::string decl = recurse_parents (cr);
+		decl += clang_getCString (clang_getCursorDisplayName (cr));
 
-		if (clang_Cursor_isVariadic (cr)) {
-			printf ("  \"variadic\" : true,\n");
+		if (decl.empty () || check_excludes (decl, d)) {
+			return CXChildVisit_Recurse;
 		}
 
-		printf ("  \"kind\" : \"%s\",\n", kind_to_txt (cr));
+		std::ostringstream o;
+		o << "{ \"decl\" : \"" << decl << "\",\n";
+
+		if (clang_Cursor_isVariadic (cr)) {
+			o << "  \"variadic\" : true,\n";
+		}
 
 		CXSourceLocation  loc = clang_getCursorLocation (cr);
 		CXFile file; unsigned line, col, off;
 		clang_getFileLocation (loc, &file, &line, &col, &off);
 
-		printf ("  \"src\" : \"%s:%d\",\n",
-				clang_getCString (clang_getFileName (file)), line);
+		o << "  \"kind\" : \"" << kind_to_txt (cr) << "\",\n"
+			<< "  \"src\" : \"" << clang_getCString (clang_getFileName (file)) << ":" << line << "\",\n"
+			<< "  \"doc\" : \"" << escape_json (clang_getCString (clang_FullComment_getAsHTML (c))) << "\"\n"
+			<< "},\n";
 
-		printf ("  \"doc\" : \"%s\"\n",
-				escape_json (clang_getCString (clang_FullComment_getAsHTML (c))).c_str ());
-		printf ("},\n");
+		dj->results[decl] = o.str ();
 	}
 	return CXChildVisit_Recurse;
 }
 
 static void
-process_file (int argc, char **args, const char *fn)
+process_file (const char* fn, struct dox2js *dj)
 {
 	CXIndex index = clang_createIndex (0, 0);
-	CXTranslationUnit tu = clang_createTranslationUnitFromSourceFile (index, fn, argc, args, 0, 0);
+	CXTranslationUnit tu = clang_createTranslationUnitFromSourceFile (index, fn, dj->clang_argc, dj->clang_argv, 0, 0);
 
 	if (tu == NULL) {
 		fprintf (stderr, "Cannot create translation unit for src: %s\n", fn);
 		return;
 	}
 
-	clang_visitChildren (clang_getTranslationUnitCursor (tu), traverse, 0);
+	clang_visitChildren (clang_getTranslationUnitCursor (tu), traverse, (CXClientData) dj);
 
 	clang_disposeTranslationUnit (tu);
 	clang_disposeIndex (index);
@@ -138,23 +198,23 @@ static void
 usage (int status)
 {
 	printf ("doxy2json - extract doxygen doc from C++ headers.\n\n");
-	fprintf (stderr, "Usage: dox2json [-I path]* <filename> [filename]*\n");
+	fprintf (stderr, "Usage: dox2json [-I path]* [-X exclude]* <filename> [filename]*\n");
 	exit (status);
 }
 
-int main (int argc, char **argv)
+int main (int argc, char** argv)
 {
-	int cnt = 2;
-	char **args = (char**) malloc (cnt * sizeof (char*));
-	args[0] = strdup ("-x");
-	args[1] = strdup ("c++");
+	struct dox2js dj;
+
+	bool report_progress = false;
   int c;
-	while (EOF != (c = getopt (argc, argv, "I:"))) {
+	while (EOF != (c = getopt (argc, argv, "I:X:"))) {
 		switch (c) {
 			case 'I':
-				args = (char**) realloc (args, (cnt + 2) * sizeof (char*));
-				args[cnt++] = strdup ("-I");
-				args[cnt++] = strdup (optarg);
+				dj.add_clang_arg (optarg);
+				break;
+			case 'X':
+				dj.add_exclude (optarg);
 				break;
 			case 'h':
 				usage (0);
@@ -168,16 +228,26 @@ int main (int argc, char **argv)
 		usage (EXIT_FAILURE);
 	}
 
-	printf ("[\n");
+	const int total = (argc - optind);
+	if (total > 6) {
+		report_progress = true;
+	}
+
 	for (int i = optind; i < argc; ++i) {
-		process_file (cnt, args, argv[i]);
+		process_file (argv[i], &dj);
+		if (report_progress) {
+			fprintf (stderr, "progress: %4.1f%%  [%4d / %4d] decl: %ld         \r",
+					100.f * (1.f + i - optind) / (float)total, i - optind, total,
+					dj.results.size ());
+			fflush (stderr);
+		}
+	}
+
+	printf ("[\n");
+	for (std::map <std::string, std::string>::const_iterator i = dj.results.begin (); i != dj.results.end (); ++i) {
+		printf ("%s\n", (*i).second.c_str ());
 	}
 	printf ("{} ]\n");
-
-	for (int i = 0; i < cnt; ++i) {
-		free (args[i]);
-	}
-	free (args);
 
   return 0;
 }

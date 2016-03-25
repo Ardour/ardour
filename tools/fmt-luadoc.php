@@ -601,10 +601,15 @@ h2.enum            { background-color: #aaaaaa; }
 h2.pointerclass    { background-color: #eeaa66; }
 h2.array           { background-color: #66aaee; }
 h2.opaque          { background-color: #6666aa; }
+p                  { text-align: justify; }
 p.cdecl            { text-align: right; float:right; font-size:90%; margin:0; padding: 0 0 0 1em;}
 ul.classindex      { columns: 2; -webkit-columns: 2; -moz-columns: 2; }
 div.clear          { clear:both; }
 p.classinfo        { margin: .25em 0;}
+div.code           { width:80%; margin:.5em auto; }
+div.code div       { width:45%; }
+div.code pre       { line-height: 1.2em; margin: .25em 0; }
+div.code samp      { color: green; font-weight: bold; background-color: #eee; }
 div.classdox       { padding: .1em 1em;}
 div.classdox p     { margin: .5em 0 .5em .6em;}
 div.classdox p     { margin: .5em 0 .5em .6em;}
@@ -615,7 +620,7 @@ table.classmembers th      { text-align:left; border-bottom:1px solid black; pad
 table.classmembers td.def  { text-align:right; padding-right:.5em;  white-space: nowrap;}
 table.classmembers td.decl { text-align:left; padding-left:.5em; white-space: nowrap; }
 table.classmembers td.doc  { text-align:left; padding-left:.6em; line-height: 1.2em; font-size:80%;}
-table.classmembers td.doc div.dox {background-color:#ddd; padding: .1em 1em;}
+table.classmembers td.doc div.dox {background-color:#eee; padding: .1em 1em;}
 table.classmembers td.doc p { margin: .5em 0; }
 table.classmembers td.doc p.para-brief { font-size:120%; }
 table.classmembers td.doc p.para-returns { font-size:120%; }
@@ -626,7 +631,7 @@ table.classmembers span.em { font-style: italic;}
 span.functionname abbr     { text-decoration:none; cursor:default;}
 div.header         {text-align:center;}
 div.header h1      {margin:0;}
-div.header p       {margin:.25em;}
+div.header p       {margin:.25em; text-align:center;}
 </style>
 </head>
 <body>
@@ -664,12 +669,90 @@ Tracks contain specifics. For Example a track <em>has-a</em> diskstream (for fil
 </p>
 <p>
 Operations are performed on objects. One gets a reference to an object and then calls a method.
-e.g   obj = Session:route_by_name("Audio")   obj:set_name("Guitar")
+e.g <code>obj = Session:route_by_name("Audio")   obj:set_name("Guitar")</code>.
 </p>
 <p>
 Object lifetimes are managed by the Session. Most Objects cannot be directly created, but one asks the Session to create or destroy them. This is mainly due to realtime constrains:
 you cannot simply remove a track that is currently processing audio. There are various <em>factory</em> methods for object creation or removal.
 </p>
+<h2>Pass by Reference</h2>
+<p>
+Since lua functions are closures, C++ methods that pass arguments by reference cannot be used as-is.
+All parameters passed to a C++ method which uses references are returned as Lua Table.
+If the C++ method also returns a value it is prefixed. Two parameters are returned: the value and a Lua Table holding the parameters.
+</p>
+
+<div class="code">
+	<div style="float:left;">C++
+
+<pre><code class="cxx">void set_ref (int&amp; var, long&amp; val)
+{
+	printf ("%d %ld\n", var, val);
+	var = 5;
+	val = 7;
+}
+</code></pre>
+
+  </div>
+	<div style="float:right;">Lua
+
+<pre><code class="lua">local var = 0;
+ref = set_ref (var, 2);
+-- output from C++ printf()
+</code><samp class="lua">0 2</samp><code>
+-- var is still 0 here
+print (ref[1], ref[2])
+</code><samp class="lua">5 7</samp></pre>
+
+  </div>
+</div>
+<div class="clear"></div>
+<div class="code">
+	<div style="float:left;">
+
+<pre><code class="cxx">int set_ref2 (int &amp;var, std::string unused)
+{
+	var = 5;
+	return 3;
+}
+</code></pre>
+
+  </div>
+  <div style="float:right;">
+<pre><code class="lua">rv, ref = set_ref2 (0, "hello");
+print (rv, ref[1], ref[2])
+</code><samp class="lua">3 5 hello</samp></pre>
+  </div>
+</div>
+<div class="clear"></div>
+
+<h2>Pointer Classes</h2>
+<p>
+Libardour makes extensive use of reference counted <code>boost::shared_ptr</code> to manage lifetimes.
+The Lua bindings provide a complete abstration of this. There are no pointers in lua.
+For example a <?=typelink('ARDOUR:Route')?> is a pointer in C++, but lua functions operate on it like it was a class instance.
+</p>
+<p>
+<code>shared_ptr</code> are reference counted. Once assigned to a lua variable, the C++ object will be kept and remains valid.
+It is good practice to assign references to lua <code>local</code> variables or reset the variable to <code>nil</code> to drop the ref.
+</p>
+<p>
+All pointer classes have a <code>isnil ()</code> method. This is for two cases:
+Construction may fail. e.g. <code><?=typelink('ARDOUR:LuaAPI')?>.newplugin()</code>
+may not be able to find the given plugin and hence cannot create an object.
+</p>
+<p>
+The second case if for <code>boost::weak_ptr</code>. As opposed to <code>boost::shared_ptr</code> weak-pointers are not reference counted.
+The object may vanish at any time.
+If lua code calls a method on a nil object, the interpreter will raise an exception and the script will not continue.
+This is not unlike <code>a = nil a:test()</code> which results in en error "<em>attempt to index a nil value</em>".
+</p>
+<p>
+From the lua side of things there is no distinction between weak and shared pointers. They behave identically.
+Below they're inidicated in orange and have an arrow to indicate the pointer type.
+Pointer Classes cannot be created in lua scripts. It always requires a call to C++ to create the Object and obtain a reference to it.
+</p>
+
 
 <?php
 echo '<h1 id="h_classes">Class Documentation</h1>'.NL;
