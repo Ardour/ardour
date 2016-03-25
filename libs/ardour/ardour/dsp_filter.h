@@ -121,11 +121,36 @@ namespace ARDOUR { namespace DSP {
 			size_t _size;
 	};
 
+	/** lua wrapper to memset() */
 	void memset (float *data, const float val, const uint32_t n_samples);
+	/** matrix multiply
+	 * multiply every sample of `data' with the corresponding sample at `mult'.
+	 *
+	 * @param data multiplicand
+	 * @param mult multiplicand
+	 * @param n_samples number of samples in data and mmult
+	 */
 	void mmult (float *data, float *mult, const uint32_t n_samples);
+	/** calculate peaks
+	 *
+	 * @param data data to analyze
+	 * @param min result, minimum value found in range
+	 * @param max result, max value found in range
+	 * @param n_samples number of samples to analyze
+	 */
 	void peaks (float *data, float &min, float &max, uint32_t n_samples);
 
+	/** non-linear power-scale meter deflection
+	 *
+	 * @param power signal power (dB)
+	 * @returns deflected value
+	 */
 	float log_meter (float power);
+	/** non-linear power-scale meter deflection
+	 *
+	 * @param coeff signal value
+	 * @returns deflected value
+	 */
 	float log_meter_coeff (float coeff);
 
 	/** 1st order Low Pass filter */
