@@ -133,6 +133,9 @@ LuaWindow::LuaWindow ()
 	scrollout.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_ALWAYS);
 	scrollout.add (outtext);
 
+	entry.set_name ("ArdourLuaEntry");
+	outtext.set_name ("ArdourLuaEntry");
+
 	Gtk::HBox *hbox = manage (new HBox());
 
 	hbox->pack_start (_btn_run, false, false, 2);
@@ -192,8 +195,6 @@ void LuaWindow::reinit_lua ()
 	LuaInstance::register_classes (L);
 	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
 	lua_setglobal (L, "Editor");
-
-
 }
 
 void LuaWindow::set_session (Session* s)
