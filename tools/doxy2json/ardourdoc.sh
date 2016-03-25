@@ -49,6 +49,12 @@ foreach (json_decode (\$json, true) as \$a) {
 	\$a['decl'] = str_replace ('uint8_t', 'unsigned char', \$a['decl']);
 	\$a['decl'] = str_replace ('pframes_t', 'unsigned int', \$a['decl']);
 	\$a['decl'] = str_replace ('uint64_t', 'unsigned long', \$a['decl']);
+	\$a['decl'] = str_replace ('const char', 'char', \$a['decl']);
+	\$a['decl'] = str_replace ('const float', 'float', \$a['decl']);
+	\$a['decl'] = str_replace ('const double', 'double', \$a['decl']);
+	\$a['decl'] = str_replace ('const long', 'long', \$a['decl']);
+	\$a['decl'] = str_replace ('const unsigned int', 'unsigned int', \$a['decl']);
+	\$a['decl'] = str_replace ('const unsigned long', 'unsigned long', \$a['decl']);
 	\$canon = str_replace (' *', '*', \$a['decl']);
 	\$api[\$canon] = \$a;
 	}

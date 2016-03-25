@@ -518,7 +518,7 @@ function format_doxydoc ($f) {
 		if (!empty ($doc)) {
 			$rv.= '<tr><td></td><td class="doc" colspan="2"><div class="dox">'.$doc;
 			$rv.= '</div></td></tr>'.NL;
-		} else if (1) { # debug
+		} else if (0) { # debug
 			$rv.= '<tr><td></td><td class="doc" colspan="2"><p>'.htmlentities($f['cand']).'</p>';
 			$rv.= '</td></tr>'.NL;
 		}
