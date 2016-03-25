@@ -3254,6 +3254,7 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 
 	_marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	_real_section = &_marker->tempo();
+	_movable = _real_section->movable();
 	assert (_marker);
 }
 
@@ -3273,11 +3274,7 @@ TempoMarkerDrag::setup_pointer_frame_offset ()
 void
 TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (!_marker->tempo().movable()) {
-		return;
-	}
-
-	if (first_move) {
+	if (first_move && _movable) {
 
 		// create a dummy marker for visual representation of moving the
 		// section, because whether its a copy or not, we're going to
@@ -3314,13 +3311,14 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	framepos_t const pf = adjusted_current_frame (event);
 	Tempo const tp = _marker->tempo();
-	_marker->set_position (pf);
 
 	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
-		double new_bpm = tp.beats_per_minute() + ((grab_y() - current_pointer_y()) / 4.0);
-		_real_section->set_beats_per_minute (new_bpm);
+		//_marker->set_position (pf);
+		double new_bpm = _real_section->beats_per_minute() + ((last_pointer_y() - current_pointer_y()) / 5.0);
 		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type()));
-	} else {
+	} else if (_movable) {
+
+		_marker->set_position (pf);
 		/* just here for a check/laugh
 		   if (_real_section->position_lock_style() == MusicTime) {
 		   const double baf = _editor->session()->tempo_map().beat_at_frame (pf);
@@ -3341,10 +3339,6 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (was_double_click()) {
 			_editor->edit_tempo_marker (*_marker);
 		}
-		return;
-	}
-
-	if (!_marker->tempo().movable()) {
 		return;
 	}
 

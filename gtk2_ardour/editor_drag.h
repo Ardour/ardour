@@ -737,6 +737,7 @@ private:
 	ARDOUR::TempoSection* _real_section;
 
 	bool _copy;
+	bool _movable;
 	XMLNode* before_state;
 };
 
