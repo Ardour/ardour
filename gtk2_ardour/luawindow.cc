@@ -475,6 +475,9 @@ LuaWindow::setup_buffers ()
 	script_buffers.push_back (ScriptBufferPtr (new LuaWindow::ScriptBuffer("#1")));
 	_current_buffer = script_buffers.front();
 
+	Glib::RefPtr<Gtk::TextBuffer> tb (entry.get_buffer());
+	tb->set_text (_current_buffer->script);
+
 	refresh_scriptlist ();
 	update_gui_state ();
 }
@@ -618,6 +621,9 @@ LuaWindow::ScriptBuffer::ScriptBuffer (const std::string& n)
 	: name (n)
 	, flags (Buffer_Scratch | Buffer_Valid)
 {
+	script =
+		"-- ardour { [\"type\"] = \"Snippet\", name = \"\" }\n"
+		"-- function factory () return function () -- -- end end\n";
 }
 
 LuaWindow::ScriptBuffer::ScriptBuffer (LuaScriptInfoPtr p)
