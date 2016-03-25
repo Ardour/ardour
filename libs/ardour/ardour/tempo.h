@@ -47,11 +47,18 @@ class TempoMap;
 /** Tempo, the speed at which musical time progresses (BPM). */
 class LIBARDOUR_API Tempo {
   public:
+	/**
+	 * @param bpm Beats Per Minute
+	 * @param type Note Type (default `4': quarter note)
+	 */
 	Tempo (double bpm, double type=4.0) // defaulting to quarter note
 		: _beats_per_minute (bpm), _note_type(type) {}
 
 	double beats_per_minute () const { return _beats_per_minute;}
 	double note_type () const { return _note_type;}
+	/** audio samples per beat
+	 * @param sr samplerate
+	 */
 	double frames_per_beat (framecnt_t sr) const {
 		return (60.0 * sr) / _beats_per_minute;
 	}

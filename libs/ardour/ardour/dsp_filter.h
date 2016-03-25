@@ -27,18 +27,20 @@
 
 namespace ARDOUR { namespace DSP {
 
-	/** C Shared Memory
+	/** C/C++ Shared Memory
 	 *
-	 * A convenience class representing a C array or float[] or int32_t[]
+	 * A convenience class representing a C array of float[] or int32_t[]
 	 * data values. This is useful for lua scripts to perform DSP operations
-	 * directly using C, C++.
-	 * Access to this memory area is always 4 byte aligned: float, int.
+	 * directly using C/C++ with CPU Hardware acceleration.
 	 *
-	 * This memory area can also be shared between different instances.
+	 * Access to this memory area is always 4 byte aligned. The data
+	 * is interpreted either as float or as int.
+	 *
+	 * This memory area can also be shared between different instances
+	 * or the same lua plugin (DSP, GUI).
 	 *
 	 * Since memory allocation is not realtime safe it should be
 	 * allocated during dsp_init() or dsp_configure().
-	 *
 	 * The memory is free()ed automatically when the lua instance is
 	 * destroyed.
 	 */
@@ -220,7 +222,7 @@ namespace ARDOUR { namespace DSP {
 			void run (float *data, const uint32_t n_samples);
 			/** setup filter, compute coefficients
 			 *
-			 * @param t filter type
+			 * @param t filter type (LowPass, HighPass, etc)
 			 * @param freq filter frequency
 			 * @param Q filter quality
 			 * @param gain filter gain
