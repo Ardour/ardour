@@ -727,7 +727,7 @@ public:
 	}
 
 	bool y_movement_matters () const {
-		return false;
+		return true;
 	}
 
 	void setup_pointer_frame_offset ();

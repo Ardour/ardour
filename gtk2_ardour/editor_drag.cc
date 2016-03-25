@@ -3312,17 +3312,24 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_marker->hide();
 	}
 
-	framepos_t const pf = adjusted_current_frame (event, false);
+	framepos_t const pf = adjusted_current_frame (event);
 	Tempo const tp = _marker->tempo();
 	_marker->set_position (pf);
-	/* just here for a check/laugh
-	if (_real_section->position_lock_style() == MusicTime) {
-		const double baf = _editor->session()->tempo_map().beat_at_frame (pf);
-		_editor->session()->tempo_map().gui_move_tempo_beat (_real_section, tp, baf);
+
+	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+		double new_bpm = tp.beats_per_minute() + ((grab_y() - current_pointer_y()) / 4.0);
+		_real_section->set_beats_per_minute (new_bpm);
+		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type()));
 	} else {
-	*/
-	_editor->session()->tempo_map().gui_move_tempo_frame (_real_section, tp, pf);
-	//}
+		/* just here for a check/laugh
+		   if (_real_section->position_lock_style() == MusicTime) {
+		   const double baf = _editor->session()->tempo_map().beat_at_frame (pf);
+		   _editor->session()->tempo_map().gui_move_tempo_beat (_real_section, tp, baf);
+		   } else {
+		*/
+		_editor->session()->tempo_map().gui_move_tempo_frame (_real_section, tp, pf);
+		//}
+	}
 
 	show_verbose_cursor_time (pf);
 }
@@ -3362,11 +3369,11 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	} else {
 		if (_marker->tempo().position_lock_style() == MusicTime) {
-			double const pulse = map.predict_tempo_pulse (_real_section, _marker->tempo(), _real_section->frame());
-			map.replace_tempo (*_real_section, Tempo (_marker->tempo().beats_per_minute(), _marker->tempo().note_type())
+			double const pulse = map.predict_tempo_pulse (_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type()), _real_section->frame());
+			map.replace_tempo (*_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type())
 					   , pulse, _marker->tempo().type());
 		} else {
-			map.replace_tempo (*_real_section, Tempo (_marker->tempo().beats_per_minute(), _marker->tempo().note_type())
+			map.replace_tempo (*_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type())
 					   , _real_section->frame(), _marker->tempo().type());
 		}
 

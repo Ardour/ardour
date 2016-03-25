@@ -56,6 +56,7 @@ class LIBARDOUR_API Tempo {
 		: _beats_per_minute (bpm), _note_type(type) {}
 
 	double beats_per_minute () const { return _beats_per_minute; }
+	void set_beats_per_minute (double bpm) { _beats_per_minute = bpm; }
 	double note_type () const { return _note_type; }
 	double pulses_per_minute () const { return _beats_per_minute / _note_type; }
 	/** audio samples per beat
@@ -387,6 +388,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void gui_move_tempo_beat (TempoSection*, const Tempo& bpm, const double& frame);
 	void gui_move_meter (MeterSection*, const Meter& mt, const framepos_t& frame);
 	void gui_move_meter (MeterSection*, const Meter& mt, const double& beat);
+	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
 
 	bool can_solve_bbt (TempoSection* section, const Tempo& bpm, const Timecode::BBT_Time& bbt);
 

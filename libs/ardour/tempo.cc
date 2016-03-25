@@ -1159,6 +1159,34 @@ TempoMap::gui_move_meter (MeterSection* ms, const Meter& mt, const double&  beat
 	MetricPositionChanged (); // Emit Signal
 }
 
+bool
+TempoMap::gui_change_tempo (TempoSection* ts,  const Tempo& bpm)
+{
+	Metrics future_map;
+	bool can_solve = false;
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
+		TempoSection* new_section = copy_metrics_and_point (future_map, ts);
+		new_section->set_beats_per_minute (bpm.beats_per_minute());
+		recompute_tempos (future_map);
+
+		if (check_solved (future_map, true)) {
+			ts->set_beats_per_minute (bpm.beats_per_minute());
+			recompute_map (_metrics);
+			can_solve = true;
+		}
+	}
+
+	Metrics::const_iterator d = future_map.begin();
+	while (d != future_map.end()) {
+		delete (*d);
+		++d;
+	}
+	if (can_solve) {
+		MetricPositionChanged (); // Emit Signal
+	}
+	return can_solve;
+}
 TempoSection*
 TempoMap::copy_metrics_and_point (Metrics& copy, TempoSection* section)
 {
@@ -1949,6 +1977,7 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const Tempo& bpm
 	MetricSectionSorter cmp;
 
 	section->set_frame (frame);
+
 	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
 		TempoSection* t;
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
@@ -1970,7 +1999,7 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const Tempo& bpm
 	}
 
 	if (section_prev) {
-		section_prev->set_c_func (section_prev->compute_c_func_pulse (section->pulses_per_minute(), section->pulse(), _frame_rate));
+		section_prev->set_c_func (section_prev->compute_c_func_frame (bpm.pulses_per_minute(), frame, _frame_rate));
 		section->set_pulse (section_prev->pulse_at_frame (frame, _frame_rate));
 	}
 
@@ -2029,6 +2058,7 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const Tempo& bpm
 	TempoSection* section_prev = 0;
 
 	section->set_pulse (pulse);
+	section->set_beats_per_minute (bpm.beats_per_minute());
 
 	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
 		TempoSection* t;
@@ -2050,7 +2080,7 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const Tempo& bpm
 		}
 	}
 	if (section_prev) {
-		section_prev->set_c_func (section_prev->compute_c_func_pulse (section->pulses_per_minute(), pulse, _frame_rate));
+		section_prev->set_c_func (section_prev->compute_c_func_pulse (bpm.pulses_per_minute(), pulse, _frame_rate));
 		section->set_frame (section_prev->frame_at_pulse (pulse, _frame_rate));
 	}
 

@@ -143,6 +143,9 @@ Editor::marker_position_changed ()
 		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
 			if ((ts = &tempo_marker->tempo()) != 0) {
 				tempo_marker->set_position (ts->frame ());
+				char buf[64];
+				snprintf (buf, sizeof (buf), "%.2f", ts->beats_per_minute());
+				tempo_marker->set_name (buf);
 			}
 		}
 		if ((meter_marker = dynamic_cast<MeterMarker*> (*x)) != 0) {
