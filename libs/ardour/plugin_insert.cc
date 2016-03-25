@@ -68,6 +68,8 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	: Processor (s, (plug ? plug->name() : string ("toBeRenamed")))
 	, _signal_analysis_collected_nframes(0)
 	, _signal_analysis_collect_nframes_max(0)
+	, _strict_io (false)
+	, _strict_io_configured (false)
 {
 	/* the first is the master */
 
@@ -138,7 +140,10 @@ PluginInsert::output_streams() const
 
 	PluginInfoPtr info = _plugins.front()->get_info();
 
-	if (info->reconfigurable_io()) {
+	if (_strict_io_configured) {
+		return _configured_in; // XXX, check initial configuration
+	}
+	else if (info->reconfigurable_io()) {
 		ChanCount out = _plugins.front()->output_streams ();
 		// DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, reconfigur(able) output streams = %1\n", out));
 		return out;
@@ -807,6 +812,7 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 PluginInsert::Match
 PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanCount& out)
 {
+	_strict_io_configured = false;
 	if (_plugins.empty()) {
 		return Match();
 	}
@@ -820,6 +826,11 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 		bool const r = _plugins.front()->can_support_io_configuration (in, out);
 		if (!r) {
 			return Match (Impossible, 0);
+		}
+
+		if (_strict_io && in.n_audio() < out.n_audio()) {
+			DEBUG_TRACE (DEBUG::Processors, string_compose ("hiding output ports of reconfigurable %1\n", name()));
+			out.set (DataType::AUDIO, in.get (DataType::AUDIO));
 		}
 
 		return Match (Delegate, 1);
@@ -852,7 +863,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	}
 
 	/* Plugin inputs match requested inputs exactly */
-	if (inputs == in) {
+	if (inputs == in  && (!_strict_io || outputs.n_audio() == inputs.n_audio())) {
 		out = outputs + midi_bypass;
 		return Match (ExactMatch, 1);
 	}
@@ -907,7 +918,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	   plugin inputs?  Let me count the ways ...
 	*/
 
-	bool can_split = true;
+	bool can_split = !_strict_io;
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 
 		bool const can_split_type = (in.get (*t) == 1 && inputs.get (*t) > 1);
@@ -943,7 +954,12 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	}
 
 	if (could_hide && !cannot_hide) {
-		out = outputs + midi_bypass;
+		if (_strict_io && inputs.get (DataType::AUDIO) == outputs.get (DataType::AUDIO)) {
+			_strict_io_configured = true;
+			outputs = inputs;
+		} else {
+			out = outputs + midi_bypass;
+		}
 		return Match (Hide, 1, hide_channels);
 	}
 

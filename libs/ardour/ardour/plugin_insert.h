@@ -143,6 +143,14 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	void collect_signal_for_analysis (framecnt_t nframes);
 
+	void set_strict_io (bool b) {
+		_strict_io = b;
+	}
+
+	bool strict_io_configured () const {
+		return _strict_io_configured;
+	}
+
 	bool splitting () const {
 		return _match.method == Split;
 	}
@@ -190,6 +198,9 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	ChanCount _configured_in;
 	ChanCount _configured_out;
+
+	bool _strict_io;
+	bool _strict_io_configured;
 
 	/** Description of how we can match our plugin's IO to our own insert IO */
 	struct Match {

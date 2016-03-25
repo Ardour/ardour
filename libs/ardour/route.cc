@@ -115,6 +115,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _track_number (0)
 	, _in_configure_processors (false)
 	, _initial_io_setup (false)
+	, _strict_io (false)
 	, _custom_meter_position_noted (false)
 {
 	processor_max_streams.reset();
@@ -1257,6 +1258,13 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 		return 1;
 	}
 
+	if (_strict_io) {
+		boost::shared_ptr<PluginInsert> pi;
+		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(processor)) != 0) {
+			pi->set_strict_io (true);
+		}
+	}
+
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
@@ -1456,6 +1464,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				pi->set_count (1);
+				pi->set_strict_io (_strict_io);
 			}
 
 			_processors.insert (loc, *i);
@@ -1839,6 +1848,11 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 		return 1;
 	}
 
+	/* ensure that sub is not owned by another route */
+	if (sub->owner ()) {
+		return 1;
+	}
+
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
@@ -1864,6 +1878,13 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 
 		if (!replaced) {
 			return 1;
+		}
+
+		if (_strict_io) {
+			boost::shared_ptr<PluginInsert> pi;
+			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(sub)) != 0) {
+				pi->set_strict_io (true);
+			}
 		}
 
 		if (configure_processors_unlocked (err)) {
@@ -2376,6 +2397,44 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 	return 0;
 }
 
+bool
+Route::set_strict_io (const bool enable)
+{
+	if (_strict_io != enable) {
+		_strict_io = enable;
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
+			boost::shared_ptr<PluginInsert> pi;
+			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
+				pi->set_strict_io (_strict_io);
+			}
+		}
+
+		list<pair<ChanCount, ChanCount> > c = try_configure_processors_unlocked (n_inputs (), 0);
+
+		if (c.empty()) {
+			// not possible
+			_strict_io = !enable; // restore old value
+			for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
+				boost::shared_ptr<PluginInsert> pi;
+				if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
+					pi->set_strict_io (_strict_io);
+				}
+			}
+			return false;
+		}
+		lm.release ();
+
+		{
+			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+			configure_processors (0);
+		}
+		processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+		_session.set_dirty ();
+	}
+	return true;
+}
+
 XMLNode&
 Route::get_state()
 {
@@ -2404,6 +2463,7 @@ Route::state(bool full_state)
 	node->add_property("id", buf);
 	node->add_property ("name", _name);
 	node->add_property("default-type", _default_type.to_string());
+	node->add_property ("strict-io", _strict_io);
 
 	if (_flags) {
 		node->add_property("flags", enum_2_string (_flags));
@@ -2525,6 +2585,10 @@ Route::set_state (const XMLNode& node, int version)
 		_flags = Flag (string_2_enum (prop->value(), _flags));
 	} else {
 		_flags = Flag (0);
+	}
+
+	if ((prop = node.property (X_("strict-io"))) != 0) {
+		_strict_io = string_is_affirmative (prop->value());
 	}
 
 	if (is_master() || is_monitor() || is_auditioner()) {
@@ -3078,6 +3142,11 @@ Route::set_processor_state (const XMLNode& node)
 						processor.reset (new UnknownProcessor (_session, **niter));
 					} else {
 						processor.reset (new PluginInsert (_session));
+						if (_strict_io) {
+							boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(processor);
+							pi->set_strict_io (true);
+						}
+
 					}
 				} else if (prop->value() == "port") {
 
