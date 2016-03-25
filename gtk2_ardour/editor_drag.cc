@@ -3274,7 +3274,7 @@ TempoMarkerDrag::setup_pointer_frame_offset ()
 void
 TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (first_move && _movable) {
+	if (first_move) {
 
 		// create a dummy marker for visual representation of moving the
 		// section, because whether its a copy or not, we're going to
