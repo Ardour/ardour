@@ -809,6 +809,9 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 	if (mm) {
 		can_remove = mm->meter().movable ();
 	} else if (tm) {
+		if (!tm->tempo().active()) {
+			return;
+		}
 		can_remove = tm->tempo().movable ();
 	} else {
 		return;

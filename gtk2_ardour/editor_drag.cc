@@ -3262,7 +3262,11 @@ void
 TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
-	show_verbose_cursor_time (adjusted_current_frame (event));
+	if (!_real_section->active()) {
+		show_verbose_cursor_text (_("inactive"));
+	} else {
+		show_verbose_cursor_time (adjusted_current_frame (event));
+	}
 }
 
 void
@@ -3274,6 +3278,9 @@ TempoMarkerDrag::setup_pointer_frame_offset ()
 void
 TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
+	if (!_real_section->active()) {
+		return;
+	}
 	if (first_move) {
 
 		// create a dummy marker for visual representation of moving the
@@ -3313,9 +3320,11 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	Tempo const tp = _marker->tempo();
 
 	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
-		//_marker->set_position (pf);
 		double new_bpm = _real_section->beats_per_minute() + ((last_pointer_y() - current_pointer_y()) / 5.0);
 		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type()));
+		stringstream strs;
+		strs << new_bpm;
+		show_verbose_cursor_text (strs.str());
 	} else if (_movable) {
 
 		_marker->set_position (pf);
@@ -3327,14 +3336,16 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		*/
 		_editor->session()->tempo_map().gui_move_tempo_frame (_real_section, tp, pf);
 		//}
+		show_verbose_cursor_time (pf);
 	}
-
-	show_verbose_cursor_time (pf);
 }
 
 void
 TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
+	if (!_real_section->active()) {
+		return;
+	}
 	if (!movement_occurred) {
 		if (was_double_click()) {
 			_editor->edit_tempo_marker (*_marker);

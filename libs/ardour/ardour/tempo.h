@@ -175,9 +175,9 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	};
 
 	TempoSection (const double& beat, double qpm, double note_type, Type tempo_type)
-		: MetricSection (beat), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type), _c_func (0.0)  {}
+		: MetricSection (beat), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type), _c_func (0.0), _active (true)  {}
 	TempoSection (framepos_t frame, double qpm, double note_type, Type tempo_type)
-		: MetricSection (frame), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type), _c_func (0.0) {}
+		: MetricSection (frame), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type), _c_func (0.0), _active (true) {}
 	TempoSection (const XMLNode&);
 
 	static const std::string xml_state_node_name;
@@ -187,6 +187,9 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	void update_bar_offset_from_bbt (const Meter&);
 	void update_bbt_time_from_bar_offset (const Meter&);
 	double bar_offset() const { return _bar_offset; }
+
+	bool active () const { return _active; }
+	void set_active (bool yn) { _active = yn; }
 
 	void set_type (Type type);
 	Type type () const { return _type; }
@@ -240,6 +243,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	double _bar_offset;
 	Type _type;
 	double _c_func;
+	bool _active;
 	Timecode::BBT_Time _legacy_bbt;
 };
 
