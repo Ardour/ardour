@@ -21,8 +21,12 @@
 
 $json = gzdecode (file_get_contents (dirname (__FILE__).'/../doc/luadoc.json.gz'));
 $doc = array ();
+$ardourversion = '';
 foreach (json_decode ($json, true) as $b) {
-	if (!isset ($b['type'])) { continue; }
+	if (!isset ($b['type'])) {
+		if (isset ($b['version'])) { $ardourversion = $b['version']; }
+		continue;
+	}
 	$b ['ldec'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['decl']));
 	if (isset ($b['ret'])) {
 		$b['ret'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['ret']));
@@ -392,8 +396,10 @@ ksort ($classlist);
 #### -- split here --  ####
 
 # from here on, only $classlist and $constlist arrays are relevant.
+# we also pull in C++ header annotation from doxygen to $api
 
-# read function documentation from doxygen
+
+# read documentation from doxygen
 $json = gzdecode (file_get_contents (dirname (__FILE__).'/../doc/ardourapi.json.gz'));
 $api = array ();
 foreach (json_decode ($json, true) as $a) {
@@ -403,8 +409,11 @@ foreach (json_decode ($json, true) as $a) {
 	$api[$canon] = $a;
 }
 
+# keep track of found/missing doc
 $dox_found = 0;
 $dox_miss = 0;
+
+# retrive a value from $api
 function doxydoc ($canonical_declaration) {
 	global $api;
 	global $dox_found;
@@ -412,12 +421,7 @@ function doxydoc ($canonical_declaration) {
 	if (isset ($api[$canonical_declaration])) {
 		$dox_found++;
 		return $api[$canonical_declaration]['doc'];
-	}
-	elseif (isset ($api['ARDOUR::'.$canonical_declaration])) {
-		$dox_found++;
-		return $api['ARDOUR::'.$canonical_declaration]['doc'];
-	}
-	else {
+	} else {
 		$dox_miss++;
 		return '';
 	}
@@ -432,22 +436,22 @@ function doxydoc ($canonical_declaration) {
 # Helper functions
 define ('NL', "\n");
 
+# constructors, enums (constants) use a dot.  (e.g. "LuaOSC.Address" -> "LuaOSC.Address" )
 function ctorname ($name) {
 	return htmlentities (str_replace (':', '.', $name));
 }
 
+# strip class prefix (e.g "Evoral:MidiEvent:channel"  -> "channel")
 function shortname ($name) {
 	return htmlentities (substr ($name, strrpos ($name, ':') + 1));
 }
 
+# retrieve variable name from    array["VARNAME"] => FLAGS
 function varname ($a) {
 	return array_keys ($a)[0];
 }
 
-function name_sort_cb ($a, $b) {
-	return strcmp ($a['name'], $b['name']);
-}
-
+# recusively collect class parents (derived classes)
 function traverse_parent ($ns, &$inherited) {
 	global $classlist;
 	$rv = '';
@@ -464,11 +468,11 @@ function traverse_parent ($ns, &$inherited) {
 	return $rv;
 }
 
+# create a cross-reference to a type (class or enum)
+# *all* <a> links are generated here, currently anchors on a single page.
 function typelink ($a, $short = false, $argcls = '', $linkcls = '', $suffix = '') {
 	global $classlist;
 	global $constlist;
-	# all cross-reference links are generated here.
-	# currently anchors on a single page.
 	if (isset($classlist[$a]['free'])) {
 		return '<a class="'.$linkcls.'" href="#'.htmlentities ($a).'">'.($short ? shortname($a) : ctorname($a)).$suffix.'</a>';
 	} else if (in_array ($a, array_keys ($classlist))) {
@@ -480,6 +484,7 @@ function typelink ($a, $short = false, $argcls = '', $linkcls = '', $suffix = ''
 	}
 }
 
+# output format function arguments
 function format_args ($args) {
 	$rv = '<span class="functionargs"> (';
 	$first = true;
@@ -500,6 +505,7 @@ function format_args ($args) {
 	return $rv;
 }
 
+# format doxygen documentation for class-definition
 function format_doxyclass ($cl) {
 	$rv = '';
 	if (isset ($cl['decl'])) {
@@ -511,6 +517,7 @@ function format_doxyclass ($cl) {
 	return $rv;
 }
 
+# format doxygen documentation for class-members
 function format_doxydoc ($f) {
 	$rv = '';
 	if (isset ($f['cand'])) {
@@ -525,8 +532,16 @@ function format_doxydoc ($f) {
 	}
 	return $rv;
 }
+
+# usort() callback for class-members
+function name_sort_cb ($a, $b) {
+	return strcmp ($a['name'], $b['name']);
+}
+
+# main output function for every class
 function format_class_members ($ns, $cl, &$dups) {
 	$rv = '';
+	# print contructor - if any
 	if (isset ($cl['ctor'])) {
 		usort ($cl['ctor'], 'name_sort_cb');
 		$rv.= ' <tr><th colspan="3">Constructor</th></tr>'.NL;
@@ -535,9 +550,14 @@ function format_class_members ($ns, $cl, &$dups) {
 			$rv.= '<span class="functionname">'.ctorname ($f['name']).'</span>';
 			$rv.= format_args ($f['args']);
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
+			# doxygen documentation (may be empty)
 			$rv.= format_doxydoc($f);
 		}
 	}
+
+	# strip duplicates (inherited or derived methods)
+	# e.g  AudioTrack -> Track -> Route -> SessionObject -> Stateful
+	# all 5 have "isnil()"
 	$nondups = array ();
 	if (isset ($cl['func'])) {
 		foreach ($cl['func'] as $f) {
@@ -545,30 +565,38 @@ function format_class_members ($ns, $cl, &$dups) {
 			$nondups[] = $f;
 		}
 	}
+
+	# print methods - if any
 	if (count ($nondups) > 0) {
 		usort ($nondups, 'name_sort_cb');
 		$rv.= ' <tr><th colspan="3">Methods</th></tr>'.NL;
 		foreach ($nondups as $f) {
 			$dups[] = stripclass ($ns, $f['name']);
+			# return value/type
 			$rv.= ' <tr><td class="def">';
 			if ($f['ref'] && isset ($f['ext'])) {
 				# external C functions
 				$rv.= '<em>'.varname ($f['ret']).'</em>';
 			} elseif ($f['ref'] && varname ($f['ret']) == 'void') {
-				# functions with reference args return args
+				# void functions with reference args
 				$rv.= '<em>LuaTable</em>(...)';
 			} elseif ($f['ref']) {
+				# functions with reference args and return value
 				$rv.= '<em>LuaTable</em>('.typelink (varname ($f['ret']), true, 'em').', ...)';
 			} else {
+				# normal class members
 				$rv.= typelink (varname ($f['ret']), true, 'em');
 			}
+			# function declaration and arguments
 			$rv.= '</td><td class="decl">';
 			$rv.= '<span class="functionname"><abbr title="'.htmlentities($f['bind']['decl']).'">'.stripclass ($ns, $f['name']).'</abbr></span>';
 			$rv.= format_args ($f['args']);
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
+			# doxygen documentation (may be empty)
 			$rv.= format_doxydoc($f);
 		}
 	}
+	# print data members - if any
 	if (isset ($cl['data'])) {
 		usort ($cl['data'], 'name_sort_cb');
 		$rv.= ' <tr><th colspan="3">Data Members</th></tr>'.NL;
@@ -632,6 +660,7 @@ span.functionname abbr     { text-decoration:none; cursor:default;}
 div.header         {text-align:center;}
 div.header h1      {margin:0;}
 div.header p       {margin:.25em; text-align:center;}
+div.footer         {text-align:center; font-size:80%; color: #888; margin: 2em 0;}
 </style>
 </head>
 <body>
@@ -646,6 +675,13 @@ div.header p       {margin:.25em; text-align:center;}
 </p>
 </div>
 <div class="content">
+
+<?php
+
+################################################################################
+# some general documentation -- should really go elsehere
+
+?>
 
 <h1 id="h_intro">Overview</h1>
 <p>
@@ -693,7 +729,7 @@ If the C++ method also returns a value it is prefixed. Two parameters are return
 }
 </code></pre>
 
-  </div>
+	</div>
 	<div style="float:right;">Lua
 
 <pre><code class="lua">local var = 0;
@@ -704,7 +740,7 @@ ref = set_ref (var, 2);
 print (ref[1], ref[2])
 </code><samp class="lua">5 7</samp></pre>
 
-  </div>
+	</div>
 </div>
 <div class="clear"></div>
 <div class="code">
@@ -717,12 +753,12 @@ print (ref[1], ref[2])
 }
 </code></pre>
 
-  </div>
-  <div style="float:right;">
+	</div>
+	<div style="float:right;">
 <pre><code class="lua">rv, ref = set_ref2 (0, "hello");
 print (rv, ref[1], ref[2])
 </code><samp class="lua">3 5 hello</samp></pre>
-  </div>
+	</div>
 </div>
 <div class="clear"></div>
 
@@ -755,32 +791,43 @@ Pointer Classes cannot be created in lua scripts. It always requires a call to C
 
 
 <?php
-echo '<h1 id="h_classes">Class Documentation</h1>'.NL;
 
+#################################
+# Main output function -- Classes
+
+echo '<h1 id="h_classes">Class Documentation</h1>'.NL;
 foreach ($classlist as $ns => $cl) {
 	$dups = array ();
 	$tbl =  format_class_members ($ns, $cl, $dups);
 
-	# format class title
+	# format class title - depending on type
 	if (empty ($tbl)) {
+		# classes with no members (no ctor, no methods, no data)
 		echo '<h2 id="'.htmlentities ($ns).'" class="cls opaque"><abbr title="Opaque Object">&empty;</abbr>&nbsp;'.htmlentities ($ns).'</h2>'.NL;
 	}
 	else if (isset ($classlist[$ns]['free'])) {
+		# free functions (no class)
 		echo '<h2 id="'.htmlentities ($ns).'" class="cls freeclass"><abbr title="Namespace">&Nopf;</abbr>&nbsp;'.ctorname($ns).'</h2>'.NL;
 	}
 	else if (isset ($classlist[$ns]['arr'])) {
+		# C Arrays
 		echo '<h2 id="'.htmlentities ($ns).'" class="cls array"><abbr title="C Array">&ctdot;</abbr>&nbsp;'.htmlentities ($ns).'</h2>'.NL;
 	}
 	else if (isset ($classlist[$ns]['ptr'])) {
+		# Pointer Classes
 		echo '<h2 id="'.htmlentities ($ns).'" class="cls pointerclass"><abbr title="Pointer Class">&Rarr;</abbr>&nbsp;'. htmlentities ($ns).'</h2>'.NL;
-	} else {
+	}
+	else {
+		# Normal Class
 		echo '<h2 id="'.htmlentities ($ns).'" class="cls class"><abbr title="Class">&comp;</abbr>&nbsp;'.htmlentities ($ns).'</h2>'.NL;
 	}
+
+	# show original C++ declaration
 	if (isset ($cl['decl'])) {
 		echo '<p class="cdecl"><em>C&#8225;</em>: '.htmlentities ($cl['decl']).'</p>'.NL;
 	}
 
-	# print class inheritance
+	# print class inheritance (direct parent *name* only)
 	$inherited = array ();
 	$isa = traverse_parent ($ns, $inherited);
 	if (!empty ($isa)) {
@@ -788,6 +835,8 @@ foreach ($classlist as $ns => $cl) {
 	}
 	echo '<div class="clear"></div>'.NL;
 
+
+	# class documentation (if any)
 	echo format_doxyclass ($cl);
 
 	# member documentation
@@ -799,7 +848,7 @@ foreach ($classlist as $ns => $cl) {
 		echo ' </table>'.NL;
 	}
 
-	# traverse parent classes (inherited members)
+	# traverse parent classes (all inherited members)
 	foreach ($inherited as $pns => $pcl) {
 		$tbl = format_class_members ($pns, $pcl, $dups);
 		if (!empty ($tbl)) {
@@ -811,6 +860,9 @@ foreach ($classlist as $ns => $cl) {
 	}
 }
 
+####################
+# Enum and Constants
+
 echo '<h1 id="h_enum">Enum/Constants</h1>'.NL;
 foreach ($constlist as $ns => $cs) {
 	echo '<h2 id="'.ctorname ($ns).'" class="cls enum"><abbr title="Enum">&isin;</abbr>&nbsp;'.ctorname ($ns).'</h2>'.NL;
@@ -821,6 +873,9 @@ foreach ($constlist as $ns => $cs) {
 	echo '</ul>'.NL;
 }
 
+######################
+# Index of all classes
+
 echo '<h1 id="h_index" >Class Index</h1>'.NL;
 echo '<ul class="classindex">'.NL;
 foreach ($classlist as $ns => $cl) {
@@ -828,8 +883,12 @@ foreach ($classlist as $ns => $cl) {
 }
 echo '</ul>'.NL;
 
+
+# see how far there is still to go...
 fwrite (STDERR, "Found $dox_found annotations. missing: $dox_miss\n");
+
 ?>
 </div>
+<div class="footer">Ardour <?=$ardourversion?> &nbsp;-&nbsp; <?=date('r')?></div>
 </body>
 </html>
