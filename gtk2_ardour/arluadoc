@@ -11,4 +11,5 @@ $TOP/build/gtk2_ardour/luadoc "$@" \
 	| sed 's/, std::allocator<[^>]*<[^>]*>[ ]*>//g;' \
 	| sed 's/, std::allocator<[^>]*>//g;' \
 	| sed 's/ "/"/g;' \
-	| gzip -9
+	| gzip -9 \
+	> $TOP/doc/luadoc.json.gz
