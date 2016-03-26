@@ -788,6 +788,12 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	_configured_in = in;
 	_configured_out = out;
 
+	/* TODO use "custom config"
+	 * allow user to edit/override output ports, handle strict i/o.
+	 *
+	 * configuration should only applied here.
+	 */
+
 	/* set the matching method and number of plugins that we will use to meet this configuration */
 	_match = private_can_support_io_configuration (in, out);
 	if (set_count (_match.plugins) == false) {
@@ -813,7 +819,8 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		break;
 	}
 
-	// TODO make configurable
+	// TODO make configurable, ideally use a single in/out map for all replicated
+	// plugins.
 	uint32_t pc = 0;
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
 		if (_match.method == Split) {
@@ -919,6 +926,53 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 		}
 	}
 
+	/* replicate no-input generators with strict i/o */
+	if (no_inputs && _strict_io) {
+		uint32_t f             = 0;
+		bool     can_replicate = true;
+
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			uint32_t nout = outputs.get (*t);
+			uint32_t nwant = in.get (*t);
+			if (nout > nwant) {
+				can_replicate = false;
+				break;
+			}
+			if (nout == nwant) {
+				continue;
+			}
+
+			if (f == 0 && nwant % nout == 0) {
+				f = nwant / nout;
+			}
+
+			if (f * nout != nwant) {
+				can_replicate = false;
+				break;
+			}
+		}
+
+		if (can_replicate && f > 1) {
+			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+				out.set (*t, outputs.get(*t) * f);
+			}
+			out += midi_bypass;
+			return Match (Replicate, f);
+		}
+	}
+
+	if ((no_inputs || inputs == in) && _strict_io) {
+		/* special case synths and generators */
+		if (in.n_audio () == 0 && in.n_midi () > 0 && outputs.n_audio () > 0) {
+			// TODO limit the audio-channel count to track output
+			out = outputs + midi_bypass;
+		} else {
+			_strict_io_configured = true;
+			out = in + midi_bypass;
+		}
+		return Match (ExactMatch, 1);
+	}
+
 	if (no_inputs) {
 		/* no inputs so we can take any input configuration since we throw it away */
 		out = outputs + midi_bypass;
@@ -926,7 +980,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	}
 
 	/* Plugin inputs match requested inputs exactly */
-	if (inputs == in  && (!_strict_io || outputs.n_audio() == inputs.n_audio())) {
+	if (inputs == in) {
 		out = outputs + midi_bypass;
 		return Match (ExactMatch, 1);
 	}
@@ -966,6 +1020,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	}
 
 	if (can_replicate) {
+		assert (f > 1);
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			out.set (*t, outputs.get(*t) * f);
 		}
@@ -982,7 +1037,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	*/
 
 	bool can_split = !_strict_io;
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+	for (DataType::iterator t = DataType::begin(); t != DataType::end() && can_split; ++t) {
 
 		bool const can_split_type = (in.get (*t) == 1 && inputs.get (*t) > 1);
 		bool const nothing_to_do_for_type = (in.get (*t) == 0 && inputs.get (*t) == 0);
@@ -1005,7 +1060,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	bool cannot_hide = false;
 	ChanCount hide_channels;
 
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+	for (DataType::iterator t = DataType::begin(); t != DataType::end() && !cannot_hide; ++t) {
 		if (inputs.get(*t) > in.get(*t)) {
 			/* there is potential to hide, since the plugin has more inputs of type t than the insert */
 			hide_channels.set (*t, inputs.get(*t) - in.get(*t));
