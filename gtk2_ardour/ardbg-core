@@ -1,0 +1,14 @@
+#!/bin/sh
+COREFILE=core
+TOP=`dirname "$0"`/..
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+export ARDOUR_INSIDE_GDB=1
+
+if test -n "`which gdb`"; then
+	exec gdb --core $COREFILE --args $TOP/$EXECUTABLE $@
+fi
+if test -n "`which lldb`"; then
+	exec lldb -c $COREFILE -- $TOP/$EXECUTABLE $@
+fi
+echo "neither gdb nor lldb was found."
