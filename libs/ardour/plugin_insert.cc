@@ -449,6 +449,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 
 	if (_no_inplace) {
 		BufferSet& inplace_bufs  = _session.get_noinplace_buffers();
+		ARDOUR::ChanMapping used_outputs;
 
 		uint32_t pc = 0;
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
@@ -490,9 +491,6 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 				deactivate ();
 			}
 
-			// clear output buffers
-			// TODO only clear buffers that are not connected, but configured
-			bufs.silence (nframes, offset);
 
 			// copy back outputs
 			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
@@ -502,9 +500,24 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 					uint32_t out_idx = _out_map[pc].get (*t, out, &valid);
 					if (valid) {
 						bufs.get (*t, out_idx).read_from (inplace_bufs.get (*t, m), nframes, offset, offset);
+						used_outputs.set (*t, out_idx, 1); // mark as used
 					}
 					backmap.set (*t, m + 1);
 				}
+			}
+		}
+		/* all instances have completed, now clear outputs that have not been written to.
+		 * (except midi bypass)
+		 */
+		if (bufs.count().n_midi() == 1 && natural_output_streams().get(DataType::MIDI) == 0) {
+			used_outputs.set (DataType::MIDI, 0, 1); // Midi bypass.
+		}
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			for (uint32_t out = 0; out < bufs.count().get (*t); ++out) {
+				bool valid;
+				used_outputs.get (*t, out, &valid);
+				if (valid) { continue; }
+				bufs.get (*t, out).silence (nframes, offset);
 			}
 		}
 
@@ -1082,6 +1095,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	}
 
 	midi_bypass.reset();
+	// TODO make it possible :)
 	return Match (Impossible, 0);
 }
 
