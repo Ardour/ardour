@@ -96,6 +96,7 @@ LuaWindow::LuaWindow ()
 	, _btn_open (_("Import"))
 	, _btn_save (_("Save"))
 	, _btn_delete (_("Delete"))
+	, _btn_revert (_("Revert"))
 	, _current_buffer ()
 {
 	set_name ("Lua");
@@ -120,10 +121,12 @@ LuaWindow::LuaWindow ()
 	_btn_open.signal_clicked.connect (sigc::mem_fun(*this, &LuaWindow::import_script));
 	_btn_save.signal_clicked.connect (sigc::mem_fun(*this, &LuaWindow::save_script));
 	_btn_delete.signal_clicked.connect (sigc::mem_fun(*this, &LuaWindow::delete_script));
+	_btn_revert.signal_clicked.connect (sigc::mem_fun(*this, &LuaWindow::revert_script));
 
 	_btn_open.set_sensitive (false); // TODO
 	_btn_save.set_sensitive (false);
 	_btn_delete.set_sensitive (false);
+	_btn_revert.set_sensitive (false);
 
 	// layout
 
@@ -143,6 +146,7 @@ LuaWindow::LuaWindow ()
 	hbox->pack_start (_btn_open, false, false, 2);
 	hbox->pack_start (_btn_save, false, false, 2);
 	hbox->pack_start (_btn_delete, false, false, 2);
+	hbox->pack_start (_btn_revert, false, false, 2);
 	hbox->pack_start (script_select, false, false, 2);
 
 	Gtk::VBox *vbox = manage (new VBox());
@@ -344,6 +348,13 @@ LuaWindow::delete_script ()
 }
 
 void
+LuaWindow::revert_script ()
+{
+	_current_buffer->flags &= BufferFlags(~Buffer_Valid);
+	script_selection_changed (_current_buffer, true);
+}
+
+void
 LuaWindow::import_script ()
 {
 	// TODO: dialog to select file or enter URL
@@ -537,7 +548,7 @@ LuaWindow::rebuild_menu ()
 
 	for (ScriptBufferList::const_iterator i = script_buffers.begin (); i != script_buffers.end (); ++i) {
 		Menu_Helpers::MenuElem elem = Gtk::Menu_Helpers::MenuElem((*i)->name,
-				sigc::bind(sigc::mem_fun(*this, &LuaWindow::script_selection_changed), (*i)));
+				sigc::bind(sigc::mem_fun(*this, &LuaWindow::script_selection_changed), (*i), false));
 
 		if ((*i)->flags & Buffer_Scratch) {
 			items_scratch.push_back(elem);
@@ -557,14 +568,17 @@ LuaWindow::rebuild_menu ()
 }
 
 void
-LuaWindow::script_selection_changed (ScriptBufferPtr n)
+LuaWindow::script_selection_changed (ScriptBufferPtr n, bool force)
 {
-	if (n == _current_buffer) {
+	if (n == _current_buffer && !force) {
 		return;
 	}
 
 	Glib::RefPtr<Gtk::TextBuffer> tb (entry.get_buffer());
-	_current_buffer->script = tb->get_text();
+
+	if ((n->flags & Buffer_Valid)) {
+		_current_buffer->script = tb->get_text();
+	}
 
 	if (!(n->flags & Buffer_Valid)) {
 		if (!n->load()) {
@@ -606,6 +620,7 @@ LuaWindow::update_gui_state ()
 
 	_btn_save.set_sensitive (sb.flags & Buffer_Dirty);
 	_btn_delete.set_sensitive (sb.flags & Buffer_Scratch); // TODO allow to remove user-scripts
+	_btn_revert.set_sensitive ((sb.flags & Buffer_Dirty) && (sb.flags & Buffer_HasFile));
 }
 
 void

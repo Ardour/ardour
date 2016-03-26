@@ -103,6 +103,7 @@ class LuaWindow :
 	ArdourButton _btn_open;
 	ArdourButton _btn_save;
 	ArdourButton _btn_delete;
+	ArdourButton _btn_revert;
 
 	ArdourDropdown script_select;
 
@@ -122,7 +123,7 @@ class LuaWindow :
 	uint32_t count_scratch_buffers () const;
 
 	void script_changed ();
-	void script_selection_changed (ScriptBufferPtr n);
+	void script_selection_changed (ScriptBufferPtr n, bool force = false);
 	void update_gui_state ();
 
 	void append_text (std::string s);
@@ -133,6 +134,7 @@ class LuaWindow :
 
 	void new_script ();
 	void delete_script ();
+	void revert_script ();
 	void import_script ();
 	void save_script ();
 };
