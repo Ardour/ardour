@@ -473,6 +473,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 				}
 			}
 
+			// TODO use map_offset_to()  instead ??
 			backmap = mapped;
 
 			// map outputs
@@ -490,6 +491,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 			}
 
 			// clear output buffers
+			// TODO only clear buffers that are not connected, but configured
 			bufs.silence (nframes, offset);
 
 			// copy back outputs
@@ -1015,7 +1017,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	}
 
 	if (could_hide && !cannot_hide) {
-		if (_strict_io && inputs.get (DataType::AUDIO) == outputs.get (DataType::AUDIO)) {
+		if (_strict_io /*&& inputs.get (DataType::AUDIO) == outputs.get (DataType::AUDIO)*/) {
 			_strict_io_configured = true;
 			outputs = inputs;
 		} else {
