@@ -619,53 +619,54 @@ function format_class_members ($ns, $cl, &$dups) {
 <title>Ardour Lua Bindings</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style type="text/css">
-div.content        { max-width:60em; margin: 1em auto; }
-h1                 { margin:2em 0 0 0; padding:0em; border-bottom: 1px solid black;}
-h2.cls             { margin:2em 0 0 0; padding-left:1em; border: 1px dashed #6666ee;}
-h2.cls abbr        { text-decoration:none; cursor:default;}
-h3.cls             { margin:1em 0 0 0;}
-h2.class           { background-color: #aaee66; }
-h2.enum            { background-color: #aaaaaa; }
-h2.pointerclass    { background-color: #eeaa66; }
-h2.array           { background-color: #66aaee; }
-h2.opaque          { background-color: #6666aa; }
-p                  { text-align: justify; }
-p.cdecl            { text-align: right; float:right; font-size:90%; margin:0; padding: 0 0 0 1em;}
-ul.classindex      { columns: 2; -webkit-columns: 2; -moz-columns: 2; }
-div.clear          { clear:both; }
-p.classinfo        { margin: .25em 0;}
-div.code           { width:80%; margin:.5em auto; }
-div.code div       { width:45%; }
-div.code pre       { line-height: 1.2em; margin: .25em 0; }
-div.code samp      { color: green; font-weight: bold; background-color: #eee; }
-div.classdox       { padding: .1em 1em;}
-div.classdox p     { margin: .5em 0 .5em .6em;}
-div.classdox p     { margin: .5em 0 .5em .6em;}
-div.classdox       { padding: .1em 1em;}
-div.classdox p     { margin: .5em 0 .5em .6em;}
-table.classmembers { width: 100%; }
-table.classmembers th      { text-align:left; border-bottom:1px solid black; padding-top:1em; }
-table.classmembers td.def  { text-align:right; padding-right:.5em;  white-space: nowrap;}
-table.classmembers td.decl { text-align:left; padding-left:.5em; white-space: nowrap; }
-table.classmembers td.doc  { text-align:left; padding-left:.6em; line-height: 1.2em; font-size:80%;}
-table.classmembers td.doc div.dox {background-color:#eee; padding: .1em 1em;}
-table.classmembers td.doc p { margin: .5em 0; }
-table.classmembers td.doc p.para-brief { font-size:120%; }
-table.classmembers td.doc p.para-returns { font-size:120%; }
-table.classmembers td.doc dl { font-size:120%; line-height: 1.3em; }
-table.classmembers td.doc dt { font-style: italic; }
-table.classmembers td.fill { width: 99%;}
-table.classmembers span.em { font-style: italic;}
-span.functionname abbr     { text-decoration:none; cursor:default;}
-div.header         {text-align:center;}
-div.header h1      {margin:0;}
-div.header p       {margin:.25em; text-align:center;}
-div.footer         {text-align:center; font-size:80%; color: #888; margin: 2em 0;}
+div.header         { text-align:center; }
+div.header h2      { margin:0; }
+div.header p       { margin:.25em; text-align:center; }
+div.luafooter      { text-align:center; font-size:80%; color: #888; margin: 2em 0; }
+#luaref            { max-width:60em; margin: 1em auto; }
+
+#luaref h2                 { margin:2em 0 0 0; padding:0em; border-bottom: 1px solid black; }
+#luaref h3.cls             { margin:2em 0 0 0; padding: 0 0 0 1em; border: 1px dashed #6666ee; }
+#luaref h3.cls abbr        { text-decoration:none; cursor:default; }
+#luaref h4.cls             { margin:1em 0 0 0; }
+#luaref h3.class           { background-color: #aaee66; }
+#luaref h3.enum            { background-color: #aaaaaa; }
+#luaref h3.pointerclass    { background-color: #eeaa66; }
+#luaref h3.array           { background-color: #66aaee; }
+#luaref h3.opaque          { background-color: #6666aa; }
+#luaref p                  { text-align: justify; }
+#luaref p.cdecl            { text-align: right; float:right; font-size:90%; margin:0; padding: 0 0 0 1em; }
+#luaref ul.classindex      { columns: 2; -webkit-columns: 2; -moz-columns: 2; }
+#luaref div.clear          { clear:both; }
+#luaref p.classinfo        { margin: .25em 0; }
+#luaref div.code           { width:80%; margin:.5em auto; }
+#luaref div.code div       { width:45%; }
+#luaref div.code pre       { line-height: 1.2em; margin: .25em 0; }
+#luaref div.code samp      { color: green; font-weight: bold; background-color: #eee; }
+#luaref div.classdox       { padding: .1em 1em; }
+#luaref div.classdox p     { margin: .5em 0 .5em .6em; }
+#luaref div.classdox p     { margin: .5em 0 .5em .6em; }
+#luaref div.classdox       { padding: .1em 1em; }
+#luaref div.classdox p     { margin: .5em 0 .5em .6em; }
+#luaref table.classmembers { width: 100%; }
+#luaref table.classmembers th      { text-align:left; border-bottom:1px solid black; padding-top:1em; }
+#luaref table.classmembers td.def  { text-align:right; padding-right:.5em;  white-space: nowrap; }
+#luaref table.classmembers td.decl { text-align:left; padding-left:.5em; white-space: nowrap; }
+#luaref table.classmembers td.doc  { text-align:left; padding-left:.6em; line-height: 1.2em; font-size:80%; }
+#luaref table.classmembers td.doc div.dox {background-color:#eee; padding: .1em 1em; }
+#luaref table.classmembers td.doc p { margin: .5em 0; }
+#luaref table.classmembers td.doc p.para-brief { font-size:120%; }
+#luaref table.classmembers td.doc p.para-returns { font-size:120%; }
+#luaref table.classmembers td.doc dl { font-size:120%; line-height: 1.3em; }
+#luaref table.classmembers td.doc dt { font-style: italic; }
+#luaref table.classmembers td.fill { width: 99%; }
+#luaref table.classmembers span.em { font-style: italic; }
+#luaref span.functionname abbr     { text-decoration:none; cursor:default; }
 </style>
 </head>
 <body>
 <div class="header">
-<h1>Ardour Lua Bindings</h1>
+<h2>Ardour Lua Bindings</h2>
 <p>
 <a href="#h_classes">Class Documentation</a>
 &nbsp;|&nbsp;
@@ -674,7 +675,10 @@ div.footer         {text-align:center; font-size:80%; color: #888; margin: 2em 0
 <a href="#h_index">Index</a>
 </p>
 </div>
-<div class="content">
+
+<!-- #### SNIP  #### !-->
+
+<div id="luaref">
 
 <?php
 
@@ -683,7 +687,7 @@ div.footer         {text-align:center; font-size:80%; color: #888; margin: 2em 0
 
 ?>
 
-<h1 id="h_intro">Overview</h1>
+<h2 id="h_intro">Overview</h2>
 <p>
 The top-level entry point are <?=typelink('ARDOUR:Session')?> and <?=typelink('ArdourUI:Editor')?>.
 Most other Classes are used indirectly starting with a Session function. e.g. Session:get_routes().
@@ -696,7 +700,7 @@ A few classes are dedicated to certain script types, e.g. Lua DSP processors hav
 <p>
 Detailed documentation (parameter names, method description) is not yet available. Please stay tuned.
 </p>
-<h2>Short introduction to Ardour classes</h2>
+<h3>Short introduction to Ardour classes</h3>
 <p>
 Ardour's structure is object oriented. The main object is the Session. A Session contains Audio Tracks, Midi Tracks and Busses.
 Audio and Midi tracks are derived from a more general "Track" Object,  which in turn is derived from a "Route" (aka Bus).
@@ -711,7 +715,7 @@ e.g <code>obj = Session:route_by_name("Audio")   obj:set_name("Guitar")</code>.
 Object lifetimes are managed by the Session. Most Objects cannot be directly created, but one asks the Session to create or destroy them. This is mainly due to realtime constrains:
 you cannot simply remove a track that is currently processing audio. There are various <em>factory</em> methods for object creation or removal.
 </p>
-<h2>Pass by Reference</h2>
+<h3>Pass by Reference</h3>
 <p>
 Since lua functions are closures, C++ methods that pass arguments by reference cannot be used as-is.
 All parameters passed to a C++ method which uses references are returned as Lua Table.
@@ -762,7 +766,7 @@ print (rv, ref[1], ref[2])
 </div>
 <div class="clear"></div>
 
-<h2>Pointer Classes</h2>
+<h3>Pointer Classes</h3>
 <p>
 Libardour makes extensive use of reference counted <code>boost::shared_ptr</code> to manage lifetimes.
 The Lua bindings provide a complete abstration of this. There are no pointers in lua.
@@ -795,7 +799,7 @@ Pointer Classes cannot be created in lua scripts. It always requires a call to C
 #################################
 # Main output function -- Classes
 
-echo '<h1 id="h_classes">Class Documentation</h1>'.NL;
+echo '<h2 id="h_classes">Class Documentation</h2>'.NL;
 foreach ($classlist as $ns => $cl) {
 	$dups = array ();
 	$tbl =  format_class_members ($ns, $cl, $dups);
@@ -803,23 +807,23 @@ foreach ($classlist as $ns => $cl) {
 	# format class title - depending on type
 	if (empty ($tbl)) {
 		# classes with no members (no ctor, no methods, no data)
-		echo '<h2 id="'.htmlentities ($ns).'" class="cls opaque"><abbr title="Opaque Object">&empty;</abbr>&nbsp;'.htmlentities ($ns).'</h2>'.NL;
+		echo '<h3 id="'.htmlentities ($ns).'" class="cls opaque"><abbr title="Opaque Object">&empty;</abbr>&nbsp;'.htmlentities ($ns).'</h3>'.NL;
 	}
 	else if (isset ($classlist[$ns]['free'])) {
 		# free functions (no class)
-		echo '<h2 id="'.htmlentities ($ns).'" class="cls freeclass"><abbr title="Namespace">&Nopf;</abbr>&nbsp;'.ctorname($ns).'</h2>'.NL;
+		echo '<h3 id="'.htmlentities ($ns).'" class="cls freeclass"><abbr title="Namespace">&Nopf;</abbr>&nbsp;'.ctorname($ns).'</h3>'.NL;
 	}
 	else if (isset ($classlist[$ns]['arr'])) {
 		# C Arrays
-		echo '<h2 id="'.htmlentities ($ns).'" class="cls array"><abbr title="C Array">&ctdot;</abbr>&nbsp;'.htmlentities ($ns).'</h2>'.NL;
+		echo '<h3 id="'.htmlentities ($ns).'" class="cls array"><abbr title="C Array">&ctdot;</abbr>&nbsp;'.htmlentities ($ns).'</h3>'.NL;
 	}
 	else if (isset ($classlist[$ns]['ptr'])) {
 		# Pointer Classes
-		echo '<h2 id="'.htmlentities ($ns).'" class="cls pointerclass"><abbr title="Pointer Class">&Rarr;</abbr>&nbsp;'. htmlentities ($ns).'</h2>'.NL;
+		echo '<h3 id="'.htmlentities ($ns).'" class="cls pointerclass"><abbr title="Pointer Class">&Rarr;</abbr>&nbsp;'. htmlentities ($ns).'</h3>'.NL;
 	}
 	else {
 		# Normal Class
-		echo '<h2 id="'.htmlentities ($ns).'" class="cls class"><abbr title="Class">&comp;</abbr>&nbsp;'.htmlentities ($ns).'</h2>'.NL;
+		echo '<h3 id="'.htmlentities ($ns).'" class="cls class"><abbr title="Class">&comp;</abbr>&nbsp;'.htmlentities ($ns).'</h3>'.NL;
 	}
 
 	# show original C++ declaration
@@ -852,7 +856,7 @@ foreach ($classlist as $ns => $cl) {
 	foreach ($inherited as $pns => $pcl) {
 		$tbl = format_class_members ($pns, $pcl, $dups);
 		if (!empty ($tbl)) {
-			echo '<h3 class="cls">Inherited from '.$pns.'</h3>'.NL;
+			echo '<h4 class="cls">Inherited from '.$pns.'</h4>'.NL;
 			echo '<table class="classmembers">'.NL;
 			echo $tbl;
 			echo '</table>'.NL;
@@ -863,9 +867,9 @@ foreach ($classlist as $ns => $cl) {
 ####################
 # Enum and Constants
 
-echo '<h1 id="h_enum">Enum/Constants</h1>'.NL;
+echo '<h2 id="h_enum">Enum/Constants</h2>'.NL;
 foreach ($constlist as $ns => $cs) {
-	echo '<h2 id="'.ctorname ($ns).'" class="cls enum"><abbr title="Enum">&isin;</abbr>&nbsp;'.ctorname ($ns).'</h2>'.NL;
+	echo '<h3 id="'.ctorname ($ns).'" class="cls enum"><abbr title="Enum">&isin;</abbr>&nbsp;'.ctorname ($ns).'</h3>'.NL;
 	echo '<ul class="enum">'.NL;
 	foreach ($cs as $c) {
 		echo '<li class="const">'.ctorname ($c['lua']).'</li>'.NL;
@@ -876,7 +880,7 @@ foreach ($constlist as $ns => $cs) {
 ######################
 # Index of all classes
 
-echo '<h1 id="h_index" >Class Index</h1>'.NL;
+echo '<h2 id="h_index" >Class Index</h2>'.NL;
 echo '<ul class="classindex">'.NL;
 foreach ($classlist as $ns => $cl) {
 	echo '<li>'.typelink($ns).'</li>'.NL;
@@ -889,6 +893,9 @@ fwrite (STDERR, "Found $dox_found annotations. missing: $dox_miss\n");
 
 ?>
 </div>
-<div class="footer">Ardour <?=$ardourversion?> &nbsp;-&nbsp; <?=date('r')?></div>
+<div class="luafooter">Ardour <?=$ardourversion?> &nbsp;-&nbsp; <?=date('r')?></div>
+
+<!-- #### SNIP  #### !-->
+
 </body>
 </html>
