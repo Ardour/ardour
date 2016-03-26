@@ -179,6 +179,13 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 		.endNamespace ()
 
+		.beginClass <ChanMapping> ("ChanMapping")
+		.addVoidConstructor ()
+		.addFunction ("get", static_cast<uint32_t(ChanMapping::*)(DataType, uint32_t)>(&ChanMapping::get))
+		.addFunction ("set", &ChanMapping::set)
+		.addConst ("Invalid", 4294967295) // UINT32_MAX
+		.endClass ()
+
 		.beginNamespace ("Properties")
 		// templated class definitions
 		.beginClass <PBD::PropertyDescriptor<bool> > ("BoolProperty").endClass ()
@@ -344,7 +351,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
 		.endClass ()
 
-		.deriveWSPtrClass <Plugin, PBD::StatefulDestructible> ("PluginInsert")
+		.deriveWSPtrClass <Plugin, PBD::StatefulDestructible> ("Plugin")
 		.addFunction ("label", &Plugin::label)
 		.addFunction ("name", &Plugin::name)
 		.addFunction ("maker", &Plugin::maker)
@@ -365,6 +372,14 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("deactivate", &PluginInsert::deactivate)
 		.addFunction ("strict_io_configured", &PluginInsert::strict_io_configured)
 		.addFunction ("set_strict_io", &PluginInsert::set_strict_io)
+		.addFunction ("no_inplace", &PluginInsert::no_inplace)
+		.addFunction ("input_map", &PluginInsert::input_map)
+		.addFunction ("output_map", &PluginInsert::output_map)
+#ifndef NDEBUG -- this is not safe, prototyping only
+		.addFunction ("set_no_inplace", &PluginInsert::set_no_inplace)
+		.addFunction ("set_input_map", &PluginInsert::set_input_map)
+		.addFunction ("set_output_map", &PluginInsert::set_output_map)
+#endif
 		.endClass ()
 
 		.deriveWSPtrClass <AutomationControl, Evoral::Control> ("AutomationControl")
@@ -633,12 +648,6 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("get_audio", static_cast<AudioBuffer&(BufferSet::*)(size_t)>(&BufferSet::get_audio))
 		.addFunction ("count", static_cast<const ChanCount&(BufferSet::*)()const>(&BufferSet::count))
 		.endClass()
-
-		.beginClass <ChanMapping> ("ChanMapping")
-		.addFunction ("get", static_cast<uint32_t(ChanMapping::*)(DataType, uint32_t)>(&ChanMapping::get))
-		.addFunction ("set", &ChanMapping::set)
-		.addConst ("Invalid", 4294967295) // UINT32_MAX
-		.endClass ()
 		.endNamespace ();
 
 	luabridge::getGlobalNamespace (L)

@@ -69,6 +69,35 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	int set_block_size (pframes_t nframes);
 
+	ChanMapping input_map (uint32_t num=0) const {
+		if (num < _in_map.size()) {
+			return _in_map.find (num)->second;
+		} else {
+			return ChanMapping ();
+		}
+	}
+
+	ChanMapping output_map (uint32_t num=0) const {
+		if (num < _out_map.size()) {
+			return _out_map.find (num)->second;
+		} else {
+			return ChanMapping ();
+		}
+	}
+
+#ifndef NDEBUG // prototyping -- this should be done synchroneously in configure_io()
+	void set_input_map (uint32_t num, ChanMapping m) {
+		if (num < _in_map.size()) {
+			_in_map[num] = m;
+		}
+	}
+	void set_output_map (uint32_t num, ChanMapping m) {
+		if (num < _in_map.size()) {
+			_out_map[num] = m;
+		}
+	}
+#endif
+
 	ChanCount output_streams() const;
 	ChanCount input_streams() const;
 	ChanCount natural_output_streams() const;
@@ -143,6 +172,14 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	void collect_signal_for_analysis (framecnt_t nframes);
 
+	bool no_inplace () const {
+		return _pending_no_inplace;
+	}
+
+	void set_no_inplace (bool b) {
+		_pending_no_inplace = b;
+	}
+
 	void set_strict_io (bool b) {
 		_strict_io = b;
 	}
@@ -199,6 +236,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 	ChanCount _configured_in;
 	ChanCount _configured_out;
 
+	bool _no_inplace;
+	bool _pending_no_inplace;
 	bool _strict_io;
 	bool _strict_io_configured;
 

@@ -68,6 +68,8 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	: Processor (s, (plug ? plug->name() : string ("toBeRenamed")))
 	, _signal_analysis_collected_nframes(0)
 	, _signal_analysis_collect_nframes_max(0)
+	, _no_inplace (false)
+	, _pending_no_inplace (false)
 	, _strict_io (false)
 	, _strict_io_configured (false)
 {
@@ -364,6 +366,7 @@ PluginInsert::flush ()
 void
 PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now)
 {
+	_no_inplace = _pending_no_inplace;
 	// Calculate if, and how many frames we need to collect for analysis
 	framecnt_t collect_signal_nframes = (_signal_analysis_collect_nframes_max -
 					     _signal_analysis_collected_nframes);
@@ -374,13 +377,13 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 	ChanCount const in_streams = input_streams ();
 	ChanCount const out_streams = output_streams ();
 
-	bool valid;
 	if (_match.method == Split) {
 		assert (_in_map.size () == 1);
 		/* fix the input mapping so that we have maps for each of the plugin's inputs */
 
 		/* copy the first stream's buffer contents to the others */
 		/* XXX: audio only */
+		bool valid;
 		uint32_t first_idx = _in_map[0].get (DataType::AUDIO, 0, &valid);
 		if (valid) {
 			for (uint32_t i = in_streams.n_audio(); i < natural_input_streams().n_audio(); ++i) {
@@ -444,10 +447,71 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 
 	}
 
-	uint32_t pc = 0;
-	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
-		if ((*i)->connect_and_run(bufs, _in_map[pc], _out_map[pc], nframes, offset)) {
-			deactivate ();
+	if (_no_inplace) {
+		BufferSet& inplace_bufs  = _session.get_noinplace_buffers();
+
+		uint32_t pc = 0;
+		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+
+			ARDOUR::ChanMapping in_map (natural_input_streams());
+			ARDOUR::ChanMapping out_map;
+			ARDOUR::ChanCount mapped;
+			ARDOUR::ChanCount backmap;
+
+			// map inputs sequentially
+			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+				for (uint32_t in = 0; in < natural_input_streams().get (*t); ++in) {
+					bool valid;
+					uint32_t in_idx = _in_map[pc].get (*t, in, &valid);
+					uint32_t m = mapped.get (*t);
+					if (valid) {
+						inplace_bufs.get (*t, m).read_from (bufs.get (*t, in_idx), nframes, offset, offset);
+					} else {
+						inplace_bufs.get (*t, m).silence (nframes, offset);
+					}
+					mapped.set (*t, m + 1);
+				}
+			}
+
+			backmap = mapped;
+
+			// map outputs
+			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+				for (uint32_t out = 0; out < natural_output_streams().get (*t); ++out) {
+					uint32_t m = mapped.get (*t);
+					inplace_bufs.get (*t, m).silence (nframes, offset);
+					out_map.set (*t, out, m);
+					mapped.set (*t, m + 1);
+				}
+			}
+
+			if ((*i)->connect_and_run(inplace_bufs, in_map, out_map, nframes, offset)) {
+				deactivate ();
+			}
+
+			// clear output buffers
+			bufs.silence (nframes, offset);
+
+			// copy back outputs
+			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+				for (uint32_t out = 0; out < natural_output_streams().get (*t); ++out) {
+					uint32_t m = backmap.get (*t);
+					bool valid;
+					uint32_t out_idx = _out_map[pc].get (*t, out, &valid);
+					if (valid) {
+						bufs.get (*t, out_idx).read_from (inplace_bufs.get (*t, m), nframes, offset, offset);
+					}
+					backmap.set (*t, m + 1);
+				}
+			}
+		}
+
+	} else {
+		uint32_t pc = 0;
+		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+			if ((*i)->connect_and_run(bufs, _in_map[pc], _out_map[pc], nframes, offset)) {
+				deactivate ();
+			}
 		}
 	}
 
