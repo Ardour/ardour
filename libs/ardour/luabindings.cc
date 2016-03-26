@@ -375,7 +375,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("no_inplace", &PluginInsert::no_inplace)
 		.addFunction ("input_map", &PluginInsert::input_map)
 		.addFunction ("output_map", &PluginInsert::output_map)
-#ifndef NDEBUG -- this is not safe, prototyping only
+#ifndef NDEBUG // this is not safe, prototyping only
 		.addFunction ("set_no_inplace", &PluginInsert::set_no_inplace)
 		.addFunction ("set_input_map", &PluginInsert::set_input_map)
 		.addFunction ("set_output_map", &PluginInsert::set_output_map)
