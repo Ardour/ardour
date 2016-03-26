@@ -477,6 +477,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/routes/recenable", "ii", route_recenable);
 		REGISTER_CALLBACK (serv, "/ardour/routes/gainabs", "if", route_set_gain_abs);
 		REGISTER_CALLBACK (serv, "/ardour/routes/gaindB", "if", route_set_gain_dB);
+		REGISTER_CALLBACK (serv, "/ardour/routes/gainVCA", "if", route_set_gain_VCA);
 		REGISTER_CALLBACK (serv, "/ardour/routes/trimabs", "if", route_set_trim_abs);
 		REGISTER_CALLBACK (serv, "/ardour/routes/trimdB", "if", route_set_trim_dB);
 		REGISTER_CALLBACK (serv, "/ardour/routes/pan_stereo_position", "if", route_set_pan_stereo_position);
@@ -1108,6 +1109,12 @@ int
 OSC::route_set_gain_dB (int rid, float dB)
 {
 	return route_set_gain_abs (rid, dB_to_coefficient (dB));
+}
+
+int
+OSC::route_set_gain_VCA (int rid, float pos)
+{
+	return route_set_gain_abs (rid, slider_position_to_gain_with_max (pos, 2.0));
 }
 
 
