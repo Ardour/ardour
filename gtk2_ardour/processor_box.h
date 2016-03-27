@@ -102,11 +102,30 @@ class ProcessorWindowProxy : public WM::ProxyBase
 	boost::weak_ptr<ARDOUR::Processor> _processor;
 	bool is_custom;
 	bool want_custom;
-	bool _valid;
 
 	void processor_going_away ();
 	PBD::ScopedConnection going_away_connection;
 };
+
+
+class PluginPinWindowProxy : public WM::ProxyBase
+{
+  public:
+	PluginPinWindowProxy (std::string const &, boost::weak_ptr<ARDOUR::Processor>);
+	~PluginPinWindowProxy();
+
+	Gtk::Window* get (bool create = false);
+	ARDOUR::SessionHandlePtr* session_handle() { return 0; }
+
+  private:
+	ProcessorBox* _processor_box;
+	boost::weak_ptr<ARDOUR::Processor> _processor;
+
+	void processor_going_away ();
+	PBD::ScopedConnection going_away_connection;
+};
+
+
 
 class ProcessorEntry : public Gtkmm2ext::DnDVBoxChild, public sigc::trackable
 {
@@ -344,6 +363,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
         Gtk::Window* get_editor_window (boost::shared_ptr<ARDOUR::Processor>, bool);
         Gtk::Window* get_generic_editor_window (boost::shared_ptr<ARDOUR::Processor>);
 
+        void manage_pins (boost::shared_ptr<ARDOUR::Processor>);
         void edit_processor (boost::shared_ptr<ARDOUR::Processor>);
         void generic_edit_processor (boost::shared_ptr<ARDOUR::Processor>);
 
@@ -462,6 +482,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	static Glib::RefPtr<Gtk::Action> paste_action;
 	static Glib::RefPtr<Gtk::Action> rename_action;
 	static Glib::RefPtr<Gtk::Action> delete_action;
+	static Glib::RefPtr<Gtk::Action> manage_pins_action;
 	static Glib::RefPtr<Gtk::Action> edit_action;
 	static Glib::RefPtr<Gtk::Action> edit_generic_action;
 	void paste_processor_state (const XMLNodeList&, boost::shared_ptr<ARDOUR::Processor>);
@@ -495,6 +516,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	static void rb_activate_all ();
 	static void rb_deactivate_all ();
 	static void rb_ab_plugins ();
+	static void rb_manage_pins ();
 	static void rb_edit ();
 	static void rb_edit_generic ();
 
@@ -508,6 +530,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	void set_processor_ui (boost::shared_ptr<ARDOUR::Processor>, Gtk::Window *);
 	void maybe_add_processor_to_ui_list (boost::weak_ptr<ARDOUR::Processor>);
+	void maybe_add_processor_pin_mgr (boost::weak_ptr<ARDOUR::Processor>);
 
 	bool one_processor_can_be_edited ();
 	bool processor_can_be_edited (boost::shared_ptr<ARDOUR::Processor>);

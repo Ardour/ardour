@@ -176,6 +176,7 @@ gtk2_ardour_sources = [
         'pingback.cc',
         'playlist_selector.cc',
         'plugin_eq_gui.cc',
+        'plugin_pin_dialog.cc',
         'plugin_selector.cc',
         'plugin_ui.cc',
         'port_group.cc',

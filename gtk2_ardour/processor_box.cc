@@ -70,6 +70,7 @@
 #include "luainstance.h"
 #include "mixer_ui.h"
 #include "mixer_strip.h"
+#include "plugin_pin_dialog.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
 #include "port_insert_ui.h"
@@ -106,6 +107,7 @@ RefPtr<Action> ProcessorBox::cut_action;
 RefPtr<Action> ProcessorBox::copy_action;
 RefPtr<Action> ProcessorBox::rename_action;
 RefPtr<Action> ProcessorBox::delete_action;
+RefPtr<Action> ProcessorBox::manage_pins_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
 RefPtr<ActionGroup> ProcessorBox::processor_box_actions;
@@ -1822,6 +1824,8 @@ ProcessorBox::show_processor_menu (int arg)
 		pi = boost::dynamic_pointer_cast<PluginInsert> (single_selection->processor ());
 	}
 
+	manage_pins_action->set_sensitive (pi != 0);
+
 	/* allow editing with an Ardour-generated UI for plugin inserts with editors */
 	edit_action->set_sensitive (pi && pi->plugin()->has_editor ());
 
@@ -2330,6 +2334,7 @@ ProcessorBox::redisplay_processors ()
 
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::add_processor_to_display));
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::maybe_add_processor_to_ui_list));
+	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::maybe_add_processor_pin_mgr));
 	setup_entry_positions ();
 }
 
@@ -2385,6 +2390,31 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 	WM::Manager::instance().register_window (wp);
 }
 
+void
+ProcessorBox::maybe_add_processor_pin_mgr (boost::weak_ptr<Processor> w)
+{
+	boost::shared_ptr<Processor> p = w.lock ();
+	if (!p || p->pinmgr_proxy ()) {
+		return;
+	}
+
+	PluginPinWindowProxy* wp = new PluginPinWindowProxy (
+			string_compose ("PM-%2-%3", _route->id(), p->id()), w);
+
+	const XMLNode* ui_xml = _session->extra_xml (X_("UI"));
+	if (ui_xml) {
+		wp->set_state (*ui_xml, 0);
+	}
+
+	void* existing_ui = p->get_ui ();
+
+	if (existing_ui) {
+		wp->use_window (*(reinterpret_cast<Gtk::Window*>(existing_ui)));
+	}
+
+	p->set_pingmgr_proxy (wp);
+	WM::Manager::instance().register_window (wp);
+}
 void
 ProcessorBox::help_count_visible_prefader_processors (boost::weak_ptr<Processor> p, uint32_t* cnt, bool* amp_seen)
 {
@@ -3229,6 +3259,10 @@ ProcessorBox::register_actions ()
 	myactions.register_action (processor_box_actions, X_("ab_plugins"), _("A/B Plugins"),
 			sigc::ptr_fun (ProcessorBox::rb_ab_plugins));
 
+	manage_pins_action = myactions.register_action (
+		processor_box_actions, X_("manage-pins"), _("Pin Management..."),
+		sigc::ptr_fun (ProcessorBox::rb_manage_pins));
+
 	/* show editors */
 	edit_action = myactions.register_action (
 		processor_box_actions, X_("edit"), _("Edit..."),
@@ -3261,6 +3295,15 @@ ProcessorBox::rb_ab_plugins ()
 	_current_processor_box->ab_plugins ();
 }
 
+void
+ProcessorBox::rb_manage_pins ()
+{
+	if (_current_processor_box == 0) {
+		return;
+	}
+
+	_current_processor_box->for_selected_processors (&ProcessorBox::manage_pins);
+}
 void
 ProcessorBox::rb_choose_plugin ()
 {
@@ -3489,6 +3532,20 @@ ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
 		proxy->show_the_right_window ();
 	}
 }
+
+void
+ProcessorBox::manage_pins (boost::shared_ptr<Processor> processor)
+{
+	if (!processor) {
+		return;
+	}
+	PluginPinWindowProxy* proxy = processor->pinmgr_proxy ();
+	if (proxy) {
+		proxy->get (true);
+		proxy->present();
+	}
+}
+
 
 void
 ProcessorBox::route_property_changed (const PropertyChange& what_changed)
@@ -3768,6 +3825,53 @@ ProcessorWindowProxy::show_the_right_window ()
 	}
 
 	toggle ();
+}
+
+
+PluginPinWindowProxy::PluginPinWindowProxy(std::string const &name, boost::weak_ptr<ARDOUR::Processor> processor)
+	: WM::ProxyBase (name, string())
+	, _processor (processor)
+{
+	boost::shared_ptr<Processor> p = _processor.lock ();
+	if (!p) {
+		return;
+	}
+	p->DropReferences.connect (going_away_connection, MISSING_INVALIDATOR, boost::bind (&PluginPinWindowProxy::processor_going_away, this), gui_context());
+}
+
+PluginPinWindowProxy::~PluginPinWindowProxy()
+{
+	_window = 0;
+}
+
+
+Gtk::Window*
+PluginPinWindowProxy::get (bool create)
+{
+	boost::shared_ptr<Processor> p = _processor.lock ();
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
+	if (!p || !pi) {
+		return 0;
+	}
+
+	if (!_window) {
+		if (!create) {
+			return 0;
+		}
+		_window = new PluginPinDialog (pi);
+	}
+
+	_window->show_all ();
+	return _window;
+}
+
+void
+PluginPinWindowProxy::processor_going_away ()
+{
+	delete _window;
+	_window = 0;
+	WM::Manager::instance().remove (this);
+	going_away_connection.disconnect();
 }
 
 void

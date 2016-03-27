@@ -654,6 +654,8 @@
     <menuitem action='deactivate_all'/>
     <menuitem action='ab_plugins'/>
     <separator/>
+    <menuitem action='manage-pins'/>
+    <separator/>
     <menuitem action='edit'/>
     <menuitem action='edit-generic'/>
   </popup>
