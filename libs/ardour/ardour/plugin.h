@@ -86,6 +86,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 
 	virtual int set_block_size (pframes_t nframes) = 0;
 	virtual bool requires_fixed_sized_buffers() const { return false; }
+	virtual bool inplace_broken() const { return false; }
 
 	virtual int connect_and_run (BufferSet& bufs,
 				     ChanMapping in, ChanMapping out,
