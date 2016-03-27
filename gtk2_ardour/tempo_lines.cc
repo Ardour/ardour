@@ -74,8 +74,17 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 		/* draw line with alpha corresponding to coarsest level */
 		const uint8_t    a = max(8, (int)rint(UINT_RGBA_A(base) / (0.8 * log2(level))));
 		const uint32_t   c = UINT_RGBA_CHANGE_A(base, a);
-		const framepos_t f = grid.begin()->frame + (l * (fpb / (double)divisions));
-		//const framepos_t f = frame_at_tick (last_beat_in_ticks + (l * (BBT_Time::ticks_per_beat / (double)divisions)));
+		framepos_t f = 0;
+
+		if (grid.begin()->c != 0.0) {
+			const double pulses_per_div = l * (grid.begin()->tempo.note_type() / grid.begin()->meter->note_divisor()) / divisions;
+			const double time_at_pulse = log (((grid.begin()->c * (pulses_per_div / grid.begin()->tempo.note_type())) /
+							   grid.begin()->tempo.pulses_per_minute()) + 1) / grid.begin()->c;
+			f = grid.begin()->frame + (framecnt_t) floor ((time_at_pulse * 60.0 * frame_rate) + 0.5);
+		} else {
+			f = grid.begin()->frame + (l * (fpb / (double)divisions));
+		}
+
 		if (f > leftmost_frame) {
 			lines.add (PublicEditor::instance().sample_to_pixel_unrounded (f), 1.0, c);
 		}

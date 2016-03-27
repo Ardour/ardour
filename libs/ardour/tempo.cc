@@ -940,7 +940,6 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		MeterSection& first (first_meter());
-		TempoSection& first_t (first_tempo());
 
 		const PositionLockStyle pl = ms.position_lock_style();
 		if (ms.pulse() != first.pulse()) {
@@ -965,7 +964,6 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const frame
 		MeterSection& first (first_meter());
 		TempoSection& first_t (first_tempo());
 
-		const PositionLockStyle pl = ms.position_lock_style();
 		if (ms.pulse() != first.pulse()) {
 			remove_meter_locked (ms);
 			add_meter_locked (meter, frame, true);
@@ -1450,6 +1448,7 @@ TempoMap::recompute_tempos (Metrics& metrics)
 			prev_ts = t;
 		}
 	}
+	prev_ts->set_c_func (0.0);
 }
 
 /* tempos must be positioned correctly */
@@ -2551,7 +2550,7 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 		MeterSection const meter = meter_section_at_locked (pos);
 		BBT_Time const bbt = beats_to_bbt (cnt);
 
-		points.push_back (BBTPoint (meter, Tempo (tempo.beats_per_minute(), tempo.note_type()), pos, bbt.bars, bbt.beats));
+		points.push_back (BBTPoint (meter, tempo_at_locked (pos), pos, bbt.bars, bbt.beats, tempo.get_c_func()));
 		++cnt;
 	}
 }
@@ -2630,6 +2629,12 @@ const Tempo
 TempoMap::tempo_at (const framepos_t& frame) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
+	return tempo_at_locked (frame);
+}
+
+const Tempo
+TempoMap::tempo_at_locked (const framepos_t& frame) const
+{
 	//frameoffset_t const frame_off = frame_offset_at (_metrics, frame);
 	TempoSection* prev_ts = 0;
 
