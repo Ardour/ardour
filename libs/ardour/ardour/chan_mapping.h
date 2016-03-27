@@ -52,6 +52,14 @@ public:
 	Mappings       mappings()       { return _mappings; }
 	const Mappings mappings() const { return _mappings; }
 
+	bool operator==(const ChanMapping& other) const {
+		return (_mappings == other._mappings);
+	}
+
+	bool operator!=(const ChanMapping& other) const {
+		return ! (*this == other);
+	}
+
 private:
 	Mappings _mappings;
 };
