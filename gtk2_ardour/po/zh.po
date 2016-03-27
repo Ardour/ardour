@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-03-16 16:31+0800\n"
-"PO-Revision-Date: 2016-03-16 18:31+0800\n"
+"POT-Creation-Date: 2016-03-27 09:39+0800\n"
+"PO-Revision-Date: 2016-03-27 10:11+0800\n"
 "Last-Translator: \n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
 "Language: zh\n"
@@ -446,24 +446,25 @@ msgid "32-bit"
 msgstr "32位"
 
 #: about.cc:617
+msgid " - debug"
+msgstr ""
+
+#: about.cc:623
 msgid "Copyright (C) 1999-2015 Paul Davis\n"
 msgstr "版权所有 (C) 1999-2015 Paul Davis\n"
 
-#: about.cc:621
+#: about.cc:627
 msgid "http://ardour.org/"
 msgstr ""
 
-#: about.cc:622
+#: about.cc:628
 msgid ""
 "%1%2\n"
-"(built from revision %3)\n"
-"%4"
+"(rev %3)\n"
+"%4%5"
 msgstr ""
-"%1%2\n"
-"（修订自版本 %3）\n"
-"%4"
 
-#: about.cc:627
+#: about.cc:633
 msgid "Config"
 msgstr "配置"
 
@@ -519,15 +520,15 @@ msgstr "音频总线"
 msgid "MIDI Busses"
 msgstr "MIDI 总线"
 
-#: add_route_dialog.cc:84 add_route_dialog.cc:551
+#: add_route_dialog.cc:84 add_route_dialog.cc:552
 msgid "First"
 msgstr "起始点"
 
-#: add_route_dialog.cc:85 add_route_dialog.cc:555
+#: add_route_dialog.cc:85 add_route_dialog.cc:556
 msgid "Before Selection"
 msgstr "已选择部分之前"
 
-#: add_route_dialog.cc:86 add_route_dialog.cc:553
+#: add_route_dialog.cc:86 add_route_dialog.cc:554
 msgid "After Selection"
 msgstr "已选择部分之后"
 
@@ -613,47 +614,47 @@ msgstr "不分层的"
 msgid "Tape"
 msgstr "磁带"
 
-#: add_route_dialog.cc:430 monitor_section.cc:272
+#: add_route_dialog.cc:431 monitor_section.cc:272
 msgid "Mono"
 msgstr "单声道"
 
-#: add_route_dialog.cc:434
+#: add_route_dialog.cc:435
 msgid "Stereo"
 msgstr "双声道立体声"
 
-#: add_route_dialog.cc:457
+#: add_route_dialog.cc:458
 msgid "3 Channel"
 msgstr "三声道"
 
-#: add_route_dialog.cc:461
+#: add_route_dialog.cc:462
 msgid "4 Channel"
 msgstr "四声道"
 
-#: add_route_dialog.cc:465
+#: add_route_dialog.cc:466
 msgid "5 Channel"
 msgstr "五声道"
 
-#: add_route_dialog.cc:469
+#: add_route_dialog.cc:470
 msgid "6 Channel"
 msgstr "六声道"
 
-#: add_route_dialog.cc:473
+#: add_route_dialog.cc:474
 msgid "8 Channel"
 msgstr "八声道"
 
-#: add_route_dialog.cc:477
+#: add_route_dialog.cc:478
 msgid "12 Channel"
 msgstr "十二声道"
 
-#: add_route_dialog.cc:481 mixer_strip.cc:1920 mixer_strip.cc:2365
+#: add_route_dialog.cc:482 mixer_strip.cc:1920 mixer_strip.cc:2365
 msgid "Custom"
 msgstr "自定义"
 
-#: add_route_dialog.cc:513 add_route_dialog.cc:529 route_group_menu.cc:81
+#: add_route_dialog.cc:514 add_route_dialog.cc:530 route_group_menu.cc:81
 msgid "New Group..."
 msgstr "新建群组…"
 
-#: add_route_dialog.cc:517 route_group_menu.cc:85
+#: add_route_dialog.cc:518 route_group_menu.cc:85
 msgid "No Group"
 msgstr "无群组"
 
@@ -983,7 +984,7 @@ msgstr "不退出"
 msgid "Just quit"
 msgstr "只管退出"
 
-#: ardour_ui.cc:1176 ardour_ui.cc:5188
+#: ardour_ui.cc:1176 ardour_ui.cc:5189
 msgid "Save and quit"
 msgstr "保存并退出"
 
@@ -1522,104 +1523,104 @@ msgstr "已清除的文件"
 msgid "deleted file"
 msgstr "已删除的文件"
 
-#: ardour_ui.cc:3997
+#: ardour_ui.cc:3998
 msgid "Cannot read session script '%1': %2"
 msgstr "无法读取会话脚本 '%1': %2"
 
-#: ardour_ui.cc:4006 luainstance.cc:585
+#: ardour_ui.cc:4007 luainstance.cc:683
 msgid "Set Script Parameters"
 msgstr "设置脚本首选项"
 
-#: ardour_ui.cc:4017
+#: ardour_ui.cc:4018
 msgid "Session script '%1' instantiation failed: %2"
 msgstr "会话脚本 '%1' 实例化失败： %2"
 
-#: ardour_ui.cc:4021
+#: ardour_ui.cc:4022
 msgid "Loading Session script '%1' failed: %2"
 msgstr "载入会话脚本 '%1' 失败：%2"
 
-#: ardour_ui.cc:4034
+#: ardour_ui.cc:4035
 msgid "There are no active Lua session scripts present in this session."
 msgstr "在本会话中没有活动的 Lua 会话脚本呈现"
 
-#: ardour_ui.cc:4051
+#: ardour_ui.cc:4052
 msgid "Session script '%1' removal failed: %2"
 msgstr "会话脚本 '%1' 移除失败：%2"
 
-#: ardour_ui.cc:4061
+#: ardour_ui.cc:4062
 msgid "Video-Server was not launched by %1. The request to stop it is ignored."
 msgstr "视频服务器未被 %1 触发。请求停止视频服务器的要求已被忽略。"
 
-#: ardour_ui.cc:4065
+#: ardour_ui.cc:4066
 msgid "Stop Video-Server"
 msgstr "停止视频服务器"
 
-#: ardour_ui.cc:4066
+#: ardour_ui.cc:4067
 msgid "Do you really want to stop the Video Server?"
 msgstr "您真的打算停止视频服务器？"
 
-#: ardour_ui.cc:4069
+#: ardour_ui.cc:4070
 msgid "Yes, Stop It"
 msgstr "是的，停止它"
 
-#: ardour_ui.cc:4095
+#: ardour_ui.cc:4096
 msgid "The Video Server is already started."
 msgstr "视频服务器已经启动。"
 
-#: ardour_ui.cc:4097
+#: ardour_ui.cc:4098
 msgid ""
 "An external Video Server is configured and can be reached. Not starting a "
 "new instance."
 msgstr "一个外部视频服务器已经配置且可以访问到。尚未启动一个新的实例。"
 
-#: ardour_ui.cc:4105 ardour_ui.cc:4210
+#: ardour_ui.cc:4106 ardour_ui.cc:4211
 msgid ""
 "Could not connect to the Video Server. Start it or configure its access URL "
 "in Preferences."
 msgstr ""
 "无法连接到视频服务器。请启动视频服务器或者配置视频服务器首选项里的访问网址。"
 
-#: ardour_ui.cc:4135
+#: ardour_ui.cc:4136
 msgid "Specified docroot is not an existing directory."
 msgstr "指定的文档根不是一个已存在的目录。"
 
-#: ardour_ui.cc:4141 ardour_ui.cc:4147
+#: ardour_ui.cc:4142 ardour_ui.cc:4148
 msgid "Given Video Server is not an executable file."
 msgstr "给定的视频服务器不是一个可执行文件。"
 
-#: ardour_ui.cc:4181
+#: ardour_ui.cc:4182
 msgid "Cannot launch the video-server"
 msgstr "无法启动视频服务器"
 
-#: ardour_ui.cc:4191
+#: ardour_ui.cc:4192
 msgid "Video-server was started but does not respond to requests..."
 msgstr "视频服务器已经启动但没有响应请求…"
 
-#: ardour_ui.cc:4236 editor_audio_import.cc:644
+#: ardour_ui.cc:4237 editor_audio_import.cc:644
 msgid "could not open %1"
 msgstr "无法打开 %1"
 
-#: ardour_ui.cc:4240
+#: ardour_ui.cc:4241
 msgid "no video-file selected"
 msgstr "尚未选择视频文件"
 
-#: ardour_ui.cc:4336
+#: ardour_ui.cc:4337
 msgid "No LTC detected, video will not be aligned."
 msgstr "检测不到 LTC（纵向时间码），视频将无法对齐。"
 
-#: ardour_ui.cc:4342
+#: ardour_ui.cc:4343
 msgid "Align video-start to %1 [samples]"
 msgstr "对齐视频起点到 %1 [样本]"
 
-#: ardour_ui.cc:4500
+#: ardour_ui.cc:4501
 msgid "xrun"
 msgstr ""
 
-#: ardour_ui.cc:4509
+#: ardour_ui.cc:4510
 msgid "Recording was stopped because your system could not keep up."
 msgstr "录制停止，因为您的系统无法持续跟进。"
 
-#: ardour_ui.cc:4538
+#: ardour_ui.cc:4539
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1633,23 +1634,23 @@ msgstr ""
 "确切地说，失败的原因是硬盘的写入速度\n"
 "不足以持续跟上录制的速度。\n"
 
-#: ardour_ui.cc:4611
+#: ardour_ui.cc:4612
 msgid "Scanning for plugins"
 msgstr "正在扫描插件"
 
-#: ardour_ui.cc:4613
+#: ardour_ui.cc:4614
 msgid "Cancel plugin scan"
 msgstr "取消插件扫描"
 
-#: ardour_ui.cc:4622
+#: ardour_ui.cc:4623
 msgid "Stop Timeout"
 msgstr "停止超时"
 
-#: ardour_ui.cc:4629
+#: ardour_ui.cc:4630
 msgid "Scan Timeout"
 msgstr "扫描超时"
 
-#: ardour_ui.cc:4673
+#: ardour_ui.cc:4674
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1663,11 +1664,11 @@ msgstr ""
 "确切地说，失败的原因是硬盘的读取速度\n"
 "不足以持续跟上回放的速度。\n"
 
-#: ardour_ui.cc:4708
+#: ardour_ui.cc:4709
 msgid "Crash Recovery"
 msgstr "崩溃恢复"
 
-#: ardour_ui.cc:4709
+#: ardour_ui.cc:4710
 msgid ""
 "This session appears to have been in the\n"
 "middle of recording when %1 or\n"
@@ -1685,19 +1686,19 @@ msgstr ""
 "或者忽略它。\n"
 "请确认您打算做什么。\n"
 
-#: ardour_ui.cc:4721
+#: ardour_ui.cc:4722
 msgid "Ignore crash data"
 msgstr "忽略崩溃的数据"
 
-#: ardour_ui.cc:4722
+#: ardour_ui.cc:4723
 msgid "Recover from crash"
 msgstr "恢复到崩溃前"
 
-#: ardour_ui.cc:4742
+#: ardour_ui.cc:4743
 msgid "Sample Rate Mismatch"
 msgstr "采样率不匹配"
 
-#: ardour_ui.cc:4743
+#: ardour_ui.cc:4744
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.  If you load this session,\n"
@@ -1707,15 +1708,15 @@ msgstr ""
 "但是 %2 目前运行在 %3 Hz。如果您加载这个会话，\n"
 "音频可能会处在错误的采样率上播放。\n"
 
-#: ardour_ui.cc:4752
+#: ardour_ui.cc:4753
 msgid "Do not load session"
 msgstr "不要载入会话"
 
-#: ardour_ui.cc:4753
+#: ardour_ui.cc:4754
 msgid "Load session anyway"
 msgstr "只管载入会话"
 
-#: ardour_ui.cc:5040
+#: ardour_ui.cc:5041
 msgid ""
 "%4This is a session from an older version of %3%5\n"
 "\n"
@@ -1741,40 +1742,40 @@ msgstr ""
 "\n"
 "从现在开始，使用连带旧版 %3 的 -2000 版本"
 
-#: ardour_ui.cc:5157
+#: ardour_ui.cc:5158
 msgid "This is a free/demo copy of %1. It has just switched to silent mode."
 msgstr "这是 %1 的一个免费/演示副本。它仅能切换到无声模式。"
 
-#: ardour_ui.cc:5163
+#: ardour_ui.cc:5164
 msgid "%1 is now silent"
 msgstr "%1 现在无声"
 
-#: ardour_ui.cc:5165
+#: ardour_ui.cc:5166
 msgid ""
 "Please consider paying for a copy of %1 - you can pay whatever you want."
 msgstr "请考虑为 %1 付费购买一个副本 - 您可以支付任意金额。"
 
-#: ardour_ui.cc:5166
+#: ardour_ui.cc:5167
 msgid "Better yet become a subscriber - subscriptions start at US$1 per month."
 msgstr "最好是成为定期资助者 - 捐献的起点是每个月一美元。"
 
-#: ardour_ui.cc:5167
+#: ardour_ui.cc:5168
 msgid "Pay for a copy (via the web)"
 msgstr "付费购买一个副本（通过网络）"
 
-#: ardour_ui.cc:5168
+#: ardour_ui.cc:5169
 msgid "Become a subscriber (via the web)"
 msgstr "成为定期资助者（通过网络）"
 
-#: ardour_ui.cc:5187
+#: ardour_ui.cc:5188
 msgid "Remain silent"
 msgstr "保持无声"
 
-#: ardour_ui.cc:5189
+#: ardour_ui.cc:5190
 msgid "Give me more time"
 msgstr "给我更多的时间"
 
-#: ardour_ui.cc:5481
+#: ardour_ui.cc:5482
 msgid "Global keybindings are missing"
 msgstr "缺失全局按键绑定"
 
@@ -2283,7 +2284,7 @@ msgstr "用户论坛"
 msgid "How to Report a Bug"
 msgstr "如何报告一个故障"
 
-#: ardour_ui_ed.cc:322 plugin_ui.cc:419
+#: ardour_ui_ed.cc:322 luawindow.cc:97 plugin_ui.cc:419
 msgid "Save"
 msgstr "保存"
 
@@ -2616,7 +2617,7 @@ msgid "Meter"
 msgstr "节拍"
 
 #: audio_clock.cc:1871 audio_streamview.cc:116 editor_actions.cc:1093
-#: luainstance.cc:458 luainstance.cc:1082 plugin_selector.cc:968
+#: luainstance.cc:555 luainstance.cc:1171 plugin_selector.cc:968
 #: plugin_selector.cc:989 session_metadata_dialog.cc:452
 #: session_metadata_dialog.cc:500 session_metadata_dialog.cc:556
 #: session_metadata_dialog.cc:845 streamview.cc:469
@@ -2808,7 +2809,8 @@ msgid "Edit"
 msgstr "编辑"
 
 #: bundle_manager.cc:266 editor.cc:5893 editor.cc:5923 editor_actions.cc:362
-#: editor_actions.cc:363 plugin_ui.cc:420 processor_box.cc:3144
+#: editor_actions.cc:363 luawindow.cc:98 plugin_ui.cc:420
+#: processor_box.cc:3207
 msgid "Delete"
 msgstr "删除"
 
@@ -2818,7 +2820,7 @@ msgstr "删除"
 msgid "Name"
 msgstr "名称"
 
-#: bundle_manager.cc:283
+#: bundle_manager.cc:283 luawindow.cc:544
 msgid "New"
 msgstr "新建"
 
@@ -3407,15 +3409,15 @@ msgstr "选择指针和编辑点之间范围"
 msgid "Select"
 msgstr "选择"
 
-#: editor.cc:2042 editor.cc:2113 editor_actions.cc:361 processor_box.cc:3140
+#: editor.cc:2042 editor.cc:2113 editor_actions.cc:361 processor_box.cc:3203
 msgid "Cut"
 msgstr "剪切"
 
-#: editor.cc:2043 editor.cc:2114 editor_actions.cc:365 processor_box.cc:3142
+#: editor.cc:2043 editor.cc:2114 editor_actions.cc:365 processor_box.cc:3205
 msgid "Copy"
 msgstr "复制"
 
-#: editor.cc:2044 editor.cc:2115 editor_actions.cc:366 processor_box.cc:3151
+#: editor.cc:2044 editor.cc:2115 editor_actions.cc:366 processor_box.cc:3214
 msgid "Paste"
 msgstr "粘贴"
 
@@ -3713,8 +3715,8 @@ msgid "Keep Remaining"
 msgstr "保留剩余的"
 
 #: editor.cc:4111 editor_audio_import.cc:597 editor_ops.cc:6511
-#: engine_dialog.cc:2968 sfdb_freesound_mootcher.cc:69 processor_box.cc:2904
-#: processor_box.cc:2929
+#: engine_dialog.cc:2968 sfdb_freesound_mootcher.cc:69 processor_box.cc:2967
+#: processor_box.cc:2992
 msgid "Cancel"
 msgstr "取消"
 
@@ -3739,7 +3741,7 @@ msgid "Unset #%1"
 msgstr "复位 #%1"
 
 #: editor.cc:5892 editor.cc:5927 editor_markers.cc:981 panner_ui.cc:412
-#: processor_box.cc:3171
+#: processor_box.cc:3234
 msgid "Edit..."
 msgstr "编辑…"
 
@@ -4027,7 +4029,7 @@ msgstr "指针到范围终点"
 msgid "Select All Tracks"
 msgstr "选择所有音轨"
 
-#: editor_actions.cc:200 export_timespan_selector.cc:59 processor_box.cc:3157
+#: editor_actions.cc:200 export_timespan_selector.cc:59 processor_box.cc:3220
 msgid "Deselect All"
 msgstr "反选所有"
 
@@ -4747,7 +4749,7 @@ msgid "Import PT session"
 msgstr "导入 PT 会话"
 
 #: editor_actions.cc:729 editor_audio_import.cc:282 editor_pt_import.cc:148
-#: session_import_dialog.cc:75 session_import_dialog.cc:95
+#: luawindow.cc:96 session_import_dialog.cc:75 session_import_dialog.cc:95
 #: session_metadata_dialog.cc:418 sfdb_ui.cc:558 editor_videotimeline.cc:91
 msgid "Import"
 msgstr "导入"
@@ -4783,8 +4785,8 @@ msgstr "为编辑器中已选择的音轨/总线切换MIDI输入激活"
 
 #: editor_actions.cc:1082 editor_actions.cc:1478 editor_actions.cc:1489
 #: editor_actions.cc:1542 editor_actions.cc:1553 editor_actions.cc:1600
-#: editor_actions.cc:1610 editor_regions.cc:1575 luainstance.cc:48
-#: luainstance.cc:1206
+#: editor_actions.cc:1610 editor_regions.cc:1577 luainstance.cc:50
+#: luainstance.cc:1286
 msgid "programming error: %1: %2"
 msgstr "程序错误： %1: %2"
 
@@ -5497,8 +5499,8 @@ msgstr "重命名标记"
 msgid "Rename Range"
 msgstr "重命名范围"
 
-#: editor_markers.cc:1415 editor_mouse.cc:2264 processor_box.cc:2679
-#: processor_box.cc:3153 route_time_axis.cc:1103 route_ui.cc:1624
+#: editor_markers.cc:1415 editor_mouse.cc:2264 processor_box.cc:2742
+#: processor_box.cc:3216 route_time_axis.cc:1103 route_ui.cc:1624
 msgid "Rename"
 msgstr "重命名"
 
@@ -5637,7 +5639,7 @@ msgstr "沉降区域到底部"
 msgid "Rename Region"
 msgstr "重命名区域"
 
-#: editor_ops.cc:2787 processor_box.cc:2677 route_ui.cc:1622
+#: editor_ops.cc:2787 processor_box.cc:2740 route_ui.cc:1622
 msgid "New name:"
 msgstr "新名称："
 
@@ -5806,7 +5808,7 @@ msgstr ""
 "您是否确定要销毁最后已捕获内容？\n"
 "（这个操作有破坏性且不能撤销！）"
 
-#: editor_ops.cc:4956 editor_ops.cc:7182 editor_regions.cc:466
+#: editor_ops.cc:4956 editor_ops.cc:7182 editor_regions.cc:458
 #: editor_snapshots.cc:171
 msgid "No, do nothing."
 msgstr "否， 什么都不做。"
@@ -6158,7 +6160,7 @@ msgstr "区域名称，在 [] 方括号内附带声道编号"
 msgid "Position of start of region"
 msgstr "区域起点的位置"
 
-#: editor_regions.cc:117 editor_regions.cc:863 time_info_box.cc:95
+#: editor_regions.cc:117 editor_regions.cc:855 time_info_box.cc:95
 msgid "End"
 msgstr "终点"
 
@@ -6214,11 +6216,11 @@ msgstr "区域模糊（从区域块以下的部分起可以被听见）?"
 msgid "Hidden"
 msgstr "隐藏"
 
-#: editor_regions.cc:395
+#: editor_regions.cc:387
 msgid "(MISSING) "
 msgstr "（缺失）"
 
-#: editor_regions.cc:463
+#: editor_regions.cc:455
 msgid ""
 "Do you really want to remove unused regions?\n"
 "(This is destructive and cannot be undone)"
@@ -6226,31 +6228,31 @@ msgstr ""
 "您真的打算移除未使用的区域？\n"
 "（这是破坏性的且无法撤销）"
 
-#: editor_regions.cc:467
+#: editor_regions.cc:459
 msgid "Yes, remove."
 msgstr "是的，移除。"
 
-#: editor_regions.cc:469
+#: editor_regions.cc:461
 msgid "Remove unused regions"
 msgstr "移除未使用的区域"
 
-#: editor_regions.cc:698
+#: editor_regions.cc:690
 msgid "EditorRegions::format_position: negative timecode position: %1"
 msgstr "编辑器区域::格式_位置: 时间码位置负值: %1"
 
-#: editor_regions.cc:828 editor_regions.cc:844 editor_regions.cc:858
+#: editor_regions.cc:820 editor_regions.cc:836 editor_regions.cc:850
 msgid "Mult."
 msgstr "多"
 
-#: editor_regions.cc:861 midi_list_editor.cc:104 time_info_box.cc:88
+#: editor_regions.cc:853 midi_list_editor.cc:104 time_info_box.cc:88
 msgid "Start"
 msgstr "起点"
 
-#: editor_regions.cc:879 editor_regions.cc:895
+#: editor_regions.cc:871 editor_regions.cc:887
 msgid "Multiple"
 msgstr "多个"
 
-#: editor_regions.cc:964
+#: editor_regions.cc:956
 msgid "MISSING "
 msgstr "缺失"
 
@@ -7280,7 +7282,7 @@ msgstr ""
 msgid "Show Times as:"
 msgstr "显示时间为："
 
-#: export_timespan_selector.cc:51 processor_box.cc:3155
+#: export_timespan_selector.cc:51 processor_box.cc:3218
 msgid "Select All"
 msgstr "选择所有"
 
@@ -7356,7 +7358,7 @@ msgstr "全部自动化"
 msgid "Switches"
 msgstr "转换"
 
-#: generic_pluginui.cc:263 generic_pluginui.cc:439 processor_box.cc:3128
+#: generic_pluginui.cc:263 generic_pluginui.cc:439 processor_box.cc:3191
 msgid "Controls"
 msgstr "控制"
 
@@ -7727,13 +7729,85 @@ msgstr "动作 %1"
 msgid "Unset"
 msgstr "复位"
 
-#: luainstance.cc:577
+#: luainstance.cc:675
 msgid "Cannot read script '%1': %2"
 msgstr "无法读取脚本 '%1': %2"
 
-#: luawindow.cc:181 luawindow.cc:186
+#: luawindow.cc:94
+msgid "Run"
+msgstr "运行"
+
+#: luawindow.cc:95
+msgid "Clear Outtput"
+msgstr "清除输出"
+
+#: luawindow.cc:99
+msgid "Revert"
+msgstr "重置"
+
+#: luawindow.cc:163
+msgid "Select Editor Buffer"
+msgstr "选择编辑器缓冲"
+
+#: luawindow.cc:249 luawindow.cc:254
 msgid "Window|Lua"
 msgstr "窗口|Lua"
+
+#: luawindow.cc:282 luawindow.cc:300
+msgid "LuaException: %1"
+msgstr "Lua除外：%1"
+
+#: luawindow.cc:392
+msgid ""
+"Missing script header.\n"
+"The script requires an '{ardour}' info table and a 'factory' function."
+msgstr ""
+"缺失脚本文件头。\n"
+"脚本要求一个 '{ardour}' 信息表以及一个 'factory' 函数。"
+
+#: luawindow.cc:397
+msgid "Script fails to compile."
+msgstr "脚本编译失败。"
+
+#: luawindow.cc:404
+msgid "Invalid or missing script-name or script-type."
+msgstr "无效或者缺失脚本名称或者脚本类型。"
+
+#: luawindow.cc:409
+msgid ""
+"Invalid script-type.\n"
+"Valid types are 'EditorAction' and 'Snippet'."
+msgstr ""
+"无效的脚本类型。\n"
+"有效的类型是 'EditorAction' 以及 'Snippet'。"
+
+#: luawindow.cc:419 luawindow.cc:468
+msgid "Saved as %1"
+msgstr "保存为 %1"
+
+#: luawindow.cc:422 luawindow.cc:471
+msgid "Error saving file: %1"
+msgstr "保存文件出错：%1"
+
+#: luawindow.cc:432
+msgid ""
+"Script with given name '%1' already exists.\n"
+"Use a different name in the descriptor."
+msgstr ""
+"带有给定名称 '%1' 的脚本已经存在。\n"
+"请在描述中使用一个不同的名称。"
+
+#: luawindow.cc:606
+msgid "Scratch Buffer %1"
+msgstr "抓取缓冲 %1"
+
+#: luawindow.cc:608
+msgid "Action: '%1'"
+msgstr "动作：'%1'"
+
+#: luawindow.cc:610
+msgid "Snippet: %1"
+msgstr "片段：%1"
 
 #: main.cc:86
 msgid "%1 could not connect to the audio backend."
@@ -7772,54 +7846,54 @@ msgstr ""
 msgid "An error was encountered while launching %1"
 msgstr "启动 %1 时遇到一个意外错误"
 
-#: main.cc:340
+#: main.cc:342
 msgid " (built using "
 msgstr "（构建使用 "
 
-#: main.cc:343
+#: main.cc:345
 msgid " and GCC version "
 msgstr " 和 GCC 版本 "
 
-#: main.cc:353
+#: main.cc:355
 msgid "Copyright (C) 1999-2015 Paul Davis"
 msgstr "版权 (C) 1999-2012 Paul Davis"
 
-#: main.cc:354
+#: main.cc:356
 msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker, Robin Gareus"
 msgstr ""
 "部分版权 (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin Gareus"
 
-#: main.cc:356
+#: main.cc:358
 msgid "%1 comes with ABSOLUTELY NO WARRANTY"
 msgstr "%1 绝对不附带任何担保"
 
-#: main.cc:357
+#: main.cc:359
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr "甚至不包括可销售性质和适用于任何特定目的的保证。"
 
-#: main.cc:358
+#: main.cc:360
 msgid "This is free software, and you are welcome to redistribute it "
 msgstr "这是自由软件，且欢迎您分发推广它，"
 
-#: main.cc:359
+#: main.cc:361
 msgid "under certain conditions; see the source for copying conditions."
 msgstr "在一定条件下；请参阅复制协议的源文件。"
 
-#: main.cc:364
+#: main.cc:366
 msgid "could not initialize %1."
 msgstr "无法初始化 %1 。"
 
-#: main.cc:374
+#: main.cc:376
 msgid "Cannot xinstall SIGPIPE error handler"
 msgstr "无法安装卸载 SIGPIPE 错误处理程序"
 
-#: main.cc:379
+#: main.cc:381
 msgid "Could not complete pre-GUI initialization"
 msgstr "无法完成先导-用户图形界面初始化"
 
-#: main.cc:386
+#: main.cc:388
 msgid "could not create %1 GUI"
 msgstr "无法创建  %1 图形用户界面"
 
@@ -8490,7 +8564,7 @@ msgstr "辅助"
 msgid "Snd"
 msgstr "声音"
 
-#: mixer_strip.cc:825 mixer_strip.cc:928 processor_box.cc:3067
+#: mixer_strip.cc:825 mixer_strip.cc:928 processor_box.cc:3130
 msgid "Not connected to audio engine - no I/O changes are possible"
 msgstr "未连接到音频引擎 —— 不可能改变输入/输出"
 
@@ -9759,19 +9833,19 @@ msgstr "没有端口可连接。"
 msgid "There are no %1 ports to connect."
 msgstr "没有 %1 端口可连接。"
 
-#: processor_box.cc:189
+#: processor_box.cc:196
 msgid "Send"
 msgstr "发送端"
 
-#: processor_box.cc:191
+#: processor_box.cc:198
 msgid "Return"
 msgstr "返回"
 
-#: processor_box.cc:294
+#: processor_box.cc:301
 msgid "New Favorite Preset for \"%1\""
 msgstr "为 \"%1\" 新建最喜爱的预设"
 
-#: processor_box.cc:474
+#: processor_box.cc:481
 msgid ""
 "\n"
 "This mono plugin has been replicated %1 times."
@@ -9779,7 +9853,7 @@ msgstr ""
 "\n"
 "这个单声道插件已经被复制了 %1 次。"
 
-#: processor_box.cc:478
+#: processor_box.cc:485
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show GUI.\n"
@@ -9789,7 +9863,7 @@ msgstr ""
 "双击显示图形用户界面。\n"
 "%2+双击显示通用图形用户界面。%3"
 
-#: processor_box.cc:481
+#: processor_box.cc:488
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show generic GUI.%2"
@@ -9797,7 +9871,7 @@ msgstr ""
 "<b>%1</b>\n"
 "双击显示通用图形用户界面。%2"
 
-#: processor_box.cc:487
+#: processor_box.cc:494
 msgid ""
 "<b>%1</b>\n"
 "The Plugin is not available on this system\n"
@@ -9807,36 +9881,36 @@ msgstr ""
 "插件在本系统上不可用\n"
 "并且已经被一个占位符取而代之。"
 
-#: processor_box.cc:530
+#: processor_box.cc:537
 #, c-format
 msgid "(%1x1) "
 msgstr ""
 
-#: processor_box.cc:625
+#: processor_box.cc:632
 msgid "Inline Display"
 msgstr "内联显示"
 
-#: processor_box.cc:633
+#: processor_box.cc:640
 msgid "Show All Controls"
 msgstr "显示所有控制"
 
-#: processor_box.cc:637
+#: processor_box.cc:644
 msgid "Hide All Controls"
 msgstr "隐藏所有控制"
 
-#: processor_box.cc:682
+#: processor_box.cc:689
 msgid "Link panner controls"
 msgstr "链接声相器控制"
 
-#: processor_box.cc:789
+#: processor_box.cc:796
 msgid "on"
 msgstr "开启"
 
-#: processor_box.cc:789 rc_option_editor.cc:3070 rc_option_editor.cc:3084
+#: processor_box.cc:796 rc_option_editor.cc:3070 rc_option_editor.cc:3084
 msgid "off"
 msgstr "关闭"
 
-#: processor_box.cc:1416
+#: processor_box.cc:1478
 msgid ""
 "Right-click to add/remove/edit\n"
 "plugins,inserts,sends and more"
@@ -9844,7 +9918,7 @@ msgstr ""
 "右键点击添加/移除/编辑\n"
 "插件、插入、发送端以及更多"
 
-#: processor_box.cc:1565
+#: processor_box.cc:1627
 msgid ""
 "Processor Drag/Drop failed. Probably because\n"
 "the I/O configuration of the plugins could\n"
@@ -9854,11 +9928,11 @@ msgstr ""
 "可能是因为插件的输入/输出配置\n"
 "无法匹配这条音轨的配置。"
 
-#: processor_box.cc:2013
+#: processor_box.cc:2075
 msgid "Add Lua DSP Processor"
 msgstr "添加 Lua DSP 处理器"
 
-#: processor_box.cc:2028
+#: processor_box.cc:2091
 msgid ""
 "Failed to instantiate Lua DSP Processor,\n"
 "probably because the script is invalid (no dsp function)."
@@ -9866,7 +9940,7 @@ msgstr ""
 "实例化 Lua DSP 处理器失败，\n"
 "可能是因为该脚本无效（无 dsp 功能）。"
 
-#: processor_box.cc:2040
+#: processor_box.cc:2103
 msgid ""
 "Failed to add Lua DSP Processor at the given position,\n"
 "probably because the I/O configuration of the plugins\n"
@@ -9876,15 +9950,15 @@ msgstr ""
 "可能是因为插件的输入/输出配置\n"
 "不匹配该音轨的配置。"
 
-#: processor_box.cc:2082 processor_box.cc:2473
+#: processor_box.cc:2145 processor_box.cc:2536
 msgid "Plugin Incompatibility"
 msgstr "插件不兼容"
 
-#: processor_box.cc:2085
+#: processor_box.cc:2148
 msgid "You attempted to add the plugin \"%1\" in slot %2.\n"
 msgstr "您试图在空位 %2 中添加插件 \"%1\" 。\n"
 
-#: processor_box.cc:2091
+#: processor_box.cc:2154
 msgid ""
 "\n"
 "This plugin has:\n"
@@ -9892,17 +9966,17 @@ msgstr ""
 "\n"
 "此插件有：\n"
 
-#: processor_box.cc:2094
+#: processor_box.cc:2157
 msgid "\t%1 MIDI input\n"
 msgid_plural "\t%1 MIDI inputs\n"
 msgstr[0] "\t%1 MIDI 输入\n"
 
-#: processor_box.cc:2098
+#: processor_box.cc:2161
 msgid "\t%1 audio input\n"
 msgid_plural "\t%1 audio inputs\n"
 msgstr[0] "\t%1 音频输出\n"
 
-#: processor_box.cc:2101
+#: processor_box.cc:2164
 msgid ""
 "\n"
 "but at the insertion point, there are:\n"
@@ -9910,17 +9984,17 @@ msgstr ""
 "\n"
 "但在插入点那里有：\n"
 
-#: processor_box.cc:2104
+#: processor_box.cc:2167
 msgid "\t%1 MIDI channel\n"
 msgid_plural "\t%1 MIDI channels\n"
 msgstr[0] "\t%1 MIDI 声道\n"
 
-#: processor_box.cc:2108
+#: processor_box.cc:2171
 msgid "\t%1 audio channel\n"
 msgid_plural "\t%1 audio channels\n"
 msgstr[0] "\t%1 音频声道\n"
 
-#: processor_box.cc:2111
+#: processor_box.cc:2174
 msgid ""
 "\n"
 "%1 is unable to insert this plugin here.\n"
@@ -9928,11 +10002,11 @@ msgstr ""
 "\n"
 "%1 无法在此处再次插入插件.\n"
 
-#: processor_box.cc:2148
+#: processor_box.cc:2211
 msgid "Cannot set up new send: %1"
 msgstr "无法建立新的发送端： %1"
 
-#: processor_box.cc:2476
+#: processor_box.cc:2539
 msgid ""
 "You cannot reorder these plugins/sends/inserts\n"
 "in that way because the inputs and\n"
@@ -9942,19 +10016,19 @@ msgstr ""
 "要求这些插件/发送端/插入\n"
 "因为输入和输出将无法正确工作。"
 
-#: processor_box.cc:2676
+#: processor_box.cc:2739
 msgid "Rename Processor"
 msgstr "重命名处理器"
 
-#: processor_box.cc:2707
+#: processor_box.cc:2770
 msgid "At least 100 IO objects exist with a name like %1 - name not changed"
 msgstr "至少有100个输入输出对象物体存在着像 %1这样的名称——名称没有改变"
 
-#: processor_box.cc:2844
+#: processor_box.cc:2907
 msgid "plugin insert constructor failed"
 msgstr "插件插入构造函数失败"
 
-#: processor_box.cc:2855
+#: processor_box.cc:2918
 msgid ""
 "Copying the set of processors on the clipboard failed,\n"
 "probably because the I/O configuration of the plugins\n"
@@ -9964,7 +10038,7 @@ msgstr ""
 "可能是因为插件的输入/输出配置\n"
 "无法匹配这条音轨的配置。"
 
-#: processor_box.cc:2901
+#: processor_box.cc:2964
 msgid ""
 "Do you really want to remove all processors from %1?\n"
 "(this cannot be undone)"
@@ -9972,15 +10046,15 @@ msgstr ""
 "您是否真的要从 %1 移除所有的处理器？\n"
 "（此操作不可撤销）"
 
-#: processor_box.cc:2905 processor_box.cc:2930
+#: processor_box.cc:2968 processor_box.cc:2993
 msgid "Yes, remove them all"
 msgstr "是的，全部移除它们"
 
-#: processor_box.cc:2907 processor_box.cc:2932
+#: processor_box.cc:2970 processor_box.cc:2995
 msgid "Remove processors"
 msgstr "移除处理器"
 
-#: processor_box.cc:2922
+#: processor_box.cc:2985
 msgid ""
 "Do you really want to remove all pre-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -9988,7 +10062,7 @@ msgstr ""
 "您是否真的要从 %1 移除所有的前置于淡化器处理器？\n"
 "（此操作不可撤销）"
 
-#: processor_box.cc:2925
+#: processor_box.cc:2988
 msgid ""
 "Do you really want to remove all post-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -9996,63 +10070,63 @@ msgstr ""
 "您是否真的要从 %1 移除所有的后置于淡化器处理器？\n"
 "（此操作不可撤销）"
 
-#: processor_box.cc:3114
+#: processor_box.cc:3177
 msgid "New Plugin"
 msgstr "新建插件"
 
-#: processor_box.cc:3117
+#: processor_box.cc:3180
 msgid "New Lua Proc"
 msgstr "新建 Lua 处理器"
 
-#: processor_box.cc:3119
+#: processor_box.cc:3182
 msgid "New Insert"
 msgstr "新建插入"
 
-#: processor_box.cc:3122
+#: processor_box.cc:3185
 msgid "New External Send ..."
 msgstr "新建外部发送端…"
 
-#: processor_box.cc:3126
+#: processor_box.cc:3189
 msgid "New Aux Send ..."
 msgstr "新建辅助发送端…"
 
-#: processor_box.cc:3129
+#: processor_box.cc:3192
 msgid "Send Options"
 msgstr "发送端选项"
 
-#: processor_box.cc:3131
+#: processor_box.cc:3194
 msgid "Clear (all)"
 msgstr "清除（所有）"
 
-#: processor_box.cc:3133
+#: processor_box.cc:3196
 msgid "Clear (pre-fader)"
 msgstr "清除（前置于淡化器）"
 
-#: processor_box.cc:3135
+#: processor_box.cc:3198
 msgid "Clear (post-fader)"
 msgstr "清除（后置于淡化器）"
 
-#: processor_box.cc:3162
+#: processor_box.cc:3225
 msgid "Activate All"
 msgstr "激活所有"
 
-#: processor_box.cc:3164
+#: processor_box.cc:3227
 msgid "Deactivate All"
 msgstr "不激活所有"
 
-#: processor_box.cc:3166
+#: processor_box.cc:3229
 msgid "A/B Plugins"
 msgstr "A/B 插件"
 
-#: processor_box.cc:3175
+#: processor_box.cc:3238
 msgid "Edit with generic controls..."
 msgstr "以通用控制编辑…"
 
-#: processor_box.cc:3487
+#: processor_box.cc:3550
 msgid "%1: %2 (by %3)"
 msgstr "%1: %2（通过 %3）"
 
-#: processor_box.cc:3489
+#: processor_box.cc:3552
 msgid "%1 (by %2)"
 msgstr "%1（通过 %2）"
 
@@ -12235,17 +12309,17 @@ msgstr "<b>作者：</b>"
 msgid "<b>Description:</b>"
 msgstr "<b>说明：</b>"
 
-#: script_selector.cc:129
+#: script_selector.cc:130
 msgid "Select Script to unload"
 msgstr "选择脚本上传"
 
-#: script_selector.cc:163
+#: script_selector.cc:164
 msgid "<b>Name:</b>"
 msgstr "<b>名称：</b>"
 
-#: script_selector.cc:169
-msgid "<b>Parameters:</b>"
-msgstr "<b>参数：</b>"
+#: script_selector.cc:171
+msgid "<b>Instance Parameters</b>"
+msgstr "<b>实例参数</b>"
 
 #: send_ui.cc:134
 msgid "Send "
@@ -14066,7 +14140,7 @@ msgstr "跳过自动对齐"
 
 #: time_fx_dialog.cc:62
 msgid "Contents"
-msgstr ""
+msgstr "内容"
 
 #: time_fx_dialog.cc:63
 msgid "Minimize time distortion"
@@ -14836,6 +14910,18 @@ msgstr ""
 "请参阅手册，位于 %1/video-timeline/operations/#export 。\n"
 "\n"
 "在浏览器里打开手册？"
+
+#~ msgid ""
+#~ "%1%2\n"
+#~ "(built from revision %3)\n"
+#~ "%4"
+#~ msgstr ""
+#~ "%1%2\n"
+#~ "（修订自版本 %3）\n"
+#~ "%4"
+
+#~ msgid "<b>Parameters:</b>"
+#~ msgstr "<b>参数：</b>"
 
 #~ msgid ""
 #~ "Chinese:\n"
