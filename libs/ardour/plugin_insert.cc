@@ -68,10 +68,11 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	: Processor (s, (plug ? plug->name() : string ("toBeRenamed")))
 	, _signal_analysis_collected_nframes(0)
 	, _signal_analysis_collect_nframes_max(0)
+	, _configured (false)
 	, _no_inplace (false)
-	, _pending_no_inplace (false)
 	, _strict_io (false)
-	, _strict_io_configured (false)
+	, _custom_cfg (false)
+	, _pending_no_inplace (false)
 {
 	/* the first is the master */
 
@@ -79,6 +80,10 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 		add_plugin (plug);
 		create_automatable_parameters ();
 	}
+}
+
+PluginInsert::~PluginInsert ()
+{
 }
 
 bool
@@ -117,8 +122,11 @@ PluginInsert::set_count (uint32_t num)
 	return true;
 }
 
-PluginInsert::~PluginInsert ()
+
+void
+PluginInsert::set_outputs (const ChanCount& c)
 {
+	_custom_out = c;
 }
 
 void
@@ -138,12 +146,26 @@ PluginInsert::control_list_automation_state_changed (Evoral::Parameter which, Au
 ChanCount
 PluginInsert::output_streams() const
 {
+	assert (_configured);
+	return _configured_out;
+}
+
+ChanCount
+PluginInsert::input_streams() const
+{
+	assert (_configured);
+	return _configured_in;
+}
+
+ChanCount
+PluginInsert::internal_output_streams() const
+{
 	assert (!_plugins.empty());
 
 	PluginInfoPtr info = _plugins.front()->get_info();
 
-	if (_strict_io_configured) {
-		return _configured_in; // XXX, check initial configuration
+	if (_match.strict_io) {
+		return _configured_in; // XXX
 	}
 	else if (info->reconfigurable_io()) {
 		ChanCount out = _plugins.front()->output_streams ();
@@ -159,7 +181,7 @@ PluginInsert::output_streams() const
 }
 
 ChanCount
-PluginInsert::input_streams() const
+PluginInsert::internal_input_streams() const
 {
 	assert (!_plugins.empty());
 
@@ -366,7 +388,12 @@ PluginInsert::flush ()
 void
 PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now)
 {
-	_no_inplace = _pending_no_inplace;
+	PinMappings in_map (_in_map);
+	PinMappings out_map (_out_map);
+
+	// TODO auto-detect (if PinMappings are not identity maps)
+	_no_inplace = _pending_no_inplace || _plugins.front()->inplace_broken ();
+
 	// Calculate if, and how many frames we need to collect for analysis
 	framecnt_t collect_signal_nframes = (_signal_analysis_collect_nframes_max -
 					     _signal_analysis_collected_nframes);
@@ -374,26 +401,31 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		collect_signal_nframes = nframes;
 	}
 
-	ChanCount const in_streams = input_streams ();
-	ChanCount const out_streams = output_streams ();
 
 	if (_match.method == Split) {
-		assert (_in_map.size () == 1);
+
+		assert (in_map.size () == 1);
+		ChanCount const in_streams = internal_input_streams ();
+		// TODO - inplace & analysis only
+		// for no-inplace the buffer is copied anyway..
 		/* fix the input mapping so that we have maps for each of the plugin's inputs */
 
 		/* copy the first stream's buffer contents to the others */
 		/* XXX: audio only */
 		bool valid;
-		uint32_t first_idx = _in_map[0].get (DataType::AUDIO, 0, &valid);
+		uint32_t first_idx = in_map[0].get (DataType::AUDIO, 0, &valid);
 		if (valid) {
 			for (uint32_t i = in_streams.n_audio(); i < natural_input_streams().n_audio(); ++i) {
-				bufs.get_audio(_in_map[0].get (DataType::AUDIO, i, &valid)).read_from(bufs.get_audio(first_idx), nframes, offset, offset);
+				uint32_t idx = in_map[0].get (DataType::AUDIO, i, &valid);
+				if (valid) {
+					bufs.get_audio(idx).read_from(bufs.get_audio(first_idx), nframes, offset, offset);
+				}
 			}
 		}
 	}
 
-	bufs.set_count(ChanCount::max(bufs.count(), in_streams));
-	bufs.set_count(ChanCount::max(bufs.count(), out_streams));
+	bufs.set_count(ChanCount::max(bufs.count(), _configured_in));
+	bufs.set_count(ChanCount::max(bufs.count(), _configured_out));
 
 	/* Note that we've already required that plugins
 	   be able to handle in-place processing.
@@ -433,12 +465,12 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 	if (collect_signal_nframes > 0) {
 		// collect input
 		//std::cerr << "collect input, bufs " << bufs.count().n_audio() << " count,  " << bufs.available().n_audio() << " available" << std::endl;
-		//std::cerr << "               streams " << input_streams().n_audio() << std::endl;
+		//std::cerr << "               streams " << internal_input_streams().n_audio() << std::endl;
 		//std::cerr << "filling buffer with " << collect_signal_nframes << " frames at " << _signal_analysis_collected_nframes << std::endl;
 
-		_signal_analysis_inputs.set_count(input_streams());
+		_signal_analysis_inputs.set_count(internal_input_streams());
 
-		for (uint32_t i = 0; i < input_streams().n_audio(); ++i) {
+		for (uint32_t i = 0; i < internal_input_streams().n_audio(); ++i) {
 			_signal_analysis_inputs.get_audio(i).read_from(
 				bufs.get_audio(i),
 				collect_signal_nframes,
@@ -454,8 +486,8 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		uint32_t pc = 0;
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
 
-			ARDOUR::ChanMapping in_map (natural_input_streams());
-			ARDOUR::ChanMapping out_map;
+			ARDOUR::ChanMapping i_in_map (natural_input_streams());
+			ARDOUR::ChanMapping i_out_map;
 			ARDOUR::ChanCount mapped;
 			ARDOUR::ChanCount backmap;
 
@@ -463,7 +495,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 				for (uint32_t in = 0; in < natural_input_streams().get (*t); ++in) {
 					bool valid;
-					uint32_t in_idx = _in_map[pc].get (*t, in, &valid);
+					uint32_t in_idx = in_map[pc].get (*t, in, &valid);
 					uint32_t m = mapped.get (*t);
 					if (valid) {
 						inplace_bufs.get (*t, m).read_from (bufs.get (*t, in_idx), nframes, offset, offset);
@@ -482,12 +514,12 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 				for (uint32_t out = 0; out < natural_output_streams().get (*t); ++out) {
 					uint32_t m = mapped.get (*t);
 					inplace_bufs.get (*t, m).silence (nframes, offset);
-					out_map.set (*t, out, m);
+					i_out_map.set (*t, out, m);
 					mapped.set (*t, m + 1);
 				}
 			}
 
-			if ((*i)->connect_and_run(inplace_bufs, in_map, out_map, nframes, offset)) {
+			if ((*i)->connect_and_run(inplace_bufs, i_in_map, i_out_map, nframes, offset)) {
 				deactivate ();
 			}
 
@@ -497,7 +529,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 				for (uint32_t out = 0; out < natural_output_streams().get (*t); ++out) {
 					uint32_t m = backmap.get (*t);
 					bool valid;
-					uint32_t out_idx = _out_map[pc].get (*t, out, &valid);
+					uint32_t out_idx = out_map[pc].get (*t, out, &valid);
 					if (valid) {
 						bufs.get (*t, out_idx).read_from (inplace_bufs.get (*t, m), nframes, offset, offset);
 						used_outputs.set (*t, out_idx, 1); // mark as used
@@ -524,7 +556,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 	} else {
 		uint32_t pc = 0;
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
-			if ((*i)->connect_and_run(bufs, _in_map[pc], _out_map[pc], nframes, offset)) {
+			if ((*i)->connect_and_run(bufs, in_map[pc], out_map[pc], nframes, offset)) {
 				deactivate ();
 			}
 		}
@@ -533,11 +565,11 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 	if (collect_signal_nframes > 0) {
 		// collect output
 		//std::cerr << "       output, bufs " << bufs.count().n_audio() << " count,  " << bufs.available().n_audio() << " available" << std::endl;
-		//std::cerr << "               streams " << output_streams().n_audio() << std::endl;
+		//std::cerr << "               streams " << internal_output_streams().n_audio() << std::endl;
 
-		_signal_analysis_outputs.set_count(output_streams());
+		_signal_analysis_outputs.set_count(internal_output_streams());
 
-		for (uint32_t i = 0; i < output_streams().n_audio(); ++i) {
+		for (uint32_t i = 0; i < internal_output_streams().n_audio(); ++i) {
 			_signal_analysis_outputs.get_audio(i).read_from(
 				bufs.get_audio(i),
 				collect_signal_nframes,
@@ -791,12 +823,42 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 	return boost::shared_ptr<Plugin> ((Plugin*) 0);
 }
 
+void
+PluginInsert::set_input_map (uint32_t num, ChanMapping m) {
+	if (num < _in_map.size()) {
+		bool changed = _in_map[num] != m;
+		_in_map[num] = m;
+		if (changed) {
+			PluginMapChanged (); /* EMIT SIGNAL */
+		}
+	}
+}
+
+void
+PluginInsert::set_output_map (uint32_t num, ChanMapping m) {
+	if (num < _out_map.size()) {
+		bool changed = _out_map[num] != m;
+		_out_map[num] = m;
+		if (changed) {
+			PluginMapChanged (); /* EMIT SIGNAL */
+		}
+	}
+}
+
 bool
 PluginInsert::configure_io (ChanCount in, ChanCount out)
 {
 	Match old_match = _match;
-	ChanCount old_in = input_streams ();
-	ChanCount old_out = output_streams ();
+	ChanCount old_in;
+	ChanCount old_out;
+
+	if (_configured) {
+		old_in = _configured_in;
+		old_out = _configured_out;
+	} else {
+		old_in = internal_input_streams ();
+		old_out = internal_output_streams ();
+	}
 
 	_configured_in = in;
 	_configured_out = out;
@@ -811,6 +873,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	_match = private_can_support_io_configuration (in, out);
 	if (set_count (_match.plugins) == false) {
 		PluginIoReConfigure (); /* EMIT SIGNAL */
+		_configured = false;
 		return false;
 	}
 
@@ -820,6 +883,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	case Hide:
 		if (_plugins.front()->configure_io (_plugins.front()->get_info()->n_inputs, out) == false) {
 			PluginIoReConfigure (); /* EMIT SIGNAL */
+			_configured = false;
 			return false;
 		}
 		break;
@@ -827,27 +891,42 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	default:
 		if (_plugins.front()->configure_io (in, out) == false) {
 			PluginIoReConfigure (); /* EMIT SIGNAL */
+			_configured = false;
 			return false;
 		}
 		break;
 	}
 
-	// TODO make configurable, ideally use a single in/out map for all replicated
-	// plugins.
-	uint32_t pc = 0;
-	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
-		if (_match.method == Split) {
-			/* TODO see PluginInsert::connect_and_run, channel replication */
-			_in_map[pc] = ChanMapping (natural_input_streams ());
-		} else {
-			_in_map[pc] = ChanMapping (input_streams ());
-		}
-		_out_map[pc] = ChanMapping (output_streams());
+	if (old_in == in && old_out == out
+			&& old_match.method == _match.method
+			&& _in_map.size() == _out_map.size()
+			&& _in_map.size() == get_count ()
+		 ) {
+		/* If the configuraton has not changed AND there is a custom map,
+		 * keep the custom map.
+		 */
+		// TODO: check if it's valid..
+	} else {
+		/* generate a new mapping */
+		uint32_t pc = 0;
+		_in_map.clear ();
+		_out_map.clear ();
+		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+			if (_match.method == Split) {
+				/* TODO see PluginInsert::connect_and_run, channel replication */
+				_in_map[pc] = ChanMapping (max (natural_input_streams (), in));
+			} else {
+				_in_map[pc] = ChanMapping (min (natural_input_streams (), in));
+			}
+			_out_map[pc] = ChanMapping (min (natural_output_streams(), out));
 
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			_in_map[pc].offset_to(*t, pc * natural_input_streams().get(*t));
-			_out_map[pc].offset_to(*t, pc * natural_output_streams().get(*t));
+			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+				_in_map[pc].offset_to(*t, pc * natural_input_streams().get(*t));
+				_out_map[pc].offset_to(*t, pc * natural_output_streams().get(*t));
+			}
 		}
+		//TODO if changed:
+		//PluginMapChanged (); /* EMIT SIGNAL */
 	}
 
 
@@ -871,6 +950,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 
 	// std::cerr << "set counts to i" << in.n_audio() << "/o" << out.n_audio() << std::endl;
 
+	_configured = true;
 	return Processor::configure_io (in, out);
 }
 
@@ -895,9 +975,13 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 PluginInsert::Match
 PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanCount& out)
 {
-	_strict_io_configured = false;
 	if (_plugins.empty()) {
 		return Match();
+	}
+
+	if (_custom_cfg && !_strict_io) {
+		out = _custom_out;
+		return Match (ExactMatch, get_count(), false, true); // XXX
 	}
 
 	PluginInfoPtr info = _plugins.front()->get_info();
@@ -979,11 +1063,11 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 		if (in.n_audio () == 0 && in.n_midi () > 0 && outputs.n_audio () > 0) {
 			// TODO limit the audio-channel count to track output
 			out = outputs + midi_bypass;
+			return Match (ExactMatch, 1);
 		} else {
-			_strict_io_configured = true;
 			out = in + midi_bypass;
+			return Match (ExactMatch, 1, true);
 		}
-		return Match (ExactMatch, 1);
 	}
 
 	if (no_inputs) {
@@ -1049,7 +1133,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	   plugin inputs?  Let me count the ways ...
 	*/
 
-	bool can_split = !_strict_io;
+	bool can_split = !_strict_io; // XXX
 	for (DataType::iterator t = DataType::begin(); t != DataType::end() && can_split; ++t) {
 
 		bool const can_split_type = (in.get (*t) == 1 && inputs.get (*t) > 1);
@@ -1085,13 +1169,13 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	}
 
 	if (could_hide && !cannot_hide) {
-		if (_strict_io /*&& inputs.get (DataType::AUDIO) == outputs.get (DataType::AUDIO)*/) {
-			_strict_io_configured = true;
+		if (_strict_io) {
 			outputs = inputs;
+			return Match (Hide, 1, true, false, hide_channels);
 		} else {
 			out = outputs + midi_bypass;
+			return Match (Hide, 1, false, false, hide_channels);
 		}
-		return Match (Hide, 1, hide_channels);
 	}
 
 	midi_bypass.reset();
@@ -1118,6 +1202,8 @@ PluginInsert::state (bool full)
 	 * in case the plugin goes missing) */
 	node.add_child_nocopy (* _configured_in.state (X_("ConfiguredInput")));
 	node.add_child_nocopy (* _configured_out.state (X_("ConfiguredOutput")));
+
+	// TODO save channel-maps,  _custom_cfg & _custom_out
 
 	_plugins[0]->set_insert_id(this->id());
 	node.add_child_nocopy (_plugins[0]->get_state());
@@ -1664,7 +1750,7 @@ PluginInsert::get_impulse_analysis_plugin()
 	boost::shared_ptr<Plugin> ret;
 	if (_impulseAnalysisPlugin.expired()) {
 		ret = plugin_factory(_plugins[0]);
-		ret->configure_io (input_streams (), output_streams ());
+		ret->configure_io (internal_input_streams (), internal_output_streams ());
 		_impulseAnalysisPlugin = ret;
 	} else {
 		ret = _impulseAnalysisPlugin.lock();
@@ -1678,8 +1764,8 @@ PluginInsert::collect_signal_for_analysis (framecnt_t nframes)
 {
 	// called from outside the audio thread, so this should be safe
 	// only do audio as analysis is (currently) only for audio plugins
-	_signal_analysis_inputs.ensure_buffers(  DataType::AUDIO, input_streams().n_audio(),  nframes);
-	_signal_analysis_outputs.ensure_buffers( DataType::AUDIO, output_streams().n_audio(), nframes);
+	_signal_analysis_inputs.ensure_buffers(  DataType::AUDIO, internal_input_streams().n_audio(),  nframes);
+	_signal_analysis_outputs.ensure_buffers( DataType::AUDIO, internal_output_streams().n_audio(), nframes);
 
 	_signal_analysis_collected_nframes   = 0;
 	_signal_analysis_collect_nframes_max = nframes;

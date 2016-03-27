@@ -120,6 +120,14 @@ public:
 		return ret;
 	}
 
+	ChanCount operator*(const unsigned int factor) const {
+		ChanCount ret;
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			ret.set(*t, get(*t) * factor );
+		}
+		return ret;
+	}
+
 	ChanCount& operator+=(const ChanCount& other) {
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			_counts[*t] += other._counts[*t];

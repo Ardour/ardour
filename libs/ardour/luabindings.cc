@@ -245,6 +245,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_comment", &Route::set_comment)
 		.addFunction ("strict_io", &Route::strict_io)
 		.addFunction ("set_strict_io", &Route::set_strict_io)
+		.addFunction ("reset_plugin_insert", &Route::reset_plugin_insert)
+		.addFunction ("customize_plugin_insert", &Route::customize_plugin_insert)
 		.endClass ()
 
 		.deriveWSPtrClass <Track, Route> ("Track")
@@ -371,15 +373,13 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("activate", &PluginInsert::activate)
 		.addFunction ("deactivate", &PluginInsert::deactivate)
 		.addFunction ("strict_io_configured", &PluginInsert::strict_io_configured)
-		.addFunction ("set_strict_io", &PluginInsert::set_strict_io)
 		.addFunction ("no_inplace", &PluginInsert::no_inplace)
 		.addFunction ("input_map", &PluginInsert::input_map)
 		.addFunction ("output_map", &PluginInsert::output_map)
-#ifndef NDEBUG // this is not safe, prototyping only
-		.addFunction ("set_no_inplace", &PluginInsert::set_no_inplace)
+		.addFunction ("set_no_inplace", &PluginInsert::set_no_inplace) // XXX
 		.addFunction ("set_input_map", &PluginInsert::set_input_map)
 		.addFunction ("set_output_map", &PluginInsert::set_output_map)
-#endif
+
 		.endClass ()
 
 		.deriveWSPtrClass <AutomationControl, Evoral::Control> ("AutomationControl")
@@ -460,6 +460,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginClass <ChanCount> ("ChanCount")
+		.addConstructor <void (*) (DataType, uint32_t)> ()
 		.addFunction ("n_audio", &ChanCount::n_audio)
 		.endClass()
 

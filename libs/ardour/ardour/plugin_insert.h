@@ -85,26 +85,35 @@ class LIBARDOUR_API PluginInsert : public Processor
 		}
 	}
 
-#ifndef NDEBUG // prototyping -- this should be done synchroneously in configure_io()
-	void set_input_map (uint32_t num, ChanMapping m) {
-		if (num < _in_map.size()) {
-			_in_map[num] = m;
-		}
-	}
-	void set_output_map (uint32_t num, ChanMapping m) {
-		if (num < _in_map.size()) {
-			_out_map[num] = m;
-		}
-	}
-#endif
+	void set_input_map (uint32_t, ChanMapping);
+	void set_output_map (uint32_t, ChanMapping);
 
+	// these are ports visible on the outside
 	ChanCount output_streams() const;
 	ChanCount input_streams() const;
+
+	// actual ports of all plugins.
+	// n * natural_i/o or result of reconfigurable i/o
+	ChanCount internal_output_streams() const;
+	ChanCount internal_input_streams() const;
+
+	// a single plugin's internal i/o
 	ChanCount natural_output_streams() const;
 	ChanCount natural_input_streams() const;
 
-	bool     set_count (uint32_t num);
-	uint32_t get_count () const { return _plugins.size(); }
+	// allow to override output_streams(), implies "Custom Mode"
+
+	// only the owning route may call these (with process lock held)
+	// route is not a friend class, it owns us
+	bool set_count      (uint32_t num);
+	void set_outputs    (const ChanCount&);
+	void set_strict_io  (bool b) { _strict_io = b; }
+	void set_custom_cfg (bool b) { _custom_cfg = b; }
+	// end C++ class slavery!
+
+	uint32_t get_count  () const { return _plugins.size(); }
+	bool     strict_io  () const { return _strict_io; }
+	bool     custom_cfg () const { return _custom_cfg; }
 
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
@@ -176,26 +185,26 @@ class LIBARDOUR_API PluginInsert : public Processor
 		return _pending_no_inplace;
 	}
 
-	void set_no_inplace (bool b) {
-		_pending_no_inplace = b;
-	}
-
-	void set_strict_io (bool b) {
-		_strict_io = b;
+	void set_no_inplace (bool b) { // XXX tenative dev API
+		_pending_no_inplace = b; // TODO detect automatically
 	}
 
 	bool strict_io_configured () const {
-		return _strict_io_configured;
+		return _match.strict_io;
 	}
 
 	bool splitting () const {
 		return _match.method == Split;
 	}
 
-	void configured_io (ChanCount &in, ChanCount &out) { in = _configured_in; out = _configured_out; }
+	void configured_io (ChanCount &in, ChanCount &out) const {
+		in = _configured_in;
+		out = _configured_out;
+	}
 
 	PBD::Signal2<void,BufferSet*, BufferSet*> AnalysisDataGathered;
 	PBD::Signal0<void> PluginIoReConfigure;
+	PBD::Signal0<void> PluginMapChanged;
 
 	/** Enumeration of the ways in which we can match our insert's
 	 *  IO to that of the plugin(s).
@@ -235,28 +244,36 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	ChanCount _configured_in;
 	ChanCount _configured_out;
+	ChanCount _custom_out;
 
+	bool _configured;
 	bool _no_inplace;
-	bool _pending_no_inplace;
 	bool _strict_io;
-	bool _strict_io_configured;
+	bool _custom_cfg;
+	bool _pending_no_inplace;
 
 	/** Description of how we can match our plugin's IO to our own insert IO */
 	struct Match {
-		Match () : method (Impossible), plugins (0) {}
-		Match (MatchingMethod m, int32_t p, ChanCount h = ChanCount ()) : method (m), plugins (p), hide (h) {}
+		Match () : method (Impossible), plugins (0), strict_io (false), custom_cfg (false) {}
+		Match (MatchingMethod m, int32_t p,
+				bool strict = false, bool custom = false, ChanCount h = ChanCount ())
+			: method (m), plugins (p), hide (h), strict_io (strict), custom_cfg (custom) {}
 
 		MatchingMethod method; ///< method to employ
 		int32_t plugins;       ///< number of copies of the plugin that we need
 		ChanCount hide;        ///< number of channels to hide
+		bool strict_io;        ///< force in == out
+		bool custom_cfg;       ///< custom config (if not strict)
 	};
 
 	Match private_can_support_io_configuration (ChanCount const &, ChanCount &);
 
 	/** details of the match currently being used */
 	Match _match;
-	std::map <uint32_t, ARDOUR::ChanMapping> _in_map;
-	std::map <uint32_t, ARDOUR::ChanMapping> _out_map;
+
+	typedef std::map <uint32_t, ARDOUR::ChanMapping> PinMappings;
+	PinMappings _in_map;
+	PinMappings _out_map;
 
 	void automation_run (BufferSet& bufs, framepos_t start, pframes_t nframes);
 	void connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now = 0);

@@ -1463,7 +1463,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			boost::shared_ptr<PluginInsert> pi;
 
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
-				pi->set_count (1);
+				pi->set_count (1); // why? configure_processors_unlocked() will re-do this
 				pi->set_strict_io (_strict_io);
 			}
 
@@ -2167,8 +2167,8 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 			 */
 			processor_max_streams = ChanCount::max(processor_max_streams, pi->input_streams());
 			processor_max_streams = ChanCount::max(processor_max_streams, pi->output_streams());
-			processor_max_streams = ChanCount::max(processor_max_streams, pi->natural_input_streams());
-			processor_max_streams = ChanCount::max(processor_max_streams, pi->natural_output_streams());
+			processor_max_streams = ChanCount::max(processor_max_streams, pi->natural_input_streams() * pi->get_count());
+			processor_max_streams = ChanCount::max(processor_max_streams, pi->natural_output_streams() * pi->get_count());
 		}
 		out = c->second;
 
@@ -2399,6 +2399,75 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 	}
 
 	return 0;
+}
+
+bool
+Route::reset_plugin_insert (boost::shared_ptr<Processor> proc)
+{
+	ChanCount unused;
+	return customize_plugin_insert (proc, 0, unused);
+}
+
+bool
+Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs)
+{
+	if (_strict_io) {
+		return false;
+	}
+
+	boost::shared_ptr<PluginInsert> pi;
+	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
+		return false;
+	}
+
+	{
+		bool found = false;
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
+			if (*p == proc) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			return false;
+		}
+	}
+
+	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		ProcessorState pstate (this);
+
+		assert (!pi->strict_io ());
+		bool      old_cust = pi->custom_cfg ();
+		uint32_t  old_cnt  = pi->get_count ();
+		ChanCount old_chan = pi->output_streams ();
+
+		if (count == 0) {
+			pi->set_custom_cfg (false);
+		} else {
+			pi->set_custom_cfg (true);
+			pi->set_count (count);
+			pi->set_outputs (outs);
+		}
+
+		list<pair<ChanCount, ChanCount> > c = try_configure_processors_unlocked (n_inputs (), 0);
+		if (c.empty()) {
+			/* not possible */
+
+			pi->set_count (old_cnt);
+			pi->set_outputs (old_chan);
+			pi->set_custom_cfg (old_cust);
+
+			return false;
+		}
+		configure_processors_unlocked (0);
+	}
+
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	_session.set_dirty ();
+	return true;
 }
 
 bool
