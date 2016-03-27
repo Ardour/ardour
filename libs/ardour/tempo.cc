@@ -2635,7 +2635,6 @@ TempoMap::tempo_at (const framepos_t& frame) const
 const Tempo
 TempoMap::tempo_at_locked (const framepos_t& frame) const
 {
-	//frameoffset_t const frame_off = frame_offset_at (_metrics, frame);
 	TempoSection* prev_ts = 0;
 
 	Metrics::const_iterator i;
