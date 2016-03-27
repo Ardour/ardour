@@ -461,7 +461,12 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass <ChanCount> ("ChanCount")
 		.addConstructor <void (*) (DataType, uint32_t)> ()
+		.addFunction ("get", &ChanCount::get)
+		.addFunction ("set", &ChanCount::set)
 		.addFunction ("n_audio", &ChanCount::n_audio)
+		.addFunction ("n_midi", &ChanCount::n_midi)
+		.addFunction ("n_total", &ChanCount::n_total)
+		.addFunction ("reset", &ChanCount::reset)
 		.endClass()
 
 		.beginClass <DataType> ("DataType")
