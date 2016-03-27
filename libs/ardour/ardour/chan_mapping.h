@@ -33,6 +33,8 @@ namespace ARDOUR {
 
 /** A mapping from one set of channels to another
  * (e.g. how to 'connect' two BufferSets).
+ *
+ * for plugins the form is  "pin" -> "buffer"
  */
 class LIBARDOUR_API ChanMapping {
 public:
@@ -41,7 +43,18 @@ public:
 	ChanMapping(const ChanMapping&);
 
 	uint32_t get(DataType t, uint32_t from, bool* valid);
+
+	/** get buffer mapping for given data type and pin
+	 * @param type data type
+	 * @param from pin
+	 * @returns mapped buffer number (or ChanMapping::Invalid)
+	 */
 	uint32_t get(DataType t, uint32_t from) { return get (t, from, NULL); }
+	/** set buffer mapping for given data type
+	 * @param type data type
+	 * @param from pin
+	 * @param to buffer
+	 */
 	void     set(DataType t, uint32_t from, uint32_t to);
 	void     offset_from(DataType t, int32_t delta);
 	void     offset_to(DataType t, int32_t delta);

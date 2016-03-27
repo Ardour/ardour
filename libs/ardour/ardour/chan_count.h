@@ -43,29 +43,56 @@ public:
 	ChanCount(const XMLNode& node);
 	ChanCount() { reset(); }
 
-	// Convenience constructor for making single-typed streams (stereo, mono, etc)
-	ChanCount(DataType type, uint32_t channels) {
+	/** Convenience constructor for making single-typed streams (mono, stereo, midi, etc)
+	 * @param type data type
+	 * @param count number of channels
+	 */
+	ChanCount(DataType type, uint32_t count) {
 		reset();
-		set(type, channels);
+		set(type, count);
 	}
 
+	/** zero count of all data types */
 	void reset() {
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			_counts[*t] = 0;
 		}
 	}
 
+	/** set channel count for given type
+	 * @param type data type
+	 * @param count number of channels
+	 */
 	void     set(DataType t, uint32_t count) { assert(t != DataType::NIL); _counts[t] = count; }
+	/** query channel count for given type
+	 * @param type data type
+	 * @returns channel count for given type
+	 */
 	uint32_t get(DataType t) const { assert(t != DataType::NIL); return _counts[t]; }
 
 	inline uint32_t n (DataType t) const { return _counts[t]; }
 
+	/** query number of audio channels
+	 * @returns number of audio channels
+	 */
 	inline uint32_t n_audio() const { return _counts[DataType::AUDIO]; }
+	/** set number of audio channels
+	 * @param a number of audio channels
+	 */
 	inline void set_audio(uint32_t a) { _counts[DataType::AUDIO] = a; }
 
+	/** query number of midi channels
+	 * @returns number of midi channels
+	 */
 	inline uint32_t n_midi()  const { return _counts[DataType::MIDI]; }
+	/** set number of audio channels
+	 * @param m number of midi channels
+	 */
 	inline void set_midi(uint32_t m) { _counts[DataType::MIDI] = m; }
 
+	/** query total channel count of all data types
+	 * @returns total channel count (audio + midi)
+	 */
 	uint32_t n_total() const {
 		uint32_t ret = 0;
 		for (uint32_t i=0; i < DataType::num_types; ++i)
