@@ -84,6 +84,7 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.set_size_request (100, -1);
 	_display.set_rules_hint (true);
 	_display.set_name ("EditGroupList");
+	_display.set_fixed_height_mode (true);
 
 	/* Try to prevent single mouse presses from initiating edits.
 	   This relies on a hack in gtktreeview.c:gtk_treeview_button_press()
@@ -94,19 +95,51 @@ EditorRegions::EditorRegions (Editor* e)
 	_model->set_sort_func (0, sigc::mem_fun (*this, &EditorRegions::sorter));
 	_model->set_sort_column (0, SORT_ASCENDING);
 
-	_display.set_model (_model);
+	TreeViewColumn* col_name = manage (new TreeViewColumn ("", _columns.name));
+	col_name->set_fixed_width (120);
+	col_name->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_position = manage (new TreeViewColumn ("", _columns.position));
+	col_position->set_fixed_width (68);
+	col_position->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_end = manage (new TreeViewColumn ("", _columns.end));
+	col_end->set_fixed_width (68);
+	col_end->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_length = manage (new TreeViewColumn ("", _columns.length));
+	col_length->set_fixed_width (68);
+	col_length->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_sync = manage (new TreeViewColumn ("", _columns.sync));
+	col_sync->set_fixed_width (38);
+	col_sync->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_fadein = manage (new TreeViewColumn ("", _columns.fadein));
+	col_fadein->set_fixed_width (68);
+	col_fadein->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_fadeout = manage (new TreeViewColumn ("", _columns.fadeout));
+	col_fadeout->set_fixed_width (68);
+	col_fadeout->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_locked = manage (new TreeViewColumn ("", _columns.locked));
+	col_locked->set_fixed_width (20);
+	col_locked->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_glued = manage (new TreeViewColumn ("", _columns.glued));
+	col_glued->set_fixed_width (20);
+	col_glued->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_muted = manage (new TreeViewColumn ("", _columns.muted));
+	col_muted->set_fixed_width (20);
+	col_muted->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_opaque = manage (new TreeViewColumn ("", _columns.opaque));
+	col_opaque->set_fixed_width (20);
+	col_opaque->set_sizing (TREE_VIEW_COLUMN_FIXED);
 
-	_display.append_column ("", _columns.name);
-	_display.append_column ("", _columns.position);
-	_display.append_column ("", _columns.end);
-	_display.append_column ("", _columns.length);
-	_display.append_column ("", _columns.sync);
-	_display.append_column ("", _columns.fadein);
-	_display.append_column ("", _columns.fadeout);
-	_display.append_column ("", _columns.locked);
-	_display.append_column ("", _columns.glued);
-	_display.append_column ("", _columns.muted);
-	_display.append_column ("", _columns.opaque);
+	_display.append_column (*col_name);
+	_display.append_column (*col_position);
+	_display.append_column (*col_end);
+	_display.append_column (*col_length);
+	_display.append_column (*col_sync);
+	_display.append_column (*col_fadein);
+	_display.append_column (*col_fadeout);
+	_display.append_column (*col_locked);
+	_display.append_column (*col_glued);
+	_display.append_column (*col_muted);
+	_display.append_column (*col_opaque);
 
 	TreeViewColumn* col;
 	Gtk::Label* l;
@@ -138,6 +171,7 @@ EditorRegions::EditorRegions (Editor* e)
 			col->set_alignment (ALIGN_CENTER);
 		}
 	}
+	_display.set_model (_model);
 
 	_display.set_headers_visible (true);
 	_display.set_rules_hint ();
