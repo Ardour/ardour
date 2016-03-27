@@ -565,7 +565,12 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 
 	uint32_t out_index = 0;
 	for (i = 0; i < (int32_t) _plugin->numOutputs; ++i) {
-		outs[i] = scratch_bufs.get_audio(i).data(offset);
+		uint32_t  index;
+		bool      valid = false;
+		index = out_map.get(DataType::AUDIO, out_index++, &valid);
+		outs[i] = (valid)
+			? bufs.get_audio(index).data(offset)
+			: scratch_bufs.get_audio(0).data(offset);
 	}
 
 	if (bufs.count().n_midi() > 0) {
@@ -592,18 +597,6 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	_plugin->processReplacing (_plugin, &ins[0], &outs[0], nframes);
 	_midi_out_buf = 0;
 
-	out_index = 0;
-	for (i = 0; i < (int32_t) _plugin->numOutputs; ++i) {
-		uint32_t  index;
-		bool      valid = false;
-		index = out_map.get(DataType::AUDIO, out_index++, &valid);
-		if (!valid) {
-			continue;
-		}
-		if (outs[i] != bufs.get_audio(index).data(offset)) {
-			copy_vector (bufs.get_audio(index).data(offset), outs[i], nframes);
-		}
-	}
 	return 0;
 }
 
