@@ -3808,7 +3808,7 @@ ProcessorWindowProxy::get (bool create)
 			setup ();
 		}
 	}
-
+	_window->show_all ();
 	return _window;
 }
 
