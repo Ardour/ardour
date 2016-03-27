@@ -36,6 +36,7 @@
 
 class XMLNode;
 class ProcessorWindowProxy;
+class PluginPinWindowProxy;
 
 namespace ARDOUR {
 
@@ -116,7 +117,10 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	void* get_ui () const { return _ui_pointer; }
 
 	ProcessorWindowProxy * window_proxy () const { return _window_proxy; }
-	void set_window_proxy (ProcessorWindowProxy* wp);
+	void set_window_proxy (ProcessorWindowProxy* wp) { _window_proxy = wp; }
+
+	PluginPinWindowProxy * pinmgr_proxy () const { return _pinmgr_proxy; }
+	void set_pingmgr_proxy (PluginPinWindowProxy* wp) { _pinmgr_proxy = wp ; }
 
 	void set_owner (SessionObject*);
 	SessionObject* owner() const;
@@ -134,6 +138,7 @@ protected:
 	bool      _pre_fader; ///< true if this processor is currently placed before the Amp, otherwise false
 	void*     _ui_pointer;
 	ProcessorWindowProxy *_window_proxy;
+	PluginPinWindowProxy *_pinmgr_proxy;
 	SessionObject* _owner;
 };
 

@@ -64,6 +64,7 @@ Processor::Processor(Session& session, const string& name)
 	, _pre_fader (false)
 	, _ui_pointer (0)
 	, _window_proxy (0)
+	, _pinmgr_proxy (0)
 	, _owner (0)
 {
 }
@@ -81,6 +82,7 @@ Processor::Processor (const Processor& other)
 	, _pre_fader (false)
 	, _ui_pointer (0)
 	, _window_proxy (0)
+	, _pinmgr_proxy (0)
 	, _owner (0)
 {
 }
@@ -275,12 +277,6 @@ void
 Processor::set_ui (void* p)
 {
 	_ui_pointer = p;
-}
-
-void
-Processor::set_window_proxy (ProcessorWindowProxy* wp)
-{
-	_window_proxy = wp;
 }
 
 void
