@@ -965,7 +965,7 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 		const PositionLockStyle pl = ms.position_lock_style();
 		if (ms.pulse() != first.pulse()) {
 			remove_meter_locked (ms);
-			add_meter_locked (meter, pulse_at_beat_locked (_metrics, bbt_to_beats_locked (_metrics, where)), where, true);
+			add_meter_locked (meter, bbt_to_beats_locked (_metrics, where), where, true);
 		} else {
 			/* cannot move the first meter section */
 			*static_cast<Meter*>(&first) = meter;
