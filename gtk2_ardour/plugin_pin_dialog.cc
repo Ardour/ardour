@@ -18,6 +18,7 @@
  */
 
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/rgb_macros.h"
 
 #include "plugin_pin_dialog.h"
 #include "gui_thread.h"
@@ -31,10 +32,10 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-
 PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
 	, _pi (pi)
+	, _pin_box_size (4)
 {
 	assert (pi->owner ()); // Route
 
@@ -51,8 +52,18 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	// TODO min. width depending on # of pins.
 	darea.set_size_request(600, 200);
 
+	HBox* hbox = manage (new HBox);
+	hbox->pack_start (darea, true, true);
+
+	// TODO add info/settings table
+	// * show  _pi->strict_io() -- inherited from route
+	// * show  _pi->custom_cfg()
+	// Add/Remove instances
+	// Add/Remove output ports
+	// Reset Button  custom-config to "Automatic"
+
 	VBox* vbox = manage (new VBox);
-	vbox->pack_start (darea, true, true);
+	vbox->pack_start (*hbox, true, true);
 	add (*vbox);
 }
 
@@ -64,6 +75,26 @@ void
 PluginPinDialog::plugin_reconfigured ()
 {
 	darea.queue_draw ();
+}
+
+void
+PluginPinDialog::set_color (cairo_t* cr, bool midi)
+{
+	// see also gtk2_ardour/processor_box.cc
+	static const uint32_t audio_port_color = 0x4A8A0EFF; // Green
+	static const uint32_t midi_port_color = 0x960909FF; //Red
+
+	if (midi) {
+		cairo_set_source_rgb (cr,
+				UINT_RGBA_R_FLT(midi_port_color),
+				UINT_RGBA_G_FLT(midi_port_color),
+				UINT_RGBA_B_FLT(midi_port_color));
+	} else {
+		cairo_set_source_rgb (cr,
+				UINT_RGBA_R_FLT(audio_port_color),
+				UINT_RGBA_G_FLT(audio_port_color),
+				UINT_RGBA_B_FLT(audio_port_color));
+	}
 }
 
 void
@@ -83,13 +114,19 @@ PluginPinDialog::draw_io_pins (cairo_t* cr, double y0, double width, uint32_t n_
 		cairo_set_source_rgb (cr, 0, 0, 0);
 		cairo_stroke_preserve (cr);
 
-		if (i < n_midi) {
-			cairo_set_source_rgb (cr, 1, 0, 0);
-		} else {
-			cairo_set_source_rgb (cr, 0, 1, 0);
-		}
+		set_color (cr, i < n_midi);
 		cairo_fill (cr);
 	}
+}
+
+bool
+PluginPinDialog::is_valid_port (uint32_t i, uint32_t n_total, uint32_t n_midi, bool midi)
+{
+	if (!midi) { i += n_midi; }
+	if (i >= n_total) {
+		return false;
+	}
+	return true;
 }
 
 double
@@ -103,35 +140,36 @@ void
 PluginPinDialog::draw_plugin_pins (cairo_t* cr, double x0, double y0, double width, uint32_t n_total, uint32_t n_midi, bool input)
 {
 	// see also ProcessorEntry::PortIcon::on_expose_event
-	const double dxy = rint (max (6., 8. * UIConfiguration::instance().get_ui_scale()));
+	const double dxy = _pin_box_size;
 
 	for (uint32_t i = 0; i < n_total; ++i) {
 		double x = rint (x0 + (i + 1) * width / (1. + n_total)) - .5;
 		cairo_rectangle (cr, x - dxy * .5, input ? y0 - dxy : y0, 1 + dxy, dxy);
 
-		if (i < n_midi) {
-			cairo_set_source_rgb (cr, 1, 0, 0);
-		} else {
-			cairo_set_source_rgb (cr, 0, 1, 0);
-		}
-
+		set_color (cr, i < n_midi);
 		cairo_fill(cr);
 	}
 }
 
 void
-PluginPinDialog::draw_connection (cairo_t* cr, double x0, double x1, double y0, double y1, bool midi)
+PluginPinDialog::draw_connection (cairo_t* cr, double x0, double x1, double y0, double y1, bool midi, bool dashed)
 {
+	double bz = 2 * _pin_box_size;
+
 	cairo_move_to (cr, x0, y0);
-	cairo_curve_to (cr, x0, y0 + 10, x1, y1 - 10, x1, y1);
+	cairo_curve_to (cr, x0, y0 + bz, x1, y1 - bz, x1, y1);
 	cairo_set_line_width  (cr, 3.0);
+	cairo_set_line_cap  (cr,  CAIRO_LINE_CAP_ROUND);
 	cairo_set_source_rgb (cr, 1, 0, 0);
-	if (midi) {
-		cairo_set_source_rgb (cr, 1, 0, 0);
-	} else {
-		cairo_set_source_rgb (cr, 0, 1, 0);
+	if (dashed) {
+		const double dashes[] = { 5, 7 };
+		cairo_set_dash (cr, dashes, 2, 0);
 	}
+	set_color (cr, midi);
 	cairo_stroke (cr);
+	if (dashed) {
+		cairo_set_dash (cr, 0, 0, 0);
+	}
 }
 
 bool
@@ -140,6 +178,8 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 	Gtk::Allocation a = darea.get_allocation();
 	double const width = a.get_width();
 	double const height = a.get_height();
+
+	_pin_box_size = rint (max (6., 8. * UIConfiguration::instance().get_ui_scale()));
 
 	cairo_t* cr = gdk_cairo_create (darea.get_window()->gobj());
 
@@ -183,7 +223,7 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 	if (sources.n_midi() == 0 && pc_in_midi > 0 && pc_out_midi > 0) {
 		double x0 = rint (width / (1. + pc_in)) - .5;
 		double x1 = rint (width / (1. + pc_out)) - .5;
-		draw_connection (cr, x0, x1, y_in, y_out, true);
+		draw_connection (cr, x0, x1, y_in, y_out, true, true);
 	}
 
 	for (uint32_t i = 0; i < plugins; ++i) {
@@ -204,9 +244,12 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 			for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
 				uint32_t pn = (*c).first; // pin
 				uint32_t pb = (*c).second;
+				if (!is_valid_port (pb, pc_in, pc_in_midi, is_midi)) {
+					continue;
+				}
 				double c_x0 = pin_x_pos (pb, 0, width, pc_in, pc_in_midi, is_midi);
 				double c_x1 = pin_x_pos (pn, x0 - bxw2, bxw, sinks.n_total (), sinks.n_midi (), is_midi);
-				draw_connection (cr, c_x0, c_x1, y_in, yc - bxh2, is_midi);
+				draw_connection (cr, c_x0, c_x1, y_in, yc - bxh2 - _pin_box_size, is_midi);
 			}
 		}
 
@@ -215,9 +258,12 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 			for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
 				uint32_t pn = (*c).first;  // pin
 				uint32_t pb = (*c).second;
+				if (!is_valid_port (pb, pc_out, pc_out_midi, is_midi)) {
+					continue;
+				}
 				double c_x0 = pin_x_pos (pn, x0 - bxw2, bxw, sources.n_total (), sources.n_midi (), is_midi);
 				double c_x1 = pin_x_pos (pb, 0, width, pc_out, pc_out_midi, is_midi);
-				draw_connection (cr, c_x0, c_x1, yc + bxh2, y_out, is_midi);
+				draw_connection (cr, c_x0, c_x1, yc + bxh2 + _pin_box_size, y_out, is_midi);
 			}
 		}
 	}

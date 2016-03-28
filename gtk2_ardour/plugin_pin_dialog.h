@@ -44,12 +44,15 @@ private:
 
 	void draw_io_pins (cairo_t*, double, double, uint32_t, uint32_t, bool);
 	void draw_plugin_pins (cairo_t*, double, double, double, uint32_t, uint32_t, bool);
-	void draw_connection (cairo_t*, double, double, double, double, bool);
+	void draw_connection (cairo_t*, double, double, double, double, bool, bool dashed = false);
+	bool is_valid_port (uint32_t, uint32_t, uint32_t, bool);
+	void set_color (cairo_t*, bool);
 
 	double pin_x_pos (uint32_t, double, double, uint32_t, uint32_t, bool);
 
 	PBD::ScopedConnectionList _plugin_connections;
 	boost::shared_ptr<ARDOUR::PluginInsert> _pi;
+	double _pin_box_size;
 };
 
 #endif
