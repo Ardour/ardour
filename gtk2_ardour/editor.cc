@@ -2157,6 +2157,8 @@ Editor::snap_musical() const
 	case SnapToBeatDiv4:
 	case SnapToBeatDiv3:
 	case SnapToBeatDiv2:
+	case SnapToBeat:
+	case SnapToBar:
 		return true;
 	default:
 		break;

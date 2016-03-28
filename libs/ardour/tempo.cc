@@ -1146,7 +1146,7 @@ TempoMap::gui_move_tempo_beat (TempoSection* ts,  const Tempo& bpm, const double
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		TempoSection* new_section = copy_metrics_and_point (future_map, ts);
 		if (solve_map (future_map, new_section, bpm, pulse_at_beat_locked (future_map, beat))) {
-			solve_map (_metrics, ts, bpm, beat);
+			solve_map (_metrics, ts, bpm,  pulse_at_beat_locked (_metrics, beat));
 		}
 	}
 
@@ -2492,16 +2492,14 @@ TempoMap::round_bbt (BBT_Time& when, const int32_t& sub_num)
 		return;
 	} else if (sub_num == 0) {
 		const double bpb = meter_section_at (bbt_to_beats_locked (_metrics, when)).divisions_per_bar();
-		if (when.ticks > BBT_Time::ticks_per_beat / 2) {
+		if ((double) when.ticks > BBT_Time::ticks_per_beat / 2.0) {
 			++when.beats;
 			while ((double) when.beats > bpb) {
 				++when.bars;
 				when.beats -= (uint32_t) floor (bpb);
 			}
-			when.ticks = 0;
-		} else {
-			when.ticks = 0;
 		}
+		when.ticks = 0;
 		return;
 	}
 	const uint32_t ticks_one_subdivisions_worth = BBT_Time::ticks_per_beat / sub_num;

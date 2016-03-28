@@ -3317,18 +3317,29 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	framepos_t pf;
+	double beat = 0.0;
+
 	if (!_editor->snap_musical()) {
 		pf = adjusted_current_frame (event);
 	} else {
-		pf = adjusted_current_frame (event);
+		pf = adjusted_current_frame (event, false);
 		Timecode::BBT_Time when;
 		_editor->session()->tempo_map().bbt_time (pf, when);
-		if (_editor->snap_type() == SnapToBar) {
-			_editor->session()->tempo_map().round_bbt (when, -1);
+		if (_real_section->position_lock_style() == MusicTime) {
+			if (_editor->snap_type() == SnapToBar) {
+				_editor->session()->tempo_map().round_bbt (when, -1);
+			} else {
+				_editor->session()->tempo_map().round_bbt (when, _editor->get_grid_beat_divisions (0));
+			}
+			beat = _editor->session()->tempo_map().bbt_to_beats (when);
 		} else {
-			_editor->session()->tempo_map().round_bbt (when, _editor->get_grid_beat_divisions (0));
+			if (_editor->snap_type() == SnapToBar) {
+				_editor->session()->tempo_map().round_bbt (when, -1);
+			} else {
+				_editor->session()->tempo_map().round_bbt (when, _editor->get_grid_beat_divisions (0));
+			}
+			pf = _editor->session()->tempo_map().predict_tempo_frame (_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type()), when);
 		}
-		pf = _editor->session()->tempo_map().predict_tempo_frame (_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type()), when);
 	}
 	Tempo const tp = _marker->tempo();
 
@@ -3340,17 +3351,14 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		show_verbose_cursor_text (strs.str());
 	} else if (_movable) {
 
-		_marker->set_position (pf);
-		/* just here for a check/laugh
-		   if (_real_section->position_lock_style() == MusicTime) {
-		   const double baf = _editor->session()->tempo_map().beat_at_frame (pf);
-		   _editor->session()->tempo_map().gui_move_tempo_beat (_real_section, tp, baf);
-		   } else {
-		*/
-		_editor->session()->tempo_map().gui_move_tempo_frame (_real_section, tp, pf);
-		//}
+		if (_real_section->position_lock_style() == MusicTime) {
+			_editor->session()->tempo_map().gui_move_tempo_beat (_real_section, tp, beat);
+		} else {
+			_editor->session()->tempo_map().gui_move_tempo_frame (_real_section, tp, pf);
+		}
 		show_verbose_cursor_time (pf);
 	}
+	_marker->set_position (pf);
 }
 
 void
