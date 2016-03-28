@@ -2360,8 +2360,8 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_tape_machine_mode)
 		     ));
 
-if (!Profile->get_mixbus()) {
 	add_option (_("Audio"), new OptionEditorHeading (_("Connection of tracks and busses")));
+if (!Profile->get_mixbus()) {
 
 	add_option (_("Audio"),
 		    new BoolOption (
@@ -2396,6 +2396,18 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Audio"), oac);
 }  // !mixbus
+
+	bo = new BoolOption (
+			"strict-io",
+			_("Use 'Strict-I/O for new tracks or Busses"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
+			);
+
+	add_option (_("Audio"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
+
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Denormals")));
 
