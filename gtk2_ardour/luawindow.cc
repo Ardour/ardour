@@ -191,6 +191,7 @@ LuaWindow::hide_window (GdkEventAny *ev)
 
 void LuaWindow::reinit_lua ()
 {
+	ENSURE_GUI_THREAD (*this, &LuaWindow::session_going_away);
 	delete lua;
 	lua = new LuaState();
 	lua->Print.connect (sigc::mem_fun (*this, &LuaWindow::append_text));
