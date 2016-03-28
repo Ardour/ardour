@@ -939,6 +939,11 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 				if (at.empty()) {
 					return -1;
 				}
+				if (Config->get_strict_io ()) {
+					for (list<boost::shared_ptr<AudioTrack> >::iterator i = at.begin(); i != at.end(); ++i) {
+						(*i)->set_strict_io (true);
+					}
+				}
 
 				existing_track = at.front();
 			} else if (mr) {
@@ -951,7 +956,13 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 				if (mt.empty()) {
 					return -1;
 				}
+				if (Config->get_strict_io ()) {
+					for (list<boost::shared_ptr<MidiTrack> >::iterator i = mt.begin(); i != mt.end(); ++i) {
+						(*i)->set_strict_io (true);
+					}
+				}
 
+				// TODO set strict_io from preferences
 				existing_track = mt.front();
 			}
 
@@ -983,6 +994,11 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 			playlist->clear_changes ();
 			playlist->add_region (copy, pos);
 			_session->add_command (new StatefulDiffCommand (playlist));
+		}
+		if (Config->get_strict_io ()) {
+			for (list<boost::shared_ptr<AudioTrack> >::iterator i = at.begin(); i != at.end(); ++i) {
+				(*i)->set_strict_io (true);
+			}
 		}
 		break;
 	}
