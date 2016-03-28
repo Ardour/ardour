@@ -3317,7 +3317,6 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	framepos_t pf;
-	double beat = 0.0;
 	Tempo const tp = _marker->tempo();
 
 	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
@@ -3351,12 +3350,15 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 			_editor->session()->tempo_map().bbt_time (pf, when);
 
 			if (_real_section->position_lock_style() == MusicTime) {
+
+				const double pulse = _editor->session()->tempo_map().predict_tempo_pulse (_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type()), pf);
+				when = _editor->session()->tempo_map().pulse_to_bbt (pulse);
 				if (use_snap && _editor->snap_type() == SnapToBar) {
 					_editor->session()->tempo_map().round_bbt (when, -1);
 				} else if (use_snap) {
 					_editor->session()->tempo_map().round_bbt (when, _editor->get_grid_beat_divisions (0));
 				}
-				beat = _editor->session()->tempo_map().bbt_to_beats (when);
+				const double beat = _editor->session()->tempo_map().bbt_to_beats (when);
 				_editor->session()->tempo_map().gui_move_tempo_beat (_real_section, tp, beat);
 			} else {
 				if (use_snap && _editor->snap_type() == SnapToBar) {
