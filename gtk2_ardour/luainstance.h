@@ -13,9 +13,12 @@
 #include "ardour/session_handle.h"
 
 #include "lua/luastate.h"
-#include "LuaBridge/LuaBridge.h"
 
 #include "luasignal.h"
+
+namespace luabridge {
+	class LuaRef;
+}
 
 typedef std::bitset<LuaSignal::LAST_SIGNAL> ActionHook;
 

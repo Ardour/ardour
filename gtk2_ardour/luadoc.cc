@@ -5,6 +5,7 @@
 #include "ardour/luabindings.h"
 #include "ardour/revision.h"
 #include "luainstance.h"
+#include "LuaBridge/LuaBridge.h"
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-version.h"

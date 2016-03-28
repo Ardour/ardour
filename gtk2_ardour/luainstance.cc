@@ -26,6 +26,8 @@
 #include "ardour/route.h"
 #include "ardour/session.h"
 
+#include "LuaBridge/LuaBridge.h"
+
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "region_selection.h"

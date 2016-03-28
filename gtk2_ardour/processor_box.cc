@@ -61,6 +61,8 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 
+#include "LuaBridge/LuaBridge.h"
+
 #include "actions.h"
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
