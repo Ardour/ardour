@@ -604,7 +604,28 @@ MeterSection::get_state() const
 }
 
 /***********************************************************************/
+/*
+  Tempo Map Overview
 
+  We have tempos, which are nice to think of in whole pulses per minute,
+  and meters which divide tempo pulses into bars (via divisions_per_bar)
+  and beats (via note_divisor).
+  Tempos and meters may be locked to audio or music.
+  Because the notion of a beat cannot be determined without both tempo and meter, the first tempo
+  and first meter are special. they must move together, and must be locked to audio.
+  Audio locked tempos which lie before the first meter are made inactive.
+  They will be re-activated if the first meter is again placed before them.
+
+  Both tempos and meters have a pulse position and a frame position.
+  Recomputing the tempo map is the process where the 'missing' position
+  (pulse in the case of AudioTime and frame for MusicTime) is calculated
+  based on the lock preference (position_lock_style).
+
+  It is important to keep the _metrics in an order that makes sense.
+  Because ramped MusicTime and AudioTime tempos can interact with each other
+  and cause reordering, care must be taken to keep _metrics in a solved state.
+  Solved means ordered by frame or pulse with frame-accurate precision (see check_solved()).
+*/
 struct MetricSectionSorter {
     bool operator() (const MetricSection* a, const MetricSection* b) {
 	    return a->pulse() < b->pulse();
@@ -2004,18 +2025,10 @@ TempoMap::check_solved (Metrics& metrics, bool by_frame)
 				if ((by_frame && t->frame() < prev_ts->frame()) || (!by_frame && t->pulse() < prev_ts->pulse())) {
 					return false;
 				}
-				if (by_frame && t->frame() != prev_ts->frame_at_pulse (t->pulse(), _frame_rate)) {
+				/* precision check ensures pulses and frames align independent of lock style.*/
+				if (t->frame() != prev_ts->frame_at_pulse (t->pulse(), _frame_rate)) {
 					return false;
 				}
-				/*
-				if (!by_frame && fabs (t->pulse() - prev_ts->pulse_at_tempo (t->pulses_per_minute(), t->frame(), _frame_rate)) > 0.00001) {
-					std::cerr << "beat precision too low for bpm: " << t->beats_per_minute() << std::endl <<
-						" |error          :" << t->pulse() - prev_ts->pulse_at_tempo (t->pulses_per_minute(), t->frame(), _frame_rate) << std::endl <<
-						"|frame at beat   :" << prev_ts->frame_at_pulse (t->pulse(), _frame_rate) << std::endl <<
-						" |frame at tempo : " << prev_ts->frame_at_tempo (t->pulses_per_minute(), t->pulse(), _frame_rate) << std::endl;
-					return false;
-				}
-				*/
 			}
 			prev_ts = t;
 		}

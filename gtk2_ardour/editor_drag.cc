@@ -3318,29 +3318,6 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	framepos_t pf;
 	double beat = 0.0;
-
-	if (!_editor->snap_musical()) {
-		pf = adjusted_current_frame (event);
-	} else {
-		pf = adjusted_current_frame (event, false);
-		Timecode::BBT_Time when;
-		_editor->session()->tempo_map().bbt_time (pf, when);
-		if (_real_section->position_lock_style() == MusicTime) {
-			if (_editor->snap_type() == SnapToBar) {
-				_editor->session()->tempo_map().round_bbt (when, -1);
-			} else {
-				_editor->session()->tempo_map().round_bbt (when, _editor->get_grid_beat_divisions (0));
-			}
-			beat = _editor->session()->tempo_map().bbt_to_beats (when);
-		} else {
-			if (_editor->snap_type() == SnapToBar) {
-				_editor->session()->tempo_map().round_bbt (when, -1);
-			} else {
-				_editor->session()->tempo_map().round_bbt (when, _editor->get_grid_beat_divisions (0));
-			}
-			pf = _editor->session()->tempo_map().predict_tempo_frame (_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type()), when);
-		}
-	}
 	Tempo const tp = _marker->tempo();
 
 	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
@@ -3350,12 +3327,47 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		strs << new_bpm;
 		show_verbose_cursor_text (strs.str());
 	} else if (_movable) {
-
-		if (_real_section->position_lock_style() == MusicTime) {
-			_editor->session()->tempo_map().gui_move_tempo_beat (_real_section, tp, beat);
+		if (!_editor->snap_musical()) {
+			pf = adjusted_current_frame (event);
 		} else {
-			_editor->session()->tempo_map().gui_move_tempo_frame (_real_section, tp, pf);
+			pf = adjusted_current_frame (event, false);
+			bool use_snap;
+
+			if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::snap_modifier ())) {
+				if (_editor->snap_mode() == Editing::SnapOff) {
+					use_snap = true;
+				} else {
+					use_snap = false;
+				}
+			} else {
+				if (_editor->snap_mode() == Editing::SnapOff) {
+					use_snap = false;
+				} else {
+					use_snap = true;
+				}
+			}
+
+			Timecode::BBT_Time when;
+			_editor->session()->tempo_map().bbt_time (pf, when);
+			if (_real_section->position_lock_style() == MusicTime) {
+				if (use_snap && _editor->snap_type() == SnapToBar) {
+					_editor->session()->tempo_map().round_bbt (when, -1);
+				} else if (use_snap) {
+					_editor->session()->tempo_map().round_bbt (when, _editor->get_grid_beat_divisions (0));
+				}
+				beat = _editor->session()->tempo_map().bbt_to_beats (when);
+				_editor->session()->tempo_map().gui_move_tempo_beat (_real_section, tp, beat);
+			} else {
+				if (use_snap && _editor->snap_type() == SnapToBar) {
+					_editor->session()->tempo_map().round_bbt (when, -1);
+				} else if (use_snap) {
+					_editor->session()->tempo_map().round_bbt (when, _editor->get_grid_beat_divisions (0));
+				}
+				pf = _editor->session()->tempo_map().predict_tempo_frame (_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type()), when);
+				_editor->session()->tempo_map().gui_move_tempo_frame (_real_section, tp, pf);
+			}
 		}
+
 		show_verbose_cursor_time (pf);
 	}
 	_marker->set_position (pf);

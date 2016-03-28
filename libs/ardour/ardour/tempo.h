@@ -55,6 +55,9 @@ class LIBARDOUR_API Tempo {
 	Tempo (double bpm, double type=4.0) // defaulting to quarter note
 		: _beats_per_minute (bpm), _note_type(type) {}
 
+	/* ..or more aptly 'pulse divisions per minute'.
+	   Nothing to do with actual beats, which are defined by the meter and tempo.
+	*/
 	double beats_per_minute () const { return _beats_per_minute; }
 	void set_beats_per_minute (double bpm) { _beats_per_minute = bpm; }
 	double note_type () const { return _note_type; }
