@@ -3349,6 +3349,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 			Timecode::BBT_Time when;
 			_editor->session()->tempo_map().bbt_time (pf, when);
+
 			if (_real_section->position_lock_style() == MusicTime) {
 				if (use_snap && _editor->snap_type() == SnapToBar) {
 					_editor->session()->tempo_map().round_bbt (when, -1);
@@ -3368,7 +3369,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 			}
 		}
 
-		show_verbose_cursor_time (pf);
+		show_verbose_cursor_time (_real_section->frame());
 	}
 	_marker->set_position (pf);
 }
