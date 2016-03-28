@@ -496,5 +496,8 @@ void
 KeyEditor::search_string_updated (const std::string& filter)
 {
 	filter_string = boost::to_lower_copy(filter);
-	current_tab ()->filter->refilter ();
+	KeyEditor::Tab* tab = current_tab ();
+	if (tab) {
+		tab->filter->refilter ();
+	}
 }
