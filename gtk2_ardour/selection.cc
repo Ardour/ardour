@@ -620,10 +620,14 @@ Selection::add (boost::shared_ptr<Evoral::ControlList> cl)
 		warning << "Programming error: Selected list is not an ARDOUR::AutomationList" << endmsg;
 		return;
 	}
-	if (find (lines.begin(), lines.end(), al) == lines.end()) {
-		lines.push_back (al);
-		LinesChanged();
-	}
+
+	/* The original may change so we must store a copy (not a pointer) here.
+	 * e.g AutomationLine rewrites the list with gain mapping.
+	 * the downside is that we can't perfom duplicate checks.
+	 * This code was changed in response to #6842
+	 */
+	lines.push_back (boost::shared_ptr<ARDOUR::AutomationList> (new ARDOUR::AutomationList(*al)));
+	LinesChanged();
 }
 
 void
