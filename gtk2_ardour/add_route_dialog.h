@@ -76,6 +76,8 @@ class AddRouteDialog : public ArdourDialog
 	};
 	InsertAt insert_at();
 
+	bool use_strict_io() { return strict_io.get_active (); }
+
   private:
 	Gtk::Entry name_template_entry;
 	Gtk::ComboBoxText track_bus_combo;
@@ -90,6 +92,7 @@ class AddRouteDialog : public ArdourDialog
 	InstrumentSelector instrument_combo;
 	Gtk::Label insert_at_label;
 	Gtk::ComboBoxText insert_at_combo;
+	Gtk::CheckButton strict_io;
 
 	std::vector<ARDOUR::TemplateInfo> route_templates;
 

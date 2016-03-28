@@ -71,6 +71,7 @@
 
 #include "ardour/ardour.h"
 #include "ardour/audio_backend.h"
+#include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/automation_watch.h"
@@ -78,6 +79,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/ltc_file_reader.h"
+#include "ardour/midi_track.h"
 #include "ardour/port.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/process_thread.h"
@@ -1776,10 +1778,15 @@ ARDOUR_UI::open_session ()
 	}
 }
 
-
 void
-ARDOUR_UI::session_add_mixed_track (const ChanCount& input, const ChanCount& output, RouteGroup* route_group,
-				    uint32_t how_many, const string& name_template, PluginInfoPtr instrument)
+ARDOUR_UI::session_add_mixed_track (
+		const ChanCount& input,
+		const ChanCount& output,
+		RouteGroup* route_group,
+		uint32_t how_many,
+		const string& name_template,
+		bool strict_io,
+		PluginInfoPtr instrument)
 {
 	list<boost::shared_ptr<MidiTrack> > tracks;
 
@@ -1797,18 +1804,26 @@ ARDOUR_UI::session_add_mixed_track (const ChanCount& input, const ChanCount& out
 	}
 
 	catch (...) {
-		MessageDialog msg (_main_window,
-				   string_compose (_("There are insufficient ports available\n\
-to create a new track or bus.\n\
-You should save %1, exit and\n\
-restart with more ports."), PROGRAM_NAME));
-		msg.run ();
+		display_insufficient_ports_message ();
+		return;
+	}
+
+	if (strict_io) {
+		for (list<boost::shared_ptr<MidiTrack> >::iterator i = tracks.begin(); i != tracks.end(); ++i) {
+			(*i)->set_strict_io (true);
+		}
 	}
 }
 
 void
-ARDOUR_UI::session_add_midi_bus (RouteGroup* route_group, uint32_t how_many, const string& name_template, PluginInfoPtr instrument)
+ARDOUR_UI::session_add_midi_bus (
+		RouteGroup* route_group,
+		uint32_t how_many,
+		const string& name_template,
+		bool strict_io,
+		PluginInfoPtr instrument)
 {
+	RouteList routes;
 
 	if (_session == 0) {
 		warning << _("You cannot add a track without a session already loaded.") << endmsg;
@@ -1816,32 +1831,40 @@ ARDOUR_UI::session_add_midi_bus (RouteGroup* route_group, uint32_t how_many, con
 	}
 
 	try {
-		RouteList routes = _session->new_midi_route (route_group, how_many, name_template, instrument);
+		routes = _session->new_midi_route (route_group, how_many, name_template, instrument);
 		if (routes.size() != how_many) {
 			error << string_compose(P_("could not create %1 new Midi Bus", "could not create %1 new Midi Busses", how_many), how_many) << endmsg;
 		}
 
 	}
 	catch (...) {
-		MessageDialog msg (_main_window,
-				   string_compose (_("There are insufficient ports available\n\
-to create a new track or bus.\n\
-You should save %1, exit and\n\
-restart with more ports."), PROGRAM_NAME));
-		msg.run ();
+		display_insufficient_ports_message ();
+		return;
+	}
+
+	if (strict_io) {
+		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+			(*i)->set_strict_io (true);
+		}
 	}
 }
 
 void
-ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t how_many, const string& name_template, PluginInfoPtr instrument)
+ARDOUR_UI::session_add_midi_route (
+		bool disk,
+		RouteGroup* route_group,
+		uint32_t how_many,
+		const string& name_template,
+		bool strict_io,
+		PluginInfoPtr instrument)
 {
 	ChanCount one_midi_channel;
 	one_midi_channel.set (DataType::MIDI, 1);
 
 	if (disk) {
-		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, instrument);
+		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, strict_io, instrument);
 	} else {
-		session_add_midi_bus (route_group, how_many, name_template, instrument);
+		session_add_midi_bus (route_group, how_many, name_template, strict_io, instrument);
 	}
 }
 
@@ -1853,7 +1876,8 @@ ARDOUR_UI::session_add_audio_route (
 	ARDOUR::TrackMode mode,
 	RouteGroup* route_group,
 	uint32_t how_many,
-	string const & name_template
+	string const & name_template,
+	bool strict_io
 	)
 {
 	list<boost::shared_ptr<AudioTrack> > tracks;
@@ -1885,14 +1909,30 @@ ARDOUR_UI::session_add_audio_route (
 	}
 
 	catch (...) {
-		MessageDialog msg (_main_window,
-				   string_compose (_("There are insufficient ports available\n\
+		display_insufficient_ports_message ();
+		return;
+	}
+
+	if (strict_io) {
+		for (list<boost::shared_ptr<AudioTrack> >::iterator i = tracks.begin(); i != tracks.end(); ++i) {
+			(*i)->set_strict_io (true);
+		}
+		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+			(*i)->set_strict_io (true);
+		}
+	}
+}
+
+void
+ARDOUR_UI::display_insufficient_ports_message ()
+{
+	MessageDialog msg (_main_window,
+			string_compose (_("There are insufficient ports available\n\
 to create a new track or bus.\n\
 You should save %1, exit and\n\
 restart with more ports."), PROGRAM_NAME));
-		pop_back_splash (msg);
-		msg.run ();
-	}
+	pop_back_splash (msg);
+	msg.run ();
 }
 
 void
@@ -3924,7 +3964,6 @@ ARDOUR_UI::add_route (Gtk::Window* /* ignored */)
 	}
 
 	setup_order_hint(add_route_dialog->insert_at());
-
 	string template_path = add_route_dialog->track_template();
 	DisplaySuspender ds;
 
@@ -3943,6 +3982,7 @@ ARDOUR_UI::add_route (Gtk::Window* /* ignored */)
 	PluginInfoPtr instrument = add_route_dialog->requested_instrument ();
 	RouteGroup* route_group = add_route_dialog->route_group ();
 	AutoConnectOption oac = Config->get_output_auto_connect();
+	bool strict_io = add_route_dialog->use_strict_io ();
 
 	if (oac & AutoConnectMaster) {
 		output_chan.set (DataType::AUDIO, (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan.n_audio()));
@@ -3955,19 +3995,19 @@ ARDOUR_UI::add_route (Gtk::Window* /* ignored */)
 
 	switch (add_route_dialog->type_wanted()) {
 	case AddRouteDialog::AudioTrack:
-		session_add_audio_track (input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template);
+		session_add_audio_track (input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template, strict_io);
 		break;
 	case AddRouteDialog::MidiTrack:
-		session_add_midi_track (route_group, count, name_template, instrument);
+		session_add_midi_track (route_group, count, name_template, strict_io, instrument);
 		break;
 	case AddRouteDialog::MixedTrack:
-		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, instrument);
+		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, strict_io, instrument);
 		break;
 	case AddRouteDialog::AudioBus:
-		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template);
+		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template, strict_io);
 		break;
 	case AddRouteDialog::MidiBus:
-		session_add_midi_bus (route_group, count, name_template, instrument);
+		session_add_midi_bus (route_group, count, name_template, strict_io, instrument);
 		break;
 	}
 }

@@ -39,6 +39,7 @@
 #include "utils.h"
 #include "add_route_dialog.h"
 #include "route_group_dialog.h"
+#include "tooltips.h"
 #include "i18n.h"
 
 using namespace Gtk;
@@ -57,6 +58,7 @@ AddRouteDialog::AddRouteDialog ()
 	, configuration_label (_("Configuration:"))
 	, mode_label (_("Record Mode:"))
 	, instrument_label (_("Instrument:"))
+	, strict_io (_("Strict I/O"))
 {
 	set_name ("AddRouteDialog");
 	set_modal (true);
@@ -159,6 +161,13 @@ AddRouteDialog::AddRouteDialog ()
 	table2->attach (insert_at_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 	++n;
 
+	/* New Route's Routing is.. */
+	strict_io.set_active (Config->get_strict_io ());
+	ARDOUR_UI_UTILS::set_tooltip (strict_io,
+			_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
+	table2->attach (strict_io, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	++n;
+
 	options_box->pack_start (*table2, false, true);
 	vbox->pack_start (*options_box, false, true);
 
@@ -221,8 +230,11 @@ AddRouteDialog::maybe_update_name_template_entry ()
 		name_template_entry.get_text() != _("MIDI")  &&
 		name_template_entry.get_text() != _("Audio+MIDI")  &&
 		name_template_entry.get_text() != _("Bus")) {
+		strict_io.set_sensitive (false);
 		return;
 	}
+
+	strict_io.set_sensitive (true);
 
 	switch (type_wanted()) {
 	case AudioTrack:

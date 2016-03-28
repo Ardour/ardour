@@ -278,27 +278,38 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		ARDOUR::TrackMode mode,
 		ARDOUR::RouteGroup* route_group,
 		uint32_t how_many,
-		std::string const & name_template
+		std::string const & name_template,
+		bool strict_io
 		) {
-
-		session_add_audio_route (true, input_channels, output_channels, mode, route_group, how_many, name_template);
+		session_add_audio_route (true, input_channels, output_channels, mode, route_group, how_many, name_template, strict_io);
 	}
 
-	void session_add_audio_bus (int input_channels, int32_t output_channels, ARDOUR::RouteGroup* route_group,
-				    uint32_t how_many, std::string const & name_template) {
-		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal, route_group, how_many, name_template);
+	void session_add_audio_bus (
+			int input_channels,
+			int32_t output_channels,
+			ARDOUR::RouteGroup* route_group,
+			uint32_t how_many,
+			std::string const & name_template,
+			bool strict_io
+			) {
+		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal, route_group, how_many, name_template, strict_io);
 	}
 
-
-	void session_add_midi_track (ARDOUR::RouteGroup* route_group, uint32_t how_many, std::string const & name_template,
+	void session_add_midi_track (
+			ARDOUR::RouteGroup* route_group,
+			uint32_t how_many,
+			std::string const & name_template,
+			bool strict_io,
 			ARDOUR::PluginInfoPtr instrument) {
-		session_add_midi_route (true, route_group, how_many, name_template, instrument);
+		session_add_midi_route (true, route_group, how_many, name_template, strict_io, instrument);
 	}
 
-	void session_add_mixed_track (const ARDOUR::ChanCount& input, const ARDOUR::ChanCount& output, ARDOUR::RouteGroup* route_group, uint32_t how_many, std::string const & name_template,
-			ARDOUR::PluginInfoPtr instrument);
+	void session_add_mixed_track (const ARDOUR::ChanCount&, const ARDOUR::ChanCount&, ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr);
+	void session_add_midi_bus (ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr);
+	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool);
+	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr);
 
-	void session_add_midi_bus (ARDOUR::RouteGroup* route_group, uint32_t how_many, std::string const & name_template, ARDOUR::PluginInfoPtr instrument);
+	void display_insufficient_ports_message ();
 
 	void attach_to_engine ();
 	void post_engine ();
@@ -600,9 +611,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void edit_metadata ();
 	void import_metadata ();
-
-	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *, uint32_t, std::string const &);
-	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, ARDOUR::PluginInfoPtr);
 
 	void set_transport_sensitivity (bool);
 
