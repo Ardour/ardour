@@ -178,18 +178,14 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	};
 
 	TempoSection (const double& beat, double qpm, double note_type, Type tempo_type)
-		: MetricSection (beat), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type), _c_func (0.0), _active (true)  {}
+		: MetricSection (beat), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true)  {}
 	TempoSection (framepos_t frame, double qpm, double note_type, Type tempo_type)
-		: MetricSection (frame), Tempo (qpm, note_type), _bar_offset (-1.0), _type (tempo_type), _c_func (0.0), _active (true) {}
+		: MetricSection (frame), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true) {}
 	TempoSection (const XMLNode&);
 
 	static const std::string xml_state_node_name;
 
 	XMLNode& get_state() const;
-
-	void update_bar_offset_from_bbt (const Meter&);
-	void update_bbt_time_from_bar_offset (const Meter&);
-	double bar_offset() const { return _bar_offset; }
 
 	bool active () const { return _active; }
 	void set_active (bool yn) { _active = yn; }
@@ -243,7 +239,6 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	   this enables us to keep the tempo change at the same relative
 	   position within the bar if/when the meter changes.
 	*/
-	double _bar_offset;
 	Type _type;
 	double _c_func;
 	bool _active;
