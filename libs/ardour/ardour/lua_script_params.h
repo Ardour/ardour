@@ -21,7 +21,10 @@
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/luascripting.h"
-#include "LuaBridge/LuaBridge.h"
+
+namespace luabridge {
+	class LuaRef;
+}
 
 /* Semantically these are static functions of the LuaScripting class
  * but are kept separately to minimize header includes.

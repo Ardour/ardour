@@ -28,6 +28,8 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/plugin_manager.h"
 
+#include "LuaBridge/LuaBridge.h"
+
 #include "i18n.h"
 
 using namespace ARDOUR;

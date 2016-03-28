@@ -31,6 +31,8 @@
 #include "ardour/plugin.h"
 #include "ardour/session.h"
 
+#include "LuaBridge/LuaBridge.h"
+
 #include "i18n.h"
 
 using namespace ARDOUR;

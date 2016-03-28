@@ -33,7 +33,10 @@
 #include "ardour/dsp_filter.h"
 
 #include "lua/luastate.h"
-#include "LuaBridge/LuaBridge.h"
+
+namespace luabridge {
+	class LuaRef;
+}
 
 namespace ARDOUR {
 

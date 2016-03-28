@@ -29,6 +29,7 @@
 //==============================================================================
 
 #ifdef LUABINDINGDOC
+#include <iostream>
 #include <typeinfo>
 #include <execinfo.h>
 #include <type_traits>
