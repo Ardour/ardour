@@ -1108,6 +1108,9 @@ OSC::route_set_gain_abs (int rid, float level)
 int
 OSC::route_set_gain_dB (int rid, float dB)
 {
+	if (dB < -192) {
+		return route_set_gain_abs (rid, 0.0);
+	}
 	return route_set_gain_abs (rid, dB_to_coefficient (dB));
 }
 
