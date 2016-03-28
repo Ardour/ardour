@@ -1660,6 +1660,12 @@ ControlList::paste (const ControlList& alist, double pos, float /*times*/)
 			if (alist.parameter() != parameter()) {
 				const ParameterDescriptor& src_desc = alist.descriptor();
 
+				// This does not work for logscale and will probably also not do
+				// the right thing for integer_step and sr_dependent parameters.
+				//
+				// TODO various flags from from ARDOUR::ParameterDescriptor
+				// to Evoral::ParameterDescriptor
+
 				value -= src_desc.lower;  // translate to 0-relative
 				value /= (src_desc.upper - src_desc.lower);  // normalize range
 				value *= (_desc.upper - _desc.lower);  // scale to our range
