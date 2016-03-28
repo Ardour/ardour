@@ -2483,7 +2483,7 @@ void
 TempoMap::round_bbt (BBT_Time& when, const int32_t& sub_num)
 {
 	if (sub_num == -1) {
-		const double bpb = meter_at (bbt_to_beats_locked (_metrics, when)).note_divisor();
+		const double bpb = meter_section_at (bbt_to_beats_locked (_metrics, when)).divisions_per_bar();
 		if ((double) when.beats > bpb / 2.0) {
 			++when.bars;
 		}
@@ -2491,8 +2491,13 @@ TempoMap::round_bbt (BBT_Time& when, const int32_t& sub_num)
 		when.ticks = 0;
 		return;
 	} else if (sub_num == 0) {
+		const double bpb = meter_section_at (bbt_to_beats_locked (_metrics, when)).divisions_per_bar();
 		if (when.ticks > BBT_Time::ticks_per_beat / 2) {
 			++when.beats;
+			while ((double) when.beats > bpb) {
+				++when.bars;
+				when.beats -= (uint32_t) floor (bpb);
+			}
 			when.ticks = 0;
 		} else {
 			when.ticks = 0;
@@ -2749,6 +2754,25 @@ TempoMap::meter_at (framepos_t frame) const
 {
 	TempoMetric m (metric_at (frame));
 	return m.meter();
+}
+
+const MeterSection&
+TempoMap::meter_section_at (const double& beat) const
+{
+	MeterSection* prev_ms = 0;
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+		MeterSection* m;
+		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
+			if (prev_ms && m->beat() > beat) {
+				break;
+			}
+			prev_ms = m;
+		}
+
+	}
+	return *prev_ms;
 }
 
 XMLNode&

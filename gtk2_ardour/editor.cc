@@ -2158,7 +2158,10 @@ Editor::snap_musical() const
 	case SnapToBeatDiv3:
 	case SnapToBeatDiv2:
 		return true;
+	default:
+		break;
 	}
+
 	return false;
 }
 
