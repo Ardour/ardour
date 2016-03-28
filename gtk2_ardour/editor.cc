@@ -2136,6 +2136,32 @@ Editor::snap_type() const
 	return _snap_type;
 }
 
+bool
+Editor::snap_musical() const
+{
+	switch (_snap_type) {
+	case SnapToBeatDiv128:
+	case SnapToBeatDiv64:
+	case SnapToBeatDiv32:
+	case SnapToBeatDiv28:
+	case SnapToBeatDiv24:
+	case SnapToBeatDiv20:
+	case SnapToBeatDiv16:
+	case SnapToBeatDiv14:
+	case SnapToBeatDiv12:
+	case SnapToBeatDiv10:
+	case SnapToBeatDiv8:
+	case SnapToBeatDiv7:
+	case SnapToBeatDiv6:
+	case SnapToBeatDiv5:
+	case SnapToBeatDiv4:
+	case SnapToBeatDiv3:
+	case SnapToBeatDiv2:
+		return true;
+	}
+	return false;
+}
+
 SnapMode
 Editor::snap_mode() const
 {

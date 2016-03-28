@@ -3316,7 +3316,20 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_marker->hide();
 	}
 
-	framepos_t const pf = adjusted_current_frame (event);
+	framepos_t pf;
+	if (!_editor->snap_musical()) {
+		pf = adjusted_current_frame (event);
+	} else {
+		pf = adjusted_current_frame (event);
+		Timecode::BBT_Time when;
+		_editor->session()->tempo_map().bbt_time (pf, when);
+		if (_editor->snap_type() == SnapToBar) {
+			_editor->session()->tempo_map().round_bbt (when, -1);
+		} else {
+			_editor->session()->tempo_map().round_bbt (when, _editor->get_grid_beat_divisions (0));
+		}
+		pf = _editor->session()->tempo_map().predict_tempo_frame (_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type()), when);
+	}
 	Tempo const tp = _marker->tempo();
 
 	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {

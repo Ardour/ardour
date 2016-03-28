@@ -171,6 +171,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Editing::SnapMode  snap_mode () const;
 	Editing::SnapType  snap_type () const;
+	bool  snap_musical () const;
 
 	void undo (uint32_t n = 1);
 	void redo (uint32_t n = 1);

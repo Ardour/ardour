@@ -403,6 +403,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir);
+	void round_bbt (Timecode::BBT_Time& when, const int32_t& snap_divisor);
 
 	void set_length (framepos_t frames);
 

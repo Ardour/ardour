@@ -2479,6 +2479,54 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 	return ret_frame;
 }
 
+void
+TempoMap::round_bbt (BBT_Time& when, const int32_t& sub_num)
+{
+	if (sub_num == -1) {
+		const double bpb = meter_at (bbt_to_beats_locked (_metrics, when)).note_divisor();
+		if ((double) when.beats > bpb / 2.0) {
+			++when.bars;
+		}
+		when.beats = 1;
+		when.ticks = 0;
+		return;
+	} else if (sub_num == 0) {
+		if (when.ticks > BBT_Time::ticks_per_beat / 2) {
+			++when.beats;
+			when.ticks = 0;
+		} else {
+			when.ticks = 0;
+		}
+		return;
+	}
+	const uint32_t ticks_one_subdivisions_worth = BBT_Time::ticks_per_beat / sub_num;
+	double rem;
+	if ((rem = fmod ((double) when.ticks, (double) ticks_one_subdivisions_worth)) > (ticks_one_subdivisions_worth / 2.0)) {
+		/* closer to the next subdivision, so shift forward */
+
+		when.ticks = when.ticks + (ticks_one_subdivisions_worth - rem);
+
+		if (when.ticks > Timecode::BBT_Time::ticks_per_beat) {
+			++when.beats;
+			when.ticks -= Timecode::BBT_Time::ticks_per_beat;
+		}
+
+	} else if (rem > 0) {
+		/* closer to previous subdivision, so shift backward */
+
+		if (rem > when.ticks) {
+			if (when.beats == 0) {
+				/* can't go backwards past zero, so ... */
+			}
+			/* step back to previous beat */
+			--when.beats;
+			when.ticks = Timecode::BBT_Time::ticks_per_beat - rem;
+		} else {
+			when.ticks = when.ticks - rem;
+		}
+	}
+}
+
 framepos_t
 TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 {
