@@ -520,7 +520,7 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 		try {
 			lua_dsp_configure (&in, &out);
 		} catch (luabridge::LuaException const& e) {
-			;
+			return false;
 		}
 	}
 
