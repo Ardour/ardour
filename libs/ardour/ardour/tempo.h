@@ -106,9 +106,9 @@ class LIBARDOUR_API Meter {
 class LIBARDOUR_API MetricSection {
   public:
 	MetricSection (double pulse)
-		: _pulse (pulse), _frame (0), _movable (true), _position_lock_style (PositionLockStyle::MusicTime) {}
+		: _pulse (pulse), _frame (0), _movable (true), _position_lock_style (MusicTime) {}
 	MetricSection (framepos_t frame)
-		: _pulse (0.0), _frame (frame), _movable (true), _position_lock_style (PositionLockStyle::AudioTime) {}
+		: _pulse (0.0), _frame (frame), _movable (true), _position_lock_style (AudioTime) {}
 
 	virtual ~MetricSection() {}
 
