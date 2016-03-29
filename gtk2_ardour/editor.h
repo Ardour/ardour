@@ -1586,9 +1586,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void queue_visual_videotimeline_update ();
 	void embed_audio_from_video (std::string, framepos_t n = 0, bool lock_position_to_video = true);
 
-	PBD::Signal0<void> EditorFreeze;
-	PBD::Signal0<void> EditorThaw;
-
   private:
 	friend class DragManager;
 	friend class EditorRouteGroups;
