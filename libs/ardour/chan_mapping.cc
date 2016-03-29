@@ -41,8 +41,13 @@ ChanMapping::ChanMapping(ChanCount identity)
 }
 
 ChanMapping::ChanMapping (const ChanMapping& other )
-	: _mappings (other._mappings)
 {
+	const ChanMapping::Mappings& mp (other.mappings());
+	for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+		for (TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+			set (tm->first, i->first, i->second);
+		}
+	}
 }
 
 uint32_t
@@ -66,7 +71,7 @@ void
 ChanMapping::set(DataType t, uint32_t from, uint32_t to)
 {
 	assert(t != DataType::NIL);
-	Mappings::iterator tm = _mappings.find(t);
+	Mappings::iterator tm = _mappings.find (t);
 	if (tm == _mappings.end()) {
 		tm = _mappings.insert(std::make_pair(t, TypeMapping())).first;
 	}
@@ -77,7 +82,7 @@ void
 ChanMapping::unset(DataType t, uint32_t from)
 {
 	assert(t != DataType::NIL);
-	Mappings::iterator tm = _mappings.find(t);
+	Mappings::iterator tm = _mappings.find (t);
 	if (tm == _mappings.end()) {
 		return;
 	}
@@ -89,10 +94,10 @@ void
 ChanMapping::offset_from(DataType t, int32_t delta)
 {
 	Mappings::iterator tm = _mappings.find(t);
-	if (tm != _mappings.end()) {
+	if (tm != _mappings.end ()) {
 		TypeMapping new_map;
 		for (TypeMapping::iterator m = tm->second.begin(); m != tm->second.end(); ++m) {
-			new_map.insert(make_pair(m->first + delta, m->second));
+			new_map.insert (make_pair (m->first + delta, m->second));
 		}
 		tm->second = new_map;
 	}
@@ -113,8 +118,9 @@ ChanMapping::offset_to(DataType t, int32_t delta)
 bool
 ChanMapping::is_subset (const ChanMapping& superset) const
 {
-	for (ARDOUR::ChanMapping::Mappings::const_iterator tm = mappings().begin(); tm != mappings().end(); ++tm) {
-		for (ARDOUR::ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+	const Mappings& mp (mappings());
+	for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+		for (TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
 			bool valid;
 			if (i->second != superset.get (tm->first, i->first, &valid)) {
 				return false;
@@ -130,9 +136,10 @@ ChanMapping::is_subset (const ChanMapping& superset) const
 bool
 ChanMapping::is_monotonic () const
 {
-	for (ARDOUR::ChanMapping::Mappings::const_iterator tm = mappings().begin(); tm != mappings().end(); ++tm) {
+	const Mappings& mp (mappings());
+	for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
 		uint32_t prev = UINT32_MAX;
-		for (ARDOUR::ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+		for (TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
 			// set keys are strictly weak ordered
 			if (i->first < i->second || i->second == prev) {
 				return false;
@@ -146,8 +153,9 @@ ChanMapping::is_monotonic () const
 bool
 ChanMapping::is_identity (ChanCount offset) const
 {
-	for (ARDOUR::ChanMapping::Mappings::const_iterator tm = mappings().begin(); tm != mappings().end(); ++tm) {
-		for (ARDOUR::ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+	const Mappings& mp (mappings());
+	for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+		for (TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
 			if (i->first + offset.get (tm->first) != i->second) {
 				return false;
 			}
@@ -160,8 +168,8 @@ ChanMapping::is_identity (ChanCount offset) const
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanMapping& cm)
 {
-	for (ARDOUR::ChanMapping::Mappings::const_iterator tm = cm.mappings().begin();
-			tm != cm.mappings().end(); ++tm) {
+	const ARDOUR::ChanMapping::Mappings& mp (cm.mappings());
+	for (ARDOUR::ChanMapping::Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
 		o << tm->first.to_string() << endl;
 		for (ARDOUR::ChanMapping::TypeMapping::const_iterator i = tm->second.begin();
 				i != tm->second.end(); ++i) {
@@ -171,4 +179,3 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanMapping& cm)
 
 	return o;
 }
-
