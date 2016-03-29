@@ -290,7 +290,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2(route_recenable,i,i);
 	PATH_CALLBACK2(route_set_gain_abs,i,f);
 	PATH_CALLBACK2(route_set_gain_dB,i,f);
-	PATH_CALLBACK2(route_set_gain_VCA,i,f);
+	PATH_CALLBACK2(route_set_gain_fader,i,f);
 	PATH_CALLBACK2(route_set_trim_abs,i,f);
 	PATH_CALLBACK2(route_set_trim_dB,i,f);
 	PATH_CALLBACK2(route_set_pan_stereo_position,i,f);
@@ -305,7 +305,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_recenable (int rid, int yn);
 	int route_set_gain_abs (int rid, float level);
 	int route_set_gain_dB (int rid, float dB);
-	int route_set_gain_VCA (int rid, float pos);
+	int route_set_gain_fader (int rid, float pos);
 	int route_set_trim_abs (int rid, float level);
 	int route_set_trim_dB (int rid, float dB);
 	int route_set_pan_stereo_position (int rid, float left_right_fraction);
