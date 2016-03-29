@@ -2581,8 +2581,8 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 		TempoSection const tempo = tempo_section_at_locked (pos);
 		MeterSection const meter = meter_section_at_locked (pos);
 		BBT_Time const bbt = beats_to_bbt (cnt);
-
-		points.push_back (BBTPoint (meter, tempo_at_locked (pos), pos, bbt.bars, bbt.beats, tempo.get_c_func()));
+		BBTPoint point = BBTPoint (meter, tempo_at_locked (pos), pos, bbt.bars, bbt.beats, tempo.get_c_func());
+		points.push_back (point);
 		++cnt;
 	}
 }
