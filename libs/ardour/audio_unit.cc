@@ -1043,7 +1043,7 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 	if (initialized) {
 		//if we are already running with the requested i/o config, bail out here
 		if ( (audio_in==input_channels) && (audio_out==output_channels) ) {
-			return 0;
+			return true;
 		} else {
 			deactivate ();
 		}
@@ -1071,13 +1071,13 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 	streamFormat.mChannelsPerFrame = audio_in;
 
 	if (set_input_format (streamFormat) != 0) {
-		return -1;
+		return false;
 	}
 
 	streamFormat.mChannelsPerFrame = audio_out;
 
 	if (set_output_format (streamFormat) != 0) {
-		return -1;
+		return false;
 	}
 
 	/* reset plugin info to show currently configured state */
@@ -1089,7 +1089,7 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 		activate ();
 	}
 
-	return 0;
+	return true;
 }
 
 ChanCount
