@@ -1988,6 +1988,11 @@ TempoMap::check_solved (Metrics& metrics, bool by_frame)
 				if ((by_frame && t->frame() < prev_ts->frame()) || (!by_frame && t->pulse() < prev_ts->pulse())) {
 					return false;
 				}
+
+				if (t->frame() == prev_ts->frame()) {
+					return false;
+				}
+
 				/* precision check ensures pulses and frames align independent of lock style.*/
 				if (by_frame && t->frame() != prev_ts->frame_at_pulse (t->pulse(), _frame_rate)) {
 					return false;
