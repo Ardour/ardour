@@ -46,14 +46,14 @@ ChanMapping::ChanMapping (const ChanMapping& other )
 }
 
 uint32_t
-ChanMapping::get(DataType t, uint32_t from, bool* valid)
+ChanMapping::get(DataType t, uint32_t from, bool* valid) const
 {
-	Mappings::iterator tm = _mappings.find(t);
+	Mappings::const_iterator tm = _mappings.find(t);
 	if (tm == _mappings.end()) {
 		if (valid) { *valid = false; }
 		return -1;
 	}
-	TypeMapping::iterator m = tm->second.find(from);
+	TypeMapping::const_iterator m = tm->second.find(from);
 	if (m == tm->second.end()) {
 		if (valid) { *valid = false; }
 		return -1;
@@ -71,6 +71,17 @@ ChanMapping::set(DataType t, uint32_t from, uint32_t to)
 		tm = _mappings.insert(std::make_pair(t, TypeMapping())).first;
 	}
 	tm->second.insert(std::make_pair(from, to));
+}
+
+void
+ChanMapping::unset(DataType t, uint32_t from)
+{
+	assert(t != DataType::NIL);
+	Mappings::iterator tm = _mappings.find(t);
+	if (tm == _mappings.end()) {
+		return;
+	}
+	tm->second.erase(from);
 }
 
 /** Offset the 'from' field of every mapping for type @a t by @a delta */
@@ -97,6 +108,52 @@ ChanMapping::offset_to(DataType t, int32_t delta)
 			m->second += delta;
 		}
 	}
+}
+
+bool
+ChanMapping::is_subset (const ChanMapping& superset) const
+{
+	for (ARDOUR::ChanMapping::Mappings::const_iterator tm = mappings().begin(); tm != mappings().end(); ++tm) {
+		for (ARDOUR::ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+			bool valid;
+			if (i->second != superset.get (tm->first, i->first, &valid)) {
+				return false;
+			}
+			if (!valid) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool
+ChanMapping::is_monotonic () const
+{
+	for (ARDOUR::ChanMapping::Mappings::const_iterator tm = mappings().begin(); tm != mappings().end(); ++tm) {
+		uint32_t prev = UINT32_MAX;
+		for (ARDOUR::ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+			// set keys are strictly weak ordered
+			if (i->first < i->second || i->second == prev) {
+				return false;
+			}
+			prev = i->second;
+		}
+	}
+	return true;
+}
+
+bool
+ChanMapping::is_identity (ChanCount offset) const
+{
+	for (ARDOUR::ChanMapping::Mappings::const_iterator tm = mappings().begin(); tm != mappings().end(); ++tm) {
+		for (ARDOUR::ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+			if (i->first + offset.get (tm->first) != i->second) {
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 } // namespace ARDOUR

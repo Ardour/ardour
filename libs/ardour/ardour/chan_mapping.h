@@ -42,14 +42,14 @@ public:
 	ChanMapping(ARDOUR::ChanCount identity);
 	ChanMapping(const ChanMapping&);
 
-	uint32_t get(DataType t, uint32_t from, bool* valid);
+	uint32_t get(DataType t, uint32_t from, bool* valid) const;
 
 	/** get buffer mapping for given data type and pin
 	 * @param type data type
 	 * @param from pin
 	 * @returns mapped buffer number (or ChanMapping::Invalid)
 	 */
-	uint32_t get(DataType t, uint32_t from) { return get (t, from, NULL); }
+	uint32_t get(DataType t, uint32_t from) const { return get (t, from, NULL); }
 	/** set buffer mapping for given data type
 	 * @param type data type
 	 * @param from pin
@@ -58,6 +58,30 @@ public:
 	void     set(DataType t, uint32_t from, uint32_t to);
 	void     offset_from(DataType t, int32_t delta);
 	void     offset_to(DataType t, int32_t delta);
+
+	/** remove mapping
+	 * @param type data type
+	 * @param from source to remove from mapping
+	 */
+	void     unset(DataType t, uint32_t from);
+
+	/** Test mapping matrix for identity
+	 * @param offset per data-type offset to take into account
+	 * @returns true if the mapping is a channel identity map
+	 */
+	bool     is_identity (ARDOUR::ChanCount offset = ARDOUR::ChanCount()) const;
+
+	/** Test if this mapping is monotonic (useful to see if inplace processing is feasible)
+	 * @returns true if the map is a strict monotonic set
+	 */
+	bool     is_monotonic () const;
+
+
+	/** Test if this mapping is a subset
+	 * @param superset to test against
+	 * @returns true if all mapping are also present in the superset
+	 */
+	bool     is_subset (const ChanMapping& superset) const;
 
 	typedef std::map<uint32_t, uint32_t>    TypeMapping;
 	typedef std::map<DataType, TypeMapping> Mappings;
