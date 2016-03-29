@@ -240,8 +240,6 @@ class LIBARDOUR_API PluginInsert : public Processor
 	BufferSet _signal_analysis_inputs;
 	BufferSet _signal_analysis_outputs;
 
-	ChanCount midi_bypass;
-
 	ChanCount _configured_in;
 	ChanCount _configured_out;
 	ChanCount _custom_out;
@@ -266,7 +264,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 		bool custom_cfg;       ///< custom config (if not strict)
 	};
 
-	Match private_can_support_io_configuration (ChanCount const &, ChanCount &);
+	Match private_can_support_io_configuration (ChanCount const &, ChanCount &) const;
+	Match automatic_can_support_io_configuration (ChanCount const &, ChanCount &) const;
 
 	/** details of the match currently being used */
 	Match _match;
