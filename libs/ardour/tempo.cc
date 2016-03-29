@@ -577,8 +577,11 @@ MeterSection::get_state() const
   They will be re-activated if the first meter is again placed before them.
 
   Both tempos and meters have a pulse position and a frame position.
+  Meters also have a beat position, which is 0.0 for the first meter.
+  A tempo locked to music is locked to pulses.
+  A meter locked to music is locked to beats.
   Recomputing the tempo map is the process where the 'missing' position
-  (pulse in the case of AudioTime and frame for MusicTime) is calculated
+  (tempo pulse or meter pulse & beat in the case of AudioTime and frame for MusicTime) is calculated
   based on the lock preference (position_lock_style).
 
   It is important to keep the _metrics in an order that makes sense.
