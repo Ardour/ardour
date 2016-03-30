@@ -3329,9 +3329,10 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		if (!_editor->snap_musical()) {
 			pf = adjusted_current_frame (event);
 		} else {
-			pf = adjusted_current_frame (event, false);
 			bool use_snap;
+			TempoMap& map (_editor->session()->tempo_map());
 
+			pf = adjusted_current_frame (event, false);
 			if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::snap_modifier ())) {
 				if (_editor->snap_mode() == Editing::SnapOff) {
 					use_snap = true;
@@ -3347,27 +3348,27 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 			}
 
 			Timecode::BBT_Time when;
-			_editor->session()->tempo_map().bbt_time (pf, when);
+			map.bbt_time (pf, when);
 
 			if (_real_section->position_lock_style() == MusicTime) {
 
-				const double pulse = _editor->session()->tempo_map().predict_tempo_pulse (_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type()), pf);
-				when = _editor->session()->tempo_map().pulse_to_bbt (pulse);
+				const double pulse = map.predict_tempo_pulse (_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type()), pf);
+				when = map.pulse_to_bbt (pulse);
 				if (use_snap && _editor->snap_type() == SnapToBar) {
-					_editor->session()->tempo_map().round_bbt (when, -1);
+					map.round_bbt (when, -1);
 				} else if (use_snap) {
-					_editor->session()->tempo_map().round_bbt (when, _editor->get_grid_beat_divisions (0));
+					map.round_bbt (when, _editor->get_grid_beat_divisions (0));
 				}
-				const double beat = _editor->session()->tempo_map().bbt_to_beats (when);
-				_editor->session()->tempo_map().gui_move_tempo_beat (_real_section, tp, beat);
+				const double beat = map.bbt_to_beats (when);
+				map.gui_move_tempo_beat (_real_section, tp, beat);
 			} else {
 				if (use_snap && _editor->snap_type() == SnapToBar) {
-					_editor->session()->tempo_map().round_bbt (when, -1);
+					map.round_bbt (when, -1);
 				} else if (use_snap) {
-					_editor->session()->tempo_map().round_bbt (when, _editor->get_grid_beat_divisions (0));
+					map.round_bbt (when, _editor->get_grid_beat_divisions (0));
 				}
-				pf = _editor->session()->tempo_map().predict_tempo_frame (_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type()), when);
-				_editor->session()->tempo_map().gui_move_tempo_frame (_real_section, tp, pf);
+				pf = map.predict_tempo_frame (_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type()), when);
+				map.gui_move_tempo_frame (_real_section, tp, pf);
 			}
 		}
 
