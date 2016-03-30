@@ -567,8 +567,9 @@ MeterSection::get_state() const
 /*
   Tempo Map Overview
 
-  Tempos can be thought of as a source of the musical pulse.
-
+  Tempo can be thought of as a source of the musical pulse.
+  Meters divide that pulse into measures and beats.
+  Tempo pulses be divided so they can be sympathetic to the meter.
   Note that Tempo::beats_per_minute() has nothing to do with musical beats.
   It should rather be thought of as tempo note divisions per minute.
 
@@ -2015,6 +2016,7 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt,
 				  we're going to set it 'incorrectly' to the next integer and use this difference
 				  to find the meter's pulse.
 				  (meters should fall on integral beats to keep us sane)
+				  XXX do it to the bar, you fool, not the beat!  - and don't forget to recompute_meters that way too.
 				*/
 				double pulse = 0.0;
 				pair<double, BBT_Time> b_bbt;
