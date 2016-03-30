@@ -3204,9 +3204,9 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		XMLNode &before = map.get_state();
 
 		if (_real_section->position_lock_style() == AudioTime) {
-			map.add_meter (Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->frame());
+			map.add_meter (Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->frame(), _real_section->beat(), _real_section->bbt());
 		} else {
-			map.add_meter (Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->pulse(), _real_section->bbt());
+			map.add_meter (Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->beat(), _real_section->bbt());
 		}
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command(new MementoCommand<TempoMap>(map, &before, &after));

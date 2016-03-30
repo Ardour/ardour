@@ -144,8 +144,8 @@ class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
   public:
 	MeterSection (double pulse, double beat, const Timecode::BBT_Time& bbt, double bpb, double note_type)
 		: MetricSection (pulse), Meter (bpb, note_type), _bbt (bbt),  _beat (beat) {}
-	MeterSection (framepos_t frame, double beat, double bpb, double note_type)
-		: MetricSection (frame), Meter (bpb, note_type), _bbt (1, 1, 0), _beat (beat) {}
+	MeterSection (framepos_t frame, double beat, const Timecode::BBT_Time& bbt, double bpb, double note_type)
+		: MetricSection (frame), Meter (bpb, note_type), _bbt (bbt), _beat (beat) {}
 	MeterSection (const XMLNode&);
 
 	static const std::string xml_state_node_name;
@@ -304,7 +304,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	struct BBTPoint {
 		framepos_t          frame;
 		const MeterSection* meter;
-		const Tempo tempo;
+		Tempo               tempo;
 		double              c;
 		uint32_t            bar;
 		uint32_t            beat;
@@ -377,7 +377,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void add_tempo (const Tempo&, const framepos_t& frame, TempoSection::Type type);
 
 	void add_meter (const Meter&, const double& beat, const Timecode::BBT_Time& where);
-	void add_meter (const Meter&, const framepos_t& frame);
+	void add_meter (const Meter&, const framepos_t& frame, const double& beat, const Timecode::BBT_Time& where);
 
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
@@ -462,6 +462,7 @@ private:
 	const Tempo tempo_at_locked (const framepos_t& frame) const;
 
 	bool check_solved (Metrics& metrics, bool by_frame);
+	bool set_active_tempos (const Metrics& metrics, const framepos_t& frame);
 	bool solve_map (Metrics& metrics, TempoSection* section, const Tempo& bpm, const framepos_t& frame);
 	bool solve_map (Metrics& metrics, TempoSection* section, const Tempo& bpm, const double& pulse);
 	void solve_map (Metrics& metrics, MeterSection* section, const Meter& mt, const framepos_t& frame);
@@ -495,7 +496,7 @@ private:
 	void add_tempo_locked (const Tempo&, framepos_t frame, bool recompute, TempoSection::Type type);
 
 	void add_meter_locked (const Meter&, double beat, Timecode::BBT_Time where, bool recompute);
-	void add_meter_locked (const Meter&, framepos_t frame, bool recompute);
+	void add_meter_locked (const Meter&, framepos_t frame, double beat, Timecode::BBT_Time where, bool recompute);
 
 	bool remove_tempo_locked (const TempoSection&);
 	bool remove_meter_locked (const MeterSection&);
