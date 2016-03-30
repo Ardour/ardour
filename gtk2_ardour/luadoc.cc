@@ -13,6 +13,7 @@
 
 int main (int argc, char **argv)
 {
+#ifdef LUABINDINGDOC
 	luabridge::setPrintBindings (true);
 	LuaState lua;
 	lua_State* L = lua.getState ();
@@ -31,4 +32,7 @@ int main (int argc, char **argv)
 	printf ("{} ]\n");
 #endif
 	return 0;
+#else
+	return 1;
+#endif
 }

@@ -38,6 +38,10 @@ namespace ARDOUR {
 
 class PublicEditor;
 
+/** Location Marker
+ *
+ * Editor ruler representation of a location marker or range on the timeline.
+ */
 class ArdourMarker : public sigc::trackable
 {
   public:
