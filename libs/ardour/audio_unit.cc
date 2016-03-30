@@ -1465,7 +1465,7 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 		ioData->mBuffers[i].mDataByteSize = sizeof (Sample) * inNumberFrames;
 
 		bool valid = false;
-		uint32_t idx = in_map->get (DataType::AUDIO, i, &valid);
+		uint32_t idx = input_map->get (DataType::AUDIO, i, &valid);
 		if (valid) {
 			ioData->mBuffers[i].mData = input_buffers->get_audio (idx).data (cb_offset + input_offset);
 		} else {
@@ -1530,7 +1530,7 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 			bool valid = false;
 			uint32_t idx = out_map.get (DataType::AUDIO, i, &valid);
 			if (valid) {
-				buffers->mBuffers[i].mData = bufs.et_audio (idx).data (offset);
+				buffers->mBuffers[i].mData = bufs.get_audio (idx).data (offset);
 			} else {
 				buffers->mBuffers[i].mData = scratch_bufs.get_audio(0).data(offset);
 			}
@@ -1581,7 +1581,7 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 			int32_t limit = min ((int32_t) buffers->mNumberBuffers, output_channels);
 			int32_t i;
 
-			for (i = 0; i < limit && inplace; ++i) {
+			for (i = 0; i < limit; ++i) {
 				// we know in_map == out_map
 				bool valid = false;
 				uint32_t idx = out_map.get (DataType::AUDIO, i, &valid);
