@@ -909,6 +909,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 
 	/* get plugin configuration */
 	_match = private_can_support_io_configuration (in, out);
+#ifndef NDEBUG // XXX
+	cout << "Match '" << name() << "': " << _match;
+#endif
 
 	/* set the matching method and number of plugins that we will use to meet this configuration */
 	if (set_count (_match.plugins) == false) {
@@ -1020,7 +1023,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 
 	if (mapping_changed) {
 		PluginMapChanged (); /* EMIT SIGNAL */
-#ifndef NDEBUG
+#ifndef NDEBUG // XXX
 		uint32_t pc = 0;
 		cout << "----<<----\n";
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
@@ -1992,4 +1995,25 @@ PluginInsert::end_touch (uint32_t param_id)
         if (ac) {
                 ac->stop_touch (true, session().audible_frame());
         }
+}
+
+std::ostream& operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m)
+{
+	switch (m.method) {
+		case PluginInsert::Impossible: o << "Impossible"; break;
+		case PluginInsert::Delegate:   o << "Delegate"; break;
+		case PluginInsert::NoInputs:   o << "NoInputs"; break;
+		case PluginInsert::ExactMatch: o << "ExactMatch"; break;
+		case PluginInsert::Replicate:  o << "Replicate"; break;
+		case PluginInsert::Split:      o << "Split"; break;
+		case PluginInsert::Hide:       o << "Hide"; break;
+	}
+	o << " cnt: " << m.plugins
+		<< (m.strict_io ? " strict-io" : "")
+		<< (m.custom_cfg ? " custom-cfg" : "");
+	if (m.method == PluginInsert::Hide) {
+		o << " hide: " << m.hide;
+	}
+	o << "\n";
+	return o;
 }

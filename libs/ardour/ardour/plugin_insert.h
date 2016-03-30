@@ -219,6 +219,20 @@ class LIBARDOUR_API PluginInsert : public Processor
 		Hide,        ///< we `hide' some of the plugin's inputs by feeding them silence
 	};
 
+	/** Description of how we can match our plugin's IO to our own insert IO */
+	struct Match {
+		Match () : method (Impossible), plugins (0), strict_io (false), custom_cfg (false) {}
+		Match (MatchingMethod m, int32_t p,
+				bool strict = false, bool custom = false, ChanCount h = ChanCount ())
+			: method (m), plugins (p), hide (h), strict_io (strict), custom_cfg (custom) {}
+
+		MatchingMethod method; ///< method to employ
+		int32_t plugins;       ///< number of copies of the plugin that we need
+		ChanCount hide;        ///< number of channels to hide
+		bool strict_io;        ///< force in == out
+		bool custom_cfg;       ///< custom config (if not strict)
+	};
+
   private:
 	/* disallow copy construction */
 	PluginInsert (const PluginInsert&);
@@ -250,20 +264,6 @@ class LIBARDOUR_API PluginInsert : public Processor
 	bool _custom_cfg;
 	bool _pending_no_inplace;
 
-	/** Description of how we can match our plugin's IO to our own insert IO */
-	struct Match {
-		Match () : method (Impossible), plugins (0), strict_io (false), custom_cfg (false) {}
-		Match (MatchingMethod m, int32_t p,
-				bool strict = false, bool custom = false, ChanCount h = ChanCount ())
-			: method (m), plugins (p), hide (h), strict_io (strict), custom_cfg (custom) {}
-
-		MatchingMethod method; ///< method to employ
-		int32_t plugins;       ///< number of copies of the plugin that we need
-		ChanCount hide;        ///< number of channels to hide
-		bool strict_io;        ///< force in == out
-		bool custom_cfg;       ///< custom config (if not strict)
-	};
-
 	Match private_can_support_io_configuration (ChanCount const &, ChanCount &) const;
 	Match automatic_can_support_io_configuration (ChanCount const &, ChanCount &) const;
 
@@ -290,5 +290,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 };
 
 } // namespace ARDOUR
+
+std::ostream& operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m);
 
 #endif /* __ardour_plugin_insert_h__ */
