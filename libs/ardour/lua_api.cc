@@ -45,9 +45,9 @@ ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 
 	LuaScriptInfoPtr spi;
 	ARDOUR::LuaScriptList & _scripts (LuaScripting::instance ().scripts (LuaScriptInfo::DSP));
-	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
-		if (name == (*s)->name) {
-			spi = *s;
+	for (LuaScriptList::const_iterator i = _scripts.begin(); i != _scripts.end(); ++i) {
+		if (name == (*i)->name) {
+			spi = *i;
 			break;
 		}
 	}
