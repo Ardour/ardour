@@ -569,7 +569,8 @@ MeterSection::get_state() const
 
   Tempo can be thought of as a source of the musical pulse.
   Meters divide that pulse into measures and beats.
-  Tempo pulses be divided so they can be sympathetic to the meter.
+  Tempo pulses can be divided to be in sympathy with the meter, but this does not affect the beat
+  at any particular time.
   Note that Tempo::beats_per_minute() has nothing to do with musical beats.
   It should rather be thought of as tempo note divisions per minute.
 
