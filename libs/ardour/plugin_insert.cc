@@ -491,7 +491,20 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		}
 
 	}
+#ifdef MIXBUS
+	if (_plugins.front()->is_channelstrip() ) {
+		if (_configured_in.n_audio() > 0) {
+			ChanMapping mb_in_map (min (_configured_in, ChanCount (DataType::AUDIO, 2)));
+			ChanMapping mb_out_map (min (_configured_out, ChanCount (DataType::AUDIO, 2)));
 
+			_plugins.front()->connect_and_run (bufs, mb_in_map, mb_out_map, nframes, offset);
+
+			for (uint32_t out = _configured_in.n_audio; out < bufs.count().get (DataType::AUDIO); ++out) {
+				bufs.get (DataType::AUDIO, out).silence (nframes, offset);
+			}
+		}
+	} else
+#endif
 	if (_no_inplace) {
 		BufferSet& inplace_bufs  = _session.get_noinplace_buffers();
 		ARDOUR::ChanMapping used_outputs;
