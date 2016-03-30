@@ -567,26 +567,36 @@ MeterSection::get_state() const
 /*
   Tempo Map Overview
 
-  We have tempos, which are nice to think of in whole pulses per minute,
-  and meters which divide tempo pulses into bars (via divisions_per_bar)
-  and beats (via note_divisor).
-  Tempos and meters may be locked to audio or music.
-  Because the notion of a beat cannot be determined without both tempo and meter, the first tempo
-  and first meter are special. they must move together, and must be locked to audio.
+  Tempos can be thought of as a source of the musical pulse.
+
+  Note that Tempo::beats_per_minute() has nothing to do with musical beats.
+  It should rather be thought of as tempo note divisions per minute.
+
+  TempoSections, which are nice to think of in whole pulses per minute,
+  and MeterSecions which divide tempo pulses into measures (via divisions_per_bar)
+  and beats (via note_divisor) are used to form a tempo map.
+  TempoSections and MeterSections may be locked to either audio or music (position lock style).
+  We construct the tempo map by first using the frame or pulse position (depending on position lock style) of each tempo.
+  We then use this pulse/frame layout to find the beat & pulse or frame position of each meter (again depending on lock style).
+
+  Having done this, we can now find any one of tempo, beat, frame or pulse if a beat, frame, pulse or tempo is known.
+
+  The first tempo and first meter are special. they must move together, and must be locked to audio.
   Audio locked tempos which lie before the first meter are made inactive.
   They will be re-activated if the first meter is again placed before them.
 
   Both tempos and meters have a pulse position and a frame position.
-  Meters also have a beat position, which is 0.0 for the first meter.
-  A tempo locked to music is locked to pulses.
+  Meters also have a beat position, which is always 0.0 for the first meter.
+
+  A tempo locked to music is locked to musical pulses.
   A meter locked to music is locked to beats.
+
   Recomputing the tempo map is the process where the 'missing' position
-  (tempo pulse or meter pulse & beat in the case of AudioTime and frame for MusicTime) is calculated
-  based on the lock preference (position_lock_style).
+  (tempo pulse or meter pulse & beat in the case of AudioTime, frame for MusicTime) is calculated.
 
   It is important to keep the _metrics in an order that makes sense.
-  Because ramped MusicTime and AudioTime tempos can interact with each other
-  and cause reordering, care must be taken to keep _metrics in a solved state.
+  Because ramped MusicTime and AudioTime tempos can interact with each other,
+  reordering is frequent. Care must be taken to keep _metrics in a solved state.
   Solved means ordered by frame or pulse with frame-accurate precision (see check_solved()).
 */
 struct MetricSectionSorter {
@@ -1452,24 +1462,29 @@ TempoMap::recompute_meters (Metrics& metrics)
 {
 	MeterSection* meter = 0;
 	MeterSection* prev_m = 0;
+	uint32_t accumulated_bars = 0;
 
 	for (Metrics::const_iterator mi = metrics.begin(); mi != metrics.end(); ++mi) {
 		if ((meter = dynamic_cast<MeterSection*> (*mi)) != 0) {
+			if (prev_m) {
+				const double beats_in_m = (meter->pulse() - prev_m->pulse()) * prev_m->note_divisor();
+				accumulated_bars += (beats_in_m + 1) / prev_m->divisions_per_bar();
+			}
 			if (meter->position_lock_style() == AudioTime) {
 				double pulse = 0.0;
+				pair<double, BBT_Time> b_bbt;
 				if (prev_m) {
 					double beats = ((pulse_at_frame_locked (metrics, meter->frame()) - prev_m->pulse()) * prev_m->note_divisor()) - prev_m->beat();
-
+					b_bbt = make_pair (ceil (beats), BBT_Time (accumulated_bars + 1, 1, 0));
 					const double true_pulse = prev_m->pulse() + (ceil (beats) - prev_m->beat()) / prev_m->note_divisor();
 					const double pulse_off = true_pulse - ((beats - prev_m->beat()) / prev_m->note_divisor());
 					pulse = true_pulse - pulse_off;
 				}
-				meter->set_pulse (pulse);
-
 				if (!meter->movable()) {
-					pair<double, BBT_Time> bt = make_pair (0.0, BBT_Time (1, 1, 0));
-					meter->set_beat (bt);
+					b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
 				}
+				meter->set_beat (b_bbt);
+				meter->set_pulse (pulse);
 			} else {
 				double pulse = 0.0;
 				if (prev_m) {
@@ -2246,7 +2261,6 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt,
 		}
 	}
 
-	double accumulated_beats = 0.0;
 	uint32_t accumulated_bars = 0;
 
 	section->set_frame (frame);
@@ -2256,30 +2270,28 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt,
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
 			if (prev_ms) {
 				const double beats_in_m = (m->pulse() - prev_ms->pulse()) * prev_ms->note_divisor();
-				accumulated_beats += beats_in_m;
 				accumulated_bars += (beats_in_m + 1) / prev_ms->divisions_per_bar();
 			}
 			if (m == section){
 				/*
-				  here we define the pulse for this frame.
-				  we're going to set it 'incorrectly' to the next integer and use this 'error'
-				  as an offset to the map as far as users of the public methods are concerned.
-				  (meters should go on absolute pulses to keep us sane)
+				  here we set the beat for this frame.
+				  we're going to set it 'incorrectly' to the next integer and use this difference
+				  to find the meter's pulse later.
+				  (meters should fall on absolute beats to keep us sane)
 				*/
+				double pulse = 0.0;
 				pair<double, BBT_Time> b_bbt;
 				if (m->movable()) {
 					double beats = ((pulse_at_frame_locked (imaginary, frame) - prev_ms->pulse()) * prev_ms->note_divisor()) - prev_ms->beat();
 					b_bbt = make_pair (ceil (beats), BBT_Time (accumulated_bars + 1, 1, 0));
-					m->set_beat (b_bbt);
 					const double true_pulse = prev_ms->pulse() + ((ceil (beats) - prev_ms->beat()) / prev_ms->note_divisor());
 					const double pulse_off = true_pulse - ((beats - prev_ms->beat()) / prev_ms->note_divisor());
-					m->set_pulse (true_pulse - pulse_off);
+					pulse = true_pulse - pulse_off;
 				} else {
 					b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
-					m->set_pulse (0.0);
-					m->set_beat (b_bbt);
 				}
-				//m->set_beat (b_bbt);
+				m->set_beat (b_bbt);
+				m->set_pulse (pulse);
 				prev_ms = m;
 				continue;
 			}
