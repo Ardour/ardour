@@ -1346,8 +1346,8 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 	if (!found && imprecise) {
 		/* try harder */
 		for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
-			int possible_in = io["audio_in"];
-			int possible_out = io["audio_out"];
+			int32_t possible_in = i->first;
+			int32_t possible_out = i->second;
 
 			assert (possible_in > 0); // all other cases will have been matched above
 			assert (possible_out !=0 || possible_in !=0); // already handled above
