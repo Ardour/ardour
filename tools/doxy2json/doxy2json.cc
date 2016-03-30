@@ -28,12 +28,13 @@
 #include <clang-c/Documentation.h>
 
 struct dox2js {
-	dox2js () : clang_argc (2), clang_argv (0), excl_argc (0), excl_argv (0)
+	dox2js () : clang_argc (3), clang_argv (0), excl_argc (0), excl_argv (0)
 	{
 		excl_argv = (char**) calloc (1, sizeof (char*));
 		clang_argv = (char**) malloc (clang_argc * sizeof (char*));
 		clang_argv[0] = strdup ("-x");
 		clang_argv[1] = strdup ("c++");
+		clang_argv[2] = strdup ("-std=c++11");
 	}
 
 	~dox2js () {
@@ -48,8 +49,7 @@ struct dox2js {
 	}
 
 	void add_clang_arg (const char *a) {
-		clang_argv = (char**) realloc (clang_argv, (clang_argc + 2) * sizeof (char*));
-		clang_argv[clang_argc++] = strdup ("-I");
+		clang_argv = (char**) realloc (clang_argv, (clang_argc + 1) * sizeof (char*));
 		clang_argv[clang_argc++] = strdup (a);
 	}
 
@@ -178,9 +178,12 @@ traverse (CXCursor cr, CXCursor /*parent*/, CXClientData d)
 }
 
 static void
-process_file (const char* fn, struct dox2js *dj)
+process_file (const char* fn, struct dox2js *dj, bool check)
 {
-	CXIndex index = clang_createIndex (0, 0);
+	if (check) {
+		fprintf (stderr, "--- %s ---\n", fn);
+	}
+	CXIndex index = clang_createIndex (0, check ? 1 : 0);
 	CXTranslationUnit tu = clang_createTranslationUnitFromSourceFile (index, fn, dj->clang_argc, dj->clang_argv, 0, 0);
 
 	if (tu == NULL) {
@@ -207,14 +210,23 @@ int main (int argc, char** argv)
 	struct dox2js dj;
 
 	bool report_progress = false;
+	bool check_compile = false;
   int c;
-	while (EOF != (c = getopt (argc, argv, "I:X:"))) {
+	while (EOF != (c = getopt (argc, argv, "D:I:TX:"))) {
 		switch (c) {
 			case 'I':
+				dj.add_clang_arg ("-I");
+				dj.add_clang_arg (optarg);
+				break;
+			case 'D':
+				dj.add_clang_arg ("-D");
 				dj.add_clang_arg (optarg);
 				break;
 			case 'X':
 				dj.add_exclude (optarg);
+				break;
+			case 'T':
+				check_compile = true;
 				break;
 			case 'h':
 				usage (0);
@@ -229,12 +241,12 @@ int main (int argc, char** argv)
 	}
 
 	const int total = (argc - optind);
-	if (total > 6) {
+	if (total > 6 && !check_compile) {
 		report_progress = true;
 	}
 
 	for (int i = optind; i < argc; ++i) {
-		process_file (argv[i], &dj);
+		process_file (argv[i], &dj, check_compile);
 		if (report_progress) {
 			fprintf (stderr, "progress: %4.1f%%  [%4d / %4d] decl: %ld         \r",
 					100.f * (1.f + i - optind) / (float)total, i - optind, total,
@@ -243,11 +255,13 @@ int main (int argc, char** argv)
 		}
 	}
 
-	printf ("[\n");
-	for (std::map <std::string, std::string>::const_iterator i = dj.results.begin (); i != dj.results.end (); ++i) {
-		printf ("%s\n", (*i).second.c_str ());
+	if (!check_compile) {
+		printf ("[\n");
+		for (std::map <std::string, std::string>::const_iterator i = dj.results.begin (); i != dj.results.end (); ++i) {
+			printf ("%s\n", (*i).second.c_str ());
+		}
+		printf ("{} ]\n");
 	}
-	printf ("{} ]\n");
 
   return 0;
 }
