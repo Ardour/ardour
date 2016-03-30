@@ -436,6 +436,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, input_maxbuf (0)
 	, input_offset (0)
 	, input_buffers (0)
+	, input_map (0)
 	, frames_processed (0)
 	, audio_input_cnt (0)
 	, _parameter_listener (0)
@@ -468,6 +469,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, input_maxbuf (0)
 	, input_offset (0)
 	, input_buffers (0)
+	, input_map (0)
 	, frames_processed (0)
 	, _parameter_listener (0)
 	, _parameter_listener_arg (0)
@@ -1455,16 +1457,20 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 	}
 	uint32_t limit = min ((uint32_t) ioData->mNumberBuffers, input_maxbuf);
 
+	ChanCount bufs_count (DataType::AUDIO, 1);
+	BufferSet& silent_bufs = _session.get_silent_buffers(bufs_count);
+
 	for (uint32_t i = 0; i < limit; ++i) {
 		ioData->mBuffers[i].mNumberChannels = 1;
 		ioData->mBuffers[i].mDataByteSize = sizeof (Sample) * inNumberFrames;
 
-		/* we don't use the channel mapping because audiounits are
-		 * never replicated. one plugin instance uses all channels/buffers
-		 * passed to PluginInsert::connect_and_run()
-		 */
-
-		ioData->mBuffers[i].mData = input_buffers->get_audio (i).data (cb_offset + input_offset);
+		bool valid = false;
+		uint32_t idx = in_map->get (DataType::AUDIO, i, &valid);
+		if (valid) {
+			ioData->mBuffers[i].mData = input_buffers->get_audio (idx).data (cb_offset + input_offset);
+		} else {
+			ioData->mBuffers[i].mData = silent_bufs.get_audio(0).data (cb_offset + input_offset);
+		}
 	}
 
 	cb_offset += inNumberFrames;
@@ -1497,11 +1503,16 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 	assert (bufs.available() >= ChanCount (DataType::AUDIO, output_channels));
 
 	input_buffers = &bufs;
+	input_map = &in_map;
 	input_maxbuf = bufs.count().n_audio(); // number of input audio buffers
 	input_offset = offset;
 	cb_offset = 0;
 
 	buffers->mNumberBuffers = output_channels;
+	bool inplace = in_map == out_map;
+
+	ChanCount bufs_count (DataType::AUDIO, 1);
+	BufferSet& scratch_bufs = _session.get_scratch_buffers(bufs_count);
 
 	for (int32_t i = 0; i < output_channels; ++i) {
 		buffers->mBuffers[i].mNumberChannels = 1;
@@ -1513,7 +1524,17 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		 * a non-null values tells the plugin to render into the buffer pointed
 		 * at by the value.
 		 */
-		buffers->mBuffers[i].mData = 0;
+		if (inplace) {
+			buffers->mBuffers[i].mData = 0;
+		} else {
+			bool valid = false;
+			uint32_t idx = out_map.get (DataType::AUDIO, i, &valid);
+			if (valid) {
+				buffers->mBuffers[i].mData = bufs.et_audio (idx).data (offset);
+			} else {
+				buffers->mBuffers[i].mData = scratch_bufs.get_audio(0).data(offset);
+			}
+		}
 	}
 
 	if (_has_midi_input) {
@@ -1524,57 +1545,64 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 
 			/* one MIDI port/buffer only */
 
-			MidiBuffer& m = bufs.get_midi (i);
+				MidiBuffer& m = bufs.get_midi (i);
 
-			for (MidiBuffer::iterator i = m.begin(); i != m.end(); ++i) {
-				Evoral::MIDIEvent<framepos_t> ev (*i);
+				for (MidiBuffer::iterator i = m.begin(); i != m.end(); ++i) {
+					Evoral::MIDIEvent<framepos_t> ev (*i);
 
-				if (ev.is_channel_event()) {
-					const uint8_t* b = ev.buffer();
-					DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: MIDI event %2\n", name(), ev));
-					unit->MIDIEvent (b[0], b[1], b[2], ev.time());
+					if (ev.is_channel_event()) {
+						const uint8_t* b = ev.buffer();
+						DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: MIDI event %2\n", name(), ev));
+						unit->MIDIEvent (b[0], b[1], b[2], ev.time());
+					}
+
+					/* XXX need to handle sysex and other message types */
 				}
-
-				/* XXX need to handle sysex and other message types */
 			}
 		}
-	}
 
-	/* does this really mean anything ?
-	*/
+		/* does this really mean anything ?
+		*/
 
-	ts.mSampleTime = frames_processed;
-	ts.mFlags = kAudioTimeStampSampleTimeValid;
+		ts.mSampleTime = frames_processed;
+		ts.mFlags = kAudioTimeStampSampleTimeValid;
 
-	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 render flags=%2 time=%3 nframes=%4 buffers=%5\n",
-				name(), flags, frames_processed, nframes, buffers->mNumberBuffers));
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 render flags=%2 time=%3 nframes=%4 buffers=%5\n",
+					name(), flags, frames_processed, nframes, buffers->mNumberBuffers));
 
-	if ((err = unit->Render (&flags, &ts, 0, nframes, buffers)) == noErr) {
+		if ((err = unit->Render (&flags, &ts, 0, nframes, buffers)) == noErr) {
 
-		input_maxbuf = 0;
-		frames_processed += nframes;
+			input_maxbuf = 0;
+			frames_processed += nframes;
 
-		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 rendered %2 buffers of %3\n",
-					name(), buffers->mNumberBuffers, output_channels));
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 rendered %2 buffers of %3\n",
+						name(), buffers->mNumberBuffers, output_channels));
 
-		int32_t limit = min ((int32_t) buffers->mNumberBuffers, output_channels);
-		int32_t i;
+			int32_t limit = min ((int32_t) buffers->mNumberBuffers, output_channels);
+			int32_t i;
 
-		for (i = 0; i < limit; ++i) {
-			Sample* expected_buffer_address= bufs.get_audio (i).data (offset);
-			if (expected_buffer_address != buffers->mBuffers[i].mData) {
-				/* plugin provided its own buffer for output so copy it back to where we want it
-				*/
-				memcpy (expected_buffer_address, buffers->mBuffers[i].mData, nframes * sizeof (Sample));
+			for (i = 0; i < limit && inplace; ++i) {
+				// we know in_map == out_map
+				bool valid = false;
+				uint32_t idx = out_map.get (DataType::AUDIO, i, &valid);
+				if (!valid) continue;
+				Sample* expected_buffer_address = bufs.get_audio (idx).data (offset);
+				if (expected_buffer_address != buffers->mBuffers[i].mData) {
+					/* plugin provided its own buffer for output so copy it back to where we want it
+					*/
+					memcpy (expected_buffer_address, buffers->mBuffers[i].mData, nframes * sizeof (Sample));
+				}
 			}
-		}
 
 		/* now silence any buffers that were passed in but the that the plugin
 		 * did not fill/touch/use.
 		 */
 
 		for (;i < output_channels; ++i) {
-			memset (bufs.get_audio (i).data (offset), 0, nframes * sizeof (Sample));
+			bool valid = false;
+			uint32_t idx = out_map.get (DataType::AUDIO, i, &valid);
+			if (!valid) continue;
+			memset (bufs.get_audio (idx).data (offset), 0, nframes * sizeof (Sample));
 		}
 
 		return 0;

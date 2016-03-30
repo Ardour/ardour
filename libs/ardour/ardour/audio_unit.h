@@ -202,6 +202,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	framecnt_t input_offset;
 	framecnt_t cb_offset;
 	BufferSet* input_buffers;
+	ChanMapping * input_map;
 	framecnt_t frames_processed;
 	uint32_t   audio_input_cnt;
 
