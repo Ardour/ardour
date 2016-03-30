@@ -69,7 +69,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	int set_block_size (pframes_t nframes);
 
-	ChanMapping input_map (uint32_t num=0) const {
+	ChanMapping input_map (uint32_t num) const {
 		if (num < _in_map.size()) {
 			return _in_map.find (num)->second;
 		} else {
@@ -77,12 +77,28 @@ class LIBARDOUR_API PluginInsert : public Processor
 		}
 	}
 
-	ChanMapping output_map (uint32_t num=0) const {
+	ChanMapping output_map (uint32_t num) const {
 		if (num < _out_map.size()) {
 			return _out_map.find (num)->second;
 		} else {
 			return ChanMapping ();
 		}
+	}
+
+	ChanMapping input_map () const {
+		ChanMapping rv;
+		for (PinMappings::const_iterator i = _in_map.begin (); i != _in_map.end (); ++i) {
+			rv += i->second;
+		}
+		return rv;
+	}
+
+	ChanMapping output_map () const {
+		ChanMapping rv;
+		for (PinMappings::const_iterator i = _out_map.begin (); i != _out_map.end (); ++i) {
+			rv += i->second;
+		}
+		return rv;
 	}
 
 	void set_input_map (uint32_t, ChanMapping);

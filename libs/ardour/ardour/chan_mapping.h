@@ -97,6 +97,20 @@ public:
 		return ! (*this == other);
 	}
 
+	ChanMapping operator+=(const ChanMapping& other) {
+		const ChanMapping::Mappings& mp (other.mappings());
+		for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+			for (TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+#if 0
+				bool valid; uint32_t x = get (tm->first, i->first, &valid);
+				assert (!valid || x == i->second);
+#endif
+				set (tm->first, i->first, i->second);
+			}
+		}
+		return *this;
+	}
+
 private:
 	Mappings _mappings;
 };
