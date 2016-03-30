@@ -2277,7 +2277,7 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt,
 				  here we set the beat for this frame.
 				  we're going to set it 'incorrectly' to the next integer and use this difference
 				  to find the meter's pulse later.
-				  (meters should fall on absolute beats to keep us sane)
+				  (meters should fall on integral beats to keep us sane)
 				*/
 				double pulse = 0.0;
 				pair<double, BBT_Time> b_bbt;
