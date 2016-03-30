@@ -418,7 +418,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 	// Currently this never triggers because the in_map for "Split" triggeres no_inplace.
 	if (_match.method == Split && !_no_inplace) {
 		assert (in_map.size () == 1);
-		in_map[0] = ChanMapping (max (natural_input_streams (), _configured_in));
+		in_map[0] = ChanMapping (ChanCount::max (natural_input_streams (), _configured_in));
 		ChanCount const in_streams = internal_input_streams ();
 		/* copy the first stream's audio buffer contents to the others */
 		bool valid;
@@ -494,8 +494,8 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 #ifdef MIXBUS
 	if (_plugins.front()->is_channelstrip() ) {
 		if (_configured_in.n_audio() > 0) {
-			ChanMapping mb_in_map (min (_configured_in, ChanCount (DataType::AUDIO, 2)));
-			ChanMapping mb_out_map (min (_configured_out, ChanCount (DataType::AUDIO, 2)));
+			ChanMapping mb_in_map (ChanCount::min (_configured_in, ChanCount (DataType::AUDIO, 2)));
+			ChanMapping mb_out_map (ChanCount::min (_configured_out, ChanCount (DataType::AUDIO, 2)));
 
 			_plugins.front()->connect_and_run (bufs, mb_in_map, mb_out_map, nframes, offset);
 
@@ -1009,9 +1009,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 					}
 				}
 			} else {
-				_in_map[pc] = ChanMapping (min (natural_input_streams (), in));
+				_in_map[pc] = ChanMapping (ChanCount::min (natural_input_streams (), in));
 			}
-			_out_map[pc] = ChanMapping (min (natural_output_streams(), out));
+			_out_map[pc] = ChanMapping (ChanCount::min (natural_output_streams(), out));
 
 			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 				_in_map[pc].offset_to(*t, pc * natural_input_streams().get(*t));
@@ -1106,7 +1106,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 			// output = midi-bypass + at most master-out channels.
 			ChanCount max_out (DataType::AUDIO, 2); // TODO use master-out
 			max_out.set (DataType::MIDI, out.get(DataType::MIDI));
-			out = min (out, max_out);
+			out = ChanCount::min (out, max_out);
 			return m;
 		}
 
