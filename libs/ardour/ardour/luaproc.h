@@ -93,7 +93,7 @@ public:
 	bool load_preset (PresetRecord) { return false; }
 	bool has_editor() const { return false; }
 
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out, ChanCount* imprecise);
 	bool configure_io (ChanCount in, ChanCount out);
 
 	ChanCount output_streams() const { return _configured_out; }

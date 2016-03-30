@@ -915,18 +915,22 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		}
 		break;
 	case Delegate:
-		if (_match.strict_io) {
+		{
 			ChanCount dout;
-			bool const r = _plugins.front()->can_support_io_configuration (in, dout);
+			ChanCount useins;
+			bool const r = _plugins.front()->can_support_io_configuration (in, dout, &useins);
 			assert (r);
-			if (_plugins.front()->configure_io (in, dout) == false) {
+			assert (_match.strict_io || dout.n_audio() == out.n_audio()); // sans midi bypass
+			if (useins.n_audio() == 0) {
+				useins = in;
+			}
+			if (_plugins.front()->configure_io (useins, dout) == false) {
 				PluginIoReConfigure (); /* EMIT SIGNAL */
 				_configured = false;
 				return false;
 			}
-			break;
 		}
-		// no break --  fall through
+		break;
 	default:
 		if (_plugins.front()->configure_io (in, out) == false) {
 			PluginIoReConfigure (); /* EMIT SIGNAL */
@@ -1003,7 +1007,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 
 	if (mapping_changed) {
 		PluginMapChanged (); /* EMIT SIGNAL */
-#if 1
+#ifndef NDEBUG
 		uint32_t pc = 0;
 		cout << "----<<----\n";
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
@@ -1126,10 +1130,13 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	}
 
 	if (info->reconfigurable_io()) {
-		// houston, we have a problem.
-		// TODO: match closest closes available config.
-		// also handle  strict_io
-		return Match (Impossible, 0);
+		ChanCount useins;
+		bool const r = _plugins.front()->can_support_io_configuration (inx, out, &useins);
+		if (!r) {
+			// houston, we have a problem.
+			return Match (Impossible, 0);
+		}
+		return Match (Delegate, 1);
 	}
 
 	// add at least as many plugins so that output count matches input count
@@ -1175,7 +1182,6 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 		if (!r) {
 			return Match (Impossible, 0);
 		}
-
 		return Match (Delegate, 1);
 	}
 

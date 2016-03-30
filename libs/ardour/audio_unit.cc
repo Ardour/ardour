@@ -1129,21 +1129,18 @@ AUPlugin::output_streams() const
 }
 
 bool
-AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
+AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, ChanCount* imprecise)
 {
 	// Note: We never attempt to multiply-instantiate plugins to meet io configurations.
 
-	int32_t audio_in = in.n_audio();
+	const int32_t audio_in = in.n_audio();
 	int32_t audio_out;
-	bool found = false;
 	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
 
 	/* lets check MIDI first */
 
-	if (in.n_midi() > 0) {
-		if (!_has_midi_input) {
-			return false;
-		}
+	if (in.n_midi() > 0 && !_has_midi_input && !imprecise) {
+		return false;
 	}
 
 	vector<pair<int,int> >& io_configs = pinfo->cache.io_configs;
@@ -1201,13 +1198,13 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 			out.set (DataType::MIDI, 0);
 			out.set (DataType::AUDIO, audio_out);
 
-			return 1;
+			return true;
 		}
 	}
 
 	/* now allow potentially "imprecise" matches */
-
 	audio_out = -1;
+	bool found = false;
 
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 
@@ -1223,26 +1220,17 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 		}
 
 		if (possible_in == 0) {
-
-			/* instrument plugin, always legal but throws away inputs ...
-			*/
-
+			/* no inputs, generators & instruments */
 			if (possible_out == -1) {
 				/* any configuration possible, provide stereo output */
 				audio_out = 2;
 				found = true;
 			} else if (possible_out == -2) {
-				/* plugins shouldn't really use (0,-2) but might.
-				   any configuration possible, provide stereo output
-				*/
+				/* invalid, should be (0, -1) */
 				audio_out = 2;
 				found = true;
 			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs.
-				 *
-				 * We really need to ask the user in this case.
-				 * stereo will be correct in 99.9% of all cases.
-				 */
+				/* explicitly variable number of outputs. */
 				audio_out = 2;
 				found = true;
 			} else {
@@ -1253,11 +1241,9 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 		}
 
 		if (possible_in == -1) {
-
 			/* wildcard for input */
-
 			if (possible_out == -1) {
-				/* out much match in */
+				/* out must match in */
 				audio_out = audio_in;
 				found = true;
 			} else if (possible_out == -2) {
@@ -1276,15 +1262,12 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 		}
 
 		if (possible_in == -2) {
-
 			if (possible_out == -1) {
 				/* any configuration possible, pick matching */
 				audio_out = audio_in;
 				found = true;
 			} else if (possible_out == -2) {
-				/* plugins shouldn't really use (-2,-2) but might.
-				   interpret as (-1,-1).
-				*/
+				/* invalid. interpret as (-1, -1) */
 				audio_out = audio_in;
 				found = true;
 			} else if (possible_out < -2) {
@@ -1299,30 +1282,24 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 		}
 
 		if (possible_in < -2) {
-
 			/* explicit variable number of inputs */
-
-			if (audio_in > -possible_in) {
-				/* request is too large */
+			if (audio_in > -possible_in && imprecise != NULL) {
+				// hide inputs ports
+				imprecise->set (DataType::AUDIO, -possible_in);
 			}
 
-
-			if (possible_out == -1) {
+			if (audio_in > -possible_in && imprecise == NULL) {
+				/* request is too large */
+			} else if (possible_out == -1) {
 				/* any output configuration possible, provide stereo out */
 				audio_out = 2;
 				found = true;
 			} else if (possible_out == -2) {
-				/* plugins shouldn't really use (<-2,-2) but might.
-				   interpret as (<-2,-1): any configuration possible, provide stereo output
-				*/
+				/* invalid. interpret as (<-2, -1) */
 				audio_out = 2;
 				found = true;
 			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs.
-				 *
-				 * We really need to ask the user in this case.
-				 * stereo will be correct in 99.9% of all cases.
-				 */
+				/* explicitly variable number of outputs, pick stereo */
 				audio_out = 2;
 				found = true;
 			} else {
@@ -1333,9 +1310,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 		}
 
 		if (possible_in && (possible_in == audio_in)) {
-
 			/* exact number of inputs ... must match obviously */
-
 			if (possible_out == -1) {
 				/* any output configuration possible, provide stereo output */
 				audio_out = 2;
@@ -1367,6 +1342,38 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 			break;
 		}
 
+	}
+	if (!found && imprecise) {
+		/* try harder */
+		for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
+			int possible_in = io["audio_in"];
+			int possible_out = io["audio_out"];
+
+			assert (possible_in > 0); // all other cases will have been matched above
+			assert (possible_out !=0 || possible_in !=0); // already handled above
+
+			imprecise->set (DataType::AUDIO, possible_in);
+			if (possible_out == -1 || possible_out == -2) {
+				audio_out = 2;
+				found = true;
+			} else if (possible_out < -2) {
+				/* explicitly variable number of outputs, pick maximum */
+				audio_out = -possible_out;
+				found = true;
+			} else {
+				/* exact number of outputs */
+				audio_out = possible_out;
+				found = true;
+			}
+
+			if (found) {
+				// ideally we'll keep iterating and take the "best match"
+				// whatever "best" means:
+				// least unconnected inputs, least silenced inputs,
+				// closest match of inputs == outputs
+				break;
+			}
+		}
 	}
 
 	if (found) {

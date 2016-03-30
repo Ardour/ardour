@@ -305,9 +305,11 @@ LuaProc::load_script ()
 }
 
 bool
-LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out)
+LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, ChanCount* imprecise)
 {
-	if (in.n_midi() > 0 && !_has_midi_input) {
+	// caller must hold process lock (no concurrent calls to interpreter
+
+	if (in.n_midi() > 0 && !_has_midi_input && !imprecise) {
 		return false;
 	}
 
@@ -344,14 +346,16 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 		return false;
 	}
 
-	int32_t audio_in = in.n_audio ();
+	const int32_t audio_in = in.n_audio ();
 	int32_t audio_out;
+	int32_t midi_out = 0; // TODO handle  _has_midi_output
 
 	if (in.n_midi() > 0 && audio_in == 0) {
 		audio_out = 2; // prefer stereo version if available.
 	} else {
 		audio_out = audio_in;
 	}
+
 
 	for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
 		assert (i.value ().type () == LUA_TTABLE);
@@ -406,7 +410,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 		if (possible_in == -1) {
 			/* wildcard for input */
 			if (possible_out == -1) {
-				/* out much match in */
+				/* out must match in */
 				audio_out = audio_in;
 				found = true;
 			} else if (possible_out == -2) {
@@ -447,10 +451,14 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 
 		if (possible_in < -2) {
 			/* explicit variable number of inputs */
-			if (audio_in > -possible_in) {
-				/* request is too large */
+			if (audio_in > -possible_in && imprecise != NULL) {
+				// hide inputs ports
+				imprecise->set (DataType::AUDIO, -possible_in);
 			}
-			if (possible_out == -1) {
+
+			if (audio_in > -possible_in && imprecise == NULL) {
+				/* request is too large */
+			} else if (possible_out == -1) {
 				/* any output configuration possible, provide stereo out */
 				audio_out = 2;
 				found = true;
@@ -495,11 +503,48 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 		}
 	}
 
+	if (!found && imprecise) {
+		/* try harder */
+		for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
+			assert (i.value ().type () == LUA_TTABLE);
+			luabridge::LuaRef io (i.value ());
+
+			int possible_in = io["audio_in"];
+			int possible_out = io["audio_out"];
+
+			assert (possible_in > 0); // all other cases will have been matched above
+			assert (possible_out !=0 || possible_in !=0); // already handled above
+
+			imprecise->set (DataType::AUDIO, possible_in);
+			if (possible_out == -1 || possible_out == -2) {
+				audio_out = 2;
+				found = true;
+			} else if (possible_out < -2) {
+				/* explicitly variable number of outputs, pick maximum */
+				audio_out = -possible_out;
+				found = true;
+			} else {
+				/* exact number of outputs */
+				audio_out = possible_out;
+				found = true;
+			}
+
+			if (found) {
+				// ideally we'll keep iterating and take the "best match"
+				// whatever "best" means:
+				// least unconnected inputs, least silenced inputs,
+				// closest match of inputs == outputs
+				break;
+			}
+		}
+	}
+
+
 	if (!found) {
 		return false;
 	}
 
-	out.set (DataType::MIDI, 0);
+	out.set (DataType::MIDI, midi_out); // currently always zero
 	out.set (DataType::AUDIO, audio_out);
 	return true;
 }
