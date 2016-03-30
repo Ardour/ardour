@@ -212,6 +212,9 @@ class LIBARDOUR_API TempoMetric {
 	Timecode::BBT_Time _start;
 };
 
+/** Tempo Map - mapping of timecode to musical time.
+ * convert audio-samples, sample-rate to Bar/Beat/Tick, Meter/Tempo
+ */
 class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 {
   public:

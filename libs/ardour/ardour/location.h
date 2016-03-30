@@ -41,6 +41,7 @@ namespace ARDOUR {
 
 class SceneChange;
 
+/** Location on Timeline - abstract representation for Markers, Loop/Punch Ranges, CD-Markers etc. */
 class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDestructible
 {
   public:

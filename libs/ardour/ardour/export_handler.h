@@ -72,6 +72,7 @@ class LIBARDOUR_API ExportElementFactory
 	Session & session;
 };
 
+/** Export Handler */
 class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::trackable
 {
   public:

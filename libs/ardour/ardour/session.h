@@ -161,6 +161,7 @@ private:
 	std::string _message;
 };
 
+/** Ardour Session */
 class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
 {
   public:
