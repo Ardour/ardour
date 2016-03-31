@@ -1475,9 +1475,8 @@ TempoMap::bbt_to_beats_locked (const Metrics& metrics, const Timecode::BBT_Time&
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
-			double bars_to_m = 0.0;
 			if (prev_ms) {
-				bars_to_m = (m->beat() - prev_ms->beat()) / prev_ms->divisions_per_bar();
+				const double bars_to_m = (m->beat() - prev_ms->beat()) / prev_ms->divisions_per_bar();
 				if ((bars_to_m + accumulated_bars) > (bbt.bars - 1)) {
 					break;
 				}
@@ -1518,12 +1517,11 @@ TempoMap::beats_to_bbt_locked (const Metrics& metrics, const double& b) const
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
 
 			if (prev_ms) {
-				double const beats_to_m = m->beat() - prev_ms->beat();
-				if (accumulated_beats + beats_to_m > beats) {
+				if (m->beat() > beats) {
 					/* this is the meter after the one our beat is on*/
 					break;
 				}
-
+				const double beats_to_m = m->beat() - prev_ms->beat();
 				/* we need a whole number of bars. */
 				accumulated_bars += (beats_to_m + 1) / prev_ms->divisions_per_bar();
 				accumulated_beats += beats_to_m;
@@ -1733,7 +1731,7 @@ TempoMap::frame_time_locked (const Metrics& metrics, const BBT_Time& bbt) const
 {
 	/* HOLD THE READER LOCK */
 
-	framepos_t const ret = frame_at_pulse_locked (metrics, pulse_at_beat_locked (metrics, bbt_to_beats_locked (metrics, bbt)));
+	framepos_t const ret = frame_at_beat_locked (metrics, bbt_to_beats_locked (metrics, bbt));
 
 	return ret;
 }
