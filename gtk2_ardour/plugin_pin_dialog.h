@@ -20,7 +20,6 @@
 #define __gtkardour_plugin_pin_dialog_h__
 
 #include <gtkmm/drawingarea.h>
-#include <gtkmm/box.h>
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -28,6 +27,7 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/route.h"
 
+#include "ardour_button.h"
 #include "ardour_window.h"
 
 class PluginPinDialog : public ArdourWindow
@@ -38,21 +38,34 @@ public:
 
 private:
 	Gtk::DrawingArea darea;
-	bool darea_expose_event (GdkEventExpose* event);
+	ArdourButton _strict_io;
+	ArdourButton _automatic;
+	ArdourButton _add_plugin;
+	ArdourButton _del_plugin;
+	ArdourButton _add_output_audio;
+	ArdourButton _del_output_audio;
+	ArdourButton _add_output_midi;
+	ArdourButton _del_output_midi;
 
+	bool darea_expose_event (GdkEventExpose* event);
 	void plugin_reconfigured ();
 
+	double pin_x_pos (uint32_t, double, double, uint32_t, uint32_t, bool);
 	void draw_io_pins (cairo_t*, double, double, uint32_t, uint32_t, bool);
 	void draw_plugin_pins (cairo_t*, double, double, double, uint32_t, uint32_t, bool);
 	void draw_connection (cairo_t*, double, double, double, double, bool, bool dashed = false);
 	bool is_valid_port (uint32_t, uint32_t, uint32_t, bool);
 	void set_color (cairo_t*, bool);
 
-	double pin_x_pos (uint32_t, double, double, uint32_t, uint32_t, bool);
+	void automatic_clicked ();
+	void add_remove_plugin_clicked (bool);
+	void add_remove_port_clicked (bool, ARDOUR::DataType);
 
 	PBD::ScopedConnectionList _plugin_connections;
 	boost::shared_ptr<ARDOUR::PluginInsert> _pi;
 	double _pin_box_size;
+
+	ARDOUR::Route* _route () { return static_cast<ARDOUR::Route*> (_pi->owner ()); }
 };
 
 #endif

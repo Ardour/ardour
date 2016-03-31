@@ -17,6 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <gtkmm/table.h>
+#include <gtkmm/box.h>
+#include <gtkmm/label.h>
+
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
@@ -34,6 +38,14 @@ using namespace Gtkmm2ext;
 
 PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
+	, _strict_io (_("Strict I/O"))
+	, _automatic (_("Automatic"))
+	, _add_plugin (_("+"))
+	, _del_plugin (_("-"))
+	, _add_output_audio (_("+"))
+	, _del_output_audio (_("-"))
+	, _add_output_midi (_("+"))
+	, _del_output_midi (_("-"))
 	, _pi (pi)
 	, _pin_box_size (4)
 {
@@ -47,24 +59,85 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context()
 			);
 
+	_pi->PluginConfigChanged.connect (
+			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context()
+			);
+
 	darea.signal_expose_event().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_expose_event));
 
 	// TODO min. width depending on # of pins.
 	darea.set_size_request(600, 200);
+	_strict_io.set_sensitive (false);
+
+	Label *l;
+	int r = 0;
+	Table *t = manage (new Table (4, 3));
+	t->set_border_width (0);
+	t->set_spacings (4);
+
+	l = manage (new Label (_("Track/Bus:"), ALIGN_END));
+	t->attach (*l, 0, 1, r, r + 1);
+	l = manage (new Label ());
+	l->set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
+	l->set_width_chars (24);
+	l->set_max_width_chars (24);
+	l->set_text (_route()->name ());
+	t->attach (*l, 1, 3, r, r + 1);
+	++r;
+
+	l = manage (new Label (_("Plugin:"), ALIGN_END));
+	t->attach (*l, 0, 1, r, r + 1);
+	l = manage (new Label ());
+	l->set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
+	l->set_width_chars (24);
+	l->set_max_width_chars (24);
+	l->set_text (pi->name ());
+	t->attach (*l, 1, 3, r, r + 1);
+	++r;
+
+	l = manage (new Label (_("Settings:"), ALIGN_END));
+	t->attach (*l, 0, 1, r, r + 1);
+	t->attach (_strict_io, 1, 2, r, r + 1, FILL, SHRINK);
+	t->attach (_automatic, 2, 3, r, r + 1, FILL, SHRINK);
+	++r;
+
+	l = manage (new Label (_("Instances:"), ALIGN_END));
+	t->attach (*l, 0, 1, r, r + 1);
+	t->attach (_add_plugin, 1, 2, r, r + 1, SHRINK, SHRINK);
+	t->attach (_del_plugin, 2, 3, r, r + 1, SHRINK, SHRINK);
+	++r;
+
+	l = manage (new Label (_("Audio Out:"), ALIGN_END));
+	t->attach (*l, 0, 1, r, r + 1);
+	t->attach (_add_output_audio, 1, 2, r, r + 1, SHRINK, SHRINK);
+	t->attach (_del_output_audio, 2, 3, r, r + 1, SHRINK, SHRINK);
+	++r;
+
+	l = manage (new Label (_("Midi Out:"), ALIGN_END));
+	t->attach (*l, 0, 1, r, r + 1);
+	t->attach (_add_output_midi, 1, 2, r, r + 1, SHRINK, SHRINK);
+	t->attach (_del_output_midi, 2, 3, r, r + 1, SHRINK, SHRINK);
+	++r;
 
 	HBox* hbox = manage (new HBox);
 	hbox->pack_start (darea, true, true);
-
-	// TODO add info/settings table
-	// * show  _pi->strict_io() -- inherited from route
-	// * show  _pi->custom_cfg()
-	// Add/Remove instances
-	// Add/Remove output ports
-	// Reset Button  custom-config to "Automatic"
+	hbox->pack_start (*t, false, true);
 
 	VBox* vbox = manage (new VBox);
 	vbox->pack_start (*hbox, true, true);
 	add (*vbox);
+	vbox->show_all();
+
+	plugin_reconfigured ();
+
+	 _automatic.signal_clicked.connect (sigc::mem_fun(*this, &PluginPinDialog::automatic_clicked));
+	 _add_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_plugin_clicked), true));
+	 _del_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_plugin_clicked), false));
+
+	 _add_output_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_port_clicked), true, DataType::AUDIO));
+	 _del_output_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_port_clicked), false, DataType::AUDIO));
+	 _add_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_port_clicked), true, DataType::MIDI));
+	 _del_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_port_clicked), false, DataType::MIDI));
 }
 
 PluginPinDialog::~PluginPinDialog()
@@ -74,6 +147,15 @@ PluginPinDialog::~PluginPinDialog()
 void
 PluginPinDialog::plugin_reconfigured ()
 {
+	uint32_t plugins = _pi->get_count ();
+	ChanCount in, out;
+	_pi->configured_io (in, out);
+
+	_del_plugin.set_sensitive (plugins > 1);
+	_del_output_audio.set_sensitive (out.n_audio () > 0 && out.n_total () > 1);
+	_del_output_midi.set_sensitive (out.n_midi () > 0 && out.n_total () > 1);
+	_strict_io.set_active (_pi->strict_io());
+
 	darea.queue_draw ();
 }
 
@@ -270,4 +352,31 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 
 	cairo_destroy (cr);
 	return true;
+}
+
+void
+PluginPinDialog::automatic_clicked ()
+{
+	_route()->reset_plugin_insert (_pi);
+}
+
+void
+PluginPinDialog::add_remove_plugin_clicked (bool add)
+{
+	uint32_t plugins = _pi->get_count ();
+	ChanCount in, out;
+	_pi->configured_io (in, out);
+	assert (add || plugins > 0);
+	_route()->customize_plugin_insert (_pi, plugins + (add ? 1 : -1),  out);
+}
+
+void
+PluginPinDialog::add_remove_port_clicked (bool add, ARDOUR::DataType dt)
+{
+	uint32_t plugins = _pi->get_count ();
+	ChanCount in, out;
+	_pi->configured_io (in, out);
+	assert (add || out.get (dt) > 0);
+	out.set (dt, out.get (dt) + (add ? 1 : -1));
+	_route()->customize_plugin_insert (_pi, plugins,  out);
 }
