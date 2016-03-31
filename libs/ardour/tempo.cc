@@ -1251,28 +1251,18 @@ TempoMap::recompute_meters (Metrics& metrics)
 {
 	MeterSection* meter = 0;
 	MeterSection* prev_m = 0;
-	uint32_t accumulated_bars = 0;
 
 	for (Metrics::const_iterator mi = metrics.begin(); mi != metrics.end(); ++mi) {
 		if ((meter = dynamic_cast<MeterSection*> (*mi)) != 0) {
-			if (prev_m) {
-				double beats_in_m;
-				if (meter->position_lock_style() == MusicTime) {
-					beats_in_m = meter->beat() - prev_m->beat();
-				} else {
-					beats_in_m = ((pulse_at_frame_locked (metrics, meter->frame()) - prev_m->pulse()) * prev_m->note_divisor()) - prev_m->beat();
-				}
-				accumulated_bars += (beats_in_m + 1) / prev_m->divisions_per_bar();
-			}
 			if (meter->position_lock_style() == AudioTime) {
 				double pulse = 0.0;
 				pair<double, BBT_Time> b_bbt;
 				if (meter->movable()) {
 					const double beats = ((pulse_at_frame_locked (metrics, meter->frame()) - prev_m->pulse()) * prev_m->note_divisor()) - prev_m->beat();
 					const double ceil_beats = beats - fmod (beats, prev_m->divisions_per_bar());
+					b_bbt = make_pair (ceil_beats, BBT_Time ((ceil_beats / prev_m->divisions_per_bar()) + prev_m->bbt().bars, 1, 0));
 					const double true_pulse = prev_m->pulse() + (ceil_beats - prev_m->beat()) / prev_m->note_divisor();
 					const double pulse_off = true_pulse - ((beats - prev_m->beat()) / prev_m->note_divisor());
-					b_bbt = make_pair (ceil_beats, BBT_Time (accumulated_bars + 1, 1, 0));
 					pulse = true_pulse - pulse_off;
 				} else {
 					b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
@@ -2000,22 +1990,11 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt,
 		}
 	}
 
-	uint32_t accumulated_bars = 0;
-
 	section->set_frame (frame);
 
 	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
 		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
-			if (prev_ms) {
-				double beats_in_m;
-				if (m->position_lock_style() == MusicTime) {
-					beats_in_m = m->beat() - prev_ms->beat();
-				} else {
-					beats_in_m = ((pulse_at_frame_locked (imaginary, frame) - prev_ms->pulse()) * prev_ms->note_divisor()) - prev_ms->beat();
-				}
-				accumulated_bars += (beats_in_m + 1) / prev_ms->divisions_per_bar();
-			}
 			if (m == section){
 				/*
 				  here we set the beat for this frame.
@@ -2027,7 +2006,7 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt,
 				if (m->movable()) {
 					const double beats = ((pulse_at_frame_locked (imaginary, frame) - prev_ms->pulse()) * prev_ms->note_divisor()) - prev_ms->beat();
 					const double ceil_beats = beats - fmod (beats,  prev_ms->divisions_per_bar());
-					b_bbt = make_pair (ceil_beats, BBT_Time (accumulated_bars + 1, 1, 0));
+					b_bbt = make_pair (ceil_beats, BBT_Time ((ceil_beats / prev_ms->divisions_per_bar()) + prev_ms->bbt().bars, 1, 0));
 					const double true_pulse = prev_ms->pulse() + ((ceil_beats - prev_ms->beat()) / prev_ms->note_divisor());
 					const double pulse_off = true_pulse - ((beats - prev_ms->beat()) / prev_ms->note_divisor());
 					pulse = true_pulse - pulse_off;
@@ -2050,9 +2029,9 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt,
 					if (m->movable()) {
 						const double beats = ((pulse_at_frame_locked (imaginary, m->frame()) - prev_ms->pulse()) * prev_ms->note_divisor()) - prev_ms->beat();
 						const double ceil_beats = beats - fmod (beats , prev_ms->divisions_per_bar());
+						b_bbt = make_pair (ceil_beats, BBT_Time ((ceil_beats / prev_ms->divisions_per_bar()) + prev_ms->bbt().bars, 1, 0));
 						const double true_pulse = prev_ms->pulse() + (ceil_beats - prev_ms->beat()) / prev_ms->note_divisor();
 						const double pulse_off = true_pulse - ((beats - prev_ms->beat()) / prev_ms->note_divisor());
-						b_bbt = make_pair (ceil_beats, BBT_Time (accumulated_bars + 1, 1, 0));
 						pulse = true_pulse - pulse_off;
 					} else {
 						b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
@@ -2081,24 +2060,12 @@ void
 TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt, const double& pulse)
 {
 	MeterSection* prev_ms = 0;
-	double accumulated_beats = 0.0;
-	uint32_t accumulated_bars = 0;
 
 	section->set_pulse (pulse);
 
 	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
 		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
-			if (prev_ms) {
-				double beats_in_m;
-				if (m->position_lock_style() == MusicTime) {
-					beats_in_m = m->beat() - prev_ms->beat();
-				} else {
-					beats_in_m = ((pulse_at_frame_locked (imaginary, m->frame()) - prev_ms->pulse()) * prev_ms->note_divisor()) - prev_ms->beat();
-				}
-				accumulated_beats += beats_in_m;
-				accumulated_bars += (beats_in_m + 1) / prev_ms->divisions_per_bar();
-			}
 			if (m == section){
 				section->set_frame (frame_at_pulse_locked (imaginary, pulse));
 				const double beats = ((pulse - prev_ms->pulse()) * prev_ms->note_divisor()) - prev_ms->beat();
@@ -2119,9 +2086,9 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const Meter& mt,
 					if (m->movable()) {
 						const double beats = ((pulse_at_frame_locked (imaginary, m->frame()) - prev_ms->pulse()) * prev_ms->note_divisor()) - prev_ms->beat();
 						const double ceil_beats = beats - fmod (beats, prev_ms->divisions_per_bar());
+						b_bbt = make_pair (ceil_beats, BBT_Time ((ceil_beats / prev_ms->divisions_per_bar()) + prev_ms->bbt().bars, 1, 0));
 						const double true_pulse = prev_ms->pulse() + (m->beat() - prev_ms->beat()) / prev_ms->note_divisor();
 						const double pulse_off = true_pulse - ((ceil_beats - prev_ms->beat()) / prev_ms->note_divisor());
-						b_bbt = make_pair (ceil_beats, BBT_Time (accumulated_bars + 1, 1, 0));
 						pulse = true_pulse - pulse_off;
 					} else {
 						b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
