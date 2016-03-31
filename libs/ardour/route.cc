@@ -2413,10 +2413,6 @@ Route::reset_plugin_insert (boost::shared_ptr<Processor> proc)
 bool
 Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs)
 {
-	if (_strict_io) {
-		return false;
-	}
-
 	boost::shared_ptr<PluginInsert> pi;
 	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
 		return false;
@@ -2441,7 +2437,6 @@ Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t coun
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
-		assert (!pi->strict_io ());
 		bool      old_cust = pi->custom_cfg ();
 		uint32_t  old_cnt  = pi->get_count ();
 		ChanCount old_chan = pi->output_streams ();

@@ -86,6 +86,16 @@ PluginInsert::~PluginInsert ()
 {
 }
 
+void
+PluginInsert::set_strict_io (bool b)
+{
+	bool changed = _strict_io != b;
+	_strict_io = b;
+	if (changed) {
+		PluginConfigChanged (); /* EMIT SIGNAL */
+	}
+}
+
 bool
 PluginInsert::set_count (uint32_t num)
 {
@@ -111,12 +121,14 @@ PluginInsert::set_count (uint32_t num)
 				/* XXX do something */
 			}
 		}
+		PluginConfigChanged (); /* EMIT SIGNAL */
 
 	} else if (num < _plugins.size()) {
 		uint32_t diff = _plugins.size() - num;
 		for (uint32_t n= 0; n < diff; ++n) {
 			_plugins.pop_back();
 		}
+		PluginConfigChanged (); /* EMIT SIGNAL */
 	}
 
 	return true;
@@ -126,7 +138,21 @@ PluginInsert::set_count (uint32_t num)
 void
 PluginInsert::set_outputs (const ChanCount& c)
 {
+	bool changed = (_custom_out != c) && _custom_cfg;
 	_custom_out = c;
+	if (changed) {
+		PluginConfigChanged (); /* EMIT SIGNAL */
+	}
+}
+
+void
+PluginInsert::set_custom_cfg (bool b)
+{
+	bool changed = _custom_cfg != b;
+	_custom_cfg = b;
+	if (changed) {
+		PluginConfigChanged (); /* EMIT SIGNAL */
+	}
 }
 
 void

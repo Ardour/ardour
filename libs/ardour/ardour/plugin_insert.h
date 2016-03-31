@@ -111,8 +111,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 	// route is not a friend class, it owns us
 	bool set_count      (uint32_t num);
 	void set_outputs    (const ChanCount&);
-	void set_strict_io  (bool b) { _strict_io = b; }
-	void set_custom_cfg (bool b) { _custom_cfg = b; }
+	void set_strict_io  (bool b);
+	void set_custom_cfg (bool b);
 	// end C++ class slavery!
 
 	uint32_t get_count  () const { return _plugins.size(); }
@@ -209,6 +209,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	PBD::Signal2<void,BufferSet*, BufferSet*> AnalysisDataGathered;
 	PBD::Signal0<void> PluginIoReConfigure;
 	PBD::Signal0<void> PluginMapChanged;
+	PBD::Signal0<void> PluginConfigChanged;
 
 	/** Enumeration of the ways in which we can match our insert's
 	 *  IO to that of the plugin(s).
