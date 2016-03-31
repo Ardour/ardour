@@ -102,6 +102,9 @@ ArdourButton::ArdourButton (Element e)
 ArdourButton::ArdourButton (const std::string& str, Element e)
 	: _elements (e)
 	, _tweaks (Tweaks (0))
+	, _char_pixel_width (0)
+	, _char_pixel_height (0)
+	, _char_avg_pixel_width (0)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (0)
@@ -538,6 +541,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	if ((_elements & Text) && !_text.empty()) {
 		// if _layout does not exist, char_pixel_height() creates it,
 		req->height = std::max(req->height, (int) ceil(char_pixel_height() * BASELINESTRETCH + 1.0));
+		assert (_layout);
 		_layout->get_pixel_size (_text_width, _text_height);
 		req->width += rint(1.75 * char_pixel_width()); // padding
 		req->width += _text_width;
