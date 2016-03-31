@@ -220,7 +220,7 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 	draw_io_pins (cr, y_out, width, pc_out, pc_out_midi, false);
 
 	// draw midi-bypass (behind)
-	if (sources.n_midi() == 0 && pc_in_midi > 0 && pc_out_midi > 0) {
+	if (_pi->has_midi_bypass ()) {
 		double x0 = rint (width / (1. + pc_in)) - .5;
 		double x1 = rint (width / (1. + pc_out)) - .5;
 		draw_connection (cr, x0, x1, y_in, y_out, true, true);

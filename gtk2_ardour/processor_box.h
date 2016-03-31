@@ -171,6 +171,7 @@ protected:
 	Gtk::VBox _vbox;
 	Position _position;
 	uint32_t _position_num;
+	ProcessorBox* _parent;
 
 	virtual void setup_visuals ();
 
@@ -184,7 +185,6 @@ private:
 	std::string name (Width) const;
 	void setup_tooltip ();
 
-	ProcessorBox* _parent;
 	boost::shared_ptr<ARDOUR::Processor> _processor;
 	Width _width;
 	PBD::ScopedConnection active_connection;
@@ -283,27 +283,47 @@ private:
 
 	class RoutingIcon : public Gtk::DrawingArea {
 	public:
-		RoutingIcon() {
-			_sources = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
-			_sinks = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
-			_splitting = false;
-			set_size_request (-1, 4);
-		}
-		void set_sources(ARDOUR::ChanCount const sources) { _sources = sources; }
-		void set_sinks(ARDOUR::ChanCount const sinks) { _sinks = sinks; }
-		void set_splitting(const bool splitting) { _splitting = splitting; }
+		RoutingIcon();
+		void set (
+				const ARDOUR::ChanCount&,
+				const ARDOUR::ChanCount&,
+				const ARDOUR::ChanCount&,
+				const ARDOUR::ChanCount&,
+				const ARDOUR::ChanMapping&,
+				const ARDOUR::ChanMapping&);
+		void set_feed (
+				const ARDOUR::ChanCount&,
+				const ARDOUR::ChanCount&,
+				const ARDOUR::ChanMapping&);
+		void unset_feed () { _feed  = false ; }
+		bool identity () const;
+
+		static double pin_x_pos (uint32_t, double, uint32_t, uint32_t, bool);
+		static void draw_connection (cairo_t*, double, double, double, double, bool, bool dashed = false);
+		static void draw_gnd (cairo_t*, double, double, bool);
+
 	private:
 		bool on_expose_event (GdkEventExpose *);
-		/* the wire icon sits on top of every processor if needed */
-		ARDOUR::ChanCount _sources; // signals available (valid outputs from prev. processor)
-		ARDOUR::ChanCount _sinks;   // actual inputs of this processor
-		bool _splitting;
+		void expose_map (cairo_t*, const double, const double);
+
+		ARDOUR::ChanCount   _in;
+		ARDOUR::ChanCount   _out;
+		ARDOUR::ChanCount   _sources;
+		ARDOUR::ChanCount   _sinks;
+		ARDOUR::ChanMapping _in_map;
+		ARDOUR::ChanMapping _out_map;
+		ARDOUR::ChanCount   _f_out;
+		ARDOUR::ChanMapping _f_out_map;
+		ARDOUR::ChanCount   _f_sources;
+		bool _feed;
 	};
 
+public:
+	RoutingIcon routing_icon;
+	PortIcon input_icon;
+	PortIcon output_icon;
+
 protected:
-	RoutingIcon _routing_icon;
-	PortIcon _input_icon;
-	PortIcon _output_icon;
 	PluginDisplay *_plugin_display ;
 };
 
@@ -315,10 +335,10 @@ public:
 	void hide_things ();
 
 private:
-	void plugin_insert_splitting_changed ();
+	void iomap_changed ();
 	boost::shared_ptr<ARDOUR::PluginInsert> _plugin_insert;
 
-	PBD::ScopedConnection _splitting_connection;
+	PBD::ScopedConnectionList _iomap_connection;
 };
 
 class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARDOUR::SessionHandlePtr
@@ -351,6 +371,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void select_all_sends ();
 
 	void all_visible_processors_active(bool state);
+	void setup_routing_feeds ();
 
 	void hide_things ();
 
