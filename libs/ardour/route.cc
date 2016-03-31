@@ -2155,6 +2155,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 
 		if (!(*p)->configure_io(c->first, c->second)) {
 			DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: configuration failed\n", _name));
+			_in_configure_processors = false;
 			return -1;
 		}
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);

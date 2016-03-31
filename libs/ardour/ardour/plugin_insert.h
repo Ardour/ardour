@@ -85,21 +85,9 @@ class LIBARDOUR_API PluginInsert : public Processor
 		}
 	}
 
-	ChanMapping input_map () const {
-		ChanMapping rv;
-		for (PinMappings::const_iterator i = _in_map.begin (); i != _in_map.end (); ++i) {
-			rv += i->second;
-		}
-		return rv;
-	}
-
-	ChanMapping output_map () const {
-		ChanMapping rv;
-		for (PinMappings::const_iterator i = _out_map.begin (); i != _out_map.end (); ++i) {
-			rv += i->second;
-		}
-		return rv;
-	}
+	ChanMapping input_map () const;
+	ChanMapping output_map () const;
+	bool has_midi_bypass () const;
 
 	void set_input_map (uint32_t, ChanMapping);
 	void set_output_map (uint32_t, ChanMapping);

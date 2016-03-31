@@ -31,10 +31,11 @@
 namespace ARDOUR {
 
 
-/** A mapping from one set of channels to another
- * (e.g. how to 'connect' two BufferSets).
+/** A mapping from one set of channels to another.
+ * The general form is  1 source (from), many sinks (to).
+ * numeric IDs are used to identify sources and sinks.
  *
- * for plugins the form is  "pin" -> "buffer"
+ * for plugins this is used to map "plugin-pin" to "audio-buffer"
  */
 class LIBARDOUR_API ChanMapping {
 public:
@@ -44,15 +45,24 @@ public:
 
 	uint32_t get(DataType t, uint32_t from, bool* valid) const;
 
+	/** reverse lookup
+	 * @param type data type
+	 * @param to pin
+	 * @param valid pointer to a boolean. If not NULL it is set to true if the mapping is found, and false otherwise.
+	 * @returns first "from" that matches given "to"
+	 */
+	uint32_t get_src(DataType t, uint32_t to, bool* valid) const;
+
 	/** get buffer mapping for given data type and pin
 	 * @param type data type
-	 * @param from pin
+	 * @param from numeric source id
 	 * @returns mapped buffer number (or ChanMapping::Invalid)
 	 */
-	uint32_t get(DataType t, uint32_t from) const { return get (t, from, NULL); }
+	uint32_t get (DataType t, uint32_t from) const { return get (t, from, NULL); }
+
 	/** set buffer mapping for given data type
 	 * @param type data type
-	 * @param from pin
+	 * @param from numeric source id
 	 * @param to buffer
 	 */
 	void     set(DataType t, uint32_t from, uint32_t to);
@@ -61,7 +71,7 @@ public:
 
 	/** remove mapping
 	 * @param type data type
-	 * @param from source to remove from mapping
+	 * @param from numeric source to remove from mapping
 	 */
 	void     unset(DataType t, uint32_t from);
 
@@ -75,7 +85,6 @@ public:
 	 * @returns true if the map is a strict monotonic set
 	 */
 	bool     is_monotonic () const;
-
 
 	/** Test if this mapping is a subset
 	 * @param superset to test against
@@ -95,20 +104,6 @@ public:
 
 	bool operator!=(const ChanMapping& other) const {
 		return ! (*this == other);
-	}
-
-	ChanMapping operator+=(const ChanMapping& other) {
-		const ChanMapping::Mappings& mp (other.mappings());
-		for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
-			for (TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
-#if 0
-				bool valid; uint32_t x = get (tm->first, i->first, &valid);
-				assert (!valid || x == i->second);
-#endif
-				set (tm->first, i->first, i->second);
-			}
-		}
-		return *this;
 	}
 
 private:

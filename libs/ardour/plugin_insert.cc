@@ -567,7 +567,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		/* all instances have completed, now clear outputs that have not been written to.
 		 * (except midi bypass)
 		 */
-		if (bufs.count().n_midi() == 1 && natural_output_streams().get(DataType::MIDI) == 0) {
+		if (has_midi_bypass ()) {
 			used_outputs.set (DataType::MIDI, 0, 1); // Midi bypass.
 		}
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
@@ -592,6 +592,9 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			for (uint32_t out = 0; out < bufs.count().get (*t); ++out) {
 				bool mapped = false;
+				if (*t == DataType::MIDI && out == 0 && has_midi_bypass ()) {
+					mapped = true; // in-place Midi bypass
+				}
 				for (uint32_t pc = 0; pc < get_count() && !mapped; ++pc) {
 					for (uint32_t o = 0; o < natural_output_streams().get (*t); ++o) {
 						bool valid;
@@ -892,6 +895,53 @@ PluginInsert::set_output_map (uint32_t num, ChanMapping m) {
 	}
 }
 
+ChanMapping
+PluginInsert::input_map () const
+{
+	ChanMapping rv;
+	uint32_t pc = 0;
+	for (PinMappings::const_iterator i = _in_map.begin (); i != _in_map.end (); ++i, ++pc) {
+		ChanMapping m (i->second);
+		const ChanMapping::Mappings& mp ((*i).second.mappings());
+		for (ChanMapping::Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+			for (ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+				rv.set (tm->first, i->first + pc * natural_input_streams().get(tm->first), i->second);
+			}
+		}
+	}
+	return rv;
+}
+
+ChanMapping
+PluginInsert::output_map () const
+{
+	ChanMapping rv;
+	uint32_t pc = 0;
+	for (PinMappings::const_iterator i = _out_map.begin (); i != _out_map.end (); ++i, ++pc) {
+		ChanMapping m (i->second);
+		const ChanMapping::Mappings& mp ((*i).second.mappings());
+		for (ChanMapping::Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+			for (ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+				rv.set (tm->first, i->first + pc * natural_output_streams().get(tm->first), i->second);
+			}
+		}
+	}
+	if (has_midi_bypass ()) {
+		rv.set (DataType::MIDI, 0, 0);
+	}
+
+	return rv;
+}
+
+bool
+PluginInsert::has_midi_bypass () const
+{
+	if (_configured_in.n_midi () == 1 && _configured_out.n_midi () == 1 && natural_output_streams ().n_midi () == 0) {
+		return true;
+	}
+	return false;
+}
+
 bool
 PluginInsert::configure_io (ChanCount in, ChanCount out)
 {
@@ -1088,14 +1138,16 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 		return Match (ExactMatch, get_count(), false, true); // XXX
 	}
 
-	/* try automatic configuration next */
+	/* try automatic configuration */
 	Match m = PluginInsert::automatic_can_support_io_configuration (inx, out);
-
 
 	PluginInfoPtr info = _plugins.front()->get_info();
 	ChanCount inputs  = info->n_inputs;
 	ChanCount outputs = info->n_outputs;
 	ChanCount midi_bypass;
+	if (inx.get(DataType::MIDI) == 1 && outputs.get(DataType::MIDI) == 0) {
+		midi_bypass.set (DataType::MIDI, 1);
+	}
 
 	/* handle case strict-i/o */
 	if (_strict_io && m.method != Impossible) {
@@ -1112,7 +1164,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 
 		switch (m.method) {
 			case NoInputs:
-				if (inx != out) {
+				if (inx.n_audio () != out.n_audio ()) { // ignore midi bypass
 					/* replicate processor to match output count (generators and such)
 					 * at least enough to feed every output port. */
 					uint32_t f = 1; // at least one. e.g. control data filters, no in, no out.
@@ -1121,7 +1173,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 						if (nin == 0 || inx.get(*t) == 0) { continue; }
 						f = max (f, (uint32_t) ceil (inx.get(*t) / (float)nin));
 					}
-					out = inx;
+					out = inx + midi_bypass;
 					return Match (Replicate, f);
 				}
 				break;
@@ -1130,9 +1182,8 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 			default:
 				break;
 		}
-		if (inx == out) { return m; }
 
-		out = inx;
+		out = inx + midi_bypass;
 		if (inx.get(DataType::MIDI) == 1
 				&& out.get (DataType::MIDI) == 0
 				&& outputs.get(DataType::MIDI) == 0) {
@@ -1165,7 +1216,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 		f = max (f, (uint32_t) floor (inx.get(*t) / (float)nout));
 	}
 	if (f > 0 && outputs * f >= _configured_out) {
-		out = outputs * f;
+		out = outputs * f + midi_bypass;
 		return Match (Replicate, f);
 	}
 
@@ -1176,7 +1227,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 		if (nin == 0 || inx.get(*t) == 0) { continue; }
 		f = max (f, (uint32_t) ceil (inx.get(*t) / (float)nin));
 	}
-	out = outputs * f;
+	out = outputs * f + midi_bypass;
 	return Match (Replicate, f);
 }
 
@@ -1206,7 +1257,7 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 
 	if (in.get(DataType::MIDI) == 1 && outputs.get(DataType::MIDI) == 0) {
 		DEBUG_TRACE ( DEBUG::Processors, string_compose ("bypassing midi-data around %1\n", name()));
-		midi_bypass.set(DataType::MIDI, 1);
+		midi_bypass.set (DataType::MIDI, 1);
 	}
 	if (in.get(DataType::MIDI) == 1 && inputs.get(DataType::MIDI) == 0) {
 		DEBUG_TRACE ( DEBUG::Processors, string_compose ("hiding midi-port from plugin %1\n", name()));
@@ -1267,7 +1318,7 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 		}
 	}
 
-	if (can_replicate) {
+	if (can_replicate && f > 0) {
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			out.set (*t, outputs.get(*t) * f);
 		}
@@ -1323,7 +1374,6 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 		return Match (Hide, 1, false, false, hide_channels);
 	}
 
-	midi_bypass.reset();
 	return Match (Impossible, 0);
 }
 

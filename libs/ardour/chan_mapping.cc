@@ -67,6 +67,26 @@ ChanMapping::get(DataType t, uint32_t from, bool* valid) const
 	return m->second;
 }
 
+uint32_t
+ChanMapping::get_src(DataType t, uint32_t to, bool* valid) const
+{
+	Mappings::const_iterator tm = _mappings.find(t);
+	if (tm == _mappings.end()) {
+		if (valid) { *valid = false; }
+		return -1;
+	}
+	for (TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+		if (i->second == to) {
+			if (valid) { *valid = true; }
+			return i->first;
+		}
+	}
+	if (valid) { *valid = false; }
+	return -1;
+}
+
+
+
 void
 ChanMapping::set(DataType t, uint32_t from, uint32_t to)
 {
