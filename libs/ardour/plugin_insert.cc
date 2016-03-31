@@ -499,7 +499,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 
 			_plugins.front()->connect_and_run (bufs, mb_in_map, mb_out_map, nframes, offset);
 
-			for (uint32_t out = _configured_in.n_audio; out < bufs.count().get (DataType::AUDIO); ++out) {
+			for (uint32_t out = _configured_in.n_audio (); out < bufs.count().get (DataType::AUDIO); ++out) {
 				bufs.get (DataType::AUDIO, out).silence (nframes, offset);
 			}
 		}
