@@ -25,6 +25,7 @@
 #include <ostream>
 #include <utility>
 
+#include "pbd/xml++.h"
 #include "ardour/data_type.h"
 #include "ardour/chan_count.h"
 
@@ -42,6 +43,7 @@ public:
 	ChanMapping() {}
 	ChanMapping(ARDOUR::ChanCount identity);
 	ChanMapping(const ChanMapping&);
+	ChanMapping(const XMLNode& node);
 
 	uint32_t get(DataType t, uint32_t from, bool* valid) const;
 
@@ -87,6 +89,8 @@ public:
 	bool     is_monotonic () const;
 
 	uint32_t count () const;
+
+	XMLNode* state(const std::string& name) const;
 
 	/** Test if this mapping is a subset
 	 * @param superset to test against

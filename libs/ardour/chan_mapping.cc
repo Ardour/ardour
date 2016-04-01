@@ -23,6 +23,10 @@
 #include <iostream>
 #include "ardour/chan_mapping.h"
 
+#include "i18n.h"
+
+static const char* state_node_name = "Channelmap";
+
 using namespace std;
 
 namespace ARDOUR {
@@ -40,12 +44,25 @@ ChanMapping::ChanMapping(ChanCount identity)
 	}
 }
 
-ChanMapping::ChanMapping (const ChanMapping& other )
+ChanMapping::ChanMapping (const ChanMapping& other)
 {
 	const ChanMapping::Mappings& mp (other.mappings());
 	for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
 		for (TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
 			set (tm->first, i->first, i->second);
+		}
+	}
+}
+
+ChanMapping::ChanMapping (const XMLNode& node)
+{
+	XMLNodeConstIterator iter = node.children().begin();
+	for ( ; iter != node.children().end(); ++iter) {
+		if ((*iter)->name() == X_(state_node_name)) {
+			const string& type_str  = (*iter)->property("type")->value();
+			const string& from_str = (*iter)->property("from")->value();
+			const string& to_str = (*iter)->property("to")->value();
+			set(DataType(type_str), atol (from_str.c_str()), atol (to_str.c_str()));
 		}
 	}
 }
@@ -133,6 +150,23 @@ ChanMapping::offset_to(DataType t, int32_t delta)
 			m->second += delta;
 		}
 	}
+}
+
+XMLNode*
+ChanMapping::state(const std::string& name) const
+{
+	XMLNode* node = new XMLNode (name);
+	const Mappings& mp (mappings());
+	for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+		for (TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+			XMLNode* n = new XMLNode(X_(state_node_name));
+			n->add_property("type", tm->first.to_string());
+			n->add_property("from", i->first);
+			n->add_property("to", i->second);
+			node->add_child_nocopy(*n);
+		}
+	}
+	return node;
 }
 
 bool
