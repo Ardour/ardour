@@ -240,10 +240,9 @@ double
 TempoSection::pulse_at_tempo (const double& ppm, const framepos_t& f, const framecnt_t& frame_rate) const
 {
 	if (_type == Constant) {
-		double const beats = ((f - frame()) / frames_per_pulse (frame_rate)) + pulse();
-		return  beats;
+		double const pulses = ((f - frame()) / frames_per_pulse (frame_rate)) + pulse();
+		return  pulses;
 	}
-
 	return pulse_at_pulse_tempo (ppm) + pulse();
 }
 
@@ -763,6 +762,10 @@ TempoMap::do_insert (MetricSection* section)
 
 					*(dynamic_cast<Tempo*>(*i)) = *(dynamic_cast<Tempo*>(insert_tempo));
 					(*i)->set_position_lock_style (AudioTime);
+					TempoSection* t;
+					if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
+						t->set_type (insert_tempo->type());
+					}
 					need_add = false;
 				} else {
 					_metrics.erase (i);
