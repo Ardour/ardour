@@ -56,6 +56,7 @@ FrameposPlusBeatsTest::doubleTempoTest ()
 	  120bpm                                                240bpm
 	  0 beats                                               12 beats
 	  0 frames                                              288e3 frames
+	  0 pulses                                              4 pulses
 	  |                 |                 |                 |                 |
 	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 4.4 |
 
@@ -64,7 +65,7 @@ FrameposPlusBeatsTest::doubleTempoTest ()
 	Tempo tempoA (120);
 	map.add_tempo (tempoA, 0.0, TempoSection::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 12.0, TempoSection::Constant);
+	map.add_tempo (tempoB, 12.0 / tempoA.note_type(), TempoSection::Constant);
 
 	/* Now some tests */
 
@@ -108,6 +109,7 @@ FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 	  120bpm                                                240bpm
 	  0 beats                                               12 beats
 	  0 frames                                              288e3 frames
+	  0 pulses                                              4 pulses
 	  |                 |                 |                 |             |
 	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 |
 
@@ -116,9 +118,9 @@ FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 	Tempo tempoA (120);
 	map.add_tempo (tempoA, 0.0, TempoSection::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 12.0, TempoSection::Constant);
+	map.add_tempo (tempoB, 12.0 / tempoA.note_type(), TempoSection::Constant);
 	Meter meterB (3, 4);
-	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0));
+	map.add_meter (meterB, 12.0 / tempoA.note_type(), BBT_Time (4, 1, 0));
 
 	/* Now some tests */
 

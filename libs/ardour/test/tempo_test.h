@@ -6,6 +6,7 @@ class TempoTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE (TempoTest);
 	CPPUNIT_TEST (recomputeMapTest);
+	CPPUNIT_TEST (rampTest);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
@@ -13,5 +14,6 @@ public:
 	void tearDown () {}
 
 	void recomputeMapTest ();
+	void rampTest ();
 };
 

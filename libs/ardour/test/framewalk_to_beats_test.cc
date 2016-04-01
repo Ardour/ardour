@@ -63,6 +63,7 @@ FramewalkToBeatsTest::doubleTempoTest ()
 	  0 beats                                         12 beats
 	  0 frames                                        288e3 frames
 	  24e3 frames per beat                            12e3 frames per beat
+	  0 pulses                                        4 pulses
 	  |               |               |               |               |
 	  1.1 1.2 1.3 1.4 2.1 2.2 2.3 2.4 3.1 3.2 3.3 3.4 4.1 4.2 4.3 4.4 5.1
 	  0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16
@@ -72,7 +73,7 @@ FramewalkToBeatsTest::doubleTempoTest ()
 	Tempo tempoA (120);
 	map.add_tempo (tempoA, 0.0, TempoSection::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 12.0, TempoSection::Constant);
+	map.add_tempo (tempoB, 12.0 / tempoB.note_type(), TempoSection::Constant);
 
 	/* Now some tests */
 
@@ -119,6 +120,7 @@ FramewalkToBeatsTest::tripleTempoTest ()
 	  120bpm            240bpm            160bpm
 	  0 beats           4 beats           8 beats
 	  0 frames          96e3 frames       144e3 frames
+	  0 pulses          1 pulse           2 pulses
 	  |                 |                 |                 |                 |
 	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 4.4 |
 
@@ -127,9 +129,9 @@ FramewalkToBeatsTest::tripleTempoTest ()
 	Tempo tempoA (120);
 	map.add_tempo (tempoA, 0.0, TempoSection::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 4.0, TempoSection::Constant);
+	map.add_tempo (tempoB, 4.0 / tempoB.note_type(), TempoSection::Constant);
 	Tempo tempoC (160);
-	map.add_tempo (tempoC, 8.0, TempoSection::Constant);
+	map.add_tempo (tempoC, 8.0 / tempoB.note_type(), TempoSection::Constant);
 
 	/* Walk from 1|3 to 4|1 */
 	double r = map.framewalk_to_beats (2 * 24e3, (2 * 24e3) + (4 * 12e3) + (4 * 18e3)).to_double();
