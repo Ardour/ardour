@@ -72,6 +72,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _no_inplace (false)
 	, _strict_io (false)
 	, _custom_cfg (false)
+	, _maps_from_state (false)
 {
 	/* the first is the master */
 
@@ -943,6 +944,47 @@ PluginInsert::has_midi_bypass () const
 }
 
 bool
+PluginInsert::reset_map (bool emit)
+{
+	uint32_t pc = 0;
+	const PinMappings old_in (_in_map);
+	const PinMappings old_out (_out_map);
+
+	_in_map.clear ();
+	_out_map.clear ();
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+		if (_match.method == Split) {
+			_in_map[pc] = ChanMapping ();
+			/* connect inputs in round-robin fashion */
+			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+				const uint32_t cend = _configured_in.get (*t);
+				if (cend == 0) { continue; }
+				uint32_t c = 0;
+				for (uint32_t in = 0; in < natural_input_streams().get (*t); ++in) {
+					_in_map[pc].set (*t, in, c);
+					c = c + 1 % cend;
+				}
+			}
+		} else {
+			_in_map[pc] = ChanMapping (ChanCount::min (natural_input_streams (), _configured_in));
+		}
+		_out_map[pc] = ChanMapping (ChanCount::min (natural_output_streams(), _configured_out));
+
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			_in_map[pc].offset_to(*t, pc * natural_input_streams().get(*t));
+			_out_map[pc].offset_to(*t, pc * natural_output_streams().get(*t));
+		}
+	}
+	if (old_in == _in_map && old_out == _out_map) {
+		return false;
+	}
+	if (emit) {
+		PluginMapChanged (); /* EMIT SIGNAL */
+	}
+	return true;
+}
+
+bool
 PluginInsert::configure_io (ChanCount in, ChanCount out)
 {
 	Match old_match = _match;
@@ -1041,33 +1083,12 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			_out_map[pc] = new_out;
 		}
 	} else {
-		/* generate a new mapping */
-		uint32_t pc = 0;
-		_in_map.clear ();
-		_out_map.clear ();
-		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
-			if (_match.method == Split) {
-				_in_map[pc] = ChanMapping ();
-				/* connect inputs in round-robin fashion */
-				for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-					const uint32_t cend = _configured_in.get (*t);
-					if (cend == 0) { continue; }
-					uint32_t c = 0;
-					for (uint32_t in = 0; in < natural_input_streams().get (*t); ++in) {
-						_in_map[pc].set (*t, in, c);
-						c = c + 1 % cend;
-					}
-				}
-			} else {
-				_in_map[pc] = ChanMapping (ChanCount::min (natural_input_streams (), in));
-			}
-			_out_map[pc] = ChanMapping (ChanCount::min (natural_output_streams(), out));
-
-			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-				_in_map[pc].offset_to(*t, pc * natural_input_streams().get(*t));
-				_out_map[pc].offset_to(*t, pc * natural_output_streams().get(*t));
-			}
+		if (_maps_from_state) {
+			_maps_from_state = false;
 			mapping_changed = true;
+		} else {
+			/* generate a new mapping */
+			mapping_changed = reset_map (false);
 		}
 	}
 
@@ -1412,11 +1433,12 @@ PluginInsert::state (bool full)
 
 	/* save custom i/o config */
 	node.add_property("custom", _custom_cfg ? "yes" : "no");
-	if (_custom_cfg) {
-		assert (_custom_out == _configured_out); // redundant
-		for (uint32_t pc = 0; pc < get_count(); ++pc) {
-			// TODO save _in_map[pc], _out_map[pc]
-		}
+	for (uint32_t pc = 0; pc < get_count(); ++pc) {
+		char tmp[128];
+		snprintf (tmp, sizeof(tmp), "InputMap-%d", pc);
+		node.add_child_nocopy (* _in_map[pc].state (tmp));
+		snprintf (tmp, sizeof(tmp), "OutputMap-%d", pc);
+		node.add_child_nocopy (* _out_map[pc].state (tmp));
 	}
 
 	_plugins[0]->set_insert_id(this->id());
@@ -1669,15 +1691,31 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		_custom_cfg = string_is_affirmative (prop->value());
 	}
 
+	uint32_t in_maps = 0;
+	uint32_t out_maps = 0;
 	XMLNodeList kids = node.children ();
 	for (XMLNodeIterator i = kids.begin(); i != kids.end(); ++i) {
 		if ((*i)->name() == X_("ConfiguredOutput")) {
 			_custom_out = ChanCount(**i);
 		}
-		// TODO restore mappings for all 0 .. count.
+		if (strncmp ((*i)->name().c_str(), X_("InputMap-"), 9) == 0) {
+			long pc = atol (&((*i)->name().c_str()[9]));
+			if (pc >=0 && pc <= get_count()) {
+				_in_map[pc] = ChanMapping (**i);
+				++in_maps;
+			}
+		}
+		if (strncmp ((*i)->name().c_str(), X_("OutputMap-"), 10) == 0) {
+			long pc = atol (&((*i)->name().c_str()[10]));
+			if (pc >=0 && pc <= get_count()) {
+				_out_map[pc] = ChanMapping (**i);
+				++out_maps;
+			}
+		}
 	}
-
-
+	if (in_maps == out_maps && out_maps >0 && out_maps == get_count()) {
+		_maps_from_state = true;
+	}
 
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		if (active()) {
