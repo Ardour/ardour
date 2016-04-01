@@ -382,19 +382,19 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
 
-	framepos_t predict_tempo_frame (TempoSection* section, const Tempo& bpm, const Timecode::BBT_Time& bbt);
-	double predict_tempo_pulse (TempoSection* section, const Tempo& bpm, const framepos_t& frame);
+	framepos_t predict_tempo_frame (TempoSection* section, const Timecode::BBT_Time& bbt);
+	double predict_tempo_pulse (TempoSection* section, const framepos_t& frame);
 
 	void replace_tempo (const TempoSection&, const Tempo&, const double& where, TempoSection::Type type);
 	void replace_tempo (const TempoSection&, const Tempo&, const framepos_t& frame, TempoSection::Type type);
 
-	void gui_move_tempo_frame (TempoSection*, const Tempo& bpm, const framepos_t& frame);
-	void gui_move_tempo_beat (TempoSection*, const Tempo& bpm, const double& frame);
-	void gui_move_meter (MeterSection*, const Meter& mt, const framepos_t& frame);
-	void gui_move_meter (MeterSection*, const Meter& mt, const double& beat);
+	void gui_move_tempo_frame (TempoSection*, const framepos_t& frame);
+	void gui_move_tempo_beat (TempoSection*, const double& frame);
+	void gui_move_meter (MeterSection*, const framepos_t& frame);
+	void gui_move_meter (MeterSection*, const double& beat);
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
 
-	bool can_solve_bbt (TempoSection* section, const Tempo& bpm, const Timecode::BBT_Time& bbt);
+	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
 
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
 	void replace_meter (const MeterSection&, const Meter&, const framepos_t& frame);
@@ -460,10 +460,10 @@ private:
 
 	bool check_solved (Metrics& metrics, bool by_frame);
 	bool set_active_tempos (const Metrics& metrics, const framepos_t& frame);
-	bool solve_map (Metrics& metrics, TempoSection* section, const Tempo& bpm, const framepos_t& frame);
-	bool solve_map (Metrics& metrics, TempoSection* section, const Tempo& bpm, const double& pulse);
-	void solve_map (Metrics& metrics, MeterSection* section, const Meter& mt, const framepos_t& frame);
-	void solve_map (Metrics& metrics, MeterSection* section, const Meter& mt, const double& pulse);
+	bool solve_map (Metrics& metrics, TempoSection* section, const framepos_t& frame);
+	bool solve_map (Metrics& metrics, TempoSection* section, const double& pulse);
+	void solve_map (Metrics& metrics, MeterSection* section, const framepos_t& frame);
+	void solve_map (Metrics& metrics, MeterSection* section, const double& pulse);
 
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;

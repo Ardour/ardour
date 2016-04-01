@@ -100,7 +100,7 @@ TempoTest::rampTest ()
 	CPPUNIT_ASSERT_EQUAL (tB->frame(), tA->frame_at_pulse (tB->pulse(), sampling_rate));
 
 	/* self-check tempo at pulse @ 125 bpm. */
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (125.0 / 4.0, tA->tempo_at_pulse (tA->pulse_at_tempo (125.0 / 4.0, 0, sampling_rate)), 0.000000000000001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (125.0 / 4.0, tA->tempo_at_pulse (tA->pulse_at_tempo (125.0 / 4.0, 0, sampling_rate)), 0.00000000000000001);
 
 	/* self-check frame at pulse 20 seconds in. */
 	const framepos_t target = 20 * sampling_rate;

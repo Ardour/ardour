@@ -378,11 +378,11 @@ Editor::edit_tempo_section (TempoSection* section)
 
 	if (tempo_dialog.get_lock_style() == MusicTime) {
 		section->set_position_lock_style (MusicTime);
-		framepos_t const f = _session->tempo_map().predict_tempo_frame (section, Tempo (bpm, nt), when);
-		double const p = _session->tempo_map().predict_tempo_pulse (section, Tempo (bpm, nt), f);
+		framepos_t const f = _session->tempo_map().predict_tempo_frame (section, when);
+		double const p = _session->tempo_map().predict_tempo_pulse (section, f);
 		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), p, tempo_dialog.get_tempo_type());
 	} else {
-		framepos_t const f = _session->tempo_map().predict_tempo_frame (section, Tempo (bpm, nt), when);
+		framepos_t const f = _session->tempo_map().predict_tempo_frame (section, when);
 		_session->tempo_map().replace_tempo (*section, Tempo (bpm, nt), f, tempo_dialog.get_tempo_type());
 	}
 
