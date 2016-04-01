@@ -270,15 +270,18 @@ EAN13MetadataField::update_status ()
 		// calculate EAN-13 modulo 10 check digit
 		int sum = 0;
 		const char *p = _value.c_str();
-		for (int i =0; i < 12; i++) {
+		for (int i = 0; i < 12; i++) {
 			char c = p[i] - '0';
 			if (i % 2) {
-				sum += c;
-			} else {
 				sum += c * 3;
+			} else {
+				sum += c;
 			}
 		}
 		sum %= 10;
+		if (sum)
+			sum = 10 - sum;
+
 		if (sum == p[12] - '0') {
 			status_label->set_markup (string_compose(
 						"<span color=\"green\">%1: %2</span>",
