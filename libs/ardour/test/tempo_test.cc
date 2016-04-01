@@ -59,19 +59,27 @@ TempoTest::rampTest ()
 	Meter meterA (4, 4);
 	Tempo tempoA (77.0, 4.0);
 	Tempo tempoB (217.0, 4.0);
-	map.add_tempo (tempoA, 0.0, TempoSection::Ramp);
-	map.add_tempo (tempoB, 100.0, TempoSection::Ramp);
+	map.add_tempo (tempoA, (framepos_t) 0, TempoSection::Ramp);
+	map.add_tempo (tempoB, (framepos_t) 60 * sampling_rate, TempoSection::Ramp);
 	map.add_meter (meterA, 0.0, BBT_Time (1, 1, 0));
 
 	/*
 
-	  120bpm                                                240bpm
-	  0 beats                                               12 beats
-	  0 frames                                              288e3 frames
-	  0 pulses                                              4 pulses
+	  77bpm / note typeA                                    217bpm / note type B
+	  0 frames                                              60 * sample rate frames
 	  |                 |                 |                 |             |
-	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 |
-
+	  |                                                    *|
+	  |                                                  *  |
+	  |                                                *    |
+	  |                                             *       |
+	  |                                          *          |
+	  |                                      *              |
+	  |                                 *                   |
+	  |                           *  |                      |
+	  |                  *           |                      |
+	  |     *            |           |                      |
+	  -------------------|-----------|-----------------------
+                             20 seconds  125.0 bpm / note_type
 	*/
 
 	TempoSection* tA = 0;
@@ -88,6 +96,14 @@ TempoTest::rampTest ()
 	}
 	map.recompute_map (map._metrics);
 
-	CPPUNIT_ASSERT_EQUAL (tB->frame(), tA->frame_at_tempo (tB->beats_per_minute() / tB->note_type(), 100.0, sampling_rate));
+	CPPUNIT_ASSERT_EQUAL (tB->frame(), tA->frame_at_tempo (tB->beats_per_minute() / tB->note_type(), 300.0, sampling_rate));
 	CPPUNIT_ASSERT_EQUAL (tB->frame(), tA->frame_at_pulse (tB->pulse(), sampling_rate));
+
+	/* self-check tempo at pulse @ 125 bpm. */
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (125.0 / 4.0, tA->tempo_at_pulse (tA->pulse_at_tempo (125.0 / 4.0, 0, sampling_rate)), 0.000000000000001);
+
+	/* self-check frame at pulse 20 seconds in. */
+	const framepos_t target = 20 * sampling_rate;
+	const framepos_t result = tA->frame_at_pulse (tA->pulse_at_frame (target, sampling_rate), sampling_rate);
+	CPPUNIT_ASSERT_EQUAL (target, result);
 }
