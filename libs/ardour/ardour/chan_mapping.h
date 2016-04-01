@@ -86,6 +86,8 @@ public:
 	 */
 	bool     is_monotonic () const;
 
+	uint32_t count () const;
+
 	/** Test if this mapping is a subset
 	 * @param superset to test against
 	 * @returns true if all mapping are also present in the superset

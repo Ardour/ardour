@@ -184,6 +184,17 @@ ChanMapping::is_identity (ChanCount offset) const
 	return true;
 }
 
+uint32_t
+ChanMapping::count () const
+{
+	uint32_t rv = 0;
+	const Mappings& mp (mappings());
+	for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+		rv += tm->second.size ();
+	}
+	return rv;
+}
+
 } // namespace ARDOUR
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanMapping& cm)
