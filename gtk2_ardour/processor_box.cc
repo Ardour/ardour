@@ -939,12 +939,16 @@ PluginInsertProcessorEntry::PluginInsertProcessorEntry (ProcessorBox* b, boost::
 	p->PluginMapChanged.connect (
 		_iomap_connection, invalidator (*this), boost::bind (&PluginInsertProcessorEntry::iomap_changed, this), gui_context()
 		);
+	p->PluginConfigChanged.connect (
+		_iomap_connection, invalidator (*this), boost::bind (&PluginInsertProcessorEntry::iomap_changed, this), gui_context()
+		);
 }
 
 void
 PluginInsertProcessorEntry::iomap_changed ()
 {
 	_parent->setup_routing_feeds ();
+	routing_icon.queue_draw();
 }
 
 void
@@ -1020,11 +1024,22 @@ ProcessorEntry::RoutingIcon::set (
 
 bool
 ProcessorEntry::RoutingIcon::identity () const {
-	if (!_in_map.is_monotonic ()) {
+	if (!_in_map.is_monotonic () || !_in_map.is_monotonic ()) {
 		return false;
 	}
-	if (_feed && (!_f_out_map.is_monotonic () || _sinks != _f_sources)) {
+	if (_in_map.count () != _sinks.n_total ()) {
 		return false;
+	}
+	if (_feed) {
+		if (!_f_out_map.is_monotonic () || _sinks != _f_sources) {
+			return false;
+		}
+		if (!_f_out_map.is_identity ()) {
+			return false;
+		}
+		if (_f_out_map.count () != _f_sources.n_total ()) {
+			return false;
+		}
 	}
 	return true;
 }
@@ -1142,6 +1157,8 @@ ProcessorEntry::RoutingIcon::expose_map (cairo_t* cr, const double width, const 
 			bool valid_src;
 			uint32_t src = _f_out_map.get_src (is_midi ? DataType::MIDI : DataType::AUDIO, idx, &valid_src);
 			if (!valid_src) {
+				double x = pin_x_pos (i, width, pc_in, pc_in_midi, is_midi);
+				draw_gnd (cr, x, height, is_midi);
 				continue;
 			}
 			c_x0 = pin_x_pos (src, width, _f_out.n_total(), _f_out.n_midi(), is_midi);
@@ -2523,6 +2540,7 @@ ProcessorBox::setup_routing_feeds ()
 			}
 		} else {
 			(*i)->routing_icon.show();
+			(*i)->routing_icon.queue_draw();
 			(*i)->input_icon.show();
 		}
 	}
