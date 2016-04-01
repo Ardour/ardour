@@ -185,14 +185,6 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	void collect_signal_for_analysis (framecnt_t nframes);
 
-	bool no_inplace () const {
-		return _pending_no_inplace;
-	}
-
-	void set_no_inplace (bool b) { // XXX tenative dev API
-		_pending_no_inplace = b; // TODO detect automatically
-	}
-
 	bool strict_io_configured () const {
 		return _match.strict_io;
 	}
@@ -267,7 +259,6 @@ class LIBARDOUR_API PluginInsert : public Processor
 	bool _no_inplace;
 	bool _strict_io;
 	bool _custom_cfg;
-	bool _pending_no_inplace;
 
 	Match private_can_support_io_configuration (ChanCount const &, ChanCount &) const;
 	Match automatic_can_support_io_configuration (ChanCount const &, ChanCount &) const;

@@ -373,10 +373,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("activate", &PluginInsert::activate)
 		.addFunction ("deactivate", &PluginInsert::deactivate)
 		.addFunction ("strict_io_configured", &PluginInsert::strict_io_configured)
-		.addFunction ("no_inplace", &PluginInsert::no_inplace)
 		.addFunction ("input_map", (ARDOUR::ChanMapping (PluginInsert::*)(uint32_t) const)&PluginInsert::input_map)
 		.addFunction ("output_map", (ARDOUR::ChanMapping (PluginInsert::*)(uint32_t) const)&PluginInsert::output_map)
-		.addFunction ("set_no_inplace", &PluginInsert::set_no_inplace) // XXX
 		.addFunction ("set_input_map", &PluginInsert::set_input_map)
 		.addFunction ("set_output_map", &PluginInsert::set_output_map)
 

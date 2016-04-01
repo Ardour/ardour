@@ -72,7 +72,6 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _no_inplace (false)
 	, _strict_io (false)
 	, _custom_cfg (false)
-	, _pending_no_inplace (false)
 {
 	/* the first is the master */
 
@@ -413,31 +412,6 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 {
 	PinMappings in_map (_in_map);
 	PinMappings out_map (_out_map);
-
-#if 1
-	// auto-detect if inplace processing is possible
-	// TODO: do this once. during configure_io and every time the
-	// plugin-count or mapping changes.
-	bool inplace_ok = true;
-	for (uint32_t pc = 0; pc < get_count() && inplace_ok ; ++pc) {
-		if (!in_map[pc].is_monotonic ()) {
-			inplace_ok = false;
-		}
-		if (!out_map[pc].is_monotonic ()) {
-			inplace_ok = false;
-		}
-	}
-
-	if (_pending_no_inplace != !inplace_ok) {
-#ifndef NDEBUG // this 'cerr' needs to go ASAP.
-		cerr << name () << " automatically set : " << (inplace_ok ? "Use Inplace" : "No Inplace") << "\n"; // XXX
-#endif
-		_pending_no_inplace = !inplace_ok;
-	}
-#endif
-
-	_no_inplace = _pending_no_inplace || _plugins.front()->inplace_broken ();
-
 
 #if 1
 	// TODO optimize special case.
@@ -1110,6 +1084,18 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		cout << "---->>----\n";
 #endif
 	}
+
+	// auto-detect if inplace processing is possible
+	bool inplace_ok = true;
+	for (uint32_t pc = 0; pc < get_count() && inplace_ok ; ++pc) {
+		if (!_in_map[pc].is_monotonic ()) {
+			inplace_ok = false;
+		}
+		if (!_out_map[pc].is_monotonic ()) {
+			inplace_ok = false;
+		}
+	}
+	_no_inplace = !inplace_ok || _plugins.front()->inplace_broken ();
 
 	if (old_in != in || old_out != out
 			|| (old_match.method != _match.method && (old_match.method == Split || _match.method == Split))
