@@ -5723,14 +5723,12 @@ Session::write_one_track (Track& track, framepos_t start, framepos_t end,
 		goto out;
 	}
 
-	legal_playlist_name = legalize_for_path (playlist->name());
-
 	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n(track.data_type()); ++chan_n) {
 
-		string base_name = string_compose ("%1-%2-bounce", playlist->name(), chan_n);
+		string base_name = string_compose ("%1-bounce", playlist->name());
 		string path = ((track.data_type() == DataType::AUDIO)
-		               ? new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, false, true)
-		               : new_midi_source_path (legal_playlist_name));
+		               ? new_audio_source_path (base_name, diskstream_channels.n_audio(), chan_n, false, true)
+		               : new_midi_source_path (base_name));
 
 		if (path.empty()) {
 			goto out;
