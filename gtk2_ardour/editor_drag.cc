@@ -3378,7 +3378,9 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 				} else if (use_snap) {
 					map.round_bbt (when, _editor->get_grid_beat_divisions (0));
 				}
-				pf = map.predict_tempo_frame (_real_section, when);
+				if (use_snap) {
+					pf = map.predict_tempo_frame (_real_section, when);
+				}
 				map.gui_move_tempo_frame (_real_section, pf);
 			}
 		}
