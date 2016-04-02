@@ -30,6 +30,10 @@
 
 namespace ARDOUR { namespace LuaAPI {
 
+	int datatype_ctor_nil (lua_State *L);
+	int datatype_ctor_audio (lua_State *L);
+	int datatype_ctor_midi (lua_State *L);
+
 	/** create a new Lua Processor (Plugin)
 	 *
 	 * @param s Session Handle

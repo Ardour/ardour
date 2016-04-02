@@ -36,6 +36,31 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
+int
+ARDOUR::LuaAPI::datatype_ctor_nil (lua_State *L)
+{
+	DataType dt (DataType::NIL);
+	luabridge::Stack <DataType>::push (L, dt);
+	return 1;
+}
+
+int
+ARDOUR::LuaAPI::datatype_ctor_audio (lua_State *L)
+{
+	DataType dt (DataType::AUDIO);
+	// NB luabridge will copy construct the object and manage lifetime.
+	luabridge::Stack <DataType>::push (L, dt);
+	return 1;
+}
+
+int
+ARDOUR::LuaAPI::datatype_ctor_midi (lua_State *L)
+{
+	DataType dt (DataType::MIDI);
+	luabridge::Stack <DataType>::push (L, dt);
+	return 1;
+}
+
 boost::shared_ptr<Processor>
 ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 {

@@ -469,6 +469,9 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass <DataType> ("DataType")
 		.addConstructor <void (*) (std::string)> ()
+		.addStaticCFunction ("null",  &LuaAPI::datatype_ctor_nil) // "nil" is a lua reseved word
+		.addStaticCFunction ("audio", &LuaAPI::datatype_ctor_audio)
+		.addStaticCFunction ("midi",  &LuaAPI::datatype_ctor_midi)
 		.endClass()
 
 		/* libardour enums */
