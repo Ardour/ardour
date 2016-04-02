@@ -3148,10 +3148,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (first_move) {
 
-		// create a dummy marker for visual representation of moving the
-		// section, because whether its a copy or not, we're going to
-		// leave or lose the original marker (leave if its a copy; lose if its
-		// not, because we'll remove it from the map).
+		// create a dummy marker to catch events, then hide it.
 
 		char name[64];
 		snprintf (name, sizeof(name), "%g/%g", _marker->meter().divisions_per_bar(), _marker->meter().note_divisor ());
@@ -3166,14 +3163,34 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 		/* use the new marker for the grab */
 		swap_grab (&_marker->the_item(), 0, GDK_CURRENT_TIME);
+		_marker->hide();
+
+		TempoMap& map (_editor->session()->tempo_map());
+		/* get current state */
+		before_state = &map.get_state();
 
 		if (!_copy) {
 			_editor->begin_reversible_command (_("move meter mark"));
-			TempoMap& map (_editor->session()->tempo_map());
-			/* get current state */
-			before_state = &map.get_state();
+		} else {
+			_editor->begin_reversible_command (_("copy meter mark"));
+
+			Timecode::BBT_Time bbt;
+			map.bbt_time (_marker->position(), bbt);
+			map.round_bbt (bbt, -1);
+			if (_real_section->frame() < adjusted_current_frame (event, false)) {
+				++bbt.bars;
+			} else {
+				--bbt.bars;
+			}
+			const double beat = map.bbt_to_beats (bbt);
+
+			if (_real_section->position_lock_style() == AudioTime) {
+				_real_section = map.add_meter (Meter (_marker->meter().divisions_per_bar(), _marker->meter().note_divisor())
+							       , _marker->position(), beat, bbt);
+			} else {
+				_real_section = map.add_meter (Meter (_marker->meter().divisions_per_bar(), _marker->meter().note_divisor()), beat, bbt);
+			}
 		}
-		_marker->hide();
 	}
 
 	framepos_t const pf = adjusted_current_frame (event, false);
@@ -3184,6 +3201,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 	} else {
 		_editor->session()->tempo_map().gui_move_meter (_real_section, pf);
 	}
+	_marker->set_position (pf);
 	show_verbose_cursor_time (pf);
 }
 
@@ -3200,20 +3218,11 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	TempoMap& map (_editor->session()->tempo_map());
 
 	if (_copy == true) {
-		_editor->begin_reversible_command (_("copy meter mark"));
-		XMLNode &before = map.get_state();
-
-		if (_real_section->position_lock_style() == AudioTime) {
-			map.add_meter (Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->frame(), _real_section->beat(), _real_section->bbt());
-		} else {
-			map.add_meter (Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->beat(), _real_section->bbt());
-		}
 		XMLNode &after = map.get_state();
-		_editor->session()->add_command(new MementoCommand<TempoMap>(map, &before, &after));
+		_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
 		_editor->commit_reversible_command ();
 
 	} else {
-		/* we removed it before, so add it back now */
 		if (_real_section->position_lock_style() == AudioTime) {
 			map.replace_meter (*_real_section, Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->frame());
 		} else {
@@ -3283,13 +3292,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 	if (first_move) {
 
-		// create a dummy marker for visual representation of moving the
-		// section, because whether its a copy or not, we're going to
-		// leave or lose the original marker (leave if its a copy; lose if its
-		// not, because we'll remove it from the map).
-
-		// create a dummy marker for visual representation of moving the copy.
-		// The actual copying is not done before we reach the finish callback.
+		// mvc drag - create a dummy marker to catch events, hide it.
 
 		char name[64];
 		snprintf (name, sizeof (name), "%.2f", _marker->tempo().beats_per_minute());
@@ -3390,7 +3393,6 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	//motion (event, false);
 
 	TempoMap& map (_editor->session()->tempo_map());
 
