@@ -2443,7 +2443,6 @@ Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t coun
 
 		if (count == 0) {
 			pi->set_custom_cfg (false);
-			pi->reset_map ();
 		} else {
 			pi->set_custom_cfg (true);
 			pi->set_count (count);
