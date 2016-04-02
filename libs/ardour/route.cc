@@ -1381,6 +1381,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 						processor.reset (new UnknownProcessor (_session, node));
 					} else {
 						processor.reset (new PluginInsert (_session));
+						processor->set_owner (this);
 					}
 
 				} else {
@@ -3212,6 +3213,7 @@ Route::set_processor_state (const XMLNode& node)
 						processor.reset (new UnknownProcessor (_session, **niter));
 					} else {
 						processor.reset (new PluginInsert (_session));
+						processor->set_owner (this);
 						if (_strict_io) {
 							boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(processor);
 							pi->set_strict_io (true);
