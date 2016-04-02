@@ -3175,8 +3175,11 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			_editor->begin_reversible_command (_("copy meter mark"));
 
 			Timecode::BBT_Time bbt;
-			map.bbt_time (_marker->position(), bbt);
+			map.bbt_time (adjusted_current_frame (event, false), bbt);
+			/* round bbt to bars */
 			map.round_bbt (bbt, -1);
+
+			/* we can't add a meter where one currently exists */
 			if (_real_section->frame() < adjusted_current_frame (event, false)) {
 				++bbt.bars;
 			} else {
@@ -3196,8 +3199,13 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 	framepos_t const pf = adjusted_current_frame (event, false);
 	_marker->set_position (pf);
 	if (_marker->meter().position_lock_style() == MusicTime) {
-		double const baf = _editor->session()->tempo_map().beat_at_frame (_editor->session()->tempo_map().round_to_bar (pf, (RoundMode) 0));
-		_editor->session()->tempo_map().gui_move_meter (_real_section, baf);
+		TempoMap& map (_editor->session()->tempo_map());
+		Timecode::BBT_Time bbt;
+		map.bbt_time (adjusted_current_frame (event, false), bbt);
+		/* round bbt to bars */
+		map.round_bbt (bbt, -1);
+		const double beat = map.bbt_to_beats (bbt);
+		_editor->session()->tempo_map().gui_move_meter (_real_section, beat);
 	} else {
 		_editor->session()->tempo_map().gui_move_meter (_real_section, pf);
 	}
