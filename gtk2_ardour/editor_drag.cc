@@ -3238,8 +3238,8 @@ void
 MeterMarkerDrag::aborted (bool moved)
 {
 	_marker->set_position (_marker->meter().frame ());
-	_editor->session()->tempo_map().set_state (*before_state, Stateful::current_state_version);
 	if (moved) {
+		_editor->session()->tempo_map().set_state (*before_state, Stateful::current_state_version);
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
 		delete _marker;
