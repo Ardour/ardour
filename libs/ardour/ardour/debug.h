@@ -37,6 +37,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits LatencyCompensation;
 		LIBARDOUR_API extern DebugBits Peaks;
 		LIBARDOUR_API extern DebugBits Processors;
+		LIBARDOUR_API extern DebugBits ChanMapping;
 		LIBARDOUR_API extern DebugBits ProcessThreads;
 		LIBARDOUR_API extern DebugBits Graph;
 		LIBARDOUR_API extern DebugBits Destruction;

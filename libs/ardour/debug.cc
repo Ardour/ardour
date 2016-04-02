@@ -33,6 +33,7 @@ PBD::DebugBits PBD::DEBUG::Latency = PBD::new_debug_bit ("latency");
 PBD::DebugBits PBD::DEBUG::LatencyCompensation = PBD::new_debug_bit ("latencycompensation");
 PBD::DebugBits PBD::DEBUG::Peaks = PBD::new_debug_bit ("peaks");
 PBD::DebugBits PBD::DEBUG::Processors = PBD::new_debug_bit ("processors");
+PBD::DebugBits PBD::DEBUG::ChanMapping = PBD::new_debug_bit ("chanmapping");
 PBD::DebugBits PBD::DEBUG::ProcessThreads = PBD::new_debug_bit ("processthreads");
 PBD::DebugBits PBD::DEBUG::Graph = PBD::new_debug_bit ("graph");
 PBD::DebugBits PBD::DEBUG::Destruction = PBD::new_debug_bit ("destruction");

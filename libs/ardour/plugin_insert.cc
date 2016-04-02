@@ -1060,8 +1060,13 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 
 	/* get plugin configuration */
 	_match = private_can_support_io_configuration (in, out);
-#ifndef NDEBUG // XXX
-	cout << "Match '" << name() << "': " << _match;
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::ChanMapping)) {
+		DEBUG_STR_DECL(a);
+		DEBUG_STR_APPEND(a, string_compose ("Match '%1':",  name()));
+		DEBUG_STR_APPEND(a, _match);
+		DEBUG_TRACE (DEBUG::ChanMapping, DEBUG_STR(a).str());
+	}
 #endif
 
 	/* set the matching method and number of plugins that we will use to meet this configuration */
@@ -1129,15 +1134,25 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 
 	if (mapping_changed) {
 		PluginMapChanged (); /* EMIT SIGNAL */
-#ifndef NDEBUG // XXX
-		uint32_t pc = 0;
-		cout << "----<<----\n";
-		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
-			cout << "Channel Map for " << name() << " plugin " << pc << "\n";
-			cout << " * Inputs:\n" << _in_map[pc];
-			cout << " * Outputs:\n" << _out_map[pc];
+
+#ifndef NDEBUG
+		if (DEBUG_ENABLED(DEBUG::ChanMapping)) {
+			uint32_t pc = 0;
+			DEBUG_STR_DECL(a);
+			DEBUG_STR_APPEND(a, "\n--------<<--------\n");
+			for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+				if (pc > 0) {
+			DEBUG_STR_APPEND(a, "----><----\n");
+				}
+				DEBUG_STR_APPEND(a, string_compose ("Channel Map for %1 plugin %2\n", name(), pc));
+				DEBUG_STR_APPEND(a, " * Inputs:\n");
+				DEBUG_STR_APPEND(a, _in_map[pc]);
+				DEBUG_STR_APPEND(a, " * Outputs:\n");
+				DEBUG_STR_APPEND(a, _out_map[pc]);
+			}
+			DEBUG_STR_APPEND(a, "-------->>--------\n");
+			DEBUG_TRACE (DEBUG::ChanMapping, DEBUG_STR(a).str());
 		}
-		cout << "---->>----\n";
 #endif
 	}
 
@@ -1324,11 +1339,11 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 	ChanCount outputs = info->n_outputs;
 
 	if (in.get(DataType::MIDI) == 1 && outputs.get(DataType::MIDI) == 0) {
-		DEBUG_TRACE ( DEBUG::Processors, string_compose ("bypassing midi-data around %1\n", name()));
+		DEBUG_TRACE ( DEBUG::ChanMapping, string_compose ("bypassing midi-data around %1\n", name()));
 		midi_bypass.set (DataType::MIDI, 1);
 	}
 	if (in.get(DataType::MIDI) == 1 && inputs.get(DataType::MIDI) == 0) {
-		DEBUG_TRACE ( DEBUG::Processors, string_compose ("hiding midi-port from plugin %1\n", name()));
+		DEBUG_TRACE ( DEBUG::ChanMapping, string_compose ("hiding midi-port from plugin %1\n", name()));
 		in.set(DataType::MIDI, 0);
 	}
 
