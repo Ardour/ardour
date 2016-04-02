@@ -40,6 +40,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_object.h"
+#include "ardour/sidechain.h"
 #include "ardour/tempo.h"
 
 #include "LuaBridge/LuaBridge.h"
@@ -231,6 +232,15 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("name", &SessionObject::name)
 		.endClass ()
 
+		.deriveWSPtrClass <IO, SessionObject> ("IO")
+		.addFunction ("active", &IO::active)
+		.addFunction ("add_port", &IO::add_port)
+		.addFunction ("remove_port", &IO::remove_port)
+		.addFunction ("connect", &IO::connect)
+		.addFunction ("disconnect", (int (IO::*)(boost::shared_ptr<Port>, std::string, void *))&IO::disconnect)
+		.addFunction ("physically_connected", &IO::physically_connected)
+		.endClass ()
+
 		.deriveWSPtrClass <Route, SessionObject> ("Route")
 		.addFunction ("set_name", &Route::set_name)
 		.addFunction ("comment", &Route::comment)
@@ -345,12 +355,24 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <Processor, Automatable> ("Processor")
 		.addCast<PluginInsert> ("to_insert")
+		.addCast<SideChain> ("to_sidechain")
+		.addCast<IOProcessor> ("to_ioprocessor")
 		.addFunction ("display_name", &Processor::display_name)
 		.addFunction ("active", &Processor::active)
 		.addFunction ("activate", &Processor::activate)
 		.addFunction ("deactivate", &Processor::deactivate)
 		.addFunction ("control", (boost::shared_ptr<Evoral::Control>(Evoral::ControlSet::*)(const Evoral::Parameter&, bool))&Evoral::ControlSet::control)
 		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
+		.endClass ()
+
+		.deriveWSPtrClass <IOProcessor, Processor> ("IOProcessor")
+		.addFunction ("natural_input_streams", &IOProcessor::natural_input_streams)
+		.addFunction ("natural_output_streams", &IOProcessor::natural_output_streams)
+		.addFunction ("input", (boost::shared_ptr<IO>(IOProcessor::*)())&IOProcessor::input)
+		.addFunction ("output", (boost::shared_ptr<IO>(IOProcessor::*)())&IOProcessor::output)
+		.endClass ()
+
+		.deriveWSPtrClass <SideChain, IOProcessor> ("SideChain")
 		.endClass ()
 
 		.deriveWSPtrClass <Plugin, PBD::StatefulDestructible> ("Plugin")
