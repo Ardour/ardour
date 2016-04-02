@@ -959,14 +959,14 @@ PluginInsert::sanitize_maps ()
 			for (uint32_t i = 0; i < natural_input_streams().get (*t); ++i) {
 				bool valid;
 				uint32_t idx = _in_map[pc].get (*t, i, &valid);
-				if (valid && idx <= _configured_in.get (*t)) {
+				if (valid && idx < _configured_in.get (*t)) {
 					new_in.set (*t, i, idx);
 				}
 			}
 			for (uint32_t o = 0; o < natural_output_streams().get (*t); ++o) {
 				bool valid;
 				uint32_t idx = _out_map[pc].get (*t, o, &valid);
-				if (valid && idx <= _configured_out.get (*t)) {
+				if (valid && idx < _configured_out.get (*t)) {
 					new_out.set (*t, o, idx);
 				}
 			}
@@ -1034,6 +1034,7 @@ PluginInsert::reset_map (bool emit)
 			_out_map[pc].offset_to(*t, pc * natural_output_streams().get(*t));
 		}
 	}
+	sanitize_maps ();
 	if (old_in == _in_map && old_out == _out_map) {
 		return false;
 	}
