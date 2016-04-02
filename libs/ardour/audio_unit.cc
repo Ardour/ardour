@@ -1497,8 +1497,8 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 				bufs.count(), bufs.available()));
 
 	/* the apparent number of buffers matches our input configuration, but we know that the bufferset
-	   has the capacity to handle our outputs.
-	   */
+	 * has the capacity to handle our outputs.
+	 */
 
 	assert (bufs.available() >= ChanCount (DataType::AUDIO, output_channels));
 
@@ -1545,54 +1545,52 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 
 			/* one MIDI port/buffer only */
 
-				MidiBuffer& m = bufs.get_midi (i);
+			MidiBuffer& m = bufs.get_midi (i);
 
-				for (MidiBuffer::iterator i = m.begin(); i != m.end(); ++i) {
-					Evoral::MIDIEvent<framepos_t> ev (*i);
+			for (MidiBuffer::iterator i = m.begin(); i != m.end(); ++i) {
+				Evoral::MIDIEvent<framepos_t> ev (*i);
 
-					if (ev.is_channel_event()) {
-						const uint8_t* b = ev.buffer();
-						DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: MIDI event %2\n", name(), ev));
-						unit->MIDIEvent (b[0], b[1], b[2], ev.time());
-					}
-
-					/* XXX need to handle sysex and other message types */
+				if (ev.is_channel_event()) {
+					const uint8_t* b = ev.buffer();
+					DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: MIDI event %2\n", name(), ev));
+					unit->MIDIEvent (b[0], b[1], b[2], ev.time());
 				}
+
+				/* XXX need to handle sysex and other message types */
 			}
 		}
+	}
 
-		/* does this really mean anything ?
-		*/
+	/* does this really mean anything ?  */
 
-		ts.mSampleTime = frames_processed;
-		ts.mFlags = kAudioTimeStampSampleTimeValid;
+	ts.mSampleTime = frames_processed;
+	ts.mFlags = kAudioTimeStampSampleTimeValid;
 
-		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 render flags=%2 time=%3 nframes=%4 buffers=%5\n",
-					name(), flags, frames_processed, nframes, buffers->mNumberBuffers));
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 render flags=%2 time=%3 nframes=%4 buffers=%5\n",
+				name(), flags, frames_processed, nframes, buffers->mNumberBuffers));
 
-		if ((err = unit->Render (&flags, &ts, 0, nframes, buffers)) == noErr) {
+	if ((err = unit->Render (&flags, &ts, 0, nframes, buffers)) == noErr) {
 
-			input_maxbuf = 0;
-			frames_processed += nframes;
+		input_maxbuf = 0;
+		frames_processed += nframes;
 
-			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 rendered %2 buffers of %3\n",
-						name(), buffers->mNumberBuffers, output_channels));
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 rendered %2 buffers of %3\n",
+					name(), buffers->mNumberBuffers, output_channels));
 
-			int32_t limit = min ((int32_t) buffers->mNumberBuffers, output_channels);
-			int32_t i;
+		int32_t limit = min ((int32_t) buffers->mNumberBuffers, output_channels);
+		int32_t i;
 
-			for (i = 0; i < limit; ++i) {
-				// we know in_map == out_map
-				bool valid = false;
-				uint32_t idx = out_map.get (DataType::AUDIO, i, &valid);
-				if (!valid) continue;
-				Sample* expected_buffer_address = bufs.get_audio (idx).data (offset);
-				if (expected_buffer_address != buffers->mBuffers[i].mData) {
-					/* plugin provided its own buffer for output so copy it back to where we want it
-					*/
-					memcpy (expected_buffer_address, buffers->mBuffers[i].mData, nframes * sizeof (Sample));
-				}
+		for (i = 0; i < limit; ++i) {
+			bool valid = false;
+			uint32_t idx = out_map.get (DataType::AUDIO, i, &valid);
+			if (!valid) continue;
+			Sample* expected_buffer_address = bufs.get_audio (idx).data (offset);
+			if (expected_buffer_address != buffers->mBuffers[i].mData) {
+				/* plugin provided its own buffer for output so copy it back to where we want it
+				*/
+				memcpy (expected_buffer_address, buffers->mBuffers[i].mData, nframes * sizeof (Sample));
 			}
+		}
 
 		/* now silence any buffers that were passed in but the that the plugin
 		 * did not fill/touch/use.
