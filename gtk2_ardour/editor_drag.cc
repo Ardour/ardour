@@ -3225,22 +3225,9 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	TempoMap& map (_editor->session()->tempo_map());
 
-	if (_copy == true) {
-		XMLNode &after = map.get_state();
-		_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
-		_editor->commit_reversible_command ();
-
-	} else {
-		if (_real_section->position_lock_style() == AudioTime) {
-			map.replace_meter (*_real_section, Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->frame());
-		} else {
-			map.replace_meter (*_real_section, Meter (_real_section->divisions_per_bar(), _real_section->note_divisor()), _real_section->bbt());
-		}
-
-		XMLNode &after = map.get_state();
-		_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
-		_editor->commit_reversible_command ();
-	}
+	XMLNode &after = map.get_state();
+	_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
+	_editor->commit_reversible_command ();
 
 	// delete the dummy marker we used for visual representation while moving.
 	// a new visual marker will show up automatically.
@@ -3251,11 +3238,8 @@ void
 MeterMarkerDrag::aborted (bool moved)
 {
 	_marker->set_position (_marker->meter().frame ());
-
+	_editor->session()->tempo_map().set_state (*before_state, Stateful::current_state_version);
 	if (moved) {
-		TempoMap& map (_editor->session()->tempo_map());
-		/* we removed it before, so add it back now */
-		map.add_meter (_marker->meter(), map.beat_at_frame (_marker->meter().frame()), _marker->meter().bbt());
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
 		delete _marker;
