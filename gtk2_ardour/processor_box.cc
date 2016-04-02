@@ -1157,7 +1157,7 @@ ProcessorEntry::RoutingIcon::expose_map (cairo_t* cr, const double width, const 
 			bool valid_src;
 			uint32_t src = _f_out_map.get_src (is_midi ? DataType::MIDI : DataType::AUDIO, idx, &valid_src);
 			if (!valid_src) {
-				double x = pin_x_pos (i, width, pc_in, pc_in_midi, is_midi);
+				double x = pin_x_pos (i, width, pc_in, 0, false);
 				draw_gnd (cr, x, height, is_midi);
 				continue;
 			}

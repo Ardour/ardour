@@ -179,11 +179,13 @@ PluginPinDialog::update_elements ()
 	_selection.reset();
 
 	for (uint32_t i = 0; i < _in.n_total (); ++i) {
-		_elements.push_back (CtrlWidget (Input, (i < _in.n_midi () ? DataType::MIDI : DataType::AUDIO), i));
+		int id = (i < _in.n_midi ()) ? i : i - _in.n_midi ();
+		_elements.push_back (CtrlWidget (Input, (i < _in.n_midi () ? DataType::MIDI : DataType::AUDIO), id));
 	}
 
 	for (uint32_t i = 0; i < _out.n_total (); ++i) {
-		_elements.push_back (CtrlWidget (Output, (i < _out.n_midi () ? DataType::MIDI : DataType::AUDIO), i));
+		int id = (i < _out.n_midi ()) ? i : i - _out.n_midi ();
+		_elements.push_back (CtrlWidget (Output, (i < _out.n_midi () ? DataType::MIDI : DataType::AUDIO), id));
 	}
 
 	for (uint32_t n = 0; n < _n_plugins; ++n) {
@@ -214,16 +216,24 @@ PluginPinDialog::update_element_pos ()
 	for (CtrlElemList::iterator i = _elements.begin(); i != _elements.end(); ++i) {
 		switch (i->e->ct) {
 			case Input:
-				i->x = rint ((i->e->id + 1) * _width / (1. + _in.n_total ())) - 5.5;
-				i->y = y_in - 25;
-				i->w = 10;
-				i->h = 25;
+				{
+					uint32_t idx = i->e->id;
+					if (i->e->dt == DataType::AUDIO) { idx += _in.n_midi (); }
+					i->x = rint ((idx + 1) * _width / (1. + _in.n_total ())) - 5.5;
+					i->y = y_in - 25;
+					i->w = 10;
+					i->h = 25;
+				}
 				break;
 			case Output:
-				i->x = rint ((i->e->id + 1) * _width / (1. + _out.n_total ())) - 5.5;
-				i->y = y_out;
-				i->w = 10;
-				i->h = 25;
+				{
+					uint32_t idx = i->e->id;
+					if (i->e->dt == DataType::AUDIO) { idx += _out.n_midi (); }
+					i->x = rint ((idx + 1) * _width / (1. + _out.n_total ())) - 5.5;
+					i->y = y_out;
+					i->w = 10;
+					i->h = 25;
+				}
 				break;
 			case Sink:
 				{
