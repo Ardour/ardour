@@ -49,7 +49,7 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	Tempo tempo (map.tempo_at (frame));
 	map.bbt_time (frame, when);
 
-	init (when, tempo.beats_per_minute(), tempo.note_type(), TempoSection::Constant, true, PositionLockStyle::MusicTime);
+	init (when, tempo.beats_per_minute(), tempo.note_type(), TempoSection::Constant, true, MusicTime);
 }
 
 TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
@@ -132,9 +132,9 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 
 	strings.clear();
 
-	lock_styles.insert (make_pair (_("music"), PositionLockStyle::MusicTime));
+	lock_styles.insert (make_pair (_("music"), MusicTime));
 	strings.push_back (_("music"));
-	lock_styles.insert (make_pair (_("audio"), PositionLockStyle::AudioTime));
+	lock_styles.insert (make_pair (_("audio"), AudioTime));
 	strings.push_back (_("audio"));
 	set_popdown_strings (lock_style, strings);
 	LockStyles::iterator ls;
@@ -340,7 +340,7 @@ TempoDialog::get_lock_style ()
 
 	if (x == lock_styles.end()) {
 		error << string_compose(_("incomprehensible lock style (%1)"), lock_style.get_active_text()) << endmsg;
-		return PositionLockStyle::MusicTime;
+		return MusicTime;
 	}
 
 	return x->second;
@@ -418,7 +418,7 @@ MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 	Meter meter (map.meter_at(frame));
 
 	map.bbt_time (frame, when);
-	init (when, meter.divisions_per_bar(), meter.note_divisor(), true, PositionLockStyle::MusicTime);
+	init (when, meter.divisions_per_bar(), meter.note_divisor(), true, MusicTime);
 }
 
 MeterDialog::MeterDialog (TempoMap& map, MeterSection& section, const string&)
@@ -475,9 +475,9 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 
 	strings.clear();
 
-	lock_styles.insert (make_pair (_("music"), PositionLockStyle::MusicTime));
+	lock_styles.insert (make_pair (_("music"), MusicTime));
 	strings.push_back (_("music"));
-	lock_styles.insert (make_pair (_("audio"), PositionLockStyle::AudioTime));
+	lock_styles.insert (make_pair (_("audio"), AudioTime));
 	strings.push_back (_("audio"));
 	set_popdown_strings (lock_style, strings);
 	LockStyles::iterator ls;
@@ -648,7 +648,7 @@ MeterDialog::get_lock_style ()
 
 	if (x == lock_styles.end()) {
 		error << string_compose(_("incomprehensible meter lock style (%1)"), lock_style.get_active_text()) << endmsg;
-		return PositionLockStyle::MusicTime;
+		return MusicTime;
 	}
 
 	return x->second;
