@@ -119,6 +119,7 @@ private:
 	double _pin_box_size;
 	double _width, _height;
 	bool _position_valid;
+	bool _ignore_updates;
 	ARDOUR::Route* _route () { return static_cast<ARDOUR::Route*> (_pi->owner ()); }
 };
 

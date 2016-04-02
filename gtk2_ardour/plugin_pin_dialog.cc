@@ -49,6 +49,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	, _pi (pi)
 	, _pin_box_size (4)
 	, _position_valid (false)
+	, _ignore_updates (false)
 {
 	assert (pi->owner ()); // Route
 
@@ -153,6 +154,9 @@ PluginPinDialog::~PluginPinDialog()
 void
 PluginPinDialog::plugin_reconfigured ()
 {
+	if (_ignore_updates) {
+		return;
+	}
 	_n_plugins = _pi->get_count ();
 	_pi->configured_io (_in, _out);
 	_sinks = _pi->natural_input_streams ();
@@ -581,7 +585,20 @@ PluginPinDialog::handle_output_action (const CtrlElem &s, const CtrlElem &o)
 			out_map.unset (s->dt, s->id);
 		}
 		// disconnect other outputs
-		uint32_t idx = out_map.get_src (s->dt, o->id, &valid);
+		_ignore_updates = true;
+		for (uint32_t n = 0; n < _n_plugins; ++n) {
+			if (n == pc) {
+				continue;
+			}
+			ChanMapping n_out_map (_pi->output_map (n));
+			idx = n_out_map.get_src (s->dt, o->id, &valid);
+			if (valid) {
+				n_out_map.unset (s->dt, idx);
+				_pi->set_output_map (n, n_out_map);
+			}
+		}
+		_ignore_updates = false;
+		idx = out_map.get_src (s->dt, o->id, &valid);
 		if (valid) {
 			out_map.unset (s->dt, idx);
 		}
