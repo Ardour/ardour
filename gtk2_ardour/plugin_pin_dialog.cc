@@ -38,8 +38,10 @@ using namespace Gtkmm2ext;
 
 PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
-	, _strict_io (_("Strict I/O"))
-	, _automatic (_("Automatic"))
+	, _ind_strict_io (_("Strict I/O"))
+	, _ind_customized (_("Customized"))
+	, _rst_config (_("Configuration"))
+	, _rst_mapping (_("Connections"))
 	, _add_plugin (_("+"))
 	, _del_plugin (_("-"))
 	, _add_output_audio (_("+"))
@@ -47,7 +49,8 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	, _add_output_midi (_("+"))
 	, _del_output_midi (_("-"))
 	, _pi (pi)
-	, _pin_box_size (4)
+	, _pin_box_size (8)
+	, _min_width (300)
 	, _position_valid (false)
 	, _ignore_updates (false)
 {
@@ -65,9 +68,11 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context()
 			);
 
-	// TODO min. width depending on # of pins.
-	darea.set_size_request(600, 200);
-	_strict_io.set_sensitive (false);
+	// needs a better way: insensitive indicators
+	_ind_strict_io.set_sensitive (false); // track status
+	_ind_strict_io.set_name ("rude solo");
+	_ind_customized.set_sensitive (false); // plugin status
+	_ind_customized.set_name ("rude solo");
 
 	Label* l;
 	int r = 0;
@@ -78,6 +83,8 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	l = manage (new Label (_("Track/Bus:"), ALIGN_END));
 	t->attach (*l, 0, 1, r, r + 1);
 	l = manage (new Label ());
+	l->set_alignment (ALIGN_START);
+	l->set_padding (2, 1);
 	l->set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 	l->set_width_chars (24);
 	l->set_max_width_chars (24);
@@ -88,6 +95,8 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	l = manage (new Label (_("Plugin:"), ALIGN_END));
 	t->attach (*l, 0, 1, r, r + 1);
 	l = manage (new Label ());
+	l->set_alignment(ALIGN_START);
+	l->set_padding (2, 1);
 	l->set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 	l->set_width_chars (24);
 	l->set_max_width_chars (24);
@@ -95,10 +104,16 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	t->attach (*l, 1, 3, r, r + 1);
 	++r;
 
-	l = manage (new Label (_("Settings:"), ALIGN_END));
+	l = manage (new Label (_("Status:"), ALIGN_END));
 	t->attach (*l, 0, 1, r, r + 1);
-	t->attach (_strict_io, 1, 2, r, r + 1, FILL, SHRINK);
-	t->attach (_automatic, 2, 3, r, r + 1, FILL, SHRINK);
+	t->attach (_ind_strict_io, 1, 2, r, r + 1, FILL, SHRINK);
+	t->attach (_ind_customized, 2, 3, r, r + 1, FILL, SHRINK);
+	++r;
+
+	l = manage (new Label (_("Reset:"), ALIGN_END));
+	t->attach (*l, 0, 1, r, r + 1);
+	t->attach (_rst_mapping, 1, 2, r, r + 1, FILL, SHRINK);
+	t->attach (_rst_config, 2, 3, r, r + 1, FILL, SHRINK);
 	++r;
 
 	l = manage (new Label (_("Instances:"), ALIGN_END));
@@ -131,20 +146,22 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	plugin_reconfigured ();
 
 	darea.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
+	darea.signal_size_request().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_size_request));
 	darea.signal_size_allocate().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_size_allocate));
 	darea.signal_expose_event().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_expose_event));
 	darea.signal_button_press_event().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_button_press_event));
 	darea.signal_button_release_event().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_button_release_event));
 	darea.signal_motion_notify_event().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_motion_notify_event));
 
-	_automatic.signal_clicked.connect (sigc::mem_fun(*this, &PluginPinDialog::automatic_clicked));
-	 _add_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_plugin_clicked), true));
-	 _del_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_plugin_clicked), false));
+	_rst_mapping.signal_clicked.connect (sigc::mem_fun(*this, &PluginPinDialog::reset_mapping));
+	_rst_config.signal_clicked.connect (sigc::mem_fun(*this, &PluginPinDialog::reset_configuration));
+	_add_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_plugin_clicked), true));
+	_del_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_plugin_clicked), false));
 
-	 _add_output_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_port_clicked), true, DataType::AUDIO));
-	 _del_output_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_port_clicked), false, DataType::AUDIO));
-	 _add_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_port_clicked), true, DataType::MIDI));
-	 _del_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_port_clicked), false, DataType::MIDI));
+	_add_output_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_port_clicked), true, DataType::AUDIO));
+	_del_output_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_port_clicked), false, DataType::AUDIO));
+	_add_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_port_clicked), true, DataType::MIDI));
+	_del_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::add_remove_port_clicked), false, DataType::MIDI));
 }
 
 PluginPinDialog::~PluginPinDialog()
@@ -165,7 +182,20 @@ PluginPinDialog::plugin_reconfigured ()
 	_del_plugin.set_sensitive (_n_plugins > 1);
 	_del_output_audio.set_sensitive (_out.n_audio () > 0 && _out.n_total () > 1);
 	_del_output_midi.set_sensitive (_out.n_midi () > 0 && _out.n_total () > 1);
-	_strict_io.set_active (_pi->strict_io());
+	_ind_strict_io.set_active (_pi->strict_io());
+	_ind_customized.set_active (_pi->custom_cfg());
+
+	// calc minimum width
+	const uint32_t max_ports = std::max (_in.n_total (), _out.n_total ());
+	const uint32_t max_pins = std::max ((_sinks * _n_plugins).n_total (), (_sources * _n_plugins).n_total ());
+	uint32_t min_width = std::max (25 * max_ports, (uint32_t)(20 + _pin_box_size) * max_pins);
+	min_width = std::max (min_width, 40 * _n_plugins);
+	min_width = std::max ((uint32_t)300, min_width);
+	min_width = 10 * ceilf (min_width / 10.f);
+	if (min_width != _min_width) {
+		_min_width = min_width;
+		darea.queue_resize ();
+	}
 
 	update_elements ();
 }
@@ -318,16 +348,6 @@ PluginPinDialog::draw_plugin_pin (cairo_t* cr, const CtrlWidget& w)
 	cairo_fill (cr);
 }
 
-bool
-PluginPinDialog::is_valid_port (uint32_t i, uint32_t n_total, uint32_t n_midi, bool midi)
-{
-	if (!midi) { i += n_midi; }
-	if (i >= n_total) {
-		return false;
-	}
-	return true;
-}
-
 double
 PluginPinDialog::pin_x_pos (uint32_t i, double x0, double width, uint32_t n_total, uint32_t n_midi, bool midi)
 {
@@ -339,9 +359,10 @@ void
 PluginPinDialog::draw_connection (cairo_t* cr, double x0, double x1, double y0, double y1, bool midi, bool dashed)
 {
 	const double bz = 2 * _pin_box_size;
+	const double bc = dashed ? 1.25 * _pin_box_size : 0;
 
 	cairo_move_to (cr, x0, y0);
-	cairo_curve_to (cr, x0, y0 + bz, x1, y1 - bz, x1, y1);
+	cairo_curve_to (cr, x0 - bc, y0 + bz, x1 - bc, y1 - bz, x1, y1);
 	cairo_set_line_width (cr, 3.0);
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 	cairo_set_source_rgb (cr, 1, 0, 0);
@@ -419,9 +440,6 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 			for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
 				uint32_t pn = (*c).first; // pin
 				uint32_t pb = (*c).second;
-				if (!is_valid_port (pb, pc_in, pc_in_midi, is_midi)) {
-					continue;
-				}
 				double c_x0 = pin_x_pos (pb, 0, width, pc_in, pc_in_midi, is_midi);
 				double c_x1 = pin_x_pos (pn, x0 - bxw2, bxw, _sinks.n_total (), _sinks.n_midi (), is_midi);
 				draw_connection (cr, c_x0, c_x1, y_in, yc - bxh2 - _pin_box_size, is_midi);
@@ -433,9 +451,6 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 			for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
 				uint32_t pn = (*c).first; // pin
 				uint32_t pb = (*c).second;
-				if (!is_valid_port (pb, pc_out, pc_out_midi, is_midi)) {
-					continue;
-				}
 				double c_x0 = pin_x_pos (pn, x0 - bxw2, bxw, _sources.n_total (), _sources.n_midi (), is_midi);
 				double c_x1 = pin_x_pos (pb, 0, width, pc_out, pc_out_midi, is_midi);
 				draw_connection (cr, c_x0, c_x1, yc + bxh2 + _pin_box_size, y_out, is_midi);
@@ -459,6 +474,13 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 
 	cairo_destroy (cr);
 	return true;
+}
+
+void
+PluginPinDialog::darea_size_request (Gtk::Requisition* req)
+{
+	req->width = _min_width;
+	req->height = 200;
 }
 
 void
@@ -579,7 +601,7 @@ PluginPinDialog::handle_input_action (const CtrlElem &s, const CtrlElem &i)
 void
 PluginPinDialog::handle_output_action (const CtrlElem &s, const CtrlElem &o)
 {
-	const int pc = s->ip;
+	const uint32_t pc = s->ip;
 	bool valid;
 	ChanMapping out_map (_pi->output_map (pc));
 	uint32_t idx = out_map.get (s->dt, s->id, &valid);
@@ -619,9 +641,15 @@ PluginPinDialog::handle_output_action (const CtrlElem &s, const CtrlElem &o)
 }
 
 void
-PluginPinDialog::automatic_clicked ()
+PluginPinDialog::reset_configuration ()
 {
 	_route()->reset_plugin_insert (_pi);
+}
+
+void
+PluginPinDialog::reset_mapping ()
+{
+	_pi->reset_map ();
 }
 
 void

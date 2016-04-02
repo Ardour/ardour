@@ -76,8 +76,10 @@ private:
 
 
 	Gtk::DrawingArea darea;
-	ArdourButton _strict_io;
-	ArdourButton _automatic;
+	ArdourButton _ind_strict_io;
+	ArdourButton _ind_customized;
+	ArdourButton _rst_config;
+	ArdourButton _rst_mapping;
 	ArdourButton _add_plugin;
 	ArdourButton _del_plugin;
 	ArdourButton _add_output_audio;
@@ -89,6 +91,7 @@ private:
 	void update_elements ();
 	void update_element_pos ();
 
+	void darea_size_request (Gtk::Requisition*);
 	void darea_size_allocate (Gtk::Allocation&);
 	bool darea_expose_event (GdkEventExpose*);
 	bool darea_motion_notify_event (GdkEventMotion*);
@@ -100,10 +103,10 @@ private:
 
 	void set_color (cairo_t*, bool);
 	double pin_x_pos (uint32_t, double, double, uint32_t, uint32_t, bool);
-	bool is_valid_port (uint32_t, uint32_t, uint32_t, bool);
 	void draw_connection (cairo_t*, double, double, double, double, bool, bool dashed = false);
 
-	void automatic_clicked ();
+	void reset_mapping ();
+	void reset_configuration ();
 	void add_remove_plugin_clicked (bool);
 	void add_remove_port_clicked (bool, ARDOUR::DataType);
 	void handle_input_action (const CtrlElem &, const CtrlElem &);
@@ -118,6 +121,7 @@ private:
 
 	double _pin_box_size;
 	double _width, _height;
+	double _min_width;
 	bool _position_valid;
 	bool _ignore_updates;
 	ARDOUR::Route* _route () { return static_cast<ARDOUR::Route*> (_pi->owner ()); }
