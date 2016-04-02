@@ -879,6 +879,7 @@ PluginInsert::set_input_map (uint32_t num, ChanMapping m) {
 	if (num < _in_map.size()) {
 		bool changed = _in_map[num] != m;
 		_in_map[num] = m;
+		sanitize_maps ();
 		if (changed) {
 			PluginMapChanged (); /* EMIT SIGNAL */
 		}
@@ -890,6 +891,7 @@ PluginInsert::set_output_map (uint32_t num, ChanMapping m) {
 	if (num < _out_map.size()) {
 		bool changed = _out_map[num] != m;
 		_out_map[num] = m;
+		sanitize_maps ();
 		if (changed) {
 			PluginMapChanged (); /* EMIT SIGNAL */
 		}
@@ -941,6 +943,63 @@ PluginInsert::has_midi_bypass () const
 		return true;
 	}
 	return false;
+}
+
+bool
+PluginInsert::sanitize_maps ()
+{
+	bool changed = false;
+	/* strip dead wood */
+	PinMappings new_ins;
+	PinMappings new_outs;
+	for (uint32_t pc = 0; pc < get_count(); ++pc) {
+		ChanMapping new_in;
+		ChanMapping new_out;
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			for (uint32_t i = 0; i < natural_input_streams().get (*t); ++i) {
+				bool valid;
+				uint32_t idx = _in_map[pc].get (*t, i, &valid);
+				if (valid && idx <= _configured_in.get (*t)) {
+					new_in.set (*t, i, idx);
+				}
+			}
+			for (uint32_t o = 0; o < natural_output_streams().get (*t); ++o) {
+				bool valid;
+				uint32_t idx = _out_map[pc].get (*t, o, &valid);
+				if (valid && idx <= _configured_out.get (*t)) {
+					new_out.set (*t, o, idx);
+				}
+			}
+		}
+		if (_in_map[pc] != new_in || _out_map[pc] != new_out) {
+			changed = true;
+		}
+		new_ins[pc] = new_in;
+		new_outs[pc] = new_out;
+	}
+	/* prevent dup output assignments */
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		for (uint32_t o = 0; o < _configured_out.get (*t); ++o) {
+			bool mapped = false;
+			for (uint32_t pc = 0; pc < get_count(); ++pc) {
+				bool valid;
+				uint32_t idx = new_outs[pc].get_src (*t, o, &valid);
+				if (valid && mapped) {
+					new_outs[pc].unset (*t, idx);
+				} else if (valid) {
+					mapped = true;
+				}
+			}
+		}
+	}
+
+	if (_in_map != new_ins || _out_map != new_outs) {
+		changed = true;
+	}
+	_in_map = new_ins;
+	_out_map = new_outs;
+
+	return changed;
 }
 
 bool
@@ -1056,36 +1115,12 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		 ) {
 		/* If the configuraton has not changed, keep the mapping */
 	} else if (_match.custom_cfg && _configured) {
-		/* strip dead wood */
-		for (uint32_t pc = 0; pc < get_count(); ++pc) {
-			ChanMapping new_in;
-			ChanMapping new_out;
-			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-				for (uint32_t i = 0; i < natural_input_streams().get (*t); ++i) {
-					bool valid;
-					uint32_t idx = _in_map[pc].get (*t, i, &valid);
-					if (valid && idx <= in.get (*t)) {
-						new_in.set (*t, i, idx);
-					}
-				}
-				for (uint32_t o = 0; o < natural_output_streams().get (*t); ++o) {
-					bool valid;
-					uint32_t idx = _out_map[pc].get (*t, o, &valid);
-					if (valid && idx <= out.get (*t)) {
-						new_out.set (*t, o, idx);
-					}
-				}
-			}
-			if (_in_map[pc] != new_in || _out_map[pc] != new_out) {
-				mapping_changed = true;
-			}
-			_in_map[pc] = new_in;
-			_out_map[pc] = new_out;
-		}
+		mapping_changed = sanitize_maps ();
 	} else {
 		if (_maps_from_state) {
 			_maps_from_state = false;
 			mapping_changed = true;
+			sanitize_maps ();
 		} else {
 			/* generate a new mapping */
 			mapping_changed = reset_map (false);

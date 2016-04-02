@@ -92,6 +92,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void set_input_map (uint32_t, ChanMapping);
 	void set_output_map (uint32_t, ChanMapping);
 	bool reset_map (bool emit = true);
+	bool sanitize_maps ();
 
 	// these are ports visible on the outside
 	ChanCount output_streams() const;
