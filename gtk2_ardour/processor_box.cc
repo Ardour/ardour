@@ -1024,20 +1024,17 @@ ProcessorEntry::RoutingIcon::set (
 
 bool
 ProcessorEntry::RoutingIcon::identity () const {
-	if (!_in_map.is_monotonic () || !_in_map.is_monotonic ()) {
+	if (!_in_map.is_monotonic () || !_in_map.is_identity ()) {
 		return false;
 	}
-	if (_in_map.count () != _sinks.n_total ()) {
+	if (_in_map.count () != _sinks.n_total () || _in.n_total () != _sinks.n_total ()) {
 		return false;
 	}
 	if (_feed) {
-		if (!_f_out_map.is_monotonic () || _sinks != _f_sources) {
+		if (!_f_out_map.is_monotonic () || !_f_out_map.is_identity ()) {
 			return false;
 		}
-		if (!_f_out_map.is_identity ()) {
-			return false;
-		}
-		if (_f_out_map.count () != _f_sources.n_total ()) {
+		if (_f_out_map.count () != _f_sources.n_total () || _sinks != _f_sources) {
 			return false;
 		}
 	}
@@ -1071,7 +1068,7 @@ void
 ProcessorEntry::RoutingIcon::draw_gnd (cairo_t* cr, double x0, double height, bool midi)
 {
 	const double dx = 1 + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale()));
-	const double y0 = rint (height * .66) - .5;
+	const double y0 = rint (height * .66) + .5;
 
 	cairo_move_to (cr, x0, height);
 	cairo_line_to (cr, x0, y0);
@@ -1161,7 +1158,7 @@ ProcessorEntry::RoutingIcon::expose_map (cairo_t* cr, const double width, const 
 				draw_gnd (cr, x, height, is_midi);
 				continue;
 			}
-			c_x0 = pin_x_pos (src, width, _f_out.n_total(), _f_out.n_midi(), is_midi);
+			c_x0 = pin_x_pos (src, width, _f_sources.n_total(), _f_sources.n_midi(), is_midi);
 		} else {
 			c_x0 = pin_x_pos (idx, width, _in.n_total(), _in.n_midi(), is_midi);
 		}
