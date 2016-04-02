@@ -1064,7 +1064,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(DEBUG::ChanMapping)) {
 		DEBUG_STR_DECL(a);
-		DEBUG_STR_APPEND(a, string_compose ("Match '%1':",  name()));
+		DEBUG_STR_APPEND(a, string_compose ("Match '%1': ",  name()));
 		DEBUG_STR_APPEND(a, _match);
 		DEBUG_TRACE (DEBUG::ChanMapping, DEBUG_STR(a).str());
 	}
@@ -1219,7 +1219,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	/* if a user specified a custom cfg, so be it. */
 	if (_custom_cfg) {
 		out = _custom_out;
-		return Match (ExactMatch, get_count(), false, true); // XXX
+		return Match (ExactMatch, get_count(), _strict_io, true); // XXX
 	}
 
 	/* try automatic configuration */
@@ -1228,10 +1228,6 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	PluginInfoPtr info = _plugins.front()->get_info();
 	ChanCount inputs  = info->n_inputs;
 	ChanCount outputs = info->n_outputs;
-	ChanCount midi_bypass;
-	if (inx.get(DataType::MIDI) == 1 && outputs.get(DataType::MIDI) == 0) {
-		midi_bypass.set (DataType::MIDI, 1);
-	}
 
 	/* handle case strict-i/o */
 	if (_strict_io && m.method != Impossible) {
@@ -1243,6 +1239,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 			ChanCount max_out (DataType::AUDIO, 2); // TODO use master-out
 			max_out.set (DataType::MIDI, out.get(DataType::MIDI));
 			out = ChanCount::min (out, max_out);
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("special case strict-i/o instrument: %1\n", name()));
 			return m;
 		}
 
@@ -1257,8 +1254,9 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 						if (nin == 0 || inx.get(*t) == 0) { continue; }
 						f = max (f, (uint32_t) ceil (inx.get(*t) / (float)nin));
 					}
-					out = inx + midi_bypass;
-					return Match (Replicate, f);
+					out = inx;
+					DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("special case strict-i/o generator: %1\n", name()));
+					return Match (Replicate, f, _strict_io);
 				}
 				break;
 			case Split:
@@ -1267,18 +1265,15 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 				break;
 		}
 
-		out = inx + midi_bypass;
-		if (inx.get(DataType::MIDI) == 1
-				&& out.get (DataType::MIDI) == 0
-				&& outputs.get(DataType::MIDI) == 0) {
-			out += ChanCount (DataType::MIDI, 1);
-		}
+		out = inx;
 		return m;
 	}
 
 	if (m.method != Impossible) {
 		return m;
 	}
+
+	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("resolving 'Impossible' match for %1\n", name()));
 
 	if (info->reconfigurable_io()) {
 		ChanCount useins;
@@ -1288,6 +1283,11 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 			return Match (Impossible, 0);
 		}
 		return Match (Delegate, 1);
+	}
+
+	ChanCount midi_bypass;
+	if (inx.get(DataType::MIDI) == 1 && outputs.get(DataType::MIDI) == 0) {
+		midi_bypass.set (DataType::MIDI, 1);
 	}
 
 	// add at least as many plugins so that output count matches input count
@@ -1340,11 +1340,11 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 	ChanCount outputs = info->n_outputs;
 
 	if (in.get(DataType::MIDI) == 1 && outputs.get(DataType::MIDI) == 0) {
-		DEBUG_TRACE ( DEBUG::ChanMapping, string_compose ("bypassing midi-data around %1\n", name()));
+		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("bypassing midi-data around %1\n", name()));
 		midi_bypass.set (DataType::MIDI, 1);
 	}
 	if (in.get(DataType::MIDI) == 1 && inputs.get(DataType::MIDI) == 0) {
-		DEBUG_TRACE ( DEBUG::ChanMapping, string_compose ("hiding midi-port from plugin %1\n", name()));
+		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("hiding midi-port from plugin %1\n", name()));
 		in.set(DataType::MIDI, 0);
 	}
 
