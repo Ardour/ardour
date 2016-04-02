@@ -242,6 +242,7 @@ PluginPinDialog::update_element_pos ()
 	const double y_out = _height - 40;
 
 	_pin_box_size = rint (max (6., 8. * UIConfiguration::instance ().get_ui_scale ()));
+	const double dx = ceil (_pin_box_size * .5);
 
 	for (CtrlElemList::iterator i = _elements.begin (); i != _elements.end (); ++i) {
 		switch (i->e->ct) {
@@ -249,7 +250,7 @@ PluginPinDialog::update_element_pos ()
 				{
 					uint32_t idx = i->e->id;
 					if (i->e->dt == DataType::AUDIO) { idx += _in.n_midi (); }
-					i->x = rint ((idx + 1) * _width / (1. + _in.n_total ())) - 5.5;
+					i->x = rint ((idx + 1) * _width / (1. + _in.n_total ())) - 0.5 - dx;
 					i->y = y_in - 25;
 					i->w = 10;
 					i->h = 25;
@@ -259,7 +260,7 @@ PluginPinDialog::update_element_pos ()
 				{
 					uint32_t idx = i->e->id;
 					if (i->e->dt == DataType::AUDIO) { idx += _out.n_midi (); }
-					i->x = rint ((idx + 1) * _width / (1. + _out.n_total ())) - 5.5;
+					i->x = rint ((idx + 1) * _width / (1. + _out.n_total ())) - 0.5 - dx;
 					i->y = y_out;
 					i->w = 10;
 					i->h = 25;
@@ -312,26 +313,30 @@ void
 PluginPinDialog::draw_io_pin (cairo_t* cr, const CtrlWidget& w)
 {
 	const double dir = (w.e->ct == Input) ? 1 : -1;
+	const double dx = ceil (_pin_box_size * .5);
+	const double dy = min (36.0, 6. * dx);
 
-	cairo_move_to (cr, w.x + 5.0, w.y + ((w.e->ct == Input) ? 25 : 0));
-	cairo_rel_line_to (cr, -5.,  -5. * dir);
-	cairo_rel_line_to (cr,  0., -25. * dir);
-	cairo_rel_line_to (cr, 10.,   0.);
-	cairo_rel_line_to (cr,  0.,  25. * dir);
+	cairo_move_to (cr, w.x + dx, w.y + ((w.e->ct == Input) ? 25 : 0));
+	cairo_rel_line_to (cr,     -dx, -dx * dir);
+	cairo_rel_line_to (cr,      0., -dy * dir);
+	cairo_rel_line_to (cr, 2. * dx,        0.);
+	cairo_rel_line_to (cr,      0.,  dy * dir);
 	cairo_close_path  (cr);
 
-	cairo_set_line_width (cr, 1.0);
-	cairo_set_source_rgb (cr, 0, 0, 0);
-	cairo_stroke_preserve (cr);
 
 	set_color (cr, w.e->dt == DataType::MIDI);
 	if (w.e == _selection || w.e == _actor) {
-		cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 1.0);
+		cairo_fill_preserve (cr);
+		cairo_set_source_rgba (cr, 0.9, 0.9, 1.0, 0.6);
 	} else if (w.prelight) {
 		cairo_fill_preserve (cr);
-		cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.5);
+		cairo_set_source_rgba (cr, 0.9, 0.9, 0.9, 0.3);
 	}
-	cairo_fill (cr);
+	cairo_fill_preserve (cr);
+
+	cairo_set_line_width (cr, 1.0);
+	cairo_set_source_rgb (cr, 0, 0, 0);
+	cairo_stroke (cr);
 }
 
 void
@@ -340,10 +345,11 @@ PluginPinDialog::draw_plugin_pin (cairo_t* cr, const CtrlWidget& w)
 	cairo_rectangle (cr, w.x, w.y, w.w, w.h);
 	set_color (cr, w.e->dt == DataType::MIDI);
 	if (w.e == _selection || w.e == _actor) {
-		cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 1.0);
+		cairo_fill_preserve (cr);
+		cairo_set_source_rgba (cr, 0.9, 0.9, 1.0, 0.6);
 	} else if (w.prelight) {
 		cairo_fill_preserve (cr);
-		cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.5);
+		cairo_set_source_rgba (cr, 0.9, 0.9, 0.9, 0.3);
 	}
 	cairo_fill (cr);
 }
