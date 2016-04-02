@@ -3189,7 +3189,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 			if (_real_section->position_lock_style() == AudioTime) {
 				_real_section = map.add_meter (Meter (_marker->meter().divisions_per_bar(), _marker->meter().note_divisor())
-							       , _marker->position(), beat, bbt);
+							       , map.frame_time (bbt), beat, bbt);
 			} else {
 				_real_section = map.add_meter (Meter (_marker->meter().divisions_per_bar(), _marker->meter().note_divisor()), beat, bbt);
 			}
