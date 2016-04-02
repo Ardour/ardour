@@ -1452,6 +1452,7 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 	// name(), inNumberFrames, ioData->mNumberBuffers));
 
 	if (input_maxbuf == 0) {
+		DEBUG_TRACE (DEBUG::AudioUnits, "AUPlugin: render callback called illegally!");
 		error << _("AUPlugin: render callback called illegally!") << endmsg;
 		return kAudioUnitErr_CannotDoInCurrentContext;
 	}
