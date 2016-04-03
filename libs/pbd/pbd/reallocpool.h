@@ -20,7 +20,7 @@
 #define _reallocpool_h_
 
 #ifndef NDEBUG
-#define RAP_WITH_CALL_STATS // collect statistics on calls counts (light)
+//#define RAP_WITH_CALL_STATS // collect statistics on calls counts (light)
 //#define RAP_WITH_HISTOGRAM 513 // collect statistic about allocation size (not bad)
 //#define RAP_WITH_SEGMENT_STATS // collect statistics (expensive)
 #endif
