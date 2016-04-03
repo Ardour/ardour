@@ -1674,7 +1674,7 @@ IO::collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset)
 		}
 
 		for ( ; i != _ports.end(*t); ++i, ++b) {
-			Buffer& bb (i->get_buffer (nframes));
+			const Buffer& bb (i->get_buffer (nframes));
 			b->read_from (bb, nframes);
 		}
 	}
