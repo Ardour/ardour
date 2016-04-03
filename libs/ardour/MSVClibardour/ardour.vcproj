@@ -1212,6 +1212,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sidechain.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\slave.cc"
 				>
 			</File>
@@ -2199,6 +2203,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\session_utils.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\sidechain.h"
 				>
 			</File>
 			<File
