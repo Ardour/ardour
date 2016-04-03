@@ -24,6 +24,7 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "io_selector.h"
 #include "plugin_pin_dialog.h"
 #include "gui_thread.h"
 #include "ui_config.h"
@@ -42,6 +43,8 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	, _ind_customized (_("Customized"))
 	, _rst_config (_("Configuration"))
 	, _rst_mapping (_("Connections"))
+	, _tgl_sidechain (_("Enable"))
+	, _edt_sidechain (_("Connect"))
 	, _add_plugin (_("+"))
 	, _del_plugin (_("-"))
 	, _add_output_audio (_("+"))
@@ -57,15 +60,15 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	assert (pi->owner ()); // Route
 
 	_pi->PluginIoReConfigure.connect (
-			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context()
+			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context ()
 			);
 
 	_pi->PluginMapChanged.connect (
-			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context()
+			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context ()
 			);
 
 	_pi->PluginConfigChanged.connect (
-			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context()
+			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context ()
 			);
 
 	// needs a better way: insensitive indicators
@@ -88,14 +91,14 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	l->set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 	l->set_width_chars (24);
 	l->set_max_width_chars (24);
-	l->set_text (_route()->name ());
+	l->set_text (_route ()->name ());
 	t->attach (*l, 1, 3, r, r + 1);
 	++r;
 
 	l = manage (new Label (_("Plugin:"), ALIGN_END));
 	t->attach (*l, 0, 1, r, r + 1);
 	l = manage (new Label ());
-	l->set_alignment(ALIGN_START);
+	l->set_alignment (ALIGN_START);
 	l->set_padding (2, 1);
 	l->set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 	l->set_width_chars (24);
@@ -114,6 +117,12 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	t->attach (*l, 0, 1, r, r + 1);
 	t->attach (_rst_mapping, 1, 2, r, r + 1, FILL, SHRINK);
 	t->attach (_rst_config, 2, 3, r, r + 1, FILL, SHRINK);
+	++r;
+
+	l = manage (new Label (_("Sidechain:"), ALIGN_END));
+	t->attach (*l, 0, 1, r, r + 1);
+	t->attach (_tgl_sidechain, 1, 2, r, r + 1, FILL, SHRINK);
+	t->attach (_edt_sidechain, 2, 3, r, r + 1, FILL, SHRINK);
 	++r;
 
 	l = manage (new Label (_("Instances:"), ALIGN_END));
@@ -153,6 +162,9 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	darea.signal_button_release_event ().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_button_release_event));
 	darea.signal_motion_notify_event ().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_motion_notify_event));
 
+	_tgl_sidechain.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::toggle_sidechain));
+	_edt_sidechain.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::connect_sidechain));
+
 	_rst_mapping.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::reset_mapping));
 	_rst_config.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::reset_configuration));
 	_add_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_plugin_clicked), true));
@@ -176,6 +188,7 @@ PluginPinDialog::plugin_reconfigured ()
 	}
 	_n_plugins = _pi->get_count ();
 	_pi->configured_io (_in, _out);
+	_ins = _pi->internal_streams (); // with sidechain
 	_sinks = _pi->natural_input_streams ();
 	_sources = _pi->natural_output_streams ();
 
@@ -184,9 +197,11 @@ PluginPinDialog::plugin_reconfigured ()
 	_del_output_midi.set_sensitive (_out.n_midi () > 0 && _out.n_total () > 1);
 	_ind_strict_io.set_active (_pi->strict_io ());
 	_ind_customized.set_active (_pi->custom_cfg ());
+	_tgl_sidechain.set_active (_pi->has_sidechain ());
+	_edt_sidechain.set_sensitive (_pi->has_sidechain ()); // && _session
 
 	// calc minimum width
-	const uint32_t max_ports = std::max (_in.n_total (), _out.n_total ());
+	const uint32_t max_ports = std::max (_ins.n_total (), _out.n_total ());
 	const uint32_t max_pins = std::max ((_sinks * _n_plugins).n_total (), (_sources * _n_plugins).n_total ());
 	uint32_t min_width = std::max (25 * max_ports, (uint32_t)(20 + _pin_box_size) * max_pins);
 	min_width = std::max (min_width, 64 * _n_plugins); // bxh2 = 18 ; aspect 16:9 (incl. 10% space)
@@ -208,9 +223,10 @@ PluginPinDialog::update_elements ()
 	_actor.reset ();
 	_selection.reset ();
 
-	for (uint32_t i = 0; i < _in.n_total (); ++i) {
-		int id = (i < _in.n_midi ()) ? i : i - _in.n_midi ();
-		_elements.push_back (CtrlWidget (Input, (i < _in.n_midi () ? DataType::MIDI : DataType::AUDIO), id));
+	for (uint32_t i = 0; i < _ins.n_total (); ++i) {
+		int id = (i < _ins.n_midi ()) ? i : i - _ins.n_midi ();
+		uint32_t sidechain = i >= _in.n_total () ? -1 : 0;
+		_elements.push_back (CtrlWidget (Input, (i < _ins.n_midi () ? DataType::MIDI : DataType::AUDIO), id, sidechain));
 	}
 
 	for (uint32_t i = 0; i < _out.n_total (); ++i) {
@@ -249,8 +265,8 @@ PluginPinDialog::update_element_pos ()
 			case Input:
 				{
 					uint32_t idx = i->e->id;
-					if (i->e->dt == DataType::AUDIO) { idx += _in.n_midi (); }
-					i->x = rint ((idx + 1) * _width / (1. + _in.n_total ())) - 0.5 - dx;
+					if (i->e->dt == DataType::AUDIO) { idx += _ins.n_midi (); }
+					i->x = rint ((idx + 1) * _width / (1. + _ins.n_total ())) - 0.5 - dx;
 					i->y = y_in - 25;
 					i->w = 10;
 					i->h = 25;
@@ -324,7 +340,13 @@ PluginPinDialog::draw_io_pin (cairo_t* cr, const CtrlWidget& w)
 	cairo_close_path  (cr);
 
 
-	set_color (cr, w.e->dt == DataType::MIDI);
+	if (w.e->ip != 0) {
+		assert (w.e->ct == Input);
+		// side-chain
+		cairo_set_source_rgb (cr, .1, .6, .7);
+	} else {
+		set_color (cr, w.e->dt == DataType::MIDI);
+	}
 	if (w.e == _selection || w.e == _actor) {
 		cairo_fill_preserve (cr);
 		cairo_set_source_rgba (cr, 0.9, 0.9, 1.0, 0.6);
@@ -417,8 +439,8 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 	const double bxw  = rint ((width * .9) / ((_n_plugins) + .2 * (_n_plugins - 1)));
 	const double bxw2 = rint (bxw * .5);
 
-	const uint32_t pc_in = _in.n_total ();
-	const uint32_t pc_in_midi = _in.n_midi ();
+	const uint32_t pc_in = _ins.n_total ();
+	const uint32_t pc_in_midi = _ins.n_midi ();
 	const uint32_t pc_out = _out.n_total ();
 	const uint32_t pc_out_midi = _out.n_midi ();
 
@@ -647,6 +669,21 @@ PluginPinDialog::handle_output_action (const CtrlElem &s, const CtrlElem &o)
 }
 
 void
+PluginPinDialog::toggle_sidechain ()
+{
+	_route ()->add_remove_sidechain (_pi, !_pi->has_sidechain ());
+}
+
+void
+PluginPinDialog::connect_sidechain ()
+{
+	if (!_session) { return; }
+	// TODO non-modal would be cooler ... :)
+	SideChainUI sc (*this, _session, _pi->sidechain_input ());
+	sc.run ();
+}
+
+void
 PluginPinDialog::reset_configuration ()
 {
 	_route ()->reset_plugin_insert (_pi);
@@ -673,4 +710,15 @@ PluginPinDialog::add_remove_port_clicked (bool add, ARDOUR::DataType dt)
 	assert (add || out.get (dt) > 0);
 	out.set (dt, out.get (dt) + (add ? 1 : -1));
 	_route ()->customize_plugin_insert (_pi, _n_plugins, out);
+}
+
+SideChainUI::SideChainUI  (Gtk::Window& p, Session* session, boost::shared_ptr<IO> sc)
+	: ArdourDialog (p, string (_("Sidechain ")) + sc->name (), true)
+{
+	HBox* hbox = manage (new HBox);
+	IOSelector * io = Gtk::manage (new IOSelector (this, session, sc));
+	hbox->pack_start (*io, true, true);
+	get_vbox ()->pack_start (*hbox, true, true);
+	io->show ();
+	hbox->show ();
 }

@@ -2380,6 +2380,7 @@ ProcessorBox::maybe_add_processor_pin_mgr (boost::weak_ptr<Processor> w)
 
 	PluginPinWindowProxy* wp = new PluginPinWindowProxy (
 			string_compose ("PM-%2-%3", _route->id(), p->id()), w);
+	wp->set_session (_session);
 
 	const XMLNode* ui_xml = _session->extra_xml (X_("UI"));
 	if (ui_xml) {
@@ -3901,6 +3902,13 @@ PluginPinWindowProxy::~PluginPinWindowProxy()
 	_window = 0;
 }
 
+ARDOUR::SessionHandlePtr*
+PluginPinWindowProxy::session_handle ()
+{
+	ArdourWindow* aw = dynamic_cast<ArdourWindow*> (_window);
+	if (aw) { return aw; }
+	return 0;
+}
 
 Gtk::Window*
 PluginPinWindowProxy::get (bool create)
@@ -3916,6 +3924,10 @@ PluginPinWindowProxy::get (bool create)
 			return 0;
 		}
 		_window = new PluginPinDialog (pi);
+		ArdourWindow* aw = dynamic_cast<ArdourWindow*> (_window);
+		if (aw) {
+			aw->set_session (_session);
+		}
 	}
 
 	_window->show_all ();

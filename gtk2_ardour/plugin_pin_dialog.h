@@ -29,6 +29,7 @@
 
 #include "ardour_button.h"
 #include "ardour_window.h"
+#include "ardour_dialog.h"
 
 class PluginPinDialog : public ArdourWindow
 {
@@ -45,12 +46,12 @@ private:
 	} CtrlType;
 
 	struct _CtrlElem {
-		_CtrlElem (CtrlType c, ARDOUR::DataType d, uint32_t i, uint32_t p = -1)
+		_CtrlElem (CtrlType c, ARDOUR::DataType d, uint32_t i, uint32_t p)
 			: ct (c), dt (d), id (i), ip (p) {}
 		CtrlType ct;
 		ARDOUR::DataType dt;
 		uint32_t id; // port/pin ID
-		uint32_t ip; // plugin ID (for Sink, Source only)
+		uint32_t ip; // plugin ID (for Sink, Source only); sidechain for (input)
 	};
 
 	typedef boost::shared_ptr<_CtrlElem> CtrlElem;
@@ -80,6 +81,8 @@ private:
 	ArdourButton _ind_customized;
 	ArdourButton _rst_config;
 	ArdourButton _rst_mapping;
+	ArdourButton _tgl_sidechain;
+	ArdourButton _edt_sidechain;
 	ArdourButton _add_plugin;
 	ArdourButton _del_plugin;
 	ArdourButton _add_output_audio;
@@ -107,6 +110,8 @@ private:
 
 	void reset_mapping ();
 	void reset_configuration ();
+	void toggle_sidechain ();
+	void connect_sidechain ();
 	void add_remove_plugin_clicked (bool);
 	void add_remove_port_clicked (bool, ARDOUR::DataType);
 	void handle_input_action (const CtrlElem &, const CtrlElem &);
@@ -116,7 +121,7 @@ private:
 	boost::shared_ptr<ARDOUR::PluginInsert> _pi;
 
 	uint32_t _n_plugins;
-	ARDOUR::ChanCount _in, _out;
+	ARDOUR::ChanCount _in, _ins, _out;
 	ARDOUR::ChanCount _sinks, _sources;
 
 	double _pin_box_size;
@@ -126,5 +131,12 @@ private:
 	bool _ignore_updates;
 	ARDOUR::Route* _route () { return static_cast<ARDOUR::Route*> (_pi->owner ()); }
 };
+
+class SideChainUI: public ArdourDialog
+{
+  public:
+	SideChainUI (Gtk::Window&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::IO>);
+};
+
 
 #endif

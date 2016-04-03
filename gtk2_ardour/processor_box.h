@@ -115,7 +115,7 @@ class PluginPinWindowProxy : public WM::ProxyBase
 	~PluginPinWindowProxy();
 
 	Gtk::Window* get (bool create = false);
-	ARDOUR::SessionHandlePtr* session_handle() { return 0; }
+	ARDOUR::SessionHandlePtr* session_handle();
 
   private:
 	ProcessorBox* _processor_box;
