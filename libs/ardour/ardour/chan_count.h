@@ -147,12 +147,37 @@ public:
 		return ret;
 	}
 
+	/** underflow safe subtraction */
+	ChanCount operator-(const ChanCount& other) const {
+		ChanCount ret;
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			if (get(*t) < other.get(*t)) {
+				ret.set(*t, 0);
+			} else {
+				ret.set(*t, get(*t) - other.get(*t));
+			}
+		}
+		return ret;
+	}
+
 	ChanCount operator*(const unsigned int factor) const {
 		ChanCount ret;
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			ret.set(*t, get(*t) * factor );
 		}
 		return ret;
+	}
+
+	/** underflow safe subtraction */
+	ChanCount& operator-=(const ChanCount& other) {
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			if (_counts[*t] < other._counts[*t]) {
+				_counts[*t] = 0;
+			} else {
+				_counts[*t] -= other._counts[*t];
+			}
+		}
+		return *this;
 	}
 
 	ChanCount& operator+=(const ChanCount& other) {
