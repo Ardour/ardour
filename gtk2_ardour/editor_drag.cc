@@ -3362,8 +3362,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	framepos_t pf;
 	Tempo const tp = _marker->tempo();
-
-	if (ArdourKeyboard::indicates_snap (event->button.state)) {
+	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
 		double new_bpm = _real_section->beats_per_minute() + ((last_pointer_y() - current_pointer_y()) / 5.0);
 		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type()));
 		stringstream strs;
@@ -3383,7 +3382,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 			TempoMap& map (_editor->session()->tempo_map());
 
 			pf = adjusted_current_frame (event, false);
-			if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::snap_modifier ())) {
+			if (ArdourKeyboard::indicates_snap (event->button.state)) {
 				if (_editor->snap_mode() == Editing::SnapOff) {
 					use_snap = true;
 				} else {
