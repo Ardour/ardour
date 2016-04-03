@@ -301,6 +301,7 @@ private:
 		static double pin_x_pos (uint32_t, double, uint32_t, uint32_t, bool);
 		static void draw_connection (cairo_t*, double, double, double, double, bool, bool dashed = false);
 		static void draw_gnd (cairo_t*, double, double, bool);
+		static void draw_sidechain (cairo_t*, double, double, bool);
 
 	private:
 		bool on_expose_event (GdkEventExpose *);

@@ -1081,6 +1081,21 @@ ProcessorEntry::RoutingIcon::draw_gnd (cairo_t* cr, double x0, double height, bo
 }
 
 void
+ProcessorEntry::RoutingIcon::draw_sidechain (cairo_t* cr, double x0, double height, bool midi)
+{
+	const double dx = 1 + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale()));
+	const double y0 = rint (height * .66) + .5;
+
+	cairo_move_to (cr, x0 - dx, height);
+	cairo_line_to (cr, x0, y0);
+	cairo_line_to (cr, x0 + dx, height);
+
+	set_routing_color (cr, midi);
+	cairo_set_line_width  (cr, 1.0);
+	cairo_stroke (cr);
+}
+
+void
 ProcessorEntry::RoutingIcon::draw_connection (cairo_t* cr, double x0, double x1, double y0, double y1, bool midi, bool dashed)
 {
 	double bz = abs (y1 - y0);
@@ -1135,16 +1150,23 @@ ProcessorEntry::RoutingIcon::expose_map (cairo_t* cr, const double width, const 
 	const uint32_t pc_in_midi = _sinks.n_midi();
 
 	// TODO indicate midi-bypass ??
-	// show "X" for
+	// TODO indicate side-chain
 
 	for (uint32_t i = 0; i < pc_in; ++i) {
 		const bool is_midi = i < pc_in_midi;
 		bool valid_in;
 		uint32_t pn = is_midi ? i : i - pc_in_midi;
-		uint32_t idx = _in_map.get (is_midi ? DataType::MIDI : DataType::AUDIO, pn, &valid_in);
+		DataType dt = is_midi ? DataType::MIDI : DataType::AUDIO;
+		uint32_t idx = _in_map.get (dt, pn, &valid_in);
 		if (!valid_in) {
 			double x = pin_x_pos (i, width, pc_in, pc_in_midi, is_midi);
 			draw_gnd (cr, x, height, is_midi);
+			continue;
+		}
+		if (idx >= _in.get (dt)) {
+			// side-chain, probably
+			double x = pin_x_pos (i, width, pc_in, pc_in_midi, is_midi);
+			draw_sidechain (cr, x, height, is_midi);
 			continue;
 		}
 		double c_x0;
@@ -1152,7 +1174,7 @@ ProcessorEntry::RoutingIcon::expose_map (cairo_t* cr, const double width, const 
 
 		if (_feed) {
 			bool valid_src;
-			uint32_t src = _f_out_map.get_src (is_midi ? DataType::MIDI : DataType::AUDIO, idx, &valid_src);
+			uint32_t src = _f_out_map.get_src (dt, idx, &valid_src);
 			if (!valid_src) {
 				double x = pin_x_pos (i, width, pc_in, 0, false);
 				draw_gnd (cr, x, height, is_midi);
