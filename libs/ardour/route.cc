@@ -1769,9 +1769,15 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 				   run.
 				*/
 
-				boost::shared_ptr<IOProcessor> iop;
+				boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
+				boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*i);
 
-				if ((iop = boost::dynamic_pointer_cast<IOProcessor> (*i)) != 0) {
+				if (pi != 0) {
+					assert (iop == 0);
+					iop = pi->sidechain();
+				}
+
+				if (iop != 0) {
 					iop->disconnect ();
 				}
 
@@ -1963,9 +1969,14 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 			   run.
 			*/
 
-			boost::shared_ptr<IOProcessor> iop;
+			boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor>(processor);
+			boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(processor);
+			if (pi != 0) {
+				assert (iop == 0);
+				iop = pi->sidechain();
+			}
 
-			if ((iop = boost::dynamic_pointer_cast<IOProcessor> (processor)) != 0) {
+			if (iop != 0) {
 				iop->disconnect ();
 			}
 
@@ -2169,6 +2180,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 			 * The configuration may only be a subset (both input and output)
 			 */
 			processor_max_streams = ChanCount::max(processor_max_streams, pi->input_streams());
+			processor_max_streams = ChanCount::max(processor_max_streams, pi->internal_streams());
 			processor_max_streams = ChanCount::max(processor_max_streams, pi->output_streams());
 			processor_max_streams = ChanCount::max(processor_max_streams, pi->natural_input_streams() * pi->get_count());
 			processor_max_streams = ChanCount::max(processor_max_streams, pi->natural_output_streams() * pi->get_count());
@@ -2405,6 +2417,63 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 }
 
 bool
+Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
+{
+	boost::shared_ptr<PluginInsert> pi;
+	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
+		return false;
+	}
+
+	if (pi->has_sidechain () == add) {
+		return true; // ?? call failed, but result is as expected.
+	}
+
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		ProcessorList::iterator i = find (_processors.begin(), _processors.end(), proc);
+		if (i == _processors.end ()) {
+			return false;
+		}
+	}
+
+	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ()); // take before Writerlock to avoid deadlock
+		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+
+		lx.release (); // IO::add_port() and ~IO takes process lock  - XXX check if this is safe
+		if (add) {
+			if (!pi->add_sidechain ()) {
+				return false;
+			}
+		} else {
+			if (!pi->del_sidechain ()) {
+				return false;
+			}
+		}
+
+		lx.acquire ();
+		list<pair<ChanCount, ChanCount> > c = try_configure_processors_unlocked (n_inputs (), 0);
+		lx.release ();
+
+		if (c.empty()) {
+			if (add) {
+				pi->del_sidechain ();
+			} else {
+				pi->add_sidechain ();
+				// TODO restore side-chain's state.
+			}
+			return false;
+		}
+		lx.acquire ();
+		configure_processors_unlocked (0);
+	}
+
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	_session.set_dirty ();
+	return true;
+}
+
+bool
 Route::reset_plugin_insert (boost::shared_ptr<Processor> proc)
 {
 	ChanCount unused;
@@ -2420,15 +2489,9 @@ Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t coun
 	}
 
 	{
-		bool found = false;
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-		for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
-			if (*p == proc) {
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
+		ProcessorList::iterator i = find (_processors.begin(), _processors.end(), proc);
+		if (i == _processors.end ()) {
 			return false;
 		}
 	}
@@ -2436,7 +2499,6 @@ Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t coun
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
-		ProcessorState pstate (this);
 
 		bool      old_cust = pi->custom_cfg ();
 		uint32_t  old_cnt  = pi->get_count ();
@@ -3544,9 +3606,14 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* 
 
 	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
-		boost::shared_ptr<IOProcessor> iop;
+		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor>(*r);
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*r);
+		if (pi != 0) {
+			assert (iop == 0);
+			iop = pi->sidechain();
+		}
 
-		if ((iop = boost::dynamic_pointer_cast<IOProcessor>(*r)) != 0) {
+		if (iop != 0) {
 			if (iop->feeds (other)) {
 				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does feed %2\n", iop->name(), other->name()));
 				if (via_send_only) {

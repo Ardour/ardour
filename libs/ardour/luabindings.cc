@@ -257,6 +257,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_strict_io", &Route::set_strict_io)
 		.addFunction ("reset_plugin_insert", &Route::reset_plugin_insert)
 		.addFunction ("customize_plugin_insert", &Route::customize_plugin_insert)
+		.addFunction ("add_sidechain", &Route::add_sidechain)
+		.addFunction ("remove_sidechain", &Route::remove_sidechain)
 		.endClass ()
 
 		.deriveWSPtrClass <Track, Route> ("Track")

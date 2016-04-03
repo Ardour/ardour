@@ -278,6 +278,9 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool set_strict_io (bool);
 	bool reset_plugin_insert (boost::shared_ptr<Processor> proc);
 	bool customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs);
+	bool add_remove_sidechain (boost::shared_ptr<Processor> proc, bool);
+	bool add_sidechain (boost::shared_ptr<Processor> proc) { return add_remove_sidechain (proc, true); }
+	bool remove_sidechain (boost::shared_ptr<Processor> proc) { return add_remove_sidechain (proc, false); }
 
 	framecnt_t set_private_port_latencies (bool playback) const;
 	void       set_public_port_latencies (framecnt_t, bool playback) const;
