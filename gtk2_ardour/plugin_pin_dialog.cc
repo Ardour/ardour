@@ -24,6 +24,8 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "ardour/plugin.h"
+
 #include "io_selector.h"
 #include "plugin_pin_dialog.h"
 #include "gui_thread.h"
@@ -225,8 +227,10 @@ PluginPinDialog::update_elements ()
 
 	for (uint32_t i = 0; i < _ins.n_total (); ++i) {
 		int id = (i < _ins.n_midi ()) ? i : i - _ins.n_midi ();
-		uint32_t sidechain = i >= _in.n_total () ? -1 : 0;
-		_elements.push_back (CtrlWidget (Input, (i < _ins.n_midi () ? DataType::MIDI : DataType::AUDIO), id, sidechain));
+		bool sidechain = i >= _in.n_total () ? true : false;
+
+		CtrlWidget cw (CtrlWidget (Input, (i < _ins.n_midi () ? DataType::MIDI : DataType::AUDIO), id, 0, sidechain));
+		_elements.push_back (cw);
 	}
 
 	for (uint32_t i = 0; i < _out.n_total (); ++i) {
@@ -235,8 +239,13 @@ PluginPinDialog::update_elements ()
 	}
 
 	for (uint32_t n = 0; n < _n_plugins; ++n) {
+		boost::shared_ptr<Plugin> plugin = _pi->plugin (n);
 		for (uint32_t i = 0; i < _sinks.n_total (); ++i) {
-			_elements.push_back (CtrlWidget (Sink, (i < _sinks.n_midi () ? DataType::MIDI : DataType::AUDIO), i, n));
+			DataType dt (_sinks.n_midi () ? DataType::MIDI : DataType::AUDIO);
+			int idx = (i < _sinks.n_midi ()) ? i : i - _sinks.n_midi ();
+			const Plugin::IOPortDescription& iod (plugin->describe_io_port (dt, true, idx));
+			CtrlWidget cw (CtrlWidget (Sink, dt, i, n, iod.is_sidechain));
+			_elements.push_back (cw);
 		}
 		for (uint32_t i = 0; i < _sources.n_total (); ++i) {
 			_elements.push_back (CtrlWidget (Source, (i < _sources.n_midi () ? DataType::MIDI : DataType::AUDIO), i, n));
@@ -340,7 +349,7 @@ PluginPinDialog::draw_io_pin (cairo_t* cr, const CtrlWidget& w)
 	cairo_close_path  (cr);
 
 
-	if (w.e->ip != 0) {
+	if (w.e->sc) {
 		assert (w.e->ct == Input);
 		// side-chain
 		cairo_set_source_rgb (cr, .1, .6, .7);
@@ -365,7 +374,15 @@ void
 PluginPinDialog::draw_plugin_pin (cairo_t* cr, const CtrlWidget& w)
 {
 	cairo_rectangle (cr, w.x, w.y, w.w, w.h);
-	set_color (cr, w.e->dt == DataType::MIDI);
+
+	if (w.e->sc) {
+		assert (w.e->ct == Sink);
+		// side-chain
+		cairo_set_source_rgb (cr, .1, .6, .7);
+	} else {
+		set_color (cr, w.e->dt == DataType::MIDI);
+	}
+
 	if (w.e == _selection || w.e == _actor) {
 		cairo_fill_preserve (cr);
 		cairo_set_source_rgba (cr, 0.9, 0.9, 1.0, 0.6);
@@ -387,7 +404,7 @@ void
 PluginPinDialog::draw_connection (cairo_t* cr, double x0, double x1, double y0, double y1, bool midi, bool dashed)
 {
 	const double bz = 2 * _pin_box_size;
-	const double bc = dashed ? 1.25 * _pin_box_size : 0;
+	const double bc = (dashed && x0 == x1) ? 1.25 * _pin_box_size : 0;
 
 	cairo_move_to (cr, x0, y0);
 	cairo_curve_to (cr, x0 - bc, y0 + bz, x1 - bc, y1 - bz, x1, y1);

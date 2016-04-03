@@ -46,21 +46,22 @@ private:
 	} CtrlType;
 
 	struct _CtrlElem {
-		_CtrlElem (CtrlType c, ARDOUR::DataType d, uint32_t i, uint32_t p)
-			: ct (c), dt (d), id (i), ip (p) {}
+		_CtrlElem (CtrlType c, ARDOUR::DataType d, uint32_t i, uint32_t p, bool s)
+			: ct (c), dt (d), id (i), ip (p), sc (s) {}
 		CtrlType ct;
 		ARDOUR::DataType dt;
 		uint32_t id; // port/pin ID
-		uint32_t ip; // plugin ID (for Sink, Source only); sidechain for (input)
+		uint32_t ip; // plugin ID (for Sink, Source only);
+		bool sc; // sidechain
 	};
 
 	typedef boost::shared_ptr<_CtrlElem> CtrlElem;
 
 	struct CtrlWidget {
-		CtrlWidget (CtrlType ct, ARDOUR::DataType dt, uint32_t id, uint32_t ip = 0)
+		CtrlWidget (CtrlType ct, ARDOUR::DataType dt, uint32_t id, uint32_t ip = 0, bool sc = false)
 			: x(0), y(0), w (0), h (0), prelight (false)
 		{
-			e = CtrlElem (new _CtrlElem (ct, dt, id, ip));
+			e = CtrlElem (new _CtrlElem (ct, dt, id, ip, sc));
 		}
 		double x,y;
 		double w,h;
