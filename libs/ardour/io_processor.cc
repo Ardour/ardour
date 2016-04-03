@@ -168,7 +168,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 	const string instr = enum_2_string (IO::Input);
 	const string outstr = enum_2_string (IO::Output);
 
-	if (_own_input) {
+	if (_own_input && _input) {
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			const XMLProperty* prop;
 			if ((prop = (*niter)->property ("name")) != 0) {
@@ -197,7 +197,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 
 	}
 
-	if (_own_output) {
+	if (_own_output && _output) {
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "IO") {
 				const XMLProperty* prop;
