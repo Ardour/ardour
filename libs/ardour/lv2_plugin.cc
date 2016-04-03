@@ -132,6 +132,7 @@ public:
 	LilvNode* lv2_enumeration;
 	LilvNode* lv2_freewheeling;
 	LilvNode* lv2_inPlaceBroken;
+	LilvNode* lv2_isSideChain;
 	LilvNode* lv2_integer;
 	LilvNode* lv2_default;
 	LilvNode* lv2_minimum;
@@ -1927,6 +1928,56 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	return 0;
 }
 
+Plugin::IOPortDescription
+LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id)
+{
+	PortFlags match = 0;
+	switch (dt) {
+		case DataType::AUDIO:
+			match = PORT_AUDIO;
+			break;
+		case DataType::MIDI:
+			match = PORT_SEQUENCE | PORT_MIDI; // ignore old PORT_EVENT
+			break;
+		default:
+			return Plugin::IOPortDescription ("?");
+			break;
+	}
+	if (input) {
+		match |= PORT_INPUT;
+	} else {
+		match |= PORT_OUTPUT;
+	}
+
+	uint32_t p = 0;
+	uint32_t idx = UINT32_MAX;
+
+	uint32_t const num_ports = parameter_count();
+	for (uint32_t port_index = 0; port_index < num_ports; ++port_index) {
+		PortFlags flags = _port_flags[port_index];
+		if ((flags & match) == match) {
+			if (p == id) {
+				idx = port_index;
+			}
+			++p;
+		}
+	}
+	if (idx == UINT32_MAX) {
+		return Plugin::IOPortDescription ("?");
+	}
+
+	LilvNode* name = lilv_port_get_name(_impl->plugin,
+			lilv_plugin_get_port_by_index(_impl->plugin, idx));
+	Plugin::IOPortDescription iod (lilv_node_as_string (name));
+	lilv_node_free(name);
+
+	if (lilv_port_has_property(_impl->plugin,
+				lilv_plugin_get_port_by_index(_impl->plugin, idx), _world.lv2_isSideChain)) {
+		iod.is_sidechain = true;
+	}
+	return iod;
+}
+
 string
 LV2Plugin::describe_parameter(Evoral::Parameter which)
 {
@@ -2679,6 +2730,7 @@ LV2World::LV2World()
 	lv2_InputPort      = lilv_new_uri(world, LILV_URI_INPUT_PORT);
 	lv2_OutputPort     = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
 	lv2_inPlaceBroken  = lilv_new_uri(world, LV2_CORE__inPlaceBroken);
+	lv2_isSideChain    = lilv_new_uri(world, LV2_CORE_PREFIX "isSideChain");
 	lv2_integer        = lilv_new_uri(world, LV2_CORE__integer);
 	lv2_default        = lilv_new_uri(world, LV2_CORE__default);
 	lv2_minimum        = lilv_new_uri(world, LV2_CORE__minimum);
@@ -2756,6 +2808,7 @@ LV2World::~LV2World()
 	lilv_node_free(lv2_sampleRate);
 	lilv_node_free(lv2_reportsLatency);
 	lilv_node_free(lv2_integer);
+	lilv_node_free(lv2_isSideChain);
 	lilv_node_free(lv2_inPlaceBroken);
 	lilv_node_free(lv2_OutputPort);
 	lilv_node_free(lv2_InputPort);
