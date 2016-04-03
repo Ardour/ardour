@@ -1859,7 +1859,7 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const framepos_t
 		recompute_meters (imaginary);
 		return true;
 	}
-#if (0)
+
 	MetricSectionSorter cmp;
 	imaginary.sort (cmp);
 	if (section->position_lock_style() == MusicTime) {
@@ -1875,7 +1875,6 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const framepos_t
 		recompute_meters (imaginary);
 		return true;
 	}
-#endif
 	//dump (imaginary, std::cerr);
 
 	return false;
