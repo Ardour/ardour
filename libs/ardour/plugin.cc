@@ -257,6 +257,33 @@ Plugin::input_streams () const
 	return ChanCount::ZERO;
 }
 
+Plugin::IOPortDescription
+Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id)
+{
+	std::stringstream ss;
+	switch (dt) {
+		case DataType::AUDIO:
+			ss << _("Audio") << " ";
+			break;
+		case DataType::MIDI:
+			ss << _("Midi") << " ";
+			break;
+		default:
+			ss << _("?") << " ";
+			break;
+	}
+	if (input) {
+		ss << _("In") << " ";
+	} else {
+		ss << _("Out") << " ";
+	}
+
+	ss << id;
+
+	Plugin::IOPortDescription iod (ss.str());
+	return iod;
+}
+
 const Plugin::PresetRecord *
 Plugin::preset_by_label (const string& label)
 {

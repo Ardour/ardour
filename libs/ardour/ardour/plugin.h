@@ -102,6 +102,22 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool parameter_is_input(uint32_t) const = 0;
 	virtual bool parameter_is_output(uint32_t) const = 0;
 
+	struct LIBARDOUR_API IOPortDescription {
+		public:
+		IOPortDescription (const std::string& n)
+			: name (n)
+			, is_sidechain (false)
+		{}
+		IOPortDescription (const IOPortDescription &other)
+			: name (other.name)
+			, is_sidechain (other.is_sidechain)
+		{}
+		std::string name;
+		bool is_sidechain;
+	};
+
+	virtual IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id);
+
 	virtual void set_automation_control (uint32_t /*port_index*/, boost::shared_ptr<ARDOUR::AutomationControl>) { }
 
 	virtual boost::shared_ptr<ScalePoints> get_scale_points(uint32_t /*port_index*/) const {
