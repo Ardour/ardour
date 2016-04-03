@@ -119,6 +119,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void set_custom_cfg (bool b);
 	bool add_sidechain  (uint32_t n_audio = 1);
 	bool del_sidechain ();
+	boost::shared_ptr<SideChain> sidechain () const { return _sidechain; }
 	// end C++ class slavery!
 
 	uint32_t get_count  () const { return _plugins.size(); }
@@ -185,14 +186,6 @@ class LIBARDOUR_API PluginInsert : public Processor
 		return _sidechain ? true : false;
 	}
 
-	// XXX dangerous
-	boost::shared_ptr<SideChain> sidechain () const {
-		return _sidechain;
-	}
-
-	// XXX even more dangerous (adding/removing ports
-	// must be done by the owning route and the plugin
-	// needs to be reconfigured afterwards)
 	boost::shared_ptr<IO> sidechain_input () const {
 		if (_sidechain) {
 			return _sidechain->input ();

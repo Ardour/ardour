@@ -783,12 +783,14 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);
+	void sidechain_change_handler (IOChange, void *src);
 
 	bool input_port_count_changing (ChanCount);
 	bool output_port_count_changing (ChanCount);
 
 	bool _in_configure_processors;
 	bool _initial_io_setup;
+	bool _in_sidechain_setup;
 
 	int configure_processors_unlocked (ProcessorStreams*);
 	bool set_meter_point_unlocked ();

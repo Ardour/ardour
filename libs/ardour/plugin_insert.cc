@@ -687,7 +687,7 @@ PluginInsert::silence (framecnt_t nframes)
 	ChanMapping in_map (natural_input_streams ());
 	ChanMapping out_map (natural_output_streams ());
 
-	// TODO fake run sidechain, too? (maybe once it has meters)
+	// TODO run sidechain (delaylines)
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->connect_and_run (_session.get_scratch_buffers ((*i)->get_info()->n_inputs, true), in_map, out_map, nframes, 0);
 	}
@@ -700,7 +700,8 @@ PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 		/* run as normal if we are active or moving from inactive to active */
 
 		if (_sidechain) {
-			// collect sidechain input for complete cycle.
+			// collect sidechain input for complete cycle (!)
+			// TODO we need delaylines here for latency compensation
 			_sidechain->run (bufs, start_frame, end_frame, nframes, true);
 		}
 

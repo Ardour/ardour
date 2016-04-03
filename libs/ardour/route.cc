@@ -115,6 +115,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _track_number (0)
 	, _in_configure_processors (false)
 	, _initial_io_setup (false)
+	, _in_sidechain_setup (false)
 	, _strict_io (false)
 	, _custom_meter_position_noted (false)
 {
@@ -2439,6 +2440,7 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ()); // take before Writerlock to avoid deadlock
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		PBD::Unwinder<bool> uw (_in_sidechain_setup, true);
 
 		lx.release (); // IO::add_port() and ~IO takes process lock  - XXX check if this is safe
 		if (add) {
@@ -2466,6 +2468,10 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 		}
 		lx.acquire ();
 		configure_processors_unlocked (0);
+	}
+
+	if (pi->has_sidechain ()) {
+		pi->sidechain_input ()->changed.connect_same_thread (*this, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
 	}
 
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
@@ -3300,6 +3306,12 @@ Route::set_processor_state (const XMLNode& node)
 					processor.reset (new UnknownProcessor (_session, **niter));
 				}
 
+				/* subscribe to Sidechain IO changes */
+				boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
+				if (pi && pi->has_sidechain ()) {
+					pi->sidechain_input ()->changed.connect_same_thread (*this, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
+				}
+
 				/* we have to note the monitor send here, otherwise a new one will be created
 				   and the state of this one will be lost.
 				*/
@@ -3805,6 +3817,21 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 			}
 
 		}
+	}
+}
+
+void
+Route::sidechain_change_handler (IOChange change, void * /*src*/)
+{
+	if (_initial_io_setup || _in_sidechain_setup) {
+		return;
+	}
+
+	if ((change.type & IOChange::ConfigurationChanged)) {
+		/* This is called with the process lock held if change
+		   contains ConfigurationChanged
+		*/
+		configure_processors (0);
 	}
 }
 
