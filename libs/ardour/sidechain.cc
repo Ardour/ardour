@@ -93,9 +93,9 @@ SideChain::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 bool
 SideChain::configure_io (ChanCount in, ChanCount out)
 {
-	if (out != in + _input->n_ports()) {
-		return false;
+	if (out != in + _input->n_ports ()) {
+		/* disabled for now - see PluginInsert::configure_io() */
+		// return false;
 	}
-	Processor::configure_io(in, out);
-	return true;
+	return Processor::configure_io (in, out);
 }
