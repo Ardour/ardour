@@ -147,6 +147,8 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	, _width (w)
 	, input_icon(true)
 	, output_icon(false)
+	, routing_icon(true)
+	, output_routing_icon(false)
 	, _plugin_display(0)
 {
 	_vbox.show ();
@@ -192,6 +194,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 				_plugin_display->show ();
 			}
 		}
+		_vbox.pack_end (output_routing_icon);
 		_vbox.pack_end (output_icon);
 
 		_button.set_active (_processor->active());
@@ -200,9 +203,10 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 		input_icon.set_no_show_all(true);
 
 		_button.show ();
-		routing_icon.hide();
 		input_icon.hide();
 		output_icon.show();
+		routing_icon.hide();
+		output_routing_icon.hide();
 
 		_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
 		_processor->PropertyChanged.connect (name_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
@@ -472,6 +476,7 @@ ProcessorEntry::processor_configuration_changed (const ChanCount in, const ChanC
 	input_icon.queue_draw();
 	output_icon.queue_draw();
 	routing_icon.queue_draw();
+	output_routing_icon.queue_draw();
 }
 
 void
@@ -949,6 +954,7 @@ PluginInsertProcessorEntry::iomap_changed ()
 {
 	_parent->setup_routing_feeds ();
 	routing_icon.queue_draw();
+	output_routing_icon.queue_draw();
 }
 
 void
@@ -1001,10 +1007,15 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 	return true;
 }
 
-ProcessorEntry::RoutingIcon::RoutingIcon ()
+ProcessorEntry::RoutingIcon::RoutingIcon (bool input)
 	: _feed (false)
+	, _input (input)
 {
-	set_size_request (-1, std::max (7.f, rintf(8.f * UIConfiguration::instance().get_ui_scale())));
+	if (input) {
+		set_size_request (-1, std::max (7.f, rintf(8.f * UIConfiguration::instance().get_ui_scale())));
+	} else {
+		set_size_request (-1, std::max (10.f, rintf(12.f * UIConfiguration::instance().get_ui_scale())));
+	}
 }
 
 void
@@ -1041,6 +1052,17 @@ ProcessorEntry::RoutingIcon::identity () const {
 	return true;
 }
 
+bool
+ProcessorEntry::RoutingIcon::out_identity () const {
+	if (!_out_map.is_monotonic () || !_out_map.is_identity ()) {
+		return false;
+	}
+	if (_out_map.count () != _sources.n_total () || _out.n_total () != _sources.n_total ()) {
+		return false;
+	}
+	return true;
+}
+
 void
 ProcessorEntry::RoutingIcon::set_feed (
 				const ARDOUR::ChanCount& out,
@@ -1062,6 +1084,26 @@ ProcessorEntry::RoutingIcon::pin_x_pos (uint32_t i, double width, uint32_t n_tot
 		return rint (width * .5) +.5;
 	}
 	return rint (width * (.2 + .6 * i / (n_total - 1))) + .5;
+}
+
+void
+ProcessorEntry::RoutingIcon::draw_X (cairo_t* cr, double x0, double height, bool midi)
+{
+	const double y0 = rint (height * .4) + .5;
+	const double dx = min (y0 - .5, 1. + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale())));
+
+	cairo_move_to (cr, x0, 0);
+	cairo_line_to (cr, x0, y0);
+	cairo_move_to (cr, x0 - dx, y0 - dx);
+	cairo_line_to (cr, x0 + dx, y0 + dx);
+	cairo_move_to (cr, x0 - dx, y0 + dx);
+	cairo_line_to (cr, x0 + dx, y0 - dx);
+
+	set_routing_color (cr, midi);
+	cairo_set_line_width  (cr, 1.0);
+	cairo_stroke_preserve (cr);
+	cairo_set_source_rgba (cr, 0, 0, 0, .4); // darken
+	cairo_stroke (cr);
 }
 
 void
@@ -1089,6 +1131,7 @@ ProcessorEntry::RoutingIcon::draw_sidechain (cairo_t* cr, double x0, double heig
 	cairo_move_to (cr, x0 - dx, height);
 	cairo_line_to (cr, x0, y0);
 	cairo_line_to (cr, x0 + dx, height);
+	cairo_close_path (cr);
 
 	set_routing_color (cr, midi);
 	cairo_set_line_width  (cr, 1.0);
@@ -1137,14 +1180,18 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, 0, 0, width, height);
 	cairo_fill (cr);
 
-	expose_map (cr, width, height);
+	if (_input) {
+		expose_input_map (cr, width, height);
+	} else {
+		expose_output_map (cr, width, height);
+	}
 
 	cairo_destroy(cr);
 	return true;
 }
 
 void
-ProcessorEntry::RoutingIcon::expose_map (cairo_t* cr, const double width, const double height)
+ProcessorEntry::RoutingIcon::expose_input_map (cairo_t* cr, const double width, const double height)
 {
 	const uint32_t pc_in = _sinks.n_total();
 	const uint32_t pc_in_midi = _sinks.n_midi();
@@ -1159,13 +1206,13 @@ ProcessorEntry::RoutingIcon::expose_map (cairo_t* cr, const double width, const 
 		DataType dt = is_midi ? DataType::MIDI : DataType::AUDIO;
 		uint32_t idx = _in_map.get (dt, pn, &valid_in);
 		if (!valid_in) {
-			double x = pin_x_pos (i, width, pc_in, pc_in_midi, is_midi);
+			double x = pin_x_pos (i, width, pc_in, 0, is_midi);
 			draw_gnd (cr, x, height, is_midi);
 			continue;
 		}
 		if (idx >= _in.get (dt)) {
 			// side-chain, probably
-			double x = pin_x_pos (i, width, pc_in, pc_in_midi, is_midi);
+			double x = pin_x_pos (i, width, pc_in, 0, is_midi);
 			draw_sidechain (cr, x, height, is_midi);
 			continue;
 		}
@@ -1188,6 +1235,50 @@ ProcessorEntry::RoutingIcon::expose_map (cairo_t* cr, const double width, const 
 	}
 }
 
+void
+ProcessorEntry::RoutingIcon::expose_output_map (cairo_t* cr, const double width, const double height)
+{
+	const uint32_t pc_out = _sources.n_total();
+	const uint32_t pc_out_midi = _sources.n_midi();
+
+	const uint32_t n_out = _out.n_total();
+	const uint32_t n_out_midi = _out.n_midi();
+
+	for (uint32_t i = 0; i < pc_out; ++i) {
+		const bool is_midi = i < pc_out_midi;
+		bool valid_out;
+		uint32_t pn = is_midi ? i : i - pc_out_midi;
+		DataType dt = is_midi ? DataType::MIDI : DataType::AUDIO;
+		uint32_t idx = _out_map.get (dt, pn, &valid_out);
+		if (!valid_out) {
+			double x = pin_x_pos (i, width, pc_out, 0, is_midi);
+			draw_X (cr, x, height - 5, is_midi);
+			continue;
+		}
+		double c_x0 = pin_x_pos (i, width, pc_out, 0, false);
+		double c_x1 = pin_x_pos (idx, width, n_out, n_out_midi, is_midi);
+		draw_connection (cr, c_x0, c_x1, 0, height - 3, is_midi);
+	}
+
+	// arrows
+	for (uint32_t i = 0; i < n_out; ++i) {
+		const bool is_midi = i < n_out_midi;
+		double x = pin_x_pos (i, width, n_out, 0, is_midi);
+		uint32_t pn = is_midi ? i : i - n_out_midi;
+		DataType dt = is_midi ? DataType::MIDI : DataType::AUDIO;
+		bool valid_src;
+		_out_map.get_src (dt, pn, &valid_src);
+		if (!valid_src) {
+			draw_gnd (cr, x, height, is_midi);
+		}
+		set_routing_color (cr, is_midi);
+		cairo_move_to (cr, x    , height);
+		cairo_line_to (cr, x - 3, height - 3);
+		cairo_line_to (cr, x + 3, height - 3);
+		cairo_close_path (cr);
+		cairo_fill (cr);
+	}
+}
 
 ProcessorEntry::PluginDisplay::PluginDisplay (boost::shared_ptr<ARDOUR::Plugin> p, uint32_t max_height)
 	: _plug (p)
@@ -2563,8 +2654,20 @@ ProcessorBox::setup_routing_feeds ()
 			(*i)->routing_icon.queue_draw();
 			(*i)->input_icon.show();
 		}
+
+		list<ProcessorEntry*>::iterator next = i;
+		if (++next == children.end()) {
+			// show additional wires if outputs of last processor are not an identity map.
+			if ((*i)->routing_icon.out_identity ()) {
+				(*i)->output_routing_icon.hide();
+			} else {
+				(*i)->output_routing_icon.copy_state ((*i)->routing_icon);
+				(*i)->output_routing_icon.show();
+			}
+		} else {
+			(*i)->output_routing_icon.hide();
+		}
 	}
-	// TODO show additional wires if outputs of last processor are not an identity map.
 }
 
 void

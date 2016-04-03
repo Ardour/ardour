@@ -283,7 +283,7 @@ private:
 
 	class RoutingIcon : public Gtk::DrawingArea {
 	public:
-		RoutingIcon();
+		RoutingIcon(bool inputrouting = true);
 		void set (
 				const ARDOUR::ChanCount&,
 				const ARDOUR::ChanCount&,
@@ -295,17 +295,34 @@ private:
 				const ARDOUR::ChanCount&,
 				const ARDOUR::ChanCount&,
 				const ARDOUR::ChanMapping&);
+
+		void copy_state (const RoutingIcon& other) {
+			_in        = other._in;
+			_out       = other._out;
+			_sources   = other._sources;
+			_sinks     = other._sinks;
+			_in_map    = other._in_map;
+			_out_map   = other._out_map;
+			_f_out     = other._f_out;
+			_f_out_map = other._f_out_map;
+			_f_sources = other._f_sources;
+			_feed      = other._feed;
+		}
+
 		void unset_feed () { _feed  = false ; }
 		bool identity () const;
+		bool out_identity () const;
 
 		static double pin_x_pos (uint32_t, double, uint32_t, uint32_t, bool);
 		static void draw_connection (cairo_t*, double, double, double, double, bool, bool dashed = false);
 		static void draw_gnd (cairo_t*, double, double, bool);
+		static void draw_X (cairo_t*, double, double, bool);
 		static void draw_sidechain (cairo_t*, double, double, bool);
 
 	private:
 		bool on_expose_event (GdkEventExpose *);
-		void expose_map (cairo_t*, const double, const double);
+		void expose_input_map (cairo_t*, const double, const double);
+		void expose_output_map (cairo_t*, const double, const double);
 
 		ARDOUR::ChanCount   _in;
 		ARDOUR::ChanCount   _out;
@@ -317,12 +334,14 @@ private:
 		ARDOUR::ChanMapping _f_out_map;
 		ARDOUR::ChanCount   _f_sources;
 		bool _feed;
+		bool _input;
 	};
 
 public:
-	RoutingIcon routing_icon;
 	PortIcon input_icon;
 	PortIcon output_icon;
+	RoutingIcon routing_icon; // sits on top of every processor (input routing)
+	RoutingIcon output_routing_icon; // only used by last processor in the chain
 
 protected:
 	PluginDisplay *_plugin_display ;
