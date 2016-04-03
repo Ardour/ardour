@@ -29,6 +29,7 @@ namespace ARDOUR {
 class IOVector : public std::vector<boost::weak_ptr<ARDOUR::IO> >
 {
 public:
+#if 0 // unused -- for future reference
 	bool connected_to (const IOVector& other) const {
 		for (IOVector::const_iterator i = other.begin(); i != other.end(); ++i) {
 			boost::shared_ptr<const IO> io = i->lock();
@@ -50,6 +51,7 @@ public:
 		}
 		return false;
 	}
+#endif
 
 	bool fed_by (boost::shared_ptr<const IO> other) const {
 		for (IOVector::const_iterator i = begin(); i != end(); ++i) {
