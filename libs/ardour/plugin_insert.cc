@@ -79,6 +79,10 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	if (plug) {
 		add_plugin (plug);
 		create_automatable_parameters ();
+		const ChanCount& sc (sidechain_input_pins ());
+		if (sc.n_total () > 0) {
+			add_sidechain (sc.n_audio ());
+		}
 	}
 }
 
@@ -297,6 +301,12 @@ ChanCount
 PluginInsert::natural_input_streams() const
 {
 	return _plugins[0]->get_info()->n_inputs;
+}
+
+ChanCount
+PluginInsert::sidechain_input_pins() const
+{
+	return _cached_sidechain_pins;
 }
 
 bool
@@ -1058,26 +1068,39 @@ PluginInsert::reset_map (bool emit)
 	_in_map.clear ();
 	_out_map.clear ();
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+		ChanCount ns_inputs  = natural_input_streams() - sidechain_input_pins ();
 		if (_match.method == Split) {
 			_in_map[pc] = ChanMapping ();
-			/* connect inputs in round-robin fashion */
+			/* connect no sidechain sinks in round-robin fashion */
 			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-				const uint32_t cend = _configured_internal.get (*t);
+				const uint32_t cend = _configured_in.get (*t);
 				if (cend == 0) { continue; }
 				uint32_t c = 0;
-				for (uint32_t in = 0; in < natural_input_streams().get (*t); ++in) {
+				for (uint32_t in = 0; in < ns_inputs.get (*t); ++in) {
 					_in_map[pc].set (*t, in, c);
-					c = c + 1 % cend;
+					c = (c + 1) % cend;
 				}
 			}
 		} else {
-			_in_map[pc] = ChanMapping (ChanCount::min (natural_input_streams (), _configured_internal));
+			_in_map[pc] = ChanMapping (ChanCount::min (ns_inputs, _configured_in));
 		}
 		_out_map[pc] = ChanMapping (ChanCount::min (natural_output_streams(), _configured_out));
 
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			_in_map[pc].offset_to(*t, pc * natural_input_streams().get(*t));
+			const uint32_t nis = natural_input_streams ().get(*t);
+			const uint32_t stride = nis - sidechain_input_pins().get (*t);
+			_in_map[pc].offset_to(*t, stride * pc);
 			_out_map[pc].offset_to(*t, pc * natural_output_streams().get(*t));
+
+			// connect side-chains
+			const uint32_t sc_start = _configured_in.get (*t);
+			const uint32_t sc_len = _configured_internal.get (*t) - sc_start;
+			if (sc_len == 0) { continue; }
+			uint32_t c = 0;
+			for (uint32_t in = ns_inputs.get (*t); in < nis; ++in) {
+				_in_map[pc].set (*t, in, sc_start + c);
+				c = (c + 1) % sc_len;
+			}
 		}
 	}
 	sanitize_maps ();
@@ -1318,9 +1341,9 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 					 * at least enough to feed every output port. */
 					uint32_t f = 1; // at least one. e.g. control data filters, no in, no out.
 					for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-						uint32_t nin = inputs.get (*t);
-						if (nin == 0 || inx.get(*t) == 0) { continue; }
-						f = max (f, (uint32_t) ceil (inx.get(*t) / (float)nin));
+						uint32_t nout = outputs.get (*t);
+						if (nout == 0 || inx.get(*t) == 0) { continue; }
+						f = max (f, (uint32_t) ceil (inx.get(*t) / (float)nout));
 					}
 					out = inx;
 					DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("special case strict-i/o generator: %1\n", name()));
@@ -1341,10 +1364,13 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 		return m;
 	}
 
+	ChanCount ns_inputs  = inputs - sidechain_input_pins ();
+
 	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("resolving 'Impossible' match for %1\n", name()));
 
 	if (info->reconfigurable_io()) {
 		ChanCount useins;
+		// TODO add sidechains here
 		bool const r = _plugins.front()->can_support_io_configuration (inx, out, &useins);
 		if (!r) {
 			// houston, we have a problem.
@@ -1358,16 +1384,28 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 		midi_bypass.set (DataType::MIDI, 1);
 	}
 
-	// add at least as many plugins so that output count matches input count
+	// add at least as many plugins so that output count matches input count (w/o sidechain pins)
 	uint32_t f = 0;
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		uint32_t nin = inputs.get (*t);
+		uint32_t nin = ns_inputs.get (*t);
 		uint32_t nout = outputs.get (*t);
 		if (nin == 0 || inx.get(*t) == 0) { continue; }
 		// prefer floor() so the count won't overly increase IFF (nin < nout)
 		f = max (f, (uint32_t) floor (inx.get(*t) / (float)nout));
 	}
 	if (f > 0 && outputs * f >= _configured_out) {
+		out = outputs * f + midi_bypass;
+		return Match (Replicate, f);
+	}
+
+	// add at least as many plugins needed to connect all inputs (w/o sidechain pins)
+	f = 0;
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		uint32_t nin = ns_inputs.get (*t);
+		if (nin == 0 || inx.get(*t) == 0) { continue; }
+		f = max (f, (uint32_t) ceil (inx.get(*t) / (float)nin));
+	}
+	if (f > 0) {
 		out = outputs * f + midi_bypass;
 		return Match (Replicate, f);
 	}
@@ -1406,6 +1444,7 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 
 	ChanCount inputs  = info->n_inputs;
 	ChanCount outputs = info->n_outputs;
+	ChanCount ns_inputs  = inputs - sidechain_input_pins ();
 
 	if (in.get(DataType::MIDI) == 1 && outputs.get(DataType::MIDI) == 0) {
 		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("bypassing midi-data around %1\n", name()));
@@ -1415,6 +1454,9 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("hiding midi-port from plugin %1\n", name()));
 		in.set(DataType::MIDI, 0);
 	}
+
+	// add internally provided sidechain ports
+	ChanCount insc = in + sidechain_input_ports ();
 
 	bool no_inputs = true;
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
@@ -1430,8 +1472,14 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 		return Match (NoInputs, 1);
 	}
 
-	/* Plugin inputs match requested inputs exactly */
-	if (inputs == in) {
+	/* Plugin inputs match requested inputs + side-chain-ports exactly */
+	if (inputs == insc) {
+		out = outputs + midi_bypass;
+		return Match (ExactMatch, 1);
+	}
+
+	/* Plugin inputs matches without side-chain-pins */
+	if (ns_inputs == in) {
 		out = outputs + midi_bypass;
 		return Match (ExactMatch, 1);
 	}
@@ -1446,7 +1494,8 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 	bool     can_replicate = true;
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 
-		uint32_t nin = inputs.get (*t);
+		// ignore side-chains
+		uint32_t nin = ns_inputs.get (*t);
 
 		// No inputs of this type
 		if (nin == 0 && in.get(*t) == 0) {
@@ -1489,7 +1538,7 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 	bool can_split = true;
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 
-		bool const can_split_type = (in.get (*t) == 1 && inputs.get (*t) > 1);
+		bool const can_split_type = (in.get (*t) == 1 && ns_inputs.get (*t) > 1);
 		bool const nothing_to_do_for_type = (in.get (*t) == 0 && inputs.get (*t) == 0);
 
 		if (!can_split_type && !nothing_to_do_for_type) {
@@ -2176,14 +2225,23 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 	plugin->set_insert_id (this->id());
 
 	if (_plugins.empty()) {
-                /* first (and probably only) plugin instance - connect to relevant signals
-                 */
+		/* first (and probably only) plugin instance - connect to relevant signals */
 
 		plugin->ParameterChangedExternally.connect_same_thread (*this, boost::bind (&PluginInsert::parameter_changed_externally, this, _1, _2));
-                plugin->StartTouch.connect_same_thread (*this, boost::bind (&PluginInsert::start_touch, this, _1));
-                plugin->EndTouch.connect_same_thread (*this, boost::bind (&PluginInsert::end_touch, this, _1));
+		plugin->StartTouch.connect_same_thread (*this, boost::bind (&PluginInsert::start_touch, this, _1));
+		plugin->EndTouch.connect_same_thread (*this, boost::bind (&PluginInsert::end_touch, this, _1));
+		// cache sidechain ports
+		_cached_sidechain_pins.reset ();
+		const ChanCount& nis (plugin->get_info()->n_inputs);
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			for (uint32_t in = 0; in < nis.get (*t); ++in) {
+				const Plugin::IOPortDescription& iod (plugin->describe_io_port (*t, true, in));
+				if (iod.is_sidechain) {
+					_cached_sidechain_pins.set (*t, 1 + _cached_sidechain_pins.n(*t));
+				}
+			}
+		}
 	}
-
 	_plugins.push_back (plugin);
 }
 

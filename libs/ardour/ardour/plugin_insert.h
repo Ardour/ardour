@@ -28,6 +28,7 @@
 #include "ardour/ardour.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/chan_mapping.h"
+#include "ardour/io.h"
 #include "ardour/types.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/processor.h"
@@ -108,6 +109,18 @@ class LIBARDOUR_API PluginInsert : public Processor
 	// a single plugin's internal i/o
 	ChanCount natural_output_streams() const;
 	ChanCount natural_input_streams() const;
+
+	/** plugin ports marked as sidechain */
+	ChanCount sidechain_input_pins() const;
+
+	/** Plugin-Insert IO sidechain ports */
+	ChanCount sidechain_input_ports() const {
+		if (_sidechain) {
+			return _sidechain->input ()->n_ports ();
+		} else {
+			return ChanCount ();
+		}
+	}
 
 	// allow to override output_streams(), implies "Custom Mode"
 
@@ -275,6 +288,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	ChanCount _configured_internal; // with side-chain
 	ChanCount _configured_out;
 	ChanCount _custom_out;
+	ChanCount _cached_sidechain_pins;
 
 	bool _configured;
 	bool _no_inplace;
