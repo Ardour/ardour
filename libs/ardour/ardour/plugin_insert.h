@@ -31,6 +31,7 @@
 #include "ardour/types.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/processor.h"
+#include "ardour/sidechain.h"
 #include "ardour/automation_control.h"
 
 class XMLNode;
@@ -97,6 +98,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	// these are ports visible on the outside
 	ChanCount output_streams() const;
 	ChanCount input_streams() const;
+	ChanCount internal_streams() const; // with side-chain
 
 	// actual ports of all plugins.
 	// n * natural_i/o or result of reconfigurable i/o
@@ -115,6 +117,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void set_outputs    (const ChanCount&);
 	void set_strict_io  (bool b);
 	void set_custom_cfg (bool b);
+	bool add_sidechain  (uint32_t n_audio = 1);
+	bool del_sidechain ();
 	// end C++ class slavery!
 
 	uint32_t get_count  () const { return _plugins.size(); }
@@ -175,6 +179,25 @@ class LIBARDOUR_API PluginInsert : public Processor
 		} else {
 			return _plugins[0]; // we always have one
 		}
+	}
+
+	bool has_sidechain () const {
+		return _sidechain ? true : false;
+	}
+
+	// XXX dangerous
+	boost::shared_ptr<SideChain> sidechain () const {
+		return _sidechain;
+	}
+
+	// XXX even more dangerous (adding/removing ports
+	// must be done by the owning route and the plugin
+	// needs to be reconfigured afterwards)
+	boost::shared_ptr<IO> sidechain_input () const {
+		if (_sidechain) {
+			return _sidechain->input ();
+		}
+		return boost::shared_ptr<IO> ();
 	}
 
 	PluginType type ();
@@ -238,12 +261,14 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	void parameter_changed_externally (uint32_t, float);
 
-	void  set_parameter (Evoral::Parameter param, float val);
+	void set_parameter (Evoral::Parameter param, float val);
 
 	float default_parameter_value (const Evoral::Parameter& param);
 
 	typedef std::vector<boost::shared_ptr<Plugin> > Plugins;
 	Plugins _plugins;
+
+	boost::shared_ptr<SideChain> _sidechain;
 
 	boost::weak_ptr<Plugin> _impulseAnalysisPlugin;
 
@@ -254,6 +279,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	BufferSet _signal_analysis_outputs;
 
 	ChanCount _configured_in;
+	ChanCount _configured_internal; // with side-chain
 	ChanCount _configured_out;
 	ChanCount _custom_out;
 

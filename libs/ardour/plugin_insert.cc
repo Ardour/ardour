@@ -155,6 +155,36 @@ PluginInsert::set_custom_cfg (bool b)
 	}
 }
 
+bool
+PluginInsert::add_sidechain (uint32_t n_audio)
+{
+	// caller must hold process lock
+	if (_sidechain) {
+		return false;
+	}
+	// TODO add route-name, plugin name and shorten.. (plugin name can be long and conatain odd chars)
+	std::string n = "Sidechain " + id().to_s(); /// XXX
+	SideChain *sc = new SideChain (_session, n);
+	_sidechain = boost::shared_ptr<SideChain> (sc);
+	_sidechain->activate ();
+	for (uint32_t n = 0; n < n_audio; ++n) {
+		_sidechain->input()->add_port ("", owner()); // add a port, don't connect.
+	}
+	PluginConfigChanged (); /* EMIT SIGNAL */
+	return true;
+}
+
+bool
+PluginInsert::del_sidechain ()
+{
+	if (!_sidechain) {
+		return false;
+	}
+	_sidechain.reset ();
+	PluginConfigChanged (); /* EMIT SIGNAL */
+	return true;
+}
+
 void
 PluginInsert::control_list_automation_state_changed (Evoral::Parameter which, AutoState s)
 {
@@ -181,6 +211,13 @@ PluginInsert::input_streams() const
 {
 	assert (_configured);
 	return _configured_in;
+}
+
+ChanCount
+PluginInsert::internal_streams() const
+{
+	assert (_configured);
+	return _configured_internal;
 }
 
 ChanCount
@@ -419,7 +456,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 	// Currently this never triggers because the in_map for "Split" triggeres no_inplace.
 	if (_match.method == Split && !_no_inplace) {
 		assert (in_map.size () == 1);
-		in_map[0] = ChanMapping (ChanCount::max (natural_input_streams (), _configured_in));
+		in_map[0] = ChanMapping (ChanCount::max (natural_input_streams (), _configured_in)); // no sidechain
 		ChanCount const in_streams = internal_input_streams ();
 		/* copy the first stream's audio buffer contents to the others */
 		bool valid;
@@ -435,7 +472,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 	}
 #endif
 
-	bufs.set_count(ChanCount::max(bufs.count(), _configured_in));
+	bufs.set_count(ChanCount::max(bufs.count(), _configured_internal));
 	bufs.set_count(ChanCount::max(bufs.count(), _configured_out));
 
 	if (with_auto) {
@@ -650,16 +687,22 @@ PluginInsert::silence (framecnt_t nframes)
 	ChanMapping in_map (natural_input_streams ());
 	ChanMapping out_map (natural_output_streams ());
 
+	// TODO fake run sidechain, too? (maybe once it has meters)
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->connect_and_run (_session.get_scratch_buffers ((*i)->get_info()->n_inputs, true), in_map, out_map, nframes, 0);
 	}
 }
 
 void
-PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t /*end_frame*/, pframes_t nframes, bool)
+PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
 {
 	if (_pending_active) {
 		/* run as normal if we are active or moving from inactive to active */
+
+		if (_sidechain) {
+			// collect sidechain input for complete cycle.
+			_sidechain->run (bufs, start_frame, end_frame, nframes, true);
+		}
 
 		if (_session.transport_rolling() || _session.bounce_processing()) {
 			automation_run (bufs, start_frame, nframes);
@@ -670,6 +713,8 @@ PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t /*end_fra
 	} else {
 		// TODO use mapping in bypassed mode ?!
 		// -> do we bypass the processor or the plugin
+
+		// TODO include sidechain??
 
 		uint32_t in = input_streams ().n_audio ();
 		uint32_t out = output_streams().n_audio ();
@@ -959,7 +1004,7 @@ PluginInsert::sanitize_maps ()
 			for (uint32_t i = 0; i < natural_input_streams().get (*t); ++i) {
 				bool valid;
 				uint32_t idx = _in_map[pc].get (*t, i, &valid);
-				if (valid && idx < _configured_in.get (*t)) {
+				if (valid && idx < _configured_internal.get (*t)) {
 					new_in.set (*t, i, idx);
 				}
 			}
@@ -1016,7 +1061,7 @@ PluginInsert::reset_map (bool emit)
 			_in_map[pc] = ChanMapping ();
 			/* connect inputs in round-robin fashion */
 			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-				const uint32_t cend = _configured_in.get (*t);
+				const uint32_t cend = _configured_internal.get (*t);
 				if (cend == 0) { continue; }
 				uint32_t c = 0;
 				for (uint32_t in = 0; in < natural_input_streams().get (*t); ++in) {
@@ -1025,7 +1070,7 @@ PluginInsert::reset_map (bool emit)
 				}
 			}
 		} else {
-			_in_map[pc] = ChanMapping (ChanCount::min (natural_input_streams (), _configured_in));
+			_in_map[pc] = ChanMapping (ChanCount::min (natural_input_streams (), _configured_internal));
 		}
 		_out_map[pc] = ChanMapping (ChanCount::min (natural_output_streams(), _configured_out));
 
@@ -1049,15 +1094,30 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 {
 	Match old_match = _match;
 	ChanCount old_in;
+	ChanCount old_internal;
 	ChanCount old_out;
 
 	if (_configured) {
 		old_in = _configured_in;
+		old_internal = _configured_internal;
 		old_out = _configured_out;
 	}
 
 	_configured_in = in;
+	_configured_internal = in;
 	_configured_out = out;
+
+	if (_sidechain) {
+		/* TODO hide midi-bypass, and custom outs. Best /fake/ "out" here.
+		 * (currently _sidechain->configure_io always succeeds
+		 *  since Processor::configure_io() succeeds)
+		 */
+		if (!_sidechain->configure_io (in, out)) {
+			DEBUG_TRACE (DEBUG::ChanMapping, "Sidechain configuration failed\n");
+			return false;
+		}
+		_configured_internal += _sidechain->input()->n_ports();
+	}
 
 	/* get plugin configuration */
 	_match = private_can_support_io_configuration (in, out);
@@ -1114,12 +1174,16 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	}
 
 	bool mapping_changed = false;
-	if (old_in == in && old_out == out && _configured
+	if (old_in == in && old_out == out
+			&& _configured
 			&& old_match.method == _match.method
 			&& _in_map.size() == _out_map.size()
 			&& _in_map.size() == get_count ()
 		 ) {
-		/* If the configuraton has not changed, keep the mapping */
+		/* If the configuration has not changed, keep the mapping */
+		if (old_internal != _configured_internal) {
+			mapping_changed = sanitize_maps ();
+		}
 	} else if (_match.custom_cfg && _configured) {
 		mapping_changed = sanitize_maps ();
 	} else {
@@ -1169,7 +1233,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	}
 	_no_inplace = !inplace_ok || _plugins.front()->inplace_broken ();
 
-	if (old_in != in || old_out != out
+	if (old_in != in || old_out != out || old_internal != _configured_internal
 			|| (old_match.method != _match.method && (old_match.method == Split || _match.method == Split))
 		 ) {
 		PluginIoReConfigure (); /* EMIT SIGNAL */
@@ -1202,6 +1266,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 bool
 PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
+	if (_sidechain) {
+		_sidechain->can_support_io_configuration (in, out); // never fails, sets "out"
+	}
 	return private_can_support_io_configuration (in, out).method != Impossible;
 }
 
@@ -1492,6 +1559,10 @@ PluginInsert::state (bool full)
 		node.add_child_nocopy (* _out_map[pc].state (tmp));
 	}
 
+	if (_sidechain) {
+		node.add_child_nocopy (_sidechain->state (full));
+	}
+
 	_plugins[0]->set_insert_id(this->id());
 	node.add_child_nocopy (_plugins[0]->get_state());
 
@@ -1742,6 +1813,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		_custom_cfg = string_is_affirmative (prop->value());
 	}
 
+	// TODO load/add sidechain
+
 	uint32_t in_maps = 0;
 	uint32_t out_maps = 0;
 	XMLNodeList kids = node.children ();
@@ -1749,21 +1822,28 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		if ((*i)->name() == X_("ConfiguredOutput")) {
 			_custom_out = ChanCount(**i);
 		}
-		if (strncmp ((*i)->name().c_str(), X_("InputMap-"), 9) == 0) {
+		if (strncmp ((*i)->name ().c_str(), X_("InputMap-"), 9) == 0) {
 			long pc = atol (&((*i)->name().c_str()[9]));
 			if (pc >=0 && pc <= get_count()) {
 				_in_map[pc] = ChanMapping (**i);
 				++in_maps;
 			}
 		}
-		if (strncmp ((*i)->name().c_str(), X_("OutputMap-"), 10) == 0) {
+		if (strncmp ((*i)->name ().c_str(), X_("OutputMap-"), 10) == 0) {
 			long pc = atol (&((*i)->name().c_str()[10]));
 			if (pc >=0 && pc <= get_count()) {
 				_out_map[pc] = ChanMapping (**i);
 				++out_maps;
 			}
 		}
+		if ((*i)->name () ==  Processor::state_node_name) {
+			if (!_sidechain) {
+				add_sidechain (0);
+			}
+			_sidechain->set_state (**i, version);
+		}
 	}
+
 	if (in_maps == out_maps && out_maps >0 && out_maps == get_count()) {
 		_maps_from_state = true;
 	}
