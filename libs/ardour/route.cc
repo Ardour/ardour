@@ -3601,12 +3601,43 @@ Route::feeds (boost::shared_ptr<Route> other, bool* via_sends_only)
 	return false;
 }
 
+IOVector
+Route::all_inputs () const
+{
+	/* TODO, if this works as expected,
+	 * cache the IOVector and maintain it via
+	 * input_change_handler(), sidechain_change_handler() etc
+	 */
+	IOVector ios;
+	ios.push_back (_input);
+
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	for (ProcessorList::const_iterator r = _processors.begin(); r != _processors.end(); ++r) {
+
+		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor>(*r);
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*r);
+		if (pi != 0) {
+			assert (iop == 0);
+			iop = pi->sidechain();
+		}
+
+		if (iop != 0 && iop->input()) {
+		ios.push_back (iop->input());
+		}
+	}
+	return ios;
+}
+
 bool
 Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* via_send_only)
 {
 	DEBUG_TRACE (DEBUG::Graph, string_compose ("Feeds? %1\n", _name));
-
-	if (_output->connected_to (other->input())) {
+#if 0
+	if (_output->connected_to (other->input()))
+#else
+		if (other->all_inputs().fed_by (_output))
+#endif
+	{
 		DEBUG_TRACE (DEBUG::Graph, string_compose ("\tdirect FEEDS %2\n", other->name()));
 		if (via_send_only) {
 			*via_send_only = false;
@@ -3616,6 +3647,7 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* 
 	}
 
 
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock); // XXX
 	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
 		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor>(*r);
@@ -3626,7 +3658,13 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* 
 		}
 
 		if (iop != 0) {
-			if (iop->feeds (other)) {
+#if 0
+			if (iop->feeds (other))
+#else
+			boost::shared_ptr<const IO> iop_out = iop->output();
+			if (iop_out && other->all_inputs().fed_by (iop_out))
+#endif
+			{
 				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does feed %2\n", iop->name(), other->name()));
 				if (via_send_only) {
 					*via_send_only = true;

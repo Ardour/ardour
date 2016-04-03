@@ -44,6 +44,7 @@
 #include "ardour/gain_control.h"
 #include "ardour/instrument_info.h"
 #include "ardour/io.h"
+#include "ardour/io_vector.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/mute_master.h"
@@ -89,6 +90,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	boost::shared_ptr<IO> input() const { return _input; }
 	boost::shared_ptr<IO> output() const { return _output; }
+	IOVector all_inputs () const;
 
 	ChanCount n_inputs() const { return _input->n_ports(); }
 	ChanCount n_outputs() const { return _output->n_ports(); }
