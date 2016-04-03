@@ -37,7 +37,6 @@ using namespace PBD;
 SideChain::SideChain (Session& s, const std::string& name)
 	: IOProcessor (s, true, false, name)
 {
-
 }
 
 SideChain::~SideChain ()
@@ -45,9 +44,9 @@ SideChain::~SideChain ()
 }
 
 XMLNode&
-SideChain::state(bool full)
+SideChain::state (bool full)
 {
-	XMLNode& node = IOProcessor::state(full);
+	XMLNode& node = IOProcessor::state (full);
 	node.add_property ("type", "sidechain");
 	return node;
 }
@@ -56,32 +55,22 @@ SideChain::state(bool full)
 int
 SideChain::set_state (const XMLNode& node, int version)
 {
-	XMLNodeList nlist = node.children();
-	const XMLNode* insert_node = &node;
-
-	for (XMLNodeIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == "IOProcessor") {
-			insert_node = *niter;
-		}
-	}
-
-	IOProcessor::set_state (*insert_node, version);
-
+	IOProcessor::set_state (node, version);
 	return 0;
 }
 
 void
 SideChain::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
 {
-	if (_input->n_ports() == ChanCount::ZERO) {
+	if (_input->n_ports () == ChanCount::ZERO) {
 		// inplace pass-through
 		return;
 	}
 
-	if ((!_active && !_pending_active)) {
+	if (!_active && !_pending_active) {
 		// zero buffers
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			for (uint32_t out = _configured_input.get (*t); out < bufs.count().get (*t); ++out) {
+		for (DataType::iterator t = DataType::begin (); t != DataType::end (); ++t) {
+			for (uint32_t out = _configured_input.get (*t); out < bufs.count ().get (*t); ++out) {
 				bufs.get (*t, out).silence (nframes);
 			}
 		}
@@ -89,7 +78,7 @@ SideChain::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, p
 	}
 
 	_input->collect_input (bufs, nframes, _configured_input);
-	bufs.set_count(_configured_output);
+	bufs.set_count (_configured_output);
 
 	_active = _pending_active;
 }
@@ -97,7 +86,7 @@ SideChain::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, p
 bool
 SideChain::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
-	out = in + _input->n_ports();
+	out = in + _input->n_ports ();
 	return true;
 }
 
