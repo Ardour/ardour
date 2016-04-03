@@ -368,7 +368,7 @@ Editor::edit_tempo_section (TempoSection* section)
 	double nt = tempo_dialog.get_note_type ();
 	Timecode::BBT_Time when;
 
-	tempo_dialog.get_bbt_time(when);
+	tempo_dialog.get_bbt_time (when);
 	double const beat = _session->tempo_map().bbt_to_beats (when);
 
 	bpm = max (0.01, bpm);

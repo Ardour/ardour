@@ -3301,20 +3301,69 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 		/* use the new marker for the grab */
 		swap_grab (&_marker->the_item(), 0, GDK_CURRENT_TIME);
+		_marker->hide();
 
+		TempoMap& map (_editor->session()->tempo_map());
+		/* get current state */
+		before_state = &map.get_state();
 		if (!_copy) {
 			_editor->begin_reversible_command (_("move tempo mark"));
-			TempoMap& map (_editor->session()->tempo_map());
-			/* get current state */
-			before_state = &map.get_state();
+		} else {
+			_editor->begin_reversible_command (_("copy tempo mark"));
+			framepos_t frame;
+			bool use_snap = false;
+
+			if (!_editor->snap_musical()) {
+				frame = adjusted_current_frame (event);
+			} else {
+				frame = adjusted_current_frame (event, false);
+				if (ArdourKeyboard::indicates_snap (event->button.state)) {
+					if (_editor->snap_mode() == Editing::SnapOff) {
+						use_snap = true;
+					} else {
+						use_snap = false;
+					}
+				} else {
+					if (_editor->snap_mode() == Editing::SnapOff) {
+						use_snap = false;
+					} else {
+						use_snap = true;
+					}
+				}
+			}
+
+			Timecode::BBT_Time bbt;
+			map.bbt_time (frame, bbt);
+
+			/* add new tempo section to map, ensuring we don't refer to existing tempos for snap */
+
+			if (_real_section->position_lock_style() == MusicTime) {
+				if (use_snap && _editor->snap_type() == SnapToBar) {
+					map.round_bbt (bbt, -1);
+				} else if (use_snap) {
+					map.round_bbt (bbt, _editor->get_grid_beat_divisions (0));
+				}
+				double const pulse = map.predict_tempo_pulse (_real_section, map.frame_time (bbt));
+				_real_section = map.add_tempo (_marker->tempo(), pulse, _real_section->type());
+			} else {
+				if (use_snap && _editor->snap_type() == SnapToBar) {
+					map.round_bbt (bbt, -1);
+				} else if (use_snap) {
+					map.round_bbt (bbt, _editor->get_grid_beat_divisions (0));
+				}
+				if (use_snap) {
+					frame = map.predict_tempo_frame (_real_section, bbt);
+				}
+				_real_section = map.add_tempo (_marker->tempo(), frame, _real_section->type());
+			}
 		}
-		_marker->hide();
+
 	}
 
 	framepos_t pf;
 	Tempo const tp = _marker->tempo();
 
-	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+	if (ArdourKeyboard::indicates_snap (event->button.state)) {
 		double new_bpm = _real_section->beats_per_minute() + ((last_pointer_y() - current_pointer_y()) / 5.0);
 		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type()));
 		stringstream strs;
@@ -3322,8 +3371,14 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		show_verbose_cursor_text (strs.str());
 	} else if (_movable) {
 		if (!_editor->snap_musical()) {
+			/* snap normally (this is not self-referential).*/
 			pf = adjusted_current_frame (event);
 		} else {
+			/* but this is.
+			   we can't use the map for anything related to tempo,
+			   so we round bbt using meters, which have no dependency
+			   on pulse for this kind of thing.
+			*/
 			bool use_snap;
 			TempoMap& map (_editor->session()->tempo_map());
 
@@ -3387,38 +3442,11 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-
 	TempoMap& map (_editor->session()->tempo_map());
 
-	if (_copy == true) {
-		_editor->begin_reversible_command (_("copy tempo mark"));
-		XMLNode &before = map.get_state();
-
-		if (_marker->tempo().position_lock_style() == MusicTime) {
-			double const pulse = map.predict_tempo_pulse (_real_section, _real_section->frame());
-			map.add_tempo (_marker->tempo(), pulse, _marker->tempo().type());
-		} else {
-			map.add_tempo (_marker->tempo(), _real_section->frame(), _marker->tempo().type());
-		}
-
-		XMLNode &after = map.get_state();
-		_editor->session()->add_command (new MementoCommand<TempoMap>(map, &before, &after));
-		_editor->commit_reversible_command ();
-
-	} else {
-		if (_marker->tempo().position_lock_style() == MusicTime) {
-			double const pulse = map.predict_tempo_pulse (_real_section, _real_section->frame());
-			map.replace_tempo (*_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type())
-					   , pulse, _marker->tempo().type());
-		} else {
-			map.replace_tempo (*_real_section, Tempo (_real_section->beats_per_minute(), _real_section->note_type())
-					   , _real_section->frame(), _marker->tempo().type());
-		}
-
-		XMLNode &after = map.get_state();
-		_editor->session()->add_command (new MementoCommand<TempoMap>(map, before_state, &after));
-		_editor->commit_reversible_command ();
-	}
+	XMLNode &after = map.get_state();
+	_editor->session()->add_command (new MementoCommand<TempoMap>(map, before_state, &after));
+	_editor->commit_reversible_command ();
 
 	// delete the dummy marker we used for visual representation while moving.
 	// a new visual marker will show up automatically.
@@ -3431,12 +3459,7 @@ TempoMarkerDrag::aborted (bool moved)
 	_marker->set_position (_marker->tempo().frame());
 	if (moved) {
 		TempoMap& map (_editor->session()->tempo_map());
-		/* we removed it before, so add it back now */
-		if (_marker->tempo().position_lock_style() == MusicTime) {
-			map.add_tempo (_marker->tempo(), _marker->tempo().pulse(), _marker->tempo().type());
-		} else {
-			map.add_tempo (_marker->tempo(), _marker->tempo().frame(), _marker->tempo().type());
-		}
+		map.set_state (*before_state, Stateful::current_state_version);
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
 		delete _marker;
