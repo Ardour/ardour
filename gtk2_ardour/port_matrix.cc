@@ -747,22 +747,30 @@ PortMatrix::can_remove_channels (boost::shared_ptr<Bundle> b) const
 void
 PortMatrix::remove_channel (ARDOUR::BundleChannel b)
 {
+	std::string errmsg;
 	boost::shared_ptr<IO> io = io_from_bundle (b.bundle);
+	boost::shared_ptr<Port> p = io->nth (b.channel);
 
-	if (io) {
-		boost::shared_ptr<Port> p = io->nth (b.channel);
-		if (p) {
-			int const r = io->remove_port (p, this);
-			if (r == -1) {
-				ArdourDialog d (_("Port removal not allowed"));
-				Label l (_("This port cannot be removed.\nEither the first plugin in the track or buss cannot accept\nthe new number of inputs or the last plugin has more outputs."));
-				d.get_vbox()->pack_start (l);
-				d.add_button (Stock::OK, RESPONSE_ACCEPT);
-				d.set_modal (true);
-				d.show_all ();
-				d.run ();
-			}
+	if (!io || !p) {
+		return;
+	}
+
+	if (io->n_ports ().n_total () == 1) {
+		errmsg = _("The last port cannot be removed");
+	} else {
+		if (-1 == io->remove_port (p, this)) {
+			errmsg = _("This port cannot be removed.\nEither the first plugin in the track or buss cannot accept\nthe new number of inputs or the last plugin has more outputs.");
 		}
+	}
+
+	if (!errmsg.empty ()) {
+		ArdourDialog d (_("Port removal not allowed"));
+		Label l (errmsg);
+		d.get_vbox()->pack_start (l);
+		d.add_button (Stock::OK, RESPONSE_ACCEPT);
+		d.set_modal (true);
+		d.show_all ();
+		d.run ();
 	}
 }
 
