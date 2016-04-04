@@ -86,7 +86,7 @@ AddRouteDialog::AddRouteDialog ()
 	insert_at_combo.append_text (_("Before Selection"));
 	insert_at_combo.append_text (_("After Selection"));
 	insert_at_combo.append_text (_("Last"));
-	insert_at_combo.set_active (1);
+	insert_at_combo.set_active (3);
 
 	strict_io_combo.append_text (_("Flexible-I/O"));
 	strict_io_combo.append_text (_("Strict-I/O"));
