@@ -196,17 +196,19 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 
 		Label* when_label = manage (new Label(_("Tempo begins at"), ALIGN_LEFT, ALIGN_CENTER));
 		table->attach (*when_label, 0, 1, row, row+1);
+
+		++row;
+
+		Label* lock_style_label = manage (new Label(_("Lock Style:"), ALIGN_LEFT, ALIGN_CENTER));
+		table->attach (*lock_style_label, 0, 1, row, row + 1);
+		table->attach (lock_style, 1, 2, row, row + 1);
+
+		++row;
 	}
 
 	Label* tempo_type_label = manage (new Label(_("Tempo Type:"), ALIGN_LEFT, ALIGN_CENTER));
-	table->attach (*tempo_type_label, 0, 1, row+1, row+2);
-	table->attach (tempo_type, 1, 2, row+1, row + 2);
-	get_vbox()->set_border_width (12);
-	get_vbox()->pack_end (*table);
-
-	Label* lock_style_label = manage (new Label(_("Lock Style:"), ALIGN_LEFT, ALIGN_CENTER));
-	table->attach (*lock_style_label, 0, 1, row+2, row+3);
-	table->attach (lock_style, 1, 2, row+2, row + 3);
+	table->attach (*tempo_type_label, 0, 1, row, row + 1);
+	table->attach (tempo_type, 1, 2, row, row + 2);
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_end (*table);
 
@@ -514,9 +516,6 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 
 		table->attach (*lock_label, 0, 1, 3, 4, FILL|EXPAND, FILL|EXPAND);
 		table->attach (lock_style, 1, 2, 3, 4, FILL|EXPAND, SHRINK);
-	} else {
-		table->attach (*lock_label, 0, 1, 2, 3, FILL|EXPAND, FILL|EXPAND);
-		table->attach (lock_style, 1, 2, 2, 3, FILL|EXPAND, SHRINK);
 	}
 
 	get_vbox()->set_border_width (12);
