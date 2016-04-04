@@ -92,20 +92,18 @@ TempoSection::TempoSection (const XMLNode& node)
 			/* legacy session - start used to be in bbt*/
 			_legacy_bbt = bbt;
 			pulse = -1.0;
-			set_pulse (pulse);
+			info << _("Legacy session detected. TempoSection XML node will be altered.") << endmsg;
 		}
-	} else {
-		warning << _("TempoSection XML node has no \"start\" property") << endmsg;
 	}
-
 
 	if ((prop = node.property ("pulse")) != 0) {
 		if (sscanf (prop->value().c_str(), "%lf", &pulse) != 1 || pulse < 0.0) {
-			error << _("TempoSection XML node has an illegal \"beat\" value") << endmsg;
-		} else {
-			set_pulse (pulse);
+			error << _("TempoSection XML node has an illegal \"pulse\" value") << endmsg;
 		}
 	}
+
+	set_pulse (pulse);
+
 	if ((prop = node.property ("frame")) != 0) {
 		if (sscanf (prop->value().c_str(), "%" PRIu32, &frame) != 1) {
 			error << _("TempoSection XML node has an illegal \"frame\" value") << endmsg;
@@ -454,10 +452,9 @@ MeterSection::MeterSection (const XMLNode& node)
 			error << _("MeterSection XML node has an illegal \"start\" value") << endmsg;
 		} else {
 			/* legacy session - start used to be in bbt*/
+			info << _("Legacy session detected - MeterSection XML node will be altered.") << endmsg;
 			pulse = -1.0;
 		}
-	} else {
-		error << _("MeterSection XML node has no \"start\" property") << endmsg;
 	}
 
 	if ((prop = node.property ("pulse")) != 0) {
@@ -469,20 +466,20 @@ MeterSection::MeterSection (const XMLNode& node)
 
 	if ((prop = node.property ("beat")) != 0) {
 		if (sscanf (prop->value().c_str(), "%lf", &beat) != 1) {
-			error << _("MeterSection XML node has an illegal \"beat\" vlue") << endmsg;
+			error << _("MeterSection XML node has an illegal \"beat\" value") << endmsg;
 		}
 	}
 
 	start.first = beat;
 
 	if ((prop = node.property ("bbt")) == 0) {
-		error << _("MeterSection XML node has no \"bbt\" property") << endmsg;
+		warning << _("MeterSection XML node has no \"bbt\" property") << endmsg;
 	} else if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
 		    &bbt.bars,
 		    &bbt.beats,
 		    &bbt.ticks) < 3) {
 		error << _("MeterSection XML node has an illegal \"bbt\" value") << endmsg;
-		//throw failed_constructor();
+		throw failed_constructor();
 	}
 
 	start.second = bbt;
