@@ -29,7 +29,7 @@
 
 #include "ardour_button.h"
 #include "ardour_window.h"
-#include "ardour_dialog.h"
+#include "io_selector.h"
 
 class PluginPinDialog : public ArdourWindow
 {
@@ -131,13 +131,7 @@ private:
 	bool _position_valid;
 	bool _ignore_updates;
 	ARDOUR::Route* _route () { return static_cast<ARDOUR::Route*> (_pi->owner ()); }
+	IOSelectorWindow *_sidechain_selector;
 };
-
-class SideChainUI: public ArdourDialog
-{
-  public:
-	SideChainUI (Gtk::Window&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::IO>);
-};
-
 
 #endif

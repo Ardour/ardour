@@ -26,7 +26,6 @@
 
 #include "ardour/plugin.h"
 
-#include "io_selector.h"
 #include "plugin_pin_dialog.h"
 #include "gui_thread.h"
 #include "ui_config.h"
@@ -58,6 +57,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	, _min_width (300)
 	, _position_valid (false)
 	, _ignore_updates (false)
+	, _sidechain_selector (0)
 {
 	assert (pi->owner ()); // Route
 
@@ -180,6 +180,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 
 PluginPinDialog::~PluginPinDialog ()
 {
+	delete _sidechain_selector;
 }
 
 void
@@ -201,6 +202,11 @@ PluginPinDialog::plugin_reconfigured ()
 	_ind_customized.set_active (_pi->custom_cfg ());
 	_tgl_sidechain.set_active (_pi->has_sidechain ());
 	_edt_sidechain.set_sensitive (_pi->has_sidechain ()); // && _session
+
+	if (!_pi->has_sidechain () && _sidechain_selector) {
+		delete _sidechain_selector;
+		_sidechain_selector = 0;
+	}
 
 	// calc minimum width
 	const uint32_t max_ports = std::max (_ins.n_total (), _out.n_total ());
@@ -695,9 +701,16 @@ void
 PluginPinDialog::connect_sidechain ()
 {
 	if (!_session) { return; }
-	// TODO non-modal would be cooler ... :)
-	SideChainUI sc (*this, _session, _pi->sidechain_input ());
-	sc.run ();
+
+	if (_sidechain_selector == 0) {
+		_sidechain_selector = new IOSelectorWindow (_session, _pi->sidechain_input ());
+	}
+
+	if (_sidechain_selector->is_visible()) {
+		_sidechain_selector->get_toplevel()->get_window()->raise();
+	} else {
+		_sidechain_selector->present ();
+	}
 }
 
 void
@@ -727,15 +740,4 @@ PluginPinDialog::add_remove_port_clicked (bool add, ARDOUR::DataType dt)
 	assert (add || out.get (dt) > 0);
 	out.set (dt, out.get (dt) + (add ? 1 : -1));
 	_route ()->customize_plugin_insert (_pi, _n_plugins, out);
-}
-
-SideChainUI::SideChainUI  (Gtk::Window& p, Session* session, boost::shared_ptr<IO> sc)
-	: ArdourDialog (p, string (_("Sidechain ")) + sc->name (), true)
-{
-	HBox* hbox = manage (new HBox);
-	IOSelector * io = Gtk::manage (new IOSelector (this, session, sc));
-	hbox->pack_start (*io, true, true);
-	get_vbox ()->pack_start (*hbox, true, true);
-	io->show ();
-	hbox->show ();
 }
