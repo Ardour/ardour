@@ -22,9 +22,10 @@
 #include <string>
 #include <sigc++/sigc++.h>
 
+#include "lua/liblua_visibility.h"
 #include "lua/lua.h"
 
-class LuaState {
+class LIBLUA_API LuaState {
 public:
 	LuaState();
 	LuaState(lua_State *ls);
