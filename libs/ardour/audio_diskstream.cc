@@ -2237,11 +2237,11 @@ AudioDiskstream::playback_buffer_load () const
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	if (c->empty ()) {
-		return 0;
+		return 1.0;
 	}
 
 	return (float) ((double) c->front()->playback_buf->read_space()/
-			(double) c->front()->playback_buf->bufsize());
+	                   (double) c->front()->playback_buf->bufsize());
 }
 
 float
@@ -2250,7 +2250,7 @@ AudioDiskstream::capture_buffer_load () const
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	if (c->empty ()) {
-		return 0;
+		return 1.0;
 	}
 
 	return (float) ((double) c->front()->capture_buf->write_space()/
