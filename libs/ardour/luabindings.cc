@@ -87,10 +87,6 @@ LuaBindings::stddef (lua_State* L)
 	// register float array (int32_t*)
 		.registerArray <int32_t> ("IntArray")
 
-	// std::vector<std::string>
-		.beginStdVector <double> ("DoubleVector")
-		.endClass ()
-
 	// TODO std::set
 		.endNamespace ();
 }
