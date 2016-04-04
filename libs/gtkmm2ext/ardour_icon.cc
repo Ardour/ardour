@@ -522,10 +522,15 @@ static void icon_rec_enable (cairo_t *cr, const int width, const int height, con
 	const double y = height * .5;
 	const double r = std::min (x, y) * .55;
 	cairo_arc (cr, x, y, r, 0, 2 * M_PI);
-	if (state == Gtkmm2ext::ExplicitActive)
-		cairo_set_source_rgba (cr, 0.95, 0.10, 0.10, 1.0);
-	else
-		cairo_set_source_rgba (cr, 0.95, 0.44, 0.44, 1.0); // #f46f6f
+	if (state == Gtkmm2ext::ExplicitActive) {
+		cairo_set_source_rgba (cr, 1.0, .1, .1, 1.0);
+	}
+	else if (state == Gtkmm2ext::ImplicitActive) {
+		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
+	}
+	else {
+		cairo_set_source_rgba (cr, .4, .3, .3, 1.0);
+	}
 	cairo_fill_preserve (cr);
 	cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 0.8); // outline
 	cairo_set_line_width (cr, 1);
@@ -543,9 +548,13 @@ static void icon_rec_tape (cairo_t *cr, const int width, const int height, const
 
 	cairo_arc (cr, 0, 0, r, 0, 2 * M_PI);
 	if (state == Gtkmm2ext::ExplicitActive) {
-		cairo_set_source_rgba (cr, .95, .1, .1, 1.);
-	} else {
-		cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
+		cairo_set_source_rgba (cr, 1.0, .1, .1, 1.0);
+	}
+	else if (state == Gtkmm2ext::ImplicitActive) {
+		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
+	}
+	else {
+		cairo_set_source_rgba (cr, .4, .3, .3, 1.0);
 	}
 	cairo_fill_preserve (cr);
 	cairo_set_source_rgba (cr, .0, .0, .0, .5);
@@ -580,10 +589,15 @@ static void icon_rec_tape (cairo_t *cr, const int width, const int height, const
 	cairo_restore (cr);
 
 	cairo_arc (cr, 0, 0, r * .3, 0, 2 * M_PI);
-	if (state == Gtkmm2ext::ExplicitActive)
-		cairo_set_source_rgba (cr, .95, .1, .1, 1.);
-	else
-		cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
+	if (state == Gtkmm2ext::ExplicitActive) {
+		cairo_set_source_rgba (cr, 1.0, .1, .1, 1.0);
+	}
+	else if (state == Gtkmm2ext::ImplicitActive) {
+		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
+	}
+	else {
+		cairo_set_source_rgba (cr, .4, .3, .3, 1.0);
+	}
 	cairo_fill (cr);
 	cairo_set_source_rgba (cr, .0, .0, .0, 1.0);
 	cairo_arc (cr, 0, 0, r *.15, 0, 2 * M_PI); // hole in the middle
