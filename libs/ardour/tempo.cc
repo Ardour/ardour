@@ -1397,33 +1397,6 @@ TempoMap::metric_at (BBT_Time bbt) const
 }
 
 double
-TempoMap::pulse_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const
-{
-	/* HOLD (at least) THE READER LOCK */
-	TempoSection* prev_t = 0;
-
-	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
-		TempoSection* t;
-		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
-			if (!t->active()) {
-				continue;
-			}
-			if (prev_t && t->frame() > frame) {
-				/*the previous ts is the one containing the frame */
-				const double ret = prev_t->pulse_at_frame (frame, _frame_rate);
-				return ret;
-			}
-			prev_t = t;
-		}
-	}
-
-	/* treated as constant for this ts */
-	const double pulses_in_section = (frame - prev_t->frame()) / prev_t->frames_per_pulse (_frame_rate);
-
-	return pulses_in_section + prev_t->pulse();
-}
-
-double
 TempoMap::pulse_at_beat_locked (const Metrics& metrics, const double& beat) const
 {
 	MeterSection* prev_m = 0;
@@ -1474,6 +1447,33 @@ TempoMap::beat_at_pulse (const double& pulse) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	return beat_at_pulse_locked (_metrics, pulse);
+}
+
+double
+TempoMap::pulse_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const
+{
+	/* HOLD (at least) THE READER LOCK */
+	TempoSection* prev_t = 0;
+
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		TempoSection* t;
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if (!t->active()) {
+				continue;
+			}
+			if (prev_t && t->frame() > frame) {
+				/*the previous ts is the one containing the frame */
+				const double ret = prev_t->pulse_at_frame (frame, _frame_rate);
+				return ret;
+			}
+			prev_t = t;
+		}
+	}
+
+	/* treated as constant for this ts */
+	const double pulses_in_section = (frame - prev_t->frame()) / prev_t->frames_per_pulse (_frame_rate);
+
+	return pulses_in_section + prev_t->pulse();
 }
 
 framecnt_t
@@ -1557,7 +1557,7 @@ TempoMap::bbt_to_beats_locked (const Metrics& metrics, const Timecode::BBT_Time&
 		}
 	}
 
-	const double remaining_bars = (bbt.bars - 1) - (prev_m->bbt().bars - 1);
+	const double remaining_bars = bbt.bars - prev_m->bbt().bars;
 	const double remaining_bars_in_beats = remaining_bars * prev_m->divisions_per_bar();
 	const double ret = remaining_bars_in_beats + prev_m->beat() + (bbt.beats - 1) + (bbt.ticks / BBT_Time::ticks_per_beat);
 
@@ -1859,7 +1859,7 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const framepos_t
 		recompute_meters (imaginary);
 		return true;
 	}
-
+#if (0)
 	MetricSectionSorter cmp;
 	imaginary.sort (cmp);
 	if (section->position_lock_style() == MusicTime) {
@@ -1875,6 +1875,7 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const framepos_t
 		recompute_meters (imaginary);
 		return true;
 	}
+#endif
 	//dump (imaginary, std::cerr);
 
 	return false;
@@ -1949,7 +1950,7 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const double& pu
 		recompute_meters (imaginary);
 		return true;
 	}
-
+#if (0)
 	MetricSectionFrameSorter fcmp;
 	imaginary.sort (fcmp);
 	if (section->position_lock_style() == AudioTime) {
@@ -1965,7 +1966,7 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const double& pu
 		recompute_meters (imaginary);
 		return true;
 	}
-
+#endif
 	//dump (imaginary, std::cerr);
 
 	return false;
@@ -2848,22 +2849,44 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 			TempoSection* t;
 			MeterSection* prev_m = 0;
 			TempoSection* prev_t = 0;
+
 			if ((m = dynamic_cast<MeterSection*>(*i)) != 0) {
+				if (!m->movable()) {
+					pair<double, BBT_Time> bbt = make_pair (0.0, BBT_Time (1, 1, 0));
+					m->set_beat (bbt);
+					m->set_pulse (0.0);
+					m->set_frame (0);
+					m->set_position_lock_style (AudioTime);
+					prev_m = m;
+					continue;
+				}
 				if (prev_m && prev_m->pulse() < 0.0) {
 					/*XX we cannot possibly make this work??. */
-					pair<double, BBT_Time> start = make_pair (((prev_m->bbt().bars - 1) * prev_m->note_divisor()) + (prev_m->bbt().beats - 1) + (prev_m->bbt().ticks / BBT_Time::ticks_per_beat), prev_m->bbt());
-					prev_m->set_beat (start);
-					const double start_pulse = ((prev_m->bbt().bars - 1) * prev_m->note_divisor()) + (prev_m->bbt().beats - 1) + (prev_m->bbt().ticks / BBT_Time::ticks_per_beat);
-					prev_m->set_pulse (start_pulse);
+					pair<double, BBT_Time> start = make_pair (((m->bbt().bars - 1) * m->note_divisor())
+										  + (m->bbt().beats - 1)
+										  + (m->bbt().ticks / BBT_Time::ticks_per_beat)
+										  , m->bbt());
+					m->set_beat (start);
+					const double start_pulse = ((m->bbt().bars - 1) * m->note_divisor())
+						+ (m->bbt().beats - 1)
+						+ (m->bbt().ticks / BBT_Time::ticks_per_beat);
+					m->set_pulse (start_pulse);
 				}
 				prev_m = m;
 			} else if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
 				if (!t->active()) {
 					continue;
 				}
+				if (!t->movable()) {
+					t->set_pulse (0.0);
+					t->set_frame (0);
+					t->set_position_lock_style (AudioTime);
+					prev_t = t;
+					continue;
+				}
 				if (prev_t && prev_t->pulse() < 0.0) {
-					double const start = ((prev_t->legacy_bbt().bars - 1) * prev_m->note_divisor()) + (prev_t->legacy_bbt().beats - 1) + (prev_t->legacy_bbt().ticks / BBT_Time::ticks_per_beat);
-					prev_t->set_pulse (start);
+					double const start = ((t->legacy_bbt().bars - 1) * prev_m->note_divisor()) + (t->legacy_bbt().beats - 1) + (t->legacy_bbt().ticks / BBT_Time::ticks_per_beat);
+					t->set_pulse (start);
 				}
 				prev_t = t;
 			}
