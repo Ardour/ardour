@@ -1017,8 +1017,14 @@ Editor::compute_bbt_ruler_scale (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, 
 
 	std::vector<TempoMap::BBTPoint>::const_iterator i;
 	Timecode::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
-	framecnt_t beat_before_lower_pos = _session->tempo_map().frame_at_beat (floor(_session->tempo_map().beat_at_frame (lower)));
-	framecnt_t beat_after_upper_pos = _session->tempo_map().frame_at_beat (floor (_session->tempo_map().beat_at_frame (upper)) + 1.0);
+	double floor_lower_beat = floor(_session->tempo_map().beat_at_frame (lower));
+
+	if (floor_lower_beat < 0.0) {
+		floor_lower_beat = 0.0;
+	}
+
+	const framecnt_t beat_before_lower_pos = _session->tempo_map().frame_at_beat (floor_lower_beat);
+	const framecnt_t beat_after_upper_pos = _session->tempo_map().frame_at_beat (floor (_session->tempo_map().beat_at_frame (upper)) + 1.0);
 
 	_session->bbt_time (beat_before_lower_pos, lower_beat);
 	_session->bbt_time (beat_after_upper_pos, upper_beat);
