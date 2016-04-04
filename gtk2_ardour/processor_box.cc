@@ -3421,7 +3421,7 @@ ProcessorBox::register_actions ()
 			sigc::ptr_fun (ProcessorBox::rb_ab_plugins));
 
 	manage_pins_action = myactions.register_action (
-		processor_box_actions, X_("manage-pins"), _("Pin Management..."),
+		processor_box_actions, X_("manage-pins"), _("Pin Connections..."),
 		sigc::ptr_fun (ProcessorBox::rb_manage_pins));
 
 	/* show editors */
