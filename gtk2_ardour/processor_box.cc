@@ -2600,23 +2600,23 @@ ProcessorBox::setup_routing_feeds ()
 			ChanCount in, out;
 			pi->configured_io (in, out);
 
-			ChanCount midi_trhu;
+			ChanCount midi_thru;
 			ChanCount midi_bypass;
 			ChanMapping input_map (pi->input_map ());
-			if (pi->has_midi_trhu ()) {
-				 midi_trhu.set(DataType::MIDI, 1);
+			if (pi->has_midi_thru ()) {
+				 midi_thru.set(DataType::MIDI, 1);
 				 input_map.set (DataType::MIDI, 0, 0);
 			}
 			if (pi->has_midi_bypass ()) {
 				 midi_bypass.set(DataType::MIDI, 1);
 			}
 
-			(*i)->input_icon.set_ports (sinks * count + midi_trhu);
+			(*i)->input_icon.set_ports (sinks * count + midi_thru);
 			(*i)->output_icon.set_ports (sources * count + midi_bypass);
 
 			(*i)->routing_icon.set (
 					in, out,
-					sinks * count + midi_trhu,
+					sinks * count + midi_thru,
 					sources * count + midi_bypass,
 					input_map,
 					pi->output_map ());
