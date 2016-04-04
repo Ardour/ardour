@@ -294,12 +294,22 @@ PluginInsert::internal_input_streams() const
 ChanCount
 PluginInsert::natural_output_streams() const
 {
+#ifdef MIXBUS
+	if (is_channelstrip ()) {
+		return _configured_out;
+	}
+#endif
 	return _plugins[0]->get_info()->n_outputs;
 }
 
 ChanCount
 PluginInsert::natural_input_streams() const
 {
+#ifdef MIXBUS
+	if (is_channelstrip ()) {
+		return _configured_in;
+	}
+#endif
 	return _plugins[0]->get_info()->n_inputs;
 }
 
@@ -1229,6 +1239,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	} else if (_match.custom_cfg && _configured) {
 		mapping_changed = sanitize_maps ();
 	} else {
+#ifdef MIXBUS
+		if (is_channelstrip ()) { _maps_from_state = false; }
+#endif
 		if (_maps_from_state) {
 			_maps_from_state = false;
 			mapping_changed = true;
@@ -1325,6 +1338,13 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 		return Match();
 	}
 
+#ifdef MIXBUS
+	if (is_channelstrip ()) {
+		out = inx;
+		return Match (ExactMatch, 1);
+	}
+#endif
+
 	/* if a user specified a custom cfg, so be it. */
 	if (_custom_cfg) {
 		out = _custom_out;
@@ -1379,12 +1399,6 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	if (m.method != Impossible) {
 		return m;
 	}
-
-#ifdef MIXBUS
-	if (is_channelstrip ()) {
-		return Match (Replicate, 1, _strict_io);
-	}
-#endif
 
 	ChanCount ns_inputs  = inputs - sidechain_input_pins ();
 
@@ -1514,11 +1528,6 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 
 	uint32_t f             = 0;
 	bool     can_replicate = true;
-#ifdef MIXBUS
-	if (is_channelstrip ()) {
-		can_replicate = false;
-	}
-#endif
 	for (DataType::iterator t = DataType::begin(); t != DataType::end() && can_replicate; ++t) {
 
 		// ignore side-chains
