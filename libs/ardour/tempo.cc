@@ -2849,7 +2849,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 			TempoSection* t;
 			MeterSection* prev_m = 0;
 			TempoSection* prev_t = 0;
-
+			/* if one is < 0.0, they all are. this is a legacy session */
 			if ((m = dynamic_cast<MeterSection*>(*i)) != 0 && m->pulse() < 0.0) {
 				if (!m->movable()) {
 					pair<double, BBT_Time> bbt = make_pair (0.0, BBT_Time (1, 1, 0));
