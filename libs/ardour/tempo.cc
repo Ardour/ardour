@@ -2867,10 +2867,10 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 										  + (m->bbt().ticks / BBT_Time::ticks_per_beat)
 										  , m->bbt());
 					m->set_beat (start);
-					const double start_pulse = ((m->bbt().bars - 1) * m->note_divisor())
+					const double start_beat = ((m->bbt().bars - 1) * m->note_divisor())
 						+ (m->bbt().beats - 1)
 						+ (m->bbt().ticks / BBT_Time::ticks_per_beat);
-					m->set_pulse (start_pulse);
+					m->set_pulse (start_beat / prev_m->note_divisor());
 				}
 				prev_m = m;
 			} else if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
@@ -2885,8 +2885,13 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 					continue;
 				}
 				if (prev_t && prev_t->pulse() < 0.0) {
-					double const start = ((t->legacy_bbt().bars - 1) * prev_m->note_divisor()) + (t->legacy_bbt().beats - 1) + (t->legacy_bbt().ticks / BBT_Time::ticks_per_beat);
-					t->set_pulse (start);
+					double const beat = ((t->legacy_bbt().bars - 1) * prev_m->note_divisor()) + (t->legacy_bbt().beats - 1) + (t->legacy_bbt().ticks / BBT_Time::ticks_per_beat);
+					if (prev_m) {
+						t->set_pulse (beat / prev_m->note_divisor());
+					} else {
+						/* really shouldn't happen but.. */
+						t->set_pulse (beat / 4.0);
+					}
 				}
 				prev_t = t;
 			}
