@@ -102,6 +102,20 @@ LuaInstance::register_hooks (lua_State* L)
 void
 LuaInstance::bind_cairo (lua_State* L)
 {
+	/* std::vector<double> for set_dash()
+	 * for Windows (DLL, .exe) this needs to be bound in the same memory context as "Cairo".
+	 *
+	 * The std::vector<> argument in set_dash() has a fixed address in ardour.exe, while
+	 * the address of the one in libardour.dll is mapped when loading the .dll
+	 *
+	 * see LuaBindings::set_session() for a detailed explanation
+	 */
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("C")
+		.beginStdVector <double> ("DoubleVector")
+		.endClass ()
+		.endNamespace ();
+
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("Cairo")
 		.beginClass <Cairo::Context> ("Context")
@@ -114,7 +128,7 @@ LuaInstance::bind_cairo (lua_State* L)
 		.addFunction ("set_line_width", &Cairo::Context::set_line_width)
 		.addFunction ("set_line_cap", &Cairo::Context::set_line_cap)
 		.addFunction ("set_line_join", &Cairo::Context::set_line_join)
-		.addFunction ("set_dash", (void (Cairo::Context::*)(std::vector<double>&, double))&Cairo::Context::set_dash)
+		.addFunction ("set_dash", (void (Cairo::Context::*)(const std::vector<double>&, double))&Cairo::Context::set_dash)
 		.addFunction ("unset_dash", &Cairo::Context::unset_dash)
 		.addFunction ("translate", &Cairo::Context::translate)
 		.addFunction ("scale", &Cairo::Context::scale)
