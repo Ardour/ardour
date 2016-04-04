@@ -1754,6 +1754,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\io_vector.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\kmeterdsp.h"
 				>
 			</File>
