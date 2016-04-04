@@ -2843,12 +2843,15 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 			MetricSectionSorter cmp;
 			_metrics.sort (cmp);
 		}
+
 		/* check for legacy sessions where bbt was the base musical unit for tempo */
+		MeterSection* prev_m = 0;
+		TempoSection* prev_t = 0;
+
 		for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
 			MeterSection* m;
 			TempoSection* t;
-			MeterSection* prev_m = 0;
-			TempoSection* prev_t = 0;
+
 			/* if one is < 0.0, they all are. this is a legacy session */
 			if ((m = dynamic_cast<MeterSection*>(*i)) != 0 && m->pulse() < 0.0) {
 				if (!m->movable()) {
@@ -2860,7 +2863,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 					prev_m = m;
 					continue;
 				}
-				if (prev_m && prev_m->pulse() < 0.0) {
+				if (prev_m) {
 					/*XX we cannot possibly make this work??. */
 					pair<double, BBT_Time> start = make_pair (((m->bbt().bars - 1) * prev_m->note_divisor())
 										  + (m->bbt().beats - 1)
@@ -2874,9 +2877,11 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 				}
 				prev_m = m;
 			} else if ((t = dynamic_cast<TempoSection*>(*i)) != 0 && t->pulse() < 0.0) {
+
 				if (!t->active()) {
 					continue;
 				}
+
 				if (!t->movable()) {
 					t->set_pulse (0.0);
 					t->set_frame (0);
@@ -2884,8 +2889,11 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 					prev_t = t;
 					continue;
 				}
-				if (prev_t && prev_t->pulse() < 0.0) {
-					double const beat = ((t->legacy_bbt().bars - 1) * prev_m->note_divisor()) + (t->legacy_bbt().beats - 1) + (t->legacy_bbt().ticks / BBT_Time::ticks_per_beat);
+
+				if (prev_t) {
+					const double beat = ((t->legacy_bbt().bars - 1) * ((prev_m) ? prev_m->note_divisor() : 4.0))
+						+ (t->legacy_bbt().beats - 1)
+						+ (t->legacy_bbt().ticks / BBT_Time::ticks_per_beat);
 					if (prev_m) {
 						t->set_pulse (beat / prev_m->note_divisor());
 					} else {
