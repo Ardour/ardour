@@ -1003,7 +1003,7 @@ PluginInsert::has_midi_bypass () const
 }
 
 bool
-PluginInsert::has_midi_trhu () const
+PluginInsert::has_midi_thru () const
 {
 	if (_configured_in.n_midi () == 1 && _configured_out.n_midi () == 1
 			&& natural_input_streams ().n_midi () == 0 && natural_output_streams ().n_midi () == 0) {
