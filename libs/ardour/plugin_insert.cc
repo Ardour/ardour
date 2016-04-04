@@ -540,7 +540,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 
 	}
 #ifdef MIXBUS
-	if (_plugins.front()->is_channelstrip() ) {
+	if (is_channelstrip ()) {
 		if (_configured_in.n_audio() > 0) {
 			ChanMapping mb_in_map (ChanCount::min (_configured_in, ChanCount (DataType::AUDIO, 2)));
 			ChanMapping mb_out_map (ChanCount::min (_configured_out, ChanCount (DataType::AUDIO, 2)));
@@ -995,11 +995,29 @@ PluginInsert::output_map () const
 bool
 PluginInsert::has_midi_bypass () const
 {
-	if (_configured_in.n_midi () == 1 && _configured_out.n_midi () == 1 && natural_output_streams ().n_midi () == 0) {
+	if (_configured_in.n_midi () == 1 && _configured_out.n_midi () == 1
+			&& natural_output_streams ().n_midi () == 0) {
 		return true;
 	}
 	return false;
 }
+
+bool
+PluginInsert::has_midi_trhu () const
+{
+	if (_configured_in.n_midi () == 1 && _configured_out.n_midi () == 1
+			&& natural_input_streams ().n_midi () == 0 && natural_output_streams ().n_midi () == 0) {
+		return true;
+	}
+	return false;
+}
+
+#ifdef MIXBUS
+bool
+PluginInsert::is_channelstrip () const {
+	return _plugins.front()->is_channelstrip();
+}
+#endif
 
 bool
 PluginInsert::sanitize_maps ()
