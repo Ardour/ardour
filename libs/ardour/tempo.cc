@@ -97,7 +97,7 @@ TempoSection::TempoSection (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("pulse")) != 0) {
-		if (sscanf (prop->value().c_str(), "%lf", &pulse) != 1 || pulse < 0.0) {
+		if (sscanf (prop->value().c_str(), "%lf", &pulse) != 1) {
 			error << _("TempoSection XML node has an illegal \"pulse\" value") << endmsg;
 		}
 	}
@@ -458,7 +458,7 @@ MeterSection::MeterSection (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("pulse")) != 0) {
-		if (sscanf (prop->value().c_str(), "%lf", &pulse) != 1 || pulse < 0.0) {
+		if (sscanf (prop->value().c_str(), "%lf", &pulse) != 1) {
 			error << _("MeterSection XML node has an illegal \"pulse\" value") << endmsg;
 		}
 	}
