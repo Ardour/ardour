@@ -1368,8 +1368,6 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 					return Match (Replicate, f, _strict_io);
 				}
 				break;
-			case Split:
-				break;
 			default:
 				break;
 		}
@@ -1381,6 +1379,12 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	if (m.method != Impossible) {
 		return m;
 	}
+
+#ifdef MIXBUS
+	if (is_channelstrip ()) {
+		return Match (Replicate, 1, _strict_io);
+	}
+#endif
 
 	ChanCount ns_inputs  = inputs - sidechain_input_pins ();
 
@@ -1394,7 +1398,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 			// houston, we have a problem.
 			return Match (Impossible, 0);
 		}
-		return Match (Delegate, 1);
+		return Match (Delegate, 1, _strict_io);
 	}
 
 	ChanCount midi_bypass;
@@ -1413,7 +1417,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	}
 	if (f > 0 && outputs * f >= _configured_out) {
 		out = outputs * f + midi_bypass;
-		return Match (Replicate, f);
+		return Match (Replicate, f, _strict_io);
 	}
 
 	// add at least as many plugins needed to connect all inputs (w/o sidechain pins)
@@ -1425,7 +1429,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 	}
 	if (f > 0) {
 		out = outputs * f + midi_bypass;
-		return Match (Replicate, f);
+		return Match (Replicate, f, _strict_io);
 	}
 
 	// add at least as many plugins needed to connect all inputs
@@ -1436,7 +1440,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 		f = max (f, (uint32_t) ceil (inx.get(*t) / (float)nin));
 	}
 	out = outputs * f + midi_bypass;
-	return Match (Replicate, f);
+	return Match (Replicate, f, _strict_io);
 }
 
 /* this is the original Ardour 3/4 behavior, mainly for backwards compatibility */
@@ -1510,7 +1514,12 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 
 	uint32_t f             = 0;
 	bool     can_replicate = true;
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+#ifdef MIXBUS
+	if (is_channelstrip ()) {
+		can_replicate = false;
+	}
+#endif
+	for (DataType::iterator t = DataType::begin(); t != DataType::end() && can_replicate; ++t) {
 
 		// ignore side-chains
 		uint32_t nin = ns_inputs.get (*t);
