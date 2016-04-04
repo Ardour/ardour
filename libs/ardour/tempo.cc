@@ -2608,7 +2608,7 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 		const TempoSection tempo = tempo_section_at_locked (pos);
 		const MeterSection meter = meter_section_at_locked (pos);
 		const BBT_Time bbt = beats_to_bbt (cnt);
-		points.push_back (BBTPoint (meter, tempo_at_locked (pos), pos, bbt.bars, bbt.beats, tempo.get_c_func()));
+		points.push_back (BBTPoint (meter, tempo_at_locked (pos), pos, bbt.bars, bbt.beats, tempo.c_func()));
 		++cnt;
 	}
 }
@@ -2862,12 +2862,12 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 				}
 				if (prev_m && prev_m->pulse() < 0.0) {
 					/*XX we cannot possibly make this work??. */
-					pair<double, BBT_Time> start = make_pair (((m->bbt().bars - 1) * m->note_divisor())
+					pair<double, BBT_Time> start = make_pair (((m->bbt().bars - 1) * prev_m->note_divisor())
 										  + (m->bbt().beats - 1)
 										  + (m->bbt().ticks / BBT_Time::ticks_per_beat)
 										  , m->bbt());
 					m->set_beat (start);
-					const double start_beat = ((m->bbt().bars - 1) * m->note_divisor())
+					const double start_beat = ((m->bbt().bars - 1) * prev_m->note_divisor())
 						+ (m->bbt().beats - 1)
 						+ (m->bbt().ticks / BBT_Time::ticks_per_beat);
 					m->set_pulse (start_beat / prev_m->note_divisor());

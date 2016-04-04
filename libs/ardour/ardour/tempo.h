@@ -193,6 +193,9 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	void set_type (Type type);
 	Type type () const { return _type; }
 
+	double c_func () const { return _c_func; }
+	void set_c_func (double c_func) { _c_func = c_func; }
+
 	double tempo_at_frame (const framepos_t& frame, const framecnt_t& frame_rate) const;
 	framepos_t frame_at_tempo (const double& ppm, const double& beat, const framecnt_t& frame_rate) const;
 
@@ -204,9 +207,6 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 
 	double compute_c_func_pulse (const double& end_bpm, const double& end_pulse, const framecnt_t& frame_rate);
 	double compute_c_func_frame (const double& end_bpm, const framepos_t& end_frame, const framecnt_t& frame_rate) const;
-
-	double get_c_func () const { return _c_func; }
-	void set_c_func (double c_func) { _c_func = c_func; }
 
 	Timecode::BBT_Time legacy_bbt () { return _legacy_bbt; }
 
