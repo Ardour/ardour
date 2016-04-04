@@ -58,7 +58,6 @@ AddRouteDialog::AddRouteDialog ()
 	, configuration_label (_("Configuration:"))
 	, mode_label (_("Record Mode:"))
 	, instrument_label (_("Instrument:"))
-	, strict_io (_("Strict I/O"))
 {
 	set_name ("AddRouteDialog");
 	set_modal (true);
@@ -87,8 +86,11 @@ AddRouteDialog::AddRouteDialog ()
 	insert_at_combo.append_text (_("Before Selection"));
 	insert_at_combo.append_text (_("After Selection"));
 	insert_at_combo.append_text (_("Last"));
-
 	insert_at_combo.set_active (1);
+
+	strict_io_combo.append_text (_("Flexible-I/O"));
+	strict_io_combo.append_text (_("Strict-I/O"));
+	strict_io_combo.set_active (Config->get_strict_io () ? 1 : 0);
 
 	VBox* vbox = manage (new VBox);
 	Gtk::Label* l;
@@ -162,10 +164,12 @@ AddRouteDialog::AddRouteDialog ()
 	++n;
 
 	/* New Route's Routing is.. */
-	strict_io.set_active (Config->get_strict_io ());
-	ARDOUR_UI_UTILS::set_tooltip (strict_io,
+	l = manage (new Label (_("Output Ports:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	table2->attach (strict_io_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+
+	ARDOUR_UI_UTILS::set_tooltip (strict_io_combo,
 			_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
-	table2->attach (strict_io, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 	++n;
 
 	options_box->pack_start (*table2, false, true);
@@ -230,11 +234,11 @@ AddRouteDialog::maybe_update_name_template_entry ()
 		name_template_entry.get_text() != _("MIDI")  &&
 		name_template_entry.get_text() != _("Audio+MIDI")  &&
 		name_template_entry.get_text() != _("Bus")) {
-		strict_io.set_sensitive (false);
+		strict_io_combo.set_sensitive (false);
 		return;
 	}
 
-	strict_io.set_sensitive (true);
+	strict_io_combo.set_sensitive (true);
 
 	switch (type_wanted()) {
 	case AudioTrack:
@@ -517,6 +521,11 @@ AddRouteDialog::route_group ()
 	}
 
 	return _session->route_group_by_name (route_group_combo.get_active_text());
+}
+
+bool
+AddRouteDialog::use_strict_io() {
+	return strict_io_combo.get_active_row_number () == 1;
 }
 
 void
