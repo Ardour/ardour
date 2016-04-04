@@ -2850,7 +2850,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 			MeterSection* prev_m = 0;
 			TempoSection* prev_t = 0;
 
-			if ((m = dynamic_cast<MeterSection*>(*i)) != 0) {
+			if ((m = dynamic_cast<MeterSection*>(*i)) != 0 && m->pulse() < 0.0) {
 				if (!m->movable()) {
 					pair<double, BBT_Time> bbt = make_pair (0.0, BBT_Time (1, 1, 0));
 					m->set_beat (bbt);
@@ -2873,7 +2873,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 					m->set_pulse (start_beat / prev_m->note_divisor());
 				}
 				prev_m = m;
-			} else if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
+			} else if ((t = dynamic_cast<TempoSection*>(*i)) != 0 && t->pulse() < 0.0) {
 				if (!t->active()) {
 					continue;
 				}
