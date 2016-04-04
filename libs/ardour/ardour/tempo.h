@@ -406,6 +406,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	void set_length (framepos_t frames);
 
+	void fix_legacy_session();
+
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 

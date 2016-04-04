@@ -84,6 +84,8 @@ TempoSection::TempoSection (const XMLNode& node)
 	double pulse;
 	uint32_t frame;
 
+	_legacy_bbt = BBT_Time (0, 0, 0);
+
 	if ((prop = node.property ("start")) != 0) {
 		if (sscanf (prop->value().c_str(), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
 			    &bbt.bars,
@@ -1290,13 +1292,16 @@ TempoMap::recompute_meters (Metrics& metrics)
 				meter->set_pulse (pulse);
 			} else {
 				double pulse = 0.0;
+				pair<double, BBT_Time> new_beat;
 				if (prev_m) {
 					pulse = prev_m->pulse() + ((meter->bbt().bars - prev_m->bbt().bars) *  prev_m->divisions_per_bar() / prev_m->note_divisor());
+					new_beat = make_pair (((pulse - prev_m->pulse()) * prev_m->note_divisor()) + prev_m->beat(), meter->bbt());
 				} else {
 					/* shouldn't happen - the first is audio-locked */
 					pulse = pulse_at_beat_locked (metrics, meter->beat());
+					new_beat = make_pair (pulse, meter->bbt());
 				}
-				pair<double, BBT_Time> new_beat (((pulse - prev_m->pulse()) * prev_m->note_divisor()) + prev_m->beat(), meter->bbt());
+
 				meter->set_beat (new_beat);
 				meter->set_frame (frame_at_pulse_locked (metrics, pulse));
 				meter->set_pulse (pulse);
@@ -2776,6 +2781,68 @@ TempoMap::meter_section_at (const double& beat) const
 	return *prev_m;
 }
 
+void
+TempoMap::fix_legacy_session ()
+{
+	MeterSection* prev_m = 0;
+	TempoSection* prev_t = 0;
+
+	for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+		MeterSection* m;
+		TempoSection* t;
+
+		if ((m = dynamic_cast<MeterSection*>(*i)) != 0) {
+			if (!m->movable()) {
+				pair<double, BBT_Time> bbt = make_pair (0.0, BBT_Time (1, 1, 0));
+				m->set_beat (bbt);
+				m->set_pulse (0.0);
+				m->set_frame (0);
+				m->set_position_lock_style (AudioTime);
+				prev_m = m;
+				continue;
+			}
+			if (prev_m) {
+				pair<double, BBT_Time> start = make_pair (((m->bbt().bars - 1) * prev_m->note_divisor())
+									  + (m->bbt().beats - 1)
+									  + (m->bbt().ticks / BBT_Time::ticks_per_beat)
+									  , m->bbt());
+				m->set_beat (start);
+				const double start_beat = ((m->bbt().bars - 1) * prev_m->note_divisor())
+					+ (m->bbt().beats - 1)
+					+ (m->bbt().ticks / BBT_Time::ticks_per_beat);
+				m->set_pulse (start_beat / prev_m->note_divisor());
+			}
+			prev_m = m;
+		} else if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
+
+			if (!t->active()) {
+				continue;
+			}
+
+			if (!t->movable()) {
+				t->set_pulse (0.0);
+				t->set_frame (0);
+				t->set_position_lock_style (AudioTime);
+				prev_t = t;
+				continue;
+			}
+
+			if (prev_t) {
+				const double beat = ((t->legacy_bbt().bars - 1) * ((prev_m) ? prev_m->note_divisor() : 4.0))
+					+ (t->legacy_bbt().beats - 1)
+					+ (t->legacy_bbt().ticks / BBT_Time::ticks_per_beat);
+				if (prev_m) {
+					t->set_pulse (beat / prev_m->note_divisor());
+				} else {
+					/* really shouldn't happen but.. */
+					t->set_pulse (beat / 4.0);
+				}
+			}
+			prev_t = t;
+		}
+	}
+}
+
 XMLNode&
 TempoMap::get_state ()
 {
@@ -2841,66 +2908,6 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 			_metrics.sort (cmp);
 		}
 
-		/* check for legacy sessions where bbt was the base musical unit for tempo */
-		MeterSection* prev_m = 0;
-		TempoSection* prev_t = 0;
-
-		for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
-			MeterSection* m;
-			TempoSection* t;
-
-			/* if one is < 0.0, they all are. this is a legacy session */
-			if ((m = dynamic_cast<MeterSection*>(*i)) != 0 && m->pulse() < 0.0) {
-				if (!m->movable()) {
-					pair<double, BBT_Time> bbt = make_pair (0.0, BBT_Time (1, 1, 0));
-					m->set_beat (bbt);
-					m->set_pulse (0.0);
-					m->set_frame (0);
-					m->set_position_lock_style (AudioTime);
-					prev_m = m;
-					continue;
-				}
-				if (prev_m) {
-					/*XX we cannot possibly make this work??. */
-					pair<double, BBT_Time> start = make_pair (((m->bbt().bars - 1) * prev_m->note_divisor())
-										  + (m->bbt().beats - 1)
-										  + (m->bbt().ticks / BBT_Time::ticks_per_beat)
-										  , m->bbt());
-					m->set_beat (start);
-					const double start_beat = ((m->bbt().bars - 1) * prev_m->note_divisor())
-						+ (m->bbt().beats - 1)
-						+ (m->bbt().ticks / BBT_Time::ticks_per_beat);
-					m->set_pulse (start_beat / prev_m->note_divisor());
-				}
-				prev_m = m;
-			} else if ((t = dynamic_cast<TempoSection*>(*i)) != 0 && t->pulse() < 0.0) {
-
-				if (!t->active()) {
-					continue;
-				}
-
-				if (!t->movable()) {
-					t->set_pulse (0.0);
-					t->set_frame (0);
-					t->set_position_lock_style (AudioTime);
-					prev_t = t;
-					continue;
-				}
-
-				if (prev_t) {
-					const double beat = ((t->legacy_bbt().bars - 1) * ((prev_m) ? prev_m->note_divisor() : 4.0))
-						+ (t->legacy_bbt().beats - 1)
-						+ (t->legacy_bbt().ticks / BBT_Time::ticks_per_beat);
-					if (prev_m) {
-						t->set_pulse (beat / prev_m->note_divisor());
-					} else {
-						/* really shouldn't happen but.. */
-						t->set_pulse (beat / 4.0);
-					}
-				}
-				prev_t = t;
-			}
-		}
 		/* check for multiple tempo/meters at the same location, which
 		   ardour2 somehow allowed.
 		*/
@@ -2927,6 +2934,17 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 				}
 			}
 			prev = i;
+		}
+
+		/* check for legacy sessions where bbt was the base musical unit for tempo */
+		for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+			TempoSection* t;
+			if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+				if (t->legacy_bbt().bars != 0) {
+					fix_legacy_session();
+					break;
+				}
+			}
 		}
 
 		recompute_map (_metrics);
