@@ -209,6 +209,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	Label* tempo_type_label = manage (new Label(_("Tempo Type:"), ALIGN_LEFT, ALIGN_CENTER));
 	table->attach (*tempo_type_label, 0, 1, row, row + 1);
 	table->attach (tempo_type, 1, 2, row, row + 2);
+
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_end (*table);
 
