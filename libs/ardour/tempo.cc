@@ -2944,6 +2944,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 					fix_legacy_session();
 					break;
 				}
+				break;
 			}
 		}
 
