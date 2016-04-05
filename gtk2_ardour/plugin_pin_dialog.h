@@ -81,17 +81,23 @@ private:
 	ArdourButton _rst_config;
 	ArdourButton _rst_mapping;
 	ArdourButton _tgl_sidechain;
-	ArdourButton _edt_sidechain;
 	ArdourButton _add_plugin;
 	ArdourButton _del_plugin;
 	ArdourButton _add_output_audio;
 	ArdourButton _del_output_audio;
 	ArdourButton _add_output_midi;
 	ArdourButton _del_output_midi;
+	ArdourButton _add_sc_audio;
+	ArdourButton _add_sc_midi;
+
+	Gtk::Menu input_menu;
+	Gtk::Table* _sidechain_tbl;
 	Glib::RefPtr<Gtk::SizeGroup> _pm_size_group;
+	Glib::RefPtr<Gtk::SizeGroup> _sc_size_group;
 
 	void plugin_reconfigured ();
 	void update_element_pos ();
+	void refill_sidechain_table ();
 
 	void darea_size_request (Gtk::Requisition*);
 	void darea_size_allocate (Gtk::Allocation&);
@@ -116,11 +122,19 @@ private:
 	void connect_sidechain ();
 	void add_remove_plugin_clicked (bool);
 	void add_remove_port_clicked (bool, ARDOUR::DataType);
+	void add_sidechain_port (ARDOUR::DataType);
 	void handle_input_action (const CtrlElem &, const CtrlElem &);
 	void handle_output_action (const CtrlElem &, const CtrlElem &);
 	void handle_disconnect (const CtrlElem &);
+	void add_port_to_table (boost::shared_ptr<ARDOUR::Port>, uint32_t, bool);
+	void remove_port (boost::weak_ptr<ARDOUR::Port>);
+	void disconnect_port (boost::weak_ptr<ARDOUR::Port>);
+
+	bool sc_input_press (GdkEventButton *, boost::weak_ptr<ARDOUR::Port>);
+	bool sc_input_release (GdkEventButton *);
 
 	PBD::ScopedConnectionList _plugin_connections;
+	PBD::ScopedConnection _io_connection;
 	boost::shared_ptr<ARDOUR::PluginInsert> _pi;
 
 	uint32_t _n_plugins;
