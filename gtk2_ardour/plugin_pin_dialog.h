@@ -78,8 +78,6 @@ private:
 
 
 	Gtk::DrawingArea darea;
-	ArdourButton _ind_strict_io;
-	ArdourButton _ind_customized;
 	ArdourButton _rst_config;
 	ArdourButton _rst_mapping;
 	ArdourButton _tgl_sidechain;
@@ -90,9 +88,9 @@ private:
 	ArdourButton _del_output_audio;
 	ArdourButton _add_output_midi;
 	ArdourButton _del_output_midi;
+	Glib::RefPtr<Gtk::SizeGroup> _pm_size_group;
 
 	void plugin_reconfigured ();
-	void update_elements ();
 	void update_element_pos ();
 
 	void darea_size_request (Gtk::Requisition*);
@@ -107,7 +105,10 @@ private:
 
 	void set_color (cairo_t*, bool);
 	double pin_x_pos (uint32_t, double, double, uint32_t, uint32_t, bool);
-	void draw_connection (cairo_t*, double, double, double, double, bool, bool dashed = false);
+	void draw_connection (cairo_t*, double, double, double, double, bool, bool, bool dashed = false);
+	void draw_connection (cairo_t*, const CtrlWidget&, const CtrlWidget&, bool dashed = false);
+	const CtrlWidget& get_io_ctrl (CtrlType ct, ARDOUR::DataType dt, uint32_t id, uint32_t ip = 0) const;
+	static void edge_coordinates (const CtrlWidget& w, double &x, double &y);
 
 	void reset_mapping ();
 	void reset_configuration ();
@@ -117,6 +118,7 @@ private:
 	void add_remove_port_clicked (bool, ARDOUR::DataType);
 	void handle_input_action (const CtrlElem &, const CtrlElem &);
 	void handle_output_action (const CtrlElem &, const CtrlElem &);
+	void handle_disconnect (const CtrlElem &);
 
 	PBD::ScopedConnectionList _plugin_connections;
 	boost::shared_ptr<ARDOUR::PluginInsert> _pi;
@@ -125,9 +127,14 @@ private:
 	ARDOUR::ChanCount _in, _ins, _out;
 	ARDOUR::ChanCount _sinks, _sources;
 
+	double _bxw2, _bxh2;
 	double _pin_box_size;
 	double _width, _height;
+	double _innerwidth, _margin_x, _margin_y;
 	double _min_width;
+	double _min_height;
+	uint32_t _n_inputs;
+	uint32_t _n_sidechains;
 	bool _position_valid;
 	bool _ignore_updates;
 	ARDOUR::Route* _route () { return static_cast<ARDOUR::Route*> (_pi->owner ()); }

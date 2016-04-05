@@ -40,11 +40,9 @@ using namespace Gtkmm2ext;
 
 PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
-	, _ind_strict_io (_("Strict I/O"))
-	, _ind_customized (_("Customized"))
-	, _rst_config (_("Configuration"))
-	, _rst_mapping (_("Connections"))
-	, _tgl_sidechain (_("Enable"))
+	, _rst_config (_("Reset"))
+	, _rst_mapping (_("Reset"))
+	, _tgl_sidechain (_("Side Chain"))
 	, _edt_sidechain (_("Connect"))
 	, _add_plugin (_("+"))
 	, _del_plugin (_("-"))
@@ -53,8 +51,16 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	, _add_output_midi (_("+"))
 	, _del_output_midi (_("-"))
 	, _pi (pi)
-	, _pin_box_size (8)
+	, _pin_box_size (10)
+	, _width (0)
+	, _height (0)
+	, _innerwidth (0)
+	, _margin_x (28)
+	, _margin_y (40)
 	, _min_width (300)
+	, _min_height (200)
+	, _n_inputs (0)
+	, _n_sidechains (0)
 	, _position_valid (false)
 	, _ignore_updates (false)
 	, _sidechain_selector (0)
@@ -73,84 +79,94 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context ()
 			);
 
-	// needs a better way: insensitive indicators
-	_ind_strict_io.set_sensitive (false); // track status
-	_ind_strict_io.set_name ("rude solo");
-	_ind_customized.set_sensitive (false); // plugin status
-	_ind_customized.set_name ("rude solo");
+	_pin_box_size = 2 * ceil (max (8., 10. * UIConfiguration::instance ().get_ui_scale ()) * .5);
+	_margin_x = 2 * ceil (max (24., 28. * UIConfiguration::instance ().get_ui_scale ()) * .5);
+	_margin_y = 2 * ceil (max (36., 40. * UIConfiguration::instance ().get_ui_scale ()) * .5);
+
+	_tgl_sidechain.set_name ("pinrouting sidechain");
+
+	_pm_size_group  = SizeGroup::create (SIZE_GROUP_BOTH);
+	_add_plugin.set_tweaks(ArdourButton::Square);
+	_del_plugin.set_tweaks(ArdourButton::Square);
+	_pm_size_group->add_widget (_add_plugin);
+	_pm_size_group->add_widget (_del_plugin);
+	_pm_size_group->add_widget (_add_output_audio);
+	_pm_size_group->add_widget (_del_output_audio);
+	_pm_size_group->add_widget (_add_output_midi);
+	_pm_size_group->add_widget (_del_output_midi);
 
 	Label* l;
+	Gtk::Separator *sep;
 	int r = 0;
-	Table* t = manage (new Table (4, 3));
-	t->set_border_width (0);
-	t->set_spacings (4);
+	Table* tl = manage (new Table (9, 2));
+	tl->set_border_width (0);
+	tl->set_spacings (2);
 
-	l = manage (new Label (_("Track/Bus:"), ALIGN_END));
-	t->attach (*l, 0, 1, r, r + 1);
-	l = manage (new Label ());
-	l->set_alignment (ALIGN_START);
-	l->set_padding (2, 1);
-	l->set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
-	l->set_width_chars (24);
-	l->set_max_width_chars (24);
-	l->set_text (_route ()->name ());
-	t->attach (*l, 1, 3, r, r + 1);
+	Table* tr = manage (new Table (4, 3));
+	tr->set_border_width (0);
+	tr->set_spacings (2);
+
+	/* left side table */
+	l = manage (new Label (_("<b>Config</b>"), ALIGN_CENTER));
+	l->set_use_markup ();
+	tl->attach (*l, 0, 2, r, r + 1, FILL, SHRINK);
+	++r;
+	tl->attach (_rst_config, 0, 2, r, r + 1, FILL, SHRINK);
 	++r;
 
-	l = manage (new Label (_("Plugin:"), ALIGN_END));
-	t->attach (*l, 0, 1, r, r + 1);
-	l = manage (new Label ());
-	l->set_alignment (ALIGN_START);
-	l->set_padding (2, 1);
-	l->set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
-	l->set_width_chars (24);
-	l->set_max_width_chars (24);
-	l->set_text (pi->name ());
-	t->attach (*l, 1, 3, r, r + 1);
+	sep = manage (new HSeparator ());
+	tl->attach (*sep, 0, 2, r, r + 1, FILL|EXPAND, FILL|EXPAND, 0, 4);
 	++r;
 
-	l = manage (new Label (_("Status:"), ALIGN_END));
-	t->attach (*l, 0, 1, r, r + 1);
-	t->attach (_ind_strict_io, 1, 2, r, r + 1, FILL, SHRINK);
-	t->attach (_ind_customized, 2, 3, r, r + 1, FILL, SHRINK);
+	l = manage (new Label (_("Instances"), ALIGN_CENTER));
+	tl->attach (*l, 0, 2, r, r + 1, FILL, SHRINK);
+	++r;
+	tl->attach (_add_plugin, 0, 1, r, r + 1, SHRINK, SHRINK);
+	tl->attach (_del_plugin, 1, 2, r, r + 1, SHRINK, SHRINK);
 	++r;
 
-	l = manage (new Label (_("Reset:"), ALIGN_END));
-	t->attach (*l, 0, 1, r, r + 1);
-	t->attach (_rst_mapping, 1, 2, r, r + 1, FILL, SHRINK);
-	t->attach (_rst_config, 2, 3, r, r + 1, FILL, SHRINK);
+	l = manage (new Label (_("Audio Out"), ALIGN_CENTER));
+	tl->attach (*l, 0, 2, r, r + 1, FILL, SHRINK);
+	++r;
+	tl->attach (_add_output_audio, 0, 1, r, r + 1, SHRINK, SHRINK);
+	tl->attach (_del_output_audio, 1, 2, r, r + 1, SHRINK, SHRINK);
 	++r;
 
-	l = manage (new Label (_("Sidechain:"), ALIGN_END));
-	t->attach (*l, 0, 1, r, r + 1);
-	t->attach (_tgl_sidechain, 1, 2, r, r + 1, FILL, SHRINK);
-	t->attach (_edt_sidechain, 2, 3, r, r + 1, FILL, SHRINK);
+	l = manage (new Label (_("Midi Out"), ALIGN_CENTER));
+	tl->attach (*l, 0, 2, r, r + 1, FILL, SHRINK);
+	++r;
+	tl->attach (_add_output_midi, 0, 1, r, r + 1, SHRINK, SHRINK);
+	tl->attach (_del_output_midi, 1, 2, r, r + 1, SHRINK, SHRINK);
 	++r;
 
-	l = manage (new Label (_("Instances:"), ALIGN_END));
-	t->attach (*l, 0, 1, r, r + 1);
-	t->attach (_add_plugin, 1, 2, r, r + 1, SHRINK, SHRINK);
-	t->attach (_del_plugin, 2, 3, r, r + 1, SHRINK, SHRINK);
+	/* right side table */
+	r = 0;
+	l = manage (new Label (_("<b>Connections</b>"), ALIGN_CENTER));
+	l->set_use_markup ();
+	tr->attach (*l, 0, 2, r, r + 1, FILL, SHRINK);
+	++r;
+	tr->attach (_rst_mapping, 0, 2, r, r + 1, FILL, SHRINK);
 	++r;
 
-	l = manage (new Label (_("Audio Out:"), ALIGN_END));
-	t->attach (*l, 0, 1, r, r + 1);
-	t->attach (_add_output_audio, 1, 2, r, r + 1, SHRINK, SHRINK);
-	t->attach (_del_output_audio, 2, 3, r, r + 1, SHRINK, SHRINK);
+	sep = manage (new HSeparator ());
+	tr->attach (*sep, 0, 2, r, r + 1, FILL|EXPAND, SHRINK, 0, 4);
 	++r;
 
-	l = manage (new Label (_("Midi Out:"), ALIGN_END));
-	t->attach (*l, 0, 1, r, r + 1);
-	t->attach (_add_output_midi, 1, 2, r, r + 1, SHRINK, SHRINK);
-	t->attach (_del_output_midi, 2, 3, r, r + 1, SHRINK, SHRINK);
+	tr->attach (_tgl_sidechain, 0, 2, r, r + 1, FILL, SHRINK);
+	++r;
+	// TODO per key connect
+	tr->attach (_edt_sidechain, 0, 2, r, r + 1, FILL, SHRINK);
 	++r;
 
 	HBox* hbox = manage (new HBox);
+	hbox->set_spacing (4);
+	hbox->pack_start (*tl, false, false);
 	hbox->pack_start (darea, true, true);
-	hbox->pack_start (*t, false, true);
+	hbox->pack_start (*tr, false, false);
 
 	VBox* vbox = manage (new VBox);
 	vbox->pack_start (*hbox, true, true);
+	set_border_width (4);
 	add (*vbox);
 	vbox->show_all ();
 
@@ -198,42 +214,36 @@ PluginPinDialog::plugin_reconfigured ()
 	_del_plugin.set_sensitive (_n_plugins > 1);
 	_del_output_audio.set_sensitive (_out.n_audio () > 0 && _out.n_total () > 1);
 	_del_output_midi.set_sensitive (_out.n_midi () > 0 && _out.n_total () > 1);
-	_ind_strict_io.set_active (_pi->strict_io ());
-	_ind_customized.set_active (_pi->custom_cfg ());
 	_tgl_sidechain.set_active (_pi->has_sidechain ());
 	_edt_sidechain.set_sensitive (_pi->has_sidechain ()); // && _session
+
+	if (_pi->custom_cfg ()) {
+		_rst_config.set_name ("pinrouting custom");
+	} else {
+		_rst_config.set_name ("generic button");
+	}
 
 	if (!_pi->has_sidechain () && _sidechain_selector) {
 		delete _sidechain_selector;
 		_sidechain_selector = 0;
 	}
+	/* update elements */
 
-	// calc minimum width
-	const uint32_t max_ports = std::max (_ins.n_total (), _out.n_total ());
-	const uint32_t max_pins = std::max ((_sinks * _n_plugins).n_total (), (_sources * _n_plugins).n_total ());
-	uint32_t min_width = std::max (25 * max_ports, (uint32_t)(20 + _pin_box_size) * max_pins);
-	min_width = std::max (min_width, 64 * _n_plugins); // bxh2 = 18 ; aspect 16:9 (incl. 10% space)
-	min_width = std::max ((uint32_t)300, min_width);
-	min_width = 10 * ceilf (min_width / 10.f);
-	if (min_width != _min_width) {
-		_min_width = min_width;
-		darea.queue_resize ();
-	}
-
-	update_elements ();
-}
-
-void
-PluginPinDialog::update_elements ()
-{
 	_elements.clear ();
 	_hover.reset ();
 	_actor.reset ();
 	_selection.reset ();
 
+	_n_inputs = _n_sidechains = 0;
+
 	for (uint32_t i = 0; i < _ins.n_total (); ++i) {
 		int id = (i < _ins.n_midi ()) ? i : i - _ins.n_midi ();
 		bool sidechain = i >= _in.n_total () ? true : false;
+		if (sidechain) {
+			++_n_sidechains;
+		} else {
+			++_n_inputs;
+		}
 
 		CtrlWidget cw (CtrlWidget (Input, (i < _ins.n_midi () ? DataType::MIDI : DataType::AUDIO), id, 0, sidechain));
 		_elements.push_back (cw);
@@ -257,6 +267,24 @@ PluginPinDialog::update_elements ()
 			_elements.push_back (CtrlWidget (Source, (i < _sources.n_midi () ? DataType::MIDI : DataType::AUDIO), i, n));
 		}
 	}
+
+	/* calc minimum size */
+	const uint32_t max_ports = std::max (_ins.n_total (), _out.n_total ());
+	const uint32_t max_pins = std::max ((_sinks * _n_plugins).n_total (), (_sources * _n_plugins).n_total ());
+	uint32_t min_width = std::max (25 * max_ports, (uint32_t)(20 + _pin_box_size) * max_pins);
+	min_width = std::max (min_width, 64 * _n_plugins); // bxh2 = 18 ; aspect 16:9 (incl. 10% space)
+	min_width = std::max ((uint32_t)300, min_width);
+	min_width = 50 + 10 * ceilf (min_width / 10.f);
+
+	uint32_t min_height = 3.5 * _margin_y + 2 * (_n_sidechains + 1) * _pin_box_size;
+	min_height = std::max ((uint32_t)200, min_height);
+
+	if (min_width != _min_width || min_height != _min_height) {
+		_min_width = min_width;
+		_min_height = min_height;
+		darea.queue_resize ();
+	}
+
 	_position_valid = false;
 	darea.queue_draw ();
 }
@@ -265,26 +293,39 @@ void
 PluginPinDialog::update_element_pos ()
 {
 	/* layout sizes */
+	_innerwidth = _width - 2. * _margin_x;
+
 	const double yc   = rint (_height * .5);
-	const double bxh2 = 18;
-	const double bxw  = rint ((_width * .9) / ((_n_plugins) + .2 * (_n_plugins - 1)));
+	const double bxh2 = rint (_margin_y * .45);
+	const double bxw  = rint ((_innerwidth * .95) / ((_n_plugins) + .2 * (_n_plugins - 1)));
 	const double bxw2 = rint (bxw * .5);
-	const double y_in = 40;
-	const double y_out = _height - 40;
+	const double y_in = _margin_y;
+	const double y_out = _height - _margin_y;
 
-	_pin_box_size = rint (max (6., 8. * UIConfiguration::instance ().get_ui_scale ()));
-	const double dx = ceil (_pin_box_size * .5);
+	_bxw2 = bxw2;
+	_bxh2 = bxh2;
 
+	const double dx = _pin_box_size * .5;
+
+	uint32_t sc_cnt = 0;
 	for (CtrlElemList::iterator i = _elements.begin (); i != _elements.end (); ++i) {
 		switch (i->e->ct) {
 			case Input:
-				{
+				if (i->e->sc) {
 					uint32_t idx = i->e->id;
 					if (i->e->dt == DataType::AUDIO) { idx += _ins.n_midi (); }
-					i->x = rint ((idx + 1) * _width / (1. + _ins.n_total ())) - 0.5 - dx;
-					i->y = y_in - 25;
-					i->w = 10;
-					i->h = 25;
+					i->x = _innerwidth + _margin_x - dx;
+					i->y = y_in + (sc_cnt + .5) * _pin_box_size;
+					i->h = _pin_box_size;
+					i->w = 1.5 * _pin_box_size;
+					++ sc_cnt;
+				} else {
+					uint32_t idx = i->e->id;
+					if (i->e->dt == DataType::AUDIO) { idx += _ins.n_midi (); }
+					i->x = rint ((idx + 1) * _width / (1. + _n_inputs)) - 0.5 - dx;
+					i->w = _pin_box_size;
+					i->h = 1.5 * _pin_box_size;
+					i->y = y_in - i->h;
 				}
 				break;
 			case Output:
@@ -293,31 +334,30 @@ PluginPinDialog::update_element_pos ()
 					if (i->e->dt == DataType::AUDIO) { idx += _out.n_midi (); }
 					i->x = rint ((idx + 1) * _width / (1. + _out.n_total ())) - 0.5 - dx;
 					i->y = y_out;
-					i->w = 10;
-					i->h = 25;
+					i->w = _pin_box_size;
+					i->h = 1.5 * _pin_box_size;
 				}
 				break;
 			case Sink:
 				{
-					const double x0 = rint ((i->e->ip + .5) * _width / (double)(_n_plugins)) - .5 - bxw2;
-					i->x = rint (x0 + (i->e->id + 1) * bxw / (1. + _sinks.n_total ())) - .5 - _pin_box_size * .5;
-					i->y = yc - bxh2 - _pin_box_size;
-					i->w = _pin_box_size + 1;
+					const double x0 = rint ((i->e->ip + .5) * _innerwidth / (double)(_n_plugins)) - .5 - bxw2;
+					i->x = _margin_x + rint (x0 + (i->e->id + 1) * bxw / (1. + _sinks.n_total ())) - .5 - dx;
+					i->y = yc - bxh2 - dx;
+					i->w = _pin_box_size;
 					i->h = _pin_box_size;
 				}
 				break;
 			case Source:
 				{
-					const double x0 = rint ((i->e->ip + .5) * _width / (double)(_n_plugins)) - .5 - bxw2;
-					i->x = rint (x0 + (i->e->id + 1) * bxw / (1. + _sources.n_total ())) - .5 - _pin_box_size * .5;
-					i->y = yc + bxh2;
-					i->w = _pin_box_size + 1;
+					const double x0 = rint ((i->e->ip + .5) * _innerwidth / (double)(_n_plugins)) - .5 - bxw2;
+					i->x = _margin_x + rint (x0 + (i->e->id + 1) * bxw / (1. + _sources.n_total ())) - .5 - dx;
+					i->y = yc + bxh2 - dx;
+					i->w = _pin_box_size;
 					i->h = _pin_box_size;
 				}
 				break;
 		}
 	}
-
 }
 
 void
@@ -343,25 +383,40 @@ PluginPinDialog::set_color (cairo_t* cr, bool midi)
 void
 PluginPinDialog::draw_io_pin (cairo_t* cr, const CtrlWidget& w)
 {
-	const double dir = (w.e->ct == Input) ? 1 : -1;
-	const double dx = ceil (_pin_box_size * .5);
-	const double dy = min (36.0, 6. * dx);
 
-	cairo_move_to (cr, w.x + dx, w.y + ((w.e->ct == Input) ? 25 : 0));
-	cairo_rel_line_to (cr,     -dx, -dx * dir);
-	cairo_rel_line_to (cr,      0., -dy * dir);
-	cairo_rel_line_to (cr, 2. * dx,        0.);
-	cairo_rel_line_to (cr,      0.,  dy * dir);
+	if (w.e->sc) {
+		const double dy = w.h * .5;
+		const double dx = w.w - dy;
+		cairo_move_to (cr, w.x, w.y + dy);
+		cairo_rel_line_to (cr,  dy, -dy);
+		cairo_rel_line_to (cr,  dx,  0);
+		cairo_rel_line_to (cr,   0,  w.h);
+		cairo_rel_line_to (cr, -dx,  0);
+	} else {
+		const double dir = (w.e->ct == Input) ? 1 : -1;
+		const double dx = w.w * .5;
+		const double dy = w.h - dx;
+
+		cairo_move_to (cr, w.x + dx, w.y + ((w.e->ct == Input) ? w.h : 0));
+		cairo_rel_line_to (cr,     -dx, -dx * dir);
+		cairo_rel_line_to (cr,      0., -dy * dir);
+		cairo_rel_line_to (cr, 2. * dx,        0.);
+		cairo_rel_line_to (cr,      0.,  dy * dir);
+	}
 	cairo_close_path  (cr);
 
+	cairo_set_line_width (cr, 1.0);
+	cairo_set_source_rgb (cr, 0, 0, 0);
+	cairo_stroke_preserve (cr);
+
+	set_color (cr, w.e->dt == DataType::MIDI);
 
 	if (w.e->sc) {
 		assert (w.e->ct == Input);
-		// side-chain
-		cairo_set_source_rgb (cr, .1, .6, .7);
-	} else {
-		set_color (cr, w.e->dt == DataType::MIDI);
+		cairo_fill_preserve (cr);
+		cairo_set_source_rgba (cr, 0.0, 0.0, 1.0, 0.4);
 	}
+
 	if (w.e == _selection || w.e == _actor) {
 		cairo_fill_preserve (cr);
 		cairo_set_source_rgba (cr, 0.9, 0.9, 1.0, 0.6);
@@ -369,24 +424,31 @@ PluginPinDialog::draw_io_pin (cairo_t* cr, const CtrlWidget& w)
 		cairo_fill_preserve (cr);
 		cairo_set_source_rgba (cr, 0.9, 0.9, 0.9, 0.3);
 	}
-	cairo_fill_preserve (cr);
-
-	cairo_set_line_width (cr, 1.0);
-	cairo_set_source_rgb (cr, 0, 0, 0);
-	cairo_stroke (cr);
+	cairo_fill (cr);
 }
 
 void
 PluginPinDialog::draw_plugin_pin (cairo_t* cr, const CtrlWidget& w)
 {
-	cairo_rectangle (cr, w.x, w.y, w.w, w.h);
+	const double dx = w.w * .5;
+	const double dy = w.h * .5;
+
+	cairo_move_to (cr, w.x + dx, w.y);
+	cairo_rel_line_to (cr, -dx,  dy);
+	cairo_rel_line_to (cr,  dx,  dy);
+	cairo_rel_line_to (cr,  dx, -dy);
+	cairo_close_path  (cr);
+
+	cairo_set_line_width (cr, 1.0);
+	cairo_set_source_rgb (cr, 0, 0, 0);
+	cairo_stroke_preserve (cr);
+
+	set_color (cr, w.e->dt == DataType::MIDI);
 
 	if (w.e->sc) {
 		assert (w.e->ct == Sink);
-		// side-chain
-		cairo_set_source_rgb (cr, .1, .6, .7);
-	} else {
-		set_color (cr, w.e->dt == DataType::MIDI);
+		cairo_fill_preserve (cr);
+		cairo_set_source_rgba (cr, 0.0, 0.0, 1.0, 0.4);
 	}
 
 	if (w.e == _selection || w.e == _actor) {
@@ -406,14 +468,62 @@ PluginPinDialog::pin_x_pos (uint32_t i, double x0, double width, uint32_t n_tota
 	return rint (x0 + (i + 1) * width / (1. + n_total)) - .5;
 }
 
+const PluginPinDialog::CtrlWidget&
+PluginPinDialog::get_io_ctrl (CtrlType ct, DataType dt, uint32_t id, uint32_t ip) const
+{
+	for (CtrlElemList::const_iterator i = _elements.begin (); i != _elements.end (); ++i) {
+		if (i->e->ct == ct && i->e->dt == dt && i->e->id == id && i->e->ip == ip) {
+			return *i;
+		}
+	}
+	fatal << string_compose (_("programming error: %1"),
+			X_("Invalid Plugin I/O Port."))
+		<< endmsg;
+	abort(); /*NOTREACHED*/
+	static CtrlWidget screw_old_compilers (Input, DataType::NIL, 0);
+	return screw_old_compilers;
+}
+
 void
-PluginPinDialog::draw_connection (cairo_t* cr, double x0, double x1, double y0, double y1, bool midi, bool dashed)
+PluginPinDialog::edge_coordinates (const CtrlWidget& w, double &x, double &y)
+{
+	switch (w.e->ct) {
+		case Input:
+			if (w.e->sc) {
+				x = w.x;
+				y = w.y + w.h * .5;
+			} else {
+				x = w.x + w.w * .5;
+				y = w.y + w.h;
+			}
+			break;
+		case Output:
+			x = w.x + w.w * .5;
+			y = w.y;
+			break;
+		case Sink:
+			x = w.x + w.w * .5;
+			y = w.y;
+			break;
+		case Source:
+			x = w.x + w.w * .5;
+			y = w.y + w.h;
+			break;
+	}
+}
+
+void
+PluginPinDialog::draw_connection (cairo_t* cr, double x0, double x1, double y0, double y1, bool midi, bool horiz, bool dashed)
 {
 	const double bz = 2 * _pin_box_size;
 	const double bc = (dashed && x0 == x1) ? 1.25 * _pin_box_size : 0;
 
 	cairo_move_to (cr, x0, y0);
-	cairo_curve_to (cr, x0 - bc, y0 + bz, x1 - bc, y1 - bz, x1, y1);
+	if (horiz) {
+		cairo_curve_to (cr, x0 - bz, y0 + bc, x1 - bc, y1 - bz, x1, y1);
+	} else {
+		cairo_curve_to (cr, x0 - bc, y0 + bz, x1 - bc, y1 - bz, x1, y1);
+	}
 	cairo_set_line_width (cr, 3.0);
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 	cairo_set_source_rgb (cr, 1, 0, 0);
@@ -427,6 +537,17 @@ PluginPinDialog::draw_connection (cairo_t* cr, double x0, double x1, double y0, 
 		cairo_set_dash (cr, 0, 0, 0);
 	}
 }
+
+void
+PluginPinDialog::draw_connection (cairo_t* cr, const CtrlWidget& w0, const CtrlWidget& w1, bool dashed)
+{
+	double x0, x1, y0, y1;
+	edge_coordinates (w0, x0, y0);
+	edge_coordinates (w1, x1, y1);
+	assert (w0.e->dt == w1.e->dt);
+	draw_connection (cr, x0, x1, y0, y1, w0.e->dt == DataType::MIDI, w0.e->sc, dashed);
+}
+
 
 bool
 PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
@@ -451,60 +572,92 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, 0, 0, width, height);
 	cairo_fill (cr);
 
-	/* layout sizes  -- TODO consolidate w/ update_element_pos() */
-	// i/o pins
-	const double y_in = 40;
-	const double y_out = height - 40;
+	const double yc = rint (_height * .5);
 
-	// plugin box(es)
-	const double yc   = rint (height * .5);
-	const double bxh2 = 18;
-	const double bxw  = rint ((width * .9) / ((_n_plugins) + .2 * (_n_plugins - 1)));
-	const double bxw2 = rint (bxw * .5);
-
-	const uint32_t pc_in = _ins.n_total ();
-	const uint32_t pc_in_midi = _ins.n_midi ();
-	const uint32_t pc_out = _out.n_total ();
-	const uint32_t pc_out_midi = _out.n_midi ();
+	/* processor box */
+	rounded_rectangle (cr, _margin_x, _margin_y - _pin_box_size * .5, _innerwidth, _height - 2 * _margin_y + _pin_box_size, 7);
+	cairo_set_line_width (cr, 1.0);
+	cairo_set_source_rgb (cr, .1, .1, .3);
+	cairo_stroke_preserve (cr);
+	cairo_set_source_rgb (cr, .3, .3, .3);
+	cairo_fill (cr);
 
 	/* draw midi-bypass (behind) */
 	if (_pi->has_midi_bypass ()) {
-		double x0 = rint (width / (1. + pc_in)) - .5;
-		double x1 = rint (width / (1. + pc_out)) - .5;
-		draw_connection (cr, x0, x1, y_in, y_out, true, true);
+		const CtrlWidget& cw0 = get_io_ctrl (Input, DataType::MIDI, 0);
+		const CtrlWidget& cw1 = get_io_ctrl (Output, DataType::MIDI, 0);
+		draw_connection (cr, cw0, cw1, true);
 	}
+
+	/* labels */
+	Glib::RefPtr<Pango::Layout> layout;
+	layout = Pango::Layout::create (get_pango_context());
+
+	layout->set_ellipsize(Pango::ELLIPSIZE_MIDDLE);
+	layout->set_width (_height * PANGO_SCALE);
+
+	int text_width;
+	int text_height;
+
+	layout->set_text (_route ()->name ());
+	layout->get_pixel_size (text_width, text_height);
+	cairo_save (cr);
+	cairo_move_to (cr, .5 * (_margin_x - text_height), .5 * (_height + text_width));
+	cairo_rotate(cr, M_PI * -.5);
+	cairo_set_source_rgba (cr, 1., 1., 1., 1.);
+	pango_cairo_show_layout (cr, layout->gobj());
+	cairo_new_path(cr);
+	cairo_restore (cr);
+
+	layout->set_width ((_innerwidth - 2 * _pin_box_size) * PANGO_SCALE);
+	layout->set_text (_pi->name ());
+	layout->get_pixel_size (text_width, text_height);
+	cairo_move_to (cr, _margin_x + _innerwidth - text_width - _pin_box_size * .5, _height - _margin_y - text_height);
+	cairo_set_source_rgba (cr, 1., 1., 1., 1.);
+	pango_cairo_show_layout (cr, layout->gobj());
+
+	if (_pi->strict_io ()) {
+		layout->set_text (_("Strict I/O"));
+		layout->get_pixel_size (text_width, text_height);
+		const double sx0 = _margin_x + .5 * (_innerwidth - text_width);
+		const double sy0 = _height - 3 - text_height;
+
+		rounded_rectangle (cr, sx0 - 2, sy0 - 1, text_width + 4, text_height + 2, 7);
+		cairo_set_source_rgba (cr, .4, .3, .1, 1.);
+		cairo_fill (cr);
+
+		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
+		cairo_move_to (cr, sx0, sy0);
+		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
+		pango_cairo_show_layout (cr, layout->gobj());
+	}
+
 
 	/* plugins & connection wires */
 	for (uint32_t i = 0; i < _n_plugins; ++i) {
-		double x0 = rint ((i + .5) * width / (double)(_n_plugins)) - .5;
+		double x0 = _margin_x + rint ((i + .5) * _innerwidth / (double)(_n_plugins)) - .5;
 
 		/* plugin box */
-		cairo_set_source_rgb (cr, .3, .3, .3);
-		rounded_rectangle (cr, x0 - bxw2, yc - bxh2, bxw, 2 * bxh2, 7);
+		cairo_set_source_rgb (cr, .5, .5, .5);
+		rounded_rectangle (cr, x0 - _bxw2, yc - _bxh2, 2 * _bxw2, 2 * _bxh2, 7);
 		cairo_fill (cr);
 
 		const ChanMapping::Mappings in_map = _pi->input_map (i).mappings ();
 		const ChanMapping::Mappings out_map = _pi->output_map (i).mappings ();
 
 		for (ChanMapping::Mappings::const_iterator t = in_map.begin (); t != in_map.end (); ++t) {
-			bool is_midi = t->first == DataType::MIDI;
 			for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
-				uint32_t pn = (*c).first; // pin
-				uint32_t pb = (*c).second;
-				double c_x0 = pin_x_pos (pb, 0, width, pc_in, pc_in_midi, is_midi);
-				double c_x1 = pin_x_pos (pn, x0 - bxw2, bxw, _sinks.n_total (), _sinks.n_midi (), is_midi);
-				draw_connection (cr, c_x0, c_x1, y_in, yc - bxh2 - _pin_box_size, is_midi);
+				const CtrlWidget& cw0 = get_io_ctrl (Input, t->first, c->second);
+				const CtrlWidget& cw1 = get_io_ctrl (Sink, t->first, c->first, i);
+				draw_connection (cr, cw0, cw1);
 			}
 		}
 
 		for (ChanMapping::Mappings::const_iterator t = out_map.begin (); t != out_map.end (); ++t) {
-			bool is_midi = t->first == DataType::MIDI;
 			for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
-				uint32_t pn = (*c).first; // pin
-				uint32_t pb = (*c).second;
-				double c_x0 = pin_x_pos (pn, x0 - bxw2, bxw, _sources.n_total (), _sources.n_midi (), is_midi);
-				double c_x1 = pin_x_pos (pb, 0, width, pc_out, pc_out_midi, is_midi);
-				draw_connection (cr, c_x0, c_x1, yc + bxh2 + _pin_box_size, y_out, is_midi);
+				const CtrlWidget& cw0 = get_io_ctrl (Source, t->first, c->first, i);
+				const CtrlWidget& cw1 = get_io_ctrl (Output, t->first, c->second);
+				draw_connection (cr, cw0, cw1);
 			}
 		}
 	}
@@ -531,7 +684,7 @@ void
 PluginPinDialog::darea_size_request (Gtk::Requisition* req)
 {
 	req->width = _min_width;
-	req->height = 200;
+	req->height = _min_height;
 }
 
 void
@@ -587,9 +740,13 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 				}
 				darea.queue_draw ();
 			}
+			break;
 		case 3:
-			if (_hover) {
+			if (_selection != _hover) {
+				_selection = _hover;
+				darea.queue_draw ();
 			}
+			_actor.reset ();
 			break;
 		default:
 			break;
@@ -601,7 +758,7 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 bool
 PluginPinDialog::darea_button_release_event (GdkEventButton* ev)
 {
-	if (_hover == _actor && _actor) {
+	if (_hover == _actor && _actor && ev->button == 1) {
 		assert (_selection);
 		assert (_selection->dt == _actor->dt);
 		if      (_selection->ct == Input && _actor->ct == Sink) {
@@ -617,6 +774,8 @@ PluginPinDialog::darea_button_release_event (GdkEventButton* ev)
 			handle_output_action (_selection, _actor);
 		}
 		_selection.reset ();
+	} else if (_hover == _selection && _selection && ev->button == 3) {
+		handle_disconnect (_selection);
 	}
 	_actor.reset ();
 	darea.queue_draw ();
@@ -688,6 +847,70 @@ PluginPinDialog::handle_output_action (const CtrlElem &s, const CtrlElem &o)
 		// connect
 		out_map.set (s->dt, s->id, o->id);
 		_pi->set_output_map (pc, out_map);
+	}
+}
+
+void
+PluginPinDialog::handle_disconnect (const CtrlElem &e)
+{
+	_ignore_updates = true;
+	bool changed = false;
+	bool valid;
+	//ChanMapping out_map (_pi->output_map (pc));
+
+	switch (e->ct) {
+		case Input:
+			for (uint32_t n = 0; n < _n_plugins; ++n) {
+				ChanMapping map (_pi->input_map (n));
+				for (uint32_t i = 0; i < _sinks.n_total (); ++i) {
+					uint32_t idx = map.get (e->dt, i, &valid);
+					if (valid && idx == e->id) {
+						map.unset (e->dt, i);
+						changed = true;
+					}
+				}
+				_pi->set_input_map (n, map);
+			}
+			break;
+		case Sink:
+			{
+				ChanMapping map (_pi->input_map (e->ip));
+				map.get (e->dt, e->id, &valid);
+				if (valid) {
+					map.unset (e->dt, e->id);
+					_pi->set_input_map (e->ip, map);
+					changed = true;
+				}
+			}
+			break;
+		case Source:
+			{
+				ChanMapping map (_pi->output_map (e->ip));
+				map.get (e->dt, e->id, &valid);
+				if (valid) {
+					map.unset (e->dt, e->id);
+					_pi->set_output_map (e->ip, map);
+					changed = true;
+				}
+			}
+			break;
+		case Output:
+			for (uint32_t n = 0; n < _n_plugins; ++n) {
+				ChanMapping map (_pi->output_map (n));
+				for (uint32_t i = 0; i < _sources.n_total (); ++i) {
+					uint32_t idx = map.get (e->dt, i, &valid);
+					if (valid && idx == e->id) {
+						map.unset (e->dt, i);
+						changed = true;
+					}
+				}
+				_pi->set_output_map (n, map);
+			}
+			break;
+	}
+	_ignore_updates = false;
+	if (changed) {
+		plugin_reconfigured ();
 	}
 }
 
