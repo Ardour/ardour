@@ -37,7 +37,7 @@ using namespace PBD;
 using namespace std;
 
 int
-ARDOUR::LuaAPI::datatype_ctor_nil (lua_State *L)
+ARDOUR::LuaAPI::datatype_ctor_null (lua_State *L)
 {
 	DataType dt (DataType::NIL);
 	luabridge::Stack <DataType>::push (L, dt);
