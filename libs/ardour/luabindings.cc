@@ -663,6 +663,8 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("data", (Sample*(AudioBuffer::*)(framecnt_t))&AudioBuffer::data)
 		.addFunction ("silence", &AudioBuffer::silence)
 		.addFunction ("apply_gain", &AudioBuffer::apply_gain)
+		.addFunction ("check_silence", &AudioBuffer::check_silence)
+		.addFunction ("read_from", (void (AudioBuffer::*)(const Sample*, framecnt_t, framecnt_t, framecnt_t))&AudioBuffer::check_silence)
 		.endClass()
 
 		.beginClass <MidiBuffer> ("MidiBuffer")

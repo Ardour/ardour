@@ -30,8 +30,20 @@
 
 namespace ARDOUR { namespace LuaAPI {
 
-	int datatype_ctor_nil (lua_State *L);
+	/** convenience contructor for DataType::NIL
+	 * @param lua ignored
+	 * @returns DataType::NIL
+	 */
+	int datatype_ctor_nil (lua_State *lua);
+	/** convenience contructor for DataType::AUDIO
+	 * @param lua ignored
+	 * @returns DataType::AUDIO
+	 */
 	int datatype_ctor_audio (lua_State *L);
+	/** convenience contructor for DataType::MIDI
+	 * @param lua ignored
+	 * @returns DataType::MIDI
+	 */
 	int datatype_ctor_midi (lua_State *L);
 
 	/** create a new Lua Processor (Plugin)
