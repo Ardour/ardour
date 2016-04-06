@@ -468,8 +468,13 @@ PluginInsert::flush ()
 void
 PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now)
 {
+	// TODO: atomically copy maps & _no_inplace
 	PinMappings in_map (_in_map);
 	PinMappings out_map (_out_map);
+	if (_mapping_changed) {
+		_no_inplace = check_inplace ();
+		_mapping_changed = false;
+	}
 
 #if 1
 	// TODO optimize special case.
@@ -948,6 +953,7 @@ PluginInsert::set_input_map (uint32_t num, ChanMapping m) {
 		sanitize_maps ();
 		if (changed) {
 			PluginMapChanged (); /* EMIT SIGNAL */
+			_mapping_changed = true;
 		}
 	}
 }
@@ -960,6 +966,7 @@ PluginInsert::set_output_map (uint32_t num, ChanMapping m) {
 		sanitize_maps ();
 		if (changed) {
 			PluginMapChanged (); /* EMIT SIGNAL */
+			_mapping_changed = true;
 		}
 	}
 }
@@ -1028,6 +1035,24 @@ PluginInsert::is_channelstrip () const {
 	return _plugins.front()->is_channelstrip();
 }
 #endif
+
+bool
+PluginInsert::check_inplace ()
+{
+	// auto-detect if inplace processing is possible
+	bool inplace_ok = true;
+	for (uint32_t pc = 0; pc < get_count() && inplace_ok ; ++pc) {
+		if (!_in_map[pc].is_monotonic ()) {
+			inplace_ok = false;
+		}
+		if (!_out_map[pc].is_monotonic ()) {
+			inplace_ok = false;
+		}
+	}
+	bool no_inplace = !inplace_ok || _plugins.front()->inplace_broken ();
+	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1 %2\n", name(), no_inplace ? "No Inplace Processing" : "In-Place"));
+	return no_inplace;
+}
 
 bool
 PluginInsert::sanitize_maps ()
@@ -1137,6 +1162,7 @@ PluginInsert::reset_map (bool emit)
 	}
 	if (emit) {
 		PluginMapChanged (); /* EMIT SIGNAL */
+		_mapping_changed = true;
 	}
 	return true;
 }
@@ -1276,17 +1302,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 #endif
 	}
 
-	// auto-detect if inplace processing is possible
-	bool inplace_ok = true;
-	for (uint32_t pc = 0; pc < get_count() && inplace_ok ; ++pc) {
-		if (!_in_map[pc].is_monotonic ()) {
-			inplace_ok = false;
-		}
-		if (!_out_map[pc].is_monotonic ()) {
-			inplace_ok = false;
-		}
-	}
-	_no_inplace = !inplace_ok || _plugins.front()->inplace_broken ();
+	_no_inplace = check_inplace ();
+	_mapping_changed = false;
+	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1 %2\n", name(), _no_inplace ? "No Inplace Processing" : "In-Place"));
 
 	if (old_in != in || old_out != out || old_internal != _configured_internal
 			|| (old_match.method != _match.method && (old_match.method == Split || _match.method == Split))
