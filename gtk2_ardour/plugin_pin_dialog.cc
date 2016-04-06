@@ -18,6 +18,7 @@
  */
 
 #include <gtkmm/table.h>
+#include <gtkmm/frame.h>
 #include <gtkmm/box.h>
 #include <gtkmm/label.h>
 
@@ -46,8 +47,7 @@ using namespace Gtkmm2ext;
 
 PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
-	, _set_config (_("Custom"), ArdourButton::led_default_elements)
-	, _rst_mapping (_("Reset"))
+	, _set_config (_("Configure"), ArdourButton::led_default_elements)
 	, _tgl_sidechain (_("Side Chain"), ArdourButton::led_default_elements)
 	, _add_plugin (_("+"))
 	, _del_plugin (_("-"))
@@ -55,8 +55,8 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	, _del_output_audio (_("-"))
 	, _add_output_midi (_("+"))
 	, _del_output_midi (_("-"))
-	, _add_sc_audio (_("A+"))
-	, _add_sc_midi (_("M+"))
+	, _add_sc_audio (_("Audio"))
+	, _add_sc_midi (_("MIDI"))
 	, _pi (pi)
 	, _pin_box_size (10)
 	, _width (0)
@@ -93,6 +93,11 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	_tgl_sidechain.set_name ("pinrouting sidechain");
 	_set_config.set_name ("pinrouting custom");
 
+	Menu_Helpers::MenuList& citems = reset_menu.items();
+	reset_menu.set_name ("ArdourContextMenu");
+	citems.clear();
+	citems.push_back (Menu_Helpers::MenuElem (_("Reset"), sigc::mem_fun (*this, &PluginPinDialog::reset_mapping)));
+
 	_pm_size_group  = SizeGroup::create (SIZE_GROUP_BOTH);
 	_add_plugin.set_tweaks (ArdourButton::Square);
 	_del_plugin.set_tweaks (ArdourButton::Square);
@@ -103,86 +108,75 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	_pm_size_group->add_widget (_add_output_midi);
 	_pm_size_group->add_widget (_del_output_midi);
 
-	_sc_size_group  = SizeGroup::create (SIZE_GROUP_BOTH);
-	_sc_size_group->add_widget (_add_sc_audio);
-	_sc_size_group->add_widget (_add_sc_midi);
+	Box* box;
+	Frame *f;
 
-	Label* l;
-	Gtk::Separator *sep;
-	int r = 0;
-	Table* tl = manage (new Table (9, 2));
-	tl->set_border_width (0);
-	tl->set_spacings (2);
+	VBox* tl = manage (new VBox ());
+	tl->set_border_width (2);
+	tl->set_spacing (2);
 
-	Table* tr = manage (new Table (4, 3));
-	tr->set_border_width (0);
-	tr->set_spacings (2);
+	VBox* tr = manage (new VBox ());
+	tr->set_border_width (2);
+	tr->set_spacing (2);
 
-	/* left side table */
-	l = manage (new Label (_("<b>Config</b>"), ALIGN_CENTER));
-	l->set_use_markup ();
-	tl->attach (*l, 0, 2, r, r + 1, FILL, SHRINK);
-	++r;
-	tl->attach (_set_config, 0, 2, r, r + 1, FILL, SHRINK);
-	++r;
+	/* left side */
+	tl->pack_start (_set_config, false, false);
+	tl->pack_start (*manage (new Label ("")), true, true); // invisible separator
 
-	sep = manage (new HSeparator ());
-	tl->attach (*sep, 0, 2, r, r + 1, FILL|EXPAND, FILL|EXPAND, 0, 4);
-	++r;
+	box = manage (new HBox ());
+	box->set_border_width (2);
+	box->pack_start (_add_plugin, true, false);
+	box->pack_start (_del_plugin, true, false);
+	f = manage (new Frame());
+	f->set_label (_("Instances"));
+	f->add (*box);
+	tl->pack_start (*f, false, false);
 
-	l = manage (new Label (_("Instances"), ALIGN_CENTER));
-	tl->attach (*l, 0, 2, r, r + 1, FILL, SHRINK);
-	++r;
-	tl->attach (_add_plugin, 0, 1, r, r + 1, SHRINK, SHRINK);
-	tl->attach (_del_plugin, 1, 2, r, r + 1, SHRINK, SHRINK);
-	++r;
+	box = manage (new HBox ());
+	box->set_border_width (2);
+	box->pack_start (_add_output_audio, true, false);
+	box->pack_start (_del_output_audio, true, false);
+	f = manage (new Frame());
+	f->set_label (_("Audio Out"));
+	f->add (*box);
+	tl->pack_start (*f, false, false);
 
-	l = manage (new Label (_("Audio Out"), ALIGN_CENTER));
-	tl->attach (*l, 0, 2, r, r + 1, FILL, SHRINK);
-	++r;
-	tl->attach (_add_output_audio, 0, 1, r, r + 1, SHRINK, SHRINK);
-	tl->attach (_del_output_audio, 1, 2, r, r + 1, SHRINK, SHRINK);
-	++r;
+	box = manage (new HBox ());
+	box->set_border_width (2);
+	box->pack_start (_add_output_midi, true, false);
+	box->pack_start (_del_output_midi, true, false);
+	f = manage (new Frame());
+	f->set_label (_("MIDI Out"));
+	f->add (*box);
+	tl->pack_start (*f, false, false);
 
-	l = manage (new Label (_("Midi Out"), ALIGN_CENTER));
-	tl->attach (*l, 0, 2, r, r + 1, FILL, SHRINK);
-	++r;
-	tl->attach (_add_output_midi, 0, 1, r, r + 1, SHRINK, SHRINK);
-	tl->attach (_del_output_midi, 1, 2, r, r + 1, SHRINK, SHRINK);
-	++r;
 
-	/* right side table */
-	r = 0;
-	l = manage (new Label (_("<b>Connections</b>"), ALIGN_CENTER));
-	l->set_use_markup ();
-	tr->attach (*l, 0, 2, r, r + 1, FILL, SHRINK);
-	++r;
-	tr->attach (_rst_mapping, 0, 2, r, r + 1, FILL, SHRINK);
-	++r;
-
-	sep = manage (new HSeparator ());
-	tr->attach (*sep, 0, 2, r, r + 1, FILL|EXPAND, SHRINK, 0, 4);
-	++r;
-
-	tr->attach (_tgl_sidechain, 0, 2, r, r + 1, FILL, SHRINK);
-	++r;
-
+	/* right side */
 	_sidechain_tbl = manage (new Gtk::Table ());
 	_sidechain_tbl->set_spacings (2);
-	tr->attach (*_sidechain_tbl, 0, 2, r, r + 1, EXPAND|FILL, EXPAND|FILL, 0, 2);
-	++r;
 
-	tr->attach (_add_sc_audio, 0, 1, r, r + 1, FILL, SHRINK);
-	tr->attach (_add_sc_midi, 1, 2, r, r + 1, FILL, SHRINK);
-	++r;
+	tr->pack_start (_tgl_sidechain, false, false);
+	tr->pack_start (*_sidechain_tbl, true, true);
 
-	HBox* hbox = manage (new HBox);
+	box = manage (new VBox ());
+	box->set_border_width (2);
+	box->set_spacing (2);
+	box->pack_start (_add_sc_audio, false, false);
+	box->pack_start (_add_sc_midi , false, false);
+	f = manage (new Frame());
+	f->set_label (_("Add Port"));
+	f->add (*box);
+
+	tr->pack_start (*f, false, false);
+
+	/* global packing */
+	HBox* hbox = manage (new HBox ());
 	hbox->set_spacing (4);
 	hbox->pack_start (*tl, false, false);
 	hbox->pack_start (darea, true, true);
 	hbox->pack_start (*tr, false, false);
 
-	VBox* vbox = manage (new VBox);
+	VBox* vbox = manage (new VBox ());
 	vbox->pack_start (*hbox, true, true);
 	set_border_width (4);
 	add (*vbox);
@@ -200,7 +194,6 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 
 	_tgl_sidechain.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::toggle_sidechain));
 
-	_rst_mapping.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::reset_mapping));
 	_set_config.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::reset_configuration));
 	_add_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_plugin_clicked), true));
 	_del_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_plugin_clicked), false));
@@ -889,6 +882,8 @@ PluginPinDialog::darea_button_release_event (GdkEventButton* ev)
 		_selection.reset ();
 	} else if (_hover == _selection && _selection && ev->button == 3) {
 		handle_disconnect (_selection);
+	} else if (!_hover) {
+		reset_menu.popup (1, ev->time);
 	}
 	_actor.reset ();
 	darea.queue_draw ();

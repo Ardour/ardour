@@ -79,7 +79,6 @@ private:
 
 	Gtk::DrawingArea darea;
 	ArdourButton _set_config;
-	ArdourButton _rst_mapping;
 	ArdourButton _tgl_sidechain;
 	ArdourButton _add_plugin;
 	ArdourButton _del_plugin;
@@ -90,6 +89,7 @@ private:
 	ArdourButton _add_sc_audio;
 	ArdourButton _add_sc_midi;
 
+	Gtk::Menu reset_menu;
 	Gtk::Menu input_menu;
 	Gtk::Table* _sidechain_tbl;
 	Glib::RefPtr<Gtk::SizeGroup> _pm_size_group;
