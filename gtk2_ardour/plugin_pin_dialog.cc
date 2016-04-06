@@ -21,6 +21,8 @@
 #include <gtkmm/box.h>
 #include <gtkmm/label.h>
 
+#include "pbd/replace_all.h"
+
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
@@ -330,10 +332,6 @@ PluginPinDialog::refill_sidechain_table ()
 		return;
 	}
 
-	io->changed.connect (
-			_io_connection, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context ()
-			);
-
 	uint32_t r = 0;
 	PortSet& p (io->ports ());
 	bool can_remove = p.num_ports () > 1;
@@ -344,6 +342,10 @@ PluginPinDialog::refill_sidechain_table ()
 		add_port_to_table (*i, r, can_remove);
 	}
 	_sidechain_tbl->show_all ();
+
+	io->changed.connect (
+			_io_connection, invalidator (*this), boost::bind (&PluginPinDialog::io_changed_proxy, this), gui_context ()
+			);
 }
 
 void
@@ -359,10 +361,10 @@ PluginPinDialog::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool 
 		lbl = "-";
 	} else if (cns.size () > 1) {
 		lbl = "...";
-		tip += " &gt;- ";
+		tip += " &lt;- ";
 	} else {
 		lbl = cns[0];
-		tip += " &gt;- ";
+		tip += " &lt;- ";
 		if (lbl.find ("system:") == 0) {
 			lbl = AudioEngine::instance ()->get_pretty_name_by_name (lbl);
 			if (lbl.empty ()) {
@@ -958,7 +960,6 @@ PluginPinDialog::handle_disconnect (const CtrlElem &e)
 	_ignore_updates = true;
 	bool changed = false;
 	bool valid;
-	//ChanMapping out_map (_pi->output_map (pc));
 
 	switch (e->ct) {
 		case Input:
@@ -1102,9 +1103,39 @@ PluginPinDialog::disconnect_port (boost::weak_ptr<ARDOUR::Port> wp)
 	if (!io || !p) {
 		return;
 	}
-	io->disconnect (this);
+	p->disconnect_all ();
+	io_changed_proxy ();
 }
 
+void
+PluginPinDialog::connect_port (boost::weak_ptr<ARDOUR::Port> wp0, boost::weak_ptr<ARDOUR::Port> wp1)
+{
+	if (_session && _session->actively_recording()) { return; }
+	boost::shared_ptr<ARDOUR::Port> p0 = wp0.lock ();
+	boost::shared_ptr<ARDOUR::Port> p1 = wp1.lock ();
+	boost::shared_ptr<IO> io = _pi->sidechain_input ();
+	if (!io || !p0 || !p1) {
+		return;
+	}
+	p0->connect (p1->name ());
+	io_changed_proxy ();
+}
+
+bool
+PluginPinDialog::sc_input_release (GdkEventButton *ev)
+{
+	if (_session && _session->actively_recording()) { return false; }
+	if (ev->button == 3) {
+		connect_sidechain ();
+	}
+	return false;
+}
+
+struct RouteCompareByName {
+	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
+		return a->name().compare (b->name()) < 0;
+	}
+};
 
 bool
 PluginPinDialog::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Port> wp)
@@ -1117,10 +1148,24 @@ PluginPinDialog::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Por
 		MenuList& citems = input_menu.items();
 		input_menu.set_name ("ArdourContextMenu");
 		citems.clear();
-		// TODO build menu -- list of ports that don't produce feedback.
+
 		boost::shared_ptr<Port> p = wp.lock ();
 		if (p && p->connected ()) {
 			citems.push_back (MenuElem (_("Disconnect"), sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::disconnect_port), wp)));
+			citems.push_back (SeparatorElem());
+		}
+
+		// TODO add system inputs, too ?!
+
+		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
+		RouteList copy = *routes;
+		copy.sort (RouteCompareByName ());
+		uint32_t added = 0;
+		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
+			added += maybe_add_route_to_input_menu (*i, p->type (), wp);
+		}
+
+		if (added > 0) {
 			citems.push_back (SeparatorElem());
 		}
 		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*this, &PluginPinDialog::connect_sidechain)));
@@ -1129,12 +1174,40 @@ PluginPinDialog::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Por
 	return false;
 }
 
-bool
-PluginPinDialog::sc_input_release (GdkEventButton *ev)
+uint32_t
+PluginPinDialog::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, DataType dt, boost::weak_ptr<Port> wp)
 {
-	if (_session && _session->actively_recording()) { return false; }
-	if (ev->button == 3) {
-		connect_sidechain ();
+	uint32_t added = 0;
+	using namespace Menu_Helpers;
+	if (r->output () == _route()->output()) {
+		return added;
 	}
-	return false;
+
+	if (_route ()->feeds_according_to_graph (r)) {
+		return added;
+	}
+
+	MenuList& citems = input_menu.items();
+	const IOVector& iov (r->all_outputs());
+
+	for (IOVector::const_iterator o = iov.begin(); o != iov.end(); ++o) {
+		boost::shared_ptr<IO> op = o->lock();
+		if (!op) {
+			continue;
+		}
+		PortSet& p (op->ports ());
+		for (PortSet::iterator i = p.begin (dt); i != p.end (dt); ++i) {
+			std::string n = i->name ();
+			replace_all (n, "_", " ");
+			citems.push_back (MenuElem (n, sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::connect_port), wp, boost::weak_ptr<Port> (*i))));
+			++added;
+		}
+	}
+	return added;
+}
+
+void
+PluginPinDialog::io_changed_proxy ()
+{
+	Glib::signal_idle().connect_once (sigc::mem_fun (*this, &PluginPinDialog::plugin_reconfigured));
 }

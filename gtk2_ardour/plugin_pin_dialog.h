@@ -129,6 +129,9 @@ private:
 	void add_port_to_table (boost::shared_ptr<ARDOUR::Port>, uint32_t, bool);
 	void remove_port (boost::weak_ptr<ARDOUR::Port>);
 	void disconnect_port (boost::weak_ptr<ARDOUR::Port>);
+	void connect_port (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
+	uint32_t maybe_add_route_to_input_menu (boost::shared_ptr<ARDOUR::Route>, ARDOUR::DataType, boost::weak_ptr<ARDOUR::Port>);
+	void io_changed_proxy ();
 
 	bool sc_input_press (GdkEventButton *, boost::weak_ptr<ARDOUR::Port>);
 	bool sc_input_release (GdkEventButton *);
