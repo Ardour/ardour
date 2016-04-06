@@ -42,8 +42,6 @@ end
 function dsp_configure (ins, outs)
 	-- store configuration in global variable
 	audio_ins = ins:n_audio ()
-	local audio_outs = outs:n_audio ()
-	assert (audio_ins == audio_outs)
 	-- allocate shared memory area
 	-- this is used to speed up DSP computaton (using a C array)
 	-- and to share data with the GUI
@@ -63,14 +61,35 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	for c = 1,audio_ins do
 		-- Note: lua starts counting at 1, ardour's ChanMapping::get() at 0
 		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped input buffer for given cannel
-		assert (ib ~= ARDOUR.ChanMapping.Invalid)
+		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped output buffer for given cannel
 		local chn_off = 4 + bufsiz * (c - 1)
-		if (write_ptr + n_samples < bufsiz) then
-			ARDOUR.DSP.copy_vector (shmem:to_float (write_ptr + chn_off), bufs:get_audio (ib):data (offset), n_samples)
+		if (ib ~= ARDOUR.ChanMapping.Invalid) then
+			if (write_ptr + n_samples < bufsiz) then
+				ARDOUR.DSP.copy_vector (shmem:to_float (write_ptr + chn_off), bufs:get_audio (ib):data (offset), n_samples)
+			else
+				local w0 = bufsiz - write_ptr;
+				ARDOUR.DSP.copy_vector (shmem:to_float (write_ptr + chn_off), bufs:get_audio (ib):data (offset), w0)
+				ARDOUR.DSP.copy_vector (shmem:to_float (chn_off)            , bufs:get_audio (ib):data (offset), n_samples - w0)
+			end
+			if (ob ~= ARDOUR.ChanMapping.Invalid and ib ~= ob) then
+				ARDOUR.DSP.copy_vector (bufs:get_audio (ob):data (offset), bufs:get_audio (ib):data (offset), n_samples)
+			end
 		else
-			local w0 = bufsiz - write_ptr;
-			ARDOUR.DSP.copy_vector (shmem:to_float (write_ptr + chn_off), bufs:get_audio (ib):data (offset), w0)
-			ARDOUR.DSP.copy_vector (shmem:to_float (chn_off)            , bufs:get_audio (ib):data (offset), n_samples - w0)
+			if (write_ptr + n_samples < bufsiz) then
+				ARDOUR.DSP.memset (shmem:to_float (write_ptr + chn_off), 0, n_samples)
+			else
+				local w0 = bufsiz - write_ptr;
+				ARDOUR.DSP.memset (shmem:to_float (write_ptr + chn_off), 0, w0)
+				ARDOUR.DSP.memset (shmem:to_float (chn_off)            , 0, n_samples - w0)
+			end
+		end
+	end
+	-- clear unconnected inplace buffers
+	for c = 1,audio_ins do
+		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped input buffer for given cannel
+		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped output buffer for given cannel
+		if (ib == ARDOUR.ChanMapping.Invalid and ob ~= ARDOUR.ChanMapping.Invalid) then
+			bufs:get_audio (ob):silence (n_samples, offset)
 		end
 	end
 
