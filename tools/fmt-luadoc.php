@@ -125,6 +125,15 @@ function luafn2class ($lua) {
 	return substr ($lua, 0, strrpos ($lua, ':'));
 }
 
+function luafn2name ($lua) {
+	$fn = strrpos ($lua, ':');
+	if ($fn !== 0 && strlen($lua) > $fn + 1) {
+		return substr ($lua, $fn + 1);
+	}
+	my_die ('invalid class prefix: '. $name);
+}
+
+
 function checkclass ($b) {
 	global $classlist;
 	if (!isset ($classlist[luafn2class ($b['lua'])])) {
@@ -249,6 +258,26 @@ foreach ($doc as $b) {
 			'ret'  => arg2lua (datatype ($b['ldec']))
 		);
 		break;
+	case "Static C Function":
+		checkclass ($b);
+		if (strpos ($b['lua'], 'ARDOUR:DataType:') === 0) {
+			# special case ARDOUR:DataType convenience c'tor
+			$args = array ();
+			$ret = array (luafn2class ($b['lua']) => 0);
+			$canon = 'ARDOUR::LuaAPI::datatype_ctor_'.strtolower (luafn2name ($b['lua'])).'(lua_State*)';
+		} else {
+			my_die ('unhandled Static C: ' . print_r($b, true));
+		}
+		$classlist[luafn2class ($b['lua'])]['func'][] = array (
+			'bind' => $b,
+			'name' => $b['lua'],
+			'args' => $args,
+			'ret'  => $ret,
+			'ref'  => false,
+			'ext'  => false,
+			'cand' => $canon
+		);
+		break;
 	case "C Function":
 		# we required C functions to be in a class namespace
 	case "Ext C Function":
@@ -257,9 +286,8 @@ foreach ($doc as $b) {
 		$ret = array ('...' => 0);
 		$ns = luafn2class ($b['lua']);
 		$cls = $classlist[$ns];
-		## std::Vector std::List types
 		if (preg_match ('/.*<([^>]*)[ ]*>/', $cls['ldec'], $templ)) {
-			// XXX -> move to C-source
+			# std::vector, std::list types
 			switch (stripclass($ns, $b['lua'])) {
 			case 'add':
 				#$args = array (array ('LuaTable {'.$templ[1].'}' => 0));
@@ -278,6 +306,7 @@ foreach ($doc as $b) {
 				break;
 			}
 		} else if (strpos ($cls['type'], ' Array') !== false) {
+			# catches  C:FloatArray, C:IntArray
 			$templ = preg_replace ('/[&*]*$/', '', $cls['ldec']);
 			switch (stripclass($ns, $b['lua'])) {
 			case 'array':
