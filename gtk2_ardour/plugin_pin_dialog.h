@@ -93,7 +93,6 @@ private:
 	Gtk::Menu input_menu;
 	Gtk::Table* _sidechain_tbl;
 	Glib::RefPtr<Gtk::SizeGroup> _pm_size_group;
-	Glib::RefPtr<Gtk::SizeGroup> _sc_size_group;
 
 	void plugin_reconfigured ();
 	void update_element_pos ();
