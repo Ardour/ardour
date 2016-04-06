@@ -78,7 +78,7 @@ private:
 
 
 	Gtk::DrawingArea darea;
-	ArdourButton _rst_config;
+	ArdourButton _set_config;
 	ArdourButton _rst_mapping;
 	ArdourButton _tgl_sidechain;
 	ArdourButton _add_plugin;

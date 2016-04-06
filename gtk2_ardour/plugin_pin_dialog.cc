@@ -46,7 +46,7 @@ using namespace Gtkmm2ext;
 
 PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
-	, _rst_config (_("Reset"))
+	, _set_config (_("Custom"), ArdourButton::led_default_elements)
 	, _rst_mapping (_("Reset"))
 	, _tgl_sidechain (_("Side Chain"))
 	, _add_plugin (_("+"))
@@ -122,7 +122,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	l->set_use_markup ();
 	tl->attach (*l, 0, 2, r, r + 1, FILL, SHRINK);
 	++r;
-	tl->attach (_rst_config, 0, 2, r, r + 1, FILL, SHRINK);
+	tl->attach (_set_config, 0, 2, r, r + 1, FILL, SHRINK);
 	++r;
 
 	sep = manage (new HSeparator ());
@@ -200,7 +200,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	_tgl_sidechain.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::toggle_sidechain));
 
 	_rst_mapping.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::reset_mapping));
-	_rst_config.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::reset_configuration));
+	_set_config.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::reset_configuration));
 	_add_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_plugin_clicked), true));
 	_del_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_plugin_clicked), false));
 
@@ -234,17 +234,26 @@ PluginPinDialog::plugin_reconfigured ()
 	_sinks = _pi->natural_input_streams ();
 	_sources = _pi->natural_output_streams ();
 
-	_del_plugin.set_sensitive (_n_plugins > 1);
-	_del_output_audio.set_sensitive (_out.n_audio () > 0 && _out.n_total () > 1);
-	_del_output_midi.set_sensitive (_out.n_midi () > 0 && _out.n_total () > 1);
 	_tgl_sidechain.set_active (_pi->has_sidechain ());
 	_add_sc_audio.set_sensitive (_pi->has_sidechain ());
 	_add_sc_midi.set_sensitive (_pi->has_sidechain ());
 
 	if (_pi->custom_cfg ()) {
-		_rst_config.set_name ("pinrouting custom");
+		_set_config.set_active (true);
+		_add_plugin.set_sensitive (true);
+		_add_output_audio.set_sensitive (true);
+		_add_output_midi.set_sensitive (true);
+		_del_plugin.set_sensitive (_n_plugins > 1);
+		_del_output_audio.set_sensitive (_out.n_audio () > 0 && _out.n_total () > 1);
+		_del_output_midi.set_sensitive (_out.n_midi () > 0 && _out.n_total () > 1);
 	} else {
-		_rst_config.set_name ("generic button");
+		_set_config.set_active (false);
+		_add_plugin.set_sensitive (false);
+		_add_output_audio.set_sensitive (false);
+		_add_output_midi.set_sensitive (false);
+		_del_plugin.set_sensitive (false);
+		_del_output_audio.set_sensitive (false);
+		_del_output_midi.set_sensitive (false);
 	}
 
 	if (!_pi->has_sidechain () && _sidechain_selector) {
@@ -1042,7 +1051,11 @@ PluginPinDialog::connect_sidechain ()
 void
 PluginPinDialog::reset_configuration ()
 {
-	_route ()->reset_plugin_insert (_pi);
+	if (_set_config.get_active ()) {
+		_route ()->reset_plugin_insert (_pi);
+	} else {
+		_route ()->customize_plugin_insert (_pi, _n_plugins, _out);
+	}
 }
 
 void
@@ -1152,7 +1165,15 @@ PluginPinDialog::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Por
 			citems.push_back (SeparatorElem());
 		}
 
+#if 0
 		// TODO add system inputs, too ?!
+		boost::shared_ptr<ARDOUR::BundleList> b = _session->bundles ();
+		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+			for (uint32_t j = 0; j < i->nchannels ().n_total (); ++j) {
+			}
+			//maybe_add_bundle_to_input_menu (*i, current);
+		}
+#endif
 
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
 		RouteList copy = *routes;
