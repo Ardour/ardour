@@ -491,8 +491,8 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 			/* copy the first stream's buffer contents to the others */
 			for (uint32_t i = 1; i < natural_input_streams ().get (*t); ++i) {
 				uint32_t idx = in_map[0].get (*t, i, &valid);
-				assert (idx == 0);
 				if (valid) {
+					assert (idx == 0);
 					bufs.get (*t, i).read_from (bufs.get (*t, first_idx), nframes, offset, offset);
 				}
 			}
@@ -613,11 +613,12 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 				}
 			}
 
-			if ((*i)->connect_and_run(inplace_bufs, i_in_map, i_out_map, nframes, offset)) {
+			if ((*i)->connect_and_run (inplace_bufs, i_in_map, i_out_map, nframes, offset)) {
 				deactivate ();
 			}
 
 			// copy back outputs
+			// XXX this may override inputs used in next iteration !!
 			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 				for (uint32_t out = 0; out < natural_output_streams().get (*t); ++out) {
 					uint32_t m = backmap.get (*t);
