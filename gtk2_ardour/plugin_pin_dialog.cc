@@ -887,10 +887,14 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 				else if (_selection->ct == Source && _hover->ct == Output) { _actor = _hover; }
 				if (!_actor) {
 				_selection = _hover;
+				_dragging = true;
+				_drag_x = ev->x;
+				_drag_y = ev->y;
 				}
 				darea.queue_draw ();
-			} else if (_selection && _selection == _hover) {
-				assert (!_dragging);
+			} else if (_hover) {
+				_selection = _hover;
+				_actor.reset ();
 				_dragging = true;
 				_drag_x = ev->x;
 				_drag_y = ev->y;
