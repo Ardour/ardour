@@ -210,6 +210,10 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	_del_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_port_clicked), false, DataType::MIDI));
 	_add_sc_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_sidechain_port), DataType::AUDIO));
 	_add_sc_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_sidechain_port), DataType::MIDI));
+
+	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
+			_io_connection, invalidator (*this), boost::bind (&PluginPinDialog::port_connected_or_disconnected, this, _1, _3), gui_context ()
+			);
 }
 
 PluginPinDialog::~PluginPinDialog ()
@@ -248,7 +252,6 @@ PluginPinDialog::plugin_reconfigured ()
 		_sidechain_selector = 0;
 	}
 
-	_io_connection.disconnect ();
 	refill_sidechain_table ();
 
 	/* update elements */
@@ -342,10 +345,6 @@ PluginPinDialog::refill_sidechain_table ()
 		add_port_to_table (*i, r, can_remove);
 	}
 	_sidechain_tbl->show_all ();
-
-	io->changed.connect (
-			_io_connection, invalidator (*this), boost::bind (&PluginPinDialog::io_changed_proxy, this), gui_context ()
-			);
 }
 
 void
@@ -1104,7 +1103,6 @@ PluginPinDialog::disconnect_port (boost::weak_ptr<ARDOUR::Port> wp)
 		return;
 	}
 	p->disconnect_all ();
-	io_changed_proxy ();
 }
 
 void
@@ -1118,7 +1116,6 @@ PluginPinDialog::connect_port (boost::weak_ptr<ARDOUR::Port> wp0, boost::weak_pt
 		return;
 	}
 	p0->connect (p1->name ());
-	io_changed_proxy ();
 }
 
 bool
@@ -1207,7 +1204,18 @@ PluginPinDialog::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, Data
 }
 
 void
-PluginPinDialog::io_changed_proxy ()
+PluginPinDialog::port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port> w0, boost::weak_ptr<ARDOUR::Port> w1)
 {
-	Glib::signal_idle().connect_once (sigc::mem_fun (*this, &PluginPinDialog::plugin_reconfigured));
+	boost::shared_ptr<Port> p0 = w0.lock ();
+	boost::shared_ptr<Port> p1 = w1.lock ();
+
+	boost::shared_ptr<IO> io = _pi->sidechain_input ();
+	if (!io) { return; }
+
+	if (p0 && io->has_port (p0)) {
+		plugin_reconfigured ();
+	}
+	else if (p1 && io->has_port (p1)) {
+		plugin_reconfigured ();
+	}
 }
