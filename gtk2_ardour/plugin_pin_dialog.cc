@@ -1124,6 +1124,9 @@ PluginPinDialog::connect_port (boost::weak_ptr<ARDOUR::Port> wp0, boost::weak_pt
 	if (!io || !p0 || !p1) {
 		return;
 	}
+	_ignore_updates = true;
+	p0->disconnect_all ();
+	_ignore_updates = false;
 	p0->connect (p1->name ());
 }
 
