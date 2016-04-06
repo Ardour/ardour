@@ -476,26 +476,30 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		_mapping_changed = false;
 	}
 
-#if 1
-	// TODO optimize special case.
-	// Currently this never triggers because the in_map for "Split" triggeres no_inplace.
 	if (_match.method == Split && !_no_inplace) {
-		assert (in_map.size () == 1);
-		in_map[0] = ChanMapping (ChanCount::max (natural_input_streams (), _configured_in)); // no sidechain
-		ChanCount const in_streams = internal_input_streams ();
-		/* copy the first stream's audio buffer contents to the others */
-		bool valid;
-		uint32_t first_idx = in_map[0].get (DataType::AUDIO, 0, &valid);
-		if (valid) {
-			for (uint32_t i = in_streams.n_audio(); i < natural_input_streams().n_audio(); ++i) {
-				uint32_t idx = in_map[0].get (DataType::AUDIO, i, &valid);
+		// TODO: also use this optimization if one source-buffer
+		// feeds _all_ *connected* inputs.
+		// currently this is *first* buffer to all only --
+		// see PluginInsert::check_inplace
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			if (_configured_internal.get (*t) == 0) {
+				continue;
+			}
+			bool valid;
+			uint32_t first_idx = in_map[0].get (*t, 0, &valid);
+			assert (valid && first_idx == 0); // check_inplace ensures this
+			/* copy the first stream's buffer contents to the others */
+			for (uint32_t i = 1; i < natural_input_streams ().get (*t); ++i) {
+				uint32_t idx = in_map[0].get (*t, i, &valid);
+				assert (idx == 0);
 				if (valid) {
-					bufs.get_audio(idx).read_from(bufs.get_audio(first_idx), nframes, offset, offset);
+					bufs.get (*t, i).read_from (bufs.get (*t, first_idx), nframes, offset, offset);
 				}
 			}
 		}
+		/* the copy operation produces a linear monotonic input map */
+		in_map[0] = ChanMapping (natural_input_streams ());
 	}
-#endif
 
 	bufs.set_count(ChanCount::max(bufs.count(), _configured_internal));
 	bufs.set_count(ChanCount::max(bufs.count(), _configured_out));
@@ -1039,8 +1043,49 @@ PluginInsert::is_channelstrip () const {
 bool
 PluginInsert::check_inplace ()
 {
-	// auto-detect if inplace processing is possible
-	bool inplace_ok = true;
+	bool inplace_ok = !_plugins.front()->inplace_broken ();
+
+	if (_match.method == Split && inplace_ok) {
+		assert (get_count() == 1);
+		assert (_in_map.size () == 1);
+		if (!_out_map[0].is_monotonic ()) {
+			inplace_ok = false;
+		}
+		if (_configured_internal != _configured_in) {
+			/* no sidechain -- TODO we could allow this with
+			 * some more logic in PluginInsert::connect_and_run().
+			 *
+			 * PluginInsert::reset_map() already maps it.
+			 */
+			inplace_ok = false;
+		}
+		/* check mapping */
+		for (DataType::iterator t = DataType::begin(); t != DataType::end() && inplace_ok; ++t) {
+			if (_configured_internal.get (*t) == 0) {
+				continue;
+			}
+			bool valid;
+			uint32_t first_idx = _in_map[0].get (*t, 0, &valid);
+			if (!valid || first_idx != 0) {
+				// so far only allow to copy the *first* stream's buffer to others
+				inplace_ok = false;
+			} else {
+				for (uint32_t i = 1; i < natural_input_streams ().get (*t); ++i) {
+					uint32_t idx = _in_map[0].get (*t, i, &valid);
+					if (valid && idx != first_idx) {
+						inplace_ok = false;
+						break;
+					}
+				}
+			}
+		}
+
+		if (inplace_ok) {
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: In Place Split Map\n", name()));
+			return false;
+		}
+	}
+
 	for (uint32_t pc = 0; pc < get_count() && inplace_ok ; ++pc) {
 		if (!_in_map[pc].is_monotonic ()) {
 			inplace_ok = false;
@@ -1049,9 +1094,8 @@ PluginInsert::check_inplace ()
 			inplace_ok = false;
 		}
 	}
-	bool no_inplace = !inplace_ok || _plugins.front()->inplace_broken ();
-	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1 %2\n", name(), no_inplace ? "No Inplace Processing" : "In-Place"));
-	return no_inplace;
+	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: %2\n", name(), inplace_ok ? "In-Place" : "No Inplace Processing"));
+	return !inplace_ok; // no-inplace
 }
 
 bool
@@ -1304,7 +1348,6 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 
 	_no_inplace = check_inplace ();
 	_mapping_changed = false;
-	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1 %2\n", name(), _no_inplace ? "No Inplace Processing" : "In-Place"));
 
 	if (old_in != in || old_out != out || old_internal != _configured_internal
 			|| (old_match.method != _match.method && (old_match.method == Split || _match.method == Split))
