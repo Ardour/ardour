@@ -91,6 +91,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	boost::shared_ptr<IO> input() const { return _input; }
 	boost::shared_ptr<IO> output() const { return _output; }
 	IOVector all_inputs () const;
+	IOVector all_outputs () const;
 
 	ChanCount n_inputs() const { return _input->n_ports(); }
 	ChanCount n_outputs() const { return _output->n_ports(); }
@@ -370,6 +371,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	 * is currently being processed.
 	 */
 	bool direct_feeds_according_to_graph (boost::shared_ptr<Route>, bool* via_send_only = 0);
+
+	bool feeds_according_to_graph (boost::shared_ptr<Route>);
 
 	struct FeedRecord {
 		boost::weak_ptr<Route> r;

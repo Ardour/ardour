@@ -3628,6 +3628,21 @@ Route::all_inputs () const
 	return ios;
 }
 
+IOVector
+Route::all_outputs () const
+{
+	IOVector ios;
+	// _output is included via Delivery
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	for (ProcessorList::const_iterator r = _processors.begin(); r != _processors.end(); ++r) {
+		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor>(*r);
+		if (iop != 0 && iop->output()) {
+			ios.push_back (iop->output());
+		}
+	}
+	return ios;
+}
+
 bool
 Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* via_send_only)
 {
@@ -3677,6 +3692,12 @@ bool
 Route::direct_feeds_according_to_graph (boost::shared_ptr<Route> other, bool* via_send_only)
 {
 	return _session._current_route_graph.has (shared_from_this (), other, via_send_only);
+}
+
+bool
+Route::feeds_according_to_graph (boost::shared_ptr<Route> other)
+{
+	return _session._current_route_graph.feeds (shared_from_this (), other);
 }
 
 /** Called from the (non-realtime) butler thread when the transport is stopped */
