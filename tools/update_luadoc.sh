@@ -13,6 +13,12 @@ test -e ../build/gtk2_ardour/luadoc
 # generate ../doc/ardourapi.json.gz
 ./doxy2json/ardourdoc.sh
 
-php fmt-luadoc.php > /tmp/luadoc.html
-# ^^ needs manual copy to ardour-manual
-ls -l /tmp/luadoc.html
+if test -f $HOME/src/ardour-manual/_manual/24_lua-scripting/02_class_reference.html; then
+	php fmt-luadoc.php -m > $HOME/src/ardour-manual/_manual/24_lua-scripting/02_class_reference.html
+	ls -l $HOME/src/ardour-manual/_manual/24_lua-scripting/02_class_reference.html
+	cd $HOME/src/ardour-manual/
+	./build.rb
+else
+	php fmt-luadoc.php > /tmp/luadoc.html
+	ls -l /tmp/luadoc.html
+fi

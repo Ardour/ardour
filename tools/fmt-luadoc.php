@@ -16,6 +16,13 @@
 # php tools/fmt-luadoc.php > /tmp/luadoc.html
 #
 
+$options = getopt("m");
+if (isset ($options['m'])) {
+	$HTMLOUTPUT = false; ## set to false to output ardour-manual
+} else {
+	$HTMLOUTPUT = true; ## set to false to output ardour-manual
+}
+
 ################################################################################
 ################################################################################
 
@@ -642,6 +649,8 @@ function format_class_members ($ns, $cl, &$dups) {
 ################################################################################
 # Start Output
 
+if ($HTMLOUTPUT) {
+
 ?><!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
@@ -705,7 +714,26 @@ div.luafooter      { text-align:center; font-size:80%; color: #888; margin: 2em 
 </p>
 </div>
 
-<!-- #### SNIP  #### !-->
+<!-- #### SNIP #### !-->
+
+<?php
+
+} else {
+
+?>
+---
+layout: default
+style: luadoc
+title: Class Reference
+---
+
+<p class="warning">
+This documention is far from complete may be inaccurate and subject to change.
+</p>
+
+<?php
+}
+?>
 
 <div id="luaref">
 
@@ -923,8 +951,10 @@ fwrite (STDERR, "Found $dox_found annotations. missing: $dox_miss\n");
 ?>
 </div>
 <div class="luafooter">Ardour <?=$ardourversion?> &nbsp;-&nbsp; <?=date('r')?></div>
+<?php
 
-<!-- #### SNIP  #### !-->
-
-</body>
-</html>
+if ($HTMLOUTPUT) {
+	echo '<!-- #### SNIP #### !-->'.NL;
+	echo '</body>'.NL;
+	echo '</html>'.NL;
+}
