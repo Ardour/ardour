@@ -59,6 +59,24 @@ GraphEdges::find_in_from_to_with_sends (GraphVertex from, GraphVertex to)
 	return _from_to_with_sends.end ();
 }
 
+GraphEdges::EdgeMapWithSends::iterator
+GraphEdges::find_recursively_in_from_to_with_sends (GraphVertex from, GraphVertex to)
+{
+	typedef EdgeMapWithSends::iterator Iter;
+	pair<Iter, Iter> r = _from_to_with_sends.equal_range (from);
+	for (Iter i = r.first; i != r.second; ++i) {
+		if (i->second.first == to) {
+			return i;
+		}
+		GraphEdges::EdgeMapWithSends::iterator t = find_recursively_in_from_to_with_sends (i->second.first, to);
+		if (t != _from_to_with_sends.end ()) {
+			return t;
+		}
+	}
+
+	return _from_to_with_sends.end ();
+}
+
 /** @param via_sends_only if non-0, filled in with true if the edge is a
  *  path via a send only.
  *  @return true if the given edge is present.
@@ -75,6 +93,16 @@ GraphEdges::has (GraphVertex from, GraphVertex to, bool* via_sends_only)
 		*via_sends_only = i->second.second;
 	}
 
+	return true;
+}
+
+bool
+GraphEdges::feeds (GraphVertex from, GraphVertex to)
+{
+	EdgeMapWithSends::iterator i = find_recursively_in_from_to_with_sends (from, to);
+	if (i == _from_to_with_sends.end ()) {
+		return false;
+	}
 	return true;
 }
 

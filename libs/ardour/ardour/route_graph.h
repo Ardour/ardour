@@ -44,6 +44,7 @@ public:
 
 	void add (GraphVertex from, GraphVertex to, bool via_sends_only);
 	bool has (GraphVertex from, GraphVertex to, bool* via_sends_only);
+	bool feeds (GraphVertex from, GraphVertex to);
 	std::set<GraphVertex> from (GraphVertex r) const;
 	void remove (GraphVertex from, GraphVertex to);
 	bool has_none_to (GraphVertex to) const;
@@ -56,6 +57,7 @@ private:
 	typedef std::multimap<GraphVertex, std::pair<GraphVertex, bool> > EdgeMapWithSends;
 
 	EdgeMapWithSends::iterator find_in_from_to_with_sends (GraphVertex, GraphVertex);
+	EdgeMapWithSends::iterator find_recursively_in_from_to_with_sends (GraphVertex, GraphVertex);
 
 	/** map of edges with from as `first' and to as `second' */
 	EdgeMap _from_to;
