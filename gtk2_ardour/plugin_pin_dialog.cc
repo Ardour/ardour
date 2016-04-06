@@ -882,7 +882,7 @@ PluginPinDialog::darea_button_release_event (GdkEventButton* ev)
 		_selection.reset ();
 	} else if (_hover == _selection && _selection && ev->button == 3) {
 		handle_disconnect (_selection);
-	} else if (!_hover) {
+	} else if (!_hover && ev->button == 3) {
 		reset_menu.popup (1, ev->time);
 	}
 	_actor.reset ();
