@@ -104,6 +104,7 @@ private:
 	bool darea_motion_notify_event (GdkEventMotion*);
 	bool darea_button_press_event (GdkEventButton*);
 	bool darea_button_release_event (GdkEventButton*);
+	bool drag_type_matches (CtrlType ct);
 
 	void draw_io_pin (cairo_t*, const CtrlWidget&);
 	void draw_plugin_pin (cairo_t*, const CtrlWidget&);
@@ -155,6 +156,9 @@ private:
 	bool _ignore_updates;
 	ARDOUR::Route* _route () { return static_cast<ARDOUR::Route*> (_pi->owner ()); }
 	IOSelectorWindow *_sidechain_selector;
+
+	bool   _dragging;
+	double _drag_x, _drag_y;
 };
 
 #endif

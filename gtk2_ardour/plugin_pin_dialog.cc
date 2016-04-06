@@ -71,6 +71,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	, _position_valid (false)
 	, _ignore_updates (false)
 	, _sidechain_selector (0)
+	, _dragging (false)
 {
 	assert (pi->owner ()); // Route
 
@@ -263,6 +264,7 @@ PluginPinDialog::plugin_reconfigured ()
 	_hover.reset ();
 	_actor.reset ();
 	_selection.reset ();
+	_dragging = 0;
 
 	_n_inputs = _n_sidechains = 0;
 
@@ -782,6 +784,27 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 		}
 	}
 
+	CtrlWidget *drag_src = NULL;
+	if (_dragging) {
+		for (CtrlElemList::iterator i = _elements.begin (); i != _elements.end (); ++i) {
+			if (i->e  == _selection ) {
+				drag_src = &(*i);
+			}
+		}
+	}
+	if (drag_src) {
+		double x0, y0;
+		if (_selection->ct == Input || _selection->ct == Source) {
+			edge_coordinates (*drag_src, x0, y0);
+			draw_connection (cr, x0, _drag_x, y0, _drag_y,
+					_selection->dt == DataType::MIDI, _selection->sc);
+		} else {
+			edge_coordinates (*drag_src, x0, y0);
+			draw_connection (cr, _drag_x, x0, _drag_y, y0,
+					_selection->dt == DataType::MIDI, _selection->sc);
+		}
+	}
+
 	cairo_destroy (cr);
 	return true;
 }
@@ -800,13 +823,25 @@ PluginPinDialog::darea_size_allocate (Gtk::Allocation&)
 }
 
 bool
+PluginPinDialog::drag_type_matches (CtrlType ct) {
+	if (!_dragging || !_selection) {
+		return true;
+	}
+	if (_selection->ct == Input && ct == Sink) { return true; }
+	if (_selection->ct == Sink && ct == Input) { return true; }
+	if (_selection->ct == Output && ct == Source) { return true; }
+	if (_selection->ct == Source && ct == Output) { return true; }
+	return false;
+}
+
+bool
 PluginPinDialog::darea_motion_notify_event (GdkEventMotion* ev)
 {
 	bool changed = false;
 	_hover.reset ();
 	for (CtrlElemList::iterator i = _elements.begin (); i != _elements.end (); ++i) {
 		if (ev->x >= i->x && ev->x <= i->x + i->w
-				&& ev->y >= i->y && ev->y <= i->y + i->h)
+				&& ev->y >= i->y && ev->y <= i->y + i->h && drag_type_matches (i->e->ct))
 		{
 			if (!i->prelight) changed = true;
 			i->prelight = true;
@@ -816,7 +851,11 @@ PluginPinDialog::darea_motion_notify_event (GdkEventMotion* ev)
 			i->prelight = false;
 		}
 	}
-	if (changed) {
+	if (_dragging) {
+		_drag_x = ev->x;
+		_drag_y = ev->y;
+	}
+	if (changed || _dragging) {
 		darea.queue_draw ();
 	}
 	return true;
@@ -834,6 +873,11 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 			if (!_selection || (_selection && !_hover)) {
 				_selection = _hover;
 				_actor.reset ();
+				if (_selection) {
+					_dragging = true;
+					_drag_x = ev->x;
+					_drag_y = ev->y;
+				}
 				darea.queue_draw ();
 			} else if (_selection && _hover && _selection != _hover) {
 				if (_selection->dt != _hover->dt) { _actor.reset (); }
@@ -845,6 +889,11 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 				_selection = _hover;
 				}
 				darea.queue_draw ();
+			} else if (_selection && _selection == _hover) {
+				assert (!_dragging);
+				_dragging = true;
+				_drag_x = ev->x;
+				_drag_y = ev->y;
 			}
 			break;
 		case 3:
@@ -864,6 +913,9 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 bool
 PluginPinDialog::darea_button_release_event (GdkEventButton* ev)
 {
+	if (_dragging && _hover && _hover != _selection) {
+		_actor = _hover;
+	}
 	if (_hover == _actor && _actor && ev->button == 1) {
 		assert (_selection);
 		assert (_selection->dt == _actor->dt);
@@ -886,6 +938,7 @@ PluginPinDialog::darea_button_release_event (GdkEventButton* ev)
 		reset_menu.popup (1, ev->time);
 	}
 	_actor.reset ();
+	_dragging = false;
 	darea.queue_draw ();
 	return true;
 }
