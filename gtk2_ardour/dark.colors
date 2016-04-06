@@ -351,8 +351,7 @@
     <ColorAlias name="processor stub: fill" alias="color 46"/>
     <ColorAlias name="processor stub: fill active" alias="color 46"/>
     <ColorAlias name="pinrouting custom: led active" alias="color 86"/>
-    <ColorAlias name="pinrouting sidechain: fill" alias="color 25"/>
-    <ColorAlias name="pinrouting sidechain: fill active" alias="color 76"/>
+    <ColorAlias name="pinrouting sidechain: led active" alias="color 50"/>
     <ColorAlias name="punch button: fill" alias="color 20"/>
     <ColorAlias name="punch button: fill active" alias="color 9"/>
     <ColorAlias name="punch button: led active" alias="color 4"/>

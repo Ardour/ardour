@@ -48,7 +48,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
 	, _set_config (_("Custom"), ArdourButton::led_default_elements)
 	, _rst_mapping (_("Reset"))
-	, _tgl_sidechain (_("Side Chain"))
+	, _tgl_sidechain (_("Side Chain"), ArdourButton::led_default_elements)
 	, _add_plugin (_("+"))
 	, _del_plugin (_("-"))
 	, _add_output_audio (_("+"))
@@ -91,6 +91,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	_margin_y = 2 * ceil (max (36., 40. * UIConfiguration::instance ().get_ui_scale ()) * .5);
 
 	_tgl_sidechain.set_name ("pinrouting sidechain");
+	_set_config.set_name ("pinrouting custom");
 
 	_pm_size_group  = SizeGroup::create (SIZE_GROUP_BOTH);
 	_add_plugin.set_tweaks (ArdourButton::Square);
