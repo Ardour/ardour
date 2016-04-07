@@ -471,6 +471,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 	// TODO: atomically copy maps & _no_inplace
 	PinMappings in_map (_in_map);
 	PinMappings out_map (_out_map);
+	ChanMapping thru_map (_thru_map);
 	if (_mapping_changed) {
 		_no_inplace = check_inplace ();
 		_mapping_changed = false;
@@ -573,19 +574,46 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 	} else
 #endif
 	if (_no_inplace) {
+		// TODO optimize -- build maps once.
+		uint32_t pc = 0;
 		BufferSet& inplace_bufs  = _session.get_noinplace_buffers();
 		ARDOUR::ChanMapping used_outputs;
 
-		uint32_t pc = 0;
-		// TODO optimize this flow. prepare during configure_io()
+		assert (inplace_bufs.count () >= natural_input_streams () + _configured_out);
+
+		/* build used-output map */
+		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+				for (uint32_t out = 0; out < natural_output_streams().get (*t); ++out) {
+					bool valid;
+					uint32_t out_idx = out_map[pc].get (*t, out, &valid);
+					if (valid) {
+						used_outputs.set (*t, out_idx, 1); // mark as used
+					}
+				}
+			}
+		}
+		/* copy thru data to outputs before processing in-place */
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			for (uint32_t out = 0; out < bufs.count().get (*t); ++out) {
+				bool valid;
+				uint32_t in_idx = thru_map.get (*t, out, &valid);
+				if (valid) {
+					uint32_t m = out + natural_input_streams ().get (*t);
+					inplace_bufs.get (*t, m).read_from (bufs.get (*t, in_idx), nframes, offset, offset);
+					used_outputs.set (*t, out, 1); // mark as used
+				}
+			}
+		}
+
+		pc = 0;
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
 
 			ARDOUR::ChanMapping i_in_map (natural_input_streams());
-			ARDOUR::ChanMapping i_out_map;
+			ARDOUR::ChanMapping i_out_map (out_map[pc]);
 			ARDOUR::ChanCount mapped;
-			ARDOUR::ChanCount backmap;
 
-			// map inputs sequentially
+			/* map inputs sequentially */
 			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 				for (uint32_t in = 0; in < natural_input_streams().get (*t); ++in) {
 					bool valid;
@@ -600,54 +628,39 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 				}
 			}
 
-			// TODO use map_offset_to()  instead ??
-			backmap = mapped;
-
-			// map outputs
+			/* outputs are mapped to inplace_bufs after the inputs */
 			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-				for (uint32_t out = 0; out < natural_output_streams().get (*t); ++out) {
-					uint32_t m = mapped.get (*t);
-					inplace_bufs.get (*t, m).silence (nframes, offset);
-					i_out_map.set (*t, out, m);
-					mapped.set (*t, m + 1);
-				}
+				i_out_map.offset_to (*t, natural_input_streams ().get (*t));
 			}
 
 			if ((*i)->connect_and_run (inplace_bufs, i_in_map, i_out_map, nframes, offset)) {
 				deactivate ();
 			}
-
-			// copy back outputs
-			// XXX this may override inputs used in next iteration !!
-			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-				for (uint32_t out = 0; out < natural_output_streams().get (*t); ++out) {
-					uint32_t m = backmap.get (*t);
-					bool valid;
-					uint32_t out_idx = out_map[pc].get (*t, out, &valid);
-					if (valid) {
-						bufs.get (*t, out_idx).read_from (inplace_bufs.get (*t, m), nframes, offset, offset);
-						used_outputs.set (*t, out_idx, 1); // mark as used
-					}
-					backmap.set (*t, m + 1);
-				}
-			}
 		}
-		/* all instances have completed, now clear outputs that have not been written to.
-		 * (except midi bypass)
-		 */
+
+		/* all instances have completed, now copy data that was written
+		 * and zero unconnected buffers */
+		ARDOUR::ChanMapping nonzero_out (used_outputs);
 		if (has_midi_bypass ()) {
-			used_outputs.set (DataType::MIDI, 0, 1); // Midi bypass.
+			nonzero_out.set (DataType::MIDI, 0, 1); // Midi bypass.
 		}
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			for (uint32_t out = 0; out < bufs.count().get (*t); ++out) {
 				bool valid;
 				used_outputs.get (*t, out, &valid);
-				if (valid) { continue; }
-				bufs.get (*t, out).silence (nframes, offset);
+				if (!valid) {
+					nonzero_out.get (*t, out, &valid);
+					if (!valid) {
+						bufs.get (*t, out).silence (nframes, offset);
+					}
+				} else {
+					uint32_t m = out + natural_input_streams ().get (*t);
+					bufs.get (*t, out).read_from (inplace_bufs.get (*t, m), nframes, offset, offset);
+				}
 			}
 		}
-
 	} else {
+		/* in-place processing */
 		uint32_t pc = 0;
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
 			if ((*i)->connect_and_run(bufs, in_map[pc], out_map[pc], nframes, offset)) {
@@ -955,7 +968,7 @@ PluginInsert::set_input_map (uint32_t num, ChanMapping m) {
 	if (num < _in_map.size()) {
 		bool changed = _in_map[num] != m;
 		_in_map[num] = m;
-		sanitize_maps ();
+		changed |= sanitize_maps ();
 		if (changed) {
 			PluginMapChanged (); /* EMIT SIGNAL */
 			_mapping_changed = true;
@@ -968,11 +981,22 @@ PluginInsert::set_output_map (uint32_t num, ChanMapping m) {
 	if (num < _out_map.size()) {
 		bool changed = _out_map[num] != m;
 		_out_map[num] = m;
-		sanitize_maps ();
+		changed |= sanitize_maps ();
 		if (changed) {
 			PluginMapChanged (); /* EMIT SIGNAL */
 			_mapping_changed = true;
 		}
+	}
+}
+
+void
+PluginInsert::set_thru_map (ChanMapping m) {
+	bool changed = _thru_map != m;
+	_thru_map = m;
+	changed |= sanitize_maps ();
+	if (changed) {
+		PluginMapChanged (); /* EMIT SIGNAL */
+		_mapping_changed = true;
 	}
 }
 
@@ -1046,6 +1070,11 @@ PluginInsert::check_inplace ()
 {
 	bool inplace_ok = !_plugins.front()->inplace_broken ();
 
+	if (_thru_map.count () > 0) {
+		// TODO once midi-bypass is part of the mapping, ignore it
+		inplace_ok = false;
+	}
+
 	if (_match.method == Split && inplace_ok) {
 		assert (get_count() == 1);
 		assert (_in_map.size () == 1);
@@ -1106,6 +1135,8 @@ PluginInsert::sanitize_maps ()
 	/* strip dead wood */
 	PinMappings new_ins;
 	PinMappings new_outs;
+	ChanMapping new_thru (_thru_map);
+
 	for (uint32_t pc = 0; pc < get_count(); ++pc) {
 		ChanMapping new_in;
 		ChanMapping new_out;
@@ -1131,6 +1162,7 @@ PluginInsert::sanitize_maps ()
 		new_ins[pc] = new_in;
 		new_outs[pc] = new_out;
 	}
+
 	/* prevent dup output assignments */
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		for (uint32_t o = 0; o < _configured_out.get (*t); ++o) {
@@ -1147,11 +1179,35 @@ PluginInsert::sanitize_maps ()
 		}
 	}
 
-	if (_in_map != new_ins || _out_map != new_outs) {
+	/* prevent out + thru,  existing plugin outputs override thru */
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		for (uint32_t o = 0; o < _configured_out.get (*t); ++o) {
+			bool mapped = false;
+			bool valid;
+			for (uint32_t pc = 0; pc < get_count(); ++pc) {
+				new_outs[pc].get_src (*t, o, &mapped);
+				if (mapped) { break; }
+			}
+			if (!mapped) { continue; }
+			uint32_t idx = new_thru.get (*t, o, &valid);
+			if (mapped) {
+				new_thru.unset (*t, idx);
+			}
+		}
+	}
+
+	if (has_midi_bypass ()) {
+		// TODO: include midi-bypass in the thru set,
+		// remove dedicated handling.
+		new_thru.unset (DataType::MIDI, 0);
+	}
+
+	if (_in_map != new_ins || _out_map != new_outs || _thru_map != new_thru) {
 		changed = true;
 	}
 	_in_map = new_ins;
 	_out_map = new_outs;
+	_thru_map = new_thru;
 
 	return changed;
 }
@@ -1165,6 +1221,7 @@ PluginInsert::reset_map (bool emit)
 
 	_in_map.clear ();
 	_out_map.clear ();
+	_thru_map = ChanMapping ();
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
 		ChanCount ns_inputs  = natural_input_streams() - sidechain_input_pins ();
 		if (_match.method == Split) {
@@ -1341,6 +1398,8 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 				DEBUG_STR_APPEND(a, " * Outputs:\n");
 				DEBUG_STR_APPEND(a, _out_map[pc]);
 			}
+			DEBUG_STR_APPEND(a, " * Thru:\n");
+			DEBUG_STR_APPEND(a, _thru_map);
 			DEBUG_STR_APPEND(a, "-------->>--------\n");
 			DEBUG_TRACE (DEBUG::ChanMapping, DEBUG_STR(a).str());
 		}
@@ -1706,6 +1765,7 @@ PluginInsert::state (bool full)
 		snprintf (tmp, sizeof(tmp), "OutputMap-%d", pc);
 		node.add_child_nocopy (* _out_map[pc].state (tmp));
 	}
+	node.add_child_nocopy (* _thru_map.state ("ThruMap"));
 
 	if (_sidechain) {
 		node.add_child_nocopy (_sidechain->state (full));
@@ -1983,6 +2043,9 @@ PluginInsert::set_state(const XMLNode& node, int version)
 				_out_map[pc] = ChanMapping (**i);
 				++out_maps;
 			}
+		}
+		if ((*i)->name () ==  "ThruMap") {
+				_thru_map = ChanMapping (**i);
 		}
 		if ((*i)->name () ==  Processor::state_node_name) {
 			if (!_sidechain) {

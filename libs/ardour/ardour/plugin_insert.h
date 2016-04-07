@@ -87,8 +87,12 @@ class LIBARDOUR_API PluginInsert : public Processor
 		}
 	}
 
-	ChanMapping input_map () const;
-	ChanMapping output_map () const;
+	ChanMapping thru_map () const {
+		return _thru_map;
+	}
+
+	ChanMapping input_map () const; ///< combined (all instances) input map
+	ChanMapping output_map () const; ///< combined (all instances) output map
 	bool has_midi_bypass () const;
 	bool has_midi_thru () const;
 
@@ -98,6 +102,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	void set_input_map (uint32_t, ChanMapping);
 	void set_output_map (uint32_t, ChanMapping);
+	void set_thru_map (ChanMapping);
 	bool reset_map (bool emit = true);
 	bool sanitize_maps ();
 	bool check_inplace ();
@@ -312,6 +317,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	typedef std::map <uint32_t, ARDOUR::ChanMapping> PinMappings;
 	PinMappings _in_map;
 	PinMappings _out_map;
+	ChanMapping _thru_map; // out-idx <=  in-idx
 
 	void automation_run (BufferSet& bufs, framepos_t start, pframes_t nframes);
 	void connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now = 0);
