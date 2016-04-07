@@ -16,6 +16,7 @@ test -f gtk2_ardour/wscript || exit 1
 : ${MAKEFLAGS=-j4}
 : ${TMPDIR=/var/tmp}
 : ${SRCCACHE=/var/tmp/winsrc}  # source-code tgz cache
+: ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 
 # TODO: grep from build/config.log instead
 while [ $# -gt 0 ] ; do
@@ -26,6 +27,7 @@ while [ $# -gt 0 ] ; do
 			WITH_HARRISON_LV2=1 ;
 			WITH_X42_LV2=1 ;
 			shift ;;
+		--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
 	esac
 done
 
@@ -275,12 +277,12 @@ if test -n "$MIXBUS"; then
 
 	mkdir -p $ALIBDIR/ladspa/strip
 	curl -s -S --fail -# \
-		-z "${SRCCACHE}/harrison_channelstrip.${WARCH}.dll" \
-		-o "${SRCCACHE}/harrison_channelstrip.${WARCH}.dll" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_channelstrip.${WARCH}.dll"
+		-z "${SRCCACHE}/${HARRISONCHANNELSTRIP}.${WARCH}.dll" \
+		-o "${SRCCACHE}/${HARRISONCHANNELSTRIP}.${WARCH}.dll" \
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONCHANNELSTRIP}.${WARCH}.dll"
 
-	cp "${SRCCACHE}/harrison_channelstrip.${WARCH}.dll" \
-		"$ALIBDIR/ladspa/strip/harrison_channelstrip.dll"
+	cp "${SRCCACHE}/${HARRISONCHANNELSTRIP}.${WARCH}.dll" \
+		"$ALIBDIR/ladspa/strip/${HARRISONCHANNELSTRIP}.dll"
 fi
 
 ( cd $DESTDIR ; find . ) > ${TMPDIR}/file_list.txt

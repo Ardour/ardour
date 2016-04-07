@@ -36,6 +36,7 @@ GCC5ABI=false
 USEWINE=false
 BUILDTYPE=""
 NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libevoral"
+: ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 
 
 if [ $# -eq 0 ] ; then
@@ -90,6 +91,7 @@ while [ $# -gt 0 ] ; do
 	--nls) WITH_NLS=1 ; shift ;;
 	--harvid) WITH_HARVID=1 ; shift ;;
 	--gcc5abi) GCC5ABI=true ; shift ;;
+	--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
 
 	*)
 		#catch all for unknown arguments
@@ -625,13 +627,13 @@ if test -n "$MIXBUS"; then
 
 	mkdir -p $APPLIB/ladspa/strip/
 	curl -s -S --fail -# \
-		-z "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
-		-o "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_channelstrip.${HARCH}.so"
+		-z "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${HARCH}.so" \
+		-o "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${HARCH}.so" \
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONCHANNELSTRIP}.${HARCH}.so"
 
-	cp "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
-		$APPLIB/ladspa/strip/harrison_channelstrip.so
-	chmod +x $APPLIB/ladspa/strip/harrison_channelstrip.so
+	cp "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${HARCH}.so" \
+		$APPLIB/ladspa/strip/${HARRISONCHANNELSTRIP}.so
+	chmod +x $APPLIB/ladspa/strip/${HARRISONCHANNELSTRIP}.so
 fi
 
 if test x$WITH_X42_LV2 != x ; then

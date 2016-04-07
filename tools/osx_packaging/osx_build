@@ -23,6 +23,7 @@ WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
+: ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -71,6 +72,7 @@ while [ $# -gt 0 ] ; do
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
+	--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
     esac
 done
 
@@ -688,12 +690,12 @@ if test -n "$MIXBUS"; then
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip"
 
 	curl -s -S --fail -#  \
-		-z "${CACHEDIR}/harrison_channelstrip.${OSX_BENSID}.so" \
-		-o "${CACHEDIR}/harrison_channelstrip.${OSX_BENSID}.so" \
-		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/harrison_channelstrip.${OSX_BENSID}.so"
+		-z "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so" \
+		-o "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so" \
+		"http://www.harrisonconsoles.com/mixbus/mb3/beta/harrison-dsp/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so"
 
-	cp "${CACHEDIR}/harrison_channelstrip.${OSX_BENSID}.so" \
-		"${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip/harrison_channelstrip.so"
+	cp "${CACHEDIR}/${HARRISONCHANNELSTRIP}.${OSX_BENSID}.so" \
+		"${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip/${HARRISONCHANNELSTRIP}.so"
 fi
 ################################################################################
 
