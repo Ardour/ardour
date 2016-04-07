@@ -39,7 +39,7 @@ private:
 	Gtk::Label  _author;
 	Gtk::Label  _description;
 
-	ARDOUR::LuaScriptList & _scripts;
+	ARDOUR::LuaScriptList _scripts;
 	ARDOUR::LuaScriptInfoPtr _script;
 	ARDOUR::LuaScriptInfo::ScriptType _script_type;
 	sigc::connection _combocon;

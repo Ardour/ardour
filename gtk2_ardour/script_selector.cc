@@ -113,6 +113,7 @@ void
 ScriptSelector::refresh ()
 {
 	LuaScripting::instance ().refresh ();
+	_script.reset ();
 	_scripts = LuaScripting::instance ().scripts (_script_type);
 	setup_list ();
 }
