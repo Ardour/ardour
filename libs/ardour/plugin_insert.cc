@@ -972,6 +972,7 @@ PluginInsert::set_input_map (uint32_t num, ChanMapping m) {
 		if (changed) {
 			PluginMapChanged (); /* EMIT SIGNAL */
 			_mapping_changed = true;
+			_session.set_dirty();
 		}
 	}
 }
@@ -985,6 +986,7 @@ PluginInsert::set_output_map (uint32_t num, ChanMapping m) {
 		if (changed) {
 			PluginMapChanged (); /* EMIT SIGNAL */
 			_mapping_changed = true;
+			_session.set_dirty();
 		}
 	}
 }
@@ -997,6 +999,7 @@ PluginInsert::set_thru_map (ChanMapping m) {
 	if (changed) {
 		PluginMapChanged (); /* EMIT SIGNAL */
 		_mapping_changed = true;
+		_session.set_dirty();
 	}
 }
 
@@ -1265,6 +1268,7 @@ PluginInsert::reset_map (bool emit)
 	if (emit) {
 		PluginMapChanged (); /* EMIT SIGNAL */
 		_mapping_changed = true;
+		_session.set_dirty();
 	}
 	return true;
 }
