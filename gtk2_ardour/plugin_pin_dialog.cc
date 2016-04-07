@@ -17,6 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <boost/algorithm/string.hpp>
+
 #include <gtkmm/table.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/box.h>
@@ -165,7 +167,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	box->pack_start (_add_sc_audio, false, false);
 	box->pack_start (_add_sc_midi , false, false);
 	f = manage (new Frame());
-	f->set_label (_("Add Port"));
+	f->set_label (_("Add Sidechain Input"));
 	f->add (*box);
 
 	tr->pack_start (*f, false, false);
@@ -367,23 +369,36 @@ PluginPinDialog::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool 
 		lbl = "...";
 		tip += " &lt;- ";
 	} else {
+		string lpn (PROGRAM_NAME);
+		boost::to_lower (lpn);
+		std::string program_port_prefix = lpn + ":"; // e.g. "ardour:"
+
 		lbl = cns[0];
 		tip += " &lt;- ";
-		if (lbl.find ("system:") == 0) {
+		if (lbl.find ("system:capture_") == 0) {
 			lbl = AudioEngine::instance ()->get_pretty_name_by_name (lbl);
 			if (lbl.empty ()) {
-				lbl = cns[0].substr (7);
+				lbl = cns[0].substr (15);
 			}
+		} else if (lbl.find("system:midi_capture_") == 0) {
+			lbl = AudioEngine::instance ()->get_pretty_name_by_name (lbl);
+			if (lbl.empty ()) {
+				// "system:midi_capture_123" -> "123"
+				lbl = "M " + cns[0].substr (20);
+			}
+		} else if (lbl.find (program_port_prefix) == 0) {
+			lbl = lbl.substr (program_port_prefix.size());
 		}
 	}
 	for (std::vector<std::string>::const_iterator i = cns.begin(); i != cns.end(); ++i) {
 		tip += *i;
 		tip += " ";
 	}
+	replace_all (lbl, "_", " ");
 
 	ArdourButton *pb = manage (new ArdourButton (lbl));
 	pb->set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
-	pb->set_layout_ellipsize_width (56 * PANGO_SCALE);
+	pb->set_layout_ellipsize_width (108 * PANGO_SCALE);
 	ARDOUR_UI_UTILS::set_tooltip (*pb, tip);
 	_sidechain_tbl->attach (*pb, 0, 1, r, r +1 , EXPAND|FILL, SHRINK);
 
