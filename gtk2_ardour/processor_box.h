@@ -290,23 +290,27 @@ private:
 				const ARDOUR::ChanCount&,
 				const ARDOUR::ChanCount&,
 				const ARDOUR::ChanMapping&,
+				const ARDOUR::ChanMapping&,
 				const ARDOUR::ChanMapping&);
 		void set_feed (
 				const ARDOUR::ChanCount&,
 				const ARDOUR::ChanCount&,
+				const ARDOUR::ChanMapping&,
 				const ARDOUR::ChanMapping&);
 
 		void copy_state (const RoutingIcon& other) {
-			_in        = other._in;
-			_out       = other._out;
-			_sources   = other._sources;
-			_sinks     = other._sinks;
-			_in_map    = other._in_map;
-			_out_map   = other._out_map;
-			_f_out     = other._f_out;
-			_f_out_map = other._f_out_map;
-			_f_sources = other._f_sources;
-			_feed      = other._feed;
+			_in         = other._in;
+			_out        = other._out;
+			_sources    = other._sources;
+			_sinks      = other._sinks;
+			_in_map     = other._in_map;
+			_out_map    = other._out_map;
+			_thru_map   = other._thru_map;
+			_f_out      = other._f_out;
+			_f_out_map  = other._f_out_map;
+			_f_thru_map = other._f_thru_map;
+			_f_sources  = other._f_sources;
+			_feed       = other._feed;
 		}
 
 		void unset_feed () { _feed  = false ; }
@@ -318,6 +322,7 @@ private:
 		static void draw_gnd (cairo_t*, double, double, bool);
 		static void draw_X (cairo_t*, double, double, bool);
 		static void draw_sidechain (cairo_t*, double, double, bool);
+		static void draw_thru (cairo_t*, double, double, bool);
 
 	private:
 		bool on_expose_event (GdkEventExpose *);
@@ -330,8 +335,10 @@ private:
 		ARDOUR::ChanCount   _sinks;
 		ARDOUR::ChanMapping _in_map;
 		ARDOUR::ChanMapping _out_map;
+		ARDOUR::ChanMapping _thru_map;
 		ARDOUR::ChanCount   _f_out;
 		ARDOUR::ChanMapping _f_out_map;
+		ARDOUR::ChanMapping _f_thru_map;
 		ARDOUR::ChanCount   _f_sources;
 		bool _feed;
 		bool _input;

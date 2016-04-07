@@ -1025,12 +1025,16 @@ ProcessorEntry::RoutingIcon::set (
 		const ARDOUR::ChanCount& sinks,
 		const ARDOUR::ChanCount& sources,
 		const ARDOUR::ChanMapping& in_map,
-		const ARDOUR::ChanMapping& out_map)
+		const ARDOUR::ChanMapping& out_map,
+		const ARDOUR::ChanMapping& thru_map)
 {
-	_in = in; _out = out;
-	_sources = sources; _sinks = sinks;
-	_in_map = in_map; _out_map = out_map;
-
+	_in       = in;
+	_out      = out;
+	_sources  = sources;
+	_sinks    = sinks;
+	_in_map   = in_map;
+	_out_map  = out_map;
+	_thru_map = thru_map;
 }
 
 bool
@@ -1060,6 +1064,9 @@ ProcessorEntry::RoutingIcon::out_identity () const {
 	if (_out_map.count () != _sources.n_total () || _out.n_total () != _sources.n_total ()) {
 		return false;
 	}
+	if (_thru_map.count () > 0) {
+		return false;
+	}
 	return true;
 }
 
@@ -1067,12 +1074,14 @@ void
 ProcessorEntry::RoutingIcon::set_feed (
 				const ARDOUR::ChanCount& out,
 				const ARDOUR::ChanCount& sources,
-				const ARDOUR::ChanMapping& out_map)
+				const ARDOUR::ChanMapping& out_map,
+				const ARDOUR::ChanMapping& thru_map)
 {
-	_f_out     = out;
-	_f_sources = sources;
-	_f_out_map = out_map;
-	_feed      = true;
+	_f_out      = out;
+	_f_sources  = sources;
+	_f_out_map  = out_map;
+	_f_thru_map = thru_map;
+	_feed       = true;
 }
 
 double
@@ -1136,6 +1145,22 @@ ProcessorEntry::RoutingIcon::draw_sidechain (cairo_t* cr, double x0, double heig
 	set_routing_color (cr, midi);
 	cairo_set_line_width  (cr, 1.0);
 	cairo_stroke (cr);
+}
+
+void
+ProcessorEntry::RoutingIcon::draw_thru (cairo_t* cr, double x0, double height, bool midi)
+{
+	const double dx = 1 + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale()));
+	const double y0 = rint (height * .5) - .5;
+
+	cairo_move_to (cr, x0 - dx, y0);
+	cairo_line_to (cr, x0, height);
+	cairo_line_to (cr, x0 + dx, y0);
+	cairo_close_path (cr);
+
+	set_routing_color (cr, midi);
+	cairo_set_line_width  (cr, 1.0);
+	cairo_fill (cr);
 }
 
 void
@@ -1224,7 +1249,13 @@ ProcessorEntry::RoutingIcon::expose_input_map (cairo_t* cr, const double width, 
 			uint32_t src = _f_out_map.get_src (dt, idx, &valid_src);
 			if (!valid_src) {
 				double x = pin_x_pos (i, width, pc_in, 0, false);
-				draw_gnd (cr, x, height, is_midi);
+				bool valid_thru;
+				_f_thru_map.get (dt, idx, &valid_thru);
+				if (valid_thru) {
+					draw_thru (cr, x, height, is_midi);
+				} else {
+					draw_gnd (cr, x, height, is_midi);
+				}
 				continue;
 			}
 			c_x0 = pin_x_pos (src, width, _f_sources.n_total(), _f_sources.n_midi(), is_midi);
@@ -1266,10 +1297,17 @@ ProcessorEntry::RoutingIcon::expose_output_map (cairo_t* cr, const double width,
 		double x = pin_x_pos (i, width, n_out, 0, is_midi);
 		uint32_t pn = is_midi ? i : i - n_out_midi;
 		DataType dt = is_midi ? DataType::MIDI : DataType::AUDIO;
+		// TODO check thru
 		bool valid_src;
 		_out_map.get_src (dt, pn, &valid_src);
 		if (!valid_src) {
-			draw_gnd (cr, x, height, is_midi);
+			bool valid_thru;
+			_thru_map.get (dt, pn, &valid_thru);
+			if (valid_thru) {
+				draw_thru (cr, x, height, is_midi);
+			} else {
+				draw_gnd (cr, x, height, is_midi);
+			}
 		}
 		set_routing_color (cr, is_midi);
 		cairo_move_to (cr, x    , height);
@@ -2619,10 +2657,11 @@ ProcessorBox::setup_routing_feeds ()
 					sinks * count + midi_thru,
 					sources * count + midi_bypass,
 					input_map,
-					pi->output_map ());
+					pi->output_map (),
+					pi->thru_map ());
 
 			if (next != children.end()) {
-				(*next)->routing_icon.set_feed (out, sources * count + midi_bypass, pi->output_map ());
+				(*next)->routing_icon.set_feed (out, sources * count + midi_bypass, pi->output_map (), pi->thru_map ());
 			}
 
 		} else {
@@ -2630,15 +2669,16 @@ ProcessorBox::setup_routing_feeds ()
 			(*i)->output_icon.set_ports (p->output_streams());
 			ChanMapping inmap (p->input_streams ());
 			ChanMapping outmap (p->input_streams ());
+			ChanMapping thrumap;
 			(*i)->routing_icon.set (
 					p->input_streams(),
 					p->output_streams(),
 					p->input_streams(),
 					p->output_streams(),
-					inmap, outmap);
+					inmap, outmap, thrumap);
 
 			if (next != children.end()) {
-				(*next)->routing_icon.set_feed (p->output_streams(),  p->output_streams(), outmap);
+				(*next)->routing_icon.set_feed (p->output_streams(),  p->output_streams(), outmap, thrumap);
 			}
 		}
 

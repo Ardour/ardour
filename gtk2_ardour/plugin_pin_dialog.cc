@@ -712,6 +712,16 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 		draw_connection (cr, cw0, cw1, true);
 	}
 
+	/* thru connections */
+	const ChanMapping::Mappings thru_map = _pi->thru_map ().mappings ();
+	for (ChanMapping::Mappings::const_iterator t = thru_map.begin (); t != thru_map.end (); ++t) {
+		for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
+			const CtrlWidget& cw0 = get_io_ctrl (Output, t->first, c->first);
+			const CtrlWidget& cw1 = get_io_ctrl (Input, t->first, c->second);
+			draw_connection (cr, cw1, cw0, true);
+		}
+	}
+
 	/* labels */
 	Glib::RefPtr<Pango::Layout> layout;
 	layout = Pango::Layout::create (get_pango_context ());
@@ -842,10 +852,12 @@ PluginPinDialog::drag_type_matches (CtrlType ct) {
 	if (!_dragging || !_selection) {
 		return true;
 	}
-	if (_selection->ct == Input && ct == Sink) { return true; }
-	if (_selection->ct == Sink && ct == Input) { return true; }
+	if (_selection->ct == Input  && ct == Sink)   { return true; }
+	if (_selection->ct == Sink   && ct == Input)  { return true; }
 	if (_selection->ct == Output && ct == Source) { return true; }
 	if (_selection->ct == Source && ct == Output) { return true; }
+	if (_selection->ct == Input  && ct == Output) { return true; }
+	if (_selection->ct == Output && ct == Input)  { return true; }
 	return false;
 }
 
@@ -896,10 +908,12 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 				darea.queue_draw ();
 			} else if (_selection && _hover && _selection != _hover) {
 				if (_selection->dt != _hover->dt) { _actor.reset (); }
-				else if (_selection->ct == Input && _hover->ct == Sink) { _actor = _hover; }
-				else if (_selection->ct == Sink && _hover->ct == Input) { _actor = _hover; }
+				else if (_selection->ct == Input  && _hover->ct == Sink)   { _actor = _hover; }
+				else if (_selection->ct == Sink   && _hover->ct == Input)  { _actor = _hover; }
 				else if (_selection->ct == Output && _hover->ct == Source) { _actor = _hover; }
 				else if (_selection->ct == Source && _hover->ct == Output) { _actor = _hover; }
+				else if (_selection->ct == Input  && _hover->ct == Output) { _actor = _hover; }
+				else if (_selection->ct == Output && _hover->ct == Input)  { _actor = _hover; }
 				if (!_actor) {
 				_selection = _hover;
 				_dragging = true;
@@ -950,6 +964,12 @@ PluginPinDialog::darea_button_release_event (GdkEventButton* ev)
 		else if (_selection->ct == Source && _actor->ct == Output) {
 			handle_output_action (_selection, _actor);
 		}
+		else if (_selection->ct == Input && _actor->ct == Output) {
+			handle_thru_action (_actor, _selection);
+		}
+		else if (_selection->ct == Output && _actor->ct == Input) {
+			handle_thru_action (_selection, _actor);
+		}
 		_selection.reset ();
 	} else if (_hover == _selection && _selection && ev->button == 3) {
 		handle_disconnect (_selection);
@@ -989,6 +1009,39 @@ PluginPinDialog::handle_input_action (const CtrlElem &s, const CtrlElem &i)
 }
 
 void
+PluginPinDialog::disconnect_other_outputs (uint32_t skip_pc, DataType dt, uint32_t id)
+{
+	_ignore_updates = true;
+	for (uint32_t n = 0; n < _n_plugins; ++n) {
+		if (n == skip_pc) {
+			continue;
+		}
+		bool valid;
+		ChanMapping n_out_map (_pi->output_map (n));
+		uint32_t idx = n_out_map.get_src (dt, id, &valid);
+		if (valid) {
+			n_out_map.unset (dt, idx);
+			_pi->set_output_map (n, n_out_map);
+		}
+	}
+	_ignore_updates = false;
+}
+
+void
+PluginPinDialog::disconnect_other_thru (DataType dt, uint32_t id)
+{
+	_ignore_updates = true;
+	bool valid;
+	ChanMapping n_thru_map (_pi->thru_map ());
+	n_thru_map.get (dt, id, &valid);
+	if (valid) {
+		n_thru_map.unset (dt, id);
+		_pi->set_thru_map (n_thru_map);
+	}
+	_ignore_updates = false;
+}
+
+void
 PluginPinDialog::handle_output_action (const CtrlElem &s, const CtrlElem &o)
 {
 	const uint32_t pc = s->ip;
@@ -1006,20 +1059,9 @@ PluginPinDialog::handle_output_action (const CtrlElem &s, const CtrlElem &o)
 		if (valid) {
 			out_map.unset (s->dt, s->id);
 		}
-		// disconnect other outputs
-		_ignore_updates = true;
-		for (uint32_t n = 0; n < _n_plugins; ++n) {
-			if (n == pc) {
-				continue;
-			}
-			ChanMapping n_out_map (_pi->output_map (n));
-			idx = n_out_map.get_src (s->dt, o->id, &valid);
-			if (valid) {
-				n_out_map.unset (s->dt, idx);
-				_pi->set_output_map (n, n_out_map);
-			}
-		}
-		_ignore_updates = false;
+		disconnect_other_outputs (pc, s->dt, o->id);
+		disconnect_other_thru (s->dt, o->id);
+
 		idx = out_map.get_src (s->dt, o->id, &valid);
 		if (valid) {
 			out_map.unset (s->dt, idx);
@@ -1031,6 +1073,26 @@ PluginPinDialog::handle_output_action (const CtrlElem &s, const CtrlElem &o)
 }
 
 void
+PluginPinDialog::handle_thru_action (const CtrlElem &o, const CtrlElem &i)
+{
+	bool valid;
+	ChanMapping thru_map (_pi->thru_map ());
+	uint32_t idx = thru_map.get (o->dt, o->id, &valid);
+
+	if (valid && idx == i->id) {
+		// disconnect
+		thru_map.unset (o->dt, o->id);
+	} else {
+		// disconnect other outputs first
+		disconnect_other_outputs (UINT32_MAX, o->dt, o->id);
+		disconnect_other_thru (o->dt, o->id);
+
+		thru_map.set (o->dt, o->id, i->id);
+	}
+	_pi->set_thru_map (thru_map);
+}
+
+void
 PluginPinDialog::handle_disconnect (const CtrlElem &e)
 {
 	_ignore_updates = true;
@@ -1039,6 +1101,19 @@ PluginPinDialog::handle_disconnect (const CtrlElem &e)
 
 	switch (e->ct) {
 		case Input:
+			{
+				ChanMapping n_thru_map (_pi->thru_map ());
+				for (uint32_t i = 0; i < _sources.n_total (); ++i) {
+					uint32_t idx = n_thru_map.get (e->dt, i, &valid);
+					if (valid && idx == e->id) {
+						n_thru_map.unset (e->dt, i);
+						changed = true;
+					}
+				}
+				if (changed) {
+					_pi->set_thru_map (n_thru_map);
+				}
+			}
 			for (uint32_t n = 0; n < _n_plugins; ++n) {
 				ChanMapping map (_pi->input_map (n));
 				for (uint32_t i = 0; i < _sinks.n_total (); ++i) {
@@ -1083,7 +1158,18 @@ PluginPinDialog::handle_disconnect (const CtrlElem &e)
 						changed = true;
 					}
 				}
-				_pi->set_output_map (n, map);
+				if (changed) {
+					_pi->set_output_map (n, map);
+				}
+			}
+			{
+				ChanMapping n_thru_map (_pi->thru_map ());
+				n_thru_map.get (e->dt, e->id, &valid);
+				if (valid) {
+					n_thru_map.unset (e->dt, e->id);
+					changed = true;
+					_pi->set_thru_map (n_thru_map);
+				}
 			}
 			break;
 	}

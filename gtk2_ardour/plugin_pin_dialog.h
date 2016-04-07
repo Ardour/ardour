@@ -125,7 +125,10 @@ private:
 	void add_sidechain_port (ARDOUR::DataType);
 	void handle_input_action (const CtrlElem &, const CtrlElem &);
 	void handle_output_action (const CtrlElem &, const CtrlElem &);
+	void handle_thru_action (const CtrlElem &, const CtrlElem &);
 	void handle_disconnect (const CtrlElem &);
+	void disconnect_other_outputs (uint32_t skip_pc, ARDOUR::DataType dt, uint32_t id);
+	void disconnect_other_thru (ARDOUR::DataType dt, uint32_t id);
 	void add_port_to_table (boost::shared_ptr<ARDOUR::Port>, uint32_t, bool);
 	void remove_port (boost::weak_ptr<ARDOUR::Port>);
 	void disconnect_port (boost::weak_ptr<ARDOUR::Port>);
