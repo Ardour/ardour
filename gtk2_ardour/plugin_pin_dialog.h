@@ -104,7 +104,7 @@ private:
 	bool darea_motion_notify_event (GdkEventMotion*);
 	bool darea_button_press_event (GdkEventButton*);
 	bool darea_button_release_event (GdkEventButton*);
-	bool drag_type_matches (CtrlType ct);
+	bool drag_type_matches (const CtrlElem& ct);
 
 	void draw_io_pin (cairo_t*, const CtrlWidget&);
 	void draw_plugin_pin (cairo_t*, const CtrlWidget&);

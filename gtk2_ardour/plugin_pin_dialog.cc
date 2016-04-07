@@ -848,16 +848,19 @@ PluginPinDialog::darea_size_allocate (Gtk::Allocation&)
 }
 
 bool
-PluginPinDialog::drag_type_matches (CtrlType ct) {
+PluginPinDialog::drag_type_matches (const CtrlElem& e) {
 	if (!_dragging || !_selection) {
 		return true;
 	}
-	if (_selection->ct == Input  && ct == Sink)   { return true; }
-	if (_selection->ct == Sink   && ct == Input)  { return true; }
-	if (_selection->ct == Output && ct == Source) { return true; }
-	if (_selection->ct == Source && ct == Output) { return true; }
-	if (_selection->ct == Input  && ct == Output) { return true; }
-	if (_selection->ct == Output && ct == Input)  { return true; }
+	if (_selection->dt != e->dt) {
+		return false;
+	}
+	if (_selection->ct == Input  && e->ct == Sink)   { return true; }
+	if (_selection->ct == Sink   && e->ct == Input)  { return true; }
+	if (_selection->ct == Output && e->ct == Source) { return true; }
+	if (_selection->ct == Source && e->ct == Output) { return true; }
+	if (_selection->ct == Input  && e->ct == Output) { return true; }
+	if (_selection->ct == Output && e->ct == Input)  { return true; }
 	return false;
 }
 
@@ -868,7 +871,8 @@ PluginPinDialog::darea_motion_notify_event (GdkEventMotion* ev)
 	_hover.reset ();
 	for (CtrlElemList::iterator i = _elements.begin (); i != _elements.end (); ++i) {
 		if (ev->x >= i->x && ev->x <= i->x + i->w
-				&& ev->y >= i->y && ev->y <= i->y + i->h && drag_type_matches (i->e->ct))
+				&& ev->y >= i->y && ev->y <= i->y + i->h
+				&& drag_type_matches (i->e))
 		{
 			if (!i->prelight) changed = true;
 			i->prelight = true;
