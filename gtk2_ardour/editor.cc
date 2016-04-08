@@ -4898,7 +4898,7 @@ Editor::get_regions_from_selection_and_mouse (framepos_t pos)
  */
 
 RegionSelection
-Editor::get_regions_from_selection_and_entered ()
+Editor::get_regions_from_selection_and_entered () const
 {
 	RegionSelection regions = selection->regions;
 

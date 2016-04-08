@@ -1921,7 +1921,7 @@ Editor::temporal_zoom_region (bool both_axes)
 
 
 bool
-Editor::get_selection_extents ( framepos_t &start, framepos_t &end )
+Editor::get_selection_extents (framepos_t &start, framepos_t &end) const
 {
 	start = max_framepos;
 	end = 0;

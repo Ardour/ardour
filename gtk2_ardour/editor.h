@@ -246,7 +246,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* selection */
 
 	Selection& get_selection() const { return *selection; }
-	bool get_selection_extents ( framepos_t &start, framepos_t &end );  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
+	bool get_selection_extents (framepos_t &start, framepos_t &end) const;  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 	void track_mixer_selection ();
 
@@ -2117,7 +2117,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void get_regions_after (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 
 	RegionSelection get_regions_from_selection_and_edit_point ();
-	RegionSelection get_regions_from_selection_and_entered ();
+	RegionSelection get_regions_from_selection_and_entered () const;
 
 	void start_updating_meters ();
 	void stop_updating_meters ();
