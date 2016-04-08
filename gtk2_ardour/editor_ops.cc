@@ -153,6 +153,8 @@ Editor::redo (uint32_t n)
 void
 Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 {
+	bool frozen = false;
+
 	RegionSelection pre_selected_regions = selection->regions;
 	bool working_on_selection = !pre_selected_regions.empty();
 
@@ -180,6 +182,8 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 	} else {
 		snap_to (where);
 
+		frozen = true;
+		EditorFreeze(); /* Emit Signal */
 	}
 
 	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ) {
@@ -245,6 +249,10 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 
 	for (vector<sigc::connection>::iterator c = region_added_connections.begin(); c != region_added_connections.end(); ++c) {
 		(*c).disconnect ();
+	}
+
+	if (frozen){
+		EditorThaw(); /* Emit Signal */
 	}
 
 	if (working_on_selection) {

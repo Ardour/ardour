@@ -255,6 +255,8 @@ EditorRegions::EditorRegions (Editor* e)
 	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::region_changed, this, _1, _2), gui_context());
 	ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::add_region, this, _1), gui_context());
 
+	e->EditorFreeze.connect (editor_freeze_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::freeze_tree_model, this), gui_context());
+	e->EditorThaw.connect (editor_thaw_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::thaw_tree_model, this), gui_context());
 }
 
 bool
@@ -1404,6 +1406,25 @@ EditorRegions::get_single_selection ()
 	}
 
 	return (*iter)[_columns.region];
+}
+
+void
+EditorRegions::freeze_tree_model (){
+
+	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
+
+}
+
+void
+EditorRegions::thaw_tree_model (){
+
+	_model->set_sort_column (0, SORT_ASCENDING); // renabale sorting
+	_display.set_model (_model);
+
+	if (toggle_full_action()->get_active()) {
+		_display.expand_all();
+	}
 }
 
 void
