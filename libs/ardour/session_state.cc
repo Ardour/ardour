@@ -782,6 +782,10 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		return 1;
 	}
 
+#ifndef NDEBUG
+	const int64_t save_start_time = g_get_monotonic_time();
+#endif
+
 	/* tell sources we're saving first, in case they write out to a new file
 	 * which should be saved with the state rather than the old one */
 	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
@@ -879,6 +883,10 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		StateSaved (snapshot_name); /* EMIT SIGNAL */
 	}
 
+#ifndef NDEBUG
+	const int64_t elapsed_time_us = g_get_monotonic_time() - save_start_time;
+	cerr << "saved state in " << setprecision (1) << elapsed_time_us / 1000. << " ms\n";
+#endif
 	return 0;
 }
 
