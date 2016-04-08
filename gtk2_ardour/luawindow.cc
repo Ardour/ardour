@@ -25,6 +25,7 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#include "pbd/gstdio_compat.h"
 #include <glibmm/fileutils.h>
 #include <gtkmm/messagedialog.h>
 
@@ -36,6 +37,7 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 
+#include "ardour/filesystem_paths.h"
 #include "ardour/luabindings.h"
 #include "LuaBridge/LuaBridge.h"
 
@@ -331,7 +333,17 @@ LuaWindow::new_script ()
 void
 LuaWindow::delete_script ()
 {
-	assert (_current_buffer->flags & Buffer_Scratch);
+	assert ((_current_buffer->flags & Buffer_Scratch) || !(_current_buffer->flags & Buffer_ReadOnly));
+	bool refresh = false;
+	bool neednew = true;
+	if (_current_buffer->flags & Buffer_HasFile) {
+		if (0 == ::g_unlink (_current_buffer->path.c_str())) {
+			append_text (X_("> ") + string_compose (_("Deleted %1"), _current_buffer->path));
+			refresh = true;
+		} else {
+			append_text (X_("> ") + string_compose (_("Failed to delete %1"), _current_buffer->path));
+		}
+	}
 	for (ScriptBufferList::iterator i = script_buffers.begin (); i != script_buffers.end (); ++i) {
 		if ((*i) == _current_buffer) {
 			script_buffers.erase (i);
@@ -342,10 +354,15 @@ LuaWindow::delete_script ()
 	for (ScriptBufferList::const_iterator i = script_buffers.begin (); i != script_buffers.end (); ++i) {
 		if ((*i)->flags & Buffer_Scratch) {
 			script_selection_changed (*i);
-			return;
+			neednew = false;
 		}
 	}
-	new_script ();
+	if (neednew) {
+		new_script ();
+	}
+	if (refresh) {
+		LuaScripting::instance ().refresh (true);
+	}
 }
 
 void
@@ -415,6 +432,7 @@ LuaWindow::save_script ()
 	if ((sb.flags & Buffer_HasFile) && !(sb.flags & Buffer_ReadOnly)) {
 		try {
 			Glib::file_set_contents (sb.path, script);
+			sb.name = lsi->name;
 			sb.flags &= BufferFlags(~Buffer_Dirty);
 			update_gui_state (); // XXX here?
 			append_text (X_("> ") + string_compose (_("Saved as %1"), sb.path));
@@ -462,9 +480,11 @@ LuaWindow::save_script ()
 	try {
 		Glib::file_set_contents (path, script);
 		sb.path = path;
+		sb.name = lsi->name;
 		sb.flags |= Buffer_HasFile;
 		sb.flags &= BufferFlags(~Buffer_Dirty);
-		update_gui_state (); // XXX here?
+		sb.flags &= BufferFlags(~Buffer_ReadOnly);
+		update_gui_state (); // XXX here? .refresh (true) may trigger this, too
 		LuaScripting::instance().refresh (true);
 		append_text (X_("> ") + string_compose (_("Saved as %1"), path));
 		return; // OK
@@ -518,12 +538,12 @@ LuaWindow::refresh_scriptlist ()
 	}
 	LuaScriptList& lsa (LuaScripting::instance ().scripts (LuaScriptInfo::EditorAction));
 	for (LuaScriptList::const_iterator s = lsa.begin(); s != lsa.end(); ++s) {
-		script_buffers.push_back (ScriptBufferPtr ( new LuaWindow::ScriptBuffer(*s)));
+		script_buffers.push_back (ScriptBufferPtr (new LuaWindow::ScriptBuffer(*s)));
 	}
 
 	LuaScriptList& lss (LuaScripting::instance ().scripts (LuaScriptInfo::Snippet));
 	for (LuaScriptList::const_iterator s = lss.begin(); s != lss.end(); ++s) {
-		script_buffers.push_back (ScriptBufferPtr ( new LuaWindow::ScriptBuffer(*s)));
+		script_buffers.push_back (ScriptBufferPtr (new LuaWindow::ScriptBuffer(*s)));
 	}
 	rebuild_menu ();
 }
@@ -619,8 +639,13 @@ LuaWindow::update_gui_state ()
 	}
 	script_select.set_text(name);
 
+	if (sb.flags & Buffer_ReadOnly) {
+		_btn_save.set_text (_("Save as"));
+	} else {
+		_btn_save.set_text (_("Save"));
+	}
 	_btn_save.set_sensitive (sb.flags & Buffer_Dirty);
-	_btn_delete.set_sensitive (sb.flags & Buffer_Scratch); // TODO allow to remove user-scripts
+	_btn_delete.set_sensitive (sb.flags & Buffer_Scratch || ((sb.flags & (Buffer_ReadOnly | Buffer_HasFile)) == Buffer_HasFile));
 	_btn_revert.set_sensitive ((sb.flags & Buffer_Dirty) && (sb.flags & Buffer_HasFile));
 }
 
@@ -649,6 +674,10 @@ LuaWindow::ScriptBuffer::ScriptBuffer (LuaScriptInfoPtr p)
 	, type (p->type)
 {
 	if (!PBD::exists_and_writable (path)) {
+		flags |= Buffer_ReadOnly;
+	}
+	if (path.find (user_config_directory ()) != 0) {
+		// mark non-user scripts as read-only
 		flags |= Buffer_ReadOnly;
 	}
 }
