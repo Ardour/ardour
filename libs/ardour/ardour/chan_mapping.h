@@ -88,7 +88,9 @@ public:
 	 */
 	bool     is_monotonic () const;
 
-	uint32_t count () const;
+	uint32_t n_total () const;
+
+	ChanCount count () const;
 
 	XMLNode* state(const std::string& name) const;
 

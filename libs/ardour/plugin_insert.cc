@@ -1073,7 +1073,7 @@ PluginInsert::check_inplace ()
 {
 	bool inplace_ok = !_plugins.front()->inplace_broken ();
 
-	if (_thru_map.count () > 0) {
+	if (_thru_map.n_total () > 0) {
 		// TODO once midi-bypass is part of the mapping, ignore it
 		inplace_ok = false;
 	}

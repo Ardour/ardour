@@ -219,8 +219,9 @@ ChanMapping::is_identity (ChanCount offset) const
 }
 
 uint32_t
-ChanMapping::count () const
+ChanMapping::n_total () const
 {
+	// fast version of count().n_total();
 	uint32_t rv = 0;
 	const Mappings& mp (mappings());
 	for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
@@ -228,6 +229,19 @@ ChanMapping::count () const
 	}
 	return rv;
 }
+
+ChanCount
+ChanMapping::count () const
+{
+	ChanCount rv;
+	const Mappings& mp (mappings());
+	for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+		rv.set (tm->first, tm->second.size ());
+	}
+	return rv;
+}
+
+
 
 } // namespace ARDOUR
 
