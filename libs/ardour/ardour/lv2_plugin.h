@@ -71,6 +71,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	uint32_t    num_ports () const;
 	uint32_t    parameter_count () const;
 	float       default_value (uint32_t port);
+	framecnt_t  max_latency () const;
 	framecnt_t  signal_latency () const;
 	void        set_parameter (uint32_t port, float val);
 	float       get_parameter (uint32_t port) const;
@@ -190,6 +191,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	URIMap&       _uri_map;
 	bool          _no_sample_accurate_ctrl;
 	bool          _can_write_automation;
+	framecnt_t    _max_latency;
+	framecnt_t    _current_latency;
 
 	friend const void* lv2plugin_get_port_value(const char* port_symbol,
 	                                            void*       user_data,

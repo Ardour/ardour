@@ -365,6 +365,8 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_was_activated          = false;
 	_has_state_interface    = false;
 	_can_write_automation   = false;
+	_max_latency            = 0;
+	_current_latency        = 0;
 	_impl->block_length     = _session.get_block_size();
 
 	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
@@ -673,6 +675,9 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 			lilv_instance_connect_port(_impl->instance, i, &_control_data[i]);
 
 			if (latent && i == latency_index) {
+				LilvNode *max;
+				lilv_port_get_range(_impl->plugin, port, NULL, NULL, &max);
+				_max_latency = max ? lilv_node_as_float(max) : .02 * _sample_rate;
 				_latency_control_port  = &_control_data[i];
 				*_latency_control_port = 0;
 			}
@@ -2009,6 +2014,12 @@ LV2Plugin::describe_parameter(Evoral::Parameter which)
 }
 
 framecnt_t
+LV2Plugin::max_latency () const
+{
+	return _max_latency;
+}
+
+framecnt_t
 LV2Plugin::signal_latency() const
 {
 	if (_latency_control_port) {
@@ -2546,6 +2557,13 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	_next_cycle_speed = _session.transport_speed();
 	_next_cycle_start = _session.transport_frame() + (nframes * _next_cycle_speed);
 
+	if (_latency_control_port) {
+		framecnt_t new_latency = signal_latency ();
+		if (_current_latency != new_latency) {
+			LatencyChanged (_current_latency, new_latency); /* EMIT SIGNAL */
+		}
+		_current_latency = new_latency;
+	}
 	return 0;
 }
 

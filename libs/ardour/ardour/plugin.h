@@ -199,6 +199,26 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 		return 0;
 	}
 
+	/** Emitted when a Latency Changes
+	 *
+	 * (this cannot be part of ARDOUR::Latent because
+	 * signals cannot be copy-constructed).
+	 */
+	PBD::Signal2<void,framecnt_t, framecnt_t> LatencyChanged;
+
+	/* overload Latent::set_user_latency w/signal emission */
+	virtual void set_user_latency (framecnt_t val) {
+		bool changed = val != _user_latency;
+		framecnt_t old = effective_latency ();
+		_user_latency = val;
+		if (changed) {
+			LatencyChanged (old, effective_latency ()); /* EMIT SIGNAL */
+		}
+	}
+
+	/** the max possible latency a plugin will have */
+	virtual framecnt_t max_latency () const { return 0; } // TODO = 0, require implementation
+
 	/** Emitted when a preset is added or removed, respectively */
 	PBD::Signal0<void> PresetAdded;
 	PBD::Signal0<void> PresetRemoved;
