@@ -408,7 +408,7 @@ XMLProperty*
 XMLNode::property(const char* n)
 {
 	string ns(n);
-	unordered_map<string,XMLProperty*>::iterator iter;
+	map<string,XMLProperty*>::iterator iter;
 
 	if ((iter = _propmap.find(ns)) != _propmap.end()) {
 		return iter->second;
@@ -420,7 +420,7 @@ XMLNode::property(const char* n)
 XMLProperty*
 XMLNode::property(const string& ns)
 {
-	unordered_map<string,XMLProperty*>::iterator iter;
+	map<string,XMLProperty*>::iterator iter;
 
 	if ((iter = _propmap.find(ns)) != _propmap.end()) {
 		return iter->second;
@@ -433,7 +433,7 @@ XMLProperty*
 XMLNode::add_property(const char* n, const string& v)
 {
 	string ns(n);
-        unordered_map<string,XMLProperty*>::iterator iter;
+        map<string,XMLProperty*>::iterator iter;
 
         if ((iter = _propmap.find(ns)) != _propmap.end()) {
                 iter->second->set_value (v);

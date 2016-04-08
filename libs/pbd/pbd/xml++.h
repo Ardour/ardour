@@ -29,7 +29,7 @@
 
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <cstdio>
 #include <cstdarg>
 
@@ -50,7 +50,7 @@ typedef XMLNodeList::const_iterator              XMLNodeConstIterator;
 typedef std::vector<XMLProperty*>                XMLPropertyList;
 typedef XMLPropertyList::iterator                XMLPropertyIterator;
 typedef XMLPropertyList::const_iterator          XMLPropertyConstIterator;
-typedef std::unordered_map<std::string, XMLProperty*>    XMLPropertyMap;
+typedef std::map<std::string, XMLProperty*>      XMLPropertyMap;
 
 class LIBPBD_API XMLTree {
 public:
