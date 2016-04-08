@@ -58,6 +58,7 @@
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/phase_control.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port.h"
 #include "ardour/port_insert.h"
@@ -67,6 +68,8 @@
 #include "ardour/route_group.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
+#include "ardour/solo_control.h"
+#include "ardour/solo_isolate_control.h"
 #include "ardour/unknown_processor.h"
 #include "ardour/utils.h"
 #include "ardour/vca.h"
@@ -84,6 +87,7 @@ PBD::Signal3<int,boost::shared_ptr<Route>, boost::shared_ptr<PluginInsert>, Rout
 /** Base class for all routable/mixable objects (tracks and busses) */
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	: Stripable (sess, name)
+	, Muteable (sess, name)
 	, Automatable (sess)
 	, GraphNode (sess._process_graph)
 	, _active (true)
@@ -99,18 +103,11 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _meter_point (MeterPostFader)
 	, _pending_meter_point (MeterPostFader)
 	, _meter_type (MeterPeak)
-	, _self_solo (false)
-	, _soloed_by_others_upstream (0)
-	, _soloed_by_others_downstream (0)
-	, _solo_isolated (false)
-	, _solo_isolated_by_upstream (0)
 	, _denormal_protection (false)
 	, _recordable (true)
 	, _silent (false)
 	, _declickable (false)
-	, _mute_master (new MuteMaster (sess, name))
 	, _have_internal_generator (false)
-	, _solo_safe (false)
 	, _default_type (default_type)
 	, _order_key (0)
 	, _has_order_key (false)
@@ -141,20 +138,29 @@ Route::init ()
 
 	/* add standard controls */
 
-	_solo_control.reset (new SoloControllable (X_("solo"), shared_from_this ()));
-	_mute_control.reset (new MuteControllable (X_("mute"), shared_from_this ()));
-	_phase_control.reset (new PhaseControllable (X_("phase"), shared_from_this ()));
+	_gain_control.reset (new GainControl (_session, GainAutomation));
+	add_control (_gain_control);
 
-	_solo_isolate_control.reset (new SoloIsolateControllable (X_("solo-iso"), shared_from_this ()));
-	_solo_safe_control.reset (new SoloSafeControllable (X_("solo-safe"), shared_from_this ()));
+	_trim_control.reset (new GainControl (_session, TrimAutomation));
+	add_control (_trim_control);
 
+	_solo_control.reset (new SoloControl (_session, X_("solo"), *this, *this));
 	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
-	_mute_control->set_flags (Controllable::Flag (_mute_control->flags() | Controllable::Toggle));
-	_phase_control->set_flags (Controllable::Flag (_phase_control->flags() | Controllable::Toggle));
-
 	add_control (_solo_control);
+	_solo_control->Changed.connect_same_thread (*this, boost::bind (&Route::solo_control_changed, this, _1, _2));
+
+	_mute_control.reset (new MuteControl (_session, X_("mute"), *this));
+	_mute_control->set_flags (Controllable::Flag (_mute_control->flags() | Controllable::Toggle));
 	add_control (_mute_control);
+
+	_phase_control.reset (new PhaseControl (_session, X_("phase")));
 	add_control (_phase_control);
+
+	_solo_isolate_control.reset (new SoloIsolateControl (_session, X_("solo-iso"), *this, *this));
+	add_control (_solo_isolate_control);
+
+	_solo_safe_control.reset (new SoloSafeControl (_session, X_("solo-safe")));
+	add_control (_solo_safe_control);
 
 	/* panning */
 
@@ -177,9 +183,6 @@ Route::init ()
 	 * it should be the first processor to be added on every route.
 	 */
 
-	_gain_control = boost::shared_ptr<GainControllable> (new GainControllable (_session, GainAutomation, shared_from_this ()));
-	add_control (_gain_control);
-
 	_amp.reset (new Amp (_session, X_("Fader"), _gain_control, true));
 	add_processor (_amp, PostFader);
 
@@ -195,9 +198,6 @@ Route::init ()
 #endif
 
 	/* and input trim */
-
-	_trim_control = boost::shared_ptr<GainControllable> (new GainControllable (_session, TrimAutomation, shared_from_this ()));
-	add_control (_trim_control);
 
 	_trim.reset (new Amp (_session, X_("Trim"), _trim_control, false));
 	_trim->set_display_to_user (false);
@@ -399,82 +399,10 @@ Route::ensure_track_or_route_name(string name, Session &session)
 }
 
 void
-Route::inc_gain (gain_t factor)
-{
-	/* To be used ONLY when doing group-relative gain adjustment, from
-	 * ::set_gain()
-	 */
-
-	float desired_gain = _gain_control->user_double();
-
-	if (fabsf (desired_gain) < GAIN_COEFF_SMALL) {
-		// really?! what's the idea here?
-		_gain_control->route_set_value (0.000001f + (0.000001f * factor));
-	} else {
-		_gain_control->route_set_value (desired_gain + (desired_gain * factor));
-	}
-}
-
-void
-Route::set_gain (gain_t val, Controllable::GroupControlDisposition gcd)
-{
-	if (use_group (gcd, &RouteGroup::is_gain)) {
-
-		if (_route_group->is_relative()) {
-
-			gain_t usable_gain = _gain_control->get_value();
-			if (usable_gain < 0.000001f) {
-				usable_gain = 0.000001f;
-			}
-
-			gain_t delta = val;
-			if (delta < 0.000001f) {
-				delta = 0.000001f;
-			}
-
-			delta -= usable_gain;
-
-			if (delta == 0.0f)
-				return;
-
-			gain_t factor = delta / usable_gain;
-
-			if (factor > 0.0f) {
-				factor = _route_group->get_max_factor(factor);
-				if (factor == 0.0f) {
-					_amp->gain_control()->Changed (true, gcd); /* EMIT SIGNAL */
-					return;
-				}
-			} else {
-				factor = _route_group->get_min_factor(factor);
-				if (factor == 0.0f) {
-					_amp->gain_control()->Changed (true, gcd); /* EMIT SIGNAL */
-					return;
-				}
-			}
-
-			_route_group->foreach_route (boost::bind (&Route::inc_gain, _1, factor));
-
-		} else {
-
-			_route_group->foreach_route (boost::bind (&Route::set_gain, _1, val, Controllable::NoGroup));
-		}
-
-		return;
-	}
-
-	if (val == _gain_control->get_value()) {
-		return;
-	}
-
-	_gain_control->route_set_value (val);
-}
-
-void
 Route::set_trim (gain_t val, Controllable::GroupControlDisposition /* group override */)
 {
 	// TODO route group, see set_gain()
-	_trim_control->route_set_value (val);
+	// _trim_control->route_set_value (val);
 }
 
 void
@@ -551,7 +479,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   DENORMAL CONTROL/PHASE INVERT
 	   ----------------------------------------------------------------------------------------- */
 
-	if (_phase_invert.any ()) {
+	if (!_phase_control->none()) {
 
 		int chn = 0;
 
@@ -560,7 +488,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++chn) {
 				Sample* const sp = i->data();
 
-				if (_phase_invert[chn]) {
+				if (_phase_control->inverted (chn)) {
 					for (pframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx]  = -sp[nx];
 						sp[nx] += 1.0e-27f;
@@ -577,7 +505,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++chn) {
 				Sample* const sp = i->data();
 
-				if (_phase_invert[chn]) {
+				if (_phase_control->inverted (chn)) {
 					for (pframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] = -sp[nx];
 					}
@@ -808,31 +736,24 @@ Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t
 }
 
 void
-Route::set_listen (bool yn, Controllable::GroupControlDisposition group_override)
+Route::set_listen (bool yn)
 {
-	if (_solo_safe) {
-		return;
+	if (yn) {
+		_monitor_send->activate ();
+	} else {
+		_monitor_send->deactivate ();
 	}
+}
 
-	if (use_group (group_override, &RouteGroup::is_solo)) {
-		_route_group->foreach_route (boost::bind (&Route::set_listen, _1, yn, Controllable::ForGroup));
-		return;
-	}
+void
+Route::solo_control_changed (bool, Controllable::GroupControlDisposition)
+{
+	/* nothing to do if we're not using AFL/PFL. But if we are, we need
+	   to alter the active state of the monitor send.
+	*/
 
-	if (_monitor_send) {
-		if (yn != _monitor_send->active()) {
-			if (yn) {
-				_monitor_send->activate ();
-				_mute_master->set_soloed_by_self (true);
-			} else {
-				_monitor_send->deactivate ();
-				_mute_master->set_soloed_by_self (false);
-			}
-			_mute_master->set_soloed_by_others (false);
-
-			/* first argument won't matter because solo <=> listen right now */
-			_solo_control->Changed (false, group_override); /* EMIT SIGNAL */
-		}
+	if (Config->get_solo_control_is_listen_control ()) {
+		set_listen (_solo_control->self_soloed());
 	}
 }
 
@@ -847,244 +768,14 @@ Route::listening_via_monitor () const
 }
 
 void
-Route::set_solo_safe (bool yn, Controllable::GroupControlDisposition gcd)
+Route::push_solo_isolate_upstream (int32_t delta)
 {
-	if (_solo_safe != yn) {
-		_solo_safe = yn;
-		_solo_safe_control->Changed (true, gcd); /* EMIT SIGNAL */
-	}
-}
-
-bool
-Route::solo_safe() const
-{
-	return _solo_safe;
-}
-
-void
-Route::clear_all_solo_state ()
-{
-	// ideally this function will never do anything, it only exists to forestall Murphy
-	bool emit_changed = false;
-
-#ifndef NDEBUG
-	// these are really debug messages, but of possible interest.
-	if (_self_solo) {
-		PBD::info << string_compose (_("Cleared Explicit solo: %1\n"), name());
-	}
-	if (_soloed_by_others_upstream || _soloed_by_others_downstream) {
-		PBD::info << string_compose (_("Cleared Implicit solo: %1 up:%2 down:%3\n"),
-				name(), _soloed_by_others_upstream, _soloed_by_others_downstream);
-	}
-#endif
-
-	if (!_self_solo && (_soloed_by_others_upstream || _soloed_by_others_downstream)) {
-		// if self-soled, set_solo() will do signal emission
-		emit_changed = true;
-	}
-
-	_soloed_by_others_upstream = 0;
-	_soloed_by_others_downstream = 0;
-
-	{
-		PBD::Unwinder<bool> uw (_solo_safe, false);
-		set_solo (false, Controllable::NoGroup);
-	}
-
-	if (emit_changed) {
-		set_mute_master_solo ();
-		_solo_control->Changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
-	}
-}
-
-void
-Route::set_solo (bool yn, Controllable::GroupControlDisposition group_override)
-{
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: set solo => %2, grp ? %3 currently self-soloed ? %4\n",
-	                                          name(), yn, enum_2_string(group_override), self_soloed()));
-
-	if (_solo_safe) {
-		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 ignore solo change due to solo-safe\n", name()));
-		return;
-	}
-
-	if (is_master() || is_monitor() || is_auditioner()) {
-		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 ignore solo change (master, monitor or auditioner)\n", name()));
-		return;
-	}
-
-	if (use_group (group_override, &RouteGroup::is_solo)) {
-		_route_group->foreach_route (boost::bind (&Route::set_solo, _1, yn, Controllable::ForGroup));
-		return;
-	}
-
-	if (self_soloed() != yn) {
-		set_self_solo (yn);
-		_solo_control->Changed (true, group_override); /* EMIT SIGNAL */
-	}
-
-	assert (Config->get_solo_control_is_listen_control() || !_monitor_send || !_monitor_send->active());
-}
-
-void
-Route::set_self_solo (bool yn)
-{
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: set SELF solo => %2\n", name(), yn));
-	_self_solo = yn;
-	set_mute_master_solo ();
-}
-
-void
-Route::mod_solo_by_others_upstream (int32_t delta)
-{
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod solo-by-upstream by %2, current up = %3 down = %4\n",
-						  name(), delta, _soloed_by_others_upstream, _soloed_by_others_downstream));
-
-	uint32_t old_sbu = _soloed_by_others_upstream;
-
-	if (delta < 0) {
-		if (_soloed_by_others_upstream >= (uint32_t) abs (delta)) {
-			_soloed_by_others_upstream += delta;
-		} else {
-			_soloed_by_others_upstream = 0;
-		}
-	} else {
-		_soloed_by_others_upstream += delta;
-	}
-
-	DEBUG_TRACE (DEBUG::Solo, string_compose (
-		             "%1 SbU delta %2 = %3 old = %4 sbd %5 ss %6 exclusive %7\n",
-		             name(), delta, _soloed_by_others_upstream, old_sbu,
-		             _soloed_by_others_downstream, _self_solo, Config->get_exclusive_solo()));
-
-	/* push the inverse solo change to everything that feeds us.
-
-	   This is important for solo-within-group. When we solo 1 track out of N that
-	   feed a bus, that track will cause mod_solo_by_upstream (+1) to be called
-	   on the bus. The bus then needs to call mod_solo_by_downstream (-1) on all
-	   tracks that feed it. This will silence them if they were audible because
-	   of a bus solo, but the newly soloed track will still be audible (because
-	   it is self-soloed).
-
-	   but .. do this only when we are being told to solo-by-upstream (i.e delta = +1),
-	   not in reverse.
-	*/
-
-	if ((_self_solo || _soloed_by_others_downstream) &&
-	    ((old_sbu == 0 && _soloed_by_others_upstream > 0) ||
-	     (old_sbu > 0 && _soloed_by_others_upstream == 0))) {
-
-		if (delta > 0 || !Config->get_exclusive_solo()) {
-			DEBUG_TRACE (DEBUG::Solo, string_compose("\t ... INVERT push from %1\n", _name));
-			for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
-				if (i->sends_only) {
-					continue;
-				}
-				boost::shared_ptr<Route> sr = i->r.lock();
-				if (sr) {
-					sr->mod_solo_by_others_downstream (-delta);
-				}
-			}
-		}
-	}
-
-	set_mute_master_solo ();
-	cerr << name() << " SC->Changed (false, UseGroup)\n";
-	_solo_control->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
-}
-
-void
-Route::mod_solo_by_others_downstream (int32_t delta)
-{
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod solo-by-downstream by %2, current up = %3 down = %4\n",
-						  name(), delta, _soloed_by_others_upstream, _soloed_by_others_downstream));
-
-	if (delta < 0) {
-		if (_soloed_by_others_downstream >= (uint32_t) abs (delta)) {
-			_soloed_by_others_downstream += delta;
-		} else {
-			_soloed_by_others_downstream = 0;
-		}
-	} else {
-		_soloed_by_others_downstream += delta;
-	}
-
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 SbD delta %2 = %3\n", name(), delta, _soloed_by_others_downstream));
-
-	set_mute_master_solo ();
-	_solo_control->Changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
-}
-
-void
-Route::set_mute_master_solo ()
-{
-	_mute_master->set_soloed_by_self (self_soloed());
-	_mute_master->set_soloed_by_others (soloed_by_others_downstream() || soloed_by_others_upstream());
-}
-
-void
-Route::mod_solo_isolated_by_upstream (bool yn)
-{
-	bool old = solo_isolated ();
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 mod_solo_isolated_by_upstream cur: %2 d: %3\n",
-				name(), _solo_isolated_by_upstream, yn ? "+1" : "-1"));
-
-	if (!yn) {
-		if (_solo_isolated_by_upstream >= 1) {
-			_solo_isolated_by_upstream--;
-		} else {
-			_solo_isolated_by_upstream = 0;
-		}
-	} else {
-		_solo_isolated_by_upstream++;
-	}
-
-	if (solo_isolated() != old) {
-		/* solo isolated status changed */
-		_mute_master->set_solo_ignore (solo_isolated());
-		_solo_isolate_control->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
-	}
-}
-
-void
-Route::set_solo_isolated (bool yn, Controllable::GroupControlDisposition group_override)
-{
-	if (is_master() || is_monitor() || is_auditioner()) {
-		return;
-	}
-
-	if (use_group (group_override, &RouteGroup::is_solo)) {
-		_route_group->foreach_route (boost::bind (&Route::set_solo_isolated, _1, yn, Controllable::ForGroup));
-		return;
-	}
-
-	bool changed = false;
-
-	if (yn) {
-		if (_solo_isolated == false) {
-			_mute_master->set_solo_ignore (true);
-			changed = true;
-		}
-		_solo_isolated = true;
-	} else {
-		if (_solo_isolated == true) {
-			_solo_isolated = false;
-			_mute_master->set_solo_ignore (false);
-			changed = true;
-		}
-	}
-
-
-	if (!changed) {
-		return;
-	}
-
 	/* forward propagate solo-isolate status to everything fed by this route, but not those via sends only */
 
 	boost::shared_ptr<RouteList> routes = _session.get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 
-		if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+		if ((*i).get() == this || !(*i)->can_solo()) {
 			continue;
 		}
 
@@ -1092,85 +783,24 @@ Route::set_solo_isolated (bool yn, Controllable::GroupControlDisposition group_o
 		bool does_feed = feeds (*i, &sends_only);
 
 		if (does_feed && !sends_only) {
-			(*i)->mod_solo_isolated_by_upstream (yn);
+			(*i)->solo_isolate_control()->mod_solo_isolated_by_upstream (delta);
 		}
 	}
-
-	/* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
-
-	_solo_isolate_control->Changed (true, group_override); /* EMIT SIGNAL */
-}
-
-bool
-Route::solo_isolated () const
-{
-	return (_solo_isolated == true) || (_solo_isolated_by_upstream > 0);
 }
 
 void
-Route::set_mute_points (MuteMaster::MutePoint mp)
+Route::push_solo_upstream (int delta)
 {
-	_mute_master->set_mute_points (mp);
-	mute_points_changed (); /* EMIT SIGNAL */
-
-	if (_mute_master->muted_by_self()) {
-		_mute_control->Changed (true, Controllable::UseGroup); /* EMIT SIGNAL */
+	DEBUG_TRACE (DEBUG::Solo, string_compose("\t ... INVERT push from %1\n", _name));
+	for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
+		if (i->sends_only) {
+			continue;
+		}
+		boost::shared_ptr<Route> sr (i->r.lock());
+		if (sr) {
+			sr->solo_control()->mod_solo_by_others_downstream (-delta);
+		}
 	}
-}
-
-void
-Route::set_mute (bool yn, Controllable::GroupControlDisposition group_override)
-{
-	if (use_group (group_override, &RouteGroup::is_mute)) {
-		_route_group->foreach_route (boost::bind (&Route::set_mute, _1, yn, Controllable::ForGroup));
-		return;
-	}
-
-	if (muted() != yn) {
-		_mute_master->set_muted_by_self (yn);
-		/* allow any derived classes to respond to the mute change
-		   before anybody else knows about it.
-		*/
-		act_on_mute ();
-		/* tell everyone else */
-		_mute_control->Changed (true, Controllable::NoGroup); /* EMIT SIGNAL */
-	}
-}
-
-bool
-Route::muted () const
-{
-	return _mute_master->muted_by_self();
-}
-
-bool
-Route::muted_by_others_soloing () const
-{
-	// This method is only used by route_ui for display state.
-	// The real thing is MuteMaster::muted_by_others_at()
-
-	//master is never muted by others
-	if (is_master())
-		return false;
-
-	//now check to see if something is soloed (and I am not)
-	//see also MuteMaster::mute_gain_at()
-	return _session.soloing() && !soloed() && !solo_isolated();
-}
-
-bool
-Route::muted_by_others () const
-{
-	// This method is only used by route_ui for display state.
-	// The real thing is MuteMaster::muted_by_others_at()
-
-	//master is never muted by others
-	if (is_master())
-		return false;
-
-	//now check to see if something is soloed (and I am not)
-	//see also MuteMaster::mute_gain_at()
-	return _mute_master->muted_by_others() || (_session.soloing() && !soloed() && !solo_isolated());
 }
 
 #if 0
@@ -2743,8 +2373,6 @@ Route::state(bool full_state)
 
 	node->add_property("active", _active?"yes":"no");
 	string p;
-	boost::to_string (_phase_invert, p);
-	node->add_property("phase-invert", p);
 	node->add_property("denormal-protection", _denormal_protection?"yes":"no");
 	node->add_property("meter-point", enum_2_string (_meter_point));
 
@@ -2756,18 +2384,9 @@ Route::state(bool full_state)
 
 	snprintf (buf, sizeof (buf), "%d", _order_key);
 	node->add_property ("order-key", buf);
-	node->add_property ("self-solo", (_self_solo ? "yes" : "no"));
-	snprintf (buf, sizeof (buf), "%d", _soloed_by_others_upstream);
-	node->add_property ("soloed-by-upstream", buf);
-	snprintf (buf, sizeof (buf), "%d", _soloed_by_others_downstream);
-	node->add_property ("soloed-by-downstream", buf);
-	node->add_property ("solo-isolated", solo_isolated() ? "yes" : "no");
-	node->add_property ("solo-safe", _solo_safe ? "yes" : "no");
 
 	node->add_child_nocopy (_input->state (full_state));
 	node->add_child_nocopy (_output->state (full_state));
-	node->add_child_nocopy (_solo_control->get_state ());
-	node->add_child_nocopy (_mute_control->get_state ());
 	node->add_child_nocopy (_mute_master->get_state ());
 
 	if (full_state) {
@@ -2866,7 +2485,7 @@ Route::set_state (const XMLNode& node, int version)
 		_strict_io = string_is_affirmative (prop->value());
 	}
 
-	if (is_master() || is_monitor() || is_auditioner()) {
+	if (!can_solo()) {
 		_mute_master->set_solo_ignore (true);
 	}
 
@@ -2933,31 +2552,10 @@ Route::set_state (const XMLNode& node, int version)
 	// this looks up the internal instrument in processors
 	reset_instrument_info();
 
-	if ((prop = node.property ("self-solo")) != 0) {
-		set_self_solo (string_is_affirmative (prop->value()));
-	}
-
-	if ((prop = node.property ("soloed-by-upstream")) != 0) {
-		_soloed_by_others_upstream = 0; // needed for mod_.... () to work
-		mod_solo_by_others_upstream (atoi (prop->value()));
-	}
-
-	if ((prop = node.property ("soloed-by-downstream")) != 0) {
-		_soloed_by_others_downstream = 0; // needed for mod_.... () to work
-		mod_solo_by_others_downstream (atoi (prop->value()));
-	}
-
-	if ((prop = node.property ("solo-isolated")) != 0) {
-		set_solo_isolated (string_is_affirmative (prop->value()), Controllable::NoGroup);
-	}
-
-	if ((prop = node.property ("solo-safe")) != 0) {
-		set_solo_safe (string_is_affirmative (prop->value()), Controllable::NoGroup);
-	}
-
-	if ((prop = node.property (X_("phase-invert"))) != 0) {
-		set_phase_invert (boost::dynamic_bitset<> (prop->value ()));
-	}
+	_solo_control->set_state (node, version);
+	_solo_safe_control->set_state (node, version);
+	_solo_isolate_control->set_state (node, version);
+	_mute_control->set_state (node, version);
 
 	if ((prop = node.property (X_("denormal-protection"))) != 0) {
 		set_denormal_protection (string_is_affirmative (prop->value()));
@@ -3046,7 +2644,7 @@ Route::set_state (const XMLNode& node, int version)
 				set_remote_control_id_internal (x);
 			}
 
-		} else if (child->name() == X_("MuteMaster")) {
+		} else if (child->name() == MuteMaster::xml_node_name) {
 			_mute_master->set_state (*child, version);
 
 		} else if (child->name() == Automatable::xml_node_name) {
@@ -3089,24 +2687,8 @@ Route::set_state_2X (const XMLNode& node, int version)
 		_mute_master->set_solo_ignore (true);
 	}
 
-	if ((prop = node.property (X_("phase-invert"))) != 0) {
-		boost::dynamic_bitset<> p (_input->n_ports().n_audio ());
-		if (string_is_affirmative (prop->value ())) {
-			p.set ();
-		}
-		set_phase_invert (p);
-	}
-
 	if ((prop = node.property (X_("denormal-protection"))) != 0) {
 		set_denormal_protection (string_is_affirmative (prop->value()));
-	}
-
-	if ((prop = node.property (X_("soloed"))) != 0) {
-		bool yn = string_is_affirmative (prop->value());
-
-		/* XXX force reset of solo status */
-
-		set_solo (yn);
 	}
 
 	if ((prop = node.property (X_("muted"))) != 0) {
@@ -3870,11 +3452,11 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 		   contains ConfigurationChanged
 		*/
 		configure_processors (0);
-		_phase_invert.resize (_input->n_ports().n_audio ());
+		_phase_control->resize (_input->n_ports().n_audio ());
 		io_changed (); /* EMIT SIGNAL */
 	}
 
-	if (_soloed_by_others_upstream || _solo_isolated_by_upstream) {
+	if (_solo_control->soloed_by_others_upstream() || _solo_isolate_control->solo_isolated_by_upstream()) {
 		int sbou = 0;
 		int ibou = 0;
 		boost::shared_ptr<RouteList> routes = _session.get_routes ();
@@ -3889,38 +3471,36 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 					if ((*i)->soloed()) {
 						++sbou;
 					}
-					if ((*i)->solo_isolated()) {
+					if ((*i)->solo_isolate_control()->solo_isolated()) {
 						++ibou;
 					}
 				}
 			}
 		}
 
-		int delta  = sbou - _soloed_by_others_upstream;
-		int idelta = ibou - _solo_isolated_by_upstream;
+		int delta  = sbou - _solo_control->soloed_by_others_upstream();
+		int idelta = ibou - _solo_isolate_control->solo_isolated_by_upstream();
 
 		if (idelta < -1) {
 			PBD::warning << string_compose (
 			                _("Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"),
-			                _name, ibou, _solo_isolated_by_upstream, idelta)
+			                _name, ibou, _solo_isolate_control->solo_isolated_by_upstream(), idelta)
 			             << endmsg;
 
 		}
 
-		if (_soloed_by_others_upstream) {
+		if (_solo_control->soloed_by_others_upstream()) {
 			// ignore new connections (they're not propagated)
 			if (delta <= 0) {
-				mod_solo_by_others_upstream (delta);
+				_solo_control->mod_solo_by_others_upstream (delta);
 			}
 		}
 
-		if (_solo_isolated_by_upstream) {
+		if (_solo_isolate_control->solo_isolated_by_upstream()) {
 			// solo-isolate currently only propagates downstream
 			if (idelta < 0) {
-				mod_solo_isolated_by_upstream (false);
+				_solo_isolate_control->mod_solo_isolated_by_upstream (1);
 			}
-			// TODO think: mod_solo_isolated_by_upstream() does not take delta arg,
-			// but idelta can't be smaller than -1, can it?
 			//_solo_isolated_by_upstream = ibou;
 		}
 
@@ -3933,11 +3513,11 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 			bool sends_only;
 			bool does_feed = feeds (*i, &sends_only);
 			if (delta <= 0 && does_feed && !sends_only) {
-				(*i)->mod_solo_by_others_upstream (delta);
+				(*i)->solo_control()->mod_solo_by_others_upstream (delta);
 			}
 
 			if (idelta < 0 && does_feed && !sends_only) {
-				(*i)->mod_solo_isolated_by_upstream (false);
+				(*i)->solo_isolate_control()->mod_solo_isolated_by_upstream (-1);
 			}
 		}
 	}
@@ -3963,7 +3543,7 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 		io_changed (); /* EMIT SIGNAL */
 	}
 
-	if (_soloed_by_others_downstream) {
+	if (_solo_control->soloed_by_others_downstream()) {
 		int sbod = 0;
 		/* checking all all downstream routes for
 		 * explicit of implict solo is a rather drastic measure,
@@ -3986,20 +3566,20 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 				}
 			}
 		}
-		int delta = sbod - _soloed_by_others_downstream;
+		int delta = sbod - _solo_control->soloed_by_others_downstream();
 		if (delta <= 0) {
 			// do not allow new connections to change implicit solo (no propagation)
-			mod_solo_by_others_downstream (delta);
+			_solo_control->mod_solo_by_others_downstream (delta);
 			// Session::route_solo_changed() does not propagate indirect solo-changes
 			// propagate upstream to tracks
 			for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-				if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+				if ((*i).get() == this || !can_solo()) {
 					continue;
 				}
 				bool sends_only;
 				bool does_feed = (*i)->feeds (shared_from_this(), &sends_only);
 				if (delta != 0 && does_feed && !sends_only) {
-					(*i)->mod_solo_by_others_downstream (delta);
+					(*i)->solo_control()->mod_solo_by_others_downstream (delta);
 				}
 			}
 
@@ -4639,41 +4219,6 @@ Route::internal_send_for (boost::shared_ptr<const Route> target) const
 	return boost::shared_ptr<Send>();
 }
 
-/** @param c Audio channel index.
- *  @param yn true to invert phase, otherwise false.
- */
-void
-Route::set_phase_invert (uint32_t c, bool yn)
-{
-	if (_phase_invert[c] != yn) {
-		_phase_invert[c] = yn;
-		_phase_control->Changed (true, Controllable::NoGroup); /* EMIT SIGNAL */
-		_session.set_dirty ();
-	}
-}
-
-void
-Route::set_phase_invert (boost::dynamic_bitset<> p)
-{
-	if (_phase_invert != p) {
-		_phase_invert = p;
-		_phase_control->Changed (true, Controllable::NoGroup); /* EMIT SIGNAL */
-		_session.set_dirty ();
-	}
-}
-
-bool
-Route::phase_invert (uint32_t c) const
-{
-	return _phase_invert[c];
-}
-
-boost::dynamic_bitset<>
-Route::phase_invert () const
-{
-	return _phase_invert;
-}
-
 void
 Route::set_denormal_protection (bool yn)
 {
@@ -4735,20 +4280,16 @@ Route::gain_control() const
 	return _gain_control;
 }
 
-boost::shared_ptr<AutomationControl>
+boost::shared_ptr<GainControl>
 Route::trim_control() const
 {
 	return _trim_control;
 }
 
-boost::shared_ptr<AutomationControl>
+boost::shared_ptr<PhaseControl>
 Route::phase_control() const
 {
-	if (phase_invert().size()) {
-		return _phase_control;
-	} else {
-		return boost::shared_ptr<PhaseControllable>();
-	}
+	return _phase_control;
 }
 
 boost::shared_ptr<AutomationControl>
@@ -4839,12 +4380,6 @@ Route::has_io_processor_named (const string& name)
 	}
 
 	return false;
-}
-
-MuteMaster::MutePoint
-Route::mute_points () const
-{
-	return _mute_master->mute_points ();
 }
 
 void
@@ -5903,7 +5438,7 @@ Route::vca_assign (boost::shared_ptr<VCA> vca)
 {
 	_gain_control->add_master (vca->gain_control());
 	_solo_control->add_master (vca->solo_control());
-	_mute_control->add_master (vca->mute_control());
+	// _mute_control->add_master (vca->mute_control());
 }
 
 void
@@ -5913,10 +5448,48 @@ Route::vca_unassign (boost::shared_ptr<VCA> vca)
 		/* unassign from all */
 		_gain_control->clear_masters ();
 		_solo_control->clear_masters ();
-		_mute_control->clear_masters ();
+		//_mute_control->clear_masters ();
 	} else {
 		_gain_control->remove_master (vca->gain_control());
 		_solo_control->remove_master (vca->solo_control());
-		_mute_control->remove_master (vca->mute_control());
+		//_mute_control->remove_master (vca->mute_control());
+	}
+}
+
+bool
+Route::muted_by_others_soloing () const
+{
+	// This method is only used by route_ui for display state.
+	// The DSP version is MuteMaster::muted_by_others_at()
+
+	if (!can_be_muted_by_others ()) {
+		return false;
+	}
+
+	return _session.soloing() && !_solo_control->soloed() && !_solo_isolate_control->solo_isolated();
+}
+
+bool
+Route::muted_by_others () const
+{
+	// This method is only used by route_ui for display state.
+	// The DSP version is MuteMaster::muted_by_others_at()
+
+	if (!can_be_muted_by_others()) {
+		return false;
+	}
+
+	return _mute_master->muted_by_others();
+}
+
+void
+Route::clear_all_solo_state ()
+{
+	double v = _solo_safe_control->get_value ();
+
+	_solo_control->clear_all_solo_state ();
+
+	if (v != 0.0) {
+		_solo_safe_control->set_value (v, Controllable::NoGroup);
 	}
 }

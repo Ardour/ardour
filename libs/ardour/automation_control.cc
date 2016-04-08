@@ -20,13 +20,16 @@
 
 #include <math.h>
 #include <iostream>
-#include "ardour/automation_control.h"
-#include "ardour/automation_watch.h"
-#include "ardour/event_type_map.h"
-#include "ardour/session.h"
 
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
+
+#include "ardour/audioengine.h"
+#include "ardour/automation_control.h"
+#include "ardour/automation_watch.h"
+#include "ardour/control_group.h"
+#include "ardour/event_type_map.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 
@@ -69,42 +72,38 @@ AutomationControl::writable() const
 	return true;
 }
 
-double
-AutomationControl::get_masters_value_locked () const
-{
-	gain_t v = 1.0;
-
-	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-		/* get current master value, scale by our current ratio with that master */
-		v *= mr->second.master()->get_value () * mr->second.ratio();
-	}
-
-	return min (_desc.upper, v);
-}
-
-double
-AutomationControl::get_value_locked() const
-{
-	/* read or write masters lock must be held */
-
-	if (_masters.empty()) {
-		return Control::get_double (false, _session.transport_frame());
-	}
-
-	return get_masters_value_locked ();
-}
-
 /** Get the current effective `user' value based on automation state */
 double
 AutomationControl::get_value() const
 {
-	bool from_list = _list && ((AutomationList*)_list.get())->automation_playback();
+	bool from_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback();
+	return Control::get_double (from_list, _session.transport_frame());
+}
 
-	if (!from_list) {
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
-		return get_value_locked ();
+void
+AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
+{
+	if (!writable()) {
+		return;
+	}
+
+	/* enforce strict double/boolean value mapping */
+
+	if (_desc.toggled) {
+		if (val != 0.0) {
+			val = 1.0;
+		}
+	}
+
+	if (check_rt (val, gcd)) {
+		/* change has been queued to take place in an RT context */
+		return;
+	}
+
+	if (_group && _group->use_me (gcd)) {
+		_group->set_group_value (shared_from_this(), val);
 	} else {
-		return Control::get_double (from_list, _session.transport_frame());
+		actually_set_value (val, gcd);
 	}
 }
 
@@ -113,12 +112,15 @@ AutomationControl::get_value() const
  *  @param value `user' value
  */
 void
-AutomationControl::set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
+AutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
 {
-	bool to_list = _list && ((AutomationList*)_list.get())->automation_write();
+	bool to_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_write();
 
 	Control::set_double (value, _session.transport_frame(), to_list);
 
+	AutomationType at = (AutomationType) _parameter.type();
+
+	std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value << " @ " << this << std::endl;
 	Changed (true, gcd);
 }
 
@@ -263,147 +265,25 @@ AutomationControl::interface_to_internal (double val) const
 	return val;
 }
 
-
 void
-AutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
+AutomationControl::set_group (boost::shared_ptr<ControlGroup> cg)
 {
-	double current_value;
-	double new_value;
-	std::pair<Masters::iterator,bool> res;
-
-	{
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		current_value = get_value_locked ();
-
-		/* ratio will be recomputed below */
-
-		res = _masters.insert (make_pair<PBD::ID,MasterRecord> (m->id(), MasterRecord (m, 1.0)));
-
-		if (res.second) {
-
-			recompute_masters_ratios (current_value);
-
-			/* note that we bind @param m as a weak_ptr<AutomationControl>, thus
-			   avoiding holding a reference to the control in the binding
-			   itself.
-			*/
-
-			m->DropReferences.connect_same_thread (masters_connections, boost::bind (&AutomationControl::master_going_away, this, m));
-
-			/* Store the connection inside the MasterRecord, so that when we destroy it, the connection is destroyed
-			   and we no longer hear about changes to the AutomationControl.
-
-			   Note that we fix the "from_self" argument that will
-			   be given to our own Changed signal to "false",
-			   because the change came from the master.
-			*/
-
-
-			m->Changed.connect_same_thread (res.first->second.connection, boost::bind (&AutomationControl::master_changed, this, _1, _2));
-		}
-
-		new_value = get_value_locked ();
+	if (_group) {
+		_group->remove_control (shared_from_this());
 	}
 
-	if (res.second) {
-		/* this will notify everyone that we're now slaved to the master */
-		MasterStatusChange (); /* EMIT SIGNAL */
-	}
-
-	if (new_value != current_value) {
-		/* force a call to to ::master_changed() to carry the
-		 * consequences that would occur if the master assumed
-		 * its current value WHILE we were slaved.
-		 */
-		master_changed (false, Controllable::NoGroup);
-		/* effective value changed by master */
-		Changed (false, Controllable::NoGroup);
-	}
-
-}
-
-void
-AutomationControl::master_changed (bool /*from_self*/, GroupControlDisposition gcd)
-{
-	/* our value has (likely) changed, but not because we were
-	 * modified. Just the master.
-	 */
-
-	Changed (false, gcd); /* EMIT SIGNAL */
-}
-
-void
-AutomationControl::master_going_away (boost::weak_ptr<AutomationControl> wm)
-{
-	boost::shared_ptr<AutomationControl> m = wm.lock();
-	if (m) {
-		remove_master (m);
-	}
-}
-
-void
-AutomationControl::remove_master (boost::shared_ptr<AutomationControl> m)
-{
-	double current_value;
-	double new_value;
-	Masters::size_type erased = 0;
-
-	{
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		current_value = get_value_locked ();
-		erased = _masters.erase (m->id());
-		if (erased) {
-			recompute_masters_ratios (current_value);
-		}
-		new_value = get_value_locked ();
-	}
-
-	if (erased) {
-		MasterStatusChange (); /* EMIT SIGNAL */
-	}
-
-	if (new_value != current_value) {
-		Changed (false, Controllable::NoGroup);
-	}
-}
-
-void
-AutomationControl::clear_masters ()
-{
-	double current_value;
-	double new_value;
-	bool had_masters = false;
-
-	{
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		current_value = get_value_locked ();
-		if (!_masters.empty()) {
-			had_masters = true;
-		}
-		_masters.clear ();
-		new_value = get_value_locked ();
-	}
-
-	if (had_masters) {
-		MasterStatusChange (); /* EMIT SIGNAL */
-	}
-
-	if (new_value != current_value) {
-		Changed (false, Controllable::NoGroup);
-	}
-
+	_group = cg;
 }
 
 bool
-AutomationControl::slaved_to (boost::shared_ptr<AutomationControl> m) const
+AutomationControl::check_rt (double val, Controllable::GroupControlDisposition gcd)
 {
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
-	return _masters.find (m->id()) != _masters.end();
-}
+	if ((flags() & Controllable::RealTime) && !AudioEngine::instance()->in_process_thread()) {
+		/* queue change in RT context */
+		std::cerr << "::set_value (" << val << ", " << enum_2_string (gcd) << ") called for " << enum_2_string ((AutomationType) _parameter.type()) << ", queueing in RT context\n";
+		_session.set_control (shared_from_this(), val, gcd);
+		return true;
+	}
 
-bool
-AutomationControl::slaved () const
-{
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
-	return !_masters.empty();
+	return false;
 }

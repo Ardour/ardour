@@ -185,15 +185,13 @@ class LIBARDOUR_API PluginInsert : public Processor
 		               const ParameterDescriptor&        desc,
 		               boost::shared_ptr<AutomationList> list=boost::shared_ptr<AutomationList>());
 
-		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
-		void set_value_unchecked (double);
 		double get_value (void) const;
 		void catch_up_with_external_value (double val);
 		XMLNode& get_state();
 
 	private:
 		PluginInsert* _plugin;
-		void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
+		void actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	};
 
 	/** A control that manipulates a plugin property (message). */
@@ -204,10 +202,10 @@ class LIBARDOUR_API PluginInsert : public Processor
 		                       const ParameterDescriptor&        desc,
 		                       boost::shared_ptr<AutomationList> list=boost::shared_ptr<AutomationList>());
 
-		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
-		void set_value_unchecked (double);
 		double get_value (void) const;
 		XMLNode& get_state();
+        protected:
+		void actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
 
 	private:
 		PluginInsert* _plugin;

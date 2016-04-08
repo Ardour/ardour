@@ -36,6 +36,7 @@
 #include "ardour/monitor_processor.h"
 #include "ardour/port.h"
 #include "ardour/route.h"
+#include "ardour/solo_isolate_control.h"
 #include "ardour/user_bundle.h"
 #include "ardour/plugin_manager.h"
 
@@ -1246,7 +1247,7 @@ MonitorSection::cancel_isolate (GdkEventButton*)
 {
 	if (_session) {
 		boost::shared_ptr<RouteList> rl (_session->get_routes ());
-		_session->set_solo_isolated (rl, false, Session::rt_cleanup, Controllable::NoGroup);
+		_session->set_controls (route_list_to_control_list (rl, &Route::solo_isolate_control), 0.0, Controllable::NoGroup);
 	}
 
 	return true;

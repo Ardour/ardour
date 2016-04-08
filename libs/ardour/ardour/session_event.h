@@ -84,26 +84,28 @@ public:
 	union {
 		void*        ptr;
 		bool         yes_or_no;
-		framepos_t  target2_frame;
+		framepos_t   target2_frame;
 		Slave*       slave;
 		Route*       route;
 	};
 
 	union {
 		bool second_yes_or_no;
+		double control_value;
 	};
 
 	union {
 		bool third_yes_or_no;
 	};
 
-	/* 4 members to handle a multi-group event handled in RT context */
+	/* 5 members to handle a multi-group event handled in RT context */
 
 	typedef boost::function<void (SessionEvent*)> RTeventCallback;
 
-	boost::shared_ptr<RouteList> routes;    /* apply to */
-	boost::function<void (void)> rt_slot;   /* what to call in RT context */
-	RTeventCallback              rt_return; /* called after rt_slot, with this event as an argument */
+	boost::shared_ptr<ControlList> controls; /* apply to */
+	boost::shared_ptr<RouteList> routes;     /* apply to */
+	boost::function<void (void)> rt_slot;    /* what to call in RT context */
+	RTeventCallback              rt_return;  /* called after rt_slot, with this event as an argument */
 	PBD::EventLoop*              event_loop;
 
 	std::list<AudioRange> audio_range;

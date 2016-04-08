@@ -140,21 +140,30 @@ setup_enum_writer ()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
 #define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
 
+	REGISTER_ENUM (NullAutomation);
 	REGISTER_ENUM (GainAutomation);
-	REGISTER_ENUM (TrimAutomation);
 	REGISTER_ENUM (PanAzimuthAutomation);
 	REGISTER_ENUM (PanElevationAutomation);
 	REGISTER_ENUM (PanWidthAutomation);
+	REGISTER_ENUM (PanFrontBackAutomation);
+	REGISTER_ENUM (PanLFEAutomation);
 	REGISTER_ENUM (PluginAutomation);
 	REGISTER_ENUM (PluginPropertyAutomation);
 	REGISTER_ENUM (SoloAutomation);
+	REGISTER_ENUM (SoloIsolateAutomation);
+	REGISTER_ENUM (SoloSafeAutomation);
 	REGISTER_ENUM (MuteAutomation);
 	REGISTER_ENUM (MidiCCAutomation);
+	REGISTER_ENUM (MidiPgmChangeAutomation);
+	REGISTER_ENUM (MidiPitchBenderAutomation);
+	REGISTER_ENUM (MidiChannelPressureAutomation);
+	REGISTER_ENUM (MidiSystemExclusiveAutomation);
 	REGISTER_ENUM (FadeInAutomation);
 	REGISTER_ENUM (FadeOutAutomation);
 	REGISTER_ENUM (EnvelopeAutomation);
-	REGISTER_ENUM (SoloIsolateAutomation);
-	REGISTER_ENUM (SoloSafeAutomation);
+	REGISTER_ENUM (RecEnableAutomation);
+	REGISTER_ENUM (RecSafeAutomation);
+	REGISTER_ENUM (TrimAutomation);
 	REGISTER_ENUM (PhaseAutomation);
 	REGISTER_ENUM (MonitoringAutomation);
 	REGISTER_ENUM (EQGain);

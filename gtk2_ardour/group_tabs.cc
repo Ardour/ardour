@@ -366,7 +366,8 @@ GroupTabs::new_from_rec_enabled ()
 	RouteList rec_enabled;
 
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if ((*i)->record_enabled()) {
+		boost::shared_ptr<Track> trk (boost::dynamic_pointer_cast<Track> (*i));
+		if (trk && trk->rec_enable_control()->get_value()) {
 			rec_enabled.push_back (*i);
 		}
 	}

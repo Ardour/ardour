@@ -31,6 +31,8 @@
 #include "ardour/midi_track.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/solo_isolate_control.h"
+#include "ardour/utils.h"
 
 #include "gtkmm2ext/cell_renderer_pixbuf_multi.h"
 #include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
@@ -422,11 +424,8 @@ EditorRoutes::on_tv_rec_enable_changed (std::string const & path_string)
 	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	if (rtv && rtv->track()) {
-		DisplaySuspender ds;
-		boost::shared_ptr<RouteList> rl (new RouteList);
 		// TODO check rec-safe and ...
-		rl->push_back (rtv->route());
-		_session->set_record_enabled (rl, !rtv->track()->record_enabled(), Session::rt_cleanup);
+		_session->set_control (rtv->track()->rec_enable_control(), !rtv->track()->rec_enable_control()->get_value(), Controllable::UseGroup);
 	}
 }
 
@@ -455,9 +454,7 @@ EditorRoutes::on_tv_mute_enable_toggled (std::string const & path_string)
 	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	if (rtv != 0) {
-		boost::shared_ptr<RouteList> rl (new RouteList);
-		rl->push_back (rtv->route());
-		_session->set_mute (rl, !rtv->route()->muted(), Session::rt_cleanup);
+		_session->set_control (rtv->route()->mute_control(), rtv->route()->mute_control()->get_value() ? 0.0 : 1.0, Controllable::UseGroup);
 	}
 }
 
@@ -471,13 +468,15 @@ EditorRoutes::on_tv_solo_enable_toggled (std::string const & path_string)
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	if (rtv != 0) {
-		boost::shared_ptr<RouteList> rl (new RouteList);
-		rl->push_back (rtv->route());
+		bool newval;
+
 		if (Config->get_solo_control_is_listen_control()) {
-			_session->set_listen (rl, !rtv->route()->listening_via_monitor(), Session::rt_cleanup);
+			newval = !rtv->route()->listening_via_monitor();
 		} else {
-			_session->set_solo (rl, !rtv->route()->self_soloed(), Session::rt_cleanup);
+			newval = !rtv->route()->self_soloed();
 		}
+
+		rtv->route()->solo_control()->set_value (newval ? 1.0 : 0.0, Controllable::UseGroup);
 	}
 }
 
@@ -491,7 +490,7 @@ EditorRoutes::on_tv_solo_isolate_toggled (std::string const & path_string)
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	if (rtv) {
-		rtv->route()->set_solo_isolated (!rtv->route()->solo_isolated(), Controllable::UseGroup);
+		rtv->route()->solo_isolate_control()->set_value (rtv->route()->solo_isolate_control()->get_value() ? 0.0 : 1.0, Controllable::UseGroup);
 	}
 }
 
@@ -505,7 +504,7 @@ EditorRoutes::on_tv_solo_safe_toggled (std::string const & path_string)
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	if (rtv) {
-		rtv->route()->set_solo_safe (!rtv->route()->solo_safe(), Controllable::UseGroup);
+		rtv->route()->solo_safe_control()->set_value (rtv->route()->solo_safe_control()->get_value() ? 0.0 : 1.0, Controllable::UseGroup);
 	}
 }
 
@@ -734,8 +733,8 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		row[_columns.mute_state] = (*x)->route()->muted() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off;
 		row[_columns.solo_state] = RouteUI::solo_active_state ((*x)->route());
 		row[_columns.solo_visible] = !(*x)->route()->is_master ();
-		row[_columns.solo_isolate_state] = (*x)->route()->solo_isolated();
-		row[_columns.solo_safe_state] = (*x)->route()->solo_safe();
+		row[_columns.solo_isolate_state] = (*x)->route()->solo_isolate_control()->solo_isolated();
+		row[_columns.solo_safe_state] = (*x)->route()->solo_safe_control()->solo_safe();
 		row[_columns.name_editable] = true;
 
 		boost::weak_ptr<Route> wr ((*x)->route());
@@ -745,8 +744,8 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 		if ((*x)->is_track()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
-			t->RecordEnableChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
-			t->RecordSafeChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
+			t->rec_enable_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
+			t->rec_safe_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
 		}
 
 		if ((*x)->is_midi_track()) {
@@ -1280,25 +1279,27 @@ EditorRoutes::key_press (GdkEventKey* ev)
 
 		case 'm':
 			if (get_relevant_routes (rl)) {
-				_session->set_mute (rl, !rl->front()->muted(), Session::rt_cleanup);
+				_session->set_controls (route_list_to_control_list (rl, &Route::mute_control), rl->front()->muted() ? 0.0 : 1.0, Controllable::NoGroup);
 			}
 			return true;
 			break;
 
 		case 's':
 			if (get_relevant_routes (rl)) {
-				if (Config->get_solo_control_is_listen_control()) {
-					_session->set_listen (rl, !rl->front()->listening_via_monitor(), Session::rt_cleanup);
-				} else {
-					_session->set_solo (rl, !rl->front()->self_soloed(), Session::rt_cleanup);
-				}
+				_session->set_controls (route_list_to_control_list (rl, &Route::solo_control), rl->front()->self_soloed() ? 0.0 : 1.0, Controllable::NoGroup);
 			}
 			return true;
 			break;
 
 		case 'r':
 			if (get_relevant_routes (rl)) {
-				_session->set_record_enabled (rl, !rl->front()->record_enabled(), Session::rt_cleanup);
+				for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
+					boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*r);
+					if (t) {
+						_session->set_controls (route_list_to_control_list (rl, &Track::rec_enable_control), !t->rec_enable_control()->get_value(), Controllable::NoGroup);
+						break;
+					}
+				}
 			}
 			break;
 
@@ -1645,10 +1646,13 @@ EditorRoutes::idle_update_mute_rec_solo_etc()
 		(*i)[_columns.solo_isolate_state] = RouteUI::solo_isolate_active_state (route) ? 1 : 0;
 		(*i)[_columns.solo_safe_state] = RouteUI::solo_safe_active_state (route) ? 1 : 0;
 		(*i)[_columns.active] = route->active ();
-		if (boost::dynamic_pointer_cast<Track> (route)) {
+
+		boost::shared_ptr<Track> trk (boost::dynamic_pointer_cast<Track>(route));
+
+		if (trk) {
 			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
 
-			if (route->record_enabled()) {
+			if (trk->rec_enable_control()->get_value()) {
 				if (_session->record_status() == Session::Recording) {
 					(*i)[_columns.rec_state] = 1;
 				} else {
@@ -1660,8 +1664,8 @@ EditorRoutes::idle_update_mute_rec_solo_etc()
 				(*i)[_columns.rec_state] = 0;
 			}
 
-			(*i)[_columns.rec_safe] = route->record_safe () ? 1 : 0;
-			(*i)[_columns.name_editable] = !route->record_enabled ();
+			(*i)[_columns.rec_safe] = !trk->rec_safe_control()->get_value();
+			(*i)[_columns.name_editable] = !trk->rec_enable_control()->get_value();
 		}
 	}
 

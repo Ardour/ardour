@@ -1265,7 +1265,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 
-					if (tr && tr->record_enabled ()) {
+					if (tr && tr->rec_enable_control()->get_value()) {
 						// tell it we've looped, so it can deal with the record state
 						tr->transport_looped (_transport_frame);
 					}

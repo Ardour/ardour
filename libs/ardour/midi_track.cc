@@ -44,6 +44,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
+#include "ardour/monitor_control.h"
 #include "ardour/parameter_types.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
@@ -103,24 +104,24 @@ MidiTrack::create_diskstream ()
 }
 
 
-void
-MidiTrack::set_record_enabled (bool yn, Controllable::GroupControlDisposition group_override)
+bool
+MidiTrack::can_be_record_safe ()
 {
 	if (_step_editing) {
-		return;
+		return false;
 	}
 
-	Track::set_record_enabled (yn, group_override);
+	return Track::can_be_record_safe ();
 }
 
-void
-MidiTrack::set_record_safe (bool yn, Controllable::GroupControlDisposition group_override)
+bool
+MidiTrack::can_be_record_enabled ()
 {
-	if (_step_editing) { /* REQUIRES REVIEW */
-		return;
+	if (_step_editing) {
+		return false;
 	}
 
-	Track::set_record_safe (yn, group_override);
+	return Track::can_be_record_enabled ();
 }
 
 void
@@ -372,7 +373,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 	if (!_active) {
 		silence (nframes);
-		if (_meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled())) {
+		if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _diskstream->record_enabled())) {
 			_meter->reset();
 		}
 		return 0;
@@ -412,7 +413,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 	/* filter captured data before meter sees it */
 	_capture_filter.filter (bufs);
 
-	if (_meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled())) {
+	if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _diskstream->record_enabled())) {
 		_meter->run (bufs, start_frame, end_frame, nframes, true);
 	}
 
@@ -726,22 +727,7 @@ MidiTrack::set_parameter_automation_state (Evoral::Parameter param, AutoState st
 }
 
 void
-MidiTrack::MidiControl::set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
-{
-	if (writable()) {
-		_set_value (val, group_override);
-	}
-}
-
-void
-MidiTrack::MidiControl::set_value_unchecked (double val)
-{
-	/* used only by automation playback */
-	_set_value (val, Controllable::NoGroup);
-}
-
-void
-MidiTrack::MidiControl::_set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
+MidiTrack::MidiControl::actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	const Evoral::Parameter &parameter = _list ? _list->parameter() : Control::parameter();
 	const Evoral::ParameterDescriptor &desc = EventTypeMap::instance().descriptor(parameter);
@@ -798,7 +784,7 @@ MidiTrack::MidiControl::_set_value (double val, PBD::Controllable::GroupControlD
 		_route->write_immediate_event(size,  ev);
 	}
 
-	AutomationControl::set_value(val, group_override);
+	AutomationControl::actually_set_value(val, group_override);
 }
 
 void
@@ -958,35 +944,27 @@ MidiTrack::act_on_mute ()
 }
 
 void
-MidiTrack::set_monitoring (MonitorChoice mc, Controllable::GroupControlDisposition gcd)
+MidiTrack::monitoring_changed (bool self, Controllable::GroupControlDisposition gcd)
 {
-	if (use_group (gcd, &RouteGroup::is_monitoring)) {
-		_route_group->apply (&Track::set_monitoring, mc, Controllable::NoGroup);
-		return;
+	Track::monitoring_changed (self, gcd);
+	
+	/* monitoring state changed, so flush out any on notes at the
+	 * port level.
+	 */
+
+	PortSet& ports (_output->ports());
+
+	for (PortSet::iterator p = ports.begin(); p != ports.end(); ++p) {
+		boost::shared_ptr<MidiPort> mp = boost::dynamic_pointer_cast<MidiPort> (*p);
+		if (mp) {
+			mp->require_resolve ();
+		}
 	}
 
-	if (mc != _monitoring) {
+	boost::shared_ptr<MidiDiskstream> md (midi_diskstream());
 
-		Track::set_monitoring (mc, gcd);
-
-		/* monitoring state changed, so flush out any on notes at the
-		 * port level.
-		 */
-
-		PortSet& ports (_output->ports());
-
-		for (PortSet::iterator p = ports.begin(); p != ports.end(); ++p) {
-			boost::shared_ptr<MidiPort> mp = boost::dynamic_pointer_cast<MidiPort> (*p);
-			if (mp) {
-				mp->require_resolve ();
-			}
-		}
-
-		boost::shared_ptr<MidiDiskstream> md (midi_diskstream());
-
-		if (md) {
-			md->reset_tracker ();
-		}
+	if (md) {
+		md->reset_tracker ();
 	}
 }
 

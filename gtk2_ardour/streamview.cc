@@ -78,7 +78,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_g
 
 	if (_trackview.is_track()) {
 		_trackview.track()->DiskstreamChanged.connect (*this, invalidator (*this), boost::bind (&StreamView::diskstream_changed, this), gui_context());
-		_trackview.track()->RecordEnableChanged.connect (*this, invalidator (*this), boost::bind (&StreamView::rec_enable_changed, this), gui_context());
+		_trackview.track()->rec_enable_control()->Changed.connect (*this, invalidator (*this), boost::bind (&StreamView::rec_enable_changed, this), gui_context());
 
 		_trackview.session()->TransportStateChange.connect (*this, invalidator (*this), boost::bind (&StreamView::transport_changed, this), gui_context());
 		_trackview.session()->TransportLooped.connect (*this, invalidator (*this), boost::bind (&StreamView::transport_looped, this), gui_context());

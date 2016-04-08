@@ -75,6 +75,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		normal = 0.0f;
 		break;
 	case RecEnableAutomation:
+	case RecSafeAutomation:
 		lower  = 0.0;
 		upper  = 1.0;
 		toggled = true;

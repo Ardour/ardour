@@ -156,7 +156,7 @@ class RouteUI : public virtual AxisView
 	bool monitor_input_release(GdkEventButton*);
 	bool monitor_disk_press(GdkEventButton*);
 	bool monitor_disk_release(GdkEventButton*);
-	void monitoring_changed ();
+	void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);
 	void update_monitoring_display ();
 
 	void edit_input_configuration ();

@@ -27,14 +27,19 @@
 #include "pbd/statefuldestructible.h"
 
 #include "ardour/automatable.h"
+#include "ardour/muteable.h"
+#include "ardour/soloable.h"
 #include "ardour/stripable.h"
 
 namespace ARDOUR {
 
-class GainControl;
 class Route;
+class GainControl;
+class SoloControl;
+class MuteControl;
+class MonitorControl;
 
-class LIBARDOUR_API VCA : public Stripable, public Automatable, public boost::enable_shared_from_this<VCA> {
+class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, public Automatable, public boost::enable_shared_from_this<VCA> {
   public:
 	VCA (Session& session,  uint32_t num, const std::string& name);
 	~VCA();
@@ -47,7 +52,15 @@ class LIBARDOUR_API VCA : public Stripable, public Automatable, public boost::en
 	int set_state (XMLNode const&, int version);
 
 	bool soloed () const;
+	void push_solo_upstream (int32_t) {}
+	void push_solo_isolate_upstream (int32_t) {}
+	bool can_solo() const { return true; }
+	bool is_safe () const { return false; }
+
 	bool muted () const;
+	bool can_be_muted_by_others () const { return true; }
+	bool muted_by_others_soloing() const { return false; }
+	bool muted_by_others() const { return false; }
 
 	static std::string default_name_template ();
 	static int next_vca_number ();
@@ -58,16 +71,16 @@ class LIBARDOUR_API VCA : public Stripable, public Automatable, public boost::en
 	static void set_next_vca_number (uint32_t);
 
 	virtual boost::shared_ptr<GainControl> gain_control() const { return _gain_control; }
-	virtual boost::shared_ptr<AutomationControl> solo_control() const { return _solo_control; }
-	virtual boost::shared_ptr<AutomationControl> mute_control() const { return _mute_control; }
+	virtual boost::shared_ptr<SoloControl> solo_control() const { return _solo_control; }
+	virtual boost::shared_ptr<MuteControl> mute_control() const { return _mute_control; }
 
 	/* null Stripable API, because VCAs don't have any of this */
 
-	virtual boost::shared_ptr<PeakMeter>       peak_meter() { return boost::shared_ptr<PeakMeter>(); }
-	virtual boost::shared_ptr<const PeakMeter> peak_meter() const { return boost::shared_ptr<PeakMeter>(); }
-	virtual boost::shared_ptr<AutomationControl> phase_control() const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> trim_control() const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<AutomationControl> monitoring_control() const { return boost::shared_ptr<AutomationControl>(); }
+	virtual boost::shared_ptr<PeakMeter>         peak_meter() { return boost::shared_ptr<PeakMeter>(); }
+	virtual boost::shared_ptr<const PeakMeter>   peak_meter() const { return boost::shared_ptr<PeakMeter>(); }
+	virtual boost::shared_ptr<PhaseControl>      phase_control() const { return boost::shared_ptr<PhaseControl>(); }
+	virtual boost::shared_ptr<GainControl>       trim_control() const { return boost::shared_ptr<GainControl>(); }
+	virtual boost::shared_ptr<MonitorControl>    monitoring_control() const { return boost::shared_ptr<MonitorControl>(); }
 	virtual boost::shared_ptr<AutomationControl> recenable_control() const { return boost::shared_ptr<AutomationControl>(); }
 	virtual boost::shared_ptr<AutomationControl> pan_azimuth_control() const { return boost::shared_ptr<AutomationControl>(); }
 	virtual boost::shared_ptr<AutomationControl> pan_elevation_control() const { return boost::shared_ptr<AutomationControl>(); }
@@ -96,36 +109,12 @@ class LIBARDOUR_API VCA : public Stripable, public Automatable, public boost::en
 	virtual boost::shared_ptr<AutomationControl> master_send_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
 
   private:
-	class VCASoloControllable : public AutomationControl {
-          public:
-		VCASoloControllable (std::string const & name, boost::shared_ptr<VCA> vca);
-		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		void set_value_unchecked (double);
-		double get_value () const;
-	  private:
-		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		boost::weak_ptr<VCA> _vca;
-	};
-
-	class VCAMuteControllable : public AutomationControl {
-          public:
-		VCAMuteControllable (std::string const & name, boost::shared_ptr<VCA> vca);
-		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		void set_value_unchecked (double);
-		double get_value () const;
-	  private:
-		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		boost::weak_ptr<VCA> _vca;
-	};
-
-	friend class VCASoloControllable;
-	friend class VCAMuteControllable;
-
 	uint32_t    _number;
 
 	boost::shared_ptr<GainControl> _gain_control;
-	boost::shared_ptr<VCASoloControllable> _solo_control;
-	boost::shared_ptr<VCAMuteControllable> _mute_control;
+	boost::shared_ptr<SoloControl> _solo_control;
+	boost::shared_ptr<MuteControl> _mute_control;
+
 	bool _solo_requested;
 	bool _mute_requested;
 

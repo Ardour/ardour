@@ -31,6 +31,8 @@
 using namespace ARDOUR;
 using namespace std;
 
+const string MuteMaster::xml_node_name (X_("MuteMaster"));
+
 const MuteMaster::MutePoint MuteMaster::AllPoints = MuteMaster::MutePoint(
 	PreFader|PostFader|Listen|Main);
 
@@ -155,7 +157,7 @@ MuteMaster::set_state (const XMLNode& node, int /*version*/)
 XMLNode&
 MuteMaster::get_state()
 {
-	XMLNode* node = new XMLNode (X_("MuteMaster"));
+	XMLNode* node = new XMLNode (xml_node_name);
 	node->add_property ("mute-point", enum_2_string (_mute_point));
 	node->add_property ("muted", (_muted_by_self ? X_("yes") : X_("no")));
 	return *node;

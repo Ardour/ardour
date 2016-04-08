@@ -763,7 +763,7 @@ TimeAxisView::end_name_edit (int response)
 
 				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
 
-				if (rtav && rtav->route()->record_enabled()) {
+				if (rtav && (!rtav->is_track() || rtav->track()->rec_enable_control()->get_value())) {
 					continue;
 				}
 
@@ -794,7 +794,7 @@ TimeAxisView::end_name_edit (int response)
 
 				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
 
-				if (rtav && rtav->route()->record_enabled()) {
+				if (rtav && (!rtav->is_track() || rtav->track()->rec_enable_control()->get_value())) {
 					continue;
 				}
 

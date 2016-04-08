@@ -37,14 +37,17 @@
 #include "ardour/debug.h"
 #include "ardour/midi_ui.h"
 #include "ardour/meter.h"
+#include "ardour/monitor_control.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
+#include "ardour/phase_control.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/send.h"
+#include "ardour/solo_isolate_control.h"
 #include "ardour/track.h"
 #include "ardour/midi_track.h"
 #include "ardour/user_bundle.h"
@@ -302,7 +305,10 @@ void
 Strip::notify_record_enable_changed ()
 {
 	if (_route && _recenable)  {
-		_surface->write (_recenable->set_state (_route->record_enabled() ? on : off));
+		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (_route);
+		if (trk) {
+			_surface->write (_recenable->set_state (trk->rec_enable_control()->get_value() ? on : off));
+		}
 	}
 }
 

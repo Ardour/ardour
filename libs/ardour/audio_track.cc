@@ -33,6 +33,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/delivery.h"
 #include "ardour/meter.h"
+#include "ardour/monitor_control.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
@@ -349,7 +350,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 	if (!_active) {
 		silence (nframes);
-		if (_meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled())) {
+		if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _diskstream->record_enabled())) {
 			_meter->reset();
 		}
 		return 0;
@@ -391,7 +392,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 	fill_buffers_with_input (bufs, _input, nframes);
 
-	if (_meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled())) {
+	if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _diskstream->record_enabled())) {
 		_meter->run (bufs, start_frame, end_frame, nframes, true);
 	}
 
@@ -629,8 +630,9 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 	/* reset stuff that has already been accounted for in the freeze process */
 
-	set_gain (GAIN_COEFF_UNITY, Controllable::NoGroup);
-	_amp->gain_control()->set_automation_state (Off);
+	gain_control()->set_value (GAIN_COEFF_UNITY, Controllable::NoGroup);
+	gain_control()->set_automation_state (Off);
+
 	/* XXX need to use _main_outs _panner->set_automation_state (Off); */
 
 	_freeze_record.state = Frozen;

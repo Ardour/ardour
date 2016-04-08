@@ -2493,7 +2493,11 @@ RouteTimeAxisView::can_edit_name () const
 {
 	/* we do not allow track name changes if it is record enabled
 	 */
-	return !_route->record_enabled();
+	boost::shared_ptr<Track> trk (boost::dynamic_pointer_cast<Track> (_route));
+	if (!trk) {
+		return true;
+	}
+	return !trk->rec_enable_control()->get_value();
 }
 
 void
@@ -2724,7 +2728,7 @@ RouteTimeAxisView::remove_underlay (StreamView* v)
 void
 RouteTimeAxisView::set_button_names ()
 {
-	if (_route && _route->solo_safe()) {
+	if (_route && _route->solo_safe_control()->solo_safe()) {
 		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
 	} else {
 		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));

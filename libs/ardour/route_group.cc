@@ -28,6 +28,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/audio_track.h"
+#include "ardour/monitor_control.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
@@ -57,21 +58,21 @@ void
 RouteGroup::make_property_quarks ()
 {
 	Properties::relative.property_id = g_quark_from_static_string (X_("relative"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for relative = %1\n", 	Properties::relative.property_id));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for relative = %1\n",	Properties::relative.property_id));
 	Properties::active.property_id = g_quark_from_static_string (X_("active"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for active = %1\n", 	Properties::active.property_id));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for active = %1\n",	Properties::active.property_id));
 	Properties::hidden.property_id = g_quark_from_static_string (X_("hidden"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for hidden = %1\n", 	Properties::hidden.property_id));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for hidden = %1\n",	Properties::hidden.property_id));
 	Properties::gain.property_id = g_quark_from_static_string (X_("gain"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for gain = %1\n", 	Properties::gain.property_id));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for gain = %1\n",	Properties::gain.property_id));
 	Properties::mute.property_id = g_quark_from_static_string (X_("mute"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for mute = %1\n", 	Properties::mute.property_id));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for mute = %1\n",	Properties::mute.property_id));
 	Properties::solo.property_id = g_quark_from_static_string (X_("solo"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for solo = %1\n", 	Properties::solo.property_id));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for solo = %1\n",	Properties::solo.property_id));
 	Properties::recenable.property_id = g_quark_from_static_string (X_("recenable"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for recenable = %1\n", 	Properties::recenable.property_id));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for recenable = %1\n",	Properties::recenable.property_id));
 	Properties::select.property_id = g_quark_from_static_string (X_("select"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for select = %1\n", 	Properties::select.property_id));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for select = %1\n",	Properties::select.property_id));
 	Properties::route_active.property_id = g_quark_from_static_string (X_("route-active"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for route-active = %1\n", Properties::route_active.property_id));
 	Properties::color.property_id = g_quark_from_static_string (X_("color"));
@@ -96,6 +97,11 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	: SessionObject (s, n)
 	, routes (new RouteList)
 	, ROUTE_GROUP_DEFAULT_PROPERTIES
+	, _solo_group (new ControlGroup (SoloAutomation))
+	, _mute_group (new ControlGroup (MuteAutomation))
+	, _rec_enable_group (new ControlGroup (RecEnableAutomation))
+	, _gain_group (new ControlGroup (GainAutomation))
+	, _monitoring_group (new ControlGroup (MonitoringAutomation))
 {
 	_xml_node_name = X_("RouteGroup");
 
@@ -114,6 +120,12 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 
 RouteGroup::~RouteGroup ()
 {
+	_solo_group->clear ();
+	_mute_group->clear ();
+	_gain_group->clear ();
+	_rec_enable_group->clear ();
+	_monitoring_group->clear ();
+
 	for (RouteList::iterator i = routes->begin(); i != routes->end();) {
 		RouteList::iterator tmp = i;
 		++tmp;
@@ -140,6 +152,15 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 
 	routes->push_back (r);
 
+	_solo_group->add_control (r->solo_control());
+	_mute_group->add_control (r->mute_control());
+	_gain_group->add_control (r->gain_control());
+	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (r);
+	if (trk) {
+		_rec_enable_group->add_control (trk->rec_enable_control());
+		_monitoring_group->add_control (trk->monitoring_control());
+	}
+
 	r->set_route_group (this);
 	r->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::remove_when_going_away, this, boost::weak_ptr<Route> (r)));
 
@@ -165,6 +186,14 @@ RouteGroup::remove (boost::shared_ptr<Route> r)
 
 	if ((i = find (routes->begin(), routes->end(), r)) != routes->end()) {
 		r->set_route_group (0);
+		_solo_group->remove_control (r->solo_control());
+		_mute_group->remove_control (r->mute_control());
+		_gain_group->remove_control (r->gain_control());
+		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (r);
+		if (trk) {
+			_rec_enable_group->remove_control (trk->rec_enable_control());
+			_monitoring_group->remove_control (trk->monitoring_control());
+		}
 		routes->erase (i);
 		_session.set_dirty ();
 		RouteRemoved (this, boost::weak_ptr<Route> (r)); /* EMIT SIGNAL */
@@ -174,49 +203,6 @@ RouteGroup::remove (boost::shared_ptr<Route> r)
 	return -1;
 }
 
-
-gain_t
-RouteGroup::get_min_factor (gain_t factor)
-{
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		gain_t const g = (*i)->gain_control()->get_value();
-
-		if ((g + g * factor) >= 0.0f) {
-			continue;
-		}
-
-		if (g <= 0.0000003f) {
-			return 0.0f;
-		}
-
-		factor = 0.0000003f / g - 1.0f;
-	}
-
-	return factor;
-}
-
-gain_t
-RouteGroup::get_max_factor (gain_t factor)
-{
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); i++) {
-		gain_t const g = (*i)->gain_control()->get_value();
-
-		// if the current factor woulnd't raise this route above maximum
-		if ((g + g * factor) <= 1.99526231f) {
-			continue;
-		}
-
-		// if route gain is already at peak, return 0.0f factor
-		if (g >= 1.99526231f) {
-			return 0.0f;
-		}
-
-		// factor is calculated so that it would raise current route to max
-		factor = 1.99526231f / g - 1.0f;
-	}
-
-	return factor;
-}
 
 XMLNode&
 RouteGroup::get_state ()
@@ -269,6 +255,8 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		}
 	}
 
+	push_to_groups ();
+
 	return 0;
 }
 
@@ -293,6 +281,8 @@ RouteGroup::set_state_2X (const XMLNode& node, int /*version*/)
 		_color = false;
 	}
 
+	push_to_groups ();
+
 	return 0;
 }
 
@@ -303,6 +293,8 @@ RouteGroup::set_gain (bool yn)
 		return;
 	}
 	_gain = yn;
+	_gain_group->set_active (yn);
+
 	send_change (PropertyChange (Properties::gain));
 }
 
@@ -313,6 +305,7 @@ RouteGroup::set_mute (bool yn)
 		return;
 	}
 	_mute = yn;
+	_mute_group->set_active (yn);
 	send_change (PropertyChange (Properties::mute));
 }
 
@@ -323,6 +316,7 @@ RouteGroup::set_solo (bool yn)
 		return;
 	}
 	_solo = yn;
+	_solo_group->set_active (yn);
 	send_change (PropertyChange (Properties::solo));
 }
 
@@ -333,6 +327,7 @@ RouteGroup::set_recenable (bool yn)
 		return;
 	}
 	_recenable = yn;
+	_rec_enable_group->set_active (yn);
 	send_change (PropertyChange (Properties::recenable));
 }
 
@@ -384,6 +379,8 @@ RouteGroup::set_monitoring (bool yn)
 	}
 
 	_monitoring = yn;
+	_monitoring_group->set_active (yn);
+
 	send_change (PropertyChange (Properties::monitoring));
 
 	_session.set_dirty ();
@@ -530,4 +527,20 @@ RouteGroup::enabled_property (PBD::PropertyID prop)
 	}
 
 	return dynamic_cast<const PropertyTemplate<bool>* > (i->second)->val ();
+}
+
+void
+RouteGroup::post_set (PBD::PropertyChange const &)
+{
+	push_to_groups ();
+}
+
+void
+RouteGroup::push_to_groups ()
+{
+	_gain_group->set_active (_gain);
+	_solo_group->set_active (_solo);
+	_mute_group->set_active (_mute);
+	_rec_enable_group->set_active (_recenable);
+	_monitoring_group->set_active (_monitoring);
 }

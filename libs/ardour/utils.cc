@@ -754,3 +754,4 @@ ARDOUR::slider_position_to_gain_with_max (double g, double max_gain)
 extern "C" {
 	void c_stacktrace() { stacktrace (cerr); }
 }
+

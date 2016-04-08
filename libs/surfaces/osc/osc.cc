@@ -974,7 +974,7 @@ OSC::routes_list (lo_message msg)
 					|| boost::dynamic_pointer_cast<MidiTrack>(r)) {
 
 				boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(r);
-				lo_message_add_int32 (reply, t->record_enabled());
+				lo_message_add_int32 (reply, (int32_t) t->rec_enable_control()->get_value());
 			}
 
 			//Automatically listen to routes listed
@@ -1054,7 +1054,7 @@ OSC::route_mute (int rid, int yn)
 	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
 	if (r) {
-		r->set_mute (yn, PBD::Controllable::NoGroup);
+		r->mute_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
 	}
 
 	return 0;
@@ -1068,7 +1068,7 @@ OSC::route_solo (int rid, int yn)
 	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
 	if (r) {
-		r->solo_control()->set_value(yn, PBD::Controllable::NoGroup);
+		r->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
 	}
 
 	return 0;
@@ -1082,7 +1082,10 @@ OSC::route_recenable (int rid, int yn)
 	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
 	if (r) {
-		r->set_record_enabled (yn, PBD::Controllable::NoGroup);
+		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (r);
+		if (trk) {
+			trk->rec_enable_control()->set_value (yn, PBD::Controllable::UseGroup);
+		}
 	}
 
 	return 0;
@@ -1096,7 +1099,7 @@ OSC::route_set_gain_abs (int rid, float level)
 	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
 	if (r) {
-		r->set_gain (level, PBD::Controllable::NoGroup);
+		r->gain_control()->set_value (level, PBD::Controllable::NoGroup);
 	}
 
 	return 0;

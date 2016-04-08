@@ -23,9 +23,11 @@
 #include "ardour/diskstream.h"
 #include "ardour/io_processor.h"
 #include "ardour/meter.h"
+#include "ardour/monitor_control.h"
 #include "ardour/playlist.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
+#include "ardour/record_enable_control.h"
 #include "ardour/route_group_specialized.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
@@ -42,7 +44,6 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
 	: Route (sess, name, flag, default_type)
         , _saved_meter_point (_meter_point)
         , _mode (mode)
-	, _monitoring (MonitorAuto)
 {
 	_freeze_record.state = NoFreeze;
         _declickable = true;
@@ -62,17 +63,24 @@ Track::init ()
 
 	boost::shared_ptr<Route> rp (shared_from_this());
 	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
-	_rec_enable_control = boost::shared_ptr<RecEnableControl> (new RecEnableControl(rt));
-	_rec_enable_control->set_flags (Controllable::Toggle);
-        _monitoring_control.reset (new MonitoringControllable (X_("monitoring"), rt));
 
-	/* don't add rec_enable_control to controls because we don't want it to
-	 * appear as an automatable parameter
-	 */
+	_record_enable_control.reset (new RecordEnableControl (_session, X_("recenable"), *this));
+	_record_enable_control->set_flags (Controllable::Toggle);
+
+	_monitoring_control.reset (new MonitorControl (_session, X_("monitoring"), *this));
+
+	_record_safe_control.reset (new AutomationControl (_session, RecSafeAutomation, ParameterDescriptor (RecSafeAutomation),
+	                                                   boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (RecSafeAutomation))),
+	                                                   X_("recsafe")));
+
 	track_number_changed.connect_same_thread (*this, boost::bind (&Track::resync_track_name, this));
 	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
 
-	return 0;
+        _monitoring_control->Changed.connect_same_thread (*this, boost::bind (&Track::monitoring_changed, this, _1, _2));
+        _record_safe_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_safe_changed, this, _1, _2));
+        _record_enable_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_enable_changed, this, _1, _2));
+
+        return 0;
 }
 
 void
@@ -97,9 +105,7 @@ XMLNode&
 Track::state (bool full)
 {
 	XMLNode& root (Route::state (full));
-	root.add_property (X_("monitoring"), enum_2_string (_monitoring));
 	root.add_property (X_("saved-meter-point"), enum_2_string (_saved_meter_point));
-	root.add_child_nocopy (_rec_enable_control->get_state());
 	root.add_child_nocopy (_diskstream->get_state ());
 
 	return root;
@@ -137,18 +143,12 @@ Track::set_state (const XMLNode& node, int version)
 		XMLProperty const * prop;
 		if (child->name() == Controllable::xml_node_name && (prop = child->property ("name")) != 0) {
 			if (prop->value() == X_("recenable")) {
-				_rec_enable_control->set_state (*child, version);
+				_record_enable_control->set_state (*child, version);
 			}
 		}
 	}
 
 	XMLProperty const * prop;
-
-	if ((prop = node.property (X_("monitoring"))) != 0) {
-		_monitoring = MonitorChoice (string_2_enum (prop->value(), _monitoring));
-	} else {
-		_monitoring = MonitorAuto;
-	}
 
 	if ((prop = node.property (X_("saved-meter-point"))) != 0) {
 		_saved_meter_point = MeterPoint (string_2_enum (prop->value(), _saved_meter_point));
@@ -178,62 +178,6 @@ Track::freeze_state() const
 	return _freeze_record.state;
 }
 
-Track::RecEnableControl::RecEnableControl (boost::shared_ptr<Track> t)
-	: AutomationControl (t->session(),
-	                     RecEnableAutomation,
-	                     ParameterDescriptor(Evoral::Parameter(RecEnableAutomation)),
-	                     boost::shared_ptr<AutomationList>(),
-	                     X_("recenable"))
-	, track (t)
-{
-	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(RecEnableAutomation)));
-	set_list (gl);
-}
-
-void
-Track::RecEnableControl::set_value (double val, Controllable::GroupControlDisposition group_override)
-{
-	if (writable()) {
-		_set_value (val, group_override);
-	}
-}
-
-void
-Track::RecEnableControl::set_value_unchecked (double val)
-{
-	if (writable()) {
-		_set_value (val, Controllable::NoGroup);
-	}
-}
-
-void
-Track::RecEnableControl::_set_value (double val, Controllable::GroupControlDisposition group_override)
-{
-	boost::shared_ptr<Track> t = track.lock ();
-	if (!t) {
-		return;
-	}
-
-	t->set_record_enabled (val >= 0.5 ? true : false, group_override);
-}
-
-double
-Track::RecEnableControl::get_value () const
-{
-	boost::shared_ptr<Track> t = track.lock ();
-	if (!t) {
-		return 0;
-	}
-
-	return (t->record_enabled() ? 1.0 : 0.0);
-}
-
-bool
-Track::record_enabled () const
-{
-	return _diskstream && _diskstream->record_enabled ();
-}
-
 bool
 Track::can_record()
 {
@@ -246,24 +190,15 @@ Track::can_record()
 	return will_record;
 }
 
-void
-Track::prep_record_enabled (bool yn, Controllable::GroupControlDisposition group_override)
+int
+Track::prep_record_enabled (bool yn)
 {
-	if (yn && record_safe ()) {
-	    return;
+	if (yn && _record_safe_control->get_value()) {
+		return -1;
 	}
 
-	if (!_session.writable()) {
-		return;
-	}
-
-	if (_freeze_record.state == Frozen) {
-		return;
-	}
-
-	if (use_group (group_override, &RouteGroup::is_recenable)) {
-		_route_group->apply (&Track::prep_record_enabled, yn, Controllable::NoGroup);
-		return;
+	if (!can_be_record_enabled()) {
+		return -1;
 	}
 
 	/* keep track of the meter point as it was before we rec-enabled */
@@ -288,31 +223,20 @@ Track::prep_record_enabled (bool yn, Controllable::GroupControlDisposition group
 			set_meter_point (_saved_meter_point);
 		}
 	}
+
+	return 0;
 }
 
 void
-Track::set_record_enabled (bool yn, Controllable::GroupControlDisposition gcd)
+Track::record_enable_changed (bool, Controllable::GroupControlDisposition)
 {
-	if (_diskstream->record_safe ()) {
-	    return;
-	}
+	_diskstream->set_record_enabled (_record_enable_control->get_value());
+}
 
-	if (!_session.writable()) {
-		return;
-	}
-
-	if (_freeze_record.state == Frozen) {
-		return;
-	}
-
-	if (use_group (gcd, &RouteGroup::is_recenable)) {
-		_route_group->apply (&Track::set_record_enabled, yn, Controllable::NoGroup);
-		return;
-	}
-
-	_diskstream->set_record_enabled (yn);
-
-	_rec_enable_control->Changed (true, gcd);
+void
+Track::record_safe_changed (bool, Controllable::GroupControlDisposition)
+{
+	_diskstream->set_record_safe (_record_safe_control->get_value());
 }
 
 bool
@@ -336,12 +260,7 @@ Track::set_record_safe (bool yn, Controllable::GroupControlDisposition group_ove
 		return;
 	}
 
-	if (use_group (group_override, &RouteGroup::is_recenable)) {
-		_route_group->apply (&Track::set_record_safe, yn, Controllable::NoGroup);
-		return;
-	}
-
-	_diskstream->set_record_safe (yn);
+	_rec_safe_control->set_value (yn, group_override);
 }
 
 void
@@ -371,7 +290,7 @@ Track::set_name (const string& str)
 {
 	bool ret;
 
-	if (record_enabled() && _session.actively_recording()) {
+	if (_record_enable_control->get_value() && _session.actively_recording()) {
 		/* this messes things up if done while recording */
 		return false;
 	}
@@ -452,7 +371,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 
 	if (!_active) {
 		silence (nframes);
-		if (_meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled())) {
+		if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _diskstream->record_enabled())) {
 			_meter->reset();
 		}
 		return 0;
@@ -611,8 +530,6 @@ Track::set_diskstream (boost::shared_ptr<Diskstream> ds)
 
 	ds->PlaylistChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_playlist_changed, this));
 	diskstream_playlist_changed ();
-	ds->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_record_enable_changed, this));
-	ds->RecordSafeChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_record_safe_changed, this));
 	ds->SpeedChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_speed_changed, this));
 	ds->AlignmentStyleChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_alignment_style_changed, this));
 }
@@ -621,18 +538,6 @@ void
 Track::diskstream_playlist_changed ()
 {
 	PlaylistChanged (); /* EMIT SIGNAL */
-}
-
-void
-Track::diskstream_record_enable_changed ()
-{
-	RecordEnableChanged (); /* EMIT SIGNAL */
-}
-
-void
-Track::diskstream_record_safe_changed ()
-{
-	RecordSafeChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -1014,12 +919,13 @@ MonitorState
 Track::monitoring_state () const
 {
 	/* Explicit requests */
+	MonitorChoice m (_monitoring_control->monitoring_choice());
 
-	if (_monitoring & MonitorInput) {
+	if (m & MonitorInput) {
 		return MonitoringInput;
 	}
 
-	if (_monitoring & MonitorDisk) {
+	if (m & MonitorDisk) {
 		return MonitoringDisk;
 	}
 
@@ -1086,7 +992,7 @@ Track::maybe_declick (BufferSet& bufs, framecnt_t nframes, int declick)
 	   ditto if we are monitoring inputs.
         */
 
-        if (_have_internal_generator || monitoring_choice() == MonitorInput) {
+	if (_have_internal_generator || (_monitoring_control->monitoring_choice() == MonitorInput)) {
                 return;
         }
 
@@ -1136,22 +1042,10 @@ Track::check_initial_delay (framecnt_t nframes, framepos_t& transport_frame)
 }
 
 void
-Track::set_monitoring (MonitorChoice mc, Controllable::GroupControlDisposition gcd)
+Track::monitoring_changed (bool, Controllable::GroupControlDisposition)
 {
-	if (use_group (gcd, &RouteGroup::is_monitoring)) {
-		_route_group->apply (&Track::set_monitoring, mc, Controllable::NoGroup);
-		return;
-	}
-
-	if (mc !=  _monitoring) {
-		_monitoring = mc;
-
-		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			(*i)->monitoring_changed ();
-		}
-
-		MonitoringChanged (); /* EMIT SIGNAL */
-		_monitoring_control->Changed (true, gcd);
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		(*i)->monitoring_changed ();
 	}
 }
 
@@ -1161,64 +1055,10 @@ Track::metering_state () const
 	bool rv;
 	if (_session.transport_rolling ()) {
 		// audio_track.cc || midi_track.cc roll() runs meter IFF:
-		rv = _meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled());
+		rv = _meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _diskstream->record_enabled());
 	} else {
 		// track no_roll() always metering if
 		rv = _meter_point == MeterInput;
 	}
 	return rv ? MeteringInput : MeteringRoute;
-}
-
-Track::MonitoringControllable::MonitoringControllable (std::string name, boost::shared_ptr<Track> r)
-	: RouteAutomationControl (name, MonitoringAutomation, boost::shared_ptr<AutomationList>(), r)
-{
-	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(MonitoringAutomation)));
-	gl->set_interpolation(Evoral::ControlList::Discrete);
-	set_list (gl);
-}
-
-void
-Track::MonitoringControllable::set_value (double val, Controllable::GroupControlDisposition gcd)
-{
-	_set_value (val, gcd);
-}
-
-void
-Track::MonitoringControllable::_set_value (double val, Controllable::GroupControlDisposition gcd)
-{
-	boost::shared_ptr<Route> r = _route.lock();
-	if (!r) {
-		return;
-	}
-
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (r);
-	if (!t) {
-		return;
-	}
-
-	int mc = (int) val;
-
-	if (mc < MonitorAuto || mc > MonitorDisk) {
-		return;
-	}
-
-	/* no group effect at present */
-
-	t->set_monitoring ((MonitorChoice) mc, gcd);
-}
-
-double
-Track::MonitoringControllable::get_value () const
-{
-	boost::shared_ptr<Route> r = _route.lock();
-	if (!r) {
-		return 0.0;
-	}
-
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (r);
-	if (!t) {
-		return 0.0;
-	}
-
-	return t->monitoring_choice();
 }

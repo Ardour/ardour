@@ -186,7 +186,7 @@ AudioStreamView::setup_rec_box ()
 
 		if (!rec_active &&
 		    _trackview.session()->record_status() == Session::Recording &&
-		    _trackview.track()->record_enabled()) {
+		    _trackview.track()->rec_enable_control()->get_value()) {
 			if (_trackview.audio_track()->mode() == Normal && UIConfiguration::instance().get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
 
 				/* add a new region, but don't bother if they set show-waveforms-while-recording mid-record */
@@ -240,7 +240,7 @@ AudioStreamView::setup_rec_box ()
 
 		} else if (rec_active &&
 			   (_trackview.session()->record_status() != Session::Recording ||
-			    !_trackview.track()->record_enabled())) {
+			    !_trackview.track()->rec_enable_control()->get_value())) {
 			screen_update_connection.disconnect();
 			rec_active = false;
 			rec_updating = false;

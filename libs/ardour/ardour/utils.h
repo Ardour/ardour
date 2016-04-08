@@ -28,18 +28,25 @@
 #include <string>
 #include <cmath>
 
+#include "boost/shared_ptr.hpp"
+
 #if __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 #endif /* __APPLE__ */
 
-#include "ardour/libardour_visibility.h"
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
 #include "ardour/dB.h"
+#include "ardour/types.h"
+
+#include "ardour/libardour_visibility.h"
 
 class XMLNode;
 
 namespace ARDOUR {
+
+class Route;
+class Track;
 
 LIBARDOUR_API std::string legalize_for_path (const std::string& str);
 LIBARDOUR_API std::string legalize_for_universal_path (const std::string& str);
@@ -169,6 +176,29 @@ LIBARDOUR_API bool matching_unsuffixed_filename_exists_in (const std::string& di
 
 LIBARDOUR_API uint32_t how_many_dsp_threads ();
 
+template<typename T> boost::shared_ptr<ControlList> route_list_to_control_list (boost::shared_ptr<RouteList> rl, boost::shared_ptr<T> (Route::*get_control)() const) {
+	boost::shared_ptr<ControlList> cl (new ControlList);
+	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
+		boost::shared_ptr<AutomationControl> ac = ((*r).get()->*get_control)();
+		if (ac) {
+			cl->push_back (ac);
+		}
+	}
+	return cl;
+}
+
+template<typename T> boost::shared_ptr<ControlList> route_list_to_control_list (boost::shared_ptr<RouteList> rl, boost::shared_ptr<T> (Track::*get_control)() const) {
+	boost::shared_ptr<ControlList> cl (new ControlList);
+	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
+		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*r);
+		boost::shared_ptr<AutomationControl> ac = (t.get()->*get_control)();
+		if (ac) {
+			cl->push_back (ac);
+		}
+	}
+	return cl;
+}
+
 #if __APPLE__
 LIBARDOUR_API std::string CFStringRefToStdString(CFStringRef stringRef);
 #endif // __APPLE__
@@ -176,4 +206,3 @@ LIBARDOUR_API std::string CFStringRefToStdString(CFStringRef stringRef);
 } //namespave
 
 #endif /* __ardour_utils_h__ */
-

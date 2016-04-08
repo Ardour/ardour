@@ -366,7 +366,7 @@ MeterStrip::set_button_names()
 {
 	mute_button->set_text (S_("Mute|M"));
 
-	if (_route && _route->solo_safe()) {
+	if (_route && _route->solo_safe_control()->solo_safe()) {
 		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
 	} else {
 		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));

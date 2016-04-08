@@ -20,6 +20,7 @@
 
 #include "ardour/route.h"
 #include "ardour/route_graph.h"
+#include "ardour/track.h"
 
 #include "i18n.h"
 
@@ -195,21 +196,39 @@ struct RouteRecEnabledComparator
 {
 	bool operator () (GraphVertex r1, GraphVertex r2) const
 	{
-		if (r1->record_enabled()) {
-			if (r2->record_enabled()) {
-				/* both rec-enabled, just use signal order */
+		boost::shared_ptr<Track> t1 (boost::dynamic_pointer_cast<Track>(r1));
+		boost::shared_ptr<Track> t2 (boost::dynamic_pointer_cast<Track>(r2));
+
+		if (!t1) {
+			if (!t2) {
+				/* makes no difference which is first, use signal order */
 				return r1->order_key () < r2->order_key ();
 			} else {
-				/* r1 rec-enabled, r2 not rec-enabled, run r2 early */
+				/* r1 is not a track, r2 is, run it early */
+				return false;
+			}
+		}
+
+		if (!t2) {
+			/* we already tested !t1, so just use signal order */
+			return r1->order_key () < r2->order_key ();
+		}
+
+		if (t1->rec_enable_control()->get_value()) {
+			if (t2->rec_enable_control()->get_value()) {
+				/* both rec-enabled, just use signal order */
+				return t1->order_key () < t2->order_key ();
+			} else {
+				/* t1 rec-enabled, t2 not rec-enabled, run t2 early */
 				return false;
 			}
 		} else {
-			if (r2->record_enabled()) {
-				/* r2 rec-enabled, r1 not rec-enabled, run r1 early */
+			if (t2->rec_enable_control()->get_value()) {
+				/* t2 rec-enabled, t1 not rec-enabled, run t1 early */
 				return true;
 			} else {
 				/* neither rec-enabled, use signal order */
-				return r1->order_key () < r2->order_key ();
+				return t1->order_key () < t2->order_key ();
 			}
 		}
 	}

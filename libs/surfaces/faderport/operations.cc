@@ -129,9 +129,9 @@ FaderPort::mute ()
 		return;
 	}
 
-	boost::shared_ptr<RouteList> rl (new RouteList);
-	rl->push_back (_current_route);
-	session->set_mute (rl, !_current_route->muted());
+	boost::shared_ptr<ControlList> cl (new ControlList);
+	cl->push_back (_current_route->mute_control());
+	session->set_controls (cl, !_current_route->muted(), PBD::Controllable::UseGroup);
 }
 
 void
@@ -141,14 +141,15 @@ FaderPort::solo ()
 		return;
 	}
 
-	boost::shared_ptr<RouteList> rl (new RouteList);
-	rl->push_back (_current_route);
+	bool yn;
 
 	if (Config->get_solo_control_is_listen_control()) {
-		session->set_listen (rl, !_current_route->listening_via_monitor());
+		yn = !_current_route->listening_via_monitor();
 	} else {
-		session->set_solo (rl, !_current_route->soloed());
+		yn = !_current_route->soloed();
 	}
+
+	_current_route->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::UseGroup);
 }
 
 void
@@ -164,10 +165,7 @@ FaderPort::rec_enable ()
 		return;
 	}
 
-	boost::shared_ptr<RouteList> rl (new RouteList);
-	rl->push_back (_current_route);
-
-	session->set_record_enabled (rl, !t->record_enabled());
+	t->rec_enable_control()->set_value (!t->rec_enable_control()->get_value(), Controllable::UseGroup);
 }
 
 void

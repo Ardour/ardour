@@ -172,7 +172,7 @@ printf("setting gain to unity (?)");
 	BOOST_FOREACH(RouteUI* r, _route_targets) {
 		boost::shared_ptr<Route> rp = r->route();
 		if (rp) {
-			rp->set_gain (1.0, Controllable::NoGroup);
+			rp->gain_control()->set_value (1.0, Controllable::NoGroup);
 		}
 	}
 }

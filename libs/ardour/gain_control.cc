@@ -33,9 +33,9 @@ using namespace ARDOUR;
 using namespace std;
 
 GainControl::GainControl (Session& session, const Evoral::Parameter &param, boost::shared_ptr<AutomationList> al)
-	: AutomationControl (session, param, ParameterDescriptor(param),
-	                     al ? al : boost::shared_ptr<AutomationList> (new AutomationList (param)),
-	                     param.type() == GainAutomation ? X_("gaincontrol") : X_("trimcontrol")) {
+	: SlavableAutomationControl (session, param, ParameterDescriptor(param),
+	                             al ? al : boost::shared_ptr<AutomationList> (new AutomationList (param)),
+	                             param.type() == GainAutomation ? X_("gaincontrol") : X_("trimcontrol")) {
 
 	alist()->reset_default (1.0);
 
@@ -44,22 +44,7 @@ GainControl::GainControl (Session& session, const Evoral::Parameter &param, boos
 }
 
 void
-GainControl::set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
-{
-	if (writable()) {
-		_set_value (val, group_override);
-	}
-}
-
-void
-GainControl::set_value_unchecked (double val)
-{
-	/* used only automation playback */
-	_set_value (val, Controllable::NoGroup);
-}
-
-void
-GainControl::_set_value (double val, Controllable::GroupControlDisposition group_override)
+GainControl::actually_set_value (double val, Controllable::GroupControlDisposition group_override)
 {
 	val = std::max (std::min (val, (double)_desc.upper), (double)_desc.lower);
 
@@ -75,7 +60,7 @@ GainControl::_set_value (double val, Controllable::GroupControlDisposition group
 	   be retrieved by AutomationControl::get_value ()
 	*/
 
-	AutomationControl::set_value (val, group_override);
+	AutomationControl::actually_set_value (val, group_override);
 
 	_session.set_dirty ();
 }
@@ -117,6 +102,23 @@ GainControl::get_user_string () const
 {
 	char theBuf[32]; sprintf( theBuf, _("%3.1f dB"), accurate_coefficient_to_dB (get_value()));
 	return std::string(theBuf);
+}
+
+void
+GainControl::inc_gain (gain_t factor)
+{
+	/* To be used ONLY when doing group-relative gain adjustment, from
+	 * ControlGroup::set_group_values().
+	 */
+
+	const float desired_gain = user_double();
+
+	if (fabsf (desired_gain) < GAIN_COEFF_SMALL) {
+		// really?! what's the idea here?
+		actually_set_value (0.000001f + (0.000001f * factor), Controllable::ForGroup);
+	} else {
+		actually_set_value (desired_gain + (desired_gain * factor), Controllable::ForGroup);
+	}
 }
 
 void

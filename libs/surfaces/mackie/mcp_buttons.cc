@@ -383,7 +383,7 @@ MackieControlProtocol::save_press (Button &)
 	} else {
 		save_state ();
 	}
-	
+
 	return none;
 }
 
@@ -886,15 +886,9 @@ MackieControlProtocol::clearsolo_press (Mackie::Button&)
 		access_action ("Editor/set-session-from-edit-range");
 		return none;
 	}
-	
-	if (session) {
-		if (session->soloing()) {
-			session->set_solo (session->get_routes(), false);
-		} else if (session->listening()) {
-			session->set_listen (session->get_routes(), false);
-		}
 
-		session->clear_all_solo_state (session->get_routes()); // safeguard, ideally this won't do anything, check the log-window
+	if (session) {
+		session->clear_all_solo_state (session->get_routes()); 
 	}
 	return none;
 }
@@ -1063,7 +1057,7 @@ MackieControlProtocol::nudge_release (Mackie::Button&)
 	_modifier_state &= ~MODIFIER_NUDGE;
 
 	/* XXX these action names are stupid, because the action can affect
-	 * regions, markers or the playhead depending on selection state. 
+	 * regions, markers or the playhead depending on selection state.
 	 */
 
 	if (main_modifier_state() & MODIFIER_SHIFT) {

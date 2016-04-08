@@ -26,13 +26,19 @@
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "ardour/gain_control.h"
 #include "ardour/session_object.h"
 
 namespace ARDOUR {
 
 class AutomationControl;
+class GainControl;
 class PeakMeter;
+class SoloControl;
+class MuteControl;
+class PhaseControl;
+class SoloIsolateControl;
+class SoloSafeControl;
+class MonitorControl;
 
 /* This is a virtual base class for any object that needs to be potentially
  * represented by a control-centric user interface using the general model of a
@@ -58,12 +64,13 @@ class Stripable : public SessionObject {
 
 	virtual boost::shared_ptr<GainControl> gain_control() const = 0;
 
-	virtual boost::shared_ptr<AutomationControl> solo_control() const = 0;
-	virtual boost::shared_ptr<AutomationControl> mute_control() const = 0;
-	virtual boost::shared_ptr<AutomationControl> phase_control() const = 0;
-	virtual boost::shared_ptr<AutomationControl> trim_control() const = 0;
+	virtual boost::shared_ptr<SoloControl> solo_control() const = 0;
+	virtual boost::shared_ptr<MuteControl> mute_control() const = 0;
 
-	virtual boost::shared_ptr<AutomationControl> monitoring_control() const = 0;
+	virtual boost::shared_ptr<PhaseControl> phase_control() const = 0;
+	virtual boost::shared_ptr<GainControl> trim_control() const = 0;
+
+	virtual boost::shared_ptr<MonitorControl> monitoring_control() const = 0;
 	virtual boost::shared_ptr<AutomationControl> recenable_control() const { return boost::shared_ptr<AutomationControl>(); }
 
 	/* "well-known" controls for panning. Any or all of these may return
@@ -131,6 +138,9 @@ class Stripable : public SessionObject {
          * the route.
          */
 	virtual boost::shared_ptr<AutomationControl> master_send_enable_controllable () const = 0;
+
+	virtual bool muted_by_others_soloing () const = 0;
+	virtual bool muted_by_others () const = 0;
 };
 
 

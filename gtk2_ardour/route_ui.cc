@@ -34,8 +34,21 @@
 
 #include "ardour/dB.h"
 #include "ardour/route_group.h"
+#include "ardour/solo_isolate_control.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
+#include "ardour/audio_track.h"
+#include "ardour/audioengine.h"
+#include "ardour/filename_extensions.h"
+#include "ardour/midi_track.h"
+#include "ardour/monitor_control.h"
+#include "ardour/internal_send.h"
+#include "ardour/profile.h"
+#include "ardour/phase_control.h"
+#include "ardour/send.h"
+#include "ardour/route.h"
+#include "ardour/session.h"
+#include "ardour/template_utils.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -55,16 +68,6 @@
 #include "timers.h"
 #include "ui_config.h"
 
-#include "ardour/audio_track.h"
-#include "ardour/audioengine.h"
-#include "ardour/filename_extensions.h"
-#include "ardour/midi_track.h"
-#include "ardour/internal_send.h"
-#include "ardour/profile.h"
-#include "ardour/send.h"
-#include "ardour/route.h"
-#include "ardour/session.h"
-#include "ardour/template_utils.h"
 
 #include "i18n.h"
 using namespace Gtk;
@@ -270,10 +273,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->solo_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_safe_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_isolate_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
-
-	if (_route->phase_control()) {
-		_route->phase_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
-	}
+	_route->phase_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
 
 	if (is_track()) {
 		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteUI::map_frozen, this), gui_context());
@@ -290,8 +290,8 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	if (_session->writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
-		t->RecordEnableChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
-		t->RecordSafeChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
+		t->rec_enable_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
+		t->rec_safe_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
 
 		rec_enable_button->show();
 		rec_enable_button->set_controllable (t->rec_enable_control());
@@ -309,7 +309,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
-		t->MonitoringChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::monitoring_changed, this), gui_context());
+		t->monitoring_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::monitoring_changed, this, _1, _2), gui_context());
 
 		update_monitoring_display ();
 	}
@@ -383,7 +383,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 		if (Keyboard::is_button2_event (ev)) {
 			// button2-click is "momentary"
 
-			_mute_release = new SoloMuteRelease (_route->muted ());
+			_mute_release = new SoloMuteRelease (_route->mute_control()->muted ());
 		}
 
 		if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
@@ -415,7 +415,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 				}
 
 				DisplaySuspender ds;
-				_session->set_mute (copy, !_route->muted());
+				_session->set_controls (route_list_to_control_list (copy, &Route::mute_control), _route->muted() ? 0.0 : 1.0, Controllable::UseGroup);
 
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -444,7 +444,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 					}
 
 					DisplaySuspender ds;
-					_session->set_mute (rl, !_route->muted(), Session::rt_cleanup, Controllable::InverseGroup);
+					_session->set_controls (route_list_to_control_list (rl, &Route::mute_control), _route->muted() ? 0.0 : 1.0, Controllable::InverseGroup);
 				}
 
 			} else {
@@ -458,7 +458,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 					_mute_release->routes = rl;
 				}
 
-				_session->set_mute (rl, !_route->muted());
+				_session->set_control (_route->mute_control(), _route->muted() ? 0.0 : 1.0, Controllable::UseGroup);
 
 			}
 		}
@@ -472,7 +472,7 @@ RouteUI::mute_release (GdkEventButton* /*ev*/)
 {
 	if (_mute_release){
 		DisplaySuspender ds;
-		_session->set_mute (_mute_release->routes, _mute_release->active, Session::rt_cleanup, Controllable::UseGroup);
+		_session->set_controls (route_list_to_control_list (_mute_release->routes, &Route::mute_control), _mute_release->active, Controllable::UseGroup);
 		delete _mute_release;
 		_mute_release = 0;
 	}
@@ -572,11 +572,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				}
 
 				DisplaySuspender ds;
-				if (Config->get_solo_control_is_listen_control()) {
-					_session->set_listen (_session->get_routes(), !_route->listening_via_monitor(),  Session::rt_cleanup, Controllable::UseGroup);
-				} else {
-					_session->set_solo (_session->get_routes(), !_route->self_soloed(),  Session::rt_cleanup, Controllable::UseGroup);
-				}
+				_session->set_controls (route_list_to_control_list (_session->get_routes(), &Route::solo_control), !_route->solo_control()->get_value(), Controllable::UseGroup);
 
 			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
 
@@ -600,14 +596,16 @@ RouteUI::solo_press(GdkEventButton* ev)
 					/* ??? we need a just_one_listen() method */
 				} else {
 					DisplaySuspender ds;
-					_session->set_just_one_solo (_route, true);
+					boost::shared_ptr<ControlList> cl (new ControlList);
+					cl->push_back (_route->solo_control());
+					_session->set_controls (cl, 1.0, Controllable::NoGroup);
 				}
 
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 
 				// shift-click: toggle solo isolated status
 
-				_route->set_solo_isolated (!_route->solo_isolated(), Controllable::UseGroup);
+				_route->solo_isolate_control()->set_value (_route->solo_isolate_control()->get_value() ? 0.0 : 1.0, Controllable::UseGroup);
 				delete _solo_release;
 				_solo_release = 0;
 
@@ -647,11 +645,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 					DisplaySuspender ds;
 
-					if (Config->get_solo_control_is_listen_control()) {
-						_session->set_listen (rl, !_route->listening_via_monitor(),  Session::rt_cleanup, Controllable::InverseGroup);
-					} else {
-						_session->set_solo (rl, !_route->self_soloed(),  Session::rt_cleanup, Controllable::InverseGroup);
-					}
+					_session->set_controls (route_list_to_control_list (rl, &Route::solo_control), !_route->self_soloed(), Controllable::InverseGroup);
 				}
 
 				delete _solo_release;
@@ -669,11 +663,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				}
 
 				DisplaySuspender ds;
-				if (Config->get_solo_control_is_listen_control()) {
-					_session->set_listen (rl, !_route->listening_via_monitor());
-				} else {
-					_session->set_solo (rl, !_route->self_soloed());
-				}
+				_session->set_controls (route_list_to_control_list (rl, &Route::solo_control), !_route->self_soloed(), Controllable::UseGroup);
 			}
 		}
 	}
@@ -690,11 +680,7 @@ RouteUI::solo_release (GdkEventButton* /*ev*/)
 
 		} else {
 			DisplaySuspender ds;
-			if (Config->get_solo_control_is_listen_control()) {
-				_session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, Controllable::UseGroup);
-			} else {
-				_session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, Controllable::UseGroup);
-			}
+			_session->set_controls (route_list_to_control_list (_solo_release->routes, &Route::solo_control), _solo_release->active ? 1.0 : 0.0, Controllable::UseGroup);
 		}
 
 		delete _solo_release;
@@ -741,7 +727,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
 			DisplaySuspender ds;
-			_session->set_record_enabled (_session->get_routes(), !_route->record_enabled());
+			_session->set_controls (route_list_to_control_list (_session->get_routes(), &Track::rec_enable_control), !track()->rec_enable_control()->get_value(), Controllable::NoGroup);
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -757,7 +743,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 				rl->push_back (_route);
 
 				DisplaySuspender ds;
-				_session->set_record_enabled (rl, !_route->record_enabled(), Session::rt_cleanup, Controllable::InverseGroup);
+				_session->set_controls (route_list_to_control_list (rl, &Track::rec_enable_control), !track()->rec_enable_control()->get_value(), Controllable::InverseGroup);
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
@@ -766,10 +752,8 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else {
 
-			boost::shared_ptr<RouteList> rl (new RouteList);
-			rl->push_back (route());
-			DisplaySuspender ds;
-			_session->set_record_enabled (rl, !_route->record_enabled());
+			boost::shared_ptr<Track> trk = track();
+			_session->set_control (trk->rec_enable_control(), !trk->rec_enable_control()->get_value(), Controllable::UseGroup);
 		}
 	}
 
@@ -777,7 +761,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 }
 
 void
-RouteUI::monitoring_changed ()
+RouteUI::monitoring_changed (bool, Controllable::GroupControlDisposition)
 {
 	update_monitoring_display ();
 }
@@ -797,7 +781,7 @@ RouteUI::update_monitoring_display ()
 
 	MonitorState ms = t->monitoring_state();
 
-	if (t->monitoring_choice() & MonitorInput) {
+	if (t->monitoring_control()->monitoring_choice() & MonitorInput) {
 		monitor_input_button->set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		if (ms & MonitoringInput) {
@@ -807,7 +791,7 @@ RouteUI::update_monitoring_display ()
 		}
 	}
 
-	if (t->monitoring_choice() & MonitorDisk) {
+	if (t->monitoring_control()->monitoring_choice() & MonitorDisk) {
 		monitor_disk_button->set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		if (ms & MonitoringDisk) {
@@ -863,8 +847,8 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 	   signal together, which requires yet more buffers.
 	*/
 
-	if (t->monitoring_choice() & monitor_choice) {
-		mc = MonitorChoice (t->monitoring_choice() & ~monitor_choice);
+	if (t->monitoring_control()->monitoring_choice() & monitor_choice) {
+		mc = MonitorChoice (t->monitoring_control()->monitoring_choice() & ~monitor_choice);
 	} else {
 		/* this line will change when the options are non-orthogonal */
 		// mc = MonitorChoice (t->monitoring_choice() | monitor_choice);
@@ -887,7 +871,7 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 	}
 
 	DisplaySuspender ds;
-	_session->set_monitoring (rl, mc, Session::rt_cleanup, Controllable::UseGroup);
+	_session->set_controls (route_list_to_control_list (rl, &Route::monitoring_control), (double) mc, Controllable::UseGroup);
 
 	return false;
 }
@@ -912,7 +896,9 @@ RouteUI::build_record_menu ()
 	}
 
 	if (step_edit_item) {
-		step_edit_item->set_sensitive (!_route->record_enabled());
+		if (track()->rec_enable_control()->get_value()) {
+			step_edit_item->set_sensitive (false);
+		}
 		step_edit_item->set_active (midi_track()->step_editing());
 	}
 	if (rec_safe_item) {
@@ -924,7 +910,7 @@ RouteUI::build_record_menu ()
 void
 RouteUI::toggle_step_edit ()
 {
-	if (!is_midi_track() || _route->record_enabled()) {
+	if (!is_midi_track() || track()->rec_enable_control()->get_value()) {
 		return;
 	}
 
@@ -1168,7 +1154,7 @@ RouteUI::solo_isolate_active_state (boost::shared_ptr<Route> r)
 		return Gtkmm2ext::Off;
 	}
 
-	if (r->solo_isolated()) {
+	if (r->solo_isolate_control()->solo_isolated()) {
 		return Gtkmm2ext::ExplicitActive;
 	} else {
 		return Gtkmm2ext::Off;
@@ -1182,7 +1168,7 @@ RouteUI::solo_safe_active_state (boost::shared_ptr<Route> r)
 		return Gtkmm2ext::Off;
 	}
 
-	if (r->solo_safe()) {
+	if (r->solo_safe_control()->solo_safe()) {
 		return Gtkmm2ext::ExplicitActive;
 	} else {
 		return Gtkmm2ext::Off;
@@ -1192,13 +1178,13 @@ RouteUI::solo_safe_active_state (boost::shared_ptr<Route> r)
 void
 RouteUI::update_solo_display ()
 {
-	bool yn = _route->solo_safe ();
+	bool yn = _route->solo_safe_control()->solo_safe ();
 
 	if (solo_safe_check && solo_safe_check->get_active() != yn) {
 		solo_safe_check->set_active (yn);
 	}
 
-	yn = _route->solo_isolated ();
+	yn = _route->solo_isolate_control()->solo_isolated ();
 
 	if (solo_isolated_check && solo_isolated_check->get_active() != yn) {
 		solo_isolated_check->set_active (yn);
@@ -1207,7 +1193,7 @@ RouteUI::update_solo_display ()
         set_button_names ();
 
         if (solo_isolated_led) {
-		if (_route->solo_isolated()) {
+	        if (_route->solo_isolate_control()->solo_isolated()) {
 			solo_isolated_led->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			solo_isolated_led->unset_active_state ();
@@ -1215,7 +1201,7 @@ RouteUI::update_solo_display ()
         }
 
         if (solo_safe_led) {
-		if (_route->solo_safe()) {
+	        if (_route->solo_safe_control()->solo_safe()) {
 			solo_safe_led->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			solo_safe_led->unset_active_state ();
@@ -1248,7 +1234,7 @@ RouteUI::mute_active_state (Session* s, boost::shared_ptr<Route> r)
 		if (r->muted ()) {
 			/* full mute */
 			return Gtkmm2ext::ExplicitActive;
-		} else if (r->muted_by_others ()) {
+		} else if (r->muted_by_others_soloing ()) {
 			/* this will reflect both solo mutes AND master mutes */
 			return Gtkmm2ext::ImplicitActive;
 		} else {
@@ -1261,10 +1247,11 @@ RouteUI::mute_active_state (Session* s, boost::shared_ptr<Route> r)
 		if (r->muted()) {
 			/* full mute */
 			return Gtkmm2ext::ExplicitActive;
-		} else if (r->mute_master()->muted_by_others()) {
+		} else if (r->muted_by_others()) {
 			/* note the direct use of MuteMaster API here. We are
 			   not interested in showing
-			   others-soloed-so-this-muted status in this branch.
+			   others-soloed-so-this-muted status in this
+			   conditional branch.
 			*/
 			return Gtkmm2ext::ImplicitActive;
 		} else {
@@ -1335,11 +1322,16 @@ RouteUI::blink_rec_display (bool blinkOn)
 	if (!rec_enable_button || !_route) {
 		return;
 	}
+
 	if (boost::dynamic_pointer_cast<Send>(_current_delivery)) {
 		return;
 	}
 
-	if (_route->record_enabled()) {
+	if (!is_track()) {
+		return;
+	}
+
+	if (track()->rec_enable_control()->get_value()) {
                 switch (_session->record_status ()) {
                 case Session::Recording:
                         rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
@@ -1347,12 +1339,12 @@ RouteUI::blink_rec_display (bool blinkOn)
 
                 case Session::Disabled:
                 case Session::Enabled:
-                        if ( UIConfiguration::instance().get_blink_rec_arm() )
-							rec_enable_button->set_active_state ( blinkOn ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off );
-						else
-							rec_enable_button->set_active_state ( ImplicitActive );
+	                if (UIConfiguration::instance().get_blink_rec_arm()) {
+	                        rec_enable_button->set_active_state ( blinkOn ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off );
+	                } else {
+	                        rec_enable_button->set_active_state ( ImplicitActive );
+	                }
                         break;
-
                 }
 
                 if (step_edit_item) {
@@ -1381,14 +1373,14 @@ RouteUI::build_solo_menu (void)
 	Gtk::CheckMenuItem* check;
 
 	check = new Gtk::CheckMenuItem(_("Solo Isolate"));
-	check->set_active (_route->solo_isolated());
+	check->set_active (_route->solo_isolate_control()->solo_isolated());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_isolated), check));
 	items.push_back (CheckMenuElem(*check));
         solo_isolated_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
 
 	check = new Gtk::CheckMenuItem(_("Solo Safe"));
-	check->set_active (_route->solo_safe());
+	check->set_active (_route->solo_safe_control()->solo_safe());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_safe), check));
 	items.push_back (CheckMenuElem(*check));
         solo_safe_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
@@ -1442,16 +1434,16 @@ RouteUI::build_mute_menu(void)
 void
 RouteUI::init_mute_menu(MuteMaster::MutePoint mp, Gtk::CheckMenuItem* check)
 {
-	check->set_active (_route->mute_points() & mp);
+	check->set_active (_route->mute_control()->mute_points() & mp);
 }
 
 void
 RouteUI::toggle_mute_menu(MuteMaster::MutePoint mp, Gtk::CheckMenuItem* check)
 {
 	if (check->get_active()) {
-		_route->set_mute_points (MuteMaster::MutePoint (_route->mute_points() | mp));
+		_route->mute_control()->set_mute_points (MuteMaster::MutePoint (_route->mute_control()->mute_points() | mp));
 	} else {
-		_route->set_mute_points (MuteMaster::MutePoint (_route->mute_points() & ~mp));
+		_route->mute_control()->set_mute_points (MuteMaster::MutePoint (_route->mute_control()->mute_points() & ~mp));
 	}
 }
 
@@ -1461,7 +1453,7 @@ RouteUI::muting_change ()
 	ENSURE_GUI_THREAD (*this, &RouteUI::muting_change)
 
 	bool yn;
-	MuteMaster::MutePoint current = _route->mute_points ();
+	MuteMaster::MutePoint current = _route->mute_control()->mute_points ();
 
 	yn = (current & MuteMaster::PreFader);
 
@@ -1496,7 +1488,7 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 	}
 
 	bool view = solo_isolated_led->active_state();
-	bool model = _route->solo_isolated();
+	bool model = _route->solo_isolate_control()->solo_isolated();
 
 	/* called BEFORE the view has changed */
 
@@ -1506,11 +1498,11 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 			if (model) {
 				/* disable isolate for all routes */
 				DisplaySuspender ds;
-				_session->set_solo_isolated (_session->get_routes(), false, Session::rt_cleanup, Controllable::NoGroup);
+				_session->set_controls (route_list_to_control_list (_session->get_routes(), &Route::solo_isolate_control), 0.0, Controllable::NoGroup);
 			} else {
 				/* enable isolate for all routes */
 				DisplaySuspender ds;
-				_session->set_solo_isolated (_session->get_routes(), true, Session::rt_cleanup, Controllable::NoGroup);
+				_session->set_controls (route_list_to_control_list (_session->get_routes(), &Route::solo_isolate_control), 1.0, Controllable::NoGroup);
 			}
 
 		} else {
@@ -1522,7 +1514,7 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 				boost::shared_ptr<RouteList> rl (new RouteList);
 				rl->push_back (_route);
 				DisplaySuspender ds;
-				_session->set_solo_isolated (rl, !view, Session::rt_cleanup, Controllable::NoGroup);
+				_session->set_controls (route_list_to_control_list (rl, &Route::solo_isolate_control), view ? 0.0 : 1.0, Controllable::NoGroup);
 			}
 		}
 	}
@@ -1538,7 +1530,7 @@ RouteUI::solo_safe_button_release (GdkEventButton* ev)
 	}
 
 	bool view = solo_safe_led->active_state();
-	bool model = _route->solo_safe();
+	bool model = _route->solo_safe_control()->solo_safe();
 
 	if (ev->button == 1) {
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
@@ -1547,20 +1539,20 @@ RouteUI::solo_safe_button_release (GdkEventButton* ev)
 				/* disable solo safe for all routes */
 				DisplaySuspender ds;
 				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-					(*i)->set_solo_safe (false, Controllable::NoGroup);
+					(*i)->solo_safe_control()->set_value (0.0, Controllable::NoGroup);
 				}
 			} else {
 				/* enable solo safe for all routes */
 				DisplaySuspender ds;
 				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-					(*i)->set_solo_safe (true, Controllable::NoGroup);
+					(*i)->solo_safe_control()->set_value (1.0, Controllable::NoGroup);
 				}
 			}
 		}
 		else {
 			if (model == view) {
 				/* flip just this route */
-				_route->set_solo_safe (!view, Controllable::NoGroup);
+				_route->solo_safe_control()->set_value (view ? 0.0 : 1.0, Controllable::NoGroup);
 			}
 		}
 	}
@@ -1572,19 +1564,19 @@ void
 RouteUI::toggle_solo_isolated (Gtk::CheckMenuItem* check)
 {
         bool view = check->get_active();
-        bool model = _route->solo_isolated();
+        bool model = _route->solo_isolate_control()->solo_isolated();
 
         /* called AFTER the view has changed */
 
         if (model != view) {
-	        _route->set_solo_isolated (view, Controllable::UseGroup);
+	        _route->solo_isolate_control()->set_value (view ? 1.0 : 0.0, Controllable::UseGroup);
         }
 }
 
 void
 RouteUI::toggle_solo_safe (Gtk::CheckMenuItem* check)
 {
-	_route->set_solo_safe (check->get_active(), Controllable::UseGroup);
+	_route->solo_safe_control()->set_value (check->get_active() ? 1.0 : 0.0, Controllable::UseGroup);
 }
 
 /** Ask the user to choose a colour, and then apply that color to my route
@@ -2022,25 +2014,25 @@ RouteUI::parameter_changed (string const & p)
 void
 RouteUI::step_gain_up ()
 {
-	_route->set_gain (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) + 0.1), Controllable::UseGroup);
+	_route->gain_control()->set_value (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) + 0.1), Controllable::UseGroup);
 }
 
 void
 RouteUI::page_gain_up ()
 {
-	_route->set_gain (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) + 0.5), Controllable::UseGroup);
+	_route->gain_control()->set_value (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) + 0.5), Controllable::UseGroup);
 }
 
 void
 RouteUI::step_gain_down ()
 {
-	_route->set_gain (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) - 0.1), Controllable::UseGroup);
+	_route->gain_control()->set_value (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) - 0.1), Controllable::UseGroup);
 }
 
 void
 RouteUI::page_gain_down ()
 {
-	_route->set_gain (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) - 0.5), Controllable::UseGroup);
+	_route->gain_control()->set_value (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) - 0.5), Controllable::UseGroup);
 }
 
 void
@@ -2158,9 +2150,9 @@ RouteUI::set_invert_button_state ()
 
 		ArdourButton* b = _invert_buttons.front ();
 
-		if (_route->phase_invert().count() == _route->phase_invert().size()) {
+		if (_route->phase_control()->count() == _route->phase_control()->size()) {
 			b->set_active_state (Gtkmm2ext::ExplicitActive);
-		} else if (_route->phase_invert().any()) {
+		} else if (_route->phase_control()->any()) {
 			b->set_active_state (Gtkmm2ext::ImplicitActive);
 		} else {
 			b->set_active_state (Gtkmm2ext::Off);
@@ -2172,7 +2164,7 @@ RouteUI::set_invert_button_state ()
 
 		int j = 0;
 		for (vector<ArdourButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i, ++j) {
-			(*i)->set_active (_route->phase_invert (j));
+			(*i)->set_active (_route->phase_control()->inverted (j));
 		}
 
 	}
@@ -2185,7 +2177,7 @@ RouteUI::invert_release (GdkEventButton* ev, uint32_t i)
 		uint32_t const N = _route->input()->n_ports().n_audio ();
 		if (N <= _max_invert_buttons) {
 			/* left-click inverts phase so long as we have a button per channel */
-			_route->set_phase_invert (i, !_invert_buttons[i]->get_active());
+			_route->phase_control()->set_phase_invert (i, !_invert_buttons[i]->get_active());
 			return false;
 		}
 	}
@@ -2216,7 +2208,7 @@ RouteUI::invert_press (GdkEventButton* ev)
 		items.push_back (CheckMenuElem (string_compose (X_("Ø%1"), i + 1), sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_menu_toggled), i)));
 		Gtk::CheckMenuItem* e = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		++_i_am_the_modifier;
-		e->set_active (_route->phase_invert (i));
+		e->set_active (_route->phase_control()->inverted (i));
 		--_i_am_the_modifier;
 	}
 
@@ -2232,7 +2224,8 @@ RouteUI::invert_menu_toggled (uint32_t c)
 		return;
 	}
 
-	_route->set_phase_invert (c, !_route->phase_invert (c));
+
+	_route->phase_control()->set_phase_invert (c, !_route->phase_control()->inverted (c));
 }
 
 void

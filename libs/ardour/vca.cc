@@ -63,6 +63,7 @@ VCA::get_next_vca_number ()
 
 VCA::VCA (Session& s,  uint32_t num, const string& name)
 	: Stripable (s, name)
+	, Muteable (s, name)
 	, Automatable (s)
 	, _number (num)
 	, _gain_control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
@@ -74,8 +75,8 @@ VCA::VCA (Session& s,  uint32_t num, const string& name)
 int
 VCA::init ()
 {
-	_solo_control.reset (new VCASoloControllable (X_("solo"), shared_from_this()));
-	_mute_control.reset (new VCAMuteControllable (X_("mute"), shared_from_this()));
+	_solo_control.reset (new SoloControl (_session, X_("solo"), *this, *this));
+	_mute_control.reset (new MuteControl (_session, X_("mute"), *this));
 
 	add_control (_gain_control);
 	add_control (_solo_control);
@@ -158,99 +159,4 @@ bool
 VCA::muted () const
 {
 	return _mute_requested;
-}
-
-VCA::VCASoloControllable::VCASoloControllable (string const & name, boost::shared_ptr<VCA> vca)
-	: AutomationControl (vca->session(), Evoral::Parameter (SoloAutomation), ParameterDescriptor (Evoral::Parameter (SoloAutomation)),
-	                     boost::shared_ptr<AutomationList>(), name)
-	, _vca (vca)
-{
-}
-
-void
-VCA::VCASoloControllable::set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
-{
-	if (writable()) {
-		_set_value (val, gcd);
-	}
-}
-
-void
-VCA::VCASoloControllable::_set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
-{
-	boost::shared_ptr<VCA> vca = _vca.lock();
-	if (!vca) {
-		return;
-	}
-
-	vca->set_solo (val >= 0.5);
-
-	AutomationControl::set_value (val, gcd);
-}
-
-void
-VCA::VCASoloControllable::set_value_unchecked (double val)
-{
-	/* used only by automation playback */
-	_set_value (val, Controllable::NoGroup);
-}
-
-double
-VCA::VCASoloControllable::get_value() const
-{
-	boost::shared_ptr<VCA> vca = _vca.lock();
-	if (!vca) {
-		return 0.0;
-	}
-
-	return vca->soloed() ? 1.0 : 0.0;
-}
-
-/*----*/
-
-VCA::VCAMuteControllable::VCAMuteControllable (string const & name, boost::shared_ptr<VCA> vca)
-	: AutomationControl (vca->session(), Evoral::Parameter (MuteAutomation), ParameterDescriptor (Evoral::Parameter (MuteAutomation)),
-	                     boost::shared_ptr<AutomationList>(), name)
-	, _vca (vca)
-{
-}
-
-void
-VCA::VCAMuteControllable::set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
-{
-	if (writable()) {
-		_set_value (val, gcd);
-	}
-}
-
-void
-VCA::VCAMuteControllable::_set_value (double val, PBD::Controllable::GroupControlDisposition gcd)
-{
-	boost::shared_ptr<VCA> vca = _vca.lock();
-
-	if (!vca) {
-		return;
-	}
-
-	vca->set_mute (val >= 0.5);
-
-	AutomationControl::set_value (val, gcd);
-}
-
-void
-VCA::VCAMuteControllable::set_value_unchecked (double val)
-{
-	/* used only by automation playback */
-	_set_value (val, Controllable::NoGroup);
-}
-
-double
-VCA::VCAMuteControllable::get_value() const
-{
-	boost::shared_ptr<VCA> vca = _vca.lock();
-	if (!vca) {
-		return 0.0;
-	}
-
-	return vca->muted() ? 1.0 : 0.0;
 }

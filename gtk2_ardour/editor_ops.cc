@@ -5699,11 +5699,11 @@ Editor::toggle_record_enable ()
 			continue;
 
 		if (first) {
-			new_state = !rtav->track()->record_enabled();
+			new_state = !rtav->track()->rec_enable_control()->get_value();
 			first = false;
 		}
 
-		rtav->track()->set_record_enabled (new_state, Controllable::UseGroup);
+		rtav->track()->rec_enable_control()->set_value (new_state, Controllable::UseGroup);
 	}
 }
 
@@ -5712,7 +5712,7 @@ Editor::toggle_solo ()
 {
 	bool new_state = false;
 	bool first = true;
-	boost::shared_ptr<RouteList> rl (new RouteList);
+	boost::shared_ptr<ControlList> cl (new ControlList);
 
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(*i);
@@ -5726,10 +5726,10 @@ Editor::toggle_solo ()
 			first = false;
 		}
 
-		rl->push_back (rtav->route());
+		cl->push_back (rtav->route()->solo_control());
 	}
 
-	_session->set_solo (rl, new_state, Session::rt_cleanup, Controllable::UseGroup);
+	_session->set_controls (cl, new_state ? 1.0 : 0.0, Controllable::UseGroup);
 }
 
 void
@@ -5754,7 +5754,7 @@ Editor::toggle_mute ()
 		rl->push_back (rtav->route());
 	}
 
-	_session->set_mute (rl, new_state, Session::rt_cleanup, Controllable::UseGroup);
+	_session->set_controls (route_list_to_control_list (rl, &Route::mute_control), new_state, Controllable::UseGroup);
 }
 
 void

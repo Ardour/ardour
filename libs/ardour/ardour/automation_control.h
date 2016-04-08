@@ -41,7 +41,7 @@ namespace ARDOUR {
 
 class Session;
 class Automatable;
-
+class ControlGroup;
 
 /** A PBD::Controllable with associated automation data (AutomationList)
  */
@@ -50,7 +50,7 @@ class LIBARDOUR_API AutomationControl
 	, public Evoral::Control
 	, public boost::enable_shared_from_this<AutomationControl>
 {
-public:
+    public:
 	AutomationControl(ARDOUR::Session&,
 	                  const Evoral::Parameter&                  parameter,
 	                  const ParameterDescriptor&                desc,
@@ -87,8 +87,6 @@ public:
 	void stop_touch(bool mark, double when);
 
 	/* inherited from PBD::Controllable.
-	 * Derived classes MUST call ::writable() to verify
-	 * that writing to the parameter is legal at that time.
 	 */
 	double get_value () const;
 	/* inherited from PBD::Controllable.
@@ -99,10 +97,11 @@ public:
 	/* automation related value setting */
 	virtual bool writable () const;
 	/* Call to ::set_value() with no test for writable() because
-	 * this is only used by automation playback. We would like
-	 * to make it pure virtual
+	 * this is only used by automation playback.
 	 */
-	virtual void set_value_unchecked (double val) {}
+	void set_value_unchecked (double val) {
+		actually_set_value (val, PBD::Controllable::NoGroup);
+	}
 
 	double lower()   const { return _desc.lower; }
 	double upper()   const { return _desc.upper; }
@@ -117,6 +116,37 @@ public:
 	const ARDOUR::Session& session() const { return _session; }
 	void commit_transaction (bool did_write);
 
+	void set_group (boost::shared_ptr<ControlGroup>);
+
+  protected:
+	ARDOUR::Session& _session;
+	boost::shared_ptr<ControlGroup> _group;
+
+	const ParameterDescriptor _desc;
+
+	bool check_rt (double val, Controllable::GroupControlDisposition gcd);
+
+	/* derived classes may reimplement this, but should either
+	   call this explicitly inside their version OR make sure that the
+	   Controllable::Changed signal is emitted when necessary.
+	*/
+
+	virtual void actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
+};
+
+class SlavableAutomationControl : public AutomationControl
+{
+    public:
+	SlavableAutomationControl(ARDOUR::Session&,
+	                  const Evoral::Parameter&                  parameter,
+	                  const ParameterDescriptor&                desc,
+	                  boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
+	                  const std::string&                        name="");
+
+	~SlavableAutomationControl ();
+
+	double get_value () const;
+
 	void add_master (boost::shared_ptr<AutomationControl>);
 	void remove_master (boost::shared_ptr<AutomationControl>);
 	void clear_masters ();
@@ -126,11 +156,7 @@ public:
 
 	PBD::Signal0<void> MasterStatusChange;
 
-  protected:
-	ARDOUR::Session& _session;
-
-	const ParameterDescriptor _desc;
-
+    protected:
 
 	class MasterRecord {
           public:
@@ -155,12 +181,12 @@ public:
 	typedef std::map<PBD::ID,MasterRecord> Masters;
 	Masters _masters;
 	PBD::ScopedConnectionList masters_connections;
-
 	virtual void master_changed (bool from_self, GroupControlDisposition gcd);
 	void master_going_away (boost::weak_ptr<AutomationControl>);
 	virtual void recompute_masters_ratios (double val) { /* do nothing by default */}
 	virtual double get_masters_value_locked () const;
 	double get_value_locked() const;
+
 };
 
 

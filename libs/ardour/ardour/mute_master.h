@@ -20,12 +20,15 @@
 #ifndef __ardour_mute_master_h__
 #define __ardour_mute_master_h__
 
-#include "evoral/Parameter.hpp"
-#include "pbd/signals.h"
-#include "pbd/stateful.h"
 #include <string>
 
+#include "pbd/signals.h"
+#include "pbd/stateful.h"
+
+#include "evoral/Parameter.hpp"
+
 #include "ardour/session_handle.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
@@ -73,6 +76,7 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 
 	XMLNode& get_state();
 	int set_state(const XMLNode&, int version);
+	static const std::string xml_node_name;
 
   private:
 	MutePoint _mute_point;

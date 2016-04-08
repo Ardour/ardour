@@ -92,7 +92,9 @@
 #include "ardour/source_factory.h"
 #include "ardour/slave.h"
 #include "ardour/system_exec.h"
+#include "ardour/track.h"
 #include "ardour/vca_manager.h"
+#include "ardour/utils.h"
 
 #include "LuaBridge/LuaBridge.h"
 
@@ -1570,7 +1572,7 @@ void
 ARDOUR_UI::count_recenabled_streams (Route& route)
 {
 	Track* track = dynamic_cast<Track*>(&route);
-	if (track && track->record_enabled()) {
+	if (track && track->rec_enable_control()->get_value()) {
 		rec_enabled_streams += track->n_inputs().n_total();
 	}
 }
@@ -2083,14 +2085,14 @@ ARDOUR_UI::trx_record_enable_all_tracks ()
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*r);
 		assert (t);
 
-		if (t->record_enabled()) {
+		if (t->rec_enable_control()->get_value()) {
 			none_record_enabled = false;
 			break;
 		}
 	}
 
 	if (none_record_enabled) {
-		_session->set_record_enabled (rl, true, Session::rt_cleanup);
+		_session->set_controls (route_list_to_control_list (rl, &Track::rec_enable_control), 1.0, Controllable::NoGroup);
 	}
 
 	return none_record_enabled;
@@ -2388,7 +2390,7 @@ ARDOUR_UI::toggle_record_enable (uint32_t rid)
 		boost::shared_ptr<Track> t;
 
 		if ((t = boost::dynamic_pointer_cast<Track>(r)) != 0) {
-			t->set_record_enabled (!t->record_enabled(), Controllable::UseGroup);
+			t->rec_enable_control()->set_value (!t->rec_enable_control()->get_value(), Controllable::UseGroup);
 		}
 	}
 }
@@ -5587,12 +5589,6 @@ void
 ARDOUR_UI::cancel_solo ()
 {
 	if (_session) {
-		if (_session->soloing()) {
-			_session->set_solo (_session->get_routes(), false);
-		} else if (_session->listening()) {
-			_session->set_listen (_session->get_routes(), false);
-		}
-
 		_session->clear_all_solo_state (_session->get_routes()); // safeguard, ideally this won't do anything, check the log-window
 	}
 }

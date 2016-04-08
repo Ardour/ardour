@@ -53,6 +53,7 @@ namespace ARDOUR {
 	class Route;
 	class Region;
 	class VCA;
+	class AutomationControl;
 
 	typedef float    Sample;
 	typedef float    pan_t;
@@ -149,6 +150,7 @@ namespace ARDOUR {
 		FadeOutAutomation,
 		EnvelopeAutomation,
 		RecEnableAutomation,
+		RecSafeAutomation,
 		TrimAutomation,
 		PhaseAutomation,
 		MonitoringAutomation,
@@ -565,6 +567,7 @@ namespace ARDOUR {
 
 	typedef std::list<boost::shared_ptr<Route> > RouteList;
 	typedef std::list<boost::weak_ptr  <Route> > WeakRouteList;
+	typedef std::list<boost::shared_ptr<AutomationControl> > ControlList;
 
 	typedef std::list<boost::shared_ptr<VCA> > VCAList;
 

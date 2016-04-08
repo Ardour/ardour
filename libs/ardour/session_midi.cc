@@ -350,7 +350,7 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 
 		if ((at = dynamic_cast<AudioTrack*>((*i).get())) != 0) {
 			if (trk == at->remote_control_id()) {
-				at->set_record_enabled (enabled, Controllable::UseGroup);
+				at->rec_enable_control()->set_value (enabled, Controllable::UseGroup);
 				break;
 			}
 		}

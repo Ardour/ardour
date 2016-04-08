@@ -29,9 +29,11 @@
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
 
-#include "ardour/libardour_visibility.h"
+#include "ardour/control_group.h"
 #include "ardour/types.h"
 #include "ardour/session_object.h"
+
+#include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
 
@@ -157,8 +159,17 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 	PBD::Property<bool> _color;
 	PBD::Property<bool> _monitoring;
 
+	boost::shared_ptr<ControlGroup> _solo_group;
+	boost::shared_ptr<ControlGroup> _mute_group;
+	boost::shared_ptr<ControlGroup> _rec_enable_group;
+	boost::shared_ptr<ControlGroup> _gain_group;
+	boost::shared_ptr<ControlGroup> _monitoring_group;
+
 	void remove_when_going_away (boost::weak_ptr<Route>);
 	int set_state_2X (const XMLNode&, int);
+
+	void post_set (PBD::PropertyChange const &);
+	void push_to_groups ();
 };
 
 } /* namespace */

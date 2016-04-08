@@ -440,7 +440,7 @@ MidiStreamView::setup_rec_box ()
 
 		if (!rec_active &&
 		    _trackview.session()->record_status() == Session::Recording &&
-		    _trackview.track()->record_enabled()) {
+		    _trackview.track()->rec_enable_control()->get_value()) {
 
 			if (UIConfiguration::instance().get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
 
@@ -512,7 +512,7 @@ MidiStreamView::setup_rec_box ()
 
 		} else if (rec_active &&
 		           (_trackview.session()->record_status() != Session::Recording ||
-		            !_trackview.track()->record_enabled())) {
+		            !_trackview.track()->rec_enable_control()->get_value())) {
 			screen_update_connection.disconnect();
 			rec_active = false;
 			rec_updating = false;

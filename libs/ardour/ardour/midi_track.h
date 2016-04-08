@@ -50,8 +50,9 @@ public:
 
 	boost::shared_ptr<Diskstream> create_diskstream ();
 	void set_diskstream (boost::shared_ptr<Diskstream>);
-	void set_record_enabled (bool yn, PBD::Controllable::GroupControlDisposition);
-	void set_record_safe (bool yn, PBD::Controllable::GroupControlDisposition);
+
+	bool can_be_record_enabled ();
+	bool can_be_record_safe ();
 
 	DataType data_type () const {
 		return DataType::MIDI;
@@ -89,14 +90,12 @@ public:
 			, _route (route)
 		{}
 
-		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
-		void set_value_unchecked (double);
 		bool writable() const { return true; }
 
 		MidiTrack* _route;
 
 	private:
-		void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
+		void actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	};
 
 	virtual void set_parameter_automation_state (Evoral::Parameter param, AutoState);
@@ -133,7 +132,6 @@ public:
 	PBD::Signal1<void, boost::weak_ptr<MidiSource> > DataRecorded;
 	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
-	void set_monitoring (MonitorChoice, PBD::Controllable::GroupControlDisposition);
 	MonitorState monitoring_state () const;
 
 	void set_input_active (bool);
@@ -144,6 +142,7 @@ protected:
 	XMLNode& state (bool full);
 
 	void act_on_mute ();
+	void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);
 
 private:
 	MidiRingBuffer<framepos_t> _immediate_events;

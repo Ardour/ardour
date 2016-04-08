@@ -22,6 +22,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ardour/interthread_info.h"
+#include "ardour/recordable.h"
 #include "ardour/route.h"
 #include "ardour/public_diskstream.h"
 
@@ -34,13 +35,14 @@ class Source;
 class Region;
 class Diskstream;
 class IO;
+class MonitorControl;
 
 /** A track is an route (bus) with a recordable diskstream and
  * related objects relevant to tracking, playback and editing.
  *
  * Specifically a track has regions and playlist objects.
  */
-class LIBARDOUR_API Track : public Route, public PublicDiskstream
+class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskstream
 {
   public:
 	Track (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
@@ -56,23 +58,9 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
 	PBD::Signal0<void> TrackModeChanged;
 
-	class LIBARDOUR_API MonitoringControllable : public RouteAutomationControl {
-	public:
-		MonitoringControllable (std::string name, boost::shared_ptr<Track>);
-		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		/* currently no automation, so no need for set_value_unchecked() */
-		double get_value () const;
-	private:
-		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-	};
+	boost::shared_ptr<MonitorControl> monitoring_control() const { return _monitoring_control; }
 
-	void set_monitoring (MonitorChoice, PBD::Controllable::GroupControlDisposition group_override);
-	MonitorChoice monitoring_choice() const { return _monitoring; }
-        MonitorState monitoring_state () const;
-	PBD::Signal0<void> MonitoringChanged;
-
-	boost::shared_ptr<AutomationControl> monitoring_control() const { return _monitoring_control; }
-
+	MonitorState monitoring_state () const;
 	MeterState metering_state () const;
 
 	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
@@ -142,13 +130,12 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	virtual int set_state (const XMLNode&, int version);
 	static void zero_diskstream_id_in_xml (XMLNode&);
 
-	boost::shared_ptr<AutomationControl> rec_enable_control() { return _rec_enable_control; }
+	boost::shared_ptr<AutomationControl> rec_enable_control() const { return _record_enable_control; }
+	boost::shared_ptr<AutomationControl> rec_safe_control() const { return _record_safe_control; }
 
-	bool record_enabled() const;
-	bool record_safe () const;
-	void set_record_enabled (bool yn, PBD::Controllable::GroupControlDisposition);
-	void set_record_safe (bool yn, PBD::Controllable::GroupControlDisposition);
-	void prep_record_enabled (bool yn, PBD::Controllable::GroupControlDisposition);
+	int prep_record_enabled (bool);
+	bool can_be_record_enabled ();
+	bool can_be_record_safe ();
 
 	bool using_diskstream_id (PBD::ID) const;
 
@@ -204,8 +191,6 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	PBD::Signal0<void> FreezeChange;
 	/* Emitted when our diskstream is set to use a different playlist */
 	PBD::Signal0<void> PlaylistChanged;
-	PBD::Signal0<void> RecordEnableChanged;
-	PBD::Signal0<void> RecordSafeChanged;
 	PBD::Signal0<void> SpeedChanged;
 	PBD::Signal0<void> AlignmentStyleChanged;
 
@@ -216,8 +201,7 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	MeterPoint    _saved_meter_point;
 	TrackMode     _mode;
 	bool          _needs_butler;
-	MonitorChoice _monitoring;
-	boost::shared_ptr<MonitoringControllable> _monitoring_control;
+	boost::shared_ptr<MonitorControl> _monitoring_control;
 
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {
@@ -242,20 +226,6 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 		FreezeState                        state;
 	};
 
-	class RecEnableControl : public AutomationControl {
-	public:
-		RecEnableControl (boost::shared_ptr<Track> t);
-
-		void set_value (double, PBD::Controllable::GroupControlDisposition);
-		void set_value_unchecked (double);
-		double get_value (void) const;
-
-		boost::weak_ptr<Track> track;
-
-	private:
-		void _set_value (double, PBD::Controllable::GroupControlDisposition);
-	};
-
 	virtual void set_state_part_two () = 0;
 
 	FreezeRecord          _freeze_record;
@@ -264,17 +234,20 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 
 	void maybe_declick (BufferSet&, framecnt_t, int);
 
-	boost::shared_ptr<RecEnableControl> _rec_enable_control;
+	boost::shared_ptr<AutomationControl> _record_enable_control;
+	boost::shared_ptr<AutomationControl> _record_safe_control;
+
+	virtual void record_enable_changed (bool, PBD::Controllable::GroupControlDisposition);
+	virtual void record_safe_changed (bool, PBD::Controllable::GroupControlDisposition);
 
 	framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&);
+	virtual void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);
 
 private:
 
 	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &) = 0;
 
 	void diskstream_playlist_changed ();
-	void diskstream_record_enable_changed ();
-	void diskstream_record_safe_changed ();
 	void diskstream_speed_changed ();
 	void diskstream_alignment_style_changed ();
 	void parameter_changed (std::string const & p);

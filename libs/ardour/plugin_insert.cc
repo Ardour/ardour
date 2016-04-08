@@ -2614,22 +2614,9 @@ PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
 }
 
 /** @param val `user' value */
-void
-PluginInsert::PluginControl::set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
-{
-	if (writable()) {
-		_set_value (user_val, group_override);
-	}
-}
-void
-PluginInsert::PluginControl::set_value_unchecked (double user_val)
-{
-	/* used only by automation playback */
-	_set_value (user_val, Controllable::NoGroup);
-}
 
 void
-PluginInsert::PluginControl::_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
+PluginInsert::PluginControl::actually_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
 {
 	/* FIXME: probably should be taking out some lock here.. */
 
@@ -2642,13 +2629,13 @@ PluginInsert::PluginControl::_set_value (double user_val, PBD::Controllable::Gro
 		iasp->set_parameter (_list->parameter().id(), user_val);
 	}
 
-	AutomationControl::set_value (user_val, group_override);
+	AutomationControl::actually_set_value (user_val, group_override);
 }
 
 void
 PluginInsert::PluginControl::catch_up_with_external_value (double user_val)
 {
-	AutomationControl::set_value (user_val, Controllable::NoGroup);
+	AutomationControl::actually_set_value (user_val, Controllable::NoGroup);
 }
 
 XMLNode&
@@ -2700,15 +2687,7 @@ PluginInsert::PluginPropertyControl::PluginPropertyControl (PluginInsert*       
 }
 
 void
-PluginInsert::PluginPropertyControl::set_value (double user_val, PBD::Controllable::GroupControlDisposition /* group_override*/)
-{
-	if (writable()) {
-		set_value_unchecked (user_val);
-	}
-}
-
-void
-PluginInsert::PluginPropertyControl::set_value_unchecked (double user_val)
+PluginInsert::PluginPropertyControl::actually_set_value (double user_val, Controllable::GroupControlDisposition gcd)
 {
 	/* Old numeric set_value(), coerce to appropriate datatype if possible.
 	   This is lossy, but better than nothing until Ardour's automation system
@@ -2724,7 +2703,8 @@ PluginInsert::PluginPropertyControl::set_value_unchecked (double user_val)
 	}
 
 	_value = value;
-	AutomationControl::set_value (user_val, Controllable::NoGroup);
+
+	AutomationControl::actually_set_value (user_val, gcd);
 }
 
 XMLNode&

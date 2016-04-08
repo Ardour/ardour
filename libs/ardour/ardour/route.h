@@ -28,7 +28,6 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
-#include <boost/dynamic_bitset.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
 #include <glibmm/threads.h>
@@ -46,12 +45,18 @@
 #include "ardour/io_vector.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
+#include "ardour/monitorable.h"
+#include "ardour/muteable.h"
 #include "ardour/mute_master.h"
+#include "ardour/mute_control.h"
 #include "ardour/route_group_member.h"
 #include "ardour/stripable.h"
 #include "ardour/graphnode.h"
 #include "ardour/automatable.h"
 #include "ardour/unknown_processor.h"
+#include "ardour/soloable.h"
+#include "ardour/solo_control.h"
+#include "ardour/solo_safe_control.h"
 
 class RoutePinWindowProxy;
 
@@ -74,8 +79,18 @@ class Pannable;
 class CapturingProcessor;
 class InternalSend;
 class VCA;
+class SoloIsolateControl;
+class PhaseControl;
+class MonitorControl;
 
-class LIBARDOUR_API Route : public Stripable, public Automatable, public RouteGroupMember, public GraphNode, public boost::enable_shared_from_this<Route>
+class LIBARDOUR_API Route : public Stripable,
+                            public Soloable,
+                            public Muteable,
+                            public Monitorable,
+                            public Automatable,
+                            public RouteGroupMember,
+                            public GraphNode,
+                            public boost::enable_shared_from_this<Route>
 {
 public:
 
@@ -119,7 +134,7 @@ public:
 	bool is_master() const { return _flags & MasterOut; }
 	bool is_monitor() const { return _flags & MonitorOut; }
 
-	virtual MonitorState monitoring_state () const;
+	MonitorState monitoring_state () const;
 	virtual MeterState metering_state () const;
 
 	/* these are the core of the API of a Route. see the protected sections as well */
@@ -135,10 +150,6 @@ public:
 
 	virtual bool can_record() { return false; }
 
-	virtual void set_record_enabled (bool /*yn*/, PBD::Controllable::GroupControlDisposition) {}
-	virtual bool record_enabled() const { return false; }
-	virtual void set_record_safe (bool /*yn*/, PBD::Controllable::GroupControlDisposition) {}
-	virtual bool record_safe () const {return false; }
 	virtual void nonrealtime_handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
 	virtual void realtime_handle_transport_stopped () {}
 	virtual void realtime_locate () {}
@@ -149,46 +160,30 @@ public:
 
 	void shift (framepos_t, framecnt_t);
 
-	void set_gain (gain_t val, PBD::Controllable::GroupControlDisposition);
-	void inc_gain (gain_t delta);
-
 	void set_trim (gain_t val, PBD::Controllable::GroupControlDisposition);
-
-	void set_mute_points (MuteMaster::MutePoint);
-	MuteMaster::MutePoint mute_points () const;
-
-	bool muted () const;
-	void set_mute (bool yn, PBD::Controllable::GroupControlDisposition);
-
-	bool muted_by_others_soloing () const;
-	bool muted_by_others () const;
 
 	/* controls use set_solo() to modify this route's solo state
 	 */
 
-	void set_solo (bool yn, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
-	bool soloed () const { return self_soloed () || soloed_by_others (); }
 	void clear_all_solo_state ();
 
-	bool soloed_by_others () const { return _soloed_by_others_upstream||_soloed_by_others_downstream; }
-	bool soloed_by_others_upstream () const { return _soloed_by_others_upstream; }
-	bool soloed_by_others_downstream () const { return _soloed_by_others_downstream; }
-	bool self_soloed () const { return _self_solo; }
+	bool soloed_by_others () const { return _solo_control->soloed_by_others(); }
+	bool soloed_by_others_upstream () const { return _solo_control->soloed_by_others_upstream(); }
+	bool soloed_by_others_downstream () const { return _solo_control->soloed_by_others_downstream(); }
+	bool self_soloed () const { return _solo_control->self_soloed(); }
+	bool soloed () const { return self_soloed () || soloed_by_others (); }
 
-	void set_solo_isolated (bool yn, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
-	bool solo_isolated() const;
+	void push_solo_upstream (int32_t delta);
+	void push_solo_isolate_upstream (int32_t delta);
+	bool can_solo () const {
+		return !(is_master() || is_monitor() || is_auditioner());
+	}
+	bool is_safe () const {
+		return _solo_safe_control->get_value();
+	}
 
-	void set_solo_safe (bool yn, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
-	bool solo_safe() const;
-
-	void set_listen (bool yn, PBD::Controllable::GroupControlDisposition group_override = PBD::Controllable::UseGroup);
 	bool listening_via_monitor () const;
 	void enable_monitor_send ();
-
-	void set_phase_invert (uint32_t, bool yn);
-	void set_phase_invert (boost::dynamic_bitset<>);
-	bool phase_invert (uint32_t) const;
-	boost::dynamic_bitset<> phase_invert () const;
 
 	void set_denormal_protection (bool yn);
 	bool denormal_protection() const;
@@ -353,7 +348,6 @@ public:
 	PBD::Signal0<void>       active_changed;
 	PBD::Signal0<void>       denormal_protection_changed;
 	PBD::Signal0<void>       comment_changed;
-	PBD::Signal0<void>       mute_points_changed;
 
 	/** track numbers - assigned by session
 	 * nubers > 0 indicate tracks (audio+midi)
@@ -456,185 +450,32 @@ public:
 
 	boost::shared_ptr<AutomationControl> get_control (const Evoral::Parameter& param);
 
-	class RouteAutomationControl : public AutomationControl {
-	public:
-		RouteAutomationControl (const std::string& name,
-		                        AutomationType atype,
-		                        boost::shared_ptr<AutomationList> alist,
-		                        boost::shared_ptr<Route> route);
-	protected:
-		friend class Route;
-
-		void route_set_value (double val) {
-			AutomationControl::set_value (val, Controllable::NoGroup);
-		}
-
-		boost::weak_ptr<Route> _route;
-	};
-
-	class BooleanRouteAutomationControl : public RouteAutomationControl {
-	public:
-		BooleanRouteAutomationControl (const std::string& name,
-		                               AutomationType atype,
-		                               boost::shared_ptr<AutomationList> alist,
-		                               boost::shared_ptr<Route> route)
-			: RouteAutomationControl (name, atype, alist, route) {}
-	protected:
-		double get_masters_value_locked() const;
-
-	};
-
-	class GainControllable : public GainControl  {
-	public:
-		GainControllable (Session& session,
-		                  AutomationType type,
-		                  boost::shared_ptr<Route> route);
-
-		void set_value (double val, PBD::Controllable::GroupControlDisposition group_override) {
-			boost::shared_ptr<Route> r = _route.lock();
-			if (r) {
-				/* Route must mediate group control */
-				r->set_control ((AutomationType) parameter().type(), val, group_override);
-			}
-		}
-
-	protected:
-		friend class Route;
-
-		void route_set_value (double val) {
-			GainControl::set_value (val, Controllable::NoGroup);
-		}
-
-		boost::weak_ptr<Route> _route;
-	};
-
-	class SoloControllable : public BooleanRouteAutomationControl {
-	    public:
-		SoloControllable (std::string name, boost::shared_ptr<Route>);
-		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		void set_value_unchecked (double);
-		double get_value () const;
-
-		/* Export additional API so that objects that only get access
-		 * to a Controllable/AutomationControl can do more fine-grained
-		 * operations with respect to solo. Obviously, they would need
-		 * to dynamic_cast<Route::SoloControllable> first.
-		 *
-		 * Solo state is not representable by a single scalar value,
-		 * so this AutomationControl maps set_value() and get_value()
-		 * to r->set_self_solo() and r->soloed() respectively. This
-		 * means that the Controllable is technically asymmetric. It is
-		 * possible to call ::set_value (0.0) to disable (self)solo,
-		 * and then call ::get_value() and get a return of 1.0 because
-		 * the Route owner is soloed by upstream/downstream.
-		 */
-
-		void set_self_solo (bool yn) {
-			boost::shared_ptr<Route> r(_route.lock()); if (r) r->set_self_solo (yn);
-		}
-		void mod_solo_by_others_upstream (int32_t delta) {
-			boost::shared_ptr<Route> r(_route.lock()); if (r) r->mod_solo_by_others_upstream (delta);
-		}
-		void mod_solo_by_others_downstream (int32_t delta) {
-			boost::shared_ptr<Route> r(_route.lock()); if (r) r->mod_solo_by_others_downstream (delta);
-		}
-		bool soloed_by_others () const {
-			boost::shared_ptr<Route> r(_route.lock()); if (r) return r->soloed_by_others(); else return false;
-		}
-		bool soloed_by_others_upstream () const {
-			boost::shared_ptr<Route> r(_route.lock()); if (r) return r->soloed_by_others_upstream(); else return false;
-		}
-		bool soloed_by_others_downstream () const {
-			boost::shared_ptr<Route> r(_route.lock()); if (r) return r->soloed_by_others_downstream(); else return false;
-		}
-		bool self_soloed () const {
-			boost::shared_ptr<Route> r(_route.lock()); if (r) return r->self_soloed(); else return false;
-		}
-
-	    protected:
-		void master_changed (bool, PBD::Controllable::GroupControlDisposition);
-
-	    private:
-		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-	};
-
-	struct MuteControllable : public BooleanRouteAutomationControl {
-	    public:
-		MuteControllable (std::string name, boost::shared_ptr<Route>);
-		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		void set_value_unchecked (double);
-		double get_value () const;
-
-		/* Pretend to change value, but do not affect actual route mute. */
-		void set_superficial_value(bool muted);
-	    protected:
-		void master_changed (bool, PBD::Controllable::GroupControlDisposition);
-
-	    private:
-		boost::weak_ptr<Route> _route;
-		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-	};
-
-	class LIBARDOUR_API PhaseControllable : public BooleanRouteAutomationControl {
-	public:
-		PhaseControllable (std::string name, boost::shared_ptr<Route>);
-		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		/* currently no automation, so no need for set_value_unchecked() */
-		void set_channel (uint32_t);
-		double get_value () const;
-		uint32_t channel() const;
-	private:
-		uint32_t _current_phase;
-		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-	};
-
-	class LIBARDOUR_API SoloIsolateControllable : public BooleanRouteAutomationControl {
-	public:
-		SoloIsolateControllable (std::string name, boost::shared_ptr<Route>);
-		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		/* currently no automation, so no need for set_value_unchecked() */
-		double get_value () const;
-	private:
-		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-	};
-
-	class LIBARDOUR_API SoloSafeControllable : public BooleanRouteAutomationControl {
-	public:
-		SoloSafeControllable (std::string name, boost::shared_ptr<Route>);
-		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		/* currently no automation, so no need for set_value_unchecked() */
-		double get_value () const;
-	private:
-		void _set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-	};
-
-	void set_control (AutomationType, double val, PBD::Controllable::GroupControlDisposition group_override);
-
-	boost::shared_ptr<AutomationControl> solo_control() const {
+	boost::shared_ptr<SoloControl> solo_control() const {
 		return _solo_control;
 	}
 
-	boost::shared_ptr<AutomationControl> mute_control() const {
+	boost::shared_ptr<MuteControl> mute_control() const {
 		return _mute_control;
 	}
 
-	boost::shared_ptr<MuteMaster> mute_master() const {
-		return _mute_master;
-	}
+	bool can_be_muted_by_others () const { return !is_master(); }
+	bool muted () const { return _mute_control->muted(); }
+	bool muted_by_others_soloing () const;
+	bool muted_by_others () const;
 
-	boost::shared_ptr<AutomationControl> solo_isolate_control() const {
+	boost::shared_ptr<SoloIsolateControl> solo_isolate_control() const {
 		return _solo_isolate_control;
 	}
 
-	boost::shared_ptr<AutomationControl> solo_safe_control() const {
+	boost::shared_ptr<SoloSafeControl> solo_safe_control() const {
 		return _solo_safe_control;
 	}
 
-	boost::shared_ptr<AutomationControl> monitoring_control() const {
+	boost::shared_ptr<MonitorControl> monitoring_control() const {
 		/* tracks override this to provide actual monitoring control;
 		   busses have no possible choices except input monitoring.
 		*/
-		return boost::shared_ptr<AutomationControl> ();
+		return boost::shared_ptr<MonitorControl> ();
 	}
 
 	/* Route doesn't own these items, but sub-objects that it does own have them
@@ -647,8 +488,8 @@ public:
 	boost::shared_ptr<Pannable> pannable() const;
 
 	boost::shared_ptr<GainControl> gain_control() const;
-	boost::shared_ptr<AutomationControl> trim_control() const;
-	boost::shared_ptr<AutomationControl> phase_control() const;
+	boost::shared_ptr<GainControl> trim_control() const;
+	boost::shared_ptr<PhaseControl> phase_control() const;
 
 	/**
 	   Return the first processor that accepts has at least one MIDI input
@@ -766,8 +607,8 @@ public:
         friend class Session;
 
 	void catch_up_on_solo_mute_override ();
-	void mod_solo_by_others_upstream (int32_t);
-	void mod_solo_by_others_downstream (int32_t);
+	void set_listen (bool);
+
 	void curve_reallocate ();
 	virtual void set_block_size (pframes_t nframes);
 
@@ -829,14 +670,6 @@ protected:
 	MeterPoint     _meter_point;
 	MeterPoint     _pending_meter_point;
 	MeterType      _meter_type;
-	boost::dynamic_bitset<> _phase_invert;
-	bool           _self_solo;
-	uint32_t       _soloed_by_others_upstream;
-	uint32_t       _soloed_by_others_downstream;
-	bool           _solo_isolated;
-	uint32_t       _solo_isolated_by_upstream;
-
-	void mod_solo_isolated_by_upstream (bool);
 
 	bool           _denormal_protection;
 
@@ -844,18 +677,14 @@ protected:
 	bool _silent : 1;
 	bool _declickable : 1;
 
-	boost::shared_ptr<SoloControllable> _solo_control;
-	boost::shared_ptr<MuteControllable> _mute_control;
-	boost::shared_ptr<MuteMaster> _mute_master;
-	boost::shared_ptr<PhaseControllable> _phase_control;
-	boost::shared_ptr<SoloIsolateControllable> _solo_isolate_control;
-	boost::shared_ptr<SoloSafeControllable> _solo_safe_control;
-
-	virtual void act_on_mute () {}
+	boost::shared_ptr<SoloControl> _solo_control;
+	boost::shared_ptr<MuteControl> _mute_control;
+	boost::shared_ptr<PhaseControl> _phase_control;
+	boost::shared_ptr<SoloIsolateControl> _solo_isolate_control;
+	boost::shared_ptr<SoloSafeControl> _solo_safe_control;
 
 	std::string    _comment;
 	bool           _have_internal_generator;
-	bool           _solo_safe;
 	DataType       _default_type;
 	FedBy          _fed_by;
 
@@ -882,9 +711,9 @@ protected:
 
 	virtual void maybe_declick (BufferSet&, framecnt_t, int);
 
-	boost::shared_ptr<GainControllable> _gain_control;
+	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<Amp>       _amp;
-	boost::shared_ptr<GainControllable> _trim_control;
+	boost::shared_ptr<GainControl> _trim_control;
 	boost::shared_ptr<Amp>       _trim;
 	boost::shared_ptr<PeakMeter> _meter;
 	boost::shared_ptr<DelayLine> _delayline;
@@ -928,7 +757,6 @@ private:
 	void placement_range (Placement p, ProcessorList::iterator& start, ProcessorList::iterator& end);
 
 	void set_self_solo (bool yn);
-	void set_mute_master_solo ();
 
 	void set_processor_positions ();
 	framecnt_t update_port_latencies (PortSet& ports, PortSet& feeders, bool playback, framecnt_t) const;
@@ -985,6 +813,7 @@ private:
 	void reset_instrument_info ();
 
 	void set_remote_control_id_internal (uint32_t id, bool notify_class_listeners = true);
+        void solo_control_changed (bool self, PBD::Controllable::GroupControlDisposition);
 };
 
 } // namespace ARDOUR

@@ -34,13 +34,10 @@ namespace ARDOUR {
 
 class Session;
 
-class LIBARDOUR_API GainControl : public AutomationControl {
+class LIBARDOUR_API GainControl : public SlavableAutomationControl {
   public:
 	GainControl (Session& session, const Evoral::Parameter &param,
 	             boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>());
-
-	void set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
-	void set_value_unchecked (double);
 
 	double internal_to_interface (double) const;
 	double interface_to_internal (double) const;
@@ -54,6 +51,8 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	int set_state (XMLNode const&, int);
 	XMLNode& get_state();
 
+	void inc_gain (gain_t);
+
   private:
 	std::string masters_string;
 	PBD::ScopedConnection vca_loaded_connection;
@@ -61,7 +60,7 @@ class LIBARDOUR_API GainControl : public AutomationControl {
 	void vcas_loaded();
 	void recompute_masters_ratios (double val);
 
-	void _set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
+	void actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 };
 
 } /* namespace */

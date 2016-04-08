@@ -507,7 +507,7 @@ FaderPort::fader_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 				   single route at a time, allow the fader to
 				   modify the group, if appropriate.
 				*/
-				_current_route->set_gain (val, Controllable::UseGroup);
+				_current_route->gain_control()->set_value (val, Controllable::UseGroup);
 			}
 		}
 	}
@@ -1147,7 +1147,7 @@ FaderPort::set_current_route (boost::shared_ptr<Route> r)
 
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_route);
 		if (t) {
-			t->RecordEnableChanged.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_recenable, this), this);
+			t->rec_enable_control()->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_recenable, this), this);
 		}
 
 		boost::shared_ptr<AutomationControl> control = _current_route->gain_control ();
@@ -1227,7 +1227,7 @@ FaderPort::map_mute ()
 		if (_current_route->muted()) {
 			stop_blinking (Mute);
 			get_button (Mute).set_led_state (_output_port, true);
-		} else if (_current_route->muted_by_others()) {
+		} else if (_current_route->mute_control()->muted_by_others()) {
 			start_blinking (Mute);
 		} else {
 			stop_blinking (Mute);
@@ -1252,7 +1252,7 @@ FaderPort::map_recenable ()
 {
 	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_route);
 	if (t) {
-		get_button (Rec).set_led_state (_output_port, t->record_enabled());
+		get_button (Rec).set_led_state (_output_port, t->rec_enable_control()->get_value());
 	} else {
 		get_button (Rec).set_led_state (_output_port, false);
 	}
