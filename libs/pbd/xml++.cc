@@ -472,7 +472,10 @@ XMLNode::remove_property(const string& n)
 {
 	if (_propmap.find(n) != _propmap.end()) {
 		XMLProperty* p = _propmap[n];
-		_proplist.remove (p);
+		XMLPropertyIterator i = std::find(_proplist.begin(), _proplist.end(), p);
+		if (i != _proplist.end ()) {
+			_proplist.erase (i);
+		}
 		delete p;
 		_propmap.erase(n);
 	}
@@ -492,15 +495,12 @@ void
 XMLNode::remove_nodes(const string& n)
 {
 	XMLNodeIterator i = _children.begin();
-	XMLNodeIterator tmp;
-
 	while (i != _children.end()) {
-		tmp = i;
-		++tmp;
 		if ((*i)->name() == n) {
-			_children.erase (i);
+			i = _children.erase (i);
+		} else {
+			++i;
 		}
-		i = tmp;
 	}
 }
 
@@ -508,16 +508,14 @@ void
 XMLNode::remove_nodes_and_delete(const string& n)
 {
 	XMLNodeIterator i = _children.begin();
-	XMLNodeIterator tmp;
 
 	while (i != _children.end()) {
-		tmp = i;
-		++tmp;
 		if ((*i)->name() == n) {
 			delete *i;
-			_children.erase (i);
+			i = _children.erase (i);
+		} else {
+			++i;
 		}
-		i = tmp;
 	}
 }
 
@@ -525,20 +523,16 @@ void
 XMLNode::remove_nodes_and_delete(const string& propname, const string& val)
 {
 	XMLNodeIterator i = _children.begin();
-	XMLNodeIterator tmp;
 	XMLProperty* prop;
 
 	while (i != _children.end()) {
-		tmp = i;
-		++tmp;
-
 		prop = (*i)->property(propname);
 		if (prop && prop->value() == val) {
 			delete *i;
-			_children.erase(i);
+			i = _children.erase(i);
+		} else {
+			++i;
 		}
-
-		i = tmp;
 	}
 }
 

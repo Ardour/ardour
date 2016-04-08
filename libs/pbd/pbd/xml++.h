@@ -28,7 +28,7 @@
  */
 
 #include <string>
-#include <list>
+#include <vector>
 #include <unordered_map>
 #include <cstdio>
 #include <cstdarg>
@@ -43,13 +43,13 @@ class XMLTree;
 class XMLNode;
 class XMLProperty;
 
-typedef std::list<XMLNode *>                   XMLNodeList;
-typedef std::list<boost::shared_ptr<XMLNode> > XMLSharedNodeList;
-typedef XMLNodeList::iterator                  XMLNodeIterator;
-typedef XMLNodeList::const_iterator            XMLNodeConstIterator;
-typedef std::list<XMLProperty*>                XMLPropertyList;
-typedef XMLPropertyList::iterator              XMLPropertyIterator;
-typedef XMLPropertyList::const_iterator        XMLPropertyConstIterator;
+typedef std::vector<XMLNode *>                   XMLNodeList;
+typedef std::vector<boost::shared_ptr<XMLNode> > XMLSharedNodeList;
+typedef XMLNodeList::iterator                    XMLNodeIterator;
+typedef XMLNodeList::const_iterator              XMLNodeConstIterator;
+typedef std::vector<XMLProperty*>                XMLPropertyList;
+typedef XMLPropertyList::iterator                XMLPropertyIterator;
+typedef XMLPropertyList::const_iterator          XMLPropertyConstIterator;
 typedef std::unordered_map<std::string, XMLProperty*>    XMLPropertyMap;
 
 class LIBPBD_API XMLTree {
