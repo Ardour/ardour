@@ -172,6 +172,9 @@ ArdourButton::set_layout_font (const Pango::FontDescription& fd)
 void
 ArdourButton::set_text (const std::string& str)
 {
+	if (_text == str) {
+		return;
+	}
 	_text = str;
 	if (!is_realized()) {
 		return;
