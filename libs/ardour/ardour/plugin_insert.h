@@ -28,6 +28,7 @@
 #include "ardour/ardour.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/chan_mapping.h"
+#include "ardour/fixed_delay.h"
 #include "ardour/io.h"
 #include "ardour/types.h"
 #include "ardour/parameter_descriptor.h"
@@ -206,6 +207,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 		}
 	}
 
+	framecnt_t plugin_latency () const;
+
 	bool has_sidechain () const {
 		return _sidechain ? true : false;
 	}
@@ -295,6 +298,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 	BufferSet _signal_analysis_inputs;
 	BufferSet _signal_analysis_outputs;
 
+	FixedDelay _delaybuffers;
+
 	ChanCount _configured_in;
 	ChanCount _configured_internal; // with side-chain
 	ChanCount _configured_out;
@@ -332,6 +337,9 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	void start_touch (uint32_t param_id);
 	void end_touch (uint32_t param_id);
+
+	void latency_changed (framecnt_t, framecnt_t);
+	bool _latency_changed;
 };
 
 } // namespace ARDOUR

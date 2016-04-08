@@ -331,6 +331,11 @@ PluginInsert::has_no_audio_inputs() const
 	return _plugins[0]->get_info()->n_inputs.n_audio() == 0;
 }
 
+framecnt_t
+PluginInsert::plugin_latency () const {
+	return _plugins.front()->signal_latency ();
+}
+
 bool
 PluginInsert::is_midi_instrument() const
 {
@@ -472,9 +477,26 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 	PinMappings in_map (_in_map);
 	PinMappings out_map (_out_map);
 	ChanMapping thru_map (_thru_map);
-	if (_mapping_changed) {
+	if (_mapping_changed) { // ToDo use a counters, increment until match.
 		_no_inplace = check_inplace ();
 		_mapping_changed = false;
+	}
+
+	if (_latency_changed) {
+		/* delaylines are configured with the max possible latency (as reported by the plugin)
+		 * so this won't allocate memory (unless the plugin lied about its max latency)
+		 * It may still 'click' though, since the fixed delaylines are not de-clicked.
+		 * Then again plugin-latency changes are not click-free to begin with.
+		 *
+		 * This is also worst case, there is currently no concept of per-stream latency.
+		 *
+		 * e.g.  Two identical latent plugins:
+		 *   1st plugin: process left (latent), bypass right.
+		 *   2nd plugin: bypass left, process right (latent).
+		 * -> currently this yields 2 times latency of the plugin,
+		 */
+		_latency_changed = false;
+		_delaybuffers.set (ChanCount::max(bufs.count(), _configured_out), plugin_latency ());
 	}
 
 	if (_match.method == Split && !_no_inplace) {
@@ -600,7 +622,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 				uint32_t in_idx = thru_map.get (*t, out, &valid);
 				if (valid) {
 					uint32_t m = out + natural_input_streams ().get (*t);
-					inplace_bufs.get (*t, m).read_from (bufs.get (*t, in_idx), nframes, offset, offset);
+					_delaybuffers.delay (*t, out, inplace_bufs.get (*t, m), bufs.get (*t, in_idx), nframes, offset, offset);
 					used_outputs.set (*t, out, 1); // mark as used
 				}
 			}
@@ -1418,6 +1440,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		 ) {
 		PluginIoReConfigure (); /* EMIT SIGNAL */
 	}
+
+	_delaybuffers.configure (_configured_out, _plugins.front()->max_latency ());
+	_latency_changed = true;
 
 	// we don't know the analysis window size, so we must work with the
 	// current buffer size here. each request for data fills in these
@@ -2395,6 +2420,7 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 		plugin->ParameterChangedExternally.connect_same_thread (*this, boost::bind (&PluginInsert::parameter_changed_externally, this, _1, _2));
 		plugin->StartTouch.connect_same_thread (*this, boost::bind (&PluginInsert::start_touch, this, _1));
 		plugin->EndTouch.connect_same_thread (*this, boost::bind (&PluginInsert::end_touch, this, _1));
+		plugin->LatencyChanged.connect_same_thread (*this, boost::bind (&PluginInsert::latency_changed, this, _1, _2));
 		// cache sidechain ports
 		_cached_sidechain_pins.reset ();
 		const ChanCount& nis (plugin->get_info()->n_inputs);
@@ -2432,6 +2458,13 @@ PluginInsert::monitoring_changed ()
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->monitoring_changed ();
 	}
+}
+
+void
+PluginInsert::latency_changed (framecnt_t, framecnt_t)
+{
+	// this is called in RT context, LatencyChanged is emitted after run()
+	_latency_changed = true;
 }
 
 void
