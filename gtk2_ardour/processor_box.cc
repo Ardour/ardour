@@ -1042,14 +1042,14 @@ ProcessorEntry::RoutingIcon::identity () const {
 	if (!_in_map.is_monotonic () || !_in_map.is_identity ()) {
 		return false;
 	}
-	if (_in_map.count () != _sinks.n_total () || _in.n_total () != _sinks.n_total ()) {
+	if (_in_map.n_total () != _sinks.n_total () || _in.n_total () != _sinks.n_total ()) {
 		return false;
 	}
 	if (_feed) {
 		if (!_f_out_map.is_monotonic () || !_f_out_map.is_identity ()) {
 			return false;
 		}
-		if (_f_out_map.count () != _f_sources.n_total () || _sinks != _f_sources) {
+		if (_f_out_map.n_total () != _f_sources.n_total () || _sinks != _f_sources) {
 			return false;
 		}
 	}
@@ -1061,10 +1061,10 @@ ProcessorEntry::RoutingIcon::out_identity () const {
 	if (!_out_map.is_monotonic () || !_out_map.is_identity ()) {
 		return false;
 	}
-	if (_out_map.count () != _sources.n_total () || _out.n_total () != _sources.n_total ()) {
+	if (_out_map.n_total () != _sources.n_total () || _out.n_total () != _sources.n_total ()) {
 		return false;
 	}
-	if (_thru_map.count () > 0) {
+	if (_thru_map.n_total () > 0) {
 		return false;
 	}
 	return true;
