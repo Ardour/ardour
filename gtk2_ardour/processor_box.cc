@@ -199,8 +199,10 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 
 		_button.set_active (_processor->active());
 
-		routing_icon.set_no_show_all(true);
 		input_icon.set_no_show_all(true);
+		routing_icon.set_no_show_all(true);
+		output_icon.set_no_show_all(true);
+		output_routing_icon.set_no_show_all(true);
 
 		_button.show ();
 		input_icon.hide();
