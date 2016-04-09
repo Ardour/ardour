@@ -19,6 +19,7 @@
 #include "timecode/bbt_time.h"
 #include "evoral/Control.hpp"
 #include "evoral/ControlList.hpp"
+#include "evoral/Range.hpp"
 
 #include "ardour/audioengine.h"
 #include "ardour/audiosource.h"
@@ -29,10 +30,12 @@
 #include "ardour/chan_mapping.h"
 #include "ardour/dB.h"
 #include "ardour/dsp_filter.h"
+#include "ardour/interthread_info.h"
 #include "ardour/lua_api.h"
 #include "ardour/luabindings.h"
 #include "ardour/meter.h"
 #include "ardour/midi_track.h"
+#include "ardour/playlist.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/runtime_functions.h"
@@ -41,6 +44,7 @@
 #include "ardour/session.h"
 #include "ardour/session_object.h"
 #include "ardour/sidechain.h"
+#include "ardour/track.h"
 #include "ardour/tempo.h"
 
 #include "LuaBridge/LuaBridge.h"
@@ -163,9 +167,32 @@ LuaBindings::common (lua_State* L)
 		.addData ("toggled", &Evoral::ParameterDescriptor::toggled)
 		.endClass ()
 
+		.beginClass <Evoral::Range<framepos_t> > ("Range")
+		.addConstructor <void (*) (framepos_t, framepos_t)> ()
+		.addData ("from", &Evoral::Range<framepos_t>::from)
+		.addData ("to", &Evoral::Range<framepos_t>::to)
+		.endClass ()
+
 		.endNamespace () // Evoral
 
 		.beginNamespace ("ARDOUR")
+
+		.beginClass <InterThreadInfo> ("InterThreadInfo")
+		.addVoidConstructor ()
+		.addData ("done", const_cast<bool InterThreadInfo::*>(&InterThreadInfo::done))
+		.addData ("cancel", (bool InterThreadInfo::*)&InterThreadInfo::cancel)
+		.addData ("progress", const_cast<float InterThreadInfo::*>(&InterThreadInfo::progress))
+		.endClass ()
+
+		.beginClass <AudioRange> ("AudioRange")
+		.addConstructor <void (*) (framepos_t, framepos_t, uint32_t)> ()
+		.addFunction ("length", &AudioRange::length)
+		.addFunction ("equal", &AudioRange::equal)
+		.addData ("start", &AudioRange::start)
+		.addData ("_end", &AudioRange::end) // XXX "end" is a lua reserved word
+		.addData ("id", &AudioRange::id)
+		.endClass ()
+
 		.beginWSPtrClass <PluginInfo> ("PluginInfo")
 		.addVoidConstructor ()
 		.endClass ()
@@ -216,12 +243,20 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("locked", &Location::locked)
 		.addFunction ("lock", &Location::lock)
 		.addFunction ("start", &Location::start)
-		.addFunction ("end", &Location::end)
+		.addFunction ("_end", &Location::end) // XXX "end" is a lua reserved word
 		.addFunction ("length", &Location::length)
 		.addFunction ("set_start", &Location::set_start)
 		.addFunction ("set_end", &Location::set_end)
 		.addFunction ("set_length", &Location::set)
 		.addFunction ("move_to", &Location::move_to)
+		.endClass ()
+
+		.deriveClass <Locations, PBD::StatefulDestructible> ("Location")
+		.addFunction ("auto_loop_location", &Locations::auto_loop_location)
+		.addFunction ("auto_punch_location", &Locations::auto_punch_location)
+		.addFunction ("session_range_location", &Locations::session_range_location)
+		.addFunction ("first_mark_after", &Locations::first_mark_after)
+		.addFunction ("first_mark_after", &Locations::first_mark_after)
 		.endClass ()
 
 		.deriveWSPtrClass <SessionObject, PBD::StatefulDestructible> ("SessionObject")
@@ -238,6 +273,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <Route, SessionObject> ("Route")
+		.addCast<Track> ("to_track")
 		.addFunction ("set_name", &Route::set_name)
 		.addFunction ("comment", &Route::comment)
 		.addFunction ("active", &Route::active)
@@ -255,15 +291,58 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("customize_plugin_insert", &Route::customize_plugin_insert)
 		.addFunction ("add_sidechain", &Route::add_sidechain)
 		.addFunction ("remove_sidechain", &Route::remove_sidechain)
+		.addFunction ("main_outs", &Route::main_outs)
+		.addFunction ("muted", &Route::muted)
+		.addFunction ("soloed", &Route::soloed)
+		.endClass ()
+
+		.deriveWSPtrClass <Playlist, SessionObject> ("Playlist")
+		.addFunction ("region_by_id", &Playlist::region_by_id)
+		.addFunction ("data_type", &Playlist::data_type)
+		.addFunction ("n_regions", &Playlist::n_regions)
+		//.addFunction ("get_extent", &Playlist::get_extent) // pair<framepos_t, framepos_t>
+		//.addFunction ("region_list", &Playlist::region_list) // RegionListProperty&
+		.addFunction ("add_region", &Playlist::add_region)
+		.addFunction ("remove_region", &Playlist::remove_region)
+		.addFunction ("regions_at", &Playlist::regions_at)
+		.addFunction ("top_region_at", &Playlist::top_region_at)
+		.addFunction ("top_unmuted_region_at", &Playlist::top_unmuted_region_at)
+		.addFunction ("find_next_region", &Playlist::find_next_region)
+		.addFunction ("find_next_region_boundary", &Playlist::find_next_region_boundary)
+		.addFunction ("count_regions_at", &Playlist::count_regions_at)
+		.addFunction ("regions_with_start_within", &Playlist::regions_with_start_within)
+		.addFunction ("regions_with_end_within", &Playlist::regions_with_end_within)
+		.addFunction ("raise_region", &Playlist::raise_region)
+		.addFunction ("lower_region", &Playlist::lower_region)
+		.addFunction ("raise_region_to_top", &Playlist::raise_region_to_top)
+		.addFunction ("lower_region_to_bottom", &Playlist::lower_region_to_bottom)
+		.addFunction ("duplicate", (void (Playlist::*)(boost::shared_ptr<Region>, framepos_t, framecnt_t, float))&Playlist::duplicate)
+		.addFunction ("duplicate_until", &Playlist::duplicate_until)
+		.addFunction ("duplicate_range", &Playlist::duplicate_range)
+		.addFunction ("combine", &Playlist::combine)
+		.addFunction ("uncombine", &Playlist::uncombine)
+		.addFunction ("split_region", &Playlist::split_region)
+		.addFunction ("split", (void (Playlist::*)(framepos_t))&Playlist::split)
+		.addFunction ("cut", (boost::shared_ptr<Playlist> (Playlist::*)(std::list<AudioRange>&, bool))&Playlist::cut)
+#if 0
+		.addFunction ("copy", &Playlist::copy)
+		.addFunction ("paste", &Playlist::paste)
+#endif
 		.endClass ()
 
 		.deriveWSPtrClass <Track, Route> ("Track")
+		.addCast<AudioTrack> ("to_audio_track")
+		.addCast<MidiTrack> ("to_midi_track")
 		.addFunction ("set_name", &Track::set_name)
 		.addFunction ("can_record", &Track::can_record)
 		.addFunction ("record_enabled", &Track::record_enabled)
 		.addFunction ("record_safe", &Track::record_safe)
 		.addFunction ("set_record_enabled", &Track::set_record_enabled)
 		.addFunction ("set_record_safe", &Track::set_record_safe)
+		.addFunction ("bounceable", &Track::bounceable)
+		.addFunction ("bounce", &Track::bounce_range)
+		.addFunction ("bounce_range", &Track::bounce_range)
+		.addFunction ("playlist", &Track::playlist)
 		.endClass ()
 
 		.deriveWSPtrClass <AudioTrack, Track> ("AudioTrack")
@@ -373,6 +452,9 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <SideChain, IOProcessor> ("SideChain")
 		.endClass ()
 
+		.deriveWSPtrClass <Delivery, IOProcessor> ("Delivery")
+		.endClass ()
+
 		.deriveWSPtrClass <Plugin, PBD::StatefulDestructible> ("Plugin")
 		.addFunction ("label", &Plugin::label)
 		.addFunction ("name", &Plugin::name)
@@ -418,28 +500,43 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("n_channels", &AudioSource::n_channels)
 		.endClass ()
 
-	// <std::list<boost::shared_ptr <AudioTrack> >
+		// <std::list<boost::shared_ptr <AudioTrack> >
 		.beginStdList <boost::shared_ptr<AudioTrack> > ("AudioTrackList")
 		.endClass ()
 
-	// std::list<boost::shared_ptr <MidiTrack> >
+		// std::list<boost::shared_ptr <MidiTrack> >
 		.beginStdList <boost::shared_ptr<MidiTrack> > ("MidiTrackList")
 		.endClass ()
 
-	// RouteList == std::list<boost::shared_ptr<Route> >
+		// RouteList == std::list<boost::shared_ptr<Route> >
 		.beginConstStdList <boost::shared_ptr<Route> > ("RouteList")
 		.endClass ()
 
-	// boost::shared_ptr<RouteList>
+		// boost::shared_ptr<RouteList>
 		.beginPtrStdList <boost::shared_ptr<Route> > ("RouteListPtr")
 		.endClass ()
 
-	// typedef std::list<boost::weak_ptr <Route> > WeakRouteList
+		// typedef std::list<boost::weak_ptr <Route> > WeakRouteList
 		.beginConstStdList <boost::weak_ptr<Route> > ("WeakRouteList")
 		.endClass ()
 
-	// std::list< boost::weak_ptr <AudioSource>
+		// std::list< boost::weak_ptr <AudioSource> >
 		.beginConstStdList <boost::weak_ptr<AudioSource> > ("WeakAudioSourceList")
+		.endClass ()
+
+		// typedef std::list<boost::shared_ptr<Region> > RegionList
+		.beginConstStdList <boost::shared_ptr<Region> > ("RegionList")
+		.endClass ()
+
+		// boost::shared_ptr <std::list<boost::shared_ptr<Region> > >
+		.beginPtrStdList <boost::shared_ptr<Region> > ("RegionListPtr")
+		.endClass ()
+
+		// used by Playlist::cut/copy
+		.beginConstStdList <AudioRange> ("AudioRangeList")
+		.endClass ()
+
+		.beginConstStdList <Location*> ("LocationList")
 		.endClass ()
 
 #if 0  // depends on Evoal:: Note, Beats see note_fixer.h
@@ -492,6 +589,8 @@ LuaBindings::common (lua_State* L)
 		.addStaticCFunction ("null",  &LuaAPI::datatype_ctor_null) // "nil" is a lua reseved word
 		.addStaticCFunction ("audio", &LuaAPI::datatype_ctor_audio)
 		.addStaticCFunction ("midi",  &LuaAPI::datatype_ctor_midi)
+		.addFunction ("to_string",  &DataType::to_string)
+		// TODO add uint32_t cast, add operator==  !=
 		.endClass()
 
 		/* libardour enums */
@@ -528,6 +627,12 @@ LuaBindings::common (lua_State* L)
 		.addConst ("CopyPlaylist", ARDOUR::PlaylistDisposition(CopyPlaylist))
 		.addConst ("NewPlaylist", ARDOUR::PlaylistDisposition(NewPlaylist))
 		.addConst ("SharePlaylist", ARDOUR::PlaylistDisposition(SharePlaylist))
+		.endNamespace ()
+
+		.beginNamespace ("RegionPoint")
+		.addConst ("Start", ARDOUR::RegionPoint(Start))
+		.addConst ("End", ARDOUR::RegionPoint(End))
+		.addConst ("SyncPoint", ARDOUR::RegionPoint(SyncPoint))
 		.endNamespace ();
 
 	luabridge::getGlobalNamespace (L)
@@ -625,6 +730,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("processor_by_id", &Session::processor_by_id)
 		.addFunction ("snap_name", &Session::snap_name)
 		.addFunction ("tempo_map", (TempoMap& (Session::*)())&Session::tempo_map)
+		.addFunction ("locations", &Session::locations)
 		.endClass ()
 
 		.beginClass <RegionFactory> ("RegionFactory")
@@ -643,6 +749,7 @@ LuaBindings::common (lua_State* L)
 		.endNamespace () // END Session enums
 
 		.beginNamespace ("LuaAPI")
+		.addFunction ("nil_proc", ARDOUR::LuaAPI::nil_processor)
 		.addFunction ("new_luaproc", ARDOUR::LuaAPI::new_luaproc)
 		.addFunction ("new_plugin_info", ARDOUR::LuaAPI::new_plugin_info)
 		.addFunction ("new_plugin", ARDOUR::LuaAPI::new_plugin)
