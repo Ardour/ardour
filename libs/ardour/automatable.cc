@@ -148,7 +148,9 @@ Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 
 	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (ac->list ());
 
-	if (al) {
+	boost::shared_ptr<AutomationControl> actl (boost::dynamic_pointer_cast<AutomationControl> (ac));
+
+	if ((!actl || !(actl->flags() & Controllable::NotAutomatable)) && al) {
 		al->automation_state_changed.connect_same_thread (
 			_list_connections,
 			boost::bind (&Automatable::automation_list_automation_state_changed,
@@ -157,7 +159,7 @@ Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 
 	ControlSet::add_control (ac);
 
-	if (al) {
+	if ((!actl || !(actl->flags() & Controllable::NotAutomatable)) && al) {
 		_can_automate_list.insert (param);
 		automation_list_automation_state_changed (param, al->automation_state ()); // sync everything up
 	}
