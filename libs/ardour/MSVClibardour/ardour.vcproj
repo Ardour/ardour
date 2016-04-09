@@ -568,6 +568,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\fixed_delay.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gain_control.cc"
 				>
 			</File>
@@ -1695,6 +1699,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\filter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\fixed_delay.h"
 				>
 			</File>
 			<File
