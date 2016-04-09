@@ -212,6 +212,8 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void set_show_measures (bool yn) = 0;
 	virtual bool show_measures () const = 0;
 	virtual void remove_tracks () = 0;
+	virtual void set_loop_range (framepos_t start, framepos_t end, std::string cmd) = 0;
+	virtual void set_punch_range (framepos_t start, framepos_t end, std::string cmd) = 0;
 
 	virtual Editing::MouseMode effective_mouse_mode () const = 0;
 

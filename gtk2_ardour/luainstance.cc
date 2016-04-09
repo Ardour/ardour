@@ -33,6 +33,8 @@
 #include "region_selection.h"
 #include "luainstance.h"
 #include "luasignal.h"
+#include "time_axis_view.h"
+#include "selection.h"
 #include "script_selector.h"
 
 #include "i18n.h"
@@ -223,6 +225,24 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("n_midi_regions", &RegionSelection::n_midi_regions)
 		.endClass ()
 
+		.beginClass <AxisView> ("AxisView")
+		.endClass ()
+		.deriveClass <TimeAxisView, AxisView> ("TimeAxisView")
+		.endClass ()
+		.deriveClass <RouteTimeAxisView, TimeAxisView> ("RouteTimeAxisView")
+		.endClass ()
+
+		.beginClass <Selection> ("Selection")
+		.addFunction ("clear", &Selection::clear)
+		.addFunction ("clear_all", &Selection::clear_all)
+		.endClass ()
+
+		.beginClass <TrackViewList> ("TrackViewList")
+		.endClass ()
+
+		.deriveClass <TrackSelection, TrackViewList> ("TrackSelection")
+		.endClass ()
+
 		.beginClass <ArdourMarker> ("ArdourMarker")
 		.endClass ()
 
@@ -245,12 +265,9 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("pixel_to_sample", &PublicEditor::pixel_to_sample)
 		.addFunction ("sample_to_pixel", &PublicEditor::sample_to_pixel)
 
-#if 0 // Selection is not yet exposed
 		.addFunction ("get_selection", &PublicEditor::get_selection)
 		.addFunction ("get_cut_buffer", &PublicEditor::get_cut_buffer)
-		.addFunction ("track_mixer_selection", &PublicEditor::track_mixer_selection)
-		.addFunction ("extend_selection_to_track", &PublicEditor::extend_selection_to_track)
-#endif
+		.addRefFunction ("get_selection_extents", &PublicEditor::get_selection_extents)
 
 		.addFunction ("play_selection", &PublicEditor::play_selection)
 		.addFunction ("play_with_preroll", &PublicEditor::play_with_preroll)
@@ -263,6 +280,9 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("set_show_measures", &PublicEditor::set_show_measures)
 		.addFunction ("show_measures", &PublicEditor::show_measures)
 		.addFunction ("remove_tracks", &PublicEditor::remove_tracks)
+
+		.addFunction ("set_loop_range", &PublicEditor::set_loop_range)
+		.addFunction ("set_punch_range", &PublicEditor::set_punch_range)
 
 		.addFunction ("effective_mouse_mode", &PublicEditor::effective_mouse_mode)
 
