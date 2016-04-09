@@ -29,11 +29,13 @@
 #include "ardour/automatable.h"
 #include "ardour/event_type_map.h"
 #include "ardour/gain_control.h"
+#include "ardour/monitor_control.h"
 #include "ardour/midi_track.h"
 #include "ardour/pan_controllable.h"
 #include "ardour/pannable.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/record_enable_control.h"
 #include "ardour/session.h"
 #include "ardour/uri_map.h"
 #include "ardour/value_as_string.h"
@@ -422,6 +424,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	bool                              make_list = true;
 	ParameterDescriptor               desc(param);
 	boost::shared_ptr<AutomationList> list;
+
 	if (param.type() >= MidiCCAutomation && param.type() <= MidiChannelPressureAutomation) {
 		MidiTrack* mt = dynamic_cast<MidiTrack*>(this);
 		if (mt) {
@@ -461,6 +464,27 @@ Automatable::control_factory(const Evoral::Parameter& param)
 			control = new PanControllable (_a_session, pannable->describe_parameter (param), pannable, param);
 		} else {
 			warning << "PanAutomation for non-Pannable" << endl;
+		}
+	} else if (param.type() == RecEnableAutomation) {
+		Recordable* re = dynamic_cast<Recordable*> (this);
+		if (re) {
+			control = new RecordEnableControl (_a_session, X_("recenable"), *re);
+		}
+	} else if (param.type() == MonitoringAutomation) {
+		Monitorable* m = dynamic_cast<Monitorable*>(this);
+		if (m) {
+			control = new MonitorControl (_a_session, X_("monitor"), *m);
+		}
+	} else if (param.type() == SoloAutomation) {
+		Soloable* s = dynamic_cast<Soloable*>(this);
+		Muteable* m = dynamic_cast<Muteable*>(this);
+		if (s && m) {
+			control = new SoloControl (_a_session, X_("solo"), *s, *m);
+		}
+	} else if (param.type() == MuteAutomation) {
+		Muteable* m = dynamic_cast<Muteable*>(this);
+		if (m) {
+			control = new MuteControl (_a_session, X_("mute"), *m);
 		}
 	}
 
