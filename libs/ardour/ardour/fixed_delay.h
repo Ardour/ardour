@@ -26,22 +26,67 @@ namespace ARDOUR {
 
 class ChanCount;
 
+/** Multichannel Audio/Midi Delay Line
+ *
+ * This is an efficient delay line operating directly on Ardour buffers.
+ * The drawback is that there is no thread safety:
+ * All calls need to be executed in the same thread.
+ *
+ * After configuration, the delay can be changed safely up to the maximum
+ * configured delay but doing so flushes the buffer. There is no de-clicking
+ * (see ARDOUR::Delayline for those cases).
+ *
+ * Increasing the delay above the max configured or requesting more
+ * buffers will allocate the required space (not realtime safe).
+ *
+ * All buffers part of the set are treated separately.
+ */
 class LIBARDOUR_API FixedDelay
 {
 public:
 	FixedDelay ();
 	~FixedDelay ();
 
-	void configure (const ChanCount& count, framecnt_t);
-	void set (const ChanCount& count, framecnt_t);
+	/** initial configuration, usually done after instantiation
+	 *
+	 * @param count Channel Count (audio+midi)
+	 * @param max_delay the maximum number of samples to delay
+	 * @param shrink when false already allocated buffers are kept if both channel-count and max-delay requirements are satisified
+	 */
+	void configure (const ChanCount& count, framecnt_t max_delay, bool shrink = true);
 
-	void delay (ARDOUR::DataType, uint32_t, Buffer&, const Buffer&, pframes_t, framecnt_t dst_offset = 0, framecnt_t src_offset = 0);
-	void flush() { _pending_flush = true; }
+	/** set delay time and update active process buffers
+	 *
+	 * This calls configure with shrink = false and sets the current delay time
+	 * if the delay time mismatches, the buffers are silenced (zeroed).
+	 *
+	 * @param count channels to be processed
+	 * @param delay number of audio samples to delay
+	 */
+	void set (const ChanCount& count, framecnt_t delay);
+
+	/** process a channel
+	 *
+	 * Read N samples from the input buffer, delay them by the configured delay-time and write
+	 * the delayed samples to the output buffer at the given offset.
+	 *
+	 * @param dt datatype
+	 * @param id buffer number (starting at 0)
+	 * @param out output buffer to write data to
+	 * @param in input buffer to read data from
+	 * @param n_samples number of samples to process (must be <= 8192)
+	 * @param dst_offset offset in output buffer to start writing to
+	 * @param src_offset offset in input buffer to start reading from
+	 */
+	void delay (ARDOUR::DataType dt, uint32_t id, Buffer& out, const Buffer& in, pframes_t n_samples, framecnt_t dst_offset = 0, framecnt_t src_offset = 0);
+
+	/** zero all buffers */
+	void flush();
 
 private:
 	framecnt_t _max_delay;
+	framecnt_t _buf_size;
 	framecnt_t _delay;
-	bool       _pending_flush;
 	ChanCount  _count;
 
 	struct DelayBuffer {

@@ -25,8 +25,8 @@ using namespace ARDOUR;
 
 FixedDelay::FixedDelay ()
 	: _max_delay (0)
+	, _buf_size (0)
 	, _delay (0)
-	, _pending_flush (false)
 {
 	for (size_t i = 0; i < DataType::num_types; ++i) {
 		_buffers.push_back (BufferVec ());
@@ -37,25 +37,6 @@ FixedDelay::FixedDelay ()
 FixedDelay::~FixedDelay ()
 {
 	clear ();
-}
-
-void
-FixedDelay::configure (const ChanCount& count, framecnt_t max_delay)
-{
-	if (max_delay <= _max_delay || count <= _count) {
-		return;
-	}
-	_max_delay = std::max (_max_delay, max_delay);
-	for (DataType::iterator i = DataType::begin (); i != DataType::end (); ++i) {
-		ensure_buffers (*i, count.get (*i), _max_delay + 1);
-	}
-}
-
-void
-FixedDelay::set (const ChanCount& count, framecnt_t delay)
-{
-	configure (count, delay);
-	_delay = delay;
 }
 
 void
@@ -93,6 +74,47 @@ FixedDelay::clear ()
 }
 
 void
+FixedDelay::flush()
+{
+	for (std::vector<BufferVec>::iterator i = _buffers.begin (); i != _buffers.end (); ++i) {
+		for (BufferVec::iterator j = (*i).begin (); j != (*i).end (); ++j) {
+			(*j)->buf->silence (_buf_size);
+		}
+	}
+}
+
+void
+FixedDelay::configure (const ChanCount& count, framecnt_t max_delay, bool shrink)
+{
+	if (shrink) {
+		if (max_delay == _max_delay && count == _count) {
+			return;
+		}
+		_max_delay = max_delay;
+	} else if (max_delay <= _max_delay || count <= _count) {
+		return;
+		_max_delay = std::max (_max_delay, max_delay);
+	}
+
+	// max possible (with all engines and during export)
+	static const framecnt_t max_block_length = 8192;
+	_buf_size = _max_delay + max_block_length;
+	for (DataType::iterator i = DataType::begin (); i != DataType::end (); ++i) {
+		ensure_buffers (*i, count.get (*i), _buf_size);
+	}
+}
+
+void
+FixedDelay::set (const ChanCount& count, framecnt_t delay)
+{
+	configure (count, delay, false);
+	if (_delay != delay) {
+		flush ();
+	}
+	_delay = delay;
+}
+
+void
 FixedDelay::delay (
 		ARDOUR::DataType dt, uint32_t id,
 		Buffer& out, const Buffer& in,
@@ -108,25 +130,25 @@ FixedDelay::delay (
 	assert (id < _buffers[dt].size ());
 	DelayBuffer *db = _buffers[dt][id];
 
-	if (db->pos + n_frames > _max_delay) {
-		uint32_t w0 = _max_delay - db->pos;
-		uint32_t w1 = db->pos + n_frames - _max_delay;
+	if (db->pos + n_frames > _buf_size) {
+		uint32_t w0 = _buf_size - db->pos;
+		uint32_t w1 = db->pos + n_frames - _buf_size;
 		db->buf->read_from (in, w0, db->pos, src_offset);
 		db->buf->read_from (in, w1, 0, src_offset + w0);
 	} else {
 		db->buf->read_from (in, n_frames, db->pos, src_offset);
 	}
 
-	uint32_t rp = (db->pos + _max_delay - _delay) % _max_delay;
+	uint32_t rp = (db->pos + _buf_size - _delay) % _buf_size;
 
-	if (rp + n_frames > _max_delay) {
-		uint32_t r0 = _max_delay - rp;
-		uint32_t r1 = rp + n_frames - _max_delay;
+	if (rp + n_frames > _buf_size) {
+		uint32_t r0 = _buf_size - rp;
+		uint32_t r1 = rp + n_frames - _buf_size;
 		out.read_from (*db->buf, r0, dst_offset, rp);
 		out.read_from (*db->buf, r1, dst_offset + r0, 0);
 	} else {
 		out.read_from (*db->buf, n_frames, dst_offset, rp);
 	}
 
-	db->pos = (db->pos + n_frames) % _max_delay;
+	db->pos = (db->pos + n_frames) % _buf_size;
 }
