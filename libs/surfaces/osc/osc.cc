@@ -487,6 +487,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/routes/send/gainabs", "iif", route_set_send_gain_abs);
 		REGISTER_CALLBACK (serv, "/ardour/routes/send/gaindB", "iif", route_set_send_gain_dB);
 
+                REGISTER_CALLBACK (serv, "/ardour/routes/gain_automation", "is", route_set_gain_automation);
+
 		/* still not-really-standardized query interface */
 		//REGISTER_CALLBACK (serv, "/ardour/*/#current_value", "", current_value);
 		//REGISTER_CALLBACK (serv, "/ardour/set", "", set);
@@ -1346,6 +1348,42 @@ OSC::route_plugin_parameter_print (int rid, int piid, int par)
 	}
 
 	return 0;
+}
+
+
+static void set_automation_state (boost::shared_ptr<AutomationControl> c, char state)
+{
+        switch (state) {
+		case 'p':
+			c->set_automation_state (Play);
+			break;
+		case 'm':
+			c->set_automation_state (Off);
+			break;
+		case 'w':
+			c->set_automation_state (Write);
+			break;
+		case 't':
+			c->set_automation_state (Touch);
+			break;
+		default:
+			break;
+        }
+}
+
+int OSC::route_set_gain_automation (int rid, char state)
+{
+        if (!session) {
+                return -1;
+        }
+
+        boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+        if (!r || !r->gain_control ()) {
+                return -1;
+        }
+
+        set_automation_state (r->gain_control (), state);
+        return 0;
 }
 
 XMLNode&
