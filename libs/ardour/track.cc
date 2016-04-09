@@ -65,13 +65,16 @@ Track::init ()
 	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
 
 	_record_enable_control.reset (new RecordEnableControl (_session, X_("recenable"), *this));
+	add_control (_record_enable_control);
 	_record_enable_control->set_flags (Controllable::Toggle);
-
-	_monitoring_control.reset (new MonitorControl (_session, X_("monitoring"), *this));
 
 	_record_safe_control.reset (new AutomationControl (_session, RecSafeAutomation, ParameterDescriptor (RecSafeAutomation),
 	                                                   boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (RecSafeAutomation))),
 	                                                   X_("recsafe")));
+	add_control (_record_safe_control);
+
+	_monitoring_control.reset (new MonitorControl (_session, X_("monitoring"), *this));
+	add_control (_monitoring_control);
 
 	track_number_changed.connect_same_thread (*this, boost::bind (&Track::resync_track_name, this));
 	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
