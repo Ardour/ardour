@@ -862,6 +862,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void add_command (Command *const cmd);
 
+	PBD::StatefulDiffCommand* add_stateful_diff_command (boost::shared_ptr<PBD::StatefulDestructible>);
+
 	/** @return The list of operations that are currently in progress */
 	std::list<GQuark> const & current_operations () {
 		return _current_trans_quarks;

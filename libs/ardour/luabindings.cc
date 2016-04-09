@@ -16,7 +16,10 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <glibmm.h>
+
 #include "timecode/bbt_time.h"
+#include "pbd/stateful_diff_command.h"
 #include "evoral/Control.hpp"
 #include "evoral/ControlList.hpp"
 #include "evoral/Range.hpp"
@@ -107,16 +110,37 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass <PBD::Stateful> ("Stateful")
 		.addFunction ("properties", &PBD::Stateful::properties)
+		.addFunction ("clear_changes", &PBD::Stateful::clear_changes)
+		.endClass ()
+
+		.beginWSPtrClass <PBD::Stateful> ("StatefulPtr")
+		.addFunction ("properties", &PBD::Stateful::properties)
+		.addFunction ("clear_changes", &PBD::Stateful::clear_changes)
 		.endClass ()
 
 		.deriveClass <PBD::StatefulDestructible, PBD::Stateful> ("StatefulDestructible")
 		.endClass ()
 
-		.beginWSPtrClass <PBD::Stateful> ("StatefulPtr")
-		.addFunction ("properties", &PBD::Stateful::properties)
+		.deriveWSPtrClass <PBD::StatefulDestructible, PBD::Stateful> ("StatefulDestructiblePtr")
 		.endClass ()
 
-		.deriveWSPtrClass <PBD::StatefulDestructible, PBD::Stateful> ("StatefulDestructiblePtr")
+		.deriveClass <Command, PBD::StatefulDestructible> ("Command")
+		.addFunction ("set_name", &Command::set_name)
+		.addFunction ("name", &Command::name)
+		.endClass ()
+
+		/* UndoTransaction::add_command() subscribes to DropReferences()
+		 * and deletes the object.
+		 *
+		 * This object cannot be constructed by lua because lua would manage lifetime
+		 * and delete the object leading to a double free.
+		 *
+		 * use Session::add_stateful_diff_command()
+		 * and Session::abort_reversible_command()
+		 */
+		.deriveClass <PBD::StatefulDiffCommand, Command> ("StatefulDiffCommand")
+		.addFunction ("undo", &PBD::StatefulDiffCommand::undo)
+		.addFunction ("empty", &PBD::StatefulDiffCommand::empty)
 		.endClass ()
 
 		.deriveWSPtrClass <PBD::Controllable, PBD::StatefulDestructible> ("Controllable")
@@ -260,6 +284,10 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <SessionObject, PBD::StatefulDestructible> ("SessionObject")
+		/* multiple inheritance is not covered by luabridge,
+		 * we need explicit casts :( */
+		.addCast<PBD::Stateful> ("to_stateful")
+		.addCast<PBD::StatefulDestructible> ("to_statefuldestructible")
 		.addFunction ("name", &SessionObject::name)
 		.endClass ()
 
@@ -426,11 +454,8 @@ LuaBindings::common (lua_State* L)
 		.addData ("logarithmic", &ParameterDescriptor::logarithmic)
 		.endClass ()
 
-		.deriveWSPtrClass <Processor, SessionObject> ("Processor")
-		// TODO mult. inheritance
-		.endClass ()
-
 		.deriveWSPtrClass <Processor, Automatable> ("Processor")
+		.addCast<SessionObject> ("to_sessionobject")
 		.addCast<PluginInsert> ("to_insert")
 		.addCast<SideChain> ("to_sidechain")
 		.addCast<IOProcessor> ("to_ioprocessor")
@@ -589,7 +614,7 @@ LuaBindings::common (lua_State* L)
 		.addStaticCFunction ("null",  &LuaAPI::datatype_ctor_null) // "nil" is a lua reseved word
 		.addStaticCFunction ("audio", &LuaAPI::datatype_ctor_audio)
 		.addStaticCFunction ("midi",  &LuaAPI::datatype_ctor_midi)
-		.addFunction ("to_string",  &DataType::to_string)
+		.addFunction ("to_string",  &DataType::to_string) // TODO Lua __tostring
 		// TODO add uint32_t cast, add operator==  !=
 		.endClass()
 
@@ -731,6 +756,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("snap_name", &Session::snap_name)
 		.addFunction ("tempo_map", (TempoMap& (Session::*)())&Session::tempo_map)
 		.addFunction ("locations", &Session::locations)
+		.addFunction ("begin_reversible_command", (void (Session::*)(const std::string&))&Session::begin_reversible_command)
+		.addFunction ("commit_reversible_command", &Session::commit_reversible_command)
+		.addFunction ("abort_reversible_command", &Session::abort_reversible_command)
+		.addFunction ("add_stateful_diff_command", &Session::add_stateful_diff_command)
 		.endClass ()
 
 		.beginClass <RegionFactory> ("RegionFactory")
@@ -755,6 +784,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("new_plugin", ARDOUR::LuaAPI::new_plugin)
 		.addFunction ("set_processor_param", ARDOUR::LuaAPI::set_processor_param)
 		.addFunction ("set_plugin_insert_param", ARDOUR::LuaAPI::set_plugin_insert_param)
+		.addFunction ("usleep", Glib::usleep)
 		.endNamespace ()
 
 		.endNamespace ();// END ARDOUR

@@ -2614,6 +2614,15 @@ Session::add_command (Command* const cmd)
 	                    cmd->name ()));
 	_current_trans->add_command (cmd);
 }
+
+PBD::StatefulDiffCommand*
+Session::add_stateful_diff_command (boost::shared_ptr<PBD::StatefulDestructible> sfd)
+{
+	PBD::StatefulDiffCommand* cmd = new PBD::StatefulDiffCommand (sfd);
+	add_command (cmd);
+	return cmd;
+}
+
 void
 Session::begin_reversible_command (const string& name)
 {
