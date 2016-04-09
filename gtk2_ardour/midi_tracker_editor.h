@@ -209,6 +209,11 @@ class MidiTrackerEditor : public ArdourWindow
 	bool                         visible_delay;
 	ArdourButton                 automation_button;
 	Gtk::Menu                    subplugin_menu;
+	Gtk::Menu*                   automation_action_menu;
+
+	typedef std::map<Evoral::Parameter, Gtk::CheckMenuItem*> ParameterMenuMap;
+	/** parameter -> menu item map for the main automation menu */
+	ParameterMenuMap _main_automation_menu_map;
 
 	boost::shared_ptr<ARDOUR::MidiRegion> region;
 	boost::shared_ptr<ARDOUR::MidiTrack>  track;
@@ -234,6 +239,10 @@ class MidiTrackerEditor : public ArdourWindow
 	void redisplay_visible_velocity ();
 	void redisplay_visible_delay ();
 	void automation_click ();
+
+	virtual void show_all_automation ();
+	virtual void show_existing_automation ();
+	virtual void hide_all_automation ();
 
 	void setup_tooltips ();
 	void setup_toolbar ();

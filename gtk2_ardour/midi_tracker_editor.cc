@@ -221,6 +221,7 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<Midi
 	, visible_channel (false)
 	, visible_velocity (true)
 	, visible_delay (true)
+	, automation_action_menu(0)
 	, region (r)
 	, track (tr)
 	, midi_model (region->midi_source(0)->model())
@@ -398,7 +399,7 @@ void
 MidiTrackerEditor::automation_click ()
 {
 	build_automation_action_menu ();
-	// automation_action_menu->popup (1, gtk_get_current_event_time());
+	automation_action_menu->popup (1, gtk_get_current_event_time());
 }
 
 void
@@ -665,39 +666,39 @@ MidiTrackerEditor::build_automation_action_menu ()
 	   otherwise bad things happen (see comment for similar case in MidiTimeAxisView::build_automation_action_menu)
 	*/
 
-	// detach_menu (subplugin_menu);
+	detach_menu (subplugin_menu);
 
-	// _main_automation_menu_map.clear ();
-	// delete automation_action_menu;
-	// automation_action_menu = new Menu;
+	_main_automation_menu_map.clear ();
+	delete automation_action_menu;
+	automation_action_menu = new Menu;
 
-	// MenuList& items = automation_action_menu->items();
+	MenuList& items = automation_action_menu->items();
 
-	// automation_action_menu->set_name ("ArdourContextMenu");
+	automation_action_menu->set_name ("ArdourContextMenu");
 
-	// items.push_back (MenuElem (_("Show All Automation"),
-	// 			   sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::show_all_automation), for_selection)));
+	items.push_back (MenuElem (_("Show All Automation"),
+	                           sigc::mem_fun (*this, &MidiTrackerEditor::show_all_automation)));
 
-	// items.push_back (MenuElem (_("Show Existing Automation"),
-	// 			   sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::show_existing_automation), for_selection)));
+	items.push_back (MenuElem (_("Show Existing Automation"),
+	                           sigc::mem_fun (*this, &MidiTrackerEditor::show_existing_automation)));
 
-	// items.push_back (MenuElem (_("Hide All Automation"),
-	// 			   sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::hide_all_automation), for_selection)));
+	items.push_back (MenuElem (_("Hide All Automation"),
+	                           sigc::mem_fun (*this, &MidiTrackerEditor::hide_all_automation)));
 
-	// /* Attach the plugin submenu. It may have previously been used elsewhere,
-	//    so it was detached above
-	// */
+	/* Attach the plugin submenu. It may have previously been used elsewhere,
+	   so it was detached above
+	*/
 
-	// if (!subplugin_menu.items().empty()) {
-	// 	items.push_back (SeparatorElem ());
-	// 	items.push_back (MenuElem (_("Processor automation"), subplugin_menu));
-	// 	items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);;
-	// }
+	if (!subplugin_menu.items().empty()) {
+		items.push_back (SeparatorElem ());
+		items.push_back (MenuElem (_("Processor automation"), subplugin_menu));
+		items.back().set_sensitive (true);
+	}
 
-	// /* Add any route automation */
+	/* Add any route automation */
 
 	// if (gain_track) {
-	// 	items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &RouteTimeAxisView::update_gain_track_visibility)));
+	// 	items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &MidiTrackerEditor::update_gain_track_visibility)));
 	// 	gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 	// 	gain_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
 	// 	                                  (gain_track && string_is_affirmative (gain_track->gui_property ("visible"))));
@@ -706,7 +707,7 @@ MidiTrackerEditor::build_automation_action_menu ()
 	// }
 
 	// if (trim_track) {
-	// 	items.push_back (CheckMenuElem (_("Trim"), sigc::mem_fun (*this, &RouteTimeAxisView::update_trim_track_visibility)));
+	// 	items.push_back (CheckMenuElem (_("Trim"), sigc::mem_fun (*this, &MidiTrackerEditor::update_trim_track_visibility)));
 	// 	trim_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 	// 	trim_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
 	// 	                                  (trim_track && string_is_affirmative (trim_track->gui_property ("visible"))));
@@ -715,7 +716,7 @@ MidiTrackerEditor::build_automation_action_menu ()
 	// }
 
 	// if (mute_track) {
-	// 	items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &RouteTimeAxisView::update_mute_track_visibility)));
+	// 	items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &MidiTrackerEditor::update_mute_track_visibility)));
 	// 	mute_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 	// 	mute_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
 	// 	                                  (mute_track && string_is_affirmative (mute_track->gui_property ("visible"))));
@@ -724,7 +725,7 @@ MidiTrackerEditor::build_automation_action_menu ()
 	// }
 
 	// if (!pan_tracks.empty()) {
-	// 	items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &RouteTimeAxisView::update_pan_track_visibility)));
+	// 	items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &MidiTrackerEditor::update_pan_track_visibility)));
 	// 	pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 	// 	pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
 	// 					 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
@@ -883,4 +884,121 @@ MidiTrackerEditor::beats_per_row_chosen (SnapType type)
 	if (ract && ract->get_active()) {
 		set_beats_per_row_to (type);
 	}
+}
+
+void
+MidiTrackerEditor::show_all_automation ()
+{
+	// Copy pasted from route_time_axis.cc
+
+	// if (apply_to_selection) {
+	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::show_all_automation, _1, false));
+	// } else {
+	// 	no_redraw = true;
+
+	// 	/* Show our automation */
+
+	// 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+	// 		i->second->set_marked_for_display (true);
+
+	// 		Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+
+	// 		if (menu) {
+	// 			menu->set_active(true);
+	// 		}
+	// 	}
+
+
+	// 	/* Show processor automation */
+
+	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	// 			if ((*ii)->view == 0) {
+	// 				add_processor_automation_curve ((*i)->processor, (*ii)->what);
+	// 			}
+
+	// 			(*ii)->menu_item->set_active (true);
+	// 		}
+	// 	}
+
+	// 	no_redraw = false;
+
+	// 	/* Redraw */
+
+	// 	request_redraw ();
+	// }
+}
+
+void
+MidiTrackerEditor::show_existing_automation ()
+{
+	// Copy pasted from route_time_axis.cc
+
+	// if (apply_to_selection) {
+	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::show_existing_automation, _1, false));
+	// } else {
+	// 	no_redraw = true;
+
+	// 	/* Show our automation */
+
+	// 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+	// 		if (i->second->has_automation()) {
+	// 			i->second->set_marked_for_display (true);
+
+	// 			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+	// 			if (menu) {
+	// 				menu->set_active(true);
+	// 			}
+	// 		}
+	// 	}
+
+	// 	/* Show processor automation */
+
+	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	// 			if ((*ii)->view != 0 && (*i)->processor->control((*ii)->what)->list()->size() > 0) {
+	// 				(*ii)->menu_item->set_active (true);
+	// 			}
+	// 		}
+	// 	}
+
+	// 	no_redraw = false;
+
+	// 	request_redraw ();
+	// }
+}
+
+void
+MidiTrackerEditor::hide_all_automation ()
+{
+	// Copy pasted from route_time_axis.cc
+
+	// if (apply_to_selection) {
+	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::hide_all_automation, _1, false));
+	// } else {
+	// 	no_redraw = true;
+
+	// 	/* Hide our automation */
+
+	// 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+	// 		i->second->set_marked_for_display (false);
+
+	// 		Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+
+	// 		if (menu) {
+	// 			menu->set_active (false);
+	// 		}
+	// 	}
+
+	// 	/* Hide processor automation */
+
+	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	// 			(*ii)->menu_item->set_active (false);
+	// 		}
+	// 	}
+
+	// 	no_redraw = false;
+	// 	request_redraw ();
+	// }
 }
