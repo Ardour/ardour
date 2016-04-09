@@ -43,6 +43,12 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	int datatype_ctor_midi (lua_State *L);
 
+	/** Create a null processor shared pointer
+	 *
+	 * This is useful for Track:bounce() to indicate no processing.
+	 */
+	boost::shared_ptr<ARDOUR::Processor> nil_processor ();
+
 	/** create a new Lua Processor (Plugin)
 	 *
 	 * @param s Session Handle

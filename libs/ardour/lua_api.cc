@@ -62,6 +62,12 @@ ARDOUR::LuaAPI::datatype_ctor_midi (lua_State *L)
 }
 
 boost::shared_ptr<Processor>
+ARDOUR::LuaAPI::nil_processor ()
+{
+	return boost::shared_ptr<Processor> ();
+}
+
+boost::shared_ptr<Processor>
 ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 {
 	if (!s) {
