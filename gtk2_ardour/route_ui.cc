@@ -309,7 +309,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
-		t->monitoring_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::monitoring_changed, this, _1, _2), gui_context());
+		t->monitoring_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_monitoring_display, this), gui_context());
 
 		update_monitoring_display ();
 	}
@@ -758,12 +758,6 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	}
 
 	return false;
-}
-
-void
-RouteUI::monitoring_changed (bool, Controllable::GroupControlDisposition)
-{
-	update_monitoring_display ();
 }
 
 void
