@@ -226,6 +226,12 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("regionlist", &RegionSelection::regionlist) // XXX check windows binding (libardour)
 		.endClass ()
 
+		.deriveClass <TimeSelection, std::list<ARDOUR::AudioRange> > ("TimeSelection")
+		.addFunction ("start", &TimeSelection::start)
+		.addFunction ("end_frame", &TimeSelection::end_frame)
+		.addFunction ("length", &TimeSelection::length)
+		.endClass ()
+
 #if 0
 		.beginClass <AxisView> ("AxisView")
 		.endClass ()
@@ -240,6 +246,7 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("clear_all", &Selection::clear_all)
 		.addData ("tracks", &Selection::tracks)
 		.addData ("regions", &Selection::regions)
+		.addData ("time", &Selection::time)
 		.endClass ()
 
 		.beginClass <TrackViewList> ("TrackViewList")
