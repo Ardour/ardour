@@ -26,9 +26,19 @@ function factory () return function ()
 	-- make sure we have a loop, and the playhead (edit point) is after it
 	-- TODO: only print an error and return
 	-- TODO: use the edit-point (not playhead) ? maybe.
-	assert (loop)
+	if not loop then
+		print ("A Loop range must be set.")
+		goto errorout
+	end
 	assert (loop:start () < loop:_end ())
-	assert (loop:_end () < playhead)
+	if loop:_end () >= playhead then
+		print ("The Playhead (paste point) needs to be after the loop.")
+		goto errorout
+	end
+
+	-- prepare undo operation
+	Session:begin_reversible_command ("Tom's Loop")
+	local add_undo = false -- keep track if something has changed
 
 	for route in Session:get_tracks ():iter () do
 		-- skip muted tracks
@@ -38,30 +48,42 @@ function factory () return function ()
 		-- test if bouncing is possible
 		local track = route:to_track ()
 		if not track:bounceable (proc, false) then
-			goto continue;
+			goto continue
 		end
 		-- only audio tracks
 		local playlist = track:playlist ()
-		if playlist:data_type ():to_string() ~= "audio" then
+		if playlist:data_type ():to_string () ~= "audio" then
 			goto continue
 		end
 
 		-- check if there are any regions in the loop-range of this track
 		local range = Evoral.Range (loop:start (), loop:_end ())
-		if playlist:regions_with_start_within (range):empty () then
-			goto continue
-		end
-		if playlist:regions_with_end_within (range):empty () then
+		if playlist:regions_with_start_within (range):empty ()
+			and playlist:regions_with_end_within (range):empty () then
 			goto continue
 		end
 
-		-- all set
-		--print (track:name ())
+		-- clear existing changes, prepare "diff" of state
+		playlist:to_stateful ():clear_changes ()
 
 		-- do the actual work
 		local region = track:bounce_range (loop:start (), loop:_end (), itt, proc, false)
-		playlist:add_region(region, playhead, npaste, false)
+		playlist:add_region (region, playhead, npaste, false)
+
+		-- create a diff of the performed work, add it to the session's undo stack
+		-- and check if it is not empty
+		if not Session:add_stateful_diff_command (playlist:to_statefuldestructible ()):empty () then
+			add_undo = true
+		end
 
 		::continue::
 	end
+	-- all done, commit the combined Undo Operation
+	if add_undo then
+		-- the 'nil' Commend here mean to use the collected diffs added above
+		Session:commit_reversible_command (nil)
+	else
+		Session:abort_reversible_command ()
+	end
+	::errorout::
 end end
