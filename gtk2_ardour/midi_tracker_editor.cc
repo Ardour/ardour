@@ -57,132 +57,6 @@ using namespace Editing;
 using Timecode::BBT_Time;
 
 ///////////////////////
-// MidiTrackerMatrix //
-///////////////////////
-
-MidiTrackerMatrix::MidiTrackerMatrix(ARDOUR::Session* session,
-                                     boost::shared_ptr<ARDOUR::MidiRegion> region,
-                                     boost::shared_ptr<ARDOUR::MidiModel> midi_model,
-                                     uint16_t rpb)
-	: _session(session), _region(region), _midi_model(midi_model),
-	  _conv(_session->tempo_map(), _region->position())
-{
-	set_rows_per_beat(rpb);
-	update_matrix();
-}
-
-void MidiTrackerMatrix::set_rows_per_beat(uint16_t rpb)
-{
-	rows_per_beat = rpb;
-	beats_per_row = Evoral::Beats(1.0 / rows_per_beat);
-	_ticks_per_row = BBT_Time::ticks_per_beat/rows_per_beat;
-}
-
-void MidiTrackerMatrix::update_matrix()
-{
-	first_beats = find_first_row_beats();
-	last_beats = find_last_row_beats();
-	nrows = find_nrows();
-
-	// Distribute the notes across N tracks so that no overlapping notes can
-	// exist on the same track. When a note on hits, it is placed on the first
-	// available track, ordered by vector index. In case several notes on are
-	// hit simultaneously, then the lowest pitch one is placed on the first
-	// available track, ordered by vector index.
-	const MidiModel::Notes& notes = _midi_model->notes();
-	MidiModel::StrictNotes strict_notes(notes.begin(), notes.end());
-	std::vector<MidiModel::Notes> notes_per_track;
-	for (MidiModel::StrictNotes::const_iterator note = strict_notes.begin();
-	     note != strict_notes.end(); ++note) {
-		int freetrack = -1;		// index of the first free track
-		for (int i = 0; i < (int)notes_per_track.size(); i++) {
-			if ((*notes_per_track[i].rbegin())->end_time() <= (*note)->time()) {
-				freetrack = i;
-				break;
-			}
-		}
-		// No free track found, create a new one.
-		if (freetrack < 0) {
-			freetrack = notes_per_track.size();
-			notes_per_track.push_back(MidiModel::Notes());
-		}
-		// Insert the note in the first free track
-		notes_per_track[freetrack].insert(*note);
-	}
-	ntracks = notes_per_track.size();
-
-	notes_on.clear();
-	notes_on.resize(ntracks);
-	notes_off.clear();
-	notes_off.resize(ntracks);
-
-	for (uint16_t itrack = 0; itrack < ntracks; ++itrack) {
-		for (MidiModel::Notes::iterator inote = notes_per_track[itrack].begin();
-		     inote != notes_per_track[itrack].end(); ++inote) {
-			Evoral::Beats on_time = (*inote)->time();
-			Evoral::Beats off_time = (*inote)->end_time();
-			uint32_t row_on_max_delay = row_at_beats_max_delay(on_time);
-			uint32_t row_on = row_at_beats(on_time);
-			uint32_t row_off_min_delay = row_at_beats_min_delay(off_time);
-			uint32_t row_off = row_at_beats(off_time);
-
-			if (row_on == row_off && row_on != row_off_min_delay) {
-				notes_on[itrack].insert(RowToNotes::value_type(row_on, *inote));
-				notes_off[itrack].insert(RowToNotes::value_type(row_off_min_delay, *inote));
-			} else if (row_on == row_off && row_on_max_delay != row_off) {
-				notes_on[itrack].insert(RowToNotes::value_type(row_on_max_delay, *inote));
-				notes_off[itrack].insert(RowToNotes::value_type(row_off, *inote));
-			} else {
-				notes_on[itrack].insert(RowToNotes::value_type(row_on, *inote));
-				notes_off[itrack].insert(RowToNotes::value_type(row_off, *inote));
-			}
-		}
-	}
-}
-
-Evoral::Beats MidiTrackerMatrix::find_first_row_beats()
-{	
-	return _conv.from (_region->first_frame()).snap_to (beats_per_row);
-}
-
-Evoral::Beats MidiTrackerMatrix::find_last_row_beats()
-{
-	return _conv.from (_region->last_frame()).snap_to (beats_per_row);
-}
-
-uint32_t MidiTrackerMatrix::find_nrows()
-{
-	return (last_beats - first_beats).to_double() * rows_per_beat;
-}
-
-framepos_t MidiTrackerMatrix::frame_at_row(uint32_t irow)
-{
-	return _conv.to (beats_at_row(irow));
-}
-
-Evoral::Beats MidiTrackerMatrix::beats_at_row(uint32_t irow)
-{
-	return first_beats + (irow*1.0) / rows_per_beat;
-}
-
-uint32_t MidiTrackerMatrix::row_at_beats(Evoral::Beats beats)
-{
-	Evoral::Beats half_row(0.5/rows_per_beat);
-	return (beats - first_beats + half_row).to_double() * rows_per_beat;
-}
-
-uint32_t MidiTrackerMatrix::row_at_beats_min_delay(Evoral::Beats beats)
-{
-	Evoral::Beats tpr_minus_1 = Evoral::Beats::ticks(_ticks_per_row - 1);
-	return (beats - first_beats + tpr_minus_1).to_double() * rows_per_beat;
-}
-
-uint32_t MidiTrackerMatrix::row_at_beats_max_delay(Evoral::Beats beats)
-{
-	return (beats - first_beats).to_double() * rows_per_beat;
-}
-
-///////////////////////
 // MidiTrackerEditor //
 ///////////////////////
 
@@ -736,6 +610,132 @@ MidiTrackerEditor::build_automation_action_menu ()
 	// 	}
 	// }
 }
+
+// void
+// RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p)
+// {
+// 	boost::shared_ptr<Processor> processor (p.lock ());
+
+// 	if (!processor || !processor->display_to_user ()) {
+// 		return;
+// 	}
+
+// 	/* we use this override to veto the Amp processor from the plugin menu,
+// 	   as its automation lane can be accessed using the special "Fader" menu
+// 	   option
+// 	*/
+
+// 	if (boost::dynamic_pointer_cast<Amp> (processor) != 0) {
+// 		return;
+// 	}
+
+// 	using namespace Menu_Helpers;
+// 	ProcessorAutomationInfo *rai;
+// 	list<ProcessorAutomationInfo*>::iterator x;
+
+// 	const std::set<Evoral::Parameter>& automatable = processor->what_can_be_automated ();
+
+// 	if (automatable.empty()) {
+// 		return;
+// 	}
+
+// 	for (x = processor_automation.begin(); x != processor_automation.end(); ++x) {
+// 		if ((*x)->processor == processor) {
+// 			break;
+// 		}
+// 	}
+
+// 	if (x == processor_automation.end()) {
+// 		rai = new ProcessorAutomationInfo (processor);
+// 		processor_automation.push_back (rai);
+// 	} else {
+// 		rai = *x;
+// 	}
+
+// 	/* any older menu was deleted at the top of processors_changed()
+// 	   when we cleared the subplugin menu.
+// 	*/
+
+// 	rai->menu = manage (new Menu);
+// 	MenuList& items = rai->menu->items();
+// 	rai->menu->set_name ("ArdourContextMenu");
+
+// 	items.clear ();
+
+// 	std::set<Evoral::Parameter> has_visible_automation;
+// 	AutomationTimeAxisView::what_has_visible_automation (processor, has_visible_automation);
+
+// 	for (std::set<Evoral::Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
+
+// 		ProcessorAutomationNode* pan;
+// 		Gtk::CheckMenuItem* mitem;
+
+// 		string name = processor->describe_parameter (*i);
+
+// 		if (name == X_("hidden")) {
+// 			continue;
+// 		}
+
+// 		items.push_back (CheckMenuElem (name));
+// 		mitem = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
+
+// 		_subplugin_menu_map[*i] = mitem;
+
+// 		if (has_visible_automation.find((*i)) != has_visible_automation.end()) {
+// 			mitem->set_active(true);
+// 		}
+
+// 		if ((pan = find_processor_automation_node (processor, *i)) == 0) {
+
+// 			/* new item */
+
+// 			pan = new ProcessorAutomationNode (*i, mitem, *this);
+
+// 			rai->lines.push_back (pan);
+
+// 		} else {
+
+// 			pan->menu_item = mitem;
+
+// 		}
+
+// 		mitem->signal_toggled().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::processor_menu_item_toggled), rai, pan));
+// 	}
+
+// 	if (items.size() == 0) {
+// 		return;
+// 	}
+
+// 	/* add the menu for this processor, because the subplugin
+// 	   menu is always cleared at the top of processors_changed().
+// 	   this is the result of some poor design in gtkmm and/or
+// 	   GTK+.
+// 	*/
+
+// 	subplugin_menu.items().push_back (MenuElem (processor->name(), *rai->menu));
+// 	rai->valid = true;
+// }
+
+// void
+// RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAutomationInfo* rai,
+// 					       RouteTimeAxisView::ProcessorAutomationNode* pan)
+// {
+// 	bool showit = pan->menu_item->get_active();
+// 	bool redraw = false;
+
+// 	if (pan->view == 0 && showit) {
+// 		add_processor_automation_curve (rai->processor, pan->what);
+// 		redraw = true;
+// 	}
+
+// 	if (pan->view && pan->view->set_marked_for_display (showit)) {
+// 		redraw = true;
+// 	}
+
+// 	if (redraw && !no_redraw) {
+// 		request_redraw ();
+// 	}
+// }
 
 void
 MidiTrackerEditor::setup_tooltips ()

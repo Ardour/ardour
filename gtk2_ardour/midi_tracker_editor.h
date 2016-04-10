@@ -35,6 +35,8 @@
 #include "ardour_window.h"
 #include "editing.h"
 
+#include "midi_tracker_matrix.h"
+
 namespace Evoral {
 	template<typename Time> class Note;
 };
@@ -44,90 +46,6 @@ namespace ARDOUR {
 	class MidiModel;
 	class MidiTrack;
 	class Session;
-};
-
-// Data structure holding the matrix of events for the tracker
-// representation
-class MidiTrackerMatrix {
-public:
-	// Holds a note and its associated track number (a maximum of 4096
-	// tracks should be more than enough).
-	typedef Evoral::Note<Evoral::Beats> NoteType;
-	typedef std::multimap<uint32_t, boost::shared_ptr<NoteType> > RowToNotes;
-	typedef std::pair<RowToNotes::const_iterator, RowToNotes::const_iterator> NotesRange;
-
-	MidiTrackerMatrix(ARDOUR::Session* session,
-	                  boost::shared_ptr<ARDOUR::MidiRegion> region,
-	                  boost::shared_ptr<ARDOUR::MidiModel> midi_model,
-	                  uint16_t rpb);
-
-	// Set the number of rows per beat. After changing that you probably need
-	// to update the matrix, see below.
-	void set_rows_per_beat(uint16_t rpb);
-
-	// Build or rebuild the matrix
-	void update_matrix();
-
-	// Find the beats corresponding to the first row
-	Evoral::Beats find_first_row_beats();
-
-	// Find the beats corresponding to the last row
-	Evoral::Beats find_last_row_beats();
-
-	// Find the number of rows of the region
-	uint32_t find_nrows();
-
-	// Return the frame at the corresponding row index
-	framepos_t frame_at_row(uint32_t irow);
-
-	// Return the beats at the corresponding row index
-	Evoral::Beats beats_at_row(uint32_t irow);
-
-	// Return the row index corresponding to the given beats, assuming the
-	// minimum allowed delay is -_ticks_per_row/2 and the maximum allowed delay
-	// is _ticks_per_row/2.
-	uint32_t row_at_beats(Evoral::Beats beats);
-
-	// Return the row index assuming the beats is allowed to have the minimum
-	// negative delay (1 - _ticks_per_row).
-	uint32_t row_at_beats_min_delay(Evoral::Beats beats);
-
-	// Return the row index assuming the beats is allowed to have the maximum
-	// positive delay (_ticks_per_row - 1).
-	uint32_t row_at_beats_max_delay(Evoral::Beats beats);
-
-	// Number of rows per beat
-	uint8_t rows_per_beat;
-
-	// Determined by the number of rows per beat
-	Evoral::Beats beats_per_row;
-
-	// Beats corresponding to the first row
-	Evoral::Beats first_beats;
-
-	// Beats corresponding to the last row
-	Evoral::Beats last_beats;
-
-	// Number of rows of that region (given the choosen resolution)
-	uint32_t nrows;
-
-	// Number of tracker tracks of that midi track (determined by the number of
-	// overlapping notes)
-	uint16_t ntracks;
-
-	// Map row index to notes on for each track
-	std::vector<RowToNotes> notes_on;
-
-	// Map row index to notes off (basically the same corresponding notes on)
-	// for each track
-	std::vector<RowToNotes> notes_off;
-
-private:
-	uint32_t _ticks_per_row;		// number of ticks per rows
-	ARDOUR::Session* _session;
-	boost::shared_ptr<ARDOUR::MidiRegion> _region;
-	boost::shared_ptr<ARDOUR::MidiModel>  _midi_model;
-	ARDOUR::BeatsFramesConverter _conv;	
 };
 
 // Maximum number of tracks in the midi tracker editor
