@@ -34,6 +34,7 @@ foreach (json_decode ($json, true) as $b) {
 		if (isset ($b['version'])) { $ardourversion = $b['version']; }
 		continue;
 	}
+	$b ['lua'] = preg_replace ('/:_end/', ':end', $b ['lua']);
 	$b ['ldec'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['decl']));
 	if (isset ($b['ret'])) {
 		$b['ret'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['ret']));
@@ -125,7 +126,7 @@ function stripclass ($classname, $name) {
 function datatype ($decl) {
 	# TODO handle spaces in type. Works because
 	# we don't yet have templated types (with_space <here >)
-	return substr ($decl, 0, strpos ($decl, ' '));
+	return substr ($decl, 0, strrpos ($decl, ' '));
 }
 
 function luafn2class ($lua) {
@@ -341,6 +342,18 @@ foreach ($doc as $b) {
 			'ext'  => true,
 			'cand' => canonical_decl ($b)
 		);
+		break;
+	case "Free C Function":
+		$funclist[luafn2class ($b['lua'])][] = array (
+			'bind' => $b,
+			'name' => $b['lua'],
+			'args' => $args,
+			'ret'  => $ret,
+			'ref'  => false,
+			'ext'  => true,
+			'cand' => str_replace (':', '::', $b['lua']).'(lua_State*)'
+		);
+		fwrite (STDERR, print_r ($b, true));
 		break;
 	case "Free Function":
 	case "Free Function RefReturn":
@@ -947,6 +960,7 @@ echo '</ul>'.NL;
 
 # see how far there is still to go...
 fwrite (STDERR, "Found $dox_found annotations. missing: $dox_miss\n");
+echo '<!-- '.$dox_found.' / '.$dox_miss.' !-->'.NL;
 
 ?>
 </div>
