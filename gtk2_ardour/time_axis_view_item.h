@@ -33,7 +33,7 @@ namespace ArdourCanvas {
 	class Pixbuf;
 	class Rectangle;
 	class Item;
-        class Container;
+	class Container;
  	class Text;
 }
 
@@ -158,9 +158,9 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 	TimeAxisViewItem (const TimeAxisViewItem&);
 
-        void init (ArdourCanvas::Item*, double, uint32_t, framepos_t, framepos_t, Visibility, bool, bool);
+	void init (ArdourCanvas::Item*, double, uint32_t, framepos_t, framepos_t, Visibility, bool, bool);
 
-        virtual bool canvas_group_event (GdkEvent*);
+	virtual bool canvas_group_event (GdkEvent*);
 
 	virtual void set_colors();
 	virtual void set_frame_color();
@@ -227,7 +227,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	ArdourCanvas::Rectangle* frame_handle_start; ///< `frame' (fade) handle for the start of the item, or 0
 	ArdourCanvas::Rectangle* frame_handle_end; ///< `frame' (fade) handle for the end of the item, or 0
 
-        bool frame_handle_crossing (GdkEvent*, ArdourCanvas::Rectangle*);
+	bool frame_handle_crossing (GdkEvent*, ArdourCanvas::Rectangle*);
 
 	double _height;
 	Visibility visibility;
@@ -238,10 +238,9 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
         double _width;
 
 private:
-
 	void parameter_changed (std::string);
-        void manage_name_highlight ();
-        void manage_name_text ();
+	void manage_name_highlight ();
+	void manage_name_text ();
 
 }; /* class TimeAxisViewItem */
 

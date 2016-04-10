@@ -123,8 +123,8 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::Sco
 
 	Glib::RefPtr<Gdk::Pixbuf> solo_safe_pixbuf;
 
-        ArdourButton* solo_safe_led;
-        ArdourButton* solo_isolated_led;
+	ArdourButton* solo_safe_led;
+	ArdourButton* solo_isolated_led;
 
 
 	Gtk::Label monitor_input_button_label;
@@ -184,8 +184,8 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::Sco
 	void solo_isolated_toggle (void*, Gtk::CheckMenuItem*);
 	void toggle_solo_isolated (Gtk::CheckMenuItem*);
 
-        bool solo_isolate_button_release (GdkEventButton*);
-        bool solo_safe_button_release (GdkEventButton*);
+	bool solo_isolate_button_release (GdkEventButton*);
+	bool solo_safe_button_release (GdkEventButton*);
 
 	void solo_safe_toggle (void*, Gtk::CheckMenuItem*);
 	void toggle_solo_safe (Gtk::CheckMenuItem*);
@@ -217,8 +217,8 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::Sco
 	void set_route_active (bool, bool);
 	void duplicate_selected_routes ();
 
-        Gtk::Menu* record_menu;
-        void build_record_menu ();
+	Gtk::Menu* record_menu;
+	void build_record_menu ();
 
 	Gtk::CheckMenuItem *step_edit_item;
 	void toggle_step_edit ();
@@ -282,10 +282,10 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::Sco
 	void reset ();
 
 	void self_delete ();
-        virtual void start_step_editing () {}
-        virtual void stop_step_editing() {}
+	virtual void start_step_editing () {}
+	virtual void stop_step_editing() {}
 
-        void set_invert_sensitive (bool);
+	void set_invert_sensitive (bool);
 	bool verify_new_route_name (const std::string& name);
 
 	void route_gui_changed (PBD::PropertyChange const&);
