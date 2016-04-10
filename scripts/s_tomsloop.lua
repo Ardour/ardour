@@ -24,8 +24,6 @@ function factory () return function ()
 	local playhead = Session:transport_frame ()
 
 	-- make sure we have a loop, and the playhead (edit point) is after it
-	-- TODO: only print an error and return
-	-- TODO: use the edit-point (not playhead) ? maybe.
 	if not loop then
 		print ("A Loop range must be set.")
 		goto errorout
@@ -58,8 +56,7 @@ function factory () return function ()
 
 		-- check if there are any regions in the loop-range of this track
 		local range = Evoral.Range (loop:start (), loop:_end ())
-		if playlist:regions_with_start_within (range):empty ()
-			and playlist:regions_with_end_within (range):empty () then
+		if playlist:regions_touched (range):empty () then
 			goto continue
 		end
 
