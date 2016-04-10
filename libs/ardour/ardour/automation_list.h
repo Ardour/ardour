@@ -111,6 +111,8 @@ class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Ev
 	XMLNode& state (bool full);
 	XMLNode& serialize_events ();
 
+	Command* memento_command (XMLNode* before, XMLNode* after);
+
 	bool operator!= (const AutomationList &) const;
 
 	XMLNode* before () { return _before; }

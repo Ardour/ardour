@@ -27,6 +27,7 @@
 #include "ardour/event_type_map.h"
 #include "ardour/parameter_descriptor.h"
 #include "evoral/Curve.hpp"
+#include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
 #include "pbd/enumwriter.h"
 
@@ -276,6 +277,12 @@ AutomationList::thaw ()
 		_changed_when_thawed = false;
 		StateChanged(); /* EMIT SIGNAL */
 	}
+}
+
+Command*
+AutomationList::memento_command (XMLNode* before, XMLNode* after)
+{
+	return new MementoCommand<AutomationList> (*this, before, after);
 }
 
 XMLNode&
