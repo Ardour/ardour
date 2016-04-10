@@ -3774,8 +3774,6 @@ Session::route_solo_isolated_changed (boost::weak_ptr<Route> wpr)
 void
 Session::route_solo_changed (bool self_solo_change, Controllable::GroupControlDisposition group_override,  boost::weak_ptr<Route> wpr)
 {
-	cerr << "route solo change (self ? " << self_solo_change << endl;
-
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("route solo change, self = %1\n", self_solo_change));
 
 	boost::shared_ptr<Route> route (wpr.lock());
@@ -3964,16 +3962,17 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->can_solo() && (*i)->self_soloed()) {
-			something_soloed = true;
-		}
-
-		if (!(*i)->is_auditioner() && (*i)->listening_via_monitor()) {
+		if ((*i)->can_solo()) {
 			if (Config->get_solo_control_is_listen_control()) {
-				listeners++;
-				something_listening = true;
+				if ((*i)->self_soloed()) {
+					listeners++;
+					something_listening = true;
+				}
 			} else {
 				(*i)->set_listen (false);
+				if ((*i)->can_solo() && (*i)->self_soloed()) {
+					something_soloed = true;
+				}
 			}
 		}
 
@@ -6118,8 +6117,16 @@ Session::listen_position_changed ()
 void
 Session::solo_control_mode_changed ()
 {
-	/* cancel all solo or all listen when solo control mode changes */
-	clear_all_solo_state (get_routes());
+	if (soloing()) {
+		/* We can't use ::clear_all_solo_state() here because during
+		   session loading at program startup, that will queue a call
+		   to rt_clear_all_solo_state() that will not execute until
+		   AFTER solo states have been established (thus throwing away
+		   the session's saved solo state). So just explicitly turn
+		   them all off.
+		*/
+		set_controls (route_list_to_control_list (get_routes(), &Route::solo_control), 0.0, Controllable::NoGroup);
+	}
 }
 
 /** Called when a property of one of our route groups changes */

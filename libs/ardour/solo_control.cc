@@ -192,8 +192,6 @@ SoloControl::get_value () const
 		return get_masters_value_locked () ? 1.0 : 0.0;
 	}
 
-	std::cerr << "solo control @ " << this << " list = " << _list << " as AL " << boost::dynamic_pointer_cast<AutomationList>(_list) << std::endl;
-
 	if (_list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
 		// Playing back automation, get the value from the list
 		return AutomationControl::get_value();

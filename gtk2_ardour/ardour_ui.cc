@@ -5589,6 +5589,9 @@ void
 ARDOUR_UI::cancel_solo ()
 {
 	if (_session) {
+		if (_session) {
+			_session->set_controls (route_list_to_control_list (_session->get_routes(), &Route::solo_control), 0.0, Controllable::NoGroup);
+		}
 		_session->clear_all_solo_state (_session->get_routes()); // safeguard, ideally this won't do anything, check the log-window
 	}
 }

@@ -1116,7 +1116,7 @@ RouteUI::send_blink (bool onoff)
 Gtkmm2ext::ActiveState
 RouteUI::solo_active_state (boost::shared_ptr<Route> r)
 {
-	if (r->is_master() || r->is_monitor()) {
+	if (!r->can_solo()) {
 		return Gtkmm2ext::Off;
 	}
 
@@ -1207,7 +1207,7 @@ RouteUI::update_solo_display ()
         /* some changes to solo status can affect mute display, so catch up
          */
 
-        update_mute_display ();
+	update_mute_display ();
 }
 
 void
