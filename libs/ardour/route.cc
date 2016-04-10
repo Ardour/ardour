@@ -2385,9 +2385,16 @@ Route::state(bool full_state)
 	snprintf (buf, sizeof (buf), "%d", _order_key);
 	node->add_property ("order-key", buf);
 
+	node->add_child_nocopy (_solo_control->get_state ());
+	node->add_child_nocopy (_solo_isolate_control->get_state ());
+	node->add_child_nocopy (_solo_safe_control->get_state ());
+
 	node->add_child_nocopy (_input->state (full_state));
 	node->add_child_nocopy (_output->state (full_state));
 	node->add_child_nocopy (_mute_master->get_state ());
+
+	node->add_child_nocopy (_mute_control->get_state ());
+	node->add_child_nocopy (_phase_control->get_state ());
 
 	if (full_state) {
 		node->add_child_nocopy (Automatable::get_automation_xml_state ());
@@ -2531,6 +2538,24 @@ Route::set_state (const XMLNode& node, int version)
 				warning << string_compose (_("Pannable state found for route (%1) without a panner!"), name()) << endmsg;
 			}
 		}
+
+		if (child->name() == Controllable::xml_node_name) {
+			if ((prop = child->property (X_("name"))) == 0) {
+				continue;
+			}
+
+			if (prop->value() == _gain_control->name()) {
+				_gain_control->set_state (*child, version);
+			} else if (prop->value() == _solo_control->name()) {
+				_solo_control->set_state (*child, version);
+			} else if (prop->value() == _solo_safe_control->name()) {
+				_solo_safe_control->set_state (*child, version);
+			} else if (prop->value() == _solo_isolate_control->name()) {
+				_solo_isolate_control->set_state (*child, version);
+			} else if (prop->value() == _solo_control->name()) {
+				_mute_control->set_state (*child, version);
+			}
+		}
 	}
 
 	if ((prop = node.property (X_("meter-point"))) != 0) {
@@ -2551,11 +2576,6 @@ Route::set_state (const XMLNode& node, int version)
 
 	// this looks up the internal instrument in processors
 	reset_instrument_info();
-
-	_solo_control->set_state (node, version);
-	_solo_safe_control->set_state (node, version);
-	_solo_isolate_control->set_state (node, version);
-	_mute_control->set_state (node, version);
 
 	if ((prop = node.property (X_("denormal-protection"))) != 0) {
 		set_denormal_protection (string_is_affirmative (prop->value()));
