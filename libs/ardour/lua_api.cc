@@ -184,6 +184,51 @@ ARDOUR::LuaAPI::set_processor_param (boost::shared_ptr<Processor> proc, uint32_t
 }
 
 int
+ARDOUR::LuaAPI::plugin_automation (lua_State *L)
+{
+	typedef boost::shared_ptr<Processor> T;
+
+	int top = lua_gettop(L);
+	if (top < 2) {
+		return luaL_argerror (L, 1, "invalid number of arguments, :plugin_automation (plugin, parameter_number)");
+	}
+	T* const p = luabridge::Userdata::get<T>(L, 1, false);
+	uint32_t which = luabridge::Stack<uint32_t>::get (L, 2);
+	if (!p) {
+		return luaL_error (L, "Invalid pointer to Ardour:Processor");
+	}
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (*p);
+	if (!pi) {
+		return luaL_error (L, "Given Processor is not a Plugin Insert");
+	}
+	boost::shared_ptr<Plugin> plugin = pi->plugin();
+	if (!plugin) {
+		return luaL_error (L, "Given Processor is not a Plugin");
+	}
+
+	bool ok=false;
+	uint32_t controlid = plugin->nth_parameter (which, ok);
+	if (!ok) {
+		return luaL_error (L, "Invalid Parameter");
+	}
+	if (!plugin->parameter_is_input (controlid)) {
+		return luaL_error (L, "Given Parameter is not an input");
+	}
+
+	ParameterDescriptor pd;
+	if (plugin->get_parameter_descriptor (controlid, pd) != 0) {
+		return luaL_error (L, "Cannot describe parameter");
+	}
+
+	boost::shared_ptr<AutomationControl> c = pi->automation_control (Evoral::Parameter(PluginAutomation, 0, controlid));
+
+	luabridge::Stack<boost::shared_ptr<AutomationList> >::push (L, c->alist());
+	luabridge::Stack<boost::shared_ptr<Evoral::ControlList> >::push (L, c->list());
+	luabridge::Stack<ParameterDescriptor>::push (L, pd);
+	return 3;
+}
+
+int
 ARDOUR::LuaOSC::Address::send (lua_State *L)
 {
 	Address * const luaosc = luabridge::Userdata::get <Address> (L, 1, false);

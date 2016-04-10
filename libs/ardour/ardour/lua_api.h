@@ -93,6 +93,24 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	bool set_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, float val);
 
+	/**
+	 * A convenience function to get a AutomationControList and ParamaterDescriptor
+	 * for a given plugin control.
+	 *
+	 * This is equivalent to the following lua code
+	 * <code>
+	 * function (processor, param_id)
+	 * 	local plugininsert = processor:to_insert ()
+	 * 	local plugin = plugininsert:plugin(0)
+	 *  local _, t = plugin:get_parameter_descriptor(param_id, ARDOUR.ParameterDescriptor ())
+	 *  local ctrl = Evoral.Parameter (ARDOUR.AutomationType.PluginAutomation, 0, param_id)
+	 *  local ac = pi:automation_control (ctrl, false)
+	 *  local acl = ac:alist()
+	 *  return ac:alist(), ac:to_ctrl():list(), t[2]
+	 * end
+	 * </code>
+	 */
+	int plugin_automation (lua_State *lua);
 } } /* namespace */
 
 namespace ARDOUR { namespace LuaOSC {

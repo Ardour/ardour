@@ -24,6 +24,7 @@
 #include "evoral/ControlList.hpp"
 #include "evoral/Range.hpp"
 
+#include "ardour/amp.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiosource.h"
 #include "ardour/audio_backend.h"
@@ -108,6 +109,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("to_s", &PBD::ID::to_s) // TODO special case LUA __tostring ?
 		.endClass ()
 
+		.beginClass <XMLNode> ("XMLNode")
+		.addFunction ("name", &XMLNode::name)
+		.endClass ()
+
 		.beginClass <PBD::Stateful> ("Stateful")
 		.addFunction ("properties", &PBD::Stateful::properties)
 		.addFunction ("clear_changes", &PBD::Stateful::clear_changes)
@@ -174,6 +179,15 @@ LuaBindings::common (lua_State* L)
 
 		.beginWSPtrClass <Evoral::ControlList> ("ControlList")
 		.addFunction ("add", &Evoral::ControlList::add)
+		.addFunction ("thin", &Evoral::ControlList::thin)
+		.addFunction ("eval", &Evoral::ControlList::eval)
+		.addRefFunction ("rt_safe_eval", &Evoral::ControlList::rt_safe_eval)
+		.addFunction ("interpolation", &Evoral::ControlList::interpolation)
+		.addFunction ("set_interpolation", &Evoral::ControlList::set_interpolation)
+		.addFunction ("truncate_end", &Evoral::ControlList::truncate_end)
+		.addFunction ("truncate_start", &Evoral::ControlList::truncate_start)
+		.addFunction ("clear", (void (Evoral::ControlList::*)(double, double))&Evoral::ControlList::clear)
+		.addFunction ("in_write_pass", &Evoral::ControlList::in_write_pass)
 		.endClass ()
 
 		.beginWSPtrClass <Evoral::ControlSet> ("ControlSet")
@@ -196,6 +210,13 @@ LuaBindings::common (lua_State* L)
 		.addData ("from", &Evoral::Range<framepos_t>::from)
 		.addData ("to", &Evoral::Range<framepos_t>::to)
 		.endClass ()
+
+		/* libevoral enums */
+		.beginNamespace ("InterpolationStyle")
+		.addConst ("Discrete", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Discrete))
+		.addConst ("Linear", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Linear))
+		.addConst ("Curved", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Curved))
+		.endNamespace ()
 
 		.endNamespace () // Evoral
 
@@ -263,6 +284,17 @@ LuaBindings::common (lua_State* L)
 		.deriveClass <PBD::OwnedPropertyList, PBD::PropertyList> ("OwnedPropertyList")
 		.endClass ()
 
+		.beginWSPtrClass <AutomationList> ("AutomationList")
+		.addCast<PBD::Stateful> ("to_stateful")
+		.addCast<PBD::StatefulDestructible> ("to_statefuldestructible")
+		.addCast<Evoral::ControlList> ("list")
+		.addFunction ("get_state", &AutomationList::get_state)
+		.addFunction ("memento_command", &AutomationList::memento_command)
+		.addFunction ("touching", &AutomationList::touching)
+		.addFunction ("writing", &AutomationList::writing)
+		.addFunction ("touch_enabled", &AutomationList::touch_enabled)
+		.endClass ()
+
 		.deriveClass <Location, PBD::StatefulDestructible> ("Location")
 		.addFunction ("locked", &Location::locked)
 		.addFunction ("lock", &Location::lock)
@@ -322,6 +354,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("main_outs", &Route::main_outs)
 		.addFunction ("muted", &Route::muted)
 		.addFunction ("soloed", &Route::soloed)
+		.addFunction ("amp", &Route::amp)
+		.addFunction ("trim", &Route::trim)
 		.endClass ()
 
 		.deriveWSPtrClass <Playlist, SessionObject> ("Playlist")
@@ -338,6 +372,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("find_next_region", &Playlist::find_next_region)
 		.addFunction ("find_next_region_boundary", &Playlist::find_next_region_boundary)
 		.addFunction ("count_regions_at", &Playlist::count_regions_at)
+		.addFunction ("regions_touched", &Playlist::regions_touched)
 		.addFunction ("regions_with_start_within", &Playlist::regions_with_start_within)
 		.addFunction ("regions_with_end_within", &Playlist::regions_with_end_within)
 		.addFunction ("raise_region", &Playlist::raise_region)
@@ -508,13 +543,24 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <AutomationControl, Evoral::Control> ("AutomationControl")
+		.addCast<Evoral::Control> ("to_ctrl")
 		.addFunction ("automation_state", &AutomationControl::automation_state)
+		.addFunction ("automation_style", &AutomationControl::automation_style)
+		.addFunction ("set_automation_state", &AutomationControl::set_automation_state)
 		.addFunction ("set_automation_style", &AutomationControl::set_automation_style)
 		.addFunction ("start_touch", &AutomationControl::start_touch)
 		.addFunction ("stop_touch", &AutomationControl::stop_touch)
 		.addFunction ("get_value", &AutomationControl::get_value)
 		.addFunction ("set_value", &AutomationControl::set_value)
 		.addFunction ("writable", &AutomationControl::writable)
+		.addFunction ("alist", &AutomationControl::alist)
+		.endClass ()
+
+		.deriveWSPtrClass <GainControl, AutomationControl> ("GainControl")
+		.endClass ()
+
+		.deriveWSPtrClass <Amp, Processor> ("Amp")
+		.addFunction ("gain_control", (boost::shared_ptr<GainControl>(Amp::*)())&Amp::gain_control)
 		.endClass ()
 
 		.deriveWSPtrClass <PluginInsert::PluginControl, AutomationControl> ("PluginControl")
@@ -642,6 +688,8 @@ LuaBindings::common (lua_State* L)
 
 		.beginNamespace ("AutomationType")
 		.addConst ("PluginAutomation", ARDOUR::AutomationType(PluginAutomation))
+		.addConst ("PluginAutomation", ARDOUR::AutomationType(GainAutomation))
+		.addConst ("PluginAutomation", ARDOUR::AutomationType(TrimAutomation))
 		.endNamespace ()
 
 		.beginNamespace ("SrcQuality")
@@ -759,6 +807,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("begin_reversible_command", (void (Session::*)(const std::string&))&Session::begin_reversible_command)
 		.addFunction ("commit_reversible_command", &Session::commit_reversible_command)
 		.addFunction ("abort_reversible_command", &Session::abort_reversible_command)
+		.addFunction ("add_command", &Session::add_command)
 		.addFunction ("add_stateful_diff_command", &Session::add_stateful_diff_command)
 		.endClass ()
 
@@ -784,6 +833,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("new_plugin", ARDOUR::LuaAPI::new_plugin)
 		.addFunction ("set_processor_param", ARDOUR::LuaAPI::set_processor_param)
 		.addFunction ("set_plugin_insert_param", ARDOUR::LuaAPI::set_plugin_insert_param)
+		.addCFunction ("plugin_automation", ARDOUR::LuaAPI::plugin_automation)
 		.addFunction ("usleep", Glib::usleep)
 		.endNamespace ()
 
