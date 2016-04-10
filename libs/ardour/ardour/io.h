@@ -74,8 +74,8 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 		Output
 	};
 
-        IO (Session&, const std::string& name, Direction, DataType default_type = DataType::AUDIO, bool sendish = false);
-        IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO, bool sendish = false);
+	IO (Session&, const std::string& name, Direction, DataType default_type = DataType::AUDIO, bool sendish = false);
+	IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO, bool sendish = false);
 
 	virtual ~IO();
 
@@ -94,7 +94,7 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 
 	int ensure_io (ChanCount cnt, bool clear, void *src);
 
-        int connect_ports_to_bundle (boost::shared_ptr<Bundle>, bool exclusive, void *);
+	int connect_ports_to_bundle (boost::shared_ptr<Bundle>, bool exclusive, void *);
 	int disconnect_ports_from_bundle (boost::shared_ptr<Bundle>, void *);
 
 	BundleList bundles_connected ();
@@ -207,7 +207,7 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	Direction _direction;
 	DataType _default_type;
 	bool     _active;
-        bool     _sendish;
+	bool     _sendish;
 
   private:
 	int connecting_became_legal ();

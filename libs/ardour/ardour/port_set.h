@@ -49,10 +49,15 @@ public:
 	void add (boost::shared_ptr<Port> port);
 	bool remove (boost::shared_ptr<Port> port);
 
-	/** nth port */
+	/** nth port
+	 * @param index port index
+	 */
 	boost::shared_ptr<Port> port(size_t index) const;
 
-	/** nth port of type @a t, or nth port if t = NIL */
+	/** nth port of type @a t, or nth port if t = NIL
+	 * @param t data type
+	 * @param index port index
+	 */
 	boost::shared_ptr<Port> port(DataType t, size_t index) const;
 
 	boost::shared_ptr<AudioPort> nth_audio_port(size_t n) const;

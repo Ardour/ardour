@@ -61,7 +61,7 @@ public:
 	int set_name (std::string const &);
 
 	/** @return flags */
-        PortFlags flags () const {
+	PortFlags flags () const {
 		return _flags;
 	}
 
@@ -98,9 +98,9 @@ public:
 	bool last_monitor() const { return _last_monitor; }
 	void set_last_monitor (bool yn) { _last_monitor = yn; }
 
-        PortEngine::PortHandle port_handle() { return _port_handle; }
+	PortEngine::PortHandle port_handle() { return _port_handle; }
 
-        void get_connected_latency_range (LatencyRange& range, bool playback) const;
+	void get_connected_latency_range (LatencyRange& range, bool playback) const;
 
 	void set_private_latency_range (LatencyRange& range, bool playback);
 	const LatencyRange&  private_latency_range (bool playback) const;
