@@ -223,21 +223,27 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("start", &RegionSelection::start)
 		.addFunction ("end_frame", &RegionSelection::end_frame)
 		.addFunction ("n_midi_regions", &RegionSelection::n_midi_regions)
+		.addFunction ("regionlist", &RegionSelection::regionlist) // XXX check windows binding (libardour)
 		.endClass ()
 
+#if 0
 		.beginClass <AxisView> ("AxisView")
 		.endClass ()
 		.deriveClass <TimeAxisView, AxisView> ("TimeAxisView")
 		.endClass ()
 		.deriveClass <RouteTimeAxisView, TimeAxisView> ("RouteTimeAxisView")
 		.endClass ()
+#endif
 
 		.beginClass <Selection> ("Selection")
 		.addFunction ("clear", &Selection::clear)
 		.addFunction ("clear_all", &Selection::clear_all)
+		.addData ("tracks", &Selection::tracks)
+		.addData ("regions", &Selection::regions)
 		.endClass ()
 
 		.beginClass <TrackViewList> ("TrackViewList")
+		.addFunction ("routelist", &TrackViewList::routelist) // XXX check windows binding (libardour)
 		.endClass ()
 
 		.deriveClass <TrackSelection, TrackViewList> ("TrackSelection")

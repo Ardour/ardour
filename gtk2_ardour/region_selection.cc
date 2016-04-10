@@ -303,3 +303,13 @@ RegionSelection::n_midi_regions () const
 
 	return count;
 }
+
+ARDOUR::RegionList
+RegionSelection::regionlist () const
+{
+	ARDOUR::RegionList rl;
+	for (const_iterator r = begin (); r != end (); ++r) {
+		rl.push_back ((*r)->region ());
+	}
+	return rl;
+}

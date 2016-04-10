@@ -20,6 +20,7 @@
 #ifndef __ardour_gtk_track_view_list_h__
 #define __ardour_gtk_track_view_list_h__
 
+#include "ardour/types.h"
 #include <list>
 #include <set>
 
@@ -37,6 +38,7 @@ public:
 	bool contains (TimeAxisView const *) const;
 
 	TrackViewList filter_to_unique_playlists ();
+	ARDOUR::RouteList routelist () const;
 };
 
 #endif

@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include "track_view_list.h"
+#include "route_time_axis.h"
 
 using namespace std;
 
@@ -50,4 +51,17 @@ TrackViewList::add (TrackViewList const & t)
 	}
 
 	return added;
+}
+
+ARDOUR::RouteList
+TrackViewList::routelist () const
+{
+	ARDOUR::RouteList rl;
+	for (TrackViewList::const_iterator i = begin (); i != end (); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (rtv) {
+			rl.push_back (rtv->route ());
+		}
+	}
+	return rl;
 }

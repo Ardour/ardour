@@ -66,6 +66,8 @@ class RegionSelection : public std::list<RegionView*>
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists () const;
 	std::list<PBD::ID> pending;
 
+	ARDOUR::RegionList regionlist () const;
+
   private:
 	void remove_it (RegionView*);
 
