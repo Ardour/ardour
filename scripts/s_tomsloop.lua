@@ -55,8 +55,7 @@ function factory () return function ()
 		end
 
 		-- check if there are any regions in the loop-range of this track
-		local range = Evoral.Range (loop:start (), loop:_end ())
-		if playlist:regions_touched (range):empty () then
+		if playlist:regions_touched (loop:start (), loop:_end ()):empty () then
 			goto continue
 		end
 
