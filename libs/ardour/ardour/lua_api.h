@@ -94,11 +94,11 @@ namespace ARDOUR { namespace LuaAPI {
 	bool set_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, float val);
 
 	/**
-	 * A convenience function to get a AutomationControList and ParamaterDescriptor
+	 * A convenience function to get a Automation Lists and ParamaterDescriptor
 	 * for a given plugin control.
 	 *
 	 * This is equivalent to the following lua code
-	 * <code>
+	 * @code
 	 * function (processor, param_id)
 	 * 	local plugininsert = processor:to_insert ()
 	 * 	local plugin = plugininsert:plugin(0)
@@ -108,7 +108,14 @@ namespace ARDOUR { namespace LuaAPI {
 	 *  local acl = ac:alist()
 	 *  return ac:alist(), ac:to_ctrl():list(), t[2]
 	 * end
-	 * </code>
+	 * @endcode
+	 *
+	 * Example usage: get 3rd input parameter of first plugin on the given route
+	 * (Ardour starts counting at zero).
+	 * @code
+	 * local al, cl, pd = ARDOUR.LuaAPI.plugin_automation (route:nth_plugin (0), 3)
+	 * @endcode
+	 * @returns 3 parameters: AutomationList, ControlList, ParamaterDescriptor
 	 */
 	int plugin_automation (lua_State *lua);
 } } /* namespace */

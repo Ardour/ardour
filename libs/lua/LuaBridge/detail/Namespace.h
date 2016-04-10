@@ -1589,6 +1589,7 @@ public:
   */
   Namespace& addCFunction (char const* name, int (*const fp)(lua_State*))
   {
+    DATADOC ("Free C Function", name, fp)
     lua_pushcfunction (L, fp);
     rawsetfield (L, -2, name);
 

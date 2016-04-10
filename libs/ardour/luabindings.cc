@@ -29,6 +29,7 @@
 #include "ardour/audiosource.h"
 #include "ardour/audio_backend.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/audio_port.h"
 #include "ardour/audio_track.h"
 #include "ardour/buffer_set.h"
 #include "ardour/chan_mapping.h"
@@ -39,6 +40,7 @@
 #include "ardour/luabindings.h"
 #include "ardour/meter.h"
 #include "ardour/midi_track.h"
+#include "ardour/midi_port.h"
 #include "ardour/playlist.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
@@ -336,6 +338,14 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("connected_to", (bool (Port::*)(Port*)const)&Port::connected_to)
 		.addFunction ("connect", (int (Port::*)(Port*))&Port::connect)
 		.addFunction ("disconnect", (int (Port::*)(Port*))&Port::disconnect)
+		.endClass ()
+
+		.deriveWSPtrClass <AudioPort, Port> ("AudioPort")
+		.endClass ()
+
+		.deriveWSPtrClass <MidiPort, Port> ("MidiPort")
+		.addFunction ("input_active", &MidiPort::input_active)
+		.addFunction ("set_input_active", &MidiPort::set_input_active)
 		.endClass ()
 
 		.beginWSPtrClass <PortSet> ("PortSet")
