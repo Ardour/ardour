@@ -123,10 +123,17 @@ public:
 	void slide (iterator before, double distance);
 	void shift (double before, double distance);
 
+	/** add automation events
+	 * @param when absolute time in samples
+	 * @param value parameter value
+	 * @param with_guards if true, add guard-points
+	 * @param with_initial if true, add an initial point if the list is empty
+	 */
 	virtual void add (double when, double value, bool with_guards=true, bool with_initial=true);
 
 	virtual bool editor_add (double when, double value, bool with_guard);
 
+	/* to be used only for loading pre-sorted data from saved state */
 	void fast_simple_add (double when, double value);
 
 	void erase_range (double start, double end);
@@ -138,9 +145,12 @@ public:
 
 	/** Thin the number of events in this list.
 	 *
-	 * The thinning factor has no units but corresponds to the area of a
-	 * triangle computed between three points in the list.  If the area is
-	 * large, it indicates significant non-linearity between the points.
+	 * The thinning factor corresponds to the area of a triangle computed
+	 * between three points in the list (time-difference * value-difference).
+	 * If the area is large, it indicates significant non-linearity between
+	 * the points.
+	 *
+	 * Time is measured in samples, value is usually normalized to 0..1.
 	 *
 	 * During automation recording we thin the recorded points using this
 	 * value.  If a point is sufficiently co-linear with its neighbours (as
@@ -148,12 +158,19 @@ public:
 	 * not include it in the list.  The larger the value, the more points are
 	 * excluded, so this effectively measures the amount of thinning to be
 	 * done.
+	 *
+	 * @param thinning_factor area-size (default: 20)
 	 */
 	void thin (double thinning_factor);
 
 	boost::shared_ptr<ControlList> cut (double, double);
 	boost::shared_ptr<ControlList> copy (double, double);
-	void clear (double, double);
+
+	/** remove all automation events between the given time range
+	 * @param start start of range (inclusive) in audio samples
+	 * @param end end of range (inclusive) in audio samples
+	 */
+	void clear (double start, double end);
 
 	bool paste (const ControlList&, double position, float times);
 
@@ -165,8 +182,14 @@ public:
 	double get_max_y() const { return _max_yval; }
 	double get_min_y() const { return _min_yval; }
 
-	void truncate_end (double length);
-	void truncate_start (double length);
+	/** truncate the event list after the given time
+	 * @param last_coordinate last event to include
+	 */
+	void truncate_end (double last_coordinate);
+	/** truncate the event list to the given time
+	 * @param overall_length overall length
+	 */
+	void truncate_start (double overall_length);
 
 	iterator            begin()       { return _events.begin(); }
 	const_iterator      begin() const { return _events.begin(); }
@@ -188,11 +211,20 @@ public:
 		(obj.*method)(*this);
 	}
 
+	/** query value at given time (takes a read-lock, not safe while writing automation)
+	 * @param where absolute time in samples
+	 * @returns parameter value
+	 */
 	double eval (double where) {
 		Glib::Threads::RWLock::ReaderLock lm (_lock);
 		return unlocked_eval (where);
 	}
 
+	/** realtime safe version of eval, may fail if read-lock cannot be taken
+	 * @param where absolute time in samples
+	 * @param ok boolean reference if returned value is valid
+	 * @returns parameter value
+	 */
 	double rt_safe_eval (double where, bool& ok) {
 
 		Glib::Threads::RWLock::ReaderLock lm (_lock, Glib::Threads::TRY_LOCK);
@@ -256,16 +288,23 @@ public:
 		Curved
 	};
 
+	/** query interpolation style of the automation data
+	 * @returns Interpolation Style
+	 */
 	InterpolationStyle interpolation() const { return _interpolation; }
-	void set_interpolation (InterpolationStyle);
+
+	/** set the interpolation style of the automation data
+	 * @param is interpolation style
+	 */
+	void set_interpolation (InterpolationStyle is);
 
 	virtual bool touching() const { return false; }
 	virtual bool writing() const { return false; }
 	virtual bool touch_enabled() const { return false; }
-        void start_write_pass (double time);
-        void write_pass_finished (double when, double thinning_factor=0.0);
-        void set_in_write_pass (bool, bool add_point = false, double when = 0.0);
-        bool in_write_pass () const;
+	void start_write_pass (double when);
+	void write_pass_finished (double when, double thinning_factor=0.0);
+	void set_in_write_pass (bool, bool add_point = false, double when = 0.0);
+	bool in_write_pass () const;
 	bool in_new_write_pass () { return new_write_pass; }
 
 	/** Emitted when mark_dirty() is called on this object */
