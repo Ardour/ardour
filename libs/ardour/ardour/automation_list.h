@@ -61,6 +61,10 @@ private:
 	AutomationListProperty& operator= (AutomationListProperty const &);
 };
 
+/** AutomationList is a stateful wrapper around Evoral::ControlList.
+ * It includes session-specifics (such as automation state), control logic (e.g. touch, signals)
+ * and acts as proxy to the underlying ControlList which holds the actual data.
+ */
 class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Evoral::ControlList
 {
   public:
