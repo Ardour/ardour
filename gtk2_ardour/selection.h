@@ -107,6 +107,11 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void block_tracks_changed (bool);
 
 	void clear ();
+
+	/** check if all selections are empty
+	 * @param internal_selection also check object internals (e.g midi notes, automation points), when false only check objects.
+	 * @return true if nothing is selected.
+	 */
 	bool empty (bool internal_selection = false);
 
 	void dump_region_layers();

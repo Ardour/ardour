@@ -33,6 +33,7 @@
 #include "region_selection.h"
 #include "luainstance.h"
 #include "luasignal.h"
+#include "marker.h"
 #include "time_axis_view.h"
 #include "selection.h"
 #include "script_selector.h"
@@ -218,6 +219,25 @@ LuaInstance::register_classes (lua_State* L)
 
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ArdourUI")
+
+		.beginStdList <ArdourMarker*> ("ArdourMarkerList")
+		.endClass ()
+
+		.beginClass <ArdourMarker> ("ArdourMarker")
+		.addFunction ("name", &ArdourMarker::name)
+		.addFunction ("position", &ArdourMarker::position)
+		.addFunction ("_type", &ArdourMarker::type)
+		.endClass ()
+
+#if 0
+		.beginClass <AxisView> ("AxisView")
+		.endClass ()
+		.deriveClass <TimeAxisView, AxisView> ("TimeAxisView")
+		.endClass ()
+		.deriveClass <RouteTimeAxisView, TimeAxisView> ("RouteTimeAxisView")
+		.endClass ()
+#endif
+
 		.beginClass <RegionSelection> ("RegionSelection")
 		.addFunction ("clear_all", &RegionSelection::clear_all)
 		.addFunction ("start", &RegionSelection::start)
@@ -232,21 +252,7 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("length", &TimeSelection::length)
 		.endClass ()
 
-#if 0
-		.beginClass <AxisView> ("AxisView")
-		.endClass ()
-		.deriveClass <TimeAxisView, AxisView> ("TimeAxisView")
-		.endClass ()
-		.deriveClass <RouteTimeAxisView, TimeAxisView> ("RouteTimeAxisView")
-		.endClass ()
-#endif
-
-		.beginClass <Selection> ("Selection")
-		.addFunction ("clear", &Selection::clear)
-		.addFunction ("clear_all", &Selection::clear_all)
-		.addData ("tracks", &Selection::tracks)
-		.addData ("regions", &Selection::regions)
-		.addData ("time", &Selection::time)
+		.deriveClass <MarkerSelection, std::list<ArdourMarker*> > ("MarkerSelection")
 		.endClass ()
 
 		.beginClass <TrackViewList> ("TrackViewList")
@@ -256,7 +262,21 @@ LuaInstance::register_classes (lua_State* L)
 		.deriveClass <TrackSelection, TrackViewList> ("TrackSelection")
 		.endClass ()
 
-		.beginClass <ArdourMarker> ("ArdourMarker")
+		.beginClass <Selection> ("Selection")
+		.addFunction ("clear", &Selection::clear)
+		.addFunction ("clear_all", &Selection::clear_all)
+		.addFunction ("empty", &Selection::empty)
+		.addData ("tracks", &Selection::tracks)
+		.addData ("regions", &Selection::regions)
+		.addData ("time", &Selection::time)
+		.addData ("markers", &Selection::markers)
+#if 0
+		.addData ("lines", &Selection::lines)
+		.addData ("playlists", &Selection::playlists)
+		.addData ("points", &Selection::points)
+		.addData ("midi_regions", &Selection::midi_regions)
+		.addData ("midi_notes", &Selection::midi_notes) // cut buffer only
+#endif
 		.endClass ()
 
 		.beginClass <PublicEditor> ("Editor")
@@ -403,7 +423,25 @@ LuaInstance::register_classes (lua_State* L)
 
 		.addFunction ("access_action", &PublicEditor::access_action)
 		.endClass ()
-		.endNamespace ();
+
+		/* ArdourUI enums */
+		.beginNamespace ("MarkerType")
+		.addConst ("Mark", ArdourMarker::Type(ArdourMarker::Mark))
+		.addConst ("Tempo", ArdourMarker::Type(ArdourMarker::Tempo))
+		.addConst ("Meter", ArdourMarker::Type(ArdourMarker::Meter))
+		.addConst ("SessionStart", ArdourMarker::Type(ArdourMarker::SessionStart))
+		.addConst ("SessionEnd", ArdourMarker::Type(ArdourMarker::SessionEnd))
+		.addConst ("RangeStart", ArdourMarker::Type(ArdourMarker::RangeStart))
+		.addConst ("RangeEnd", ArdourMarker::Type(ArdourMarker::RangeEnd))
+		.addConst ("LoopStart", ArdourMarker::Type(ArdourMarker::LoopStart))
+		.addConst ("LoopEnd", ArdourMarker::Type(ArdourMarker::LoopEnd))
+		.addConst ("PunchIn", ArdourMarker::Type(ArdourMarker::PunchIn))
+		.addConst ("PunchOut", ArdourMarker::Type(ArdourMarker::PunchOut))
+		.endNamespace ()
+
+		.endNamespace (); // end ArdourUI
+
+	// Editing Symbols
 
 #undef ZOOMFOCUS
 #undef SNAPTYPE
