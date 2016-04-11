@@ -198,7 +198,6 @@ VCAMasterStrip::set_selected (bool yn)
 bool
 VCAMasterStrip::solo_release (GdkEventButton*)
 {
-	std::cerr << "VCA solo release, from " << _vca->solo_control()->get_value() << std::endl;
 	_vca->solo_control()->set_value (_vca->solo_control()->get_value() ? 0.0 : 1.0, Controllable::NoGroup);
 	return true;
 }
