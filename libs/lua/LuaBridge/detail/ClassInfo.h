@@ -36,6 +36,15 @@ template <class T>
 class ClassInfo
 {
 public:
+#ifdef PLATFORM_WINDOWS
+	/* static symbols on windows (even identical symbols) are not
+	 * mapped to the same address when mixing .dll + .exe.
+	 * the implementation is moved to libardour/gtk2_ardour.
+	 */
+  static void const* getStaticKey ();
+  static void const* getClassKey ();
+  static void const* getConstKey ();
+#else
   /** Get the key for the static table.
 
       The static table holds the static data members, static properties, and
@@ -69,5 +78,6 @@ public:
     static char value;
     return &value;
   }
+#endif
 };
 

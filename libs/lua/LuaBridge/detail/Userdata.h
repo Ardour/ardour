@@ -51,11 +51,15 @@
     6. Our metatables have "__metatable" set to a boolean = false.
     7. Our lightuserdata is unique.
 */
+#ifdef PLATFORM_WINDOWS
+extern void* getIdentityKey ();
+#else
 inline void* getIdentityKey ()
 {
   static char value;
   return &value;
 }
+#endif
 
 /**
   Interface to a class pointer retrievable from a userdata.

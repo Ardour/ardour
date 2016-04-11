@@ -38,6 +38,7 @@
 #include "ardour/interthread_info.h"
 #include "ardour/lua_api.h"
 #include "ardour/luabindings.h"
+#include "ardour/luaproc.h"
 #include "ardour/meter.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_port.h"
@@ -54,6 +55,96 @@
 #include "ardour/tempo.h"
 
 #include "LuaBridge/LuaBridge.h"
+
+#ifdef PLATFORM_WINDOWS
+/* luabridge uses addresses of static functions/variables to identify classes.
+ *
+ * Static symbols on windows (even identical symbols) are not
+ * mapped to the same address when mixing .dll + .exe.
+ * So we need a single point to define those static functions.
+ * (normally they're header-only in libs/lua/LuaBridge/detail/ClassInfo.h)
+ *
+ * Really!! A static function with a static variable in a library header
+ * should never ever be replicated, even if it is a template.
+ * But then again this is windows... what else can go wrong.
+ */
+
+template <class T>
+void const*
+luabridge::ClassInfo<T>::getStaticKey ()
+{
+	static char value;
+	return &value;
+}
+
+template <class T>
+void const*
+luabridge::ClassInfo<T>::getClassKey ()
+{
+	static char value;
+	return &value;
+}
+
+template <class T>
+void const*
+luabridge::ClassInfo<T>::getConstKey ()
+{
+	static char value;
+	return &value;
+}
+
+void*
+luabridge::getIdentityKey ()
+{
+  static char value;
+  return &value;
+}
+
+/* ...and this is the ugly part of it.
+ *
+ * We need to foward declare classes from gtk2_ardour.
+ * This is needed because some of the classes use objects from libardour
+ * as function parameters and the .exe would re-create symbols for libardour
+ * objects.
+ *
+ * Classes which don't use libardour symbols could be moved to
+ * gtk2_ardour/luainstance.cc, but keeping this here reduces code
+ * duplication and does not give the compiler a chance to even think
+ * about replicating the symbols.
+ */
+
+#define CLASSKEYS(CLS) \
+	template void const* luabridge::ClassInfo< CLS >::getStaticKey(); \
+	template void const* luabridge::ClassInfo< CLS >::getClassKey();  \
+	template void const* luabridge::ClassInfo< CLS >::getConstKey();
+
+#define CLASSINFO(CLS) \
+	class CLS; \
+	template void const* luabridge::ClassInfo< CLS >::getStaticKey(); \
+	template void const* luabridge::ClassInfo< CLS >::getClassKey();  \
+	template void const* luabridge::ClassInfo< CLS >::getConstKey();
+
+CLASSINFO(MarkerSelection);
+CLASSINFO(TrackSelection);
+CLASSINFO(TrackViewList);
+CLASSINFO(TimeSelection);
+CLASSINFO(RegionSelection);
+CLASSINFO(PublicEditor);
+CLASSINFO(Selection);
+CLASSINFO(ArdourMarker);
+
+namespace Cairo {
+	class Context;
+}
+CLASSKEYS(Cairo::Context);
+CLASSKEYS(std::vector<double>);
+CLASSKEYS(std::list<ArdourMarker*>);
+CLASSKEYS(std::bitset<47ul>); // LuaSignal::LAST_SIGNAL
+CLASSKEYS(ArdourMarker*);
+CLASSKEYS(ARDOUR::RouteGroup);
+CLASSKEYS(ARDOUR::LuaProc);
+
+#endif // end windows special case
 
 /* Some notes on Lua bindings for libardour and friends
  *
@@ -582,7 +673,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("output_map", (ARDOUR::ChanMapping (PluginInsert::*)(uint32_t) const)&PluginInsert::output_map)
 		.addFunction ("set_input_map", &PluginInsert::set_input_map)
 		.addFunction ("set_output_map", &PluginInsert::set_output_map)
-
 		.endClass ()
 
 		.deriveWSPtrClass <AutomationControl, PBD::Controllable> ("AutomationControl")
