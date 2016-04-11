@@ -3622,7 +3622,7 @@ Route::all_inputs () const
 		}
 
 		if (iop != 0 && iop->input()) {
-		ios.push_back (iop->input());
+			ios.push_back (iop->input());
 		}
 	}
 	return ios;
@@ -3669,7 +3669,7 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* 
 
 		if (iop != 0) {
 			boost::shared_ptr<const IO> iop_out = iop->output();
-			if (iop_out && other->all_inputs().fed_by (iop_out)) {
+			if ((iop_out && other->all_inputs().fed_by (iop_out)) || iop->feeds (other)) {
 				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does feed %2\n", iop->name(), other->name()));
 				if (via_send_only) {
 					*via_send_only = true;
