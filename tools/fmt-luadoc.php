@@ -353,7 +353,6 @@ foreach ($doc as $b) {
 			'ext'  => true,
 			'cand' => str_replace (':', '::', $b['lua']).'(lua_State*)'
 		);
-		fwrite (STDERR, print_r ($b, true));
 		break;
 	case "Free Function":
 	case "Free Function RefReturn":

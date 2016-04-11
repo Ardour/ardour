@@ -19,16 +19,19 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <pthread.h>
 #include <cstdio>
 #include <cstring>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
 #include <map>
+#include <vector>
 #include <clang-c/Index.h>
 #include <clang-c/Documentation.h>
 
-struct dox2js {
-	dox2js () : clang_argc (3), clang_argv (0), excl_argc (0), excl_argv (0)
+struct Dox2jsConfig {
+	Dox2jsConfig () : clang_argc (3), clang_argv (0), excl_argc (0), excl_argv (0)
 	{
 		excl_argv = (char**) calloc (1, sizeof (char*));
 		clang_argv = (char**) malloc (clang_argc * sizeof (char*));
@@ -37,7 +40,7 @@ struct dox2js {
 		clang_argv[2] = strdup ("-std=c++11");
 	}
 
-	~dox2js () {
+	~Dox2jsConfig () {
 		for (int i = 0; i < clang_argc; ++i) {
 			free (clang_argv[i]);
 		}
@@ -63,8 +66,37 @@ struct dox2js {
 	char** clang_argv;
 	int    excl_argc;
 	char** excl_argv;
-	std::map <std::string, std::string> results;
 };
+
+typedef std::map <std::string, std::string> ResultMap;
+
+struct dox2js {
+	Dox2jsConfig *cfg;
+	ResultMap results;
+};
+
+struct ProcessQueue {
+	ProcessQueue (std::vector<char*>* files, ResultMap* r, Dox2jsConfig* c, pthread_mutex_t* lck, bool report, bool check)
+		: fq (files)
+		, rm (r)
+		, djc (c)
+		, lock (lck)
+		, total (files->size ())
+		, done (0)
+		, report_progress (report)
+		, check_compile (check)
+	{ }
+
+	std::vector<char*>* fq;
+	ResultMap *rm;
+	Dox2jsConfig *djc;
+	pthread_mutex_t* lock;
+	unsigned int total;
+	unsigned int done;
+	bool report_progress;
+	bool check_compile;
+};
+
 
 static const char*
 kind_to_txt (CXCursor cursor)
@@ -126,8 +158,8 @@ recurse_parents (CXCursor cr) {
 
 static bool
 check_excludes (const std::string& decl, CXClientData d) {
-	struct dox2js* dj = (struct dox2js*) d;
-	char** excl = dj->excl_argv;
+	struct Dox2jsConfig* djc = (struct Dox2jsConfig*) d;
+	char** excl = djc->excl_argv;
 	for (int i = 0; excl[i]; ++i) {
 		if (decl.compare (0, strlen (excl[i]), excl[i]) == 0) {
 			return true;
@@ -152,7 +184,7 @@ traverse (CXCursor cr, CXCursor /*parent*/, CXClientData d)
 		std::string decl = recurse_parents (cr);
 		decl += clang_getCString (clang_getCursorDisplayName (cr));
 
-		if (decl.empty () || check_excludes (decl, d)) {
+		if (decl.empty () || check_excludes (decl, dj->cfg)) {
 			return CXChildVisit_Recurse;
 		}
 
@@ -177,25 +209,64 @@ traverse (CXCursor cr, CXCursor /*parent*/, CXClientData d)
 	return CXChildVisit_Recurse;
 }
 
-static void
-process_file (const char* fn, struct dox2js *dj, bool check)
+static ResultMap
+process_file (const char* fn, struct Dox2jsConfig *djc, bool check)
 {
+	dox2js dj;
+	dj.cfg = djc;
+
 	if (check) {
 		fprintf (stderr, "--- %s ---\n", fn);
 	}
 	CXIndex index = clang_createIndex (0, check ? 1 : 0);
-	CXTranslationUnit tu = clang_createTranslationUnitFromSourceFile (index, fn, dj->clang_argc, dj->clang_argv, 0, 0);
+	CXTranslationUnit tu = clang_createTranslationUnitFromSourceFile (index, fn, djc->clang_argc, djc->clang_argv, 0, 0);
 
 	if (tu == NULL) {
 		fprintf (stderr, "Cannot create translation unit for src: %s\n", fn);
-		return;
+		return ResultMap ();
 	}
 
-	clang_visitChildren (clang_getTranslationUnitCursor (tu), traverse, (CXClientData) dj);
+	clang_visitChildren (clang_getTranslationUnitCursor (tu), traverse, (CXClientData) &dj);
 
 	clang_disposeTranslationUnit (tu);
 	clang_disposeIndex (index);
+	return dj.results;
 }
+
+static void*
+process_thread (void *d)
+{
+	struct ProcessQueue* proc = (struct ProcessQueue*) d;
+	pthread_mutex_lock (proc->lock);
+
+	while (1) {
+		if (proc->fq->empty ()) {
+			break;
+		}
+		char* fn = strdup (proc->fq->back ());
+		proc->fq->pop_back ();
+		pthread_mutex_unlock (proc->lock);
+
+		ResultMap rm = process_file (fn, proc->djc, proc->check_compile);
+		free (fn);
+
+		pthread_mutex_lock (proc->lock);
+		for (ResultMap::const_iterator i = rm.begin (); i != rm.end (); ++i) {
+			(*proc->rm)[i->first] = i->second;
+		}
+		++proc->done;
+
+		if (proc->report_progress) {
+			fprintf (stderr, "progress: %4.1f%%  [%4d / %4d] decl: %ld         \r",
+					100.f * proc->done / (float)proc->total, proc->done, proc->total,
+					proc->rm->size ());
+		}
+	}
+	pthread_mutex_unlock (proc->lock);
+	pthread_exit (NULL);
+	return NULL;
+}
+
 
 static void
 usage (int status)
@@ -207,23 +278,30 @@ usage (int status)
 
 int main (int argc, char** argv)
 {
-	struct dox2js dj;
+	struct Dox2jsConfig djc;
+
+#define MAX_THREADS 16
+	pthread_t threads[MAX_THREADS];
 
 	bool report_progress = false;
 	bool check_compile = false;
+	size_t num_threads = 1;
   int c;
-	while (EOF != (c = getopt (argc, argv, "D:I:TX:"))) {
+	while (EOF != (c = getopt (argc, argv, "j:D:I:TX:"))) {
 		switch (c) {
+			case 'j':
+				num_threads = std::max (1, std::min ((int)MAX_THREADS, atoi (optarg)));
+				break;
 			case 'I':
-				dj.add_clang_arg ("-I");
-				dj.add_clang_arg (optarg);
+				djc.add_clang_arg ("-I");
+				djc.add_clang_arg (optarg);
 				break;
 			case 'D':
-				dj.add_clang_arg ("-D");
-				dj.add_clang_arg (optarg);
+				djc.add_clang_arg ("-D");
+				djc.add_clang_arg (optarg);
 				break;
 			case 'X':
-				dj.add_exclude (optarg);
+				djc.add_exclude (optarg);
 				break;
 			case 'T':
 				check_compile = true;
@@ -245,23 +323,46 @@ int main (int argc, char** argv)
 		report_progress = true;
 	}
 
+	ResultMap results;
+	std::vector<char*> src;
+	pthread_mutex_t lock;
+	pthread_mutex_init (&lock, NULL);
+
 	for (int i = optind; i < argc; ++i) {
-		process_file (argv[i], &dj, check_compile);
-		if (report_progress) {
-			fprintf (stderr, "progress: %4.1f%%  [%4d / %4d] decl: %ld         \r",
-					100.f * (1.f + i - optind) / (float)total, i - optind, total,
-					dj.results.size ());
-			fflush (stderr);
+		src.push_back (argv[i]);
+	}
+
+	if (check_compile) {
+		num_threads = 1;
+	} else {
+		num_threads = std::min (src.size (), num_threads);
+	}
+
+	struct ProcessQueue proc (&src, &results, &djc, &lock, report_progress, check_compile);
+
+	for (unsigned int i = 0; i < num_threads; ++i) {
+		int rc = pthread_create (&threads[i], NULL, process_thread, (void *)&proc);
+		if (rc) {
+			fprintf (stderr, "failed to create thread.\n");
+			exit(EXIT_FAILURE);
 		}
+	}
+
+	pthread_yield();
+
+	for (unsigned int i = 0; i < num_threads; ++i) {
+		pthread_join (threads[i], NULL);
 	}
 
 	if (!check_compile) {
 		printf ("[\n");
-		for (std::map <std::string, std::string>::const_iterator i = dj.results.begin (); i != dj.results.end (); ++i) {
+		for (std::map <std::string, std::string>::const_iterator i = results.begin (); i != results.end (); ++i) {
 			printf ("%s\n", (*i).second.c_str ());
 		}
 		printf ("{} ]\n");
 	}
+
+	pthread_mutex_destroy (&lock);
 
   return 0;
 }
