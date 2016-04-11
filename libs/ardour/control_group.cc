@@ -104,9 +104,19 @@ ControlGroup::control_going_away (boost::weak_ptr<AutomationControl> wac)
 int
 ControlGroup::remove_control (boost::shared_ptr<AutomationControl> ac)
 {
-	Glib::Threads::RWLock::WriterLock lm (controls_lock);
+	int erased;
+
+	{
+		Glib::Threads::RWLock::WriterLock lm (controls_lock);
+		erased = _controls.erase (ac->id());
+	}
+
+	if (erased) {
+		ac->set_group (boost::shared_ptr<ControlGroup>());
+	}
+
 	/* return zero if erased, non-zero otherwise */
-	return !(_controls.erase (ac->id()) > 0);
+	return !erased;
 }
 
 int

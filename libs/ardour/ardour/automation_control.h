@@ -33,9 +33,11 @@
 #include "evoral/types.hpp"
 #include "evoral/Control.hpp"
 
-#include "ardour/libardour_visibility.h"
 #include "ardour/automation_list.h"
+#include "ardour/control_group_member.h"
 #include "ardour/parameter_descriptor.h"
+
+#include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
 
@@ -49,6 +51,7 @@ class LIBARDOUR_API AutomationControl
 	: public PBD::Controllable
 	, public Evoral::Control
 	, public boost::enable_shared_from_this<AutomationControl>
+	, public ControlGroupMember
 {
     public:
 	AutomationControl(ARDOUR::Session&,
@@ -116,8 +119,6 @@ class LIBARDOUR_API AutomationControl
 	const ARDOUR::Session& session() const { return _session; }
 	void commit_transaction (bool did_write);
 
-	void set_group (boost::shared_ptr<ControlGroup>);
-
   protected:
 	ARDOUR::Session& _session;
 	boost::shared_ptr<ControlGroup> _group;
@@ -132,6 +133,14 @@ class LIBARDOUR_API AutomationControl
 	*/
 
 	virtual void actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
+
+  private:
+	/* I am unclear on why we have to make ControlGroup a friend in order
+	   to get access to the ::set_group() method when it is already
+	   declared to be a friend in ControlGroupMember. Oh well.
+	*/
+	friend class ControlGroup;
+	void set_group (boost::shared_ptr<ControlGroup>);
 };
 
 class SlavableAutomationControl : public AutomationControl

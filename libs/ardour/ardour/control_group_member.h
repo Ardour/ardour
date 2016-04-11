@@ -1,0 +1,40 @@
+/*
+  Copyright (C) 2016 Paul Davis
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the Free
+  Software Foundation; either version 2 of the License, or (at your option)
+  any later version.
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  for more details.
+
+  You should have received a copy of the GNU General Public License along
+  with this program; if not, write to the Free Software Foundation, Inc.,
+  675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+#ifndef __libardour_control_group_member_h__
+#define __libardour_control_group_member_h__
+
+namespace ARDOUR {
+
+class ControlGroup;
+
+class LIBARDOUR_API ControlGroupMember
+{
+  public:
+	virtual ~ControlGroupMember () {};
+  private:
+	friend class ControlGroup;
+	/* Only a ControlGroup can call this; all membership changes must be
+	   mediated by the ControlGroup, not by operating on the member.
+	*/
+	virtual void set_group (boost::shared_ptr<ControlGroup>) = 0;
+};
+
+} /* namespace */
+
+#endif /* __libardour_control_group_member_h__ */

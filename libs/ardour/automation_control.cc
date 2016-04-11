@@ -268,9 +268,11 @@ AutomationControl::interface_to_internal (double val) const
 void
 AutomationControl::set_group (boost::shared_ptr<ControlGroup> cg)
 {
-	if (_group) {
-		_group->remove_control (shared_from_this());
-	}
+	/* this method can only be called by a ControlGroup. We do not need
+	   to ensure consistency by calling ControlGroup::remove_control(),
+	   since we are guaranteed that the ControlGroup will take care of that
+	   for us.
+	*/
 
 	_group = cg;
 }
