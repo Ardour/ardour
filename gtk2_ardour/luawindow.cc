@@ -567,8 +567,16 @@ LuaWindow::rebuild_menu ()
 		items_scratch.push_back(elem);
 	}
 
+	items_scratch.push_back(SeparatorElem());
+
 	for (ScriptBufferList::const_iterator i = script_buffers.begin (); i != script_buffers.end (); ++i) {
-		Menu_Helpers::MenuElem elem = Gtk::Menu_Helpers::MenuElem((*i)->name,
+		std::string name;
+		if ((*i)->flags & Buffer_ReadOnly) {
+			name = "[R] " + (*i)->name;
+		} else {
+			name = (*i)->name;
+		}
+		Menu_Helpers::MenuElem elem = Gtk::Menu_Helpers::MenuElem(name,
 				sigc::bind(sigc::mem_fun(*this, &LuaWindow::script_selection_changed), (*i), false));
 
 		if ((*i)->flags & Buffer_Scratch) {
