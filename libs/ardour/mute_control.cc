@@ -40,21 +40,6 @@ MuteControl::MuteControl (Session& session, std::string const & name, Muteable& 
 }
 
 void
-MuteControl::master_changed (bool from_self, PBD::Controllable::GroupControlDisposition gcd)
-{
-	bool master_muted;
-
-	{
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
-		master_muted = (bool) get_masters_value_locked ();
-	}
-
-	_muteable.mute_master()->mod_muted_by_others (master_muted ? 1 : -1);
-
-	SlavableAutomationControl::master_changed (false, gcd);
-}
-
-void
 MuteControl::actually_set_value (double val, Controllable::GroupControlDisposition gcd)
 {
 	if (muted() != bool (val)) {
@@ -111,5 +96,5 @@ MuteControl::muted () const
 bool
 MuteControl::muted_by_others () const
 {
-	return _muteable.mute_master()->muted_by_others ();
+	return _muteable.mute_master()->muted_by_others () || get_masters_value();
 }

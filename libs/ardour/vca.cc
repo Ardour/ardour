@@ -67,8 +67,6 @@ VCA::VCA (Session& s,  uint32_t num, const string& name)
 	, Automatable (s)
 	, _number (num)
 	, _gain_control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
-	, _solo_requested (false)
-	, _mute_requested (false)
 {
 }
 
@@ -102,10 +100,10 @@ VCA::get_state ()
 	XMLNode* node = new XMLNode (xml_node_name);
 	node->add_property (X_("name"), _name);
 	node->add_property (X_("number"), _number);
-	node->add_property (X_("soloed"), (_solo_requested ? X_("yes") : X_("no")));
-	node->add_property (X_("muted"), (_mute_requested ? X_("yes") : X_("no")));
 
 	node->add_child_nocopy (_gain_control->get_state());
+	node->add_child_nocopy (_solo_control->get_state());
+	node->add_child_nocopy (_mute_control->get_state());
 	node->add_child_nocopy (get_automation_xml_state());
 
 	return *node;
@@ -127,9 +125,21 @@ VCA::set_state (XMLNode const& node, int version)
 	XMLNodeList const &children (node.children());
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == Controllable::xml_node_name) {
+
 			XMLProperty* prop = (*i)->property ("name");
-			if (prop && prop->value() == X_("gaincontrol")) {
+
+			if (!prop) {
+				continue;
+			}
+
+			if (prop->value() == _gain_control->name()) {
 				_gain_control->set_state (**i, version);
+			}
+			if (prop->value() == _solo_control->name()) {
+				_solo_control->set_state (**i, version);
+			}
+			if (prop->value() == _mute_control->name()) {
+				_mute_control->set_state (**i, version);
 			}
 		}
 	}
@@ -137,26 +147,4 @@ VCA::set_state (XMLNode const& node, int version)
 	return 0;
 }
 
-void
-VCA::set_solo (bool yn)
-{
-	_solo_requested = yn;
-}
 
-void
-VCA::set_mute (bool yn)
-{
-	_mute_requested = yn;
-}
-
-bool
-VCA::soloed () const
-{
-	return _solo_requested;
-}
-
-bool
-VCA::muted () const
-{
-	return _mute_requested;
-}

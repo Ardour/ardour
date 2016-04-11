@@ -115,19 +115,12 @@ class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, pu
 	boost::shared_ptr<SoloControl> _solo_control;
 	boost::shared_ptr<MuteControl> _mute_control;
 
-	bool _solo_requested;
-	bool _mute_requested;
-
 	static gint next_number;
 
 	void solo_target_going_away (boost::weak_ptr<Route>);
 	void mute_target_going_away (boost::weak_ptr<Route>);
 	bool soloed_locked () const;
 	bool muted_locked () const;
-
-	void set_solo (bool yn);
-	void set_mute (bool yn);
-
 };
 
 } /* namespace */

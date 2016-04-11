@@ -5460,7 +5460,7 @@ Route::vca_assign (boost::shared_ptr<VCA> vca)
 {
 	_gain_control->add_master (vca->gain_control());
 	_solo_control->add_master (vca->solo_control());
-	// _mute_control->add_master (vca->mute_control());
+	_mute_control->add_master (vca->mute_control());
 }
 
 void
@@ -5470,11 +5470,11 @@ Route::vca_unassign (boost::shared_ptr<VCA> vca)
 		/* unassign from all */
 		_gain_control->clear_masters ();
 		_solo_control->clear_masters ();
-		//_mute_control->clear_masters ();
+		_mute_control->clear_masters ();
 	} else {
 		_gain_control->remove_master (vca->gain_control());
 		_solo_control->remove_master (vca->solo_control());
-		//_mute_control->remove_master (vca->mute_control());
+		_mute_control->remove_master (vca->mute_control());
 	}
 }
 

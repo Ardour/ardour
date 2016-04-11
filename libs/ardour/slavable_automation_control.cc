@@ -43,11 +43,18 @@ SlavableAutomationControl::~SlavableAutomationControl ()
 double
 SlavableAutomationControl::get_masters_value_locked () const
 {
-	gain_t v = 1.0;
+	gain_t v = _desc.normal;
 
 	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-		/* get current master value, scale by our current ratio with that master */
-		v *= mr->second.master()->get_value () * mr->second.ratio();
+		if (_desc.toggled) {
+			/* if any master is enabled, the slaves are too */
+			if (mr->second.master()->get_value()) {
+				return _desc.upper;
+			}
+		} else {
+			/* get current master value, scale by our current ratio with that master */
+			v *= mr->second.master()->get_value () * mr->second.ratio();
+		}
 	}
 
 	return min (_desc.upper, v);
@@ -69,7 +76,7 @@ SlavableAutomationControl::get_value_locked() const
 double
 SlavableAutomationControl::get_value() const
 {
-	bool from_list = _list && ((AutomationList*)_list.get())->automation_playback();
+	bool from_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback();
 
 	if (!from_list) {
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
@@ -113,8 +120,8 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 			   because the change came from the master.
 			*/
 
-
 			m->Changed.connect_same_thread (res.first->second.connection, boost::bind (&SlavableAutomationControl::master_changed, this, _1, _2));
+			cerr << this << enum_2_string ((AutomationType) _parameter.type()) << " now listening to Changed from " << m << endl;
 		}
 
 		new_value = get_value_locked ();
@@ -126,13 +133,11 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 	}
 
 	if (new_value != current_value) {
-		/* force a call to to ::master_changed() to carry the
-		 * consequences that would occur if the master assumed
-		 * its current value WHILE we were slaved.
+		/* need to do this without a writable() check in case
+		 * the master is removed while this control is doing
+		 * automation playback.
 		 */
-		master_changed (false, Controllable::NoGroup);
-		/* effective value changed by master */
-		Changed (false, Controllable::NoGroup);
+		 actually_set_value (new_value, Controllable::NoGroup);
 	}
 
 }
@@ -140,6 +145,8 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 void
 SlavableAutomationControl::master_changed (bool /*from_self*/, GroupControlDisposition gcd)
 {
+	cerr << this << enum_2_string ((AutomationType)_parameter.type()) << " master changed, relay changed along\n";
+
 	/* our value has (likely) changed, but not because we were
 	 * modified. Just the master.
 	 */

@@ -161,6 +161,11 @@ class SlavableAutomationControl : public AutomationControl
 	void clear_masters ();
 	bool slaved_to (boost::shared_ptr<AutomationControl>) const;
 	bool slaved () const;
+	double get_masters_value () const {
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		return get_masters_value_locked ();
+	}
+
 	std::vector<PBD::ID> masters () const;
 
 	PBD::Signal0<void> MasterStatusChange;

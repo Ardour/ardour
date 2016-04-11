@@ -198,14 +198,15 @@ VCAMasterStrip::set_selected (bool yn)
 bool
 VCAMasterStrip::solo_release (GdkEventButton*)
 {
-	_vca->solo_control()->set_value (_vca->soloed() ? 0.0 : 1.0, Controllable::NoGroup);
+	std::cerr << "VCA solo release, from " << _vca->solo_control()->get_value() << std::endl;
+	_vca->solo_control()->set_value (_vca->solo_control()->get_value() ? 0.0 : 1.0, Controllable::NoGroup);
 	return true;
 }
 
 bool
 VCAMasterStrip::mute_release (GdkEventButton*)
 {
-	_vca->mute_control()->set_value (_vca->muted() ? 0.0 : 1.0, Controllable::NoGroup);
+	_vca->mute_control()->set_value (_vca->mute_control()->get_value() ? 0.0 : 1.0, Controllable::NoGroup);
 	return true;
 }
 
@@ -229,7 +230,7 @@ VCAMasterStrip::set_solo_text ()
 void
 VCAMasterStrip::mute_changed ()
 {
-	if (_vca->muted()) {
+	if (_vca->mute_control()->muted()) {
 		mute_button.set_active_state (ExplicitActive);
 	} else {
 		mute_button.set_active_state (Gtkmm2ext::Off);
@@ -239,7 +240,7 @@ VCAMasterStrip::mute_changed ()
 void
 VCAMasterStrip::solo_changed ()
 {
-	if (_vca->soloed()) {
+	if (_vca->solo_control()->soloed()) {
 		solo_button.set_active_state (ExplicitActive);
 	} else {
 		solo_button.set_active_state (Gtkmm2ext::Off);

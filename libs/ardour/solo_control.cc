@@ -63,31 +63,6 @@ SoloControl::set_mute_master_solo ()
 }
 
 void
-SoloControl::master_changed (bool from_self, PBD::Controllable::GroupControlDisposition gcd)
-{
-	if (_soloable.is_safe() || !_soloable.can_solo()) {
-		return;
-	}
-
-	bool master_soloed;
-
-	{
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
-		master_soloed = (bool) get_masters_value_locked ();
-	}
-
-	/* Master is considered equivalent to an upstream solo control, not
-	 * direct control over self-soloed.
-	 */
-
-	mod_solo_by_others_upstream (master_soloed ? 1 : -1);
-
-	/* no need to call AutomationControl::master_changed() since it just
-	   emits Changed() which we already did in mod_solo_by_others_upstream()
-	*/
-}
-
-void
 SoloControl::mod_solo_by_others_downstream (int32_t delta)
 {
 	if (_soloable.is_safe() || !_soloable.can_solo()) {

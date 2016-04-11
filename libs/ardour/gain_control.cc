@@ -244,3 +244,4 @@ GainControl::vcas_loaded ()
 	vca_loaded_connection.disconnect ();
 	masters_string.clear ();
 }
+
