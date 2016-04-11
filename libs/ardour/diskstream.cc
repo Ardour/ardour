@@ -380,7 +380,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 		_playlist = playlist;
 		_playlist->use();
 
-		if (!in_set_state && recordable()) {
+		if (!in_set_state && destructive() && recordable()) {
 			reset_write_sources (false);
 		}
 
