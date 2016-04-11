@@ -151,6 +151,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <PBD::Controllable, PBD::StatefulDestructible> ("Controllable")
+		.addFunction ("name", &PBD::Controllable::name)
 		.addFunction ("get_value", &PBD::Controllable::get_value)
 		.endClass ()
 
@@ -317,9 +318,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("first_mark_after", &Locations::first_mark_after)
 		.endClass ()
 
-		.deriveWSPtrClass <SessionObject, PBD::StatefulDestructible> ("SessionObject")
-		/* multiple inheritance is not covered by luabridge,
-		 * we need explicit casts :( */
+		.beginWSPtrClass <SessionObject> ("SessionObject")
+		/* SessionObject is-a PBD::StatefulDestructible,
+		 * but multiple inheritance is not covered by luabridge,
+		 * we need explicit casts */
 		.addCast<PBD::Stateful> ("to_stateful")
 		.addCast<PBD::StatefulDestructible> ("to_statefuldestructible")
 		.addFunction ("name", &SessionObject::name)
@@ -530,8 +532,8 @@ LuaBindings::common (lua_State* L)
 		.addData ("logarithmic", &ParameterDescriptor::logarithmic)
 		.endClass ()
 
-		.deriveWSPtrClass <Processor, Automatable> ("Processor")
-		.addCast<SessionObject> ("to_sessionobject")
+		.deriveWSPtrClass <Processor, SessionObject> ("Processor")
+		.addCast<Automatable> ("to_automatable")
 		.addCast<PluginInsert> ("to_insert")
 		.addCast<SideChain> ("to_sidechain")
 		.addCast<IOProcessor> ("to_ioprocessor")
@@ -583,7 +585,7 @@ LuaBindings::common (lua_State* L)
 
 		.endClass ()
 
-		.deriveWSPtrClass <AutomationControl, Evoral::Control> ("AutomationControl")
+		.deriveWSPtrClass <AutomationControl, PBD::Controllable> ("AutomationControl")
 		.addCast<Evoral::Control> ("to_ctrl")
 		.addFunction ("automation_state", &AutomationControl::automation_state)
 		.addFunction ("automation_style", &AutomationControl::automation_style)
