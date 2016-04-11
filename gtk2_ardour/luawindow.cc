@@ -605,7 +605,7 @@ LuaWindow::script_selection_changed (ScriptBufferPtr n, bool force)
 
 	Glib::RefPtr<Gtk::TextBuffer> tb (entry.get_buffer());
 
-	if ((n->flags & Buffer_Valid)) {
+	if (_current_buffer->flags & Buffer_Valid) {
 		_current_buffer->script = tb->get_text();
 	}
 
@@ -671,6 +671,7 @@ LuaWindow::ScriptBuffer::ScriptBuffer (const std::string& n)
 	, flags (Buffer_Scratch | Buffer_Valid)
 {
 	script =
+		"---- this header is (only) required to save the script\n"
 		"-- ardour { [\"type\"] = \"Snippet\", name = \"\" }\n"
 		"-- function factory () return function () -- -- end end\n";
 }
@@ -708,11 +709,12 @@ LuaWindow::ScriptBuffer::~ScriptBuffer ()
 bool
 LuaWindow::ScriptBuffer::load ()
 {
+	assert (!(flags & Buffer_Valid));
 	if (!(flags & Buffer_HasFile)) return false;
-	if (flags & Buffer_Valid) return true;
 	try {
 		script = Glib::file_get_contents (path);
 		flags |= Buffer_Valid;
+		flags &= BufferFlags(~Buffer_Dirty);
 	} catch (Glib::FileError e) {
 		return false;
 	}
