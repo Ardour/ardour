@@ -738,10 +738,12 @@ Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t
 void
 Route::set_listen (bool yn)
 {
-	if (yn) {
-		_monitor_send->activate ();
-	} else {
-		_monitor_send->deactivate ();
+	if (_monitor_send) {
+		if (yn) {
+			_monitor_send->activate ();
+		} else {
+			_monitor_send->deactivate ();
+		}
 	}
 }
 
