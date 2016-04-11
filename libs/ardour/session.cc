@@ -6117,7 +6117,7 @@ Session::listen_position_changed ()
 void
 Session::solo_control_mode_changed ()
 {
-	if (soloing()) {
+	if (soloing() || listening()) {
 		/* We can't use ::clear_all_solo_state() here because during
 		   session loading at program startup, that will queue a call
 		   to rt_clear_all_solo_state() that will not execute until
