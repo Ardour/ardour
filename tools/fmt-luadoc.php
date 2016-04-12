@@ -34,7 +34,9 @@ foreach (json_decode ($json, true) as $b) {
 		if (isset ($b['version'])) { $ardourversion = $b['version']; }
 		continue;
 	}
+	# reserved lua words
 	$b ['lua'] = preg_replace ('/:_end/', ':end', $b ['lua']);
+	$b ['lua'] = preg_replace ('/:_type/', ':type', $b ['lua']);
 	$b ['ldec'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['decl']));
 	if (isset ($b['ret'])) {
 		$b['ret'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['ret']));
@@ -371,10 +373,20 @@ foreach ($doc as $b) {
 	case "Weak/Shared Pointer Function":
 	case "Weak/Shared Pointer Function RefReturn":
 	case "Weak/Shared Null Check":
-	case "Weak/Shared Pointer Cast":
 	case "Static Member Function":
 		checkclass ($b);
 		$classlist[luafn2class ($b['lua'])]['func'][] = array (
+			'bind' => $b,
+			'name' => $b['lua'],
+			'args' => decl2args ($b['ldec']),
+			'ret'  => arg2lua ($b['ret']),
+			'ref'  => (strpos ($b['type'], "RefReturn") !== false),
+			'cand' => canonical_decl ($b)
+		);
+		break;
+	case "Weak/Shared Pointer Cast":
+		checkclass ($b);
+		$classlist[luafn2class ($b['lua'])]['cast'][] = array (
 			'bind' => $b,
 			'name' => $b['lua'],
 			'args' => decl2args ($b['ldec']),
@@ -644,6 +656,23 @@ function format_class_members ($ns, $cl, &$dups) {
 			$rv.= format_doxydoc($f);
 		}
 	}
+	# print cast - if any
+	if (isset ($cl['cast'])) {
+		usort ($cl['cast'], 'name_sort_cb');
+		$rv.= ' <tr><th colspan="3">Cast</th></tr>'.NL;
+		foreach ($cl['cast'] as $f) {
+			$rv.= ' <tr><td class="def">';
+			$rv.= typelink (varname ($f['ret']), true, 'em');
+			# function declaration and arguments
+			$rv.= '</td><td class="decl">';
+			$rv.= '<span class="functionname"><abbr title="'.htmlentities($f['bind']['decl']).'">'.stripclass ($ns, $f['name']).'</abbr></span>';
+			$rv.= format_args ($f['args']);
+			$rv.= '</td><td class="fill"></td></tr>'.NL;
+			# doxygen documentation (may be empty)
+			$rv.= format_doxydoc($f);
+		}
+	}
+
 	# print data members - if any
 	if (isset ($cl['data'])) {
 		usort ($cl['data'], 'name_sort_cb');
@@ -779,6 +808,12 @@ Tracks contain specifics. For Example a track <em>has-a</em> diskstream (for fil
 <p>
 Operations are performed on objects. One gets a reference to an object and then calls a method.
 e.g <code>obj = Session:route_by_name("Audio")   obj:set_name("Guitar")</code>.
+</p>
+<p>
+Lua automatically follows C++ class inheritance. e.g one can directly call all SessionObject and Route methods on Track object. However lua does not automatically promote objects. A Route object which just happens to be a Track needs to be explicily cast to a Track. Methods for casts are provided with each class. Note that the cast may fail and return a <em>nil</em> reference.
+</p>
+<p>
+Likewise multiple inheritance is a <a href="http://www.lua.org/pil/16.3.html">non-trivial issue</a> in lua. To avoid performance penalties involved with lookups, explicit casts are required in this case. One example is <?=typelink('ARDOUR:SessionObject')?> which is-a StatefulDestructible which inhertis from both Stateful and Destructible.
 </p>
 <p>
 Object lifetimes are managed by the Session. Most Objects cannot be directly created, but one asks the Session to create or destroy them. This is mainly due to realtime constrains:
