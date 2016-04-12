@@ -292,14 +292,16 @@ PluginPinDialog::plugin_reconfigured ()
 	for (uint32_t n = 0; n < _n_plugins; ++n) {
 		boost::shared_ptr<Plugin> plugin = _pi->plugin (n);
 		for (uint32_t i = 0; i < _sinks.n_total (); ++i) {
-			DataType dt (_sinks.n_midi () ? DataType::MIDI : DataType::AUDIO);
-			int idx = (i < _sinks.n_midi ()) ? i : i - _sinks.n_midi ();
+			DataType dt (i < _sinks.n_midi () ? DataType::MIDI : DataType::AUDIO);
+			int idx = (dt == DataType::MIDI) ? i : i - _sinks.n_midi ();
 			const Plugin::IOPortDescription& iod (plugin->describe_io_port (dt, true, idx));
-			CtrlWidget cw (CtrlWidget (Sink, dt, i, n, iod.is_sidechain));
+			CtrlWidget cw (CtrlWidget (Sink, dt, idx, n, iod.is_sidechain));
 			_elements.push_back (cw);
 		}
 		for (uint32_t i = 0; i < _sources.n_total (); ++i) {
-			_elements.push_back (CtrlWidget (Source, (i < _sources.n_midi () ? DataType::MIDI : DataType::AUDIO), i, n));
+			DataType dt (i < _sources.n_midi () ? DataType::MIDI : DataType::AUDIO);
+			int idx = (dt == DataType::MIDI) ? i : i - _sources.n_midi ();
+			_elements.push_back (CtrlWidget (Source, dt, idx, n));
 		}
 	}
 
@@ -463,8 +465,10 @@ PluginPinDialog::update_element_pos ()
 				break;
 			case Sink:
 				{
+					uint32_t idx = i->e->id;
+					if (i->e->dt == DataType::AUDIO) { idx += _sinks.n_midi (); }
 					const double x0 = rint ((i->e->ip + .5) * _innerwidth / (double)(_n_plugins)) - .5 - bxw2;
-					i->x = _margin_x + rint (x0 + (i->e->id + 1) * bxw / (1. + _sinks.n_total ())) - .5 - dx;
+					i->x = _margin_x + rint (x0 + (idx + 1) * bxw / (1. + _sinks.n_total ())) - .5 - dx;
 					i->y = yc - bxh2 - dx;
 					i->w = _pin_box_size;
 					i->h = _pin_box_size;
@@ -472,8 +476,10 @@ PluginPinDialog::update_element_pos ()
 				break;
 			case Source:
 				{
+					uint32_t idx = i->e->id;
+					if (i->e->dt == DataType::AUDIO) { idx += _sources.n_midi (); }
 					const double x0 = rint ((i->e->ip + .5) * _innerwidth / (double)(_n_plugins)) - .5 - bxw2;
-					i->x = _margin_x + rint (x0 + (i->e->id + 1) * bxw / (1. + _sources.n_total ())) - .5 - dx;
+					i->x = _margin_x + rint (x0 + (idx + 1) * bxw / (1. + _sources.n_total ())) - .5 - dx;
 					i->y = yc + bxh2 - dx;
 					i->w = _pin_box_size;
 					i->h = _pin_box_size;
@@ -599,6 +605,7 @@ PluginPinDialog::get_io_ctrl (CtrlType ct, DataType dt, uint32_t id, uint32_t ip
 			return *i;
 		}
 	}
+	assert (0);
 	fatal << string_compose (_("programming error: %1"),
 			X_("Invalid Plugin I/O Port."))
 		<< endmsg;
