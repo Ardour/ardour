@@ -44,6 +44,8 @@ tags
 /build/
 /doc/html/
 /doc/latex/
+/doc/ardourapi.json.gz
+/doc/luadoc.json.gz
 
 
 # translations
