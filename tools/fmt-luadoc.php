@@ -420,8 +420,10 @@ foreach ($classlist as $ns => $cl) {
 		if ($c['lua'] == $ns) {
 			if (strpos ($c['type'], 'Pointer Class') !== false) {
 				$classlist[$ns]['ptr'] = true;
-				$classlist[$ns]['decl'] = 'boost::shared_ptr< '.$c['decl']. ' >, boost::weak_ptr< '.$c['decl']. ' >';
+				$classlist[$ns]['cdecl'] = 'boost::shared_ptr< '.$c['decl']. ' >, boost::weak_ptr< '.$c['decl']. ' >';
 				break;
+			} else {
+				$classlist[$ns]['cdecl'] = $c['decl'];
 			}
 		}
 	}
@@ -481,10 +483,19 @@ function doxydoc ($canonical_declaration) {
 	if (isset ($api[$canonical_declaration])) {
 		$dox_found++;
 		return $api[$canonical_declaration]['doc'];
-	} else {
-		$dox_miss++;
-		return '';
 	}
+	// remove template namespace e.g.
+	//  "ARDOUR::Track::bounceable(boost::shared_ptr<ARDOUR::Processor>"
+	//  "ARDOUR::Track::bounceable(boost::shared_ptr<Processor>"
+	$cn = preg_replace ('/<[^>]*::([^>]*)>/', '<$1>', $canonical_declaration);
+	if (isset ($api[$cn])) {
+		$dox_found++;
+		return $api[$cn]['doc'];
+	}
+	#fwrite (STDERR, $canonical_declaration."\n"); # XXX DEBUG
+
+	$dox_miss++;
+	return '';
 }
 
 ################################################################################
@@ -932,7 +943,7 @@ foreach ($classlist as $ns => $cl) {
 
 	# show original C++ declaration
 	if (isset ($cl['decl'])) {
-		echo '<p class="cdecl"><em>C&#8225;</em>: '.htmlentities ($cl['decl']).'</p>'.NL;
+		echo '<p class="cdecl"><em>C&#8225;</em>: '.htmlentities ($cl['cdecl']).'</p>'.NL;
 	}
 
 	# print class inheritance (direct parent *name* only)

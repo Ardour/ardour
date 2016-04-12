@@ -9,7 +9,9 @@ test -e ../gtk2_ardour/arluadoc
 test -e ../build/gtk2_ardour/luadoc
 
 # generate ../doc/ardourapi.json.gz
-./doxy2json/ardourdoc.sh
+if test -z "$1"; then
+	./doxy2json/ardourdoc.sh
+fi
 
 # generate ../doc/luadoc.json.gz
 $DIR/../gtk2_ardour/arluadoc
