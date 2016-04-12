@@ -31,6 +31,8 @@ typedef struct _VSTState VSTState;
 
 namespace ARDOUR {
 
+class PluginInsert;
+
 /** Parent class for VST plugins of both Windows and Linux varieties */
 class LIBARDOUR_API VSTPlugin : public Plugin
 {
@@ -81,6 +83,10 @@ public:
 
 	int first_user_preset_index () const;
 
+	void set_insert (PluginInsert* pi, uint32_t num) { _pi = pi; _num = num; }
+	PluginInsert* plugin_insert () const { return _pi; }
+	uint32_t plugin_number () const { return _num; }
+
 protected:
 	void set_plugin (AEffect *);
 	gchar* get_chunk (bool) const;
@@ -97,6 +103,8 @@ protected:
 	VSTHandle* _handle;
 	VSTState*  _state;
 	AEffect*   _plugin;
+	PluginInsert* _pi;
+	uint32_t      _num;
 
 	MidiBuffer* _midi_out_buf;
 };

@@ -44,6 +44,8 @@ VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 	, _handle (handle)
 	, _state (0)
 	, _plugin (0)
+	, _pi (0)
+	, _num (0)
 {
 
 }
