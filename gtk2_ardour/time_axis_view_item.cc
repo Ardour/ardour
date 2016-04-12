@@ -160,7 +160,6 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 {
 	group = new ArdourCanvas::Container (parent);
 	CANVAS_DEBUG_NAME (group, string_compose ("TAVI group for %1", get_item_name()));
-	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
 
 	fill_color = base_color;
 	fill_color_name = "time axis view item base";
@@ -247,13 +246,14 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		frame_handle_start = frame_handle_end = 0;
 	}
 
-	set_color (base_color);
+	//set_color (base_color);
 
-	set_duration (item_duration, this);
-	set_position (start, this);
+	//set_duration (item_duration, this);
+	//set_position (start, this);
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&TimeAxisViewItem::parameter_changed, this, _1), gui_context ());
-	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &TimeAxisViewItem::parameter_changed));
+	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
+	//Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&TimeAxisViewItem::parameter_changed, this, _1), gui_context ());
+	//UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &TimeAxisViewItem::parameter_changed));
 }
 
 TimeAxisViewItem::~TimeAxisViewItem()
@@ -532,7 +532,7 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 	name_text_width = pixel_width (new_name, NAME_FONT) + 2;
 	name_text->set (new_name);
 	manage_name_text ();
-
+	manage_name_highlight ();
 }
 
 /**
@@ -569,8 +569,6 @@ TimeAxisViewItem::set_height (double height)
 			selection_frame->set (frame->get().shrink (1.0));
 		}
 	}
-
-	set_colors ();
 }
 
 void

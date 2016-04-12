@@ -178,13 +178,14 @@ RegionView::init (bool wfd)
 		_enable_display = true;
 	}
 
-	set_height (trackview.current_height());
+	/* derived class calls set_height () including RegionView::set_height() in ::init() */
+	//set_height (trackview.current_height());
 
 	_region->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::region_changed, this, _1), gui_context());
 
-	set_colors ();
-
-	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &RegionView::color_handler));
+	/* derived class calls set_colors () including RegionView::set_colors() in ::init() */
+	//set_colors ();
+	//UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &RegionView::color_handler));
 
 	/* XXX sync mark drag? */
 }
@@ -588,7 +589,6 @@ RegionView::region_renamed ()
 
 	set_item_name (str, this);
 	set_name_text (str);
-	reset_width_dependent_items (_pixel_width);
 }
 
 void
@@ -775,39 +775,25 @@ RegionView::update_coverage_frames (LayerDisplay d)
 	/* the color that will be used to show parts of regions that will not be heard */
 	uint32_t const non_playing_color = UIConfiguration::instance().color_mod ("covered region", "covered region base");
 
-	while (t < end) {
+	t = pl->find_next_region_boundary (t, 1);
 
-		t++;
+	/* is this region is on top at time t? */
+	bool const new_me = (pl->top_unmuted_region_at (t) == _region);
 
-		/* is this region is on top at time t? */
-		bool const new_me = (pl->top_unmuted_region_at (t) == _region);
-
-		/* finish off any old rect, if required */
-		if (cr && me != new_me) {
-			cr->set_x1 (trackview.editor().sample_to_pixel (t - position));
+	/* start off any new rect, if required */
+	if (cr == 0 || me != new_me) {
+		cr = new ArdourCanvas::Rectangle (group);
+		_coverage_frames.push_back (cr);
+		cr->set_x0 (trackview.editor().sample_to_pixel (t - position));
+		cr->set_y0 (1);
+		cr->set_y1 (_height + 1);
+		cr->set_outline (false);
+		cr->set_ignore_events (true);
+		if (new_me) {
+			cr->set_fill_color (UINT_RGBA_CHANGE_A (non_playing_color, 0));
+		} else {
+			cr->set_fill_color (non_playing_color);
 		}
-
-		/* start off any new rect, if required */
-		if (cr == 0 || me != new_me) {
-			cr = new ArdourCanvas::Rectangle (group);
-			_coverage_frames.push_back (cr);
-			cr->set_x0 (trackview.editor().sample_to_pixel (t - position));
-			cr->set_y0 (1);
-			cr->set_y1 (_height + 1);
-			cr->set_outline (false);
-			cr->set_ignore_events (true);
-			if (new_me) {
-				cr->set_fill_color (UINT_RGBA_CHANGE_A (non_playing_color, 0));
-			} else {
-				cr->set_fill_color (non_playing_color);
-			}
-		}
-
-		t = pl->find_next_region_boundary (t, 1);
-		if (t < 0) {
-			break;
-		}
-		me = new_me;
 	}
 
 	if (cr) {

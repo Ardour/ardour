@@ -271,12 +271,12 @@ MidiRegionView::init (bool wfd)
 
 	RegionView::init (false);
 
-	set_height (trackview.current_height());
+	//set_height (trackview.current_height());
 
 	region_muted ();
 	region_sync_changed ();
 	region_resized (ARDOUR::bounds_change);
-	region_locked ();
+	//region_locked ();
 
 	set_colors ();
 

@@ -1822,6 +1822,7 @@ Playlist::regions_at (framepos_t frame)
 	 for (RegionList::iterator i = rlist->begin(); i != rlist->end(); ) {
 
 		 RegionList::iterator tmp = i;
+
 		 ++tmp;
 
 		 if ((*i)->muted()) {
@@ -2047,23 +2048,25 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 
 			 boost::shared_ptr<Region> r = (*i);
 			 frameoffset_t distance;
+			 const framepos_t first_frame = r->first_frame();
+			 const framepos_t last_frame = r->last_frame();
 
-			 if (r->first_frame() > frame) {
+			 if (first_frame > frame) {
 
-				 distance = r->first_frame() - frame;
+				 distance = first_frame - frame;
 
 				 if (distance < closest) {
-					 ret = r->first_frame();
+					 ret = first_frame;
 					 closest = distance;
 				 }
 			 }
 
-			 if (r->last_frame () > frame) {
+			 if (last_frame > frame) {
 
-				 distance = r->last_frame () - frame;
+				 distance = last_frame - frame;
 
 				 if (distance < closest) {
-					 ret = r->last_frame ();
+					 ret = last_frame;
 					 closest = distance;
 				 }
 			 }
@@ -2075,23 +2078,25 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 
 			 boost::shared_ptr<Region> r = (*i);
 			 frameoffset_t distance;
+			 const framepos_t first_frame = r->first_frame();
+			 const framepos_t last_frame = r->last_frame();
 
-			 if (r->last_frame() < frame) {
+			 if (last_frame < frame) {
 
-				 distance = frame - r->last_frame();
+				 distance = frame - last_frame;
 
 				 if (distance < closest) {
-					 ret = r->last_frame();
+					 ret = last_frame;
 					 closest = distance;
 				 }
 			 }
 
-			 if (r->first_frame() < frame) {
+			 if (first_frame < frame) {
 
-				 distance = frame - r->first_frame();
+				 distance = frame - first_frame;
 
 				 if (distance < closest) {
-					 ret = r->first_frame();
+					 ret = first_frame;
 					 closest = distance;
 				 }
 			 }
@@ -2899,6 +2904,7 @@ Playlist::update_after_tempo_map_change ()
 	}
 
 	thaw ();
+	notify_contents_changed();
 }
 
 void

@@ -187,7 +187,7 @@ TimeInfoBox::region_property_change (boost::shared_ptr<ARDOUR::Region> /* r */, 
 	 * RegionView (not Region itself).
 	 */
 
-	selection_changed ();
+	//selection_changed ();
 }
 
 bool

@@ -231,23 +231,24 @@ AudioRegionView::init (bool wfd)
 	}
 
 	const string line_name = _region->name() + ":gain";
+
 	gain_line.reset (new AudioRegionGainLine (line_name, *this, *group, audio_region()->envelope()));
 
 	update_envelope_visibility ();
 	gain_line->reset ();
 
-	set_height (trackview.current_height()); // XXX not correct for Layered mode, but set_height() will fix later.
+	/* streamview will call set_height() */
+	//set_height (trackview.current_height()); // XXX not correct for Layered mode, but set_height() will fix later.
 
 	region_muted ();
 	region_sync_changed ();
 
 	region_resized (ARDOUR::bounds_change);
+	/* region_resized sets ghost region duration */
 
-	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_duration (_region->length() / samples_per_pixel);
-	}
+	/* region_locked is a synonym for region_renamed () which is called in region_muted() above */
+	//region_locked ();
 
-	region_locked ();
 	envelope_active_changed ();
 	fade_in_active_changed ();
 	fade_out_active_changed ();
@@ -274,15 +275,14 @@ AudioRegionView::init (bool wfd)
 
 	setup_waveform_visibility ();
 
-	pending_peak_data->raise_to_top ();
-
+	/* reset_width_dependent_items() does this:
 	if (frame_handle_start) {
 		frame_handle_start->raise_to_top ();
 	}
 	if (frame_handle_end) {
 		frame_handle_end->raise_to_top ();
 	}
-
+	*/
 	/* XXX sync mark drag? */
 }
 
@@ -449,6 +449,10 @@ AudioRegionView::region_resized (const PropertyChange& what_changed)
 void
 AudioRegionView::reset_width_dependent_items (double pixel_width)
 {
+	if (pixel_width == _width) {
+		return;
+	}
+
 	RegionView::reset_width_dependent_items(pixel_width);
 	assert(_pixel_width == pixel_width);
 
@@ -530,6 +534,10 @@ AudioRegionView::setup_fade_handle_positions()
 void
 AudioRegionView::set_height (gdouble height)
 {
+	if (height == _height) {
+		return;
+	}
+
 	RegionView::set_height (height);
 	pending_peak_data->set_y1 (height);
 

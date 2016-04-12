@@ -70,6 +70,10 @@ Text::~Text ()
 void
 Text::set (string const & text)
 {
+	if (text == _text) {
+		return;
+	}
+
 	begin_change ();
 
 	_text = text;
@@ -237,6 +241,10 @@ Text::compute_bounding_box () const
 void
 Text::set_alignment (Pango::Alignment alignment)
 {
+	if (alignment == _alignment) {
+		return;
+	}
+
 	begin_change ();
 
 	_alignment = alignment;
@@ -261,6 +269,10 @@ Text::set_font_description (Pango::FontDescription font_description)
 void
 Text::set_color (Color color)
 {
+	if (color == _color) {
+		return;
+	}
+
 	begin_change ();
 
 	_color = color;

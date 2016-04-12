@@ -235,9 +235,9 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	bool _recregion;
 	bool _automation; ///< true if this is an automation region view
 	bool _dragging;
+        double _width;
 
 private:
-        double _width;
 
 	void parameter_changed (std::string);
         void manage_name_highlight ();

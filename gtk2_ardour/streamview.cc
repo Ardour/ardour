@@ -119,7 +119,7 @@ StreamView::set_height (double h)
 		return -1;
 	}
 
-	if (canvas_rect->y1() == h) {
+	if (height == h) {
 		return 0;
 	}
 
@@ -137,6 +137,10 @@ StreamView::set_samples_per_pixel (double fpp)
 
 	if (fpp < 1.0) {
 		return -1;
+	}
+
+	if (fpp == _samples_per_pixel) {
+		return 0;
 	}
 
 	_samples_per_pixel = fpp;
@@ -292,7 +296,8 @@ StreamView::playlist_layered (boost::weak_ptr<Track> wtr)
 
 	if (_layer_display == Stacked) {
 		update_contents_height ();
-		update_coverage_frames ();
+		/* tricky. playlist_changed() does this as well, and its really inefficient. */
+		//update_coverage_frames ();
 	} else {
 		/* layering has probably been modified. reflect this in the canvas. */
 		layer_regions();
@@ -311,12 +316,12 @@ StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 	/* disconnect from old playlist */
 
 	playlist_connections.drop_connections ();
-	undisplay_track ();
+	//undisplay_track ();
 
 	/* draw it */
-
+	tr->playlist()->freeze();
 	redisplay_track ();
-
+	tr->playlist()->thaw();
 	/* update layers count and the y positions and heights of our regions */
 	_layers = tr->playlist()->top_layer() + 1;
 	update_contents_height ();
