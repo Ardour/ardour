@@ -51,8 +51,14 @@
     6. Our metatables have "__metatable" set to a boolean = false.
     7. Our lightuserdata is unique.
 */
-#ifdef PLATFORM_WINDOWS
+
+#ifdef  PLATFORM_WINDOWS
+# ifdef COMPILER_MSVC
+#include "LuaBridge/LuaBridge.h" /* Needed for LuaBridge_API */
+LuaBridge_API void* getIdentityKey ();
+# else
 extern void* getIdentityKey ();
+# endif
 #else
 inline void* getIdentityKey ()
 {
