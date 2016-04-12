@@ -125,6 +125,7 @@ using namespace PBD;
 
 bool Session::_disable_all_loaded_plugins = false;
 bool Session::_bypass_all_loaded_plugins = false;
+guint Session::_name_id_counter = 0;
 
 PBD::Signal1<int,uint32_t> Session::AudioEngineSetupRequired;
 PBD::Signal1<void,std::string> Session::Dialog;
@@ -311,6 +312,8 @@ Session::Session (AudioEngine &eng,
 	pthread_mutex_init (&_rt_emit_mutex, 0);
 	pthread_cond_init (&_rt_emit_cond, 0);
 
+	init_name_id_counter (1); // reset for new sessions, start at 1
+
 	pre_engine_init (fullpath);
 
 	setup_lua ();
@@ -467,6 +470,24 @@ Session::~Session ()
 	ST.dump ("ST.dump");
 #endif
 	destroy ();
+}
+
+unsigned int
+Session::next_name_id ()
+{
+	return g_atomic_int_add (&_name_id_counter, 1);
+}
+
+unsigned int
+Session::name_id_counter ()
+{
+	return g_atomic_int_get (&_name_id_counter);
+}
+
+void
+Session::init_name_id_counter (guint n)
+{
+	g_atomic_int_set (&_name_id_counter, n);
 }
 
 int

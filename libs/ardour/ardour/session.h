@@ -186,6 +186,12 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format);
 	static std::string get_snapshot_from_instant (const std::string& session_dir);
 
+	/** a monotonic counter used for naming user-visible things uniquely
+	 * (curently the sidechain port).
+	 * Use sparingly to keep the numbers low, prefer PBD::ID for all
+	 * internal, not user-visible IDs */
+	static unsigned int next_name_id ();
+
 	std::string path() const { return _path; }
 	std::string name() const { return _name; }
 	std::string snap_name() const { return _current_snapshot_name; }
@@ -1097,6 +1103,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
   private:
 	int  create (const std::string& mix_template, BusProfile*);
 	void destroy ();
+
+	static guint _name_id_counter;
+	static void init_name_id_counter (guint n);
+	static unsigned int name_id_counter ();
 
 	enum SubState {
 		PendingDeclickIn      = 0x1,  ///< pending de-click fade-in for start

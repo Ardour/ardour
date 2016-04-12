@@ -1084,6 +1084,9 @@ Session::state (bool full_state)
 	snprintf (buf, sizeof (buf), "%" PRIu64, ID::counter());
 	node->add_property ("id-counter", buf);
 
+	snprintf (buf, sizeof (buf), "%u", name_id_counter ());
+	node->add_property ("name-counter", buf);
+
 	/* save the event ID counter */
 
 	snprintf (buf, sizeof (buf), "%d", Evoral::event_id_counter());
@@ -1336,10 +1339,13 @@ Session::set_state (const XMLNode& node, int version)
 		ID::init_counter (now);
 	}
 
-        if ((prop = node.property (X_("event-counter"))) != 0) {
-                Evoral::init_event_id_counter (atoi (prop->value()));
-        }
+	if ((prop = node.property (X_("name-counter"))) != 0) {
+		init_name_id_counter (atoi (prop->value()));
+	}
 
+	if ((prop = node.property (X_("event-counter"))) != 0) {
+		Evoral::init_event_id_counter (atoi (prop->value()));
+	}
 
 	if ((child = find_named_node (node, "MIDIPorts")) != 0) {
 		_midi_ports->set_midi_port_states (child->children());
