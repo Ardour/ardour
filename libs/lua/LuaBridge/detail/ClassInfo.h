@@ -27,7 +27,11 @@
 //==============================================================================
 
 #ifdef COMPILER_MSVC
+#ifdef LIBARDOUR_DLL_EXPORTS
 # define LuaBridge_API __declspec(dllexport)
+#else
+# define LuaBridge_API __declspec(dllimport)
+#endif
 #else
 # define LuaBridge_API // mingw is sane WRT to static class members
 #endif
