@@ -429,7 +429,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("move_to", &Location::move_to)
 		.endClass ()
 
-		.deriveClass <Locations, PBD::StatefulDestructible> ("Location")
+		.deriveClass <Locations, PBD::StatefulDestructible> ("Locations")
 		.addFunction ("auto_loop_location", &Locations::auto_loop_location)
 		.addFunction ("auto_punch_location", &Locations::auto_punch_location)
 		.addFunction ("session_range_location", &Locations::session_range_location)
