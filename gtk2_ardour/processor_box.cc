@@ -1137,7 +1137,7 @@ void
 ProcessorEntry::RoutingIcon::draw_sidechain (cairo_t* cr, double x0, double height, bool midi)
 {
 	const double dx = 1 + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale()));
-	const double y0 = rint (height * .66) + .5;
+	const double y0 = rint (height * .6) + .5;
 
 	cairo_move_to (cr, x0 - dx, height);
 	cairo_line_to (cr, x0, y0);
@@ -1145,24 +1145,27 @@ ProcessorEntry::RoutingIcon::draw_sidechain (cairo_t* cr, double x0, double heig
 	cairo_close_path (cr);
 
 	set_routing_color (cr, midi);
-	cairo_set_line_width  (cr, 1.0);
-	cairo_stroke (cr);
+	cairo_fill (cr);
 }
 
 void
 ProcessorEntry::RoutingIcon::draw_thru (cairo_t* cr, double x0, double height, bool midi)
 {
 	const double dx = 1 + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale()));
-	const double y0 = rint (height * .5) - .5;
+	const double y0 = rint (height * .5) + .5;
 
-	cairo_move_to (cr, x0 - dx, y0);
+	cairo_move_to (cr, x0 - dx - .5, y0);
+	cairo_line_to (cr, x0 + dx + .5, y0 - 2);
+
+	cairo_move_to (cr, x0 - dx - .5, y0 + 2);
+	cairo_line_to (cr, x0 + dx + .5, y0);
+
+	cairo_move_to (cr, x0, y0 + 1);
 	cairo_line_to (cr, x0, height);
-	cairo_line_to (cr, x0 + dx, y0);
-	cairo_close_path (cr);
 
 	set_routing_color (cr, midi);
 	cairo_set_line_width  (cr, 1.0);
-	cairo_fill (cr);
+	cairo_stroke (cr);
 }
 
 void
@@ -1284,8 +1287,6 @@ ProcessorEntry::RoutingIcon::expose_output_map (cairo_t* cr, const double width,
 		DataType dt = is_midi ? DataType::MIDI : DataType::AUDIO;
 		uint32_t idx = _out_map.get (dt, pn, &valid_out);
 		if (!valid_out) {
-			double x = pin_x_pos (i, width, pc_out, 0, is_midi);
-			draw_X (cr, x, height - 5, is_midi);
 			continue;
 		}
 		double c_x0 = pin_x_pos (i, width, pc_out, 0, false);
@@ -1293,13 +1294,12 @@ ProcessorEntry::RoutingIcon::expose_output_map (cairo_t* cr, const double width,
 		draw_connection (cr, c_x0, c_x1, 0, height - 3, is_midi);
 	}
 
-	// arrows
+	// output arrows
 	for (uint32_t i = 0; i < n_out; ++i) {
 		const bool is_midi = i < n_out_midi;
 		double x = pin_x_pos (i, width, n_out, 0, is_midi);
 		uint32_t pn = is_midi ? i : i - n_out_midi;
 		DataType dt = is_midi ? DataType::MIDI : DataType::AUDIO;
-		// TODO check thru
 		bool valid_src;
 		_out_map.get_src (dt, pn, &valid_src);
 		if (!valid_src) {
