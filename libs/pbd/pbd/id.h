@@ -29,6 +29,7 @@
 
 namespace PBD {
 
+/** a unique ID to identify objects numerically */
 class LIBPBD_API ID {
   public:
 	ID ();

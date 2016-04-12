@@ -37,7 +37,7 @@ class XMLNode;
 
 namespace PBD {
 
-/* This is a pure virtual class to represent a scalar control.
+/** This is a pure virtual class to represent a scalar control.
  *
  * Note that it contains no storage/state for the controllable thing that it
  * represents. Derived classes must provide set_value()/get_value() methods,
@@ -49,7 +49,6 @@ namespace PBD {
  * as a control whose value can range between 0 and 1.0.
  *
  */
-
 class LIBPBD_API Controllable : public PBD::StatefulDestructible {
   public:
 	enum Flag {

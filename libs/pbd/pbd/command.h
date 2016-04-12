@@ -28,6 +28,7 @@
 #include "pbd/signals.h"
 #include "pbd/statefuldestructible.h"
 
+/** Base class for Undo/Redo commands and changesets */
 class LIBPBD_API Command : public PBD::StatefulDestructible, public PBD::ScopedConnectionList
 {
 public:

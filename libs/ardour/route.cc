@@ -79,6 +79,7 @@ using namespace PBD;
 PBD::Signal0<void> Route::SyncOrderKeys;
 PBD::Signal0<void> Route::RemoteControlIDChange;
 
+/** Base class for all routable/mixable objects (tracks and busses) */
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	: SessionObject (sess, name)
 	, Automatable (sess)

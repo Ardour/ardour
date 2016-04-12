@@ -164,6 +164,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	void recompute_bbt_from_frames ();
 };
 
+/** A collection of session locations including unique dedicated locations (loop, punch, etc) */
 class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDestructible
 {
   public:

@@ -55,6 +55,14 @@ typedef boost::shared_ptr<Plugin> PluginPtr;
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
 typedef std::list<PluginInfoPtr> PluginInfoList;
 
+/** A plugin is an external module (usually 3rd party provided) loaded into Ardour
+ * for the purpose of digital signal processing.
+ *
+ * This class provides an abstraction for methords provided by
+ * all supported plugin standards such as presets, name, parameters etc.
+ *
+ * Plugins are not used directly in Ardour but always wrapped by a PluginInsert.
+ */
 class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 {
   public:

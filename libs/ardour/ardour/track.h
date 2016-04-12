@@ -35,6 +35,11 @@ class Region;
 class Diskstream;
 class IO;
 
+/** A track is an route (bus) with a recordable diskstream and
+ * related objects relevant to tracking, playback and editing.
+ *
+ * Specifically a track has regions and playlist objects.
+ */
 class LIBARDOUR_API Track : public Route, public PublicDiskstream
 {
   public:
