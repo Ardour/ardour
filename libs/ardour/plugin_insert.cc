@@ -2437,6 +2437,11 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 			}
 		}
 	}
+
+	boost::shared_ptr<VSTPlugin> vst = boost::dynamic_pointer_cast<VSTPlugin> (plugin);
+	if (vst) {
+		vst->set_insert (this, _plugins.size ());
+	}
 	_plugins.push_back (plugin);
 }
 

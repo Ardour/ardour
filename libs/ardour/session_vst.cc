@@ -26,6 +26,7 @@
 #include "ardour/debug.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/windows_vst_plugin.h"
 #include "ardour/vestige/aeffectx.h"
 #include "ardour/vst_types.h"
@@ -124,11 +125,25 @@ intptr_t Session::vst_callback (
 		}
 		switch (value) {
 			case 0:
+				if (plug->plugin_insert ()) {
+					bool valid;
+					const ChanMapping& map (plug->plugin_insert ()->input_map (plug->plugin_number ()));
+					map.get (DataType::AUDIO, index, &valid);
+					return valid ? 0 : 1;
+				}
 				if (index < plug->plugin()->numInputs) {
 					return 0;
 				}
 				break;
 			case 1:
+#if 0 // investigate, the outputs *are* connected to scratch buffers
+				if (plug->plugin_insert ()) {
+					bool valid;
+					const ChanMapping& map (plug->plugin_insert ()->output_map (plug->plugin_number ()));
+					map.get (DataType::AUDIO, index, &valid);
+					return valid ? 0 : 1;
+				}
+#endif
 				if (index < plug->plugin()->numOutputs) {
 					return 0;
 				}
