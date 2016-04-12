@@ -26,6 +26,12 @@
 */
 //==============================================================================
 
+#ifdef COMPILER_MSVC
+# define LuaBridge_API __declspec(dllexport)
+#else
+# define LuaBridge_API // mingw is sane WRT to static class members
+#endif
+
 /** Unique Lua registry keys for a class.
 
     Each registered class inserts three keys into the registry, whose
@@ -33,7 +39,7 @@
     allows a quick and reliable lookup for a metatable from a template type.
 */
 template <class T>
-class ClassInfo
+class LuaBridge_API ClassInfo
 {
 public:
 #ifdef PLATFORM_WINDOWS

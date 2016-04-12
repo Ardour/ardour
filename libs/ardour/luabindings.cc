@@ -102,8 +102,10 @@ luabridge::getIdentityKey ()
 
 /* ...and this is the ugly part of it.
  *
- * We need to foward declare classes from gtk2_ardour.
- * This is needed because some of the classes use objects from libardour
+ * We need to foward declare classes from gtk2_ardour
+ * end explicily list classes which are used by gtk2_ardour's bindings.
+ *
+ * This is needed because some of the GUI classes use objects from libardour
  * as function parameters and the .exe would re-create symbols for libardour
  * objects.
  *
@@ -143,6 +145,32 @@ CLASSKEYS(std::bitset<47ul>); // LuaSignal::LAST_SIGNAL
 CLASSKEYS(ArdourMarker*);
 CLASSKEYS(ARDOUR::RouteGroup);
 CLASSKEYS(ARDOUR::LuaProc);
+CLASSKEYS(ARDOUR::DataType);
+CLASSKEYS(ARDOUR::ChanCount);
+CLASSKEYS(boost::shared_ptr<ARDOUR::Processor>);
+CLASSKEYS(ARDOUR::ParameterDescriptor);
+CLASSKEYS(boost::shared_ptr<ARDOUR::AutomationList>);
+CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
+CLASSKEYS(ARDOUR::LuaOSC::Address);
+CLASSKEYS(ARDOUR::Session);
+CLASSKEYS(ARDOUR::BufferSet);
+CLASSKEYS(ARDOUR::ChanMapping);
+CLASSKEYS(ARDOUR::DSP::DspShm);
+CLASSKEYS(PBD::ID);
+CLASSKEYS(ARDOUR::Location);
+CLASSKEYS(ARDOUR::PluginInfo);
+CLASSKEYS(PBD::PropertyChange);
+CLASSKEYS(std::vector<std::string>);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
+CLASSKEYS(boost::shared_ptr<ARDOUR::PluginInfo>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
+CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
+CLASSKEYS(std::list<ARDOUR::AudioRange>);
+CLASSKEYS(Evoral::Beats);
+CLASSKEYS(ARDOUR::AudioEngine);
+CLASSKEYS(void);
+CLASSKEYS(float);
 
 #endif // end windows special case
 
