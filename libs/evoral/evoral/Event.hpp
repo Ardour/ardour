@@ -92,6 +92,11 @@ public:
 
 	inline bool owns_buffer() const { return _owns_buf; }
 
+	/** set event data (e.g. midi data)
+	 * @param size number of bytes
+	 * @param buf raw 8bit data
+	 * @param own set to true if the buffer owns the data (copy, allocate/free) or false to reference previously allocated data.
+	 */
 	inline void set_buffer(uint32_t size, uint8_t* buf, bool own) {
 		if (_owns_buf) {
 			free(_buf);

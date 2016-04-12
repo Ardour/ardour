@@ -228,6 +228,13 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	std::string new_audio_source_path_for_embedded (const std::string& existing_path);
 	std::string new_audio_source_path (const std::string&, uint32_t nchans, uint32_t chan, bool destructive, bool take_required);
 	std::string new_midi_source_path (const std::string&);
+	/** create a new track or bus from a template (XML path)
+	 * @param how_many how many tracks or busses to create
+	 * @param template_path path to xml template file
+	 * @param name name (prefix) of the route to create
+	 * @param pd Playlist disposition
+	 * @return list of newly created routes
+	 */
 	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name, PlaylistDisposition pd = NewPlaylist);
 	RouteList new_route_from_template (uint32_t how_many, XMLNode&, const std::string& name, PlaylistDisposition pd = NewPlaylist);
 	std::vector<std::string> get_paths_for_new_sources (bool allow_replacing, const std::string& import_file_path, uint32_t channels);
@@ -472,6 +479,13 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	};
 
 	int save_as (SaveAs&);
+	/** save session
+	 * @param snapshot_name name of the session (use an empty string for the current name)
+	 * @param pending save a 'recovery', not full state (default: false)
+	 * @param switch_to_snapshot switch to given snapshot after saving (default: false)
+	 * @param template_only save a session template (default: false)
+	 * @return zero on success
+	 */
 	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false, bool template_only = false);
 	int restore_state (std::string snapshot_name);
 	int save_template (std::string template_name, bool replace_existing = false);

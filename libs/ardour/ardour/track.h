@@ -102,11 +102,26 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	virtual void freeze_me (InterThreadInfo&) = 0;
 	virtual void unfreeze () = 0;
 
-	/** @return true if the track can be bounced, or false otherwise.
+	/** Test if the track can be bounced with the given settings.
+	 * If sends/inserts/returns are present in the signal path or the given track
+	 * has no audio outputs bouncing is not possible.
+	 *
+	 * @param endpoint the processor to tap the signal off (or nil for the top)
+	 * @param include_endpoint include the given processor in the bounced audio.
+	 * @return true if the track can be bounced, or false otherwise.
 	 */
 	virtual bool bounceable (boost::shared_ptr<Processor> endpoint, bool include_endpoint) const = 0;
 	virtual boost::shared_ptr<Region> bounce (InterThreadInfo&) = 0;
-	virtual boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&,
+
+	/** Bounce the given range to a new audio region.
+	 * @param start start time (in samples)
+	 * @param end end time (in samples)
+	 * @param itt asynchronous progress report and cancel
+	 * @param endpoint the processor to tap the signal off (or nil for the top)
+	 * @param include_endpoint include the given processor in the bounced audio.
+	 * @return a new audio region (or nil in case of error)
+	 */
+	virtual boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo& itt,
 							boost::shared_ptr<Processor> endpoint, bool include_endpoint) = 0;
 	virtual int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t nframes,
 				  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) = 0;

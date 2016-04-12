@@ -100,8 +100,8 @@ namespace ARDOUR { namespace LuaAPI {
 	 * This is equivalent to the following lua code
 	 * @code
 	 * function (processor, param_id)
-	 * 	local plugininsert = processor:to_insert ()
-	 * 	local plugin = plugininsert:plugin(0)
+	 *  local plugininsert = processor:to_insert ()
+	 *  local plugin = plugininsert:plugin(0)
 	 *  local _, t = plugin:get_parameter_descriptor(param_id, ARDOUR.ParameterDescriptor ())
 	 *  local ctrl = Evoral.Parameter (ARDOUR.AutomationType.PluginAutomation, 0, param_id)
 	 *  local ac = pi:automation_control (ctrl, false)
@@ -110,7 +110,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * end
 	 * @endcode
 	 *
-	 * Example usage: get 3rd input parameter of first plugin on the given route
+	 * Example usage: get the third input parameter of first plugin on the given route
 	 * (Ardour starts counting at zero).
 	 * @code
 	 * local al, cl, pd = ARDOUR.LuaAPI.plugin_automation (route:nth_plugin (0), 3)

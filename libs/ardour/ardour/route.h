@@ -238,6 +238,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	/* special processors */
 
 	boost::shared_ptr<InternalSend>     monitor_send() const { return _monitor_send; }
+	/** the signal processorat at end of the processing chain which produces output */
 	boost::shared_ptr<Delivery>         main_outs() const { return _main_outs; }
 	boost::shared_ptr<InternalReturn>   internal_return() const { return _intreturn; }
 	boost::shared_ptr<MonitorProcessor> monitor_control() const { return _monitor_control; }
