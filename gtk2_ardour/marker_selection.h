@@ -24,9 +24,10 @@
 
 #include "marker.h"
 
-struct MarkerSelection : public std::list<ArdourMarker*>
+class MarkerSelection : public std::list<ArdourMarker*>
 {
-        void range (ARDOUR::framepos_t& start, ARDOUR::framepos_t& end);
+	public:
+		void range (ARDOUR::framepos_t& start, ARDOUR::framepos_t& end);
 };
 
 #endif /* __ardour_gtk_marker_selection_h__ */
