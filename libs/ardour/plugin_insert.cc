@@ -80,7 +80,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 		add_plugin (plug);
 		create_automatable_parameters ();
 		const ChanCount& sc (sidechain_input_pins ());
-		if (sc.n_total () > 0) {
+		if (sc.n_audio () > 0) {
 			add_sidechain (sc.n_audio ());
 		}
 	}
@@ -166,9 +166,13 @@ PluginInsert::add_sidechain (uint32_t n_audio)
 	if (_sidechain) {
 		return false;
 	}
-	// TODO add route-name, plugin name and shorten.. (plugin name can be long and conatain odd chars)
-	std::string n = "Sidechain " + id().to_s(); /// XXX
-	SideChain *sc = new SideChain (_session, n);
+	std::ostringstream n;
+	if (n_audio > 0) {
+		n << "Sidechain " << Session::next_name_id ();
+	} else {
+		n << "TO BE RESET FROM XML";
+	}
+	SideChain *sc = new SideChain (_session, n.str ());
 	_sidechain = boost::shared_ptr<SideChain> (sc);
 	_sidechain->activate ();
 	for (uint32_t n = 0; n < n_audio; ++n) {
