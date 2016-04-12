@@ -266,8 +266,22 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	boost::shared_ptr<Processor> before_processor_for_placement (Placement);
 	boost::shared_ptr<Processor> before_processor_for_index (int);
 	bool processors_reorder_needs_configure (const ProcessorList& new_order);
-	int remove_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0, bool need_process_lock = true);
-	int replace_processor (boost::shared_ptr<Processor>, boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
+	/** remove plugin/processor
+	 *
+	 * @param proc processor to remove
+	 * @param err error report (index where removal vailed, channel-count why it failed) may be nil
+	 * @param need_process_lock if locking is required (set to true, unless called from RT context with lock)
+	 * @returns 0 on success
+	 */
+	int remove_processor (boost::shared_ptr<Processor> proc, ProcessorStreams* err = 0, bool need_process_lock = true);
+	/** replace plugin/processor with another
+	 *
+	 * @param old processor to remove
+	 * @param sub processor to substitute the old one with
+	 * @param err error report (index where removal vailed, channel-count why it failed) may be nil
+	 * @returns 0 on success
+	 */
+	int replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Processor> sub, ProcessorStreams* err = 0);
 	int remove_processors (const ProcessorList&, ProcessorStreams* err = 0);
 	int reorder_processors (const ProcessorList& new_order, ProcessorStreams* err = 0);
 	void disable_processors (Placement);
@@ -280,10 +294,40 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	bool strict_io () const { return _strict_io; }
 	bool set_strict_io (bool);
+	/** reset plugin-insert configuration to default, disable customizations.
+	 *
+	 * This is equivalent to calling
+	 * @code
+	 * customize_plugin_insert (proc, 0, unused)
+	 * @endcode
+	 *
+	 * @param proc Processor to reset
+	 * @returns true if successful
+	 */
 	bool reset_plugin_insert (boost::shared_ptr<Processor> proc);
+	/** enable custom plugin-insert configuration
+	 * @param proc Processor to customize
+	 * @param count number of plugin instances to use (if zero, reset to default)
+	 * @param outs output port customization
+	 * @returns true if successful
+	 */
 	bool customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs);
 	bool add_remove_sidechain (boost::shared_ptr<Processor> proc, bool);
+
+	/* enable sidechain input for a given processor
+	 *
+	 * The sidechain itself is an IO port object with variable number of channels and configured independently.
+	 * Adding/removing the port itself however requires reconfiguring the route and is hence
+	 * not a plugin operation itself.
+	 *
+	 * @param proc the processor to add sidechain inputs to
+	 * @returns true on success
+	 */
 	bool add_sidechain (boost::shared_ptr<Processor> proc) { return add_remove_sidechain (proc, true); }
+	/* remove sidechain input from given processor
+	 * @param proc the processor to remove the sidechain input from
+	 * @returns true on success
+	 */
 	bool remove_sidechain (boost::shared_ptr<Processor> proc) { return add_remove_sidechain (proc, false); }
 
 	framecnt_t set_private_port_latencies (bool playback) const;

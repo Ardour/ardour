@@ -875,14 +875,37 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	std::string next_undo() const { return _history.next_undo(); }
 	std::string next_redo() const { return _history.next_redo(); }
 
+	/** begin collecting undo information
+	 *
+	 * This call must always be followed by either
+	 * begin_reversible_command() or commit_reversible_command()
+	 *
+	 * @param cmd_name human readable name for the undo operation
+	 */
 	void begin_reversible_command (const std::string& cmd_name);
 	void begin_reversible_command (GQuark);
+	/** abort an open undo command
+	 * This must only be called after begin_reversible_command ()
+	 */
 	void abort_reversible_command ();
+	/** finalize an undo command and commit pending transactions
+	 *
+	 * This must only be called after begin_reversible_command ()
+	 * @param cmd (additional) command to add
+	 */
 	void commit_reversible_command (Command* cmd = 0);
 
 	void add_command (Command *const cmd);
 
-	PBD::StatefulDiffCommand* add_stateful_diff_command (boost::shared_ptr<PBD::StatefulDestructible>);
+	/** create an StatefulDiffCommand from the given object and add it to the stack.
+	 *
+	 * This function must only be called after  begin_reversible_command.
+	 * Failing to do so may lead to a crash.
+	 *
+	 * @param sfd the object to diff
+	 * @returns the allocated StatefulDiffCommand (already added via add_command)
+	 */
+	PBD::StatefulDiffCommand* add_stateful_diff_command (boost::shared_ptr<PBD::StatefulDestructible> sfd);
 
 	/** @return The list of operations that are currently in progress */
 	std::list<GQuark> const & current_operations () {

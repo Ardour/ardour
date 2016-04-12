@@ -116,7 +116,13 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	 * @return true if the track can be bounced, or false otherwise.
 	 */
 	virtual bool bounceable (boost::shared_ptr<Processor> endpoint, bool include_endpoint) const = 0;
-	virtual boost::shared_ptr<Region> bounce (InterThreadInfo&) = 0;
+
+	/** bounce track from session start to session end to new region
+	 *
+	 * @param itt asynchronous progress report and cancel
+	 * @return a new audio region (or nil in case of error)
+	 */
+	virtual boost::shared_ptr<Region> bounce (InterThreadInfo& itt) = 0;
 
 	/** Bounce the given range to a new audio region.
 	 * @param start start time (in samples)
