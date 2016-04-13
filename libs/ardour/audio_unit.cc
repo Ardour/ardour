@@ -2776,7 +2776,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 				info->n_inputs.set (DataType::AUDIO, 1);
 			}
 
-			info->n_inputs.set (DataType::MIDI, has_midi_in ? 1 ; 0);
+			info->n_inputs.set (DataType::MIDI, has_midi_in ? 1 : 0);
 
 			if (possible_out > 0) {
 				info->n_outputs.set (DataType::AUDIO, possible_out);
