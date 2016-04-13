@@ -625,12 +625,10 @@ TempoMap::TempoMap (framecnt_t fr)
 	BBT_Time start (1, 1, 0);
 
 	TempoSection *t = new TempoSection (0.0, _default_tempo.beats_per_minute(), _default_tempo.note_type(), TempoSection::Constant);
-	MeterSection *m = new MeterSection (0.0, 0.0, start, _default_meter.divisions_per_bar(), _default_meter.note_divisor());
+	MeterSection *m = new MeterSection ((framepos_t) 0, 0.0, start, _default_meter.divisions_per_bar(), _default_meter.note_divisor());
 
 	t->set_movable (false);
 	m->set_movable (false);
-	t->set_position_lock_style (AudioTime);
-	m->set_position_lock_style (AudioTime);
 
 	/* note: frame time is correct (zero) for both of these */
 
