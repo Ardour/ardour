@@ -1653,6 +1653,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void marker_menu_remove ();
 	void marker_menu_rename ();
 	void rename_marker (ArdourMarker *marker);
+	void toggle_marker_lock_style ();
+	void toggle_tempo_type ();
 	void toggle_marker_menu_lock ();
 	void toggle_marker_menu_glue ();
 	void marker_menu_hide ();
@@ -1677,11 +1679,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void new_transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void build_range_marker_menu (bool, bool);
 	void build_marker_menu (ARDOUR::Location *);
-	void build_tempo_or_meter_marker_menu (bool);
+	void build_tempo_marker_menu (TempoMarker *, bool);
+	void build_meter_marker_menu (MeterMarker *, bool);
 	void build_new_transport_marker_menu ();
 	void dynamic_cast_marker_object (void*, MeterMarker**, TempoMarker**) const;
 
-	Gtk::Menu* tempo_or_meter_marker_menu;
+	Gtk::Menu* tempo_marker_menu;
+	Gtk::Menu* meter_marker_menu;
 	Gtk::Menu* marker_menu;
 	Gtk::Menu* range_marker_menu;
 	Gtk::Menu* transport_marker_menu;

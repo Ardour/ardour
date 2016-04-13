@@ -808,18 +808,20 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 
 	if (mm) {
 		can_remove = mm->meter().movable ();
+		delete meter_marker_menu;
+		build_meter_marker_menu (mm, can_remove);
+		meter_marker_menu->popup (1, ev->time);
 	} else if (tm) {
 		if (!tm->tempo().active()) {
 			return;
 		}
 		can_remove = tm->tempo().movable ();
+		delete tempo_marker_menu;
+		build_tempo_marker_menu (tm, can_remove);
+		tempo_marker_menu->popup (1, ev->time);
 	} else {
 		return;
 	}
-
-	delete tempo_or_meter_marker_menu;
-	build_tempo_or_meter_marker_menu (can_remove);
-	tempo_or_meter_marker_menu->popup (1, ev->time);
 }
 
 void
@@ -973,14 +975,42 @@ Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 }
 
 void
-Editor::build_tempo_or_meter_marker_menu (bool can_remove)
+Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 {
 	using namespace Menu_Helpers;
 
-	tempo_or_meter_marker_menu = new Menu;
-	MenuList& items = tempo_or_meter_marker_menu->items();
-	tempo_or_meter_marker_menu->set_name ("ArdourContextMenu");
+	tempo_marker_menu = new Menu;
+	MenuList& items = tempo_marker_menu->items();
+	tempo_marker_menu->set_name ("ArdourContextMenu");
+	if (loc->tempo().type() == TempoSection::Constant) {
+		items.push_back (MenuElem (_("Ramped"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
+	} else {
+		items.push_back (MenuElem (_("Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
+	}
+	if (loc->tempo().position_lock_style() == AudioTime) {
+		items.push_back (MenuElem (_("Lock to Music"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
+	} else {
+		items.push_back (MenuElem (_("Lock to Audio"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
+	}
+	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
+	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 
+	items.back().set_sensitive (can_remove);
+}
+
+void
+Editor::build_meter_marker_menu (MeterMarker* loc, bool can_remove)
+{
+	using namespace Menu_Helpers;
+
+	meter_marker_menu = new Menu;
+	MenuList& items = meter_marker_menu->items();
+	meter_marker_menu->set_name ("ArdourContextMenu");
+	if (loc->meter().position_lock_style() == AudioTime) {
+		items.push_back (MenuElem (_("Lock to Music"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
+	} else {
+		items.push_back (MenuElem (_("Lock to Audio"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
+	}
 	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 
@@ -1343,6 +1373,44 @@ Editor::marker_menu_remove ()
 		remove_tempo_marker (marker_menu_item);
 	} else {
 		remove_marker (*marker_menu_item, (GdkEvent*) 0);
+	}
+}
+
+void
+Editor::toggle_marker_lock_style ()
+{
+	MeterMarker* mm;
+	TempoMarker* tm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+
+	if (mm) {
+		if (mm->meter().position_lock_style() == AudioTime) {
+			mm->meter().set_position_lock_style (MusicTime);
+		} else {
+			mm->meter().set_position_lock_style (AudioTime);
+		}
+	} else if (tm) {
+		if (tm->tempo().position_lock_style() == AudioTime) {
+			tm->tempo().set_position_lock_style (MusicTime);
+		} else {
+			tm->tempo().set_position_lock_style (AudioTime);
+		}
+	}
+}
+
+void
+Editor::toggle_tempo_type ()
+{
+	TempoMarker* tm;
+	MeterMarker* mm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+
+	if (tm) {
+		if (tm->tempo().type() == TempoSection::Constant) {
+			tm->tempo().set_type (TempoSection::Ramp);
+		} else {
+			tm->tempo().set_type (TempoSection::Constant);
+		}
 	}
 }
 
