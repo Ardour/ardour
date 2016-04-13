@@ -225,13 +225,17 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 	TempoMap& map(_session->tempo_map());
 
 	begin_reversible_command (_("add tempo mark"));
-        XMLNode &before = map.get_state();
-	/* add music-locked ramped (?) tempo using the bpm/note type at frame*/
-	map.add_tempo (map.tempo_at (frame), map.pulse_at_frame (frame), TempoSection::Ramp);
+	const double pulse = map.pulse_at_frame (frame);
 
-        XMLNode &after = map.get_state();
-	_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
-	commit_reversible_command ();
+	if (pulse > 0.0) {
+		XMLNode &before = map.get_state();
+		/* add music-locked ramped (?) tempo using the bpm/note type at frame*/
+		map.add_tempo (map.tempo_at (frame), pulse, TempoSection::Ramp);
+
+		XMLNode &after = map.get_state();
+		_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
+		commit_reversible_command ();
+	}
 
 	//map.dump (cerr);
 }
