@@ -236,10 +236,6 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 	PortSet& ports (_output->ports());
 	gain_t tgain;
 
-	if (_output->n_ports ().get (_output->default_type()) == 0) {
-		goto out;
-	}
-
 	if (!_active && !_pending_active) {
 		_output->silence (nframes);
 		goto out;
