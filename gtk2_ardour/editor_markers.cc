@@ -1389,10 +1389,12 @@ Editor::toggle_marker_lock_style ()
 	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
 
 	if (mm) {
+		MeterSection* msp = &mm->meter();
+
 		if (mm->meter().position_lock_style() == AudioTime) {
-			mm->meter().set_position_lock_style (MusicTime);
+			_session->tempo_map().replace_meter (*msp, Meter (msp->divisions_per_bar(), msp->note_divisor()), msp->bbt());
 		} else {
-			mm->meter().set_position_lock_style (AudioTime);
+			_session->tempo_map().replace_meter (*msp, Meter (msp->divisions_per_bar(), msp->note_divisor()), msp->frame());
 		}
 	} else if (tm) {
 		if (tm->tempo().position_lock_style() == AudioTime) {
