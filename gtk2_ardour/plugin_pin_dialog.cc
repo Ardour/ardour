@@ -280,13 +280,13 @@ PluginPinDialog::plugin_reconfigured ()
 			++_n_inputs;
 		}
 
-		CtrlWidget cw (CtrlWidget (Input, dt, id, 0, sidechain));
+		CtrlWidget cw (CtrlWidget ("", Input, dt, id, 0, sidechain));
 		_elements.push_back (cw);
 	}
 
 	for (uint32_t i = 0; i < _out.n_total (); ++i) {
 		int id = (i < _out.n_midi ()) ? i : i - _out.n_midi ();
-		_elements.push_back (CtrlWidget (Output, (i < _out.n_midi () ? DataType::MIDI : DataType::AUDIO), id));
+		_elements.push_back (CtrlWidget ("", Output, (i < _out.n_midi () ? DataType::MIDI : DataType::AUDIO), id));
 	}
 
 	for (uint32_t n = 0; n < _n_plugins; ++n) {
@@ -295,13 +295,14 @@ PluginPinDialog::plugin_reconfigured ()
 			DataType dt (i < _sinks.n_midi () ? DataType::MIDI : DataType::AUDIO);
 			int idx = (dt == DataType::MIDI) ? i : i - _sinks.n_midi ();
 			const Plugin::IOPortDescription& iod (plugin->describe_io_port (dt, true, idx));
-			CtrlWidget cw (CtrlWidget (Sink, dt, idx, n, iod.is_sidechain));
+			CtrlWidget cw (CtrlWidget (iod.name, Sink, dt, idx, n, iod.is_sidechain));
 			_elements.push_back (cw);
 		}
 		for (uint32_t i = 0; i < _sources.n_total (); ++i) {
 			DataType dt (i < _sources.n_midi () ? DataType::MIDI : DataType::AUDIO);
 			int idx = (dt == DataType::MIDI) ? i : i - _sources.n_midi ();
-			_elements.push_back (CtrlWidget (Source, dt, idx, n));
+			const Plugin::IOPortDescription& iod (plugin->describe_io_port (dt, false, idx));
+			_elements.push_back (CtrlWidget (iod.name, Source, dt, idx, n));
 		}
 	}
 
@@ -512,7 +513,6 @@ PluginPinDialog::set_color (cairo_t* cr, bool midi)
 void
 PluginPinDialog::draw_io_pin (cairo_t* cr, const CtrlWidget& w)
 {
-
 	if (w.e->sc) {
 		const double dy = w.h * .5;
 		const double dx = w.w - dy;
@@ -588,6 +588,23 @@ PluginPinDialog::draw_plugin_pin (cairo_t* cr, const CtrlWidget& w)
 		cairo_set_source_rgba (cr, 0.9, 0.9, 0.9, 0.3);
 	}
 	cairo_fill (cr);
+
+	if ((w.prelight || w.e == _selection) && !w.name.empty()) {
+		int text_width;
+		int text_height;
+		Glib::RefPtr<Pango::Layout> layout;
+		layout = Pango::Layout::create (get_pango_context ());
+		layout->set_text (w.name);
+		layout->get_pixel_size (text_width, text_height);
+
+		rounded_rectangle (cr, w.x + dx - .5 * text_width - 2, w.y - text_height - 2,  text_width + 4, text_height + 2, 7);
+		cairo_set_source_rgba (cr, 0, 0, 0, .5);
+		cairo_fill (cr);
+
+		cairo_move_to (cr, w.x + dx - .5 * text_width, w.y - text_height - 1);
+		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
+		pango_cairo_show_layout (cr, layout->gobj ());
+	}
 }
 
 double
@@ -610,7 +627,7 @@ PluginPinDialog::get_io_ctrl (CtrlType ct, DataType dt, uint32_t id, uint32_t ip
 			X_("Invalid Plugin I/O Port."))
 		<< endmsg;
 	abort (); /*NOTREACHED*/
-	static CtrlWidget screw_old_compilers (Input, DataType::NIL, 0);
+	static CtrlWidget screw_old_compilers ("", Input, DataType::NIL, 0);
 	return screw_old_compilers;
 }
 

@@ -58,11 +58,12 @@ private:
 	typedef boost::shared_ptr<_CtrlElem> CtrlElem;
 
 	struct CtrlWidget {
-		CtrlWidget (CtrlType ct, ARDOUR::DataType dt, uint32_t id, uint32_t ip = 0, bool sc = false)
-			: x(0), y(0), w (0), h (0), prelight (false)
+		CtrlWidget (const std::string& n, CtrlType ct, ARDOUR::DataType dt, uint32_t id, uint32_t ip = 0, bool sc = false)
+			: name (n), x(0), y(0), w (0), h (0), prelight (false)
 		{
 			e = CtrlElem (new _CtrlElem (ct, dt, id, ip, sc));
 		}
+		std::string name;
 		double x,y;
 		double w,h;
 		bool prelight;
