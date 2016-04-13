@@ -1809,9 +1809,8 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 			/* on the beat */
 			*outDeltaSampleOffsetToNextBeat = 0;
 		} else {
-			*outDeltaSampleOffsetToNextBeat = (UInt32)
-				double const beat_frac_to_next = (Timecode::BBT_Time::ticks_per_beat - bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
-				tmap.frame_at_beat (tmap.beat_at_frame (_session.transport_frame() + input_offset) + beat_frac_to_next);
+			double const beat_frac_to_next = (Timecode::BBT_Time::ticks_per_beat - bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
+			*outDeltaSampleOffsetToNextBeat = tmap.frame_at_beat (tmap.beat_at_frame (_session.transport_frame() + input_offset) + beat_frac_to_next);
 		}
 	}
 
