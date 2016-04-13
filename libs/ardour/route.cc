@@ -2081,6 +2081,31 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
 
 		if ((*p)->can_support_io_configuration(in, out)) {
+
+			if (boost::dynamic_pointer_cast<Delivery> (*p)
+					&& boost::dynamic_pointer_cast<Delivery> (*p)->role() == Delivery::Main
+					&& _strict_io) {
+				/* with strict I/O the panner + output are forced to
+				 * follow the last processor's output.
+				 *
+				 * Delivery::can_support_io_configuration() will only add ports,
+				 * but not remove excess ports.
+				 *
+				 * This works because the delivery only requires
+				 * as many outputs as there are inputs.
+				 * Delivery::configure_io() will do the actual removal
+				 * by calling _output->ensure_io()
+				 */
+				if (_session.master_out ()) {
+					/* ..but at least as many as there are master-inputs */
+					// XXX this may need special-casing for mixbus (master-outputs)
+					// and should maybe be a preference anyway ?!
+					out = ChanCount::max (in, _session.master_out ()->n_inputs ());
+				} else {
+					out = in;
+				}
+			}
+
 			DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 ID=%2 in=%3 out=%4\n",(*p)->name(), (*p)->id(), in, out));
 			configuration.push_back(make_pair(in, out));
 
