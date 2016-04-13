@@ -301,7 +301,7 @@ Session::Session (AudioEngine &eng,
 	, first_file_header_format_reset (true)
 	, have_looped (false)
 	, _have_rec_enabled_track (false)
-    , _have_rec_disabled_track (true)
+	, _have_rec_disabled_track (true)
 	, _step_editors (0)
 	, _suspend_timecode_transmission (0)
 	,  _speakers (new Speakers)

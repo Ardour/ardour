@@ -155,7 +155,11 @@ TempoSection::TempoSection (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("lock-style")) == 0) {
-		set_position_lock_style (MusicTime);
+		if (movable()) {
+			set_position_lock_style (MusicTime);
+		} else {
+			set_position_lock_style (AudioTime);
+		}
 	} else {
 		set_position_lock_style (PositionLockStyle (string_2_enum (prop->value(), position_lock_style())));
 	}
@@ -517,19 +521,23 @@ MeterSection::MeterSection (const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	if ((prop = node.property ("lock-style")) == 0) {
-		warning << _("MeterSection XML node has no \"lock-style\" property") << endmsg;
-		set_position_lock_style (MusicTime);
-	} else {
-		set_position_lock_style (PositionLockStyle (string_2_enum (prop->value(), position_lock_style())));
-	}
-
 	if ((prop = node.property ("movable")) == 0) {
 		error << _("MeterSection XML node has no \"movable\" property") << endmsg;
 		throw failed_constructor();
 	}
 
 	set_movable (string_is_affirmative (prop->value()));
+
+	if ((prop = node.property ("lock-style")) == 0) {
+		warning << _("MeterSection XML node has no \"lock-style\" property") << endmsg;
+		if (movable()) {
+			set_position_lock_style (MusicTime);
+		} else {
+			set_position_lock_style (AudioTime);
+		}
+	} else {
+		set_position_lock_style (PositionLockStyle (string_2_enum (prop->value(), position_lock_style())));
+	}
 }
 
 XMLNode&
@@ -621,6 +629,8 @@ TempoMap::TempoMap (framecnt_t fr)
 
 	t->set_movable (false);
 	m->set_movable (false);
+	t->set_position_lock_style (AudioTime);
+	m->set_position_lock_style (AudioTime);
 
 	/* note: frame time is correct (zero) for both of these */
 
@@ -788,7 +798,7 @@ TempoMap::do_insert (MetricSection* section)
 					 */
 
 					*(dynamic_cast<Meter*>(*i)) = *(dynamic_cast<Meter*>(insert_meter));
-					(*i)->set_position_lock_style (insert_meter->position_lock_style());
+					(*i)->set_position_lock_style (AudioTime);
 					need_add = false;
 				} else {
 					_metrics.erase (i);
@@ -952,10 +962,9 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 			add_meter_locked (meter, bbt_to_beats_locked (_metrics, where), where, true);
 		} else {
 			MeterSection& first (first_meter());
-			const PositionLockStyle pl = ms.position_lock_style();
 			/* cannot move the first meter section */
 			*static_cast<Meter*>(&first) = meter;
-			first.set_position_lock_style (pl);
+			first.set_position_lock_style (AudioTime);
 		}
 		recompute_map (_metrics);
 	}
