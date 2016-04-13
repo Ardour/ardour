@@ -280,7 +280,7 @@ AutomationControl::set_group (boost::shared_ptr<ControlGroup> cg)
 bool
 AutomationControl::check_rt (double val, Controllable::GroupControlDisposition gcd)
 {
-	if ((flags() & Controllable::RealTime) && !AudioEngine::instance()->in_process_thread()) {
+	if (!_session.loading() && (flags() & Controllable::RealTime) && !AudioEngine::instance()->in_process_thread()) {
 		/* queue change in RT context */
 		std::cerr << "::set_value (" << val << ", " << enum_2_string (gcd) << ") called for " << enum_2_string ((AutomationType) _parameter.type()) << ", queueing in RT context\n";
 		_session.set_control (shared_from_this(), val, gcd);
