@@ -1759,6 +1759,11 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 
 		PBD::ID id = pi->id();
 		XMLNode& state = otherproc->get_state ();
+		/* strip side-chain state (processor inside processor must be a side-chain)
+		 * otherwise we'll end up with duplicate ports-names.
+		 * (this needs a better solution which retains connections)
+		 */
+		state.remove_nodes ("Processor");
 		proc->set_state (state, Stateful::loading_state_version);
 		boost::dynamic_pointer_cast<PluginInsert>(proc)->update_id (id);
 		return;
@@ -3134,8 +3139,22 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				   is a plugin.
 				*/
 				p.reset (new PluginInsert (*_session));
+				/* we can't use RAII Stateful::ForceIDRegeneration
+				 * because that'd void copying the state and wrongly bump
+				 * the state-version counter.
+				 * we need to load the state (incl external files) first and
+				 * only then update the ID)
+				 */
 				PBD::ID id = p->id();
-				p->set_state (**niter, Stateful::current_state_version);
+				/* strip side-chain state (processor inside processor must be a side-chain)
+				 * otherwise we'll end up with duplicate ports-names.
+				 * (this needs a better solution which retains connections)
+				 * We really would want Stateful::ForceIDRegeneration here :(
+				 */
+				XMLNode state (**niter);
+				state.remove_nodes ("Processor");
+
+				p->set_state (state, Stateful::current_state_version);
 				boost::dynamic_pointer_cast<PluginInsert>(p)->update_id (id);
 			}
 
