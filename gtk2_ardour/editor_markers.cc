@@ -982,16 +982,19 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 	tempo_marker_menu = new Menu;
 	MenuList& items = tempo_marker_menu->items();
 	tempo_marker_menu->set_name ("ArdourContextMenu");
+
 	if (loc->tempo().type() == TempoSection::Constant) {
-		items.push_back (MenuElem (_("Ramped"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
+		items.push_back (MenuElem (_("Make Ramped"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
 	} else {
-		items.push_back (MenuElem (_("Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
+		items.push_back (MenuElem (_("Make Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
 	}
-	if (loc->tempo().position_lock_style() == AudioTime) {
+
+	if (loc->tempo().position_lock_style() == AudioTime && can_remove) {
 		items.push_back (MenuElem (_("Lock to Music"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
-	} else {
+	} else if (can_remove) {
 		items.push_back (MenuElem (_("Lock to Audio"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
 	}
+
 	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 
@@ -1006,11 +1009,13 @@ Editor::build_meter_marker_menu (MeterMarker* loc, bool can_remove)
 	meter_marker_menu = new Menu;
 	MenuList& items = meter_marker_menu->items();
 	meter_marker_menu->set_name ("ArdourContextMenu");
-	if (loc->meter().position_lock_style() == AudioTime) {
+
+	if (loc->meter().position_lock_style() == AudioTime && can_remove) {
 		items.push_back (MenuElem (_("Lock to Music"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
-	} else {
+	} else if (can_remove) {
 		items.push_back (MenuElem (_("Lock to Audio"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
 	}
+
 	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 
@@ -1406,10 +1411,11 @@ Editor::toggle_tempo_type ()
 	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
 
 	if (tm) {
+		TempoSection* tsp = &tm->tempo();
 		if (tm->tempo().type() == TempoSection::Constant) {
-			tm->tempo().set_type (TempoSection::Ramp);
+			_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->pulse(), TempoSection::Ramp);
 		} else {
-			tm->tempo().set_type (TempoSection::Constant);
+			_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->pulse(), TempoSection::Constant);
 		}
 	}
 }
