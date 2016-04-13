@@ -4757,6 +4757,9 @@ Route::input_port_count_changing (ChanCount to)
 bool
 Route::output_port_count_changing (ChanCount to)
 {
+	if (_strict_io && !_in_configure_processors) {
+		return true;
+	}
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		if (processor_out_streams.get(*t) > to.get(*t)) {
 			return true;
