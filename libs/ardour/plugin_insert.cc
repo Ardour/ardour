@@ -1251,42 +1251,59 @@ PluginInsert::reset_map (bool emit)
 	_in_map.clear ();
 	_out_map.clear ();
 	_thru_map = ChanMapping ();
-	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
-		ChanCount ns_inputs  = natural_input_streams() - sidechain_input_pins ();
-		if (_match.method == Split) {
-			_in_map[pc] = ChanMapping ();
-			/* connect no sidechain sinks in round-robin fashion */
-			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-				const uint32_t cend = _configured_in.get (*t);
-				if (cend == 0) { continue; }
-				uint32_t c = 0;
-				for (uint32_t in = 0; in < ns_inputs.get (*t); ++in) {
-					_in_map[pc].set (*t, in, c);
-					c = (c + 1) % cend;
-				}
-			}
-		} else {
-			_in_map[pc] = ChanMapping (ChanCount::min (ns_inputs, _configured_in));
-		}
-		_out_map[pc] = ChanMapping (ChanCount::min (natural_output_streams(), _configured_out));
 
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+	/* build input map */
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		uint32_t sc = 0; // side-chain round-robin (all instances)
+		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
 			const uint32_t nis = natural_input_streams ().get(*t);
 			const uint32_t stride = nis - sidechain_input_pins().get (*t);
-			_in_map[pc].offset_to(*t, stride * pc);
-			_out_map[pc].offset_to(*t, pc * natural_output_streams().get(*t));
 
-			// connect side-chains
+			/* SC inputs are last in the plugin-insert.. */
 			const uint32_t sc_start = _configured_in.get (*t);
 			const uint32_t sc_len = _configured_internal.get (*t) - sc_start;
-			if (sc_len == 0) { continue; }
-			uint32_t c = 0;
-			for (uint32_t in = ns_inputs.get (*t); in < nis; ++in) {
-				_in_map[pc].set (*t, in, sc_start + c);
-				c = (c + 1) % sc_len;
+			/* ...but may not be at the end of the plugin ports.
+			 * in case the side-chain is not the last port, shift connections back.
+			 * and connect to side-chain
+			 */
+			uint32_t shift = 0;
+			uint32_t ic = 0; // split inputs
+			const uint32_t cend = _configured_in.get (*t);
+
+			for (uint32_t in = 0; in < nis; ++in) {
+				const Plugin::IOPortDescription& iod (_plugins[pc]->describe_io_port (*t, true, in));
+				if (iod.is_sidechain) {
+					/* connect sidechain sinks to sidechain inputs in round-robin fashion */
+					if (sc_len > 0) {// side-chain may be hidden
+						_in_map[pc].set (*t, in, sc_start + sc);
+						sc = (sc + 1) % sc_len;
+					}
+					++shift;
+				} else {
+					if (_match.method == Split) {
+						if (cend == 0) { continue; }
+						/* connect *no* sidechain sinks in round-robin fashion */
+						_in_map[pc].set (*t, in, ic + stride * pc);
+						ic = (ic + 1) % cend;
+					} else {
+						uint32_t s = in - shift;
+						if (stride * pc + s < cend) {
+							_in_map[pc].set (*t, in, stride * pc + s);
+						}
+					}
+				}
 			}
 		}
 	}
+
+	/* build output map */
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+		_out_map[pc] = ChanMapping (ChanCount::min (natural_output_streams(), _configured_out));
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			_out_map[pc].offset_to(*t, pc * natural_output_streams().get(*t));
+		}
+	}
+
 	sanitize_maps ();
 	if (old_in == _in_map && old_out == _out_map) {
 		return false;
@@ -2425,7 +2442,7 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 		plugin->StartTouch.connect_same_thread (*this, boost::bind (&PluginInsert::start_touch, this, _1));
 		plugin->EndTouch.connect_same_thread (*this, boost::bind (&PluginInsert::end_touch, this, _1));
 		plugin->LatencyChanged.connect_same_thread (*this, boost::bind (&PluginInsert::latency_changed, this, _1, _2));
-		// cache sidechain ports
+		// cache sidechain port count
 		_cached_sidechain_pins.reset ();
 		const ChanCount& nis (plugin->get_info()->n_inputs);
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
