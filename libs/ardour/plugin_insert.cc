@@ -1244,7 +1244,6 @@ PluginInsert::sanitize_maps ()
 bool
 PluginInsert::reset_map (bool emit)
 {
-	uint32_t pc = 0;
 	const PinMappings old_in (_in_map);
 	const PinMappings old_out (_out_map);
 
@@ -1255,6 +1254,7 @@ PluginInsert::reset_map (bool emit)
 	/* build input map */
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		uint32_t sc = 0; // side-chain round-robin (all instances)
+		uint32_t pc = 0;
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
 			const uint32_t nis = natural_input_streams ().get(*t);
 			const uint32_t stride = nis - sidechain_input_pins().get (*t);
@@ -1297,6 +1297,7 @@ PluginInsert::reset_map (bool emit)
 	}
 
 	/* build output map */
+	uint32_t pc = 0;
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
 		_out_map[pc] = ChanMapping (ChanCount::min (natural_output_streams(), _configured_out));
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
