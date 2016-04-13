@@ -2437,11 +2437,12 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 			}
 		}
 	}
-
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
 	boost::shared_ptr<VSTPlugin> vst = boost::dynamic_pointer_cast<VSTPlugin> (plugin);
 	if (vst) {
 		vst->set_insert (this, _plugins.size ());
 	}
+#endif
 	_plugins.push_back (plugin);
 }
 
