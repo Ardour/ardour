@@ -663,7 +663,7 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
         }
 
-	if ((widget = ActionManager::get_widget ("/ui/Main/Session/toggle-rc-options-editor"))) {
+	if ((widget = ActionManager::get_widget ("/ui/Main/Edit/menu-show-preferences"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
         }
 
