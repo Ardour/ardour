@@ -1397,10 +1397,11 @@ Editor::toggle_marker_lock_style ()
 			_session->tempo_map().replace_meter (*msp, Meter (msp->divisions_per_bar(), msp->note_divisor()), msp->frame());
 		}
 	} else if (tm) {
-		if (tm->tempo().position_lock_style() == AudioTime) {
-			tm->tempo().set_position_lock_style (MusicTime);
+		TempoSection* tsp = &tm->tempo();
+		if (tsp->position_lock_style() == AudioTime) {
+			_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->pulse(), tsp->type());
 		} else {
-			tm->tempo().set_position_lock_style (AudioTime);
+			_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->frame(), tsp->type());
 		}
 	}
 }
