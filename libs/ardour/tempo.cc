@@ -624,7 +624,7 @@ TempoMap::TempoMap (framecnt_t fr)
 	_frame_rate = fr;
 	BBT_Time start (1, 1, 0);
 
-	TempoSection *t = new TempoSection (0.0, _default_tempo.beats_per_minute(), _default_tempo.note_type(), TempoSection::Constant);
+	TempoSection *t = new TempoSection ((framepos_t) 0, _default_tempo.beats_per_minute(), _default_tempo.note_type(), TempoSection::Constant);
 	MeterSection *m = new MeterSection ((framepos_t) 0, 0.0, start, _default_meter.divisions_per_bar(), _default_meter.note_divisor());
 
 	t->set_movable (false);
