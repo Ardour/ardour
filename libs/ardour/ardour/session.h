@@ -211,6 +211,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool deletion_in_progress() const { return _state_of_the_state & Deletion; }
 	bool routes_deletion_in_progress() const { return _route_deletion_in_progress; }
 	bool peaks_cleanup_in_progres() const { return _state_of_the_state & PeakCleanup; }
+	bool loading () const { return _state_of_the_state & Loading; }
 
 	PBD::Signal0<void> DirtyChanged;
 
