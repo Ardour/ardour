@@ -8,7 +8,7 @@
       <separator/>
       <menuitem action='Save'/>
       <menuitem action='SaveAs'/>
-#ifndef WINDOWS // can't move open files.
+#ifndef WINDOWS /* can't move open files. */
       <menuitem action='Rename'/>
       <menuitem action='SnapshotStay'/>
       <menuitem action='SnapshotSwitch'/>
