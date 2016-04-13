@@ -2071,8 +2071,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		_custom_cfg = string_is_affirmative (prop->value());
 	}
 
-	// TODO load/add sidechain
-
 	uint32_t in_maps = 0;
 	uint32_t out_maps = 0;
 	XMLNodeList kids = node.children ();
@@ -2097,6 +2095,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		if ((*i)->name () ==  "ThruMap") {
 				_thru_map = ChanMapping (**i);
 		}
+
+		// sidechain is a Processor (IO)
 		if ((*i)->name () ==  Processor::state_node_name) {
 			if (!_sidechain) {
 				add_sidechain (0);
@@ -2117,6 +2117,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		}
 	}
 
+	PluginConfigChanged (); /* EMIT SIGNAL */
 	return 0;
 }
 

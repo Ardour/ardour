@@ -1466,7 +1466,6 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			boost::shared_ptr<PluginInsert> pi;
 
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
-				pi->set_count (1); // why? configure_processors_unlocked() will re-do this
 				pi->set_strict_io (_strict_io);
 			}
 
