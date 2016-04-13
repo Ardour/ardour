@@ -394,6 +394,7 @@ class LIBARDOUR_API PluginInfo {
 
 	virtual PluginPtr load (Session& session) = 0;
 	virtual bool is_instrument() const;
+	virtual bool needs_midi_input() const { return is_instrument (); }
 	virtual bool in_category (const std::string &) const { return false; }
 
 	virtual std::vector<Plugin::PresetRecord> get_presets (bool user_only) const = 0;

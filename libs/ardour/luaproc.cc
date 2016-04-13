@@ -156,6 +156,7 @@ bool
 LuaProc::load_script ()
 {
 	assert (!_lua_dsp); // don't allow to re-initialize
+	LuaPluginInfoPtr lpi;
 
 	// TODO: refine APIs; function arguments..
 	// - perform channel-map in ardour (silent/scratch buffers) ?
@@ -167,7 +168,7 @@ LuaProc::load_script ()
 
 	try {
 		LuaScriptInfoPtr lsi = LuaScripting::script_info (_script);
-		LuaPluginInfoPtr lpi (new LuaPluginInfo (lsi));
+		lpi = LuaPluginInfoPtr (new LuaPluginInfo (lsi));
 		assert (lpi);
 		set_info (lpi);
 		_mempool.set_name ("LuaProc: " + lsi->name);
@@ -216,6 +217,7 @@ LuaProc::load_script ()
 			;
 		}
 	}
+	lpi->_is_instrument = _has_midi_input;
 
 	_ctrl_params.clear ();
 

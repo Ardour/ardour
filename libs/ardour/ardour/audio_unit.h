@@ -235,7 +235,7 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 
-	bool needs_midi_input ();
+	bool needs_midi_input () const;
 	bool is_effect () const;
 	bool is_effect_without_midi_input () const;
 	bool is_effect_with_midi_input () const;

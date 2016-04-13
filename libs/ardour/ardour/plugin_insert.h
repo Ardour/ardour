@@ -156,7 +156,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	bool has_no_inputs() const;
 	bool has_no_audio_inputs() const;
-	bool is_midi_instrument() const;
+	bool needs_midi_input() const;
 
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();

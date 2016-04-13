@@ -2679,6 +2679,8 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			continue;
 		}
 
+		bool has_midi_in = false;
+
 		AUPluginInfoPtr info (new AUPluginInfo
 				      (boost::shared_ptr<CAComponentDescription> (new CAComponentDescription(temp))));
 
@@ -2703,9 +2705,11 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			break;
 		case kAudioUnitType_MusicDevice:
 			info->category = _("AudioUnit Instruments");
+			has_midi_in = true;
 			break;
 		case kAudioUnitType_MusicEffect:
 			info->category = _("AudioUnit MusicEffects");
+			has_midi_in = true;
 			break;
 		case kAudioUnitType_Effect:
 			info->category = _("AudioUnit Effects");
@@ -2771,6 +2775,8 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			} else {
 				info->n_inputs.set (DataType::AUDIO, 1);
 			}
+
+			info->n_inputs.set (DataType::MIDI, has_midi_in ? 1 ; 0);
 
 			if (possible_out > 0) {
 				info->n_outputs.set (DataType::AUDIO, possible_out);
@@ -3046,7 +3052,7 @@ AUPluginInfo::stringify_descriptor (const CAComponentDescription& desc)
 }
 
 bool
-AUPluginInfo::needs_midi_input ()
+AUPluginInfo::needs_midi_input () const
 {
 	return is_effect_with_midi_input () || is_instrument ();
 }

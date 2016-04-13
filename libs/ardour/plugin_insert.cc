@@ -341,15 +341,13 @@ PluginInsert::plugin_latency () const {
 }
 
 bool
-PluginInsert::is_midi_instrument() const
+PluginInsert::needs_midi_input() const
 {
-	/* XXX more finesse is possible here. VST plugins have a
-	   a specific "instrument" flag, for example.
-	 */
-	PluginInfoPtr pi = _plugins[0]->get_info();
-
-	return pi->n_inputs.n_midi() != 0 &&
-		pi->n_outputs.n_audio() > 0;
+	PluginInfoPtr pip = _plugins[0]->get_info();
+	if (pip->needs_midi_input ()) {
+		return true;
+	}
+	return pip->n_inputs.n_midi() != 0 && pip->n_outputs.n_audio() != 0;
 }
 
 void
@@ -1535,7 +1533,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 		m.strict_io = true;
 
 		/* special case MIDI instruments */
-		if (is_midi_instrument()) {
+		if (needs_midi_input ()) {
 			// output = midi-bypass + at most master-out channels.
 			ChanCount max_out (DataType::AUDIO, 2); // TODO use master-out
 			max_out.set (DataType::MIDI, out.get(DataType::MIDI));
