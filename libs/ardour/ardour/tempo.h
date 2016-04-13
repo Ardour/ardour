@@ -441,13 +441,16 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	double pulse_at_beat (const double& beat) const;
 	double beat_at_pulse (const double& pulse) const;
 
+	double pulse_at_frame (const framecnt_t& frame) const;
+	framecnt_t frame_at_pulse (const double& pulse) const;
+
 	PBD::Signal0<void> MetricPositionChanged;
 
 private:
 	double pulse_at_beat_locked (const Metrics& metrics, const double& beat) const;
 	double beat_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 	double pulse_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;
-	framecnt_t frame_at_pulse_locked (const Metrics& metrics, const double& beat) const;
+	framecnt_t frame_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
 	double beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;
 	framecnt_t frame_at_beat_locked (const Metrics& metrics, const double& beat) const;

@@ -223,32 +223,12 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 	}
 
 	TempoMap& map(_session->tempo_map());
-	TempoDialog tempo_dialog (map, frame, _("add"));
 
-	//this causes compiz to display no border.
-	//tempo_dialog.signal_realize().connect (sigc::bind (sigc::ptr_fun (set_decoration), &tempo_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
-
-	switch (tempo_dialog.run()) {
-	case RESPONSE_ACCEPT:
-		break;
-	default:
-		return;
-	}
-
-	double bpm = 0;
-	Timecode::BBT_Time requested;
-	bpm = tempo_dialog.get_bpm ();
-	double nt = tempo_dialog.get_note_type();
-	bpm = max (0.01, bpm);
-
-	tempo_dialog.get_bbt_time (requested);
 	begin_reversible_command (_("add tempo mark"));
         XMLNode &before = map.get_state();
-	if (tempo_dialog.get_lock_style() == MusicTime) {
-		map.add_tempo (Tempo (bpm,nt), map.pulse_at_beat (map.bbt_to_beats (requested)), tempo_dialog.get_tempo_type());
-	} else {
-		map.add_tempo (Tempo (bpm,nt), frame, tempo_dialog.get_tempo_type());
-	}
+	/* add music-locked ramped (?) tempo using the bpm/note type at frame*/
+	map.add_tempo (map.tempo_at (frame), map.pulse_at_frame (frame), TempoSection::Ramp);
+
         XMLNode &after = map.get_state();
 	_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 	commit_reversible_command ();
