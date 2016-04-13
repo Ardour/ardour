@@ -2096,7 +2096,7 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 				 * Delivery::configure_io() will do the actual removal
 				 * by calling _output->ensure_io()
 				 */
-				if (_session.master_out ()) {
+				if (!is_master() && _session.master_out ()) {
 					/* ..but at least as many as there are master-inputs */
 					// XXX this may need special-casing for mixbus (master-outputs)
 					// and should maybe be a preference anyway ?!
