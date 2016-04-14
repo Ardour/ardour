@@ -1280,13 +1280,19 @@ PluginInsert::reset_map (bool emit)
 				} else {
 					if (_match.method == Split) {
 						if (cend == 0) { continue; }
+						if (_strict_io && ic + stride * pc >= cend) {
+							break;
+						}
 						/* connect *no* sidechain sinks in round-robin fashion */
 						_in_map[pc].set (*t, in, ic + stride * pc);
+						if (_strict_io && (ic + 1) == cend) {
+							break;
+						}
 						ic = (ic + 1) % cend;
 					} else {
 						uint32_t s = in - shift;
 						if (stride * pc + s < cend) {
-							_in_map[pc].set (*t, in, stride * pc + s);
+							_in_map[pc].set (*t, in, s + stride * pc);
 						}
 					}
 				}
