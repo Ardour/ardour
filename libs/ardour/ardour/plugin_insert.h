@@ -134,6 +134,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 		}
 	}
 
+	ChanCount required_buffers () const { return _required_buffers; }
+
 	// allow to override output_streams(), implies "Custom Mode"
 
 	// only the owning route may call these (with process lock held)
@@ -305,6 +307,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	ChanCount _configured_out;
 	ChanCount _custom_out;
 	ChanCount _cached_sidechain_pins;
+	ChanCount _required_buffers;
 
 	bool _configured;
 	bool _no_inplace;

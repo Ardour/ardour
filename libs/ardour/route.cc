@@ -2199,17 +2199,18 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
 
+		boost::shared_ptr<IOProcessor> iop;
 		boost::shared_ptr<PluginInsert> pi;
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
 			/* plugins connected via Split or Hide Match may have more channels.
 			 * route/scratch buffers are needed for all of them
 			 * The configuration may only be a subset (both input and output)
 			 */
-			processor_max_streams = ChanCount::max(processor_max_streams, pi->input_streams());
-			processor_max_streams = ChanCount::max(processor_max_streams, pi->internal_streams());
-			processor_max_streams = ChanCount::max(processor_max_streams, pi->output_streams());
-			processor_max_streams = ChanCount::max(processor_max_streams, pi->natural_input_streams() * pi->get_count());
-			processor_max_streams = ChanCount::max(processor_max_streams, pi->natural_output_streams() * pi->get_count());
+			processor_max_streams = ChanCount::max(processor_max_streams, pi->required_buffers());
+		}
+		else if ((iop = boost::dynamic_pointer_cast<IOProcessor>(*p)) != 0) {
+			processor_max_streams = ChanCount::max(processor_max_streams, iop->natural_input_streams());
+			processor_max_streams = ChanCount::max(processor_max_streams, iop->natural_output_streams());
 		}
 		out = c->second;
 

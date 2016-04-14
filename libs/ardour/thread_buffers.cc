@@ -72,7 +72,7 @@ ThreadBuffers::ensure_buffers (ChanCount howmany, size_t custom)
 		}
 
 		scratch_buffers->ensure_buffers (*t, count, size);
-		noinplace_buffers->ensure_buffers (*t, count + count, size); // in + out
+		noinplace_buffers->ensure_buffers (*t, count, size);
 		mix_buffers->ensure_buffers (*t, count, size);
 		silent_buffers->ensure_buffers (*t, count, size);
 		route_buffers->ensure_buffers (*t, count, size);

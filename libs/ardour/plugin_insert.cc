@@ -1455,6 +1455,12 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	_no_inplace = check_inplace ();
 	_mapping_changed = false;
 
+	/* only the "noinplace_buffers" thread buffers need to be this large,
+	 * this can be optimized. other buffers are fine with
+	 * ChanCount::max (natural_input_streams (), natural_output_streams())
+	 */
+	_required_buffers = natural_input_streams () + natural_output_streams() * get_count();
+
 	if (old_in != in || old_out != out || old_internal != _configured_internal
 			|| (old_match.method != _match.method && (old_match.method == Split || _match.method == Split))
 		 ) {
