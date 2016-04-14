@@ -33,6 +33,11 @@
 #include <sys/resource.h>
 #endif
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
+
 #include <stdint.h>
 #include <fcntl.h>
 #include <signal.h>

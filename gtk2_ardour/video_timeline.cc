@@ -17,6 +17,11 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#include <sys/wait.h> /* for WNOHANG */
+#endif
+
 #include <algorithm>
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
