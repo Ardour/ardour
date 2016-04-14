@@ -23,7 +23,7 @@
 #include <iostream>
 #if defined(PLATFORM_WINDOWS)
 #include <winsock.h>
-#elif defined(__FREE_BSD__)
+#elif defined(__FreeBSD__)
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/_sockaddr_storage.h>
