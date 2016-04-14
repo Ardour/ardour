@@ -2083,7 +2083,10 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 
 			if (boost::dynamic_pointer_cast<Delivery> (*p)
 					&& boost::dynamic_pointer_cast<Delivery> (*p)->role() == Delivery::Main
-					&& _strict_io) {
+#ifndef MIXBUS
+					&& _strict_io
+#endif
+					) {
 				/* with strict I/O the panner + output are forced to
 				 * follow the last processor's output.
 				 *
