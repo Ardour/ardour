@@ -1464,8 +1464,21 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	/* only the "noinplace_buffers" thread buffers need to be this large,
 	 * this can be optimized. other buffers are fine with
 	 * ChanCount::max (natural_input_streams (), natural_output_streams())
+	 * and route.cc's max (configured_in, configured_out)
+	 *
+	 * no-inplace copies "thru" outputs (to emulate in-place) for
+	 * all outputs (to prevent overwrite) into a temporary space
+	 * which also holds input buffers (in case the plugin does process
+	 * in-place and overwrites those).
+	 *
+	 * this buffers need to be at least as
+	 *   natural_input_streams () + possible outputs.
+	 *
+	 * sidechain inputs add a constraint on the input:
+	 * configured input + sidechain (=_configured_internal)
 	 */
-	_required_buffers = natural_input_streams () + natural_output_streams() * get_count();
+	_required_buffers =ChanCount::max (_configured_internal,
+			natural_input_streams () + ChanCount::max (_configured_out, natural_output_streams () * get_count ()));
 
 	if (old_in != in || old_out != out || old_internal != _configured_internal
 			|| (old_match.method != _match.method && (old_match.method == Split || _match.method == Split))
