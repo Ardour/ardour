@@ -2568,6 +2568,8 @@ Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t coun
 bool
 Route::set_strict_io (const bool enable)
 {
+	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+
 	if (_strict_io != enable) {
 		_strict_io = enable;
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
@@ -2593,10 +2595,9 @@ Route::set_strict_io (const bool enable)
 		}
 		lm.release ();
 
-		{
-			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-			configure_processors (0);
-		}
+		configure_processors (0);
+		lx.release ();
+
 		processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
