@@ -1998,6 +1998,11 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const double& pu
 void
 TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t& frame)
 {
+	/* disallow moving first meter past any subsequent one, and any movable meter before the first one */
+	const MeterSection* other =  &meter_section_at_locked (frame);
+	if ((!section->movable() && other->movable()) || (!other->movable() && section->movable() && other->frame() >= frame)) {
+		return;
+	}
 	MeterSection* prev_m = 0;
 
 	if (!section->movable()) {
