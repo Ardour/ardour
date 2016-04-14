@@ -76,6 +76,7 @@ private:
 	CtrlElem _actor;
 	CtrlElem _hover;
 	CtrlElemList _elements;
+	CtrlElem _drag_dst;
 
 
 	Gtk::DrawingArea darea;
@@ -107,6 +108,8 @@ private:
 	bool darea_button_release_event (GdkEventButton*);
 	bool drag_type_matches (const CtrlElem& ct);
 
+	void start_drag (const CtrlElem&, double, double);
+
 	void draw_io_pin (cairo_t*, const CtrlWidget&);
 	void draw_plugin_pin (cairo_t*, const CtrlWidget&);
 
@@ -127,7 +130,7 @@ private:
 	void handle_input_action (const CtrlElem &, const CtrlElem &);
 	void handle_output_action (const CtrlElem &, const CtrlElem &);
 	void handle_thru_action (const CtrlElem &, const CtrlElem &);
-	void handle_disconnect (const CtrlElem &);
+	bool handle_disconnect (const CtrlElem &, bool no_signal = false);
 	void disconnect_other_outputs (uint32_t skip_pc, ARDOUR::DataType dt, uint32_t id);
 	void disconnect_other_thru (ARDOUR::DataType dt, uint32_t id);
 	void add_port_to_table (boost::shared_ptr<ARDOUR::Port>, uint32_t, bool);
@@ -163,6 +166,7 @@ private:
 
 	bool   _dragging;
 	double _drag_x, _drag_y;
+
 };
 
 #endif

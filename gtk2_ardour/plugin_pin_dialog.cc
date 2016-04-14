@@ -266,7 +266,8 @@ PluginPinDialog::plugin_reconfigured ()
 	_hover.reset ();
 	_actor.reset ();
 	_selection.reset ();
-	_dragging = 0;
+	_drag_dst.reset();
+	_dragging = false;
 
 	_n_inputs = _n_sidechains = 0;
 
@@ -742,7 +743,9 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 		for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
 			const CtrlWidget& cw0 = get_io_ctrl (Output, t->first, c->first);
 			const CtrlWidget& cw1 = get_io_ctrl (Input, t->first, c->second);
-			draw_connection (cr, cw1, cw0, true);
+			if (!(_dragging && cw1.e == _selection && cw0.e == _drag_dst)) {
+				draw_connection (cr, cw1, cw0, true);
+			}
 		}
 	}
 
@@ -806,7 +809,9 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 			for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
 				const CtrlWidget& cw0 = get_io_ctrl (Input, t->first, c->second);
 				const CtrlWidget& cw1 = get_io_ctrl (Sink, t->first, c->first, i);
-				draw_connection (cr, cw0, cw1);
+				if (!(_dragging && cw0.e == _selection && cw1.e == _drag_dst)) {
+					draw_connection (cr, cw0, cw1);
+				}
 			}
 		}
 
@@ -814,7 +819,9 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 			for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
 				const CtrlWidget& cw0 = get_io_ctrl (Source, t->first, c->first, i);
 				const CtrlWidget& cw1 = get_io_ctrl (Output, t->first, c->second);
-				draw_connection (cr, cw0, cw1);
+				if (!(_dragging && cw0.e == _selection && cw1.e == _drag_dst)) {
+					draw_connection (cr, cw0, cw1);
+				}
 			}
 		}
 	}
@@ -833,6 +840,7 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 		}
 	}
 
+	/* DnD wire */
 	CtrlWidget *drag_src = NULL;
 	if (_dragging) {
 		for (CtrlElemList::iterator i = _elements.begin (); i != _elements.end (); ++i) {
@@ -841,6 +849,7 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 			}
 		}
 	}
+
 	if (drag_src) {
 		double x0, y0;
 		if (_selection->ct == Input || _selection->ct == Source) {
@@ -872,7 +881,8 @@ PluginPinDialog::darea_size_allocate (Gtk::Allocation&)
 }
 
 bool
-PluginPinDialog::drag_type_matches (const CtrlElem& e) {
+PluginPinDialog::drag_type_matches (const CtrlElem& e)
+{
 	if (!_dragging || !_selection) {
 		return true;
 	}
@@ -886,6 +896,49 @@ PluginPinDialog::drag_type_matches (const CtrlElem& e) {
 	if (_selection->ct == Input  && e->ct == Output) { return true; }
 	if (_selection->ct == Output && e->ct == Input)  { return true; }
 	return false;
+}
+
+void
+PluginPinDialog::start_drag (const CtrlElem& e, double x, double y)
+{
+	assert (_selection == e);
+	_drag_dst.reset ();
+	if (e->ct == Sink) {
+		bool valid;
+		const ChanMapping& map (_pi->input_map (e->ip));
+		uint32_t idx = map.get (e->dt, e->id, &valid);
+		if (valid) {
+			const CtrlWidget& cw = get_io_ctrl (Input, e->dt, idx, 0);
+			_drag_dst = e;
+			_selection = cw.e;
+		}
+	}
+	else if (e->ct == Output) {
+		for (uint32_t i = 0; i < _n_plugins; ++i) {
+			bool valid;
+			const ChanMapping& map (_pi->output_map (i));
+			uint32_t idx = map.get_src (e->dt, e->id, &valid);
+			if (valid) {
+				const CtrlWidget& cw = get_io_ctrl (Source, e->dt, idx, i);
+				_drag_dst = e;
+				_selection = cw.e;
+				break;
+			}
+		}
+		if (!_drag_dst) {
+			bool valid;
+			const ChanMapping& map (_pi->thru_map ());
+			uint32_t idx = map.get (e->dt, e->id, &valid);
+			if (valid) {
+				const CtrlWidget& cw = get_io_ctrl (Input, e->dt, idx, 0);
+				_drag_dst = e;
+				_selection = cw.e;
+			}
+		}
+	}
+	_dragging = true;
+	_drag_x = x;
+	_drag_y = y;
 }
 
 bool
@@ -925,13 +978,12 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 
 	switch (ev->button) {
 		case 1:
+			_drag_dst.reset ();
 			if (!_selection || (_selection && !_hover)) {
 				_selection = _hover;
 				_actor.reset ();
 				if (_selection) {
-					_dragging = true;
-					_drag_x = ev->x;
-					_drag_y = ev->y;
+					start_drag (_selection, ev->x, ev->y);
 				}
 				darea.queue_draw ();
 			} else if (_selection && _hover && _selection != _hover) {
@@ -943,21 +995,18 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 				else if (_selection->ct == Input  && _hover->ct == Output) { _actor = _hover; }
 				else if (_selection->ct == Output && _hover->ct == Input)  { _actor = _hover; }
 				if (!_actor) {
-				_selection = _hover;
-				_dragging = true;
-				_drag_x = ev->x;
-				_drag_y = ev->y;
+					_selection = _hover;
+					start_drag (_selection, ev->x, ev->y);
 				}
 				darea.queue_draw ();
 			} else if (_hover) {
 				_selection = _hover;
 				_actor.reset ();
-				_dragging = true;
-				_drag_x = ev->x;
-				_drag_y = ev->y;
+				start_drag (_selection, ev->x, ev->y);
 			}
 			break;
 		case 3:
+			_drag_dst.reset ();
 			if (_selection != _hover) {
 				_selection = _hover;
 				darea.queue_draw ();
@@ -974,12 +1023,28 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 bool
 PluginPinDialog::darea_button_release_event (GdkEventButton* ev)
 {
+	if (_dragging && _selection && _drag_dst && _drag_dst == _hover) {
+		// select click. (or re-connect same)
+		assert (_selection != _hover);
+		_actor.reset ();
+		_dragging = false;
+		_drag_dst.reset ();
+		_selection =_hover;
+		darea.queue_draw ();
+		return true;
+	}
+
 	if (_dragging && _hover && _hover != _selection) {
 		_actor = _hover;
 	}
+
 	if (_hover == _actor && _actor && ev->button == 1) {
 		assert (_selection);
 		assert (_selection->dt == _actor->dt);
+		if (_drag_dst) {
+			assert (_dragging && _selection != _drag_dst);
+			handle_disconnect (_drag_dst, true);
+		}
 		if      (_selection->ct == Input && _actor->ct == Sink) {
 			handle_input_action (_actor, _selection);
 		}
@@ -1004,8 +1069,13 @@ PluginPinDialog::darea_button_release_event (GdkEventButton* ev)
 	} else if (!_hover && ev->button == 3) {
 		reset_menu.popup (1, ev->time);
 	}
+
+	if (_dragging && _hover != _selection) {
+		_selection.reset ();
+	}
 	_actor.reset ();
 	_dragging = false;
+	_drag_dst.reset ();
 	darea.queue_draw ();
 	return true;
 }
@@ -1020,8 +1090,12 @@ PluginPinDialog::handle_input_action (const CtrlElem &s, const CtrlElem &i)
 
 	if (valid && idx == i->id) {
 		// disconnect
-		in_map.unset (s->dt, s->id);
-		_pi->set_input_map (pc, in_map);
+		if (!_dragging) {
+			in_map.unset (s->dt, s->id);
+			_pi->set_input_map (pc, in_map);
+		} else {
+			plugin_reconfigured ();
+		}
 	}
 	else if (!valid) {
 		// connect
@@ -1079,17 +1153,21 @@ PluginPinDialog::handle_output_action (const CtrlElem &s, const CtrlElem &o)
 
 	if (valid && idx == o->id) {
 		// disconnect
-		out_map.unset (s->dt, s->id);
-		_pi->set_output_map (pc, out_map);
+		if (!_dragging) {
+			out_map.unset (s->dt, s->id);
+			_pi->set_output_map (pc, out_map);
+		} else {
+			plugin_reconfigured ();
+		}
 	}
 	else {
 		// disconnect source
+		disconnect_other_outputs (pc, s->dt, o->id);
+		disconnect_other_thru (s->dt, o->id);
+		out_map = _pi->output_map (pc); // re-read map
 		if (valid) {
 			out_map.unset (s->dt, s->id);
 		}
-		disconnect_other_outputs (pc, s->dt, o->id);
-		disconnect_other_thru (s->dt, o->id);
-
 		idx = out_map.get_src (s->dt, o->id, &valid);
 		if (valid) {
 			out_map.unset (s->dt, idx);
@@ -1108,20 +1186,22 @@ PluginPinDialog::handle_thru_action (const CtrlElem &o, const CtrlElem &i)
 	uint32_t idx = thru_map.get (o->dt, o->id, &valid);
 
 	if (valid && idx == i->id) {
-		// disconnect
-		thru_map.unset (o->dt, o->id);
+		if (!_dragging) {
+			thru_map.unset (o->dt, o->id);
+		}
 	} else {
 		// disconnect other outputs first
 		disconnect_other_outputs (UINT32_MAX, o->dt, o->id);
 		disconnect_other_thru (o->dt, o->id);
+		thru_map = _pi->thru_map (); // re-read map
 
 		thru_map.set (o->dt, o->id, i->id);
 	}
 	_pi->set_thru_map (thru_map);
 }
 
-void
-PluginPinDialog::handle_disconnect (const CtrlElem &e)
+bool
+PluginPinDialog::handle_disconnect (const CtrlElem &e, bool no_signal)
 {
 	_ignore_updates = true;
 	bool changed = false;
@@ -1202,9 +1282,10 @@ PluginPinDialog::handle_disconnect (const CtrlElem &e)
 			break;
 	}
 	_ignore_updates = false;
-	if (changed) {
+	if (changed && !no_signal) {
 		plugin_reconfigured ();
 	}
+	return changed;
 }
 
 void
