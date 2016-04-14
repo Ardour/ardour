@@ -367,6 +367,19 @@ struct CFunc
   };
 
   template <class T>
+  struct ClassEqualCheck
+  {
+    static int f (lua_State* L)
+    {
+      T const* const t0 = Userdata::get <T> (L, 1, true);
+      T const* const t1 = Userdata::get <T> (L, 2, true);
+      Stack <bool>::push (L, t0 == t1);
+      return 1;
+    }
+  };
+
+
+  template <class T>
   struct PtrNullCheck
   {
     static int f (lua_State* L)

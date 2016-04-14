@@ -1005,6 +1005,7 @@ LuaBindings::dsp (lua_State* L)
 		.beginNamespace ("ARDOUR")
 
 		.beginClass <AudioBuffer> ("AudioBuffer")
+		.addEqualCheck ()
 		.addFunction ("data", (Sample*(AudioBuffer::*)(framecnt_t))&AudioBuffer::data)
 		.addFunction ("silence", &AudioBuffer::silence)
 		.addFunction ("apply_gain", &AudioBuffer::apply_gain)
@@ -1013,12 +1014,14 @@ LuaBindings::dsp (lua_State* L)
 		.endClass()
 
 		.beginClass <MidiBuffer> ("MidiBuffer")
+		.addEqualCheck ()
 		.addFunction ("silence", &MidiBuffer::silence)
 		.addFunction ("empty", &MidiBuffer::empty)
 		// TODO iterators..
 		.endClass()
 
 		.beginClass <BufferSet> ("BufferSet")
+		.addEqualCheck ()
 		.addFunction ("get_audio", static_cast<AudioBuffer&(BufferSet::*)(size_t)>(&BufferSet::get_audio))
 		.addFunction ("count", static_cast<const ChanCount&(BufferSet::*)()const>(&BufferSet::count))
 		.endClass()
