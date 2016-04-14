@@ -874,15 +874,17 @@ MixerStrip::output_press (GdkEventButton *ev)
 			citems.pop_back ();
 		}
 
-		citems.push_back (SeparatorElem());
+		if (!ARDOUR::Profile->get_mixbus()) {
+			citems.push_back (SeparatorElem());
 
-		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-			citems.push_back (
-				MenuElem (
-					string_compose (_("Add %1 port"), (*i).to_i18n_string()),
-					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_output_port), *i)
-					)
-				);
+			for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+				citems.push_back (
+						MenuElem (
+							string_compose (_("Add %1 port"), (*i).to_i18n_string()),
+							sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_output_port), *i)
+							)
+						);
+			}
 		}
 
 		citems.push_back (SeparatorElem());
