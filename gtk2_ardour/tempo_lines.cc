@@ -76,7 +76,7 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 		framepos_t f = 0;
 
 		if (grid.begin()->c != 0.0) {
-			const double pulses_per_div = l * (grid.begin()->tempo.note_type() / grid.begin()->meter->note_divisor()) / (double) divisions;
+			const double pulses_per_div = l * (grid.begin()->tempo.note_type() / grid.begin()->meter.note_divisor()) / (double) divisions;
 			const double time_at_pulse = log (((grid.begin()->c * (pulses_per_div / grid.begin()->tempo.note_type())) /
 							   grid.begin()->tempo.pulses_per_minute()) + 1) / grid.begin()->c;
 			f = grid.begin()->frame + (framecnt_t) floor ((time_at_pulse * 60.0 * frame_rate) + 0.5);
@@ -86,6 +86,7 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 		}
 
 		if (f > leftmost_frame) {
+
 			lines.add (PublicEditor::instance().sample_to_pixel_unrounded (f), 1.0, c);
 		}
 	}
@@ -151,8 +152,7 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 			/* draw subdivisions of this beat */
 			std::vector<ARDOUR::TempoMap::BBTPoint> vec;
 			vec.push_back (*i);
-
-			draw_ticks(vec, divisions, leftmost_frame, frame_rate);
+			draw_ticks (vec, divisions, leftmost_frame, frame_rate);
 		}
 	}
 }
