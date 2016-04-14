@@ -32,24 +32,24 @@ public:
 	*/
 	int load(std::string path, int64_t targetsr);
 
-	typedef struct wav {
+	struct wav_t {
 		std::string filename;
 		uint16_t    index;
 
 		int64_t     posabsolute;
 		int64_t     length;
 
-		bool operator <(const struct wav& other) {
+		bool operator <(const struct wav_t& other) const {
 			return (strcasecmp(this->filename.c_str(),
 					other.filename.c_str()) < 0);
 		}
 
-		bool operator ==(const struct wav& other) {
+		bool operator ==(const struct wav_t& other) const {
 			return (this->filename == other.filename ||
 				this->index == other.index);
 		}
 
-	} wav_t;
+	};
 
 	typedef struct region {
 		std::string name;
@@ -130,7 +130,7 @@ private:
 	void parserest10(void);
 	void parseaudio5(void);
 	void parseaudio(void);
-	void resort(std::vector<wav_t> *ws);
+	void resort(std::vector<wav_t>& ws);
 	uint8_t mostfrequent(uint32_t start, uint32_t stop);
 	std::vector<wav_t> actualwavs;
 	float ratefactor;

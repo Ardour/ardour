@@ -637,11 +637,10 @@ PTFFormat::parserest5(void) {
 }
 
 void
-PTFFormat::resort(std::vector<wav_t> *ws) {
+PTFFormat::resort(std::vector<wav_t>& ws) {
 	int j = 0;
-	std::sort((*ws).begin(), (*ws).end());
-	for (std::vector<wav_t>::iterator i = (*ws).begin();
-			i != (*ws).end(); ++i) {
+	std::sort(ws.begin(), ws.end());
+	for (std::vector<wav_t>::iterator i = ws.begin(); i != ws.end(); ++i) {
 		(*i).index = j;
 		j++;
 	}
@@ -733,8 +732,8 @@ PTFFormat::parseaudio5(void) {
 		numberofwavs--;
 		i += 7;
 	}
-	resort(&actualwavs);
-	resort(&audiofiles);
+	resort(actualwavs);
+	resort(audiofiles);
 }
 
 void
