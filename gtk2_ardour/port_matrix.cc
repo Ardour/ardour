@@ -729,9 +729,7 @@ PortMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 	if (io) {
 		int const r = io->add_port ("", this, t);
 		if (r == -1) {
-			Gtk::MessageDialog msg (_("It is not possible to add a port here, as the first processor in the track or buss cannot "
-						  "support the new configuration."
-							));
+			Gtk::MessageDialog msg (_("It is not possible to add a port here."));
 			msg.set_title (_("Cannot add port"));
 			msg.run ();
 		}
@@ -759,7 +757,7 @@ PortMatrix::remove_channel (ARDOUR::BundleChannel b)
 		errmsg = _("The last port cannot be removed");
 	} else {
 		if (-1 == io->remove_port (p, this)) {
-			errmsg = _("This port cannot be removed.\nEither the first plugin in the track or buss cannot accept\nthe new number of inputs or the last plugin has more outputs.");
+			errmsg = _("This port cannot be removed.");
 		}
 	}
 
