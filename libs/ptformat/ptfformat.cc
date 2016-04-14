@@ -589,13 +589,18 @@ PTFFormat::parserest5(void) {
 				vector<track_t>::iterator ti;
 				vector<track_t>::iterator bt = tracks.begin();
 				vector<track_t>::iterator et = tracks.end();
-				track_t tr ( name, 0, 0, &r);
+				track_t tr = { name, 0, 0, r };
 				if ((ti = std::find(bt, et, tr)) != et) {
 					tracknumber = (*ti).index;
 				} else {
 					tracknumber = tracks.size() + 1;
 				}
-				track_t t ( name, (uint16_t)tracknumber, uint8_t(0), &r);
+				track_t t = {
+					name,
+					(uint16_t)tracknumber,
+					uint8_t(0),
+					r
+				};
 				tracks.push_back(t);
 			} else {
 				region_t r = {
@@ -610,13 +615,18 @@ PTFFormat::parserest5(void) {
 				vector<track_t>::iterator ti;
 				vector<track_t>::iterator bt = tracks.begin();
 				vector<track_t>::iterator et = tracks.end();
-				track_t tr ( name, 0, 0, &r );
+				track_t tr = { name, 0, 0, r };
 				if ((ti = std::find(bt, et, tr)) != et) {
 					tracknumber = (*ti).index;
 				} else {
 					tracknumber = tracks.size() + 1;
 				}
-				track_t t ( name, (uint16_t)tracknumber, uint8_t(0), &r);
+				track_t t = {
+					name,
+					(uint16_t)tracknumber,
+					uint8_t(0),
+					r
+				};
 				tracks.push_back(t);
 			}
 			rindex++;
@@ -1297,7 +1307,7 @@ PTFFormat::parserest10(void) {
 					vector<region_t>::iterator finish = regions.end();
 					vector<region_t>::iterator found;
 					if ((found = std::find(begin, finish, tr.reg)) != finish) {
-						tr.set_region (&(*found));
+						tr.reg = (*found);
 					}
 					i = l+16;
 					offset = 0;
