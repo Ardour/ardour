@@ -373,10 +373,42 @@ PluginPinDialog::refill_output_presets ()
 {
 	using namespace Menu_Helpers;
 	_out_presets.clear_items();
+	PluginOutputConfiguration ppc (_pi->plugin (0)->possible_output ());
+
+	bool need_dropdown = true;
+
+	if (ppc.size () == 0) {
+		need_dropdown = false;
+	}
+
+	if (!_pi->strict_io () && ppc.size () == 1) {
+		need_dropdown = false;
+	}
+
+	if (_pi->strict_io () && ppc.size () == 1) {
+		// XXX "stereo" is currently preferred default for instruments, see PluginInsert
+		if (ppc.find (2) != ppc.end ()) {
+			need_dropdown = false;
+		}
+	}
+
+	if (!_pi->needs_midi_input ()) {
+		/* loose definition of instruments, maybe impose additional
+		 * || _pi->natural_input_streams ().n_audio () != 0
+		 * and special case variable output plugins
+		 * && !_pi->plugin (0)->info->reconfigurable_io()
+		 */
+		need_dropdown = false;
+	}
+
+	if (!need_dropdown) {
+		_out_presets.set_sensitive (false);
+		_out_presets.set_text(_("Automatic"));
+		return;
+	}
 
 	_out_presets.AddMenuElem (MenuElem(_("Automatic"), sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::select_output_preset), 0)));
 
-	PluginOutputConfiguration ppc (_pi->plugin (0)->possible_output ());
 	const uint32_t n_audio = _pi->preset_out ().n_audio ();
 	if (n_audio == 0) {
 		_out_presets.set_text(_("Automatic"));
