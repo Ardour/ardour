@@ -2384,6 +2384,10 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 				goto failed;
 			}
 
+			if (Profile->get_mixbus ()) {
+				track->set_strict_io (true);
+			}
+
 			track->use_new_diskstream();
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -2477,6 +2481,10 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 
 			if (bus->init ()) {
 				goto failure;
+			}
+
+			if (Profile->get_mixbus ()) {
+				bus->set_strict_io (true);
 			}
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -3009,6 +3017,11 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				goto failed;
 			}
 
+			if (Profile->get_mixbus ()) {
+				track->set_strict_io (true);
+			}
+
+
 			if (ARDOUR::Profile->get_trx ()) {
 				// TRACKS considers it's not a USE CASE, it's
 				// a piece of behavior of the session model:
@@ -3116,6 +3129,10 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 
 			if (bus->init ()) {
 				goto failure;
+			}
+
+			if (Profile->get_mixbus ()) {
+				bus->set_strict_io (true);
 			}
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
