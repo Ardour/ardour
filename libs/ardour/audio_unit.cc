@@ -1471,9 +1471,18 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		_last_nframes = nframes;
 	}
 
-	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 in %2 out %3 MIDI %4 bufs %5 (available %6)\n",
+	/* test if we can run in-place; only compare audio buffers */
+	bool inplace = true;
+	ChanMapping::Mappings inmap (in_map.mappings ());
+	ChanMapping::Mappings outmap (out_map.mappings ());
+	assert (outmap[DataType::AUDIO].size () > 0);
+	if (inmap[DataType::AUDIO].size() > 0 && inmap != outmap) {
+		inplace = false;
+	}
+
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 in %2 out %3 MIDI %4 bufs %5 (available %6) Inplace: %7\n",
 				name(), input_channels, output_channels, _has_midi_input,
-				bufs.count(), bufs.available()));
+				bufs.count(), bufs.available(), inplace));
 
 	/* the apparent number of buffers matches our input configuration, but we know that the bufferset
 	 * has the capacity to handle our outputs.
@@ -1488,7 +1497,6 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 	cb_offset = 0;
 
 	buffers->mNumberBuffers = output_channels;
-	bool inplace = in_map == out_map;
 
 	ChanCount bufs_count (DataType::AUDIO, 1);
 	BufferSet& scratch_bufs = _session.get_scratch_buffers(bufs_count);
