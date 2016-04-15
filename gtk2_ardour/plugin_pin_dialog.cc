@@ -32,6 +32,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/plugin.h"
 #include "ardour/port.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 
 #include "plugin_pin_dialog.h"
@@ -776,7 +777,7 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 	cairo_set_source_rgba (cr, 1., 1., 1., 1.);
 	pango_cairo_show_layout (cr, layout->gobj ());
 
-	if (_pi->strict_io ()) {
+	if (_pi->strict_io () && !Profile->get_mixbus ()) {
 		layout->set_text (_("Strict I/O"));
 		layout->get_pixel_size (text_width, text_height);
 		const double sx0 = _margin_x + .5 * (_innerwidth - text_width);

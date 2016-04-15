@@ -1591,11 +1591,13 @@ MixerStrip::build_route_ops_menu ()
 	i->set_sensitive(! _session->transport_rolling());
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
 
-	items.push_back (SeparatorElem());
-	items.push_back (CheckMenuElem (_("Strict I/O")));
-	i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
-	i->set_active (_route->strict_io());
-	i->signal_activate().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*_route, &Route::set_strict_io), !_route->strict_io())));
+	if (!Profile->get_mixbus ()) {
+		items.push_back (SeparatorElem());
+		items.push_back (CheckMenuElem (_("Strict I/O")));
+		i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+		i->set_active (_route->strict_io());
+		i->signal_activate().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*_route, &Route::set_strict_io), !_route->strict_io())));
+	}
 
 	items.push_back (SeparatorElem());
 
