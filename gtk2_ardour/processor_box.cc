@@ -3435,7 +3435,7 @@ ProcessorBox::register_actions ()
 	myactions.register_action (processor_box_actions, X_("newplugin"), _("New Plugin"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_plugin));
 
-	act = myactions.register_action (processor_box_actions, X_("newlua"), _("New Lua Proc"),
+	act = myactions.register_action (processor_box_actions, X_("newlua"), _("New Lua DSP"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_lua));
 	act = myactions.register_action (processor_box_actions, X_("newinsert"), _("New Insert"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_insert));
