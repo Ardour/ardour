@@ -789,25 +789,6 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 	cairo_set_source_rgb (cr, .3, .3, .3);
 	cairo_fill (cr);
 
-	/* draw midi-bypass (behind) */
-	if (_pi->has_midi_bypass ()) {
-		const CtrlWidget& cw0 = get_io_ctrl (Input, DataType::MIDI, 0);
-		const CtrlWidget& cw1 = get_io_ctrl (Output, DataType::MIDI, 0);
-		draw_connection (cr, cw0, cw1, true);
-	}
-
-	/* thru connections */
-	const ChanMapping::Mappings thru_map = _pi->thru_map ().mappings ();
-	for (ChanMapping::Mappings::const_iterator t = thru_map.begin (); t != thru_map.end (); ++t) {
-		for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
-			const CtrlWidget& cw0 = get_io_ctrl (Output, t->first, c->first);
-			const CtrlWidget& cw1 = get_io_ctrl (Input, t->first, c->second);
-			if (!(_dragging && cw1.e == _selection && cw0.e == _drag_dst)) {
-				draw_connection (cr, cw1, cw0, true);
-			}
-		}
-	}
-
 	/* labels */
 	Glib::RefPtr<Pango::Layout> layout;
 	layout = Pango::Layout::create (get_pango_context ());
@@ -859,6 +840,25 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 		cairo_move_to (cr, sx0, sy0);
 		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
 		pango_cairo_show_layout (cr, layout->gobj ());
+	}
+
+	/* draw midi-bypass (behind) */
+	if (_pi->has_midi_bypass ()) {
+		const CtrlWidget& cw0 = get_io_ctrl (Input, DataType::MIDI, 0);
+		const CtrlWidget& cw1 = get_io_ctrl (Output, DataType::MIDI, 0);
+		draw_connection (cr, cw0, cw1, true);
+	}
+
+	/* thru connections */
+	const ChanMapping::Mappings thru_map = _pi->thru_map ().mappings ();
+	for (ChanMapping::Mappings::const_iterator t = thru_map.begin (); t != thru_map.end (); ++t) {
+		for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
+			const CtrlWidget& cw0 = get_io_ctrl (Output, t->first, c->first);
+			const CtrlWidget& cw1 = get_io_ctrl (Input, t->first, c->second);
+			if (!(_dragging && cw1.e == _selection && cw0.e == _drag_dst)) {
+				draw_connection (cr, cw1, cw0, true);
+			}
+		}
 	}
 
 
