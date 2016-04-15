@@ -1135,7 +1135,6 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 {
 	_output_configs.clear ();
 	const int32_t audio_in = in.n_audio();
-	int32_t audio_out;
 	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
 
 	/* lets check MIDI first */
@@ -1151,7 +1150,6 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 
 	// preferred setting (provided by plugin_insert)
 	const int preferred_out = out.n_audio ();
-	audio_out = out.n_audio ();
 	bool found = false;
 	bool exact_match = false;
 
