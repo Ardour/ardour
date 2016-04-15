@@ -2399,7 +2399,7 @@ if (!Profile->get_mixbus()) {
 
 	bo = new BoolOption (
 			"strict-io",
-			_("Use 'Strict-I/O for new tracks or Busses"),
+			_("Use 'Strict-I/O' for new tracks or Busses"),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
 			);
