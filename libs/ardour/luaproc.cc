@@ -114,9 +114,7 @@ LuaProc::init ()
 	_stats_avg[0] = _stats_avg[1] = _stats_max[0] = _stats_max[1] = _stats_cnt = 0;
 #endif
 
-#ifndef NDEBUG
 	lua.Print.connect (sigc::mem_fun (*this, &LuaProc::lua_print));
-#endif
 	// register session object
 	lua_State* L = lua.getState ();
 	LuaBindings::stddef (L);
@@ -150,6 +148,7 @@ LuaProc::init ()
 void
 LuaProc::lua_print (std::string s) {
 	std::cout <<"LuaProc: " << s << "\n";
+	PBD::error << "LuaProc: " << s << "\n";
 }
 
 bool
@@ -659,8 +658,9 @@ LuaProc::connect_and_run (BufferSet& bufs,
 			(*_lua_dsp)(in_map, out_map, nframes);
 		}
 	} catch (luabridge::LuaException const& e) {
+		PBD::error << "LuaException: " << e.what () << "\n";
 #ifndef NDEBUG
-		printf ("LuaException: %s\n", e.what ());
+		std::cerr << "LuaException: " << e.what () << "\n";
 #endif
 		return -1;
 	}
@@ -961,10 +961,7 @@ LuaProc::setup_lua_inline_gui (LuaState *lua_gui)
 	LuaBindings::common (LG);
 	LuaBindings::dsp (LG);
 
-#ifndef NDEBUG
 	lua_gui->Print.connect (sigc::mem_fun (*this, &LuaProc::lua_print));
-#endif
-
 	lua_gui->do_command ("function ardour () end");
 	lua_gui->do_command (_script);
 
