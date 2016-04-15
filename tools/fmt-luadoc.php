@@ -780,7 +780,7 @@ title: Class Reference
 ---
 
 <p class="warning">
-This documention is far from complete may be inaccurate and subject to change.
+This documentation is far from complete may be inaccurate and subject to change.
 </p>
 
 <?php
