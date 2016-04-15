@@ -2395,7 +2395,6 @@ if (!Profile->get_mixbus()) {
 	oac->add (ManualConnect, _("manually"));
 
 	add_option (_("Audio"), oac);
-}  // !mixbus
 
 	bo = new BoolOption (
 			"strict-io",
@@ -2408,6 +2407,7 @@ if (!Profile->get_mixbus()) {
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 			_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
 
+}  // !mixbus
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Denormals")));
 
