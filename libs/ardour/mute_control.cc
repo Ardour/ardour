@@ -42,7 +42,7 @@ MuteControl::MuteControl (Session& session, std::string const & name, Muteable& 
 void
 MuteControl::actually_set_value (double val, Controllable::GroupControlDisposition gcd)
 {
-	if (muted() != bool (val)) {
+	if (muted_by_self() != bool (val)) {
 		_muteable.mute_master()->set_muted_by_self (val);
 
 		/* allow the Muteable to respond to the mute change
@@ -54,12 +54,63 @@ MuteControl::actually_set_value (double val, Controllable::GroupControlDispositi
 	AutomationControl::actually_set_value (val, gcd);
 }
 
+void
+MuteControl::master_changed (bool self_change, Controllable::GroupControlDisposition gcd)
+{
+	double m = get_masters_value ();
+	const int32_t old_muted_by_others = _muteable.mute_master()->muted_by_others ();
+	std::cerr << "master " << (self_change ? " self " : " not-self") << " changed to " << m << " old others = " << old_muted_by_others << std::endl;
+
+	_muteable.mute_master()->mod_muted_by_others (m ? 1 : -1);
+
+	if (m) {
+		/* master(s) are now muted. If we are self-muted, this
+		   doesn't change our status. If we are not self-muted,
+		   then it changes our status if either:
+
+		   - the master had its own self-muted status changed OR
+		   - the total number of masters that are muted used to be zero
+		*/
+
+		if (!muted_by_self()) {
+			if (self_change || old_muted_by_others == 0) {
+				/* note false as the first argument - our own
+				   value was not changed
+				*/
+				Changed (false, gcd);
+			} else {
+				cerr << " no Change signal\n";
+			}
+		} else {
+			cerr << "muted by self, not relevant\n";
+		}
+	} else {
+		/* no master(s) are now muted. If we are self-muted, this
+		   doesn't change our status. If we are not self-muted,
+		   then it changes our status if either:
+
+		   - the master had its own self-muted status changed OR
+		   - the total number of masters that are muted used to be non-zero
+		*/
+
+		if (!muted_by_self()) {
+			if (self_change || old_muted_by_others != 0) {
+				Changed (false, gcd);
+			} else {
+				cerr << " No change signal\n";
+			}
+		} else {
+			cerr << "muted by self, not relevant\n";
+		}
+	}
+}
+
 double
 MuteControl::get_value () const
 {
-	if (slaved()) {
+	if (slaved ()) {
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
-		return get_masters_value_locked () ? 1.0 : 0.0;
+		return get_masters_value_locked ();
 	}
 
 	if (_list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
@@ -90,11 +141,17 @@ MuteControl::mute_points () const
 bool
 MuteControl::muted () const
 {
+	return _muteable.mute_master()->muted_by_self() || _muteable.mute_master()->muted_by_others();
+}
+
+bool
+MuteControl::muted_by_self () const
+{
 	return _muteable.mute_master()->muted_by_self();
 }
 
 bool
 MuteControl::muted_by_others () const
 {
-	return _muteable.mute_master()->muted_by_others () || get_masters_value();
+	return _muteable.mute_master()->muted_by_others ();
 }

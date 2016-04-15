@@ -155,8 +155,7 @@ SoloControl::actually_set_value (double val, PBD::Controllable::GroupControlDisp
 	   be retrieved by AutomationControl::get_value (), and emits Changed
 	*/
 
-	AutomationControl::actually_set_value (val, group_override);
-	_session.set_dirty ();
+	SlavableAutomationControl::actually_set_value (val, group_override);
 }
 
 double

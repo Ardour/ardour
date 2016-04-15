@@ -152,8 +152,6 @@ class SlavableAutomationControl : public AutomationControl
 	                  boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
 	                  const std::string&                        name="");
 
-	~SlavableAutomationControl ();
-
 	double get_value () const;
 
 	void add_master (boost::shared_ptr<AutomationControl>);
@@ -200,7 +198,7 @@ class SlavableAutomationControl : public AutomationControl
 	virtual void recompute_masters_ratios (double val) { /* do nothing by default */}
 	virtual double get_masters_value_locked () const;
 	double get_value_locked() const;
-
+	void actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 };
 
 

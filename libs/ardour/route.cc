@@ -5481,27 +5481,13 @@ Route::vca_unassign (boost::shared_ptr<VCA> vca)
 bool
 Route::muted_by_others_soloing () const
 {
-	// This method is only used by route_ui for display state.
-	// The DSP version is MuteMaster::muted_by_others_at()
-
 	if (!can_be_muted_by_others ()) {
 		return false;
 	}
 
+	/* XXX something needed here re: mute-overrides-solo */
+
 	return _session.soloing() && !_solo_control->soloed() && !_solo_isolate_control->solo_isolated();
-}
-
-bool
-Route::muted_by_others () const
-{
-	// This method is only used by route_ui for display state.
-	// The DSP version is MuteMaster::muted_by_others_at()
-
-	if (!can_be_muted_by_others()) {
-		return false;
-	}
-
-	return _mute_master->muted_by_others();
 }
 
 void

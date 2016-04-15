@@ -59,8 +59,6 @@ class LIBARDOUR_API GainControl : public SlavableAutomationControl {
 
 	void vcas_loaded();
 	void recompute_masters_ratios (double val);
-
-	void actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 };
 
 } /* namespace */

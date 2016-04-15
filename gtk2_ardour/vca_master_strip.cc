@@ -131,6 +131,8 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	_vca->solo_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::solo_changed, this), gui_context());
 	_vca->mute_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::mute_changed, this), gui_context());
 
+	/* only need to connect to one of these to update VCA status */
+
 	_vca->gain_control()->MasterStatusChange.connect (vca_connections,
 	                                          invalidator (*this),
 	                                          boost::bind (&VCAMasterStrip::update_vca_display, this),
@@ -198,14 +200,20 @@ VCAMasterStrip::set_selected (bool yn)
 bool
 VCAMasterStrip::solo_release (GdkEventButton*)
 {
-	_vca->solo_control()->set_value (_vca->solo_control()->get_value() ? 0.0 : 1.0, Controllable::NoGroup);
+	/* We use NoGroup because VCA controls are never part of a group. This
+	   is redundant, but clear.
+	*/
+	_vca->solo_control()->set_value (_vca->solo_control()->self_soloed() ? 0.0 : 1.0, Controllable::NoGroup);
 	return true;
 }
 
 bool
 VCAMasterStrip::mute_release (GdkEventButton*)
 {
-	_vca->mute_control()->set_value (_vca->mute_control()->get_value() ? 0.0 : 1.0, Controllable::NoGroup);
+	/* We use NoGroup because VCA controls are never part of a group. This
+	   is redundant, but clear.
+	*/
+	_vca->mute_control()->set_value (_vca->mute_control()->muted_by_self() ? 0.0 : 1.0, Controllable::NoGroup);
 	return true;
 }
 
@@ -229,8 +237,11 @@ VCAMasterStrip::set_solo_text ()
 void
 VCAMasterStrip::mute_changed ()
 {
-	if (_vca->mute_control()->muted()) {
+	std::cerr << "Mute changed for " << _vca->number() << std::endl;
+	if (_vca->mute_control()->muted_by_self()) {
 		mute_button.set_active_state (ExplicitActive);
+	} else if (_vca->mute_control()->muted_by_others()) {
+		mute_button.set_active_state (ImplicitActive);
 	} else {
 		mute_button.set_active_state (Gtkmm2ext::Off);
 	}
@@ -239,7 +250,7 @@ VCAMasterStrip::mute_changed ()
 void
 VCAMasterStrip::solo_changed ()
 {
-	if (_vca->solo_control()->soloed()) {
+	if (_vca->solo_control()->soloed() || _vca->solo_control()->get_masters_value()) {
 		solo_button.set_active_state (ExplicitActive);
 	} else {
 		solo_button.set_active_state (Gtkmm2ext::Off);
@@ -257,10 +268,14 @@ VCAMasterStrip::vca_menu_toggle (CheckMenuItem* menuitem, uint32_t n)
 			vca_unassign ();
 		} else {
 			_vca->gain_control()->remove_master (vca->gain_control());
+			_vca->solo_control()->remove_master (vca->solo_control());
+			_vca->mute_control()->remove_master (vca->mute_control());
 		}
 	} else {
 		if (vca) {
 			_vca->gain_control()->add_master (vca->gain_control());
+			_vca->mute_control()->add_master (vca->mute_control());
+			_vca->solo_control()->add_master (vca->solo_control());
 		}
 	}
 }
@@ -269,6 +284,8 @@ void
 VCAMasterStrip::vca_unassign ()
 {
 	_vca->gain_control()->clear_masters ();
+	_vca->solo_control()->clear_masters ();
+	_vca->mute_control()->clear_masters ();
 }
 
 bool

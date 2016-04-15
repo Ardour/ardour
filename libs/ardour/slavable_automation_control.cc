@@ -19,6 +19,8 @@
 #ifndef __libardour_slavable_automation_control_h__
 #define __libardour_slavable_automation_control_h__
 
+#include "pbd/enumwriter.h"
+
 #include "ardour/automation_control.h"
 #include "ardour/session.h"
 
@@ -35,29 +37,26 @@ SlavableAutomationControl::SlavableAutomationControl(ARDOUR::Session& s,
 {
 }
 
-SlavableAutomationControl::~SlavableAutomationControl ()
-{
-
-}
-
 double
 SlavableAutomationControl::get_masters_value_locked () const
 {
-	gain_t v = _desc.normal;
+	double v = _desc.normal;
 
-	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-		if (_desc.toggled) {
-			/* if any master is enabled, the slaves are too */
+	if (_desc.toggled) {
+		for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
 			if (mr->second.master()->get_value()) {
 				return _desc.upper;
 			}
-		} else {
-			/* get current master value, scale by our current ratio with that master */
-			v *= mr->second.master()->get_value () * mr->second.ratio();
 		}
+		return _desc.lower;
 	}
 
-	return min (_desc.upper, v);
+	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+		/* get current master value, scale by our current ratio with that master */
+		v *= mr->second.master()->get_value () * mr->second.ratio();
+	}
+
+	return min ((double) _desc.upper, v);
 }
 
 double
@@ -67,6 +66,16 @@ SlavableAutomationControl::get_value_locked() const
 
 	if (_masters.empty()) {
 		return Control::get_double (false, _session.transport_frame());
+	}
+
+	if (_desc.toggled) {
+		/* for boolean/toggle controls, if this slave OR any master is
+		 * enabled, this slave is enabled. So check our own value
+		 * first, because if we are enabled, we can return immediately.
+		 */
+		if (Control::get_double (false, _session.transport_frame())) {
+			return _desc.upper;
+		}
 	}
 
 	return get_masters_value_locked ();
@@ -87,6 +96,27 @@ SlavableAutomationControl::get_value() const
 }
 
 void
+SlavableAutomationControl::actually_set_value (double val, Controllable::GroupControlDisposition group_override)
+{
+	val = std::max (std::min (val, (double)_desc.upper), (double)_desc.lower);
+
+	{
+		Glib::Threads::RWLock::WriterLock lm (master_lock);
+
+		if (!_masters.empty()) {
+			recompute_masters_ratios (val);
+		}
+	}
+
+	/* this sets the Evoral::Control::_user_value for us, which will
+	   be retrieved by AutomationControl::get_value ()
+	*/
+	AutomationControl::actually_set_value (val, group_override);
+
+	_session.set_dirty ();
+}
+
+void
 SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 {
 	double current_value;
@@ -103,7 +133,9 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 
 		if (res.second) {
 
-			recompute_masters_ratios (current_value);
+			if (_desc.toggled) {
+				recompute_masters_ratios (current_value);
+			}
 
 			/* note that we bind @param m as a weak_ptr<AutomationControl>, thus
 			   avoiding holding a reference to the control in the binding
@@ -145,13 +177,17 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 void
 SlavableAutomationControl::master_changed (bool /*from_self*/, GroupControlDisposition gcd)
 {
-	cerr << this << enum_2_string ((AutomationType)_parameter.type()) << " master changed, relay changed along\n";
-
 	/* our value has (likely) changed, but not because we were
 	 * modified. Just the master.
 	 */
 
-	Changed (false, gcd); /* EMIT SIGNAL */
+	/* propagate master state into our own control so that if we stop
+	 * being slaved, our value doesn't change, and propagate to any
+	 * group this control is part of.
+	 */
+
+	cerr << this << ' ' << enum_2_string ((AutomationType) _parameter.type()) << " pass along " << get_masters_value() << " from master to group\n";
+	actually_set_value (get_masters_value(), Controllable::UseGroup);
 }
 
 void
@@ -168,6 +204,7 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 {
 	double current_value;
 	double new_value;
+	bool masters_left;
 	Masters::size_type erased = 0;
 
 	{
@@ -177,6 +214,7 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 		if (erased) {
 			recompute_masters_ratios (current_value);
 		}
+		masters_left = _masters.size ();
 		new_value = get_value_locked ();
 	}
 
@@ -185,7 +223,12 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 	}
 
 	if (new_value != current_value) {
-		Changed (false, Controllable::NoGroup);
+		if (masters_left == 0) {
+			/* no masters left, make sure we keep the same value
+			   that we had before.
+			*/
+			actually_set_value (current_value, Controllable::UseGroup);
+		}
 	}
 }
 

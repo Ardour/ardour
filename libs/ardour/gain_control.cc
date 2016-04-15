@@ -43,28 +43,6 @@ GainControl::GainControl (Session& session, const Evoral::Parameter &param, boos
 	range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
 }
 
-void
-GainControl::actually_set_value (double val, Controllable::GroupControlDisposition group_override)
-{
-	val = std::max (std::min (val, (double)_desc.upper), (double)_desc.lower);
-
-	{
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
-
-		if (!_masters.empty()) {
-			recompute_masters_ratios (val);
-		}
-	}
-
-	/* this sets the Evoral::Control::_user_value for us, which will
-	   be retrieved by AutomationControl::get_value ()
-	*/
-
-	AutomationControl::actually_set_value (val, group_override);
-
-	_session.set_dirty ();
-}
-
 double
 GainControl::internal_to_interface (double v) const
 {

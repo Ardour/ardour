@@ -173,4 +173,5 @@ void
 MuteMaster::mod_muted_by_others (int32_t delta)
 {
 	_muted_by_others = max (0, _muted_by_others + delta);
+	std::cerr << this << " mod others by " << delta << " to get " << _muted_by_others << endl;
 }

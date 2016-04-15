@@ -70,7 +70,7 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 	void set_solo_ignore (bool yn) { _solo_ignore = yn; }
 
 	void mod_muted_by_others (int32_t delta);
-	bool muted_by_others () const { return _muted_by_others; }
+	int32_t muted_by_others () const { return _muted_by_others; }
 
 	PBD::Signal0<void> MutePointChanged;
 

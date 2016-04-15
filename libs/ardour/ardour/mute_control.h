@@ -53,6 +53,7 @@ class LIBARDOUR_API MuteControl : public SlavableAutomationControl
 	 */
 
 	bool muted () const;
+	bool muted_by_self () const;
 
 	bool muted_by_others_soloing () const;
 	bool muted_by_others () const;
@@ -61,6 +62,7 @@ class LIBARDOUR_API MuteControl : public SlavableAutomationControl
 	MuteMaster::MutePoint mute_points () const;
 
   protected:
+	void master_changed (bool, PBD::Controllable::GroupControlDisposition);
 	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 
   private:
