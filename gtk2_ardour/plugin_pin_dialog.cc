@@ -723,7 +723,8 @@ void
 PluginPinDialog::draw_connection (cairo_t* cr, double x0, double x1, double y0, double y1, bool midi, bool horiz, bool dashed)
 {
 	const double bz = 2 * _pin_box_size;
-	const double bc = (dashed && x0 == x1) ? 1.25 * _pin_box_size : 0;
+	double bc = (dashed && x0 == x1) ? 1.25 * _pin_box_size : 0;
+	if (x0 > _width * .5) { bc *= -1; }
 
 	cairo_move_to (cr, x0, y0);
 	if (horiz) {
@@ -872,7 +873,7 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 		cairo_fill (cr);
 
 		layout->set_width (1.9 * _bxw2 * PANGO_SCALE);
-		layout->set_text (string_compose (_("Plugin #%1"), i + 1));
+		layout->set_text (string_compose (_("Instance #%1"), i + 1));
 		layout->get_pixel_size (text_width, text_height);
 		cairo_move_to (cr, x0 - text_width * .5, yc - text_height * .5);
 		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
@@ -1060,8 +1061,9 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 				_actor.reset ();
 				if (_selection) {
 					start_drag (_selection, ev->x, ev->y);
+				} else {
+					darea.queue_draw ();
 				}
-				darea.queue_draw ();
 			} else if (_selection && _hover && _selection != _hover) {
 				if (_selection->dt != _hover->dt) { _actor.reset (); }
 				else if (_selection->ct == Input  && _hover->ct == Sink)   { _actor = _hover; }
@@ -1073,8 +1075,9 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 				if (!_actor) {
 					_selection = _hover;
 					start_drag (_selection, ev->x, ev->y);
+				} else {
+					darea.queue_draw ();
 				}
-				darea.queue_draw ();
 			} else if (_hover) {
 				_selection = _hover;
 				_actor.reset ();
