@@ -354,12 +354,9 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	int32_t audio_out;
 	int32_t midi_out = 0; // TODO handle  _has_midi_output
 
-	if (in.n_midi() > 0 && audio_in == 0) {
-		audio_out = 2; // prefer stereo version if available.
-	} else {
-		audio_out = audio_in;
-	}
-
+	// preferred setting (provided by plugin_insert)
+	assert (out.n_audio () > 0);
+	audio_out = out.n_audio ();
 
 	for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
 		assert (i.value ().type () == LUA_TTABLE);
@@ -380,6 +377,19 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 	audio_out = -1;
 	bool found = false;
 
+	float penalty = 9999;
+	const int preferred_out = out.n_audio ();
+
+#define FOUNDCFG(nch) {                                  \
+	float p = fabsf ((float)(nch) - preferred_out);  \
+	if ((nch) > preferred_out) { p *= 1.1; }         \
+	if (p < penalty) {                               \
+		audio_out = (nch);                       \
+		penalty = p;                             \
+		found = true;                            \
+	}                                                \
+}
+
 	for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
 		assert (i.value ().type () == LUA_TTABLE);
 		luabridge::LuaRef io (i.value ());
@@ -393,21 +403,17 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 		if (possible_in == 0) {
 			/* no inputs, generators & instruments */
 			if (possible_out == -1) {
-				/* any configuration possible, provide stereo output */
-				audio_out = 2;
-				found = true;
+				/* any configuration possible, stereo output */
+				FOUNDCFG (preferred_out);
 			} else if (possible_out == -2) {
 				/* invalid, should be (0, -1) */
-				audio_out = 2;
-				found = true;
+				FOUNDCFG (preferred_out);
 			} else if (possible_out < -2) {
-				/* variable number of outputs. -> whatever */
-				audio_out = 2;
-				found = true;
+				/* variable number of outputs up to -N, */
+				FOUNDCFG (min (-possible_out, preferred_out));
 			} else {
 				/* exact number of outputs */
-				audio_out = possible_out;
-				found = true;
+				FOUNDCFG (possible_out);
 			}
 		}
 
@@ -415,20 +421,18 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 			/* wildcard for input */
 			if (possible_out == -1) {
 				/* out must match in */
-				audio_out = audio_in;
-				found = true;
+				FOUNDCFG (audio_in);
 			} else if (possible_out == -2) {
 				/* any configuration possible, pick matching */
-				audio_out = audio_in;
-				found = true;
+				FOUNDCFG (preferred_out);
 			} else if (possible_out < -2) {
 				/* explicitly variable number of outputs, pick maximum */
-				audio_out = -possible_out;
-				found = true;
+				FOUNDCFG (max (-possible_out, preferred_out));
+				/* and try min, too, in case the penalty is lower */
+				FOUNDCFG (min (-possible_out, preferred_out));
 			} else {
 				/* exact number of outputs */
-				audio_out = possible_out;
-				found = true;
+				FOUNDCFG (possible_out);
 			}
 		}
 
@@ -436,20 +440,17 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 			if (possible_out == -1) {
 				/* any configuration possible, pick matching */
-				audio_out = audio_in;
-				found = true;
+				FOUNDCFG (preferred_out);
 			} else if (possible_out == -2) {
 				/* invalid. interpret as (-1, -1) */
-				audio_out = audio_in;
-				found = true;
+				FOUNDCFG (preferred_out);
 			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs, pick maximum */
-				audio_out = -possible_out;
-				found = true;
+				/* invalid,  interpret as (<-2, <-2)
+				 * variable number of outputs up to -N, */
+				FOUNDCFG (min (-possible_out, preferred_out));
 			} else {
 				/* exact number of outputs */
-				audio_out = possible_out;
-				found = true;
+				FOUNDCFG (possible_out);
 			}
 		}
 
@@ -463,47 +464,36 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 			if (audio_in > -possible_in && imprecise == NULL) {
 				/* request is too large */
 			} else if (possible_out == -1) {
-				/* any output configuration possible, provide stereo out */
-				audio_out = 2;
-				found = true;
+				/* any output configuration possible */
+				FOUNDCFG (preferred_out);
 			} else if (possible_out == -2) {
 				/* invalid. interpret as (<-2, -1) */
-				audio_out = 2;
-				found = true;
+				FOUNDCFG (preferred_out);
 			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs, pick stereo */
-				audio_out = 2;
-				found = true;
+				/* variable number of outputs up to -N, */
+				FOUNDCFG (min (-possible_out, preferred_out));
 			} else {
 				/* exact number of outputs */
-				audio_out = possible_out;
-				found = true;
+				FOUNDCFG (possible_out);
 			}
 		}
 
 		if (possible_in && (possible_in == audio_in)) {
 			/* exact number of inputs ... must match obviously */
 			if (possible_out == -1) {
-				/* any output configuration possible, provide stereo output */
-				audio_out = 2;
-				found = true;
+				/* any output configuration possible */
+				FOUNDCFG (preferred_out);
 			} else if (possible_out == -2) {
 				/* invalid. interpret as (>0, -1) */
-				audio_out = 2;
-				found = true;
+				FOUNDCFG (preferred_out);
 			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs, pick maximum */
-				audio_out = -possible_out;
-				found = true;
+				/* > 0, < -2 is not specified
+				 * interpret as up to -N */
+				FOUNDCFG (min (-possible_out, preferred_out));
 			} else {
 				/* exact number of outputs */
-				audio_out = possible_out;
-				found = true;
+				FOUNDCFG (possible_out);
 			}
-		}
-
-		if (found) {
-			break;
 		}
 	}
 
@@ -521,25 +511,16 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 
 			imprecise->set (DataType::AUDIO, possible_in);
 			if (possible_out == -1 || possible_out == -2) {
-				audio_out = 2;
-				found = true;
+				FOUNDCFG (2);
 			} else if (possible_out < -2) {
 				/* explicitly variable number of outputs, pick maximum */
-				audio_out = -possible_out;
-				found = true;
+				FOUNDCFG (min (-possible_out, preferred_out));
 			} else {
 				/* exact number of outputs */
-				audio_out = possible_out;
-				found = true;
+				FOUNDCFG (possible_out);
 			}
-
-			if (found) {
-				// ideally we'll keep iterating and take the "best match"
-				// whatever "best" means:
-				// least unconnected inputs, least silenced inputs,
-				// closest match of inputs == outputs
-				break;
-			}
+			// ideally we'll also find the closest, best matching
+			// input configuration with minimal output penalty...
 		}
 	}
 

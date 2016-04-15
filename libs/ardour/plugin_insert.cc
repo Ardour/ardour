@@ -258,7 +258,6 @@ PluginInsert::internal_input_streams() const
 	PluginInfoPtr info = _plugins.front()->get_info();
 
 	if (info->reconfigurable_io()) {
-		assert (_plugins.size() == 1);
 		in = _plugins.front()->input_streams();
 	} else {
 		in = info->n_inputs;
@@ -1381,14 +1380,22 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		break;
 	case Delegate:
 		{
-			ChanCount dout;
+			ChanCount dout (in); // hint
+			if (_custom_cfg) { 
+				dout = _custom_out;
+			} else if (dout.n_midi () > 0 && dout.n_audio () == 0) {
+				dout.set (DataType::AUDIO, 2);
+			}
+			if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
 			ChanCount useins;
 			bool const r = _plugins.front()->can_support_io_configuration (in, dout, &useins);
 			assert (r);
-			assert (_match.strict_io || dout.n_audio() == out.n_audio()); // sans midi bypass
+			assert (dout.n_audio() <= out.n_audio()); // sans midi bypass
 			if (useins.n_audio() == 0) {
 				useins = in;
 			}
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("Delegate configuration: %1 %2 %3\n", name(), useins, dout));
+
 			if (_plugins.front()->configure_io (useins, dout) == false) {
 				PluginIoReConfigure (); /* EMIT SIGNAL */
 				_configured = false;
@@ -1542,8 +1549,13 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 
 	/* if a user specified a custom cfg, so be it. */
 	if (_custom_cfg) {
+		PluginInfoPtr info = _plugins.front()->get_info();
 		out = _custom_out;
-		return Match (ExactMatch, get_count(), _strict_io, true); // XXX
+		if (info->reconfigurable_io()) {
+			return Match (Delegate, get_count(), _strict_io, true);
+		} else {
+			return Match (ExactMatch, get_count(), _strict_io, true);
+		}
 	}
 
 	/* try automatic configuration */
@@ -1601,7 +1613,9 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 
 	if (info->reconfigurable_io()) {
 		ChanCount useins;
-		// TODO add sidechains here
+		out = inx; // hint
+		if (out.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
+		if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
 		bool const r = _plugins.front()->can_support_io_configuration (inx, out, &useins);
 		if (!r) {
 			// houston, we have a problem.
@@ -1665,7 +1679,12 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 	ChanCount midi_bypass;
 
 	if (info->reconfigurable_io()) {
-		/* Plugin has flexible I/O, so delegate to it */
+		/* Plugin has flexible I/O, so delegate to it
+		 * pre-seed outputs, plugin tries closest match
+		 */
+		out = in; // hint
+		if (out.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
+		if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
 		bool const r = _plugins.front()->can_support_io_configuration (in, out);
 		if (!r) {
 			return Match (Impossible, 0);
