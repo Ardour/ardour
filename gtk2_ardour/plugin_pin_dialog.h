@@ -28,6 +28,7 @@
 #include "ardour/route.h"
 
 #include "ardour_button.h"
+#include "ardour_dropdown.h"
 #include "ardour_window.h"
 #include "io_selector.h"
 
@@ -91,6 +92,8 @@ private:
 	ArdourButton _add_sc_audio;
 	ArdourButton _add_sc_midi;
 
+	ArdourDropdown _out_presets;
+
 	Gtk::Menu reset_menu;
 	Gtk::Menu input_menu;
 	Gtk::Table* _sidechain_tbl;
@@ -99,6 +102,7 @@ private:
 	void plugin_reconfigured ();
 	void update_element_pos ();
 	void refill_sidechain_table ();
+	void refill_output_presets ();
 
 	void darea_size_request (Gtk::Requisition*);
 	void darea_size_allocate (Gtk::Allocation&);
@@ -127,6 +131,7 @@ private:
 	void add_remove_plugin_clicked (bool);
 	void add_remove_port_clicked (bool, ARDOUR::DataType);
 	void add_sidechain_port (ARDOUR::DataType);
+	void select_output_preset (uint32_t n_audio);
 	void handle_input_action (const CtrlElem &, const CtrlElem &);
 	void handle_output_action (const CtrlElem &, const CtrlElem &);
 	void handle_thru_action (const CtrlElem &, const CtrlElem &);

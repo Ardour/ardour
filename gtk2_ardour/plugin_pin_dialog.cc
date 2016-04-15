@@ -50,7 +50,7 @@ using namespace Gtkmm2ext;
 
 PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
-	, _set_config (_("Configure"), ArdourButton::led_default_elements)
+	, _set_config (_("Manual Config"), ArdourButton::led_default_elements)
 	, _tgl_sidechain (_("Side Chain"), ArdourButton::led_default_elements)
 	, _add_plugin (_("+"))
 	, _del_plugin (_("-"))
@@ -125,7 +125,6 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 
 	/* left side */
 	tl->pack_start (_set_config, false, false);
-	tl->pack_start (*manage (new Label ("")), true, true); // invisible separator
 
 	box = manage (new HBox ());
 	box->set_border_width (2);
@@ -154,6 +153,11 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	f->add (*box);
 	tl->pack_start (*f, false, false);
 
+	tl->pack_start (*manage (new Label ("")), true, true); // invisible separator
+	tl->pack_start (*manage (new HSeparator ()), false, false, 4);
+	_out_presets.disable_scrolling ();
+	ARDOUR_UI_UTILS::set_tooltip (_out_presets, _("Output Presets"));
+	tl->pack_start (_out_presets, false, false);
 
 	/* right side */
 	_sidechain_tbl = manage (new Gtk::Table ());
@@ -232,6 +236,7 @@ PluginPinDialog::plugin_reconfigured ()
 	_sinks = _pi->natural_input_streams ();
 	_sources = _pi->natural_output_streams ();
 
+
 	_tgl_sidechain.set_active (_pi->has_sidechain ());
 	_add_sc_audio.set_sensitive (_pi->has_sidechain ());
 	_add_sc_midi.set_sensitive (_pi->has_sidechain ());
@@ -244,6 +249,8 @@ PluginPinDialog::plugin_reconfigured ()
 		_del_plugin.set_sensitive (_n_plugins > 1);
 		_del_output_audio.set_sensitive (_out.n_audio () > 0 && _out.n_total () > 1);
 		_del_output_midi.set_sensitive (_out.n_midi () > 0 && _out.n_total () > 1);
+		_out_presets.set_sensitive (false);
+		_out_presets.set_text (_("Manual"));
 	} else {
 		_set_config.set_active (false);
 		_add_plugin.set_sensitive (false);
@@ -252,6 +259,8 @@ PluginPinDialog::plugin_reconfigured ()
 		_del_plugin.set_sensitive (false);
 		_del_output_audio.set_sensitive (false);
 		_del_output_midi.set_sensitive (false);
+		_out_presets.set_sensitive (true);
+		refill_output_presets ();
 	}
 
 	if (!_pi->has_sidechain () && _sidechain_selector) {
@@ -357,6 +366,55 @@ PluginPinDialog::refill_sidechain_table ()
 		add_port_to_table (*i, r, can_remove);
 	}
 	_sidechain_tbl->show_all ();
+}
+
+void
+PluginPinDialog::refill_output_presets ()
+{
+	using namespace Menu_Helpers;
+	_out_presets.clear_items();
+
+	_out_presets.AddMenuElem (MenuElem(_("Automatic"), sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::select_output_preset), 0)));
+
+	PluginOutputConfiguration ppc (_pi->plugin (0)->possible_output ());
+	const uint32_t n_audio = _pi->preset_out ().n_audio ();
+	if (n_audio == 0) {
+		_out_presets.set_text(_("Automatic"));
+	}
+
+	if (ppc.find (0) != ppc.end ()) {
+		// anyting goes
+		ppc.clear ();
+		if (n_audio != 0) {
+			ppc.insert (n_audio);
+		}
+		ppc.insert (1);
+		ppc.insert (2);
+		ppc.insert (8);
+		ppc.insert (16);
+		ppc.insert (24);
+		ppc.insert (32);
+	}
+
+	for (PluginOutputConfiguration::const_iterator i = ppc.begin () ; i != ppc.end (); ++i) {
+		assert (*i > 0);
+		std::string tmp;
+		switch (*i) {
+			case 1:
+				tmp = _("Mono");
+				break;
+			case 2:
+				tmp = _("Stereo");
+				break;
+			default:
+				tmp = string_compose (P_("%1 Channel", "%1 Channels", *i), *i);
+				break;
+		}
+		_out_presets.AddMenuElem (MenuElem(tmp, sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::select_output_preset), *i)));
+		if (n_audio == *i) {
+			_out_presets.set_text(tmp);
+		}
+	}
 }
 
 void
@@ -777,6 +835,16 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 	cairo_set_source_rgba (cr, 1., 1., 1., 1.);
 	pango_cairo_show_layout (cr, layout->gobj ());
 
+	if (_pi->signal_latency () > 0) {
+		// TODO: this needs a better location also format to msec (and cache)
+		layout->set_width ((_innerwidth - 2 * _pin_box_size) * PANGO_SCALE);
+		layout->set_text (string_compose (_("Latency %1 spl"), _pi->signal_latency ()));
+		layout->get_pixel_size (text_width, text_height);
+		cairo_move_to (cr, _margin_x + _pin_box_size * .5, _margin_y + 2);
+		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
+		pango_cairo_show_layout (cr, layout->gobj ());
+	}
+
 	if (_pi->strict_io () && !Profile->get_mixbus ()) {
 		layout->set_text (_("Strict I/O"));
 		layout->get_pixel_size (text_width, text_height);
@@ -802,6 +870,13 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 		cairo_set_source_rgb (cr, .5, .5, .5);
 		rounded_rectangle (cr, x0 - _bxw2, yc - _bxh2, 2 * _bxw2, 2 * _bxh2, 7);
 		cairo_fill (cr);
+
+		layout->set_width (1.9 * _bxw2 * PANGO_SCALE);
+		layout->set_text (string_compose (_("Plugin #%1"), i + 1));
+		layout->get_pixel_size (text_width, text_height);
+		cairo_move_to (cr, x0 - text_width * .5, yc - text_height * .5);
+		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
+		pango_cairo_show_layout (cr, layout->gobj ());
 
 		const ChanMapping::Mappings in_map = _pi->input_map (i).mappings ();
 		const ChanMapping::Mappings out_map = _pi->output_map (i).mappings ();
@@ -1326,6 +1401,14 @@ void
 PluginPinDialog::reset_mapping ()
 {
 	_pi->reset_map ();
+}
+
+void
+PluginPinDialog::select_output_preset (uint32_t n_audio)
+{
+	if (_session && _session->actively_recording()) { return; }
+	ChanCount out (DataType::AUDIO, n_audio);
+	_route ()->plugin_preset_output (_pi, out);
 }
 
 void
