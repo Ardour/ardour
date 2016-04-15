@@ -2506,6 +2506,45 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 }
 
 bool
+Route::plugin_preset_output (boost::shared_ptr<Processor> proc, ChanCount outs)
+{
+	boost::shared_ptr<PluginInsert> pi;
+	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
+		return false;
+	}
+
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		ProcessorList::iterator i = find (_processors.begin(), _processors.end(), proc);
+		if (i == _processors.end ()) {
+			return false;
+		}
+	}
+
+	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+
+		const ChanCount& old (pi->preset_out ());
+		if (!pi->set_preset_out (outs)) {
+			return true; // no change, OK
+		}
+
+		list<pair<ChanCount, ChanCount> > c = try_configure_processors_unlocked (n_inputs (), 0);
+		if (c.empty()) {
+			/* not possible */
+			pi->set_preset_out (old);
+			return false;
+		}
+		configure_processors_unlocked (0);
+	}
+
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	_session.set_dirty ();
+	return true;
+}
+
+bool
 Route::reset_plugin_insert (boost::shared_ptr<Processor> proc)
 {
 	ChanCount unused;

@@ -74,6 +74,8 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	void set_parameter (uint32_t which, float val);
 	float get_parameter (uint32_t which) const;
 
+	PluginOutputConfiguration possible_output () const { return _output_configs; }
+
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	uint32_t nth_parameter (uint32_t which, bool& ok) const;
 	void activate ();
@@ -172,6 +174,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	AudioBufferList* buffers;
 	bool _has_midi_input;
 	bool _has_midi_output;
+	PluginOutputConfiguration _output_configs;
 
 	/* despite all the cool work that apple did on their AU preset
 	   system, they left factory presets and user presets as two

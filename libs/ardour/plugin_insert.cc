@@ -160,6 +160,17 @@ PluginInsert::set_custom_cfg (bool b)
 }
 
 bool
+PluginInsert::set_preset_out (const ChanCount& c)
+{
+	bool changed = _preset_out != c;
+	_preset_out = c;
+	if (changed && !_custom_cfg) {
+		PluginConfigChanged (); /* EMIT SIGNAL */
+	}
+	return changed;
+}
+
+bool
 PluginInsert::add_sidechain (uint32_t n_audio)
 {
 	// caller must hold process lock
@@ -1383,6 +1394,8 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			ChanCount dout (in); // hint
 			if (_custom_cfg) { 
 				dout = _custom_out;
+			} else if (_preset_out.n_audio () > 0) {
+				dout.set (DataType::AUDIO, _preset_out.n_audio ());
 			} else if (dout.n_midi () > 0 && dout.n_audio () == 0) {
 				dout.set (DataType::AUDIO, 2);
 			}
@@ -1390,7 +1403,6 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			ChanCount useins;
 			bool const r = _plugins.front()->can_support_io_configuration (in, dout, &useins);
 			assert (r);
-			assert (dout.n_audio() <= out.n_audio()); // sans midi bypass
 			if (useins.n_audio() == 0) {
 				useins = in;
 			}
@@ -1529,12 +1541,29 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	return private_can_support_io_configuration (in, out).method != Impossible;
 }
 
+PluginInsert::Match
+PluginInsert::private_can_support_io_configuration (ChanCount const& in, ChanCount& out) const
+{
+	if (!_custom_cfg && _preset_out.n_audio () > 0) {
+		// preseed hint (for variable i/o)
+		out.set (DataType::AUDIO, _preset_out.n_audio ());
+	}
+
+	Match rv = internal_can_support_io_configuration (in, out);
+
+	if (!_custom_cfg && _preset_out.n_audio () > 0) {
+		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("using output preset: %1 %2\n", name(), _preset_out));
+		out.set (DataType::AUDIO, _preset_out.n_audio ());
+	}
+	return rv;
+}
+
 /** A private version of can_support_io_configuration which returns the method
  *  by which the configuration can be matched, rather than just whether or not
  *  it can be.
  */
 PluginInsert::Match
-PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanCount& out) const
+PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, ChanCount& out) const
 {
 	if (_plugins.empty()) {
 		return Match();
@@ -1848,6 +1877,7 @@ PluginInsert::state (bool full)
 	 * in case the plugin goes missing) */
 	node.add_child_nocopy (* _configured_in.state (X_("ConfiguredInput")));
 	node.add_child_nocopy (* _configured_out.state (X_("ConfiguredOutput")));
+	node.add_child_nocopy (* _preset_out.state (X_("PresetOutput")));
 
 	/* save custom i/o config */
 	node.add_property("custom", _custom_cfg ? "yes" : "no");
@@ -2120,6 +2150,9 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	for (XMLNodeIterator i = kids.begin(); i != kids.end(); ++i) {
 		if ((*i)->name() == X_("ConfiguredOutput")) {
 			_custom_out = ChanCount(**i);
+		}
+		if ((*i)->name() == X_("PresetOutput")) {
+			_preset_out = ChanCount(**i);
 		}
 		if (strncmp ((*i)->name ().c_str(), X_("InputMap-"), 9) == 0) {
 			long pc = atol (&((*i)->name().c_str()[9]));

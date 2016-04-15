@@ -1934,7 +1934,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 }
 
 Plugin::IOPortDescription
-LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id)
+LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 {
 	PortFlags match = 0;
 	switch (dt) {

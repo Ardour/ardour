@@ -134,7 +134,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 		}
 	}
 
-	ChanCount required_buffers () const { return _required_buffers; }
+	const ChanCount& required_buffers () const { return _required_buffers; }
+	const ChanCount& preset_out () const { return _preset_out; }
 
 	// allow to override output_streams(), implies "Custom Mode"
 
@@ -144,6 +145,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void set_outputs    (const ChanCount&);
 	void set_strict_io  (bool b);
 	void set_custom_cfg (bool b);
+	bool set_preset_out (const ChanCount&);
 	bool add_sidechain  (uint32_t n_audio = 1);
 	bool del_sidechain ();
 	boost::shared_ptr<SideChain> sidechain () const { return _sidechain; }
@@ -306,6 +308,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	ChanCount _configured_internal; // with side-chain
 	ChanCount _configured_out;
 	ChanCount _custom_out;
+	ChanCount _preset_out;
 	ChanCount _cached_sidechain_pins;
 	ChanCount _required_buffers;
 
@@ -317,6 +320,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	bool _mapping_changed;
 
 	Match private_can_support_io_configuration (ChanCount const &, ChanCount &) const;
+	Match internal_can_support_io_configuration (ChanCount const &, ChanCount &) const;
 	Match automatic_can_support_io_configuration (ChanCount const &, ChanCount &) const;
 
 	/** details of the match currently being used */

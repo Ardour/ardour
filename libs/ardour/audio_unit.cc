@@ -1133,8 +1133,7 @@ AUPlugin::output_streams() const
 bool
 AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, ChanCount* imprecise)
 {
-	// Note: We never attempt to multiply-instantiate plugins to meet io configurations.
-
+	_output_configs.clear ();
 	const int32_t audio_in = in.n_audio();
 	int32_t audio_out;
 	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
@@ -1151,7 +1150,10 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 							name(), io_configs.size(), in, out));
 
 	// preferred setting (provided by plugin_insert)
+	const int preferred_out = out.n_audio ();
 	audio_out = out.n_audio ();
+	bool found = false;
+	bool exact_match = false;
 
 	/* kAudioUnitProperty_SupportedNumChannels
 	 * https://developer.apple.com/library/mac/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/TheAudioUnit/TheAudioUnit.html#//apple_ref/doc/uid/TP40003278-CH12-SW20
@@ -1184,35 +1186,43 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 		int32_t possible_in = i->first;
 		int32_t possible_out = i->second;
 
-		if ((possible_in == audio_in) && (possible_out == audio_out)) {
+		if ((possible_in == audio_in) && (possible_out == preferred_out)) {
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: %1 in %2 out to match in %3 out %4\n",
-									possible_in, possible_out,
-									in, out));
+						possible_in, possible_out,
+						in, out));
 
-			out.set (DataType::MIDI, 0);
-			out.set (DataType::AUDIO, audio_out);
-
-			return true;
+			// exact match
+			_output_configs.insert (preferred_out);
+			exact_match = true;
+			found = true;
+			break;
 		}
 	}
 
 	/* now allow potentially "imprecise" matches */
-	audio_out = -1;
-	bool found = false;
-
+	int32_t audio_out = -1;
 	float penalty = 9999;
-	const int preferred_out = out.n_audio ();
 	int used_possible_in = 0;
 
-#define FOUNDCFG(nch) {                                  \
-	float p = fabsf ((float)(nch) - preferred_out);  \
-	if ((nch) > preferred_out) { p *= 1.1; }         \
-	if (p < penalty) {                               \
-		used_possible_in = possible_in;          \
-		audio_out = (nch);                       \
-		penalty = p;                             \
-		found = true;                            \
-	}                                                \
+#define FOUNDCFG(nch) {                            \
+  float p = fabsf ((float)(nch) - preferred_out);  \
+  _output_configs.insert (nch);                    \
+  if ((nch) > preferred_out) { p *= 1.1; }         \
+  if (p < penalty) {                               \
+    used_possible_in = possible_in;                \
+    audio_out = (nch);                             \
+    penalty = p;                                   \
+    found = true;                                  \
+  }                                                \
+}
+
+#define ANYTHINGGOES                               \
+  _output_configs.insert (0);
+
+#define UPTO(nch) {                                \
+  for (int n = 1; n < nch; ++n) {                  \
+    _output_configs.insert (n);                    \
+  }                                                \
 }
 
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
@@ -1233,12 +1243,15 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 			if (possible_out == -1) {
 				/* any configuration possible, provide stereo output */
 				FOUNDCFG (preferred_out);
+				ANYTHINGGOES;
 			} else if (possible_out == -2) {
 				/* invalid, should be (0, -1) */
 				FOUNDCFG (preferred_out);
+				ANYTHINGGOES;
 			} else if (possible_out < -2) {
 				/* variable number of outputs up to -N, */
 				FOUNDCFG (min (-possible_out, preferred_out));
+				UPTO (-possible_out);
 			} else {
 				/* exact number of outputs */
 				FOUNDCFG (possible_out);
@@ -1253,11 +1266,13 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 			} else if (possible_out == -2) {
 				/* any configuration possible, pick matching */
 				FOUNDCFG (preferred_out);
+				ANYTHINGGOES;
 			} else if (possible_out < -2) {
 				/* explicitly variable number of outputs, pick maximum */
 				FOUNDCFG (max (-possible_out, preferred_out));
 				/* and try min, too, in case the penalty is lower */
 				FOUNDCFG (min (-possible_out, preferred_out));
+				UPTO (-possible_out)
 			} else {
 				/* exact number of outputs */
 				FOUNDCFG (possible_out);
@@ -1268,13 +1283,16 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 			if (possible_out == -1) {
 				/* any configuration possible, pick matching */
 				FOUNDCFG (preferred_out);
+				ANYTHINGGOES;
 			} else if (possible_out == -2) {
 				/* invalid. interpret as (-1, -1) */
 				FOUNDCFG (preferred_out);
+				ANYTHINGGOES;
 			} else if (possible_out < -2) {
 				/* invalid,  interpret as (<-2, <-2)
 				 * variable number of outputs up to -N, */
 				FOUNDCFG (min (-possible_out, preferred_out));
+				UPTO (-possible_out)
 			} else {
 				/* exact number of outputs */
 				FOUNDCFG (possible_out);
@@ -1291,14 +1309,17 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 			if (audio_in > -possible_in && imprecise == NULL) {
 				/* request is too large */
 			} else if (possible_out == -1) {
-				/* any output configuration possible, provide stereo out */
+				/* any output configuration possible */
 				FOUNDCFG (preferred_out);
+				ANYTHINGGOES;
 			} else if (possible_out == -2) {
 				/* invalid. interpret as (<-2, -1) */
 				FOUNDCFG (preferred_out);
+				ANYTHINGGOES;
 			} else if (possible_out < -2) {
 				/* variable number of outputs up to -N, */
 				FOUNDCFG (min (-possible_out, preferred_out));
+				UPTO (-possible_out)
 			} else {
 				/* exact number of outputs */
 				FOUNDCFG (possible_out);
@@ -1310,15 +1331,16 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 			if (possible_out == -1) {
 				/* any output configuration possible */
 				FOUNDCFG (preferred_out);
+				ANYTHINGGOES;
 			} else if (possible_out == -2) {
-				/* plugins shouldn't really use (>0,-2) but might.
-				 * interpret as (>0,-1):
-				 */
+				/* plugins shouldn't really use (>0,-2), interpret as (>0,-1) */
 				FOUNDCFG (preferred_out);
+				ANYTHINGGOES;
 			} else if (possible_out < -2) {
 				/* > 0, < -2 is not specified
 				 * interpret as up to -N */
 				FOUNDCFG (min (-possible_out, preferred_out));
+				UPTO (-possible_out)
 			} else {
 				/* exact number of outputs */
 				FOUNDCFG (possible_out);
@@ -1350,20 +1372,24 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 		}
 	}
 
-	if (found) {
+	if (!found) {
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tFAIL: no io configs match %1\n", in));
+		return false;
+	}
+
+	if (exact_match) {
+		out.set (DataType::MIDI, 0); // currently always zero
+		out.set (DataType::AUDIO, preferred_out);
+	} else {
 		if (used_possible_in < -2 && audio_in == 0) {
 			// input-port count cannot be zero, use as many ports
 			// as outputs, but at most abs(possible_in)
 			audio_input_cnt = max (1, min (audio_out, -used_possible_in));
 		}
-
 		out.set (DataType::MIDI, 0); /// XXX
 		out.set (DataType::AUDIO, audio_out);
-		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2\n", in, out));
-	} else {
-		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tFAIL: no io configs match %1\n", in));
-		return false;
 	}
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2\n", in, out));
 
 	return true;
 }
