@@ -459,9 +459,9 @@ private:
 
 	framepos_t frame_time_locked (const Metrics& metrics, const Timecode::BBT_Time&) const;
 
-	const MeterSection& meter_section_at_locked (framepos_t frame) const;
-	const TempoSection& tempo_section_at_locked (framepos_t frame) const;
-	const Tempo tempo_at_locked (const framepos_t& frame) const;
+	const MeterSection& meter_section_at_locked (const Metrics& metrics, framepos_t frame) const;
+	const TempoSection& tempo_section_at_locked (const Metrics& metrics, framepos_t frame) const;
+	const Tempo tempo_at_locked (const Metrics& metrics, const framepos_t& frame) const;
 
 	bool check_solved (Metrics& metrics, bool by_frame);
 	bool set_active_tempos (const Metrics& metrics, const framepos_t& frame);
