@@ -3197,7 +3197,6 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	framepos_t const pf = adjusted_current_frame (event, false);
-	_marker->set_position (pf);
 	if (_marker->meter().position_lock_style() == MusicTime) {
 		TempoMap& map (_editor->session()->tempo_map());
 		Timecode::BBT_Time bbt;
@@ -3210,7 +3209,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_editor->session()->tempo_map().gui_move_meter (_real_section, pf);
 	}
 	_marker->set_position (pf);
-	show_verbose_cursor_time (pf);
+	show_verbose_cursor_time (_real_section->frame());
 }
 
 void
