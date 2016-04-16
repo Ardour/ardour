@@ -1540,12 +1540,30 @@ TempoMap::frame_at_pulse (const double& pulse) const
 double
 TempoMap::beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const
 {
-	const MeterSection& prev_m = meter_section_at_locked (metrics, frame);
 	const TempoSection& ts = tempo_section_at_locked (metrics, frame);
-	if (frame < prev_m.frame()) {
+	MeterSection* prev_m = 0;
+	MeterSection* next_m = 0;
+
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		MeterSection* m;
+		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
+			if (prev_m && m->frame() > frame) {
+				next_m = m;
+				break;
+			}
+			prev_m = m;
+		}
+	}
+	if (frame < prev_m->frame()) {
 		return 0.0;
 	}
-	return prev_m.beat() + (ts.pulse_at_frame (frame, _frame_rate) - prev_m.pulse()) * prev_m.note_divisor();
+	const double beat = prev_m->beat() + (ts.pulse_at_frame (frame, _frame_rate) - prev_m->pulse()) * prev_m->note_divisor();
+
+	if (next_m && next_m->beat() < beat) {
+		return next_m->beat();
+	}
+
+	return beat;
 }
 
 double
