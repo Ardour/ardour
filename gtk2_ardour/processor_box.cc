@@ -1360,7 +1360,7 @@ ProcessorEntry::RoutingIcon::expose_input_map (cairo_t* cr, const double width, 
 		bool valid_thru;
 		uint32_t pn = is_midi ? i : i - n_in_midi;
 		DataType dt = is_midi ? DataType::MIDI : DataType::AUDIO;
-		uint32_t idx = _thru_map.get_src (dt, pn, &valid_thru);
+		_thru_map.get_src (dt, pn, &valid_thru);
 		if (!valid_thru) {
 			continue;
 		}
@@ -2893,7 +2893,9 @@ ProcessorBox::setup_routing_feeds ()
 			}
 		} else {
 			(*i)->output_routing_icon.set_terminal(false);
-			if (!(*i)->routing_icon.out_identity () && (*i)->routing_icon.can_coalesce ()){
+			if (!(*i)->routing_icon.out_identity ()
+					&& !(*i)->routing_icon.in_identity ()
+					&& (*i)->routing_icon.can_coalesce ()) {
 				(*i)->output_routing_icon.hide();
 			} else if (!(*i)->routing_icon.out_identity ()) {
 				(*i)->output_routing_icon.show();
