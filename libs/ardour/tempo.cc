@@ -1542,6 +1542,9 @@ TempoMap::beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame)
 {
 	const MeterSection& prev_m = meter_section_at_locked (metrics, frame);
 	const TempoSection& ts = tempo_section_at_locked (metrics, frame);
+	if (frame < prev_m.frame()) {
+		return 0.0;
+	}
 	return prev_m.beat() + (ts.pulse_at_frame (frame, _frame_rate) - prev_m.pulse()) * prev_m.note_divisor();
 }
 
