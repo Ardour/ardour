@@ -1172,7 +1172,7 @@ PluginInsert::sanitize_maps ()
 	/* strip dead wood */
 	PinMappings new_ins;
 	PinMappings new_outs;
-	ChanMapping new_thru (_thru_map);
+	ChanMapping new_thru;
 
 	for (uint32_t pc = 0; pc < get_count(); ++pc) {
 		ChanMapping new_in;
@@ -1212,6 +1212,17 @@ PluginInsert::sanitize_maps ()
 				} else if (valid) {
 					mapped = true;
 				}
+			}
+		}
+	}
+
+	/* remove excess thru */
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		for (uint32_t o = 0; o < _configured_out.get (*t); ++o) {
+			bool valid;
+			uint32_t idx = _thru_map.get (*t, o, &valid);
+			if (valid && idx < _configured_internal.get (*t)) {
+				new_thru.set (*t, o, idx);
 			}
 		}
 	}
