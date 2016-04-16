@@ -113,6 +113,7 @@ PTFFormat::load(std::string path, int64_t targetsr) {
 	uint64_t i;
 	uint64_t j;
 	int inv;
+	int err;
 
 	if (! (fp = fopen(path.c_str(), "rb"))) {
 		return -1;
@@ -257,8 +258,12 @@ PTFFormat::load(std::string path, int64_t targetsr) {
 		}
 	}
 
+	if (version < 5 || version > 12)
+		return -1;
 	targetrate = targetsr;
-	parse();
+	err = parse();
+	if (err)
+		return -1;
 	return 0;
 }
 
@@ -298,36 +303,48 @@ PTFFormat::unxor10(void)
 	}
 }
 
-void
+int
 PTFFormat::parse(void) {
 	if (version == 5) {
 		parse5header();
 		setrates();
+		if (sessionrate < 44100 || sessionrate > 192000)
+		  return -1;
 		parseaudio5();
 		parserest5();
 	} else if (version == 7) {
 		parse7header();
 		setrates();
+		if (sessionrate < 44100 || sessionrate > 192000)
+		  return -1;
 		parseaudio();
 		parserest89();
 	} else if (version == 8) {
 		parse8header();
 		setrates();
+		if (sessionrate < 44100 || sessionrate > 192000)
+		  return -1;
 		parseaudio();
 		parserest89();
 	} else if (version == 9) {
 		parse9header();
 		setrates();
+		if (sessionrate < 44100 || sessionrate > 192000)
+		  return -1;
 		parseaudio();
 		parserest89();
 	} else if (version == 10 || version == 11 || version == 12) {
 		parse10header();
 		setrates();
+		if (sessionrate < 44100 || sessionrate > 192000)
+		  return -1;
 		parseaudio();
 		parserest10();
 	} else {
 		// Should not occur
+		return -1;
 	}
+	return 0;
 }
 
 void

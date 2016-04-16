@@ -121,6 +121,7 @@ Editor::do_ptimport (std::string ptpath,
 	vector<string> to_import;
 	string fullpath;
 	bool ok = false;
+	bool onefailed = false;
 	PTFFormat ptf;
 	framepos_t pos = -1;
 
@@ -165,7 +166,17 @@ Editor::do_ptimport (std::string ptpath,
 
 			ptfwavpair.push_back(p);
 			imported.push_back(import_status.sources.back());
+		} else {
+			onefailed = true;
 		}
+	}
+
+	if (onefailed) {
+		MessageDialog msg (_("Failed to load one or more of the audio files, but continuing to attempt import."));
+		msg.run ();
+	} else {
+		MessageDialog msg (_("Success! Import should complete soon."));
+		msg.run ();
 	}
 
 	for (vector<PTFFormat::region_t>::iterator a = ptf.regions.begin();
