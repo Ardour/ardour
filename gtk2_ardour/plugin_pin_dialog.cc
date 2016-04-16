@@ -37,6 +37,7 @@
 
 #include "plugin_pin_dialog.h"
 #include "gui_thread.h"
+#include "timers.h"
 #include "tooltips.h"
 #include "ui_config.h"
 
@@ -79,15 +80,15 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	assert (pi->owner ()); // Route
 
 	_pi->PluginIoReConfigure.connect (
-			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context ()
+			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::queue_idle_update, this), gui_context ()
 			);
 
 	_pi->PluginMapChanged.connect (
-			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context ()
+			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::queue_idle_update, this), gui_context ()
 			);
 
 	_pi->PluginConfigChanged.connect (
-			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::plugin_reconfigured, this), gui_context ()
+			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::queue_idle_update, this), gui_context ()
 			);
 
 	_pin_box_size = 2 * ceil (max (8., 10. * UIConfiguration::instance ().get_ui_scale ()) * .5);
@@ -224,6 +225,45 @@ PluginPinDialog::~PluginPinDialog ()
 }
 
 void
+PluginPinDialog::set_session (ARDOUR::Session *s)
+{
+	SessionHandlePtr::set_session (s);
+	plugin_reconfigured ();
+}
+
+void
+PluginPinDialog::queue_idle_update ()
+{
+	/* various actions here are directly executed, in the GUI thread,
+	 * with the GUI-thread eventually taking the process and processor lock.
+	 * "connect gui_context()" will call back immediately and this
+	 * signal-handler will run with the locks held.
+	 *
+	 * This will lead to a crash with calling nth_send() which takes
+	 * a processor read-lock while holding a write lock in the same thread.
+	 *
+	 * decouple update to GUI idle.
+	 *
+	 * BUT, do delete existing controls here (in case they're affected by
+	 * the change and hit by the Timer before idle comes around)
+	 */
+	for (list<Control*>::iterator i = _controls.begin (); i != _controls.end (); ++i) {
+		_sidechain_tbl->remove ((*i)->box);
+		delete *i;
+	}
+	_controls.clear ();
+	Glib::signal_idle().connect (sigc::mem_fun(*this, &PluginPinDialog::idle_update));
+}
+
+bool
+PluginPinDialog::idle_update ()
+{
+	plugin_reconfigured ();
+	return false;
+}
+
+
+void
 PluginPinDialog::plugin_reconfigured ()
 {
 	ENSURE_GUI_THREAD (*this, &PluginPinDialog::plugin_reconfigured);
@@ -348,6 +388,10 @@ PluginPinDialog::refill_sidechain_table ()
 		i = kids.erase (i);
 	}
 	_sidechain_tbl->resize (1, 1);
+	for (list<Control*>::iterator i = _controls.begin (); i != _controls.end (); ++i) {
+		delete *i;
+	}
+	_controls.clear ();
 	if (!_pi->has_sidechain () && _sidechain_selector) {
 		return;
 	}
@@ -359,11 +403,11 @@ PluginPinDialog::refill_sidechain_table ()
 	uint32_t r = 0;
 	PortSet& p (io->ports ());
 	bool can_remove = p.num_ports () > 1;
-	for (PortSet::iterator i = p.begin (DataType::MIDI); i != p.end (DataType::MIDI); ++i, ++r) {
-		add_port_to_table (*i, r, can_remove);
+	for (PortSet::iterator i = p.begin (DataType::MIDI); i != p.end (DataType::MIDI); ++i) {
+		r += add_port_to_table (*i, r, can_remove);
 	}
-	for (PortSet::iterator i = p.begin (DataType::AUDIO); i != p.end (DataType::AUDIO); ++i, ++r) {
-		add_port_to_table (*i, r, can_remove);
+	for (PortSet::iterator i = p.begin (DataType::AUDIO); i != p.end (DataType::AUDIO); ++i) {
+		r += add_port_to_table (*i, r, can_remove);
 	}
 	_sidechain_tbl->show_all ();
 }
@@ -386,7 +430,7 @@ PluginPinDialog::refill_output_presets ()
 	}
 
 	if (_pi->strict_io () && ppc.size () == 1) {
-		// XXX "stereo" is currently preferred default for instruments, see PluginInsert
+		// "stereo" is currently preferred default for instruments, see PluginInsert
 		if (ppc.find (2) != ppc.end ()) {
 			need_dropdown = false;
 		}
@@ -449,7 +493,7 @@ PluginPinDialog::refill_output_presets ()
 	}
 }
 
-void
+uint32_t
 PluginPinDialog::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool can_remove)
 {
 	std::string lbl;
@@ -507,6 +551,41 @@ PluginPinDialog::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool 
 	} else {
 		pb->set_sensitive (false);
 	}
+
+	uint32_t rv = 1;
+
+	if (cns.size () == 1 && _session) {
+		/* check if it's an Ardour Send feeding.. */
+		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
+		for (ARDOUR::RouteList::const_iterator i = routes->begin (); i != routes->end (); ++i) {
+			uint32_t nth = 0;
+			boost::shared_ptr<Processor> proc;
+			/* nth_send () takes a processor read-lock */
+			while ((proc = (*i)->nth_send (nth))) {
+				boost::shared_ptr<IOProcessor> send = boost::dynamic_pointer_cast<IOProcessor> (proc);
+				if (!send || !send->output ()) {
+					++nth;
+					continue;
+				}
+				if (!send->output ()->connected_to (p->name ())) {
+					++nth;
+					continue;
+				}
+				/* if processor goes away, we're notified by the port disconnect,
+				 * there should be no need to explicily connect to proc->DropReferences
+				 */
+				set<Evoral::Parameter> p = proc->what_can_be_automated ();
+				for (set<Evoral::Parameter>::iterator i = p.begin (); i != p.end (); ++i) {
+					Control* c = new Control (proc->automation_control (*i), _("Send"));
+					_controls.push_back (c);
+					++r; ++rv;
+					_sidechain_tbl->attach (c->box, 0, 2, r, r + 1, EXPAND|FILL, SHRINK);
+				}
+				break;
+			}
+		}
+	}
+	return rv;
 }
 
 void
@@ -1473,13 +1552,16 @@ PluginPinDialog::add_sidechain_port (DataType dt)
 	if (!io) {
 		return;
 	}
+
+	// this triggers a PluginIoReConfigure with process and processor write lock held
+	// from /this/ thread.
 	io->add_port ("", this, dt);
 }
 
 void
 PluginPinDialog::remove_port (boost::weak_ptr<ARDOUR::Port> wp)
 {
-	if (_session && _session->actively_recording()) { return; }
+	if (_session && _session->actively_recording ()) { return; }
 	boost::shared_ptr<ARDOUR::Port> p = wp.lock ();
 	boost::shared_ptr<IO> io = _pi->sidechain_input ();
 	if (!io || !p) {
@@ -1619,9 +1701,122 @@ PluginPinDialog::port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port> w
 	if (!io) { return; }
 
 	if (p0 && io->has_port (p0)) {
-		plugin_reconfigured ();
+		queue_idle_update ();
 	}
 	else if (p1 && io->has_port (p1)) {
-		plugin_reconfigured ();
+		queue_idle_update ();
 	}
+}
+
+/* lifted from ProcessorEntry::Control */
+PluginPinDialog::Control::Control (boost::shared_ptr<AutomationControl> c, string const & n)
+	: _control (c)
+	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain ()), 0, 1, 0.01, 0.1)
+	, _slider (&_adjustment, boost::shared_ptr<PBD::Controllable> (), 0, max (13.f, rintf (13.f * UIConfiguration::instance ().get_ui_scale ())))
+	, _slider_persistant_tooltip (&_slider)
+	, _ignore_ui_adjustment (false)
+	, _name (n)
+{
+	_slider.set_controllable (c);
+	box.set_padding (0, 0, 4, 4);
+
+	_slider.set_name ("ProcessorControlSlider");
+	_slider.set_text (_name);
+
+	box.add (_slider);
+	_slider.show ();
+
+	const ARDOUR::ParameterDescriptor& desc = c->desc ();
+	double const lo = c->internal_to_interface (desc.lower);
+	double const up = c->internal_to_interface (desc.upper);
+	double const normal = c->internal_to_interface (desc.normal);
+	double smallstep = desc.smallstep;
+	double largestep = desc.largestep;
+
+	if (smallstep == 0.0) {
+		smallstep = up / 1000.;
+	} else {
+		smallstep = c->internal_to_interface (desc.lower + smallstep);
+	}
+
+	if (largestep == 0.0) {
+		largestep = up / 40.;
+	} else {
+		largestep = c->internal_to_interface (desc.lower + largestep);
+	}
+
+	_adjustment.set_lower (lo);
+	_adjustment.set_upper (up);
+	_adjustment.set_step_increment (smallstep);
+	_adjustment.set_page_increment (largestep);
+	_slider.set_default_value (normal);
+
+	_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
+	// dup. currently timers are used :(
+	//c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
+
+	// yuck, do we really need to do this?
+	// according to c404374 this is only needed for send automation
+	timer_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Control::control_changed));
+
+	control_changed ();
+	set_tooltip ();
+
+	/* We're providing our own PersistentTooltip */
+	set_no_tooltip_whatsoever (_slider);
+}
+
+PluginPinDialog::Control::~Control ()
+{
+	timer_connection.disconnect ();
+}
+
+void
+PluginPinDialog::Control::set_tooltip ()
+{
+	boost::shared_ptr<AutomationControl> c = _control.lock ();
+	if (!c) {
+		return;
+	}
+	char tmp[256];
+	snprintf (tmp, sizeof (tmp), "%s: %.2f", _name.c_str (), c->internal_to_user (c->get_value ()));
+
+	string sm = Gtkmm2ext::markup_escape_text (tmp);
+	_slider_persistant_tooltip.set_tip (sm);
+}
+
+void
+PluginPinDialog::Control::slider_adjusted ()
+{
+	if (_ignore_ui_adjustment) {
+		return;
+	}
+	boost::shared_ptr<AutomationControl> c = _control.lock ();
+	if (!c) {
+		return;
+	}
+	c->set_value ( c->interface_to_internal (_adjustment.get_value ()) , Controllable::NoGroup);
+	set_tooltip ();
+}
+
+
+void
+PluginPinDialog::Control::control_changed ()
+{
+	boost::shared_ptr<AutomationControl> c = _control.lock ();
+	if (!c) {
+		return;
+	}
+
+	_ignore_ui_adjustment = true;
+
+	// as long as rapid timers are used, only update the tooltip
+	// if the value has changed.
+	const double nval = c->internal_to_interface (c->get_value ());
+	if (_adjustment.get_value () != nval) {
+		_adjustment.set_value (nval);
+		set_tooltip ();
+	}
+
+	_ignore_ui_adjustment = false;
 }

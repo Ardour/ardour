@@ -27,6 +27,10 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/route.h"
 
+#include "gtkmm2ext/pixfader.h"
+#include "gtkmm2ext/persistent_tooltip.h"
+#include "gtkmm2ext/slider_controller.h"
+
 #include "ardour_button.h"
 #include "ardour_dropdown.h"
 #include "ardour_window.h"
@@ -37,7 +41,7 @@ class PluginPinDialog : public ArdourWindow
 public:
 	PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert>);
 	~PluginPinDialog ();
-
+	void set_session (ARDOUR::Session *);
 private:
 	typedef enum {
 		Input,
@@ -138,10 +142,10 @@ private:
 	bool handle_disconnect (const CtrlElem &, bool no_signal = false);
 	void disconnect_other_outputs (uint32_t skip_pc, ARDOUR::DataType dt, uint32_t id);
 	void disconnect_other_thru (ARDOUR::DataType dt, uint32_t id);
-	void add_port_to_table (boost::shared_ptr<ARDOUR::Port>, uint32_t, bool);
 	void remove_port (boost::weak_ptr<ARDOUR::Port>);
 	void disconnect_port (boost::weak_ptr<ARDOUR::Port>);
 	void connect_port (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
+	uint32_t add_port_to_table (boost::shared_ptr<ARDOUR::Port>, uint32_t, bool);
 	uint32_t maybe_add_route_to_input_menu (boost::shared_ptr<ARDOUR::Route>, ARDOUR::DataType, boost::weak_ptr<ARDOUR::Port>);
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
 
@@ -151,6 +155,9 @@ private:
 	PBD::ScopedConnectionList _plugin_connections;
 	PBD::ScopedConnection _io_connection;
 	boost::shared_ptr<ARDOUR::PluginInsert> _pi;
+
+	void queue_idle_update ();
+	bool idle_update ();
 
 	uint32_t _n_plugins;
 	ARDOUR::ChanCount _in, _ins, _out;
@@ -172,6 +179,26 @@ private:
 	bool   _dragging;
 	double _drag_x, _drag_y;
 
+	class Control: public sigc::trackable {
+	public:
+		Control (boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
+		~Control ();
+		Gtk::Alignment box;
+	private:
+		void slider_adjusted ();
+		void control_changed ();
+		void set_tooltip ();
+
+		boost::weak_ptr<ARDOUR::AutomationControl> _control;
+		Gtk::Adjustment _adjustment;
+		Gtkmm2ext::HSliderController _slider;
+		Gtkmm2ext::PersistentTooltip _slider_persistant_tooltip;
+
+		bool _ignore_ui_adjustment;
+		sigc::connection timer_connection;
+		std::string _name;
+	};
+	std::list<Control*> _controls;
 };
 
 #endif
