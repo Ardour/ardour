@@ -97,9 +97,9 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	_tgl_sidechain.set_name ("pinrouting sidechain");
 	_set_config.set_name ("pinrouting custom");
 
-	Menu_Helpers::MenuList& citems = reset_menu.items();
+	Menu_Helpers::MenuList& citems = reset_menu.items ();
 	reset_menu.set_name ("ArdourContextMenu");
-	citems.clear();
+	citems.clear ();
 	citems.push_back (Menu_Helpers::MenuElem (_("Reset"), sigc::mem_fun (*this, &PluginPinDialog::reset_mapping)));
 
 	_pm_size_group  = SizeGroup::create (SIZE_GROUP_BOTH);
@@ -130,7 +130,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	box->set_border_width (2);
 	box->pack_start (_add_plugin, true, false);
 	box->pack_start (_del_plugin, true, false);
-	f = manage (new Frame());
+	f = manage (new Frame ());
 	f->set_label (_("Instances"));
 	f->add (*box);
 	tl->pack_start (*f, false, false);
@@ -139,7 +139,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	box->set_border_width (2);
 	box->pack_start (_add_output_audio, true, false);
 	box->pack_start (_del_output_audio, true, false);
-	f = manage (new Frame());
+	f = manage (new Frame ());
 	f->set_label (_("Audio Out"));
 	f->add (*box);
 	tl->pack_start (*f, false, false);
@@ -148,7 +148,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	box->set_border_width (2);
 	box->pack_start (_add_output_midi, true, false);
 	box->pack_start (_del_output_midi, true, false);
-	f = manage (new Frame());
+	f = manage (new Frame ());
 	f->set_label (_("MIDI Out"));
 	f->add (*box);
 	tl->pack_start (*f, false, false);
@@ -171,7 +171,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	box->set_spacing (2);
 	box->pack_start (_add_sc_audio, false, false);
 	box->pack_start (_add_sc_midi , false, false);
-	f = manage (new Frame());
+	f = manage (new Frame ());
 	f->set_label (_("Add Sidechain Input"));
 	f->add (*box);
 
@@ -213,7 +213,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	_add_sc_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_sidechain_port), DataType::AUDIO));
 	_add_sc_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_sidechain_port), DataType::MIDI));
 
-	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
+	AudioEngine::instance ()->PortConnectedOrDisconnected.connect (
 			_io_connection, invalidator (*this), boost::bind (&PluginPinDialog::port_connected_or_disconnected, this, _1, _3), gui_context ()
 			);
 }
@@ -276,7 +276,7 @@ PluginPinDialog::plugin_reconfigured ()
 	_hover.reset ();
 	_actor.reset ();
 	_selection.reset ();
-	_drag_dst.reset();
+	_drag_dst.reset ();
 	_dragging = false;
 
 	_n_inputs = _n_sidechains = 0;
@@ -372,7 +372,7 @@ void
 PluginPinDialog::refill_output_presets ()
 {
 	using namespace Menu_Helpers;
-	_out_presets.clear_items();
+	_out_presets.clear_items ();
 	PluginOutputConfiguration ppc (_pi->plugin (0)->possible_output ());
 
 	bool need_dropdown = true;
@@ -403,15 +403,15 @@ PluginPinDialog::refill_output_presets ()
 
 	if (!need_dropdown) {
 		_out_presets.set_sensitive (false);
-		_out_presets.set_text(_("Automatic"));
+		_out_presets.set_text (_("Automatic"));
 		return;
 	}
 
-	_out_presets.AddMenuElem (MenuElem(_("Automatic"), sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::select_output_preset), 0)));
+	_out_presets.AddMenuElem (MenuElem (_("Automatic"), sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::select_output_preset), 0)));
 
 	const uint32_t n_audio = _pi->preset_out ().n_audio ();
 	if (n_audio == 0) {
-		_out_presets.set_text(_("Automatic"));
+		_out_presets.set_text (_("Automatic"));
 	}
 
 	if (ppc.find (0) != ppc.end ()) {
@@ -442,9 +442,9 @@ PluginPinDialog::refill_output_presets ()
 				tmp = string_compose (P_("%1 Channel", "%1 Channels", *i), *i);
 				break;
 		}
-		_out_presets.AddMenuElem (MenuElem(tmp, sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::select_output_preset), *i)));
+		_out_presets.AddMenuElem (MenuElem (tmp, sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::select_output_preset), *i)));
 		if (n_audio == *i) {
-			_out_presets.set_text(tmp);
+			_out_presets.set_text (tmp);
 		}
 	}
 }
@@ -475,17 +475,17 @@ PluginPinDialog::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool 
 			if (lbl.empty ()) {
 				lbl = cns[0].substr (15);
 			}
-		} else if (lbl.find("system:midi_capture_") == 0) {
+		} else if (lbl.find ("system:midi_capture_") == 0) {
 			lbl = AudioEngine::instance ()->get_pretty_name_by_name (lbl);
 			if (lbl.empty ()) {
 				// "system:midi_capture_123" -> "123"
 				lbl = "M " + cns[0].substr (20);
 			}
 		} else if (lbl.find (program_port_prefix) == 0) {
-			lbl = lbl.substr (program_port_prefix.size());
+			lbl = lbl.substr (program_port_prefix.size ());
 		}
 	}
-	for (std::vector<std::string>::const_iterator i = cns.begin(); i != cns.end(); ++i) {
+	for (std::vector<std::string>::const_iterator i = cns.begin (); i != cns.end (); ++i) {
 		tip += *i;
 		tip += " ";
 	}
@@ -501,7 +501,7 @@ PluginPinDialog::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool 
 	pb->signal_button_release_event ().connect (sigc::mem_fun (*this, &PluginPinDialog::sc_input_release), false);
 
 	pb = manage (new ArdourButton ("-"));
-	_sidechain_tbl->attach (*pb, 1, 2, r, r +1 , FILL, SHRINK);
+	_sidechain_tbl->attach (*pb, 1, 2, r, r + 1, FILL, SHRINK);
 	if (can_remove) {
 		pb->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::remove_port), boost::weak_ptr<Port> (p)));
 	} else {
@@ -681,7 +681,7 @@ PluginPinDialog::draw_plugin_pin (cairo_t* cr, const CtrlWidget& w)
 	}
 	cairo_fill (cr);
 
-	if ((w.prelight || w.e == _selection) && !w.name.empty()) {
+	if ((w.prelight || w.e == _selection) && !w.name.empty ()) {
 		int text_width;
 		int text_height;
 		Glib::RefPtr<Pango::Layout> layout;
@@ -1402,7 +1402,7 @@ PluginPinDialog::handle_disconnect (const CtrlElem &e, bool no_signal)
 void
 PluginPinDialog::toggle_sidechain ()
 {
-	if (_session && _session->actively_recording()) { return; }
+	if (_session && _session->actively_recording ()) { return; }
 	_route ()->add_remove_sidechain (_pi, !_pi->has_sidechain ());
 }
 
@@ -1441,7 +1441,7 @@ PluginPinDialog::reset_mapping ()
 void
 PluginPinDialog::select_output_preset (uint32_t n_audio)
 {
-	if (_session && _session->actively_recording()) { return; }
+	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out (DataType::AUDIO, n_audio);
 	_route ()->plugin_preset_output (_pi, out);
 }
@@ -1449,7 +1449,7 @@ PluginPinDialog::select_output_preset (uint32_t n_audio)
 void
 PluginPinDialog::add_remove_plugin_clicked (bool add)
 {
-	if (_session && _session->actively_recording()) { return; }
+	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out = _out;
 	assert (add || _n_plugins > 0);
 	_route ()->customize_plugin_insert (_pi, _n_plugins + (add ? 1 : -1),  out);
@@ -1458,7 +1458,7 @@ PluginPinDialog::add_remove_plugin_clicked (bool add)
 void
 PluginPinDialog::add_remove_port_clicked (bool add, ARDOUR::DataType dt)
 {
-	if (_session && _session->actively_recording()) { return; }
+	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out = _out;
 	assert (add || out.get (dt) > 0);
 	out.set (dt, out.get (dt) + (add ? 1 : -1));
@@ -1468,7 +1468,7 @@ PluginPinDialog::add_remove_port_clicked (bool add, ARDOUR::DataType dt)
 void
 PluginPinDialog::add_sidechain_port (DataType dt)
 {
-	if (_session && _session->actively_recording()) { return; }
+	if (_session && _session->actively_recording ()) { return; }
 	boost::shared_ptr<IO> io = _pi->sidechain_input ();
 	if (!io) {
 		return;
@@ -1491,7 +1491,7 @@ PluginPinDialog::remove_port (boost::weak_ptr<ARDOUR::Port> wp)
 void
 PluginPinDialog::disconnect_port (boost::weak_ptr<ARDOUR::Port> wp)
 {
-	if (_session && _session->actively_recording()) { return; }
+	if (_session && _session->actively_recording ()) { return; }
 	boost::shared_ptr<ARDOUR::Port> p = wp.lock ();
 	boost::shared_ptr<IO> io = _pi->sidechain_input ();
 	if (!io || !p) {
@@ -1503,7 +1503,7 @@ PluginPinDialog::disconnect_port (boost::weak_ptr<ARDOUR::Port> wp)
 void
 PluginPinDialog::connect_port (boost::weak_ptr<ARDOUR::Port> wp0, boost::weak_ptr<ARDOUR::Port> wp1)
 {
-	if (_session && _session->actively_recording()) { return; }
+	if (_session && _session->actively_recording ()) { return; }
 	boost::shared_ptr<ARDOUR::Port> p0 = wp0.lock ();
 	boost::shared_ptr<ARDOUR::Port> p1 = wp1.lock ();
 	boost::shared_ptr<IO> io = _pi->sidechain_input ();
@@ -1519,7 +1519,7 @@ PluginPinDialog::connect_port (boost::weak_ptr<ARDOUR::Port> wp0, boost::weak_pt
 bool
 PluginPinDialog::sc_input_release (GdkEventButton *ev)
 {
-	if (_session && _session->actively_recording()) { return false; }
+	if (_session && _session->actively_recording ()) { return false; }
 	if (ev->button == 3) {
 		connect_sidechain ();
 	}
@@ -1528,7 +1528,7 @@ PluginPinDialog::sc_input_release (GdkEventButton *ev)
 
 struct RouteCompareByName {
 	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		return a->name().compare (b->name()) < 0;
+		return a->name ().compare (b->name ()) < 0;
 	}
 };
 
@@ -1536,18 +1536,18 @@ bool
 PluginPinDialog::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Port> wp)
 {
 	using namespace Menu_Helpers;
-	if (!_session || _session->actively_recording()) { return false; }
-	if (!_session->engine().connected()) { return false; }
+	if (!_session || _session->actively_recording ()) { return false; }
+	if (!_session->engine ().connected ()) { return false; }
 
 	if (ev->button == 1) {
-		MenuList& citems = input_menu.items();
+		MenuList& citems = input_menu.items ();
 		input_menu.set_name ("ArdourContextMenu");
-		citems.clear();
+		citems.clear ();
 
 		boost::shared_ptr<Port> p = wp.lock ();
 		if (p && p->connected ()) {
 			citems.push_back (MenuElem (_("Disconnect"), sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::disconnect_port), wp)));
-			citems.push_back (SeparatorElem());
+			citems.push_back (SeparatorElem ());
 		}
 
 #if 0
@@ -1564,12 +1564,12 @@ PluginPinDialog::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Por
 		RouteList copy = *routes;
 		copy.sort (RouteCompareByName ());
 		uint32_t added = 0;
-		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
+		for (ARDOUR::RouteList::const_iterator i = copy.begin (); i != copy.end (); ++i) {
 			added += maybe_add_route_to_input_menu (*i, p->type (), wp);
 		}
 
 		if (added > 0) {
-			citems.push_back (SeparatorElem());
+			citems.push_back (SeparatorElem ());
 		}
 		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*this, &PluginPinDialog::connect_sidechain)));
 		input_menu.popup (1, ev->time);
@@ -1582,7 +1582,7 @@ PluginPinDialog::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, Data
 {
 	uint32_t added = 0;
 	using namespace Menu_Helpers;
-	if (r->output () == _route()->output()) {
+	if (r->output () == _route ()->output ()) {
 		return added;
 	}
 
@@ -1590,11 +1590,11 @@ PluginPinDialog::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, Data
 		return added;
 	}
 
-	MenuList& citems = input_menu.items();
-	const IOVector& iov (r->all_outputs());
+	MenuList& citems = input_menu.items ();
+	const IOVector& iov (r->all_outputs ());
 
-	for (IOVector::const_iterator o = iov.begin(); o != iov.end(); ++o) {
-		boost::shared_ptr<IO> op = o->lock();
+	for (IOVector::const_iterator o = iov.begin (); o != iov.end (); ++o) {
+		boost::shared_ptr<IO> op = o->lock ();
 		if (!op) {
 			continue;
 		}
@@ -1602,7 +1602,7 @@ PluginPinDialog::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, Data
 		for (PortSet::iterator i = p.begin (dt); i != p.end (dt); ++i) {
 			std::string n = i->name ();
 			replace_all (n, "_", " ");
-			citems.push_back (MenuElem (n, sigc::bind (sigc::mem_fun(*this, &PluginPinDialog::connect_port), wp, boost::weak_ptr<Port> (*i))));
+			citems.push_back (MenuElem (n, sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::connect_port), wp, boost::weak_ptr<Port> (*i))));
 			++added;
 		}
 	}
