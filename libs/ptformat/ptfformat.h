@@ -117,7 +117,7 @@ public:
 
 private:
 	bool foundin(std::string haystack, std::string needle);
-	void parse(void);
+	int parse(void);
 	void unxor10(void);
 	void setrates(void);
 	void parse5header(void);
