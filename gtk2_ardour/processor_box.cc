@@ -513,8 +513,14 @@ ProcessorEntry::setup_tooltip ()
 					string_compose (_("<b>%1</b>\nThe Plugin is not available on this system\nand has been replaced by a stub."), name (Wide)));
 			return;
 		}
-		if (boost::dynamic_pointer_cast<Send> (_processor) && !boost::dynamic_pointer_cast<InternalSend>(_processor)) {
-			ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>&gt; %1</b>", _processor->name()));
+		boost::shared_ptr<Send> send;
+		if ((send = boost::dynamic_pointer_cast<Send> (_processor)) != 0 &&
+				!boost::dynamic_pointer_cast<InternalSend>(_processor)) {
+			if (send->remove_on_disconnect ()) {
+				ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>&gt; %1</b>\nThis (sidechain) send will be removed when disconnected.", _processor->name()));
+			} else {
+				ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>&gt; %1</b>", _processor->name()));
+			}
 			return;
 		}
 	}

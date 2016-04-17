@@ -1777,18 +1777,8 @@ PluginPinDialog::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, Data
 		if (send->output ()->connected_to (_pi->sidechain_input ())) {
 			// only if (send->remove_on_disconnect ()) ??
 			already_present = true;
-			++nth;
-			continue;
+			break;
 		}
-#if 1 // add existing sends that are not connected
-		PortSet& p (send->output ()->ports ());
-		for (PortSet::iterator i = p.begin (dt); i != p.end (dt); ++i) {
-			std::string n = i->name ();
-			replace_all (n, "_", " ");
-			citems.push_back (MenuElem (n, sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::connect_port), wp, boost::weak_ptr<Port> (*i))));
-			++added;
-		}
-#endif
 		++nth;
 	}
 	/* we're going to create the new send pre-fader, so check the route amp's data type.  */
