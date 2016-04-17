@@ -57,6 +57,7 @@ public:
 
 	/** @return Port human readable name */
 	std::string pretty_name (bool fallback_to_name = false) const;
+	bool set_pretty_name (const std::string&);
 
 	int set_name (std::string const &);
 

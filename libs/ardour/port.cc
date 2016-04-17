@@ -103,6 +103,19 @@ Port::pretty_name(bool fallback_to_name) const
 	return "";
 }
 
+bool
+Port::set_pretty_name(const std::string& n)
+{
+	if (_port_handle) {
+		if (0 == port_engine.set_port_property (_port_handle,
+					"http://jackaudio.org/metadata/pretty-name", n, ""))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void
 Port::drop ()
 {
