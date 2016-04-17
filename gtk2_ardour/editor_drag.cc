@@ -3174,10 +3174,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		} else {
 			_editor->begin_reversible_command (_("copy meter mark"));
 
-			Timecode::BBT_Time bbt;
-			map.bbt_time (adjusted_current_frame (event, false), bbt);
-			/* round bbt to bars */
-			map.round_bbt (bbt, -1);
+			Timecode::BBT_Time bbt = _real_section->bbt();
 
 			/* we can't add a meter where one currently exists */
 			if (_real_section->frame() < adjusted_current_frame (event, false)) {
@@ -3200,11 +3197,18 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 	if (_marker->meter().position_lock_style() == MusicTime) {
 		TempoMap& map (_editor->session()->tempo_map());
 		Timecode::BBT_Time bbt;
-		map.bbt_time (adjusted_current_frame (event, false), bbt);
+		map.bbt_time (pf, bbt);
 		/* round bbt to bars */
 		map.round_bbt (bbt, -1);
-		const double beat = map.bbt_to_beats (bbt);
-		_editor->session()->tempo_map().gui_move_meter (_real_section, beat);
+
+		if (bbt.bars > _real_section->bbt().bars) {
+			const double pulse = _real_section->pulse() + (_real_section->note_divisor() / _real_section->divisions_per_bar());
+			_editor->session()->tempo_map().gui_move_meter (_real_section, pulse);
+		} else if (bbt.bars < _real_section->bbt().bars) {
+			const MeterSection& prev_m = map.meter_section_at (pf);
+			const double pulse = _real_section->pulse() - (prev_m.note_divisor() / prev_m.divisions_per_bar());
+			_editor->session()->tempo_map().gui_move_meter (_real_section, pulse);
+		}
 	} else {
 		_editor->session()->tempo_map().gui_move_meter (_real_section, pf);
 	}
