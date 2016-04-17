@@ -88,6 +88,8 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	void set_active(bool yn) { _active = yn; }
 
 	bool set_name (const std::string& str);
+	void set_pretty_name (const std::string& str);
+	std::string pretty_name () const { return _pretty_name_prefix; }
 
 	virtual void silence (framecnt_t);
 	void increment_port_buffer_offset (pframes_t offset);
@@ -248,6 +250,8 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	void setup_bundle ();
 	std::string bundle_channel_name (uint32_t, uint32_t, DataType) const;
 
+	void apply_pretty_name ();
+	std::string _pretty_name_prefix;
 	BufferSet _buffers;
 	void disconnect_check (boost::shared_ptr<ARDOUR::Port>, boost::shared_ptr<ARDOUR::Port>);
 };

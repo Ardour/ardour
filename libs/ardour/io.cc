@@ -368,6 +368,7 @@ IO::add_port (string destination, void* src, DataType type)
 		}
 	}
 
+	apply_pretty_name ();
 	setup_bundle ();
 	_session.set_dirty ();
 
@@ -535,6 +536,10 @@ IO::state (bool /*full_state*/)
 	node->add_property ("direction", enum_2_string (_direction));
 	node->add_property ("default-type", _default_type.to_string());
 
+	if (!_pretty_name_prefix.empty ()) {
+		node->add_property("pretty-name", _pretty_name_prefix);
+	}
+
 	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
 		XMLNode* n = new XMLNode ("Bundle");
 		n->add_property ("name", (*i)->bundle->name ());
@@ -617,6 +622,11 @@ IO::set_state (const XMLNode& node, int version)
 
 	if (create_ports (node, version)) {
 		return -1;
+	}
+
+	// after create_ports, updates names
+	if ((prop = node.property ("pretty-name")) != 0) {
+		set_pretty_name (prop->value());
 	}
 
 	if (connecting_legal) {
@@ -1218,6 +1228,31 @@ IO::set_name (const string& requested_name)
 	setup_bundle ();
 
 	return r;
+}
+
+void
+IO::set_pretty_name (const std::string& str)
+{
+	if (_pretty_name_prefix == str) {
+		return;
+	}
+	_pretty_name_prefix = str;
+	apply_pretty_name ();
+}
+
+void
+IO::apply_pretty_name ()
+{
+	uint32_t pn = 1;
+	if (_pretty_name_prefix.empty ()) {
+		return;
+	}
+	for (PortSet::iterator i = _ports.begin (); i != _ports.end(); ++i, ++pn) {
+		(*i)->set_pretty_name (string_compose (("%1/%2 %3"),
+					_pretty_name_prefix,
+					_direction == Output ? _("Out") : _("In"),
+					pn));
+	}
 }
 
 framecnt_t
