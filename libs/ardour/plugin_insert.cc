@@ -36,6 +36,7 @@
 #include "ardour/luaproc.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/port.h"
 
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
@@ -1372,6 +1373,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			return false;
 		}
 		_configured_internal += _sidechain->input()->n_ports();
+
+		// include (static_cast<Route*>owner())->name() ??
+		_sidechain->input ()-> set_pretty_name (string_compose (_("SC %1"), name ()));
 	}
 
 	/* get plugin configuration */
