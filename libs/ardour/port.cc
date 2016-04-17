@@ -75,6 +75,8 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 	}
 
 	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::drop, this));
+	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection,
+			boost::bind (&Port::port_connected_or_disconnected, this, _1, _3, _5));
 }
 
 /** Port destructor */
@@ -123,6 +125,26 @@ Port::drop ()
 		DEBUG_TRACE (DEBUG::Ports, string_compose ("drop handle for port %1\n", name()));
 		port_engine.unregister_port (_port_handle);
 		_port_handle = 0;
+	}
+}
+
+void
+Port::port_connected_or_disconnected (boost::weak_ptr<Port> w0, boost::weak_ptr<Port> w1, bool con)
+{
+	if (con) {
+		/* we're only interested in disconnect */
+		return;
+	}
+	boost::shared_ptr<Port> p0 = w0.lock ();
+	boost::shared_ptr<Port> p1 = w1.lock ();
+	/* a cheaper, less hacky way to do boost::shared_from_this() ...  */
+	boost::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
+
+	if (p0 == pself) {
+		PostDisconnect (p0, p1); // emit signal
+	}
+	if (p1 == pself) {
+		PostDisconnect (p1, p0); // emit signal
 	}
 }
 
@@ -238,8 +260,7 @@ Port::disconnect (std::string const & other)
 		_connections.erase (other);
 	}
 
-	/* a cheaper, less hacky way to do boost::shared_from_this() ...
-	 */
+	/* a cheaper, less hacky way to do boost::shared_from_this() ...  */
 	boost::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
 	boost::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (other);
 
@@ -478,6 +499,8 @@ Port::reestablish ()
 
 	reset ();
 
+	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection,
+			boost::bind (&Port::port_connected_or_disconnected, this, _1, _3, _5));
 	return 0;
 }
 

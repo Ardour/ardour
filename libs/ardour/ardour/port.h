@@ -169,8 +169,10 @@ private:
 	*/
 	std::set<std::string> _connections;
 
-       void drop ();
-       PBD::ScopedConnection drop_connection;
+	void port_connected_or_disconnected (boost::weak_ptr<Port>, boost::weak_ptr<Port>, bool);
+	void drop ();
+	PBD::ScopedConnection drop_connection;
+	PBD::ScopedConnection engine_connection;
 };
 
 }
