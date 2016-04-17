@@ -513,6 +513,10 @@ ProcessorEntry::setup_tooltip ()
 					string_compose (_("<b>%1</b>\nThe Plugin is not available on this system\nand has been replaced by a stub."), name (Wide)));
 			return;
 		}
+		if (boost::dynamic_pointer_cast<Send> (_processor) && !boost::dynamic_pointer_cast<InternalSend>(_processor)) {
+			ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>&gt; %1</b>", _processor->name()));
+			return;
+		}
 	}
 	ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>%1</b>", name (Wide)));
 }
@@ -531,19 +535,52 @@ ProcessorEntry::name (Width w) const
 	    !boost::dynamic_pointer_cast<InternalSend>(_processor)) {
 
 		name_display += '>';
+		std::string send_name;
+		bool pretty_ok = true;
+
+		if (send->remove_on_disconnect ()) {
+			// assume it's a sidechain, find pretty name of connected port(s)
+			PortSet& ps (send->output ()->ports ());
+			for (PortSet::iterator i = ps.begin (); i != ps.end () && pretty_ok; ++i) {
+				vector<string> connections;
+				if (i->get_connections (connections)) {
+					vector<string>::const_iterator ci;
+					for (ci = connections.begin(); ci != connections.end(); ++ci) {
+						std::string pn = AudioEngine::instance()->get_pretty_name_by_name (*ci);
+						if (pn.empty ()) {
+							continue;
+						}
+						if (send_name.empty ()) {
+							send_name = pn;
+						} else if (send_name != pn) {
+							// pretty names don't match
+							pretty_ok = false;
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if (!pretty_ok) {
+			send_name = "";
+		}
 
 		/* grab the send name out of its overall name */
-
-		string::size_type lbracket, rbracket;
-		lbracket = send->name().find ('[');
-		rbracket = send->name().find (']');
+		if (send_name.empty()) {
+			send_name = send->name();
+			string::size_type lbracket, rbracket;
+			lbracket = send_name.find ('[');
+			rbracket = send_name.find (']');
+			send_name = send_name.substr (lbracket+1, lbracket-rbracket-1);
+		}
 
 		switch (w) {
 		case Wide:
-			name_display += send->name().substr (lbracket+1, lbracket-rbracket-1);
+			name_display += send_name;
 			break;
 		case Narrow:
-			name_display += PBD::short_version (send->name().substr (lbracket+1, lbracket-rbracket-1), 4);
+			name_display += PBD::short_version (send_name, 5);
 			break;
 		}
 

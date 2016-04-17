@@ -504,14 +504,20 @@ PluginPinDialog::port_label (const std::string& portname, bool strip)
 	boost::to_lower (lpn);
 	std::string program_port_prefix = lpn + ":"; // e.g. "ardour:"
 
+	std::string pn = AudioEngine::instance ()->get_pretty_name_by_name (portname);
+	if (!pn.empty ()) {
+		string::size_type slash = pn.find ("/");
+		if (slash != string::npos) {
+			pn = pn.substr (0, slash);
+		}
+		return pn;
+	}
 	std::string label (portname);
 	if (label.find ("system:capture_") == 0) {
-		label = AudioEngine::instance ()->get_pretty_name_by_name (label);
 		if (label.empty ()) {
 			label = portname.substr (15);
 		}
 	} else if (label.find ("system:midi_capture_") == 0) {
-		label = AudioEngine::instance ()->get_pretty_name_by_name (label);
 		if (label.empty ()) {
 			// "system:midi_capture_123" -> "123"
 			label = "M " + portname.substr (20);
@@ -1650,8 +1656,15 @@ PluginPinDialog::add_send_from (boost::weak_ptr<ARDOUR::Port> wp, boost::weak_pt
 		return;
 	}
 
-	_ignore_updates = true;
+	std::string sendname = send->name ();
+	string::size_type last_letter = sendname.find_last_not_of ("0123456789");
+	if (last_letter != string::npos) {
+		send->output ()->set_pretty_name (string_compose (_("SC %1 (%2)"),
+				r->name (),
+				sendname.substr (last_letter + 1)));
+	}
 
+	_ignore_updates = true;
 	p->disconnect_all ();
 
 	DataType dt = p->type ();
