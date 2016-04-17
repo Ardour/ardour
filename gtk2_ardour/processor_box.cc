@@ -2905,6 +2905,7 @@ ProcessorBox::setup_routing_feeds ()
 			(*i)->routing_icon.unset_fed_by ();
 		}
 		prev = i;
+		(*i)->input_icon.hide();
 	}
 
 	/* now set which icons need to be displayed */
@@ -2915,8 +2916,6 @@ ProcessorBox::setup_routing_feeds ()
 			(*i)->routing_icon.hide();
 			if (i == children.begin()) {
 				(*i)->input_icon.show();
-			} else {
-				(*i)->input_icon.hide();
 			}
 		} else {
 			(*i)->routing_icon.show();
@@ -2944,6 +2943,7 @@ ProcessorBox::setup_routing_feeds ()
 			} else if (!(*i)->routing_icon.out_identity ()) {
 				(*i)->output_routing_icon.show();
 				(*i)->output_routing_icon.queue_draw();
+				(*next)->input_icon.show();
 			} else {
 				(*i)->output_routing_icon.hide();
 			}
