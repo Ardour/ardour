@@ -1365,7 +1365,8 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 			// "ardour:Master/" -> "Master"
 			string::size_type slash = ardour_track_name.find("/");
 			if (slash != string::npos) {
-				label << ardour_track_name.substr(7, slash - 7);
+				const size_t ppps = RouteUI::program_port_prefix.size () + 1; // "ardour:"
+				label << ardour_track_name.substr (ppps, slash - ppps);
 				have_label = true;
 			}
 		}
