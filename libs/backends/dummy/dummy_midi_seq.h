@@ -770,6 +770,16 @@ static const MIDISequence *sequences[] = {
 	s0, s1, s2, s3, s4, s5, s6
 };
 
+static const char *sequence_names[] = {
+	"Short Sequence",
+	"Cmaj7, all channels",
+	"Note Sweep, chan 1",
+	"Velocity Sweep, chan 1",
+	"Sustain Pedal Test",
+	"CCs only",
+	"Nonsense, Dups"
+};
+
 }} // namespace
 
 #define NUM_MIDI_EVENT_GENERATORS (sizeof (ARDOUR::DummyMidiData::sequences) / sizeof(ARDOUR::DummyMidiData::MIDISequence*))

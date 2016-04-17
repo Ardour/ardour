@@ -659,6 +659,38 @@ DummyAudioBackend::get_port_name (PortEngine::PortHandle port) const
 	return static_cast<DummyPort*>(port)->name ();
 }
 
+int
+DummyAudioBackend::get_port_property (PortHandle port, const std::string& key, std::string& value, std::string& type) const
+{
+	if (!valid_port (port)) {
+		PBD::warning << _("DummyBackend::get_port_property: Invalid Port(s)") << endmsg;
+		return -1;
+	}
+	if (key == "http://jackaudio.org/metadata/pretty-name") {
+		type = "";
+		value = static_cast<DummyPort*>(port)->pretty_name ();
+		if (!value.empty()) {
+			return 0;
+		}
+	}
+	return -1;
+}
+
+int
+DummyAudioBackend::set_port_property (PortHandle port, const std::string& key, const std::string& value, const std::string& type)
+{
+	if (!valid_port (port)) {
+		PBD::warning << _("DummyBackend::set_port_property: Invalid Port(s)") << endmsg;
+		return -1;
+	}
+	if (key == "http://jackaudio.org/metadata/pretty-name" && type.empty ()) {
+		 static_cast<DummyPort*>(port)->set_pretty_name (value);
+		 return 0;
+	}
+	return -1;
+}
+
+
 PortEngine::PortHandle
 DummyAudioBackend::get_port_by_name (const std::string& name) const
 {
@@ -843,6 +875,7 @@ DummyAudioBackend::register_system_ports()
 		_system_midi_in.push_back (static_cast<DummyMidiPort*>(p));
 		if (_midi_mode == MidiGenerator) {
 			static_cast<DummyMidiPort*>(p)->setup_generator (i % NUM_MIDI_EVENT_GENERATORS, _samplerate);
+			static_cast<DummyMidiPort*>(p)->set_pretty_name (DummyMidiData::sequence_names[i % NUM_MIDI_EVENT_GENERATORS]);
 		}
 	}
 
@@ -854,6 +887,17 @@ DummyAudioBackend::register_system_ports()
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
 		_system_midi_out.push_back (static_cast<DummyMidiPort*>(p));
+
+		if (_device == _("Loopback") && _midi_mode == MidiToAudio) {
+			std::stringstream ss;
+			ss << "Midi2Audio";
+			for (int apc = 0; apc < (int)_system_inputs.size(); ++apc) {
+				if ((apc % m_out) + 1 == i) {
+					ss << " >" << (apc + 1);
+				}
+			}
+			static_cast<DummyMidiPort*>(p)->set_pretty_name (ss.str());
+		}
 	}
 	return 0;
 }

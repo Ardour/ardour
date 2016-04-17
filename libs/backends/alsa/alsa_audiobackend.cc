@@ -1243,6 +1243,20 @@ AlsaAudioBackend::get_port_property (PortHandle port, const std::string& key, st
 	return -1;
 }
 
+int
+AlsaAudioBackend::set_port_property (PortHandle port, const std::string& key, const std::string& value, const std::string& type)
+{
+	if (!valid_port (port)) {
+		PBD::warning << _("AlsaBackend::set_port_property: Invalid Port(s)") << endmsg;
+		return -1;
+	}
+	if (key == "http://jackaudio.org/metadata/pretty-name" && type.empty ()) {
+		 static_cast<AlsaPort*>(port)->set_pretty_name (value);
+		 return 0;
+	}
+	return -1;
+}
+
 PortEngine::PortHandle
 AlsaAudioBackend::get_port_by_name (const std::string& name) const
 {
