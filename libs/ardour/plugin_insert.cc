@@ -117,12 +117,14 @@ PluginInsert::set_count (uint32_t num)
 		for (uint32_t n = 0; n < diff; ++n) {
 			boost::shared_ptr<Plugin> p = plugin_factory (_plugins[0]);
 			add_plugin (p);
-			if (active ()) {
-				p->activate ();
-			}
 
 			if (require_state) {
-				/* XXX do something */
+				XMLNode& state = _plugins[0]->get_state ();
+				p->set_state (state, Stateful::loading_state_version);
+			}
+
+			if (active ()) {
+				p->activate ();
 			}
 		}
 		PluginConfigChanged (); /* EMIT SIGNAL */
