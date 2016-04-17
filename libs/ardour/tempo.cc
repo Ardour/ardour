@@ -1286,11 +1286,14 @@ TempoMap::recompute_meters (Metrics& metrics)
 				double pulse = 0.0;
 				pair<double, BBT_Time> b_bbt;
 				if (meter->movable()) {
-					const double beats = ((pulse_at_frame_locked (metrics, meter->frame()) - prev_m->pulse()) * prev_m->note_divisor());
-					const double floor_beats = beats - fmod (beats, prev_m->divisions_per_bar());
-					if (floor_beats + prev_m->beat() < meter->beat()) {
+					const double beats = floor ((pulse_at_frame_locked (metrics, meter->frame()) - prev_m->pulse())
+								    * prev_m->note_divisor() + 0.5);
+
+					if (beats + prev_m->beat() < meter->beat()) {
 						/* tempo change caused a change in beat (bar). */
-						b_bbt = make_pair (floor_beats + prev_m->beat(), BBT_Time ((floor_beats / prev_m->divisions_per_bar()) + prev_m->bbt().bars, 1, 0));
+						const double floor_beats = beats - fmod (beats, prev_m->divisions_per_bar());
+						b_bbt = make_pair (floor_beats + prev_m->beat()
+								   , BBT_Time ((floor_beats / prev_m->divisions_per_bar()) + prev_m->bbt().bars, 1, 0));
 						const double true_pulse = prev_m->pulse() + (floor_beats / prev_m->note_divisor());
 						const double pulse_off = true_pulse - (beats / prev_m->note_divisor()) - prev_m->pulse();
 						pulse = true_pulse - pulse_off;
@@ -1466,6 +1469,7 @@ TempoMap::beat_at_pulse (const double& pulse) const
 	return beat_at_pulse_locked (_metrics, pulse);
 }
 
+/* tempo section based */
 double
 TempoMap::pulse_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const
 {
@@ -1500,6 +1504,7 @@ TempoMap::pulse_at_frame (const framecnt_t& frame) const
 	return pulse_at_frame_locked (_metrics, frame);
 }
 
+/* tempo section based */
 framecnt_t
 TempoMap::frame_at_pulse_locked (const Metrics& metrics, const double& pulse) const
 {
@@ -1537,6 +1542,7 @@ TempoMap::frame_at_pulse (const double& pulse) const
 	return frame_at_pulse_locked (_metrics, pulse);
 }
 
+/* meter section based */
 double
 TempoMap::beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const
 {
@@ -1573,6 +1579,7 @@ TempoMap::beat_at_frame (const framecnt_t& frame) const
 	return beat_at_frame_locked (_metrics, frame);
 }
 
+/* meter section based */
 framecnt_t
 TempoMap::frame_at_beat_locked (const Metrics& metrics, const double& beat) const
 {
@@ -1763,6 +1770,7 @@ TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt)
 	bbt = beats_to_bbt_locked (_metrics, beat);
 }
 
+/* meter section based */
 framepos_t
 TempoMap::frame_time_locked (const Metrics& metrics, const BBT_Time& bbt) const
 {
@@ -2080,26 +2088,27 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 				  and use the delta to find the meter's pulse.
 				*/
 				double new_pulse = 0.0;
-				pair<double, BBT_Time> b_bbt;
 
 				if (section->movable()) {
 					const double beats = ((pulse_at_frame_locked (imaginary, frame) - prev_m->pulse()) * prev_m->note_divisor());
-					const double floor_beats = beats - fmod (beats,  prev_m->divisions_per_bar());
-					if (floor_beats + prev_m->beat() < section->beat()) {
-						/* disallow position change if it will alter out beat
+					if (beats + prev_m->beat() < section->beat()) {
+						/* disallow position change if it will alter our beat
 						   we allow tempo changes to do this in recompute_meters().
 						   blocking this is an option, but i'm not convinced that
 						   this is what the user would actually want.
+						   here we set the frame/pulse corresponding to its musical position.
 						*/
+						new_pulse = ((section->beat() - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse();
+						section->set_frame (frame_at_pulse_locked (imaginary, new_pulse));
+						section->set_pulse (new_pulse);
 						return;
 					}
-					b_bbt = make_pair (section->beat(), section->bbt());
 					new_pulse = pulse_at_frame_locked (imaginary, frame);
 				} else {
-					b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
+					pair<double, BBT_Time> b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
+					section->set_beat (b_bbt);
 				}
 				section->set_frame (frame);
-				section->set_beat (b_bbt);
 				section->set_pulse (new_pulse);
 				prev_m = m;
 
@@ -2116,20 +2125,12 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 						m->set_beat (new_beat);
 					}
 				} else {
-					pair<double, BBT_Time> b_bbt;
 					if (m->movable()) {
-						const double beats = ((pulse_at_frame_locked (imaginary, m->frame()) - prev_m->pulse()) * prev_m->note_divisor());
-						const double floor_beats = beats - fmod (beats , prev_m->divisions_per_bar());
-						b_bbt = make_pair (floor_beats + prev_m->beat()
-								   , BBT_Time ((floor_beats / prev_m->divisions_per_bar()) + prev_m->bbt().bars, 1, 0));
-						const double true_pulse = prev_m->pulse() + (floor_beats / prev_m->note_divisor());
-						const double pulse_off = true_pulse - (beats / prev_m->note_divisor()) - prev_m->pulse();
-						new_pulse = true_pulse - pulse_off;
+						new_pulse = pulse_at_frame_locked (imaginary, m->frame());
 					} else {
-						b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
-						new_pulse = 0.0;
+						pair<double, BBT_Time> b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
+						m->set_beat (b_bbt);
 					}
-					m->set_beat (b_bbt);
 				}
 				m->set_pulse (new_pulse);
 			}
@@ -2177,19 +2178,12 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const double& pu
 						m->set_beat (new_beat);
 					}
 				} else {
-					pair<double, BBT_Time> b_bbt;
 					if (m->movable()) {
-						const double beats = ((pulse_at_frame_locked (imaginary, m->frame()) - prev_m->pulse()) * prev_m->note_divisor());
-						const double floor_beats = beats - fmod (beats, prev_m->divisions_per_bar());
-						b_bbt = make_pair (floor_beats + prev_m->beat()
-								   , BBT_Time ((floor_beats / prev_m->divisions_per_bar()) + prev_m->bbt().bars, 1, 0));
-						const double true_pulse = prev_m->pulse() + (floor_beats / prev_m->note_divisor());
-						const double pulse_off = true_pulse - (beats / prev_m->note_divisor()) - prev_m->pulse();
-						new_pulse = true_pulse - pulse_off;
+						new_pulse = pulse_at_frame_locked (imaginary, m->frame());
 					} else {
-						b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
+						pair<double, BBT_Time> b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
+						m->set_beat (b_bbt);
 					}
-					m->set_beat (b_bbt);
 				}
 				m->set_pulse (new_pulse);
 			}
@@ -2671,7 +2665,6 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 		    framepos_t lower, framepos_t upper)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	const int32_t upper_beat = (int32_t) floor (beat_at_frame_locked (_metrics, upper));
 	int32_t cnt = ceil (beat_at_frame_locked (_metrics, lower));
 	framecnt_t pos = 0;
 	/* although the map handles negative beats, bbt doesn't. */
