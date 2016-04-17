@@ -836,6 +836,10 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	void output_change_handler (IOChange, void *src);
 	void sidechain_change_handler (IOChange, void *src);
 
+	void processor_selfdestruct (boost::weak_ptr<Processor>);
+	std::vector<boost::weak_ptr<Processor> > selfdestruct_sequence;
+	Glib::Threads::Mutex  selfdestruct_lock;
+
 	bool input_port_count_changing (ChanCount);
 	bool output_port_count_changing (ChanCount);
 

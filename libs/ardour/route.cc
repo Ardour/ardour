@@ -1339,7 +1339,24 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	set_processor_positions ();
 
+	boost::shared_ptr<Send> send;
+	if ((send = boost::dynamic_pointer_cast<Send> (processor))) {
+		send->SelfDestruct.connect_same_thread (*this,
+				boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
+	}
+
 	return 0;
+}
+
+void
+Route::processor_selfdestruct (boost::weak_ptr<Processor> wp)
+{
+	/* We cannot destruct the processor here (usually RT-thread
+	 * with various locks held - in case of sends also io_locks).
+	 * Queue for deletion in low-priority thread.
+	 */
+	Glib::Threads::Mutex::Lock lx (selfdestruct_lock);
+	selfdestruct_sequence.push_back (wp);
 }
 
 bool
@@ -3362,6 +3379,9 @@ Route::set_processor_state (const XMLNode& node)
 				} else if (prop->value() == "send") {
 
 					processor.reset (new Send (_session, _pannable, _mute_master, Delivery::Send, true));
+					boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
+					send->SelfDestruct.connect_same_thread (*this,
+							boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
 
 				} else {
 					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
@@ -4108,13 +4128,12 @@ Route::apply_processor_changes_rt ()
 		g_atomic_int_set (&_pending_signals, emissions);
 		return true;
 	}
-	return false;
+	return (!selfdestruct_sequence.empty ());
 }
 
 void
 Route::emit_pending_signals ()
 {
-
 	int sig = g_atomic_int_and (&_pending_signals, 0);
 	if (sig & EmitMeterChanged) {
 		_meter->emit_configuration_changed();
@@ -4127,6 +4146,24 @@ Route::emit_pending_signals ()
 	}
 	if (sig & EmitRtProcessorChange) {
 		processors_changed (RouteProcessorChange (RouteProcessorChange::RealTimeChange)); /* EMIT SIGNAL */
+	}
+
+	/* this would be a job for the butler.
+	 * Conceptually we should not take processe/processor locks here.
+	 * OTOH its more efficient (less overhead for summoning the butler and
+	 * telling her what do do) and signal emission is called
+	 * directly after the process callback, which decreases the chance
+	 * of x-runs when taking the locks.
+	 */
+	while (!selfdestruct_sequence.empty ()) {
+		Glib::Threads::Mutex::Lock lx (selfdestruct_lock);
+		if (selfdestruct_sequence.empty ()) { break; } // re-check with lock
+		boost::shared_ptr<Processor> proc = selfdestruct_sequence.back ().lock ();
+		selfdestruct_sequence.pop_back ();
+		lx.release ();
+		if (proc) {
+			remove_processor (proc);
+		}
 	}
 }
 
