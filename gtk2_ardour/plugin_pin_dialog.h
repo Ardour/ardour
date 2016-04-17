@@ -126,7 +126,9 @@ private:
 	void draw_connection (cairo_t*, double, double, double, double, bool, bool, bool dashed = false);
 	void draw_connection (cairo_t*, const CtrlWidget&, const CtrlWidget&, bool dashed = false);
 	const CtrlWidget& get_io_ctrl (CtrlType ct, ARDOUR::DataType dt, uint32_t id, uint32_t ip = 0) const;
+
 	static void edge_coordinates (const CtrlWidget& w, double &x, double &y);
+	static std::string port_label (const std::string&, bool);
 
 	void reset_mapping ();
 	void reset_configuration ();
@@ -145,6 +147,7 @@ private:
 	void remove_port (boost::weak_ptr<ARDOUR::Port>);
 	void disconnect_port (boost::weak_ptr<ARDOUR::Port>);
 	void connect_port (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
+	void add_send_from (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Route>);
 	uint32_t add_port_to_table (boost::shared_ptr<ARDOUR::Port>, uint32_t, bool);
 	uint32_t maybe_add_route_to_input_menu (boost::shared_ptr<ARDOUR::Route>, ARDOUR::DataType, boost::weak_ptr<ARDOUR::Port>);
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);

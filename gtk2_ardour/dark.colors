@@ -350,6 +350,8 @@
     <ColorAlias name="processor prefader: led active" alias="color 37"/>
     <ColorAlias name="processor stub: fill" alias="color 46"/>
     <ColorAlias name="processor stub: fill active" alias="color 46"/>
+    <ColorAlias name="processor sidechain: fill" alias="color 68"/>
+    <ColorAlias name="processor sidechain: led active" alias="color 37"/>
     <ColorAlias name="pinrouting custom: led active" alias="color 86"/>
     <ColorAlias name="pinrouting sidechain: led active" alias="color 50"/>
     <ColorAlias name="punch button: fill" alias="color 20"/>

@@ -29,10 +29,13 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "ardour/amp.h"
 #include "ardour/audioengine.h"
+#include "ardour/pannable.h"
 #include "ardour/plugin.h"
 #include "ardour/port.h"
 #include "ardour/profile.h"
+#include "ardour/send.h"
 #include "ardour/session.h"
 
 #include "plugin_pin_dialog.h"
@@ -493,47 +496,74 @@ PluginPinDialog::refill_output_presets ()
 	}
 }
 
+std::string
+PluginPinDialog::port_label (const std::string& portname, bool strip)
+{
+	// compare to MixerStrip::update_io_button()
+	string lpn (PROGRAM_NAME);
+	boost::to_lower (lpn);
+	std::string program_port_prefix = lpn + ":"; // e.g. "ardour:"
+
+	std::string label (portname);
+	if (label.find ("system:capture_") == 0) {
+		label = AudioEngine::instance ()->get_pretty_name_by_name (label);
+		if (label.empty ()) {
+			label = portname.substr (15);
+		}
+	} else if (label.find ("system:midi_capture_") == 0) {
+		label = AudioEngine::instance ()->get_pretty_name_by_name (label);
+		if (label.empty ()) {
+			// "system:midi_capture_123" -> "123"
+			label = "M " + portname.substr (20);
+		}
+	} else if (label.find (program_port_prefix) == 0) {
+		label = label.substr (program_port_prefix.size ());
+		if (strip) {
+			string::size_type slash = label.find ("/");
+			if (slash != string::npos) {
+				label = label.substr (0, slash);
+			}
+		}
+	}
+	return label;
+}
+
 uint32_t
 PluginPinDialog::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool can_remove)
 {
 	std::string lbl;
 	std::string tip = p->name ();
 	std::vector<std::string> cns;
+	bool single_source = true;
 	p->get_connections (cns);
 
-	// TODO proper labels, see MixerStrip::update_io_button()
-	if (cns.size () == 0) {
-		lbl = "-";
-	} else if (cns.size () > 1) {
-		lbl = "...";
-		tip += " &lt;- ";
-	} else {
-		string lpn (PROGRAM_NAME);
-		boost::to_lower (lpn);
-		std::string program_port_prefix = lpn + ":"; // e.g. "ardour:"
-
-		lbl = cns[0];
-		tip += " &lt;- ";
-		if (lbl.find ("system:capture_") == 0) {
-			lbl = AudioEngine::instance ()->get_pretty_name_by_name (lbl);
-			if (lbl.empty ()) {
-				lbl = cns[0].substr (15);
-			}
-		} else if (lbl.find ("system:midi_capture_") == 0) {
-			lbl = AudioEngine::instance ()->get_pretty_name_by_name (lbl);
-			if (lbl.empty ()) {
-				// "system:midi_capture_123" -> "123"
-				lbl = "M " + cns[0].substr (20);
-			}
-		} else if (lbl.find (program_port_prefix) == 0) {
-			lbl = lbl.substr (program_port_prefix.size ());
+	for (std::vector<std::string>::const_iterator i = cns.begin (); i != cns.end (); ++i) {
+		if (lbl.empty ()) {
+			lbl = port_label (*i, true);
+			continue;
+		}
+		if (port_label (*i, true) != lbl) {
+			lbl = "...";
+			single_source = false;
+			break;
 		}
 	}
+
+	if (cns.size () == 0) {
+		lbl = "-";
+		single_source = false;
+	} else if (cns.size () == 1) {
+		tip += " &lt;- ";
+		lbl = port_label (cns[0], false);
+	} else {
+		tip += " &lt;- ";
+	}
+	replace_all (lbl, "_", " ");
+
 	for (std::vector<std::string>::const_iterator i = cns.begin (); i != cns.end (); ++i) {
 		tip += *i;
 		tip += " ";
 	}
-	replace_all (lbl, "_", " ");
 
 	ArdourButton *pb = manage (new ArdourButton (lbl));
 	pb->set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
@@ -554,7 +584,7 @@ PluginPinDialog::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool 
 
 	uint32_t rv = 1;
 
-	if (cns.size () == 1 && _session) {
+	if (single_source && _session) {
 		/* check if it's an Ardour Send feeding.. */
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
 		for (ARDOUR::RouteList::const_iterator i = routes->begin (); i != routes->end (); ++i) {
@@ -1598,6 +1628,44 @@ PluginPinDialog::connect_port (boost::weak_ptr<ARDOUR::Port> wp0, boost::weak_pt
 	p0->connect (p1->name ());
 }
 
+void
+PluginPinDialog::add_send_from (boost::weak_ptr<ARDOUR::Port> wp, boost::weak_ptr<ARDOUR::Route> wr)
+{
+	if (_session && _session->actively_recording ()) { return; }
+	boost::shared_ptr<Port> p = wp.lock ();
+	boost::shared_ptr<Route> r = wr.lock ();
+	boost::shared_ptr<IO> io = _pi->sidechain_input ();
+	if (!p || !r || !io || !_session) {
+		return;
+	}
+
+	boost::shared_ptr<Pannable> sendpan (new Pannable (*_session));
+	boost::shared_ptr<Send> send (new Send (*_session, sendpan, r->mute_master ()));
+	const ChanCount& outs (r->amp ()->input_streams ());
+	try {
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance ()->process_lock ());
+		send->output()->ensure_io (outs, false, this);
+	} catch (AudioEngine::PortRegistrationFailure& err) {
+		error << string_compose (_("Cannot set up new send: %1"), err.what ()) << endmsg;
+		return;
+	}
+
+	_ignore_updates = true;
+
+	p->disconnect_all ();
+
+	DataType dt = p->type ();
+	PortSet& ps (send->output ()->ports ());
+	for (PortSet::iterator i = ps.begin (dt); i != ps.end (dt); ++i) {
+		p->connect (&(**i));
+	}
+
+	send->set_remove_on_disconnect (true);
+	r->add_processor (send, PreFader);
+	_ignore_updates = false;
+	queue_idle_update ();
+}
+
 bool
 PluginPinDialog::sc_input_release (GdkEventButton *ev)
 {
@@ -1673,20 +1741,40 @@ PluginPinDialog::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, Data
 	}
 
 	MenuList& citems = input_menu.items ();
-	const IOVector& iov (r->all_outputs ());
 
-	for (IOVector::const_iterator o = iov.begin (); o != iov.end (); ++o) {
-		boost::shared_ptr<IO> op = o->lock ();
-		if (!op) {
+	/*check if there's already a send.. */
+	bool already_present = false;
+	uint32_t nth = 0;
+	boost::shared_ptr<Processor> proc;
+	/* Note: nth_send () takes a processor read-lock */
+	while ((proc = r->nth_send (nth))) {
+		boost::shared_ptr<IOProcessor> send = boost::dynamic_pointer_cast<IOProcessor> (proc);
+		if (!send || !send->output ()) {
+			++nth;
 			continue;
 		}
-		PortSet& p (op->ports ());
+		if (send->output ()->connected_to (_pi->sidechain_input ())) {
+			// only if (send->remove_on_disconnect ()) ??
+			already_present = true;
+			++nth;
+			continue;
+		}
+#if 1 // add existing sends that are not connected
+		PortSet& p (send->output ()->ports ());
 		for (PortSet::iterator i = p.begin (dt); i != p.end (dt); ++i) {
 			std::string n = i->name ();
 			replace_all (n, "_", " ");
 			citems.push_back (MenuElem (n, sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::connect_port), wp, boost::weak_ptr<Port> (*i))));
 			++added;
 		}
+#endif
+		++nth;
+	}
+	/* we're going to create the new send pre-fader, so check the route amp's data type.  */
+	const ChanCount& rc (r->amp ()->input_streams ());
+	if (!already_present && rc.get (dt) > 0) {
+		citems.push_back (MenuElem (r->name (), sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_send_from), wp, boost::weak_ptr<Route> (r))));
+		++added;
 	}
 	return added;
 }

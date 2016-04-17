@@ -381,6 +381,13 @@ ProcessorEntry::setup_visuals ()
 		_button.set_name ("processor stub");
 		return;
 	}
+	boost::shared_ptr<Send> send;
+	if ((send = boost::dynamic_pointer_cast<Send> (_processor))) {
+		if (send->remove_on_disconnect ()) {
+			_button.set_name ("processor sidechain");
+			return;
+		}
+	}
 
 	switch (_position) {
 	case PreFader:
