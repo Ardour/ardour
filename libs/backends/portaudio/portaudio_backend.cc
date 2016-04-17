@@ -1238,6 +1238,24 @@ PortAudioBackend::get_port_property (PortHandle port,
 	return -1;
 }
 
+int
+PortAudioBackend::set_port_property (PortHandle port,
+                                     const std::string& key,
+                                     const std::string& value,
+                                     const std::string& type)
+{
+	if (!valid_port (port)) {
+		DEBUG_PORTS("get_port_name: Invalid Port(s)\n");
+		return -1;
+	}
+
+	if (key == "http://jackaudio.org/metadata/pretty-name" && type.empty ()) {
+		static_cast<PamPort*>(port)->set_pretty_name (value);
+		return 0;
+	}
+	return -1;
+}
+
 PortEngine::PortHandle
 PortAudioBackend::get_port_by_name (const std::string& name) const
 {

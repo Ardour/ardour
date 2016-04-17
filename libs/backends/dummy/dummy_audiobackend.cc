@@ -684,12 +684,11 @@ DummyAudioBackend::set_port_property (PortHandle port, const std::string& key, c
 		return -1;
 	}
 	if (key == "http://jackaudio.org/metadata/pretty-name" && type.empty ()) {
-		 static_cast<DummyPort*>(port)->set_pretty_name (value);
-		 return 0;
+		static_cast<DummyPort*>(port)->set_pretty_name (value);
+		return 0;
 	}
 	return -1;
 }
-
 
 PortEngine::PortHandle
 DummyAudioBackend::get_port_by_name (const std::string& name) const

@@ -935,6 +935,20 @@ CoreAudioBackend::get_port_property (PortHandle port, const std::string& key, st
 	return -1;
 }
 
+int
+CoreAudioBackend::set_port_property (PortHandle port, const std::string& key, const std::string& value, const std::string& type)
+{
+	if (!valid_port (port)) {
+		PBD::warning << _("CoreAudioBackend::set_port_property: Invalid Port(s)") << endmsg;
+		return -1;
+	}
+	if (key == "http://jackaudio.org/metadata/pretty-name" && type.empty ()) {
+		static_cast<CoreBackendPort*>(port)->set_pretty_name (value);
+		return 0;
+	}
+	return -1;
+}
+
 PortEngine::PortHandle
 CoreAudioBackend::get_port_by_name (const std::string& name) const
 {

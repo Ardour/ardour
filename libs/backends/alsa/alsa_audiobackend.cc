@@ -1251,8 +1251,8 @@ AlsaAudioBackend::set_port_property (PortHandle port, const std::string& key, co
 		return -1;
 	}
 	if (key == "http://jackaudio.org/metadata/pretty-name" && type.empty ()) {
-		 static_cast<AlsaPort*>(port)->set_pretty_name (value);
-		 return 0;
+		static_cast<AlsaPort*>(port)->set_pretty_name (value);
+		return 0;
 	}
 	return -1;
 }
