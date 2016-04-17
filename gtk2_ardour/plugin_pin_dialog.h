@@ -83,6 +83,13 @@ private:
 	CtrlElemList _elements;
 	CtrlElem _drag_dst;
 
+	/* cache settings for expose */
+	typedef std::map <uint32_t, ARDOUR::ChanMapping> Mappings;
+	Mappings _in_map;
+	Mappings _out_map;
+	ARDOUR::ChanMapping _thru_map;
+	bool _has_midi_bypass;
+
 
 	Gtk::DrawingArea darea;
 	ArdourButton _set_config;

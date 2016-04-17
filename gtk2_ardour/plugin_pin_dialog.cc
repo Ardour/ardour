@@ -343,6 +343,9 @@ PluginPinDialog::plugin_reconfigured ()
 		_elements.push_back (CtrlWidget ("", Output, (i < _out.n_midi () ? DataType::MIDI : DataType::AUDIO), id));
 	}
 
+	_in_map.clear ();
+	_out_map.clear ();
+
 	for (uint32_t n = 0; n < _n_plugins; ++n) {
 		boost::shared_ptr<Plugin> plugin = _pi->plugin (n);
 		for (uint32_t i = 0; i < _sinks.n_total (); ++i) {
@@ -358,7 +361,13 @@ PluginPinDialog::plugin_reconfigured ()
 			const Plugin::IOPortDescription& iod (plugin->describe_io_port (dt, false, idx));
 			_elements.push_back (CtrlWidget (iod.name, Source, dt, idx, n));
 		}
+		_in_map[n] = _pi->input_map (n);
+		_out_map[n] = _pi->output_map (n);
 	}
+	_has_midi_bypass = _pi->has_midi_bypass ();
+	_thru_map = _pi->thru_map ();
+
+	/* cache maps */
 
 	/* calc minimum size */
 	const uint32_t max_ports = std::max (_ins.n_total (), _out.n_total ());
@@ -991,14 +1000,14 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 	}
 
 	/* draw midi-bypass (behind) */
-	if (_pi->has_midi_bypass ()) {
+	if (_has_midi_bypass) {
 		const CtrlWidget& cw0 = get_io_ctrl (Input, DataType::MIDI, 0);
 		const CtrlWidget& cw1 = get_io_ctrl (Output, DataType::MIDI, 0);
 		draw_connection (cr, cw0, cw1, true);
 	}
 
 	/* thru connections */
-	const ChanMapping::Mappings thru_map = _pi->thru_map ().mappings ();
+	const ChanMapping::Mappings thru_map (_thru_map.mappings ());
 	for (ChanMapping::Mappings::const_iterator t = thru_map.begin (); t != thru_map.end (); ++t) {
 		for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
 			const CtrlWidget& cw0 = get_io_ctrl (Output, t->first, c->first);
@@ -1008,7 +1017,6 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 			}
 		}
 	}
-
 
 	/* plugins & connection wires */
 	for (uint32_t i = 0; i < _n_plugins; ++i) {
@@ -1026,8 +1034,8 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
 		pango_cairo_show_layout (cr, layout->gobj ());
 
-		const ChanMapping::Mappings in_map = _pi->input_map (i).mappings ();
-		const ChanMapping::Mappings out_map = _pi->output_map (i).mappings ();
+		const ChanMapping::Mappings in_map = _in_map[i].mappings ();
+		const ChanMapping::Mappings out_map = _out_map[i].mappings ();
 
 		for (ChanMapping::Mappings::const_iterator t = in_map.begin (); t != in_map.end (); ++t) {
 			for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
@@ -1129,7 +1137,7 @@ PluginPinDialog::start_drag (const CtrlElem& e, double x, double y)
 	_drag_dst.reset ();
 	if (e->ct == Sink) {
 		bool valid;
-		const ChanMapping& map (_pi->input_map (e->ip));
+		const ChanMapping& map (_in_map[e->ip]);
 		uint32_t idx = map.get (e->dt, e->id, &valid);
 		if (valid) {
 			const CtrlWidget& cw = get_io_ctrl (Input, e->dt, idx, 0);
@@ -1140,7 +1148,7 @@ PluginPinDialog::start_drag (const CtrlElem& e, double x, double y)
 	else if (e->ct == Output) {
 		for (uint32_t i = 0; i < _n_plugins; ++i) {
 			bool valid;
-			const ChanMapping& map (_pi->output_map (i));
+			const ChanMapping& map (_out_map[i]);
 			uint32_t idx = map.get_src (e->dt, e->id, &valid);
 			if (valid) {
 				const CtrlWidget& cw = get_io_ctrl (Source, e->dt, idx, i);
@@ -1151,7 +1159,7 @@ PluginPinDialog::start_drag (const CtrlElem& e, double x, double y)
 		}
 		if (!_drag_dst) {
 			bool valid;
-			const ChanMapping& map (_pi->thru_map ());
+			const ChanMapping& map (_thru_map);
 			uint32_t idx = map.get (e->dt, e->id, &valid);
 			if (valid) {
 				const CtrlWidget& cw = get_io_ctrl (Input, e->dt, idx, 0);
