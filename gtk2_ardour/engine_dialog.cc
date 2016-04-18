@@ -2771,7 +2771,8 @@ void
 EngineControl::set_desired_sample_rate (uint32_t sr)
 {
 	_desired_sample_rate = sr;
-	if (ARDOUR::AudioEngine::instance()->running()) {
+	if (ARDOUR::AudioEngine::instance ()->running ()
+			&& ARDOUR::AudioEngine::instance ()->sample_rate () != sr) {
 		stop_engine ();
 	}
 	device_changed ();
