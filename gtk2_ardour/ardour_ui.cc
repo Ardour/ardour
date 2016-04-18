@@ -368,6 +368,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	ARDOUR::Session::AskAboutSampleRateMismatch.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::sr_mismatch_dialog, this, _1, _2));
 
+	/* handle sr mismatch with a dialog - cross-thread from engine */
+	ARDOUR::Session::NotifyAboutSampleRateMismatch.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::sr_mismatch_message, this, _1, _2), gui_context ());
+
 	/* handle requests to quit (coming from JACK session) */
 
 	ARDOUR::Session::Quit.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::finish, this), gui_context ());
@@ -4806,6 +4809,21 @@ audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual
 	}
 
         return 1;
+}
+
+void
+ARDOUR_UI::sr_mismatch_message (framecnt_t desired, framecnt_t actual)
+{
+	MessageDialog msg (string_compose (_("\
+This session was created with a sample rate of %1 Hz, but\n\
+%2 is currently running at %3 Hz.\n\
+Audio will be recorded and played at the wrong sample rate.\n\
+Re-Configure the Audio Engine in\n\
+Menu > Window > Audio/Midi Setup"),
+				desired, PROGRAM_NAME, actual),
+			true,
+			Gtk::MESSAGE_WARNING);
+	msg.run ();
 }
 
 void
