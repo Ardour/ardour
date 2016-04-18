@@ -764,12 +764,25 @@ PluginInsert::silence (framecnt_t nframes)
 		return;
 	}
 
-	ChanMapping in_map (natural_input_streams ());
-	ChanMapping out_map (natural_output_streams ());
+	_delaybuffers.flush ();
 
-	// TODO run sidechain (delaylines)
-	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->connect_and_run (_session.get_scratch_buffers ((*i)->get_info()->n_inputs, true), in_map, out_map, nframes, 0);
+#ifdef MIXBUS
+	if (is_channelstrip ()) {
+		if (_configured_in.n_audio() > 0) {
+			ChanCount maxbuf = ChanCount::min (_configured_in, ChanCount (DataType::AUDIO, 2));
+			ChanMapping mb_in_map (ChanCount::min (_configured_in, ChanCount (DataType::AUDIO, 2)));
+			ChanMapping mb_out_map (ChanCount::min (_configured_out, ChanCount (DataType::AUDIO, 2)));
+			_plugins.front()->connect_and_run (_session.get_scratch_buffers (maxbuf, true), mb_in_map, mb_out_map, nframes, 0);
+		}
+	} else
+#endif
+	{
+		ChanMapping in_map (natural_input_streams ());
+		ChanMapping out_map (natural_output_streams ());
+		ChanCount maxbuf = ChanCount::max (natural_input_streams (), natural_output_streams());
+		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+			(*i)->connect_and_run (_session.get_scratch_buffers (maxbuf, true), in_map, out_map, nframes, 0);
+		}
 	}
 }
 
