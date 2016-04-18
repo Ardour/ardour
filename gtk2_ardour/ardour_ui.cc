@@ -5122,10 +5122,19 @@ ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 	audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
 	audio_midi_setup->set_position (WIN_POS_CENTER);
 
-	int response;
+	// TODO make this a preference.
+	// (engine state is parsed by the GUI, but currently saved
+	// in preferences: ARDOUR::Config->extra_xml
+	// soooo where should this option go?)
+	if (getenv("TRY_AUTOSTART_ENGINE")) {
+		audio_midi_setup->try_autostart ();
+		if (ARDOUR::AudioEngine::instance()->running()) {
+			return 0;
+		}
+	}
 
 	while (true) {
-		response = audio_midi_setup->run();
+		int response = audio_midi_setup->run();
 		switch (response) {
 		case Gtk::RESPONSE_OK:
 			if (!AudioEngine::instance()->running()) {
