@@ -17,7 +17,7 @@
 */
 
 #include "ardour/plugin_manager.h"
-
+#include "gtkmm2ext/gui_thread.h"
 #include "instrument_selector.h"
 
 #include "i18n.h"
@@ -28,10 +28,39 @@ using namespace ARDOUR;
 InstrumentSelector::InstrumentSelector()
 	: _reasonable_synth_id(0)
 {
+	refill ();
+
+	PluginManager::instance ().PluginListChanged.connect (_update_connection, invalidator (*this), boost::bind (&InstrumentSelector::refill, this), gui_context());
+}
+
+void
+InstrumentSelector::refill()
+{
+	TreeModel::iterator iter = get_active();
+	std::string selected;
+	if (iter) {
+		const TreeModel::Row& row = (*iter);
+		selected = row[_instrument_list_columns.name];
+	}
+
+	unset_model ();
+	clear ();
 	build_instrument_list();
 	set_model(_instrument_list);
 	pack_start(_instrument_list_columns.name);
-	set_active(_reasonable_synth_id);
+	if (selected.empty ()) {
+		set_active(_reasonable_synth_id);
+	} else {
+		TreeModel::Children rows = _instrument_list->children();
+		TreeModel::Children::iterator i;
+		for (i = rows.begin(); i != rows.end(); ++i) {
+			std::string cn = (*i)[_instrument_list_columns.name];
+			if (cn == selected) {
+				set_active(*i);
+				break;
+			}
+		}
+	}
 	set_button_sensitivity(Gtk::SENSITIVITY_AUTO);
 }
 
