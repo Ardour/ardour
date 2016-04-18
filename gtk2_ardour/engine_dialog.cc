@@ -307,13 +307,18 @@ EngineControl::EngineControl ()
 		set_default_state ();
 	}
 
+	update_sensitivity ();
 	connect_changed_signals ();
 
 	notebook.signal_switch_page().connect (sigc::mem_fun (*this, &EngineControl::on_switch_page));
 
 	connect_disconnect_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::connect_disconnect_click));
-	connect_disconnect_button.set_no_show_all();
 
+	connect_disconnect_button.set_no_show_all();
+	use_buffered_io_button.set_no_show_all();
+	update_devices_button.set_no_show_all();
+	start_stop_button.set_no_show_all();
+	midi_devices_button.set_no_show_all();
 }
 
 void
