@@ -99,6 +99,9 @@ IO::~IO ()
 void
 IO::disconnect_check (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
 {
+	if (_session.state_of_the_state () & Session::Deletion) {
+		return;
+	}
 	/* this could be called from within our own ::disconnect() method(s)
 	   or from somewhere that operates directly on a port. so, we don't
 	   know for sure if we can take this lock or not. if we fail,
