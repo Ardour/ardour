@@ -131,6 +131,7 @@ PBD::Signal1<int,uint32_t> Session::AudioEngineSetupRequired;
 PBD::Signal1<void,std::string> Session::Dialog;
 PBD::Signal0<int> Session::AskAboutPendingState;
 PBD::Signal2<int, framecnt_t, framecnt_t> Session::AskAboutSampleRateMismatch;
+PBD::Signal2<void, framecnt_t, framecnt_t> Session::NotifyAboutSampleRateMismatch;
 PBD::Signal0<void> Session::SendFeedback;
 PBD::Signal3<int,Session*,std::string,DataType> Session::MissingFile;
 
@@ -2026,6 +2027,9 @@ Session::set_frame_rate (framecnt_t frames_per_second)
 
 	if (_base_frame_rate == 0) {
 		_base_frame_rate = frames_per_second;
+	}
+	else if (_base_frame_rate != frames_per_second && frames_per_second != _nominal_frame_rate) {
+		NotifyAboutSampleRateMismatch (_base_frame_rate, frames_per_second);
 	}
 	_nominal_frame_rate = frames_per_second;
 

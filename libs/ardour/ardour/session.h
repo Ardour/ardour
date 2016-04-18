@@ -726,6 +726,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	*/
 	static PBD::Signal2<int, framecnt_t, framecnt_t> AskAboutSampleRateMismatch;
 
+	/** non interactive message */
+	static PBD::Signal2<void, framecnt_t, framecnt_t> NotifyAboutSampleRateMismatch;
+
 	/** handlers should return !0 for use pending state, 0 for ignore it.
 	 */
 	static PBD::Signal0<int> AskAboutPendingState;

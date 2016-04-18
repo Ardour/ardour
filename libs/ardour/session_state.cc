@@ -1316,8 +1316,9 @@ Session::set_state (const XMLNode& node, int version)
 		_base_frame_rate = atoi (prop->value());
 		_nominal_frame_rate = _base_frame_rate;
 
-		if (_nominal_frame_rate != _current_frame_rate) {
-                        boost::optional<int> r = AskAboutSampleRateMismatch (_nominal_frame_rate, _current_frame_rate);
+		assert (AudioEngine::instance()->running ());
+		if (_base_frame_rate != AudioEngine::instance()->sample_rate ()) {
+			boost::optional<int> r = AskAboutSampleRateMismatch (_base_frame_rate, _current_frame_rate);
 			if (r.get_value_or (0)) {
 				goto out;
 			}
