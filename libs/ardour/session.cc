@@ -166,8 +166,8 @@ Session::Session (AudioEngine &eng,
 	, _bounce_processing_active (false)
 	, waiting_for_sync_offset (false)
 	, _base_frame_rate (0)
-	, _current_frame_rate (0)
 	, _nominal_frame_rate (0)
+	, _current_frame_rate (0)
 	, transport_sub_state (0)
 	, _record_status (Disabled)
 	, _transport_frame (0)
@@ -2024,7 +2024,9 @@ Session::set_frame_rate (framecnt_t frames_per_second)
 		here.
 	*/
 
-	_base_frame_rate = frames_per_second;
+	if (_base_frame_rate == 0) {
+		_base_frame_rate = frames_per_second;
+	}
 	_nominal_frame_rate = frames_per_second;
 
 	sync_time_vars();

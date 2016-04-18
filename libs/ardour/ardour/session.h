@@ -1152,9 +1152,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	process_function_type    last_process_function;
 	bool                    _bounce_processing_active;
 	bool                     waiting_for_sync_offset;
-	framecnt_t              _base_frame_rate;
-	framecnt_t              _current_frame_rate;  //this includes video pullup offset
-	framecnt_t              _nominal_frame_rate;  //ignores audioengine setting, "native" SR
+	framecnt_t              _base_frame_rate;     // sample-rate of the session at creation time, "native" SR
+	framecnt_t              _nominal_frame_rate;  // overridden by audioengine setting
+	framecnt_t              _current_frame_rate;  // this includes video pullup offset
 	int                      transport_sub_state;
 	mutable gint            _record_status;
 	framepos_t              _transport_frame;
