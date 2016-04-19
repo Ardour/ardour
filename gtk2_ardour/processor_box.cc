@@ -4252,8 +4252,8 @@ ProcessorWindowProxy::get (bool create)
 		if (_window) {
 			setup ();
 		}
+		_window->show_all ();
 	}
-	_window->show_all ();
 	return _window;
 }
 
@@ -4315,9 +4315,8 @@ PluginPinWindowProxy::get (bool create)
 		if (aw) {
 			aw->set_session (_session);
 		}
+		_window->show_all ();
 	}
-
-	_window->show_all ();
 	return _window;
 }
 
