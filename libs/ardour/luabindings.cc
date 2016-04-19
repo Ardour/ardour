@@ -347,7 +347,7 @@ LuaBindings::common (lua_State* L)
 		.beginClass <InterThreadInfo> ("InterThreadInfo")
 		.addVoidConstructor ()
 		.addData ("done", const_cast<bool InterThreadInfo::*>(&InterThreadInfo::done))
-		.addData ("cancel", (bool InterThreadInfo::*)&InterThreadInfo::cancel)
+		.addData ("cancel", const_cast<bool InterThreadInfo::*>(&InterThreadInfo::cancel))
 		.addData ("progress", const_cast<float InterThreadInfo::*>(&InterThreadInfo::progress))
 		.endClass ()
 
