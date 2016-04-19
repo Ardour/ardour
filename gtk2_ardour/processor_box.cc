@@ -1209,7 +1209,7 @@ ProcessorEntry::RoutingIcon::draw_sidechain (cairo_t* cr, double x0, double y0, 
 void
 ProcessorEntry::RoutingIcon::draw_thru_src (cairo_t* cr, double x0, double y0, double height, bool midi)
 {
-	const double rad = 2;
+	const double rad = 1;
 	const double y1 = height - rad - 1.5;
 
 	cairo_arc (cr, x0, y0 + y1, rad, 0, 2. * M_PI);
@@ -1223,7 +1223,7 @@ ProcessorEntry::RoutingIcon::draw_thru_src (cairo_t* cr, double x0, double y0, d
 void
 ProcessorEntry::RoutingIcon::draw_thru_sink (cairo_t* cr, double x0, double y0, double height, bool midi)
 {
-	const double rad = 2;
+	const double rad = 1;
 	const double y1 = rad + 1;
 
 	cairo_arc (cr, x0, y0 + y1, rad, 0, 2. * M_PI);
