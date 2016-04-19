@@ -42,7 +42,7 @@ SoloIsolateControl::SoloIsolateControl (Session& session, std::string const & na
 }
 
 void
-SoloIsolateControl::master_changed (bool from_self, PBD::Controllable::GroupControlDisposition gcd)
+SoloIsolateControl::master_changed (bool from_self, PBD::Controllable::GroupControlDisposition gcd, boost::shared_ptr<AutomationControl>)
 {
 	if (!_soloable.can_solo()) {
 		return;

@@ -170,8 +170,8 @@ MuteMaster::muted_by_others_at (MutePoint mp) const
 }
 
 void
-MuteMaster::mod_muted_by_others (int32_t delta)
+MuteMaster::set_muted_by_others (bool yn)
 {
-	_muted_by_others = max (0, _muted_by_others + delta);
-	std::cerr << this << " mod others by " << delta << " to get " << _muted_by_others << endl;
+	_muted_by_others = yn;
+	std::cerr << this << " set muted by others to " << yn << std::endl;
 }

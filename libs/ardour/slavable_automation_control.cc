@@ -119,13 +119,11 @@ SlavableAutomationControl::actually_set_value (double val, Controllable::GroupCo
 void
 SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 {
-	double current_value;
-	double new_value;
 	std::pair<Masters::iterator,bool> res;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		current_value = get_value_locked ();
+		const double current_value = get_value_locked ();
 
 		/* ratio will be recomputed below */
 
@@ -133,9 +131,7 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 
 		if (res.second) {
 
-			if (_desc.toggled) {
-				recompute_masters_ratios (current_value);
-			}
+			recompute_masters_ratios (current_value);
 
 			/* note that we bind @param m as a weak_ptr<AutomationControl>, thus
 			   avoiding holding a reference to the control in the binding
@@ -152,11 +148,9 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 			   because the change came from the master.
 			*/
 
-			m->Changed.connect_same_thread (res.first->second.connection, boost::bind (&SlavableAutomationControl::master_changed, this, _1, _2));
+			m->Changed.connect_same_thread (res.first->second.connection, boost::bind (&SlavableAutomationControl::master_changed, this, _1, _2, m));
 			cerr << this << enum_2_string ((AutomationType) _parameter.type()) << " now listening to Changed from " << m << endl;
 		}
-
-		new_value = get_value_locked ();
 	}
 
 	if (res.second) {
@@ -164,30 +158,66 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 		MasterStatusChange (); /* EMIT SIGNAL */
 	}
 
-	if (new_value != current_value) {
-		/* need to do this without a writable() check in case
-		 * the master is removed while this control is doing
-		 * automation playback.
-		 */
-		 actually_set_value (new_value, Controllable::NoGroup);
+	post_add_master (m);
+
+	update_boolean_masters_records (m);
+}
+
+bool
+SlavableAutomationControl::get_boolean_masters () const
+{
+	if (!_desc.toggled) {
+		return false;
 	}
 
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+		if (mr->second.yn()) {
+			return true;
+		}
+	}
 }
 
 void
-SlavableAutomationControl::master_changed (bool /*from_self*/, GroupControlDisposition gcd)
+SlavableAutomationControl::update_boolean_masters_records (boost::shared_ptr<AutomationControl> m)
 {
-	/* our value has (likely) changed, but not because we were
-	 * modified. Just the master.
-	 */
+	if (_desc.toggled) {
+		/* We may modify a MasterRecord, but we not modify the master
+		 * map, so we use a ReaderLock
+		 */
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		Masters::iterator mi = _masters.find (m->id());
+		if (mi != _masters.end()) {
+			/* update MasterRecord to show whether the master is
+			   on/off. We need to store this because the master
+			   may change (in the sense of emitting Changed())
+			   several times without actually changing the result
+			   of ::get_value(). This is a feature of
+			   AutomationControls (or even just Controllables,
+			   really) which have more than a simple scalar
+			   value. For example, the master may be a mute control
+			   which can be muted_by_self() and/or
+			   muted_by_others(). When either of those two
+			   conditions changes, Changed() will be emitted, even
+			   though ::get_value() will return the same value each
+			   time (1.0 if either are true, 0.0 if neither is).
 
-	/* propagate master state into our own control so that if we stop
-	 * being slaved, our value doesn't change, and propagate to any
-	 * group this control is part of.
-	 */
+			   This provides a way for derived types to check
+			   the last known state of a Master when the Master
+			   changes. We update it after calling
+			   ::master_changed() (though derived types must do
+			   this themselves).
+			*/
+			mi->second.set_yn (m->get_value());
+		}
+	}
+}
 
-	cerr << this << ' ' << enum_2_string ((AutomationType) _parameter.type()) << " pass along " << get_masters_value() << " from master to group\n";
-	actually_set_value (get_masters_value(), Controllable::UseGroup);
+void
+SlavableAutomationControl::master_changed (bool /*from_self*/, GroupControlDisposition gcd, boost::shared_ptr<AutomationControl> m)
+{
+	update_boolean_masters_records (m);
+	Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 }
 
 void
@@ -206,6 +236,8 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 	double new_value;
 	bool masters_left;
 	Masters::size_type erased = 0;
+
+	pre_remove_master (m);
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
@@ -230,6 +262,10 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 			actually_set_value (current_value, Controllable::UseGroup);
 		}
 	}
+
+	/* no need to update boolean masters records, since the MR will have
+	 * been removed already.
+	 */
 }
 
 void
@@ -238,6 +274,9 @@ SlavableAutomationControl::clear_masters ()
 	double current_value;
 	double new_value;
 	bool had_masters = false;
+
+	/* null ptr means "all masters */
+	pre_remove_master (boost::shared_ptr<AutomationControl>());
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
@@ -254,9 +293,12 @@ SlavableAutomationControl::clear_masters ()
 	}
 
 	if (new_value != current_value) {
-		Changed (false, Controllable::NoGroup);
+		actually_set_value (current_value, Controllable::UseGroup);
 	}
 
+	/* no need to update boolean masters records, since all MRs will have
+	 * been removed already.
+	 */
 }
 
 bool

@@ -40,6 +40,40 @@ MuteControl::MuteControl (Session& session, std::string const & name, Muteable& 
 }
 
 void
+MuteControl::post_add_master (boost::shared_ptr<AutomationControl> m)
+{
+	if (m->get_value()) {
+
+		/* boolean masters records are not updated until AFTER
+		 * ::post_add_master() is called, so we can use them to check
+		 * on whether any master was already enabled before the new
+		 * one was added.
+		 */
+
+		if (!muted_by_self() && !get_boolean_masters()) {
+			Changed (false, Controllable::NoGroup);
+		}
+	}
+}
+
+void
+MuteControl::pre_remove_master (boost::shared_ptr<AutomationControl> m)
+{
+	if (!m) {
+		/* null control ptr means we're removing all masters */
+		_muteable.mute_master()->set_muted_by_others (false);
+		/* Changed will be emitted in SlavableAutomationControl::clear_masters() */
+		return;
+	}
+
+	if (m->get_value()) {
+		if (!muted_by_self() && (muted_by_others() == 1)) {
+			Changed (false, Controllable::NoGroup);
+		}
+	}
+}
+
+void
 MuteControl::actually_set_value (double val, Controllable::GroupControlDisposition gcd)
 {
 	if (muted_by_self() != bool (val)) {
@@ -55,53 +89,33 @@ MuteControl::actually_set_value (double val, Controllable::GroupControlDispositi
 }
 
 void
-MuteControl::master_changed (bool self_change, Controllable::GroupControlDisposition gcd)
+MuteControl::master_changed (bool self_change, Controllable::GroupControlDisposition gcd, boost::shared_ptr<AutomationControl> m)
 {
-	double m = get_masters_value ();
-	const int32_t old_muted_by_others = _muteable.mute_master()->muted_by_others ();
-	std::cerr << "master " << (self_change ? " self " : " not-self") << " changed to " << m << " old others = " << old_muted_by_others << std::endl;
-
-	_muteable.mute_master()->mod_muted_by_others (m ? 1 : -1);
+	bool send_signal = false;
+	const double changed_master_value = m->get_value();
+	boost::shared_ptr<MuteControl> mc = boost::dynamic_pointer_cast<MuteControl> (m);
 
 	if (m) {
-		/* master(s) are now muted. If we are self-muted, this
-		   doesn't change our status. If we are not self-muted,
-		   then it changes our status if either:
+		cerr << "master changed, self ? " << self_change << " self muted = "
+		     << mc->muted_by_self() << " others " << mc->muted_by_others()
+		     << endl;
+	}
 
-		   - the master had its own self-muted status changed OR
-		   - the total number of masters that are muted used to be zero
-		*/
-
-		if (!muted_by_self()) {
-			if (self_change || old_muted_by_others == 0) {
-				/* note false as the first argument - our own
-				   value was not changed
-				*/
-				Changed (false, gcd);
-			} else {
-				cerr << " no Change signal\n";
-			}
-		} else {
-			cerr << "muted by self, not relevant\n";
+	if (changed_master_value) {
+		/* this master is now enabled */
+		if (!muted_by_self() && get_boolean_masters() == 0) {
+			send_signal = true;
 		}
 	} else {
-		/* no master(s) are now muted. If we are self-muted, this
-		   doesn't change our status. If we are not self-muted,
-		   then it changes our status if either:
-
-		   - the master had its own self-muted status changed OR
-		   - the total number of masters that are muted used to be non-zero
-		*/
-
-		if (!muted_by_self()) {
-			if (self_change || old_muted_by_others != 0) {
-				Changed (false, gcd);
-			} else {
-				cerr << " No change signal\n";
-			}
-		} else {
-			cerr << "muted by self, not relevant\n";
+		if (!muted_by_self() && get_boolean_masters() == 1) {
+			send_signal = true;
 		}
+	}
+
+	update_boolean_masters_records (m);
+
+	if (send_signal) {
+		Changed (false, Controllable::NoGroup);
 	}
 }
 
@@ -141,7 +155,7 @@ MuteControl::mute_points () const
 bool
 MuteControl::muted () const
 {
-	return _muteable.mute_master()->muted_by_self() || _muteable.mute_master()->muted_by_others();
+	return muted_by_self() || muted_by_others();
 }
 
 bool
@@ -153,5 +167,5 @@ MuteControl::muted_by_self () const
 bool
 MuteControl::muted_by_others () const
 {
-	return _muteable.mute_master()->muted_by_others ();
+	return get_masters_value ();
 }
