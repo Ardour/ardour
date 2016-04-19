@@ -1421,7 +1421,9 @@ ProcessorEntry::RoutingIcon::expose_output_map (cairo_t* cr, const double width,
 			_i_in_map.get_src (dt, idx, &valid_sink);
 			_i_thru_map.get_src (dt, idx, &valid_thru);
 			if (!valid_thru && !valid_sink) {
-				continue;
+				if (!is_midi || i != 0) { // special case midi-bypass
+					continue;
+				}
 			}
 		}
 		double c_x0 = pin_x_pos (i, width, pc_out, 0, false);
@@ -1443,7 +1445,9 @@ ProcessorEntry::RoutingIcon::expose_output_map (cairo_t* cr, const double width,
 				_i_in_map.get_src (dt, pn, &valid_sink);
 				_i_thru_map.get_src (dt, pn, &valid_thru_f);
 				if (!valid_thru_f && !valid_sink) {
-					continue;
+					if (!is_midi || i != 0) { // special case midi-bypass
+						continue;
+					}
 				}
 			}
 
