@@ -96,6 +96,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	ChanMapping output_map () const; ///< combined (all instances) output map
 	bool has_midi_bypass () const;
 	bool has_midi_thru () const;
+	bool inplace () const { return ! _no_inplace; }
 
 #ifdef MIXBUS
 	bool is_channelstrip () const;

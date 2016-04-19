@@ -1489,6 +1489,15 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			mapping_changed = true;
 			sanitize_maps ();
 		} else {
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("Reset Map for '%1': cfg:%2 chn-in:%3 chn-out:%4 match:%5 size-in:%6 size-out:%7\n",
+						name (),
+						_configured ? "Y" : "N",
+						old_in == in ? "==" : "!=",
+						old_out == out ? "==" : "mismatch",
+						old_match.method == _match.method ? "==" : "!=",
+						_in_map.size() == get_count () ? "==" : "!=",
+						_out_map.size() == get_count () ? "==" : "!="
+						));
 			/* generate a new mapping */
 			mapping_changed = reset_map (false);
 		}
