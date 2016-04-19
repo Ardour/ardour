@@ -1225,8 +1225,6 @@ RouteUI::mute_active_state (Session* s, boost::shared_ptr<Route> r)
 
 	if (Config->get_show_solo_mutes() && !Config->get_solo_control_is_listen_control ()) {
 
-		std::cerr << r->name() << " self " << r->mute_control()->muted_by_self() << " others " << r->muted_by_others() << " soloing " << r->muted_by_others_soloing() << std::endl;
-
 		if (r->mute_control()->muted_by_self ()) {
 			/* full mute */
 			return Gtkmm2ext::ExplicitActive;
