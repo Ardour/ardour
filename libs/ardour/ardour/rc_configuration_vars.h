@@ -40,13 +40,7 @@ CONFIG_VARIABLE (bool, auto_connect_standard_busses, "auto-connect-standard-buss
 */
 CONFIG_VARIABLE (AutoConnectOption, output_auto_connect, "output-auto-connect", AutoConnectMaster)
 CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", AutoConnectPhysical)
-
-#if (defined MIXBUS || defined PLATFORM_WINDOWS)
-// mainly useful for VSTs (stereo/mono compat) and Mixbus' stereo-only workflow
 CONFIG_VARIABLE (bool, strict_io, "strict-io", true)
-#else
-CONFIG_VARIABLE (bool, strict_io, "strict-io", false)
-#endif
 
 /* Naming */
 CONFIG_VARIABLE (TracksAutoNamingRule, tracks_auto_naming, "tracks-auto-naming", UseDefaultNames)
