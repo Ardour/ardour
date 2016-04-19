@@ -973,15 +973,22 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 	cairo_set_source_rgba (cr, 1., 1., 1., 1.);
 	pango_cairo_show_layout (cr, layout->gobj ());
 
-	if (_pi->signal_latency () > 0) {
-		// TODO: this needs a better location also format to msec (and cache)
+#ifndef NDEBUG
+	if (_pi->signal_latency () > 0 || !_pi->inplace()) {
 		layout->set_width ((_innerwidth - 2 * _pin_box_size) * PANGO_SCALE);
-		layout->set_text (string_compose (_("Latency %1 spl"), _pi->signal_latency ()));
+		if (_pi->signal_latency () > 0 && !_pi->inplace()) {
+			layout->set_text (string_compose (_("Latency %1 spl%2 %3"), _pi->signal_latency (), ", ", _("no-inplace")));
+		} else if (_pi->signal_latency () > 0) {
+			layout->set_text (string_compose (_("Latency %1 spl"), _pi->signal_latency ()));
+		} else {
+			layout->set_text (_("no-inplace"));
+		}
 		layout->get_pixel_size (text_width, text_height);
 		cairo_move_to (cr, _margin_x + _pin_box_size * .5, _margin_y + 2);
 		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
 		pango_cairo_show_layout (cr, layout->gobj ());
 	}
+#endif
 
 	if (_pi->strict_io () && !Profile->get_mixbus ()) {
 		layout->set_text (_("Strict I/O"));
