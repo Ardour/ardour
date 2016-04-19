@@ -1422,7 +1422,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	case Delegate:
 		{
 			ChanCount dout (in); // hint
-			if (_custom_cfg) { 
+			if (_custom_cfg) {
 				dout = _custom_out;
 			} else if (_preset_out.n_audio () > 0) {
 				dout.set (DataType::AUDIO, _preset_out.n_audio ());
@@ -1527,8 +1527,12 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	 *
 	 * sidechain inputs add a constraint on the input:
 	 * configured input + sidechain (=_configured_internal)
+	 *
+	 * NB. this also satisfies
+	 * max (natural_input_streams(), natural_output_streams())
+	 * which is needed for silence runs
 	 */
-	_required_buffers =ChanCount::max (_configured_internal,
+	_required_buffers = ChanCount::max (_configured_internal,
 			natural_input_streams () + ChanCount::max (_configured_out, natural_output_streams () * get_count ()));
 
 	if (old_in != in || old_out != out || old_internal != _configured_internal
@@ -1537,7 +1541,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		PluginIoReConfigure (); /* EMIT SIGNAL */
 	}
 
-	_delaybuffers.configure (_configured_out, _plugins.front()->max_latency ());
+	_delaybuffers.configure (_configured_out, _plugins.front ()->max_latency ());
 	_latency_changed = true;
 
 	// we don't know the analysis window size, so we must work with the
@@ -2516,6 +2520,9 @@ PluginInsert::get_impulse_analysis_plugin()
 {
 	boost::shared_ptr<Plugin> ret;
 	if (_impulseAnalysisPlugin.expired()) {
+		// LV2 in particular uses various _session params
+		// during init() -- most notably block_size..
+		// not great.
 		ret = plugin_factory(_plugins[0]);
 		ret->configure_io (internal_input_streams (), internal_output_streams ());
 		_impulseAnalysisPlugin = ret;
