@@ -635,10 +635,18 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 			for (uint32_t out = 0; out < bufs.count().get (*t); ++out) {
 				bool valid;
 				uint32_t in_idx = thru_map.get (*t, out, &valid);
+				uint32_t m = out + natural_input_streams ().get (*t);
 				if (valid) {
-					uint32_t m = out + natural_input_streams ().get (*t);
 					_delaybuffers.delay (*t, out, inplace_bufs.get (*t, m), bufs.get (*t, in_idx), nframes, offset, offset);
 					used_outputs.set (*t, out, 1); // mark as used
+				} else {
+					used_outputs.get (*t, out, &valid);
+					if (valid) {
+						/* the plugin is expected to write here, but may not :(
+						 * (e.g. drumgizmo w/o kit loaded)
+						 */
+						inplace_bufs.get (*t, m).silence (nframes);
+					}
 				}
 			}
 		}
