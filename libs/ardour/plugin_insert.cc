@@ -313,7 +313,7 @@ PluginInsert::natural_output_streams() const
 {
 #ifdef MIXBUS
 	if (is_channelstrip ()) {
-		return _configured_out;
+		return ChanCount::min (_configured_out, ChanCount (DataType::AUDIO, 2));
 	}
 #endif
 	return _plugins[0]->get_info()->n_outputs;
@@ -324,7 +324,7 @@ PluginInsert::natural_input_streams() const
 {
 #ifdef MIXBUS
 	if (is_channelstrip ()) {
-		return _configured_in;
+		return ChanCount::min (_configured_in, ChanCount (DataType::AUDIO, 2));
 	}
 #endif
 	return _plugins[0]->get_info()->n_inputs;
@@ -766,23 +766,18 @@ PluginInsert::silence (framecnt_t nframes)
 
 	_delaybuffers.flush ();
 
+	ChanMapping in_map (natural_input_streams ());
+	ChanMapping out_map (natural_output_streams ());
+	ChanCount maxbuf = ChanCount::max (natural_input_streams (), natural_output_streams());
 #ifdef MIXBUS
 	if (is_channelstrip ()) {
 		if (_configured_in.n_audio() > 0) {
-			ChanCount maxbuf = ChanCount::min (_configured_in, ChanCount (DataType::AUDIO, 2));
-			ChanMapping mb_in_map (ChanCount::min (_configured_in, ChanCount (DataType::AUDIO, 2)));
-			ChanMapping mb_out_map (ChanCount::min (_configured_out, ChanCount (DataType::AUDIO, 2)));
-			_plugins.front()->connect_and_run (_session.get_scratch_buffers (maxbuf, true), mb_in_map, mb_out_map, nframes, 0);
+			_plugins.front()->connect_and_run (_session.get_scratch_buffers (maxbuf, true), in_map, out_map, nframes, 0);
 		}
 	} else
 #endif
-	{
-		ChanMapping in_map (natural_input_streams ());
-		ChanMapping out_map (natural_output_streams ());
-		ChanCount maxbuf = ChanCount::max (natural_input_streams (), natural_output_streams());
-		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-			(*i)->connect_and_run (_session.get_scratch_buffers (maxbuf, true), in_map, out_map, nframes, 0);
-		}
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		(*i)->connect_and_run (_session.get_scratch_buffers (maxbuf, true), in_map, out_map, nframes, 0);
 	}
 }
 
@@ -1471,7 +1466,23 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		mapping_changed = sanitize_maps ();
 	} else {
 #ifdef MIXBUS
-		if (is_channelstrip ()) { _maps_from_state = false; }
+		if (is_channelstrip ()) {
+			/* fake channel map - for wire display */
+			_maps_from_state = false;
+			_in_map.clear ();
+			_out_map.clear ();
+			_thru_map = ChanMapping ();
+			_in_map[0] = ChanMapping (ChanCount::min (_configured_in, ChanCount (DataType::AUDIO, 2)));
+			_out_map[0] = ChanMapping (ChanCount::min (_configured_out, ChanCount (DataType::AUDIO, 2)));
+			/* set "thru" map for in-place forward of audio */
+			for (uint32_t i = 2; i < _configured_in.n_audio(); ++i) {
+				_thru_map.set (DataType::AUDIO, i, i);
+			}
+			/* and midi (after implicit 1st channel bypass) */
+			for (uint32_t i = 1; i < _configured_in.n_midi(); ++i) {
+				_thru_map.set (DataType::MIDI, i, i);
+			}
+		} else
 #endif
 		if (_maps_from_state) {
 			_maps_from_state = false;
