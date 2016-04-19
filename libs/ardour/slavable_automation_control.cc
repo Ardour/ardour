@@ -21,7 +21,7 @@
 
 #include "pbd/enumwriter.h"
 
-#include "ardour/automation_control.h"
+#include "ardour/slavable_automation_control.h"
 #include "ardour/session.h"
 
 using namespace std;

@@ -21,6 +21,8 @@
 
 #include <string>
 
+#include "ardour/slavable_automation_control.h"
+
 #include "ardour/libardour_visibility.h"
 
 class XMLNode;

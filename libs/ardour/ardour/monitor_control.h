@@ -24,7 +24,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/dynamic_bitset.hpp>
 
-#include "ardour/automation_control.h"
+#include "ardour/slavable_automation_control.h"
 #include "ardour/monitorable.h"
 
 #include "ardour/libardour_visibility.h"

@@ -23,6 +23,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "ardour/slavable_automation_control.h"
 #include "ardour/libardour_visibility.h"
 
 class XMLNode;
@@ -72,7 +73,7 @@ class LIBARDOUR_API SoloIsolateControl : public SlavableAutomationControl
 	XMLNode& get_state ();
 
   protected:
-	void master_changed (bool from_self, PBD::Controllable::GroupControlDisposition gcd);
+	void master_changed (bool from_self, PBD::Controllable::GroupControlDisposition gcd, boost::shared_ptr<AutomationControl>);
 	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 
   private:

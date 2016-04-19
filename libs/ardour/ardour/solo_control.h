@@ -23,7 +23,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "ardour/automation_control.h"
+#include "ardour/slavable_automation_control.h"
 #include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
