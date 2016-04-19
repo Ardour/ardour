@@ -96,7 +96,7 @@ class SlavableAutomationControl : public AutomationControl
 	double get_value_locked() const;
 	void   actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	void   update_boolean_masters_records (boost::shared_ptr<AutomationControl>);
-	bool   get_boolean_masters () const;
+	int32_t   get_boolean_masters () const;
 
 	virtual void   master_changed (bool from_self, GroupControlDisposition gcd, boost::shared_ptr<AutomationControl>);
 	virtual void   recompute_masters_ratios (double val) { /* do nothing by default */}

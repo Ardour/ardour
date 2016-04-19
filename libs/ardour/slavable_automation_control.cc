@@ -163,19 +163,21 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 	update_boolean_masters_records (m);
 }
 
-bool
+int32_t
 SlavableAutomationControl::get_boolean_masters () const
 {
-	if (!_desc.toggled) {
-		return false;
-	}
+	int32_t n = 0;
 
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
-	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-		if (mr->second.yn()) {
-			return true;
+	if (_desc.toggled) {
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+			if (mr->second.yn()) {
+				++n;
+			}
 		}
 	}
+
+	return n;
 }
 
 void

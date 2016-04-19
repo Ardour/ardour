@@ -67,7 +67,7 @@ MuteControl::pre_remove_master (boost::shared_ptr<AutomationControl> m)
 	}
 
 	if (m->get_value()) {
-		if (!muted_by_self() && (muted_by_others() == 1)) {
+		if (!muted_by_self() && (get_boolean_masters() == 1)) {
 			Changed (false, Controllable::NoGroup);
 		}
 	}
