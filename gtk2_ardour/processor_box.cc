@@ -1040,17 +1040,10 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_fill (cr);
 
 	const double dx = rint(max(2., 2. * UIConfiguration::instance().get_ui_scale()));
-	if (_ports.n_total() > 1) {
-		for (uint32_t i = 0; i < _ports.n_total(); ++i) {
-			set_routing_color (cr, i < _ports.n_midi());
-			const float x = rintf(width * (.2f + .6f * i / (_ports.n_total() - 1.f)));
-			cairo_rectangle (cr, x-dx * .5, 0, 1+dx, height);
-			cairo_fill(cr);
-		}
-	} else if (_ports.n_total() == 1) {
-		set_routing_color (cr, _ports.n_midi() == 1);
-		const float x = rintf(width * .5);
-		cairo_rectangle (cr, x-dx * .5, 0, 1+dx, height);
+	for (uint32_t i = 0; i < _ports.n_total(); ++i) {
+		set_routing_color (cr, i < _ports.n_midi());
+		const double x = ProcessorEntry::RoutingIcon::pin_x_pos (i, width, _ports.n_total(), 0 , false);
+		cairo_rectangle (cr, x - .5 - dx * .5, 0, 1 + dx, height);
 		cairo_fill(cr);
 	}
 
@@ -1173,7 +1166,7 @@ ProcessorEntry::RoutingIcon::pin_x_pos (uint32_t i, double width, uint32_t n_tot
 		assert (i == 0);
 		return rint (width * .5) +.5;
 	}
-	return rint (width * (.2 + .6 * i / (n_total - 1))) + .5;
+	return rint (width * (.15 + .7 * i / (n_total - 1))) + .5;
 }
 
 void
@@ -1216,47 +1209,29 @@ ProcessorEntry::RoutingIcon::draw_sidechain (cairo_t* cr, double x0, double y0, 
 void
 ProcessorEntry::RoutingIcon::draw_thru_src (cairo_t* cr, double x0, double y0, double height, bool midi)
 {
-	const double dx = 1 + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale()));
-	const double y1 = rint (height * .5) + .5;
+	const double rad = 2;
+	const double y1 = height - rad - 1.5;
 
-	cairo_save (cr);
-	cairo_translate (cr, x0, y0);
-	cairo_move_to (cr, 0 - dx - .5, y1);
-	cairo_line_to (cr, 0 + dx + .5, y1 - 2);
-
-	cairo_move_to (cr, 0 - dx - .5, y1 + 2);
-	cairo_line_to (cr, 0 + dx + .5, y1);
-
-	cairo_move_to (cr, 0, y1 + 1);
-	cairo_line_to (cr, 0, height);
-
+	cairo_arc (cr, x0, y0 + y1, rad, 0, 2. * M_PI);
+	cairo_move_to (cr, x0, y0 + height - 1.5);
+	cairo_line_to (cr, x0, y0 + height);
 	set_routing_color (cr, midi);
 	cairo_set_line_width  (cr, 1.0);
 	cairo_stroke (cr);
-	cairo_restore (cr);
 }
 
 void
 ProcessorEntry::RoutingIcon::draw_thru_sink (cairo_t* cr, double x0, double y0, double height, bool midi)
 {
-	const double dx = 1 + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale()));
-	const double y1 = rint (height * .5) - .5;
+	const double rad = 2;
+	const double y1 = rad + 1;
 
-	cairo_save (cr);
-	cairo_translate (cr, x0, y0);
-	cairo_move_to (cr, 0 - dx - .5, y1);
-	cairo_line_to (cr, 0 + dx + .5, y1 - 2);
-
-	cairo_move_to (cr, 0 - dx - .5, y1 + 2);
-	cairo_line_to (cr, 0 + dx + .5, y1);
-
-	cairo_move_to (cr, 0, y1 - 1);
-	cairo_line_to (cr, 0, 0);
-
+	cairo_arc (cr, x0, y0 + y1, rad, 0, 2. * M_PI);
+	cairo_move_to (cr, x0, y0);
+	cairo_line_to (cr, x0, y0 + 1);
 	set_routing_color (cr, midi);
 	cairo_set_line_width  (cr, 1.0);
 	cairo_stroke (cr);
-	cairo_restore (cr);
 }
 
 void
@@ -1461,29 +1436,34 @@ ProcessorEntry::RoutingIcon::expose_output_map (cairo_t* cr, const double width,
 		double x = pin_x_pos (i, width, n_out, 0, is_midi);
 
 		if (!_terminal) {
-			// only check thru (gnd is part of input)
-			bool valid_thru;
-			uint32_t idx = _thru_map.get (dt, pn, &valid_thru);
-			if (!valid_thru) {
-				continue;
-			}
-
-			// skip connections that are not used in the next's input :(
+			bool valid_thru_f = false;
+			// skip connections that are not used in the next's input
 			if (_feeding) {
 				bool valid_sink;
 				_i_in_map.get_src (dt, pn, &valid_sink);
-				_i_thru_map.get_src (dt, pn, &valid_thru);
-				if (!valid_thru && !valid_sink) {
+				_i_thru_map.get_src (dt, pn, &valid_thru_f);
+				if (!valid_thru_f && !valid_sink) {
 					continue;
 				}
 			}
 
-			if (idx >= _in.get (dt)) {
-				draw_sidechain (cr, x, 0, ht, is_midi);
-			} else {
-				draw_thru_src (cr, x, 0, ht, is_midi);
+			bool valid_src;
+			_out_map.get_src (dt, pn, &valid_src);
+			if (!valid_src) {
+				bool valid_thru;
+				uint32_t idx = _thru_map.get (dt, pn, &valid_thru);
+				if (valid_thru) {
+					if (idx >= _in.get (dt)) {
+						draw_sidechain (cr, x, 0, height, is_midi);
+					} else {
+						draw_thru_src (cr, x, 0, height, is_midi);
+					}
+				} else if (valid_thru_f){
+					// gnd is part of input, unless it's a thru input
+					// (also only true if !coalesced into one small display)
+					draw_gnd (cr, x, 0, height, is_midi);
+				}
 			}
-
 		} else {
 			// terminal node, add arrows
 			bool valid_src;
