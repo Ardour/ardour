@@ -80,7 +80,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int set_feedback (bool yn);
 	bool get_feedback () const;
 
-	void set_namespace_root (std::string);
 
 	int start ();
 	int stop ();
@@ -114,7 +113,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	lo_server _osc_unix_server;
 	std::string _osc_unix_socket_path;
 	std::string _osc_url_file;
-	std::string _namespace_root;
 	bool _send_route_changes;
 	OSCDebugMode _debugmode;
 
