@@ -3957,18 +3957,13 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 }
 
 void
-Route::sidechain_change_handler (IOChange change, void * /*src*/)
+Route::sidechain_change_handler (IOChange change, void* src)
 {
 	if (_initial_io_setup || _in_sidechain_setup) {
 		return;
 	}
 
-	if ((change.type & IOChange::ConfigurationChanged)) {
-		/* This is called with the process lock held if change
-		   contains ConfigurationChanged
-		*/
-		configure_processors (0);
-	}
+	input_change_handler (change, src);
 }
 
 uint32_t
