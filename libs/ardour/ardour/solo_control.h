@@ -61,7 +61,7 @@ class LIBARDOUR_API SoloControl : public SlavableAutomationControl
 	 */
 
 	bool soloed_by_others () const {
-		return _soloed_by_others_downstream || _soloed_by_others_downstream;
+		return _soloed_by_others_downstream || _soloed_by_others_downstream || get_masters_value ();
 	}
 	uint32_t soloed_by_others_upstream () const {
 		return _soloed_by_others_upstream;
@@ -81,6 +81,9 @@ class LIBARDOUR_API SoloControl : public SlavableAutomationControl
 
   protected:
 	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+	void master_changed (bool from_self, GroupControlDisposition, boost::shared_ptr<AutomationControl> m);
+	void pre_remove_master (boost::shared_ptr<AutomationControl>);
+	void post_add_master (boost::shared_ptr<AutomationControl>);
 
   private:
 	Soloable&      _soloable;

@@ -171,7 +171,7 @@ SoloControl::get_value () const
 		return AutomationControl::get_value();
 	}
 
-	return self_soloed() ? 1.0 : 0.0;
+	return soloed() ? 1.0 : 0.0;
 }
 
 void
@@ -233,4 +233,63 @@ SoloControl::get_state ()
 	node.add_property (X_("soloed-by-downstream"), buf);
 
 	return node;
+}
+
+void
+SoloControl::master_changed (bool /*from self*/, GroupControlDisposition, boost::shared_ptr<AutomationControl> m)
+{
+	bool send_signal = false;
+	const double changed_master_value = m->get_value();
+
+	if (changed_master_value) {
+		/* this master is now enabled */
+		if (!self_soloed() && get_boolean_masters() == 0) {
+			send_signal = true;
+		}
+	} else {
+		if (!self_soloed() && get_boolean_masters() == 1) {
+			send_signal = true;
+		}
+	}
+
+	update_boolean_masters_records (m);
+
+	if (send_signal) {
+		Changed (false, Controllable::NoGroup);
+	}
+}
+
+void
+SoloControl::post_add_master (boost::shared_ptr<AutomationControl> m)
+{
+	if (m->get_value()) {
+
+		/* boolean masters records are not updated until AFTER
+		 * ::post_add_master() is called, so we can use them to check
+		 * on whether any master was already enabled before the new
+		 * one was added.
+		 */
+
+		if (!self_soloed() && !get_boolean_masters()) {
+			Changed (false, Controllable::NoGroup);
+		}
+	}
+}
+
+void
+SoloControl::pre_remove_master (boost::shared_ptr<AutomationControl> m)
+{
+	if (!m) {
+		/* null control ptr means we're removing all masters. Nothing
+		 * to do. Changed will be emitted in
+		 * SlavableAutomationControl::clear_masters()
+		 */
+		return;
+	}
+
+	if (m->get_value()) {
+		if (!self_soloed() && (get_boolean_masters() == 1)) {
+			Changed (false, Controllable::NoGroup);
+		}
+	}
 }
