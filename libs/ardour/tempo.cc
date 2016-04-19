@@ -328,6 +328,13 @@ t = b log (Ta / T0) / (T0 (e^(log (Ta / T0)) - 1))
 By substituting our expanded t as a in the c function above, our problem is reduced to:
 c = T0 (e^(log (Ta / T0)) - 1) / b
 
+Of course the word 'beat' has been left loosely defined above.
+In music, a beat is defined by the musical pulse (which comes from the tempo)
+and the meter in use at a particular time (how many  pulse divisions there are in one bar).
+It would be more accurate to substitute the work 'pulse' for 'beat' above.
+
+Anyway ...
+
 We can now store c for future time calculations.
 If the following tempo section (the one that defines c in conjunction with this one)
 is changed or moved, c is no longer valid.
