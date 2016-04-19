@@ -95,12 +95,6 @@ MuteControl::master_changed (bool self_change, Controllable::GroupControlDisposi
 	const double changed_master_value = m->get_value();
 	boost::shared_ptr<MuteControl> mc = boost::dynamic_pointer_cast<MuteControl> (m);
 
-	if (m) {
-		cerr << "master changed, self ? " << self_change << " self muted = "
-		     << mc->muted_by_self() << " others " << mc->muted_by_others()
-		     << endl;
-	}
-
 	if (changed_master_value) {
 		/* this master is now enabled */
 		if (!muted_by_self() && get_boolean_masters() == 0) {
