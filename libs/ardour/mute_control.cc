@@ -85,7 +85,7 @@ MuteControl::actually_set_value (double val, Controllable::GroupControlDispositi
 		_muteable.act_on_mute ();
 	}
 
-	AutomationControl::actually_set_value (val, gcd);
+	SlavableAutomationControl::actually_set_value (val, gcd);
 }
 
 void
