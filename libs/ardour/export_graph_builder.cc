@@ -581,7 +581,7 @@ ExportGraphBuilder::SilenceHandler::SilenceHandler (ExportGraphBuilder & parent,
 	framecnt_t sample_rate = parent.session.nominal_frame_rate();
 
 #ifdef MIXBUS
-	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in, -90);
+	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in, -90));
 #else
 	// TODO silence-threshold should be per export-preset, with Config->get_silence_threshold being the default
 	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in, Config->get_export_silence_threshold ()));
