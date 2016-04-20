@@ -1140,7 +1140,7 @@ Session::add_monitor_section ()
 	/* if monitor section is not connected, connect it to physical outs
 	 */
 
-	if (Config->get_auto_connect_standard_busses() && !_monitor_out->output()->connected ()) {
+	if ((Config->get_auto_connect_standard_busses () || Profile->get_mixbus ()) && !_monitor_out->output()->connected ()) {
 
 		if (!Config->get_monitor_bus_preferred_bundle().empty()) {
 
