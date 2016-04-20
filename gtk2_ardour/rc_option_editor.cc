@@ -2611,6 +2611,8 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Solo & mute"), new OptionEditorHeading (_("Send Routing")));
 
+
+if (!ARDOUR::Profile->get_mixbus()) {
 	add_option (_("Solo & mute"),
 	     new BoolOption (
 		     "link-send-and-route-panner",
@@ -2618,6 +2620,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
 		     ));
+}
 
 	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Preferences")));
 

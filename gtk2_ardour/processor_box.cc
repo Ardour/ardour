@@ -2089,19 +2089,22 @@ ProcessorBox::show_processor_menu (int arg)
 		}
 	}
 
-	Gtk::MenuItem* send_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/send_options"));
-	if (send_menu_item) {
-		if (single_selection && !_route->is_monitor()) {
-			Menu* m = single_selection->build_send_options_menu ();
-			if (m && !m->items().empty()) {
-				send_menu_item->set_submenu (*m);
-				send_menu_item->set_sensitive (true);
+
+	if (!ARDOUR::Profile->get_mixbus()) {
+		Gtk::MenuItem* send_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/send_options"));
+		if (send_menu_item) {
+			if (single_selection && !_route->is_monitor()) {
+				Menu* m = single_selection->build_send_options_menu ();
+				if (m && !m->items().empty()) {
+					send_menu_item->set_submenu (*m);
+					send_menu_item->set_sensitive (true);
+				} else {
+					gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
+					send_menu_item->set_sensitive (false);
+				}
 			} else {
-				gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
 				send_menu_item->set_sensitive (false);
 			}
-		} else {
-			send_menu_item->set_sensitive (false);
 		}
 	}
 
