@@ -1435,7 +1435,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			bool const r = _plugins.front()->can_support_io_configuration (_configured_internal, dout, &useins);
 			assert (r);
 			if (useins.n_audio() == 0) {
-				useins = in;
+				useins = _configured_internal;
 			}
 			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate configuration: %2 %3\n", name(), useins, dout));
 
