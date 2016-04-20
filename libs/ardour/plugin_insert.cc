@@ -1369,11 +1369,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	ChanCount old_internal;
 	ChanCount old_out;
 
-	if (_configured) {
-		old_in = _configured_in;
-		old_internal = _configured_internal;
-		old_out = _configured_out;
-	}
+	old_in = _configured_in;
+	old_out = _configured_out;
+	old_internal = _configured_internal;
 
 	_configured_in = in;
 	_configured_internal = in;
@@ -2213,8 +2211,12 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	uint32_t out_maps = 0;
 	XMLNodeList kids = node.children ();
 	for (XMLNodeIterator i = kids.begin(); i != kids.end(); ++i) {
+		if ((*i)->name() == X_("ConfiguredInput")) {
+			_configured_in = ChanCount(**i);
+		}
 		if ((*i)->name() == X_("ConfiguredOutput")) {
 			_custom_out = ChanCount(**i);
+			_configured_out = ChanCount(**i);
 		}
 		if ((*i)->name() == X_("PresetOutput")) {
 			_preset_out = ChanCount(**i);
