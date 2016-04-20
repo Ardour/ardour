@@ -49,6 +49,7 @@
 #include "ardour/panner.h"
 #include "ardour/panner_manager.h"
 #include "ardour/panner_shell.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/speakers.h"
 
@@ -73,7 +74,7 @@ PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p
 {
 	if (is_send) {
 		_pannable_internal.reset(new Pannable (s));
-		if (Config->get_link_send_and_route_panner()) {
+		if (Config->get_link_send_and_route_panner() && !ARDOUR::Profile->get_mixbus()) {
 			_panlinked = true;
 		} else {
 			_panlinked = false;
@@ -178,7 +179,9 @@ PannerShell::set_state (const XMLNode& node, int version)
 	}
 
 	if ((prop = node.property (X_("linked-to-route"))) != 0) {
-		_panlinked = string_is_affirmative (prop->value ());
+		if (!ARDOUR::Profile->get_mixbus()) {
+			_panlinked = string_is_affirmative (prop->value ());
+		}
 	}
 
 	if ((prop = node.property (X_("user-panner"))) != 0) {
