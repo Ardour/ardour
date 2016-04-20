@@ -1432,7 +1432,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			}
 			if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
 			ChanCount useins;
-			bool const r = _plugins.front()->can_support_io_configuration (in, dout, &useins);
+			bool const r = _plugins.front()->can_support_io_configuration (_configured_internal, dout, &useins);
 			assert (r);
 			if (useins.n_audio() == 0) {
 				useins = in;
@@ -1708,7 +1708,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 		out = inx; // hint
 		if (out.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
 		if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
-		bool const r = _plugins.front()->can_support_io_configuration (inx, out, &useins);
+		bool const r = _plugins.front()->can_support_io_configuration (inx + sidechain_input_pins (), out, &useins);
 		if (!r) {
 			// houston, we have a problem.
 			return Match (Impossible, 0);
@@ -1777,7 +1777,7 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 		out = in; // hint
 		if (out.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
 		if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
-		bool const r = _plugins.front()->can_support_io_configuration (in, out);
+		bool const r = _plugins.front()->can_support_io_configuration (in + sidechain_input_pins (), out);
 		if (!r) {
 			return Match (Impossible, 0);
 		}
