@@ -1399,7 +1399,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(DEBUG::ChanMapping)) {
 		DEBUG_STR_DECL(a);
-		DEBUG_STR_APPEND(a, string_compose ("Match '%1': ",  name()));
+		DEBUG_STR_APPEND(a, string_compose ("%1: ",  name()));
 		DEBUG_STR_APPEND(a, _match);
 		DEBUG_TRACE (DEBUG::ChanMapping, DEBUG_STR(a).str());
 	}
@@ -1439,7 +1439,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			if (useins.n_audio() == 0) {
 				useins = in;
 			}
-			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("Delegate configuration: %1 %2 %3\n", name(), useins, dout));
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate configuration: %2 %3\n", name(), useins, dout));
 
 			if (_plugins.front()->configure_io (useins, dout) == false) {
 				PluginIoReConfigure (); /* EMIT SIGNAL */
@@ -1456,6 +1456,17 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		}
 		break;
 	}
+
+	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: cfg:%2 state:%3 chn-in:%4 chn-out:%5 match:%6 size-in:%7 size-out:%8\n",
+				name (),
+				_configured ? "Y" : "N",
+				_maps_from_state ? "Y" : "N",
+				old_in == in ? "==" : "!=",
+				old_out == out ? "==" : "!=",
+				old_match.method == _match.method ? "==" : "!=",
+				_in_map.size() == get_count () ? "==" : "!=",
+				_out_map.size() == get_count () ? "==" : "!="
+				));
 
 	bool mapping_changed = false;
 	if (old_in == in && old_out == out
@@ -1476,7 +1487,6 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 #ifdef MIXBUS
 		if (is_channelstrip ()) {
 			/* fake channel map - for wire display */
-			_maps_from_state = false;
 			_in_map.clear ();
 			_out_map.clear ();
 			_thru_map = ChanMapping ();
@@ -1492,23 +1502,14 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			}
 		} else
 #endif
-		if (_maps_from_state) {
-			_maps_from_state = false;
+		if (_maps_from_state && old_in == in && old_out == out) {
 			mapping_changed = true;
 			sanitize_maps ();
 		} else {
-			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("Reset Map for '%1': cfg:%2 chn-in:%3 chn-out:%4 match:%5 size-in:%6 size-out:%7\n",
-						name (),
-						_configured ? "Y" : "N",
-						old_in == in ? "==" : "!=",
-						old_out == out ? "==" : "mismatch",
-						old_match.method == _match.method ? "==" : "!=",
-						_in_map.size() == get_count () ? "==" : "!=",
-						_out_map.size() == get_count () ? "==" : "!="
-						));
 			/* generate a new mapping */
 			mapping_changed = reset_map (false);
 		}
+		_maps_from_state = false;
 	}
 
 	if (mapping_changed) {
@@ -1616,7 +1617,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const& in, ChanCou
 	Match rv = internal_can_support_io_configuration (in, out);
 
 	if (!_custom_cfg && _preset_out.n_audio () > 0) {
-		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("using output preset: %1 %2\n", name(), _preset_out));
+		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: using output preset: %2\n", name(), _preset_out));
 		out.set (DataType::AUDIO, _preset_out.n_audio ());
 	}
 	return rv;
@@ -1668,7 +1669,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 			ChanCount max_out (DataType::AUDIO, 2); // TODO use master-out
 			max_out.set (DataType::MIDI, out.get(DataType::MIDI));
 			out = ChanCount::min (out, max_out);
-			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("special case strict-i/o instrument: %1\n", name()));
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: special case strict-i/o instrument\n", name()));
 			return m;
 		}
 
@@ -1684,7 +1685,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 						f = max (f, (uint32_t) ceil (inx.get(*t) / (float)nout));
 					}
 					out = inx;
-					DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("special case strict-i/o generator: %1\n", name()));
+					DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: special case strict-i/o for generator\n", name()));
 					return Match (Replicate, f, _strict_io);
 				}
 				break;
@@ -1702,7 +1703,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 
 	ChanCount ns_inputs  = inputs - sidechain_input_pins ();
 
-	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("resolving 'Impossible' match for %1\n", name()));
+	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: resolving 'Impossible' match...\n", name()));
 
 	if (info->reconfigurable_io()) {
 		ChanCount useins;
@@ -1790,11 +1791,11 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 	ChanCount ns_inputs  = inputs - sidechain_input_pins ();
 
 	if (in.get(DataType::MIDI) == 1 && outputs.get(DataType::MIDI) == 0) {
-		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("bypassing midi-data around %1\n", name()));
+		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: bypassing midi-data\n", name()));
 		midi_bypass.set (DataType::MIDI, 1);
 	}
 	if (in.get(DataType::MIDI) == 1 && inputs.get(DataType::MIDI) == 0) {
-		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("hiding midi-port from plugin %1\n", name()));
+		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: hiding midi-port from plugin\n", name()));
 		in.set(DataType::MIDI, 0);
 	}
 
