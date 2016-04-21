@@ -60,6 +60,15 @@ class LIBARDOUR_API SoloControl : public SlavableAutomationControl
 	/* API to check different aspects of solo substate
 	 */
 
+	bool self_soloed () const {
+		return _self_solo;
+	}
+	bool soloed_by_masters () const {
+		return get_masters_value();
+	}
+	bool soloed_by_self_or_masters () const {
+		return self_soloed() || get_masters_value ();
+	}
 	bool soloed_by_others () const {
 		return _soloed_by_others_downstream || _soloed_by_others_downstream || get_masters_value ();
 	}
@@ -68,9 +77,6 @@ class LIBARDOUR_API SoloControl : public SlavableAutomationControl
 	}
 	uint32_t soloed_by_others_downstream () const {
 		return _soloed_by_others_downstream;
-	}
-	bool self_soloed () const {
-		return _self_solo;
 	}
 	bool soloed() const { return self_soloed() || soloed_by_others(); }
 

@@ -1120,22 +1120,10 @@ RouteUI::solo_active_state (boost::shared_ptr<Route> r)
 		return Gtkmm2ext::Off;
 	}
 
-	if (Config->get_solo_control_is_listen_control()) {
-
-		if (r->listening_via_monitor()) {
-			return Gtkmm2ext::ExplicitActive;
-		} else {
-			return Gtkmm2ext::Off;
-		}
-
-	}
-
-	if (r->soloed()) {
-                if (!r->self_soloed()) {
-                        return Gtkmm2ext::ImplicitActive;
-                } else {
-                        return Gtkmm2ext::ExplicitActive;
-                }
+	if (r->self_soloed()) {
+		return Gtkmm2ext::ExplicitActive;
+	} else if (r->soloed_by_others()) {
+		return Gtkmm2ext::ImplicitActive;
 	} else {
 		return Gtkmm2ext::Off;
 	}

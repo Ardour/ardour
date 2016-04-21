@@ -1241,7 +1241,7 @@ void
 FaderPort::map_solo ()
 {
 	if (_current_route) {
-		get_button (Solo).set_led_state (_output_port, _current_route->soloed() || _current_route->listening_via_monitor());
+		get_button (Solo).set_led_state (_output_port, _current_route->soloed());
 	} else {
 		get_button (Solo).set_led_state (_output_port, false);
 	}

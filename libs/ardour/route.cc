@@ -759,16 +759,6 @@ Route::solo_control_changed (bool, Controllable::GroupControlDisposition)
 	}
 }
 
-bool
-Route::listening_via_monitor () const
-{
-	if (_monitor_send) {
-		return _monitor_send->active ();
-	} else {
-		return false;
-	}
-}
-
 void
 Route::push_solo_isolate_upstream (int32_t delta)
 {

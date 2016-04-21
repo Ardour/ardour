@@ -285,7 +285,7 @@ void
 Strip::notify_solo_changed ()
 {
 	if (_route && _solo) {
-		_surface->write (_solo->set_state ((_route->soloed() || _route->listening_via_monitor()) ? on : off));
+		_surface->write (_solo->set_state (_route->soloed() ? on : off));
 	}
 }
 

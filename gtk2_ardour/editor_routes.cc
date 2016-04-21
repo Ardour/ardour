@@ -468,15 +468,7 @@ EditorRoutes::on_tv_solo_enable_toggled (std::string const & path_string)
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	if (rtv != 0) {
-		bool newval;
-
-		if (Config->get_solo_control_is_listen_control()) {
-			newval = !rtv->route()->listening_via_monitor();
-		} else {
-			newval = !rtv->route()->self_soloed();
-		}
-
-		rtv->route()->solo_control()->set_value (newval ? 1.0 : 0.0, Controllable::UseGroup);
+		rtv->route()->solo_control()->set_value (rtv->route()->soloed() ? 0.0 : 1.0, Controllable::UseGroup);
 	}
 }
 

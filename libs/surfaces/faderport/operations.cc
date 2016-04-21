@@ -141,15 +141,7 @@ FaderPort::solo ()
 		return;
 	}
 
-	bool yn;
-
-	if (Config->get_solo_control_is_listen_control()) {
-		yn = !_current_route->listening_via_monitor();
-	} else {
-		yn = !_current_route->soloed();
-	}
-
-	_current_route->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::UseGroup);
+	_current_route->solo_control()->set_value (_current_route->soloed() ? 0.0 : 1.0, PBD::Controllable::UseGroup);
 }
 
 void
