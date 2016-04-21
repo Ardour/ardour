@@ -125,6 +125,8 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	set_solo_text ();
 	update_vca_display ();
 	update_vca_name ();
+	solo_changed ();
+	mute_changed ();
 
 	_vca->PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
 
