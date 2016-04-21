@@ -226,14 +226,19 @@ libxml_structured_error_func (void* /* parsing_context*/,
 
 	replace_all (msg, "\n", "");
 
-	if (err->file && err->line) {
-		error << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
+	if (!msg.empty()) {
+		if (err->file && err->line) {
+			error << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
 
-		if (err->int2) {
-			error << ':' << err->int2;
+			if (err->int2) {
+				error << ':' << err->int2;
+			}
+
+			error << endmsg;
+		} else {
+			error << msg << endmsg;
 		}
 	}
-	error << endmsg;
 }
 
 
