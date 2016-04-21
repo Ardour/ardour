@@ -28,7 +28,7 @@ using namespace std;
 using namespace PBD;
 
 SoloIsolateControl::SoloIsolateControl (Session& session, std::string const & name, Soloable& s, Muteable& m)
-	: SlavableAutomationControl (session, SoloAutomation, ParameterDescriptor (SoloIsolateAutomation),
+	: SlavableAutomationControl (session, SoloIsolateAutomation, ParameterDescriptor (SoloIsolateAutomation),
 	                             boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(SoloIsolateAutomation))),
 	                             name)
 	, _soloable (s)
@@ -97,7 +97,7 @@ SoloIsolateControl::actually_set_value (double val, PBD::Controllable::GroupCont
 		return;
 	}
 
-	set_solo_isolated (val == 0.0 ? false : true, gcd);
+	set_solo_isolated (val, gcd);
 
 	/* this sets the Evoral::Control::_user_value for us, which will
 	   be retrieved by AutomationControl::get_value (), and emits Changed
@@ -110,7 +110,7 @@ SoloIsolateControl::actually_set_value (double val, PBD::Controllable::GroupCont
 void
 SoloIsolateControl::set_solo_isolated (bool yn, Controllable::GroupControlDisposition group_override)
 {
-	if (_soloable.can_solo()) {
+	if (!_soloable.can_solo()) {
 		return;
 	}
 
@@ -129,7 +129,6 @@ SoloIsolateControl::set_solo_isolated (bool yn, Controllable::GroupControlDispos
 			changed = true;
 		}
 	}
-
 
 	if (!changed) {
 		return;
