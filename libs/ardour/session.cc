@@ -107,6 +107,7 @@
 #include "ardour/user_bundle.h"
 #include "ardour/utils.h"
 #include "ardour/vca_manager.h"
+#include "ardour/vca.h"
 
 #include "midi++/port.h"
 #include "midi++/mmc.h"
@@ -324,6 +325,7 @@ Session::Session (AudioEngine &eng,
 	pthread_cond_init (&_auto_connect_cond, 0);
 
 	init_name_id_counter (1); // reset for new sessions, start at 1
+	VCA::set_next_vca_number (1); // reset for new sessions, start at 1
 
 	pre_engine_init (fullpath);
 

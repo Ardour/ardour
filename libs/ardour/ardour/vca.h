@@ -51,6 +51,8 @@ class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, pu
 	XMLNode& get_state();
 	int set_state (XMLNode const&, int version);
 
+	void clear_all_solo_state ();
+
 	bool soloed () const;
 	void push_solo_upstream (int32_t) {}
 	void push_solo_isolate_upstream (int32_t) {}

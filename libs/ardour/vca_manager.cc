@@ -177,3 +177,13 @@ VCAManager::set_state (XMLNode const& node, int version)
 
 	return 0;
 }
+
+void
+VCAManager::clear_all_solo_state ()
+{
+	Mutex::Lock lm (lock);
+
+	for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
+		(*i)->clear_all_solo_state ();
+	}
+}

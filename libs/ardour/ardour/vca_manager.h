@@ -58,6 +58,7 @@ class VCAManager : public SessionHandleRef, public PBD::StatefulDestructible
 	int set_state (XMLNode const&, int version);
 
 	bool vcas_loaded() const { return _vcas_loaded; }
+	void clear_all_solo_state ();
 
 	static std::string xml_node_name;
 

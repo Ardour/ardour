@@ -146,3 +146,9 @@ VCA::set_state (XMLNode const& node, int version)
 
 	return 0;
 }
+
+void
+VCA::clear_all_solo_state ()
+{
+	_solo_control->clear_all_solo_state ();
+}

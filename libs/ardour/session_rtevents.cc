@@ -25,6 +25,7 @@
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
+#include "ardour/vca_manager.h"
 
 #include "i18n.h"
 
@@ -71,6 +72,9 @@ Session::rt_clear_all_solo_state (boost::shared_ptr<RouteList> rl, bool /* yn */
 		}
 		(*i)->clear_all_solo_state();
 	}
+
+	_vca_manager->clear_all_solo_state ();
+
 	set_dirty();
 }
 
