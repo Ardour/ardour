@@ -74,6 +74,14 @@ class LIBARDOUR_API SoloControl : public SlavableAutomationControl
 	}
 	bool soloed() const { return self_soloed() || soloed_by_others(); }
 
+	/* The session object needs to respond to solo
+	   changes, but to do so accurately it needs to know if we transition
+	   into or out of solo. The normal Changed signal doesn't make that
+	   possible.
+	*/
+
+	int32_t transitioned_into_solo () const { return _transition_into_solo; }
+
 	void clear_all_solo_state ();
 
 	int set_state (XMLNode const&, int);
@@ -86,11 +94,12 @@ class LIBARDOUR_API SoloControl : public SlavableAutomationControl
 	void post_add_master (boost::shared_ptr<AutomationControl>);
 
   private:
-	Soloable&      _soloable;
-	Muteable&      _muteable;
-	bool           _self_solo;
-	uint32_t       _soloed_by_others_upstream;
-	uint32_t       _soloed_by_others_downstream;
+	Soloable& _soloable;
+	Muteable& _muteable;
+	bool      _self_solo;
+	uint32_t  _soloed_by_others_upstream;
+	uint32_t  _soloed_by_others_downstream;
+	int32_t   _transition_into_solo;
 
 	void set_self_solo (bool yn);
 	void set_mute_master_solo ();

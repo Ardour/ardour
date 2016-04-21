@@ -1227,7 +1227,7 @@ FaderPort::map_mute ()
 		if (_current_route->muted()) {
 			stop_blinking (Mute);
 			get_button (Mute).set_led_state (_output_port, true);
-		} else if (_current_route->mute_control()->muted_by_others()) {
+		} else if (_current_route->muted_by_others_soloing () || _current_route->muted_by_masters()) {
 			start_blinking (Mute);
 		} else {
 			stop_blinking (Mute);

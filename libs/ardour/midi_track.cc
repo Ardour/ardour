@@ -920,7 +920,7 @@ MidiTrack::act_on_mute ()
 		return;
 	}
 
-	if (muted() || _mute_master->muted_by_others_at(MuteMaster::AllPoints)) {
+	if (muted() || _mute_master->muted_by_others_soloing_at (MuteMaster::AllPoints)) {
 		/* only send messages for channels we are using */
 
 		uint16_t mask = _playback_filter.get_channel_mask();
@@ -947,7 +947,7 @@ void
 MidiTrack::monitoring_changed (bool self, Controllable::GroupControlDisposition gcd)
 {
 	Track::monitoring_changed (self, gcd);
-	
+
 	/* monitoring state changed, so flush out any on notes at the
 	 * port level.
 	 */

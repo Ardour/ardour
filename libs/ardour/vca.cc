@@ -146,5 +146,3 @@ VCA::set_state (XMLNode const& node, int version)
 
 	return 0;
 }
-
-

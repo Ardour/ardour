@@ -52,7 +52,9 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 
 	bool muted_by_self () const { return _muted_by_self && (_mute_point != MutePoint (0)); }
 	bool muted_by_self_at (MutePoint mp) const { return _muted_by_self && (_mute_point & mp); }
-	bool muted_by_others_at (MutePoint mp) const;
+	bool muted_by_others_soloing_at (MutePoint mp) const;
+	bool muted_by_masters () const { return _muted_by_masters && (_mute_point != MutePoint (0)); }
+	bool muted_by_masters_at (MutePoint mp) const { return _muted_by_masters && (_mute_point & mp); }
 
 	gain_t mute_gain_at (MutePoint) const;
 
@@ -69,7 +71,7 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 	void set_soloed_by_others (bool yn) { _soloed_by_others = yn; }
 	void set_solo_ignore (bool yn) { _solo_ignore = yn; }
 
-	void set_muted_by_others (bool);
+	void set_muted_by_masters (bool);
 
 	PBD::Signal0<void> MutePointChanged;
 
@@ -83,7 +85,7 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 	bool      _soloed_by_self;
 	bool      _soloed_by_others;
 	bool      _solo_ignore;
-	bool      _muted_by_others;
+	bool      _muted_by_masters;
 };
 
 } // namespace ARDOUR

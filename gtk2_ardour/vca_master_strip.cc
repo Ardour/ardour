@@ -237,10 +237,9 @@ VCAMasterStrip::set_solo_text ()
 void
 VCAMasterStrip::mute_changed ()
 {
-	std::cerr << "Mute changed for " << _vca->number() << std::endl;
 	if (_vca->mute_control()->muted_by_self()) {
 		mute_button.set_active_state (ExplicitActive);
-	} else if (_vca->mute_control()->muted_by_others()) {
+	} else if (_vca->mute_control()->muted_by_masters ()) {
 		mute_button.set_active_state (ImplicitActive);
 	} else {
 		mute_button.set_active_state (Gtkmm2ext::Off);

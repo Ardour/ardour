@@ -45,6 +45,11 @@ class SlavableAutomationControl : public AutomationControl
 		return get_masters_value_locked ();
 	}
 
+	/* for toggled/boolean controls, returns a count of the number of
+	   masters currently enabled. For other controls, returns zero.
+	*/
+	int32_t   get_boolean_masters () const;
+
 	std::vector<PBD::ID> masters () const;
 
 	PBD::Signal0<void> MasterStatusChange;
@@ -96,7 +101,6 @@ class SlavableAutomationControl : public AutomationControl
 	double get_value_locked() const;
 	void   actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
 	void   update_boolean_masters_records (boost::shared_ptr<AutomationControl>);
-	int32_t   get_boolean_masters () const;
 
 	virtual void   master_changed (bool from_self, GroupControlDisposition gcd, boost::shared_ptr<AutomationControl>);
 	virtual void   recompute_masters_ratios (double val) { /* do nothing by default */}

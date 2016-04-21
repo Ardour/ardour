@@ -56,9 +56,12 @@ class LIBARDOUR_API MuteControl : public SlavableAutomationControl
 
 	bool muted () const;
 	bool muted_by_self () const;
+	bool muted_by_masters () const;
+	bool muted_by_self_or_masters () const {
+		return muted_by_self() || muted_by_masters ();
+	}
 
 	bool muted_by_others_soloing () const;
-	bool muted_by_others () const;
 
 	void set_mute_points (MuteMaster::MutePoint);
 	MuteMaster::MutePoint mute_points () const;

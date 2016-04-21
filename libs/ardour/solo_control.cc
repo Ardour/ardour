@@ -36,6 +36,7 @@ SoloControl::SoloControl (Session& session, std::string const & name, Soloable& 
 	, _self_solo (false)
 	, _soloed_by_others_upstream (0)
 	, _soloed_by_others_downstream (0)
+	, _transition_into_solo (false)
 {
 	_list->set_interpolation (Evoral::ControlList::Discrete);
 	/* solo changes must be synchronized by the process cycle */
@@ -48,17 +49,29 @@ SoloControl::set_self_solo (bool yn)
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: set SELF solo => %2\n", name(), yn));
 	_self_solo = yn;
 	set_mute_master_solo ();
+
+	_transition_into_solo = 0;
+
+	if (yn) {
+		if (get_masters_value() == 0) {
+			_transition_into_solo = 1;
+		}
+	} else {
+		if (get_masters_value() == 0) {
+			_transition_into_solo = -1;
+		}
+	}
 }
 
 void
 SoloControl::set_mute_master_solo ()
 {
-	_muteable.mute_master()->set_soloed_by_self (self_soloed());
+	_muteable.mute_master()->set_soloed_by_self (self_soloed() || get_masters_value());
 
 	if (Config->get_solo_control_is_listen_control()) {
 		_muteable.mute_master()->set_soloed_by_others (false);
 	} else {
-		_muteable.mute_master()->set_soloed_by_others (soloed_by_others_downstream() || soloed_by_others_upstream());
+		_muteable.mute_master()->set_soloed_by_others (soloed_by_others_downstream() || soloed_by_others_upstream() || get_masters_value());
 	}
 }
 
@@ -85,6 +98,7 @@ SoloControl::mod_solo_by_others_downstream (int32_t delta)
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 SbD delta %2 = %3\n", name(), delta, _soloed_by_others_downstream));
 
 	set_mute_master_solo ();
+	_transition_into_solo = 0;
 	Changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
 }
 
@@ -139,6 +153,7 @@ SoloControl::mod_solo_by_others_upstream (int32_t delta)
 	}
 
 	set_mute_master_solo ();
+	_transition_into_solo = 0;
 	Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 }
 
@@ -194,7 +209,7 @@ SoloControl::clear_all_solo_state ()
 	_soloed_by_others_downstream = 0;
 
 	set_self_solo (false);
-
+	_transition_into_solo = 0; /* Session does not need to propagate */
 	Changed (false, Controllable::UseGroup); /* EMIT SIGNAL */
 }
 
@@ -239,15 +254,18 @@ void
 SoloControl::master_changed (bool /*from self*/, GroupControlDisposition, boost::shared_ptr<AutomationControl> m)
 {
 	bool send_signal = false;
-	const double changed_master_value = m->get_value();
 
-	if (changed_master_value) {
+	_transition_into_solo = 0;
+
+	if (m->get_value()) {
 		/* this master is now enabled */
 		if (!self_soloed() && get_boolean_masters() == 0) {
 			send_signal = true;
+			_transition_into_solo = 1;
 		}
 	} else {
 		if (!self_soloed() && get_boolean_masters() == 1) {
+			_transition_into_solo = -1;
 			send_signal = true;
 		}
 	}
@@ -255,8 +273,10 @@ SoloControl::master_changed (bool /*from self*/, GroupControlDisposition, boost:
 	update_boolean_masters_records (m);
 
 	if (send_signal) {
-		Changed (false, Controllable::NoGroup);
+		set_mute_master_solo ();
+		Changed (false, Controllable::UseGroup);
 	}
+
 }
 
 void
@@ -271,6 +291,7 @@ SoloControl::post_add_master (boost::shared_ptr<AutomationControl> m)
 		 */
 
 		if (!self_soloed() && !get_boolean_masters()) {
+			_transition_into_solo = 1;
 			Changed (false, Controllable::NoGroup);
 		}
 	}
@@ -289,7 +310,21 @@ SoloControl::pre_remove_master (boost::shared_ptr<AutomationControl> m)
 
 	if (m->get_value()) {
 		if (!self_soloed() && (get_boolean_masters() == 1)) {
-			Changed (false, Controllable::NoGroup);
+			/* we're not self-soloed, this master is, and we're
+			   removing
+			   it. SlavableAutomationControl::remove_master() will
+			   ensure that we reset our own value after actually
+			   removing the master, so that our state does not
+			   change (this is a precondition of the
+			   SlavableAutomationControl API). This will emit
+			   Changed(), and we need to make sure that any
+			   listener knows that there has been no transition.
+			*/
+			_transition_into_solo = 0;
+		} else {
+			_transition_into_solo = 1;
 		}
+	} else {
+		_transition_into_solo = 0;
 	}
 }

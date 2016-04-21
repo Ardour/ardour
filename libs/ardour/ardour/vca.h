@@ -57,10 +57,8 @@ class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, pu
 	bool can_solo() const { return true; }
 	bool is_safe () const { return false; }
 
-	bool muted () const;
 	bool can_be_muted_by_others () const { return true; }
 	bool muted_by_others_soloing() const { return false; }
-	bool muted_by_others() const { return false; }
 
 	static std::string default_name_template ();
 	static int next_vca_number ();

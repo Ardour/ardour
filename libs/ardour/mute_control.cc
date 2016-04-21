@@ -51,6 +51,7 @@ MuteControl::post_add_master (boost::shared_ptr<AutomationControl> m)
 		 */
 
 		if (!muted_by_self() && !get_boolean_masters()) {
+			_muteable.mute_master()->set_muted_by_masters (true);
 			Changed (false, Controllable::NoGroup);
 		}
 	}
@@ -61,7 +62,7 @@ MuteControl::pre_remove_master (boost::shared_ptr<AutomationControl> m)
 {
 	if (!m) {
 		/* null control ptr means we're removing all masters */
-		_muteable.mute_master()->set_muted_by_others (false);
+		_muteable.mute_master()->set_muted_by_masters (false);
 		/* Changed will be emitted in SlavableAutomationControl::clear_masters() */
 		return;
 	}
@@ -92,16 +93,18 @@ void
 MuteControl::master_changed (bool self_change, Controllable::GroupControlDisposition gcd, boost::shared_ptr<AutomationControl> m)
 {
 	bool send_signal = false;
-	const double changed_master_value = m->get_value();
 	boost::shared_ptr<MuteControl> mc = boost::dynamic_pointer_cast<MuteControl> (m);
 
-	if (changed_master_value) {
+	if (m->get_value()) {
 		/* this master is now enabled */
 		if (!muted_by_self() && get_boolean_masters() == 0) {
+			_muteable.mute_master()->set_muted_by_masters (true);
 			send_signal = true;
 		}
 	} else {
+		/* this master is disabled and there was only 1 enabled before */
 		if (!muted_by_self() && get_boolean_masters() == 1) {
+			_muteable.mute_master()->set_muted_by_masters (false);
 			send_signal = true;
 		}
 	}
@@ -117,8 +120,7 @@ double
 MuteControl::get_value () const
 {
 	if (slaved ()) {
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
-		return get_masters_value_locked ();
+		return get_masters_value ();
 	}
 
 	if (_list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
@@ -149,7 +151,11 @@ MuteControl::mute_points () const
 bool
 MuteControl::muted () const
 {
-	return muted_by_self() || muted_by_others();
+	/* have to get (self-muted) value from somewhere. could be our own
+	   Control, or the Muteable that we sort-of proxy for. Since this
+	   method is called by ::get_value(), use the latter to avoid recursion.
+	*/
+	return _muteable.mute_master()->muted_by_self() || get_masters_value ();
 }
 
 bool
@@ -159,7 +165,8 @@ MuteControl::muted_by_self () const
 }
 
 bool
-MuteControl::muted_by_others () const
+MuteControl::muted_by_masters () const
 {
 	return get_masters_value ();
 }
+

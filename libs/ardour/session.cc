@@ -3406,7 +3406,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		boost::weak_ptr<Route> wpr (*x);
 		boost::shared_ptr<Route> r (*x);
 
-		r->solo_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, _2, wpr));
+		r->solo_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, _2,wpr));
 		r->solo_isolate_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_solo_isolated_changed, this, wpr));
 		r->mute_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this));
 
@@ -3772,9 +3772,9 @@ Session::route_solo_isolated_changed (boost::weak_ptr<Route> wpr)
 }
 
 void
-Session::route_solo_changed (bool self_solo_change, Controllable::GroupControlDisposition group_override,  boost::weak_ptr<Route> wpr)
+Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlDisposition group_override,  boost::weak_ptr<Route> wpr)
 {
-	DEBUG_TRACE (DEBUG::Solo, string_compose ("route solo change, self = %1\n", self_solo_change));
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("route solo change, self = %1\n", self_solo_changed));
 
 	boost::shared_ptr<Route> route (wpr.lock());
 
@@ -3787,19 +3787,26 @@ Session::route_solo_changed (bool self_solo_change, Controllable::GroupControlDi
 		return;
 	}
 
-	if (!self_solo_change) {
-		// session doesn't care about changes to soloed-by-others
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: self %2 masters %3 transition %4\n", route->name(), route->self_soloed(), route->solo_control()->get_masters_value(), route->solo_control()->transitioned_into_solo()));
+
+	if (route->solo_control()->transitioned_into_solo() == 0) {
+		/* route solo changed by upstream/downstream; not interesting
+		   to Session.
+		*/
+		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 not self-soloed nor soloed by master (%2), ignoring\n", route->name(), route->solo_control()->get_masters_value()));
 		return;
 	}
 
-	boost::shared_ptr<RouteList> r = routes.reader ();
-	int32_t delta;
-
-	if (route->self_soloed()) {
-		delta = 1;
-	} else {
-		delta = -1;
+	if (route->solo_control()->transitioned_into_solo() == 0) {
+		/* reason for being soloed changed (e.g. master went away, we
+		 * took over the master state), but actual status did
+		 * not. nothing to do.
+		 */
+		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1: solo change was change in reason, not status\n", route->name()));
 	}
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	int32_t delta = route->solo_control()->transitioned_into_solo ();
 
 	/* the route may be a member of a group that has shared-solo
 	 * semantics. If so, then all members of that group should follow the
@@ -3907,11 +3914,11 @@ Session::route_solo_changed (bool self_solo_change, Controllable::GroupControlDi
 			   sends are involved.
 			*/
 			DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 feeds %2 via sends only %3 sboD %4 sboU %5\n",
-								  route->name(),
-								  (*i)->name(),
-								  via_sends_only,
-								  route->soloed_by_others_downstream(),
-								  route->soloed_by_others_upstream()));
+			                                          route->name(),
+			                                          (*i)->name(),
+			                                          via_sends_only,
+			                                          route->soloed_by_others_downstream(),
+			                                          route->soloed_by_others_upstream()));
 			if (!via_sends_only) {
 				//NB. Triggers Invert Push, which handles soloed by downstream
 				DEBUG_TRACE (DEBUG::Solo, string_compose ("\tmod %1 by %2\n", (*i)->name(), delta));
@@ -3964,13 +3971,13 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->can_solo()) {
 			if (Config->get_solo_control_is_listen_control()) {
-				if ((*i)->self_soloed()) {
+				if ((*i)->self_soloed() || (*i)->solo_control()->get_masters_value()) {
 					listeners++;
 					something_listening = true;
 				}
 			} else {
 				(*i)->set_listen (false);
-				if ((*i)->can_solo() && (*i)->self_soloed()) {
+				if ((*i)->can_solo() && ((*i)->self_soloed() || (*i)->solo_control()->get_masters_value())) {
 					something_soloed = true;
 				}
 			}

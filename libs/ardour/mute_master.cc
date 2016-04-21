@@ -43,7 +43,7 @@ MuteMaster::MuteMaster (Session& s, const std::string&)
         , _soloed_by_self (false)
         , _soloed_by_others (false)
         , _solo_ignore (false)
-	, _muted_by_others (0)
+	, _muted_by_masters (0)
 {
 
 	if (Config->get_mute_affects_pre_fader ()) {
@@ -89,22 +89,22 @@ MuteMaster::mute_gain_at (MutePoint mp) const
         if (Config->get_solo_mute_override()) {
                 if (_soloed_by_self) {
                         gain = GAIN_COEFF_UNITY;
-                } else if (muted_by_self_at (mp)) {
+                } else if (muted_by_self_at (mp) || muted_by_masters_at (mp)) {
                         gain = GAIN_COEFF_ZERO;
                 } else {
-                        if (muted_by_others_at (mp) && !_soloed_by_others) {
+	                if (!_soloed_by_others && muted_by_others_soloing_at (mp)) {
                                 gain = Config->get_solo_mute_gain ();
                         } else {
                                 gain = GAIN_COEFF_UNITY;
                         }
                 }
         } else {
-                if (muted_by_self_at (mp)) {
+	        if (muted_by_self_at (mp) || muted_by_masters_at (mp)) {
                         gain = GAIN_COEFF_ZERO;
                 } else if (_soloed_by_self || _soloed_by_others) {
                         gain = GAIN_COEFF_UNITY;
                 } else {
-                        if (muted_by_others_at (mp)) {
+                        if (muted_by_others_soloing_at (mp)) {
                                 gain = Config->get_solo_mute_gain ();
                         } else {
                                 gain = GAIN_COEFF_UNITY;
@@ -164,14 +164,16 @@ MuteMaster::get_state()
 }
 
 bool
-MuteMaster::muted_by_others_at (MutePoint mp) const
+MuteMaster::muted_by_others_soloing_at (MutePoint mp) const
 {
-	return (!_solo_ignore && (_muted_by_others || _session.soloing()) && (_mute_point & mp));
+	/* note: this is currently called with the assumption that the owner is
+	   not soloed. it does not test for this condition.
+	*/
+	return (!_solo_ignore && _session.soloing()) && (_mute_point & mp);
 }
 
 void
-MuteMaster::set_muted_by_others (bool yn)
+MuteMaster::set_muted_by_masters (bool yn)
 {
-	_muted_by_others = yn;
-	std::cerr << this << " set muted by others to " << yn << std::endl;
+	_muted_by_masters = yn;
 }

@@ -140,7 +140,6 @@ class Stripable : public SessionObject {
 	virtual boost::shared_ptr<AutomationControl> master_send_enable_controllable () const = 0;
 
 	virtual bool muted_by_others_soloing () const = 0;
-	virtual bool muted_by_others () const = 0;
 };
 
 

@@ -5485,8 +5485,6 @@ Route::muted_by_others_soloing () const
 		return false;
 	}
 
-	/* XXX something needed here re: mute-overrides-solo */
-
 	return _session.soloing() && !_solo_control->soloed() && !_solo_isolate_control->solo_isolated();
 }
 

@@ -199,7 +199,7 @@ SlavableAutomationControl::update_boolean_masters_records (boost::shared_ptr<Aut
 			   really) which have more than a simple scalar
 			   value. For example, the master may be a mute control
 			   which can be muted_by_self() and/or
-			   muted_by_others(). When either of those two
+			   muted_by_masters(). When either of those two
 			   conditions changes, Changed() will be emitted, even
 			   though ::get_value() will return the same value each
 			   time (1.0 if either are true, 0.0 if neither is).
