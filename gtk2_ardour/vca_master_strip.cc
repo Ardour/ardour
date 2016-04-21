@@ -249,8 +249,10 @@ VCAMasterStrip::mute_changed ()
 void
 VCAMasterStrip::solo_changed ()
 {
-	if (_vca->solo_control()->soloed() || _vca->solo_control()->get_masters_value()) {
+	if (_vca->solo_control()->self_soloed()) {
 		solo_button.set_active_state (ExplicitActive);
+	} else if (_vca->solo_control()->soloed_by_masters ()) {
+		solo_button.set_active_state (ImplicitActive);
 	} else {
 		solo_button.set_active_state (Gtkmm2ext::Off);
 	}
