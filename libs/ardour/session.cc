@@ -3706,7 +3706,7 @@ Session::route_listen_changed (Controllable::GroupControlDisposition group_overr
 		if (Config->get_exclusive_solo()) {
 
 			RouteGroup* rg = route->route_group ();
-			const bool group_already_accounted_for = route->use_group (group_override, &RouteGroup::is_solo);
+			const bool group_already_accounted_for = (group_override == Controllable::ForGroup);
 
 			boost::shared_ptr<RouteList> r = routes.reader ();
 

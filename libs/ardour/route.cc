@@ -755,7 +755,7 @@ Route::solo_control_changed (bool, Controllable::GroupControlDisposition)
 	*/
 
 	if (Config->get_solo_control_is_listen_control ()) {
-		set_listen (_solo_control->self_soloed());
+		set_listen (_solo_control->self_soloed() || _solo_control->get_masters_value());
 	}
 }
 
