@@ -32,6 +32,7 @@
 #include "ardour/io.h"
 #include "ardour/types.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/plugin.h"
 #include "ardour/processor.h"
 #include "ardour/sidechain.h"
 #include "ardour/automation_control.h"
@@ -166,6 +167,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
 	void monitoring_changed ();
+
+	bool load_preset (Plugin::PresetRecord);
 
 	/** A control that manipulates a plugin parameter (control port). */
 	struct PluginControl : public AutomationControl

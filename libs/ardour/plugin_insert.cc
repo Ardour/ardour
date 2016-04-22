@@ -2610,6 +2610,18 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 	_plugins.push_back (plugin);
 }
 
+bool
+PluginInsert::load_preset (ARDOUR::Plugin::PresetRecord pr)
+{
+	bool ok = true;
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		if (! (*i)->load_preset (pr)) {
+			ok = false;
+		}
+	}
+	return ok;
+}
+
 void
 PluginInsert::realtime_handle_transport_stopped ()
 {
