@@ -236,7 +236,7 @@ libxml_structured_error_func (void* /* parsing_context*/,
 
 			error << endmsg;
 		} else {
-			error << msg << endmsg;
+			error << X_("XML error: ") << msg << endmsg;
 		}
 	}
 }
