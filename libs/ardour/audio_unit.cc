@@ -605,15 +605,14 @@ AUPlugin::init ()
 	bus_outputs = (uint32_t*) calloc (output_elements, sizeof(uint32_t));
 
 	for (size_t i = 0; i < output_elements; ++i) {
-		AudioUnitReset (unit->AU(), kAudioUnitScope_Output, i);
+		unit->Reset (kAudioUnitScope_Output, i);
 		AudioStreamBasicDescription fmt;
-		UInt32 sz = sizeof(AudioStreamBasicDescription);
-		err = AudioUnitGetProperty(unit->AU(), kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, i, &fmt, &sz);
+		err = unit->GetFormat (kAudioUnitScope_Output, i, fmt);
 		if (err == noErr) {
 			bus_outputs[i] = fmt.mChannelsPerFrame;
 		}
 		CFStringRef name;
-		sz = sizeof (CFStringRef);
+		UInt32 sz = sizeof (CFStringRef);
 		if (AudioUnitGetProperty (unit->AU(), kAudioUnitProperty_ElementName, kAudioUnitScope_Output,
 					i, &name, &sz) == noErr
 				&& sz > 0) {
@@ -625,15 +624,14 @@ AUPlugin::init ()
 	}
 
 	for (size_t i = 0; i < input_elements; ++i) {
-		AudioUnitReset (unit->AU(), kAudioUnitScope_Input, i);
+		unit->Reset (kAudioUnitScope_Input, i);
 		AudioStreamBasicDescription fmt;
-		UInt32 sz = sizeof(AudioStreamBasicDescription);
-		err = AudioUnitGetProperty(unit->AU(), kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, i, &fmt, &sz);
+		err = unit->GetFormat (kAudioUnitScope_Input, i, fmt);
 		if (err == noErr) {
 			bus_inputs[i] = fmt.mChannelsPerFrame;
 		}
 		CFStringRef name;
-		sz = sizeof (CFStringRef);
+		UInt32 sz = sizeof (CFStringRef);
 		if (AudioUnitGetProperty (unit->AU(), kAudioUnitProperty_ElementName, kAudioUnitScope_Input,
 					i, &name, &sz) == noErr
 				&& sz > 0) {
@@ -1128,10 +1126,10 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 	configured_output_busses = 0;
 	/* reset busses */
 	for (size_t i = 0; i < output_elements; ++i) {
-		AudioUnitReset (unit->AU(), kAudioUnitScope_Output, i);
+		unit->Reset (kAudioUnitScope_Output, i);
 	}
 	for (size_t i = 0; i < input_elements; ++i) {
-		AudioUnitReset (unit->AU(), kAudioUnitScope_Input, i);
+		unit->Reset (kAudioUnitScope_Input, i);
 	}
 
 	/* now assign the channels to available busses */
@@ -1958,6 +1956,7 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 				if (pid < bus_inputs[bus]) {
 					id = pid;
 					ss << _bus_name_in[bus];
+					ss << " / Bus " << (1 + bus);
 					break;
 				}
 				pid -= bus_inputs[bus];
@@ -1969,6 +1968,7 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 				if (pid < bus_outputs[bus]) {
 					id = pid;
 					ss << _bus_name_out[bus];
+					ss << " / Bus " << (1 + bus);
 					break;
 				}
 				pid -= bus_outputs[bus];
