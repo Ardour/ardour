@@ -284,13 +284,6 @@ PluginPinDialog::plugin_reconfigured ()
 	_add_sc_audio.set_sensitive (_pi->has_sidechain ());
 	_add_sc_midi.set_sensitive (_pi->has_sidechain ());
 
-#ifdef MIXBUS
-	if (_pi->plugin (0)->get_info()->type == ARDOUR::AudioUnit) {
-		_set_config.set_sensitive (false);
-		_tgl_sidechain.set_sensitive (false);
-	}
-#endif
-
 	if (_pi->custom_cfg ()) {
 		_set_config.set_active (true);
 		_add_plugin.set_sensitive (true);
@@ -311,6 +304,11 @@ PluginPinDialog::plugin_reconfigured ()
 		_del_output_midi.set_sensitive (false);
 		_out_presets.set_sensitive (true);
 		refill_output_presets ();
+	}
+
+	if (_pi->plugin (0)->get_info()->type == ARDOUR::AudioUnit) {
+		_add_plugin.set_sensitive (false);
+		_del_plugin.set_sensitive (false);
 	}
 
 	if (!_pi->has_sidechain () && _sidechain_selector) {
