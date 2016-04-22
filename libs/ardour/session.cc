@@ -5491,7 +5491,7 @@ Session::next_insert_id ()
 	/* this doesn't really loop forever. just think about it */
 
 	while (true) {
-		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < insert_bitset.size(); ++n) {
+		for (boost::dynamic_bitset<uint32_t>::size_type n = 1; n < insert_bitset.size(); ++n) {
 			if (!insert_bitset[n]) {
 				insert_bitset[n] = true;
 				return n;
@@ -5511,7 +5511,7 @@ Session::next_send_id ()
 	/* this doesn't really loop forever. just think about it */
 
 	while (true) {
-		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < send_bitset.size(); ++n) {
+		for (boost::dynamic_bitset<uint32_t>::size_type n = 1; n < send_bitset.size(); ++n) {
 			if (!send_bitset[n]) {
 				send_bitset[n] = true;
 				return n;
@@ -5531,7 +5531,7 @@ Session::next_aux_send_id ()
 	/* this doesn't really loop forever. just think about it */
 
 	while (true) {
-		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < aux_send_bitset.size(); ++n) {
+		for (boost::dynamic_bitset<uint32_t>::size_type n = 1; n < aux_send_bitset.size(); ++n) {
 			if (!aux_send_bitset[n]) {
 				aux_send_bitset[n] = true;
 				return n;
@@ -5551,7 +5551,7 @@ Session::next_return_id ()
 	/* this doesn't really loop forever. just think about it */
 
 	while (true) {
-		for (boost::dynamic_bitset<uint32_t>::size_type n = 0; n < return_bitset.size(); ++n) {
+		for (boost::dynamic_bitset<uint32_t>::size_type n = 1; n < return_bitset.size(); ++n) {
 			if (!return_bitset[n]) {
 				return_bitset[n] = true;
 				return n;
