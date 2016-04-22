@@ -1136,7 +1136,7 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 	uint32_t used_in = 0;
 	uint32_t used_out = 0;
 
-	if (variable_inputs) {
+	if (variable_inputs || input_elements == 1) {
 		// we only ever use the first bus
 		if (input_elements > 1) {
 			warning << string_compose (_("AU %1 has multiple input busses and variable port count."), name()) << endmsg;
@@ -1165,7 +1165,7 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 		}
 	}
 
-	if (variable_outputs) {
+	if (variable_outputs || output_elements == 1) {
 		if (output_elements > 1) {
 			warning << string_compose (_("AU %1 has multiple output busses and variable port count."), name()) << endmsg;
 		}
@@ -1261,7 +1261,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 							name(), io_configs.size(), in, out));
 
 #if 0
-	printf ("AU I/O Configs %s %d\n", name().c_str(), io_configs.size());
+	printf ("AU I/O Configs %s %d\n", name(), io_configs.size());
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 		printf ("- I/O  %d / %d\n", i->first, i->second);
 	}
@@ -1343,7 +1343,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
   _output_configs.insert (0);
 
 #define UPTO(nch) {                                \
-  for (int n = 1; n < nch; ++n) {                  \
+  for (int n = 1; n <= nch; ++n) {                 \
     _output_configs.insert (n);                    \
   }                                                \
 }
@@ -1651,7 +1651,7 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 	uint32_t busoff = 0;
 	uint32_t remain = output_channels;
 	for (uint32_t bus = 0; remain > 0 && bus < configured_output_busses; ++bus) {
-		uint32_t cnt = std::min (remain, bus_outputs[bus]);
+		uint32_t cnt = variable_outputs ? output_channels : std::min (remain, bus_outputs[bus]); // XXX
 		assert (cnt > 0);
 
 		buffers->mNumberBuffers = cnt;
@@ -3040,17 +3040,21 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 	}
 
 	if (ret > 0) {
-
-		/* no explicit info available, so default to 1in/1out */
-
-		/* XXX this is wrong. we should be indicating wildcard values */
-
+		/* AU is expected to deal with same channel valance in and out */
 		cinfo.io_configs.push_back (pair<int,int> (-1, -1));
-
 	} else {
-		/* store each configuration */
-		if (comp.Desc().IsGenerator() || comp.Desc().IsMusicDevice()) {
-			// incrementally add busses
+		/* CAAudioUnit::GetChannelInfo silently merges bus formats
+		 * check if this was the case and if so, add
+		 * bus configs as incremental options.
+		 */
+		Boolean* isWritable = 0;
+		UInt32	dataSize = 0;
+		OSStatus result = AudioUnitGetPropertyInfo (unit.AU(),
+				kAudioUnitProperty_SupportedNumChannels,
+				kAudioUnitScope_Global, 0,
+				&dataSize, isWritable);
+		if (result != noErr && (comp.Desc().IsGenerator() || comp.Desc().IsMusicDevice())) {
+			/* incrementally add busses */
 			int in = 0;
 			int out = 0;
 			for (uint32_t n = 0; n < cnt; ++n) {
@@ -3059,6 +3063,7 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 				cinfo.io_configs.push_back (pair<int,int> (in, out));
 			}
 		} else {
+			/* store each configuration */
 			for (uint32_t n = 0; n < cnt; ++n) {
 				cinfo.io_configs.push_back (pair<int,int> (channel_info[n].inChannels,
 							channel_info[n].outChannels));
