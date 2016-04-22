@@ -2698,6 +2698,8 @@ AUPluginInfo::discover (bool scan_only)
 
 	if (!Glib::file_test (au_cache_path(), Glib::FILE_TEST_EXISTS)) {
 		ARDOUR::BootMessage (_("Discovering AudioUnit plugins (could take some time ...)"));
+		// flush RAM cache -- after clear_cache()
+		cached_info.clear();
 	}
 	// create crash log file
 	au_start_crashlog ();
@@ -3070,6 +3072,17 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 	save_cached_info ();
 
 	return 0;
+}
+
+void
+AUPluginInfo::clear_cache ()
+{
+	const string& fn = au_cache_path();
+	if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		::g_unlink(fn.c_str());
+	}
+	// keep cached_info in RAM until restart or re-scan
+	cached_info.clear();
 }
 
 void

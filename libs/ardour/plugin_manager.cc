@@ -437,11 +437,7 @@ void
 PluginManager::clear_au_cache ()
 {
 #ifdef AUDIOUNIT_SUPPORT
-	// AUPluginInfo::au_cache_path ()
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_cache");
-	if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-		::g_unlink(fn.c_str());
-	}
+	AUPluginInfo::clear_cache ();
 #endif
 }
 

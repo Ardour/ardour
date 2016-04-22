@@ -258,6 +258,7 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 
 	bool reconfigurable_io() const { return true; }
 
+	static void clear_cache ();
 	static PluginInfoList* discover (bool scan_only);
 	static bool au_get_crashlog (std::string &msg);
 	static std::string stringify_descriptor (const CAComponentDescription&);
