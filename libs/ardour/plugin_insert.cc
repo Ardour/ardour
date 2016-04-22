@@ -106,9 +106,14 @@ PluginInsert::set_count (uint32_t num)
 {
 	bool require_state = !_plugins.empty();
 
+	if (require_state && num > 1 && plugin (0)->get_info ()->type == ARDOUR::AudioUnit) {
+		// we don't allow to replicate AUs
+		return false;
+	}
+
 	/* this is a bad idea.... we shouldn't do this while active.
-	   only a route holding their redirect_lock should be calling this
-	*/
+	 * only a route holding their redirect_lock should be calling this
+	 */
 
 	if (num == 0) {
 		return false;

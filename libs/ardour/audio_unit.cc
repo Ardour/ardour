@@ -441,6 +441,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, bus_outputs (0)
 	, input_maxbuf (0)
 	, input_offset (0)
+	, cb_offsets (0)
 	, input_buffers (0)
 	, input_map (0)
 	, frames_processed (0)
@@ -508,6 +509,7 @@ AUPlugin::~AUPlugin ()
 	free (buffers);
 	free (bus_inputs);
 	free (bus_outputs);
+	free (cb_offsets);
 }
 
 void
@@ -598,6 +600,7 @@ AUPlugin::init ()
 	DEBUG_TRACE (DEBUG::AudioUnits, "count output elements\n");
 	unit->GetElementCount (kAudioUnitScope_Output, output_elements);
 
+	cb_offsets = (framecnt_t*) calloc (input_elements, sizeof(uint32_t));
 	bus_inputs = (uint32_t*) calloc (input_elements, sizeof(uint32_t));
 	bus_outputs = (uint32_t*) calloc (output_elements, sizeof(uint32_t));
 
@@ -1200,8 +1203,8 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 	output_channels = used_out;
 	/* reset plugin info to show currently configured state */
 
-	_info->n_inputs = in;
-	_info->n_outputs = out;
+	_info->n_inputs = ChanCount (DataType::AUDIO, used_in) + ChanCount (DataType::MIDI, _has_midi_input ? 1 : 0);
+	_info->n_outputs = ChanCount (DataType::AUDIO, used_out);
 
 	if (was_initialized) {
 		activate ();
@@ -1543,8 +1546,6 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 			  AudioBufferList* ioData)
 {
 	/* not much to do with audio - the data is already in the buffers given to us in connect_and_run() */
-	cerr << string_compose ("%1: render callback, frames %2 bus %3 bufs %4\n",
-			name(), inNumberFrames, bus, ioData->mNumberBuffers);
 
 	// DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: render callback, frames %2 bus %3 bufs %4\n",
 	// name(), inNumberFrames, bus, ioData->mNumberBuffers));
@@ -1575,14 +1576,12 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 		bool valid = false;
 		uint32_t idx = input_map->get (DataType::AUDIO, i + busoff, &valid);
 		if (valid) {
-			ioData->mBuffers[i].mData = input_buffers->get_audio (idx).data (cb_offset + input_offset);
+			ioData->mBuffers[i].mData = input_buffers->get_audio (idx).data (cb_offsets[bus] + input_offset);
 		} else {
-			ioData->mBuffers[i].mData = silent_bufs.get_audio(0).data (cb_offset + input_offset);
+			ioData->mBuffers[i].mData = silent_bufs.get_audio(0).data (cb_offsets[bus] + input_offset);
 		}
 	}
-#if 0 // TODO  per bus
-	cb_offset += inNumberFrames;
-#endif
+	cb_offsets[bus] += inNumberFrames;
 	return noErr;
 }
 
@@ -1601,7 +1600,7 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 	}
 
 	/* test if we can run in-place; only compare audio buffers */
-	bool inplace = true; // configured_output_busses == 1;
+	bool inplace = true; // TODO check plugin-insert in-place ?
 	ChanMapping::Mappings inmap (in_map.mappings ());
 	ChanMapping::Mappings outmap (out_map.mappings ());
 	assert (outmap[DataType::AUDIO].size () > 0);
@@ -1623,7 +1622,9 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 	input_map = &in_map;
 	input_maxbuf = bufs.count().n_audio(); // number of input audio buffers
 	input_offset = offset;
-	cb_offset = 0;
+	for (size_t i = 0; i < input_elements; ++i) {
+		cb_offsets[i] = 0;
+	}
 
 	ChanCount bufs_count (DataType::AUDIO, 1);
 	BufferSet& scratch_bufs = _session.get_scratch_buffers(bufs_count);
@@ -1644,6 +1645,9 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 			}
 		}
 	}
+
+	assert (input_maxbuf < 512);
+	std::bitset<512> used_outputs;
 
 	bool ok = true;
 	uint32_t busoff = 0;
@@ -1694,6 +1698,7 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 				bool valid = false;
 				uint32_t idx = out_map.get (DataType::AUDIO, i + busoff, &valid);
 				if (!valid) continue;
+				used_outputs.set (i + busoff);
 				Sample* expected_buffer_address = bufs.get_audio (idx).data (offset);
 				if (expected_buffer_address != buffers->mBuffers[i].mData) {
 					/* plugin provided its own buffer for output so copy it back to where we want it */
@@ -1709,17 +1714,20 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		remain -= cnt;
 		busoff += bus_outputs[bus];
 	}
-#if 0
+
 	/* now silence any buffers that were passed in but the that the plugin
 	 * did not fill/touch/use.
+	 *
+	 * TODO: optimize, when plugin-insert is processing in-place
+	 * unconnected buffers are (also) cleared there.
 	 */
-	for (;i < output_channels; ++i) {
+	for (uint32_t i = 0; i < input_maxbuf; ++i) {
+		if (used_outputs.test (i)) { continue; }
 		bool valid = false;
 		uint32_t idx = out_map.get (DataType::AUDIO, i, &valid);
 		if (!valid) continue;
 		memset (bufs.get_audio (idx).data (offset), 0, nframes * sizeof (Sample));
 	}
-#endif
 
 	input_maxbuf = 0;
 

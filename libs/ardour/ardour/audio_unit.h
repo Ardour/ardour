@@ -213,7 +213,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	ParameterMap parameter_map;
 	uint32_t   input_maxbuf;
 	framecnt_t input_offset;
-	framecnt_t cb_offset;
+	framecnt_t *cb_offsets;
 	BufferSet* input_buffers;
 	ChanMapping * input_map;
 	framecnt_t frames_processed;
