@@ -1928,6 +1928,44 @@ Mixer_UI::pane_allocation_handler (Allocation& allocation, Gtk::Paned* which)
 	int height = default_height;
 	static bool done[4] = { false, false, false, false };
 
+	/* Gtk::Paned behaves very oddly and rather undesirably. Setting the
+	 * position is a crapshoot if you time it incorrectly with the overall
+	 * sizing of the Paned. For example, if you might retrieve the size with
+	 * ::get_position() and then later call ::set_position() on a Paned at
+	 * a time when its allocation is different than it was when you retrieved
+	 * the position. The position will be interpreted as the size of the
+	 * first (top or left) child widget. If packing/size allocation later
+	 * resizes the Paned to a (final) smaller size, the position will be
+	 * used in ways that mean that the Paned ends up NOT in the same state
+	 * that it was in when you originally saved the position.
+	 *
+	 * Concrete example: Paned is 800 pixels wide, position is 400
+	 * (halfway).  Save position as 400. During program restart, set
+	 * position to 400, before Paned has been allocated any space. Paned
+	 * ends up initially sized to 1200 pixels.  Position is now 1/3 of the
+	 * way across/down.  Subsequent resizes will leave the position 1/3 of
+	 * the way across, rather than leaving it as a fixed pixel
+	 * position. Eventually, the Paned ends up 800 pixels wide/high again,
+	 * but the position is now 267, not 400.
+	 *
+	 * So ...
+	 *
+	 * We deal with this by using two strategies:
+	 *
+	 * 1) only set the position if the allocated size of the Paned is at
+	 * least as big as it needs to be for the position to make sense.
+	 *
+	 * 2) in recent versions of Ardour, save the position as a fraction,
+	 * and restore it using that fraction.
+	 *
+	 * So, we will only call ::set_position() AFTER the Paned is of a
+	 * sensible size, and then in addition, we will set the position in a
+	 * way that will be maintained as/when/if the Paned is resized.
+	 *
+	 * Once we've called ::set_position() on a Paned, we don't do it
+	 * again.
+	 */
+
 	if (which == static_cast<Gtk::Paned*> (&rhs_pane1)) {
 
 		if (done[0]) {
