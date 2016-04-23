@@ -992,3 +992,23 @@ Gtkmm2ext::add_volume_shortcuts (Gtk::FileChooser& c)
 	}
 #endif
 }
+
+float
+Gtkmm2ext::paned_position_as_fraction (Gtk::Paned& paned, bool h)
+{
+	const guint pos = gtk_paned_get_position (const_cast<GtkPaned*>(static_cast<const Gtk::Paned*>(&paned)->gobj()));
+	return (double) pos / (h ? paned.get_allocation().get_height() : paned.get_allocation().get_width());
+}
+
+void
+Gtkmm2ext::paned_set_position_as_fraction (Gtk::Paned& paned, float fraction, bool h)
+{
+	gint v = (h ? paned.get_allocation().get_height() : paned.get_allocation().get_width());
+
+	if (v < 1) {
+		return;
+	}
+
+	paned.set_position ((guint) floor (fraction * v));
+}
+

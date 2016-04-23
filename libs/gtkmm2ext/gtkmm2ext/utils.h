@@ -172,6 +172,9 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API std::string markup_escape_text (std::string const& s);
 
 	LIBGTKMM2EXT_API void add_volume_shortcuts (Gtk::FileChooser& c);
+
+	LIBGTKMM2EXT_API float paned_position_as_fraction (Gtk::Paned& paned, bool h);
+	LIBGTKMM2EXT_API void  paned_set_position_as_fraction (Gtk::Paned& paned, float fraction, bool h);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */
