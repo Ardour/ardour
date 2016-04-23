@@ -5442,6 +5442,8 @@ Route::slaved_to (boost::shared_ptr<VCA> vca) const
 		return false;
 	}
 
+	/* just test one particular control, not all of them */
+
 	return _gain_control->slaved_to (vca->gain_control());
 }
 

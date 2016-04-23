@@ -139,7 +139,7 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 			   itself.
 			*/
 
-			m->DropReferences.connect_same_thread (masters_connections, boost::bind (&SlavableAutomationControl::master_going_away, this, m));
+			m->DropReferences.connect_same_thread (masters_connections, boost::bind (&SlavableAutomationControl::master_going_away, this, boost::weak_ptr<AutomationControl>(m)));
 
 			/* Store the connection inside the MasterRecord, so that when we destroy it, the connection is destroyed
 			   and we no longer hear about changes to the AutomationControl.
@@ -241,6 +241,7 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 	Masters::size_type erased = 0;
 
 	pre_remove_master (m);
+
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);

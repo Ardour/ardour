@@ -48,6 +48,9 @@ void
 VCAManager::clear ()
 {
 	Mutex::Lock lm (lock);
+	for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
+		(*i)->DropReferences ();
+	}
 	_vcas.clear ();
 }
 
