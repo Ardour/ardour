@@ -87,7 +87,9 @@ def build(bld):
     #    if bld.env['DEBUG'] == False:
     #        obj.linkflags = ['-mwindows']
 
+    obj.linkflags    = bld.env['LDFLAGS']
+
     if bld.is_defined('NEED_INTL'):
-        obj.linkflags = ' -lintl'
+        obj.linkflags += '-lintl'
 
     obj.install_path = bld.env['DLLDIR']

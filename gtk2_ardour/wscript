@@ -517,7 +517,7 @@ def build(bld):
         'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
         ]
     obj.install_path = bld.env['DLLDIR']
-    obj.linkflags    = ''
+    obj.linkflags    = bld.env['LDFLAGS']
     obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML '
 
     if sys.platform == 'darwin':

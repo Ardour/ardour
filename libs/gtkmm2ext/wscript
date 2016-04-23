@@ -106,6 +106,7 @@ def build(bld):
 
     obj.export_includes = ['.']
     obj.includes     = ['.']
+    obj.linkflags    = bld.env['LDFLAGS']
     obj.name         = 'libgtkmm2ext'
     obj.target       = 'gtkmm2ext'
     obj.uselib       = 'GTKMM GTK XML'
