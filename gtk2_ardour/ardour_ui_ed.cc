@@ -149,8 +149,7 @@ ARDOUR_UI::install_actions ()
 	act = global_actions.register_action (main_actions, X_("Close"), _("Close"),  sigc::mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("AddTrackBus"), _("Add Track or Bus..."),
-			sigc::mem_fun(*this, &ARDOUR_UI::add_route));
+	act = global_actions.register_action (main_actions, X_("AddTrackBus"), _("Add Track or Bus..."), sigc::mem_fun(*this, &ARDOUR_UI::add_route));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 

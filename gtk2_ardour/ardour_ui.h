@@ -255,6 +255,7 @@ public:
 	void synchronize_sync_source_and_video_pullup ();
 
 	void add_route ();
+
 	void add_routes_part_two ();
 	void add_routes_thread ();
 

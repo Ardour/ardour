@@ -520,8 +520,7 @@ RouteParams_UI::show_track_menu()
 	if (track_menu == 0) {
 		track_menu = new Menu;
 		track_menu->set_name ("ArdourContextMenu");
-		track_menu->items().push_back
-				(MenuElem (_("Add Track or Bus"), sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::add_route)));
+		track_menu->items().push_back (MenuElem (_("Add Track or Bus"), sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::add_route)));
 	}
 	track_menu->popup (1, gtk_get_current_event_time());
 }
