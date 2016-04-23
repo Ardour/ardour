@@ -212,8 +212,8 @@ static const gchar *_zoom_focus_strings[] = {
 	N_("Right"),
 	N_("Center"),
 	N_("Playhead"),
- 	N_("Mouse"),
- 	N_("Edit point"),
+	N_("Mouse"),
+	N_("Edit point"),
 	0
 };
 
@@ -1673,7 +1673,7 @@ Editor::build_track_context_menu ()
 {
 	using namespace Menu_Helpers;
 
- 	MenuList& edit_items = track_context_menu.items();
+	MenuList& edit_items = track_context_menu.items();
 	edit_items.clear();
 
 	add_dstream_context_items (edit_items);
@@ -1685,7 +1685,7 @@ Editor::build_track_bus_context_menu ()
 {
 	using namespace Menu_Helpers;
 
- 	MenuList& edit_items = track_context_menu.items();
+	MenuList& edit_items = track_context_menu.items();
 	edit_items.clear();
 
 	add_bus_context_items (edit_items);
@@ -2561,10 +2561,10 @@ Editor::get_state ()
 
 	node->add_child_nocopy (Tabbable::get_state());
 
-	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&edit_pane)->gobj()));
+	snprintf(buf,sizeof(buf), "%f", paned_position_as_fraction (edit_pane, false));
 	node->add_property("edit-horizontal-pane-pos", string(buf));
 	node->add_property("notebook-shrunk", _notebook_shrunk ? "1" : "0");
-	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&editor_summary_pane)->gobj()));
+	snprintf(buf,sizeof(buf), "%f", paned_position_as_fraction (editor_summary_pane, true));
 	node->add_property("edit-vertical-pane-pos", string(buf));
 
 	maybe_add_mixer_strip_width (*node);
@@ -3908,11 +3908,12 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 {
 	/* recover or initialize pane positions. do this here rather than earlier because
 	   we don't want the positions to change the child allocations, which they seem to do.
+
+	   See comments in mixer_ui.cc about how this works.
 	 */
 
-	int pos;
-	XMLProperty const * prop;
-	char buf[32];
+	float pos;
+	XMLProperty* prop;
 	XMLNode* geometry = ARDOUR_UI::instance()->editor_settings();
 
 	enum Pane {
@@ -3935,16 +3936,22 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 		if (!geometry || (prop = geometry->property ("edit-horizontal-pane-pos")) == 0) {
 			/* initial allocation is 90% to canvas, 10% to notebook */
 			pos = (int) floor (alloc.get_width() * 0.90f);
-			snprintf (buf, sizeof(buf), "%d", pos);
 		} else {
-			pos = atoi (prop->value());
+			pos = atof (prop->value());
 		}
 
-		if (edit_pane.get_allocation().get_width() > pos) {
-			edit_pane.set_position (pos);
+		if (pos > 1.0f) {
+			/* older versions of Ardour stored absolute position */
+			if (alloc.get_width() > pos) {
+				edit_pane.set_position (pos);
+				done = (Pane) (done | Horizontal);
+			}
+		} else {
+			if (alloc.get_width() > 1.0/pos) {
+				paned_set_position_as_fraction (edit_pane, pos, false);
+				done = (Pane) (done | Horizontal);
+			}
 		}
-
-		done = (Pane) (done | Horizontal);
 
 	} else if (which == static_cast<Paned*> (&editor_summary_pane)) {
 
@@ -3955,17 +3962,23 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 		if (!geometry || (prop = geometry->property ("edit-vertical-pane-pos")) == 0) {
 			/* initial allocation is 90% to canvas, 10% to summary */
 			pos = (int) floor (alloc.get_height() * 0.90f);
-			snprintf (buf, sizeof(buf), "%d", pos);
 		} else {
 
-			pos = atoi (prop->value());
+			pos = atof (prop->value());
 		}
 
-		if (editor_summary_pane.get_allocation().get_height() > pos) {
-			editor_summary_pane.set_position (pos);
+		if (pos > 1.0f) {
+			/* older versions of Ardour stored absolute position */
+			if (alloc.get_height() > pos) {
+				editor_summary_pane.set_position (pos);
+				done = (Pane) (done | Vertical);
+			}
+		} else {
+			if (alloc.get_height() > 1.0/pos) {
+				paned_set_position_as_fraction (editor_summary_pane, pos, true);
+				done = (Pane) (done | Vertical);
+			}
 		}
-
-		done = (Pane) (done | Vertical);
 	}
 }
 
