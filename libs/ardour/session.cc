@@ -591,6 +591,9 @@ Session::destroy ()
 
 	_state_of_the_state = StateOfTheState (CannotSave|Deletion);
 
+	/* stop autoconnecting */
+	auto_connect_thread_terminate ();
+
 	/* disconnect from any and all signals that we are connected to */
 
 	drop_connections ();
@@ -613,6 +616,7 @@ Session::destroy ()
 	 * callbacks from the engine any more.
 	 */
 
+	Port::PortSignalDrop (); /* EMIT SIGNAL */
 	Port::PortDrop (); /* EMIT SIGNAL */
 
 	ltc_tx_cleanup();
@@ -724,8 +728,6 @@ Session::destroy ()
 
 	pthread_cond_destroy (&_rt_emit_cond);
 	pthread_mutex_destroy (&_rt_emit_mutex);
-
-	auto_connect_thread_terminate ();
 
 	pthread_cond_destroy (&_auto_connect_cond);
 	pthread_mutex_destroy (&_auto_connect_mutex);
@@ -6791,12 +6793,12 @@ Session::auto_connect_thread_start ()
 	if (_ac_thread_active) {
 		return;
 	}
-	_ac_thread_active = true;
-	// clear queue
+
 	while (!_auto_connect_queue.empty ()) {
 		_auto_connect_queue.pop ();
 	}
 
+	_ac_thread_active = true;
 	if (pthread_create (&_auto_connect_thread, NULL, auto_connect_thread, this)) {
 		_ac_thread_active = false;
 	}
@@ -6809,6 +6811,13 @@ Session::auto_connect_thread_terminate ()
 		return;
 	}
 	_ac_thread_active = false;
+
+	{
+		Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
+		while (!_auto_connect_queue.empty ()) {
+			_auto_connect_queue.pop ();
+		}
+	}
 
 	if (pthread_mutex_lock (&_auto_connect_mutex) == 0) {
 		pthread_cond_signal (&_auto_connect_cond);

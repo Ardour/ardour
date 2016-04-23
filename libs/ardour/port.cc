@@ -38,6 +38,7 @@ using namespace PBD;
 
 PBD::Signal2<void,boost::shared_ptr<Port>, boost::shared_ptr<Port> > Port::PostDisconnect;
 PBD::Signal0<void> Port::PortDrop;
+PBD::Signal0<void> Port::PortSignalDrop;
 
 bool         Port::_connecting_blocked = false;
 pframes_t    Port::_global_port_buffer_offset = 0;
@@ -75,6 +76,7 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 	}
 
 	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::drop, this));
+	PortSignalDrop.connect_same_thread (drop_connection, boost::bind (&Port::signal_drop, this));
 	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection,
 			boost::bind (&Port::port_connected_or_disconnected, this, _1, _3, _5));
 }
@@ -116,6 +118,12 @@ Port::set_pretty_name(const std::string& n)
 		}
 	}
 	return false;
+}
+
+void
+Port::signal_drop ()
+{
+	engine_connection.disconnect ();
 }
 
 void

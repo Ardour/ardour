@@ -125,6 +125,7 @@ public:
 	PBD::Signal1<void,bool> MonitorInputChanged;
 	static PBD::Signal2<void,boost::shared_ptr<Port>,boost::shared_ptr<Port> > PostDisconnect;
 	static PBD::Signal0<void> PortDrop;
+	static PBD::Signal0<void> PortSignalDrop;
 
 	static void set_cycle_framecnt (pframes_t n) {
 		_cycle_nframes = n;
@@ -170,6 +171,7 @@ private:
 	std::set<std::string> _connections;
 
 	void port_connected_or_disconnected (boost::weak_ptr<Port>, boost::weak_ptr<Port>, bool);
+	void signal_drop ();
 	void drop ();
 	PBD::ScopedConnection drop_connection;
 	PBD::ScopedConnection engine_connection;
