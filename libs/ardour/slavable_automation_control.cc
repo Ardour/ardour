@@ -127,9 +127,8 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 
 		/* ratio will be recomputed below */
 
-		PBD::ID id (m->id());
-
-		res = _masters.insert (make_pair<PBD::ID,MasterRecord> (id, MasterRecord (m, 1.0)));
+		pair<PBD::ID,MasterRecord> newpair (m->id(), MasterRecord (m, 1.0));
+		res = _masters.insert (newpair);
 
 		if (res.second) {
 
