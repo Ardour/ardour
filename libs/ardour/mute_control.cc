@@ -120,7 +120,7 @@ double
 MuteControl::get_value () const
 {
 	if (slaved ()) {
-		return get_masters_value ();
+		return muted_by_self() || get_masters_value ();
 	}
 
 	if (_list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
@@ -128,7 +128,7 @@ MuteControl::get_value () const
 		return AutomationControl::get_value();
 	}
 
-	return muted() ? 1.0 : 0.0;
+	return muted();
 }
 
 void

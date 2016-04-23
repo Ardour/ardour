@@ -177,8 +177,7 @@ double
 SoloControl::get_value () const
 {
 	if (slaved()) {
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
-		return get_masters_value_locked () ? 1.0 : 0.0;
+		return self_soloed() || get_masters_value ();
 	}
 
 	if (_list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
@@ -186,7 +185,7 @@ SoloControl::get_value () const
 		return AutomationControl::get_value();
 	}
 
-	return soloed() ? 1.0 : 0.0;
+	return soloed();
 }
 
 void
@@ -256,6 +255,7 @@ SoloControl::master_changed (bool /*from self*/, GroupControlDisposition, boost:
 	bool send_signal = false;
 
 	_transition_into_solo = 0;
+
 
 	if (m->get_value()) {
 		/* this master is now enabled */

@@ -146,8 +146,7 @@ double
 SoloIsolateControl::get_value () const
 {
 	if (slaved()) {
-		Glib::Threads::RWLock::ReaderLock lm (master_lock);
-		return get_masters_value_locked () ? 1.0 : 0.0;
+		return solo_isolated() || get_masters_value ();
 	}
 
 	if (_list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
@@ -155,7 +154,7 @@ SoloIsolateControl::get_value () const
 		return AutomationControl::get_value();
 	}
 
-	return solo_isolated () ? 1.0 : 0.0;
+	return solo_isolated ();
 }
 
 int
