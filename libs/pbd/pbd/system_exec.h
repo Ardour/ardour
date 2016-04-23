@@ -39,6 +39,10 @@
 
 #endif
 
+#ifdef PLATFORM_BSD
+#include <sys/wait.h>
+#endif
+
 #include <string>
 #include <pthread.h>
 #include <signal.h>

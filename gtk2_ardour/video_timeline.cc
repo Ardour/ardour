@@ -33,10 +33,6 @@
 #include "video_timeline.h"
 #include "video_tool_paths.h"
 
-#ifdef PLATFORM_BSD
-#include <sys/wait.h>
-#endif
-
 #include <gtkmm2ext/utils.h>
 #include <pthread.h>
 #include <curl/curl.h>

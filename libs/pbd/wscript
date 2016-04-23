@@ -153,8 +153,6 @@ def build(bld):
         obj.source += [ 'windows_mmcss.cc' ]
         obj.uselib += ' OLE'
 
-    obj.linkflags    = bld.env['LDFLAGS']
-    
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests
         testobj              = bld(features = 'cxx cxxprogram')
@@ -174,7 +172,7 @@ def build(bld):
             testobj.source += [ 'test/windows_timer_utils_test.cc' ]
         testobj.target       = 'run-tests'
         testobj.includes     = obj.includes + ['test', '../pbd']
-        testobj.linkflags    = bld.env['LDFLAGS']
+        testobj.linkflags    = ''
         testobj.uselib       = 'CPPUNIT XML SNDFILE'
         testobj.use          = 'libpbd'
         testobj.name         = 'libpbd-tests'
