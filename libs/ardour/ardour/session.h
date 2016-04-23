@@ -28,6 +28,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <queue>
 #include <stdint.h>
 
 #include <boost/dynamic_bitset.hpp>
@@ -1119,7 +1120,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
 	void set_frame_rate (framecnt_t nframes);
+#ifdef USE_TRACKS_CODE_FEATURES
 	void reconnect_existing_routes (bool withLock, bool reconnect_master = true, bool reconnect_inputs = true, bool reconnect_outputs = true);
+#endif
 
   protected:
 	friend class Route;
@@ -1459,6 +1462,45 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	pthread_cond_t  _rt_emit_cond;
 	bool            _rt_emit_pending;
 
+	/* Auto Connect Thread */
+	static void *auto_connect_thread (void *);
+	void auto_connect_thread_run ();
+	void auto_connect_thread_start ();
+	void auto_connect_thread_terminate ();
+
+	pthread_t       _auto_connect_thread;
+	bool            _ac_thread_active;
+	pthread_mutex_t _auto_connect_mutex;
+	pthread_cond_t  _auto_connect_cond;
+
+	struct AutoConnectRequest {
+		public:
+		AutoConnectRequest (boost::shared_ptr <Route> r, bool ci,
+				const ChanCount& is,
+				const ChanCount& os,
+				const ChanCount& io,
+				const ChanCount& oo)
+			: route (boost::weak_ptr<Route> (r))
+			, connect_inputs (ci)
+			, input_start (is)
+			, output_start (os)
+			, input_offset (io)
+			, output_offset (oo)
+		{}
+
+		boost::weak_ptr <Route> route;
+		bool connect_inputs;
+		ChanCount input_start;
+		ChanCount output_start;
+		ChanCount input_offset;
+		ChanCount output_offset;
+	};
+
+	typedef std::queue<AutoConnectRequest> AutoConnectQueue;
+	Glib::Threads::Mutex  _auto_connect_queue_lock;
+	AutoConnectQueue _auto_connect_queue;
+
+	void auto_connect (const AutoConnectRequest&);
 
 	/* SessionEventManager interface */
 
@@ -1621,9 +1663,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	bool find_route_name (std::string const &, uint32_t& id, std::string& name, bool);
 	void count_existing_track_channels (ChanCount& in, ChanCount& out);
-	void auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing_inputs, ChanCount& existing_outputs,
-	                         bool with_lock, bool connect_inputs = true,
-	                         ChanCount input_start = ChanCount (), ChanCount output_start = ChanCount ());
+	void auto_connect_route (boost::shared_ptr<Route>, bool, const ChanCount&, const ChanCount&, const ChanCount& io = ChanCount(), const ChanCount& oo = ChanCount());
 	void midi_output_change_handler (IOChange change, void* /*src*/, boost::weak_ptr<Route> midi_track);
 
 	/* track numbering */

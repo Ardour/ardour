@@ -42,6 +42,7 @@
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/md5.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/search_path.h"
 #include "pbd/stacktrace.h"
 #include "pbd/stl_delete.h"
@@ -243,6 +244,7 @@ Session::Session (AudioEngine &eng,
 	, _ignore_skips_updates (false)
 	, _rt_thread_active (false)
 	, _rt_emit_pending (false)
+	, _ac_thread_active (false)
 	, step_speed (0)
 	, outbound_mtc_timecode_frame (0)
 	, next_quarter_frame_to_send (-1)
@@ -312,6 +314,9 @@ Session::Session (AudioEngine &eng,
 
 	pthread_mutex_init (&_rt_emit_mutex, 0);
 	pthread_cond_init (&_rt_emit_cond, 0);
+
+	pthread_mutex_init (&_auto_connect_mutex, 0);
+	pthread_cond_init (&_auto_connect_cond, 0);
 
 	init_name_id_counter (1); // reset for new sessions, start at 1
 
@@ -408,6 +413,7 @@ Session::Session (AudioEngine &eng,
 	EndTimeChanged.connect_same_thread (*this, boost::bind (&Session::end_time_changed, this, _1));
 
 	emit_thread_start ();
+	auto_connect_thread_start ();
 
 	/* hook us up to the engine since we are now completely constructed */
 
@@ -718,6 +724,11 @@ Session::destroy ()
 
 	pthread_cond_destroy (&_rt_emit_cond);
 	pthread_mutex_destroy (&_rt_emit_mutex);
+
+	auto_connect_thread_terminate ();
+
+	pthread_cond_destroy (&_auto_connect_cond);
+	pthread_mutex_destroy (&_auto_connect_mutex);
 
 	delete _scene_changer; _scene_changer = 0;
 	delete midi_control_ui; midi_control_ui = 0;
@@ -2559,151 +2570,26 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 void
 Session::midi_output_change_handler (IOChange change, void * /*src*/, boost::weak_ptr<Route> wmt)
 {
-        boost::shared_ptr<Route> midi_track (wmt.lock());
+	boost::shared_ptr<Route> midi_track (wmt.lock());
 
-        if (!midi_track) {
-                return;
-        }
-
-	if ((change.type & IOChange::ConfigurationChanged) && Config->get_output_auto_connect() != ManualConnect) {
-
-                if (change.after.n_audio() <= change.before.n_audio()) {
-                        return;
-                }
-
-                /* new audio ports: make sure the audio goes somewhere useful,
-                   unless the user has no-auto-connect selected.
-
-                   The existing ChanCounts don't matter for this call as they are only
-                   to do with matching input and output indices, and we are only changing
-                   outputs here.
-                */
-
-                ChanCount dummy;
-
-                auto_connect_route (midi_track, dummy, dummy, false, false, ChanCount(), change.before);
-        }
-}
-
-/** @param connect_inputs true to connect inputs as well as outputs, false to connect just outputs.
- *  @param input_start Where to start from when auto-connecting inputs; e.g. if this is 0, auto-connect starting from input 0.
- *  @param output_start As \a input_start, but for outputs.
- */
-void
-Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing_inputs, ChanCount& existing_outputs,
-                             bool with_lock, bool connect_inputs, ChanCount input_start, ChanCount output_start)
-{
-	if (!IO::connecting_legal) {
+	if (!midi_track) {
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+	if ((change.type & IOChange::ConfigurationChanged) && Config->get_output_auto_connect() != ManualConnect) {
 
-	if (with_lock) {
-		lm.acquire ();
-	}
-
-	/* If both inputs and outputs are auto-connected to physical ports,
-	   use the max of input and output offsets to ensure auto-connected
-	   port numbers always match up (e.g. the first audio input and the
-	   first audio output of the route will have the same physical
-	   port number).  Otherwise just use the lowest input or output
-	   offset possible.
-	*/
-
-	DEBUG_TRACE (DEBUG::Graph,
-	             string_compose("Auto-connect: existing in = %1 out = %2\n",
-	                            existing_inputs, existing_outputs));
-
-	const bool in_out_physical =
-		(Config->get_input_auto_connect() & AutoConnectPhysical)
-		&& (Config->get_output_auto_connect() & AutoConnectPhysical)
-		&& connect_inputs;
-
-	const ChanCount in_offset = in_out_physical
-		? ChanCount::max(existing_inputs, existing_outputs)
-                : existing_inputs;
-
-	const ChanCount out_offset = in_out_physical
-		? ChanCount::max(existing_inputs, existing_outputs)
-		: existing_outputs;
-
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		vector<string> physinputs;
-		vector<string> physoutputs;
-
-		_engine.get_physical_outputs (*t, physoutputs);
-		_engine.get_physical_inputs (*t, physinputs);
-
-		if (!physinputs.empty() && connect_inputs) {
-			uint32_t nphysical_in = physinputs.size();
-
-			DEBUG_TRACE (DEBUG::Graph,
-			             string_compose("There are %1 physical inputs of type %2\n",
-			                            nphysical_in, *t));
-
-			for (uint32_t i = input_start.get(*t); i < route->n_inputs().get(*t) && i < nphysical_in; ++i) {
-				string port;
-
-				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-					DEBUG_TRACE (DEBUG::Graph,
-					             string_compose("Get index %1 + %2 % %3 = %4\n",
-					                            in_offset.get(*t), i, nphysical_in,
-					                            (in_offset.get(*t) + i) % nphysical_in));
-					port = physinputs[(in_offset.get(*t) + i) % nphysical_in];
-				}
-
-				DEBUG_TRACE (DEBUG::Graph,
-				             string_compose("Connect route %1 IN to %2\n",
-				                            route->name(), port));
-
-				if (!port.empty() && route->input()->connect (route->input()->ports().port(*t, i), port, this)) {
-					break;
-				}
-
-                                ChanCount one_added (*t, 1);
-                                existing_inputs += one_added;
-			}
+		if (change.after.n_audio() <= change.before.n_audio()) {
+			return;
 		}
 
-		if (!physoutputs.empty()) {
-			uint32_t nphysical_out = physoutputs.size();
-			for (uint32_t i = output_start.get(*t); i < route->n_outputs().get(*t); ++i) {
-				string port;
-
-				/* Waves Tracks:
-				 * do not create new connections if we reached the limit of physical outputs
-				 * in Multi Out mode
-				 */
-
-				if (!(Config->get_output_auto_connect() & AutoConnectMaster) &&
-				    ARDOUR::Profile->get_trx () &&
-				    existing_outputs.get(*t) == nphysical_out ) {
-					break;
-				}
-
-				if ((*t) == DataType::MIDI && (Config->get_output_auto_connect() & AutoConnectPhysical)) {
-					port = physoutputs[(out_offset.get(*t) + i) % nphysical_out];
-				} else if ((*t) == DataType::AUDIO && (Config->get_output_auto_connect() & AutoConnectMaster)) {
-                                        /* master bus is audio only */
-					if (_master_out && _master_out->n_inputs().get(*t) > 0) {
-						port = _master_out->input()->ports().port(*t,
-								i % _master_out->input()->n_ports().get(*t))->name();
-					}
-				}
-
-				DEBUG_TRACE (DEBUG::Graph,
-				             string_compose("Connect route %1 OUT to %2\n",
-				                            route->name(), port));
-
-				if (!port.empty() && route->output()->connect (route->output()->ports().port(*t, i), port, this)) {
-					break;
-				}
-
-                                ChanCount one_added (*t, 1);
-                                existing_outputs += one_added;
-			}
-		}
+		/* new audio ports: make sure the audio goes somewhere useful,
+		 * unless the user has no-auto-connect selected.
+		 *
+		 * The existing ChanCounts don't matter for this call as they are only
+		 * to do with matching input and output indices, and we are only changing
+		 * outputs here.
+		 */
+		auto_connect_route (midi_track, false, ChanCount(), change.before);
 	}
 }
 
@@ -2865,8 +2751,6 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
 					}
 				}
 			}
-
-			//auto_connect_route (*rIter, inputs, outputs, false, reconnectIputs);
 		}
 
 		_master_out->output()->disconnect (this);
@@ -3398,16 +3282,17 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 void
 Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect)
 {
-        ChanCount existing_inputs;
-        ChanCount existing_outputs;
+	ChanCount existing_inputs;
+	ChanCount existing_outputs;
 	uint32_t order = next_control_id();
+
 
 	if (_order_hint > -1) {
 		order = _order_hint;
 		_order_hint = -1;
 	}
 
-        count_existing_track_channels (existing_inputs, existing_outputs);
+	count_existing_track_channels (existing_inputs, existing_outputs);
 
 	{
 		RCUWriter<RouteList> writer (routes);
@@ -3415,10 +3300,10 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		r->insert (r->end(), new_routes.begin(), new_routes.end());
 
 		/* if there is no control out and we're not in the middle of loading,
-		   resort the graph here. if there is a control out, we will resort
-		   toward the end of this method. if we are in the middle of loading,
-		   we will resort when done.
-		*/
+		 * resort the graph here. if there is a control out, we will resort
+		 * toward the end of this method. if we are in the middle of loading,
+		 * we will resort when done.
+		 */
 
 		if (!_monitor_out && IO::connecting_legal) {
 			resort_routes_using (r);
@@ -3454,19 +3339,20 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (tr);
 			if (mt) {
 				mt->StepEditStatusChange.connect_same_thread (*this, boost::bind (&Session::step_edit_status_change, this, _1));
-                                mt->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, boost::weak_ptr<Route>(mt)));
+				mt->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, boost::weak_ptr<Route>(mt)));
 			}
 		}
 
-
 		if (input_auto_connect || output_auto_connect) {
-			auto_connect_route (r, existing_inputs, existing_outputs, true, input_auto_connect);
+			auto_connect_route (r, input_auto_connect, ChanCount (), ChanCount (), existing_inputs, existing_outputs);
+			existing_inputs += r->n_inputs();
+			existing_outputs += r->n_outputs();
 		}
 
 		/* order keys are a GUI responsibility but we need to set up
-		   reasonable defaults because they also affect the remote control
-		   ID in most situations.
-		*/
+			 reasonable defaults because they also affect the remote control
+			 ID in most situations.
+			 */
 
 		if (!r->has_order_key ()) {
 			if (r->is_auditioner()) {
@@ -3489,7 +3375,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 			if ((*x)->is_monitor()) {
 				/* relax */
 			} else if ((*x)->is_master()) {
-					/* relax */
+				/* relax */
 			} else {
 				(*x)->enable_monitor_send ();
 			}
@@ -6788,4 +6674,179 @@ Session::clear_object_selection ()
 #ifdef USE_TRACKS_CODE_FEATURES
 	follow_playhead_priority ();
 #endif
+}
+
+void
+Session::auto_connect_route (boost::shared_ptr<Route> route, bool connect_inputs,
+		const ChanCount& input_start,
+		const ChanCount& output_start,
+		const ChanCount& input_offset,
+		const ChanCount& output_offset)
+{
+	Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
+	_auto_connect_queue.push (AutoConnectRequest (route, connect_inputs,
+				input_start, output_start,
+				input_offset, output_offset));
+
+	if (pthread_mutex_trylock (&_auto_connect_mutex) == 0) {
+		pthread_cond_signal (&_auto_connect_cond);
+		pthread_mutex_unlock (&_auto_connect_mutex);
+	}
+}
+
+void
+Session::auto_connect (const AutoConnectRequest& ar)
+{
+	boost::shared_ptr<Route> route = ar.route.lock();
+
+	if (!route) { return; }
+
+	if (!IO::connecting_legal) {
+		return;
+	}
+
+	//why would we need the process lock ??
+	//Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+
+	/* If both inputs and outputs are auto-connected to physical ports,
+	 * use the max of input and output offsets to ensure auto-connected
+	 * port numbers always match up (e.g. the first audio input and the
+	 * first audio output of the route will have the same physical
+	 * port number).  Otherwise just use the lowest input or output
+	 * offset possible.
+	 */
+
+	const bool in_out_physical =
+		(Config->get_input_auto_connect() & AutoConnectPhysical)
+		&& (Config->get_output_auto_connect() & AutoConnectPhysical)
+		&& ar.connect_inputs;
+
+	const ChanCount in_offset = in_out_physical
+		? ChanCount::max(ar.input_offset, ar.output_offset)
+		: ar.input_offset;
+
+	const ChanCount out_offset = in_out_physical
+		? ChanCount::max(ar.input_offset, ar.output_offset)
+		: ar.output_offset;
+
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		vector<string> physinputs;
+		vector<string> physoutputs;
+
+		_engine.get_physical_outputs (*t, physoutputs);
+		_engine.get_physical_inputs (*t, physinputs);
+
+		if (!physinputs.empty() && ar.connect_inputs) {
+			uint32_t nphysical_in = physinputs.size();
+
+			for (uint32_t i = ar.input_start.get(*t); i < route->n_inputs().get(*t) && i < nphysical_in; ++i) {
+				string port;
+
+				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
+					port = physinputs[(in_offset.get(*t) + i) % nphysical_in];
+				}
+
+				if (!port.empty() && route->input()->connect (route->input()->ports().port(*t, i), port, this)) {
+					break;
+				}
+			}
+		}
+
+		if (!physoutputs.empty()) {
+			uint32_t nphysical_out = physoutputs.size();
+			for (uint32_t i = ar.output_start.get(*t); i < route->n_outputs().get(*t); ++i) {
+				string port;
+
+				/* Waves Tracks:
+				 * do not create new connections if we reached the limit of physical outputs
+				 * in Multi Out mode
+				 */
+				if (!(Config->get_output_auto_connect() & AutoConnectMaster) &&
+						ARDOUR::Profile->get_trx () &&
+						ar.output_offset.get(*t) == nphysical_out ) {
+					break;
+				}
+
+				if ((*t) == DataType::MIDI && (Config->get_output_auto_connect() & AutoConnectPhysical)) {
+					port = physoutputs[(out_offset.get(*t) + i) % nphysical_out];
+				} else if ((*t) == DataType::AUDIO && (Config->get_output_auto_connect() & AutoConnectMaster)) {
+					/* master bus is audio only */
+					if (_master_out && _master_out->n_inputs().get(*t) > 0) {
+						port = _master_out->input()->ports().port(*t,
+								i % _master_out->input()->n_ports().get(*t))->name();
+					}
+				}
+
+				if (!port.empty() && route->output()->connect (route->output()->ports().port(*t, i), port, this)) {
+					break;
+				}
+			}
+		}
+	}
+}
+
+void
+Session::auto_connect_thread_start ()
+{
+	if (_ac_thread_active) {
+		return;
+	}
+	_ac_thread_active = true;
+	// clear queue
+	while (!_auto_connect_queue.empty ()) {
+		_auto_connect_queue.pop ();
+	}
+
+	if (pthread_create (&_auto_connect_thread, NULL, auto_connect_thread, this)) {
+		_ac_thread_active = false;
+	}
+}
+
+void
+Session::auto_connect_thread_terminate ()
+{
+	if (!_ac_thread_active) {
+		return;
+	}
+	_ac_thread_active = false;
+
+	if (pthread_mutex_lock (&_auto_connect_mutex) == 0) {
+		pthread_cond_signal (&_auto_connect_cond);
+		pthread_mutex_unlock (&_auto_connect_mutex);
+	}
+
+	void *status;
+	pthread_join (_auto_connect_thread, &status);
+}
+
+void *
+Session::auto_connect_thread (void *arg)
+{
+	Session *s = static_cast<Session *>(arg);
+	s->auto_connect_thread_run ();
+	pthread_exit (0);
+	return 0;
+}
+
+void
+Session::auto_connect_thread_run ()
+{
+	pthread_set_name (X_("autoconnect"));
+	SessionEvent::create_per_thread_pool (X_("autoconnect"), 256);
+	PBD::notify_event_loops_about_thread_creation (pthread_self(), X_("autoconnect"), 256);
+	pthread_mutex_lock (&_auto_connect_mutex);
+	while (_ac_thread_active) {
+
+		while (!_auto_connect_queue.empty ()) {
+			Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
+			if (_auto_connect_queue.empty ()) { break; } // re-check with lock
+			const AutoConnectRequest ar (_auto_connect_queue.front());
+			_auto_connect_queue.pop ();
+			lx.release ();
+			auto_connect (ar);
+		}
+
+		pthread_cond_wait (&_auto_connect_cond, &_auto_connect_mutex);
+	}
+	pthread_mutex_unlock (&_auto_connect_mutex);
 }
