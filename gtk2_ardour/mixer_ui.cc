@@ -1960,6 +1960,7 @@ Mixer_UI::pane_allocation_handler (Allocation& allocation, Gtk::Paned* which)
 		}
 
 		if (pos > 1.0f) {
+			/* older versions of Ardour stored absolute position */
 			if ((done[0] = (allocation.get_height() > pos))) {
 				rhs_pane1.set_position (pos);
 			}
@@ -1983,6 +1984,7 @@ Mixer_UI::pane_allocation_handler (Allocation& allocation, Gtk::Paned* which)
 		}
 
 		if (pos > 1.0f) {
+			/* older versions of Ardour stored absolute position */
 			if ((done[1] = (allocation.get_height() > pos))) {
 				rhs_pane2.set_position (pos);
 			}
@@ -2029,6 +2031,7 @@ Mixer_UI::pane_allocation_handler (Allocation& allocation, Gtk::Paned* which)
 		}
 
 		if (pos > 1.0f) {
+			/* older versions of Ardour stored absolute position */
 			if ((done[3] = (allocation.get_width() > pos))) {
 				inner_pane.set_position (pos);
 			}
