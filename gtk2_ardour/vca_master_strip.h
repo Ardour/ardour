@@ -44,7 +44,11 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	std::string state_id() const { return "VCAMasterStrip"; }
 	boost::shared_ptr<ARDOUR::VCA> vca() const { return _vca; }
 
-      private:
+	static PBD::Signal1<void,VCAMasterStrip*> CatchDeletion;
+
+     private:
+	~VCAMasterStrip ();
+
 	boost::shared_ptr<ARDOUR::VCA> _vca;
 	Gtk::HBox    vertical_padding;
 	ArdourButton name_button;
@@ -84,6 +88,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void vca_property_changed (PBD::PropertyChange const & what_changed);
 	void update_vca_name ();
 	void build_context_menu ();
+	void self_delete ();
 };
 
 

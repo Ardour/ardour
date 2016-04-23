@@ -385,6 +385,8 @@ Mixer_UI::add_masters (VCAList& vcas)
 		row[track_columns.text] = (*v)->name();
 		row[track_columns.visible] = true;
 		row[track_columns.vca] = vms;
+
+		vms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_master, this, _1), gui_context());
 	}
 
 	redisplay_track_list ();
@@ -393,6 +395,21 @@ Mixer_UI::add_masters (VCAList& vcas)
 void
 Mixer_UI::remove_master (VCAMasterStrip* vms)
 {
+	if (_session && _session->deletion_in_progress()) {
+		/* its all being taken care of */
+		return;
+	}
+
+	TreeModel::Children rows = track_model->children();
+	TreeModel::Children::iterator ri;
+
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+		if ((*ri)[track_columns.vca] == vms) {
+                        PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
+			track_model->erase (ri);
+			break;
+		}
+	}
 }
 
 void

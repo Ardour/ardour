@@ -39,6 +39,8 @@ using namespace Gtk;
 using namespace PBD;
 using std::string;
 
+PBD::Signal1<void,VCAMasterStrip*> VCAMasterStrip::CatchDeletion;
+
 VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	: AxisView (s)
 	, _vca (v)
@@ -139,6 +141,21 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	                                          invalidator (*this),
 	                                          boost::bind (&VCAMasterStrip::update_vca_display, this),
 	                                          gui_context());
+
+
+	_vca->DropReferences.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::self_delete, this), gui_context());
+
+}
+
+VCAMasterStrip::~VCAMasterStrip ()
+{
+	CatchDeletion (this); /* EMIT SIGNAL */
+}
+
+void
+VCAMasterStrip::self_delete ()
+{
+	delete this;
 }
 
 void
