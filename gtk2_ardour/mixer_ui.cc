@@ -2192,7 +2192,6 @@ Mixer_UI::new_track_or_bus ()
 	ARDOUR_UI::instance()->add_route ();
 }
 
-
 void
 Mixer_UI::update_title ()
 {
