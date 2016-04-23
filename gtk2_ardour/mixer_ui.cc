@@ -1588,8 +1588,9 @@ Mixer_UI::show_mixer_list (bool yn)
 
 		//if user wants to show the pane, we should make sure that it is wide enough to be visible
 		int width = list_hpane.get_position();
-		if (width < 40)
+		if (width < 40) {
 			list_hpane.set_position(40);
+		}
 	} else {
 		list_vpacker.hide ();
 	}
@@ -1860,6 +1861,25 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 	return 0;
 }
 
+float
+paned_position_as_fraction (Gtk::Paned& paned, bool h)
+{
+	const guint pos = gtk_paned_get_position (const_cast<GtkPaned*>(static_cast<const Paned*>(&paned)->gobj()));
+	return (double) pos / (h ? paned.get_allocation().get_height() : paned.get_allocation().get_width());
+}
+
+void
+gtk_paned_set_position_as_fraction (Gtk::Paned& paned, float fraction, bool h)
+{
+	gint v = (h ? paned.get_allocation().get_height() : paned.get_allocation().get_width());
+
+	if (v < 1) {
+		return;
+	}
+
+	paned.set_position ((guint) floor (fraction * v));
+}
+
 XMLNode&
 Mixer_UI::get_state ()
 {
@@ -1868,13 +1888,13 @@ Mixer_UI::get_state ()
 
 	node->add_child_nocopy (Tabbable::get_state());
 
-	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (const_cast<GtkPaned*>(static_cast<const Paned*>(&rhs_pane1)->gobj())));
+	snprintf(buf,sizeof(buf), "%f", paned_position_as_fraction (rhs_pane1, true));
 	node->add_property(X_("mixer-rhs-pane1-pos"), string(buf));
-	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (const_cast<GtkPaned*>(static_cast<const Paned*>(&rhs_pane2)->gobj())));
+	snprintf(buf,sizeof(buf), "%f", paned_position_as_fraction (rhs_pane2, true));
 	node->add_property(X_("mixer-rhs_pane2-pos"), string(buf));
-	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (const_cast<GtkPaned*>(static_cast<const Paned*>(&list_hpane)->gobj())));
+	snprintf(buf,sizeof(buf), "%f", paned_position_as_fraction (list_hpane, false));
 	node->add_property(X_("mixer-list-hpane-pos"), string(buf));
-	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (const_cast<GtkPaned*>(static_cast<const Paned*>(&inner_pane)->gobj())));
+	snprintf(buf,sizeof(buf), "%f", paned_position_as_fraction (inner_pane, false));
 	node->add_property(X_("mixer-inner-pane-pos"), string(buf));
 
 	node->add_property ("narrow-strips", _strip_width == Narrow ? "yes" : "no");
@@ -1900,9 +1920,9 @@ Mixer_UI::get_state ()
 }
 
 void
-Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
+Mixer_UI::pane_allocation_handler (Allocation& allocation, Gtk::Paned* which)
 {
-	int pos;
+	float pos;
 	XMLProperty* prop = 0;
 	XMLNode* geometry = ARDOUR_UI::instance()->mixer_settings();
 	int height = default_height;
@@ -1917,14 +1937,22 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 		if (!geometry || (prop = geometry->property("mixer-rhs-pane1-pos")) == 0) {
 			pos = height / 3;
 		} else {
-			pos = atoi (prop->value());
+			pos = atof (prop->value());
 		}
 
-		if ((done[0] = (GTK_WIDGET(rhs_pane1.gobj())->allocation.height > pos))) {
-			rhs_pane1.set_position (pos);
+		if (pos > 1.0f) {
+			if ((done[0] = (allocation.get_height() > pos))) {
+				rhs_pane1.set_position (pos);
+			}
+		} else {
+			if ((done[0] = (allocation.get_height() > 1.0/pos))) {
+				gtk_paned_set_position_as_fraction (rhs_pane1, pos, true);
+			}
 		}
+	}
 
-	} else if (which == static_cast<Gtk::Paned*> (&rhs_pane2)) {
+	if (which == static_cast<Gtk::Paned*> (&rhs_pane2)) {
+
 		if (done[1]) {
 			return;
 		}
@@ -1932,13 +1960,21 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 		if (!geometry || (prop = geometry->property("mixer-rhs-pane2-pos")) == 0) {
 			pos = 2 * height / 3;
 		} else {
-			pos = atoi (prop->value());
+			pos = atof (prop->value());
 		}
 
-		if ((done[1] = (GTK_WIDGET(rhs_pane2.gobj())->allocation.height > pos))) {
-			rhs_pane2.set_position (pos);
+		if (pos > 1.0f) {
+			if ((done[1] = (allocation.get_height() > pos))) {
+				rhs_pane2.set_position (pos);
+			}
+		} else {
+			if ((done[1] = (allocation.get_height() > 1.0/pos))) {
+				gtk_paned_set_position_as_fraction (rhs_pane2, pos, true);
+			}
 		}
-	} else if (which == static_cast<Gtk::Paned*> (&list_hpane)) {
+	}
+
+	if (which == static_cast<Gtk::Paned*> (&list_hpane)) {
 
 		if (done[2]) {
 			return;
@@ -1947,30 +1983,40 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 		if (!geometry || (prop = geometry->property("mixer-list-hpane-pos")) == 0) {
 			pos = std::max ((float)100, rintf ((float) 125 * UIConfiguration::instance().get_ui_scale()));
 		} else {
-			pos = max (36, atoi (prop->value ()));
+			pos = max (0.1, atof (prop->value ()));
 		}
 
-		if ((done[2] = (GTK_WIDGET(list_hpane.gobj())->allocation.width > pos))) {
-			list_hpane.set_position (pos);
+		if (pos > 1.0f) {
+			if ((done[2] = (allocation.get_width() > pos))) {
+				list_hpane.set_position (pos);
+			}
+		} else {
+			if ((done[2] = (allocation.get_width() > 1.0/pos))) {
+				gtk_paned_set_position_as_fraction (list_hpane, pos, false);
+			}
 		}
-	} else if (which == static_cast<Gtk::Paned*> (&inner_pane)) {
+	}
+
+	if (which == static_cast<Gtk::Paned*> (&inner_pane)) {
 
 		if (done[3]) {
 			return;
 		}
 
 		if (!geometry || (prop = geometry->property("mixer-inner-pane-pos")) == 0) {
-			cerr << "using default value\n";
 			pos = std::max ((float)100, rintf ((float) 125 * UIConfiguration::instance().get_ui_scale()));
 		} else {
-			cerr << "using " << prop->value() << endl;
-			pos = max (36, atoi (prop->value ()));
+			pos = max (0.1, atof (prop->value ()));
 		}
 
-		cerr << "Setting inner pane pos to " << pos << endl;
-
-		if ((done[3] = (GTK_WIDGET(inner_pane.gobj())->allocation.width > pos))) {
-			inner_pane.set_position (pos);
+		if (pos > 1.0f) {
+			if ((done[3] = (allocation.get_width() > pos))) {
+				inner_pane.set_position (pos);
+			}
+		} else {
+			if ((done[3] = (allocation.get_width() > 1.0/pos))) {
+				gtk_paned_set_position_as_fraction (inner_pane, pos, false);
+			}
 		}
 	}
 }
