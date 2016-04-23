@@ -186,15 +186,12 @@ ARDOUR_UI::install_actions ()
 
 	act = global_actions.register_action (main_actions, X_("SnapshotStay"), _("Snapshot (& keep working on current version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("SnapshotSwitch"), _("Snapshot (& switch to new version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), true));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("QuickSnapshotStay"), _("Quick Snapshot(& keep working on current version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::quick_snapshot_session), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("QuickSnapshotSwitch"), _("Quick Snapshot (& switch to new version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::quick_snapshot_session), true));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -202,7 +199,6 @@ ARDOUR_UI::install_actions ()
 
 	act = global_actions.register_action (main_actions, X_("SaveAs"), _("Save As..."), sigc::mem_fun(*this, &ARDOUR_UI::save_session_as));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("Rename"), _("Rename..."), sigc::mem_fun(*this, &ARDOUR_UI::rename_session));
 	ActionManager::session_sensitive_actions.push_back (act);
