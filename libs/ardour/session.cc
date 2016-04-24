@@ -6719,9 +6719,6 @@ Session::auto_connect (const AutoConnectRequest& ar)
 		return;
 	}
 
-	//why would we need the process lock ??
-	//Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-
 	/* If both inputs and outputs are auto-connected to physical ports,
 	 * use the max of input and output offsets to ensure auto-connected
 	 * port numbers always match up (e.g. the first audio input and the
@@ -6853,18 +6850,27 @@ void
 Session::auto_connect_thread_run ()
 {
 	pthread_set_name (X_("autoconnect"));
-	SessionEvent::create_per_thread_pool (X_("autoconnect"), 256);
-	PBD::notify_event_loops_about_thread_creation (pthread_self(), X_("autoconnect"), 256);
+	SessionEvent::create_per_thread_pool (X_("autoconnect"), 1024);
+	PBD::notify_event_loops_about_thread_creation (pthread_self(), X_("autoconnect"), 1024);
 	pthread_mutex_lock (&_auto_connect_mutex);
 	while (_ac_thread_active) {
 
-		while (!_auto_connect_queue.empty ()) {
+		if (!_auto_connect_queue.empty ()) {
+			// Why would we need the process lock ??
+			// A: if ports are added while we're connecting, the backend's iterator may be invalidated:
+			//   graph_order_callback() -> resort_routes() -> direct_feeds_according_to_reality () -> backend::connected_to()
+			//   All ardour-internal backends use a std::vector   xxxAudioBackend::find_port()
+			//   We have control over those, but what does jack do?
+			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+
 			Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
-			if (_auto_connect_queue.empty ()) { break; } // re-check with lock
-			const AutoConnectRequest ar (_auto_connect_queue.front());
-			_auto_connect_queue.pop ();
-			lx.release ();
-			auto_connect (ar);
+			while (!_auto_connect_queue.empty ()) {
+				const AutoConnectRequest ar (_auto_connect_queue.front());
+				_auto_connect_queue.pop ();
+				lx.release ();
+				auto_connect (ar);
+				lx.acquire ();
+			}
 		}
 
 		pthread_cond_wait (&_auto_connect_cond, &_auto_connect_mutex);
