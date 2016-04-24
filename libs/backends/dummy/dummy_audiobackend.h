@@ -88,7 +88,7 @@ class DummyPort {
 		bool is_connected (const DummyPort *port) const;
 		bool is_physically_connected () const;
 
-		const std::vector<DummyPort *>& get_connections () const { return _connections; }
+		const std::set<DummyPort *>& get_connections () const { return _connections; }
 
 		int connect (DummyPort *port);
 		int disconnect (DummyPort *port);
@@ -121,7 +121,7 @@ class DummyPort {
 		const PortFlags _flags;
 		LatencyRange _capture_latency_range;
 		LatencyRange _playback_latency_range;
-		std::vector<DummyPort*> _connections;
+		std::set<DummyPort*> _connections;
 
 		void _connect (DummyPort* , bool);
 		void _disconnect (DummyPort* , bool);
@@ -447,7 +447,11 @@ class DummyAudioBackend : public AudioBackend {
 		std::vector<DummyAudioPort *> _system_outputs;
 		std::vector<DummyMidiPort *> _system_midi_in;
 		std::vector<DummyMidiPort *> _system_midi_out;
-		std::vector<DummyPort *> _ports;
+
+		typedef std::map<std::string, DummyPort *> PortMap; // fast lookup in _ports
+		typedef std::set<DummyPort *> PortIndex; // fast lookup in _ports
+		PortMap _portmap;
+		PortIndex _ports;
 
 		struct PortConnectData {
 			std::string a;
@@ -475,16 +479,15 @@ class DummyAudioBackend : public AudioBackend {
 		}
 
 		bool valid_port (PortHandle port) const {
-			return std::find (_ports.begin (), _ports.end (), (DummyPort*)port) != _ports.end ();
+			return _ports.find (static_cast<DummyPort*>(port)) != _ports.end ();
 		}
 
-		DummyPort * find_port (const std::string& port_name) const {
-			for (std::vector<DummyPort*>::const_iterator it = _ports.begin (); it != _ports.end (); ++it) {
-				if ((*it)->name () == port_name) {
-					return *it;
-				}
+		DummyPort* find_port (const std::string& port_name) const {
+			PortMap::const_iterator it = _portmap.find (port_name);
+			if (it == _portmap.end()) {
+				return NULL;
 			}
-			return NULL;
+			return (*it).second;
 		}
 
 }; // class DummyAudioBackend

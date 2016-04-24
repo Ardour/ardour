@@ -427,9 +427,9 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 		return BackendReinitializationError;
 	}
 
-	if (_ports.size()) {
+	if (_ports.size () || _portmap.size ()) {
 		PBD::warning << _("DummyAudioBackend: recovering from unclean shutdown, port registry is not empty.") << endmsg;
-		for (std::vector<DummyPort*>::const_iterator it = _ports.begin (); it != _ports.end (); ++it) {
+		for (PortIndex::const_iterator it = _ports.begin (); it != _ports.end (); ++it) {
 			PBD::info << _("DummyAudioBackend: port '") << (*it)->name () << "' exists." << endmsg;
 		}
 		_system_inputs.clear();
@@ -437,6 +437,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 		_system_midi_in.clear();
 		_system_midi_out.clear();
 		_ports.clear();
+		_portmap.clear();
 	}
 
 	if (register_system_ports()) {
@@ -711,8 +712,9 @@ DummyAudioBackend::get_ports (
 			use_regexp = true;
 		}
 	}
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		DummyPort* port = _ports[i];
+
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		DummyPort* port = *i;
 		if ((port->type () == type) && flags == (port->flags () & flags)) {
 			if (!use_regexp || !regexec (&port_regex, port->name ().c_str (), 0, NULL, 0)) {
 				port_names.push_back (port->name ());
@@ -774,7 +776,8 @@ DummyAudioBackend::add_port (
 			return 0;
 	}
 
-	_ports.push_back (port);
+	_ports.insert (port);
+	_portmap.insert (make_pair (name, port));
 
 	return port;
 }
@@ -788,12 +791,16 @@ DummyAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 		return;
 	}
 	DummyPort* port = static_cast<DummyPort*>(port_handle);
-	std::vector<DummyPort*>::iterator i = std::find (_ports.begin (), _ports.end (), static_cast<DummyPort*>(port_handle));
+	PortIndex::iterator i = _ports.find (static_cast<DummyPort*>(port_handle));
 	if (i == _ports.end ()) {
 		PBD::error << _("DummyBackend::unregister_port: Failed to find port") << endmsg;
 		return;
 	}
 	disconnect_all(port_handle);
+	PortMap::const_iterator it = _portmap.find ((*i)->name());
+	if (it != _portmap.end()) {
+		_portmap.erase (it);
+	}
 	_ports.erase (i);
 	delete port;
 }
@@ -909,14 +916,17 @@ DummyAudioBackend::unregister_ports (bool system_only)
 	_system_midi_in.clear();
 	_system_midi_out.clear();
 
-	for (std::vector<DummyPort*>::iterator i = _ports.begin (); i != _ports.end ();) {
-		DummyPort* port = *i;
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end ();) {
+		PortIndex::iterator cur = i++;
+		DummyPort* port = *cur;
 		if (! system_only || (port->is_physical () && port->is_terminal ())) {
 			port->disconnect_all ();
+			PortMap::const_iterator it = _portmap.find (port->name());
+			if (it != _portmap.end()) {
+				_portmap.erase (it);
+			}
 			delete port;
-			i = _ports.erase (i);
-		} else {
-			++i;
+			_ports.erase (cur);
 		}
 	}
 }
@@ -1005,10 +1015,12 @@ bool
 DummyAudioBackend::connected_to (PortEngine::PortHandle src, const std::string& dst, bool /*process_callback_safe*/)
 {
 	DummyPort* dst_port = find_port (dst);
+#ifndef NDEBUG
 	if (!valid_port (src) || !dst_port) {
 		PBD::error << _("DummyBackend::connected_to: Invalid Port") << endmsg;
 		return false;
 	}
+#endif
 	return static_cast<DummyPort*>(src)->is_connected (dst_port);
 }
 
@@ -1032,9 +1044,9 @@ DummyAudioBackend::get_connections (PortEngine::PortHandle port, std::vector<std
 
 	assert (0 == names.size ());
 
-	const std::vector<DummyPort*>& connected_ports = static_cast<DummyPort*>(port)->get_connections ();
+	const std::set<DummyPort*>& connected_ports = static_cast<DummyPort*>(port)->get_connections ();
 
-	for (std::vector<DummyPort*>::const_iterator i = connected_ports.begin (); i != connected_ports.end (); ++i) {
+	for (std::set<DummyPort*>::const_iterator i = connected_ports.begin (); i != connected_ports.end (); ++i) {
 		names.push_back ((*i)->name ());
 	}
 
@@ -1183,8 +1195,8 @@ DummyAudioBackend::port_is_physical (PortEngine::PortHandle port) const
 void
 DummyAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>& port_names)
 {
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		DummyPort* port = _ports[i];
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		DummyPort* port = *i;
 		if ((port->type () == type) && port->is_input () && port->is_physical ()) {
 			port_names.push_back (port->name ());
 		}
@@ -1194,8 +1206,8 @@ DummyAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>
 void
 DummyAudioBackend::get_physical_inputs (DataType type, std::vector<std::string>& port_names)
 {
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		DummyPort* port = _ports[i];
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		DummyPort* port = *i;
 		if ((port->type () == type) && port->is_output () && port->is_physical ()) {
 			port_names.push_back (port->name ());
 		}
@@ -1207,8 +1219,8 @@ DummyAudioBackend::n_physical_outputs () const
 {
 	int n_midi = 0;
 	int n_audio = 0;
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		DummyPort* port = _ports[i];
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		DummyPort* port = *i;
 		if (port->is_output () && port->is_physical ()) {
 			switch (port->type ()) {
 				case DataType::AUDIO: ++n_audio; break;
@@ -1228,8 +1240,8 @@ DummyAudioBackend::n_physical_inputs () const
 {
 	int n_midi = 0;
 	int n_audio = 0;
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		DummyPort* port = _ports[i];
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		DummyPort* port = *i;
 		if (port->is_input () && port->is_physical ()) {
 			switch (port->type ()) {
 				case DataType::AUDIO: ++n_audio; break;
@@ -1499,7 +1511,7 @@ int DummyPort::connect (DummyPort *port)
 
 void DummyPort::_connect (DummyPort *port, bool callback)
 {
-	_connections.push_back (port);
+	_connections.insert (port);
 	if (callback) {
 		port->_connect (this, false);
 		_dummy_backend.port_connect_callback (name(),  port->name(), true);
@@ -1525,12 +1537,9 @@ int DummyPort::disconnect (DummyPort *port)
 
 void DummyPort::_disconnect (DummyPort *port, bool callback)
 {
-	std::vector<DummyPort*>::iterator it = std::find (_connections.begin (), _connections.end (), port);
-
+	std::set<DummyPort*>::iterator it = _connections.find (port);
 	assert (it != _connections.end ());
-
 	_connections.erase (it);
-
 	if (callback) {
 		port->_disconnect (this, false);
 		_dummy_backend.port_connect_callback (name(),  port->name(), false);
@@ -1541,21 +1550,22 @@ void DummyPort::_disconnect (DummyPort *port, bool callback)
 void DummyPort::disconnect_all ()
 {
 	while (!_connections.empty ()) {
-		_connections.back ()->_disconnect (this, false);
-		_dummy_backend.port_connect_callback (name(),  _connections.back ()->name(), false);
-		_connections.pop_back ();
+		std::set<DummyPort*>::iterator it = _connections.begin ();
+		(*it)->_disconnect (this, false);
+		_dummy_backend.port_connect_callback (name(), (*it)->name(), false);
+		_connections.erase (it);
 	}
 }
 
 bool
 DummyPort::is_connected (const DummyPort *port) const
 {
-	return std::find (_connections.begin (), _connections.end (), port) != _connections.end ();
+	return _connections.find (const_cast<DummyPort *>(port)) != _connections.end ();
 }
 
 bool DummyPort::is_physically_connected () const
 {
-	for (std::vector<DummyPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+	for (std::set<DummyPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
 		if ((*it)->is_physical ()) {
 			return true;
 		}
@@ -1872,8 +1882,9 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 void* DummyAudioPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
-		std::vector<DummyPort*>::const_iterator it = get_connections ().begin ();
-		if (it == get_connections ().end ()) {
+		const std::set<DummyPort *>& connections = get_connections ();
+		std::set<DummyPort*>::const_iterator it = connections.begin ();
+		if (it == connections.end ()) {
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 		} else {
 			DummyAudioPort * source = static_cast<DummyAudioPort*>(*it);
@@ -1882,7 +1893,7 @@ void* DummyAudioPort::get_buffer (pframes_t n_samples)
 				source->get_buffer(n_samples); // generate signal.
 			}
 			memcpy (_buffer, source->const_buffer (), n_samples * sizeof (Sample));
-			while (++it != get_connections ().end ()) {
+			while (++it != connections.end ()) {
 				source = static_cast<DummyAudioPort*>(*it);
 				assert (source && source->is_output ());
 				Sample* dst = buffer ();
@@ -1987,8 +1998,9 @@ void* DummyMidiPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
 		_buffer.clear ();
-		for (std::vector<DummyPort*>::const_iterator i = get_connections ().begin ();
-				i != get_connections ().end ();
+		const std::set<DummyPort*>& connections = get_connections ();
+		for (std::set<DummyPort*>::const_iterator i = connections.begin ();
+				i != connections.end ();
 				++i) {
 			DummyMidiPort * source = static_cast<DummyMidiPort*>(*i);
 			if (source->is_physical() && source->is_terminal()) {
