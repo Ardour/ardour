@@ -596,6 +596,7 @@ Session::destroy ()
 
 	/* disconnect from any and all signals that we are connected to */
 
+	Port::PortSignalDrop (); /* EMIT SIGNAL */
 	drop_connections ();
 
 	/* shutdown control surface protocols while we still have ports
@@ -616,7 +617,6 @@ Session::destroy ()
 	 * callbacks from the engine any more.
 	 */
 
-	Port::PortSignalDrop (); /* EMIT SIGNAL */
 	Port::PortDrop (); /* EMIT SIGNAL */
 
 	ltc_tx_cleanup();
@@ -1077,11 +1077,16 @@ Session::remove_monitor_section ()
 	}
 
 	remove_route (_monitor_out);
+	if (_state_of_the_state & Deletion) {
+		return;
+	}
+
 	auto_connect_master_bus ();
 
 	if (auditioner) {
 		auditioner->connect ();
 	}
+
 	Config->ParameterChanged ("use-monitor-bus");
 }
 
@@ -3557,7 +3562,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 		resort_routes ();
 #endif
 
-	if (_process_graph) {
+	if (_process_graph && !(_state_of_the_state & Deletion)) {
 		_process_graph->clear_other_chain ();
 	}
 
@@ -3572,6 +3577,10 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 
 	for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
 		(*iter)->drop_references ();
+	}
+
+	if (_state_of_the_state & Deletion) {
+		return;
 	}
 
 	Route::RemoteControlIDChange(); /* EMIT SIGNAL */
