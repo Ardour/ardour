@@ -188,7 +188,15 @@ static Session * _create_session (string dir, string state, uint32_t rate)
 		return 0;
 	}
 
-	Session* session = new Session (*engine, dir, state);
+	// TODO add option/bindings for this
+	BusProfile bus_profile;
+	bus_profile.master_out_channels = 2;
+	bus_profile.input_ac = AutoConnectPhysical;
+	bus_profile.output_ac = AutoConnectMaster;
+	bus_profile.requested_physical_in = 0; // use all available
+	bus_profile.requested_physical_out = 0; // use all available
+
+	Session* session = new Session (*engine, dir, state, &bus_profile);
 	return session;
 }
 
@@ -385,6 +393,7 @@ int main (int argc, char **argv)
 			break;
 		}
 		if (strlen (line) == 0) {
+			free (line);
 			continue;
 		}
 		if (!lua->do_command (line)) {
