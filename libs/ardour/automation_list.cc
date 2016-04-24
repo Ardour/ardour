@@ -131,6 +131,7 @@ AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
 
 AutomationList::~AutomationList()
 {
+	delete _before;
 }
 
 boost::shared_ptr<Evoral::ControlList>
@@ -192,8 +193,11 @@ AutomationList::set_automation_state (AutoState s)
 {
 	if (s != _state) {
 		_state = s;
+		delete _before;
 		if (s == Write && _desc.toggled) {
 			_before = &get_state ();
+		} else {
+			_before = 0;
 		}
 		automation_state_changed (s); /* EMIT SIGNAL */
 	}
@@ -211,8 +215,11 @@ AutomationList::set_automation_style (AutoStyle s)
 void
 AutomationList::start_write_pass (double when)
 {
+	delete _before;
 	if (in_new_write_pass ()) {
 		_before = &get_state ();
+	} else {
+		_before = 0;
 	}
 	ControlList::start_write_pass (when);
 }
@@ -221,8 +228,6 @@ void
 AutomationList::write_pass_finished (double when, double thinning_factor)
 {
 	ControlList::write_pass_finished (when, thinning_factor);
-	/* automation control has deleted this or it is now owned by the session undo stack */
-	_before = 0;
 }
 
 void
@@ -260,7 +265,9 @@ AutomationList::stop_touch (bool mark, double)
 
 /* _before may be owned by the undo stack,
  * so we have to be careful about doing this.
-*/
+ *
+ * ::before () transfers ownership, setting _before to 0
+ */
 void
 AutomationList::clear_history ()
 {
