@@ -582,6 +582,11 @@ PluginManager::ladspa_discover (string path)
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("LADSPA plugin found at %1\n", path));
 
 	for (uint32_t i = 0; ; ++i) {
+		/* if a ladspa plugin allocates memory here
+		 * it is never free()ed (or plugin-dependent only when unloading).
+		 * For some plugins memory allocated is incremental, we should
+		 * avoid re-scanning plugins and file bug reports.
+		 */
 		if ((descriptor = dfunc (i)) == 0) {
 			break;
 		}
