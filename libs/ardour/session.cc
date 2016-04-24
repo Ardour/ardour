@@ -2174,16 +2174,18 @@ Session::resort_routes ()
 	}
 
 #ifndef NDEBUG
-	boost::shared_ptr<RouteList> rl = routes.reader ();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		DEBUG_TRACE (DEBUG::Graph, string_compose ("%1 fed by ...\n", (*i)->name()));
+	if (DEBUG_ENABLED(DEBUG::Graph)) {
+		boost::shared_ptr<RouteList> rl = routes.reader ();
+		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+			DEBUG_TRACE (DEBUG::Graph, string_compose ("%1 fed by ...\n", (*i)->name()));
 
-		const Route::FedBy& fb ((*i)->fed_by());
+			const Route::FedBy& fb ((*i)->fed_by());
 
-		for (Route::FedBy::const_iterator f = fb.begin(); f != fb.end(); ++f) {
-			boost::shared_ptr<Route> sf = f->r.lock();
-			if (sf) {
-				DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 (sends only ? %2)\n", sf->name(), f->sends_only));
+			for (Route::FedBy::const_iterator f = fb.begin(); f != fb.end(); ++f) {
+				boost::shared_ptr<Route> sf = f->r.lock();
+				if (sf) {
+					DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 (sends only ? %2)\n", sf->name(), f->sends_only));
+				}
 			}
 		}
 	}
