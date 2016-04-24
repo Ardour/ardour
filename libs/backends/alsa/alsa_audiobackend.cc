@@ -809,13 +809,14 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		return BackendReinitializationError;
 	}
 
-	if (_ports.size()) {
+	if (_ports.size () || _portmap.size ()) {
 		PBD::warning << _("AlsaAudioBackend: recovering from unclean shutdown, port registry is not empty.") << endmsg;
 		_system_inputs.clear();
 		_system_outputs.clear();
 		_system_midi_in.clear();
 		_system_midi_out.clear();
 		_ports.clear();
+		_portmap.clear();
 	}
 
 	/* reset internal state */
@@ -1278,8 +1279,9 @@ AlsaAudioBackend::get_ports (
 			use_regexp = true;
 		}
 	}
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		AlsaPort* port = _ports[i];
+
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		AlsaPort* port = *i;
 		if ((port->type () == type) && flags == (port->flags () & flags)) {
 			if (!use_regexp || !regexec (&port_regex, port->name ().c_str (), 0, NULL, 0)) {
 				port_names.push_back (port->name ());
@@ -1338,7 +1340,8 @@ AlsaAudioBackend::add_port (
 			return 0;
 	}
 
-	_ports.push_back (port);
+	_ports.insert (port);
+	_portmap.insert (make_pair (name, port));
 
 	return port;
 }
@@ -1350,12 +1353,13 @@ AlsaAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 		return;
 	}
 	AlsaPort* port = static_cast<AlsaPort*>(port_handle);
-	std::vector<AlsaPort*>::iterator i = std::find (_ports.begin (), _ports.end (), static_cast<AlsaPort*>(port_handle));
+	PortIndex::iterator i = _ports.find (static_cast<AlsaPort*>(port_handle));
 	if (i == _ports.end ()) {
 		PBD::error << _("AlsaBackend::unregister_port: Failed to find port") << endmsg;
 		return;
 	}
 	disconnect_all(port_handle);
+	_portmap.erase (port->name());
 	_ports.erase (i);
 	delete port;
 }
@@ -1504,19 +1508,19 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 void
 AlsaAudioBackend::unregister_ports (bool system_only)
 {
-	size_t i = 0;
 	_system_inputs.clear();
 	_system_outputs.clear();
 	_system_midi_in.clear();
 	_system_midi_out.clear();
-	while (i <  _ports.size ()) {
-		AlsaPort* port = _ports[i];
+
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end ();) {
+		PortIndex::iterator cur = i++;
+		AlsaPort* port = *cur;
 		if (! system_only || (port->is_physical () && port->is_terminal ())) {
 			port->disconnect_all ();
+			_portmap.erase (port->name());
 			delete port;
-			_ports.erase (_ports.begin() + i);
-		} else {
-			++i;
+			_ports.erase (cur);
 		}
 	}
 }
@@ -1605,10 +1609,12 @@ bool
 AlsaAudioBackend::connected_to (PortEngine::PortHandle src, const std::string& dst, bool /*process_callback_safe*/)
 {
 	AlsaPort* dst_port = find_port (dst);
+#ifndef NDEBUG
 	if (!valid_port (src) || !dst_port) {
 		PBD::error << _("AlsaBackend::connected_to: Invalid Port") << endmsg;
 		return false;
 	}
+#endif
 	return static_cast<AlsaPort*>(src)->is_connected (dst_port);
 }
 
@@ -1632,9 +1638,9 @@ AlsaAudioBackend::get_connections (PortEngine::PortHandle port, std::vector<std:
 
 	assert (0 == names.size ());
 
-	const std::vector<AlsaPort*>& connected_ports = static_cast<AlsaPort*>(port)->get_connections ();
+	const std::set<AlsaPort*>& connected_ports = static_cast<AlsaPort*>(port)->get_connections ();
 
-	for (std::vector<AlsaPort*>::const_iterator i = connected_ports.begin (); i != connected_ports.end (); ++i) {
+	for (std::set<AlsaPort*>::const_iterator i = connected_ports.begin (); i != connected_ports.end (); ++i) {
 		names.push_back ((*i)->name ());
 	}
 
@@ -1775,8 +1781,8 @@ AlsaAudioBackend::port_is_physical (PortEngine::PortHandle port) const
 void
 AlsaAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>& port_names)
 {
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		AlsaPort* port = _ports[i];
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		AlsaPort* port = *i;
 		if ((port->type () == type) && port->is_input () && port->is_physical ()) {
 			port_names.push_back (port->name ());
 		}
@@ -1786,8 +1792,8 @@ AlsaAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>&
 void
 AlsaAudioBackend::get_physical_inputs (DataType type, std::vector<std::string>& port_names)
 {
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		AlsaPort* port = _ports[i];
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		AlsaPort* port = *i;
 		if ((port->type () == type) && port->is_output () && port->is_physical ()) {
 			port_names.push_back (port->name ());
 		}
@@ -1799,8 +1805,8 @@ AlsaAudioBackend::n_physical_outputs () const
 {
 	int n_midi = 0;
 	int n_audio = 0;
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		AlsaPort* port = _ports[i];
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		AlsaPort* port = *i;
 		if (port->is_output () && port->is_physical ()) {
 			switch (port->type ()) {
 				case DataType::AUDIO: ++n_audio; break;
@@ -1820,8 +1826,8 @@ AlsaAudioBackend::n_physical_inputs () const
 {
 	int n_midi = 0;
 	int n_audio = 0;
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		AlsaPort* port = _ports[i];
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		AlsaPort* port = *i;
 		if (port->is_input () && port->is_physical ()) {
 			switch (port->type ()) {
 				case DataType::AUDIO: ++n_audio; break;
@@ -2175,7 +2181,7 @@ int AlsaPort::connect (AlsaPort *port)
 
 void AlsaPort::_connect (AlsaPort *port, bool callback)
 {
-	_connections.push_back (port);
+	_connections.insert (port);
 	if (callback) {
 		port->_connect (this, false);
 		_alsa_backend.port_connect_callback (name(),  port->name(), true);
@@ -2201,12 +2207,9 @@ int AlsaPort::disconnect (AlsaPort *port)
 
 void AlsaPort::_disconnect (AlsaPort *port, bool callback)
 {
-	std::vector<AlsaPort*>::iterator it = std::find (_connections.begin (), _connections.end (), port);
-
+	std::set<AlsaPort*>::iterator it = _connections.find (port);
 	assert (it != _connections.end ());
-
 	_connections.erase (it);
-
 	if (callback) {
 		port->_disconnect (this, false);
 		_alsa_backend.port_connect_callback (name(),  port->name(), false);
@@ -2217,21 +2220,22 @@ void AlsaPort::_disconnect (AlsaPort *port, bool callback)
 void AlsaPort::disconnect_all ()
 {
 	while (!_connections.empty ()) {
-		_connections.back ()->_disconnect (this, false);
-		_alsa_backend.port_connect_callback (name(),  _connections.back ()->name(), false);
-		_connections.pop_back ();
+		std::set<AlsaPort*>::iterator it = _connections.begin ();
+		(*it)->_disconnect (this, false);
+		_alsa_backend.port_connect_callback (name(), (*it)->name(), false);
+		_connections.erase (it);
 	}
 }
 
 bool
 AlsaPort::is_connected (const AlsaPort *port) const
 {
-	return std::find (_connections.begin (), _connections.end (), port) != _connections.end ();
+	return _connections.find (const_cast<AlsaPort *>(port)) != _connections.end ();
 }
 
 bool AlsaPort::is_physically_connected () const
 {
-	for (std::vector<AlsaPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+	for (std::set<AlsaPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
 		if ((*it)->is_physical ()) {
 			return true;
 		}
@@ -2253,14 +2257,15 @@ AlsaAudioPort::~AlsaAudioPort () { }
 void* AlsaAudioPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
-		std::vector<AlsaPort*>::const_iterator it = get_connections ().begin ();
-		if (it == get_connections ().end ()) {
+		const std::set<AlsaPort *>& connections = get_connections ();
+		std::set<AlsaPort*>::const_iterator it = connections.begin ();
+		if (it == connections.end ()) {
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 		} else {
 			AlsaAudioPort const * source = static_cast<const AlsaAudioPort*>(*it);
 			assert (source && source->is_output ());
 			memcpy (_buffer, source->const_buffer (), n_samples * sizeof (Sample));
-			while (++it != get_connections ().end ()) {
+			while (++it != connections.end ()) {
 				source = static_cast<const AlsaAudioPort*>(*it);
 				assert (source && source->is_output ());
 				Sample* dst = buffer ();
@@ -2296,8 +2301,9 @@ void* AlsaMidiPort::get_buffer (pframes_t /* nframes */)
 {
 	if (is_input ()) {
 		(_buffer[_bufperiod]).clear ();
-		for (std::vector<AlsaPort*>::const_iterator i = get_connections ().begin ();
-				i != get_connections ().end ();
+		const std::set<AlsaPort*>& connections = get_connections ();
+		for (std::set<AlsaPort*>::const_iterator i = connections.begin ();
+				i != connections.end ();
 				++i) {
 			const AlsaMidiBuffer * src = static_cast<const AlsaMidiPort*>(*i)->const_buffer ();
 			for (AlsaMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
