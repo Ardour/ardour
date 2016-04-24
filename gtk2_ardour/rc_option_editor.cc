@@ -374,7 +374,7 @@ public:
 		  _insert_note_button_adjustment (3, 1, 5),
 		  _insert_note_button_spin (_insert_note_button_adjustment)
 	{
-		const Glib::ustring restart_msg = _("\nChanges to this setting will only persist after your project has been saved.");
+		const std::string restart_msg = _("\nChanges to this setting will only persist after your project has been saved.");
 		/* internationalize and prepare for use with combos */
 
 		vector<string> dumb;
@@ -667,9 +667,9 @@ public:
 		set_popdown_strings (_snap_modifier_combo, dumb);
 		_snap_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_modifier_chosen));
 #ifdef __APPLE__
-		Glib::ustring mod_str = string_compose (X_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
+		std::string mod_str = string_compose (X_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
 #else
-		Glib::ustring mod_str = Keyboard::secondary_modifier_name();
+		std::string mod_str = Keyboard::secondary_modifier_name();
 #endif
 		Gtkmm2ext::UI::instance()->set_tip (_snap_modifier_combo,
 						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
@@ -1028,8 +1028,8 @@ public:
 		Label* l = manage (new Label (_("GUI and Font scaling:")));
 		l->set_name ("OptionsLabel");
 
-		 const Glib::ustring dflt = _("Default");
-		 const Glib::ustring empty = X_(""); // despite gtk-doc saying so, NULL does not work as reference
+		const std::string dflt = _("Default");
+		const std::string empty = X_(""); // despite gtk-doc saying so, NULL does not work as reference
 
 		_dpi_slider.set_name("FontScaleSlider");
 		_dpi_slider.set_update_policy (UPDATE_DISCONTINUOUS);
