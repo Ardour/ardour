@@ -798,9 +798,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         void step_edit_status_change (bool);
 
-	void platform_specific ();
-	void platform_setup ();
-
 	/* these are used only in response to a platform-specific "ShouldQuit" signal
 	 */
 	bool idle_finish ();
