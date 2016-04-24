@@ -395,6 +395,7 @@ int main (int argc, char **argv)
 		event_loop->run();
 		free (line);
 	}
+	free (line);
 	printf ("\n");
 
 	if (_session) {

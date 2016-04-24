@@ -412,15 +412,16 @@ Graph::helper_thread()
 	ProcessThread* pt = new ProcessThread ();
 	resume_rt_malloc_checks ();
 
-        pt->get_buffers();
+	pt->get_buffers();
 
-        while(1) {
-                if (run_one()) {
-                        break;
-                }
-        }
+	while(1) {
+		if (run_one()) {
+			break;
+		}
+	}
 
-        pt->drop_buffers();
+	pt->drop_buffers();
+	delete pt;
 }
 
 /** Here's the main graph thread */
@@ -431,35 +432,35 @@ Graph::main_thread()
 	ProcessThread* pt = new ProcessThread ();
 	resume_rt_malloc_checks ();
 
-        pt->get_buffers();
+	pt->get_buffers();
 
-  again:
-        _callback_start_sem.wait ();
+again:
+	_callback_start_sem.wait ();
 
 	DEBUG_TRACE(DEBUG::ProcessThreads, "main thread is awake\n");
 
-        if (!_threads_active) {
-                return;
-        }
+	if (!_threads_active) {
+		return;
+	}
 
 	prep ();
 
-        if (_graph_empty && _threads_active) {
-                _callback_done_sem.signal ();
-                DEBUG_TRACE(DEBUG::ProcessThreads, "main thread sees graph done, goes back to sleep\n");
-                goto again;
-        }
+	if (_graph_empty && _threads_active) {
+		_callback_done_sem.signal ();
+		DEBUG_TRACE(DEBUG::ProcessThreads, "main thread sees graph done, goes back to sleep\n");
+		goto again;
+	}
 
 	/* This loop will run forever */
-        while (1) {
+	while (1) {
 		DEBUG_TRACE(DEBUG::ProcessThreads, "main thread runs one graph node\n");
-                if (run_one()) {
-                        break;
-                }
-        }
+		if (run_one()) {
+			break;
+		}
+	}
 
-        pt->drop_buffers();
-        delete (pt);
+	pt->drop_buffers();
+	delete (pt);
 }
 
 void

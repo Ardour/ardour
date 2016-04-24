@@ -808,6 +808,7 @@ LV2Plugin::~LV2Plugin ()
 #endif
 
 	free(_features);
+	free(_log_feature.data);
 	free(_make_path_feature.data);
 	free(_work_schedule_feature.data);
 
@@ -828,6 +829,7 @@ LV2Plugin::~LV2Plugin ()
 	delete [] _shadow_data;
 	delete [] _defaults;
 	delete [] _ev_buffers;
+	delete _impl;
 }
 
 bool

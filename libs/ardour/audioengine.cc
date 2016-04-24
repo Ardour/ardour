@@ -114,6 +114,7 @@ AudioEngine::~AudioEngine ()
 	for (BackendMap::const_iterator i = _backends.begin(); i != _backends.end(); ++i) {
 		i->second->deinstantiate();
 	}
+	delete _main_thread;
 }
 
 AudioEngine*
@@ -1234,6 +1235,7 @@ AudioEngine::thread_init_callback (void* arg)
 	AsyncMIDIPort::set_process_thread (pthread_self());
 
 	if (arg) {
+		delete AudioEngine::instance()->_main_thread;
 		/* the special thread created/managed by the backend */
 		AudioEngine::instance()->_main_thread = new ProcessThread;
 	}

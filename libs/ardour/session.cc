@@ -101,6 +101,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/speakers.h"
 #include "ardour/tempo.h"
+#include "ardour/ticker.h"
 #include "ardour/track.h"
 #include "ardour/user_bundle.h"
 #include "ardour/utils.h"
@@ -306,6 +307,7 @@ Session::Session (AudioEngine &eng,
 	,  _speakers (new Speakers)
 	, _order_hint (-1)
 	, ignore_route_processor_changes (false)
+	, midi_clock (0)
 	, _scene_changer (0)
 	, _midi_ports (0)
 	, _mmc (0)
@@ -739,6 +741,7 @@ Session::destroy ()
 	delete _midi_ports; _midi_ports = 0;
 	delete _locations; _locations = 0;
 
+	delete midi_clock;
 	delete _tempo_map;
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
