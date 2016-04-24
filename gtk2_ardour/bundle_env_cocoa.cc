@@ -40,6 +40,7 @@
 
 #include "i18n.h"
 
+#include <asl.h>
 #include <Carbon/Carbon.h>
 #include <mach-o/dyld.h>
 #include <sys/param.h>
@@ -50,8 +51,27 @@ using namespace std;
 
 extern void set_language_preference (); // cocoacarbon.mm
 
+static void
+setup_logging(void)
+{
+        aslmsg msg;
+        aslclient c = asl_open (PROGRAM_NAME, "com.apple.console", 0);
+
+        msg = asl_new(ASL_TYPE_MSG);
+        asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
+        asl_set(msg, ASL_KEY_LEVEL, ASL_STRING_NOTICE);
+        asl_set(msg, ASL_KEY_READ_UID, "-1");
+
+        int fd = dup(2);
+        //asl_set_filter(c, ASL_FILTER_MASK_UPTO(ASL_LEVEL_DEBUG));
+        asl_add_log_file(c, fd);
+        asl_log(c, NULL, ASL_LEVEL_INFO, string_compose ("Hello world from %1", PROGRAM_NAME).c_str());
+        asl_log_descriptor(c, msg, ASL_LEVEL_INFO, 1,  ASL_LOG_DESCRIPTOR_WRITE);
+        asl_log_descriptor(c, msg, ASL_LEVEL_INFO, 2, ASL_LOG_DESCRIPTOR_WRITE);
+}
+
 void
-fixup_bundle_environment (int, char* [], string & localedir)
+fixup_bundle_environment (int argc, char* argv[], string & localedir)
 {
 	if (!g_getenv ("ARDOUR_BUNDLED")) {
 		return;
@@ -60,6 +80,8 @@ fixup_bundle_environment (int, char* [], string & localedir)
 	EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
 
 	set_language_preference ();
+
+        setup_logging ();
 
 	char execpath[MAXPATHLEN+1];
 	uint32_t pathsz = sizeof (execpath);
