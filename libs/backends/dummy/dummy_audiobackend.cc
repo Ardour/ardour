@@ -797,10 +797,7 @@ DummyAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 		return;
 	}
 	disconnect_all(port_handle);
-	PortMap::const_iterator it = _portmap.find ((*i)->name());
-	if (it != _portmap.end()) {
-		_portmap.erase (it);
-	}
+	_portmap.erase (port->name());
 	_ports.erase (i);
 	delete port;
 }
@@ -921,10 +918,7 @@ DummyAudioBackend::unregister_ports (bool system_only)
 		DummyPort* port = *cur;
 		if (! system_only || (port->is_physical () && port->is_terminal ())) {
 			port->disconnect_all ();
-			PortMap::const_iterator it = _portmap.find (port->name());
-			if (it != _portmap.end()) {
-				_portmap.erase (it);
-			}
+			_portmap.erase (port->name());
 			delete port;
 			_ports.erase (cur);
 		}
