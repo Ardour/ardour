@@ -1311,7 +1311,7 @@ AudioClock::set_session (Session *s)
 
 					if ((prop = (*i)->property (X_("mode"))) != 0) {
 						amode = AudioClock::Mode (string_2_enum (prop->value(), amode));
-						set_mode (amode);
+						set_mode (amode, true);
 					}
 					if ((prop = (*i)->property (X_("on"))) != 0) {
 						set_off (!string_is_affirmative (prop->value()));
@@ -2112,10 +2112,10 @@ AudioClock::build_ops_menu ()
 	MenuList& ops_items = ops_menu->items();
 	ops_menu->set_name ("ArdourContextMenu");
 
-	ops_items.push_back (MenuElem (_("Timecode"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Timecode)));
-	ops_items.push_back (MenuElem (_("Bars:Beats"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), BBT)));
-	ops_items.push_back (MenuElem (_("Minutes:Seconds"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), MinSec)));
-	ops_items.push_back (MenuElem (_("Samples"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Frames)));
+	ops_items.push_back (MenuElem (_("Timecode"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Timecode, false)));
+	ops_items.push_back (MenuElem (_("Bars:Beats"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), BBT, false)));
+	ops_items.push_back (MenuElem (_("Minutes:Seconds"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), MinSec, false)));
+	ops_items.push_back (MenuElem (_("Samples"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Frames, false)));
 
 	if (editable && !_off && !is_duration && !_follows_playhead) {
 		ops_items.push_back (SeparatorElem());
@@ -2148,7 +2148,7 @@ AudioClock::locate ()
 }
 
 void
-AudioClock::set_mode (Mode m)
+AudioClock::set_mode (Mode m, bool noemit)
 {
 	if (_mode == m) {
 		return;
@@ -2222,11 +2222,11 @@ AudioClock::set_mode (Mode m)
 
 	set (last_when, true);
 
-        if (!is_transient) {
-                ModeChanged (); /* EMIT SIGNAL (the static one)*/
-        }
+	if (!is_transient && !noemit) {
+		ModeChanged (); /* EMIT SIGNAL (the static one)*/
+	}
 
-        mode_changed (); /* EMIT SIGNAL (the member one) */
+	mode_changed (); /* EMIT SIGNAL (the member one) */
 }
 
 void
