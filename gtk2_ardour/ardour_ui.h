@@ -519,6 +519,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourButton feedback_alert_button;
 	ArdourButton error_alert_button;
 
+	ArdourButton action_script_call_btn[10];
+	Gtk::Table action_script_table;
+
 	Gtk::VBox alert_box;
 	Gtk::VBox meter_box;
 	LevelMeterHBox * editor_meter;

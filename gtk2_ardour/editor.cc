@@ -5746,8 +5746,10 @@ Editor::set_script_action_name (int i, const std::string& n)
 	assert (act);
 	if (n.empty ()) {
 		act->set_label (string_compose (_("Unset #%1"), i + 1));
+		act->set_tooltip (_("(no action bound"));
 	} else {
 		act->set_label (n);
+		act->set_tooltip (n);
 	}
 	KeyEditor::UpdateBindings ();
 }

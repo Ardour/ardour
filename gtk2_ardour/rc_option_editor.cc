@@ -1718,6 +1718,72 @@ private:
 	Button _xjadeo_browse_button;
 };
 
+class ColumVisibilityOption : public Option
+{
+	public:
+	ColumVisibilityOption (string id, string name, uint32_t n_col, sigc::slot<uint32_t> get, sigc::slot<bool, uint32_t> set)
+		: Option (id, name)
+		, _heading (name)
+		, _n_col (n_col)
+		, _get (get)
+		, _set (set)
+	{
+		cb = (CheckButton**) malloc (sizeof (CheckButton*) * n_col);
+		for (uint32_t i = 0; i < n_col; ++i) {
+			CheckButton* col = manage (new CheckButton (string_compose (_("Column %1"), i + 1)));
+			col->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ColumVisibilityOption::column_toggled), i));
+			_hbox.pack_start (*col);
+			cb[i] = col;
+		}
+		parameter_changed (id);
+	}
+
+	~ColumVisibilityOption () {
+		free (cb);
+	}
+
+	Gtk::Widget& tip_widget() { return _hbox; }
+
+	void set_state_from_config ()
+	{
+		uint32_t c = _get();
+		for (uint32_t i = 0; i < _n_col; ++i) {
+			bool en = (c & (1<<i)) ? true : false;
+			if (cb[i]->get_active () != en) {
+				cb[i]->set_active (en);
+			}
+		}
+	}
+
+	void add_to_page (OptionEditorPage* p)
+	{
+		_heading.add_to_page (p);
+		add_widget_to_page (p, &_hbox);
+	}
+	private:
+
+	void column_toggled (int b) {
+		uint32_t c = _get();
+		uint32_t cc = c;
+		if (cb[b]->get_active ()) {
+			c |= (1<<b);
+		} else {
+			c &= ~(1<<b);
+		}
+		if (cc != c) {
+			_set (c);
+		}
+	}
+
+	HBox _hbox;
+	OptionEditorHeading _heading;
+
+	CheckButton** cb;
+	uint32_t _n_col;
+	sigc::slot<uint32_t> _get;
+	sigc::slot<bool, uint32_t> _set;
+};
+
 
 /** A class which allows control of visibility of some editor components usign
  *  a VisibilityGroup.  The caller should pass in a `dummy' VisibilityGroup
@@ -3072,6 +3138,14 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_narrow_ms),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
 		     ));
+
+	add_option (S_("Preferences|GUI"),
+			new ColumVisibilityOption (
+				"action-table-columns", _("Action Script Button Visibility"), 3,
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
+				)
+			);
 
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
 
