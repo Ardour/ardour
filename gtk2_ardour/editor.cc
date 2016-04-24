@@ -108,6 +108,7 @@
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "keyeditor.h"
 #include "luainstance.h"
 #include "marker.h"
 #include "midi_region_view.h"
@@ -5748,6 +5749,7 @@ Editor::set_script_action_name (int i, const std::string& n)
 	} else {
 		act->set_label (n);
 	}
+	KeyEditor::UpdateBindings ();
 }
 
 void

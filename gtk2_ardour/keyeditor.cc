@@ -53,6 +53,8 @@ using namespace PBD;
 using Gtkmm2ext::Keyboard;
 using Gtkmm2ext::Bindings;
 
+sigc::signal<void> KeyEditor::UpdateBindings;
+
 void bindings_collision_dialog (Gtk::Window& parent)
 {
 	ArdourDialog dialog (parent, _("Colliding keybindings"), true);
@@ -108,6 +110,7 @@ KeyEditor::KeyEditor ()
 	add (vpacker);
 
 	unbind_button.set_sensitive (false);
+	UpdateBindings.connect (sigc::mem_fun (*this, &KeyEditor::refresh));
 }
 
 void
@@ -121,6 +124,7 @@ KeyEditor::add_tab (string const & name, Bindings& bindings)
 		return;
 	}
 
+	tabs.push_back (t);
 	t->show_all ();
 	notebook.append_page (*t, name);
 }
@@ -479,7 +483,12 @@ void
 KeyEditor::reset ()
 {
 	Keyboard::the_keyboard().reset_bindings ();
+	refresh ();
+}
 
+void
+KeyEditor::refresh ()
+{
 	for (Tabs::iterator t = tabs.begin(); t != tabs.end(); ++t) {
 		(*t)->view.get_selection()->unselect_all ();
 		(*t)->populate ();
