@@ -41,7 +41,7 @@ namespace ARDOUR {
 
 class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 {
-  public:
+	public:
 	enum Mode {
 		Timecode,
 		BBT,
@@ -69,7 +69,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void locate ();
 	void set_mode (Mode, bool noemit = false);
 	void set_bbt_reference (framepos_t);
-        void set_is_duration (bool);
+	void set_is_duration (bool);
 
 	void copy_text_to_clipboard () const;
 
@@ -78,7 +78,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	framepos_t current_time (framepos_t position = 0) const;
 	framepos_t current_duration (framepos_t position = 0) const;
 	void set_session (ARDOUR::Session *s);
-        void set_negative_allowed (bool yn);
+	void set_negative_allowed (bool yn);
 
 	/** Alter cairo scaling during rendering.
 	 *
@@ -97,7 +97,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	static sigc::signal<void> ModeChanged;
 	static std::vector<AudioClock*> clocks;
 
-  protected:
+	protected:
 	void render (cairo_t*, cairo_rectangle_t*);
 	bool get_is_duration () const { return is_duration; } ;
 
@@ -115,7 +115,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	double get_left_rect_width() const {
 	       return round (((get_width() - separator_height) * mode_based_info_ratio) + 0.5);
 	}
-  private:
+	private:
 	Mode             _mode;
 	std::string      _name;
 	bool              is_transient;
@@ -127,8 +127,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool             _off;
 	int              em_width;
 	bool             _edit_by_click_field;
-        bool             _negative_allowed;
-        bool             edit_is_negative;
+	bool             _negative_allowed;
+	bool             edit_is_negative;
 
 	Glib::RefPtr<Pango::Layout> _layout;
 	Glib::RefPtr<Pango::Layout> _left_layout;
@@ -143,7 +143,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	int first_height;
 	int first_width;
-        bool style_resets_first;
+	bool style_resets_first;
 	int layout_height;
 	int layout_width;
 	int info_height;
@@ -213,7 +213,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_minsec (framepos_t, bool);
 	void set_frames (framepos_t, bool);
 
-        void set_clock_dimensions (Gtk::Requisition&);
+	void set_clock_dimensions (Gtk::Requisition&);
 
 	framepos_t get_frame_step (Field, framepos_t pos = 0, int dir = 1);
 
@@ -221,7 +221,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool bbt_validate_edit (const std::string&);
 	bool minsec_validate_edit (const std::string&);
 
-        framepos_t frames_from_timecode_string (const std::string&) const;
+	framepos_t frames_from_timecode_string (const std::string&) const;
 	framepos_t frames_from_bbt_string (framepos_t, const std::string&) const;
 	framepos_t frame_duration_from_bbt_string (framepos_t, const std::string&) const;
 	framepos_t frames_from_minsec_string (const std::string&) const;
