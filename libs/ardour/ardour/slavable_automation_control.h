@@ -21,10 +21,11 @@
 #define __ardour_slavable_automation_control_h__
 
 #include "ardour/automation_control.h"
+#include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
 
-class SlavableAutomationControl : public AutomationControl
+class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 {
     public:
 	SlavableAutomationControl(ARDOUR::Session&,

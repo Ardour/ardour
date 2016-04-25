@@ -26,6 +26,7 @@
 #include "pbd/xml++.h"
 
 #include "ardour/slavable.h"
+#include "ardour/slavable_automation_control.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
@@ -127,3 +128,59 @@ Slavable::unassign (boost::shared_ptr<VCA> v)
 	(void) unassign_controls (v);
 	_masters.erase (v->number());
 }
+
+int
+Slavable::assign_controls (boost::shared_ptr<VCA> vca)
+{
+	boost::shared_ptr<SlavableAutomationControl> slave;
+	boost::shared_ptr<AutomationControl> master;
+	AutomationType types[] = {
+		GainAutomation,
+		SoloAutomation,
+		MuteAutomation,
+		RecEnableAutomation,
+		MonitoringAutomation,
+		NullAutomation
+	};
+
+	for (uint32_t n = 0; types[n] != NullAutomation; ++n) {
+
+		slave = boost::dynamic_pointer_cast<SlavableAutomationControl> (automation_control (types[n]));
+		master = vca->automation_control (types[n]);
+
+		if (slave && master) {
+			slave->add_master (master);
+		}
+	}
+
+	return 0;
+}
+
+int
+Slavable::unassign_controls (boost::shared_ptr<VCA> vca)
+{
+	boost::shared_ptr<SlavableAutomationControl> slave;
+	boost::shared_ptr<AutomationControl> master;
+	AutomationType types[] = {
+		GainAutomation,
+		SoloAutomation,
+		MuteAutomation,
+		RecEnableAutomation,
+		MonitoringAutomation,
+		NullAutomation
+	};
+
+	for (uint32_t n = 0; types[n] != NullAutomation; ++n) {
+
+		slave = boost::dynamic_pointer_cast<SlavableAutomationControl> (automation_control (types[n]));
+		if (!vca) {
+			/* unassign from all */
+			slave->clear_masters ();
+		} else {
+			slave->remove_master (master);
+		}
+	}
+
+	return 0;
+}
+

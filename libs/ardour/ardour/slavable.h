@@ -26,7 +26,11 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <pbd/signals.h>
+#include "pbd/signals.h"
+
+#include "evoral/Parameter.hpp"
+
+#include "ardour/libardour_visibility.h"
 
 class XMLNode;
 
@@ -34,8 +38,9 @@ namespace ARDOUR {
 
 class VCA;
 class VCAManager;
+class AutomationControl;
 
-class Slavable
+class LIBARDOUR_API Slavable
 {
     public:
 	Slavable ();
@@ -47,14 +52,16 @@ class Slavable
 	void assign (boost::shared_ptr<VCA>);
 	void unassign (boost::shared_ptr<VCA>);
 
+	virtual boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id) = 0;
+
 	static std::string xml_node_name;
 
 	/* signal sent VCAManager once assignment is possible */
 	static PBD::Signal1<void,VCAManager*> Assign;
 
     protected:
-	virtual int assign_controls (boost::shared_ptr<VCA>) = 0;
-	virtual int unassign_controls (boost::shared_ptr<VCA>) = 0;
+	virtual int assign_controls (boost::shared_ptr<VCA>);
+	virtual int unassign_controls (boost::shared_ptr<VCA>);
 
     private:
 	mutable Glib::Threads::RWLock master_lock;

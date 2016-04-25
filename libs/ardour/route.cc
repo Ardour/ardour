@@ -5444,33 +5444,6 @@ Route::slaved_to (boost::shared_ptr<VCA> vca) const
 	return _gain_control->slaved_to (vca->gain_control());
 }
 
-int
-Route::assign_controls (boost::shared_ptr<VCA> vca)
-{
-	_gain_control->add_master (vca->gain_control());
-	_solo_control->add_master (vca->solo_control());
-	_mute_control->add_master (vca->mute_control());
-
-	return 0;
-}
-
-int
-Route::unassign_controls (boost::shared_ptr<VCA> vca)
-{
-	if (!vca) {
-		/* unassign from all */
-		_gain_control->clear_masters ();
-		_solo_control->clear_masters ();
-		_mute_control->clear_masters ();
-	} else {
-		_gain_control->remove_master (vca->gain_control());
-		_solo_control->remove_master (vca->solo_control());
-		_mute_control->remove_master (vca->mute_control());
-	}
-
-	return 0;
-}
-
 bool
 Route::muted_by_others_soloing () const
 {

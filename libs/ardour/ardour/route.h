@@ -91,7 +91,6 @@ class LIBARDOUR_API Route : public GraphNode,
                             public Monitorable,
                             public Automatable,
                             public RouteGroupMember,
-                            public Slavable,
                             public boost::enable_shared_from_this<Route>
 {
 public:
@@ -612,9 +611,6 @@ public:
 	virtual void set_block_size (pframes_t nframes);
 
   protected:
-	int assign_controls (boost::shared_ptr<VCA>);
-	int unassign_controls (boost::shared_ptr<VCA>);
-
         virtual framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&) { return nframes; }
 
 	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);

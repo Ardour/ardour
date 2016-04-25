@@ -161,61 +161,6 @@ VCA::clear_all_solo_state ()
 	_solo_control->clear_all_solo_state ();
 }
 
-int
-VCA::assign_controls (boost::shared_ptr<VCA> vca)
-{
-	boost::shared_ptr<SlavableAutomationControl> slave;
-	boost::shared_ptr<AutomationControl> master;
-	AutomationType types[] = {
-		GainAutomation,
-		SoloAutomation,
-		MuteAutomation,
-		RecEnableAutomation,
-		MonitoringAutomation,
-		NullAutomation
-	};
-
-	for (uint32_t n = 0; types[n] != NullAutomation; ++n) {
-
-		slave = boost::dynamic_pointer_cast<SlavableAutomationControl> (automation_control (types[n]));
-		master = vca->automation_control (types[n]);
-
-		if (slave && master) {
-			slave->add_master (master);
-		}
-	}
-
-	return 0;
-}
-
-int
-VCA::unassign_controls (boost::shared_ptr<VCA> vca)
-{
-	boost::shared_ptr<SlavableAutomationControl> slave;
-	boost::shared_ptr<AutomationControl> master;
-	AutomationType types[] = {
-		GainAutomation,
-		SoloAutomation,
-		MuteAutomation,
-		RecEnableAutomation,
-		MonitoringAutomation,
-		NullAutomation
-	};
-
-	for (uint32_t n = 0; types[n] != NullAutomation; ++n) {
-
-		slave = boost::dynamic_pointer_cast<SlavableAutomationControl> (automation_control (types[n]));
-		if (!vca) {
-			/* unassign from all */
-			slave->clear_masters ();
-		} else {
-			slave->remove_master (master);
-		}
-	}
-
-	return 0;
-}
-
 MonitorState
 VCA::monitoring_state () const
 {

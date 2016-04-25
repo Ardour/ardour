@@ -23,10 +23,15 @@
 #include <map>
 #include <set>
 #include <string>
+
 #include <boost/shared_ptr.hpp>
+
 #include "pbd/signals.h"
+
 #include "evoral/ControlSet.hpp"
+
 #include "ardour/libardour_visibility.h"
+#include "ardour/slavable.h"
 #include "ardour/types.h"
 
 class XMLNode;
@@ -39,7 +44,7 @@ class AutomationControl;
 /* The inherited ControlSet is virtual because AutomatableSequence inherits
  * from this AND EvoralSequence, which is also a ControlSet
  */
-class LIBARDOUR_API Automatable : virtual public Evoral::ControlSet
+class LIBARDOUR_API Automatable : virtual public Evoral::ControlSet, public Slavable
 {
 public:
 	Automatable(Session&);
@@ -47,17 +52,17 @@ public:
 
         virtual ~Automatable();
 
-	boost::shared_ptr<Evoral::Control>
-	control_factory(const Evoral::Parameter& id);
+	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
 
-	boost::shared_ptr<AutomationControl>
-	automation_control (const Evoral::Parameter& id, bool create_if_missing=false);
+	boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id) {
+		return automation_control (id, false);
+	}
 
-	boost::shared_ptr<const AutomationControl>
-	automation_control (const Evoral::Parameter& id) const;
+	boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id, bool create_if_missing);
+	boost::shared_ptr<const AutomationControl> automation_control (const Evoral::Parameter& id) const;
 
 	virtual void add_control(boost::shared_ptr<Evoral::Control>);
-	virtual bool find_next_event(double start, double end, Evoral::ControlEvent& ev, bool only_active = true) const;
+	virtual bool find_next_event (double start, double end, Evoral::ControlEvent& ev, bool only_active = true) const;
 	void clear_controls ();
 
         virtual void transport_located (framepos_t now);
