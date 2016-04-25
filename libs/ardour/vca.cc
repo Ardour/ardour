@@ -20,7 +20,9 @@
 
 #include "ardour/automation_control.h"
 #include "ardour/gain_control.h"
+#include "ardour/monitor_control.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/record_enable_control.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/vca.h"
@@ -75,6 +77,8 @@ VCA::init ()
 {
 	_solo_control.reset (new SoloControl (_session, X_("solo"), *this, *this));
 	_mute_control.reset (new MuteControl (_session, X_("mute"), *this));
+	_recenable_control.reset (new RecordEnableControl (_session, X_("recenable"), *this));
+	_monitor_control.reset (new MonitorControl (_session, X_("monitoring"), *this));
 
 	add_control (_gain_control);
 	add_control (_solo_control);
@@ -182,4 +186,11 @@ VCA::unassign_controls (boost::shared_ptr<VCA> vca)
 	}
 
 	return 0;
+}
+
+MonitorState
+VCA::monitoring_state () const
+{
+	/* XXX this has to get more complex but not clear how */
+	return MonitoringInput;
 }

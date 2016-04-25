@@ -28,6 +28,8 @@
 
 #include "ardour/automatable.h"
 #include "ardour/muteable.h"
+#include "ardour/monitorable.h"
+#include "ardour/recordable.h"
 #include "ardour/soloable.h"
 #include "ardour/slavable.h"
 #include "ardour/stripable.h"
@@ -40,7 +42,14 @@ class SoloControl;
 class MuteControl;
 class MonitorControl;
 
-class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, public Automatable, public Slavable, public boost::enable_shared_from_this<VCA> {
+class LIBARDOUR_API VCA : public Stripable,
+                          public Soloable,
+                          public Muteable,
+                          public Automatable,
+                          public Slavable,
+                          public Recordable,
+                          public Monitorable,
+                          public boost::enable_shared_from_this<VCA> {
   public:
 	VCA (Session& session,  uint32_t num, const std::string& name);
 	~VCA();
@@ -52,6 +61,8 @@ class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, pu
 	XMLNode& get_state();
 	int set_state (XMLNode const&, int version);
 
+	/* Soloable API */
+
 	void clear_all_solo_state ();
 
 	bool soloed () const;
@@ -60,8 +71,20 @@ class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, pu
 	bool can_solo() const { return true; }
 	bool is_safe () const { return false; }
 
+	/* Muteable API */
+
 	bool can_be_muted_by_others () const { return true; }
 	bool muted_by_others_soloing() const { return false; }
+
+	/* Recordable API */
+
+	int prep_record_enabled (bool yn) { return 0; }
+	bool can_be_record_enabled() { return true; }
+	bool can_be_record_safe() { return true; }
+
+	/* Monitorable API */
+
+	MonitorState monitoring_state() const;
 
 	static std::string default_name_template ();
 	static int next_vca_number ();
@@ -74,6 +97,8 @@ class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, pu
 	virtual boost::shared_ptr<GainControl> gain_control() const { return _gain_control; }
 	virtual boost::shared_ptr<SoloControl> solo_control() const { return _solo_control; }
 	virtual boost::shared_ptr<MuteControl> mute_control() const { return _mute_control; }
+	virtual boost::shared_ptr<AutomationControl> recenable_control() const { return _recenable_control; }
+	virtual boost::shared_ptr<MonitorControl>    monitoring_control() const { return _monitor_control; }
 
 	/* null Stripable API, because VCAs don't have any of this */
 
@@ -81,8 +106,6 @@ class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, pu
 	virtual boost::shared_ptr<const PeakMeter>   peak_meter() const { return boost::shared_ptr<PeakMeter>(); }
 	virtual boost::shared_ptr<PhaseControl>      phase_control() const { return boost::shared_ptr<PhaseControl>(); }
 	virtual boost::shared_ptr<GainControl>       trim_control() const { return boost::shared_ptr<GainControl>(); }
-	virtual boost::shared_ptr<MonitorControl>    monitoring_control() const { return boost::shared_ptr<MonitorControl>(); }
-	virtual boost::shared_ptr<AutomationControl> recenable_control() const { return boost::shared_ptr<AutomationControl>(); }
 	virtual boost::shared_ptr<AutomationControl> pan_azimuth_control() const { return boost::shared_ptr<AutomationControl>(); }
 	virtual boost::shared_ptr<AutomationControl> pan_elevation_control() const { return boost::shared_ptr<AutomationControl>(); }
 	virtual boost::shared_ptr<AutomationControl> pan_width_control() const { return boost::shared_ptr<AutomationControl>(); }
@@ -119,6 +142,9 @@ class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, pu
 	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<SoloControl> _solo_control;
 	boost::shared_ptr<MuteControl> _mute_control;
+	boost::shared_ptr<AutomationControl> _recenable_control;
+	// boost::shared_ptr<AutomationControl> _record_safe_control;
+	boost::shared_ptr<MonitorControl> _monitor_control;
 
 	static gint next_number;
 
