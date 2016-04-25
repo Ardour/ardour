@@ -497,9 +497,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("n_ports", &IO::n_ports)
 		.endClass ()
 
-		.deriveWSPtrClass <RouteGroup, SessionObject> ("RouteGroupPtr")
-		.endClass ()
-
 		.beginClass <RouteGroup> ("RouteGroup")
 		// stub RouteGroup* is needed for new_audio_track()
 		.endClass ()

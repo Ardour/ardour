@@ -55,6 +55,13 @@ class Track;
 class AudioTrack;
 class Session;
 
+/** A group identifier for routes.
+ *
+ * RouteGroups permit to define properties which are shared
+ * among all Routes that use the given identifier.
+ *
+ * A route can at most be in one group.
+ */
 class LIBARDOUR_API RouteGroup : public SessionObject
 {
   public:
