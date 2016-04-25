@@ -66,7 +66,6 @@ Track::init ()
 
 	_record_enable_control.reset (new RecordEnableControl (_session, X_("recenable"), *this));
 	add_control (_record_enable_control);
-	_record_enable_control->set_flags (Controllable::Toggle);
 
 	_record_safe_control.reset (new AutomationControl (_session, RecSafeAutomation, ParameterDescriptor (RecSafeAutomation),
 	                                                   boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (RecSafeAutomation))),

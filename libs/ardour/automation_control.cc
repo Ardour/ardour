@@ -55,6 +55,9 @@ AutomationControl::AutomationControl(ARDOUR::Session&                          s
 	, _session(session)
 	, _desc(desc)
 {
+	if (_desc.toggled) {
+		set_flags (Controllable::Toggle);
+	}
 }
 
 AutomationControl::~AutomationControl ()

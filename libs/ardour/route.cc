@@ -145,12 +145,10 @@ Route::init ()
 	add_control (_trim_control);
 
 	_solo_control.reset (new SoloControl (_session, X_("solo"), *this, *this));
-	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
 	add_control (_solo_control);
 	_solo_control->Changed.connect_same_thread (*this, boost::bind (&Route::solo_control_changed, this, _1, _2));
 
 	_mute_control.reset (new MuteControl (_session, X_("mute"), *this));
-	_mute_control->set_flags (Controllable::Flag (_mute_control->flags() | Controllable::Toggle));
 	add_control (_mute_control);
 
 	_phase_control.reset (new PhaseControl (_session, X_("phase")));
