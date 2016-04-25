@@ -65,12 +65,8 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 {
 	i_am_the_modifier = 0;
 
-	remove_button.set_image (*manage (new Image (Stock::REMOVE, Gtk::ICON_SIZE_MENU)));
-
-	start_to_playhead_button.set_name ("LocationEditCdButton");
-	end_to_playhead_button.set_name ("LocationEditCdButton");
-	locate_to_start_button.set_name ("LocationEditCdButton");
-	locate_to_end_button.set_name ("LocationEditCdButton");
+	remove_button.set_icon (ArdourIcon::CloseCross);
+	remove_button.set_events (remove_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
 	number_label.set_name ("LocationEditNumberLabel");
 	name_label.set_name ("LocationEditNameLabel");
@@ -79,7 +75,6 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	hide_check_button.set_name ("LocationEditHideButton");
 	lock_check_button.set_name ("LocationEditLockButton");
 	glue_check_button.set_name ("LocationEditGlueButton");
-	remove_button.set_name ("LocationEditRemoveButton");
 	isrc_label.set_name ("LocationEditNumberLabel");
 	isrc_entry.set_name ("LocationEditNameEntry");
 	scms_check_button.set_name ("LocationEditCdButton");
@@ -135,30 +130,27 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	set_session (sess);
 
 	start_hbox.set_spacing (2);
+	start_hbox.pack_start (locate_to_start_button, false, false);
 	start_hbox.pack_start (start_clock, false, false);
 	start_hbox.pack_start (start_to_playhead_button, false, false);
-	start_hbox.pack_start (locate_to_start_button, false, false);
 
 	/* this is always in this location, no matter what the location is */
 
-	VBox *rbox = manage (new VBox);
-	rbox->pack_start (remove_button, false, false);
+	item_table.attach (remove_button, 8, 9, 0, 1, SHRINK, SHRINK, 4, 1);
+	item_table.attach (start_hbox, 0, 1, 0, 1, FILL, Gtk::AttachOptions(0), 4, 0);
 
-	item_table.attach (*rbox, 0, 1, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
-	item_table.attach (start_hbox, 2, 3, 0, 1, FILL, Gtk::AttachOptions(0), 4, 0);
-
-	start_to_playhead_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocStart));
-	locate_to_start_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_button_pressed), LocStart));
+	start_to_playhead_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocStart));
+	locate_to_start_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_button_pressed), LocStart));
 	start_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocStart));
 	start_clock.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_to_clock), &start_clock), false);
 
 	end_hbox.set_spacing (2);
+	end_hbox.pack_start (locate_to_end_button, false, false);
 	end_hbox.pack_start (end_clock, false, false);
 	end_hbox.pack_start (end_to_playhead_button, false, false);
-	end_hbox.pack_start (locate_to_end_button, false, false);
 
-	end_to_playhead_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocEnd));
-	locate_to_end_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_button_pressed), LocEnd));
+	end_to_playhead_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocEnd));
+	locate_to_end_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_button_pressed), LocEnd));
 	end_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocEnd));
 	end_clock.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_to_clock), &end_clock), false);
 
@@ -169,7 +161,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	lock_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::lock_toggled));
 	glue_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::glue_toggled));
 
-	remove_button.signal_clicked().connect(sigc::mem_fun(*this, &LocationEditRow::remove_button_pressed));
+	remove_button.signal_clicked.connect(sigc::mem_fun(*this, &LocationEditRow::remove_button_pressed));
 
 	pack_start(item_table, true, true);
 
@@ -247,9 +239,9 @@ LocationEditRow::set_location (Location *loc)
 	++i_am_the_modifier;
 
 	if (!hide_check_button.get_parent()) {
-		item_table.attach (hide_check_button, 6, 7, 0, 1, FILL, Gtk::FILL, 4, 0);
-		item_table.attach (lock_check_button, 7, 8, 0, 1, FILL, Gtk::FILL, 4, 0);
-		item_table.attach (glue_check_button, 8, 9, 0, 1, FILL, Gtk::FILL, 4, 0);
+		item_table.attach (hide_check_button, 5, 6, 0, 1, FILL, Gtk::FILL, 4, 0);
+		item_table.attach (lock_check_button, 6, 7, 0, 1, FILL, Gtk::FILL, 4, 0);
+		item_table.attach (glue_check_button, 7, 8, 0, 1, FILL, Gtk::FILL, 4, 0);
 	}
 	hide_check_button.set_active (location->is_hidden());
 	lock_check_button.set_active (location->locked());
@@ -264,7 +256,7 @@ LocationEditRow::set_location (Location *loc)
 		remove_button.hide ();
 
 		if (!name_label.get_parent()) {
-			item_table.attach (name_label, 1, 2, 0, 1, FILL, FILL, 4, 0);
+			item_table.attach (name_label, 2, 3, 0, 1, FILL, FILL, 4, 0);
 		}
 
 		name_label.show();
@@ -277,12 +269,12 @@ LocationEditRow::set_location (Location *loc)
 		name_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::name_entry_changed));
 
 		if (!name_entry.get_parent()) {
-			item_table.attach (name_entry, 1, 2, 0, 1, FILL | EXPAND, FILL, 4, 0);
+			item_table.attach (name_entry, 2, 3, 0, 1, FILL | EXPAND, FILL, 4, 0);
 		}
 		name_entry.show();
 
 		if (!cd_check_button.get_parent()) {
-			item_table.attach (cd_check_button, 5, 6, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
+			item_table.attach (cd_check_button, 4, 5, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
 		}
 
 		if (location->is_session_range()) {
@@ -308,10 +300,10 @@ LocationEditRow::set_location (Location *loc)
 
 	if (!location->is_mark()) {
 		if (!end_hbox.get_parent()) {
-			item_table.attach (end_hbox, 3, 4, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
+			item_table.attach (end_hbox, 1, 2, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
 		}
 		if (!length_clock.get_parent()) {
-			end_hbox.pack_start (length_clock, false, false);
+			end_hbox.pack_start (length_clock, false, false, 4);
 		}
 
 		end_clock.set (location->end(), true);
@@ -324,20 +316,20 @@ LocationEditRow::set_location (Location *loc)
 			show_cd_track_details ();
 		}
 
-		set_tooltip (remove_button, _("Remove this range"));
+		set_tooltip (&remove_button, _("Remove this range"));
 		set_tooltip (start_clock, _("Start time - middle click to locate here"));
 		set_tooltip (end_clock, _("End time - middle click to locate here"));
 		set_tooltip (length_clock, _("Length"));
 
-		set_tooltip (start_to_playhead_button, _("Set range start from playhead location"));
-		set_tooltip (end_to_playhead_button, _("Set range end from playhead location"));
+		set_tooltip (&start_to_playhead_button, _("Set range start from playhead location"));
+		set_tooltip (&end_to_playhead_button, _("Set range end from playhead location"));
 
 	} else {
 
-		set_tooltip (remove_button, _("Remove this marker"));
+		set_tooltip (&remove_button, _("Remove this marker"));
 		set_tooltip (start_clock, _("Position - middle click to locate here"));
 
-		set_tooltip (start_to_playhead_button, _("Set marker time from playhead location"));
+		set_tooltip (&start_to_playhead_button, _("Set marker time from playhead location"));
 
 		end_clock.hide();
 		length_clock.hide();
