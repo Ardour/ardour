@@ -211,6 +211,7 @@ libardour_sources = [
         'session_transport.cc',
         'sidechain.cc',
         'slave.cc',
+        'slavable.cc',
         'slavable_automation_control.cc',
         'smf_source.cc',
         'sndfile_helpers.cc',

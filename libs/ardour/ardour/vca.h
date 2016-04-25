@@ -29,6 +29,7 @@
 #include "ardour/automatable.h"
 #include "ardour/muteable.h"
 #include "ardour/soloable.h"
+#include "ardour/slavable.h"
 #include "ardour/stripable.h"
 
 namespace ARDOUR {
@@ -39,7 +40,7 @@ class SoloControl;
 class MuteControl;
 class MonitorControl;
 
-class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, public Automatable, public boost::enable_shared_from_this<VCA> {
+class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, public Automatable, public Slavable, public boost::enable_shared_from_this<VCA> {
   public:
 	VCA (Session& session,  uint32_t num, const std::string& name);
 	~VCA();
@@ -107,6 +108,10 @@ class LIBARDOUR_API VCA : public Stripable, public Soloable, public Muteable, pu
 	virtual boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const { return boost::shared_ptr<AutomationControl>(); }
 	virtual std::string send_name (uint32_t n) const { return std::string(); }
 	virtual boost::shared_ptr<AutomationControl> master_send_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+
+  protected:
+	int assign_controls (boost::shared_ptr<VCA>);
+	int unassign_controls (boost::shared_ptr<VCA>);
 
   private:
 	uint32_t    _number;

@@ -57,6 +57,7 @@
 #include "ardour/soloable.h"
 #include "ardour/solo_control.h"
 #include "ardour/solo_safe_control.h"
+#include "ardour/slavable.h"
 
 class RoutePinWindowProxy;
 
@@ -83,13 +84,14 @@ class SoloIsolateControl;
 class PhaseControl;
 class MonitorControl;
 
-class LIBARDOUR_API Route : public Stripable,
+class LIBARDOUR_API Route : public GraphNode,
+                            public Stripable,
                             public Soloable,
                             public Muteable,
                             public Monitorable,
                             public Automatable,
                             public RouteGroupMember,
-                            public GraphNode,
+                            public Slavable,
                             public boost::enable_shared_from_this<Route>
 {
 public:
@@ -599,8 +601,6 @@ public:
 			pframes_t nframes, int declick);
 
         bool slaved_to (boost::shared_ptr<VCA>) const;
-        void vca_assign (boost::shared_ptr<VCA>);
-        void vca_unassign (boost::shared_ptr<VCA>);
 
   protected:
         friend class Session;
@@ -611,8 +611,11 @@ public:
 	void curve_reallocate ();
 	virtual void set_block_size (pframes_t nframes);
 
-protected:
-	virtual framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&) { return nframes; }
+  protected:
+	int assign_controls (boost::shared_ptr<VCA>);
+	int unassign_controls (boost::shared_ptr<VCA>);
+
+        virtual framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&) { return nframes; }
 
 	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
 
