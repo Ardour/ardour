@@ -178,26 +178,29 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	};
 
 	TempoSection (const double& beat, double qpm, double note_type, Type tempo_type)
-		: MetricSection (beat), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true)  {}
+		: MetricSection (beat), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true), _locked_to_meter (false)  {}
 	TempoSection (framepos_t frame, double qpm, double note_type, Type tempo_type)
-		: MetricSection (frame), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true) {}
+		: MetricSection (frame), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true), _locked_to_meter (false) {}
 	TempoSection (const XMLNode&);
 
 	static const std::string xml_state_node_name;
 
 	XMLNode& get_state() const;
 
-	bool active () const { return _active; }
-	void set_active (bool yn) { _active = yn; }
+	double c_func () const { return _c_func; }
+	void set_c_func (double c_func) { _c_func = c_func; }
 
 	void set_type (Type type);
 	Type type () const { return _type; }
 
-	double c_func () const { return _c_func; }
-	void set_c_func (double c_func) { _c_func = c_func; }
+	bool active () const { return _active; }
+	void set_active (bool yn) { _active = yn; }
 
-	double tempo_at_frame (const framepos_t& frame, const framecnt_t& frame_rate) const;
-	framepos_t frame_at_tempo (const double& ppm, const double& beat, const framecnt_t& frame_rate) const;
+	bool locked_to_meter ()  const { return _locked_to_meter; }
+	void set_locked_to_meter (bool yn) { _locked_to_meter = yn; }
+
+	double tempo_at_frame (const frameoffset_t& frame, const framecnt_t& frame_rate) const;
+	frameoffset_t frame_at_tempo (const double& ppm, const double& beat, const framecnt_t& frame_rate) const;
 
 	double tempo_at_pulse (const double& pulse) const;
 	double pulse_at_tempo (const double& ppm, const framepos_t& frame, const framecnt_t& frame_rate) const;
@@ -212,8 +215,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 
   private:
 
-	framecnt_t minute_to_frame (const double& time, const framecnt_t& frame_rate) const;
-	double frame_to_minute (const framecnt_t& frame, const framecnt_t& frame_rate) const;
+	frameoffset_t minute_to_frame (const double& time, const framecnt_t& frame_rate) const;
+	double frame_to_minute (const frameoffset_t& frame, const framecnt_t& frame_rate) const;
 
 	/*  tempo ramp functions. zero-based with time in minutes,
 	 * 'tick tempo' in ticks per minute and tempo in bpm.
@@ -242,6 +245,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	Type _type;
 	double _c_func;
 	bool _active;
+	bool _locked_to_meter;
 	Timecode::BBT_Time _legacy_bbt;
 };
 
@@ -393,6 +397,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void gui_move_meter (MeterSection*, const framepos_t& frame);
 	void gui_move_meter (MeterSection*, const double& pulse);
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
+	void gui_dilate_tempo (MeterSection*, const framepos_t& frame);
 
 	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
 
@@ -463,6 +468,7 @@ private:
 	const TempoSection& tempo_section_at_locked (const Metrics& metrics, framepos_t frame) const;
 	const MeterSection& meter_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
 	const TempoSection& tempo_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
+	const TempoSection& tempo_section_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 	const Tempo tempo_at_locked (const Metrics& metrics, const framepos_t& frame) const;
 
 	bool check_solved (const Metrics& metrics, bool by_frame) const;

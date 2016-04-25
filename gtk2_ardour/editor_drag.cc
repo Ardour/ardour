@@ -3201,7 +3201,9 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		/* round bbt to bars */
 		map.round_bbt (bbt, -1);
 
-		if (bbt.bars > _real_section->bbt().bars) {
+		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+			_editor->session()->tempo_map().gui_dilate_tempo (_real_section, pf);
+		} else if (bbt.bars > _real_section->bbt().bars) {
 			const double pulse = _real_section->pulse() + (_real_section->note_divisor() / _real_section->divisions_per_bar());
 			_editor->session()->tempo_map().gui_move_meter (_real_section, pulse);
 		} else if (bbt.bars < _real_section->bbt().bars) {
@@ -3210,7 +3212,11 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			_editor->session()->tempo_map().gui_move_meter (_real_section, pulse);
 		}
 	} else {
-		_editor->session()->tempo_map().gui_move_meter (_real_section, pf);
+		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+			_editor->session()->tempo_map().gui_dilate_tempo (_real_section, pf);
+		} else {
+			_editor->session()->tempo_map().gui_move_meter (_real_section, pf);
+		}
 	}
 	_marker->set_position (pf);
 	show_verbose_cursor_time (_real_section->frame());
