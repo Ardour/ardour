@@ -3212,8 +3212,11 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			_editor->session()->tempo_map().gui_move_meter (_real_section, pulse);
 		}
 	} else {
+		/* AudioTime */
 		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
-			_editor->session()->tempo_map().gui_dilate_tempo (_real_section, pf);
+			if (_real_section->movable()) {
+				_editor->session()->tempo_map().gui_dilate_tempo (_real_section, pf);
+			}
 		} else {
 			_editor->session()->tempo_map().gui_move_meter (_real_section, pf);
 		}
