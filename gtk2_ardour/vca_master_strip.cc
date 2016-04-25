@@ -285,27 +285,22 @@ VCAMasterStrip::vca_menu_toggle (CheckMenuItem* menuitem, uint32_t n)
 	if (!menuitem->get_active()) {
 		if (!vca) {
 			/* null VCA means drop all VCA assignments */
-			vca_unassign ();
+			_vca->unassign (boost::shared_ptr<VCA>());
+
 		} else {
-			_vca->gain_control()->remove_master (vca->gain_control());
-			_vca->solo_control()->remove_master (vca->solo_control());
-			_vca->mute_control()->remove_master (vca->mute_control());
+			_vca->unassign (vca);
 		}
 	} else {
 		if (vca) {
-			_vca->gain_control()->add_master (vca->gain_control());
-			_vca->mute_control()->add_master (vca->mute_control());
-			_vca->solo_control()->add_master (vca->solo_control());
+			_vca->assign (vca);
 		}
 	}
 }
 
 void
-VCAMasterStrip::vca_unassign ()
+VCAMasterStrip::unassign ()
 {
-	_vca->gain_control()->clear_masters ();
-	_vca->solo_control()->clear_masters ();
-	_vca->mute_control()->clear_masters ();
+	_vca->unassign (boost::shared_ptr<VCA>());
 }
 
 bool
@@ -333,7 +328,7 @@ VCAMasterStrip::vca_button_release (GdkEventButton* ev)
 	Menu* menu = new Menu;
 	MenuList& items = menu->items();
 
-	items.push_back (MenuElem (_("Unassign"), sigc::mem_fun (*this, &VCAMasterStrip::vca_unassign)));
+	items.push_back (MenuElem (_("Unassign"), sigc::mem_fun (*this, &VCAMasterStrip::unassign)));
 
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
 

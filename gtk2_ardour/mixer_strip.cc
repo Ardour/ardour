@@ -2522,7 +2522,7 @@ MixerStrip::vca_assign (boost::shared_ptr<VCA> vca)
 		return;
 	}
 
-	_route->vca_assign (vca);
+	_route->assign (vca);
 }
 
 void
@@ -2532,7 +2532,7 @@ MixerStrip::vca_unassign (boost::shared_ptr<VCA> vca)
 		return;
 	}
 
-	_route->vca_unassign (vca);
+	_route->unassign (vca);
 }
 
 bool

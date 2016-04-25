@@ -80,7 +80,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void solo_changed ();
 	void mute_changed ();
 	void vca_menu_toggle (Gtk::CheckMenuItem* menuitem, uint32_t n);
-	void vca_unassign ();
+	void unassign ();
 	bool vca_button_release (GdkEventButton*);
 	void update_vca_display ();
 	void finish_name_edit (std::string);
