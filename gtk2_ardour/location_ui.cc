@@ -256,7 +256,7 @@ LocationEditRow::set_location (Location *loc)
 		remove_button.hide ();
 
 		if (!name_label.get_parent()) {
-			item_table.attach (name_label, 2, 3, 0, 1, FILL, FILL, 4, 0);
+			item_table.attach (name_label, 2, 3, 0, 1, EXPAND|FILL, FILL, 4, 0);
 		}
 
 		name_label.show();
@@ -761,6 +761,7 @@ LocationUI::LocationUI ()
 	loop_edit_row.set_clock_group (*_clock_group);
 	punch_edit_row.set_clock_group (*_clock_group);
 
+	loop_punch_box.set_border_width (6); // 5 + 1 px framebox-border
 	loop_punch_box.pack_start (loop_edit_row, false, false);
 	loop_punch_box.pack_start (punch_edit_row, false, false);
 
