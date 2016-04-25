@@ -42,6 +42,8 @@ LuaScriptManager::LuaScriptManager ()
 	_a_view.append_column (_("Name"), _a_model.name);
 	_a_view.get_column(0)->set_resizable (true);
 	_a_view.get_column(0)->set_expand (true);
+	_c_view.get_column(1)->set_resizable (true);
+	_c_view.get_column(1)->set_expand (true);
 
 	Gtk::HBox* edit_box = manage (new Gtk::HBox);
 	edit_box->set_spacing(3);
@@ -72,9 +74,13 @@ LuaScriptManager::LuaScriptManager ()
 	_c_store = ListStore::create (_c_model);
 	_c_view.set_model (_c_store);
 	_c_view.append_column (_("Name"), _c_model.name);
+	_c_view.append_column (_("Signal(s)"), _c_model.signals);
 	_c_view.get_column(0)->set_resizable (true);
 	_c_view.get_column(0)->set_expand (true);
-	_c_view.append_column (_("Signal(s)"), _c_model.signals);
+	_c_view.get_column(1)->set_resizable (true);
+	_c_view.get_column(1)->set_expand (true);
+	Gtk::CellRendererText* r = dynamic_cast<Gtk::CellRendererText*>(_c_view.get_column_cell_renderer (1));
+	r->property_ellipsize () = Pango::ELLIPSIZE_MIDDLE;
 
 	edit_box = manage (new Gtk::HBox);
 	edit_box->set_spacing(3);

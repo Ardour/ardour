@@ -483,6 +483,7 @@ Editor::register_actions ()
 		string const n = string_compose (_("Unset #%1"), i);
 		act = reg_sens (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::trigger_script), i - 1));
 		act->set_tooltip (_("(no action bound"));
+		act->set_sensitive (false);
 	}
 
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = myactions.create_action_group (X_("MouseMode"));
