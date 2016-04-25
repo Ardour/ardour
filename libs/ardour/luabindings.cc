@@ -48,6 +48,7 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
+#include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/session_object.h"
 #include "ardour/sidechain.h"
