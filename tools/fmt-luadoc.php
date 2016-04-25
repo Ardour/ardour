@@ -414,6 +414,7 @@ foreach ($doc as $b) {
 foreach ($classlist as $ns => $cl) {
 	if (strpos ($cl['type'], ' Array') !== false) {
 		$classlist[$ns]['arr'] = true;
+		$classlist[$ns]['cdecl'] = $cl['decl'];
 		continue;
 	}
 	foreach ($classes as $c) {
@@ -942,7 +943,7 @@ foreach ($classlist as $ns => $cl) {
 	}
 
 	# show original C++ declaration
-	if (isset ($cl['decl'])) {
+	if (isset ($cl['cdecl'])) {
 		echo '<p class="cdecl"><em>C&#8225;</em>: '.htmlentities ($cl['cdecl']).'</p>'.NL;
 	}
 
