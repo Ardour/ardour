@@ -42,8 +42,8 @@ LuaScriptManager::LuaScriptManager ()
 	_a_view.append_column (_("Name"), _a_model.name);
 	_a_view.get_column(0)->set_resizable (true);
 	_a_view.get_column(0)->set_expand (true);
-	_c_view.get_column(1)->set_resizable (true);
-	_c_view.get_column(1)->set_expand (true);
+	_a_view.get_column(1)->set_resizable (true);
+	_a_view.get_column(1)->set_expand (true);
 
 	Gtk::HBox* edit_box = manage (new Gtk::HBox);
 	edit_box->set_spacing(3);
