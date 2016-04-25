@@ -18,9 +18,11 @@
 */
 
 #include <cstdlib>
-#include <signal.h>
 #include <cerrno>
 #include <vector>
+
+#include <signal.h>
+#include <locale.h>
 
 #include <sigc++/bind.h>
 #include <gtkmm/settings.h>
@@ -294,7 +296,7 @@ int main (int argc, char *argv[])
 #endif
 
 #ifdef ENABLE_NLS
-	gtk_set_locale ();
+	setlocale (LC_ALL, "");
 #endif
 
 	console_madness_begin();
