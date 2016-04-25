@@ -48,18 +48,20 @@ using namespace Gtkmm2ext;
 
 LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	: SessionHandlePtr (0) /* explicitly set below */
-        , location(0)
-        , item_table (1, 6, false)
-        , start_clock (X_("locationstart"), true, "", true, false)
+	, location(0)
+	, item_table (1, 6, false)
+	, start_clock (X_("locationstart"), true, "", true, false)
 	, start_to_playhead_button (_("Use PH"))
-        , end_clock (X_("locationend"), true, "", true, false)
+	, locate_to_start_button (_("Goto"))
+	, end_clock (X_("locationend"), true, "", true, false)
 	, end_to_playhead_button (_("Use PH"))
-        , length_clock (X_("locationlength"), true, "", true, false, true)
-        , cd_check_button (_("CD"))
-        , hide_check_button (_("Hide"))
-        , lock_check_button (_("Lock"))
-        , glue_check_button (_("Glue"))
-        , _clock_group (0)
+	, locate_to_end_button (_("Goto"))
+	, length_clock (X_("locationlength"), true, "", true, false, true)
+	, cd_check_button (_("CD"))
+	, hide_check_button (_("Hide"))
+	, lock_check_button (_("Lock"))
+	, glue_check_button (_("Glue"))
+	, _clock_group (0)
 {
          i_am_the_modifier = 0;
 
@@ -67,6 +69,8 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
 	 start_to_playhead_button.set_name ("LocationEditCdButton");
 	 end_to_playhead_button.set_name ("LocationEditCdButton");
+	 locate_to_start_button.set_name ("LocationEditCdButton");
+	 locate_to_end_button.set_name ("LocationEditCdButton");
 
          number_label.set_name ("LocationEditNumberLabel");
          name_label.set_name ("LocationEditNameLabel");
@@ -133,6 +137,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	 start_hbox.set_spacing (2);
          start_hbox.pack_start (start_clock, false, false);
 	 start_hbox.pack_start (start_to_playhead_button, false, false);
+	 start_hbox.pack_start (locate_to_start_button, false, false);
 
          /* this is always in this location, no matter what the location is */
 
@@ -143,14 +148,17 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
          item_table.attach (start_hbox, 2, 3, 0, 1, FILL, Gtk::AttachOptions(0), 4, 0);
 
 	 start_to_playhead_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocStart));
+	 locate_to_start_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_button_pressed), LocStart));
          start_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocStart));
 	 start_clock.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_to_clock), &start_clock), false);
 
 	 end_hbox.set_spacing (2);
          end_hbox.pack_start (end_clock, false, false);
 	 end_hbox.pack_start (end_to_playhead_button, false, false);
+	 end_hbox.pack_start (locate_to_end_button, false, false);
 
 	 end_to_playhead_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocEnd));
+	 locate_to_end_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_button_pressed), LocEnd));
          end_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocEnd));
 	 end_clock.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::locate_to_clock), &end_clock), false);
 
@@ -423,6 +431,21 @@ LocationEditRow::to_playhead_button_pressed (LocationPart part)
 		break;
 	default:
 		break;
+	}
+}
+
+void
+LocationEditRow::locate_button_pressed (LocationPart part)
+{
+	switch (part) {
+		case LocStart:
+			_session->request_locate (start_clock.current_time());
+			break;
+		case LocEnd:
+			_session->request_locate (end_clock.current_time());
+			break;
+		default:
+			break;
 	}
 }
 
