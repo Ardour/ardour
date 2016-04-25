@@ -2442,13 +2442,21 @@ TempoMap::gui_dilate_tempo (MeterSection* ms, const framepos_t& frame)
 		/* the change in frames is the result of changing the slope of at most 2 previous tempo sections.
 		   constant to constant is straightforward, as the tempo prev to prev_t has constant slope.
 		*/
+		double contribution = 0.0;
+		frameoffset_t frame_contribution = 0.0;
+		frameoffset_t prev_t_frame_contribution = 0.0;
+
+		if (prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
+			/* prev to prev_t's position will remain constant in terms of frame and pulse. lets use frames. */
+			contribution = (prev_t->frame() - prev_to_prev_t->frame()) / (double) (ms->frame() - prev_to_prev_t->frame());
+			frame_contribution = contribution * (double) fr_off;
+			prev_t_frame_contribution = fr_off - frame_contribution;
+		}
+
 		if (prev_t->type() == TempoSection::Constant || prev_t->c_func() == 0.0) {
+
 			if (prev_t->position_lock_style() == MusicTime) {
 				if (prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
-					/* prev to prev_t's position will remain constant in terms of frame and pulse. lets use frames. */
-					const double contribution = (prev_t->frame() - prev_to_prev_t->frame()) / (double) (ms->frame() - prev_to_prev_t->frame());
-					const frameoffset_t frame_contribution = contribution * (double) fr_off;
-					const frameoffset_t prev_t_frame_contribution = fr_off - frame_contribution;
 					new_bpm = prev_t->beats_per_minute() * ((ms->frame() - prev_t->frame())
 										/ (double) (ms->frame() + prev_t_frame_contribution - prev_t->frame()));
 
@@ -2466,11 +2474,6 @@ TempoMap::gui_dilate_tempo (MeterSection* ms, const framepos_t& frame)
 			} else {
 				/* AudioTime */
 				if (prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
-					/* prev to prev_t's position will remain constant in terms of frame and pulse. lets use frames. */
-					const double contribution = (prev_t->frame() - prev_to_prev_t->frame())
-						/ (double) (ms->frame() - prev_to_prev_t->frame());
-					const frameoffset_t frame_contribution = contribution * (double) fr_off;
-					const frameoffset_t prev_t_frame_contribution = fr_off - frame_contribution;
 					new_bpm = prev_t->beats_per_minute() * ((ms->frame() - prev_t->frame())
 										/ (double) (ms->frame() + prev_t_frame_contribution - prev_t->frame()));
 				} else {
@@ -2485,32 +2488,31 @@ TempoMap::gui_dilate_tempo (MeterSection* ms, const framepos_t& frame)
 			}
 		} else if (prev_t->c_func() < 0.0) {
 			if (prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
-				const double contribution = (prev_t->frame() - prev_to_prev_t->frame()) / (double) (ms->frame() - prev_to_prev_t->frame());
-				const frameoffset_t frame_contribution = contribution * (double) fr_off;
 				new_bpm = prev_t->tempo_at_frame (prev_t->frame() + frame_contribution, _frame_rate) * (double) prev_t->note_type();
 			} else {
 				/* prev_to_prev_t is irrelevant */
 				new_bpm = prev_t->tempo_at_frame (prev_t->frame() + fr_off, _frame_rate) * (double) prev_t->note_type();
 			}
 
-			const double diff =  prev_t->beats_per_minute() - new_bpm;
+			const double diff = (prev_t->tempo_at_frame (frame, _frame_rate) * prev_t->note_type()) - prev_t->beats_per_minute();
 			if (diff > -0.1 && diff  < 0.1) {
-				new_bpm = prev_t->beats_per_minute() * ((ms->frame() - prev_t->frame()) / (double) (frame - prev_t->frame()));
+				new_bpm = prev_t->beats_per_minute() * ((ms->frame() - prev_t->frame())
+									/ (double) ((ms->frame() + prev_t_frame_contribution) - prev_t->frame()));
 			}
 
 		} else if (prev_t->c_func() > 0.0) {
 			if (prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
-				const double contribution = (prev_t->frame() - prev_to_prev_t->frame()) / (double) (ms->frame() - prev_to_prev_t->frame());
-				const frameoffset_t frame_contribution = contribution * (double) fr_off;
 				new_bpm = prev_t->tempo_at_frame (prev_t->frame() - frame_contribution, _frame_rate) * (double) prev_t->note_type();
 			} else {
 				/* prev_to_prev_t is irrelevant */
 				new_bpm = prev_t->tempo_at_frame (prev_t->frame() - fr_off, _frame_rate) * (double) prev_t->note_type();
 			}
+
 			/* limits - a bit clunky, but meh */
-			const double diff =  prev_t->beats_per_minute() - new_bpm;
+			const double diff = (prev_t->tempo_at_frame (frame, _frame_rate) * prev_t->note_type()) - prev_t->beats_per_minute();
 			if (diff > -0.1 && diff  < 0.1) {
-				new_bpm = prev_t->beats_per_minute() * ((ms->frame() - prev_t->frame()) / (double) (frame - prev_t->frame()));
+				new_bpm = prev_t->beats_per_minute() * ((ms->frame() - prev_t->frame())
+									/ (double) ((ms->frame() + prev_t_frame_contribution) - prev_t->frame()));
 			}
 		}
 
@@ -2525,9 +2527,8 @@ TempoMap::gui_dilate_tempo (MeterSection* ms, const framepos_t& frame)
 
 			if (ms->position_lock_style() == AudioTime) {
 				ms->set_frame (frame);
-			} else {
-				ms->set_pulse (prev_t->pulse_at_frame (frame, _frame_rate));
 			}
+
 			recompute_meters (_metrics);
 		}
 	}
