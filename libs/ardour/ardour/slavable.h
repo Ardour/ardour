@@ -26,12 +26,14 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <pbd/signals.h>
+
 class XMLNode;
 
 namespace ARDOUR {
 
 class VCA;
-class Session;
+class VCAManager;
 
 class Slavable
 {
@@ -39,13 +41,16 @@ class Slavable
 	Slavable ();
 	virtual ~Slavable() {}
 
-	XMLNode& state () const;
-	int assign (Session& s, XMLNode const&);
+	XMLNode& get_state () const;
+	int set_state (XMLNode const&, int);
 
 	void assign (boost::shared_ptr<VCA>);
 	void unassign (boost::shared_ptr<VCA>);
 
 	static std::string xml_node_name;
+
+	/* signal sent VCAManager once assignment is possible */
+	static PBD::Signal1<void,VCAManager*> Assign;
 
     protected:
 	virtual int assign_controls (boost::shared_ptr<VCA>) = 0;
@@ -54,6 +59,9 @@ class Slavable
     private:
 	mutable Glib::Threads::RWLock master_lock;
 	std::set<uint32_t> _masters;
+	PBD::ScopedConnection assign_connection;
+
+	int do_assign (VCAManager* s);
 };
 
 } // namespace ARDOUR

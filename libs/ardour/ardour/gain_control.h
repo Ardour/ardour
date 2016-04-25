@@ -54,10 +54,6 @@ class LIBARDOUR_API GainControl : public SlavableAutomationControl {
 	void inc_gain (gain_t);
 
   private:
-	std::string masters_string;
-	PBD::ScopedConnection vca_loaded_connection;
-
-	void vcas_loaded();
 	void recompute_masters_ratios (double val);
 };
 

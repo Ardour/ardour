@@ -50,7 +50,6 @@ class VCAManager : public SessionHandleRef, public PBD::StatefulDestructible
 
 	VCAList vcas() const;
 
-	PBD::Signal0<void>          VCAsLoaded;
 	PBD::Signal1<void,VCAList&> VCAAdded;
 	PBD::Signal1<void,VCAList&> VCARemoved;
 

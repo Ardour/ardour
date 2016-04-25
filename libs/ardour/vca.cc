@@ -106,6 +106,8 @@ VCA::get_state ()
 	node->add_child_nocopy (_mute_control->get_state());
 	node->add_child_nocopy (get_automation_xml_state());
 
+	node->add_child_nocopy (Slavable::get_state());
+
 	return *node;
 }
 
@@ -141,6 +143,8 @@ VCA::set_state (XMLNode const& node, int version)
 			if (prop->value() == _mute_control->name()) {
 				_mute_control->set_state (**i, version);
 			}
+		} else if ((*i)->name() == Slavable::xml_node_name) {
+			Slavable::set_state (**i, version);
 		}
 	}
 

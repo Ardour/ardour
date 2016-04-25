@@ -1486,6 +1486,10 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
+	/* Now that we have Routes and masters loaded, connect them if appropriate */
+
+	Slavable::Assign (_vca_manager); /* EMIT SIGNAL */
+
 	/* our diskstreams list is no longer needed as they are now all owned by their Route */
 	_diskstreams_2X.clear ();
 

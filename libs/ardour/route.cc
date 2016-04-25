@@ -2447,6 +2447,8 @@ Route::state(bool full_state)
 		foreach_processor (sigc::bind (sigc::mem_fun (*this, &Route::set_plugin_state_dir), ""));
 	}
 
+	node->add_child_copy (Slavable::get_state());
+
 	return *node;
 }
 
@@ -2517,21 +2519,16 @@ Route::set_state (const XMLNode& node, int version)
 			} else if (prop->value() == "Output") {
 				_output->set_state (*child, version);
 			}
-		}
 
-		if (child->name() == X_("Processor")) {
+		} else if (child->name() == X_("Processor")) {
 			processor_state.add_child_copy (*child);
-		}
-
-		if (child->name() == X_("Pannable")) {
+		} else if (child->name() == X_("Pannable")) {
 			if (_pannable) {
 				_pannable->set_state (*child, version);
 			} else {
 				warning << string_compose (_("Pannable state found for route (%1) without a panner!"), name()) << endmsg;
 			}
-		}
-
-		if (child->name() == Controllable::xml_node_name) {
+		}  else if (child->name() == Controllable::xml_node_name) {
 			if ((prop = child->property (X_("name"))) == 0) {
 				continue;
 			}
@@ -2547,6 +2544,8 @@ Route::set_state (const XMLNode& node, int version)
 			} else if (prop->value() == _solo_control->name()) {
 				_mute_control->set_state (*child, version);
 			}
+		} else if (child->name() == Slavable::xml_node_name) {
+			Slavable::set_state (*child, version);
 		}
 	}
 

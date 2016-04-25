@@ -21,6 +21,7 @@
 #include "pbd/error.h"
 #include "pbd/replace_all.h"
 
+#include "ardour/slavable.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
@@ -175,7 +176,6 @@ VCAManager::set_state (XMLNode const& node, int version)
 
 	_vcas_loaded = true;
 
-	VCAsLoaded (); /* EMIT SIGNAL */
 	VCAAdded (vcal); /* EMIT SIGNAL */
 
 	return 0;
