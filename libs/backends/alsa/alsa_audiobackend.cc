@@ -1210,11 +1210,20 @@ AlsaAudioBackend::port_name_size () const
 int
 AlsaAudioBackend::set_port_name (PortEngine::PortHandle port, const std::string& name)
 {
+	std::string newname (_instance_name + ":" + name);
 	if (!valid_port (port)) {
-		PBD::error << _("AlsaBackend::set_port_name: Invalid Port(s)") << endmsg;
+		PBD::error << _("AlsaBackend::set_port_name: Invalid Port") << endmsg;
 		return -1;
 	}
-	return static_cast<AlsaPort*>(port)->set_name (_instance_name + ":" + name);
+	if (find_port (newname)) {
+		PBD::error << _("AlsaBackend::set_port_name: Port with given name already exists") << endmsg;
+		return -1;
+	}
+
+	AlsaPort* p = static_cast<AlsaPort*>(port);
+	_portmap.erase (p->name());
+	_portmap.insert (make_pair (newname, p));
+	return p->set_name (newname);
 }
 
 std::string

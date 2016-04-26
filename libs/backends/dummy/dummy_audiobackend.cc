@@ -432,6 +432,9 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 		for (PortIndex::const_iterator it = _ports.begin (); it != _ports.end (); ++it) {
 			PBD::info << _("DummyAudioBackend: port '") << (*it)->name () << "' exists." << endmsg;
 		}
+		for (PortMap::const_iterator it = _portmap.begin (); it != _portmap.end (); ++it) {
+			PBD::info << _("DummyAudioBackend: portmap '") << (*it).first << "' exists." << endmsg;
+		}
 		_system_inputs.clear();
 		_system_outputs.clear();
 		_system_midi_in.clear();
@@ -643,11 +646,22 @@ DummyAudioBackend::port_name_size () const
 int
 DummyAudioBackend::set_port_name (PortEngine::PortHandle port, const std::string& name)
 {
+	std::string newname (_instance_name + ":" + name);
+
 	if (!valid_port (port)) {
 		PBD::error << _("DummyBackend::set_port_name: Invalid Port(s)") << endmsg;
 		return -1;
 	}
-	return static_cast<DummyPort*>(port)->set_name (_instance_name + ":" + name);
+
+	if (find_port (newname)) {
+		PBD::error << _("DummyBackend::set_port_name: Port with given name already exists") << endmsg;
+		return -1;
+	}
+
+	DummyPort* p = static_cast<DummyPort*>(port);
+	_portmap.erase (p->name());
+	_portmap.insert (make_pair (newname, p));
+	return p->set_name (newname);
 }
 
 std::string

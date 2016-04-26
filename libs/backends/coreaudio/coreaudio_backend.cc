@@ -902,11 +902,20 @@ CoreAudioBackend::port_name_size () const
 int
 CoreAudioBackend::set_port_name (PortEngine::PortHandle port, const std::string& name)
 {
+	std::string newname (_instance_name + ":" + name);
 	if (!valid_port (port)) {
 		PBD::warning << _("CoreAudioBackend::set_port_name: Invalid Port(s)") << endmsg;
 		return -1;
 	}
-	return static_cast<CoreBackendPort*>(port)->set_name (_instance_name + ":" + name);
+	if (find_port (newname)) {
+		PBD::error << _("CoreAudioBackend::set_port_name: Port with given name already exists") << endmsg;
+		return -1;
+	}
+
+	CoreBackendPort* p = static_cast<CoreBackendPort*>(port);
+	_portmap.erase (p->name());
+	_portmap.insert (make_pair (newname, p));
+	return p->set_name (newname);
 }
 
 std::string
