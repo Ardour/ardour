@@ -575,7 +575,7 @@ cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Etc
 # Copied directly from source tree
 
 cp ../../system_config $Etc/system_config
-cp ../../gtk2_ardour/dark.colors $Etc
+cp ../../gtk2_ardour/*.colors $Etc
 cp ../../instant.xml $Shared/instant.xml
 cp -r ../../gtk2_ardour/icons $Shared
 cp -r ../../gtk2_ardour/pixmaps $Shared
