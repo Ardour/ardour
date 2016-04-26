@@ -394,6 +394,13 @@ ARDOUR_UI::parameter_changed (std::string p)
 			stop_clocking ();
 			start_clocking ();
 		}
+	} else if (p == "use-tooltips") {
+		/* this doesn't really belong here but it has to go somewhere */
+		if (UIConfiguration::instance().get_use_tooltips()) {
+			Gtkmm2ext::enable_tooltips ();
+		} else {
+			Gtkmm2ext::disable_tooltips ();
+		}
 	} else if (p == "waveform-gradient-depth") {
 		ArdourCanvas::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
 	} else if (p == "show-editor-meter") {

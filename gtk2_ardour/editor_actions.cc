@@ -1719,15 +1719,6 @@ Editor::parameter_changed (std::string p)
 		if (_routes) {
 			_routes->reset_remote_control_ids ();
 		}
-	} else if (p == "use-tooltips") {
-
-		/* this doesn't really belong here but it has to go somewhere */
-
-		if (UIConfiguration::instance().get_use_tooltips()) {
-			Gtkmm2ext::enable_tooltips ();
-		} else {
-			Gtkmm2ext::disable_tooltips ();
-		}
 	} else if (p == "skip-playback") {
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-skip-playback"));
 
