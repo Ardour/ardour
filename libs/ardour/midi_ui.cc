@@ -82,8 +82,13 @@ MidiControlUI::do_request (MidiUIRequest* req)
 }
 
 bool
-MidiControlUI::midi_input_handler (IOCondition ioc, boost::shared_ptr<AsyncMIDIPort> port)
+MidiControlUI::midi_input_handler (IOCondition ioc, boost::weak_ptr<AsyncMIDIPort> wport)
 {
+	boost::shared_ptr<AsyncMIDIPort> port = wport.lock ();
+	if (!port) {
+		return false;
+	}
+
 	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("something happend on  %1\n", boost::shared_ptr<ARDOUR::Port> (port)->name()));
 
 	if (ioc & ~IO_IN) {
@@ -130,7 +135,8 @@ MidiControlUI::reset_ports ()
 	}
 
 	for (vector<boost::shared_ptr<AsyncMIDIPort> >::const_iterator pi = ports.begin(); pi != ports.end(); ++pi) {
-		(*pi)->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &MidiControlUI::midi_input_handler), *pi));
+		(*pi)->xthread().set_receive_handler (sigc::bind (
+					sigc::mem_fun (this, &MidiControlUI::midi_input_handler), boost::weak_ptr<AsyncMIDIPort>(*pi)));
 		(*pi)->xthread().attach (_main_loop->get_context());
 	}
 }
