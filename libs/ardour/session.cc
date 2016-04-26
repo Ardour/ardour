@@ -3184,9 +3184,47 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 			XMLNodeList children = node_copy.children ();
 			for (XMLNodeList::iterator i = children.begin(); i != children.end(); ++i) {
 				if ((*i)->name() == X_("Processor")) {
+					/* ForceIDRegeneration does not catch the following */
 					XMLProperty* role = (*i)->property (X_("role"));
+					XMLProperty* type = (*i)->property (X_("type"));
+					if (role && role->value() == X_("Aux")) {
+						/* check if the target bus exists.
+						 * we should not save aux-sends in templates.
+						 */
+						XMLProperty* target = (*i)->property (X_("target"));
+						if (!target) {
+							(*i)->add_property ("type", "dangling-aux-send");
+							continue;
+						}
+						boost::shared_ptr<Route> r = route_by_id (target->value());
+						if (!r || boost::dynamic_pointer_cast<Track>(r)) {
+							(*i)->add_property ("type", "dangling-aux-send");
+							continue;
+						}
+					}
 					if (role && role->value() == X_("Listen")) {
 						(*i)->remove_property (X_("bitslot"));
+					}
+					else if (role && (role->value() == X_("Send") || role->value() == X_("Aux"))) {
+						char buf[32];
+						Delivery::Role xrole;
+						uint32_t bitslot = 0;
+						xrole = Delivery::Role (string_2_enum (role->value(), xrole));
+						std::string name = Send::name_and_id_new_send(*this, xrole, bitslot, false);
+						snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
+						(*i)->remove_property (X_("bitslot"));
+						(*i)->remove_property (X_("name"));
+						(*i)->add_property ("bitslot", buf);
+						(*i)->add_property ("name", name);
+					}
+					else if (type && type->value() == X_("return")) {
+						// Return::set_state() generates a new one
+						(*i)->remove_property (X_("bitslot"));
+					}
+					else if (type && type->value() == X_("port")) {
+						// PortInsert::set_state() handles the bitslot
+						(*i)->remove_property (X_("bitslot"));
+						(*i)->add_property ("ignore-name", "1");
 					}
 				}
 			}
