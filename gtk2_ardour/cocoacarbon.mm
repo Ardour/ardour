@@ -41,24 +41,6 @@
 using namespace std;
 using namespace PBD;
 
-void
-ARDOUR_UI::platform_specific ()
-{
-	gtk_application_ready ();
-
-	if (!ARDOUR_COMMAND_LINE::finder_invoked_ardour) {
-		
-		/* if invoked from the command line, make sure we're visible */
-		
-		[NSApp activateIgnoringOtherApps:1];
-	} 
-}
-
-void
-ARDOUR_UI::platform_setup ()
-{
-}
-
 bool
 cocoa_open_url (const char* uri)
 {

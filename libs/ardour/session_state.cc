@@ -251,6 +251,7 @@ Session::post_engine_init ()
 
 		/* MidiClock requires a tempo map */
 
+		delete midi_clock;
 		midi_clock = new MidiClockTicker ();
 		midi_clock->set_session (this);
 
@@ -1046,7 +1047,7 @@ Session::state (bool full_state)
 	if (full_state) {
 
 		node->add_property ("name", _name);
-		snprintf (buf, sizeof (buf), "%" PRId64, _nominal_frame_rate);
+		snprintf (buf, sizeof (buf), "%" PRId64, _base_frame_rate);
 		node->add_property ("sample-rate", buf);
 
 		if (session_dirs.size() > 1) {
@@ -1313,10 +1314,12 @@ Session::set_state (const XMLNode& node, int version)
 
 	if ((prop = node.property (X_("sample-rate"))) != 0) {
 
-		_nominal_frame_rate = atoi (prop->value());
+		_base_frame_rate = atoi (prop->value());
+		_nominal_frame_rate = _base_frame_rate;
 
-		if (_nominal_frame_rate != _current_frame_rate) {
-                        boost::optional<int> r = AskAboutSampleRateMismatch (_nominal_frame_rate, _current_frame_rate);
+		assert (AudioEngine::instance()->running ());
+		if (_base_frame_rate != AudioEngine::instance()->sample_rate ()) {
+			boost::optional<int> r = AskAboutSampleRateMismatch (_base_frame_rate, _current_frame_rate);
 			if (r.get_value_or (0)) {
 				goto out;
 			}

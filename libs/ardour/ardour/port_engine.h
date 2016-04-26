@@ -138,6 +138,17 @@ class LIBARDOUR_API PortEngine {
      */
     virtual int get_port_property (PortHandle, const std::string& key, std::string& value, std::string& type) const { return -1; }
 
+    /** Set the port-property value and type for a given key
+     *
+     * The API follows jack_set_property():
+     * @param key The key of the property.
+     * @param value The value of the property.
+     * @param type The type of the property.
+     *
+     * @return 0 on success, -1 on error
+     */
+    virtual int set_port_property (PortHandle, const std::string& key, const std::string& value, const std::string& type) { return -1; }
+
     /** Return a reference to a port with the fullname @param name. Return
      * an "empty" PortHandle (analogous to a null pointer) if no such port exists.
      */

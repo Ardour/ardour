@@ -8,7 +8,7 @@
       <separator/>
       <menuitem action='Save'/>
       <menuitem action='SaveAs'/>
-#ifndef WINDOWS // can't move open files.
+#ifndef WINDOWS /* can't move open files. */
       <menuitem action='Rename'/>
       <menuitem action='SnapshotStay'/>
       <menuitem action='SnapshotSwitch'/>
@@ -296,8 +296,8 @@
       </menu>
 #ifndef GTKOSX
       <separator/>
-      <menuitem action='menu-show-preferences'/>
 #endif
+      <menuitem action='menu-show-preferences'/>
     </menu>         
 
     <menu name='RegionMenu' action='RegionMenu'>
@@ -634,7 +634,9 @@
     <menuitem action='newlua'/>
     <separator/>
     <menuitem action='controls'/>
+#ifndef MIXBUS
     <menuitem action='send_options'/>
+#endif
     <separator/>
     <menuitem action='clear'/>
     <menuitem action='clear_pre'/>

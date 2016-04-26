@@ -431,6 +431,7 @@ ARDOUR_UI::setup_transport ()
 	window_button_box->pack_start (prefs_visibility_button, true, false);
 
 	transport_hbox.pack_end (*window_button_box, false, false);
+	transport_hbox.pack_end (action_script_table, false, false);
 
 	/* desensitize */
 

@@ -74,6 +74,8 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	void set_parameter (uint32_t which, float val);
 	float get_parameter (uint32_t which) const;
 
+	PluginOutputConfiguration possible_output () const { return _output_configs; }
+
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	uint32_t nth_parameter (uint32_t which, bool& ok) const;
 	void activate ();
@@ -86,6 +88,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 			     pframes_t nframes, framecnt_t offset);
 	std::set<Evoral::Parameter> automatable() const;
 	std::string describe_parameter (Evoral::Parameter);
+	IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id) const;
 	std::string state_node_name () const { return "audiounit"; }
 	void print_parameter (uint32_t, char*, uint32_t len) const;
 
@@ -172,6 +175,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	AudioBufferList* buffers;
 	bool _has_midi_input;
 	bool _has_midi_output;
+	PluginOutputConfiguration _output_configs;
 
 	/* despite all the cool work that apple did on their AU preset
 	   system, they left factory presets and user presets as two
@@ -190,9 +194,18 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	UInt32 output_elements;
 	UInt32 input_elements;
 
-	int set_output_format (AudioStreamBasicDescription&);
-	int set_input_format (AudioStreamBasicDescription&);
-	int set_stream_format (int scope, uint32_t cnt, AudioStreamBasicDescription&);
+	bool variable_inputs;
+	bool variable_outputs;
+
+	uint32_t configured_input_busses;
+	uint32_t configured_output_busses;
+
+	uint32_t *bus_inputs;
+	uint32_t *bus_outputs;
+	std::vector <std::string> _bus_name_in;
+	std::vector <std::string> _bus_name_out;
+
+	int set_stream_format (int scope, uint32_t bus, AudioStreamBasicDescription&);
 	void discover_parameters ();
 	void add_state (XMLNode *) const;
 
@@ -200,7 +213,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	ParameterMap parameter_map;
 	uint32_t   input_maxbuf;
 	framecnt_t input_offset;
-	framecnt_t cb_offset;
+	framecnt_t *cb_offsets;
 	BufferSet* input_buffers;
 	ChanMapping * input_map;
 	framecnt_t frames_processed;
@@ -235,7 +248,7 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 
-	bool needs_midi_input ();
+	bool needs_midi_input () const;
 	bool is_effect () const;
 	bool is_effect_without_midi_input () const;
 	bool is_effect_with_midi_input () const;
@@ -245,6 +258,7 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 
 	bool reconfigurable_io() const { return true; }
 
+	static void clear_cache ();
 	static PluginInfoList* discover (bool scan_only);
 	static bool au_get_crashlog (std::string &msg);
 	static std::string stringify_descriptor (const CAComponentDescription&);

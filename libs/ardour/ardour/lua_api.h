@@ -30,15 +30,15 @@
 
 namespace ARDOUR { namespace LuaAPI {
 
-	/** convenience contructor for DataType::NIL
+	/** convenience constructor for DataType::NIL with managed lifetime
 	 * @returns DataType::NIL
 	 */
 	int datatype_ctor_null (lua_State *lua);
-	/** convenience contructor for DataType::AUDIO
+	/** convenience constructor for DataType::AUDIO with managed lifetime
 	 * @returns DataType::AUDIO
 	 */
 	int datatype_ctor_audio (lua_State *L);
-	/** convenience contructor for DataType::MIDI
+	/** convenience constructor for DataType::MIDI with managed lifetime
 	 * @returns DataType::MIDI
 	 */
 	int datatype_ctor_midi (lua_State *L);

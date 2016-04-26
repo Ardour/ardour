@@ -126,6 +126,8 @@ Processor::state (bool full_state)
 		XMLNode& automation = Automatable::get_automation_xml_state();
 		if (!automation.children().empty() || !automation.properties().empty()) {
 			node->add_child_nocopy (automation);
+		} else {
+			delete &automation;
 		}
 	}
 

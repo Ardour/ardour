@@ -424,6 +424,16 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "waveform-cache-size") {
 		/* GUI option has units of megabytes; image cache uses units of bytes */
 		ArdourCanvas::WaveView::set_image_cache_size (UIConfiguration::instance().get_waveform_cache_size() * 1048576);
+	} else if (p == "action-table-columns") {
+		const uint32_t cols = UIConfiguration::instance().get_action_table_columns ();
+		for (int i = 0; i < 9; ++i) {
+			const int col = i / 3;
+			if (cols & (1<<col)) {
+				action_script_call_btn[i].show();
+			} else {
+				action_script_call_btn[i].hide();
+			}
+		}
 	}
 }
 

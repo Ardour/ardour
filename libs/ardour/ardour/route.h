@@ -313,6 +313,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	 */
 	bool customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs);
 	bool add_remove_sidechain (boost::shared_ptr<Processor> proc, bool);
+	bool plugin_preset_output (boost::shared_ptr<Processor> proc, ChanCount outs);
 
 	/* enable sidechain input for a given processor
 	 *
@@ -834,6 +835,10 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);
 	void sidechain_change_handler (IOChange, void *src);
+
+	void processor_selfdestruct (boost::weak_ptr<Processor>);
+	std::vector<boost::weak_ptr<Processor> > selfdestruct_sequence;
+	Glib::Threads::Mutex  selfdestruct_lock;
 
 	bool input_port_count_changing (ChanCount);
 	bool output_port_count_changing (ChanCount);

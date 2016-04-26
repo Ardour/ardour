@@ -77,6 +77,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	, _metering (false)
 	, _delay_in (0)
 	, _delay_out (0)
+	, _remove_on_disconnect (false)
 {
 	if (_role == Listen) {
 		/* we don't need to do this but it keeps things looking clean
@@ -98,6 +99,9 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 
 	if (panner_shell()) {
 		panner_shell()->Changed.connect_same_thread (*this, boost::bind (&Send::panshell_changed, this));
+	}
+	if (_output) {
+		_output->changed.connect_same_thread (*this, boost::bind (&Send::snd_output_changed, this, _1, _2));
 	}
 }
 
@@ -221,6 +225,8 @@ Send::state (bool full)
 		node.add_property ("bitslot", buf);
 	}
 
+	node.add_property("selfdestruct", _remove_on_disconnect ? "yes" : "no");
+
 	node.add_child_nocopy (_amp->state (full));
 
 	return node;
@@ -266,6 +272,10 @@ Send::set_state (const XMLNode& node, int version)
 				_bitslot = 0;
 			}
 		}
+	}
+
+	if ((prop = node.property (X_("selfdestruct"))) != 0) {
+		_remove_on_disconnect = string_is_affirmative (prop->value());
 	}
 
 	XMLNodeList nlist = node.children();
@@ -402,4 +412,15 @@ string
 Send::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 {
 	return _amp->value_as_string (ac);
+}
+
+void
+Send::snd_output_changed (IOChange change, void* /*src*/)
+{
+	if (change.type & IOChange::ConnectionsChanged) {
+		if (!_output->connected() && _remove_on_disconnect) {
+			_remove_on_disconnect = false;
+			SelfDestruct (); /* EMIT SIGNAL */
+		}
+	}
 }

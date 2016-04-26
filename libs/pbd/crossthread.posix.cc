@@ -29,11 +29,6 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 
 CrossThreadChannel::~CrossThreadChannel ()
 {
-	if (receive_source) {
-		g_source_destroy (receive_source);
-		receive_source = 0;
-	}
-
 	if (receive_channel) {
                 g_io_channel_unref (receive_channel);
                 receive_channel = 0;

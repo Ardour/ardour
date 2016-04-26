@@ -63,6 +63,8 @@ public:
 	std::string get_docs () const { return _docs; }
 	std::string get_parameter_docs (uint32_t) const;
 
+	PluginOutputConfiguration possible_output () const { return _output_configs; }
+
 	std::set<Evoral::Parameter> automatable() const;
 
 	void activate () { }
@@ -140,6 +142,7 @@ private:
 
 	ChanCount _configured_in;
 	ChanCount _configured_out;
+	PluginOutputConfiguration _output_configs;
 
 	bool _has_midi_input;
 	bool _has_midi_output;
@@ -160,8 +163,10 @@ class LIBARDOUR_API LuaPluginInfo : public PluginInfo
 	PluginPtr load (Session& session);
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 
-	bool is_instrument () const { return false; }
+	bool is_instrument () const { return _is_instrument ; }
 	bool reconfigurable_io() const { return true; }
+
+	bool _is_instrument;
 };
 
 typedef boost::shared_ptr<LuaPluginInfo> LuaPluginInfoPtr;

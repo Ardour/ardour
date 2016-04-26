@@ -45,9 +45,11 @@
 #include "ardour/playlist.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/port_manager.h"
 #include "ardour/runtime_functions.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
+#include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/session_object.h"
 #include "ardour/sidechain.h"
@@ -162,12 +164,14 @@ CLASSKEYS(ARDOUR::PluginInfo);
 CLASSKEYS(PBD::PropertyChange);
 CLASSKEYS(std::vector<std::string>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
 CLASSKEYS(boost::shared_ptr<ARDOUR::PluginInfo>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
 CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<ARDOUR::AudioRange>);
 CLASSKEYS(Evoral::Beats);
+CLASSKEYS(ARDOUR::PortManager);
 CLASSKEYS(ARDOUR::AudioEngine);
 CLASSKEYS(void);
 CLASSKEYS(float);
@@ -347,7 +351,9 @@ LuaBindings::common (lua_State* L)
 		.beginClass <InterThreadInfo> ("InterThreadInfo")
 		.addVoidConstructor ()
 		.addData ("done", const_cast<bool InterThreadInfo::*>(&InterThreadInfo::done))
+#if 0 // currently unused, lua is single-threaded, no custom UIs.
 		.addData ("cancel", (bool InterThreadInfo::*)&InterThreadInfo::cancel)
+#endif
 		.addData ("progress", const_cast<float InterThreadInfo::*>(&InterThreadInfo::progress))
 		.endClass ()
 
@@ -492,6 +498,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("midi", &IO::midi)
 		.addFunction ("port_by_name", &IO::nth)
 		.addFunction ("n_ports", &IO::n_ports)
+		.endClass ()
+
+		.beginClass <RouteGroup> ("RouteGroup")
+		// stub RouteGroup* is needed for new_audio_track()
 		.endClass ()
 
 		.deriveWSPtrClass <Route, SessionObject> ("Route")
@@ -765,6 +775,10 @@ LuaBindings::common (lua_State* L)
 		.beginPtrStdList <boost::shared_ptr<Region> > ("RegionListPtr")
 		.endClass ()
 
+		//std::list<boost::shared_ptr<Port> > PortList;
+		.beginConstStdList <boost::shared_ptr<Port> > ("PortList")
+		.endClass ()
+
 		// used by Playlist::cut/copy
 		.beginConstStdList <AudioRange> ("AudioRangeList")
 		.endClass ()
@@ -854,6 +868,14 @@ LuaBindings::common (lua_State* L)
 		.addConst ("SrcBest", ARDOUR::SrcQuality(SrcBest))
 		.endNamespace ()
 
+		.beginNamespace ("PortFlags")
+		.addConst ("IsInput", ARDOUR::PortFlags(IsInput))
+		.addConst ("IsOutput", ARDOUR::PortFlags(IsOutput))
+		.addConst ("IsPhysical", ARDOUR::PortFlags(IsPhysical))
+		.addConst ("CanMonitor", ARDOUR::PortFlags(CanMonitor))
+		.addConst ("IsTerminal", ARDOUR::PortFlags(IsTerminal))
+		.endNamespace ()
+
 		.beginNamespace ("PlaylistDisposition")
 		.addConst ("CopyPlaylist", ARDOUR::PlaylistDisposition(CopyPlaylist))
 		.addConst ("NewPlaylist", ARDOUR::PlaylistDisposition(NewPlaylist))
@@ -864,6 +886,13 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Start", ARDOUR::RegionPoint(Start))
 		.addConst ("End", ARDOUR::RegionPoint(End))
 		.addConst ("SyncPoint", ARDOUR::RegionPoint(SyncPoint))
+		.endNamespace ()
+
+		.beginNamespace ("TrackMode")
+		.addConst ("Normal", ARDOUR::TrackMode(Start))
+		.addConst ("NonLayered", ARDOUR::TrackMode(NonLayered))
+		.addConst ("Destructive", ARDOUR::TrackMode(Destructive))
+		.endNamespace ()
 		.endNamespace ();
 
 	luabridge::getGlobalNamespace (L)
@@ -908,7 +937,26 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_output_device_name", &AudioBackend::set_output_device_name)
 		.endClass()
 
-		.beginClass <AudioEngine> ("AudioEngine")
+		.beginClass <PortManager> ("PortManager")
+		.addFunction ("port_engine", &PortManager::port_engine)
+		.addFunction ("connected", &PortManager::connected)
+		.addFunction ("connect", &PortManager::connect)
+		.addFunction ("physically_connected", &PortManager::physically_connected)
+		.addFunction ("disconnect", (int (PortManager::*)(const std::string&, const std::string&))&PortManager::disconnect)
+		.addFunction ("disconnect_port", (int (PortManager::*)(boost::shared_ptr<Port>))&PortManager::disconnect)
+		.addFunction ("get_port_by_name", &PortManager::get_port_by_name)
+		.addFunction ("get_pretty_name_by_name", &PortManager::get_pretty_name_by_name)
+		.addFunction ("port_is_physical", &PortManager::port_is_physical)
+		.addFunction ("get_physical_outputs", &PortManager::get_physical_outputs)
+		.addFunction ("get_physical_inputs", &PortManager::get_physical_inputs)
+		.addFunction ("n_physical_outputs", &PortManager::n_physical_outputs)
+		.addFunction ("n_physical_inputs", &PortManager::n_physical_inputs)
+		.addRefFunction ("get_connections", &PortManager::get_connections)
+		.addRefFunction ("get_ports", (int (PortManager::*)(DataType, PortManager::PortList&))&PortManager::get_ports)
+		.addRefFunction ("get_backend_ports", (int (PortManager::*)(const std::string&, DataType, PortFlags, std::vector<std::string>&))&PortManager::get_ports)
+		.endClass()
+
+		.deriveClass <AudioEngine, PortManager> ("AudioEngine")
 		.addFunction ("available_backends", &AudioEngine::available_backends)
 		.addFunction ("current_backend_name", &AudioEngine::current_backend_name)
 		.addFunction ("set_backend", &AudioEngine::set_backend)
@@ -947,6 +995,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("current_start_frame", &Session::current_start_frame)
 		.addFunction ("current_end_frame", &Session::current_end_frame)
 		.addFunction ("actively_recording", &Session::actively_recording)
+		.addFunction ("new_audio_track", &Session::new_audio_track)
+		.addFunction ("new_audio_route", &Session::new_audio_route)
+		.addFunction ("new_midi_track", &Session::new_midi_track)
+		.addFunction ("new_midi_route", &Session::new_midi_route)
 		.addFunction ("get_routes", &Session::get_routes)
 		.addFunction ("get_tracks", &Session::get_tracks)
 		.addFunction ("name", &Session::name)
@@ -960,6 +1012,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("controllable_by_id", &Session::controllable_by_id)
 		.addFunction ("processor_by_id", &Session::processor_by_id)
 		.addFunction ("snap_name", &Session::snap_name)
+		.addFunction ("monitor_out", &Session::monitor_out)
+		.addFunction ("master_out", &Session::master_out)
 		.addFunction ("tempo_map", (TempoMap& (Session::*)())&Session::tempo_map)
 		.addFunction ("locations", &Session::locations)
 		.addFunction ("begin_reversible_command", (void (Session::*)(const std::string&))&Session::begin_reversible_command)
@@ -967,6 +1021,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("abort_reversible_command", &Session::abort_reversible_command)
 		.addFunction ("add_command", &Session::add_command)
 		.addFunction ("add_stateful_diff_command", &Session::add_stateful_diff_command)
+		.addFunction ("engine", (AudioEngine& (Session::*)())&Session::engine)
 		.endClass ()
 
 		.beginClass <RegionFactory> ("RegionFactory")
@@ -1005,6 +1060,7 @@ LuaBindings::dsp (lua_State* L)
 		.beginNamespace ("ARDOUR")
 
 		.beginClass <AudioBuffer> ("AudioBuffer")
+		.addEqualCheck ()
 		.addFunction ("data", (Sample*(AudioBuffer::*)(framecnt_t))&AudioBuffer::data)
 		.addFunction ("silence", &AudioBuffer::silence)
 		.addFunction ("apply_gain", &AudioBuffer::apply_gain)
@@ -1013,12 +1069,14 @@ LuaBindings::dsp (lua_State* L)
 		.endClass()
 
 		.beginClass <MidiBuffer> ("MidiBuffer")
+		.addEqualCheck ()
 		.addFunction ("silence", &MidiBuffer::silence)
 		.addFunction ("empty", &MidiBuffer::empty)
 		// TODO iterators..
 		.endClass()
 
 		.beginClass <BufferSet> ("BufferSet")
+		.addEqualCheck ()
 		.addFunction ("get_audio", static_cast<AudioBuffer&(BufferSet::*)(size_t)>(&BufferSet::get_audio))
 		.addFunction ("count", static_cast<const ChanCount&(BufferSet::*)()const>(&BufferSet::count))
 		.endClass()

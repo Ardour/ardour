@@ -519,6 +519,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourButton feedback_alert_button;
 	ArdourButton error_alert_button;
 
+	ArdourButton action_script_call_btn[10];
+	Gtk::Table action_script_table;
+
 	Gtk::VBox alert_box;
 	Gtk::VBox meter_box;
 	LevelMeterHBox * editor_meter;
@@ -753,6 +756,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void session_dialog (std::string);
 	int pending_state_dialog ();
 	int sr_mismatch_dialog (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
+	void sr_mismatch_message (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
 
 	Gtk::MenuItem* jack_disconnect_item;
 	Gtk::MenuItem* jack_reconnect_item;
@@ -793,9 +797,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         PBD::ScopedConnection halt_connection;
 
         void step_edit_status_change (bool);
-
-	void platform_specific ();
-	void platform_setup ();
 
 	/* these are used only in response to a platform-specific "ShouldQuit" signal
 	 */

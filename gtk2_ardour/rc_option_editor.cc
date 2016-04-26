@@ -374,7 +374,7 @@ public:
 		  _insert_note_button_adjustment (3, 1, 5),
 		  _insert_note_button_spin (_insert_note_button_adjustment)
 	{
-		const Glib::ustring restart_msg = _("\nChanges to this setting will only persist after your project has been saved.");
+		const std::string restart_msg = _("\nChanges to this setting will only persist after your project has been saved.");
 		/* internationalize and prepare for use with combos */
 
 		vector<string> dumb;
@@ -667,9 +667,9 @@ public:
 		set_popdown_strings (_snap_modifier_combo, dumb);
 		_snap_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_modifier_chosen));
 #ifdef __APPLE__
-		Glib::ustring mod_str = string_compose (X_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
+		std::string mod_str = string_compose (X_("%1-%2"), Keyboard::level4_modifier_name (), Keyboard::tertiary_modifier_name ());
 #else
-		Glib::ustring mod_str = Keyboard::secondary_modifier_name();
+		std::string mod_str = Keyboard::secondary_modifier_name();
 #endif
 		Gtkmm2ext::UI::instance()->set_tip (_snap_modifier_combo,
 						    (string_compose (_("<b>Recommended Setting: %1</b>%2"), mod_str, restart_msg)));
@@ -1028,8 +1028,8 @@ public:
 		Label* l = manage (new Label (_("GUI and Font scaling:")));
 		l->set_name ("OptionsLabel");
 
-		 const Glib::ustring dflt = _("Default");
-		 const Glib::ustring empty = X_(""); // despite gtk-doc saying so, NULL does not work as reference
+		const std::string dflt = _("Default");
+		const std::string empty = X_(""); // despite gtk-doc saying so, NULL does not work as reference
 
 		_dpi_slider.set_name("FontScaleSlider");
 		_dpi_slider.set_update_policy (UPDATE_DISCONTINUOUS);
@@ -1718,6 +1718,72 @@ private:
 	Button _xjadeo_browse_button;
 };
 
+class ColumVisibilityOption : public Option
+{
+	public:
+	ColumVisibilityOption (string id, string name, uint32_t n_col, sigc::slot<uint32_t> get, sigc::slot<bool, uint32_t> set)
+		: Option (id, name)
+		, _heading (name)
+		, _n_col (n_col)
+		, _get (get)
+		, _set (set)
+	{
+		cb = (CheckButton**) malloc (sizeof (CheckButton*) * n_col);
+		for (uint32_t i = 0; i < n_col; ++i) {
+			CheckButton* col = manage (new CheckButton (string_compose (_("Column %1"), i + 1)));
+			col->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ColumVisibilityOption::column_toggled), i));
+			_hbox.pack_start (*col);
+			cb[i] = col;
+		}
+		parameter_changed (id);
+	}
+
+	~ColumVisibilityOption () {
+		free (cb);
+	}
+
+	Gtk::Widget& tip_widget() { return _hbox; }
+
+	void set_state_from_config ()
+	{
+		uint32_t c = _get();
+		for (uint32_t i = 0; i < _n_col; ++i) {
+			bool en = (c & (1<<i)) ? true : false;
+			if (cb[i]->get_active () != en) {
+				cb[i]->set_active (en);
+			}
+		}
+	}
+
+	void add_to_page (OptionEditorPage* p)
+	{
+		_heading.add_to_page (p);
+		add_widget_to_page (p, &_hbox);
+	}
+	private:
+
+	void column_toggled (int b) {
+		uint32_t c = _get();
+		uint32_t cc = c;
+		if (cb[b]->get_active ()) {
+			c |= (1<<b);
+		} else {
+			c &= ~(1<<b);
+		}
+		if (cc != c) {
+			_set (c);
+		}
+	}
+
+	HBox _hbox;
+	OptionEditorHeading _heading;
+
+	CheckButton** cb;
+	uint32_t _n_col;
+	sigc::slot<uint32_t> _get;
+	sigc::slot<bool, uint32_t> _set;
+};
+
 
 /** A class which allows control of visibility of some editor components usign
  *  a VisibilityGroup.  The caller should pass in a `dummy' VisibilityGroup
@@ -2395,11 +2461,10 @@ if (!Profile->get_mixbus()) {
 	oac->add (ManualConnect, _("manually"));
 
 	add_option (_("Audio"), oac);
-}  // !mixbus
 
 	bo = new BoolOption (
 			"strict-io",
-			_("Use 'Strict-I/O for new tracks or Busses"),
+			_("Use 'Strict-I/O' for new tracks or Busses"),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
 			);
@@ -2408,6 +2473,7 @@ if (!Profile->get_mixbus()) {
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 			_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
 
+}  // !mixbus
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Denormals")));
 
@@ -2611,6 +2677,8 @@ if (!Profile->get_mixbus()) {
 
 	add_option (_("Solo & mute"), new OptionEditorHeading (_("Send Routing")));
 
+
+if (!ARDOUR::Profile->get_mixbus()) {
 	add_option (_("Solo & mute"),
 	     new BoolOption (
 		     "link-send-and-route-panner",
@@ -2618,6 +2686,7 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
 		     ));
+}
 
 	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Preferences")));
 
@@ -3069,6 +3138,14 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_narrow_ms),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
 		     ));
+
+	add_option (S_("Preferences|GUI"),
+			new ColumVisibilityOption (
+				"action-table-columns", _("Action Script Button Visibility"), 3,
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
+				)
+			);
 
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
 

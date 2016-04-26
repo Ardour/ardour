@@ -26,6 +26,8 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/liststore.h>
 
+#include "pbd/signals.h"
+
 #include "ardour/plugin.h"
 #include "ardour/types.h"
 #include "ardour/template_utils.h"
@@ -52,10 +54,12 @@ private:
 	};
 
 	void build_instrument_list();
+	void refill();
 
 	Glib::RefPtr<Gtk::ListStore> _instrument_list;
 	InstrumentListColumns        _instrument_list_columns;
 	uint32_t                     _reasonable_synth_id;
+	PBD::ScopedConnection        _update_connection;
 };
 
 #endif /* __gtk_ardour_instrument_selector_h__ */

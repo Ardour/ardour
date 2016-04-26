@@ -36,6 +36,7 @@
 #include "ardour/luaproc.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/port.h"
 
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
@@ -105,9 +106,14 @@ PluginInsert::set_count (uint32_t num)
 {
 	bool require_state = !_plugins.empty();
 
+	if (require_state && num > 1 && plugin (0)->get_info ()->type == ARDOUR::AudioUnit) {
+		// we don't allow to replicate AUs
+		return false;
+	}
+
 	/* this is a bad idea.... we shouldn't do this while active.
-	   only a route holding their redirect_lock should be calling this
-	*/
+	 * only a route holding their redirect_lock should be calling this
+	 */
 
 	if (num == 0) {
 		return false;
@@ -117,12 +123,14 @@ PluginInsert::set_count (uint32_t num)
 		for (uint32_t n = 0; n < diff; ++n) {
 			boost::shared_ptr<Plugin> p = plugin_factory (_plugins[0]);
 			add_plugin (p);
-			if (active ()) {
-				p->activate ();
-			}
 
 			if (require_state) {
-				/* XXX do something */
+				XMLNode& state = _plugins[0]->get_state ();
+				p->set_state (state, Stateful::loading_state_version);
+			}
+
+			if (active ()) {
+				p->activate ();
 			}
 		}
 		PluginConfigChanged (); /* EMIT SIGNAL */
@@ -157,6 +165,17 @@ PluginInsert::set_custom_cfg (bool b)
 	if (changed) {
 		PluginConfigChanged (); /* EMIT SIGNAL */
 	}
+}
+
+bool
+PluginInsert::set_preset_out (const ChanCount& c)
+{
+	bool changed = _preset_out != c;
+	_preset_out = c;
+	if (changed && !_custom_cfg) {
+		PluginConfigChanged (); /* EMIT SIGNAL */
+	}
+	return changed;
 }
 
 bool
@@ -258,7 +277,6 @@ PluginInsert::internal_input_streams() const
 	PluginInfoPtr info = _plugins.front()->get_info();
 
 	if (info->reconfigurable_io()) {
-		assert (_plugins.size() == 1);
 		in = _plugins.front()->input_streams();
 	} else {
 		in = info->n_inputs;
@@ -300,7 +318,7 @@ PluginInsert::natural_output_streams() const
 {
 #ifdef MIXBUS
 	if (is_channelstrip ()) {
-		return _configured_out;
+		return ChanCount::min (_configured_out, ChanCount (DataType::AUDIO, 2));
 	}
 #endif
 	return _plugins[0]->get_info()->n_outputs;
@@ -311,7 +329,7 @@ PluginInsert::natural_input_streams() const
 {
 #ifdef MIXBUS
 	if (is_channelstrip ()) {
-		return _configured_in;
+		return ChanCount::min (_configured_in, ChanCount (DataType::AUDIO, 2));
 	}
 #endif
 	return _plugins[0]->get_info()->n_inputs;
@@ -341,15 +359,13 @@ PluginInsert::plugin_latency () const {
 }
 
 bool
-PluginInsert::is_midi_instrument() const
+PluginInsert::needs_midi_input() const
 {
-	/* XXX more finesse is possible here. VST plugins have a
-	   a specific "instrument" flag, for example.
-	 */
-	PluginInfoPtr pi = _plugins[0]->get_info();
-
-	return pi->n_inputs.n_midi() != 0 &&
-		pi->n_outputs.n_audio() > 0;
+	PluginInfoPtr pip = _plugins[0]->get_info();
+	if (pip->needs_midi_input ()) {
+		return true;
+	}
+	return pip->n_inputs.n_midi() != 0 && pip->n_outputs.n_audio() != 0;
 }
 
 void
@@ -624,10 +640,18 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 			for (uint32_t out = 0; out < bufs.count().get (*t); ++out) {
 				bool valid;
 				uint32_t in_idx = thru_map.get (*t, out, &valid);
+				uint32_t m = out + natural_input_streams ().get (*t);
 				if (valid) {
-					uint32_t m = out + natural_input_streams ().get (*t);
 					_delaybuffers.delay (*t, out, inplace_bufs.get (*t, m), bufs.get (*t, in_idx), nframes, offset, offset);
 					used_outputs.set (*t, out, 1); // mark as used
+				} else {
+					used_outputs.get (*t, out, &valid);
+					if (valid) {
+						/* the plugin is expected to write here, but may not :(
+						 * (e.g. drumgizmo w/o kit loaded)
+						 */
+						inplace_bufs.get (*t, m).silence (nframes);
+					}
 				}
 			}
 		}
@@ -753,12 +777,20 @@ PluginInsert::silence (framecnt_t nframes)
 		return;
 	}
 
+	_delaybuffers.flush ();
+
 	ChanMapping in_map (natural_input_streams ());
 	ChanMapping out_map (natural_output_streams ());
-
-	// TODO run sidechain (delaylines)
+	ChanCount maxbuf = ChanCount::max (natural_input_streams (), natural_output_streams());
+#ifdef MIXBUS
+	if (is_channelstrip ()) {
+		if (_configured_in.n_audio() > 0) {
+			_plugins.front()->connect_and_run (_session.get_scratch_buffers (maxbuf, true), in_map, out_map, nframes, 0);
+		}
+	} else
+#endif
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->connect_and_run (_session.get_scratch_buffers ((*i)->get_info()->n_inputs, true), in_map, out_map, nframes, 0);
+		(*i)->connect_and_run (_session.get_scratch_buffers (maxbuf, true), in_map, out_map, nframes, 0);
 	}
 }
 
@@ -1164,7 +1196,7 @@ PluginInsert::sanitize_maps ()
 	/* strip dead wood */
 	PinMappings new_ins;
 	PinMappings new_outs;
-	ChanMapping new_thru (_thru_map);
+	ChanMapping new_thru;
 
 	for (uint32_t pc = 0; pc < get_count(); ++pc) {
 		ChanMapping new_in;
@@ -1208,6 +1240,17 @@ PluginInsert::sanitize_maps ()
 		}
 	}
 
+	/* remove excess thru */
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		for (uint32_t o = 0; o < _configured_out.get (*t); ++o) {
+			bool valid;
+			uint32_t idx = _thru_map.get (*t, o, &valid);
+			if (valid && idx < _configured_internal.get (*t)) {
+				new_thru.set (*t, o, idx);
+			}
+		}
+	}
+
 	/* prevent out + thru,  existing plugin outputs override thru */
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		for (uint32_t o = 0; o < _configured_out.get (*t); ++o) {
@@ -1244,49 +1287,73 @@ PluginInsert::sanitize_maps ()
 bool
 PluginInsert::reset_map (bool emit)
 {
-	uint32_t pc = 0;
 	const PinMappings old_in (_in_map);
 	const PinMappings old_out (_out_map);
 
 	_in_map.clear ();
 	_out_map.clear ();
 	_thru_map = ChanMapping ();
-	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
-		ChanCount ns_inputs  = natural_input_streams() - sidechain_input_pins ();
-		if (_match.method == Split) {
-			_in_map[pc] = ChanMapping ();
-			/* connect no sidechain sinks in round-robin fashion */
-			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-				const uint32_t cend = _configured_in.get (*t);
-				if (cend == 0) { continue; }
-				uint32_t c = 0;
-				for (uint32_t in = 0; in < ns_inputs.get (*t); ++in) {
-					_in_map[pc].set (*t, in, c);
-					c = (c + 1) % cend;
-				}
-			}
-		} else {
-			_in_map[pc] = ChanMapping (ChanCount::min (ns_inputs, _configured_in));
-		}
-		_out_map[pc] = ChanMapping (ChanCount::min (natural_output_streams(), _configured_out));
 
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+	/* build input map */
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		uint32_t sc = 0; // side-chain round-robin (all instances)
+		uint32_t pc = 0;
+		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
 			const uint32_t nis = natural_input_streams ().get(*t);
 			const uint32_t stride = nis - sidechain_input_pins().get (*t);
-			_in_map[pc].offset_to(*t, stride * pc);
-			_out_map[pc].offset_to(*t, pc * natural_output_streams().get(*t));
 
-			// connect side-chains
+			/* SC inputs are last in the plugin-insert.. */
 			const uint32_t sc_start = _configured_in.get (*t);
 			const uint32_t sc_len = _configured_internal.get (*t) - sc_start;
-			if (sc_len == 0) { continue; }
-			uint32_t c = 0;
-			for (uint32_t in = ns_inputs.get (*t); in < nis; ++in) {
-				_in_map[pc].set (*t, in, sc_start + c);
-				c = (c + 1) % sc_len;
+			/* ...but may not be at the end of the plugin ports.
+			 * in case the side-chain is not the last port, shift connections back.
+			 * and connect to side-chain
+			 */
+			uint32_t shift = 0;
+			uint32_t ic = 0; // split inputs
+			const uint32_t cend = _configured_in.get (*t);
+
+			for (uint32_t in = 0; in < nis; ++in) {
+				const Plugin::IOPortDescription& iod (_plugins[pc]->describe_io_port (*t, true, in));
+				if (iod.is_sidechain) {
+					/* connect sidechain sinks to sidechain inputs in round-robin fashion */
+					if (sc_len > 0) {// side-chain may be hidden
+						_in_map[pc].set (*t, in, sc_start + sc);
+						sc = (sc + 1) % sc_len;
+					}
+					++shift;
+				} else {
+					if (_match.method == Split) {
+						if (cend == 0) { continue; }
+						if (_strict_io && ic + stride * pc >= cend) {
+							break;
+						}
+						/* connect *no* sidechain sinks in round-robin fashion */
+						_in_map[pc].set (*t, in, ic + stride * pc);
+						if (_strict_io && (ic + 1) == cend) {
+							break;
+						}
+						ic = (ic + 1) % cend;
+					} else {
+						uint32_t s = in - shift;
+						if (stride * pc + s < cend) {
+							_in_map[pc].set (*t, in, s + stride * pc);
+						}
+					}
+				}
 			}
 		}
 	}
+
+	/* build output map */
+	uint32_t pc = 0;
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+		_out_map[pc] = ChanMapping (ChanCount::min (natural_output_streams(), _configured_out));
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			_out_map[pc].offset_to(*t, pc * natural_output_streams().get(*t));
+		}
+	}
+
 	sanitize_maps ();
 	if (old_in == _in_map && old_out == _out_map) {
 		return false;
@@ -1307,11 +1374,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	ChanCount old_internal;
 	ChanCount old_out;
 
-	if (_configured) {
-		old_in = _configured_in;
-		old_internal = _configured_internal;
-		old_out = _configured_out;
-	}
+	old_in = _configured_in;
+	old_out = _configured_out;
+	old_internal = _configured_internal;
 
 	_configured_in = in;
 	_configured_internal = in;
@@ -1327,6 +1392,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			return false;
 		}
 		_configured_internal += _sidechain->input()->n_ports();
+
+		// include (static_cast<Route*>owner())->name() ??
+		_sidechain->input ()-> set_pretty_name (string_compose (_("SC %1"), name ()));
 	}
 
 	/* get plugin configuration */
@@ -1334,7 +1402,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(DEBUG::ChanMapping)) {
 		DEBUG_STR_DECL(a);
-		DEBUG_STR_APPEND(a, string_compose ("Match '%1': ",  name()));
+		DEBUG_STR_APPEND(a, string_compose ("%1: ",  name()));
 		DEBUG_STR_APPEND(a, _match);
 		DEBUG_TRACE (DEBUG::ChanMapping, DEBUG_STR(a).str());
 	}
@@ -1359,14 +1427,23 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		break;
 	case Delegate:
 		{
-			ChanCount dout;
-			ChanCount useins;
-			bool const r = _plugins.front()->can_support_io_configuration (in, dout, &useins);
-			assert (r);
-			assert (_match.strict_io || dout.n_audio() == out.n_audio()); // sans midi bypass
-			if (useins.n_audio() == 0) {
-				useins = in;
+			ChanCount dout (in); // hint
+			if (_custom_cfg) {
+				dout = _custom_out;
+			} else if (_preset_out.n_audio () > 0) {
+				dout.set (DataType::AUDIO, _preset_out.n_audio ());
+			} else if (dout.n_midi () > 0 && dout.n_audio () == 0) {
+				dout.set (DataType::AUDIO, 2);
 			}
+			if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
+			ChanCount useins;
+			bool const r = _plugins.front()->can_support_io_configuration (_configured_internal, dout, &useins);
+			assert (r);
+			if (useins.n_audio() == 0) {
+				useins = _configured_internal;
+			}
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate configuration: %2 %3\n", name(), useins, dout));
+
 			if (_plugins.front()->configure_io (useins, dout) == false) {
 				PluginIoReConfigure (); /* EMIT SIGNAL */
 				_configured = false;
@@ -1383,6 +1460,17 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		break;
 	}
 
+	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: cfg:%2 state:%3 chn-in:%4 chn-out:%5 match:%6 size-in:%7 size-out:%8\n",
+				name (),
+				_configured ? "Y" : "N",
+				_maps_from_state ? "Y" : "N",
+				old_in == in ? "==" : "!=",
+				old_out == out ? "==" : "!=",
+				old_match.method == _match.method ? "==" : "!=",
+				_in_map.size() == get_count () ? "==" : "!=",
+				_out_map.size() == get_count () ? "==" : "!="
+				));
+
 	bool mapping_changed = false;
 	if (old_in == in && old_out == out
 			&& _configured
@@ -1390,24 +1478,41 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			&& _in_map.size() == _out_map.size()
 			&& _in_map.size() == get_count ()
 		 ) {
+		assert (_maps_from_state == false);
 		/* If the configuration has not changed, keep the mapping */
 		if (old_internal != _configured_internal) {
 			mapping_changed = sanitize_maps ();
 		}
 	} else if (_match.custom_cfg && _configured) {
+		assert (_maps_from_state == false);
 		mapping_changed = sanitize_maps ();
 	} else {
 #ifdef MIXBUS
-		if (is_channelstrip ()) { _maps_from_state = false; }
+		if (is_channelstrip ()) {
+			/* fake channel map - for wire display */
+			_in_map.clear ();
+			_out_map.clear ();
+			_thru_map = ChanMapping ();
+			_in_map[0] = ChanMapping (ChanCount::min (_configured_in, ChanCount (DataType::AUDIO, 2)));
+			_out_map[0] = ChanMapping (ChanCount::min (_configured_out, ChanCount (DataType::AUDIO, 2)));
+			/* set "thru" map for in-place forward of audio */
+			for (uint32_t i = 2; i < _configured_in.n_audio(); ++i) {
+				_thru_map.set (DataType::AUDIO, i, i);
+			}
+			/* and midi (after implicit 1st channel bypass) */
+			for (uint32_t i = 1; i < _configured_in.n_midi(); ++i) {
+				_thru_map.set (DataType::MIDI, i, i);
+			}
+		} else
 #endif
-		if (_maps_from_state) {
-			_maps_from_state = false;
+		if (_maps_from_state && old_in == in && old_out == out) {
 			mapping_changed = true;
 			sanitize_maps ();
 		} else {
 			/* generate a new mapping */
 			mapping_changed = reset_map (false);
 		}
+		_maps_from_state = false;
 	}
 
 	if (mapping_changed) {
@@ -1439,13 +1544,36 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	_no_inplace = check_inplace ();
 	_mapping_changed = false;
 
+	/* only the "noinplace_buffers" thread buffers need to be this large,
+	 * this can be optimized. other buffers are fine with
+	 * ChanCount::max (natural_input_streams (), natural_output_streams())
+	 * and route.cc's max (configured_in, configured_out)
+	 *
+	 * no-inplace copies "thru" outputs (to emulate in-place) for
+	 * all outputs (to prevent overwrite) into a temporary space
+	 * which also holds input buffers (in case the plugin does process
+	 * in-place and overwrites those).
+	 *
+	 * this buffers need to be at least as
+	 *   natural_input_streams () + possible outputs.
+	 *
+	 * sidechain inputs add a constraint on the input:
+	 * configured input + sidechain (=_configured_internal)
+	 *
+	 * NB. this also satisfies
+	 * max (natural_input_streams(), natural_output_streams())
+	 * which is needed for silence runs
+	 */
+	_required_buffers = ChanCount::max (_configured_internal,
+			natural_input_streams () + ChanCount::max (_configured_out, natural_output_streams () * get_count ()));
+
 	if (old_in != in || old_out != out || old_internal != _configured_internal
 			|| (old_match.method != _match.method && (old_match.method == Split || _match.method == Split))
 		 ) {
 		PluginIoReConfigure (); /* EMIT SIGNAL */
 	}
 
-	_delaybuffers.configure (_configured_out, _plugins.front()->max_latency ());
+	_delaybuffers.configure (_configured_out, _plugins.front ()->max_latency ());
 	_latency_changed = true;
 
 	// we don't know the analysis window size, so we must work with the
@@ -1481,12 +1609,29 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	return private_can_support_io_configuration (in, out).method != Impossible;
 }
 
+PluginInsert::Match
+PluginInsert::private_can_support_io_configuration (ChanCount const& in, ChanCount& out) const
+{
+	if (!_custom_cfg && _preset_out.n_audio () > 0) {
+		// preseed hint (for variable i/o)
+		out.set (DataType::AUDIO, _preset_out.n_audio ());
+	}
+
+	Match rv = internal_can_support_io_configuration (in, out);
+
+	if (!_custom_cfg && _preset_out.n_audio () > 0) {
+		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: using output preset: %2\n", name(), _preset_out));
+		out.set (DataType::AUDIO, _preset_out.n_audio ());
+	}
+	return rv;
+}
+
 /** A private version of can_support_io_configuration which returns the method
  *  by which the configuration can be matched, rather than just whether or not
  *  it can be.
  */
 PluginInsert::Match
-PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanCount& out) const
+PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, ChanCount& out) const
 {
 	if (_plugins.empty()) {
 		return Match();
@@ -1501,8 +1646,13 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 
 	/* if a user specified a custom cfg, so be it. */
 	if (_custom_cfg) {
+		PluginInfoPtr info = _plugins.front()->get_info();
 		out = _custom_out;
-		return Match (ExactMatch, get_count(), _strict_io, true); // XXX
+		if (info->reconfigurable_io()) {
+			return Match (Delegate, get_count(), _strict_io, true);
+		} else {
+			return Match (ExactMatch, get_count(), _strict_io, true);
+		}
 	}
 
 	/* try automatic configuration */
@@ -1517,12 +1667,12 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 		m.strict_io = true;
 
 		/* special case MIDI instruments */
-		if (is_midi_instrument()) {
+		if (needs_midi_input ()) {
 			// output = midi-bypass + at most master-out channels.
 			ChanCount max_out (DataType::AUDIO, 2); // TODO use master-out
 			max_out.set (DataType::MIDI, out.get(DataType::MIDI));
 			out = ChanCount::min (out, max_out);
-			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("special case strict-i/o instrument: %1\n", name()));
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: special case strict-i/o instrument\n", name()));
 			return m;
 		}
 
@@ -1538,7 +1688,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 						f = max (f, (uint32_t) ceil (inx.get(*t) / (float)nout));
 					}
 					out = inx;
-					DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("special case strict-i/o generator: %1\n", name()));
+					DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: special case strict-i/o for generator\n", name()));
 					return Match (Replicate, f, _strict_io);
 				}
 				break;
@@ -1556,12 +1706,14 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanC
 
 	ChanCount ns_inputs  = inputs - sidechain_input_pins ();
 
-	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("resolving 'Impossible' match for %1\n", name()));
+	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: resolving 'Impossible' match...\n", name()));
 
 	if (info->reconfigurable_io()) {
 		ChanCount useins;
-		// TODO add sidechains here
-		bool const r = _plugins.front()->can_support_io_configuration (inx, out, &useins);
+		out = inx; // hint
+		if (out.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
+		if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
+		bool const r = _plugins.front()->can_support_io_configuration (inx + sidechain_input_pins (), out, &useins);
 		if (!r) {
 			// houston, we have a problem.
 			return Match (Impossible, 0);
@@ -1624,8 +1776,13 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 	ChanCount midi_bypass;
 
 	if (info->reconfigurable_io()) {
-		/* Plugin has flexible I/O, so delegate to it */
-		bool const r = _plugins.front()->can_support_io_configuration (in, out);
+		/* Plugin has flexible I/O, so delegate to it
+		 * pre-seed outputs, plugin tries closest match
+		 */
+		out = in; // hint
+		if (out.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
+		if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
+		bool const r = _plugins.front()->can_support_io_configuration (in + sidechain_input_pins (), out);
 		if (!r) {
 			return Match (Impossible, 0);
 		}
@@ -1637,11 +1794,11 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 	ChanCount ns_inputs  = inputs - sidechain_input_pins ();
 
 	if (in.get(DataType::MIDI) == 1 && outputs.get(DataType::MIDI) == 0) {
-		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("bypassing midi-data around %1\n", name()));
+		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: bypassing midi-data\n", name()));
 		midi_bypass.set (DataType::MIDI, 1);
 	}
 	if (in.get(DataType::MIDI) == 1 && inputs.get(DataType::MIDI) == 0) {
-		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("hiding midi-port from plugin %1\n", name()));
+		DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: hiding midi-port from plugin\n", name()));
 		in.set(DataType::MIDI, 0);
 	}
 
@@ -1788,6 +1945,7 @@ PluginInsert::state (bool full)
 	 * in case the plugin goes missing) */
 	node.add_child_nocopy (* _configured_in.state (X_("ConfiguredInput")));
 	node.add_child_nocopy (* _configured_out.state (X_("ConfiguredOutput")));
+	node.add_child_nocopy (* _preset_out.state (X_("PresetOutput")));
 
 	/* save custom i/o config */
 	node.add_property("custom", _custom_cfg ? "yes" : "no");
@@ -2054,14 +2212,19 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		_custom_cfg = string_is_affirmative (prop->value());
 	}
 
-	// TODO load/add sidechain
-
 	uint32_t in_maps = 0;
 	uint32_t out_maps = 0;
 	XMLNodeList kids = node.children ();
 	for (XMLNodeIterator i = kids.begin(); i != kids.end(); ++i) {
+		if ((*i)->name() == X_("ConfiguredInput")) {
+			_configured_in = ChanCount(**i);
+		}
 		if ((*i)->name() == X_("ConfiguredOutput")) {
 			_custom_out = ChanCount(**i);
+			_configured_out = ChanCount(**i);
+		}
+		if ((*i)->name() == X_("PresetOutput")) {
+			_preset_out = ChanCount(**i);
 		}
 		if (strncmp ((*i)->name ().c_str(), X_("InputMap-"), 9) == 0) {
 			long pc = atol (&((*i)->name().c_str()[9]));
@@ -2080,6 +2243,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		if ((*i)->name () ==  "ThruMap") {
 				_thru_map = ChanMapping (**i);
 		}
+
+		// sidechain is a Processor (IO)
 		if ((*i)->name () ==  Processor::state_node_name) {
 			if (!_sidechain) {
 				add_sidechain (0);
@@ -2100,6 +2265,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		}
 	}
 
+	PluginConfigChanged (); /* EMIT SIGNAL */
 	return 0;
 }
 
@@ -2390,6 +2556,9 @@ PluginInsert::get_impulse_analysis_plugin()
 {
 	boost::shared_ptr<Plugin> ret;
 	if (_impulseAnalysisPlugin.expired()) {
+		// LV2 in particular uses various _session params
+		// during init() -- most notably block_size..
+		// not great.
 		ret = plugin_factory(_plugins[0]);
 		ret->configure_io (internal_input_streams (), internal_output_streams ());
 		_impulseAnalysisPlugin = ret;
@@ -2425,7 +2594,7 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 		plugin->StartTouch.connect_same_thread (*this, boost::bind (&PluginInsert::start_touch, this, _1));
 		plugin->EndTouch.connect_same_thread (*this, boost::bind (&PluginInsert::end_touch, this, _1));
 		plugin->LatencyChanged.connect_same_thread (*this, boost::bind (&PluginInsert::latency_changed, this, _1, _2));
-		// cache sidechain ports
+		// cache sidechain port count
 		_cached_sidechain_pins.reset ();
 		const ChanCount& nis (plugin->get_info()->n_inputs);
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
@@ -2444,6 +2613,18 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 	}
 #endif
 	_plugins.push_back (plugin);
+}
+
+bool
+PluginInsert::load_preset (ARDOUR::Plugin::PresetRecord pr)
+{
+	bool ok = true;
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		if (! (*i)->load_preset (pr)) {
+			ok = false;
+		}
+	}
+	return ok;
 }
 
 void

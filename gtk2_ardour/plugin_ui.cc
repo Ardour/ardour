@@ -561,7 +561,7 @@ PlugUIBase::preset_selected (Plugin::PresetRecord preset)
 		return;
 	}
 	if (!preset.label.empty()) {
-		plugin->load_preset (preset);
+		insert->load_preset (preset);
 	} else {
 		// blank selected = no preset
 		plugin->clear_preset();

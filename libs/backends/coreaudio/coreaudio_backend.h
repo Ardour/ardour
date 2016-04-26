@@ -82,7 +82,7 @@ class CoreBackendPort {
 	bool is_connected (const CoreBackendPort *port) const;
 	bool is_physically_connected () const;
 
-	const std::vector<CoreBackendPort *>& get_connections () const { return _connections; }
+	const std::set<CoreBackendPort *>& get_connections () const { return _connections; }
 
 	int connect (CoreBackendPort *port);
 	int disconnect (CoreBackendPort *port);
@@ -114,7 +114,7 @@ class CoreBackendPort {
 	const PortFlags _flags;
 	LatencyRange _capture_latency_range;
 	LatencyRange _playback_latency_range;
-	std::vector<CoreBackendPort*> _connections;
+	std::set<CoreBackendPort*> _connections;
 
 	void _connect (CoreBackendPort* , bool);
 	void _disconnect (CoreBackendPort* , bool);
@@ -330,6 +330,7 @@ class CoreAudioBackend : public AudioBackend {
 	std::string get_port_name (PortHandle) const;
 	PortHandle  get_port_by_name (const std::string&) const;
 	int get_port_property (PortHandle, const std::string& key, std::string& value, std::string& type) const;
+	int set_port_property (PortHandle, const std::string& key, const std::string& value, const std::string& type);
 
 	int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&) const;
 
@@ -460,11 +461,15 @@ class CoreAudioBackend : public AudioBackend {
 	int register_system_audio_ports ();
 	void unregister_ports (bool system_only = false);
 
-	std::vector<CoreBackendPort *> _ports;
 	std::vector<CoreBackendPort *> _system_inputs;
 	std::vector<CoreBackendPort *> _system_outputs;
 	std::vector<CoreBackendPort *> _system_midi_in;
 	std::vector<CoreBackendPort *> _system_midi_out;
+
+	typedef std::map<std::string, CoreBackendPort *> PortMap; // fast lookup in _ports
+	typedef std::set<CoreBackendPort *> PortIndex; // fast lookup in _ports
+	PortMap _portmap;
+	PortIndex _ports;
 
 	struct PortConnectData {
 		std::string a;
@@ -492,16 +497,15 @@ class CoreAudioBackend : public AudioBackend {
 	}
 
 	bool valid_port (PortHandle port) const {
-		return std::find (_ports.begin (), _ports.end (), (CoreBackendPort*)port) != _ports.end ();
+		return _ports.find (static_cast<CoreBackendPort*>(port)) != _ports.end ();
 	}
 
-	CoreBackendPort * find_port (const std::string& port_name) const {
-		for (std::vector<CoreBackendPort*>::const_iterator it = _ports.begin (); it != _ports.end (); ++it) {
-			if ((*it)->name () == port_name) {
-				return *it;
-			}
+	CoreBackendPort* find_port (const std::string& port_name) const {
+		PortMap::const_iterator it = _portmap.find (port_name);
+		if (it == _portmap.end()) {
+			return NULL;
 		}
-		return NULL;
+		return (*it).second;
 	}
 
 	CoreBackendPort * find_port_in (std::vector<CoreBackendPort *> plist, const std::string& port_name) const {

@@ -874,15 +874,17 @@ MixerStrip::output_press (GdkEventButton *ev)
 			citems.pop_back ();
 		}
 
-		citems.push_back (SeparatorElem());
+		if (!ARDOUR::Profile->get_mixbus()) {
+			citems.push_back (SeparatorElem());
 
-		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-			citems.push_back (
-				MenuElem (
-					string_compose (_("Add %1 port"), (*i).to_i18n_string()),
-					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_output_port), *i)
-					)
-				);
+			for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+				citems.push_back (
+						MenuElem (
+							string_compose (_("Add %1 port"), (*i).to_i18n_string()),
+							sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_output_port), *i)
+							)
+						);
+			}
 		}
 
 		citems.push_back (SeparatorElem());
@@ -1363,7 +1365,8 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 			// "ardour:Master/" -> "Master"
 			string::size_type slash = ardour_track_name.find("/");
 			if (slash != string::npos) {
-				label << ardour_track_name.substr(7, slash - 7);
+				const size_t ppps = RouteUI::program_port_prefix.size (); // "ardour:"
+				label << ardour_track_name.substr (ppps, slash - ppps);
 				have_label = true;
 			}
 		}
@@ -1589,11 +1592,13 @@ MixerStrip::build_route_ops_menu ()
 	i->set_sensitive(! _session->transport_rolling());
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
 
-	items.push_back (SeparatorElem());
-	items.push_back (CheckMenuElem (_("Strict I/O")));
-	i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
-	i->set_active (_route->strict_io());
-	i->signal_activate().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*_route, &Route::set_strict_io), !_route->strict_io())));
+	if (!Profile->get_mixbus ()) {
+		items.push_back (SeparatorElem());
+		items.push_back (CheckMenuElem (_("Strict I/O")));
+		i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+		i->set_active (_route->strict_io());
+		i->signal_activate().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*_route, &Route::set_strict_io), !_route->strict_io())));
+	}
 
 	items.push_back (SeparatorElem());
 

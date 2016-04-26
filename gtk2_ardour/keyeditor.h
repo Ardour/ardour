@@ -43,6 +43,8 @@ class KeyEditor : public ArdourWindow
 	void add_tab (std::string const &name, Gtkmm2ext::Bindings&);
 	void remove_tab (std::string const &name);
 
+	static sigc::signal<void> UpdateBindings;
+
 	private:
 	class Tab : public Gtk::VBox
 	{
@@ -113,6 +115,7 @@ class KeyEditor : public ArdourWindow
 
 	void unbind ();
 	void reset ();
+	void refresh ();
 	void page_change (GtkNotebookPage*, guint);
 
 	unsigned int sort_column;

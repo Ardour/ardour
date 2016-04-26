@@ -5,12 +5,41 @@ export UBUNTU_MENUPROXY=""
 
 if [ $# -gt 0 ] ; then
     case $1 in
-        -g|--gdb) GDB=gdb; shift ;;
+        -g|--gdb) DBG=gdb; shift ;;
+    esac
+    case $1 in
+        --valgrind) DBG=valgrind; shift ;;
+    esac
+    case $1 in
+        --callgrind) DBG=callgrind; shift ;;
     esac
 fi
 
-if test -z "$GDB"; then
+
+if test -z "$DBG"; then
 	exec $TOP/build/tools/luadevel/luasession "$@"
+fi
+
+if test "$DBG" = "valgrind"; then
+	export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
+	exec valgrind \
+		--error-limit=no --num-callers=50 \
+		--tool=memcheck \
+		--track-origins=yes \
+		 --leak-check=full --show-leak-kinds=all \
+		--suppressions=${TOP}/tools/valgrind.supp \
+		$TOP/build/tools/luadevel/luasession "$@"
+fi
+
+if test "$DBG" = "callgrind"; then
+	exec valgrind \
+		--error-limit=no --num-callers=50 \
+		--tool=callgrind \
+		--separate-callers=3 \
+		--separate-threads=yes \
+		--collect-systime=yes \
+		--collect-jumps=yes \
+		$TOP/build/tools/luadevel/luasession "$@"
 fi
 
 if test -n "`which gdb`"; then

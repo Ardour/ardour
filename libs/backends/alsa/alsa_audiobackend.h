@@ -86,7 +86,7 @@ class AlsaPort {
 		bool is_connected (const AlsaPort *port) const;
 		bool is_physically_connected () const;
 
-		const std::vector<AlsaPort *>& get_connections () const { return _connections; }
+		const std::set<AlsaPort *>& get_connections () const { return _connections; }
 
 		int connect (AlsaPort *port);
 		int disconnect (AlsaPort *port);
@@ -118,7 +118,7 @@ class AlsaPort {
 		const PortFlags _flags;
 		LatencyRange _capture_latency_range;
 		LatencyRange _playback_latency_range;
-		std::vector<AlsaPort*> _connections;
+		std::set<AlsaPort*> _connections;
 
 		void _connect (AlsaPort* , bool);
 		void _disconnect (AlsaPort* , bool);
@@ -266,7 +266,9 @@ class AlsaAudioBackend : public AudioBackend {
 		int         set_port_name (PortHandle, const std::string&);
 		std::string get_port_name (PortHandle) const;
 		PortHandle  get_port_by_name (const std::string&) const;
+
 		int get_port_property (PortHandle, const std::string& key, std::string& value, std::string& type) const;
+		int set_port_property (PortHandle, const std::string& key, const std::string& value, const std::string& type);
 
 		int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&) const;
 
@@ -402,11 +404,15 @@ class AlsaAudioBackend : public AudioBackend {
 		int register_system_midi_ports (const std::string device = "");
 		void unregister_ports (bool system_only = false);
 
-		std::vector<AlsaPort *> _ports;
 		std::vector<AlsaPort *> _system_inputs;
 		std::vector<AlsaPort *> _system_outputs;
 		std::vector<AlsaPort *> _system_midi_in;
 		std::vector<AlsaPort *> _system_midi_out;
+
+		typedef std::map<std::string, AlsaPort *> PortMap; // fast lookup in _ports
+		typedef std::set<AlsaPort *> PortIndex; // fast lookup in _ports
+		PortMap _portmap;
+		PortIndex _ports;
 
 		std::vector<AlsaMidiOut *> _rmidi_out;
 		std::vector<AlsaMidiIn  *> _rmidi_in;
@@ -440,16 +446,15 @@ class AlsaAudioBackend : public AudioBackend {
 		}
 
 		bool valid_port (PortHandle port) const {
-			return std::find (_ports.begin (), _ports.end (), (AlsaPort*)port) != _ports.end ();
+			return _ports.find (static_cast<AlsaPort*>(port)) != _ports.end ();
 		}
 
-		AlsaPort * find_port (const std::string& port_name) const {
-			for (std::vector<AlsaPort*>::const_iterator it = _ports.begin (); it != _ports.end (); ++it) {
-				if ((*it)->name () == port_name) {
-					return *it;
-				}
+		AlsaPort* find_port (const std::string& port_name) const {
+			PortMap::const_iterator it = _portmap.find (port_name);
+			if (it == _portmap.end()) {
+				return NULL;
 			}
-			return NULL;
+			return (*it).second;
 		}
 
 		void update_systemic_audio_latencies ();

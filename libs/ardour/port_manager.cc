@@ -158,6 +158,7 @@ void
 PortManager::get_physical_outputs (DataType type, std::vector<std::string>& s)
 {
 	if (!_backend) {
+		s.clear ();
 		return;
 	}
 	_backend->get_physical_outputs (type, s);
@@ -167,6 +168,7 @@ void
 PortManager::get_physical_inputs (DataType type, std::vector<std::string>& s)
 {
 	if (!_backend) {
+		s.clear ();
 		return;
 	}
 
@@ -383,6 +385,40 @@ PortManager::connected (const string& port_name)
 	}
 
 	return _backend->connected (handle);
+}
+
+bool
+PortManager::physically_connected (const string& port_name)
+{
+	if (!_backend) {
+		return false;
+	}
+
+	PortEngine::PortHandle handle = _backend->get_port_by_name (port_name);
+
+	if (!handle) {
+		return false;
+	}
+
+	return _backend->physically_connected (handle);
+}
+
+int
+PortManager::get_connections (const string& port_name, std::vector<std::string>& s)
+{
+	if (!_backend) {
+		s.clear ();
+		return 0;
+	}
+
+	PortEngine::PortHandle handle = _backend->get_port_by_name (port_name);
+
+	if (!handle) {
+		s.clear ();
+		return 0;
+	}
+
+	return _backend->get_connections (handle, s);
 }
 
 int

@@ -114,6 +114,7 @@ PTFFormat::load(std::string path, int64_t targetsr) {
 	uint64_t i;
 	uint64_t j;
 	int inv;
+	int err;
 
 	if (! (fp = fopen(path.c_str(), "rb"))) {
 		return -1;
@@ -258,8 +259,12 @@ PTFFormat::load(std::string path, int64_t targetsr) {
 		}
 	}
 
+	if (version < 5 || version > 12)
+		return -1;
 	targetrate = targetsr;
-	parse();
+	err = parse();
+	if (err)
+		return -1;
 	return 0;
 }
 
@@ -299,36 +304,48 @@ PTFFormat::unxor10(void)
 	}
 }
 
-void
+int
 PTFFormat::parse(void) {
 	if (version == 5) {
 		parse5header();
 		setrates();
+		if (sessionrate < 44100 || sessionrate > 192000)
+		  return -1;
 		parseaudio5();
 		parserest5();
 	} else if (version == 7) {
 		parse7header();
 		setrates();
+		if (sessionrate < 44100 || sessionrate > 192000)
+		  return -1;
 		parseaudio();
 		parserest89();
 	} else if (version == 8) {
 		parse8header();
 		setrates();
+		if (sessionrate < 44100 || sessionrate > 192000)
+		  return -1;
 		parseaudio();
 		parserest89();
 	} else if (version == 9) {
 		parse9header();
 		setrates();
+		if (sessionrate < 44100 || sessionrate > 192000)
+		  return -1;
 		parseaudio();
 		parserest89();
 	} else if (version == 10 || version == 11 || version == 12) {
 		parse10header();
 		setrates();
+		if (sessionrate < 44100 || sessionrate > 192000)
+		  return -1;
 		parseaudio();
 		parserest10();
 	} else {
 		// Should not occur
+		return -1;
 	}
+	return 0;
 }
 
 void
@@ -590,13 +607,18 @@ PTFFormat::parserest5(void) {
 				vector<track_t>::iterator ti;
 				vector<track_t>::iterator bt = tracks.begin();
 				vector<track_t>::iterator et = tracks.end();
-				track_t tr ( name, 0, 0, &r);
+				track_t tr = { name, 0, 0, r };
 				if ((ti = std::find(bt, et, tr)) != et) {
 					tracknumber = (*ti).index;
 				} else {
 					tracknumber = tracks.size() + 1;
 				}
-				track_t t ( name, (uint16_t)tracknumber, uint8_t(0), &r);
+				track_t t = {
+					name,
+					(uint16_t)tracknumber,
+					uint8_t(0),
+					r
+				};
 				tracks.push_back(t);
 			} else {
 				region_t r = {
@@ -611,13 +633,18 @@ PTFFormat::parserest5(void) {
 				vector<track_t>::iterator ti;
 				vector<track_t>::iterator bt = tracks.begin();
 				vector<track_t>::iterator et = tracks.end();
-				track_t tr ( name, 0, 0, &r );
+				track_t tr = { name, 0, 0, r };
 				if ((ti = std::find(bt, et, tr)) != et) {
 					tracknumber = (*ti).index;
 				} else {
 					tracknumber = tracks.size() + 1;
 				}
-				track_t t ( name, (uint16_t)tracknumber, uint8_t(0), &r);
+				track_t t = {
+					name,
+					(uint16_t)tracknumber,
+					uint8_t(0),
+					r
+				};
 				tracks.push_back(t);
 			}
 			rindex++;
@@ -628,11 +655,10 @@ PTFFormat::parserest5(void) {
 }
 
 void
-PTFFormat::resort(std::vector<wav_t> *ws) {
+PTFFormat::resort(std::vector<wav_t>& ws) {
 	int j = 0;
-	std::sort((*ws).begin(), (*ws).end());
-	for (std::vector<wav_t>::iterator i = (*ws).begin();
-			i != (*ws).end(); ++i) {
+	std::sort(ws.begin(), ws.end());
+	for (std::vector<wav_t>::iterator i = ws.begin(); i != ws.end(); ++i) {
 		(*i).index = j;
 		j++;
 	}
@@ -724,8 +750,8 @@ PTFFormat::parseaudio5(void) {
 		numberofwavs--;
 		i += 7;
 	}
-	resort(&actualwavs);
-	resort(&audiofiles);
+	resort(actualwavs);
+	resort(audiofiles);
 }
 
 void
@@ -1298,7 +1324,7 @@ PTFFormat::parserest10(void) {
 					vector<region_t>::iterator finish = regions.end();
 					vector<region_t>::iterator found;
 					if ((found = std::find(begin, finish, tr.reg)) != finish) {
-						tr.set_region (&(*found));
+						tr.reg = (*found);
 					}
 					i = l+16;
 					offset = 0;

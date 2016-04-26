@@ -85,13 +85,17 @@ Auditioner::init ()
 
 Auditioner::~Auditioner ()
 {
+	if (asynth) {
+		asynth->drop_references ();
+	}
+	asynth.reset ();
 }
 
 void
 Auditioner::lookup_synth ()
 {
 	string plugin_id = Config->get_midi_audition_synth_uri();
-	asynth = boost::shared_ptr<Processor>();
+	asynth.reset ();
 	if (!plugin_id.empty()) {
 		boost::shared_ptr<Plugin> p;
 		p = find_plugin (_session, plugin_id, ARDOUR::LV2);

@@ -303,6 +303,19 @@ ARDOUR_UI::setup_windows ()
 	main_vpacker.pack_start (status_bar_hpacker, false, false);
 #endif
 
+	for (int i = 0; i < 9; ++i) {
+		std::string const a = string_compose (X_("script-action-%1"), i + 1);
+		Glib::RefPtr<Action> act = ActionManager::get_action(X_("Editor"), a.c_str());
+		assert (act);
+		action_script_call_btn[i].set_text (string_compose ("%1", i+1));
+		action_script_call_btn[i].set_related_action (act);
+		const int row = i % 3;
+		const int col = i / 3;
+		action_script_table.attach (action_script_call_btn[i], col, col + 1, row, row + 1, EXPAND, EXPAND, 1, 1);
+		action_script_call_btn[i].set_no_show_all ();
+	}
+	action_script_table.show ();
+
 	setup_transport();
 	build_menu_bar ();
 	setup_tooltips ();

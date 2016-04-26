@@ -38,6 +38,7 @@ using namespace PBD;
 
 PBD::Signal2<void,boost::shared_ptr<Port>, boost::shared_ptr<Port> > Port::PostDisconnect;
 PBD::Signal0<void> Port::PortDrop;
+PBD::Signal0<void> Port::PortSignalDrop;
 
 bool         Port::_connecting_blocked = false;
 pframes_t    Port::_global_port_buffer_offset = 0;
@@ -75,6 +76,9 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 	}
 
 	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::drop, this));
+	PortSignalDrop.connect_same_thread (drop_connection, boost::bind (&Port::signal_drop, this));
+	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection,
+			boost::bind (&Port::port_connected_or_disconnected, this, _1, _3, _5));
 }
 
 /** Port destructor */
@@ -103,6 +107,25 @@ Port::pretty_name(bool fallback_to_name) const
 	return "";
 }
 
+bool
+Port::set_pretty_name(const std::string& n)
+{
+	if (_port_handle) {
+		if (0 == port_engine.set_port_property (_port_handle,
+					"http://jackaudio.org/metadata/pretty-name", n, ""))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void
+Port::signal_drop ()
+{
+	engine_connection.disconnect ();
+}
+
 void
 Port::drop ()
 {
@@ -110,6 +133,26 @@ Port::drop ()
 		DEBUG_TRACE (DEBUG::Ports, string_compose ("drop handle for port %1\n", name()));
 		port_engine.unregister_port (_port_handle);
 		_port_handle = 0;
+	}
+}
+
+void
+Port::port_connected_or_disconnected (boost::weak_ptr<Port> w0, boost::weak_ptr<Port> w1, bool con)
+{
+	if (con) {
+		/* we're only interested in disconnect */
+		return;
+	}
+	boost::shared_ptr<Port> p0 = w0.lock ();
+	boost::shared_ptr<Port> p1 = w1.lock ();
+	/* a cheaper, less hacky way to do boost::shared_from_this() ...  */
+	boost::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
+
+	if (p0 == pself) {
+		PostDisconnect (p0, p1); // emit signal
+	}
+	if (p1 == pself) {
+		PostDisconnect (p1, p0); // emit signal
 	}
 }
 
@@ -225,8 +268,7 @@ Port::disconnect (std::string const & other)
 		_connections.erase (other);
 	}
 
-	/* a cheaper, less hacky way to do boost::shared_from_this() ...
-	 */
+	/* a cheaper, less hacky way to do boost::shared_from_this() ...  */
 	boost::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
 	boost::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (other);
 
@@ -465,6 +507,8 @@ Port::reestablish ()
 
 	reset ();
 
+	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection,
+			boost::bind (&Port::port_connected_or_disconnected, this, _1, _3, _5));
 	return 0;
 }
 

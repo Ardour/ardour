@@ -22,6 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <string>
+#include <set>
 
 #include "pbd/statefuldestructible.h"
 #include "pbd/controllable.h"
@@ -54,6 +55,7 @@ class AutomationControl;
 typedef boost::shared_ptr<Plugin> PluginPtr;
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
 typedef std::list<PluginInfoPtr> PluginInfoList;
+typedef std::set<uint32_t> PluginOutputConfiguration;
 
 /** A plugin is an external module (usually 3rd party provided) loaded into Ardour
  * for the purpose of digital signal processing.
@@ -124,7 +126,8 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 		bool is_sidechain;
 	};
 
-	virtual IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id);
+	virtual IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id) const;
+	virtual PluginOutputConfiguration possible_output () const;
 
 	virtual void set_automation_control (uint32_t /*port_index*/, boost::shared_ptr<ARDOUR::AutomationControl>) { }
 
@@ -394,6 +397,7 @@ class LIBARDOUR_API PluginInfo {
 
 	virtual PluginPtr load (Session& session) = 0;
 	virtual bool is_instrument() const;
+	virtual bool needs_midi_input() const { return is_instrument (); }
 	virtual bool in_category (const std::string &) const { return false; }
 
 	virtual std::vector<Plugin::PresetRecord> get_presets (bool user_only) const = 0;

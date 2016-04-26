@@ -55,6 +55,10 @@ class LIBARDOUR_API Send : public Delivery
 	XMLNode& get_state ();
 	int set_state(const XMLNode&, int version);
 
+	PBD::Signal0<void> SelfDestruct;
+	void set_remove_on_disconnect (bool b) { _remove_on_disconnect = b; }
+	bool remove_on_disconnect () const { return _remove_on_disconnect; }
+
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
 
 	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
@@ -89,6 +93,7 @@ class LIBARDOUR_API Send : public Delivery
 	/* disallow copy construction */
 	Send (const Send&);
 	void panshell_changed ();
+	void snd_output_changed (IOChange, void*);
 
 	int set_state_2X (XMLNode const &, int);
 
@@ -96,6 +101,7 @@ class LIBARDOUR_API Send : public Delivery
 
 	framecnt_t _delay_in;
 	framecnt_t _delay_out;
+	bool       _remove_on_disconnect;
 };
 
 } // namespace ARDOUR

@@ -1039,6 +1039,15 @@ private:
       return addConstructor <void (*) ()> ();
     }
 
+    Class <T>& addEqualCheck ()
+    {
+      PRINTDOC("Member Function", _name << "sameinstance", std::string("bool"), std::string("void (*)(" + type_name <T>() + ")"))
+      assert (lua_istable (L, -1));
+      lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+      rawsetfield (L, -3, "sameinstance");
+      return *this;
+    }
+
   };
 
   /** C Array to/from table */
@@ -1060,6 +1069,8 @@ private:
           std::string(""), "int (*)(lua_State*)")
       PRINTDOC ("Ext C Function", _name << "set_table",
           std::string(""), "int (*)(lua_State*)")
+      PRINTDOC("Member Function", _name << "sameinstance",
+          std::string("bool"), std::string("void (*)(" + type_name <T>() + "*)"))
 
       m_stackSize = parent->m_stackSize + 3;
       parent->m_stackSize = 0;
@@ -1117,6 +1128,10 @@ private:
 
         lua_pushcclosure (L, &CFunc::setTable <T>, 0);
         rawsetfield (L, -3, "set_table"); // class table
+
+        lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+        rawsetfield (L, -3, "sameinstance");
+
       }
       else
       {

@@ -164,13 +164,18 @@ AddRouteDialog::AddRouteDialog ()
 	++n;
 
 	/* New Route's Routing is.. */
-	l = manage (new Label (_("Output Ports:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	table2->attach (strict_io_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 
-	ARDOUR_UI_UTILS::set_tooltip (strict_io_combo,
-			_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
-	++n;
+	if (Profile->get_mixbus ()) {
+		strict_io_combo.set_active (1);
+	} else {
+		l = manage (new Label (_("Output Ports:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		table2->attach (strict_io_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+
+		ARDOUR_UI_UTILS::set_tooltip (strict_io_combo,
+				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
+		++n;
+	}
 
 	options_box->pack_start (*table2, false, true);
 	vbox->pack_start (*options_box, false, true);

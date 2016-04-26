@@ -307,13 +307,18 @@ EngineControl::EngineControl ()
 		set_default_state ();
 	}
 
+	update_sensitivity ();
 	connect_changed_signals ();
 
 	notebook.signal_switch_page().connect (sigc::mem_fun (*this, &EngineControl::on_switch_page));
 
 	connect_disconnect_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::connect_disconnect_click));
-	connect_disconnect_button.set_no_show_all();
 
+	connect_disconnect_button.set_no_show_all();
+	use_buffered_io_button.set_no_show_all();
+	update_devices_button.set_no_show_all();
+	start_stop_button.set_no_show_all();
+	midi_devices_button.set_no_show_all();
 }
 
 void
@@ -416,6 +421,18 @@ EngineControl::on_show ()
 	}
 	device_changed ();
 	ok_button->grab_focus();
+}
+
+bool
+EngineControl::try_autostart ()
+{
+	if (!start_stop_button.get_sensitive()) {
+		return false;
+	}
+	if (ARDOUR::AudioEngine::instance()->running()) {
+		return true;
+	}
+	return start_engine ();
 }
 
 bool
@@ -2754,6 +2771,10 @@ void
 EngineControl::set_desired_sample_rate (uint32_t sr)
 {
 	_desired_sample_rate = sr;
+	if (ARDOUR::AudioEngine::instance ()->running ()
+			&& ARDOUR::AudioEngine::instance ()->sample_rate () != sr) {
+		stop_engine ();
+	}
 	device_changed ();
 }
 

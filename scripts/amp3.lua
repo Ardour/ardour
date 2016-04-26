@@ -31,15 +31,15 @@ end
 -- This is as efficient as Ardour doing it itself in C++
 -- Lua function overhead is negligible
 --
--- this also exemplifies the /simpler/ way of letting ardour to
--- the channel and offset mapping.
+-- this also exemplifies the /simpler/ way of delegating the
+-- channel-mapping to ardour.
 
 function dsp_run (ins, outs, n_samples)
 	local ctrl = CtrlPorts:array() -- get control port array (read/write)
 	local gain = ARDOUR.DSP.dB_to_coefficient (ctrl[1])
-	assert (#ins == #outs) -- ensure that we can run in-place
+	assert (#ins == #outs) -- ensure that we can run in-place (channel count matches)
 	for c = 1,#ins do
-	--for c in pairs (ins) do -- also works, slightly less effective
+		assert (ins[c]:sameinstance(outs[c])) -- check in-place
 		ARDOUR.DSP.apply_gain_to_buffer (ins[c], n_samples, gain); -- process in-place
 	end
 end

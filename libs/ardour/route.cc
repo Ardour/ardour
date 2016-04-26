@@ -1339,7 +1339,24 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	set_processor_positions ();
 
+	boost::shared_ptr<Send> send;
+	if ((send = boost::dynamic_pointer_cast<Send> (processor))) {
+		send->SelfDestruct.connect_same_thread (*this,
+				boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
+	}
+
 	return 0;
+}
+
+void
+Route::processor_selfdestruct (boost::weak_ptr<Processor> wp)
+{
+	/* We cannot destruct the processor here (usually RT-thread
+	 * with various locks held - in case of sends also io_locks).
+	 * Queue for deletion in low-priority thread.
+	 */
+	Glib::Threads::Mutex::Lock lx (selfdestruct_lock);
+	selfdestruct_sequence.push_back (wp);
 }
 
 bool
@@ -1466,7 +1483,6 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			boost::shared_ptr<PluginInsert> pi;
 
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
-				pi->set_count (1); // why? configure_processors_unlocked() will re-do this
 				pi->set_strict_io (_strict_io);
 			}
 
@@ -2084,7 +2100,8 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 
 			if (boost::dynamic_pointer_cast<Delivery> (*p)
 					&& boost::dynamic_pointer_cast<Delivery> (*p)->role() == Delivery::Main
-					&& _strict_io) {
+					&& !(is_monitor() || is_auditioner())
+					&& ( _strict_io || Profile->get_mixbus ())) {
 				/* with strict I/O the panner + output are forced to
 				 * follow the last processor's output.
 				 *
@@ -2200,17 +2217,18 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
 
+		boost::shared_ptr<IOProcessor> iop;
 		boost::shared_ptr<PluginInsert> pi;
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
 			/* plugins connected via Split or Hide Match may have more channels.
 			 * route/scratch buffers are needed for all of them
 			 * The configuration may only be a subset (both input and output)
 			 */
-			processor_max_streams = ChanCount::max(processor_max_streams, pi->input_streams());
-			processor_max_streams = ChanCount::max(processor_max_streams, pi->internal_streams());
-			processor_max_streams = ChanCount::max(processor_max_streams, pi->output_streams());
-			processor_max_streams = ChanCount::max(processor_max_streams, pi->natural_input_streams() * pi->get_count());
-			processor_max_streams = ChanCount::max(processor_max_streams, pi->natural_output_streams() * pi->get_count());
+			processor_max_streams = ChanCount::max(processor_max_streams, pi->required_buffers());
+		}
+		else if ((iop = boost::dynamic_pointer_cast<IOProcessor>(*p)) != 0) {
+			processor_max_streams = ChanCount::max(processor_max_streams, iop->natural_input_streams());
+			processor_max_streams = ChanCount::max(processor_max_streams, iop->natural_output_streams());
 		}
 		out = c->second;
 
@@ -2506,6 +2524,45 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 }
 
 bool
+Route::plugin_preset_output (boost::shared_ptr<Processor> proc, ChanCount outs)
+{
+	boost::shared_ptr<PluginInsert> pi;
+	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
+		return false;
+	}
+
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		ProcessorList::iterator i = find (_processors.begin(), _processors.end(), proc);
+		if (i == _processors.end ()) {
+			return false;
+		}
+	}
+
+	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+
+		const ChanCount& old (pi->preset_out ());
+		if (!pi->set_preset_out (outs)) {
+			return true; // no change, OK
+		}
+
+		list<pair<ChanCount, ChanCount> > c = try_configure_processors_unlocked (n_inputs (), 0);
+		if (c.empty()) {
+			/* not possible */
+			pi->set_preset_out (old);
+			return false;
+		}
+		configure_processors_unlocked (0);
+	}
+
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	_session.set_dirty ();
+	return true;
+}
+
+bool
 Route::reset_plugin_insert (boost::shared_ptr<Processor> proc)
 {
 	ChanCount unused;
@@ -2565,6 +2622,8 @@ Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t coun
 bool
 Route::set_strict_io (const bool enable)
 {
+	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+
 	if (_strict_io != enable) {
 		_strict_io = enable;
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
@@ -2590,10 +2649,9 @@ Route::set_strict_io (const bool enable)
 		}
 		lm.release ();
 
-		{
-			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-			configure_processors (0);
-		}
+		configure_processors (0);
+		lx.release ();
+
 		processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
@@ -3321,6 +3379,9 @@ Route::set_processor_state (const XMLNode& node)
 				} else if (prop->value() == "send") {
 
 					processor.reset (new Send (_session, _pannable, _mute_master, Delivery::Send, true));
+					boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
+					send->SelfDestruct.connect_same_thread (*this,
+							boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
 
 				} else {
 					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
@@ -3896,18 +3957,13 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 }
 
 void
-Route::sidechain_change_handler (IOChange change, void * /*src*/)
+Route::sidechain_change_handler (IOChange change, void* src)
 {
 	if (_initial_io_setup || _in_sidechain_setup) {
 		return;
 	}
 
-	if ((change.type & IOChange::ConfigurationChanged)) {
-		/* This is called with the process lock held if change
-		   contains ConfigurationChanged
-		*/
-		configure_processors (0);
-	}
+	input_change_handler (change, src);
 }
 
 uint32_t
@@ -4067,13 +4123,12 @@ Route::apply_processor_changes_rt ()
 		g_atomic_int_set (&_pending_signals, emissions);
 		return true;
 	}
-	return false;
+	return (!selfdestruct_sequence.empty ());
 }
 
 void
 Route::emit_pending_signals ()
 {
-
 	int sig = g_atomic_int_and (&_pending_signals, 0);
 	if (sig & EmitMeterChanged) {
 		_meter->emit_configuration_changed();
@@ -4086,6 +4141,24 @@ Route::emit_pending_signals ()
 	}
 	if (sig & EmitRtProcessorChange) {
 		processors_changed (RouteProcessorChange (RouteProcessorChange::RealTimeChange)); /* EMIT SIGNAL */
+	}
+
+	/* this would be a job for the butler.
+	 * Conceptually we should not take processe/processor locks here.
+	 * OTOH its more efficient (less overhead for summoning the butler and
+	 * telling her what do do) and signal emission is called
+	 * directly after the process callback, which decreases the chance
+	 * of x-runs when taking the locks.
+	 */
+	while (!selfdestruct_sequence.empty ()) {
+		Glib::Threads::Mutex::Lock lx (selfdestruct_lock);
+		if (selfdestruct_sequence.empty ()) { break; } // re-check with lock
+		boost::shared_ptr<Processor> proc = selfdestruct_sequence.back ().lock ();
+		selfdestruct_sequence.pop_back ();
+		lx.release ();
+		if (proc) {
+			remove_processor (proc);
+		}
 	}
 }
 
@@ -4758,6 +4831,9 @@ Route::input_port_count_changing (ChanCount to)
 bool
 Route::output_port_count_changing (ChanCount to)
 {
+	if (_strict_io && !_in_configure_processors) {
+		return true;
+	}
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		if (processor_out_streams.get(*t) > to.get(*t)) {
 			return true;

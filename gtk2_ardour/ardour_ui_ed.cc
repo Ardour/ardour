@@ -186,15 +186,12 @@ ARDOUR_UI::install_actions ()
 
 	act = global_actions.register_action (main_actions, X_("SnapshotStay"), _("Snapshot (& keep working on current version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("SnapshotSwitch"), _("Snapshot (& switch to new version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), true));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("QuickSnapshotStay"), _("Quick Snapshot(& keep working on current version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::quick_snapshot_session), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("QuickSnapshotSwitch"), _("Quick Snapshot (& switch to new version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::quick_snapshot_session), true));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -202,7 +199,6 @@ ARDOUR_UI::install_actions ()
 
 	act = global_actions.register_action (main_actions, X_("SaveAs"), _("Save As..."), sigc::mem_fun(*this, &ARDOUR_UI::save_session_as));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("Rename"), _("Rename..."), sigc::mem_fun(*this, &ARDOUR_UI::rename_session));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -464,22 +460,22 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (transport_actions, X_("primary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Timecode));
+	act = global_actions.register_action (transport_actions, X_("primary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Timecode, false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("primary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::BBT));
+	act = global_actions.register_action (transport_actions, X_("primary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::BBT, false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("primary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::MinSec));
+	act = global_actions.register_action (transport_actions, X_("primary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::MinSec, false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("primary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Frames));
+	act = global_actions.register_action (transport_actions, X_("primary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Frames, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (transport_actions, X_("secondary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Timecode));
+	act = global_actions.register_action (transport_actions, X_("secondary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Timecode, false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("secondary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::BBT));
+	act = global_actions.register_action (transport_actions, X_("secondary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::BBT, false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("secondary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::MinSec));
+	act = global_actions.register_action (transport_actions, X_("secondary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::MinSec, false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("secondary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Frames));
+	act = global_actions.register_action (transport_actions, X_("secondary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Frames, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = global_actions.register_toggle_action (transport_actions, X_("TogglePunchIn"), _("Punch In"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_punch_in));
@@ -663,7 +659,7 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
         }
 
-	if ((widget = ActionManager::get_widget ("/ui/Main/Session/toggle-rc-options-editor"))) {
+	if ((widget = ActionManager::get_widget ("/ui/Main/Edit/menu-show-preferences"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
         }
 

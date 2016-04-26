@@ -126,7 +126,7 @@ static void init ()
 	assert (!event_loop);
 	event_loop = new MyEventLoop ("lua");
 	EventLoop::set_event_loop_for_thread (event_loop);
-	SessionEvent::create_per_thread_pool ("lua", 512);
+	SessionEvent::create_per_thread_pool ("lua", 4096);
 
 	static LuaReceiver lua_receiver;
 
@@ -151,6 +151,53 @@ static void unset_session ()
 {
 	session_connections.drop_connections ();
 	set_session (NULL);
+}
+
+static Session * _create_session (string dir, string state, uint32_t rate)
+{
+	AudioEngine* engine = AudioEngine::instance ();
+
+	if (!engine->current_backend ()) {
+		if (!engine->set_backend ("None (Dummy)", "Unit-Test", "")) {
+			std::cerr << "Cannot create Audio/MIDI engine\n";
+			return 0;
+		}
+	}
+
+	if (!engine->current_backend ()) {
+		std::cerr << "Cannot create Audio/MIDI engine\n";
+		return 0;
+	}
+
+	if (engine->running ()) {
+		engine->stop ();
+	}
+
+	std::string s = Glib::build_filename (dir, state + statefile_suffix);
+	if (Glib::file_test (dir, Glib::FILE_TEST_EXISTS)) {
+		std::cerr << "Session already exists: " << s << "\n";
+		return 0;
+	}
+
+	engine->set_sample_rate (rate);
+
+	init_post_engine ();
+
+	if (engine->start () != 0) {
+		std::cerr << "Cannot start Audio/MIDI engine\n";
+		return 0;
+	}
+
+	// TODO add option/bindings for this
+	BusProfile bus_profile;
+	bus_profile.master_out_channels = 2;
+	bus_profile.input_ac = AutoConnectPhysical;
+	bus_profile.output_ac = AutoConnectMaster;
+	bus_profile.requested_physical_in = 0; // use all available
+	bus_profile.requested_physical_out = 0; // use all available
+
+	Session* session = new Session (*engine, dir, state, &bus_profile);
+	return session;
 }
 
 static Session * _load_session (string dir, string state)
@@ -203,6 +250,37 @@ static Session * _load_session (string dir, string state)
 	return session;
 }
 
+static Session* create_session (string dir, string state, uint32_t rate)
+{
+	Session* s = 0;
+	if (_session) {
+		cerr << "Session already open" << "\n";
+		return 0;
+	}
+	try {
+		s = _create_session (dir, state, rate);
+	} catch (failed_constructor& e) {
+		cerr << "failed_constructor: " << e.what () << "\n";
+		return 0;
+	} catch (AudioEngine::PortRegistrationFailure& e) {
+		cerr << "PortRegistrationFailure: " << e.what () << "\n";
+		return 0;
+	} catch (exception& e) {
+		cerr << "exception: " << e.what () << "\n";
+		return 0;
+	} catch (...) {
+		cerr << "unknown exception.\n";
+		return 0;
+	}
+	Glib::usleep (1000000); // allow signal propagation, callback/thread-pool setup
+	if (!s) {
+		return 0;
+	}
+	set_session (s);
+	s->DropReferences.connect_same_thread (session_connections, &unset_session);
+	return s;
+}
+
 static Session* load_session (string dir, string state)
 {
 	Session* s = 0;
@@ -225,8 +303,10 @@ static Session* load_session (string dir, string state)
 		cerr << "unknown exception.\n";
 		return 0;
 	}
-	Glib::usleep (1000000); // allo signal propagation, callback/thread-pool setup
-	assert (s);
+	Glib::usleep (1000000); // allow signal propagation, callback/thread-pool setup
+	if (!s) {
+		return 0;
+	}
 	set_session (s);
 	s->DropReferences.connect_same_thread (session_connections, &unset_session);
 	return s;
@@ -278,6 +358,7 @@ static void setup_lua ()
 
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("_G")
+		.addFunction ("create_session", &create_session)
 		.addFunction ("load_session", &load_session)
 		.addFunction ("close_session", &close_session)
 		.addFunction ("sleep", &delay)
@@ -312,6 +393,7 @@ int main (int argc, char **argv)
 			break;
 		}
 		if (strlen (line) == 0) {
+			free (line);
 			continue;
 		}
 		if (!lua->do_command (line)) {
@@ -322,6 +404,7 @@ int main (int argc, char **argv)
 		event_loop->run();
 		free (line);
 	}
+	free (line);
 	printf ("\n");
 
 	if (_session) {

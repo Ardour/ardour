@@ -80,6 +80,9 @@ struct LIBARDOUR_API AudioBackendInfo {
     bool (*available)();
 };
 
+/** AudioBackend is an high-level abstraction for interacting with the operating system's
+ * audio and midi I/O.
+ */
 class LIBARDOUR_API AudioBackend : public PortEngine {
   public:
 

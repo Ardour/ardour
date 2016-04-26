@@ -34,6 +34,7 @@
 #include "ardour/location.h"
 #include "ardour/session_handle.h"
 
+#include "ardour_button.h"
 #include "ardour_window.h"
 #include "audio_clock.h"
 
@@ -80,11 +81,13 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	Gtk::HBox     start_hbox;
 	AudioClock    start_clock;
-	Gtk::Button   start_to_playhead_button;
+	ArdourButton  start_to_playhead_button;
+	ArdourButton  locate_to_start_button;
 
 	Gtk::HBox     end_hbox;
 	AudioClock    end_clock;
-	Gtk::Button   end_to_playhead_button;
+	ArdourButton  end_to_playhead_button;
+	ArdourButton  locate_to_end_button;
 
 	AudioClock    length_clock;
 	Gtk::CheckButton cd_check_button;
@@ -92,7 +95,7 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	Gtk::CheckButton lock_check_button;
 	Gtk::CheckButton glue_check_button;
 
-	Gtk::Button   remove_button;
+	ArdourButton   remove_button;
 
 	Gtk::HBox     cd_track_details_hbox;
 	Gtk::Entry    isrc_entry;
@@ -118,6 +121,7 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void composer_entry_changed ();
 
 	void to_playhead_button_pressed (LocationPart part);
+	void locate_button_pressed (LocationPart part);
 
 	void clock_changed (LocationPart part);
 	bool locate_to_clock (GdkEventButton*, AudioClock*);

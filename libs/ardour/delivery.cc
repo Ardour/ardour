@@ -236,7 +236,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 	PortSet& ports (_output->ports());
 	gain_t tgain;
 
-	if (_output->n_ports ().get (_output->default_type()) == 0) {
+	if (ports.num_ports () == 0) {
 		goto out;
 	}
 
@@ -246,8 +246,8 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 	}
 
 	/* this setup is not just for our purposes, but for anything that comes after us in the
-	   processing pathway that wants to use this->output_buffers() for some reason.
-	*/
+	 * processing pathway that wants to use this->output_buffers() for some reason.
+	 */
 
 	// TODO delayline -- latency-compensation
 	output_buffers().get_backend_port_addresses (ports, nframes);
@@ -267,8 +267,8 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 	} else if (tgain < GAIN_COEFF_SMALL) {
 
 		/* we were quiet last time, and we're still supposed to be quiet.
-		   Silence the outputs, and make sure the buffers are quiet too,
-		*/
+			 Silence the outputs, and make sure the buffers are quiet too,
+			 */
 
 		_output->silence (nframes);
 		if (result_required) {
@@ -283,7 +283,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 		Amp::apply_simple_gain (bufs, nframes, tgain);
 	}
 
-        // Speed quietning
+	// Speed quietning
 
 	if (fabs (_session.transport_speed()) > 1.5 && Config->get_quieten_at_speed ()) {
 		Amp::apply_simple_gain (bufs, nframes, speed_quietning, false);
@@ -309,18 +309,18 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 
 		if (bufs.count().n_audio() > 0 && ports.count().n_audio () > 0) {
 			_output->copy_to_outputs (bufs, DataType::AUDIO, nframes, 0);
-                }
+		}
 
 		if (bufs.count().n_midi() > 0 && ports.count().n_midi () > 0) {
 			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, ports.port(0)->port_offset());
 		}
 	}
 
-        if (result_required) {
-                bufs.read_from (output_buffers (), nframes);
-        }
+	if (result_required) {
+		bufs.read_from (output_buffers (), nframes);
+	}
 
-  out:
+out:
 	_active = _pending_active;
 }
 

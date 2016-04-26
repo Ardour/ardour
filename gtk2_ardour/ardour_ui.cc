@@ -231,14 +231,19 @@ libxml_structured_error_func (void* /* parsing_context*/,
 
 	replace_all (msg, "\n", "");
 
-	if (err->file && err->line) {
-		error << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
+	if (!msg.empty()) {
+		if (err->file && err->line) {
+			error << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
 
-		if (err->int2) {
-			error << ':' << err->int2;
+			if (err->int2) {
+				error << ':' << err->int2;
+			}
+
+			error << endmsg;
+		} else {
+			error << X_("XML error: ") << msg << endmsg;
 		}
 	}
-	error << endmsg;
 }
 
 
@@ -372,6 +377,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	/* handle sr mismatch with a dialog (PROBLEM: needs to return a value and thus cannot be x-thread) */
 
 	ARDOUR::Session::AskAboutSampleRateMismatch.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::sr_mismatch_dialog, this, _1, _2));
+
+	/* handle sr mismatch with a dialog - cross-thread from engine */
+	ARDOUR::Session::NotifyAboutSampleRateMismatch.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::sr_mismatch_message, this, _1, _2), gui_context ());
 
 	/* handle requests to quit (coming from JACK session) */
 
@@ -1711,6 +1719,10 @@ ARDOUR_UI::open_recent_session ()
 
 		can_return = false;
 	}
+	if (splash && splash->is_visible()) {
+		// in 1 second, hide the splash screen
+		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
+	}
 }
 
 bool
@@ -2631,7 +2643,7 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	if (switch_to_it) {
-		prompter.set_title (_("Save as..."));
+		prompter.set_title (_("Snapshot and switch"));
 		prompter.set_prompt (_("New session name"));
 	} else {
 		prompter.set_title (_("Take Snapshot"));
@@ -3268,6 +3280,10 @@ ARDOUR_UI::close_session()
 
 	if (get_session_parameters (true, false)) {
 		exit (1);
+	}
+	if (splash && splash->is_visible()) {
+		// in 1 second, hide the splash screen
+		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
 	}
 }
 
@@ -4814,6 +4830,21 @@ audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual
 }
 
 void
+ARDOUR_UI::sr_mismatch_message (framecnt_t desired, framecnt_t actual)
+{
+	MessageDialog msg (string_compose (_("\
+This session was created with a sample rate of %1 Hz, but\n\
+%2 is currently running at %3 Hz.\n\
+Audio will be recorded and played at the wrong sample rate.\n\
+Re-Configure the Audio Engine in\n\
+Menu > Window > Audio/Midi Setup"),
+				desired, PROGRAM_NAME, actual),
+			true,
+			Gtk::MESSAGE_WARNING);
+	msg.run ();
+}
+
+void
 ARDOUR_UI::use_config ()
 {
 	XMLNode* node = Config->extra_xml (X_("TransportControllables"));
@@ -5127,10 +5158,15 @@ ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 	audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
 	audio_midi_setup->set_position (WIN_POS_CENTER);
 
-	int response;
+	if (Config->get_try_autostart_engine () || getenv ("TRY_AUTOSTART_ENGINE")) {
+		audio_midi_setup->try_autostart ();
+		if (ARDOUR::AudioEngine::instance()->running()) {
+			return 0;
+		}
+	}
 
 	while (true) {
-		response = audio_midi_setup->run();
+		int response = audio_midi_setup->run();
 		switch (response) {
 		case Gtk::RESPONSE_OK:
 			if (!AudioEngine::instance()->running()) {
@@ -5405,7 +5441,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		}
 	}
 
-        DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 focus = %7 (%8) Key event: code = %2  state = %3 special handling ? %4 magic widget focus ? %5 focus widget %6 named %7 mods ? %8\n",
+        DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 [title = %9] focus = %7 (%8) Key event: code = %2  state = %3 special handling ? %4 magic widget focus ? %5 focus widget %6 named %7 mods ? %8\n",
                                                           win,
                                                           ev->keyval,
 							  show_gdk_event_state (ev->state),
@@ -5413,7 +5449,8 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
                                                           Keyboard::some_magic_widget_has_focus(),
 							  focus,
                                                           (focus ? gtk_widget_get_name (focus) : "no focus widget"),
-                                                          ((ev->state & mask) ? "yes" : "no")));
+                                                          ((ev->state & mask) ? "yes" : "no"),
+                                                          window.get_title()));
 
 	/* This exists to allow us to override the way GTK handles
 	   key events. The normal sequence is:

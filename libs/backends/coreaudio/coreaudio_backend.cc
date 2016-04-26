@@ -497,13 +497,14 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		return BackendReinitializationError;
 	}
 
-	if (_ports.size()) {
+	if (_ports.size () || _portmap.size ()) {
 		PBD::warning << _("CoreAudioBackend: recovering from unclean shutdown, port registry is not empty.") << endmsg;
 		_system_inputs.clear();
 		_system_outputs.clear();
 		_system_midi_in.clear();
 		_system_midi_out.clear();
 		_ports.clear();
+		_portmap.clear();
 	}
 
 	uint32_t device1 = name_to_id(_input_audio_device);
@@ -901,11 +902,20 @@ CoreAudioBackend::port_name_size () const
 int
 CoreAudioBackend::set_port_name (PortEngine::PortHandle port, const std::string& name)
 {
+	std::string newname (_instance_name + ":" + name);
 	if (!valid_port (port)) {
 		PBD::warning << _("CoreAudioBackend::set_port_name: Invalid Port(s)") << endmsg;
 		return -1;
 	}
-	return static_cast<CoreBackendPort*>(port)->set_name (_instance_name + ":" + name);
+	if (find_port (newname)) {
+		PBD::error << _("CoreAudioBackend::set_port_name: Port with given name already exists") << endmsg;
+		return -1;
+	}
+
+	CoreBackendPort* p = static_cast<CoreBackendPort*>(port);
+	_portmap.erase (p->name());
+	_portmap.insert (make_pair (newname, p));
+	return p->set_name (newname);
 }
 
 std::string
@@ -935,6 +945,20 @@ CoreAudioBackend::get_port_property (PortHandle port, const std::string& key, st
 	return -1;
 }
 
+int
+CoreAudioBackend::set_port_property (PortHandle port, const std::string& key, const std::string& value, const std::string& type)
+{
+	if (!valid_port (port)) {
+		PBD::warning << _("CoreAudioBackend::set_port_property: Invalid Port(s)") << endmsg;
+		return -1;
+	}
+	if (key == "http://jackaudio.org/metadata/pretty-name" && type.empty ()) {
+		static_cast<CoreBackendPort*>(port)->set_pretty_name (value);
+		return 0;
+	}
+	return -1;
+}
+
 PortEngine::PortHandle
 CoreAudioBackend::get_port_by_name (const std::string& name) const
 {
@@ -956,8 +980,9 @@ CoreAudioBackend::get_ports (
 			use_regexp = true;
 		}
 	}
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		CoreBackendPort* port = _ports[i];
+
+	for (PortIndex::const_iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		CoreBackendPort* port = *i;
 		if ((port->type () == type) && flags == (port->flags () & flags)) {
 			if (!use_regexp || !regexec (&port_regex, port->name ().c_str (), 0, NULL, 0)) {
 				port_names.push_back (port->name ());
@@ -1016,7 +1041,8 @@ CoreAudioBackend::add_port (
 		return 0;
 	}
 
-	_ports.push_back (port);
+	_ports.insert (port);
+	_portmap.insert (make_pair (name, port));
 
 	return port;
 }
@@ -1028,12 +1054,13 @@ CoreAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 		return;
 	}
 	CoreBackendPort* port = static_cast<CoreBackendPort*>(port_handle);
-	std::vector<CoreBackendPort*>::iterator i = std::find (_ports.begin (), _ports.end (), static_cast<CoreBackendPort*>(port_handle));
+	PortIndex::iterator i = _ports.find (static_cast<CoreBackendPort*>(port_handle));
 	if (i == _ports.end ()) {
 		PBD::warning << _("CoreAudioBackend::unregister_port: Failed to find port") << endmsg;
 		return;
 	}
 	disconnect_all(port_handle);
+	_portmap.erase (port->name());
 	_ports.erase (i);
 	delete port;
 }
@@ -1186,19 +1213,19 @@ CoreAudioBackend::coremidi_rediscover()
 void
 CoreAudioBackend::unregister_ports (bool system_only)
 {
-	size_t i = 0;
 	_system_inputs.clear();
 	_system_outputs.clear();
 	_system_midi_in.clear();
 	_system_midi_out.clear();
-	while (i <  _ports.size ()) {
-		CoreBackendPort* port = _ports[i];
+
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end ();) {
+		PortIndex::iterator cur = i++;
+		CoreBackendPort* port = *cur;
 		if (! system_only || (port->is_physical () && port->is_terminal ())) {
 			port->disconnect_all ();
+			_portmap.erase (port->name());
 			delete port;
-			_ports.erase (_ports.begin() + i);
-		} else {
-			++i;
+			_ports.erase (cur);
 		}
 	}
 }
@@ -1287,10 +1314,12 @@ bool
 CoreAudioBackend::connected_to (PortEngine::PortHandle src, const std::string& dst, bool /*process_callback_safe*/)
 {
 	CoreBackendPort* dst_port = find_port (dst);
+#ifndef NDEBUG
 	if (!valid_port (src) || !dst_port) {
 		PBD::warning << _("CoreAudioBackend::connected_to: Invalid Port") << endmsg;
 		return false;
 	}
+#endif
 	return static_cast<CoreBackendPort*>(src)->is_connected (dst_port);
 }
 
@@ -1314,9 +1343,9 @@ CoreAudioBackend::get_connections (PortEngine::PortHandle port, std::vector<std:
 
 	assert (0 == names.size ());
 
-	const std::vector<CoreBackendPort*>& connected_ports = static_cast<CoreBackendPort*>(port)->get_connections ();
+	const std::set<CoreBackendPort*>& connected_ports = static_cast<CoreBackendPort*>(port)->get_connections ();
 
-	for (std::vector<CoreBackendPort*>::const_iterator i = connected_ports.begin (); i != connected_ports.end (); ++i) {
+	for (std::set<CoreBackendPort*>::const_iterator i = connected_ports.begin (); i != connected_ports.end (); ++i) {
 		names.push_back ((*i)->name ());
 	}
 
@@ -1459,8 +1488,8 @@ CoreAudioBackend::port_is_physical (PortEngine::PortHandle port) const
 void
 CoreAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>& port_names)
 {
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		CoreBackendPort* port = _ports[i];
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		CoreBackendPort* port = *i;
 		if ((port->type () == type) && port->is_input () && port->is_physical ()) {
 			port_names.push_back (port->name ());
 		}
@@ -1470,8 +1499,8 @@ CoreAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>&
 void
 CoreAudioBackend::get_physical_inputs (DataType type, std::vector<std::string>& port_names)
 {
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		CoreBackendPort* port = _ports[i];
+	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		CoreBackendPort* port = *i;
 		if ((port->type () == type) && port->is_output () && port->is_physical ()) {
 			port_names.push_back (port->name ());
 		}
@@ -1483,8 +1512,8 @@ CoreAudioBackend::n_physical_outputs () const
 {
 	int n_midi = 0;
 	int n_audio = 0;
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		CoreBackendPort* port = _ports[i];
+	for (PortIndex::const_iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		CoreBackendPort* port = *i;
 		if (port->is_output () && port->is_physical ()) {
 			switch (port->type ()) {
 			case DataType::AUDIO: ++n_audio; break;
@@ -1504,8 +1533,8 @@ CoreAudioBackend::n_physical_inputs () const
 {
 	int n_midi = 0;
 	int n_audio = 0;
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		CoreBackendPort* port = _ports[i];
+	for (PortIndex::const_iterator i = _ports.begin (); i != _ports.end (); ++i) {
+		CoreBackendPort* port = *i;
 		if (port->is_input () && port->is_physical ()) {
 			switch (port->type ()) {
 			case DataType::AUDIO: ++n_audio; break;
@@ -1962,7 +1991,7 @@ int CoreBackendPort::connect (CoreBackendPort *port)
 
 void CoreBackendPort::_connect (CoreBackendPort *port, bool callback)
 {
-	_connections.push_back (port);
+	_connections.insert (port);
 	if (callback) {
 		port->_connect (this, false);
 		_osx_backend.port_connect_callback (name(),  port->name(), true);
@@ -1988,12 +2017,9 @@ int CoreBackendPort::disconnect (CoreBackendPort *port)
 
 void CoreBackendPort::_disconnect (CoreBackendPort *port, bool callback)
 {
-	std::vector<CoreBackendPort*>::iterator it = std::find (_connections.begin (), _connections.end (), port);
-
+	std::set<CoreBackendPort*>::iterator it = _connections.find (port);
 	assert (it != _connections.end ());
-
 	_connections.erase (it);
-
 	if (callback) {
 		port->_disconnect (this, false);
 		_osx_backend.port_connect_callback (name(),  port->name(), false);
@@ -2004,21 +2030,22 @@ void CoreBackendPort::_disconnect (CoreBackendPort *port, bool callback)
 void CoreBackendPort::disconnect_all ()
 {
 	while (!_connections.empty ()) {
-		_connections.back ()->_disconnect (this, false);
-		_osx_backend.port_connect_callback (name(),  _connections.back ()->name(), false);
-		_connections.pop_back ();
+		std::set<CoreBackendPort*>::iterator it = _connections.begin ();
+		(*it)->_disconnect (this, false);
+		_osx_backend.port_connect_callback (name(), (*it)->name(), false);
+		_connections.erase (it);
 	}
 }
 
 bool
 CoreBackendPort::is_connected (const CoreBackendPort *port) const
 {
-	return std::find (_connections.begin (), _connections.end (), port) != _connections.end ();
+	return _connections.find (const_cast<CoreBackendPort *>(port)) != _connections.end ();
 }
 
 bool CoreBackendPort::is_physically_connected () const
 {
-	for (std::vector<CoreBackendPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+	for (std::set<CoreBackendPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
 		if ((*it)->is_physical ()) {
 			return true;
 		}
@@ -2040,14 +2067,15 @@ CoreAudioPort::~CoreAudioPort () { }
 void* CoreAudioPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
-		std::vector<CoreBackendPort*>::const_iterator it = get_connections ().begin ();
-		if (it == get_connections ().end ()) {
+		const std::set<CoreBackendPort *>& connections = get_connections ();
+		std::set<CoreBackendPort*>::const_iterator it = connections.begin ();
+		if (it == connections.end ()) {
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 		} else {
 			CoreAudioPort const * source = static_cast<const CoreAudioPort*>(*it);
 			assert (source && source->is_output ());
 			memcpy (_buffer, source->const_buffer (), n_samples * sizeof (Sample));
-			while (++it != get_connections ().end ()) {
+			while (++it != connections.end ()) {
 				source = static_cast<const CoreAudioPort*>(*it);
 				assert (source && source->is_output ());
 				Sample* dst = buffer ();
@@ -2090,8 +2118,9 @@ void* CoreMidiPort::get_buffer (pframes_t /* nframes */)
 {
 	if (is_input ()) {
 		(_buffer[_bufperiod]).clear ();
-		for (std::vector<CoreBackendPort*>::const_iterator i = get_connections ().begin ();
-		     i != get_connections ().end ();
+		const std::set<CoreBackendPort*>& connections = get_connections ();
+		for (std::set<CoreBackendPort*>::const_iterator i = connections.begin ();
+		     i != connections.end ();
 		     ++i) {
 			const CoreMidiBuffer * src = static_cast<const CoreMidiPort*>(*i)->const_buffer ();
 			for (CoreMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {

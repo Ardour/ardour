@@ -80,7 +80,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	uint32_t    nth_parameter (uint32_t port, bool& ok) const;
 
-	IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id);
+	IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id) const;
 
 	const void* extension_data (const char* uri) const;
 

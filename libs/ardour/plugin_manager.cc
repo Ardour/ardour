@@ -437,11 +437,7 @@ void
 PluginManager::clear_au_cache ()
 {
 #ifdef AUDIOUNIT_SUPPORT
-	// AUPluginInfo::au_cache_path ()
-	string fn = Glib::build_filename (ARDOUR::user_config_directory(), "au_cache");
-	if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-		::g_unlink(fn.c_str());
-	}
+	AUPluginInfo::clear_cache ();
 #endif
 }
 
@@ -586,6 +582,11 @@ PluginManager::ladspa_discover (string path)
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("LADSPA plugin found at %1\n", path));
 
 	for (uint32_t i = 0; ; ++i) {
+		/* if a ladspa plugin allocates memory here
+		 * it is never free()ed (or plugin-dependent only when unloading).
+		 * For some plugins memory allocated is incremental, we should
+		 * avoid re-scanning plugins and file bug reports.
+		 */
 		if ((descriptor = dfunc (i)) == 0) {
 			break;
 		}

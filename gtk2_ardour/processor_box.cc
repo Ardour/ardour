@@ -381,6 +381,13 @@ ProcessorEntry::setup_visuals ()
 		_button.set_name ("processor stub");
 		return;
 	}
+	boost::shared_ptr<Send> send;
+	if ((send = boost::dynamic_pointer_cast<Send> (_processor))) {
+		if (send->remove_on_disconnect ()) {
+			_button.set_name ("processor sidechain");
+			return;
+		}
+	}
 
 	switch (_position) {
 	case PreFader:
@@ -506,6 +513,16 @@ ProcessorEntry::setup_tooltip ()
 					string_compose (_("<b>%1</b>\nThe Plugin is not available on this system\nand has been replaced by a stub."), name (Wide)));
 			return;
 		}
+		boost::shared_ptr<Send> send;
+		if ((send = boost::dynamic_pointer_cast<Send> (_processor)) != 0 &&
+				!boost::dynamic_pointer_cast<InternalSend>(_processor)) {
+			if (send->remove_on_disconnect ()) {
+				ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>&gt; %1</b>\nThis (sidechain) send will be removed when disconnected.", _processor->name()));
+			} else {
+				ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>&gt; %1</b>", _processor->name()));
+			}
+			return;
+		}
 	}
 	ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>%1</b>", name (Wide)));
 }
@@ -524,19 +541,52 @@ ProcessorEntry::name (Width w) const
 	    !boost::dynamic_pointer_cast<InternalSend>(_processor)) {
 
 		name_display += '>';
+		std::string send_name;
+		bool pretty_ok = true;
+
+		if (send->remove_on_disconnect ()) {
+			// assume it's a sidechain, find pretty name of connected port(s)
+			PortSet& ps (send->output ()->ports ());
+			for (PortSet::iterator i = ps.begin (); i != ps.end () && pretty_ok; ++i) {
+				vector<string> connections;
+				if (i->get_connections (connections)) {
+					vector<string>::const_iterator ci;
+					for (ci = connections.begin(); ci != connections.end(); ++ci) {
+						std::string pn = AudioEngine::instance()->get_pretty_name_by_name (*ci);
+						if (pn.empty ()) {
+							continue;
+						}
+						if (send_name.empty ()) {
+							send_name = pn;
+						} else if (send_name != pn) {
+							// pretty names don't match
+							pretty_ok = false;
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if (!pretty_ok) {
+			send_name = "";
+		}
 
 		/* grab the send name out of its overall name */
-
-		string::size_type lbracket, rbracket;
-		lbracket = send->name().find ('[');
-		rbracket = send->name().find (']');
+		if (send_name.empty()) {
+			send_name = send->name();
+			string::size_type lbracket, rbracket;
+			lbracket = send_name.find ('[');
+			rbracket = send_name.find (']');
+			send_name = send_name.substr (lbracket+1, lbracket-rbracket-1);
+		}
 
 		switch (w) {
 		case Wide:
-			name_display += send->name().substr (lbracket+1, lbracket-rbracket-1);
+			name_display += send_name;
 			break;
 		case Narrow:
-			name_display += PBD::short_version (send->name().substr (lbracket+1, lbracket-rbracket-1), 4);
+			name_display += PBD::short_version (send_name, 5);
 			break;
 		}
 
@@ -990,19 +1040,11 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_fill (cr);
 
 	const double dx = rint(max(2., 2. * UIConfiguration::instance().get_ui_scale()));
-	if (_ports.n_total() > 1) {
-		for (uint32_t i = 0; i < _ports.n_total(); ++i) {
-			set_routing_color (cr, i < _ports.n_midi());
-			const float x = rintf(width * (.2f + .6f * i / (_ports.n_total() - 1.f)));
-			cairo_rectangle (cr, x-dx * .5, 0, 1+dx, height);
-			cairo_fill(cr);
-		}
-	} else if (_ports.n_total() == 1) {
-		set_routing_color (cr, _ports.n_midi() == 1);
-		const float x = rintf(width * .5);
-		cairo_rectangle (cr, x-dx * .5, 0, 1+dx, height);
+	for (uint32_t i = 0; i < _ports.n_total(); ++i) {
+		set_routing_color (cr, i < _ports.n_midi());
+		const double x = ProcessorEntry::RoutingIcon::pin_x_pos (i, width, _ports.n_total(), 0 , false);
+		cairo_rectangle (cr, x - .5 - dx * .5, 0, 1 + dx, height);
 		cairo_fill(cr);
-		cairo_stroke(cr);
 	}
 
 	cairo_destroy(cr);
@@ -1010,14 +1052,20 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 }
 
 ProcessorEntry::RoutingIcon::RoutingIcon (bool input)
-	: _feed (false)
+	: _fed_by (false)
 	, _input (input)
 {
-	if (input) {
-		set_size_request (-1, std::max (7.f, rintf(8.f * UIConfiguration::instance().get_ui_scale())));
-	} else {
-		set_size_request (-1, std::max (10.f, rintf(12.f * UIConfiguration::instance().get_ui_scale())));
+	set_terminal (false);
+}
+
+void
+ProcessorEntry::RoutingIcon::set_terminal (bool b) {
+	_terminal = b;
+	int h = std::max (8.f, rintf(8.f * sqrt (UIConfiguration::instance().get_ui_scale())));
+	if (_terminal) {
+		h += std::max (4.f, rintf(4.f * sqrt (UIConfiguration::instance().get_ui_scale())));
 	}
+	set_size_request (-1, h);
 }
 
 void
@@ -1040,40 +1088,50 @@ ProcessorEntry::RoutingIcon::set (
 }
 
 bool
-ProcessorEntry::RoutingIcon::identity () const {
+ProcessorEntry::RoutingIcon::in_identity () const {
+	if (_thru_map.n_total () > 0) {
+		return false;
+	}
 	if (!_in_map.is_monotonic () || !_in_map.is_identity ()) {
 		return false;
 	}
 	if (_in_map.n_total () != _sinks.n_total () || _in.n_total () != _sinks.n_total ()) {
 		return false;
 	}
-	if (_feed) {
-		if (!_f_out_map.is_monotonic () || !_f_out_map.is_identity ()) {
-			return false;
-		}
-		if (_f_out_map.n_total () != _f_sources.n_total () || _sinks != _f_sources) {
-			return false;
-		}
-	}
 	return true;
 }
 
 bool
 ProcessorEntry::RoutingIcon::out_identity () const {
+	if (_thru_map.n_total () > 0) {
+		// TODO skip if trhu is not connected to any of next's inputs
+		return false;
+	}
 	if (!_out_map.is_monotonic () || !_out_map.is_identity ()) {
 		return false;
 	}
 	if (_out_map.n_total () != _sources.n_total () || _out.n_total () != _sources.n_total ()) {
 		return false;
 	}
-	if (_thru_map.n_total () > 0) {
-		return false;
-	}
 	return true;
 }
 
+bool
+ProcessorEntry::RoutingIcon::can_coalesce () const {
+	if (_thru_map.n_total () > 0) {
+		return false;
+	}
+	if (_fed_by && _f_out != _f_sources) {
+		return false;
+	}
+	if (_input && _sinks == _in && (!_fed_by || _f_out == _in)) {
+		return true;
+	}
+	return false;
+}
+
 void
-ProcessorEntry::RoutingIcon::set_feed (
+ProcessorEntry::RoutingIcon::set_fed_by (
 				const ARDOUR::ChanCount& out,
 				const ARDOUR::ChanCount& sources,
 				const ARDOUR::ChanMapping& out_map,
@@ -1083,7 +1141,21 @@ ProcessorEntry::RoutingIcon::set_feed (
 	_f_sources  = sources;
 	_f_out_map  = out_map;
 	_f_thru_map = thru_map;
-	_feed       = true;
+	_fed_by     = true;
+}
+
+void
+ProcessorEntry::RoutingIcon::set_feeding (
+				const ARDOUR::ChanCount& in,
+				const ARDOUR::ChanCount& sinks,
+				const ARDOUR::ChanMapping& in_map,
+				const ARDOUR::ChanMapping& thru_map)
+{
+	_i_in       = in;
+	_i_sinks    = sinks;
+	_i_in_map   = in_map;
+	_i_thru_map = thru_map;
+	_feeding    = true;
 }
 
 double
@@ -1094,75 +1166,69 @@ ProcessorEntry::RoutingIcon::pin_x_pos (uint32_t i, double width, uint32_t n_tot
 		assert (i == 0);
 		return rint (width * .5) +.5;
 	}
-	return rint (width * (.2 + .6 * i / (n_total - 1))) + .5;
+	return rint (width * (.15 + .7 * i / (n_total - 1))) + .5;
 }
 
 void
-ProcessorEntry::RoutingIcon::draw_X (cairo_t* cr, double x0, double height, bool midi)
-{
-	const double y0 = rint (height * .4) + .5;
-	const double dx = min (y0 - .5, 1. + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale())));
-
-	cairo_move_to (cr, x0, 0);
-	cairo_line_to (cr, x0, y0);
-	cairo_move_to (cr, x0 - dx, y0 - dx);
-	cairo_line_to (cr, x0 + dx, y0 + dx);
-	cairo_move_to (cr, x0 - dx, y0 + dx);
-	cairo_line_to (cr, x0 + dx, y0 - dx);
-
-	set_routing_color (cr, midi);
-	cairo_set_line_width  (cr, 1.0);
-	cairo_stroke_preserve (cr);
-	cairo_set_source_rgba (cr, 0, 0, 0, .4); // darken
-	cairo_stroke (cr);
-}
-
-void
-ProcessorEntry::RoutingIcon::draw_gnd (cairo_t* cr, double x0, double height, bool midi)
+ProcessorEntry::RoutingIcon::draw_gnd (cairo_t* cr, double x0, double y0, double height, bool midi)
 {
 	const double dx = 1 + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale()));
-	const double y0 = rint (height * .66) + .5;
+	const double y1 = rint (height * .66) + .5;
 
-	cairo_move_to (cr, x0, height);
-	cairo_line_to (cr, x0, y0);
-	cairo_move_to (cr, x0 - dx, y0);
-	cairo_line_to (cr, x0 + dx, y0);
+	cairo_save (cr);
+	cairo_translate (cr, x0, y0);
+	cairo_move_to (cr, 0, height);
+	cairo_line_to (cr, 0, y1);
+	cairo_move_to (cr, 0 - dx, y1);
+	cairo_line_to (cr, 0 + dx, y1);
 
 	set_routing_color (cr, midi);
-	cairo_set_line_width  (cr, 1.0);
+	cairo_set_line_width (cr, 1.0);
 	cairo_stroke (cr);
+	cairo_restore (cr);
 }
 
 void
-ProcessorEntry::RoutingIcon::draw_sidechain (cairo_t* cr, double x0, double height, bool midi)
+ProcessorEntry::RoutingIcon::draw_sidechain (cairo_t* cr, double x0, double y0, double height, bool midi)
 {
 	const double dx = 1 + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale()));
-	const double y0 = rint (height * .6) + .5;
+	const double y1 = rint (height * .5) - .5;
 
-	cairo_move_to (cr, x0 - dx, height);
-	cairo_line_to (cr, x0, y0);
-	cairo_line_to (cr, x0 + dx, height);
+	cairo_save (cr);
+	cairo_translate (cr, x0, y0);
+	cairo_move_to (cr, 0 - dx, height);
+	cairo_line_to (cr, 0, y1);
+	cairo_line_to (cr, 0 + dx, height);
 	cairo_close_path (cr);
 
 	set_routing_color (cr, midi);
 	cairo_fill (cr);
+	cairo_restore (cr);
 }
 
 void
-ProcessorEntry::RoutingIcon::draw_thru (cairo_t* cr, double x0, double height, bool midi)
+ProcessorEntry::RoutingIcon::draw_thru_src (cairo_t* cr, double x0, double y0, double height, bool midi)
 {
-	const double dx = 1 + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale()));
-	const double y0 = rint (height * .5) + .5;
+	const double rad = 1;
+	const double y1 = height - rad - 1.5;
 
-	cairo_move_to (cr, x0 - dx - .5, y0);
-	cairo_line_to (cr, x0 + dx + .5, y0 - 2);
+	cairo_arc (cr, x0, y0 + y1, rad, 0, 2. * M_PI);
+	cairo_move_to (cr, x0, y0 + height - 1.5);
+	cairo_line_to (cr, x0, y0 + height);
+	set_routing_color (cr, midi);
+	cairo_set_line_width  (cr, 1.0);
+	cairo_stroke (cr);
+}
 
-	cairo_move_to (cr, x0 - dx - .5, y0 + 2);
-	cairo_line_to (cr, x0 + dx + .5, y0);
+void
+ProcessorEntry::RoutingIcon::draw_thru_sink (cairo_t* cr, double x0, double y0, double height, bool midi)
+{
+	const double rad = 1;
+	const double y1 = rad + 1;
 
-	cairo_move_to (cr, x0, y0 + 1);
-	cairo_line_to (cr, x0, height);
-
+	cairo_arc (cr, x0, y0 + y1, rad, 0, 2. * M_PI);
+	cairo_move_to (cr, x0, y0);
+	cairo_line_to (cr, x0, y0 + 1);
 	set_routing_color (cr, midi);
 	cairo_set_line_width  (cr, 1.0);
 	cairo_stroke (cr);
@@ -1197,7 +1263,6 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
 
-	cairo_set_line_width (cr, max (1.f, UIConfiguration::instance().get_ui_scale()));
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 
 	Gtk::Allocation a = get_allocation();
@@ -1211,7 +1276,11 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_fill (cr);
 
 	if (_input) {
-		expose_input_map (cr, width, height);
+		if (can_coalesce ()) {
+			expose_coalesced_input_map (cr, width, height);
+		} else {
+			expose_input_map (cr, width, height);
+		}
 	} else {
 		expose_output_map (cr, width, height);
 	}
@@ -1221,13 +1290,10 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 }
 
 void
-ProcessorEntry::RoutingIcon::expose_input_map (cairo_t* cr, const double width, const double height)
+ProcessorEntry::RoutingIcon::expose_coalesced_input_map (cairo_t* cr, const double width, const double height)
 {
 	const uint32_t pc_in = _sinks.n_total();
 	const uint32_t pc_in_midi = _sinks.n_midi();
-
-	// TODO indicate midi-bypass ??
-	// TODO indicate side-chain
 
 	for (uint32_t i = 0; i < pc_in; ++i) {
 		const bool is_midi = i < pc_in_midi;
@@ -1237,19 +1303,19 @@ ProcessorEntry::RoutingIcon::expose_input_map (cairo_t* cr, const double width, 
 		uint32_t idx = _in_map.get (dt, pn, &valid_in);
 		if (!valid_in) {
 			double x = pin_x_pos (i, width, pc_in, 0, is_midi);
-			draw_gnd (cr, x, height, is_midi);
+			draw_gnd (cr, x, 0, height, is_midi);
 			continue;
 		}
 		if (idx >= _in.get (dt)) {
 			// side-chain, probably
 			double x = pin_x_pos (i, width, pc_in, 0, is_midi);
-			draw_sidechain (cr, x, height, is_midi);
+			draw_sidechain (cr, x, 0, height, is_midi);
 			continue;
 		}
 		double c_x0;
 		double c_x1 = pin_x_pos (i, width, pc_in, 0, false);
 
-		if (_feed) {
+		if (_fed_by) {
 			bool valid_src;
 			uint32_t src = _f_out_map.get_src (dt, idx, &valid_src);
 			if (!valid_src) {
@@ -1257,9 +1323,9 @@ ProcessorEntry::RoutingIcon::expose_input_map (cairo_t* cr, const double width, 
 				bool valid_thru;
 				_f_thru_map.get (dt, idx, &valid_thru);
 				if (valid_thru) {
-					draw_thru (cr, x, height, is_midi);
+					draw_thru_src (cr, x, 0, height, is_midi);
 				} else {
-					draw_gnd (cr, x, height, is_midi);
+					draw_gnd (cr, x, 0, height, is_midi);
 				}
 				continue;
 			}
@@ -1272,11 +1338,71 @@ ProcessorEntry::RoutingIcon::expose_input_map (cairo_t* cr, const double width, 
 }
 
 void
+ProcessorEntry::RoutingIcon::expose_input_map (cairo_t* cr, const double width, const double height)
+{
+	const uint32_t n_in = _in.n_total();
+	const uint32_t n_in_midi = _in.n_midi();
+	const uint32_t pc_in = _sinks.n_total();
+	const uint32_t pc_in_midi = _sinks.n_midi();
+
+	// draw inputs to this
+	for (uint32_t i = 0; i < pc_in; ++i) {
+		const bool is_midi = i < pc_in_midi;
+		bool valid_in;
+		uint32_t pn = is_midi ? i : i - pc_in_midi;
+		DataType dt = is_midi ? DataType::MIDI : DataType::AUDIO;
+		uint32_t idx = _in_map.get (dt, pn, &valid_in);
+		// check if it's fed
+		bool valid_src = true;
+		if (valid_in && idx < _in.get (dt) && _fed_by) {
+			bool valid_out;
+			bool valid_thru;
+			_f_out_map.get_src (dt, idx, &valid_out);
+			_f_thru_map.get (dt, idx, &valid_thru);
+			if (!valid_out && !valid_thru) {
+				valid_src = false;
+			}
+		}
+		if (!valid_in || !valid_src) {
+			double x = pin_x_pos (i, width, pc_in, 0, is_midi);
+			draw_gnd (cr, x, 0, height, is_midi);
+			continue;
+		}
+		if (idx >= _in.get (dt)) {
+			// side-chain, probably
+			double x = pin_x_pos (i, width, pc_in, 0, is_midi);
+			draw_sidechain (cr, x, 0, height, is_midi);
+			continue;
+		}
+		double c_x1 = pin_x_pos (i, width, pc_in, 0, false);
+		double c_x0 = pin_x_pos (idx, width, n_in, n_in_midi, is_midi);
+		draw_connection (cr, c_x0, c_x1, 0, height, is_midi);
+	}
+
+	// draw reverse thru
+	for (uint32_t i = 0; i < n_in; ++i) {
+		const bool is_midi = i < n_in_midi;
+		bool valid_thru;
+		uint32_t pn = is_midi ? i : i - n_in_midi;
+		DataType dt = is_midi ? DataType::MIDI : DataType::AUDIO;
+		_thru_map.get_src (dt, pn, &valid_thru);
+		if (!valid_thru) {
+			continue;
+		}
+		double x = pin_x_pos (i, width, n_in, 0, is_midi);
+		draw_thru_sink (cr, x, 0, height, is_midi);
+	}
+}
+
+void
 ProcessorEntry::RoutingIcon::expose_output_map (cairo_t* cr, const double width, const double height)
 {
+	int dh = std::max (4.f, rintf(4.f * UIConfiguration::instance().get_ui_scale()));
+	double ht = _terminal ? height - dh : height;
+
+	// draw outputs of this
 	const uint32_t pc_out = _sources.n_total();
 	const uint32_t pc_out_midi = _sources.n_midi();
-
 	const uint32_t n_out = _out.n_total();
 	const uint32_t n_out_midi = _out.n_midi();
 
@@ -1289,34 +1415,92 @@ ProcessorEntry::RoutingIcon::expose_output_map (cairo_t* cr, const double width,
 		if (!valid_out) {
 			continue;
 		}
-		double c_x0 = pin_x_pos (i, width, pc_out, 0, false);
-		double c_x1 = pin_x_pos (idx, width, n_out, n_out_midi, is_midi);
-		draw_connection (cr, c_x0, c_x1, 0, height - 3, is_midi);
-	}
-
-	// output arrows
-	for (uint32_t i = 0; i < n_out; ++i) {
-		const bool is_midi = i < n_out_midi;
-		double x = pin_x_pos (i, width, n_out, 0, is_midi);
-		uint32_t pn = is_midi ? i : i - n_out_midi;
-		DataType dt = is_midi ? DataType::MIDI : DataType::AUDIO;
-		bool valid_src;
-		_out_map.get_src (dt, pn, &valid_src);
-		if (!valid_src) {
-			bool valid_thru;
-			_thru_map.get (dt, pn, &valid_thru);
-			if (valid_thru) {
-				draw_thru (cr, x, height, is_midi);
-			} else {
-				draw_gnd (cr, x, height, is_midi);
+		// skip connections that are not used in the next's input
+		if (_feeding) {
+			bool valid_thru, valid_sink;
+			_i_in_map.get_src (dt, idx, &valid_sink);
+			_i_thru_map.get_src (dt, idx, &valid_thru);
+			if (!valid_thru && !valid_sink) {
+				if (!is_midi || i != 0) { // special case midi-bypass
+					continue;
+				}
 			}
 		}
-		set_routing_color (cr, is_midi);
-		cairo_move_to (cr, x    , height);
-		cairo_line_to (cr, x - 3, height - 3);
-		cairo_line_to (cr, x + 3, height - 3);
-		cairo_close_path (cr);
-		cairo_fill (cr);
+		double c_x0 = pin_x_pos (i, width, pc_out, 0, false);
+		double c_x1 = pin_x_pos (idx, width, n_out, n_out_midi, is_midi);
+		draw_connection (cr, c_x0, c_x1, 0, ht, is_midi);
+	}
+
+	for (uint32_t i = 0; i < n_out; ++i) {
+		const bool is_midi = i < n_out_midi;
+		uint32_t pn = is_midi ? i : i - n_out_midi;
+		DataType dt = is_midi ? DataType::MIDI : DataType::AUDIO;
+		double x = pin_x_pos (i, width, n_out, 0, is_midi);
+
+		if (!_terminal) {
+			bool valid_thru_f = false;
+			// skip connections that are not used in the next's input
+			if (_feeding) {
+				bool valid_sink;
+				_i_in_map.get_src (dt, pn, &valid_sink);
+				_i_thru_map.get_src (dt, pn, &valid_thru_f);
+				if (!valid_thru_f && !valid_sink) {
+					if (!is_midi || i != 0) { // special case midi-bypass
+						continue;
+					}
+				}
+			}
+
+			bool valid_src;
+			_out_map.get_src (dt, pn, &valid_src);
+			if (!valid_src) {
+				bool valid_thru;
+				uint32_t idx = _thru_map.get (dt, pn, &valid_thru);
+				if (valid_thru) {
+					if (idx >= _in.get (dt)) {
+						draw_sidechain (cr, x, 0, height, is_midi);
+					} else {
+						draw_thru_src (cr, x, 0, height, is_midi);
+					}
+				} else if (valid_thru_f){
+					// gnd is part of input, unless it's a thru input
+					// (also only true if !coalesced into one small display)
+					draw_gnd (cr, x, 0, height, is_midi);
+				}
+			}
+		} else {
+			// terminal node, add arrows
+			bool valid_src;
+			_out_map.get_src (dt, pn, &valid_src);
+			if (!valid_src) {
+				bool valid_thru;
+				uint32_t idx = _thru_map.get (dt, pn, &valid_thru);
+				if (valid_thru) {
+					if (idx >= _in.get (dt)) {
+						draw_sidechain (cr, x, 0, height - dh, is_midi);
+					} else {
+						draw_thru_src (cr, x, 0, height - dh, is_midi);
+					}
+				} else {
+					draw_gnd (cr, x, 0, height - dh, is_midi);
+				}
+			}
+
+			set_routing_color (cr, is_midi);
+			cairo_set_line_width (cr, 1.0);
+			cairo_move_to (cr, x, height - dh);
+			cairo_line_to (cr, x, height - 2);
+			cairo_stroke (cr);
+
+			const double ar = dh - 1;
+			cairo_move_to (cr, x - ar, height - ar);
+			cairo_line_to (cr, x     , height - .5);
+			cairo_line_to (cr, x + ar, height - ar);
+			cairo_line_to (cr, x     , height - ar * .5);
+			cairo_close_path (cr);
+			cairo_fill_preserve (cr);
+			cairo_stroke (cr);
+		}
 	}
 }
 
@@ -1759,6 +1943,11 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 
 		PBD::ID id = pi->id();
 		XMLNode& state = otherproc->get_state ();
+		/* strip side-chain state (processor inside processor must be a side-chain)
+		 * otherwise we'll end up with duplicate ports-names.
+		 * (this needs a better solution which retains connections)
+		 */
+		state.remove_nodes ("Processor");
 		proc->set_state (state, Stateful::loading_state_version);
 		boost::dynamic_pointer_cast<PluginInsert>(proc)->update_id (id);
 		return;
@@ -1900,19 +2089,22 @@ ProcessorBox::show_processor_menu (int arg)
 		}
 	}
 
-	Gtk::MenuItem* send_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/send_options"));
-	if (send_menu_item) {
-		if (single_selection && !_route->is_monitor()) {
-			Menu* m = single_selection->build_send_options_menu ();
-			if (m && !m->items().empty()) {
-				send_menu_item->set_submenu (*m);
-				send_menu_item->set_sensitive (true);
+
+	if (!ARDOUR::Profile->get_mixbus()) {
+		Gtk::MenuItem* send_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/send_options"));
+		if (send_menu_item) {
+			if (single_selection && !_route->is_monitor()) {
+				Menu* m = single_selection->build_send_options_menu ();
+				if (m && !m->items().empty()) {
+					send_menu_item->set_submenu (*m);
+					send_menu_item->set_sensitive (true);
+				} else {
+					gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
+					send_menu_item->set_sensitive (false);
+				}
 			} else {
-				gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
 				send_menu_item->set_sensitive (false);
 			}
-		} else {
-			send_menu_item->set_sensitive (false);
 		}
 	}
 
@@ -2309,8 +2501,7 @@ ProcessorBox::choose_insert ()
 void
 ProcessorBox::choose_send ()
 {
-	boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
-	boost::shared_ptr<Send> send (new Send (*_session, sendpan, _route->mute_master()));
+	boost::shared_ptr<Send> send (new Send (*_session, _route->pannable (), _route->mute_master()));
 
 	/* make an educated guess at the initial number of outputs for the send */
 	ChanCount outs = (_session->master_out())
@@ -2626,6 +2817,9 @@ void
 ProcessorBox::setup_routing_feeds ()
 {
 	list<ProcessorEntry*> children = processor_display.children ();
+	/* first set the i/o maps for every processor */
+	list<ProcessorEntry*>::iterator prev = children.begin();
+
 	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
 		boost::shared_ptr<ARDOUR::Processor> p = (*i)->processor();
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
@@ -2663,7 +2857,13 @@ ProcessorBox::setup_routing_feeds ()
 					pi->thru_map ());
 
 			if (next != children.end()) {
-				(*next)->routing_icon.set_feed (out, sources * count + midi_bypass, pi->output_map (), pi->thru_map ());
+				(*next)->routing_icon.set_fed_by (out, sources * count + midi_bypass,
+						pi->output_map (), pi->thru_map ());
+			}
+
+			if (prev != i) {
+				(*prev)->routing_icon.set_feeding (in, sinks * count + midi_thru,
+						pi->input_map (), pi->thru_map ());
 			}
 
 		} else {
@@ -2680,22 +2880,34 @@ ProcessorBox::setup_routing_feeds ()
 					inmap, outmap, thrumap);
 
 			if (next != children.end()) {
-				(*next)->routing_icon.set_feed (p->output_streams(),  p->output_streams(), outmap, thrumap);
+				(*next)->routing_icon.set_fed_by (
+						p->output_streams(),
+						p->output_streams(),
+						outmap, thrumap);
+			}
+			if (prev != i) {
+				(*prev)->routing_icon.set_feeding (
+						p->input_streams(),
+						p->output_streams(),
+						inmap, thrumap);
 			}
 		}
 
 		if (i == children.begin()) {
-			(*i)->routing_icon.unset_feed ();
+			(*i)->routing_icon.unset_fed_by ();
 		}
+		prev = i;
+		(*i)->input_icon.hide();
 	}
 
+	/* now set which icons need to be displayed */
 	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
-		if ((*i)->routing_icon.identity ()) {
+		(*i)->output_routing_icon.copy_state ((*i)->routing_icon);
+
+		if ((*i)->routing_icon.in_identity ()) {
 			(*i)->routing_icon.hide();
 			if (i == children.begin()) {
 				(*i)->input_icon.show();
-			} else {
-				(*i)->input_icon.hide();
 			}
 		} else {
 			(*i)->routing_icon.show();
@@ -2705,15 +2917,28 @@ ProcessorBox::setup_routing_feeds ()
 
 		list<ProcessorEntry*>::iterator next = i;
 		if (++next == children.end()) {
-			// show additional wires if outputs of last processor are not an identity map.
+			// last processor in the chain
+			(*i)->output_routing_icon.set_terminal(true);
+			(*i)->output_routing_icon.unset_feeding ();
 			if ((*i)->routing_icon.out_identity ()) {
 				(*i)->output_routing_icon.hide();
 			} else {
-				(*i)->output_routing_icon.copy_state ((*i)->routing_icon);
 				(*i)->output_routing_icon.show();
+				(*i)->output_routing_icon.queue_draw();
 			}
 		} else {
-			(*i)->output_routing_icon.hide();
+			(*i)->output_routing_icon.set_terminal(false);
+			if (!(*i)->routing_icon.out_identity ()
+					&& !(*i)->routing_icon.in_identity ()
+					&& (*i)->routing_icon.can_coalesce ()) {
+				(*i)->output_routing_icon.hide();
+			} else if (!(*i)->routing_icon.out_identity ()) {
+				(*i)->output_routing_icon.show();
+				(*i)->output_routing_icon.queue_draw();
+				(*next)->input_icon.show();
+			} else {
+				(*i)->output_routing_icon.hide();
+			}
 		}
 	}
 }
@@ -3134,8 +3359,22 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				   is a plugin.
 				*/
 				p.reset (new PluginInsert (*_session));
+				/* we can't use RAII Stateful::ForceIDRegeneration
+				 * because that'd void copying the state and wrongly bump
+				 * the state-version counter.
+				 * we need to load the state (incl external files) first and
+				 * only then update the ID)
+				 */
 				PBD::ID id = p->id();
-				p->set_state (**niter, Stateful::current_state_version);
+				/* strip side-chain state (processor inside processor must be a side-chain)
+				 * otherwise we'll end up with duplicate ports-names.
+				 * (this needs a better solution which retains connections)
+				 * We really would want Stateful::ForceIDRegeneration here :(
+				 */
+				XMLNode state (**niter);
+				state.remove_nodes ("Processor");
+
+				p->set_state (state, Stateful::current_state_version);
 				boost::dynamic_pointer_cast<PluginInsert>(p)->update_id (id);
 			}
 
@@ -3416,7 +3655,7 @@ ProcessorBox::register_actions ()
 	myactions.register_action (processor_box_actions, X_("newplugin"), _("New Plugin"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_plugin));
 
-	act = myactions.register_action (processor_box_actions, X_("newlua"), _("New Lua Proc"),
+	act = myactions.register_action (processor_box_actions, X_("newlua"), _("New Lua DSP"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_lua));
 	act = myactions.register_action (processor_box_actions, X_("newinsert"), _("New Insert"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_insert));
@@ -4016,8 +4255,8 @@ ProcessorWindowProxy::get (bool create)
 		if (_window) {
 			setup ();
 		}
+		_window->show_all ();
 	}
-	_window->show_all ();
 	return _window;
 }
 
@@ -4079,9 +4318,8 @@ PluginPinWindowProxy::get (bool create)
 		if (aw) {
 			aw->set_session (_session);
 		}
+		_window->show_all ();
 	}
-
-	_window->show_all ();
 	return _window;
 }
 

@@ -147,6 +147,20 @@ JACKAudioBackend::get_port_property (PortHandle port, const std::string& key, st
 #endif
 }
 
+int
+JACKAudioBackend::set_port_property (PortHandle port, const std::string& key, const std::string& value, const std::string& type)
+{
+#ifdef HAVE_JACK_METADATA // really everyone ought to have this by now.
+	int rv = -1;
+	jack_client_t* client = _jack_connection->jack();
+	jack_uuid_t uuid = jack_port_uuid((jack_port_t*) port);
+	return jack_set_property(client, uuid, key.c_str(), value.c_str(), type.c_str());
+	return rv;
+#else
+	return -1;
+#endif
+}
+
 PortEngine::PortHandle
 JACKAudioBackend:: get_port_by_name (const std::string& name) const
 {

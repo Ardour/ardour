@@ -41,6 +41,7 @@ SideChain::SideChain (Session& s, const std::string& name)
 
 SideChain::~SideChain ()
 {
+	disconnect ();
 }
 
 XMLNode&

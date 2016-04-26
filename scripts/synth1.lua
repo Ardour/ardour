@@ -11,7 +11,12 @@ ardour {
 function dsp_ioconfig ()
 	return
 	{
-		{ audio_in = 0, audio_out = 1},
+	--	{ audio_in = 0, audio_out = -1}, -- any number of channels
+	--	{ audio_in = 0, audio_out =  1}, -- values >  0, precisely N channels
+		{ audio_in = 0, audio_out =  2}, -- values >  0, precisely N channels
+		{ audio_in = 0, audio_out =  4}, -- values >  0, precisely N channels
+		{ audio_in = 0, audio_out =  8}, -- values >  0, precisely N channels
+	--	{ audio_in = 0, audio_out = -6}, -- values < -2, up to -N channels, here 1,..,6
 	}
 end
 
@@ -34,7 +39,6 @@ end
 
 function dsp_run (ins, outs, n_samples)
 	-- initialize output buffer
-	assert (#outs == 1)
 	local a = {}
 	for s = 1, n_samples do a[s] = 0 end
 
@@ -96,5 +100,7 @@ function dsp_run (ins, outs, n_samples)
 	synth(tme, n_samples)
 
 	-- copy
-	outs[1]:set_table(a, n_samples)
+	for c = 1,#outs do
+		outs[c]:set_table(a, n_samples)
+	end
 end

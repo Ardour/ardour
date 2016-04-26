@@ -34,8 +34,17 @@ end
 
 function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	for c = 1,audio_ins do
-		local b = in_map:get(ARDOUR.DataType("audio"), c - 1); -- get id of mapped buffer
-		local a = bufs:get_audio(b):data(offset):array() -- get a reference (pointer to array)
+		-- ensure that processing does happen in-place
+		local ib = in_map:get(ARDOUR.DataType("audio"), c - 1); -- get id of mapped input buffer for given cannel
+		local ob = out_map:get(ARDOUR.DataType("audio"), c - 1); -- get id of mapped output buffer for given cannel
+		assert (ib ~= ARDOUR.ChanMapping.Invalid);
+		assert (ob ~= ARDOUR.ChanMapping.Invalid);
+
+		local bi = bufs:get_audio(ib)
+		local bo = bufs:get_audio(ob)
+		assert (bi:sameinstance(bo))
+
+		local a = bufs:get_audio(ib):data(offset):array() -- get a reference (pointer to array)
 		for s = 1,n_samples do
 			a[s] = a[s] * 2; -- modify data in-place (shared with ardour)
 		end

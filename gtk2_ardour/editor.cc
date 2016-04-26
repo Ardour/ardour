@@ -108,6 +108,7 @@
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "keyeditor.h"
 #include "luainstance.h"
 #include "marker.h"
 #include "midi_region_view.h"
@@ -5745,9 +5746,14 @@ Editor::set_script_action_name (int i, const std::string& n)
 	assert (act);
 	if (n.empty ()) {
 		act->set_label (string_compose (_("Unset #%1"), i + 1));
+		act->set_tooltip (_("(no action bound"));
+		act->set_sensitive (false);
 	} else {
 		act->set_label (n);
+		act->set_tooltip (n);
+		act->set_sensitive (true);
 	}
+	KeyEditor::UpdateBindings ();
 }
 
 void

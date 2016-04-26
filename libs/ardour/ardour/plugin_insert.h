@@ -32,6 +32,7 @@
 #include "ardour/io.h"
 #include "ardour/types.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/plugin.h"
 #include "ardour/processor.h"
 #include "ardour/sidechain.h"
 #include "ardour/automation_control.h"
@@ -96,6 +97,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	ChanMapping output_map () const; ///< combined (all instances) output map
 	bool has_midi_bypass () const;
 	bool has_midi_thru () const;
+	bool inplace () const { return ! _no_inplace; }
 
 #ifdef MIXBUS
 	bool is_channelstrip () const;
@@ -134,6 +136,9 @@ class LIBARDOUR_API PluginInsert : public Processor
 		}
 	}
 
+	const ChanCount& required_buffers () const { return _required_buffers; }
+	const ChanCount& preset_out () const { return _preset_out; }
+
 	// allow to override output_streams(), implies "Custom Mode"
 
 	// only the owning route may call these (with process lock held)
@@ -142,6 +147,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void set_outputs    (const ChanCount&);
 	void set_strict_io  (bool b);
 	void set_custom_cfg (bool b);
+	bool set_preset_out (const ChanCount&);
 	bool add_sidechain  (uint32_t n_audio = 1);
 	bool del_sidechain ();
 	boost::shared_ptr<SideChain> sidechain () const { return _sidechain; }
@@ -156,11 +162,13 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	bool has_no_inputs() const;
 	bool has_no_audio_inputs() const;
-	bool is_midi_instrument() const;
+	bool needs_midi_input() const;
 
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
 	void monitoring_changed ();
+
+	bool load_preset (Plugin::PresetRecord);
 
 	/** A control that manipulates a plugin parameter (control port). */
 	struct PluginControl : public AutomationControl
@@ -304,7 +312,9 @@ class LIBARDOUR_API PluginInsert : public Processor
 	ChanCount _configured_internal; // with side-chain
 	ChanCount _configured_out;
 	ChanCount _custom_out;
+	ChanCount _preset_out;
 	ChanCount _cached_sidechain_pins;
+	ChanCount _required_buffers;
 
 	bool _configured;
 	bool _no_inplace;
@@ -314,6 +324,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	bool _mapping_changed;
 
 	Match private_can_support_io_configuration (ChanCount const &, ChanCount &) const;
+	Match internal_can_support_io_configuration (ChanCount const &, ChanCount &) const;
 	Match automatic_can_support_io_configuration (ChanCount const &, ChanCount &) const;
 
 	/** details of the match currently being used */

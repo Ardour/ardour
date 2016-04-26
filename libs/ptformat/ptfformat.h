@@ -32,24 +32,24 @@ public:
 	*/
 	int load(std::string path, int64_t targetsr);
 
-	typedef struct wav {
+	struct wav_t {
 		std::string filename;
 		uint16_t    index;
 
 		int64_t     posabsolute;
 		int64_t     length;
 
-		bool operator <(const struct wav& other) const {
+		bool operator <(const struct wav_t& other) const {
 			return (strcasecmp(this->filename.c_str(),
 					other.filename.c_str()) < 0);
 		}
 
-		bool operator ==(const struct wav& other) const {
+		bool operator ==(const struct wav_t& other) const {
 			return (this->filename == other.filename ||
 				this->index == other.index);
 		}
 
-	} wav_t;
+	};
 
 	typedef struct region {
 		std::string name;
@@ -65,25 +65,6 @@ public:
 	} region_t;
 
 	typedef struct track {
-		track ()
-			: index (0)
-			, playlist (0)
-		{
-			memset ((void*)&reg, 0, sizeof(region_t));
-		}
-
-		track (std::string n, uint16_t i, uint8_t p, region_t *r)
-			: name (n)
-			, index (i)
-			, playlist (p)
-		{
-			set_region (r);
-		}
-
-		void set_region (region_t *r) {
-			memcpy ((void*)&reg, (void*)r, sizeof(region_t));
-		}
-
 		std::string name;
 		uint16_t    index;
 		uint8_t     playlist;
@@ -136,7 +117,7 @@ public:
 
 private:
 	bool foundin(std::string haystack, std::string needle);
-	void parse(void);
+	int parse(void);
 	void unxor10(void);
 	void setrates(void);
 	void parse5header(void);
@@ -149,7 +130,7 @@ private:
 	void parserest10(void);
 	void parseaudio5(void);
 	void parseaudio(void);
-	void resort(std::vector<wav_t> *ws);
+	void resort(std::vector<wav_t>& ws);
 	uint8_t mostfrequent(uint32_t start, uint32_t stop);
 	std::vector<wav_t> actualwavs;
 	float ratefactor;

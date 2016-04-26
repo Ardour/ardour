@@ -258,7 +258,7 @@ Plugin::input_streams () const
 }
 
 Plugin::IOPortDescription
-Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id)
+Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 {
 	std::stringstream ss;
 	switch (dt) {
@@ -278,10 +278,20 @@ Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id)
 		ss << _("Out") << " ";
 	}
 
-	ss << id;
+	ss << (id + 1);
 
 	Plugin::IOPortDescription iod (ss.str());
 	return iod;
+}
+
+PluginOutputConfiguration
+Plugin::possible_output () const
+{
+	PluginOutputConfiguration oc;
+	if (_info) {
+		oc.insert (_info->n_outputs.n_audio ());
+	}
+	return oc;
 }
 
 const Plugin::PresetRecord *

@@ -808,6 +808,7 @@ LV2Plugin::~LV2Plugin ()
 #endif
 
 	free(_features);
+	free(_log_feature.data);
 	free(_make_path_feature.data);
 	free(_work_schedule_feature.data);
 
@@ -828,6 +829,7 @@ LV2Plugin::~LV2Plugin ()
 	delete [] _shadow_data;
 	delete [] _defaults;
 	delete [] _ev_buffers;
+	delete _impl;
 }
 
 bool
@@ -1934,7 +1936,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 }
 
 Plugin::IOPortDescription
-LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id)
+LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 {
 	PortFlags match = 0;
 	switch (dt) {
@@ -2775,7 +2777,7 @@ LV2World::LV2World()
 	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
 	patch_Message      = lilv_new_uri(world, LV2_PATCH__Message);
 #ifdef LV2_EXTENDED
-	lv2_noSampleAccurateCtrl    = lilv_new_uri(world, LV2_CORE_PREFIX "noSampleAccurateControls");
+	lv2_noSampleAccurateCtrl    = lilv_new_uri(world, "http://ardour.org/lv2/ext#noSampleAccurateControls");
 	auto_can_write_automatation = lilv_new_uri(world, LV2_AUTOMATE_URI__can_write);
 	auto_automation_control     = lilv_new_uri(world, LV2_AUTOMATE_URI__control);
 	auto_automation_controlled  = lilv_new_uri(world, LV2_AUTOMATE_URI__controlled);

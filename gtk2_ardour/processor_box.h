@@ -292,11 +292,19 @@ private:
 				const ARDOUR::ChanMapping&,
 				const ARDOUR::ChanMapping&,
 				const ARDOUR::ChanMapping&);
-		void set_feed (
+		void set_fed_by (
 				const ARDOUR::ChanCount&,
 				const ARDOUR::ChanCount&,
 				const ARDOUR::ChanMapping&,
 				const ARDOUR::ChanMapping&);
+
+		void set_feeding (
+				const ARDOUR::ChanCount&,
+				const ARDOUR::ChanCount&,
+				const ARDOUR::ChanMapping&,
+				const ARDOUR::ChanMapping&);
+
+		void set_terminal (bool b);
 
 		void copy_state (const RoutingIcon& other) {
 			_in         = other._in;
@@ -310,23 +318,31 @@ private:
 			_f_out_map  = other._f_out_map;
 			_f_thru_map = other._f_thru_map;
 			_f_sources  = other._f_sources;
-			_feed       = other._feed;
+			_i_in       = other._i_in;
+			_i_in_map   = other._i_in_map;
+			_i_thru_map = other._i_thru_map;
+			_i_sinks    = other._i_sinks;
+			_fed_by     = other._fed_by;
+			_feeding    = other._feeding;
 		}
 
-		void unset_feed () { _feed  = false ; }
-		bool identity () const;
+		void unset_fed_by () { _fed_by  = false ; }
+		void unset_feeding () { _feeding  = false ; }
+		bool in_identity () const;
 		bool out_identity () const;
+		bool can_coalesce () const;
 
 		static double pin_x_pos (uint32_t, double, uint32_t, uint32_t, bool);
 		static void draw_connection (cairo_t*, double, double, double, double, bool, bool dashed = false);
-		static void draw_gnd (cairo_t*, double, double, bool);
-		static void draw_X (cairo_t*, double, double, bool);
-		static void draw_sidechain (cairo_t*, double, double, bool);
-		static void draw_thru (cairo_t*, double, double, bool);
+		static void draw_gnd (cairo_t*, double, double, double, bool);
+		static void draw_sidechain (cairo_t*, double, double, double, bool);
+		static void draw_thru_src (cairo_t*, double, double, double, bool);
+		static void draw_thru_sink (cairo_t*, double, double, double, bool);
 
 	private:
 		bool on_expose_event (GdkEventExpose *);
 		void expose_input_map (cairo_t*, const double, const double);
+		void expose_coalesced_input_map (cairo_t*, const double, const double);
 		void expose_output_map (cairo_t*, const double, const double);
 
 		ARDOUR::ChanCount   _in;
@@ -340,8 +356,14 @@ private:
 		ARDOUR::ChanMapping _f_out_map;
 		ARDOUR::ChanMapping _f_thru_map;
 		ARDOUR::ChanCount   _f_sources;
-		bool _feed;
+		ARDOUR::ChanCount   _i_in;
+		ARDOUR::ChanMapping _i_in_map;
+		ARDOUR::ChanMapping _i_thru_map;
+		ARDOUR::ChanCount   _i_sinks;
+		bool _fed_by;
+		bool _feeding;
 		bool _input;
+		bool _terminal;
 	};
 
 public:
