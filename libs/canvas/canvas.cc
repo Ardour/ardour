@@ -32,6 +32,8 @@
 #include <gtkmm/label.h>
 #include <gtkmm/window.h>
 
+#include "gtkmm2ext/persistent_tooltip.h"
+
 #include "pbd/compose.h"
 #include "pbd/stacktrace.h"
 
@@ -1145,7 +1147,7 @@ GtkCanvas::start_tooltip_timeout (Item* item)
 {
 	stop_tooltip_timeout ();
 
-	if (item) {
+	if (item && Gtkmm2ext::PersistentTooltip::tooltips_enabled ()) {
 		current_tooltip_item = item;
 
 		/* wait for the first idle that happens after this is
