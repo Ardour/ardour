@@ -3047,7 +3047,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_widget_prelight)
 		     ));
 
-#ifdef TOOLTIPS_GOT_FIXED
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "use-tooltips",
@@ -3055,7 +3054,6 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_tooltips),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_tooltips)
 		     ));
-#endif
 
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
