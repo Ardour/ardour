@@ -1714,6 +1714,10 @@ ARDOUR_UI::open_recent_session ()
 
 		can_return = false;
 	}
+	if (splash && splash->is_visible()) {
+		// in 1 second, hide the splash screen
+		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
+	}
 }
 
 bool
@@ -3271,6 +3275,10 @@ ARDOUR_UI::close_session()
 
 	if (get_session_parameters (true, false)) {
 		exit (1);
+	}
+	if (splash && splash->is_visible()) {
+		// in 1 second, hide the splash screen
+		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
 	}
 }
 
