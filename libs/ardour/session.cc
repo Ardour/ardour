@@ -333,7 +333,7 @@ Session::Session (AudioEngine &eng,
 #ifdef USE_TRACKS_CODE_FEATURES
 		sr = EngineStateController::instance()->get_current_sample_rate();
 #endif
-		if (ensure_engine (sr)) {
+		if (ensure_engine (sr, true)) {
 			destroy ();
 			throw SessionException (_("Cannot connect to audio/midi engine"));
 		}
@@ -387,7 +387,7 @@ Session::Session (AudioEngine &eng,
 			}
 		}
 
-		if (ensure_engine (sr)) {
+		if (ensure_engine (sr, false)) {
 			destroy ();
 			throw SessionException (_("Cannot connect to audio/midi engine"));
 		}
@@ -500,7 +500,7 @@ Session::init_name_id_counter (guint n)
 }
 
 int
-Session::ensure_engine (uint32_t desired_sample_rate)
+Session::ensure_engine (uint32_t desired_sample_rate, bool isnew)
 {
 	if (_engine.current_backend() == 0) {
 		/* backend is unknown ... */
@@ -508,6 +508,8 @@ Session::ensure_engine (uint32_t desired_sample_rate)
 		if (r.get_value_or (-1) != 0) {
 			return -1;
 		}
+	} else if (!isnew && _engine.running() && _engine.sample_rate () == desired_sample_rate) {
+		/* keep engine */
 	} else if (_engine.setup_required()) {
 		/* backend is known, but setup is needed */
 		boost::optional<int> r = AudioEngineSetupRequired (desired_sample_rate);
@@ -520,8 +522,7 @@ Session::ensure_engine (uint32_t desired_sample_rate)
 		}
 	}
 
-	/* at this point the engine should be running
-	*/
+	/* at this point the engine should be running */
 
 	if (!_engine.running()) {
 		return -1;
