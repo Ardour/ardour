@@ -45,6 +45,7 @@
 #include "ardour/playlist.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/port_manager.h"
 #include "ardour/runtime_functions.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
@@ -163,12 +164,14 @@ CLASSKEYS(ARDOUR::PluginInfo);
 CLASSKEYS(PBD::PropertyChange);
 CLASSKEYS(std::vector<std::string>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
 CLASSKEYS(boost::shared_ptr<ARDOUR::PluginInfo>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
 CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<ARDOUR::AudioRange>);
 CLASSKEYS(Evoral::Beats);
+CLASSKEYS(ARDOUR::PortManager);
 CLASSKEYS(ARDOUR::AudioEngine);
 CLASSKEYS(void);
 CLASSKEYS(float);
@@ -772,6 +775,10 @@ LuaBindings::common (lua_State* L)
 		.beginPtrStdList <boost::shared_ptr<Region> > ("RegionListPtr")
 		.endClass ()
 
+		//std::list<boost::shared_ptr<Port> > PortList;
+		.beginConstStdList <boost::shared_ptr<Port> > ("PortList")
+		.endClass ()
+
 		// used by Playlist::cut/copy
 		.beginConstStdList <AudioRange> ("AudioRangeList")
 		.endClass ()
@@ -922,7 +929,13 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_output_device_name", &AudioBackend::set_output_device_name)
 		.endClass()
 
-		.beginClass <AudioEngine> ("AudioEngine")
+		.beginClass <PortManager> ("PortManager")
+		.addFunction ("port_engine", &PortManager::port_engine)
+		.addFunction ("connected", &PortManager::connected)
+		.addRefFunction ("get_ports", (int (PortManager::*)(DataType, PortManager::PortList&))&PortManager::get_ports)
+		.endClass()
+
+		.deriveClass <AudioEngine, PortManager> ("AudioEngine")
 		.addFunction ("available_backends", &AudioEngine::available_backends)
 		.addFunction ("current_backend_name", &AudioEngine::current_backend_name)
 		.addFunction ("set_backend", &AudioEngine::set_backend)
@@ -987,6 +1000,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("abort_reversible_command", &Session::abort_reversible_command)
 		.addFunction ("add_command", &Session::add_command)
 		.addFunction ("add_stateful_diff_command", &Session::add_stateful_diff_command)
+		.addFunction ("engine", (AudioEngine& (Session::*)())&Session::engine)
 		.endClass ()
 
 		.beginClass <RegionFactory> ("RegionFactory")
