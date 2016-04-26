@@ -141,11 +141,8 @@ LadspaPlugin::init (string module_path, uint32_t index, framecnt_t rate)
 				*_latency_control_port = 0;
 			}
 
-			if (!LADSPA_IS_PORT_INPUT(port_descriptor (i))) {
-				continue;
-			}
-
 			_shadow_data[i] = _default_value (i);
+			_control_data[i] = _shadow_data[i];
 		}
 	}
 
