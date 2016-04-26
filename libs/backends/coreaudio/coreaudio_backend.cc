@@ -981,7 +981,7 @@ CoreAudioBackend::get_ports (
 		}
 	}
 
-	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+	for (PortIndex::const_iterator i = _ports.begin (); i != _ports.end (); ++i) {
 		CoreBackendPort* port = *i;
 		if ((port->type () == type) && flags == (port->flags () & flags)) {
 			if (!use_regexp || !regexec (&port_regex, port->name ().c_str (), 0, NULL, 0)) {
@@ -1512,7 +1512,7 @@ CoreAudioBackend::n_physical_outputs () const
 {
 	int n_midi = 0;
 	int n_audio = 0;
-	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+	for (PortIndex::const_iterator i = _ports.begin (); i != _ports.end (); ++i) {
 		CoreBackendPort* port = *i;
 		if (port->is_output () && port->is_physical ()) {
 			switch (port->type ()) {
@@ -1533,7 +1533,7 @@ CoreAudioBackend::n_physical_inputs () const
 {
 	int n_midi = 0;
 	int n_audio = 0;
-	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+	for (PortIndex::const_iterator i = _ports.begin (); i != _ports.end (); ++i) {
 		CoreBackendPort* port = *i;
 		if (port->is_input () && port->is_physical ()) {
 			switch (port->type ()) {
