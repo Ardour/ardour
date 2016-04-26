@@ -29,6 +29,8 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
+bool PersistentTooltip::_tooltips_enabled = true;
+
 /** @param target The widget to provide the tooltip for */
 PersistentTooltip::PersistentTooltip (Gtk::Widget* target, bool  draggable, int margin_y)
 	: _target (target)
@@ -115,7 +117,7 @@ PersistentTooltip::hide ()
 void
 PersistentTooltip::show ()
 {
-	if (_tip.empty()) {
+	if (_tip.empty() || !_tooltips_enabled) {
 		return;
 	}
 

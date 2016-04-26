@@ -33,6 +33,7 @@
 #include <gtkmm/tooltip.h>
 
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/persistent_tooltip.h"
 
 #include "i18n.h"
 
@@ -836,12 +837,14 @@ void
 Gtkmm2ext::enable_tooltips ()
 {
 	gtk_rc_parse_string ("gtk-enable-tooltips = 1");
+	PersistentTooltip::set_tooltips_enabled (true);
 }
 
 void
 Gtkmm2ext::disable_tooltips ()
 {
 	gtk_rc_parse_string ("gtk-enable-tooltips = 0");
+	PersistentTooltip::set_tooltips_enabled (false);
 }
 
 bool

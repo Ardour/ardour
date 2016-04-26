@@ -40,8 +40,11 @@ class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
 	void set_center_alignment (bool align_to_center);
 
 	virtual bool dragging () const;
+	static void set_tooltips_enabled (bool en) { _tooltips_enabled = en; }
+	static bool tooltips_enabled () { return _tooltips_enabled; }
 
   private:
+	static bool _tooltips_enabled;
 	bool timeout ();
 	void show ();
 	void hide ();
