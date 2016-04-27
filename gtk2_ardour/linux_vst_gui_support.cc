@@ -56,7 +56,7 @@ static VSTState * vstfx_first = NULL;
 
 const char magic[] = "VSTFX Plugin State v002";
 
-static int gui_quit = 0;
+static volatile int gui_quit = 0;
 
 /*This will be our connection to X*/
 
@@ -471,7 +471,7 @@ again:
 			clock1 = g_get_monotonic_time();
 		}
 
-		if (may_sleep && elapsed_time_ms + 1 < LXVST_sched_timer_interval) {
+		if (!gui_quit && may_sleep && elapsed_time_ms + 1 < LXVST_sched_timer_interval) {
 			Glib::usleep(1000 * (LXVST_sched_timer_interval - elapsed_time_ms - 1));
 		}
 	}
@@ -487,6 +487,8 @@ normally started in globals.cc*/
 
 int vstfx_init (void* ptr)
 {
+	assert (gui_quit == 0);
+	pthread_mutex_init (&plugin_mutex, NULL);
 
 	int thread_create_result;
 
@@ -553,7 +555,11 @@ void vstfx_exit()
 	/*We need to pthread_join the gui_thread here so
 	we know when it has stopped*/
 
+	// BEWARE: some Plugin GUIs can crash if the thread local storage is free()d
+	// after the shared library containing the destructor is already dl-closed.
+	// (e.g u-he LXVST GUI, crash in __nptl_deallocate_tsd) :(
 	pthread_join(LXVST_gui_event_thread, NULL);
+	pthread_mutex_destroy (&plugin_mutex);
 }
 
 /*Adds a new plugin (VSTFX) instance to the linked list*/
