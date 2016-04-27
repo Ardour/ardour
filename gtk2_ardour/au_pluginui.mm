@@ -597,15 +597,6 @@ AUPluginUI::cocoa_view_resized ()
 
         [au_view setAutoresizingMask:NSViewNotSizable];
 
-	/* this resizes the window. it will eventually trigger a new
-	 * size_allocate event/callback, and we'll end up in
-	 * ::update_view_size(). We want to stop that from doing anything,
-	 * because we've already resized the window to fit the new new view,
-	 * so there's no need to actually update the view size again.
-	 */
-
-	[window setFrame:windowFrame display:1];
-
         /* Some stupid AU Views change the origin of the original AU View when
            they are resized (I'm looking at you AUSampler). If the origin has
            been moved, move it back.
@@ -627,6 +618,15 @@ AUPluginUI::cocoa_view_resized ()
 			  << " == new au origin " << [NSStringFromPoint(new_frame.origin) UTF8String]
 			  << std::endl;
 	}
+
+	/* this resizes the window. it will eventually trigger a new
+	 * size_allocate event/callback, and we'll end up in
+	 * ::update_view_size(). We want to stop that from doing anything,
+	 * because we've already resized the window to fit the new new view,
+	 * so there's no need to actually update the view size again.
+	 */
+
+	[window setFrame:windowFrame display:1];
 
         [au_view setAutoresizingMask:old_auto_resize];
 
