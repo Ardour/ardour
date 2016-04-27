@@ -69,6 +69,14 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
 	virtual int set_state (const XMLNode&, int version);
 	virtual XMLNode& get_state ();
 
+	enum StateMask {
+		Position = 0x1,
+		Size = 0x2
+	};
+
+	void set_state_mask (StateMask);
+	StateMask state_mask () const { return _state_mask; }
+
 	operator bool() const { return _window != 0; }
 
 	static std::string xml_node_name();
@@ -84,6 +92,7 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
 	mutable int  _width; ///< width
 	mutable int  _height; ///< height
 	Gtkmm2ext::VisibilityTracker* vistracker;
+	StateMask _state_mask;
 
 	void save_pos_and_size ();
 	void set_pos_and_size ();

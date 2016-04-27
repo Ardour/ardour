@@ -42,6 +42,7 @@ WindowProxy::WindowProxy (const std::string& name)
 	, _width (-1)
 	, _height (-1)
 	, vistracker (0)
+	, _state_mask (StateMask (Position|Size))
 {
 }
 
@@ -55,6 +56,7 @@ WindowProxy::WindowProxy (const std::string& name, const std::string& menu_name)
 	, _width (-1)
 	, _height (-1)
 	, vistracker (0)
+	, _state_mask (StateMask (Position|Size))
 {
 }
 
@@ -189,14 +191,32 @@ WindowProxy::get_state ()
 		_window->get_size (_width, _height);
 	}
 
+	int x, y, w, h;
+
+	if (_state_mask & Position) {
+		x = _x_off;
+		y = _y_off;
+	} else {
+		x = -1;
+		y = -1;
+	}
+
+	if (_state_mask & Size) {
+		w = _width;
+		h = _height;
+	} else {
+		w = -1;
+		h = -1;
+	}
+
 	node->add_property (X_("visible"), _visible? X_("yes") : X_("no"));
-	snprintf (buf, sizeof (buf), "%d", _x_off);
+	snprintf (buf, sizeof (buf), "%d", x);
 	node->add_property (X_("x-off"), buf);
-	snprintf (buf, sizeof (buf), "%d", _y_off);
+	snprintf (buf, sizeof (buf), "%d", y);
 	node->add_property (X_("y-off"), buf);
-	snprintf (buf, sizeof (buf), "%d", _width);
+	snprintf (buf, sizeof (buf), "%d", w);
 	node->add_property (X_("x-size"), buf);
-	snprintf (buf, sizeof (buf), "%d", _height);
+	snprintf (buf, sizeof (buf), "%d", h);
 	node->add_property (X_("y-size"), buf);
 
 	return *node;
@@ -327,16 +347,16 @@ WindowProxy::set_pos_and_size ()
 		return;
 	}
 
-	if (_width != -1 || _height != -1 || _x_off != -1 || _y_off != -1) {
+	if ((_state_mask & Position) && (_width != -1 || _height != -1 || _x_off != -1 || _y_off != -1)) {
 		/* cancel any mouse-based positioning */
 		_window->set_position (Gtk::WIN_POS_NONE);
 	}
 
-	if (_width != -1 && _height != -1) {
+	if ((_state_mask & Size) && _width != -1 && _height != -1) {
 		_window->resize (_width, _height);
 	}
 
-	if (_x_off != -1 && _y_off != -1) {
+	if ((_state_mask & Position) && _x_off != -1 && _y_off != -1) {
 		_window->move (_x_off, _y_off);
 	}
 }
@@ -348,6 +368,10 @@ WindowProxy::set_pos ()
 		return;
 	}
 
+	if (!(_state_mask & Position)) {
+		return;
+	}
+
 	if (_width != -1 || _height != -1 || _x_off != -1 || _y_off != -1) {
 		/* cancel any mouse-based positioning */
 		_window->set_position (Gtk::WIN_POS_NONE);
@@ -356,4 +380,10 @@ WindowProxy::set_pos ()
 	if (_x_off != -1 && _y_off != -1) {
 		_window->move (_x_off, _y_off);
 	}
+}
+
+void
+WindowProxy::set_state_mask (StateMask sm)
+{
+	_state_mask = sm;
 }
