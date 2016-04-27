@@ -204,7 +204,7 @@ vst_search_path ()
 	}
 
 	if (p == 0) {
-#ifdef ARCH_X86
+#if ( (defined __i386__) || (defined _M_IX86) )
 		char *pVSTx86 = 0;
 		std::string pProgFilesX86 = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILESX86);
 
