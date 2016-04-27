@@ -2119,8 +2119,7 @@ LV2Plugin::allocate_atom_event_buffers()
 			LilvNodes* atom_supports = lilv_port_get_value(
 				p, port, _world.atom_supports);
 
-			if (!lilv_nodes_contains(buffer_types, _world.atom_Sequence)
-					|| !lilv_nodes_contains(atom_supports, _world.midi_MidiEvent)) {
+			if (lilv_nodes_contains(buffer_types, _world.atom_Sequence)) {
 				if (lilv_port_is_a(p, port, _world.lv2_InputPort)) {
 					count_atom_in++;
 				}
@@ -2147,7 +2146,7 @@ LV2Plugin::allocate_atom_event_buffers()
 		return;
 	}
 
-	DEBUG_TRACE(DEBUG::LV2, string_compose("allocate %1 atom_ev_buffers of %d bytes\n", total_atom_buffers, minimumSize));
+	DEBUG_TRACE(DEBUG::LV2, string_compose("allocate %1 atom_ev_buffers of %2 bytes\n", total_atom_buffers, minimumSize));
 	_atom_ev_buffers = (LV2_Evbuf**) malloc((total_atom_buffers + 1) * sizeof(LV2_Evbuf*));
 	for (int i = 0; i < total_atom_buffers; ++i ) {
 		_atom_ev_buffers[i] = lv2_evbuf_new(minimumSize, LV2_EVBUF_ATOM,
