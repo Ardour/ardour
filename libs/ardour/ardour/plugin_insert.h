@@ -144,6 +144,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	// only the owning route may call these (with process lock held)
 	// route is not a friend class, it owns us
 	bool set_count      (uint32_t num);
+	void set_sinks      (const ChanCount&); // reconfigurable I/O ONLY
 	void set_outputs    (const ChanCount&);
 	void set_strict_io  (bool b);
 	void set_custom_cfg (bool b);
@@ -312,6 +313,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	ChanCount _configured_internal; // with side-chain
 	ChanCount _configured_out;
 	ChanCount _custom_out;
+	ChanCount _custom_sinks;
 	ChanCount _preset_out;
 	ChanCount _cached_sidechain_pins;
 	ChanCount _required_buffers;

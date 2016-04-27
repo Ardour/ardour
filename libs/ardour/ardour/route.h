@@ -309,9 +309,10 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	 * @param proc Processor to customize
 	 * @param count number of plugin instances to use (if zero, reset to default)
 	 * @param outs output port customization
+	 * @param sinks input pins for variable-I/O plugins
 	 * @returns true if successful
 	 */
-	bool customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs);
+	bool customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs, ChanCount sinks);
 	bool add_remove_sidechain (boost::shared_ptr<Processor> proc, bool);
 	bool plugin_preset_output (boost::shared_ptr<Processor> proc, ChanCount outs);
 

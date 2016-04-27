@@ -2566,11 +2566,11 @@ bool
 Route::reset_plugin_insert (boost::shared_ptr<Processor> proc)
 {
 	ChanCount unused;
-	return customize_plugin_insert (proc, 0, unused);
+	return customize_plugin_insert (proc, 0, unused, unused);
 }
 
 bool
-Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs)
+Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs, ChanCount sinks)
 {
 	boost::shared_ptr<PluginInsert> pi;
 	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
@@ -2589,9 +2589,10 @@ Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t coun
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 
-		bool      old_cust = pi->custom_cfg ();
-		uint32_t  old_cnt  = pi->get_count ();
-		ChanCount old_chan = pi->output_streams ();
+		bool      old_cust  = pi->custom_cfg ();
+		uint32_t  old_cnt   = pi->get_count ();
+		ChanCount old_chan  = pi->output_streams ();
+		ChanCount old_sinks = pi->natural_input_streams ();
 
 		if (count == 0) {
 			pi->set_custom_cfg (false);
@@ -2599,6 +2600,7 @@ Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t coun
 			pi->set_custom_cfg (true);
 			pi->set_count (count);
 			pi->set_outputs (outs);
+			pi->set_sinks (sinks);
 		}
 
 		list<pair<ChanCount, ChanCount> > c = try_configure_processors_unlocked (n_inputs (), 0);
@@ -2606,6 +2608,7 @@ Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t coun
 			/* not possible */
 
 			pi->set_count (old_cnt);
+			pi->set_sinks (old_sinks);
 			pi->set_outputs (old_chan);
 			pi->set_custom_cfg (old_cust);
 

@@ -148,6 +148,14 @@ PluginInsert::set_count (uint32_t num)
 
 
 void
+PluginInsert::set_sinks (const ChanCount& c)
+{
+	bool changed = (_custom_sinks != c) && _custom_cfg;
+	_custom_sinks = c;
+	/* no signal, change will only be visible after re-config */
+}
+
+void
 PluginInsert::set_outputs (const ChanCount& c)
 {
 	bool changed = (_custom_out != c) && _custom_cfg;
@@ -1373,7 +1381,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	ChanCount old_in;
 	ChanCount old_internal;
 	ChanCount old_out;
+	ChanCount old_pins;
 
+	old_pins = natural_input_streams();
 	old_in = _configured_in;
 	old_out = _configured_out;
 	old_internal = _configured_internal;
@@ -1427,8 +1437,12 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		break;
 	case Delegate:
 		{
-			ChanCount dout (in); // hint
+			ChanCount din (_configured_internal);
+			ChanCount dout (din); // hint
 			if (_custom_cfg) {
+				if (_custom_sinks.n_total () > 0) {
+					din = _custom_sinks;
+				}
 				dout = _custom_out;
 			} else if (_preset_out.n_audio () > 0) {
 				dout.set (DataType::AUDIO, _preset_out.n_audio ());
@@ -1437,10 +1451,11 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			}
 			if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
 			ChanCount useins;
-			bool const r = _plugins.front()->can_support_io_configuration (_configured_internal, dout, &useins);
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate lookup : %2 %3\n", name(), din, dout));
+			bool const r = _plugins.front()->can_support_io_configuration (din, dout, &useins);
 			assert (r);
 			if (useins.n_audio() == 0) {
-				useins = _configured_internal;
+				useins = din;
 			}
 			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate configuration: %2 %3\n", name(), useins, dout));
 
@@ -1448,6 +1463,9 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 				PluginIoReConfigure (); /* EMIT SIGNAL */
 				_configured = false;
 				return false;
+			}
+			if (!_custom_cfg) {
+				_custom_sinks = din;
 			}
 		}
 		break;
@@ -1568,6 +1586,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			natural_input_streams () + ChanCount::max (_configured_out, natural_output_streams () * get_count ()));
 
 	if (old_in != in || old_out != out || old_internal != _configured_internal
+			|| old_pins != natural_input_streams ()
 			|| (old_match.method != _match.method && (old_match.method == Split || _match.method == Split))
 		 ) {
 		PluginIoReConfigure (); /* EMIT SIGNAL */
@@ -1649,7 +1668,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 		PluginInfoPtr info = _plugins.front()->get_info();
 		out = _custom_out;
 		if (info->reconfigurable_io()) {
-			return Match (Delegate, get_count(), _strict_io, true);
+			return Match (Delegate, 1, _strict_io, true);
 		} else {
 			return Match (ExactMatch, get_count(), _strict_io, true);
 		}
@@ -1944,6 +1963,7 @@ PluginInsert::state (bool full)
 	/* remember actual i/o configuration (for later placeholder
 	 * in case the plugin goes missing) */
 	node.add_child_nocopy (* _configured_in.state (X_("ConfiguredInput")));
+	node.add_child_nocopy (* _custom_sinks.state (X_("CustomSinks")));
 	node.add_child_nocopy (* _configured_out.state (X_("ConfiguredOutput")));
 	node.add_child_nocopy (* _preset_out.state (X_("PresetOutput")));
 
@@ -2218,6 +2238,9 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	for (XMLNodeIterator i = kids.begin(); i != kids.end(); ++i) {
 		if ((*i)->name() == X_("ConfiguredInput")) {
 			_configured_in = ChanCount(**i);
+		}
+		if ((*i)->name() == X_("CustomSinks")) {
+			_custom_sinks = ChanCount(**i);
 		}
 		if ((*i)->name() == X_("ConfiguredOutput")) {
 			_custom_out = ChanCount(**i);
@@ -2594,6 +2617,7 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 		plugin->StartTouch.connect_same_thread (*this, boost::bind (&PluginInsert::start_touch, this, _1));
 		plugin->EndTouch.connect_same_thread (*this, boost::bind (&PluginInsert::end_touch, this, _1));
 		plugin->LatencyChanged.connect_same_thread (*this, boost::bind (&PluginInsert::latency_changed, this, _1, _2));
+		_custom_sinks = plugin->get_info()->n_inputs;
 		// cache sidechain port count
 		_cached_sidechain_pins.reset ();
 		const ChanCount& nis (plugin->get_info()->n_inputs);
