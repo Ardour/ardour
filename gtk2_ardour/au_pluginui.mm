@@ -14,9 +14,11 @@
 #undef check // stupid gtk, stupid apple
 
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/window_proxy.h>
 
 #include "au_pluginui.h"
 #include "gui_thread.h"
+#include "processor_box.h"
 
 #include "CAAudioUnit.h"
 #include "CAComponent.h"
@@ -139,6 +141,29 @@ dump_view_tree (NSView* view, int depth, int maxdepth)
 
 @end
 
+@implementation LiveResizeNotificationObject
+
+- (LiveResizeNotificationObject*) initWithPluginUI: (AUPluginUI*) apluginui
+{
+	self = [ super init ];
+	if (self) {
+		plugin_ui = apluginui;
+	}
+
+	return self;
+}
+
+- (void)windowWillStartLiveResizeHandler:(NSNotification*)notification
+{
+	plugin_ui->start_live_resize ();
+}
+
+- (void)windowWillEndLiveResizeHandler:(NSNotification*)notification
+{
+	plugin_ui->end_live_resize ();
+}
+@end
+
 AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	: PlugUIBase (insert)
 	, automation_mode_label (_("Automation"))
@@ -151,6 +176,13 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	, req_height (0)
 	, alo_width (0)
 	, alo_height (0)
+	, cocoa_window (0)
+	, au_view (0)
+	, in_live_resize (false)
+	, plugin_requested_resize (0)
+	, cocoa_parent (0)
+	, _notify (0)
+	, _resize_notify (0)
 
 {
 	if (automation_mode_strings.empty()) {
@@ -253,6 +285,10 @@ AUPluginUI::~AUPluginUI ()
 {
 	if (_notify) {
 		[[NSNotificationCenter defaultCenter] removeObserver:_notify];
+	}
+
+	if (_resize_notify) {
+		[[NSNotificationCenter defaultCenter] removeObserver:_resize_notify];
 	}
 
 	if (cocoa_parent) {
@@ -397,7 +433,7 @@ AUPluginUI::create_cocoa_view ()
 	// [A] Show custom UI if view has it
 
 	if (CocoaViewBundlePath && factoryClassName) {
-		NSBundle *viewBundle  	= [NSBundle bundleWithPath:[CocoaViewBundlePath path]];
+		NSBundle *viewBundle	= [NSBundle bundleWithPath:[CocoaViewBundlePath path]];
 
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("tried to create bundle, result = %1\n", viewBundle));
 
@@ -455,9 +491,11 @@ AUPluginUI::create_cocoa_view ()
 
 	// Get the initial size of the new AU View's frame
 	NSRect  frame = [au_view frame];
-	min_width  = req_width  = CGRectGetWidth(NSRectToCGRect(frame));
-	min_height = req_height = CGRectGetHeight(NSRectToCGRect(frame));
+	min_width  = req_width  = frame.size.width;
+	min_height = req_height = frame.size.height;
+
 	resizable  = [au_view autoresizingMask];
+	std::cerr << plugin->name() << " initial frame = " << [NSStringFromRect (frame) UTF8String] << " resizable ? " << resizable << std::endl;
 
 	low_box.queue_resize ();
 
@@ -465,25 +503,135 @@ AUPluginUI::create_cocoa_view ()
 }
 
 void
+AUPluginUI::update_view_size ()
+{
+	last_au_frame = [au_view frame];
+}
+
+void
 AUPluginUI::cocoa_view_resized ()
 {
-	if (!mapped || alo_width == 0 || alo_height == 0 || !resizable) {
+        /* we can get here for two reasons:
+
+           1) the plugin window was resized by the user, a new size was
+           allocated to the window, ::update_view_size() was called, and we
+           explicitly/manually resized the AU NSView.
+
+           2) the plugin decided to resize itself (probably in response to user
+           action, but not in response to an actual window resize)
+
+           We only want to proceed with a window resizing in the second case.
+        */
+
+	if (in_live_resize) {
+		/* ::update_view_size() will be called at the right times and
+		 * will update the view size. We don't need to anything while a
+		 * live resize in underway.
+		 */
 		return;
 	}
-	/* check for self-resizing plugins (e.g expand settings in AUSampler)
-	 * if the widget expands it moves its y-offset (cocoa y-axis points towards the top)
+
+	if (plugin_requested_resize) {
+		/* we tried to change the plugin frame from inside this method
+		 * (to adjust the origin), and the plugin changed its size
+		 * again. Ignore this second call.
+		 */
+		std::cerr << plugin->name() << " re-entrant call to cocoa_view_resized, ignored\n";
+		return;
+	}
+
+	plugin_requested_resize = 1;
+
+	ProcessorWindowProxy* wp = insert->window_proxy();
+	if (wp) {
+		/* Once a plugin has requested a resize of its own window, do
+		 * NOT save the window. The user may save state with the plugin
+		 * editor expanded to show "extra detail" - the plugin will not
+		 * refill this space when the editor is first
+		 * instantiated. Leaving the window in the "too big" state
+		 * cannot be recovered from.
+		 *
+		 * The window will be sized to fit the plugin's own request. Done.
+		 */
+		wp->set_state_mask (WindowProxy::Position);
+	}
+
+        NSRect new_frame = [au_view frame];
+
+	std::cerr << "Plugin " << plugin->name() << " requested update (prs now = " << plugin_requested_resize << ")\n";
+	std::cerr << "\tAU NSView frame : " << [ NSStringFromRect (new_frame) UTF8String] << std::endl;
+	std::cerr << "\tlast au frame : " << [ NSStringFromRect (last_au_frame) UTF8String] << std::endl;
+
+	/* from here on, we know that we've been called because the plugin
+	 * decided to change the NSView frame itself.
 	 */
-	NSRect new_au_frame = [au_view frame];
 
-	//float dx = last_au_frame.origin.x - new_au_frame.origin.x;
-	float dy = last_au_frame.origin.y - new_au_frame.origin.y;
-	//req_width += dx;
-	req_height += dy;
-	if (req_width < min_width) req_width = min_width;
-	if (req_height < min_height) req_height = min_height;
+	/* step one: compute the change in the frame size.
+	 */
 
-	last_au_frame = new_au_frame;
-	low_box.queue_resize ();
+	float dy = new_frame.size.height - last_au_frame.size.height;
+        float dx = new_frame.size.width - last_au_frame.size.width;
+
+        NSWindow* window = get_nswindow ();
+        NSRect windowFrame= [window frame];
+
+	/* we want the top edge of the window to remain in the same place,
+	   but the Cocoa/Quartz origin is at the lower left. So, when we make
+	   the window larger, we will move it down, which means shifting the
+	   origin toward (x,0). This will leave the top edge in the same place.
+	*/
+
+        windowFrame.origin.y    -= dy;
+        windowFrame.origin.x    -= dx;
+        windowFrame.size.height += dy;
+        windowFrame.size.width  += dx;
+
+	std::cerr << "\tChange size by " << dx << " x " << dy << std::endl;
+
+        NSUInteger old_auto_resize = [au_view autoresizingMask];
+
+	/* Stop the AU NSView from resizing itself *again* in response to
+	   us changing the window size.
+	*/
+
+
+        [au_view setAutoresizingMask:NSViewNotSizable];
+
+	/* this resizes the window. it will eventually trigger a new
+	 * size_allocate event/callback, and we'll end up in
+	 * ::update_view_size(). We want to stop that from doing anything,
+	 * because we've already resized the window to fit the new new view,
+	 * so there's no need to actually update the view size again.
+	 */
+
+	[window setFrame:windowFrame display:1];
+
+        /* Some stupid AU Views change the origin of the original AU View when
+           they are resized (I'm looking at you AUSampler). If the origin has
+           been moved, move it back.
+        */
+
+        if (last_au_frame.origin.x != new_frame.origin.x ||
+            last_au_frame.origin.y != new_frame.origin.y) {
+                new_frame.origin = last_au_frame.origin;
+		std::cerr << "Move AU NSView origin back to "
+			  << new_frame.origin.x << ", " << new_frame.origin.y
+			  << std::endl;
+                [au_view setFrame:new_frame];
+                /* also be sure to redraw the topbox because this can
+                   also go wrong.
+                 */
+                top_box.queue_draw ();
+        }
+
+        [au_view setAutoresizingMask:old_auto_resize];
+
+	/* keep a copy of the size of the AU NSView. We didn't set - the plugin did */
+	last_au_frame = new_frame;
+	min_width  = req_width  = new_frame.size.width;
+	min_height = req_height = new_frame.size.height;
+
+	plugin_requested_resize = 0;
 }
 
 int
@@ -652,6 +800,11 @@ AUPluginUI::parent_cocoa_window ()
 	NSView* view = gdk_quartz_window_get_nsview (low_box.get_window()->gobj());
 	[view addSubview:au_view];
 
+	/* this moves the AU NSView down and over to provide a left-hand margin
+	 * and to clear the Ardour "task bar" (with plugin preset mgmt buttons,
+	 * keyboard focus control, bypass etc).
+	 */
+
 	gint xx, yy;
 	gtk_widget_translate_coordinates(
 			GTK_WIDGET(low_box.gobj()),
@@ -666,6 +819,18 @@ AUPluginUI::parent_cocoa_window ()
 	[[NSNotificationCenter defaultCenter] addObserver:_notify
 		selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
 		object:au_view];
+
+	// catch notifications that live resizing is about to start
+
+	_resize_notify = [ [ LiveResizeNotificationObject alloc] initWithPluginUI:this ];
+
+	[[NSNotificationCenter defaultCenter] addObserver:_resize_notify
+		selector:@selector(windowWillStartLiveResizeHandler:) name:NSWindowWillStartLiveResizeNotification
+		object:win];
+
+	[[NSNotificationCenter defaultCenter] addObserver:_resize_notify
+		selector:@selector(windowWillEndLiveResizeHandler:) name:NSWindowDidEndLiveResizeNotification
+		object:win];
 
 	return 0;
 }
@@ -736,46 +901,6 @@ AUPluginUI::lower_box_visibility_notify (GdkEventVisibility* ev)
 }
 
 void
-AUPluginUI::update_view_size ()
-{
-	if (!mapped || alo_width == 0 || alo_height == 0) {
-		return;
-	}
-	gint xx, yy;
-	gtk_widget_translate_coordinates(
-			GTK_WIDGET(low_box.gobj()),
-			GTK_WIDGET(low_box.get_parent()->gobj()),
-			8, 6, &xx, &yy);
-
-	[[NSNotificationCenter defaultCenter] removeObserver:_notify
-		name:NSViewFrameDidChangeNotification
-		object:au_view];
-
-	if (!resizable) {
-		xx += (alo_width - req_width) * .5;
-		[au_view setFrame:NSMakeRect(xx, yy, req_width, req_height)];
-	} else {
-		/* this mitigates issues with plugins that resize themselves
-		 * depending on visible options (e.g AUSampler)
-		 * since the OSX y-axis points upwards, the plugin adjusts its
-		 * own y-offset if the view expands to the bottom to accomodate
-		 * subviews inside the main view.
-		 */
-		[au_view setAutoresizesSubviews:0];
-		[au_view setFrame:NSMakeRect(xx, yy, alo_width, alo_height)];
-		[au_view setAutoresizesSubviews:1];
-		[au_view setNeedsDisplay:1];
-	}
-
-	last_au_frame = [au_view frame];
-
-	[[NSNotificationCenter defaultCenter]
-	     addObserver:_notify
-	        selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
-	          object:au_view];
-}
-
-void
 AUPluginUI::lower_box_map ()
 {
 	mapped = true;
@@ -802,18 +927,22 @@ AUPluginUI::lower_box_size_allocate (Gtk::Allocation& allocation)
 {
 	alo_width  = allocation.get_width ();
 	alo_height = allocation.get_height ();
+	std::cerr << "lower box size reallocated to " << alo_width << " x " << alo_height << std::endl;
 	update_view_size ();
+	std::cerr << "low box draw (0, 0, " << alo_width << " x " << alo_height << ")\n";
+	low_box.queue_draw_area (0, 0, alo_width, alo_height);
 }
 
 gboolean
 AUPluginUI::lower_box_expose (GdkEventExpose* event)
 {
-#if 0 // AU view magically redraws by itself
-	[au_view drawRect:NSMakeRect(event->area.x,
-			event->area.y,
-			event->area.width,
-			event->area.height)];
-#endif
+	std::cerr << "lower box expose: " << event->area.x << ", " << event->area.y
+		  << ' '
+		  << event->area.width << " x " << event->area.height
+		  << " ALLOC "
+		  << get_allocation().get_width() << " x " << get_allocation().get_height()
+		  << std::endl;
+
 	/* hack to keep ardour responsive
 	 * some UIs (e.g Addictive Drums) completely hog the CPU
 	 */
@@ -880,4 +1009,16 @@ create_au_gui (boost::shared_ptr<PluginInsert> plugin_insert, VBox** box)
 	return aup;
 }
 
+void
+AUPluginUI::start_live_resize ()
+{
+  std::cerr << "\n\n\n++++ Entering Live Resize\n";
+  in_live_resize = true;
+}
 
+void
+AUPluginUI::end_live_resize ()
+{
+  std::cerr << "\n\n\n ----Leaving Live Resize\n";
+  in_live_resize = false;
+}

@@ -65,6 +65,12 @@ class AUPluginUI;
 }
 @end
 
+@interface LiveResizeNotificationObject : NSObject {
+	@private
+		AUPluginUI* plugin_ui;
+}
+@end
+
 class AUPluginUI : public PlugUIBase, public Gtk::VBox
 {
   public:
@@ -100,6 +106,9 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 
 	OSStatus carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event);
 
+	void start_live_resize ();
+	void end_live_resize ();
+
   private:
 	WindowRef wr;
 	boost::shared_ptr<ARDOUR::AUPlugin> au;
@@ -129,6 +138,8 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	NSWindow*           cocoa_window;
 	NSView*             au_view;
         NSRect              last_au_frame;
+	bool                in_live_resize;
+	uint32_t            plugin_requested_resize;
 
 	/* Carbon */
 
@@ -136,9 +147,13 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	ComponentDescription carbon_descriptor;
 	AudioUnitCarbonView  editView;
 	WindowRef            carbon_window;
- 	EventHandlerRef      carbon_event_handler;
+	EventHandlerRef      carbon_event_handler;
 	bool                 _activating_from_app;
+
+	/* Generic */
+
 	NotificationObject* _notify;
+	LiveResizeNotificationObject* _resize_notify;
 
 	bool test_cocoa_view_support ();
 	bool test_carbon_view_support ();
