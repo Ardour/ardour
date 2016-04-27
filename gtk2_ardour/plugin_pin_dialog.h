@@ -96,6 +96,10 @@ private:
 	ArdourButton _tgl_sidechain;
 	ArdourButton _add_plugin;
 	ArdourButton _del_plugin;
+	ArdourButton _add_input_audio;
+	ArdourButton _del_input_audio;
+	ArdourButton _add_input_midi;
+	ArdourButton _del_input_midi;
 	ArdourButton _add_output_audio;
 	ArdourButton _del_output_audio;
 	ArdourButton _add_output_midi;
@@ -143,6 +147,7 @@ private:
 	void connect_sidechain ();
 	void add_remove_plugin_clicked (bool);
 	void add_remove_port_clicked (bool, ARDOUR::DataType);
+	void add_remove_inpin_clicked (bool, ARDOUR::DataType);
 	void add_sidechain_port (ARDOUR::DataType);
 	void select_output_preset (uint32_t n_audio);
 	void handle_input_action (const CtrlElem &, const CtrlElem &);

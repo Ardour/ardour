@@ -58,6 +58,10 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	, _tgl_sidechain (_("Side Chain"), ArdourButton::led_default_elements)
 	, _add_plugin (_("+"))
 	, _del_plugin (_("-"))
+	, _add_input_audio (_("+"))
+	, _del_input_audio (_("-"))
+	, _add_input_midi (_("+"))
+	, _del_input_midi (_("-"))
 	, _add_output_audio (_("+"))
 	, _del_output_audio (_("-"))
 	, _add_output_midi (_("+"))
@@ -109,8 +113,15 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	_pm_size_group  = SizeGroup::create (SIZE_GROUP_BOTH);
 	_add_plugin.set_tweaks (ArdourButton::Square);
 	_del_plugin.set_tweaks (ArdourButton::Square);
-	_pm_size_group->add_widget (_add_plugin);
-	_pm_size_group->add_widget (_del_plugin);
+	if (_pi->plugin (0)->get_info()->reconfigurable_io ()) {
+		_pm_size_group->add_widget (_add_input_audio);
+		_pm_size_group->add_widget (_del_input_audio);
+		_pm_size_group->add_widget (_add_input_midi);
+		_pm_size_group->add_widget (_del_input_midi);
+	} else {
+		_pm_size_group->add_widget (_add_plugin);
+		_pm_size_group->add_widget (_del_plugin);
+	}
 	_pm_size_group->add_widget (_add_output_audio);
 	_pm_size_group->add_widget (_del_output_audio);
 	_pm_size_group->add_widget (_add_output_midi);
@@ -130,14 +141,34 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	/* left side */
 	tl->pack_start (_set_config, false, false);
 
-	box = manage (new HBox ());
-	box->set_border_width (2);
-	box->pack_start (_add_plugin, true, false);
-	box->pack_start (_del_plugin, true, false);
-	f = manage (new Frame ());
-	f->set_label (_("Instances"));
-	f->add (*box);
-	tl->pack_start (*f, false, false);
+	if (_pi->plugin (0)->get_info()->reconfigurable_io ()) {
+		box = manage (new HBox ());
+		box->set_border_width (2);
+		box->pack_start (_add_input_audio, true, false);
+		box->pack_start (_del_input_audio, true, false);
+		f = manage (new Frame ());
+		f->set_label (_("Audio Input Pins"));
+		f->add (*box);
+		tl->pack_start (*f, false, false);
+
+		box = manage (new HBox ());
+		box->set_border_width (2);
+		box->pack_start (_add_input_midi, true, false);
+		box->pack_start (_del_input_midi, true, false);
+		f = manage (new Frame ());
+		f->set_label (_("MIDI Input Pins"));
+		f->add (*box);
+		tl->pack_start (*f, false, false);
+	} else {
+		box = manage (new HBox ());
+		box->set_border_width (2);
+		box->pack_start (_add_plugin, true, false);
+		box->pack_start (_del_plugin, true, false);
+		f = manage (new Frame ());
+		f->set_label (_("Instances"));
+		f->add (*box);
+		tl->pack_start (*f, false, false);
+	}
 
 	box = manage (new HBox ());
 	box->set_border_width (2);
@@ -210,10 +241,16 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	_add_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_plugin_clicked), true));
 	_del_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_plugin_clicked), false));
 
+	_add_input_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_inpin_clicked), true, DataType::AUDIO));
+	_del_input_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_inpin_clicked), false, DataType::AUDIO));
+	_add_input_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_inpin_clicked), true, DataType::MIDI));
+	_del_input_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_inpin_clicked), false, DataType::MIDI));
+
 	_add_output_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_port_clicked), true, DataType::AUDIO));
 	_del_output_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_port_clicked), false, DataType::AUDIO));
 	_add_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_port_clicked), true, DataType::MIDI));
 	_del_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_port_clicked), false, DataType::MIDI));
+
 	_add_sc_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_sidechain_port), DataType::AUDIO));
 	_add_sc_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_sidechain_port), DataType::MIDI));
 
@@ -287,28 +324,31 @@ PluginPinDialog::plugin_reconfigured ()
 	if (_pi->custom_cfg ()) {
 		_set_config.set_active (true);
 		_add_plugin.set_sensitive (true);
+		_del_plugin.set_sensitive (_n_plugins > 1);
 		_add_output_audio.set_sensitive (true);
 		_add_output_midi.set_sensitive (true);
-		_del_plugin.set_sensitive (_n_plugins > 1);
 		_del_output_audio.set_sensitive (_out.n_audio () > 0 && _out.n_total () > 1);
 		_del_output_midi.set_sensitive (_out.n_midi () > 0 && _out.n_total () > 1);
+		_add_input_audio.set_sensitive (true);
+		_add_input_midi.set_sensitive (true);
+		_del_input_audio.set_sensitive (_sinks.n_audio () > 0 && _sinks.n_total () > 1);
+		_del_input_midi.set_sensitive (_sinks.n_midi () > 0 && _sinks.n_total () > 1);
 		_out_presets.set_sensitive (false);
 		_out_presets.set_text (_("Manual"));
 	} else {
 		_set_config.set_active (false);
 		_add_plugin.set_sensitive (false);
+		_del_plugin.set_sensitive (false);
+		_add_input_audio.set_sensitive (false);
+		_add_input_midi.set_sensitive (false);
+		_del_input_audio.set_sensitive (false);
+		_del_input_midi.set_sensitive (false);
 		_add_output_audio.set_sensitive (false);
 		_add_output_midi.set_sensitive (false);
-		_del_plugin.set_sensitive (false);
 		_del_output_audio.set_sensitive (false);
 		_del_output_midi.set_sensitive (false);
 		_out_presets.set_sensitive (true);
 		refill_output_presets ();
-	}
-
-	if (_pi->plugin (0)->get_info()->type == ARDOUR::AudioUnit) {
-		_add_plugin.set_sensitive (false);
-		_del_plugin.set_sensitive (false);
 	}
 
 	if (!_pi->has_sidechain () && _sidechain_selector) {
@@ -1563,7 +1603,7 @@ PluginPinDialog::reset_configuration ()
 	if (_set_config.get_active ()) {
 		_route ()->reset_plugin_insert (_pi);
 	} else {
-		_route ()->customize_plugin_insert (_pi, _n_plugins, _out);
+		_route ()->customize_plugin_insert (_pi, _n_plugins, _out, _sinks);
 	}
 }
 
@@ -1586,8 +1626,9 @@ PluginPinDialog::add_remove_plugin_clicked (bool add)
 {
 	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out = _out;
+	ChanCount sinks = _sinks;
 	assert (add || _n_plugins > 0);
-	_route ()->customize_plugin_insert (_pi, _n_plugins + (add ? 1 : -1),  out);
+	_route ()->customize_plugin_insert (_pi, _n_plugins + (add ? 1 : -1), out, sinks);
 }
 
 void
@@ -1595,9 +1636,21 @@ PluginPinDialog::add_remove_port_clicked (bool add, ARDOUR::DataType dt)
 {
 	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out = _out;
+	ChanCount sinks = _sinks;
 	assert (add || out.get (dt) > 0);
 	out.set (dt, out.get (dt) + (add ? 1 : -1));
-	_route ()->customize_plugin_insert (_pi, _n_plugins, out);
+	_route ()->customize_plugin_insert (_pi, _n_plugins, out, sinks);
+}
+
+void
+PluginPinDialog::add_remove_inpin_clicked (bool add, ARDOUR::DataType dt)
+{
+	if (_session && _session->actively_recording ()) { return; }
+	ChanCount out = _out;
+	ChanCount sinks = _sinks;
+	assert (add || sinks.get (dt) > 0);
+	sinks.set (dt, sinks.get (dt) + (add ? 1 : -1));
+	_route ()->customize_plugin_insert (_pi, _n_plugins, out, sinks);
 }
 
 void
