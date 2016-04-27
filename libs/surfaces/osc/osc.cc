@@ -1068,9 +1068,7 @@ OSC::route_solo (int rid, int yn)
 	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
 	if (r) {
-		boost::shared_ptr<RouteList> rl (new RouteList);
-		rl->push_back (r);
-		session->set_solo (rl, yn, Session::rt_cleanup, PBD::Controllable::NoGroup);
+		r->solo_control()->set_value(yn, PBD::Controllable::NoGroup);
 	}
 
 	return 0;
