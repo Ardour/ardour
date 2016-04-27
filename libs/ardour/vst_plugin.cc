@@ -513,7 +513,7 @@ VSTPlugin::signal_latency () const
 	}
 
 #if ( defined(__x86_64__) || defined(_M_X64) )
-	return *((int32_t *) (((char *) &_plugin->flags) + 20)); /* initialDelay */
+	return *((int32_t *) (((char *) &_plugin->flags) + 24)); /* initialDelay */
 #else
 	return *((int32_t *) (((char *) &_plugin->flags) + 12)); /* initialDelay */
 #endif
