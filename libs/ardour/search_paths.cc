@@ -204,6 +204,7 @@ vst_search_path ()
 	}
 
 	if (p == 0) {
+#ifdef ARCH_X86
 		char *pVSTx86 = 0;
 		std::string pProgFilesX86 = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILESX86);
 
@@ -218,22 +219,21 @@ vst_search_path ()
 				g_free (pVSTx86);
 			}
 		}
+#else
+		// Look for a VST folder under C:\Program Files
+		char *pVST = 0;
+		std::string pProgFiles = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILES);
 
-		if (p == 0) {
-			// Look for a VST folder under C:\Program Files
-			char *pVST = 0;
-			std::string pProgFiles = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILES);
+		if (!pProgFiles.empty()) {
+			if ((pVST = g_build_filename (pProgFiles.c_str(), "Steinberg", "VSTPlugins", NULL))) {
+				if (Glib::file_test (pVST, Glib::FILE_TEST_EXISTS))
+					if (Glib::file_test (pVST, Glib::FILE_TEST_IS_DIR))
+						p = g_build_filename (pVST, NULL);
 
-			if (!pProgFiles.empty()) {
-				if ((pVST = g_build_filename (pProgFiles.c_str(), "Steinberg", "VSTPlugins", NULL))) {
-					if (Glib::file_test (pVST, Glib::FILE_TEST_EXISTS))
-						if (Glib::file_test (pVST, Glib::FILE_TEST_IS_DIR))
-							p = g_build_filename (pVST, NULL);
-
-					g_free (pVST);
-				}
+				g_free (pVST);
 			}
 		}
+#endif
 	}
 
 	if (p == 0) {
