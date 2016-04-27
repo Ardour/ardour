@@ -622,7 +622,11 @@ AUPluginUI::cocoa_view_resized ()
                    also go wrong.
                  */
                 top_box.queue_draw ();
-        }
+        } else {
+		std::cerr << "No need to move origin, last au origin " << [NSStringFromPoint(last_au_frame.origin) UTF8String]
+			  << " == new au origin " << [NSStringFromPoint(new_frame.origin) UTF8String]
+			  << std::endl;
+	}
 
         [au_view setAutoresizingMask:old_auto_resize];
 
