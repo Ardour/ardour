@@ -33,6 +33,8 @@
 #include "public_editor.h"
 #include "i18n.h"
 
+#include "gtk2ardour-config.h"
+
 #ifdef COREAUDIO105
 #define ArdourCloseComponent CloseComponent
 #else
@@ -826,6 +828,7 @@ AUPluginUI::parent_cocoa_window ()
 
 	// catch notifications that live resizing is about to start
 
+#if HAVE_COCOA_LIVE_RESIZING
 	_resize_notify = [ [ LiveResizeNotificationObject alloc] initWithPluginUI:this ];
 
 	[[NSNotificationCenter defaultCenter] addObserver:_resize_notify
@@ -835,7 +838,28 @@ AUPluginUI::parent_cocoa_window ()
 	[[NSNotificationCenter defaultCenter] addObserver:_resize_notify
 		selector:@selector(windowWillEndLiveResizeHandler:) name:NSWindowDidEndLiveResizeNotification
 		object:win];
+#else
+	/* No way before 10.6 to identify the start of a live resize (drag
+	 * resize) without subclassing NSView and overriding two of its
+	 * methods. Instead of that, we make the window non-resizable, thus
+	 * ending confusion about whether or not resizes are plugin or user
+	 * driven (they are always plugin-driven).
+	 */
 
+	Gtk::Container* toplevel = get_toplevel();
+	Requisition req;
+
+	resizable = false;
+
+	if (!toplevel || !toplevel->is_toplevel()) {
+		error << _("AUPluginUI: no top level window!") << endmsg;
+	}
+
+	toplevel->size_request (req);
+	toplevel->set_size_request (req.width, req.height);
+	dynamic_cast<Gtk::Window*>(toplevel)->set_resizable (false);
+
+#endif
 	return 0;
 }
 
