@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
 from waflib import Options, TaskGen
+from waflib.ConfigSet import ConfigSet
 import waflib.Logs as Logs, waflib.Utils as Utils
 import os
 import shutil
@@ -11,10 +12,17 @@ from waflib.Task import Task
 from waflib.Tools import winres
 import subprocess
 import glob
+import copy
 
 # Mandatory variables
 top = '.'
 out = 'build'
+
+from waflib import TaskGen
+@TaskGen.extension('.m')
+def m_hook(self, node):
+	"""Alias .m files to be compiled the same as .c files, gcc will do the right thing."""
+	return self.create_compiled_task('c', node)
 
 path_prefix = 'gtk2_ardour/'
 
@@ -321,6 +329,26 @@ def configure(conf):
     autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
     autowaf.check_pkg(conf, 'x11', uselib_store='X11', atleast_version='1.1', mandatory=False)
     autowaf.check_pkg(conf, 'fontconfig', uselib_store='FONTCONFIG')
+
+
+    if sys.platform == 'darwin':
+        retval = conf.run_c_code (code='#include <AppKit/NSWindow.h>\n\
+        int main(void) { (void) NSWindowWillStartLiveResizeNotification; return 0; }\n',
+                                  env = conf.env.derive (),
+                                  features = [ 'c' ],
+                                  compiler = 'cc',
+                                  compile_filename='test.m',
+                                  msg = 'Checking for Cocoa live resizing constants',
+                                  okmsg = 'ok',
+                                  errmsg = 'too old - AU plugin windows will be fixed size',
+                                  mandatory = False,
+            )
+
+        if retval == 0:
+            autowaf.display_msg (conf, 'Checking for Cocoa live resizing constants', 'ok')
+            conf.define ('HAVE_COCOA_LIVE_RESIZING', 1)
+        else:
+            autowaf.display_msg (conf, 'Checking for Cocoa live resizing constants', 'too old - AU plugin windows will be fixed size')
 
     conf.write_config_header('gtk2ardour-config.h', remove=False)
 
