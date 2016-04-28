@@ -2374,49 +2374,6 @@ ProcessorBox::choose_plugin ()
 
 /** @return true if an error occurred, otherwise false */
 bool
-ProcessorBox::choose_lua ()
-{
-	LuaScriptInfoPtr spi;
-
-	ScriptSelector ss (_("Add Lua DSP Processor"), LuaScriptInfo::DSP);
-	switch (ss.run ()) {
-		case Gtk::RESPONSE_ACCEPT:
-			spi = ss.script();
-			break;
-		default:
-			return true;
-	}
-	ss.hide ();
-
-	PluginPtr p;
-	try {
-		LuaPluginInfoPtr lpi (new LuaPluginInfo(spi));
-		p = (lpi->load (*_session));
-	} catch (...) {
-		string msg = _(
-				"Failed to instantiate Lua DSP Processor,\n"
-				"probably because the script is invalid (no dsp function).");
-		MessageDialog am (msg);
-		am.run ();
-		return true;
-	}
-
-	boost::shared_ptr<Processor> processor (new PluginInsert (*_session, p));
-
-	Route::ProcessorStreams err_streams;
-	if (_route->add_processor_by_index (processor, _placement, &err_streams, Config->get_new_plugins_active ())) {
-		string msg = _(
-				"Failed to add Lua DSP Processor at the given position,\n"
-				"probably because the I/O configuration of the plugins\n"
-				"could not match the configuration of this track.");
-		MessageDialog am (msg);
-		am.run ();
-	}
-	return false;
-}
-
-/** @return true if an error occurred, otherwise false */
-bool
 ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 {
 	for (SelectedPlugins::const_iterator p = plugins.begin(); p != plugins.end(); ++p) {
@@ -3655,8 +3612,6 @@ ProcessorBox::register_actions ()
 	myactions.register_action (processor_box_actions, X_("newplugin"), _("New Plugin"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_plugin));
 
-	act = myactions.register_action (processor_box_actions, X_("newlua"), _("New Lua DSP"),
-			sigc::ptr_fun (ProcessorBox::rb_choose_lua));
 	act = myactions.register_action (processor_box_actions, X_("newinsert"), _("New Insert"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_insert));
 	ActionManager::engine_sensitive_actions.push_back (act);
@@ -3759,15 +3714,6 @@ ProcessorBox::rb_choose_plugin ()
 		return;
 	}
 	_current_processor_box->choose_plugin ();
-}
-
-void
-ProcessorBox::rb_choose_lua ()
-{
-	if (_current_processor_box == 0) {
-		return;
-	}
-	_current_processor_box->choose_lua ();
 }
 
 void

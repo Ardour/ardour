@@ -506,7 +506,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void return_io_finished (IOSelector::Result, boost::weak_ptr<ARDOUR::Processor>, IOSelectorWindow*);
 	void choose_insert ();
 	void choose_plugin ();
-	bool choose_lua ();
 	bool use_plugins (const SelectedPlugins&);
 
 	bool no_processor_redisplay;
@@ -571,7 +570,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	static void rb_choose_aux (boost::weak_ptr<ARDOUR::Route>);
 	static void rb_choose_plugin ();
 	static void rb_choose_insert ();
-	static void rb_choose_lua ();
 	static void rb_choose_send ();
 	static void rb_clear ();
 	static void rb_clear_pre ();

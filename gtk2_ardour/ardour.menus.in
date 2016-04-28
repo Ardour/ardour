@@ -631,7 +631,6 @@
     <menuitem action='newinsert'/>
     <menuitem action='newsend'/>
     <menuitem action='newaux'/>
-    <menuitem action='newlua'/>
     <separator/>
     <menuitem action='controls'/>
 #ifndef MIXBUS
