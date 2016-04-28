@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
 from waflib import Options, TaskGen
-from waflib.ConfigSet import ConfigSet
 import waflib.Logs as Logs, waflib.Utils as Utils
 import os
 import shutil
@@ -338,9 +337,6 @@ def configure(conf):
                                   features = [ 'c' ],
                                   compiler = 'cc',
                                   compile_filename='test.m',
-                                  msg = 'Checking for Cocoa live resizing constants',
-                                  okmsg = 'ok',
-                                  errmsg = 'too old - AU plugin windows will be fixed size',
                                   mandatory = False,
             )
 
