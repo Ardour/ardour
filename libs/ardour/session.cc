@@ -745,6 +745,42 @@ Session::destroy ()
 	delete midi_clock;
 	delete _tempo_map;
 
+	/* clear event queue, the session is gone, nobody is interested in
+	 * those anymore, but they do leak memory if not removed
+	 */
+	while (!immediate_events.empty ()) {
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		SessionEvent *ev = immediate_events.front ();
+		DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("Drop event: %1\n", enum_2_string (ev->type)));
+		immediate_events.pop_front ();
+		bool remove = true;
+		bool del = true;
+		switch (ev->type) {
+			case SessionEvent::AutoLoop:
+			case SessionEvent::AutoLoopDeclick:
+			case SessionEvent::Skip:
+			case SessionEvent::PunchIn:
+			case SessionEvent::PunchOut:
+			case SessionEvent::StopOnce:
+			case SessionEvent::RangeStop:
+			case SessionEvent::RangeLocate:
+				remove = false;
+				del = false;
+				break;
+			case SessionEvent::RealTimeOperation:
+				process_rtop (ev);
+				del = false;
+			default:
+				break;
+		}
+		if (remove) {
+			del = del && !_remove_event (ev);
+		}
+		if (del) {
+			delete ev;
+		}
+	}
+
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
