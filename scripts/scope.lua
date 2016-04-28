@@ -1,6 +1,7 @@
 ardour {
 	["type"]    = "dsp",
 	name        = "Inline Scope",
+	category    = "Visualization",
 	license     = "GPLv2",
 	author      = "Robin Gareus",
 	email       = "robin@gareus.org",

@@ -1,6 +1,7 @@
 ardour {
 	["type"]    = "dsp",
 	name        = "Simple Synth",
+	category    = "Instrument",
 	license     = "MIT",
 	author      = "Robin Gareus",
 	email       = "robin@gareus.org",

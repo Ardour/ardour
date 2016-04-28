@@ -1,6 +1,7 @@
 ardour {
 	["type"]    = "dsp",
 	name        = "Voice/Level Activate",
+	category    = "Utility",
 	license     = "MIT",
 	author      = "Robin Gareus",
 	authoremail = "robin@gareus.org",
