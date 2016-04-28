@@ -815,7 +815,7 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 		if (!tm->tempo().active()) {
 			return;
 		}
-		can_remove = tm->tempo().movable ();
+		can_remove = tm->tempo().movable() && !tm->tempo().locked_to_meter();
 		delete tempo_marker_menu;
 		build_tempo_marker_menu (tm, can_remove);
 		tempo_marker_menu->popup (1, ev->time);
@@ -997,7 +997,6 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 
 	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
-
 	items.back().set_sensitive (can_remove);
 }
 

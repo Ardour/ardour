@@ -3291,7 +3291,7 @@ TempoMarkerDrag::setup_pointer_frame_offset ()
 void
 TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (!_real_section->active()) {
+	if (!_real_section->active() || _real_section->locked_to_meter()) {
 		return;
 	}
 	if (first_move) {
@@ -3443,7 +3443,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 void
 TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!_real_section->active()) {
+	if (!_real_section->active() || _real_section->locked_to_meter()) {
 		return;
 	}
 	if (!movement_occurred) {
