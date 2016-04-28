@@ -848,7 +848,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool _initial_io_setup;
 	bool _in_sidechain_setup;
 
-	int configure_processors_unlocked (ProcessorStreams*);
+	int configure_processors_unlocked (ProcessorStreams*, Glib::Threads::RWLock::WriterLock*);
 	bool set_meter_point_unlocked ();
 	void apply_processor_order (const ProcessorList& new_order);
 

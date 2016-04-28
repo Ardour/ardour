@@ -1310,9 +1310,9 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 		// configure redirect ports properly, etc.
 
 		{
-			if (configure_processors_unlocked (err)) {
+			if (configure_processors_unlocked (err, &lm)) {
 				pstate.restore ();
-				configure_processors_unlocked (0); // it worked before we tried to add it ...
+				configure_processors_unlocked (0, &lm); // it worked before we tried to add it ...
 				return -1;
 			}
 		}
@@ -1495,9 +1495,9 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 			/* Think: does this really need to be called for every processor in the loop? */
 			{
-				if (configure_processors_unlocked (err)) {
+				if (configure_processors_unlocked (err, &lm)) {
 					pstate.restore ();
-					configure_processors_unlocked (0); // it worked before we tried to add it ...
+					configure_processors_unlocked (0, &lm); // it worked before we tried to add it ...
 					return -1;
 				}
 			}
@@ -1715,7 +1715,7 @@ Route::clear_processors (Placement p)
 		}
 
 		_processors = new_list;
-		configure_processors_unlocked (&err); // this can't fail
+		configure_processors_unlocked (&err, &lm); // this can't fail
 	}
 
 	processor_max_streams.reset();
@@ -1815,10 +1815,10 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 			return 1;
 		}
 
-		if (configure_processors_unlocked (err)) {
+		if (configure_processors_unlocked (err, &lm)) {
 			pstate.restore ();
 			/* we know this will work, because it worked before :) */
-			configure_processors_unlocked (0);
+			configure_processors_unlocked (0, &lm);
 			return -1;
 		}
 
@@ -1912,9 +1912,9 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 			}
 		}
 
-		if (configure_processors_unlocked (err)) {
+		if (configure_processors_unlocked (err, &lm)) {
 			pstate.restore ();
-			configure_processors_unlocked (0);
+			configure_processors_unlocked (0, &lm);
 			return -1;
 		}
 
@@ -2009,10 +2009,10 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 
 		_output->set_user_latency (0);
 
-		if (configure_processors_unlocked (err)) {
+		if (configure_processors_unlocked (err, &lm)) {
 			pstate.restore ();
 			/* we know this will work, because it worked before :) */
-			configure_processors_unlocked (0);
+			configure_processors_unlocked (0, &lm);
 			return -1;
 		}
 		//lx.unlock();
@@ -2063,7 +2063,7 @@ Route::configure_processors (ProcessorStreams* err)
 
 	if (!_in_configure_processors) {
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
-		return configure_processors_unlocked (err);
+		return configure_processors_unlocked (err, &lm);
 	}
 
 	return 0;
@@ -2179,7 +2179,7 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
  *  Return 0 on success, otherwise configuration is impossible.
  */
 int
-Route::configure_processors_unlocked (ProcessorStreams* err)
+Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLock::WriterLock* lm)
 {
 #ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
@@ -2206,12 +2206,37 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	processor_out_streams = _input->n_ports();
 	processor_max_streams.reset();
 
+	/* processor configure_io() may result in adding ports
+	 * e.g. Delivery::configure_io -> ARDOUR::IO::ensure_io ()
+	 *
+	 * with jack2 adding ports results in a graph-order callback,
+	 * which calls Session::resort_routes() and eventually
+	 * Route::direct_feeds_according_to_reality()
+	 * which takes a ReaderLock (_processor_lock).
+	 *
+	 * so we can't hold a WriterLock here until jack2 threading
+	 * is fixed.
+	 *
+	 * NB. we still hold the process lock
+	 *
+	 * (ardour's own engines do call graph-order from the
+	 * process-thread and hence do not have this issue; besides
+	 * merely adding ports won't trigger a graph-order, only
+	 * making connections does)
+	 */
+	lm->release ();
+
+	// TODO check for a potential ReaderLock after ReaderLock ??
+	Glib::Threads::RWLock::ReaderLock lr (_processor_lock);
+
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
 
 		if (!(*p)->configure_io(c->first, c->second)) {
 			DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: configuration failed\n", _name));
 			_in_configure_processors = false;
+			lr.release ();
+			lm->acquire ();
 			return -1;
 		}
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
@@ -2244,6 +2269,9 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 			processor_out_streams = out;
 		}
 	}
+
+	lr.release ();
+	lm->acquire ();
 
 
 	if (_meter) {
@@ -2438,7 +2466,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 
 		apply_processor_order (new_order);
 
-		if (configure_processors_unlocked (err)) {
+		if (configure_processors_unlocked (err, &lm)) {
 			pstate.restore ();
 			return -1;
 		}
@@ -2511,7 +2539,7 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 			return false;
 		}
 		lx.acquire ();
-		configure_processors_unlocked (0);
+		configure_processors_unlocked (0, &lm);
 	}
 
 	if (pi->has_sidechain ()) {
@@ -2554,7 +2582,7 @@ Route::plugin_preset_output (boost::shared_ptr<Processor> proc, ChanCount outs)
 			pi->set_preset_out (old);
 			return false;
 		}
-		configure_processors_unlocked (0);
+		configure_processors_unlocked (0, &lm);
 	}
 
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
@@ -2614,7 +2642,7 @@ Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t coun
 
 			return false;
 		}
-		configure_processors_unlocked (0);
+		configure_processors_unlocked (0, &lm);
 	}
 
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
@@ -3426,7 +3454,7 @@ Route::set_processor_state (const XMLNode& node)
 		_processors = new_order;
 
 		if (must_configure) {
-			configure_processors_unlocked (0);
+			configure_processors_unlocked (0, &lm);
 		}
 
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
@@ -3746,8 +3774,8 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* 
 		return true;
 	}
 
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock); // XXX
 	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
 		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor>(*r);
@@ -4271,10 +4299,10 @@ Route::listen_position_changed ()
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
-		if (configure_processors_unlocked (0)) {
+		if (configure_processors_unlocked (0, &lm)) {
 			DEBUG_TRACE (DEBUG::Processors, "---- CONFIGURATION FAILED.\n");
 			pstate.restore ();
-			configure_processors_unlocked (0); // it worked before we tried to add it ...
+			configure_processors_unlocked (0, &lm); // it worked before we tried to add it ...
 			return;
 		}
 	}
@@ -4295,7 +4323,7 @@ Route::add_export_point()
 		_capturing_processor.reset (new CapturingProcessor (_session));
 		_capturing_processor->activate ();
 
-		configure_processors_unlocked (0);
+		configure_processors_unlocked (0, &lw);
 
 	}
 
