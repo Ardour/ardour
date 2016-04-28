@@ -40,8 +40,14 @@ using namespace PBD;
 static const char* localedir = LOCALEDIR;
 static PBD::ScopedConnectionList engine_connections;
 static PBD::ScopedConnectionList session_connections;
-static Session *_session = NULL;
-static LuaState *lua;
+static Session* session = NULL;
+static LuaState* lua;
+static bool keep_running = true;
+
+/* extern VST functions */
+int vstfx_init (void*) { return 0; }
+void vstfx_exit () {}
+void vstfx_destroy_editor (VSTState*) {}
 
 class LuaReceiver : public Receiver
 {
@@ -89,10 +95,10 @@ class MyEventLoop : public sigc::trackable, public EventLoop
 
 		void call_slot (InvalidationRecord* ir, const boost::function<void()>& f) {
 			if (Glib::Threads::Thread::self () == run_loop_thread) {
-				//cout << string_compose ("%1/%2 direct dispatch of call slot via functor @ %3, invalidation %4\n", event_loop_name(), pthread_name(), &f, ir);
+				cout << string_compose ("%1/%2 direct dispatch of call slot via functor @ %3, invalidation %4\n", event_loop_name(), pthread_name(), &f, ir);
 				f ();
 			} else {
-				//cout << string_compose ("%1/%2 queue call-slot using functor @ %3, invalidation %4\n", event_loop_name(), pthread_name(), &f, ir);
+				cout << string_compose ("%1/%2 queue call-slot using functor @ %3, invalidation %4\n", event_loop_name(), pthread_name(), &f, ir);
 				assert (!ir);
 				f (); // XXX TODO, queue and process during run ()
 			}
@@ -109,12 +115,15 @@ class MyEventLoop : public sigc::trackable, public EventLoop
 		Glib::Threads::Mutex   request_buffer_map_lock;
 };
 
+static MyEventLoop *event_loop = NULL;
+
+/* ****************************************************************************/
+/* internal helper fn and callbacks */
+
 static int do_audio_midi_setup (uint32_t desired_sample_rate)
 {
 	return AudioEngine::instance ()->start ();
 }
-
-static MyEventLoop *event_loop = NULL;
 
 static void init ()
 {
@@ -140,10 +149,10 @@ static void init ()
 
 static void set_session (ARDOUR::Session *s)
 {
-	_session = s;
+	session = s;
 	assert (lua);
 	lua_State* L = lua->getState ();
-	LuaBindings::set_session (L, _session);
+	LuaBindings::set_session (L, session);
 	lua->collect_garbage (); // drop references
 }
 
@@ -153,24 +162,50 @@ static void unset_session ()
 	set_session (NULL);
 }
 
-static Session * _create_session (string dir, string state, uint32_t rate)
+static int prepare_engine ()
 {
 	AudioEngine* engine = AudioEngine::instance ();
 
 	if (!engine->current_backend ()) {
 		if (!engine->set_backend ("None (Dummy)", "Unit-Test", "")) {
 			std::cerr << "Cannot create Audio/MIDI engine\n";
-			return 0;
+			return -1;
 		}
 	}
 
 	if (!engine->current_backend ()) {
 		std::cerr << "Cannot create Audio/MIDI engine\n";
-		return 0;
+		return -1;
 	}
 
 	if (engine->running ()) {
 		engine->stop ();
+	}
+	return 0;
+}
+
+static int start_engine (uint32_t rate)
+{
+	AudioEngine* engine = AudioEngine::instance ();
+
+	if (engine->set_sample_rate (rate)) {
+		std::cerr << "Cannot set session's samplerate.\n";
+		return -1;
+	}
+
+	if (engine->start () != 0) {
+		std::cerr << "Cannot start Audio/MIDI engine\n";
+		return -1;
+	}
+
+	init_post_engine ();
+	return 0;
+}
+
+static Session * _create_session (string dir, string state, uint32_t rate) // throws
+{
+	if (prepare_engine ()) {
+		return 0;
 	}
 
 	std::string s = Glib::build_filename (dir, state + statefile_suffix);
@@ -179,12 +214,7 @@ static Session * _create_session (string dir, string state, uint32_t rate)
 		return 0;
 	}
 
-	engine->set_sample_rate (rate);
-
-	init_post_engine ();
-
-	if (engine->start () != 0) {
-		std::cerr << "Cannot start Audio/MIDI engine\n";
+	if (start_engine (rate)) {
 		return 0;
 	}
 
@@ -196,64 +226,46 @@ static Session * _create_session (string dir, string state, uint32_t rate)
 	bus_profile.requested_physical_in = 0; // use all available
 	bus_profile.requested_physical_out = 0; // use all available
 
+	AudioEngine* engine = AudioEngine::instance ();
 	Session* session = new Session (*engine, dir, state, &bus_profile);
 	return session;
 }
 
-static Session * _load_session (string dir, string state)
+static Session * _load_session (string dir, string state) // throws
 {
-	AudioEngine* engine = AudioEngine::instance ();
-
-	if (!engine->current_backend ()) {
-		if (!engine->set_backend ("None (Dummy)", "Unit-Test", "")) {
-			std::cerr << "Cannot create Audio/MIDI engine\n";
-			return 0;
-		}
-	}
-
-	if (!engine->current_backend ()) {
-		std::cerr << "Cannot create Audio/MIDI engine\n";
+	if (prepare_engine ()) {
 		return 0;
-	}
-
-	if (engine->running ()) {
-		engine->stop ();
 	}
 
 	float sr;
 	SampleFormat sf;
-
 	std::string s = Glib::build_filename (dir, state + statefile_suffix);
 	if (!Glib::file_test (dir, Glib::FILE_TEST_EXISTS)) {
 		std::cerr << "Cannot find session: " << s << "\n";
 		return 0;
 	}
 
-	if (Session::get_info_from_path (s, sr, sf) == 0) {
-		if (engine->set_sample_rate (sr)) {
-			std::cerr << "Cannot set session's samplerate.\n";
-			return 0;
-		}
-	} else {
+	if (Session::get_info_from_path (s, sr, sf) != 0) {
 		std::cerr << "Cannot get samplerate from session.\n";
 		return 0;
 	}
 
-	init_post_engine ();
-
-	if (engine->start () != 0) {
-		std::cerr << "Cannot start Audio/MIDI engine\n";
+	if (start_engine (sr)) {
 		return 0;
 	}
 
+	AudioEngine* engine = AudioEngine::instance ();
 	Session* session = new Session (*engine, dir, state);
 	return session;
 }
 
+/* ****************************************************************************/
+/* lua bound functions */
+
 static Session* create_session (string dir, string state, uint32_t rate)
 {
 	Session* s = 0;
-	if (_session) {
+	if (session) {
 		cerr << "Session already open" << "\n";
 		return 0;
 	}
@@ -284,7 +296,7 @@ static Session* create_session (string dir, string state, uint32_t rate)
 static Session* load_session (string dir, string state)
 {
 	Session* s = 0;
-	if (_session) {
+	if (session) {
 		cerr << "Session already open" << "\n";
 		return 0;
 	}
@@ -312,15 +324,20 @@ static Session* load_session (string dir, string state)
 	return s;
 }
 
+static int set_debug_options (const char *opts)
+{
+	return PBD::parse_debug_options (opts);
+}
+
 static void close_session ()
 {
-	delete _session;
-	assert (!_session);
+	delete session;
+	assert (!session);
 }
 
 static int close_session_lua (lua_State *L)
 {
-	if (!_session) {
+	if (!session) {
 		cerr << "No open session" << "\n";
 		return 0;
 	}
@@ -328,19 +345,22 @@ static int close_session_lua (lua_State *L)
 	return 0;
 }
 
-/* extern VST functions */
-int vstfx_init (void*) { return 0; }
-void vstfx_exit () {}
-void vstfx_destroy_editor (VSTState*) {}
-
-static void my_lua_print (std::string s) {
-	std::cout << s << "\n";
-}
-
 static void delay (float d) {
 	if (d > 0) {
 		Glib::usleep (d * 1000000);
 	}
+}
+
+static int do_quit (lua_State *L)
+{
+	keep_running = false;
+	return 0;
+}
+
+/* ****************************************************************************/
+
+static void my_lua_print (std::string s) {
+	std::cout << s << "\n";
 }
 
 static void setup_lua ()
@@ -362,8 +382,11 @@ static void setup_lua ()
 		.addFunction ("load_session", &load_session)
 		.addFunction ("close_session", &close_session)
 		.addFunction ("sleep", &delay)
+		.addFunction ("quit", &do_quit)
+		.addFunction ("set_debug_options", &set_debug_options)
 		.endNamespace ();
 
+	// add a Session::close() method
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ARDOUR")
 		.beginClass <Session> ("Session")
@@ -374,6 +397,8 @@ static void setup_lua ()
 	// push instance to global namespace (C++ lifetime)
 	luabridge::push <AudioEngine *> (L, AudioEngine::create ());
 	lua_setglobal (L, "AudioEngine");
+
+	AudioEngine::instance ()->stop ();
 }
 
 int main (int argc, char **argv)
@@ -386,28 +411,31 @@ int main (int argc, char **argv)
 
 	read_history (histfile.c_str());
 
-	char *line;
-	while ((line = readline ("> "))) {
+	char *line = NULL;
+	while (keep_running && (line = readline ("> "))) {
 		event_loop->run();
 		if (!strcmp (line, "quit")) {
+			free (line); line = NULL;
 			break;
 		}
+
 		if (strlen (line) == 0) {
-			free (line);
+			free (line); line = NULL;
 			continue;
 		}
-		if (!lua->do_command (line)) {
-			add_history (line); // OK
-		} else {
-			add_history (line); // :)
+
+		if (lua->do_command (line)) {
+			// error
 		}
+
+		add_history (line);
 		event_loop->run();
-		free (line);
+		free (line); line = NULL;
 	}
 	free (line);
 	printf ("\n");
 
-	if (_session) {
+	if (session) {
 		close_session ();
 	}
 
