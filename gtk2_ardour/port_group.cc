@@ -511,7 +511,18 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
         lpnc += ':';
 
 	vector<string> ports;
-	if (AudioEngine::instance()->get_ports ("", type, inputs ? IsInput : IsOutput, ports) > 0) {
+	if (type == DataType::NIL) {
+		vector<string> p1;
+		AudioEngine::instance()->get_ports ("", DataType::AUDIO, inputs ? IsInput : IsOutput, ports);
+		AudioEngine::instance()->get_ports ("", DataType::MIDI, inputs ? IsInput : IsOutput, p1);
+		for (vector<string>::const_iterator s = p1.begin(); s != p1.end(); ++s) {
+			ports.push_back (*s);
+		}
+	} else {
+		AudioEngine::instance()->get_ports ("", type, inputs ? IsInput : IsOutput, ports);
+	}
+
+	if (ports.size () > 0) {
 
 		for (vector<string>::const_iterator s = ports.begin(); s != ports.end(); ) {
 
