@@ -634,6 +634,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 
 		_port_flags.push_back(flags);
 		_port_minimumSize.push_back(minimumSize);
+		DEBUG_TRACE(DEBUG::LV2, string_compose("port %1 buffer %2 bytes\n", i, minimumSize));
 	}
 
 	_control_data = new float[num_ports];
