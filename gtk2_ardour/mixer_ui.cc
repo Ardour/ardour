@@ -1733,6 +1733,21 @@ Mixer_UI::get_state ()
 	node->add_property ("show-mixer-list", _show_mixer_list ? "yes" : "no");
 	node->add_property ("maximised", _maximised ? "yes" : "no");
 
+	store_current_favorite_order ();
+	XMLNode* plugin_order = new XMLNode ("PluginOrder");
+	int cnt = 0;
+	for (PluginInfoList::const_iterator i = favorite_order.begin(); i != favorite_order.end(); ++i, ++cnt) {
+		XMLNode* p = new XMLNode ("PluginInfo");
+		p->add_property ("sort", cnt);
+		p->add_property ("unique-id", (*i)->unique_id);
+		if (favorite_ui_state.find ((*i)->unique_id) != favorite_ui_state.end ()) {
+			p->add_property ("expanded", favorite_ui_state[(*i)->unique_id]);
+		}
+		plugin_order->add_child_nocopy (*p);
+		;
+	}
+	node->add_child_nocopy (*plugin_order);
+
 	return *node;
 }
 
