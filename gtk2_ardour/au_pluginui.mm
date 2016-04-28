@@ -851,13 +851,11 @@ AUPluginUI::parent_cocoa_window ()
 
 	resizable = false;
 
-	if (!toplevel || !toplevel->is_toplevel()) {
-		error << _("AUPluginUI: no top level window!") << endmsg;
+	if (toplevel && toplevel->is_toplevel()) {
+		toplevel->size_request (req);
+		toplevel->set_size_request (req.width, req.height);
+		dynamic_cast<Gtk::Window*>(toplevel)->set_resizable (false);
 	}
-
-	toplevel->size_request (req);
-	toplevel->set_size_request (req.width, req.height);
-	dynamic_cast<Gtk::Window*>(toplevel)->set_resizable (false);
 
 #endif
 	return 0;
