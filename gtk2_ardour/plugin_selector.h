@@ -123,6 +123,7 @@ class PluginSelector : public ArdourDialog
 	void vst_refiller (const std::string&);
 	void lxvst_refiller (const std::string&);
 	void au_refiller (const std::string&);
+	void lua_refiller (const std::string&);
 
 	Gtk::Menu* _plugin_menu;
 	ARDOUR::PluginManager& manager;

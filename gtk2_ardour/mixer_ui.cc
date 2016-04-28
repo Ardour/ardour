@@ -2177,6 +2177,7 @@ Mixer_UI::refill_favorite_plugins ()
 	refiller (plugs, mgr.au_plugin_info ());
 #endif
 	refiller (plugs, mgr.ladspa_plugin_info ());
+	refiller (plugs, mgr.lua_plugin_info ());
 
 	store_current_favorite_order ();
 

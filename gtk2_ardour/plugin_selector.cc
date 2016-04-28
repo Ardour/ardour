@@ -331,6 +331,7 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 				compstr = X_("LXVST");
 				break;
 			case Lua:
+				compstr = X_("Lua");
 				break;
 			}
 
@@ -379,6 +380,7 @@ PluginSelector::refill ()
 	vst_refiller (filterstr);
 	lxvst_refiller (filterstr);
 	au_refiller (filterstr);
+	lua_refiller (filterstr);
 
 	in_row_change = false;
 }
@@ -443,6 +445,12 @@ void
 PluginSelector::ladspa_refiller (const std::string& filterstr)
 {
 	refiller (manager.ladspa_plugin_info(), filterstr, "LADSPA");
+}
+
+void
+PluginSelector::lua_refiller (const std::string& filterstr)
+{
+	refiller (manager.lua_plugin_info(), filterstr, "Lua");
 }
 
 void
@@ -705,6 +713,7 @@ PluginSelector::build_plugin_menu ()
 	PluginInfoList all_plugs;
 
 	all_plugs.insert (all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
+	all_plugs.insert (all_plugs.end(), manager.lua_plugin_info().begin(), manager.lua_plugin_info().end());
 #ifdef WINDOWS_VST_SUPPORT
 	all_plugs.insert (all_plugs.end(), manager.windows_vst_plugin_info().begin(), manager.windows_vst_plugin_info().end());
 #endif

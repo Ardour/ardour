@@ -71,6 +71,7 @@ InstrumentSelector::build_instrument_list()
 
 	PluginInfoList all_plugs;
 	all_plugs.insert(all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
+	all_plugs.insert(all_plugs.end(), manager.lua_plugin_info().begin(), manager.lua_plugin_info().end());
 #ifdef WINDOWS_VST_SUPPORT
 	all_plugs.insert(all_plugs.end(), manager.windows_vst_plugin_info().begin(), manager.windows_vst_plugin_info().end());
 #endif
