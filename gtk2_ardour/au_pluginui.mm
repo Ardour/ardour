@@ -1,6 +1,7 @@
 #undef  Marker
 #define Marker FuckYouAppleAndYourLackOfNameSpaces
 
+#include <sys/time.h>
 #include <gtkmm/button.h>
 #include <gdk/gdkquartz.h>
 
@@ -25,6 +26,8 @@
 
 #import <AudioUnit/AUCocoaUIView.h>
 #import <CoreAudioKit/AUGenericView.h>
+#import <objc/runtime.h>
+#include <dispatch/dispatch.h>
 
 #undef Marker
 
@@ -47,6 +50,8 @@ using namespace std;
 using namespace PBD;
 
 vector<string> AUPluginUI::automation_mode_strings;
+bool AUPluginUI::idle_meter_needed = true;
+int64_t AUPluginUI::last_idle = 0;
 
 static const gchar* _automation_mode_strings[] = {
 	X_("Manual"),
@@ -66,7 +71,7 @@ dump_view_tree (NSView* view, int depth, int maxdepth)
 		cerr << '\t';
 	}
 	NSRect frame = [view frame];
-	cerr << " view @ " <<  frame.origin.x << ", " << frame.origin.y
+	cerr << " view " << view << " @ " <<  frame.origin.x << ", " << frame.origin.y
 		<< ' ' << frame.size.width << " x " << frame.size.height
 		<< endl;
 
@@ -78,6 +83,63 @@ dump_view_tree (NSView* view, int depth, int maxdepth)
 		dump_view_tree (subview, depth+1, maxdepth);
 	}
 }
+
+static IMP original_nsview_draw_rect;
+static std::vector<id> plugin_views;
+static uint32_t gandalf_block = 0;
+
+static void add_plugin_view (id view)
+{
+	plugin_views.push_back (view);
+	std::cerr << "Added " << view << " now have " << plugin_views.size() << endl;
+}
+
+static void remove_plugin_view (id view)
+{
+	std::vector<id>::iterator x = find (plugin_views.begin(), plugin_views.end(), view);
+	if (x != plugin_views.end()) {
+		plugin_views.erase (x);
+		std::cerr << "Removed " << view << " now have " << plugin_views.size() << endl;
+	}
+}
+
+static bool is_plugin_view (id view)
+{
+	for (std::vector<id>::const_iterator v = plugin_views.begin(); v != plugin_views.end(); ++v) {
+		/* displayIfNeeded seems to be invoked for some toplevel NSView
+		 * that we can't actually access. It is a superview of the
+		 * contentView of the NSWindow for the plugin.
+		 */
+
+		if (view == [(*v) superview]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+int gandalf_draw (id receiver, SEL selector, NSRect rect)
+{
+	if (gandalf_block && is_plugin_view (receiver)) {
+		gandalf_block--;
+		/* YOU ... SHALL .... NOT ... DRAW!!!! */
+		return 0;
+	}
+	return ((int(*)(id,SEL,NSRect)) original_nsview_draw_rect) (receiver, selector, rect);
+}
+
+@implementation NSView (Tracking)
++ (void) load {
+	static dispatch_once_t once_token;
+
+	dispatch_once (&once_token, ^{
+			Method target = class_getInstanceMethod ([NSView class], @selector(displayIfNeeded));
+			original_nsview_draw_rect = method_setImplementation (target, (IMP) gandalf_draw);
+		}
+		);
+}
+
+@end
 
 @implementation NotificationObject
 
@@ -170,14 +232,9 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	: PlugUIBase (insert)
 	, automation_mode_label (_("Automation"))
 	, preset_label (_("Presets"))
-	, mapped (false)
 	, resizable (false)
-	, min_width (0)
-	, min_height (0)
 	, req_width (0)
 	, req_height (0)
-	, alo_width (0)
-	, alo_height (0)
 	, cocoa_window (0)
 	, au_view (0)
 	, in_live_resize (false)
@@ -185,7 +242,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	, cocoa_parent (0)
 	, _notify (0)
 	, _resize_notify (0)
-
+	, expose_cnt (0)
 {
 	if (automation_mode_strings.empty()) {
 		automation_mode_strings = I18N (_automation_mode_strings);
@@ -293,12 +350,16 @@ AUPluginUI::~AUPluginUI ()
 		[[NSNotificationCenter defaultCenter] removeObserver:_resize_notify];
 	}
 
-	if (cocoa_parent) {
-		NSWindow* win = get_nswindow();
-		[win removeChildWindow:cocoa_parent];
+	NSWindow* win = get_nswindow();
+	if (au_view) {
+		remove_plugin_view ([win contentView]);
 	}
 
 #ifdef WITH_CARBON
+	if (cocoa_parent) {
+		[win removeChildWindow:cocoa_parent];
+	}
+
 	if (carbon_window) {
 		/* not parented, just overlaid on top of our window */
 		DisposeWindow (carbon_window);
@@ -313,7 +374,6 @@ AUPluginUI::~AUPluginUI ()
 		/* remove whatever we packed into low_box so that GTK doesn't
 		   mess with it.
 		 */
-
 		[au_view removeFromSuperview];
 	}
 }
@@ -493,8 +553,8 @@ AUPluginUI::create_cocoa_view ()
 
 	// Get the initial size of the new AU View's frame
 	NSRect  frame = [au_view frame];
-	min_width  = req_width  = frame.size.width;
-	min_height = req_height = frame.size.height;
+	req_width  = frame.size.width;
+	req_height = frame.size.height;
 
 	resizable  = [au_view autoresizingMask];
 	std::cerr << plugin->name() << " initial frame = " << [NSStringFromRect (frame) UTF8String] << " resizable ? " << resizable << std::endl;
@@ -508,6 +568,31 @@ void
 AUPluginUI::update_view_size ()
 {
 	last_au_frame = [au_view frame];
+}
+
+bool
+AUPluginUI::idle_meter ()
+{
+	int64_t now = ARDOUR::get_microseconds ();
+
+	if (!last_idle) {
+		last_idle = now;
+		return true; /* call me again */
+	}
+
+	if ((now - last_idle) > 40000) {
+		gandalf_block = 10;
+		std::cerr << "Idle too slow (" << (now - last_idle) << " usecs), block plugin redraws for the next 10 plugin exposes\n";
+	} else {
+		std::cerr << "idle all good: elapsed was " << (now - last_idle) << endl;
+	}
+
+	/* We've been called twice. Cancel everything for now. */
+
+	idle_meter_needed = true;
+	last_idle = 0;
+
+	return false;
 }
 
 void
@@ -535,8 +620,9 @@ AUPluginUI::cocoa_view_resized ()
 
 	if (plugin_requested_resize) {
 		/* we tried to change the plugin frame from inside this method
-		 * (to adjust the origin), and the plugin changed its size
-		 * again. Ignore this second call.
+		 * (to adjust the origin), which changes the frame of the AU
+		 * NSView, resulting in a reentrant call to the FrameDidChange
+		 * handler (this method). Ignore this reentrant call.
 		 */
 		std::cerr << plugin->name() << " re-entrant call to cocoa_view_resized, ignored\n";
 		return;
@@ -592,13 +678,6 @@ AUPluginUI::cocoa_view_resized ()
 
         NSUInteger old_auto_resize = [au_view autoresizingMask];
 
-	/* Stop the AU NSView from resizing itself *again* in response to
-	   us changing the window size.
-	*/
-
-
-        [au_view setAutoresizingMask:NSViewNotSizable];
-
         /* Some stupid AU Views change the origin of the original AU View when
            they are resized (I'm looking at you AUSampler). If the origin has
            been moved, move it back.
@@ -628,14 +707,28 @@ AUPluginUI::cocoa_view_resized ()
 	 * so there's no need to actually update the view size again.
 	 */
 
-	[window setFrame:windowFrame display:1];
+	/* We resize the window using Cocoa. We can't use GTK mechanisms
+	 * because of this:
+	 *
+	 * http://www.lists.apple.com/archives/coreaudio-api/2005/Aug/msg00245.html
+	 *
+	 * "The host needs to be aware that changing the size of the window in
+	 * response to the NSViewFrameDidChangeNotification can cause the view
+	 * size to change depending on the autoresizing mask of the view. The
+	 * host may need to cache the autoresizing mask of the view, set it to
+	 * NSViewNotSizable, resize the window, and then reset the autoresizing
+	 * mask of the view once the window has been sized."
+	 *
+	 */
 
+        [au_view setAutoresizingMask:NSViewNotSizable];
+	[window setFrame:windowFrame display:1];
         [au_view setAutoresizingMask:old_auto_resize];
 
 	/* keep a copy of the size of the AU NSView. We didn't set - the plugin did */
 	last_au_frame = new_frame;
-	min_width  = req_width  = new_frame.size.width;
-	min_height = req_height = new_frame.size.height;
+	req_width  = new_frame.size.width;
+	req_height = new_frame.size.height;
 
 	plugin_requested_resize = 0;
 }
@@ -805,6 +898,7 @@ AUPluginUI::parent_cocoa_window ()
 
 	NSView* view = gdk_quartz_window_get_nsview (low_box.get_window()->gobj());
 	[view addSubview:au_view];
+	add_plugin_view ([win contentView]);
 
 	/* this moves the AU NSView down and over to provide a left-hand margin
 	 * and to clear the Ardour "task bar" (with plugin preset mgmt buttons,
@@ -929,7 +1023,6 @@ AUPluginUI::lower_box_visibility_notify (GdkEventVisibility* ev)
 void
 AUPluginUI::lower_box_map ()
 {
-	mapped = true;
 	[au_view setHidden:0];
 	update_view_size ();
 }
@@ -937,7 +1030,6 @@ AUPluginUI::lower_box_map ()
 void
 AUPluginUI::lower_box_unmap ()
 {
-	mapped = false;
 	[au_view setHidden:1];
 }
 
@@ -951,30 +1043,31 @@ AUPluginUI::lower_box_size_request (GtkRequisition* requisition)
 void
 AUPluginUI::lower_box_size_allocate (Gtk::Allocation& allocation)
 {
-	alo_width  = allocation.get_width ();
-	alo_height = allocation.get_height ();
-	std::cerr << "lower box size reallocated to " << alo_width << " x " << alo_height << std::endl;
+	std::cerr << "lower box size reallocated to " << allocation.get_width() << " x " << allocation.get_height() << std::endl;
 	update_view_size ();
-	std::cerr << "low box draw (0, 0, " << alo_width << " x " << alo_height << ")\n";
-	low_box.queue_draw_area (0, 0, alo_width, alo_height);
 }
 
-gboolean
+bool
 AUPluginUI::lower_box_expose (GdkEventExpose* event)
 {
 	std::cerr << "lower box expose: " << event->area.x << ", " << event->area.y
 		  << ' '
 		  << event->area.width << " x " << event->area.height
 		  << " ALLOC "
-		  << get_allocation().get_width() << " x " << get_allocation().get_height()
+		  << low_box.get_allocation().get_width() << " x " << low_box.get_allocation().get_height()
 		  << std::endl;
 
-	/* hack to keep ardour responsive
-	 * some UIs (e.g Addictive Drums) completely hog the CPU
-	 */
-	ARDOUR::GUIIdle();
+	++expose_cnt;
 
-	return true;
+	if (!(expose_cnt % 10)) {
+		/* every 100 exposes, check how frequently idle is being called */
+		if (idle_meter_needed) {
+			Glib::signal_idle().connect (sigc::ptr_fun (AUPluginUI::idle_meter));
+			idle_meter_needed = false;
+		}
+	}
+
+	return false;
 }
 
 void
@@ -1038,13 +1131,11 @@ create_au_gui (boost::shared_ptr<PluginInsert> plugin_insert, VBox** box)
 void
 AUPluginUI::start_live_resize ()
 {
-  std::cerr << "\n\n\n++++ Entering Live Resize\n";
-  in_live_resize = true;
+	in_live_resize = true;
 }
 
 void
 AUPluginUI::end_live_resize ()
 {
-  std::cerr << "\n\n\n ----Leaving Live Resize\n";
-  in_live_resize = false;
+	in_live_resize = false;
 }
