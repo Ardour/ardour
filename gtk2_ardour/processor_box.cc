@@ -168,7 +168,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	}
 	{
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
-		if (pi && pi->plugin() && pi->plugin()->get_info()->type != ARDOUR::Lua) {
+		if (pi && pi->plugin()) {
 			_plugin_preset_pointer = PluginPresetPtr (new PluginPreset (pi->plugin()->get_info()));
 		}
 	}
