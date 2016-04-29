@@ -56,6 +56,9 @@ public:
 
 	PBD::Signal0<void> VisibilityChanged;
 
+	static std::string remove_element (std::string const& from, std::string const& element);
+	static std::string add_element (std::string const& from, std::string const& element);
+
 private:
 
 	struct Member {

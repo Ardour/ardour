@@ -21,7 +21,10 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/menushell.h>
 #include <gtkmm/treeview.h>
+
+#include "pbd/strsplit.h"
 #include "pbd/xml++.h"
+
 #include "visibility_group.h"
 
 #include "i18n.h"
@@ -165,6 +168,52 @@ VisibilityGroup::set_state (string v)
 	} while (1);
 
 	update ();
+}
+
+string
+VisibilityGroup::remove_element (std::string const& from, std::string const& element)
+{
+	std::vector<string> s;
+	std::string ret;
+
+	split (from, s, ',');
+	for (std::vector<string>::const_iterator i = s.begin(); i != s.end(); ++i) {
+		if ((*i) == element) {
+			continue;
+		}
+		if (!ret.empty()) {
+			ret += ',';
+		}
+		ret += *i;
+	}
+
+	return ret;
+}
+
+string
+VisibilityGroup::add_element (std::string const& from, std::string const& element)
+{
+	std::vector<string> s;
+	std::string ret;
+	
+	split (from, s, ',');
+
+	for (std::vector<string>::const_iterator i = s.begin(); i != s.end(); ++i) {
+		if ((*i) == element) {
+			/* already present, just return the original */
+			return from;
+		}
+	}
+
+	ret = from;
+
+	if (!ret.empty()) {
+		ret += ',';
+	}
+
+	ret += element;
+
+	return ret;
 }
 
 string

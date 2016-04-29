@@ -1233,6 +1233,7 @@ Mixer_UI::redisplay_track_list ()
 {
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;
+	uint32_t n_masters = 0;
 
 	if (no_track_list_redisplay) {
 		return;
@@ -1247,6 +1248,7 @@ Mixer_UI::redisplay_track_list ()
 		if (vms) {
 			vca_packer.pack_start (*vms, false, false);
 			vms->show ();
+			n_masters++;
 			continue;
 		}
 
@@ -1294,6 +1296,14 @@ Mixer_UI::redisplay_track_list ()
 				}
 			}
 		}
+	}
+
+	/* update visibility of VCA assign buttons */
+
+	if (n_masters == 0) {
+		UIConfiguration::instance().set_mixer_strip_visibility (VisibilityGroup::remove_element (UIConfiguration::instance().get_mixer_strip_visibility(), X_("VCA")));
+	} else {
+		UIConfiguration::instance().set_mixer_strip_visibility (VisibilityGroup::add_element (UIConfiguration::instance().get_mixer_strip_visibility(), X_("VCA")));
 	}
 
 	_group_tabs->set_dirty ();
