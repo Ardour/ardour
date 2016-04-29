@@ -18,12 +18,16 @@
 */
 
 #include <glib.h>
+#include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
+
 #include "pbd/gstdio_compat.h"
 
 #include "pbd/pthread_utils.h"
 
 #include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/luabindings.h"
 #include "ardour/luaproc.h"
 #include "ardour/luascripting.h"
@@ -1002,10 +1006,152 @@ LuaProc::setup_lua_inline_gui (LuaState *lua_gui)
 	luabridge::push <float *> (LG, _shadow_data);
 	lua_setglobal (LG, "CtrlPorts");
 }
+////////////////////////////////////////////////////////////////////////////////
+
+#include "ardour/search_paths.h"
+#include "sha1.c"
+
+std::string
+LuaProc::preset_name_to_uri (const std::string& name) const
+{
+	std::string uri ("urn:lua:");
+	char hash[41];
+	Sha1Digest s;
+	sha1_init (&s);
+	sha1_write (&s, (const uint8_t *) name.c_str(), name.size ());
+	sha1_write (&s, (const uint8_t *) _script.c_str(), _script.size ());
+	sha1_result_hash (&s, hash);
+	return uri + hash;
+}
+
+std::string
+LuaProc::presets_file () const
+{
+	return string_compose ("lua-%1", _info->unique_id);
+}
+
+XMLTree*
+LuaProc::presets_tree () const
+{
+	XMLTree* t = new XMLTree;
+	std::string p = Glib::build_filename (ARDOUR::user_config_directory (), "presets");
+
+	if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
+		if (g_mkdir_with_parents (p.c_str(), 0755) != 0) {
+			error << _("Unable to create LuaProc presets directory") << endmsg;
+		};
+	}
+
+	p = Glib::build_filename (p, presets_file ());
+
+	if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
+		t->set_root (new XMLNode (X_("LuaPresets")));
+		return t;
+	}
+
+	t->set_filename (p);
+	if (!t->read ()) {
+		delete t;
+		return 0;
+	}
+	return t;
+}
+
+bool
+LuaProc::load_preset (PresetRecord r)
+{
+	boost::shared_ptr<XMLTree> t (presets_tree ());
+	if (t == 0) {
+		return false;
+	}
+
+	XMLNode* root = t->root ();
+	for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
+		XMLProperty* label = (*i)->property (X_("label"));
+		assert (label);
+		if (label->value() != r.label) {
+			continue;
+		}
+
+		for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
+			if ((*j)->name() == X_("Parameter")) {
+				XMLProperty* index = (*j)->property (X_("index"));
+				XMLProperty* value = (*j)->property (X_("value"));
+				assert (index);
+				assert (value);
+				set_parameter (atoi (index->value().c_str()), atof (value->value().c_str ()));
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+std::string
+LuaProc::do_save_preset (std::string name) {
+
+	boost::shared_ptr<XMLTree> t (presets_tree ());
+	if (t == 0) {
+		return "";
+	}
+
+	std::string uri (preset_name_to_uri (name));
+
+	XMLNode* p = new XMLNode (X_("Preset"));
+	p->add_property (X_("uri"), uri);
+	p->add_property (X_("label"), name);
+
+	for (uint32_t i = 0; i < parameter_count(); ++i) {
+		if (parameter_is_input (i)) {
+			XMLNode* c = new XMLNode (X_("Parameter"));
+			c->add_property (X_("index"), string_compose ("%1", i));
+			c->add_property (X_("value"), string_compose ("%1", get_parameter (i)));
+			p->add_child_nocopy (*c);
+		}
+	}
+	t->root()->add_child_nocopy (*p);
+
+	std::string f = Glib::build_filename (ARDOUR::user_config_directory (), "presets");
+	f = Glib::build_filename (f, presets_file ());
+
+	t->write (f);
+	return uri;
+}
+
+void
+LuaProc::do_remove_preset (std::string name)
+{
+	boost::shared_ptr<XMLTree> t (presets_tree ());
+	if (t == 0) {
+		return;
+	}
+	t->root()->remove_nodes_and_delete (X_("label"), name);
+	std::string f = Glib::build_filename (ARDOUR::user_config_directory (), "presets");
+	f = Glib::build_filename (f, presets_file ());
+	t->write (f);
+}
+
+void
+LuaProc::find_presets ()
+{
+	boost::shared_ptr<XMLTree> t (presets_tree ());
+	if (t) {
+		XMLNode* root = t->root ();
+		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
+
+			XMLProperty* uri = (*i)->property (X_("uri"));
+			XMLProperty* label = (*i)->property (X_("label"));
+
+			assert (uri);
+			assert (label);
+
+			PresetRecord r (uri->value(), label->value(), true);
+			_presets.insert (make_pair (r.uri, r));
+		}
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////
-#include <glibmm/miscutils.h>
-#include <glibmm/fileutils.h>
 
 LuaPluginInfo::LuaPluginInfo (LuaScriptInfoPtr lsi) {
 	if (lsi->type != LuaScriptInfo::DSP) {
@@ -1054,5 +1200,19 @@ std::vector<Plugin::PresetRecord>
 LuaPluginInfo::get_presets (bool /*user_only*/) const
 {
 	std::vector<Plugin::PresetRecord> p;
+	XMLTree* t = new XMLTree;
+	std::string pf = Glib::build_filename (ARDOUR::user_config_directory (), "presets", string_compose ("lua-%1", unique_id));
+	if (Glib::file_test (pf, Glib::FILE_TEST_EXISTS)) {
+		t->set_filename (pf);
+		if (t->read ()) {
+			XMLNode* root = t->root ();
+			for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
+				XMLProperty* uri = (*i)->property (X_("uri"));
+				XMLProperty* label = (*i)->property (X_("label"));
+				p.push_back (Plugin::PresetRecord (uri->value(), label->value(), true));
+			}
+		}
+	}
+	delete t;
 	return p;
 }

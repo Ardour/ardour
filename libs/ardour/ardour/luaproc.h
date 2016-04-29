@@ -92,7 +92,10 @@ public:
 	int set_state (const XMLNode&, int version);
 	int set_script_from_state (const XMLNode&);
 
-	bool load_preset (PresetRecord) { return false; }
+	bool load_preset (PresetRecord);
+	std::string do_save_preset (std::string);
+	void do_remove_preset (std::string);
+
 	bool has_editor() const { return false; }
 
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out, ChanCount* imprecise);
@@ -101,14 +104,11 @@ public:
 	ChanCount output_streams() const { return _configured_out; }
 	ChanCount input_streams() const { return _configured_in; }
 
-	std::string do_save_preset (std::string) { return ""; }
-	void do_remove_preset (std::string) { }
-
 	bool has_inline_display () { return _lua_has_inline_display; }
 	void setup_lua_inline_gui (LuaState *lua_gui);
 
 private:
-	void find_presets () { }
+	void find_presets ();
 
 	/* END Plugin interface */
 protected:
@@ -130,6 +130,10 @@ private:
 	void init ();
 	bool load_script ();
 	void lua_print (std::string s);
+
+	std::string preset_name_to_uri (const std::string&) const;
+	std::string presets_file () const;
+	XMLTree* presets_tree () const;
 
 	boost::shared_ptr<ScalePoints> parse_scale_points (luabridge::LuaRef*);
 
