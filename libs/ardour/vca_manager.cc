@@ -103,10 +103,9 @@ VCAManager::remove_vca (boost::shared_ptr<VCA> vca)
 		_vcas.remove (vca);
 	}
 
-	VCAList vcal;
-	vcal.push_back (vca);
+	/* this should cause deassignment and deletion */
 
-	VCARemoved (vcal); /* EMIT SIGNAL */
+	vca->DropReferences ();
 }
 
 boost::shared_ptr<VCA>

@@ -51,7 +51,6 @@ class VCAManager : public SessionHandleRef, public PBD::StatefulDestructible
 	VCAList vcas() const;
 
 	PBD::Signal1<void,VCAList&> VCAAdded;
-	PBD::Signal1<void,VCAList&> VCARemoved;
 
 	XMLNode& get_state();
 	int set_state (XMLNode const&, int version);

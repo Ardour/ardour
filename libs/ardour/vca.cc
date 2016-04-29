@@ -19,6 +19,7 @@
 #include "pbd/convert.h"
 
 #include "ardour/automation_control.h"
+#include "ardour/debug.h"
 #include "ardour/gain_control.h"
 #include "ardour/monitor_control.h"
 #include "ardour/rc_configuration.h"
@@ -89,7 +90,7 @@ VCA::init ()
 
 VCA::~VCA ()
 {
-	DropReferences (); /* emit signal */
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delete VCA %1\n", number()));
 }
 
 uint32_t
