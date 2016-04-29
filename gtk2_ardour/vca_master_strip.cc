@@ -23,6 +23,7 @@
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
+#include "gtkmm2ext/doi.h"
 #include "gtkmm2ext/keyboard.h"
 
 #include "gui_thread.h"
@@ -155,7 +156,7 @@ VCAMasterStrip::~VCAMasterStrip ()
 void
 VCAMasterStrip::self_delete ()
 {
-	delete this;
+	delete_when_idle (this);
 }
 
 void
@@ -192,6 +193,10 @@ VCAMasterStrip::name() const
 void
 VCAMasterStrip::hide_clicked ()
 {
+	/* get everything to deassign. This will also delete ourselves (when
+	 * idle) and that in turn will remove us from the Mixer GUI
+	 */
+	_session->vca_manager().remove_vca (_vca);
 }
 
 bool
