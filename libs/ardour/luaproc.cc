@@ -1016,7 +1016,7 @@ LuaPluginInfo::LuaPluginInfo (LuaScriptInfoPtr lsi) {
 	name = lsi->name;
 	creator = lsi->author;
 	category = lsi->category;
-	unique_id = "luascript"; // the interpreter is not unique.
+	unique_id = lsi->unique_id;
 
 	n_inputs.set (DataType::AUDIO, 1);
 	n_outputs.set (DataType::AUDIO, 1);

@@ -164,10 +164,7 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 
 	switch (type) {
 	case ARDOUR::Lua:
-		{
-			PluginPtr plugin (new LuaProc (session.engine(), session, ""));
-			return plugin;
-		}
+		plugs = mgr.lua_plugin_info();
 		break;
 
 	case ARDOUR::LADSPA:

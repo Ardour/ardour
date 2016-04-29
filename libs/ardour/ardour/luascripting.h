@@ -43,10 +43,11 @@ class LIBARDOUR_API LuaScriptInfo {
 	static std::string type2str (const ScriptType t);
 	static ScriptType str2type (const std::string& str);
 
-	LuaScriptInfo (ScriptType t, const std::string &n, const std::string &p)
+	LuaScriptInfo (ScriptType t, const std::string &n, const std::string &p, const std::string &uid)
 	: type (t)
 	, name (n)
 	, path (p)
+	, unique_id (uid)
 	{ }
 
 	virtual ~LuaScriptInfo () { }
@@ -54,6 +55,7 @@ class LIBARDOUR_API LuaScriptInfo {
 	ScriptType type;
 	std::string name;
 	std::string path;
+	std::string unique_id;
 
 	std::string author;
 	std::string license;

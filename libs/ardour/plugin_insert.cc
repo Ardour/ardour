@@ -150,7 +150,6 @@ PluginInsert::set_count (uint32_t num)
 void
 PluginInsert::set_sinks (const ChanCount& c)
 {
-	bool changed = (_custom_sinks != c) && _custom_cfg;
 	_custom_sinks = c;
 	/* no signal, change will only be visible after re-config */
 }
@@ -2117,6 +2116,19 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	}
 #endif
 
+	if (plugin == 0 && type == ARDOUR::Lua) {
+		/* unique ID (sha1 of script) was not found,
+		 * load the plugin from the serialized version in the
+		 * session-file instead.
+		 */
+		boost::shared_ptr<LuaProc> lp (new LuaProc (_session.engine(), _session, ""));
+		XMLNode *ls = node.child (lp->state_node_name().c_str());
+		if (ls && lp) {
+			lp->set_script_from_state (*ls);
+			plugin = lp;
+		}
+	}
+
 	if (plugin == 0) {
 		error << string_compose(
 			_("Found a reference to a plugin (\"%1\") that is unknown.\n"
@@ -2124,15 +2136,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			prop->value())
 		      << endmsg;
 		return -1;
-	}
-
-	if (type == ARDOUR::Lua) {
-		XMLNode *ls = node.child (plugin->state_node_name().c_str());
-		// we need to load the script to set the name and parameters.
-		boost::shared_ptr<LuaProc> lp = boost::dynamic_pointer_cast<LuaProc>(plugin);
-		if (ls && lp) {
-			lp->set_script_from_state (*ls);
-		}
 	}
 
 	// The name of the PluginInsert comes from the plugin, nothing else

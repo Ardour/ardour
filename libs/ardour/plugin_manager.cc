@@ -67,6 +67,8 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/ladspa.h"
 #include "ardour/ladspa_plugin.h"
+#include "ardour/luascripting.h"
+#include "ardour/luaproc.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/rc_configuration.h"
@@ -119,6 +121,7 @@ PluginManager::PluginManager ()
 	, _ladspa_plugin_info(0)
 	, _lv2_plugin_info(0)
 	, _au_plugin_info(0)
+	, _lua_plugin_info(0)
 	, _cancel_scan(false)
 	, _cancel_timeout(false)
 {
@@ -215,6 +218,8 @@ PluginManager::PluginManager ()
 	}
 
 	BootMessage (_("Discovering Plugins"));
+
+	LuaScripting::instance().scripts_changed.connect_same_thread (lua_refresh_connection, boost::bind (&PluginManager::lua_refresh_cb, this));
 }
 
 
@@ -227,6 +232,7 @@ PluginManager::~PluginManager()
 		delete _ladspa_plugin_info;
 		delete _lv2_plugin_info;
 		delete _au_plugin_info;
+		delete _lua_plugin_info;
 	}
 }
 
@@ -244,6 +250,8 @@ PluginManager::refresh (bool cache_only)
 
 	BootMessage (_("Scanning LADSPA Plugins"));
 	ladspa_refresh ();
+	BootMessage (_("Scanning Lua DSP Processors"));
+	lua_refresh ();
 #ifdef LV2_SUPPORT
 	BootMessage (_("Scanning LV2 Plugins"));
 	lv2_refresh ();
@@ -450,6 +458,32 @@ PluginManager::clear_au_blacklist ()
 		::g_unlink(fn.c_str());
 	}
 #endif
+}
+
+void
+PluginManager::lua_refresh ()
+{
+	if (_lua_plugin_info) {
+		_lua_plugin_info->clear ();
+	} else {
+		_lua_plugin_info = new ARDOUR::PluginInfoList ();
+	}
+	ARDOUR::LuaScriptList & _scripts (LuaScripting::instance ().scripts (LuaScriptInfo::DSP));
+	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
+		LuaPluginInfoPtr lpi (new LuaPluginInfo(*s));
+		_lua_plugin_info->push_back (lpi);
+	}
+}
+
+void
+PluginManager::lua_refresh_cb ()
+{
+	Glib::Threads::Mutex::Lock lm (_lock, Glib::Threads::TRY_LOCK);
+	if (!lm.locked()) {
+		return;
+	}
+	lua_refresh ();
+	PluginListChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -1104,8 +1138,7 @@ PluginManager::save_statuses ()
 			ofs << "LXVST";
 			break;
 		case Lua:
-			assert (0);
-			continue;
+			ofs << "Lua";
 			break;
 		}
 
@@ -1193,6 +1226,8 @@ PluginManager::load_statuses ()
 			type = Windows_VST;
 		} else if (stype == "LXVST") {
 			type = LXVST;
+		} else if (stype == "Lua") {
+			type = Lua;
 		} else {
 			error << string_compose (_("unknown plugin type \"%1\" - ignored"), stype)
 			      << endmsg;
@@ -1269,4 +1304,11 @@ PluginManager::au_plugin_info ()
 	}
 #endif
 	return _empty_plugin_info;
+}
+
+ARDOUR::PluginInfoList&
+PluginManager::lua_plugin_info ()
+{
+	assert(_lua_plugin_info);
+	return *_lua_plugin_info;
 }

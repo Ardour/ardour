@@ -33,6 +33,7 @@
 #include "LuaBridge/LuaBridge.h"
 
 #include "i18n.h"
+#include "sha1.c"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -186,6 +187,7 @@ LuaScripting::scan_script (const std::string &fn, const std::string &sc)
 			"function ardour (entry)"
 			"  ardourluainfo['type'] = assert(entry['type'])"
 			"  ardourluainfo['name'] = assert(entry['name'])"
+			"  ardourluainfo['category'] = entry['category'] or 'Unknown'"
 			"  ardourluainfo['author'] = entry['author'] or 'Unknown'"
 			"  ardourluainfo['license'] = entry['license'] or ''"
 			"  ardourluainfo['description'] = entry['description'] or ''"
@@ -236,7 +238,24 @@ LuaScripting::scan_script (const std::string &fn, const std::string &sc)
 		return LuaScriptInfoPtr();
 	}
 
-	LuaScriptInfoPtr lsi (new LuaScriptInfo (type, name, fn));
+	char hash[41];
+	Sha1Digest s;
+	sha1_init (&s);
+
+	if (fn.empty()) {
+		sha1_write (&s, (const uint8_t *) sc.c_str(), sc.size ());
+	} else {
+		try {
+			std::string script = Glib::file_get_contents (fn);
+			sha1_write (&s, (const uint8_t *) script.c_str(), script.size ());
+		} catch (Glib::FileError err) {
+			return LuaScriptInfoPtr();
+		}
+	}
+	sha1_result_hash (&s, hash);
+
+
+	LuaScriptInfoPtr lsi (new LuaScriptInfo (type, name, fn, hash));
 
 	for (luabridge::Iterator i(nfo); !i.isNil (); ++i) {
 		if (!i.key().isString() || !i.value().isString()) {
@@ -248,8 +267,8 @@ LuaScripting::scan_script (const std::string &fn, const std::string &sc)
 		if (key == "author") { lsi->author = val; }
 		if (key == "license") { lsi->license = val; }
 		if (key == "description") { lsi->description = val; }
+		if (key == "category") { lsi->category = val; }
 	}
-
 	return lsi;
 }
 

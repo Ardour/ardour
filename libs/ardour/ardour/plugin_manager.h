@@ -50,6 +50,7 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	ARDOUR::PluginInfoList &ladspa_plugin_info ();
 	ARDOUR::PluginInfoList &lv2_plugin_info ();
 	ARDOUR::PluginInfoList &au_plugin_info ();
+	ARDOUR::PluginInfoList &lua_plugin_info ();
 
 	void refresh (bool cache_only = false);
 	void cancel_plugin_scan();
@@ -112,6 +113,7 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	ARDOUR::PluginInfoList* _ladspa_plugin_info;
 	ARDOUR::PluginInfoList* _lv2_plugin_info;
 	ARDOUR::PluginInfoList* _au_plugin_info;
+	ARDOUR::PluginInfoList* _lua_plugin_info;
 
 	std::map<uint32_t, std::string> rdf_type;
 
@@ -122,6 +124,8 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	bool _cancel_timeout;
 
 	void ladspa_refresh ();
+	void lua_refresh ();
+	void lua_refresh_cb ();
 	void windows_vst_refresh (bool cache_only = false);
 	void lxvst_refresh (bool cache_only = false);
 
@@ -146,6 +150,7 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	std::string get_ladspa_category (uint32_t id);
 	std::vector<uint32_t> ladspa_plugin_whitelist;
 
+	PBD::ScopedConnection lua_refresh_connection;
 	Glib::Threads::Mutex _lock;
 
 	static PluginManager* _instance; // singleton
