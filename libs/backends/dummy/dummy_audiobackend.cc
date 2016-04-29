@@ -112,6 +112,8 @@ DummyAudioBackend::enumerate_devices () const
 {
 	if (_device_status.empty()) {
 		_device_status.push_back (DeviceStatus (_("Silence"), true));
+		_device_status.push_back (DeviceStatus (_("DC -6dBFS (+.5)"), true));
+		_device_status.push_back (DeviceStatus (_("Demolition"), true));
 		_device_status.push_back (DeviceStatus (_("Sine Wave"), true));
 		_device_status.push_back (DeviceStatus (_("Square Wave"), true));
 		_device_status.push_back (DeviceStatus (_("Impulses"), true));
@@ -845,6 +847,10 @@ DummyAudioBackend::register_system_ports()
 		gt = DummyAudioPort::SquareSweepSwell;
 	} else if (_device == _("Loopback")) {
 		gt = DummyAudioPort::Loopback;
+	} else if (_device == _("Demolition")) {
+		gt = DummyAudioPort::Demolition;
+	} else if (_device == _("DC -6dBFS (+.5)")) {
+		gt = DummyAudioPort::DC05;
 	} else {
 		gt = DummyAudioPort::Silence;
 	}
@@ -1659,7 +1665,11 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 		case PonyNoise:
 		case UniformWhiteNoise:
 		case GaussianWhiteNoise:
+		case DC05:
 		case Silence:
+			break;
+		case Demolition:
+			_gen_period = 3 * samplerate;
 			break;
 		case KronekerDelta:
 			_gen_period = (5 + randi() % (int)(samplerate / 20.f));
@@ -1781,6 +1791,23 @@ float DummyAudioPort::grandf ()
 	return r * x1;
 }
 
+/* inspired by jack-demolition by Steve Harris */
+static const float _demolition[] = {
+	 0.0f,           /* special case - 0dbFS white noise */
+	 0.0f,           /* zero, may cause denomrals following a signal */
+	 0.73 / 1e45,    /* very small - should be denormal when floated */
+	 3.7f,           /* arbitrary number > 0dBFS */
+	-4.3f,           /* arbitrary negative number > 0dBFS */
+	 4294967395.0f,  /* 2^16 + 100 */
+	-4294967395.0f,
+	 HUGE,           /* Big, non-inf number */
+	 1.f/0.f,        /* +inf */
+	-1.f/0.f,        /* -inf */
+	-0.f/0.f,        /* -nan */
+	 0.f/0.f,        /*  nan */
+	 0.0f,           /* some silence to check for recovery */
+};
+
 void DummyAudioPort::generate (const pframes_t n_samples)
 {
 	Glib::Threads::Mutex::Lock lm (generator_lock);
@@ -1791,6 +1818,30 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 	switch (_gen_type) {
 		case Silence:
 			memset (_buffer, 0, n_samples * sizeof (Sample));
+			break;
+		case DC05:
+			for (pframes_t i = 0 ; i < n_samples; ++i) {
+				_buffer[i] = 0.5f;
+			}
+			break;
+		case Demolition:
+			switch (_gen_count2) {
+				case 0: // noise
+					for (pframes_t i = 0 ; i < n_samples; ++i) {
+						_buffer[i] = randf();
+					}
+					break;
+				default:
+					for (pframes_t i = 0 ; i < n_samples; ++i) {
+						_buffer[i] = _demolition [_gen_count2];
+					}
+					break;
+			}
+			_gen_offset += n_samples;
+			if (_gen_offset > _gen_period) {
+				_gen_offset = 0;
+				_gen_count2 = (_gen_count2 + 1) % (sizeof (_demolition) / sizeof (float));
+			}
 			break;
 		case SquareWave:
 			assert(_gen_period > 0);

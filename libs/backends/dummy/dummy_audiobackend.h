@@ -152,6 +152,8 @@ class DummyAudioPort : public DummyPort {
 
 		enum GeneratorType {
 			Silence,
+			DC05,
+			Demolition,
 			UniformWhiteNoise,
 			GaussianWhiteNoise,
 			PinkNoise,
