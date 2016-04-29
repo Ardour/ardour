@@ -67,6 +67,16 @@ dump_view_tree (NSView* view, int depth, int maxdepth)
 	NSArray* subviews = [view subviews];
 	unsigned long cnt = [subviews count];
 
+	if (depth == 0) {
+		NSView* su = [view superview];
+		if (su) {
+			NSRect sf = [su frame];
+			cerr << " PARENT view " << su << " @ " <<  sf.origin.x << ", " << sf.origin.y
+			     << ' ' << sf.size.width << " x " << sf.size.height
+			     << endl;
+		}
+	}
+
 	for (int d = 0; d < depth; d++) {
 		cerr << '\t';
 	}
@@ -84,14 +94,115 @@ dump_view_tree (NSView* view, int depth, int maxdepth)
 	}
 }
 
-static IMP original_nsview_draw_rect;
+/* This deeply hacky block of code exists for a rather convoluted reason.
+ *
+ * The proximal reason is that there are plugins (such as XLN's Addictive Drums
+ * 2) which redraw their GUI/editor windows using a timer, and use a drawing
+ * technique that on Retina displays ends up calling arg32_image_mark_RGB32, a
+ * function that for some reason (probably byte-swapping or pixel-doubling) is
+ * many times slower than the function used on non-Retina displays.
+ *
+ * We are not the first people to discover the problem with
+ * arg32_image_mark_RGB32.
+ *
+ * Justin Fraenkel, the lead author of Reaper, wrote a very detailed account of
+ * the performance issues with arg32_image_mark_RGB32 here:
+ * http://www.1014.org/?article=516
+ *
+ * The problem was also seen by Robert O'Callahan (lead developer of rr, the
+ * reverse debugger) as far back as 2010:
+ * http://robert.ocallahan.org/2010/05/cglayer-performance-trap-with-isflipped_03.html
+ *
+ * In fact, it is so slow that the drawing takes up close to 100% of a single
+ * core, and the event loop that the drawing occurs in never sleeps or "idles".
+ *
+ * In AU hosts built directly on top of Cocoa, or some other toolkits, this
+ * isn't inherently a major problem - it just makes the entire GUI of the
+ * application slow.
+ *
+ * However, there is an additional problem for Ardour because GTK+ is built on
+ * top of the GDK/Quartz event loop integration. This integration is rather
+ * baroque, mostly because it was written at a time when CFRunLoop did not
+ * offer a way to wait for "input" from file descriptors (which arrived in OS X
+ * 10.5). As a result, it uses a hair-raising design involving an additional
+ * thread. This design has a major problem, which is that it effectively
+ * creates two nested run loops.
+ *
+ * The GTK+/GDK/glib one runs until it has nothing to do, at which time it
+ * calls a function to wait until there is something to do. On Linux or Windows
+ * that would involve some variant or relative of poll(2), which puts the
+ * process to sleep until there is something to do.
+ *
+ * On OS X, glib ends up calling [CFRunLoop waitForNextEventMatchingMask] which
+ * will eventually put the process to sleep, but won't do so until the
+ * CFRunLoop also has nothing to do. This includes (at least) a complete redraw
+ * cycle. If redrawing takes too long, and there are timers expired for another
+ * redraw (e.g. Addictive Drums 2, again), then the CFRunLoop will just start
+ * another redraw cycle after processing any events and other stuff.
+ *
+ * If the CFRunLoop stays busy, then it will never return to the glib
+ * level at all, thus stopping any further GTK+ level activity (events,
+ * drawing) from taking place. In short, the current (spring 2016) design of
+ * the GDK/Quartz event loop integration relies on the idea that the internal
+ * CFRunLoop will go idle, and totally breaks if this does not happen.
+ *
+ * So take a fully functional Ardour, add in XLN's Addictive Drums 2, and a
+ * Retina display, and Apple's ridiculously slow blitting code, and the
+ * CFRunLoop never goes idle. As soon as Addictive Drums starts drawing (over
+ * and over again), the GTK+ event loop stops receiving events and stops
+ * drawing.
+ *
+ * One fix for this was to run a nested GTK+ event loop iteration (or two)
+ * whenever a plugin window was redrawn. This works in the sense that the
+ * immediate issue (no GTK+ events or drawing) is fixed. But the recursive GTK+
+ * event loop causes its own (very subtle) problems too.
+ *
+ * This code takes a rather radical approach. We use Objective C's ability to
+ * swizzle object methods. Specifically, we replace [NSView displayIfNeeded]
+ * with our own version which will skip redraws of plugin windows if we tell it
+ * too. If we haven't done that, or if the redraw is of a non-plugin window,
+ * then we invoke the original displayIfNeeded method.
+ *
+ * After every 10 redraws of a given plugin GUI/editor window, we queue up a
+ * GTK/glib idle callback to measure the interval between those idle
+ * callbacks. We do this globally across all plugin windows, so if the callback
+ * is already queued, we don't requeue it.
+ *
+ * If the interval is longer than 40msec (a 25fps redraw rate), we set
+ * block_plugin_redraws to some number. Each successive call to our interposed
+ * displayIfNeeded method will (a) check this value and if non-zero (b) check
+ * if the call is for a plugin-related NSView/NSWindow. If it is, then we will
+ * skip the redisplay entirely, hopefully avoiding any calls to
+ * argb32_image_mark_RGB32 or any other slow drawing code, and thus allowing
+ * the CFRunLoop to go idle. If the value is zero or the call is for a
+ * non-plugin window, then we just invoke the "original" displayIfNeeded
+ * method.
+ *
+ * This hack adds a tiny bit of overhead onto redrawing of the entire
+ * application. But in the common case this consists of 1 conditional (the
+ * check on block_plugin_redraws, which will find it to be zero) and the
+ * invocation of the original method. Given how much work is typically done
+ * during drawing, this seems acceptable.
+ *
+ * The correct fix for this is to redesign the relationship between
+ * GTK+/GDK/glib so that a glib run loop is actually a CFRunLoop, with all
+ * GSources represented as CFRunLoopSources, without any nesting and without
+ * any additional thread. This is not a task to be undertaken lightly, and is
+ * certainly substantially more work than this was. It may never be possible to
+ * do that work in a way that could be integrated back into glib, because of
+ * the rather specific semantics and types of GSources, but it would almost
+ * certainly be possible to make it work for Ardour.
+ */
+
+static IMP original_nsview_drawIfNeeded;
 static std::vector<id> plugin_views;
-static uint32_t gandalf_block = 0;
+static uint32_t block_plugin_redraws = 0;
+static const uint32_t minimum_redraw_rate = 25; /* frames per second */
+static const uint32_t block_plugin_redraw_count = 100; /* number of combined plugin redraws to block, if blocking */
 
 static void add_plugin_view (id view)
 {
 	plugin_views.push_back (view);
-	std::cerr << "Added " << view << " now have " << plugin_views.size() << endl;
 }
 
 static void remove_plugin_view (id view)
@@ -99,47 +210,39 @@ static void remove_plugin_view (id view)
 	std::vector<id>::iterator x = find (plugin_views.begin(), plugin_views.end(), view);
 	if (x != plugin_views.end()) {
 		plugin_views.erase (x);
-		std::cerr << "Removed " << view << " now have " << plugin_views.size() << endl;
 	}
 }
 
-static bool is_plugin_view (id view)
+static void interposed_drawIfNeeded (id receiver, SEL selector, NSRect rect)
 {
-	for (std::vector<id>::const_iterator v = plugin_views.begin(); v != plugin_views.end(); ++v) {
-		/* displayIfNeeded seems to be invoked for some toplevel NSView
-		 * that we can't actually access. It is a superview of the
-		 * contentView of the NSWindow for the plugin.
-		 */
-
-		if (view == [(*v) superview]) {
-			return true;
-		}
-	}
-	return false;
-}
-
-int gandalf_draw (id receiver, SEL selector, NSRect rect)
-{
-	if (gandalf_block && is_plugin_view (receiver)) {
-		gandalf_block--;
+	if (block_plugin_redraws && (find (plugin_views.begin(), plugin_views.end(), receiver) != plugin_views.end())) {
+		block_plugin_redraws--;
+		std::cerr << "Plugin redraw blocked\n";
 		/* YOU ... SHALL .... NOT ... DRAW!!!! */
-		return 0;
+		return;
 	}
-	return ((int(*)(id,SEL,NSRect)) original_nsview_draw_rect) (receiver, selector, rect);
+	(void) ((int (*)(id,SEL,NSRect)) original_nsview_drawIfNeeded) (receiver, selector, rect);
 }
 
 @implementation NSView (Tracking)
 + (void) load {
 	static dispatch_once_t once_token;
 
+	/* this swizzles NSView::displayIfNeeded and replaces it with
+	 * interposed_drawIfNeeded(), which allows us to interpose and block
+	 * the redrawing of plugin UIs when their redrawing behaviour
+	 * is interfering with event loop behaviour.
+	 */
+
 	dispatch_once (&once_token, ^{
 			Method target = class_getInstanceMethod ([NSView class], @selector(displayIfNeeded));
-			original_nsview_draw_rect = method_setImplementation (target, (IMP) gandalf_draw);
-		}
-		);
+			original_nsview_drawIfNeeded = method_setImplementation (target, (IMP) interposed_drawIfNeeded);
+		});
 }
 
 @end
+
+/* END OF THE PLUGIN REDRAW HACK */
 
 @implementation NotificationObject
 
@@ -352,7 +455,7 @@ AUPluginUI::~AUPluginUI ()
 
 	NSWindow* win = get_nswindow();
 	if (au_view) {
-		remove_plugin_view ([win contentView]);
+		remove_plugin_view ([[win contentView] superview]);
 	}
 
 #ifdef WITH_CARBON
@@ -557,7 +660,6 @@ AUPluginUI::create_cocoa_view ()
 	req_height = frame.size.height;
 
 	resizable  = [au_view autoresizingMask];
-	std::cerr << plugin->name() << " initial frame = " << [NSStringFromRect (frame) UTF8String] << " resizable ? " << resizable << std::endl;
 
 	low_box.queue_resize ();
 
@@ -580,8 +682,8 @@ AUPluginUI::idle_meter ()
 		return true; /* call me again */
 	}
 
-	if ((now - last_idle) > 40000) {
-		gandalf_block = 10;
+	if ((now - last_idle) > (1000000/minimum_redraw_rate)) {
+		block_plugin_redraws = block_plugin_redraw_count;
 		std::cerr << "Idle too slow (" << (now - last_idle) << " usecs), block plugin redraws for the next 10 plugin exposes\n";
 	} else {
 		std::cerr << "idle all good: elapsed was " << (now - last_idle) << endl;
@@ -646,10 +748,6 @@ AUPluginUI::cocoa_view_resized ()
 
         NSRect new_frame = [au_view frame];
 
-	std::cerr << "Plugin " << plugin->name() << " requested update (prs now = " << plugin_requested_resize << ")\n";
-	std::cerr << "\tAU NSView frame : " << [ NSStringFromRect (new_frame) UTF8String] << std::endl;
-	std::cerr << "\tlast au frame : " << [ NSStringFromRect (last_au_frame) UTF8String] << std::endl;
-
 	/* from here on, we know that we've been called because the plugin
 	 * decided to change the NSView frame itself.
 	 */
@@ -674,8 +772,6 @@ AUPluginUI::cocoa_view_resized ()
         windowFrame.size.height += dy;
         windowFrame.size.width  += dx;
 
-	std::cerr << "\tChange size by " << dx << " x " << dy << std::endl;
-
         NSUInteger old_auto_resize = [au_view autoresizingMask];
 
         /* Some stupid AU Views change the origin of the original AU View when
@@ -686,26 +782,12 @@ AUPluginUI::cocoa_view_resized ()
         if (last_au_frame.origin.x != new_frame.origin.x ||
             last_au_frame.origin.y != new_frame.origin.y) {
                 new_frame.origin = last_au_frame.origin;
-		std::cerr << "Move AU NSView origin back to "
-			  << new_frame.origin.x << ", " << new_frame.origin.y
-			  << std::endl;
                 [au_view setFrame:new_frame];
                 /* also be sure to redraw the topbox because this can
                    also go wrong.
                  */
                 top_box.queue_draw ();
-        } else {
-		std::cerr << "No need to move origin, last au origin " << [NSStringFromPoint(last_au_frame.origin) UTF8String]
-			  << " == new au origin " << [NSStringFromPoint(new_frame.origin) UTF8String]
-			  << std::endl;
 	}
-
-	/* this resizes the window. it will eventually trigger a new
-	 * size_allocate event/callback, and we'll end up in
-	 * ::update_view_size(). We want to stop that from doing anything,
-	 * because we've already resized the window to fit the new new view,
-	 * so there's no need to actually update the view size again.
-	 */
 
 	/* We resize the window using Cocoa. We can't use GTK mechanisms
 	 * because of this:
@@ -725,7 +807,7 @@ AUPluginUI::cocoa_view_resized ()
 	[window setFrame:windowFrame display:1];
         [au_view setAutoresizingMask:old_auto_resize];
 
-	/* keep a copy of the size of the AU NSView. We didn't set - the plugin did */
+	/* keep a copy of the size of the AU NSView. We didn't set it - the plugin did */
 	last_au_frame = new_frame;
 	req_width  = new_frame.size.width;
 	req_height = new_frame.size.height;
@@ -898,7 +980,15 @@ AUPluginUI::parent_cocoa_window ()
 
 	NSView* view = gdk_quartz_window_get_nsview (low_box.get_window()->gobj());
 	[view addSubview:au_view];
-	add_plugin_view ([win contentView]);
+	/* despite the fact that the documentation says that [NSWindow
+	   contentView] is the highest "accessible" NSView in an NSWindow, when
+	   the redraw cycle is executed, displayIfNeeded is actually executed
+	   on the parent of the contentView. To provide a marginal speedup when
+	   checking if a given redraw is for a plugin, use this "hidden" NSView
+	   to identify the plugin, so that we do not have to call [superview]
+	   every time in interposed_drawIfNeeded().
+	*/
+	add_plugin_view ([[win contentView] superview]);
 
 	/* this moves the AU NSView down and over to provide a left-hand margin
 	 * and to clear the Ardour "task bar" (with plugin preset mgmt buttons,
@@ -1043,24 +1133,16 @@ AUPluginUI::lower_box_size_request (GtkRequisition* requisition)
 void
 AUPluginUI::lower_box_size_allocate (Gtk::Allocation& allocation)
 {
-	std::cerr << "lower box size reallocated to " << allocation.get_width() << " x " << allocation.get_height() << std::endl;
 	update_view_size ();
 }
 
 bool
 AUPluginUI::lower_box_expose (GdkEventExpose* event)
 {
-	std::cerr << "lower box expose: " << event->area.x << ", " << event->area.y
-		  << ' '
-		  << event->area.width << " x " << event->area.height
-		  << " ALLOC "
-		  << low_box.get_allocation().get_width() << " x " << low_box.get_allocation().get_height()
-		  << std::endl;
-
 	++expose_cnt;
 
 	if (!(expose_cnt % 10)) {
-		/* every 100 exposes, check how frequently idle is being called */
+		/* every 10 exposes, check how frequently idle is being called */
 		if (idle_meter_needed) {
 			Glib::signal_idle().connect (sigc::ptr_fun (AUPluginUI::idle_meter));
 			idle_meter_needed = false;
