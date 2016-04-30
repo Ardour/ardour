@@ -2454,6 +2454,12 @@ TempoMap::gui_move_meter (MeterSection* ms, const framepos_t&  frame)
 		}
 	}
 
+	Metrics::const_iterator d = future_map.begin();
+	while (d != future_map.end()) {
+		delete (*d);
+		++d;
+	}
+
 	MetricPositionChanged (); // Emit Signal
 }
 
@@ -2467,6 +2473,12 @@ TempoMap::gui_move_meter (MeterSection* ms, const double& pulse)
 		if (solve_map (future_map, copy, pulse)) {
 			solve_map (_metrics, ms, pulse);
 		}
+	}
+
+	Metrics::const_iterator d = future_map.begin();
+	while (d != future_map.end()) {
+		delete (*d);
+		++d;
 	}
 
 	MetricPositionChanged (); // Emit Signal
