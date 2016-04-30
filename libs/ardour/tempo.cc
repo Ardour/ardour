@@ -2226,7 +2226,6 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const double& pu
 					const double beats = ((m->bbt().bars - prev_m->bbt().bars) * prev_m->divisions_per_bar());
 					if (beats + prev_m->beat() != m->beat()) {
 						/* tempo/ meter change caused a change in beat (bar). */
-						const double floor_beats = beats - fmod (beats, prev_m->divisions_per_bar());
 						b_bbt = make_pair (beats + prev_m->beat()
 								   , BBT_Time ((beats / prev_m->divisions_per_bar()) + prev_m->bbt().bars, 1, 0));
 						new_pulse = prev_m->pulse() + (beats / prev_m->note_divisor());
@@ -2461,9 +2460,13 @@ TempoMap::gui_move_meter (MeterSection* ms, const framepos_t&  frame)
 void
 TempoMap::gui_move_meter (MeterSection* ms, const double& pulse)
 {
+	Metrics future_map;
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		solve_map (_metrics, ms, pulse);
+		MeterSection* copy = copy_metrics_and_point (_metrics, future_map, ms);
+		if (solve_map (future_map, copy, pulse)) {
+			solve_map (_metrics, ms, pulse);
+		}
 	}
 
 	MetricPositionChanged (); // Emit Signal
