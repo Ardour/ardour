@@ -50,8 +50,11 @@ using namespace std;
 using namespace PBD;
 
 vector<string> AUPluginUI::automation_mode_strings;
-bool AUPluginUI::idle_meter_needed = true;
-int64_t AUPluginUI::last_idle = 0;
+int64_t AUPluginUI::last_timer = 0;
+bool    AUPluginUI::timer_needed = true;
+CFRunLoopTimerRef AUPluginUI::cf_timer;
+uint64_t AUPluginUI::timer_callbacks = 0;
+uint64_t AUPluginUI::timer_out_of_range = 0;
 
 static const gchar* _automation_mode_strings[] = {
 	X_("Manual"),
@@ -198,11 +201,16 @@ static IMP original_nsview_drawIfNeeded;
 static std::vector<id> plugin_views;
 static uint32_t block_plugin_redraws = 0;
 static const uint32_t minimum_redraw_rate = 25; /* frames per second */
-static const uint32_t block_plugin_redraw_count = 100; /* number of combined plugin redraws to block, if blocking */
+static const uint32_t block_plugin_redraw_count = 10; /* number of combined plugin redraws to block, if blocking */
 
 static void add_plugin_view (id view)
 {
+	if (plugin_views.empty()) {
+		AUPluginUI::start_cf_timer ();
+	}
+
 	plugin_views.push_back (view);
+
 }
 
 static void remove_plugin_view (id view)
@@ -210,6 +218,9 @@ static void remove_plugin_view (id view)
 	std::vector<id>::iterator x = find (plugin_views.begin(), plugin_views.end(), view);
 	if (x != plugin_views.end()) {
 		plugin_views.erase (x);
+	}
+	if (plugin_views.empty()) {
+		AUPluginUI::stop_cf_timer ();
 	}
 }
 
@@ -345,7 +356,6 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	, cocoa_parent (0)
 	, _notify (0)
 	, _resize_notify (0)
-	, expose_cnt (0)
 {
 	if (automation_mode_strings.empty()) {
 		automation_mode_strings = I18N (_automation_mode_strings);
@@ -439,7 +449,6 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 		low_box.signal_size_allocate ().connect (mem_fun (this, &AUPluginUI::lower_box_size_allocate));
 		low_box.signal_map ().connect (mem_fun (this, &AUPluginUI::lower_box_map));
 		low_box.signal_unmap ().connect (mem_fun (this, &AUPluginUI::lower_box_unmap));
-		low_box.signal_expose_event ().connect (mem_fun (this, &AUPluginUI::lower_box_expose));
 	}
 }
 
@@ -672,29 +681,78 @@ AUPluginUI::update_view_size ()
 	last_au_frame = [au_view frame];
 }
 
-bool
-AUPluginUI::idle_meter ()
+
+void
+au_cf_timer_callback (CFRunLoopTimerRef timer, void* info)
+{
+	reinterpret_cast<AUPluginUI*> (info)->cf_timer_callback ();
+}
+
+void
+AUPluginUI::cf_timer_callback ()
 {
 	int64_t now = ARDOUR::get_microseconds ();
+	timer_callbacks++;
 
-	if (!last_idle) {
-		last_idle = now;
-		return true; /* call me again */
+	if (!last_timer) {
+		last_timer = now;
+		return;
 	}
 
-	if ((now - last_idle) > (1000000/minimum_redraw_rate)) {
-		block_plugin_redraws = block_plugin_redraw_count;
-		std::cerr << "Idle too slow (" << (now - last_idle) << " usecs), block plugin redraws for the next 10 plugin exposes\n";
-	} else {
-		std::cerr << "idle all good: elapsed was " << (now - last_idle) << endl;
+	const int64_t usecs_slop = 7500; /* 7.5 msec */
+
+	std::cerr << "Timer elapsed : " << now - last_timer << std::endl;
+
+	if ((now - last_timer) > (usecs_slop + (1000000/minimum_redraw_rate))) {
+		timer_out_of_range++;
 	}
 
-	/* We've been called twice. Cancel everything for now. */
+	/* check timing roughly every second */
 
-	idle_meter_needed = true;
-	last_idle = 0;
+	if ((timer_callbacks % minimum_redraw_rate) == 0) {
+		std::cerr << "OOR check: " << timer_out_of_range << std::endl;
+		if (timer_out_of_range > (minimum_redraw_rate / 4)) {
+			/* more than 25 % of the last second's worth of timers
+			   have been late. Take action.
+			*/
+			block_plugin_redraws = block_plugin_redraw_count;
+			std::cerr << "Timer too slow, block plugin redraws\n";
+		}
+		timer_out_of_range = 0;
+	}
 
-	return false;
+	last_timer = now;
+}
+
+void
+AUPluginUI::start_cf_timer ()
+{
+	if (!timer_needed) {
+		return;
+	}
+
+	CFTimeInterval interval = 1.0/25.0; /* secs => 40msec or 25fps */
+
+	cf_timer = CFRunLoopTimerCreate (kCFAllocatorDefault,
+	                                 CFAbsoluteTimeGetCurrent() + interval,
+	                                 interval, 0, 0,
+	                                 au_cf_timer_callback,
+	                                 0);
+
+	CFRunLoopAddTimer (CFRunLoopGetCurrent(), cf_timer, kCFRunLoopCommonModes);
+	timer_needed = false;
+}
+
+void
+AUPluginUI::stop_cf_timer ()
+{
+	if (timer_needed) {
+		return;
+	}
+
+	CFRunLoopRemoveTimer (CFRunLoopGetCurrent(), cf_timer, kCFRunLoopCommonModes);
+	timer_needed = true;
+	last_timer = 0;
 }
 
 void
@@ -1134,22 +1192,6 @@ void
 AUPluginUI::lower_box_size_allocate (Gtk::Allocation& allocation)
 {
 	update_view_size ();
-}
-
-bool
-AUPluginUI::lower_box_expose (GdkEventExpose* event)
-{
-	++expose_cnt;
-
-	if (!(expose_cnt % 10)) {
-		/* every 10 exposes, check how frequently idle is being called */
-		if (idle_meter_needed) {
-			Glib::signal_idle().connect (sigc::ptr_fun (AUPluginUI::idle_meter));
-			idle_meter_needed = false;
-		}
-	}
-
-	return false;
 }
 
 void

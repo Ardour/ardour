@@ -96,7 +96,6 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	void lower_box_unmap ();
 	void lower_box_size_request (GtkRequisition*);
 	void lower_box_size_allocate (Gtk::Allocation&);
-	bool lower_box_expose (GdkEventExpose*);
 
 	void cocoa_view_resized ();
 	void on_realize ();
@@ -165,10 +164,17 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 
 	bool plugin_class_valid (Class pluginClass);
 
-	static bool idle_meter();
-	static int64_t last_idle;
-	static bool idle_meter_needed;
-	int64_t expose_cnt;
+	friend void au_cf_timer_callback (CFRunLoopTimerRef timer, void* info);
+	static CFRunLoopTimerRef   cf_timer;
+	static void cf_timer_callback ();
+	static int64_t last_timer;
+	static bool timer_needed;
+	static uint64_t timer_callbacks;
+	static uint64_t timer_out_of_range;
+
+  public:
+	static void start_cf_timer ();
+	static void stop_cf_timer ();
 };
 
 #endif /* __gtk2_ardour_auplugin_ui_h__  */
