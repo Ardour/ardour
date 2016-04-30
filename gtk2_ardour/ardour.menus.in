@@ -19,7 +19,7 @@
         <menuitem action='ImportMetadata'/>
       </menu>
       <separator/>
-      <menuitem action='AddTrackBus'/>	
+      <menuitem action='AddTrackBus'/>
       <separator/>
       <menuitem action='addExistingAudioFiles'/>
 #ifdef PTFORMAT
@@ -36,7 +36,7 @@
       <menuitem action='CloseVideo'/>
 
       <menu name='Export' action='Export'>
-       <menuitem action='ExportAudio'/>
+        <menuitem action='ExportAudio'/>
         <menuitem action='StemExport'/>
         <menuitem action='ExportVideo'/>
       </menu>
@@ -87,7 +87,7 @@
       <menuitem action='TransitionToReverse'/>
       <separator/>
 
-      
+
       <menu action="MovePlayHeadMenu">
         <menuitem action='set-playhead'/>
         <menuitem action='playhead-to-edit'/>
@@ -127,7 +127,7 @@
 
       <menu action="MarkerMenu">
         <menuitem action='add-location-from-playhead'/>
-		<menuitem action='remove-location-from-playhead'/>
+        <menuitem action='remove-location-from-playhead'/>
         <separator/>
         <menuitem action='goto-mark-1'/>
         <menuitem action='goto-mark-2'/>
@@ -139,8 +139,8 @@
         <menuitem action='goto-mark-8'/>
         <menuitem action='goto-mark-9'/>
         <separator/>
-		<menuitem action='set-session-start-from-playhead'/>
-		<menuitem action='set-session-end-from-playhead'/>
+        <menuitem action='set-session-start-from-playhead'/>
+        <menuitem action='set-session-end-from-playhead'/>
       </menu>
 
       <separator/>
@@ -157,7 +157,7 @@
       <menuitem action='toggle-stationary-playhead'/>
       <menuitem action='ToggleFollowEdits'/>
       <menuitem action='panic'/>
-     <separator/>
+      <separator/>
     </menu>
 
     <menu name='Edit' action='Edit'>
@@ -166,22 +166,22 @@
       <separator/>
       <menuitem action='undo-last-selection-op'/>
       <menuitem action='redo-last-selection-op'/>
-      <separator/>  
+      <separator/>
       <menuitem action='editor-cut'/>
       <menuitem action='editor-copy'/>
       <menuitem action='editor-paste'/>
-      <separator/>       
-      <menu action="SelectMenu">	   
+      <separator/>
+      <menu action="SelectMenu">
         <menuitem action='select-all-objects'/>
         <menuitem action='select-all-tracks'/>
         <menuitem action='deselect-all'/>
         <menuitem action='invert-selection'/>
         <separator/>
-	<menuitem action='select-loop-range'/>
-	<menuitem action='select-punch-range'/>
-	<menuitem action='select-from-regions'/>
+        <menuitem action='select-loop-range'/>
+        <menuitem action='select-punch-range'/>
+        <menuitem action='select-from-regions'/>
         <separator/>
-	<menuitem action='select-all-after-edit-cursor'/>
+        <menuitem action='select-all-after-edit-cursor'/>
         <menuitem action='select-all-before-edit-cursor'/>
         <menuitem action='select-all-between-cursors'/>
         <menuitem action='select-all-within-cursors'/>
@@ -198,7 +198,7 @@
         <separator/>
         <menuitem action='select-next-route'/>
         <menuitem action='select-prev-route'/>
-      </menu>	   
+      </menu>
       <separator/>
       <menuitem action='editor-delete'/>
       <menuitem action='editor-crop'/>
@@ -224,7 +224,7 @@
         <menuitem action='set-fade-out-length'/>
         <menuitem action='toggle-region-fade-out'/>
       </menu>
-      <separator/>       
+      <separator/>
       <menuitem action='remove-last-capture'/>
       <separator/>
       <menu action="EditPointMenu">
@@ -294,11 +294,11 @@
         <menuitem action='script-action-8'/>
         <menuitem action='script-action-9'/>
       </menu>
-#ifndef GTKOSX
+#ifndef __APPLE__
       <separator/>
 #endif
       <menuitem action='menu-show-preferences'/>
-    </menu>         
+    </menu>
 
     <menu name='RegionMenu' action='RegionMenu'>
       <menuitem action='insert-region-from-region-list'/>
@@ -309,16 +309,16 @@
       <menuitem action='loudness-analyze-region'/>
       <menuitem action='spectral-analyze-region'/>
       <menu action='RegionMenuEdit'>
-         <menuitem action='combine-regions'/>
-         <menuitem action='uncombine-regions'/>
-         <menuitem action='pitch-shift-region'/>
-         <menuitem action='split-region-at-transients'/>
-         <menuitem action='split-multichannel-region'/>
-         <menuitem action='close-region-gaps'/>
-         <menuitem action='place-transient' />
-         <menuitem action='show-rhythm-ferret'/>
-         <menuitem action='strip-region-silence'/>
-         <menuitem action='reverse-region'/>    
+        <menuitem action='combine-regions'/>
+        <menuitem action='uncombine-regions'/>
+        <menuitem action='pitch-shift-region'/>
+        <menuitem action='split-region-at-transients'/>
+        <menuitem action='split-multichannel-region'/>
+        <menuitem action='close-region-gaps'/>
+        <menuitem action='place-transient' />
+        <menuitem action='show-rhythm-ferret'/>
+        <menuitem action='strip-region-silence'/>
+        <menuitem action='reverse-region'/>
       </menu>
       <menu action='RegionMenuLayering'>
         <menuitem action='raise-region-to-top'/>
@@ -341,7 +341,7 @@
         <menuitem action='toggle-region-mute'/>
         <menuitem action='normalize-region'/>
         <menuitem action='boost-region-gain'/>
-        <menuitem action='cut-region-gain'/>      		   
+        <menuitem action='cut-region-gain'/>
         <menuitem action='reset-region-gain-envelopes'/>
         <menuitem action='toggle-region-gain-envelope-active'/>
       </menu>
@@ -357,7 +357,7 @@
         <menuitem action='nudge-backward'/>
         <menuitem action='nudge-forward-by-capture-offset'/>
         <menuitem action='nudge-backward-by-capture-offset'/>
-	<menuitem action='sequence-regions'/>
+        <menuitem action='sequence-regions'/>
       </menu>
       <menu action='RegionMenuTrim'>
         <menuitem action='trim-front'/>
@@ -392,8 +392,8 @@
     </menu>
 
     <menu action='TrackMenu'>
-      <menuitem action='AddTrackBus'/>	
-      <menuitem action='duplicate-routes'/>	
+      <menuitem action='AddTrackBus'/>
+      <menuitem action='duplicate-routes'/>
       <separator/>
       <menuitem action='track-record-enable-toggle'/>
       <menuitem action='track-solo-toggle'/>
@@ -412,8 +412,8 @@
         <menuitem action='track-height-small'/>
       </menu>
       <separator/>
-     <menuitem action='toggle-track-active'/>	
-      <menuitem action='remove-track'/>	
+      <menuitem action='toggle-track-active'/>
+      <menuitem action='remove-track'/>
     </menu>
 
     <menu name='View' action = 'View'>
@@ -423,7 +423,7 @@
       <separator/>
 
       <menu action="PrimaryClockMenu">
-		<menuitem action='focus-on-clock'/>
+        <menuitem action='focus-on-clock'/>
         <menuitem action="primary-clock-timecode"/>
         <menuitem action="primary-clock-bbt"/>
         <menuitem action="primary-clock-minsec"/>
@@ -533,22 +533,22 @@
       <menuitem action='toggle-audio-midi-setup'/>
       <separator/>
       <menu action='EditorMenu'>
-          <menuitem action='show-editor'/>
-          <menuitem action='hide-editor'/>
-          <menuitem action='attach-editor'/>
-          <menuitem action='detach-editor'/>
+        <menuitem action='show-editor'/>
+        <menuitem action='hide-editor'/>
+        <menuitem action='attach-editor'/>
+        <menuitem action='detach-editor'/>
       </menu>
       <menu action='MixerMenu'>
-          <menuitem action='show-mixer'/>
-          <menuitem action='hide-mixer'/>
-          <menuitem action='attach-mixer'/>
-          <menuitem action='detach-mixer'/>
+        <menuitem action='show-mixer'/>
+        <menuitem action='hide-mixer'/>
+        <menuitem action='attach-mixer'/>
+        <menuitem action='detach-mixer'/>
       </menu>
       <menu action='PrefsMenu'>
-          <menuitem action='show-preferences'/>
-          <menuitem action='hide-preferences'/>
-          <menuitem action='attach-preferences'/>
-          <menuitem action='detach-preferences'/>
+        <menuitem action='show-preferences'/>
+        <menuitem action='hide-preferences'/>
+        <menuitem action='attach-preferences'/>
+        <menuitem action='detach-preferences'/>
       </menu>
       <menuitem action='toggle-meterbridge'/>
       <menuitem action='toggle-luawindow'/>
@@ -589,27 +589,27 @@
   </menubar>
 
   <popup action="editorTabbableButtonMenu">
-          <menuitem action='show-editor'/>
-          <menuitem action='hide-editor'/>
-          <menuitem action='attach-editor'/>
-          <menuitem action='detach-editor'/>
+    <menuitem action='show-editor'/>
+    <menuitem action='hide-editor'/>
+    <menuitem action='attach-editor'/>
+    <menuitem action='detach-editor'/>
   </popup>
 
   <popup action="mixerTabbableButtonMenu">
-          <menuitem action='show-mixer'/>
-          <menuitem action='hide-mixer'/>
-          <menuitem action='attach-mixer'/>
-          <menuitem action='detach-mixer'/>
+    <menuitem action='show-mixer'/>
+    <menuitem action='hide-mixer'/>
+    <menuitem action='attach-mixer'/>
+    <menuitem action='detach-mixer'/>
   </popup>
 
   <popup action="preferencesTabbableButtonMenu">
-          <menuitem action='show-preferences'/>
-          <menuitem action='hide-preferences'/>
-          <menuitem action='attach-preferences'/>
-          <menuitem action='detach-preferences'/>
+    <menuitem action='show-preferences'/>
+    <menuitem action='hide-preferences'/>
+    <menuitem action='attach-preferences'/>
+    <menuitem action='detach-preferences'/>
   </popup>
 
-<popup action="RulerMenuPopup">
+  <popup action="RulerMenuPopup">
     <menuitem action="toggle-minsec-ruler"/>
     <menuitem action="toggle-timecode-ruler"/>
     <menuitem action="toggle-samples-ruler"/>
@@ -691,7 +691,7 @@
     <separator/>
     <menuitem action='addExternalAudioToRegionList'/>
     <separator/>
-    <menuitem action='removeUnusedRegions'/>    
+    <menuitem action='removeUnusedRegions'/>
   </popup>
 
   <popup name='PopupRegionMenu' action='PopupRegionMenu'>
@@ -700,16 +700,16 @@
     <menuitem action='rename-region'/>
     <menuitem action='show-region-properties'/>
     <menu action='RegionMenuEdit'>
-       <menuitem action='combine-regions'/>
-       <menuitem action='uncombine-regions'/>
-       <menuitem action='split-region'/>
-       <menuitem action='split-multichannel-region'/>
-       <menuitem action='pitch-shift-region'/>
-       <menuitem action='reverse-region'/>    
-       <menuitem action='close-region-gaps'/>
-       <menuitem action='place-transient' />
-       <menuitem action='show-rhythm-ferret'/>
-       <menuitem action='strip-region-silence'/>
+      <menuitem action='combine-regions'/>
+      <menuitem action='uncombine-regions'/>
+      <menuitem action='pitch-shift-region'/>
+      <menuitem action='split-region'/>
+      <menuitem action='split-multichannel-region'/>
+      <menuitem action='close-region-gaps'/>
+      <menuitem action='place-transient' />
+      <menuitem action='show-rhythm-ferret'/>
+      <menuitem action='strip-region-silence'/>
+      <menuitem action='reverse-region'/>
     </menu>
     <menu action='RegionMenuMIDI'>
       <menuitem action='transpose-region'/>
@@ -761,7 +761,7 @@
       <menuitem action='toggle-region-mute'/>
       <menuitem action='normalize-region'/>
       <menuitem action='boost-region-gain'/>
-      <menuitem action='cut-region-gain'/>      		   
+      <menuitem action='cut-region-gain'/>
       <menuitem action='reset-region-gain-envelopes'/>
       <menuitem action='toggle-region-gain-envelope-active'/>
     </menu>
@@ -782,7 +782,7 @@
     <menuitem action='spectral-analyze-region'/>
     <separator/>
     <menuitem action='remove-region'/>
-    
+
   </popup>
 
 </ui>
