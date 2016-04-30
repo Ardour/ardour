@@ -70,14 +70,39 @@ BasicUI::access_action ( std::string action_path )
 void
 BasicUI::loop_toggle ()
 {
+	if (!session) {
+		return;
+	}
+
+	Location * looploc = session->locations()->auto_loop_location();
+
+	if (!looploc) {
+		return;
+	}
+
 	if (session->get_play_loop()) {
+
+		/* looping enabled, our job is to disable it */
+
 		session->request_play_loop (false);
+
 	} else {
-		session->request_play_loop (true);
-		if (!session->transport_rolling()) {
-			session->request_transport_speed (1.0);
+
+		/* looping not enabled, our job is to enable it.
+
+		   loop-is-NOT-mode: this action always starts the transport rolling.
+		   loop-IS-mode:     this action simply sets the loop play mechanism, but
+		                        does not start transport.
+		*/
+		if (Config->get_loop_is_mode()) {
+			session->request_play_loop (true, false);
+		} else {
+			session->request_play_loop (true, true);
 		}
 	}
+
+	//show the loop markers
+	looploc->set_hidden (false, this);
 }
 
 void
