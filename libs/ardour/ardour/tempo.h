@@ -177,8 +177,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 		Constant,
 	};
 
-	TempoSection (const double& beat, double qpm, double note_type, Type tempo_type)
-		: MetricSection (beat), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true), _locked_to_meter (false)  {}
+	TempoSection (const double& pulse, double qpm, double note_type, Type tempo_type)
+		: MetricSection (pulse), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true), _locked_to_meter (false)  {}
 	TempoSection (framepos_t frame, double qpm, double note_type, Type tempo_type)
 		: MetricSection (frame), Tempo (qpm, note_type), _type (tempo_type), _c_func (0.0), _active (true), _locked_to_meter (false) {}
 	TempoSection (const XMLNode&);
@@ -206,7 +206,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	double pulse_at_tempo (const double& ppm, const framepos_t& frame, const framecnt_t& frame_rate) const;
 
 	double pulse_at_frame (const framepos_t& frame, const framecnt_t& frame_rate) const;
-	framepos_t frame_at_pulse (const double& pulse, const framecnt_t& frame_rate) const;
+	frameoffset_t frame_at_pulse (const double& pulse, const framecnt_t& frame_rate) const;
 
 	double compute_c_func_pulse (const double& end_bpm, const double& end_pulse, const framecnt_t& frame_rate);
 	double compute_c_func_frame (const double& end_bpm, const framepos_t& end_frame, const framecnt_t& frame_rate) const;
@@ -475,8 +475,8 @@ private:
 	bool set_active_tempos (const Metrics& metrics, const framepos_t& frame);
 	bool solve_map (Metrics& metrics, TempoSection* section, const framepos_t& frame);
 	bool solve_map (Metrics& metrics, TempoSection* section, const double& pulse);
-	void solve_map (Metrics& metrics, MeterSection* section, const framepos_t& frame);
-	void solve_map (Metrics& metrics, MeterSection* section, const double& pulse);
+	bool solve_map (Metrics& metrics, MeterSection* section, const framepos_t& frame);
+	bool solve_map (Metrics& metrics, MeterSection* section, const double& pulse);
 
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;
@@ -511,7 +511,8 @@ private:
 	bool remove_tempo_locked (const TempoSection&);
 	bool remove_meter_locked (const MeterSection&);
 
-	TempoSection* copy_metrics_and_point (Metrics& copy, TempoSection* section);
+	TempoSection* copy_metrics_and_point (const Metrics& metrics, Metrics& copy, TempoSection* section);
+	MeterSection* copy_metrics_and_point (const Metrics& metrics, Metrics& copy, MeterSection* section);
 };
 
 }; /* namespace ARDOUR */

@@ -3200,20 +3200,22 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		map.bbt_time (pf, bbt);
 		/* round bbt to bars */
 		map.round_bbt (bbt, -1);
+		const MeterSection& prev_m = map.meter_section_at (_real_section->frame() - 1);
 
-		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+		if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier ())) {
 			_editor->session()->tempo_map().gui_dilate_tempo (_real_section, pf);
 		} else if (bbt.bars > _real_section->bbt().bars) {
-			const double pulse = _real_section->pulse() + (_real_section->note_divisor() / _real_section->divisions_per_bar());
+			const double pulse = _real_section->pulse() + (prev_m.note_divisor() / prev_m.divisions_per_bar());
+			//const double pulse = _real_section->pulse() + (_real_section->note_divisor() / _real_section->divisions_per_bar());
 			_editor->session()->tempo_map().gui_move_meter (_real_section, pulse);
 		} else if (bbt.bars < _real_section->bbt().bars) {
-			const MeterSection& prev_m = map.meter_section_at (pf);
 			const double pulse = _real_section->pulse() - (prev_m.note_divisor() / prev_m.divisions_per_bar());
 			_editor->session()->tempo_map().gui_move_meter (_real_section, pulse);
 		}
 	} else {
 		/* AudioTime */
-		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+		if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+			/* currently disabled in the lib for AudioTime */
 			if (_real_section->movable()) {
 				_editor->session()->tempo_map().gui_dilate_tempo (_real_section, pf);
 			}
@@ -3291,7 +3293,7 @@ TempoMarkerDrag::setup_pointer_frame_offset ()
 void
 TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (!_real_section->active() || _real_section->locked_to_meter()) {
+	if (!_real_section->active()) {
 		return;
 	}
 	if (first_move) {
@@ -3373,14 +3375,14 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	framepos_t pf;
-	Tempo const tp = _marker->tempo();
-	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+
+	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier ())) {
 		double new_bpm = _real_section->beats_per_minute() + ((last_pointer_y() - current_pointer_y()) / 5.0);
 		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type()));
 		stringstream strs;
 		strs << new_bpm;
 		show_verbose_cursor_text (strs.str());
-	} else if (_movable) {
+	} else if (_movable && !_real_section->locked_to_meter()) {
 		if (!_editor->snap_musical()) {
 			/* snap normally (this is not self-referential).*/
 			pf = adjusted_current_frame (event);
@@ -3443,7 +3445,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 void
 TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!_real_section->active() || _real_section->locked_to_meter()) {
+	if (!_real_section->active()) {
 		return;
 	}
 	if (!movement_occurred) {
