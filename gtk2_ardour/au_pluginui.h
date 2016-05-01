@@ -172,6 +172,9 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	static uint64_t timer_callbacks;
 	static uint64_t timer_out_of_range;
 
+	static bool timer_callback ();
+	static sigc::connection timer_connection;
+
   public:
 	static void start_cf_timer ();
 	static void stop_cf_timer ();

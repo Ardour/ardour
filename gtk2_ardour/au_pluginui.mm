@@ -63,8 +63,7 @@ vector<string> AUPluginUI::automation_mode_strings;
 int64_t AUPluginUI::last_timer = 0;
 bool    AUPluginUI::timer_needed = true;
 CFRunLoopTimerRef AUPluginUI::cf_timer;
-uint64_t AUPluginUI::timer_callbacks = 0;
-uint64_t AUPluginUI::timer_out_of_range = 0;
+sigc::connection AUPluginUI::timer_connection;
 
 static const gchar* _automation_mode_strings[] = {
 	X_("Manual"),
@@ -210,8 +209,8 @@ dump_view_tree (NSView* view, int depth, int maxdepth)
 static IMP original_nsview_drawIfNeeded;
 static std::vector<id> plugin_views;
 static uint32_t block_plugin_redraws = 0;
-static const uint32_t minimum_redraw_rate = 25; /* frames per second */
-static const uint32_t block_plugin_redraw_count = 10; /* number of combined plugin redraws to block, if blocking */
+static const uint32_t minimum_redraw_rate = 30; /* frames per second */
+static const uint32_t block_plugin_redraw_count = 15; /* number of combined plugin redraws to block, if blocking */
 
 static void add_plugin_view (id view)
 {
@@ -238,7 +237,9 @@ static void interposed_drawIfNeeded (id receiver, SEL selector, NSRect rect)
 {
 	if (block_plugin_redraws && (find (plugin_views.begin(), plugin_views.end(), receiver) != plugin_views.end())) {
 		block_plugin_redraws--;
+#ifdef AU_DEBUG_PRINT
 		std::cerr << "Plugin redraw blocked\n";
+#endif
 		/* YOU ... SHALL .... NOT ... DRAW!!!! */
 		return;
 	}
@@ -691,6 +692,15 @@ AUPluginUI::update_view_size ()
 	last_au_frame = [au_view frame];
 }
 
+bool
+AUPluginUI::timer_callback ()
+{
+	block_plugin_redraws = 0;
+#ifdef AU_DEBUG_PRINT
+	std::cerr << "Resume redraws after idle\n";
+#endif
+	return false;
+}
 
 void
 au_cf_timer_callback (CFRunLoopTimerRef timer, void* info)
@@ -702,33 +712,25 @@ void
 AUPluginUI::cf_timer_callback ()
 {
 	int64_t now = ARDOUR::get_microseconds ();
-	timer_callbacks++;
 
-	if (!last_timer) {
+	if (!last_timer || block_plugin_redraws) {
 		last_timer = now;
 		return;
 	}
 
-	const int64_t usecs_slop = 7500; /* 7.5 msec */
+	const int64_t usecs_slop = (1400000 / minimum_redraw_rate); // 140%
 
+#ifdef AU_DEBUG_PRINT
 	std::cerr << "Timer elapsed : " << now - last_timer << std::endl;
+#endif
 
 	if ((now - last_timer) > (usecs_slop + (1000000/minimum_redraw_rate))) {
-		timer_out_of_range++;
-	}
-
-	/* check timing roughly every second */
-
-	if ((timer_callbacks % minimum_redraw_rate) == 0) {
-		std::cerr << "OOR check: " << timer_out_of_range << std::endl;
-		if (timer_out_of_range > (minimum_redraw_rate / 4)) {
-			/* more than 25 % of the last second's worth of timers
-			   have been late. Take action.
-			*/
-			block_plugin_redraws = block_plugin_redraw_count;
-			std::cerr << "Timer too slow, block plugin redraws\n";
-		}
-		timer_out_of_range = 0;
+		block_plugin_redraws = block_plugin_redraw_count;
+		timer_connection.disconnect ();
+		timer_connection = Glib::signal_timeout().connect (&AUPluginUI::timer_callback, 40);
+#ifdef AU_DEBUG_PRINT
+		std::cerr << "Timer too slow, block plugin redraws\n";
+#endif
 	}
 
 	last_timer = now;
@@ -741,7 +743,7 @@ AUPluginUI::start_cf_timer ()
 		return;
 	}
 
-	CFTimeInterval interval = 1.0/25.0; /* secs => 40msec or 25fps */
+	CFTimeInterval interval = 1.0 / (float) minimum_redraw_rate;
 
 	cf_timer = CFRunLoopTimerCreate (kCFAllocatorDefault,
 	                                 CFAbsoluteTimeGetCurrent() + interval,
@@ -794,7 +796,9 @@ AUPluginUI::cocoa_view_resized ()
 		 * NSView, resulting in a reentrant call to the FrameDidChange
 		 * handler (this method). Ignore this reentrant call.
 		 */
+#ifdef AU_DEBUG_PRINT
 		std::cerr << plugin->name() << " re-entrant call to cocoa_view_resized, ignored\n";
+#endif
 		return;
 	}
 
