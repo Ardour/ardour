@@ -213,7 +213,7 @@ AudioRegion::register_properties ()
 	, _fade_in (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (*other->_fade_in.val()))) \
 	, _inverse_fade_in (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (*other->_inverse_fade_in.val()))) \
 	, _fade_out (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (*other->_fade_out.val()))) \
-	, _inverse_fade_out (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (*other->_inverse_fade_out.val())))
+	, _inverse_fade_out (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (*other->_inverse_fade_out.val()))) \
 /* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
 void
@@ -372,7 +372,7 @@ void
 AudioRegion::connect_to_analysis_changed ()
 {
 	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-		(*i)->AnalysisChanged.connect_same_thread (*this, boost::bind (&AudioRegion::invalidate_transients, this));
+		(*i)->AnalysisChanged.connect_same_thread (*this, boost::bind (&AudioRegion::maybe_invalidate_transients, this));
 	}
 }
 
@@ -1594,93 +1594,136 @@ AudioRegion::get_related_audio_file_channel_count () const
     return chan_count;
 }
 
-int
-AudioRegion::adjust_transients (frameoffset_t delta)
+void
+AudioRegion::clear_transients () // yet unused
 {
-	for (AnalysisFeatureList::iterator x = _transients.begin(); x != _transients.end(); ++x) {
-		(*x) = (*x) + delta;
-	}
-
+	_user_transients.clear ();
+	_valid_transients = false;
 	send_change (PropertyChange (Properties::valid_transients));
-
-	return 0;
-}
-
-int
-AudioRegion::update_transient (framepos_t old_position, framepos_t new_position)
-{
-	for (AnalysisFeatureList::iterator x = _transients.begin(); x != _transients.end(); ++x) {
-		if ((*x) == old_position) {
-			(*x) = new_position;
-			send_change (PropertyChange (Properties::valid_transients));
-
-			break;
-		}
-	}
-
-	return 0;
 }
 
 void
 AudioRegion::add_transient (framepos_t where)
 {
-	_transients.push_back(where);
-	_valid_transients = true;
+	if (where < first_frame () || where >= last_frame ()) {
+		return;
+	}
+	where -= _position;
 
+	if (!_valid_transients) {
+		_transient_user_start = _start;
+		_valid_transients = true;
+	}
+	frameoffset_t offset = _transient_user_start - _start;
+
+	if (where < offset) {
+		if (offset <= 0) {
+			return;
+		}
+		// region start changed (extend to front), shift points and offset
+		for (AnalysisFeatureList::iterator x = _transients.begin(); x != _transients.end(); ++x) {
+			(*x) += offset;
+		}
+		_transient_user_start -= offset;
+		offset = 0;
+	}
+
+	const framepos_t p = where - offset;
+	_user_transients.push_back(p);
 	send_change (PropertyChange (Properties::valid_transients));
+}
+
+void
+AudioRegion::update_transient (framepos_t old_position, framepos_t new_position)
+{
+	bool changed = false;
+	if (!_onsets.empty ()) {
+		const framepos_t p = old_position - _position;
+		AnalysisFeatureList::iterator x = std::find (_onsets.begin (), _onsets.end (), p);
+		if (x != _transients.end ()) {
+			(*x) = new_position - _position;
+			changed = true;
+		}
+	}
+
+	if (_valid_transients) {
+		const frameoffset_t offset = _position + _transient_user_start - _start;
+		const framepos_t p = old_position - offset;
+		AnalysisFeatureList::iterator x = std::find (_user_transients.begin (), _user_transients.end (), p);
+		if (x != _transients.end ()) {
+			(*x) = new_position - offset;
+			changed = true;
+		}
+	}
+
+	if (changed) {
+		send_change (PropertyChange (Properties::valid_transients));
+	}
 }
 
 void
 AudioRegion::remove_transient (framepos_t where)
 {
-	_transients.remove(where);
-	_valid_transients = true;
+	bool changed = false;
+	if (!_onsets.empty ()) {
+		const framepos_t p = where - _position;
+		AnalysisFeatureList::iterator i = std::find (_onsets.begin (), _onsets.end (), p);
+		if (i != _transients.end ()) {
+			_onsets.erase (i);
+			changed = true;
+		}
+	}
 
+	if (_valid_transients) {
+		const framepos_t p = where - (_position + _transient_user_start - _start);
+		AnalysisFeatureList::iterator i = std::find (_user_transients.begin (), _user_transients.end (), p);
+		if (i != _transients.end ()) {
+			_transients.erase (i);
+			changed = true;
+		}
+	}
+
+	if (changed) {
+		send_change (PropertyChange (Properties::valid_transients));
+	}
+}
+
+void
+AudioRegion::set_onsets (AnalysisFeatureList& results)
+{
+	_onsets.clear();
+	_onsets = results;
 	send_change (PropertyChange (Properties::valid_transients));
 }
 
-int
-AudioRegion::set_transients (AnalysisFeatureList& results)
+void
+AudioRegion::build_transients ()
 {
-	_transients.clear();
-	_transients = results;
-	_valid_transients = true;
+	_transients.clear ();
+	_transient_analysis_start = _transient_analysis_end = 0;
 
-	send_change (PropertyChange (Properties::valid_transients));
-
-	return 0;
-}
-
-int
-AudioRegion::get_transients (AnalysisFeatureList& results, bool force_new)
-{
 	boost::shared_ptr<Playlist> pl = playlist();
 
 	if (!pl) {
-		return -1;
+		return;
 	}
 
-	if (_valid_transients && !force_new) {
-		results = _transients;
-		return 0;
-	}
-
+	/* check analyzed sources first */
 	SourceList::iterator s;
-
 	for (s = _sources.begin() ; s != _sources.end(); ++s) {
 		if (!(*s)->has_been_analysed()) {
+#ifndef NDEBUG
 			cerr << "For " << name() << " source " << (*s)->name() << " has not been analyzed\n";
+#endif
 			break;
 		}
 	}
 
 	if (s == _sources.end()) {
 		/* all sources are analyzed, merge data from each one */
-
 		for (s = _sources.begin() ; s != _sources.end(); ++s) {
 
 			/* find the set of transients within the bounds of this region */
-
 			AnalysisFeatureList::iterator low = lower_bound ((*s)->transients.begin(),
 									 (*s)->transients.end(),
 									 _start);
@@ -1690,23 +1733,19 @@ AudioRegion::get_transients (AnalysisFeatureList& results, bool force_new)
 									  _start + _length);
 
 			/* and add them */
-
-			results.insert (results.end(), low, high);
+			_transients.insert (_transients.end(), low, high);
 		}
 
-		TransientDetector::cleanup_transients (results, pl->session().frame_rate(), 3.0);
+		TransientDetector::cleanup_transients (_transients, pl->session().frame_rate(), 3.0);
 
 		/* translate all transients to current position */
-
-		for (AnalysisFeatureList::iterator x = results.begin(); x != results.end(); ++x) {
+		for (AnalysisFeatureList::iterator x = _transients.begin(); x != _transients.end(); ++x) {
 			(*x) -= _start;
-			(*x) += _position;
 		}
 
-		_transients = results;
-		_valid_transients = true;
-
-		return 0;
+		_transient_analysis_start = _start;
+		_transient_analysis_end = _start + _length;
+		return;
 	}
 
 	/* no existing/complete transient info */
@@ -1721,7 +1760,7 @@ You currently have \"auto-analyse-audio\" disabled, which means \
 that transient data must be generated every time it is required.\n\n\
 If you are doing work that will require transient data on a \
 regular basis, you should probably enable \"auto-analyse-audio\" \
-then quit %1 and restart.\n\n\
+in Preferences > Audio > Regions, then quit %1 and restart.\n\n\
 This dialog will not display again.  But you may notice a slight delay \
 in this and future transient-detection operations.\n\
 "), PROGRAM_NAME));
@@ -1729,64 +1768,74 @@ in this and future transient-detection operations.\n\
 		}
 	}
 
-	bool existing_results = !results.empty();
-
 	try {
-
 		TransientDetector t (pl->session().frame_rate());
-
-		_transients.clear ();
-		_valid_transients = false;
-
 		for (uint32_t i = 0; i < n_channels(); ++i) {
 
 			AnalysisFeatureList these_results;
 
 			t.reset ();
 
+			/* this produces analysis result relative to current position
+			 * ::read() sample 0 is at _position */
 			if (t.run ("", this, i, these_results)) {
-				return -1;
-			}
-
-			/* translate all transients to give absolute position */
-
-			for (AnalysisFeatureList::iterator i = these_results.begin(); i != these_results.end(); ++i) {
-				(*i) += _position;
+				return;
 			}
 
 			/* merge */
-
 			_transients.insert (_transients.end(), these_results.begin(), these_results.end());
 		}
 	} catch (...) {
 		error << string_compose(_("Transient Analysis failed for %1."), _("Audio Region")) << endmsg;
-		return -1;
+		return;
 	}
 
-	if (!results.empty()) {
-		if (existing_results) {
+	TransientDetector::cleanup_transients (_transients, pl->session().frame_rate(), 3.0);
+	_transient_analysis_start = _start;
+	_transient_analysis_end = _start + _length;
+}
 
-			/* merge our transients into the existing ones, then clean up
-			   those.
-			*/
-
-			results.insert (results.end(), _transients.begin(), _transients.end());
-			TransientDetector::cleanup_transients (results, pl->session().frame_rate(), 3.0);
-		}
-
-		/* make sure ours are clean too */
-
-		TransientDetector::cleanup_transients (_transients, pl->session().frame_rate(), 3.0);
-
-	} else {
-
-		TransientDetector::cleanup_transients (_transients, pl->session().frame_rate(), 3.0);
-		results = _transients;
+/* Transient analysis uses ::read() which is relative to _start,
+ * at the time of analysis and spans _length samples.
+ *
+ * This is true for RhythmFerret::run_analysis and the
+ * TransientDetector here.
+ *
+ * We store _start and length in _transient_analysis_start,
+ * _transient_analysis_end in case the region is trimmed or split after analysis.
+ *
+ * Various methods (most notably Playlist::find_next_transient and
+ * RhythmFerret::do_split_action) span multiple regions and *merge/combine*
+ * Analysis results.
+ * We therefore need to translate the analysis timestamps to absolute session-time
+ * and include the _position of the region.
+ *
+ * Note: we should special case the AudioRegionView. The region-view itself
+ * is located at _position (currently ARV subtracts _position again)
+ */
+void
+AudioRegion::get_transients (AnalysisFeatureList& results)
+{
+	boost::shared_ptr<Playlist> pl = playlist();
+	if (!playlist ()) {
+		return;
 	}
 
-	_valid_transients = true;
+	Region::merge_features (results, _user_transients, _position + _transient_user_start - _start);
 
-	return 0;
+	if (!_onsets.empty ()) {
+		// onsets are invalidated when start or length changes
+		merge_features (results, _onsets, _position);
+		return;
+	}
+
+	if ((_transient_analysis_start == _transient_analysis_end)
+			|| _transient_analysis_start > _start
+			|| _transient_analysis_end < _start + _length) {
+		build_transients ();
+	}
+
+	merge_features (results, _transients, _position + _transient_analysis_start - _start);
 }
 
 /** Find areas of `silence' within a region.

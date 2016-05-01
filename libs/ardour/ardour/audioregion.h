@@ -167,10 +167,10 @@ class LIBARDOUR_API AudioRegion : public Region
 
 	void add_transient (framepos_t where);
 	void remove_transient (framepos_t where);
-	int set_transients (AnalysisFeatureList&);
-	int get_transients (AnalysisFeatureList&, bool force_new = false);
-	int update_transient (framepos_t old_position, framepos_t new_position);
-	int adjust_transients (frameoffset_t delta);
+	void clear_transients ();
+	void set_onsets (AnalysisFeatureList&);
+	void get_transients (AnalysisFeatureList&);
+	void update_transient (framepos_t old_position, framepos_t new_position);
 
 	AudioIntervalResult find_silence (Sample, framecnt_t, framecnt_t, InterThreadInfo&) const;
 
@@ -187,6 +187,8 @@ class LIBARDOUR_API AudioRegion : public Region
   private:
 	friend class ::AudioRegionReadTest;
 	friend class ::PlaylistReadTest;
+
+	void build_transients ();
 
 	PBD::Property<bool>     _envelope_active;
 	PBD::Property<bool>     _default_fade_in;

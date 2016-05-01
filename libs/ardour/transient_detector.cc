@@ -119,7 +119,7 @@ TransientDetector::cleanup_transients (AnalysisFeatureList& t, float sr, float g
 
 		// move f until we find a new value that is far enough away
 
-		while ((f != t.end()) && (((*f) - (*i)) < gap_frames)) {
+		while ((f != t.end()) && gap_frames > 0 && (((*f) - (*i)) < gap_frames)) {
 			++f;
 		}
 

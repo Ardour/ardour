@@ -101,8 +101,6 @@ class LIBARDOUR_API Region
 
 	const DataType& data_type () const { return _type; }
 
-	AnalysisFeatureList transients () { return _transients; };
-
 	/** How the region parameters play together:
 	 *
 	 * POSITION: first frame of the region along the timeline
@@ -163,7 +161,6 @@ class LIBARDOUR_API Region
 	bool locked ()           const { return _locked; }
 	bool position_locked ()  const { return _position_locked; }
 	bool video_locked ()     const { return _video_locked; }
-	bool valid_transients () const { return _valid_transients; }
 	bool automatic ()        const { return _automatic; }
 	bool whole_file ()       const { return _whole_file; }
 	bool captured ()         const { return !(_import || _external); }
@@ -290,37 +287,45 @@ class LIBARDOUR_API Region
 		// no transients, but its OK
 	}
 
-	virtual int update_transient (framepos_t /* old_position */, framepos_t /* new_position */) {
+	virtual void clear_transients () {
 		// no transients, but its OK
-		return 0;
+	}
+
+	virtual void update_transient (framepos_t /* old_position */, framepos_t /* new_position */) {
+		// no transients, but its OK
 	}
 
 	virtual void remove_transient (framepos_t /* where */) {
 		// no transients, but its OK
 	}
 
-	virtual int set_transients (AnalysisFeatureList&) {
+	virtual void set_onsets (AnalysisFeatureList&) {
 		// no transients, but its OK
-		return 0;
 	}
 
-	virtual int get_transients (AnalysisFeatureList&, bool force_new = false) {
-		(void) force_new;
+	/** merges _onsets and _user_transients into given list
+	 * and removed exact duplicates.
+	 */
+	void transients (AnalysisFeatureList&);
+
+	/** merges _onsets OR _transients with _user_transients into given list
+	 * if _onsets and _transients are unset, run analysis.
+	 * list is not thinned, duplicates remain in place.
+	 * 
+	 * intended for: Playlist::find_next_transient ()
+	 */
+	virtual void get_transients (AnalysisFeatureList&) {
 		// no transients, but its OK
-		return 0;
 	}
 
-	virtual int adjust_transients (frameoffset_t /*delta*/) {
-		// no transients, but its OK
-		return 0;
-	}
+	bool has_transients () const;
 
 	virtual int separate_by_channel (ARDOUR::Session&,
 			std::vector< boost::shared_ptr<Region> >&) const {
 		return 0;
 	}
 
-	void invalidate_transients ();
+	void maybe_invalidate_transients ();
 
 	void drop_sources ();
 
@@ -371,9 +376,20 @@ class LIBARDOUR_API Region
 	/** Used when timefx are applied, so we can always use the original source */
 	SourceList              _master_sources;
 
-	AnalysisFeatureList     _transients;
-
 	boost::weak_ptr<ARDOUR::Playlist> _playlist;
+
+	void merge_features (AnalysisFeatureList&, const AnalysisFeatureList&, const frameoffset_t) const;
+
+	AnalysisFeatureList     _onsets; // used by the Ferret (Aubio OnsetDetector)
+
+	// _transient_user_start is covered by  _valid_transients
+	AnalysisFeatureList     _user_transients; // user added
+	framepos_t              _transient_user_start; // region's _start relative to user_transients
+
+	// these are used by Playlist::find_next_transient() in absence of onsets
+	AnalysisFeatureList     _transients; // Source Analysis (QM Transient), user read-only
+	framepos_t              _transient_analysis_start;
+	framepos_t              _transient_analysis_end;
 
   private:
 	void mid_thaw (const PBD::PropertyChange&);

@@ -36,6 +36,7 @@
 #include "ardour/session.h"
 #include "ardour/source.h"
 #include "ardour/tempo.h"
+#include "ardour/transient_detector.h"
 
 #include "i18n.h"
 
@@ -171,6 +172,9 @@ Region::register_properties ()
 	, _length (Properties::length, (l))	\
 	, _position (Properties::position, 0) \
 	, _sync_position (Properties::sync_position, (s)) \
+	, _transient_user_start (0) \
+	, _transient_analysis_start (0) \
+	, _transient_analysis_end (0) \
 	, _muted (Properties::muted, false) \
 	, _opaque (Properties::opaque, true) \
 	, _locked (Properties::locked, false) \
@@ -197,7 +201,12 @@ Region::register_properties ()
 	, _length(Properties::length, other->_length)		\
 	, _position(Properties::position, other->_position)	\
 	, _sync_position(Properties::sync_position, other->_sync_position) \
-        , _muted (Properties::muted, other->_muted)	        \
+	, _user_transients (other->_user_transients) \
+	, _transient_user_start (other->_transient_user_start) \
+	, _transients (other->_transients) \
+	, _transient_analysis_start (other->_transient_analysis_start) \
+	, _transient_analysis_end (other->_transient_analysis_end) \
+	, _muted (Properties::muted, other->_muted)	        \
 	, _opaque (Properties::opaque, other->_opaque)		\
 	, _locked (Properties::locked, other->_locked)		\
   , _video_locked (Properties::video_locked, other->_video_locked) \
@@ -434,7 +443,7 @@ Region::set_length (framecnt_t len)
 		_whole_file = false;
 		first_edit ();
 		maybe_uncopy ();
-		invalidate_transients ();
+		maybe_invalidate_transients ();
 
 		if (!property_changes_suspended()) {
 			recompute_at_end ();
@@ -635,8 +644,6 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 		if (allow_bbt_recompute) {
 			recompute_position_from_lock_style ();
 		}
-
-		//invalidate_transients ();
 	}
 }
 
@@ -709,7 +716,7 @@ Region::set_start (framepos_t pos)
 		set_start_internal (pos);
 		_whole_file = false;
 		first_edit ();
-		invalidate_transients ();
+		maybe_invalidate_transients ();
 
 		send_change (Properties::start);
 	}
@@ -797,7 +804,6 @@ Region::modify_front (framepos_t new_position, bool reset_fade)
 	if (new_position < end) { /* can't trim it zero or negative length */
 
 		framecnt_t newlen = 0;
-		framepos_t delta = 0;
 
 		if (!can_trim_start_before_source_start ()) {
 			/* can't trim it back past where source position zero is located */
@@ -806,10 +812,8 @@ Region::modify_front (framepos_t new_position, bool reset_fade)
 
 		if (new_position > _position) {
 			newlen = _length - (new_position - _position);
-			delta = -1 * (new_position - _position);
 		} else {
 			newlen = _length + (_position - new_position);
-			delta = _position - new_position;
 		}
 
 		trim_to_internal (new_position, newlen);
@@ -822,9 +826,7 @@ Region::modify_front (framepos_t new_position, bool reset_fade)
 			recompute_at_start ();
 		}
 
-		if (_transients.size() > 0){
-			adjust_transients(delta);
-		}
+		maybe_invalidate_transients ();
 	}
 }
 
@@ -1303,7 +1305,7 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 	}
 
 	// saved property is invalid, region-transients are not saved
-	if (_transients.size() == 0){
+	if (_user_transients.size() == 0){
 		_valid_transients = false;
 	}
 
@@ -1627,12 +1629,60 @@ Region::apply (Filter& filter, Progress* progress)
 
 
 void
-Region::invalidate_transients ()
+Region::maybe_invalidate_transients ()
 {
-	_valid_transients = false;
-	_transients.clear ();
+	bool changed = !_onsets.empty();
+	_onsets.clear ();
 
-	send_change (PropertyChange (Properties::valid_transients));
+	if (_valid_transients || changed) {
+		send_change (PropertyChange (Properties::valid_transients));
+		return;
+	}
+}
+
+void
+Region::transients (AnalysisFeatureList& afl)
+{
+	int cnt = afl.empty() ? 0 : 1;
+
+	Region::merge_features (afl, _onsets, _position);
+	Region::merge_features (afl, _user_transients, _position + _transient_user_start - _start);
+	if (!_onsets.empty ()) {
+		++cnt;
+	}
+	if (!_user_transients.empty ()) {
+		++cnt;
+	}
+	if (cnt > 1 ) {
+		afl.sort ();
+		// remove exact duplicates
+		TransientDetector::cleanup_transients (afl, _session.frame_rate(), 0);
+	}
+}
+
+bool
+Region::has_transients () const
+{
+	if (!_user_transients.empty ()) {
+		assert (_valid_transients);
+		return true;
+	}
+	if (!_onsets.empty ()) {
+		return true;
+	}
+	return false;
+}
+
+void
+Region::merge_features (AnalysisFeatureList& result, const AnalysisFeatureList& src, const frameoffset_t off) const
+{
+	for (AnalysisFeatureList::const_iterator x = src.begin(); x != src.end(); ++x) {
+		const frameoffset_t p = (*x) + off;
+		if (p < first_frame() || p > last_frame()) {
+			continue;
+		}
+		result.push_back (p);
+	}
 }
 
 void

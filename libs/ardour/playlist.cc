@@ -1949,7 +1949,7 @@ Playlist::find_next_transient (framepos_t from, int dir)
 	bool reached = false;
 
 	if (dir > 0) {
-		for (AnalysisFeatureList::iterator x = points.begin(); x != points.end(); ++x) {
+		for (AnalysisFeatureList::const_iterator x = points.begin(); x != points.end(); ++x) {
 			if ((*x) >= from) {
 				reached = true;
 			}
@@ -1959,7 +1959,7 @@ Playlist::find_next_transient (framepos_t from, int dir)
 			}
 		}
 	} else {
-		for (AnalysisFeatureList::reverse_iterator x = points.rbegin(); x != points.rend(); ++x) {
+		for (AnalysisFeatureList::const_reverse_iterator x = points.rbegin(); x != points.rend(); ++x) {
 			if ((*x) <= from) {
 				reached = true;
 			}
