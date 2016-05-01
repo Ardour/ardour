@@ -21,8 +21,18 @@
 #include "gui_thread.h"
 #include "processor_box.h"
 
+// yes, yes we know (see wscript for various available OSX compat modes)
+#if defined (__clang__)
+#	pragma clang diagnostic push
+#	pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include "CAAudioUnit.h"
 #include "CAComponent.h"
+
+#if defined (__clang__)
+#	pragma clang diagnostic pop
+#endif
 
 #import <AudioUnit/AUCocoaUIView.h>
 #import <CoreAudioKit/AUGenericView.h>
