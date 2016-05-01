@@ -175,8 +175,9 @@ public:
 
 	private:
 		struct Change {
+			Change () : sysex_id (0) {}
 			boost::shared_ptr<Evoral::Event<TimeType> > sysex;
-   		        gint sysex_id;
+			gint sysex_id;
 			SysExDiffCommand::Property property;
 			TimeType old_time;
 			TimeType new_time;

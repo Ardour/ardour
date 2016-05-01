@@ -5393,7 +5393,7 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 static Gtkmm2ext::Bindings*
 get_bindings_from_widget_heirarchy (GtkWidget* w)
 {
-	void* p;
+	void* p = NULL;
 
 	while (w) {
 		if ((p = g_object_get_data (G_OBJECT(w), "ardour-bindings")) != 0) {

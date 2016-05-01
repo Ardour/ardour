@@ -2254,14 +2254,14 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		}
 		if (strncmp ((*i)->name ().c_str(), X_("InputMap-"), 9) == 0) {
 			long pc = atol (&((*i)->name().c_str()[9]));
-			if (pc >=0 && pc <= get_count()) {
+			if (pc >= 0 && pc <= (long) get_count()) {
 				_in_map[pc] = ChanMapping (**i);
 				++in_maps;
 			}
 		}
 		if (strncmp ((*i)->name ().c_str(), X_("OutputMap-"), 10) == 0) {
 			long pc = atol (&((*i)->name().c_str()[10]));
-			if (pc >=0 && pc <= get_count()) {
+			if (pc >= 0 && pc <= (long) get_count()) {
 				_out_map[pc] = ChanMapping (**i);
 				++out_maps;
 			}
