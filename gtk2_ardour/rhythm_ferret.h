@@ -85,6 +85,10 @@ class RhythmFerret : public ArdourDialog {
 	Gtk::HScale peak_picker_threshold_scale;
 	Gtk::Adjustment silence_threshold_adjustment;
 	Gtk::HScale silence_threshold_scale;
+#ifdef HAVE_AUBIO4
+	Gtk::Adjustment minioi_adjustment;
+	Gtk::HScale minioi_scale;
+#endif
 
 	/* generic stuff */
 

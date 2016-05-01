@@ -58,26 +58,35 @@ static const gchar * _onset_function_strings[] = {
 	N_("Phase Deviation"),
 	N_("Kullback-Liebler"),
 	N_("Modified Kullback-Liebler"),
+#ifdef HAVE_AUBIO4
+	N_("Spectral Flux"),
+#endif
 	0
 };
 
 static const gchar * _operation_strings[] = {
 	N_("Split region"),
+#if 0 // these don't do what a user expects
 	N_("Snap regions"),
 	N_("Conform regions"),
+#endif
 	0
 };
 
 RhythmFerret::RhythmFerret (Editor& e)
 	: ArdourDialog (_("Rhythm Ferret"))
 	, editor (e)
-	, detection_threshold_adjustment (0.015, 0.0, 0.1, 0.001, 0.1)
+	, detection_threshold_adjustment (-35, -80, -6, 1, 6)
 	, detection_threshold_scale (detection_threshold_adjustment)
 	, sensitivity_adjustment (40, 0, 100, 1, 10)
 	, sensitivity_scale (sensitivity_adjustment)
 	, analyze_button (_("Analyze"))
 	, peak_picker_threshold_adjustment (0.3, 0.0, 1.0, 0.01, 0.1)
 	, peak_picker_threshold_scale (peak_picker_threshold_adjustment)
+#ifdef HAVE_AUBIO4
+	, minioi_adjustment (4, 0, 40, 1, 5)
+	, minioi_scale (minioi_adjustment)
+#endif
 	, silence_threshold_adjustment (-90.0, -120.0, 0.0, 1, 10)
 	, silence_threshold_scale (silence_threshold_adjustment)
 	, trigger_gap_adjustment (3, 0, 100, 1, 10)
@@ -114,19 +123,13 @@ RhythmFerret::RhythmFerret (Editor& e)
 	t->attach (onset_detection_function_selector, 1, 2, n, n + 1, FILL);
 	++n;
 
-	t->attach (*manage (new Label (_("Trigger gap"), 1, 0.5)), 0, 1, n, n + 1, FILL);
+	t->attach (*manage (new Label (_("Trigger gap (postproc)"), 1, 0.5)), 0, 1, n, n + 1, FILL);
 	t->attach (trigger_gap_spinner, 1, 2, n, n + 1, FILL);
 	t->attach (*manage (new Label (_("ms"))), 2, 3, n, n + 1, FILL);
 	++n;
 
-	t->attach (*manage (new Label (_("Threshold"), 1, 0.5)), 0, 1, n, n + 1, FILL);
-	t->attach (detection_threshold_scale, 1, 2, n, n + 1, FILL);
-	t->attach (*manage (new Label (_("dB"))), 2, 3, n, n + 1, FILL);
-	++n;
-
 	t->attach (*manage (new Label (_("Peak threshold"), 1, 0.5)), 0, 1, n, n + 1, FILL);
 	t->attach (peak_picker_threshold_scale, 1, 2, n, n + 1, FILL);
-	t->attach (*manage (new Label (_("dB"))), 2, 3, n, n + 1, FILL);
 	++n;
 
 	t->attach (*manage (new Label (_("Silence threshold"), 1, 0.5)), 0, 1, n, n + 1, FILL);
@@ -134,8 +137,21 @@ RhythmFerret::RhythmFerret (Editor& e)
 	t->attach (*manage (new Label (_("dB"))), 2, 3, n, n + 1, FILL);
 	++n;
 
+#ifdef HAVE_AUBIO4
+	t->attach (*manage (new Label (_("Min Inter-Onset Time"), 1, 0.5)), 0, 1, n, n + 1, FILL);
+	t->attach (minioi_scale, 1, 2, n, n + 1, FILL);
+	t->attach (*manage (new Label (_("ms"))), 2, 3, n, n + 1, FILL);
+	++n;
+#endif
+
+
 	t->attach (*manage (new Label (_("Sensitivity"), 1, 0.5)), 0, 1, n, n + 1, FILL);
 	t->attach (sensitivity_scale, 1, 2, n, n + 1, FILL);
+	++n;
+
+	t->attach (*manage (new Label (_("Cut Pos Threshold"), 1, 0.5)), 0, 1, n, n + 1, FILL);
+	t->attach (detection_threshold_scale, 1, 2, n, n + 1, FILL);
+	t->attach (*manage (new Label (_("dB"))), 2, 3, n, n + 1, FILL);
 	++n;
 
 	t->attach (*manage (new Label (_("Operation"), 1, 0.5)), 0, 1, n, n + 1, FILL);
@@ -161,12 +177,16 @@ RhythmFerret::analysis_mode_changed ()
 {
 	bool const perc = get_analysis_mode() == PercussionOnset;
 
-	trigger_gap_spinner.set_sensitive (!perc);
+	// would be nice to actually hide/show the rows.
 	detection_threshold_scale.set_sensitive (perc);
 	sensitivity_scale.set_sensitive (perc);
+	trigger_gap_spinner.set_sensitive (!perc);
 	onset_detection_function_selector.set_sensitive (!perc);
 	peak_picker_threshold_scale.set_sensitive (!perc);
 	silence_threshold_scale.set_sensitive (!perc);
+#ifdef HAVE_AUBIO4
+	minioi_scale.set_sensitive (!perc);
+#endif
 }
 
 RhythmFerret::AnalysisMode
@@ -240,7 +260,9 @@ RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readabl
 		AnalysisFeatureList these_results;
 
 		t.reset ();
-		t.set_threshold (detection_threshold_adjustment.get_value());
+		float dB = detection_threshold_adjustment.get_value();
+		float coeff = dB > -80.0f ? pow (10.0f, dB * 0.05f) : 0.0f;
+		t.set_threshold (coeff);
 		t.set_sensitivity (sensitivity_adjustment.get_value());
 
 		if (t.run ("", readable.get(), i, these_results)) {
@@ -287,11 +309,15 @@ RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, fra
 
 			AnalysisFeatureList these_results;
 
-			t.reset ();
-
 			t.set_function (get_note_onset_function());
 			t.set_silence_threshold (silence_threshold_adjustment.get_value());
 			t.set_peak_threshold (peak_picker_threshold_adjustment.get_value());
+#ifdef HAVE_AUBIO4
+			t.set_minioi (minioi_adjustment.get_value());
+#endif
+
+			// aubio-vamp only picks up new settings on reset.
+			t.reset ();
 
 			if (t.run ("", readable.get(), i, these_results)) {
 				continue;
@@ -327,6 +353,7 @@ RhythmFerret::do_action ()
 		do_split_action ();
 		break;
 	case SnapRegionsToGrid:
+		// split first, select all.. ?!
 		editor.snap_regions_to_grid();
 		break;
 	case ConformRegion:
