@@ -1116,6 +1116,7 @@ Editor::sensitize_the_right_region_actions ()
 	bool have_inactive_fade_out = false;
 	bool have_active_fade_in = false;
 	bool have_active_fade_out = false;
+	bool have_transients = false;
 
 	for (list<RegionView*>::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 
@@ -1171,6 +1172,10 @@ Editor::sensitize_the_right_region_actions ()
 			have_not_at_natural_position = true;
 		}
 
+		if (r->has_transients ()){
+			have_transients = true;
+		}
+
 		if (ar) {
 			if (ar->envelope_active()) {
 				have_envelope_active = true;
@@ -1195,6 +1200,8 @@ Editor::sensitize_the_right_region_actions ()
 			}
 		}
 	}
+
+	_region_actions->get_action("split-region-at-transients")->set_sensitive (have_transients);
 
 	if (rs.size() > 1) {
 		_region_actions->get_action("show-region-list-editor")->set_sensitive (false);

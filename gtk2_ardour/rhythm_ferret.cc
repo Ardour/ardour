@@ -225,7 +225,7 @@ RhythmFerret::run_analysis ()
 			break;
 		}
 
-		(*i)->region()->set_transients (current_results);
+		(*i)->region()->set_onsets (current_results);
 		current_results.clear();
 	}
 }
@@ -360,7 +360,7 @@ RhythmFerret::do_split_action ()
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 		AnalysisFeatureList features;
-		features = (*i)->region()->transients();
+		(*i)->region()->transients(features);
 
 		merged_features.insert (merged_features.end(), features.begin(), features.end());
 	}
@@ -407,7 +407,7 @@ RhythmFerret::clear_transients ()
 	current_results.clear ();
 
 	for (RegionSelection::iterator i = regions_with_transients.begin(); i != regions_with_transients.end(); ++i) {
-		(*i)->region()->set_transients (current_results);
+		(*i)->region()->set_onsets (current_results);
 	}
 
 	regions_with_transients.clear ();

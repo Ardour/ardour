@@ -6581,7 +6581,8 @@ Editor::split_region_at_transients ()
 
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i)->region());
 
-		if (ar && (ar->get_transients (positions) == 0)) {
+		if (ar) {
+			ar->transients (positions);
 			split_region_at_points ((*i)->region(), positions, true);
 			positions.clear ();
 		}
@@ -6609,7 +6610,6 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	if (positions.empty()) {
 		return;
 	}
-
 
 	if (positions.size() > 20 && can_ferret) {
 		std::string msgstr = string_compose (_("You are about to split\n%1\ninto %2 pieces.\nThis could take a long time."), r->name(), positions.size() + 1);
@@ -6663,27 +6663,28 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 	framepos_t pos = 0;
 
+	framepos_t rstart = r->first_frame ();
+	framepos_t rend = r->last_frame ();
+
 	while (x != positions.end()) {
 
 		/* deal with positons that are out of scope of present region bounds */
-		if (*x <= 0 || *x > r->length()) {
+		if (*x <= rstart || *x > rend) {
 			++x;
 			continue;
 		}
 
-		/* file start = original start + how far we from the initial position ?
-		 */
+		/* file start = original start + how far we from the initial position ?  */
 
 		framepos_t file_start = r->start() + pos;
 
-		/* length = next position - current position
-		 */
+		/* length = next position - current position */
 
-		framepos_t len = (*x) - pos;
+		framepos_t len = (*x) - pos - rstart;
 
 		/* XXX we do we really want to allow even single-sample regions?
-		   shouldn't we have some kind of lower limit on region size?
-		*/
+		 * shouldn't we have some kind of lower limit on region size?
+		 */
 
 		if (len <= 0) {
 			break;
@@ -6703,14 +6704,15 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 		plist.add (ARDOUR::Properties::length, len);
 		plist.add (ARDOUR::Properties::name, new_name);
 		plist.add (ARDOUR::Properties::layer, 0);
+		// TODO set transients_offset
 
 		boost::shared_ptr<Region> nr = RegionFactory::create (r->sources(), plist, false);
 		/* because we set annouce to false, manually add the new region to the
-		   RegionFactory map
-		*/
+		 * RegionFactory map
+		 */
 		RegionFactory::map_add (nr);
 
-		pl->add_region (nr, r->position() + pos);
+		pl->add_region (nr, rstart + pos);
 
 		if (select_new) {
 			new_regions.push_front(nr);
@@ -6780,8 +6782,7 @@ Editor::place_transient()
 	begin_reversible_command (_("place transient"));
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
-		framepos_t position = (*r)->region()->position();
-		(*r)->region()->add_transient(where - position);
+		(*r)->region()->add_transient(where);
 	}
 
 	commit_reversible_command ();
