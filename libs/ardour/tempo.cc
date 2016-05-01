@@ -2118,16 +2118,27 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 
 						if (meter_locked_tempo) {
 							Metrics future_map;
+							bool solved = false;
 							TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
 							const double new_pulse = ((section->beat() - prev_m->beat())
 										  / prev_m->note_divisor()) + prev_m->pulse();
 							const framepos_t smallest_frame = frame_at_pulse_locked (future_map, new_pulse);
-							if (solve_map (future_map, tempo_copy, smallest_frame)) {
+							if ((solved = solve_map (future_map, tempo_copy, smallest_frame))) {
 								meter_locked_tempo->set_pulse (new_pulse);
 								solve_map (imaginary, meter_locked_tempo, smallest_frame);
 								section->set_frame (smallest_frame);
 								section->set_pulse (new_pulse);
 							} else {
+								solved = false;
+							}
+
+							Metrics::const_iterator d = future_map.begin();
+							while (d != future_map.end()) {
+								delete (*d);
+								++d;
+							}
+
+							if (!solved) {
 								return false;
 							}
 						}
@@ -2135,17 +2146,28 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 					} else {
 						if (meter_locked_tempo) {
 							Metrics future_map;
+							bool solved = false;
 
 							TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
 							MeterSection* meter_copy = const_cast<MeterSection*> (&meter_section_at_locked (future_map, section->frame()));
 							meter_copy->set_frame (frame);
 
-							if (solve_map (future_map, tempo_copy, frame)) {
+							if ((solved = solve_map (future_map, tempo_copy, frame))) {
 								section->set_frame (frame);
 								meter_locked_tempo->set_pulse (((section->beat() - prev_m->beat())
 												/ prev_m->note_divisor()) + prev_m->pulse());
 								solve_map (imaginary, meter_locked_tempo, frame);
 							} else {
+								solved = false;
+							}
+
+							Metrics::const_iterator d = future_map.begin();
+							while (d != future_map.end()) {
+								delete (*d);
+								++d;
+							}
+
+							if (!solved) {
 								return false;
 							}
 						}
@@ -2154,19 +2176,31 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 					/* not movable (first meter atm) */
 					if (meter_locked_tempo) {
 						Metrics future_map;
+						bool solved = false;
 						TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
 
 						tempo_copy->set_frame (frame);
 						tempo_copy->set_pulse (0.0);
 
-						if (solve_map (future_map, tempo_copy, frame)) {
+						if ((solved = solve_map (future_map, tempo_copy, frame))) {
 							section->set_frame (frame);
 							meter_locked_tempo->set_frame (frame);
 							meter_locked_tempo->set_pulse (0.0);
 							solve_map (imaginary, meter_locked_tempo, frame);
 						} else {
+							solved = false;
+						}
+
+						Metrics::const_iterator d = future_map.begin();
+						while (d != future_map.end()) {
+							delete (*d);
+							++d;
+						}
+
+						if (!solved) {
 							return false;
 						}
+
 					} else {
 						return false;
 					}
