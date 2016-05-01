@@ -2405,13 +2405,22 @@ Mixer_UI::add_favorite_processor (ARDOUR::PluginPresetPtr ppp, ProcessorPosition
 			case AddPostFader:
 				{
 					int idx = 0;
+					int pos = 0;
 					for (;;++idx) {
 						boost::shared_ptr<Processor> np = rt->nth_processor (idx);
-						if (!np || boost::dynamic_pointer_cast<Amp> (np)) {
+						if (!np) {
 							break;
 						}
+						if (!np->display_to_user()) {
+							continue;
+						}
+						if (boost::dynamic_pointer_cast<Amp> (np) && // Fader, not Trim
+								boost::dynamic_pointer_cast<Amp> (np)->gain_control()->parameter().type() == GainAutomation) {
+							break;
+						}
+						++pos;
 					}
-					rt->add_processor_by_index (processor, ++idx, &err, Config->get_new_plugins_active ());
+					rt->add_processor_by_index (processor, ++pos, &err, Config->get_new_plugins_active ());
 				}
 				break;
 			case AddBottom:
