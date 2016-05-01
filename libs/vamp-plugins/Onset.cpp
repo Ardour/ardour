@@ -166,6 +166,12 @@ Onset::reset()
                                              lrintf(m_inputSampleRate));
 
     m_lastOnset = Vamp::RealTime::zeroTime - m_delay - m_delay;
+#else
+    if (m_onsetdet) aubio_onsetdetection_free(m_onsetdet);
+    if (m_peakpick) del_aubio_peakpicker(m_peakpick);
+
+    m_peakpick = new_aubio_peakpicker(m_threshold);
+    m_onsetdet = new_aubio_onsetdetection(m_onsettype, m_blockSize, m_channelCount);
 #endif
 }
 

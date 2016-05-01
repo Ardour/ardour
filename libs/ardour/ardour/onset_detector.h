@@ -37,6 +37,7 @@ public:
 
 	void set_silence_threshold (float);
 	void set_peak_threshold (float);
+	void set_minioi (float);
 	void set_function (int);
 
 	int run (const std::string& path, Readable*, uint32_t channel, AnalysisFeatureList& results);

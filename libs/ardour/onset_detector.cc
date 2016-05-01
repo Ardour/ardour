@@ -93,6 +93,16 @@ OnsetDetector::set_peak_threshold (float val)
 }
 
 void
+OnsetDetector::set_minioi (float val)
+{
+#ifdef HAVE_AUBIO4
+	if (plugin) {
+		plugin->setParameter ("minioi", val);
+	}
+#endif
+}
+
+void
 OnsetDetector::set_function (int val)
 {
 	if (plugin) {
