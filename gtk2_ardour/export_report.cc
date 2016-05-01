@@ -24,6 +24,7 @@
 #include <gtkmm/stock.h>
 
 #include "pbd/openuri.h"
+#include "pbd/basename.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/utils.h"
 #include "canvas/utils.h"
@@ -126,6 +127,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		framecnt_t sample_rate = 0;
 		framecnt_t start_off = 0;
 		unsigned int channels = 0;
+		std::string file_fmt;
 
 		if (with_file && AudioFileSource::get_soundfile_info (path, info, errmsg)) {
 			AudioClock * clock;
@@ -144,13 +146,13 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 
 			l = manage (new Label (_("Format:"), ALIGN_END));
 			t->attach (*l, 0, 1, 1, 2);
-			std::string fmt = info.format_name;
-			std::replace (fmt.begin (), fmt.end (), '\n', ' ');
+			file_fmt = info.format_name;
+			std::replace (file_fmt.begin (), file_fmt.end (), '\n', ' ');
 			l = manage (new Label ());
 			l->set_ellipsize (Pango::ELLIPSIZE_START);
 			l->set_width_chars (48);
 			l->set_max_width_chars (48);
-			l->set_text (fmt);
+			l->set_text (file_fmt);
 			l->set_alignment (ALIGN_START, ALIGN_CENTER);
 			t->attach (*l, 1, 3, 1, 2, FILL, SHRINK);
 
@@ -260,6 +262,81 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		y0[4] = y0[3] + lin[3] * 1.25;
 		y0[5] = y0[4] + lin[4] * 1.25;
 
+		/* calc heights & alignment of png-image */
+		const float specth = sizeof (p->spectrum[0]) / sizeof (float);
+		const float waveh2 = std::min (100, 8 * lin[0] / (int) p->n_channels);
+
+		Cairo::RefPtr<Cairo::ImageSurface> png_surface;
+		int png_w = 0;
+		int png_y0 = 0;
+
+		if (with_file && UIConfiguration::instance().get_save_export_analysis_image ()) { /*png image */
+			const int top_w = 540 + 2 * (mnw + 4); // 4px spacing
+			const int wav_w = m_l + m_r + 4 + sizeof (p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
+			const int spc_w = m_l + m_r + 4 + sizeof (p->spectrum) / sizeof (float) / specth;
+			int ann_h = 0;
+			int linesp = 0;
+
+			if (channels > 0 && file_length > 0 && sample_rate > 0) {
+				layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+				layout->set_text (_("00:00:00.000"));
+				layout->get_pixel_size (w, h);
+				int height = h * 1.75;
+				ann_h = 4 + height /* Time Axis */;
+
+				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				layout->set_text (_("0|A8"));
+				layout->get_pixel_size (w, h);
+				linesp = h * 1.5;
+				ann_h += 4 + 3 * linesp; /* File Info */;
+			}
+
+			const int png_h = hh + 4 + p->n_channels * (2 * waveh2 + 4) + ann_h + specth + 4;
+			png_w = std::max (std::max (top_w, wav_w), spc_w);
+
+			png_surface = Cairo::ImageSurface::create (Cairo::FORMAT_RGB24, png_w, png_h);
+			Cairo::RefPtr<Cairo::Context> pcx = Cairo::Context::create (png_surface);
+			pcx->set_source_rgb (.2, .2, .2);
+			pcx->paint ();
+
+			if (channels > 0 && file_length > 0 && sample_rate > 0) {
+				png_y0 += 4;
+				// Add file-name, format, duration, sample-rate & timecode
+				pcx->set_source_rgb (.7, .7, .7);
+				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				layout->set_alignment (Pango::ALIGN_LEFT);
+
+#define IMGLABEL(X0, STR, VAL) {       \
+  layout->set_text (STR);              \
+  pcx->move_to (X0, png_y0);           \
+  layout->get_pixel_size (w, h);       \
+  layout->show_in_cairo_context (pcx); \
+  layout->set_text (VAL);              \
+  pcx->move_to (X0 + w + 2, png_y0);   \
+  layout->show_in_cairo_context (pcx); \
+}
+
+				// TODO get max width of labels per column, right-align labels,  x-align 1/3, 2/3 columns
+				const int lx0 = m_l;
+				const int lx1 = m_l + png_w / 2;
+
+				IMGLABEL (lx0, _("File:"), Glib::path_get_basename (path));
+				IMGLABEL (lx1, _("Channels:"), string_compose ("%1", channels));
+				png_y0 += linesp;
+
+				IMGLABEL (lx0, _("Format:"), file_fmt);
+				IMGLABEL (lx1, _("Sample rate:"), string_compose (_("%1 Hz"), sample_rate));
+				png_y0 += linesp;
+
+				if (_session) {
+					Timecode::Time tct;
+					_session->sample_to_timecode (start_off, tct, false, false);
+					IMGLABEL (lx0, _("Timecode:"), Timecode::timecode_format_time (tct));
+				}
+				IMGLABEL (lx1, _("Duration:"), Timecode::timecode_format_sampletime (file_length, sample_rate, 1000, false));
+				png_y0 += linesp;
+			}
+		}
 
 		{ /* peak, loudness and R128 histogram */
 			Cairo::RefPtr<Cairo::ImageSurface> nums = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, mnw, hh);
@@ -481,6 +558,17 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 
 			hist->flush ();
 
+			if (png_surface) {
+				Cairo::RefPtr<Cairo::Context> pcx = Cairo::Context::create (png_surface);
+				pcx->set_source (nums, 0, png_y0);
+				pcx->paint ();
+				pcx->set_source (hist, (png_w - 540) / 2, png_y0);
+				pcx->paint ();
+				pcx->set_source (ebur, png_w - mnw, png_y0);
+				pcx->paint ();
+				png_y0 += hh + 4;
+			}
+
 			CimgArea *nu = manage (new CimgArea (nums));
 			CimgArea *eb = manage (new CimgArea (ebur));
 			CimgArea *hi = manage (new CimgArea (hist));
@@ -530,10 +618,10 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			Cairo::RefPtr<Cairo::ImageSurface> wave_log;
 			Cairo::RefPtr<Cairo::ImageSurface> wave_rect;
 			Cairo::RefPtr<Cairo::ImageSurface> wave_lr;
-			draw_waveform(wave, p, c, m_l, width, anw, lin[0], false, false);
-			draw_waveform(wave_log, p, c, m_l, width, anw, lin[0], true, false);
-			draw_waveform(wave_rect, p, c, m_l, width, anw, lin[0], false, true);
-			draw_waveform(wave_lr, p, c, m_l, width, anw, lin[0], true, true);
+			draw_waveform(wave, p, c, m_l, width, anw, waveh2, false, false);
+			draw_waveform(wave_log, p, c, m_l, width, anw, waveh2, true, false);
+			draw_waveform(wave_rect, p, c, m_l, width, anw, waveh2, false, true);
+			draw_waveform(wave_lr, p, c, m_l, width, anw, waveh2, true, true);
 
 			CimgWaveArea *wv = manage (new CimgWaveArea (wave, wave_log, wave_rect, wave_lr, m_l, width));
 
@@ -542,6 +630,13 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			wv->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
 			wtbl->attach (*wv, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
 			++wrow;
+
+			if (png_surface) {
+				Cairo::RefPtr<Cairo::Context> pcx = Cairo::Context::create (png_surface);
+				pcx->set_source (wave, 0, png_y0);
+				pcx->paint ();
+				png_y0 += 2 * waveh2 + 4;
+			}
 		}
 
 		if (channels > 0 && file_length > 0 && sample_rate > 0)
@@ -599,12 +694,19 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			tm->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
 			wtbl->attach (*tm, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
 			++wrow;
+
+			if (png_surface) {
+				Cairo::RefPtr<Cairo::Context> pcx = Cairo::Context::create (png_surface);
+				pcx->set_source (ytme, 0, png_y0);
+				pcx->paint ();
+				png_y0 += height + 4;
+			}
 		}
 
 		{
 			/* Draw Spectrum */
+			const size_t height = specth;
 			const size_t swh = sizeof (p->spectrum) / sizeof (float);
-			const size_t height = sizeof (p->spectrum[0]) / sizeof (float);
 			const size_t width = swh / height;
 
 			Cairo::RefPtr<Cairo::ImageSurface> spec = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, m_l + width, height);
@@ -710,6 +812,14 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			wtbl->attach (*sp, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
 			wtbl->attach (*an, 1, 2, wrow, wrow + 1, SHRINK, SHRINK);
 			++wrow;
+
+			if (png_surface) {
+				Cairo::RefPtr<Cairo::Context> pcx = Cairo::Context::create (png_surface);
+				pcx->set_source (spec, 0, png_y0);
+				pcx->paint ();
+				pcx->set_source (scale, png_w - m_r, png_y0);
+				pcx->paint ();
+			}
 		}
 
 		timeline[page] = playhead_widgets;
@@ -724,6 +834,13 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		img->hide();
 		pages.pages ().push_back (Notebook_Helpers::TabElem (*vb, *tab));
 		pages.signal_switch_page().connect (sigc::mem_fun (*this, &ExportReport::on_switch_page));
+
+		if (png_surface) {
+			assert (with_file && !path.empty ());
+			std::string imgpath = Glib::build_filename (Glib::path_get_dirname (path), PBD::basename_nosuffix (path) + ".png");
+			PBD::info << string_compose(_("Writing Export Analysis Image: %1."), imgpath) << endmsg;
+			png_surface->write_to_png (imgpath);
+		}
 	}
 
 	pages.set_show_tabs (true);
@@ -949,11 +1066,10 @@ ExportReport::on_rectivied_toggled (Gtk::ToggleButton* b)
 }
 
 void
-ExportReport::draw_waveform (Cairo::RefPtr<Cairo::ImageSurface>& wave, ExportAnalysisPtr p, uint32_t c, int m_l, size_t width, int anw, int height, bool log, bool rect)
+ExportReport::draw_waveform (Cairo::RefPtr<Cairo::ImageSurface>& wave, ExportAnalysisPtr p, uint32_t c, int m_l, size_t width, int anw, int height_2, bool log, bool rect)
 {
 	int w, h;
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (get_pango_context ());
-	const float height_2 = std::min (100, 8 * height / (int) p->n_channels); // TODO refine
 	const float ht = 2.f * height_2;
 
 	std::vector<double> dashes;

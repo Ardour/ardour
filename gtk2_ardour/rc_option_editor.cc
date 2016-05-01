@@ -3294,6 +3294,16 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_style_led)
 		     ));
 
+	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Post Export Analysis")));
+
+	add_option (S_("Preferences|Metering"),
+	     new BoolOption (
+		     "save-export-analysis-image",
+		     _("Save loudness analysis as image file"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_save_export_analysis_image),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_analysis_image)
+		     ));
+
 	/* and now the theme manager */
 
 	ThemeManager* tm = manage (new ThemeManager);
