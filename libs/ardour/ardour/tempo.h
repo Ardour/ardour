@@ -393,7 +393,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void replace_tempo (const TempoSection&, const Tempo&, const framepos_t& frame, TempoSection::Type type);
 
 	void gui_move_tempo_frame (TempoSection*, const framepos_t& frame);
-	void gui_move_tempo_beat (TempoSection*, const double& frame);
+	void gui_move_tempo_beat (TempoSection*, const double& beat);
+	void gui_move_tempo_pulse (TempoSection*, const double& pulse);
 	void gui_move_meter (MeterSection*, const framepos_t& frame);
 	void gui_move_meter (MeterSection*, const double& pulse);
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);

@@ -3206,7 +3206,6 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			_editor->session()->tempo_map().gui_dilate_tempo (_real_section, pf);
 		} else if (bbt.bars > _real_section->bbt().bars) {
 			const double pulse = _real_section->pulse() + (prev_m.note_divisor() / prev_m.divisions_per_bar());
-			//const double pulse = _real_section->pulse() + (_real_section->note_divisor() / _real_section->divisions_per_bar());
 			_editor->session()->tempo_map().gui_move_meter (_real_section, pulse);
 		} else if (bbt.bars < _real_section->bbt().bars) {
 			const double pulse = _real_section->pulse() - (prev_m.note_divisor() / prev_m.divisions_per_bar());

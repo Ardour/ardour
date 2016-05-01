@@ -2400,7 +2400,7 @@ TempoMap::predict_tempo_frame (TempoSection* section, const BBT_Time& bbt)
 	if (solve_map (future_map, tempo_copy, pulse_at_beat_locked (future_map, beat))) {
 		ret = tempo_copy->frame();
 	} else {
-		ret = frame_at_beat_locked (_metrics, beat);
+		ret = section->frame();
 	}
 
 	Metrics::const_iterator d = future_map.begin();
@@ -2422,7 +2422,7 @@ TempoMap::predict_tempo_pulse (TempoSection* section, const framepos_t& frame)
 	if (solve_map (future_map, tempo_copy, frame)) {
 		ret = tempo_copy->pulse();
 	} else {
-		ret = pulse_at_frame_locked (_metrics, frame);
+		ret = section->pulse();
 	}
 
 	Metrics::const_iterator d = future_map.begin();
@@ -2464,6 +2464,28 @@ TempoMap::gui_move_tempo_beat (TempoSection* ts, const double& beat)
 		TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
 		if (solve_map (future_map, tempo_copy, pulse_at_beat_locked (future_map, beat))) {
 			solve_map (_metrics, ts, pulse_at_beat_locked (_metrics, beat));
+			recompute_meters (_metrics);
+		}
+	}
+
+	Metrics::const_iterator d = future_map.begin();
+	while (d != future_map.end()) {
+		delete (*d);
+		++d;
+	}
+
+	MetricPositionChanged (); // Emit Signal
+}
+
+void
+TempoMap::gui_move_tempo_pulse (TempoSection* ts, const double& pulse)
+{
+	Metrics future_map;
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
+		TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
+		if (solve_map (future_map, tempo_copy, pulse)) {
+			solve_map (_metrics, ts, pulse);
 			recompute_meters (_metrics);
 		}
 	}
