@@ -654,6 +654,12 @@ TempoMap::TempoMap (framecnt_t fr)
 
 TempoMap::~TempoMap ()
 {
+	Metrics::const_iterator d = _metrics.begin();
+	while (d != _metrics.end()) {
+		delete (*d);
+		++d;
+	}
+	_metrics.clear();
 }
 
 void
@@ -2112,17 +2118,14 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 
 						if (meter_locked_tempo) {
 							Metrics future_map;
-							TempoSection* new_section = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
-							if (!new_section) {
-								return false;
-							}
+							TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
 							const double new_pulse = ((section->beat() - prev_m->beat())
 										  / prev_m->note_divisor()) + prev_m->pulse();
-
-							if (solve_map (future_map, new_section, section->frame())) {
+							const framepos_t smallest_frame = frame_at_pulse_locked (future_map, new_pulse);
+							if (solve_map (future_map, tempo_copy, smallest_frame)) {
 								meter_locked_tempo->set_pulse (new_pulse);
-								solve_map (imaginary, meter_locked_tempo, section->frame());
-								section->set_frame (frame_at_pulse_locked (imaginary, new_pulse));
+								solve_map (imaginary, meter_locked_tempo, smallest_frame);
+								section->set_frame (smallest_frame);
 								section->set_pulse (new_pulse);
 							} else {
 								return false;
@@ -2132,13 +2135,13 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 					} else {
 						if (meter_locked_tempo) {
 							Metrics future_map;
-							TempoSection* new_section = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
-							if (!new_section) {
-								return false;
-							}
-							new_section->set_active (true);
 
-							if (solve_map (future_map, new_section, frame)) {
+							TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
+							MeterSection* meter_copy = const_cast<MeterSection*> (&meter_section_at_locked (future_map, section->frame()));
+							meter_copy->set_frame (frame);
+
+							if (solve_map (future_map, tempo_copy, frame)) {
+								section->set_frame (frame);
 								meter_locked_tempo->set_pulse (((section->beat() - prev_m->beat())
 												/ prev_m->note_divisor()) + prev_m->pulse());
 								solve_map (imaginary, meter_locked_tempo, frame);
@@ -2148,20 +2151,18 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 						}
 					}
 				} else {
+					/* not movable (first meter atm) */
 					if (meter_locked_tempo) {
 						Metrics future_map;
-						TempoSection* new_section = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
-						if (!new_section) {
-							return false;
-						}
-						new_section->set_frame (frame);
-						new_section->set_pulse (0.0);
-						new_section->set_active (true);
+						TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
 
-						if (solve_map (future_map, new_section, frame)) {
+						tempo_copy->set_frame (frame);
+						tempo_copy->set_pulse (0.0);
+
+						if (solve_map (future_map, tempo_copy, frame)) {
+							section->set_frame (frame);
 							meter_locked_tempo->set_frame (frame);
 							meter_locked_tempo->set_pulse (0.0);
-							meter_locked_tempo->set_active (true);
 							solve_map (imaginary, meter_locked_tempo, frame);
 						} else {
 							return false;
@@ -2174,7 +2175,7 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 					section->set_pulse (0.0);
 
 				}
-				section->set_frame (frame);
+				//section->set_frame (frame);
 				break;
 			}
 
@@ -2320,18 +2321,18 @@ bool
 TempoMap::can_solve_bbt (TempoSection* ts, const BBT_Time& bbt)
 {
 	Metrics copy;
-	TempoSection* new_section = 0;
+	TempoSection* tempo_copy = 0;
 
 	{
 		Glib::Threads::RWLock::ReaderLock lm (lock);
-		new_section = copy_metrics_and_point (_metrics, copy, ts);
-		if (!new_section) {
+		tempo_copy = copy_metrics_and_point (_metrics, copy, ts);
+		if (!tempo_copy) {
 			return false;
 		}
 	}
 
 	const double beat = bbt_to_beats_locked (copy, bbt);
-	const bool ret = solve_map (copy, new_section, pulse_at_beat_locked (copy, beat));
+	const bool ret = solve_map (copy, tempo_copy, pulse_at_beat_locked (copy, beat));
 
 	Metrics::const_iterator d = copy.begin();
 	while (d != copy.end()) {
@@ -2356,14 +2357,14 @@ TempoMap::predict_tempo_frame (TempoSection* section, const BBT_Time& bbt)
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	Metrics future_map;
 	framepos_t ret = 0;
-	TempoSection* new_section = copy_metrics_and_point (_metrics, future_map, section);
-	if (!new_section) {
+	TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, section);
+	if (!tempo_copy) {
 		return 0;
 	}
 	const double beat = bbt_to_beats_locked (future_map, bbt);
 
-	if (solve_map (future_map, new_section, pulse_at_beat_locked (future_map, beat))) {
-		ret = new_section->frame();
+	if (solve_map (future_map, tempo_copy, pulse_at_beat_locked (future_map, beat))) {
+		ret = tempo_copy->frame();
 	} else {
 		ret = frame_at_beat_locked (_metrics, beat);
 	}
@@ -2382,10 +2383,10 @@ TempoMap::predict_tempo_pulse (TempoSection* section, const framepos_t& frame)
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	Metrics future_map;
 	double ret = 0.0;
-	TempoSection* new_section = copy_metrics_and_point (_metrics, future_map, section);
+	TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, section);
 
-	if (solve_map (future_map, new_section, frame)) {
-		ret = new_section->pulse();
+	if (solve_map (future_map, tempo_copy, frame)) {
+		ret = tempo_copy->pulse();
 	} else {
 		ret = pulse_at_frame_locked (_metrics, frame);
 	}
@@ -2404,8 +2405,8 @@ TempoMap::gui_move_tempo_frame (TempoSection* ts, const framepos_t& frame)
 	Metrics future_map;
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		TempoSection* new_section = copy_metrics_and_point (_metrics, future_map, ts);
-		if (solve_map (future_map, new_section, frame)) {
+		TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
+		if (solve_map (future_map, tempo_copy, frame)) {
 			solve_map (_metrics, ts, frame);
 			recompute_meters (_metrics);
 		}
@@ -2426,8 +2427,8 @@ TempoMap::gui_move_tempo_beat (TempoSection* ts, const double& beat)
 	Metrics future_map;
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		TempoSection* new_section = copy_metrics_and_point (_metrics, future_map, ts);
-		if (solve_map (future_map, new_section, pulse_at_beat_locked (future_map, beat))) {
+		TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
+		if (solve_map (future_map, tempo_copy, pulse_at_beat_locked (future_map, beat))) {
 			solve_map (_metrics, ts, pulse_at_beat_locked (_metrics, beat));
 			recompute_meters (_metrics);
 		}
@@ -2491,8 +2492,8 @@ TempoMap::gui_change_tempo (TempoSection* ts, const Tempo& bpm)
 	bool can_solve = false;
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		TempoSection* new_section = copy_metrics_and_point (_metrics, future_map, ts);
-		new_section->set_beats_per_minute (bpm.beats_per_minute());
+		TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
+		tempo_copy->set_beats_per_minute (bpm.beats_per_minute());
 		recompute_tempos (future_map);
 
 		if (check_solved (future_map, true)) {
