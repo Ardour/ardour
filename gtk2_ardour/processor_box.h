@@ -243,7 +243,7 @@ private:
 	class PluginDisplay : public Gtk::DrawingArea {
 	public:
 		PluginDisplay(boost::shared_ptr<ARDOUR::Plugin>, uint32_t max_height = 80);
-		~PluginDisplay();
+		virtual ~PluginDisplay();
 	protected:
 		bool on_expose_event (GdkEventExpose *);
 		void on_size_request (Gtk::Requisition* req);
