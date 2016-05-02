@@ -91,7 +91,10 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	void set_trim_beginning (bool value) { _trim_beginning = value; }
 	void set_trim_end (bool value) { _trim_end = value; }
 	void set_normalize (bool value) { _normalize = value; }
-	void set_normalize_target (float value) { _normalize_target = value; }
+	void set_normalize_loudness (bool value) { _normalize_loudness = value; }
+	void set_normalize_dbfs (float value) { _normalize_dbfs = value; }
+	void set_normalize_lufs (float value) { _normalize_lufs = value; }
+	void set_normalize_dbtp (float value) { _normalize_dbtp = value; }
 
 	void set_tag (bool tag_it) { _tag = tag_it; }
 	void set_with_cue (bool yn) { _with_cue = yn; }
@@ -157,7 +160,10 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	bool trim_beginning () const { return _trim_beginning; }
 	bool trim_end () const { return _trim_end; }
 	bool normalize () const { return _normalize; }
-	float normalize_target () const { return _normalize_target; }
+	bool normalize_loudness () const { return _normalize_loudness; }
+	float normalize_dbfs () const { return _normalize_dbfs; }
+	float normalize_lufs () const { return _normalize_lufs; }
+	float normalize_dbtp () const { return _normalize_dbtp; }
 	bool with_toc() const { return _with_toc; }
 	bool with_cue() const { return _with_cue; }
 	bool with_mp4chaps() const { return _with_mp4chaps; }
@@ -211,7 +217,10 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	Time            _silence_end;
 
 	bool            _normalize;
-	float           _normalize_target;
+	bool            _normalize_loudness;
+	float           _normalize_dbfs;
+	float           _normalize_lufs;
+	float           _normalize_dbtp;
 	bool            _with_toc;
 	bool            _with_cue;
 	bool            _with_mp4chaps;

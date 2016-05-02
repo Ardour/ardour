@@ -167,7 +167,10 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	, _silence_end (s)
 
 	, _normalize (false)
-	, _normalize_target (GAIN_COEFF_UNITY)
+	, _normalize_loudness (false)
+	, _normalize_dbfs (GAIN_COEFF_UNITY)
+	, _normalize_lufs (-23)
+	, _normalize_dbtp (-1)
 	, _with_toc (false)
 	, _with_cue (false)
 	, _with_mp4chaps (false)
@@ -184,9 +187,30 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 
 ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const & state)
 	: session (s)
+
+	, has_sample_format (false)
+	, supports_tagging (false)
+	, _has_broadcast_info (false)
+	, _channel_limit (0)
+	, _dither_type (D_None)
+	, _src_quality (SRC_SincBest)
+	, _tag (true)
+
+	, _trim_beginning (false)
 	, _silence_beginning (s)
+	, _trim_end (false)
 	, _silence_end (s)
+
+	, _normalize (false)
+	, _normalize_loudness (false)
+	, _normalize_dbfs (GAIN_COEFF_UNITY)
+	, _normalize_lufs (-23)
+	, _normalize_dbtp (-1)
+	, _with_toc (false)
+	, _with_cue (false)
+	, _with_mp4chaps (false)
 	, _soundcloud_upload (false)
+	, _command ("")
 	, _analyse (true)
 {
 	_silence_beginning.type = Time::Timecode;
@@ -228,7 +252,10 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 	set_trim_beginning (other.trim_beginning());
 	set_trim_end (other.trim_end());
 	set_normalize (other.normalize());
-	set_normalize_target (other.normalize_target());
+	set_normalize_loudness (other.normalize_loudness());
+	set_normalize_dbfs (other.normalize_dbfs());
+	set_normalize_lufs (other.normalize_lufs());
+	set_normalize_dbtp (other.normalize_dbtp());
 
 	set_tag (other.tag());
 
@@ -281,7 +308,10 @@ ExportFormatSpecification::get_state ()
 
 	node = processing->add_child ("Normalize");
 	node->add_property ("enabled", normalize() ? "true" : "false");
-	node->add_property ("target", to_string (normalize_target(), std::dec));
+	node->add_property ("loudness", normalize_loudness() ? "yes" : "no");
+	node->add_property ("dbfs", to_string (normalize_dbfs(), std::dec));
+	node->add_property ("lufs", to_string (normalize_lufs(), std::dec));
+	node->add_property ("dbtp", to_string (normalize_dbtp(), std::dec));
 
 	XMLNode * silence = processing->add_child ("Silence");
 	XMLNode * start = silence->add_child ("Start");
@@ -407,8 +437,25 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 			_normalize = (!prop->value().compare ("true"));
 		}
 
+		// old formats before ~ 4.7-930ish
 		if ((prop = child->property ("target"))) {
-			_normalize_target = atof (prop->value());
+			_normalize_dbfs = atof (prop->value());
+		}
+
+		if ((prop = child->property ("loudness"))) {
+			_normalize_loudness = string_is_affirmative (prop->value());
+		}
+
+		if ((prop = child->property ("dbfs"))) {
+			_normalize_dbfs = atof (prop->value());
+		}
+
+		if ((prop = child->property ("lufs"))) {
+			_normalize_lufs = atof (prop->value());
+		}
+
+		if ((prop = child->property ("dbtp"))) {
+			_normalize_dbtp = atof (prop->value());
 		}
 	}
 
@@ -556,7 +603,11 @@ ExportFormatSpecification::description (bool include_name)
 	list<string> components;
 
 	if (_normalize) {
-		components.push_back (_("normalize"));
+		if (_normalize_loudness) {
+			components.push_back (_("normalize loudness"));
+		} else {
+			components.push_back (_("normalize peak"));
+		}
 	}
 
 	if (_trim_beginning && _trim_end) {

@@ -343,9 +343,30 @@ ExportFormatManager::select_normalize (bool value)
 }
 
 void
-ExportFormatManager::select_normalize_target (float value)
+ExportFormatManager::select_normalize_loudness (bool value)
 {
-	current_selection->set_normalize_target (value);
+	current_selection->set_normalize_loudness (value);
+	check_for_description_change ();
+}
+
+void
+ExportFormatManager::select_normalize_dbfs (float value)
+{
+	current_selection->set_normalize_dbfs (value);
+	check_for_description_change ();
+}
+
+void
+ExportFormatManager::select_normalize_lufs (float value)
+{
+	current_selection->set_normalize_lufs (value);
+	check_for_description_change ();
+}
+
+void
+ExportFormatManager::select_normalize_dbtp (float value)
+{
+	current_selection->set_normalize_dbtp (value);
 	check_for_description_change ();
 }
 

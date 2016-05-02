@@ -32,6 +32,7 @@
 namespace AudioGrapher {
 	class SampleRateConverter;
 	class PeakReader;
+	class LoudnessReader;
 	class Normalizer;
 	class Analyser;
 	template <typename T> class Chunker;
@@ -160,6 +161,7 @@ class LIBARDOUR_API ExportGraphBuilder
 
 	                                        private:
 		typedef boost::shared_ptr<AudioGrapher::PeakReader> PeakReaderPtr;
+		typedef boost::shared_ptr<AudioGrapher::LoudnessReader> LoudnessReaderPtr;
 		typedef boost::shared_ptr<AudioGrapher::Normalizer> NormalizerPtr;
 		typedef boost::shared_ptr<AudioGrapher::TmpFile<Sample> > TmpFilePtr;
 		typedef boost::shared_ptr<AudioGrapher::Threader<Sample> > ThreaderPtr;
@@ -171,12 +173,13 @@ class LIBARDOUR_API ExportGraphBuilder
 
 		FileSpec        config;
 		framecnt_t      max_frames_out;
-
+		bool            use_loudness;
 		BufferPtr       buffer;
 		PeakReaderPtr   peak_reader;
 		TmpFilePtr      tmp_file;
 		NormalizerPtr   normalizer;
 		ThreaderPtr     threader;
+		LoudnessReaderPtr    loudness_reader;
 		boost::ptr_list<SFC> children;
 
 		PBD::ScopedConnection post_processing_connection;

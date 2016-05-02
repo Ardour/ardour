@@ -30,6 +30,7 @@
 #include "audiographer/general/normalizer.h"
 #include "audiographer/general/analyser.h"
 #include "audiographer/general/peak_reader.h"
+#include "audiographer/general/loudness_reader.h"
 #include "audiographer/general/sample_format_converter.h"
 #include "audiographer/general/sr_converter.h"
 #include "audiographer/general/silence_trimmer.h"
@@ -405,8 +406,9 @@ ExportGraphBuilder::SFC::operator== (FileSpec const & other_config) const
 
 /* Normalizer */
 
-ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t /*max_frames*/)
+ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames)
 	: parent (parent)
+	, use_loudness (false)
 {
 	std::string tmpfile_path = parent.session.session_directory().export_path();
 	tmpfile_path = Glib::build_filename(tmpfile_path, "XXXXXX");
@@ -417,10 +419,12 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
 	config = new_config;
 	uint32_t const channels = config.channel_config->get_n_chans();
 	max_frames_out = 4086 - (4086 % channels); // TODO good chunk size
+	use_loudness = config.format->normalize_loudness ();
 
 	buffer.reset (new AllocatingProcessContext<Sample> (max_frames_out, channels));
 	peak_reader.reset (new PeakReader ());
-	normalizer.reset (new AudioGrapher::Normalizer (config.format->normalize_target()));
+	loudness_reader.reset (new LoudnessReader (config.format->sample_rate(), channels, max_frames));
+	normalizer.reset (new AudioGrapher::Normalizer (use_loudness ? 0.0 : config.format->normalize_dbfs()));
 	threader.reset (new Threader<Sample> (parent.thread_pool));
 
 	normalizer->alloc_buffer (max_frames_out);
@@ -433,12 +437,19 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
 
 	add_child (new_config);
 
-	peak_reader->add_output (tmp_file);
+	if (use_loudness) {
+		loudness_reader->add_output (tmp_file);
+	} else {
+		peak_reader->add_output (tmp_file);
+	}
 }
 
 ExportGraphBuilder::FloatSinkPtr
 ExportGraphBuilder::Normalizer::sink ()
 {
+	if (use_loudness) {
+		return loudness_reader;
+	}
 	return peak_reader;
 }
 
@@ -471,7 +482,11 @@ bool
 ExportGraphBuilder::Normalizer::operator== (FileSpec const & other_config) const
 {
 	return config.format->normalize() == other_config.format->normalize() &&
-		config.format->normalize_target() == other_config.format->normalize_target();
+		(
+		 (!config.format->normalize_loudness () && config.format->normalize_dbfs() == other_config.format->normalize_dbfs())
+		 ||
+		 (config.format->normalize_loudness () /* lufs/dbtp is a result option, not an instantaion option */)
+		);
 }
 
 unsigned
@@ -491,7 +506,12 @@ ExportGraphBuilder::Normalizer::process()
 void
 ExportGraphBuilder::Normalizer::start_post_processing()
 {
-	const float gain = normalizer->set_peak (peak_reader->get_peak());
+	float gain;
+	if (use_loudness) {
+		gain = normalizer->set_peak (loudness_reader->get_peak (config.format->normalize_lufs (), config.format->normalize_dbtp ()));
+	} else {
+		gain = normalizer->set_peak (peak_reader->get_peak());
+	}
 	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i).set_peak (gain);
 	}
