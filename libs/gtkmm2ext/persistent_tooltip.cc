@@ -19,6 +19,7 @@
 
 #include <gtkmm/window.h>
 #include <gtkmm/label.h>
+#include <gtkmm/settings.h>
 #include "gtkmm2ext/persistent_tooltip.h"
 
 #include "pbd/stacktrace.h"
@@ -30,6 +31,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 bool PersistentTooltip::_tooltips_enabled = true;
+unsigned int PersistentTooltip::_tooltip_timeout = 500;
 
 /** @param target The widget to provide the tooltip for */
 PersistentTooltip::PersistentTooltip (Gtk::Widget* target, bool  draggable, int margin_y)
@@ -45,6 +47,7 @@ PersistentTooltip::PersistentTooltip (Gtk::Widget* target, bool  draggable, int 
 	target->signal_leave_notify_event().connect (sigc::mem_fun (*this, &PersistentTooltip::leave), false);
 	target->signal_button_press_event().connect (sigc::mem_fun (*this, &PersistentTooltip::press), false);
 	target->signal_button_release_event().connect (sigc::mem_fun (*this, &PersistentTooltip::release), false);
+	_tooltip_timeout = Gtk::Settings::get_default()->property_gtk_tooltip_timeout ();
 }
 
 PersistentTooltip::~PersistentTooltip ()
@@ -58,7 +61,7 @@ PersistentTooltip::enter (GdkEventCrossing *)
 	if (_timeout.connected()) {
 		leave(NULL);
 	}
-	_timeout = Glib::signal_timeout().connect (sigc::mem_fun (*this, &PersistentTooltip::timeout), 500);
+	_timeout = Glib::signal_timeout().connect (sigc::mem_fun (*this, &PersistentTooltip::timeout), _tooltip_timeout);
 	return false;
 }
 

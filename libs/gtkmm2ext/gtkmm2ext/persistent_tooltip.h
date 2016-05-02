@@ -45,6 +45,7 @@ class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
 
   private:
 	static bool _tooltips_enabled;
+	static unsigned int _tooltip_timeout;
 	bool timeout ();
 	void show ();
 	void hide ();
