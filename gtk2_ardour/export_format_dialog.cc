@@ -38,9 +38,16 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
   name_label (_("Label: "), Gtk::ALIGN_LEFT),
   name_generated_part ("", Gtk::ALIGN_LEFT),
 
-  normalize_checkbox (_("Normalize to:")),
-  normalize_adjustment (0.00, -90.00, 0.00, 0.1, 0.2),
-  normalize_db_label (_("dBFS"), Gtk::ALIGN_LEFT),
+  normalize_checkbox (_("Normalize:")),
+  normalize_peak_rb (_("Peak")),
+  normalize_loudness_rb (_("Loudness")),
+  normalize_dbfs_adjustment ( 0.00, -90.00, 0.00, 0.1, 0.2),
+  normalize_lufs_adjustment (-23.0, -90.00, 0.00, 0.1, 1.0),
+  normalize_dbtp_adjustment ( -1.0, -90.00, 0.00, 0.1, 0.2),
+
+  normalize_dbfs_label (_("dBFS"), Gtk::ALIGN_LEFT),
+  normalize_lufs_label (_("LUFS"), Gtk::ALIGN_LEFT),
+  normalize_dbtp_label (_("dBTP"), Gtk::ALIGN_LEFT),
 
   silence_table (2, 4),
   trim_start_checkbox (_("Trim silence at start")),
@@ -95,11 +102,26 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
 	/* Normalize */
 
-	normalize_hbox.pack_start (normalize_checkbox, false, false, 0);
-	normalize_hbox.pack_start (normalize_spinbutton, false, false, 6);
-	normalize_hbox.pack_start (normalize_db_label, false, false, 0);
+	Gtk::RadioButtonGroup normalize_group = normalize_loudness_rb.get_group();
+	normalize_peak_rb.set_group (normalize_group);
 
-	normalize_spinbutton.configure (normalize_adjustment, 0.1, 2);
+	normalize_hbox.pack_start (normalize_checkbox, false, false, 2);
+	normalize_hbox.pack_start (normalize_peak_rb, false, false, 0);
+	normalize_hbox.pack_start (normalize_dbfs_spinbutton, false, false, 2);
+	normalize_hbox.pack_start (normalize_dbfs_label, false, false, 0);
+
+	normalize_hbox.pack_start (*Gtk::manage (new Gtk::Label ("")), false, false, 6); // separator
+
+	normalize_hbox.pack_start (normalize_loudness_rb, false, false, 0);
+	normalize_hbox.pack_start (normalize_lufs_spinbutton, false, false, 2);
+	normalize_hbox.pack_start (normalize_lufs_label, false, false, 0);
+	normalize_hbox.pack_start (*Gtk::manage (new Gtk::Label (_("\u2227"))), false, false, 4);
+	normalize_hbox.pack_start (normalize_dbtp_spinbutton, false, false, 2);
+	normalize_hbox.pack_start (normalize_dbtp_label, false, false, 0);
+
+	normalize_dbfs_spinbutton.configure (normalize_dbfs_adjustment, 0.1, 2);
+	normalize_lufs_spinbutton.configure (normalize_lufs_adjustment, 0.1, 2);
+	normalize_dbtp_spinbutton.configure (normalize_dbtp_adjustment, 0.1, 2);
 
 	/* Silence  */
 
@@ -171,7 +193,11 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	trim_end_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_trim_end_selection));
 
 	normalize_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
-	normalize_spinbutton.signal_value_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
+	normalize_peak_rb.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
+	normalize_loudness_rb.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
+	normalize_dbfs_spinbutton.signal_value_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
+	normalize_lufs_spinbutton.signal_value_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
+	normalize_dbtp_spinbutton.signal_value_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
 
 	silence_start_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_silence_start_selection));
 	silence_start_clock.ValueChanged.connect (sigc::mem_fun (*this, &ExportFormatDialog::update_silence_start_selection));
@@ -201,6 +227,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	/* Finalize */
 
 	show_all_children();
+	update_normalize_sensitivity ();
 }
 
 ExportFormatDialog::~ExportFormatDialog ()
@@ -252,7 +279,11 @@ ExportFormatDialog::load_state (FormatPtr spec)
 	name_entry.set_text (spec->name());
 
 	normalize_checkbox.set_active (spec->normalize());
-	normalize_spinbutton.set_value (spec->normalize_target());
+	normalize_peak_rb.set_active (!spec->normalize_loudness());
+	normalize_loudness_rb.set_active (spec->normalize_loudness());
+	normalize_dbfs_spinbutton.set_value (spec->normalize_dbfs());
+	normalize_lufs_spinbutton.set_value (spec->normalize_lufs());
+	normalize_dbtp_spinbutton.set_value (spec->normalize_dbtp());
 
 	trim_start_checkbox.set_active (spec->trim_beginning());
 	silence_start = spec->silence_beginning_time();
@@ -307,6 +338,7 @@ ExportFormatDialog::load_state (FormatPtr spec)
 		}
 	}
 
+	update_normalize_sensitivity ();
 	tag_checkbox.set_active (spec->tag());
 	command_entry.set_text (spec->command());
 }
@@ -768,10 +800,24 @@ ExportFormatDialog::update_trim_end_selection ()
 }
 
 void
+ExportFormatDialog::update_normalize_sensitivity ()
+{
+	bool en = normalize_checkbox.get_active();
+	bool loudness = normalize_loudness_rb.get_active();
+	normalize_dbfs_spinbutton.set_sensitive (!loudness && en);
+	normalize_lufs_spinbutton.set_sensitive (loudness && en);
+	normalize_dbtp_spinbutton.set_sensitive (loudness && en);
+}
+
+void
 ExportFormatDialog::update_normalize_selection ()
 {
 	manager.select_normalize (normalize_checkbox.get_active());
-	manager.select_normalize_target (normalize_spinbutton.get_value ());
+	manager.select_normalize_loudness (normalize_loudness_rb.get_active());
+	manager.select_normalize_dbfs (normalize_dbfs_spinbutton.get_value ());
+	manager.select_normalize_lufs (normalize_lufs_spinbutton.get_value ());
+	manager.select_normalize_dbtp (normalize_dbtp_spinbutton.get_value ());
+	update_normalize_sensitivity ();
 }
 
 void

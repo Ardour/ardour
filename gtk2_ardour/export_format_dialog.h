@@ -126,6 +126,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	void update_trim_end_selection ();
 
 	void update_normalize_selection ();
+	void update_normalize_sensitivity ();
 	void update_silence_start_selection ();
 	void update_silence_end_selection ();
 
@@ -163,9 +164,17 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	Gtk::HBox        normalize_hbox;
 	Gtk::CheckButton normalize_checkbox;
-	Gtk::SpinButton  normalize_spinbutton;
-	Gtk::Adjustment  normalize_adjustment;
-	Gtk::Label       normalize_db_label;
+	Gtk::RadioButton normalize_peak_rb;
+	Gtk::RadioButton normalize_loudness_rb;
+	Gtk::SpinButton  normalize_dbfs_spinbutton;
+	Gtk::Adjustment  normalize_dbfs_adjustment;
+	Gtk::SpinButton  normalize_lufs_spinbutton;
+	Gtk::Adjustment  normalize_lufs_adjustment;
+	Gtk::SpinButton  normalize_dbtp_spinbutton;
+	Gtk::Adjustment  normalize_dbtp_adjustment;
+	Gtk::Label       normalize_dbfs_label;
+	Gtk::Label       normalize_lufs_label;
+	Gtk::Label       normalize_dbtp_label;
 
 	/* Silence  */
 
