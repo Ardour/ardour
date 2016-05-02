@@ -1744,7 +1744,6 @@ Mixer_UI::get_state ()
 			p->add_property ("expanded", favorite_ui_state[(*i)->unique_id]);
 		}
 		plugin_order->add_child_nocopy (*p);
-		;
 	}
 	node->add_child_nocopy (*plugin_order);
 
