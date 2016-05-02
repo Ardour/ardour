@@ -24,11 +24,7 @@ using namespace AudioGrapher;
 const float Analyser::fft_range_db (120); // dB
 
 Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize, framecnt_t n_samples)
-	: _ebur128_plugin (0)
-	, _dbtp_plugin (0)
-	, _sample_rate (sample_rate)
-	, _channels (channels)
-	, _bufsize (bufsize / channels)
+	: LoudnessReader (sample_rate, channels, bufsize)
 	, _n_samples (n_samples)
 	, _pos (0)
 {
@@ -36,33 +32,8 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 	assert (bufsize % channels == 0);
 	assert (bufsize > 1);
 	assert (_bufsize > 0);
-	if (channels > 0 && channels <= 2) {
-		using namespace Vamp::HostExt;
-		PluginLoader* loader (PluginLoader::getInstance ());
-		_ebur128_plugin = loader->loadPlugin ("libardourvampplugins:ebur128", sample_rate, PluginLoader::ADAPT_ALL_SAFE);
-		assert (_ebur128_plugin);
-		_ebur128_plugin->reset ();
-		if (!_ebur128_plugin->initialise (channels, _bufsize, _bufsize)) {
-			delete _ebur128_plugin;
-			_ebur128_plugin = 0;
-		}
-	}
 
-	_dbtp_plugin = (Vamp::Plugin**) malloc (sizeof(Vamp::Plugin*) * channels);
-	for (unsigned int c = 0; c < _channels; ++c) {
-		using namespace Vamp::HostExt;
-		PluginLoader* loader (PluginLoader::getInstance ());
-		_dbtp_plugin[c] = loader->loadPlugin ("libardourvampplugins:dBTP", sample_rate, PluginLoader::ADAPT_ALL_SAFE);
-		assert (_dbtp_plugin[c]);
-		_dbtp_plugin[c]->reset ();
-		if (!_dbtp_plugin[c]->initialise (1, _bufsize, _bufsize)) {
-			delete _dbtp_plugin[c];
-			_dbtp_plugin[c] = 0;
-		}
-	}
 
-	_bufs[0] = (float*) malloc (sizeof (float) * _bufsize);
-	_bufs[1] = (float*) malloc (sizeof (float) * _bufsize);
 
 	const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
 	_spp = ceil ((_n_samples + 2.f) / (float) peaks);
@@ -123,13 +94,6 @@ Analyser::Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize
 
 Analyser::~Analyser ()
 {
-	delete _ebur128_plugin;
-	for (unsigned int c = 0; c < _channels; ++c) {
-		delete _dbtp_plugin[c];
-	}
-	free (_dbtp_plugin);
-	free (_bufs[0]);
-	free (_bufs[1]);
 	fftwf_destroy_plan (_fft_plan);
 	fftwf_free (_fft_data_in);
 	fftwf_free (_fft_data_out);
@@ -180,8 +144,8 @@ Analyser::process (ProcessContext<float> const & ctx)
 		}
 	}
 
-	if (_ebur128_plugin) {
-		_ebur128_plugin->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
+	if (_ebur_plugin) {
+		_ebur_plugin->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
 	}
 
 	float const * const data = ctx.data ();
@@ -268,8 +232,8 @@ Analyser::result ()
 		}
 	}
 
-	if (_ebur128_plugin) {
-		Vamp::Plugin::FeatureSet features = _ebur128_plugin->getRemainingFeatures ();
+	if (_ebur_plugin) {
+		Vamp::Plugin::FeatureSet features = _ebur_plugin->getRemainingFeatures ();
 		if (!features.empty () && features.size () == 3) {
 			_result.loudness = features[0][0].values[0];
 			_result.loudness_range = features[1][0].values[0];

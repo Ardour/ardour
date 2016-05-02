@@ -66,6 +66,7 @@ def build(bld):
         'src/debug_utils.cc',
         'src/general/analyser.cc',
         'src/general/broadcast_info.cc',
+        'src/general/loudness_reader.cc',
         'src/general/normalizer.cc'
         ]
     if bld.is_defined('HAVE_SAMPLERATE'):

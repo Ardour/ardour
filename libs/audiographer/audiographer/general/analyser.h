@@ -20,20 +20,13 @@
 #define AUDIOGRAPHER_ANALYSER_H
 
 #include <fftw3.h>
-
-#include <vamp-hostsdk/PluginLoader.h>
-#include <vamp-sdk/Plugin.h>
-
-#include "audiographer/visibility.h"
-#include "audiographer/sink.h"
-#include "audiographer/utils/listed_source.h"
-
+#include "loudness_reader.h"
 #include "ardour/export_analysis.h"
 
 namespace AudioGrapher
 {
 
-class LIBAUDIOGRAPHER_API Analyser : public ListedSource<float>, public Sink<float>
+class LIBAUDIOGRAPHER_API Analyser : public LoudnessReader
 {
   public:
 	Analyser (float sample_rate, unsigned int channels, framecnt_t bufsize, framecnt_t n_samples);
@@ -46,26 +39,19 @@ class LIBAUDIOGRAPHER_API Analyser : public ListedSource<float>, public Sink<flo
 		_result.norm_gain_factor = gain;
 	}
 
-	using Sink<float>::process;
-
 	static const float fft_range_db;
+
+	using Sink<float>::process;
 
 	private:
 	float fft_power_at_bin (const uint32_t b, const float norm) const;
 
 	ARDOUR::ExportAnalysis _result;
-	Vamp::Plugin*  _ebur128_plugin;
-	Vamp::Plugin** _dbtp_plugin;
 
-	float        _sample_rate;
-	unsigned int _channels;
-	framecnt_t   _bufsize;
 	framecnt_t   _n_samples;
 	framecnt_t   _pos;
 	framecnt_t   _spp;
 	framecnt_t   _fpp;
-
-	float* _bufs[2];
 
 	float*     _hann_window;
 	uint32_t   _fft_data_size;
@@ -74,7 +60,6 @@ class LIBAUDIOGRAPHER_API Analyser : public ListedSource<float>, public Sink<flo
 	float*     _fft_data_out;
 	float*     _fft_power;
 	fftwf_plan _fft_plan;
-
 };
 
 } // namespace
