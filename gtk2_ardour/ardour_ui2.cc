@@ -29,6 +29,8 @@
 #include <cmath>
 
 #include <sigc++/bind.h>
+#include "canvas/canvas.h"
+
 #include "pbd/error.h"
 #include "pbd/basename.h"
 #include "pbd/fastlog.h"
@@ -72,6 +74,8 @@ using namespace ARDOUR_UI_UTILS;
 void
 ARDOUR_UI::setup_tooltips ()
 {
+	ArdourCanvas::Canvas::set_tooltip_timeout (Gtk::Settings::get_default()->property_gtk_tooltip_timeout ());
+
 	set_tip (roll_button, _("Play from playhead"));
 	set_tip (stop_button, _("Stop playback"));
 	set_tip (rec_button, _("Toggle record"));
