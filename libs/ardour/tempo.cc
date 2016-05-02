@@ -1105,7 +1105,7 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, BBT_Time where, boo
 	do_insert (new_meter);
 
 	if (recompute) {
-		solve_map (_metrics, new_meter, pulse);
+		solve_map (_metrics, new_meter, where);
 	}
 
 	return new_meter;
@@ -2092,10 +2092,8 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 		TempoSection* t;
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 			if ((t->locked_to_meter() || !t->movable()) && t->frame() == section->frame()) {
-				if (t->frame() == section->frame()) {
-					meter_locked_tempo = t;
-					break;
-				}
+				meter_locked_tempo = t;
+				break;
 			}
 		}
 	}
@@ -2209,7 +2207,6 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 					section->set_pulse (0.0);
 
 				}
-				//section->set_frame (frame);
 				break;
 			}
 
@@ -2232,33 +2229,37 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 }
 
 bool
-TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const double& pulse)
+TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const BBT_Time& when)
 {
 	MeterSection* prev_m = 0;
-
-	section->set_pulse (pulse);
 
 	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
 		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
-			double new_pulse = 0.0;
 			pair<double, BBT_Time> b_bbt;
+			double new_pulse = 0.0;
 
 			if (prev_m && m == section){
-				/* the first meter is always audio-locked, so prev_m should exist.
-				   should we allow setting audio locked meters by pulse?
-				*/
-				const double beats = floor (((pulse - prev_m->pulse()) * prev_m->note_divisor()) + 0.5);
-				const int32_t bars = (beats) / prev_m->divisions_per_bar();
-				pair<double, BBT_Time> b_bbt = make_pair (beats + prev_m->beat(), BBT_Time (bars + prev_m->bbt().bars, 1, 0));
+				const double beats = (when.bars - prev_m->bbt().bars) * prev_m->divisions_per_bar();
+				const double pulse = (beats / prev_m->note_divisor()) + prev_m->pulse();
+
+				b_bbt = make_pair (beats + prev_m->beat(), when);
+
 				section->set_beat (b_bbt);
+				section->set_pulse (pulse);
 				section->set_frame (frame_at_pulse_locked (imaginary, pulse));
+
 				prev_m = m;
 				continue;
+
+			} else if (m->bbt().bars == when.bars) {
+				return false;
 			}
+
 			if (m->position_lock_style() == AudioTime) {
 				if (m->movable()) {
 					const double beats = ((m->bbt().bars - prev_m->bbt().bars) * prev_m->divisions_per_bar());
+
 					if (beats + prev_m->beat() != m->beat()) {
 						/* tempo/ meter change caused a change in beat (bar). */
 						b_bbt = make_pair (beats + prev_m->beat()
@@ -2271,12 +2272,23 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const double& pu
 				} else {
 					b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
 				}
+
+				m->set_beat (b_bbt);
+				m->set_pulse (new_pulse);
+
 			} else {
-				new_pulse = prev_m->pulse() + ((m->bbt().bars - prev_m->bbt().bars) *  prev_m->divisions_per_bar() / prev_m->note_divisor());
-				b_bbt = make_pair (((new_pulse - prev_m->pulse()) * prev_m->note_divisor()) + prev_m->beat(), m->bbt());
+				const double beats = ((m->bbt().bars - prev_m->bbt().bars) * prev_m->divisions_per_bar());
+
+				b_bbt = make_pair (beats + prev_m->beat()
+						   , BBT_Time ((beats / prev_m->divisions_per_bar()) + prev_m->bbt().bars, 1, 0));
+				new_pulse = prev_m->pulse() + ((m->bbt().bars - prev_m->bbt().bars) *  prev_m->divisions_per_bar()
+							       / prev_m->note_divisor());
+
+				m->set_beat (b_bbt);
+				m->set_pulse (new_pulse);
+				m->set_frame (frame_at_pulse_locked (imaginary, new_pulse));
 			}
-			m->set_beat (b_bbt);
-			m->set_pulse (new_pulse);
+
 			prev_m = m;
 		}
 	}
@@ -2521,14 +2533,14 @@ TempoMap::gui_move_meter (MeterSection* ms, const framepos_t&  frame)
 }
 
 void
-TempoMap::gui_move_meter (MeterSection* ms, const double& pulse)
+TempoMap::gui_move_meter (MeterSection* ms, const Timecode::BBT_Time& bbt)
 {
 	Metrics future_map;
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		MeterSection* copy = copy_metrics_and_point (_metrics, future_map, ms);
-		if (solve_map (future_map, copy, pulse)) {
-			solve_map (_metrics, ms, pulse);
+		if (solve_map (future_map, copy, bbt)) {
+			solve_map (_metrics, ms, bbt);
 		}
 	}
 
@@ -2821,16 +2833,27 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 }
 
 void
-TempoMap::round_bbt (BBT_Time& when, const int32_t& sub_num)
+TempoMap::round_bbt (BBT_Time& when, const int32_t& sub_num, RoundMode dir)
 {
 	if (sub_num == -1) {
-		const double bpb = meter_section_at_beat (bbt_to_beats_locked (_metrics, when)).divisions_per_bar();
-		if ((double) when.beats > bpb / 2.0) {
+		if (dir > 0) {
 			++when.bars;
+			when.beats = 1;
+			when.ticks = 0;
+		} else if (dir < 0) {
+			when.beats = 1;
+			when.ticks = 0;
+		} else {
+			const double bpb = meter_section_at_beat (bbt_to_beats_locked (_metrics, when)).divisions_per_bar();
+			if ((double) when.beats > bpb / 2.0) {
+				++when.bars;
+			}
+			when.beats = 1;
+			when.ticks = 0;
 		}
-		when.beats = 1;
-		when.ticks = 0;
+
 		return;
+
 	} else if (sub_num == 0) {
 		const double bpb = meter_section_at_beat (bbt_to_beats_locked (_metrics, when)).divisions_per_bar();
 		if ((double) when.ticks > BBT_Time::ticks_per_beat / 2.0) {
@@ -2841,32 +2864,76 @@ TempoMap::round_bbt (BBT_Time& when, const int32_t& sub_num)
 			}
 		}
 		when.ticks = 0;
+
 		return;
 	}
+
 	const uint32_t ticks_one_subdivisions_worth = BBT_Time::ticks_per_beat / sub_num;
-	double rem;
-	if ((rem = fmod ((double) when.ticks, (double) ticks_one_subdivisions_worth)) > (ticks_one_subdivisions_worth / 2.0)) {
-		/* closer to the next subdivision, so shift forward */
 
-		when.ticks = when.ticks + (ticks_one_subdivisions_worth - rem);
+	if (dir > 0) {
+		/* round to next (or same iff dir == RoundUpMaybe) */
 
-		if (when.ticks > Timecode::BBT_Time::ticks_per_beat) {
-			++when.beats;
-			when.ticks -= Timecode::BBT_Time::ticks_per_beat;
+		uint32_t mod = when.ticks % ticks_one_subdivisions_worth;
+
+		if (mod == 0 && dir == RoundUpMaybe) {
+			/* right on the subdivision, which is fine, so do nothing */
+
+		} else if (mod == 0) {
+			/* right on the subdivision, so the difference is just the subdivision ticks */
+			when.ticks += ticks_one_subdivisions_worth;
+
+		} else {
+			/* not on subdivision, compute distance to next subdivision */
+
+			when.ticks += ticks_one_subdivisions_worth - mod;
 		}
 
-	} else if (rem > 0) {
-		/* closer to previous subdivision, so shift backward */
+		if (when.ticks >= BBT_Time::ticks_per_beat) {
+			when.ticks -= BBT_Time::ticks_per_beat;
+		}
 
-		if (rem > when.ticks) {
-			if (when.beats == 0) {
-				/* can't go backwards past zero, so ... */
-			}
-			/* step back to previous beat */
-			--when.beats;
-			when.ticks = Timecode::BBT_Time::ticks_per_beat - rem;
+	} else if (dir < 0) {
+		/* round to previous (or same iff dir == RoundDownMaybe) */
+
+		uint32_t difference = when.ticks % ticks_one_subdivisions_worth;
+
+		if (difference == 0 && dir == RoundDownAlways) {
+			/* right on the subdivision, but force-rounding down,
+			   so the difference is just the subdivision ticks */
+			difference = ticks_one_subdivisions_worth;
+		}
+
+		if (when.ticks < difference) {
+			when.ticks = BBT_Time::ticks_per_beat - when.ticks;
 		} else {
-			when.ticks = when.ticks - rem;
+			when.ticks -= difference;
+		}
+
+	} else {
+		/* round to nearest */	double rem;
+		if ((rem = fmod ((double) when.ticks, (double) ticks_one_subdivisions_worth)) > (ticks_one_subdivisions_worth / 2.0)) {
+			/* closer to the next subdivision, so shift forward */
+
+			when.ticks = when.ticks + (ticks_one_subdivisions_worth - rem);
+
+			if (when.ticks > Timecode::BBT_Time::ticks_per_beat) {
+				++when.beats;
+				when.ticks -= Timecode::BBT_Time::ticks_per_beat;
+			}
+
+		} else if (rem > 0) {
+			/* closer to previous subdivision, so shift backward */
+
+			if (rem > when.ticks) {
+				if (when.beats == 0) {
+					/* can't go backwards past zero, so ... */
+				}
+				/* step back to previous beat */
+				--when.beats;
+				when.ticks = Timecode::BBT_Time::ticks_per_beat - rem;
+			} else {
+				when.ticks = when.ticks - rem;
+			}
 		}
 	}
 }

@@ -396,7 +396,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void gui_move_tempo_beat (TempoSection*, const double& beat);
 	void gui_move_tempo_pulse (TempoSection*, const double& pulse);
 	void gui_move_meter (MeterSection*, const framepos_t& frame);
-	void gui_move_meter (MeterSection*, const double& pulse);
+	void gui_move_meter (MeterSection*, const Timecode::BBT_Time& bbt);
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
 	void gui_dilate_tempo (MeterSection*, const framepos_t& frame);
 
@@ -408,7 +408,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir);
-	void round_bbt (Timecode::BBT_Time& when, const int32_t& snap_divisor);
+	void round_bbt (Timecode::BBT_Time& when, const int32_t& snap_divisor, RoundMode dir);
 
 	void set_length (framepos_t frames);
 
@@ -477,7 +477,7 @@ private:
 	bool solve_map (Metrics& metrics, TempoSection* section, const framepos_t& frame);
 	bool solve_map (Metrics& metrics, TempoSection* section, const double& pulse);
 	bool solve_map (Metrics& metrics, MeterSection* section, const framepos_t& frame);
-	bool solve_map (Metrics& metrics, MeterSection* section, const double& pulse);
+	bool solve_map (Metrics& metrics, MeterSection* section, const Timecode::BBT_Time& bbt);
 
 	friend class ::BBTTest;
 	friend class ::FrameposPlusBeatsTest;

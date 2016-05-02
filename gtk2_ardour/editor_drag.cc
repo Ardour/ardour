@@ -3199,17 +3199,15 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		Timecode::BBT_Time bbt;
 		map.bbt_time (pf, bbt);
 		/* round bbt to bars */
-		map.round_bbt (bbt, -1);
-		const MeterSection& prev_m = map.meter_section_at (_real_section->frame() - 1);
+		map.round_bbt (bbt, -1, RoundNearest);
 
 		if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+			/* adjust previous tempo to match meter frame */
 			_editor->session()->tempo_map().gui_dilate_tempo (_real_section, pf);
-		} else if (bbt.bars > _real_section->bbt().bars) {
-			const double pulse = _real_section->pulse() + (prev_m.note_divisor() / prev_m.divisions_per_bar());
-			_editor->session()->tempo_map().gui_move_meter (_real_section, pulse);
-		} else if (bbt.bars < _real_section->bbt().bars) {
-			const double pulse = _real_section->pulse() - (prev_m.note_divisor() / prev_m.divisions_per_bar());
-			_editor->session()->tempo_map().gui_move_meter (_real_section, pulse);
+		} else if ((bbt.bars > _real_section->bbt().bars && pf > last_pointer_frame())
+			   || (bbt.bars < _real_section->bbt().bars && pf < last_pointer_frame())) {
+			/* move meter beat-based */
+			_editor->session()->tempo_map().gui_move_meter (_real_section, bbt);
 		}
 	} else {
 		/* AudioTime */
@@ -3352,17 +3350,17 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 			if (_real_section->position_lock_style() == MusicTime) {
 				if (use_snap && _editor->snap_type() == SnapToBar) {
-					map.round_bbt (bbt, -1);
+					map.round_bbt (bbt, -1, (frame > _real_section->frame()) ? RoundUpMaybe : RoundDownMaybe);
 				} else if (use_snap) {
-					map.round_bbt (bbt, _editor->get_grid_beat_divisions (0));
+					map.round_bbt (bbt, _editor->get_grid_beat_divisions (0), RoundNearest);
 				}
 				double const pulse = map.predict_tempo_pulse (_real_section, map.frame_time (bbt));
 				_real_section = map.add_tempo (_marker->tempo(), pulse, _real_section->type());
 			} else {
 				if (use_snap && _editor->snap_type() == SnapToBar) {
-					map.round_bbt (bbt, -1);
+					map.round_bbt (bbt, -1, (frame > _real_section->frame()) ? RoundUpMaybe : RoundDownMaybe);
 				} else if (use_snap) {
-					map.round_bbt (bbt, _editor->get_grid_beat_divisions (0));
+					map.round_bbt (bbt, _editor->get_grid_beat_divisions (0), RoundNearest);
 				}
 				if (use_snap) {
 					frame = map.predict_tempo_frame (_real_section, bbt);
@@ -3417,17 +3415,17 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 				const double pulse = map.predict_tempo_pulse (_real_section, pf);
 				when = map.pulse_to_bbt (pulse);
 				if (use_snap && _editor->snap_type() == SnapToBar) {
-					map.round_bbt (when, -1);
+					map.round_bbt (when, -1, (pf > _real_section->frame()) ? RoundUpMaybe : RoundDownMaybe);
 				} else if (use_snap) {
-					map.round_bbt (when, _editor->get_grid_beat_divisions (0));
+					map.round_bbt (when, _editor->get_grid_beat_divisions (0), RoundNearest);
 				}
 				const double beat = map.bbt_to_beats (when);
 				map.gui_move_tempo_beat (_real_section, beat);
 			} else {
 				if (use_snap && _editor->snap_type() == SnapToBar) {
-					map.round_bbt (when, -1);
+					map.round_bbt (when, -1, (pf > _real_section->frame()) ? RoundUpMaybe : RoundDownMaybe);
 				} else if (use_snap) {
-					map.round_bbt (when, _editor->get_grid_beat_divisions (0));
+					map.round_bbt (when, _editor->get_grid_beat_divisions (0), RoundNearest);
 				}
 				if (use_snap) {
 					pf = map.predict_tempo_frame (_real_section, when);
