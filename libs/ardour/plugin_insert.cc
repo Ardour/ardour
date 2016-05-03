@@ -1477,13 +1477,15 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		break;
 	}
 
-	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: cfg:%2 state:%3 chn-in:%4 chn-out:%5 match:%6 size-in:%7 size-out:%8\n",
+	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: cfg:%2 state:%3 chn-in:%4 chn-out:%5 inpin:%6 match:%7 cust:%8 size-in:%9 size-out:%10\n",
 				name (),
 				_configured ? "Y" : "N",
 				_maps_from_state ? "Y" : "N",
 				old_in == in ? "==" : "!=",
 				old_out == out ? "==" : "!=",
+				old_pins == natural_input_streams () ? "==" : "!=",
 				old_match.method == _match.method ? "==" : "!=",
+				old_match.custom_cfg == _match.custom_cfg ? "==" : "!=",
 				_in_map.size() == get_count () ? "==" : "!=",
 				_out_map.size() == get_count () ? "==" : "!="
 				));
@@ -1491,17 +1493,18 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	bool mapping_changed = false;
 	if (old_in == in && old_out == out
 			&& _configured
+			&& old_pins == natural_input_streams ()
 			&& old_match.method == _match.method
+			&& old_match.custom_cfg == _match.custom_cfg
 			&& _in_map.size() == _out_map.size()
 			&& _in_map.size() == get_count ()
 		 ) {
 		assert (_maps_from_state == false);
 		/* If the configuration has not changed, keep the mapping */
-		if (old_internal != _configured_internal) {
-			mapping_changed = sanitize_maps ();
-		}
+		mapping_changed = sanitize_maps ();
 	} else if (_match.custom_cfg && _configured) {
 		assert (_maps_from_state == false);
+		/* don't touch the map in manual mode */
 		mapping_changed = sanitize_maps ();
 	} else {
 #ifdef MIXBUS
