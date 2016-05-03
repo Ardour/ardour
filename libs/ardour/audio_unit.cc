@@ -1606,9 +1606,10 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		inplace = false;
 	}
 
-	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 in %2 out %3 MIDI %4 bufs %5 (available %6) Inplace: %7\n",
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1 in %2 out %3 MIDI %4 bufs %5 (available %6) InBus %7 OutBus %8 Inplace: %9 var-i/o %10 %11\n",
 				name(), input_channels, output_channels, _has_midi_input,
-				bufs.count(), bufs.available(), inplace));
+				bufs.count(), bufs.available(),
+				configured_input_busses, configured_output_busses, inplace, variable_inputs, variable_outputs));
 
 	/* the apparent number of buffers matches our input configuration, but we know that the bufferset
 	 * has the capacity to handle our outputs.
@@ -1651,7 +1652,12 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 	uint32_t busoff = 0;
 	uint32_t remain = output_channels;
 	for (uint32_t bus = 0; remain > 0 && bus < configured_output_busses; ++bus) {
-		uint32_t cnt = variable_outputs ? output_channels : std::min (remain, bus_outputs[bus]); // XXX
+		uint32_t cnt;
+		if (variable_outputs || (output_elements == configured_output_busses && configured_output_busses == 1)) {
+			cnt = output_channels;
+		} else {
+			cnt = std::min (remain, bus_outputs[bus]);
+		}
 		assert (cnt > 0);
 
 		buffers->mNumberBuffers = cnt;
@@ -1704,7 +1710,8 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 				}
 			}
 		} else {
-			error << string_compose (_("AU: render error for %1, bus %2 status = %2"), name(), bus, err) << endmsg;
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose (_("AU: render error for %1, bus %2 status = %3\n"), name(), bus, err));
+			error << string_compose (_("AU: render error for %1, bus %2 status = %3"), name(), bus, err) << endmsg;
 			ok = false;
 			break;
 		}
