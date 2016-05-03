@@ -7098,6 +7098,7 @@ Editor::remove_tracks ()
 bool
 Editor::idle_remove_tracks ()
 {
+	Session::StateProtector sp (_session);
 	_remove_tracks ();
 	return false; /* do not call again */
 }
@@ -7201,12 +7202,17 @@ edit your ardour.rc file to set the\n\
 	}
 
 	{
-		Session::StateProtector sp (_session);
 		DisplaySuspender ds;
+		boost::shared_ptr<RouteList> rl (new RouteList);
 		for (vector<boost::shared_ptr<Route> >::iterator x = routes.begin(); x != routes.end(); ++x) {
-			_session->remove_route (*x);
+			rl->push_back (*x);
 		}
+		_session->remove_routes (rl);
 	}
+	/* TrackSelection and RouteList leave scope,
+	 * destructors are called,
+	 * diskstream drops references, save_state is called (again for every track)
+	 */
 }
 
 void
