@@ -570,6 +570,9 @@ EditorRoutes::redisplay ()
 	// model deprecated g_atomic_int_exchange_and_add(, 1)
 	g_atomic_int_inc(const_cast<gint*>(&_redisplay_active));
 	if (!g_atomic_int_compare_and_exchange (const_cast<gint*>(&_redisplay_active), 1, 1)) {
+		/* recursive re-display can happen if redisplay shows/hides a TrackView
+		 * which has children and their display status changes as result.
+		 */
 		return;
 	}
 
@@ -584,6 +587,9 @@ EditorRoutes::redisplay ()
 void
 EditorRoutes::row_deleted (Gtk::TreeModel::Path const &)
 {
+	if (!_session || _session->deletion_in_progress()) {
+		return;
+	}
 	/* this happens as the second step of a DnD within the treeview, and
 	 * when a route is actually removed. we don't differentiate between
 	 * the two cases.
