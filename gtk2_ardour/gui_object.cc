@@ -25,34 +25,22 @@
 
 using std::string;
 
-const string GUIObjectState::xml_node_name (X_("GUIObjectState"));
-
-GUIObjectState::GUIObjectState ()
-	: _state (X_("GUIObjectState"))
-{
-
-}
-
-XMLNode *
+/*static*/ XMLNode *
 GUIObjectState::get_node (const XMLNode* parent, const string& id)
 {
 	XMLNodeList const & children = parent->children ();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-
 		if ((*i)->name() != X_("Object")) {
 			continue;
 		}
-
-		XMLProperty* p = (*i)->property (X_("id"));
-		if (p && p->value() == id) {
+		if ((*i)->has_property_with_value(X_("id"), id)) {
 			return *i;
 		}
 	}
-
 	return 0;
 }
 
-XMLNode *
+/*static*/ XMLNode *
 GUIObjectState::get_or_add_node (XMLNode* parent, const string& id)
 {
 	XMLNode* child = get_node (parent, id);
@@ -61,46 +49,52 @@ GUIObjectState::get_or_add_node (XMLNode* parent, const string& id)
 		child->add_property (X_("id"), id);
 		parent->add_child_nocopy (*child);
 	}
-
 	return child;
+}
+
+
+const string GUIObjectState::xml_node_name (X_("GUIObjectState"));
+
+GUIObjectState::GUIObjectState ()
+	: _state (X_("GUIObjectState"))
+{
 }
 
 XMLNode *
 GUIObjectState::get_or_add_node (const string& id)
 {
-	return get_or_add_node (&_state, id);
+	std::map <std::string, XMLNode*>::iterator i = object_map.find (id);
+	if (i != object_map.end()) {
+		return i->second;
+	}
+	//assert (get_node (&_state, id) == 0); // XXX
+	XMLNode* child = new XMLNode (X_("Object"));
+	child->add_property (X_("id"), id);
+	_state.add_child_nocopy (*child);
+	object_map[id] = child;
+	return child;
 }
-
-/** Remove node with provided id.
- *  @param id property of Object node to look for.
- */
 
 void
 GUIObjectState::remove_node (const std::string& id)
 {
+	object_map.erase (id);
 	_state.remove_nodes_and_delete(X_("id"), id );
 }
-
-/** Get a string from our state.
- *  @param id property of Object node to look for.
- *  @param prop_name name of the Object property to return.
- *  @param empty if non-0, filled in with true if the property is currently non-existant, otherwise false.
- *  @return value of property `prop_name', or empty.
- */
 
 string
 GUIObjectState::get_string (const string& id, const string& prop_name, bool* empty)
 {
-	XMLNode* child = get_node (&_state, id);
-
-	if (!child) {
+	std::map <std::string, XMLNode*>::const_iterator i = object_map.find (id);
+	if (i == object_map.end()) {
+		//assert (get_node (&_state, id) == 0); // XXX
 		if (empty) {
 			*empty = true;
 		}
 		return string ();
 	}
 
-	XMLProperty* p = child->property (prop_name);
+	const XMLProperty* p (i->second->property (prop_name));
 	if (!p) {
 		if (empty) {
 			*empty = true;
@@ -128,7 +122,20 @@ GUIObjectState::set_state (const XMLNode& node)
 		return -1;
 	}
 
+	object_map.clear ();
 	_state = node;
+
+	XMLNodeList const & children (_state.children ());
+	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->name() != X_("Object")) {
+			continue;
+		}
+		const XMLProperty* prop = (*i)->property (X_("id"));
+		if (!prop) {
+			continue;
+		}
+		object_map[prop->value ()] = *i;
+	}
 	return 0;
 }
 
@@ -142,19 +149,9 @@ std::list<string>
 GUIObjectState::all_ids () const
 {
 	std::list<string> ids;
-	XMLNodeList const & children = _state.children ();
-	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-		if ((*i)->name() != X_("Object")) {
-			continue;
-		}
-
-		XMLProperty* p = (*i)->property (X_("id"));
-		if (p) {
-			ids.push_back (p->value ());
-		}
+	for (std::map <std::string, XMLNode*>::const_iterator i = object_map.begin ();
+			i != object_map.end (); ++i) {
+		ids.push_back (i->first);
 	}
-
 	return ids;
 }
-
-
