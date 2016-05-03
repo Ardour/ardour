@@ -96,7 +96,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	, parent (rent)
 	, selection_group (0)
 	, _ghost_group (0)
-	, _hidden (false)
+	, _hidden (true)
 	, in_destructor (false)
 	, _size_menu (0)
 	, _canvas_display (0)
