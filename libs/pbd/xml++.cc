@@ -429,6 +429,17 @@ XMLNode::property(const string& ns)
 	return 0;
 }
 
+bool
+XMLNode::has_property_with_value (const string& key, const string& value) const
+{
+	map<string,XMLProperty*>::const_iterator iter = _propmap.find(key);
+	if (iter != _propmap.end()) {
+		const XMLProperty* p = (iter->second);
+		return (p && p->value() == value);
+	}
+	return false;
+}
+
 XMLProperty*
 XMLNode::add_property(const char* n, const string& v)
 {
