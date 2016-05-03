@@ -3204,7 +3204,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier ())) {
 			/* adjust previous tempo to match meter frame */
 			_editor->session()->tempo_map().gui_dilate_tempo (_real_section, pf);
-		} else if ((bbt.bars > _real_section->bbt().bars && pf > last_pointer_frame())
+		} else if ((bbt.bars != _real_section->bbt().bars && pf > last_pointer_frame())
 			   || (bbt.bars < _real_section->bbt().bars && pf < last_pointer_frame())) {
 			/* move meter beat-based */
 			_editor->session()->tempo_map().gui_move_meter (_real_section, bbt);

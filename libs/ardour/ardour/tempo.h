@@ -199,8 +199,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	bool locked_to_meter ()  const { return _locked_to_meter; }
 	void set_locked_to_meter (bool yn) { _locked_to_meter = yn; }
 
-	double tempo_at_frame (const frameoffset_t& frame, const framecnt_t& frame_rate) const;
-	frameoffset_t frame_at_tempo (const double& ppm, const double& beat, const framecnt_t& frame_rate) const;
+	double tempo_at_frame (const framepos_t& frame, const framecnt_t& frame_rate) const;
+	framepos_t frame_at_tempo (const double& ppm, const double& beat, const framecnt_t& frame_rate) const;
 
 	double tempo_at_pulse (const double& pulse) const;
 	double pulse_at_tempo (const double& ppm, const framepos_t& frame, const framecnt_t& frame_rate) const;
@@ -215,8 +215,8 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 
   private:
 
-	frameoffset_t minute_to_frame (const double& time, const framecnt_t& frame_rate) const;
-	double frame_to_minute (const frameoffset_t& frame, const framecnt_t& frame_rate) const;
+	framepos_t minute_to_frame (const double& time, const framecnt_t& frame_rate) const;
+	double frame_to_minute (const framepos_t& frame, const framecnt_t& frame_rate) const;
 
 	/*  tempo ramp functions. zero-based with time in minutes,
 	 * 'tick tempo' in ticks per minute and tempo in bpm.
