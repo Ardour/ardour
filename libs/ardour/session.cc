@@ -6403,9 +6403,10 @@ Session::unknown_processors () const
 void
 Session::update_latency (bool playback)
 {
+
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("JACK latency callback: %1\n", (playback ? "PLAYBACK" : "CAPTURE")));
 
-	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress) {
+	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress || _route_deletion_in_progress) {
 		return;
 	}
 
