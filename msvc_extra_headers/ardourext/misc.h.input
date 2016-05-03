@@ -49,6 +49,10 @@
 #define INFINITY    HUGE_VAL
 #endif
 
+#ifndef NAN
+#define NAN        _NANCODE
+#endif
+
 // File access modes copied from unistd.h
 #define F_OK 0
 #define R_OK 4

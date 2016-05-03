@@ -17,6 +17,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <math.h>
 #include <sys/time.h>
 #include <regex.h>
 #include <stdlib.h>
@@ -1801,10 +1802,10 @@ static const float _demolition[] = {
 	 4294967395.0f,  /* 2^16 + 100 */
 	-4294967395.0f,
 	 HUGE,           /* Big, non-inf number */
-	 1.f/0.f,        /* +inf */
-	-1.f/0.f,        /* -inf */
-	-0.f/0.f,        /* -nan */
-	 0.f/0.f,        /*  nan */
+	 INFINITY,       /* +inf */
+	-INFINITY,       /* -inf */
+	-NAN,            /* -nan */
+	 NAN,            /*  nan */
 	 0.0f,           /* some silence to check for recovery */
 };
 
