@@ -55,7 +55,7 @@ using namespace Gtkmm2ext;
 PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
 	, _set_config (_("Manual Config"), ArdourButton::led_default_elements)
-	, _tgl_sidechain (_("Side Chain"), ArdourButton::led_default_elements)
+	, _tgl_sidechain (_("Sidechain"), ArdourButton::led_default_elements)
 	, _add_plugin (_("+"))
 	, _del_plugin (_("-"))
 	, _add_input_audio (_("+"))
