@@ -32,6 +32,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
+#include "ardour/pannable.h"
 
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/keyboard.h"
@@ -84,11 +85,415 @@ static const gchar *_beats_per_row_strings[] = {
 
 #define COMBO_TRIANGLE_WIDTH 25
 
+////////////////
+// Automation //
+////////////////
+
+void
+MidiTrackerEditor::show_all_automation ()
+{
+	// Copy pasted from route_time_axis.cc
+
+	// if (apply_to_selection) {
+	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::show_all_automation, _1, false));
+	// } else {
+	// 	no_redraw = true;
+
+	// 	/* Show our automation */
+
+	// 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+	// 		i->second->set_marked_for_display (true);
+
+	// 		Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+
+	// 		if (menu) {
+	// 			menu->set_active(true);
+	// 		}
+	// 	}
+
+
+	// 	/* Show processor automation */
+
+	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	// 			if ((*ii)->view == 0) {
+	// 				add_processor_automation_curve ((*i)->processor, (*ii)->what);
+	// 			}
+
+	// 			(*ii)->menu_item->set_active (true);
+	// 		}
+	// 	}
+
+	// 	no_redraw = false;
+
+	// 	/* Redraw */
+
+	// 	request_redraw ();
+	// }
+}
+
+void
+MidiTrackerEditor::show_existing_automation ()
+{
+	// Copy pasted from route_time_axis.cc
+
+	// if (apply_to_selection) {
+	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::show_existing_automation, _1, false));
+	// } else {
+	// 	no_redraw = true;
+
+	// 	/* Show our automation */
+
+	// 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+	// 		if (i->second->has_automation()) {
+	// 			i->second->set_marked_for_display (true);
+
+	// 			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+	// 			if (menu) {
+	// 				menu->set_active(true);
+	// 			}
+	// 		}
+	// 	}
+
+	// 	/* Show processor automation */
+
+	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	// 			if ((*ii)->view != 0 && (*i)->processor->control((*ii)->what)->list()->size() > 0) {
+	// 				(*ii)->menu_item->set_active (true);
+	// 			}
+	// 		}
+	// 	}
+
+	// 	no_redraw = false;
+
+	// 	request_redraw ();
+	// }
+}
+
+void
+MidiTrackerEditor::hide_all_automation ()
+{
+	// Copy pasted from route_time_axis.cc
+
+	// if (apply_to_selection) {
+	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::hide_all_automation, _1, false));
+	// } else {
+	// 	no_redraw = true;
+
+	// 	/* Hide our automation */
+
+	// 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+	// 		i->second->set_marked_for_display (false);
+
+	// 		Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+
+	// 		if (menu) {
+	// 			menu->set_active (false);
+	// 		}
+	// 	}
+
+	// 	/* Hide processor automation */
+
+	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+	// 			(*ii)->menu_item->set_active (false);
+	// 		}
+	// 	}
+
+	// 	no_redraw = false;
+	// 	request_redraw ();
+	// }
+}
+
+/** Set up the processor menu for the current set of processors, and
+ *  display automation curves for any parameters which have data.
+ */
+void
+MidiTrackerEditor::setup_processor_menu_and_curves ()
+{
+	_subplugin_menu_map.clear ();
+	subplugin_menu.items().clear ();
+	route->foreach_processor (sigc::mem_fun (*this, &MidiTrackerEditor::add_processor_to_subplugin_menu));
+	// route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
+}
+
+void
+MidiTrackerEditor::add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor> p)
+{
+	boost::shared_ptr<ARDOUR::Processor> processor (p.lock ());
+
+	if (!processor || !processor->display_to_user ()) {
+		return;
+	}
+
+	// /* we use this override to veto the Amp processor from the plugin menu,
+	//    as its automation lane can be accessed using the special "Fader" menu
+	//    option
+	// */
+
+	// if (boost::dynamic_pointer_cast<Amp> (processor) != 0) {
+	// 	return;
+	// }
+
+	using namespace Menu_Helpers;
+	ProcessorAutomationInfo *rai;
+	list<ProcessorAutomationInfo*>::iterator x;
+
+	const std::set<Evoral::Parameter>& automatable = processor->what_can_be_automated ();
+
+	if (automatable.empty()) {
+		return;
+	}
+
+	for (x = processor_automation.begin(); x != processor_automation.end(); ++x) {
+		if ((*x)->processor == processor) {
+			break;
+		}
+	}
+
+	if (x == processor_automation.end()) {
+		rai = new ProcessorAutomationInfo (processor);
+		processor_automation.push_back (rai);
+	} else {
+		rai = *x;
+	}
+
+	/* any older menu was deleted at the top of processors_changed()
+	   when we cleared the subplugin menu.
+	*/
+
+	rai->menu = manage (new Menu);
+	MenuList& items = rai->menu->items();
+	rai->menu->set_name ("ArdourContextMenu");
+
+	items.clear ();
+
+	std::set<Evoral::Parameter> has_visible_automation;
+	// AutomationTimeAxisView::what_has_visible_automation (processor, has_visible_automation);
+
+	for (std::set<Evoral::Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
+
+		ProcessorAutomationNode* pan = NULL;
+		Gtk::CheckMenuItem* mitem;
+
+		string name = processor->describe_parameter (*i);
+
+		if (name == X_("hidden")) {
+			continue;
+		}
+
+		items.push_back (CheckMenuElem (name));
+		mitem = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
+
+		_subplugin_menu_map[*i] = mitem;
+
+		if (has_visible_automation.find((*i)) != has_visible_automation.end()) {
+			mitem->set_active(true);
+		}
+
+		// if ((pan = find_processor_automation_node (processor, *i)) == 0) {
+
+		// 	/* new item */
+
+		// 	pan = new ProcessorAutomationNode (*i, mitem, *this);
+
+		// 	rai->lines.push_back (pan);
+
+		// } else {
+
+		// 	pan->menu_item = mitem;
+
+		// }
+
+		mitem->signal_toggled().connect (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::processor_menu_item_toggled), rai, pan));
+	}
+
+	if (items.size() == 0) {
+		return;
+	}
+
+	/* add the menu for this processor, because the subplugin
+	   menu is always cleared at the top of processors_changed().
+	   this is the result of some poor design in gtkmm and/or
+	   GTK+.
+	*/
+
+	subplugin_menu.items().push_back (MenuElem (processor->name(), *rai->menu));
+	rai->valid = true;
+}
+
+void
+MidiTrackerEditor::processor_menu_item_toggled (MidiTrackerEditor::ProcessorAutomationInfo* rai, MidiTrackerEditor::ProcessorAutomationNode* pan)
+{
+	// bool showit = pan->menu_item->get_active();
+	// bool redraw = false;
+
+	// if (pan->view == 0 && showit) {
+	// 	add_processor_automation_curve (rai->processor, pan->what);
+	// 	redraw = true;
+	// }
+
+	// if (pan->view && pan->view->set_marked_for_display (showit)) {
+	// 	redraw = true;
+	// }
+
+	// if (redraw && !no_redraw) {
+	// 	request_redraw ();
+	// }
+}
+
+void
+MidiTrackerEditor::build_automation_action_menu ()
+{
+	using namespace Menu_Helpers;
+
+	/* detach subplugin_menu from automation_action_menu before we delete automation_action_menu,
+	   otherwise bad things happen (see comment for similar case in MidiTimeAxisView::build_automation_action_menu)
+	*/
+
+	detach_menu (subplugin_menu);
+
+	_main_automation_menu_map.clear ();
+	delete automation_action_menu;
+	automation_action_menu = new Menu;
+
+	MenuList& items = automation_action_menu->items();
+
+	automation_action_menu->set_name ("ArdourContextMenu");
+
+	items.push_back (MenuElem (_("Show All Automation"),
+	                           sigc::mem_fun (*this, &MidiTrackerEditor::show_all_automation)));
+
+	items.push_back (MenuElem (_("Show Existing Automation"),
+	                           sigc::mem_fun (*this, &MidiTrackerEditor::show_existing_automation)));
+
+	items.push_back (MenuElem (_("Hide All Automation"),
+	                           sigc::mem_fun (*this, &MidiTrackerEditor::hide_all_automation)));
+
+	/* Attach the plugin submenu. It may have previously been used elsewhere,
+	   so it was detached above
+	*/
+
+	if (!subplugin_menu.items().empty()) {
+		items.push_back (SeparatorElem ());
+		items.push_back (MenuElem (_("Processor automation"), subplugin_menu));
+		items.back().set_sensitive (true);
+	}
+
+	/* Add any route automation */
+
+	if (true /*gain_track*/) {
+		items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &MidiTrackerEditor::update_gain_track_visibility)));
+		gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		gain_automation_item->set_active (false);
+
+		_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
+	}
+
+	if (false /*trim_track*/) {
+		items.push_back (CheckMenuElem (_("Trim"), sigc::mem_fun (*this, &MidiTrackerEditor::update_trim_track_visibility)));
+		trim_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		trim_automation_item->set_active (false);
+
+		_main_automation_menu_map[Evoral::Parameter(TrimAutomation)] = trim_automation_item;
+	}
+
+	if (true /*mute_track*/) {
+		items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &MidiTrackerEditor::update_mute_track_visibility)));
+		mute_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		mute_automation_item->set_active (false);
+
+		_main_automation_menu_map[Evoral::Parameter(MuteAutomation)] = mute_automation_item;
+	}
+
+	if (true /*!pan_tracks.empty()*/) {
+		items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &MidiTrackerEditor::update_pan_track_visibility)));
+		pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		pan_automation_item->set_active (false);
+
+		set<Evoral::Parameter> const & params = route->pannable()->what_can_be_automated ();
+		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
+			_main_automation_menu_map[*p] = pan_automation_item;
+		}
+	}
+}
+
+void
+MidiTrackerEditor::update_gain_track_visibility ()
+{
+	// bool const showit = gain_automation_item->get_active();
+
+	// if (showit != string_is_affirmative (gain_track->gui_property ("visible"))) {
+	// 	gain_track->set_marked_for_display (showit);
+
+	// 	/* now trigger a redisplay */
+
+	// 	if (!no_redraw) {
+	// 		 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+	// 	}
+	// }
+}
+
+void
+MidiTrackerEditor::update_trim_track_visibility ()
+{
+	// bool const showit = trim_automation_item->get_active();
+
+	// if (showit != string_is_affirmative (trim_track->gui_property ("visible"))) {
+	// 	trim_track->set_marked_for_display (showit);
+
+	// 	/* now trigger a redisplay */
+
+	// 	if (!no_redraw) {
+	// 		 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+	// 	}
+	// }
+}
+
+void
+MidiTrackerEditor::update_mute_track_visibility ()
+{
+	// bool const showit = mute_automation_item->get_active();
+
+	// if (showit != string_is_affirmative (mute_track->gui_property ("visible"))) {
+	// 	mute_track->set_marked_for_display (showit);
+
+	// 	/* now trigger a redisplay */
+
+	// 	if (!no_redraw) {
+	// 		 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+	// 	}
+	// }
+}
+
+void
+MidiTrackerEditor::update_pan_track_visibility ()
+{
+	// bool const showit = pan_automation_item->get_active();
+	// bool changed = false;
+
+	// for (list<boost::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
+	// 	if ((*i)->set_marked_for_display (showit)) {
+	// 		changed = true;
+	// 	}
+	// }
+
+	// if (changed) {
+	// 	_route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+	// }
+}
+
+/////////////////////////
+// Other (to sort out) //
+/////////////////////////
+
 const std::string MidiTrackerEditor::note_off_str = "===";
 const std::string MidiTrackerEditor::undefined_str = "***";
 
 MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<ARDOUR::Route> rou, boost::shared_ptr<MidiRegion> reg, boost::shared_ptr<MidiTrack> tr)
 	: ArdourWindow (reg->name())
+	, automation_action_menu(0)
 	, route(rou)
 	, myactions (X_("Tracking"))
 	, visible_blank (false)
@@ -96,7 +501,6 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<ARDO
 	, visible_channel (false)
 	, visible_velocity (true)
 	, visible_delay (true)
-	, automation_action_menu(0)
 	, region (reg)
 	, track (tr)
 	, midi_model (region->midi_source(0)->model())
@@ -536,223 +940,6 @@ MidiTrackerEditor::build_beats_per_row_menu ()
 }
 
 void
-MidiTrackerEditor::build_automation_action_menu ()
-{
-	using namespace Menu_Helpers;
-
-	/* detach subplugin_menu from automation_action_menu before we delete automation_action_menu,
-	   otherwise bad things happen (see comment for similar case in MidiTimeAxisView::build_automation_action_menu)
-	*/
-
-	detach_menu (subplugin_menu);
-
-	_main_automation_menu_map.clear ();
-	delete automation_action_menu;
-	automation_action_menu = new Menu;
-
-	MenuList& items = automation_action_menu->items();
-
-	automation_action_menu->set_name ("ArdourContextMenu");
-
-	items.push_back (MenuElem (_("Show All Automation"),
-	                           sigc::mem_fun (*this, &MidiTrackerEditor::show_all_automation)));
-
-	items.push_back (MenuElem (_("Show Existing Automation"),
-	                           sigc::mem_fun (*this, &MidiTrackerEditor::show_existing_automation)));
-
-	items.push_back (MenuElem (_("Hide All Automation"),
-	                           sigc::mem_fun (*this, &MidiTrackerEditor::hide_all_automation)));
-
-	/* Attach the plugin submenu. It may have previously been used elsewhere,
-	   so it was detached above
-	*/
-
-	if (!subplugin_menu.items().empty()) {
-		items.push_back (SeparatorElem ());
-		items.push_back (MenuElem (_("Processor automation"), subplugin_menu));
-		items.back().set_sensitive (true);
-	}
-
-	/* Add any route automation */
-
-	// if (gain_track) {
-	// 	items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &MidiTrackerEditor::update_gain_track_visibility)));
-	// 	gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-	// 	gain_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
-	// 	                                  (gain_track && string_is_affirmative (gain_track->gui_property ("visible"))));
-
-	// 	_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
-	// }
-
-	// if (trim_track) {
-	// 	items.push_back (CheckMenuElem (_("Trim"), sigc::mem_fun (*this, &MidiTrackerEditor::update_trim_track_visibility)));
-	// 	trim_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-	// 	trim_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
-	// 	                                  (trim_track && string_is_affirmative (trim_track->gui_property ("visible"))));
-
-	// 	_main_automation_menu_map[Evoral::Parameter(TrimAutomation)] = trim_automation_item;
-	// }
-
-	// if (mute_track) {
-	// 	items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &MidiTrackerEditor::update_mute_track_visibility)));
-	// 	mute_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-	// 	mute_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
-	// 	                                  (mute_track && string_is_affirmative (mute_track->gui_property ("visible"))));
-
-	// 	_main_automation_menu_map[Evoral::Parameter(MuteAutomation)] = mute_automation_item;
-	// }
-
-	// if (!pan_tracks.empty()) {
-	// 	items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &MidiTrackerEditor::update_pan_track_visibility)));
-	// 	pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-	// 	pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
-	// 					 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
-
-	// 	set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
-	// 	for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
-	// 		_main_automation_menu_map[*p] = pan_automation_item;
-	// 	}
-	// }
-}
-
-/** Set up the processor menu for the current set of processors, and
- *  display automation curves for any parameters which have data.
- */
-void
-MidiTrackerEditor::setup_processor_menu_and_curves ()
-{
-	_subplugin_menu_map.clear ();
-	subplugin_menu.items().clear ();
-	route->foreach_processor (sigc::mem_fun (*this, &MidiTrackerEditor::add_processor_to_subplugin_menu));
-	// route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
-}
-
-void
-MidiTrackerEditor::add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor> p)
-{
-	boost::shared_ptr<ARDOUR::Processor> processor (p.lock ());
-
-	if (!processor || !processor->display_to_user ()) {
-		return;
-	}
-
-	// /* we use this override to veto the Amp processor from the plugin menu,
-	//    as its automation lane can be accessed using the special "Fader" menu
-	//    option
-	// */
-
-	// if (boost::dynamic_pointer_cast<Amp> (processor) != 0) {
-	// 	return;
-	// }
-
-	using namespace Menu_Helpers;
-	ProcessorAutomationInfo *rai;
-	list<ProcessorAutomationInfo*>::iterator x;
-
-	const std::set<Evoral::Parameter>& automatable = processor->what_can_be_automated ();
-
-	if (automatable.empty()) {
-		return;
-	}
-
-	for (x = processor_automation.begin(); x != processor_automation.end(); ++x) {
-		if ((*x)->processor == processor) {
-			break;
-		}
-	}
-
-	if (x == processor_automation.end()) {
-		rai = new ProcessorAutomationInfo (processor);
-		processor_automation.push_back (rai);
-	} else {
-		rai = *x;
-	}
-
-	/* any older menu was deleted at the top of processors_changed()
-	   when we cleared the subplugin menu.
-	*/
-
-	rai->menu = manage (new Menu);
-	MenuList& items = rai->menu->items();
-	rai->menu->set_name ("ArdourContextMenu");
-
-	items.clear ();
-
-	std::set<Evoral::Parameter> has_visible_automation;
-	// AutomationTimeAxisView::what_has_visible_automation (processor, has_visible_automation);
-
-	for (std::set<Evoral::Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
-
-		ProcessorAutomationNode* pan;
-		Gtk::CheckMenuItem* mitem;
-
-		string name = processor->describe_parameter (*i);
-
-		if (name == X_("hidden")) {
-			continue;
-		}
-
-		items.push_back (CheckMenuElem (name));
-		mitem = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
-
-		_subplugin_menu_map[*i] = mitem;
-
-		if (has_visible_automation.find((*i)) != has_visible_automation.end()) {
-			mitem->set_active(true);
-		}
-
-		// if ((pan = find_processor_automation_node (processor, *i)) == 0) {
-
-		// 	/* new item */
-
-		// 	pan = new ProcessorAutomationNode (*i, mitem, *this);
-
-		// 	rai->lines.push_back (pan);
-
-		// } else {
-
-		// 	pan->menu_item = mitem;
-
-		// }
-
-		mitem->signal_toggled().connect (sigc::bind (sigc::mem_fun(*this, &MidiTrackerEditor::processor_menu_item_toggled), rai, pan));
-	}
-
-	if (items.size() == 0) {
-		return;
-	}
-
-	/* add the menu for this processor, because the subplugin
-	   menu is always cleared at the top of processors_changed().
-	   this is the result of some poor design in gtkmm and/or
-	   GTK+.
-	*/
-
-	subplugin_menu.items().push_back (MenuElem (processor->name(), *rai->menu));
-	rai->valid = true;
-}
-
-void
-MidiTrackerEditor::processor_menu_item_toggled (MidiTrackerEditor::ProcessorAutomationInfo* rai, MidiTrackerEditor::ProcessorAutomationNode* pan)
-{
-	bool showit = pan->menu_item->get_active();
-	bool redraw = false;
-
-	// if (pan->view == 0 && showit) {
-	// 	add_processor_automation_curve (rai->processor, pan->what);
-	// 	redraw = true;
-	// }
-
-	// if (pan->view && pan->view->set_marked_for_display (showit)) {
-	// 	redraw = true;
-	// }
-
-	// if (redraw && !no_redraw) {
-	// 	request_redraw ();
-	// }
-}
-
-void
 MidiTrackerEditor::setup_tooltips ()
 {
 	set_tooltip (beats_per_row_selector, _("Beats Per Row"));
@@ -899,121 +1086,4 @@ MidiTrackerEditor::beats_per_row_chosen (SnapType type)
 	if (ract && ract->get_active()) {
 		set_beats_per_row_to (type);
 	}
-}
-
-void
-MidiTrackerEditor::show_all_automation ()
-{
-	// Copy pasted from route_time_axis.cc
-
-	// if (apply_to_selection) {
-	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::show_all_automation, _1, false));
-	// } else {
-	// 	no_redraw = true;
-
-	// 	/* Show our automation */
-
-	// 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-	// 		i->second->set_marked_for_display (true);
-
-	// 		Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
-
-	// 		if (menu) {
-	// 			menu->set_active(true);
-	// 		}
-	// 	}
-
-
-	// 	/* Show processor automation */
-
-	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
-	// 			if ((*ii)->view == 0) {
-	// 				add_processor_automation_curve ((*i)->processor, (*ii)->what);
-	// 			}
-
-	// 			(*ii)->menu_item->set_active (true);
-	// 		}
-	// 	}
-
-	// 	no_redraw = false;
-
-	// 	/* Redraw */
-
-	// 	request_redraw ();
-	// }
-}
-
-void
-MidiTrackerEditor::show_existing_automation ()
-{
-	// Copy pasted from route_time_axis.cc
-
-	// if (apply_to_selection) {
-	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::show_existing_automation, _1, false));
-	// } else {
-	// 	no_redraw = true;
-
-	// 	/* Show our automation */
-
-	// 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-	// 		if (i->second->has_automation()) {
-	// 			i->second->set_marked_for_display (true);
-
-	// 			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
-	// 			if (menu) {
-	// 				menu->set_active(true);
-	// 			}
-	// 		}
-	// 	}
-
-	// 	/* Show processor automation */
-
-	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
-	// 			if ((*ii)->view != 0 && (*i)->processor->control((*ii)->what)->list()->size() > 0) {
-	// 				(*ii)->menu_item->set_active (true);
-	// 			}
-	// 		}
-	// 	}
-
-	// 	no_redraw = false;
-
-	// 	request_redraw ();
-	// }
-}
-
-void
-MidiTrackerEditor::hide_all_automation ()
-{
-	// Copy pasted from route_time_axis.cc
-
-	// if (apply_to_selection) {
-	// 	_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&MidiTrackerEditor::hide_all_automation, _1, false));
-	// } else {
-	// 	no_redraw = true;
-
-	// 	/* Hide our automation */
-
-	// 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-	// 		i->second->set_marked_for_display (false);
-
-	// 		Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
-
-	// 		if (menu) {
-	// 			menu->set_active (false);
-	// 		}
-	// 	}
-
-	// 	/* Hide processor automation */
-
-	// 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-	// 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
-	// 			(*ii)->menu_item->set_active (false);
-	// 		}
-	// 	}
-
-	// 	no_redraw = false;
-	// 	request_redraw ();
-	// }
 }

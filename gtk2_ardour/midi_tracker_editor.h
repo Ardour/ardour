@@ -50,6 +50,8 @@ namespace ARDOUR {
 	class Processor;
 };
 
+class AutomationTimeAxisView;
+
 // Maximum number of tracks in the midi tracker editor
 #define MAX_NUMBER_OF_TRACKS 256
 
@@ -63,6 +65,79 @@ class MidiTrackerEditor : public ArdourWindow
 	~MidiTrackerEditor();
 
   private:
+
+	///////////////////
+    // Automation	 //
+    ///////////////////
+
+	struct ProcessorAutomationNode {
+		Evoral::Parameter                         what;
+		Gtk::CheckMenuItem*                       menu_item;
+		// boost::shared_ptr<AutomationTimeAxisView> view;
+		MidiTrackerEditor&                        parent;
+
+	    ProcessorAutomationNode (Evoral::Parameter w, Gtk::CheckMenuItem* mitem, MidiTrackerEditor& p)
+		    : what (w), menu_item (mitem), parent (p) {}
+
+	    ~ProcessorAutomationNode ();
+	};
+
+	struct ProcessorAutomationInfo {
+	    boost::shared_ptr<ARDOUR::Processor> processor;
+	    bool                                 valid;
+	    Gtk::Menu*                           menu;
+	    std::vector<ProcessorAutomationNode*>     lines;
+
+	    ProcessorAutomationInfo (boost::shared_ptr<ARDOUR::Processor> i)
+		    : processor (i), valid (true), menu (0) {}
+
+	    ~ProcessorAutomationInfo ();
+	};
+	
+	/** Information about all automatable processor parameters that apply to
+	 *  this route.  The Amp processor is not included in this list.
+	 */
+	std::list<ProcessorAutomationInfo*> processor_automation;
+
+	ArdourButton                 automation_button;
+	Gtk::Menu                    subplugin_menu;
+	Gtk::Menu*                   automation_action_menu;
+
+	typedef std::map<Evoral::Parameter, Gtk::CheckMenuItem*> ParameterMenuMap;
+	/** parameter -> menu item map for the main automation menu */
+	ParameterMenuMap _main_automation_menu_map;
+	/** parameter -> menu item map for the plugin automation menu */
+	ParameterMenuMap _subplugin_menu_map;
+
+	// TODO replace AutomationTimeAxisView by AutomationTrackerView
+	boost::shared_ptr<AutomationTimeAxisView> gain_track;
+	boost::shared_ptr<AutomationTimeAxisView> trim_track;
+	boost::shared_ptr<AutomationTimeAxisView> mute_track;
+	std::list<boost::shared_ptr<AutomationTimeAxisView> > pan_tracks;
+
+	Gtk::CheckMenuItem* gain_automation_item;
+	Gtk::CheckMenuItem* trim_automation_item;
+	Gtk::CheckMenuItem* mute_automation_item;
+	Gtk::CheckMenuItem* pan_automation_item;
+
+	virtual void show_all_automation ();
+	virtual void show_existing_automation ();
+	virtual void hide_all_automation ();
+
+	void setup_processor_menu_and_curves ();
+	void add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor>);
+	void processor_menu_item_toggled (MidiTrackerEditor::ProcessorAutomationInfo*, MidiTrackerEditor::ProcessorAutomationNode*);
+	void build_automation_action_menu ();
+
+	void update_gain_track_visibility ();
+	void update_trim_track_visibility ();
+	void update_mute_track_visibility ();
+	void update_pan_track_visibility ();
+
+	////////////////////////////
+    // Other (to sort out)	  //
+    ////////////////////////////
+
 	struct MidiTrackerModelColumns : public Gtk::TreeModel::ColumnRecord {
 		MidiTrackerModelColumns()
 		{
@@ -102,37 +177,8 @@ class MidiTrackerEditor : public ArdourWindow
 	// same row, then this string is printed.
 	static const std::string undefined_str;
 
-	struct ProcessorAutomationNode {
-		Evoral::Parameter                         what;
-		Gtk::CheckMenuItem*                       menu_item;
-		// boost::shared_ptr<AutomationTimeAxisView> view;
-		MidiTrackerEditor&                        parent;
-
-	    ProcessorAutomationNode (Evoral::Parameter w, Gtk::CheckMenuItem* mitem, MidiTrackerEditor& p)
-		    : what (w), menu_item (mitem), parent (p) {}
-
-	    ~ProcessorAutomationNode ();
-	};
-
-	struct ProcessorAutomationInfo {
-	    boost::shared_ptr<ARDOUR::Processor> processor;
-	    bool                                 valid;
-	    Gtk::Menu*                           menu;
-	    std::vector<ProcessorAutomationNode*>     lines;
-
-	    ProcessorAutomationInfo (boost::shared_ptr<ARDOUR::Processor> i)
-		    : processor (i), valid (true), menu (0) {}
-
-	    ~ProcessorAutomationInfo ();
-	};
-	
 	boost::shared_ptr<ARDOUR::Route> route;
 
-	/** Information about all automatable processor parameters that apply to
-	 *  this route.  The Amp processor is not included in this list.
-	 */
-	std::list<ProcessorAutomationInfo*> processor_automation;
-	
 	MidiTrackerModelColumns      columns;
 	Glib::RefPtr<Gtk::ListStore> model;
 	Gtk::TreeView                view;
@@ -158,16 +204,6 @@ class MidiTrackerEditor : public ArdourWindow
 	bool                         visible_channel;
 	bool                         visible_velocity;
 	bool                         visible_delay;
-	ArdourButton                 automation_button;
-	Gtk::Menu                    subplugin_menu;
-	Gtk::Menu*                   automation_action_menu;
-
-
-	typedef std::map<Evoral::Parameter, Gtk::CheckMenuItem*> ParameterMenuMap;
-	/** parameter -> menu item map for the main automation menu */
-	ParameterMenuMap _main_automation_menu_map;
-	/** parameter -> menu item map for the plugin automation menu */
-	ParameterMenuMap _subplugin_menu_map;
 
 	boost::shared_ptr<ARDOUR::MidiRegion> region;
 	boost::shared_ptr<ARDOUR::MidiTrack>  track;
@@ -179,7 +215,6 @@ class MidiTrackerEditor : public ArdourWindow
 	PBD::ScopedConnection content_connection;
 
 	void build_beats_per_row_menu ();
-	void build_automation_action_menu ();
 
 	void register_actions ();
 
@@ -194,10 +229,6 @@ class MidiTrackerEditor : public ArdourWindow
 	void redisplay_visible_delay ();
 	void automation_click ();
 
-	virtual void show_all_automation ();
-	virtual void show_existing_automation ();
-	virtual void hide_all_automation ();
-
 	void setup_tooltips ();
 	void setup_toolbar ();
 	void setup_matrix ();
@@ -211,10 +242,6 @@ class MidiTrackerEditor : public ArdourWindow
 	void beats_per_row_selection_done (Editing::SnapType);
 	Glib::RefPtr<Gtk::RadioAction> beats_per_row_action (Editing::SnapType);
 	void beats_per_row_chosen (Editing::SnapType);
-
-	void setup_processor_menu_and_curves ();
-	void add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor>);
-	void processor_menu_item_toggled (MidiTrackerEditor::ProcessorAutomationInfo*, MidiTrackerEditor::ProcessorAutomationNode*);
 
 	// Make it up for the lack of C++11 support
 	template<typename T> std::string to_string(const T& v)
