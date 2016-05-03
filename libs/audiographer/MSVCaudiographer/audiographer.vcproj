@@ -281,6 +281,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\general\loudness_reader.cc"
+					>
+				</File>
+				<File
 					RelativePath="..\src\general\normalizer.cc"
 					>
 				</File>
@@ -369,6 +373,10 @@
 			</File>
 			<File
 				RelativePath="..\audiographer\utils\listed_source.h"
+				>
+			</File>
+			<File
+				RelativePath="..\audiographer\general\loudness_reader.h"
 				>
 			</File>
 			<File
