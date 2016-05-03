@@ -174,7 +174,7 @@ ARDOUR_UI::install_actions ()
 	              sigc::mem_fun (*this, &ARDOUR_UI::remove_lua_script));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("OpenVideo..."), _("Open Video"),
+	act = global_actions.register_action (main_actions, X_("OpenVideo"), _("Open Video..."),
 					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = global_actions.register_action (main_actions, X_("CloseVideo"), _("Remove Video"),
