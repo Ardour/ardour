@@ -34,6 +34,7 @@
 #include "ardour/tempo.h"
 #include "ardour/pannable.h"
 #include "ardour/midi_track.h"
+#include "ardour/midi_patch_manager.h"
 
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/keyboard.h"
@@ -648,80 +649,195 @@ MidiTrackerEditor::build_controller_menu ()
 		}
 	}
 
-	// TODO
-	// using namespace MIDI::Name;
-	// boost::shared_ptr<MasterDeviceNames> device_names = get_device_names();
+	using namespace MIDI::Name;
+	boost::shared_ptr<MasterDeviceNames> device_names = get_device_names();
 
-	// if (device_names && !device_names->controls().empty()) {
-	// 	/* Controllers names available in midnam file, generate fancy menu */
-	// 	unsigned n_items  = 0;
-	// 	unsigned n_groups = 0;
+	if (device_names && !device_names->controls().empty()) {
+		/* Controllers names available in midnam file, generate fancy menu */
+		unsigned n_items  = 0;
+		unsigned n_groups = 0;
 
-	// 	/* TODO: This is not correct, should look up the currently applicable ControlNameList
-	// 	   and only build a menu for that one. */
-	// 	for (MasterDeviceNames::ControlNameLists::const_iterator l = device_names->controls().begin();
-	// 	     l != device_names->controls().end(); ++l) {
-	// 		boost::shared_ptr<ControlNameList> name_list = l->second;
-	// 		Menu*                              ctl_menu  = NULL;
+		/* TODO: This is not correct, should look up the currently applicable ControlNameList
+		   and only build a menu for that one. */
+		for (MasterDeviceNames::ControlNameLists::const_iterator l = device_names->controls().begin();
+		     l != device_names->controls().end(); ++l) {
+			boost::shared_ptr<ControlNameList> name_list = l->second;
+			Menu*                              ctl_menu  = NULL;
 
-	// 		for (ControlNameList::Controls::const_iterator c = name_list->controls().begin();
-	// 		     c != name_list->controls().end();) {
-	// 			const uint16_t ctl = c->second->number();
-	// 			if (ctl != MIDI_CTL_MSB_BANK && ctl != MIDI_CTL_LSB_BANK) {
-	// 				/* Skip bank select controllers since they're handled specially */
-	// 				if (n_items == 0) {
-	// 					/* Create a new submenu */
-	// 					ctl_menu = manage (new Menu);
-	// 				}
+			for (ControlNameList::Controls::const_iterator c = name_list->controls().begin();
+			     c != name_list->controls().end();) {
+				const uint16_t ctl = c->second->number();
+				if (ctl != MIDI_CTL_MSB_BANK && ctl != MIDI_CTL_LSB_BANK) {
+					/* Skip bank select controllers since they're handled specially */
+					if (n_items == 0) {
+						/* Create a new submenu */
+						ctl_menu = manage (new Menu);
+					}
 
-	// 				MenuList& ctl_items (ctl_menu->items());
-	// 				if (chn_cnt > 1) {
-	// 					add_multi_channel_controller_item(ctl_items, ctl, c->second->name());
-	// 				} else {
-	// 					add_single_channel_controller_item(ctl_items, ctl, c->second->name());
-	// 				}
-	// 			}
+					MenuList& ctl_items (ctl_menu->items());
+					if (chn_cnt > 1) {
+						add_multi_channel_controller_item(ctl_items, ctl, c->second->name());
+					} else {
+						add_single_channel_controller_item(ctl_items, ctl, c->second->name());
+					}
+				}
 
-	// 			++c;
-	// 			if (ctl_menu && (++n_items == 16 || c == name_list->controls().end())) {
-	// 				/* Submenu has 16 items or we're done, add it to controller menu and reset */
-	// 				items.push_back(
-	// 					MenuElem(string_compose(_("Controllers %1-%2"),
-	// 					                        (16 * n_groups), (16 * n_groups) + n_items - 1),
-	// 					         *ctl_menu));
-	// 				ctl_menu = NULL;
-	// 				n_items  = 0;
-	// 				++n_groups;
-	// 			}
-	// 		}
-	// 	}
-	// } else {
-	// 	/* No controllers names, generate generic numeric menu */
-	// 	for (int i = 0; i < 127; i += 16) {
-	// 		Menu*     ctl_menu = manage (new Menu);
-	// 		MenuList& ctl_items (ctl_menu->items());
+				++c;
+				if (ctl_menu && (++n_items == 16 || c == name_list->controls().end())) {
+					/* Submenu has 16 items or we're done, add it to controller menu and reset */
+					items.push_back(
+						MenuElem(string_compose(_("Controllers %1-%2"),
+						                        (16 * n_groups), (16 * n_groups) + n_items - 1),
+						         *ctl_menu));
+					ctl_menu = NULL;
+					n_items  = 0;
+					++n_groups;
+				}
+			}
+		}
+	} else {
+		/* No controllers names, generate generic numeric menu */
+		for (int i = 0; i < 127; i += 16) {
+			Menu*     ctl_menu = manage (new Menu);
+			MenuList& ctl_items (ctl_menu->items());
 
-	// 		for (int ctl = i; ctl < i+16; ++ctl) {
-	// 			if (ctl == MIDI_CTL_MSB_BANK || ctl == MIDI_CTL_LSB_BANK) {
-	// 				/* Skip bank select controllers since they're handled specially */
-	// 				continue;
-	// 			}
+			for (int ctl = i; ctl < i+16; ++ctl) {
+				if (ctl == MIDI_CTL_MSB_BANK || ctl == MIDI_CTL_LSB_BANK) {
+					/* Skip bank select controllers since they're handled specially */
+					continue;
+				}
 
-	// 			if (chn_cnt > 1) {
-	// 				add_multi_channel_controller_item(
-	// 					ctl_items, ctl, string_compose(_("Controller %1"), ctl));
-	// 			} else {
-	// 				add_single_channel_controller_item(
-	// 					ctl_items, ctl, string_compose(_("Controller %1"), ctl));
-	// 			}
-	// 		}
+				if (chn_cnt > 1) {
+					add_multi_channel_controller_item(
+						ctl_items, ctl, string_compose(_("Controller %1"), ctl));
+				} else {
+					add_single_channel_controller_item(
+						ctl_items, ctl, string_compose(_("Controller %1"), ctl));
+				}
+			}
 
-	// 		/* Add submenu for this block of controllers to controller menu */
-	// 		items.push_back (
-	// 			MenuElem (string_compose (_("Controllers %1-%2"), i, i + 15),
-	// 			          *ctl_menu));
-	// 	}
-	// }
+			/* Add submenu for this block of controllers to controller menu */
+			items.push_back (
+				MenuElem (string_compose (_("Controllers %1-%2"), i, i + 15),
+				          *ctl_menu));
+		}
+	}
+}
+
+boost::shared_ptr<MIDI::Name::MasterDeviceNames>
+MidiTrackerEditor::get_device_names()
+{
+	using namespace MIDI::Name;
+
+	const std::string model;// = gui_property (X_("midnam-model-name"));
+
+	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance()
+		.document_by_model(model);
+	if (midnam) {
+		return midnam->master_device_names(model);
+	} else {
+		return boost::shared_ptr<MasterDeviceNames>();
+	}
+}
+
+
+/** Add a single menu item for a controller on one channel. */
+void
+MidiTrackerEditor::add_single_channel_controller_item(Menu_Helpers::MenuList& ctl_items,
+                                                      int                     ctl,
+                                                      const std::string&      name)
+{
+	using namespace Menu_Helpers;
+
+	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
+	for (uint8_t chn = 0; chn < 16; chn++) {
+		if (selected_channels & (0x0001 << chn)) {
+
+			Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
+			ctl_items.push_back (
+				CheckMenuElem (
+					string_compose ("<b>%1</b>: %2 [%3]", ctl, name, int (chn + 1)),
+					sigc::bind (
+						sigc::mem_fun (*this, &MidiTrackerEditor::toggle_automation_track),
+						fully_qualified_param)));
+			dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
+
+			// boost::shared_ptr<AutomationTimeAxisView> track = automation_child (
+			// 	fully_qualified_param);
+
+			bool visible = false;
+			// if (track) {
+			// 	if (track->marked_for_display()) {
+			// 		visible = true;
+			// 	}
+			// }
+
+			Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&ctl_items.back());
+			_controller_menu_map[fully_qualified_param] = cmi;
+			cmi->set_active (visible);
+
+			/* one channel only */
+			break;
+		}
+	}
+}
+
+/** Add a submenu with 1 item per channel for a controller on many channels. */
+void
+MidiTrackerEditor::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl_items,
+                                                     int                     ctl,
+                                                     const std::string&      name)
+{
+	using namespace Menu_Helpers;
+
+	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
+
+	Menu* chn_menu = manage (new Menu);
+	MenuList& chn_items (chn_menu->items());
+
+	/* add a couple of items to hide/show this controller on all channels */
+
+	Evoral::Parameter param_without_channel (MidiCCAutomation, 0, ctl);
+	chn_items.push_back (
+		MenuElem (_("Hide all channels"),
+		          sigc::bind (sigc::mem_fun (*this, &MidiTrackerEditor::change_all_channel_tracks_visibility),
+		                      false, param_without_channel)));
+	chn_items.push_back (
+		MenuElem (_("Show all channels"),
+		          sigc::bind (sigc::mem_fun (*this, &MidiTrackerEditor::change_all_channel_tracks_visibility),
+		                      true, param_without_channel)));
+
+	for (uint8_t chn = 0; chn < 16; chn++) {
+		if (selected_channels & (0x0001 << chn)) {
+
+			/* for each selected channel, add a menu item for this controller */
+
+			Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
+			chn_items.push_back (
+				CheckMenuElem (string_compose (_("Channel %1"), chn+1),
+				               sigc::bind (sigc::mem_fun (*this, &MidiTrackerEditor::toggle_automation_track),
+				                           fully_qualified_param)));
+
+			// boost::shared_ptr<AutomationTimeAxisView> track = automation_child (
+			// 	fully_qualified_param);
+			bool visible = false;
+
+			// if (track) {
+			// 	if (track->marked_for_display()) {
+			// 		visible = true;
+			// 	}
+			// }
+
+			Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&chn_items.back());
+			_controller_menu_map[fully_qualified_param] = cmi;
+			cmi->set_active (visible);
+		}
+	}
+
+	/* add the per-channel menu to the list of controllers, with the name of the controller */
+	ctl_items.push_back (MenuElem (string_compose ("<b>%1</b>: %2", ctl, name),
+	                               *chn_menu));
+	dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
 }
 
 void

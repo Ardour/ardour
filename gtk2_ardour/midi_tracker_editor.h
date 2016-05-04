@@ -41,6 +41,13 @@ namespace Evoral {
 	template<typename Time> class Note;
 };
 
+namespace MIDI {
+namespace Name {
+class MasterDeviceNames;
+class CustomDeviceMode;
+}
+}
+
 namespace ARDOUR {
 	class MidiRegion;
 	class MidiModel;
@@ -111,6 +118,8 @@ class MidiTrackerEditor : public ArdourWindow
 	ParameterMenuMap _subplugin_menu_map;
 	/** parameter -> menu item map for the channel command items */
 	ParameterMenuMap _channel_command_menu_map;
+	/** parameter -> menu item map for the controller menu */
+	ParameterMenuMap _controller_menu_map;
 
 	// TODO replace AutomationTimeAxisView by AutomationTrackerView
 	boost::shared_ptr<AutomationTimeAxisView> gain_track;
@@ -135,6 +144,9 @@ class MidiTrackerEditor : public ArdourWindow
 	void change_all_channel_tracks_visibility (bool yn, Evoral::Parameter param);
 	void toggle_automation_track (const Evoral::Parameter& param);
 	void build_controller_menu ();
+	boost::shared_ptr<MIDI::Name::MasterDeviceNames> get_device_names();
+	void add_single_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
+	void add_multi_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 
 	void update_gain_track_visibility ();
 	void update_trim_track_visibility ();
