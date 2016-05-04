@@ -102,6 +102,7 @@ class MidiTrackerEditor : public ArdourWindow
 	ArdourButton                 automation_button;
 	Gtk::Menu                    subplugin_menu;
 	Gtk::Menu*                   automation_action_menu;
+	Gtk::Menu*                   controller_menu;
 
 	typedef std::map<Evoral::Parameter, Gtk::CheckMenuItem*> ParameterMenuMap;
 	/** parameter -> menu item map for the main automation menu */

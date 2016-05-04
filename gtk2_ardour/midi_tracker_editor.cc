@@ -451,10 +451,10 @@ MidiTrackerEditor::build_automation_action_menu ()
 		   it has been used anywhere else.
 		*/
 
-		// build_controller_menu ();
+		build_controller_menu ();
 
-		// automation_items.push_back (MenuElem (_("Controllers"), *controller_menu));
-		// automation_items.back().set_sensitive (true);
+		automation_items.push_back (MenuElem (_("Controllers"), *controller_menu));
+		automation_items.back().set_sensitive (true);
 	} else {
 		automation_items.push_back (
 			MenuElem (string_compose ("<i>%1</i>", _("No MIDI Channels selected"))));
@@ -618,36 +618,37 @@ MidiTrackerEditor::toggle_automation_track (const Evoral::Parameter& param)
 void
 MidiTrackerEditor::build_controller_menu ()
 {
-	// using namespace Menu_Helpers;
+	using namespace Menu_Helpers;
 
-	// if (controller_menu) {
-	// 	/* it exists and has not been invalidated by a channel mode change */
-	// 	return;
-	// }
+	if (controller_menu) {
+		/* it exists and has not been invalidated by a channel mode change */
+		return;
+	}
 
-	// controller_menu = new Menu; // explicitly managed by us
-	// MenuList& items (controller_menu->items());
+	controller_menu = new Menu; // explicitly managed by us
+	MenuList& items (controller_menu->items());
 
-	// /* create several "top level" menu items for sets of controllers (16 at a
-	//    time), and populate each one with a submenu for each controller+channel
-	//    combination covering the currently selected channels for this track
-	// */
+	/* create several "top level" menu items for sets of controllers (16 at a
+	   time), and populate each one with a submenu for each controller+channel
+	   combination covering the currently selected channels for this track
+	*/
 
-	// const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
+	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 
-	// /* count the number of selected channels because we will build a different menu
-	//    structure if there is more than 1 selected.
-	// */
+	/* count the number of selected channels because we will build a different menu
+	   structure if there is more than 1 selected.
+	*/
 
-	// int chn_cnt = 0;
-	// for (uint8_t chn = 0; chn < 16; chn++) {
-	// 	if (selected_channels & (0x0001 << chn)) {
-	// 		if (++chn_cnt > 1) {
-	// 			break;
-	// 		}
-	// 	}
-	// }
+	int chn_cnt = 0;
+	for (uint8_t chn = 0; chn < 16; chn++) {
+		if (selected_channels & (0x0001 << chn)) {
+			if (++chn_cnt > 1) {
+				break;
+			}
+		}
+	}
 
+	// TODO
 	// using namespace MIDI::Name;
 	// boost::shared_ptr<MasterDeviceNames> device_names = get_device_names();
 
@@ -798,6 +799,7 @@ const std::string MidiTrackerEditor::undefined_str = "***";
 MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<ARDOUR::Route> rou, boost::shared_ptr<MidiRegion> reg, boost::shared_ptr<MidiTrack> tr)
 	: ArdourWindow (reg->name())
 	, automation_action_menu(0)
+	, controller_menu (0)
 	, route(rou)
 	, myactions (X_("Tracking"))
 	, visible_blank (false)
@@ -852,6 +854,8 @@ MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<ARDO
 MidiTrackerEditor::~MidiTrackerEditor ()
 {
 	delete mtm;
+	delete automation_action_menu;
+	delete controller_menu;
 }
 
 void
