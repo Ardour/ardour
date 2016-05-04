@@ -380,7 +380,7 @@ LuaBindings::common (lua_State* L)
 		.addVoidConstructor ()
 		.addFunction ("get", static_cast<uint32_t(ChanMapping::*)(DataType, uint32_t) const>(&ChanMapping::get))
 		.addFunction ("set", &ChanMapping::set)
-		.addConst ("Invalid", 4294967295) // UINT32_MAX
+		.addConst ("Invalid", 4294967295U) // UINT32_MAX
 		.endClass ()
 
 		.beginNamespace ("Properties")
