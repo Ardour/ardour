@@ -206,11 +206,24 @@ dump_view_tree (NSView* view, int depth, int maxdepth)
  * certainly be possible to make it work for Ardour.
  */
 
-static IMP original_nsview_drawIfNeeded;
-static std::vector<id> plugin_views;
 static uint32_t block_plugin_redraws = 0;
 static const uint32_t minimum_redraw_rate = 30; /* frames per second */
 static const uint32_t block_plugin_redraw_count = 15; /* number of combined plugin redraws to block, if blocking */
+
+#ifdef __ppc
+
+/* PowerPC versions of OS X do not support libdispatch, which we use below when swizzling objective C. But they also don't have Retina
+ * which is the underlying reason for this code. So just skip it on those CPUs.
+ */
+
+
+static void add_plugin_view (id view) {}
+static void remove_plugin_view (id view) {}
+
+#else
+
+static IMP original_nsview_drawIfNeeded;
+static std::vector<id> plugin_views;
 
 static void add_plugin_view (id view)
 {
@@ -263,6 +276,8 @@ static void interposed_drawIfNeeded (id receiver, SEL selector, NSRect rect)
 }
 
 @end
+
+#endif /* __ppc */
 
 /* END OF THE PLUGIN REDRAW HACK */
 
