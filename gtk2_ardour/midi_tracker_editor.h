@@ -108,6 +108,8 @@ class MidiTrackerEditor : public ArdourWindow
 	ParameterMenuMap _main_automation_menu_map;
 	/** parameter -> menu item map for the plugin automation menu */
 	ParameterMenuMap _subplugin_menu_map;
+	/** parameter -> menu item map for the channel command items */
+	ParameterMenuMap _channel_command_menu_map;
 
 	// TODO replace AutomationTimeAxisView by AutomationTrackerView
 	boost::shared_ptr<AutomationTimeAxisView> gain_track;
@@ -128,6 +130,10 @@ class MidiTrackerEditor : public ArdourWindow
 	void add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor>);
 	void processor_menu_item_toggled (MidiTrackerEditor::ProcessorAutomationInfo*, MidiTrackerEditor::ProcessorAutomationNode*);
 	void build_automation_action_menu ();
+	void add_channel_command_menu_item (Gtk::Menu_Helpers::MenuList& items, const std::string& label, ARDOUR::AutomationType auto_type, uint8_t cmd);
+	void change_all_channel_tracks_visibility (bool yn, Evoral::Parameter param);
+	void toggle_automation_track (const Evoral::Parameter& param);
+	void build_controller_menu ();
 
 	void update_gain_track_visibility ();
 	void update_trim_track_visibility ();
@@ -235,6 +241,9 @@ class MidiTrackerEditor : public ArdourWindow
 	void setup_scroller ();
 	void redisplay_model ();
 
+	bool is_midi_track () const;
+	boost::shared_ptr<ARDOUR::MidiTrack> midi_track() const;
+	
 	// Beats per row corresponds to a SnapType. I could have user an integer
 	// directly but I prefer to use the SnapType to be more consistent with the
 	// main editor.
