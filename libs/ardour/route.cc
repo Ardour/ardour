@@ -5297,11 +5297,9 @@ boost::shared_ptr<Processor>
 Route::the_instrument_unlocked () const
 {
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if (boost::dynamic_pointer_cast<PluginInsert>(*i)) {
-			if ((*i)->input_streams().n_midi() > 0 &&
-			    (*i)->output_streams().n_audio() > 0) {
-				return (*i);
-			}
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*i);
+		if (pi && pi->plugin ()->get_info ()->is_instrument ()) {
+			return (*i);
 		}
 	}
 	return boost::shared_ptr<Processor>();
