@@ -2218,14 +2218,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"),
 	     new BoolOption (
-		     "show-track-meters",
-		     _("Show meters on tracks in the editor"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_track_meters),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_track_meters)
-		     ));
-
-	add_option (_("Editor"),
-	     new BoolOption (
 		     "show-editor-meter",
 		     _("Display master-meter in the toolbar"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_editor_meter),
@@ -3292,6 +3284,24 @@ if (!ARDOUR::Profile->get_mixbus()) {
 		     _("LED meter style"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_style_led),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_style_led)
+		     ));
+
+	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Editor Meters")));
+
+	add_option (S_("Preferences|Metering"),
+	     new BoolOption (
+		     "show-track-meters",
+		     _("Show meters on tracks in the editor"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_track_meters),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_track_meters)
+		     ));
+
+	add_option (S_("Preferences|Metering"),
+	     new BoolOption (
+		     "editor-stereo-only-meters",
+		     _("Show at most stereo meters in the track-header"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_editor_stereo_only_meters),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
 		     ));
 
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Post Export Analysis")));

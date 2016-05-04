@@ -65,6 +65,7 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::tra
 	void clear_meters (bool reset_highlight = true);
 	void hide_meters ();
 	void setup_meters (int len=0, int width=3, int thin=2);
+	void set_max_audio_meter_count (uint32_t cnt = 0);
 
 	void set_type (ARDOUR::MeterType);
 	ARDOUR::MeterType get_type () { return meter_type; }
@@ -108,7 +109,8 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::tra
 	float                  max_peak;
 	ARDOUR::MeterType      meter_type;
 	ARDOUR::MeterType      visible_meter_type;
-	uint32_t               visible_meter_count;
+	uint32_t               meter_count;
+	uint32_t               max_visible_meters;
 
 	PBD::ScopedConnection _configuration_connection;
 	PBD::ScopedConnection _meter_type_connection;

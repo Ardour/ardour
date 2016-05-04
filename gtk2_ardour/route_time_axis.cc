@@ -124,6 +124,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	number_label.set_fallthrough_to_parent (true);
 
 	sess->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::parameter_changed, this, _1), gui_context());
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::parameter_changed));
+
+	parameter_changed ("editor-stereo-only-meters");
 }
 
 void
@@ -441,6 +444,12 @@ RouteTimeAxisView::parameter_changed (string const & p)
 {
 	if (p == "track-name-number") {
 		update_track_number_visibility();
+	} else if (p == "editor-stereo-only-meters") {
+		if (UIConfiguration::instance().get_editor_stereo_only_meters()) {
+			gm.get_level_meter().set_max_audio_meter_count (2);
+		} else {
+			gm.get_level_meter().set_max_audio_meter_count (0);
+		}
 	}
 }
 

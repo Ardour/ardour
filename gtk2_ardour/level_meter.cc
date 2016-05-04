@@ -51,7 +51,8 @@ LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* 
 	, max_peak (minus_infinity())
 	, meter_type (MeterPeak)
 	, visible_meter_type (MeterType(0))
-	, visible_meter_count (0)
+	, meter_count (0)
+	, max_visible_meters (0)
 	, color_changed (false)
 {
 	set_session (s);
@@ -230,7 +231,18 @@ LevelMeterBase::hide_all_meters ()
 			(*i).packed = false;
 		}
 	}
-	visible_meter_count = 0;
+	meter_count = 0;
+}
+
+void
+LevelMeterBase::set_max_audio_meter_count (uint32_t cnt)
+{
+	if (cnt == max_visible_meters) {
+		return;
+	}
+	color_changed = true; // force re-setup
+	max_visible_meters = cnt;
+	setup_meters (meter_length, regular_meter_width, thin_meter_width);
 }
 
 void
@@ -264,7 +276,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 	width = rint (width * UIConfiguration::instance().get_ui_scale());
 
 	if (   meters.size() > 0
-	    && nmeters == visible_meter_count
+	    && nmeters == meter_count
 	    && meters[0].width == width
 	    && meters[0].length == len
 	    && !color_changed
@@ -277,7 +289,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 			(meters.size() > 0) ? "yes" : "no",
 			(meters.size() > 0 &&  meters[0].width == width) ? "yes" : "no",
 			(meters.size() > 0 &&  meters[0].length == len) ? "yes" : "no",
-			(nmeters == visible_meter_count) ? "yes" : "no",
+			(nmeters == meter_count) ? "yes" : "no",
 			(meter_type == visible_meter_type) ? "yes" : "no",
 			!color_changed ? "yes" : "no"
 			);
@@ -459,13 +471,17 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 
 		//pack_end (*meters[n].meter, false, false);
 		mtr_pack (*meters[n].meter);
-		meters[n].meter->show_all ();
 		meters[n].packed = true;
+		if (max_visible_meters == 0 || (uint32_t) n < max_visible_meters + nmidi) {
+			meters[n].meter->show_all ();
+		} else {
+			meters[n].meter->hide ();
+		}
 	}
 	//show();
 	color_changed = false;
 	visible_meter_type = meter_type;
-	visible_meter_count = nmeters;
+	meter_count = nmeters;
 }
 
 void
