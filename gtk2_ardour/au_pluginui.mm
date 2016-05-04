@@ -37,7 +37,10 @@
 #import <AudioUnit/AUCocoaUIView.h>
 #import <CoreAudioKit/AUGenericView.h>
 #import <objc/runtime.h>
+
+#ifndef __ppc__
 #include <dispatch/dispatch.h>
+#endif
 
 #undef Marker
 
@@ -210,7 +213,7 @@ static uint32_t block_plugin_redraws = 0;
 static const uint32_t minimum_redraw_rate = 30; /* frames per second */
 static const uint32_t block_plugin_redraw_count = 15; /* number of combined plugin redraws to block, if blocking */
 
-#ifdef __ppc
+#ifdef __ppc__
 
 /* PowerPC versions of OS X do not support libdispatch, which we use below when swizzling objective C. But they also don't have Retina
  * which is the underlying reason for this code. So just skip it on those CPUs.
@@ -277,7 +280,7 @@ static void interposed_drawIfNeeded (id receiver, SEL selector, NSRect rect)
 
 @end
 
-#endif /* __ppc */
+#endif /* __ppc__ */
 
 /* END OF THE PLUGIN REDRAW HACK */
 
