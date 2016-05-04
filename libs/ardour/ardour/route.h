@@ -14,7 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #ifndef __ardour_route_h__
@@ -73,7 +72,7 @@ class InternalSend;
 
 class LIBARDOUR_API Route : public SessionObject, public Automatable, public RouteGroupMember, public GraphNode, public boost::enable_shared_from_this<Route>
 {
-  public:
+public:
 
 	typedef std::list<boost::shared_ptr<Processor> > ProcessorList;
 
@@ -107,8 +106,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool set_name (const std::string& str);
 	static void set_name_in_state (XMLNode &, const std::string &, bool rename_playlist = true);
 
-        uint32_t order_key () const;
-        bool has_order_key () const;
+	uint32_t order_key () const;
+	bool has_order_key () const;
 	void set_order_key (uint32_t);
 
 	bool is_auditioner() const { return _flags & Auditioner; }
@@ -138,7 +137,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	virtual void nonrealtime_handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
 	virtual void realtime_handle_transport_stopped () {}
 	virtual void realtime_locate () {}
-        virtual void non_realtime_locate (framepos_t);
+	virtual void non_realtime_locate (framepos_t);
 	virtual void set_pending_declick (int);
 
 	/* end of vfunc-based API */
@@ -594,75 +593,75 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	   special case not covered by this utility function.
 	*/
 	boost::shared_ptr<Processor> the_instrument() const;
-        InstrumentInfo& instrument_info() { return _instrument_info; }
+	InstrumentInfo& instrument_info() { return _instrument_info; }
 
-        /* "well-known" controls for panning. Any or all of these may return
-         * null.
-         */
+	/* "well-known" controls for panning. Any or all of these may return
+	 * null.
+	 */
 
-        boost::shared_ptr<AutomationControl> pan_azimuth_control() const;
-        boost::shared_ptr<AutomationControl> pan_elevation_control() const;
-        boost::shared_ptr<AutomationControl> pan_width_control() const;
-        boost::shared_ptr<AutomationControl> pan_frontback_control() const;
-        boost::shared_ptr<AutomationControl> pan_lfe_control() const;
+	boost::shared_ptr<AutomationControl> pan_azimuth_control() const;
+	boost::shared_ptr<AutomationControl> pan_elevation_control() const;
+	boost::shared_ptr<AutomationControl> pan_width_control() const;
+	boost::shared_ptr<AutomationControl> pan_frontback_control() const;
+	boost::shared_ptr<AutomationControl> pan_lfe_control() const;
 
-        /* "well-known" controls for an EQ in this route. Any or all may
-         * be null. eq_band_cnt() must return 0 if there is no EQ present.
-         * Passing an @param band value >= eq_band_cnt() will guarantee the
-         * return of a null ptr (or an empty string for eq_band_name()).
-         */
-        uint32_t eq_band_cnt () const;
-        std::string eq_band_name (uint32_t) const;
-        boost::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const;
-        boost::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const;
-        boost::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const;
-        boost::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const;
-        boost::shared_ptr<AutomationControl> eq_enable_controllable () const;
-        boost::shared_ptr<AutomationControl> eq_hpf_controllable () const;
+	/* "well-known" controls for an EQ in this route. Any or all may
+	 * be null. eq_band_cnt() must return 0 if there is no EQ present.
+	 * Passing an @param band value >= eq_band_cnt() will guarantee the
+	 * return of a null ptr (or an empty string for eq_band_name()).
+	 */
+	uint32_t eq_band_cnt () const;
+	std::string eq_band_name (uint32_t) const;
+	boost::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const;
+	boost::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const;
+	boost::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const;
+	boost::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const;
+	boost::shared_ptr<AutomationControl> eq_enable_controllable () const;
+	boost::shared_ptr<AutomationControl> eq_hpf_controllable () const;
 
-        /* "well-known" controls for a compressor in this route. Any or all may
-         * be null.
-         */
-        boost::shared_ptr<AutomationControl> comp_enable_controllable () const;
-        boost::shared_ptr<AutomationControl> comp_threshold_controllable () const;
-        boost::shared_ptr<AutomationControl> comp_speed_controllable () const;
-        boost::shared_ptr<AutomationControl> comp_mode_controllable () const;
-        boost::shared_ptr<AutomationControl> comp_makeup_controllable () const;
-        boost::shared_ptr<AutomationControl> comp_redux_controllable () const;
+	/* "well-known" controls for a compressor in this route. Any or all may
+	 * be null.
+	 */
+	boost::shared_ptr<AutomationControl> comp_enable_controllable () const;
+	boost::shared_ptr<AutomationControl> comp_threshold_controllable () const;
+	boost::shared_ptr<AutomationControl> comp_speed_controllable () const;
+	boost::shared_ptr<AutomationControl> comp_mode_controllable () const;
+	boost::shared_ptr<AutomationControl> comp_makeup_controllable () const;
+	boost::shared_ptr<AutomationControl> comp_redux_controllable () const;
 
-        /* @param mode must be supplied by the comp_mode_controllable(). All other values
-         * result in undefined behaviour
-         */
-        std::string comp_mode_name (uint32_t mode) const;
-        /* @param mode - as for comp mode name. This returns the name for the
-         * parameter/control accessed via comp_speed_controllable(), which can
-         * be mode dependent.
-         */
-        std::string comp_speed_name (uint32_t mode) const;
+	/* @param mode must be supplied by the comp_mode_controllable(). All other values
+	 * result in undefined behaviour
+	 */
+	std::string comp_mode_name (uint32_t mode) const;
+	/* @param mode - as for comp mode name. This returns the name for the
+	 * parameter/control accessed via comp_speed_controllable(), which can
+	 * be mode dependent.
+	 */
+	std::string comp_speed_name (uint32_t mode) const;
 
-        /* "well-known" controls for sends to well-known busses in this route. Any or all may
-         * be null.
-         *
-         * In Mixbus, these are the sends that connect to the mixbusses.
-         * In Ardour, these are user-created sends that connect to user-created
-         * Aux busses.
-         */
-        boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const;
-        boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const;
-        /* for the same value of @param n, this returns the name of the send
-         * associated with the pair of controllables returned by the above two methods.
-         */
-        std::string send_name (uint32_t n) const;
+	/* "well-known" controls for sends to well-known busses in this route. Any or all may
+	 * be null.
+	 *
+	 * In Mixbus, these are the sends that connect to the mixbusses.
+	 * In Ardour, these are user-created sends that connect to user-created
+	 * Aux busses.
+	 */
+	boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const;
+	boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const;
+	/* for the same value of @param n, this returns the name of the send
+	 * associated with the pair of controllables returned by the above two methods.
+	 */
+	std::string send_name (uint32_t n) const;
 
-        /* well known control that enables/disables sending to the master bus.
-         *
-         * In Ardour, this returns null.
-         * In Mixbus, it will return a suitable control, or null depending on
-         * the route.
-         */
-        boost::shared_ptr<AutomationControl> master_send_enable_controllable () const;
+	/* well known control that enables/disables sending to the master bus.
+	 *
+	 * In Ardour, this returns null.
+	 * In Mixbus, it will return a suitable control, or null depending on
+	 * the route.
+	 */
+	boost::shared_ptr<AutomationControl> master_send_enable_controllable () const;
 
-        void protect_automation ();
+	void protect_automation ();
 
 	enum {
 		/* These numbers are taken from MIDI Machine Control,
@@ -675,7 +674,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	void     set_remote_control_id (uint32_t id, bool notify_class_listeners = true);
 	uint32_t remote_control_id () const;
-        void     set_remote_control_id_explicit (uint32_t order_key);
+	void     set_remote_control_id_explicit (uint32_t order_key);
 
 	/* for things concerned about *this* route's RID */
 
@@ -688,13 +687,13 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	bool has_external_redirects() const;
 
-        /* can only be executed by a route for which is_monitor() is true
-	   (i.e. the monitor out)
-        */
-        void monitor_run (framepos_t start_frame, framepos_t end_frame,
-			  pframes_t nframes, int declick);
+	/* can only be executed by a route for which is_monitor() is true
+	 *	 (i.e. the monitor out)
+	 */
+	void monitor_run (framepos_t start_frame, framepos_t end_frame,
+			pframes_t nframes, int declick);
 
-  protected:
+protected:
 	friend class Session;
 
 	void catch_up_on_solo_mute_override ();
@@ -703,12 +702,12 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	void curve_reallocate ();
 	virtual void set_block_size (pframes_t nframes);
 
-  protected:
+protected:
 	virtual framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&) { return nframes; }
 
-        void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
+	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
 
-        void passthru (BufferSet&, framepos_t start_frame, framepos_t end_frame,
+	void passthru (BufferSet&, framepos_t start_frame, framepos_t end_frame,
 			pframes_t nframes, int declick);
 
 	virtual void write_out_of_band_data (BufferSet& /* bufs */, framepos_t /* start_frame */, framepos_t /* end_frame */,
@@ -791,11 +790,11 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	DataType       _default_type;
 	FedBy          _fed_by;
 
-        InstrumentInfo _instrument_info;
+	InstrumentInfo _instrument_info;
 
 	virtual ChanCount input_streams () const;
 
-  protected:
+protected:
 	virtual XMLNode& state(bool);
 
 	int configure_processors (ProcessorStreams*);
@@ -823,13 +822,13 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	boost::shared_ptr<Processor> the_instrument_unlocked() const;
 
-  private:
+private:
 	int set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
 
 	uint32_t _order_key;
 	bool _has_order_key;
-        uint32_t _remote_control_id;
+	uint32_t _remote_control_id;
 
 	int64_t _track_number;
 
@@ -913,9 +912,9 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	*/
 	boost::weak_ptr<Processor> _processor_after_last_custom_meter;
 
-        void reset_instrument_info ();
+	void reset_instrument_info ();
 
-        void set_remote_control_id_internal (uint32_t id, bool notify_class_listeners = true);
+	void set_remote_control_id_internal (uint32_t id, bool notify_class_listeners = true);
 };
 
 } // namespace ARDOUR
