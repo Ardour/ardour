@@ -34,20 +34,8 @@ using namespace PBD;
  * and some plugin may change either behind our back.
  */
 
-LocaleGuard::LocaleGuard (const char*)
-	: old_c (0)
-{
-	init ();
-}
-
 LocaleGuard::LocaleGuard ()
 	: old_c (0)
-{
-	init ();
-}
-
-void
-LocaleGuard::init ()
 {
 	char* actual = setlocale (LC_NUMERIC, NULL);
 	if (strcmp ("C", actual)) {

@@ -245,7 +245,7 @@ Speakers::get_state ()
 {
         XMLNode* node = new XMLNode (X_("Speakers"));
         char buf[32];
-        LocaleGuard lg (X_("C"));
+        LocaleGuard lg ();
 
         for (vector<Speaker>::const_iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
                 XMLNode* speaker = new XMLNode (X_("Speaker"));
@@ -269,7 +269,7 @@ Speakers::set_state (const XMLNode& node, int /*version*/)
         XMLNodeConstIterator i;
         XMLProperty const * prop;
         double a, e, d;
-        LocaleGuard lg (X_("C"));
+        LocaleGuard lg ();
         int n = 0;
 
         _speakers.clear ();

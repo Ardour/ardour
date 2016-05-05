@@ -366,7 +366,7 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 
 	float tcfps = _session->timecode_frames_per_second();
 
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
 	bool filenameset = false;
@@ -482,7 +482,7 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 XMLNode&
 ExportVideoDialog::get_state ()
 {
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 	XMLNode* node = new XMLNode (X_("Videoexport"));
 	node->add_property (X_("ChangeGeometry"), scale_checkbox.get_active() ? X_("1") : X_("0"));
 	node->add_property (X_("KeepAspect"), scale_aspect.get_active() ? X_("1") : X_("0"));

@@ -348,7 +348,7 @@ LadspaPlugin::add_state (XMLNode* root) const
 {
 	XMLNode *child;
 	char buf[32];
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	for (uint32_t i = 0; i < parameter_count(); ++i){
 
@@ -381,7 +381,7 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 	const char *data;
 	uint32_t port_id;
 #endif
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LadspaPlugin::set_state") << endmsg;
@@ -431,7 +431,7 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 	const char *data;
 	uint32_t port_id;
 #endif
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LadspaPlugin::set_state") << endmsg;

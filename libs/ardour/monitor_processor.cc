@@ -226,7 +226,7 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
 XMLNode&
 MonitorProcessor::state (bool full)
 {
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
         XMLNode& node (Processor::state (full));
         char buf[64];
 

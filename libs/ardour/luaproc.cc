@@ -713,7 +713,7 @@ LuaProc::add_state (XMLNode* root) const
 {
 	XMLNode*    child;
 	char        buf[32];
-	LocaleGuard lg(X_("C"));
+	LocaleGuard lg ();
 
 	gchar* b64 = g_base64_encode ((const guchar*)_script.c_str (), _script.size ());
 	std::string b64s (b64);
@@ -783,7 +783,7 @@ LuaProc::set_state (const XMLNode& node, int version)
 	const char *port;
 	uint32_t port_id;
 #endif
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	if (_script.empty ()) {
 		if (set_script_from_state (node)) {

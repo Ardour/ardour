@@ -1127,7 +1127,7 @@ LV2Plugin::add_state(XMLNode* root) const
 
 	XMLNode*    child;
 	char        buf[32];
-	LocaleGuard lg(X_("C"));
+	LocaleGuard lg ();
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		if (parameter_is_input(i) && parameter_is_control(i)) {
@@ -1806,7 +1806,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 	const char*          sym;
 	const char*          value;
 	uint32_t             port_id;
-	LocaleGuard          lg(X_("C"));
+	LocaleGuard          lg ();
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LV2Plugin::set_state") << endmsg;

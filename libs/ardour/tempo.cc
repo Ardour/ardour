@@ -74,7 +74,7 @@ TempoSection::TempoSection (const XMLNode& node)
 {
 	XMLProperty const * prop;
 	BBT_Time start;
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	if ((prop = node.property ("start")) == 0) {
 		error << _("TempoSection XML node has no \"start\" property") << endmsg;
@@ -133,7 +133,7 @@ TempoSection::get_state() const
 {
 	XMLNode *root = new XMLNode (xml_state_node_name);
 	char buf[256];
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	snprintf (buf, sizeof (buf), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
 		  start().bars,
@@ -196,7 +196,7 @@ MeterSection::MeterSection (const XMLNode& node)
 {
 	XMLProperty const * prop;
 	BBT_Time start;
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	if ((prop = node.property ("start")) == 0) {
 		error << _("MeterSection XML node has no \"start\" property") << endmsg;
@@ -250,7 +250,7 @@ MeterSection::get_state() const
 {
 	XMLNode *root = new XMLNode (xml_state_node_name);
 	char buf[256];
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	snprintf (buf, sizeof (buf), "%" PRIu32 "|%" PRIu32 "|%" PRIu32,
 		  start().bars,

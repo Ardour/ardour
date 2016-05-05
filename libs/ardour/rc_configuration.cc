@@ -172,7 +172,7 @@ XMLNode&
 RCConfiguration::get_state ()
 {
 	XMLNode* root;
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	root = new XMLNode("Ardour");
 
@@ -193,7 +193,7 @@ XMLNode&
 RCConfiguration::get_variables ()
 {
 	XMLNode* node;
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	node = new XMLNode ("Config");
 

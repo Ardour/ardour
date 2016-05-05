@@ -530,7 +530,7 @@ IO::state (bool /*full_state*/)
 	char buf[64];
 	string str;
 	int n;
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 	Glib::Threads::Mutex::Lock lm (io_lock);
 
 	node->add_property("name", _name);
@@ -597,7 +597,7 @@ IO::set_state (const XMLNode& node, int version)
 
 	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	/* force use of non-localized representation of decimal point,
 	   since we use it a lot in XML files and so forth.
@@ -658,7 +658,7 @@ IO::set_state_2X (const XMLNode& node, int version, bool in)
 {
 	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 
 	/* force use of non-localized representation of decimal point,
 	   since we use it a lot in XML files and so forth.

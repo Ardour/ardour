@@ -29,11 +29,9 @@ namespace PBD {
 	struct LIBPBD_API LocaleGuard {
 		public:
 			LocaleGuard ();
-			LocaleGuard (const char*); // deprecated
 			~LocaleGuard ();
 
 		private:
-			void init ();
 			std::locale old_cpp;
 			char* old_c;
 	};

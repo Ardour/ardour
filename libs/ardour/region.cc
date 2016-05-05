@@ -1158,7 +1158,7 @@ Region::state ()
 	XMLNode *node = new XMLNode ("Region");
 	char buf[64];
 	char buf2[64];
-	LocaleGuard lg (X_("C"));
+	LocaleGuard lg ();
 	const char* fe = NULL;
 
 	/* custom version of 'add_properties (*node);'
