@@ -19,36 +19,62 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <locale.h>
 
 #include "pbd/locale_guard.h"
 
 using namespace PBD;
 
-// try to avoid calling setlocale() recursively.  this is not thread-safe.
-std::string PBD::LocaleGuard::current;
+/* The initial C++ locate is "C" regardless of the user's preferred locale.
+ * and affects std::sprintf() et al from <cstdio>
+ *
+ * the C locale from stlocale() matches the user's preferred locale
+ * and effects ::sprintf() et al from <stdio.h>
+ *
+ * Setting the C++ locale will change the C locale, but not the other way 'round.
+ * and some plugin may change either behind our back.
+ */
 
-LocaleGuard::LocaleGuard (const char* str)
-	: old(0)
+LocaleGuard::LocaleGuard (const char*)
+	: old_c (0)
 {
-	if (current != str) {
-		old = strdup (setlocale (LC_NUMERIC, NULL));
-		if (strcmp (old, str)) {
-			if (setlocale (LC_NUMERIC, str)) {
-				current = str;
-			}
-		}
+	init ();
+}
+
+LocaleGuard::LocaleGuard ()
+	: old_c (0)
+{
+	init ();
+}
+
+void
+LocaleGuard::init ()
+{
+	char* actual = setlocale (LC_NUMERIC, NULL);
+	if (strcmp ("C", actual)) {
+		old_c = strdup (actual);
+		/* this changes both C++ and C locale */
+		std::locale::global (std::locale (std::locale::classic(), "C", std::locale::numeric));
 	}
+	assert (old_cpp == std::locale::classic ());
 }
 
 LocaleGuard::~LocaleGuard ()
 {
-	if (old) {
-		if (setlocale (LC_NUMERIC, old)) {
-			current = old;
-		}
+	char* actual = setlocale (LC_NUMERIC, NULL);
+	std::locale current;
 
-		free (old);
+	if (current != old_cpp) {
+		/* the C++ locale should always be "C", that's the default
+		 * at application start, and ardour never changes it
+		 * if it's not: some plugin meddled with it.
+		 */
+		assert (old_cpp == std::locale::classic ());
+		std::locale::global (old_cpp);
 	}
+	if (old_c && strcmp (old_c, actual)) {
+		setlocale (LC_NUMERIC, old_c);
+	}
+	free (old_c);
 }
-

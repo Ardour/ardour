@@ -22,20 +22,21 @@
 
 #include "pbd/libpbd_visibility.h"
 
-#include <string>
+#include <locale>
 
 namespace PBD {
 
-struct LIBPBD_API LocaleGuard {
-    LocaleGuard (const char*);
-    ~LocaleGuard ();
+	struct LIBPBD_API LocaleGuard {
+		public:
+			LocaleGuard ();
+			LocaleGuard (const char*); // deprecated
+			~LocaleGuard ();
 
-	static std::string current;
-
-private:
-    char* old;
-};
-
+		private:
+			void init ();
+			std::locale old_cpp;
+			char* old_c;
+	};
 }
 
 #endif /* __pbd_locale_guard__ */
