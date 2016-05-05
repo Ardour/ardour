@@ -1365,7 +1365,7 @@ Selection::set_state (XMLNode const & node, int)
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == X_("RouteView")) {
 
-			XMLProperty* prop_id = (*i)->property (X_("id"));
+			XMLProperty const * prop_id = (*i)->property (X_("id"));
 			assert (prop_id);
 			PBD::ID id (prop_id->value ());
 			RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (id);
@@ -1374,7 +1374,7 @@ Selection::set_state (XMLNode const & node, int)
 			}
 
 		} else if ((*i)->name() == X_("Region")) {
-			XMLProperty* prop_id = (*i)->property (X_("id"));
+			XMLProperty const * prop_id = (*i)->property (X_("id"));
 			assert (prop_id);
 			PBD::ID id (prop_id->value ());
 
@@ -1392,7 +1392,7 @@ Selection::set_state (XMLNode const & node, int)
 			}
 
 		} else if ((*i)->name() == X_("MIDINote")) {
-			XMLProperty* prop_region_id = (*i)->property (X_("region-id"));
+			XMLProperty const * prop_region_id = (*i)->property (X_("region-id"));
 
 			assert (prop_region_id);
 
@@ -1405,12 +1405,12 @@ Selection::set_state (XMLNode const & node, int)
 			XMLNodeList children = (*i)->children ();
 
 			for (XMLNodeList::const_iterator ci = children.begin(); ci != children.end(); ++ci) {
-				XMLProperty* prop_channel = (*ci)->property (X_("channel"));
-				XMLProperty* prop_time = (*ci)->property (X_("time"));
-				XMLProperty* prop_note = (*ci)->property (X_("note"));
-				XMLProperty* prop_length = (*ci)->property (X_("length"));
-				XMLProperty* prop_velocity = (*ci)->property (X_("velocity"));
-				XMLProperty* prop_off_velocity = (*ci)->property (X_("off-velocity"));
+				XMLProperty const * prop_channel = (*ci)->property (X_("channel"));
+				XMLProperty const * prop_time = (*ci)->property (X_("time"));
+				XMLProperty const * prop_note = (*ci)->property (X_("note"));
+				XMLProperty const * prop_length = (*ci)->property (X_("length"));
+				XMLProperty const * prop_velocity = (*ci)->property (X_("velocity"));
+				XMLProperty const * prop_off_velocity = (*ci)->property (X_("off-velocity"));
 
 				assert (prop_channel);
 				assert (prop_time);
@@ -1445,16 +1445,16 @@ Selection::set_state (XMLNode const & node, int)
 			}
 
 		} else if  ((*i)->name() == X_("ControlPoint")) {
-			XMLProperty* prop_type = (*i)->property (X_("type"));
+			XMLProperty const * prop_type = (*i)->property (X_("type"));
 
 			assert(prop_type);
 
 			if (prop_type->value () == "track") {
 
-				XMLProperty* prop_route_id = (*i)->property (X_("route-id"));
-				XMLProperty* prop_alist_id = (*i)->property (X_("automation-list-id"));
-				XMLProperty* prop_parameter = (*i)->property (X_("parameter"));
-				XMLProperty* prop_view_index = (*i)->property (X_("view-index"));
+				XMLProperty const * prop_route_id = (*i)->property (X_("route-id"));
+				XMLProperty const * prop_alist_id = (*i)->property (X_("automation-list-id"));
+				XMLProperty const * prop_parameter = (*i)->property (X_("parameter"));
+				XMLProperty const * prop_view_index = (*i)->property (X_("view-index"));
 
 				assert (prop_route_id);
 				assert (prop_alist_id);
@@ -1484,8 +1484,8 @@ Selection::set_state (XMLNode const & node, int)
 					add (cps);
 				}
 			} else if (prop_type->value () == "region") {
-				XMLProperty* prop_region_id = (*i)->property (X_("region-id"));
-				XMLProperty* prop_view_index = (*i)->property (X_("view-index"));
+				XMLProperty const * prop_region_id = (*i)->property (X_("region-id"));
+				XMLProperty const * prop_view_index = (*i)->property (X_("view-index"));
 
 				if (!prop_region_id || !prop_view_index) {
 					continue;
@@ -1515,8 +1515,8 @@ Selection::set_state (XMLNode const & node, int)
 			}
 
 		} else if  ((*i)->name() == X_("AudioRange")) {
-			XMLProperty* prop_start = (*i)->property (X_("start"));
-			XMLProperty* prop_end = (*i)->property (X_("end"));
+			XMLProperty const * prop_start = (*i)->property (X_("start"));
+			XMLProperty const * prop_end = (*i)->property (X_("end"));
 
 			assert (prop_start);
 			assert (prop_end);
@@ -1528,8 +1528,8 @@ Selection::set_state (XMLNode const & node, int)
 
 		} else if ((*i)->name() == X_("AutomationView")) {
 
-			XMLProperty* prop_id = (*i)->property (X_("id"));
-			XMLProperty* prop_parameter = (*i)->property (X_("parameter"));
+			XMLProperty const * prop_id = (*i)->property (X_("id"));
+			XMLProperty const * prop_parameter = (*i)->property (X_("parameter"));
 
 			assert (prop_id);
 			assert (prop_parameter);
@@ -1552,8 +1552,8 @@ Selection::set_state (XMLNode const & node, int)
 
 		} else if ((*i)->name() == X_("Marker")) {
 
-			XMLProperty* prop_id = (*i)->property (X_("id"));
-			XMLProperty* prop_start = (*i)->property (X_("start"));
+			XMLProperty const * prop_id = (*i)->property (X_("id"));
+			XMLProperty const * prop_start = (*i)->property (X_("start"));
 			assert (prop_id);
 			assert (prop_start);
 

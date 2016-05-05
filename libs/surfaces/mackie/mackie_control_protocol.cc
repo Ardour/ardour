@@ -867,7 +867,7 @@ MackieControlProtocol::create_surfaces ()
 			XMLNode* this_device = 0;
 			XMLNodeList const& devices = configuration_state->children();
 			for (XMLNodeList::const_iterator d = devices.begin(); d != devices.end(); ++d) {
-				XMLProperty* prop = (*d)->property (X_("name"));
+				XMLProperty const * prop = (*d)->property (X_("name"));
 				if (prop && prop->value() == _device_info.name()) {
 					this_device = *d;
 					break;

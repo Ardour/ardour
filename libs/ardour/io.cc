@@ -595,7 +595,7 @@ IO::set_state (const XMLNode& node, int version)
 	 */
 	assert (version >= 3000);
 
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
 	LocaleGuard lg (X_("C"));
 
@@ -656,7 +656,7 @@ IO::set_state (const XMLNode& node, int version)
 int
 IO::set_state_2X (const XMLNode& node, int version, bool in)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
 	LocaleGuard lg (X_("C"));
 
@@ -928,7 +928,7 @@ IO::make_connections (const XMLNode& node, int version, bool in)
 		return make_connections_2X (node, version, in);
 	}
 
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	for (XMLNodeConstIterator i = node.children().begin(); i != node.children().end(); ++i) {
 
@@ -989,7 +989,7 @@ IO::prepare_for_reset (XMLNode& node, const std::string& name)
 	   the name of the thing we're applying it to.
 	*/
 
-	XMLProperty* prop;
+	XMLProperty * prop;
 	XMLNodeList children = node.children();
 
 	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
@@ -1020,7 +1020,7 @@ IO::prepare_for_reset (XMLNode& node, const std::string& name)
 int
 IO::make_connections_2X (const XMLNode& node, int /*version*/, bool in)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	/* XXX: bundles ("connections" as was) */
 
@@ -1596,7 +1596,7 @@ IO::bundle_channel_name (uint32_t c, uint32_t n, DataType t) const
 string
 IO::name_from_state (const XMLNode& node)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	if ((prop = node.property ("name")) != 0) {
 		return prop->value();

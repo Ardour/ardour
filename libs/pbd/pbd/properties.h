@@ -236,8 +236,8 @@ public:
 		if (i == children.end()) {
 			return 0;
 		}
-		XMLProperty* from = (*i)->property ("from");
-		XMLProperty* to = (*i)->property ("to");
+		XMLProperty const * from = (*i)->property ("from");
+		XMLProperty const * to = (*i)->property ("to");
 
 		if (!from || !to) {
 			return 0;

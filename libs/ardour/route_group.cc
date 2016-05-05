@@ -249,7 +249,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 
 	set_id (node);
 	set_values (node);

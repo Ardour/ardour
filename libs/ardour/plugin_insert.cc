@@ -2006,7 +2006,7 @@ PluginInsert::set_control_ids (const XMLNode& node, int version)
 
 	for (iter = nlist.begin(); iter != nlist.end(); ++iter) {
 		if ((*iter)->name() == Controllable::xml_node_name) {
-			const XMLProperty* prop;
+			XMLProperty const * prop;
 
 			uint32_t p = (uint32_t)-1;
 #ifdef LV2_SUPPORT
@@ -2047,7 +2047,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	XMLPropertyList plist;
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 	ARDOUR::PluginType type;
 
 	if ((prop = node.property ("type")) == 0) {
@@ -2329,7 +2329,7 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 		}
 
 		XMLNodeList cnodes;
-		XMLProperty *cprop;
+		XMLProperty const * cprop;
 		XMLNodeConstIterator iter;
 		XMLNode *child;
 		const char *port;

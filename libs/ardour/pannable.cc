@@ -213,7 +213,7 @@ Pannable::set_state (const XMLNode& root, int version)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == Controllable::xml_node_name) {
-			const XMLProperty* prop = (*niter)->property (X_("name"));
+			XMLProperty const * prop = (*niter)->property (X_("name"));
 
 			if (!prop) {
 				continue;
@@ -235,7 +235,7 @@ Pannable::set_state (const XMLNode& root, int version)
 			set_automation_xml_state (**niter, PanAzimuthAutomation);
 
 		} else {
-			const XMLProperty* prop;
+			XMLProperty const * prop;
 
 			/* old school (alpha1-6) XML info */
 

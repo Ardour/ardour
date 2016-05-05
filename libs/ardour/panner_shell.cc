@@ -171,7 +171,7 @@ PannerShell::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist = node.children ();
 	XMLNodeConstIterator niter;
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 	LocaleGuard lg (X_("C"));
 
 	if ((prop = node.property (X_("bypassed"))) != 0) {

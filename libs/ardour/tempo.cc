@@ -72,7 +72,7 @@ const string TempoSection::xml_state_node_name = "Tempo";
 TempoSection::TempoSection (const XMLNode& node)
 	: MetricSection (BBT_Time()), Tempo (TempoMap::default_tempo())
 {
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 	BBT_Time start;
 	LocaleGuard lg (X_("C"));
 
@@ -194,7 +194,7 @@ const string MeterSection::xml_state_node_name = "Meter";
 MeterSection::MeterSection (const XMLNode& node)
 	: MetricSection (BBT_Time()), Meter (TempoMap::default_meter())
 {
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 	BBT_Time start;
 	LocaleGuard lg (X_("C"));
 

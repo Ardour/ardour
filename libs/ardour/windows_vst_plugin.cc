@@ -115,8 +115,8 @@ WindowsVSTPluginInfo::get_presets (bool user_only) const
 		if (t->read ()) {
 			XMLNode* root = t->root ();
 			for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
-				XMLProperty* uri = (*i)->property (X_("uri"));
-				XMLProperty* label = (*i)->property (X_("label"));
+				XMLProperty const * uri = (*i)->property (X_("uri"));
+				XMLProperty const * label = (*i)->property (X_("label"));
 				p.push_back (Plugin::PresetRecord (uri->value(), label->value(), true));
 			}
 		}

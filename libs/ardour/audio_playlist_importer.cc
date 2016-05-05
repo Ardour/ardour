@@ -51,7 +51,7 @@ AudioPlaylistImportHandler::AudioPlaylistImportHandler (XMLTree const & source, 
 
 	XMLNodeList const & pl_children = playlists->children();
 	for (XMLNodeList::const_iterator it = pl_children.begin(); it != pl_children.end(); ++it) {
-		const XMLProperty* type = (*it)->property("type");
+		XMLProperty const * type = (*it)->property("type");
 		if ( !type || type->value() == "audio" ) {
 			try {
 				elements.push_back (ElementPtr ( new AudioPlaylistImporter (source, session, *this, **it)));
@@ -75,7 +75,7 @@ AudioPlaylistImportHandler::get_regions (XMLNode const & node, ElementList & lis
 }
 
 void
-AudioPlaylistImportHandler::update_region_id (XMLProperty* id_prop)
+AudioPlaylistImportHandler::update_region_id (XMLProperty * id_prop)
 {
 	PBD::ID old_id (id_prop->value());
 	PBD::ID new_id (region_handler.get_new_id (old_id));
@@ -178,7 +178,7 @@ AudioPlaylistImporter::_prepare_move ()
 		name = rename_pair.second;
 	}
 
-	XMLProperty* p = xml_playlist.property ("name");
+	XMLProperty * p = xml_playlist.property ("name");
 	if (!p) {
 		error << _("badly-formed XML in imported playlist") << endmsg;
 		return false;
@@ -219,8 +219,8 @@ AudioPlaylistImporter::_move ()
 	// Update region ids in crossfades
 	XMLNodeList crossfades = xml_playlist.children("Crossfade");
 	for (XMLNodeIterator it = crossfades.begin(); it != crossfades.end(); ++it) {
-		XMLProperty* in = (*it)->property("in");
-		XMLProperty* out = (*it)->property("out");
+		XMLProperty * in = (*it)->property("in");
+		XMLProperty * out = (*it)->property("out");
 		if (!in || !out) {
 			error << string_compose (X_("AudioPlaylistImporter (%1): did not find the \"in\" or \"out\" property from a crossfade"), name) << endmsg;
 			continue; // or fatal?
@@ -230,12 +230,12 @@ AudioPlaylistImporter::_move ()
 		handler.update_region_id (out);
 
 		// rate convert length and position
-		XMLProperty* length = (*it)->property("length");
+		XMLProperty * length = (*it)->property("length");
 		if (length) {
 			length->set_value (rate_convert_samples (length->value()));
 		}
 
-		XMLProperty* position = (*it)->property("position");
+		XMLProperty * position = (*it)->property("position");
 		if (position) {
 			position->set_value (rate_convert_samples (position->value()));
 		}

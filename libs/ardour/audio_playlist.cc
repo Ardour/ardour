@@ -38,7 +38,7 @@ AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden
 	: Playlist (session, node, DataType::AUDIO, hidden)
 {
 #ifndef NDEBUG
-	const XMLProperty* prop = node.property("type");
+	XMLProperty const * prop = node.property("type");
 	assert(!prop || DataType(prop->value()) == DataType::AUDIO);
 #endif
 
@@ -487,7 +487,7 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 	for (XMLNodeConstIterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == X_("Crossfade")) {
 
-			XMLProperty* p = (*i)->property (X_("active"));
+			XMLProperty const * p = (*i)->property (X_("active"));
 			assert (p);
 
 			if (!string_is_affirmative (p->value())) {

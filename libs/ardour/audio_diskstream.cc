@@ -1932,7 +1932,7 @@ AudioDiskstream::get_state ()
 int
 AudioDiskstream::set_state (const XMLNode& node, int version)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	uint32_t nchans = 1;
@@ -2260,7 +2260,7 @@ AudioDiskstream::capture_buffer_load () const
 int
 AudioDiskstream::use_pending_capture_data (XMLNode& node)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	boost::shared_ptr<AudioFileSource> fs;

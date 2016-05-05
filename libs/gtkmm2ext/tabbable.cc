@@ -352,7 +352,7 @@ Tabbable::set_state (const XMLNode& node, int version)
 	XMLNode* window_node = node.child ("Window");
 
 	if (window_node) {
-		const XMLProperty* prop = window_node->property (X_("tabbed"));
+		XMLProperty const * prop = window_node->property (X_("tabbed"));
 		if (prop) {
 			tab_requested_by_state = PBD::string_is_affirmative (prop->value());
 		}

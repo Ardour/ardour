@@ -107,7 +107,7 @@ int
 ExportFilename::set_state (const XMLNode & node)
 {
 	XMLNode * child;
-	XMLProperty * prop;
+	XMLProperty const * prop;
 	FieldPair pair;
 
 	child = node.child ("Folder");
@@ -372,7 +372,7 @@ ExportFilename::get_field (XMLNode const & node, string const & name)
 	XMLNodeList children = node.children();
 
 	for (XMLNodeList::iterator it = children.begin(); it != children.end(); ++it) {
-		XMLProperty * prop = (*it)->property ("name");
+		XMLProperty const * prop = (*it)->property ("name");
 		if (prop && !prop->value().compare (name)) {
 
 			prop = (*it)->property ("enabled");

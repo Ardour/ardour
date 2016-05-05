@@ -236,7 +236,7 @@ AudioRegionImporter::parse_source_xml ()
 	char buf[128];
 	std::string source_dir(get_sound_dir (source));
 	XMLNode * source_node;
-	XMLProperty *prop;
+	XMLProperty const * prop;
 
 	// Get XML for sources
 	if (!(source_node = source.root()->child (X_("Sources")))) {

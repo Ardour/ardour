@@ -86,7 +86,7 @@ Return::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	const XMLNode* insert_node = &node;
 
 	/* Return has regular IO automation (gain, pan) */

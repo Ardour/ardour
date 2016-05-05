@@ -108,7 +108,7 @@ AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_desc
 		}
 	}
 
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	pair<framepos_t,framepos_t> extent = _playlist->get_extent();
 
 	AudioSource::_length = extent.second - extent.first;

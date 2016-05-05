@@ -2646,7 +2646,7 @@ RouteTimeAxisView::set_underlay_state()
 			continue;
 		}
 
-		XMLProperty* prop = child_node->property ("id");
+		XMLProperty const * prop = child_node->property ("id");
 		if (prop) {
 			PBD::ID id (prop->value());
 
@@ -2688,7 +2688,7 @@ RouteTimeAxisView::add_underlay (StreamView* v, bool /*update_xml*/)
 			}
 
 			XMLNode* node = underlay_xml_node->add_child("Underlay");
-			XMLProperty* prop = node->add_property("id");
+			XMLProperty const * prop = node->add_property("id");
 			prop->set_value(v->trackview().route()->id().to_s());
 		}
 #endif

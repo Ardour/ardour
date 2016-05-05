@@ -1970,9 +1970,9 @@ EngineControl::set_state (const XMLNode& root)
 {
 	XMLNodeList          clist, cclist;
 	XMLNodeConstIterator citer, cciter;
-	XMLNode* child;
-	XMLNode* grandchild;
-	XMLProperty* prop = NULL;
+	XMLNode const * child;
+	XMLNode const * grandchild;
+	XMLProperty const * prop = NULL;
 
 	fprintf (stderr, "EngineControl::set_state\n");
 

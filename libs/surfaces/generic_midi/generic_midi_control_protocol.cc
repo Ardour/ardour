@@ -168,7 +168,7 @@ GenericMidiControlProtocol::reload_maps ()
 
 		MapInfo mi;
 
-		XMLProperty* prop = tree.root()->property ("name");
+		XMLProperty const * prop = tree.root()->property ("name");
 
 		if (!prop) {
 			continue;

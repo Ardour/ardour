@@ -313,7 +313,7 @@ Editor::store_ruler_visibility ()
 void
 Editor::restore_ruler_visibility ()
 {
-	XMLProperty* prop;
+	XMLProperty const * prop;
 	XMLNode * node = _session->extra_xml (X_("RulerVisibility"));
 
 	no_ruler_shown_update = true;

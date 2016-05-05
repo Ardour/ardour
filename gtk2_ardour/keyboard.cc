@@ -227,7 +227,7 @@ ArdourKeyboard::get_state (void)
 int
 ArdourKeyboard::set_state (const XMLNode& node, int version)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	if ((prop = node.property ("constraint-modifier")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &constraint_mod);

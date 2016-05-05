@@ -35,10 +35,10 @@ MidiAutomationListBinder::MidiAutomationListBinder (boost::shared_ptr<MidiSource
 MidiAutomationListBinder::MidiAutomationListBinder (XMLNode* node, Session::SourceMap const & sources)
 	: _parameter (0, 0, 0)
 {
-	XMLProperty* source = node->property ("source-id");
+	XMLProperty const * source = node->property ("source-id");
 	assert (source);
 
-	XMLProperty* parameter = node->property ("parameter");
+	XMLProperty const * parameter = node->property ("parameter");
 	assert (parameter);
 
 	Session::SourceMap::const_iterator i = sources.find (PBD::ID (source->value()));

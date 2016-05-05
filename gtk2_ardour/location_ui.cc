@@ -1143,7 +1143,7 @@ LocationUI::clock_mode_from_session_instant_xml () const
 		return AudioClock::Frames;
 	}
 
-	XMLProperty* p = node->property (X_("clock-mode"));
+	XMLProperty const * p = node->property (X_("clock-mode"));
 	if (!p) {
 		return ARDOUR_UI::instance()->secondary_clock->mode();
 	}

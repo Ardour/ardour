@@ -117,10 +117,10 @@ public:
 	std::string attribute_value();
 
 	const XMLPropertyList& properties() const { return _proplist; }
-	XMLProperty*       property(const char*);
-	XMLProperty*       property(const std::string&);
-	const XMLProperty* property(const char* n)   const { return const_cast<XMLNode*>(this)->property(n); }
-	const XMLProperty* property(const std::string& n) const { return const_cast<XMLNode*>(this)->property(n); }
+	XMLProperty const *    property(const char*) const;
+	XMLProperty const *    property(const std::string&) const;
+	XMLProperty *    property(const char*);
+	XMLProperty *    property(const std::string&);
 
 	bool has_property_with_value (const std::string&, const std::string&) const;
 

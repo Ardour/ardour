@@ -1800,7 +1800,7 @@ int
 LV2Plugin::set_state(const XMLNode& node, int version)
 {
 	XMLNodeList          nodes;
-	const XMLProperty*   prop;
+	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
 	XMLNode*             child;
 	const char*          sym;

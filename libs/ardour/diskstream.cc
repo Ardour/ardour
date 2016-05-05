@@ -483,7 +483,7 @@ Diskstream::get_state ()
 int
 Diskstream::set_state (const XMLNode& node, int /*version*/)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value();

@@ -1652,7 +1652,7 @@ private:
 int
 Mixer_UI::set_state (const XMLNode& node, int version)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	Tabbable::set_state (node, version);
 
@@ -1754,7 +1754,7 @@ void
 Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 {
 	int pos;
-	XMLProperty* prop = 0;
+	XMLProperty const * prop = 0;
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	XMLNode* geometry;
 	int height;

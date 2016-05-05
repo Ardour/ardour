@@ -77,7 +77,7 @@ Automatable::~Automatable ()
 int
 Automatable::old_set_automation_state (const XMLNode& node)
 {
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 
 	if ((prop = node.property ("path")) != 0) {
 		load_automation (prop->value());
@@ -220,7 +220,7 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 
 		if ((*niter)->name() == "AutomationList") {
 
-			const XMLProperty* id_prop = (*niter)->property("automation-id");
+			XMLProperty const * id_prop = (*niter)->property("automation-id");
 
 			Evoral::Parameter param = (id_prop
 					? EventTypeMap::instance().from_symbol(id_prop->value())

@@ -381,8 +381,9 @@ Session::Session (AudioEngine &eng,
 		 */
 
 		if (state_tree) {
-			const XMLProperty* prop;
-			if ((prop = state_tree->root()->property (X_("sample-rate"))) != 0) {
+			XMLProperty const * prop;
+			XMLNode const * root (state_tree->root());
+			if ((prop = root->property (X_("sample-rate"))) != 0) {
 				sr = atoi (prop->value());
 			}
 		}
@@ -3221,13 +3222,13 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 			for (XMLNodeList::iterator i = children.begin(); i != children.end(); ++i) {
 				if ((*i)->name() == X_("Processor")) {
 					/* ForceIDRegeneration does not catch the following */
-					XMLProperty* role = (*i)->property (X_("role"));
-					XMLProperty* type = (*i)->property (X_("type"));
+					XMLProperty const * role = (*i)->property (X_("role"));
+					XMLProperty const * type = (*i)->property (X_("type"));
 					if (role && role->value() == X_("Aux")) {
 						/* check if the target bus exists.
 						 * we should not save aux-sends in templates.
 						 */
-						XMLProperty* target = (*i)->property (X_("target"));
+						XMLProperty const * target = (*i)->property (X_("target"));
 						if (!target) {
 							(*i)->add_property ("type", "dangling-aux-send");
 							continue;

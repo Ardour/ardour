@@ -48,7 +48,7 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 	, _read_end(0)
 {
 #ifndef NDEBUG
-	const XMLProperty* prop = node.property("type");
+	XMLProperty const * prop = node.property("type");
 	assert(prop && DataType(prop->value()) == DataType::MIDI);
 #endif
 

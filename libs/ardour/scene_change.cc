@@ -30,7 +30,7 @@ const uint32_t SceneChange::out_of_bound_color = 0x00000000; /* note: zero alpha
 boost::shared_ptr<SceneChange>
 SceneChange::factory (const XMLNode& node, int version)
 {
-	const XMLProperty* prop = node.property (X_("type"));
+	XMLProperty const * prop = node.property (X_("type"));
 
 	if (prop->value() == X_("MIDI")) {
 		return boost::shared_ptr<SceneChange> (new MIDISceneChange (node, version));

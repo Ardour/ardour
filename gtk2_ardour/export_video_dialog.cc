@@ -402,7 +402,7 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 
 	node = _session->extra_xml (X_("Videoexport"));
 	if (node) {
-		const XMLProperty* prop;
+		XMLProperty const * prop;
 		prop = node->property (X_("ChangeGeometry"));
 		if (prop) { scale_checkbox.set_active(atoi(prop->value())?true:false); }
 		prop = node->property (X_("KeepAspect"));

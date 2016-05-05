@@ -873,7 +873,7 @@ AutomationTimeAxisView::what_has_visible_automation (const boost::shared_ptr<Aut
 			const XMLNode* gui_node = ac->extra_xml ("GUI");
 
 			if (gui_node) {
-				const XMLProperty* prop = gui_node->property ("shown");
+				XMLProperty const * prop = gui_node->property ("shown");
 				if (prop) {
 					if (string_is_affirmative (prop->value())) {
 						visible.insert (i->first);

@@ -158,7 +158,7 @@ AudioTrack::deprecated_use_diskstream_connections ()
 		return 0;
 	}
 
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	XMLNode& node (*diskstream->deprecated_io_node);
 
 	/* don't do this more than once. */
@@ -200,7 +200,7 @@ AudioTrack::deprecated_use_diskstream_connections ()
 int
 AudioTrack::set_state (const XMLNode& node, int version)
 {
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 
 	if ((prop = node.property (X_("mode"))) != 0) {
 		_mode = TrackMode (string_2_enum (prop->value(), _mode));
@@ -266,7 +266,7 @@ void
 AudioTrack::set_state_part_two ()
 {
 	XMLNode* fnode;
-	XMLProperty* prop;
+	XMLProperty const * prop;
 	LocaleGuard lg (X_("C"));
 
 	/* This is called after all session state has been restored but before

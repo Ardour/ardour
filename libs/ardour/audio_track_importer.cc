@@ -51,7 +51,7 @@ AudioTrackImportHandler::AudioTrackImportHandler (XMLTree const & source, Sessio
 
 	XMLNodeList const & route_list = routes->children();
 	for (XMLNodeList::const_iterator it = route_list.begin(); it != route_list.end(); ++it) {
-		const XMLProperty* type = (*it)->property("default-type");
+		XMLProperty const * type = (*it)->property("default-type");
 		if ( (!type || type->value() == "audio") &&  ((*it)->property ("diskstream") != 0 || (*it)->property ("diskstream-id") != 0)) {
 			try {
 				elements.push_back (ElementPtr ( new AudioTrackImporter (source, session, *this, **it, pl_handler)));
@@ -254,7 +254,7 @@ AudioTrackImporter::_prepare_move ()
 		return false;
 	}
 
-	XMLProperty* p = c->property ("name");
+	XMLProperty * p = c->property ("name");
 	if (!p) {
 		error << _("badly-formed XML in imported track") << endmsg;
 		return false;
@@ -289,7 +289,7 @@ AudioTrackImporter::_move ()
 	}
 
 	boost::shared_ptr<XMLNode> ds_node = ds_node_list->front();
-	XMLProperty* p = ds_node->property (X_("id"));
+	XMLProperty * p = ds_node->property (X_("id"));
 	assert (p);
 	p->set_value (new_ds_id.to_s());
 

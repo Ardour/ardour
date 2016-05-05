@@ -1301,7 +1301,7 @@ AudioClock::set_session (Session *s)
 		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 		_session->tempo_map().PropertyChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_property_changed, this, _1), gui_context());
 
-		const XMLProperty* prop;
+		XMLProperty const * prop;
 		XMLNode* node = _session->extra_xml (X_("ClockModes"));
 		AudioClock::Mode amode;
 

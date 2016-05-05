@@ -150,7 +150,7 @@ EngineStateController::_deserialize_and_load_engine_states ()
 
 		XMLNode* state_node = *state_node_iter;
 		StatePtr engine_state (new State);
-		XMLProperty* prop = NULL;
+		XMLProperty const * prop = NULL;
 
 		if ((prop = state_node->property ("backend-name")) == 0) {
 			continue;
@@ -302,7 +302,7 @@ EngineStateController::_deserialize_and_load_midi_port_states ()
 			for (; input_state_node_iter != input_state_nodes.end (); ++input_state_node_iter) {
 
 				XMLNode* input_state_node = *input_state_node_iter;
-				XMLProperty* prop = NULL;
+				XMLProperty const * prop = NULL;
 
 				if (input_state_node->name () != "input") {
 					continue;
@@ -341,7 +341,7 @@ EngineStateController::_deserialize_and_load_midi_port_states ()
 			for (; output_state_node_iter != output_state_nodes.end (); ++output_state_node_iter) {
 
 				XMLNode* output_state_node = *output_state_node_iter;
-				XMLProperty* prop = NULL;
+				XMLProperty const * prop = NULL;
 
 				if (output_state_node->name () != "output") {
 					continue;

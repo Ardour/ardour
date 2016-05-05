@@ -94,7 +94,7 @@ GUIObjectState::get_string (const string& id, const string& prop_name, bool* emp
 		return string ();
 	}
 
-	const XMLProperty* p (i->second->property (prop_name));
+	XMLProperty const * p (i->second->property (prop_name));
 	if (!p) {
 		if (empty) {
 			*empty = true;
@@ -130,7 +130,7 @@ GUIObjectState::set_state (const XMLNode& node)
 		if ((*i)->name() != X_("Object")) {
 			continue;
 		}
-		const XMLProperty* prop = (*i)->property (X_("id"));
+		XMLProperty const * prop = (*i)->property (X_("id"));
 		if (!prop) {
 			continue;
 		}

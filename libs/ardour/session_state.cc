@@ -949,7 +949,7 @@ Session::load_state (string snapshot_name)
 		return -1;
 	}
 
-	XMLNode& root (*state_tree->root());
+	XMLNode const & root (*state_tree->root());
 
 	if (root.name() != X_("Session")) {
 		error << string_compose (_("Session file %1 is not a session"), xmlpath) << endmsg;
@@ -958,7 +958,7 @@ Session::load_state (string snapshot_name)
 		return -1;
 	}
 
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	if ((prop = root.property ("version")) == 0) {
 		/* no version implies very old version of Ardour */
@@ -1298,7 +1298,7 @@ Session::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist;
 	XMLNode* child;
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	int ret = -1;
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
@@ -1581,7 +1581,7 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 	XMLNode* ds_child = find_named_node (node, X_("Diskstream"));
 
 	DataType type = DataType::AUDIO;
-	const XMLProperty* prop = node.property("default-type");
+	XMLProperty const * prop = node.property("default-type");
 
 	if (prop) {
 		type = DataType (prop->value());
@@ -1614,7 +1614,7 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 
 	} else {
 		enum Route::Flag flags = Route::Flag(0);
-		const XMLProperty* prop = node.property("flags");
+		XMLProperty const * prop = node.property("flags");
 		if (prop) {
 			flags = Route::Flag (string_2_enum (prop->value(), flags));
 		}
@@ -1647,7 +1647,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 	}
 
 	DataType type = DataType::AUDIO;
-	const XMLProperty* prop = node.property("default-type");
+	XMLProperty const * prop = node.property("default-type");
 
 	if (prop) {
 		type = DataType (prop->value());
@@ -1692,7 +1692,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 
 	} else {
 		enum Route::Flag flags = Route::Flag(0);
-		const XMLProperty* prop = node.property("flags");
+		XMLProperty const * prop = node.property("flags");
 		if (prop) {
 			flags = Route::Flag (string_2_enum (prop->value(), flags));
 		}
@@ -1724,7 +1724,7 @@ Session::load_regions (const XMLNode& node)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((region = XMLRegionFactory (**niter, false)) == 0) {
 			error << _("Session: cannot create Region from XML description.");
-			const XMLProperty *name = (**niter).property("name");
+			XMLProperty const * name = (**niter).property("name");
 
 			if (name) {
 				error << " " << string_compose (_("Can not load state for region '%1'"), name->value());
@@ -1742,7 +1742,7 @@ Session::load_compounds (const XMLNode& node)
 {
 	XMLNodeList calist = node.children();
 	XMLNodeConstIterator caiter;
-	XMLProperty *caprop;
+	XMLProperty const * caprop;
 
 	for (caiter = calist.begin(); caiter != calist.end(); ++caiter) {
 		XMLNode* ca = *caiter;
@@ -1789,7 +1789,7 @@ Session::load_nested_sources (const XMLNode& node)
 			/* it may already exist, so don't recreate it unnecessarily
 			 */
 
-			XMLProperty* prop = (*niter)->property (X_("id"));
+			XMLProperty const * prop = (*niter)->property (X_("id"));
 			if (!prop) {
 				error << _("Nested source has no ID info in session file! (ignored)") << endmsg;
 				continue;
@@ -1813,7 +1813,7 @@ Session::load_nested_sources (const XMLNode& node)
 boost::shared_ptr<Region>
 Session::XMLRegionFactory (const XMLNode& node, bool full)
 {
-	const XMLProperty* type = node.property("type");
+	XMLProperty const * type = node.property("type");
 
 	try {
 
@@ -1842,7 +1842,7 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 boost::shared_ptr<AudioRegion>
 Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	boost::shared_ptr<Source> source;
 	boost::shared_ptr<AudioSource> as;
 	SourceList sources;
@@ -1961,7 +1961,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 boost::shared_ptr<MidiRegion>
 Session::XMLMidiRegionFactory (const XMLNode& node, bool /*full*/)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	boost::shared_ptr<Source> source;
 	boost::shared_ptr<MidiSource> ms;
 	SourceList sources;
@@ -2793,7 +2793,7 @@ Session::find_all_sources (string path, set<string>& result)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-		XMLProperty* prop;
+		XMLProperty const * prop;
 
 		if ((prop = (*niter)->property (X_("type"))) == 0) {
 			continue;
@@ -4230,27 +4230,29 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 
 	/* sample rate */
 
-	const XMLProperty* prop;
-	if ((prop = tree.root()->property (X_("sample-rate"))) != 0) {
+	XMLProperty const * prop;
+	XMLNode const * root (tree.root());
+
+	if ((prop = root->property (X_("sample-rate"))) != 0) {
 		sample_rate = atoi (prop->value());
 		found_sr = true;
 	}
 
-	const XMLNodeList& children (tree.root()->children());
+	const XMLNodeList& children (root->children());
 	for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 		const XMLNode* child = *c;
 		if (child->name() == "Config") {
 			const XMLNodeList& options (child->children());
 			for (XMLNodeList::const_iterator oc = options.begin(); oc != options.end(); ++oc) {
-				const XMLNode* option = *oc;
-				const XMLProperty* name = option->property("name");
+				XMLNode const * option = *oc;
+				XMLProperty const * name = option->property("name");
 
 				if (!name) {
 					continue;
 				}
 
 				if (name->value() == "native-file-data-format") {
-					const XMLProperty* value = option->property ("value");
+					XMLProperty const * value = option->property ("value");
 					if (value) {
 						SampleFormat fmt = (SampleFormat) string_2_enum (option->property ("value")->value(), fmt);
 						data_format = fmt;
@@ -4282,7 +4284,7 @@ Session::get_snapshot_from_instant (const std::string& session_dir)
 		return "";
 	}
 
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	XMLNode *last_used_snapshot = tree.root()->child("LastUsedSnapshot");
 	if (last_used_snapshot && (prop = last_used_snapshot->property ("name")) != 0) {
 		return prop->value();

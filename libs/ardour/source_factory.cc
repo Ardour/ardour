@@ -150,7 +150,7 @@ boost::shared_ptr<Source>
 SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 {
 	DataType type = DataType::AUDIO;
-	const XMLProperty* prop = node.property("type");
+	XMLProperty const * prop = node.property("type");
 
 	if (prop) {
 		type = DataType (prop->value());

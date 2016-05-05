@@ -36,7 +36,7 @@ PBD::Signal2<void,boost::shared_ptr<Playlist>, bool> PlaylistFactory::PlaylistCr
 boost::shared_ptr<Playlist>
 PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden, bool unused)
 {
-	const XMLProperty* type = node.property("type");
+	XMLProperty const * type = node.property("type");
 
 	boost::shared_ptr<Playlist> pl;
 

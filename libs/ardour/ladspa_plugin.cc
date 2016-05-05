@@ -374,7 +374,7 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 
 #ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
-	XMLProperty *prop;
+	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
 	XMLNode *child;
 	const char *port;
@@ -424,7 +424,7 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 {
 #ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
-	XMLProperty *prop;
+	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
 	XMLNode *child;
 	const char *port;

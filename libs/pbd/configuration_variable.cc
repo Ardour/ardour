@@ -47,7 +47,7 @@ ConfigVariableBase::set_from_node (XMLNode const & node)
 		const XMLProperty* prop;
 		XMLNodeList nlist;
 		XMLNodeConstIterator niter;
-		XMLNode* child;
+		XMLNode const * child;
 
 		nlist = node.children();
 

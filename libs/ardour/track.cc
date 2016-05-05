@@ -134,7 +134,7 @@ Track::set_state (const XMLNode& node, int version)
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		child = *niter;
 
-		XMLProperty* prop;
+		XMLProperty const * prop;
 		if (child->name() == Controllable::xml_node_name && (prop = child->property ("name")) != 0) {
 			if (prop->value() == X_("recenable")) {
 				_rec_enable_control->set_state (*child, version);
@@ -142,7 +142,7 @@ Track::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	if ((prop = node.property (X_("monitoring"))) != 0) {
 		_monitoring = MonitorChoice (string_2_enum (prop->value(), _monitoring));

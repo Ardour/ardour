@@ -168,7 +168,7 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 
 	cpi.descriptor = get_descriptor (cpi.path);
 
- 	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("instantiating %1\n", cpi.name));
+	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("instantiating %1\n", cpi.name));
 
 	if (cpi.descriptor == 0) {
 		error << string_compose (_("control protocol name \"%1\" has no descriptor"), cpi.name) << endmsg;
@@ -410,22 +410,24 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 {
 	XMLNodeList clist;
 	XMLNodeConstIterator citer;
-	XMLProperty* prop;
+	XMLProperty const * prop;
 
 	Glib::Threads::Mutex::Lock lm (protocols_lock);
 
 	clist = node.children();
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
-		if ((*citer)->name() == X_("Protocol")) {
+		XMLNode const * child = *citer;
 
-			if ((prop = (*citer)->property (X_("active"))) == 0) {
+		if (child->name() == X_("Protocol")) {
+
+			if ((prop = child->property (X_("active"))) == 0) {
 				continue;
 			}
 
 			bool active = string_is_affirmative (prop->value());
 
-			if ((prop = (*citer)->property (X_("name"))) == 0) {
+			if ((prop = child->property (X_("name"))) == 0) {
 				continue;
 			}
 

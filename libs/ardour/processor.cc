@@ -180,8 +180,8 @@ Processor::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-	const XMLProperty *prop;
-	const XMLProperty *legacy_active = 0;
+	XMLProperty const * prop;
+	XMLProperty const * legacy_active = 0;
 	bool leave_name_alone = (node.property ("ignore-name") != 0);
 
 	if (!leave_name_alone) {
@@ -205,7 +205,7 @@ Processor::set_state (const XMLNode& node, int version)
 
 		if ((*niter)->name() == X_("Automation")) {
 
-			XMLProperty *prop;
+			XMLProperty const * prop;
 
 			if ((prop = (*niter)->property ("path")) != 0) {
 				old_set_automation_state (*(*niter));

@@ -534,11 +534,12 @@ UIConfiguration::load_color_aliases (XMLNode const & node)
 	color_aliases.clear ();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() != X_("ColorAlias")) {
+		XMLNode const * child = *niter;
+		if (child->name() != X_("ColorAlias")) {
 			continue;
 		}
-		name = (*niter)->property (X_("name"));
-		alias = (*niter)->property (X_("alias"));
+		name = child->property (X_("name"));
+		alias = child->property (X_("alias"));
 
 		if (name && alias) {
 			color_aliases.insert (make_pair (name->value(), alias->value()));
@@ -557,11 +558,12 @@ UIConfiguration::load_colors (XMLNode const & node)
 	colors.clear ();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() != X_("Color")) {
+		XMLNode const * child = *niter;
+		if (child->name() != X_("Color")) {
 			continue;
 		}
-		name = (*niter)->property (X_("name"));
-		color = (*niter)->property (X_("value"));
+		name = child->property (X_("name"));
+		color = child->property (X_("value"));
 
 		if (name && color) {
 			ArdourCanvas::Color c;
@@ -583,12 +585,13 @@ UIConfiguration::load_modifiers (XMLNode const & node)
 	modifiers.clear ();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() != X_("Modifier")) {
+		XMLNode const * child = *niter;
+		if (child->name() != X_("Modifier")) {
 			continue;
 		}
 
-		name = (*niter)->property (X_("name"));
-		mod = (*niter)->property (X_("modifier"));
+		name = child->property (X_("name"));
+		mod = child->property (X_("modifier"));
 
 		if (name && mod) {
 			SVAModifier svam (mod->value());

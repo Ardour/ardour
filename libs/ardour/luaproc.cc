@@ -776,7 +776,7 @@ LuaProc::set_state (const XMLNode& node, int version)
 {
 #ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
-	XMLProperty *prop;
+	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
 	XMLNode *child;
 	const char *value;
@@ -1067,7 +1067,7 @@ LuaProc::load_preset (PresetRecord r)
 
 	XMLNode* root = t->root ();
 	for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
-		XMLProperty* label = (*i)->property (X_("label"));
+		XMLProperty const * label = (*i)->property (X_("label"));
 		assert (label);
 		if (label->value() != r.label) {
 			continue;
@@ -1075,8 +1075,8 @@ LuaProc::load_preset (PresetRecord r)
 
 		for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
 			if ((*j)->name() == X_("Parameter")) {
-				XMLProperty* index = (*j)->property (X_("index"));
-				XMLProperty* value = (*j)->property (X_("value"));
+				XMLProperty const * index = (*j)->property (X_("index"));
+				XMLProperty const * value = (*j)->property (X_("value"));
 				assert (index);
 				assert (value);
 				set_parameter (atoi (index->value().c_str()), atof (value->value().c_str ()));
@@ -1139,8 +1139,8 @@ LuaProc::find_presets ()
 		XMLNode* root = t->root ();
 		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
 
-			XMLProperty* uri = (*i)->property (X_("uri"));
-			XMLProperty* label = (*i)->property (X_("label"));
+			XMLProperty const * uri = (*i)->property (X_("uri"));
+			XMLProperty const * label = (*i)->property (X_("label"));
 
 			assert (uri);
 			assert (label);
@@ -1207,8 +1207,8 @@ LuaPluginInfo::get_presets (bool /*user_only*/) const
 		if (t->read ()) {
 			XMLNode* root = t->root ();
 			for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
-				XMLProperty* uri = (*i)->property (X_("uri"));
-				XMLProperty* label = (*i)->property (X_("label"));
+				XMLProperty const * uri = (*i)->property (X_("uri"));
+				XMLProperty const * label = (*i)->property (X_("label"));
 				p.push_back (Plugin::PresetRecord (uri->value(), label->value(), true));
 			}
 		}

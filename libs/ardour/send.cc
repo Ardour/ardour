@@ -239,7 +239,7 @@ Send::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	Delivery::set_state (node, version);
 

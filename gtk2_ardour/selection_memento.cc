@@ -54,7 +54,7 @@ SelectionMemento::get_state () {
 int
 SelectionMemento::set_state (const XMLNode& node, int /*version*/) {
 
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	PublicEditor& editor = PublicEditor::instance();
 	if (node.name() != X_("SelectionMemento")) {
 		return -1;

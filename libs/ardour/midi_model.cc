@@ -491,7 +491,7 @@ Evoral::Sequence<MidiModel::TimeType>::NotePtr
 MidiModel::NoteDiffCommand::unmarshal_note (XMLNode *xml_note)
 {
 	unsigned int note;
-	XMLProperty* prop;
+	XMLProperty const * prop;
 	unsigned int channel;
 	MidiModel::TimeType time;
 	MidiModel::TimeType length;
@@ -599,7 +599,7 @@ MidiModel::NoteDiffCommand::marshal_change (const NoteChange& change)
 MidiModel::NoteDiffCommand::NoteChange
 MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 {
-	XMLProperty* prop;
+	XMLProperty const * prop;
 	NoteChange change;
 	change.note_id = 0;
 
@@ -876,7 +876,7 @@ MidiModel::SysExDiffCommand::marshal_change (const Change& change)
 MidiModel::SysExDiffCommand::Change
 MidiModel::SysExDiffCommand::unmarshal_change (XMLNode *xml_change)
 {
-	XMLProperty* prop;
+	XMLProperty const * prop;
 	Change change;
 
 	if ((prop = xml_change->property ("property")) != 0) {
@@ -1235,8 +1235,8 @@ MidiModel::PatchChangeDiffCommand::marshal_change (const Change& c)
 MidiModel::PatchChangePtr
 MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 {
-	XMLProperty* prop;
-	XMLProperty* prop_id;
+	XMLProperty const * prop;
+	XMLProperty const * prop_id;
 	Evoral::event_id_t id = 0;
 	Evoral::Beats time = Evoral::Beats();
 	int channel = 0;
@@ -1277,7 +1277,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 MidiModel::PatchChangeDiffCommand::Change
 MidiModel::PatchChangeDiffCommand::unmarshal_change (XMLNode* n)
 {
-	XMLProperty* prop;
+	XMLProperty const * prop;
 	Change c;
 	int an_int;
 

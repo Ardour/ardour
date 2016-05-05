@@ -141,7 +141,7 @@ Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide
 	, _type(type)
 {
 #ifndef NDEBUG
-	const XMLProperty* prop = node.property("type");
+	XMLProperty const * prop = node.property("type");
 	assert(!prop || DataType(prop->value()) == _type);
 #endif
 
@@ -2156,7 +2156,7 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 	 XMLNodeConstIterator niter;
 	 XMLPropertyList plist;
 	 XMLPropertyConstIterator piter;
-	 XMLProperty *prop;
+	 XMLProperty const * prop;
 	 boost::shared_ptr<Region> region;
 	 string region_name;
 	 bool seen_region_nodes = false;

@@ -657,7 +657,7 @@ ProcessorEntry::set_control_state (XMLNode const * node)
 
 	if (_plugin_display) {
 		XMLNode* n = GUIObjectState::get_node (node, X_("InlineDisplay"));
-		XMLProperty* p = n ? n->property (X_("visible")) : NULL;
+		XMLProperty const * p = n ? n->property (X_("visible")) : NULL;
 		if (p) {
 			if (string_is_affirmative (p->value ())) {
 				_plugin_display->show();
@@ -947,7 +947,7 @@ ProcessorEntry::Control::set_state (XMLNode const * node)
 {
 	XMLNode* n = GUIObjectState::get_node (node, state_id ());
 	if (n) {
-		XMLProperty* p = n->property (X_("visible"));
+		XMLProperty const * p = n->property (X_("visible"));
 		set_visible (p && string_is_affirmative (p->value ()));
 	} else {
 		set_visible (false);
@@ -4160,7 +4160,7 @@ ProcessorWindowProxy::set_state (const XMLNode& node, int /*version*/)
 	XMLNodeList children = node.children ();
 	XMLNodeList::const_iterator i = children.begin ();
 	while (i != children.end()) {
-		XMLProperty* prop = (*i)->property (X_("name"));
+		XMLProperty const * prop = (*i)->property (X_("name"));
 		if ((*i)->name() == X_("Window") && prop && prop->value() == _name) {
 			break;
 		}
@@ -4168,7 +4168,7 @@ ProcessorWindowProxy::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if (i != children.end()) {
-		XMLProperty* prop;
+		XMLProperty const * prop;
 		if ((prop = (*i)->property (X_("custom-ui"))) != 0) {
 			want_custom = PBD::string_is_affirmative (prop->value ());
 		}

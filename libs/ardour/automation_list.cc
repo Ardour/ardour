@@ -425,7 +425,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	XMLNode* nsos;
 	XMLNodeIterator niter;
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	if (node.name() == X_("events")) {
 		/* partial state setting*/
@@ -443,7 +443,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 
 		const XMLNodeList& elist = node.children();
 		XMLNodeConstIterator i;
-		XMLProperty* prop;
+		XMLProperty const * prop;
 		pframes_t x;
 		double y;
 

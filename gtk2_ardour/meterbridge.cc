@@ -463,7 +463,7 @@ Meterbridge::session_going_away ()
 int
 Meterbridge::set_state (const XMLNode& node)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	XMLNode* geometry;
 
 	m_width = default_width;
@@ -473,7 +473,7 @@ Meterbridge::set_state (const XMLNode& node)
 
 	if ((geometry = find_named_node (node, "geometry")) != 0) {
 
-		XMLProperty* prop;
+		XMLProperty const * prop;
 
 		if ((prop = geometry->property("x_size")) == 0) {
 			prop = geometry->property ("x-size");

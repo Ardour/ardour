@@ -331,7 +331,7 @@ ARDOUR_UI::setup_windows ()
 	const XMLNode* mnode = main_window_settings ();
 
 	if (mnode) {
-		const XMLProperty* prop;
+		XMLProperty const * prop;
 		gint x = -1;
 		gint y = -1;
 		gint w = -1;

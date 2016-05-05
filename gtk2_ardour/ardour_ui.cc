@@ -741,7 +741,7 @@ ARDOUR_UI::configure_handler (GdkEventConfigure* /*conf*/)
 void
 ARDOUR_UI::set_transport_controllable_state (const XMLNode& node)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	if ((prop = node.property ("roll")) != 0) {
 		roll_controllable->set_id (prop->value());

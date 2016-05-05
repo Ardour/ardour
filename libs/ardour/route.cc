@@ -1362,7 +1362,7 @@ Route::processor_selfdestruct (boost::weak_ptr<Processor> wp)
 bool
 Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 {
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 
 	try {
 		boost::shared_ptr<Processor> processor;
@@ -2821,7 +2821,7 @@ Route::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	XMLNode *child;
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 
 	if (node.name() != "Route"){
 		error << string_compose(_("Bad node sent to Route::set_state() [%1]"), node.name()) << endmsg;
@@ -3044,7 +3044,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	XMLNode *child;
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 
 	/* 2X things which still remain to be handled:
 	 * default-type
@@ -3330,7 +3330,7 @@ Route::set_processor_state (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-		XMLProperty* prop = (*niter)->property ("type");
+		XMLProperty const * prop = (*niter)->property ("type");
 
 		if (prop->value() == "amp") {
 			_amp->set_state (**niter, Stateful::current_state_version);
@@ -3367,7 +3367,7 @@ Route::set_processor_state (const XMLNode& node)
 			ProcessorList::iterator o;
 
 			for (o = _processors.begin(); o != _processors.end(); ++o) {
-				XMLProperty* id_prop = (*niter)->property(X_("id"));
+				XMLProperty const * id_prop = (*niter)->property(X_("id"));
 				if (id_prop && (*o)->id() == id_prop->value()) {
 					(*o)->set_state (**niter, Stateful::current_state_version);
 					new_order.push_back (*o);
@@ -4585,7 +4585,7 @@ Route::set_name_in_state (XMLNode& node, string const & name, bool rename_playli
 
 		} else if ((*i)->name() == X_("Processor")) {
 
-			XMLProperty* role = (*i)->property (X_("role"));
+			XMLProperty const * role = (*i)->property (X_("role"));
 			if (role && role->value() == X_("Main")) {
 				(*i)->add_property (X_("name"), name);
 			}

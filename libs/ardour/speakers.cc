@@ -267,7 +267,7 @@ int
 Speakers::set_state (const XMLNode& node, int /*version*/)
 {
         XMLNodeConstIterator i;
-        const XMLProperty* prop;
+        XMLProperty const * prop;
         double a, e, d;
         LocaleGuard lg (X_("C"));
         int n = 0;

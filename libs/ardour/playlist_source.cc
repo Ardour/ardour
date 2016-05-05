@@ -93,7 +93,7 @@ PlaylistSource::set_state (const XMLNode& node, int /*version*/)
 {
 	/* check that we have a playlist ID */
 
-	const XMLProperty *prop = node.property (X_("playlist"));
+	XMLProperty const * prop = node.property (X_("playlist"));
 
 	if (!prop) {
 		error << _("No playlist ID in PlaylistSource XML!") << endmsg;

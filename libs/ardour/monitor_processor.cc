@@ -112,7 +112,7 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
                 return ret;
         }
 
-        const XMLProperty* prop;
+        XMLProperty const * prop;
 
         if ((prop = node.property (X_("type"))) == 0) {
                 error << string_compose (X_("programming error: %1"), X_("MonitorProcessor XML settings have no type information"))

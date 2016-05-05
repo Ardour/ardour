@@ -352,7 +352,7 @@ Delivery::state (bool full_state)
 int
 Delivery::set_state (const XMLNode& node, int version)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	if (IOProcessor::set_state (node, version)) {
 		return -1;

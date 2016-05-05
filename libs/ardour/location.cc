@@ -598,7 +598,7 @@ Location::get_state ()
 int
 Location::set_state (const XMLNode& node, int version)
 {
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 
 	XMLNodeList cd_list = node.children();
 	XMLNodeConstIterator cd_iter;

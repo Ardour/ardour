@@ -113,7 +113,7 @@ MidiSource::get_state ()
 int
 MidiSource::set_state (const XMLNode& node, int /*version*/)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	if ((prop = node.property ("captured-for")) != 0) {
 		_captured_for = prop->value();
 	}

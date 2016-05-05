@@ -587,7 +587,7 @@ Port::get_state () const
 int
 Port::set_state (const XMLNode& node, int)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	if (node.name() != state_node_name) {
 		return -1;

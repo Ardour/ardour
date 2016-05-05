@@ -1260,7 +1260,7 @@ Region::set_state (const XMLNode& node, int version)
 int
 Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_changed, bool send)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	Stateful::save_extra_xml (node);
 

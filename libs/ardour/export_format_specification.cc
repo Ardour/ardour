@@ -700,7 +700,7 @@ ExportFormatSpecification::get_option (XMLNode const * node, std::string const &
 	XMLNodeList list (node->children ("Option"));
 
 	for (XMLNodeList::iterator it = list.begin(); it != list.end(); ++it) {
-		XMLProperty * prop = (*it)->property ("name");
+		XMLProperty const * prop = (*it)->property ("name");
 		if (prop && !name.compare (prop->value())) {
 			prop = (*it)->property ("value");
 			if (prop) {

@@ -186,7 +186,7 @@ PortInsert::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	XMLPropertyList plist;
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 
 	const XMLNode* insert_node = &node;
 

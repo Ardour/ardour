@@ -215,7 +215,7 @@ Keyboard::get_state (void)
 int
 Keyboard::set_state (const XMLNode& node, int /*version*/)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	if ((prop = node.property ("copy-modifier")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &CopyModifier);
@@ -702,8 +702,9 @@ Keyboard::read_keybindings (string const & path)
 	XMLNodeList const& children = tree.root()->children();
 
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-		if ((*i)->name() == X_("Bindings")) {
-		        XMLProperty const* name = (*i)->property (X_("name"));
+		XMLNode const * child = *i;
+		if (child->name() == X_("Bindings")) {
+		        XMLProperty const* name = child->property (X_("name"));
 		        if (!name) {
 			        warning << _("Keyboard binding found without a name") << endmsg;
 			        continue;

@@ -123,7 +123,7 @@ MIDISceneChange::set_state (const XMLNode& node, int /* version-ignored */)
 		return -1;
 	}
 
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	if ((prop = node.property (X_("program"))) == 0) {
 		return -1;

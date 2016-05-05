@@ -136,7 +136,7 @@ MuteMaster::set_mute_points (MutePoint mp)
 int
 MuteMaster::set_state (const XMLNode& node, int /*version*/)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 
 	if ((prop = node.property ("mute-point")) != 0) {
 		_mute_point = (MutePoint) string_2_enum (prop->value(), _mute_point);

@@ -709,13 +709,14 @@ Bindings::load_operation (XMLNode const& node)
 
 		for (XMLNodeList::const_iterator p = children.begin(); p != children.end(); ++p) {
 
-			XMLProperty* ap;
-			XMLProperty* kp;
-			XMLProperty* bp;
+			XMLProperty const * ap;
+			XMLProperty const * kp;
+			XMLProperty const * bp;
+			XMLNode const * child = *p;
 
-			ap = (*p)->property ("action");
-			kp = (*p)->property ("key");
-			bp = (*p)->property ("button");
+			ap = child->property ("action");
+			kp = child->property ("key");
+			bp = child->property ("button");
 
 			if (!ap || (!kp && !bp)) {
 				continue;

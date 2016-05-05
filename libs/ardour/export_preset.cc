@@ -30,7 +30,7 @@ ExportPreset::ExportPreset (string filename, Session & s) :
 {
 	XMLNode * root;
 	if ((root = global.root())) {
-		XMLProperty * prop;
+		XMLProperty const * prop;
 		if ((prop = root->property ("id"))) {
 			set_id (prop->value());
 		}
@@ -124,7 +124,7 @@ ExportPreset::get_instant_xml () const
 	if ((instant_xml = session.instant_xml ("ExportPresets"))) {
 		XMLNodeList children = instant_xml->children ("ExportPreset");
 		for (XMLNodeList::iterator it = children.begin(); it != children.end(); ++it) {
-			XMLProperty * prop;
+			XMLProperty const * prop;
 			if ((prop = (*it)->property ("id")) && _id == PBD::UUID(prop->value())) {
 				return *it;
 			}

@@ -3165,7 +3165,7 @@ AUPluginInfo::load_cached_info ()
 	}
 
 	//initial version has incorrectly stored i/o info, and/or garbage chars.
-	const XMLProperty* version = root->property(X_("version"));
+	XMLProperty const * version = root->property(X_("version"));
 	if (! ((version != NULL) && (version->value() == X_(AU_CACHE_VERSION)))) {
 		error << "au_cache is not correct version.  AU plugins will be re-scanned" << endmsg;
 		return -1;
@@ -3183,7 +3183,7 @@ AUPluginInfo::load_cached_info ()
 
 			const XMLNode* gchild;
 			const XMLNodeList gchildren = child->children();
-			const XMLProperty* prop = child->property (X_("id"));
+			XMLProperty const * prop = child->property (X_("id"));
 
 			if (!prop) {
 				continue;
@@ -3221,8 +3221,8 @@ AUPluginInfo::load_cached_info ()
 
 					int in;
 					int out;
-					const XMLProperty* iprop;
-					const XMLProperty* oprop;
+					XMLProperty const * iprop;
+					XMLProperty const * oprop;
 
 					if (((iprop = gchild->property (X_("in"))) != 0) &&
 					    ((oprop = gchild->property (X_("out"))) != 0)) {

@@ -42,7 +42,7 @@ ElementImporter::ElementImporter (XMLTree const & source, ARDOUR::Session & sess
   _broken (false)
 {
 	// Get samplerate
-	XMLProperty *prop;
+	XMLProperty const * prop;
 	prop = source.root()->property ("sample-rate");
 	if (prop) {
 		std::istringstream iss (prop->value());

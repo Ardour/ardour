@@ -2287,7 +2287,7 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 int
 Editor::set_state (const XMLNode& node, int version)
 {
-	const XMLProperty* prop;
+	XMLProperty const * prop;
 	set_id (node);
 
 	Tabbable::set_state (node, version);
@@ -3873,7 +3873,7 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 	 */
 
 	int pos;
-	XMLProperty* prop;
+	XMLProperty const * prop;
 	char buf[32];
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 

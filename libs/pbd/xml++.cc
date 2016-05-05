@@ -6,7 +6,10 @@
  */
 
 #include <iostream>
+
+#include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
+
 #include <libxml/debugXML.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
@@ -404,7 +407,32 @@ XMLNode::add_content(const string& c)
 	return add_child_copy(XMLNode (string(), c));
 }
 
-XMLProperty*
+XMLProperty const *
+XMLNode::property(const char* n) const
+{
+	string ns(n);
+	map<string,XMLProperty*>::const_iterator iter;
+
+	if ((iter = _propmap.find(ns)) != _propmap.end()) {
+		return iter->second;
+	}
+
+	return 0;
+}
+
+XMLProperty const *
+XMLNode::property(const string& ns) const
+{
+	map<string,XMLProperty*>::const_iterator iter;
+
+	if ((iter = _propmap.find(ns)) != _propmap.end()) {
+		return iter->second;
+	}
+
+	return 0;
+}
+
+XMLProperty *
 XMLNode::property(const char* n)
 {
 	string ns(n);
@@ -417,7 +445,7 @@ XMLNode::property(const char* n)
 	return 0;
 }
 
-XMLProperty*
+XMLProperty *
 XMLNode::property(const string& ns)
 {
 	map<string,XMLProperty*>::iterator iter;
@@ -534,7 +562,7 @@ void
 XMLNode::remove_nodes_and_delete(const string& propname, const string& val)
 {
 	XMLNodeIterator i = _children.begin();
-	XMLProperty* prop;
+	XMLProperty const * prop;
 
 	while (i != _children.end()) {
 		prop = (*i)->property(propname);

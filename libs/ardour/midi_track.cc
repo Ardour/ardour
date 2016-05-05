@@ -161,7 +161,7 @@ MidiTrack::midi_diskstream() const
 int
 MidiTrack::set_state (const XMLNode& node, int version)
 {
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 
 	/* This must happen before Track::set_state(), as there will be a buffer
 	   fill during that call, and we must fill buffers using the correct
@@ -272,7 +272,7 @@ void
 MidiTrack::set_state_part_two ()
 {
 	XMLNode* fnode;
-	XMLProperty* prop;
+	XMLProperty const * prop;
 	LocaleGuard lg (X_("C"));
 
 	/* This is called after all session state has been restored but before

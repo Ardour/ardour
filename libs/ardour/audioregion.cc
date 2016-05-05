@@ -840,7 +840,7 @@ int
 AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_changed, bool send)
 {
 	const XMLNodeList& nlist = node.children();
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 	LocaleGuard lg (X_("C"));
 	boost::shared_ptr<Playlist> the_playlist (_playlist.lock());
 
@@ -871,7 +871,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		XMLNode *child;
-		XMLProperty *prop;
+		XMLProperty const * prop;
 
 		child = (*niter);
 

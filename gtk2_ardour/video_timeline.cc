@@ -155,38 +155,38 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 
 	set_id(*node);
 
-	const XMLProperty* proph = node->property (X_("Height"));
+	XMLProperty const * proph = node->property (X_("Height"));
 	if (proph) {
 		editor->set_video_timeline_height(atoi(proph->value()));
 	}
 #if 0 /* TODO THINK: set FPS first time only ?! */
-	const XMLProperty* propasfps = node->property (X_("AutoFPS"));
+	XMLProperty const * propasfps = node->property (X_("AutoFPS"));
 	if (propasfps) {
 		auto_set_session_fps = atoi(propasfps->value())?true:false;
 	}
 #endif
 
-	const XMLProperty* propoffset = node->property (X_("VideoOffset"));
+	XMLProperty const * propoffset = node->property (X_("VideoOffset"));
 	if (propoffset) {
 		video_offset = atoll(propoffset->value());
 		video_offset_p = video_offset;
 	}
 
-	const XMLProperty* proplock = node->property (X_("VideoOffsetLock"));
+	XMLProperty const * proplock = node->property (X_("VideoOffsetLock"));
 	if (proplock) {
 		video_offset_lock = atoi(proplock->value())?true:false;
 	}
 
-	const XMLProperty* localfile = node->property (X_("LocalFile"));
+	XMLProperty const * localfile = node->property (X_("LocalFile"));
 	if (localfile) {
 		local_file = atoi(localfile->value())?true:false;
 	}
 
-	const XMLProperty* propf = node->property (X_("Filename"));
+	XMLProperty const * propf = node->property (X_("Filename"));
 	video_file_info(propf->value(), local_file);
 
 	if ((node = _session->extra_xml (X_("Videomonitor")))) {
-		const XMLProperty* prop = node->property (X_("active"));
+		XMLProperty const * prop = node->property (X_("active"));
 		if (prop && prop->value() == "yes" && found_xjadeo() && !video_filename.empty() && local_file) {
 			open_video_monitor();
 		}
@@ -225,7 +225,7 @@ int
 VideoTimeLine::set_state (const XMLNode& node, int /*version*/)
 {
 	LocaleGuard lg (X_("C"));
-	const XMLProperty* propoffset = node.property (X_("VideoOffset"));
+	XMLProperty const * propoffset = node.property (X_("VideoOffset"));
 	if (propoffset) {
 		video_offset = atoll(propoffset->value());
 	}
@@ -804,7 +804,7 @@ VideoTimeLine::open_video_monitor() {
 		/* load mask from Session */
 		XMLNode* node = _session->extra_xml (X_("XJRestoreSettings"));
 		if (node) {
-			const XMLProperty* prop = node->property (X_("mask"));
+			XMLProperty const * prop = node->property (X_("mask"));
 			if (prop) {
 				xj_settings_mask = atoi(prop->value());
 			}
@@ -825,7 +825,7 @@ VideoTimeLine::open_video_monitor() {
 		if (_session) {
 			XMLNode* node = _session->extra_xml (X_("Videomonitor"));
 			if (node) {
-				const XMLProperty* prop = node->property (X_("active"));
+				XMLProperty const * prop = node->property (X_("active"));
 				if (prop && prop->value() != "yes") _session->set_dirty ();
 			} else {
 				_session->set_dirty ();

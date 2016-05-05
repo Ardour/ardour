@@ -111,7 +111,7 @@ MidiPortManager::create_ports ()
 void
 MidiPortManager::set_midi_port_states (const XMLNodeList&nodes)
 {
-	XMLProperty* prop;
+	XMLProperty const * prop;
 	typedef map<std::string,boost::shared_ptr<Port> > PortMap;
 	PortMap ports;
 	const int version = 0;

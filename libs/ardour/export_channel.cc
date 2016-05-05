@@ -98,7 +98,7 @@ PortExportChannel::get_state (XMLNode * node) const
 void
 PortExportChannel::set_state (XMLNode * node, Session & session)
 {
-	XMLProperty * prop;
+	XMLProperty const * prop;
 	XMLNodeList xml_ports = node->children ("Port");
 	for (XMLNodeList::iterator it = xml_ports.begin(); it != xml_ports.end(); ++it) {
 		if ((prop = (*it)->property ("name"))) {

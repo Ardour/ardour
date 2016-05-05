@@ -701,7 +701,7 @@ ExportProfileManager::init_formats (XMLNodeList nodes)
 ExportProfileManager::FormatStatePtr
 ExportProfileManager::deserialize_format (XMLNode & root)
 {
-	XMLProperty * prop;
+	XMLProperty const * prop;
 	PBD::UUID id;
 
 	if ((prop = root.property ("id"))) {

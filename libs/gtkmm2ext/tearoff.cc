@@ -286,7 +286,7 @@ void
 TearOff::set_state (const XMLNode& node)
 {
         Glib::RefPtr<Gdk::Window> win;
-        const XMLProperty* prop;
+        XMLProperty const * prop;
 
         if ((prop = node.property (X_("tornoff"))) == 0) {
                 return;

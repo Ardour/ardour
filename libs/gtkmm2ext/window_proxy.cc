@@ -84,12 +84,13 @@ int
 WindowProxy::set_state (const XMLNode& node, int /* version */)
 {
 	XMLNodeList children = node.children ();
-
+	XMLNode const * child;
 	XMLNodeList::const_iterator i = children.begin ();
 
 	while (i != children.end()) {
-		XMLProperty* prop = (*i)->property (X_("name"));
-		if ((*i)->name() == X_("Window") && prop && prop->value() == _name) {
+		child = *i;
+		XMLProperty const * prop = child->property (X_("name"));
+		if (child->name() == X_("Window") && prop && prop->value() == _name) {
 			break;
 		}
 
@@ -98,22 +99,23 @@ WindowProxy::set_state (const XMLNode& node, int /* version */)
 
 	if (i != children.end()) {
 
-		XMLProperty* prop;
+		XMLProperty const * prop;
+		child = *i;
 
-		if ((prop = (*i)->property (X_("visible"))) != 0) {
+		if ((prop = child->property (X_("visible"))) != 0) {
 			_visible = PBD::string_is_affirmative (prop->value ());
 		}
 
-		if ((prop = (*i)->property (X_("x-off"))) != 0) {
+		if ((prop = child->property (X_("x-off"))) != 0) {
 			_x_off = atoi (prop->value());
 		}
-		if ((prop = (*i)->property (X_("y-off"))) != 0) {
+		if ((prop = child->property (X_("y-off"))) != 0) {
 			_y_off = atoi (prop->value());
 		}
-		if ((prop = (*i)->property (X_("x-size"))) != 0) {
+		if ((prop = child->property (X_("x-size"))) != 0) {
 			_width = atoi (prop->value());
 		}
-		if ((prop = (*i)->property (X_("y-size"))) != 0) {
+		if ((prop = child->property (X_("y-size"))) != 0) {
 			_height = atoi (prop->value());
 		}
 	}
