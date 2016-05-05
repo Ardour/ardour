@@ -2944,7 +2944,6 @@ Route::set_state (const XMLNode& node, int version)
 
 	if ((prop = node.property (X_("active"))) != 0) {
 		bool yn = string_is_affirmative (prop->value());
-		_active = !yn; // force switch
 		set_active (yn, this);
 	}
 
