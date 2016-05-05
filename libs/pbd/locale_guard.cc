@@ -26,10 +26,10 @@
 
 using namespace PBD;
 
-/* The initial C++ locate is "C" regardless of the user's preferred locale.
+/* The initial C++ locale is "C" regardless of the user's preferred locale.
  * and affects std::sprintf() et al from <cstdio>
  *
- * the C locale from stlocale() matches the user's preferred locale
+ * the C locale from setlocale() matches the user's preferred locale
  * and effects ::sprintf() et al from <stdio.h>
  *
  * Setting the C++ locale will change the C locale, but not the other way 'round.
@@ -53,6 +53,9 @@ LocaleGuard::init ()
 {
 	char* actual = setlocale (LC_NUMERIC, NULL);
 	if (strcmp ("C", actual)) {
+		/* purpose of LocaleGuard is to make sure we're using "C" for
+		   the numeric locale during its lifetime, so make it so.
+		*/
 		old_c = strdup (actual);
 		/* this changes both C++ and C locale */
 		std::locale::global (std::locale (std::locale::classic(), "C", std::locale::numeric));
