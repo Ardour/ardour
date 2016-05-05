@@ -1095,7 +1095,6 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& whe
 
 	const double pulse = pulse_at_beat_locked (_metrics, beat);
 	MeterSection* new_meter = new MeterSection (pulse, beat, where, meter.divisions_per_bar(), meter.note_divisor());
-	new_meter->set_frame (frame_at_pulse_locked (_metrics, pulse));
 
 	do_insert (new_meter);
 
@@ -1109,16 +1108,16 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& whe
 MeterSection*
 TempoMap::add_meter_locked (const Meter& meter, framepos_t frame, double beat, const Timecode::BBT_Time& where, bool recompute)
 {
+	/* add meter-locked tempo */
+	TempoSection* t = add_tempo_locked (tempo_at_locked (_metrics, frame), frame, true, TempoSection::Ramp);
+	if (t) {
+		t->set_locked_to_meter (true);
+	}
+
 	MeterSection* new_meter = new MeterSection (frame, beat, where, meter.divisions_per_bar(), meter.note_divisor());
-	TempoSection* t = 0;
-	double pulse = pulse_at_frame_locked (_metrics, frame);
-	new_meter->set_pulse (pulse);
+	new_meter->set_pulse (pulse_at_frame_locked (_metrics, frame));
 
 	do_insert (new_meter);
-
-	/* add meter-locked tempo */
-	t = add_tempo_locked (tempo_at_locked (_metrics, frame), frame, true, TempoSection::Ramp);
-	t->set_locked_to_meter (true);
 
 	if (recompute) {
 		solve_map (_metrics, new_meter, frame);
@@ -2263,7 +2262,7 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const BBT_Time& 
 	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
 		MeterSection* m;
 		if ((m = dynamic_cast<MeterSection*> (*i)) != 0) {
-			if (m->bbt().bars == when.bars) {
+			if (m != section && m->bbt().bars == when.bars) {
 				return false;
 			}
 		}
@@ -2359,6 +2358,7 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const BBT_Time& 
 
 	MetricSectionSorter cmp;
 	imaginary.sort (cmp);
+
 	if (section->position_lock_style() == AudioTime) {
 		/* we're setting the pulse */
 		section->set_position_lock_style (MusicTime);
