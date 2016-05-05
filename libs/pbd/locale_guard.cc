@@ -70,7 +70,9 @@ LocaleGuard::~LocaleGuard ()
 
 	if (current != old_cpp) {
 		/* the C++ locale should always be "C", that's the default
-		 * at application start, and ardour never changes it
+		 * at application start, and ardour never changes it to
+		 * anything but "C".
+		 *
 		 * if it's not: some plugin meddled with it.
 		 */
 		assert (old_cpp == std::locale::classic ());
