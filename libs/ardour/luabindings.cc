@@ -239,11 +239,13 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginClass <PBD::Stateful> ("Stateful")
+		.addFunction ("id", &PBD::Stateful::id)
 		.addFunction ("properties", &PBD::Stateful::properties)
 		.addFunction ("clear_changes", &PBD::Stateful::clear_changes)
 		.endClass ()
 
 		.beginWSPtrClass <PBD::Stateful> ("StatefulPtr")
+		.addFunction ("id", &PBD::Stateful::id)
 		.addFunction ("properties", &PBD::Stateful::properties)
 		.addFunction ("clear_changes", &PBD::Stateful::clear_changes)
 		.endClass ()
