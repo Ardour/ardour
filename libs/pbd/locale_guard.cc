@@ -23,14 +23,12 @@
 #include <locale.h>
 
 #include "pbd/locale_guard.h"
+#include "pbd/error.h"
 
 using namespace PBD;
 
 /* The initial C++ locale is "C" regardless of the user's preferred locale.
- * and affects std::sprintf() et al from <cstdio>
- *
- * the C locale from setlocale() matches the user's preferred locale
- * and effects ::sprintf() et al from <stdio.h>
+ * The C locale from setlocale() matches the user's preferred locale
  *
  * Setting the C++ locale will change the C locale, but not the other way 'round.
  * and some plugin may change either behind our back.
@@ -60,7 +58,9 @@ LocaleGuard::init ()
 		/* this changes both C++ and C locale */
 		std::locale::global (std::locale (std::locale::classic(), "C", std::locale::numeric));
 	}
-	assert (old_cpp == std::locale::classic ());
+	if (old_cpp != std::locale::classic ()) {
+		PBD::error << "LocaleGuard: initial C++ locale is not 'C'. Expect non-portable session files.\n";
+	}
 }
 
 LocaleGuard::~LocaleGuard ()
@@ -75,7 +75,9 @@ LocaleGuard::~LocaleGuard ()
 		 *
 		 * if it's not: some plugin meddled with it.
 		 */
-		assert (old_cpp == std::locale::classic ());
+		if (old_cpp != std::locale::classic ()) {
+			PBD::error << "LocaleGuard: someone (a plugin) changed the C++ locale, expect non-portable session files.\n";
+		}
 		std::locale::global (old_cpp);
 	}
 	if (old_c && strcmp (old_c, actual)) {
