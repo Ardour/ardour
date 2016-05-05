@@ -506,8 +506,8 @@ private:
 	TempoSection* add_tempo_locked (const Tempo&, double pulse, bool recompute, TempoSection::Type type);
 	TempoSection* add_tempo_locked (const Tempo&, framepos_t frame, bool recompute, TempoSection::Type type);
 
-	MeterSection* add_meter_locked (const Meter&, double beat, Timecode::BBT_Time where, bool recompute);
-	MeterSection* add_meter_locked (const Meter&, framepos_t frame, double beat, Timecode::BBT_Time where, bool recompute);
+	MeterSection* add_meter_locked (const Meter&, double beat, const Timecode::BBT_Time& where, bool recompute);
+	MeterSection* add_meter_locked (const Meter&, framepos_t frame, double beat, const Timecode::BBT_Time& where, bool recompute);
 
 	bool remove_tempo_locked (const TempoSection&);
 	bool remove_meter_locked (const MeterSection&);

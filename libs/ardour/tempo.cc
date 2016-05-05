@@ -879,7 +879,7 @@ TempoMap::do_insert (MetricSection* section)
 		}
 
 		_metrics.insert (i, section);
-		//dump (_metrics, std::cerr);
+		//dump (_metrics, std::cout);
 	}
 }
 
@@ -1084,7 +1084,7 @@ TempoMap::add_meter (const Meter& meter, const framepos_t& frame, const double& 
 }
 
 MeterSection*
-TempoMap::add_meter_locked (const Meter& meter, double beat, BBT_Time where, bool recompute)
+TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& where, bool recompute)
 {
 	/* a new meter always starts a new bar on the first beat. so
 	   round the start time appropriately. remember that
@@ -1093,14 +1093,10 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, BBT_Time where, boo
 
 	*/
 
-	if (where.beats != 1) {
-		where.beats = 1;
-		where.bars++;
-	}
-	/* new meters *always* start on a beat. */
-	where.ticks = 0;
 	const double pulse = pulse_at_beat_locked (_metrics, beat);
 	MeterSection* new_meter = new MeterSection (pulse, beat, where, meter.divisions_per_bar(), meter.note_divisor());
+	new_meter->set_frame (frame_at_pulse_locked (_metrics, pulse));
+
 	do_insert (new_meter);
 
 	if (recompute) {
@@ -1111,7 +1107,7 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, BBT_Time where, boo
 }
 
 MeterSection*
-TempoMap::add_meter_locked (const Meter& meter, framepos_t frame, double beat, Timecode::BBT_Time where, bool recompute)
+TempoMap::add_meter_locked (const Meter& meter, framepos_t frame, double beat, const Timecode::BBT_Time& where, bool recompute)
 {
 	MeterSection* new_meter = new MeterSection (frame, beat, where, meter.divisions_per_bar(), meter.note_divisor());
 	TempoSection* t = 0;
@@ -1398,7 +1394,6 @@ TempoMap::recompute_meters (Metrics& metrics)
 			prev_m = meter;
 		}
 	}
-	//dump (_metrics, std::cerr;
 }
 
 void
@@ -2025,8 +2020,6 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const framepos_t
 		return true;
 	}
 
-	//dump (imaginary, std::cerr);
-
 	return false;
 }
 
@@ -2099,8 +2092,6 @@ TempoMap::solve_map (Metrics& imaginary, TempoSection* section, const double& pu
 	if (check_solved (imaginary, false)) {
 		return true;
 	}
-
-	//dump (imaginary, std::cerr);
 
 	return false;
 }
@@ -2261,7 +2252,7 @@ TempoMap::solve_map (Metrics& imaginary, MeterSection* section, const framepos_t
 	} else {
 		recompute_meters (imaginary);
 	}
-	//dump (imaginary, std::cerr);
+
 	return true;
 }
 
