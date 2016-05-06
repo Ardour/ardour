@@ -1698,7 +1698,7 @@ static std::list<Gtk::TargetEntry> drop_targets()
 	std::list<Gtk::TargetEntry> tmp;
 	tmp.push_back (Gtk::TargetEntry ("processor")); // from processor-box to processor-box
 	tmp.push_back (Gtk::TargetEntry ("PluginInfoPtr")); // from plugin-manager
-	tmp.push_back (Gtk::TargetEntry ("PluginPresetPtr")); // from sidebar
+	tmp.push_back (Gtk::TargetEntry ("PluginFavoritePtr")); // from sidebar
 	return tmp;
 }
 
@@ -1910,7 +1910,7 @@ ProcessorBox::plugin_drop (Gtk::SelectionData const &data, ProcessorEntry* posit
 	if (data.get_target() == "PluginInfoPtr") {
 		_drop_plugin (data, pl);
 	}
-	else if (data.get_target() == "PluginPresetPtr") {
+	else if (data.get_target() == "PluginFavoritePtr") {
 		_drop_plugin_preset (data, pl);
 	}
 	else {

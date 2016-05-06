@@ -196,6 +196,10 @@ Mixer_UI::Mixer_UI ()
 	group_display_frame.set_shadow_type (Gtk::SHADOW_IN);
 	group_display_frame.add (group_display_vbox);
 
+
+	list<TargetEntry> target_list;
+	target_list.push_back (TargetEntry ("PluginPresetPtr"));
+
 	favorite_plugins_model = PluginTreeStore::create (favorite_plugins_columns);
 	favorite_plugins_display.set_model (favorite_plugins_model);
 	favorite_plugins_display.append_column (_("Favorite Plugins"), favorite_plugins_columns.name);
@@ -205,8 +209,9 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.set_headers_visible (true);
 	favorite_plugins_display.set_rules_hint (true);
 	favorite_plugins_display.set_can_focus (false);
-	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "PluginPresetPtr");
+	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "PluginFavoritePtr");
 	favorite_plugins_display.set_drag_column (favorite_plugins_columns.name.index());
+	favorite_plugins_display.add_drop_targets (target_list);
 	favorite_plugins_display.signal_row_activated().connect (sigc::mem_fun (*this, &Mixer_UI::plugin_row_activated));
 	favorite_plugins_display.signal_button_press_event().connect (sigc::mem_fun (*this, &Mixer_UI::plugin_row_button_press), false);
 	favorite_plugins_display.signal_drop.connect (sigc::mem_fun (*this, &Mixer_UI::plugin_drop));
