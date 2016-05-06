@@ -154,7 +154,7 @@ namespace Gtkmm2ext {
 
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 {
-    public:
+public:
 	ARDOUR_UI (int *argcp, char **argvp[], const char* localedir);
 	~ARDOUR_UI();
 
@@ -189,7 +189,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool get_smart_mode () const;
 
 	int get_session_parameters (bool quit_on_cancel, bool should_be_new = false, std::string load_template = "");
-        int  build_session_from_dialog (SessionDialog&, const std::string& session_name, const std::string& session_path);
+	int  build_session_from_dialog (SessionDialog&, const std::string& session_name, const std::string& session_path);
 	bool ask_about_loading_existing_session (const std::string& session_path);
 
 	/// @return true if session was successfully unloaded.
@@ -223,7 +223,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	static sigc::signal<void, framepos_t, bool, framepos_t> Clock;
 
 	static void close_all_dialogs () { CloseAllDialogs(); }
-        static sigc::signal<void> CloseAllDialogs;
+	static sigc::signal<void> CloseAllDialogs;
 
 	XMLNode* main_window_settings() const;
 	XMLNode* editor_settings() const;
@@ -256,8 +256,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void synchronize_sync_source_and_video_pullup ();
 
 	void add_route ();
-        void add_routes_part_two ();
-        void add_routes_thread ();
+	void add_routes_part_two ();
+	void add_routes_thread ();
 
 	void start_duplicate_routes ();
 
@@ -335,7 +335,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void reset_route_peak_display (ARDOUR::Route*);
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
-        const std::string& announce_string() const { return _announce_string; }
+	const std::string& announce_string() const { return _announce_string; }
 
 	void hide_application ();
 
@@ -357,7 +357,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	Gtkmm2ext::ActionMap global_actions;
 
-  protected:
+protected:
 	friend class PublicEditor;
 
 	void toggle_auto_play ();
@@ -371,12 +371,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void reenable_hide_loop_punch_ruler_if_appropriate ();
 	void toggle_auto_return ();
 	void toggle_click ();
-        void toggle_audio_midi_setup ();
+	void toggle_audio_midi_setup ();
 	void toggle_session_auto_loop ();
 	void toggle_rc_options_window ();
 	void toggle_session_options_window ();
 
-  private:
+private:
 	Gtk::Window   _main_window;
 	Gtk::VBox      main_vpacker;
 	Gtk::HBox      status_bar_hpacker;
@@ -386,8 +386,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::Tooltips _tooltips;
 	NSM_Client*    nsm;
 	bool          _was_dirty;
-        bool          _mixer_on_top;
-        bool          _initial_verbose_plugin_scan;
+	bool          _mixer_on_top;
+	bool          _initial_verbose_plugin_scan;
 	bool           first_time_engine_run;
 
 	void show_tabbable (Gtkmm2ext::Tabbable*);
@@ -410,7 +410,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	static ARDOUR_UI *theArdourUI;
 	SessionDialog *_session_dialog;
 
-        int starting ();
+	int starting ();
 
 	int  ask_about_saving_session (const std::vector<std::string>& actions);
 
@@ -670,37 +670,37 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Meterbridge  *meterbridge;
 	LuaWindow    *luawindow;
 
-        /* Dialogs that can be created via new<T> */
+	/* Dialogs that can be created via new<T> */
 
-        RCOptionEditor* rc_option_editor;
+	RCOptionEditor* rc_option_editor;
 	Gtk::HBox rc_option_editor_placeholder;
 
-        WM::Proxy<SpeakerDialog> speaker_config_window;
-        WM::Proxy<AddRouteDialog> add_route_dialog;
-        WM::Proxy<About> about;
-        WM::Proxy<LocationUIWindow> location_ui;
-        WM::Proxy<RouteParams_UI> route_params;
-        WM::Proxy<EngineControl> audio_midi_setup;
-        WM::Proxy<ExportVideoDialog> export_video_dialog;
-        WM::Proxy<LuaScriptManager> lua_script_window;
+	WM::Proxy<SpeakerDialog> speaker_config_window;
+	WM::Proxy<AddRouteDialog> add_route_dialog;
+	WM::Proxy<About> about;
+	WM::Proxy<LocationUIWindow> location_ui;
+	WM::Proxy<RouteParams_UI> route_params;
+	WM::Proxy<EngineControl> audio_midi_setup;
+	WM::Proxy<ExportVideoDialog> export_video_dialog;
+	WM::Proxy<LuaScriptManager> lua_script_window;
 
-        /* Windows/Dialogs that require a creator method */
+	/* Windows/Dialogs that require a creator method */
 
-        WM::ProxyWithConstructor<SessionOptionEditor> session_option_editor;
-        WM::ProxyWithConstructor<AddVideoDialog> add_video_dialog;
-        WM::ProxyWithConstructor<BundleManager> bundle_manager;
-        WM::ProxyWithConstructor<BigClockWindow> big_clock_window;
-        WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
-        WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
-        WM::ProxyWithConstructor<KeyEditor> key_editor;
+	WM::ProxyWithConstructor<SessionOptionEditor> session_option_editor;
+	WM::ProxyWithConstructor<AddVideoDialog> add_video_dialog;
+	WM::ProxyWithConstructor<BundleManager> bundle_manager;
+	WM::ProxyWithConstructor<BigClockWindow> big_clock_window;
+	WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
+	WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
+	WM::ProxyWithConstructor<KeyEditor> key_editor;
 
-        /* creator methods */
+	/* creator methods */
 
-        SessionOptionEditor*    create_session_option_editor ();
-        BundleManager*          create_bundle_manager ();
-        AddVideoDialog*         create_add_video_dialog ();
-        BigClockWindow*         create_big_clock_window();
-        GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
+	SessionOptionEditor*    create_session_option_editor ();
+	BundleManager*          create_bundle_manager ();
+	AddVideoDialog*         create_add_video_dialog ();
+	BigClockWindow*         create_big_clock_window();
+	GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 	KeyEditor*              create_key_editor ();
 
 	ARDOUR::SystemExec *video_server_process;
@@ -751,7 +751,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void plugin_scan_dialog (std::string type, std::string plugin, bool);
 	void plugin_scan_timeout (int);
 
-        void session_format_mismatch (std::string, std::string);
+	void session_format_mismatch (std::string, std::string);
 
 	void session_dialog (std::string);
 	int pending_state_dialog ();
@@ -789,23 +789,22 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 			Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag,
 			const char *msg);
 	Gtk::Label status_bar_label;
-        bool status_bar_button_press (GdkEventButton*);
+	bool status_bar_button_press (GdkEventButton*);
 
 	void loading_message (const std::string& msg);
 
 	PBD::ScopedConnectionList forever_connections;
-        PBD::ScopedConnection halt_connection;
+	PBD::ScopedConnection halt_connection;
 
-        void step_edit_status_change (bool);
+	void step_edit_status_change (bool);
 
-	/* these are used only in response to a platform-specific "ShouldQuit" signal
-	 */
+	/* these are used only in response to a platform-specific "ShouldQuit" signal */
 	bool idle_finish ();
 	void queue_finish ();
 	void fontconfig_dialog ();
 
-        int missing_file (ARDOUR::Session*s, std::string str, ARDOUR::DataType type);
-        int ambiguous_file (std::string file, std::vector<std::string> hits);
+	int missing_file (ARDOUR::Session*s, std::string str, ARDOUR::DataType type);
+	int ambiguous_file (std::string file, std::vector<std::string> hits);
 
 	bool click_button_clicked (GdkEventButton *);
 
@@ -837,10 +836,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	bool xrun_button_release (GdkEventButton* ev);
 
-        std::string _announce_string;
-        void check_announcements ();
+	std::string _announce_string;
+	void check_announcements ();
 
-        int do_audio_midi_setup (uint32_t);
+	int do_audio_midi_setup (uint32_t);
 	void audioengine_became_silent ();
 
 	DuplicateRouteDialog* duplicate_routes_dialog;
