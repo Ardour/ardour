@@ -2704,6 +2704,7 @@ Route::get_template()
 XMLNode&
 Route::state(bool full_state)
 {
+	LocaleGuard lg ();
 	if (!_session._template_state_dir.empty()) {
 		assert (!full_state); // only for templates
 		foreach_processor (sigc::bind (sigc::mem_fun (*this, &Route::set_plugin_state_dir), _session._template_state_dir));
