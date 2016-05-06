@@ -689,8 +689,9 @@ MidiTrackerEditor::build_controller_menu ()
 	using namespace Menu_Helpers;
 
 	if (controller_menu) {
-		/* it exists and has not been invalidated by a channel mode change */
-		return;
+		/* For some reason an already built controller menu cannot be attached
+		   so let's rebuild it */
+		delete controller_menu;
 	}
 
 	controller_menu = new Menu; // explicitly managed by us
