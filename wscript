@@ -568,8 +568,7 @@ int main() { return 0; }''',
     if opt.stl_debug:
         cxx_flags.append("-D_GLIBCXX_DEBUG")
 
-    if re.search ("freebsd", sys.platform) != None:
-        linker_flags.append('-lexecinfo')
+    linker_flags.append('-lexecinfo')
 
     if conf.env['DEBUG_RT_ALLOC']:
         compiler_flags.append('-DDEBUG_RT_ALLOC')
