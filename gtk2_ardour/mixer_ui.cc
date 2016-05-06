@@ -1609,7 +1609,7 @@ Mixer_UI::strip_scroller_button_release (GdkEventButton* ev)
 	using namespace Menu_Helpers;
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		// ARDOUR_UI::instance()->add_route (this);
+		ARDOUR_UI::instance()->add_route ();
 		return true;
 	}
 
@@ -1965,7 +1965,7 @@ Mixer_UI::setup_track_display ()
 void
 Mixer_UI::new_track_or_bus ()
 {
-	// ARDOUR_UI::instance()->add_route (this);
+	ARDOUR_UI::instance()->add_route ();
 }
 
 

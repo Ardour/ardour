@@ -3950,7 +3950,7 @@ ARDOUR_UI::start_duplicate_routes ()
 }
 
 void
-ARDOUR_UI::add_route (Gtk::Window* /* ignored */)
+ARDOUR_UI::add_route ()
 {
 	int count;
 

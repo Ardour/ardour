@@ -3805,7 +3805,7 @@ bool
 Editor::edit_controls_button_release (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
-		ARDOUR_UI::instance()->add_route (current_toplevel());
+		ARDOUR_UI::instance()->add_route ();
 	} else if (ev->button == 1) {
 		selection->clear_tracks ();
 	}
