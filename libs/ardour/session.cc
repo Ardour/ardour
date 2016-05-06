@@ -2425,7 +2425,7 @@ Session::default_track_name_pattern (DataType t)
  */
 list<boost::shared_ptr<MidiTrack> >
 Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost::shared_ptr<PluginInfo> instrument,
-			 TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template)
+			 TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template, Plugin::PresetRecord* pset)
 {
 	string track_name;
 	uint32_t track_id = 0;
@@ -2517,6 +2517,9 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 		if (instrument) {
 			for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
 				PluginPtr plugin = instrument->load (*this);
+				if (pset) {
+					plugin->load_preset (*pset);
+				}
 				boost::shared_ptr<Processor> p (new PluginInsert (*this, plugin));
 				(*r)->add_processor (p, PreFader);
 
@@ -2528,7 +2531,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 }
 
 RouteList
-Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name_template, boost::shared_ptr<PluginInfo> instrument)
+Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name_template, boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset)
 {
 	string bus_name;
 	uint32_t bus_id = 0;
@@ -2606,6 +2609,9 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 		if (instrument) {
 			for (RouteList::iterator r = ret.begin(); r != ret.end(); ++r) {
 				PluginPtr plugin = instrument->load (*this);
+				if (pset) {
+					plugin->load_preset (*pset);
+				}
 				boost::shared_ptr<Processor> p (new PluginInsert (*this, plugin));
 				(*r)->add_processor (p, PreFader);
 			}

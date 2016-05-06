@@ -68,6 +68,7 @@
 #include "ardour/session_configuration.h"
 #include "ardour/session_event.h"
 #include "ardour/interpolation.h"
+#include "ardour/plugin.h"
 #include "ardour/route.h"
 #include "ardour/route_graph.h"
 
@@ -605,10 +606,15 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		const ChanCount& input, const ChanCount& output,
 		boost::shared_ptr<PluginInfo> instrument = boost::shared_ptr<PluginInfo>(),
 		TrackMode mode = Normal,
-		RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = ""
+		RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = "",
+		Plugin::PresetRecord* pset = 0
 		);
 
-	RouteList new_midi_route (RouteGroup* route_group, uint32_t how_many, std::string name_template = "", boost::shared_ptr<PluginInfo> instrument = boost::shared_ptr<PluginInfo>());
+	RouteList new_midi_route (RouteGroup* route_group,
+			uint32_t how_many,
+			std::string name_template = "",
+			boost::shared_ptr<PluginInfo> instrument = boost::shared_ptr<PluginInfo>(),
+			Plugin::PresetRecord* pset = 0);
 
 	void remove_routes (boost::shared_ptr<RouteList>);
 	void remove_route (boost::shared_ptr<Route>);
