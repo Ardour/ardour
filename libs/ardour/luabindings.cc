@@ -646,6 +646,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginClass <Plugin::PresetRecord> ("PresetRecord")
+		.addVoidConstructor ()
 		.addData ("uri", &Plugin::PresetRecord::uri, false)
 		.addData ("label", &Plugin::PresetRecord::label, false)
 		.addData ("user", &Plugin::PresetRecord::user, false)
