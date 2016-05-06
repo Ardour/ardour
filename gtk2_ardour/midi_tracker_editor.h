@@ -34,6 +34,7 @@
 #include "ardour_dropdown.h"
 #include "ardour_window.h"
 #include "editing.h"
+#include "midi_time_axis.h"
 
 #include "midi_tracker_matrix.h"
 
@@ -67,8 +68,7 @@ class MidiTrackerEditor : public ArdourWindow
   public:
 	typedef Evoral::Note<Evoral::Beats> NoteType;
 
-	MidiTrackerEditor(ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::MidiRegion>,
-	                  boost::shared_ptr<ARDOUR::MidiTrack>);
+	MidiTrackerEditor(ARDOUR::Session*, MidiTimeAxisView*, boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::MidiRegion>, boost::shared_ptr<ARDOUR::MidiTrack>);
 	~MidiTrackerEditor();
 
   private:
@@ -196,6 +196,7 @@ class MidiTrackerEditor : public ArdourWindow
 	// same row, then this string is printed.
 	static const std::string undefined_str;
 
+	MidiTimeAxisView* midi_time_axis_view;
 	boost::shared_ptr<ARDOUR::Route> route;
 
 	MidiTrackerModelColumns      columns;

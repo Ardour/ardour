@@ -927,7 +927,7 @@ MidiRegionView::show_tracker_editor ()
 {
 	if (!_tracker_editor) {
 		MidiTimeAxisView* const mtv  = dynamic_cast<MidiTimeAxisView*>(&trackview);
-		_tracker_editor = new MidiTrackerEditor (trackview.session(), mtv->_route, midi_region(), midi_view()->midi_track());
+		_tracker_editor = new MidiTrackerEditor (trackview.session(), mtv, mtv->_route, midi_region(), midi_view()->midi_track());
 	}
 	_tracker_editor->present ();
 }

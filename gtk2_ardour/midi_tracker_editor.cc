@@ -46,6 +46,7 @@
 #include "midi_tracker_editor.h"
 #include "note_player.h"
 #include "tooltips.h"
+#include "axis_view.h"
 
 #include "i18n.h"
 
@@ -86,6 +87,72 @@ static const gchar *_beats_per_row_strings[] = {
 };
 
 #define COMBO_TRIANGLE_WIDTH 25
+
+const std::string MidiTrackerEditor::note_off_str = "===";
+const std::string MidiTrackerEditor::undefined_str = "***";
+
+MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, MidiTimeAxisView* mtv, boost::shared_ptr<ARDOUR::Route> rou, boost::shared_ptr<MidiRegion> reg, boost::shared_ptr<MidiTrack> tr)
+	: ArdourWindow (reg->name())
+	, automation_action_menu(0)
+	, controller_menu (0)
+	, midi_time_axis_view(mtv)
+	, route(rou)
+	, myactions (X_("Tracking"))
+	, visible_blank (false)
+	, visible_note (true)
+	, visible_channel (false)
+	, visible_velocity (true)
+	, visible_delay (true)
+	, region (reg)
+	, track (tr)
+	, midi_model (region->midi_source(0)->model())
+
+{
+	/* We do not handle nested sources/regions. Caller should have tackled this */
+
+	if (reg->max_source_level() > 0) {
+		throw failed_constructor();
+	}
+
+	set_session (s);
+
+	// Beats per row combo
+	beats_per_row_strings =  I18N (_beats_per_row_strings);
+	build_beats_per_row_menu ();
+
+	register_actions ();
+
+	setup_tooltips ();
+	setup_toolbar ();
+	setup_matrix ();
+	setup_scroller ();
+
+	setup_processor_menu_and_curves ();
+
+	set_beats_per_row_to (SnapToBeatDiv4);
+
+	redisplay_model ();
+
+	midi_model->ContentsChanged.connect (content_connection, invalidator (*this),
+	                                     boost::bind (&MidiTrackerEditor::redisplay_model, this), gui_context());
+
+	vbox.show ();
+
+	vbox.set_spacing (6);
+	vbox.set_border_width (6);
+	vbox.pack_start (toolbar, false, false);
+	vbox.pack_start (scroller, true, true);
+
+	add (vbox);
+	set_size_request (-1, 400);
+}
+
+MidiTrackerEditor::~MidiTrackerEditor ()
+{
+	delete mtm;
+	delete automation_action_menu;
+	delete controller_menu;
+}
 
 ////////////////
 // Automation //
@@ -727,17 +794,7 @@ MidiTrackerEditor::build_controller_menu ()
 boost::shared_ptr<MIDI::Name::MasterDeviceNames>
 MidiTrackerEditor::get_device_names()
 {
-	using namespace MIDI::Name;
-
-	const std::string model;// = gui_property (X_("midnam-model-name"));
-
-	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance()
-		.document_by_model(model);
-	if (midnam) {
-		return midnam->master_device_names(model);
-	} else {
-		return boost::shared_ptr<MasterDeviceNames>();
-	}
+	return midi_time_axis_view->get_device_names();
 }
 
 
@@ -908,71 +965,6 @@ MidiTrackerEditor::update_pan_track_visibility ()
 /////////////////////////
 // Other (to sort out) //
 /////////////////////////
-
-const std::string MidiTrackerEditor::note_off_str = "===";
-const std::string MidiTrackerEditor::undefined_str = "***";
-
-MidiTrackerEditor::MidiTrackerEditor (ARDOUR::Session* s, boost::shared_ptr<ARDOUR::Route> rou, boost::shared_ptr<MidiRegion> reg, boost::shared_ptr<MidiTrack> tr)
-	: ArdourWindow (reg->name())
-	, automation_action_menu(0)
-	, controller_menu (0)
-	, route(rou)
-	, myactions (X_("Tracking"))
-	, visible_blank (false)
-	, visible_note (true)
-	, visible_channel (false)
-	, visible_velocity (true)
-	, visible_delay (true)
-	, region (reg)
-	, track (tr)
-	, midi_model (region->midi_source(0)->model())
-
-{
-	/* We do not handle nested sources/regions. Caller should have tackled this */
-
-	if (reg->max_source_level() > 0) {
-		throw failed_constructor();
-	}
-
-	set_session (s);
-
-	// Beats per row combo
-	beats_per_row_strings =  I18N (_beats_per_row_strings);
-	build_beats_per_row_menu ();
-
-	register_actions ();
-
-	setup_tooltips ();
-	setup_toolbar ();
-	setup_matrix ();
-	setup_scroller ();
-
-	setup_processor_menu_and_curves ();
-
-	set_beats_per_row_to (SnapToBeatDiv4);
-
-	redisplay_model ();
-
-	midi_model->ContentsChanged.connect (content_connection, invalidator (*this),
-	                                     boost::bind (&MidiTrackerEditor::redisplay_model, this), gui_context());
-
-	vbox.show ();
-
-	vbox.set_spacing (6);
-	vbox.set_border_width (6);
-	vbox.pack_start (toolbar, false, false);
-	vbox.pack_start (scroller, true, true);
-
-	add (vbox);
-	set_size_request (-1, 400);
-}
-
-MidiTrackerEditor::~MidiTrackerEditor ()
-{
-	delete mtm;
-	delete automation_action_menu;
-	delete controller_menu;
-}
 
 void
 MidiTrackerEditor::register_actions ()
