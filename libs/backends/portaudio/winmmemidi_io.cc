@@ -18,6 +18,7 @@
 
 #include <windows.h>
 #include <mmsystem.h>
+#include <glibmm.h>
 
 #include <sstream>
 #include <set>
