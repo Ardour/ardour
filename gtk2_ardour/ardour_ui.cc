@@ -1798,7 +1798,8 @@ ARDOUR_UI::session_add_mixed_track (
 		uint32_t how_many,
 		const string& name_template,
 		bool strict_io,
-		PluginInfoPtr instrument)
+		PluginInfoPtr instrument,
+		Plugin::PresetRecord* pset)
 {
 	list<boost::shared_ptr<MidiTrack> > tracks;
 
@@ -1833,7 +1834,8 @@ ARDOUR_UI::session_add_midi_bus (
 		uint32_t how_many,
 		const string& name_template,
 		bool strict_io,
-		PluginInfoPtr instrument)
+		PluginInfoPtr instrument,
+		Plugin::PresetRecord* pset)
 {
 	RouteList routes;
 
@@ -1843,7 +1845,7 @@ ARDOUR_UI::session_add_midi_bus (
 	}
 
 	try {
-		routes = _session->new_midi_route (route_group, how_many, name_template, instrument);
+		routes = _session->new_midi_route (route_group, how_many, name_template, instrument, pset);
 		if (routes.size() != how_many) {
 			error << string_compose(P_("could not create %1 new Midi Bus", "could not create %1 new Midi Busses", how_many), how_many) << endmsg;
 		}
@@ -1868,15 +1870,16 @@ ARDOUR_UI::session_add_midi_route (
 		uint32_t how_many,
 		const string& name_template,
 		bool strict_io,
-		PluginInfoPtr instrument)
+		PluginInfoPtr instrument,
+		Plugin::PresetRecord* pset)
 {
 	ChanCount one_midi_channel;
 	one_midi_channel.set (DataType::MIDI, 1);
 
 	if (disk) {
-		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, strict_io, instrument);
+		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, strict_io, instrument, pset);
 	} else {
-		session_add_midi_bus (route_group, how_many, name_template, strict_io, instrument);
+		session_add_midi_bus (route_group, how_many, name_template, strict_io, instrument, pset);
 	}
 }
 
@@ -4017,13 +4020,13 @@ ARDOUR_UI::add_route ()
 		session_add_midi_track (route_group, count, name_template, strict_io, instrument);
 		break;
 	case AddRouteDialog::MixedTrack:
-		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, strict_io, instrument);
+		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, strict_io, instrument, 0);
 		break;
 	case AddRouteDialog::AudioBus:
 		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template, strict_io);
 		break;
 	case AddRouteDialog::MidiBus:
-		session_add_midi_bus (route_group, count, name_template, strict_io, instrument);
+		session_add_midi_bus (route_group, count, name_template, strict_io, instrument, 0);
 		break;
 	}
 }

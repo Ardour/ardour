@@ -117,6 +117,13 @@ Mixer_UI::Mixer_UI ()
 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	scroller_base.set_name ("MixerWindow");
 	scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
+
+	/* set up drag-n-drop */
+	vector<TargetEntry> target_table;
+	target_table.push_back (TargetEntry ("PluginFavoritePtr"));
+	scroller_base.drag_dest_set (target_table);
+	scroller_base.signal_drag_data_received().connect (sigc::mem_fun(*this, &Mixer_UI::scroller_drag_data_received));
+
 	// add as last item of strip packer
 	strip_packer.pack_end (scroller_base, true, true);
 
@@ -1619,6 +1626,38 @@ Mixer_UI::strip_scroller_button_release (GdkEventButton* ev)
 	}
 
 	return false;
+}
+
+void
+Mixer_UI::scroller_drag_data_received (const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& data, guint info, guint time)
+{
+	printf ("Mixer_UI::scroller_drag_data_received\n");
+	if (data.get_target() != "PluginFavoritePtr") {
+		context->drag_finish (false, false, time);
+		return;
+	}
+
+	const void * d = data.get_data();
+	const Gtkmm2ext::DnDTreeView<ARDOUR::PluginPresetPtr>* tv = reinterpret_cast<const Gtkmm2ext::DnDTreeView<ARDOUR::PluginPresetPtr>*>(d);                                                   
+
+	PluginPresetList nfos;
+	TreeView* source;
+	tv->get_object_drag_data (nfos, &source);
+
+	Route::ProcessorList pl;
+	bool ok = false;
+
+	for (list<PluginPresetPtr>::const_iterator i = nfos.begin(); i != nfos.end(); ++i) {
+		PluginPresetPtr ppp = (*i);
+		PluginInfoPtr pip = ppp->_pip;
+		if (!pip->is_instrument ()) {
+			continue;
+		}
+		ARDOUR_UI::instance()->session_add_midi_track (NULL, 1, _("MIDI"), Config->get_strict_io (), pip, ppp->_preset.valid ? &ppp->_preset : 0);
+		ok = true;
+	}
+
+	context->drag_finish (ok, false, time);
 }
 
 void

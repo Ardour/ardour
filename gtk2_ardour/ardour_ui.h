@@ -298,14 +298,15 @@ public:
 			uint32_t how_many,
 			std::string const & name_template,
 			bool strict_io,
-			ARDOUR::PluginInfoPtr instrument) {
-		session_add_midi_route (true, route_group, how_many, name_template, strict_io, instrument);
+			ARDOUR::PluginInfoPtr instrument,
+			ARDOUR::Plugin::PresetRecord* preset = NULL) {
+		session_add_midi_route (true, route_group, how_many, name_template, strict_io, instrument, preset);
 	}
 
-	void session_add_mixed_track (const ARDOUR::ChanCount&, const ARDOUR::ChanCount&, ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr);
-	void session_add_midi_bus (ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr);
+	void session_add_mixed_track (const ARDOUR::ChanCount&, const ARDOUR::ChanCount&, ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*);
+	void session_add_midi_bus (ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*);
 	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool);
-	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr);
+	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*);
 
 	void display_insufficient_ports_message ();
 
