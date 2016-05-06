@@ -141,5 +141,3 @@ DnDTreeViewBase::on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int
 	drag_data.source = 0;
 	return TreeView::on_drag_drop (context, x, y, time);
 }
-
-
