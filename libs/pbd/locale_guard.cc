@@ -43,8 +43,10 @@ LocaleGuard::LocaleGuard ()
 		   the numeric locale during its lifetime, so make it so.
 		*/
 		old_c = strdup (actual);
-		/* this changes both C++ and C locale */
+		/* this changes both C++ and C locale (according to specs) */
 		std::locale::global (std::locale (std::locale::classic(), "C", std::locale::numeric));
+		/* ..but maybe not.. */
+		setlocale (LC_NUMERIC, "C");
 	}
 	if (old_cpp != std::locale::classic ()) {
 		PBD::error << "LocaleGuard: initial C++ locale is not 'C'. Expect non-portable session files.\n";
