@@ -475,9 +475,6 @@ Editor::register_actions ()
 
 	myactions.register_action (editor_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), sigc::mem_fun (*this, &Editor::cycle_zoom_focus));
 
-	reg_sens (editor_actions, "manage-action-scripts", _("Manage"),
-				sigc::mem_fun(*this, &Editor::manage_action_scripts));
-
 	for (int i = 1; i <= 9; ++i) {
 		string const a = string_compose (X_("script-action-%1"), i);
 		string const n = string_compose (_("Unset #%1"), i);

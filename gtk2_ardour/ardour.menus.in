@@ -282,7 +282,7 @@
       <menuitem action='set-mouse-mode-object-range'/>
       <separator/>
       <menu action="ActionScripts">
-        <menuitem action='manage-action-scripts'/>
+        <menuitem action='toggle-script-manager'/>
         <separator/>
         <menuitem action='script-action-1'/>
         <menuitem action='script-action-2'/>

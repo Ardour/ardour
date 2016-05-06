@@ -31,7 +31,6 @@ public:
 	LuaScriptManager ();
 
 protected:
-	bool on_delete_event (GdkEventAny*);
 	void session_going_away();
 
 private:

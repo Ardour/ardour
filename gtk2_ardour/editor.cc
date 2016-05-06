@@ -5727,12 +5727,6 @@ Editor::session_going_away ()
 }
 
 void
-Editor::manage_action_scripts ()
-{
-	ARDOUR_UI::instance()->lua_script_manager();
-}
-
-void
 Editor::trigger_script (int i)
 {
 	LuaInstance::instance()-> call_action (i);

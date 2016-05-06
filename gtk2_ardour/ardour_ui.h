@@ -211,8 +211,6 @@ public:
 	void toggle_monitor_section_visibility ();
 	void toggle_keep_tearoffs();
 
-	void lua_script_manager();
-
 	static PublicEditor* _instance;
 
 	/** Emitted frequently with the audible frame, false, and the edit point as

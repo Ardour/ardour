@@ -109,12 +109,6 @@ LuaScriptManager::LuaScriptManager ()
 	callback_selection_changed ();
 }
 
-bool
-LuaScriptManager::on_delete_event (GdkEventAny*)
-{
-	return false;
-}
-
 void
 LuaScriptManager::session_going_away ()
 {

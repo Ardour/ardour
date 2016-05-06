@@ -1618,7 +1618,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void initialize_canvas ();
 
-	void manage_action_scripts ();
 	void set_script_action_name (int i, const std::string&);
 
 	/* display control */
