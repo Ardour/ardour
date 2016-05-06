@@ -223,7 +223,7 @@ WinMMEMidiIO::get_input_name_from_index (int index, std::string& name)
 		                          capabilities.wMid,
 		                          capabilities.wPid));
 
-		name = capabilities.szPname;
+		name = Glib::locale_to_utf8 (capabilities.szPname);
 		return true;
 	} else {
 		DEBUG_MIDI ("Unable to get WinMME input device capabilities\n");
@@ -241,7 +241,8 @@ WinMMEMidiIO::get_output_name_from_index (int index, std::string& name)
 		                          capabilities.szPname,
 		                          capabilities.wMid,
 		                          capabilities.wPid));
-		name = capabilities.szPname;
+
+		name = Glib::locale_to_utf8 (capabilities.szPname);
 		return true;
 	} else {
 		DEBUG_MIDI ("Unable to get WinMME output device capabilities\n");
