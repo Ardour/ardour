@@ -36,6 +36,7 @@ enum ItemType {
 	GainLineItem,
 	AutomationLineItem,
 	MeterMarkerItem,
+	TempoCurveItem,
 	TempoMarkerItem,
 	MeterBarItem,
 	TempoBarItem,

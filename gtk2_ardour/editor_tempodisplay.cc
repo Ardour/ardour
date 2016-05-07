@@ -69,6 +69,11 @@ Editor::remove_metric_marks ()
 		delete_when_idle (*x);
 	}
 	metric_marks.clear ();
+
+	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ++x) {
+		delete (*x);
+	}
+	tempo_curves.clear ();
 }
 
 void
@@ -78,6 +83,8 @@ Editor::draw_metric_marks (const Metrics& metrics)
 	const MeterSection *ms;
 	const TempoSection *ts;
 	char buf[64];
+	double max_tempo = 0.0;
+	double min_tempo = DBL_MAX;
 
 	remove_metric_marks ();
 
@@ -89,14 +96,35 @@ Editor::draw_metric_marks (const Metrics& metrics)
 								 *(const_cast<MeterSection*>(ms))));
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
 			if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
-				snprintf (buf, sizeof (buf), "%.2f/%.0f", ts->beats_per_minute(), ts->note_type());
+				snprintf (buf, sizeof (buf), "%.3f/%.0f", ts->beats_per_minute(), ts->note_type());
 			} else {
-				snprintf (buf, sizeof (buf), "%.2f", ts->beats_per_minute());
+				snprintf (buf, sizeof (buf), "%.3f", ts->beats_per_minute());
 			}
+			if (ts->beats_per_minute() > max_tempo) {
+				max_tempo = ts->beats_per_minute();
+			}
+			if (ts->beats_per_minute() < min_tempo) {
+				min_tempo = ts->beats_per_minute();
+			}
+			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, UIConfiguration::instance().color ("range drag rect"),
+								*(const_cast<TempoSection*>(ts)), ts->frame(), false));
 			metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker"), buf,
 								 *(const_cast<TempoSection*>(ts))));
+
 		}
 
+	}
+	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ) {
+		Curves::iterator tmp = x;
+		(*x)->set_max_tempo (max_tempo);
+		(*x)->set_min_tempo (min_tempo);
+		++tmp;
+		if (tmp != tempo_curves.end()) {
+			(*x)->set_position ((*x)->tempo().frame(), (*tmp)->tempo().frame());
+		} else {
+			(*x)->set_position ((*x)->tempo().frame(), UINT32_MAX);
+		}
+		++x;
 	}
 
 }
@@ -122,6 +150,12 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 	update_tempo_based_rulers (grid);
 }
 
+struct CurveComparator {
+	bool operator() (TempoCurve const * a, TempoCurve const * b) {
+		return a->position() < b->position();
+	}
+};
+
 void
 Editor::marker_position_changed ()
 {
@@ -138,14 +172,21 @@ Editor::marker_position_changed ()
 	MeterMarker* meter_marker;
 	const TempoSection *ts;
 	const MeterSection *ms;
-
+	double max_tempo = 0.0;
+	double min_tempo = DBL_MAX;
 	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
 		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
 			if ((ts = &tempo_marker->tempo()) != 0) {
 				tempo_marker->set_position (ts->frame ());
 				char buf[64];
-				snprintf (buf, sizeof (buf), "%.2f", ts->beats_per_minute());
+				snprintf (buf, sizeof (buf), "%.3f", ts->beats_per_minute());
 				tempo_marker->set_name (buf);
+				if (ts->beats_per_minute() > max_tempo) {
+					max_tempo = ts->beats_per_minute();
+				}
+				if (ts->beats_per_minute() < min_tempo) {
+					min_tempo = ts->beats_per_minute();
+				}
 			}
 		}
 		if ((meter_marker = dynamic_cast<MeterMarker*> (*x)) != 0) {
@@ -154,6 +195,20 @@ Editor::marker_position_changed ()
 			}
 		}
 	}
+	tempo_curves.sort (CurveComparator());
+	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ) {
+		Curves::iterator tmp = x;
+		(*x)->set_max_tempo (max_tempo);
+		(*x)->set_min_tempo (min_tempo);
+		++tmp;
+		if (tmp != tempo_curves.end()) {
+			(*x)->set_position ((*x)->tempo().frame(), (*tmp)->tempo().frame());
+		} else {
+			(*x)->set_position ((*x)->tempo().frame(), UINT32_MAX);
+		}
+		++x;
+	}
+
 	std::vector<TempoMap::BBTPoint> grid;
 	compute_current_bbt_points (grid, leftmost_frame, leftmost_frame + current_page_samples());
 	draw_measures (grid);
@@ -251,9 +306,6 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
 	TempoMap& map(_session->tempo_map());
 	MeterDialog meter_dialog (map, frame, _("add"));
 
-	//this causes compiz to display no border..
-	//meter_dialog.signal_realize().connect (sigc::bind (sigc::ptr_fun (set_decoration), &meter_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
-
 	switch (meter_dialog.run ()) {
 	case RESPONSE_ACCEPT:
 		break;
@@ -271,11 +323,13 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
 
 	begin_reversible_command (_("add meter mark"));
         XMLNode &before = map.get_state();
+
 	if (meter_dialog.get_lock_style() == MusicTime) {
 		map.add_meter (Meter (bpb, note_type), map.bbt_to_beats (requested), requested);
 	} else {
-		map.add_meter (Meter (bpb, note_type), frame, meter_dialog.get_lock_style());
+		map.add_meter (Meter (bpb, note_type), map.frame_time (requested), map.bbt_to_beats (requested), requested);
 	}
+
 	_session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
 	commit_reversible_command ();
 

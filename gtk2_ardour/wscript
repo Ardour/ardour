@@ -241,6 +241,7 @@ gtk2_ardour_sources = [
         'strip_silence_dialog.cc',
         'sys_ex.cc',
         'tape_region_view.cc',
+        'tempo_curve.cc',
         'tempo_dialog.cc',
         'tempo_lines.cc',
         'theme_manager.cc',

@@ -3476,6 +3476,69 @@ TempoMarkerDrag::aborted (bool moved)
 	}
 }
 
+BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
+	: Drag (e, i)
+	, before_state (0)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New BBTRulerDrag\n");
+
+}
+
+void
+BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, cursor);
+	show_verbose_cursor_time (adjusted_current_frame (event));
+}
+
+void
+BBTRulerDrag::setup_pointer_frame_offset ()
+{
+	_pointer_frame_offset = 0;
+}
+
+void
+BBTRulerDrag::motion (GdkEvent* event, bool first_move)
+{
+	if (first_move) {
+		TempoMap& map (_editor->session()->tempo_map());
+		/* get current state */
+		before_state = &map.get_state();
+		_editor->begin_reversible_command (_("dilate tempo"));
+	}
+
+	framepos_t const pf = adjusted_current_frame (event, false);
+
+	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier())) {
+		/* adjust previous tempo to match pointer frame */
+		_editor->session()->tempo_map().gui_dilate_tempo (last_pointer_frame(), pf);
+	}
+	show_verbose_cursor_time (pf);
+}
+
+void
+BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	if (!movement_occurred) {
+		return;
+	}
+
+	TempoMap& map (_editor->session()->tempo_map());
+
+	XMLNode &after = map.get_state();
+	_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
+	_editor->commit_reversible_command ();
+}
+
+void
+BBTRulerDrag::aborted (bool moved)
+{
+	if (moved) {
+		_editor->session()->tempo_map().set_state (*before_state, Stateful::current_state_version);
+	}
+}
+
+
 CursorDrag::CursorDrag (Editor* e, EditorCursor& c, bool s)
 	: Drag (e, &c.track_canvas_item(), false)
 	, _cursor (c)

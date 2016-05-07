@@ -60,6 +60,7 @@
 #include "editor_items.h"
 #include "region_selection.h"
 #include "selection_memento.h"
+#include "tempo_curve.h"
 
 namespace Gtkmm2ext {
 	class Bindings;
@@ -1565,6 +1566,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, RouteTimeAxisView*);
 	bool canvas_marker_event (GdkEvent* event,ArdourCanvas::Item*, ArdourMarker*);
 	bool canvas_tempo_marker_event (GdkEvent* event,ArdourCanvas::Item*, TempoMarker*);
+	bool canvas_tempo_curve_event (GdkEvent* event,ArdourCanvas::Item*, TempoCurve*);
 	bool canvas_meter_marker_event (GdkEvent* event,ArdourCanvas::Item*, MeterMarker*);
 	bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*);
 	bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item *);
@@ -1695,6 +1697,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	typedef std::list<ArdourMarker*> Marks;
 	Marks metric_marks;
+
+	typedef std::list<TempoCurve*> Curves;
+	Curves tempo_curves;
 
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);

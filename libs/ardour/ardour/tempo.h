@@ -399,6 +399,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void gui_move_meter (MeterSection*, const Timecode::BBT_Time& bbt);
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
 	void gui_dilate_tempo (MeterSection*, const framepos_t& frame);
+	void gui_dilate_tempo (const framepos_t& frame, const framepos_t& end_frame);
 
 	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
 

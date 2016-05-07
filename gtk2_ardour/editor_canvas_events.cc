@@ -1014,6 +1014,12 @@ Editor::canvas_tempo_marker_event (GdkEvent *event, ArdourCanvas::Item* item, Te
 }
 
 bool
+Editor::canvas_tempo_curve_event (GdkEvent *event, ArdourCanvas::Item* item, TempoCurve* /*marker*/)
+{
+	return typed_event (item, event, TempoCurveItem);
+}
+
+bool
 Editor::canvas_meter_marker_event (GdkEvent *event, ArdourCanvas::Item* item, MeterMarker* /*marker*/)
 {
 	return typed_event (item, event, MeterMarkerItem);

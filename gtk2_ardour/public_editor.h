@@ -79,6 +79,7 @@ class PluginUIWindow;
 class RegionView;
 class RouteTimeAxisView;
 class Selection;
+class TempoCurve;
 class TempoMarker;
 class TimeAxisView;
 class TimeAxisViewItem;
@@ -346,6 +347,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual bool canvas_marker_event (GdkEvent* event, ArdourCanvas::Item*, ArdourMarker*) = 0;
 	virtual bool canvas_videotl_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_tempo_marker_event (GdkEvent* event, ArdourCanvas::Item*, TempoMarker*) = 0;
+	virtual bool canvas_tempo_curve_event (GdkEvent* event, ArdourCanvas::Item*, TempoCurve*) = 0;
 	virtual bool canvas_meter_marker_event (GdkEvent* event, ArdourCanvas::Item*, MeterMarker*) = 0;
 	virtual bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*) = 0;
 

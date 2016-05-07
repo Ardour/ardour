@@ -711,13 +711,17 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case MarkerBarItem:
 	case TempoBarItem:
+	case TempoCurveItem:
 	case MeterBarItem:
 	case TimecodeRulerItem:
 	case SamplesRulerItem:
 	case MinsecRulerItem:
 	case BBTRulerItem:
-		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
+			&& !Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier())) {
 			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+		} else if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier())) {
+			_drags->set (new BBTRulerDrag (this, item), event);
 		}
 		return true;
 		break;
@@ -1333,7 +1337,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case RegionItem:
 			show_region_properties ();
 			break;
-
 		case TempoMarkerItem: {
 			ArdourMarker* marker;
 			TempoMarker* tempo_marker;
@@ -1438,6 +1441,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case TransportMarkerBarItem:
 			case CdMarkerBarItem:
 			case TempoBarItem:
+			case TempoCurveItem:
 			case MeterBarItem:
 			case VideoBarItem:
 			case TimecodeRulerItem:
@@ -1547,8 +1551,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				mouse_add_new_marker (where, true);
 			}
 			return true;
-
 		case TempoBarItem:
+		case TempoCurveItem:
 			if (!_dragging_playhead) {
 				snap_to_with_modifier (where, event);
 				mouse_add_new_tempo_event (where);

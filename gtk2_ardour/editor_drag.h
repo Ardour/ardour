@@ -741,6 +741,31 @@ private:
 	XMLNode* before_state;
 };
 
+/** BBT Ruler drag */
+class BBTRulerDrag : public Drag
+{
+public:
+	BBTRulerDrag (Editor *, ArdourCanvas::Item *);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
+	void setup_pointer_frame_offset ();
+
+private:
+
+	XMLNode* before_state;
+};
 
 /** Drag of the playhead cursor */
 class CursorDrag : public Drag
