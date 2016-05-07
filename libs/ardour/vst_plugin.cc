@@ -160,7 +160,7 @@ VSTPlugin::set_chunk (gchar const * data, bool single)
 void
 VSTPlugin::add_state (XMLNode* root) const
 {
-	LocaleGuard lg ();
+	LocaleGuard lg;
 
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
@@ -197,7 +197,7 @@ VSTPlugin::add_state (XMLNode* root) const
 int
 VSTPlugin::set_state (const XMLNode& node, int version)
 {
-	LocaleGuard lg ();
+	LocaleGuard lg;
 	int ret = -1;
 
 	if (node.name() != state_node_name()) {

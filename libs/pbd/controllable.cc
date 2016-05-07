@@ -107,7 +107,7 @@ XMLNode&
 Controllable::get_state ()
 {
 	XMLNode* node = new XMLNode (xml_node_name);
-	LocaleGuard lg ();
+	LocaleGuard lg;
 	char buf[64];
 
 	/* Waves' "Pressure3" has a parameter called "µ-iness"
@@ -138,7 +138,7 @@ Controllable::get_state ()
 int
 Controllable::set_state (const XMLNode& node, int /*version*/)
 {
-	LocaleGuard lg ();
+	LocaleGuard lg;
 	const XMLProperty* prop;
 
 	Stateful::save_extra_xml (node);

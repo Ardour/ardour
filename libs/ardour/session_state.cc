@@ -759,6 +759,8 @@ Session::remove_state (string snapshot_name)
 int
 Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot, bool template_only)
 {
+	DEBUG_TRACE (DEBUG::Locale, string_compose ("Session::save_state locale '%1'\n", setlocale (LC_NUMERIC, NULL)));
+
 	XMLTree tree;
 	std::string xml_path(_session_dir->root_path());
 
@@ -1002,7 +1004,7 @@ Session::load_state (string snapshot_name)
 int
 Session::load_options (const XMLNode& node)
 {
-	LocaleGuard lg ();
+	LocaleGuard lg;
 	config.set_variables (node);
 	return 0;
 }

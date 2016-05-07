@@ -273,7 +273,7 @@ MidiTrack::set_state_part_two ()
 {
 	XMLNode* fnode;
 	XMLProperty const * prop;
-	LocaleGuard lg ();
+	LocaleGuard lg;
 
 	/* This is called after all session state has been restored but before
 	   have been made ports and connections are established.

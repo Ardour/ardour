@@ -308,7 +308,7 @@ int
 UIConfiguration::store_color_theme ()
 {
 	XMLNode* root;
-	LocaleGuard lg ();
+	LocaleGuard lg;
 
 	root = new XMLNode("Ardour");
 
@@ -443,7 +443,7 @@ XMLNode&
 UIConfiguration::get_state ()
 {
 	XMLNode* root;
-	LocaleGuard lg ();
+	LocaleGuard lg;
 
 	root = new XMLNode("Ardour");
 
@@ -461,7 +461,7 @@ XMLNode&
 UIConfiguration::get_variables (std::string which_node)
 {
 	XMLNode* node;
-	LocaleGuard lg ();
+	LocaleGuard lg;
 
 	node = new XMLNode (which_node);
 
@@ -576,7 +576,7 @@ UIConfiguration::load_colors (XMLNode const & node)
 void
 UIConfiguration::load_modifiers (XMLNode const & node)
 {
-	PBD::LocaleGuard lg ();
+	PBD::LocaleGuard lg;
 	XMLNodeList const nlist = node.children();
 	XMLNodeConstIterator niter;
 	XMLProperty const *name;

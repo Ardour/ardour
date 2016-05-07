@@ -377,6 +377,8 @@ int main (int argc, char *argv[])
 	}
 #endif
 
+	DEBUG_TRACE (DEBUG::Locale, string_compose ("main() locale '%1'\n", setlocale (LC_NUMERIC, NULL)));
+
 	if (UIConfiguration::instance().pre_gui_init ()) {
 		error << _("Could not complete pre-GUI initialization") << endmsg;
 		exit (1);

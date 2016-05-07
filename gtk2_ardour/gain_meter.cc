@@ -463,7 +463,7 @@ GainMeterBase::gain_activated ()
 		// if they use different LC_NUMERIC conventions,
 		// we will honor them.
 
-		PBD::LocaleGuard lg ();
+		PBD::LocaleGuard lg;
 		if (sscanf (gain_display.get_text().c_str(), "%f", &f) != 1) {
 			return;
 		}

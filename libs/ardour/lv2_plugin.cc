@@ -1127,7 +1127,7 @@ LV2Plugin::add_state(XMLNode* root) const
 
 	XMLNode*    child;
 	char        buf[32];
-	LocaleGuard lg ();
+	LocaleGuard lg;
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		if (parameter_is_input(i) && parameter_is_control(i)) {
