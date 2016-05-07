@@ -1806,7 +1806,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 	const char*          sym;
 	const char*          value;
 	uint32_t             port_id;
-	LocaleGuard          lg ();
+	LocaleGuard          lg;
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LV2Plugin::set_state") << endmsg;
