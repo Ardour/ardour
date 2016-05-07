@@ -185,6 +185,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	reset_saved_values ();
 
 	if (!r) {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 Strip %2 mapped to null route\n", _surface->number(), _index));
 		zero ();
 		return;
 	}

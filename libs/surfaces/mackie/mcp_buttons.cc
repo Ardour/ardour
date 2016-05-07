@@ -726,8 +726,7 @@ MackieControlProtocol::plugin_release (Button &)
 LedState
 MackieControlProtocol::eq_press (Button &)
 {
-	boost::shared_ptr<Route> r = first_selected_route ();
-	set_subview_mode (EQ, r);
+	set_subview_mode (EQ, first_selected_route ());
 	return none; /* led state handled by set_subview_mode() */
 
 }
@@ -739,8 +738,7 @@ MackieControlProtocol::eq_release (Button &)
 LedState
 MackieControlProtocol::dyn_press (Button &)
 {
-	boost::shared_ptr<Route> r = first_selected_route ();
-	set_subview_mode (Dynamics, r);
+	set_subview_mode (Dynamics, first_selected_route ());
 	return none; /* led state handled by set_subview_mode() */
 }
 
@@ -922,8 +920,7 @@ MackieControlProtocol::track_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::send_press (Mackie::Button&)
 {
-	boost::shared_ptr<Route> r = first_selected_route ();
-	set_subview_mode (Sends, r);
+	set_subview_mode (Sends, first_selected_route());
 	return none; /* led state handled by set_subview_mode() */
 }
 Mackie::LedState

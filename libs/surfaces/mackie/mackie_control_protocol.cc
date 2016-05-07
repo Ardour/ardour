@@ -394,7 +394,9 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	uint32_t strip_cnt = n_strips (false); // do not include locked strips
 					       // in this count
 
-	if (initial >= sorted.size()) {
+	if (initial >= sorted.size() && !force) {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank target %1 exceeds route range %2\n",
+		                                                   _current_initial_bank, sorted.size()));
 		/* too high, we can't get there */
 		return -1;
 	}
@@ -403,6 +405,8 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		/* no banking - not enough routes to fill all strips and we're
 		 * not at the first one.
 		 */
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("less routes (%1) than strips (%2) and we're at the end already (%3)\n",
+		                                                   sorted.size(), strip_cnt, _current_initial_bank));
 		return -1;
 	}
 
@@ -437,6 +441,14 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		}
 
 	} else {
+		/* all strips need to be reset */
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("clear all strips, bank target %1  is outside route range %2\n",
+		                                                   _current_initial_bank, sorted.size()));
+		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+			vector<boost::shared_ptr<Route> > routes;
+			/* pass in an empty route list, so that all strips will be reset */
+			(*si)->map_routes (routes);
+		}
 		return -1;
 	}
 
@@ -1743,8 +1755,6 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 		set_flip_mode (Normal);
 	}
 
-	boost::shared_ptr<Route> old_route = _subview_route;
-
 	if (!subview_mode_would_be_ok (sm, r)) {
 
 		if (r) {
@@ -1787,14 +1797,12 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Route
 		return -1;
 	}
 
+	boost::shared_ptr<Route> old_route = _subview_route;
+
 	_subview_mode = sm;
+	_subview_route = r;
 
-	if (r) {
-		/* retain _subview_route even if it is reset to null implicitly */
-		_subview_route = r;
-	}
-
-	if (r != old_route) {
+	if (_subview_route != old_route) {
 		subview_route_connections.drop_connections ();
 
 		/* Catch the current subview route going away */
