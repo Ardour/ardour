@@ -4,7 +4,6 @@
 #include "canvas/rectangle.h"
 #include "canvas/container.h"
 #include "canvas/curve.h"
-#include "canvas/polygon.h"
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
 
@@ -21,27 +20,32 @@
 
 PBD::Signal1<void,TempoCurve*> TempoCurve::CatchDeletion;
 
+static double curve_height = 13.0;
+
+void TempoCurve::setup_sizes(const double timebar_height)
+{
+	curve_height = floor (timebar_height) - 2;
+}
+
 TempoCurve::TempoCurve (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba, ARDOUR::TempoSection& temp, framepos_t frame, bool handle_events)
 
 	: editor (ed)
 	, _parent (&parent)
-	, _shown (false)
 	, _curve (0)
+	, _shown (false)
 	, _color (rgba)
+	, _min_tempo (temp.beats_per_minute())
 	, _max_tempo (temp.beats_per_minute())
 	, _tempo (temp)
 
 
 {
-	const double MH = 12.0;
-	const double M3 = std::max(1.f, rintf(3.f * UIConfiguration::instance().get_ui_scale()));
-	const double M6 = std::max(2.f, rintf(6.f * UIConfiguration::instance().get_ui_scale()));
 
 	points = new ArdourCanvas::Points ();
 	points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 	points->push_back (ArdourCanvas::Duple (1.0, 0.0));
-	points->push_back (ArdourCanvas::Duple (1.0, MH));
-	points->push_back (ArdourCanvas::Duple (0.0, MH));
+	points->push_back (ArdourCanvas::Duple (1.0, curve_height));
+	points->push_back (ArdourCanvas::Duple (0.0, curve_height));
 
 	frame_position = frame;
 	unit_position = editor.sample_to_pixel (frame);
@@ -53,14 +57,14 @@ TempoCurve::TempoCurve (PublicEditor& ed, ArdourCanvas::Container& parent, guint
 
 	_background = new ArdourCanvas::Rectangle (group);
 #ifdef CANVAS_DEBUG
-	_background->name = string_compose ("Marker::_background for %1", _tempo.beats_per_minute());
+	_background->name = string_compose ("TempoCurve::_background for %1", _tempo.beats_per_minute());
 #endif
 	_background->set_x0 (0.0);
 	_background->set_x1 (ArdourCanvas::COORD_MAX);
 	_background->set_outline_what (ArdourCanvas::Rectangle::What(0));
 	_curve = new ArdourCanvas::Curve (group);
 #ifdef CANVAS_DEBUG
-	_curve->name = string_compose ("Marker::_background for %1", _tempo.beats_per_minute());
+	_curve->name = string_compose ("TempoCurve::_curve for %1", _tempo.beats_per_minute());
 #endif
 	_curve->set_fill_mode (ArdourCanvas::Curve::Inside);
 	_curve->set_points_per_segment (32);
@@ -114,21 +118,20 @@ TempoCurve::the_item() const
 void
 TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 {
-	const double height = 12.0;
 	points->clear();
 	unit_position = editor.sample_to_pixel (frame);
 	group->set_x_position (unit_position);
 	frame_position = frame;
 	_end_frame = end_frame;
-	_background->set_x0 (0.0);
-	_background->set_x1 (editor.sample_to_pixel (end_frame - frame));
+
 	const double tempo_delta = max (10.0, _max_tempo - _min_tempo);
 	double max_y = 0.0;
 	points = new ArdourCanvas::Points ();
+
 	if (end_frame == UINT32_MAX) {
 		_curve->set_fill_mode (ArdourCanvas::Curve::None);
 		const double tempo_at = _tempo.tempo_at_frame (frame, editor.session()->frame_rate()) * _tempo.note_type();
-		const double y2_pos =  (height + 2.0) - (((tempo_at - _min_tempo) / (tempo_delta)) * height);
+		const double y2_pos =  (curve_height + 2.0) - (((tempo_at - _min_tempo) / (tempo_delta)) * curve_height);
 		max_y = y2_pos;
 		points->push_back (ArdourCanvas::Duple (0.0, y2_pos));
 		points->push_back (ArdourCanvas::Duple (ArdourCanvas::COORD_MAX - 5.0, y2_pos));
@@ -139,7 +142,7 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 		framepos_t current_frame = frame;
 		while (current_frame < end_frame) {
 			const double tempo_at = _tempo.tempo_at_frame (current_frame, editor.session()->frame_rate()) * _tempo.note_type();
-			const double y2_pos = (height + 2.0) - (((tempo_at - _min_tempo) / (tempo_delta)) * height);
+			const double y2_pos = (curve_height + 2.0) - (((tempo_at - _min_tempo) / (tempo_delta)) * curve_height);
 
 			points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel (current_frame - frame), y2_pos));
 			max_y = max (y2_pos, max_y);
@@ -148,10 +151,12 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 	}
 
 	/* the background fills the gap between the bottom of the curve and the time bar */
+	_background->set_x0 (0.0);
+	_background->set_x1 (editor.sample_to_pixel (end_frame - frame));
 	_background->set_y0 (max_y + 1.0);
-	_background->set_y1 (height + 2.0);
+	_background->set_y1 (curve_height + 2.0);
 
-	if (max_y == height + 2.0) {
+	if (max_y == curve_height + 2.0) {
 		_background->hide();
 	} else {
 		_background->show();

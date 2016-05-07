@@ -9,7 +9,6 @@
 #include "ardour/ardour.h"
 #include "pbd/signals.h"
 
-#include "canvas/fwd.h"
 #include "canvas/types.h"
 
 namespace ARDOUR {
@@ -63,8 +62,8 @@ protected:
 
 	void reposition ();
 private:
-	double       _max_tempo;
 	double       _min_tempo;
+	double       _max_tempo;
 	/* disallow copy construction */
 	TempoCurve (TempoCurve const &);
 	TempoCurve & operator= (TempoCurve const &);
