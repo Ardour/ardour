@@ -1037,7 +1037,6 @@ Session::get_template()
 XMLNode&
 Session::state (bool full_state)
 {
-	LocaleGuard lg ();
 	XMLNode* node = new XMLNode("Session");
 	XMLNode* child;
 
@@ -1299,7 +1298,6 @@ Session::get_control_protocol_state ()
 int
 Session::set_state (const XMLNode& node, int version)
 {
-	LocaleGuard lg ();
 	XMLNodeList nlist;
 	XMLNode* child;
 	XMLProperty const * prop;
