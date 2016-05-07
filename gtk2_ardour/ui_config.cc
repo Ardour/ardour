@@ -33,6 +33,7 @@
 #include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
 
 #include "pbd/gstdio_compat.h"
+#include "pbd/unwind.h"
 #include <glibmm/miscutils.h>
 
 #include <gtkmm/settings.h>
@@ -248,7 +249,6 @@ UIConfiguration::load_defaults ()
 	if (ret == 0) {
 		/* reload color theme */
 		load_color_theme (false);
-		ColorsChanged (); /* EMIT SIGNAL */
 	}
 
 	return ret;
@@ -260,6 +260,10 @@ UIConfiguration::load_color_theme (bool allow_own)
 	std::string cfile;
 	string basename;
 	bool found = false;
+	/* ColorsChanged() will trigger a  parameter_changed () which
+	 * in turn calls save_state()
+	 */
+	PBD::Unwinder<uint32_t> uw (block_save, block_save + 1);
 
 	if (allow_own) {
 		basename = "my-";
@@ -357,6 +361,7 @@ UIConfiguration::store_color_theme ()
 int
 UIConfiguration::load_state ()
 {
+	LocaleGuard lg; // a single guard for all 3 configs
 	bool found = false;
 
 	std::string rcfile;
@@ -407,6 +412,9 @@ UIConfiguration::load_state ()
 int
 UIConfiguration::save_state()
 {
+	if (block_save != 0) {
+		return -1;
+	}
 
 	if (_dirty) {
 		std::string rcfile = Glib::build_filename (user_config_directory(), ui_config_file_name);
@@ -480,6 +488,7 @@ UIConfiguration::get_variables (std::string which_node)
 int
 UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 {
+	LocaleGuard lg;
 	/* this can load a generic UI configuration file or a colors file */
 
 	if (root.name() != "Ardour") {

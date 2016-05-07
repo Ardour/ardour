@@ -677,6 +677,7 @@ ARDOUR_UI::save_ardour_state ()
 	   a different lifetime model from add_instant_xml().
 	*/
 
+	LocaleGuard lg; // one guard to rule them all
 	XMLNode* node = new XMLNode (keyboard->get_state());
 	Config->add_extra_xml (*node);
 	Config->add_extra_xml (get_transport_controllable_state());
