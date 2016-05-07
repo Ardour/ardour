@@ -61,7 +61,6 @@
 
 #include "evoral/SMF.hpp"
 
-#include "pbd/boost_debug.h"
 #include "pbd/basename.h"
 #include "pbd/controllable_descriptor.h"
 #include "pbd/debug.h"
@@ -83,6 +82,7 @@
 #include "ardour/audiofilesource.h"
 #include "ardour/audioregion.h"
 #include "ardour/automation_control.h"
+#include "ardour/boost_debug.h"
 #include "ardour/butler.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/directory_names.h"
@@ -637,10 +637,10 @@ Session::create (const string& session_template, BusProfile* bus_profile)
                         if (r->init ()) {
                                 return -1;
                         }
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			// boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
-#endif
-			{
+
+                        BOOST_MARK_ROUTE(r);
+
+                        {
 				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				r->input()->ensure_io (count, false, this);
 				r->output()->ensure_io (count, false, this);
@@ -1611,9 +1611,7 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
                         return ret;
                 }
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-                // boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
-#endif
+                BOOST_MARK_TRACK (track);
                 ret = track;
 
 	} else {
@@ -1626,9 +1624,7 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
                 if (r->init () == 0 && r->set_state (node, version) == 0) {
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-                        // boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
-#endif
+	                BOOST_MARK_ROUTE (r);
                         ret = r;
                 }
 	}
@@ -1689,9 +1685,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 
 		track->set_diskstream (*i);
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-                // boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
-#endif
+		BOOST_MARK_TRACK (track);
                 ret = track;
 
 	} else {
@@ -1704,9 +1698,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
                 if (r->init () == 0 && r->set_state (node, version) == 0) {
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-                        // boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
-#endif
+	                BOOST_MARK_ROUTE (r);
                         ret = r;
                 }
 	}

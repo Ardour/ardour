@@ -36,7 +36,6 @@
 #include <boost/algorithm/string/erase.hpp>
 
 #include "pbd/basename.h"
-#include "pbd/boost_debug.h"
 #include "pbd/convert.h"
 #include "pbd/convert.h"
 #include "pbd/error.h"
@@ -59,6 +58,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/auditioner.h"
+#include "ardour/boost_debug.h"
 #include "ardour/buffer_manager.h"
 #include "ardour/buffer_set.h"
 #include "ardour/bundle.h"
@@ -785,9 +785,7 @@ Session::destroy ()
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	boost_debug_list_ptrs ();
-#endif
+	BOOST_SHOW_POINTERS ();
 }
 
 void
@@ -1147,9 +1145,8 @@ Session::add_monitor_section ()
 		return;
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	// boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
-#endif
+	BOOST_MARK_ROUTE(r);
+
 	try {
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		r->input()->ensure_io (_master_out->output()->n_ports(), false, this);
@@ -2458,9 +2455,8 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 
 			track->use_new_diskstream();
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			// boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
-#endif
+			BOOST_MARK_TRACK (track);
+
 			{
 				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				if (track->input()->ensure_io (input, false, this)) {
@@ -2558,9 +2554,8 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 				bus->set_strict_io (true);
 			}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			// boost_debug_shared_ptr_mark_interesting (bus.get(), "Route");
-#endif
+			BOOST_MARK_ROUTE(bus);
+
 			{
 				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
@@ -2985,9 +2980,8 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 			track->use_new_diskstream();
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			// boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
-#endif
+			BOOST_MARK_TRACK (track);
+
 			{
 				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
@@ -3082,9 +3076,8 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 				bus->set_strict_io (true);
 			}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			// boost_debug_shared_ptr_mark_interesting (bus.get(), "Route");
-#endif
+			BOOST_MARK_ROUTE(bus);
+
 			{
 				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
@@ -3563,7 +3556,6 @@ Session::add_internal_send (boost::shared_ptr<Route> dest, boost::shared_ptr<Pro
 
 	graph_reordered ();
 }
-
 
 void
 Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)

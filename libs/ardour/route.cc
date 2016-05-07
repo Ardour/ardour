@@ -33,7 +33,6 @@
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
-#include "pbd/boost_debug.h"
 #include "pbd/unwind.h"
 
 #include "ardour/amp.h"
@@ -41,6 +40,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audio_port.h"
 #include "ardour/audioengine.h"
+#include "ardour/boost_debug.h"
 #include "ardour/buffer.h"
 #include "ardour/buffer_set.h"
 #include "ardour/capturing_processor.h"

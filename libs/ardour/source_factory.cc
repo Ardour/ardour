@@ -22,7 +22,6 @@
 #include "libardour-config.h"
 #endif
 
-#include "pbd/boost_debug.h"
 #include "pbd/error.h"
 #include "pbd/convert.h"
 #include "pbd/pthread_utils.h"
@@ -30,6 +29,7 @@
 
 #include "ardour/audioplaylist.h"
 #include "ardour/audio_playlist_source.h"
+#include "ardour/boost_debug.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_playlist_source.h"
 #include "ardour/source.h"

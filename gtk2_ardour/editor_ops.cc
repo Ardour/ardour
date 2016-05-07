@@ -42,6 +42,7 @@
 
 #include "ardour/audio_track.h"
 #include "ardour/audioregion.h"
+#include "ardour/boost_debug.h"
 #include "ardour/dB.h"
 #include "ardour/location.h"
 #include "ardour/midi_region.h"

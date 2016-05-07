@@ -19,8 +19,8 @@
 
 #include "pbd/demangle.h"
 #include "pbd/error.h"
-#include "pbd/boost_debug.h"
 
+#include "ardour/boost_debug.h"
 #include "ardour/session.h"
 #include "ardour/session_handle.h"
 

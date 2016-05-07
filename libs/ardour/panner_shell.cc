@@ -32,7 +32,6 @@
 #include <glibmm.h>
 
 #include "pbd/cartesian.h"
-#include "pbd/boost_debug.h"
 #include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
@@ -43,6 +42,7 @@
 
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
+#include "ardour/boost_debug.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
 #include "ardour/pannable.h"

@@ -21,9 +21,9 @@
 #include <algorithm>
 
 #include "pbd/xml++.h"
-#include "pbd/boost_debug.h"
 
 #include "ardour/amp.h"
+#include "ardour/boost_debug.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
 #include "ardour/gain_control.h"

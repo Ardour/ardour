@@ -20,8 +20,8 @@
 #include "pbd/error.h"
 #include "pbd/convert.h"
 #include "pbd/compose.h"
-#include "pbd/boost_debug.h"
 
+#include "ardour/boost_debug.h"
 #include "ardour/debug.h"
 #include "ardour/automation_control.h"
 #include "ardour/automation_list.h"

@@ -19,7 +19,6 @@
 
 #include <boost/scoped_array.hpp>
 
-#include "pbd/boost_debug.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 
@@ -30,6 +29,7 @@
 #include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioplaylist.h"
+#include "ardour/boost_debug.h"
 #include "ardour/buffer_set.h"
 #include "ardour/delivery.h"
 #include "ardour/meter.h"
