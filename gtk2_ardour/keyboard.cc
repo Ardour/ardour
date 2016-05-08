@@ -56,7 +56,7 @@ ArdourKeyboard::find_bindings_files (map<string,string>& files)
 	vector<std::string> found;
 	Searchpath spath = ardour_config_search_path();
 
-	find_files_matching_pattern (found, spath, string_compose ("*.%1", Keyboard::binding_filename_suffix));
+	find_files_matching_pattern (found, spath, string_compose ("*%1", Keyboard::binding_filename_suffix));
 
 	if (found.empty()) {
 		return;
