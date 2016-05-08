@@ -1494,6 +1494,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\boost_debug.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\broadcast_info.h"
 				>
 			</File>
