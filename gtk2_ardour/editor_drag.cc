@@ -3481,27 +3481,31 @@ BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 	, before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New BBTRulerDrag\n");
-
 }
 
 void
 BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
-	show_verbose_cursor_time (adjusted_current_frame (event));
+	TempoMap& map (_editor->session()->tempo_map());
+	ostringstream sstr;
+	sstr << fixed << setprecision(3) << map.tempo_at (adjusted_current_frame (event)).beats_per_minute();
+	show_verbose_cursor_text (sstr.str());
 }
 
 void
 BBTRulerDrag::setup_pointer_frame_offset ()
 {
-	_pointer_frame_offset = 0;
+	TempoMap& map (_editor->session()->tempo_map());
+	_pointer_frame_offset = raw_grab_frame() - map.frame_at_beat (ceil (map.beat_at_frame (raw_grab_frame())));
 }
 
 void
 BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 {
+	TempoMap& map (_editor->session()->tempo_map());
+
 	if (first_move) {
-		TempoMap& map (_editor->session()->tempo_map());
 		/* get current state */
 		before_state = &map.get_state();
 		_editor->begin_reversible_command (_("dilate tempo"));
@@ -3513,7 +3517,9 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 		/* adjust previous tempo to match pointer frame */
 		_editor->session()->tempo_map().gui_dilate_tempo (last_pointer_frame(), pf);
 	}
-	show_verbose_cursor_time (pf);
+	ostringstream sstr;
+	sstr << fixed << setprecision(3) << map.tempo_at (pf).beats_per_minute();
+	show_verbose_cursor_text (sstr.str());
 }
 
 void

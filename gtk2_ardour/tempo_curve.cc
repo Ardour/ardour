@@ -78,14 +78,16 @@ TempoCurve::TempoCurve (PublicEditor& ed, ArdourCanvas::Container& parent, guint
 	 * make sure they can both be used to lookup this object.
 	 */
 
-	group->set_data ("marker", this);
+	_curve->set_data ("tempo curve", this);
+	_background->set_data ("tempo curve", this);
 
 	if (handle_events) {
 		//group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 	}
+
 	set_position (_tempo.frame(), UINT32_MAX);
-	_curve->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_curve_event), group, this));
-	_background->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_curve_event), group, this));
+	_curve->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_curve_event), _curve, this));
+	_background->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_curve_event), _background, this));
 
 }
 
