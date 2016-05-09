@@ -36,11 +36,11 @@
 #include "ardour_window.h"
 #include "io_selector.h"
 
-class PluginPinDialog : public ArdourWindow
+class PluginPinWidget : public ARDOUR::SessionHandlePtr, public Gtk::VBox
 {
 public:
-	PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert>);
-	~PluginPinDialog ();
+	PluginPinWidget (boost::shared_ptr<ARDOUR::PluginInsert>);
+	~PluginPinWidget ();
 	void set_session (ARDOUR::Session *);
 private:
 	typedef enum {
@@ -214,6 +214,19 @@ private:
 		std::string _name;
 	};
 	std::list<Control*> _controls;
+};
+
+
+class PluginPinDialog : public ArdourWindow
+{
+public:
+	PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert>);
+	~PluginPinDialog ();
+
+	void set_session (ARDOUR::Session *);
+private:
+	PluginPinWidget ppw;
+
 };
 
 #endif

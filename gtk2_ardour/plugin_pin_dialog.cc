@@ -52,9 +52,8 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
-	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
-	, _set_config (_("Manual Config"), ArdourButton::led_default_elements)
+PluginPinWidget::PluginPinWidget (boost::shared_ptr<ARDOUR::PluginInsert> pi)
+	: _set_config (_("Manual Config"), ArdourButton::led_default_elements)
 	, _tgl_sidechain (_("Sidechain"), ArdourButton::led_default_elements)
 	, _add_plugin (_("+"))
 	, _del_plugin (_("-"))
@@ -87,15 +86,15 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	assert (pi->owner ()); // Route
 
 	_pi->PluginIoReConfigure.connect (
-			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::queue_idle_update, this), gui_context ()
+			_plugin_connections, invalidator (*this), boost::bind (&PluginPinWidget::queue_idle_update, this), gui_context ()
 			);
 
 	_pi->PluginMapChanged.connect (
-			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::queue_idle_update, this), gui_context ()
+			_plugin_connections, invalidator (*this), boost::bind (&PluginPinWidget::queue_idle_update, this), gui_context ()
 			);
 
 	_pi->PluginConfigChanged.connect (
-			_plugin_connections, invalidator (*this), boost::bind (&PluginPinDialog::queue_idle_update, this), gui_context ()
+			_plugin_connections, invalidator (*this), boost::bind (&PluginPinWidget::queue_idle_update, this), gui_context ()
 			);
 
 	_pin_box_size = 2 * ceil (max (8., 10. * UIConfiguration::instance ().get_ui_scale ()) * .5);
@@ -108,7 +107,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	Menu_Helpers::MenuList& citems = reset_menu.items ();
 	reset_menu.set_name ("ArdourContextMenu");
 	citems.clear ();
-	citems.push_back (Menu_Helpers::MenuElem (_("Reset"), sigc::mem_fun (*this, &PluginPinDialog::reset_mapping)));
+	citems.push_back (Menu_Helpers::MenuElem (_("Reset"), sigc::mem_fun (*this, &PluginPinWidget::reset_mapping)));
 
 	_pm_size_group  = SizeGroup::create (SIZE_GROUP_BOTH);
 	_add_plugin.set_tweaks (ArdourButton::Square);
@@ -219,60 +218,58 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	hbox->pack_start (darea, true, true);
 	hbox->pack_start (*tr, false, false);
 
-	VBox* vbox = manage (new VBox ());
-	vbox->pack_start (*hbox, true, true);
+	pack_start (*hbox, true, true);
 	set_border_width (4);
-	add (*vbox);
-	vbox->show_all ();
+	show_all ();
 
 	plugin_reconfigured ();
 
 	darea.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
-	darea.signal_size_request ().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_size_request));
-	darea.signal_size_allocate ().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_size_allocate));
-	darea.signal_expose_event ().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_expose_event));
-	darea.signal_button_press_event ().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_button_press_event));
-	darea.signal_button_release_event ().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_button_release_event));
-	darea.signal_motion_notify_event ().connect (sigc::mem_fun (*this, &PluginPinDialog::darea_motion_notify_event));
+	darea.signal_size_request ().connect (sigc::mem_fun (*this, &PluginPinWidget::darea_size_request));
+	darea.signal_size_allocate ().connect (sigc::mem_fun (*this, &PluginPinWidget::darea_size_allocate));
+	darea.signal_expose_event ().connect (sigc::mem_fun (*this, &PluginPinWidget::darea_expose_event));
+	darea.signal_button_press_event ().connect (sigc::mem_fun (*this, &PluginPinWidget::darea_button_press_event));
+	darea.signal_button_release_event ().connect (sigc::mem_fun (*this, &PluginPinWidget::darea_button_release_event));
+	darea.signal_motion_notify_event ().connect (sigc::mem_fun (*this, &PluginPinWidget::darea_motion_notify_event));
 
-	_tgl_sidechain.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::toggle_sidechain));
+	_tgl_sidechain.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinWidget::toggle_sidechain));
 
-	_set_config.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinDialog::reset_configuration));
-	_add_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_plugin_clicked), true));
-	_del_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_plugin_clicked), false));
+	_set_config.signal_clicked.connect (sigc::mem_fun (*this, &PluginPinWidget::reset_configuration));
+	_add_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_remove_plugin_clicked), true));
+	_del_plugin.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_remove_plugin_clicked), false));
 
-	_add_input_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_inpin_clicked), true, DataType::AUDIO));
-	_del_input_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_inpin_clicked), false, DataType::AUDIO));
-	_add_input_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_inpin_clicked), true, DataType::MIDI));
-	_del_input_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_inpin_clicked), false, DataType::MIDI));
+	_add_input_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_remove_inpin_clicked), true, DataType::AUDIO));
+	_del_input_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_remove_inpin_clicked), false, DataType::AUDIO));
+	_add_input_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_remove_inpin_clicked), true, DataType::MIDI));
+	_del_input_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_remove_inpin_clicked), false, DataType::MIDI));
 
-	_add_output_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_port_clicked), true, DataType::AUDIO));
-	_del_output_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_port_clicked), false, DataType::AUDIO));
-	_add_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_port_clicked), true, DataType::MIDI));
-	_del_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_remove_port_clicked), false, DataType::MIDI));
+	_add_output_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_remove_port_clicked), true, DataType::AUDIO));
+	_del_output_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_remove_port_clicked), false, DataType::AUDIO));
+	_add_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_remove_port_clicked), true, DataType::MIDI));
+	_del_output_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_remove_port_clicked), false, DataType::MIDI));
 
-	_add_sc_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_sidechain_port), DataType::AUDIO));
-	_add_sc_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_sidechain_port), DataType::MIDI));
+	_add_sc_audio.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_sidechain_port), DataType::AUDIO));
+	_add_sc_midi.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_sidechain_port), DataType::MIDI));
 
 	AudioEngine::instance ()->PortConnectedOrDisconnected.connect (
-			_io_connection, invalidator (*this), boost::bind (&PluginPinDialog::port_connected_or_disconnected, this, _1, _3), gui_context ()
+			_io_connection, invalidator (*this), boost::bind (&PluginPinWidget::port_connected_or_disconnected, this, _1, _3), gui_context ()
 			);
 }
 
-PluginPinDialog::~PluginPinDialog ()
+PluginPinWidget::~PluginPinWidget ()
 {
 	delete _sidechain_selector;
 }
 
 void
-PluginPinDialog::set_session (ARDOUR::Session *s)
+PluginPinWidget::set_session (ARDOUR::Session *s)
 {
 	SessionHandlePtr::set_session (s);
 	plugin_reconfigured ();
 }
 
 void
-PluginPinDialog::queue_idle_update ()
+PluginPinWidget::queue_idle_update ()
 {
 	/* various actions here are directly executed, in the GUI thread,
 	 * with the GUI-thread eventually taking the process and processor lock.
@@ -292,11 +289,11 @@ PluginPinDialog::queue_idle_update ()
 		delete *i;
 	}
 	_controls.clear ();
-	Glib::signal_idle().connect (sigc::mem_fun(*this, &PluginPinDialog::idle_update));
+	Glib::signal_idle().connect (sigc::mem_fun(*this, &PluginPinWidget::idle_update));
 }
 
 bool
-PluginPinDialog::idle_update ()
+PluginPinWidget::idle_update ()
 {
 	plugin_reconfigured ();
 	return false;
@@ -304,9 +301,9 @@ PluginPinDialog::idle_update ()
 
 
 void
-PluginPinDialog::plugin_reconfigured ()
+PluginPinWidget::plugin_reconfigured ()
 {
-	ENSURE_GUI_THREAD (*this, &PluginPinDialog::plugin_reconfigured);
+	ENSURE_GUI_THREAD (*this, &PluginPinWidget::plugin_reconfigured);
 	if (_ignore_updates) {
 		return;
 	}
@@ -438,7 +435,7 @@ PluginPinDialog::plugin_reconfigured ()
 }
 
 void
-PluginPinDialog::refill_sidechain_table ()
+PluginPinWidget::refill_sidechain_table ()
 {
 	Table_Helpers::TableList& kids = _sidechain_tbl->children ();
 	for (Table_Helpers::TableList::iterator i = kids.begin (); i != kids.end ();) {
@@ -470,7 +467,7 @@ PluginPinDialog::refill_sidechain_table ()
 }
 
 void
-PluginPinDialog::refill_output_presets ()
+PluginPinWidget::refill_output_presets ()
 {
 	using namespace Menu_Helpers;
 	_out_presets.clear_items ();
@@ -508,7 +505,7 @@ PluginPinDialog::refill_output_presets ()
 		return;
 	}
 
-	_out_presets.AddMenuElem (MenuElem (_("Automatic"), sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::select_output_preset), 0)));
+	_out_presets.AddMenuElem (MenuElem (_("Automatic"), sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::select_output_preset), 0)));
 
 	const uint32_t n_audio = _pi->preset_out ().n_audio ();
 	if (n_audio == 0) {
@@ -543,7 +540,7 @@ PluginPinDialog::refill_output_presets ()
 				tmp = string_compose (P_("%1 Channel", "%1 Channels", *i), *i);
 				break;
 		}
-		_out_presets.AddMenuElem (MenuElem (tmp, sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::select_output_preset), *i)));
+		_out_presets.AddMenuElem (MenuElem (tmp, sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::select_output_preset), *i)));
 		if (n_audio == *i) {
 			_out_presets.set_text (tmp);
 		}
@@ -551,7 +548,7 @@ PluginPinDialog::refill_output_presets ()
 }
 
 std::string
-PluginPinDialog::port_label (const std::string& portname, bool strip)
+PluginPinWidget::port_label (const std::string& portname, bool strip)
 {
 	// compare to MixerStrip::update_io_button()
 	string lpn (PROGRAM_NAME);
@@ -589,7 +586,7 @@ PluginPinDialog::port_label (const std::string& portname, bool strip)
 }
 
 uint32_t
-PluginPinDialog::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool can_remove)
+PluginPinWidget::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool can_remove)
 {
 	std::string lbl;
 	std::string tip = p->name ();
@@ -631,13 +628,13 @@ PluginPinDialog::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool 
 	ARDOUR_UI_UTILS::set_tooltip (*pb, tip);
 	_sidechain_tbl->attach (*pb, 0, 1, r, r +1 , EXPAND|FILL, SHRINK);
 
-	pb->signal_button_press_event ().connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::sc_input_press), boost::weak_ptr<Port> (p)), false);
-	pb->signal_button_release_event ().connect (sigc::mem_fun (*this, &PluginPinDialog::sc_input_release), false);
+	pb->signal_button_press_event ().connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::sc_input_press), boost::weak_ptr<Port> (p)), false);
+	pb->signal_button_release_event ().connect (sigc::mem_fun (*this, &PluginPinWidget::sc_input_release), false);
 
 	pb = manage (new ArdourButton ("-"));
 	_sidechain_tbl->attach (*pb, 1, 2, r, r + 1, FILL, SHRINK);
 	if (can_remove) {
-		pb->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::remove_port), boost::weak_ptr<Port> (p)));
+		pb->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::remove_port), boost::weak_ptr<Port> (p)));
 	} else {
 		pb->set_sensitive (false);
 	}
@@ -679,7 +676,7 @@ PluginPinDialog::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool 
 }
 
 void
-PluginPinDialog::update_element_pos ()
+PluginPinWidget::update_element_pos ()
 {
 	/* layout sizes */
 	_innerwidth = _width - 2. * _margin_x;
@@ -752,7 +749,7 @@ PluginPinDialog::update_element_pos ()
 }
 
 void
-PluginPinDialog::set_color (cairo_t* cr, bool midi)
+PluginPinWidget::set_color (cairo_t* cr, bool midi)
 {
 	// see also gtk2_ardour/processor_box.cc
 	static const uint32_t audio_port_color = 0x4A8A0EFF; // Green
@@ -772,7 +769,7 @@ PluginPinDialog::set_color (cairo_t* cr, bool midi)
 }
 
 void
-PluginPinDialog::draw_io_pin (cairo_t* cr, const CtrlWidget& w)
+PluginPinWidget::draw_io_pin (cairo_t* cr, const CtrlWidget& w)
 {
 	if (w.e->sc) {
 		const double dy = w.h * .5;
@@ -818,7 +815,7 @@ PluginPinDialog::draw_io_pin (cairo_t* cr, const CtrlWidget& w)
 }
 
 void
-PluginPinDialog::draw_plugin_pin (cairo_t* cr, const CtrlWidget& w)
+PluginPinWidget::draw_plugin_pin (cairo_t* cr, const CtrlWidget& w)
 {
 	const double dx = w.w * .5;
 	const double dy = w.h * .5;
@@ -869,14 +866,14 @@ PluginPinDialog::draw_plugin_pin (cairo_t* cr, const CtrlWidget& w)
 }
 
 double
-PluginPinDialog::pin_x_pos (uint32_t i, double x0, double width, uint32_t n_total, uint32_t n_midi, bool midi)
+PluginPinWidget::pin_x_pos (uint32_t i, double x0, double width, uint32_t n_total, uint32_t n_midi, bool midi)
 {
 	if (!midi) { i += n_midi; }
 	return rint (x0 + (i + 1) * width / (1. + n_total)) - .5;
 }
 
-const PluginPinDialog::CtrlWidget&
-PluginPinDialog::get_io_ctrl (CtrlType ct, DataType dt, uint32_t id, uint32_t ip) const
+const PluginPinWidget::CtrlWidget&
+PluginPinWidget::get_io_ctrl (CtrlType ct, DataType dt, uint32_t id, uint32_t ip) const
 {
 	for (CtrlElemList::const_iterator i = _elements.begin (); i != _elements.end (); ++i) {
 		if (i->e->ct == ct && i->e->dt == dt && i->e->id == id && i->e->ip == ip) {
@@ -893,7 +890,7 @@ PluginPinDialog::get_io_ctrl (CtrlType ct, DataType dt, uint32_t id, uint32_t ip
 }
 
 void
-PluginPinDialog::edge_coordinates (const CtrlWidget& w, double &x, double &y)
+PluginPinWidget::edge_coordinates (const CtrlWidget& w, double &x, double &y)
 {
 	switch (w.e->ct) {
 		case Input:
@@ -921,7 +918,7 @@ PluginPinDialog::edge_coordinates (const CtrlWidget& w, double &x, double &y)
 }
 
 void
-PluginPinDialog::draw_connection (cairo_t* cr, double x0, double x1, double y0, double y1, bool midi, bool horiz, bool dashed)
+PluginPinWidget::draw_connection (cairo_t* cr, double x0, double x1, double y0, double y1, bool midi, bool horiz, bool dashed)
 {
 	const double bz = 2 * _pin_box_size;
 	double bc = (dashed && x0 == x1) ? 1.25 * _pin_box_size : 0;
@@ -948,7 +945,7 @@ PluginPinDialog::draw_connection (cairo_t* cr, double x0, double x1, double y0, 
 }
 
 void
-PluginPinDialog::draw_connection (cairo_t* cr, const CtrlWidget& w0, const CtrlWidget& w1, bool dashed)
+PluginPinWidget::draw_connection (cairo_t* cr, const CtrlWidget& w0, const CtrlWidget& w1, bool dashed)
 {
 	double x0, x1, y0, y1;
 	edge_coordinates (w0, x0, y0);
@@ -959,7 +956,7 @@ PluginPinDialog::draw_connection (cairo_t* cr, const CtrlWidget& w0, const CtrlW
 
 
 bool
-PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
+PluginPinWidget::darea_expose_event (GdkEventExpose* ev)
 {
 	Gtk::Allocation a = darea.get_allocation ();
 	double const width = a.get_width ();
@@ -1152,20 +1149,20 @@ PluginPinDialog::darea_expose_event (GdkEventExpose* ev)
 }
 
 void
-PluginPinDialog::darea_size_request (Gtk::Requisition* req)
+PluginPinWidget::darea_size_request (Gtk::Requisition* req)
 {
 	req->width = _min_width;
 	req->height = _min_height;
 }
 
 void
-PluginPinDialog::darea_size_allocate (Gtk::Allocation&)
+PluginPinWidget::darea_size_allocate (Gtk::Allocation&)
 {
 	_position_valid = false;
 }
 
 bool
-PluginPinDialog::drag_type_matches (const CtrlElem& e)
+PluginPinWidget::drag_type_matches (const CtrlElem& e)
 {
 	if (!_dragging || !_selection) {
 		return true;
@@ -1183,7 +1180,7 @@ PluginPinDialog::drag_type_matches (const CtrlElem& e)
 }
 
 void
-PluginPinDialog::start_drag (const CtrlElem& e, double x, double y)
+PluginPinWidget::start_drag (const CtrlElem& e, double x, double y)
 {
 	assert (_selection == e);
 	_drag_dst.reset ();
@@ -1226,7 +1223,7 @@ PluginPinDialog::start_drag (const CtrlElem& e, double x, double y)
 }
 
 bool
-PluginPinDialog::darea_motion_notify_event (GdkEventMotion* ev)
+PluginPinWidget::darea_motion_notify_event (GdkEventMotion* ev)
 {
 	bool changed = false;
 	_hover.reset ();
@@ -1254,7 +1251,7 @@ PluginPinDialog::darea_motion_notify_event (GdkEventMotion* ev)
 }
 
 bool
-PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
+PluginPinWidget::darea_button_press_event (GdkEventButton* ev)
 {
 	if (ev->type != GDK_BUTTON_PRESS) {
 		return false;
@@ -1307,7 +1304,7 @@ PluginPinDialog::darea_button_press_event (GdkEventButton* ev)
 }
 
 bool
-PluginPinDialog::darea_button_release_event (GdkEventButton* ev)
+PluginPinWidget::darea_button_release_event (GdkEventButton* ev)
 {
 	if (_dragging && _selection && _drag_dst && _drag_dst == _hover) {
 		// select click. (or re-connect same)
@@ -1367,7 +1364,7 @@ PluginPinDialog::darea_button_release_event (GdkEventButton* ev)
 }
 
 void
-PluginPinDialog::handle_input_action (const CtrlElem &s, const CtrlElem &i)
+PluginPinWidget::handle_input_action (const CtrlElem &s, const CtrlElem &i)
 {
 	const int pc = s->ip;
 	bool valid;
@@ -1397,7 +1394,7 @@ PluginPinDialog::handle_input_action (const CtrlElem &s, const CtrlElem &i)
 }
 
 void
-PluginPinDialog::disconnect_other_outputs (uint32_t skip_pc, DataType dt, uint32_t id)
+PluginPinWidget::disconnect_other_outputs (uint32_t skip_pc, DataType dt, uint32_t id)
 {
 	_ignore_updates = true;
 	for (uint32_t n = 0; n < _n_plugins; ++n) {
@@ -1416,7 +1413,7 @@ PluginPinDialog::disconnect_other_outputs (uint32_t skip_pc, DataType dt, uint32
 }
 
 void
-PluginPinDialog::disconnect_other_thru (DataType dt, uint32_t id)
+PluginPinWidget::disconnect_other_thru (DataType dt, uint32_t id)
 {
 	_ignore_updates = true;
 	bool valid;
@@ -1430,7 +1427,7 @@ PluginPinDialog::disconnect_other_thru (DataType dt, uint32_t id)
 }
 
 void
-PluginPinDialog::handle_output_action (const CtrlElem &s, const CtrlElem &o)
+PluginPinWidget::handle_output_action (const CtrlElem &s, const CtrlElem &o)
 {
 	const uint32_t pc = s->ip;
 	bool valid;
@@ -1465,7 +1462,7 @@ PluginPinDialog::handle_output_action (const CtrlElem &s, const CtrlElem &o)
 }
 
 void
-PluginPinDialog::handle_thru_action (const CtrlElem &o, const CtrlElem &i)
+PluginPinWidget::handle_thru_action (const CtrlElem &o, const CtrlElem &i)
 {
 	bool valid;
 	ChanMapping thru_map (_pi->thru_map ());
@@ -1487,7 +1484,7 @@ PluginPinDialog::handle_thru_action (const CtrlElem &o, const CtrlElem &i)
 }
 
 bool
-PluginPinDialog::handle_disconnect (const CtrlElem &e, bool no_signal)
+PluginPinWidget::handle_disconnect (const CtrlElem &e, bool no_signal)
 {
 	_ignore_updates = true;
 	bool changed = false;
@@ -1575,14 +1572,14 @@ PluginPinDialog::handle_disconnect (const CtrlElem &e, bool no_signal)
 }
 
 void
-PluginPinDialog::toggle_sidechain ()
+PluginPinWidget::toggle_sidechain ()
 {
 	if (_session && _session->actively_recording ()) { return; }
 	_route ()->add_remove_sidechain (_pi, !_pi->has_sidechain ());
 }
 
 void
-PluginPinDialog::connect_sidechain ()
+PluginPinWidget::connect_sidechain ()
 {
 	if (!_session) { return; }
 
@@ -1598,7 +1595,7 @@ PluginPinDialog::connect_sidechain ()
 }
 
 void
-PluginPinDialog::reset_configuration ()
+PluginPinWidget::reset_configuration ()
 {
 	if (_set_config.get_active ()) {
 		_route ()->reset_plugin_insert (_pi);
@@ -1608,13 +1605,13 @@ PluginPinDialog::reset_configuration ()
 }
 
 void
-PluginPinDialog::reset_mapping ()
+PluginPinWidget::reset_mapping ()
 {
 	_pi->reset_map ();
 }
 
 void
-PluginPinDialog::select_output_preset (uint32_t n_audio)
+PluginPinWidget::select_output_preset (uint32_t n_audio)
 {
 	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out (DataType::AUDIO, n_audio);
@@ -1622,7 +1619,7 @@ PluginPinDialog::select_output_preset (uint32_t n_audio)
 }
 
 void
-PluginPinDialog::add_remove_plugin_clicked (bool add)
+PluginPinWidget::add_remove_plugin_clicked (bool add)
 {
 	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out = _out;
@@ -1632,7 +1629,7 @@ PluginPinDialog::add_remove_plugin_clicked (bool add)
 }
 
 void
-PluginPinDialog::add_remove_port_clicked (bool add, ARDOUR::DataType dt)
+PluginPinWidget::add_remove_port_clicked (bool add, ARDOUR::DataType dt)
 {
 	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out = _out;
@@ -1643,7 +1640,7 @@ PluginPinDialog::add_remove_port_clicked (bool add, ARDOUR::DataType dt)
 }
 
 void
-PluginPinDialog::add_remove_inpin_clicked (bool add, ARDOUR::DataType dt)
+PluginPinWidget::add_remove_inpin_clicked (bool add, ARDOUR::DataType dt)
 {
 	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out = _out;
@@ -1654,7 +1651,7 @@ PluginPinDialog::add_remove_inpin_clicked (bool add, ARDOUR::DataType dt)
 }
 
 void
-PluginPinDialog::add_sidechain_port (DataType dt)
+PluginPinWidget::add_sidechain_port (DataType dt)
 {
 	if (_session && _session->actively_recording ()) { return; }
 	boost::shared_ptr<IO> io = _pi->sidechain_input ();
@@ -1668,7 +1665,7 @@ PluginPinDialog::add_sidechain_port (DataType dt)
 }
 
 void
-PluginPinDialog::remove_port (boost::weak_ptr<ARDOUR::Port> wp)
+PluginPinWidget::remove_port (boost::weak_ptr<ARDOUR::Port> wp)
 {
 	if (_session && _session->actively_recording ()) { return; }
 	boost::shared_ptr<ARDOUR::Port> p = wp.lock ();
@@ -1680,7 +1677,7 @@ PluginPinDialog::remove_port (boost::weak_ptr<ARDOUR::Port> wp)
 }
 
 void
-PluginPinDialog::disconnect_port (boost::weak_ptr<ARDOUR::Port> wp)
+PluginPinWidget::disconnect_port (boost::weak_ptr<ARDOUR::Port> wp)
 {
 	if (_session && _session->actively_recording ()) { return; }
 	boost::shared_ptr<ARDOUR::Port> p = wp.lock ();
@@ -1692,7 +1689,7 @@ PluginPinDialog::disconnect_port (boost::weak_ptr<ARDOUR::Port> wp)
 }
 
 void
-PluginPinDialog::connect_port (boost::weak_ptr<ARDOUR::Port> wp0, boost::weak_ptr<ARDOUR::Port> wp1)
+PluginPinWidget::connect_port (boost::weak_ptr<ARDOUR::Port> wp0, boost::weak_ptr<ARDOUR::Port> wp1)
 {
 	if (_session && _session->actively_recording ()) { return; }
 	boost::shared_ptr<ARDOUR::Port> p0 = wp0.lock ();
@@ -1708,7 +1705,7 @@ PluginPinDialog::connect_port (boost::weak_ptr<ARDOUR::Port> wp0, boost::weak_pt
 }
 
 void
-PluginPinDialog::add_send_from (boost::weak_ptr<ARDOUR::Port> wp, boost::weak_ptr<ARDOUR::Route> wr)
+PluginPinWidget::add_send_from (boost::weak_ptr<ARDOUR::Port> wp, boost::weak_ptr<ARDOUR::Route> wr)
 {
 	if (_session && _session->actively_recording ()) { return; }
 	boost::shared_ptr<Port> p = wp.lock ();
@@ -1753,7 +1750,7 @@ PluginPinDialog::add_send_from (boost::weak_ptr<ARDOUR::Port> wp, boost::weak_pt
 }
 
 bool
-PluginPinDialog::sc_input_release (GdkEventButton *ev)
+PluginPinWidget::sc_input_release (GdkEventButton *ev)
 {
 	if (_session && _session->actively_recording ()) { return false; }
 	if (ev->button == 3) {
@@ -1769,7 +1766,7 @@ struct RouteCompareByName {
 };
 
 bool
-PluginPinDialog::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Port> wp)
+PluginPinWidget::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Port> wp)
 {
 	using namespace Menu_Helpers;
 	if (!_session || _session->actively_recording ()) { return false; }
@@ -1782,7 +1779,7 @@ PluginPinDialog::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Por
 
 		boost::shared_ptr<Port> p = wp.lock ();
 		if (p && p->connected ()) {
-			citems.push_back (MenuElem (_("Disconnect"), sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::disconnect_port), wp)));
+			citems.push_back (MenuElem (_("Disconnect"), sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::disconnect_port), wp)));
 			citems.push_back (SeparatorElem ());
 		}
 
@@ -1807,14 +1804,14 @@ PluginPinDialog::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Por
 		if (added > 0) {
 			citems.push_back (SeparatorElem ());
 		}
-		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*this, &PluginPinDialog::connect_sidechain)));
+		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*this, &PluginPinWidget::connect_sidechain)));
 		input_menu.popup (1, ev->time);
 	}
 	return false;
 }
 
 uint32_t
-PluginPinDialog::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, DataType dt, boost::weak_ptr<Port> wp)
+PluginPinWidget::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, DataType dt, boost::weak_ptr<Port> wp)
 {
 	uint32_t added = 0;
 	using namespace Menu_Helpers;
@@ -1849,14 +1846,14 @@ PluginPinDialog::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, Data
 	/* we're going to create the new send pre-fader, so check the route amp's data type.  */
 	const ChanCount& rc (r->amp ()->input_streams ());
 	if (!already_present && rc.get (dt) > 0) {
-		citems.push_back (MenuElem (r->name (), sigc::bind (sigc::mem_fun (*this, &PluginPinDialog::add_send_from), wp, boost::weak_ptr<Route> (r))));
+		citems.push_back (MenuElem (r->name (), sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_send_from), wp, boost::weak_ptr<Route> (r))));
 		++added;
 	}
 	return added;
 }
 
 void
-PluginPinDialog::port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port> w0, boost::weak_ptr<ARDOUR::Port> w1)
+PluginPinWidget::port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port> w0, boost::weak_ptr<ARDOUR::Port> w1)
 {
 	boost::shared_ptr<Port> p0 = w0.lock ();
 	boost::shared_ptr<Port> p1 = w1.lock ();
@@ -1873,7 +1870,7 @@ PluginPinDialog::port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port> w
 }
 
 /* lifted from ProcessorEntry::Control */
-PluginPinDialog::Control::Control (boost::shared_ptr<AutomationControl> c, string const & n)
+PluginPinWidget::Control::Control (boost::shared_ptr<AutomationControl> c, string const & n)
 	: _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain ()), 0, 1, 0.01, 0.1)
 	, _slider (&_adjustment, boost::shared_ptr<PBD::Controllable> (), 0, max (13.f, rintf (13.f * UIConfiguration::instance ().get_ui_scale ())))
@@ -1930,13 +1927,13 @@ PluginPinDialog::Control::Control (boost::shared_ptr<AutomationControl> c, strin
 	set_no_tooltip_whatsoever (_slider);
 }
 
-PluginPinDialog::Control::~Control ()
+PluginPinWidget::Control::~Control ()
 {
 	timer_connection.disconnect ();
 }
 
 void
-PluginPinDialog::Control::set_tooltip ()
+PluginPinWidget::Control::set_tooltip ()
 {
 	boost::shared_ptr<AutomationControl> c = _control.lock ();
 	if (!c) {
@@ -1950,7 +1947,7 @@ PluginPinDialog::Control::set_tooltip ()
 }
 
 void
-PluginPinDialog::Control::slider_adjusted ()
+PluginPinWidget::Control::slider_adjusted ()
 {
 	if (_ignore_ui_adjustment) {
 		return;
@@ -1965,7 +1962,7 @@ PluginPinDialog::Control::slider_adjusted ()
 
 
 void
-PluginPinDialog::Control::control_changed ()
+PluginPinWidget::Control::control_changed ()
 {
 	boost::shared_ptr<AutomationControl> c = _control.lock ();
 	if (!c) {
@@ -1983,4 +1980,20 @@ PluginPinDialog::Control::control_changed ()
 	}
 
 	_ignore_ui_adjustment = false;
+}
+
+PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
+	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
+	, ppw (pi)
+{
+	add (ppw);
+}
+
+PluginPinDialog::~PluginPinDialog () { }
+
+void
+PluginPinDialog::set_session (ARDOUR::Session *s)
+{
+	SessionHandlePtr::set_session (s);
+	ppw.set_session (s);
 }
