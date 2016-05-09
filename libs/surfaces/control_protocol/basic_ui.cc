@@ -199,22 +199,56 @@ BasicUI::transport_stop ()
 void
 BasicUI::transport_play (bool from_last_start)
 {
-	bool rolling = session->transport_rolling ();
+	if (!session) {
+		return;
+	}
+
+	if (session->is_auditioning()) {
+		return;
+	}
+
+#if 0
+	if (session->config.get_external_sync()) {
+		switch (Config->get_sync_source()) {
+		case Engine:
+			break;
+		default:
+			/* transport controlled by the master */
+			return;
+		}
+	}
+#endif
+
+	bool rolling = session->transport_rolling();
 
 	if (session->get_play_loop()) {
-		session->request_play_loop (false);
+
+		/* If loop playback is not a mode, then we should cancel
+		   it when this action is requested. If it is a mode
+		   we just leave it in place.
+		*/
+
+		if (!Config->get_loop_is_mode()) {
+			/* XXX it is not possible to just leave seamless loop and keep
+			   playing at present (nov 4th 2009)
+			*/
+			if (!Config->get_seamless_loop()) {
+				/* stop loop playback and stop rolling */
+				session->request_play_loop (false, true);
+			} else if (rolling) {
+				/* stop loop playback but keep rolling */
+				session->request_play_loop (false, false);
+			}
+		}
+
+	} else if (session->get_play_range () ) {
+		/* stop playing a range if we currently are */
+		session->request_play_range (0, true);
 	}
 
-	if (session->get_play_range ()) {
-		session->request_play_range (0);
+	if (!rolling) {
+		session->request_transport_speed (1.0f);
 	}
-
-	if (from_last_start && rolling) {
-		session->request_locate (session->last_transport_start(), true);
-
-	}
-
-	session->request_transport_speed (1.0f);
 }
 
 void
@@ -357,11 +391,11 @@ BasicUI::jump_by_seconds (double secs)
 {
 	framepos_t current = session->transport_frame();
 	double s = (double) current / (double) session->nominal_frame_rate();
-	
+
 	s+= secs;
 	if (s < 0) current = 0;
 	s = s * session->nominal_frame_rate();
-	
+
 	session->request_locate ( floor(s) );
 }
 
@@ -374,11 +408,11 @@ BasicUI::jump_by_bars (double bars)
 
 	bars += bbt.bars;
 	if (bars < 0) bars = 0;
-	
+
 	AnyTime any;
 	any.type = AnyTime::BBT;
 	any.bbt.bars = bars;
-	
+
 	session->request_locate ( session->convert_to_frames (any) );
 }
 
