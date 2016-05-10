@@ -2788,13 +2788,15 @@ TempoMap::gui_dilate_tempo (const framepos_t& frame, const framepos_t& end_frame
 	Metrics future_map;
 	TempoSection* ts = 0;
 
-
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
+
 		ts = const_cast<TempoSection*>(&tempo_section_at_locked (_metrics, frame - 1));
+
 		if (!ts) {
 			return;
 		}
+
 		TempoSection* prev_t = copy_metrics_and_point (_metrics, future_map, ts);
 		TempoSection* prev_to_prev_t = 0;
 		const frameoffset_t fr_off = end_frame - frame;
@@ -2802,6 +2804,7 @@ TempoMap::gui_dilate_tempo (const framepos_t& frame, const framepos_t& end_frame
 		if (prev_t && prev_t->pulse() > 0.0) {
 			prev_to_prev_t = const_cast<TempoSection*>(&tempo_section_at_locked (future_map, prev_t->frame() - 1));
 		}
+
 
 		/* the change in frames is the result of changing the slope of at most 2 previous tempo sections.
 		   constant to constant is straightforward, as the tempo prev to prev_t has constant slope.
@@ -2813,15 +2816,13 @@ TempoMap::gui_dilate_tempo (const framepos_t& frame, const framepos_t& end_frame
 			contribution = prev_to_prev_t->beats_per_minute() / (prev_to_prev_t->beats_per_minute() + prev_t->beats_per_minute());
 		}
 
-		frameoffset_t frame_contribution = contribution * (double) fr_off;
-		frameoffset_t prev_t_frame_contribution = fr_off - frame_contribution;
+		frameoffset_t prev_t_frame_contribution = fr_off - (contribution * (double) fr_off);
 
 		const double start_tempo = prev_t->tempo_at_frame (frame, _frame_rate);
 		const double end_tempo = prev_t->tempo_at_frame (frame + prev_t_frame_contribution, _frame_rate);
 		const double start_pulse = prev_t->pulse_at_frame (frame, _frame_rate);
 		const double end_pulse = prev_t->pulse_at_frame (end_frame, _frame_rate);
-		const double dpulse = (start_pulse) / (end_pulse);
-		double new_bpm = prev_t->tempo_at_frame (prev_t->frame() - prev_t_frame_contribution, _frame_rate) * (double) prev_t->note_type();
+		double new_bpm;
 
 		if (prev_t->type() == TempoSection::Constant || prev_t->c_func() == 0.0) {
 
@@ -2854,35 +2855,12 @@ TempoMap::gui_dilate_tempo (const framepos_t& frame, const framepos_t& end_frame
 					}
 				}
 			}
-		} else if (prev_t->c_func() < 0.0) {
-
+		} else {
 			const double end_minute = (((frame + prev_t_frame_contribution) - prev_t->frame()) / (double) _frame_rate) / 60.0;
-			const double future_c = log (end_tempo / (new_bpm / (double) prev_t->note_type())) / end_minute;
 
-			const double dtempo = (start_tempo) / (end_tempo);
-			const double dframe = (frame) / (double) ((frame + prev_t_frame_contribution));
+			new_bpm = (((start_pulse  - prev_t->pulse()) * prev_t->c_func())
+				   / (exp (end_minute * prev_t->c_func()) - 1)) * (double) prev_t->note_type();
 
-			/* limits - a bit clunky, but meh */
-			if (future_c > -10.1 && future_c  < 10.1) {
-				new_bpm = prev_t->beats_per_minute() * (dpulse / dtempo);
-			} else {
-				new_bpm = prev_t->beats_per_minute() * (dframe / dtempo);
-			}
-
-		} else if (prev_t->c_func() > 0.0) {
-
-			const double end_minute = (((frame + prev_t_frame_contribution) - prev_t->frame()) / (double) _frame_rate) / 60.0;
-			const double future_c = log (end_tempo / (new_bpm / (double) prev_t->note_type())) / end_minute;
-
-			const double dtempo = (end_tempo) / (start_tempo);
-			const double dframe = (frame) / (double) ((frame + prev_t_frame_contribution));
-
-			/* limits - a bit clunky, but meh */
-			if (future_c > -10.1 && future_c  < 10.1) {
-				new_bpm = prev_t->beats_per_minute() * (dpulse / dtempo);
-			} else {
-				new_bpm = prev_t->beats_per_minute() * (dframe / dtempo);
-			}
 		}
 
 		prev_t->set_beats_per_minute (new_bpm);
