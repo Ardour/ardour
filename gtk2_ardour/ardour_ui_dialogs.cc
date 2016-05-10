@@ -347,7 +347,7 @@ ARDOUR_UI::toggle_editor_and_mixer ()
 	}
 
 	if (editor->tabbed() && !mixer->tabbed()) {
-		if (!editor->fully_visible()) {
+		if (main_window_visibility && main_window_visibility->fully_visible()) {
 			if (_tabs.get_current_page() == _tabs.page_num (editor->contents())) {
 				mixer->make_visible ();
 			}
@@ -358,7 +358,7 @@ ARDOUR_UI::toggle_editor_and_mixer ()
 	}
 
 	if (mixer->tabbed () && !editor->tabbed()) {
-		if (!editor->fully_visible()) {
+		if (main_window_visibility && main_window_visibility->fully_visible()) {
 			if (_tabs.get_current_page() == _tabs.page_num (mixer->contents())) {
 				editor->make_visible ();
 			}
