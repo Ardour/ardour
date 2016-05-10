@@ -40,6 +40,7 @@
 #include "ardour_button.h"
 #include "keyboard.h"
 #include "utils.h"
+#include "plugin_pin_dialog.h"
 #include "prompter.h"
 #include "gui_thread.h"
 #include "ardour_dialog.h"
@@ -328,6 +329,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		blink_rec_display(true); // set initial rec-en button state
 	}
 
+	maybe_add_route_print_mgr ();
 	route_color_changed();
 }
 
@@ -2249,4 +2251,92 @@ RouteGroup*
 RouteUI::route_group() const
 {
 	return _route->route_group();
+}
+
+
+RoutePinWindowProxy::RoutePinWindowProxy(std::string const &name, boost::shared_ptr<ARDOUR::Route> route)
+	: WM::ProxyBase (name, string())
+	, _route (boost::weak_ptr<Route> (route))
+{
+	route->DropReferences.connect (going_away_connection, MISSING_INVALIDATOR, boost::bind (&RoutePinWindowProxy::route_going_away, this), gui_context());
+}
+
+RoutePinWindowProxy::~RoutePinWindowProxy()
+{
+	_window = 0;
+}
+
+ARDOUR::SessionHandlePtr*
+RoutePinWindowProxy::session_handle ()
+{
+	ArdourWindow* aw = dynamic_cast<ArdourWindow*> (_window);
+	if (aw) { return aw; }
+	return 0;
+}
+
+Gtk::Window*
+RoutePinWindowProxy::get (bool create)
+{
+	boost::shared_ptr<Route> r = _route.lock ();
+	if (!r) {
+		return 0;
+	}
+
+	if (!_window) {
+		if (!create) {
+			return 0;
+		}
+		_window = new PluginPinDialog (r);
+		ArdourWindow* aw = dynamic_cast<ArdourWindow*> (_window);
+		if (aw) {
+			aw->set_session (_session);
+		}
+		_window->show_all ();
+	}
+	return _window;
+}
+
+void
+RoutePinWindowProxy::route_going_away ()
+{
+	delete _window;
+	_window = 0;
+	WM::Manager::instance().remove (this);
+	going_away_connection.disconnect();
+}
+
+void
+RouteUI::maybe_add_route_print_mgr ()
+{
+	if (_route->pinmgr_proxy ()) {
+		return;
+	}
+	RoutePinWindowProxy* wp = new RoutePinWindowProxy (
+			string_compose ("RPM-%1", _route->id()), _route);
+	wp->set_session (_session);
+
+	const XMLNode* ui_xml = _session->extra_xml (X_("UI"));
+	if (ui_xml) {
+		wp->set_state (*ui_xml, 0);
+	}
+
+#if 0
+	void* existing_ui = _route->pinmgr_proxy ();
+	if (existing_ui) {
+		wp->use_window (*(reinterpret_cast<Gtk::Window*>(existing_ui)));
+	}
+#endif
+	_route->set_pingmgr_proxy (wp);
+
+	WM::Manager::instance().register_window (wp);
+}
+
+void
+RouteUI::manage_pins ()
+{
+	RoutePinWindowProxy* proxy = _route->pinmgr_proxy ();
+	if (proxy) {
+		proxy->get (true);
+		proxy->present();
+	}
 }

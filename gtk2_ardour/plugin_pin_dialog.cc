@@ -21,7 +21,6 @@
 
 #include <gtkmm/table.h>
 #include <gtkmm/frame.h>
-#include <gtkmm/box.h>
 #include <gtkmm/label.h>
 
 #include "pbd/replace_all.h"
@@ -1982,18 +1981,79 @@ PluginPinWidget::Control::control_changed ()
 	_ignore_ui_adjustment = false;
 }
 
+
+
 PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
-	, ppw (pi)
 {
-	add (ppw);
+	ppw.push_back (PluginPinWidgetPtr(new PluginPinWidget (pi)));
+	add (*ppw.back());
 }
 
-PluginPinDialog::~PluginPinDialog () { }
 
+PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::Route> r)
+	: ArdourWindow (string_compose (_("Pin Configuration: %1"), r->name ()))
+	, _route (r)
+{
+	vbox = manage (new VBox ());
+	add (*vbox);
+	vbox->show ();
+
+	_route->foreach_processor (sigc::mem_fun (*this, &PluginPinDialog::add_processor));
+
+	_route->processors_changed.connect (
+		_route_connections, invalidator (*this), boost::bind (&PluginPinDialog::route_processors_changed, this, _1), gui_context()
+		);
+
+	_route->DropReferences.connect (
+		_route_connections, invalidator (*this), boost::bind (&PluginPinDialog::route_going_away, this), gui_context()
+		);
+}
 void
 PluginPinDialog::set_session (ARDOUR::Session *s)
 {
 	SessionHandlePtr::set_session (s);
-	ppw.set_session (s);
+	for (PluginPinWidgetList::iterator i = ppw.begin(); i != ppw.end(); ++i) {
+		(*i)->set_session (s);
+	}
+}
+
+void
+PluginPinDialog::route_processors_changed (ARDOUR::RouteProcessorChange)
+{
+	ppw.clear ();
+	remove ();
+	vbox = manage (new VBox ());
+	add (*vbox);
+	vbox->show ();
+	_route->foreach_processor (sigc::mem_fun (*this, &PluginPinDialog::add_processor));
+}
+
+void
+PluginPinDialog::route_going_away ()
+{
+	ppw.clear ();
+	_route.reset ();
+	remove ();
+}
+
+void
+PluginPinDialog::add_processor (boost::weak_ptr<Processor> p)
+{
+	boost::shared_ptr<Processor> proc = p.lock ();
+	if (!proc || !proc->display_to_user ()) {
+		return;
+	}
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
+	if (pi) {
+		ppw.push_back (PluginPinWidgetPtr(new PluginPinWidget (pi)));
+		vbox->pack_start (*ppw.back());
+	} else {
+		HBox* hbox = manage (new HBox ());
+		hbox->pack_start (*manage (new HSeparator ()));
+		hbox->pack_start (*manage (new Label (proc->display_name ())));
+		hbox->pack_start (*manage (new HSeparator ()));
+		vbox->pack_start (*hbox);
+		hbox->show_all ();
+	}
 }

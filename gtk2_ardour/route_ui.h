@@ -39,6 +39,7 @@
 
 #include "axis_view.h"
 #include "selectable.h"
+#include "window_manager.h"
 
 namespace ARDOUR {
 	class AudioTrack;
@@ -54,6 +55,22 @@ namespace Gtk {
 class ArdourButton;
 class ArdourWindow;
 class IOSelectorWindow;
+
+class RoutePinWindowProxy : public WM::ProxyBase
+{
+  public:
+	RoutePinWindowProxy (std::string const &, boost::shared_ptr<ARDOUR::Route>);
+	~RoutePinWindowProxy();
+
+	Gtk::Window* get (bool create = false);
+	ARDOUR::SessionHandlePtr* session_handle();
+
+  private:
+	boost::weak_ptr<ARDOUR::Route> _route;
+
+	void route_going_away ();
+	PBD::ScopedConnection going_away_connection;
+};
 
 class RouteUI : public virtual AxisView
 {
@@ -188,6 +205,9 @@ class RouteUI : public virtual AxisView
 	int  set_color_from_route ();
 
 	void route_rename();
+
+	void manage_pins ();
+	void maybe_add_route_print_mgr ();
 
 	virtual void property_changed (const PBD::PropertyChange&);
 	void route_removed ();

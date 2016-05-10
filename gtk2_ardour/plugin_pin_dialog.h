@@ -27,6 +27,8 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/route.h"
 
+#include <gtkmm/box.h>
+
 #include "gtkmm2ext/pixfader.h"
 #include "gtkmm2ext/persistent_tooltip.h"
 #include "gtkmm2ext/slider_controller.h"
@@ -221,12 +223,21 @@ class PluginPinDialog : public ArdourWindow
 {
 public:
 	PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert>);
-	~PluginPinDialog ();
+	PluginPinDialog (boost::shared_ptr<ARDOUR::Route>);
 
 	void set_session (ARDOUR::Session *);
 private:
-	PluginPinWidget ppw;
+	Gtk::VBox *vbox;
+	typedef boost::shared_ptr<PluginPinWidget> PluginPinWidgetPtr;
+	typedef std::vector<PluginPinWidgetPtr> PluginPinWidgetList;
 
+	void route_going_away ();
+	void route_processors_changed (ARDOUR::RouteProcessorChange);
+	void add_processor (boost::weak_ptr<ARDOUR::Processor>);
+
+	boost::shared_ptr<ARDOUR::Route> _route;
+	PluginPinWidgetList ppw;
+	PBD::ScopedConnectionList _route_connections;
 };
 
 #endif

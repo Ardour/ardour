@@ -1600,8 +1600,12 @@ MixerStrip::build_route_ops_menu ()
 		i->signal_activate().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*_route, &Route::set_strict_io), !_route->strict_io())));
 	}
 
-	items.push_back (SeparatorElem());
+	if (1 /* TODO IFF >= 1 plugin-insert */) {
+		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Pin Connections..."), sigc::mem_fun (*this, &RouteUI::manage_pins)));
+	}
 
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Adjust Latency..."), sigc::mem_fun (*this, &RouteUI::adjust_latency)));
 
 	items.push_back (SeparatorElem());
