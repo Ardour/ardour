@@ -14,12 +14,14 @@
 
 */
 
-#include "ptfformat.h"
-
 #include <stdio.h>
 #include <string>
 #include <string.h>
 #include <assert.h>
+
+#include <glib/gstdio.h>
+
+#include "ptfformat.h"
 
 using namespace std;
 
@@ -115,7 +117,7 @@ PTFFormat::load(std::string path, int64_t targetsr) {
 	int inv;
 	int err;
 
-	if (! (fp = fopen(path.c_str(), "rb"))) {
+	if (! (fp = g_fopen(path.c_str(), "rb"))) {
 		return -1;
 	}
 
