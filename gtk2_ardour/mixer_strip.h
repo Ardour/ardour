@@ -237,9 +237,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::MenuItem* rename_menu_item;
 	void build_send_action_menu ();
 
-	void new_send ();
-	void show_send_controls ();
-
 	PBD::ScopedConnection panstate_connection;
 	PBD::ScopedConnection panstyle_connection;
 	void connect_to_pan ();
