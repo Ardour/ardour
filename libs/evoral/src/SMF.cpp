@@ -22,7 +22,11 @@
 #include <cmath>
 #include <iostream>
 #include <stdint.h>
+
+#include <glib/gstdio.h>
+
 #include "libsmf/smf.h"
+
 #include "evoral/Event.hpp"
 #include "evoral/SMF.hpp"
 #include "evoral/midi_util.h"
@@ -78,7 +82,7 @@ SMF::seek_to_track(int track)
 bool
 SMF::test(const std::string& path)
 {
-	FILE* f = fopen(path.c_str(), "r");
+	FILE* f = g_fopen(path.c_str(), "r");
 	if (f == 0) {
 		return false;
 	}
@@ -108,7 +112,7 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 		smf_delete(_smf);
 	}
 
-	FILE* f = fopen(path.c_str(), "r");
+	FILE* f = g_fopen(path.c_str(), "r");
 	if (f == 0) {
 		return -1;
 	} else if ((_smf = smf_load(f)) == 0) {
@@ -176,7 +180,7 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 	{
 		/* put a stub file on disk */
 
-		FILE* f = fopen (path.c_str(), "w+");
+		FILE* f = g_fopen (path.c_str(), "w+");
 		if (f == 0) {
 			return -1;
 		}
@@ -405,7 +409,7 @@ SMF::end_write(string const & path) THROW_FILE_ERROR
 		return;
 	}
 
-	FILE* f = fopen (path.c_str(), "w+");
+	FILE* f = g_fopen (path.c_str(), "w+");
 	if (f == 0) {
 		throw FileError (path);
 	}
