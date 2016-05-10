@@ -52,6 +52,8 @@
 #include "ardour/automatable.h"
 #include "ardour/unknown_processor.h"
 
+class RoutePinWindowProxy;
+
 namespace ARDOUR {
 
 class Amp;
@@ -233,6 +235,9 @@ public:
 	ChanCount max_processor_streams () const { return processor_max_streams; }
 
 	std::list<std::string> unknown_processors () const;
+
+	RoutePinWindowProxy * pinmgr_proxy () const { return _pinmgr_proxy; }
+	void set_pingmgr_proxy (RoutePinWindowProxy* wp) { _pinmgr_proxy = wp ; }
 
 	/* special processors */
 
@@ -911,6 +916,7 @@ private:
 	    or 0.
 	*/
 	boost::weak_ptr<Processor> _processor_after_last_custom_meter;
+	RoutePinWindowProxy *_pinmgr_proxy;
 
 	void reset_instrument_info ();
 

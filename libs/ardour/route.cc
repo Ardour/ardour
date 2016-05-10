@@ -119,6 +119,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _in_sidechain_setup (false)
 	, _strict_io (false)
 	, _custom_meter_position_noted (false)
+	, _pinmgr_proxy (0)
 {
 	processor_max_streams.reset();
 }
