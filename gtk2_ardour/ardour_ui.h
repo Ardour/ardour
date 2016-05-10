@@ -59,6 +59,7 @@
 #include "gtkmm2ext/stateful_button.h"
 #include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/visibility_tracker.h"
 
 #include "ardour/ardour.h"
 #include "ardour/types.h"
@@ -377,6 +378,7 @@ protected:
 
 private:
 	Gtk::Window   _main_window;
+	Gtkmm2ext::VisibilityTracker* main_window_visibility;
 	Gtk::VBox      main_vpacker;
 	Gtk::HBox      status_bar_hpacker;
 	Gtk::Notebook _tabs;

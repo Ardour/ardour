@@ -252,6 +252,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, video_timeline(0)
 	, global_actions (X_("global"))
 	, ignore_dual_punch (false)
+	, main_window_visibility (0)
 	, editor (0)
 	, mixer (0)
 	, nsm (0)
@@ -325,6 +326,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	if (theArdourUI == 0) {
 		theArdourUI = this;
 	}
+
+	/* track main window visibility */
+
+	main_window_visibility = new VisibilityTracker (_main_window);
 
 	/* stop libxml from spewing to stdout/stderr */
 
@@ -683,6 +688,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete mixer; mixer = 0;
 		delete nsm; nsm = 0;
 		delete gui_object_state; gui_object_state = 0;
+		delete main_window_visibility;
 		FastMeter::flush_pattern_cache ();
 		PixFader::flush_pattern_cache ();
 	}
