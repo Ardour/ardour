@@ -93,12 +93,15 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
 	mutable int  _height; ///< height
 	Gtkmm2ext::VisibilityTracker* vistracker;
 	StateMask _state_mask;
+	sigc::connection delete_connection;
+	sigc::connection configure_connection;
 
 	void save_pos_and_size ();
 	void set_pos_and_size ();
 	void set_pos ();
 
 	virtual bool delete_event_handler (GdkEventAny *ev);
+	virtual bool configure_handler (GdkEventConfigure*);
 
 	virtual void setup ();
 	void toggle ();

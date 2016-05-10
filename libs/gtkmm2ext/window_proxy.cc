@@ -228,6 +228,8 @@ void
 WindowProxy::drop_window ()
 {
 	if (_window) {
+		delete_connection.disconnect ();
+		configure_connection.disconnect ();
 		_window->hide ();
 		delete _window;
 		_window = 0;
@@ -250,10 +252,26 @@ WindowProxy::setup ()
 	assert (_window);
 
 	vistracker = new Gtkmm2ext::VisibilityTracker (*_window);
-	_window->signal_delete_event().connect (sigc::mem_fun (*this, &WindowProxy::delete_event_handler));
+
+	delete_connection = _window->signal_delete_event().connect (sigc::mem_fun (*this, &WindowProxy::delete_event_handler));
+	configure_connection = _window->signal_configure_event().connect (sigc::mem_fun (*this, &WindowProxy::configure_handler), false);
 
 	set_pos_and_size ();
 }
+
+bool
+WindowProxy::configure_handler (GdkEventConfigure* ev)
+{
+	/* stupidly, the geometry data in the event isn't the same as we get
+	   from the window geometry APIs.so we have to actively interrogate
+	   them to get the new information.
+
+	   the difference is generally down to window manager framing.
+	*/
+	save_pos_and_size ();
+	return false;
+}
+
 
 bool
 WindowProxy::visible() const
