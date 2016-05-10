@@ -2666,12 +2666,6 @@ ProcessorBox::maybe_add_processor_pin_mgr (boost::weak_ptr<Processor> w)
 		wp->set_state (*ui_xml, 0);
 	}
 
-	void* existing_ui = p->get_ui ();
-
-	if (existing_ui) {
-		wp->use_window (*(reinterpret_cast<Gtk::Window*>(existing_ui)));
-	}
-
 	p->set_pingmgr_proxy (wp);
 	WM::Manager::instance().register_window (wp);
 }
