@@ -3478,6 +3478,7 @@ TempoMarkerDrag::aborted (bool moved)
 
 BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
+	, _tempo (0)
 	, before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New BBTRulerDrag\n");
@@ -3491,13 +3492,18 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	ostringstream sstr;
 	sstr << fixed << setprecision(3) << map.tempo_at (adjusted_current_frame (event)).beats_per_minute();
 	show_verbose_cursor_text (sstr.str());
+	_tempo = const_cast<TempoSection*> (&map.tempo_section_at (adjusted_current_frame (event, false)));
+
+	if (!_tempo) {
+		Drag::abort();
+	}
 }
 
 void
 BBTRulerDrag::setup_pointer_frame_offset ()
 {
 	TempoMap& map (_editor->session()->tempo_map());
-	_pointer_frame_offset = raw_grab_frame() - map.frame_at_beat (ceil (map.beat_at_frame (raw_grab_frame())));
+	_pointer_frame_offset = raw_grab_frame() - map.frame_at_beat (floor (map.beat_at_frame (raw_grab_frame())));
 }
 
 void
@@ -3515,7 +3521,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier())) {
 		/* adjust previous tempo to match pointer frame */
-		_editor->session()->tempo_map().gui_dilate_tempo (last_pointer_frame(), pf);
+		_editor->session()->tempo_map().gui_dilate_tempo (_tempo, last_pointer_frame(), pf);
 	}
 	ostringstream sstr;
 	sstr << fixed << setprecision(3) << map.tempo_at (pf).beats_per_minute();

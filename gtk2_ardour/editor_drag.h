@@ -37,6 +37,7 @@
 
 namespace ARDOUR {
 	class Location;
+	class TempoSection;
 }
 
 namespace ArdourCanvas {
@@ -763,7 +764,7 @@ public:
 	void setup_pointer_frame_offset ();
 
 private:
-
+	ARDOUR::TempoSection* _tempo;
 	XMLNode* before_state;
 };
 
