@@ -1146,7 +1146,7 @@ ExportReport::draw_waveform (Cairo::RefPtr<Cairo::ImageSurface>& wave, ExportAna
 		}
 	}
 
-	// > 0dBFS
+	// >= 0dBFS
 	cr->set_source_rgba (1.0, 0, 0, 1.0);
 	for (size_t x = 0 ; x < width; ++x) {
 		if (p->peaks[c][x].max >= 1.0) {
@@ -1160,7 +1160,7 @@ ExportReport::draw_waveform (Cairo::RefPtr<Cairo::ImageSurface>& wave, ExportAna
 	}
 	cr->stroke ();
 
-	// > -1dBTP
+	// >= -1dBTP (coeff >= .89125, libs/vamp-plugins/TruePeak.cpp)
 	cr->set_source_rgba (1.0, 0.7, 0, 0.7);
 	for (std::set<framepos_t>::const_iterator i = p->truepeakpos[c].begin (); i != p->truepeakpos[c].end (); ++i) {
 		cr->move_to (m_l + (*i) - .5, clip_top);
