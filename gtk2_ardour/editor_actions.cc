@@ -478,8 +478,8 @@ Editor::register_actions ()
 	for (int i = 1; i <= 9; ++i) {
 		string const a = string_compose (X_("script-action-%1"), i);
 		string const n = string_compose (_("Unset #%1"), i);
-		act = reg_sens (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::trigger_script), i - 1));
-		act->set_tooltip (_("(no action bound"));
+		act = myactions.register_action (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::trigger_script), i - 1));
+		act->set_tooltip (_("no action bound"));
 		act->set_sensitive (false);
 	}
 
