@@ -1,15 +1,14 @@
 ardour {
 	["type"]    = "session",
-	name        = "Example",
+	name        = "Good Night",
 	license     = "MIT",
 	author      = "Robin Gareus",
 	email       = "robin@gareus.org",
 	site        = "http://gareus.org",
 	description = [[
-	An Example Ardour Session Process Plugin.
-	Install a 'hook' that is called on every process cycle
-	(before doing any processing).
-	This example stops the transport after rolling for a specific time.]]
+	Example Ardour Session Script.
+	Session scripts are called at the beginning of every process-callback (before doing any audio processing).
+	This example stops the transport after rolling for a configurable time which can be set when instantiating the script.]]
 }
 
 function sess_params ()
