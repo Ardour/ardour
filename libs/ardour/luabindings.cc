@@ -280,6 +280,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("get_value", &PBD::Controllable::get_value)
 		.endClass ()
 
+		/* PBD enums */
 		.beginNamespace ("GroupControlDisposition")
 		.addConst ("InverseGroup", PBD::Controllable::GroupControlDisposition(PBD::Controllable::InverseGroup))
 		.addConst ("NoGroup", PBD::Controllable::GroupControlDisposition(PBD::Controllable::NoGroup))
@@ -442,7 +443,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("auto_punch_location", &Locations::auto_punch_location)
 		.addFunction ("session_range_location", &Locations::session_range_location)
 		.addFunction ("first_mark_after", &Locations::first_mark_after)
-		.addFunction ("first_mark_after", &Locations::first_mark_after)
+		.addFunction ("first_mark_before", &Locations::first_mark_before)
+		.addFunction ("first_mark_at", &Locations::mark_at)
+		.addRefFunction ("marks_either_side", &Locations::marks_either_side)
+		.addRefFunction ("find_all_between", &Locations::find_all_between)
 		.endClass ()
 
 		.beginWSPtrClass <SessionObject> ("SessionObject")
@@ -895,7 +899,7 @@ LuaBindings::common (lua_State* L)
 		.addConst ("NonLayered", ARDOUR::TrackMode(NonLayered))
 		.addConst ("Destructive", ARDOUR::TrackMode(Destructive))
 		.endNamespace ()
-		.endNamespace ();
+		.endNamespace (); // end ARDOUR
 
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ARDOUR")
@@ -1024,13 +1028,18 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("add_command", &Session::add_command)
 		.addFunction ("add_stateful_diff_command", &Session::add_stateful_diff_command)
 		.addFunction ("engine", (AudioEngine& (Session::*)())&Session::engine)
+		.addFunction ("get_block_size", &Session::get_block_size)
+		.addFunction ("worst_output_latency", &Session::worst_output_latency)
+		.addFunction ("worst_input_latency", &Session::worst_input_latency)
+		.addFunction ("worst_track_latency", &Session::worst_track_latency)
+		.addFunction ("worst_playback_latency", &Session::worst_playback_latency)
 		.endClass ()
 
 		.beginClass <RegionFactory> ("RegionFactory")
 		.addStaticFunction ("region_by_id", &RegionFactory::region_by_id)
 		.endClass ()
 
-		/* session enums */
+		/* session enums (rt-safe, common) */
 		.beginNamespace ("Session")
 
 		.beginNamespace ("RecordState")
@@ -1039,7 +1048,20 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Recording", ARDOUR::Session::RecordState(Session::Recording))
 		.endNamespace ()
 
-		.endNamespace () // END Session enums
+		.endNamespace () // end Session enums
+
+		/* ardour enums (rt-safe, common) */
+		.beginNamespace ("LocationFlags")
+		.addConst ("IsMark", ARDOUR::Location::Flags(Location::IsMark))
+		.addConst ("IsAutoPunch", ARDOUR::Location::Flags(Location::IsAutoPunch))
+		.addConst ("IsAutoLoop", ARDOUR::Location::Flags(Location::IsAutoLoop))
+		.addConst ("IsHidden", ARDOUR::Location::Flags(Location::IsHidden))
+		.addConst ("IsCDMarker", ARDOUR::Location::Flags(Location::IsCDMarker))
+		.addConst ("IsRangeMarker", ARDOUR::Location::Flags(Location::IsRangeMarker))
+		.addConst ("IsSessionRange", ARDOUR::Location::Flags(Location::IsSessionRange))
+		.addConst ("IsSkip", ARDOUR::Location::Flags(Location::IsSkip))
+		.addConst ("IsSkipping", ARDOUR::Location::Flags(Location::IsSkipping))
+		.endNamespace ()
 
 		.beginNamespace ("LuaAPI")
 		.addFunction ("nil_proc", ARDOUR::LuaAPI::nil_processor)
@@ -1050,9 +1072,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_plugin_insert_param", ARDOUR::LuaAPI::set_plugin_insert_param)
 		.addCFunction ("plugin_automation", ARDOUR::LuaAPI::plugin_automation)
 		.addFunction ("usleep", Glib::usleep)
-		.endNamespace ()
-
-		.endNamespace ();// END ARDOUR
+		.endNamespace () // end LuaAPI
+		.endNamespace ();// end ARDOUR
 }
 
 void
