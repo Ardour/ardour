@@ -121,7 +121,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	normalize_hbox.pack_start (normalize_dbtp_label, false, false, 0);
 
 	ARDOUR_UI_UTILS::set_tooltip (normalize_loudness_rb,
-			_("Normalize loudness to not exceed given EBU-R128/RMS LUFS and given true-peak. EBU-R128 normalization is only available for mono and stereo targets."));
+			_("Normalize to EBU-R128 LUFS target loudness without exceeding the given true-peak limit. EBU-R128 normalization is only available for mono and stereo targets, true-peak works for any channel layout."));
 
 	normalize_dbfs_spinbutton.configure (normalize_dbfs_adjustment, 0.1, 2);
 	normalize_lufs_spinbutton.configure (normalize_lufs_adjustment, 0.1, 2);
