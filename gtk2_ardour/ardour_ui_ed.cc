@@ -704,7 +704,7 @@ ARDOUR_UI::save_ardour_state ()
 	} else if (current_page_number == _tabs.page_num (mixer->contents())) {
 		current_tab = "mixer";
 	} else if (current_page_number == _tabs.page_num (rc_option_editor->contents())) {
-		current_tab == "preferences";
+		current_tab = "preferences";
 	}
 
 	main_window_node.add_property (X_("current-tab"), current_tab);
