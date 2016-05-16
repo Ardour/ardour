@@ -206,9 +206,9 @@ class MackieControlProtocol
 	void handle_button_event (Mackie::Surface&, Mackie::Button& button, Mackie::ButtonState);
 
 	void notify_subview_route_deleted ();
-	void notify_route_added_or_removed ();
+	void notify_route_removed ();
 	void notify_route_added (ARDOUR::RouteList &);
-	void notify_remote_id_changed();
+	void notify_presentation_info_changed();
 
 	void recalibrate_faders ();
 	void toggle_backlight ();

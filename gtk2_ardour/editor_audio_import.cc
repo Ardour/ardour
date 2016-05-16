@@ -937,7 +937,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 	{
 		if (!existing_track) {
 			if (ar) {
-				list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (in_chans, out_chans, Normal, 0, 1));
+				list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (in_chans, out_chans, 0, 1, string(), PresentationInfo::max_order, Normal));
 
 				if (at.empty()) {
 					return -1;
@@ -954,7 +954,8 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 					_session->new_midi_track (ChanCount (DataType::MIDI, 1),
 					                          ChanCount (DataType::MIDI, 1),
 					                          instrument,
-					                          Normal, 0, 1));
+					                          0, 1, string(),
+					                          PresentationInfo::max_order));
 
 				if (mt.empty()) {
 					return -1;
@@ -990,7 +991,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 			return -1;
 		}
 
-		list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (in_chans, out_chans, Destructive));
+		list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (in_chans, out_chans, 0, 1, string(), PresentationInfo::max_order, Destructive));
 		if (!at.empty()) {
 			boost::shared_ptr<Playlist> playlist = at.front()->playlist();
 			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));

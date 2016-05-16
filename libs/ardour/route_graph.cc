@@ -198,11 +198,13 @@ struct RouteRecEnabledComparator
 	{
 		boost::shared_ptr<Track> t1 (boost::dynamic_pointer_cast<Track>(r1));
 		boost::shared_ptr<Track> t2 (boost::dynamic_pointer_cast<Track>(r2));
+		PresentationInfo::global_order_t r1o = r1->presentation_info().global_order();
+		PresentationInfo::global_order_t r2o = r2->presentation_info().global_order();
 
 		if (!t1) {
 			if (!t2) {
-				/* makes no difference which is first, use signal order */
-				return r1->order_key () < r2->order_key ();
+				/* makes no difference which is first, use presentation order */
+				return r1o < r2o;
 			} else {
 				/* r1 is not a track, r2 is, run it early */
 				return false;
@@ -210,14 +212,14 @@ struct RouteRecEnabledComparator
 		}
 
 		if (!t2) {
-			/* we already tested !t1, so just use signal order */
-			return r1->order_key () < r2->order_key ();
+			/* we already tested !t1, so just use presentation order */
+			return r1o < r2o;
 		}
 
 		if (t1->rec_enable_control()->get_value()) {
 			if (t2->rec_enable_control()->get_value()) {
 				/* both rec-enabled, just use signal order */
-				return t1->order_key () < t2->order_key ();
+				return r1o < r2o;
 			} else {
 				/* t1 rec-enabled, t2 not rec-enabled, run t2 early */
 				return false;
@@ -227,8 +229,8 @@ struct RouteRecEnabledComparator
 				/* t2 rec-enabled, t1 not rec-enabled, run t1 early */
 				return true;
 			} else {
-				/* neither rec-enabled, use signal order */
-				return t1->order_key () < t2->order_key ();
+				/* neither rec-enabled, use presentation order */
+				return r1o < r2o;
 			}
 		}
 	}

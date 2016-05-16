@@ -658,7 +658,7 @@ OSC::send_current_value (const char* path, lo_arg** argv, int argc, lo_message m
 		lo_message_add_string (reply, "bad syntax");
 	} else {
 		id = argv[0]->i;
-		r = session->route_by_remote_id (id);
+		r = session->get_remote_nth_route (id);
 
 		if (!r) {
 			lo_message_add_string (reply, "not found");
@@ -729,7 +729,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		} else {
 			for (int n = 0; n < argc; ++n) {
 
-				boost::shared_ptr<Route> r = session->route_by_remote_id (argv[n]->i);
+				boost::shared_ptr<Route> r = session->get_remote_nth_route (argv[n]->i);
 
 				if (!r) {
 					lo_message_add_string (reply, "not found");
@@ -752,7 +752,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 		for (int n = 0; n < argc; ++n) {
 
-			boost::shared_ptr<Route> r = session->route_by_remote_id (argv[n]->i);
+			boost::shared_ptr<Route> r = session->get_remote_nth_route (argv[n]->i);
 
 			if (r) {
 				end_listen (r, lo_message_get_source (msg));
@@ -949,7 +949,7 @@ OSC::routes_list (lo_message msg)
 	}
 	for (int n = 0; n < (int) session->nroutes(); ++n) {
 
-		boost::shared_ptr<Route> r = session->route_by_remote_id (n);
+		boost::shared_ptr<Route> r = session->get_remote_nth_route (n);
 
 		if (r) {
 
@@ -968,7 +968,8 @@ OSC::routes_list (lo_message msg)
 			lo_message_add_int32 (reply, r->n_outputs().n_audio());
 			lo_message_add_int32 (reply, r->muted());
 			lo_message_add_int32 (reply, r->soloed());
-			lo_message_add_int32 (reply, r->remote_control_id());
+			/* XXX Can only use group ID at this point */
+			lo_message_add_int32 (reply, r->presentation_info().group_order());
 
 			if (boost::dynamic_pointer_cast<AudioTrack>(r)
 					|| boost::dynamic_pointer_cast<MidiTrack>(r)) {
@@ -1051,7 +1052,7 @@ OSC::route_mute (int rid, int yn)
 {
 	if (!session) return -1;
 
-	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
 	if (r) {
 		r->mute_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
@@ -1065,7 +1066,7 @@ OSC::route_solo (int rid, int yn)
 {
 	if (!session) return -1;
 
-	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
 	if (r) {
 		r->solo_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
@@ -1079,7 +1080,7 @@ OSC::route_recenable (int rid, int yn)
 {
 	if (!session) return -1;
 
-	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
 	if (r) {
 		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (r);
@@ -1096,7 +1097,7 @@ OSC::route_set_gain_abs (int rid, float level)
 {
 	if (!session) return -1;
 
-	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
 	if (r) {
 		r->gain_control()->set_value (level, PBD::Controllable::NoGroup);
@@ -1126,7 +1127,7 @@ OSC::route_set_trim_abs (int rid, float level)
 {
 	if (!session) return -1;
 
-	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
 	if (r) {
 		r->set_trim (level, PBD::Controllable::NoGroup);
@@ -1147,7 +1148,7 @@ OSC::route_set_pan_stereo_position (int rid, float pos)
 {
 	if (!session) return -1;
 
-	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
 	if (r) {
 		boost::shared_ptr<Panner> panner = r->panner();
@@ -1165,7 +1166,7 @@ OSC::route_set_pan_stereo_width (int rid, float pos)
 {
 	if (!session) return -1;
 
-	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
 	if (r) {
 		boost::shared_ptr<Panner> panner = r->panner();
@@ -1185,7 +1186,7 @@ OSC::route_set_send_gain_abs (int rid, int sid, float val)
 		return -1;
 	}
 
-	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
 	if (!r) {
 		return -1;
@@ -1217,7 +1218,7 @@ OSC::route_set_send_gain_dB (int rid, int sid, float val)
 		return -1;
 	}
 
-	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
 	if (!r) {
 		return -1;
@@ -1248,7 +1249,7 @@ OSC::route_plugin_parameter (int rid, int piid, int par, float val)
 	if (!session)
 		return -1;
 
-	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
 	if (!r) {
 		PBD::error << "OSC: Invalid Remote Control ID '" << rid << "'" << endmsg;
@@ -1307,7 +1308,7 @@ OSC::route_plugin_parameter_print (int rid, int piid, int par)
 		return -1;
 	}
 
-	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+	boost::shared_ptr<Route> r = session->get_remote_nth_route (rid);
 
 	if (!r) {
 		return -1;

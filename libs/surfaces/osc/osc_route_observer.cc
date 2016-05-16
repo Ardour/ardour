@@ -82,7 +82,8 @@ OSCRouteObserver::name_changed (const PBD::PropertyChange& what_changed)
 
 	lo_message msg = lo_message_new ();
 
-	lo_message_add_int32 (msg, _route->remote_control_id());
+	/* XXX can only use group part of ID at present */
+	lo_message_add_int32 (msg, _route->presentation_info().group_order());
 	lo_message_add_string (msg, _route->name().c_str());
 
 	lo_send_message (addr, "/route/name", msg);
@@ -94,7 +95,8 @@ OSCRouteObserver::send_change_message (string path, boost::shared_ptr<Controllab
 {
 	lo_message msg = lo_message_new ();
 
-	lo_message_add_int32 (msg, _route->remote_control_id());
+	/* XXX can only use group part of ID at present */
+	lo_message_add_int32 (msg, _route->presentation_info().group_order());
 	lo_message_add_float (msg, (float) controllable->get_value());
 
 	/* XXX thread issues */

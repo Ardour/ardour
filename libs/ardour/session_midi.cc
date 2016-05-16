@@ -335,6 +335,30 @@ Session::mmc_shuttle (MIDI::MachineControl &/*mmc*/, float speed, bool forw)
 	}
 }
 
+boost::shared_ptr<Route>
+Session::get_midi_nth_route_by_id (PresentationInfo::order_t n) const
+{
+	PresentationInfo id (PresentationInfo::Flag (0));
+
+	if (n == 318) {
+		id.set_flags (PresentationInfo::MasterOut);
+	} else if (n == 319) {
+		id.set_flags (PresentationInfo::MonitorOut);
+	} else {
+		id = PresentationInfo (n, PresentationInfo::Route);
+	}
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if ((*i)->presentation_info().match (id)) {
+			return *i;
+		}
+	}
+
+	return boost::shared_ptr<Route>();
+}
+
 void
 Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 {
@@ -342,17 +366,13 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 		return;
 	}
 
-	RouteList::iterator i;
-	boost::shared_ptr<RouteList> r = routes.reader();
+	boost::shared_ptr<Route> r = get_midi_nth_route_by_id (trk);
 
-	for (i = r->begin(); i != r->end(); ++i) {
-		AudioTrack *at;
+	if (r) {
+		boost::shared_ptr<AudioTrack> at;
 
-		if ((at = dynamic_cast<AudioTrack*>((*i).get())) != 0) {
-			if (trk == at->remote_control_id()) {
-				at->rec_enable_control()->set_value (enabled, Controllable::UseGroup);
-				break;
-			}
+		if ((at = boost::dynamic_pointer_cast<AudioTrack> (r))) {
+			at->rec_enable_control()->set_value (enabled, Controllable::UseGroup);
 		}
 	}
 }
@@ -696,4 +716,3 @@ Session::mtc_input_port () const
 {
 	return _midi_ports->mtc_input_port ();
 }
-

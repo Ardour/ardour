@@ -26,7 +26,11 @@
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/signals.h"
+
+#include "ardour/presentation_info.h"
 #include "ardour/session_object.h"
+#include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
 
@@ -46,18 +50,44 @@ class MonitorControl;
  * and behaviour of the object.
  */
 
-class Stripable : public SessionObject {
+class LIBARDOUR_API Stripable : public SessionObject {
    public:
-	Stripable (Session& session, const std::string& name)
-		: SessionObject (session, name) {}
+	Stripable (Session& session, std::string const & name, PresentationInfo const &);
+	virtual ~Stripable () {}
 
 	/* XXX
 	   midi on/off
-	   selected status
-	   visible/hidden
 	 */
 
-	virtual uint32_t remote_control_id () const = 0;
+	bool is_auditioner() const { return _presentation_info.flags() & PresentationInfo::Auditioner; }
+	bool is_master() const { return _presentation_info.flags() & PresentationInfo::MasterOut; }
+	bool is_monitor() const { return _presentation_info.flags() & PresentationInfo::MonitorOut; }
+
+	int set_state (XMLNode const&, int);
+
+	bool is_hidden() const { return _presentation_info.flags() & PresentationInfo::Hidden; }
+	bool is_selected() const { return _presentation_info.flags() & PresentationInfo::Selected; }
+
+	PresentationInfo const & presentation_info () const { return _presentation_info; }
+	PresentationInfo& presentation_info () { return _presentation_info; }
+
+	/* set just the order */
+
+	void  set_presentation_group_order (PresentationInfo::order_t, bool notify_class_listeners = true);
+	void  set_presentation_group_order_explicit (PresentationInfo::order_t);
+
+	/* for things concerned about *this* route's RID */
+
+	PBD::Signal0<void> PresentationInfoChanged;
+
+	/* for things concerned about *any* route's RID changes */
+
+	static PBD::Signal0<void> PresentationInfoChange;
+
+	/***************************************************************
+	 * Pure interface begins here
+	 ***************************************************************/
+
 
 	virtual boost::shared_ptr<PeakMeter>       peak_meter() = 0;
 	virtual boost::shared_ptr<const PeakMeter> peak_meter() const = 0;
@@ -140,6 +170,28 @@ class Stripable : public SessionObject {
 	virtual boost::shared_ptr<AutomationControl> master_send_enable_controllable () const = 0;
 
 	virtual bool muted_by_others_soloing () const = 0;
+
+   protected:
+	PresentationInfo _presentation_info;
+
+	/* set the entire info. This should only be used in cases where the
+	 * derived could not supply the correct Flag and/or order information
+	 * in its constructor.
+	 */
+
+	void set_presentation_info (PresentationInfo id, bool notify_class_listeners = true);
+	void set_presentation_info_explicit (PresentationInfo);
+
+	void add_state (XMLNode&) const;
+
+  private:
+	void set_presentation_info_internal (PresentationInfo id, bool notify_class_listeners = true);
+};
+
+struct PresentationInfoSorter {
+	bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
+		return a->presentation_info() < b->presentation_info();
+	}
 };
 
 

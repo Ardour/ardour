@@ -320,10 +320,8 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	Width _strip_width;
 
-        void sync_order_keys_from_treeview ();
-        void sync_treeview_from_order_keys ();
-        void reset_remote_control_ids ();
-        void reset_order_keys ();
+        void sync_presentation_info_from_treeview ();
+        void sync_treeview_from_presentation_info ();
 
         bool ignore_reorder;
 

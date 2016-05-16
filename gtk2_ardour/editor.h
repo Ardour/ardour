@@ -1088,7 +1088,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void control_step_tracks_down ();
 	void control_view (uint32_t);
 	void control_scroll (float);
-	void control_select (uint32_t rid, Selection::Operation);
+	void control_select (uint16_t rid, Selection::Operation);
 	void control_unselect ();
 	void access_action (std::string,std::string);
 	bool deferred_control_scroll (framepos_t);

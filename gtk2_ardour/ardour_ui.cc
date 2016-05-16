@@ -1818,7 +1818,8 @@ ARDOUR_UI::session_add_mixed_track (
 		const string& name_template,
 		bool strict_io,
 		PluginInfoPtr instrument,
-		Plugin::PresetRecord* pset)
+		Plugin::PresetRecord* pset,
+		ARDOUR::PresentationInfo::order_t order)
 {
 	list<boost::shared_ptr<MidiTrack> > tracks;
 
@@ -1828,7 +1829,7 @@ ARDOUR_UI::session_add_mixed_track (
 	}
 
 	try {
-		tracks = _session->new_midi_track (input, output, instrument, ARDOUR::Normal, route_group, how_many, name_template, pset);
+		tracks = _session->new_midi_track (input, output, instrument, pset, route_group, how_many, name_template, order, ARDOUR::Normal);
 
 		if (tracks.size() != how_many) {
 			error << string_compose(P_("could not create %1 new mixed track", "could not create %1 new mixed tracks", how_many), how_many) << endmsg;
@@ -1854,7 +1855,8 @@ ARDOUR_UI::session_add_midi_bus (
 		const string& name_template,
 		bool strict_io,
 		PluginInfoPtr instrument,
-		Plugin::PresetRecord* pset)
+		Plugin::PresetRecord* pset,
+		ARDOUR::PresentationInfo::order_t order)
 {
 	RouteList routes;
 
@@ -1864,7 +1866,8 @@ ARDOUR_UI::session_add_midi_bus (
 	}
 
 	try {
-		routes = _session->new_midi_route (route_group, how_many, name_template, instrument, pset);
+
+		routes = _session->new_midi_route (route_group, how_many, name_template, instrument, pset, PresentationInfo::MidiBus, order);
 		if (routes.size() != how_many) {
 			error << string_compose(P_("could not create %1 new Midi Bus", "could not create %1 new Midi Busses", how_many), how_many) << endmsg;
 		}
@@ -1890,15 +1893,16 @@ ARDOUR_UI::session_add_midi_route (
 		const string& name_template,
 		bool strict_io,
 		PluginInfoPtr instrument,
-		Plugin::PresetRecord* pset)
+		Plugin::PresetRecord* pset,
+		ARDOUR::PresentationInfo::order_t order)
 {
 	ChanCount one_midi_channel;
 	one_midi_channel.set (DataType::MIDI, 1);
 
 	if (disk) {
-		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, strict_io, instrument, pset);
+		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, strict_io, order, instrument, pset);
 	} else {
-		session_add_midi_bus (route_group, how_many, name_template, strict_io, instrument, pset);
+		session_add_midi_bus (route_group, how_many, name_template, strict_io, order, instrument, pset);
 	}
 }
 
@@ -1911,8 +1915,8 @@ ARDOUR_UI::session_add_audio_route (
 	RouteGroup* route_group,
 	uint32_t how_many,
 	string const & name_template,
-	bool strict_io
-	)
+	bool strict_io,
+	ARDOUR::PresentationInfo::order_t order)
 {
 	list<boost::shared_ptr<AudioTrack> > tracks;
 	RouteList routes;
@@ -1924,7 +1928,7 @@ ARDOUR_UI::session_add_audio_route (
 
 	try {
 		if (track) {
-			tracks = _session->new_audio_track (input_channels, output_channels, mode, route_group, how_many, name_template);
+			tracks = _session->new_audio_track (input_channels, output_channels, route_group, how_many, name_template, order, mode);
 
 			if (tracks.size() != how_many) {
 				error << string_compose (P_("could not create %1 new audio track", "could not create %1 new audio tracks", how_many), how_many)
@@ -1933,7 +1937,7 @@ ARDOUR_UI::session_add_audio_route (
 
 		} else {
 
-			routes = _session->new_audio_route (input_channels, output_channels, route_group, how_many, name_template);
+			routes = _session->new_audio_route (input_channels, output_channels, route_group, how_many, name_template, PresentationInfo::AudioBus, order);
 
 			if (routes.size() != how_many) {
 				error << string_compose (P_("could not create %1 new audio bus", "could not create %1 new audio busses", how_many), how_many)
@@ -2377,7 +2381,7 @@ ARDOUR_UI::transport_forward (int option)
 }
 
 void
-ARDOUR_UI::toggle_record_enable (uint32_t rid)
+ARDOUR_UI::toggle_record_enable (uint16_t rid)
 {
 	if (!_session) {
 		return;
@@ -2385,7 +2389,7 @@ ARDOUR_UI::toggle_record_enable (uint32_t rid)
 
 	boost::shared_ptr<Route> r;
 
-	if ((r = _session->route_by_remote_id (rid)) != 0) {
+	if ((r = _session->get_remote_nth_route (rid)) != 0) {
 
 		boost::shared_ptr<Track> t;
 
@@ -3902,14 +3906,14 @@ ARDOUR_UI::cleanup_peakfiles ()
 	}
 }
 
-void
-ARDOUR_UI::setup_order_hint (AddRouteDialog::InsertAt place)
+PresentationInfo::order_t
+ARDOUR_UI::translate_order (AddRouteDialog::InsertAt place)
 {
-	uint32_t order_hint = UINT32_MAX;
-
 	if (editor->get_selection().tracks.empty()) {
-		return;
+		return PresentationInfo::max_order;
 	}
+
+	PresentationInfo::order_t order_hint = PresentationInfo::max_order;
 
 	/*
 	  we want the new routes to have their order keys set starting from
@@ -3919,42 +3923,21 @@ ARDOUR_UI::setup_order_hint (AddRouteDialog::InsertAt place)
 	if (place == AddRouteDialog::AfterSelection) {
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView*> (editor->get_selection().tracks.back());
 		if (rtav) {
-			order_hint = rtav->route()->order_key();
+			order_hint = rtav->route()->presentation_info().group_order();
 			order_hint++;
 		}
 	} else if (place == AddRouteDialog::BeforeSelection) {
 		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView*> (editor->get_selection().tracks.front());
 		if (rtav) {
-			order_hint = rtav->route()->order_key();
+			order_hint = rtav->route()->presentation_info().group_order();
 		}
 	} else if (place == AddRouteDialog::First) {
 		order_hint = 0;
 	} else {
-		/* leave order_hint at UINT32_MAX */
+		/* leave order_hint at max_order */
 	}
 
-	if (order_hint == UINT32_MAX) {
-		/** AddRouteDialog::Last or selection with first/last not a RouteTimeAxisView
-		 * not setting an order hint will place new routes last.
-		 */
-		return;
-	}
-
-	_session->set_order_hint (order_hint);
-
-	/* create a gap in the existing route order keys to accomodate new routes.*/
-	boost::shared_ptr <RouteList> rd = _session->get_routes();
-	for (RouteList::iterator ri = rd->begin(); ri != rd->end(); ++ri) {
-		boost::shared_ptr<Route> rt (*ri);
-
-		if (rt->is_monitor()) {
-			continue;
-		}
-
-		if (rt->order_key () >= order_hint) {
-			rt->set_order_key (rt->order_key () + add_route_dialog->count());
-		}
-	}
+	return order_hint;
 }
 
 void
@@ -4001,7 +3984,7 @@ ARDOUR_UI::add_route ()
 		return;
 	}
 
-	setup_order_hint(add_route_dialog->insert_at());
+	PresentationInfo::order_t order = translate_order (add_route_dialog->insert_at());
 	string template_path = add_route_dialog->track_template();
 	DisplaySuspender ds;
 
@@ -4033,19 +4016,19 @@ ARDOUR_UI::add_route ()
 
 	switch (add_route_dialog->type_wanted()) {
 	case AddRouteDialog::AudioTrack:
-		session_add_audio_track (input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template, strict_io);
+		session_add_audio_track (input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template, strict_io, order);
 		break;
 	case AddRouteDialog::MidiTrack:
-		session_add_midi_track (route_group, count, name_template, strict_io, instrument);
+		session_add_midi_track (route_group, count, name_template, strict_io, instrument, 0, order);
 		break;
 	case AddRouteDialog::MixedTrack:
-		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, strict_io, instrument, 0);
+		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, strict_io, instrument, 0, order);
 		break;
 	case AddRouteDialog::AudioBus:
-		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template, strict_io);
+		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template, strict_io, order);
 		break;
 	case AddRouteDialog::MidiBus:
-		session_add_midi_bus (route_group, count, name_template, strict_io, instrument, 0);
+		session_add_midi_bus (route_group, count, name_template, strict_io, instrument, 0, order);
 		break;
 	case AddRouteDialog::VCAMaster:
 		session_add_vca (name_template, count);

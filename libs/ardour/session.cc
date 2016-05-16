@@ -92,7 +92,6 @@
 #include "ardour/region_factory.h"
 #include "ardour/route_graph.h"
 #include "ardour/route_group.h"
-#include "ardour/route_sorters.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
@@ -308,7 +307,6 @@ Session::Session (AudioEngine &eng,
 	, _step_editors (0)
 	, _suspend_timecode_transmission (0)
 	,  _speakers (new Speakers)
-	, _order_hint (-1)
 	, ignore_route_processor_changes (false)
 	, midi_clock (0)
 	, _scene_changer (0)
@@ -1149,7 +1147,7 @@ Session::add_monitor_section ()
 		return;
 	}
 
-	boost::shared_ptr<Route> r (new Route (*this, _("Monitor"), Route::MonitorOut, DataType::AUDIO));
+	boost::shared_ptr<Route> r (new Route (*this, _("Monitor"), PresentationInfo::MonitorOut, DataType::AUDIO));
 
 	if (r->init ()) {
 		return;
@@ -1167,7 +1165,7 @@ Session::add_monitor_section ()
 	}
 
 	rl.push_back (r);
-	add_routes (rl, false, false, false);
+	add_routes (rl, false, false, false, 0);
 
 	assert (_monitor_out);
 
@@ -2307,8 +2305,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 #ifndef NDEBUG
 		DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 signal order %2\n",
-								   (*i)->name(), (*i)->order_key ()));
+			DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 presentation order %2\n", (*i)->name(), (*i)->presentation_info().global_order()));
 		}
 #endif
 
@@ -2426,8 +2423,9 @@ Session::default_track_name_pattern (DataType t)
  *  @param instrument plugin info for the instrument to insert pre-fader, if any
  */
 list<boost::shared_ptr<MidiTrack> >
-Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost::shared_ptr<PluginInfo> instrument,
-			 TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template, Plugin::PresetRecord* pset)
+Session::new_midi_track (boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
+                         RouteGroup* route_group, uint32_t how_many, string name_template, PresentationInfo::order_t order, 
+                         TrackMode mode)
 {
 	string track_name;
 	uint32_t track_id = 0;
@@ -2447,7 +2445,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 		boost::shared_ptr<MidiTrack> track;
 
 		try {
-			track.reset (new MidiTrack (*this, track_name, Route::Flag (0), mode));
+			track.reset (new MidiTrack (*this, track_name, mode));
 
 			if (track->init ()) {
 				goto failed;
@@ -2482,14 +2480,8 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 
 			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
 
-			if (Config->get_remote_model() == UserOrdered) {
-				track->set_remote_control_id (next_control_id());
-			}
-
 			new_routes.push_back (track);
 			ret.push_back (track);
-
-			RouteAddedOrRemoved (true); /* EMIT SIGNAL */
 		}
 
 		catch (failed_constructor &err) {
@@ -2510,9 +2502,9 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 	if (!new_routes.empty()) {
 		StateProtector sp (this);
 		if (Profile->get_trx()) {
-			add_routes (new_routes, false, false, false);
+			add_routes (new_routes, false, false, false, order);
 		} else {
-			add_routes (new_routes, true, true, false);
+			add_routes (new_routes, true, true, false, order);
 		}
 
 		if (instrument) {
@@ -2532,7 +2524,8 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 }
 
 RouteList
-Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name_template, boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset)
+Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name_template, boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
+                         PresentationInfo::Flag flag, PresentationInfo::order_t order)
 {
 	string bus_name;
 	uint32_t bus_id = 0;
@@ -2546,9 +2539,9 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 			error << "cannot find name for new midi bus" << endmsg;
 			goto failure;
 		}
-
+		
 		try {
-			boost::shared_ptr<Route> bus (new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO)); // XXX Editor::add_routes is not ready for ARDOUR::DataType::MIDI
+			boost::shared_ptr<Route> bus (new Route (*this, bus_name, flag, DataType::AUDIO)); // XXX Editor::add_routes is not ready for ARDOUR::DataType::MIDI
 
 			if (bus->init ()) {
 				goto failure;
@@ -2578,13 +2571,8 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 			if (route_group) {
 				route_group->add (bus);
 			}
-			if (Config->get_remote_model() == UserOrdered) {
-				bus->set_remote_control_id (next_control_id());
-			}
 
 			ret.push_back (bus);
-			RouteAddedOrRemoved (true); /* EMIT SIGNAL */
-			ARDOUR::GUIIdle ();
 		}
 
 		catch (failed_constructor &err) {
@@ -2604,7 +2592,7 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
   failure:
 	if (!ret.empty()) {
 		StateProtector sp (this);
-		add_routes (ret, false, false, false);
+		add_routes (ret, false, false, false, order);
 
 		if (instrument) {
 			for (RouteList::iterator r = ret.begin(); r != ret.end(); ++r) {
@@ -2931,12 +2919,36 @@ Session::reconnect_mmc_ports(bool inputs)
 
 #endif
 
+void
+Session::ensure_presentation_info_gap (PresentationInfo::order_t first_new_order, uint32_t how_many)
+{
+	if (first_new_order == PresentationInfo::max_order) {
+		/* adding at end, no worries */
+		return;
+	}
+
+	/* create a gap in the existing route order keys to accomodate new routes.*/
+	boost::shared_ptr <RouteList> rd = routes.reader();
+	for (RouteList::iterator ri = rd->begin(); ri != rd->end(); ++ri) {
+		boost::shared_ptr<Route> rt (*ri);
+
+		if (rt->presentation_info().special()) {
+			continue;
+		}
+
+		if (rt->presentation_info().group_order () >= first_new_order) {
+			rt->set_presentation_group_order (rt->presentation_info().group_order () + how_many);
+		}
+	}
+}
+
 /** Caller must not hold process lock
  *  @param name_template string to use for the start of the name, or "" to use "Audio".
  */
 list< boost::shared_ptr<AudioTrack> >
-Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* route_group,
-			  uint32_t how_many, string name_template)
+Session::new_audio_track (int input_channels, int output_channels, RouteGroup* route_group,
+                          uint32_t how_many, string name_template, PresentationInfo::order_t order,
+                          TrackMode mode)
 {
 	string track_name;
 	uint32_t track_id = 0;
@@ -2957,7 +2969,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 		boost::shared_ptr<AudioTrack> track;
 
 		try {
-			track.reset (new AudioTrack (*this, track_name, Route::Flag (0), mode));
+			track.reset (new AudioTrack (*this, track_name, mode));
 
 			if (track->init ()) {
 				goto failed;
@@ -2966,7 +2978,6 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			if (Profile->get_mixbus ()) {
 				track->set_strict_io (true);
 			}
-
 
 			if (ARDOUR::Profile->get_trx ()) {
 				// TRACKS considers it's not a USE CASE, it's
@@ -3013,14 +3024,9 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			track->non_realtime_input_change();
 
 			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
-			if (Config->get_remote_model() == UserOrdered) {
-				track->set_remote_control_id (next_control_id());
-			}
 
 			new_routes.push_back (track);
 			ret.push_back (track);
-
-			RouteAddedOrRemoved (true); /* EMIT SIGNAL */
 		}
 
 		catch (failed_constructor &err) {
@@ -3041,9 +3047,9 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	if (!new_routes.empty()) {
 		StateProtector sp (this);
 		if (Profile->get_trx()) {
-			add_routes (new_routes, false, false, false);
+			add_routes (new_routes, false, false, false, order);
 		} else {
-			add_routes (new_routes, true, true, false);
+			add_routes (new_routes, true, true, false, order);
 		}
 	}
 
@@ -3054,7 +3060,8 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
  *  @param name_template string to use for the start of the name, or "" to use "Bus".
  */
 RouteList
-Session::new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, string name_template)
+Session::new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, string name_template,
+                          PresentationInfo::Flag flags, PresentationInfo::order_t order)
 {
 	string bus_name;
 	uint32_t bus_id = 0;
@@ -3063,6 +3070,8 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Bus");
 
+	ensure_presentation_info_gap (order, how_many);
+
 	while (how_many) {
 		if (!find_route_name (name_template.empty () ? _("Bus") : name_template, ++bus_id, bus_name, use_number)) {
 			error << "cannot find name for new audio bus" << endmsg;
@@ -3070,7 +3079,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 		}
 
 		try {
-			boost::shared_ptr<Route> bus (new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO));
+			boost::shared_ptr<Route> bus (new Route (*this, bus_name, flags, DataType::AUDIO));
 
 			if (bus->init ()) {
 				goto failure;
@@ -3104,19 +3113,10 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 			if (route_group) {
 				route_group->add (bus);
 			}
-			if (Config->get_remote_model() == UserOrdered) {
-				bus->set_remote_control_id (next_control_id());
-			}
 
 			bus->add_internal_return ();
-
 			ret.push_back (bus);
-
-			RouteAddedOrRemoved (true); /* EMIT SIGNAL */
-
-			ARDOUR::GUIIdle ();
 		}
-
 
 		catch (failed_constructor &err) {
 			error << _("Session: could not create new audio route.") << endmsg;
@@ -3136,9 +3136,9 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 	if (!ret.empty()) {
 		StateProtector sp (this);
 		if (Profile->get_trx()) {
-			add_routes (ret, false, false, false);
+			add_routes (ret, false, false, false, order);
 		} else {
-			add_routes (ret, false, true, true); // autoconnect // outputs only
+			add_routes (ret, false, true, true, order); // autoconnect // outputs only
 		}
 	}
 
@@ -3162,7 +3162,6 @@ RouteList
 Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::string& name_base, PlaylistDisposition pd)
 {
 	RouteList ret;
-	uint32_t control_id;
 	uint32_t number = 0;
 	const uint32_t being_added = how_many;
 	/* This will prevent the use of any existing XML-provided PBD::ID
@@ -3170,8 +3169,6 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 	*/
 	Stateful::ForceIDRegeneration force_ids;
 	IO::disable_connecting ();
-
-	control_id = next_control_id ();
 
 	while (how_many) {
 
@@ -3293,9 +3290,6 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 				route->output()->changed (change, this);
 			}
 
-			route->set_remote_control_id (control_id);
-			++control_id;
-
 			boost::shared_ptr<Track> track;
 
 			if ((track = boost::dynamic_pointer_cast<Track> (route))) {
@@ -3312,8 +3306,6 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 			};
 
 			ret.push_back (route);
-
-			RouteAddedOrRemoved (true); /* EMIT SIGNAL */
 		}
 
 		catch (failed_constructor &err) {
@@ -3333,9 +3325,9 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 	if (!ret.empty()) {
 		StateProtector sp (this);
 		if (Profile->get_trx()) {
-			add_routes (ret, false, false, false);
+			add_routes (ret, false, false, false, PresentationInfo::max_order);
 		} else {
-			add_routes (ret, true, true, false);
+			add_routes (ret, true, true, false, PresentationInfo::max_order);
 		}
 		IO::enable_connecting ();
 	}
@@ -3344,11 +3336,11 @@ Session::new_route_from_template (uint32_t how_many, XMLNode& node, const std::s
 }
 
 void
-Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, bool save)
+Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, bool save, PresentationInfo::order_t order)
 {
 	try {
 		PBD::Unwinder<bool> aip (_adding_routes_in_progress, true);
-		add_routes_inner (new_routes, input_auto_connect, output_auto_connect);
+		add_routes_inner (new_routes, input_auto_connect, output_auto_connect, order);
 
 	} catch (...) {
 		error << _("Adding new tracks/busses failed") << endmsg;
@@ -3365,25 +3357,18 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 		save_state (_current_snapshot_name);
 	}
 
-	reassign_track_numbers();
-
 	update_route_record_state ();
 
 	RouteAdded (new_routes); /* EMIT SIGNAL */
 }
 
 void
-Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect)
+Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, PresentationInfo::order_t order)
 {
 	ChanCount existing_inputs;
 	ChanCount existing_outputs;
-	uint32_t order = next_control_id();
-
-
-	if (_order_hint > -1) {
-		order = _order_hint;
-		_order_hint = -1;
-	}
+	uint32_t n_routes;
+	uint32_t added = 0;
 
 	count_existing_track_channels (existing_inputs, existing_outputs);
 
@@ -3391,6 +3376,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> r = writer.get_copy ();
 		r->insert (r->end(), new_routes.begin(), new_routes.end());
+		n_routes = r->size();
 
 		/* if there is no control out and we're not in the middle of loading,
 		 * resort the graph here. if there is a control out, we will resort
@@ -3403,7 +3389,10 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		}
 	}
 
-	for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
+	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("ensure order gap starting at %1 for %2\n", order, new_routes.size()));
+	ensure_presentation_info_gap (order, new_routes.size());
+
+	for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x, ++added) {
 
 		boost::weak_ptr<Route> wpr (*x);
 		boost::shared_ptr<Route> r (*x);
@@ -3436,26 +3425,39 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 			}
 		}
 
+		if (!r->presentation_info().special()) {
+
+			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("checking PI state for %1\n", r->name()));
+
+			/* presentation info order may already have been set from XML */
+
+			if (r->presentation_info().unordered()) {
+
+				if (order == PresentationInfo::max_order) {
+					/* just add to the end */
+					r->set_presentation_group_order_explicit (n_routes + added);
+					DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order not set, set to NR %1 + %2 = %3\n", n_routes, added, n_routes + added));
+				} else {
+					r->set_presentation_group_order_explicit (order + added);
+					DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order not set, set to %1 + %2 = %3\n", order, added, order + added));
+				}
+			} else {
+				DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("group order already set to %1\n", r->presentation_info().group_order()));
+			}
+		}
+
+		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("added route %1, group order %2 global order %3 type %4 (summary: %5)\n",
+		                                               r->name(),
+		                                               r->presentation_info().group_order(),
+		                                               r->presentation_info().global_order(),
+		                                               enum_2_string (r->presentation_info().flags()),
+		                                               r->presentation_info().to_string()));
+
+
 		if (input_auto_connect || output_auto_connect) {
 			auto_connect_route (r, input_auto_connect, ChanCount (), ChanCount (), existing_inputs, existing_outputs);
 			existing_inputs += r->n_inputs();
 			existing_outputs += r->n_outputs();
-		}
-
-		/* order keys are a GUI responsibility but we need to set up
-			 reasonable defaults because they also affect the remote control
-			 ID in most situations.
-			 */
-
-		if (!r->has_order_key ()) {
-			if (r->is_auditioner()) {
-				/* use an arbitrarily high value */
-				r->set_order_key (UINT_MAX);
-			} else {
-				DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("while adding, set %1 to order key %2\n", r->name(), order));
-				r->set_order_key (order);
-				order++;
-			}
 		}
 
 		ARDOUR::GUIIdle ();
@@ -3631,7 +3633,6 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	} // end of RCU Writer scope
 
 	update_route_solo_state ();
-	RouteAddedOrRemoved (false); /* EMIT SIGNAL */
 	update_latency_compensation ();
 	set_dirty();
 
@@ -3668,7 +3669,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 		return;
 	}
 
-	Route::RemoteControlIDChange(); /* EMIT SIGNAL */
+	Stripable::PresentationInfoChange(); /* EMIT SIGNAL */
 
 	/* save the new state of the world */
 
@@ -3676,7 +3677,6 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 		save_history (_current_snapshot_name);
 	}
 
-	reassign_track_numbers();
 	update_route_record_state ();
 }
 
@@ -4028,7 +4028,7 @@ Session::get_routes_with_internal_returns() const
 }
 
 bool
-Session::io_name_is_legal (const std::string& name)
+Session::io_name_is_legal (const std::string& name) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
@@ -4137,7 +4137,7 @@ Session::routes_using_input_from (const string& str, RouteList& rl)
 }
 
 boost::shared_ptr<Route>
-Session::route_by_name (string name)
+Session::route_by_name (string name) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
@@ -4151,7 +4151,7 @@ Session::route_by_name (string name)
 }
 
 boost::shared_ptr<Route>
-Session::route_by_id (PBD::ID id)
+Session::route_by_id (PBD::ID id) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
@@ -4180,7 +4180,7 @@ Session::processor_by_id (PBD::ID id) const
 }
 
 boost::shared_ptr<Track>
-Session::track_by_diskstream_id (PBD::ID id)
+Session::track_by_diskstream_id (PBD::ID id) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
@@ -4195,37 +4195,34 @@ Session::track_by_diskstream_id (PBD::ID id)
 }
 
 boost::shared_ptr<Route>
-Session::route_by_remote_id (uint32_t id)
+Session::get_remote_nth_route (uint16_t n) const
 {
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->remote_control_id() == id) {
-			return *i;
-		}
-	}
-
-	return boost::shared_ptr<Route> ((Route*) 0);
+	return boost::dynamic_pointer_cast<Route> (get_remote_nth_stripable (n, PresentationInfo::Route));
 }
-
 
 boost::shared_ptr<Stripable>
-Session::stripable_by_remote_id (uint32_t id)
+Session::get_remote_nth_stripable (uint16_t n, PresentationInfo::Flag flags) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
+	vector<boost::shared_ptr<Route> > v;
+
+	if (n > r->size()) {
+		return boost::shared_ptr<Route> ();
+	}
+
+	v.assign (r->size(), boost::shared_ptr<Route>());
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->remote_control_id() == id) {
-			return *i;
+		if ((*i)->presentation_info().flag_match (flags)) {
+			v[(*i)->presentation_info().group_order()] = (*i);
 		}
 	}
 
-	return boost::shared_ptr<Route> ((Route*) 0);
+	return v[n];
 }
 
-
 boost::shared_ptr<Route>
-Session::route_by_selected_count (uint32_t id)
+Session::route_by_selected_count (uint32_t id) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
@@ -4236,6 +4233,19 @@ Session::route_by_selected_count (uint32_t id)
 	return boost::shared_ptr<Route> ((Route*) 0);
 }
 
+struct PresentationOrderSorter {
+	bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
+		if (a->presentation_info().special() && !b->presentation_info().special()) {
+			/* a is not ordered, b is; b comes before a */
+			return false;
+		} else if (b->presentation_info().unordered() && !a->presentation_info().unordered()) {
+			/* b is not ordered, a is; a comes before b */
+			return true;
+		} else {
+			return a->presentation_info().global_order() < b->presentation_info().global_order();
+		}
+	}
+};
 
 void
 Session::reassign_track_numbers ()
@@ -4243,7 +4253,7 @@ Session::reassign_track_numbers ()
 	int64_t tn = 0;
 	int64_t bn = 0;
 	RouteList r (*(routes.reader ()));
-	SignalOrderRouteSorter sorter;
+	PresentationOrderSorter sorter;
 	r.sort (sorter);
 
 	StateProtector sp (this);
@@ -5319,7 +5329,7 @@ Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::
 	if (b->is_monitor()) {
 		return false;
 	}
-	return a->order_key () < b->order_key ();
+	return a->presentation_info() < b->presentation_info();
 }
 
 bool
@@ -6659,31 +6669,8 @@ Session::session_name_is_legal (const string& path)
 	return 0;
 }
 
-uint32_t
-Session::next_control_id () const
-{
-	int subtract = 0;
-
-	/* the monitor bus remote ID is in a different
-	 * "namespace" than regular routes. its existence doesn't
-	 * affect normal (low) numbered routes.
-	 */
-
-	if (_monitor_out) {
-		subtract++;
-	}
-
-	/* the same about masterbus in Waves Tracks */
-
-	if (Profile->get_trx() && _master_out) {
-		subtract++;
-	}
-
-	return nroutes() - subtract;
-}
-
 void
-Session::notify_remote_id_change ()
+Session::notify_presentation_info_change ()
 {
 	if (deletion_in_progress()) {
 		return;
@@ -6691,41 +6678,21 @@ Session::notify_remote_id_change ()
 
 	switch (Config->get_remote_model()) {
 	case MixerOrdered:
-		Route::RemoteControlIDChange (); /* EMIT SIGNAL */
+		Stripable::PresentationInfoChange (); /* EMIT SIGNAL */
 		break;
 	default:
 		break;
 	}
 
-#ifdef USE_TRACKS_CODE_FEATURES
-		/* Waves Tracks: for Waves Tracks session it's required to reconnect their IOs
-		 * if track order has been changed by user
-		 */
-		reconnect_existing_routes(true, true);
-#endif
-
-}
-
-void
-Session::sync_order_keys ()
-{
-	if (deletion_in_progress()) {
-		return;
-	}
-
-	/* tell everyone that something has happened to the sort keys
-	   and let them sync up with the change(s)
-	   this will give objects that manage the sort order keys the
-	   opportunity to keep them in sync if they wish to.
-	*/
-
-	DEBUG_TRACE (DEBUG::OrderKeys, "Sync Order Keys.\n");
-
 	reassign_track_numbers();
 
-	Route::SyncOrderKeys (); /* EMIT SIGNAL */
+#ifdef USE_TRACKS_CODE_FEATURES
+	/* Waves Tracks: for Waves Tracks session it's required to reconnect their IOs
+	 * if track order has been changed by user
+	 */
+	reconnect_existing_routes(true, true);
+#endif
 
-	DEBUG_TRACE (DEBUG::OrderKeys, "\tsync done\n");
 }
 
 bool

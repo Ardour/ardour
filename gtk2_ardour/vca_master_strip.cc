@@ -16,6 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <gtkmm/stock.h>
+
 #include "pbd/convert.h"
 
 #include "ardour/rc_configuration.h"
@@ -26,8 +28,9 @@
 #include "gtkmm2ext/doi.h"
 #include "gtkmm2ext/keyboard.h"
 
-#include "gui_thread.h"
+#include "ardour_dialog.h"
 #include "floating_text_entry.h"
+#include "gui_thread.h"
 #include "tooltips.h"
 #include "vca_master_strip.h"
 
@@ -47,6 +50,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	, _vca (v)
 	, gain_meter (s, 250)
 	, context_menu (0)
+	, delete_dialog (0)
 {
 	gain_meter.set_controls (boost::shared_ptr<Route>(),
 	                         boost::shared_ptr<PeakMeter>(),
@@ -150,6 +154,9 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 
 VCAMasterStrip::~VCAMasterStrip ()
 {
+	delete delete_dialog;
+	delete context_menu;
+
 	CatchDeletion (this); /* EMIT SIGNAL */
 }
 
@@ -193,10 +200,31 @@ VCAMasterStrip::name() const
 void
 VCAMasterStrip::hide_clicked ()
 {
-	/* get everything to deassign. This will also delete ourselves (when
-	 * idle) and that in turn will remove us from the Mixer GUI
-	 */
-	_session->vca_manager().remove_vca (_vca);
+	if (!delete_dialog) {
+		delete_dialog = new MessageDialog (_("Removing a Master will deassign all slaves. Remove it anyway?"),
+		                                   true, MESSAGE_WARNING, BUTTONS_YES_NO, true);
+		delete_dialog->signal_response().connect (sigc::mem_fun (*this, &VCAMasterStrip::hide_confirmation));
+	}
+
+	delete_dialog->set_position (Gtk::WIN_POS_MOUSE);
+	delete_dialog->present ();
+}
+
+void
+VCAMasterStrip::hide_confirmation (int response)
+{
+	delete_dialog->hide ();
+
+	switch (response) {
+	case RESPONSE_OK:
+		/* get everything to deassign. This will also delete ourselves (when
+		 * idle) and that in turn will remove us from the Mixer GUI
+		 */
+		_session->vca_manager().remove_vca (_vca);
+		break;
+	default:
+		break;
+	}
 }
 
 bool

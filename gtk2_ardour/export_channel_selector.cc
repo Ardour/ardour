@@ -18,8 +18,6 @@
 
 */
 
-#include "export_channel_selector.h"
-
 #include <algorithm>
 
 #include "pbd/convert.h"
@@ -33,18 +31,15 @@
 
 #include <sstream>
 
+#include "export_channel_selector.h"
+#include "route_sorter.h"
+
 #include "i18n.h"
 
 using namespace std;
 using namespace Glib;
 using namespace ARDOUR;
 using namespace PBD;
-
-struct EditorOrderRouteSorter {
-    bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-	    return a->order_key () < b->order_key ();
-    }
-};
 
 PortExportChannelSelector::PortExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager) :
   ExportChannelSelector (session, manager),
@@ -126,7 +121,7 @@ PortExportChannelSelector::fill_route_list ()
 		channel_view.add_route (master);
 	}
 
-	routes.sort (EditorOrderRouteSorter ());
+	routes.sort (PresentationInfoSorter ());
 
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		if ((*it)->is_master () || (*it)->is_monitor ()) {
@@ -700,7 +695,7 @@ TrackExportChannelSelector::add_track (boost::shared_ptr<Route> route)
 	row[track_cols.selected] = false;
 	row[track_cols.label] = route->name();
 	row[track_cols.route] = route;
-	row[track_cols.order_key] = route->order_key();
+	row[track_cols.order_key] = route->presentation_info().global_order();
 }
 
 void

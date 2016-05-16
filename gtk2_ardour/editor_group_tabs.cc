@@ -192,8 +192,3 @@ EditorGroupTabs::selected_routes () const
 	return rl;
 }
 
-void
-EditorGroupTabs::sync_order_keys ()
-{
-	_editor->_routes->sync_order_keys_from_treeview ();
-}

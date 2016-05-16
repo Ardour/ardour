@@ -50,8 +50,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
-	: Track (sess, name, flag, mode)
+AudioTrack::AudioTrack (Session& sess, string name, TrackMode mode)
+	: Track (sess, name, PresentationInfo::AudioTrack, mode)
 {
 }
 

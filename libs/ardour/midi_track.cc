@@ -67,8 +67,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
-	: Track (sess, name, flag, mode, DataType::MIDI)
+MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
+	: Track (sess, name, PresentationInfo::MidiTrack, mode, DataType::MIDI)
 	, _immediate_events(1024) // FIXME: size?
 	, _step_edit_ring_buffer(64) // FIXME: size?
 	, _note_mode(Sustained)

@@ -32,6 +32,7 @@
 #include "ardour/location.h"
 #include "ardour/midi_model.h"
 #include "ardour/mute_master.h"
+#include "ardour/presentation_info.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
 #include "ardour/tempo.h"
@@ -99,7 +100,6 @@ setup_enum_writer ()
 	AutoConnectOption _AutoConnectOption;
 	TracksAutoNamingRule _TracksAutoNamingRule;
 	Session::StateOfTheState _Session_StateOfTheState;
-	Route::Flag _Route_Flag;
 	Source::Flag _Source_Flag;
 	Diskstream::Flag _Diskstream_Flag;
 	Location::Flags _Location_Flags;
@@ -134,6 +134,7 @@ setup_enum_writer ()
 	Evoral::OverlapType _OverlapType;
         BufferingPreset _BufferingPreset;
 	AutoReturnTarget _AutoReturnTarget;
+	PresentationInfo::Flag _PresentationInfo_Flag;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -491,11 +492,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session, pullup_Minus4Minus1);
 	REGISTER (_Session_PullupFormat);
 
-	REGISTER_CLASS_ENUM (Route, Auditioner);
-	REGISTER_CLASS_ENUM (Route, MasterOut);
-	REGISTER_CLASS_ENUM (Route, MonitorOut);
-	REGISTER_BITS (_Route_Flag);
-
 	REGISTER_CLASS_ENUM (Source, Writable);
 	REGISTER_CLASS_ENUM (Source, CanRename);
 	REGISTER_CLASS_ENUM (Source, Broadcast);
@@ -709,6 +705,20 @@ setup_enum_writer ()
 	REGISTER_ENUM (Loop);
 	REGISTER_ENUM (RegionSelectionStart);
 	REGISTER_BITS (_AutoReturnTarget);
+
+	REGISTER_CLASS_ENUM (PresentationInfo, AudioTrack);
+	REGISTER_CLASS_ENUM (PresentationInfo, MidiTrack);
+	REGISTER_CLASS_ENUM (PresentationInfo, AudioBus);
+	REGISTER_CLASS_ENUM (PresentationInfo, MidiBus);
+	REGISTER_CLASS_ENUM (PresentationInfo, MasterOut);
+	REGISTER_CLASS_ENUM (PresentationInfo, MonitorOut);
+	REGISTER_CLASS_ENUM (PresentationInfo, VCA);
+	REGISTER_CLASS_ENUM (PresentationInfo, Bus);
+	REGISTER_CLASS_ENUM (PresentationInfo, Track);
+	REGISTER_CLASS_ENUM (PresentationInfo, Route);
+	REGISTER_CLASS_ENUM (PresentationInfo, Selected);
+	REGISTER_CLASS_ENUM (PresentationInfo, Hidden);
+	REGISTER (_PresentationInfo_Flag);
 }
 
 } /* namespace ARDOUR */

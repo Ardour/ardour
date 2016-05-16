@@ -64,11 +64,13 @@
 #include "ardour/luascripting.h"
 #include "ardour/location.h"
 #include "ardour/monitor_processor.h"
+#include "ardour/presentation_info.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session_configuration.h"
 #include "ardour/session_event.h"
 #include "ardour/interpolation.h"
 #include "ardour/plugin.h"
+#include "ardour/presentation_info.h"
 #include "ardour/route.h"
 #include "ardour/route_graph.h"
 
@@ -215,8 +217,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	PBD::Signal0<void> DirtyChanged;
 
-	PBD::Signal1<void, bool> RouteAddedOrRemoved;
-
 	const SessionDirectory& session_directory () const { return *(_session_dir.get()); }
 
 	static PBD::Signal1<void,std::string> Dialog;
@@ -293,22 +293,20 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
 
-	void set_order_hint (int32_t order_hint) {_order_hint = order_hint;};
-	void notify_remote_id_change ();
-	void sync_order_keys ();
+	void notify_presentation_info_change ();
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&), bool sort = true);
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>), bool sort = true);
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg, bool sort = true);
 
 	static char session_name_is_legal (const std::string&);
-	bool io_name_is_legal (const std::string&);
-	boost::shared_ptr<Route> route_by_name (std::string);
-	boost::shared_ptr<Route> route_by_id (PBD::ID);
-	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
-	boost::shared_ptr<Stripable> stripable_by_remote_id (uint32_t id);
-	boost::shared_ptr<Route> route_by_selected_count (uint32_t cnt);
-	boost::shared_ptr<Track> track_by_diskstream_id (PBD::ID);
+	bool io_name_is_legal (const std::string&) const;
+	boost::shared_ptr<Route> route_by_name (std::string) const;
+	boost::shared_ptr<Route> route_by_id (PBD::ID) const;
+	boost::shared_ptr<Stripable> get_remote_nth_stripable (uint16_t n, PresentationInfo::Flag) const;
+	boost::shared_ptr<Route> get_remote_nth_route (uint16_t n) const;
+	boost::shared_ptr<Route> route_by_selected_count (uint32_t cnt) const;
+	boost::shared_ptr<Track> track_by_diskstream_id (PBD::ID) const;
 	void routes_using_input_from (const std::string& str, RouteList& rl);
 
 	bool route_name_unique (std::string) const;
@@ -595,29 +593,24 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (
 		int input_channels,
 		int output_channels,
-		TrackMode mode = Normal,
-		RouteGroup* route_group = 0,
-		uint32_t how_many = 1,
-		std::string name_template = ""
-		);
-
-	RouteList new_audio_route (
-		int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template = ""
+		RouteGroup* route_group,
+		uint32_t how_many,
+		std::string name_template,
+		PresentationInfo::order_t order,
+		TrackMode mode = Normal
 		);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
 		const ChanCount& input, const ChanCount& output,
-		boost::shared_ptr<PluginInfo> instrument = boost::shared_ptr<PluginInfo>(),
-		TrackMode mode = Normal,
-		RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = "",
-		Plugin::PresetRecord* pset = 0
+		boost::shared_ptr<PluginInfo> instrument,
+		Plugin::PresetRecord* pset = 0,
+		RouteGroup* route_group, uint32_t how_many, std::string name_template,
+		PresentationInfo::order_t,
+		TrackMode mode = Normal
 		);
 
-	RouteList new_midi_route (RouteGroup* route_group,
-			uint32_t how_many,
-			std::string name_template = "",
-			boost::shared_ptr<PluginInfo> instrument = boost::shared_ptr<PluginInfo>(),
-			Plugin::PresetRecord* pset = 0);
+	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template, PresentationInfo::Flag, PresentationInfo::order_t);
+	RouteList new_midi_route (RouteGroup* route_group, uint32_t how_many, std::string name_template, boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord*, PresentationInfo::Flag, PresentationInfo::order_t);
 
 	void remove_routes (boost::shared_ptr<RouteList>);
 	void remove_route (boost::shared_ptr<Route>);
@@ -1658,8 +1651,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	SerializedRCUManager<RouteList>  routes;
 
-	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, bool save);
-	void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect);
+	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, bool save, PresentationInfo::order_t);
+	void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect, PresentationInfo::order_t);
 	bool _adding_routes_in_progress;
 	bool _reconnecting_routes_in_progress;
 	bool _route_deletion_in_progress;
@@ -1976,8 +1969,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	*/
 	GraphEdges _current_route_graph;
 
-	uint32_t next_control_id () const;
-	int32_t _order_hint;
+	void ensure_presentation_info_gap (PresentationInfo::order_t, uint32_t gap_size);
 	bool ignore_route_processor_changes;
 
 	MidiClockTicker* midi_clock;
@@ -2005,6 +1997,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	std::string _template_state_dir;
 
 	VCAManager* _vca_manager;
+
+	boost::shared_ptr<Route> get_midi_nth_route_by_id (PresentationInfo::order_t n) const;
 };
 
 

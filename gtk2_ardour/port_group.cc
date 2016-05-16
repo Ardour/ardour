@@ -316,7 +316,7 @@ struct RouteIOs {
 class RouteIOsComparator {
 public:
 	bool operator() (RouteIOs const & a, RouteIOs const & b) {
-		return a.route->order_key () < b.route->order_key ();
+		return a.route->presentation_info ().group_order() < b.route->presentation_info().group_order();
 	}
 };
 

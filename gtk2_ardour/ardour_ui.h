@@ -281,9 +281,10 @@ public:
 		ARDOUR::RouteGroup* route_group,
 		uint32_t how_many,
 		std::string const & name_template,
-		bool strict_io
+		bool strict_io,
+		ARDOUR::PresentationInfo::order_t order
 		) {
-		session_add_audio_route (true, input_channels, output_channels, mode, route_group, how_many, name_template, strict_io);
+		session_add_audio_route (true, input_channels, output_channels, mode, route_group, how_many, name_template, strict_io, order);
 	}
 
 	void session_add_audio_bus (
@@ -292,9 +293,10 @@ public:
 			ARDOUR::RouteGroup* route_group,
 			uint32_t how_many,
 			std::string const & name_template,
-			bool strict_io
+			bool strict_io,
+			ARDOUR::PresentationInfo::order_t order
 			) {
-		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal, route_group, how_many, name_template, strict_io);
+		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal, route_group, how_many, name_template, strict_io, order);
 	}
 
 	void session_add_midi_track (
@@ -302,15 +304,20 @@ public:
 			uint32_t how_many,
 			std::string const & name_template,
 			bool strict_io,
+			ARDOUR::PresentationInfo::order_t order,
 			ARDOUR::PluginInfoPtr instrument,
 			ARDOUR::Plugin::PresetRecord* preset = NULL) {
-		session_add_midi_route (true, route_group, how_many, name_template, strict_io, instrument, preset);
+		session_add_midi_route (true, route_group, how_many, name_template, strict_io, order, instrument, preset);
 	}
 
-	void session_add_mixed_track (const ARDOUR::ChanCount&, const ARDOUR::ChanCount&, ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*);
-	void session_add_midi_bus (ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*);
-	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool);
-	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*);
+	void session_add_mixed_track (const ARDOUR::ChanCount&, const ARDOUR::ChanCount&, ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr,
+	                              ARDOUR::PresentationInfo::order_t order);
+	void session_add_midi_bus (ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr,
+	                           ARDOUR::PresentationInfo::order_t order);
+	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool,
+	                              ARDOUR::PresentationInfo::order_t order);
+	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool, ARDOUR::PresentationInfo::order_t order,
+	                             ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*);
 
 	void display_insufficient_ports_message ();
 
@@ -401,7 +408,7 @@ private:
 	void button_change_tabbable_visibility (Gtkmm2ext::Tabbable*);
 	void key_change_tabbable_visibility (Gtkmm2ext::Tabbable*);
 	void toggle_editor_and_mixer ();
-	
+
 	void tabbable_state_change (Gtkmm2ext::Tabbable&);
 
 	void toggle_meterbridge ();
@@ -664,7 +671,7 @@ private:
 	bool save_as_progress_update (float fraction, int64_t cnt, int64_t total, Gtk::Label* label, Gtk::ProgressBar* bar);
 	void save_session_as ();
 	void rename_session ();
-	void setup_order_hint (AddRouteDialog::InsertAt);
+	ARDOUR::PresentationInfo::order_t translate_order (AddRouteDialog::InsertAt);
 
 	int         create_mixer ();
 	int         create_editor ();
@@ -720,7 +727,7 @@ private:
 
 	void install_actions ();
 
-	void toggle_record_enable (uint32_t);
+	void toggle_record_enable (uint16_t);
 
 	uint32_t rec_enabled_streams;
 	void count_recenabled_streams (ARDOUR::Route&);

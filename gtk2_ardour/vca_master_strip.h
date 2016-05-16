@@ -68,6 +68,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	ArdourButton assign_button;
 	Gtk::Menu*   context_menu;
 	PBD::ScopedConnectionList vca_connections;
+	Gtk::MessageDialog* delete_dialog;
 
 	void hide_clicked();
 	bool width_button_pressed (GdkEventButton *);
@@ -87,6 +88,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void vca_property_changed (PBD::PropertyChange const & what_changed);
 	void update_vca_name ();
 	void build_context_menu ();
+	void hide_confirmation (int);
 	void self_delete ();
 };
 

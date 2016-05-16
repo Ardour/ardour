@@ -40,7 +40,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, DataType default_type)
+Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode mode, DataType default_type)
 	: Route (sess, name, flag, default_type)
         , _saved_meter_point (_meter_point)
         , _mode (mode)
@@ -75,7 +75,6 @@ Track::init ()
 	_monitoring_control.reset (new MonitorControl (_session, X_("monitoring"), *this));
 	add_control (_monitoring_control);
 
-	track_number_changed.connect_same_thread (*this, boost::bind (&Track::resync_track_name, this));
 	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
 
         _monitoring_control->Changed.connect_same_thread (*this, boost::bind (&Track::monitoring_changed, this, _1, _2));

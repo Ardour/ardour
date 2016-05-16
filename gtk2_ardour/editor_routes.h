@@ -61,7 +61,7 @@ public:
 	std::list<TimeAxisView*> views () const;
 	void hide_all_tracks (bool);
 	void clear ();
-	void sync_order_keys_from_treeview ();
+	void sync_presentation_info_from_treeview ();
 	void reset_remote_control_ids ();
 
 private:
@@ -76,7 +76,7 @@ private:
 	void on_tv_solo_safe_toggled (std::string const &);
 	void build_menu ();
 	void show_menu ();
-	void sync_treeview_from_order_keys ();
+	void sync_treeview_from_presentation_info ();
 	void row_deleted (Gtk::TreeModel::Path const &);
 	void visible_changed (std::string const &);
 	void active_changed (std::string const &);

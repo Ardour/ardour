@@ -40,7 +40,6 @@
 
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
-#include "ardour/route_sorters.h"
 
 #include "meterbridge.h"
 
@@ -124,7 +123,6 @@ Meterbridge::Meterbridge ()
 
 	signal_delete_event().connect (sigc::mem_fun (*this, &Meterbridge::hide_window));
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
-	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Meterbridge::sync_order_keys, this), gui_context());
 	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Meterbridge::remove_strip, this, _1), gui_context());
 	MeterStrip::MetricChanged.connect (*this, invalidator (*this), boost::bind(&Meterbridge::resync_order, this), gui_context());
 	MeterStrip::ConfigurationChanged.connect (*this, invalidator (*this), boost::bind(&Meterbridge::queue_resize, this), gui_context());
@@ -400,6 +398,20 @@ Meterbridge::on_scroll()
 	metrics_right.set_metric_mode(mm_right, mt_right);
 }
 
+struct PresentationInfoRouteSorter
+{
+	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
+		if (a->is_master()) {
+			/* master before everything else */
+			return true;
+		} else if (b->is_master()) {
+			/* everything else before b */
+			return false;
+		}
+		return a->presentation_info() < b->presentation_info();
+	}
+};
+
 void
 Meterbridge::set_session (Session* s)
 {
@@ -422,7 +434,7 @@ Meterbridge::set_session (Session* s)
 	_show_master = _session->config.get_show_master_on_meterbridge();
 	_show_midi = _session->config.get_show_midi_on_meterbridge();
 
-	ARDOUR::SignalOrderRouteSorter sorter;
+	PresentationInfoRouteSorter sorter;
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
 
 	RouteList copy(*routes);

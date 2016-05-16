@@ -28,6 +28,7 @@
 #include "pbd/unwind.h"
 
 #include "ardour/debug.h"
+#include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -313,9 +314,8 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	_display.set_enable_search (false);
 
-	Route::SyncOrderKeys.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::sync_treeview_from_order_keys, this), gui_context());
 	Route::PluginSetup.connect_same_thread (*this, boost::bind (&EditorRoutes::plugin_setup, this, _1, _2, _3));
-
+	Stripable::PresentationInfoChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::sync_treeview_from_presentation_info, this), gui_context());
 }
 
 bool
@@ -623,27 +623,28 @@ EditorRoutes::row_deleted (Gtk::TreeModel::Path const &)
 	 * when a route is actually removed. we don't differentiate between
 	 * the two cases.
 	 *
-	 * note that the sync_orders_keys() step may not actually change any
-	 * RID's (e.g. the last track may be removed, so all other tracks keep
-	 * the same RID), which means that no redisplay would happen. so we
-	 * have to force a redisplay.
+	 * note that the sync_presentation_info_from_treeview() step may not
+	 * actually change any presentation info (e.g. the last track may be
+	 * removed, so all other tracks keep the same presentation info), which
+	 * means that no redisplay would happen. so we have to force a
+	 * redisplay.
 	 */
 
 	DEBUG_TRACE (DEBUG::OrderKeys, "editor routes treeview row deleted\n");
 
 	DisplaySuspender ds;
-	sync_order_keys_from_treeview ();
+	sync_presentation_info_from_treeview ();
 }
 
 void
 EditorRoutes::reordered (TreeModel::Path const &, TreeModel::iterator const &, int* /*what*/)
 {
-	/* reordering implies that RID's will change, so sync_order_keys() will
-	   cause a redisplay.
+	/* reordering implies that RID's will change, so
+	   sync_presentation_info_from_treeview() will cause a redisplay.
 	*/
 
 	DEBUG_TRACE (DEBUG::OrderKeys, "editor routes treeview reordered\n");
-	sync_order_keys_from_treeview ();
+	sync_presentation_info_from_treeview ();
 }
 
 void
@@ -691,7 +692,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 	for (Gtk::TreeModel::Children::iterator it = _model->children().begin(); it != _model->children().end(); ++it) {
 		boost::shared_ptr<Route> r = (*it)[_columns.route];
 
-		if (r->order_key() == (routes.front()->route()->order_key() + routes.size())) {
+		if (r->presentation_info().group_order() == (routes.front()->route()->presentation_info().group_order() + routes.size())) {
 			insert_iter = it;
 			break;
 		}
@@ -767,7 +768,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 	/* now update route order keys from the treeview/track display order */
 	if (!from_scratch) {
-		sync_order_keys_from_treeview ();
+		sync_presentation_info_from_treeview ();
 	}
 }
 
@@ -862,7 +863,7 @@ EditorRoutes::update_visibility ()
 	/* force route order keys catch up with visibility changes
 	 */
 
-	sync_order_keys_from_treeview ();
+	sync_presentation_info_from_treeview ();
 }
 
 void
@@ -905,60 +906,10 @@ EditorRoutes::reset_remote_control_ids ()
 		return;
 	}
 
-	TreeModel::Children rows = _model->children();
-
-	if (rows.empty()) {
-		return;
-	}
-
-
-	DEBUG_TRACE (DEBUG::OrderKeys, "editor reset remote control ids\n");
-
-	TreeModel::Children::iterator ri;
-	bool rid_change = false;
-	uint32_t rid = 1;
-	uint32_t invisible_key = UINT32_MAX;
-
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-
-		/* skip two special values */
-
-		if (rid == Route::MasterBusRemoteControlID) {
-			rid++;
-		}
-
-		if (rid == Route::MonitorBusRemoteControlID) {
-			rid++;
-		}
-
-		boost::shared_ptr<Route> route = (*ri)[_columns.route];
-		bool visible = (*ri)[_columns.visible];
-
-		if (!route->is_master() && !route->is_monitor()) {
-
-			uint32_t new_rid = (visible ? rid : invisible_key--);
-
-			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_explicit (new_rid);
-				rid_change = true;
-			}
-
-			if (visible) {
-				rid++;
-			}
-
-		}
-	}
-
-	if (rid_change) {
-		/* tell the world that we changed the remote control IDs */
-		_session->notify_remote_id_change ();
-	}
+	sync_presentation_info_from_treeview ();
 }
-
-
 void
-EditorRoutes::sync_order_keys_from_treeview ()
+EditorRoutes::sync_presentation_info_from_treeview ()
 {
 	if (_ignore_reorder || !_session || _session->deletion_in_progress()) {
 		return;
@@ -970,60 +921,46 @@ EditorRoutes::sync_order_keys_from_treeview ()
 		return;
 	}
 
-
 	DEBUG_TRACE (DEBUG::OrderKeys, "editor sync order keys from treeview\n");
 
 	TreeModel::Children::iterator ri;
-	bool changed = false;
-	bool rid_change = false;
-	uint32_t order = 0;
-	uint32_t rid = 1;
-	uint32_t invisible_key = UINT32_MAX;
+	bool change = false;
+	PresentationInfo::order_t order = 0;
+
+	/* hmm, problem ... editor doesn't represent all Stripables... we can't
+	   reset the whole presentation order from here.
+	*/
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
 		bool visible = (*ri)[_columns.visible];
 
-		uint32_t old_key = route->order_key ();
-
-		if (order != old_key) {
-			route->set_order_key (order);
-
-			changed = true;
+		if (route->presentation_info().special ()) {
+			continue;
 		}
 
-		if ((Config->get_remote_model() == MixerOrdered) && !route->is_master() && !route->is_monitor()) {
+		if (!visible) {
+			route->presentation_info().set_flag (PresentationInfo::Hidden);
+		} else {
+			route->presentation_info().unset_flag (PresentationInfo::Hidden);
+		}
 
-			uint32_t new_rid = (visible ? rid : invisible_key--);
-
-			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_explicit (new_rid);
-				rid_change = true;
-			}
-
-			if (visible) {
-				rid++;
-			}
-
+		if (order != route->presentation_info().group_order()) {
+			route->set_presentation_group_order_explicit (order);
+			change = true;
 		}
 
 		++order;
 	}
 
-	if (changed) {
-		/* tell the world that we changed the editor sort keys */
-		_session->sync_order_keys ();
-	}
-
-	if (rid_change) {
-		/* tell the world that we changed the remote control IDs */
-		_session->notify_remote_id_change ();
+	if (change) {
+		Stripable::PresentationInfoChange(); /* EMIT SIGNAL */
 	}
 }
 
 void
-EditorRoutes::sync_treeview_from_order_keys ()
+EditorRoutes::sync_treeview_from_presentation_info ()
 {
 	/* Some route order key(s) have been changed, make sure that
 	   we update out tree/list model and GUI to reflect the change.
@@ -1033,7 +970,7 @@ EditorRoutes::sync_treeview_from_order_keys ()
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::OrderKeys, "editor sync model from order keys.\n");
+	DEBUG_TRACE (DEBUG::OrderKeys, "editor sync model from presentation info.\n");
 
 	/* we could get here after either a change in the Mixer or Editor sort
 	 * order, but either way, the mixer order keys reflect the intended
@@ -1053,7 +990,11 @@ EditorRoutes::sync_treeview_from_order_keys ()
 
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
-		sorted.push_back (OrderKeys (old_order, route->order_key ()));
+		sorted.push_back (OrderKeys (old_order, route->presentation_info().group_order()));
+		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("build new order: route %3  old = %1 new = %1\n",
+		                                               old_order,
+		                                               route->presentation_info().group_order(),
+		                                               route->name()));
 	}
 
 	SortByNewDisplayOrder cmp;
@@ -1128,7 +1069,7 @@ EditorRoutes::set_all_tracks_visibility (bool yn)
 	/* force route order keys catch up with visibility changes
 	 */
 
-	sync_order_keys_from_treeview ();
+	sync_presentation_info_from_treeview ();
 }
 
 void
@@ -1193,7 +1134,7 @@ EditorRoutes::set_all_audio_midi_visibility (int tracks, bool yn)
 	/* force route order keys catch up with visibility changes
 	 */
 
-	sync_order_keys_from_treeview ();
+	sync_presentation_info_from_treeview ();
 }
 
 void
@@ -1427,7 +1368,7 @@ EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path
 	return true;
 }
 
-struct EditorOrderRouteSorter
+struct PresentationInfoRouteSorter
 {
 	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 		if (a->is_master()) {
@@ -1437,7 +1378,7 @@ struct EditorOrderRouteSorter
 			/* everything else before master */
 			return false;
 		}
-		return a->order_key () < b->order_key ();
+		return a->presentation_info().global_order () < b->presentation_info().global_order ();
 	}
 };
 
@@ -1453,7 +1394,7 @@ EditorRoutes::initial_display ()
 
 	RouteList r (*_session->get_routes());
 
-	r.sort (EditorOrderRouteSorter ());
+	r.sort (PresentationInfoRouteSorter ());
 	_editor->add_routes (r);
 }
 
@@ -1575,7 +1516,7 @@ EditorRoutes::move_selected_tracks (bool up)
 	}
 
 	for (leading = view_routes.begin(); leading != view_routes.end(); ++leading) {
-		uint32_t order = leading->second->order_key ();
+		uint32_t order = (uint32_t) leading->second->presentation_info().group_order ();
 		neworder.push_back (order);
 	}
 
@@ -1781,7 +1722,7 @@ EditorRoutes::show_tracks_with_regions_at_playhead ()
 	/* force route order keys catch up with visibility changes
 	 */
 
-	sync_order_keys_from_treeview ();
+	sync_presentation_info_from_treeview ();
 }
 
 int

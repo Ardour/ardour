@@ -242,21 +242,21 @@ MackieControlProtocol::route_is_locked_to_strip (boost::shared_ptr<Route> r) con
 }
 
 // predicate for sort call in get_sorted_routes
-struct RouteByRemoteId
+struct RouteByPresentationOrder
 {
 	bool operator () (const boost::shared_ptr<Route> & a, const boost::shared_ptr<Route> & b) const
 	{
-		return a->remote_control_id() < b->remote_control_id();
+		return a->presentation_info() < b->presentation_info();
 	}
 
 	bool operator () (const Route & a, const Route & b) const
 	{
-		return a.remote_control_id() < b.remote_control_id();
+		return a.presentation_info() < b.presentation_info();
 	}
 
 	bool operator () (const Route * a, const Route * b) const
 	{
-		return a->remote_control_id() < b->remote_control_id();
+		return a->presentation_info() < b->presentation_info();
 	}
 };
 
@@ -267,22 +267,14 @@ MackieControlProtocol::get_sorted_routes()
 
 	// fetch all routes
 	boost::shared_ptr<RouteList> routes = session->get_routes();
-	set<uint32_t> remote_ids;
+	set<PresentationInfo> remote_ids;
 
-	// routes with remote_id 0 should never be added
-	// TODO verify this with ardour devs
-	// remote_ids.insert (0);
-
-	// sort in remote_id order, and exclude master, control and hidden routes
+	// sort in presentation order, and exclude master, control and hidden routes
 	// and any routes that are already set.
 
 	for (RouteList::iterator it = routes->begin(); it != routes->end(); ++it) {
 
 		boost::shared_ptr<Route> route = *it;
-
-		if (remote_ids.find (route->remote_control_id()) != remote_ids.end()) {
-			continue;
-		}
 
 		if (route->is_auditioner() || route->is_master() || route->is_monitor()) {
 			continue;
@@ -290,7 +282,7 @@ MackieControlProtocol::get_sorted_routes()
 
 		/* don't include locked routes */
 
-		if (route_is_locked_to_strip(route)) {
+		if (route_is_locked_to_strip (route)) {
 			continue;
 		}
 
@@ -298,13 +290,13 @@ MackieControlProtocol::get_sorted_routes()
 		case Mixer:
 			if (! is_hidden(route)) {
 				sorted.push_back (route);
-				remote_ids.insert (route->remote_control_id());
+				remote_ids.insert (route->presentation_info());
 			}
 			break;
 		case AudioTracks:
 			if (is_audio_track(route) && !is_hidden(route)) {
 				sorted.push_back (route);
-				remote_ids.insert (route->remote_control_id());
+				remote_ids.insert (route->presentation_info());
 			}
 			break;
 		case Busses:
@@ -312,20 +304,20 @@ MackieControlProtocol::get_sorted_routes()
 #ifdef MIXBUS
 				if (route->mixbus()) {
 					sorted.push_back (route);
-					remote_ids.insert (route->remote_control_id());
+					remote_ids.insert (route->presentation_info());
 				}
 #endif
 			} else {
 				if (!is_track(route) && !is_hidden(route)) {
 					sorted.push_back (route);
-					remote_ids.insert (route->remote_control_id());
+					remote_ids.insert (route->presentation_info());
 				}
 			}
 			break;
 		case MidiTracks:
 			if (is_midi_track(route) && !is_hidden(route)) {
 				sorted.push_back (route);
-				remote_ids.insert (route->remote_control_id());
+				remote_ids.insert (route->presentation_info());
 			}
 			break;
 		case Plugins:
@@ -338,27 +330,27 @@ MackieControlProtocol::get_sorted_routes()
 #endif
 			{
 				sorted.push_back (route);
-				remote_ids.insert (route->remote_control_id());
+				remote_ids.insert (route->presentation_info());
 			}
 			break;
 		case Hidden: // Show all the tracks we have hidden
 			if (is_hidden(route)) {
 				// maybe separate groups
 				sorted.push_back (route);
-				remote_ids.insert (route->remote_control_id());
+				remote_ids.insert (route->presentation_info());
 			}
 			break;
 		case Selected: // For example: a group (this is USER)
 			if (selected(route) && !is_hidden(route)) {
 				sorted.push_back (route);
-				remote_ids.insert (route->remote_control_id());
+				remote_ids.insert (route->presentation_info());
 			}
 			break;
 		}
 
 	}
 
-	sort (sorted.begin(), sorted.end(), RouteByRemoteId());
+	sort (sorted.begin(), sorted.end(), RouteByPresentationOrder());
 	return sorted;
 }
 
@@ -716,7 +708,6 @@ MackieControlProtocol::connect_session_signals()
 {
 	// receive routes added
 	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_route_added, this, _1), this);
-	session->RouteAddedOrRemoved.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_route_added_or_removed, this), this);
 	// receive record state toggled
 	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_record_state_changed, this), this);
 	// receive transport state changed
@@ -733,7 +724,7 @@ MackieControlProtocol::connect_session_signals()
 	Sorted sorted = get_sorted_routes();
 
 	for (Sorted::iterator it = sorted.begin(); it != sorted.end(); ++it) {
-		(*it)->RemoteControlIDChanged.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_remote_id_changed, this), this);
+		(*it)->PresentationInfoChanged.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_presentation_info_changed, this), this);
 	}
 }
 
@@ -1251,7 +1242,7 @@ void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 }
 
 void
-MackieControlProtocol::notify_route_added_or_removed ()
+MackieControlProtocol::notify_route_removed ()
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
@@ -1291,7 +1282,7 @@ MackieControlProtocol::notify_route_added (ARDOUR::RouteList & rl)
 	typedef ARDOUR::RouteList ARS;
 
 	for (ARS::iterator it = rl.begin(); it != rl.end(); ++it) {
-		(*it)->RemoteControlIDChanged.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_remote_id_changed, this), this);
+		(*it)->PresentationInfoChanged.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_presentation_info_changed, this), this);
 	}
 }
 
@@ -1320,7 +1311,7 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 }
 
 void
-MackieControlProtocol::notify_remote_id_changed()
+MackieControlProtocol::notify_presentation_info_changed()
 {
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -2120,12 +2111,15 @@ MackieControlProtocol::select_range ()
 		for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
 
 			if (main_modifier_state() == MODIFIER_SHIFT) {
-				ToggleRouteSelection ((*r)->remote_control_id ());
+				/* XXX can only use numeric part of ID at present */
+				ToggleRouteSelection ((*r)->presentation_info ().global_order());
 			} else {
 				if (r == routes.begin()) {
-					SetRouteSelection ((*r)->remote_control_id());
+					/* XXX can only use numeric part of ID at present */
+					SetRouteSelection ((*r)->presentation_info().global_order());
 				} else {
-					AddRouteToSelection ((*r)->remote_control_id());
+					/* XXX can only use numeric part of ID at present */
+					AddRouteToSelection ((*r)->presentation_info().global_order());
 				}
 			}
 		}
@@ -2441,7 +2435,7 @@ MackieControlProtocol::is_hidden (boost::shared_ptr<Route> r) const
 	if (!r) {
 		return false;
 	}
-	return (((r->remote_control_id()) >>31) != 0);
+	return (r->presentation_info().flags() & PresentationInfo::Hidden);
 }
 
 bool

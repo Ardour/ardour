@@ -61,7 +61,6 @@ SESSION(PositionChanged, PositionChanged, 1)
 SESSION(Located, Located, 0)
 SESSION(RoutesReconnected, session_routes_reconnected, 0)
 SESSION(RouteAdded, RouteAdded, 1)
-SESSION(RouteAddedOrRemoved, RouteAddedOrRemoved, 1)
 SESSION(RouteGroupPropertyChanged, RouteGroupPropertyChanged, 1)
 SESSION(RouteAddedToRouteGroup, RouteAddedToRouteGroup, 2)
 SESSION(RouteRemovedFromRouteGroup, RouteRemovedFromRouteGroup, 2)
@@ -69,9 +68,6 @@ SESSION(StepEditStatusChange, StepEditStatusChange, 1)
 SESSION(RouteGroupAdded, route_group_added, 1)
 SESSION(RouteGroupRemoved, route_group_removed, 0)
 SESSION(RouteGroupsReordered, route_groups_reordered, 0)
-
-// route static globals
-STATIC(SyncOrderKeys, &Route::SyncOrderKeys, 0)
 
 // plugin manager instance
 STATIC(PluginListChanged, &(PluginManager::instance().PluginListChanged), 0)

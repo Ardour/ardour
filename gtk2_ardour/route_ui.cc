@@ -2031,7 +2031,7 @@ RouteUI::open_remote_control_id_dialog ()
 		spin->set_digits (0);
 		spin->set_increments (1, 10);
 		spin->set_range (0, limit);
-		spin->set_value (_route->remote_control_id());
+		spin->set_value (_route->presentation_info().group_order());
 		hbox->pack_start (*spin);
 		dialog.get_vbox()->pack_start (*hbox);
 
@@ -2043,14 +2043,14 @@ RouteUI::open_remote_control_id_dialog ()
 			l->set_markup (string_compose (_("The remote control ID of %1 is: %2\n\n\n"
 							 "The remote control ID of %3 cannot be changed."),
 						       Gtkmm2ext::markup_escape_text (_route->name()),
-						       _route->remote_control_id(),
+			                               _route->presentation_info().group_order(),
 						       (_route->is_master() ? _("the master bus") : _("the monitor bus"))));
 		} else {
 			l->set_markup (string_compose (_("The remote control ID of %5 is: %2\n\n\n"
 							 "Remote Control IDs are currently determined by track/bus ordering in %6.\n\n"
 							 "%3Use the User Interaction tab of the Preferences window if you want to change this%4"),
 						       (is_track() ? _("track") : _("bus")),
-						       _route->remote_control_id(),
+			                               _route->presentation_info().group_order(),
 						       "<span size=\"small\" style=\"italic\">",
 						       "</span>",
 						       Gtkmm2ext::markup_escape_text (_route->name()),
@@ -2064,7 +2064,7 @@ RouteUI::open_remote_control_id_dialog ()
 	int const r = dialog.run ();
 
 	if (r == RESPONSE_ACCEPT && spin) {
-		_route->set_remote_control_id (spin->get_value_as_int ());
+		_route->set_presentation_group_order_explicit (spin->get_value_as_int ());
 	}
 }
 

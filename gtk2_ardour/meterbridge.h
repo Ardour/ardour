@@ -107,7 +107,7 @@ class Meterbridge :
 				/* everything comes before b */
 				return true;
 			}
-			return a->order_key () < b->order_key ();
+			return a->presentation_info() < b->presentation_info ();
 		}
 	};
 

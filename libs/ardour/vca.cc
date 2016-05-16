@@ -65,7 +65,7 @@ VCA::get_next_vca_number ()
 }
 
 VCA::VCA (Session& s,  uint32_t num, const string& name)
-	: Stripable (s, name)
+	: Stripable (s, name, PresentationInfo (num, PresentationInfo::VCA))
 	, Muteable (s, name)
 	, Automatable (s)
 	, _number (num)
@@ -106,6 +106,8 @@ VCA::get_state ()
 	node->add_property (X_("name"), _name);
 	node->add_property (X_("number"), _number);
 
+	Stripable::add_state (*node);
+
 	node->add_child_nocopy (_gain_control->get_state());
 	node->add_child_nocopy (_solo_control->get_state());
 	node->add_child_nocopy (_mute_control->get_state());
@@ -120,6 +122,8 @@ int
 VCA::set_state (XMLNode const& node, int version)
 {
 	XMLProperty const* prop;
+
+	Stripable::set_state (node, version);
 
 	if ((prop = node.property ("name")) != 0) {
 		set_name (prop->value());

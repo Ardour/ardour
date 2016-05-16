@@ -801,12 +801,12 @@ MeterStrip::name_changed () {
 	}
 	name_label.set_text(_route->name ());
 	if (_session && _session->config.get_track_name_number()) {
-		const int64_t track_number = _route->track_number ();
+		const uint64_t track_number = _route->track_number();
 		if (track_number == 0) {
 			number_label.set_text("-");
 			number_label.hide();
 		} else {
-			number_label.set_text (PBD::to_string (abs(_route->track_number ()), std::dec));
+			number_label.set_text (PBD::to_string (track_number, std::dec));
 			number_label.show();
 		}
 		const int tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()

@@ -97,13 +97,7 @@ public:
 
 	typedef std::list<boost::shared_ptr<Processor> > ProcessorList;
 
-	enum Flag {
-		Auditioner = 0x1,
-		MasterOut = 0x2,
-		MonitorOut = 0x4
-	};
-
-	Route (Session&, std::string name, Flag flags = Flag(0), DataType default_type = DataType::AUDIO);
+	Route (Session&, std::string name, PresentationInfo::Flag flags = PresentationInfo::Flag(0), DataType default_type = DataType::AUDIO);
 	virtual ~Route();
 
 	virtual int init ();
@@ -126,14 +120,6 @@ public:
 
 	bool set_name (const std::string& str);
 	static void set_name_in_state (XMLNode &, const std::string &, bool rename_playlist = true);
-
-	uint32_t order_key () const;
-	bool has_order_key () const;
-	void set_order_key (uint32_t);
-
-	bool is_auditioner() const { return _flags & Auditioner; }
-	bool is_master() const { return _flags & MasterOut; }
-	bool is_monitor() const { return _flags & MonitorOut; }
 
 	MonitorState monitoring_state () const;
 	virtual MeterState metering_state () const;
@@ -569,28 +555,6 @@ public:
 
 	void protect_automation ();
 
-	enum {
-		/* These numbers are taken from MIDI Machine Control,
-		   which can only control up to 317 tracks without
-		   doing sysex segmentation.
-		*/
-		MasterBusRemoteControlID = 318,
-		MonitorBusRemoteControlID = 319,
-	};
-
-	void     set_remote_control_id (uint32_t id, bool notify_class_listeners = true);
-	uint32_t remote_control_id () const;
-	void     set_remote_control_id_explicit (uint32_t order_key);
-
-	/* for things concerned about *this* route's RID */
-
-	PBD::Signal0<void> RemoteControlIDChanged;
-
-	/* for things concerned about *any* route's RID changes */
-
-	static PBD::Signal0<void> RemoteControlIDChange;
-	static PBD::Signal0<void> SyncOrderKeys;
-
 	bool has_external_redirects() const;
 
 	/* can only be executed by a route for which is_monitor() is true
@@ -663,7 +627,6 @@ public:
 	gint           _pending_process_reorder; // atomic
 	gint           _pending_signals; // atomic
 
-	Flag           _flags;
 	int            _pending_declick;
 	MeterPoint     _meter_point;
 	MeterPoint     _pending_meter_point;
@@ -718,15 +681,11 @@ protected:
 
 	boost::shared_ptr<Processor> the_instrument_unlocked() const;
 
-private:
+  private:
+	int64_t _track_number;
+
 	int set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
-
-	uint32_t _order_key;
-	bool _has_order_key;
-	uint32_t _remote_control_id;
-
-	int64_t _track_number;
 
 	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);
@@ -810,7 +769,6 @@ private:
 
 	void reset_instrument_info ();
 
-	void set_remote_control_id_internal (uint32_t id, bool notify_class_listeners = true);
         void solo_control_changed (bool self, PBD::Controllable::GroupControlDisposition);
 };
 

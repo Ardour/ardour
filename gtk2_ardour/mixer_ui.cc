@@ -42,10 +42,10 @@
 
 #include "ardour/amp.h"
 #include "ardour/debug.h"
+#include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/route_group.h"
-#include "ardour/route_sorters.h"
 #include "ardour/session.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
@@ -107,7 +107,7 @@ Mixer_UI::Mixer_UI ()
 	, _maximised (false)
 	, _show_mixer_list (true)
 {
-	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_order_keys, this), gui_context());
+	Stripable::PresentationInfoChange.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_presentation_info, this), gui_context());
 
 	/* bindings was already set in MixerActor constructor */
 
@@ -427,7 +427,7 @@ Mixer_UI::add_strips (RouteList& routes)
 
 		nroutes++;
 
-		if (r->order_key() == (routes.front()->order_key() + routes.size())) {
+		if (r->presentation_info().group_order() == (routes.front()->presentation_info().group_order() + routes.size())) {
 			insert_iter = it;
 			break;
 		}
@@ -512,7 +512,7 @@ Mixer_UI::add_strips (RouteList& routes)
 	no_track_list_redisplay = false;
 	track_display.set_model (track_model);
 
-	sync_order_keys_from_treeview ();
+	sync_presentation_info_from_treeview ();
 	redisplay_track_list ();
 }
 
@@ -576,69 +576,9 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 }
 
 void
-Mixer_UI::reset_remote_control_ids ()
+Mixer_UI::sync_presentation_info_from_treeview ()
 {
-	if (Config->get_remote_model() == UserOrdered || !_session || _session->deletion_in_progress()) {
-		return;
-	}
-
-	TreeModel::Children rows = track_model->children();
-
-	if (rows.empty()) {
-		return;
-	}
-
-	DEBUG_TRACE (DEBUG::OrderKeys, "mixer resets remote control ids after remote model change\n");
-
-	TreeModel::Children::iterator ri;
-	bool rid_change = false;
-	uint32_t rid = 1;
-	uint32_t invisible_key = UINT32_MAX;
-
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-
-		/* skip two special values */
-
-		if (rid == Route::MasterBusRemoteControlID) {
-			rid++;
-		}
-
-		if (rid == Route::MonitorBusRemoteControlID) {
-			rid++;
-		}
-
-		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
-		bool visible = (*ri)[track_columns.visible];
-
-		if (!route) {
-			continue;
-		}
-
-		if (!route->is_master() && !route->is_monitor()) {
-
-			uint32_t new_rid = (visible ? rid : invisible_key--);
-
-			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_explicit (new_rid);
-				rid_change = true;
-			}
-
-			if (visible) {
-				rid++;
-			}
-		}
-	}
-
-	if (rid_change) {
-		/* tell the world that we changed the remote control IDs */
-		_session->notify_remote_id_change ();
-	}
-}
-
-void
-Mixer_UI::sync_order_keys_from_treeview ()
-{
-	if (ignore_reorder || !_session || _session->deletion_in_progress()) {
+	if (ignore_reorder || !_session || _session->deletion_in_progress() || (Config->get_remote_model() != MixerOrdered)) {
 		return;
 	}
 
@@ -651,58 +591,46 @@ Mixer_UI::sync_order_keys_from_treeview ()
 	DEBUG_TRACE (DEBUG::OrderKeys, "mixer sync order keys from model\n");
 
 	TreeModel::Children::iterator ri;
-	bool changed = false;
-	bool rid_change = false;
+	bool change = false;
 	uint32_t order = 0;
-	uint32_t rid = 1;
-	uint32_t invisible_key = UINT32_MAX;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		bool visible = (*ri)[track_columns.visible];
 
+
 		if (!route) {
 			continue;
 		}
 
-		uint32_t old_key = route->order_key ();
-
-		if (order != old_key) {
-			route->set_order_key (order);
-			changed = true;
+		if (route->presentation_info().special()) {
+			continue;
 		}
 
-		if ((Config->get_remote_model() == MixerOrdered) && !route->is_master() && !route->is_monitor()) {
+		if (!visible) {
+			route->presentation_info().set_flag (PresentationInfo::Hidden);
+		} else {
+			route->presentation_info().unset_flag (PresentationInfo::Hidden);
+		}
 
-			uint32_t new_rid = (visible ? rid : invisible_key--);
+		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("route %1 old order %2 new order %3\n", route->name(), route->presentation_info().group_order(), order));
 
-			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_explicit (new_rid);
-				rid_change = true;
-			}
-
-			if (visible) {
-				rid++;
-			}
-
+		if (order != route->presentation_info().group_order()) {
+			route->set_presentation_group_order_explicit (order);
+			change = true;
 		}
 
 		++order;
 	}
 
-	if (changed) {
-		/* tell everyone that we changed the mixer sort keys */
-		_session->sync_order_keys ();
-	}
-
-	if (rid_change) {
-		/* tell the world that we changed the remote control IDs */
-		_session->notify_remote_id_change ();
+	if (change) {
+		DEBUG_TRACE (DEBUG::OrderKeys, "... notify PI change from mixer GUI\n");
+		_session->notify_presentation_info_change ();
 	}
 }
 
 void
-Mixer_UI::sync_treeview_from_order_keys ()
+Mixer_UI::sync_treeview_from_presentation_info ()
 {
 	if (!_session || _session->deletion_in_progress()) {
 		return;
@@ -736,7 +664,7 @@ Mixer_UI::sync_treeview_from_order_keys ()
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		if (route) {
-			max_route_order_key = max (route->order_key(), max_route_order_key);
+			max_route_order_key = max (route->presentation_info().group_order(), max_route_order_key);
 		}
 	}
 
@@ -749,7 +677,7 @@ Mixer_UI::sync_treeview_from_order_keys ()
 			 */
 			sorted.push_back (OrderKeys (old_order, max_route_order_key + ++vca_cnt));
 		} else {
-			sorted.push_back (OrderKeys (old_order, route->order_key ()));
+			sorted.push_back (OrderKeys (old_order, route->presentation_info().group_order()));
 		}
 	}
 
@@ -1007,10 +935,10 @@ Mixer_UI::update_track_visibility ()
 			}
 		}
 
-		/* force route order keys catch up with visibility changes
+		/* force presentation catch up with visibility changes
 		 */
 
-		sync_order_keys_from_treeview ();
+		sync_presentation_info_from_treeview ();
 	}
 
 	redisplay_track_list ();
@@ -1207,7 +1135,7 @@ void
 Mixer_UI::track_list_reorder (const TreeModel::Path&, const TreeModel::iterator&, int* /*new_order*/)
 {
 	DEBUG_TRACE (DEBUG::OrderKeys, "mixer UI treeview reordered\n");
-	sync_order_keys_from_treeview ();
+	sync_presentation_info_from_treeview ();
 }
 
 void
@@ -1221,7 +1149,7 @@ Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 	*/
 
 	DEBUG_TRACE (DEBUG::OrderKeys, "mixer UI treeview row deleted\n");
-	sync_order_keys_from_treeview ();
+	sync_presentation_info_from_treeview ();
 
         if (_route_deletion_in_progress) {
                 redisplay_track_list ();
@@ -1302,8 +1230,10 @@ Mixer_UI::redisplay_track_list ()
 
 	if (n_masters == 0) {
 		UIConfiguration::instance().set_mixer_strip_visibility (VisibilityGroup::remove_element (UIConfiguration::instance().get_mixer_strip_visibility(), X_("VCA")));
+		vca_scroller.hide ();
 	} else {
 		UIConfiguration::instance().set_mixer_strip_visibility (VisibilityGroup::add_element (UIConfiguration::instance().get_mixer_strip_visibility(), X_("VCA")));
+		vca_scroller.show ();
 	}
 
 	_group_tabs->set_dirty ();
@@ -1336,12 +1266,19 @@ Mixer_UI::strip_width_changed ()
 
 }
 
+struct PresentationInfoRouteSorter
+{
+	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
+		return a->presentation_info().global_order () < b->presentation_info().global_order ();
+	}
+};
+
 void
 Mixer_UI::initial_track_display ()
 {
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
 	RouteList copy (*routes);
-	ARDOUR::SignalOrderRouteSorter sorter;
+	PresentationInfoRouteSorter sorter;
 
 	copy.sort (sorter);
 
@@ -1354,8 +1291,6 @@ Mixer_UI::initial_track_display ()
 		add_masters (vcas);
 		add_strips (copy);
 	}
-
-	_session->sync_order_keys ();
 
 	redisplay_track_list ();
 }
@@ -2133,8 +2068,6 @@ Mixer_UI::parameter_changed (string const & p)
 		for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
 			(*i)->set_width_enum (s ? Narrow : Wide, this);
 		}
-	} else if (p == "remote-model") {
-		reset_remote_control_ids ();
 	} else if (p == "use-monitor-bus") {
 		if (_session && !_session->monitor_out()) {
 			monitor_section_detached ();

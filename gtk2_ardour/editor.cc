@@ -1000,7 +1000,7 @@ Editor::control_unselect ()
 }
 
 void
-Editor::control_select (uint32_t rid, Selection::Operation op)
+Editor::control_select (uint16_t rid, Selection::Operation op)
 {
 	/* handles the (static) signal from the ControlProtocol class that
 	 * requests setting the selected track to a given RID
@@ -1010,7 +1010,7 @@ Editor::control_select (uint32_t rid, Selection::Operation op)
 		return;
 	}
 
-	boost::shared_ptr<Route> r = _session->route_by_remote_id (rid);
+	boost::shared_ptr<Route> r = _session->get_remote_nth_route (rid);
 
 	if (!r) {
 		return;

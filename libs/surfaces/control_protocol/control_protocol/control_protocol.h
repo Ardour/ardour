@@ -78,10 +78,10 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	static PBD::Signal0<void> StepTracksDown;
 	static PBD::Signal0<void> StepTracksUp;
 
-	static PBD::Signal1<void,uint32_t> AddRouteToSelection;
-	static PBD::Signal1<void,uint32_t> SetRouteSelection;
-	static PBD::Signal1<void,uint32_t> ToggleRouteSelection;
-	static PBD::Signal1<void,uint32_t> RemoveRouteFromSelection;
+	static PBD::Signal1<void,uint64_t> AddRouteToSelection;
+	static PBD::Signal1<void,uint64_t> SetRouteSelection;
+	static PBD::Signal1<void,uint64_t> ToggleRouteSelection;
+	static PBD::Signal1<void,uint64_t> RemoveRouteFromSelection;
 	static PBD::Signal0<void>          ClearRouteSelection;
 
 	/* signals that one UI (e.g. the GUI) can emit to get all other UI's to

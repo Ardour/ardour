@@ -473,7 +473,7 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 		 * (since tracks can't have fewer outs than ins,
 		 * "nin" currently defines the number of outpus if nin > 2)
 		 */
-		rl = _session.new_audio_route (nin, 2 /*XXX*/, 0, 1);
+		rl = _session.new_audio_route (nin, 2, 0, 1, string(), PresentationInfo::AudioBus, PresentationInfo::max_order);
 	} catch (...) {
 		return;
 	}

@@ -321,6 +321,7 @@ Strip::notify_active_changed ()
 void
 Strip::notify_route_deleted ()
 {
+	_surface->mcp().notify_route_removed ();
 	_surface->mcp().refresh_current_bank();
 }
 

@@ -628,7 +628,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 	_state_of_the_state = Clean;
 
-        /* set up Master Out and Control Out if necessary */
+        /* set up Master Out and Monitor Out if necessary */
 
         if (bus_profile) {
 
@@ -637,7 +637,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
                 // Waves Tracks: always create master bus for Tracks
                 if (ARDOUR::Profile->get_trx() || bus_profile->master_out_channels) {
-	                boost::shared_ptr<Route> r (new Route (*this, _("Master"), Route::MasterOut, DataType::AUDIO));
+	                boost::shared_ptr<Route> r (new Route (*this, _("Master"), PresentationInfo::MasterOut, DataType::AUDIO));
                         if (r->init ()) {
                                 return -1;
                         }
@@ -658,7 +658,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 		}
 
 		if (!rl.empty()) {
-			add_routes (rl, false, false, false);
+			add_routes (rl, false, false, false, PresentationInfo::max_order);
 		}
 
 		// Waves Tracks: Skip this. Always use autoconnection for Tracks
@@ -1593,7 +1593,7 @@ Session::load_routes (const XMLNode& node, int version)
 
 	BootMessage (_("Tracks/busses loaded;  Adding to Session"));
 
-	add_routes (new_routes, false, false, false);
+	add_routes (new_routes, false, false, false, PresentationInfo::max_order);
 
 	BootMessage (_("Finished adding tracks/busses"));
 
@@ -1642,12 +1642,7 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
                 ret = track;
 
 	} else {
-		enum Route::Flag flags = Route::Flag(0);
-		XMLProperty const * prop = node.property("flags");
-		if (prop) {
-			flags = Route::Flag (string_2_enum (prop->value(), flags));
-		}
-
+		PresentationInfo::Flag flags = PresentationInfo::get_flags (node);
 		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
                 if (r->init () == 0 && r->set_state (node, version) == 0) {
@@ -1716,12 +1711,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
                 ret = track;
 
 	} else {
-		enum Route::Flag flags = Route::Flag(0);
-		XMLProperty const * prop = node.property("flags");
-		if (prop) {
-			flags = Route::Flag (string_2_enum (prop->value(), flags));
-		}
-
+		PresentationInfo::Flag flags = PresentationInfo::get_flags (node);
 		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
                 if (r->init () == 0 && r->set_state (node, version) == 0) {
@@ -3423,7 +3413,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	}
 
 	case ControllableDescriptor::RemoteControlID:
-		r = route_by_remote_id (desc.rid());
+		r = get_remote_nth_route (desc.rid());
 		break;
 
 	case ControllableDescriptor::SelectionCount:

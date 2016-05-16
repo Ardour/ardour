@@ -244,7 +244,7 @@ Editor::do_ptimport (std::string ptpath,
 				} else {
 					// Put on a new track
 					DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) new_tr(%3)\n", a->reg.wave.filename.c_str(), a->reg.index, nth));
-					list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (1, 2, Normal, 0, 1));
+					list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (1, 2, 0, 1, string(), PresentationInfo::max_order, Normal));
 					if (at.empty()) {
 						return;
 					}

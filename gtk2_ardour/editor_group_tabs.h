@@ -37,5 +37,4 @@ private:
 	}
 	void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *);
 	ARDOUR::RouteList selected_routes () const;
-	void sync_order_keys ();
 };

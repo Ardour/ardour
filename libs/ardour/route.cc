@@ -80,14 +80,12 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal0<void> Route::SyncOrderKeys;
-PBD::Signal0<void> Route::RemoteControlIDChange;
 PBD::Signal3<int,boost::shared_ptr<Route>, boost::shared_ptr<PluginInsert>, Route::PluginSetupOptions > Route::PluginSetup;
 
 /** Base class for all routable/mixable objects (tracks and busses) */
-Route::Route (Session& sess, string name, Flag flg, DataType default_type)
+Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType default_type)
 	: GraphNode (sess._process_graph)
-	, Stripable (sess, name)
+	, Stripable (sess, name, PresentationInfo (flag))
 	, Muteable (sess, name)
 	, Automatable (sess)
 	, _active (true)
@@ -98,7 +96,6 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _roll_delay (0)
 	, _pending_process_reorder (0)
 	, _pending_signals (0)
-	, _flags (flg)
 	, _pending_declick (true)
 	, _meter_point (MeterPostFader)
 	, _pending_meter_point (MeterPostFader)
@@ -109,10 +106,6 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _declickable (false)
 	, _have_internal_generator (false)
 	, _default_type (default_type)
-	, _order_key (0)
-	, _has_order_key (false)
-	, _remote_control_id (0)
-	, _track_number (0)
 	, _in_configure_processors (false)
 	, _initial_io_setup (false)
 	, _in_sidechain_setup (false)
@@ -162,7 +155,7 @@ Route::init ()
 
 	/* panning */
 
-	if (!(_flags & Route::MonitorOut)) {
+	if (!(_presentation_info.flags() & PresentationInfo::MonitorOut)) {
 		_pannable.reset (new Pannable (_session));
 	}
 
@@ -268,120 +261,6 @@ Route::~Route ()
 	}
 
 	_processors.clear ();
-}
-
-void
-Route::set_remote_control_id (uint32_t id, bool notify_class_listeners)
-{
-	if (Config->get_remote_model() != UserOrdered) {
-		return;
-	}
-
-	set_remote_control_id_internal (id, notify_class_listeners);
-}
-
-void
-Route::set_remote_control_id_internal (uint32_t id, bool notify_class_listeners)
-{
-	/* force IDs for master/monitor busses and prevent
-	   any other route from accidentally getting these IDs
-	   (i.e. legacy sessions)
-	*/
-
-	if (is_master() && id != MasterBusRemoteControlID) {
-		id = MasterBusRemoteControlID;
-	}
-
-	if (is_monitor() && id != MonitorBusRemoteControlID) {
-		id = MonitorBusRemoteControlID;
-	}
-
-	if (id < 1) {
-		return;
-	}
-
-	/* don't allow it to collide */
-
-	if (!is_master () && !is_monitor() &&
-	    (id == MasterBusRemoteControlID || id == MonitorBusRemoteControlID)) {
-		id += MonitorBusRemoteControlID;
-	}
-
-	if (id != remote_control_id()) {
-		_remote_control_id = id;
-		RemoteControlIDChanged ();
-
-		if (notify_class_listeners) {
-			RemoteControlIDChange ();
-		}
-	}
-}
-
-uint32_t
-Route::remote_control_id() const
-{
-	if (is_master()) {
-		return MasterBusRemoteControlID;
-	}
-
-	if (is_monitor()) {
-		return MonitorBusRemoteControlID;
-	}
-
-	return _remote_control_id;
-}
-
-bool
-Route::has_order_key () const
-{
-	return _has_order_key;
-}
-
-uint32_t
-Route::order_key () const
-{
-	return _order_key;
-}
-
-void
-Route::set_remote_control_id_explicit (uint32_t rid)
-{
-	if (is_master() || is_monitor() || is_auditioner()) {
-		/* hard-coded remote IDs, or no remote ID */
-		return;
-	}
-
-	if (_remote_control_id != rid) {
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1: set edit-based RID to %2\n", name(), rid));
-		_remote_control_id = rid;
-		RemoteControlIDChanged (); /* EMIT SIGNAL (per-route) */
-	}
-
-	/* don't emit the class-level RID signal RemoteControlIDChange here,
-	   leave that to the entity that changed the order key, so that we
-	   don't get lots of emissions for no good reasons (e.g. when changing
-	   all route order keys).
-
-	   See Session::sync_remote_id_from_order_keys() for the (primary|only)
-	   spot where that is emitted.
-	*/
-}
-
-void
-Route::set_order_key (uint32_t n)
-{
-	_has_order_key = true;
-
-	if (_order_key == n) {
-		return;
-	}
-
-	_order_key = n;
-
-	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1 order key set to %2\n",
-						       name(), order_key ()));
-
-	_session.set_dirty ();
 }
 
 string
@@ -2357,9 +2236,7 @@ Route::state(bool full_state)
 	node->add_property("default-type", _default_type.to_string());
 	node->add_property ("strict-io", _strict_io);
 
-	if (_flags) {
-		node->add_property("flags", enum_2_string (_flags));
-	}
+	Stripable::add_state (*node);
 
 	node->add_property("active", _active?"yes":"no");
 	string p;
@@ -2371,9 +2248,6 @@ Route::state(bool full_state)
 	if (_route_group) {
 		node->add_property("route-group", _route_group->name());
 	}
-
-	snprintf (buf, sizeof (buf), "%d", _order_key);
-	node->add_property ("order-key", buf);
 
 	node->add_child_nocopy (_solo_control->get_state ());
 	node->add_child_nocopy (_solo_isolate_control->get_state ());
@@ -2389,11 +2263,6 @@ Route::state(bool full_state)
 	if (full_state) {
 		node->add_child_nocopy (Automatable::get_automation_xml_state ());
 	}
-
-	XMLNode* remote_control_node = new XMLNode (X_("RemoteControl"));
-	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
-	remote_control_node->add_property (X_("id"), buf);
-	node->add_child_nocopy (*remote_control_node);
 
 	if (_comment.length()) {
 		XMLNode *cmt = node->add_child ("Comment");
@@ -2474,11 +2343,7 @@ Route::set_state (const XMLNode& node, int version)
 	set_id (node);
 	_initial_io_setup = true;
 
-	if ((prop = node.property (X_("flags"))) != 0) {
-		_flags = Flag (string_2_enum (prop->value(), _flags));
-	} else {
-		_flags = Flag (0);
-	}
+	Stripable::set_state (node, version);
 
 	if ((prop = node.property (X_("strict-io"))) != 0) {
 		_strict_io = string_is_affirmative (prop->value());
@@ -2575,46 +2440,6 @@ Route::set_state (const XMLNode& node, int version)
 		set_active (yn, this);
 	}
 
-	if ((prop = node.property (X_("order-key"))) != 0) { // New order key (no separate mixer/editor ordering)
-		set_order_key (atoi(prop->value()));
-	}
-
-	if ((prop = node.property (X_("order-keys"))) != 0) { // Deprecated order keys
-
-		int32_t n;
-
-		string::size_type colon, equal;
-		string remaining = prop->value();
-
-		while (remaining.length()) {
-
-			if ((equal = remaining.find_first_of ('=')) == string::npos || equal == remaining.length()) {
-				error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
-				      << endmsg;
-			} else {
-				if (sscanf (remaining.substr (equal+1).c_str(), "%d", &n) != 1) {
-					error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
-					      << endmsg;
-				} else {
-					string keyname = remaining.substr (0, equal);
-
-					if ((keyname == "EditorSort") || (keyname == "editor")) {
-						cerr << "Setting " << name() << " order key to " << n << " using saved Editor order." << endl;
-						set_order_key (n);
-					}
-				}
-			}
-
-			colon = remaining.find_first_of (':');
-
-			if (colon != string::npos) {
-				remaining = remaining.substr (colon+1);
-			} else {
-				break;
-			}
-		}
-	}
-
 	if ((prop = node.property (X_("processor-after-last-custom-meter"))) != 0) {
 		PBD::ID id (prop->value ());
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
@@ -2644,13 +2469,6 @@ Route::set_state (const XMLNode& node, int version)
 				_solo_control->set_state (*child, version);
 			} else if (prop->value() == "mute") {
 				_mute_control->set_state (*child, version);
-			}
-
-		} else if (child->name() == X_("RemoteControl")) {
-			if ((prop = child->property (X_("id"))) != 0) {
-				int32_t x;
-				sscanf (prop->value().c_str(), "%d", &x);
-				set_remote_control_id_internal (x);
 			}
 
 		} else if (child->name() == MuteMaster::xml_node_name) {
@@ -2684,13 +2502,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 		return -1;
 	}
 
-	if ((prop = node.property (X_("flags"))) != 0) {
-		string f = prop->value ();
-		boost::replace_all (f, "ControlOut", "MonitorOut");
-		_flags = Flag (string_2_enum (f, _flags));
-	} else {
-		_flags = Flag (0);
-	}
+	Stripable::set_state (node, version);
 
 	if (is_master() || is_monitor() || is_auditioner()) {
 		_mute_master->set_solo_ignore (true);
@@ -2762,46 +2574,6 @@ Route::set_state_2X (const XMLNode& node, int version)
 
 	if ((prop = node.property (X_("meter-point"))) != 0) {
 		_meter_point = MeterPoint (string_2_enum (prop->value (), _meter_point));
-	}
-
-	/* do not carry over edit/mix groups from 2.X because (a) its hard (b) they
-	   don't mean the same thing.
-	*/
-
-	if ((prop = node.property (X_("order-keys"))) != 0) {
-
-		int32_t n;
-
-		string::size_type colon, equal;
-		string remaining = prop->value();
-
-		while (remaining.length()) {
-
-			if ((equal = remaining.find_first_of ('=')) == string::npos || equal == remaining.length()) {
-				error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
-					<< endmsg;
-			} else {
-				if (sscanf (remaining.substr (equal+1).c_str(), "%d", &n) != 1) {
-					error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
-						<< endmsg;
-				} else {
-					string keyname = remaining.substr (0, equal);
-
-					if (keyname == "EditorSort" || keyname == "editor") {
-						info << string_compose(_("Converting deprecated order key for %1 using Editor order %2"), name (), n) << endmsg;
-						set_order_key (n);
-					}
-				}
-			}
-
-			colon = remaining.find_first_of (':');
-
-			if (colon != string::npos) {
-				remaining = remaining.substr (colon+1);
-			} else {
-				break;
-			}
-		}
 	}
 
 	/* IOs */
@@ -2891,13 +2663,6 @@ Route::set_state_2X (const XMLNode& node, int version)
 				_solo_control->set_state (*child, version);
 			} else if (prop->value() == X_("mute")) {
 				_mute_control->set_state (*child, version);
-			}
-
-		} else if (child->name() == X_("RemoteControl")) {
-			if ((prop = child->property (X_("id"))) != 0) {
-				int32_t x;
-				sscanf (prop->value().c_str(), "%d", &x);
-				set_remote_control_id_internal (x);
 			}
 
 		}

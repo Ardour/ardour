@@ -45,7 +45,7 @@ class MonitorControl;
 class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskstream
 {
   public:
-	Track (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
+	Track (Session&, std::string name, PresentationInfo::Flag f = PresentationInfo::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
 	virtual ~Track ();
 
 	int init ();

@@ -36,7 +36,6 @@ private:
 	}
 
 	ARDOUR::RouteList selected_routes () const;
-	void sync_order_keys ();
 
 	Mixer_UI* _mixer;
 };

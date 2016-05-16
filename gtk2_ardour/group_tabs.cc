@@ -451,13 +451,13 @@ GroupTabs::un_subgroup (RouteGroup* g)
 
 struct CollectSorter {
 	bool operator () (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		return a->order_key () < b->order_key ();
+		return a->presentation_info () < b->presentation_info();
 	}
 };
 
 struct OrderSorter {
 	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		return a->order_key () < b->order_key ();
+		return a->presentation_info() < b->presentation_info();
 	}
 };
 
@@ -480,7 +480,7 @@ GroupTabs::collect (RouteGroup* g)
 	int coll = -1;
 	while (i != group_routes->end() && j != routes->end()) {
 
-		int const k = (*j)->order_key ();
+		PresentationInfo::order_t const k = (*j)->presentation_info ().group_order();
 
 		if (*i == *j) {
 
@@ -491,21 +491,21 @@ GroupTabs::collect (RouteGroup* g)
 				--diff;
 			}
 
-			(*j)->set_order_key (coll);
+			(*j)->set_presentation_group_order_explicit (coll);
 
 			++coll;
 			++i;
 
 		} else {
 
-			(*j)->set_order_key (k + diff);
+			(*j)->set_presentation_group_order_explicit (k + diff);
 
 		}
 
 		++j;
 	}
 
-	_session->sync_order_keys ();
+	_session->notify_presentation_info_change ();
 }
 
 void

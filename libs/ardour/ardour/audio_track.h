@@ -34,7 +34,7 @@ class AudioFileSource;
 class LIBARDOUR_API AudioTrack : public Track
 {
   public:
-	AudioTrack (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
+	AudioTrack (Session&, std::string name, TrackMode m = Normal);
 	~AudioTrack ();
 
 	int set_mode (TrackMode m);

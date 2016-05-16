@@ -25,6 +25,7 @@
 
 #include "ardour/slavable_automation_control.h"
 
+#include "ardour/mute_master.h"
 #include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
