@@ -52,6 +52,7 @@ namespace ARDOUR {
 	class AudioSource;
 	class Route;
 	class Region;
+	class Stripable;
 	class VCA;
 	class AutomationControl;
 
@@ -566,7 +567,9 @@ namespace ARDOUR {
 	typedef std::list<framepos_t> AnalysisFeatureList;
 
 	typedef std::list<boost::shared_ptr<Route> > RouteList;
+	typedef std::list<boost::shared_ptr<Stripable> > StripableList;
 	typedef std::list<boost::weak_ptr  <Route> > WeakRouteList;
+	typedef std::list<boost::weak_ptr  <Stripable> > WeakStripableList;
 	typedef std::list<boost::shared_ptr<AutomationControl> > ControlList;
 
 	typedef std::list<boost::shared_ptr<VCA> > VCAList;
