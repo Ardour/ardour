@@ -1225,11 +1225,11 @@ const char* const ardour_config_info = "\\n\\
     config_text.close ()
     print('')
 
-def build(bld):
-    create_stored_revision()
-
     if Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
         create_resource_file(Options.options.program_name.lower())
+
+def build(bld):
+    create_stored_revision()
 
     # add directories that contain only headers, to workaround an issue with waf
 
