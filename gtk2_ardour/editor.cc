@@ -802,6 +802,12 @@ Editor::Editor ()
 	ControlProtocol::ToggleRouteSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
 	ControlProtocol::ClearRouteSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_unselect, this), gui_context());
 
+	ControlProtocol::AddStripableToSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Add), gui_context());
+	ControlProtocol::RemoveStripableFromSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
+	ControlProtocol::SetStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Set), gui_context());
+	ControlProtocol::ToggleStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
+	ControlProtocol::ClearStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_unselect, this), gui_context());
+
 	BasicUI::AccessAction.connect (*this, invalidator (*this), boost::bind (&Editor::access_action, this, _1, _2), gui_context());
 
 	/* problematic: has to return a value and thus cannot be x-thread */
@@ -1000,7 +1006,7 @@ Editor::control_unselect ()
 }
 
 void
-Editor::control_select (uint16_t rid, Selection::Operation op)
+Editor::control_select (PresentationInfo::global_order_t global_order, Selection::Operation op)
 {
 	/* handles the (static) signal from the ControlProtocol class that
 	 * requests setting the selected track to a given RID
@@ -1010,7 +1016,12 @@ Editor::control_select (uint16_t rid, Selection::Operation op)
 		return;
 	}
 
-	boost::shared_ptr<Route> r = _session->get_remote_nth_route (rid);
+	PresentationInfo pi (global_order, PresentationInfo::Flag (0));
+	boost::shared_ptr<Stripable> s = _session->get_remote_nth_stripable (pi.group_order(), pi.flags());
+
+	/* selected object may not be a Route */
+
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
 
 	if (!r) {
 		return;
