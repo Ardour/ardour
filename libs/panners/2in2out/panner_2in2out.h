@@ -63,7 +63,7 @@ class Panner2in2out : public Panner
 	static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
 
         std::string describe_parameter (Evoral::Parameter);
-        std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
+        std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
 	XMLNode& get_state ();
 

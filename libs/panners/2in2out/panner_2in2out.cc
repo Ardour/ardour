@@ -508,7 +508,7 @@ Panner2in2out::describe_parameter (Evoral::Parameter p)
 }
 
 string
-Panner2in2out::value_as_string (boost::shared_ptr<AutomationControl> ac) const
+Panner2in2out::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
 {
         /* DO NOT USE LocaleGuard HERE */
         double val = ac->get_value();

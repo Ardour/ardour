@@ -296,7 +296,7 @@ Pannerbalance::describe_parameter (Evoral::Parameter p)
 }
 
 string
-Pannerbalance::value_as_string (boost::shared_ptr<AutomationControl> ac) const
+Pannerbalance::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
 {
 	/* DO NOT USE LocaleGuard HERE */
 	double val = ac->get_value();

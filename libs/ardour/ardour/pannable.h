@@ -68,7 +68,7 @@ class LIBARDOUR_API Pannable : public PBD::Stateful, public Automatable, public 
 		return ((_auto_state & Write) || ((_auto_state & Touch) && touching()));
 	}
 
-	std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
+	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
 	void start_touch (double when);
 	void stop_touch (bool mark, double when);

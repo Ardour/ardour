@@ -79,7 +79,7 @@ public:
 		return _gain_control;
 	}
 
-	std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
+	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
 private:
 	bool   _denormal_protection;

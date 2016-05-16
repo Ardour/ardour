@@ -77,7 +77,7 @@ class LIBARDOUR_API Send : public Delivery
 
 	bool set_name (const std::string& str);
 
-	std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
+	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
 	static uint32_t how_many_sends();
 	static std::string name_and_id_new_send (Session&, Delivery::Role r, uint32_t&, bool);

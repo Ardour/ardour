@@ -110,7 +110,7 @@ public:
 
 	virtual std::set<Evoral::Parameter> what_can_be_automated() const;
 	virtual std::string describe_parameter (Evoral::Parameter);
-	virtual std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
+	virtual std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
 	bool touching() const;
 
