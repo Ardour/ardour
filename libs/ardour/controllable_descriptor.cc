@@ -16,12 +16,14 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "pbd/controllable_descriptor.h"
 #include "pbd/strsplit.h"
 #include "pbd/convert.h"
 
+#include "ardour/controllable_descriptor.h"
+
 using namespace std;
 using namespace PBD;
+using namespace ARDOUR;
 
 int
 ControllableDescriptor::set (const std::string& str)
@@ -51,18 +53,36 @@ ControllableDescriptor::set (const std::string& str)
 
 	if (path[0] == "route" || path[0] == "rid") {
 
-		_top_level_type = RemoteControlID;
+		_top_level_type = PresentationOrderRoute;
 
 		if (rest[0][0] == 'B') {
 			_banked = true;
-			_rid = atoi (rest[0].substr (1));
+			_presentation_order = atoi (rest[0].substr (1));
 		} else if (rest[0][0] == 'S') {
 			_top_level_type = SelectionCount;
 			_banked = true;
 			_selection_id = atoi (rest[0].substr (1));
 		} else if (isdigit (rest[0][0])) {
 			_banked = false;
-			_rid = atoi (rest[0]);
+			_presentation_order = atoi (rest[0]);
+		} else {
+			return -1;
+		}
+
+	} else if (path[0] == "vca") {
+
+		_top_level_type = PresentationOrderVCA;
+
+		if (rest[0][0] == 'B') {
+			_banked = true;
+			_presentation_order = atoi (rest[0].substr (1));
+		} else if (rest[0][0] == 'S') {
+			_top_level_type = SelectionCount;
+			_banked = true;
+			_selection_id = atoi (rest[0].substr (1));
+		} else if (isdigit (rest[0][0])) {
+			_banked = false;
+			_presentation_order = atoi (rest[0]);
 		} else {
 			return -1;
 		}
@@ -127,13 +147,13 @@ ControllableDescriptor::set (const std::string& str)
 }
 
 uint32_t
-ControllableDescriptor::rid () const
+ControllableDescriptor::presentation_order () const
 {
 	if (banked()) {
-		return _rid + _bank_offset;
+		return _presentation_order + _bank_offset;
 	}
 
-	return _rid;
+	return _presentation_order;
 }
 
 uint32_t

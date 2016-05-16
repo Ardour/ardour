@@ -37,7 +37,6 @@ libpbd_sources = [
     'configuration_variable.cc',
     'convert.cc',
     'controllable.cc',
-    'controllable_descriptor.cc',
     'crossthread.cc',
     'cpus.cc',
     'debug.cc',

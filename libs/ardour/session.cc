@@ -4206,7 +4206,7 @@ Session::get_remote_nth_stripable (uint16_t n, PresentationInfo::Flag flags) con
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	vector<boost::shared_ptr<Route> > v;
 
-	if (n > r->size()) {
+	if (n >= r->size()) {
 		return boost::shared_ptr<Route> ();
 	}
 
@@ -6676,14 +6676,7 @@ Session::notify_presentation_info_change ()
 		return;
 	}
 
-	switch (Config->get_remote_model()) {
-	case MixerOrdered:
-		Stripable::PresentationInfoChange (); /* EMIT SIGNAL */
-		break;
-	default:
-		break;
-	}
-
+	Stripable::PresentationInfoChange (); /* EMIT SIGNAL */
 	reassign_track_numbers();
 
 #ifdef USE_TRACKS_CODE_FEATURES

@@ -62,7 +62,6 @@
 #include "evoral/SMF.hpp"
 
 #include "pbd/basename.h"
-#include "pbd/controllable_descriptor.h"
 #include "pbd/debug.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
@@ -84,6 +83,7 @@
 #include "ardour/automation_control.h"
 #include "ardour/boost_debug.h"
 #include "ardour/butler.h"
+#include "ardour/controllable_descriptor.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
@@ -1596,6 +1596,24 @@ Session::load_routes (const XMLNode& node, int version)
 	add_routes (new_routes, false, false, false, PresentationInfo::max_order);
 
 	BootMessage (_("Finished adding tracks/busses"));
+
+	boost::shared_ptr<Route> r;
+	uint32_t n = nroutes ();
+
+	for (uint32_t nn = 0; nn < n + 1; ++nn) {
+		r = get_remote_nth_route (nn);
+		if (r) {
+			std::cerr << "Nth-route = " << r->name() << endl;
+		} else {
+			std::cerr << "Nth-route: undefined\n";
+		}
+	}
+
+	boost::shared_ptr<Stripable> s;
+	s = get_remote_nth_stripable (0, PresentationInfo::MasterOut);
+	std::cerr << " Master = " << s << std::endl;
+	s = get_remote_nth_stripable (0, PresentationInfo::MonitorOut);
+	std::cerr << " Monitor = " << s << std::endl;
 
 	return 0;
 }
@@ -3396,6 +3414,7 @@ boost::shared_ptr<Controllable>
 Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 {
 	boost::shared_ptr<Controllable> c;
+	boost::shared_ptr<Stripable> s;
 	boost::shared_ptr<Route> r;
 
 	switch (desc.top_level_type()) {
@@ -3403,65 +3422,65 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	{
 		std::string str = desc.top_level_name();
 		if (str == "Master" || str == "master") {
-			r = _master_out;
+			s = _master_out;
 		} else if (str == "control" || str == "listen") {
-			r = _monitor_out;
+			s = _monitor_out;
 		} else {
-			r = route_by_name (desc.top_level_name());
+			s = route_by_name (desc.top_level_name());
 		}
 		break;
 	}
 
-	case ControllableDescriptor::RemoteControlID:
-		r = get_remote_nth_route (desc.rid());
+	case ControllableDescriptor::PresentationOrderRoute:
+		s = get_remote_nth_stripable (desc.presentation_order(), PresentationInfo::Route);
+		break;
+
+	case ControllableDescriptor::PresentationOrderVCA:
+		s = get_remote_nth_stripable (desc.presentation_order(), PresentationInfo::VCA);
 		break;
 
 	case ControllableDescriptor::SelectionCount:
-		r = route_by_selected_count (desc.selection_id());
+		s = route_by_selected_count (desc.selection_id());
 		break;
 	}
 
-	if (!r) {
+	if (!s) {
 		return c;
 	}
 
+	r = boost::dynamic_pointer_cast<Route> (s);
+
 	switch (desc.subtype()) {
 	case ControllableDescriptor::Gain:
-		c = r->gain_control ();
+		c = s->gain_control ();
 		break;
 
 	case ControllableDescriptor::Trim:
-		c = r->trim()->gain_control ();
+		c = s->trim_control ();
 		break;
 
 	case ControllableDescriptor::Solo:
-                c = r->solo_control();
+                c = s->solo_control();
 		break;
 
 	case ControllableDescriptor::Mute:
-		c = r->mute_control();
+		c = s->mute_control();
 		break;
 
 	case ControllableDescriptor::Recenable:
-	{
-		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(r);
-
-		if (t) {
-			c = t->rec_enable_control ();
-		}
+		c = s->recenable_control ();
 		break;
-	}
 
 	case ControllableDescriptor::PanDirection:
-		c = r->pan_azimuth_control();
+		c = s->pan_azimuth_control();
 		break;
 
 	case ControllableDescriptor::PanWidth:
-	        c = r->pan_width_control();
+	        c = s->pan_width_control();
 		break;
 
 	case ControllableDescriptor::PanElevation:
-	        c = r->pan_elevation_control();
+	        c = s->pan_elevation_control();
 		break;
 
 	case ControllableDescriptor::Balance:
@@ -3483,6 +3502,10 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 			--parameter_index;
 		}
 
+		if (!r) {
+			return c;
+		}
+
 		boost::shared_ptr<Processor> p = r->nth_plugin (plugin);
 
 		if (p) {
@@ -3496,6 +3519,9 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		uint32_t send = desc.target (0);
 		if (send > 0) {
 			--send;
+		}
+		if (!r) {
+			return c;
 		}
 		c = r->send_level_controllable (send);
 		break;

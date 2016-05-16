@@ -88,7 +88,6 @@ class Parser;
 
 namespace PBD {
 class Controllable;
-class ControllableDescriptor;
 }
 
 namespace luabridge {
@@ -114,6 +113,7 @@ class BufferSet;
 class Bundle;
 class Butler;
 class Click;
+class ControllableDescriptor;
 class Diskstream;
 class ExportHandler;
 class ExportStatus;
@@ -988,7 +988,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<Processor> processor_by_id (PBD::ID) const;
 
 	boost::shared_ptr<PBD::Controllable> controllable_by_id (const PBD::ID&);
-	boost::shared_ptr<PBD::Controllable> controllable_by_descriptor (const PBD::ControllableDescriptor&);
+	boost::shared_ptr<PBD::Controllable> controllable_by_descriptor (const ARDOUR::ControllableDescriptor&);
 
 	void add_controllable (boost::shared_ptr<PBD::Controllable>);
 	void remove_controllable (PBD::Controllable*);

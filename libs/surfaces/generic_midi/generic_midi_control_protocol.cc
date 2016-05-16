@@ -25,7 +25,6 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
-#include "pbd/controllable_descriptor.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
@@ -37,6 +36,7 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioengine.h"
+#include "ardour/controllable_descriptor.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/session.h"
 #include "ardour/route.h"

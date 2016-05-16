@@ -23,7 +23,6 @@
 #include <iostream>
 
 #include "pbd/error.h"
-#include "pbd/controllable_descriptor.h"
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
 #include "pbd/compose.h"
@@ -34,6 +33,7 @@
 
 #include "ardour/async_midi_port.h"
 #include "ardour/automation_control.h"
+#include "ardour/controllable_descriptor.h"
 #include "ardour/midi_ui.h"
 #include "ardour/utils.h"
 #include "ardour/debug.h"

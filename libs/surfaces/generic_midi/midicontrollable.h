@@ -30,7 +30,7 @@
 
 #include "ardour/types.h"
 
-namespace PBD {
+namespace ARDOUR {
 	class ControllableDescriptor;
 }
 
@@ -91,7 +91,7 @@ class MIDIControllable : public PBD::Stateful
 	void set_controllable (PBD::Controllable*);
 	const std::string& current_uri() const { return _current_uri; }
 
-	PBD::ControllableDescriptor& descriptor() const { return *_descriptor; }
+	ARDOUR::ControllableDescriptor& descriptor() const { return *_descriptor; }
 
 	std::string control_description() const { return _control_description; }
 
@@ -116,7 +116,7 @@ class MIDIControllable : public PBD::Stateful
 
 	GenericMidiControlProtocol* _surface;
 	PBD::Controllable* controllable;
-	PBD::ControllableDescriptor* _descriptor;
+	ARDOUR::ControllableDescriptor* _descriptor;
 	std::string     _current_uri;
         MIDI::Parser&   _parser;
 	bool             setting;

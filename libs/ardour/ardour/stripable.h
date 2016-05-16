@@ -183,9 +183,6 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	void set_presentation_info_explicit (PresentationInfo);
 
 	void add_state (XMLNode&) const;
-
-  private:
-	void set_presentation_info_internal (PresentationInfo id, bool notify_class_listeners = true);
 };
 
 struct PresentationInfoSorter {

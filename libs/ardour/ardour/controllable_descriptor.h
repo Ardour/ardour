@@ -16,21 +16,22 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __pbd_controllable_descriptor_h__
-#define __pbd_controllable_descriptor_h__
+#ifndef __libardour_controllable_descriptor_h__
+#define __libardour_controllable_descriptor_h__
 
 #include <vector>
 #include <string>
 #include <stdint.h>
 
-#include "pbd/libpbd_visibility.h"
+#include "ardour/libardour_visibility.h"
 
-namespace PBD {
+namespace ARDOUR {
 
-class LIBPBD_API ControllableDescriptor {
+class LIBARDOUR_API ControllableDescriptor {
 public:
     enum TopLevelType {
-	    RemoteControlID,
+	    PresentationOrderRoute,
+	    PresentationOrderVCA,
 	    NamedRoute,
 	    SelectionCount,
     };
@@ -50,9 +51,8 @@ public:
     };
 
     ControllableDescriptor ()
-	    : _top_level_type (RemoteControlID)
+	    : _top_level_type (PresentationOrderRoute)
 	    , _subtype (Gain)
-	    , _rid (0)
 	    , _banked (false)
 	    , _bank_offset (0)
     {}
@@ -68,7 +68,7 @@ public:
 
     SubType subtype() const { return _subtype; }
 
-    uint32_t rid() const;
+    uint32_t presentation_order() const;
     uint32_t selection_id() const;
     uint32_t target (uint32_t n) const;
     bool banked() const { return _banked; }
@@ -80,7 +80,7 @@ private:
     SubType               _subtype;
     std::string           _top_level_name;
     union {
-	    uint32_t  _rid;
+	    uint32_t  _presentation_order;
 	    uint32_t  _selection_id;
     };
     std::vector<uint32_t> _target;
@@ -90,4 +90,4 @@ private:
 
 }
 
-#endif /* __pbd_controllable_descriptor_h__ */
+#endif /* __libardour_controllable_descriptor_h__ */

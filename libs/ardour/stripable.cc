@@ -43,7 +43,7 @@ Stripable::Stripable (Session& s, string const & name, PresentationInfo const & 
 void
 Stripable::set_presentation_group_order (PresentationInfo::order_t order, bool notify_class_listeners)
 {
-	set_presentation_info_internal (PresentationInfo (order, _presentation_info.flags()), notify_class_listeners);
+	set_presentation_info (PresentationInfo (order, _presentation_info.flags()), notify_class_listeners);
 }
 
 void
@@ -54,16 +54,6 @@ Stripable::set_presentation_group_order_explicit (PresentationInfo::order_t orde
 
 void
 Stripable::set_presentation_info (PresentationInfo pi, bool notify_class_listeners)
-{
-	if (Config->get_remote_model() != UserOrdered) {
-		return;
-	}
-
-	set_presentation_info_internal (pi, notify_class_listeners);
-}
-
-void
-Stripable::set_presentation_info_internal (PresentationInfo pi, bool notify_class_listeners)
 {
 	if (pi != presentation_info()) {
 
@@ -88,7 +78,7 @@ Stripable::set_presentation_info_internal (PresentationInfo pi, bool notify_clas
 void
 Stripable::set_presentation_info_explicit (PresentationInfo pi)
 {
-	set_presentation_info_internal (pi, false);
+	set_presentation_info (pi, false);
 }
 
 int
@@ -99,24 +89,19 @@ Stripable::set_state (XMLNode const& node, int version)
 	XMLNodeConstIterator niter;
 	XMLNode *child;
 
-	if (version > 3000) {
-
-		std::cerr << "Looking for PI\n";
+	if (version > 3001) {
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 			child = *niter;
 
 			if (child->name() == X_("PresentationInfo")) {
-				std::cerr << "Found it\n";
 				if ((prop = child->property (X_("value"))) != 0) {
 					_presentation_info = prop->value ();
-					std::cerr << "Set pinfo to " << _presentation_info << " from " << prop->value() << std::endl;
 				}
 			}
 		}
 
 	} else {
-		std::cerr << "Old\n";
 
 		/* Older versions of Ardour stored "_flags" as a property of the Route
 		 * node, only for 3 special Routes (MasterOut, MonitorOut, Auditioner.
@@ -145,6 +130,12 @@ Stripable::set_state (XMLNode const& node, int version)
 
 			_presentation_info.set_flags (flags);
 
+		}
+
+		if (!_presentation_info.special()) {
+			if ((prop = node.property (X_("order-key"))) != 0) {
+				_presentation_info.set_group_order (atol (prop->value()));
+			}
 		}
 	}
 
