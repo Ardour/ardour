@@ -188,6 +188,7 @@ class MackieControlProtocol
 	void notify_subview_stripable_deleted ();
 	void notify_stripable_removed ();
 	void notify_routes_added (ARDOUR::RouteList &);
+	void notify_vca_added (ARDOUR::VCAList &);
 
 	void notify_presentation_info_changed();
 

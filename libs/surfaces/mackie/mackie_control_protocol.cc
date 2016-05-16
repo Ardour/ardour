@@ -59,6 +59,7 @@
 #include "ardour/track.h"
 #include "ardour/types.h"
 #include "ardour/audioengine.h"
+#include "ardour/vca_manager.h"
 
 #include "mackie_control_protocol.h"
 
@@ -699,7 +700,7 @@ MackieControlProtocol::connect_session_signals()
 	// receive routes added
 	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_routes_added, this, _1), this);
 	// receive VCAs added
-	//session->RoutesAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_stripable_added, this, _1), this);
+	session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_vca_added, this, _1), this);
 
 	// receive record state toggled
 	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_record_state_changed, this), this);
@@ -1241,6 +1242,12 @@ MackieControlProtocol::notify_stripable_removed ()
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->master_monitor_may_have_changed ();
 	}
+}
+
+void
+MackieControlProtocol::notify_vca_added (ARDOUR::VCAList& vl)
+{
+	refresh_current_bank ();
 }
 
 // RouteList is the set of Routes that have just been added
