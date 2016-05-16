@@ -95,6 +95,8 @@ class LIBARDOUR_API VCA : public Stripable,
 
 	virtual boost::shared_ptr<GainControl> gain_control() const { return _gain_control; }
 	virtual boost::shared_ptr<SoloControl> solo_control() const { return _solo_control; }
+	virtual boost::shared_ptr<SoloIsolateControl> solo_isolate_control() const { return boost::shared_ptr<SoloIsolateControl>(); }
+	virtual boost::shared_ptr<SoloSafeControl> solo_safe_control() const { return boost::shared_ptr<SoloSafeControl>(); }
 	virtual boost::shared_ptr<MuteControl> mute_control() const { return _mute_control; }
 	virtual boost::shared_ptr<AutomationControl> recenable_control() const { return _recenable_control; }
 	virtual boost::shared_ptr<MonitorControl>    monitoring_control() const { return _monitor_control; }
