@@ -51,8 +51,10 @@
 #ifdef __APPLE__
       <menuitem action='toggle-about'/>
 #endif
+#ifndef MIXBUS
       <separator/>
       <menuitem action='lock'/>
+#endif
 #ifndef __APPLE__
       <separator/>
       <menuitem action='Quit'/>
@@ -386,7 +388,9 @@
         <menuitem action='region-fill-track'/>
       </menu>
       <menuitem action='export-region'/>
+#ifndef MIXBUS
       <menuitem action='bounce-regions-processed'/>
+#endif
       <menuitem action='bounce-regions-unprocessed'/>
       <separator/>
       <menuitem action='remove-region'/>
@@ -394,6 +398,9 @@
 
     <menu action='TrackMenu'>
       <menuitem action='AddTrackBus'/>
+#ifdef MIXBUS
+      <menuitem action='addExistingAudioFiles'/>
+#endif
       <menuitem action='duplicate-routes'/>
       <separator/>
       <menuitem action='track-record-enable-toggle'/>
@@ -554,16 +561,25 @@
       <menuitem action='toggle-meterbridge'/>
       <menuitem action='toggle-luawindow'/>
       <separator/>
+#ifndef MIXBUS
       <menuitem action='toggle-inspector'/>
+#endif
       <menuitem action='toggle-locations'/>
       <menuitem action='toggle-key-editor'/>
+#ifndef MIXBUS
       <menuitem action='toggle-bundle-manager'/>
+#endif
       <menuitem action='toggle-big-clock'/>
 #if 0
       <menuitem action='toggle-speaker-config'/>
 #endif
 
       <separator/>
+#ifdef MIXBUS
+      <menuitem action='license-manager'/>
+
+      <separator/>
+#endif
 
       <menuitem action='ToggleJadeo'/>
       <separator/>
@@ -578,6 +594,12 @@
 #ifndef __APPLE__
       <menuitem action='toggle-about'/>
 #endif
+#ifdef MIXBUS
+      <menuitem action='reference'/>
+      <menuitem action='manual'/>
+      <menuitem action='forums'/>
+      <menuitem action='chat'/>
+#else
       <menuitem action='chat'/>
       <menuitem action='manual'/>
       <menuitem action='reference'/>
@@ -586,6 +608,7 @@
       <menuitem action='tracker'/>
       <menuitem action='website'/>
       <menuitem action='website-dev'/>
+#endif
     </menu>
   </menubar>
 
@@ -654,7 +677,9 @@
     <separator/>
     <menuitem action='activate_all'/>
     <menuitem action='deactivate_all'/>
+#ifndef MIXBUS
     <menuitem action='ab_plugins'/>
+#endif
     <separator/>
     <menuitem action='manage-pins'/>
     <separator/>
@@ -778,7 +803,9 @@
       <menuitem action='region-fill-track'/>
     </menu>
     <menuitem action='export-region'/>
+#ifndef MIXBUS
     <menuitem action='bounce-regions-processed'/>
+#endif
     <menuitem action='bounce-regions-unprocessed'/>
     <menuitem action='loudness-analyze-region'/>
     <menuitem action='spectral-analyze-region'/>
