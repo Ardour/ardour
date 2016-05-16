@@ -95,6 +95,8 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	virtual boost::shared_ptr<GainControl> gain_control() const = 0;
 
 	virtual boost::shared_ptr<SoloControl> solo_control() const = 0;
+	virtual boost::shared_ptr<SoloIsolateControl> solo_isolate_control() const = 0;
+	virtual boost::shared_ptr<SoloSafeControl> solo_safe_control() const = 0;
 	virtual boost::shared_ptr<MuteControl> mute_control() const = 0;
 
 	virtual boost::shared_ptr<PhaseControl> phase_control() const = 0;
