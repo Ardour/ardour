@@ -4013,6 +4013,16 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 						  something_soloed, listeners, isolated));
 }
 
+void
+Session::get_stripables (StripableList& sl) const
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	sl.insert (sl.end(), r->begin(), r->end());
+
+	VCAList v = _vca_manager->vcas ();
+	sl.insert (sl.end(), v.begin(), v.end());
+}
+
 boost::shared_ptr<RouteList>
 Session::get_routes_with_internal_returns() const
 {

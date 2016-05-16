@@ -277,6 +277,14 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		return routes.reader ();
 	}
 
+	/* because the set of Stripables consists of objects managed
+	 * independently, in multiple containers within the Session (or objects
+	 * owned by the session), we fill out a list in-place rather than
+	 * return a pointer to a copy of the (RCU) managed list, as happens
+	 * with get_routes()
+	 */
+
+	void get_stripables (StripableList&) const;
 	boost::shared_ptr<RouteList> get_tracks() const;
 	boost::shared_ptr<RouteList> get_routes_with_internal_returns() const;
 	boost::shared_ptr<RouteList> get_routes_with_regions_at (framepos_t const) const;
