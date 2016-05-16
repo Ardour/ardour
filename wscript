@@ -1207,16 +1207,12 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
     write_config_text('Windows key',           opts.windows_key)
 
-    print ('\nBackends:')
-    
     write_config_text('PortAudio Backend',     conf.env['BUILD_PABACKEND'])
     write_config_text('CoreAudio/Midi Backend',conf.env['BUILD_CORECRAPPITA'])
     write_config_text('ALSA Backend',          conf.env['BUILD_ALSABACKEND'])
     write_config_text('Dummy backend',         conf.env['BUILD_DUMMYBACKEND'])
     write_config_text('JACK Backend',          conf.env['BUILD_JACKBACKEND'])
 
-    print ('\n')
-    
     write_config_text('C compiler flags',      conf.env['CFLAGS'])
     write_config_text('C++ compiler flags',    conf.env['CXXFLAGS'])
     write_config_text('Linker flags',          conf.env['LINKFLAGS'])
