@@ -67,7 +67,7 @@ PresentationInfo::parse (string const& str)
 int
 PresentationInfo::parse (uint32_t n, Flag f)
 {
-	if (n < UINT16_MAX) {
+	if (n < UINT32_MAX) {
 		assert (f != Flag (0));
 		_order = n;
 		_flags = Flag (f|GroupOrderSet);
