@@ -2667,10 +2667,9 @@ if (!Profile->get_mixbus()) {
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_main_outs)
 		     ));
 
-	add_option (_("Solo & mute"), new OptionEditorHeading (_("Send Routing")));
-
 
 if (!ARDOUR::Profile->get_mixbus()) {
+	add_option (_("Solo & mute"), new OptionEditorHeading (_("Send Routing")));
 	add_option (_("Solo & mute"),
 	     new BoolOption (
 		     "link-send-and-route-panner",
