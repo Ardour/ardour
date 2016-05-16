@@ -46,13 +46,22 @@ PBD::Signal0<void> ControlProtocol::VerticalZoomOutAll;
 PBD::Signal0<void> ControlProtocol::VerticalZoomInSelected;
 PBD::Signal0<void> ControlProtocol::VerticalZoomOutSelected;
 PBD::Signal1<void,RouteNotificationListPtr> ControlProtocol::TrackSelectionChanged;
+PBD::Signal0<void>          ControlProtocol::StepTracksDown;
+PBD::Signal0<void>          ControlProtocol::StepTracksUp;
+
 PBD::Signal1<void,uint64_t> ControlProtocol::AddRouteToSelection;
 PBD::Signal1<void,uint64_t> ControlProtocol::SetRouteSelection;
 PBD::Signal1<void,uint64_t> ControlProtocol::ToggleRouteSelection;
 PBD::Signal1<void,uint64_t> ControlProtocol::RemoveRouteFromSelection;
 PBD::Signal0<void>          ControlProtocol::ClearRouteSelection;
-PBD::Signal0<void>          ControlProtocol::StepTracksDown;
-PBD::Signal0<void>          ControlProtocol::StepTracksUp;
+
+PBD::Signal1<void,StripableNotificationListPtr> ControlProtocol::StripableSelectionChanged;
+PBD::Signal1<void,uint64_t> ControlProtocol::AddStripableToSelection;
+PBD::Signal1<void,uint64_t> ControlProtocol::SetStripableSelection;
+PBD::Signal1<void,uint64_t> ControlProtocol::ToggleStripableSelection;
+PBD::Signal1<void,uint64_t> ControlProtocol::RemoveStripableFromSelection;
+PBD::Signal0<void>          ControlProtocol::ClearStripableSelection;
+
 
 const std::string ControlProtocol::state_node_name ("Protocol");
 
