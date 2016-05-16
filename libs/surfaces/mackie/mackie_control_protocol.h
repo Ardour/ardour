@@ -130,25 +130,25 @@ class MackieControlProtocol
 	FlipMode flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
 	SubViewMode subview_mode () const { return _subview_mode; }
-	static bool subview_mode_would_be_ok (SubViewMode, boost::shared_ptr<ARDOUR::Route>);
-	boost::shared_ptr<ARDOUR::Route> subview_route() const;
+	static bool subview_mode_would_be_ok (SubViewMode, boost::shared_ptr<ARDOUR::Stripable>);
+	boost::shared_ptr<ARDOUR::Stripable> subview_stripable() const;
 	bool zoom_mode () const { return modifier_state() & MODIFIER_ZOOM; }
 	bool     metering_active () const { return _metering_active; }
 
-	bool is_track (boost::shared_ptr<ARDOUR::Route>) const;
-	bool is_audio_track (boost::shared_ptr<ARDOUR::Route>) const;
-	bool is_midi_track (boost::shared_ptr<ARDOUR::Route>) const;
-	bool selected (boost::shared_ptr<ARDOUR::Route>) const;
-	bool is_hidden (boost::shared_ptr<ARDOUR::Route>) const;
-	bool is_mapped (boost::shared_ptr<ARDOUR::Route>) const;
-	boost::shared_ptr<ARDOUR::Route> first_selected_route () const;
+	bool is_track (boost::shared_ptr<ARDOUR::Stripable>) const;
+	bool is_audio_track (boost::shared_ptr<ARDOUR::Stripable>) const;
+	bool is_midi_track (boost::shared_ptr<ARDOUR::Stripable>) const;
+	bool selected (boost::shared_ptr<ARDOUR::Stripable>) const;
+	bool is_hidden (boost::shared_ptr<ARDOUR::Stripable>) const;
+	bool is_mapped (boost::shared_ptr<ARDOUR::Stripable>) const;
+	boost::shared_ptr<ARDOUR::Stripable> first_selected_stripable () const;
 
 	void check_fader_automation_state ();
 	void update_fader_automation_state ();
 	void set_automation_state (ARDOUR::AutoState);
 
 	void set_view_mode (ViewMode);
-	int set_subview_mode (SubViewMode, boost::shared_ptr<ARDOUR::Route>);
+	int set_subview_mode (SubViewMode, boost::shared_ptr<ARDOUR::Stripable>);
 	void set_flip_mode (FlipMode);
 	void display_view_mode ();
 
@@ -185,17 +185,18 @@ class MackieControlProtocol
 
 	void handle_button_event (Mackie::Surface&, Mackie::Button& button, Mackie::ButtonState);
 
-	void notify_subview_route_deleted ();
-	void notify_route_removed ();
-	void notify_route_added (ARDOUR::RouteList &);
+	void notify_subview_stripable_deleted ();
+	void notify_stripable_removed ();
+	void notify_routes_added (ARDOUR::RouteList &);
+
 	void notify_presentation_info_changed();
 
 	void recalibrate_faders ();
 	void toggle_backlight ();
 	void set_touch_sensitivity (int);
 
-	/// rebuild the current bank. Called on route added/removed and
-	/// remote id changed.
+	/// rebuild the current bank. Called on route or vca added/removed and
+	/// presentation info changed.
 	void refresh_current_bank();
 
 	// button-related signals
@@ -254,11 +255,11 @@ class MackieControlProtocol
 	void zero_all();
 
 	/**
-	   Fetch the set of routes to be considered for control by the
+	   Fetch the set of Stripables to be considered for control by the
 	   surface. Excluding master, hidden and control routes, and inactive routes
 	*/
-	typedef std::vector<boost::shared_ptr<ARDOUR::Route> > Sorted;
-	Sorted get_sorted_routes();
+	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
+	Sorted get_sorted_stripables();
 
 	// bank switching
 	int switch_banks (uint32_t first_remote_id, bool force = false);
@@ -276,7 +277,7 @@ class MackieControlProtocol
 
 	void thread_init ();
 
-	bool route_is_locked_to_strip (boost::shared_ptr<ARDOUR::Route>) const;
+	bool stripable_is_locked_to_strip (boost::shared_ptr<ARDOUR::Stripable>) const;
 
   private:
 
@@ -304,8 +305,8 @@ class MackieControlProtocol
 	uint32_t                 _current_initial_bank;
 	PBD::ScopedConnectionList audio_engine_connections;
 	PBD::ScopedConnectionList session_connections;
-	PBD::ScopedConnectionList route_connections;
-	PBD::ScopedConnectionList subview_route_connections;
+	PBD::ScopedConnectionList stripable_connections;
+	PBD::ScopedConnectionList subview_stripable_connections;
 	PBD::ScopedConnectionList gui_connections;
 	PBD::ScopedConnectionList fader_automation_connections;
 	// timer for two quick marker left presses
@@ -324,7 +325,7 @@ class MackieControlProtocol
 	FlipMode                 _flip_mode;
 	ViewMode                 _view_mode;
 	SubViewMode              _subview_mode;
-	boost::shared_ptr<ARDOUR::Route> _subview_route;
+	boost::shared_ptr<ARDOUR::Stripable> _subview_stripable;
 	int                      _current_selected_track;
 	int                      _modifier_state;
 	ButtonMap                 button_map;
@@ -332,7 +333,7 @@ class MackieControlProtocol
 	bool                      needs_ipmidi_restart;
 	bool                     _metering_active;
 	bool                     _initialized;
-	ARDOUR::RouteNotificationList _last_selected_routes;
+	ARDOUR::StripableNotificationList _last_selected_stripables;
 	XMLNode*                 configuration_state;
 	int                      state_version;
 	int                      _last_bank[9];
@@ -357,10 +358,10 @@ class MackieControlProtocol
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
 	void clear_ports ();
 	void clear_surfaces ();
-	void force_special_route_to_strip (boost::shared_ptr<ARDOUR::Route> r, uint32_t surface, uint32_t strip_number);
+	void force_special_stripable_to_strip (boost::shared_ptr<ARDOUR::Stripable> r, uint32_t surface, uint32_t strip_number);
 	void build_button_map ();
-	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr, bool save_list);
-	void _gui_track_selection_changed (ARDOUR::RouteNotificationList*, bool save_list, bool gui_did_change);
+	void gui_track_selection_changed (ARDOUR::StripableNotificationListPtr, bool save_list);
+	void _gui_track_selection_changed (ARDOUR::StripableNotificationList*, bool save_list, bool gui_did_change);
 	int ipmidi_restart ();
         void initialize ();
         int set_device_info (const std::string& device_name);
@@ -378,7 +379,7 @@ class MackieControlProtocol
 	DownButtonMap  _down_buttons;
 	DownButtonList _down_select_buttons;
 
-	void pull_route_range (DownButtonList&, ARDOUR::RouteList&);
+	void pull_stripable_range (DownButtonList&, ARDOUR::StripableList&);
 
 	/* implemented button handlers */
 	Mackie::LedState stop_press(Mackie::Button &);

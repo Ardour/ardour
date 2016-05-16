@@ -166,7 +166,7 @@ Strip::add (Control & control)
 }
 
 void
-Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
+Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 {
 	if (_controls_locked) {
 		return;
@@ -174,7 +174,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	mb_pan_controllable.reset();
 
-	route_connections.drop_connections ();
+	stripable_connections.drop_connections ();
 
 	_solo->set_control (boost::shared_ptr<AutomationControl>());
 	_mute->set_control (boost::shared_ptr<AutomationControl>());
@@ -183,7 +183,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	_fader->set_control (boost::shared_ptr<AutomationControl>());
 	_vpot->set_control (boost::shared_ptr<AutomationControl>());
 
-	_route = r;
+	_stripable = r;
 
 	reset_saved_values ();
 
@@ -193,58 +193,59 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 strip %2 now mapping route %3\n",
-							   _surface->number(), _index, _route->name()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 strip %2 now mapping stripable %3\n",
+							   _surface->number(), _index, _stripable->name()));
 
-	_solo->set_control (_route->solo_control());
-	_mute->set_control (_route->mute_control());
+	_solo->set_control (_stripable->solo_control());
+	_mute->set_control (_stripable->mute_control());
 
-	_route->solo_control()->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
-	_route->mute_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_mute_changed, this), ui_context());
+	_stripable->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
+	_stripable->mute_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_mute_changed, this), ui_context());
 
-	boost::shared_ptr<AutomationControl> pan_control = _route->pan_azimuth_control();
+	boost::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control();
 	if (pan_control) {
-		pan_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
+		pan_control->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
 	}
 
-	pan_control = _route->pan_width_control();
+	pan_control = _stripable->pan_width_control();
 	if (pan_control) {
-		pan_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_width_changed, this, false), ui_context());
+		pan_control->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_width_changed, this, false), ui_context());
 	}
 
-	_route->gain_control()->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_gain_changed, this, false), ui_context());
-	_route->PropertyChanged.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
+	_stripable->gain_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_gain_changed, this, false), ui_context());
+	_stripable->PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
 
-	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
+	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_stripable);
 
 	if (trk) {
 		_recenable->set_control (trk->rec_enable_control());
-		trk->rec_enable_control()->Changed .connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_record_enable_changed, this), ui_context());
+		trk->rec_enable_control()->Changed .connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_record_enable_changed, this), ui_context());
 	}
 
-	// TODO this works when a currently-banked route is made inactive, but not
-	// when a route is activated which should be currently banked.
+	// TODO this works when a currently-banked stripable is made inactive, but not
+	// when a stripable is activated which should be currently banked.
 
-	_route->active_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_active_changed, this), ui_context());
-	_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_route_deleted, this), ui_context());
+	// XXX Stripable
+	// _stripable->active_changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_active_changed, this), ui_context());
+	_stripable->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_stripable_deleted, this), ui_context());
 
-	/* setup legal VPot modes for this route */
+	/* setup legal VPot modes for this stripable */
 
 	possible_pot_parameters.clear();
 
-	if (_route->pan_azimuth_control()) {
+	if (_stripable->pan_azimuth_control()) {
 		possible_pot_parameters.push_back (PanAzimuthAutomation);
 	}
-	if (_route->pan_width_control()) {
+	if (_stripable->pan_width_control()) {
 		possible_pot_parameters.push_back (PanWidthAutomation);
 	}
-	if (_route->pan_elevation_control()) {
+	if (_stripable->pan_elevation_control()) {
 		possible_pot_parameters.push_back (PanElevationAutomation);
 	}
-	if (_route->pan_frontback_control()) {
+	if (_stripable->pan_frontback_control()) {
 		possible_pot_parameters.push_back (PanFrontBackAutomation);
 	}
-	if (_route->pan_lfe_control()) {
+	if (_stripable->pan_lfe_control()) {
 		possible_pot_parameters.push_back (PanLFEAutomation);
 	}
 
@@ -254,7 +255,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 		set_vpot_parameter (_pan_mode);
 	}
 
-	_fader->set_control (_route->gain_control());
+	_fader->set_control (_stripable->gain_control());
 
 	notify_all ();
 }
@@ -262,7 +263,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 void
 Strip::notify_all()
 {
-	if (!_route) {
+	if (!_stripable) {
 		zero ();
 		return;
 	}
@@ -284,8 +285,8 @@ Strip::notify_all()
 void
 Strip::notify_solo_changed ()
 {
-	if (_route && _solo) {
-		_surface->write (_solo->set_state (_route->soloed() ? on : off));
+	if (_stripable && _solo) {
+		_surface->write (_solo->set_state (_stripable->solo_control()->soloed() ? on : off));
 	}
 }
 
@@ -293,19 +294,19 @@ void
 Strip::notify_mute_changed ()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Strip %1 mute changed\n", _index));
-	if (_route && _mute) {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("\troute muted ? %1\n", _route->muted()));
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("mute message: %1\n", _mute->set_state (_route->muted() ? on : off)));
+	if (_stripable && _mute) {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("\tstripable muted ? %1\n", _stripable->mute_control()->muted()));
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("mute message: %1\n", _mute->set_state (_stripable->mute_control()->muted() ? on : off)));
 
-		_surface->write (_mute->set_state (_route->muted() ? on : off));
+		_surface->write (_mute->set_state (_stripable->mute_control()->muted() ? on : off));
 	}
 }
 
 void
 Strip::notify_record_enable_changed ()
 {
-	if (_route && _recenable)  {
-		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (_route);
+	if (_stripable && _recenable)  {
+		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (_stripable);
 		if (trk) {
 			_surface->write (_recenable->set_state (trk->rec_enable_control()->get_value() ? on : off));
 		}
@@ -319,20 +320,20 @@ Strip::notify_active_changed ()
 }
 
 void
-Strip::notify_route_deleted ()
+Strip::notify_stripable_deleted ()
 {
-	_surface->mcp().notify_route_removed ();
+	_surface->mcp().notify_stripable_removed ();
 	_surface->mcp().refresh_current_bank();
 }
 
 void
 Strip::notify_gain_changed (bool force_update)
 {
-	if (!_route) {
+	if (!_stripable) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = _route->gain_control();
+	boost::shared_ptr<AutomationControl> ac = _stripable->gain_control();
 	Control* control;
 
 	if (!ac) {
@@ -382,11 +383,11 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 		return;
 	}
 
-	show_route_name ();
+	show_stripable_name ();
 }
 
 void
-Strip::show_route_name ()
+Strip::show_stripable_name ()
 {
 	MackieControlProtocol::SubViewMode svm = _surface->mcp().subview_mode();
 
@@ -396,10 +397,10 @@ Strip::show_route_name ()
 	}
 
 	string fullname = string();
-	if (!_route) {
+	if (!_stripable) {
 		fullname = string();
 	} else {
-		fullname = _route->name();
+		fullname = _stripable->name();
 	}
 
 	if (fullname.length() <= 6) {
@@ -412,7 +413,7 @@ Strip::show_route_name ()
 void
 Strip::notify_send_level_change (AutomationType type, uint32_t send_num, bool force_update)
 {
-	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
+	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
 
 	if (!r) {
 		/* not in subview mode */
@@ -443,7 +444,7 @@ Strip::notify_send_level_change (AutomationType type, uint32_t send_num, bool fo
 void
 Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool force_update)
 {
-	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
+	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
 
 	if (!r) {
 		/* not in subview mode */
@@ -497,7 +498,7 @@ Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool for
 void
 Strip::notify_eq_change (AutomationType type, uint32_t band, bool force_update)
 {
-	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
+	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
 
 	if (!r) {
 		/* not in subview mode */
@@ -545,7 +546,7 @@ Strip::notify_eq_change (AutomationType type, uint32_t band, bool force_update)
 void
 Strip::notify_dyn_change (AutomationType type, bool force_update, bool propagate_mode)
 {
-	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
+	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
 
 	if (!r) {
 		/* not in subview mode */
@@ -599,13 +600,13 @@ Strip::notify_dyn_change (AutomationType type, bool force_update, bool propagate
 void
 Strip::notify_panner_azi_changed (bool force_update)
 {
-	if (!_route) {
+	if (!_stripable) {
 		return;
 	}
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("pan change for strip %1\n", _index));
 
-	boost::shared_ptr<AutomationControl> pan_control = _route->pan_azimuth_control ();
+	boost::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control ();
 
 	if (!pan_control) {
 		/* basically impossible, since we're here because that control
@@ -634,13 +635,13 @@ Strip::notify_panner_azi_changed (bool force_update)
 void
 Strip::notify_panner_width_changed (bool force_update)
 {
-	if (!_route) {
+	if (!_stripable) {
 		return;
 	}
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("pan width change for strip %1\n", _index));
 
-	boost::shared_ptr<AutomationControl> pan_control = _route->pan_width_control ();
+	boost::shared_ptr<AutomationControl> pan_control = _stripable->pan_width_control ();
 
 	if (!pan_control) {
 		/* basically impossible, since we're here because that control
@@ -738,7 +739,7 @@ Strip::vselect_event (Button&, ButtonState bs)
 			 * explicitly.
 			 */
 
-			boost::shared_ptr<Route> r = _surface->mcp().subview_route();
+			boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
 
 			if (r) {
 
@@ -763,7 +764,7 @@ Strip::vselect_event (Button&, ButtonState bs)
 					} else {
 						/* we just turned it on, show the level
 						*/
-						control = _route->send_level_controllable (global_pos);
+						control = _stripable->send_level_controllable (global_pos);
 						do_parameter_display (BusSendLevel, control->get_value());
 					}
 				}
@@ -792,8 +793,8 @@ Strip::vselect_event (Button&, ButtonState bs)
 		}  else {
 
 #ifdef MIXBUS
-			if (_route) {
-				boost::shared_ptr<AutomationControl> ac = _route->master_send_enable_controllable ();
+			if (_stripable) {
+				boost::shared_ptr<AutomationControl> ac = _stripable->master_send_enable_controllable ();
 				if (ac) {
 					Controllable::GroupControlDisposition gcd;
 
@@ -951,10 +952,10 @@ Strip::do_parameter_display (AutomationType type, float val)
 			pending_display[1] = buf;
 			screen_hold = true;
 		} else {
-			if (_route) {
-				boost::shared_ptr<Pannable> p = _route->pannable();
-				if (p && _route->panner()) {
-					pending_display[1] =_route->panner()->value_as_string (p->pan_azimuth_control);
+			if (_stripable) {
+				boost::shared_ptr<AutomationControl> pa = _stripable->pan_azimuth_control();
+				if (pa) {
+					pending_display[1] = pa->get_user_string ();
 					screen_hold = true;
 				}
 			}
@@ -962,7 +963,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 		break;
 
 	case PanWidthAutomation:
-		if (_route) {
+		if (_stripable) {
 			snprintf (buf, sizeof (buf), "%5ld%%", lrintf ((val * 200.0)-100));
 			pending_display[1] = buf;
 			screen_hold = true;
@@ -970,7 +971,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 		break;
 
 	case TrimAutomation:
-		if (_route) {
+		if (_stripable) {
 			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
 			pending_display[1] = buf;
@@ -979,7 +980,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 		break;
 
 	case PhaseAutomation:
-		if (_route) {
+		if (_stripable) {
 			if (val < 0.5) {
 				pending_display[1] = "Normal";
 			} else {
@@ -1011,8 +1012,8 @@ Strip::do_parameter_display (AutomationType type, float val)
 		}
 		break;
 	case CompMode:
-		if (_surface->mcp().subview_route()) {
-			pending_display[1] = _surface->mcp().subview_route()->comp_mode_name (val);
+		if (_surface->mcp().subview_stripable()) {
+			pending_display[1] = _surface->mcp().subview_stripable()->comp_mode_name (val);
 		}
 		break;
 	case SoloSafeAutomation:
@@ -1193,17 +1194,17 @@ Strip::redisplay (ARDOUR::microseconds_t now, bool force)
 void
 Strip::update_automation ()
 {
-	if (!_route) {
+	if (!_stripable) {
 		return;
 	}
 
-	ARDOUR::AutoState state = _route->gain_control()->automation_state();
+	ARDOUR::AutoState state = _stripable->gain_control()->automation_state();
 
 	if (state == Touch || state == Play) {
 		notify_gain_changed (false);
 	}
 
-	boost::shared_ptr<AutomationControl> pan_control = _route->pan_azimuth_control ();
+	boost::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control ();
 	if (pan_control) {
 		state = pan_control->automation_state ();
 		if (state == Touch || state == Play) {
@@ -1211,7 +1212,7 @@ Strip::update_automation ()
 		}
 	}
 
-	pan_control = _route->pan_width_control ();
+	pan_control = _stripable->pan_width_control ();
 	if (pan_control) {
 		state = pan_control->automation_state ();
 		if (state == Touch || state == Play) {
@@ -1223,7 +1224,7 @@ Strip::update_automation ()
 void
 Strip::update_meter ()
 {
-	if (!_route) {
+	if (!_stripable) {
 		return;
 	}
 
@@ -1232,7 +1233,7 @@ Strip::update_meter ()
 	}
 
 	if (_meter && _transport_is_rolling && _metering_active) {
-		float dB = _route->peak_meter()->meter_level (0, MeterMCP);
+		float dB = _stripable->peak_meter()->meter_level (0, MeterMCP);
 		_meter->send_update (*_surface, dB);
 		return;
 	}
@@ -1313,10 +1314,10 @@ Strip::unlock_controls ()
 }
 
 void
-Strip::gui_selection_changed (const ARDOUR::StrongRouteNotificationList& rl)
+Strip::gui_selection_changed (const ARDOUR::StrongStripableNotificationList& rl)
 {
-	for (ARDOUR::StrongRouteNotificationList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
-		if ((*i) == _route) {
+	for (ARDOUR::StrongStripableNotificationList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
+		if ((*i) == _stripable) {
 			_surface->write (_select->set_state (on));
 			return;
 		}
@@ -1411,7 +1412,7 @@ Strip::return_to_vpot_mode_display ()
 	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
 		/* do nothing - second line shows value of current subview parameter */
 		return;
-	} else if (_route) {
+	} else if (_stripable) {
 		pending_display[1] = vpot_mode_string();
 	} else {
 		pending_display[1] = string();
@@ -1471,7 +1472,7 @@ Strip::next_pot_mode ()
 void
 Strip::subview_mode_changed ()
 {
-	boost::shared_ptr<Route> r = _surface->mcp().subview_route();
+	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
 
 	subview_connections.drop_connections ();
 
@@ -1479,8 +1480,8 @@ Strip::subview_mode_changed ()
 	case MackieControlProtocol::None:
 		set_vpot_parameter (_pan_mode);
 		/* need to show strip name again */
-		show_route_name ();
-		if (!_route) {
+		show_stripable_name ();
+		if (!_stripable) {
 			_surface->write (_vpot->set (0, true, Pot::wrap));
 			_surface->write (_fader->set_position (0.0));
 		}
@@ -1525,7 +1526,7 @@ Strip::subview_mode_changed ()
 }
 
 void
-Strip::setup_dyn_vpot (boost::shared_ptr<Route> r)
+Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
 {
 	if (!r) {
 		return;
@@ -1610,7 +1611,7 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Route> r)
 }
 
 void
-Strip::setup_eq_vpot (boost::shared_ptr<Route> r)
+Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 {
 	uint32_t bands = r->eq_band_cnt ();
 
@@ -1745,7 +1746,7 @@ Strip::setup_eq_vpot (boost::shared_ptr<Route> r)
 }
 
 void
-Strip::setup_sends_vpot (boost::shared_ptr<Route> r)
+Strip::setup_sends_vpot (boost::shared_ptr<Stripable> r)
 {
 	if (!r) {
 		return;
@@ -1770,7 +1771,7 @@ Strip::setup_sends_vpot (boost::shared_ptr<Route> r)
 }
 
 void
-Strip::setup_trackview_vpot (boost::shared_ptr<Route> r)
+Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 {
 	if (!r) {
 		return;
@@ -1854,7 +1855,7 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Route> r)
 void
 Strip::set_vpot_parameter (AutomationType p)
 {
-	if (!_route || (p == NullAutomation)) {
+	if (!_stripable || (p == NullAutomation)) {
 		_vpot->set_control (boost::shared_ptr<AutomationControl>());
 		pending_display[1] = string();
 		return;
@@ -1868,10 +1869,10 @@ Strip::set_vpot_parameter (AutomationType p)
 
 	switch (p) {
 	case PanAzimuthAutomation:
-		pan_control = _route->pan_azimuth_control ();
+		pan_control = _stripable->pan_azimuth_control ();
 		break;
 	case PanWidthAutomation:
-		pan_control = _route->pan_width_control ();
+		pan_control = _stripable->pan_width_control ();
 		break;
 	case PanElevationAutomation:
 		break;
@@ -1894,7 +1895,7 @@ Strip::set_vpot_parameter (AutomationType p)
 bool
 Strip::is_midi_track () const
 {
-	return boost::dynamic_pointer_cast<MidiTrack>(_route) != 0;
+	return boost::dynamic_pointer_cast<MidiTrack>(_stripable) != 0;
 }
 
 void
@@ -1914,7 +1915,7 @@ Strip::notify_metering_state_changed()
 		return;
 	}
 
-	if (!_route || !_meter) {
+	if (!_stripable || !_meter) {
 		return;
 	}
 

@@ -20,7 +20,7 @@
 #include "device_info.h"
 
 namespace ARDOUR {
-	class Route;
+	class Stripable;
 	class Bundle;
 	class ChannelCount;
 }
@@ -53,13 +53,13 @@ public:
 	Strip (Surface&, const std::string & name, int index, const std::map<Button::ID,StripButtonInfo>&);
 	~Strip();
 
-	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
+	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return _stripable; }
 
 	void add (Control & control);
 	int index() const { return _index; } // zero based
 	Surface* surface() const { return _surface; }
 
-	void set_route (boost::shared_ptr<ARDOUR::Route>, bool with_messages = true);
+	void set_stripable (boost::shared_ptr<ARDOUR::Stripable>, bool with_messages = true);
 
 	// call all signal handlers manually
 	void notify_all ();
@@ -84,7 +84,7 @@ public:
 	void unlock_controls ();
 	bool locked() const { return _controls_locked; }
 
-	void gui_selection_changed (const ARDOUR::StrongRouteNotificationList&);
+	void gui_selection_changed (const ARDOUR::StrongStripableNotificationList&);
 
 	void notify_metering_state_changed();
 
@@ -115,8 +115,8 @@ private:
 	std::string current_display[2];
 	uint64_t _block_screen_redisplay_until;
 	uint64_t return_to_vpot_mode_display_at;
-	boost::shared_ptr<ARDOUR::Route> _route;
-	PBD::ScopedConnectionList route_connections;
+	boost::shared_ptr<ARDOUR::Stripable> _stripable;
+	PBD::ScopedConnectionList stripable_connections;
 	PBD::ScopedConnectionList subview_connections;
 	PBD::ScopedConnectionList send_connections;
 	int       eq_band;
@@ -136,7 +136,7 @@ private:
 	void notify_panner_azi_changed (bool force_update = true);
 	void notify_panner_width_changed (bool force_update = true);
 	void notify_active_changed ();
-	void notify_route_deleted ();
+	void notify_stripable_deleted ();
 	void notify_processor_changed (bool force_update = true);
 	void update_automation ();
 	void update_meter ();
@@ -155,23 +155,23 @@ private:
 	std::vector<ARDOUR::AutomationType> possible_pot_parameters;
 	std::vector<ARDOUR::AutomationType> possible_trim_parameters;
 	void set_vpot_parameter (ARDOUR::AutomationType);
-	void show_route_name ();
+	void show_stripable_name ();
 
 	void reset_saved_values ();
 
 	bool is_midi_track () const;
 
 	void notify_eq_change (ARDOUR::AutomationType, uint32_t band, bool force);
-	void setup_eq_vpot (boost::shared_ptr<ARDOUR::Route>);
+	void setup_eq_vpot (boost::shared_ptr<ARDOUR::Stripable>);
 
 	void notify_dyn_change (ARDOUR::AutomationType, bool force, bool propagate_mode_change);
-	void setup_dyn_vpot (boost::shared_ptr<ARDOUR::Route>);
+	void setup_dyn_vpot (boost::shared_ptr<ARDOUR::Stripable>);
 
 	void notify_send_level_change (ARDOUR::AutomationType, uint32_t band, bool force);
-	void setup_sends_vpot (boost::shared_ptr<ARDOUR::Route>);
+	void setup_sends_vpot (boost::shared_ptr<ARDOUR::Stripable>);
 
 	void notify_trackview_change (ARDOUR::AutomationType, uint32_t band, bool force);
-	void setup_trackview_vpot (boost::shared_ptr<ARDOUR::Route>);
+	void setup_trackview_vpot (boost::shared_ptr<ARDOUR::Stripable>);
 };
 
 }

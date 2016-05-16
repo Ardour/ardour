@@ -65,7 +65,7 @@
 
 using namespace std;
 using namespace PBD;
-using ARDOUR::Route;
+using ARDOUR::Stripable;
 using ARDOUR::Panner;
 using ARDOUR::Profile;
 using ARDOUR::AutomationControl;
@@ -377,7 +377,7 @@ Surface::master_monitor_may_have_changed ()
 void
 Surface::setup_master ()
 {
-	boost::shared_ptr<Route> m;
+	boost::shared_ptr<Stripable> m;
 
 	if ((m = _mcp.get_session().monitor_out()) == 0) {
 		m = _mcp.get_session().master_out();
@@ -932,29 +932,29 @@ Surface::write (const MidiByteArray& data)
 }
 
 void
-Surface::map_routes (const vector<boost::shared_ptr<Route> >& routes)
+Surface::map_stripables (const vector<boost::shared_ptr<Stripable> >& stripables)
 {
-	vector<boost::shared_ptr<Route> >::const_iterator r;
+	vector<boost::shared_ptr<Stripable> >::const_iterator r;
 	Strips::iterator s = strips.begin();
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Mapping %1 routes to %2 strips\n", routes.size(), strips.size()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Mapping %1 stripables to %2 strips\n", stripables.size(), strips.size()));
 
-	for (r = routes.begin(); r != routes.end() && s != strips.end(); ++s) {
+	for (r = stripables.begin(); r != stripables.end() && s != strips.end(); ++s) {
 
-		/* don't try to assign routes to a locked strip. it won't
+		/* don't try to assign stripables to a locked strip. it won't
 		   use it anyway, but if we do, then we get out of sync
 		   with the proposed mapping.
 		*/
 
 		if (!(*s)->locked()) {
-			(*s)->set_route (*r);
+			(*s)->set_stripable (*r);
 			++r;
 		}
 	}
 
 	for (; s != strips.end(); ++s) {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 being set to null route\n", (*s)->index()));
-		(*s)->set_route (boost::shared_ptr<Route>());
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 being set to null stripable\n", (*s)->index()));
+		(*s)->set_stripable (boost::shared_ptr<Stripable>());
 	}
 }
 
@@ -1142,10 +1142,10 @@ Surface::update_view_mode_display (bool with_helpful_text)
 }
 
 void
-Surface::gui_selection_changed (const ARDOUR::StrongRouteNotificationList& routes)
+Surface::gui_selection_changed (const ARDOUR::StrongStripableNotificationList& stripables)
 {
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->gui_selection_changed (routes);
+		(*s)->gui_selection_changed (stripables);
 	}
 }
 
@@ -1174,10 +1174,10 @@ Surface::set_jog_mode (JogWheel::Mode)
 }
 
 bool
-Surface::route_is_locked_to_strip (boost::shared_ptr<Route> r) const
+Surface::stripable_is_locked_to_strip (boost::shared_ptr<Stripable> stripable) const
 {
 	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
-		if ((*s)->route() == r && (*s)->locked()) {
+		if ((*s)->stripable() == stripable && (*s)->locked()) {
 			return true;
 		}
 	}
@@ -1185,10 +1185,10 @@ Surface::route_is_locked_to_strip (boost::shared_ptr<Route> r) const
 }
 
 bool
-Surface::route_is_mapped (boost::shared_ptr<Route> r) const
+Surface::stripable_is_mapped (boost::shared_ptr<Stripable> stripable) const
 {
 	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
-		if ((*s)->route() == r) {
+		if ((*s)->stripable() == stripable) {
 			return true;
 		}
 	}

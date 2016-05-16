@@ -22,7 +22,7 @@ namespace MIDI {
 }
 
 namespace ARDOUR {
-	class Route;
+	class Stripable;
 	class Port;
 }
 
@@ -79,8 +79,8 @@ public:
 	uint32_t n_strips (bool with_locked_strips = true) const;
 	Strip* nth_strip (uint32_t n) const;
 
-	bool route_is_locked_to_strip (boost::shared_ptr<ARDOUR::Route>) const;
-	bool route_is_mapped (boost::shared_ptr<ARDOUR::Route>) const;
+	bool stripable_is_locked_to_strip (boost::shared_ptr<ARDOUR::Stripable>) const;
+	bool stripable_is_mapped (boost::shared_ptr<ARDOUR::Stripable>) const;
 
 	/// This collection owns the groups
 	typedef std::map<std::string,Group*> Groups;
@@ -88,7 +88,7 @@ public:
 
 	SurfacePort& port() const { return *_port; }
 
-	void map_routes (const std::vector<boost::shared_ptr<ARDOUR::Route> >& routes);
+	void map_stripables (const std::vector<boost::shared_ptr<ARDOUR::Stripable> >&);
 
 	const MidiByteArray& sysex_hdr() const;
 
@@ -155,7 +155,7 @@ public:
 	void update_view_mode_display (bool with_helpful_text);
 	void update_flip_mode_display ();
 
-	void gui_selection_changed (const ARDOUR::StrongRouteNotificationList&);
+	void gui_selection_changed (const ARDOUR::StrongStripableNotificationList&);
 	void subview_mode_changed ();
 
 	MackieControlProtocol& mcp() const { return _mcp; }

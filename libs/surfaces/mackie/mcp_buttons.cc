@@ -102,7 +102,7 @@ MackieControlProtocol::left_press (Button &)
 		return none;
 	}
 
-	Sorted sorted = get_sorted_routes();
+	Sorted sorted = get_sorted_stripables();
 	uint32_t strip_cnt = n_strips ();
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank left with current initial = %1 nstrips = %2 tracks/busses = %3\n",
@@ -130,7 +130,7 @@ MackieControlProtocol::right_press (Button &)
 		return none;
 	}
 
-	Sorted sorted = get_sorted_routes();
+	Sorted sorted = get_sorted_stripables();
 	uint32_t strip_cnt = n_strips();
 	uint32_t route_cnt = sorted.size();
 	uint32_t max_bank = route_cnt / strip_cnt * strip_cnt;
@@ -270,7 +270,7 @@ MackieControlProtocol::channel_left_press (Button &)
 	if (_subview_mode != None) {
 		return none;
 	}
-	Sorted sorted = get_sorted_routes();
+	Sorted sorted = get_sorted_stripables();
 	if (sorted.size() > n_strips()) {
 		prev_track();
 		return on;
@@ -291,7 +291,7 @@ MackieControlProtocol::channel_right_press (Button &)
 	if (_subview_mode != None) {
 		return none;
 	}
-	Sorted sorted = get_sorted_routes();
+	Sorted sorted = get_sorted_stripables();
 	if (sorted.size() > n_strips()) {
 		next_track();
 		return on;
@@ -703,7 +703,7 @@ LedState
 MackieControlProtocol::pan_press (Button &)
 {
 	/* XXX eventually pan may have its own subview mode */
-	set_subview_mode (MackieControlProtocol::None, boost::shared_ptr<Route>());
+	set_subview_mode (MackieControlProtocol::None, boost::shared_ptr<Stripable>());
 	return none;
 }
 LedState
@@ -726,7 +726,7 @@ MackieControlProtocol::plugin_release (Button &)
 LedState
 MackieControlProtocol::eq_press (Button &)
 {
-	set_subview_mode (EQ, first_selected_route ());
+	set_subview_mode (EQ, first_selected_stripable ());
 	return none; /* led state handled by set_subview_mode() */
 
 }
@@ -738,7 +738,7 @@ MackieControlProtocol::eq_release (Button &)
 LedState
 MackieControlProtocol::dyn_press (Button &)
 {
-	set_subview_mode (Dynamics, first_selected_route ());
+	set_subview_mode (Dynamics, first_selected_stripable ());
 	return none; /* led state handled by set_subview_mode() */
 }
 
@@ -903,7 +903,7 @@ MackieControlProtocol::clearsolo_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::track_press (Mackie::Button&)
 {
-	set_subview_mode (TrackView, first_selected_route());
+	set_subview_mode (TrackView, first_selected_stripable());
 	return none;
 }
 Mackie::LedState
@@ -914,7 +914,7 @@ MackieControlProtocol::track_release (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::send_press (Mackie::Button&)
 {
-	set_subview_mode (Sends, first_selected_route());
+	set_subview_mode (Sends, first_selected_stripable());
 	return none; /* led state handled by set_subview_mode() */
 }
 Mackie::LedState
