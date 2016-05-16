@@ -63,26 +63,6 @@ namespace Mackie {
 
 gboolean ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data);
 
-/**
-	This handles the plugin duties, and the midi encoding and decoding,
-	and the signal callbacks, mostly from ARDOUR::Route.
-
-	The model of the control surface is handled by classes in controls.h
-
-	What happens is that each strip on the control surface has
-	a corresponding route in ControlProtocol::route_table. When
-	an incoming midi message is signaled, the correct route
-	is looked up, and the relevant changes made to it.
-
-	For each route currently in route_table, there's a RouteSignal object
-	which encapsulates the signals that indicate that there are changes
-	to be sent to the surface. The signals are handled by this class.
-
-	Calls to signal handlers pass a Route object which is used to look
-	up the relevant Strip in Surface. Then the state is retrieved from
-	the Route and encoded as the correct midi message.
-*/
-
 struct MackieControlUIRequest : public BaseUI::BaseRequestObject {
 public:
 	MackieControlUIRequest () {}
