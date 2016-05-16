@@ -43,7 +43,6 @@ using namespace Gtkmm2ext;
 static void *
 _peak_amplitude_thread (void* arg)
 {
-	SessionEvent::create_per_thread_pool ("peak amplitude events", 64);
 	static_cast<AudioRegionEditor*>(arg)->peak_amplitude_thread ();
 	return 0;
 }
@@ -52,11 +51,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 	: RegionEditor (s, r)
 	, _audio_region (r)
 	, gain_adjustment(accurate_coefficient_to_dB(_audio_region->scale_amplitude()), -40.0, +40.0, 0.1, 1.0, 0)
-#ifdef PLATFORM_WINDOWS
-	, m_peak_sem ("peak_semaphore", 0)
-#else
 	, _peak_channel (false)
-#endif
 {
 
 	Gtk::HBox* b = Gtk::manage (new Gtk::HBox);
@@ -92,14 +87,17 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 	_peak_amplitude.set_text (_("Calculating..."));
 
 	PeakAmplitudeFound.connect (_peak_amplitude_connection, invalidator (*this), boost::bind (&AudioRegionEditor::peak_amplitude_found, this, _1), gui_context ());
-	pthread_create_and_store (X_("peak-amplitude"), &_peak_amplitude_thread_handle, _peak_amplitude_thread, this);
+
+	char name[64];
+	snprintf (name, 64, "peak amplitude-%p", this);
+	pthread_create_and_store (name, &_peak_amplitude_thread_handle, _peak_amplitude_thread, this);
 	signal_peak_thread ();
 }
 
 AudioRegionEditor::~AudioRegionEditor ()
 {
 	void* v;
-	pthread_cancel_one (_peak_amplitude_thread_handle);
+	_peak_channel.deliver ('t');
 	pthread_join (_peak_amplitude_thread_handle, &v);
 }
 
@@ -138,30 +136,20 @@ AudioRegionEditor::gain_adjustment_changed ()
 void
 AudioRegionEditor::signal_peak_thread ()
 {
-#ifdef PLATFORM_WINDOWS
-	m_peak_sem.signal ();
-#else
 	_peak_channel.deliver ('c');
-#endif
-}
-
-void
-AudioRegionEditor::wait_for_signal ()
-{
-#ifdef PLATFORM_WINDOWS
-	m_peak_sem.wait ();
-#else
-	char msg;
-	_peak_channel.receive (msg);
-#endif
 }
 
 void
 AudioRegionEditor::peak_amplitude_thread ()
 {
 	while (1) {
+		char msg;
 		/* await instructions to run */
-		wait_for_signal ();
+		_peak_channel.receive (msg);
+
+		if (msg == 't') {
+			break;
+		}
 
 		/* compute peak amplitude and signal the fact */
 		PeakAmplitudeFound (accurate_coefficient_to_dB (_audio_region->maximum_amplitude ())); /* EMIT SIGNAL */
