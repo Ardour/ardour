@@ -18,6 +18,15 @@ test -f gtk2_ardour/wscript || exit 1
 : ${SRCCACHE=/var/tmp/winsrc}  # source-code tgz cache
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 
+# see also wscript, video_tool_paths.cc, bundle_env_mingw.cc
+# registry keys based on this are used there
+PROGRAM_NAME=Ardour
+PROGRAM_KEY=Ardour
+PROGRAM_VERSION=${major_version}
+
+PRODUCT_NAME=ardour
+PRODUCT_VERSION=${major_version}
+
 # TODO: grep from build/config.log instead
 while [ $# -gt 0 ] ; do
 	echo "arg = $1"
@@ -26,24 +35,27 @@ while [ $# -gt 0 ] ; do
 			MIXBUS=1
 			WITH_HARRISON_LV2=1 ;
 			WITH_X42_LV2=1 ;
+			PROGRAM_NAME=Mixbus
+			PROGRAM_KEY=Mixbus
+			PRODUCT_NAME=mixbus
+			shift ;;
+		--mixbus32c)
+			MIXBUS=1
+			WITH_HARRISON_LV2=1 ;
+			WITH_X42_LV2=1 ;
+			PRODUCT_NAME=mixbus32c
+			PROGRAM_KEY=Mixbus32C
+			PROGRAM_NAME=Mixbus32C-${PROGRAM_VERSION}
+			PROGRAM_VERSION=""
 			shift ;;
 		--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
 	esac
 done
 
-# see also wscript, video_tool_paths.cc, bundle_env_mingw.cc
-# registry keys based on this are used there
-PROGRAM_NAME=Ardour
-PRODUCT_NAME=ardour
-PROGRAM_VERSION=${major_version}
 
 LOWERCASE_DIRNAME=ardour${major_version}
 STATEFILE_SUFFIX=ardour # see filename_extensions.cc
 
-if test -n "$MIXBUS"; then
-	PROGRAM_NAME=Mixbus
-	PRODUCT_NAME=mixbus
-fi
 
 # derived variables
 PRODUCT_ID=${PROGRAM_NAME}${PROGRAM_VERSION}
@@ -321,7 +333,7 @@ Name "${PROGRAM_NAME}${PROGRAM_VERSION}"
 OutFile "${OUTFILE}"
 RequestExecutionLevel admin
 InstallDir "\$${PGF}\\${PRODUCT_ID}"
-InstallDirRegKey HKLM "Software\\${PROGRAM_NAME}\\${PRODUCT_ID}\\$WARCH" "Install_Dir"
+InstallDirRegKey HKLM "Software\\${PRODUCT_NAME}\\${PRODUCT_ID}\\$WARCH" "Install_Dir"
 !define MUI_ICON "share\\${PRODUCT_ICON}"
 
 EOF
@@ -370,7 +382,7 @@ Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   File /r share
   File /nonfatal debug.bat
   File /nonfatal /r gdb
-  WriteRegStr HKLM "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}\\$WARCH" "Install_Dir" "\$INSTDIR"
+  WriteRegStr HKLM "Software\\${PROGRAM_KEY}\\v${major_version}\\$WARCH" "Install_Dir" "\$INSTDIR"
   WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "DisplayName" "${PROGRAM_NAME}${PROGRAM_VERSION}"
   WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "UninstallString" '"\$INSTDIR\\uninstall.exe"'
   WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "NoModify" 1
@@ -388,7 +400,7 @@ if test -z "$NOVIDEOTOOLS"; then
 
 	cat >> $NSISFILE << EOF
 Section "Videotimeline Tools" SecVideo
-  WriteRegStr HKLM "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}\\video" "Install_Dir" "\$INSTDIR\\video"
+  WriteRegStr HKLM "Software\\${PROGRAM_KEY}\\v${major_version}\\video" "Install_Dir" "\$INSTDIR\\video"
   SetOutPath \$INSTDIR
   File /r video
 SectionEnd
@@ -449,7 +461,7 @@ Section "Uninstall"
   SetShellVarContext all
   DeleteRegKey HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}"
   DeleteRegKey HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}"
-  DeleteRegKey HKLM "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}"
+  DeleteRegKey HKLM "Software\\${PROGRAM_KEY}\\v${major_version}"
   RMDir /r "\$INSTDIR\\bin"
   RMDir /r "\$INSTDIR\\lib"
   RMDir /r "\$INSTDIR\\share"

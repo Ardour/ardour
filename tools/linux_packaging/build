@@ -67,6 +67,18 @@ while [ $# -gt 0 ] ; do
 		VENDOR=Harrison ;
 		EXENAME=mixbus ;
 		shift ;;
+	--mixbus32c)
+		MIXBUS=1;
+		WITH_HARRISON_LV2=1 ;
+		WITH_X42_LV2=1 ;
+		WITH_NLS=1 ;
+		WITH_LADSPA=;
+		STRIP=all
+		APPNAME=Mixbus32C ;
+		VENDOR=Harrison ;
+		EXENAME=mixbus32c ;
+		major_version=""
+		shift ;;
 	--public)
 		WITH_NLS=1 ;
 		WITH_LADSPA=;

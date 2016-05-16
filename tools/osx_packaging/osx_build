@@ -16,6 +16,7 @@ mkdir -p "$CACHEDIR"
 
 SAE=
 MIXBUS=
+MIXBUS32C=
 WITH_HARVID=1
 WITH_HARRISON_LV2=
 WITH_X42_LV2=
@@ -24,6 +25,8 @@ STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
+
+. ../define_versions.sh
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -49,6 +52,18 @@ while [ $# -gt 0 ] ; do
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus;
 		APPNAME=Mixbus ;
+		shift ;;
+	--mixbus32c) MIXBUS=1;
+		MIXBUS32C=1;
+		WITH_HARRISON_LV2=1 ;
+		WITH_X42_LV2=1 ;
+		WITH_NLS=1 ;
+		SAE= ;
+		WITH_LADSPA=;
+		STRIP= ;
+		PRODUCT_PKG_DIR=Mixbus32C;
+		APPNAME=Mixbus32C-${major_version} ;
+		major_version=""
 		shift ;;
 	--public)
 		SAE= ;
@@ -81,7 +96,6 @@ if test -z "$PRODUCT_PKG_DIR" -o -z "$APPNAME"; then
 	exit 1
 fi
 
-. ../define_versions.sh
 echo "Version is $release_version"
 if [ "x$commit" != "x" ] ; then
     info_string="$release_version ($commit) built on `hostname` by `whoami` on `date`"
@@ -178,7 +192,7 @@ if test x$SAE != x ; then
     env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de-nokeypad</string>"
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui_sae.conf</string>"
 elif test x$MIXBUS != x ; then
-    appname="Mixbus"
+    appname=$APPNAME
     EXECUTABLE=${appname}${major_version}
     env="$env<key>ARDOUR_MIXBUS</key><string>true</string>"
     #
@@ -240,6 +254,8 @@ cp $BUILD_ROOT/gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTAB
 if test x$SAE != x ; then
     # cp $BUILD_ROOT/gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
     cp  Ardour3-SAE.icns $Resources/appIcon.icns
+elif test x$MIXBUS32C != x ; then
+    cp  Mixbus32C.icns $Resources/appIcon.icns
 elif test x$MIXBUS != x ; then
     cp  Mixbus.icns $Resources/appIcon.icns
 else
