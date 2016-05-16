@@ -24,6 +24,8 @@ WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
+LCNAME=ardour
+
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 
 . ../define_versions.sh
@@ -51,6 +53,7 @@ while [ $# -gt 0 ] ; do
 		WITH_LADSPA=;
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus;
+		LCNAME=mixbus ;
 		APPNAME=Mixbus ;
 		shift ;;
 	--mixbus32c) MIXBUS=1;
@@ -61,6 +64,7 @@ while [ $# -gt 0 ] ; do
 		SAE= ;
 		WITH_LADSPA=;
 		STRIP= ;
+		LCNAME=mixbus32c ;
 		PRODUCT_PKG_DIR=Mixbus32C;
 		APPNAME=Mixbus32C-${major_version} ;
 		major_version=""
@@ -486,8 +490,8 @@ cp ../../instant.xml $Resources/instant.xml
 cp -r ../../gtk2_ardour/icons $Resources
 cp -r ../../gtk2_ardour/pixmaps $Resources
 cp ../../gtk2_ardour/*.colors $Resources
-cp -R ../../gtk2_ardour/splash.png $Shared
-cp -R ../../gtk2_ardour/small-splash.png $Shared
+cp -R ../../gtk2_ardour/icons/${LCNAME}-splash.png ${Shared}/splash.png
+cp -R ../../gtk2_ardour/icons/${LCNAME}-small-splash.png ${Shared}/small-splash.png
 cp -R ../../gtk2_ardour/ArdourMono.ttf $Shared
 
 # go through and recursively remove any .svn dirs in the bundle

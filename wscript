@@ -611,6 +611,10 @@ int main() { return 0; }''',
     if Options.options.program_name.lower() == "mixbus":
         compiler_flags.append ('-DMIXBUS')
 
+    if Options.options.program_name.lower() == "mixbus32c":
+        compiler_flags.append ('-DMIXBUS')
+        compiler_flags.append ('-DMIXBUS32C')
+
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
 
@@ -632,6 +636,16 @@ int main() { return 0; }''',
     conf.env.append_value('CXXFLAGS', compiler_flags)
     conf.env.append_value('CXXFLAGS', cxx_flags)
     conf.env.append_value('LINKFLAGS', linker_flags)
+
+def create_resource_file(icon):
+    try:
+        text = 'IDI_ICON1 ICON DISCARDABLE "icons/' + icon + '.ico"\n'
+        o = open('gtk2_ardour/windows_icon.rc', 'w')
+        o.write(text)
+        o.close()
+    except IOError:
+        print('Could not open gtk2_ardour/windows_icon.rc for writing\n')
+        sys.exit(-1)
 
 def is_tracks_build (conf):
         return conf.env['PROGRAM_NAME'] == 'Tracks Live'
@@ -1213,6 +1227,9 @@ const char* const ardour_config_info = "\\n\\
 
 def build(bld):
     create_stored_revision()
+
+    if Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc':
+        create_resource_file(Options.options.program_name.lower())
 
     # add directories that contain only headers, to workaround an issue with waf
 

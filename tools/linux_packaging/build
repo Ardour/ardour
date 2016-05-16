@@ -591,8 +591,8 @@ cp ../../gtk2_ardour/*.colors $Etc
 cp ../../instant.xml $Shared/instant.xml
 cp -r ../../gtk2_ardour/icons $Shared
 cp -r ../../gtk2_ardour/pixmaps $Shared
-cp -r ../../gtk2_ardour/splash.png $Shared
-cp -r ../../gtk2_ardour/small-splash.png $Shared
+cp -r ../../gtk2_ardour/icons/${EXENAME}-splash.png ${Shared}/splash.png
+cp -r ../../gtk2_ardour/icons/${EXENAME}-small-splash.png ${Shared}/small-splash.png
 cp -r ../../gtk2_ardour/ArdourMono.ttf $Shared
 
 #
