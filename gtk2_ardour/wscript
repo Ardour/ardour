@@ -792,12 +792,21 @@ def build(bld):
         obj.install_path = bld.env['CONFDIR']
         
     # Icons/Images
-    lowercase_appname = Options.options.program_name.lower();
     bld.install_files(os.path.join (bld.env['DATADIR'], 'icons'), bld.path.ant_glob('icons/*.png'))
     bld.install_files(os.path.join (bld.env['DATADIR'], 'pixmaps'), bld.path.ant_glob('pixmaps/*.xpm'))
-    bld.install_as(os.path.join (bld.env['DATADIR'], 'splash.png') , 'icons/' + lowercase_appname + '-splash.png')
-    bld.install_as(os.path.join (bld.env['DATADIR'], 'small-splash.png') , 'icons/' + lowercase_appname + '-small-splash.png')
     bld.install_files(bld.env['DATADIR'], 'ArdourMono.ttf')
+
+    # Splash
+    lowercase_appname = Options.options.program_name.lower();
+    obj = bld(features = 'copy')
+    obj.source = 'icons/' + lowercase_appname + '-splash.png'
+    obj.target = 'splash.png'
+    obj.install_path = bld.env['DATADIR']
+    obj = bld(features = 'copy')
+    obj.source = 'icons/' + lowercase_appname + '-small-splash.png'
+    obj.target = 'small-splash.png'
+    obj.install_path = bld.env['DATADIR']
+
 
     if bld.env['build_target'] == 'mingw':
         # These icons need to overwrite the files already installed in the icons
