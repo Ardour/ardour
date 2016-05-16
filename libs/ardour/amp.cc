@@ -405,7 +405,7 @@ Amp::visible() const
 }
 
 std::string
-Amp::value_as_string (boost::shared_ptr<AutomationControl> ac) const
+Amp::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
 {
 	if (ac == _gain_control) {
 		char buffer[32];

@@ -519,7 +519,7 @@ Automatable::clear_controls ()
 }
 
 string
-Automatable::value_as_string (boost::shared_ptr<AutomationControl> ac) const
+Automatable::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
 {
 	return ARDOUR::value_as_string(ac->desc(), ac->get_value());
 }
