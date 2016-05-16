@@ -275,7 +275,7 @@ Pannable::set_state (const XMLNode& root, int version)
 }
 
 string
-Pannable::value_as_string (boost::shared_ptr<AutomationControl> ac) const
+Pannable::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
 {
 	boost::shared_ptr<Panner> p = panner ();
 
