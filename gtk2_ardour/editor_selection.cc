@@ -962,6 +962,7 @@ Editor::track_selection_changed ()
 	}
 
 	RouteNotificationListPtr routes (new RouteNotificationList);
+	StripableNotificationListPtr stripables (new StripableNotificationList);
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 
@@ -985,6 +986,7 @@ Editor::track_selection_changed ()
 			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*i);
 			if (rtav) {
 				routes->push_back (rtav->route());
+				stripables->push_back (rtav->route());
 			}
 		}
 	}
@@ -994,6 +996,7 @@ Editor::track_selection_changed ()
 	/* notify control protocols */
 
 	ControlProtocol::TrackSelectionChanged (routes);
+	ControlProtocol::StripableSelectionChanged (stripables);
 
 	if (sfbrowser && _session && !_session->deletion_in_progress()) {
 		uint32_t audio_track_cnt = 0;
