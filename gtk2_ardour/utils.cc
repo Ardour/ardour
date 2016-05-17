@@ -465,6 +465,12 @@ ARDOUR_UI_UTILS::get_icon_path (const char* cname, string icon_set, bool is_imag
 		find_file (spath, name, data_file_path);
 	}
 
+	if (data_file_path.empty()) {
+		Searchpath rc (ARDOUR::ardour_data_search_path());
+		rc.add_subdirectory_to_paths ("resources");
+		find_file (rc, name, data_file_path);
+	}
+
 	if (is_image && data_file_path.empty()) {
 
 		if (!icon_set.empty() && icon_set != _("default")) {

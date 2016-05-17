@@ -348,7 +348,10 @@ SessionDialog::setup_initial_choice_box ()
 
 	string image_path;
 
-	if (find_file (ardour_data_search_path(), "small-splash.png", image_path)) {
+	Searchpath rc (ARDOUR::ardour_data_search_path());
+	rc.add_subdirectory_to_paths ("resources");
+
+	if (find_file (rc, PROGRAM_NAME "-small-splash.png", image_path)) {
 		Gtk::Image* image;
 		if ((image = manage (new Gtk::Image (image_path))) != 0) {
 			hbox->pack_start (*image, false, false);

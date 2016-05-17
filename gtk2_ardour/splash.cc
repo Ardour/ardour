@@ -50,7 +50,10 @@ Splash::Splash ()
 
 	std::string splash_file;
 
-	if (!find_file (ardour_data_search_path(), "splash.png", splash_file)) {
+	Searchpath rc (ARDOUR::ardour_data_search_path());
+	rc.add_subdirectory_to_paths ("resources");
+
+	if (!find_file (rc, PROGRAM_NAME "-splash.png", splash_file)) {
                 cerr << "Cannot find splash screen image file\n";
 		throw failed_constructor();
 	}

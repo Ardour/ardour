@@ -5309,16 +5309,16 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 
 	if (window_icons.empty()) {
 		Glib::RefPtr<Gdk::Pixbuf> icon;
-		if ((icon = ::get_icon ("ardour_icon_16px")) != 0) {
+		if ((icon = ::get_icon (PROGRAM_NAME "-icon_16px")) != 0) {
 			window_icons.push_back (icon);
 		}
-		if ((icon = ::get_icon ("ardour_icon_22px")) != 0) {
+		if ((icon = ::get_icon (PROGRAM_NAME "-icon_22px")) != 0) {
 			window_icons.push_back (icon);
 		}
-		if ((icon = ::get_icon ("ardour_icon_32px")) != 0) {
+		if ((icon = ::get_icon (PROGRAM_NAME "-icon_32px")) != 0) {
 			window_icons.push_back (icon);
 		}
-		if ((icon = ::get_icon ("ardour_icon_48px")) != 0) {
+		if ((icon = ::get_icon (PROGRAM_NAME "-icon_48px")) != 0) {
 			window_icons.push_back (icon);
 		}
 	}
