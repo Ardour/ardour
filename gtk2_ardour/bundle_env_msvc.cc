@@ -386,21 +386,6 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 	Glib::setenv ("ARDOUR_CONFIG_PATH", path, true);
 
 
-	// Next, set up 'ARDOUR_PATH'
-	path  = user_config_directory();
-	path  = Glib::path_get_dirname (path);
-	path += G_SEARCHPATH_SEPARATOR;
-	path += windows_search_path().to_string();
-	path += "\\icons;";
-	path += windows_search_path().to_string();
-	path += "\\pixmaps;";
-	path += ardour_data_search_path().to_string();  // In fact, adds both the 'data' search
-	path += G_SEARCHPATH_SEPARATOR;                 // path and our 'config' search path
-	path += dir_path;
-	path += "\\etc";
-	Glib::setenv ("ARDOUR_PATH", path, true);
-
-
 	// Next, set up 'ARDOUR_INSTANT_XML_PATH'
 	path = user_config_directory();
 	Glib::setenv ("ARDOUR_INSTANT_XML_PATH", path, true);
