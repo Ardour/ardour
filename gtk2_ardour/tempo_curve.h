@@ -10,6 +10,7 @@
 #include "pbd/signals.h"
 
 #include "canvas/types.h"
+#include "canvas/framed_curve.h"
 
 namespace ARDOUR {
 	class TempoSection;
@@ -50,8 +51,7 @@ protected:
 	ArdourCanvas::Container* _parent;
 	ArdourCanvas::Container *group;
 	ArdourCanvas::Points *points;
-	ArdourCanvas::Rectangle* _background;
-	ArdourCanvas::Curve* _curve;
+	ArdourCanvas::FramedCurve* _curve;
 
 	double        unit_position;
 	framepos_t    frame_position;
