@@ -78,12 +78,6 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	static PBD::Signal0<void> StepTracksDown;
 	static PBD::Signal0<void> StepTracksUp;
 
-	static PBD::Signal1<void,uint64_t> AddRouteToSelection;
-	static PBD::Signal1<void,uint64_t> SetRouteSelection;
-	static PBD::Signal1<void,uint64_t> ToggleRouteSelection;
-	static PBD::Signal1<void,uint64_t> RemoveRouteFromSelection;
-	static PBD::Signal0<void>          ClearRouteSelection;
-
 	static PBD::Signal1<void,uint64_t> AddStripableToSelection;
 	static PBD::Signal1<void,uint64_t> SetStripableSelection;
 	static PBD::Signal1<void,uint64_t> ToggleStripableSelection;
