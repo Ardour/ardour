@@ -1232,7 +1232,7 @@ Strip::update_meter ()
 		return;
 	}
 
-	if (_meter && _transport_is_rolling && _metering_active) {
+	if (_meter && _transport_is_rolling && _metering_active && _stripable->peak_meter()) {
 		float dB = _stripable->peak_meter()->meter_level (0, MeterMCP);
 		_meter->send_update (*_surface, dB);
 		return;
