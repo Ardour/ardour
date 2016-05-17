@@ -79,16 +79,15 @@ Editor::remove_metric_marks ()
 void
 Editor::draw_metric_marks (const Metrics& metrics)
 {
-
-	const MeterSection *ms;
-	const TempoSection *ts;
 	char buf[64];
 	double max_tempo = 0.0;
 	double min_tempo = DBL_MAX;
 
-	remove_metric_marks ();
+	remove_metric_marks (); // also clears tempo curves
 
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		const MeterSection *ms;
+		const TempoSection *ts;
 
 		if ((ms = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			snprintf (buf, sizeof(buf), "%g/%g", ms->divisions_per_bar(), ms->note_divisor ());
@@ -100,12 +99,10 @@ Editor::draw_metric_marks (const Metrics& metrics)
 			} else {
 				snprintf (buf, sizeof (buf), "%.3f", ts->beats_per_minute());
 			}
-			if (ts->beats_per_minute() > max_tempo) {
-				max_tempo = ts->beats_per_minute();
-			}
-			if (ts->beats_per_minute() < min_tempo) {
-				min_tempo = ts->beats_per_minute();
-			}
+
+			max_tempo = max (max_tempo, ts->beats_per_minute());
+			min_tempo = min (min_tempo, ts->beats_per_minute());
+
 			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, UIConfiguration::instance().color ("range drag rect"),
 								*(const_cast<TempoSection*>(ts)), ts->frame(), false));
 			metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker"), buf,
@@ -114,6 +111,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		}
 
 	}
+
 	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ) {
 		Curves::iterator tmp = x;
 		(*x)->set_max_tempo (max_tempo);
@@ -127,6 +125,13 @@ Editor::draw_metric_marks (const Metrics& metrics)
 		++x;
 	}
 
+	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
+		TempoMarker* tempo_marker;
+
+		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
+			tempo_marker->update_height_mark ((tempo_marker->tempo().beats_per_minute() - min_tempo) / (max_tempo - min_tempo));
+		}
+	}
 }
 
 
@@ -168,25 +173,25 @@ Editor::marker_position_changed ()
 	if (tempo_lines) {
 		tempo_lines->tempo_map_changed();
 	}
-	TempoMarker* tempo_marker;
-	MeterMarker* meter_marker;
-	const TempoSection *ts;
-	const MeterSection *ms;
+
 	double max_tempo = 0.0;
 	double min_tempo = DBL_MAX;
+
 	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
+		TempoMarker* tempo_marker;
+		MeterMarker* meter_marker;
+		const TempoSection *ts;
+		const MeterSection *ms;
+
 		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
 			if ((ts = &tempo_marker->tempo()) != 0) {
 				tempo_marker->set_position (ts->frame ());
 				char buf[64];
 				snprintf (buf, sizeof (buf), "%.3f", ts->beats_per_minute());
 				tempo_marker->set_name (buf);
-				if (ts->beats_per_minute() > max_tempo) {
-					max_tempo = ts->beats_per_minute();
-				}
-				if (ts->beats_per_minute() < min_tempo) {
-					min_tempo = ts->beats_per_minute();
-				}
+
+				max_tempo = max (max_tempo, ts->beats_per_minute());
+				min_tempo = min (min_tempo, ts->beats_per_minute());
 			}
 		}
 		if ((meter_marker = dynamic_cast<MeterMarker*> (*x)) != 0) {
@@ -195,7 +200,9 @@ Editor::marker_position_changed ()
 			}
 		}
 	}
+
 	tempo_curves.sort (CurveComparator());
+
 	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ) {
 		Curves::iterator tmp = x;
 		(*x)->set_max_tempo (max_tempo);
@@ -207,6 +214,13 @@ Editor::marker_position_changed ()
 			(*x)->set_position ((*x)->tempo().frame(), UINT32_MAX);
 		}
 		++x;
+	}
+
+	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
+		TempoMarker* tempo_marker;
+		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
+			tempo_marker->update_height_mark ((tempo_marker->tempo().beats_per_minute() - min_tempo) / max (max_tempo - min_tempo, 10.0));
+		}
 	}
 
 	std::vector<TempoMap::BBTPoint> grid;

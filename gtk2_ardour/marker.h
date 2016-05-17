@@ -145,6 +145,7 @@ class TempoMarker : public ArdourMarker
 
 	ARDOUR::TempoSection& tempo() const { return _tempo; }
 
+	void update_height_mark (const double& ratio);
   private:
 	ARDOUR::TempoSection& _tempo;
 };
