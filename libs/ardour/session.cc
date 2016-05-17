@@ -4208,7 +4208,7 @@ Session::track_by_diskstream_id (PBD::ID id) const
 }
 
 boost::shared_ptr<Route>
-Session::get_remote_nth_route (uint16_t n) const
+Session::get_remote_nth_route (PresentationInfo::order_t n) const
 {
 	return boost::dynamic_pointer_cast<Route> (get_remote_nth_stripable (n, PresentationInfo::Route));
 }
@@ -4220,10 +4220,10 @@ struct GlobalPresentationOrderSorter {
 };
 
 boost::shared_ptr<Stripable>
-Session::get_remote_nth_stripable (uint16_t n, PresentationInfo::Flag flags) const
+Session::get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo::Flag flags) const
 {
 	StripableList sl;
-	uint32_t match_cnt = 0;
+	PresentationInfo::order_t match_cnt = 0;
 
 	/* API is one-based, so adjust n */
 
