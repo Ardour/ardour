@@ -658,3 +658,10 @@ SVAModifier::operator () (HSV& hsv)  const
 	return r;
 }
 
+ArdourCanvas::Color
+ArdourCanvas::color_at_alpha (ArdourCanvas::Color c, double a)
+{
+	double r, g, b, unused;
+	color_to_rgba (c, r, g, b, unused);
+	return rgba_to_color( r,g,b, a );
+}

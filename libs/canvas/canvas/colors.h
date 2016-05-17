@@ -35,6 +35,7 @@ extern LIBCANVAS_API Color change_alpha (Color, double alpha);
 
 extern LIBCANVAS_API Color hsva_to_color (double h, double s, double v, double a = 1.0);
 extern LIBCANVAS_API void  color_to_hsva (Color color, double& h, double& s, double& v, double& a);
+extern LIBCANVAS_API Color color_at_alpha (Color, double a);
 extern LIBCANVAS_API void  color_to_hsv (Color color, double& h, double& s, double& v);
 extern LIBCANVAS_API void  color_to_rgba (Color, double& r, double& g, double& b, double& a);
 extern LIBCANVAS_API Color rgba_to_color (double r, double g, double b, double a);
