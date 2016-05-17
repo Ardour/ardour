@@ -57,7 +57,7 @@ Stripable::set_presentation_info (PresentationInfo pi, bool notify_class_listene
 {
 	if (pi != presentation_info()) {
 
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1: set edit-based RID to %2\n", name(), pi));
+		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1: set presentation info to %2\n", name(), pi));
 
 		if (is_master()) {
 			_presentation_info = PresentationInfo (0, PresentationInfo::MasterOut);
