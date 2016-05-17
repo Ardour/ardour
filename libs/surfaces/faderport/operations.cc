@@ -60,8 +60,8 @@ FaderPort::right ()
 void
 FaderPort::read ()
 {
-	if (_current_route) {
-		boost::shared_ptr<AutomationControl> gain = _current_route->gain_control ();
+	if (_current_stripable) {
+		boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 		if (gain) {
 			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Play );
 		}
@@ -71,8 +71,8 @@ FaderPort::read ()
 void
 FaderPort::write ()
 {
-	if (_current_route) {
-		boost::shared_ptr<AutomationControl> gain = _current_route->gain_control ();
+	if (_current_stripable) {
+		boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 		if (gain) {
 			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Write );
 		}
@@ -82,8 +82,8 @@ FaderPort::write ()
 void
 FaderPort::touch ()
 {
-	if (_current_route) {
-		boost::shared_ptr<AutomationControl> gain = _current_route->gain_control ();
+	if (_current_stripable) {
+		boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 		if (gain) {
 			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Touch );
 		}
@@ -93,8 +93,8 @@ FaderPort::touch ()
 void
 FaderPort::off ()
 {
-	if (_current_route) {
-		boost::shared_ptr<AutomationControl> gain = _current_route->gain_control ();
+	if (_current_stripable) {
+		boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 		if (gain) {
 			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Off );
 		}
@@ -119,39 +119,39 @@ FaderPort::redo ()
 void
 FaderPort::mute ()
 {
-	if (!_current_route) {
+	if (!_current_stripable) {
 		return;
 	}
 
-	if (_current_route == session->monitor_out()) {
-		boost::shared_ptr<MonitorProcessor> mp = _current_route->monitor_control();
+	if (_current_stripable == session->monitor_out()) {
+		boost::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
 		mp->set_cut_all (!mp->cut_all());
 		return;
 	}
 
 	boost::shared_ptr<ControlList> cl (new ControlList);
-	cl->push_back (_current_route->mute_control());
-	session->set_controls (cl, !_current_route->muted(), PBD::Controllable::UseGroup);
+	cl->push_back (_current_stripable->mute_control());
+	session->set_controls (cl, !_current_stripable->mute_control()->muted(), PBD::Controllable::UseGroup);
 }
 
 void
 FaderPort::solo ()
 {
-	if (!_current_route) {
+	if (!_current_stripable) {
 		return;
 	}
 
-	_current_route->solo_control()->set_value (_current_route->soloed() ? 0.0 : 1.0, PBD::Controllable::UseGroup);
+	_current_stripable->solo_control()->set_value (_current_stripable->solo_control()->soloed() ? 0.0 : 1.0, PBD::Controllable::UseGroup);
 }
 
 void
 FaderPort::rec_enable ()
 {
-	if (!_current_route) {
+	if (!_current_stripable) {
 		return;
 	}
 
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_current_route);
+	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_current_stripable);
 
 	if (!t) {
 		return;
@@ -163,18 +163,18 @@ FaderPort::rec_enable ()
 void
 FaderPort::use_master ()
 {
-	boost::shared_ptr<Route> r = session->master_out();
+	boost::shared_ptr<Stripable> r = session->master_out();
 	if (r) {
-		if (_current_route == r) {
-			r = pre_master_route.lock();
-			set_current_route (r);
+		if (_current_stripable == r) {
+			r = pre_master_stripable.lock();
+			set_current_stripable (r);
 			get_button(Output).set_led_state (_output_port, false);
 			blinkers.remove (Output);
 		} else {
-			if (_current_route != session->master_out() && _current_route != session->monitor_out()) {
-				pre_master_route = boost::weak_ptr<Route> (_current_route);
+			if (_current_stripable != session->master_out() && _current_stripable != session->monitor_out()) {
+				pre_master_stripable = boost::weak_ptr<Stripable> (_current_stripable);
 			}
-			set_current_route (r);
+			set_current_stripable (r);
 			get_button(Output).set_led_state (_output_port, true);
 			blinkers.remove (Output);
 		}
@@ -184,19 +184,19 @@ FaderPort::use_master ()
 void
 FaderPort::use_monitor ()
 {
-	boost::shared_ptr<Route> r = session->monitor_out();
+	boost::shared_ptr<Stripable> r = session->monitor_out();
 
 	if (r) {
-		if (_current_route == r) {
-			r = pre_monitor_route.lock();
-			set_current_route (r);
+		if (_current_stripable == r) {
+			r = pre_monitor_stripable.lock();
+			set_current_stripable (r);
 			get_button(Output).set_led_state (_output_port, false);
 			blinkers.remove (Output);
 		} else {
-			if (_current_route != session->master_out() && _current_route != session->monitor_out()) {
-				pre_monitor_route = boost::weak_ptr<Route> (_current_route);
+			if (_current_stripable != session->master_out() && _current_stripable != session->monitor_out()) {
+				pre_monitor_stripable = boost::weak_ptr<Stripable> (_current_stripable);
 			}
-			set_current_route (r);
+			set_current_stripable (r);
 			get_button(Output).set_led_state (_output_port, true);
 			blinkers.push_back (Output);
 		}
@@ -207,11 +207,17 @@ FaderPort::use_monitor ()
 void
 FaderPort::ardour_pan_azimuth (int delta)
 {
-	if (!_current_route) {
+	if (!_current_stripable) {
 		return;
 	}
 
-	boost::shared_ptr<Pannable> pannable = _current_route->pannable ();
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_current_stripable);
+
+	if (!r) {
+		return;
+	}
+
+	boost::shared_ptr<Pannable> pannable = r->pannable ();
 
 	if (!pannable) {
 		return;
@@ -230,11 +236,17 @@ FaderPort::ardour_pan_azimuth (int delta)
 void
 FaderPort::ardour_pan_width(int delta)
 {
-	if (!_current_route) {
+	if (!_current_stripable) {
 		return;
 	}
 
-	boost::shared_ptr<Pannable> pannable = _current_route->pannable ();
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_current_stripable);
+
+	if (!r) {
+		return;
+	}
+
+	boost::shared_ptr<Pannable> pannable = r->pannable ();
 
 	if (!pannable) {
 		return;
@@ -253,12 +265,18 @@ void
 FaderPort::mixbus_pan (int delta)
 {
 #ifdef MIXBUS
-	if (!_current_route) {
+	if (!_current_stripable) {
+		return;
+	}
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_current_stripable);
+
+	if (!r) {
 		return;
 	}
 
+
 	const uint32_t port_channel_post_pan = 2; // gtk2_ardour/mixbus_ports.h
-	boost::shared_ptr<ARDOUR::PluginInsert> plug = _current_route->ch_post();
+	boost::shared_ptr<ARDOUR::PluginInsert> plug = r->ch_post();
 
 	if (!plug) {
 		return;

@@ -164,9 +164,9 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
 
   private:
-	boost::shared_ptr<ARDOUR::Route> _current_route;
-	boost::weak_ptr<ARDOUR::Route> pre_master_route;
-	boost::weak_ptr<ARDOUR::Route> pre_monitor_route;
+	boost::shared_ptr<ARDOUR::Stripable> _current_stripable;
+	boost::weak_ptr<ARDOUR::Stripable> pre_master_stripable;
+	boost::weak_ptr<ARDOUR::Stripable> pre_monitor_stripable;
 
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
@@ -294,15 +294,15 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void start_blinking (ButtonID);
 	void stop_blinking (ButtonID);
 
-	void set_current_route (boost::shared_ptr<ARDOUR::Route>);
-	void drop_current_route ();
+	void set_current_stripable (boost::shared_ptr<ARDOUR::Stripable>);
+	void drop_current_stripable ();
 	void use_master ();
 	void use_monitor ();
-	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr);
+	void gui_track_selection_changed (ARDOUR::StripableNotificationListPtr);
 	PBD::ScopedConnection selection_connection;
-	PBD::ScopedConnectionList route_connections;
+	PBD::ScopedConnectionList stripable_connections;
 
-	void map_route_state ();
+	void map_stripable_state ();
 	void map_solo ();
 	void map_mute ();
 	bool rec_enable_state;

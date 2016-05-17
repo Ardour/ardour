@@ -47,7 +47,7 @@
 #include "ardour/monitor_processor.h"
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
-#include "ardour/route.h"
+#include "ardour/stripable.h"
 #include "ardour/session.h"
 #include "ardour/session_configuration.h"
 #include "ardour/track.h"
@@ -108,7 +108,7 @@ FaderPort::FaderPort (Session& s)
 		);
 
 
-	TrackSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::gui_track_selection_changed, this, _1), this);
+	StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::gui_track_selection_changed, this, _1), this);
 
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::connection_handler, this, _1, _2, _3, _4, _5), this);
@@ -372,8 +372,8 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		break;
 	case FaderTouch:
 		fader_is_touched = tb->value;
-		if (_current_route) {
-			boost::shared_ptr<AutomationControl> gain = _current_route->gain_control ();
+		if (_current_stripable) {
+			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
 				framepos_t now = session->engine().sample_time();
 				if (tb->value) {
@@ -443,7 +443,7 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 		last_good_encoder_delta = delta;
 	}
 
-	if (_current_route) {
+	if (_current_stripable) {
 
 		ButtonState trim_modifier;
 		ButtonState width_modifier;
@@ -457,7 +457,7 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 		}
 
 		if ((button_state & trim_modifier) == trim_modifier ) {    // mod+encoder = input trim
-			boost::shared_ptr<AutomationControl> trim = _current_route->trim()->gain_control ();
+			boost::shared_ptr<AutomationControl> trim = _current_stripable->trim_control ();
 			if (trim) {
 				float val = trim->get_user();  //for gain elements, the "user" value is in dB
 				val += delta;
@@ -498,16 +498,16 @@ FaderPort::fader_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	}
 
 	if (was_fader) {
-		if (_current_route) {
-			boost::shared_ptr<AutomationControl> gain = _current_route->gain_control ();
+		if (_current_stripable) {
+			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
 				int ival = (fader_msb << 7) | fader_lsb;
 				float val = gain->interface_to_internal (ival/16384.0);
 				/* even though the faderport only controls a
-				   single route at a time, allow the fader to
+				   single stripable at a time, allow the fader to
 				   modify the group, if appropriate.
 				*/
-				_current_route->gain_control()->set_value (val, Controllable::UseGroup);
+				_current_stripable->gain_control()->set_value (val, Controllable::UseGroup);
 			}
 		}
 	}
@@ -601,11 +601,11 @@ FaderPort::set_active (bool yn)
 bool
 FaderPort::periodic ()
 {
-	if (!_current_route) {
+	if (!_current_stripable) {
 		return true;
 	}
 
-	ARDOUR::AutoState gain_state = _current_route->gain_control()->automation_state();
+	ARDOUR::AutoState gain_state = _current_stripable->gain_control()->automation_state();
 
 	if (gain_state == ARDOUR::Touch || gain_state == ARDOUR::Play) {
 		map_gain ();
@@ -652,10 +652,10 @@ FaderPort::close ()
 	port_connection.disconnect ();
 	blink_connection.disconnect ();
 	selection_connection.disconnect ();
-	route_connections.drop_connections ();
+	stripable_connections.drop_connections ();
 
 #if 0
-	route_connections.drop_connections ();
+	stripable_connections.drop_connections ();
 #endif
 }
 
@@ -1104,67 +1104,67 @@ FaderPort::Button::get_state () const
 }
 
 void
-FaderPort::gui_track_selection_changed (RouteNotificationListPtr routes)
+FaderPort::gui_track_selection_changed (StripableNotificationListPtr stripables)
 {
-	boost::shared_ptr<Route> r;
+	boost::shared_ptr<Stripable> r;
 
-	if (!routes->empty()) {
-		r = routes->front().lock();
+	if (!stripables->empty()) {
+		r = stripables->front().lock();
 	}
 
-	set_current_route (r);
+	set_current_stripable (r);
 }
 
 void
-FaderPort::drop_current_route ()
+FaderPort::drop_current_stripable ()
 {
-	if (_current_route) {
-		if (_current_route == session->monitor_out()) {
-			set_current_route (session->master_out());
+	if (_current_stripable) {
+		if (_current_stripable == session->monitor_out()) {
+			set_current_stripable (session->master_out());
 		} else {
-			set_current_route (boost::shared_ptr<Route>());
+			set_current_stripable (boost::shared_ptr<Stripable>());
 		}
 	}
 }
 
 void
-FaderPort::set_current_route (boost::shared_ptr<Route> r)
+FaderPort::set_current_stripable (boost::shared_ptr<Stripable> r)
 {
-	route_connections.drop_connections ();
+	stripable_connections.drop_connections ();
 
-	_current_route = r;
+	_current_stripable = r;
 
 	/* turn this off. It will be turned on back on in use_master() or
 	   use_monitor() as appropriate.
 	*/
 	get_button(Output).set_led_state (_output_port, false);
 
-	if (_current_route) {
-		_current_route->DropReferences.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::drop_current_route, this), this);
+	if (_current_stripable) {
+		_current_stripable->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::drop_current_stripable, this), this);
 
-		_current_route->mute_control()->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_mute, this), this);
-		_current_route->solo_control()->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_solo, this), this);
+		_current_stripable->mute_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_mute, this), this);
+		_current_stripable->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_solo, this), this);
 
-		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_route);
+		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_stripable);
 		if (t) {
-			t->rec_enable_control()->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_recenable, this), this);
+			t->rec_enable_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_recenable, this), this);
 		}
 
-		boost::shared_ptr<AutomationControl> control = _current_route->gain_control ();
+		boost::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
 		if (control) {
-			control->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_gain, this), this);
-			control->alist()->automation_state_changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_auto, this), this);
+			control->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_gain, this), this);
+			control->alist()->automation_state_changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_auto, this), this);
 		}
 
-		boost::shared_ptr<MonitorProcessor> mp = _current_route->monitor_control();
+		boost::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
 		if (mp) {
-			mp->cut_control()->Changed.connect (route_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_cut, this), this);
+			mp->cut_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_cut, this), this);
 		}
 	}
 
 	//ToDo: subscribe to the fader automation modes so we can light the LEDs
 
-	map_route_state ();
+	map_stripable_state ();
 }
 
 void
@@ -1174,7 +1174,7 @@ FaderPort::map_auto ()
 	 * the Off button, because this will disable the fader.
 	 */
 
-	boost::shared_ptr<AutomationControl> control = _current_route->gain_control ();
+	boost::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
 	const AutoState as = control->automation_state ();
 
 	switch (as) {
@@ -1206,7 +1206,7 @@ FaderPort::map_auto ()
 void
 FaderPort::map_cut ()
 {
-	boost::shared_ptr<MonitorProcessor> mp = _current_route->monitor_control();
+	boost::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
 
 	if (mp) {
 		bool yn = mp->cut_all ();
@@ -1223,11 +1223,11 @@ FaderPort::map_cut ()
 void
 FaderPort::map_mute ()
 {
-	if (_current_route) {
-		if (_current_route->muted()) {
+	if (_current_stripable) {
+		if (_current_stripable->mute_control()->muted()) {
 			stop_blinking (Mute);
 			get_button (Mute).set_led_state (_output_port, true);
-		} else if (_current_route->muted_by_others_soloing () || _current_route->muted_by_masters()) {
+		} else if (_current_stripable->mute_control()->muted_by_others_soloing () || _current_stripable->mute_control()->muted_by_masters()) {
 			start_blinking (Mute);
 		} else {
 			stop_blinking (Mute);
@@ -1240,8 +1240,8 @@ FaderPort::map_mute ()
 void
 FaderPort::map_solo ()
 {
-	if (_current_route) {
-		get_button (Solo).set_led_state (_output_port, _current_route->soloed());
+	if (_current_stripable) {
+		get_button (Solo).set_led_state (_output_port, _current_stripable->solo_control()->soloed());
 	} else {
 		get_button (Solo).set_led_state (_output_port, false);
 	}
@@ -1250,7 +1250,7 @@ FaderPort::map_solo ()
 void
 FaderPort::map_recenable ()
 {
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_route);
+	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_stripable);
 	if (t) {
 		get_button (Rec).set_led_state (_output_port, t->rec_enable_control()->get_value());
 	} else {
@@ -1266,11 +1266,11 @@ FaderPort::map_gain ()
 		return;
 	}
 
-	if (!_current_route) {
+	if (!_current_stripable) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> control = _current_route->gain_control ();
+	boost::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
 	double val;
 
 	if (!control) {
@@ -1309,9 +1309,9 @@ FaderPort::map_gain ()
 }
 
 void
-FaderPort::map_route_state ()
+FaderPort::map_stripable_state ()
 {
-	if (!_current_route) {
+	if (!_current_stripable) {
 		stop_blinking (Mute);
 		stop_blinking (Solo);
 		get_button (Rec).set_led_state (_output_port, false);
@@ -1321,7 +1321,7 @@ FaderPort::map_route_state ()
 		map_gain ();
 		map_auto ();
 
-		if (_current_route == session->monitor_out()) {
+		if (_current_stripable == session->monitor_out()) {
 			map_cut ();
 		} else {
 			map_mute ();
