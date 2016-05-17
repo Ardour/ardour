@@ -428,9 +428,9 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("clear all strips, bank target %1  is outside route range %2\n",
 		                                                   _current_initial_bank, sorted.size()));
 		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-			vector<boost::shared_ptr<Route> > routes;
-			/* pass in an empty route list, so that all strips will be reset */
-			(*si)->map_routes (routes);
+			vector<boost::shared_ptr<Stripable> > stripables;
+			/* pass in an empty stripables list, so that all strips will be reset */
+			(*si)->map_stripables (stripables);
 		}
 		return -1;
 	}
@@ -1793,8 +1793,8 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Strip
 	_subview_mode = sm;
 	_subview_stripable = r;
 
-	if (_subview_route != old_stripable) {
-		subview_route_connections.drop_connections ();
+	if (_subview_stripable != old_stripable) {
+		subview_stripable_connections.drop_connections ();
 
 		/* Catch the current subview stripable going away */
 		if (_subview_stripable) {
