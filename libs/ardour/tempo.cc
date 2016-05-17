@@ -2554,28 +2554,6 @@ TempoMap::gui_move_tempo_beat (TempoSection* ts, const double& beat)
 }
 
 void
-TempoMap::gui_move_tempo_pulse (TempoSection* ts, const double& pulse)
-{
-	Metrics future_map;
-	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
-		TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
-		if (solve_map (future_map, tempo_copy, pulse)) {
-			solve_map (_metrics, ts, pulse);
-			recompute_meters (_metrics);
-		}
-	}
-
-	Metrics::const_iterator d = future_map.begin();
-	while (d != future_map.end()) {
-		delete (*d);
-		++d;
-	}
-
-	MetricPositionChanged (); // Emit Signal
-}
-
-void
 TempoMap::gui_move_meter (MeterSection* ms, const framepos_t&  frame)
 {
 	Metrics future_map;
@@ -2733,12 +2711,6 @@ TempoMap::gui_dilate_tempo (MeterSection* ms, const framepos_t& frame)
 				new_bpm = prev_t->tempo_at_frame (prev_t->frame() + fr_off, _frame_rate) * (double) prev_t->note_type();
 			}
 
-			const double diff = (prev_t->tempo_at_frame (frame, _frame_rate) * prev_t->note_type()) - prev_t->beats_per_minute();
-			if (diff > -0.1 && diff  < 0.1) {
-				new_bpm = prev_t->beats_per_minute() * ((ms->frame() - prev_t->frame())
-									/ (double) ((ms->frame() + prev_t_frame_contribution) - prev_t->frame()));
-			}
-
 		} else if (prev_t->c_func() > 0.0) {
 			if (prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
 				new_bpm = prev_t->tempo_at_frame (prev_t->frame() - frame_contribution, _frame_rate) * (double) prev_t->note_type();
@@ -2746,13 +2718,13 @@ TempoMap::gui_dilate_tempo (MeterSection* ms, const framepos_t& frame)
 				/* prev_to_prev_t is irrelevant */
 				new_bpm = prev_t->tempo_at_frame (prev_t->frame() - fr_off, _frame_rate) * (double) prev_t->note_type();
 			}
+		}
 
-			/* limits - a bit clunky, but meh */
-			const double diff = (prev_t->tempo_at_frame (frame, _frame_rate) * prev_t->note_type()) - prev_t->beats_per_minute();
-			if (diff > -0.1 && diff  < 0.1) {
-				new_bpm = prev_t->beats_per_minute() * ((ms->frame() - prev_t->frame())
-									/ (double) ((ms->frame() + prev_t_frame_contribution) - prev_t->frame()));
-			}
+		/* limits - a bit clunky, but meh */
+		const double diff = (prev_t->tempo_at_frame (frame, _frame_rate) * prev_t->note_type()) - prev_t->beats_per_minute();
+		if (diff > -1.0 && diff  < 1.0) {
+			new_bpm = prev_t->beats_per_minute() * ((ms->frame() - prev_t->frame())
+								/ (double) ((ms->frame() + prev_t_frame_contribution) - prev_t->frame()));
 		}
 
 		prev_t->set_beats_per_minute (new_bpm);
@@ -2809,6 +2781,7 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 		if (prev_t && prev_t->pulse() > 0.0) {
 			prev_to_prev_t = const_cast<TempoSection*>(&tempo_section_at_locked (future_map, prev_t->frame() - 1));
 		}
+
 		TempoSection* next_t = 0;
 		for (Metrics::iterator i = future_map.begin(); i != future_map.end(); ++i) {
 			TempoSection* t = 0;
