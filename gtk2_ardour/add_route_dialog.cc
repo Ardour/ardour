@@ -239,7 +239,7 @@ AddRouteDialog::maybe_update_name_template_entry ()
 {
 	if (
 		name_template_entry.get_text() != "" &&
-		name_template_entry.get_text() != _("VCA") &&
+		name_template_entry.get_text() != VCA::default_name_template() &&
 		name_template_entry.get_text() != _("Audio") &&
 		name_template_entry.get_text() != _("MIDI")  &&
 		name_template_entry.get_text() != _("Audio+MIDI")  &&
@@ -355,7 +355,7 @@ AddRouteDialog::name_template_is_default() const
 	    n == _("MIDI") ||
 	    n == _("Audio+MIDI") ||
 	    n == _("Bus") ||
-	    n == _("VCA")) {
+	    n == VCA::default_name_template()) {
 		return true;
 	}
 
