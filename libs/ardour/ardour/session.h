@@ -611,7 +611,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
 		const ChanCount& input, const ChanCount& output,
 		boost::shared_ptr<PluginInfo> instrument,
-		Plugin::PresetRecord* pset = 0,
+		Plugin::PresetRecord* pset,
 		RouteGroup* route_group, uint32_t how_many, std::string name_template,
 		PresentationInfo::order_t,
 		TrackMode mode = Normal

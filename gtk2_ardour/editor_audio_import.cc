@@ -953,8 +953,10 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 				list<boost::shared_ptr<MidiTrack> > mt (
 					_session->new_midi_track (ChanCount (DataType::MIDI, 1),
 					                          ChanCount (DataType::MIDI, 1),
-					                          instrument,
-					                          0, 1, string(),
+					                          instrument, (Plugin::PresetRecord*) 0,
+					                          (RouteGroup*) 0,
+					                          1,
+					                          string(),
 					                          PresentationInfo::max_order));
 
 				if (mt.empty()) {

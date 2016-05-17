@@ -1280,12 +1280,14 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 					output_chan =  session()->master_out()->n_inputs().n_audio();
 				}
 				list<boost::shared_ptr<AudioTrack> > audio_tracks;
-				audio_tracks = session()->new_audio_track (region->n_channels(), output_chan, 0, 1, region->name(), PresentationInfo::max_order, ARDOUR::Normal);
+				audio_tracks = session()->new_audio_track (region->n_channels(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
 				rtav = axis_view_from_route (audio_tracks.front());
 			} else if (boost::dynamic_pointer_cast<MidiRegion> (region)) {
 				ChanCount one_midi_port (DataType::MIDI, 1);
 				list<boost::shared_ptr<MidiTrack> > midi_tracks;
-				midi_tracks = session()->new_midi_track (one_midi_port, one_midi_port, boost::shared_ptr<ARDOUR::PluginInfo>(), 0, 1, region->name(), PresentationInfo::max_order, ARDOUR::Normal);
+				midi_tracks = session()->new_midi_track (one_midi_port, one_midi_port, boost::shared_ptr<ARDOUR::PluginInfo>(),
+				                                         (ARDOUR::Plugin::PresetRecord*) 0,
+				                                         (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order);
 				rtav = axis_view_from_route (midi_tracks.front());
 			} else {
 				return;

@@ -1397,7 +1397,7 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 			if ((Config->get_output_auto_connect() & AutoConnectMaster) && _editor->session()->master_out()) {
 				output_chan =  _editor->session()->master_out()->n_inputs().n_audio();
 			}
-			audio_tracks = _editor->session()->new_audio_track (region->n_channels(), output_chan, 0, 1, region->name(), PresentationInfo::max_order, ARDOUR::Normal);
+			audio_tracks = _editor->session()->new_audio_track (region->n_channels(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
 			RouteTimeAxisView* rtav = _editor->axis_view_from_route (audio_tracks.front());
 			if (rtav) {
 				rtav->set_height (original->current_height());
@@ -1406,7 +1406,9 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 		} else {
 			ChanCount one_midi_port (DataType::MIDI, 1);
 			list<boost::shared_ptr<MidiTrack> > midi_tracks;
-			midi_tracks = _editor->session()->new_midi_track (one_midi_port, one_midi_port, boost::shared_ptr<ARDOUR::PluginInfo>(), 0, 1, region->name(), PresentationInfo::max_order, ARDOUR::Normal);
+			midi_tracks = _editor->session()->new_midi_track (one_midi_port, one_midi_port, boost::shared_ptr<ARDOUR::PluginInfo>(),
+			                                                  (ARDOUR::Plugin::PresetRecord*) 0,
+			                                                  (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order);
 			RouteTimeAxisView* rtav = _editor->axis_view_from_route (midi_tracks.front());
 			if (rtav) {
 				rtav->set_height (original->current_height());

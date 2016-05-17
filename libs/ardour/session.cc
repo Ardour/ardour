@@ -2423,7 +2423,8 @@ Session::default_track_name_pattern (DataType t)
  *  @param instrument plugin info for the instrument to insert pre-fader, if any
  */
 list<boost::shared_ptr<MidiTrack> >
-Session::new_midi_track (boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
+Session::new_midi_track (const ChanCount& input, const ChanCount& output,
+                         boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
                          RouteGroup* route_group, uint32_t how_many, string name_template, PresentationInfo::order_t order, 
                          TrackMode mode)
 {

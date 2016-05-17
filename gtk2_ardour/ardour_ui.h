@@ -274,6 +274,7 @@ public:
 
 	void session_add_vca (std::string const &, uint32_t);
 
+	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool, ARDOUR::PresentationInfo::order_t order);
 	void session_add_audio_track (
 		int input_channels,
 		int32_t output_channels,
@@ -304,21 +305,21 @@ public:
 			uint32_t how_many,
 			std::string const & name_template,
 			bool strict_io,
-			ARDOUR::PresentationInfo::order_t order,
 			ARDOUR::PluginInfoPtr instrument,
-			ARDOUR::Plugin::PresetRecord* preset = NULL) {
-		session_add_midi_route (true, route_group, how_many, name_template, strict_io, order, instrument, preset);
+			ARDOUR::Plugin::PresetRecord* preset,
+			ARDOUR::PresentationInfo::order_t order
+		) {
+		session_add_midi_route (true, route_group, how_many, name_template, strict_io, instrument, preset, order);
 	}
 
-	void session_add_mixed_track (const ARDOUR::ChanCount&, const ARDOUR::ChanCount&, ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr,
+	void session_add_mixed_track (const ARDOUR::ChanCount&, const ARDOUR::ChanCount&, ARDOUR::RouteGroup*, uint32_t, std::string const &, bool,
+	                              ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord* pset,
 	                              ARDOUR::PresentationInfo::order_t order);
-	void session_add_midi_bus (ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr,
+	void session_add_midi_bus (ARDOUR::RouteGroup*, uint32_t, std::string const &, bool, ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord* pset,
 	                           ARDOUR::PresentationInfo::order_t order);
-	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool,
-	                              ARDOUR::PresentationInfo::order_t order);
-	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool, ARDOUR::PresentationInfo::order_t order,
-	                             ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*);
-
+	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool,
+	                             ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*,
+	                             ARDOUR::PresentationInfo::order_t order);
 	void display_insufficient_ports_message ();
 
 	void attach_to_engine ();

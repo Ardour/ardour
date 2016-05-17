@@ -1900,9 +1900,9 @@ ARDOUR_UI::session_add_midi_route (
 	one_midi_channel.set (DataType::MIDI, 1);
 
 	if (disk) {
-		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, strict_io, order, instrument, pset);
+		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, strict_io, instrument, pset, order);
 	} else {
-		session_add_midi_bus (route_group, how_many, name_template, strict_io, order, instrument, pset);
+		session_add_midi_bus (route_group, how_many, name_template, strict_io, instrument, pset, order);
 	}
 }
 
