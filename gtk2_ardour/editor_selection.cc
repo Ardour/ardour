@@ -995,7 +995,6 @@ Editor::track_selection_changed ()
 
 	/* notify control protocols */
 
-	ControlProtocol::TrackSelectionChanged (routes);
 	ControlProtocol::StripableSelectionChanged (stripables);
 
 	if (sfbrowser && _session && !_session->deletion_in_progress()) {

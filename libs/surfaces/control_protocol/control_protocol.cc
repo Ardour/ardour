@@ -45,7 +45,6 @@ PBD::Signal0<void> ControlProtocol::VerticalZoomInAll;
 PBD::Signal0<void> ControlProtocol::VerticalZoomOutAll;
 PBD::Signal0<void> ControlProtocol::VerticalZoomInSelected;
 PBD::Signal0<void> ControlProtocol::VerticalZoomOutSelected;
-PBD::Signal1<void,RouteNotificationListPtr> ControlProtocol::TrackSelectionChanged;
 PBD::Signal0<void>          ControlProtocol::StepTracksDown;
 PBD::Signal0<void>          ControlProtocol::StepTracksUp;
 

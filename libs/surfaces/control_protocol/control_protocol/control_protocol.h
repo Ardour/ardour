@@ -95,7 +95,6 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	   no attention to these signals.
 	*/
 
-	static PBD::Signal1<void,RouteNotificationListPtr> TrackSelectionChanged;
 	static PBD::Signal1<void,StripableNotificationListPtr> StripableSelectionChanged;
 
 	/* the model here is as follows:
