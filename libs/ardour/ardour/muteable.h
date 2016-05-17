@@ -35,6 +35,7 @@ class Muteable {
 
 	virtual bool can_be_muted_by_others () const = 0;
 	virtual void act_on_mute () {}
+	virtual bool muted_by_others_soloing () const = 0;
 
 	boost::shared_ptr<MuteMaster> mute_master() const {
 		return _mute_master;
