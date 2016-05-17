@@ -179,7 +179,7 @@ class LIBARDOUR_API PresentationInfo
 
 			   these translate into the following
 
-			   _order  |  _flags            | order()
+			   _order  |  _flags            | global_order()
 			   --------------------------------------
 			   1       |   0x1   AudioTrack | ((0x1|0x2|0x4|0x8)<<32)|1 = 64424509441
 			   2       |   0x2   AudioBus   | ((0x1|0x2|0x4|0x8)<<32)|2 = 64424509442
@@ -193,9 +193,9 @@ class LIBARDOUR_API PresentationInfo
 
 			*/
 
-			return (((global_order_t) (_flags | Route)) << sizeof(order_t)) | _order;
+			return (((global_order_t) (_flags | Route)) << (8*sizeof(order_t))) | _order;
 		} else {
-			return (((global_order_t) _flags) << sizeof(order_t)) | _order;
+			return (((global_order_t) _flags) << (8*sizeof(order_t))) | _order;
 		}
 	}
 
@@ -257,7 +257,7 @@ class LIBARDOUR_API PresentationInfo
 	std::string to_string () const;
 
 	uint64_t to_integer () const {
-		return ((uint64_t) _flags << sizeof(order_t)) | _order;
+		return ((uint64_t) _flags << (8*sizeof(order_t))) | _order;
 	}
 
 	bool operator< (PresentationInfo const& other) const {
