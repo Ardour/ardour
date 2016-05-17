@@ -39,7 +39,6 @@
 #include "ardour/controllable_descriptor.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/session.h"
-#include "ardour/route.h"
 #include "ardour/midi_ui.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/midiport_manager.h"
