@@ -135,7 +135,6 @@ private:
 	void notify_property_changed (const PBD::PropertyChange&);
 	void notify_panner_azi_changed (bool force_update = true);
 	void notify_panner_width_changed (bool force_update = true);
-	void notify_active_changed ();
 	void notify_stripable_deleted ();
 	void notify_processor_changed (bool force_update = true);
 	void update_automation ();

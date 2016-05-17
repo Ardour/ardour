@@ -225,8 +225,6 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 	// TODO this works when a currently-banked stripable is made inactive, but not
 	// when a stripable is activated which should be currently banked.
 
-	// XXX Stripable
-	// _stripable->active_changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_active_changed, this), ui_context());
 	_stripable->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_stripable_deleted, this), ui_context());
 
 	/* setup legal VPot modes for this stripable */
@@ -311,12 +309,6 @@ Strip::notify_record_enable_changed ()
 			_surface->write (_recenable->set_state (trk->rec_enable_control()->get_value() ? on : off));
 		}
 	}
-}
-
-void
-Strip::notify_active_changed ()
-{
-	_surface->mcp().refresh_current_bank();
 }
 
 void
