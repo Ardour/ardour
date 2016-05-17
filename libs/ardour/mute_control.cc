@@ -170,3 +170,8 @@ MuteControl::muted_by_masters () const
 	return get_masters_value ();
 }
 
+bool
+MuteControl::muted_by_others_soloing () const
+{
+	return _muteable.muted_by_others_soloing ();
+}
