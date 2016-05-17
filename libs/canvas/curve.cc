@@ -194,7 +194,7 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		window_space = item_to_window (Duple (samples[left].x, samples[left].y));
 		context->move_to (window_space.x, window_space.y);
 		for (uint32_t idx = left + 1; idx < right; ++idx) {
-			window_space = item_to_window (Duple (samples[idx].x, samples[idx].y), false);
+			window_space = item_to_window (Duple (samples[idx].x, samples[idx].y));
 			context->line_to (window_space.x, window_space.y);
 		}
 
