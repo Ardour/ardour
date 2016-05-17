@@ -106,6 +106,7 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _declickable (false)
 	, _have_internal_generator (false)
 	, _default_type (default_type)
+	, _track_number (0)
 	, _in_configure_processors (false)
 	, _initial_io_setup (false)
 	, _in_sidechain_setup (false)
