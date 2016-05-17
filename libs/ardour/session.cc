@@ -2425,7 +2425,7 @@ Session::default_track_name_pattern (DataType t)
 list<boost::shared_ptr<MidiTrack> >
 Session::new_midi_track (const ChanCount& input, const ChanCount& output,
                          boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
-                         RouteGroup* route_group, uint32_t how_many, string name_template, PresentationInfo::order_t order, 
+                         RouteGroup* route_group, uint32_t how_many, string name_template, PresentationInfo::order_t order,
                          TrackMode mode)
 {
 	string track_name;
@@ -2540,7 +2540,7 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 			error << "cannot find name for new midi bus" << endmsg;
 			goto failure;
 		}
-		
+
 		try {
 			boost::shared_ptr<Route> bus (new Route (*this, bus_name, flag, DataType::AUDIO)); // XXX Editor::add_routes is not ready for ARDOUR::DataType::MIDI
 
@@ -3477,6 +3477,8 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 			}
 		}
 	}
+
+	reassign_track_numbers ();
 }
 
 void
@@ -4291,6 +4293,16 @@ Session::reassign_track_numbers ()
 		// trigger GUI re-layout
 		config.ParameterChanged("track-name-number");
 	}
+
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::OrderKeys)) {
+		boost::shared_ptr<RouteList> rl = routes.reader ();
+		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1 numbered %2\n", (*i)->name(), (*i)->track_number()));
+		}
+	}
+#endif /* NDEBUG */
+
 }
 
 void

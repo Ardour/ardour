@@ -921,7 +921,7 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::OrderKeys, "editor sync order keys from treeview\n");
+	DEBUG_TRACE (DEBUG::OrderKeys, "editor sync presentation info from treeview\n");
 
 	TreeModel::Children::iterator ri;
 	bool change = false;
@@ -992,10 +992,6 @@ EditorRoutes::sync_treeview_from_presentation_info ()
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
 		sorted.push_back (OrderKeys (old_order, route->presentation_info().group_order()));
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("build new order: route %3  old = %1 new = %1\n",
-		                                               old_order,
-		                                               route->presentation_info().group_order(),
-		                                               route->name()));
 	}
 
 	SortByNewDisplayOrder cmp;
@@ -1012,9 +1008,6 @@ EditorRoutes::sync_treeview_from_presentation_info ()
 		if (sr->old_display_order != n) {
 			changed = true;
 		}
-
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("EDITOR change order from %1 to %2\n",
-							       sr->old_display_order, n));
 	}
 
 	if (changed) {

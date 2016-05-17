@@ -588,7 +588,7 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::OrderKeys, "mixer sync order keys from model\n");
+	DEBUG_TRACE (DEBUG::OrderKeys, "mixer sync presentation info from treeview\n");
 
 	TreeModel::Children::iterator ri;
 	bool change = false;
@@ -613,8 +613,6 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 			route->presentation_info().unset_flag (PresentationInfo::Hidden);
 		}
 
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("route %1 old order %2 new order %3\n", route->name(), route->presentation_info().group_order(), order));
-
 		if (order != route->presentation_info().group_order()) {
 			route->set_presentation_group_order_explicit (order);
 			change = true;
@@ -636,7 +634,7 @@ Mixer_UI::sync_treeview_from_presentation_info ()
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::OrderKeys, "mixer sync model from order keys.\n");
+	DEBUG_TRACE (DEBUG::OrderKeys, "mixer sync model from presentation info.\n");
 
 	/* we could get here after either a change in the Mixer or Editor sort
 	 * order, but either way, the mixer order keys reflect the intended
@@ -695,9 +693,6 @@ Mixer_UI::sync_treeview_from_presentation_info ()
 		if (sr->old_display_order != n) {
 			changed = true;
 		}
-
-		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("MIXER change order from %1 to %2\n",
-							       sr->old_display_order, n));
 	}
 
 	if (changed) {
