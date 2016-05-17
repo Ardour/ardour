@@ -29,6 +29,7 @@
 #include <cerrno>
 #include <cstdio> /* snprintf(3) ... grrr */
 #include <cmath>
+
 #include <unistd.h>
 #include <climits>
 #include <signal.h>
@@ -80,6 +81,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/audioregion.h"
+#include "ardour/auditioner.h"
 #include "ardour/automation_control.h"
 #include "ardour/boost_debug.h"
 #include "ardour/butler.h"
@@ -3403,18 +3405,30 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	case ControllableDescriptor::NamedRoute:
 	{
 		std::string str = desc.top_level_name();
+
 		if (str == "Master" || str == "master") {
 			s = _master_out;
-		} else if (str == "control" || str == "listen") {
+		} else if (str == "control" || str == "listen" || str == "monitor" || str == "Monitor") {
 			s = _monitor_out;
+		} else if (str == "auditioner") {
+			s = auditioner;
 		} else {
 			s = route_by_name (desc.top_level_name());
 		}
+
 		break;
 	}
 
 	case ControllableDescriptor::PresentationOrderRoute:
 		s = get_remote_nth_stripable (desc.presentation_order(), PresentationInfo::Route);
+		break;
+
+	case ControllableDescriptor::PresentationOrderTrack:
+		s = get_remote_nth_stripable (desc.presentation_order(), PresentationInfo::Track);
+		break;
+
+	case ControllableDescriptor::PresentationOrderBus:
+		s = get_remote_nth_stripable (desc.presentation_order(), PresentationInfo::Bus);
 		break;
 
 	case ControllableDescriptor::PresentationOrderVCA:
