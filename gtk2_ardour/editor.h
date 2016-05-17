@@ -2254,6 +2254,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	friend class RegionSpliceDrag;
 	friend class RegionRippleDrag;
 	friend class TrimDrag;
+	friend class BBTRulerDrag;
 	friend class MeterMarkerDrag;
 	friend class TempoMarkerDrag;
 	friend class CursorDrag;

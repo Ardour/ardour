@@ -3478,32 +3478,47 @@ TempoMarkerDrag::aborted (bool moved)
 
 BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
+	, _pulse (0.0)
+	, _beat (0.0)
 	, _tempo (0)
 	, before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New BBTRulerDrag\n");
+
 }
 
 void
 BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
+
 	TempoMap& map (_editor->session()->tempo_map());
 	ostringstream sstr;
-	sstr << fixed << setprecision(3) << map.tempo_at (adjusted_current_frame (event)).beats_per_minute();
-	show_verbose_cursor_text (sstr.str());
-	_tempo = const_cast<TempoSection*> (&map.tempo_section_at (adjusted_current_frame (event, false)));
 
-	if (!_tempo) {
-		Drag::abort();
-	}
+	_tempo = const_cast<TempoSection*> (&map.tempo_section_at (raw_grab_frame()));
+	sstr << "^" << fixed << setprecision(3) << map.tempo_at (adjusted_current_frame (event)).beats_per_minute() << "\n";
+	sstr << "<" << fixed << setprecision(3) << _tempo->beats_per_minute();
+	show_verbose_cursor_text (sstr.str());
+	finished (event, false);
 }
 
 void
 BBTRulerDrag::setup_pointer_frame_offset ()
 {
 	TempoMap& map (_editor->session()->tempo_map());
-	_pointer_frame_offset = raw_grab_frame() - map.frame_at_beat (floor (map.beat_at_frame (raw_grab_frame())));
+	const double beat_at_frame = map.beat_at_frame (raw_grab_frame());
+	const uint32_t divisions = _editor->get_grid_beat_divisions (0);
+	if (divisions > 0) {
+		_beat = floor (beat_at_frame) + (floor (((beat_at_frame - floor (beat_at_frame)) * divisions)) / divisions);
+	} else {
+		/* while it makes some sense for the user to determine the division to 'grab',
+		   grabbing a bar often leads to confusing results wrt the actual tempo section being altered
+		   and the result over steep tempo curves. Use sixteenths.
+		*/
+		_beat = floor (beat_at_frame) + (floor (((beat_at_frame - floor (beat_at_frame)) * 4)) / 4);
+	}
+	_pulse = map.pulse_at_beat (_beat);
+	_pointer_frame_offset = raw_grab_frame() - map.frame_at_beat (_beat);
 }
 
 void
@@ -3521,10 +3536,11 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier())) {
 		/* adjust previous tempo to match pointer frame */
-		_editor->session()->tempo_map().gui_dilate_tempo (_tempo, last_pointer_frame(), pf);
+		_editor->session()->tempo_map().gui_dilate_tempo (_tempo, map.frame_at_pulse (_pulse), pf, _pulse);
 	}
 	ostringstream sstr;
-	sstr << fixed << setprecision(3) << map.tempo_at (pf).beats_per_minute();
+	sstr << "^" << fixed << setprecision(3) << map.tempo_at (pf).beats_per_minute() << "\n";
+	sstr << "<" << fixed << setprecision(3) << _tempo->beats_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 

@@ -764,6 +764,8 @@ public:
 	void setup_pointer_frame_offset ();
 
 private:
+	double _pulse;
+	double _beat;
 	ARDOUR::TempoSection* _tempo;
 	XMLNode* before_state;
 };
