@@ -145,7 +145,7 @@ Session::memento_command_factory(XMLNode *n)
     }
 
     /* we failed */
-    error << string_compose (_("could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"), obj_T, id.to_s()) << endmsg;
+    info << string_compose (_("could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"), obj_T, id.to_s()) << endmsg;
 
     return 0 ;
 }
