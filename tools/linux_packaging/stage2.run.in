@@ -500,7 +500,7 @@ else
 fi
 
 PGM_EXEC_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/${PGM_EXEC_FILE}"
-ICON_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/share/icons"
+ICON_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/share/resources"
 MENU_FILE_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/share"
 
 ################################
@@ -563,15 +563,15 @@ ${SUPER} mv /tmp/${MENU_FILE} ${MENU_FILE_PATH}/.
 if [ "T" = ${HAS_XDG} ];
 then
 	echo "Adding ${PGM_NAME} to the applications menu"
-	${SUPER} xdg-icon-resource install --context apps --size 16 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_16px.png ${ICON_NAME}
-	${SUPER} xdg-icon-resource install --context apps --size 22 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_22px.png ${ICON_NAME}
-	${SUPER} xdg-icon-resource install --context apps --size 32 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_32px.png ${ICON_NAME}
-	${SUPER} xdg-icon-resource install --context apps --size 48 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_48px.png ${ICON_NAME}
-	${SUPER} xdg-icon-resource install --context apps --size 256 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_256px.png ${ICON_NAME}
+	${SUPER} xdg-icon-resource install --context apps --size 16 ${ICON_PATH}/${PGM_NAME}-icon_16px.png ${ICON_NAME}
+	${SUPER} xdg-icon-resource install --context apps --size 22 ${ICON_PATH}/${PGM_NAME}-icon_22px.png ${ICON_NAME}
+	${SUPER} xdg-icon-resource install --context apps --size 32 ${ICON_PATH}/${PGM_NAME}-icon_32px.png ${ICON_NAME}
+	${SUPER} xdg-icon-resource install --context apps --size 48 ${ICON_PATH}/${PGM_NAME}-icon_48px.png ${ICON_NAME}
+	${SUPER} xdg-icon-resource install --context apps --size 256 ${ICON_PATH}/${PGM_NAME}-icon_256px.png ${ICON_NAME}
 
-	if [ -e ${ICON_PATH}/${PGM_NAME_LOWER}_icon.svg -a -d /usr/share/icons/hicolor/scalable/apps ]; 
+	if [ -e ${ICON_PATH}/${PGM_NAME}_icon.svg -a -d /usr/share/icons/hicolor/scalable/apps ];
 	then
-		${SUPER} cp -f ${ICON_PATH}/${PGM_NAME_LOWER}_icon.svg  /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg
+		${SUPER} cp -f ${ICON_PATH}/${PGM_NAME}_icon.svg  /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg
 	fi
 
 	${SUPER} xdg-desktop-menu install ${MENU_FILE_PATH}/${MENU_FILE}
