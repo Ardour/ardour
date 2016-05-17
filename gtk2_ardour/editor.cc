@@ -1010,7 +1010,21 @@ Editor::control_select (PresentationInfo::global_order_t global_order, Selection
 		return;
 	}
 
-	PresentationInfo pi (global_order, PresentationInfo::Flag (0));
+	PresentationInfo::Flag select_flags;
+
+	if (global_order & ~0xffffffff) {
+		/* some flags are set, so the PresentationInfo constructor
+		 * will use them
+		 */
+		select_flags = PresentationInfo::Flag (0);
+	} else {
+		/* no type flags set in the global order ID, so assume caller
+		 * wants to select a Route
+		 */
+		select_flags = PresentationInfo::Route;
+	}
+
+	PresentationInfo pi (global_order, select_flags);
 	boost::shared_ptr<Stripable> s = _session->get_remote_nth_stripable (pi.group_order(), pi.flags());
 
 	/* selected object may not be a Route */
