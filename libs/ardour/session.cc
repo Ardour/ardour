@@ -4213,25 +4213,39 @@ Session::get_remote_nth_route (uint16_t n) const
 	return boost::dynamic_pointer_cast<Route> (get_remote_nth_stripable (n, PresentationInfo::Route));
 }
 
+struct GlobalPresentationOrderSorter {
+	bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
+		return a->presentation_info() < b->presentation_info();
+	}
+};
+
 boost::shared_ptr<Stripable>
 Session::get_remote_nth_stripable (uint16_t n, PresentationInfo::Flag flags) const
 {
-	boost::shared_ptr<RouteList> r = routes.reader ();
-	vector<boost::shared_ptr<Route> > v;
+	StripableList sl;
+	uint32_t match_cnt = 0;
 
-	if (n >= r->size()) {
-		return boost::shared_ptr<Route> ();
+	/* API is one-based, so adjust n */
+
+	if (n) {
+		--n;
 	}
 
-	v.assign (r->size(), boost::shared_ptr<Route>());
+	get_stripables (sl);
+	GlobalPresentationOrderSorter cmp;
+	sl.sort (cmp);
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->presentation_info().flag_match (flags)) {
-			v[(*i)->presentation_info().group_order()] = (*i);
+	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
+		if ((*s)->presentation_info().flag_match (flags)) {
+			cerr << '\t' << (*s)->name() << " matches " << enum_2_string (flags) << endl;
+			if (match_cnt++ == n) {
+				return *s;
+			}
 		}
 	}
 
-	return v[n];
+	/* there is no nth stripable that matches the given flags */
+	return boost::shared_ptr<Stripable>();
 }
 
 boost::shared_ptr<Route>
