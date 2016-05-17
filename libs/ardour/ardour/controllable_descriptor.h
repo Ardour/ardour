@@ -31,6 +31,8 @@ class LIBARDOUR_API ControllableDescriptor {
 public:
     enum TopLevelType {
 	    PresentationOrderRoute,
+	    PresentationOrderTrack,
+	    PresentationOrderBus,
 	    PresentationOrderVCA,
 	    NamedRoute,
 	    SelectionCount,

@@ -16,6 +16,13 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifdef COMPILER_MSVC
+#include <io.h> // Microsoft's nearest equivalent to <unistd.h>
+#include <ardourext/misc.h>
+#else
+#include <regex.h>
+#endif
+
 #include "pbd/strsplit.h"
 #include "pbd/convert.h"
 
@@ -51,28 +58,68 @@ ControllableDescriptor::set (const std::string& str)
 		return -1;
 	}
 
+	bool stripable = false;
+	regex_t compiled_pattern;
+	const char * const pattern = "^[BS]?[0-9]+";
+
 	if (path[0] == "route" || path[0] == "rid") {
 
-		_top_level_type = PresentationOrderRoute;
+		/* this is not going to fail */
+		regcomp (&compiled_pattern, pattern, REG_EXTENDED|REG_NOSUB);
+		bool matched = (regexec (&compiled_pattern, rest[0].c_str(), 0, 0, 0) == 0);
+		regfree (&compiled_pattern);
 
-		if (rest[0][0] == 'B') {
-			_banked = true;
-			_presentation_order = atoi (rest[0].substr (1));
-		} else if (rest[0][0] == 'S') {
-			_top_level_type = SelectionCount;
-			_banked = true;
-			_selection_id = atoi (rest[0].substr (1));
-		} else if (isdigit (rest[0][0])) {
-			_banked = false;
-			_presentation_order = atoi (rest[0]);
+		if (matched) {
+			_top_level_type = PresentationOrderRoute;
+			stripable = true;
 		} else {
-			return -1;
+			_top_level_type = NamedRoute;
+			_top_level_name = rest[0];
 		}
 
 	} else if (path[0] == "vca") {
-
 		_top_level_type = PresentationOrderVCA;
+		stripable = true;
+	} else if (path[0] == "bus") {
+		/* digits, or B<digits> or S<digits> will be used as for route;
+		   anything else will be treated as a track name.
+		*/
 
+		/* this is not going to fail */
+
+		regcomp (&compiled_pattern, pattern, REG_EXTENDED|REG_NOSUB);
+		bool matched = (regexec (&compiled_pattern, rest[0].c_str(), 0, 0, 0) == 0);
+		regfree (&compiled_pattern);
+
+		if (matched) {
+			_top_level_type = PresentationOrderBus;
+			stripable = true;
+		} else {
+			_top_level_type = NamedRoute;
+			_top_level_name = rest[0];
+		}
+
+	} else if (path[0] == "track") {
+
+		/* digits, or B<digits> or S<digits> will be used as for route;
+		   anything else will be treated as a track name.
+		*/
+
+		/* this is not going to fail */
+		regcomp (&compiled_pattern, pattern, REG_EXTENDED|REG_NOSUB);
+		bool matched = (regexec (&compiled_pattern, rest[0].c_str(), 0, 0, 0) == 0);
+		regfree (&compiled_pattern);
+
+		if (matched) {
+			_top_level_type = PresentationOrderTrack;
+			stripable = true;
+		} else {
+			_top_level_type = NamedRoute;
+			_top_level_name = rest[0];
+		}
+	}
+
+	if (stripable) {
 		if (rest[0][0] == 'B') {
 			_banked = true;
 			_presentation_order = atoi (rest[0].substr (1));
@@ -86,11 +133,6 @@ ControllableDescriptor::set (const std::string& str)
 		} else {
 			return -1;
 		}
-
-	} else if (path[0] == "bus" || path[0] == "track") {
-
-		_top_level_type = NamedRoute;
-		_top_level_name = rest[0];
 	}
 
 	if (path[1] == "gain") {
