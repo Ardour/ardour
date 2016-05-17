@@ -4237,7 +4237,6 @@ Session::get_remote_nth_stripable (uint16_t n, PresentationInfo::Flag flags) con
 
 	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
 		if ((*s)->presentation_info().flag_match (flags)) {
-			cerr << '\t' << (*s)->name() << " matches " << enum_2_string (flags) << endl;
 			if (match_cnt++ == n) {
 				return *s;
 			}
