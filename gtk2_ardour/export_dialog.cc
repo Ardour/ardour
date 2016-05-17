@@ -26,6 +26,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/export_status.h"
 #include "ardour/export_handler.h"
+#include "ardour/profile.h"
 
 #include "export_dialog.h"
 #include "export_report.h"
@@ -331,12 +332,12 @@ ExportDialog::show_progress ()
 
 	if (!status->aborted()) {
 		hide();
-
-		NagScreen* ns = NagScreen::maybe_nag (_("export"));
-
-		if (ns) {
-			ns->nag ();
-			delete ns;
+		if (!ARDOUR::Profile->get_mixbus()) {
+			NagScreen* ns = NagScreen::maybe_nag (_("export"));
+			if (ns) {
+				ns->nag ();
+				delete ns;
+			}
 		}
 	} else {
 		notify_errors ();

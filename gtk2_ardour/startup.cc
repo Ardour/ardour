@@ -46,6 +46,7 @@
 #include "ardour/session.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/template_utils.h"
+#include "ardour/profile.h"
 
 #include "startup.h"
 #include "opts.h"
@@ -357,7 +358,9 @@ ArdourStartup::setup_final_page ()
 
 	VBox* vbox = manage (new VBox);
 	vbox->pack_start (*final_label, true, true);
-	vbox->pack_start (plugin_disco_button, true, false);
+	if (!Profile->get_mixbus()) {
+		vbox->pack_start (plugin_disco_button, true, false);
+	}
 	vbox->show ();
 
 	final_page_index = append_page (*vbox);

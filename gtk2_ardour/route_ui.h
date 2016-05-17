@@ -300,6 +300,7 @@ class RouteUI : public virtual AxisView
 
 	std::string route_state_id () const;
 
+protected:
 	struct SoloMuteRelease {
 	    SoloMuteRelease (bool was_active)
 	    : active (was_active)
@@ -316,6 +317,7 @@ class RouteUI : public virtual AxisView
 	SoloMuteRelease* _solo_release;
 	SoloMuteRelease* _mute_release;
 
+private:
 	void setup_invert_buttons ();
 	void set_invert_button_state ();
 	void invert_menu_toggled (uint32_t);
