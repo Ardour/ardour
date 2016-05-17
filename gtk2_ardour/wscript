@@ -793,7 +793,6 @@ def build(bld):
         
     # Icons/Images
     bld.install_files(os.path.join (bld.env['DATADIR'], 'icons'), bld.path.ant_glob('icons/*.png'))
-    bld.install_files(os.path.join (bld.env['DATADIR'], 'pixmaps'), bld.path.ant_glob('pixmaps/*.xpm'))
     bld.install_files(bld.env['DATADIR'], 'ArdourMono.ttf')
 
     # Application/Product specific resources (icon, splash)
