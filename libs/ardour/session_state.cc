@@ -1597,24 +1597,6 @@ Session::load_routes (const XMLNode& node, int version)
 
 	BootMessage (_("Finished adding tracks/busses"));
 
-	boost::shared_ptr<Route> r;
-	uint32_t n = nroutes ();
-
-	for (uint32_t nn = 0; nn < n + 1; ++nn) {
-		r = get_remote_nth_route (nn);
-		if (r) {
-			std::cerr << "Nth-route = " << r->name() << endl;
-		} else {
-			std::cerr << "Nth-route: undefined\n";
-		}
-	}
-
-	boost::shared_ptr<Stripable> s;
-	s = get_remote_nth_stripable (0, PresentationInfo::MasterOut);
-	std::cerr << " Master = " << s << std::endl;
-	s = get_remote_nth_stripable (0, PresentationInfo::MonitorOut);
-	std::cerr << " Monitor = " << s << std::endl;
-
 	return 0;
 }
 
