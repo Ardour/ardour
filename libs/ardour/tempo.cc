@@ -2875,11 +2875,11 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 			if (prev_to_prev_t) {
 
 				frame_ratio = (((pulse_pos - fr_off) - prev_to_prev_t->frame()) / (double) ((pulse_pos) - prev_to_prev_t->frame()));
-				pulse_ratio = ((start_pulse - prev_to_prev_t->pulse()) / (double) (end_pulse - prev_to_prev_t->pulse()));
+				pulse_ratio = ((start_pulse - prev_to_prev_t->pulse()) / (end_pulse - prev_to_prev_t->pulse()));
 			} else {
 
 				frame_ratio = (((pulse_pos - fr_off) - prev_t->frame()) / (double) ((pulse_pos) - prev_t->frame()));
-				pulse_ratio = ((start_pulse) / (double) (end_pulse));
+				pulse_ratio = (start_pulse / end_pulse);
 			}
 			new_bpm = prev_t->beats_per_minute() * (pulse_ratio * frame_ratio);
 		}
