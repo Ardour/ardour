@@ -43,6 +43,7 @@ class PhaseControl;
 class SoloIsolateControl;
 class SoloSafeControl;
 class MonitorControl;
+class MonitorProcessor;
 
 /* This is a virtual base class for any object that needs to be potentially
  * represented by a control-centric user interface using the general model of a
@@ -173,7 +174,9 @@ class LIBARDOUR_API Stripable : public SessionObject {
 
 	virtual bool muted_by_others_soloing () const = 0;
 
-   protected:
+	virtual boost::shared_ptr<MonitorProcessor> monitor_control() const = 0;
+
+  protected:
 	PresentationInfo _presentation_info;
 
 	/* set the entire info. This should only be used in cases where the
