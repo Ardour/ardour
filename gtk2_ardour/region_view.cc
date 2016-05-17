@@ -808,6 +808,9 @@ RegionView::update_coverage_frames (LayerDisplay d)
 		}
 
 		t = pl->find_next_region_boundary (t, 1);
+		if (t < 0) {
+			break;
+		}
 		me = new_me;
 	}
 
