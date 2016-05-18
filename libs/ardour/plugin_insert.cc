@@ -498,6 +498,39 @@ PluginInsert::flush ()
 }
 
 void
+PluginInsert::inplace_silence_unconnected (BufferSet& bufs, const PinMappings& out_map, framecnt_t nframes, framecnt_t offset) const
+{
+	// TODO optimize: store "unconnected" in a fixed set.
+	// it only changes on reconfiguration.
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		for (uint32_t out = 0; out < bufs.count().get (*t); ++out) {
+			bool mapped = false;
+			if (*t == DataType::MIDI && out == 0 && has_midi_bypass ()) {
+				mapped = true; // in-place Midi bypass
+			}
+			for (uint32_t pc = 0; pc < get_count() && !mapped; ++pc) {
+				PinMappings::const_iterator i = out_map.find (pc);
+				if (i == out_map.end ()) {
+					continue;
+				}
+				const ChanMapping& outmap (i->second);
+				for (uint32_t o = 0; o < natural_output_streams().get (*t); ++o) {
+					bool valid;
+					uint32_t idx = outmap.get (*t, o, &valid);
+					if (valid && idx == out) {
+						mapped = true;
+						break;
+					}
+				}
+			}
+			if (!mapped) {
+				bufs.get (*t, out).silence (nframes, offset);
+			}
+		}
+	}
+}
+
+void
 PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now)
 {
 	// TODO: atomically copy maps & _no_inplace
@@ -724,30 +757,8 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 				deactivate ();
 			}
 		}
-
-		// TODO optimize: store "unconnected" in a fixed set.
-		// it only changes on reconfiguration.
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			for (uint32_t out = 0; out < bufs.count().get (*t); ++out) {
-				bool mapped = false;
-				if (*t == DataType::MIDI && out == 0 && has_midi_bypass ()) {
-					mapped = true; // in-place Midi bypass
-				}
-				for (uint32_t pc = 0; pc < get_count() && !mapped; ++pc) {
-					for (uint32_t o = 0; o < natural_output_streams().get (*t); ++o) {
-						bool valid;
-						uint32_t idx = out_map[pc].get (*t, o, &valid);
-						if (valid && idx == out) {
-							mapped = true;
-							break;
-						}
-					}
-				}
-				if (!mapped) {
-					bufs.get (*t, out).silence (nframes, offset);
-				}
-			}
-		}
+		// now silence unconnected outputs
+		inplace_silence_unconnected (bufs, _out_map, nframes, offset);
 	}
 
 	if (collect_signal_nframes > 0) {
@@ -773,6 +784,117 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 
 			AnalysisDataGathered(&_signal_analysis_inputs,
 					     &_signal_analysis_outputs);
+		}
+	}
+}
+
+void
+PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
+{
+	/* bypass the plugin(s) not the whole processor.
+	 * -> use mappings just like connect_and_run
+	 */
+
+	// TODO: atomically copy maps & _no_inplace
+	ChanMapping in_map (input_map ());
+	ChanMapping out_map (output_map ());
+	if (_mapping_changed) {
+		_no_inplace = check_inplace ();
+		_mapping_changed = false;
+	}
+
+	bufs.set_count(ChanCount::max(bufs.count(), _configured_internal));
+	bufs.set_count(ChanCount::max(bufs.count(), _configured_out));
+
+	if (_no_inplace) {
+		ChanMapping thru_map (_thru_map);
+
+		BufferSet& inplace_bufs  = _session.get_noinplace_buffers();
+		// copy all inputs
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			for (uint32_t in = 0; in < _configured_internal.get (*t); ++in) {
+				inplace_bufs.get (*t, in).read_from (bufs.get (*t, in), nframes, 0, 0);
+			}
+		}
+		ARDOUR::ChanMapping used_outputs;
+		// copy thru
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			for (uint32_t out = 0; out < _configured_out.get (*t); ++out) {
+				bool valid;
+				uint32_t in_idx = thru_map.get (*t, out, &valid);
+				if (valid) {
+					bufs.get (*t, out).read_from (inplace_bufs.get (*t, in_idx), nframes, 0, 0);
+					used_outputs.set (*t, out, 1); // mark as used
+				}
+			}
+		}
+		// plugin no-op: assume every plugin has an internal identity map
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			for (uint32_t out = 0; out < _configured_out.get (*t); ++out) {
+				bool valid;
+				uint32_t src_idx = out_map.get_src (*t, out, &valid);
+				if (!valid) {
+					continue;
+				}
+				uint32_t in_idx = in_map.get (*t, src_idx, &valid);
+				if (!valid) {
+					continue;
+				}
+				bufs.get (*t, out).read_from (inplace_bufs.get (*t, in_idx), nframes, 0, 0);
+				used_outputs.set (*t, out, 1); // mark as used
+			}
+		}
+		// now silence all unused outputs
+		if (has_midi_bypass ()) {
+			used_outputs.set (DataType::MIDI, 0, 1); // Midi bypass.
+		}
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			for (uint32_t out = 0; out < _configured_out.get (*t); ++out) {
+				bool valid;
+				used_outputs.get (*t, out, &valid);
+				if (!valid) {
+						bufs.get (*t, out).silence (nframes, 0);
+				}
+			}
+		}
+	} else {
+		if (_match.method == Split) {
+			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+				if (_configured_internal.get (*t) == 0) {
+					continue;
+				}
+				// copy/feeds _all_ *connected* inputs, copy the first buffer
+				bool valid;
+				uint32_t first_idx = in_map.get (*t, 0, &valid);
+				assert (valid && first_idx == 0); // check_inplace ensures this
+				for (uint32_t i = 1; i < natural_input_streams ().get (*t); ++i) {
+					uint32_t idx = in_map.get (*t, i, &valid);
+					if (valid) {
+						assert (idx == 0);
+						bufs.get (*t, i).read_from (bufs.get (*t, first_idx), nframes, 0, 0);
+					}
+				}
+			}
+		}
+
+		// apply output map and/or monotonic but not identity i/o mappings
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			for (uint32_t out = 0; out < _configured_out.get (*t); ++out) {
+				bool valid;
+				uint32_t src_idx = out_map.get_src (*t, out, &valid);
+				if (!valid) {
+					bufs.get (*t, out).silence (nframes, 0);
+					continue;
+				}
+				uint32_t in_idx = in_map.get (*t, src_idx, &valid);
+				if (!valid) {
+					bufs.get (*t, out).silence (nframes, 0);
+					continue;
+				}
+				if (in_idx != src_idx) {
+					bufs.get (*t, out).read_from (bufs.get (*t, in_idx), nframes, 0, 0);
+				}
+			}
 		}
 	}
 }
@@ -820,35 +942,8 @@ PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 		}
 
 	} else {
-		// TODO use mapping in bypassed mode ?!
-		// -> do we bypass the processor or the plugin
-
-		// TODO include sidechain??
-
-		uint32_t in = input_streams ().n_audio ();
-		uint32_t out = output_streams().n_audio ();
-
-		if (has_no_audio_inputs() || in == 0) {
-
-			/* silence all (audio) outputs. Should really declick
-			 * at the transitions of "active"
-			 */
-
-			for (uint32_t n = 0; n < out; ++n) {
-				bufs.get_audio (n).silence (nframes);
-			}
-
-		} else if (out > in) {
-
-			/* not active, but something has make up for any channel count increase
-			 * for now , simply replicate last buffer
-			 */
-			for (uint32_t n = in; n < out; ++n) {
-				bufs.get_audio(n).read_from(bufs.get_audio(in - 1), nframes);
-			}
-		}
-
-		bufs.count().set_audio (out);
+		bypass (bufs, nframes);
+		_delaybuffers.flush ();
 	}
 
 	_active = _pending_active;

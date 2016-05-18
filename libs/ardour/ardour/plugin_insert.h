@@ -339,6 +339,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	void automation_run (BufferSet& bufs, framepos_t start, pframes_t nframes);
 	void connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now = 0);
+	void bypass (BufferSet& bufs, pframes_t nframes);
+	void inplace_silence_unconnected (BufferSet&, const PinMappings&, framecnt_t nframes, framecnt_t offset) const;
 
 	void create_automatable_parameters ();
 	void control_list_automation_state_changed (Evoral::Parameter, AutoState);
