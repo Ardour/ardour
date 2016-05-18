@@ -375,6 +375,35 @@ PluginInsert::needs_midi_input() const
 	return pip->n_inputs.n_midi() != 0 && pip->n_outputs.n_audio() != 0;
 }
 
+bool
+PluginInsert::has_output_presets (ChanCount in, ChanCount out)
+{
+	if (!_configured && _plugins[0]->get_info ()->reconfigurable_io ()) {
+		// collect possible configurations, prefer given in/out
+		_plugins[0]->can_support_io_configuration (in, out);
+	}
+
+	PluginOutputConfiguration ppc (_plugins[0]->possible_output ());
+
+	if (ppc.size () == 0) {
+		return false;
+	}
+	if (!strict_io () && ppc.size () == 1) {
+		return false;
+	}
+
+	if (strict_io () && ppc.size () == 1) {
+		// "stereo" is currently preferred default for instruments
+		if (ppc.find (2) != ppc.end ()) {
+			return false;
+		}
+	}
+	if (!needs_midi_input ()) {
+			return false;
+	}
+	return true;
+}
+
 void
 PluginInsert::create_automatable_parameters ()
 {

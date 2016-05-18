@@ -164,6 +164,10 @@ class LIBARDOUR_API PluginInsert : public Processor
 	bool has_no_inputs() const;
 	bool has_no_audio_inputs() const;
 	bool needs_midi_input() const;
+	bool has_output_presets (
+			ChanCount in = ChanCount (DataType::MIDI, 1),
+			ChanCount out = ChanCount (DataType::AUDIO, 2)
+			);
 
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
