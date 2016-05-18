@@ -2329,10 +2329,16 @@ Editor::set_state (const XMLNode& node, int version)
 
 	if ((prop = node.property ("snap-to"))) {
 		snap_type_selection_done ((SnapType) string_2_enum (prop->value(), _snap_type));
+		set_snap_to ((SnapType) string_2_enum (prop->value(), _snap_type));
 	}
 
 	if ((prop = node.property ("snap-mode"))) {
 		snap_mode_selection_done((SnapMode) string_2_enum (prop->value(), _snap_mode));
+		/* set text of Dropdown. in case _snap_mode == SnapOff (default)
+		 * snap_mode_selection_done() will only mark an already active item as active
+		 * which does not trigger set_text().
+		 */
+		set_snap_mode ((SnapMode) string_2_enum (prop->value(), _snap_mode));
 	}
 
 	if ((prop = node.property ("internal-snap-to"))) {
