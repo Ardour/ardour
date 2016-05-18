@@ -436,6 +436,7 @@ Editor::Editor ()
 	, show_gain_after_trim (false)
 	, selection_op_cmd_depth (0)
 	, selection_op_history_it (0)
+	, no_save_instant (false)
 	, current_timefx (0)
 	, current_mixer_strip (0)
 	, show_editor_mixer_when_tracks_arrive (false)
@@ -949,7 +950,7 @@ Editor::set_entered_track (TimeAxisView* tav)
 void
 Editor::instant_save ()
 {
-	if (!constructed || !ARDOUR_UI::instance()->session_loaded) {
+	if (!constructed || !ARDOUR_UI::instance()->session_loaded || no_save_instant) {
 		return;
 	}
 
@@ -2289,6 +2290,7 @@ Editor::set_state (const XMLNode& node, int version)
 {
 	XMLProperty const * prop;
 	set_id (node);
+	PBD::Unwinder<bool> nsi (no_save_instant, true);
 
 	Tabbable::set_state (node, version);
 

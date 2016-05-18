@@ -1975,6 +1975,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void update_title_s (const std::string & snapshot_name);
 
 	void instant_save ();
+	bool no_save_instant;
 
 	boost::shared_ptr<ARDOUR::AudioRegion> last_audition_region;
 
