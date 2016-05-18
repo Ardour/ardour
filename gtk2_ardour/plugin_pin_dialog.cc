@@ -470,33 +470,8 @@ PluginPinWidget::refill_output_presets ()
 {
 	using namespace Menu_Helpers;
 	_out_presets.clear_items ();
-	PluginOutputConfiguration ppc (_pi->plugin (0)->possible_output ());
 
-	bool need_dropdown = true;
-
-	if (ppc.size () == 0) {
-		need_dropdown = false;
-	}
-
-	if (!_pi->strict_io () && ppc.size () == 1) {
-		need_dropdown = false;
-	}
-
-	if (_pi->strict_io () && ppc.size () == 1) {
-		// "stereo" is currently preferred default for instruments, see PluginInsert
-		if (ppc.find (2) != ppc.end ()) {
-			need_dropdown = false;
-		}
-	}
-
-	if (!_pi->needs_midi_input ()) {
-		/* loose definition of instruments, maybe impose additional
-		 * || _pi->natural_input_streams ().n_audio () != 0
-		 * and special case variable output plugins
-		 * && !_pi->plugin (0)->info->reconfigurable_io()
-		 */
-		need_dropdown = false;
-	}
+	bool need_dropdown = _pi->has_output_presets ();
 
 	if (!need_dropdown) {
 		_out_presets.set_sensitive (false);
@@ -511,6 +486,7 @@ PluginPinWidget::refill_output_presets ()
 		_out_presets.set_text (_("Automatic"));
 	}
 
+	PluginOutputConfiguration ppc (_pi->plugin (0)->possible_output ());
 	if (ppc.find (0) != ppc.end ()) {
 		// anyting goes
 		ppc.clear ();
