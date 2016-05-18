@@ -546,8 +546,19 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		req->height = std::max(req->height, (int) ceil(char_pixel_height() * BASELINESTRETCH + 1.0));
 		assert (_layout);
 		_layout->get_pixel_size (_text_width, _text_height);
+
 		req->width += rint(1.75 * char_pixel_width()); // padding
 		req->width += _text_width;
+
+		/* XXX hack (surprise). Deal with two common rotation angles */
+
+		if (_angle == 90 || _angle == 270) {
+			/* do not swap text width or height because we rely on
+			   these being the un-rotated values in ::render()
+			*/
+			swap (req->width, req->height);
+		}
+
 	} else {
 		_text_width = 0;
 		_text_height = 0;
