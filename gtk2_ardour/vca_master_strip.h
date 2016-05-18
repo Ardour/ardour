@@ -70,6 +70,8 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	Gtk::MessageDialog* delete_dialog;
 	ArdourButton vertical_button;
 
+	void spill ();
+	void spill_change (boost::shared_ptr<ARDOUR::VCA>);
 	void hide_clicked();
 	bool width_button_pressed (GdkEventButton *);
 	void set_selected (bool);

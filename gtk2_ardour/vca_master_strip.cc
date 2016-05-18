@@ -31,6 +31,7 @@
 #include "ardour_dialog.h"
 #include "floating_text_entry.h"
 #include "gui_thread.h"
+#include "mixer_ui.h"
 #include "tooltips.h"
 #include "ui_config.h"
 #include "vca_master_strip.h"
@@ -45,30 +46,6 @@ using namespace PBD;
 using std::string;
 
 PBD::Signal1<void,VCAMasterStrip*> VCAMasterStrip::CatchDeletion;
-
-static string
-verticalize (string const & str)
-{
-	return str;
-#if 0
-	string ret;
-	string::const_iterator s = str.begin();
-	ret = *s;
-	ret += '\n';
-	++s;
-
-	while (s != str.end()) {
-		ret += *s;
-		ret += '\n';
-		++s;
-	}
-
-	/* remove terminal newline */
-
-	ret.erase (ret.length() - 1, string::npos);
-	return ret;
-#endif
-}
 
 VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	: AxisView (s)
@@ -124,6 +101,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	/* horizontally centered, with a little space (5%) at the top */
 	vertical_button.set_angle (90);
 	vertical_button.set_layout_font (UIConfiguration::instance().get_NormalBoldFont());
+	vertical_button.signal_clicked.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill));
 
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (0);
@@ -165,6 +143,8 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	update_vca_name ();
 	solo_changed ();
 	mute_changed ();
+
+	Mixer_UI::instance()->show_vca_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
 
 	/* this remains unchanged as the name changes */
 	name_button.set_text (string_compose (X_("VCA %1"), _vca->number()));
@@ -485,7 +465,8 @@ VCAMasterStrip::vca_property_changed (PropertyChange const & what_changed)
 void
 VCAMasterStrip::update_vca_name ()
 {
-	vertical_button.set_text (verticalize (short_version (_vca->name(), 15)));
+	/* 20 is a rough guess at the number of letters we can fit. */
+	vertical_button.set_text (short_version (_vca->name(), 20));
 }
 
 void
@@ -496,4 +477,24 @@ VCAMasterStrip::build_context_menu ()
 	MenuList& items = context_menu->items();
 	items.push_back (MenuElem (_("Rename"), sigc::mem_fun (*this, &VCAMasterStrip::start_name_edit)));
 	items.push_back (MenuElem (_("Remove")));
+}
+
+void
+VCAMasterStrip::spill ()
+{
+	if (Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
+		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
+	} else {
+		Mixer_UI::instance()->show_vca_slaves (_vca);
+	}
+}
+
+void
+VCAMasterStrip::spill_change (boost::shared_ptr<VCA> vca)
+{
+	if (vca != _vca) {
+		vertical_button.set_active_state (Gtkmm2ext::Off);
+	} else {
+		vertical_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	}
 }

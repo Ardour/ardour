@@ -2663,3 +2663,19 @@ Mixer_UI::do_vca_unassign (boost::shared_ptr<VCA> vca)
 	/* call protected MixerActor:: method */
 	vca_unassign (vca);
 }
+
+void
+Mixer_UI::show_vca_slaves (boost::shared_ptr<VCA> vca)
+{
+	boost::shared_ptr<VCA> v = spilled_vca.lock();
+	if (v != vca) {
+		spilled_vca = vca;
+		show_vca_change (vca); /* EMIT SIGNAL */
+	}
+}
+
+bool
+Mixer_UI::showing_vca_slaves_for (boost::shared_ptr<VCA> vca) const
+{
+       return vca == spilled_vca.lock();
+}

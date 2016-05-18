@@ -115,6 +115,10 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	void do_vca_assign (boost::shared_ptr<ARDOUR::VCA>);
 	void do_vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
+	void show_vca_slaves (boost::shared_ptr<ARDOUR::VCA>);
+	bool showing_vca_slaves_for (boost::shared_ptr<ARDOUR::VCA>) const;
+
+	sigc::signal1<void,boost::shared_ptr<ARDOUR::VCA> > show_vca_change;
 
   protected:
 	void set_route_targets_for_operation ();
@@ -365,6 +369,8 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	// true if mixer list is visible
 	bool _show_mixer_list;
+
+	mutable boost::weak_ptr<ARDOUR::VCA> spilled_vca;
 };
 
 #endif /* __ardour_mixer_ui_h__ */
