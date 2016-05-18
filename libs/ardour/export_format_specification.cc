@@ -272,6 +272,7 @@ ExportFormatSpecification::~ExportFormatSpecification ()
 XMLNode &
 ExportFormatSpecification::get_state ()
 {
+	LocaleGuard lg;
 	XMLNode * node;
 	XMLNode * root = new XMLNode ("ExportFormatSpecification");
 
@@ -340,6 +341,7 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 	XMLProperty const * prop;
 	XMLNode const * child;
 	string value;
+	LocaleGuard lg;
 
 	if ((prop = root.property ("name"))) {
 		_name = prop->value();
