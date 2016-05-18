@@ -22,8 +22,8 @@ FrameposMinusBeatsTest::singleTempoTest ()
 	Tempo tempo (bpm);
 	Meter meter (4, 4);
 
-	map.add_meter (meter, 0.0, BBT_Time (1, 1, 0));
-	map.add_tempo (tempo, 0.0, TempoSection::Constant);
+	map.add_meter_beat (meter, 0.0, BBT_Time (1, 1, 0));
+	map.add_tempo_pulse (tempo, 0.0, TempoSection::Constant);
 
 	/* Subtract 1 beat from beat 3 of the first bar */
 	framepos_t r = map.framepos_minus_beats (frames_per_beat * 2, Beats(1));
@@ -42,7 +42,7 @@ FrameposMinusBeatsTest::doubleTempoTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meter (4, 4);
-	map.add_meter (meter, 0.0, BBT_Time (1, 1, 0));
+	map.add_meter_beat (meter, 0.0, BBT_Time (1, 1, 0));
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
@@ -64,9 +64,9 @@ FrameposMinusBeatsTest::doubleTempoTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, 0.0, TempoSection::Constant);
+	map.add_tempo_pulse (tempoA, 0.0, TempoSection::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 12.0 / tempoA.note_type(), TempoSection::Constant);
+	map.add_tempo_pulse (tempoB, 12.0 / tempoA.note_type(), TempoSection::Constant);
 
 	/* Now some tests */
 
@@ -95,7 +95,7 @@ FrameposMinusBeatsTest::doubleTempoWithMeterTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meterA (4, 4);
-	map.add_meter (meterA, 0.0, BBT_Time (1, 1, 0));
+	map.add_meter_beat (meterA, 0.0, BBT_Time (1, 1, 0));
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
@@ -117,11 +117,11 @@ FrameposMinusBeatsTest::doubleTempoWithMeterTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, 0.0, TempoSection::Constant);
+	map.add_tempo_pulse (tempoA, 0.0, TempoSection::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 12.0 / tempoA.note_type(), TempoSection::Constant);
+	map.add_tempo_pulse (tempoB, 12.0 / tempoA.note_type(), TempoSection::Constant);
 	Meter meterB (3, 4);
-	map.add_meter (meterB, 12.0 / tempoA.note_type(), BBT_Time (4, 1, 0));
+	map.add_meter_beat (meterB, 12.0 / tempoA.note_type(), BBT_Time (4, 1, 0));
 
 	/* Now some tests */
 

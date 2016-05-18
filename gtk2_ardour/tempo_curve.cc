@@ -133,10 +133,10 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 		points->push_back (ArdourCanvas::Duple (ArdourCanvas::COORD_MAX - 5.0, y_pos));
 
 	} else {
-		const framepos_t frame_step = (end_frame - frame) / 31;
+		const framepos_t frame_step = ((end_frame - 1) - frame) / 29;
 		framepos_t current_frame = frame;
 
-		while (current_frame < end_frame) {
+		while (current_frame < (end_frame - frame_step)) {
 			const double tempo_at = _tempo.tempo_at_frame (current_frame, editor.session()->frame_rate()) * _tempo.note_type();
 			const double y_pos = (curve_height) - (((tempo_at - _min_tempo) / (tempo_delta)) * curve_height);
 
@@ -145,12 +145,10 @@ TempoCurve::set_position (framepos_t frame, framepos_t end_frame)
 			max_y = max (y_pos, max_y);
 			current_frame += frame_step;
 		}
-		if (current_frame != end_frame) {
-			const double tempo_at = _tempo.tempo_at_frame (end_frame, editor.session()->frame_rate()) * _tempo.note_type();
-			const double y_pos = (curve_height) - (((tempo_at - _min_tempo) / (tempo_delta)) * curve_height);
+		const double tempo_at = _tempo.tempo_at_frame (end_frame, editor.session()->frame_rate()) * _tempo.note_type();
+		const double y_pos = (curve_height) - (((tempo_at - _min_tempo) / (tempo_delta)) * curve_height);
 
-			points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel (end_frame - frame), y_pos));
-		}
+		points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel ((end_frame - 1) - frame), y_pos));
 	}
 
 	_curve->set (*points);

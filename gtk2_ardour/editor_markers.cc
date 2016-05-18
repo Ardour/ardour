@@ -1392,9 +1392,9 @@ Editor::toggle_marker_lock_style ()
 		XMLNode &before = _session->tempo_map().get_state();
 		MeterSection* msp = &mm->meter();
 		if (mm->meter().position_lock_style() == AudioTime) {
-			_session->tempo_map().replace_meter (*msp, Meter (msp->divisions_per_bar(), msp->note_divisor()), msp->bbt());
+			_session->tempo_map().replace_meter_bbt (*msp, Meter (msp->divisions_per_bar(), msp->note_divisor()), msp->bbt());
 		} else {
-			_session->tempo_map().replace_meter (*msp, Meter (msp->divisions_per_bar(), msp->note_divisor()), msp->frame());
+			_session->tempo_map().replace_meter_frame (*msp, Meter (msp->divisions_per_bar(), msp->note_divisor()), msp->frame());
 		}
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
@@ -1404,9 +1404,9 @@ Editor::toggle_marker_lock_style ()
 		XMLNode &before = _session->tempo_map().get_state();
 		TempoSection* tsp = &tm->tempo();
 		if (tsp->position_lock_style() == AudioTime) {
-			_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->pulse(), tsp->type());
+			_session->tempo_map().replace_tempo_pulse (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->pulse(), tsp->type());
 		} else {
-			_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->frame(), tsp->type());
+			_session->tempo_map().replace_tempo_frame (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->frame(), tsp->type());
 		}
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
@@ -1426,9 +1426,11 @@ Editor::toggle_tempo_type ()
 		XMLNode &before = _session->tempo_map().get_state();
 		TempoSection* tsp = &tm->tempo();
 		if (tsp->position_lock_style() == AudioTime) {
-			_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->frame(), (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp);
+			_session->tempo_map().replace_tempo_frame (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type())
+								   , tsp->frame(), (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp);
 		} else {
-			_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->pulse(), (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp);
+			_session->tempo_map().replace_tempo_pulse (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type())
+								   , tsp->pulse(), (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp);
 		}
 
 		XMLNode &after = _session->tempo_map().get_state();

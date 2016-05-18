@@ -3185,10 +3185,10 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			const double beat = map.bbt_to_beats (bbt);
 
 			if (_real_section->position_lock_style() == AudioTime) {
-				_real_section = map.add_meter (Meter (_marker->meter().divisions_per_bar(), _marker->meter().note_divisor())
+				_real_section = map.add_meter_frame (Meter (_marker->meter().divisions_per_bar(), _marker->meter().note_divisor())
 							       , map.frame_time (bbt), beat, bbt);
 			} else {
-				_real_section = map.add_meter (Meter (_marker->meter().divisions_per_bar(), _marker->meter().note_divisor()), beat, bbt);
+				_real_section = map.add_meter_beat (Meter (_marker->meter().divisions_per_bar(), _marker->meter().note_divisor()), beat, bbt);
 			}
 		}
 	}
@@ -3207,7 +3207,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		} else if ((bbt.bars != _real_section->bbt().bars && pf > last_pointer_frame())
 			   || (bbt.bars < _real_section->bbt().bars && pf < last_pointer_frame())) {
 			/* move meter beat-based */
-			_editor->session()->tempo_map().gui_move_meter (_real_section, bbt);
+			_editor->session()->tempo_map().gui_move_meter_bbt (_real_section, bbt);
 		}
 	} else {
 		/* AudioTime */
@@ -3217,7 +3217,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 				_editor->session()->tempo_map().gui_dilate_tempo (_real_section, pf);
 			}
 		} else {
-			_editor->session()->tempo_map().gui_move_meter (_real_section, pf);
+			_editor->session()->tempo_map().gui_move_meter_frame (_real_section, pf);
 		}
 	}
 	_marker->set_position (pf);
@@ -3355,7 +3355,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 					map.round_bbt (bbt, _editor->get_grid_beat_divisions (0), RoundNearest);
 				}
 				double const pulse = map.predict_tempo_pulse (_real_section, map.frame_time (bbt));
-				_real_section = map.add_tempo (_marker->tempo(), pulse, _real_section->type());
+				_real_section = map.add_tempo_pulse (_marker->tempo(), pulse, _real_section->type());
 			} else {
 				if (use_snap && _editor->snap_type() == SnapToBar) {
 					map.round_bbt (bbt, -1, (frame > _real_section->frame()) ? RoundUpMaybe : RoundDownMaybe);
@@ -3365,7 +3365,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 				if (use_snap) {
 					frame = map.predict_tempo_frame (_real_section, bbt);
 				}
-				_real_section = map.add_tempo (_marker->tempo(), frame, _real_section->type());
+				_real_section = map.add_tempo_frame (_marker->tempo(), frame, _real_section->type());
 			}
 		}
 

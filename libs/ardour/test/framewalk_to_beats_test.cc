@@ -20,8 +20,8 @@ FramewalkToBeatsTest::singleTempoTest ()
 	Tempo tempo (bpm);
 	Meter meter (4, 4);
 
-	map.add_meter (meter, 0.0, BBT_Time (1, 1, 0));
-	map.add_tempo (tempo, 0.0, TempoSection::Constant);
+	map.add_meter_beat (meter, 0.0, BBT_Time (1, 1, 0));
+	map.add_tempo_pulse (tempo, 0.0, TempoSection::Constant);
 
 	/* Walk 1 beats-worth of frames from beat 3 */
 	double r = map.framewalk_to_beats (frames_per_beat * 2, frames_per_beat * 1).to_double();
@@ -47,7 +47,7 @@ FramewalkToBeatsTest::doubleTempoTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meter (4, 4);
-	map.add_meter (meter, 0.0, BBT_Time (1, 1, 0));
+	map.add_meter_beat (meter, 0.0, BBT_Time (1, 1, 0));
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
@@ -71,9 +71,9 @@ FramewalkToBeatsTest::doubleTempoTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, 0.0, TempoSection::Constant);
+	map.add_tempo_pulse (tempoA, 0.0, TempoSection::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 12.0 / tempoB.note_type(), TempoSection::Constant);
+	map.add_tempo_pulse (tempoB, 12.0 / tempoB.note_type(), TempoSection::Constant);
 
 	/* Now some tests */
 
@@ -104,7 +104,7 @@ FramewalkToBeatsTest::tripleTempoTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meter (4, 4);
-	map.add_meter (meter, 0.0, BBT_Time (1, 1, 0));
+	map.add_meter_beat (meter, 0.0, BBT_Time (1, 1, 0));
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 2, 160bpm at bar 3
@@ -127,11 +127,11 @@ FramewalkToBeatsTest::tripleTempoTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.add_tempo (tempoA, 0.0, TempoSection::Constant);
+	map.add_tempo_pulse (tempoA, 0.0, TempoSection::Constant);
 	Tempo tempoB (240);
-	map.add_tempo (tempoB, 4.0 / tempoB.note_type(), TempoSection::Constant);
+	map.add_tempo_pulse (tempoB, 4.0 / tempoB.note_type(), TempoSection::Constant);
 	Tempo tempoC (160);
-	map.add_tempo (tempoC, 8.0 / tempoB.note_type(), TempoSection::Constant);
+	map.add_tempo_pulse (tempoC, 8.0 / tempoB.note_type(), TempoSection::Constant);
 
 	/* Walk from 1|3 to 4|1 */
 	double r = map.framewalk_to_beats (2 * 24e3, (2 * 24e3) + (4 * 12e3) + (4 * 18e3)).to_double();
