@@ -65,12 +65,10 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	ArdourButton solo_button;
 	ArdourButton mute_button;
 	ArdourButton assign_button;
-	ArdourButton spill_button;
 	Gtk::Menu*   context_menu;
 	PBD::ScopedConnectionList vca_connections;
 	Gtk::MessageDialog* delete_dialog;
-	Gtk::EventBox vertical_box;
-	Gtk::Label   vertical_label;
+	ArdourButton vertical_button;
 
 	void hide_clicked();
 	bool width_button_pressed (GdkEventButton *);

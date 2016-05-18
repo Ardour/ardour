@@ -32,6 +32,7 @@
 #include "floating_text_entry.h"
 #include "gui_thread.h"
 #include "tooltips.h"
+#include "ui_config.h"
 #include "vca_master_strip.h"
 
 #include "i18n.h"
@@ -118,16 +119,11 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	top_padding.set_size_request (-1, 16); /* must match height in GroupTabs::set_size_request() */
 	bottom_padding.set_size_request (-1, 50); /* this one is a hack. there's no trivial way to compute it */
 
-	vertical_label.set_justify (JUSTIFY_CENTER);
+	//Glib::RefPtr<Pango::Layout> layout = vertical_button.get_layout ();
+	// layout->set_justify (JUSTIFY_CENTER);
 	/* horizontally centered, with a little space (5%) at the top */
-	vertical_label.set_alignment (0.5, 0.05);
-	vertical_label.set_name (X_("vca_vertical_box"));
-	vertical_label.set_angle (270); /* top to bottom */
-
-	vertical_box.add (vertical_label);
-	vertical_box.set_name (X_("vca_vertical_box"));
-	vertical_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	vertical_box.signal_button_press_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vertical_box_press), false);
+	vertical_button.set_angle (90);
+	vertical_button.set_layout_font (UIConfiguration::instance().get_NormalBoldFont());
 
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (0);
@@ -135,7 +131,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	global_vpacker.pack_start (top_padding, false, false);
 	global_vpacker.pack_start (width_hide_box, false, false);
 	global_vpacker.pack_start (name_button, false, false);
-	global_vpacker.pack_start (vertical_box, true, true);
+	global_vpacker.pack_start (vertical_button, true, true);
 	global_vpacker.pack_start (solo_mute_box, false, false);
 	global_vpacker.pack_start (gain_meter, false, false);
 	global_vpacker.pack_start (assign_button, false, false);
@@ -151,8 +147,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	global_frame.show ();
 	top_padding.show ();
 	bottom_padding.show ();
-	vertical_label.show ();
-	vertical_box.show ();
+	vertical_button.show ();
 	hide_button.show ();
 	number_label.show ();
 	width_hide_box.show ();
@@ -490,7 +485,7 @@ VCAMasterStrip::vca_property_changed (PropertyChange const & what_changed)
 void
 VCAMasterStrip::update_vca_name ()
 {
-	vertical_label.set_text (verticalize (short_version (_vca->name(), 15)));
+	vertical_button.set_text (verticalize (short_version (_vca->name(), 15)));
 }
 
 void

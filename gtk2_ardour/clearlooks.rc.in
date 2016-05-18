@@ -1020,11 +1020,6 @@ style "settings_notebook" = "big_text"
 
 }
 
-style "vca_vertical_box" = "medium_bold_text"
-{
-	bg[NORMAL] = shade (0.82, @background)
-}
-
 class "GtkWidget" style:highest "default"
 class "GtkScrollbar" style:highest "ardour_adjusters"
 class "GtkLabel" style:highest "default_generic"
@@ -1038,7 +1033,6 @@ widget "*MarkerText" style:highest "marker_text"
 widget "*ArdourContextMenu*" style:highest "default_menu"
 
 widget "*mixer strip button" style:highest "very_small_button"
-widget "*vca_vertical_box" style:highest "vca_vertical_box"
 
 widget "*AddRouteDialogSpinner" style:highest "ardour_adjusters"
 widget "*OptionsNotebook" style:highest "preferences"
