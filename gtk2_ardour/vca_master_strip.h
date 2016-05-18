@@ -49,7 +49,6 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 
      private:
 	boost::shared_ptr<ARDOUR::VCA> _vca;
-	Gtk::HBox    vertical_padding;
 	ArdourButton name_button;
 	GainMeter    gain_meter;
 
@@ -66,9 +65,12 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	ArdourButton solo_button;
 	ArdourButton mute_button;
 	ArdourButton assign_button;
+	ArdourButton spill_button;
 	Gtk::Menu*   context_menu;
 	PBD::ScopedConnectionList vca_connections;
 	Gtk::MessageDialog* delete_dialog;
+	Gtk::EventBox vertical_box;
+	Gtk::Label   vertical_label;
 
 	void hide_clicked();
 	bool width_button_pressed (GdkEventButton *);
@@ -85,6 +87,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void update_vca_display ();
 	void finish_name_edit (std::string);
 	bool name_button_press (GdkEventButton*);
+	bool vertical_box_press (GdkEventButton*);
 	void vca_property_changed (PBD::PropertyChange const & what_changed);
 	void update_vca_name ();
 	void build_context_menu ();

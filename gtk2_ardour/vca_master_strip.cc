@@ -45,6 +45,30 @@ using std::string;
 
 PBD::Signal1<void,VCAMasterStrip*> VCAMasterStrip::CatchDeletion;
 
+static string
+verticalize (string const & str)
+{
+	return str;
+#if 0
+	string ret;
+	string::const_iterator s = str.begin();
+	ret = *s;
+	ret += '\n';
+	++s;
+
+	while (s != str.end()) {
+		ret += *s;
+		ret += '\n';
+		++s;
+	}
+
+	/* remove terminal newline */
+
+	ret.erase (ret.length() - 1, string::npos);
+	return ret;
+#endif
+}
+
 VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	: AxisView (s)
 	, _vca (v)
@@ -94,13 +118,24 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	top_padding.set_size_request (-1, 16); /* must match height in GroupTabs::set_size_request() */
 	bottom_padding.set_size_request (-1, 50); /* this one is a hack. there's no trivial way to compute it */
 
+	vertical_label.set_justify (JUSTIFY_CENTER);
+	/* horizontally centered, with a little space (5%) at the top */
+	vertical_label.set_alignment (0.5, 0.05);
+	vertical_label.set_name (X_("vca_vertical_box"));
+	vertical_label.set_angle (270); /* top to bottom */
+
+	vertical_box.add (vertical_label);
+	vertical_box.set_name (X_("vca_vertical_box"));
+	vertical_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	vertical_box.signal_button_press_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vertical_box_press), false);
+
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (0);
 
 	global_vpacker.pack_start (top_padding, false, false);
 	global_vpacker.pack_start (width_hide_box, false, false);
 	global_vpacker.pack_start (name_button, false, false);
-	global_vpacker.pack_start (vertical_padding, true, true);
+	global_vpacker.pack_start (vertical_box, true, true);
 	global_vpacker.pack_start (solo_mute_box, false, false);
 	global_vpacker.pack_start (gain_meter, false, false);
 	global_vpacker.pack_start (assign_button, false, false);
@@ -116,7 +151,8 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	global_frame.show ();
 	top_padding.show ();
 	bottom_padding.show ();
-	vertical_padding.show ();
+	vertical_label.show ();
+	vertical_box.show ();
 	hide_button.show ();
 	number_label.show ();
 	width_hide_box.show ();
@@ -134,6 +170,9 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	update_vca_name ();
 	solo_changed ();
 	mute_changed ();
+
+	/* this remains unchanged as the name changes */
+	name_button.set_text (string_compose (X_("VCA %1"), _vca->number()));
 
 	_vca->PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
 
@@ -384,6 +423,12 @@ VCAMasterStrip::vca_button_release (GdkEventButton* ev)
 }
 
 bool
+VCAMasterStrip::vertical_box_press (GdkEventButton* ev)
+{
+	return name_button_press (ev);
+}
+
+bool
 VCAMasterStrip::name_button_press (GdkEventButton* ev)
 {
 	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
@@ -422,7 +467,7 @@ VCAMasterStrip::vca_property_changed (PropertyChange const & what_changed)
 void
 VCAMasterStrip::update_vca_name ()
 {
-	name_button.set_text (short_version (_vca->name(), 8));
+	vertical_label.set_text (verticalize (short_version (_vca->name(), 15)));
 }
 
 void
