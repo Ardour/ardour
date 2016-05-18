@@ -1152,15 +1152,68 @@ Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 }
 
 void
-Mixer_UI::redisplay_track_list ()
+Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
 {
 	TreeModel::Children rows = track_model->children();
-	TreeModel::Children::iterator i;
-	uint32_t n_masters = 0;
 
+	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
+
+		MixerStrip* strip = (*i)[track_columns.strip];
+
+		if (!strip) {
+			/* we're in the middle of changing a row, don't worry */
+			continue;
+		}
+
+		if (!strip->route()) {
+			/* non-route element */
+			continue;
+		}
+
+		if (strip->route()->is_master() || strip->route()->is_monitor()) {
+			continue;
+		}
+
+		if (strip->route()->slaved_to (vca)) {
+
+			strip->set_gui_property ("visible", true);
+
+			if (strip->packed()) {
+				strip_packer.reorder_child (*strip, -1); /* put at end */
+			} else {
+				strip_packer.pack_start (*strip, false, false);
+				strip->set_packed (true);
+			}
+
+		} else {
+
+			strip->set_gui_property ("visible", false);
+
+			if (strip->packed()) {
+				strip_packer.remove (*strip);
+				strip->set_packed (false);
+			}
+		}
+	}
+}
+
+void
+Mixer_UI::redisplay_track_list ()
+{
 	if (no_track_list_redisplay) {
 		return;
 	}
+
+	boost::shared_ptr<VCA> sv = spilled_vca.lock ();
+
+	if (sv) {
+		spill_redisplay (sv);
+		return;
+	}
+
+	TreeModel::Children rows = track_model->children();
+	TreeModel::Children::iterator i;
+	uint32_t n_masters = 0;
 
 	container_clear (vca_packer);
 
@@ -2671,6 +2724,7 @@ Mixer_UI::show_vca_slaves (boost::shared_ptr<VCA> vca)
 	if (v != vca) {
 		spilled_vca = vca;
 		show_vca_change (vca); /* EMIT SIGNAL */
+		redisplay_track_list ();
 	}
 }
 
