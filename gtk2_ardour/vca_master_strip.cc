@@ -425,17 +425,31 @@ VCAMasterStrip::vca_button_release (GdkEventButton* ev)
 bool
 VCAMasterStrip::vertical_box_press (GdkEventButton* ev)
 {
-	return name_button_press (ev);
+	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
+		start_name_edit ();
+		return true;
+	}
+
+	if (Keyboard::is_context_menu_event (ev)) {
+		if (!context_menu) {
+			build_context_menu ();
+		}
+		context_menu->popup (1, ev->time);
+		return true;
+	}
+
+	if (ev->button == 1) {
+		// spill ();
+	}
+
+	return true;
 }
 
 bool
 VCAMasterStrip::name_button_press (GdkEventButton* ev)
 {
 	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
-		Gtk::Window* win = dynamic_cast<Gtk::Window*>(get_toplevel());
-		FloatingTextEntry* fte = new FloatingTextEntry (win, _vca->name());
-		fte->use_text.connect (sigc::mem_fun (*this, &VCAMasterStrip::finish_name_edit));
-		fte->present ();
+		start_name_edit ();
 		return true;
 	}
 
@@ -448,6 +462,15 @@ VCAMasterStrip::name_button_press (GdkEventButton* ev)
 	}
 
 	return false;
+}
+
+void
+VCAMasterStrip::start_name_edit ()
+{
+	Gtk::Window* win = dynamic_cast<Gtk::Window*>(get_toplevel());
+	FloatingTextEntry* fte = new FloatingTextEntry (win, _vca->name());
+	fte->use_text.connect (sigc::mem_fun (*this, &VCAMasterStrip::finish_name_edit));
+	fte->present ();
 }
 
 void
@@ -476,5 +499,6 @@ VCAMasterStrip::build_context_menu ()
 	using namespace Gtk::Menu_Helpers;
 	context_menu = new Menu;
 	MenuList& items = context_menu->items();
+	items.push_back (MenuElem (_("Rename"), sigc::mem_fun (*this, &VCAMasterStrip::start_name_edit)));
 	items.push_back (MenuElem (_("Remove")));
 }

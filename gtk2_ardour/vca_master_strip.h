@@ -85,6 +85,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void unassign ();
 	bool vca_button_release (GdkEventButton*);
 	void update_vca_display ();
+	void start_name_edit ();
 	void finish_name_edit (std::string);
 	bool name_button_press (GdkEventButton*);
 	bool vertical_box_press (GdkEventButton*);
