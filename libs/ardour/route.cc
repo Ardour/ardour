@@ -1257,93 +1257,17 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 	DEBUG_TRACE (DEBUG::Processors, string_compose (
 		             "%1 adding processor %2\n", name(), processor->name()));
 
-	if (!AudioEngine::instance()->connected() || !processor) {
-		return 1;
+	ProcessorList pl;
+
+	pl.push_back (processor);
+	int rv = add_processors (pl, before, err);
+
+	if (rv) {
+		return rv;
 	}
 
-	if (_strict_io) {
-		boost::shared_ptr<PluginInsert> pi;
-		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(processor)) != 0) {
-			pi->set_strict_io (true);
-		}
-	}
-
-	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
-		ProcessorState pstate (this);
-
-		boost::shared_ptr<PluginInsert> pi;
-		boost::shared_ptr<PortInsert> porti;
-
-		if (processor == _amp) {
-			/* Ensure that only one amp is in the list at any time */
-			ProcessorList::iterator check = find (_processors.begin(), _processors.end(), processor);
-			if (check != _processors.end()) {
-				if (before == _amp) {
-					/* Already in position; all is well */
-					return 0;
-				} else {
-					_processors.erase (check);
-				}
-			}
-		}
-
-		assert (find (_processors.begin(), _processors.end(), processor) == _processors.end ());
-
-		ProcessorList::iterator loc;
-		if (before) {
-			/* inserting before a processor; find it */
-			loc = find (_processors.begin(), _processors.end(), before);
-			if (loc == _processors.end ()) {
-				/* Not found */
-				return 1;
-			}
-		} else {
-			/* inserting at end */
-			loc = _processors.end ();
-		}
-
-		_processors.insert (loc, processor);
-		processor->set_owner (this);
-
-		// Set up processor list channels.  This will set processor->[input|output]_streams(),
-		// configure redirect ports properly, etc.
-
-		{
-			if (configure_processors_unlocked (err, &lm)) {
-				pstate.restore ();
-				configure_processors_unlocked (0, &lm); // it worked before we tried to add it ...
-				return -1;
-			}
-		}
-
-		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(processor)) != 0) {
-
-			if (pi->has_no_inputs ()) {
-				/* generator plugin */
-				_have_internal_generator = true;
-			}
-
-		}
-
-		if (activation_allowed && (!_session.get_bypass_all_loaded_plugins () || !processor->display_to_user ())) {
-			processor->activate ();
-		}
-
-		processor->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
-
-		_output->set_user_latency (0);
-	}
-
-	reset_instrument_info ();
-	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
-	set_processor_positions ();
-
-	boost::shared_ptr<Send> send;
-	if ((send = boost::dynamic_pointer_cast<Send> (processor))) {
-		send->SelfDestruct.connect_same_thread (*this,
-				boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
+	if (activation_allowed && (!_session.get_bypass_all_loaded_plugins () || !processor->display_to_user ())) {
+		processor->activate ();
 	}
 
 	return 0;
@@ -1448,21 +1372,19 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 int
 Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor> before, ProcessorStreams* err)
 {
-	/* NOTE: this is intended to be used ONLY when copying
-	   processors from another Route. Hence the subtle
-	   differences between this and ::add_processor()
-	*/
-
 	ProcessorList::iterator loc;
 
 	if (before) {
 		loc = find(_processors.begin(), _processors.end(), before);
+		if (loc == _processors.end ()) {
+			return 1;
+		}
 	} else {
 		/* nothing specified - at end */
 		loc = _processors.end ();
 	}
 
-	if (!_session.engine().connected()) {
+	if (!AudioEngine::instance()->connected()) {
 		return 1;
 	}
 
@@ -1487,14 +1409,24 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 				pi->set_strict_io (_strict_io);
 			}
 
+			if (*i == _amp) {
+				/* Ensure that only one amp is in the list at any time */
+				ProcessorList::iterator check = find (_processors.begin(), _processors.end(), *i);
+				if (check != _processors.end()) {
+					if (before == _amp) {
+						/* Already in position; all is well */
+						continue;
+					} else {
+						_processors.erase (check);
+					}
+				}
+			}
+
+			assert (find (_processors.begin(), _processors.end(), *i) == _processors.end ());
+
 			_processors.insert (loc, *i);
 			(*i)->set_owner (this);
 
-			if ((*i)->active()) {
-				(*i)->activate ();
-			}
-
-			/* Think: does this really need to be called for every processor in the loop? */
 			{
 				if (configure_processors_unlocked (err, &lm)) {
 					pstate.restore ();
@@ -1503,7 +1435,17 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 				}
 			}
 
+			if ((*i)->active()) {
+				(*i)->activate ();
+			}
+
 			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
+
+			boost::shared_ptr<Send> send;
+			if ((send = boost::dynamic_pointer_cast<Send> (*i))) {
+				send->SelfDestruct.connect_same_thread (*this,
+						boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (*i)));
+			}
 		}
 
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
