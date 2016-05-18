@@ -79,7 +79,7 @@ TempoSection::TempoSection (const XMLNode& node)
 	, _active (true)
 	, _locked_to_meter (false)
 {
-	const XMLProperty *prop;
+	XMLProperty const * prop;
 	LocaleGuard lg;
 	BBT_Time bbt;
 	double pulse;
@@ -456,9 +456,7 @@ MeterSection::MeterSection (const XMLNode& node)
 	: MetricSection (0.0), Meter (TempoMap::default_meter())
 {
 	XMLProperty const * prop;
-	BBT_Time start;
 	LocaleGuard lg;
-	const XMLProperty *prop;
 	BBT_Time bbt;
 	double pulse = 0.0;
 	double beat = 0.0;
