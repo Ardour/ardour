@@ -48,7 +48,7 @@ public:
 	 */
 	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g, bool tabArea = false);
 
-	void run_new_group_dialog (ARDOUR::RouteList const &);
+	void run_new_group_dialog (ARDOUR::RouteList const &, bool with_master);
 
 	static void set_group_color (ARDOUR::RouteGroup *, uint32_t);
 	static std::string group_gui_id (ARDOUR::RouteGroup *);
@@ -93,10 +93,12 @@ private:
 	virtual void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *) {}
 	virtual ARDOUR::RouteList selected_routes () const = 0;
 
-	void new_from_selection ();
-	void new_from_rec_enabled ();
-	void new_from_soloed ();
+	void new_from_selection (bool just_master, bool with_master);
+	void new_from_rec_enabled (bool just_master, bool with_master);
+	void new_from_soloed (bool just_master, bool with_master);
 	ARDOUR::RouteGroup* create_and_add_group () const;
+	ARDOUR::RouteGroup* create_and_add_master () const;
+	ARDOUR::RouteGroup* create_and_add_group_with_master () const;
 	void collect (ARDOUR::RouteGroup *);
 	void set_activation (ARDOUR::RouteGroup *, bool);
 	void edit_group (ARDOUR::RouteGroup *);
@@ -117,6 +119,10 @@ private:
 	void route_group_property_changed (ARDOUR::RouteGroup *);
 	void route_added_to_route_group (ARDOUR::RouteGroup *, boost::weak_ptr<ARDOUR::Route>);
 	void route_removed_from_route_group (ARDOUR::RouteGroup *, boost::weak_ptr<ARDOUR::Route>);
+
+	void assign_selection_to_master (uint32_t which);
+	void assign_recenabled_to_master (uint32_t which);
+	void assign_soloed_to_master (uint32_t which);
 
 	Gtk::Menu* _menu;
 	std::list<Tab> _tabs; ///< current list of tabs

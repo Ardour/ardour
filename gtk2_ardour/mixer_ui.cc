@@ -1535,7 +1535,7 @@ Mixer_UI::new_route_group ()
 {
 	RouteList rl;
 
-	_group_tabs->run_new_group_dialog (rl);
+	_group_tabs->run_new_group_dialog (rl, false);
 }
 
 void

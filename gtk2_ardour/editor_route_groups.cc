@@ -574,7 +574,7 @@ EditorRouteGroups::run_new_group_dialog ()
 {
 	RouteList rl;
 
-	return _editor->_group_tabs->run_new_group_dialog (rl);
+	return _editor->_group_tabs->run_new_group_dialog (rl, false);
 }
 
 /** Called when a model row is deleted, but also when the model is

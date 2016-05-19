@@ -307,21 +307,44 @@ GroupTabs::get_menu (RouteGroup* g, bool TabArea)
 
 	delete _menu;
 
-	Menu* new_from = new Menu;
-	MenuList& f = new_from->items ();
-	f.push_back (MenuElem (_("Selection..."), sigc::mem_fun (*this, &GroupTabs::new_from_selection)));
-	f.push_back (MenuElem (_("Record Enabled..."), sigc::mem_fun (*this, &GroupTabs::new_from_rec_enabled)));
-	f.push_back (MenuElem (_("Soloed..."), sigc::mem_fun (*this, &GroupTabs::new_from_soloed)));
-
 	_menu = new Menu;
 	_menu->set_name ("ArdourContextMenu");
 	MenuList& items = _menu->items();
 
 	if (!TabArea) {
 		items.push_back (MenuElem (_("Create New Group ..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group))));
+		items.push_back (MenuElem (_("Create New Control Master ..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_master))));
+		items.push_back (MenuElem (_("Create New Group & Control Master ..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group_with_master))));
 	}
 
+	Menu* new_from = new Menu;
+	{
+		MenuList& f = new_from->items ();
+		f.push_back (MenuElem (_("Selection..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_selection), false, false)));
+		f.push_back (MenuElem (_("Record Enabled..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_rec_enabled), false, false)));
+		f.push_back (MenuElem (_("Soloed..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_soloed), false, false)));
+	}
 	items.push_back (MenuElem (_("Create New Group From"), *new_from));
+
+	new_from = new Menu;
+	{
+		MenuList& f = new_from->items ();
+		f.push_back (MenuElem (_("Selection..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_selection), true, false)));
+		f.push_back (MenuElem (_("Record Enabled..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_rec_enabled), true, false)));
+		f.push_back (MenuElem (_("Soloed..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_soloed), true, false)));
+	}
+	items.push_back (MenuElem (_("Create New Master From"), *new_from));
+
+	new_from = new Menu;
+	{
+		MenuList& f = new_from->items ();
+		f.push_back (MenuElem (_("Selection..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_selection), true, true)));
+		f.push_back (MenuElem (_("Record Enabled..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_rec_enabled), true, true)));
+		f.push_back (MenuElem (_("Soloed..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_soloed), true, true)));
+	}
+	items.push_back (MenuElem (_("Create New Group & Master From"), *new_from));
+
+	Menu* vca_menu;
 
 	if (g) {
 		items.push_back (MenuElem (_("Edit Group..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group), g)));
@@ -335,6 +358,13 @@ GroupTabs::get_menu (RouteGroup* g, bool TabArea)
 		}
 		items.push_back (MenuElem (_("Add New Aux Bus (pre-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PreFader)));
 		items.push_back (MenuElem (_("Add New Aux Bus (post-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PostFader)));
+		items.push_back (SeparatorElem());
+
+		vca_menu = new Menu;
+		MenuList& f (vca_menu->items());
+		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), 0)));
+		f.push_back (MenuElem ("VCA 1", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), 1)));
+		items.push_back (MenuElem (_("Assign Group to Control Master..."), *vca_menu));
 	}
 
 	add_menu_items (_menu, g);
@@ -342,24 +372,68 @@ GroupTabs::get_menu (RouteGroup* g, bool TabArea)
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Enable All Groups"), sigc::mem_fun(*this, &GroupTabs::activate_all)));
 	items.push_back (MenuElem (_("Disable All Groups"), sigc::mem_fun(*this, &GroupTabs::disable_all)));
+	items.push_back (SeparatorElem());
+
+	vca_menu = new Menu;
+	{
+		MenuList& f (vca_menu->items());
+		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), 0)));
+		f.push_back (MenuElem ("VCA 1", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), 1)));
+
+	}
+
+	items.push_back (MenuElem (_("Assign Selection to Control Master..."), *vca_menu));
+
+	vca_menu = new Menu;
+	{
+		MenuList& f (vca_menu->items());
+		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), 0)));
+		f.push_back (MenuElem ("VCA 1", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_recenabled_to_master), 1)));
+
+	}
+	items.push_back (MenuElem (_("Assign Record Enabled to Control Master..."), *vca_menu));
+
+	vca_menu = new Menu;
+	{
+		MenuList& f (vca_menu->items());
+		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), 0)));
+		f.push_back (MenuElem ("VCA 1", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_soloed_to_master), 1)));
+
+	}
+	items.push_back (MenuElem (_("Assign Soloed to Control Master...")));
 
 	return _menu;
 
 }
 
 void
-GroupTabs::new_from_selection ()
+GroupTabs::assign_selection_to_master (uint32_t which)
+{
+}
+
+void
+GroupTabs::assign_recenabled_to_master (uint32_t which)
+{
+}
+
+void
+GroupTabs::assign_soloed_to_master (uint32_t which)
+{
+}
+
+void
+GroupTabs::new_from_selection (bool just_master, bool with_master)
 {
 	RouteList rl = selected_routes ();
 	if (rl.empty()) {
 		return;
 	}
 
-	run_new_group_dialog (rl);
+	run_new_group_dialog (rl, with_master);
 }
 
 void
-GroupTabs::new_from_rec_enabled ()
+GroupTabs::new_from_rec_enabled (bool just_master, bool with_master)
 {
 	boost::shared_ptr<RouteList> rl = _session->get_routes ();
 
@@ -376,11 +450,11 @@ GroupTabs::new_from_rec_enabled ()
 		return;
 	}
 
-	run_new_group_dialog (rec_enabled);
+	run_new_group_dialog (rec_enabled, with_master);
 }
 
 void
-GroupTabs::new_from_soloed ()
+GroupTabs::new_from_soloed (bool just_master, bool with_master)
 {
 	boost::shared_ptr<RouteList> rl = _session->get_routes ();
 
@@ -396,11 +470,11 @@ GroupTabs::new_from_soloed ()
 		return;
 	}
 
-	run_new_group_dialog (soloed);
+	run_new_group_dialog (soloed, with_master);
 }
 
 void
-GroupTabs::run_new_group_dialog (RouteList const & rl)
+GroupTabs::run_new_group_dialog (RouteList const & rl, bool with_master)
 {
 	RouteGroup* g = new RouteGroup (*_session, "");
 	RouteGroupDialog d (g, true);
@@ -417,6 +491,27 @@ GroupTabs::run_new_group_dialog (RouteList const & rl)
 
 RouteGroup *
 GroupTabs::create_and_add_group () const
+{
+	RouteGroup* g = new RouteGroup (*_session, "");
+	RouteGroupDialog d (g, true);
+
+	if (d.do_run ()) {
+		delete g;
+		return 0;
+	}
+
+	_session->add_route_group (g);
+	return g;
+}
+
+RouteGroup *
+GroupTabs::create_and_add_master () const
+{
+	return 0;
+}
+
+RouteGroup *
+GroupTabs::create_and_add_group_with_master () const
 {
 	RouteGroup* g = new RouteGroup (*_session, "");
 	RouteGroupDialog d (g, true);
