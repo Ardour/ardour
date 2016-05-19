@@ -143,6 +143,9 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 
 	int set_state (const XMLNode&, int version);
 
+	void assign_master (boost::shared_ptr<VCA>);
+	void unassign_master (boost::shared_ptr<VCA>);
+
   private:
 	boost::shared_ptr<RouteList> routes;
 	boost::shared_ptr<Route> subgroup_bus;
@@ -158,6 +161,10 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 	PBD::Property<bool> _route_active;
 	PBD::Property<bool> _color;
 	PBD::Property<bool> _monitoring;
+
+	bool pre_master_gain;
+	bool pre_master_solo;
+	bool pre_master_mute;
 
 	boost::shared_ptr<ControlGroup> _solo_group;
 	boost::shared_ptr<ControlGroup> _mute_group;
