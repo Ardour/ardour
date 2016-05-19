@@ -243,8 +243,14 @@ Mixer_UI::Mixer_UI ()
 
 	list_vpacker.pack_start (rhs_pane2, true, true);
 
+	vca_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	vca_scroller_base.set_name ("MixerWindow");
+	vca_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::masters_scroller_button_release), false);
+	vca_packer.pack_end (vca_scroller_base, true, true);
+
 	vca_scroller.add (vca_packer);
 	vca_scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
+	vca_scroller.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
 
 	inner_pane.pack1 (scroller);
 	inner_pane.pack2 (vca_scroller);
@@ -291,9 +297,10 @@ Mixer_UI::Mixer_UI ()
 	rhs_pane1.show();
 	rhs_pane2.show();
 	strip_packer.show();
-	inner_pane.show ();
+	inner_pane.show();
 	vca_scroller.show();
 	vca_packer.show();
+	vca_scroller_base.show();
 	out_packer.show();
 	list_hpane.show();
 	group_display.show();
@@ -410,6 +417,19 @@ Mixer_UI::remove_master (VCAMasterStrip* vms)
 			break;
 		}
 	}
+}
+
+bool
+Mixer_UI::masters_scroller_button_release (GdkEventButton* ev)
+{
+	using namespace Menu_Helpers;
+
+	if (Keyboard::is_context_menu_event (ev)) {
+		ARDOUR_UI::instance()->add_route ();
+		return true;
+	}
+
+	return false;
 }
 
 void
@@ -1216,6 +1236,7 @@ Mixer_UI::redisplay_track_list ()
 	uint32_t n_masters = 0;
 
 	container_clear (vca_packer);
+	vca_packer.pack_end (vca_scroller_base, true, true);
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 

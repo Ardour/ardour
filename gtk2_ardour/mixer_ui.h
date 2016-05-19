@@ -134,23 +134,24 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	Gtk::HBox             scroller_hpacker;
 	Gtk::VBox             mixer_scroller_vpacker;
 	Gtk::VBox             list_vpacker;
-	Gtk::Label				group_display_button_label;
-	Gtk::Button				group_display_button;
-	Gtk::ScrolledWindow		track_display_scroller;
-	Gtk::ScrolledWindow		group_display_scroller;
-	Gtk::ScrolledWindow		favorite_plugins_scroller;
-	Gtk::VBox				group_display_vbox;
-	Gtk::Frame				track_display_frame;
-	Gtk::Frame				group_display_frame;
-	Gtk::Frame				favorite_plugins_frame;
-	Gtk::VPaned				rhs_pane1;
-	Gtk::VPaned				rhs_pane2;
-	Gtk::HPaned                             inner_pane;
-	Gtk::HBox				strip_packer;
-	Gtk::ScrolledWindow			vca_scroller;
-	Gtk::HBox				vca_packer;
-	Gtk::HBox				out_packer;
-	Gtk::HPaned				list_hpane;
+	Gtk::Label            group_display_button_label;
+	Gtk::Button           group_display_button;
+	Gtk::ScrolledWindow   track_display_scroller;
+	Gtk::ScrolledWindow   group_display_scroller;
+	Gtk::ScrolledWindow   favorite_plugins_scroller;
+	Gtk::VBox             group_display_vbox;
+	Gtk::Frame            track_display_frame;
+	Gtk::Frame            group_display_frame;
+	Gtk::Frame            favorite_plugins_frame;
+	Gtk::VPaned           rhs_pane1;
+	Gtk::VPaned           rhs_pane2;
+	Gtk::HPaned           inner_pane;
+	Gtk::HBox             strip_packer;
+	Gtk::ScrolledWindow   vca_scroller;
+	Gtk::HBox             vca_packer;
+	Gtk::EventBox         vca_scroller_base;
+	Gtk::HBox             out_packer;
+	Gtk::HPaned           list_hpane;
 
 	MixerGroupTabs* _group_tabs;
 
@@ -162,6 +163,7 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	void scroller_drag_data_received (const Glib::RefPtr<Gdk::DragContext>&, int, int, const Gtk::SelectionData&, guint, guint);
 	bool strip_scroller_button_release (GdkEventButton*);
+	bool masters_scroller_button_release (GdkEventButton*);
 	void scroll_left ();
 	void scroll_right ();
         void toggle_midi_input_active (bool flip_others);
