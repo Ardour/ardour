@@ -239,6 +239,8 @@ CONFIG_VARIABLE (bool, discover_vst_on_start, "discover-vst-on-start", false)
 CONFIG_VARIABLE (bool, verbose_plugin_scan, "verbose-plugin-scan", true)
 CONFIG_VARIABLE (int, vst_scan_timeout, "vst-scan-timeout", 600) /* deciseconds, per plugin, <= 0 no timeout */
 CONFIG_VARIABLE (bool, discover_audio_units, "discover-audio-units", false)
+CONFIG_VARIABLE (bool, ask_replace_instrument, "ask-replace-instrument", true)
+CONFIG_VARIABLE (bool, ask_setup_instrument, "ask-setup-instrument", true)
 
 /* custom user plugin paths */
 CONFIG_VARIABLE (std::string, plugin_path_vst, "plugin-path-vst", "@default@")

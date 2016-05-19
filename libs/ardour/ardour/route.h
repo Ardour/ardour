@@ -64,6 +64,7 @@ class Panner;
 class PannerShell;
 class PortSet;
 class Processor;
+class PluginInsert;
 class RouteGroup;
 class Send;
 class InternalReturn;
@@ -371,6 +372,14 @@ public:
 		track_number_changed();
 		PropertyChanged (ARDOUR::Properties::name);
 	}
+
+	enum PluginSetupOptions {
+		None = 0x0,
+		CanReplace = 0x1,
+		MultiOut = 0x2,
+	};
+
+	static PBD::Signal3<int,boost::shared_ptr<Route>, boost::shared_ptr<PluginInsert>, PluginSetupOptions > PluginSetup;
 
 	/** the processors have changed; the parameter indicates what changed */
 	PBD::Signal1<void,RouteProcessorChange> processors_changed;

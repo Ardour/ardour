@@ -1192,6 +1192,20 @@ PluginInsert::set_thru_map (ChanMapping m) {
 	}
 }
 
+bool
+PluginInsert::pre_seed (const ChanCount& in, const ChanCount& out,
+		const ChanMapping& im, const ChanMapping& om, const ChanMapping& tm)
+{
+	if (_configured) { return false; }
+	_configured_in = in;
+	_configured_out = out;
+	_in_map[0] = im;
+	_out_map[0] = om;
+	_thru_map = tm;
+	_maps_from_state = in.n_total () > 0 && out.n_total () > 0;
+	return true;
+}
+
 ChanMapping
 PluginInsert::input_map () const
 {

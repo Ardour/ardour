@@ -78,6 +78,7 @@ using namespace PBD;
 
 PBD::Signal0<void> Route::SyncOrderKeys;
 PBD::Signal0<void> Route::RemoteControlIDChange;
+PBD::Signal3<int,boost::shared_ptr<Route>, boost::shared_ptr<PluginInsert>, Route::PluginSetupOptions > Route::PluginSetup;
 
 /** Base class for all routable/mixable objects (tracks and busses) */
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
@@ -1369,6 +1370,15 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 	}
 }
 
+
+inline Route::PluginSetupOptions operator|= (Route::PluginSetupOptions& a, const Route::PluginSetupOptions& b) {
+	return a = static_cast<Route::PluginSetupOptions> (static_cast <int>(a) | static_cast<int> (b));
+}
+
+inline Route::PluginSetupOptions operator&= (Route::PluginSetupOptions& a, const Route::PluginSetupOptions& b) {
+	return a = static_cast<Route::PluginSetupOptions> (static_cast <int>(a) & static_cast<int> (b));
+}
+
 int
 Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor> before, ProcessorStreams* err)
 {
@@ -1392,6 +1402,59 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		return 0;
 	}
 
+	ProcessorList to_skip;
+
+	// check if there's an instrument to replace or configure
+	for (ProcessorList::const_iterator i = others.begin(); i != others.end(); ++i) {
+		boost::shared_ptr<PluginInsert> pi;
+		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) == 0) {
+			continue;
+		}
+		if (!pi->plugin ()->get_info ()->is_instrument ()) {
+			continue;
+		}
+		boost::shared_ptr<Processor> instrument = the_instrument ();
+		ChanCount in (DataType::MIDI, 1);
+		ChanCount out (DataType::AUDIO, 2); // XXX route's out?!
+
+		PluginSetupOptions flags = None;
+		if (instrument) {
+			flags |= CanReplace;
+			in = instrument->input_streams ();
+			out = instrument->output_streams ();
+		}
+		if (pi->has_output_presets (in, out)) {
+			flags |= MultiOut;
+		}
+
+		pi->set_strict_io (_strict_io);
+
+		PluginSetupOptions mask = None;
+		if (Config->get_ask_replace_instrument ()) {
+			mask |= CanReplace;
+		}
+		if (Config->get_ask_setup_instrument ()) {
+			mask |= MultiOut;
+		}
+
+		flags &= mask;
+
+		if (flags != None) {
+			boost::optional<int> rv = PluginSetup (shared_from_this (), pi, flags);  /* EMIT SIGNAL */
+			switch (rv.get_value_or (0)) {
+				case 1:
+					to_skip.push_back (*i); // don't add this one;
+					break;
+				case 2:
+					replace_processor (instrument, *i, err);
+					to_skip.push_back (*i);
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
@@ -1400,6 +1463,10 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		for (ProcessorList::const_iterator i = others.begin(); i != others.end(); ++i) {
 
 			if (*i == _meter) {
+				continue;
+			}
+			ProcessorList::iterator check = find (to_skip.begin(), to_skip.end(), *i);
+			if (check != to_skip.end()) {
 				continue;
 			}
 

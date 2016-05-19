@@ -93,6 +93,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 		return _thru_map;
 	}
 
+	bool pre_seed (const ChanCount&, const ChanCount&, const ChanMapping&, const ChanMapping&, const ChanMapping&);
+
 	ChanMapping input_map () const; ///< combined (all instances) input map
 	ChanMapping output_map () const; ///< combined (all instances) output map
 	bool has_midi_bypass () const;
