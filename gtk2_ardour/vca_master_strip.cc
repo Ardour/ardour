@@ -101,7 +101,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	vertical_button.set_layout_font (UIConfiguration::instance().get_NormalBoldFont());
 	vertical_button.signal_clicked.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill));
 
-	drop_button.set_text(_("Drop"));
+	drop_button.set_text(_("drop"));
 	drop_button.signal_clicked.connect (sigc::mem_fun (*this, &VCAMasterStrip::drop_button_press));
 	set_tooltip (drop_button, _("Unassign all slaves from this control master"));
 
@@ -462,7 +462,7 @@ VCAMasterStrip::build_context_menu ()
 	MenuList& items = context_menu->items();
 	items.push_back (MenuElem (_("Rename"), sigc::mem_fun (*this, &VCAMasterStrip::start_name_edit)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Drop All Slaves"), sigc::mem_fun (*this, &VCAMasterStrip::start_name_edit)));
+	items.push_back (MenuElem (_("Drop All Slaves"), sigc::mem_fun (*this, &VCAMasterStrip::drop_all_slaves)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun (*this, &VCAMasterStrip::remove)));
 }
