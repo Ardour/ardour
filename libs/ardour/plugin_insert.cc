@@ -1877,6 +1877,8 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 			// houston, we have a problem.
 			return Match (Impossible, 0);
 		}
+		// midi bypass
+		if (inx.n_midi () > 0 && out.n_midi () == 0) { out.set (DataType::MIDI, 1); }
 		return Match (Delegate, 1, _strict_io);
 	}
 
@@ -1945,6 +1947,8 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 		if (!r) {
 			return Match (Impossible, 0);
 		}
+		// midi bypass
+		if (in.n_midi () > 0 && out.n_midi () == 0) { out.set (DataType::MIDI, 1); }
 		return Match (Delegate, 1);
 	}
 
