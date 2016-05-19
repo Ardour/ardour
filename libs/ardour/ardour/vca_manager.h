@@ -49,6 +49,7 @@ class VCAManager : public SessionHandleRef, public PBD::StatefulDestructible
 	boost::shared_ptr<VCA> vca_by_number(uint32_t) const;
 
 	VCAList vcas() const;
+	VCAList::size_type n_vcas() const { return _vcas.size(); }
 
 	PBD::Signal1<void,VCAList&> VCAAdded;
 
