@@ -1403,11 +1403,9 @@ Editor::toggle_marker_lock_style ()
 		begin_reversible_command (_("change tempo lock style"));
 		XMLNode &before = _session->tempo_map().get_state();
 		TempoSection* tsp = &tm->tempo();
-		if (tsp->position_lock_style() == AudioTime) {
-			_session->tempo_map().replace_tempo_pulse (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->pulse(), tsp->type());
-		} else {
-			_session->tempo_map().replace_tempo_frame (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->frame(), tsp->type());
-		}
+		const PositionLockStyle pls = (tsp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
+		_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->pulse(), tsp->frame(), tsp->type(), pls);
+
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 		commit_reversible_command ();
@@ -1425,13 +1423,9 @@ Editor::toggle_tempo_type ()
 		begin_reversible_command (_("change tempo type"));
 		XMLNode &before = _session->tempo_map().get_state();
 		TempoSection* tsp = &tm->tempo();
-		if (tsp->position_lock_style() == AudioTime) {
-			_session->tempo_map().replace_tempo_frame (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type())
-								   , tsp->frame(), (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp);
-		} else {
-			_session->tempo_map().replace_tempo_pulse (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type())
-								   , tsp->pulse(), (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp);
-		}
+		const TempoSection::Type type = (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp;
+		_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->pulse(), tsp->frame()
+						     , type, tsp->position_lock_style());
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));

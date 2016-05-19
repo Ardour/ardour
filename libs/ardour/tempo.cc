@@ -882,39 +882,20 @@ TempoMap::do_insert (MetricSection* section)
 }
 
 void
-TempoMap::replace_tempo_pulse (const TempoSection& ts, const Tempo& tempo, const double& pulse, TempoSection::Type type)
+TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const double& pulse, const framepos_t& frame, TempoSection::Type type, PositionLockStyle pls)
 {
-	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
-		TempoSection& first (first_tempo());
-		if (ts.pulse() != first.pulse()) {
-			remove_tempo_locked (ts);
-			add_tempo_pulse_locked (tempo, pulse, true, type);
-		} else {
-			first.set_type (type);
-			{
-				/* cannot move the first tempo section */
-				*static_cast<Tempo*>(&first) = tempo;
-				recompute_map (_metrics);
-			}
-		}
-	}
+	const bool locked_to_meter = ts.locked_to_meter();
 
-	PropertyChanged (PropertyChange ());
-}
-
-void
-TempoMap::replace_tempo_frame (const TempoSection& ts, const Tempo& tempo, const framepos_t& frame, TempoSection::Type type)
-{
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		TempoSection& first (first_tempo());
 		if (ts.frame() != first.frame()) {
 			remove_tempo_locked (ts);
-			add_tempo_frame_locked (tempo, frame, true, type);
+			add_tempo_locked (tempo, pulse, frame, type, pls, true, locked_to_meter);
 		} else {
 			first.set_type (type);
 			first.set_pulse (0.0);
+			first.set_frame (frame);
 			first.set_position_lock_style (AudioTime);
 			{
 				/* cannot move the first tempo section */
@@ -931,9 +912,10 @@ TempoSection*
 TempoMap::add_tempo_pulse (const Tempo& tempo, const double& pulse, ARDOUR::TempoSection::Type type)
 {
 	TempoSection* ts = 0;
+	const framepos_t frame = frame_at_pulse_locked (_metrics, pulse);
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		ts = add_tempo_pulse_locked (tempo, pulse, true, type);
+		ts = add_tempo_locked (tempo, pulse, frame, type, MusicTime, true);
 	}
 
 	PropertyChanged (PropertyChange ());
@@ -945,9 +927,10 @@ TempoSection*
 TempoMap::add_tempo_frame (const Tempo& tempo, const framepos_t& frame, ARDOUR::TempoSection::Type type)
 {
 	TempoSection* ts = 0;
+	const double pulse = pulse_at_frame_locked (_metrics, frame);
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		ts = add_tempo_frame_locked (tempo, frame, true, type);
+		ts = add_tempo_locked (tempo, pulse, frame, type, AudioTime, true);
 	}
 
 
@@ -957,29 +940,20 @@ TempoMap::add_tempo_frame (const Tempo& tempo, const framepos_t& frame, ARDOUR::
 }
 
 TempoSection*
-TempoMap::add_tempo_pulse_locked (const Tempo& tempo, double pulse, bool recompute, ARDOUR::TempoSection::Type type)
+TempoMap::add_tempo_locked (const Tempo& tempo, double pulse, framepos_t frame
+			    , TempoSection::Type type, PositionLockStyle pls, bool recompute, bool locked_to_meter)
 {
-	TempoSection* t = new TempoSection (pulse, 0, tempo.beats_per_minute(), tempo.note_type(), type, MusicTime);
+	TempoSection* t = new TempoSection (pulse, frame, tempo.beats_per_minute(), tempo.note_type(), type, pls);
+	t->set_locked_to_meter (locked_to_meter);
 
 	do_insert (t);
 
 	if (recompute) {
-		solve_map_pulse (_metrics, t, t->pulse());
-		recompute_meters (_metrics);
-	}
-
-	return t;
-}
-
-TempoSection*
-TempoMap::add_tempo_frame_locked (const Tempo& tempo, framepos_t frame, bool recompute, ARDOUR::TempoSection::Type type)
-{
-	TempoSection* t = new TempoSection (0.0, frame, tempo.beats_per_minute(), tempo.note_type(), type, AudioTime);
-
-	do_insert (t);
-
-	if (recompute) {
-		solve_map_frame (_metrics, t, t->frame());
+		if (pls == AudioTime) {
+			solve_map_frame (_metrics, t, t->frame());
+		} else {
+			solve_map_pulse (_metrics, t, t->pulse());
+		}
 		recompute_meters (_metrics);
 	}
 
@@ -1107,13 +1081,10 @@ MeterSection*
 TempoMap::add_meter_frame_locked (const Meter& meter, framepos_t frame, double beat, const Timecode::BBT_Time& where, bool recompute)
 {
 	/* add meter-locked tempo */
-	TempoSection* t = add_tempo_frame_locked (tempo_at_locked (_metrics, frame), frame, true, TempoSection::Ramp);
-	if (t) {
-		t->set_locked_to_meter (true);
-	}
+	const double pulse = pulse_at_frame_locked (_metrics, frame);
+	TempoSection* t = add_tempo_locked (tempo_at_locked (_metrics, frame), pulse,  frame, TempoSection::Ramp, AudioTime, true, true);
 
-	MeterSection* new_meter = new MeterSection (0.0, frame, beat, where, meter.divisions_per_bar(), meter.note_divisor(), AudioTime);
-	new_meter->set_pulse (pulse_at_frame_locked (_metrics, frame));
+	MeterSection* new_meter = new MeterSection (pulse, frame, beat, where, meter.divisions_per_bar(), meter.note_divisor(), AudioTime);
 
 	do_insert (new_meter);
 

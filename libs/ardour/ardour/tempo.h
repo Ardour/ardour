@@ -402,8 +402,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framepos_t predict_tempo_frame (TempoSection* section, const Timecode::BBT_Time& bbt);
 	double predict_tempo_pulse (TempoSection* section, const framepos_t& frame);
 
-	void replace_tempo_pulse (const TempoSection&, const Tempo&, const double& where, TempoSection::Type type);
-	void replace_tempo_frame (const TempoSection&, const Tempo&, const framepos_t& frame, TempoSection::Type type);
+	void replace_tempo (const TempoSection&, const Tempo&, const double& pulse, const framepos_t& frame
+			    , TempoSection::Type type, PositionLockStyle pls);
 
 	void gui_move_tempo_frame (TempoSection*, const framepos_t& frame);
 	void gui_move_tempo_beat (TempoSection*, const double& beat);
@@ -516,8 +516,8 @@ private:
 
 	void do_insert (MetricSection* section);
 
-	TempoSection* add_tempo_pulse_locked (const Tempo&, double pulse, bool recompute, TempoSection::Type type);
-	TempoSection* add_tempo_frame_locked (const Tempo&, framepos_t frame, bool recompute, TempoSection::Type type);
+	TempoSection* add_tempo_locked (const Tempo&, double pulse, framepos_t frame
+					, TempoSection::Type type, PositionLockStyle pls, bool recompute, bool locked_to_meter = false);
 
 	MeterSection* add_meter_beat_locked (const Meter&, double beat, const Timecode::BBT_Time& where, bool recompute);
 	MeterSection* add_meter_frame_locked (const Meter&, framepos_t frame, double beat, const Timecode::BBT_Time& where, bool recompute);
