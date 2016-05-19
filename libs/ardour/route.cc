@@ -5199,6 +5199,16 @@ Route::master_send_enable_controllable () const
 }
 
 bool
+Route::slaved () const
+{
+	if (!_gain_control) {
+		return false;
+	}
+	/* just test one particular control, not all of them */
+	return _gain_control->slaved ();
+}
+
+bool
 Route::slaved_to (boost::shared_ptr<VCA> vca) const
 {
 	if (!vca || !_gain_control) {
