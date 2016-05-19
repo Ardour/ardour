@@ -126,7 +126,11 @@ Slavable::unassign (boost::shared_ptr<VCA> v)
 {
 	Glib::Threads::RWLock::WriterLock lm (master_lock);
 	(void) unassign_controls (v);
-	_masters.erase (v->number());
+	if (v) {
+		_masters.erase (v->number());
+	} else {
+		_masters.clear ();
+	}
 }
 
 int
@@ -173,14 +177,19 @@ Slavable::unassign_controls (boost::shared_ptr<VCA> vca)
 	for (uint32_t n = 0; types[n] != NullAutomation; ++n) {
 
 		slave = boost::dynamic_pointer_cast<SlavableAutomationControl> (automation_control (types[n]));
+
 		if (!vca) {
 			/* unassign from all */
-			slave->clear_masters ();
+			if (slave) {
+				slave->clear_masters ();
+			}
 		} else {
-			slave->remove_master (master);
+			master = vca->automation_control (types[n]);
+			if (slave && master) {
+				slave->remove_master (master);
+			}
 		}
 	}
 
 	return 0;
 }
-
