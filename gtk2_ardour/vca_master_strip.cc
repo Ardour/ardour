@@ -91,10 +91,8 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
 
-	name_button.signal_button_press_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::name_button_press), false);
-
 	top_padding.set_size_request (-1, 16); /* must match height in GroupTabs::set_size_request() */
-	bottom_padding.set_size_request (-1, 50); /* this one is a hack. there's no trivial way to compute it */
+	bottom_padding.set_size_request (-1, 30); /* this one is a hack. there's no trivial way to compute it */
 
 	//Glib::RefPtr<Pango::Layout> layout = vertical_button.get_layout ();
 	// layout->set_justify (JUSTIFY_CENTER);
@@ -103,16 +101,20 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	vertical_button.set_layout_font (UIConfiguration::instance().get_NormalBoldFont());
 	vertical_button.signal_clicked.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill));
 
+	drop_button.set_text(_("Drop"));
+	drop_button.signal_clicked.connect (sigc::mem_fun (*this, &VCAMasterStrip::drop_button_press));
+	set_tooltip (drop_button, _("Unassign all slaves from this control master"));
+
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (0);
 
 	global_vpacker.pack_start (top_padding, false, false);
 	global_vpacker.pack_start (width_hide_box, false, false);
-	global_vpacker.pack_start (name_button, false, false);
 	global_vpacker.pack_start (vertical_button, true, true);
 	global_vpacker.pack_start (solo_mute_box, false, false);
 	global_vpacker.pack_start (gain_meter, false, false);
 	global_vpacker.pack_start (assign_button, false, false);
+	global_vpacker.pack_start (drop_button, false, false);
 	global_vpacker.pack_start (bottom_padding, false, false);
 
 	global_frame.add (global_vpacker);
@@ -129,10 +131,10 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	hide_button.show ();
 	number_label.show ();
 	width_hide_box.show ();
-	name_button.show ();
 	gain_meter.show ();
 	solo_mute_box.show_all ();
 	assign_button.show ();
+	drop_button.show ();
 
 	/* force setting of visible selected status */
 
@@ -145,9 +147,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	mute_changed ();
 
 	Mixer_UI::instance()->show_vca_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
-
-	/* this remains unchanged as the name changes */
-	name_button.set_text (string_compose (X_("VCA %1"), _vca->number()));
 
 	_vca->PropertyChanged.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::vca_property_changed, this, _1), gui_context());
 
@@ -425,25 +424,6 @@ VCAMasterStrip::vertical_box_press (GdkEventButton* ev)
 	return true;
 }
 
-bool
-VCAMasterStrip::name_button_press (GdkEventButton* ev)
-{
-	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
-		start_name_edit ();
-		return true;
-	}
-
-	if (Keyboard::is_context_menu_event (ev)) {
-		if (!context_menu) {
-			build_context_menu ();
-		}
-		context_menu->popup (1, ev->time);
-		return true;
-	}
-
-	return false;
-}
-
 void
 VCAMasterStrip::start_name_edit ()
 {
@@ -481,6 +461,9 @@ VCAMasterStrip::build_context_menu ()
 	context_menu = new Menu;
 	MenuList& items = context_menu->items();
 	items.push_back (MenuElem (_("Rename"), sigc::mem_fun (*this, &VCAMasterStrip::start_name_edit)));
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Drop All Slaves"), sigc::mem_fun (*this, &VCAMasterStrip::start_name_edit)));
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun (*this, &VCAMasterStrip::remove)));
 }
 
@@ -512,4 +495,14 @@ VCAMasterStrip::remove ()
 	}
 
 	_session->vca_manager().remove_vca (_vca);
+}
+
+void
+VCAMasterStrip::drop_all_slaves ()
+{
+}
+
+void
+VCAMasterStrip::drop_button_press ()
+{
 }
