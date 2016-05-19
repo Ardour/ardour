@@ -64,6 +64,7 @@ AddRouteDialog::AddRouteDialog ()
 	set_modal (true);
 	set_skip_taskbar_hint (true);
 	set_resizable (false);
+	set_position (WIN_POS_MOUSE);
 
 	name_template_entry.set_name (X_("AddRouteDialogNameTemplateEntry"));
 	// routes_spinner.set_name (X_("AddRouteDialogSpinner"));
@@ -293,7 +294,7 @@ AddRouteDialog::track_type_chosen ()
 		route_group_combo.set_sensitive (true);
 		break;
 	case MixedTrack:
-          	{
+		{
 			MessageDialog msg (_("Audio+MIDI tracks are intended for use <b>ONLY</b> with plugins that use both audio and MIDI input data\n\n"
 					     "If you do not plan to use such a plugin, then use a normal audio or MIDI track instead."),
 					   true, MESSAGE_INFO, BUTTONS_OK, true);
