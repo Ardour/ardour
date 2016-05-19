@@ -500,9 +500,15 @@ VCAMasterStrip::remove ()
 void
 VCAMasterStrip::drop_all_slaves ()
 {
+	_vca->Drop (); /* EMIT SIGNAL */
+
+	if (Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
+		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
+	}
 }
 
 void
 VCAMasterStrip::drop_button_press ()
 {
+	drop_all_slaves ();
 }
