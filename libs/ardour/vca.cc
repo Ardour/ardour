@@ -172,3 +172,25 @@ VCA::monitoring_state () const
 	/* XXX this has to get more complex but not clear how */
 	return MonitoringInput;
 }
+
+bool
+VCA::slaved () const
+{
+	if (!_gain_control) {
+		return false;
+	}
+	/* just test one particular control, not all of them */
+	return _gain_control->slaved ();
+}
+
+bool
+VCA::slaved_to (boost::shared_ptr<VCA> vca) const
+{
+	if (!vca || !_gain_control) {
+		return false;
+	}
+
+	/* just test one particular control, not all of them */
+
+	return _gain_control->slaved_to (vca->gain_control());
+}

@@ -60,6 +60,11 @@ class LIBARDOUR_API VCA : public Stripable,
 	XMLNode& get_state();
 	int set_state (XMLNode const&, int version);
 
+	/* Slavable API */
+
+        bool slaved_to (boost::shared_ptr<VCA>) const;
+        bool slaved () const;
+
 	/* Soloable API */
 
 	void clear_all_solo_state ();
