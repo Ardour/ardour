@@ -168,6 +168,11 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 
 VCAMasterStrip::~VCAMasterStrip ()
 {
+	if ((_session && !_session->deletion_in_progress()) && Mixer_UI::instance()->showing_vca_slaves_for (_vca)) {
+		/* cancel spill for this VCA */
+		Mixer_UI::instance()->show_vca_slaves (boost::shared_ptr<VCA>());
+	}
+
 	delete delete_dialog;
 	delete context_menu;
 
@@ -476,7 +481,7 @@ VCAMasterStrip::build_context_menu ()
 	context_menu = new Menu;
 	MenuList& items = context_menu->items();
 	items.push_back (MenuElem (_("Rename"), sigc::mem_fun (*this, &VCAMasterStrip::start_name_edit)));
-	items.push_back (MenuElem (_("Remove")));
+	items.push_back (MenuElem (_("Remove"), sigc::mem_fun (*this, &VCAMasterStrip::remove)));
 }
 
 void
@@ -497,4 +502,14 @@ VCAMasterStrip::spill_change (boost::shared_ptr<VCA> vca)
 	} else {
 		vertical_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	}
+}
+
+void
+VCAMasterStrip::remove ()
+{
+	if (!_session) {
+		return;
+	}
+
+	_session->vca_manager().remove_vca (_vca);
 }

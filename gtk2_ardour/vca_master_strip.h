@@ -94,6 +94,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void build_context_menu ();
 	void hide_confirmation (int);
 	void self_delete ();
+	void remove ();
 };
 
 
