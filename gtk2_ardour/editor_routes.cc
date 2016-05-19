@@ -46,6 +46,7 @@
 #include "keyboard.h"
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
+#include "plugin_setup_dialog.h"
 #include "route_sorter.h"
 #include "tooltips.h"
 #include "utils.h"
@@ -292,6 +293,8 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.set_enable_search (false);
 
 	Route::SyncOrderKeys.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::sync_treeview_from_order_keys, this), gui_context());
+	Route::PluginSetup.connect_same_thread (*this, boost::bind (&EditorRoutes::plugin_setup, this, _1, _2, _3));
+
 }
 
 bool
@@ -1746,4 +1749,11 @@ EditorRoutes::show_tracks_with_regions_at_playhead ()
 	 */
 
 	sync_order_keys_from_treeview ();
+}
+
+int
+EditorRoutes::plugin_setup (boost::shared_ptr<Route> r, boost::shared_ptr<PluginInsert> pi, ARDOUR::Route::PluginSetupOptions flags)
+{
+	PluginSetupDialog psd (r, pi, flags);
+	return psd.run ();
 }

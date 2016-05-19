@@ -104,6 +104,8 @@ private:
 	void show_tracks_with_regions_at_playhead ();
 	void selection_changed ();
 
+	int plugin_setup (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::PluginInsert>, ARDOUR::Route::PluginSetupOptions);
+
 	void display_drag_data_received (
 		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
 		);

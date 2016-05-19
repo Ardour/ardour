@@ -3001,6 +3001,27 @@ if (!ARDOUR::Profile->get_mixbus()) {
 			);
 	add_option (_("Plugins"), _plugin_prefer_inline);
 #endif
+
+	add_option (_("Plugins"), new OptionEditorHeading (_("Instrument")));
+
+	bo = new BoolOption (
+			"ask-replace-instrument",
+			_("Ask to replace existing instrument plugin"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_ask_replace_instrument),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_ask_replace_instrument)
+			);
+	add_option (_("Plugins"), bo);
+
+	bo = new BoolOption (
+			"ask-setup_instrument",
+			_("Interactively configure instrument plugins on insert"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_ask_setup_instrument),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_ask_setup_instrument)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> show a dialog to select instrument channel configuration before adding a multichannel plugin."));
+
 #endif
 
 	/* INTERFACE */
