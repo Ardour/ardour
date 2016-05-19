@@ -115,10 +115,13 @@ Slavable::do_assign (VCAManager* manager)
 void
 Slavable::assign (boost::shared_ptr<VCA> v)
 {
+	assert (v);
 	Glib::Threads::RWLock::WriterLock lm (master_lock);
 	if (assign_controls (v) == 0) {
 		_masters.insert (v->number());
 	}
+
+	v->Drop.connect_same_thread (unassign_connections, boost::bind (&Slavable::unassign, this, v));
 }
 
 void

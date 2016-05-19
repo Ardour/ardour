@@ -67,8 +67,10 @@ class LIBARDOUR_API Slavable
 	mutable Glib::Threads::RWLock master_lock;
 	std::set<uint32_t> _masters;
 	PBD::ScopedConnection assign_connection;
+	PBD::ScopedConnectionList unassign_connections;
 
 	int do_assign (VCAManager* s);
+
 };
 
 } // namespace ARDOUR
