@@ -93,6 +93,8 @@ private:
 	virtual void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *) {}
 	virtual ARDOUR::RouteList selected_routes () const = 0;
 
+	void add_new_from_items (Gtk::Menu_Helpers::MenuList&);
+
 	void new_from_selection (bool with_master);
 	void new_from_rec_enabled (bool with_master);
 	void new_from_soloed (bool with_master);

@@ -303,22 +303,11 @@ GroupTabs::click_to_tab (double c, list<Tab>::iterator* prev, list<Tab>::iterato
 	return under;
 }
 
-Gtk::Menu*
-GroupTabs::get_menu (RouteGroup* g, bool TabArea)
+void
+GroupTabs::add_new_from_items (Menu_Helpers::MenuList& items)
 {
 	using namespace Menu_Helpers;
-
-	delete _menu;
-
-	_menu = new Menu;
-	_menu->set_name ("ArdourContextMenu");
-	MenuList& items = _menu->items();
-	Menu* new_from;
-
-	if (!TabArea) {
-		items.push_back (MenuElem (_("Create New Group ..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group))));
-		items.push_back (MenuElem (_("Create New Group with Control Master ..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group_with_master))));
-	}
+	Menu *new_from;
 
 	new_from = new Menu;
 	{
@@ -337,9 +326,74 @@ GroupTabs::get_menu (RouteGroup* g, bool TabArea)
 		f.push_back (MenuElem (_("Soloed..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_soloed), true)));
 	}
 	items.push_back (MenuElem (_("Create New Group with Master From..."), *new_from));
+}
 
+Gtk::Menu*
+GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
+{
+	using namespace Menu_Helpers;
+
+	delete _menu;
+
+	_menu = new Menu;
+	_menu->set_name ("ArdourContextMenu");
+
+	MenuList& items = _menu->items();
 	Menu* vca_menu;
+
 	const VCAList vcas = _session->vca_manager().vcas ();
+
+	if (!in_tab_area) {
+		items.push_back (MenuElem (_("Create New Group ..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group))));
+		items.push_back (MenuElem (_("Create New Group with Control Master ..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group_with_master))));
+
+		/* context menu is not for a group tab, show the "create new
+		   from" items here
+		*/
+		add_new_from_items (items);
+	}
+
+	if (g) {
+		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Edit Group..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group), g)));
+		items.push_back (MenuElem (_("Collect Group"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::collect), g)));
+		items.push_back (MenuElem (_("Remove Group"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::remove_group), g)));
+
+		items.push_back (SeparatorElem());
+
+		vca_menu = new Menu;
+		MenuList& f (vca_menu->items());
+		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), 0, g)));
+
+		for (VCAList::const_iterator v = vcas.begin(); v != vcas.end(); ++v) {
+			f.push_back (MenuElem (string_compose ("VCA %1", (*v)->number()), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), (*v)->number(), g)));
+		}
+		items.push_back (MenuElem (_("Assign Group to Control Master..."), *vca_menu));
+
+
+		items.push_back (SeparatorElem());
+
+		if (g->has_subgroup()) {
+			items.push_back (MenuElem (_("Remove Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::un_subgroup), g)));
+		} else {
+			items.push_back (MenuElem (_("Add New Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, false, PreFader)));
+		}
+		items.push_back (MenuElem (_("Add New Aux Bus (pre-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PreFader)));
+		items.push_back (MenuElem (_("Add New Aux Bus (post-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PostFader)));
+		items.push_back (SeparatorElem());
+
+	}
+
+	add_menu_items (_menu, g);
+
+	if (in_tab_area) {
+		/* context menu is for a group tab, show the "create new
+		   from" items here
+		*/
+		add_new_from_items (items);
+	}
+
+	items.push_back (SeparatorElem());
 
 	vca_menu = new Menu;
 	{
@@ -374,37 +428,9 @@ GroupTabs::get_menu (RouteGroup* g, bool TabArea)
 	}
 	items.push_back (MenuElem (_("Assign Soloed to Control Master...")));
 
-	if (g) {
-		items.push_back (SeparatorElem());
-		items.push_back (MenuElem (_("Edit Group..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group), g)));
-		items.push_back (MenuElem (_("Collect Group"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::collect), g)));
-		items.push_back (MenuElem (_("Remove Group"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::remove_group), g)));
-		items.push_back (SeparatorElem());
-		if (g->has_subgroup()) {
-			items.push_back (MenuElem (_("Remove Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::un_subgroup), g)));
-		} else {
-			items.push_back (MenuElem (_("Add New Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, false, PreFader)));
-		}
-		items.push_back (MenuElem (_("Add New Aux Bus (pre-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PreFader)));
-		items.push_back (MenuElem (_("Add New Aux Bus (post-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PostFader)));
-		items.push_back (SeparatorElem());
-
-		vca_menu = new Menu;
-		MenuList& f (vca_menu->items());
-		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), 0, g)));
-
-		for (VCAList::const_iterator v = vcas.begin(); v != vcas.end(); ++v) {
-			f.push_back (MenuElem (string_compose ("VCA %1", (*v)->number()), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), (*v)->number(), g)));
-		}
-		items.push_back (MenuElem (_("Assign Group to Control Master..."), *vca_menu));
-	}
-
-	add_menu_items (_menu, g);
-
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Enable All Groups"), sigc::mem_fun(*this, &GroupTabs::activate_all)));
 	items.push_back (MenuElem (_("Disable All Groups"), sigc::mem_fun(*this, &GroupTabs::disable_all)));
-	items.push_back (SeparatorElem());
 
 	return _menu;
 }
