@@ -192,7 +192,7 @@ VCAMasterStrip::update_vca_display ()
 	string label;
 
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-		if (_vca->gain_control()->slaved_to ((*v)->gain_control())) {
+		if (_vca->slaved_to (*v)) {
 			if (!label.empty()) {
 				label += ' ';
 			}
