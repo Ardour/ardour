@@ -234,7 +234,7 @@ VCAMasterStrip::hide_confirmation (int response)
 	delete_dialog->hide ();
 
 	switch (response) {
-	case RESPONSE_OK:
+	case RESPONSE_YES:
 		/* get everything to deassign. This will also delete ourselves (when
 		 * idle) and that in turn will remove us from the Mixer GUI
 		 */
