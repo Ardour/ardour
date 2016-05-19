@@ -145,6 +145,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 
 	void assign_master (boost::shared_ptr<VCA>);
 	void unassign_master (boost::shared_ptr<VCA>);
+	bool slaved () const;
 
   private:
 	boost::shared_ptr<RouteList> routes;

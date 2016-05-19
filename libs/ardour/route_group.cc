@@ -562,6 +562,10 @@ RouteGroup::push_to_groups ()
 void
 RouteGroup::assign_master (boost::shared_ptr<VCA> master)
 {
+	if (!routes || routes->empty()) {
+		return;
+	}
+
 	boost::shared_ptr<Route> front = routes->front ();
 
 	if (!front) {
@@ -572,16 +576,20 @@ RouteGroup::assign_master (boost::shared_ptr<VCA> master)
 		return;
 	}
 
-	if (!front->slaved()) {
+	bool cancel_master_controls = false;
 
+	if (!front->slaved()) {
 		pre_master_gain = is_gain ();
 		pre_master_solo = is_solo ();
 		pre_master_mute = is_mute ();
+		cancel_master_controls = true;
+	}
 
-		for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
-			(*r)->assign (master);
-		}
+	for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
+		(*r)->assign (master);
+	}
 
+	if (cancel_master_controls) {
 		set_gain (false);
 		set_solo (false);
 		set_mute (false);
@@ -591,6 +599,10 @@ RouteGroup::assign_master (boost::shared_ptr<VCA> master)
 void
 RouteGroup::unassign_master (boost::shared_ptr<VCA> master)
 {
+	if (!routes || routes->empty()) {
+		return;
+	}
+
 	boost::shared_ptr<Route> front = routes->front ();
 
 	if (!front) {
@@ -610,4 +622,14 @@ RouteGroup::unassign_master (boost::shared_ptr<VCA> master)
 		set_solo (pre_master_solo);
 		set_mute (pre_master_mute);
 	}
+}
+
+bool
+RouteGroup::slaved () const
+{
+	if (!routes || routes->empty()) {
+		return false;
+	}
+
+	return routes->front()->slaved ();
 }
