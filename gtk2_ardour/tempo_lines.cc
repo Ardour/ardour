@@ -69,24 +69,24 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 				level = d;
 			}
 		}
-
 		/* draw line with alpha corresponding to coarsest level */
 		const uint8_t    a = max(8, (int)rint(UINT_RGBA_A(base) / (0.8 * log2(level))));
 		const uint32_t   c = UINT_RGBA_CHANGE_A(base, a);
 		framepos_t f = 0;
 
 		if (grid.begin()->c != 0.0) {
-			const double pulses_per_div = l * (grid.begin()->tempo.note_type() / grid.begin()->meter.note_divisor()) / (double) divisions;
-			const double time_at_pulse = log (((grid.begin()->c * (pulses_per_div / grid.begin()->tempo.note_type())) /
-							   grid.begin()->tempo.pulses_per_minute()) + 1) / grid.begin()->c;
-			f = grid.begin()->frame + (framecnt_t) floor ((time_at_pulse * 60.0 * frame_rate) + 0.5);
+			const double beat_divisions = (l / ((double) divisions)) * (grid.begin()->tempo.note_type() / grid.begin()->meter.note_divisor());
+			const double time_at_division = log (((grid.begin()->c * (beat_divisions)) /
+							   grid.begin()->tempo.beats_per_minute()) + 1) / grid.begin()->c;
+
+			f = grid.begin()->frame + (framecnt_t) floor ((time_at_division * 60.0 * frame_rate) + 0.5);
 		} else {
-			const double fpb  = grid.begin()->tempo.frames_per_beat (frame_rate);
+			const double fpb  = grid.begin()->tempo.frames_per_beat (frame_rate)
+				* (grid.begin()->tempo.note_type() / grid.begin()->meter.note_divisor());
+
 			f = grid.begin()->frame + (l * (fpb / (double) divisions));
 		}
-
 		if (f > leftmost_frame) {
-
 			lines.add (PublicEditor::instance().sample_to_pixel_unrounded (f), 1.0, c);
 		}
 	}

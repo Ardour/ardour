@@ -1709,7 +1709,7 @@ TempoMap::beats_to_bbt_locked (const Metrics& metrics, const double& b) const
 {
 	/* CALLER HOLDS READ LOCK */
 	MeterSection* prev_m = 0;
-	const double beats = (b < 0.0) ? 0.0 : b;
+	const double beats = max (0.0, b);
 
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		MeterSection* m = 0;
