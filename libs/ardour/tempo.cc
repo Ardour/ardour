@@ -2339,14 +2339,15 @@ TempoMap::predict_tempo_frame (TempoSection* section, const BBT_Time& bbt)
 }
 
 double
-TempoMap::predict_tempo_pulse (TempoSection* section, const framepos_t& frame)
+TempoMap::predict_tempo_pulse (TempoSection* section, const BBT_Time& bbt)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	Metrics future_map;
 	double ret = 0.0;
 	TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, section);
+	const double beat = bbt_to_beats_locked (future_map, bbt);
 
-	if (solve_map_frame (future_map, tempo_copy, frame)) {
+	if (solve_map_pulse (future_map, tempo_copy, pulse_at_beat_locked (future_map, beat))) {
 		ret = tempo_copy->pulse();
 	} else {
 		ret = section->pulse();

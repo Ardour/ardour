@@ -3142,10 +3142,6 @@ MeterMarkerDrag::setup_pointer_frame_offset ()
 void
 MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (!_marker->meter().movable()) {
-		//return;
-	}
-
 	if (first_move) {
 
 		// create a dummy marker to catch events, then hide it.
@@ -3281,6 +3277,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	if (!_real_section->active()) {
 		return;
 	}
+
 	if (first_move) {
 
 		// mvc drag - create a dummy marker to catch events, hide it.
@@ -3342,7 +3339,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 				} else if (use_snap) {
 					map.round_bbt (bbt, _editor->get_grid_beat_divisions (0), RoundNearest);
 				}
-				double const pulse = map.predict_tempo_pulse (_real_section, map.frame_time (bbt));
+				double const pulse = map.predict_tempo_pulse (_real_section, bbt);
 				_real_section = map.add_tempo (_marker->tempo(), pulse, 0, _real_section->type(), MusicTime);
 			} else {
 				if (use_snap && _editor->snap_type() == SnapToBar) {
@@ -3400,7 +3397,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 			if (_real_section->position_lock_style() == MusicTime) {
 
-				const double pulse = map.predict_tempo_pulse (_real_section, pf);
+				const double pulse = map.predict_tempo_pulse (_real_section, when);
 				when = map.pulse_to_bbt (pulse);
 				if (use_snap && _editor->snap_type() == SnapToBar) {
 					map.round_bbt (when, -1, (pf > _real_section->frame()) ? RoundUpMaybe : RoundDownMaybe);
