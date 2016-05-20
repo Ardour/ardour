@@ -145,14 +145,18 @@ BiQuad::run (float *data, const uint32_t n_samples)
 void
 BiQuad::compute (Type type, double freq, double Q, double gain)
 {
+	if (Q <= .001)     { Q = 0.001; }
+	if (freq <= 1.)    { freq = 1.; }
+	if (freq >= _rate) { freq = _rate; }
+
 	/* Compute biquad filter settings.
 	 * Based on 'Cookbook formulae for audio EQ biquad filter coefficents'
 	 * by Robert Bristow-Johnson
 	 */
-	const double     A = pow (10.0, (gain / 40.0));
+	const double A = pow (10.0, (gain / 40.0));
 	const double W0 = (2.0 * M_PI * freq) / _rate;
-	const double sinW0  = sin (W0);
-	const double cosW0  = cos (W0);
+	const double sinW0 = sin (W0);
+	const double cosW0 = cos (W0);
 	const double alpha = sinW0 / (2.0 * Q);
 	const double beta  = sqrt (A) / Q;
 
@@ -249,4 +253,25 @@ BiQuad::compute (Type type, double freq, double Q, double gain)
 	_b2 /= _a0;
 	_a1 /= _a0;
 	_a2 /= _a0;
+}
+
+float
+BiQuad::dB_at_freq (float freq) const
+{
+	const double W0 = (2.0 * M_PI * freq) / _rate;
+	const float c1 = cosf (W0);
+	const float s1 = sinf (W0);
+
+	const float A = _b0 + _b2;
+	const float B = _b0 - _b2;
+	const float C = 1.0 + _a2;
+	const float D = 1.0 - _a2;
+
+	const float a = A * c1 + _b1;
+	const float b = B * s1;
+	const float c = C * c1 + _a1;
+	const float d = D * s1;
+
+#define SQUARE(x) ( (x) * (x) )
+	return 20.f * log10f (sqrtf ((SQUARE(a) + SQUARE(b)) * (SQUARE(c) + SQUARE(d))) / (SQUARE(c) + SQUARE(d)));
 }

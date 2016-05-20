@@ -1166,6 +1166,7 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("run", &DSP::BiQuad::run)
 		.addFunction ("compute", &DSP::BiQuad::compute)
 		.addFunction ("reset", &DSP::BiQuad::reset)
+		.addFunction ("dB_at_freq", &DSP::BiQuad::dB_at_freq)
 		.endClass ()
 
 		/* DSP enums */
