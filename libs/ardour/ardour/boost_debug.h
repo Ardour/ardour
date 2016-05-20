@@ -29,10 +29,12 @@
 
 //#define BOOST_MARK_ROUTE(p) boost_debug_shared_ptr_mark_interesting((p).get(),"Route")
 //#define BOOST_MARK_TRACK(p) boost_debug_shared_ptr_mark_interesting((p).get(),"Track")
+//#define BOOST_MARK_VCA(p) boost_debug_shared_ptr_mark_interesting((p).get(),"ControlMaster")
 //#define BOOST_SHOW_POINTERS() boost_debug_list_ptrs()
 
 #define BOOST_MARK_ROUTE(p)
 #define BOOST_MARK_TRACK(p)
+#define BOOST_MARK_VCA(p)
 #define BOOST_SHOW_POINTERS()
 
 
