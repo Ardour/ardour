@@ -70,6 +70,7 @@ class LIBARDOUR_API Slavable
 	PBD::ScopedConnectionList unassign_connections;
 
 	int do_assign (VCAManager* s);
+	void weak_unassign (boost::weak_ptr<VCA>);
 
 };
 

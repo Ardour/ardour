@@ -83,6 +83,7 @@ Slavable::set_state (XMLNode const& node, int version)
 	return 0;
 }
 
+
 int
 Slavable::do_assign (VCAManager* manager)
 {
@@ -121,7 +122,23 @@ Slavable::assign (boost::shared_ptr<VCA> v)
 		_masters.insert (v->number());
 	}
 
-	v->Drop.connect_same_thread (unassign_connections, boost::bind (&Slavable::unassign, this, v));
+	/* Do NOT use ::unassign() because it will store a
+	 * boost::shared_ptr<VCA> in the functor, leaving a dangling ref to the
+	 * VCA.
+	 */
+
+
+	v->Drop.connect_same_thread (unassign_connections, boost::bind (&Slavable::weak_unassign, this, boost::weak_ptr<VCA>(v)));
+	v->DropReferences.connect_same_thread (unassign_connections, boost::bind (&Slavable::weak_unassign, this, boost::weak_ptr<VCA>(v)));
+}
+
+void
+Slavable::weak_unassign (boost::weak_ptr<VCA> v)
+{
+	boost::shared_ptr<VCA> sv (v.lock());
+	if (sv) {
+		unassign (sv);
+	}
 }
 
 void
