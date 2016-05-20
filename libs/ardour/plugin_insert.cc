@@ -955,6 +955,12 @@ PluginInsert::silence (framecnt_t nframes)
 void
 PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
 {
+#ifndef NDEBUG
+	if (!_configured) {
+		error << string_compose (_("Force bypassed unconfigured plugin: %1"), name ()) << endmsg;
+		deactivate ();
+	}
+#endif
 	if (_pending_active) {
 		/* run as normal if we are active or moving from inactive to active */
 
