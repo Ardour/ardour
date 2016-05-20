@@ -20,7 +20,7 @@ function dsp_params ()
 	{
 		{ ["type"] = "input", name = "Timescale", min = .1, max = 5, default = 2, unit="sec", logarithmic = true },
 		{ ["type"] = "input", name = "Logscale", min = 0, max = 1, default = 0, toggled = true },
-		{ ["type"] = "input", name = "Height", min = 0, max = 3, default = 1, unit="dB", enum = true, scalepoints =
+		{ ["type"] = "input", name = "Height", min = 0, max = 3, default = 1, enum = true, scalepoints =
 			{
 				["Min"] = 0,
 				["16:10"] = 1,
