@@ -1687,7 +1687,9 @@ ProcessorEntry::LuaPluginDisplay::render_inline (cairo_t *cr, uint32_t width)
 			return h;
 		}
 	} catch (luabridge::LuaException const& e) {
-		;
+#ifndef NDEBUG
+		cerr << "LuaException:" << e.what () << endl;
+#endif
 	}
 	return 0;
 }
