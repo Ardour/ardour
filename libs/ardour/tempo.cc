@@ -881,6 +881,21 @@ TempoMap::do_insert (MetricSection* section)
 	}
 }
 
+TempoSection*
+TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& frame, ARDOUR::TempoSection::Type type, PositionLockStyle pls)
+{
+	TempoSection* ts = 0;
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
+		ts = add_tempo_locked (tempo, pulse, frame, type, pls, true);
+	}
+
+
+	PropertyChanged (PropertyChange ());
+
+	return ts;
+}
+
 void
 TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const double& pulse, const framepos_t& frame, TempoSection::Type type, PositionLockStyle pls)
 {
@@ -909,21 +924,6 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const doubl
 }
 
 TempoSection*
-TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& frame, ARDOUR::TempoSection::Type type, PositionLockStyle pls)
-{
-	TempoSection* ts = 0;
-	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
-		ts = add_tempo_locked (tempo, pulse, frame, type, pls, true);
-	}
-
-
-	PropertyChanged (PropertyChange ());
-
-	return ts;
-}
-
-TempoSection*
 TempoMap::add_tempo_locked (const Tempo& tempo, double pulse, framepos_t frame
 			    , TempoSection::Type type, PositionLockStyle pls, bool recompute, bool locked_to_meter)
 {
@@ -942,6 +942,26 @@ TempoMap::add_tempo_locked (const Tempo& tempo, double pulse, framepos_t frame
 	}
 
 	return t;
+}
+
+MeterSection*
+TempoMap::add_meter (const Meter& meter, const double& beat, const Timecode::BBT_Time& where, const framepos_t& frame, PositionLockStyle pls)
+{
+	MeterSection* m = 0;
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
+		m = add_meter_locked (meter, beat, where, frame, pls, true);
+	}
+
+
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::TempoMap)) {
+		dump (_metrics, std::cerr);
+	}
+#endif
+
+	PropertyChanged (PropertyChange ());
+	return m;
 }
 
 void
@@ -971,26 +991,6 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 		recompute_map (_metrics);
 	}
 	PropertyChanged (PropertyChange ());
-}
-
-MeterSection*
-TempoMap::add_meter (const Meter& meter, const double& beat, const Timecode::BBT_Time& where, const framepos_t& frame, PositionLockStyle pls)
-{
-	MeterSection* m = 0;
-	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
-		m = add_meter_locked (meter, beat, where, frame, pls, true);
-	}
-
-
-#ifndef NDEBUG
-	if (DEBUG_ENABLED(DEBUG::TempoMap)) {
-		dump (_metrics, std::cerr);
-	}
-#endif
-
-	PropertyChanged (PropertyChange ());
-	return m;
 }
 
 MeterSection*
@@ -1374,6 +1374,13 @@ TempoMap::metric_at (BBT_Time bbt) const
 }
 
 double
+TempoMap::pulse_at_beat (const double& beat) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+	return pulse_at_beat_locked (_metrics, beat);
+}
+
+double
 TempoMap::pulse_at_beat_locked (const Metrics& metrics, const double& beat) const
 {
 	MeterSection* prev_m = 0;
@@ -1393,10 +1400,10 @@ TempoMap::pulse_at_beat_locked (const Metrics& metrics, const double& beat) cons
 }
 
 double
-TempoMap::pulse_at_beat (const double& beat) const
+TempoMap::beat_at_pulse (const double& pulse) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return pulse_at_beat_locked (_metrics, beat);
+	return beat_at_pulse_locked (_metrics, pulse);
 }
 
 double
@@ -1421,10 +1428,10 @@ TempoMap::beat_at_pulse_locked (const Metrics& metrics, const double& pulse) con
 }
 
 double
-TempoMap::beat_at_pulse (const double& pulse) const
+TempoMap::pulse_at_frame (const framecnt_t& frame) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return beat_at_pulse_locked (_metrics, pulse);
+	return pulse_at_frame_locked (_metrics, frame);
 }
 
 /* tempo section based */
@@ -1455,11 +1462,11 @@ TempoMap::pulse_at_frame_locked (const Metrics& metrics, const framecnt_t& frame
 	return pulses_in_section + prev_t->pulse();
 }
 
-double
-TempoMap::pulse_at_frame (const framecnt_t& frame) const
+framecnt_t
+TempoMap::frame_at_pulse (const double& pulse) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return pulse_at_frame_locked (_metrics, frame);
+	return frame_at_pulse_locked (_metrics, pulse);
 }
 
 /* tempo section based */
@@ -1493,11 +1500,11 @@ TempoMap::frame_at_pulse_locked (const Metrics& metrics, const double& pulse) co
 	return ret;
 }
 
-framecnt_t
-TempoMap::frame_at_pulse (const double& pulse) const
+double
+TempoMap::beat_at_frame (const framecnt_t& frame) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return frame_at_pulse_locked (_metrics, pulse);
+	return beat_at_frame_locked (_metrics, frame);
 }
 
 /* meter section based */
@@ -1530,11 +1537,11 @@ TempoMap::beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame)
 	return beat;
 }
 
-double
-TempoMap::beat_at_frame (const framecnt_t& frame) const
+framecnt_t
+TempoMap::frame_at_beat (const double& beat) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return beat_at_frame_locked (_metrics, frame);
+	return frame_at_beat_locked (_metrics, beat);
 }
 
 /* meter section based */
@@ -1557,12 +1564,13 @@ TempoMap::frame_at_beat_locked (const Metrics& metrics, const double& beat) cons
 	return prev_t.frame_at_pulse (((beat - prev_m->beat()) / prev_m->note_divisor()) + prev_m->pulse(), _frame_rate);
 }
 
-framecnt_t
-TempoMap::frame_at_beat (const double& beat) const
+double
+TempoMap::bbt_to_beats (const Timecode::BBT_Time& bbt)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return frame_at_beat_locked (_metrics, beat);
+	return bbt_to_beats_locked (_metrics, bbt);
 }
+
 
 double
 TempoMap::bbt_to_beats_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const
@@ -1594,11 +1602,11 @@ TempoMap::bbt_to_beats_locked (const Metrics& metrics, const Timecode::BBT_Time&
 	return ret;
 }
 
-double
-TempoMap::bbt_to_beats (const Timecode::BBT_Time& bbt)
+Timecode::BBT_Time
+TempoMap::beats_to_bbt (const double& beats)
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return bbt_to_beats_locked (_metrics, bbt);
+	return beats_to_bbt_locked (_metrics, beats);
 }
 
 Timecode::BBT_Time
@@ -1650,13 +1658,6 @@ TempoMap::beats_to_bbt_locked (const Metrics& metrics, const double& b) const
 	}
 
 	return ret;
-}
-
-Timecode::BBT_Time
-TempoMap::beats_to_bbt (const double& beats)
-{
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-	return beats_to_bbt_locked (_metrics, beats);
 }
 
 Timecode::BBT_Time
@@ -1728,16 +1729,6 @@ TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt)
 	bbt = beats_to_bbt_locked (_metrics, beat);
 }
 
-/* meter section based */
-framepos_t
-TempoMap::frame_time_locked (const Metrics& metrics, const BBT_Time& bbt) const
-{
-	/* HOLD THE READER LOCK */
-
-	const framepos_t ret = frame_at_beat_locked (metrics, bbt_to_beats_locked (metrics, bbt));
-	return ret;
-}
-
 framepos_t
 TempoMap::frame_time (const BBT_Time& bbt)
 {
@@ -1754,8 +1745,18 @@ TempoMap::frame_time (const BBT_Time& bbt)
 	return frame_time_locked (_metrics, bbt);
 }
 
+/* meter section based */
+framepos_t
+TempoMap::frame_time_locked (const Metrics& metrics, const BBT_Time& bbt) const
+{
+	/* HOLD THE READER LOCK */
+
+	const framepos_t ret = frame_at_beat_locked (metrics, bbt_to_beats_locked (metrics, bbt));
+	return ret;
+}
+
 bool
-TempoMap::check_solved (const Metrics& metrics, bool by_frame) const
+TempoMap::check_solved (const Metrics& metrics) const
 {
 	TempoSection* prev_t = 0;
 	MeterSection* prev_m = 0;
@@ -1768,11 +1769,7 @@ TempoMap::check_solved (const Metrics& metrics, bool by_frame) const
 				continue;
 			}
 			if (prev_t) {
-				if ((by_frame && t->frame() < prev_t->frame()) || (!by_frame && t->pulse() < prev_t->pulse())) {
-					return false;
-				}
-
-				if (t->frame() == prev_t->frame()) {
+				if ((t->frame() <= prev_t->frame()) || (t->pulse() <= prev_t->pulse())) {
 					return false;
 				}
 
@@ -1884,31 +1881,18 @@ TempoMap::solve_map_frame (Metrics& imaginary, TempoSection* section, const fram
 		}
 	}
 
-	if (section->position_lock_style() == MusicTime) {
-		/* we're setting the frame */
-		section->set_position_lock_style (AudioTime);
-		recompute_tempos (imaginary);
-		section->set_position_lock_style (MusicTime);
-	} else {
-		recompute_tempos (imaginary);
-	}
+	recompute_tempos (imaginary);
 
-	if (check_solved (imaginary, true)) {
+	if (check_solved (imaginary)) {
 		return true;
 	}
 
 	MetricSectionFrameSorter fcmp;
 	imaginary.sort (fcmp);
-	if (section->position_lock_style() == MusicTime) {
-		/* we're setting the frame */
-		section->set_position_lock_style (AudioTime);
-		recompute_tempos (imaginary);
-		section->set_position_lock_style (MusicTime);
-	} else {
-		recompute_tempos (imaginary);
-	}
 
-	if (check_solved (imaginary, true)) {
+	recompute_tempos (imaginary);
+
+	if (check_solved (imaginary)) {
 		return true;
 	}
 
@@ -1952,36 +1936,33 @@ TempoMap::solve_map_pulse (Metrics& imaginary, TempoSection* section, const doub
 			prev_t = t;
 		}
 	}
+
 	if (section_prev) {
 		section_prev->set_c_func (section_prev->compute_c_func_pulse (section->pulses_per_minute(), pulse, _frame_rate));
 		section->set_frame (section_prev->frame_at_pulse (pulse, _frame_rate));
 	}
 
-	if (section->position_lock_style() == AudioTime) {
-		/* we're setting the pulse */
-		section->set_position_lock_style (MusicTime);
-		recompute_tempos (imaginary);
-		section->set_position_lock_style (AudioTime);
-	} else {
-		recompute_tempos (imaginary);
-	}
+	recompute_tempos (imaginary);
 
-	if (check_solved (imaginary, false)) {
+	if (check_solved (imaginary)) {
 		return true;
 	}
 
 	MetricSectionSorter cmp;
 	imaginary.sort (cmp);
-	if (section->position_lock_style() == AudioTime) {
-		/* we're setting the pulse */
-		section->set_position_lock_style (MusicTime);
-		recompute_tempos (imaginary);
-		section->set_position_lock_style (AudioTime);
-	} else {
-		recompute_tempos (imaginary);
-	}
 
-	if (check_solved (imaginary, false)) {
+	recompute_tempos (imaginary);
+	/* Reordering
+	 * XX need a restriction here, but only for this case,
+	 * as audio locked tempos don't interact in the same way.
+	 *
+	 * With music-locked tempos, the solution to cross-dragging can fly off the screen
+	 * e.g.
+	 * |50 bpm                        |250 bpm |60 bpm
+	 *                drag 250 to the pulse after 60->
+	 * a clue: dragging the second 60 <- past the 250 would cause no such problem.
+	 */
+	if (check_solved (imaginary)) {
 		return true;
 	}
 
@@ -2018,7 +1999,13 @@ TempoMap::solve_map_frame (Metrics& imaginary, MeterSection* section, const fram
 		}
 	}
 
+	if (!meter_locked_tempo) {
+		return false;
+	}
+
 	MeterSection* prev_m = 0;
+	Metrics future_map;
+	bool solved = false;
 
 	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
 		MeterSection* m;
@@ -2027,83 +2014,42 @@ TempoMap::solve_map_frame (Metrics& imaginary, MeterSection* section, const fram
 				if (prev_m && section->movable()) {
 					const double beats = (pulse_at_frame_locked (imaginary, frame) - prev_m->pulse()) * prev_m->note_divisor();
 					if (beats + prev_m->beat() < section->beat()) {
-						/* disallow position change if it will alter our beat
-						   we allow tempo changes to do this in recompute_meters().
-						   blocking this is an option, but i'm not convinced that
-						   this is what the user would actually want.
-						   here we set the frame/pulse corresponding to its musical position.
+						/* set the frame/pulse corresponding to its musical position,
+						 * as an earlier time than this has been requested.
 						*/
 
-						if (meter_locked_tempo) {
-							Metrics future_map;
-							bool solved = false;
-							TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
-							const double new_pulse = ((section->beat() - prev_m->beat())
-										  / prev_m->note_divisor()) + prev_m->pulse();
-							const framepos_t smallest_frame = frame_at_pulse_locked (future_map, new_pulse);
-							if ((solved = solve_map_frame (future_map, tempo_copy, smallest_frame))) {
-								meter_locked_tempo->set_pulse (new_pulse);
-								solve_map_frame (imaginary, meter_locked_tempo, smallest_frame);
-								section->set_frame (smallest_frame);
-								section->set_pulse (new_pulse);
-							} else {
-								solved = false;
-							}
-
-							Metrics::const_iterator d = future_map.begin();
-							while (d != future_map.end()) {
-								delete (*d);
-								++d;
-							}
-
-							if (!solved) {
-								return false;
-							}
-						}
-						return false;
-					} else {
-						if (meter_locked_tempo) {
-							Metrics future_map;
-							bool solved = false;
-
-							TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
-							MeterSection* meter_copy = const_cast<MeterSection*> (&meter_section_at_locked (future_map, section->frame()));
-							meter_copy->set_frame (frame);
-
-							if ((solved = solve_map_frame (future_map, tempo_copy, frame))) {
-								section->set_frame (frame);
-								meter_locked_tempo->set_pulse (((section->beat() - prev_m->beat())
-												/ prev_m->note_divisor()) + prev_m->pulse());
-								solve_map_frame (imaginary, meter_locked_tempo, frame);
-							} else {
-								solved = false;
-							}
-
-							Metrics::const_iterator d = future_map.begin();
-							while (d != future_map.end()) {
-								delete (*d);
-								++d;
-							}
-
-							if (!solved) {
-								return false;
-							}
-						}
-					}
-				} else {
-					/* not movable (first meter atm) */
-					if (meter_locked_tempo) {
-						Metrics future_map;
-						bool solved = false;
 						TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
+						const double new_pulse = ((section->beat() - prev_m->beat())
+									  / prev_m->note_divisor()) + prev_m->pulse();
+						const framepos_t smallest_frame = frame_at_pulse_locked (future_map, new_pulse);
+						if ((solved = solve_map_frame (future_map, tempo_copy, smallest_frame))) {
+							meter_locked_tempo->set_pulse (new_pulse);
+							solve_map_frame (imaginary, meter_locked_tempo, smallest_frame);
+							section->set_frame (smallest_frame);
+							section->set_pulse (new_pulse);
+						} else {
+							solved = false;
+						}
 
-						tempo_copy->set_frame (frame);
-						tempo_copy->set_pulse (0.0);
+						Metrics::const_iterator d = future_map.begin();
+						while (d != future_map.end()) {
+							delete (*d);
+							++d;
+						}
+
+						if (!solved) {
+							return false;
+						}
+					} else {
+
+						TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
+						MeterSection* meter_copy = const_cast<MeterSection*> (&meter_section_at_locked (future_map, section->frame()));
+						meter_copy->set_frame (frame);
 
 						if ((solved = solve_map_frame (future_map, tempo_copy, frame))) {
 							section->set_frame (frame);
-							meter_locked_tempo->set_frame (frame);
-							meter_locked_tempo->set_pulse (0.0);
+							meter_locked_tempo->set_pulse (((section->beat() - prev_m->beat())
+												/ prev_m->note_divisor()) + prev_m->pulse());
 							solve_map_frame (imaginary, meter_locked_tempo, frame);
 						} else {
 							solved = false;
@@ -2118,10 +2064,34 @@ TempoMap::solve_map_frame (Metrics& imaginary, MeterSection* section, const fram
 						if (!solved) {
 							return false;
 						}
+					}
+				} else {
+					/* not movable (first meter atm) */
 
+					TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
+
+					tempo_copy->set_frame (frame);
+					tempo_copy->set_pulse (0.0);
+
+					if ((solved = solve_map_frame (future_map, tempo_copy, frame))) {
+						section->set_frame (frame);
+						meter_locked_tempo->set_frame (frame);
+						meter_locked_tempo->set_pulse (0.0);
+						solve_map_frame (imaginary, meter_locked_tempo, frame);
 					} else {
+						solved = false;
+					}
+
+					Metrics::const_iterator d = future_map.begin();
+					while (d != future_map.end()) {
+						delete (*d);
+						++d;
+					}
+
+					if (!solved) {
 						return false;
 					}
+
 					pair<double, BBT_Time> b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
 					section->set_beat (b_bbt);
 					section->set_pulse (0.0);
@@ -2136,14 +2106,8 @@ TempoMap::solve_map_frame (Metrics& imaginary, MeterSection* section, const fram
 
 	MetricSectionFrameSorter fcmp;
 	imaginary.sort (fcmp);
-	if (section->position_lock_style() == MusicTime) {
-		/* we're setting the frame */
-		section->set_position_lock_style (AudioTime);
-		recompute_meters (imaginary);
-		section->set_position_lock_style (MusicTime);
-	} else {
-		recompute_meters (imaginary);
-	}
+
+	recompute_meters (imaginary);
 
 	return true;
 }
@@ -2252,14 +2216,7 @@ TempoMap::solve_map_bbt (Metrics& imaginary, MeterSection* section, const BBT_Ti
 	MetricSectionSorter cmp;
 	imaginary.sort (cmp);
 
-	if (section->position_lock_style() == AudioTime) {
-		/* we're setting the pulse */
-		section->set_position_lock_style (MusicTime);
-		recompute_meters (imaginary);
-		section->set_position_lock_style (AudioTime);
-	} else {
-		recompute_meters (imaginary);
-	}
+	recompute_meters (imaginary);
 
 	return true;
 }
@@ -2502,7 +2459,7 @@ TempoMap::gui_change_tempo (TempoSection* ts, const Tempo& bpm)
 		tempo_copy->set_beats_per_minute (bpm.beats_per_minute());
 		recompute_tempos (future_map);
 
-		if (check_solved (future_map, true)) {
+		if (check_solved (future_map)) {
 			ts->set_beats_per_minute (bpm.beats_per_minute());
 			recompute_map (_metrics);
 			can_solve = true;
@@ -2625,7 +2582,7 @@ TempoMap::gui_dilate_tempo (MeterSection* ms, const framepos_t& frame)
 		recompute_tempos (future_map);
 		recompute_meters (future_map);
 
-		if (check_solved (future_map, true)) {
+		if (check_solved (future_map)) {
 
 			prev_t = const_cast<TempoSection*>(&tempo_section_at_locked (_metrics, ms->frame() - 1));
 			prev_t->set_beats_per_minute (new_bpm);
@@ -2755,7 +2712,7 @@ TempoMap::gui_dilate_tempo (TempoSection* ts, const framepos_t& frame, const fra
 		recompute_tempos (future_map);
 		recompute_meters (future_map);
 
-		if (check_solved (future_map, true)) {
+		if (check_solved (future_map)) {
 			ts->set_beats_per_minute (new_bpm);
 			recompute_tempos (_metrics);
 			recompute_meters (_metrics);

@@ -460,24 +460,27 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 private:
 	double pulse_at_beat_locked (const Metrics& metrics, const double& beat) const;
 	double beat_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
+
 	double pulse_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;
 	framecnt_t frame_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
 	double beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;
 	framecnt_t frame_at_beat_locked (const Metrics& metrics, const double& beat) const;
+
 	double bbt_to_beats_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const ;
 	Timecode::BBT_Time beats_to_bbt_locked (const Metrics& metrics, const double& beats) const;
 
 	framepos_t frame_time_locked (const Metrics& metrics, const Timecode::BBT_Time&) const;
 
-	const MeterSection& meter_section_at_locked (const Metrics& metrics, framepos_t frame) const;
 	const TempoSection& tempo_section_at_locked (const Metrics& metrics, framepos_t frame) const;
-	const MeterSection& meter_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
 	const TempoSection& tempo_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
 	const TempoSection& tempo_section_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 	const Tempo tempo_at_locked (const Metrics& metrics, const framepos_t& frame) const;
 
-	bool check_solved (const Metrics& metrics, bool by_frame) const;
+	const MeterSection& meter_section_at_locked (const Metrics& metrics, framepos_t frame) const;
+	const MeterSection& meter_section_at_beat_locked (const Metrics& metrics, const double& beat) const;
+
+	bool check_solved (const Metrics& metrics) const;
 	bool set_active_tempos (const Metrics& metrics, const framepos_t& frame);
 	bool solve_map_frame (Metrics& metrics, TempoSection* section, const framepos_t& frame);
 	bool solve_map_pulse (Metrics& metrics, TempoSection* section, const double& pulse);
