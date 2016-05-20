@@ -907,38 +907,6 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const doubl
 
 	PropertyChanged (PropertyChange ());
 }
-/*
-TempoSection*
-TempoMap::add_tempo_pulse (const Tempo& tempo, const double& pulse, ARDOUR::TempoSection::Type type)
-{
-	TempoSection* ts = 0;
-	const framepos_t frame = frame_at_pulse_locked (_metrics, pulse);
-	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
-		ts = add_tempo_locked (tempo, pulse, frame, type, MusicTime, true);
-	}
-
-	PropertyChanged (PropertyChange ());
-
-	return ts;
-}
-
-TempoSection*
-TempoMap::add_tempo_frame (const Tempo& tempo, const framepos_t& frame, ARDOUR::TempoSection::Type type)
-{
-	TempoSection* ts = 0;
-	const double pulse = pulse_at_frame_locked (_metrics, frame);
-	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
-		ts = add_tempo_locked (tempo, pulse, frame, type, AudioTime, true);
-	}
-
-
-	PropertyChanged (PropertyChange ());
-
-	return ts;
-}
-*/
 
 TempoSection*
 TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& frame, ARDOUR::TempoSection::Type type, PositionLockStyle pls)
