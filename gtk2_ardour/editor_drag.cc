@@ -3197,24 +3197,16 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		/* round bbt to bars */
 		map.round_bbt (bbt, -1, RoundNearest);
 
-		if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier ())) {
-			/* adjust previous tempo to match meter frame */
-			_editor->session()->tempo_map().gui_dilate_tempo (_real_section, pf);
-		} else if ((bbt.bars != _real_section->bbt().bars && pf > last_pointer_frame())
-			   || (bbt.bars < _real_section->bbt().bars && pf < last_pointer_frame())) {
+		if ((bbt.bars != _real_section->bbt().bars && pf > last_pointer_frame())
+		    || (bbt.bars < _real_section->bbt().bars && pf < last_pointer_frame())) {
+
 			/* move meter beat-based */
 			_editor->session()->tempo_map().gui_move_meter_bbt (_real_section, bbt);
 		}
 	} else {
 		/* AudioTime */
-		if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier ())) {
-			/* currently disabled in the lib for AudioTime */
-			if (_real_section->movable()) {
-				_editor->session()->tempo_map().gui_dilate_tempo (_real_section, pf);
-			}
-		} else {
-			_editor->session()->tempo_map().gui_move_meter_frame (_real_section, pf);
-		}
+		/* move meter frame-based */
+		_editor->session()->tempo_map().gui_move_meter_frame (_real_section, pf);
 	}
 	_marker->set_position (pf);
 	show_verbose_cursor_time (_real_section->frame());
@@ -3415,6 +3407,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 				} else if (use_snap) {
 					map.round_bbt (when, _editor->get_grid_beat_divisions (0), RoundNearest);
 				}
+
 				const double beat = map.bbt_to_beats (when);
 				map.gui_move_tempo_beat (_real_section, beat);
 			} else {
