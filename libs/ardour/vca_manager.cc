@@ -21,6 +21,7 @@
 #include "pbd/error.h"
 #include "pbd/replace_all.h"
 
+#include "ardour/boost_debug.h"
 #include "ardour/slavable.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
@@ -81,6 +82,7 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 			}
 
 			boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, num, name));
+			BOOST_MARK_VCA (vca);
 
 			vca->init ();
 
@@ -106,6 +108,7 @@ VCAManager::remove_vca (boost::shared_ptr<VCA> vca)
 	/* this should cause deassignment and deletion */
 
 	vca->DropReferences ();
+	std::cerr << "After DR, uc = " << vca.use_count() << std::endl;
 }
 
 boost::shared_ptr<VCA>
@@ -153,6 +156,7 @@ VCAManager::set_state (XMLNode const& node, int version)
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == VCA::xml_node_name) {
 			boost::shared_ptr<VCA> vca = boost::shared_ptr<VCA> (new VCA (_session, 0, X_("tobereset")));
+			BOOST_MARK_VCA (vca);
 
 			if (vca->init() || vca->set_state (**i, version)) {
 				error << _("Cannot set state of a VCA") << endmsg;
