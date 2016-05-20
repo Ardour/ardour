@@ -2005,6 +2005,7 @@ TempoMap::solve_map_frame (Metrics& imaginary, MeterSection* section, const fram
 
 	MeterSection* prev_m = 0;
 	Metrics future_map;
+	TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
 	bool solved = false;
 
 	for (Metrics::iterator i = imaginary.begin(); i != imaginary.end(); ++i) {
@@ -2017,11 +2018,11 @@ TempoMap::solve_map_frame (Metrics& imaginary, MeterSection* section, const fram
 						/* set the frame/pulse corresponding to its musical position,
 						 * as an earlier time than this has been requested.
 						*/
-
-						TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
 						const double new_pulse = ((section->beat() - prev_m->beat())
 									  / prev_m->note_divisor()) + prev_m->pulse();
+
 						const framepos_t smallest_frame = frame_at_pulse_locked (future_map, new_pulse);
+
 						if ((solved = solve_map_frame (future_map, tempo_copy, smallest_frame))) {
 							meter_locked_tempo->set_pulse (new_pulse);
 							solve_map_frame (imaginary, meter_locked_tempo, smallest_frame);
@@ -2041,8 +2042,7 @@ TempoMap::solve_map_frame (Metrics& imaginary, MeterSection* section, const fram
 							return false;
 						}
 					} else {
-
-						TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
+						/* all is ok. set section's tempo */
 						MeterSection* meter_copy = const_cast<MeterSection*> (&meter_section_at_locked (future_map, section->frame()));
 						meter_copy->set_frame (frame);
 
@@ -2067,8 +2067,6 @@ TempoMap::solve_map_frame (Metrics& imaginary, MeterSection* section, const fram
 					}
 				} else {
 					/* not movable (first meter atm) */
-
-					TempoSection* tempo_copy = copy_metrics_and_point (imaginary, future_map, meter_locked_tempo);
 
 					tempo_copy->set_frame (frame);
 					tempo_copy->set_pulse (0.0);
@@ -2149,6 +2147,7 @@ TempoMap::solve_map_bbt (Metrics& imaginary, MeterSection* section, const BBT_Ti
 
 			if (m->position_lock_style() == AudioTime) {
 				TempoSection* meter_locked_tempo = 0;
+
 				for (Metrics::const_iterator ii = imaginary.begin(); ii != imaginary.end(); ++ii) {
 					TempoSection* t;
 					if ((t = dynamic_cast<TempoSection*> (*ii)) != 0) {
@@ -2157,6 +2156,10 @@ TempoMap::solve_map_bbt (Metrics& imaginary, MeterSection* section, const BBT_Ti
 							break;
 						}
 					}
+				}
+
+				if (!meter_locked_tempo) {
+					return false;
 				}
 
 				if (prev_m) {
@@ -2174,10 +2177,8 @@ TempoMap::solve_map_bbt (Metrics& imaginary, MeterSection* section, const BBT_Ti
 				} else {
 					b_bbt = make_pair (0.0, BBT_Time (1, 1, 0));
 				}
-				if (meter_locked_tempo) {
-					meter_locked_tempo->set_pulse (new_pulse);
-					recompute_tempos (imaginary);
-				}
+
+				meter_locked_tempo->set_pulse (new_pulse);
 				m->set_beat (b_bbt);
 				m->set_pulse (new_pulse);
 
@@ -2312,45 +2313,24 @@ TempoMap::can_solve_bbt (TempoSection* ts, const BBT_Time& bbt)
 * @param bbt - the bbt where the altered tempo will fall
 * @return returns - the position in frames where the new tempo section will lie.
 */
-framepos_t
-TempoMap::predict_tempo_frame (TempoSection* section, const BBT_Time& bbt)
+pair<double, framepos_t>
+TempoMap::predict_tempo (TempoSection* section, const BBT_Time& bbt)
 {
-	Glib::Threads::RWLock::ReaderLock lm (lock);
 	Metrics future_map;
-	framepos_t ret = 0;
+	pair<double, framepos_t> ret = make_pair (0.0, 0);
+
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
 	TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, section);
-	if (!tempo_copy) {
-		return 0;
-	}
+
 	const double beat = bbt_to_beats_locked (future_map, bbt);
 
 	if (solve_map_pulse (future_map, tempo_copy, pulse_at_beat_locked (future_map, beat))) {
-		ret = tempo_copy->frame();
+		ret.first = tempo_copy->pulse();
+		ret.second = tempo_copy->frame();
 	} else {
-		ret = section->frame();
-	}
-
-	Metrics::const_iterator d = future_map.begin();
-	while (d != future_map.end()) {
-		delete (*d);
-		++d;
-	}
-	return ret;
-}
-
-double
-TempoMap::predict_tempo_pulse (TempoSection* section, const BBT_Time& bbt)
-{
-	Glib::Threads::RWLock::ReaderLock lm (lock);
-	Metrics future_map;
-	double ret = 0.0;
-	TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, section);
-	const double beat = bbt_to_beats_locked (future_map, bbt);
-
-	if (solve_map_pulse (future_map, tempo_copy, pulse_at_beat_locked (future_map, beat))) {
-		ret = tempo_copy->pulse();
-	} else {
-		ret = section->pulse();
+		ret.first = section->pulse();
+		ret.second = section->frame();
 	}
 
 	Metrics::const_iterator d = future_map.begin();

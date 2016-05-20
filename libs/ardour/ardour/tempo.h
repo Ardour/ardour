@@ -374,14 +374,14 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	const MeterSection& meter_section_at_beat (double beat) const;
 
 
-	/** add a tempo section locked to pls. ignored values are set in recompute_tempos()
+	/** add a tempo section locked to pls. ignored values will be set in recompute_tempos()
 	 * @param pulse pulse position of new section. ignored if pls == AudioTime
 	 * @param frame frame position of new section. ignored if pls == MusicTime
 	 * @param type type of new tempo section (Ramp, Constant)
 	 */
 	TempoSection* add_tempo (const Tempo&, const double& pulse, const framepos_t& frame, TempoSection::Type type, PositionLockStyle pls);
 
-	/** add an meter section locked to pls.. ignored values are set in recompute_meters()
+	/** add an meter section locked to pls.. ignored values will be set in recompute_meters()
 	 * @param beat beat position of new section
 	 * @param where bbt position of new section
 	 * @param frame frame position of new section. ignored if pls == MusicTime
@@ -391,14 +391,13 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
 
-	framepos_t predict_tempo_frame (TempoSection* section, const Timecode::BBT_Time& bbt);
-	double predict_tempo_pulse (TempoSection* section, const Timecode::BBT_Time& bbt);
-
 	void replace_tempo (const TempoSection&, const Tempo&, const double& pulse, const framepos_t& frame
 			    , TempoSection::Type type, PositionLockStyle pls);
 
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where, const framepos_t& frame
 			    , PositionLockStyle pls);
+
+	std::pair<double, framepos_t> predict_tempo (TempoSection* section, const Timecode::BBT_Time& bbt);
 
 	void gui_move_tempo_frame (TempoSection*, const framepos_t& frame);
 	void gui_move_tempo_beat (TempoSection*, const double& beat);
