@@ -300,7 +300,7 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 	if (pulse > 0.0) {
 		XMLNode &before = map.get_state();
 		/* add music-locked ramped (?) tempo using the bpm/note type at frame*/
-		map.add_tempo_pulse (map.tempo_at (frame), pulse, TempoSection::Ramp);
+		map.add_tempo (map.tempo_at (frame), pulse, 0, TempoSection::Ramp, MusicTime);
 
 		XMLNode &after = map.get_state();
 		_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
@@ -340,9 +340,9 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
         XMLNode &before = map.get_state();
 
 	if (meter_dialog.get_lock_style() == MusicTime) {
-		map.add_meter_beat (Meter (bpb, note_type), map.bbt_to_beats (requested), requested);
+		map.add_meter (Meter (bpb, note_type), map.bbt_to_beats (requested), requested, 0, MusicTime);
 	} else {
-		map.add_meter_frame (Meter (bpb, note_type), map.frame_time (requested), map.bbt_to_beats (requested), requested);
+		map.add_meter (Meter (bpb, note_type), map.bbt_to_beats (requested), requested, map.frame_time (requested), AudioTime);
 	}
 
 	_session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
@@ -394,13 +394,10 @@ Editor::edit_meter_section (MeterSection* section)
 
 	begin_reversible_command (_("replace meter mark"));
         XMLNode &before = _session->tempo_map().get_state();
-	section->set_position_lock_style (meter_dialog.get_lock_style());
-	if (meter_dialog.get_lock_style() == MusicTime) {
-		_session->tempo_map().replace_meter_bbt (*section, Meter (bpb, note_type), when);
-	} else {
-		_session->tempo_map().replace_meter_frame (*section, Meter (bpb, note_type), frame);
-	}
-        XMLNode &after = _session->tempo_map().get_state();
+
+	_session->tempo_map().replace_meter (*section, Meter (bpb, note_type), when, frame, meter_dialog.get_lock_style());
+
+	XMLNode &after = _session->tempo_map().get_state();
 	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
 }

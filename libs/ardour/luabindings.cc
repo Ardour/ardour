@@ -832,10 +832,8 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginClass <TempoMap> ("TempoMap")
-		.addFunction ("add_tempo_pulse", &TempoMap::add_tempo_pulse)
-		.addFunction ("add_tempo_frame", &TempoMap::add_tempo_frame)
-		.addFunction ("add_meter_beat", &TempoMap::add_meter_beat)
-		.addFunction ("add_meter_frame", &TempoMap::add_meter_frame)
+		.addFunction ("add_tempo", &TempoMap::add_tempo)
+		.addFunction ("add_meter", &TempoMap::add_meter)
 		.endClass ()
 
 		.beginClass <ChanCount> ("ChanCount")

@@ -373,28 +373,20 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	const MeterSection& meter_section_at (framepos_t frame) const;
 	const MeterSection& meter_section_at_beat (double beat) const;
 
-	/** add a music-locked tempo section at pulse
-	 * @param pulse pulse position of new section
-	 */
-	TempoSection* add_tempo_pulse (const Tempo&, const double& pulse, TempoSection::Type type);
 
-	/** add an audio-locked tempo section at frame
-	 * @param frame frame position of new section
+	/** add a tempo section locked to pls. ignored values are set in recompute_tempos()
+	 * @param pulse pulse position of new section. ignored if pls == AudioTime
+	 * @param frame frame position of new section. ignored if pls == MusicTime
+	 * @param type type of new tempo section (Ramp, Constant)
 	 */
-	TempoSection* add_tempo_frame (const Tempo&, const framepos_t& frame, TempoSection::Type type);
+	TempoSection* add_tempo (const Tempo&, const double& pulse, const framepos_t& frame, TempoSection::Type type, PositionLockStyle pls);
 
-	/** add a music-locked meter section at beat
+	/** add an meter section locked to pls.. ignored values are set in recompute_meters()
 	 * @param beat beat position of new section
 	 * @param where bbt position of new section
+	 * @param frame frame position of new section. ignored if pls == MusicTime
 	 */
-	MeterSection* add_meter_beat (const Meter&, const double& beat, const Timecode::BBT_Time& where);
-
-	/** add an audio-locked meter section at frame
-	 * @param frame frame position of new section
-	 * @param beat beat position of new section
-	 * @param where bbt position of new section
-	 */
-	MeterSection* add_meter_frame (const Meter&, const framepos_t& frame, const double& beat, const Timecode::BBT_Time& where);
+	MeterSection* add_meter (const Meter&, const double& beat, const Timecode::BBT_Time& where, const framepos_t& frame, PositionLockStyle pls);
 
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
@@ -405,6 +397,9 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void replace_tempo (const TempoSection&, const Tempo&, const double& pulse, const framepos_t& frame
 			    , TempoSection::Type type, PositionLockStyle pls);
 
+	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where, const framepos_t& frame
+			    , PositionLockStyle pls);
+
 	void gui_move_tempo_frame (TempoSection*, const framepos_t& frame);
 	void gui_move_tempo_beat (TempoSection*, const double& beat);
 	void gui_move_meter_frame (MeterSection*, const framepos_t& frame);
@@ -414,9 +409,6 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame, const double& pulse);
 
 	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
-
-	void replace_meter_bbt (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
-	void replace_meter_frame (const MeterSection&, const Meter&, const framepos_t& frame);
 
 	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
 	framepos_t round_to_beat (framepos_t frame, RoundMode dir);
@@ -517,10 +509,10 @@ private:
 	void do_insert (MetricSection* section);
 
 	TempoSection* add_tempo_locked (const Tempo&, double pulse, framepos_t frame
-					, TempoSection::Type type, PositionLockStyle pls, bool recompute, bool locked_to_meter = false);
+			       , TempoSection::Type type, PositionLockStyle pls, bool recompute, bool locked_to_meter = false);
 
-	MeterSection* add_meter_beat_locked (const Meter&, double beat, const Timecode::BBT_Time& where, bool recompute);
-	MeterSection* add_meter_frame_locked (const Meter&, framepos_t frame, double beat, const Timecode::BBT_Time& where, bool recompute);
+	MeterSection* add_meter_locked (const Meter&, double beat, const Timecode::BBT_Time& where, framepos_t frame
+					, PositionLockStyle pls, bool recompute);
 
 	bool remove_tempo_locked (const TempoSection&);
 	bool remove_meter_locked (const MeterSection&);

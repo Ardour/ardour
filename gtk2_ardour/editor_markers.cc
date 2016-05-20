@@ -1391,11 +1391,10 @@ Editor::toggle_marker_lock_style ()
 		begin_reversible_command (_("change meter lock style"));
 		XMLNode &before = _session->tempo_map().get_state();
 		MeterSection* msp = &mm->meter();
-		if (mm->meter().position_lock_style() == AudioTime) {
-			_session->tempo_map().replace_meter_bbt (*msp, Meter (msp->divisions_per_bar(), msp->note_divisor()), msp->bbt());
-		} else {
-			_session->tempo_map().replace_meter_frame (*msp, Meter (msp->divisions_per_bar(), msp->note_divisor()), msp->frame());
-		}
+		const PositionLockStyle pls = (msp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
+
+		_session->tempo_map().replace_meter (*msp, Meter (msp->divisions_per_bar(), msp->note_divisor()), msp->bbt(), msp->frame(), pls);
+
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 		commit_reversible_command ();
@@ -1404,6 +1403,7 @@ Editor::toggle_marker_lock_style ()
 		XMLNode &before = _session->tempo_map().get_state();
 		TempoSection* tsp = &tm->tempo();
 		const PositionLockStyle pls = (tsp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
+
 		_session->tempo_map().replace_tempo (*tsp, Tempo (tsp->beats_per_minute(), tsp->note_type()), tsp->pulse(), tsp->frame(), tsp->type(), pls);
 
 		XMLNode &after = _session->tempo_map().get_state();
