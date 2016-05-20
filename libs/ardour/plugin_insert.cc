@@ -660,10 +660,10 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		//std::cerr << "               streams " << internal_input_streams().n_audio() << std::endl;
 		//std::cerr << "filling buffer with " << collect_signal_nframes << " frames at " << _signal_analysis_collected_nframes << std::endl;
 
-		_signal_analysis_inputs.set_count(internal_input_streams());
+		_signal_analysis_inputs.set_count(input_streams());
 
-		for (uint32_t i = 0; i < internal_input_streams().n_audio(); ++i) {
-			_signal_analysis_inputs.get_audio(i).read_from(
+		for (uint32_t i = 0; i < input_streams().n_audio(); ++i) {
+			_signal_analysis_inputs.get_audio(i).read_from (
 				bufs.get_audio(i),
 				collect_signal_nframes,
 				_signal_analysis_collected_nframes); // offset is for target buffer
@@ -795,9 +795,9 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		//std::cerr << "       output, bufs " << bufs.count().n_audio() << " count,  " << bufs.available().n_audio() << " available" << std::endl;
 		//std::cerr << "               streams " << internal_output_streams().n_audio() << std::endl;
 
-		_signal_analysis_outputs.set_count(internal_output_streams());
+		_signal_analysis_outputs.set_count(output_streams());
 
-		for (uint32_t i = 0; i < internal_output_streams().n_audio(); ++i) {
+		for (uint32_t i = 0; i < output_streams().n_audio(); ++i) {
 			_signal_analysis_outputs.get_audio(i).read_from(
 				bufs.get_audio(i),
 				collect_signal_nframes,
@@ -1746,10 +1746,10 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	// buffers and the analyser makes sure it gets enough data for the
 	// analysis window
 	session().ensure_buffer_set (_signal_analysis_inputs, in);
-	//_signal_analysis_inputs.set_count (in);
+	_signal_analysis_inputs.set_count (in);
 
 	session().ensure_buffer_set (_signal_analysis_outputs, out);
-	//_signal_analysis_outputs.set_count (out);
+	_signal_analysis_outputs.set_count (out);
 
 	// std::cerr << "set counts to i" << in.n_audio() << "/o" << out.n_audio() << std::endl;
 
@@ -2751,8 +2751,8 @@ PluginInsert::collect_signal_for_analysis (framecnt_t nframes)
 {
 	// called from outside the audio thread, so this should be safe
 	// only do audio as analysis is (currently) only for audio plugins
-	_signal_analysis_inputs.ensure_buffers(  DataType::AUDIO, internal_input_streams().n_audio(),  nframes);
-	_signal_analysis_outputs.ensure_buffers( DataType::AUDIO, internal_output_streams().n_audio(), nframes);
+	_signal_analysis_inputs.ensure_buffers (DataType::AUDIO, input_streams().n_audio(),  nframes);
+	_signal_analysis_outputs.ensure_buffers (DataType::AUDIO, output_streams().n_audio(), nframes);
 
 	_signal_analysis_collected_nframes   = 0;
 	_signal_analysis_collect_nframes_max = nframes;
