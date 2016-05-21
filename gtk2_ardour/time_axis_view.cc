@@ -88,7 +88,7 @@ TimeAxisView::setup_sizes()
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
-	, controls_table (3, 3)
+	, controls_table (5, 4)
 	, controls_button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_BOTH))
 	, _name_editing (false)
 	, height (0)
