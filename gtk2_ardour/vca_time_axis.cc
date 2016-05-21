@@ -48,11 +48,13 @@ VCATimeAxisView::VCATimeAxisView (PublicEditor& ed, Session* s, ArdourCanvas::Ca
 	solo_button.set_name ("solo button");
 	set_tooltip (solo_button, _("Solo slaves"));
 	solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::solo_release), false);
+	mute_button.unset_flags (Gtk::CAN_FOCUS);
 
 	mute_button.set_name ("mute button");
 	mute_button.set_text (_("M"));
 	set_tooltip (mute_button, _("Mute slaves"));
 	mute_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::mute_release), false);
+	solo_button.unset_flags (Gtk::CAN_FOCUS);
 
 	drop_button.set_name ("mute button");
 	drop_button.set_text (_("D"));
@@ -143,6 +145,9 @@ VCATimeAxisView::set_vca (boost::shared_ptr<VCA> v)
 	_vca->solo_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCATimeAxisView::update_solo_display, this), gui_context());
 	_vca->mute_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCATimeAxisView::update_mute_display, this), gui_context());
 	_vca->DropReferences.connect (vca_connections, invalidator (*this), boost::bind (&VCATimeAxisView::self_delete, this), gui_context());
+
+	solo_button.set_controllable (_vca->solo_control());
+	mute_button.set_controllable (_vca->mute_control());
 
 	/* VCA number never changes */
 	number_label.set_text (to_string (_vca->number(), std::dec));
