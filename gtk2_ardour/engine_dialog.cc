@@ -2367,6 +2367,8 @@ EngineControl::push_state_to_backend (bool start)
 			change_channels = true;
 			change_latency = true;
 			change_midi = true;
+			change_buffered_io = backend->can_use_buffered_io();
+			change_channels = true;
 			change_nperiods = backend->can_set_period_size() && get_popdown_string_count (nperiods_combo) > 0;
 		}
 
@@ -2428,7 +2430,7 @@ EngineControl::push_state_to_backend (bool start)
 	if (change_driver || change_device || change_channels || change_nperiods ||
 			(change_latency && !backend->can_change_systemic_latency_when_running ()) ||
 			(change_rate && !backend->can_change_sample_rate_when_running()) ||
-			change_midi ||
+			change_midi || change_buffered_io ||
 			(change_bufsize && !backend->can_change_buffer_size_when_running())) {
 		restart_required = true;
 	} else {
