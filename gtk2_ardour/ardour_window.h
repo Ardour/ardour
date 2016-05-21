@@ -39,20 +39,21 @@ namespace WM {
  */
 class ArdourWindow : public Gtk::Window, public ARDOUR::SessionHandlePtr, public Gtkmm2ext::VisibilityTracker
 {
-  public:
+public:
 	ArdourWindow (std::string title);
 	ArdourWindow (Gtk::Window& parent, std::string title);
-	~ArdourWindow();
+	virtual ~ArdourWindow();
 
+protected:
 	bool on_focus_in_event (GdkEventFocus*);
 	bool on_focus_out_event (GdkEventFocus*);
-        bool on_delete_event (GdkEventAny *);
-        bool on_key_press_event (GdkEventKey*);
+	bool on_delete_event (GdkEventAny *);
+	bool on_key_press_event (GdkEventKey*);
 	void on_unmap ();
 
-  private:
-    WM::ProxyTemporary* proxy;
-    void init ();
+private:
+	WM::ProxyTemporary* proxy;
+	void init ();
 };
 
 #endif // __ardour_window_h__
