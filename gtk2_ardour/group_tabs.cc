@@ -760,11 +760,12 @@ GroupTabs::set_group_color (RouteGroup* group, uint32_t color)
 	UINT_TO_RGBA (color, &r, &g, &b, &a);
 
 	/* Hack to disallow black route groups; force a dark grey instead */
+	const uint32_t dark_gray = 25;
 
-	if (r == 0 && g == 0 && b == 0) {
-		r = 25;
-		g = 25;
-		b = 25;
+	if (r < dark_gray && g < dark_gray && b < dark_gray) {
+		r = dark_gray;
+		g = dark_gray;
+		b = dark_gray;
 	}
 
 	GUIObjectState& gui_state = *ARDOUR_UI::instance()->gui_object_state;
