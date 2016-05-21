@@ -34,7 +34,8 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 
-gint VCA::next_number = 1;
+Glib::Threads::Mutex VCA::number_lock;
+uint32_t VCA::next_number = 1;
 string VCA::xml_node_name (X_("VCA"));
 
 string
@@ -43,25 +44,28 @@ VCA::default_name_template ()
 	return _("VCA %n");
 }
 
-int
+uint32_t
 VCA::next_vca_number ()
 {
-	/* recall that atomic_int_add() returns the value before the add. We
-	 * start at one, then next one will be two etc.
-	 */
-	return g_atomic_int_add (&next_number, 1);
+	/* we could use atomic inc here, but elsewhere we need more complete
+	   mutex semantics, so we have to do it here also.
+	*/
+	Glib::Threads::Mutex::Lock lm (number_lock);
+	return next_number++;
 }
 
 void
 VCA::set_next_vca_number (uint32_t n)
 {
-	g_atomic_int_set (&next_number, n);
+	Glib::Threads::Mutex::Lock lm (number_lock);
+	next_number = n;
 }
 
 uint32_t
 VCA::get_next_vca_number ()
 {
-	return g_atomic_int_get (&next_number);
+	Glib::Threads::Mutex::Lock lm (number_lock);
+	return next_number;
 }
 
 VCA::VCA (Session& s,  uint32_t num, const string& name)
@@ -91,12 +95,15 @@ VCA::init ()
 VCA::~VCA ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delete VCA %1\n", number()));
-}
-
-uint32_t
-VCA::remote_control_id () const
-{
-	return 9999999 + _number;
+	{
+		Glib::Threads::Mutex::Lock lm (number_lock);
+		if (_number == next_number - 1) {
+			/* this was the "last" VCA added, so rewind the next number so
+			 * that future VCAs get numbered as intended
+			 */
+			next_number--;
+		}
+	}
 }
 
 XMLNode&

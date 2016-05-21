@@ -23,6 +23,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
+#include <glibmm/threads.h>
+
 #include "pbd/controllable.h"
 #include "pbd/statefuldestructible.h"
 
@@ -54,7 +56,6 @@ class LIBARDOUR_API VCA : public Stripable,
 	~VCA();
 
 	uint32_t number () const { return _number; }
-	uint32_t remote_control_id() const;
 
 	int init ();
 	XMLNode& get_state();
@@ -93,7 +94,7 @@ class LIBARDOUR_API VCA : public Stripable,
 	MonitorState monitoring_state() const;
 
 	static std::string default_name_template ();
-	static int next_vca_number ();
+	static uint32_t next_vca_number ();
 	static std::string xml_node_name;
 
 	/* used by Session to save/restore the atomic counter */
@@ -142,7 +143,7 @@ class LIBARDOUR_API VCA : public Stripable,
 	boost::shared_ptr<MonitorProcessor> monitor_control() const { return boost::shared_ptr<MonitorProcessor>(); }
 
   private:
-	uint32_t    _number;
+	uint32_t _number;
 
 	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<SoloControl> _solo_control;
@@ -151,7 +152,8 @@ class LIBARDOUR_API VCA : public Stripable,
 	// boost::shared_ptr<AutomationControl> _record_safe_control;
 	boost::shared_ptr<MonitorControl> _monitor_control;
 
-	static gint next_number;
+	static uint32_t next_number;
+	static Glib::Threads::Mutex number_lock;
 
 	void solo_target_going_away (boost::weak_ptr<Route>);
 	void mute_target_going_away (boost::weak_ptr<Route>);
