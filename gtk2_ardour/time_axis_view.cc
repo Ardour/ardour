@@ -828,6 +828,10 @@ TimeAxisView::can_edit_name () const
 void
 TimeAxisView::conditionally_add_to_selection ()
 {
+	if (!selectable()) {
+		return;
+	}
+
 	Selection& s (_editor.get_selection ());
 
 	if (!s.selected (this)) {
