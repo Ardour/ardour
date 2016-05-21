@@ -459,7 +459,7 @@ Session::import_files (ImportStatus& status)
 
 	status.sources.clear ();
 
-	for (vector<string>::iterator p = status.paths.begin();
+	for (vector<string>::const_iterator p = status.paths.begin();
 	     p != status.paths.end() && !status.cancel;
 	     ++p)
 	{
