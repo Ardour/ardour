@@ -28,18 +28,27 @@ class FloatingTextEntry : public Gtk::Window
   public:
 	FloatingTextEntry (Gtk::Window* parent, const std::string& initial_contents);
 
-        sigc::signal1<void,std::string> use_text;
+	/* 1st argument to handler is the new text
+	 * 2nd argument is 0, 1 or -1 to indicate:
+	 *  - do not move to next editable field
+	 *  - move to next editable field
+	 *  - move to previous editable field.
+	 */
+	sigc::signal2<void,std::string,int> use_text;
 
   private:
         Gtk::Entry entry;
         bool entry_changed;
+	bool by_popup_menu;
 
         /* handlers for Entry events */
-		bool entry_focus_out (GdkEventFocus*);
+	bool entry_focus_out (GdkEventFocus*);
         bool key_press (GdkEventKey*);
+        bool key_release (GdkEventKey*);
         void activated ();
         bool button_press (GdkEventButton*);
         void changed ();
+	void populate_popup (Gtk::Menu*);
 
         /* handlers for window events */
 
@@ -48,4 +57,3 @@ class FloatingTextEntry : public Gtk::Window
 };
 
 #endif // __ardour_window_h__
-

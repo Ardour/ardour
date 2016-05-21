@@ -207,7 +207,7 @@ protected:
 
 	void take_name_changed (void *src);
 	void route_property_changed (const PBD::PropertyChange&);
-	void name_entry_changed ();
+	bool name_entry_changed (std::string const&);
 
 	void blink_rec_display (bool onoff);
 

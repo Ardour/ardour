@@ -171,7 +171,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	playlist_button.set_name ("route button");
 	automation_button.set_name ("route button");
 
- 	route_group_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::route_group_click), false);
+	route_group_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::route_group_click), false);
 	playlist_button.signal_clicked.connect (sigc::mem_fun(*this, &RouteTimeAxisView::playlist_click));
 	automation_button.signal_clicked.connect (sigc::mem_fun(*this, &RouteTimeAxisView::automation_click));
 
@@ -470,7 +470,7 @@ RouteTimeAxisView::take_name_changed (void *src)
 void
 RouteTimeAxisView::playlist_click ()
 {
- 	build_playlist_menu ();
+	build_playlist_menu ();
 	conditionally_add_to_selection ();
 	playlist_action_menu->popup (1, gtk_get_current_event_time());
 }
@@ -1428,33 +1428,30 @@ RouteTimeAxisView::playlist () const
 	}
 }
 
-void
-RouteTimeAxisView::name_entry_changed ()
+bool
+RouteTimeAxisView::name_entry_changed (string const& str)
 {
-	TimeAxisView::name_entry_changed ();
-
-	string x = name_entry->get_text ();
-
-	if (x == _route->name()) {
-		return;
+	if (str == _route->name()) {
+		return true;
 	}
 
+	string x = str;
+	
 	strip_whitespace_edges (x);
 
-	if (x.length() == 0) {
-		name_entry->set_text (_route->name());
-		return;
+	if (x.empty()) {
+		return false;
 	}
 
 	if (_session->route_name_internal (x)) {
-		ARDOUR_UI::instance()->popup_error (string_compose (_("You cannot create a track with that name as it is reserved for %1"),
-								    PROGRAM_NAME));
-		name_entry->grab_focus ();
+		ARDOUR_UI::instance()->popup_error (string_compose (_("The name \"%1\" is reserved for %2"), x, PROGRAM_NAME));
+		return false;
 	} else if (RouteUI::verify_new_route_name (x)) {
 		_route->set_name (x);
-	} else {
-		name_entry->grab_focus ();
+		return true;
 	}
+
+	return false;
 }
 
 boost::shared_ptr<Region>

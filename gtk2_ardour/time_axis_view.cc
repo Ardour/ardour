@@ -42,6 +42,7 @@
 #include "ardour/profile.h"
 
 #include "ardour_dialog.h"
+#include "floating_text_entry.h"
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "time_axis_view.h"
@@ -102,9 +103,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	, _canvas_display (0)
 	, _y_position (0)
 	, _editor (ed)
-	, name_entry (0)
-	, ending_name_edit (false)
-	, by_popup_menu (false)
 	, control_parent (0)
 	, _order (0)
 	, _effective_height (0)
@@ -610,148 +608,42 @@ TimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	_editor.override_visible_track_count ();
 }
 
-bool
-TimeAxisView::name_entry_key_press (GdkEventKey* ev)
-{
-	/* steal escape, tabs from GTK */
-
-	switch (ev->keyval) {
-	case GDK_Escape:
-	case GDK_ISO_Left_Tab:
-	case GDK_Tab:
-		return true;
-	}
-	return false;
-}
-
-bool
-TimeAxisView::name_entry_key_release (GdkEventKey* ev)
-{
-	TrackViewList::iterator i;
-
-	switch (ev->keyval) {
-	case GDK_Escape:
-		end_name_edit (RESPONSE_CANCEL);
-		return true;
-
-	case GDK_ISO_Left_Tab:
-		/* Shift+Tab Keys Pressed. Note that for Shift+Tab, GDK actually
-		 * generates a different ev->keyval, rather than setting
-		 * ev->state.
-		 */
-		end_name_edit (RESPONSE_APPLY);
-		return true;
-
-	case GDK_Tab:
-		end_name_edit (RESPONSE_ACCEPT);
-		return true;
-	default:
-		break;
-	}
-
-	return false;
-}
-
-bool
-TimeAxisView::name_entry_focus_out (GdkEventFocus*)
-{
-	if (by_popup_menu) {
-		by_popup_menu = false;
-		return false;
-	}
-	end_name_edit (RESPONSE_OK);
-	return false;
-}
-
-void
-TimeAxisView::name_entry_populate_popup (Gtk::Menu *)
-{
-	by_popup_menu = true;
-}
-
 void
 TimeAxisView::begin_name_edit ()
 {
-	if (name_entry) {
+	if (!can_edit_name()) {
 		return;
 	}
 
-	if (can_edit_name()) {
+	Gtk::Window* toplevel = (Gtk::Window*) control_parent->get_toplevel();
+	FloatingTextEntry* fte = new FloatingTextEntry (toplevel, name_label.get_text ());
 
-		name_entry = manage (new Gtkmm2ext::FocusEntry);
+	fte->set_name ("TrackNameEditor");
+	fte->use_text.connect (sigc::mem_fun (*this, &TimeAxisView::end_name_edit));
 
-		name_entry->set_width_chars(8); // min width, entry expands
+	/* We want to new toplevel window to overlay the name label, so
+	 * translate the coordinates of the upper left corner of the name label
+	 * into the coordinate space of the top level window.
+	 */
 
-		name_entry->set_name ("EditorTrackNameDisplay");
-		name_entry->signal_key_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_press), false);
-		name_entry->signal_key_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_release), false);
-		name_entry->signal_focus_out_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_out));
-		name_entry->set_text (name_label.get_text());
-		name_entry->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisView::end_name_edit), RESPONSE_OK));
-		name_entry->signal_populate_popup().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_populate_popup));
+	int x, y;
+        int wx, wy;
 
-		if (name_label.is_ancestor (name_hbox)) {
-			name_hbox.remove (name_label);
-		}
+        name_label.translate_coordinates (*toplevel, 0, 0, x, y);
+        toplevel->get_window()->get_origin (wx, wy);
 
-		name_hbox.pack_end (*name_entry, true, true);
-		name_entry->show ();
-
-		name_entry->select_region (0, -1);
-		name_entry->set_state (STATE_SELECTED);
-		name_entry->grab_focus ();
-		name_entry->start_editing (0);
-	}
+        fte->move (wx + x, wy + y);
+	fte->present ();
 }
 
 void
-TimeAxisView::end_name_edit (int response)
+TimeAxisView::end_name_edit (std::string str, int next_dir)
 {
-	if (!name_entry) {
-		return;
+	if (!name_entry_changed (str)) {
+		next_dir = 0;
 	}
 
-	if (ending_name_edit) {
-		/* already doing this, and focus out or other event has caused
-		   us to re-enter this code.
-		*/
-		return;
-	}
-
-	PBD::Unwinder<bool> uw (ending_name_edit, true);
-
-	bool edit_next = false;
-	bool edit_prev = false;
-
-	switch (response) {
-	case RESPONSE_CANCEL:
-		break;
-	case RESPONSE_OK:
-		name_entry_changed ();
-		break;
-	case RESPONSE_ACCEPT:
-		name_entry_changed ();
-		edit_next = true;
-	case RESPONSE_APPLY:
-		name_entry_changed ();
-		edit_prev = true;
-	}
-
-	/* this will delete the name_entry. but it will also drop focus, which
-	 * will cause another callback to this function, so set name_entry = 0
-	 * first to ensure we don't double-remove etc. etc.
-	 */
-
-	Gtk::Entry* tmp = name_entry;
-	name_entry = 0;
-	name_hbox.remove (*tmp);
-
-	/* put the name label back */
-
-	name_hbox.pack_end (name_label);
-	name_label.show ();
-
-	if (edit_next) {
+	if (next_dir > 0) {
 
 		TrackViewList const & allviews = _editor.get_track_views ();
 		TrackViewList::const_iterator i = find (allviews.begin(), allviews.end(), this);
@@ -781,7 +673,7 @@ TimeAxisView::end_name_edit (int response)
 			(*i)->begin_name_edit ();
 		}
 
-	} else if (edit_prev) {
+	} else if (next_dir < 0) {
 
 		TrackViewList const & allviews = _editor.get_track_views ();
 		TrackViewList::const_iterator i = find (allviews.begin(), allviews.end(), this);
@@ -814,9 +706,10 @@ TimeAxisView::end_name_edit (int response)
 	}
 }
 
-void
-TimeAxisView::name_entry_changed ()
+bool
+TimeAxisView::name_entry_changed (string const&)
 {
+	return true;
 }
 
 bool
@@ -851,9 +744,12 @@ TimeAxisView::popup_display_menu (guint32 when)
 void
 TimeAxisView::set_selected (bool yn)
 {
-	if (can_edit_name() && name_entry && name_entry->get_visible()) {
-		end_name_edit (RESPONSE_CANCEL);
+#if 0
+	/* end any name edit in progress */
+	if (can_edit_name()) {
+		end_name_edit (string(), 0);
 	}
+#endif
 
 	if (yn == _selected) {
 		return;

@@ -798,25 +798,10 @@ style "audio_bus_metrics_inactive" = "track_controls_inactive"
 	font_name = ""
 }
 
-style "track_name_display" = "medium_text"
+style "track_name_editor" = "medium_text"
 {
 	xthickness = 0
 	ythickness = 0
-	fg[NORMAL] = @foreground
-	fg[ACTIVE] = @foreground
-	fg[SELECTED] = @foreground
-
-	text[NORMAL] = @foreground
-	text[ACTIVE] = @foreground
-	text[SELECTED] = @foreground
-
-	base[NORMAL] = @bases
-	base[ACTIVE] = @bg_selected
-	base[SELECTED] = @bg_selected
-
-	bg[NORMAL] = lighter(@bases)
-	bg[ACTIVE] = lighter(@bases)
-	bg[SELECTED] = lighter(@bases)
 }
 
 style "track_separator"
@@ -1106,8 +1091,8 @@ widget "*AudioBusFader" style:highest "audio_bus_fader"
 
 widget "*BusControlsBaseUnselected" style:highest "audio_bus_base"
 widget "*TrackSeparator" style:highest "track_separator"
-widget "*EditorTrackNameDisplay" style:highest "track_name_display"
-widget "*EditorTrackNameDisplay*" style:highest "track_name_display"
+widget "*TrackNameEditor" style:highest "track_name_editor"
+widget "*TrackNameEditor*" style:highest "track_name_editor"
 widget "*CrossfadeEditAuditionButton" style:highest "bright_when_active"
 widget "*CrossfadeEditAuditionButton*" style:highest "bright_when_active"
 widget "*CrossfadeEditCurveButton" style:highest "bright_when_active"

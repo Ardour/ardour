@@ -468,7 +468,7 @@ VCAMasterStrip::start_name_edit ()
 }
 
 void
-VCAMasterStrip::finish_name_edit (std::string str)
+VCAMasterStrip::finish_name_edit (std::string str, int)
 {
 	_vca->set_name (str);
 }
