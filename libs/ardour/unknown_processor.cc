@@ -103,8 +103,11 @@ UnknownProcessor::can_support_io_configuration (const ChanCount &in, ChanCount &
 		out = in;
 #endif
 		return true;
+	} else {
+		PBD::error << _("Using plugin-stub with mismatching i/o configuration for: ") << name() << endmsg;
+		out = in;
 	}
-	return false;
+	return true;
 }
 
 void
