@@ -128,7 +128,7 @@ private:
 			add (solo_safe_state);
 			add (is_track);
 			add (tv);
-			add (route);
+			add (stripable);
 			add (name_editable);
 			add (is_input_active);
 			add (is_midi);
@@ -147,7 +147,7 @@ private:
 		Gtk::TreeModelColumn<uint32_t>       solo_safe_state;
 		Gtk::TreeModelColumn<bool>           is_track;
 		Gtk::TreeModelColumn<TimeAxisView*>  tv;
-		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;
+		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Stripable> >  stripable;
 		Gtk::TreeModelColumn<bool>           name_editable;
 		Gtk::TreeModelColumn<bool>           is_input_active;
 		Gtk::TreeModelColumn<bool>           is_midi;

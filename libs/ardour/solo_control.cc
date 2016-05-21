@@ -328,3 +328,9 @@ SoloControl::pre_remove_master (boost::shared_ptr<AutomationControl> m)
 		_transition_into_solo = 0;
 	}
 }
+
+bool
+SoloControl::can_solo () const
+{
+	return _soloable.can_solo ();
+}

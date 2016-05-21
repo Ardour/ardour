@@ -39,6 +39,8 @@ class LIBARDOUR_API SoloControl : public SlavableAutomationControl
 
 	double get_value () const;
 
+	bool can_solo() const;
+
 	/* Export additional API so that objects that only get access
 	 * to a Controllable/AutomationControl can do more fine-grained
 	 * operations with respect to solo. Obviously, they would need

@@ -250,10 +250,10 @@ class RouteUI : public virtual AxisView
 	void save_as_template ();
 	void open_remote_control_id_dialog ();
 
-	static Gtkmm2ext::ActiveState solo_active_state (boost::shared_ptr<ARDOUR::Route>);
-	static Gtkmm2ext::ActiveState solo_isolate_active_state (boost::shared_ptr<ARDOUR::Route>);
-	static Gtkmm2ext::ActiveState solo_safe_active_state (boost::shared_ptr<ARDOUR::Route>);
-	static Gtkmm2ext::ActiveState mute_active_state (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
+	static Gtkmm2ext::ActiveState solo_active_state (boost::shared_ptr<ARDOUR::Stripable>);
+	static Gtkmm2ext::ActiveState solo_isolate_active_state (boost::shared_ptr<ARDOUR::Stripable>);
+	static Gtkmm2ext::ActiveState solo_safe_active_state (boost::shared_ptr<ARDOUR::Stripable>);
+	static Gtkmm2ext::ActiveState mute_active_state (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Stripable>);
 
 	/** Emitted when a bus has been set or unset from `display sends to this bus' mode
 	 *  by a click on the `Sends' button.  The parameter is the route that the sends are
