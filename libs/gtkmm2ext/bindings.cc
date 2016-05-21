@@ -676,6 +676,107 @@ Bindings::save (XMLNode& root)
 	root.add_child_nocopy (*releases);
 }
 
+void
+Bindings::save_all_bindings_as_html (ostream& ostr)
+{
+	if (bindings.empty()) {
+		return;
+	}
+
+	ostr << "<http>\n<head>\n<title>";
+	ostr << PROGRAM_NAME;
+	ostr << "</title>\n</head>\n<body>\n";
+
+	for (list<Bindings*>::const_iterator b = bindings.begin(); b != bindings.end(); ++b) {
+		(*b)->save_as_html (ostr);
+	}
+
+	ostr << "</body>\n";
+	ostr << "</http>\n";
+}
+
+void
+Bindings::save_as_html (ostream& ostr) const
+{
+	ostr << "<h1 class=\"binding-set-name\">";
+	ostr << name();
+	ostr << "</h1>\n";
+
+	if (!press_bindings.empty() || !button_press_bindings.empty()) {
+
+		ostr << "<h2 class=\"action-title\">";
+		ostr << _("Press");
+		ostr << "</h2>\n";
+
+		if (!press_bindings.empty()) {
+
+			ostr << "<dl class=\"key-binding\">\n";
+
+			for (KeybindingMap::const_iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
+				if (k->first.name().empty()) {
+					continue;
+				}
+
+				RefPtr<Action> action;
+
+				if (k->second.action) {
+					action = k->second.action;
+				} else {
+					if (_action_map) {
+						action = _action_map->find_action (k->second.action_name);
+					}
+				}
+
+				if (!action) {
+					continue;
+				}
+
+				ostr << "<dt class=\"key-name\">" << k->first.name() << "</dt>\n";
+				ostr << "<dd class=\"key-action\">" << action->get_label() << "</dd>\n";
+			}
+
+			ostr << "</dl>\n";
+		}
+	}
+
+	if (!release_bindings.empty() || !release_bindings.empty()) {
+
+		ostr << "<h2 class=\"action-title\">";
+		ostr << _("Release");
+		ostr << "</h2>\n";
+
+		if (!release_bindings.empty()) {
+			ostr << "<dl class=\"key-binding\">\n";
+
+			for (KeybindingMap::const_iterator k = release_bindings.begin(); k != release_bindings.end(); ++k) {
+
+				if (k->first.name().empty()) {
+					continue;
+				}
+
+				RefPtr<Action> action;
+
+				if (k->second.action) {
+					action = k->second.action;
+				} else {
+					if (_action_map) {
+						action = _action_map->find_action (k->second.action_name);
+					}
+				}
+
+				if (!action) {
+					continue;
+				}
+
+				ostr << "<dt class=\"key-name\">" << k->first.name() << "</dt>\n";
+				ostr << "<dd class=\"key-action\">" << action->get_label() << "</dd>\n";
+			}
+
+			ostr << "</dl>\n";
+		}
+	}
+}
+
 bool
 Bindings::load (XMLNode const& node)
 {
