@@ -42,6 +42,7 @@ public:
 protected:
 
 	virtual bool update ();
+	virtual void on_hide ();
 
 	Gtk::Button _cancel_button;
 	Gtk::Label _cancel_label;

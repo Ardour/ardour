@@ -56,6 +56,14 @@ InterthreadProgressWindow::InterthreadProgressWindow (ARDOUR::InterThreadInfo* i
 }
 
 void
+InterthreadProgressWindow::on_hide ()
+{
+	if (!_interthread_info->done) {
+		_interthread_info->cancel = true;
+	}
+}
+
+void
 InterthreadProgressWindow::cancel_clicked ()
 {
 	_interthread_info->cancel = true;

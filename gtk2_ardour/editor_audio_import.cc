@@ -507,7 +507,10 @@ Editor::import_sndfiles (vector<string>            paths,
 		gtk_main_iteration ();
 	}
 
-	import_status.done = true;
+	// wait for thread to terminate
+	while (!import_status.done) {
+		gtk_main_iteration ();
+	}
 
 	int result = -1;
 
