@@ -171,9 +171,9 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_border_width (2);
 
 	if (ARDOUR::Profile->get_mixbus() ) {
-		controls_table.attach (name_hbox, 4, 5, 0, 2,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
+		controls_table.attach (name_hbox, 4, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
 	} else {
-		controls_table.attach (name_hbox, 1, 2, 0, 2,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
+		controls_table.attach (name_hbox, 1, 2, 0, 1,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
 	}
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
