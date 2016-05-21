@@ -34,6 +34,8 @@
 #include "ardour/session.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/utils.h"
+#include "ardour/vca.h"
+#include "ardour/vca_manager.h"
 
 #include "gtkmm2ext/cell_renderer_pixbuf_multi.h"
 #include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
@@ -52,6 +54,7 @@
 #include "plugin_setup_dialog.h"
 #include "route_sorter.h"
 #include "tooltips.h"
+#include "vca_time_axis.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -686,6 +689,54 @@ EditorRoutes::active_changed (std::string const & path)
 }
 
 void
+EditorRoutes::vcas_added (list<VCATimeAxisView*> vcas)
+{
+	PBD::Unwinder<bool> at (_adding_routes, true);
+	bool from_scratch = (_model->children().size() == 0);
+	Gtk::TreeModel::Children::iterator insert_iter = _model->children().end();
+
+	_display.set_model (Glib::RefPtr<ListStore>());
+
+	for (list<VCATimeAxisView*>::iterator x = vcas.begin(); x != vcas.end(); ++x) {
+
+		boost::shared_ptr<VCA> vca ((*x)->vca());
+
+		TreeModel::Row row = *(_model->insert (insert_iter));
+
+		row[_columns.text] = vca->name();
+		row[_columns.visible] = (*x)->marked_for_display();
+
+		row[_columns.active] = true;
+		row[_columns.tv] = *x;
+		row[_columns.stripable] = vca;
+		row[_columns.is_track] = false;
+		row[_columns.is_input_active] = false;
+		row[_columns.is_midi] = false;
+		row[_columns.mute_state] = RouteUI::mute_active_state (_session, vca);
+		row[_columns.solo_state] = RouteUI::solo_active_state (vca);
+		row[_columns.solo_visible] = true;
+		row[_columns.solo_isolate_state] = RouteUI::solo_isolate_active_state (vca);
+		row[_columns.solo_safe_state] = RouteUI::solo_safe_active_state (vca);
+		row[_columns.name_editable] = true;
+
+		boost::weak_ptr<Stripable> wv (vca);
+
+		// vca->gui_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::handle_gui_changes, this, _1, _2), gui_context());
+		vca->PropertyChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::route_property_changed, this, _1, wv), gui_context());
+
+		vca->mute_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_mute_display, this), gui_context());
+		vca->solo_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_display, this), gui_context());
+	}
+
+	_display.set_model (_model);
+
+	/* now update route order keys from the treeview/track display order */
+	if (!from_scratch) {
+		sync_presentation_info_from_treeview ();
+	}
+}
+
+void
 EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 {
 	PBD::Unwinder<bool> at (_adding_routes, true);
@@ -707,16 +758,18 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 	for (list<RouteTimeAxisView*>::iterator x = routes.begin(); x != routes.end(); ++x) {
 
+		boost::shared_ptr<Route> route = (*x)->route ();
 		boost::shared_ptr<MidiTrack> midi_trk = boost::dynamic_pointer_cast<MidiTrack> ((*x)->route());
 
 		TreeModel::Row row = *(_model->insert (insert_iter));
 
-		row[_columns.text] = (*x)->route()->name();
+		row[_columns.text] = route->name();
 		row[_columns.visible] = (*x)->marked_for_display();
-		row[_columns.active] = (*x)->route()->active ();
+
+		row[_columns.active] = route->active ();
 		row[_columns.tv] = *x;
-		row[_columns.stripable] = (*x)->route ();
-		row[_columns.is_track] = (boost::dynamic_pointer_cast<Track> ((*x)->route()) != 0);
+		row[_columns.stripable] = route;
+		row[_columns.is_track] = (boost::dynamic_pointer_cast<Track> (route) != 0);
 
 		if (midi_trk) {
 			row[_columns.is_input_active] = midi_trk->input_active ();
@@ -726,37 +779,36 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 			row[_columns.is_midi] = false;
 		}
 
-		row[_columns.mute_state] = (*x)->route()->muted() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off;
-		row[_columns.solo_state] = RouteUI::solo_active_state ((*x)->route());
+		row[_columns.mute_state] = RouteUI::mute_active_state (_session, route);
+		row[_columns.solo_state] = RouteUI::solo_active_state (route);
 		row[_columns.solo_visible] = !(*x)->route()->is_master ();
-		row[_columns.solo_isolate_state] = (*x)->route()->solo_isolate_control()->solo_isolated();
-		row[_columns.solo_safe_state] = (*x)->route()->solo_safe_control()->solo_safe();
+		row[_columns.solo_isolate_state] = RouteUI::solo_isolate_active_state (route);
+		row[_columns.solo_safe_state] = RouteUI::solo_safe_active_state (route);
 		row[_columns.name_editable] = true;
 
-		boost::weak_ptr<Route> wr ((*x)->route());
+		boost::weak_ptr<Stripable> wr (route);
 
-		(*x)->route()->gui_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::handle_gui_changes, this, _1, _2), gui_context());
-		(*x)->route()->PropertyChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::route_property_changed, this, _1, wr), gui_context());
+		route->gui_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::handle_gui_changes, this, _1, _2), gui_context());
+		route->PropertyChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::route_property_changed, this, _1, wr), gui_context());
 
 		if ((*x)->is_track()) {
-			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
+			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (route);
 			t->rec_enable_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
 			t->rec_safe_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
 		}
 
 		if ((*x)->is_midi_track()) {
-			boost::shared_ptr<MidiTrack> t = boost::dynamic_pointer_cast<MidiTrack> ((*x)->route());
+			boost::shared_ptr<MidiTrack> t = boost::dynamic_pointer_cast<MidiTrack> (route);
 			t->StepEditStatusChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
 			t->InputActiveChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_input_active_display, this), gui_context());
 		}
 
-		(*x)->route()->mute_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_mute_display, this), gui_context());
-		(*x)->route()->solo_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_display, this), gui_context());
-		(*x)->route()->solo_isolate_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_isolate_display, this), gui_context());
-		(*x)->route()->solo_safe_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_safe_display, this), gui_context());
+		route->mute_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_mute_display, this), gui_context());
+		route->solo_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_display, this), gui_context());
+		route->solo_isolate_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_isolate_display, this), gui_context());
+		route->solo_safe_control()->Changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_safe_display, this), gui_context());
 
-		(*x)->route()->active_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_active_display, this), gui_context ());
-
+		route->active_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_active_display, this), gui_context ());
 	}
 
 	update_rec_display ();
@@ -816,7 +868,7 @@ EditorRoutes::route_removed (TimeAxisView *tv)
 }
 
 void
-EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost::weak_ptr<Route> r)
+EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost::weak_ptr<Stripable> s)
 {
 	if (!what_changed.contains (ARDOUR::Properties::name)) {
 		return;
@@ -824,9 +876,9 @@ EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost:
 
 	ENSURE_GUI_THREAD (*this, &EditorRoutes::route_name_changed, r)
 
-	boost::shared_ptr<Route> route = r.lock ();
+	boost::shared_ptr<Stripable> stripable = s.lock ();
 
-	if (!route) {
+	if (!stripable) {
 		return;
 	}
 
@@ -834,9 +886,9 @@ EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost:
 	TreeModel::Children::iterator i;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		boost::shared_ptr<Stripable> t = (*i)[_columns.stripable];
-		if (t == route) {
-			(*i)[_columns.text] = route->name();
+		boost::shared_ptr<Stripable> ss = (*i)[_columns.stripable];
+		if (ss == stripable) {
+			(*i)[_columns.text] = stripable->name();
 			break;
 		}
 	}
@@ -1379,6 +1431,13 @@ struct PresentationInfoRouteSorter
 	}
 };
 
+struct PresentationInfoVCASorter
+{
+	bool operator() (boost::shared_ptr<VCA> a, boost::shared_ptr<VCA> b) {
+		return a->presentation_info().global_order () < b->presentation_info().global_order ();
+	}
+};
+
 void
 EditorRoutes::initial_display ()
 {
@@ -1393,6 +1452,11 @@ EditorRoutes::initial_display ()
 
 	r.sort (PresentationInfoRouteSorter ());
 	_editor->add_routes (r);
+
+	VCAList v (_session->vca_manager().vcas());
+	v.sort (PresentationInfoVCASorter ());
+
+	_editor->add_vcas (v);
 }
 
 void

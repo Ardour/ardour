@@ -76,6 +76,7 @@
 #include "ardour/session_playlists.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
+#include "ardour/vca_manager.h"
 
 #include "canvas/debug.h"
 #include "canvas/text.h"
@@ -132,6 +133,7 @@
 #include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
+#include "vca_time_axis.h"
 #include "verbose_cursor.h"
 
 #include "i18n.h"
@@ -1387,6 +1389,7 @@ Editor::set_session (Session *t)
 	_session->StepEditStatusChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::step_edit_status_change, this, _1), gui_context());
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_transport_state, this), gui_context());
 	_session->PositionChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_position_change, this, _1), gui_context());
+	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_vcas, this, _1), gui_context());
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_routes, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_title, this), gui_context());
 	_session->tempo_map().PropertyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this, _1), gui_context());
@@ -5262,6 +5265,23 @@ Editor::resume_route_redisplay ()
 	if (_routes) {
 		_routes->redisplay(); // queue redisplay
 		_routes->resume_redisplay();
+	}
+}
+
+void
+Editor::add_vcas (VCAList& vcas)
+{
+	VCATimeAxisView* vtv;
+	list<VCATimeAxisView*> new_views;
+
+	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
+		vtv = new VCATimeAxisView (*this, _session, *_track_canvas);
+		vtv->set_vca (*v);
+		new_views.push_back (vtv);
+	}
+
+	if (new_views.size() > 0) {
+		_routes->vcas_added (new_views);
 	}
 }
 

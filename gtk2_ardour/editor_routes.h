@@ -22,7 +22,10 @@
 
 #include "pbd/signals.h"
 #include "gtkmm2ext/widget_state.h"
+
 #include "editor_component.h"
+
+class VCATimeAxisView;
 
 class EditorRoutes : public EditorComponent, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
@@ -56,6 +59,7 @@ public:
 	void redisplay ();
 	void update_visibility ();
 	void routes_added (std::list<RouteTimeAxisView*> routes);
+	void vcas_added (std::list<VCATimeAxisView*> routes);
 	void route_removed (TimeAxisView *);
 	void hide_track_in_display (TimeAxisView &);
 	std::list<TimeAxisView*> views () const;
@@ -82,7 +86,7 @@ private:
 	void active_changed (std::string const &);
 	void reordered (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int *);
 	bool button_press (GdkEventButton *);
-	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route>);
+	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Stripable>);
 	void handle_gui_changes (std::string const &, void *);
 	bool idle_update_mute_rec_solo_etc ();
 	void update_rec_display ();

@@ -1116,13 +1116,20 @@ RouteUI::send_blink (bool onoff)
 Gtkmm2ext::ActiveState
 RouteUI::solo_active_state (boost::shared_ptr<Stripable> s)
 {
-	if (!s->solo_control()->can_solo()) {
+	boost::shared_ptr<SoloControl> sc = s->solo_control();
+
+	if (!sc) {
 		return Gtkmm2ext::Off;
 	}
 
-	if (s->solo_control()->self_soloed()) {
+	if (!sc->can_solo()) {
+		return Gtkmm2ext::Off;
+	}
+
+
+	if (sc->self_soloed()) {
 		return Gtkmm2ext::ExplicitActive;
-	} else if (s->solo_control()->soloed_by_others()) {
+	} else if (sc->soloed_by_others()) {
 		return Gtkmm2ext::ImplicitActive;
 	} else {
 		return Gtkmm2ext::Off;
@@ -1130,13 +1137,19 @@ RouteUI::solo_active_state (boost::shared_ptr<Stripable> s)
 }
 
 Gtkmm2ext::ActiveState
-RouteUI::solo_isolate_active_state (boost::shared_ptr<Stripable> r)
+RouteUI::solo_isolate_active_state (boost::shared_ptr<Stripable> s)
 {
-	if (r->is_master() || r->is_monitor()) {
+	boost::shared_ptr<SoloIsolateControl> sc = s->solo_isolate_control();
+
+	if (!sc) {
 		return Gtkmm2ext::Off;
 	}
 
-	if (r->solo_isolate_control()->solo_isolated()) {
+	if (s->is_master() || s->is_monitor()) {
+		return Gtkmm2ext::Off;
+	}
+
+	if (sc->solo_isolated()) {
 		return Gtkmm2ext::ExplicitActive;
 	} else {
 		return Gtkmm2ext::Off;
@@ -1144,13 +1157,19 @@ RouteUI::solo_isolate_active_state (boost::shared_ptr<Stripable> r)
 }
 
 Gtkmm2ext::ActiveState
-RouteUI::solo_safe_active_state (boost::shared_ptr<Stripable> r)
+RouteUI::solo_safe_active_state (boost::shared_ptr<Stripable> s)
 {
-	if (r->is_master() || r->is_monitor()) {
+	boost::shared_ptr<SoloSafeControl> sc = s->solo_safe_control();
+
+	if (!sc) {
 		return Gtkmm2ext::Off;
 	}
 
-	if (r->solo_safe_control()->solo_safe()) {
+	if (s->is_master() || s->is_monitor()) {
+		return Gtkmm2ext::Off;
+	}
+
+	if (sc->solo_safe()) {
 		return Gtkmm2ext::ExplicitActive;
 	} else {
 		return Gtkmm2ext::Off;
@@ -1205,18 +1224,24 @@ RouteUI::solo_changed_so_update_mute ()
 }
 
 ActiveState
-RouteUI::mute_active_state (Session* s, boost::shared_ptr<Stripable> r)
+RouteUI::mute_active_state (Session*, boost::shared_ptr<Stripable> s)
 {
-	if (r->is_monitor()) {
-		return ActiveState(0);
+	boost::shared_ptr<MuteControl> mc = s->mute_control();
+
+	if (s->is_monitor()) {
+		return Gtkmm2ext::Off;
+	}
+
+	if (!mc) {
+		return Gtkmm2ext::Off;
 	}
 
 	if (Config->get_show_solo_mutes() && !Config->get_solo_control_is_listen_control ()) {
 
-		if (r->mute_control()->muted_by_self ()) {
+		if (mc->muted_by_self ()) {
 			/* full mute */
 			return Gtkmm2ext::ExplicitActive;
-		} else if (r->mute_control()->muted_by_others_soloing () || r->mute_control()->muted_by_masters ()) {
+		} else if (mc->muted_by_others_soloing () || mc->muted_by_masters ()) {
 			/* this will reflect both solo mutes AND master mutes */
 			return Gtkmm2ext::ImplicitActive;
 		} else {
@@ -1226,10 +1251,10 @@ RouteUI::mute_active_state (Session* s, boost::shared_ptr<Stripable> r)
 
 	} else {
 
-		if (r->mute_control()->muted_by_self()) {
+		if (mc->muted_by_self()) {
 			/* full mute */
 			return Gtkmm2ext::ExplicitActive;
-		} else if (r->mute_control()->muted_by_masters ()) {
+		} else if (mc->muted_by_masters ()) {
 			/* this shows only master mutes, not mute-by-others-soloing */
 			return Gtkmm2ext::ImplicitActive;
 		} else {

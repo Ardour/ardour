@@ -775,6 +775,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void add_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView *);
+	void add_vcas (ARDOUR::VCAList&);
 
 	Gtk::HBox global_hpacker;
 	Gtk::VBox global_vpacker;
