@@ -969,6 +969,14 @@ struct CFunc
     return 0;
   }
 
+  // return same array at an offset
+  template <typename T>
+  static int offsetArray (lua_State* L) {
+    T *v = luabridge::Stack<T*>::get (L, 1);
+    const unsigned int i = luabridge::Stack<unsigned int>::get (L, 2);
+    Stack <T*>::push (L, &v[i]);
+    return 1;
+  }
 
   //--------------------------------------------------------------------------
   /**

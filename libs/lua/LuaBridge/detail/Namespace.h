@@ -1070,7 +1070,9 @@ private:
       PRINTDOC ("Ext C Function", _name << "set_table",
           std::string(""), "int (*)(lua_State*)")
       PRINTDOC("Member Function", _name << "sameinstance",
-          std::string("bool"), std::string("void (*)(" + type_name <T>() + "*)"))
+          std::string("bool"), std::string("bool (*)(" + type_name <T>() + "*)"))
+      PRINTDOC("Member Function", _name << "offset",
+          std::string(type_name <T>() + "*"), std::string(type_name <T>() + "* (*)(unsigned int)"))
 
       m_stackSize = parent->m_stackSize + 3;
       parent->m_stackSize = 0;
@@ -1131,6 +1133,9 @@ private:
 
         lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
         rawsetfield (L, -3, "sameinstance");
+
+        lua_pushcclosure (L, &CFunc::offsetArray <T>, 0);
+        rawsetfield (L, -3, "offset"); // class table
 
       }
       else
