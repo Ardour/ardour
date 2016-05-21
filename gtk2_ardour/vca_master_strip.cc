@@ -166,6 +166,9 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 
 	_vca->DropReferences.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::self_delete, this), gui_context());
 
+	s->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCAMasterStrip::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCAMasterStrip::parameter_changed, this, _1), gui_context());
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VCAMasterStrip::parameter_changed));
 }
 
 VCAMasterStrip::~VCAMasterStrip ()
@@ -185,6 +188,34 @@ void
 VCAMasterStrip::self_delete ()
 {
 	delete_when_idle (this);
+}
+
+void
+VCAMasterStrip::parameter_changed (std::string const & p)
+{
+	if (p == "use-monitor-bus" || p == "solo-control-is-listen-control" || p == "listen-position") {
+		set_button_names ();
+	}
+}
+
+void
+VCAMasterStrip::set_button_names ()
+{
+	if (Config->get_solo_control_is_listen_control()) {
+		switch (Config->get_listen_position()) {
+		case AfterFaderListen:
+			solo_button.set_text (S_("AfterFader|A"));
+			set_tooltip (solo_button, _("After-fade listen (AFL)"));
+			break;
+		case PreFaderListen:
+			solo_button.set_text (S_("PreFader|P"));
+			set_tooltip (solo_button, _("Pre-fade listen (PFL)"));
+			break;
+		}
+	} else {
+		solo_button.set_text (S_("Solo|S"));
+		set_tooltip (solo_button, _("Solo"));
+	}
 }
 
 void
