@@ -108,7 +108,6 @@ VCAManager::remove_vca (boost::shared_ptr<VCA> vca)
 	/* this should cause deassignment and deletion */
 
 	vca->DropReferences ();
-	std::cerr << "After DR, uc = " << vca.use_count() << std::endl;
 }
 
 boost::shared_ptr<VCA>
