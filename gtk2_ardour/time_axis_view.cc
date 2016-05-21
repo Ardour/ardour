@@ -510,7 +510,9 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 
 	switch (ev->button) {
 	case 1:
-		selection_click (ev);
+		if (selectable()) {
+			selection_click (ev);
+		}
 		break;
 
 	case 3:
