@@ -456,7 +456,7 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath="..\..\..\..\icons\win32\msvc_resources.rc"
+				RelativePath="..\..\..\..\gtk2_ardour\win32\msvc_resources.rc"
 				>
 			</File>
 		</Filter>

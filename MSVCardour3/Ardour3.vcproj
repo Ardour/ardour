@@ -2360,7 +2360,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\icons\win32\msvc_resources.rc"
+				RelativePath="..\gtk2_ardour\win32\msvc_resources.rc"
 				>
 			</File>
 		</Filter>
