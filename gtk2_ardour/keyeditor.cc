@@ -22,6 +22,7 @@
 #endif
 
 #include <map>
+#include <fstream>
 
 #include <boost/algorithm/string.hpp>
 
@@ -72,6 +73,7 @@ KeyEditor::KeyEditor ()
 	, unbind_box (BUTTONBOX_END)
 	, filter_entry (_("Search..."), true)
 	, filter_string("")
+	, print_button (_("Print"))
 	, sort_column(0)
 	, sort_type(Gtk::SORT_ASCENDING)
 {
@@ -100,10 +102,14 @@ KeyEditor::KeyEditor ()
 	reset_button.add (reset_label);
 	reset_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Reset Bindings to Defaults")));
 
+	print_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::print));
+
 	reset_box.pack_start (reset_button, true, false);
+	reset_box.pack_start (print_button, true, false);
 	reset_box.show ();
 	reset_button.show ();
 	reset_label.show ();
+	print_button.show ();
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::reset));
 	vpacker.pack_start (reset_box, false, false);
 
@@ -509,4 +515,21 @@ KeyEditor::search_string_updated (const std::string& filter)
 	if (tab) {
 		tab->filter->refilter ();
 	}
+}
+
+void
+KeyEditor::print () const
+{
+	char templ[14];
+
+	snprintf (templ, sizeof (templ), "akprintXXXXXX");
+
+	int fd = mkstemp (templ);
+	ofstream f;
+	//f.open (fd);
+
+	Bindings::save_all_bindings_as_html (cerr);
+
+	f.close ();
+	close (fd);
 }

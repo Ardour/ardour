@@ -107,6 +107,7 @@ class KeyEditor : public ArdourWindow
 	Gtk::Label reset_label;
 	Gtkmm2ext::SearchBar filter_entry;
 	std::string filter_string;
+	Gtk::Button print_button;
 
 	typedef std::vector<Tab*> Tabs;
 
@@ -122,6 +123,7 @@ class KeyEditor : public ArdourWindow
 	Gtk::SortType sort_type;
 	void toggle_sort_type ();
 	void search_string_updated (const std::string&);
+	void print () const;
 };
 
 #endif /* __ardour_gtk_key_editor_h__ */
