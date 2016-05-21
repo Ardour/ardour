@@ -115,7 +115,7 @@ LowPass::ctrl (float *data, const float val, const uint32_t n_samples)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BiQuad::BiQuad (double samplerate)
+Biquad::Biquad (double samplerate)
 	: _rate (samplerate)
 	, _z1 (0.0)
 	, _z2 (0.0)
@@ -127,7 +127,7 @@ BiQuad::BiQuad (double samplerate)
 {
 }
 
-BiQuad::BiQuad (const BiQuad &other)
+Biquad::Biquad (const Biquad &other)
 	: _rate (other._rate)
 	, _z1 (0.0)
 	, _z2 (0.0)
@@ -140,7 +140,7 @@ BiQuad::BiQuad (const BiQuad &other)
 }
 
 void
-BiQuad::run (float *data, const uint32_t n_samples)
+Biquad::run (float *data, const uint32_t n_samples)
 {
 	for (uint32_t i = 0; i < n_samples; ++i) {
 		const float xn = data[i];
@@ -155,7 +155,7 @@ BiQuad::run (float *data, const uint32_t n_samples)
 }
 
 void
-BiQuad::compute (Type type, double freq, double Q, double gain)
+Biquad::compute (Type type, double freq, double Q, double gain)
 {
 	if (Q <= .001)     { Q = 0.001; }
 	if (freq <= 1.)    { freq = 1.; }
@@ -268,7 +268,7 @@ BiQuad::compute (Type type, double freq, double Q, double gain)
 }
 
 float
-BiQuad::dB_at_freq (float freq) const
+Biquad::dB_at_freq (float freq) const
 {
 	const double W0 = (2.0 * M_PI * freq) / _rate;
 	const float c1 = cosf (W0);

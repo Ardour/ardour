@@ -193,7 +193,7 @@ namespace ARDOUR { namespace DSP {
 	};
 
 	/** Biquad Filter */
-	class LIBARDOUR_API BiQuad {
+	class LIBARDOUR_API Biquad {
 		public:
 			enum Type {
 				LowPass,
@@ -211,8 +211,8 @@ namespace ARDOUR { namespace DSP {
 			 *
 			 * @param samplerate Samplerate
 			 */
-			BiQuad (double samplerate);
-			BiQuad (const BiQuad &other);
+			Biquad (double samplerate);
+			Biquad (const Biquad &other);
 
 			/** process audio data
 			 *
