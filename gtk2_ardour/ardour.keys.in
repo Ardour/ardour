@@ -269,7 +269,9 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/editor-delete|Delete|delete
 @edit|Editor/alternate-editor-delete|BackSpace|backspace (delete)
 
-@select|Editor/escape|Escape|break drag or deselect all
+;; this one is super-global, so we put it in the session group but don't show
+;; it on cheat sheets etc.
+@-sess|Main/Escape|Escape|break drag or deselect all
 
 ;; keypad
 

@@ -109,11 +109,19 @@ ARDOUR_UI::create_luawindow ()
 }
 
 void
+ARDOUR_UI::escape ()
+{
+	Escape (); /* EMIT SIGNAL */
+}
+
+void
 ARDOUR_UI::install_actions ()
 {
 	Glib::RefPtr<ActionGroup> main_actions = global_actions.create_action_group (X_("Main"));
 	Glib::RefPtr<ActionGroup> main_menu_actions = global_actions.create_action_group (X_("Main_menu"));
 	Glib::RefPtr<Action> act;
+
+	global_actions.register_action (main_actions, X_("Escape"), _("Escape"), sigc::mem_fun (*this, &ARDOUR_UI::escape));
 
 	/* menus + submenus that need action items */
 

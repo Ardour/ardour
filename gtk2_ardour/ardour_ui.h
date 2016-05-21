@@ -202,6 +202,12 @@ public:
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
 
+	/* signal emitted when escape key is pressed. All UI components that
+	   need to respond to Escape in some way (e.g. break drag, clear
+	   selection, etc) should connect to and handle this.
+	*/
+	PBD::Signal0<void> Escape;
+
 	PublicEditor&	  the_editor() { return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
 
@@ -877,6 +883,8 @@ private:
 
 	void step_up_through_tabs ();
 	void step_down_through_tabs ();
+
+	void escape ();
 };
 
 #endif /* __ardour_gui_h__ */

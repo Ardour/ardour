@@ -153,8 +153,6 @@ Editor::register_actions ()
 
 	/* add named actions for the editor */
 
-	myactions.register_action (editor_actions, "escape", _("Break drag or deselect all"), sigc::mem_fun (*this, &Editor::escape));
-
 	/* We don't bother registering "unlock" because it would be insensitive
 	   when required. Editor::unlock() must be invoked directly.
 	*/

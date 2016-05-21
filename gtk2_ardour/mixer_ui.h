@@ -374,6 +374,8 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	bool _show_mixer_list;
 
 	mutable boost::weak_ptr<ARDOUR::VCA> spilled_vca;
+
+	void escape ();
 };
 
 #endif /* __ardour_mixer_ui_h__ */

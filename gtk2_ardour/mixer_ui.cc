@@ -308,6 +308,10 @@ Mixer_UI::Mixer_UI ()
 
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 
+	/* handle escape */
+
+	ARDOUR_UI::instance()->Escape.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::escape, this), gui_context());
+
 #ifndef DEFER_PLUGIN_SELECTOR_LOAD
 	_plugin_selector = new PluginSelector (PluginManager::instance ());
 #else
@@ -325,6 +329,12 @@ Mixer_UI::~Mixer_UI ()
 		delete _monitor_section;
 	}
 	delete _plugin_selector;
+}
+
+void
+Mixer_UI::escape ()
+{
+	select_none ();
 }
 
 void
