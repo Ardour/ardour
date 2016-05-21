@@ -363,10 +363,10 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 
 		vca_menu = new Menu;
 		MenuList& f (vca_menu->items());
-		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), 0, g)));
+		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), 0, g, true)));
 
 		for (VCAList::const_iterator v = vcas.begin(); v != vcas.end(); ++v) {
-			f.push_back (MenuElem (string_compose ("VCA %1", (*v)->number()), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), (*v)->number(), g)));
+			f.push_back (MenuElem (string_compose ("VCA %1", (*v)->number()), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), (*v)->number(), g, true)));
 		}
 		items.push_back (MenuElem (_("Assign Group to Control Master..."), *vca_menu));
 
@@ -436,7 +436,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 }
 
 void
-GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group)
+GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group, bool rename_master)
 {
 	if (!_session || !group) {
 		return;
@@ -465,6 +465,10 @@ GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group)
 	}
 
 	group->assign_master (master);
+
+	if (rename_master){
+		master->set_name (group->name());
+	}
 }
 
 void
@@ -596,6 +600,10 @@ GroupTabs::run_new_group_dialog (RouteList const & rl, bool with_master)
 		_session->add_route_group (g);
 		for (RouteList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
 			g->add (*i);
+		}
+
+		if (with_master) {
+			assign_group_to_master (0, g, true); /* zero => new master */
 		}
 	}
 }

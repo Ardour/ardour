@@ -122,7 +122,7 @@ private:
 	void route_added_to_route_group (ARDOUR::RouteGroup *, boost::weak_ptr<ARDOUR::Route>);
 	void route_removed_from_route_group (ARDOUR::RouteGroup *, boost::weak_ptr<ARDOUR::Route>);
 
-	void assign_group_to_master (uint32_t which, ARDOUR::RouteGroup*);
+	void assign_group_to_master (uint32_t which, ARDOUR::RouteGroup*, bool rename_master);
 	void assign_selection_to_master (uint32_t which);
 	void assign_recenabled_to_master (uint32_t which);
 	void assign_soloed_to_master (uint32_t which);
