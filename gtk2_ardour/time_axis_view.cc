@@ -632,11 +632,11 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 		end_name_edit (RESPONSE_CANCEL);
 		return true;
 
-	/* Shift+Tab Keys Pressed. Note that for Shift+Tab, GDK actually
-	 * generates a different ev->keyval, rather than setting
-	 * ev->state.
-	 */
 	case GDK_ISO_Left_Tab:
+		/* Shift+Tab Keys Pressed. Note that for Shift+Tab, GDK actually
+		 * generates a different ev->keyval, rather than setting
+		 * ev->state.
+		 */
 		end_name_edit (RESPONSE_APPLY);
 		return true;
 
