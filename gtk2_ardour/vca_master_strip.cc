@@ -99,7 +99,9 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	/* horizontally centered, with a little space (5%) at the top */
 	vertical_button.set_angle (90);
 	vertical_button.set_layout_font (UIConfiguration::instance().get_NormalBoldFont());
-	vertical_button.signal_clicked.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill));
+	vertical_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vertical_button_press));
+	vertical_button.set_fallthrough_to_parent (true);
+	set_tooltip (vertical_button, _("Click to show slaves only")); /* tooltip updated dynamically */
 
 	drop_button.set_text(_("drop"));
 	drop_button.signal_clicked.connect (sigc::mem_fun (*this, &VCAMasterStrip::drop_button_press));
@@ -112,7 +114,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	global_vpacker.pack_start (width_hide_box, false, false);
 	global_vpacker.pack_start (vertical_button, true, true);
 	global_vpacker.pack_start (solo_mute_box, false, false);
-	global_vpacker.pack_start (gain_meter, false, false);
+	global_vpacker.pack_start (gain_meter, false, false, 2);
 	global_vpacker.pack_start (assign_button, false, false);
 	global_vpacker.pack_start (drop_button, false, false);
 	global_vpacker.pack_start (bottom_padding, false, false);
@@ -145,6 +147,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	update_vca_name ();
 	solo_changed ();
 	mute_changed ();
+	spill_change (boost::shared_ptr<VCA>());
 
 	Mixer_UI::instance()->show_vca_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
 
@@ -402,7 +405,7 @@ VCAMasterStrip::vca_button_release (GdkEventButton* ev)
 }
 
 bool
-VCAMasterStrip::vertical_box_press (GdkEventButton* ev)
+VCAMasterStrip::vertical_button_press (GdkEventButton* ev)
 {
 	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
 		start_name_edit ();
@@ -418,7 +421,7 @@ VCAMasterStrip::vertical_box_press (GdkEventButton* ev)
 	}
 
 	if (ev->button == 1) {
-		// spill ();
+		spill ();
 	}
 
 	return true;
@@ -482,8 +485,10 @@ VCAMasterStrip::spill_change (boost::shared_ptr<VCA> vca)
 {
 	if (vca != _vca) {
 		vertical_button.set_active_state (Gtkmm2ext::Off);
+		set_tooltip (vertical_button, _("Click to show slaves only"));
 	} else {
 		vertical_button.set_active_state (Gtkmm2ext::ExplicitActive);
+		set_tooltip (vertical_button, _("Click to show normal mixer"));
 	}
 }
 
