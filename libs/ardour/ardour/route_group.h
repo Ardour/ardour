@@ -163,10 +163,6 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 	PBD::Property<bool> _color;
 	PBD::Property<bool> _monitoring;
 
-	bool pre_master_gain;
-	bool pre_master_solo;
-	bool pre_master_mute;
-
 	boost::shared_ptr<ControlGroup> _solo_group;
 	boost::shared_ptr<ControlGroup> _mute_group;
 	boost::shared_ptr<ControlGroup> _rec_enable_group;

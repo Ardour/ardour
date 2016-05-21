@@ -295,10 +295,6 @@ RouteGroup::set_gain (bool yn)
 	_gain = yn;
 	_gain_group->set_active (yn);
 
-	if (routes->empty() || !routes->front()->slaved()) {
-		pre_master_gain = yn;
-	}
-
 	send_change (PropertyChange (Properties::gain));
 }
 
@@ -311,10 +307,6 @@ RouteGroup::set_mute (bool yn)
 	_mute = yn;
 	_mute_group->set_active (yn);
 
-	if (routes->empty() || !routes->front()->slaved()) {
-		pre_master_mute = yn;
-	}
-
 	send_change (PropertyChange (Properties::mute));
 }
 
@@ -326,10 +318,6 @@ RouteGroup::set_solo (bool yn)
 	}
 	_solo = yn;
 	_solo_group->set_active (yn);
-
-	if (routes->empty() || !routes->front()->slaved()) {
-		pre_master_solo = yn;
-	}
 
 	send_change (PropertyChange (Properties::solo));
 }
@@ -568,31 +556,12 @@ RouteGroup::assign_master (boost::shared_ptr<VCA> master)
 
 	boost::shared_ptr<Route> front = routes->front ();
 
-	if (!front) {
-		return;
-	}
-
 	if (front->slaved_to (master)) {
 		return;
 	}
 
-	bool cancel_master_controls = false;
-
-	if (!front->slaved()) {
-		pre_master_gain = is_gain ();
-		pre_master_solo = is_solo ();
-		pre_master_mute = is_mute ();
-		cancel_master_controls = true;
-	}
-
 	for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
 		(*r)->assign (master);
-	}
-
-	if (cancel_master_controls) {
-		set_gain (false);
-		set_solo (false);
-		set_mute (false);
 	}
 }
 
@@ -605,22 +574,12 @@ RouteGroup::unassign_master (boost::shared_ptr<VCA> master)
 
 	boost::shared_ptr<Route> front = routes->front ();
 
-	if (!front) {
-		return;
-	}
-
 	if (!front->slaved_to (master)) {
 		return;
 	}
 
 	for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
 		(*r)->unassign (master);
-	}
-
-	if (!front->slaved()) {
-		set_gain (pre_master_gain);
-		set_solo (pre_master_solo);
-		set_mute (pre_master_mute);
 	}
 }
 
