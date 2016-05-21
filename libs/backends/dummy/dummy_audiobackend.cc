@@ -116,6 +116,7 @@ DummyAudioBackend::enumerate_devices () const
 		_device_status.push_back (DeviceStatus (_("DC -6dBFS (+.5)"), true));
 		_device_status.push_back (DeviceStatus (_("Demolition"), true));
 		_device_status.push_back (DeviceStatus (_("Sine Wave"), true));
+		_device_status.push_back (DeviceStatus (_("Sine Wave 1K, 1/3 Oct"), true));
 		_device_status.push_back (DeviceStatus (_("Square Wave"), true));
 		_device_status.push_back (DeviceStatus (_("Impulses"), true));
 		_device_status.push_back (DeviceStatus (_("Uniform White Noise"), true));
@@ -834,6 +835,8 @@ DummyAudioBackend::register_system_ports()
 		gt = DummyAudioPort::PonyNoise;
 	} else if (_device == _("Sine Wave")) {
 		gt = DummyAudioPort::SineWave;
+	} else if (_device == _("Sine Wave 1K, 1/3 Oct")) {
+		gt = DummyAudioPort::SineWaveOctaves;
 	} else if (_device == _("Square Wave")) {
 		gt = DummyAudioPort::SquareWave;
 	} else if (_device == _("Impulses")) {
@@ -875,7 +878,10 @@ DummyAudioBackend::register_system_ports()
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
 		_system_inputs.push_back (static_cast<DummyAudioPort*>(p));
-		static_cast<DummyAudioPort*>(p)->setup_generator (gt, _samplerate);
+		std::string name = static_cast<DummyAudioPort*>(p)->setup_generator (gt, _samplerate, i - 1, a_ins);
+		if (!name.empty ()) {
+			static_cast<DummyAudioPort*>(p)->set_pretty_name (name);
+		}
 	}
 
 	lr.min = lr.max = _systemic_output_latency;
@@ -898,8 +904,10 @@ DummyAudioBackend::register_system_ports()
 		set_latency_range (p, false, lr);
 		_system_midi_in.push_back (static_cast<DummyMidiPort*>(p));
 		if (_midi_mode == MidiGenerator) {
-			static_cast<DummyMidiPort*>(p)->setup_generator (i % NUM_MIDI_EVENT_GENERATORS, _samplerate);
-			static_cast<DummyMidiPort*>(p)->set_pretty_name (DummyMidiData::sequence_names[i % NUM_MIDI_EVENT_GENERATORS]);
+			std::string name = static_cast<DummyMidiPort*>(p)->setup_generator (i % NUM_MIDI_EVENT_GENERATORS, _samplerate);
+			if (!name.empty ()) {
+				static_cast<DummyMidiPort*>(p)->set_pretty_name (name);
+			}
 		}
 	}
 
@@ -1656,8 +1664,42 @@ DummyAudioPort::~DummyAudioPort () {
 	_wavetable = 0;
 }
 
-void DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate)
+static std::string format_hz (float freq) {
+	std::stringstream ss;
+	if (freq >= 10000) {
+		ss <<  std::setprecision (1) << std::fixed << freq / 1000 << "KHz";
+	} else if (freq >= 1000) {
+		ss <<  std::setprecision (2) << std::fixed << freq / 1000 << "KHz";
+	} else {
+		ss <<  std::setprecision (1) << std::fixed << freq << "Hz";
+	}
+	return ss.str ();
+}
+
+static size_t fit_wave (float freq, float rate, float precision = 0.001) {
+	const size_t max_mult = floor (freq * rate);
+	float minErr = 2;
+	size_t fact = 1;
+	for (size_t i = 1; i < max_mult; ++i) {
+		const float isc = rate * (float)i / freq; // ideal sample count
+		const float rsc = rintf (isc); // rounded sample count
+		const float err = fabsf (isc - rsc);
+		if (err < minErr) {
+			minErr = err;
+			fact = i;
+		}
+		if (err < precision) {
+			break;
+		}
+	}
+	//printf(" FIT %8.1f Hz / %8.1f Hz * %ld = %.0f (err: %e)\n", freq, rate, fact, fact * rate / freq, minErr);
+	return fact;
+}
+
+std::string
+DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate, int c, int total)
 {
+	std::string name;
 	DummyPort::setup_random_number_generator();
 	_gen_type = g;
 
@@ -1674,12 +1716,29 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 			break;
 		case KronekerDelta:
 			_gen_period = (5 + randi() % (int)(samplerate / 20.f));
+			name = "Delta " + format_hz (samplerate / _gen_period);
 			break;
 		case SquareWave:
 			_gen_period = (5 + randi() % (int)(samplerate / 20.f)) & ~1;
+			name = "Square " + format_hz (samplerate / _gen_period);
+			break;
+		case SineWaveOctaves:
+			{
+				 const int x = c - floor (total / 2);
+				 float f = powf (2.f, x / 3.f) * 1000.f;
+				 f = std::max (10.f, std::min (samplerate *.5f, f));
+				 const size_t mult = fit_wave (f, samplerate);
+				 _gen_period = rintf ((float)mult * samplerate / f);
+					name = "Sine " + format_hz (samplerate * mult / (float)_gen_period);
+				 _wavetable = (Sample*) malloc (_gen_period * sizeof(Sample));
+				 for (uint32_t i = 0 ; i < _gen_period; ++i) {
+					 _wavetable[i] = .12589f * sinf(2.0f * M_PI * (float)mult * (float)i / (float)(_gen_period)); // -18dBFS
+				 }
+			}
 			break;
 		case SineWave:
 			_gen_period = 5 + randi() % (int)(samplerate / 20.f);
+			name = "Sine " + format_hz (samplerate / _gen_period);
 			_wavetable = (Sample*) malloc (_gen_period * sizeof(Sample));
 			for (uint32_t i = 0 ; i < _gen_period; ++i) {
 				_wavetable[i] = .12589f * sinf(2.0f * M_PI * (float)i / (float)_gen_period); // -18dBFS
@@ -1738,6 +1797,7 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 			_wavetable = (Sample*) malloc (DummyAudioBackend::max_buffer_size() * sizeof(Sample));
 			break;
 	}
+	return name;
 }
 
 void DummyAudioPort::midi_to_wavetable (DummyMidiBuffer const * const src, size_t n_samples)
@@ -1881,6 +1941,7 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 		case Loopback:
 			_gen_period = n_samples; // XXX DummyBackend::_samples_per_period;
 		case SineWave:
+		case SineWaveOctaves:
 		case SineSweep:
 		case SquareSweep:
 			assert(_wavetable && _gen_period > 0);
@@ -2004,13 +2065,15 @@ void DummyMidiPort::set_loopback (DummyMidiBuffer const * const src)
 	}
 }
 
-void DummyMidiPort::setup_generator (int seq_id, const float sr)
+std::string
+DummyMidiPort::setup_generator (int seq_id, const float sr)
 {
 	DummyPort::setup_random_number_generator();
 	_midi_seq_dat = DummyMidiData::sequences[seq_id % NUM_MIDI_EVENT_GENERATORS];
 	_midi_seq_spb = sr * .5f; // 120 BPM, beat_time 1.0 per beat.
 	_midi_seq_pos = 0;
 	_midi_seq_time = 0;
+	return DummyMidiData::sequence_names[seq_id];
 }
 
 void DummyMidiPort::midi_generate (const pframes_t n_samples)

@@ -159,6 +159,7 @@ class DummyAudioPort : public DummyPort {
 			PinkNoise,
 			PonyNoise,
 			SineWave,
+			SineWaveOctaves,
 			SquareWave,
 			KronekerDelta,
 			SineSweep,
@@ -167,7 +168,7 @@ class DummyAudioPort : public DummyPort {
 			SquareSweepSwell,
 			Loopback,
 		};
-		void setup_generator (GeneratorType const, float const);
+		std::string setup_generator (GeneratorType const, float const, int, int);
 		void fill_wavetable (const float* d, size_t n_samples) { assert(_wavetable != 0);  memcpy(_wavetable, d, n_samples * sizeof(float)); }
 		void midi_to_wavetable (DummyMidiBuffer const * const src, size_t n_samples);
 
@@ -205,7 +206,7 @@ class DummyMidiPort : public DummyPort {
 		void* get_buffer (pframes_t nframes);
 		const DummyMidiBuffer * const_buffer () const { return &_buffer; }
 
-		void setup_generator (int, float const);
+		std::string setup_generator (int, float const);
 		void set_loopback (DummyMidiBuffer const * const src);
 
 	private:
