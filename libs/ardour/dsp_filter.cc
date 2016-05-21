@@ -17,10 +17,18 @@
  *
  */
 
+#include <algorithm>
 #include <stdlib.h>
-#include <math.h>
+#include <cmath>
 #include "ardour/dB.h"
 #include "ardour/dsp_filter.h"
+
+#ifdef COMPILER_MSVC
+#include <float.h>
+#define isfinite_local(val) (bool)_finite((double)val)
+#else
+#define isfinite_local std::isfinite
+#endif
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -89,6 +97,7 @@ LowPass::proc (float *data, const uint32_t n_samples)
 		z = data[i];
 	}
 	_z = z;
+	if (!isfinite_local (_z)) { _z = 0; }
 }
 
 void
@@ -140,6 +149,9 @@ BiQuad::run (float *data, const uint32_t n_samples)
 		_z2           = _b2 * xn - _a2 * z;
 		data[i] = z;
 	}
+
+	if (!isfinite_local (_z1)) { _z1 = 0; }
+	if (!isfinite_local (_z2)) { _z2 = 0; }
 }
 
 void
@@ -273,5 +285,7 @@ BiQuad::dB_at_freq (float freq) const
 	const float d = D * s1;
 
 #define SQUARE(x) ( (x) * (x) )
-	return 20.f * log10f (sqrtf ((SQUARE(a) + SQUARE(b)) * (SQUARE(c) + SQUARE(d))) / (SQUARE(c) + SQUARE(d)));
+	float rv = 20.f * log10f (sqrtf ((SQUARE(a) + SQUARE(b)) * (SQUARE(c) + SQUARE(d))) / (SQUARE(c) + SQUARE(d)));
+	if (!isfinite_local (rv)) { rv = 0; }
+	return std::min (120.f, std::max(-120.f, rv));
 }

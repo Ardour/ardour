@@ -229,9 +229,9 @@ namespace ARDOUR { namespace DSP {
 			 */
 			void compute (Type t, double freq, double Q, double gain);
 
-			/** filter transfer function (for spectrum visualization)
+			/** filter transfer function (filter response for spectrum visualization)
 			 * @param freq frequency
-			 * @return gain at given frequency in dB
+			 * @return gain at given frequency in dB (clamped to -120..+120)
 			 */
 			float dB_at_freq (float freq) const;
 
