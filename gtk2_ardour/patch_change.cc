@@ -183,7 +183,7 @@ PatchChange::event_handler (GdkEvent* ev)
 			}
 		}
 
-		if (ev->button.button == 3) {
+		if (Gtkmm2ext::Keyboard::is_context_menu_event (&ev->button)) {
 			if (!_popup_initialized) {
 				initialize_popup_menus();
 				_popup_initialized = true;
