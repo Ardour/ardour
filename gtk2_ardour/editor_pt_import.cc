@@ -249,7 +249,22 @@ Editor::do_ptimport (std::string ptpath,
 						return;
 					}
 					existing_track = at.back();
-					existing_track->set_name (a->name);
+					std::string trackname;
+					try {
+						trackname = Glib::convert_with_fallback (a->name, "UTF-8", "UTF-8", "_");
+					} catch (Glib::ConvertError& err) {
+						trackname = string_compose ("Invalid %1", a->index);
+					}
+					// TODO legalize track name (no slashes, no colons)
+#if 0 // TODO --  "find_route_name" is currently private
+					/* generate a unique name by adding a number if needed */
+					uint32_t id = 0;
+					if (!_session->find_route_name (trackname.c_str (), id, trackname, false)) {
+						fatal << _("PTImport: UINT_MAX routes? impossible!") << endmsg;
+						abort(); /*NOTREACHED*/
+					}
+#endif
+					existing_track->set_name (trackname);
 					boost::shared_ptr<Playlist> playlist = existing_track->playlist();
 					boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
 					playlist->clear_changes ();
