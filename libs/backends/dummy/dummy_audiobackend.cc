@@ -1724,7 +1724,7 @@ DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate, 
 			break;
 		case SineWaveOctaves:
 			{
-				 const int x = c - floor (total / 2);
+				 const int x = c - floor (((float)total / 2));
 				 float f = powf (2.f, x / 3.f) * 1000.f;
 				 f = std::max (10.f, std::min (samplerate *.5f, f));
 				 const size_t mult = fit_wave (f, samplerate);
