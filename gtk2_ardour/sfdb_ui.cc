@@ -1690,7 +1690,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	str.push_back (_("playhead"));
 	str.push_back (_("session start"));
 	set_popdown_strings (where_combo, str);
-	where_combo.set_active_text (str.front());
+	where_combo.set_active_text (str.back());
 	where_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::where_combo_changed));
 
 	Label* l = manage (new Label);
