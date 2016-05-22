@@ -141,8 +141,16 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 
 			m->DropReferences.connect_same_thread (masters_connections, boost::bind (&SlavableAutomationControl::master_going_away, this, boost::weak_ptr<AutomationControl>(m)));
 
-			/* Store the connection inside the MasterRecord, so that when we destroy it, the connection is destroyed
-			   and we no longer hear about changes to the AutomationControl.
+			/* Store the connection inside the MasterRecord, so
+			   that when we destroy it, the connection is destroyed
+			   and we no longer hear about changes to the
+			   AutomationControl. 
+
+			   Note that this also makes it safe to store a
+			   boost::shared_ptr<AutomationControl> in the functor,
+			   since we know we will destroy the functor when the 
+			   connection is destroyed, which happens when we
+			   disconnect from the master (for any reason).
 
 			   Note that we fix the "from_self" argument that will
 			   be given to our own Changed signal to "false",
