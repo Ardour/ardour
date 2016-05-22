@@ -256,15 +256,22 @@ SoloControl::master_changed (bool /*from self*/, GroupControlDisposition, boost:
 
 	_transition_into_solo = 0;
 
+	/* Notice that we call get_boolean_masters() BEFORE we call
+	 * update_boolean_masters_records(), in order to know what
+	 * our master state was BEFORE it gets changed.
+	 */
+
 
 	if (m->get_value()) {
 		/* this master is now enabled */
 		if (!self_soloed() && get_boolean_masters() == 0) {
+			/* not self-soloed, wasn't soloed by masters before */
 			send_signal = true;
 			_transition_into_solo = 1;
 		}
 	} else {
 		if (!self_soloed() && get_boolean_masters() == 1) {
+			/* not self-soloed, soloed by just 1 master before */
 			_transition_into_solo = -1;
 			send_signal = true;
 		}
