@@ -6021,6 +6021,9 @@ void
 PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 {
 	if (!movement_occurred) {
+		if (was_double_click()) {
+			_region_view->edit_patch_change (_patch_change);
+		}
 		return;
 	}
 
