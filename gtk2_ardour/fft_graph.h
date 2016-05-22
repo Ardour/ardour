@@ -38,62 +38,68 @@ class AnalysisWindow;
 
 class FFTGraph : public Gtk::DrawingArea
 {
-	public:
+public:
 
-		FFTGraph(int windowSize);
-		~FFTGraph();
+	FFTGraph (int windowSize);
+	~FFTGraph ();
 
-		void set_analysis_window(AnalysisWindow *a_window);
+	void set_analysis_window (AnalysisWindow *a_window);
 
-		int windowSize() const { return _windowSize; }
-		void setWindowSize(int windowSize);
+	int windowSize () const { return _windowSize; }
+	void setWindowSize (int windowSize);
 
-		void redraw();
-		bool on_expose_event (GdkEventExpose* event);
+	void redraw ();
+	bool on_expose_event (GdkEventExpose* event);
 
-		void on_size_request(Gtk::Requisition* requisition);
-		void on_size_allocate(Gtk::Allocation & alloc);
-		FFTResult *prepareResult(Gdk::Color color, std::string trackname);
+	void on_size_request (Gtk::Requisition* requisition);
+	void on_size_allocate (Gtk::Allocation & alloc);
+	FFTResult *prepareResult (Gdk::Color color, std::string trackname);
 
-		void set_show_minmax     (bool v) { _show_minmax     = v; redraw(); }
-		void set_show_normalized (bool v) { _show_normalized = v; redraw(); }
+	void set_show_minmax      (bool v) { _show_minmax       = v; redraw (); }
+	void set_show_normalized  (bool v) { _show_normalized   = v; redraw (); }
+	void set_show_proportioanl(bool v) { _show_proportional = v; redraw (); }
 
-	private:
+private:
 
-		void update_size();
+	void update_size ();
 
-		void setWindowSize_internal(int windowSize);
+	void setWindowSize_internal (int windowSize);
 
-		void draw_scales(Glib::RefPtr<Gdk::Window> window);
+	int draw_scales (Glib::RefPtr<Gdk::Window> window);
 
-		static const int minScaleWidth = 512;
-		static const int minScaleHeight = 420;
+	static const int minScaleWidth = 512;
+	static const int minScaleHeight = 420;
 
-		int currentScaleWidth;
-		int currentScaleHeight;
+	static const int hl_margin = 40; // this should scale with font (dBFS labels)
+	static const int hr_margin = 12;
+	static const int v_margin  = 12;
 
-		static const int h_margin = 20;
-		static const int v_margin = 20;
-		Glib::RefPtr<Gdk::GC> graph_gc;
+	int currentScaleWidth;
+	Glib::RefPtr<Gdk::GC> graph_gc;
 
-		int width;
-		int height;
+	int width;
+	int height;
 
-		int _windowSize;
-		int _dataSize;
+	unsigned int _windowSize;
+	unsigned int _dataSize;
 
-		Glib::RefPtr<Pango::Layout> layout;
-		AnalysisWindow *_a_window;
+	Glib::RefPtr<Pango::Layout> layout;
+	AnalysisWindow *_a_window;
 
-		fftwf_plan _plan;
+	fftwf_plan _plan;
 
-		float *_out;
-		float *_in;
-		float *_hanning;
-		int *_logScale;
+	float* _out;
+	float* _in;
+	float* _hanning;
+	int*   _logScale;
 
-		bool _show_minmax;
-		bool _show_normalized;
+	bool _show_minmax;
+	bool _show_normalized;
+	bool _show_proportional;
+
+	float _fft_start;
+	float _fft_end;
+	float _fft_log_base;
 
 	friend class FFTResult;
 };

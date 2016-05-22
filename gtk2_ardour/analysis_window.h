@@ -46,7 +46,6 @@ namespace ARDOUR {
 	class Session;
 }
 
-
 class AnalysisWindow : public Gtk::Window, public ARDOUR::SessionHandlePtr
 {
 public:
@@ -65,10 +64,12 @@ private:
 
 	void source_selection_changed (Gtk::RadioButton *);
 	void display_model_changed    (Gtk::RadioButton *);
-	void show_minmax_changed	();
-	void show_normalized_changed	();
 
-	void analyze_data				(Gtk::Button *);
+	void show_minmax_changed ();
+	void show_normalized_changed ();
+	void show_proportional_changed ();
+
+	void analyze_data (Gtk::Button *);
 
 	struct TrackListColumns : public Gtk::TreeModel::ColumnRecord {
 		public:
@@ -95,22 +96,16 @@ private:
 
 	Gtk::Label source_selection_label;
 
-
 	Gtk::RadioButton source_selection_ranges_rb;
 	Gtk::RadioButton source_selection_regions_rb;
 
 	Gtk::HSeparator hseparator1;
 
-	Gtk::Label display_model_label;
-	Gtk::RadioButton display_model_composite_separate_rb;
-	Gtk::RadioButton display_model_composite_all_tracks_rb;
-
 	Gtk::Button refresh_button;
-
 
 	Gtk::CheckButton show_minmax_button;
 	Gtk::CheckButton show_normalized_button;
-
+	Gtk::CheckButton show_proportional_button;
 
 	// The graph
 	FFTGraph fft_graph;
