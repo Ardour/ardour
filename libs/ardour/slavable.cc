@@ -153,24 +153,27 @@ Slavable::unassign (boost::shared_ptr<VCA> v)
 	}
 }
 
+/* Gain, solo & mute are currently the only controls that are
+ * automatically slaved to the master's own equivalent controls.
+ */
+
+static AutomationType auto_slave_types[] = {
+	GainAutomation,
+	SoloAutomation,
+	MuteAutomation,
+	NullAutomation
+};
+
 int
 Slavable::assign_controls (boost::shared_ptr<VCA> vca)
 {
 	boost::shared_ptr<SlavableAutomationControl> slave;
 	boost::shared_ptr<AutomationControl> master;
-	AutomationType types[] = {
-		GainAutomation,
-		SoloAutomation,
-		MuteAutomation,
-		RecEnableAutomation,
-		MonitoringAutomation,
-		NullAutomation
-	};
 
-	for (uint32_t n = 0; types[n] != NullAutomation; ++n) {
+	for (uint32_t n = 0; auto_slave_types[n] != NullAutomation; ++n) {
 
-		slave = boost::dynamic_pointer_cast<SlavableAutomationControl> (automation_control (types[n]));
-		master = vca->automation_control (types[n]);
+		slave = boost::dynamic_pointer_cast<SlavableAutomationControl> (automation_control (auto_slave_types[n]));
+		master = vca->automation_control (auto_slave_types[n]);
 
 		if (slave && master) {
 			slave->add_master (master);
@@ -185,18 +188,10 @@ Slavable::unassign_controls (boost::shared_ptr<VCA> vca)
 {
 	boost::shared_ptr<SlavableAutomationControl> slave;
 	boost::shared_ptr<AutomationControl> master;
-	AutomationType types[] = {
-		GainAutomation,
-		SoloAutomation,
-		MuteAutomation,
-		RecEnableAutomation,
-		MonitoringAutomation,
-		NullAutomation
-	};
 
-	for (uint32_t n = 0; types[n] != NullAutomation; ++n) {
+	for (uint32_t n = 0; auto_slave_types[n] != NullAutomation; ++n) {
 
-		slave = boost::dynamic_pointer_cast<SlavableAutomationControl> (automation_control (types[n]));
+		slave = boost::dynamic_pointer_cast<SlavableAutomationControl> (automation_control (auto_slave_types[n]));
 
 		if (!vca) {
 			/* unassign from all */
@@ -204,7 +199,7 @@ Slavable::unassign_controls (boost::shared_ptr<VCA> vca)
 				slave->clear_masters ();
 			}
 		} else {
-			master = vca->automation_control (types[n]);
+			master = vca->automation_control (auto_slave_types[n]);
 			if (slave && master) {
 				slave->remove_master (master);
 			}
