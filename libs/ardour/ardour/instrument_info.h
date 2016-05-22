@@ -52,6 +52,7 @@ class LIBARDOUR_API InstrumentInfo {
     void set_internal_instrument (boost::shared_ptr<ARDOUR::Processor>);
 
     std::string get_patch_name (uint16_t bank, uint8_t program, uint8_t channel) const;
+    std::string get_patch_name_without (uint16_t bank, uint8_t program, uint8_t channel) const;
     std::string get_controller_name (Evoral::Parameter param) const;
     std::string get_instrument_name () const;
 
@@ -70,6 +71,7 @@ class LIBARDOUR_API InstrumentInfo {
     boost::shared_ptr<MIDI::Name::ChannelNameSet> plugin_programs_to_channel_name_set (boost::shared_ptr<Processor> p);
     std::string get_plugin_patch_name (boost::shared_ptr<ARDOUR::Processor>, uint16_t bank, uint8_t program, uint8_t channel) const;
 
+    std::string get_patch_name (uint16_t bank, uint8_t program, uint8_t channel, bool with_extra) const;
     static MIDI::Name::PatchNameList _gm_patches;
 };
 

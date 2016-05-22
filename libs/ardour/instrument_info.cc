@@ -82,6 +82,18 @@ InstrumentInfo::get_instrument_name () const
 string
 InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel) const
 {
+	return get_patch_name (bank, program, channel, true);
+}
+
+string
+InstrumentInfo::get_patch_name_without (uint16_t bank, uint8_t program, uint8_t channel) const
+{
+	return get_patch_name (bank, program, channel, false);
+}
+
+string
+InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel, bool with_extra) const
+{
 	boost::shared_ptr<Processor> p = internal_instrument.lock();
 	if (p) {
 		return get_plugin_patch_name (p, bank, program, channel);
@@ -100,7 +112,11 @@ InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel)
 
 #define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
 
-		return string_compose ("prg %1 bnk %2",program + MIDI_BP_ZERO , bank + MIDI_BP_ZERO);
+		if (with_extra) {
+			return string_compose ("prg %1 bnk %2",program + MIDI_BP_ZERO , bank + MIDI_BP_ZERO);
+		} else {
+			return string_compose ("%1", program + MIDI_BP_ZERO);
+		}
 	}
 }
 
