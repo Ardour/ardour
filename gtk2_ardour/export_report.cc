@@ -602,6 +602,9 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			VBox *lrb = manage (new VBox());
 			ToggleButton *log = manage (new ToggleButton (S_("Logscale|Lg")));
 			ToggleButton *rec = manage (new ToggleButton (S_("Rectified|Rf")));
+			Gtkmm2ext::UI::instance()->set_tip (log, _("Logscale"));
+			Gtkmm2ext::UI::instance()->set_tip (rec, _("Rectified"));
+
 			lrb->pack_start (*log, false, false, 5);
 			lrb->pack_end (*rec, false, false, 5);
 			log->signal_toggled ().connect (sigc::bind (sigc::mem_fun (*this, &ExportReport::on_logscale_toggled), log));
