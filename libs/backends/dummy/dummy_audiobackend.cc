@@ -1724,16 +1724,16 @@ DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate, 
 			break;
 		case SineWaveOctaves:
 			{
-				 const int x = c - floor (((float)total / 2));
-				 float f = powf (2.f, x / 3.f) * 1000.f;
-				 f = std::max (10.f, std::min (samplerate *.5f, f));
-				 const size_t mult = fit_wave (f, samplerate);
-				 _gen_period = rintf ((float)mult * samplerate / f);
-					name = "Sine " + format_hz (samplerate * mult / (float)_gen_period);
-				 _wavetable = (Sample*) malloc (_gen_period * sizeof(Sample));
-				 for (uint32_t i = 0 ; i < _gen_period; ++i) {
-					 _wavetable[i] = .12589f * sinf(2.0f * M_PI * (float)mult * (float)i / (float)(_gen_period)); // -18dBFS
-				 }
+				const int x = c - floor (((float)total / 2));
+				float f = powf (2.f, x / 3.f) * 1000.f;
+				f = std::max (10.f, std::min (samplerate *.5f, f));
+				const size_t mult = fit_wave (f, samplerate);
+				_gen_period = rintf ((float)mult * samplerate / f);
+				name = "Sine " + format_hz (samplerate * mult / (float)_gen_period);
+				_wavetable = (Sample*) malloc (_gen_period * sizeof(Sample));
+				for (uint32_t i = 0 ; i < _gen_period; ++i) {
+					_wavetable[i] = .12589f * sinf(2.0f * M_PI * (float)mult * (float)i / (float)(_gen_period)); // -18dBFS
+				}
 			}
 			break;
 		case SineWave:
