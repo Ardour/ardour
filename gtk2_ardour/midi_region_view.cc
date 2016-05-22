@@ -3331,9 +3331,8 @@ void
 MidiRegionView::patch_entered (PatchChange* p)
 {
 	ostringstream s;
-	/* XXX should get patch name if we can */
 	s << _("Bank ") << (p->patch()->bank() + MIDI_BP_ZERO) << '\n'
-	  << _("Program ") << ((int) p->patch()->program()) + MIDI_BP_ZERO << '\n'
+	  << instrument_info().get_patch_name_without (p->patch()->bank(), p->patch()->program(), p->patch()->channel()) << '\n'
 	  << _("Channel ") << ((int) p->patch()->channel() + 1);
 	show_verbose_cursor (s.str(), 10, 20);
 	p->item().grab_focus();
