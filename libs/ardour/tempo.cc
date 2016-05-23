@@ -1273,24 +1273,24 @@ TempoMap::recompute_meters (Metrics& metrics)
 			} else {
 				/* MusicTime */
 				double pulse = 0.0;
-				pair<double, BBT_Time> new_beat;
+				pair<double, BBT_Time> b_bbt;
 				if (prev_m) {
 					const double beats = (meter->bbt().bars - prev_m->bbt().bars) * prev_m->divisions_per_bar();
 					if (beats + prev_m->beat() != meter->beat()) {
 						/* reordering caused a bbt change */
-						new_beat = make_pair (beats + prev_m->beat()
+						b_bbt = make_pair (beats + prev_m->beat()
 								   , BBT_Time ((beats / prev_m->divisions_per_bar()) + prev_m->bbt().bars, 1, 0));
 					} else {
-						new_beat = make_pair (beats + prev_m->beat(), meter->bbt());
+						b_bbt = make_pair (beats + prev_m->beat(), meter->bbt());
 					}
 					pulse = (beats / prev_m->note_divisor()) + prev_m->pulse();
 				} else {
 					/* shouldn't happen - the first is audio-locked */
 					pulse = pulse_at_beat_locked (metrics, meter->beat());
-					new_beat = make_pair (meter->beat(), meter->bbt());
+					b_bbt = make_pair (meter->beat(), meter->bbt());
 				}
 
-				meter->set_beat (new_beat);
+				meter->set_beat (b_bbt);
 				meter->set_pulse (pulse);
 				meter->set_frame (frame_at_pulse_locked (metrics, pulse));
 			}
