@@ -2352,7 +2352,7 @@ TempoMap::predict_tempo_position (TempoSection* section, const BBT_Time& bbt)
 }
 
 void
-TempoMap::gui_move_tempo (TempoSection* ts, const pair<const double&, const framepos_t&>& pulse)
+TempoMap::gui_move_tempo (TempoSection* ts, const pair<double, framepos_t>& pulse)
 {
 	Metrics future_map;
 
@@ -2388,37 +2388,33 @@ TempoMap::gui_move_tempo (TempoSection* ts, const pair<const double&, const fram
 }
 
 void
-TempoMap::gui_move_meter_frame (MeterSection* ms, const framepos_t&  frame)
+TempoMap::gui_move_meter (MeterSection* ms, const framepos_t& frame)
 {
 	Metrics future_map;
-	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
-		MeterSection* copy = copy_metrics_and_point (_metrics, future_map, ms);
-		if (solve_map_frame (future_map, copy, frame)) {
-			solve_map_frame (_metrics, ms, frame);
-			recompute_tempos (_metrics);
+
+	if (ms->position_lock_style() == AudioTime) {
+
+		{
+			Glib::Threads::RWLock::WriterLock lm (lock);
+			MeterSection* copy = copy_metrics_and_point (_metrics, future_map, ms);
+
+			if (solve_map_frame (future_map, copy, frame)) {
+				solve_map_frame (_metrics, ms, frame);
+				recompute_tempos (_metrics);
+			}
 		}
-	}
+	} else {
+		{
+			Glib::Threads::RWLock::WriterLock lm (lock);
+			MeterSection* copy = copy_metrics_and_point (_metrics, future_map, ms);
 
-	Metrics::const_iterator d = future_map.begin();
-	while (d != future_map.end()) {
-		delete (*d);
-		++d;
-	}
+			const double beat = beat_at_frame_locked (_metrics, frame);
+			const Timecode::BBT_Time bbt = beats_to_bbt_locked (_metrics, beat);
 
-	MetricPositionChanged (); // Emit Signal
-}
-
-void
-TempoMap::gui_move_meter_bbt (MeterSection* ms, const Timecode::BBT_Time& bbt)
-{
-	Metrics future_map;
-	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
-		MeterSection* copy = copy_metrics_and_point (_metrics, future_map, ms);
-		if (solve_map_bbt (future_map, copy, bbt)) {
-			solve_map_bbt (_metrics, ms, bbt);
-			recompute_tempos (_metrics);
+			if (solve_map_bbt (future_map, copy, bbt)) {
+				solve_map_bbt (_metrics, ms, bbt);
+				recompute_tempos (_metrics);
+			}
 		}
 	}
 

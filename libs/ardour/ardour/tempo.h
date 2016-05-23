@@ -399,10 +399,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
 
-	void gui_move_tempo (TempoSection*, const std::pair<const double&, const framepos_t&>& pulse);
-
-	void gui_move_meter_frame (MeterSection*, const framepos_t& frame);
-	void gui_move_meter_bbt (MeterSection*, const Timecode::BBT_Time& bbt);
+	void gui_move_tempo (TempoSection*, const std::pair<double, framepos_t>& pulse);
+	void gui_move_meter (MeterSection*, const framepos_t& frame);
 
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
 	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame, const double& pulse);
@@ -481,6 +479,7 @@ private:
 
 	bool check_solved (const Metrics& metrics) const;
 	bool set_active_tempos (const Metrics& metrics, const framepos_t& frame);
+
 	bool solve_map_frame (Metrics& metrics, TempoSection* section, const framepos_t& frame);
 	bool solve_map_pulse (Metrics& metrics, TempoSection* section, const double& pulse);
 	bool solve_map_frame (Metrics& metrics, MeterSection* section, const framepos_t& frame);

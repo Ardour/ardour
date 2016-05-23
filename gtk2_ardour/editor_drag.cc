@@ -3185,25 +3185,16 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
-	framepos_t const pf = adjusted_current_frame (event, false);
-	if (_marker->meter().position_lock_style() == MusicTime) {
-		TempoMap& map (_editor->session()->tempo_map());
-		Timecode::BBT_Time bbt;
-		map.bbt_time (pf, bbt);
-		/* round bbt to bars */
-		map.round_bbt (bbt, -1, RoundNearest);
+	framepos_t pf = adjusted_current_frame (event);
 
-		if ((bbt.bars != _real_section->bbt().bars && pf > last_pointer_frame())
-		    || (bbt.bars < _real_section->bbt().bars && pf < last_pointer_frame())) {
-
-			/* move meter beat-based */
-			_editor->session()->tempo_map().gui_move_meter_bbt (_real_section, bbt);
-		}
-	} else {
-		/* AudioTime */
-		/* move meter frame-based */
-		_editor->session()->tempo_map().gui_move_meter_frame (_real_section, pf);
+	if (_real_section->position_lock_style() == AudioTime && _editor->snap_musical()) {
+		/* never snap to music for audio locked */
+		pf = adjusted_current_frame (event, false);
 	}
+
+	_editor->session()->tempo_map().gui_move_meter (_real_section, pf);
+
+	setup_pointer_frame_offset ();
 	_marker->set_position (pf);
 	show_verbose_cursor_time (_real_section->frame());
 }
