@@ -586,10 +586,9 @@ MeterSection::get_state() const
 /*
   Tempo Map Overview
 
-  Tempo can be thought of as a source of the musical pulse.
-  Meters divide that pulse into measures and beats.
-  Tempo pulses can be divided to be in sympathy with the meter, but this does not affect the beat
-  at any particular time.
+  Tempo is the rate of the musical pulse.
+  Meters divide the pulses into measures and beats.
+
   Note that Tempo::beats_per_minute() has nothing to do with musical beats.
   It should rather be thought of as tempo note divisions per minute.
 
@@ -601,6 +600,19 @@ MeterSection::get_state() const
   We then use this pulse/frame layout to find the beat & pulse or frame position of each meter (again depending on lock style).
 
   Having done this, we can now find any one of tempo, beat, frame or pulse if a beat, frame, pulse or tempo is known.
+
+  With tepo sections potentially being ramped, meters provide a way of mapping beats to whole pulses without
+  referring to the tempo function(s) involved as the distance in whole pulses between a meter and a subsequent beat is
+  sb->beat() - meter->beat() / meter->note_divisor().
+  Because every meter falls on a known pulse, (derived from its bar), the rest is easy as the duration in pulses between
+  two meters is of course
+  (meater_b->bar - meter_a->bar) * meter_a->divisions_per_bar / meter_a->note_divisor.
+
+  Below, beat calculations are based on meter sections and all pulse and tempo calculations are based on tempo sections.
+  Beat to frame conversion of course requires the use of meter and tempo.
+
+  Remembering that ramped tempo sections interact, it is important to avoid referring to any other tempos when moving tempo sections,
+  Here, beats (meters) are used to determine the new pulse (see predict_tempo_position())
 
   The first tempo and first meter are special. they must move together, and must be locked to audio.
   Audio locked tempos which lie before the first meter are made inactive.
@@ -1211,7 +1223,6 @@ TempoMap::recompute_tempos (Metrics& metrics)
 
 /* tempos must be positioned correctly.
    the current approach is to use a meter's bbt time as its base position unit.
-   this means that a meter's beat may change, but its bbt may not.
    an audio-locked meter requires a recomputation of pulse and beat (but not bbt),
    while a music-locked meter requires recomputations of frame pulse and beat (but not bbt)
 */
@@ -1507,7 +1518,7 @@ TempoMap::beat_at_frame (const framecnt_t& frame) const
 	return beat_at_frame_locked (_metrics, frame);
 }
 
-/* meter section based */
+/* meter / tempo section based */
 double
 TempoMap::beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const
 {
@@ -2306,15 +2317,14 @@ TempoMap::can_solve_bbt (TempoSection* ts, const BBT_Time& bbt)
 }
 
 /**
-* This is for a gui that needs to know the frame of a tempo section if it were to be moved to some bbt time,
+* This is for a gui that needs to know the pulse or frame of a tempo section if it were to be moved to some bbt time,
 * taking any possible reordering as a consequence of this into account.
 * @param section - the section to be altered
-* @param bpm - the new Tempo
 * @param bbt - the bbt where the altered tempo will fall
-* @return returns - the position in frames where the new tempo section will lie.
+* @return returns - the position in pulses and frames (as a pair) where the new tempo section will lie.
 */
 pair<double, framepos_t>
-TempoMap::predict_tempo (TempoSection* section, const BBT_Time& bbt)
+TempoMap::predict_tempo_position (TempoSection* section, const BBT_Time& bbt)
 {
 	Metrics future_map;
 	pair<double, framepos_t> ret = make_pair (0.0, 0);
@@ -2342,37 +2352,29 @@ TempoMap::predict_tempo (TempoSection* section, const BBT_Time& bbt)
 }
 
 void
-TempoMap::gui_move_tempo_frame (TempoSection* ts, const framepos_t& frame)
+TempoMap::gui_move_tempo (TempoSection* ts, const pair<const double&, const framepos_t&>& pulse)
 {
 	Metrics future_map;
-	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
-		TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
-		if (solve_map_frame (future_map, tempo_copy, frame)) {
-			solve_map_frame (_metrics, ts, frame);
-			recompute_meters (_metrics);
+
+	if (ts->position_lock_style() == MusicTime) {
+		{
+			Glib::Threads::RWLock::WriterLock lm (lock);
+			TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
+			if (solve_map_pulse (future_map, tempo_copy, pulse.first)) {
+				solve_map_pulse (_metrics, ts, pulse.first);
+				recompute_meters (_metrics);
+			}
 		}
-	}
 
-	Metrics::const_iterator d = future_map.begin();
-	while (d != future_map.end()) {
-		delete (*d);
-		++d;
-	}
+	} else {
 
-	MetricPositionChanged (); // Emit Signal
-}
-
-void
-TempoMap::gui_move_tempo_beat (TempoSection* ts, const double& beat)
-{
-	Metrics future_map;
-	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
-		TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
-		if (solve_map_pulse (future_map, tempo_copy, pulse_at_beat_locked (future_map, beat))) {
-			solve_map_pulse (_metrics, ts, pulse_at_beat_locked (_metrics, beat));
-			recompute_meters (_metrics);
+		{
+			Glib::Threads::RWLock::WriterLock lm (lock);
+			TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
+			if (solve_map_frame (future_map, tempo_copy, pulse.second)) {
+				solve_map_frame (_metrics, ts, pulse.second);
+				recompute_meters (_metrics);
+			}
 		}
 	}
 
@@ -2758,6 +2760,12 @@ TempoMap::round_bbt (BBT_Time& when, const int32_t& sub_num, RoundMode dir)
 		}
 
 		if (when.ticks >= BBT_Time::ticks_per_beat) {
+			++when.beats;
+			const double bpb = meter_section_at_beat (bbt_to_beats_locked (_metrics, when)).divisions_per_bar();
+			if ((double) when.beats > bpb) {
+				++when.bars;
+				when.beats = 1;
+			}
 			when.ticks -= BBT_Time::ticks_per_beat;
 		}
 
@@ -2773,6 +2781,12 @@ TempoMap::round_bbt (BBT_Time& when, const int32_t& sub_num, RoundMode dir)
 		}
 
 		if (when.ticks < difference) {
+			--when.beats;
+			const double bpb = meter_section_at_beat (bbt_to_beats_locked (_metrics, when)).divisions_per_bar();
+			if ((double) when.beats < bpb) {
+				--when.bars;
+				//when.beats = 1;
+			}
 			when.ticks = BBT_Time::ticks_per_beat - when.ticks;
 		} else {
 			when.ticks -= difference;

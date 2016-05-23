@@ -397,12 +397,13 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where, const framepos_t& frame
 			    , PositionLockStyle pls);
 
-	std::pair<double, framepos_t> predict_tempo (TempoSection* section, const Timecode::BBT_Time& bbt);
+	std::pair<double, framepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
 
-	void gui_move_tempo_frame (TempoSection*, const framepos_t& frame);
-	void gui_move_tempo_beat (TempoSection*, const double& beat);
+	void gui_move_tempo (TempoSection*, const std::pair<const double&, const framepos_t&>& pulse);
+
 	void gui_move_meter_frame (MeterSection*, const framepos_t& frame);
 	void gui_move_meter_bbt (MeterSection*, const Timecode::BBT_Time& bbt);
+
 	bool gui_change_tempo (TempoSection*, const Tempo& bpm);
 	void gui_dilate_tempo (TempoSection* tempo, const framepos_t& frame, const framepos_t& end_frame, const double& pulse);
 

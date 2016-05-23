@@ -3339,7 +3339,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 				} else if (use_snap) {
 					map.round_bbt (bbt, _editor->get_grid_beat_divisions (0), RoundNearest);
 				}
-				double const pulse = map.predict_tempo (_real_section, bbt).first;
+				double const pulse = map.predict_tempo_position (_real_section, bbt).first;
 				_real_section = map.add_tempo (_marker->tempo(), pulse, 0, _real_section->type(), MusicTime);
 			} else {
 				if (use_snap && _editor->snap_type() == SnapToBar) {
@@ -3348,7 +3348,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 					map.round_bbt (bbt, _editor->get_grid_beat_divisions (0), RoundNearest);
 				}
 				if (use_snap) {
-					frame = map.predict_tempo (_real_section, bbt).second;
+					frame = map.predict_tempo_position (_real_section, bbt).second;
 				}
 				_real_section = map.add_tempo (_marker->tempo(), 0.0, frame, _real_section->type(), AudioTime);
 			}
@@ -3359,25 +3359,30 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	framepos_t pf;
 
 	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+		/* use vertical movement to alter tempo .. should be log */
 		double new_bpm = _real_section->beats_per_minute() + ((last_pointer_y() - current_pointer_y()) / 5.0);
-		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type()));
 		stringstream strs;
+
+		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type()));
 		strs << new_bpm;
 		show_verbose_cursor_text (strs.str());
+
 	} else if (_movable && !_real_section->locked_to_meter()) {
+
 		if (!_editor->snap_musical()) {
 			/* snap normally (this is not self-referential).*/
 			pf = adjusted_current_frame (event);
+
 		} else {
 			/* but this is.
 			   we can't use the map for anything related to tempo,
 			   so we round bbt using meters, which have no dependency
 			   on pulse for this kind of thing.
 			*/
-			bool use_snap;
 			TempoMap& map (_editor->session()->tempo_map());
+			Timecode::BBT_Time when;
+			bool use_snap;
 
-			pf = adjusted_current_frame (event, false);
 			if (ArdourKeyboard::indicates_snap (event->button.state)) {
 				if (_editor->snap_mode() == Editing::SnapOff) {
 					use_snap = true;
@@ -3392,36 +3397,24 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 				}
 			}
 
-			Timecode::BBT_Time when;
+			pf = adjusted_current_frame (event);
 			map.bbt_time (pf, when);
 
-			if (_real_section->position_lock_style() == MusicTime) {
+			if (use_snap && _editor->snap_type() == SnapToBar) {
+				map.round_bbt (when, -1, (pf > _real_section->frame()) ? RoundUpMaybe : RoundDownMaybe);
 
-				const double pulse = map.predict_tempo (_real_section, when).first;
-				when = map.pulse_to_bbt (pulse);
-				if (use_snap && _editor->snap_type() == SnapToBar) {
-					map.round_bbt (when, -1, (pf > _real_section->frame()) ? RoundUpMaybe : RoundDownMaybe);
-				} else if (use_snap) {
-					map.round_bbt (when, _editor->get_grid_beat_divisions (0), RoundNearest);
-				}
-
-				const double beat = map.bbt_to_beats (when);
-				map.gui_move_tempo_beat (_real_section, beat);
-			} else {
-				if (use_snap && _editor->snap_type() == SnapToBar) {
-					map.round_bbt (when, -1, (pf > _real_section->frame()) ? RoundUpMaybe : RoundDownMaybe);
-				} else if (use_snap) {
-					map.round_bbt (when, _editor->get_grid_beat_divisions (0), RoundNearest);
-				}
-				if (use_snap) {
-					pf = map.predict_tempo (_real_section, when).second;
-				}
-				map.gui_move_tempo_frame (_real_section, pf);
 			}
+			const pair<double, framepos_t> future_pos = map.predict_tempo_position (_real_section, when);
+			map.gui_move_tempo (_real_section, future_pos);
+
 		}
 
 		show_verbose_cursor_time (_real_section->frame());
 	}
+
+	/* this has moved the bar lines themselves, so recalibrate the offset */
+	setup_pointer_frame_offset();
+
 	_marker->set_position (pf);
 }
 
