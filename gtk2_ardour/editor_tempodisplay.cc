@@ -340,9 +340,9 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
         XMLNode &before = map.get_state();
 
 	if (meter_dialog.get_lock_style() == MusicTime) {
-		map.add_meter (Meter (bpb, note_type), map.bbt_to_beats (requested), requested, 0, MusicTime);
+		map.add_meter (Meter (bpb, note_type), map.beat_at_bbt (requested), requested, 0, MusicTime);
 	} else {
-		map.add_meter (Meter (bpb, note_type), map.bbt_to_beats (requested), requested, map.frame_time (requested), AudioTime);
+		map.add_meter (Meter (bpb, note_type), map.beat_at_bbt (requested), requested, map.frame_time (requested), AudioTime);
 	}
 
 	_session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
@@ -389,8 +389,8 @@ Editor::edit_meter_section (MeterSection* section)
 
 	double const note_type = meter_dialog.get_note_type ();
 	Timecode::BBT_Time when;
-	meter_dialog.get_bbt_time(when);
-	framepos_t const frame = _session->tempo_map().frame_at_beat (_session->tempo_map().bbt_to_beats (when));
+	meter_dialog.get_bbt_time (when);
+	framepos_t const frame = _session->tempo_map().frame_time (when);
 
 	begin_reversible_command (_("replace meter mark"));
         XMLNode &before = _session->tempo_map().get_state();

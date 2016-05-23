@@ -442,9 +442,11 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	framecnt_t frame_rate () const { return _frame_rate; }
 
-	double bbt_to_beats (const Timecode::BBT_Time& bbt);
-	Timecode::BBT_Time beats_to_bbt (const double& beats);
-	Timecode::BBT_Time pulse_to_bbt (const double& pulse);
+	double beat_at_bbt (const Timecode::BBT_Time& bbt);
+	Timecode::BBT_Time bbt_at_beat (const double& beats);
+
+	double pulse_at_bbt (const Timecode::BBT_Time& bbt);
+	Timecode::BBT_Time bbt_at_pulse (const double& pulse);
 
 	double pulse_at_beat (const double& beat) const;
 	double beat_at_pulse (const double& pulse) const;
@@ -464,8 +466,11 @@ private:
 	double beat_at_frame_locked (const Metrics& metrics, const framecnt_t& frame) const;
 	framecnt_t frame_at_beat_locked (const Metrics& metrics, const double& beat) const;
 
-	double bbt_to_beats_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const ;
-	Timecode::BBT_Time beats_to_bbt_locked (const Metrics& metrics, const double& beats) const;
+	double beat_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const ;
+	Timecode::BBT_Time bbt_at_beat_locked (const Metrics& metrics, const double& beats) const;
+
+	double pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const;
+	Timecode::BBT_Time bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
 	framepos_t frame_time_locked (const Metrics& metrics, const Timecode::BBT_Time&) const;
 

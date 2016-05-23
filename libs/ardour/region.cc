@@ -1285,7 +1285,7 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 				    &bbt_time.ticks) != 3) {
 				_position_lock_style = AudioTime;
 			} else {
-				_beat = _session.tempo_map().bbt_to_beats (bbt_time);
+				_beat = _session.tempo_map().beat_at_bbt (bbt_time);
 			}
 		}
 	}
