@@ -20,6 +20,7 @@
 #ifndef __ardour_fft_result_h
 #define __ardour_fft_result_h
 
+#include <math.h>
 #include <fftw3.h>
 
 #include <gdkmm/color.h>
